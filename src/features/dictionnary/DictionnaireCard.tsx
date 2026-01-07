@@ -13,7 +13,7 @@ import StylizedHTMLView from '~common/StylizedHTMLView'
 
 import { wp } from '~helpers/utils'
 import truncate from '~helpers/truncate'
-import { StackActions } from '@react-navigation/native'
+import { Router } from 'expo-router'
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 
 const slideWidth = wp(60)
@@ -60,7 +60,7 @@ class StrongCard extends React.Component<any> {
   openStrong = () => {
     // @ts-ignore
     const {
-      navigation,
+      router,
       isSelectionMode,
       dictionnaireRef: { word },
     } = this.props
@@ -68,7 +68,10 @@ class StrongCard extends React.Component<any> {
     if (isSelectionMode) {
       /** TODO */
     } else {
-      navigation.dispatch(StackActions.push('DictionnaryDetail', { word }))
+      router.navigate({
+        pathname: '/dictionnary-detail',
+        params: { word },
+      })
     }
   }
 

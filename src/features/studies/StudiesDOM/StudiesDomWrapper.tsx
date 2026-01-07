@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Keyboard, KeyboardAvoidingView, Platform } from 'react-native'
 import { WebViewMessageEvent } from 'react-native-webview'
@@ -38,7 +38,7 @@ const StudiesDomWrapper = ({
   studyAtom,
 }: Props) => {
   const ref = useRef<StudyDOMRef>(null)
-  const navigation = useNavigation()
+  const router = useRouter()
   const [isKeyboardOpened, setIsKeyboardOpened] = useState(false)
   const [activeFormats, setActiveFormats] = useState({})
   const { colorScheme } = useCurrentThemeSelector()
@@ -46,8 +46,9 @@ const StudiesDomWrapper = ({
   const navigateBibleView = async (type: StudyNavigateBibleType) => {
     dispatchToWebView('BLUR_EDITOR')
     await timeout(300)
-    navigation.navigate('BibleView', {
-      isSelectionMode: type,
+    router.push({
+      pathname: '/bible-view',
+      params: { isSelectionMode: type },
     })
   }
 
@@ -120,46 +121,56 @@ const StudiesDomWrapper = ({
           }
           break
         case 'VIEW_BIBLE_VERSE': {
-          navigation.navigate('BibleView', {
-            ...msgData.payload,
-            arrayVerses: null,
-            book: books[msgData.payload.book - 1],
+          router.push({
+            pathname: '/bible-view',
+            params: {
+              ...msgData.payload,
+              arrayVerses: null,
+              book: JSON.stringify(books[msgData.payload.book - 1]),
+            },
           })
           return
         }
         case 'VIEW_BIBLE_STRONG': {
-          navigation.navigate('Strong', msgData.payload)
+          router.push({
+            pathname: '/strong',
+            params: msgData.payload,
+          })
           return
         }
         case 'SELECT_BIBLE_VERSE': {
           dispatchToWebView('BLUR_EDITOR')
           await timeout(300)
-          navigation.navigate('BibleView', {
-            isSelectionMode: 'verse',
+          router.push({
+            pathname: '/bible-view',
+            params: { isSelectionMode: 'verse' },
           })
           return
         }
         case 'SELECT_BIBLE_STRONG': {
           dispatchToWebView('BLUR_EDITOR')
           await timeout(300)
-          navigation.navigate('BibleView', {
-            isSelectionMode: 'strong',
+          router.push({
+            pathname: '/bible-view',
+            params: { isSelectionMode: 'strong' },
           })
           return
         }
         case 'SELECT_BIBLE_VERSE_BLOCK': {
           dispatchToWebView('BLUR_EDITOR')
           await timeout(300)
-          navigation.navigate('BibleView', {
-            isSelectionMode: 'verse-block',
+          router.push({
+            pathname: '/bible-view',
+            params: { isSelectionMode: 'verse-block' },
           })
           return
         }
         case 'SELECT_BIBLE_STRONG_BLOCK': {
           dispatchToWebView('BLUR_EDITOR')
           await timeout(300)
-          navigation.navigate('BibleView', {
-            isSelectionMode: 'strong-block',
+          router.push({
+            pathname: '/bible-view',
+            params: { isSelectionMode: 'strong-block' },
           })
           return
         }

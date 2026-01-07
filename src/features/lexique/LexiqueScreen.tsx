@@ -2,12 +2,10 @@ import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { StackScreenProps } from '@react-navigation/stack'
 import { StrongTab } from '../../state/tabs'
 import LexiqueListScreen from './LexiqueListScreen'
-import { MainStackProps } from '~navigation/type'
 
-const LexiqueScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Lexique'>) => {
+const LexiqueScreen = () => {
   const { t } = useTranslation()
   const onTheFlyAtom = useMemo(
     () =>
@@ -22,6 +20,6 @@ const LexiqueScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Lexique
     []
   )
 
-  return <LexiqueListScreen strongAtom={onTheFlyAtom} navigation={navigation} hasBackButton />
+  return <LexiqueListScreen strongAtom={onTheFlyAtom} hasBackButton />
 }
 export default LexiqueScreen

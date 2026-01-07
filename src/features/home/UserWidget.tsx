@@ -18,8 +18,6 @@ import Spacer from '~common/ui/Spacer'
 import { RootState } from '~redux/modules/reducer'
 import OfflineNotice from './OfflineNotice'
 import VerseOfTheDay from './VerseOfTheDay'
-import { StackNavigationProp } from '@react-navigation/stack'
-import { MainStackProps } from '~navigation/type'
 import { Theme } from '@emotion/react'
 import { FeatherIcon } from '~common/ui/Icon'
 
@@ -74,11 +72,7 @@ const ChipIcon = styled(Icon.Feather)(({ theme, color }: any) => ({
   marginRight: 5,
 }))
 
-type UserWidgetProps = {
-  navigation: StackNavigationProp<MainStackProps>
-}
-
-const UserWidget = ({ navigation }: UserWidgetProps) => {
+const UserWidget = () => {
   const { isLogged, user } = useLogin()
   const { t } = useTranslation()
 
@@ -108,7 +102,6 @@ const UserWidget = ({ navigation }: UserWidgetProps) => {
           </Paragraph>
           <Button
             route="Login"
-            navigation={navigation}
             rightIcon={
               <Icon.Feather name="arrow-right" size={20} color="white" style={{ marginLeft: 10 }} />
             }

@@ -14,8 +14,7 @@ import Loading from '~common/Loading'
 import Text from '~common/ui/Text'
 import useHTMLView from '~helpers/useHTMLView'
 
-import { StackActions } from '@react-navigation/native'
-import { StackNavigationProp } from '@react-navigation/stack'
+import { useRouter } from 'expo-router'
 import produce from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -30,7 +29,6 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
 import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
 import { timeout } from '~helpers/timeout'
-import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
 import { makeWordTagsSelector } from '~redux/selectors/bible'
 import { historyAtom, multipleTagsModalAtom } from '../../state/app'
@@ -41,11 +39,11 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
 }))
 
 interface DictionaryDetailScreenProps {
-  navigation: StackNavigationProp<MainStackProps>
   dictionaryAtom: PrimitiveAtom<DictionaryTab>
 }
 
-const DictionnaryDetailScreen = ({ navigation, dictionaryAtom }: DictionaryDetailScreenProps) => {
+const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps) => {
+  const router = useRouter()
   const [dictionaryTab, setDictionaryTab] = useAtom(dictionaryAtom)
   const { isInTab } = useTabContext()
 
@@ -70,9 +68,9 @@ const DictionnaryDetailScreen = ({ navigation, dictionaryAtom }: DictionaryDetai
         })
       )
     } else {
-      navigation.goBack()
+      router.back()
     }
-  }, [isInTab, setDictionaryTab, navigation])
+  }, [isInTab, setDictionaryTab, router])
 
   const selectWordTags = useMemo(() => makeWordTagsSelector(), [])
   const tags = useSelector((state: RootState) => selectWordTags(state, word ?? ''))
@@ -113,11 +111,14 @@ const DictionnaryDetailScreen = ({ navigation, dictionaryAtom }: DictionaryDetai
           .replace(String.fromCharCode(160), ' ')
           .split(/\b\s+(?!$)/)
         const [chapter, verse] = splittedHref[splittedHref.length - 1].split('.')
-        navigation.navigate('BibleView', {
-          isReadOnly: true,
-          book,
-          chapter: parseInt(chapter, 10),
-          verse: parseInt(verse, 10),
+        router.push({
+          pathname: '/bible-view',
+          params: {
+            isReadOnly: 'true',
+            book: JSON.stringify(book),
+            chapter: String(parseInt(chapter, 10)),
+            verse: String(parseInt(verse, 10)),
+          },
         })
       } catch (e) {
         toast.error('Impossible de charger ce mot.')
@@ -131,7 +132,10 @@ const DictionnaryDetailScreen = ({ navigation, dictionaryAtom }: DictionaryDetai
           })
         )
       } else {
-        navigation.dispatch(StackActions.push('DictionnaryDetail', { word: href }))
+        router.push({
+          pathname: '/dictionnary-detail',
+          params: { word: href },
+        })
       }
     }
   }

@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import { StackActions, useNavigation } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 import React from 'react'
 
 import Box, { TouchableBox } from '~common/ui/Box'
@@ -18,7 +18,7 @@ const Tag = styled(Box)(({ theme }) => ({
 }))
 
 const TagList = ({ tags, limit }: { tags: any; limit: any }) => {
-  const navigation = useNavigation()
+  const router = useRouter()
 
   if (!tags || !Object.values(tags).length) {
     return null
@@ -32,11 +32,10 @@ const TagList = ({ tags, limit }: { tags: any; limit: any }) => {
         <TouchableBox
           key={tag.id}
           onPress={() =>
-            navigation.dispatch(
-              StackActions.push('Tag', {
-                tagId: tag.id,
-              })
-            )
+            router.push({
+              pathname: '/tag',
+              params: { tagId: tag.id },
+            })
           }
         >
           <Tag>

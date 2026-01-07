@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react'
 import { ScrollView } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 import { shallowEqual, useSelector, useDispatch } from 'react-redux'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 
@@ -18,6 +18,7 @@ import {
   updateCustomColor,
 } from '~redux/modules/user'
 import { makeColorsSelector } from '~redux/selectors/user'
+import { EMPTY_ARRAY, EMPTY_OBJECT } from '~helpers/emptyReferences'
 import TouchableIcon from './TouchableIcon'
 
 type DefaultColorKey = 'color1' | 'color2' | 'color3' | 'color4' | 'color5'
@@ -47,7 +48,7 @@ const ColorCirclesBar = ({
   removeHighlight,
   onClose,
 }: Props) => {
-  const navigation = useNavigation()
+  const router = useRouter()
   const dispatch = useDispatch()
   const modalRef = useRef<BottomSheetModal>(null)
   const [editingColor, setEditingColor] = useState<EditingColor | null>(null)
@@ -56,14 +57,14 @@ const ColorCirclesBar = ({
   const selectColors = useMemo(() => makeColorsSelector(), [])
   const colors = useSelector((state: RootState) => selectColors(state, currentTheme))
   const customHighlightColors = useSelector(
-    (state: RootState) => state.user.bible.settings.customHighlightColors ?? []
+    (state: RootState) => state.user.bible.settings.customHighlightColors ?? EMPTY_ARRAY
   )
   const defaultColorTypes = useSelector(
-    (state: RootState) => state.user.bible.settings.defaultColorTypes ?? {},
+    (state: RootState) => state.user.bible.settings.defaultColorTypes ?? EMPTY_OBJECT,
     shallowEqual
   )
   const defaultColorNames = useSelector(
-    (state: RootState) => state.user.bible.settings.defaultColorNames ?? {},
+    (state: RootState) => state.user.bible.settings.defaultColorNames ?? EMPTY_OBJECT,
     shallowEqual
   )
 
@@ -172,7 +173,7 @@ const ColorCirclesBar = ({
           <TouchableIcon
             name={customHighlightColors.length < 5 ? 'plus-circle' : 'arrow-right-circle'}
             onPress={() => {
-              navigation.navigate('CustomHighlightColors')
+              router.push('/custom-highlight-colors')
             }}
             noFlex
           />

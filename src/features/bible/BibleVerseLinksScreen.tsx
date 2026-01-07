@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { StackScreenProps } from '@react-navigation/stack'
+import { useLocalSearchParams } from 'expo-router'
 
 import BibleLinkModal from './BibleLinkModal'
 import BibleLinkItem from './BibleLinkItem'
@@ -15,7 +15,6 @@ import TagsHeader from '~common/TagsHeader'
 import TagsModal from '~common/TagsModal'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import verseToReference from '~helpers/verseToReference'
-import { MainStackProps } from '~navigation/type'
 import { Tag, VerseIds } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import { Link } from '~redux/modules/user'
@@ -26,11 +25,10 @@ type TLink = {
   link: Link
 }
 
-const BibleVerseLinks = ({
-  navigation,
-  route,
-}: StackScreenProps<MainStackProps, 'BibleVerseLinks'>) => {
-  const { withBack, verse } = route.params || {}
+const BibleVerseLinks = () => {
+  const params = useLocalSearchParams<{ withBack?: string; verse?: string }>()
+  const withBack = params.withBack === 'true'
+  const verse = params.verse || ''
   const { t } = useTranslation()
 
   const [title, setTitle] = useState('')
@@ -53,7 +51,6 @@ const BibleVerseLinks = ({
   }, [verse, _links])
 
   const loadPage = async () => {
-    const { verse } = route.params || {}
     let title
     const filtered_links: TLink[] = []
 

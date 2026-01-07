@@ -18,9 +18,7 @@ import getBiblePericope from '~helpers/getBiblePericope'
 import { toast } from 'sonner-native'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '~helpers/react-query-lite'
-import { StackNavigationProp } from '@react-navigation/stack'
-import { MainStackProps } from '~navigation/type'
-import { StackActions } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 
 const H1 = styled(Paragraph)(() => ({
@@ -66,7 +64,8 @@ function clearEmpties(o: any) {
   return o
 }
 
-const PericopeScreen = ({ navigation }: { navigation: StackNavigationProp<MainStackProps> }) => {
+const PericopeScreen = () => {
+  const router = useRouter()
   const { t } = useTranslation()
   const defaultVersion = useDefaultBibleVersion()
 
@@ -131,15 +130,16 @@ const PericopeScreen = ({ navigation }: { navigation: StackNavigationProp<MainSt
                         onPress={() =>
                           versionNeedsDownload
                             ? toast(t('Vous devez télécharger cette version de la Bible.'))
-                            : navigation.dispatch(
-                                StackActions.push('BibleView', {
-                                  isReadOnly: true,
-                                  book,
-                                  chapter: Number(chapterKey),
+                            : router.push({
+                                pathname: '/bible-view',
+                                params: {
+                                  isReadOnly: 'true',
+                                  book: JSON.stringify(book),
+                                  chapter: String(chapterKey),
                                   version,
-                                  verse: 1,
-                                })
-                              )
+                                  verse: '1',
+                                },
+                              })
                         }
                       >
                         {h1 && <H1>{h1}</H1>}

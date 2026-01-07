@@ -21,10 +21,8 @@ import useLanguage from '~helpers/useLanguage'
 import NaveItem from './NaveItem'
 import { useSearchValue, useResultsByLetterOrSearch } from '../lexique/useUtilities'
 import { useTranslation } from 'react-i18next'
-import { StackNavigationProp } from '@react-navigation/stack'
 import { NaveTab } from '../../state/tabs'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import { MainStackProps } from '~navigation/type'
 import PopOverMenu from '~common/PopOverMenu'
 import LanguageMenuOption from '~common/LanguageMenuOption'
 
@@ -53,13 +51,12 @@ const useSectionResults = (results: any) => {
 }
 
 interface NaveListScreenProps {
-  navigation: StackNavigationProp<MainStackProps>
   naveAtom: PrimitiveAtom<NaveTab>
   hasBackButton?: boolean
   onNaveSelect?: (name_lower: string, name: string) => void
 }
 
-const NaveListScreen = ({ hasBackButton, navigation, onNaveSelect }: NaveListScreenProps) => {
+const NaveListScreen = ({ hasBackButton, onNaveSelect }: NaveListScreenProps) => {
   const { t } = useTranslation()
   const isFR = useLanguage()
   const [error, setError] = useState(false)
@@ -137,7 +134,6 @@ const NaveListScreen = ({ hasBackButton, navigation, onNaveSelect }: NaveListScr
             renderItem={({ item: { name_lower, name } }) => (
               <NaveItem
                 key={name_lower}
-                navigation={navigation}
                 name_lower={name_lower}
                 name={name}
                 onSelect={onNaveSelect}

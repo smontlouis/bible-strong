@@ -16,21 +16,17 @@ import sunsetColors from '~themes/sunsetColors'
 import BibleViewer from './BibleViewer'
 const deepmerge = require('@fastify/deepmerge')()
 
-import { StackNavigationProp } from '@react-navigation/stack'
-
 import { atom, getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { getDatabases } from '~helpers/databases'
-import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { BibleTab } from '../../state/tabs'
 
 interface BibleTabScreenProps {
-  navigation: StackNavigationProp<MainStackProps, 'BibleView'>
-  bibleAtom: PrimitiveAtom<BibleTab> // extract to MainStackNaviagtor as props
+  bibleAtom: PrimitiveAtom<BibleTab>
 }
 
-const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
+const BibleTabScreen = ({ bibleAtom }: BibleTabScreenProps) => {
   const dispatch = useDispatch()
   const [reloadKey, setReloadKey] = useState(0)
   const isBibleViewReloadingAtom = useMemo(() => atom(false), [])
@@ -104,7 +100,6 @@ const BibleTabScreen = ({ navigation, bibleAtom }: BibleTabScreenProps) => {
   return (
     <BibleViewer
       key={`bible-viewer-${reloadKey}`}
-      navigation={navigation}
       settings={settings}
       bibleAtom={bibleAtom}
       onMountTimeout={handleBibleViewerReload}

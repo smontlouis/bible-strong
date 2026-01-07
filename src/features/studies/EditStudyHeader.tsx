@@ -2,7 +2,7 @@ import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import React, { memo, useCallback } from 'react'
 
-import { NavigationProp } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
@@ -14,7 +14,6 @@ import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
-import { MainStackProps } from '~navigation/type'
 import { deleteStudy, Study } from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
 import PublishStudyMenuItem from './PublishStudyMenuItem'
@@ -36,7 +35,6 @@ type EditHeaderProps = {
   openRenameModal: () => void
   hasBackButton?: boolean
   study: Study
-  navigation: NavigationProp<MainStackProps>
 }
 
 const EditHeader = ({
@@ -46,8 +44,8 @@ const EditHeader = ({
   openRenameModal,
   hasBackButton = true,
   study,
-  navigation,
 }: EditHeaderProps) => {
+  const router = useRouter()
   const openInNewTab = useOpenInNewTab()
   const { t } = useTranslation()
   const dispatch = useDispatch()
@@ -62,12 +60,12 @@ const EditHeader = ({
         onPress: () => {
           dispatch(deleteStudy(study.id))
           close()
-          navigation.goBack()
+          router.back()
         },
         style: 'destructive',
       },
     ])
-  }, [dispatch, study.id, close, navigation, t])
+  }, [dispatch, study.id, close, router, t])
 
   if (isReadOnly) {
     return (

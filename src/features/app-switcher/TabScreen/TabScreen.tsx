@@ -5,7 +5,6 @@ import { StyleSheet, View } from 'react-native'
 import { useAnimatedReaction, useAnimatedStyle } from 'react-native-reanimated'
 import { runOnJS } from 'react-native-worklets'
 
-import { StackNavigationProp } from '@react-navigation/stack'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import BibleTabScreen from '~features/bible/BibleTabScreen'
@@ -24,8 +23,6 @@ import useScrollToActiveTab from '../utils/useScrollToActiveTab'
 
 import TabScreenWrapper from './TabScreenWrapper'
 import { useSafeAreaFrame } from 'react-native-safe-area-context'
-import { MainStackProps } from '~navigation/type'
-import { RouteProp } from '@react-navigation/native'
 
 const getComponentTab = (tab: TabItem) => {
   switch (tab.type) {
@@ -84,12 +81,10 @@ const getComponentTab = (tab: TabItem) => {
 
 export type TabScreenProps = {
   tabAtom: PrimitiveAtom<TabItem>
-  navigation: StackNavigationProp<MainStackProps>
-  route: RouteProp<MainStackProps>
   ref?: Ref<View>
 }
 
-const TabScreen = ({ tabAtom, navigation, route, ref }: TabScreenProps) => {
+const TabScreen = ({ tabAtom, ref }: TabScreenProps) => {
   const tab = useAtomValue(tabAtom)
   const { height: HEIGHT, width: WIDTH } = useSafeAreaFrame()
   const { activeTabScreen } = useAppSwitcherContext()
@@ -132,8 +127,6 @@ const TabScreen = ({ tabAtom, navigation, route, ref }: TabScreenProps) => {
         <Component
           {...{
             [atomName]: tabAtom,
-            navigation,
-            route,
           }}
         />
       </TabScreenWrapper>

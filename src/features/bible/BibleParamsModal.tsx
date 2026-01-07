@@ -3,6 +3,7 @@ import { FlatList } from 'react-native'
 
 import styled from '@emotion/native'
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
@@ -122,11 +123,11 @@ export const useParamsModalLabels = () => {
 
 interface BibleParamsModalprops {
   modalRef: React.RefObject<BottomSheetModal | null>
-  navigation: any
 }
 
-const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
+const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
   const { t } = useTranslation()
+  const router = useRouter()
 
   const {
     alignContentToString,
@@ -390,7 +391,7 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
           alignItems="center"
           row
           onPress={() => {
-            navigation.navigate('CustomHighlightColors')
+            router.push('/custom-highlight-colors')
             modalRef.current?.close()
           }}
         >
@@ -404,7 +405,7 @@ const BibleParamsModal = ({ modalRef, navigation }: BibleParamsModalprops) => {
           alignItems="center"
           row
           onPress={() => {
-            navigation.navigate('BibleShareOptions')
+            router.push('/bible-share-options')
             modalRef.current?.close()
           }}
         >

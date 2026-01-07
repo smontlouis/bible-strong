@@ -1,5 +1,5 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import { useNavigation } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
@@ -20,7 +20,7 @@ type Props = {
 const LinksSettingsModal = ({ ref, linkId, onClosed, title }: Props) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const navigation = useNavigation()
+  const router = useRouter()
   const [, setMultipleTagsItem] = useAtom(multipleTagsModalAtom)
 
   const close = useCallback(() => {
@@ -47,13 +47,15 @@ const LinksSettingsModal = ({ ref, linkId, onClosed, title }: Props) => {
     const [Livre, Chapitre, Verset] = linkId.split('/')[0].split('-')
     close()
     setTimeout(() => {
-      // @ts-ignore
-      navigation.navigate('BibleView', {
-        isReadOnly: true,
-        book: books[Number(Livre) - 1],
-        chapter: Number(Chapitre),
-        verse: Number(Verset),
-        focusVerses: [Number(Verset)],
+      router.push({
+        pathname: '/bible-view',
+        params: {
+          isReadOnly: 'true',
+          book: JSON.stringify(books[Number(Livre) - 1]),
+          chapter: String(Chapitre),
+          verse: String(Verset),
+          focusVerses: JSON.stringify([Number(Verset)]),
+        },
       })
     }, 300)
   }

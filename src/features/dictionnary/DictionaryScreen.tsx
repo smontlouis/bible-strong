@@ -2,12 +2,10 @@ import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { StackScreenProps } from '@react-navigation/stack'
 import { DictionaryTab } from '../../state/tabs'
 import DictionaryListScreen from './DictionaryListScreen'
-import { MainStackProps } from '~navigation/type'
 
-const DictionaryScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Dictionnaire'>) => {
+const DictionaryScreen = () => {
   const { t } = useTranslation()
   const onTheFlyAtom = useMemo(
     () =>
@@ -22,8 +20,6 @@ const DictionaryScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Dict
     []
   )
 
-  return (
-    <DictionaryListScreen dictionaryAtom={onTheFlyAtom} navigation={navigation} hasBackButton />
-  )
+  return <DictionaryListScreen dictionaryAtom={onTheFlyAtom} hasBackButton />
 }
 export default DictionaryScreen

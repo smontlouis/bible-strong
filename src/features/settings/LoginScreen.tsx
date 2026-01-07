@@ -9,18 +9,18 @@ import Header from '~common/Header'
 import Login from '~common/Login'
 import useLogin from '~helpers/useLogin'
 import { useTranslation } from 'react-i18next'
-import { StackScreenProps } from '@react-navigation/stack'
-import { MainStackProps } from '~navigation/type'
+import { useRouter } from 'expo-router'
 
-const LoginScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Login'>) => {
+const LoginScreen = () => {
+  const router = useRouter()
   const { isLogged } = useLogin()
   const { t } = useTranslation()
 
   useEffect(() => {
     if (isLogged) {
-      navigation.goBack()
+      router.back()
     }
-  }, [isLogged, navigation])
+  }, [isLogged, router])
 
   return (
     <Container>

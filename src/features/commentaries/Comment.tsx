@@ -4,8 +4,7 @@ import { Image } from 'expo-image'
 import React, { memo, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking, Share } from 'react-native'
-import { StackActions, useNavigation } from '@react-navigation/native'
-import { StackNavigationProp } from '@react-navigation/stack'
+import { useRouter } from 'expo-router'
 import truncHTML from 'trunc-html'
 import books, { bookMappingComments } from '~assets/bible_versions/books-desc-2'
 import Link, { LinkBox } from '~common/Link'
@@ -20,7 +19,6 @@ import { firebaseDb } from '~helpers/firebase'
 import { useAtomValue } from 'jotai'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import { Comment as CommentProps, EGWComment } from './types'
-import { MainStackProps } from '~navigation/type'
 import { timeout } from '~helpers/timeout'
 
 const findBookNumber = (bookName: string) => {
@@ -120,7 +118,7 @@ const Comment = ({ comment }: Props) => {
   const { resource, content, href, id } = comment
   const [isCollapsed, setCollapsed] = React.useState(true)
   const cacheImage = useFireStorage(resource.logo)
-  const navigation = useNavigation<StackNavigationProp<MainStackProps>>()
+  const router = useRouter()
   const fastImageSource = useMemo(
     () => ({
       uri: cacheImage,
@@ -142,14 +140,15 @@ const Comment = ({ comment }: Props) => {
       book = findBookNumber(book.substr(0, 3).toUpperCase())
       const [chapter, verse] = numbers.split('.')
 
-      navigation.dispatch(
-        StackActions.push('BibleView', {
-          isReadOnly: true,
-          book: Number(book),
-          chapter: Number(chapter),
-          verse: Number(verse),
-        })
-      )
+      router.push({
+        pathname: '/bible-view',
+        params: {
+          isReadOnly: 'true',
+          book: String(book),
+          chapter: String(chapter),
+          verse: String(verse),
+        },
+      })
     }
   }
 

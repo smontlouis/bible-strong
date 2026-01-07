@@ -1,6 +1,5 @@
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
-import { StackNavigationProp } from '@react-navigation/stack'
 import * as Sentry from '@sentry/react-native'
 import produce from 'immer'
 import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
@@ -13,6 +12,7 @@ import { toast } from 'sonner-native'
 
 import { createSelector } from '@reduxjs/toolkit'
 import * as Icon from '@expo/vector-icons'
+import { useRouter } from 'expo-router'
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
 import TagList from '~common/TagList'
@@ -28,7 +28,6 @@ import Text from '~common/ui/Text'
 import books from '~assets/bible_versions/books-desc'
 import { timeout } from '~helpers/timeout'
 import verseToReference from '~helpers/verseToReference'
-import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
 import { addNote, deleteNote, Note } from '~redux/modules/user'
 import { isFullScreenBibleValue, multipleTagsModalAtom } from '~state/app'
@@ -59,7 +58,6 @@ const StyledTextArea = styled(TextInput)(({ theme }) => ({
 }))
 
 interface NoteDetailTabScreenProps {
-  navigation: StackNavigationProp<MainStackProps>
   notesAtom: PrimitiveAtom<NotesTab>
   noteId: string
 }
@@ -79,8 +77,9 @@ const makeCurrentNoteSelector = () =>
     }
   )
 
-const NoteDetailTabScreen = ({ navigation, notesAtom, noteId }: NoteDetailTabScreenProps) => {
+const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) => {
   const theme = useTheme()
+  const router = useRouter()
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
   const dispatch = useDispatch()
@@ -205,13 +204,15 @@ ${currentNote?.description}
 
   const navigateToBible = () => {
     const [Livre, Chapitre, Verset] = noteId.split('/')[0].split('-')
-    // @ts-ignore
-    navigation.navigate('BibleView', {
-      isReadOnly: true,
-      book: books[Number(Livre) - 1],
-      chapter: Number(Chapitre),
-      verse: Number(Verset),
-      focusVerses: [Number(Verset)],
+    router.push({
+      pathname: '/bible-view',
+      params: {
+        isReadOnly: 'true',
+        book: JSON.stringify(books[Number(Livre) - 1]),
+        chapter: String(Number(Chapitre)),
+        verse: String(Number(Verset)),
+        focusVerses: JSON.stringify([Number(Verset)]),
+      },
     })
   }
 

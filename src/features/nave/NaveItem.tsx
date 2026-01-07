@@ -2,16 +2,14 @@ import React, { memo, useCallback } from 'react'
 import styled from '@emotion/native'
 import { Pressable } from 'react-native'
 
+import { useRouter } from 'expo-router'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { StackNavigationProp } from '@react-navigation/stack'
-import { MainStackProps } from '~navigation/type'
 
 interface NaveItemProps {
   name_lower: string
   name: string
-  navigation: StackNavigationProp<MainStackProps>
   onSelect?: (name_lower: string, name: string) => void
 }
 
@@ -26,14 +24,19 @@ const SectionItem = styled(Box)(({ theme }) => ({
   justifyContent: 'center',
 }))
 
-const NaveItem = memo(({ name_lower, name, navigation, onSelect }: NaveItemProps) => {
+const NaveItem = memo(({ name_lower, name, onSelect }: NaveItemProps) => {
+  const router = useRouter()
+
   const handlePress = useCallback(() => {
     if (onSelect) {
       onSelect(name_lower, name)
     } else {
-      navigation.navigate('NaveDetail', { name_lower, name })
+      router.push({
+        pathname: '/nave-detail',
+        params: { name_lower, name },
+      })
     }
-  }, [onSelect, name_lower, name, navigation])
+  }, [onSelect, name_lower, name, router])
 
   const content = (
     <SectionItem>
@@ -52,7 +55,7 @@ const NaveItem = memo(({ name_lower, name, navigation, onSelect }: NaveItemProps
 
   // Otherwise use Link for standard navigation
   return (
-    <Link route="NaveDetail" navigation={navigation} params={{ name_lower, name }}>
+    <Link route="NaveDetail" params={{ name_lower, name }}>
       {content}
     </Link>
   )

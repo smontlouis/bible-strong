@@ -1,16 +1,16 @@
 import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
-import { StackScreenProps } from '@react-navigation/stack'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { CompareTab } from '../../state/tabs'
 import CompareVersesTabScreen from './CompareVersesTabScreen'
-import { MainStackProps } from '~navigation/type'
 
-const CompareVersesScreen = ({
-  navigation,
-  route,
-}: StackScreenProps<MainStackProps, 'BibleCompareVerses'>) => {
-  const { selectedVerses } = route.params || {}
+const CompareVersesScreen = () => {
+  const router = useRouter()
+  const params = useLocalSearchParams<{ selectedVerses?: string }>()
+
+  // Parse params from URL strings
+  const selectedVerses = params.selectedVerses ? JSON.parse(params.selectedVerses) : undefined
 
   const onTheFlyAtom = useMemo(
     () =>
@@ -27,6 +27,6 @@ const CompareVersesScreen = ({
     []
   )
 
-  return <CompareVersesTabScreen compareAtom={onTheFlyAtom} navigation={navigation} />
+  return <CompareVersesTabScreen compareAtom={onTheFlyAtom} navigation={router} />
 }
 export default CompareVersesScreen

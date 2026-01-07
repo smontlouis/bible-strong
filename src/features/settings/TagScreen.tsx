@@ -37,8 +37,7 @@ import StudyItem from '~features/studies/StudyItem'
 import truncate from '~helpers/truncate'
 import useLanguage from '~helpers/useLanguage'
 import { RootState } from '~redux/modules/reducer'
-import { StackScreenProps } from '@react-navigation/stack'
-import { MainStackProps } from '~navigation/type'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { makeTagDataSelector } from '~redux/selectors/bible'
 import { makeTagByIdSelector } from '~redux/selectors/tags'
 
@@ -168,8 +167,10 @@ const SectionHeader = ({ title, count }: { title: string; count: number }) => (
   </Box>
 )
 
-const TagScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Tag'>) => {
-  const tagId = route.params.tagId
+const TagScreen = () => {
+  const router = useRouter()
+  const params = useLocalSearchParams<{ tagId?: string }>()
+  const tagId = params.tagId || ''
   const dispatch = useDispatch()
   const { t } = useTranslation()
   const isFR = useLanguage()
@@ -208,7 +209,7 @@ const TagScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Tag'
         style: 'destructive',
         onPress: () => {
           dispatch(removeTag(tag.id))
-          navigation.goBack()
+          router.back()
         },
       },
     ])

@@ -3,20 +3,15 @@ import React, { useCallback } from 'react'
 import produce from 'immer'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useAtom } from 'jotai/react'
-import { StackNavigationProp } from '@react-navigation/stack'
 import { DictionaryTab } from '../../state/tabs'
 import DictionaryListScreen from './DictionaryListScreen'
 import DictionaryDetailTabScreen from './DictionaryDetailTabScreen'
-import { MainStackProps } from '~navigation/type'
-import { RouteProp } from '@react-navigation/native'
 
 interface DictionaryTabScreenProps {
-  navigation: StackNavigationProp<MainStackProps>
-  route: RouteProp<MainStackProps>
   dictionaryAtom: PrimitiveAtom<DictionaryTab>
 }
 
-const DictionaryTabScreen = ({ dictionaryAtom, navigation }: DictionaryTabScreenProps) => {
+const DictionaryTabScreen = ({ dictionaryAtom }: DictionaryTabScreenProps) => {
   const [dictionaryTab, setDictionaryTab] = useAtom(dictionaryAtom)
 
   const {
@@ -42,7 +37,6 @@ const DictionaryTabScreen = ({ dictionaryAtom, navigation }: DictionaryTabScreen
     return (
       <DictionaryListScreen
         hasBackButton={hasBackButton}
-        navigation={navigation}
         dictionaryAtom={dictionaryAtom}
         onWordSelect={onWordSelect}
       />
@@ -52,7 +46,6 @@ const DictionaryTabScreen = ({ dictionaryAtom, navigation }: DictionaryTabScreen
   return (
     <DictionaryDetailTabScreen
       dictionaryAtom={dictionaryAtom}
-      navigation={navigation}
     />
   )
 }

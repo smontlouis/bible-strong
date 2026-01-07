@@ -1,5 +1,5 @@
-import { useNavigation } from '@react-navigation/native'
-import React, { FC, memo, PropsWithChildren } from 'react'
+import { useRouter } from 'expo-router'
+import React, { FC, PropsWithChildren } from 'react'
 import { TouchableOpacity } from 'react-native'
 
 type BackProps = {
@@ -16,10 +16,10 @@ const Back: FC<PropsWithChildren<BackProps>> = ({
   onGoBack,
   ...props
 }: BackProps) => {
-  const navigation = useNavigation()
+  const router = useRouter()
 
   const handlePress = () => {
-    navigation.goBack()
+    router.back()
     onGoBack?.()
   }
 
@@ -40,4 +40,4 @@ const Back: FC<PropsWithChildren<BackProps>> = ({
   )
 }
 
-export default memo(Back)
+export default Back

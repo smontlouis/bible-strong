@@ -1,5 +1,5 @@
 import React from 'react'
-import { useNavigation } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 
 import Link from '~common/Link'
 import styled from '@emotion/native'
@@ -29,12 +29,12 @@ interface Props {
 }
 
 const ReadButton = ({ readingSliceId, planId, isRead }: Props) => {
-  const navigation = useNavigation()
+  const router = useRouter()
   const dispatch = useDispatch()
 
   const onPress = () => {
     dispatch(markAsRead({ readingSliceId, planId }))
-    navigation.goBack()
+    router.back()
   }
   return (
     <StyledLink onPress={onPress} style={{ opacity: isRead ? 0.3 : 1 }}>

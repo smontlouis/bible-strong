@@ -1,5 +1,5 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import { StackNavigationProp } from '@react-navigation/stack'
+import { useRouter } from 'expo-router'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
@@ -8,16 +8,15 @@ import Box from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
-import { MainStackProps } from '~navigation/type'
 import { removePlan, resetPlan } from '~redux/modules/plan'
 
 interface Props {
   modalRefDetails: React.RefObject<BottomSheetModal | null>
   planId: string
-  navigation: StackNavigationProp<MainStackProps, 'Plan'>
 }
 
-const Menu = ({ modalRefDetails, planId, navigation }: Props) => {
+const Menu = ({ modalRefDetails, planId }: Props) => {
+  const router = useRouter()
   const dispatch = useDispatch()
   const { t } = useTranslation()
 
@@ -47,7 +46,7 @@ const Menu = ({ modalRefDetails, planId, navigation }: Props) => {
         text: t('Supprimer'),
         onPress: () => {
           dispatch(removePlan(planId))
-          navigation.goBack()
+          router.back()
         },
         style: 'destructive',
       },

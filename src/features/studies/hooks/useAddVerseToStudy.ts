@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { useNavigation } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
@@ -25,7 +25,7 @@ interface QuillDelta {
 
 export const useAddVerseToStudy = () => {
   const dispatch = useDispatch()
-  const navigation = useNavigation()
+  const router = useRouter()
   const { t } = useTranslation()
   const tabs = useAtomValue(tabsAtom)
   const dispatchTabs = useSetAtom(tabsAtomsAtom)
@@ -126,7 +126,7 @@ export const useAddVerseToStudy = () => {
             },
           })
           // Navigate to AppSwitcher and slide to new tab
-          navigation.navigate('AppSwitcher')
+          router.navigate('/')
           triggerSlideNewTab(newTabId)
           toast.dismiss()
         },

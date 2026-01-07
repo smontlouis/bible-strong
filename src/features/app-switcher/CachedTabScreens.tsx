@@ -2,19 +2,11 @@ import { useAtomValue } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
 import React, { memo } from 'react'
 import { View } from 'react-native'
-import { StackNavigationProp } from '@react-navigation/stack'
 import useDynamicRefs from '~helpers/useDynamicRefs'
 import { cachedTabIdsAtom, tabsAtomsAtom } from '../../state/tabs'
 import TabScreen, { TabScreenProps } from './TabScreen/TabScreen'
-import { MainStackProps } from '~navigation/type'
-import { RouteProp } from '@react-navigation/native'
 
-export interface ChachedTabScreensProps {
-  navigation: StackNavigationProp<MainStackProps>
-  route: RouteProp<MainStackProps>
-}
-
-const CachedTabScreens = ({ navigation, route }: ChachedTabScreensProps) => {
+const CachedTabScreens = () => {
   const cachedTabIds = useAtomValue(cachedTabIdsAtom)
   const tabsAtoms = useAtomValue(tabsAtomsAtom)
 
@@ -35,8 +27,6 @@ const CachedTabScreens = ({ navigation, route }: ChachedTabScreensProps) => {
           <TabScreenRefMemoize
             key={tab.id}
             tabAtom={tabAtom}
-            navigation={navigation}
-            route={route}
           />
         )
       })}

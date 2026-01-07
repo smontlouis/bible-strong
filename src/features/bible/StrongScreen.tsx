@@ -1,17 +1,22 @@
 import React from 'react'
 import { atom } from 'jotai/vanilla'
 import { useMemo } from 'react'
-import { StackScreenProps } from '@react-navigation/stack'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { StrongTab } from '../../state/tabs'
 import StrongDetailScreen from '~features/lexique/StrongDetailScreen'
-import { MainStackProps } from '~navigation/type'
 
-const StrongScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Strong'>) => {
-  const book = route.params.book
-  // @ts-ignore
-  const reference = route.params.reference
-  // @ts-ignore
-  let strongReference = route.params.strongReference
+const StrongScreen = () => {
+  const router = useRouter()
+  const params = useLocalSearchParams<{
+    book?: string
+    reference?: string
+    strongReference?: string
+  }>()
+
+  // Parse params from URL strings
+  const book = params.book ? Number(params.book) : undefined
+  const reference = params.reference || undefined
+  const strongReference = params.strongReference ? JSON.parse(params.strongReference) : undefined
 
   const onTheFlyAtom = useMemo(
     () =>
@@ -30,7 +35,7 @@ const StrongScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'S
     [book, reference, strongReference]
   )
 
-  return <StrongDetailScreen navigation={navigation} strongAtom={onTheFlyAtom} />
+  return <StrongDetailScreen navigation={router} strongAtom={onTheFlyAtom} />
 }
 
 export default StrongScreen

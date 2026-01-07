@@ -1,4 +1,3 @@
-import { StackNavigationProp } from '@react-navigation/stack'
 import produce from 'immer'
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -11,13 +10,11 @@ import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import Switch from '~common/ui/Switch'
 import i18n from '~i18n'
-import { MainStackProps } from '~navigation/type'
 import { SearchTab } from '../../state/tabs'
 import LocalSearchScreen from './LocalSearchScreen'
 import OnlineSearchScreen from './OnlineSearchScreen'
 
 interface SearchScreenProps {
-  navigation: StackNavigationProp<MainStackProps, 'Search'>
   searchAtom: PrimitiveAtom<SearchTab>
 }
 

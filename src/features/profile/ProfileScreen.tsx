@@ -1,26 +1,26 @@
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { StackScreenProps } from '@react-navigation/stack'
+import { useRouter } from 'expo-router'
 import Container from '~common/ui/Container'
 import Header from '~common/Header'
 import ScrollView from '~common/ui/ScrollView'
 import Box from '~common/ui/Box'
-import { MainStackProps } from '~navigation/type'
 import useLogin from '~helpers/useLogin'
 
 import ProfileHeader from './components/ProfileHeader'
 import ProfileStats from './components/ProfileStats'
 import ProfileActions from './components/ProfileActions'
 
-const ProfileScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Profile'>) => {
+const ProfileScreen = () => {
   const { t } = useTranslation()
+  const router = useRouter()
   const { isLogged } = useLogin()
 
   useEffect(() => {
     if (!isLogged) {
-      navigation.replace('Login')
+      router.replace('/login')
     }
-  }, [isLogged, navigation])
+  }, [isLogged, router])
 
   if (!isLogged) {
     return null
@@ -35,7 +35,7 @@ const ProfileScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Profile
         </Box>
         <ProfileStats />
         <Box pt={20}>
-          <ProfileActions navigation={navigation} />
+          <ProfileActions />
         </Box>
       </ScrollView>
     </Container>

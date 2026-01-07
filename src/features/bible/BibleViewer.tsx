@@ -11,7 +11,6 @@ import loadBibleChapter from '~helpers/loadBibleChapter'
 import loadMhyComments from '~helpers/loadMhyComments'
 import BibleHeader from './BibleHeader'
 
-import { StackNavigationProp } from '@react-navigation/stack'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useDerivedValue } from 'react-native-reanimated'
@@ -26,7 +25,6 @@ import getVersesContent from '~helpers/getVersesContent'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useBottomSheet, useBottomSheetModal } from '~helpers/useBottomSheet'
 import useLanguage from '~helpers/useLanguage'
-import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
 import { addHighlight, removeHighlight } from '~redux/modules/user'
 import {
@@ -60,7 +58,6 @@ const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: nu
 }
 
 interface BibleViewerProps {
-  navigation: StackNavigationProp<MainStackProps>
   bibleAtom: PrimitiveAtom<BibleTab>
   commentsDisplay?: boolean
   settings: RootState['user']['bible']['settings']
@@ -89,7 +86,6 @@ const formatVerses = (verses: string[]) =>
   }, '')
 
 const BibleViewer = ({
-  navigation,
   bibleAtom,
   settings,
   onMountTimeout,
@@ -462,7 +458,6 @@ const BibleViewer = ({
   return (
     <Box flex={1} bg="reverse">
       <BibleHeader
-        navigation={navigation}
         bibleAtom={bibleAtom}
         onBibleParamsClick={bibleParamsModal.open}
         commentsDisplay={settings.commentsDisplay}
@@ -494,7 +489,6 @@ const BibleViewer = ({
           book={book}
           chapter={chapter}
           isLoading={isLoading}
-          navigation={navigation}
           addSelectedVerse={actions.addSelectedVerse}
           removeSelectedVerse={actions.removeSelectedVerse}
           setSelectedVerse={actions.setSelectedVerse}
@@ -600,7 +594,7 @@ const BibleViewer = ({
         onChangeResourceType={onChangeResourceType}
         isSelectionMode={isSelectionMode}
       />
-      <BibleParamsModal navigation={navigation} modalRef={bibleParamsModal.getRef()} />
+      <BibleParamsModal modalRef={bibleParamsModal.getRef()} />
       <AddToStudyModal
         bottomSheetRef={addToStudyModal.getRef()}
         onSelectStudy={handleSelectStudy}

@@ -5,8 +5,7 @@ import fr from 'date-fns/locale/fr'
 import enGB from 'date-fns/locale/en-GB'
 
 import styled from '@emotion/native'
-// import { withNavigation } from 'react-navigation'
-import { useNavigation } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 import { shallowEqual, useSelector } from 'react-redux'
 
 import TagList from '~common/TagList'
@@ -27,6 +26,7 @@ import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { RootState } from '~redux/modules/reducer'
 import { CustomColor, HighlightType } from '~redux/modules/user'
 import { resolveHighlightColor } from '~helpers/highlightColors'
+import { EMPTY_ARRAY, EMPTY_OBJECT } from '~helpers/emptyReferences'
 
 const DateText = styled.Text(({ theme }) => ({
   color: theme.colors.tertiary,
@@ -46,21 +46,23 @@ const VerseComponent = ({
   verseIds,
   stringIds,
   tags,
-  // navigation,
   setSettings,
 }: any) => {
-  const navigation = useNavigation()
+  const router = useRouter()
   const verses = useBibleVerses(verseIds)
   const { t } = useTranslation()
   const isFR = useLanguage()
   const { theme: currentTheme } = useCurrentThemeSelector()
-  const { themeColors, customHighlightColors, defaultColorTypes } = useSelector(
-    (state: RootState) => ({
-      themeColors: state.user.bible.settings.colors[currentTheme],
-      customHighlightColors: state.user.bible.settings.customHighlightColors ?? [],
-      defaultColorTypes: state.user.bible.settings.defaultColorTypes ?? {},
-    }),
-    shallowEqual
+
+  // Use separate selectors to avoid reference instability
+  const themeColors = useSelector(
+    (state: RootState) => state.user.bible.settings.colors[currentTheme]
+  )
+  const customHighlightColors = useSelector(
+    (state: RootState) => state.user.bible.settings.customHighlightColors ?? EMPTY_ARRAY
+  )
+  const defaultColorTypes = useSelector(
+    (state: RootState) => state.user.bible.settings.defaultColorTypes ?? EMPTY_OBJECT
   )
 
   const resolvedColor = resolveHighlightColor(color, themeColors, customHighlightColors)
@@ -92,14 +94,15 @@ const VerseComponent = ({
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={() =>
-        // @ts-ignore
-        navigation.navigate('BibleView', {
-          isReadOnly: true,
-          // @ts-ignore
-          book: books[Livre - 1],
-          chapter: Number(Chapitre),
-          verse: Number(Verset),
-          focusVerses: verses.map(v => Number(v.Verset)),
+        router.push({
+          pathname: '/bible-view',
+          params: {
+            isReadOnly: 'true',
+            book: JSON.stringify(books[Livre - 1]),
+            chapter: String(Chapitre),
+            verse: String(Verset),
+            focusVerses: JSON.stringify(verses.map(v => Number(v.Verset))),
+          },
         })
       }
     >
@@ -145,4 +148,3 @@ const VerseComponent = ({
 }
 
 export default VerseComponent
-// export default withNavigation(VerseComponent)

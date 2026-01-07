@@ -1,4 +1,4 @@
-import { StackScreenProps } from '@react-navigation/stack'
+import { useLocalSearchParams } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
@@ -15,7 +15,6 @@ import TagsModal from '~common/TagsModal'
 import { Tag, VerseIds } from '~common/types'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import verseToReference from '~helpers/verseToReference'
-import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
 import { Note } from '~redux/modules/user'
 import BibleNotesSettingsModal from './BibleNotesSettingsModal'
@@ -26,11 +25,10 @@ type TNote = {
   notes: Note
 }
 
-const BibleVerseNotes = ({
-  navigation,
-  route,
-}: StackScreenProps<MainStackProps, 'BibleVerseNotes'>) => {
-  const { withBack, verse } = route.params || {}
+const BibleVerseNotes = () => {
+  const params = useLocalSearchParams<{ withBack?: string; verse?: string }>()
+  const withBack = params.withBack === 'true'
+  const verse = params.verse || ''
   const { t } = useTranslation()
 
   const [title, setTitle] = useState('')
@@ -53,7 +51,6 @@ const BibleVerseNotes = ({
   }, [verse, _notes])
 
   const loadPage = async () => {
-    const { verse } = route.params || {}
     let title
     const filtered_notes: TNote[] = []
 

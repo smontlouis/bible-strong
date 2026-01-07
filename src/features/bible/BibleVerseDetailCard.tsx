@@ -19,8 +19,7 @@ import StrongCard from './StrongCard'
 import BibleVerseDetailFooter from './BibleVerseDetailFooter'
 
 import { useTranslation, withTranslation } from 'react-i18next'
-// import { withNavigation } from 'react-navigation'
-import { useNavigation } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { CarouselProvider } from '~helpers/CarouselContext'
 import { useLayoutSize } from '~helpers/useLayoutSize'
@@ -106,7 +105,7 @@ interface State {
 }
 
 const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateVerse }) => {
-  const navigation = useNavigation()
+  const router = useRouter()
   const theme = useTheme()
   const { t } = useTranslation()
   const carouselRef = useRef<any>(null)
@@ -183,7 +182,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
         // @ts-ignore
         isSelectionMode={isSelectionMode}
         // @ts-ignore
-        navigation={navigation}
+        navigation={router}
         // @ts-ignore
         book={verse.Livre}
         // @ts-ignore

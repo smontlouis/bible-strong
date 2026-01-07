@@ -11,11 +11,11 @@ import ScrollView from '~common/ui/ScrollView'
 import BibleCompareVerseItem from '~features/bible/BibleCompareVerseItem'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
 
+import { useRouter } from 'expo-router'
 import produce from 'immer'
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { StackNavigationProp } from '@react-navigation/stack'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import PopOverMenu from '~common/PopOverMenu'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -26,11 +26,11 @@ import { versions } from '~helpers/bibleVersions'
 import { CompareTab, SelectedVerses } from '../../state/tabs'
 
 interface CompareVersesTabScreenProps {
-  navigation: StackNavigationProp<any>
   compareAtom: PrimitiveAtom<CompareTab>
 }
 
-const CompareVersesTabScreen = ({ compareAtom, navigation }: CompareVersesTabScreenProps) => {
+const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) => {
+  const router = useRouter()
   const [compareTab, setCompareTab] = useAtom(compareAtom)
   const { t } = useTranslation()
   const setSelectedVerses = (v: SelectedVerses) =>
@@ -97,7 +97,7 @@ const CompareVersesTabScreen = ({ compareAtom, navigation }: CompareVersesTabScr
           <PopOverMenu
             popover={
               <>
-                <MenuOption onSelect={() => navigation.navigate('ToggleCompareVerses')}>
+                <MenuOption onSelect={() => router.push('/toggle-compare-verses')}>
                   <Box row alignItems="center">
                     <FeatherIcon name="check-square" size={15} />
                     <Text marginLeft={10}>{t('common.chooseCompareVersions')}</Text>

@@ -29,6 +29,7 @@ import {
 import { multipleTagsModalAtom } from '../../state/app'
 import VersesList from './VersesList'
 import type { TagsObj, Verse, VerseIds } from '~common/types'
+import { EMPTY_ARRAY, EMPTY_OBJECT } from '~helpers/emptyReferences'
 
 const MIN_ITEM_WIDTH = 40
 
@@ -80,10 +81,10 @@ const HighlightsScreen = () => {
   const selectColors = useMemo(() => makeColorsSelector(), [])
   const colors = useSelector((state: RootState) => selectColors(state, currentTheme))
   const customHighlightColors = useSelector(
-    (state: RootState) => state.user.bible.settings.customHighlightColors ?? []
+    (state: RootState) => state.user.bible.settings.customHighlightColors ?? EMPTY_ARRAY
   )
   const defaultColorTypes = useSelector(
-    (state: RootState) => state.user.bible.settings.defaultColorTypes ?? {}
+    (state: RootState) => state.user.bible.settings.defaultColorTypes ?? EMPTY_OBJECT
   )
   const [, setMultipleTagsItem] = useAtom(multipleTagsModalAtom)
 

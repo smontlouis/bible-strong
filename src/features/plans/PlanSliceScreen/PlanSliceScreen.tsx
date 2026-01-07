@@ -28,8 +28,7 @@ import ReadButton from './ReadButton'
 import Slice from './Slice'
 import { chapterSliceToText, verseSliceToText, videoSliceToText } from './share'
 import BottomSheet from '@gorhom/bottom-sheet'
-import { StackScreenProps } from '@react-navigation/stack'
-import { MainStackProps } from '~navigation/type'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useBookAndVersionSelector } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 import { timeout } from '~helpers/timeout'
 
@@ -44,8 +43,15 @@ const extractTitle = (slice: EntitySlice) => {
   }
 }
 
-const PlanSliceScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'PlanSlice'>) => {
-  const { id, title, slices, planId } = route.params.readingSlice || {}
+const PlanSliceScreen = () => {
+  const router = useRouter()
+  const params = useLocalSearchParams<{ readingSlice?: string }>()
+
+  // Parse complex object from URL string
+  const readingSlice: ComputedReadingSlice | undefined = params.readingSlice
+    ? JSON.parse(params.readingSlice)
+    : undefined
+  const { id, title, slices, planId } = readingSlice || {}
 
   const { t } = useTranslation()
   const dispatch = useDispatch()
@@ -83,7 +89,7 @@ const PlanSliceScreen = ({ navigation, route }: StackScreenProps<MainStackProps,
 
   const onMarkAsReadSelect = () => {
     dispatch(markAsRead({ readingSliceId: id, planId }))
-    navigation.goBack()
+    router.back()
   }
 
   const mainSlice: EntitySlice | undefined = slices.find(

@@ -22,17 +22,15 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useTranslation } from 'react-i18next'
 import TryAudibibleWidget from './TryAudibibleWidget'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { StackNavigationProp, StackScreenProps } from '@react-navigation/stack'
-import { MainStackProps } from '~navigation/type'
+import { useRouter } from 'expo-router'
 import { Events } from './Events'
 
 // local react props
 type HomeProps = {
   closeHome: () => void
-  navigation: StackNavigationProp<MainStackProps>
 }
 
-export const Home = ({ closeHome, navigation }: HomeProps) => {
+export const Home = ({ closeHome }: HomeProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
@@ -42,7 +40,7 @@ export const Home = ({ closeHome, navigation }: HomeProps) => {
     <Box bg="lightGrey" flex={1}>
       <HomeScrollView showsVerticalScrollIndicator={false}>
         <Events />
-        <UserWidget navigation={navigation} />
+        <UserWidget />
         <Box bg="lightGrey" pt={20} px={20}>
           <Text title fontSize={23} flex>
             {t('Apprendre')}
@@ -170,9 +168,10 @@ export const Home = ({ closeHome, navigation }: HomeProps) => {
   )
 }
 
-const HomeScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Home'>) => {
-  const closeHome = route.params.closeHome
+const HomeScreen = () => {
+  const router = useRouter()
+  const closeHome = () => router.back()
 
-  return <Home closeHome={closeHome} navigation={navigation} />
+  return <Home closeHome={closeHome} />
 }
 export default HomeScreen

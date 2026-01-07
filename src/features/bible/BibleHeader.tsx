@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 
-import { StackNavigationProp } from '@react-navigation/stack'
+import { useRouter } from 'expo-router'
 import { VerseIds } from '~common/types'
 import verseToReference from '~helpers/verseToReference'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
@@ -32,7 +32,6 @@ import truncate from '~helpers/truncate'
 import useDimensions from '~helpers/useDimensions'
 import useLanguage from '~helpers/useLanguage'
 import { usePrevious } from '~helpers/usePrevious'
-import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { makeSelectBookmarkForChapter } from '~redux/selectors/bookmarks'
@@ -42,7 +41,6 @@ import { useBookAndVersionSelector } from './BookSelectorBottomSheet/BookSelecto
 import { VerseSelectorPopup } from './VerseSelectorPopup'
 
 interface BibleHeaderProps {
-  navigation: StackNavigationProp<MainStackProps>
   bibleAtom: PrimitiveAtom<BibleTab>
   hasBackButton?: boolean
   onBibleParamsClick: () => void
@@ -57,7 +55,6 @@ interface BibleHeaderProps {
 }
 
 const Header = ({
-  navigation,
   hasBackButton,
   bibleAtom,
   onBibleParamsClick,
@@ -70,6 +67,7 @@ const Header = ({
   isParallel,
   selectedVerses,
 }: BibleHeaderProps) => {
+  const router = useRouter()
   const { t } = useTranslation()
   const isFR = useLanguage()
   const dispatch = useDispatch()
@@ -162,7 +160,7 @@ const Header = ({
 
     if (needsDownload) {
       toast(t('Téléchargez la base de commentaires Matthew Henry'))
-      navigation.navigate('Downloads')
+      router.push('/downloads')
       return
     }
 
@@ -349,7 +347,7 @@ const Header = ({
                           <Text marginLeft={10}>{t('Affichage parallèle')}</Text>
                         </Box>
                       </MenuOption>
-                      <MenuOption onSelect={() => navigation.navigate('History')}>
+                      <MenuOption onSelect={() => router.push('/history')}>
                         <Box row alignItems="center">
                           <MaterialIcon name="history" size={20} />
                           <Text marginLeft={10}>{t('Historique')}</Text>

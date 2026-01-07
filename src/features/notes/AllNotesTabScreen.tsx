@@ -1,5 +1,4 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet/'
-import { StackNavigationProp } from '@react-navigation/stack'
 import produce from 'immer'
 import { PrimitiveAtom, useAtom } from 'jotai'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
@@ -14,7 +13,6 @@ import Container from '~common/ui/Container'
 import FlatList from '~common/ui/FlatList'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import verseToReference from '~helpers/verseToReference'
-import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
 import { Note } from '~redux/modules/user'
 import { NotesTab } from '~state/tabs'
@@ -29,11 +27,10 @@ type TNote = {
 
 type AllNotesTabScreenProps = {
   hasBackButton?: boolean
-  navigation: StackNavigationProp<MainStackProps>
   notesAtom: PrimitiveAtom<NotesTab>
 }
 
-const AllNotesTabScreen = ({ hasBackButton, navigation, notesAtom }: AllNotesTabScreenProps) => {
+const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps) => {
   const { t } = useTranslation()
   const [, setNotesTab] = useAtom(notesAtom)
 

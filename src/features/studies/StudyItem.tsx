@@ -31,11 +31,10 @@ export type StudyItemProps = {
   study: Study
   theme: Theme
   setStudySettings?: any
-  navigation: any
   onPress?: (studyId: string) => void
 }
 
-const StudyItem = ({ study, theme, setStudySettings, navigation, onPress }: StudyItemProps) => {
+const StudyItem = ({ study, theme, setStudySettings, onPress }: StudyItemProps) => {
   const { t } = useTranslation()
   const isFR = useLanguage()
 
@@ -54,7 +53,6 @@ const StudyItem = ({ study, theme, setStudySettings, navigation, onPress }: Stud
           : {
               route: 'EditStudy',
               params: { studyId: study.id },
-              navigation,
             })}
       >
         <Box

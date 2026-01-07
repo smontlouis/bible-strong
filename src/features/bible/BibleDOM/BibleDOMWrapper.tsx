@@ -1,7 +1,7 @@
 import { useTheme } from '@emotion/react'
-import { StackNavigationProp } from '@react-navigation/stack'
 import * as Sentry from '@sentry/react-native'
 import * as Haptics from 'expo-haptics'
+import { useRouter } from 'expo-router'
 import produce from 'immer'
 import { useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
@@ -9,7 +9,6 @@ import { Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
 import { BibleTab, VersionCode } from 'src/state/tabs'
-import { MainStackProps } from '~navigation/type'
 import BibleDOMComponent from './BibleDOMComponent'
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -74,7 +73,6 @@ export type WebViewProps = {
   book: Book
   chapter: number
   isLoading: boolean
-  navigation: StackNavigationProp<MainStackProps>
   addSelectedVerse: (id: string) => void
   removeSelectedVerse: (id: string) => void
   setSelectedVerse: (selectedVerse: number) => void
@@ -164,6 +162,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
+  const router = useRouter()
   // Add this to track component mounting
   const mountedRef = useRef(false)
 
@@ -207,24 +206,27 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
       case NAVIGATE_TO_VERSE_NOTES: {
-        const { navigation } = props
-        navigation.push('BibleVerseNotes', {
-          verse: action.payload,
-          withBack: true,
+        router.push({
+          pathname: '/bible-verse-notes',
+          params: {
+            verse: action.payload,
+            withBack: 'true',
+          },
         })
         break
       }
       case NAVIGATE_TO_VERSE_LINKS: {
-        const { navigation } = props
-        navigation.push('BibleVerseLinks', {
-          verse: action.payload,
-          withBack: true,
+        router.push({
+          pathname: '/bible-verse-links',
+          params: {
+            verse: action.payload,
+            withBack: 'true',
+          },
         })
         break
       }
       case NAVIGATE_TO_PERICOPE: {
-        const { navigation } = props
-        navigation.navigate('Pericope')
+        router.push('/pericope')
         break
       }
       case NAVIGATE_TO_VERSION: {
@@ -299,7 +301,6 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
       case NAVIGATE_TO_BIBLE_VIEW: {
-        const { navigation } = props
         // @ts-ignore
         const book = Object.keys(books).find(key => books[key][0].toUpperCase() === action.bookCode)
 
@@ -309,11 +310,14 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
           return
         }
 
-        navigation.navigate('BibleView', {
-          isReadOnly: true,
-          book: parseInt(book, 10),
-          chapter: parseInt(action.chapter, 10),
-          verse: parseInt(action.verse, 10),
+        router.push({
+          pathname: '/bible-view',
+          params: {
+            isReadOnly: 'true',
+            book: book,
+            chapter: action.chapter,
+            verse: action.verse,
+          },
         })
 
         break
@@ -367,9 +371,11 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
       }
 
       case NAVIGATE_TO_TAG: {
-        const { navigation } = props
         const { tagId } = action.payload
-        navigation.navigate('Tag', { tagId })
+        router.push({
+          pathname: '/tag',
+          params: { tagId },
+        })
         break
       }
 

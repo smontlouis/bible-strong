@@ -2,8 +2,8 @@ import { BottomSheetModal } from '@gorhom/bottom-sheet/'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { useFocusEffect } from '@react-navigation/native'
-import { StackScreenProps } from '@react-navigation/stack'
+import { useFocusEffect } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import produce from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
@@ -11,7 +11,6 @@ import { isFullScreenBibleValue } from 'src/state/app'
 import RenameModal from '~common/RenameModal'
 import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
-import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
 import { updateStudy } from '~redux/modules/user'
 import EditStudyHeader from './EditStudyHeader'
@@ -20,8 +19,13 @@ import { openedFromTabAtom } from './atom'
 import { StudyTab } from 'src/state/tabs'
 import { PrimitiveAtom } from 'jotai/vanilla'
 
-type EditStudyScreenProps = StackScreenProps<MainStackProps, 'EditStudy'> & {
+type EditStudyScreenProps = {
   studyAtom?: PrimitiveAtom<StudyTab>
+  // Props passed directly (when called from StudiesTabScreen)
+  studyId?: string
+  canEdit?: boolean
+  hasBackButton?: boolean
+  openedFromTab?: boolean
 }
 
 // Component to update tab title when study title changes
@@ -47,13 +51,44 @@ const TabTitleUpdater = ({
   return null
 }
 
-const EditStudyScreen = ({ studyAtom, navigation, route, ...props }: EditStudyScreenProps) => {
+const EditStudyScreen = ({
+  studyAtom,
+  studyId: propStudyId,
+  canEdit: propCanEdit,
+  hasBackButton: propHasBackButton,
+  openedFromTab: propOpenedFromTab,
+}: EditStudyScreenProps) => {
   const { t } = useTranslation()
+  const router = useRouter()
+  const params = useLocalSearchParams<{
+    studyId?: string
+    canEdit?: string
+    hasBackButton?: string
+    openedFromTab?: string
+    type?: string
+    title?: string
+    content?: string
+    version?: string
+    verses?: string
+  }>()
 
-  const studyId = useMemo(() => route.params.studyId, [])
-  const canEdit = useMemo(() => route.params.canEdit, [])
-  const hasBackButton = useMemo(() => route.params.hasBackButton, [])
-  const openedFromTab = useMemo(() => route.params.openedFromTab, [])
+  // Use props if provided, otherwise parse from URL params
+  const studyId = useMemo(
+    () => propStudyId ?? params.studyId ?? '',
+    [propStudyId, params.studyId]
+  )
+  const canEdit = useMemo(
+    () => propCanEdit ?? params.canEdit === 'true',
+    [propCanEdit, params.canEdit]
+  )
+  const hasBackButton = useMemo(
+    () => propHasBackButton ?? params.hasBackButton === 'true',
+    [propHasBackButton, params.hasBackButton]
+  )
+  const openedFromTab = useMemo(
+    () => propOpenedFromTab ?? params.openedFromTab === 'true',
+    [propOpenedFromTab, params.openedFromTab]
+  )
 
   const dispatch = useDispatch()
   const [isReadOnly, setIsReadOnly] = useState(!canEdit)
@@ -107,14 +142,14 @@ const EditStudyScreen = ({ studyAtom, navigation, route, ...props }: EditStudySc
         }}
         title={currentStudy.title}
         study={currentStudy}
-        navigation={navigation}
+        navigation={router}
       />
       <StudiesDomWrapper
         isReadOnly={isReadOnly}
         onDeltaChangeCallback={onDeltaChangeCallback}
         contentToDisplay={currentStudy.content}
         fontFamily={fontFamily}
-        params={route.params}
+        params={params as any}
         studyAtom={studyAtom}
       />
       <RenameModal

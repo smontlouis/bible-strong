@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { withTheme } from '@emotion/react'
 import * as Icon from '@expo/vector-icons'
-import { StackScreenProps } from '@react-navigation/stack'
+import { useRouter } from 'expo-router'
 
 import FireAuth from '~helpers/FireAuth'
 import Button from '~common/ui/Button'
@@ -14,12 +14,9 @@ import Text from '~common/ui/Text'
 import Header from '~common/Header'
 import { toast } from 'sonner-native'
 import { useTranslation } from 'react-i18next'
-import { MainStackProps } from '~navigation/type'
 
-const ForgotPasswordScreen = ({
-  theme,
-  navigation,
-}: { theme: any } & StackScreenProps<MainStackProps, 'ForgotPassword'>) => {
+const ForgotPasswordScreen = ({ theme }: { theme: any }) => {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [isLoading, setLoading] = useState(false)
   const { t } = useTranslation()
@@ -32,7 +29,7 @@ const ForgotPasswordScreen = ({
     setLoading(true)
     await FireAuth.resetPassword(email)
     setLoading(false)
-    navigation.goBack()
+    router.back()
   }
 
   return (

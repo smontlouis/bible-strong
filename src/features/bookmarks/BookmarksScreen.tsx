@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 
+import { useRouter } from 'expo-router'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Link from '~common/Link'
@@ -15,8 +16,6 @@ import { FeatherIcon, IonIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { selectSortedBookmarks } from '~redux/selectors/bookmarks'
 import type { Bookmark } from '~common/types'
-import { StackScreenProps } from '@react-navigation/stack'
-import { MainStackProps } from '~navigation/type'
 import BookmarkModal from './BookmarkModal'
 import books from '~assets/bible_versions/books-desc'
 
@@ -73,8 +72,9 @@ const BookmarkItem = ({ item, onEdit, onNavigate }: BookmarkItemProps) => {
   )
 }
 
-const BookmarksScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Bookmarks'>) => {
+const BookmarksScreen = () => {
   const { t } = useTranslation()
+  const router = useRouter()
   const bookmarks = useSelector(selectSortedBookmarks)
   const [selectedBookmark, setSelectedBookmark] = useState<Bookmark | null>(null)
   const bookmarkModalRef = useRef<BottomSheetModal>(null)
@@ -85,11 +85,14 @@ const BookmarksScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Bookm
   }
 
   const handleNavigate = (bookmark: Bookmark) => {
-    navigation.navigate('BibleView', {
-      isReadOnly: true,
-      book: bookmark.book,
-      chapter: bookmark.chapter,
-      verse: bookmark.verse,
+    router.push({
+      pathname: '/bible-view',
+      params: {
+        isReadOnly: 'true',
+        book: String(bookmark.book),
+        chapter: String(bookmark.chapter),
+        verse: bookmark.verse !== undefined ? String(bookmark.verse) : undefined,
+      },
     })
   }
 

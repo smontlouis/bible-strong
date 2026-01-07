@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useTheme } from '@emotion/react'
 import * as Icon from '@expo/vector-icons'
-import { StackScreenProps } from '@react-navigation/stack'
+import { useRouter } from 'expo-router'
 
-import { MainStackProps } from '~navigation/type'
 import FireAuth from '~helpers/FireAuth'
 import useLogin from '~helpers/useLogin'
 import Button from '~common/ui/Button'
@@ -16,8 +15,9 @@ import Header from '~common/Header'
 import { toast } from 'sonner-native'
 import { useTranslation } from 'react-i18next'
 
-const RegisterScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Register'>) => {
+const RegisterScreen = () => {
   const theme = useTheme()
+  const router = useRouter()
   const { isLogged } = useLogin()
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
@@ -27,9 +27,10 @@ const RegisterScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Regist
 
   useEffect(() => {
     if (isLogged) {
-      navigation.pop(2)
+      // Go back two screens (register -> login -> previous)
+      router.dismiss(2)
     }
-  }, [isLogged, navigation])
+  }, [isLogged, router])
 
   const onRegister = async () => {
     if (!username || !email || !password) {

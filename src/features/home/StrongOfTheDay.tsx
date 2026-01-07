@@ -13,9 +13,6 @@ import truncate from '~helpers/truncate'
 import RandomButton from './RandomButton'
 import waitForStrongWidget from './waitForStrongWidget'
 import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
-import { MainStackProps } from '~navigation/type'
-import { StackNavigationProp } from '@react-navigation/stack'
-import { useNavigation } from '@react-navigation/native'
 import { StrongReference } from '~common/types'
 
 const StrongOfTheDay = ({ type, color1 = 'rgb(69,150,220)', color2 = 'rgb(89,131,240)' }: any) => {

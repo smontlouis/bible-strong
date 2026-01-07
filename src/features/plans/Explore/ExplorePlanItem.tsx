@@ -1,6 +1,6 @@
 // TODO : type nested screen
 import { BottomSheetFooter, BottomSheetModal } from '@gorhom/bottom-sheet'
-import { useNavigation } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 import { Image } from 'expo-image'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -27,7 +27,7 @@ const ExplorePlanItem = ({
   type,
   featured,
 }: any) => {
-  const navigation = useNavigation()
+  const router = useRouter()
   const { t } = useTranslation()
   const modalRef = React.useRef<BottomSheetModal>(null)
   const planImage = useFireStorage(image)
@@ -108,7 +108,7 @@ const ExplorePlanItem = ({
                   dispatch(fetchPlan({ id, update: true }))
                     .then(() => {
                       setIsLoading(false)
-                      navigation.goBack()
+                      router.back()
                       modalRef?.current?.dismiss()
                       toast.success(t('Plan ajouté avec succès'))
                     })

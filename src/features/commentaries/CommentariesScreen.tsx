@@ -1,16 +1,15 @@
 import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
-import { StackScreenProps } from '@react-navigation/stack'
+import { useLocalSearchParams } from 'expo-router'
 import { CommentaryTab } from '../../state/tabs'
 import CommentariesTabScreen from './CommentariesTabScreen'
-import { MainStackProps } from '~navigation/type'
 
-const CommentariesScreen = ({
-  navigation,
-  route,
-}: StackScreenProps<MainStackProps, 'Commentaries'>) => {
-  const verse = route.params.verse // navigation.getParam('verse')
+const CommentariesScreen = () => {
+  const params = useLocalSearchParams<{ verse?: string }>()
+
+  // Parse params from URL strings
+  const verse = params.verse || ''
 
   const onTheFlyAtom = useMemo(
     () =>

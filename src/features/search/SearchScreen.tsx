@@ -1,12 +1,10 @@
 import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
-import { StackScreenProps } from '@react-navigation/stack'
 import { SearchTab } from '../../state/tabs'
 import SearchTabScreen from './SearchTabScreen'
-import { MainStackProps } from '~navigation/type'
 
-const SearchScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Search'>) => {
+const SearchScreen = () => {
   const onTheFlyAtom = useMemo(
     () =>
       atom<SearchTab>({
@@ -22,6 +20,6 @@ const SearchScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Search'>
     []
   )
 
-  return <SearchTabScreen searchAtom={onTheFlyAtom} navigation={navigation} />
+  return <SearchTabScreen searchAtom={onTheFlyAtom} />
 }
 export default SearchScreen

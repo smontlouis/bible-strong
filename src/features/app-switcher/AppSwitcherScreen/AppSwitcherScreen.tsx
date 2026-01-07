@@ -1,16 +1,14 @@
-import { useAtom, useAtomValue } from 'jotai/react'
+import { useAtomValue } from 'jotai/react'
 import React, { useEffect, useRef } from 'react'
 
 import { BackHandler, useWindowDimensions } from 'react-native'
 
-import { StackScreenProps } from '@react-navigation/stack'
 import { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 import Box, { AnimatedBox } from '~common/ui/Box'
 import BottomTabBar from '~features/app-switcher/BottomTabBar/BottomTabBar'
 import { Home } from '~features/home/HomeScreen'
 import { More } from '~features/settings/MoreScreen'
-import { MainStackProps } from '~navigation/type'
-import { tabsAtomsAtom, tabsCountAtom } from '../../../state/tabs'
+import { tabsCountAtom } from '../../../state/tabs'
 import CachedTabScreens from '../CachedTabScreens'
 import { TabContextProvider } from '../context/TabContext'
 import TabPreviewCarousel from '../TabPreviewCarousel/TabPreviewCarousel'
@@ -26,17 +24,12 @@ export const TAB_PREVIEW_SCALE = 0.6
 const DRAWER_WIDTH_PERCENT = 0.95
 const MAX_DRAWER_WIDTH = 450
 
-const AppSwitcherScreen = ({
-  navigation,
-  route,
-  openHome,
-  openMenu,
-}: StackScreenProps<MainStackProps, 'AppSwitcher'> & AppSwitcherScreenFuncs) => {
+const AppSwitcherScreen = ({ openHome, openMenu }: AppSwitcherScreenFuncs) => {
   return (
     <TabContextProvider>
       <Box flex={1} bg="lightGrey">
         <TabGroupPager />
-        <CachedTabScreens navigation={navigation} route={route} />
+        <CachedTabScreens />
         <TabPreviewCarousel />
         <BottomTabBar openMenu={openMenu} openHome={openHome} />
       </Box>
@@ -44,7 +37,7 @@ const AppSwitcherScreen = ({
   )
 }
 
-const AppSwitcherScreenWrapper = (props: StackScreenProps<MainStackProps, 'AppSwitcher'>) => {
+const AppSwitcherScreenWrapper = () => {
   const { width: screenWidth } = useWindowDimensions()
   const drawerWidth = Math.min(screenWidth * DRAWER_WIDTH_PERCENT, MAX_DRAWER_WIDTH)
 
@@ -111,11 +104,11 @@ const AppSwitcherScreenWrapper = (props: StackScreenProps<MainStackProps, 'AppSw
         style={[{ width: drawerWidth * 2 + screenWidth, marginLeft: -drawerWidth }, containerStyle]}
       >
         <Box width={drawerWidth}>
-          <Home closeHome={closeHome} navigation={props.navigation} />
+          <Home closeHome={closeHome} />
         </Box>
 
         <Box width={screenWidth}>
-          <AppSwitcherScreen openHome={openHome} openMenu={openMenu} {...props} />
+          <AppSwitcherScreen openHome={openHome} openMenu={openMenu} />
         </Box>
 
         <Box width={drawerWidth}>

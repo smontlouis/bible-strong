@@ -19,11 +19,9 @@ import { useResultsByLetterOrSearch, useSearchValue } from './useUtilities'
 
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { StackNavigationProp } from '@react-navigation/stack'
 import waitForStrongDB from '~common/waitForStrongDB'
 import { StrongTab } from '../../state/tabs'
 import LexiqueItem from './LexiqueItem'
-import { MainStackProps } from '~navigation/type'
 import PopOverMenu from '~common/PopOverMenu'
 import LanguageMenuOption from '~common/LanguageMenuOption'
 
@@ -54,13 +52,12 @@ const useSectionResults = (results: any) => {
 }
 
 interface LexiqueListScreenProps {
-  navigation: StackNavigationProp<MainStackProps>
   strongAtom: PrimitiveAtom<StrongTab>
   hasBackButton?: boolean
   onStrongSelect?: (book: number, reference: string) => void
 }
 
-const LexiqueListScreen = ({ strongAtom, navigation, hasBackButton, onStrongSelect }: LexiqueListScreenProps) => {
+const LexiqueListScreen = ({ strongAtom, hasBackButton, onStrongSelect }: LexiqueListScreenProps) => {
   const { t } = useTranslation()
   const [error, setError] = useState(false)
   const [letter, setLetter] = useState('a')
@@ -130,7 +127,7 @@ const LexiqueListScreen = ({ strongAtom, navigation, hasBackButton, onStrongSele
             renderItem={({ item: { Mot, Grec, Hebreu, Code, lexiqueType }, index }) => (
               <LexiqueItem
                 key={index}
-                {...{ Mot, Grec, Hebreu, Code, lexiqueType, navigation }}
+                {...{ Mot, Grec, Hebreu, Code, lexiqueType }}
                 onSelect={onStrongSelect}
               />
             )}

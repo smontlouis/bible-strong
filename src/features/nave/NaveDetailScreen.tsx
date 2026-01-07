@@ -1,17 +1,17 @@
 import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
-import { StackScreenProps } from '@react-navigation/stack'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { NaveTab } from '../../state/tabs'
 import NaveDetailTabScreen from './NaveDetailTabScreen'
-import { MainStackProps } from '~navigation/type'
 
-const NaveDetailScreen = ({
-  navigation,
-  route,
-}: StackScreenProps<MainStackProps, 'NaveDetail'>) => {
-  const name_lower = route.params.name_lower // navigation.getParam('name_lower')
-  const name = route.params.name // navigation.getParam('name')
+const NaveDetailScreen = () => {
+  const router = useRouter()
+  const params = useLocalSearchParams<{ name_lower?: string; name?: string }>()
+
+  // Parse params from URL strings
+  const name_lower = params.name_lower || ''
+  const name = params.name || ''
 
   const onTheFlyAtom = useMemo(
     () =>
@@ -29,6 +29,6 @@ const NaveDetailScreen = ({
     []
   )
 
-  return <NaveDetailTabScreen naveAtom={onTheFlyAtom} navigation={navigation} />
+  return <NaveDetailTabScreen naveAtom={onTheFlyAtom} navigation={router} />
 }
 export default NaveDetailScreen

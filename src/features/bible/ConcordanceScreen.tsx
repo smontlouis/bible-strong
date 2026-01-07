@@ -3,7 +3,7 @@ import * as Icon from '@expo/vector-icons'
 import React from 'react'
 import { FlatList, TouchableOpacity } from 'react-native'
 
-import { StackScreenProps } from '@react-navigation/stack'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import books from '~assets/bible_versions/books-desc'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
@@ -12,8 +12,6 @@ import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
 import loadStrongVersesCountByBook from '~helpers/loadStrongVersesCountByBook'
 import useAsync from '~helpers/useAsync'
-import { MainStackProps } from '~navigation/type'
-import { StackActions } from '@react-navigation/native'
 
 const OccurencesNumber = styled.View(({ theme }) => ({
   marginLeft: 10,
@@ -34,12 +32,13 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
-const ConcordanceScreen = ({
-  navigation,
-  route,
-}: StackScreenProps<MainStackProps, 'Concordance'>) => {
-  const strongReference = route.params.strongReference || {}
-  const book = route.params.book || 0
+const ConcordanceScreen = () => {
+  const router = useRouter()
+  const params = useLocalSearchParams<{ strongReference?: string; book?: string }>()
+
+  // Parse params from URL strings
+  const strongReference = params.strongReference ? JSON.parse(params.strongReference) : {}
+  const book = params.book ? Number(params.book) : 0
 
   const { data: versesCountByBook, status } = useAsync(
     async () => await loadStrongVersesCountByBook(book, strongReference.Code)
@@ -58,12 +57,13 @@ const ConcordanceScreen = ({
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => {
-                navigation.dispatch(
-                  StackActions.push('ConcordanceByBook', {
-                    book: item.Livre,
-                    strongReference,
-                  })
-                )
+                router.push({
+                  pathname: '/concordance-by-book',
+                  params: {
+                    book: String(item.Livre),
+                    strongReference: JSON.stringify(strongReference),
+                  },
+                })
               }}
             >
               <ListItem row alignItems="center" height={50}>

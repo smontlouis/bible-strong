@@ -15,23 +15,22 @@ import useLogin from '~helpers/useLogin'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { updateStudy } from '~redux/modules/user'
 
-import { StackNavigationProp } from '@react-navigation/stack'
+import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { Tag } from '~common/types'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
 import generateUUID from '~helpers/generateUUID'
-import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
 import StudyItem from './StudyItem'
 import StudySettingsModal from './StudySettingsModal'
 
 type StudiesScreenProps = {
   hasBackButton?: boolean
-  navigation: StackNavigationProp<MainStackProps>
   onStudySelect?: (studyId: string) => void
 }
 
-const StudiesScreen = ({ hasBackButton, navigation, onStudySelect }: StudiesScreenProps) => {
+const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => {
+  const router = useRouter()
   const { t } = useTranslation()
   const { isLogged } = useLogin()
   const { isInTab } = useTabContext()
@@ -63,12 +62,13 @@ const StudiesScreen = ({ hasBackButton, navigation, onStudySelect }: StudiesScre
       if (isInTab && onStudySelect) {
         onStudySelect(studyId)
       } else {
-        navigation.navigate('EditStudy', {
-          studyId,
+        router.push({
+          pathname: '/edit-study',
+          params: { studyId },
         })
       }
     },
-    [isInTab, onStudySelect, navigation]
+    [isInTab, onStudySelect, router]
   )
 
   const [selectedChip, setSelectedChip] = React.useState<Tag | null>(null)
@@ -118,7 +118,6 @@ const StudiesScreen = ({ hasBackButton, navigation, onStudySelect }: StudiesScre
               key={item.id}
               study={item}
               setStudySettings={openStudySettings}
-              navigation={navigation}
               onPress={onStudyPress}
             />
           )}

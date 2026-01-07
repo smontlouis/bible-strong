@@ -5,7 +5,6 @@ import { useAtom } from 'jotai'
 import { TouchableOpacity } from 'react-native'
 import Animated from 'react-native-reanimated'
 import { useTheme } from '@emotion/react'
-import { StackScreenProps } from '@react-navigation/stack'
 
 import { Image } from 'expo-image'
 import Header from '~common/Header'
@@ -21,7 +20,6 @@ import {
   type ResourcesLanguageState,
 } from 'src/state/resourcesLanguage'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import { MainStackProps } from '~navigation/type'
 
 // Icons mapping using SVG files
 const icons = {
@@ -281,7 +279,7 @@ const ResourceRow = ({
   )
 }
 
-const ResourceLanguageScreen = ({}: StackScreenProps<MainStackProps, 'ResourceLanguage'>) => {
+const ResourceLanguageScreen = () => {
   const { t, i18n } = useTranslation()
   const dispatch = useDispatch()
 

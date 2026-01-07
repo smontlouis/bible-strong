@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useSetAtom } from 'jotai/react'
 import { toast } from 'sonner-native'
@@ -62,7 +62,7 @@ export interface TagData {
 
 export const useCreateTabGroupFromTag = () => {
   const { t } = useTranslation()
-  const navigation = useNavigation()
+  const router = useRouter()
   const createGroup = useCreateGroup()
   const switchGroup = useSwitchGroup()
   const groupsCount = useGroupsCount()
@@ -223,7 +223,7 @@ export const useCreateTabGroupFromTag = () => {
     switchGroup(groupId)
 
     // Naviguer vers AppSwitcher
-    navigation.navigate('AppSwitcher' as never)
+    router.navigate('/')
 
     // Attendre que le layout soit prêt puis ouvrir le premier tab
     setTimeout(() => {

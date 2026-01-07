@@ -1,5 +1,5 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import { useNavigation } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 import produce from 'immer'
 import { PrimitiveAtom, useAtom } from 'jotai'
 import React, { useCallback } from 'react'
@@ -22,7 +22,7 @@ type Props = {
 const NotesSettingsModal = ({ ref, noteId, onClosed, notesAtom }: Props) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const navigation = useNavigation()
+  const router = useRouter()
   const openInNewTab = useOpenInNewTab()
   const [, setNotesTab] = useAtom(notesAtom)
 
@@ -50,13 +50,15 @@ const NotesSettingsModal = ({ ref, noteId, onClosed, notesAtom }: Props) => {
     const [Livre, Chapitre, Verset] = noteId.split('/')[0].split('-')
     close()
     setTimeout(() => {
-      // @ts-ignore
-      navigation.navigate('BibleView', {
-        isReadOnly: true,
-        book: books[Number(Livre) - 1],
-        chapter: Number(Chapitre),
-        verse: Number(Verset),
-        focusVerses: [Number(Verset)],
+      router.push({
+        pathname: '/bible-view',
+        params: {
+          isReadOnly: 'true',
+          book: JSON.stringify(books[Number(Livre) - 1]),
+          chapter: String(Chapitre),
+          verse: String(Verset),
+          focusVerses: JSON.stringify([Number(Verset)]),
+        },
       })
     }, 300)
   }

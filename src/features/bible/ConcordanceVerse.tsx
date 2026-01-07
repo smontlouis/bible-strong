@@ -7,9 +7,7 @@ import books from '~assets/bible_versions/books-desc'
 import Loading from '~common/Loading'
 import verseToStrong from '~helpers/verseToStrong'
 import { TFunction, useTranslation, withTranslation } from 'react-i18next'
-import { StackNavigationProp } from '@react-navigation/stack'
-import { MainStackProps } from '~navigation/type'
-import { StackActions } from '@react-navigation/native'
+import { Router } from 'expo-router'
 
 const VerseText = styled.View(() => ({
   flex: 1,
@@ -26,7 +24,7 @@ const Container = styled.TouchableOpacity(({ theme }) => ({
 }))
 
 type Props = {
-  navigation: StackNavigationProp<MainStackProps>
+  router: Router
   t: TFunction<'translation', undefined>
   verse: any
   concordanceFor: any
@@ -47,7 +45,7 @@ class ConcordanceVerse extends React.Component<Props> {
   }
 
   render() {
-    const { verse, navigation } = this.props
+    const { verse, router } = this.props
 
     if (!this.state.formattedTexte) {
       return <Loading />
@@ -56,15 +54,16 @@ class ConcordanceVerse extends React.Component<Props> {
     return (
       <Container
         onPress={() =>
-          navigation.dispatch(
-            StackActions.push('BibleView', {
-              isReadOnly: true,
-              book: books[verse.Livre - 1],
-              chapter: verse.Chapitre,
-              verse: verse.Verset,
-              focusVerses: [verse.Verset],
-            })
-          )
+          router.push({
+            pathname: '/bible-view',
+            params: {
+              isReadOnly: 'true',
+              book: JSON.stringify(books[verse.Livre - 1]),
+              chapter: String(verse.Chapitre),
+              verse: String(verse.Verset),
+              focusVerses: JSON.stringify([verse.Verset]),
+            },
+          })
         }
       >
         <Text title fontSize={16} marginBottom={5}>

@@ -2,7 +2,6 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { SectionList } from 'react-native'
-import { StackScreenProps } from '@react-navigation/stack'
 
 import Header from '~common/Header'
 import Container from '~common/ui/Container'
@@ -11,12 +10,11 @@ import Text from '~common/ui/Text'
 import { versions, Version } from '~helpers/bibleVersions'
 import { setDefaultBibleVersion } from '~redux/modules/user'
 import { RootState } from '~redux/modules/reducer'
-import { MainStackProps } from '~navigation/type'
 import { getLangIsFr } from '~i18n'
 import VersionSelectorItem from '~features/bible/VersionSelectorItem'
 import { VersionCode } from 'src/state/tabs'
 
-const BibleDefaultsScreen = ({}: StackScreenProps<MainStackProps, 'BibleDefaults'>) => {
+const BibleDefaultsScreen = () => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
 

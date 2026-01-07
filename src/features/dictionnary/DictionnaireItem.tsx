@@ -2,15 +2,13 @@ import React, { memo, useCallback } from 'react'
 import styled from '@emotion/native'
 import { Pressable } from 'react-native'
 
+import { useRouter } from 'expo-router'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { StackNavigationProp } from '@react-navigation/stack'
-import { MainStackProps } from '~navigation/type'
 
 interface DictionnaireItemProps {
   word: string
-  navigation: StackNavigationProp<MainStackProps>
   onSelect?: (word: string) => void
 }
 
@@ -25,14 +23,19 @@ const SectionItem = styled(Box)(({ theme }) => ({
   justifyContent: 'center',
 }))
 
-const DictionnaireItem = memo(({ word, navigation, onSelect }: DictionnaireItemProps) => {
+const DictionnaireItem = memo(({ word, onSelect }: DictionnaireItemProps) => {
+  const router = useRouter()
+
   const handlePress = useCallback(() => {
     if (onSelect) {
       onSelect(word)
     } else {
-      navigation.navigate('DictionnaryDetail', { word })
+      router.push({
+        pathname: '/dictionnary-detail',
+        params: { word },
+      })
     }
-  }, [onSelect, word, navigation])
+  }, [onSelect, word, router])
 
   const content = (
     <SectionItem>

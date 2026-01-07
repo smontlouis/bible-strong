@@ -14,7 +14,7 @@ import { CarouselProvider } from '~helpers/CarouselContext'
 import loadBible from '~helpers/loadBible'
 
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
-import { useNavigation } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { Verse } from '~common/types'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
@@ -168,7 +168,7 @@ const DictionnaireVerseDetailScreen = ({
   const { t } = useTranslation()
   const carousel = useRef<ICarouselInstance>(null)
   const { Livre, Chapitre, Verset } = verse
-  const navigation = useNavigation()
+  const router = useRouter()
   const [boxHeight, setBoxHeight] = useState(0)
   const {
     ref: carouselContainerRef,
@@ -272,7 +272,7 @@ const DictionnaireVerseDetailScreen = ({
             defaultIndex={currentWordIndex === -1 ? 0 : currentWordIndex}
             data={words}
             renderItem={({ item, index }) => (
-              <DictionnaireCard navigation={navigation} dictionnaireRef={item} index={index} />
+              <DictionnaireCard navigation={router} dictionnaireRef={item} index={index} />
             )}
             onSnapToItem={(index: any) => setCurrentWord(wordsInVerse[index])}
           />

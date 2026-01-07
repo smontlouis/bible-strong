@@ -1,6 +1,4 @@
 import { useTheme } from '@emotion/react'
-import { useNavigation } from '@react-navigation/native'
-import { StackNavigationProp } from '@react-navigation/stack'
 import { Asset } from 'expo-asset'
 import * as FileSystem from 'expo-file-system/legacy'
 import { Image } from 'expo-image'

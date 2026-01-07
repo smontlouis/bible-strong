@@ -14,11 +14,10 @@ import capitalize from '~helpers/capitalize'
 import truncate from '~helpers/truncate'
 import { cleanParams, wp } from '~helpers/utils'
 import { useAtomValue } from 'jotai/react'
+import { useRouter } from 'expo-router'
 import { openedFromTabAtom } from '~features/studies/atom'
 import { ScrollView } from 'react-native'
 import { StrongReference, StudyNavigateBibleType } from '~common/types'
-import { StackNavigationProp } from '@react-navigation/stack'
-import { MainStackProps } from '~navigation/type'
 import { Theme } from '@emotion/react'
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 
@@ -84,7 +83,6 @@ type Props = {
   theme: Theme
   book: string
   strongReference: StrongReference
-  navigation: StackNavigationProp<MainStackProps>
   isSelectionMode?: StudyNavigateBibleType
   isModal?: boolean
   onClosed?: () => void
@@ -92,13 +90,13 @@ type Props = {
 
 const StrongCard = (props: Props) => {
   const { t } = useTranslation()
+  const router = useRouter()
   const openedFromTab = useAtomValue(openedFromTabAtom)
 
   const openStrong = () => {
     const {
       book,
       strongReference,
-      navigation,
       isSelectionMode,
       onClosed,
       strongReference: { Code, Type, Mot, Phonetique, Definition, LSG, Hebreu, Grec },
@@ -108,15 +106,12 @@ const StrongCard = (props: Props) => {
 
     if (isSelectionMode) {
       if (openedFromTab) {
-        // @ts-ignore
-        navigation.navigate('AppSwitcher')
+        router.navigate('/')
       } else {
-        // @ts-ignore
-        navigation.navigate({
-          name: 'EditStudy',
+        router.navigate({
+          pathname: '/edit-study',
           params: {
             ...cleanParams(),
-            // @ts-ignore
             type: isSelectionMode,
             title: Mot,
             codeStrong: Code,
@@ -127,13 +122,15 @@ const StrongCard = (props: Props) => {
             original: Hebreu || Grec,
             book,
           },
-          merge: true,
         })
       }
     } else {
-      navigation.navigate('Strong', {
-        book: Number(book),
-        strongReference,
+      router.push({
+        pathname: '/strong',
+        params: {
+          book: String(Number(book)),
+          reference: JSON.stringify(strongReference),
+        },
       })
     }
   }

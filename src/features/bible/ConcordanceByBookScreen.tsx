@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native'
-import { StackNavigationProp } from '@react-navigation/stack'
+import { useRouter, useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 
 import Container from '~common/ui/Container'
@@ -26,28 +25,23 @@ interface Verse {
 }
 
 const ConcordanceByBook = () => {
-  // @ts-ignore
-  const navigation = useNavigation()
-  const route = useRoute<RouteProp<MainStackProps, 'ConcordanceByBook'>>()
+  const router = useRouter()
+  const params = useLocalSearchParams<{ book: string; strongReference: string }>()
   const { t } = useTranslation()
   const [verses, setVerses] = useState<Verse[]>([])
 
+  const book = params.book ? Number(params.book) : 0
+  const strongReference = params.strongReference ? JSON.parse(params.strongReference) : { Code: 0, Mot: '' }
+  const { Code, Mot } = strongReference
+
   useEffect(() => {
     const loadVerses = async () => {
-      const {
-        book,
-        strongReference: { Code },
-      } = route.params
+      if (!book || !Code) return
       const foundVerses = await loadFoundVersesByBook(book, Code)
       setVerses(foundVerses)
     }
     loadVerses()
-  }, [route.params])
-
-  const {
-    book,
-    strongReference: { Code, Mot },
-  } = route.params
+  }, [book, Code])
 
   return (
     <Container>
@@ -78,12 +72,11 @@ const ConcordanceByBook = () => {
             keyExtractor={(item: any) => `${item.Livre}-${item.Chapitre}-${item.Verset}`}
             renderItem={({ item }: any) => {
               const props = {
-                navigation,
+                router,
                 concordanceFor: Code,
                 verse: item,
                 t,
               }
-              // @ts-ignore
               return <ConcordanceVerse {...props} />
             }}
           />

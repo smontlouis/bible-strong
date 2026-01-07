@@ -3,7 +3,7 @@ import React from 'react'
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view'
 
 import { useTranslation } from 'react-i18next'
-import { useNavigation } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 import books from '~assets/bible_versions/books-desc'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -18,7 +18,7 @@ import bibleLSG from './bibleLSG'
 const LocalSearchResults = ({ results = [], searchValue }: any) => {
   const { t } = useTranslation()
   const theme = useTheme()
-  const navigation = useNavigation()
+  const router = useRouter()
   const nbResults = results.length
 
   return (
@@ -77,11 +77,14 @@ const LocalSearchResults = ({ results = [], searchValue }: any) => {
             reference={title}
             text={text}
             onPress={() =>
-              navigation.navigate('BibleView', {
-                isReadOnly: true,
-                book: books[book - 1],
-                chapter: Number(chapter),
-                verse: Number(verse),
+              router.push({
+                pathname: '/bible-view',
+                params: {
+                  isReadOnly: 'true',
+                  book: JSON.stringify(books[book - 1]),
+                  chapter: String(chapter),
+                  verse: String(verse),
+                },
               })
             }
           />

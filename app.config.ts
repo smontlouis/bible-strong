@@ -5,6 +5,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   name: process.env.APP_NAME ?? 'dev - Bible Strong',
   description: 'Bible strong for french people',
   slug: 'bible-strong',
+  scheme: 'biblestrong',
   primaryColor: '#ffffff',
   githubUrl: 'https://github.com/bulby97/bible-strong',
   platforms: ['ios', 'android'],
@@ -24,6 +25,21 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundImage: './assets/images/background-image.png',
       monochromeImage: './assets/images/icon_notification.png',
     },
+    // Deep linking: Android App Links
+    intentFilters: [
+      {
+        action: 'VIEW',
+        autoVerify: true,
+        data: [
+          {
+            scheme: 'https',
+            host: 'bible.strong.app',
+            pathPrefix: '/',
+          },
+        ],
+        category: ['BROWSABLE', 'DEFAULT'],
+      },
+    ],
   },
   ios: {
     bundleIdentifier: process.env.BUNDLE_IDENTIFIER ?? 'com.smontlouis.biblestrong.dev',
@@ -50,8 +66,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     entitlements: {
       'com.apple.developer.applesignin': ['Default'],
     },
+    // Deep linking: iOS Universal Links
+    associatedDomains: ['applinks:bible.strong.app'],
   },
   plugins: [
+    'expo-router',
     'expo-asset',
     'expo-sqlite',
     'expo-audio',

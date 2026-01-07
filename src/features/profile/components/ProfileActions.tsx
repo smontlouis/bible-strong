@@ -1,7 +1,6 @@
 import React, { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
-import { StackNavigationProp } from '@react-navigation/stack'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 
 import Box from '~common/ui/Box'
@@ -11,14 +10,9 @@ import { FeatherIcon } from '~common/ui/Icon'
 import IconCircle from '~common/ui/IconCircle'
 import SectionCard, { SectionCardHeader } from '~common/ui/SectionCard'
 import useLogin from '~helpers/useLogin'
-import { MainStackProps } from '~navigation/type'
 import ChangePasswordModal from './ChangePasswordModal'
 
-type ProfileActionsProps = {
-  navigation: StackNavigationProp<MainStackProps>
-}
-
-const ProfileActions = ({ navigation }: ProfileActionsProps) => {
+const ProfileActions = () => {
   const { t } = useTranslation()
   const { user, logout, promptDeleteAccount } = useLogin()
   const passwordModalRef = useRef<BottomSheetModal>(null)

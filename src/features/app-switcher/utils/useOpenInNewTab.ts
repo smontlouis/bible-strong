@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner-native'
@@ -6,7 +6,7 @@ import { TabItem, tabsAtomsAtom } from '../../../state/tabs'
 import { useSlideNewTab } from './useSlideNewTab'
 
 export const useOpenInNewTab = () => {
-  const navigation = useNavigation()
+  const router = useRouter()
   const { t } = useTranslation()
   const dispatchTabs = useSetAtom(tabsAtomsAtom)
   const { triggerSlideNewTab } = useSlideNewTab()
@@ -31,7 +31,7 @@ export const useOpenInNewTab = () => {
         action: {
           label: t('common.goTo'),
           onClick: () => {
-            navigation.navigate('AppSwitcher')
+            router.navigate('/')
             triggerSlideNewTab(newTabId)
             toast.dismiss()
           },
@@ -39,7 +39,7 @@ export const useOpenInNewTab = () => {
       })
     } else {
       triggerSlideNewTab(newTabId)
-      navigation.navigate('AppSwitcher')
+      router.navigate('/')
     }
   }
 

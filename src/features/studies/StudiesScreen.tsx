@@ -1,13 +1,14 @@
 import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
-import { StackScreenProps } from '@react-navigation/stack'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { StudyTab } from '../../state/tabs'
 import StudiesTabScreen from './StudiesTabScreen'
-import { MainStackProps } from '~navigation/type'
 
-const StudiesScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Studies'>) => {
-  const studyId = route.params?.studyId
+const StudiesScreen = () => {
+  const router = useRouter()
+  const params = useLocalSearchParams<{ studyId?: string }>()
+  const studyId = params.studyId
 
   const onTheFlyAtom = useMemo(
     () =>
@@ -24,6 +25,6 @@ const StudiesScreen = ({ navigation, route }: StackScreenProps<MainStackProps, '
     [studyId]
   )
 
-  return <StudiesTabScreen studyAtom={onTheFlyAtom} navigation={navigation} route={route} />
+  return <StudiesTabScreen studyAtom={onTheFlyAtom} />
 }
 export default StudiesScreen

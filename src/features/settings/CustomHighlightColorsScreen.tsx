@@ -29,6 +29,7 @@ import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { makeColorsSelector } from '~redux/selectors/user'
 import getTheme from '~themes/index'
 import defaultColors from '~themes/colors'
+import { EMPTY_ARRAY, EMPTY_OBJECT } from '~helpers/emptyReferences'
 
 type ColorKey = keyof typeof defaultColors
 
@@ -73,17 +74,17 @@ const CustomHighlightColorsScreen = () => {
   const themeColors = useSelector((state: RootState) => selectColors(state, currentTheme))
 
   const customHighlightColors = useSelector(
-    (state: RootState) => state.user.bible.settings.customHighlightColors ?? [],
+    (state: RootState) => state.user.bible.settings.customHighlightColors ?? EMPTY_ARRAY,
     shallowEqual
   )
 
   const defaultColorNames = useSelector(
-    (state: RootState) => state.user.bible.settings.defaultColorNames ?? {},
+    (state: RootState) => state.user.bible.settings.defaultColorNames ?? EMPTY_OBJECT,
     shallowEqual
   )
 
   const defaultColorTypes = useSelector(
-    (state: RootState) => state.user.bible.settings.defaultColorTypes ?? {},
+    (state: RootState) => state.user.bible.settings.defaultColorTypes ?? EMPTY_OBJECT,
     shallowEqual
   )
 

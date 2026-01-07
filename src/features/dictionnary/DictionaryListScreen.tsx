@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
-import { StackNavigationProp } from '@react-navigation/stack'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import AlphabetList from '~common/AlphabetList'
@@ -18,7 +17,6 @@ import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { getFirstLetterFrom } from '~helpers/alphabet'
 import loadDictionnaireByLetter from '~helpers/loadDictionnaireByLetter'
 import loadDictionnaireBySearch from '~helpers/loadDictionnaireBySearch'
-import { MainStackProps } from '~navigation/type'
 import { DictionaryTab } from '../../state/tabs'
 import { useResultsByLetterOrSearch, useSearchValue } from '../lexique/useUtilities'
 import DictionnaireItem from './DictionnaireItem'
@@ -53,13 +51,12 @@ const useSectionResults = (results: any) => {
 }
 
 interface DictionaryListScreenProps {
-  navigation: StackNavigationProp<MainStackProps>
   dictionaryAtom: PrimitiveAtom<DictionaryTab>
   hasBackButton?: boolean
   onWordSelect?: (word: string) => void
 }
 
-const DictionaryListScreen = ({ hasBackButton, navigation, onWordSelect }: DictionaryListScreenProps) => {
+const DictionaryListScreen = ({ hasBackButton, onWordSelect }: DictionaryListScreenProps) => {
   const { t } = useTranslation()
   const [error, setError] = useState(false)
   const [letter, setLetter] = useState('a')
@@ -118,7 +115,6 @@ const DictionaryListScreen = ({ hasBackButton, navigation, onWordSelect }: Dicti
             renderItem={({ item: { id, word } }) => (
               <DictionnaireItem
                 key={id}
-                navigation={navigation}
                 word={word}
                 onSelect={onWordSelect}
               />

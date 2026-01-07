@@ -1,16 +1,16 @@
 import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
-import { StackScreenProps } from '@react-navigation/stack'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { DictionaryTab } from '../../state/tabs'
 import DictionaryDetailTabScreen from './DictionaryDetailTabScreen'
-import { MainStackProps } from '~navigation/type'
 
-const DictionaryDetailScreen = ({
-  navigation,
-  route,
-}: StackScreenProps<MainStackProps, 'DictionnaryDetail'>) => {
-  const word = route.params.word // navigation.getParam('word')
+const DictionaryDetailScreen = () => {
+  const router = useRouter()
+  const params = useLocalSearchParams<{ word?: string }>()
+
+  // Parse params from URL strings
+  const word = params.word || ''
 
   const onTheFlyAtom = useMemo(
     () =>
@@ -27,6 +27,6 @@ const DictionaryDetailScreen = ({
     []
   )
 
-  return <DictionaryDetailTabScreen dictionaryAtom={onTheFlyAtom} navigation={navigation} />
+  return <DictionaryDetailTabScreen dictionaryAtom={onTheFlyAtom} navigation={router} />
 }
 export default DictionaryDetailScreen

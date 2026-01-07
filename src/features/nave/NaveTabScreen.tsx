@@ -3,20 +3,15 @@ import React, { useCallback } from 'react'
 import produce from 'immer'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useAtom } from 'jotai/react'
-import { StackNavigationProp } from '@react-navigation/stack'
 import { NaveTab } from '../../state/tabs'
 import NaveListScreen from './NaveListScreen'
 import NaveDetailTabScreen from './NaveDetailTabScreen'
-import { MainStackProps } from '~navigation/type'
-import { RouteProp } from '@react-navigation/native'
 
 interface NaveTabScreenProps {
-  navigation: StackNavigationProp<MainStackProps>
-  route: RouteProp<MainStackProps>
   naveAtom: PrimitiveAtom<NaveTab>
 }
 
-const NaveTabScreen = ({ naveAtom, navigation }: NaveTabScreenProps) => {
+const NaveTabScreen = ({ naveAtom }: NaveTabScreenProps) => {
   const [naveTab, setNaveTab] = useAtom(naveAtom)
 
   const {
@@ -43,7 +38,6 @@ const NaveTabScreen = ({ naveAtom, navigation }: NaveTabScreenProps) => {
     return (
       <NaveListScreen
         hasBackButton={hasBackButton}
-        navigation={navigation}
         naveAtom={naveAtom}
         onNaveSelect={onNaveSelect}
       />
@@ -53,7 +47,6 @@ const NaveTabScreen = ({ naveAtom, navigation }: NaveTabScreenProps) => {
   return (
     <NaveDetailTabScreen
       naveAtom={naveAtom}
-      navigation={navigation}
     />
   )
 }

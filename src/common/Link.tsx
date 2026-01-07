@@ -1,9 +1,10 @@
 import React, { PropsWithChildren } from 'react'
 import { Linking, Share, TouchableOpacity } from 'react-native'
 
-import { StackActions, useNavigation } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 import Box, { BoxProps } from '~common/ui/Box'
 import { MainStackProps } from '~navigation/type'
+import { routeMapping } from '~navigation/routeMapping'
 
 export interface LinkProps<R extends keyof MainStackProps> {
   route?: R
@@ -16,6 +17,27 @@ export interface LinkProps<R extends keyof MainStackProps> {
   paddingSmall?: boolean
   style?: any
   size?: number
+}
+
+/**
+ * Serialize params for Expo Router - URL params can only be strings
+ * Complex objects/arrays are JSON.stringify'd, primitives are converted to strings
+ */
+const serializeParams = (
+  params: Record<string, any> | undefined
+): Record<string, string> | undefined => {
+  if (!params) return undefined
+
+  const serialized: Record<string, string> = {}
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null) continue
+    if (typeof value === 'object') {
+      serialized[key] = JSON.stringify(value)
+    } else {
+      serialized[key] = String(value)
+    }
+  }
+  return serialized
 }
 
 const Link = <R extends keyof MainStackProps>({
@@ -31,23 +53,26 @@ const Link = <R extends keyof MainStackProps>({
   size,
   ...props
 }: PropsWithChildren<LinkProps<R>>) => {
-  const navigation = useNavigation()
+  const router = useRouter()
 
   const handlePress = () => {
     if (route) {
+      const pathname = routeMapping[route]
+      const serializedParams = serializeParams(params as Record<string, any>)
+
       if (onPress) {
         onPress()
         setTimeout(() => {
           replace
-            ? navigation.dispatch(StackActions.replace(route, params))
-            : navigation.dispatch(StackActions.push(route, params))
+            ? router.replace({ pathname, params: serializedParams })
+            : router.push({ pathname, params: serializedParams })
         }, 300)
         return
       }
 
       replace
-        ? navigation.dispatch(StackActions.replace(route, params))
-        : navigation.dispatch(StackActions.push(route, params))
+        ? router.replace({ pathname, params: serializedParams })
+        : router.push({ pathname, params: serializedParams })
     }
 
     if (href) {

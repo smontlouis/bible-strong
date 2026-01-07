@@ -3,7 +3,7 @@ import { ActivityIndicator } from 'react-native'
 
 import { useTheme } from '@emotion/react'
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
-import { useNavigation } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
 import waitForStrongModal from '~common/waitForStrongModal'
@@ -79,7 +79,7 @@ interface StrongModalProps {
 }
 
 const StrongModal = ({ ref, onClosed, selectedCode, version }: StrongModalProps) => {
-  const navigation = useNavigation()
+  const router = useRouter()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
 
@@ -109,7 +109,7 @@ const StrongModal = ({ ref, onClosed, selectedCode, version }: StrongModalProps)
       }}
     >
       <BottomSheetScrollView>
-        <StrongCardWrapper {...{ navigation, selectedCode, onClosed }} />
+        <StrongCardWrapper {...{ navigation: router, selectedCode, onClosed }} />
       </BottomSheetScrollView>
     </BottomSheet>
   )

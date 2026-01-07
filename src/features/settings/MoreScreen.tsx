@@ -19,8 +19,7 @@ import useLogin from '~helpers/useLogin'
 import { RootState } from '~redux/modules/reducer'
 import app from '../../../package.json'
 
-import { StackScreenProps } from '@react-navigation/stack'
-import { MainStackProps } from '~navigation/type'
+import { useRouter } from 'expo-router'
 
 export const LinkItem = styled(Link)<LinkProps<keyof MainStackProps>>(() => ({
   flexDirection: 'row',
@@ -317,8 +316,9 @@ export const More = ({ closeMenu }: MoreProps) => {
   )
 }
 
-const MoreScreen = ({ route }: StackScreenProps<MainStackProps, 'More'>) => {
-  const closeMenu = route.params.closeMenu
+const MoreScreen = () => {
+  const router = useRouter()
+  const closeMenu = () => router.back()
 
   return <More closeMenu={closeMenu} />
 }

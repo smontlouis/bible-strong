@@ -6,9 +6,6 @@ import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { Theme } from '~themes'
-import { StackNavigationProp } from '@react-navigation/stack'
-import { MainStackProps } from '~navigation/type'
-import { useNavigation } from '@react-navigation/native'
 
 interface Props {
   children: React.ReactNode
@@ -27,7 +24,6 @@ interface Props {
   rightIcon?: JSX.Element
   subTitle?: string
   theme?: Theme
-  navigation?: StackNavigationProp<MainStackProps>
 }
 
 const WrapperButton = styled.TouchableOpacity(
@@ -127,7 +123,6 @@ const Button = ({
         secondary={secondary}
         success={success}
         color={color}
-        navigation={navigation}
       >
         {isLoading ? (
           <ActivityIndicator color="white" />

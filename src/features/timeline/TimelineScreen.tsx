@@ -4,15 +4,15 @@ import { View } from 'react-native'
 import TimelineSection from './TimelineSection'
 import { TimelineSection as TimelineSectionProps, ShallowTimelineSection } from './types'
 
-import { StackScreenProps } from '@react-navigation/stack'
+import { useLocalSearchParams } from 'expo-router'
 import { useQuery } from '~helpers/react-query-lite'
 import { getEvents } from './events'
-import { MainStackProps } from '~navigation/type'
 
 const omitEvents = ({ events, ...rest }: TimelineSectionProps): ShallowTimelineSection => rest
 
-const Timeline = ({ route }: StackScreenProps<MainStackProps, 'Timeline'>) => {
-  const goTo = route.params.goTo // navigation.getParam('goTo', 0)
+const Timeline = () => {
+  const params = useLocalSearchParams<{ goTo?: string }>()
+  const goTo = params.goTo ? Number(params.goTo) : 0
 
   const [current, setCurrent] = React.useState(goTo)
   const [entrance, setEntrance] = React.useState<0 | 1>(1)

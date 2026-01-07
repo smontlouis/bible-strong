@@ -4,8 +4,7 @@ import { WebView } from 'react-native-webview'
 import { useSelector } from 'react-redux'
 import truncHTML from 'trunc-html'
 
-import { StackActions } from '@react-navigation/native'
-import { StackNavigationProp } from '@react-navigation/stack'
+import { useRouter } from 'expo-router'
 import produce from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -27,18 +26,17 @@ import { useTabContext } from '~features/app-switcher/context/TabContext'
 import loadNaveItem from '~helpers/loadNaveItem'
 import { timeout } from '~helpers/timeout'
 import useHTMLView from '~helpers/useHTMLView'
-import { MainStackProps } from '~navigation/type'
 import { RootState } from '~redux/modules/reducer'
 import { makeNaveTagsSelector } from '~redux/selectors/bible'
 import { historyAtom, multipleTagsModalAtom } from '../../state/app'
 import { NaveTab } from '../../state/tabs'
 
 interface NaveDetailScreenProps {
-  navigation: StackNavigationProp<MainStackProps>
   naveAtom: PrimitiveAtom<NaveTab>
 }
 
-const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
+const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
+  const router = useRouter()
   const [naveTab, setNaveTab] = useAtom(naveAtom)
   const { isInTab } = useTabContext()
 
@@ -59,9 +57,9 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
         })
       )
     } else {
-      navigation.goBack()
+      router.back()
     }
-  }, [isInTab, setNaveTab, navigation])
+  }, [isInTab, setNaveTab, router])
 
   const [naveItem, setNaveItem] = useState<any>(null)
   const { t } = useTranslation()
@@ -101,12 +99,15 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
       try {
         const [book, chapter, verses] = item.split('-')
         const [verse] = verses ? verses.split(',') : []
-        navigation.navigate('BibleView', {
-          isReadOnly: true,
-          book: Number(book),
-          chapter: Number(chapter),
-          verse: Number(verse),
-          focusVerses: verses?.split(',').map(Number),
+        router.push({
+          pathname: '/bible-view',
+          params: {
+            isReadOnly: 'true',
+            book: String(book),
+            chapter: String(chapter),
+            verse: String(verse),
+            focusVerses: JSON.stringify(verses?.split(',').map(Number)),
+          },
         })
       } catch (e) {
         console.log('[Nave] Error loading verse:', e)
@@ -124,12 +125,13 @@ const NaveDetailScreen = ({ navigation, naveAtom }: NaveDetailScreenProps) => {
           })
         )
       } else {
-        navigation.dispatch(
-          StackActions.push('NaveDetail', {
+        router.push({
+          pathname: '/nave-detail',
+          params: {
             name_lower: item,
             name: item,
-          })
-        )
+          },
+        })
       }
     }
   }

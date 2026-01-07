@@ -3,15 +3,33 @@ import { useMemo } from 'react'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
 
-import { StackScreenProps } from '@react-navigation/stack'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { atom } from 'jotai/vanilla'
-import { MainStackProps } from '~navigation/type'
 import { BibleTab, getDefaultBibleTab } from '../../state/tabs'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 import BibleTabScreen from './BibleTabScreen'
 
-const BibleScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'BibleView'>) => {
-  const { focusVerses, isSelectionMode, isReadOnly, book, chapter, verse, version } = route.params
+const BibleScreen = () => {
+  const router = useRouter()
+  const params = useLocalSearchParams<{
+    focusVerses?: string
+    isSelectionMode?: string
+    isReadOnly?: string
+    book?: string
+    chapter?: string
+    verse?: string
+    version?: string
+  }>()
+
+  // Parse params from URL strings
+  const focusVerses = params.focusVerses ? JSON.parse(params.focusVerses) : undefined
+  const isSelectionMode = params.isSelectionMode || undefined
+  const isReadOnly = params.isReadOnly === 'true'
+  const book = params.book ? JSON.parse(params.book) : undefined
+  const chapter = params.chapter ? Number(params.chapter) : undefined
+  const verse = params.verse ? Number(params.verse) : undefined
+  const version = params.version || undefined
+
   const defaultVersion = useDefaultBibleVersion()
 
   const initialValues = produce(getDefaultBibleTab(version || defaultVersion), draft => {
@@ -31,7 +49,7 @@ const BibleScreen = ({ navigation, route }: StackScreenProps<MainStackProps, 'Bi
   // Always create an on-the-fly atom for this screen
   const bibleAtom = useMemo(() => atom<BibleTab>(initialValues), [])
 
-  return <BibleTabScreen bibleAtom={bibleAtom} navigation={navigation} />
+  return <BibleTabScreen bibleAtom={bibleAtom} navigation={router} />
 }
 
 export default BibleScreen

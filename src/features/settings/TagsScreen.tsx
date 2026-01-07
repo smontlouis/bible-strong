@@ -23,8 +23,6 @@ import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { addTag, removeTag, updateTag } from '~redux/modules/user'
 import { sortedTagsSelector } from '~redux/selectors/tags'
 import { makeTagDataSelector, makeGroupedHighlightsCountSelector } from '~redux/selectors/bible'
-import { StackNavigationProp, StackScreenProps } from '@react-navigation/stack'
-import { MainStackProps } from '~navigation/type'
 import { Tag } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import { useCreateTabGroupFromTag } from './useCreateTabGroupFromTag'
@@ -44,10 +42,9 @@ const Chip = styled(Box)(({ theme }) => ({
 type TagItemProps = {
   item: Tag
   setOpen: any
-  navigation: StackNavigationProp<MainStackProps>
 }
 
-const TagItem = ({ item, setOpen, navigation }: TagItemProps) => {
+const TagItem = ({ item, setOpen }: TagItemProps) => {
   const { t } = useTranslation()
   const selectGroupedHighlightsCount = useMemo(() => makeGroupedHighlightsCountSelector(), [])
   const highlightsNumber = useSelector((state: RootState) =>
@@ -132,7 +129,7 @@ const TagItem = ({ item, setOpen, navigation }: TagItemProps) => {
   )
 }
 
-const TagsScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Tags'>) => {
+const TagsScreen = () => {
   const { t } = useTranslation()
   const tags = useSelector(sortedTagsSelector, shallowEqual)
   const [isOpen, setOpen] = useState<Tag | undefined>(undefined)
@@ -191,7 +188,7 @@ const TagsScreen = ({ navigation }: StackScreenProps<MainStackProps, 'Tags'>) =>
         <FlatList
           data={result}
           renderItem={({ item }: { item: Tag }) => (
-            <TagItem setOpen={setOpen} item={item} navigation={navigation} />
+            <TagItem setOpen={setOpen} item={item} />
           )}
           keyExtractor={(item: Tag) => item.id}
           contentContainerStyle={{ paddingBottom: 70 }}

@@ -30,7 +30,7 @@ import produce from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { StackNavigationProp } from '@react-navigation/stack'
+import { useRouter } from 'expo-router'
 import DetailedHeader from '~common/DetailedHeader'
 import LanguageMenuOption from '~common/LanguageMenuOption'
 import PopOverMenu from '~common/PopOverMenu'
@@ -42,8 +42,6 @@ import { RootState } from '~redux/modules/reducer'
 import { makeStrongTagsSelector } from '~redux/selectors/bible'
 import { StrongTab } from '../../state/tabs'
 import { historyAtom, multipleTagsModalAtom } from '../../state/app'
-import { MainStackProps } from '~navigation/type'
-import { StackActions } from '@react-navigation/native'
 import { timeout } from '~helpers/timeout'
 
 const LinkBox = Box.withComponent(Link)
@@ -68,11 +66,11 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
 }))
 
 interface StrongDetailScreenProps {
-  navigation: StackNavigationProp<MainStackProps>
   strongAtom: PrimitiveAtom<StrongTab>
 }
 
-const StrongDetailScreen = ({ navigation, strongAtom }: StrongDetailScreenProps) => {
+const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
+  const router = useRouter()
   const [strongTab, setStrongTab] = useAtom(strongAtom)
   const { isInTab } = useTabContext()
 
@@ -108,9 +106,9 @@ const StrongDetailScreen = ({ navigation, strongAtom }: StrongDetailScreenProps)
         })
       )
     } else {
-      navigation.goBack()
+      router.back()
     }
-  }, [isInTab, setStrongTab, navigation, t])
+  }, [isInTab, setStrongTab, router, t])
 
   const setTitle = (title: string) =>
     setStrongTab(
@@ -188,12 +186,13 @@ const StrongDetailScreen = ({ navigation, strongAtom }: StrongDetailScreenProps)
         })
       )
     } else {
-      navigation.dispatch(
-        StackActions.push('Strong', {
-          book,
-          reference: ref,
-        })
-      )
+      router.push({
+        pathname: '/strong',
+        params: {
+          book: String(book),
+          reference: String(ref),
+        },
+      })
     }
   }
 
@@ -375,7 +374,7 @@ const StrongDetailScreen = ({ navigation, strongAtom }: StrongDetailScreenProps)
                 <Box my={10}>
                   {verses.map((item, i) => (
                     <ConcordanceVerse
-                      navigation={navigation}
+                      router={router}
                       t={t}
                       concordanceFor={Code}
                       verse={item}
@@ -387,9 +386,12 @@ const StrongDetailScreen = ({ navigation, strongAtom }: StrongDetailScreenProps)
                   <Box>
                     <Button
                       onPress={() =>
-                        navigation.navigate('Concordance', {
-                          strongReference,
-                          book,
+                        router.push({
+                          pathname: '/concordance',
+                          params: {
+                            strongReference: JSON.stringify(strongReference),
+                            book: String(book),
+                          },
                         })
                       }
                     >

@@ -3,20 +3,15 @@ import React, { useCallback } from 'react'
 import produce from 'immer'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useAtom } from 'jotai/react'
-import { StackNavigationProp } from '@react-navigation/stack'
 import { StrongTab } from '../../state/tabs'
 import LexiqueListScreen from './LexiqueListScreen'
 import StrongDetailScreen from './StrongDetailScreen'
-import { MainStackProps } from '~navigation/type'
-import { RouteProp } from '@react-navigation/native'
 
 interface StrongTabScreenProps {
-  navigation: StackNavigationProp<MainStackProps>
-  route: RouteProp<MainStackProps>
   strongAtom: PrimitiveAtom<StrongTab>
 }
 
-const StrongTabScreen = ({ strongAtom, navigation }: StrongTabScreenProps) => {
+const StrongTabScreen = ({ strongAtom }: StrongTabScreenProps) => {
   const [strongTab, setStrongTab] = useAtom(strongAtom)
 
   const {
@@ -44,7 +39,6 @@ const StrongTabScreen = ({ strongAtom, navigation }: StrongTabScreenProps) => {
     return (
       <LexiqueListScreen
         hasBackButton={hasBackButton}
-        navigation={navigation}
         strongAtom={strongAtom}
         onStrongSelect={onStrongSelect}
       />
@@ -54,7 +48,6 @@ const StrongTabScreen = ({ strongAtom, navigation }: StrongTabScreenProps) => {
   return (
     <StrongDetailScreen
       strongAtom={strongAtom}
-      navigation={navigation}
     />
   )
 }

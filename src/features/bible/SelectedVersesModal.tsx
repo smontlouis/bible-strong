@@ -5,7 +5,7 @@ import { Share } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
-import { useNavigation } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import CommentIcon from '~common/CommentIcon'
@@ -75,7 +75,7 @@ const VersesModal = ({
   onAddToStudy,
   onAddBookmark,
 }: Props) => {
-  const navigation = useNavigation()
+  const router = useRouter()
   const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
   const { t } = useTranslation()
   const openedFromTab = useAtomValue(openedFromTabAtom)
@@ -134,9 +134,9 @@ const VersesModal = ({
   }
 
   const compareVerses = () => {
-    // @ts-ignore
-    navigation.navigate('BibleCompareVerses', {
-      selectedVerses,
+    router.push({
+      pathname: '/bible-compare-verses',
+      params: { selectedVerses: JSON.stringify(selectedVerses) },
     })
   }
 
@@ -153,18 +153,17 @@ const VersesModal = ({
       verses: selectedVerses,
       version,
     })
-    // @ts-ignore
-    navigation.navigate({
-      name: openedFromTab ? 'AppSwitcher' : 'EditStudy',
+    const pathname = openedFromTab ? '/' : '/edit-study'
+    router.push({
+      pathname,
       params: {
         ...cleanParams(),
         type: isSelectionMode,
         title,
         content,
         version,
-        verses: Object.keys(selectedVerses),
+        verses: JSON.stringify(Object.keys(selectedVerses)),
       },
-      merge: true,
     })
     close()
   }

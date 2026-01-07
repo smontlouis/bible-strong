@@ -1,4 +1,3 @@
-import { StackNavigationProp } from '@react-navigation/stack'
 import { useAtomValue } from 'jotai/react'
 import { atom } from 'jotai/vanilla'
 import React, { useEffect } from 'react'
