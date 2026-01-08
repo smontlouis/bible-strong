@@ -58,7 +58,7 @@ interface NaveListScreenProps {
 
 const NaveListScreen = ({ hasBackButton, onNaveSelect }: NaveListScreenProps) => {
   const { t } = useTranslation()
-  const isFR = useLanguage()
+  const lang = useLanguage()
   const [error, setError] = useState(false)
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
@@ -103,7 +103,7 @@ const NaveListScreen = ({ hasBackButton, onNaveSelect }: NaveListScreenProps) =>
         title={t('Thématique Nave')}
         rightComponent={
           <Box row alignItems="center">
-            {isFR && (
+            {lang === 'fr' && (
               <Link route="NaveWarning" padding>
                 <Icon.Feather size={20} name="alert-triangle" color="rgb(255,188,0)" />
               </Link>

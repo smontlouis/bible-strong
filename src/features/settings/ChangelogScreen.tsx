@@ -1,6 +1,4 @@
 import distanceInWords from 'date-fns/formatDistance'
-import enGB from 'date-fns/locale/en-GB'
-import fr from 'date-fns/locale/fr'
 import React from 'react'
 
 import { shallowEqual, useSelector } from 'react-redux'
@@ -13,13 +11,14 @@ import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
+import { getDateLocale } from '~helpers/languageUtils'
 import useLanguage from '~helpers/useLanguage'
 import { RootState } from '~redux/modules/reducer'
 
 const Changelog = () => {
   const changelog = useSelector((state: RootState) => state.user.changelog.data, shallowEqual)
   const { t } = useTranslation()
-  const isFR = useLanguage()
+  const lang = useLanguage()
 
   // @ts-ignore
   changelog.sort((a, b) => b.date - a.date)
@@ -39,7 +38,7 @@ const Changelog = () => {
           <Box marginTop={10}>
             {changelog.map(log => {
               const formattedDate = distanceInWords(Number(log.date), Date.now(), {
-                locale: isFR ? fr : enGB,
+                locale: getDateLocale(lang),
               })
               return (
                 <Box key={log.date} marginTop={10} marginBottom={10}>

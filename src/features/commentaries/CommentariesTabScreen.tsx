@@ -169,7 +169,7 @@ interface CommentariesScreenProps {
 
 const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: CommentariesScreenProps) => {
   const { t } = useTranslation()
-  const isFR = useLanguage()
+  const lang = useLanguage()
   const theme: Theme = useTheme()
 
   const [commentaryTab, setCommentaryTab] = useAtom(commentaryAtom)

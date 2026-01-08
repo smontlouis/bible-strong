@@ -1,5 +1,6 @@
 import books from '~assets/bible_versions/books-desc'
-import i18n, { getLangIsFr } from '~i18n'
+import i18n, { getLanguage } from '~i18n'
+import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import loadBible from './loadBible'
 
 export interface VerseBase {
@@ -11,7 +12,7 @@ export interface VerseBase {
 export const searchReference = async (ref?: string): Promise<VerseBase | null> => {
   if (!ref) return null
   let reference = ref.trim().toLowerCase()
-  const bible = await loadBible(getLangIsFr() ? 'LSG' : 'KJV')
+  const bible = await loadBible(getDefaultBibleVersion(getLanguage()))
 
   const findBook = books.find(book => reference.includes(i18n.t(book.Nom).toLowerCase()))
 

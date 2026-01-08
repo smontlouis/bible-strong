@@ -5,6 +5,7 @@ import Modal from 'react-native-modal'
 import { useDispatch } from 'react-redux'
 import { deleteAllDatabases } from '~helpers/sqlite'
 import useLanguage from '~helpers/useLanguage'
+import { getDefaultBibleVersion } from '~helpers/languageUtils'
 
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import { setDefaultBibleVersion } from '~redux/modules/user'
@@ -22,7 +23,7 @@ const StylizedModal = styled(Modal)(({ theme }) => ({
 }))
 
 const useCheckMandatoryVersions = () => {
-  const isFR = useLanguage()
+  const lang = useLanguage()
   const dispatch = useDispatch()
   const [isOnboardingCompleted, setIsOnboardingCompleted] = useAtom(isOnboardingCompletedAtom)
   const [showOnboarding, setShowOnboarding] = useState(false)
@@ -35,14 +36,16 @@ const useCheckMandatoryVersions = () => {
       return
     }
 
+    const defaultVersion = getDefaultBibleVersion(lang)
+
     ;(async () => {
       try {
-        const lsgNeedsDownload = await getIfVersionNeedsDownload(isFR ? 'LSG' : 'KJV')
+        const needsDownload = await getIfVersionNeedsDownload(defaultVersion)
 
-        if (lsgNeedsDownload) {
+        if (needsDownload) {
           console.log('[Onboarding] Needs download, open onboarding.')
           setShowOnboarding(true)
-          dispatch(setDefaultBibleVersion(isFR ? 'LSG' : 'KJV'))
+          dispatch(setDefaultBibleVersion(defaultVersion))
           deleteAllDatabases()
         } else {
           // Bible exists, mark onboarding as completed for future fast starts
@@ -53,10 +56,10 @@ const useCheckMandatoryVersions = () => {
         console.error('[Onboarding] Error checking version:', error)
         // On error, assume onboarding is required to be safe
         setShowOnboarding(true)
-        dispatch(setDefaultBibleVersion(isFR ? 'LSG' : 'KJV'))
+        dispatch(setDefaultBibleVersion(defaultVersion))
       }
     })()
-  }, [isFR, dispatch, isOnboardingCompleted])
+  }, [lang, dispatch, isOnboardingCompleted])
 
   return showOnboarding
 }

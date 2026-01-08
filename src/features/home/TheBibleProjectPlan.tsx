@@ -15,11 +15,11 @@ const LinkBox = Box.withComponent(Link)
 
 const TheBibleProject = () => {
   const { t } = useTranslation()
-  const isFR = useLanguage()
+  const lang = useLanguage()
 
   const plans = useComputedPlanItems()
   const { id, title, image, description, author, progress } =
-    plans.find(p => p.id === (isFR ? 'bible-project-plan' : 'bible-project-plan-en')) || {}
+    plans.find(p => p.id === (lang === 'fr' ? 'bible-project-plan' : 'bible-project-plan-en')) || {}
   const theme: Theme = useTheme()
 
   if (!id) {

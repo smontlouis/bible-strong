@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react'
 import useLanguage from '~helpers/useLanguage'
+import { getLegacyLocalizedField } from '~helpers/languageUtils'
 
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
@@ -38,7 +39,7 @@ const EventDetails = waitForTimeline(
     start,
     end,
   }: Pick<TimelineEventProps, 'slug' | 'image' | 'title' | 'titleEn' | 'start' | 'end'>) => {
-    const isFR = useLanguage()
+    const lang = useLanguage()
     const { goBack, canGoBack } = useEventDetailsModal()
     const date = calculateLabel(start, end)
     const event = useMemo(() => {
@@ -71,7 +72,7 @@ const EventDetails = waitForTimeline(
         )}
         <Box mb={30} px={20}>
           <Paragraph textAlign="center" fontFamily="title" scale={3} flex>
-            {isFR ? title : titleEn}
+            {getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
           </Paragraph>
           <Paragraph color="grey" scale={-2} textAlign="center" fontFamily="text">
             {date}

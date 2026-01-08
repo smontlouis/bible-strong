@@ -10,7 +10,8 @@ import Text from '~common/ui/Text'
 import { versions, Version } from '~helpers/bibleVersions'
 import { setDefaultBibleVersion } from '~redux/modules/user'
 import { RootState } from '~redux/modules/reducer'
-import { getLangIsFr } from '~i18n'
+import { getLanguage } from '~i18n'
+import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import VersionSelectorItem from '~features/bible/VersionSelectorItem'
 import { VersionCode } from 'src/state/tabs'
 
@@ -20,7 +21,7 @@ const BibleDefaultsScreen = () => {
 
   const defaultVersion = useSelector(
     (state: RootState) =>
-      state.user.bible.settings.defaultBibleVersion || (getLangIsFr() ? 'LSG' : 'KJV')
+      state.user.bible.settings.defaultBibleVersion || getDefaultBibleVersion(getLanguage())
   )
 
   const handleVersionChange = (versionId: VersionCode) => {

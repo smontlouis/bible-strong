@@ -13,6 +13,7 @@ import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
+import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { calculateLabel, offset, rowToPx } from './constants'
 import { TimelineEvent as TimelineEventProps } from './types'
 
@@ -46,7 +47,7 @@ const TimelineEvent = ({
   eventModalRef,
   setEvent,
 }: Props) => {
-  const isFR = useLanguage()
+  const lang = useLanguage()
   const { current: top } = React.useRef(rowToPx(row))
   const { current: left } = React.useRef(yearsToPx(start))
   const { current: width } = React.useRef(calculateEventWidth(start, end, isFixed))
@@ -92,7 +93,7 @@ const TimelineEvent = ({
           justifyContent="center"
         >
           <Text color="white" fontSize={10} numberOfLines={1}>
-            {isFR ? title : titleEn}
+            {getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
           </Text>
         </Box>
         <Box px={10} justifyContent="center">
@@ -125,7 +126,7 @@ const TimelineEvent = ({
         style={styles}
       >
         <Text fontSize={12} numberOfLines={2}>
-          {isFR ? title : titleEn}
+          {getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
         </Text>
         <Box borderBottomWidth={1} borderColor="border" />
         <Text fontSize={10} textAlign="center">

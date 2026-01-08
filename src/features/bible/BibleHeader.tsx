@@ -69,7 +69,7 @@ const Header = ({
 }: BibleHeaderProps) => {
   const router = useRouter()
   const { t } = useTranslation()
-  const isFR = useLanguage()
+  const lang = useLanguage()
   const dispatch = useDispatch()
   const dimensions = useDimensions()
   const isSmall = dimensions.screen.width < 400
@@ -323,7 +323,7 @@ const Header = ({
                           <Text marginLeft={10}>{t('Police et paramêtres')}</Text>
                         </Box>
                       </MenuOption>
-                      {!commentsDisplay && isFR && (
+                      {!commentsDisplay && lang === 'fr' && (
                         <MenuOption onSelect={onOpenCommentaire}>
                           <Box row alignItems="center">
                             <MaterialIcon name="chat" size={20} />
@@ -331,7 +331,7 @@ const Header = ({
                           </Box>
                         </MenuOption>
                       )}
-                      {commentsDisplay && isFR && (
+                      {commentsDisplay && lang === 'fr' && (
                         <MenuOption onSelect={() => dispatch(setSettingsCommentaires(false))}>
                           <Box row alignItems="center">
                             <MaterialIcon name="chat" size={20} color="primary" />

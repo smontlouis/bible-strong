@@ -2,7 +2,7 @@ import * as FileSystem from 'expo-file-system/legacy'
 import to from 'await-to-js'
 
 import { getDatabasesRef } from '~helpers/firebase'
-import i18n, { getLangIsFr } from '~i18n'
+import i18n, { getLanguage } from '~i18n'
 import { getI18n } from 'react-i18next'
 import {
   ResourceLanguage,
@@ -149,7 +149,7 @@ export const getIfDatabaseNeedsDownloadForLang = async (
 // Database configuration with language-aware paths
 export const databases = (lang?: ResourceLanguage) => {
   // Default to current UI language if not specified
-  const effectiveLang = lang || (getLangIsFr() ? 'fr' : 'en')
+  const effectiveLang = lang || getLanguage()
 
   return {
     STRONG: {

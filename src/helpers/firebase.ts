@@ -15,7 +15,7 @@ import {
   where,
 } from '@react-native-firebase/firestore'
 import { getStorage, ref } from '@react-native-firebase/storage'
-import { getLangIsFr } from '~i18n'
+import { getLanguage } from '~i18n'
 import { ResourceLanguage, DatabaseId, isSharedDB } from '~helpers/databaseTypes'
 
 // Firebase instances (modular API)
@@ -95,7 +95,7 @@ export const getDatabaseUrl = (dbId: DatabaseId, lang: ResourceLanguage): string
 
 // Legacy function for backward compatibility
 export const getDatabasesRef = (): DatabasesRef => {
-  if (getLangIsFr()) {
+  if (getLanguage() === 'fr') {
     return databasesRef
   }
 

@@ -14,7 +14,8 @@ import {
 } from '~common/types'
 import { FireAuthProfile } from '~helpers/FireAuth'
 import { firebaseDb } from '~helpers/firebase'
-import { getLangIsFr } from '~i18n'
+import { getLanguage } from '~i18n'
+import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { tabGroupsAtom } from '~state/tabs'
 import blackColors from '~themes/blackColors'
 import defaultColors from '~themes/colors'
@@ -325,7 +326,7 @@ const getInitialState = (): UserState => ({
     words: {},
     naves: {},
     settings: {
-      defaultBibleVersion: getLangIsFr() ? 'LSG' : 'KJV',
+      defaultBibleVersion: getDefaultBibleVersion(getLanguage()),
       alignContent: 'left',
       lineHeight: 'normal',
       fontSizeScale: 0,
@@ -356,7 +357,7 @@ const getInitialState = (): UserState => ({
         night: nightColors,
       },
       compare: {
-        [getLangIsFr() ? 'LSG' : 'KJV']: true,
+        [getDefaultBibleVersion(getLanguage())]: true,
       },
       customHighlightColors: [],
     },

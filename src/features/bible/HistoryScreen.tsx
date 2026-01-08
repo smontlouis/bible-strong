@@ -2,9 +2,6 @@ import styled from '@emotion/native'
 import distanceInWords from 'date-fns/formatDistance'
 import React from 'react'
 
-import enGB from 'date-fns/locale/en-GB'
-import fr from 'date-fns/locale/fr'
-
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { Trans, useTranslation } from 'react-i18next'
 import books from '~assets/bible_versions/books-desc'
@@ -19,6 +16,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import formatVerseContent from '~helpers/formatVerseContent'
 import useLanguage from '~helpers/useLanguage'
+import { getDateLocale } from '~helpers/languageUtils'
 import { deleteHistoryAtom, historyAtom } from '../../state/app'
 
 const Chip = styled.View<{ color: string }>(({ theme, color }) => ({
@@ -35,12 +33,12 @@ const Chip = styled.View<{ color: string }>(({ theme, color }) => ({
 
 const HistoryItem = ({ item }: any) => {
   const { t } = useTranslation()
-  const isFR = useLanguage()
+  const lang = useLanguage()
 
   if (item.type === 'strong') {
     const { Hebreu, Grec, Mot, date, book } = item
     const ago = distanceInWords(Number(date), Date.now(), {
-      locale: isFR ? fr : enGB,
+      locale: getDateLocale(lang),
     })
     return (
       <Link route="Strong" params={{ book, strongReference: item }}>
@@ -69,7 +67,7 @@ const HistoryItem = ({ item }: any) => {
   if (item.type === 'verse') {
     const { book, chapter, verse, version, date } = item
     const ago = distanceInWords(Number(date), Date.now(), {
-      locale: isFR ? fr : enGB,
+      locale: getDateLocale(lang),
     })
     let { title } = formatVerseContent([{ Livre: book, Chapitre: chapter, Verset: verse }])
     if (title.endsWith(':1')) {
@@ -109,7 +107,7 @@ const HistoryItem = ({ item }: any) => {
   if (item.type === 'word') {
     const { word, date } = item
     const ago = distanceInWords(Number(date), Date.now(), {
-      locale: isFR ? fr : enGB,
+      locale: getDateLocale(lang),
     })
     return (
       <Link route="DictionnaryDetail" params={{ word }}>
@@ -134,7 +132,7 @@ const HistoryItem = ({ item }: any) => {
   if (item.type === 'nave') {
     const { name, name_lower, date } = item
     const ago = distanceInWords(Number(date), Date.now(), {
-      locale: isFR ? fr : enGB,
+      locale: getDateLocale(lang),
     })
     return (
       <Link route="NaveDetail" params={{ name, name_lower }}>

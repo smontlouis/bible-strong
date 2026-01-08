@@ -60,6 +60,22 @@ export const setI18n = async () =>
       cleanCode: true,
     })
 
-export const getLangIsFr = () => (i18n.language ? i18n.language === 'fr' : languageTag === 'fr')
+import type { ActiveLanguage } from '~helpers/languageUtils'
+import { DEFAULT_LANGUAGE, isActiveLanguage } from '~helpers/languageUtils'
+
+/**
+ * Get the current language code
+ * Returns the i18n language if set, otherwise falls back to device language tag
+ */
+export const getLanguage = (): ActiveLanguage => {
+  const lang = i18n.language || languageTag
+  return isActiveLanguage(lang) ? lang : DEFAULT_LANGUAGE
+}
+
+/**
+ * @deprecated Use getLanguage() instead
+ * This function returns a boolean which doesn't scale for multiple languages
+ */
+export const getLangIsFr = () => getLanguage() === 'fr'
 
 export default i18n

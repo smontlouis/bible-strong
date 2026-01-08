@@ -13,6 +13,7 @@ import Highlight from './Highlight'
 import { useTranslation } from 'react-i18next'
 import { useAtomValue } from 'jotai'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
+import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import VerseResultWidget from '~features/bible/VerseResultWidget'
 
 interface Props {
@@ -35,7 +36,7 @@ const InfiniteHits = ({
 }: Props) => {
   const { t } = useTranslation()
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
-  const isFR = resourcesLanguage.SEARCH === 'fr'
+  const searchLang = resourcesLanguage.SEARCH
   return (
     <Box flex>
       <FlatList
@@ -68,7 +69,7 @@ const InfiniteHits = ({
         onEndReached={() => hasMore && refineNext()}
         renderItem={({ item }: any) => (
           // @ts-ignore
-          <Highlight attribute={isFR ? 'LSG' : 'KJV'} hit={item} />
+          <Highlight attribute={getDefaultBibleVersion(searchLang)} hit={item} />
         )}
       />
     </Box>

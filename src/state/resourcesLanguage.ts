@@ -2,7 +2,7 @@ import { getDefaultStore, useAtom, useAtomValue, useSetAtom } from 'jotai'
 
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
-import { getLangIsFr } from '~i18n'
+import { getLanguage } from '~i18n'
 
 // Resources language state - each resource can have its own language
 export type ResourcesLanguageState = {
@@ -18,7 +18,7 @@ export type ResourcesLanguageState = {
 
 // Helper to get default resources language based on current UI language
 const getDefaultResourcesLanguage = (): ResourcesLanguageState => {
-  const defaultLang: ResourceLanguage = getLangIsFr() ? 'fr' : 'en'
+  const defaultLang: ResourceLanguage = getLanguage()
   return {
     STRONG: defaultLang,
     DICTIONNAIRE: defaultLang,

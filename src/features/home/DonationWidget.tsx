@@ -14,12 +14,12 @@ const color1 = '#E0EAFC'
 const color2 = '#CFDEF3'
 
 const DonationWidget = () => {
-  const isFr = useLanguage()
+  const lang = useLanguage()
   const { t } = useTranslation()
   return (
     <Box bg="lightGrey" px={20} pt={20} pb={20}>
       <LinkBox
-        href={`https://bible-strong.app/${isFr ? 'fr/' : ''}give`}
+        href={`https://bible-strong.app/${lang === 'fr' ? 'fr/' : ''}give`}
         backgroundColor="primary"
         borderRadius={30}
         lightShadow

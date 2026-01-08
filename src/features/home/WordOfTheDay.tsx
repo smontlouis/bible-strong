@@ -21,7 +21,7 @@ function randomIntFromInterval(min: number, max: number) {
 
 const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47,128,237,1)' }) => {
   const { t } = useTranslation()
-  const isFR = useLanguage()
+  const lang = useLanguage()
   const [error, setError] = useState(false)
   const [startRandom, setStartRandom] = useState(true)
   const [strongReference, setStrongRef] = useState(null)
@@ -31,7 +31,7 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
 
       // UGLY HACK
       const strongReference = await loadDictionnaireItemByRowId(
-        isFR ? randomIntFromInterval(5437, 10872) : randomIntFromInterval(1, 8620)
+        lang === 'fr' ? randomIntFromInterval(5437, 10872) : randomIntFromInterval(1, 8620)
       )
       if (!strongReference || strongReference.error) {
         setError(strongReference?.error || true)
@@ -42,7 +42,7 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
       setStartRandom(false)
     }
     loadStrong()
-  }, [startRandom, isFR])
+  }, [startRandom, lang])
 
   if (error) {
     return (
