@@ -44,6 +44,7 @@ import BibleNoteModal from './BibleNoteModal'
 import BibleParamsModal from './BibleParamsModal'
 import BibleFooter from './footer/BibleFooter'
 import { OpenInNewTabButton } from './OpenInNewTabButton'
+import { ReadWholeChapterButton } from './ReadWholeChapterButton'
 import ResourcesModal from './resources/ResourceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
@@ -479,6 +480,7 @@ const BibleViewer = ({
         chapter={chapter}
         hasBackButton={isReadOnly || Boolean(isSelectionMode)}
         selectedVerses={selectedVerses}
+        isReadOnly={isReadOnly}
       />
       {error && (
         <Box flex={1} zIndex={-1}>
@@ -554,6 +556,7 @@ const BibleViewer = ({
           animate={translationY}
           {...motiTransition}
         >
+          <ReadWholeChapterButton onPress={actions.exitReadOnlyMode} />
           <OpenInNewTabButton book={book} chapter={chapter} verse={verse} version={version} />
         </MotiBox>
       )}

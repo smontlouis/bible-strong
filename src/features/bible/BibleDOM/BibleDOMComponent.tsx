@@ -217,6 +217,7 @@ const VersesRenderer = ({
   linkedVerses,
   settings,
   verseToScroll,
+  isReadOnly,
   version,
   pericopeChapter,
   chapter,
@@ -630,6 +631,10 @@ const VersesRenderer = ({
           if (verse.Verset == 0) return null
 
           const { Livre, Chapitre, Verset } = verse
+
+          // In readonly mode, only show focused verses
+          const isFocused = focusVerses ? focusVerses.includes(Number(Verset)) : undefined
+          if (isReadOnly && focusVerses && !isFocused) return null
           const isSelected = Boolean(selectedVerses[`${Livre}-${Chapitre}-${Verset}`])
           const isSelectedMode = Boolean(Object.keys(selectedVerses).length)
           const isHighlighted = Boolean(highlightedVerses[`${Livre}-${Chapitre}-${Verset}`])
@@ -646,7 +651,6 @@ const VersesRenderer = ({
           const linksCount = linkedVersesCount[Verset]
           const linksText = linkedVersesText[Verset]
           const comment = comments?.[Verset]
-          const isFocused = focusVerses ? focusVerses.includes(Number(Verset)) : undefined
           const isVerseToScroll = verseToScroll == Verset
           const secondaryVerse = secondaryVerses && secondaryVerses[i]
           const parallelVerse = isParallelVerse

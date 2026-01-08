@@ -323,6 +323,9 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
       case SWIPE_LEFT: {
+        // Disable chapter navigation in readonly mode
+        if (isReadOnly) break
+
         const { goToNextChapter, book, chapter } = props
         const hasNextChapter = !(book.Numero === 66 && chapter === 22)
 
@@ -332,6 +335,9 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
       case SWIPE_RIGHT: {
+        // Disable chapter navigation in readonly mode
+        if (isReadOnly) break
+
         const { goToPrevChapter, book, chapter } = props
         const hasPreviousChapter = !(book.Numero === 1 && chapter === 1)
 

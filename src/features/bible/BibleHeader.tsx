@@ -52,6 +52,7 @@ interface BibleHeaderProps {
   isSelectionMode?: boolean
   isParallel?: boolean
   selectedVerses?: VerseIds
+  isReadOnly?: boolean
 }
 
 const Header = ({
@@ -66,6 +67,7 @@ const Header = ({
   isSelectionMode,
   isParallel,
   selectedVerses,
+  isReadOnly,
 }: BibleHeaderProps) => {
   const router = useRouter()
   const { t } = useTranslation()
@@ -210,6 +212,12 @@ const Header = ({
           <Box flex={1} center>
             <Text fontWeight="bold" fontSize={14}>
               {selectedVersesReference}
+            </Text>
+          </Box>
+        ) : isReadOnly ? (
+          <Box flex={1} center>
+            <Text fontWeight="bold" fontSize={14}>
+              {`${t(bookName)} ${chapter}:${verseFormatted} - ${version}`}
             </Text>
           </Box>
         ) : (
