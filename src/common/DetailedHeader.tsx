@@ -47,7 +47,13 @@ const DetailedHeader = ({
         )}
         <Box marginTop={10} width={35} height={3} backgroundColor={borderColor} />
       </Box>
-      {rightComponent}
+      {rightComponent ? (
+        <Box justifyContent="center" alignItems="flex-end" overflow="visible">
+          {rightComponent}
+        </Box>
+      ) : (
+        <Box width={60} />
+      )}
     </Box>
   )
 }

@@ -204,7 +204,7 @@ function InnerApp() {
   useKeepAwake()
   useUpdates()
   useNavigationTracking()
-  useAtomsDevtools('jotai')
+  // useAtomsDevtools('jotai')
 
   useEffect(() => {
     changeStatusBarStyle(currentTheme)

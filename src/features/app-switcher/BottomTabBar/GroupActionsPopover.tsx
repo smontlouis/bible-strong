@@ -19,7 +19,7 @@ interface PopoverItemProps {
 
 const PopoverItem = memo(({ icon, label, onPress, destructive }: PopoverItemProps) => {
   return (
-    <TouchableBox row alignItems="center" py={12} px={16} onPress={onPress}>
+    <TouchableBox row alignItems="center" py={8} px={16} onPress={onPress}>
       <FeatherIcon
         name={icon as any}
         size={18}

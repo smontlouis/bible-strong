@@ -28,6 +28,10 @@ const PopOverMenu = ({ element, popover, width = 60, height = 60, ...props }: Pr
         backgroundColor: theme.colors.reverse,
         borderRadius: 10,
       }}
+      arrowSize={{
+        width: 0,
+        height: 0,
+      }}
       from={
         <TouchableOpacity onPress={() => setShowPopover(true)}>
           {element || (

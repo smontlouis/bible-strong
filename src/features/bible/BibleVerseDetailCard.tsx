@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
-import { useTheme, withTheme } from '@emotion/react'
-import React, { useRef, useState, useEffect } from 'react'
+import { useTheme } from '@emotion/react'
+import React, { useEffect, useRef, useState } from 'react'
 import Carousel from 'react-native-reanimated-carousel'
 
 import waitForStrongDB from '~common/waitForStrongDB'
@@ -18,15 +18,14 @@ import StrongCard from './StrongCard'
 
 import BibleVerseDetailFooter from './BibleVerseDetailFooter'
 
-import { useTranslation, withTranslation } from 'react-i18next'
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { useRouter } from 'expo-router'
+import { useTranslation } from 'react-i18next'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
+import { StudyNavigateBibleType } from '~common/types'
 import { CarouselProvider } from '~helpers/CarouselContext'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
-import { ScrollView, View } from 'react-native'
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
-import { StudyNavigateBibleType } from '~common/types'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
