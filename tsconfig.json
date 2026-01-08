@@ -7,6 +7,7 @@
     "paths": {
       "~assets/*": ["src/assets/*"],
       "~common/*": ["src/common/*"],
+      "~devtools/*": ["src/devtools/*"],
       "~features/*": ["src/features/*"],
       "~helpers/*": ["src/helpers/*"],
       "~navigation/*": ["src/navigation/*"],

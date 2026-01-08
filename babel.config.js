@@ -10,6 +10,7 @@ module.exports = function (api) {
           alias: {
             '~assets': './src/assets',
             '~common': './src/common',
+            '~devtools': './src/devtools',
             '~features': './src/features',
             '~helpers': './src/helpers',
             '~navigation': './src/navigation',
@@ -20,6 +21,8 @@ module.exports = function (api) {
           },
         },
       ],
+      // Automatically adds debug labels to Jotai atoms
+      'jotai/babel/plugin-debug-label',
     ],
     env: {
       production: {

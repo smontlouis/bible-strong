@@ -223,7 +223,7 @@ export const useCreateTabGroupFromTag = () => {
     switchGroup(groupId)
 
     // Naviguer vers AppSwitcher
-    router.navigate('/')
+    router.dismissTo('/')
 
     // Attendre que le layout soit prêt puis ouvrir le premier tab
     setTimeout(() => {

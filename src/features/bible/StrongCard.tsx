@@ -105,31 +105,28 @@ const StrongCard = (props: Props) => {
     // onClosed?.()
 
     if (isSelectionMode) {
-      if (openedFromTab) {
-        router.navigate('/')
-      } else {
-        router.navigate({
-          pathname: '/edit-study',
-          params: {
-            ...cleanParams(),
-            type: isSelectionMode,
-            title: Mot,
-            codeStrong: Code,
-            strongType: Type,
-            phonetique: Phonetique,
-            definition: Definition,
-            translatedBy: LSG,
-            original: Hebreu || Grec,
-            book,
-          },
-        })
-      }
+      const pathname = openedFromTab ? '/' : '/edit-study'
+      router.dismissTo({
+        pathname,
+        params: {
+          ...cleanParams(),
+          type: isSelectionMode,
+          title: Mot,
+          codeStrong: Code,
+          strongType: Type,
+          phonetique: Phonetique,
+          definition: Definition,
+          translatedBy: LSG,
+          original: Hebreu || Grec,
+          book,
+        },
+      })
     } else {
       router.push({
         pathname: '/strong',
         params: {
           book: String(Number(book)),
-          reference: JSON.stringify(strongReference),
+          strongReference: JSON.stringify(strongReference),
         },
       })
     }

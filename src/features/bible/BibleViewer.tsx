@@ -9,6 +9,7 @@ import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 import getBiblePericope from '~helpers/getBiblePericope'
 import loadBibleChapter from '~helpers/loadBibleChapter'
 import loadMhyComments from '~helpers/loadMhyComments'
+import { usePrevious } from '~helpers/usePrevious'
 import BibleHeader from './BibleHeader'
 
 import { useAtomValue, useSetAtom } from 'jotai/react'
@@ -258,6 +259,9 @@ const BibleViewer = ({
     })
   }
 
+  const prevBook = usePrevious(book.Numero)
+  const prevChapter = usePrevious(chapter)
+
   useEffect(() => {
     // Don't load verses if onboarding is not completed
     if (!isOnboardingCompleted) {
@@ -268,7 +272,11 @@ const BibleViewer = ({
       setError(true)
       setIsLoading(false)
     })
-    actions.clearSelectedVerses()
+
+    // Only clear selected verses when book or chapter changes
+    if (prevBook !== undefined && (prevBook !== book.Numero || prevChapter !== chapter)) {
+      actions.clearSelectedVerses()
+    }
   }, [book, chapter, version, JSON.stringify(parallelVersions), isOnboardingCompleted])
 
   useEffect(() => {

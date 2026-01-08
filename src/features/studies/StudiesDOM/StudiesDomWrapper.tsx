@@ -1,10 +1,10 @@
 import { useRouter } from 'expo-router'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Keyboard, KeyboardAvoidingView, Platform } from 'react-native'
 import { WebViewMessageEvent } from 'react-native-webview'
 
 import { PrimitiveAtom } from 'jotai/vanilla'
-import { StudyTab, useIsCurrentTab } from 'src/state/tabs'
+import { StudyTab, TabItem, useIsCurrentTab } from 'src/state/tabs'
 import books from '~assets/bible_versions/books-desc'
 import { StudyNavigateBibleType } from '~common/types'
 import { timeout } from '~helpers/timeout'
@@ -43,15 +43,6 @@ const StudiesDomWrapper = ({
   const [activeFormats, setActiveFormats] = useState({})
   const { colorScheme } = useCurrentThemeSelector()
 
-  const navigateBibleView = async (type: StudyNavigateBibleType) => {
-    dispatchToWebView('BLUR_EDITOR')
-    await timeout(300)
-    router.push({
-      pathname: '/bible-view',
-      params: { isSelectionMode: type },
-    })
-  }
-
   useEffect(() => {
     const updateListener = Platform.OS === 'android' ? 'keyboardDidShow' : 'keyboardWillShow'
     const resetListener = Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide'
@@ -69,7 +60,7 @@ const StudiesDomWrapper = ({
   }, [])
 
   const getIsCurrentTab = useIsCurrentTab()
-  const isCurrentTab = studyAtom ? getIsCurrentTab(studyAtom) : false
+  const isCurrentTab = studyAtom ? getIsCurrentTab(studyAtom as PrimitiveAtom<TabItem>) : false
   useEffect(() => {
     console.log('[Studies] isCurrentTab', isCurrentTab)
 
@@ -79,31 +70,43 @@ const StudiesDomWrapper = ({
     }
   }, [isCurrentTab])
 
-  useEffect(() => {
-    // @ts-ignore
-    if (!params?.type) return
-
-    // @ts-ignore
-    if (params.type.includes('verse')) {
-      // @ts-ignore
-      const isBlock = params.type.includes('block')
-      dispatchToWebView('FOCUS_EDITOR')
-      dispatchToWebView(isBlock ? 'GET_BIBLE_VERSES_BLOCK' : 'GET_BIBLE_VERSES', params)
-    } else {
-      // @ts-ignore
-      const isBlock = params.type.includes('block')
-      dispatchToWebView('FOCUS_EDITOR')
-      dispatchToWebView(isBlock ? 'GET_BIBLE_STRONG_BLOCK' : 'GET_BIBLE_STRONG', params)
-    }
-  }, [params])
-
-  const dispatchToWebView = useCallback((type: string, payload?: any) => {
+  const dispatchToWebView = (type: string, payload?: any) => {
     if (ref.current) {
       console.log('[Studies] RN DISPATCH:', type)
       console.log('[Studies] Ref:', ref.current)
       ref.current?.dispatch({ type, payload })
     }
-  }, [])
+  }
+
+  useEffect(() => {
+    ;(async () => {
+      // @ts-ignore
+      if (!params?.type) return
+
+      // @ts-ignore
+      if (params.type.includes('verse')) {
+        // @ts-ignore
+        const isBlock = params.type.includes('block')
+        dispatchToWebView('FOCUS_EDITOR')
+
+        dispatchToWebView(isBlock ? 'GET_BIBLE_VERSES_BLOCK' : 'GET_BIBLE_VERSES', params)
+      } else {
+        // @ts-ignore
+        const isBlock = params.type.includes('block')
+        dispatchToWebView('FOCUS_EDITOR')
+        dispatchToWebView(isBlock ? 'GET_BIBLE_STRONG_BLOCK' : 'GET_BIBLE_STRONG', params)
+      }
+    })()
+  }, [JSON.stringify(params)])
+
+  const navigateBibleView = async (type: StudyNavigateBibleType) => {
+    dispatchToWebView('BLUR_EDITOR')
+    await timeout(300)
+    router.push({
+      pathname: '/bible-view',
+      params: { isSelectionMode: type },
+    })
+  }
 
   const dispatch = async (event: WebViewMessageEvent) => {
     let msgData
@@ -215,7 +218,6 @@ const StudiesDomWrapper = ({
         }}
       />
       {isKeyboardOpened && (
-        // @ts-ignore
         <StudyFooter
           navigateBibleView={navigateBibleView}
           dispatchToWebView={dispatchToWebView}

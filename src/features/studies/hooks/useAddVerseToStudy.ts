@@ -126,7 +126,7 @@ export const useAddVerseToStudy = () => {
             },
           })
           // Navigate to AppSwitcher and slide to new tab
-          router.navigate('/')
+          router.dismissTo('/')
           triggerSlideNewTab(newTabId)
           toast.dismiss()
         },

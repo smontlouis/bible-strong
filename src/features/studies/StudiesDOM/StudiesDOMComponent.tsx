@@ -47,6 +47,80 @@ export default function StudiesDOMComponent({
     'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
   })
 
+  const onChangeText = (delta: any, oldDelta: any, source: any) => {
+    dispatch('TEXT_CHANGED', {
+      type: 'success',
+      // @ts-ignore
+      delta: quillRef.current.getContents(),
+      deltaChange: delta,
+      deltaOld: oldDelta,
+      changeSource: source,
+    })
+  }
+
+  const addTextChangeEventToEditor = () => {
+    // @ts-ignore
+    quillRef.current.on('text-change', debounce(onChangeText, 500))
+
+    // @ts-ignore
+    quillRef.current.on(Quill.events.EDITOR_CHANGE, (type: any, range: any) => {
+      const isReadOnly =
+        // @ts-ignore
+        quillRef.current.container.classList.contains('ql-disabled')
+
+      if (isReadOnly) return
+      if (type !== Quill.events.SELECTION_CHANGE) return
+
+      if (range) {
+        // @ts-ignore
+        const selectedBottom = quillRef.current.getBounds(range).bottom
+
+        setTimeout(() => {
+          const windowHeight = document.body.getBoundingClientRect().height
+
+          if (selectedBottom > windowHeight) {
+            // @ts-ignore
+            document
+              .querySelector('.ql-editor')
+              // @ts-ignore
+              .scrollTo(
+                0,
+                // @ts-ignore
+                document.querySelector('.ql-editor').scrollTop + selectedBottom - windowHeight + 30
+              )
+          }
+        }, 300)
+      }
+    })
+  }
+
+  const loadEditor = ({ fontFamily, language }: { fontFamily: string; language: string }) => {
+    document.getElementById('editor')!.style.fontFamily = fontFamily
+    // @ts-ignore
+    quillRef.current = new Quill('#editor', {
+      theme: 'snow',
+      modules: {
+        toolbar: false,
+        'inline-verse': true,
+        'block-verse': true,
+        format: true,
+      },
+      placeholder: language === 'fr' ? 'Créer votre étude...' : 'Create your study...',
+      readOnly: true,
+    })
+
+    console.log('[Studies] Loading editor')
+    // @ts-ignore
+    quillRef.current.focus()
+
+    console.log('[Studies] Editor initialized')
+
+    // @ts-ignore
+    quillRef.current.setContents(contentToDisplay, Quill.sources.SILENT)
+
+    addTextChangeEventToEditor()
+  }
+
   const quillRef = useRef<any>(null)
   const inlineVerseModuleRef = useRef<any>(null)
   const blockVerseModuleRef = useRef<any>(null)
@@ -216,80 +290,6 @@ export default function StudiesDOMComponent({
     }),
     []
   )
-
-  const onChangeText = (delta: any, oldDelta: any, source: any) => {
-    dispatch('TEXT_CHANGED', {
-      type: 'success',
-      // @ts-ignore
-      delta: quillRef.current.getContents(),
-      deltaChange: delta,
-      deltaOld: oldDelta,
-      changeSource: source,
-    })
-  }
-
-  const addTextChangeEventToEditor = () => {
-    // @ts-ignore
-    quillRef.current.on('text-change', debounce(onChangeText, 500))
-
-    // @ts-ignore
-    quillRef.current.on(Quill.events.EDITOR_CHANGE, (type: any, range: any) => {
-      const isReadOnly =
-        // @ts-ignore
-        quillRef.current.container.classList.contains('ql-disabled')
-
-      if (isReadOnly) return
-      if (type !== Quill.events.SELECTION_CHANGE) return
-
-      if (range) {
-        // @ts-ignore
-        const selectedBottom = quillRef.current.getBounds(range).bottom
-
-        setTimeout(() => {
-          const windowHeight = document.body.getBoundingClientRect().height
-
-          if (selectedBottom > windowHeight) {
-            // @ts-ignore
-            document
-              .querySelector('.ql-editor')
-              // @ts-ignore
-              .scrollTo(
-                0,
-                // @ts-ignore
-                document.querySelector('.ql-editor').scrollTop + selectedBottom - windowHeight + 30
-              )
-          }
-        }, 300)
-      }
-    })
-  }
-
-  const loadEditor = ({ fontFamily, language }: { fontFamily: string; language: string }) => {
-    document.getElementById('editor')!.style.fontFamily = fontFamily
-    // @ts-ignore
-    quillRef.current = new Quill('#editor', {
-      theme: 'snow',
-      modules: {
-        toolbar: false,
-        'inline-verse': true,
-        'block-verse': true,
-        format: true,
-      },
-      placeholder: language === 'fr' ? 'Créer votre étude...' : 'Create your study...',
-      readOnly: true,
-    })
-
-    console.log('[Studies] Loading editor')
-    // @ts-ignore
-    quillRef.current.focus()
-
-    console.log('[Studies] Editor initialized')
-
-    // @ts-ignore
-    quillRef.current.setContents(contentToDisplay, Quill.sources.SILENT)
-
-    addTextChangeEventToEditor()
-  }
 
   return (
     <div

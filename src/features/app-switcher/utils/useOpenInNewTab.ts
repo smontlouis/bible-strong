@@ -31,7 +31,7 @@ export const useOpenInNewTab = () => {
         action: {
           label: t('common.goTo'),
           onClick: () => {
-            router.navigate('/')
+            router.dismissTo('/')
             triggerSlideNewTab(newTabId)
             toast.dismiss()
           },
@@ -39,7 +39,7 @@ export const useOpenInNewTab = () => {
       })
     } else {
       triggerSlideNewTab(newTabId)
-      router.navigate('/')
+      router.dismissTo('/')
     }
   }
 

@@ -96,35 +96,6 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
   const isGreek = (book || 1) > 39
   const tags = useSelector((state: RootState) => selectStrongTags(state, code, isGreek))
 
-  // Go back to list view (for tab context)
-  const goBack = useCallback(() => {
-    if (isInTab) {
-      setStrongTab(
-        produce(draft => {
-          draft.title = t('Lexique')
-          draft.data = {}
-        })
-      )
-    } else {
-      router.back()
-    }
-  }, [isInTab, setStrongTab, router, t])
-
-  const setTitle = (title: string) =>
-    setStrongTab(
-      produce(draft => {
-        draft.title = title
-      })
-    )
-
-  useEffect(() => {
-    setTitle(`${strongReference?.Hebreu ? t('Hébreu') : t('Grec')} ${strongReference?.Mot}`)
-  }, [strongReference?.Mot, strongReference?.Hebreu, t])
-
-  useEffect(() => {
-    loadData()
-  }, [reference, book])
-
   const loadData = async () => {
     let loadedStrongReference = strongReferenceParam
 
@@ -154,6 +125,33 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
     setCount(strongVersesCount[0]?.versesCount)
     setConcordanceLoading(false)
   }
+
+  // Go back to list view (for tab context)
+  const goBack = useCallback(() => {
+    if (isInTab) {
+      setStrongTab(
+        produce(draft => {
+          draft.title = t('Lexique')
+          draft.data = {}
+        })
+      )
+    } else {
+      router.back()
+    }
+  }, [isInTab, setStrongTab, router, t])
+
+  useEffect(() => {
+    if (!strongReference) return
+    setStrongTab(
+      produce(draft => {
+        draft.title = `${strongReference.Hebreu ? t('Hébreu') : t('Grec')} ${strongReference.Mot}`
+      })
+    )
+  }, [strongReference, t, setStrongTab])
+
+  useEffect(() => {
+    loadData()
+  }, [reference, book])
 
   const shareContent = async () => {
     const { Code, Hebreu, Grec, Mot, Phonetique, Definition, Type, LSG } = strongReference!
@@ -196,9 +194,6 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
     }
   }
 
-  const { Code, Hebreu, Grec, Mot, Phonetique, Definition, Origine, Type, LSG } =
-    strongReference || {}
-
   if (error) {
     return (
       <Container>
@@ -223,6 +218,8 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
       </Container>
     )
   }
+
+  const { Code, Hebreu, Grec, Mot, Phonetique, Definition, Origine, Type, LSG } = strongReference
 
   return (
     <Container>
@@ -296,10 +293,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
                   <Word>{Hebreu}</Word>
                 </Paragraph>
                 <Box ml={15} mb={4}>
-                  <ListenToStrong
-                    type={Hebreu ? 'hebreu' : 'grec'}
-                    code={Code!}
-                  />
+                  <ListenToStrong type={Hebreu ? 'hebreu' : 'grec'} code={Code!} />
                 </Box>
               </Box>
             </ViewItem>
@@ -312,10 +306,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
                   <Word>{Grec}</Word>
                 </Paragraph>
                 <Box ml={15} mb={4}>
-                  <ListenToStrong
-                    type={Hebreu ? 'hebreu' : 'grec'}
-                    code={Code!}
-                  />
+                  <ListenToStrong type={Hebreu ? 'hebreu' : 'grec'} code={Code!} />
                 </Box>
               </Box>
             </ViewItem>

@@ -35,7 +35,7 @@ const StrongScreen = () => {
     [book, reference, strongReference]
   )
 
-  return <StrongDetailScreen navigation={router} strongAtom={onTheFlyAtom} />
+  return <StrongDetailScreen strongAtom={onTheFlyAtom} />
 }
 
 export default StrongScreen

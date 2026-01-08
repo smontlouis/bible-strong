@@ -68,9 +68,7 @@ export const routeMapping: Record<keyof MainStackProps, string> = {
 /**
  * Gets the Expo Router path for a given screen name
  */
-export function getRoutePath<T extends keyof MainStackProps>(
-  screenName: T
-): string {
+export function getRoutePath<T extends keyof MainStackProps>(screenName: T): string {
   return routeMapping[screenName]
 }
 

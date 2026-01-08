@@ -154,7 +154,7 @@ const VersesModal = ({
       version,
     })
     const pathname = openedFromTab ? '/' : '/edit-study'
-    router.push({
+    router.dismissTo({
       pathname,
       params: {
         ...cleanParams(),

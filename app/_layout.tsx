@@ -1,11 +1,14 @@
-import * as Icon from '@expo/vector-icons'
+import { installReduxDevToolsPolyfill } from '~devtools/reduxDevtoolsPolyfill'
+// installReduxDevToolsPolyfill()
+
 import { ThemeProvider } from '@emotion/react'
+import * as Icon from '@expo/vector-icons'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { PortalProvider } from '@gorhom/portal'
 import { getAnalytics, logScreenView } from '@react-native-firebase/analytics'
 import * as Sentry from '@sentry/react-native'
-import { Stack, usePathname, useSegments, useLocalSearchParams } from 'expo-router'
 import * as Font from 'expo-font'
+import { Stack, useLocalSearchParams, usePathname, useSegments } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { setAutoFreeze } from 'immer'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -19,14 +22,19 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { Provider as ReduxProvider, useSelector } from 'react-redux'
 import { Toaster } from 'sonner-native'
 
+import notifee, { EventType } from '@notifee/react-native'
+import { useKeepAwake } from 'expo-keep-awake'
+import { useAtomsDevtools } from 'jotai-devtools/utils'
+import TrackPlayer from 'react-native-track-player'
+import { PersistGate } from 'redux-persist/integration/react'
+import ChangelogModal from '~common/Changelog'
 import ErrorBoundary from '~common/ErrorBoundary'
 import InitHooks from '~common/InitHooks'
-import ChangelogModal from '~common/Changelog'
 import MultipleTagsModal from '~common/MultipleTagsModal'
-import OnBoardingModal from '~features/onboarding/OnBoarding'
 import { CurrentTheme } from '~common/types'
 import { AppSwitcherProvider } from '~features/app-switcher/AppSwitcherProvider'
 import { BookSelectorBottomSheetProvider } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
+import OnBoardingModal from '~features/onboarding/OnBoarding'
 import { DBStateProvider } from '~helpers/databaseState'
 import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
 import { QueryClient, QueryClientProvider } from '~helpers/react-query-lite'
@@ -39,12 +47,33 @@ import {
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { useRemoteConfig } from '~helpers/useRemoteConfig'
 import { useUpdates } from '~helpers/useUpdates'
-import { persistor, store } from '~redux/store'
 import { RootState } from '~redux/modules/reducer'
+import { persistor, store } from '~redux/store'
 import getTheme, { Theme, baseTheme } from '~themes/index'
 import { setI18n } from '../i18n'
-import { useKeepAwake } from 'expo-keep-awake'
-import { PersistGate } from 'redux-persist/integration/react'
+import { PlaybackService } from '../playbackService'
+
+TrackPlayer.registerPlaybackService(() => PlaybackService)
+
+// Register background event handler for Notifee
+// This prevents ANR when notifications fire while app is in background
+// by handling events without spinning up the full React Native context
+notifee.onBackgroundEvent(async ({ type, detail }) => {
+  // Handle notification press in background
+  if (type === EventType.PRESS) {
+    // Notification was pressed - app will open and handle in foreground
+    return
+  }
+
+  // Handle notification dismissed
+  if (type === EventType.DISMISSED) {
+    return
+  }
+
+  // For trigger notifications (like Verse of the Day), just acknowledge
+  // The notification has already been displayed by the system
+  return
+})
 
 // Configure Reanimated logger
 configureReanimatedLogger({
@@ -175,6 +204,7 @@ function InnerApp() {
   useKeepAwake()
   useUpdates()
   useNavigationTracking()
+  useAtomsDevtools('jotai')
 
   useEffect(() => {
     changeStatusBarStyle(currentTheme)
