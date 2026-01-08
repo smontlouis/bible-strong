@@ -81,7 +81,7 @@ const LexiqueListScreen = ({ strongAtom, hasBackButton, onStrongSelect }: Lexiqu
       <Container>
         <Header hasBackButton={hasBackButton} title={t('Désolé...')} />
         <Empty
-          source={require('~assets/images/empty.json')}
+          icon={require('~assets/images/empty-state-icons/inbox.svg')}
           message={`${t('Impossible de charger la strong pour ce verset...')}
             ${
               // @ts-ignore
@@ -153,7 +153,7 @@ const LexiqueListScreen = ({ strongAtom, hasBackButton, onStrongSelect }: Lexiqu
           />
         ) : (
           <Empty
-            source={require('~assets/images/empty.json')}
+            icon={require('~assets/images/empty-state-icons/word.svg')}
             message={t('Aucune strong trouvée...')}
           />
         )}

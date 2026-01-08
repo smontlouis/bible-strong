@@ -19,7 +19,7 @@ const MyPlanListScreen = () => {
   if (!plans || !plans.length) {
     return (
       <Empty
-        source={require('~assets/images/empty.json')}
+        icon={require('~assets/images/empty-state-icons/plan.svg')}
         message={t("Vous n'avez aucun plan...")}
       />
     )

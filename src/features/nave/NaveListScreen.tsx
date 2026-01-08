@@ -82,7 +82,7 @@ const NaveListScreen = ({ hasBackButton, onNaveSelect }: NaveListScreenProps) =>
       <Container>
         <Header hasBackButton={hasBackButton} title={t('Désolé...')} />
         <Empty
-          source={require('~assets/images/empty.json')}
+          icon={require('~assets/images/empty-state-icons/inbox.svg')}
           message={`${t('Impossible de charger la nave...')}${
             // @ts-ignore
             error === 'CORRUPTED_DATABASE'
@@ -160,7 +160,7 @@ const NaveListScreen = ({ hasBackButton, onNaveSelect }: NaveListScreenProps) =>
             keyExtractor={(item: any) => item.name_lower}
           />
         ) : (
-          <Empty source={require('~assets/images/empty.json')} message={t('Aucun mot trouvé...')} />
+          <Empty icon={require('~assets/images/empty-state-icons/word.svg')} message={t('Aucun mot trouvé...')} />
         )}
       </Box>
       {!searchValue && <AlphabetList color="quint" letter={letter} setLetter={setLetter} />}

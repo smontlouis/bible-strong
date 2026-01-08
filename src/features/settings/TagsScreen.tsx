@@ -194,7 +194,7 @@ const TagsScreen = () => {
           contentContainerStyle={{ paddingBottom: 70 }}
         />
       ) : (
-        <Empty source={require('~assets/images/empty.json')} message={t('Aucune étiquette...')} />
+        <Empty icon={require('~assets/images/empty-state-icons/tag.svg')} message={t('Aucune étiquette...')} />
       )}
 
       <Modal.Body ref={ref} onModalClose={() => setOpen(undefined)} enableDynamicSizing>
