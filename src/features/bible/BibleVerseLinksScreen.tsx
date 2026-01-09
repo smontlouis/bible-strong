@@ -134,7 +134,7 @@ const BibleVerseLinks = () => {
         />
       ) : (
         <Empty
-          source={require('~assets/images/empty.json')}
+          icon={require('~assets/images/empty-state-icons/link.svg')}
           message={t("Vous n'avez pas encore de liens...")}
         />
       )}

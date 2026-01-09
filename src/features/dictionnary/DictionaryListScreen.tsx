@@ -113,11 +113,7 @@ const DictionaryListScreen = ({ hasBackButton, onWordSelect }: DictionaryListScr
         ) : sectionResults.length ? (
           <SectionList
             renderItem={({ item: { id, word } }) => (
-              <DictionnaireItem
-                key={id}
-                word={word}
-                onSelect={onWordSelect}
-              />
+              <DictionnaireItem key={id} word={word} onSelect={onWordSelect} />
             )}
             removeClippedSubviews
             maxToRenderPerBatch={100}
@@ -140,7 +136,10 @@ const DictionaryListScreen = ({ hasBackButton, onWordSelect }: DictionaryListScr
             keyExtractor={item => item.id}
           />
         ) : (
-          <Empty icon={require('~assets/images/empty-state-icons/word.svg')} message={t('Aucun mot trouvé...')} />
+          <Empty
+            icon={require('~assets/images/empty-state-icons/word.svg')}
+            message={t('Aucun mot trouvé...')}
+          />
         )}
       </Box>
       {!searchValue && <AlphabetList color="secondary" letter={letter} setLetter={setLetter} />}

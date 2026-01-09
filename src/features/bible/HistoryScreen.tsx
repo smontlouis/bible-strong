@@ -183,7 +183,10 @@ const History = () => {
             renderItem={({ item }: any) => <HistoryItem item={item} />}
           />
         ) : (
-          <Empty icon={require('~assets/images/empty-state-icons/history.svg')} message="Historique vide..." />
+          <Empty
+            icon={require('~assets/images/empty-state-icons/history.svg')}
+            message="Historique vide..."
+          />
         )}
       </Box>
     </Container>

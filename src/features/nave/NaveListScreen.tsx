@@ -160,7 +160,10 @@ const NaveListScreen = ({ hasBackButton, onNaveSelect }: NaveListScreenProps) =>
             keyExtractor={(item: any) => item.name_lower}
           />
         ) : (
-          <Empty icon={require('~assets/images/empty-state-icons/word.svg')} message={t('Aucun mot trouvé...')} />
+          <Empty
+            icon={require('~assets/images/empty-state-icons/word.svg')}
+            message={t('Aucun mot trouvé...')}
+          />
         )}
       </Box>
       {!searchValue && <AlphabetList color="quint" letter={letter} setLetter={setLetter} />}

@@ -98,7 +98,7 @@ const SearchInTimelineModal = ({
         ListHeaderComponent={
           !submittedValue || !canQuery ? (
             <Empty
-              source={require('~assets/images/search-loop.json')}
+              icon={require('~assets/images/empty-state-icons/search.svg')}
               message={t('Faites une recherche dans la Bible !')}
             />
           ) : error ? (

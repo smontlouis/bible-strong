@@ -292,10 +292,12 @@ const TagScreen = () => {
           !words.length &&
           !strongsGrec.length &&
           !strongsHebreu.length && (
-            <Empty
-              source={require('~assets/images/empty.json')}
-              message={t("Vous n'avez rien enregistré avec cette étiquette...")}
-            />
+            <Box pt={40} px={20}>
+              <Empty
+                icon={require('~assets/images/empty-state-icons/tag.svg')}
+                message={t("Vous n'avez rien enregistré avec cette étiquette...")}
+              />
+            </Box>
           )}
         {(!!strongsGrec.length || !!strongsHebreu.length) && (
           <Box px={20}>

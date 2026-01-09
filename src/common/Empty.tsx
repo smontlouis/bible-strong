@@ -30,17 +30,12 @@ const Empty = ({ message, source, icon, ...props }: Props) => {
 
   return (
     <Container {...props}>
-      <Box
-        alignItems="center"
-        justifyContent="center"
-        flex
-        paddingHorizontal={20}
-      >
+      <Box alignItems="center" justifyContent="center" flex paddingHorizontal={20}>
         {icon && (
           <Box mb={20}>
             <Image
               source={icon}
-              style={{ width: 80, height: 80 }}
+              style={{ width: 80, height: 80, opacity: 0.6 }}
               tintColor={theme.colors.tertiary}
               contentFit="contain"
             />
@@ -50,7 +45,7 @@ const Empty = ({ message, source, icon, ...props }: Props) => {
           <Lottie
             ref={animation}
             style={{
-              width: '100%',
+              width: 200,
               height: 200,
               marginBottom: 20,
             }}

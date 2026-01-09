@@ -132,7 +132,7 @@ const BibleVerseNotes = () => {
         />
       ) : (
         <Empty
-          source={require('~assets/images/empty.json')}
+          icon={require('~assets/images/empty-state-icons/note.svg')}
           message={t("Vous n'avez pas encore de notes...")}
         />
       )}
