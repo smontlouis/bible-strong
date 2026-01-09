@@ -259,16 +259,11 @@ const BibleViewer = ({
       const secondaryResult = await loadBibleChapter(
         book.Numero,
         chapter,
-<<<<<<< HEAD
-        isFR ? 'LSG' : 'KJV'
+        getDefaultBibleVersion(lang)
       )
       if (secondaryResult.success && secondaryResult.data) {
         secondaryVersesToLoad = secondaryResult.data as Verse[]
       }
-=======
-        getDefaultBibleVersion(lang)
-      )) as Verse[]
->>>>>>> a699321909bde28afee8e9612c5428d130b89687
     }
 
     // Load comments if enabled

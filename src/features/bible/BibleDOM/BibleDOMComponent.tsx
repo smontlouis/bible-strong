@@ -27,6 +27,7 @@ import {
   SWIPE_UP,
 } from './dispatch'
 import { DispatchProvider, useDispatch } from './DispatchProvider'
+import { TranslationsProvider, BibleDOMTranslations } from './TranslationsContext'
 import ExternalIcon from './ExternalIcon'
 import MinusIcon from './MinusIcon'
 import PlusIcon from './PlusIcon'
@@ -85,6 +86,7 @@ type Props = Pick<
 > & {
   dispatch: Dispatch
   dom: import('expo/dom').DOMProps
+  translations: BibleDOMTranslations
 }
 
 const extractParallelVerse = (
@@ -248,6 +250,7 @@ const VersesRenderer = ({
   isSelectionMode,
   selectedCode,
   dispatch,
+  translations,
 }: Props) => {
   const [isINTComplete, setIsINTComplete] = useState(true)
   const [loaded, error] = useFonts({
@@ -602,8 +605,9 @@ const VersesRenderer = ({
   const linkedVersesText = getLinkedVersesText(verses, linkedVerses)
 
   return (
-    <DispatchProvider dispatch={dispatch}>
-      <Container
+    <TranslationsProvider translations={translations}>
+      <DispatchProvider dispatch={dispatch}>
+        <Container
         rtl={isHebreu}
         settings={settings}
         isParallelVerse={isParallelVerse}
@@ -764,7 +768,8 @@ const VersesRenderer = ({
           </filter>
         </defs>
       </svg>
-    </DispatchProvider>
+      </DispatchProvider>
+    </TranslationsProvider>
   )
 }
 

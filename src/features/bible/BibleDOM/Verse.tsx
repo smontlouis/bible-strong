@@ -28,6 +28,7 @@ import InterlinearVerseComplete from './InterlinearVerseComplete'
 import InterlinearVerse from './InterlinearVerse'
 import VerseTags from './VerseTags'
 import { BibleError } from '~helpers/bibleErrors'
+import { useTranslations } from './TranslationsContext'
 
 const VerseText = styled('span')<RootStyles & { isParallel?: boolean }>(
   ({ isParallel, settings: { fontSizeScale, lineHeight } }) => ({
@@ -134,6 +135,7 @@ const Verse = ({
   const shouldShortPressRef = useRef(false)
   const buttonPressTimerRef = useRef<any>()
   const dispatch = useDispatch()
+  const translations = useTranslations()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -286,10 +288,10 @@ const Verse = ({
           if (p.error) {
             const errorMessage =
               p.error.type === 'BIBLE_NOT_FOUND'
-                ? 'Version non téléchargée'
+                ? translations.parallelVersionNotFound
                 : p.error.type === 'CHAPTER_NOT_FOUND'
-                  ? 'Chapitre indisponible'
-                  : 'Erreur de chargement'
+                  ? translations.parallelChapterNotFound
+                  : translations.parallelLoadError
             return (
               <div
                 key={i}
