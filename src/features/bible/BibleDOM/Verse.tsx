@@ -27,6 +27,7 @@ import { ContainerText } from './ContainerText'
 import InterlinearVerseComplete from './InterlinearVerseComplete'
 import InterlinearVerse from './InterlinearVerse'
 import VerseTags from './VerseTags'
+import { BibleError } from '~helpers/bibleErrors'
 
 const VerseText = styled('span')<RootStyles & { isParallel?: boolean }>(
   ({ isParallel, settings: { fontSizeScale, lineHeight } }) => ({
@@ -62,6 +63,18 @@ const Spacer = styled('div')(() => ({
   marginTop: '5px',
 }))
 
+const ParallelError = styled('div')<RootStyles>(
+  ({ settings: { theme, colors, fontFamily, fontSizeScale } }) => ({
+    fontFamily,
+    fontSize: scaleFontSize(13, fontSizeScale),
+    color: colors[theme].darkGrey,
+    padding: '8px',
+    textAlign: 'center',
+    fontStyle: 'italic',
+    lineHeight: 1.4,
+  })
+)
+
 interface Props {
   verse: TVerse
   isSelectedMode: boolean
@@ -70,6 +83,7 @@ interface Props {
   parallelVerse?: {
     version: string
     verse: TVerse
+    error?: BibleError
   }[]
   secondaryVerse?: TVerse | null
   isSelected: boolean
@@ -268,8 +282,38 @@ const Verse = ({
     return (
       <div style={{ display: 'flex' }}>
         {parallelVerse.map((p, i) => {
+          // Show error message if parallel version failed to load
+          if (p.error) {
+            const errorMessage =
+              p.error.type === 'BIBLE_NOT_FOUND'
+                ? 'Version non téléchargée'
+                : p.error.type === 'CHAPTER_NOT_FOUND'
+                  ? 'Chapitre indisponible'
+                  : 'Erreur de chargement'
+            return (
+              <div
+                key={i}
+                style={{
+                  flex: 1,
+                  padding: '5px 0',
+                  paddingLeft: i === 0 ? '0px' : '10px',
+                }}
+              >
+                <ParallelError settings={settings}>{errorMessage}</ParallelError>
+              </div>
+            )
+          }
           if (!p.verse) {
-            return null
+            return (
+              <div
+                key={i}
+                style={{
+                  flex: 1,
+                  padding: '5px 0',
+                  paddingLeft: i === 0 ? '0px' : '10px',
+                }}
+              />
+            )
           }
           return (
             <div

@@ -24,6 +24,7 @@ import { RootState } from '~redux/modules/reducer'
 import type { Bookmark } from '~common/types'
 import { HighlightsObj, NotesObj, LinksObj } from '~redux/modules/user'
 import { useBookAndVersionSelector } from '../BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
+import { BibleError } from '~helpers/bibleErrors'
 import {
   ADD_PARALLEL_VERSION,
   NAVIGATE_TO_BIBLE_LINK,
@@ -49,6 +50,7 @@ import {
 export type ParallelVerse = {
   id: VersionCode
   verses: Verse[]
+  error?: BibleError
 }
 
 export type TaggedVerse = {

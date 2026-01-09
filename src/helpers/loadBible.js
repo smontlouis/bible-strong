@@ -2,6 +2,7 @@ import * as FileSystem from 'expo-file-system/legacy'
 import bibleMemoize from '~helpers/bibleStupidMemoize'
 import { timeout } from '~helpers/timeout'
 import i18n from '~i18n'
+import { BibleLoadingError } from '~helpers/bibleErrors'
 
 export default function loadBible(bible, position) {
   return new Promise(async (resolve, reject) => {
@@ -16,7 +17,7 @@ export default function loadBible(bible, position) {
           const path = `${FileSystem.documentDirectory}bible-${b}.json`
           const file = await FileSystem.getInfoAsync(path)
           if (!file.exists) {
-            throw new Error(`Bible file not found: ${path}`)
+            throw new BibleLoadingError('BIBLE_NOT_FOUND', b)
           }
           const data = await FileSystem.readAsStringAsync(file.uri)
 
@@ -33,7 +34,7 @@ export default function loadBible(bible, position) {
           const path = `${FileSystem.documentDirectory}bible-LSG.json`
           const file = await FileSystem.getInfoAsync(path)
           if (!file.exists) {
-            throw new Error(`Bible file not found: ${path}`)
+            throw new BibleLoadingError('BIBLE_NOT_FOUND', bible)
           }
           const data = await FileSystem.readAsStringAsync(file.uri)
 
@@ -51,7 +52,7 @@ export default function loadBible(bible, position) {
           const path = `${FileSystem.documentDirectory}bible-KJV.json`
           const file = await FileSystem.getInfoAsync(path)
           if (!file.exists) {
-            throw new Error(`Bible file not found: ${path}`)
+            throw new BibleLoadingError('BIBLE_NOT_FOUND', bible)
           }
           const data = await FileSystem.readAsStringAsync(file.uri)
 
@@ -68,7 +69,7 @@ export default function loadBible(bible, position) {
           const path = `${FileSystem.documentDirectory}bible-${bible}.json`
           const file = await FileSystem.getInfoAsync(path)
           if (!file.exists) {
-            throw new Error(`Bible file not found: ${path}`)
+            throw new BibleLoadingError('BIBLE_NOT_FOUND', bible)
           }
           const data = await FileSystem.readAsStringAsync(file.uri)
 
@@ -83,7 +84,12 @@ export default function loadBible(bible, position) {
       }
     } catch (e) {
       console.log(e)
-      reject('Erreur loadBible', e)
+      // Re-throw BibleLoadingError as-is
+      if (e instanceof BibleLoadingError) {
+        reject(e)
+      } else {
+        reject(new BibleLoadingError('UNKNOWN_ERROR', bible))
+      }
     }
   })
 }
