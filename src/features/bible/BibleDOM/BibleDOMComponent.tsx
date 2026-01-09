@@ -27,6 +27,7 @@ import {
   SWIPE_UP,
 } from './dispatch'
 import { DispatchProvider, useDispatch } from './DispatchProvider'
+import { TranslationsProvider, BibleDOMTranslations } from './TranslationsContext'
 import ExternalIcon from './ExternalIcon'
 import MinusIcon from './MinusIcon'
 import PlusIcon from './PlusIcon'
@@ -85,6 +86,7 @@ type Props = Pick<
 > & {
   dispatch: Dispatch
   dom: import('expo/dom').DOMProps
+  translations: BibleDOMTranslations
 }
 
 const extractParallelVerse = (
@@ -92,12 +94,22 @@ const extractParallelVerse = (
   parallelVerses: ParallelVerse[],
   verse: TVerse,
   version: string
-) => [{ version, verse }, ...parallelVerses.map(p => ({ version: p.id, verse: p.verses[i] }))]
+) => [
+  { version, verse, error: undefined },
+  ...parallelVerses.map(p => ({
+    version: p.id,
+    verse: p.verses[i],
+    error: p.error,
+  })),
+]
 
 const extractParallelVersionTitles = (parallelVerses: ParallelVerse[], currentVersion: string) => {
   if (!parallelVerses?.length) return []
 
-  return [currentVersion, ...parallelVerses.map(p => p.id)]
+  return [
+    { id: currentVersion, error: undefined },
+    ...parallelVerses.map(p => ({ id: p.id, error: p.error })),
+  ]
 }
 
 const Container = styled('div')<RootStyles & { rtl: boolean; isParallelVerse: boolean }>(
@@ -171,6 +183,21 @@ const VersionTitle = styled('div')<RootStyles>(({ settings: { fontSizeScale, fon
   fontSize: scaleFontSize(18, fontSizeScale),
 }))
 
+const VersionErrorIndicator = styled('span')<RootStyles>(({ settings: { theme, colors } }) => ({
+  color: colors[theme].quart,
+  marginLeft: '4px',
+  fontSize: '12px',
+}))
+
+const ParallelVersionError = styled('div')<RootStyles>(({ settings: { theme, colors, fontFamily, fontSizeScale } }) => ({
+  fontFamily,
+  fontSize: scaleFontSize(14, fontSizeScale),
+  color: colors[theme].darkGrey,
+  padding: '10px',
+  textAlign: 'center',
+  fontStyle: 'italic',
+}))
+
 const VersionsContainer = styled('div')<RootStyles>(({ settings: { theme, colors } }) => ({
   display: 'flex',
   position: 'sticky',
@@ -224,6 +251,7 @@ const VersesRenderer = ({
   isSelectionMode,
   selectedCode,
   dispatch,
+  translations,
 }: Props) => {
   const [isINTComplete, setIsINTComplete] = useState(true)
   const [loaded, error] = useFonts({
@@ -578,8 +606,9 @@ const VersesRenderer = ({
   const linkedVersesText = getLinkedVersesText(verses, linkedVerses)
 
   return (
-    <DispatchProvider dispatch={dispatch}>
-      <Container
+    <TranslationsProvider translations={translations}>
+      <DispatchProvider dispatch={dispatch}>
+        <Container
         rtl={isHebreu}
         settings={settings}
         isParallelVerse={isParallelVerse}
@@ -589,6 +618,7 @@ const VersesRenderer = ({
           <VersionsContainer settings={settings}>
             {parallelVersionTitles?.map((p, i) => (
               <div
+                key={i}
                 style={{
                   flex: 1,
                   display: 'flex',
@@ -596,12 +626,14 @@ const VersesRenderer = ({
                 }}
               >
                 <VersionTitle
-                  onClick={() => navigateToVersion(p, i)}
+                  onClick={() => navigateToVersion(p.id, i)}
                   style={{ paddingLeft: i === 0 ? '0px' : '10px' }}
-                  key={i}
                   settings={settings}
                 >
-                  {p}
+                  {p.id}
+                  {p.error && (
+                    <VersionErrorIndicator settings={settings}>⚠</VersionErrorIndicator>
+                  )}
                   <ChevronDownIcon style={{ marginLeft: 4 }} />
                 </VersionTitle>
                 {i !== 0 && (
@@ -740,7 +772,8 @@ const VersesRenderer = ({
           </filter>
         </defs>
       </svg>
-    </DispatchProvider>
+      </DispatchProvider>
+    </TranslationsProvider>
   )
 }
 

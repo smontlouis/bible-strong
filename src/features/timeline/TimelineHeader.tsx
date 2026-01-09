@@ -9,6 +9,7 @@ import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
+import { getLegacyLocalizedField } from '~helpers/languageUtils'
 
 const HeaderBox = styled(Box)(({ theme }) => ({
   position: 'absolute',
@@ -43,7 +44,7 @@ const TimelineHeader = ({
   onPress,
   searchModalRef,
 }: Props) => {
-  const isFR = useLanguage()
+  const lang = useLanguage()
 
   const openSearch = () => {
     searchModalRef.current?.expand()
@@ -59,7 +60,7 @@ const TimelineHeader = ({
       </Box>
       <Box flex center>
         <Text title fontSize={fontSize}>
-          {isFR ? title : titleEn}
+          {getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
         </Text>
       </Box>
       <Box center row>

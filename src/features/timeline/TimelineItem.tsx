@@ -6,6 +6,7 @@ import Text from '~common/ui/Text'
 import { TimelineSection } from './types'
 import { Image } from 'expo-image'
 import useLanguage from '~helpers/useLanguage'
+import { getLegacyLocalizedField } from '~helpers/languageUtils'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -20,7 +21,7 @@ const TimelineItem = ({
   color,
   goTo,
 }: TimelineSection & { goTo: number }) => {
-  const isFR = useLanguage()
+  const lang = useLanguage()
   return (
     <LinkBox row px={20} center mb={30} route="Timeline" params={{ goTo }}>
       <Box
@@ -37,17 +38,17 @@ const TimelineItem = ({
         justifyContent="space-between"
       >
         <Text title fontSize={12}>
-          {isFR ? sectionTitle : sectionTitleEn}
+          {getLegacyLocalizedField(lang, { fr: sectionTitle, en: sectionTitleEn })}
         </Text>
         <Text title fontSize={18}>
-          {isFR ? title : titleEn}
+          {getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
         </Text>
 
         <Box>
           <Box height={2} bg="default" />
 
           <Text py={3} textAlign="center" fontSize={10} title>
-            {isFR ? subTitle : subTitleEn}
+            {getLegacyLocalizedField(lang, { fr: subTitle, en: subTitleEn })}
           </Text>
           <Box height={2} bg="default" />
         </Box>

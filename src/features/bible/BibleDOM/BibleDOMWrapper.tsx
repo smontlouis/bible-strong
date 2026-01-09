@@ -24,6 +24,8 @@ import { RootState } from '~redux/modules/reducer'
 import type { Bookmark } from '~common/types'
 import { HighlightsObj, NotesObj, LinksObj } from '~redux/modules/user'
 import { useBookAndVersionSelector } from '../BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
+import { BibleError } from '~helpers/bibleErrors'
+import { BibleDOMTranslations } from './TranslationsContext'
 import {
   ADD_PARALLEL_VERSION,
   NAVIGATE_TO_BIBLE_LINK,
@@ -49,6 +51,7 @@ import {
 export type ParallelVerse = {
   id: VersionCode
   verses: Verse[]
+  error?: BibleError
 }
 
 export type TaggedVerse = {
@@ -163,6 +166,13 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
   const router = useRouter()
+
+  // Translations for the DOM component (which can't access i18n directly)
+  const translations: BibleDOMTranslations = {
+    parallelVersionNotFound: t('bible.error.parallelVersionNotFound'),
+    parallelChapterNotFound: t('bible.error.parallelChapterNotFound'),
+    parallelLoadError: t('bible.error.parallelLoadError'),
+  }
   // Add this to track component mounting
   const mountedRef = useRef(false)
 
@@ -437,6 +447,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         selectedCode={selectedCode}
         comments={comments}
         dispatch={dispatch}
+        translations={translations}
       />
       {Platform.OS === 'android' && Platform.Version < 30 && (
         <HelpTip

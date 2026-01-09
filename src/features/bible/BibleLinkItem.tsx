@@ -1,7 +1,5 @@
 import styled from '@emotion/native'
 import distanceInWords from 'date-fns/formatDistance'
-import enGB from 'date-fns/locale/en-GB'
-import fr from 'date-fns/locale/fr'
 import React from 'react'
 
 import * as Icon from '@expo/vector-icons'
@@ -17,6 +15,7 @@ import { useTranslation } from 'react-i18next'
 import Paragraph from '~common/ui/Paragraph'
 import truncate from '~helpers/truncate'
 import useLanguage from '~helpers/useLanguage'
+import { getDateLocale } from '~helpers/languageUtils'
 import { FeatherIcon } from '~common/ui/Icon'
 import { Link as LinkType } from '~redux/modules/user'
 import { linkTypeConfig } from '~helpers/fetchOpenGraphData'
@@ -53,10 +52,10 @@ type Props = {
 const BibleLinkItem = ({ item, onPress, onMenuPress }: Props) => {
   const { t } = useTranslation()
   const theme = useTheme()
-  const isFR = useLanguage()
+  const lang = useLanguage()
 
   const formattedDate = distanceInWords(Number(item.link.date), Date.now(), {
-    locale: isFR ? fr : enGB,
+    locale: getDateLocale(lang),
   })
 
   const config = linkTypeConfig[item.link.linkType] || linkTypeConfig.website

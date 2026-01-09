@@ -822,5 +822,13 @@
 
   "forgotPassword.title": "Mot de passe oublié",
   "forgotPassword.description": "Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
-  "forgotPassword.send": "Envoyer le lien"
+  "forgotPassword.send": "Envoyer le lien",
+
+  "bible.error.versionNotFound": "Cette version de la Bible n'est pas téléchargée. Rendez-vous dans la gestion des téléchargements pour la télécharger.",
+  "bible.error.chapterNotFound": "Ce chapitre n'existe pas dans cette version de la Bible.",
+  "bible.error.databaseCorrupted": "La base de données semble corrompue. Rendez-vous dans la gestion des téléchargements pour la retélécharger.",
+  "bible.error.unknown": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+  "bible.error.parallelVersionNotFound": "Version non téléchargée",
+  "bible.error.parallelChapterNotFound": "Chapitre indisponible",
+  "bible.error.parallelLoadError": "Erreur de chargement"
 }

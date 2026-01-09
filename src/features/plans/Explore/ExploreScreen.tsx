@@ -41,9 +41,9 @@ const LangButton = ({
 
 const ExploreScreen = () => {
   const { t } = useTranslation()
-  const isFR = useLanguage()
+  const currentLang = useLanguage()
   const dispatch = useDispatch()
-  const [lang, setLang] = useState(isFR ? 'fr' : 'en')
+  const [lang, setLang] = useState(currentLang)
   const status = useSelector((state: RootState) => state.plan.onlineStatus)
   const plans = useSelector(selectSortedOnlinePlans)
 
@@ -64,7 +64,7 @@ const ExploreScreen = () => {
         }
       >
         <Empty
-          source={require('~assets/images/empty.json')}
+          icon={require('~assets/images/empty-state-icons/plan.svg')}
           message={t('Vous devez être enregistré pour accéder aux plans')}
         />
       </ScrollView>

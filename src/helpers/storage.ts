@@ -164,10 +164,10 @@ export const useMigrateToLanguageFolders = () => {
         try {
           // Import dynamically to avoid circular dependencies
           const { migrateToLanguageFolders } = await import('~helpers/databaseMigration')
-          const { getLangIsFr } = await import('~i18n')
+          const { getLanguage } = await import('~i18n')
 
           // Use current UI language as the target for migration
-          const currentLang = getLangIsFr() ? 'fr' : 'en'
+          const currentLang = getLanguage()
           await migrateToLanguageFolders(currentLang)
 
           storage.set('hasMigratedToLanguageFolders', true)

@@ -26,12 +26,12 @@ const LinkBox = Box.withComponent(Link)
 
 const useGetFirstPlans = () => {
   const hasPlans = useSelector((state: RootState) => state.plan.myPlans.length)
-  const isFR = useLanguage()
+  const lang = useLanguage()
   const dispatch = useDispatch()
 
   const getBibleProjectPlan = async () => {
     const [{ localUri }] = await Asset.loadAsync(
-      isFR
+      lang === 'fr'
         ? require('~assets/plans/bible-project-plan.txt')
         : require('~assets/plans/bible-project-plan-en.txt')
     )

@@ -10,6 +10,7 @@ import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import useLanguage from '~helpers/useLanguage'
+import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { wp } from '~helpers/utils'
 import { ShallowTimelineSection } from './types'
 
@@ -35,7 +36,7 @@ const SectionDetailsModal = ({
   endYear,
   interval,
 }: Props) => {
-  const isFR = useLanguage()
+  const lang = useLanguage()
   const { t } = useTranslation()
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
@@ -54,18 +55,18 @@ const SectionDetailsModal = ({
       <BottomSheetScrollView>
         <Box flex center px={50} py={60}>
           <Text title fontSize={20}>
-            {isFR ? sectionTitle : sectionTitleEn}
+            {getLegacyLocalizedField(lang, { fr: sectionTitle, en: sectionTitleEn })}
           </Text>
 
           <Text py={30} fontSize={35} title textAlign="center">
-            {(isFR ? title : titleEn).toUpperCase()}
+            {getLegacyLocalizedField(lang, { fr: title, en: titleEn }).toUpperCase()}
           </Text>
 
           <Box>
             <Box height={2} bg="default" />
 
             <Text py={3} textAlign="center" title>
-              {isFR ? subTitle : subTitleEn}
+              {getLegacyLocalizedField(lang, { fr: subTitle, en: subTitleEn })}
             </Text>
             <Box height={2} bg="default" />
           </Box>
@@ -78,7 +79,9 @@ const SectionDetailsModal = ({
             />
           </Box>
           <Box lightShadow bg={color} width={50} height={10} borderRadius={10} my={50} />
-          <Paragraph>{isFR ? description : descriptionEn}</Paragraph>
+          <Paragraph>
+            {getLegacyLocalizedField(lang, { fr: description, en: descriptionEn })}
+          </Paragraph>
           <Paragraph scale={-2} mt={80} textAlign="center">
             {`${t('Vous souhaitez aller plus loin ?')}\n`}
             <InlineLink

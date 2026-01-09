@@ -8,7 +8,8 @@ import { StrongReference, StudyNavigateBibleType, VerseIds } from '~common/types
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
 import { storage } from '~helpers/storage'
 import { versions } from '~helpers/bibleVersions'
-import i18n, { getLangIsFr } from '~i18n'
+import { getDefaultBibleVersion } from '~helpers/languageUtils'
+import i18n, { getLanguage } from '~i18n'
 
 // ============================================================================
 // TAB TYPES
@@ -177,7 +178,7 @@ export const getDefaultBibleTab = (version?: VersionCode): BibleTab => ({
   title: 'Genèse 1:1',
   type: 'bible',
   data: {
-    selectedVersion: version || (getLangIsFr() ? 'LSG' : 'KJV'),
+    selectedVersion: version || getDefaultBibleVersion(getLanguage()),
     selectedBook: { Numero: 1, Nom: 'Genèse', Chapitres: 50 },
     selectedChapter: 1,
     selectedVerse: 1,
@@ -675,7 +676,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const addParallelVersion = () =>
     setBibleTab(
       produce(draft => {
-        draft.data.parallelVersions.push(getLangIsFr() ? 'LSG' : 'KJV')
+        draft.data.parallelVersions.push(getDefaultBibleVersion(getLanguage()))
       })
     )
 

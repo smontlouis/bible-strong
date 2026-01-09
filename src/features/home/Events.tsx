@@ -4,9 +4,9 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { firebaseDb } from '~helpers/firebase'
 import { useQuery } from '~helpers/react-query-lite'
-import { getLangIsFr } from '~i18n'
+import { getLanguage } from '~i18n'
+import { getDateLocale } from '~helpers/languageUtils'
 import { format } from 'date-fns'
-import { fr, enUS } from 'date-fns/locale'
 import React from 'react'
 import { useFireStorage } from '~features/plans/plan.hooks'
 import { StyleSheet, Linking, Pressable, TouchableOpacity } from 'react-native'
@@ -35,13 +35,13 @@ const getEvents = async () => {
   const events = await firebaseDb
     .collection('events')
     .where('status', '==', 'published')
-    .where('lang', '==', getLangIsFr() ? 'fr' : 'en')
+    .where('lang', '==', getLanguage())
     .get()
   return events.docs.map(x => x.data() as Event)
 }
 
 const EventPeriod = ({ event }: { event: Event }) => {
-  const locale = getLangIsFr() ? fr : enUS
+  const locale = getDateLocale(getLanguage())
 
   if (!event.startDate && !event.endDate) return null
 

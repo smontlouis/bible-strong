@@ -58,7 +58,7 @@ interface NaveListScreenProps {
 
 const NaveListScreen = ({ hasBackButton, onNaveSelect }: NaveListScreenProps) => {
   const { t } = useTranslation()
-  const isFR = useLanguage()
+  const lang = useLanguage()
   const [error, setError] = useState(false)
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
@@ -82,7 +82,7 @@ const NaveListScreen = ({ hasBackButton, onNaveSelect }: NaveListScreenProps) =>
       <Container>
         <Header hasBackButton={hasBackButton} title={t('Désolé...')} />
         <Empty
-          source={require('~assets/images/empty.json')}
+          icon={require('~assets/images/empty-state-icons/inbox.svg')}
           message={`${t('Impossible de charger la nave...')}${
             // @ts-ignore
             error === 'CORRUPTED_DATABASE'
@@ -103,7 +103,7 @@ const NaveListScreen = ({ hasBackButton, onNaveSelect }: NaveListScreenProps) =>
         title={t('Thématique Nave')}
         rightComponent={
           <Box row alignItems="center">
-            {isFR && (
+            {lang === 'fr' && (
               <Link route="NaveWarning" padding>
                 <Icon.Feather size={20} name="alert-triangle" color="rgb(255,188,0)" />
               </Link>
@@ -160,7 +160,10 @@ const NaveListScreen = ({ hasBackButton, onNaveSelect }: NaveListScreenProps) =>
             keyExtractor={(item: any) => item.name_lower}
           />
         ) : (
-          <Empty source={require('~assets/images/empty.json')} message={t('Aucun mot trouvé...')} />
+          <Empty
+            icon={require('~assets/images/empty-state-icons/word.svg')}
+            message={t('Aucun mot trouvé...')}
+          />
         )}
       </Box>
       {!searchValue && <AlphabetList color="quint" letter={letter} setLetter={setLetter} />}

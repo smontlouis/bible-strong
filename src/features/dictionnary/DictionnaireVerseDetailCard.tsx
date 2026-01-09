@@ -25,6 +25,7 @@ import { QueryStatus, useQuery } from '~helpers/react-query-lite'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
+import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import DictionnaireCard from './DictionnaireCard'
 import DictionnaireVerseReference from './DictionnaireVerseReference'
 
@@ -114,8 +115,6 @@ const useFormattedText = ({
   const [formattedText, setFormattedText] = useState<JSX.Element | JSX.Element[] | undefined>()
   const [boxHeight, setBoxHeight] = useState(0)
 
-  const isFR = resourceLang === 'fr'
-
   const { Livre, Chapitre, Verset } = verse
 
   useEffect(() => {
@@ -124,12 +123,12 @@ const useFormattedText = ({
         return
       }
       setCurrentWord(wordsInVerse[0])
-      const bible = await loadBible(isFR ? 'LSG' : 'KJV')
+      const bible = await loadBible(getDefaultBibleVersion(resourceLang))
       const verseToDictionnaryText = await verseToDictionnary(verse, wordsInVerse, bible)
       setFormattedText(verseToDictionnaryText)
       setVersesInCurrentChapter(Object.keys(bible[Livre][Chapitre]).length)
     })()
-  }, [wordsInVerse, verse, isFR, Chapitre, Livre])
+  }, [wordsInVerse, verse, resourceLang, Chapitre, Livre])
 
   // @ts-ignore
   const { error: wordsError, data: words } = useQuery({

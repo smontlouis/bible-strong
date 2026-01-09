@@ -1,8 +1,6 @@
 import React from 'react'
 import styled from '@emotion/native'
 import distanceInWords from 'date-fns/formatDistance'
-import fr from 'date-fns/locale/fr'
-import enGB from 'date-fns/locale/en-GB'
 
 import { Theme, withTheme } from '@emotion/react'
 
@@ -17,6 +15,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
+import { getDateLocale } from '~helpers/languageUtils'
 import { StudiesObj, Study } from '~redux/modules/user'
 
 export const LinkBox = Box.withComponent(Link)
@@ -36,10 +35,10 @@ export type StudyItemProps = {
 
 const StudyItem = ({ study, theme, setStudySettings, onPress }: StudyItemProps) => {
   const { t } = useTranslation()
-  const isFR = useLanguage()
+  const lang = useLanguage()
 
   const formattedDate = distanceInWords(Number(study.modified_at), Date.now(), {
-    locale: isFR ? fr : enGB,
+    locale: getDateLocale(lang),
   })
   const r = useMediaQueriesArray()
 

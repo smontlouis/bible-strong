@@ -1,6 +1,6 @@
 import * as FileSystem from 'expo-file-system/legacy'
 
-import { getLangIsFr } from '~i18n'
+import { getLanguage } from '~i18n'
 import { audioDefault, audioV2 } from './topBibleAudio'
 import { zeroFill } from './zeroFill'
 import { getDatabases, getDbPath } from './databases'
@@ -573,7 +573,7 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(versions
 )
 
 export const getVersionsBySections = () => {
-  if (getLangIsFr()) {
+  if (getLanguage() === 'fr') {
     return versionsBySections
   }
 

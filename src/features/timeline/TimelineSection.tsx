@@ -65,7 +65,7 @@ const Timeline = ({
   prevEvent,
   nextEvent,
 }: Props) => {
-  const isFR = useLanguage()
+  const lang = useLanguage()
   const isReady = useSharedValue(0)
   const modalRef = React.useRef<BottomSheet>(null)
   const eventModalRef = React.useRef<BottomSheet>(null)
@@ -194,7 +194,7 @@ const Timeline = ({
         />
         {/* @ts-ignore */}
         <InstantSearch
-          indexName={isFR ? 'bible-timeline' : 'bible-timeline-en'}
+          indexName={lang === 'fr' ? 'bible-timeline' : 'bible-timeline-en'}
           searchClient={searchClient}
         >
           {/* @ts-ignore */}

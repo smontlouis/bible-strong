@@ -6,8 +6,6 @@ import {
   BottomSheetScrollView,
 } from '@gorhom/bottom-sheet'
 import distanceInWords from 'date-fns/formatDistance'
-import fr from 'date-fns/locale/fr'
-import enGB from 'date-fns/locale/en-GB'
 
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
@@ -19,6 +17,7 @@ import { logTypes } from '~helpers/changelog'
 import { saveAllLogsAsSeen } from '~redux/modules/user'
 import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
+import { getDateLocale } from '~helpers/languageUtils'
 import styled from '@emotion/native'
 import { RootState } from '~redux/modules/reducer'
 import { ChangelogItem, LogType } from './types'
@@ -71,7 +70,7 @@ const findNewLogs = (seenLogs: string[], changeLog: ChangelogItem[]) =>
 const Changelog = () => {
   const dispatch = useDispatch()
   const { t } = useTranslation()
-  const isFR = useLanguage()
+  const lang = useLanguage()
   const modalRef = useRef<BottomSheetModal>(null)
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
   const insets = useSafeAreaInsets()
@@ -93,7 +92,7 @@ const Changelog = () => {
   }, [showModal])
 
   const getAttribute = (log: ChangelogItem, attr: keyof ChangelogItem) => {
-    if (isFR) {
+    if (lang === 'fr') {
       return log[attr]
     }
 
@@ -142,7 +141,7 @@ const Changelog = () => {
           <Box marginTop={10}>
             {newLogs.map(log => {
               const formattedDate = distanceInWords(Number(log.date), Date.now(), {
-                locale: isFR ? fr : enGB,
+                locale: getDateLocale(lang),
               })
               return (
                 <Box key={log.date} marginTop={10} marginBottom={10}>

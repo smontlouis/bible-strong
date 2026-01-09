@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useAtomValue } from 'jotai'
 import { Configure, InstantSearch } from 'react-instantsearch-native'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
+import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import Filters from './Filters'
 import SearchBox from './SearchBox'
 import SearchResults from './SearchResults'
@@ -21,7 +22,7 @@ interface SearchScreenProps {
 const OnlineSearchScreen = ({ searchValue, setSearchValue }: SearchScreenProps) => {
   const { t } = useTranslation()
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
-  const isFR = resourcesLanguage.SEARCH === 'fr'
+  const searchLang = resourcesLanguage.SEARCH
   const [canQuery, setCanQuery] = React.useState(true)
   const [submittedValue, setSubmittedValue] = React.useState('')
 
@@ -50,7 +51,7 @@ const OnlineSearchScreen = ({ searchValue, setSearchValue }: SearchScreenProps) 
       {/* @ts-ignore */}
       <InstantSearch indexName="bible-lsg" searchClient={searchClient}>
         {/* @ts-ignore */}
-        <Configure restrictSearchableAttributes={isFR ? ['LSG'] : ['KJV']} />
+        <Configure restrictSearchableAttributes={[getDefaultBibleVersion(searchLang)]} />
         <>
           {/* @ts-ignore */}
           <SearchBox

@@ -1,7 +1,5 @@
 import { BottomSheetModal, BottomSheetFlashList } from '@gorhom/bottom-sheet'
 import distanceInWords from 'date-fns/formatDistance'
-import enGB from 'date-fns/locale/en-GB'
-import fr from 'date-fns/locale/fr'
 import React, { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
@@ -15,6 +13,7 @@ import Text from '~common/ui/Text'
 import generateUUID from '~helpers/generateUUID'
 import useFuzzy from '~helpers/useFuzzy'
 import useLanguage from '~helpers/useLanguage'
+import { getDateLocale } from '~helpers/languageUtils'
 import type { RootState } from '~redux/modules/reducer'
 import type { Study } from '~redux/modules/user'
 
@@ -26,7 +25,7 @@ interface AddToStudyModalProps {
 
 const AddToStudyModal = ({ bottomSheetRef, onSelectStudy, onClose }: AddToStudyModalProps) => {
   const { t } = useTranslation()
-  const isFR = useLanguage()
+  const lang = useLanguage()
 
   const studies = useSelector((state: RootState) => state.user.bible.studies, shallowEqual)
 
@@ -71,7 +70,7 @@ const AddToStudyModal = ({ bottomSheetRef, onSelectStudy, onClose }: AddToStudyM
 
   const renderStudyItem = ({ item }: { item: Study }) => {
     const formattedDate = distanceInWords(Number(item.modified_at), Date.now(), {
-      locale: isFR ? fr : enGB,
+      locale: getDateLocale(lang),
     })
 
     return (
@@ -124,7 +123,10 @@ const AddToStudyModal = ({ bottomSheetRef, onSelectStudy, onClose }: AddToStudyM
         contentContainerStyle={{ paddingBottom: 20 }}
         ListEmptyComponent={
           <Box flex justifyContent="center" alignItems="center" padding={40}>
-            <Empty source={require('~assets/images/empty.json')} message={t('study.noStudies')} />
+            <Empty
+              icon={require('~assets/images/empty-state-icons/study.svg')}
+              message={t('study.noStudies')}
+            />
           </Box>
         }
       />

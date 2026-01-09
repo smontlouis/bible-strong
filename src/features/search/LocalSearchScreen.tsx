@@ -235,7 +235,7 @@ const LocalSearchScreen = ({ idxFile, searchValue, setSearchValue, resourceLang 
         <LocalSearchResults searchValue={debouncedSearchValue} results={results} />
       ) : (
         <Empty
-          source={require('~assets/images/search-loop.json')}
+          icon={require('~assets/images/empty-state-icons/search.svg')}
           message={t('Fais une recherche dans la Bible !')}
         />
       )}

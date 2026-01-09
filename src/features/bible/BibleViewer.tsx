@@ -11,6 +11,7 @@ import loadBibleChapter from '~helpers/loadBibleChapter'
 import loadMhyComments from '~helpers/loadMhyComments'
 import { usePrevious } from '~helpers/usePrevious'
 import BibleHeader from './BibleHeader'
+import { BibleError, BibleErrorType } from '~helpers/bibleErrors'
 
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -26,6 +27,7 @@ import getVersesContent from '~helpers/getVersesContent'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useBottomSheet, useBottomSheetModal } from '~helpers/useBottomSheet'
 import useLanguage from '~helpers/useLanguage'
+import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { RootState } from '~redux/modules/reducer'
 import { addHighlight, removeHighlight } from '~redux/modules/user'
 import {
@@ -67,6 +69,22 @@ interface BibleViewerProps {
   isBibleViewReloadingAtom: PrimitiveAtom<boolean>
 }
 
+/**
+ * Get localized error message based on error type
+ */
+const getErrorMessage = (error: BibleError, t: (key: string) => string): string => {
+  switch (error.type) {
+    case 'BIBLE_NOT_FOUND':
+      return t('bible.error.versionNotFound')
+    case 'CHAPTER_NOT_FOUND':
+      return t('bible.error.chapterNotFound')
+    case 'DATABASE_CORRUPTED':
+      return t('bible.error.databaseCorrupted')
+    default:
+      return t('bible.error.unknown')
+  }
+}
+
 const formatVerses = (verses: string[]) =>
   verses.reduce((acc, v, i, array) => {
     // @ts-ignore
@@ -96,7 +114,7 @@ const BibleViewer = ({
   const { t } = useTranslation()
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
 
-  const [error, setError] = useState(false)
+  const [error, setError] = useState<BibleError | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [verses, setVerses] = useState<Verse[]>([])
   const [parallelVerses, setParallelVerses] = useState<ParallelVerse[]>([])
@@ -137,7 +155,7 @@ const BibleViewer = ({
   } | null>(null)
   const addVerseToStudy = useAddVerseToStudy()
 
-  const isFR = useLanguage()
+  const lang = useLanguage()
   const dispatch = useDispatch()
   const [pericope, setPericope] = useState<Pericope | null>(null)
   const [resourceType, onChangeResourceType] = useState<BibleResource>('strong')
@@ -210,24 +228,46 @@ const BibleViewer = ({
     setPericope(await getBiblePericope(version))
     setIsLoading(true)
 
-    const versesToLoad = await loadBibleChapter(book.Numero, chapter, version)
+    // Load main Bible version
+    const mainResult = await loadBibleChapter(book.Numero, chapter, version)
+
+    // If main Bible version fails, set error and stop
+    if (!mainResult.success || !mainResult.data) {
+      setError(mainResult.error!)
+      setIsLoading(false)
+      return
+    }
+
+    const versesToLoad = mainResult.data as Verse[]
+
+    // Load parallel versions independently - don't let one failure break others
     const parallelVersesToLoad: ParallelVerse[] = []
     if (parallelVersions.length) {
       for (const p of parallelVersions) {
-        const pVerses = (await loadBibleChapter(book.Numero, chapter, p)) as Verse[]
-        parallelVersesToLoad.push({ id: p, verses: pVerses })
+        const pResult = await loadBibleChapter(book.Numero, chapter, p)
+        if (pResult.success && pResult.data) {
+          parallelVersesToLoad.push({ id: p, verses: pResult.data as Verse[] })
+        } else {
+          // Include the parallel version with error info instead of breaking
+          parallelVersesToLoad.push({ id: p, verses: [], error: pResult.error })
+        }
       }
     }
 
+    // Load secondary verses for interlinear mode
     let secondaryVersesToLoad: Verse[] | null = null
     if (version === 'INT' || version === 'INT_EN') {
-      secondaryVersesToLoad = (await loadBibleChapter(
+      const secondaryResult = await loadBibleChapter(
         book.Numero,
         chapter,
-        isFR ? 'LSG' : 'KJV'
-      )) as Verse[]
+        getDefaultBibleVersion(lang)
+      )
+      if (secondaryResult.success && secondaryResult.data) {
+        secondaryVersesToLoad = secondaryResult.data as Verse[]
+      }
     }
 
+    // Load comments if enabled
     if (settings.commentsDisplay) {
       const commentsToLoad = await loadMhyComments(book.Numero, chapter)
       setComments(JSON.parse(commentsToLoad.commentaires))
@@ -235,15 +275,11 @@ const BibleViewer = ({
       setComments(null)
     }
 
-    if (!versesToLoad) {
-      throw new Error('I crashed!')
-    }
-
     setIsLoading(false)
     setVerses(versesToLoad)
     setParallelVerses(parallelVersesToLoad)
     setSecondaryVerses(secondaryVersesToLoad)
-    setError(false)
+    setError(null)
 
     addHistory({
       book: book.Numero,
@@ -270,7 +306,14 @@ const BibleViewer = ({
     }
     loadVerses().catch(e => {
       console.log('[Bible] Error loading verses:', e)
-      setError(true)
+      // Set a generic error if something unexpected happens
+      setError({
+        type: 'UNKNOWN_ERROR',
+        version,
+        book: book.Numero,
+        chapter,
+        message: e?.message || 'Unknown error',
+      })
       setIsLoading(false)
     })
 
@@ -486,9 +529,7 @@ const BibleViewer = ({
         <Box flex={1} zIndex={-1}>
           <Empty
             source={require('~assets/images/empty.json')}
-            message={
-              "Désolé ! Une erreur est survenue:\n Ce chapitre n'existe pas dans cette version.\n Si vous êtes en mode parallèle, désactivez la version concernée."
-            }
+            message={getErrorMessage(error, t)}
           />
         </Box>
       )}

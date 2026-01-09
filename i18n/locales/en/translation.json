@@ -818,5 +818,13 @@
 
   "forgotPassword.title": "Forgot password",
   "forgotPassword.description": "Enter your email address and we'll send you a link to reset your password.",
-  "forgotPassword.send": "Send reset link"
+  "forgotPassword.send": "Send reset link",
+
+  "bible.error.versionNotFound": "This Bible version is not downloaded. Go to download management to download it.",
+  "bible.error.chapterNotFound": "This chapter does not exist in this Bible version.",
+  "bible.error.databaseCorrupted": "The database appears to be corrupted. Go to download management to re-download it.",
+  "bible.error.unknown": "An unexpected error occurred. Please try again.",
+  "bible.error.parallelVersionNotFound": "Version not downloaded",
+  "bible.error.parallelChapterNotFound": "Chapter unavailable",
+  "bible.error.parallelLoadError": "Loading error"
 }

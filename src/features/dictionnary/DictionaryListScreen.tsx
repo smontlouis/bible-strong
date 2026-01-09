@@ -82,7 +82,7 @@ const DictionaryListScreen = ({ hasBackButton, onWordSelect }: DictionaryListScr
       <Container>
         <Header hasBackButton={hasBackButton} title={t('Désolé...')} />
         <Empty
-          source={require('~assets/images/empty.json')}
+          icon={require('~assets/images/empty-state-icons/inbox.svg')}
           message={`${t('Impossible de charger le dictionnaire...')}${
             // @ts-ignore
             error === 'CORRUPTED_DATABASE'
@@ -113,11 +113,7 @@ const DictionaryListScreen = ({ hasBackButton, onWordSelect }: DictionaryListScr
         ) : sectionResults.length ? (
           <SectionList
             renderItem={({ item: { id, word } }) => (
-              <DictionnaireItem
-                key={id}
-                word={word}
-                onSelect={onWordSelect}
-              />
+              <DictionnaireItem key={id} word={word} onSelect={onWordSelect} />
             )}
             removeClippedSubviews
             maxToRenderPerBatch={100}
@@ -140,7 +136,10 @@ const DictionaryListScreen = ({ hasBackButton, onWordSelect }: DictionaryListScr
             keyExtractor={item => item.id}
           />
         ) : (
-          <Empty source={require('~assets/images/empty.json')} message={t('Aucun mot trouvé...')} />
+          <Empty
+            icon={require('~assets/images/empty-state-icons/word.svg')}
+            message={t('Aucun mot trouvé...')}
+          />
         )}
       </Box>
       {!searchValue && <AlphabetList color="secondary" letter={letter} setLetter={setLetter} />}
