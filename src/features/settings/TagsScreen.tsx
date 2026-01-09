@@ -187,14 +187,15 @@ const TagsScreen = () => {
       {result.length ? (
         <FlatList
           data={result}
-          renderItem={({ item }: { item: Tag }) => (
-            <TagItem setOpen={setOpen} item={item} />
-          )}
+          renderItem={({ item }: { item: Tag }) => <TagItem setOpen={setOpen} item={item} />}
           keyExtractor={(item: Tag) => item.id}
           contentContainerStyle={{ paddingBottom: 70 }}
         />
       ) : (
-        <Empty source={require('~assets/images/empty.json')} message={t('Aucune étiquette...')} />
+        <Empty
+          icon={require('~assets/images/empty-state-icons/tag.svg')}
+          message={t('Aucune étiquette...')}
+        />
       )}
 
       <Modal.Body ref={ref} onModalClose={() => setOpen(undefined)} enableDynamicSizing>
@@ -209,9 +210,7 @@ const TagsScreen = () => {
         >
           {t('Éditer')}
         </Modal.Item>
-        <Modal.Item onPress={handleOpenInTabGroup}>
-          {t('tabs.createGroupFromTag')}
-        </Modal.Item>
+        <Modal.Item onPress={handleOpenInTabGroup}>{t('tabs.createGroupFromTag')}</Modal.Item>
         <Modal.Item color="quart" onPress={promptLogout}>
           {t('Supprimer')}
         </Modal.Item>

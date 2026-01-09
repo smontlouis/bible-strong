@@ -216,7 +216,7 @@ const HighlightsScreen = () => {
         <VersesList setSettings={setSettingsData} groupedHighlights={groupedHighlights} />
       ) : (
         <Empty
-          source={require('~assets/images/empty.json')}
+          icon={require('~assets/images/empty-state-icons/highlight.svg')}
           message={t("Vous n'avez pas encore rien surligné...")}
         />
       )}

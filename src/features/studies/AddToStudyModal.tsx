@@ -123,7 +123,10 @@ const AddToStudyModal = ({ bottomSheetRef, onSelectStudy, onClose }: AddToStudyM
         contentContainerStyle={{ paddingBottom: 20 }}
         ListEmptyComponent={
           <Box flex justifyContent="center" alignItems="center" padding={40}>
-            <Empty source={require('~assets/images/empty.json')} message={t('study.noStudies')} />
+            <Empty
+              icon={require('~assets/images/empty-state-icons/study.svg')}
+              message={t('study.noStudies')}
+            />
           </Box>
         }
       />

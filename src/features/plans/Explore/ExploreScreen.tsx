@@ -64,7 +64,7 @@ const ExploreScreen = () => {
         }
       >
         <Empty
-          source={require('~assets/images/empty.json')}
+          icon={require('~assets/images/empty-state-icons/plan.svg')}
           message={t('Vous devez être enregistré pour accéder aux plans')}
         />
       </ScrollView>

@@ -291,7 +291,7 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
             </Box>
           ) : status === 'Rejected' ? (
             <Empty
-              source={require('~assets/images/empty.json')}
+              icon={require('~assets/images/empty-state-icons/comment.svg')}
               message={t("Une erreur est survenue. Assurez-vous d'être connecté à Internet.")}
             />
           ) : (
