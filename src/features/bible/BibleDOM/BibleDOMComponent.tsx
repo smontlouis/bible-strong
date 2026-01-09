@@ -18,6 +18,7 @@ import ChevronDownIcon from './ChevronDownIcon'
 import Comment from './Comment'
 import {
   ADD_PARALLEL_VERSION,
+  EXIT_READONLY_MODE,
   NAVIGATE_TO_PERICOPE,
   NAVIGATE_TO_VERSION,
   REMOVE_PARALLEL_VERSION,
@@ -27,7 +28,7 @@ import {
   SWIPE_UP,
 } from './dispatch'
 import { DispatchProvider, useDispatch } from './DispatchProvider'
-import { TranslationsProvider, BibleDOMTranslations } from './TranslationsContext'
+import { TranslationsProvider, BibleDOMTranslations, useTranslations } from './TranslationsContext'
 import ExternalIcon from './ExternalIcon'
 import MinusIcon from './MinusIcon'
 import PlusIcon from './PlusIcon'
@@ -220,6 +221,33 @@ const ResponsivePlusIcon = styled(PlusIcon)<RootStyles>(({ settings: { theme, co
 
   [mediaQueries[0]]: {
     display: 'block',
+  },
+}))
+
+const ReadWholeChapterButtonContainer = styled('div')({
+  display: 'flex',
+  justifyContent: 'center',
+  marginTop: '20px',
+  marginBottom: '20px',
+})
+
+const ReadWholeChapterButton = styled('button')<RootStyles>(({ settings: { theme, colors } }) => ({
+  backgroundColor: colors[theme].primary,
+  color: '#fff',
+  border: 'none',
+  borderRadius: '25px',
+  padding: '12px 24px',
+  fontSize: '14px',
+  fontWeight: 'bold',
+  cursor: 'pointer',
+  boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+  transition: 'transform 0.2s, box-shadow 0.2s',
+  ':hover': {
+    transform: 'scale(1.02)',
+    boxShadow: '0 4px 8px rgba(0,0,0,0.25)',
+  },
+  ':active': {
+    transform: 'scale(0.98)',
   },
 }))
 
@@ -748,6 +776,16 @@ const VersesRenderer = ({
             </Span>
           )
         })}
+        {isReadOnly && focusVerses && focusVerses.length > 0 && (
+          <ReadWholeChapterButtonContainer>
+            <ReadWholeChapterButton
+              settings={settings}
+              onClick={() => dispatch({ type: EXIT_READONLY_MODE })}
+            >
+              {translations.readWholeChapter}
+            </ReadWholeChapterButton>
+          </ReadWholeChapterButtonContainer>
+        )}
       </Container>
       <svg
         style={{

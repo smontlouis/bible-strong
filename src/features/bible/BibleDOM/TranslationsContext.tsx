@@ -5,7 +5,8 @@ export interface BibleDOMTranslations {
   parallelVersionNotFound: string
   parallelChapterNotFound: string
   parallelLoadError: string
-  // Extensible for future translations
+  // Readonly mode
+  readWholeChapter: string
 }
 
 const TranslationsContext = createContext<BibleDOMTranslations | null>(null)
