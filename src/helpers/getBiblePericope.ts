@@ -1,4 +1,4 @@
-import { getLangIsFr } from '~i18n'
+import { getLanguage } from '~i18n'
 import { Asset } from 'expo-asset'
 import * as FileSystem from 'expo-file-system/legacy'
 import { VersionCode } from 'src/state/tabs'
@@ -53,7 +53,7 @@ const getAsyncRequire = (version: VersionCode) => {
       return PericopeNJKV
     }
     default: {
-      return getLangIsFr() ? PericopeLSG : PericopeESV
+      return getLanguage() === 'fr' ? PericopeLSG : PericopeESV
     }
   }
 }

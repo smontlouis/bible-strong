@@ -27,6 +27,7 @@ import getVersesContent from '~helpers/getVersesContent'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useBottomSheet, useBottomSheetModal } from '~helpers/useBottomSheet'
 import useLanguage from '~helpers/useLanguage'
+import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { RootState } from '~redux/modules/reducer'
 import { addHighlight, removeHighlight } from '~redux/modules/user'
 import {
@@ -153,7 +154,7 @@ const BibleViewer = ({
   } | null>(null)
   const addVerseToStudy = useAddVerseToStudy()
 
-  const isFR = useLanguage()
+  const lang = useLanguage()
   const dispatch = useDispatch()
   const [pericope, setPericope] = useState<Pericope | null>(null)
   const [resourceType, onChangeResourceType] = useState<BibleResource>('strong')
@@ -258,11 +259,16 @@ const BibleViewer = ({
       const secondaryResult = await loadBibleChapter(
         book.Numero,
         chapter,
+<<<<<<< HEAD
         isFR ? 'LSG' : 'KJV'
       )
       if (secondaryResult.success && secondaryResult.data) {
         secondaryVersesToLoad = secondaryResult.data as Verse[]
       }
+=======
+        getDefaultBibleVersion(lang)
+      )) as Verse[]
+>>>>>>> a699321909bde28afee8e9612c5428d130b89687
     }
 
     // Load comments if enabled

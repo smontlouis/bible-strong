@@ -1,7 +1,5 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet/'
 import distanceInWords from 'date-fns/formatDistance'
-import enGB from 'date-fns/locale/en-GB'
-import fr from 'date-fns/locale/fr'
 import React, { useMemo, useRef, useState } from 'react'
 import { Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -36,16 +34,17 @@ import NaveResultItem from '~features/nave/NaveResultItem'
 import StudyItem from '~features/studies/StudyItem'
 import truncate from '~helpers/truncate'
 import useLanguage from '~helpers/useLanguage'
+import { getDateLocale, type ActiveLanguage } from '~helpers/languageUtils'
 import { RootState } from '~redux/modules/reducer'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { makeTagDataSelector } from '~redux/selectors/bible'
 import { makeTagByIdSelector } from '~redux/selectors/tags'
 
-const NoteItem = ({ item, t, isFR }: any) => {
+const NoteItem = ({ item, t, lang }: { item: any; t: any; lang: ActiveLanguage }) => {
   const [Livre, Chapitre, Verset] = item.id.split('-')
   const { title } = formatVerseContent([{ Livre, Chapitre, Verset }])
   const formattedDate = distanceInWords(Number(item.date), Date.now(), {
-    locale: isFR ? fr : enGB,
+    locale: getDateLocale(lang),
   })
 
   return (
@@ -95,11 +94,11 @@ const LinkTypeIcon = styled(Box)<{ bgColor: string }>(({ bgColor }) => ({
 
 type LinkItemType = LinkModel & { id: string }
 
-const LinkItem = ({ item, t, isFR }: { item: LinkItemType; t: any; isFR: boolean }) => {
+const LinkItem = ({ item, t, lang }: { item: LinkItemType; t: any; lang: ActiveLanguage }) => {
   const [Livre, Chapitre, Verset] = item.id.split('-').map(Number)
   const { title } = formatVerseContent([{ Livre, Chapitre, Verset }])
   const formattedDate = distanceInWords(Number(item.date), Date.now(), {
-    locale: isFR ? fr : enGB,
+    locale: getDateLocale(lang),
   })
   const config = linkTypeConfig[item.linkType as LinkType] || linkTypeConfig.website
   const displayTitle = item.customTitle || item.ogData?.title || item.url
@@ -173,7 +172,7 @@ const TagScreen = () => {
   const tagId = params.tagId || ''
   const dispatch = useDispatch()
   const { t } = useTranslation()
-  const isFR = useLanguage()
+  const lang = useLanguage()
 
   // Create memoized selectors
   const selectTagById = useMemo(() => makeTagByIdSelector(), [])
@@ -292,10 +291,12 @@ const TagScreen = () => {
           !words.length &&
           !strongsGrec.length &&
           !strongsHebreu.length && (
-            <Empty
-              source={require('~assets/images/empty.json')}
-              message={t("Vous n'avez rien enregistré avec cette étiquette...")}
-            />
+            <Box pt={40} px={20}>
+              <Empty
+                icon={require('~assets/images/empty-state-icons/tag.svg')}
+                message={t("Vous n'avez rien enregistré avec cette étiquette...")}
+              />
+            </Box>
           )}
         {(!!strongsGrec.length || !!strongsHebreu.length) && (
           <Box px={20}>
@@ -388,7 +389,7 @@ const TagScreen = () => {
           <Box px={20}>
             <Accordion defaultExpanded title={<SectionHeader title="Notes" count={notes.length} />}>
               {notes.map(n => {
-                return <NoteItem t={t} isFR={isFR} key={n.date.toString()} item={n} />
+                return <NoteItem t={t} lang={lang} key={n.date.toString()} item={n} />
               })}
             </Accordion>
           </Box>
@@ -401,7 +402,7 @@ const TagScreen = () => {
               title={<SectionHeader title={t('Liens')} count={links.length} />}
             >
               {links.map(l => {
-                return <LinkItem t={t} isFR={isFR} key={l.id} item={l} />
+                return <LinkItem t={t} lang={lang} key={l.id} item={l} />
               })}
             </Accordion>
           </Box>

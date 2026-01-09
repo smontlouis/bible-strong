@@ -65,7 +65,7 @@ type MoreProps = {
 export const More = ({ closeMenu }: MoreProps) => {
   const { isLogged, logout, promptDeleteAccount } = useLogin()
 
-  const isFR = useLanguage()
+  const lang = useLanguage()
   const hasUpdate = useSelector((state: RootState) =>
     Object.values(state.user.needsUpdate).some(v => v)
   )
@@ -258,7 +258,7 @@ export const More = ({ closeMenu }: MoreProps) => {
           </CardLinkItem>
           {!appleIsReviewing && (
             <CardLinkItem
-              href={isFR ? 'https://bible-strong.app/fr/give' : 'https://bible-strong.app/give'}
+              href={lang === 'fr' ? 'https://bible-strong.app/fr/give' : 'https://bible-strong.app/give'}
             >
               <IconCircle bg="rgba(236, 72, 153, 0.1)">
                 <FeatherIcon name="heart" size={20} color="color2" />
@@ -284,7 +284,7 @@ export const More = ({ closeMenu }: MoreProps) => {
           <LinkItem
             style={{ paddingVertical: 10, paddingHorizontal: 0 }}
             href={
-              isFR
+              lang === 'fr'
                 ? 'https://bible-strong.app/politique-de-confidentialite'
                 : 'https://bible-strong.app/privacy-policy'
             }
@@ -295,7 +295,7 @@ export const More = ({ closeMenu }: MoreProps) => {
           </LinkItem>
           <LinkItem
             style={{ paddingVertical: 10, paddingHorizontal: 0 }}
-            href={isFR ? 'https://bible-strong.app/eula' : 'https://bible-strong.app/eula-en'}
+            href={lang === 'fr' ? 'https://bible-strong.app/eula' : 'https://bible-strong.app/eula-en'}
           >
             <Text fontSize={14} color="grey">
               {t("Conditions d'utilisation")}

@@ -113,7 +113,10 @@ const BookmarksScreen = () => {
           contentContainerStyle={{ paddingBottom: 70 }}
         />
       ) : (
-        <Empty source={require('~assets/images/empty.json')} message={t('Aucun marque-page...')} />
+        <Empty
+          icon={require('~assets/images/empty-state-icons/bookmark.svg')}
+          message={t('Aucun marque-page...')}
+        />
       )}
       <BookmarkModal
         bottomSheetRef={bookmarkModalRef}

@@ -13,17 +13,19 @@ import { getDatabases } from '~helpers/databases'
 import { biblesRef, getDatabaseUrl, getDatabasesRef } from '~helpers/firebase'
 import { requireBiblePath } from '~helpers/requireBiblePath'
 import useLanguage from '~helpers/useLanguage'
+import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { ResourceToDownload, selectedResourcesAtom } from './atom'
 import ResourceItem from './ResourceItem'
 
 const DownloadFiles = ({ setStep }: { setStep: React.Dispatch<React.SetStateAction<number>> }) => {
   const { t } = useTranslation()
-  const isFR = useLanguage()
-  const databases = Object.values(getDatabases()).filter(db => (!isFR ? db.id !== 'MHY' : true))
+  const lang = useLanguage()
+  const databases = Object.values(getDatabases()).filter(db => (lang !== 'fr' ? db.id !== 'MHY' : true))
   const [selectedResources, setSelectedResources] = useAtom(selectedResourcesAtom)
 
-  const getDefaultVersion = (): ResourceToDownload => {
-    const defaultVersion = isFR ? getVersions().LSG : getVersions().KJV
+  const getDefaultVersionResource = (): ResourceToDownload => {
+    const defaultVersionCode = getDefaultBibleVersion(lang)
+    const defaultVersion = getVersions()[defaultVersionCode]
     const path = requireBiblePath(defaultVersion.id)
     const uri =
       defaultVersion.id === 'INT'
@@ -43,7 +45,7 @@ const DownloadFiles = ({ setStep }: { setStep: React.Dispatch<React.SetStateActi
 
   // Set default version
   useEffect(() => {
-    setSelectedResources([getDefaultVersion()])
+    setSelectedResources([getDefaultVersionResource()])
   }, [])
 
   const onPressItem = (resource: ResourceToDownload) => {
@@ -117,7 +119,7 @@ const DownloadFiles = ({ setStep }: { setStep: React.Dispatch<React.SetStateActi
             <ResourceItem
               name={version.name}
               isSelected={Boolean(selectedResources.find(r => r.id === version.id))}
-              isDisabled={version.id === (isFR ? 'LSG' : 'KJV')}
+              isDisabled={version.id === getDefaultBibleVersion(lang)}
               onPress={() => {
                 const path = requireBiblePath(version.id)
                 const uri =

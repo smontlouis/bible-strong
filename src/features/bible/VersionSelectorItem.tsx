@@ -20,12 +20,12 @@ import Text from '~common/ui/Text'
 import { getIfVersionNeedsDownload, isStrongVersion, Version } from '~helpers/bibleVersions'
 import { requireBiblePath } from '~helpers/requireBiblePath'
 import useLanguage from '~helpers/useLanguage'
+import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 import { RootState } from '~redux/modules/reducer'
 import { setDefaultBibleVersion, setVersionUpdated } from '~redux/modules/user'
 import { Theme } from '~themes'
 import { VersionCode, tabsAtom, BibleTab } from 'src/state/tabs'
-import { getLangIsFr } from '~i18n'
 import { store } from '~redux/store'
 
 const BIBLE_FILESIZE = 2500000
@@ -96,7 +96,7 @@ const VersionSelectorItem = ({
   onDownloadComplete,
 }: Props) => {
   const { t } = useTranslation()
-  const isFR = useLanguage()
+  const lang = useLanguage()
   const theme: Theme = useTheme()
   const [versionNeedsDownload, setVersionNeedsDownload] = React.useState<boolean>()
   const [fileProgress, setFileProgress] = React.useState(0)
@@ -178,7 +178,7 @@ const VersionSelectorItem = ({
     // Check if we're deleting the default Bible version
     const state = store.getState()
     const defaultVersion = state.user.bible.settings.defaultBibleVersion
-    const fallback: VersionCode = getLangIsFr() ? 'LSG' : 'KJV'
+    const fallback: VersionCode = getDefaultBibleVersion(lang)
 
     if (version.id === defaultVersion) {
       // Switch to fallback version (LSG for French, KJV for English)
@@ -329,8 +329,7 @@ const VersionSelectorItem = ({
               <UpdateIcon name="download" size={18} />
             </TouchableOpacity>
           ) : (
-            version.id !== 'LSG' &&
-            version.id !== 'KJV' && (
+            version.id !== getDefaultBibleVersion(lang) && (
               <TouchableOpacity onPress={confirmDelete} style={{ padding: 10 }}>
                 <DeleteIcon name="trash-2" size={18} />
               </TouchableOpacity>

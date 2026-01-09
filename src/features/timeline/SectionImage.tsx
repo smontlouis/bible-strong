@@ -5,6 +5,7 @@ import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
+import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { wp } from '~helpers/utils'
 import { ShallowTimelineSection } from './types'
 
@@ -21,7 +22,7 @@ const SectionImage = ({
   subTitleEn,
   direction,
 }: ShallowTimelineSection & { direction?: 'previous' | 'next' }) => {
-  const isFR = useLanguage()
+  const lang = useLanguage()
 
   return (
     <Box flex bg="reverse" row>
@@ -30,18 +31,18 @@ const SectionImage = ({
       </Box>
       <Box flex center>
         <Text title fontSize={20}>
-          {isFR ? sectionTitle : sectionTitleEn}
+          {getLegacyLocalizedField(lang, { fr: sectionTitle, en: sectionTitleEn })}
         </Text>
 
         <Text py={10} fontSize={30} title textAlign="center">
-          {isFR ? title.toUpperCase() : titleEn.toUpperCase()}
+          {getLegacyLocalizedField(lang, { fr: title, en: titleEn }).toUpperCase()}
         </Text>
 
         <Box>
           <Box height={2} bg="default" />
 
           <Text py={3} textAlign="center" title>
-            {isFR ? subTitle : subTitleEn}
+            {getLegacyLocalizedField(lang, { fr: subTitle, en: subTitleEn })}
           </Text>
           <Box height={2} bg="default" />
         </Box>

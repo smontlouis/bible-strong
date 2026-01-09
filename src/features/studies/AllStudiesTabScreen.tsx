@@ -131,7 +131,10 @@ const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => 
             selectedChip={selectedChip}
             hasBackButton={hasBackButton}
           />
-          <Empty source={require('~assets/images/empty.json')} message={t('Aucune étude...')} />
+          <Empty
+            icon={require('~assets/images/empty-state-icons/study.svg')}
+            message={t('Aucune étude...')}
+          />
         </>
       )}
       {isLogged && (

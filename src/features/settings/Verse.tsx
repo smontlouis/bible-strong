@@ -1,8 +1,6 @@
 import React from 'react'
 import { TouchableOpacity } from 'react-native'
 import distanceInWords from 'date-fns/formatDistance'
-import fr from 'date-fns/locale/fr'
-import enGB from 'date-fns/locale/en-GB'
 
 import styled from '@emotion/native'
 import { useRouter } from 'expo-router'
@@ -22,6 +20,7 @@ import useBibleVerses from '~helpers/useBibleVerses'
 import { removeBreakLines } from '~helpers/utils'
 import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
+import { getDateLocale } from '~helpers/languageUtils'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { RootState } from '~redux/modules/reducer'
 import { CustomColor, HighlightType } from '~redux/modules/user'
@@ -51,7 +50,7 @@ const VerseComponent = ({
   const router = useRouter()
   const verses = useBibleVerses(verseIds)
   const { t } = useTranslation()
-  const isFR = useLanguage()
+  const lang = useLanguage()
   const { theme: currentTheme } = useCurrentThemeSelector()
 
   // Use separate selectors to avoid reference instability
@@ -86,7 +85,7 @@ const VerseComponent = ({
 
   const { title, content } = formatVerseContent(verses)
   const formattedDate = distanceInWords(Number(date), Date.now(), {
-    locale: isFR ? fr : enGB,
+    locale: getDateLocale(lang),
   })
   // @ts-ignore
   const { Livre, Chapitre, Verset } = verses[0]
