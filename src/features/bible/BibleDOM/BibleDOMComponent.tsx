@@ -18,6 +18,7 @@ import ChevronDownIcon from './ChevronDownIcon'
 import Comment from './Comment'
 import {
   ADD_PARALLEL_VERSION,
+  ENTER_READONLY_MODE,
   EXIT_READONLY_MODE,
   NAVIGATE_TO_PERICOPE,
   NAVIGATE_TO_VERSION,
@@ -190,15 +191,6 @@ const VersionErrorIndicator = styled('span')<RootStyles>(({ settings: { theme, c
   fontSize: '12px',
 }))
 
-const ParallelVersionError = styled('div')<RootStyles>(({ settings: { theme, colors, fontFamily, fontSizeScale } }) => ({
-  fontFamily,
-  fontSize: scaleFontSize(14, fontSizeScale),
-  color: colors[theme].darkGrey,
-  padding: '10px',
-  textAlign: 'center',
-  fontStyle: 'italic',
-}))
-
 const VersionsContainer = styled('div')<RootStyles>(({ settings: { theme, colors } }) => ({
   display: 'flex',
   position: 'sticky',
@@ -232,22 +224,17 @@ const ReadWholeChapterButtonContainer = styled('div')({
 })
 
 const ReadWholeChapterButton = styled('button')<RootStyles>(({ settings: { theme, colors } }) => ({
-  backgroundColor: colors[theme].primary,
-  color: '#fff',
+  backgroundColor: colors[theme].opacity5,
+  color: colors[theme].primary,
   border: 'none',
-  borderRadius: '25px',
-  padding: '12px 24px',
+  borderRadius: '100px',
+  padding: '12px 18px',
   fontSize: '14px',
   fontWeight: 'bold',
   cursor: 'pointer',
-  boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-  transition: 'transform 0.2s, box-shadow 0.2s',
-  ':hover': {
-    transform: 'scale(1.02)',
-    boxShadow: '0 4px 8px rgba(0,0,0,0.25)',
-  },
-  ':active': {
-    transform: 'scale(0.98)',
+  transition: 'all 0.2s',
+  '&:hover': {
+    opacity: 0.6,
   },
 }))
 
@@ -637,179 +624,232 @@ const VersesRenderer = ({
     <TranslationsProvider translations={translations}>
       <DispatchProvider dispatch={dispatch}>
         <Container
-        rtl={isHebreu}
-        settings={settings}
-        isParallelVerse={isParallelVerse}
-        data-swipe-threshold="100"
-      >
-        {isParallelVerse && (
-          <VersionsContainer settings={settings}>
-            {parallelVersionTitles?.map((p, i) => (
-              <div
-                key={i}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
+          rtl={isHebreu}
+          settings={settings}
+          isParallelVerse={isParallelVerse}
+          data-swipe-threshold="100"
+        >
+          {isParallelVerse && (
+            <VersionsContainer settings={settings}>
+              {parallelVersionTitles?.map((p, i) => (
+                <div
+                  key={i}
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  <VersionTitle
+                    onClick={() => navigateToVersion(p.id, i)}
+                    style={{ paddingLeft: i === 0 ? '0px' : '10px' }}
+                    settings={settings}
+                  >
+                    {p.id}
+                    {p.error && (
+                      <VersionErrorIndicator settings={settings}>⚠</VersionErrorIndicator>
+                    )}
+                    <ChevronDownIcon style={{ marginLeft: 4 }} />
+                  </VersionTitle>
+                  {i !== 0 && (
+                    <MinusIcon
+                      onClick={() => removeParallelVersion(i)}
+                      style={{ marginLeft: 20, opacity: 0.5 }}
+                    />
+                  )}
+                </div>
+              ))}
+              {parallelVerses.length < 3 && (
+                <ResponsivePlusIcon settings={settings} onClick={() => addParallelVersion()} />
+              )}
+            </VersionsContainer>
+          )}
+          {(version === 'INT' || version === 'INT_EN') && (
+            <IntMode settings={settings} onClick={() => setIsINTComplete(!isINTComplete)}>
+              {isINTComplete ? 'Mode 1' : 'Mode 2'}
+            </IntMode>
+          )}
+          {isHebreu && <RightDirection settings={settings}>Sens de la lecture ←</RightDirection>}
+          {!!introComment && settings.commentsDisplay && (
+            <Comment isIntro id="comment-0" settings={settings} comment={introComment} />
+          )}
+
+          {(() => {
+            // Calculate adjacent verses for fade effect in readonly mode
+            const adjacentVerses = focusVerses
+              ? {
+                  prev: Math.min(...focusVerses.map(Number)) - 1,
+                  next: Math.max(...focusVerses.map(Number)) + 1,
+                }
+              : null
+
+            // Calculate last focus verse for close context button
+            const lastFocusVerse = focusVerses
+              ? Math.max(...focusVerses.map(Number))
+              : null
+
+            return verses.map((verse, i) => {
+              if (verse.Verset == 0) return null
+
+              const { Livre, Chapitre, Verset } = verse
+
+              // In readonly mode, only show focused verses and adjacent fading verses
+              const isFocused = focusVerses ? focusVerses.includes(Number(Verset)) : undefined
+              const fadePosition =
+                isReadOnly && adjacentVerses
+                  ? Number(Verset) === adjacentVerses.prev
+                    ? 'top'
+                    : Number(Verset) === adjacentVerses.next
+                      ? 'bottom'
+                      : undefined
+                  : undefined
+              if (isReadOnly && focusVerses && !isFocused && !fadePosition) return null
+              const isSelected = Boolean(selectedVerses[`${Livre}-${Chapitre}-${Verset}`])
+              const isSelectedMode = Boolean(Object.keys(selectedVerses).length)
+              const isHighlighted = Boolean(highlightedVerses[`${Livre}-${Chapitre}-${Verset}`])
+              const tag: TaggedVerse | undefined = taggedVerses?.find(
+                v => v.lastVerse === `${Livre}-${Chapitre}-${Verset}`
+              )
+              const highlightedColor = isHighlighted
+                ? (highlightedVerses[`${Livre}-${Chapitre}-${Verset}`]
+                    .color as keyof RootStyles['settings']['colors'][keyof RootStyles['settings']['colors']])
+                : undefined
+
+              const notesCount = notedVersesCount[Verset]
+              const notesText = notedVersesText[Verset]
+              const linksCount = linkedVersesCount[Verset]
+              const linksText = linkedVersesText[Verset]
+              const comment = comments?.[Verset]
+              const isVerseToScroll = !isReadOnly && verseToScroll == Verset
+              const secondaryVerse = secondaryVerses && secondaryVerses[i]
+              const parallelVerse = isParallelVerse
+                ? extractParallelVerse(i, parallelVerses, verse, version)
+                : []
+
+              const { h1, h2, h3, h4 } = getPericopeVerse(pericopeChapter, Number(Verset))
+
+              const bookmark = bookmarkedVerses?.[Number(Verset)]
+
+              // Show close context button on last focus verse when not in readonly mode
+              const isLastFocusVerse =
+                !isReadOnly && lastFocusVerse !== null && Number(Verset) === lastFocusVerse
+
+              return (
+                <Span key={`${Livre}-${Chapitre}-${Verset}`}>
+                  {h1 && (
+                    <H1 isHebreu={isHebreu} settings={settings} onClick={navigateToPericope}>
+                      {h1}
+                      <ExternalIcon />
+                    </H1>
+                  )}
+                  {h2 && (
+                    <H2 isHebreu={isHebreu} settings={settings} onClick={navigateToPericope}>
+                      {h2}
+                      <ExternalIcon />
+                    </H2>
+                  )}
+                  {h3 && (
+                    <H3 isHebreu={isHebreu} settings={settings} onClick={navigateToPericope}>
+                      {h3}
+                      <ExternalIcon />
+                    </H3>
+                  )}
+                  {h4 && (
+                    <H4 isHebreu={isHebreu} settings={settings} onClick={navigateToPericope}>
+                      {h4}
+                      <ExternalIcon />
+                    </H4>
+                  )}
+                  <Verse
+                    isHebreu={isHebreu}
+                    version={version}
+                    verse={verse}
+                    isParallelVerse={isParallelVerse}
+                    parallelVerse={parallelVerse}
+                    secondaryVerse={secondaryVerse}
+                    settings={settings}
+                    isSelected={isSelected}
+                    isSelectedMode={isSelectedMode}
+                    isSelectionMode={isSelectionMode}
+                    highlightedColor={highlightedColor}
+                    notesCount={notesCount}
+                    notesText={notesText}
+                    linksCount={linksCount}
+                    linksText={linksText}
+                    isVerseToScroll={isVerseToScroll}
+                    selectedCode={selectedCode}
+                    isFocused={isFocused}
+                    isINTComplete={isINTComplete}
+                    tag={tag}
+                    bookmark={bookmark}
+                    fadePosition={fadePosition}
+                    isLastFocusVerse={isLastFocusVerse}
+                  />
+                  {!!comment && settings.commentsDisplay && (
+                    <Comment id={`comment-${verse.Verset}`} settings={settings} comment={comment} />
+                  )}
+                </Span>
+              )
+            })
+          })()}
+          {isReadOnly && focusVerses && focusVerses.length > 0 && (
+            <ReadWholeChapterButtonContainer>
+              <ReadWholeChapterButton
+                settings={settings}
+                onClick={() => {
+                  const verseToScrollTo = focusVerses[0]
+                  dispatch({ type: EXIT_READONLY_MODE })
+                  setTimeout(() => {
+                    const element = document.querySelector(`#verset-${verseToScrollTo}`)
+                    if (element) {
+                      const elementPosition = element.getBoundingClientRect().top
+                      window.scrollTo({
+                        top: window.scrollY + elementPosition - 100,
+                      })
+                    }
+                  }, 400)
                 }}
               >
-                <VersionTitle
-                  onClick={() => navigateToVersion(p.id, i)}
-                  style={{ paddingLeft: i === 0 ? '0px' : '10px' }}
-                  settings={settings}
-                >
-                  {p.id}
-                  {p.error && (
-                    <VersionErrorIndicator settings={settings}>⚠</VersionErrorIndicator>
-                  )}
-                  <ChevronDownIcon style={{ marginLeft: 4 }} />
-                </VersionTitle>
-                {i !== 0 && (
-                  <MinusIcon
-                    onClick={() => removeParallelVersion(i)}
-                    style={{ marginLeft: 20, opacity: 0.5 }}
-                  />
-                )}
-              </div>
-            ))}
-            {parallelVerses.length < 3 && (
-              <ResponsivePlusIcon settings={settings} onClick={() => addParallelVersion()} />
-            )}
-          </VersionsContainer>
-        )}
-        {(version === 'INT' || version === 'INT_EN') && (
-          <IntMode settings={settings} onClick={() => setIsINTComplete(!isINTComplete)}>
-            {isINTComplete ? 'Mode 1' : 'Mode 2'}
-          </IntMode>
-        )}
-        {isHebreu && <RightDirection settings={settings}>Sens de la lecture ←</RightDirection>}
-        {!!introComment && settings.commentsDisplay && (
-          <Comment isIntro id="comment-0" settings={settings} comment={introComment} />
-        )}
-
-        {verses.map((verse, i) => {
-          if (verse.Verset == 0) return null
-
-          const { Livre, Chapitre, Verset } = verse
-
-          // In readonly mode, only show focused verses
-          const isFocused = focusVerses ? focusVerses.includes(Number(Verset)) : undefined
-          if (isReadOnly && focusVerses && !isFocused) return null
-          const isSelected = Boolean(selectedVerses[`${Livre}-${Chapitre}-${Verset}`])
-          const isSelectedMode = Boolean(Object.keys(selectedVerses).length)
-          const isHighlighted = Boolean(highlightedVerses[`${Livre}-${Chapitre}-${Verset}`])
-          const tag: TaggedVerse | undefined = taggedVerses?.find(
-            v => v.lastVerse === `${Livre}-${Chapitre}-${Verset}`
-          )
-          const highlightedColor = isHighlighted
-            ? (highlightedVerses[`${Livre}-${Chapitre}-${Verset}`]
-                .color as keyof RootStyles['settings']['colors'][keyof RootStyles['settings']['colors']])
-            : undefined
-
-          const notesCount = notedVersesCount[Verset]
-          const notesText = notedVersesText[Verset]
-          const linksCount = linkedVersesCount[Verset]
-          const linksText = linkedVersesText[Verset]
-          const comment = comments?.[Verset]
-          const isVerseToScroll = verseToScroll == Verset
-          const secondaryVerse = secondaryVerses && secondaryVerses[i]
-          const parallelVerse = isParallelVerse
-            ? extractParallelVerse(i, parallelVerses, verse, version)
-            : []
-
-          const { h1, h2, h3, h4 } = getPericopeVerse(pericopeChapter, Number(Verset))
-
-          const bookmark = bookmarkedVerses?.[Number(Verset)]
-
-          return (
-            <Span key={`${Livre}-${Chapitre}-${Verset}`}>
-              {h1 && (
-                <H1 isHebreu={isHebreu} settings={settings} onClick={navigateToPericope}>
-                  {h1}
-                  <ExternalIcon />
-                </H1>
-              )}
-              {h2 && (
-                <H2 isHebreu={isHebreu} settings={settings} onClick={navigateToPericope}>
-                  {h2}
-                  <ExternalIcon />
-                </H2>
-              )}
-              {h3 && (
-                <H3 isHebreu={isHebreu} settings={settings} onClick={navigateToPericope}>
-                  {h3}
-                  <ExternalIcon />
-                </H3>
-              )}
-              {h4 && (
-                <H4 isHebreu={isHebreu} settings={settings} onClick={navigateToPericope}>
-                  {h4}
-                  <ExternalIcon />
-                </H4>
-              )}
-              <Verse
-                isHebreu={isHebreu}
-                version={version}
-                verse={verse}
-                isParallelVerse={isParallelVerse}
-                parallelVerse={parallelVerse}
-                secondaryVerse={secondaryVerse}
+                {translations.readWholeChapter}
+              </ReadWholeChapterButton>
+            </ReadWholeChapterButtonContainer>
+          )}
+          {!isReadOnly && focusVerses && focusVerses.length > 0 && (
+            <ReadWholeChapterButtonContainer>
+              <ReadWholeChapterButton
                 settings={settings}
-                isSelected={isSelected}
-                isSelectedMode={isSelectedMode}
-                isSelectionMode={isSelectionMode}
-                highlightedColor={highlightedColor}
-                notesCount={notesCount}
-                notesText={notesText}
-                linksCount={linksCount}
-                linksText={linksText}
-                isVerseToScroll={isVerseToScroll}
-                selectedCode={selectedCode}
-                isFocused={isFocused}
-                isINTComplete={isINTComplete}
-                tag={tag}
-                bookmark={bookmark}
+                onClick={() => {
+                  dispatch({ type: ENTER_READONLY_MODE })
+                }}
+              >
+                {translations.closeContext}
+              </ReadWholeChapterButton>
+            </ReadWholeChapterButtonContainer>
+          )}
+        </Container>
+        <svg
+          style={{
+            visibility: 'hidden',
+            position: 'absolute',
+          }}
+          width="0"
+          height="0"
+          xmlns="http://www.w3.org/2000/svg"
+          version="1.1"
+        >
+          <defs>
+            <filter id="goo">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+              <feColorMatrix
+                in="blur"
+                mode="matrix"
+                values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 35 -4"
+                result="goo"
               />
-              {!!comment && settings.commentsDisplay && (
-                <Comment id={`comment-${verse.Verset}`} settings={settings} comment={comment} />
-              )}
-            </Span>
-          )
-        })}
-        {isReadOnly && focusVerses && focusVerses.length > 0 && (
-          <ReadWholeChapterButtonContainer>
-            <ReadWholeChapterButton
-              settings={settings}
-              onClick={() => dispatch({ type: EXIT_READONLY_MODE })}
-            >
-              {translations.readWholeChapter}
-            </ReadWholeChapterButton>
-          </ReadWholeChapterButtonContainer>
-        )}
-      </Container>
-      <svg
-        style={{
-          visibility: 'hidden',
-          position: 'absolute',
-        }}
-        width="0"
-        height="0"
-        xmlns="http://www.w3.org/2000/svg"
-        version="1.1"
-      >
-        <defs>
-          <filter id="goo">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
-            <feColorMatrix
-              in="blur"
-              mode="matrix"
-              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 35 -4"
-              result="goo"
-            />
-            <feComposite in="SourceGraphic" in2="goo" operator="atop" />
-          </filter>
-        </defs>
-      </svg>
+              <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+            </filter>
+          </defs>
+        </svg>
       </DispatchProvider>
     </TranslationsProvider>
   )

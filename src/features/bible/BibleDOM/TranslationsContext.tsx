@@ -7,6 +7,7 @@ export interface BibleDOMTranslations {
   parallelLoadError: string
   // Readonly mode
   readWholeChapter: string
+  closeContext: string
 }
 
 const TranslationsContext = createContext<BibleDOMTranslations | null>(null)
@@ -17,11 +18,7 @@ export const TranslationsProvider = ({
 }: {
   children: ReactNode
   translations: BibleDOMTranslations
-}) => (
-  <TranslationsContext.Provider value={translations}>
-    {children}
-  </TranslationsContext.Provider>
-)
+}) => <TranslationsContext.Provider value={translations}>{children}</TranslationsContext.Provider>
 
 export const useTranslations = () => {
   const context = useContext(TranslationsContext)

@@ -28,6 +28,7 @@ import { BibleError } from '~helpers/bibleErrors'
 import { BibleDOMTranslations } from './TranslationsContext'
 import {
   ADD_PARALLEL_VERSION,
+  ENTER_READONLY_MODE,
   EXIT_READONLY_MODE,
   NAVIGATE_TO_BIBLE_LINK,
   NAVIGATE_TO_BIBLE_NOTE,
@@ -110,6 +111,7 @@ export type WebViewProps = {
   onMountTimeout?: () => void
   onOpenBookmarkModal?: (bookmark: Bookmark) => void
   exitReadOnlyMode?: () => void
+  enterReadOnlyMode?: () => void
 }
 
 export type NotedVerse = {
@@ -175,6 +177,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     parallelChapterNotFound: t('bible.error.parallelChapterNotFound'),
     parallelLoadError: t('bible.error.parallelLoadError'),
     readWholeChapter: t('tab.readWholeChapter'),
+    closeContext: t('tab.closeContext'),
   }
   // Add this to track component mounting
   const mountedRef = useRef(false)
@@ -401,6 +404,12 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
       case EXIT_READONLY_MODE: {
         const { exitReadOnlyMode } = props
         exitReadOnlyMode?.()
+        break
+      }
+
+      case ENTER_READONLY_MODE: {
+        const { enterReadOnlyMode } = props
+        enterReadOnlyMode?.()
         break
       }
 

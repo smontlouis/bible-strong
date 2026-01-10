@@ -801,7 +801,14 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     setBibleTab(
       produce(draft => {
         draft.data.isReadOnly = false
-        draft.data.focusVerses = undefined
+      })
+    )
+  }
+
+  const enterReadOnlyMode = () => {
+    setBibleTab(
+      produce(draft => {
+        draft.data.isReadOnly = true
       })
     )
   }
@@ -945,6 +952,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     clearSelectedVerses,
     selectSelectedVerse,
     exitReadOnlyMode,
+    enterReadOnlyMode,
 
     goToNextChapter,
     goToPrevChapter,

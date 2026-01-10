@@ -12,13 +12,13 @@ interface HighlightInfo {
 
 const zoom = keyframes({
   '0%': {
-    background: convertHex('#95afc0', 0),
+    opacity: 0.4,
   },
   '50%': {
-    background: convertHex('#95afc0', 30),
+    opacity: 1,
   },
   '100%': {
-    background: convertHex('#95afc0', 0),
+    opacity: 0.4,
   },
 })
 
@@ -48,7 +48,8 @@ const resolveHighlightInfo = (
 const getHighlightStyles = (hex: string, type: HighlightType, theme: string) => {
   switch (type) {
     case 'background': {
-      const isDarkTheme = theme === 'dark' || theme === 'black' || theme === 'night'
+      const isDarkTheme =
+        theme === 'dark' || theme === 'black' || theme === 'night' || theme === 'mauve'
       const textColor = getContrastTextColor(hex, isDarkTheme)
 
       return {
@@ -136,8 +137,7 @@ export const ContainerText = styled('span')<
     //   : {}),
     ...(isVerseToScroll
       ? {
-          animation: `0.75s ease 0s 3 normal none running ${zoom}`,
-          borderRadius: '4px',
+          animation: `0.5s ease 0s 3 normal none running ${zoom}`,
         }
       : {}),
     ...(isFocused === false

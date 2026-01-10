@@ -66,6 +66,7 @@ interface BibleViewerProps {
   settings: RootState['user']['bible']['settings']
   onMountTimeout?: () => void
   isBibleViewReloadingAtom: PrimitiveAtom<boolean>
+  withNavigation?: boolean
 }
 
 /**
@@ -109,6 +110,7 @@ const BibleViewer = ({
   settings,
   onMountTimeout,
   isBibleViewReloadingAtom,
+  withNavigation,
 }: BibleViewerProps) => {
   const { t } = useTranslation()
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
@@ -494,7 +496,7 @@ const BibleViewer = ({
     }
   })
 
-  console.log('[Bible] BibleViewer', version, book.Numero, chapter, verse)
+  console.log('[Bible] BibleViewer', version, book.Numero, chapter, verse, isReadOnly)
 
   // Wait for onboarding to complete before rendering Bible content
   // This prevents FileNotFoundException when Bible files don't exist yet
@@ -520,7 +522,7 @@ const BibleViewer = ({
         version={version}
         bookName={book.Nom}
         chapter={chapter}
-        hasBackButton={isReadOnly || Boolean(isSelectionMode)}
+        hasBackButton={withNavigation}
         selectedVerses={selectedVerses}
         isReadOnly={isReadOnly}
       />
@@ -571,9 +573,10 @@ const BibleViewer = ({
           onMountTimeout={onMountTimeout}
           onOpenBookmarkModal={handleOpenBookmarkModal}
           exitReadOnlyMode={actions.exitReadOnlyMode}
+          enterReadOnlyMode={actions.enterReadOnlyMode}
         />
       )}
-      {!isReadOnly && (
+      {!(withNavigation || isReadOnly) && (
         <BibleFooter
           bibleAtom={bibleAtom}
           disabled={isLoading}
@@ -585,7 +588,7 @@ const BibleViewer = ({
           version={version}
         />
       )}
-      {isReadOnly && !error && (
+      {withNavigation && !error && (
         <MotiBox
           center
           paddingBottom={insets.bottom}
@@ -597,7 +600,7 @@ const BibleViewer = ({
           animate={translationY}
           {...motiTransition}
         >
-          <OpenInNewTabButton book={book} chapter={chapter} verse={verse} version={version} />
+          <OpenInNewTabButton bibleTab={bible} />
         </MotiBox>
       )}
       <SelectedVersesModal

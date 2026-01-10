@@ -27,6 +27,7 @@ import { ContainerText } from './ContainerText'
 import InterlinearVerseComplete from './InterlinearVerseComplete'
 import InterlinearVerse from './InterlinearVerse'
 import VerseTags from './VerseTags'
+import CloseContextTag from './CloseContextTag'
 import { BibleError } from '~helpers/bibleErrors'
 import { useTranslations } from './TranslationsContext'
 
@@ -43,22 +44,41 @@ const NumberText = styled<RootStyles & { isFocused?: boolean }>('span')(
   })
 )
 
-const Wrapper = styled('span')<RootStyles & { isSelectedMode?: boolean; isSelected?: boolean }>(
-  ({ settings: { textDisplay }, isSelectedMode, isSelected }) => ({
-    display: textDisplay,
-    transition: 'opacity 0.3s ease',
-    ...(textDisplay === 'block'
-      ? {
-          marginBottom: '5px',
-        }
-      : {}),
-    ...(isSelectedMode && !isSelected
-      ? {
-          opacity: 0.3,
-        }
-      : {}),
-  })
-)
+const Wrapper = styled('span')<
+  RootStyles & {
+    isSelectedMode?: boolean
+    isSelected?: boolean
+    fadePosition?: 'top' | 'bottom'
+  }
+>(({ settings: { textDisplay, theme, colors }, isSelectedMode, isSelected, fadePosition }) => ({
+  display: textDisplay,
+  transition: 'opacity 0.3s ease',
+  ...(textDisplay === 'block'
+    ? {
+        marginBottom: '5px',
+      }
+    : {}),
+  ...(isSelectedMode && !isSelected
+    ? {
+        opacity: 0.3,
+      }
+    : {}),
+  ...(fadePosition
+    ? {
+        // background:
+        //   fadePosition === 'top'
+        //     ? `linear-gradient(to left, ${colors[theme].default}, transparent)`
+        //     : `linear-gradient(to right, ${colors[theme].default}, transparent)`,
+        // WebkitBackgroundClip: 'text',
+        // backgroundClip: 'text',
+        // color: 'transparent',
+        // WebkitTextFillColor: 'transparent',
+        pointerEvents: 'none',
+        filter: 'blur(4px)',
+        // opacity: 0.5,
+      }
+    : {}),
+}))
 
 const Spacer = styled('div')(() => ({
   marginTop: '5px',
@@ -103,6 +123,8 @@ interface Props {
   isINTComplete?: boolean
   tag: TaggedVerse | undefined
   bookmark?: Bookmark
+  fadePosition?: 'top' | 'bottom'
+  isLastFocusVerse?: boolean
 }
 
 const Verse = ({
@@ -128,6 +150,8 @@ const Verse = ({
   isINTComplete,
   tag,
   bookmark,
+  fadePosition,
+  isLastFocusVerse,
 }: Props) => {
   const [isTouched, setIsTouched] = useState(false)
   const detectScrollRef = useRef<any>()
@@ -414,6 +438,7 @@ const Verse = ({
       id={`verset-${verse.Verset}`}
       isSelectedMode={isSelectedMode}
       isSelected={isSelected}
+      fadePosition={fadePosition}
     >
       <ContainerText
         isFocused={isFocused}
@@ -452,6 +477,7 @@ const Verse = ({
         </VerseText>
         {tag && <VerseTags settings={settings} tag={tag} />}
       </ContainerText>
+      {isLastFocusVerse && <CloseContextTag settings={settings} />}
       {notesText && settings.notesDisplay === 'inline' && !isSelectionMode && (
         <NotesText
           isParallel={isParallel}

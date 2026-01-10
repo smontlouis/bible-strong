@@ -3,14 +3,13 @@ import { useMemo } from 'react'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
 
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
 import { atom } from 'jotai/vanilla'
 import { BibleTab, getDefaultBibleTab } from '../../state/tabs'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 import BibleTabScreen from './BibleTabScreen'
 
 const BibleScreen = () => {
-  const router = useRouter()
   const params = useLocalSearchParams<{
     focusVerses?: string
     isSelectionMode?: string
@@ -49,7 +48,7 @@ const BibleScreen = () => {
   // Always create an on-the-fly atom for this screen
   const bibleAtom = useMemo(() => atom<BibleTab>(initialValues), [])
 
-  return <BibleTabScreen bibleAtom={bibleAtom} navigation={router} />
+  return <BibleTabScreen bibleAtom={bibleAtom} withNavigation />
 }
 
 export default BibleScreen

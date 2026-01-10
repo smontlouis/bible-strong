@@ -1,32 +1,23 @@
 import { useTranslation } from 'react-i18next'
-import { getDefaultBibleTab, VersionCode } from 'src/state/tabs'
-import { Book } from '~assets/bible_versions/books-desc'
+import { BibleTab } from 'src/state/tabs'
 import Button from '~common/ui/Button'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 
 interface OpenInNewTabButtonProps {
-  book: Book
-  chapter: number
-  verse: number
-  version: VersionCode
+  bibleTab: BibleTab
 }
 
-export const OpenInNewTabButton = ({ book, chapter, verse, version }: OpenInNewTabButtonProps) => {
+export const OpenInNewTabButton = ({ bibleTab }: OpenInNewTabButtonProps) => {
   const { t } = useTranslation()
   const openInNewTab = useOpenInNewTab()
 
   const openInBibleTab = () => {
     openInNewTab({
+      ...bibleTab,
       id: `bible-${Date.now()}`,
-      title: t('tabs.new'),
-      isRemovable: true,
-      type: 'bible',
       data: {
-        ...getDefaultBibleTab().data,
-        selectedBook: book,
-        selectedChapter: chapter,
-        selectedVerse: verse,
-        selectedVersion: version,
+        ...bibleTab.data,
+        isReadOnly: true,
       },
     })
   }

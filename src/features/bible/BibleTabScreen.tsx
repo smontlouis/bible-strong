@@ -24,9 +24,10 @@ import { BibleTab } from '../../state/tabs'
 
 interface BibleTabScreenProps {
   bibleAtom: PrimitiveAtom<BibleTab>
+  withNavigation?: boolean
 }
 
-const BibleTabScreen = ({ bibleAtom }: BibleTabScreenProps) => {
+const BibleTabScreen = ({ bibleAtom, withNavigation }: BibleTabScreenProps) => {
   const dispatch = useDispatch()
   const [reloadKey, setReloadKey] = useState(0)
   const isBibleViewReloadingAtom = useMemo(() => atom(false), [])
@@ -104,6 +105,7 @@ const BibleTabScreen = ({ bibleAtom }: BibleTabScreenProps) => {
       bibleAtom={bibleAtom}
       onMountTimeout={handleBibleViewerReload}
       isBibleViewReloadingAtom={isBibleViewReloadingAtom}
+      withNavigation={withNavigation}
     />
   )
 }

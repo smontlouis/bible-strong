@@ -188,7 +188,7 @@ const Header = ({
       {...motiTransition}
     >
       <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
-        {(isSelectionMode || hasBackButton) && (
+        {hasBackButton && (
           <Back
             onGoBack={() => {
               isFullScreenBibleValue.set(false)
@@ -209,17 +209,23 @@ const Header = ({
           </Back>
         )}
         {hasSelectedVerses ? (
-          <Box flex={1} center>
-            <Text fontWeight="bold" fontSize={14}>
-              {selectedVersesReference}
-            </Text>
-          </Box>
+          <>
+            <Box flex={1} center>
+              <Text fontWeight="bold" fontSize={14}>
+                {selectedVersesReference}
+              </Text>
+            </Box>
+            <Box width={50} />
+          </>
         ) : isReadOnly ? (
-          <Box flex={1} center>
-            <Text fontWeight="bold" fontSize={14}>
-              {`${t(bookName)} ${chapter}:${verseFormatted} - ${version}`}
-            </Text>
-          </Box>
+          <>
+            <Box flex={1} center>
+              <Text fontWeight="bold" fontSize={14}>
+                {`${t(bookName)} ${chapter}:${verseFormatted} - ${version}`}
+              </Text>
+            </Box>
+            <Box width={50} />
+          </>
         ) : (
           <>
             <HStack alignItems="center" gap={3}>
@@ -255,7 +261,9 @@ const Header = ({
                     animate={bookSelectorTranslateY}
                     {...motiTransition}
                   >
-                    {isSmall ? truncate(`${t(bookName)} ${chapter}`, 10) : `${t(bookName)} ${chapter}`}
+                    {isSmall
+                      ? truncate(`${t(bookName)} ${chapter}`, 10)
+                      : `${t(bookName)} ${chapter}`}
                   </MotiText>
                 </TouchableBox>
               </HStack>
@@ -366,7 +374,9 @@ const Header = ({
                           <IonIcon
                             name="bookmark"
                             size={20}
-                            color={currentChapterBookmark ? currentChapterBookmark.color : undefined}
+                            color={
+                              currentChapterBookmark ? currentChapterBookmark.color : undefined
+                            }
                           />
                           <Text marginLeft={10}>
                             {currentChapterBookmark
