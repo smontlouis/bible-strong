@@ -258,7 +258,7 @@ describe('Links Reducer', () => {
       const state = {
         bible: {
           links: {
-            '1-1-1': createLink({ tags: { 'tag-1': { id: 'tag-1', name: 'Test' } } }),
+            '1-1-1': createLink({ tags: { 'tag-1': { id: 'tag-1', name: 'Test', date: Date.now(), strongsGrec: {} } } }),
           },
           tags: {
             'tag-1': {

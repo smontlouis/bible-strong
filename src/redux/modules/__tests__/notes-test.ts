@@ -1,9 +1,6 @@
 /* eslint-env jest */
 
-import notesReducer, {
-  ADD_NOTE,
-  REMOVE_NOTE,
-} from '../user/notes'
+import notesReducer, { ADD_NOTE, REMOVE_NOTE } from '../user/notes'
 import type { Note, NotesObj } from '../user'
 
 const getInitialState = () => ({
@@ -82,12 +79,13 @@ describe('Notes Reducer', () => {
     })
 
     it('should preserve tags on note', () => {
-      const note = createNote({ tags: { 'tag-1': { id: 'tag-1', name: 'Test' } } })
+      const note = createNote({ tags: { 'tag-1': { id: 'tag-1', name: 'Test', date: Date.now(), strongsGrec: {} } } })
       const newState = notesReducer(initialState, {
         type: ADD_NOTE,
         payload: { '1-1-1': note },
       })
-      expect(newState.bible.notes['1-1-1'].tags).toEqual({ 'tag-1': { id: 'tag-1', name: 'Test' } })
+      expect(newState.bible.notes['1-1-1'].tags?.['tag-1'].id).toBe('tag-1')
+      expect(newState.bible.notes['1-1-1'].tags?.['tag-1'].name).toBe('Test')
     })
   })
 
@@ -130,7 +128,9 @@ describe('Notes Reducer', () => {
       const state = {
         bible: {
           notes: {
-            '1-1-1': createNote({ tags: { 'tag-1': { id: 'tag-1', name: 'Test' } } }),
+            '1-1-1': createNote({
+              tags: { 'tag-1': { id: 'tag-1', name: 'Test', date: Date.now(), strongsGrec: {} } },
+            }),
           },
           tags: {
             'tag-1': {

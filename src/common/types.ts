@@ -150,7 +150,7 @@ export interface Tag {
   id: string
   name: string
   highlights?: Object // what kind of object?
-  date: string
+  date: number
   notes?: Object // what kind of object?
   links?: Object // what kind of object?
   studies?: Object // what kind of object?

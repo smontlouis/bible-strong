@@ -78,6 +78,7 @@ import reducer, {
   SAVE_ALL_LOGS_AS_SEEN,
   RECEIVE_SUBCOLLECTION_UPDATES,
 } from '../user'
+import type { UserState } from '../user'
 
 const getInitialState = () => ({
   id: '',
@@ -149,10 +150,17 @@ const getInitialState = () => ({
       customHighlightColors: [],
     },
   },
-})
+}) as unknown as UserState
+
+// Helper to create partial state for testing
+const createState = (overrides: Partial<UserState>): UserState =>
+  ({
+    ...getInitialState(),
+    ...overrides,
+  }) as unknown as UserState
 
 describe('User Reducer', () => {
-  let initialState: ReturnType<typeof getInitialState>
+  let initialState: UserState
 
   beforeEach(() => {
     initialState = getInitialState()
@@ -160,7 +168,7 @@ describe('User Reducer', () => {
 
   describe('EMAIL_VERIFIED', () => {
     it('should set emailVerified to true', () => {
-      const state = { ...initialState, emailVerified: false }
+      const state = createState({ emailVerified: false })
       const newState = reducer(state, { type: EMAIL_VERIFIED })
       expect(newState.emailVerified).toBe(true)
     })
@@ -168,7 +176,7 @@ describe('User Reducer', () => {
 
   describe('APP_FETCH_DATA', () => {
     it('should set isLoading to true', () => {
-      const state = { ...initialState, isLoading: false }
+      const state = createState({ isLoading: false })
       const newState = reducer(state, { type: APP_FETCH_DATA })
       expect(newState.isLoading).toBe(true)
     })
@@ -176,7 +184,7 @@ describe('User Reducer', () => {
 
   describe('APP_FETCH_DATA_FAIL', () => {
     it('should set isLoading to false', () => {
-      const state = { ...initialState, isLoading: true }
+      const state = createState({ isLoading: true })
       const newState = reducer(state, { type: APP_FETCH_DATA_FAIL })
       expect(newState.isLoading).toBe(false)
     })
@@ -238,7 +246,7 @@ describe('User Reducer', () => {
     })
 
     it('should not overwrite existing displayName', () => {
-      const state = { ...initialState, displayName: 'Existing Name' }
+      const state = createState({ displayName: 'Existing Name' })
       const profile = {
         id: 'user-123',
         email: 'test@example.com',
@@ -298,7 +306,7 @@ describe('User Reducer', () => {
           changelog: { '2023-01-01': true },
           bookmarks: { 'bookmark-1': { id: 'bookmark-1', book: 1, chapter: 1, verse: 1, version: 'LSG', date: Date.now() } },
         },
-      }
+      } as unknown as UserState
       const newState = reducer(loggedInState, { type: USER_LOGOUT })
 
       expect(newState.id).toBe('')
@@ -319,8 +327,8 @@ describe('User Reducer', () => {
         type: SAVE_ALL_LOGS_AS_SEEN,
         payload: logs,
       })
-      expect(newState.bible.changelog['2023-01-01']).toBe(true)
-      expect(newState.bible.changelog['2023-01-02']).toBe(true)
+      expect((newState.bible.changelog as Record<string, boolean>)['2023-01-01']).toBe(true)
+      expect((newState.bible.changelog as Record<string, boolean>)['2023-01-02']).toBe(true)
     })
   })
 
@@ -343,7 +351,7 @@ describe('User Reducer', () => {
             compare: { LSG: true, OST: true },
           },
         },
-      }
+      } as UserState
       const newState = reducer(state, {
         type: TOGGLE_COMPARE_VERSION,
         payload: 'OST',
@@ -363,7 +371,7 @@ describe('User Reducer', () => {
             compare: { LSG: true, OST: true, KJV: true },
           },
         },
-      }
+      } as UserState
       const newState = reducer(state, {
         type: RESET_COMPARE_VERSION,
         payload: 'KJV',
@@ -394,7 +402,7 @@ describe('User Reducer', () => {
           ...initialState.changelog,
           data: [{ date: '2023-01-01', title: 'Old' }],
         },
-      }
+      } as UserState
       const newState = reducer(state, {
         type: GET_CHANGELOG_SUCCESS,
         payload: [{ date: '2023-01-02', title: 'New' }],

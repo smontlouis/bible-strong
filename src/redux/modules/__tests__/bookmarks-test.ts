@@ -1,14 +1,13 @@
 /* eslint-env jest */
 
-import produce from 'immer'
+import type { Bookmark } from '~common/types'
 import bookmarksReducer, {
   ADD_BOOKMARK,
+  MAX_BOOKMARKS,
+  MOVE_BOOKMARK,
   REMOVE_BOOKMARK,
   UPDATE_BOOKMARK,
-  MOVE_BOOKMARK,
-  MAX_BOOKMARKS,
 } from '../user/bookmarks'
-import type { Bookmark } from '~common/types'
 
 const getInitialState = () => ({
   bible: {
@@ -18,6 +17,8 @@ const getInitialState = () => ({
 
 const createBookmark = (id: string, overrides?: Partial<Bookmark>): Bookmark => ({
   id,
+  name: '',
+  color: '#000000',
   book: 1,
   chapter: 1,
   verse: 1,

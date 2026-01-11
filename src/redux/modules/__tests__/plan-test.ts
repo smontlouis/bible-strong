@@ -80,10 +80,12 @@ const createPlan = (id: string, sections: Section[] = []): Plan => ({
   id,
   title: `Plan ${id}`,
   description: 'Test plan',
-  author: 'Test Author',
+  author: { id: 'test-author', displayName: 'Test Author', photoUrl: '' },
   image: 'https://example.com/image.jpg',
   sections,
   lastUpdate: Date.now(),
+  type: 'yearly',
+  lang: 'fr',
 })
 
 const createSection = (id: string, readingSlices: ReadingSlice[] = []): Section => ({
@@ -95,7 +97,7 @@ const createSection = (id: string, readingSlices: ReadingSlice[] = []): Section 
 
 const createReadingSlice = (id: string): ReadingSlice => ({
   id,
-  slices: [{ type: 'Verse', id: '1-1-1' }],
+  slices: [{ type: 'Verse', id: '1-1-1', verses: 'Gen 1:1' }],
 })
 
 const getInitialState = () => ({

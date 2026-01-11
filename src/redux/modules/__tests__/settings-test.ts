@@ -22,6 +22,7 @@ import settingsReducer, {
   SET_DEFAULT_BIBLE_VERSION,
   CHANGE_COLOR,
 } from '../user/settings'
+import type { UserState } from '../user'
 
 // Mock react-native Appearance
 jest.mock('react-native', () => ({
@@ -40,47 +41,59 @@ jest.mock('~themes/sunsetColors', () => ({ primary: '#aaa', secondary: '#bbb' })
 jest.mock('~themes/mauveColors', () => ({ primary: '#ccc', secondary: '#ddd' }))
 jest.mock('~themes/nightColors', () => ({ primary: '#eee', secondary: '#fff' }))
 
-const getInitialState = () => ({
-  bible: {
-    settings: {
-      defaultBibleVersion: 'LSG',
-      alignContent: 'left' as const,
-      lineHeight: 'normal' as const,
-      fontSizeScale: 0,
-      textDisplay: 'inline' as const,
-      preferredColorScheme: 'auto' as const,
-      preferredLightTheme: 'default' as const,
-      preferredDarkTheme: 'dark' as const,
-      press: 'longPress' as const,
-      notesDisplay: 'inline' as const,
-      linksDisplay: 'inline' as const,
-      commentsDisplay: false,
-      shareVerses: {
-        hasVerseNumbers: true,
-        hasInlineVerses: true,
-        hasQuotes: true,
-        hasAppName: true,
+const getInitialState = () =>
+  ({
+    bible: {
+      settings: {
+        defaultBibleVersion: 'LSG',
+        alignContent: 'left' as const,
+        lineHeight: 'normal' as const,
+        fontSizeScale: 0,
+        textDisplay: 'inline' as const,
+        preferredColorScheme: 'auto' as const,
+        preferredLightTheme: 'default' as const,
+        preferredDarkTheme: 'dark' as const,
+        press: 'longPress' as const,
+        notesDisplay: 'inline' as const,
+        linksDisplay: 'inline' as const,
+        commentsDisplay: false,
+        shareVerses: {
+          hasVerseNumbers: true,
+          hasInlineVerses: true,
+          hasQuotes: true,
+          hasAppName: true,
+        },
+        fontFamily: 'Avenir',
+        theme: 'default' as const,
+        colors: {
+          default: { primary: '#000', secondary: '#111' },
+          dark: { primary: '#222', secondary: '#333' },
+          black: { primary: '#444', secondary: '#555' },
+          sepia: { primary: '#666', secondary: '#777' },
+          nature: { primary: '#888', secondary: '#999' },
+          sunset: { primary: '#aaa', secondary: '#bbb' },
+          mauve: { primary: '#ccc', secondary: '#ddd' },
+          night: { primary: '#eee', secondary: '#fff' },
+        },
+        compare: { LSG: true },
+        customHighlightColors: [],
       },
-      fontFamily: 'Avenir',
-      theme: 'default' as const,
-      colors: {
-        default: { primary: '#000', secondary: '#111' },
-        dark: { primary: '#222', secondary: '#333' },
-        black: { primary: '#444', secondary: '#555' },
-        sepia: { primary: '#666', secondary: '#777' },
-        nature: { primary: '#888', secondary: '#999' },
-        sunset: { primary: '#aaa', secondary: '#bbb' },
-        mauve: { primary: '#ccc', secondary: '#ddd' },
-        night: { primary: '#eee', secondary: '#fff' },
-      },
-      compare: { LSG: true },
-      customHighlightColors: [],
     },
-  },
-})
+  }) as unknown as UserState
+
+// Helper to create partial state for testing
+const createState = (overrides: Partial<UserState['bible']['settings']>): UserState =>
+  ({
+    bible: {
+      settings: {
+        ...getInitialState().bible.settings,
+        ...overrides,
+      },
+    },
+  }) as unknown as UserState
 
 describe('Settings Reducer', () => {
-  let initialState: ReturnType<typeof getInitialState>
+  let initialState: UserState
 
   beforeEach(() => {
     initialState = getInitialState()
@@ -88,13 +101,7 @@ describe('Settings Reducer', () => {
 
   describe('SET_SETTINGS_ALIGN_CONTENT', () => {
     it('should set align content to left', () => {
-      const state = {
-        ...initialState,
-        bible: {
-          ...initialState.bible,
-          settings: { ...initialState.bible.settings, alignContent: 'justify' as const },
-        },
-      }
+      const state = createState({ alignContent: 'justify' as const })
       const newState = settingsReducer(state, {
         type: SET_SETTINGS_ALIGN_CONTENT,
         payload: 'left',
@@ -146,13 +153,7 @@ describe('Settings Reducer', () => {
     })
 
     it('should not exceed 5', () => {
-      const state = {
-        ...initialState,
-        bible: {
-          ...initialState.bible,
-          settings: { ...initialState.bible.settings, fontSizeScale: 5 },
-        },
-      }
+      const state = createState({ fontSizeScale: 5 })
       const newState = settingsReducer(state, {
         type: INCREASE_SETTINGS_FONTSIZE_SCALE,
       })
@@ -160,13 +161,7 @@ describe('Settings Reducer', () => {
     })
 
     it('should increase from 4 to 5', () => {
-      const state = {
-        ...initialState,
-        bible: {
-          ...initialState.bible,
-          settings: { ...initialState.bible.settings, fontSizeScale: 4 },
-        },
-      }
+      const state = createState({ fontSizeScale: 4 })
       const newState = settingsReducer(state, {
         type: INCREASE_SETTINGS_FONTSIZE_SCALE,
       })
@@ -183,13 +178,7 @@ describe('Settings Reducer', () => {
     })
 
     it('should not go below -5', () => {
-      const state = {
-        ...initialState,
-        bible: {
-          ...initialState.bible,
-          settings: { ...initialState.bible.settings, fontSizeScale: -5 },
-        },
-      }
+      const state = createState({ fontSizeScale: -5 })
       const newState = settingsReducer(state, {
         type: DECREASE_SETTINGS_FONTSIZE_SCALE,
       })
@@ -197,13 +186,7 @@ describe('Settings Reducer', () => {
     })
 
     it('should decrease from -4 to -5', () => {
-      const state = {
-        ...initialState,
-        bible: {
-          ...initialState.bible,
-          settings: { ...initialState.bible.settings, fontSizeScale: -4 },
-        },
-      }
+      const state = createState({ fontSizeScale: -4 })
       const newState = settingsReducer(state, {
         type: DECREASE_SETTINGS_FONTSIZE_SCALE,
       })
@@ -345,13 +328,7 @@ describe('Settings Reducer', () => {
     })
 
     it('should set comments display to false', () => {
-      const state = {
-        ...initialState,
-        bible: {
-          ...initialState.bible,
-          settings: { ...initialState.bible.settings, commentsDisplay: true },
-        },
-      }
+      const state = createState({ commentsDisplay: true })
       const newState = settingsReducer(state, {
         type: SET_SETTINGS_COMMENTS_DISPLAY,
         payload: false,
@@ -369,16 +346,9 @@ describe('Settings Reducer', () => {
     })
 
     it('should toggle hasVerseNumbers from false to true', () => {
-      const state = {
-        ...initialState,
-        bible: {
-          ...initialState.bible,
-          settings: {
-            ...initialState.bible.settings,
-            shareVerses: { ...initialState.bible.settings.shareVerses, hasVerseNumbers: false },
-          },
-        },
-      }
+      const state = createState({
+        shareVerses: { ...getInitialState().bible.settings.shareVerses, hasVerseNumbers: false },
+      })
       const newState = settingsReducer(state, {
         type: TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS,
       })
@@ -432,16 +402,9 @@ describe('Settings Reducer', () => {
     })
 
     it('should remove color name when set to empty', () => {
-      const state = {
-        ...initialState,
-        bible: {
-          ...initialState.bible,
-          settings: {
-            ...initialState.bible.settings,
-            defaultColorNames: { color1: 'My Color', color2: 'Other' },
-          },
-        },
-      }
+      const state = createState({
+        defaultColorNames: { color1: 'My Color', color2: 'Other' },
+      })
       const newState = settingsReducer(state, {
         type: SET_DEFAULT_COLOR_NAME,
         payload: { colorKey: 'color1', name: '' },
@@ -451,16 +414,9 @@ describe('Settings Reducer', () => {
     })
 
     it('should delete defaultColorNames object when last entry removed', () => {
-      const state = {
-        ...initialState,
-        bible: {
-          ...initialState.bible,
-          settings: {
-            ...initialState.bible.settings,
-            defaultColorNames: { color1: 'My Color' },
-          },
-        },
-      }
+      const state = createState({
+        defaultColorNames: { color1: 'My Color' },
+      })
       const newState = settingsReducer(state, {
         type: SET_DEFAULT_COLOR_NAME,
         payload: { colorKey: 'color1', name: '' },
@@ -487,16 +443,9 @@ describe('Settings Reducer', () => {
     })
 
     it('should remove color type when set to background (default)', () => {
-      const state = {
-        ...initialState,
-        bible: {
-          ...initialState.bible,
-          settings: {
-            ...initialState.bible.settings,
-            defaultColorTypes: { color1: 'textColor' as const, color2: 'underline' as const },
-          },
-        },
-      }
+      const state = createState({
+        defaultColorTypes: { color1: 'textColor' as const, color2: 'underline' as const },
+      })
       const newState = settingsReducer(state, {
         type: SET_DEFAULT_COLOR_TYPE,
         payload: { colorKey: 'color1', type: 'background' },
@@ -506,16 +455,9 @@ describe('Settings Reducer', () => {
     })
 
     it('should delete defaultColorTypes object when last entry removed', () => {
-      const state = {
-        ...initialState,
-        bible: {
-          ...initialState.bible,
-          settings: {
-            ...initialState.bible.settings,
-            defaultColorTypes: { color1: 'textColor' as const },
-          },
-        },
-      }
+      const state = createState({
+        defaultColorTypes: { color1: 'textColor' as const },
+      })
       const newState = settingsReducer(state, {
         type: SET_DEFAULT_COLOR_TYPE,
         payload: { colorKey: 'color1', type: 'background' },
@@ -545,19 +487,12 @@ describe('Settings Reducer', () => {
     })
 
     it('should reset color to default when no color provided', () => {
-      const state = {
-        ...initialState,
-        bible: {
-          ...initialState.bible,
-          settings: {
-            ...initialState.bible.settings,
-            colors: {
-              ...initialState.bible.settings.colors,
-              default: { ...initialState.bible.settings.colors.default, primary: '#ff0000' },
-            },
-          },
+      const state = createState({
+        colors: {
+          ...getInitialState().bible.settings.colors,
+          default: { ...getInitialState().bible.settings.colors.default, primary: '#ff0000' },
         },
-      }
+      })
       const newState = settingsReducer(state, {
         type: CHANGE_COLOR,
         name: 'primary',

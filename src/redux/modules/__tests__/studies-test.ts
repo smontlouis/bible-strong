@@ -204,7 +204,7 @@ describe('Studies Reducer', () => {
           ...initialState.bible,
           studies: {
             'study-1': createStudy('study-1', {
-              tags: { 'tag-1': { id: 'tag-1', name: 'Test' } },
+              tags: { 'tag-1': { id: 'tag-1', name: 'Test', date: Date.now(), strongsGrec: {} } },
             }),
           },
           tags: {
