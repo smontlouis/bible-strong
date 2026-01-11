@@ -149,15 +149,31 @@ export interface Pericope {
 export interface Tag {
   id: string
   name: string
-  highlights?: Object // what kind of object?
+  highlights?: {
+    [verse: string]: true
+  }
   date: number
-  notes?: Object // what kind of object?
-  links?: Object // what kind of object?
-  studies?: Object // what kind of object?
-  strongsHebreu?: Object // what kind of object?
-  strongsGrec: Object // what kind of object?
-  words?: Object // what kind of object?
-  naves?: Object // what kind of object?
+  notes?: {
+    [verse: string]: true
+  }
+  links?: {
+    [verse: string]: true
+  }
+  studies?: {
+    [id: string]: true
+  }
+  strongsHebreu?: {
+    [id: string]: true
+  }
+  strongsGrec?: {
+    [id: string]: true
+  }
+  words?: {
+    [id: string]: true
+  }
+  naves?: {
+    [id: string]: true
+  }
 }
 
 export interface TagsObj {

@@ -1,7 +1,7 @@
-import produce from 'immer'
-
+import { createAction } from '@reduxjs/toolkit'
 import generateUUID from '~helpers/generateUUID'
 
+// Action type constants for backward compatibility
 export const ADD_TAG = 'user/ADD_TAG'
 export const TOGGLE_TAG_ENTITY = 'TOGGLE_TAG_ENTITY'
 export const UPDATE_TAG = 'user/UPDATE_TAG'
@@ -18,171 +18,29 @@ export const entitiesArray = [
   'naves',
 ] as const
 
-export default produce((draft, action) => {
-  switch (action.type) {
-    case ADD_TAG: {
-      const tagId = generateUUID()
-      draft.bible.tags[tagId] = {
-        id: tagId,
-        date: Date.now(),
-        name: action.payload,
-      }
-      break
-    }
-    case UPDATE_TAG: {
-      draft.bible.tags[action.id].name = action.value
+// RTK Action Creators
+export const addTag = createAction(ADD_TAG, (name: string) => ({
+  payload: { name, id: generateUUID() },
+}))
 
-      entitiesArray.forEach(ent => {
-        const entities = draft.bible[ent]
-        Object.values(entities).forEach((entity: any) => {
-          const entityTags = entity.tags
-          if (entityTags && entityTags[action.id]) {
-            entityTags[action.id].name = action.value
-          }
-        })
-      })
+export const updateTag = createAction(UPDATE_TAG, (id: string, value: string) => ({
+  payload: { id, value },
+}))
 
-      break
-    }
-    case REMOVE_TAG: {
-      delete draft.bible.tags[action.payload]
+export const removeTag = createAction(REMOVE_TAG, (tagId: string) => ({
+  payload: tagId,
+}))
 
-      entitiesArray.forEach(ent => {
-        const entities = draft.bible[ent]
-        Object.values(entities).forEach((entity: any) => {
-          const entityTags = entity.tags
-          if (entityTags && entityTags[action.payload]) {
-            delete entityTags[action.payload]
-          }
-        })
-      })
-      break
-    }
-    case TOGGLE_TAG_ENTITY: {
-      const { item, tagId } = action.payload
-
-      if (item.ids) {
-        const hasTag = draft.bible[item.entity][Object.keys(item.ids)[0]]?.tags?.[tagId]
-
-        Object.keys(item.ids).forEach(id => {
-          // DELETE OPERATION - In order to have a true toggle, check only for first item with Object.keys(item.ids)[0]
-          if (hasTag) {
-            try {
-              delete draft.bible.tags[tagId][item.entity][id]
-              delete draft.bible[item.entity][id].tags[tagId]
-
-              // Delete highlight if it has no color and no remaining tags
-              if (item.entity === 'highlights') {
-                const highlight = draft.bible[item.entity][id]
-                if (
-                  highlight &&
-                  highlight.color === '' &&
-                  Object.keys(highlight.tags || {}).length === 0
-                ) {
-                  delete draft.bible[item.entity][id]
-                }
-              }
-            } catch (e) {}
-
-            // ADD OPERATION
-          } else {
-            if (!draft.bible.tags[tagId][item.entity]) {
-              draft.bible.tags[tagId][item.entity] = {}
-            }
-            draft.bible.tags[tagId][item.entity][id] = true
-
-            // Create highlight if it doesn't exist (for highlights entity only)
-            if (item.entity === 'highlights' && !draft.bible[item.entity][id]) {
-              draft.bible[item.entity][id] = {
-                color: '',
-                date: Date.now(),
-                tags: {},
-              }
-            }
-
-            if (!draft.bible[item.entity][id].tags) {
-              draft.bible[item.entity][id].tags = {}
-            }
-            draft.bible[item.entity][id].tags[tagId] = {
-              id: tagId,
-              name: draft.bible.tags[tagId].name,
-            }
-          }
-        })
-      } else {
-        if (!draft.bible[item.entity][item.id]) {
-          draft.bible[item.entity][item.id] = {
-            id: item.id,
-            title: item.title,
-            tags: {},
-          }
-        }
-
-        // DELETE OPERATION
-        // eslint-disable-next-line no-lonely-if
-        if (draft.bible[item.entity][item.id]?.tags?.[tagId]) {
-          delete draft.bible.tags[tagId][item.entity][item.id]
-          delete draft.bible[item.entity][item.id].tags[tagId]
-
-          // If words / strongs / nave, delete unused entity
-          if (['naves', 'strongsHebreu', 'strongsGrec', 'words'].includes(item.entity)) {
-            const hasTags = Object.keys(draft.bible[item.entity][item.id].tags).length
-
-            if (!hasTags) {
-              delete draft.bible[item.entity][item.id]
-            }
-          }
-
-          // ADD OPERATION
-        } else {
-          if (!draft.bible.tags[tagId][item.entity]) {
-            draft.bible.tags[tagId][item.entity] = {}
-          }
-          draft.bible.tags[tagId][item.entity][item.id] = true
-
-          if (!draft.bible[item.entity][item.id].tags) {
-            draft.bible[item.entity][item.id].tags = {}
-          }
-          draft.bible[item.entity][item.id].tags[tagId] = {
-            id: tagId,
-            name: draft.bible.tags[tagId].name,
-          }
-        }
-      }
-
-      break
-    }
-    default:
-      break
-  }
-})
-
-// TAGS
-export function addTag(payload: any) {
-  return {
-    type: ADD_TAG,
-    payload,
-  }
+export interface ToggleTagEntityItem {
+  entity: (typeof entitiesArray)[number]
+  id?: string
+  ids?: Record<string, any>
+  title?: string
 }
 
-export function updateTag(id: any, value: any) {
-  return {
-    type: UPDATE_TAG,
-    id,
-    value,
-  }
-}
-
-export function removeTag(payload: any) {
-  return {
-    type: REMOVE_TAG,
-    payload,
-  }
-}
-
-export function toggleTagEntity({ item, tagId }: any) {
-  return {
-    type: TOGGLE_TAG_ENTITY,
+export const toggleTagEntity = createAction(
+  TOGGLE_TAG_ENTITY,
+  ({ item, tagId }: { item: ToggleTagEntityItem; tagId: string }) => ({
     payload: { item, tagId },
-  }
-}
+  })
+)

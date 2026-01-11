@@ -1,34 +1,53 @@
 /* eslint-env jest */
 
-import settingsReducer, {
-  SET_SETTINGS_ALIGN_CONTENT,
-  SET_SETTINGS_LINE_HEIGHT,
-  INCREASE_SETTINGS_FONTSIZE_SCALE,
-  DECREASE_SETTINGS_FONTSIZE_SCALE,
-  SET_SETTINGS_TEXT_DISPLAY,
-  SET_SETTINGS_PRESS,
-  SET_SETTINGS_NOTES_DISPLAY,
-  SET_SETTINGS_LINKS_DISPLAY,
-  SET_SETTINGS_COMMENTS_DISPLAY,
-  SET_SETTINGS_PREFERRED_COLOR_SCHEME,
-  SET_SETTINGS_PREFERRED_LIGHT_THEME,
-  SET_SETTINGS_PREFERRED_DARK_THEME,
-  TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS,
-  TOGGLE_SETTINGS_SHARE_INLINE_VERSES,
-  TOGGLE_SETTINGS_SHARE_QUOTES,
-  TOGGLE_SETTINGS_SHARE_APP_NAME,
-  SET_DEFAULT_COLOR_NAME,
-  SET_DEFAULT_COLOR_TYPE,
-  SET_DEFAULT_BIBLE_VERSION,
-  CHANGE_COLOR,
-} from '../user/settings'
-import type { UserState } from '../user'
-
-// Mock react-native Appearance
+// Mock react-native before any imports
 jest.mock('react-native', () => ({
   Appearance: {
     getColorScheme: jest.fn(() => 'light'),
   },
+}))
+
+// Mock expo-file-system
+jest.mock('expo-file-system/legacy', () => ({}))
+jest.mock('expo-file-system', () => ({}))
+
+// Mock expo-sqlite
+jest.mock('expo-sqlite', () => ({}))
+
+// Mock bibleVersions and databases to avoid deep import chains
+jest.mock('~helpers/bibleVersions', () => ({
+  versions: {},
+  getIfVersionNeedsUpdate: jest.fn(),
+}))
+
+jest.mock('~helpers/databases', () => ({
+  databases: {},
+  getIfDatabaseNeedsUpdate: jest.fn(),
+}))
+
+// Mock modules before importing reducer
+jest.mock('~state/tabs', () => ({
+  tabGroupsAtom: {},
+}))
+
+jest.mock('jotai/vanilla', () => ({
+  getDefaultStore: jest.fn(() => ({
+    set: jest.fn(),
+  })),
+}))
+
+jest.mock('~helpers/firebase', () => ({
+  firebaseDb: {
+    collection: jest.fn(),
+  },
+}))
+
+jest.mock('~i18n', () => ({
+  getLanguage: jest.fn(() => 'fr'),
+}))
+
+jest.mock('~helpers/languageUtils', () => ({
+  getDefaultBibleVersion: jest.fn(() => 'LSG'),
 }))
 
 // Mock theme imports
@@ -41,9 +60,65 @@ jest.mock('~themes/sunsetColors', () => ({ primary: '#aaa', secondary: '#bbb' })
 jest.mock('~themes/mauveColors', () => ({ primary: '#ccc', secondary: '#ddd' }))
 jest.mock('~themes/nightColors', () => ({ primary: '#eee', secondary: '#fff' }))
 
-const getInitialState = () =>
+import type { Bookmark } from '~common/types'
+import userReducer, { UserState } from '../user'
+import {
+  setSettingsAlignContent,
+  setSettingsLineHeight,
+  increaseSettingsFontSizeScale,
+  decreaseSettingsFontSizeScale,
+  setSettingsTextDisplay,
+  setSettingsPreferredColorScheme,
+  setSettingsPreferredLightTheme,
+  setSettingsPreferredDarkTheme,
+  setSettingsPress,
+  setSettingsNotesDisplay,
+  setSettingsLinksDisplay,
+  setSettingsCommentaires,
+  toggleSettingsShareVerseNumbers,
+  toggleSettingsShareLineBreaks,
+  toggleSettingsShareQuotes,
+  toggleSettingsShareAppName,
+  setDefaultColorName,
+  setDefaultColorType,
+  setDefaultBibleVersion,
+  changeColor,
+} from '../user/settings'
+
+const getInitialState = (): UserState =>
   ({
+    id: '',
+    email: '',
+    displayName: '',
+    photoURL: '',
+    provider: '',
+    subscription: undefined,
+    emailVerified: false,
+    createdAt: null,
+    isLoading: true,
+    notifications: {
+      verseOfTheDay: '07:00',
+      notificationId: '',
+    },
+    changelog: {
+      isLoading: true,
+      lastSeen: 0,
+      data: [],
+    },
+    needsUpdate: {},
+    fontFamily: 'Avenir',
     bible: {
+      changelog: {},
+      bookmarks: {} as { [key: string]: Bookmark },
+      highlights: {},
+      notes: {},
+      links: {},
+      studies: {},
+      tags: {},
+      strongsHebreu: {},
+      strongsGrec: {},
+      words: {},
+      naves: {},
       settings: {
         defaultBibleVersion: 'LSG',
         alignContent: 'left' as const,
@@ -84,7 +159,9 @@ const getInitialState = () =>
 // Helper to create partial state for testing
 const createState = (overrides: Partial<UserState['bible']['settings']>): UserState =>
   ({
+    ...getInitialState(),
     bible: {
+      ...getInitialState().bible,
       settings: {
         ...getInitialState().bible.settings,
         ...overrides,
@@ -99,249 +176,175 @@ describe('Settings Reducer', () => {
     initialState = getInitialState()
   })
 
-  describe('SET_SETTINGS_ALIGN_CONTENT', () => {
+  describe('setSettingsAlignContent', () => {
     it('should set align content to left', () => {
       const state = createState({ alignContent: 'justify' as const })
-      const newState = settingsReducer(state, {
-        type: SET_SETTINGS_ALIGN_CONTENT,
-        payload: 'left',
-      })
+      const newState = userReducer(state, setSettingsAlignContent('left'))
       expect(newState.bible.settings.alignContent).toBe('left')
     })
 
     it('should set align content to justify', () => {
-      const newState = settingsReducer(initialState, {
-        type: SET_SETTINGS_ALIGN_CONTENT,
-        payload: 'justify',
-      })
+      const newState = userReducer(initialState, setSettingsAlignContent('justify'))
       expect(newState.bible.settings.alignContent).toBe('justify')
     })
   })
 
-  describe('SET_SETTINGS_LINE_HEIGHT', () => {
+  describe('setSettingsLineHeight', () => {
     it('should set line height to normal', () => {
-      const newState = settingsReducer(initialState, {
-        type: SET_SETTINGS_LINE_HEIGHT,
-        payload: 'normal',
-      })
+      const newState = userReducer(initialState, setSettingsLineHeight('normal'))
       expect(newState.bible.settings.lineHeight).toBe('normal')
     })
 
     it('should set line height to small', () => {
-      const newState = settingsReducer(initialState, {
-        type: SET_SETTINGS_LINE_HEIGHT,
-        payload: 'small',
-      })
+      const newState = userReducer(initialState, setSettingsLineHeight('small'))
       expect(newState.bible.settings.lineHeight).toBe('small')
     })
 
     it('should set line height to large', () => {
-      const newState = settingsReducer(initialState, {
-        type: SET_SETTINGS_LINE_HEIGHT,
-        payload: 'large',
-      })
+      const newState = userReducer(initialState, setSettingsLineHeight('large'))
       expect(newState.bible.settings.lineHeight).toBe('large')
     })
   })
 
-  describe('INCREASE_SETTINGS_FONTSIZE_SCALE', () => {
+  describe('increaseSettingsFontSizeScale', () => {
     it('should increase font size scale by 1', () => {
-      const newState = settingsReducer(initialState, {
-        type: INCREASE_SETTINGS_FONTSIZE_SCALE,
-      })
+      const newState = userReducer(initialState, increaseSettingsFontSizeScale())
       expect(newState.bible.settings.fontSizeScale).toBe(1)
     })
 
     it('should not exceed 5', () => {
       const state = createState({ fontSizeScale: 5 })
-      const newState = settingsReducer(state, {
-        type: INCREASE_SETTINGS_FONTSIZE_SCALE,
-      })
+      const newState = userReducer(state, increaseSettingsFontSizeScale())
       expect(newState.bible.settings.fontSizeScale).toBe(5)
     })
 
     it('should increase from 4 to 5', () => {
       const state = createState({ fontSizeScale: 4 })
-      const newState = settingsReducer(state, {
-        type: INCREASE_SETTINGS_FONTSIZE_SCALE,
-      })
+      const newState = userReducer(state, increaseSettingsFontSizeScale())
       expect(newState.bible.settings.fontSizeScale).toBe(5)
     })
   })
 
-  describe('DECREASE_SETTINGS_FONTSIZE_SCALE', () => {
+  describe('decreaseSettingsFontSizeScale', () => {
     it('should decrease font size scale by 1', () => {
-      const newState = settingsReducer(initialState, {
-        type: DECREASE_SETTINGS_FONTSIZE_SCALE,
-      })
+      const newState = userReducer(initialState, decreaseSettingsFontSizeScale())
       expect(newState.bible.settings.fontSizeScale).toBe(-1)
     })
 
     it('should not go below -5', () => {
       const state = createState({ fontSizeScale: -5 })
-      const newState = settingsReducer(state, {
-        type: DECREASE_SETTINGS_FONTSIZE_SCALE,
-      })
+      const newState = userReducer(state, decreaseSettingsFontSizeScale())
       expect(newState.bible.settings.fontSizeScale).toBe(-5)
     })
 
     it('should decrease from -4 to -5', () => {
       const state = createState({ fontSizeScale: -4 })
-      const newState = settingsReducer(state, {
-        type: DECREASE_SETTINGS_FONTSIZE_SCALE,
-      })
+      const newState = userReducer(state, decreaseSettingsFontSizeScale())
       expect(newState.bible.settings.fontSizeScale).toBe(-5)
     })
   })
 
-  describe('SET_SETTINGS_TEXT_DISPLAY', () => {
+  describe('setSettingsTextDisplay', () => {
     it('should set text display to inline', () => {
-      const newState = settingsReducer(initialState, {
-        type: SET_SETTINGS_TEXT_DISPLAY,
-        payload: 'inline',
-      })
+      const newState = userReducer(initialState, setSettingsTextDisplay('inline'))
       expect(newState.bible.settings.textDisplay).toBe('inline')
     })
 
     it('should set text display to block', () => {
-      const newState = settingsReducer(initialState, {
-        type: SET_SETTINGS_TEXT_DISPLAY,
-        payload: 'block',
-      })
+      const newState = userReducer(initialState, setSettingsTextDisplay('block'))
       expect(newState.bible.settings.textDisplay).toBe('block')
     })
   })
 
-  describe('SET_SETTINGS_PREFERRED_COLOR_SCHEME', () => {
+  describe('setSettingsPreferredColorScheme', () => {
     it('should set preferred color scheme to auto', () => {
-      const newState = settingsReducer(initialState, {
-        type: SET_SETTINGS_PREFERRED_COLOR_SCHEME,
-        payload: 'auto',
-      })
+      const newState = userReducer(initialState, setSettingsPreferredColorScheme('auto'))
       expect(newState.bible.settings.preferredColorScheme).toBe('auto')
     })
 
     it('should set preferred color scheme to light', () => {
-      const newState = settingsReducer(initialState, {
-        type: SET_SETTINGS_PREFERRED_COLOR_SCHEME,
-        payload: 'light',
-      })
+      const newState = userReducer(initialState, setSettingsPreferredColorScheme('light'))
       expect(newState.bible.settings.preferredColorScheme).toBe('light')
     })
 
     it('should set preferred color scheme to dark', () => {
-      const newState = settingsReducer(initialState, {
-        type: SET_SETTINGS_PREFERRED_COLOR_SCHEME,
-        payload: 'dark',
-      })
+      const newState = userReducer(initialState, setSettingsPreferredColorScheme('dark'))
       expect(newState.bible.settings.preferredColorScheme).toBe('dark')
     })
   })
 
-  describe('SET_SETTINGS_PREFERRED_LIGHT_THEME', () => {
+  describe('setSettingsPreferredLightTheme', () => {
     const themes = ['default', 'sepia', 'nature', 'sunset', 'mauve'] as const
     themes.forEach(theme => {
       it(`should set preferred light theme to ${theme}`, () => {
-        const newState = settingsReducer(initialState, {
-          type: SET_SETTINGS_PREFERRED_LIGHT_THEME,
-          payload: theme,
-        })
+        const newState = userReducer(initialState, setSettingsPreferredLightTheme(theme))
         expect(newState.bible.settings.preferredLightTheme).toBe(theme)
       })
     })
   })
 
-  describe('SET_SETTINGS_PREFERRED_DARK_THEME', () => {
+  describe('setSettingsPreferredDarkTheme', () => {
     const themes = ['dark', 'black', 'night'] as const
     themes.forEach(theme => {
       it(`should set preferred dark theme to ${theme}`, () => {
-        const newState = settingsReducer(initialState, {
-          type: SET_SETTINGS_PREFERRED_DARK_THEME,
-          payload: theme,
-        })
+        const newState = userReducer(initialState, setSettingsPreferredDarkTheme(theme))
         expect(newState.bible.settings.preferredDarkTheme).toBe(theme)
       })
     })
   })
 
-  describe('SET_SETTINGS_PRESS', () => {
+  describe('setSettingsPress', () => {
     it('should set press to shortPress', () => {
-      const newState = settingsReducer(initialState, {
-        type: SET_SETTINGS_PRESS,
-        payload: 'shortPress',
-      })
+      const newState = userReducer(initialState, setSettingsPress('shortPress'))
       expect(newState.bible.settings.press).toBe('shortPress')
     })
 
     it('should set press to longPress', () => {
-      const newState = settingsReducer(initialState, {
-        type: SET_SETTINGS_PRESS,
-        payload: 'longPress',
-      })
+      const newState = userReducer(initialState, setSettingsPress('longPress'))
       expect(newState.bible.settings.press).toBe('longPress')
     })
   })
 
-  describe('SET_SETTINGS_NOTES_DISPLAY', () => {
+  describe('setSettingsNotesDisplay', () => {
     it('should set notes display to inline', () => {
-      const newState = settingsReducer(initialState, {
-        type: SET_SETTINGS_NOTES_DISPLAY,
-        payload: 'inline',
-      })
+      const newState = userReducer(initialState, setSettingsNotesDisplay('inline'))
       expect(newState.bible.settings.notesDisplay).toBe('inline')
     })
 
     it('should set notes display to block', () => {
-      const newState = settingsReducer(initialState, {
-        type: SET_SETTINGS_NOTES_DISPLAY,
-        payload: 'block',
-      })
+      const newState = userReducer(initialState, setSettingsNotesDisplay('block'))
       expect(newState.bible.settings.notesDisplay).toBe('block')
     })
   })
 
-  describe('SET_SETTINGS_LINKS_DISPLAY', () => {
+  describe('setSettingsLinksDisplay', () => {
     it('should set links display to inline', () => {
-      const newState = settingsReducer(initialState, {
-        type: SET_SETTINGS_LINKS_DISPLAY,
-        payload: 'inline',
-      })
+      const newState = userReducer(initialState, setSettingsLinksDisplay('inline'))
       expect(newState.bible.settings.linksDisplay).toBe('inline')
     })
 
     it('should set links display to block', () => {
-      const newState = settingsReducer(initialState, {
-        type: SET_SETTINGS_LINKS_DISPLAY,
-        payload: 'block',
-      })
+      const newState = userReducer(initialState, setSettingsLinksDisplay('block'))
       expect(newState.bible.settings.linksDisplay).toBe('block')
     })
   })
 
-  describe('SET_SETTINGS_COMMENTS_DISPLAY', () => {
+  describe('setSettingsCommentaires', () => {
     it('should set comments display to true', () => {
-      const newState = settingsReducer(initialState, {
-        type: SET_SETTINGS_COMMENTS_DISPLAY,
-        payload: true,
-      })
+      const newState = userReducer(initialState, setSettingsCommentaires(true))
       expect(newState.bible.settings.commentsDisplay).toBe(true)
     })
 
     it('should set comments display to false', () => {
       const state = createState({ commentsDisplay: true })
-      const newState = settingsReducer(state, {
-        type: SET_SETTINGS_COMMENTS_DISPLAY,
-        payload: false,
-      })
+      const newState = userReducer(state, setSettingsCommentaires(false))
       expect(newState.bible.settings.commentsDisplay).toBe(false)
     })
   })
 
-  describe('TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS', () => {
+  describe('toggleSettingsShareVerseNumbers', () => {
     it('should toggle hasVerseNumbers from true to false', () => {
-      const newState = settingsReducer(initialState, {
-        type: TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS,
-      })
+      const newState = userReducer(initialState, toggleSettingsShareVerseNumbers())
       expect(newState.bible.settings.shareVerses.hasVerseNumbers).toBe(false)
     })
 
@@ -349,54 +352,40 @@ describe('Settings Reducer', () => {
       const state = createState({
         shareVerses: { ...getInitialState().bible.settings.shareVerses, hasVerseNumbers: false },
       })
-      const newState = settingsReducer(state, {
-        type: TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS,
-      })
+      const newState = userReducer(state, toggleSettingsShareVerseNumbers())
       expect(newState.bible.settings.shareVerses.hasVerseNumbers).toBe(true)
     })
   })
 
-  describe('TOGGLE_SETTINGS_SHARE_INLINE_VERSES', () => {
+  describe('toggleSettingsShareLineBreaks', () => {
     it('should toggle hasInlineVerses', () => {
-      const newState = settingsReducer(initialState, {
-        type: TOGGLE_SETTINGS_SHARE_INLINE_VERSES,
-      })
+      const newState = userReducer(initialState, toggleSettingsShareLineBreaks())
       expect(newState.bible.settings.shareVerses.hasInlineVerses).toBe(false)
     })
   })
 
-  describe('TOGGLE_SETTINGS_SHARE_QUOTES', () => {
+  describe('toggleSettingsShareQuotes', () => {
     it('should toggle hasQuotes', () => {
-      const newState = settingsReducer(initialState, {
-        type: TOGGLE_SETTINGS_SHARE_QUOTES,
-      })
+      const newState = userReducer(initialState, toggleSettingsShareQuotes())
       expect(newState.bible.settings.shareVerses.hasQuotes).toBe(false)
     })
   })
 
-  describe('TOGGLE_SETTINGS_SHARE_APP_NAME', () => {
+  describe('toggleSettingsShareAppName', () => {
     it('should toggle hasAppName', () => {
-      const newState = settingsReducer(initialState, {
-        type: TOGGLE_SETTINGS_SHARE_APP_NAME,
-      })
+      const newState = userReducer(initialState, toggleSettingsShareAppName())
       expect(newState.bible.settings.shareVerses.hasAppName).toBe(false)
     })
   })
 
-  describe('SET_DEFAULT_COLOR_NAME', () => {
+  describe('setDefaultColorName', () => {
     it('should set default color name', () => {
-      const newState = settingsReducer(initialState, {
-        type: SET_DEFAULT_COLOR_NAME,
-        payload: { colorKey: 'color1', name: 'My Color' },
-      })
+      const newState = userReducer(initialState, setDefaultColorName('color1', 'My Color'))
       expect(newState.bible.settings.defaultColorNames?.color1).toBe('My Color')
     })
 
     it('should create defaultColorNames object if it does not exist', () => {
-      const newState = settingsReducer(initialState, {
-        type: SET_DEFAULT_COLOR_NAME,
-        payload: { colorKey: 'color2', name: 'Second Color' },
-      })
+      const newState = userReducer(initialState, setDefaultColorName('color2', 'Second Color'))
       expect(newState.bible.settings.defaultColorNames).toBeDefined()
       expect(newState.bible.settings.defaultColorNames?.color2).toBe('Second Color')
     })
@@ -405,10 +394,7 @@ describe('Settings Reducer', () => {
       const state = createState({
         defaultColorNames: { color1: 'My Color', color2: 'Other' },
       })
-      const newState = settingsReducer(state, {
-        type: SET_DEFAULT_COLOR_NAME,
-        payload: { colorKey: 'color1', name: '' },
-      })
+      const newState = userReducer(state, setDefaultColorName('color1', ''))
       expect(newState.bible.settings.defaultColorNames?.color1).toBeUndefined()
       expect(newState.bible.settings.defaultColorNames?.color2).toBe('Other')
     })
@@ -417,28 +403,19 @@ describe('Settings Reducer', () => {
       const state = createState({
         defaultColorNames: { color1: 'My Color' },
       })
-      const newState = settingsReducer(state, {
-        type: SET_DEFAULT_COLOR_NAME,
-        payload: { colorKey: 'color1', name: '' },
-      })
+      const newState = userReducer(state, setDefaultColorName('color1', ''))
       expect(newState.bible.settings.defaultColorNames).toBeUndefined()
     })
   })
 
-  describe('SET_DEFAULT_COLOR_TYPE', () => {
+  describe('setDefaultColorType', () => {
     it('should set default color type to textColor', () => {
-      const newState = settingsReducer(initialState, {
-        type: SET_DEFAULT_COLOR_TYPE,
-        payload: { colorKey: 'color1', type: 'textColor' },
-      })
+      const newState = userReducer(initialState, setDefaultColorType('color1', 'textColor'))
       expect(newState.bible.settings.defaultColorTypes?.color1).toBe('textColor')
     })
 
     it('should set default color type to underline', () => {
-      const newState = settingsReducer(initialState, {
-        type: SET_DEFAULT_COLOR_TYPE,
-        payload: { colorKey: 'color1', type: 'underline' },
-      })
+      const newState = userReducer(initialState, setDefaultColorType('color1', 'underline'))
       expect(newState.bible.settings.defaultColorTypes?.color1).toBe('underline')
     })
 
@@ -446,10 +423,7 @@ describe('Settings Reducer', () => {
       const state = createState({
         defaultColorTypes: { color1: 'textColor' as const, color2: 'underline' as const },
       })
-      const newState = settingsReducer(state, {
-        type: SET_DEFAULT_COLOR_TYPE,
-        payload: { colorKey: 'color1', type: 'background' },
-      })
+      const newState = userReducer(state, setDefaultColorType('color1', 'background'))
       expect(newState.bible.settings.defaultColorTypes?.color1).toBeUndefined()
       expect(newState.bible.settings.defaultColorTypes?.color2).toBe('underline')
     })
@@ -458,31 +432,21 @@ describe('Settings Reducer', () => {
       const state = createState({
         defaultColorTypes: { color1: 'textColor' as const },
       })
-      const newState = settingsReducer(state, {
-        type: SET_DEFAULT_COLOR_TYPE,
-        payload: { colorKey: 'color1', type: 'background' },
-      })
+      const newState = userReducer(state, setDefaultColorType('color1', 'background'))
       expect(newState.bible.settings.defaultColorTypes).toBeUndefined()
     })
   })
 
-  describe('SET_DEFAULT_BIBLE_VERSION', () => {
+  describe('setDefaultBibleVersion', () => {
     it('should set default Bible version', () => {
-      const newState = settingsReducer(initialState, {
-        type: SET_DEFAULT_BIBLE_VERSION,
-        payload: 'KJV',
-      })
+      const newState = userReducer(initialState, setDefaultBibleVersion('KJV'))
       expect(newState.bible.settings.defaultBibleVersion).toBe('KJV')
     })
   })
 
-  describe('CHANGE_COLOR', () => {
+  describe('changeColor', () => {
     it('should change color with provided color value', () => {
-      const newState = settingsReducer(initialState, {
-        type: CHANGE_COLOR,
-        name: 'primary',
-        color: '#ff0000',
-      })
+      const newState = userReducer(initialState, changeColor({ name: 'primary', color: '#ff0000' }))
       expect(newState.bible.settings.colors.default.primary).toBe('#ff0000')
     })
 
@@ -493,18 +457,15 @@ describe('Settings Reducer', () => {
           default: { ...getInitialState().bible.settings.colors.default, primary: '#ff0000' },
         },
       })
-      const newState = settingsReducer(state, {
-        type: CHANGE_COLOR,
-        name: 'primary',
-      })
+      const newState = userReducer(state, changeColor({ name: 'primary' }))
       expect(newState.bible.settings.colors.default.primary).toBe('#000')
     })
   })
 
   describe('default case', () => {
     it('should return state unchanged for unknown action', () => {
-      const newState = settingsReducer(initialState, { type: 'UNKNOWN_ACTION' })
-      expect(newState).toEqual(initialState)
+      const newState = userReducer(initialState, { type: 'UNKNOWN_ACTION' } as any)
+      expect(newState.bible.settings).toEqual(initialState.bible.settings)
     })
   })
 })

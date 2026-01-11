@@ -1,13 +1,64 @@
 /* eslint-env jest */
 
-import tagsReducer, {
-  ADD_TAG,
-  UPDATE_TAG,
-  REMOVE_TAG,
-  TOGGLE_TAG_ENTITY,
-  entitiesArray,
-} from '../user/tags'
-import type { TagsObj } from '~common/types'
+// Mock react-native before any imports
+jest.mock('react-native', () => ({
+  Appearance: {
+    getColorScheme: jest.fn(() => 'light'),
+  },
+}))
+
+// Mock expo-file-system
+jest.mock('expo-file-system/legacy', () => ({}))
+jest.mock('expo-file-system', () => ({}))
+
+// Mock expo-sqlite
+jest.mock('expo-sqlite', () => ({}))
+
+// Mock bibleVersions and databases to avoid deep import chains
+jest.mock('~helpers/bibleVersions', () => ({
+  versions: {},
+  getIfVersionNeedsUpdate: jest.fn(),
+}))
+
+jest.mock('~helpers/databases', () => ({
+  databases: {},
+  getIfDatabaseNeedsUpdate: jest.fn(),
+}))
+
+// Mock modules before importing reducer
+jest.mock('~state/tabs', () => ({
+  tabGroupsAtom: {},
+}))
+
+jest.mock('jotai/vanilla', () => ({
+  getDefaultStore: jest.fn(() => ({
+    set: jest.fn(),
+  })),
+}))
+
+jest.mock('~helpers/firebase', () => ({
+  firebaseDb: {
+    collection: jest.fn(),
+  },
+}))
+
+jest.mock('~i18n', () => ({
+  getLanguage: jest.fn(() => 'fr'),
+}))
+
+jest.mock('~helpers/languageUtils', () => ({
+  getDefaultBibleVersion: jest.fn(() => 'LSG'),
+}))
+
+// Mock theme imports
+jest.mock('~themes/colors', () => ({ primary: '#000' }))
+jest.mock('~themes/darkColors', () => ({ primary: '#111' }))
+jest.mock('~themes/blackColors', () => ({ primary: '#222' }))
+jest.mock('~themes/sepiaColors', () => ({ primary: '#333' }))
+jest.mock('~themes/natureColors', () => ({ primary: '#444' }))
+jest.mock('~themes/sunsetColors', () => ({ primary: '#555' }))
+jest.mock('~themes/mauveColors', () => ({ primary: '#666' }))
+jest.mock('~themes/nightColors', () => ({ primary: '#777' }))
 
 // Mock generateUUID to return predictable values
 jest.mock('~helpers/generateUUID', () => {
@@ -15,34 +66,101 @@ jest.mock('~helpers/generateUUID', () => {
   return jest.fn(() => `uuid-${++counter}`)
 })
 
-const getInitialState = () => ({
-  bible: {
-    tags: {} as TagsObj,
-    highlights: {} as { [key: string]: any },
-    notes: {} as { [key: string]: any },
-    links: {} as { [key: string]: any },
-    studies: {} as { [key: string]: any },
-    strongsHebreu: {} as { [key: string]: any },
-    strongsGrec: {} as { [key: string]: any },
-    words: {} as { [key: string]: any },
-    naves: {} as { [key: string]: any },
-  },
+import type { Bookmark, Tag, TagsObj } from '~common/types'
+import userReducer, { UserState } from '../user'
+import { addTag, updateTag, removeTag, toggleTagEntity, entitiesArray } from '../user/tags'
+
+const getInitialState = (): UserState =>
+  ({
+    id: '',
+    email: '',
+    displayName: '',
+    photoURL: '',
+    provider: '',
+    subscription: undefined,
+    emailVerified: false,
+    createdAt: null,
+    isLoading: true,
+    notifications: {
+      verseOfTheDay: '07:00',
+      notificationId: '',
+    },
+    changelog: {
+      isLoading: true,
+      lastSeen: 0,
+      data: [],
+    },
+    needsUpdate: {},
+    fontFamily: 'Avenir',
+    bible: {
+      changelog: {},
+      bookmarks: {} as { [key: string]: Bookmark },
+      highlights: {},
+      notes: {},
+      links: {},
+      studies: {},
+      tags: {} as TagsObj,
+      strongsHebreu: {},
+      strongsGrec: {},
+      words: {},
+      naves: {},
+      settings: {
+        defaultBibleVersion: 'LSG',
+        alignContent: 'left',
+        lineHeight: 'normal',
+        fontSizeScale: 0,
+        textDisplay: 'inline',
+        preferredColorScheme: 'auto',
+        preferredLightTheme: 'default',
+        preferredDarkTheme: 'dark',
+        press: 'longPress',
+        notesDisplay: 'inline',
+        linksDisplay: 'inline',
+        commentsDisplay: false,
+        shareVerses: {
+          hasVerseNumbers: true,
+          hasInlineVerses: true,
+          hasQuotes: true,
+          hasAppName: true,
+        },
+        fontFamily: 'Avenir',
+        theme: 'default',
+        colors: {
+          default: { primary: '#000' },
+          dark: { primary: '#111' },
+          black: { primary: '#222' },
+          sepia: { primary: '#333' },
+          nature: { primary: '#444' },
+          sunset: { primary: '#555' },
+          mauve: { primary: '#666' },
+          night: { primary: '#777' },
+        },
+        compare: {
+          LSG: true,
+        },
+        customHighlightColors: [],
+      },
+    },
+  }) as unknown as UserState
+
+const createTag = (id: string, name: string, overrides?: Partial<Tag>): Tag => ({
+  id,
+  name,
+  date: Date.now(),
+  ...overrides,
 })
 
 describe('Tags Reducer', () => {
-  let initialState: ReturnType<typeof getInitialState>
+  let initialState: UserState
 
   beforeEach(() => {
     initialState = getInitialState()
     jest.clearAllMocks()
   })
 
-  describe('ADD_TAG', () => {
+  describe('addTag', () => {
     it('should add a new tag', () => {
-      const newState = tagsReducer(initialState, {
-        type: ADD_TAG,
-        payload: 'Test Tag',
-      })
+      const newState = userReducer(initialState, addTag('Test Tag'))
       const tagIds = Object.keys(newState.bible.tags)
       expect(tagIds).toHaveLength(1)
       expect(newState.bible.tags[tagIds[0]].name).toBe('Test Tag')
@@ -50,10 +168,7 @@ describe('Tags Reducer', () => {
 
     it('should set id and date on new tag', () => {
       const beforeAdd = Date.now()
-      const newState = tagsReducer(initialState, {
-        type: ADD_TAG,
-        payload: 'Test Tag',
-      })
+      const newState = userReducer(initialState, addTag('Test Tag'))
       const tagIds = Object.keys(newState.bible.tags)
       const tag = newState.bible.tags[tagIds[0]]
       expect(tag.id).toBeDefined()
@@ -61,42 +176,34 @@ describe('Tags Reducer', () => {
     })
 
     it('should add multiple tags', () => {
-      let state = tagsReducer(initialState, {
-        type: ADD_TAG,
-        payload: 'Tag 1',
-      })
-      state = tagsReducer(state, {
-        type: ADD_TAG,
-        payload: 'Tag 2',
-      })
+      let state = userReducer(initialState, addTag('Tag 1'))
+      state = userReducer(state, addTag('Tag 2'))
       expect(Object.keys(state.bible.tags)).toHaveLength(2)
     })
   })
 
-  describe('UPDATE_TAG', () => {
+  describe('updateTag', () => {
     it('should update tag name', () => {
       const state = {
+        ...initialState,
         bible: {
           ...initialState.bible,
           tags: {
-            'tag-1': { id: 'tag-1', name: 'Old Name', date: Date.now() },
+            'tag-1': createTag('tag-1', 'Old Name'),
           },
         },
-      }
-      const newState = tagsReducer(state, {
-        type: UPDATE_TAG,
-        id: 'tag-1',
-        value: 'New Name',
-      })
+      } as UserState
+      const newState = userReducer(state, updateTag('tag-1', 'New Name'))
       expect(newState.bible.tags['tag-1'].name).toBe('New Name')
     })
 
     it('should update tag name in all entities that reference it', () => {
       const state = {
+        ...initialState,
         bible: {
           ...initialState.bible,
           tags: {
-            'tag-1': { id: 'tag-1', name: 'Old Name', date: Date.now() },
+            'tag-1': createTag('tag-1', 'Old Name'),
           },
           highlights: {
             '1-1-1': {
@@ -114,43 +221,38 @@ describe('Tags Reducer', () => {
             },
           },
         },
-      }
-      const newState = tagsReducer(state, {
-        type: UPDATE_TAG,
-        id: 'tag-1',
-        value: 'New Name',
-      })
+      } as UserState
+      const newState = userReducer(state, updateTag('tag-1', 'New Name'))
       expect(newState.bible.tags['tag-1'].name).toBe('New Name')
       expect(newState.bible.highlights['1-1-1'].tags['tag-1'].name).toBe('New Name')
-      expect(newState.bible.notes['1-1-2'].tags['tag-1'].name).toBe('New Name')
+      expect(newState.bible.notes['1-1-2'].tags?.['tag-1'].name).toBe('New Name')
     })
   })
 
-  describe('REMOVE_TAG', () => {
+  describe('removeTag', () => {
     it('should remove a tag', () => {
       const state = {
+        ...initialState,
         bible: {
           ...initialState.bible,
           tags: {
-            'tag-1': { id: 'tag-1', name: 'Tag 1', date: Date.now() },
-            'tag-2': { id: 'tag-2', name: 'Tag 2', date: Date.now() },
+            'tag-1': createTag('tag-1', 'Tag 1'),
+            'tag-2': createTag('tag-2', 'Tag 2'),
           },
         },
-      }
-      const newState = tagsReducer(state, {
-        type: REMOVE_TAG,
-        payload: 'tag-1',
-      })
+      } as UserState
+      const newState = userReducer(state, removeTag('tag-1'))
       expect(newState.bible.tags['tag-1']).toBeUndefined()
       expect(newState.bible.tags['tag-2']).toBeDefined()
     })
 
     it('should remove tag from all entities', () => {
       const state = {
+        ...initialState,
         bible: {
           ...initialState.bible,
           tags: {
-            'tag-1': { id: 'tag-1', name: 'Tag 1', date: Date.now() },
+            'tag-1': createTag('tag-1', 'Tag 1'),
           },
           highlights: {
             '1-1-1': {
@@ -168,59 +270,55 @@ describe('Tags Reducer', () => {
             },
           },
         },
-      }
-      const newState = tagsReducer(state, {
-        type: REMOVE_TAG,
-        payload: 'tag-1',
-      })
+      } as UserState
+      const newState = userReducer(state, removeTag('tag-1'))
       expect(newState.bible.tags['tag-1']).toBeUndefined()
       expect(newState.bible.highlights['1-1-1'].tags['tag-1']).toBeUndefined()
-      expect(newState.bible.notes['1-1-2'].tags['tag-1']).toBeUndefined()
+      expect(newState.bible.notes['1-1-2'].tags?.['tag-1']).toBeUndefined()
     })
   })
 
-  describe('TOGGLE_TAG_ENTITY', () => {
+  describe('toggleTagEntity', () => {
     describe('with ids (multiple items)', () => {
       it('should add tag to multiple highlights', () => {
         const state = {
+          ...initialState,
           bible: {
             ...initialState.bible,
             tags: {
-              'tag-1': { id: 'tag-1', name: 'Tag 1', date: Date.now() },
+              'tag-1': createTag('tag-1', 'Tag 1'),
             },
             highlights: {
               '1-1-1': { color: 'red', date: Date.now(), tags: {} },
               '1-1-2': { color: 'blue', date: Date.now(), tags: {} },
             },
           },
-        }
-        const newState = tagsReducer(state, {
-          type: TOGGLE_TAG_ENTITY,
-          payload: {
+        } as UserState
+        const newState = userReducer(
+          state,
+          toggleTagEntity({
             item: {
               entity: 'highlights',
               ids: { '1-1-1': true, '1-1-2': true },
             },
             tagId: 'tag-1',
-          },
-        })
+          })
+        )
         expect(newState.bible.highlights['1-1-1'].tags['tag-1']).toBeDefined()
         expect(newState.bible.highlights['1-1-2'].tags['tag-1']).toBeDefined()
-        expect(newState.bible.tags['tag-1'].highlights['1-1-1']).toBe(true)
-        expect(newState.bible.tags['tag-1'].highlights['1-1-2']).toBe(true)
+        expect(newState.bible.tags['tag-1'].highlights?.['1-1-1']).toBe(true)
+        expect(newState.bible.tags['tag-1'].highlights?.['1-1-2']).toBe(true)
       })
 
       it('should remove tag from multiple highlights when already tagged', () => {
         const state = {
+          ...initialState,
           bible: {
             ...initialState.bible,
             tags: {
-              'tag-1': {
-                id: 'tag-1',
-                name: 'Tag 1',
-                date: Date.now(),
+              'tag-1': createTag('tag-1', 'Tag 1', {
                 highlights: { '1-1-1': true, '1-1-2': true },
-              },
+              }),
             },
             highlights: {
               '1-1-1': {
@@ -235,43 +333,44 @@ describe('Tags Reducer', () => {
               },
             },
           },
-        }
-        const newState = tagsReducer(state, {
-          type: TOGGLE_TAG_ENTITY,
-          payload: {
+        } as UserState
+        const newState = userReducer(
+          state,
+          toggleTagEntity({
             item: {
               entity: 'highlights',
               ids: { '1-1-1': true, '1-1-2': true },
             },
             tagId: 'tag-1',
-          },
-        })
+          })
+        )
         expect(newState.bible.highlights['1-1-1'].tags['tag-1']).toBeUndefined()
         expect(newState.bible.highlights['1-1-2'].tags['tag-1']).toBeUndefined()
-        expect(newState.bible.tags['tag-1'].highlights['1-1-1']).toBeUndefined()
-        expect(newState.bible.tags['tag-1'].highlights['1-1-2']).toBeUndefined()
+        expect(newState.bible.tags['tag-1'].highlights?.['1-1-1']).toBeUndefined()
+        expect(newState.bible.tags['tag-1'].highlights?.['1-1-2']).toBeUndefined()
       })
 
       it('should create highlight entity if it does not exist when adding tag', () => {
         const state = {
+          ...initialState,
           bible: {
             ...initialState.bible,
             tags: {
-              'tag-1': { id: 'tag-1', name: 'Tag 1', date: Date.now() },
+              'tag-1': createTag('tag-1', 'Tag 1'),
             },
             highlights: {},
           },
-        }
-        const newState = tagsReducer(state, {
-          type: TOGGLE_TAG_ENTITY,
-          payload: {
+        } as UserState
+        const newState = userReducer(
+          state,
+          toggleTagEntity({
             item: {
               entity: 'highlights',
               ids: { '1-1-1': true },
             },
             tagId: 'tag-1',
-          },
-        })
+          })
+        )
         expect(newState.bible.highlights['1-1-1']).toBeDefined()
         expect(newState.bible.highlights['1-1-1'].color).toBe('')
         expect(newState.bible.highlights['1-1-1'].tags['tag-1']).toBeDefined()
@@ -279,15 +378,13 @@ describe('Tags Reducer', () => {
 
       it('should delete highlight with no color and no tags after untag', () => {
         const state = {
+          ...initialState,
           bible: {
             ...initialState.bible,
             tags: {
-              'tag-1': {
-                id: 'tag-1',
-                name: 'Tag 1',
-                date: Date.now(),
+              'tag-1': createTag('tag-1', 'Tag 1', {
                 highlights: { '1-1-1': true },
-              },
+              }),
             },
             highlights: {
               '1-1-1': {
@@ -297,31 +394,29 @@ describe('Tags Reducer', () => {
               },
             },
           },
-        }
-        const newState = tagsReducer(state, {
-          type: TOGGLE_TAG_ENTITY,
-          payload: {
+        } as UserState
+        const newState = userReducer(
+          state,
+          toggleTagEntity({
             item: {
               entity: 'highlights',
               ids: { '1-1-1': true },
             },
             tagId: 'tag-1',
-          },
-        })
+          })
+        )
         expect(newState.bible.highlights['1-1-1']).toBeUndefined()
       })
 
       it('should not delete highlight with color when untagging', () => {
         const state = {
+          ...initialState,
           bible: {
             ...initialState.bible,
             tags: {
-              'tag-1': {
-                id: 'tag-1',
-                name: 'Tag 1',
-                date: Date.now(),
+              'tag-1': createTag('tag-1', 'Tag 1', {
                 highlights: { '1-1-1': true },
-              },
+              }),
             },
             highlights: {
               '1-1-1': {
@@ -331,17 +426,17 @@ describe('Tags Reducer', () => {
               },
             },
           },
-        }
-        const newState = tagsReducer(state, {
-          type: TOGGLE_TAG_ENTITY,
-          payload: {
+        } as UserState
+        const newState = userReducer(
+          state,
+          toggleTagEntity({
             item: {
               entity: 'highlights',
               ids: { '1-1-1': true },
             },
             tagId: 'tag-1',
-          },
-        })
+          })
+        )
         expect(newState.bible.highlights['1-1-1']).toBeDefined()
         expect(newState.bible.highlights['1-1-1'].color).toBe('red')
       })
@@ -350,10 +445,11 @@ describe('Tags Reducer', () => {
     describe('with id (single item)', () => {
       it('should add tag to a single entity', () => {
         const state = {
+          ...initialState,
           bible: {
             ...initialState.bible,
             tags: {
-              'tag-1': { id: 'tag-1', name: 'Tag 1', date: Date.now() },
+              'tag-1': createTag('tag-1', 'Tag 1'),
             },
             studies: {
               'study-1': {
@@ -367,32 +463,30 @@ describe('Tags Reducer', () => {
               },
             },
           },
-        }
-        const newState = tagsReducer(state, {
-          type: TOGGLE_TAG_ENTITY,
-          payload: {
+        } as UserState
+        const newState = userReducer(
+          state,
+          toggleTagEntity({
             item: {
               entity: 'studies',
               id: 'study-1',
             },
             tagId: 'tag-1',
-          },
-        })
-        expect(newState.bible.studies['study-1'].tags['tag-1']).toBeDefined()
-        expect(newState.bible.tags['tag-1'].studies['study-1']).toBe(true)
+          })
+        )
+        expect(newState.bible.studies['study-1'].tags?.['tag-1']).toBeDefined()
+        expect(newState.bible.tags['tag-1'].studies?.['study-1']).toBe(true)
       })
 
       it('should remove tag from a single entity when already tagged', () => {
         const state = {
+          ...initialState,
           bible: {
             ...initialState.bible,
             tags: {
-              'tag-1': {
-                id: 'tag-1',
-                name: 'Tag 1',
-                date: Date.now(),
+              'tag-1': createTag('tag-1', 'Tag 1', {
                 studies: { 'study-1': true },
-              },
+              }),
             },
             studies: {
               'study-1': {
@@ -406,42 +500,43 @@ describe('Tags Reducer', () => {
               },
             },
           },
-        }
-        const newState = tagsReducer(state, {
-          type: TOGGLE_TAG_ENTITY,
-          payload: {
+        } as UserState
+        const newState = userReducer(
+          state,
+          toggleTagEntity({
             item: {
               entity: 'studies',
               id: 'study-1',
             },
             tagId: 'tag-1',
-          },
-        })
-        expect(newState.bible.studies['study-1'].tags['tag-1']).toBeUndefined()
-        expect(newState.bible.tags['tag-1'].studies['study-1']).toBeUndefined()
+          })
+        )
+        expect(newState.bible.studies['study-1'].tags?.['tag-1']).toBeUndefined()
+        expect(newState.bible.tags['tag-1'].studies?.['study-1']).toBeUndefined()
       })
 
       it('should create entity with title if it does not exist', () => {
         const state = {
+          ...initialState,
           bible: {
             ...initialState.bible,
             tags: {
-              'tag-1': { id: 'tag-1', name: 'Tag 1', date: Date.now() },
+              'tag-1': createTag('tag-1', 'Tag 1'),
             },
             words: {},
           },
-        }
-        const newState = tagsReducer(state, {
-          type: TOGGLE_TAG_ENTITY,
-          payload: {
+        } as UserState
+        const newState = userReducer(
+          state,
+          toggleTagEntity({
             item: {
               entity: 'words',
               id: 'word-1',
               title: 'Word Title',
             },
             tagId: 'tag-1',
-          },
-        })
+          })
+        )
         expect(newState.bible.words['word-1']).toBeDefined()
         expect(newState.bible.words['word-1'].title).toBe('Word Title')
         expect(newState.bible.words['word-1'].tags['tag-1']).toBeDefined()
@@ -452,15 +547,13 @@ describe('Tags Reducer', () => {
 
         entities.forEach(entity => {
           const state = {
+            ...initialState,
             bible: {
               ...initialState.bible,
               tags: {
-                'tag-1': {
-                  id: 'tag-1',
-                  name: 'Tag 1',
-                  date: Date.now(),
+                'tag-1': createTag('tag-1', 'Tag 1', {
                   [entity]: { 'item-1': true },
-                },
+                }),
               },
               [entity]: {
                 'item-1': {
@@ -470,17 +563,17 @@ describe('Tags Reducer', () => {
                 },
               },
             },
-          }
-          const newState = tagsReducer(state, {
-            type: TOGGLE_TAG_ENTITY,
-            payload: {
+          } as UserState
+          const newState = userReducer(
+            state,
+            toggleTagEntity({
               item: {
                 entity,
                 id: 'item-1',
               },
               tagId: 'tag-1',
-            },
-          })
+            })
+          )
           expect(newState.bible[entity]['item-1']).toBeUndefined()
         })
       })
@@ -503,15 +596,16 @@ describe('Tags Reducer', () => {
   describe('default case', () => {
     it('should return state unchanged for unknown action', () => {
       const state = {
+        ...initialState,
         bible: {
           ...initialState.bible,
           tags: {
-            'tag-1': { id: 'tag-1', name: 'Tag 1', date: Date.now() },
+            'tag-1': createTag('tag-1', 'Tag 1'),
           },
         },
-      }
-      const newState = tagsReducer(state, { type: 'UNKNOWN_ACTION' })
-      expect(newState).toEqual(state)
+      } as UserState
+      const newState = userReducer(state, { type: 'UNKNOWN_ACTION' } as any)
+      expect(newState.bible.tags).toEqual(state.bible.tags)
     })
   })
 })

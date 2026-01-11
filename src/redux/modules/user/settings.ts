@@ -1,18 +1,9 @@
-import produce, { Draft } from 'immer'
-import { Appearance } from 'react-native'
+import { createAction } from '@reduxjs/toolkit'
 import { PreferredColorScheme, PreferredDarkTheme, PreferredLightTheme } from '~common/types'
-
-import blackColors from '~themes/blackColors'
 import defaultColors from '~themes/colors'
-import darkColors from '~themes/darkColors'
-import mauveColors from '~themes/mauveColors'
-import natureColors from '~themes/natureColors'
-import nightColors from '~themes/nightColors'
-import sepiaColors from '~themes/sepiaColors'
-import sunsetColors from '~themes/sunsetColors'
+import { HighlightType } from '../user'
 
-import { HighlightType, UserState } from '../user'
-
+// Action type constants for backward compatibility
 export const SET_SETTINGS_ALIGN_CONTENT = 'user/SET_SETTINGS_ALIGN_CONTENT'
 export const SET_SETTINGS_LINE_HEIGHT = 'user/SET_SETTINGS_LINE_HEIGHT'
 export const INCREASE_SETTINGS_FONTSIZE_SCALE = 'user/INCREASE_SETTINGS_FONTSIZE_SCALE'
@@ -26,7 +17,6 @@ export const CHANGE_COLOR = 'user/CHANGE_COLOR'
 export const SET_SETTINGS_PREFERRED_COLOR_SCHEME = 'user/SET_SETTINGS_PREFERRED_COLOR_SCHEME'
 export const SET_SETTINGS_PREFERRED_LIGHT_THEME = 'user/SET_SETTINGS_PREFERRED_LIGHT_THEME'
 export const SET_SETTINGS_PREFERRED_DARK_THEME = 'user/SET_SETTINGS_PREFERRED_DARK_THEME'
-
 export const TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS = 'user/SET_SETTINGS_SHARE_VERSE_NUMBERS'
 export const TOGGLE_SETTINGS_SHARE_INLINE_VERSES = 'user/SET_SETTINGS_SHARE_INLINE_VERSES'
 export const TOGGLE_SETTINGS_SHARE_QUOTES = 'user/SET_SETTINGS_SHARE_QUOTES'
@@ -35,314 +25,90 @@ export const SET_DEFAULT_COLOR_NAME = 'user/SET_DEFAULT_COLOR_NAME'
 export const SET_DEFAULT_COLOR_TYPE = 'user/SET_DEFAULT_COLOR_TYPE'
 export const SET_DEFAULT_BIBLE_VERSION = 'user/SET_DEFAULT_BIBLE_VERSION'
 
-export default produce((draft: Draft<UserState>, action) => {
-  switch (action.type) {
-    // !TODO: Fix change color
-    case CHANGE_COLOR: {
-      const preferredColorScheme = draft.bible.settings.preferredColorScheme
-      const preferredDarkTheme = draft.bible.settings.preferredDarkTheme
-      const preferredLightTheme = draft.bible.settings.preferredLightTheme
-      const systemColorScheme = Appearance.getColorScheme()
+// RTK Action Creators
+export const setSettingsAlignContent = createAction(
+  SET_SETTINGS_ALIGN_CONTENT,
+  (payload: string) => ({ payload })
+)
 
-      // Provide derived theme
-      const currentTheme = (() => {
-        if (preferredColorScheme === 'auto') {
-          if (systemColorScheme === 'dark') {
-            return preferredDarkTheme
-          }
-          return preferredLightTheme
-        }
+export const setSettingsLineHeight = createAction(
+  SET_SETTINGS_LINE_HEIGHT,
+  (payload: 'normal' | 'small' | 'large') => ({ payload })
+)
 
-        if (preferredColorScheme === 'dark') return preferredDarkTheme
-        return preferredLightTheme
-      })()
+export const setSettingsTextDisplay = createAction(
+  SET_SETTINGS_TEXT_DISPLAY,
+  (payload: string) => ({ payload })
+)
 
-      const getColor = () => {
-        if (action.color) {
-          return action.color as string
-        }
-        if (currentTheme === 'black') {
-          return blackColors[action.name as keyof typeof blackColors]
-        }
-        if (currentTheme === 'mauve') {
-          return mauveColors[action.name as keyof typeof mauveColors]
-        }
-        if (currentTheme === 'nature') {
-          return natureColors[action.name as keyof typeof natureColors]
-        }
-        if (currentTheme === 'night') {
-          return nightColors[action.name as keyof typeof nightColors]
-        }
-        if (currentTheme === 'sepia') {
-          return sepiaColors[action.name as keyof typeof sepiaColors]
-        }
-        if (currentTheme === 'sunset') {
-          return sunsetColors[action.name as keyof typeof sunsetColors]
-        }
-        if (currentTheme === 'dark') {
-          return darkColors[action.name as keyof typeof darkColors]
-        }
-        return defaultColors[action.name as keyof typeof defaultColors]
-      }
+export const setSettingsPreferredColorScheme = createAction(
+  SET_SETTINGS_PREFERRED_COLOR_SCHEME,
+  (payload: PreferredColorScheme) => ({ payload })
+)
 
-      // @ts-ignore
-      draft.bible.settings.colors[currentTheme][action.name] = getColor()
-      break
-    }
-    case SET_SETTINGS_ALIGN_CONTENT: {
-      draft.bible.settings.alignContent = action.payload
-      break
-    }
-    case SET_SETTINGS_LINE_HEIGHT: {
-      draft.bible.settings.lineHeight = action.payload
-      break
-    }
-    case SET_SETTINGS_TEXT_DISPLAY: {
-      draft.bible.settings.textDisplay = action.payload
-      break
-    }
-    case SET_SETTINGS_PREFERRED_COLOR_SCHEME: {
-      draft.bible.settings.preferredColorScheme = action.payload
-      break
-    }
-    case SET_SETTINGS_PREFERRED_LIGHT_THEME: {
-      draft.bible.settings.preferredLightTheme = action.payload
-      break
-    }
-    case SET_SETTINGS_PREFERRED_DARK_THEME: {
-      draft.bible.settings.preferredDarkTheme = action.payload
-      break
-    }
-    case SET_SETTINGS_PRESS: {
-      draft.bible.settings.press = action.payload
-      break
-    }
-    case SET_SETTINGS_NOTES_DISPLAY: {
-      draft.bible.settings.notesDisplay = action.payload
-      break
-    }
-    case SET_SETTINGS_LINKS_DISPLAY: {
-      draft.bible.settings.linksDisplay = action.payload
-      break
-    }
-    case SET_SETTINGS_COMMENTS_DISPLAY: {
-      draft.bible.settings.commentsDisplay = action.payload
-      break
-    }
-    case INCREASE_SETTINGS_FONTSIZE_SCALE: {
-      if (draft.bible.settings.fontSizeScale < 5) {
-        draft.bible.settings.fontSizeScale += 1
-      }
-      break
-    }
-    case DECREASE_SETTINGS_FONTSIZE_SCALE: {
-      if (draft.bible.settings.fontSizeScale > -5) {
-        draft.bible.settings.fontSizeScale -= 1
-      }
-      break
-    }
-    case TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS: {
-      draft.bible.settings.shareVerses.hasVerseNumbers =
-        !draft.bible.settings.shareVerses.hasVerseNumbers
-      break
-    }
-    case TOGGLE_SETTINGS_SHARE_INLINE_VERSES: {
-      draft.bible.settings.shareVerses.hasInlineVerses =
-        !draft.bible.settings.shareVerses.hasInlineVerses
-      break
-    }
-    case TOGGLE_SETTINGS_SHARE_QUOTES: {
-      draft.bible.settings.shareVerses.hasQuotes = !draft.bible.settings.shareVerses.hasQuotes
-      break
-    }
-    case TOGGLE_SETTINGS_SHARE_APP_NAME: {
-      draft.bible.settings.shareVerses.hasAppName = !draft.bible.settings.shareVerses.hasAppName
-      break
-    }
-    case SET_DEFAULT_COLOR_NAME: {
-      const { colorKey, name } = action.payload
-      if (name) {
-        // Créer l'objet seulement si on a une valeur à y mettre
-        if (!draft.bible.settings.defaultColorNames) {
-          draft.bible.settings.defaultColorNames = {}
-        }
-        draft.bible.settings.defaultColorNames[
-          colorKey as keyof typeof draft.bible.settings.defaultColorNames
-        ] = name
-      } else if (draft.bible.settings.defaultColorNames) {
-        // Supprimer la clé seulement si l'objet existe
-        delete draft.bible.settings.defaultColorNames[
-          colorKey as keyof typeof draft.bible.settings.defaultColorNames
-        ]
-        // Supprimer l'objet entier s'il devient vide
-        if (Object.keys(draft.bible.settings.defaultColorNames).length === 0) {
-          delete draft.bible.settings.defaultColorNames
-        }
-      }
-      break
-    }
-    case SET_DEFAULT_COLOR_TYPE: {
-      const { colorKey, type } = action.payload as { colorKey: string; type?: HighlightType }
-      if (type && type !== 'background') {
-        // Créer l'objet seulement si on a une valeur à y mettre
-        if (!draft.bible.settings.defaultColorTypes) {
-          draft.bible.settings.defaultColorTypes = {}
-        }
-        draft.bible.settings.defaultColorTypes[
-          colorKey as keyof typeof draft.bible.settings.defaultColorTypes
-        ] = type
-      } else if (draft.bible.settings.defaultColorTypes) {
-        // Supprimer la clé seulement si l'objet existe
-        delete draft.bible.settings.defaultColorTypes[
-          colorKey as keyof typeof draft.bible.settings.defaultColorTypes
-        ]
-        // Supprimer l'objet entier s'il devient vide
-        if (Object.keys(draft.bible.settings.defaultColorTypes).length === 0) {
-          delete draft.bible.settings.defaultColorTypes
-        }
-      }
-      break
-    }
-    case SET_DEFAULT_BIBLE_VERSION: {
-      draft.bible.settings.defaultBibleVersion = action.payload
-      break
-    }
-    default:
-      break
-  }
-})
+export const setSettingsPreferredLightTheme = createAction(
+  SET_SETTINGS_PREFERRED_LIGHT_THEME,
+  (payload: PreferredLightTheme) => ({ payload })
+)
 
-// SETTINGS
-export function setSettingsAlignContent(payload: string) {
-  return {
-    type: SET_SETTINGS_ALIGN_CONTENT,
-    payload,
-  }
-}
+export const setSettingsPreferredDarkTheme = createAction(
+  SET_SETTINGS_PREFERRED_DARK_THEME,
+  (payload: PreferredDarkTheme) => ({ payload })
+)
 
-export function setSettingsLineHeight(payload: 'normal' | 'small' | 'large') {
-  return {
-    type: SET_SETTINGS_LINE_HEIGHT,
-    payload,
-  }
-}
-export function setSettingsTextDisplay(payload: string) {
-  return {
-    type: SET_SETTINGS_TEXT_DISPLAY,
-    payload,
-  }
-}
+export const setSettingsNotesDisplay = createAction(
+  SET_SETTINGS_NOTES_DISPLAY,
+  (payload: string) => ({ payload })
+)
 
-export function setSettingsPreferredColorScheme(payload: PreferredColorScheme) {
-  return {
-    type: SET_SETTINGS_PREFERRED_COLOR_SCHEME,
-    payload,
-  }
-}
+export const setSettingsLinksDisplay = createAction(
+  SET_SETTINGS_LINKS_DISPLAY,
+  (payload: 'inline' | 'block') => ({ payload })
+)
 
-export function setSettingsPreferredLightTheme(payload: PreferredLightTheme) {
-  return {
-    type: SET_SETTINGS_PREFERRED_LIGHT_THEME,
-    payload,
-  }
-}
+export const setSettingsCommentaires = createAction(
+  SET_SETTINGS_COMMENTS_DISPLAY,
+  (payload: boolean) => ({ payload })
+)
 
-export function setSettingsPreferredDarkTheme(payload: PreferredDarkTheme) {
-  return {
-    type: SET_SETTINGS_PREFERRED_DARK_THEME,
-    payload,
-  }
-}
+export const increaseSettingsFontSizeScale = createAction(INCREASE_SETTINGS_FONTSIZE_SCALE)
 
-export function setSettingsNotesDisplay(payload: string) {
-  return {
-    type: SET_SETTINGS_NOTES_DISPLAY,
-    payload,
-  }
-}
+export const decreaseSettingsFontSizeScale = createAction(DECREASE_SETTINGS_FONTSIZE_SCALE)
 
-export function setSettingsLinksDisplay(payload: 'inline' | 'block') {
-  return {
-    type: SET_SETTINGS_LINKS_DISPLAY,
-    payload,
-  }
-}
+export const setSettingsPress = createAction(SET_SETTINGS_PRESS, (payload: string) => ({
+  payload,
+}))
 
-export function setSettingsCommentaires(payload: boolean) {
-  return {
-    type: SET_SETTINGS_COMMENTS_DISPLAY,
-    payload,
-  }
-}
+export const changeColor = createAction(
+  CHANGE_COLOR,
+  ({ name, color }: { name: keyof typeof defaultColors; color?: string }) => ({
+    payload: { name, color },
+  })
+)
 
-export function increaseSettingsFontSizeScale() {
-  return {
-    type: INCREASE_SETTINGS_FONTSIZE_SCALE,
-  }
-}
+export const toggleSettingsShareVerseNumbers = createAction(TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS)
 
-export function decreaseSettingsFontSizeScale() {
-  return {
-    type: DECREASE_SETTINGS_FONTSIZE_SCALE,
-  }
-}
+export const toggleSettingsShareLineBreaks = createAction(TOGGLE_SETTINGS_SHARE_INLINE_VERSES)
 
-export function setSettingsPress(payload: string) {
-  return {
-    type: SET_SETTINGS_PRESS,
-    payload,
-  }
-}
+export const toggleSettingsShareQuotes = createAction(TOGGLE_SETTINGS_SHARE_QUOTES)
 
-export function changeColor({ name, color }: { name: keyof typeof defaultColors; color?: string }) {
-  return {
-    type: CHANGE_COLOR,
-    name,
-    color,
-  }
-}
+export const toggleSettingsShareAppName = createAction(TOGGLE_SETTINGS_SHARE_APP_NAME)
 
-export function toggleSettingsShareVerseNumbers() {
-  return {
-    type: TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS,
-  }
-}
-
-export function toggleSettingsShareLineBreaks() {
-  return {
-    type: TOGGLE_SETTINGS_SHARE_INLINE_VERSES,
-  }
-}
-
-export function toggleSettingsShareQuotes() {
-  return {
-    type: TOGGLE_SETTINGS_SHARE_QUOTES,
-  }
-}
-
-export function toggleSettingsShareAppName() {
-  return {
-    type: TOGGLE_SETTINGS_SHARE_APP_NAME,
-  }
-}
-
-export function setDefaultColorName(colorKey: string, name?: string) {
-  return {
-    type: SET_DEFAULT_COLOR_NAME,
+export const setDefaultColorName = createAction(
+  SET_DEFAULT_COLOR_NAME,
+  (colorKey: string, name?: string) => ({
     payload: { colorKey, name },
-  }
-}
+  })
+)
 
-export function setDefaultColorType(colorKey: string, type?: HighlightType) {
-  return {
-    type: SET_DEFAULT_COLOR_TYPE,
+export const setDefaultColorType = createAction(
+  SET_DEFAULT_COLOR_TYPE,
+  (colorKey: string, type?: HighlightType) => ({
     payload: { colorKey, type },
-  }
-}
+  })
+)
 
-export function setDefaultBibleVersion(payload: string) {
-  return {
-    type: SET_DEFAULT_BIBLE_VERSION,
-    payload,
-  }
-}
+export const setDefaultBibleVersion = createAction(
+  SET_DEFAULT_BIBLE_VERSION,
+  (payload: string) => ({ payload })
+)

@@ -1,9 +1,8 @@
-import { createStore, applyMiddleware } from 'redux'
-import thunk from 'redux-thunk'
-import { composeWithDevTools } from 'redux-devtools-expo-dev-plugin'
+import { configureStore as createRTKStore } from '@reduxjs/toolkit'
 import { persistStore, persistReducer, createMigrate, getStoredState } from 'redux-persist'
 import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2'
 import FilesystemStorage from 'redux-persist-filesystem-storage'
+import devToolsEnhancer from 'redux-devtools-expo-dev-plugin'
 
 import firestoreMiddleware from './firestoreMiddleware'
 import { logger, crashReporter } from './logMiddleware'
@@ -11,7 +10,6 @@ import migrations from './migrations'
 
 import reducer from '~redux/modules/reducer'
 import { mmkvStorage } from '~helpers/storage'
-import { PersistConfig } from 'redux-persist/es/types'
 
 function configureStore() {
   const persistConfig: any = {
@@ -35,12 +33,21 @@ function configureStore() {
     })
   }
 
-  const middleware = [logger, crashReporter, firestoreMiddleware, thunk]
-
   // @ts-ignore
   const persistedReducer = persistReducer(persistConfig, reducer)
-  const composeEnhancers = __DEV__ ? composeWithDevTools : (f: any) => f
-  const store = composeEnhancers(applyMiddleware(...middleware))(createStore)(persistedReducer)
+
+  const store = createRTKStore({
+    reducer: persistedReducer,
+    middleware: getDefaultMiddleware =>
+      getDefaultMiddleware({
+        serializableCheck: false,
+        immutableCheck: false,
+      }).concat(logger, crashReporter, firestoreMiddleware),
+    devTools: false,
+    enhancers: defaultEnhancers =>
+      __DEV__ ? [...defaultEnhancers, devToolsEnhancer()] : defaultEnhancers,
+  })
+
   const persistor = persistStore(store)
   // persistor.purge() // Purge async storage
   // storage.clearAll()

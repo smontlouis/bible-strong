@@ -1,6 +1,6 @@
-import produce, { Draft } from 'immer'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { getDefaultStore } from 'jotai/vanilla'
-import { Reducer } from 'redux'
+import { Appearance } from 'react-native'
 import {
   BookmarksObj,
   ChangelogItem,
@@ -25,17 +25,60 @@ import natureColors from '~themes/natureColors'
 import nightColors from '~themes/nightColors'
 import sepiaColors from '~themes/sepiaColors'
 import sunsetColors from '~themes/sunsetColors'
-import bookmarksReducer from './user/bookmarks'
-import customColorsReducer from './user/customColors'
-import highlightsReducer from './user/highlights'
-import linksReducer from './user/links'
-import notesReducer from './user/notes'
-import settingsReducer from './user/settings'
-import studiesReducer from './user/studies'
-import tagsReducer from './user/tags'
-import versionUpdateReducer from './user/versionUpdate'
-import { reduceReducers } from './utils'
+
+// Import action creators from sub-modules
+import { addBookmarkAction, removeBookmark, updateBookmark, moveBookmark } from './user/bookmarks'
+import { addCustomColor, updateCustomColor, deleteCustomColor } from './user/customColors'
+import { addHighlightAction, removeHighlight, changeHighlightColor } from './user/highlights'
+import { addLinkAction, updateLink, deleteLink } from './user/links'
+import { addNoteAction, deleteNote } from './user/notes'
+import {
+  setSettingsAlignContent,
+  setSettingsLineHeight,
+  setSettingsTextDisplay,
+  setSettingsPreferredColorScheme,
+  setSettingsPreferredLightTheme,
+  setSettingsPreferredDarkTheme,
+  setSettingsNotesDisplay,
+  setSettingsLinksDisplay,
+  setSettingsCommentaires,
+  increaseSettingsFontSizeScale,
+  decreaseSettingsFontSizeScale,
+  setSettingsPress,
+  changeColor,
+  toggleSettingsShareVerseNumbers,
+  toggleSettingsShareLineBreaks,
+  toggleSettingsShareQuotes,
+  toggleSettingsShareAppName,
+  setDefaultColorName,
+  setDefaultColorType,
+  setDefaultBibleVersion,
+} from './user/settings'
+import {
+  updateStudy,
+  addStudies,
+  deleteStudy,
+  publishStudyAction,
+  type StudyMutation,
+} from './user/studies'
+import { addTag, updateTag, removeTag, toggleTagEntity, entitiesArray } from './user/tags'
+import { setVersionUpdated, getVersionUpdate, getDatabaseUpdate } from './user/versionUpdate'
+
 const deepmerge = require('@fastify/deepmerge')()
+
+// Re-export everything from sub-modules for backward compatibility
+export * from './user/bookmarks'
+export * from './user/customColors'
+export * from './user/highlights'
+export * from './user/links'
+export * from './user/notes'
+export * from './user/settings'
+export * from './user/studies'
+export * from './user/tags'
+export * from './user/versionUpdate'
+
+// Re-export types
+export type { Tag }
 
 /**
  * Nettoie les données corrompues de Firestore
@@ -64,45 +107,18 @@ const cleanCorruptedFirestoreData = (obj: any): any => {
   return result
 }
 
-export * from './user/bookmarks'
-export * from './user/customColors'
-export * from './user/highlights'
-export * from './user/links'
-export * from './user/notes'
-export * from './user/settings'
-export * from './user/studies'
-export * from './user/tags'
-export * from './user/versionUpdate'
-
-export const USER_LOGIN_SUCCESS = 'user/USER_LOGIN_SUCCESS'
-export const USER_UPDATE_PROFILE = 'user/USER_UPDATE_PROFILE'
-export const USER_LOGOUT = 'USER_LOGOUT'
-
-export const SAVE_ALL_LOGS_AS_SEEN = 'user/SAVE_ALL_LOGS_AS_SEEN'
-
-export const SET_LAST_SEEN = 'user/SET_LAST_SEEN'
-
-export const SET_NOTIFICATION_VOD = 'user/SET_NOTIFICATION_VOD'
-export const SET_NOTIFICATION_ID = 'user/SET_NOTIFICATION_ID'
-
-export const TOGGLE_COMPARE_VERSION = 'user/TOGGLE_COMPARE_VERSION'
-export const RESET_COMPARE_VERSION = 'user/RESET_COMPARE_VERSION'
-
-export const GET_CHANGELOG = 'user/GET_CHANGELOG'
-export const GET_CHANGELOG_SUCCESS = 'user/GET_CHANGELOG_SUCCESS'
-export const GET_CHANGELOG_FAIL = 'user/GET_CHANGELOG_FAIL'
-
-export const SET_FONT_FAMILY = 'user/SET_FONT_FAMILY'
-
-export const APP_FETCH_DATA = 'user/APP_FETCH_DATA'
-export const APP_FETCH_DATA_FAIL = 'user/APP_FETCH_DATA_FAIL'
-
-export const SET_SUBSCRIPTION = 'user/SET_SUBSCRIPTION'
-export const EMAIL_VERIFIED = 'user/EMAIL_VERIFIED'
-
-export const RECEIVE_LIVE_UPDATES = 'user/RECEIVE_LIVE_UPDATES'
-export const RECEIVE_SUBCOLLECTION_UPDATES = 'user/RECEIVE_SUBCOLLECTION_UPDATES'
-export const IMPORT_DATA = 'user/IMPORT_DATA'
+// Helper function to remove entity from tags
+const removeEntityInTags = (
+  draft: UserState,
+  entity: 'notes' | 'links' | 'highlights' | 'studies',
+  key: string
+) => {
+  for (const tag in draft.bible.tags) {
+    if (draft.bible.tags[tag][entity]) {
+      delete draft.bible.tags[tag][entity][key]
+    }
+  }
+}
 
 export interface Study {
   id: string
@@ -141,7 +157,7 @@ export type HighlightType = 'background' | 'textColor' | 'underline'
 
 export type Highlight = {
   color: string
-  tags: TagsObj
+  tags?: TagsObj
   date: number
 }
 
@@ -364,77 +380,105 @@ const getInitialState = (): UserState => ({
   },
 })
 
-// UserReducer
-const userReducer = produce((draft: Draft<UserState>, action) => {
-  switch (action.type) {
-    case EMAIL_VERIFIED: {
-      draft.emailVerified = true
-      break
-    }
-    case APP_FETCH_DATA: {
-      draft.isLoading = true
-      break
-    }
-    case APP_FETCH_DATA_FAIL: {
-      draft.isLoading = false
-      break
-    }
-    case SET_FONT_FAMILY: {
-      draft.fontFamily = action.payload
-      break
-    }
-    case SET_NOTIFICATION_VOD: {
-      draft.notifications.verseOfTheDay = action.payload
-      break
-    }
+const MAX_CUSTOM_COLORS = 5
 
-    case RECEIVE_LIVE_UPDATES: {
-      const { id, email, displayName, photoURL, provider, bible, subscription } = action.payload
-        .remoteUserData as FireStoreUserData
+const userSlice = createSlice({
+  name: 'user',
+  initialState: getInitialState(),
+  reducers: {
+    verifyEmail(state) {
+      state.emailVerified = true
+    },
+    setFontFamily(state, action: PayloadAction<string>) {
+      state.fontFamily = action.payload
+    },
+    saveAllLogsAsSeen(state, action: PayloadAction<any[]>) {
+      action.payload.forEach((log: any) => {
+        // @ts-ignore
+        state.bible.changelog[log.date] = true
+      })
+    },
+    onUserLoginSuccess(state, action: PayloadAction<{ profile: FireAuthProfile }>) {
+      const { id, email, displayName, photoURL, provider, emailVerified } = action.payload.profile
 
-      draft.id = id
-      draft.email = email
-      draft.displayName = draft.displayName || displayName
-      draft.photoURL = photoURL
-      draft.provider = provider
-      draft.subscription = subscription
+      state.id = id
+      state.email = email
+      state.displayName = state.displayName || displayName
+      state.photoURL = photoURL
+      state.provider = provider
+      state.emailVerified = emailVerified
+      state.createdAt = action.payload.profile.createdAt || null
+      state.isLoading = false
+    },
+    onUserLogout(state) {
+      const initialState = getInitialState()
+      return {
+        ...initialState,
+        bible: {
+          ...initialState.bible,
+          // Keep changelog
+          changelog: state.bible.changelog,
+        },
+      }
+    },
+    onUserUpdateProfile(
+      state,
+      action: PayloadAction<
+        Partial<{ displayName: string; photoURL: string; emailVerified: boolean }>
+      >
+    ) {
+      const profile = action.payload
+      if (profile) {
+        if (profile.displayName !== undefined) state.displayName = profile.displayName
+        if (profile.photoURL !== undefined) state.photoURL = profile.photoURL
+        if (profile.emailVerified !== undefined) state.emailVerified = profile.emailVerified
+      }
+    },
+    receiveLiveUpdates(state, action: PayloadAction<{ remoteUserData: FireStoreUserData }>) {
+      const { id, email, displayName, photoURL, provider, bible, subscription } =
+        action.payload.remoteUserData
+
+      state.id = id
+      state.email = email
+      state.displayName = state.displayName || displayName
+      state.photoURL = photoURL
+      state.provider = provider
+      state.subscription = subscription
 
       // Preserve subcollection data (managed separately)
-      const currentBookmarks = draft.bible.bookmarks
-      const currentHighlights = draft.bible.highlights
-      const currentNotes = draft.bible.notes
-      const currentLinks = draft.bible.links
-      const currentTags = draft.bible.tags
-      const currentStrongsHebreu = draft.bible.strongsHebreu
-      const currentStrongsGrec = draft.bible.strongsGrec
-      const currentWords = draft.bible.words
-      const currentNaves = draft.bible.naves
-      const currentStudies = draft.bible.studies
-      const currentChangelog = draft.bible.changelog
+      const currentBookmarks = state.bible.bookmarks
+      const currentHighlights = state.bible.highlights
+      const currentNotes = state.bible.notes
+      const currentLinks = state.bible.links
+      const currentTags = state.bible.tags
+      const currentStrongsHebreu = state.bible.strongsHebreu
+      const currentStrongsGrec = state.bible.strongsGrec
+      const currentWords = state.bible.words
+      const currentNaves = state.bible.naves
+      const currentStudies = state.bible.studies
+      const currentChangelog = state.bible.changelog
 
       // Merge bible (only settings and other non-subcollection data)
       // Clean corrupted data before merging (removes {_type: 'delete'} objects)
       const cleanedBible = cleanCorruptedFirestoreData(bible || {})
-      draft.bible = deepmerge(getInitialState().bible, cleanedBible)
+      state.bible = deepmerge(getInitialState().bible, cleanedBible)
 
       // Restore subcollection data
-      draft.bible.bookmarks = currentBookmarks
-      draft.bible.highlights = currentHighlights
-      draft.bible.notes = currentNotes
-      draft.bible.links = currentLinks
-      draft.bible.tags = currentTags
-      draft.bible.strongsHebreu = currentStrongsHebreu
-      draft.bible.strongsGrec = currentStrongsGrec
-      draft.bible.words = currentWords
-      draft.bible.naves = currentNaves
-      draft.bible.studies = currentStudies
-      draft.bible.changelog = currentChangelog
-
-      break
-    }
-
-    case RECEIVE_SUBCOLLECTION_UPDATES: {
-      const { collection, data } = action.payload as {
+      state.bible.bookmarks = currentBookmarks
+      state.bible.highlights = currentHighlights
+      state.bible.notes = currentNotes
+      state.bible.links = currentLinks
+      state.bible.tags = currentTags
+      state.bible.strongsHebreu = currentStrongsHebreu
+      state.bible.strongsGrec = currentStrongsGrec
+      state.bible.words = currentWords
+      state.bible.naves = currentNaves
+      state.bible.studies = currentStudies
+      state.bible.changelog = currentChangelog
+    },
+    receiveSubcollectionUpdates(
+      state,
+      action: PayloadAction<{
         collection:
           | 'bookmarks'
           | 'highlights'
@@ -447,52 +491,52 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
           | 'naves'
         data: Record<string, unknown>
         isInitialLoad: boolean
-      }
+      }>
+    ) {
+      const { collection, data } = action.payload
 
       // Update the specific subcollection
       switch (collection) {
         case 'bookmarks':
-          draft.bible.bookmarks = data as BookmarksObj
+          state.bible.bookmarks = data as BookmarksObj
           break
         case 'highlights':
-          draft.bible.highlights = data as HighlightsObj
+          state.bible.highlights = data as HighlightsObj
           break
         case 'notes':
-          draft.bible.notes = data as NotesObj
+          state.bible.notes = data as NotesObj
           break
         case 'links':
-          draft.bible.links = data as LinksObj
+          state.bible.links = data as LinksObj
           break
         case 'tags':
-          draft.bible.tags = data as TagsObj
+          state.bible.tags = data as TagsObj
           break
         case 'strongsHebreu':
-          draft.bible.strongsHebreu = data
+          state.bible.strongsHebreu = data
           break
         case 'strongsGrec':
-          draft.bible.strongsGrec = data
+          state.bible.strongsGrec = data
           break
         case 'words':
-          draft.bible.words = data
+          state.bible.words = data
           break
         case 'naves':
-          draft.bible.naves = data
+          state.bible.naves = data
           break
       }
-      break
-    }
-
-    case IMPORT_DATA: {
+    },
+    importData(state, action: PayloadAction<any>) {
       const { bible, studies, tabGroups } = action.payload
-      const currentChangelog = draft.bible.changelog
+      const currentChangelog = state.bible.changelog
 
       // Merge bible (clean corrupted data before merging)
       const cleanedBible = cleanCorruptedFirestoreData(bible || {})
-      draft.bible = deepmerge(getInitialState().bible, cleanedBible)
+      state.bible = deepmerge(getInitialState().bible, cleanedBible)
 
       // Restore studies and changelog
-      draft.bible.studies = studies
-      draft.bible.changelog = currentChangelog
+      state.bible.studies = studies
+      state.bible.changelog = currentChangelog
 
       // Restaurer les onglets via Jotai
       // Le groupe actif sera automatiquement reset sur groups[0] via activeGroupAtom
@@ -500,228 +544,516 @@ const userReducer = produce((draft: Draft<UserState>, action) => {
         const store = getDefaultStore()
         store.set(tabGroupsAtom, tabGroups)
       }
-
-      break
-    }
-
-    /**
-     * 4. Update user profile (login - don't overwrite existing displayName)
-     */
-    case USER_LOGIN_SUCCESS: {
-      const { id, email, displayName, photoURL, provider, emailVerified } =
-        action.profile as FireAuthProfile
-
-      draft.id = id
-      draft.email = email
-      draft.displayName = draft.displayName || displayName
-      draft.photoURL = photoURL
-      draft.provider = provider
-      draft.emailVerified = emailVerified
-      draft.createdAt = action.profile.createdAt || null
-      draft.isLoading = false
-
-      break
-    }
-
-    /**
-     * 4b. Update user profile (explicit update - overwrite displayName)
-     */
-    case USER_UPDATE_PROFILE: {
-      const profile = action.profile || action.payload
-      if (profile) {
-        if (profile.displayName !== undefined) draft.displayName = profile.displayName
-        if (profile.photoURL !== undefined) draft.photoURL = profile.photoURL
-        if (profile.emailVerified !== undefined) draft.emailVerified = profile.emailVerified
-      }
-      break
-    }
-    case USER_LOGOUT: {
-      return {
-        ...getInitialState(),
-        bible: {
-          ...getInitialState().bible,
-          // Keep changelog
-          changelog: draft.bible.changelog,
-        },
-      }
-    }
-    case SAVE_ALL_LOGS_AS_SEEN: {
-      action.payload.forEach((log: any) => {
-        // @ts-ignore
-        draft.bible.changelog[log.date] = true
-      })
-      break
-    }
-    case TOGGLE_COMPARE_VERSION: {
-      if (draft.bible.settings.compare[action.payload]) {
-        delete draft.bible.settings.compare[action.payload]
+    },
+    setNotificationVOD(state, action: PayloadAction<string>) {
+      state.notifications.verseOfTheDay = action.payload
+    },
+    setNotificationId(state, action: PayloadAction<string>) {
+      state.notifications.notificationId = action.payload
+    },
+    toggleCompareVersion(state, action: PayloadAction<string>) {
+      if (state.bible.settings.compare[action.payload]) {
+        delete state.bible.settings.compare[action.payload]
       } else {
-        draft.bible.settings.compare[action.payload] = true
+        state.bible.settings.compare[action.payload] = true
       }
-      break
-    }
-    case RESET_COMPARE_VERSION: {
-      draft.bible.settings.compare = {
+    },
+    resetCompareVersion(state, action: PayloadAction<'LSG' | 'KJV'>) {
+      state.bible.settings.compare = {
         [action.payload]: true,
       }
-      break
-    }
-    case SET_NOTIFICATION_ID: {
-      draft.notifications.notificationId = action.payload
-      break
-    }
-    case GET_CHANGELOG_SUCCESS: {
-      draft.changelog.isLoading = false
+    },
+    addChangelog(state, action: PayloadAction<ChangelogItem[]>) {
+      state.changelog.isLoading = false
       // @ts-ignore
-      draft.changelog.lastSeen = Date.now().toString()
-      draft.changelog.data = [...draft.changelog.data, ...action.payload]
-      break
-    }
-    case GET_CHANGELOG_FAIL: {
-      draft.changelog.isLoading = false
-      break
-    }
-    case SET_SUBSCRIPTION: {
-      draft.subscription = action.payload
-      break
-    }
-    default: {
-      break
-    }
-  }
-}) as Reducer<UserState>
+      state.changelog.lastSeen = Date.now().toString()
+      state.changelog.data = [...state.changelog.data, ...action.payload]
+    },
+    getChangelogFail(state) {
+      state.changelog.isLoading = false
+    },
+    appFetchData(state) {
+      state.isLoading = true
+    },
+    appFetchDataFail(state) {
+      state.isLoading = false
+    },
+  },
+  extraReducers: builder => {
+    // Bookmarks
+    builder.addCase(addBookmarkAction, (state, action) => {
+      state.bible.bookmarks[action.payload.id] = action.payload
+    })
+    builder.addCase(removeBookmark, (state, action) => {
+      delete state.bible.bookmarks[action.payload]
+    })
+    builder.addCase(updateBookmark, (state, action) => {
+      const { id, ...updates } = action.payload
+      if (state.bible.bookmarks[id]) {
+        state.bible.bookmarks[id] = {
+          ...state.bible.bookmarks[id],
+          ...updates,
+        }
+      }
+    })
+    builder.addCase(moveBookmark, (state, action) => {
+      const { id, book, chapter, verse, version } = action.payload
+      if (state.bible.bookmarks[id]) {
+        state.bible.bookmarks[id].book = book
+        state.bible.bookmarks[id].chapter = chapter
+        state.bible.bookmarks[id].verse = verse
+        if (version !== undefined) {
+          state.bible.bookmarks[id].version = version
+        }
+        state.bible.bookmarks[id].date = Date.now()
+      }
+    })
 
-const reducers = <typeof userReducer>(
-  reduceReducers(
-    getInitialState(),
-    userReducer,
-    bookmarksReducer,
-    notesReducer,
-    linksReducer,
-    highlightsReducer,
-    settingsReducer,
-    tagsReducer,
-    versionUpdateReducer,
-    studiesReducer,
-    customColorsReducer
-  )
-)
+    // Custom Colors
+    builder.addCase(addCustomColor, (state, action) => {
+      if (state.bible.settings.customHighlightColors.length < MAX_CUSTOM_COLORS) {
+        state.bible.settings.customHighlightColors.push(action.payload)
+      }
+    })
+    builder.addCase(updateCustomColor, (state, action) => {
+      const { id, hex, name, type } = action.payload
+      const colorIndex = state.bible.settings.customHighlightColors.findIndex(
+        (c: CustomColor) => c.id === id
+      )
+      if (colorIndex !== -1) {
+        state.bible.settings.customHighlightColors[colorIndex].hex = hex
+        state.bible.settings.customHighlightColors[colorIndex].name = name
+        state.bible.settings.customHighlightColors[colorIndex].type = type
+      }
+    })
+    builder.addCase(deleteCustomColor, (state, action) => {
+      const id = action.payload
+      state.bible.settings.customHighlightColors =
+        state.bible.settings.customHighlightColors.filter((c: CustomColor) => c.id !== id)
+    })
 
-export default reducers
+    // Highlights
+    builder.addCase(addHighlightAction, (state, action) => {
+      state.bible.highlights = {
+        ...state.bible.highlights,
+        ...action.payload.selectedVerses,
+      }
+    })
+    builder.addCase(removeHighlight, (state, action) => {
+      Object.keys(action.payload.selectedVerses).forEach(key => {
+        delete state.bible.highlights[key]
+        removeEntityInTags(state, 'highlights', key)
+      })
+    })
+    builder.addCase(changeHighlightColor, (state, action) => {
+      Object.keys(action.payload.verseIds).forEach(key => {
+        state.bible.highlights[key].color = action.payload.color
+      })
+    })
 
-// Email verified
-export function verifyEmail() {
-  return {
-    type: EMAIL_VERIFIED,
-  }
-}
+    // Links
+    builder.addCase(addLinkAction, (state, action) => {
+      state.bible.links = {
+        ...state.bible.links,
+        ...action.payload,
+      }
+    })
+    builder.addCase(updateLink, (state, action) => {
+      const { key, data } = action.payload
+      if (state.bible.links[key]) {
+        state.bible.links[key] = {
+          ...state.bible.links[key],
+          ...data,
+        }
+      }
+    })
+    builder.addCase(deleteLink, (state, action) => {
+      delete state.bible.links[action.payload]
+      removeEntityInTags(state, 'links', action.payload)
+    })
 
-// FONT-FAMILY
-export function setFontFamily(payload: any) {
-  return {
-    type: SET_FONT_FAMILY,
-    payload,
-  }
-}
+    // Notes
+    builder.addCase(addNoteAction, (state, action) => {
+      state.bible.notes = {
+        ...state.bible.notes,
+        ...action.payload,
+      }
+    })
+    builder.addCase(deleteNote, (state, action) => {
+      delete state.bible.notes[action.payload]
+      removeEntityInTags(state, 'notes', action.payload)
+    })
 
-// CHANGELOG
-export function saveAllLogsAsSeen(payload: any) {
-  return {
-    type: SAVE_ALL_LOGS_AS_SEEN,
-    payload,
-  }
-}
+    // Settings
+    builder.addCase(setSettingsAlignContent, (state, action) => {
+      state.bible.settings.alignContent = action.payload as 'left' | 'justify'
+    })
+    builder.addCase(setSettingsLineHeight, (state, action) => {
+      state.bible.settings.lineHeight = action.payload
+    })
+    builder.addCase(setSettingsTextDisplay, (state, action) => {
+      state.bible.settings.textDisplay = action.payload as 'inline' | 'block'
+    })
+    builder.addCase(setSettingsPreferredColorScheme, (state, action) => {
+      state.bible.settings.preferredColorScheme = action.payload
+    })
+    builder.addCase(setSettingsPreferredLightTheme, (state, action) => {
+      state.bible.settings.preferredLightTheme = action.payload
+    })
+    builder.addCase(setSettingsPreferredDarkTheme, (state, action) => {
+      state.bible.settings.preferredDarkTheme = action.payload
+    })
+    builder.addCase(setSettingsNotesDisplay, (state, action) => {
+      state.bible.settings.notesDisplay = action.payload as 'inline' | 'block'
+    })
+    builder.addCase(setSettingsLinksDisplay, (state, action) => {
+      state.bible.settings.linksDisplay = action.payload
+    })
+    builder.addCase(setSettingsCommentaires, (state, action) => {
+      state.bible.settings.commentsDisplay = action.payload
+    })
+    builder.addCase(increaseSettingsFontSizeScale, state => {
+      if (state.bible.settings.fontSizeScale < 5) {
+        state.bible.settings.fontSizeScale += 1
+      }
+    })
+    builder.addCase(decreaseSettingsFontSizeScale, state => {
+      if (state.bible.settings.fontSizeScale > -5) {
+        state.bible.settings.fontSizeScale -= 1
+      }
+    })
+    builder.addCase(setSettingsPress, (state, action) => {
+      state.bible.settings.press = action.payload as 'shortPress' | 'longPress'
+    })
+    builder.addCase(changeColor, (state, action) => {
+      const preferredColorScheme = state.bible.settings.preferredColorScheme
+      const preferredDarkTheme = state.bible.settings.preferredDarkTheme
+      const preferredLightTheme = state.bible.settings.preferredLightTheme
+      const systemColorScheme = Appearance.getColorScheme()
 
-// USERS
-/**
- * 2. onUserLoginSuccess call
- */
-export function onUserLoginSuccess({ profile }: { profile: FireAuthProfile }) {
-  return {
-    type: USER_LOGIN_SUCCESS,
-    profile,
-  }
-}
+      // Provide derived theme
+      const currentTheme = (() => {
+        if (preferredColorScheme === 'auto') {
+          if (systemColorScheme === 'dark') {
+            return preferredDarkTheme
+          }
+          return preferredLightTheme
+        }
 
-export function onUserLogout() {
-  return {
-    type: USER_LOGOUT,
-  }
-}
+        if (preferredColorScheme === 'dark') return preferredDarkTheme
+        return preferredLightTheme
+      })()
 
-export function onUserUpdateProfile(profile: any) {
-  return {
-    type: USER_UPDATE_PROFILE,
-    payload: profile,
-  }
-}
+      const getColorValue = () => {
+        if (action.payload.color) {
+          return action.payload.color as string
+        }
+        if (currentTheme === 'black') {
+          return blackColors[action.payload.name as keyof typeof blackColors]
+        }
+        if (currentTheme === 'mauve') {
+          return mauveColors[action.payload.name as keyof typeof mauveColors]
+        }
+        if (currentTheme === 'nature') {
+          return natureColors[action.payload.name as keyof typeof natureColors]
+        }
+        if (currentTheme === 'night') {
+          return nightColors[action.payload.name as keyof typeof nightColors]
+        }
+        if (currentTheme === 'sepia') {
+          return sepiaColors[action.payload.name as keyof typeof sepiaColors]
+        }
+        if (currentTheme === 'sunset') {
+          return sunsetColors[action.payload.name as keyof typeof sunsetColors]
+        }
+        if (currentTheme === 'dark') {
+          return darkColors[action.payload.name as keyof typeof darkColors]
+        }
+        return defaultColors[action.payload.name as keyof typeof defaultColors]
+      }
 
-export function receiveLiveUpdates({ remoteUserData }: { remoteUserData: FireStoreUserData }) {
-  return {
-    type: RECEIVE_LIVE_UPDATES,
-    payload: { remoteUserData },
-  }
-}
+      // @ts-ignore
+      state.bible.settings.colors[currentTheme][action.payload.name] = getColorValue()
+    })
+    builder.addCase(toggleSettingsShareVerseNumbers, state => {
+      state.bible.settings.shareVerses.hasVerseNumbers =
+        !state.bible.settings.shareVerses.hasVerseNumbers
+    })
+    builder.addCase(toggleSettingsShareLineBreaks, state => {
+      state.bible.settings.shareVerses.hasInlineVerses =
+        !state.bible.settings.shareVerses.hasInlineVerses
+    })
+    builder.addCase(toggleSettingsShareQuotes, state => {
+      state.bible.settings.shareVerses.hasQuotes = !state.bible.settings.shareVerses.hasQuotes
+    })
+    builder.addCase(toggleSettingsShareAppName, state => {
+      state.bible.settings.shareVerses.hasAppName = !state.bible.settings.shareVerses.hasAppName
+    })
+    builder.addCase(setDefaultColorName, (state, action) => {
+      const { colorKey, name } = action.payload
+      if (name) {
+        // Créer l'objet seulement si on a une valeur à y mettre
+        if (!state.bible.settings.defaultColorNames) {
+          state.bible.settings.defaultColorNames = {}
+        }
+        state.bible.settings.defaultColorNames[
+          colorKey as keyof typeof state.bible.settings.defaultColorNames
+        ] = name
+      } else if (state.bible.settings.defaultColorNames) {
+        // Supprimer la clé seulement si l'objet existe
+        delete state.bible.settings.defaultColorNames[
+          colorKey as keyof typeof state.bible.settings.defaultColorNames
+        ]
+        // Supprimer l'objet entier s'il devient vide
+        if (Object.keys(state.bible.settings.defaultColorNames).length === 0) {
+          delete state.bible.settings.defaultColorNames
+        }
+      }
+    })
+    builder.addCase(setDefaultColorType, (state, action) => {
+      const { colorKey, type } = action.payload
+      if (type && type !== 'background') {
+        // Créer l'objet seulement si on a une valeur à y mettre
+        if (!state.bible.settings.defaultColorTypes) {
+          state.bible.settings.defaultColorTypes = {}
+        }
+        state.bible.settings.defaultColorTypes[
+          colorKey as keyof typeof state.bible.settings.defaultColorTypes
+        ] = type
+      } else if (state.bible.settings.defaultColorTypes) {
+        // Supprimer la clé seulement si l'objet existe
+        delete state.bible.settings.defaultColorTypes[
+          colorKey as keyof typeof state.bible.settings.defaultColorTypes
+        ]
+        // Supprimer l'objet entier s'il devient vide
+        if (Object.keys(state.bible.settings.defaultColorTypes).length === 0) {
+          delete state.bible.settings.defaultColorTypes
+        }
+      }
+    })
+    builder.addCase(setDefaultBibleVersion, (state, action) => {
+      state.bible.settings.defaultBibleVersion = action.payload
+    })
 
-export function receiveSubcollectionUpdates({
-  collection,
-  data,
-  isInitialLoad,
-}: {
-  collection:
-    | 'bookmarks'
-    | 'highlights'
-    | 'notes'
-    | 'tags'
-    | 'strongsHebreu'
-    | 'strongsGrec'
-    | 'words'
-    | 'naves'
-  data: Record<string, unknown>
-  isInitialLoad: boolean
-}) {
-  return {
-    type: RECEIVE_SUBCOLLECTION_UPDATES,
-    payload: { collection, data, isInitialLoad },
-  }
-}
+    // Studies
+    builder.addCase(updateStudy, (state, action) => {
+      const { id, content, title, modified_at, created_at, tags } = action.payload
 
-// Notifications
-export function setNotificationVOD(payload: string) {
-  return {
-    type: SET_NOTIFICATION_VOD,
-    payload,
-  }
-}
+      state.bible.studies[id] = {
+        ...state.bible.studies[id],
+        ...(created_at && { created_at }),
+        ...(modified_at && { modified_at }),
+        ...(title && { title }),
+        ...(content && { content }),
+        ...(tags && { tags }),
+        user: {
+          id: state.id,
+          displayName: state.displayName,
+          photoUrl: state.photoURL,
+        },
+        id,
+      }
+    })
+    builder.addCase(addStudies, (state, action) => {
+      state.bible.studies = action.payload
+    })
+    builder.addCase(deleteStudy, (state, action) => {
+      delete state.bible.studies[action.payload]
+      removeEntityInTags(state, 'studies', action.payload)
+    })
+    builder.addCase(publishStudyAction, (state, action) => {
+      const study = state.bible.studies[action.payload.id]
+      study.published = action.payload.publish
+      study.modified_at = Date.now()
+    })
 
-export function setNotificationId(payload: any) {
-  return {
-    type: SET_NOTIFICATION_ID,
-    payload,
-  }
-}
+    // Tags
+    builder.addCase(addTag, (state, action) => {
+      const { id, name } = action.payload
+      state.bible.tags[id] = {
+        id,
+        date: Date.now(),
+        name,
+      }
+    })
+    builder.addCase(updateTag, (state, action) => {
+      const { id, value } = action.payload
+      state.bible.tags[id].name = value
 
-// Compare
-export function toggleCompareVersion(payload: string) {
-  return {
-    type: TOGGLE_COMPARE_VERSION,
-    payload,
-  }
-}
+      entitiesArray.forEach(ent => {
+        const entities = state.bible[ent]
+        Object.values(entities).forEach((entity: any) => {
+          const entityTags = entity.tags
+          if (entityTags && entityTags[id]) {
+            entityTags[id].name = value
+          }
+        })
+      })
+    })
+    builder.addCase(removeTag, (state, action) => {
+      delete state.bible.tags[action.payload]
 
-export function resetCompareVersion(payload: 'LSG' | 'KJV') {
-  return {
-    type: RESET_COMPARE_VERSION,
-    payload,
-  }
-}
+      entitiesArray.forEach(ent => {
+        const entities = state.bible[ent]
+        Object.values(entities).forEach((entity: any) => {
+          const entityTags = entity.tags
+          if (entityTags && entityTags[action.payload]) {
+            delete entityTags[action.payload]
+          }
+        })
+      })
+    })
+    builder.addCase(toggleTagEntity, (state, action) => {
+      const { item, tagId } = action.payload
 
-// Changelog
+      if (item.ids) {
+        const hasTag = state.bible[item.entity][Object.keys(item.ids)[0]]?.tags?.[tagId]
+
+        Object.keys(item.ids).forEach(id => {
+          // DELETE OPERATION - In order to have a true toggle, check only for first item with Object.keys(item.ids)[0]
+          if (hasTag) {
+            try {
+              delete state.bible.tags[tagId][item.entity]?.[id]
+              delete state.bible[item.entity][id].tags[tagId]
+
+              // Delete highlight if it has no color and no remaining tags
+              if (item.entity === 'highlights') {
+                const highlight = state.bible[item.entity][id]
+                if (
+                  highlight &&
+                  highlight.color === '' &&
+                  Object.keys(highlight.tags || {}).length === 0
+                ) {
+                  delete state.bible[item.entity][id]
+                }
+              }
+            } catch (e) {}
+
+            // ADD OPERATION
+          } else {
+            if (!state.bible.tags[tagId][item.entity]) {
+              state.bible.tags[tagId][item.entity] = {}
+            }
+            state.bible.tags[tagId][item.entity][id] = true
+
+            // Create highlight if it doesn't exist (for highlights entity only)
+            if (item.entity === 'highlights' && !state.bible[item.entity][id]) {
+              state.bible[item.entity][id] = {
+                color: '',
+                date: Date.now(),
+                tags: {},
+              }
+            }
+
+            if (!state.bible[item.entity][id].tags) {
+              state.bible[item.entity][id].tags = {}
+            }
+            state.bible[item.entity][id].tags[tagId] = {
+              id: tagId,
+              name: state.bible.tags[tagId].name,
+            }
+          }
+        })
+      } else {
+        if (!state.bible[item.entity][item.id!]) {
+          state.bible[item.entity][item.id!] = {
+            id: item.id,
+            title: item.title,
+            tags: {},
+          }
+        }
+
+        // DELETE OPERATION
+        // eslint-disable-next-line no-lonely-if
+        if (state.bible[item.entity][item.id!]?.tags?.[tagId]) {
+          delete state.bible.tags[tagId][item.entity][item.id!]
+          delete state.bible[item.entity][item.id!].tags[tagId]
+
+          // If words / strongs / nave, delete unused entity
+          if (['naves', 'strongsHebreu', 'strongsGrec', 'words'].includes(item.entity)) {
+            const hasTags = Object.keys(state.bible[item.entity][item.id!].tags).length
+
+            if (!hasTags) {
+              delete state.bible[item.entity][item.id!]
+            }
+          }
+
+          // ADD OPERATION
+        } else {
+          if (!state.bible.tags[tagId][item.entity]) {
+            state.bible.tags[tagId][item.entity] = {}
+          }
+          state.bible.tags[tagId][item.entity][item.id!] = true
+
+          if (!state.bible[item.entity][item.id!].tags) {
+            state.bible[item.entity][item.id!].tags = {}
+          }
+          state.bible[item.entity][item.id!].tags[tagId] = {
+            id: tagId,
+            name: state.bible.tags[tagId].name,
+          }
+        }
+      }
+    })
+
+    // Version Update
+    builder.addCase(setVersionUpdated, (state, action) => {
+      state.needsUpdate[action.payload] = false
+    })
+    builder.addCase(getVersionUpdate.fulfilled, (state, action) => {
+      state.needsUpdate = { ...state.needsUpdate, ...action.payload }
+    })
+    builder.addCase(getDatabaseUpdate.fulfilled, (state, action) => {
+      state.needsUpdate = { ...state.needsUpdate, ...action.payload }
+    })
+  },
+})
+
+// Export actions
+export const {
+  verifyEmail,
+  setFontFamily,
+  saveAllLogsAsSeen,
+  onUserLoginSuccess,
+  onUserLogout,
+  onUserUpdateProfile,
+  receiveLiveUpdates,
+  receiveSubcollectionUpdates,
+  importData,
+  setNotificationVOD,
+  setNotificationId,
+  toggleCompareVersion,
+  resetCompareVersion,
+  addChangelog,
+  getChangelogFail,
+  appFetchData,
+  appFetchDataFail,
+} = userSlice.actions
+
+// Export action type constants for backward compatibility
+export const USER_LOGIN_SUCCESS = onUserLoginSuccess.type
+export const USER_UPDATE_PROFILE = onUserUpdateProfile.type
+export const USER_LOGOUT = onUserLogout.type
+export const SAVE_ALL_LOGS_AS_SEEN = saveAllLogsAsSeen.type
+export const SET_NOTIFICATION_VOD = setNotificationVOD.type
+export const SET_NOTIFICATION_ID = setNotificationId.type
+export const TOGGLE_COMPARE_VERSION = toggleCompareVersion.type
+export const RESET_COMPARE_VERSION = resetCompareVersion.type
+export const GET_CHANGELOG_SUCCESS = addChangelog.type
+export const GET_CHANGELOG_FAIL = getChangelogFail.type
+export const SET_FONT_FAMILY = setFontFamily.type
+export const APP_FETCH_DATA = appFetchData.type
+export const APP_FETCH_DATA_FAIL = appFetchDataFail.type
+export const EMAIL_VERIFIED = verifyEmail.type
+export const RECEIVE_LIVE_UPDATES = receiveLiveUpdates.type
+export const RECEIVE_SUBCOLLECTION_UPDATES = receiveSubcollectionUpdates.type
+export const IMPORT_DATA = importData.type
+export const GET_CHANGELOG = 'user/GET_CHANGELOG'
+
+// Changelog thunk
 export function getChangelog() {
   return async (dispatch: any, getState: any) => {
-    dispatch({
-      type: GET_CHANGELOG,
-    })
+    dispatch({ type: GET_CHANGELOG })
     const lastChangelog = getState().user.changelog.lastSeen.toString()
     const changelogDoc = firebaseDb
       .collection('changelog')
@@ -740,30 +1072,9 @@ export function getChangelog() {
       return dispatch(addChangelog(changelog))
     } catch (e) {
       console.log(e)
-      return dispatch({
-        type: GET_CHANGELOG_FAIL,
-      })
+      return dispatch(getChangelogFail())
     }
   }
 }
 
-export function addChangelog(payload: any) {
-  return {
-    type: GET_CHANGELOG_SUCCESS,
-    payload,
-  }
-}
-
-export function setSubscription(payload: SubscriptionType) {
-  return {
-    type: SET_SUBSCRIPTION,
-    payload,
-  }
-}
-
-export function importData(payload: any) {
-  return {
-    type: IMPORT_DATA,
-    payload,
-  }
-}
+export default userSlice.reducer

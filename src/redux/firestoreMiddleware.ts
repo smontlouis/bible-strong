@@ -1,87 +1,70 @@
 import { getAuth } from '@react-native-firebase/auth'
+import { isAnyOf, Middleware } from '@reduxjs/toolkit'
 import * as Sentry from '@sentry/react-native'
-import { tokenManager } from '~helpers/TokenManager'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
-import {
-  USER_LOGOUT,
-  USER_UPDATE_PROFILE,
-  //
-  SET_SETTINGS_ALIGN_CONTENT,
-  SET_SETTINGS_LINE_HEIGHT,
-  INCREASE_SETTINGS_FONTSIZE_SCALE,
-  DECREASE_SETTINGS_FONTSIZE_SCALE,
-  SET_SETTINGS_TEXT_DISPLAY,
-  SET_SETTINGS_PRESS,
-  SET_SETTINGS_NOTES_DISPLAY,
-  SET_SETTINGS_LINKS_DISPLAY,
-  SET_SETTINGS_COMMENTS_DISPLAY,
-  //
-  CHANGE_COLOR,
-  //
-  ADD_BOOKMARK,
-  REMOVE_BOOKMARK,
-  UPDATE_BOOKMARK,
-  MOVE_BOOKMARK,
-  //
-  ADD_NOTE,
-  REMOVE_NOTE,
-  //
-  ADD_LINK,
-  UPDATE_LINK,
-  REMOVE_LINK,
-  //
-  ADD_TAG,
-  REMOVE_TAG,
-  TOGGLE_TAG_ENTITY,
-  UPDATE_TAG,
-  //
-  CREATE_STUDY,
-  UPDATE_STUDY,
-  DELETE_STUDY,
-  PUBLISH_STUDY,
-  //
-  //
-  ADD_HIGHLIGHT,
-  REMOVE_HIGHLIGHT,
-  CHANGE_HIGHLIGHT_COLOR,
-  //
-  TOGGLE_COMPARE_VERSION,
-  RESET_COMPARE_VERSION,
-  //
-  SET_SUBSCRIPTION,
-  SET_SETTINGS_PREFERRED_DARK_THEME,
-  SET_SETTINGS_PREFERRED_LIGHT_THEME,
-  SET_SETTINGS_PREFERRED_COLOR_SCHEME,
-  //
-  TOGGLE_SETTINGS_SHARE_APP_NAME,
-  TOGGLE_SETTINGS_SHARE_INLINE_VERSES,
-  TOGGLE_SETTINGS_SHARE_QUOTES,
-  TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS,
-  SAVE_ALL_LOGS_AS_SEEN,
-  SET_DEFAULT_COLOR_NAME,
-  SET_DEFAULT_COLOR_TYPE,
-  //
-  IMPORT_DATA,
-} from './modules/user'
-import {
-  ADD_CUSTOM_COLOR,
-  UPDATE_CUSTOM_COLOR,
-  DELETE_CUSTOM_COLOR,
-} from './modules/user/customColors'
+import { tokenManager } from '~helpers/TokenManager'
 
-import { firebaseDb, doc, setDoc, getDoc, deleteDoc, deleteField } from '../helpers/firebase'
-import { markAsRead, resetPlan, fetchPlan, removePlan } from './modules/plan'
-import { RootState } from '~redux/modules/reducer'
-import { diff } from '~helpers/deep-obj'
-import { toast } from 'sonner-native'
-import i18n from '~i18n'
+// Import action creators from user.ts
 import {
-  type SubcollectionName,
-  SUBCOLLECTION_NAMES,
-  batchWriteSubcollection,
-  type BatchChanges,
-} from '~helpers/firestoreSubcollections'
+  importData,
+  onUserLogout,
+  resetCompareVersion,
+  saveAllLogsAsSeen,
+  toggleCompareVersion,
+} from './modules/user'
+
+// Import action creators from sub-modules
+import {
+  addBookmarkAction,
+  moveBookmark,
+  removeBookmark,
+  updateBookmark,
+} from './modules/user/bookmarks'
+import { addCustomColor, deleteCustomColor, updateCustomColor } from './modules/user/customColors'
+import {
+  addHighlightAction,
+  changeHighlightColor,
+  removeHighlight,
+} from './modules/user/highlights'
+import { addLinkAction, deleteLink, updateLink } from './modules/user/links'
+import { addNoteAction, deleteNote } from './modules/user/notes'
+import {
+  changeColor,
+  decreaseSettingsFontSizeScale,
+  increaseSettingsFontSizeScale,
+  setDefaultColorName,
+  setDefaultColorType,
+  setSettingsAlignContent,
+  setSettingsCommentaires,
+  setSettingsLineHeight,
+  setSettingsLinksDisplay,
+  setSettingsNotesDisplay,
+  setSettingsPreferredColorScheme,
+  setSettingsPreferredDarkTheme,
+  setSettingsPreferredLightTheme,
+  setSettingsPress,
+  setSettingsTextDisplay,
+  toggleSettingsShareAppName,
+  toggleSettingsShareLineBreaks,
+  toggleSettingsShareQuotes,
+  toggleSettingsShareVerseNumbers,
+} from './modules/user/settings'
+import { deleteStudy, publishStudyAction, updateStudy } from './modules/user/studies'
+import { addTag, removeTag, toggleTagEntity, updateTag } from './modules/user/tags'
+
+import { toast } from 'sonner-native'
+import { diff } from '~helpers/deep-obj'
 import { migrateImportedDataToSubcollections } from '~helpers/firestoreMigration'
+import {
+  batchWriteSubcollection,
+  SUBCOLLECTION_NAMES,
+  type BatchChanges,
+  type SubcollectionName,
+} from '~helpers/firestoreSubcollections'
+import i18n from '~i18n'
+import { RootState } from '~redux/modules/reducer'
+import { deleteDoc, deleteField, doc, firebaseDb, getDoc, setDoc } from '../helpers/firebase'
+import { fetchPlan, markAsRead, removePlan, resetPlan } from './modules/plan'
 
 export const removeUndefinedVariables = (obj: any) => JSON.parse(JSON.stringify(obj)) // Remove undefined variables
 
@@ -226,16 +209,58 @@ async function handleSyncWithRetry(
   }
 }
 
-export default (store: any) => (next: any) => async (action: any) => {
+// RTK Matchers for action grouping
+const isPlanAction = isAnyOf(removePlan, fetchPlan.fulfilled, resetPlan, markAsRead)
+
+const isSettingsAction = isAnyOf(
+  setSettingsAlignContent,
+  setSettingsLineHeight,
+  increaseSettingsFontSizeScale,
+  decreaseSettingsFontSizeScale,
+  setSettingsTextDisplay,
+  setSettingsPreferredDarkTheme,
+  setSettingsPreferredLightTheme,
+  setSettingsPreferredColorScheme,
+  setSettingsPress,
+  setSettingsNotesDisplay,
+  setSettingsLinksDisplay,
+  setSettingsCommentaires,
+  changeColor,
+  toggleCompareVersion,
+  resetCompareVersion,
+  toggleSettingsShareAppName,
+  toggleSettingsShareLineBreaks,
+  toggleSettingsShareQuotes,
+  toggleSettingsShareVerseNumbers,
+  saveAllLogsAsSeen,
+  setDefaultColorName,
+  setDefaultColorType
+)
+
+const isCustomColorAction = isAnyOf(addCustomColor, updateCustomColor, deleteCustomColor)
+
+const isBookmarkAction = isAnyOf(addBookmarkAction, removeBookmark, updateBookmark, moveBookmark)
+
+const isNoteAction = isAnyOf(addNoteAction, deleteNote)
+
+const isLinkAction = isAnyOf(addLinkAction, updateLink, deleteLink)
+
+const isHighlightAction = isAnyOf(addHighlightAction, removeHighlight, changeHighlightColor)
+
+const isTagAction = isAnyOf(addTag, removeTag, updateTag)
+
+const isStudyUpdateAction = isAnyOf(updateStudy, publishStudyAction)
+
+const firestoreMiddleware: Middleware = store => next => async action => {
   const oldState = store.getState()
   const result = next(action)
 
   // Early return for logout - prevent race conditions with app lifecycle
-  if (action.type === USER_LOGOUT) {
+  if (onUserLogout.match(action)) {
     return result
   }
 
-  const state = store.getState()
+  const state = store.getState() as RootState
 
   const deleteMarker = deleteField()
   const diffState: any = diff(oldState, state, deleteMarker)
@@ -249,238 +274,139 @@ export default (store: any) => (next: any) => async (action: any) => {
   }
 
   const userId = currentUser.uid
-  const { user, plan }: RootState = state
+  const { user, plan } = state
   const userDocRef = doc(firebaseDb, 'users', userId)
 
   // Schedule un backup automatique après chaque changement (debounced 30s)
   autoBackupManager.scheduleBackup(state)
 
-  switch (action.type) {
-    // ========== PLAN SYNC ==========
-    case removePlan.type:
-    case fetchPlan.fulfilled.type:
-    case resetPlan.type:
-    case markAsRead.type: {
-      try {
+  // ========== PLAN SYNC ==========
+  if (isPlanAction(action)) {
+    try {
+      await setDoc(
+        userDocRef,
+        { plan: removeUndefinedVariables(plan.ongoingPlans) },
+        { merge: true }
+      )
+    } catch (error) {
+      console.log('[Firestore] Error syncing plan:', error)
+      toast.error(i18n.t('app.syncError'))
+      Sentry.captureException(error, {
+        tags: { feature: 'sync', action: 'plan_sync' },
+        extra: { userId },
+      })
+    }
+    return result
+  }
+
+  // ========== SETTINGS SYNC (reste dans le document user) ==========
+  if (isSettingsAction(action)) {
+    if (!diffState?.user?.bible?.settings) return result
+
+    const cleanedSettings = cleanForFirestore(diffState.user.bible.settings)
+
+    // Ne pas sync si le résultat est vide/null (évite les erreurs Firestore)
+    if (!cleanedSettings) return result
+
+    await handleSyncWithRetry(
+      async () => {
+        await setDoc(userDocRef, { bible: { settings: cleanedSettings } }, { merge: true })
+      },
+      userId,
+      'settings_sync',
+      state
+    )
+    return result
+  }
+
+  // ========== CUSTOM HIGHLIGHT COLORS SYNC ==========
+  if (isCustomColorAction(action)) {
+    const customHighlightColors = state.user.bible.settings.customHighlightColors ?? []
+
+    await handleSyncWithRetry(
+      async () => {
         await setDoc(
           userDocRef,
-          { plan: removeUndefinedVariables(plan.ongoingPlans) },
-          { merge: true }
-        )
-      } catch (error) {
-        console.log('[Firestore] Error syncing plan:', error)
-        toast.error(i18n.t('app.syncError'))
-        Sentry.captureException(error, {
-          tags: { feature: 'sync', action: 'plan_sync' },
-          extra: { userId },
-        })
-      }
-      break
-    }
-
-    // ========== SETTINGS SYNC (reste dans le document user) ==========
-    case SET_SETTINGS_ALIGN_CONTENT:
-    case SET_SETTINGS_LINE_HEIGHT:
-    case INCREASE_SETTINGS_FONTSIZE_SCALE:
-    case DECREASE_SETTINGS_FONTSIZE_SCALE:
-    case SET_SETTINGS_TEXT_DISPLAY:
-    case SET_SETTINGS_PREFERRED_DARK_THEME:
-    case SET_SETTINGS_PREFERRED_LIGHT_THEME:
-    case SET_SETTINGS_PREFERRED_COLOR_SCHEME:
-    case SET_SETTINGS_PRESS:
-    case SET_SETTINGS_NOTES_DISPLAY:
-    case SET_SETTINGS_LINKS_DISPLAY:
-    case SET_SETTINGS_COMMENTS_DISPLAY:
-    case CHANGE_COLOR:
-    case TOGGLE_COMPARE_VERSION:
-    case RESET_COMPARE_VERSION:
-    case TOGGLE_SETTINGS_SHARE_APP_NAME:
-    case TOGGLE_SETTINGS_SHARE_INLINE_VERSES:
-    case TOGGLE_SETTINGS_SHARE_QUOTES:
-    case TOGGLE_SETTINGS_SHARE_VERSE_NUMBERS:
-    case SAVE_ALL_LOGS_AS_SEEN:
-    case SET_DEFAULT_COLOR_NAME:
-    case SET_DEFAULT_COLOR_TYPE: {
-      if (!diffState?.user?.bible?.settings) break
-
-      const cleanedSettings = cleanForFirestore(diffState.user.bible.settings)
-
-      // Ne pas sync si le résultat est vide/null (évite les erreurs Firestore)
-      if (!cleanedSettings) break
-
-      await handleSyncWithRetry(
-        async () => {
-          await setDoc(userDocRef, { bible: { settings: cleanedSettings } }, { merge: true })
-        },
-        userId,
-        'settings_sync',
-        state
-      )
-      break
-    }
-
-    // ========== CUSTOM HIGHLIGHT COLORS SYNC ==========
-    // Sync le tableau complet (pas le diff) pour éviter les problèmes de merge avec Firestore
-    case ADD_CUSTOM_COLOR:
-    case UPDATE_CUSTOM_COLOR:
-    case DELETE_CUSTOM_COLOR: {
-      const customHighlightColors = state.user.bible.settings.customHighlightColors ?? []
-
-      await handleSyncWithRetry(
-        async () => {
-          await setDoc(
-            userDocRef,
-            {
-              bible: {
-                settings: {
-                  customHighlightColors: removeUndefinedVariables(customHighlightColors),
-                },
+          {
+            bible: {
+              settings: {
+                customHighlightColors: removeUndefinedVariables(customHighlightColors),
               },
             },
-            { merge: true }
-          )
-        },
-        userId,
-        'custom_colors_sync',
-        state
-      )
-      break
-    }
-
-    // ========== BOOKMARKS SYNC (sous-collection) ==========
-    case ADD_BOOKMARK:
-    case REMOVE_BOOKMARK:
-    case UPDATE_BOOKMARK:
-    case MOVE_BOOKMARK: {
-      if (!diffState?.user?.bible?.bookmarks) break
-
-      await handleSyncWithRetry(
-        async () => {
-          await syncSubcollectionChanges(
-            userId,
-            'bookmarks',
-            diffState.user.bible.bookmarks,
-            user.bible.bookmarks,
-            deleteMarker
-          )
-        },
-        userId,
-        'bookmarks_sync',
-        state
-      )
-      break
-    }
-
-    // ========== NOTES SYNC (sous-collection) ==========
-    case ADD_NOTE:
-    case REMOVE_NOTE: {
-      if (!diffState?.user?.bible?.notes) break
-
-      await handleSyncWithRetry(
-        async () => {
-          await syncSubcollectionChanges(
-            userId,
-            'notes',
-            diffState.user.bible.notes,
-            user.bible.notes,
-            deleteMarker
-          )
-        },
-        userId,
-        'notes_sync',
-        state
-      )
-      break
-    }
-
-    // ========== LINKS SYNC (sous-collection) ==========
-    case ADD_LINK:
-    case UPDATE_LINK:
-    case REMOVE_LINK: {
-      if (!diffState?.user?.bible?.links) break
-
-      await handleSyncWithRetry(
-        async () => {
-          await syncSubcollectionChanges(
-            userId,
-            'links',
-            diffState.user.bible.links,
-            user.bible.links,
-            deleteMarker
-          )
-        },
-        userId,
-        'links_sync',
-        state
-      )
-
-      // Si des tags ont aussi changé (via removeEntityInTags), sync les tags
-      if (diffState?.user?.bible?.tags) {
-        await handleSyncWithRetry(
-          async () => {
-            await syncSubcollectionChanges(
-              userId,
-              'tags',
-              diffState.user.bible.tags,
-              user.bible.tags,
-              deleteMarker
-            )
           },
-          userId,
-          'tags_sync_from_link',
-          state
+          { merge: true }
         )
-      }
-      break
-    }
+      },
+      userId,
+      'custom_colors_sync',
+      state
+    )
+    return result
+  }
 
-    // ========== HIGHLIGHTS SYNC (sous-collection) ==========
-    case ADD_HIGHLIGHT:
-    case REMOVE_HIGHLIGHT:
-    case CHANGE_HIGHLIGHT_COLOR: {
-      if (!diffState?.user?.bible?.highlights) break
+  // ========== BOOKMARKS SYNC (sous-collection) ==========
+  if (isBookmarkAction(action)) {
+    if (!diffState?.user?.bible?.bookmarks) return result
 
-      await handleSyncWithRetry(
-        async () => {
-          await syncSubcollectionChanges(
-            userId,
-            'highlights',
-            diffState.user.bible.highlights,
-            user.bible.highlights,
-            deleteMarker
-          )
-        },
-        userId,
-        'highlights_sync',
-        state
-      )
-
-      // Si des tags ont aussi changé (via removeEntityInTags), sync les tags
-      if (diffState?.user?.bible?.tags) {
-        await handleSyncWithRetry(
-          async () => {
-            await syncSubcollectionChanges(
-              userId,
-              'tags',
-              diffState.user.bible.tags,
-              user.bible.tags,
-              deleteMarker
-            )
-          },
+    await handleSyncWithRetry(
+      async () => {
+        await syncSubcollectionChanges(
           userId,
-          'tags_sync_from_highlight',
-          state
+          'bookmarks',
+          diffState.user.bible.bookmarks,
+          user.bible.bookmarks,
+          deleteMarker
         )
-      }
-      break
-    }
+      },
+      userId,
+      'bookmarks_sync',
+      state
+    )
+    return result
+  }
 
-    // ========== TAGS SYNC (sous-collection) ==========
-    case ADD_TAG:
-    case REMOVE_TAG:
-    case UPDATE_TAG: {
-      if (!diffState?.user?.bible?.tags) break
+  // ========== NOTES SYNC (sous-collection) ==========
+  if (isNoteAction(action)) {
+    if (!diffState?.user?.bible?.notes) return result
 
+    await handleSyncWithRetry(
+      async () => {
+        await syncSubcollectionChanges(
+          userId,
+          'notes',
+          diffState.user.bible.notes,
+          user.bible.notes,
+          deleteMarker
+        )
+      },
+      userId,
+      'notes_sync',
+      state
+    )
+    return result
+  }
+
+  // ========== LINKS SYNC (sous-collection) ==========
+  if (isLinkAction(action)) {
+    if (!diffState?.user?.bible?.links) return result
+
+    await handleSyncWithRetry(
+      async () => {
+        await syncSubcollectionChanges(
+          userId,
+          'links',
+          diffState.user.bible.links,
+          user.bible.links,
+          deleteMarker
+        )
+      },
+      userId,
+      'links_sync',
+      state
+    )
+
+    // Si des tags ont aussi changé (via removeEntityInTags), sync les tags
+    if (diffState?.user?.bible?.tags) {
       await handleSyncWithRetry(
         async () => {
           await syncSubcollectionChanges(
@@ -492,195 +418,253 @@ export default (store: any) => (next: any) => async (action: any) => {
           )
         },
         userId,
-        'tags_sync',
+        'tags_sync_from_link',
         state
       )
-      break
+    }
+    return result
+  }
+
+  // ========== HIGHLIGHTS SYNC (sous-collection) ==========
+  if (isHighlightAction(action)) {
+    if (!diffState?.user?.bible?.highlights) return result
+
+    await handleSyncWithRetry(
+      async () => {
+        await syncSubcollectionChanges(
+          userId,
+          'highlights',
+          diffState.user.bible.highlights,
+          user.bible.highlights,
+          deleteMarker
+        )
+      },
+      userId,
+      'highlights_sync',
+      state
+    )
+
+    // Si des tags ont aussi changé (via removeEntityInTags), sync les tags
+    if (diffState?.user?.bible?.tags) {
+      await handleSyncWithRetry(
+        async () => {
+          await syncSubcollectionChanges(
+            userId,
+            'tags',
+            diffState.user.bible.tags,
+            user.bible.tags,
+            deleteMarker
+          )
+        },
+        userId,
+        'tags_sync_from_highlight',
+        state
+      )
+    }
+    return result
+  }
+
+  // ========== TAGS SYNC (sous-collection) ==========
+  if (isTagAction(action)) {
+    if (!diffState?.user?.bible?.tags) return result
+
+    await handleSyncWithRetry(
+      async () => {
+        await syncSubcollectionChanges(
+          userId,
+          'tags',
+          diffState.user.bible.tags,
+          user.bible.tags,
+          deleteMarker
+        )
+      },
+      userId,
+      'tags_sync',
+      state
+    )
+    return result
+  }
+
+  // ========== TOGGLE TAG ENTITY (modifie tag ET entity) ==========
+  if (toggleTagEntity.match(action)) {
+    if (!diffState?.user?.bible) return result
+
+    // Sync les tags modifiés
+    if (diffState.user.bible.tags) {
+      await handleSyncWithRetry(
+        async () => {
+          await syncSubcollectionChanges(
+            userId,
+            'tags',
+            diffState.user.bible.tags,
+            user.bible.tags,
+            deleteMarker
+          )
+        },
+        userId,
+        'tags_sync_toggle',
+        state
+      )
     }
 
-    // ========== TOGGLE TAG ENTITY (modifie tag ET entity) ==========
-    case TOGGLE_TAG_ENTITY: {
-      if (!diffState?.user?.bible) break
-
-      // Sync les tags modifiés
-      if (diffState.user.bible.tags) {
+    // Sync les entités modifiées (highlights, notes, etc.)
+    for (const collection of SUBCOLLECTION_NAMES) {
+      if (collection !== 'tags' && diffState.user.bible[collection]) {
         await handleSyncWithRetry(
           async () => {
             await syncSubcollectionChanges(
               userId,
-              'tags',
-              diffState.user.bible.tags,
-              user.bible.tags,
+              collection,
+              diffState.user.bible[collection],
+              user.bible[collection],
               deleteMarker
             )
           },
           userId,
-          'tags_sync_toggle',
+          `${collection}_sync_toggle`,
           state
         )
       }
-
-      // Sync les entités modifiées (highlights, notes, etc.)
-      for (const collection of SUBCOLLECTION_NAMES) {
-        if (collection !== 'tags' && diffState.user.bible[collection]) {
-          await handleSyncWithRetry(
-            async () => {
-              await syncSubcollectionChanges(
-                userId,
-                collection,
-                diffState.user.bible[collection],
-                user.bible[collection],
-                deleteMarker
-              )
-            },
-            userId,
-            `${collection}_sync_toggle`,
-            state
-          )
-        }
-      }
-      break
     }
+    return result
+  }
 
-    // ========== STUDIES SYNC (collection séparée - inchangé) ==========
-    case CREATE_STUDY:
-    case UPDATE_STUDY:
-    case PUBLISH_STUDY: {
-      if (!diffState?.user?.bible?.studies) break
+  // ========== STUDIES SYNC (collection séparée) ==========
+  if (isStudyUpdateAction(action)) {
+    if (!diffState?.user?.bible?.studies) return result
 
-      const { studies } = diffState.user.bible
+    const { studies } = diffState.user.bible
 
-      try {
-        await Promise.all(
-          Object.entries(studies).map(async ([studyId, obj]) => {
-            const studyDocRef = doc(firebaseDb, 'studies', studyId)
-            const studyContent = state.user.bible.studies[studyId]?.content?.ops
+    try {
+      await Promise.all(
+        Object.entries(studies).map(async ([studyId, obj]) => {
+          const studyDocRef = doc(firebaseDb, 'studies', studyId)
+          const studyContent = state.user.bible.studies[studyId]?.content?.ops
 
-            try {
-              await setDoc(
-                studyDocRef,
-                {
-                  ...removeUndefinedVariables(obj),
-                  content: { ops: studyContent || [] },
-                },
-                { merge: true }
-              )
-              console.log(`[Firestore] Study ${studyId} synced successfully`)
-            } catch (studyError) {
-              console.error(`Failed to sync study ${studyId}:`, studyError)
-              Sentry.captureException(studyError, {
-                tags: { feature: 'sync', action: 'study_sync', studyId },
-                extra: { userId, studyTitle: (obj as any)?.title || 'unknown' },
-              })
-              throw studyError
-            }
-          })
-        )
-      } catch (studiesError) {
-        console.error('Studies sync failed:', studiesError)
-        toast.error(i18n.t('app.syncError'))
-      }
-      break
-    }
-
-    case DELETE_STUDY: {
-      if (!diffState?.user?.bible?.studies) break
-      const { studies } = diffState.user.bible
-
-      try {
-        await Promise.all(
-          Object.entries(studies).map(async ([studyId]) => {
-            const studyDocRef = doc(firebaseDb, 'studies', studyId)
-
-            try {
-              const studyDocSnap = await getDoc(studyDocRef)
-              if (!studyDocSnap.exists()) {
-                console.log(`[Firestore] Study ${studyId} already deleted`)
-                return
-              }
-
-              await deleteDoc(studyDocRef)
-              console.log(`[Firestore] Study ${studyId} deleted successfully`)
-            } catch (deleteError) {
-              console.error(`Failed to delete study ${studyId}:`, deleteError)
-              Sentry.captureException(deleteError, {
-                tags: { feature: 'sync', action: 'study_delete', studyId },
-                extra: { userId },
-              })
-              throw deleteError
-            }
-          })
-        )
-      } catch (deletionError) {
-        console.error('Studies deletion failed:', deletionError)
-        toast.error(i18n.t('app.syncError'))
-      }
-      break
-    }
-
-    // ========== IMPORT DATA (migration vers sous-collections) ==========
-    case IMPORT_DATA: {
-      const { bible, studies, plan: importedPlan } = action.payload
-
-      await handleSyncWithRetry(
-        async () => {
-          // 1. Migrer les données vers les sous-collections
-          await migrateImportedDataToSubcollections(userId, {
-            bookmarks: bible?.bookmarks,
-            highlights: bible?.highlights,
-            notes: bible?.notes,
-            links: bible?.links,
-            tags: bible?.tags,
-            strongsHebreu: bible?.strongsHebreu,
-            strongsGrec: bible?.strongsGrec,
-            words: bible?.words,
-            naves: bible?.naves,
-          })
-
-          // 2. Sync settings dans le document user
-          if (bible?.settings) {
+          try {
             await setDoc(
-              userDocRef,
-              { bible: { settings: removeUndefinedVariables(bible.settings) } },
+              studyDocRef,
+              {
+                ...removeUndefinedVariables(obj),
+                content: { ops: studyContent || [] },
+              },
               { merge: true }
             )
-          }
-
-          // 3. Sync plan
-          if (importedPlan) {
-            await setDoc(
-              userDocRef,
-              { plan: removeUndefinedVariables(importedPlan) },
-              { merge: true }
-            )
-          }
-        },
-        userId,
-        'import_data',
-        state
-      )
-
-      // 4. Sync studies (collection séparée)
-      if (studies && Object.keys(studies).length > 0) {
-        try {
-          await Promise.all(
-            Object.entries(studies).map(async ([studyId, study]) => {
-              await setDoc(doc(firebaseDb, 'studies', studyId), removeUndefinedVariables(study), {
-                merge: true,
-              })
+            console.log(`[Firestore] Study ${studyId} synced successfully`)
+          } catch (studyError) {
+            console.error(`Failed to sync study ${studyId}:`, studyError)
+            Sentry.captureException(studyError, {
+              tags: { feature: 'sync', action: 'study_sync', studyId },
+              extra: { userId, studyTitle: (obj as any)?.title || 'unknown' },
             })
-          )
-          console.log('[Sync] Studies imported successfully')
-        } catch (studiesError) {
-          console.error('[Sync] Failed to import studies:', studiesError)
-          toast.error(i18n.t('app.syncError'))
-        }
-      }
-      break
+            throw studyError
+          }
+        })
+      )
+    } catch (studiesError) {
+      console.error('Studies sync failed:', studiesError)
+      toast.error(i18n.t('app.syncError'))
     }
+    return result
+  }
 
-    default:
+  if (deleteStudy.match(action)) {
+    if (!diffState?.user?.bible?.studies) return result
+    const { studies } = diffState.user.bible
+
+    try {
+      await Promise.all(
+        Object.entries(studies).map(async ([studyId]) => {
+          const studyDocRef = doc(firebaseDb, 'studies', studyId)
+
+          try {
+            const studyDocSnap = await getDoc(studyDocRef)
+            if (!studyDocSnap.exists()) {
+              console.log(`[Firestore] Study ${studyId} already deleted`)
+              return
+            }
+
+            await deleteDoc(studyDocRef)
+            console.log(`[Firestore] Study ${studyId} deleted successfully`)
+          } catch (deleteError) {
+            console.error(`Failed to delete study ${studyId}:`, deleteError)
+            Sentry.captureException(deleteError, {
+              tags: { feature: 'sync', action: 'study_delete', studyId },
+              extra: { userId },
+            })
+            throw deleteError
+          }
+        })
+      )
+    } catch (deletionError) {
+      console.error('Studies deletion failed:', deletionError)
+      toast.error(i18n.t('app.syncError'))
+    }
+    return result
+  }
+
+  // ========== IMPORT DATA (migration vers sous-collections) ==========
+  if (importData.match(action)) {
+    const { bible, studies, plan: importedPlan } = action.payload
+
+    await handleSyncWithRetry(
+      async () => {
+        // 1. Migrer les données vers les sous-collections
+        await migrateImportedDataToSubcollections(userId, {
+          bookmarks: bible?.bookmarks,
+          highlights: bible?.highlights,
+          notes: bible?.notes,
+          links: bible?.links,
+          tags: bible?.tags,
+          strongsHebreu: bible?.strongsHebreu,
+          strongsGrec: bible?.strongsGrec,
+          words: bible?.words,
+          naves: bible?.naves,
+        })
+
+        // 2. Sync settings dans le document user
+        if (bible?.settings) {
+          await setDoc(
+            userDocRef,
+            { bible: { settings: removeUndefinedVariables(bible.settings) } },
+            { merge: true }
+          )
+        }
+
+        // 3. Sync plan
+        if (importedPlan) {
+          await setDoc(
+            userDocRef,
+            { plan: removeUndefinedVariables(importedPlan) },
+            { merge: true }
+          )
+        }
+      },
+      userId,
+      'import_data',
+      state
+    )
+
+    // 4. Sync studies (collection séparée)
+    if (studies && Object.keys(studies).length > 0) {
+      try {
+        await Promise.all(
+          Object.entries(studies).map(async ([studyId, study]) => {
+            await setDoc(doc(firebaseDb, 'studies', studyId), removeUndefinedVariables(study), {
+              merge: true,
+            })
+          })
+        )
+        console.log('[Sync] Studies imported successfully')
+      } catch (studiesError) {
+        console.error('[Sync] Failed to import studies:', studiesError)
+        toast.error(i18n.t('app.syncError'))
+      }
+    }
+    return result
   }
 
   return result
 }
+
+export default firestoreMiddleware

@@ -1,43 +1,30 @@
-import produce from 'immer'
+import { createAction } from '@reduxjs/toolkit'
 import { VerseIds } from '~common/types'
 import orderVerses from '~helpers/orderVerses'
 import { Link } from '../user'
-import { removeEntityInTags } from '../utils'
 
+// Action type constants for backward compatibility
 export const ADD_LINK = 'user/ADD_LINK'
 export const UPDATE_LINK = 'user/UPDATE_LINK'
 export const REMOVE_LINK = 'user/REMOVE_LINK'
 
-export default produce((draft, action) => {
-  switch (action.type) {
-    case ADD_LINK: {
-      draft.bible.links = {
-        ...draft.bible.links,
-        ...action.payload,
-      }
-      break
-    }
-    case UPDATE_LINK: {
-      const { key, data } = action.payload
-      if (draft.bible.links[key]) {
-        draft.bible.links[key] = {
-          ...draft.bible.links[key],
-          ...data,
-        }
-      }
-      break
-    }
-    case REMOVE_LINK: {
-      delete draft.bible.links[action.payload]
-      removeEntityInTags(draft, 'links', action.payload)
-      break
-    }
-    default:
-      break
-  }
-})
+// RTK Action Creators
+export const addLinkAction = createAction(ADD_LINK, (linkData: { [key: string]: Link }) => ({
+  payload: linkData,
+}))
 
-// LINKS
+export const updateLink = createAction(UPDATE_LINK, (key: string, data: Partial<Link>) => ({
+  payload: { key, data },
+}))
+
+export const deleteLink = createAction(REMOVE_LINK, (linkId: string) => ({
+  payload: linkId,
+}))
+
+// Alias for consistency with removeNote, removeHighlight pattern
+export const removeLink = deleteLink
+
+// Helper function that creates the link with proper key
 export function addLink(link: Link, selectedVerses: VerseIds) {
   selectedVerses = orderVerses(selectedVerses)
   const key = Object.keys(selectedVerses).join('/')
@@ -45,22 +32,5 @@ export function addLink(link: Link, selectedVerses: VerseIds) {
   if (!key) {
     return
   }
-  return { type: ADD_LINK, payload: { [key]: link } }
+  return addLinkAction({ [key]: link })
 }
-
-export function updateLink(key: string, data: Partial<Link>) {
-  return {
-    type: UPDATE_LINK,
-    payload: { key, data },
-  }
-}
-
-export function deleteLink(linkId: string) {
-  return {
-    type: REMOVE_LINK,
-    payload: linkId,
-  }
-}
-
-// Alias for consistency with removeNote, removeHighlight pattern
-export const removeLink = deleteLink

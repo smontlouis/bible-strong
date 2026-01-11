@@ -481,7 +481,7 @@ const BibleViewer = ({
     }
   })
 
-  console.log('[Bible] BibleViewer', version, book.Numero, chapter, verse, focusVerses)
+  console.log('[Bible] BibleViewer', version, book.Numero, chapter, verse)
 
   // Wait for onboarding to complete before rendering Bible content
   // This prevents FileNotFoundException when Bible files don't exist yet

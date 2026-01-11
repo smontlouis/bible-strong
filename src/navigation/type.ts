@@ -1,6 +1,4 @@
 import { PrimitiveAtom } from 'jotai/vanilla'
-import { TranslationProps } from 'react-i18next'
-import { Insets } from 'react-native'
 import { EdgeInsets } from 'react-native-safe-area-context'
 import { BibleTab, SelectedVerses, VersionCode } from 'src/state/tabs'
 import { Book } from '~assets/bible_versions/books-desc'

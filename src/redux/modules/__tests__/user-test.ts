@@ -61,96 +61,96 @@ jest.mock('~themes/mauveColors', () => ({ primary: '#666' }))
 jest.mock('~themes/nightColors', () => ({ primary: '#777' }))
 
 import reducer, {
-  USER_LOGIN_SUCCESS,
-  USER_UPDATE_PROFILE,
-  USER_LOGOUT,
-  SET_FONT_FAMILY,
-  SET_NOTIFICATION_VOD,
-  SET_NOTIFICATION_ID,
-  TOGGLE_COMPARE_VERSION,
-  RESET_COMPARE_VERSION,
-  GET_CHANGELOG_SUCCESS,
-  GET_CHANGELOG_FAIL,
-  SET_SUBSCRIPTION,
-  EMAIL_VERIFIED,
-  APP_FETCH_DATA,
-  APP_FETCH_DATA_FAIL,
-  SAVE_ALL_LOGS_AS_SEEN,
-  RECEIVE_SUBCOLLECTION_UPDATES,
+  UserState,
+  verifyEmail,
+  setFontFamily,
+  saveAllLogsAsSeen,
+  onUserLoginSuccess,
+  onUserLogout,
+  onUserUpdateProfile,
+  receiveSubcollectionUpdates,
+  setNotificationVOD,
+  setNotificationId,
+  toggleCompareVersion,
+  resetCompareVersion,
+  addChangelog,
+  getChangelogFail,
+  appFetchData,
+  appFetchDataFail,
 } from '../user'
-import type { UserState } from '../user'
 
-const getInitialState = () => ({
-  id: '',
-  email: '',
-  displayName: '',
-  photoURL: '',
-  provider: '',
-  subscription: undefined,
-  emailVerified: false,
-  createdAt: null,
-  isLoading: true,
-  notifications: {
-    verseOfTheDay: '07:00',
-    notificationId: '',
-  },
-  changelog: {
+const getInitialState = (): UserState =>
+  ({
+    id: '',
+    email: '',
+    displayName: '',
+    photoURL: '',
+    provider: '',
+    subscription: undefined,
+    emailVerified: false,
+    createdAt: null,
     isLoading: true,
-    lastSeen: 0,
-    data: [],
-  },
-  needsUpdate: {},
-  fontFamily: 'Avenir',
-  bible: {
-    changelog: {},
-    bookmarks: {},
-    highlights: {},
-    notes: {},
-    links: {},
-    studies: {},
-    tags: {},
-    strongsHebreu: {},
-    strongsGrec: {},
-    words: {},
-    naves: {},
-    settings: {
-      defaultBibleVersion: 'LSG',
-      alignContent: 'left',
-      lineHeight: 'normal',
-      fontSizeScale: 0,
-      textDisplay: 'inline',
-      preferredColorScheme: 'auto',
-      preferredLightTheme: 'default',
-      preferredDarkTheme: 'dark',
-      press: 'longPress',
-      notesDisplay: 'inline',
-      linksDisplay: 'inline',
-      commentsDisplay: false,
-      shareVerses: {
-        hasVerseNumbers: true,
-        hasInlineVerses: true,
-        hasQuotes: true,
-        hasAppName: true,
-      },
-      fontFamily: 'Avenir',
-      theme: 'default',
-      colors: {
-        default: { primary: '#000' },
-        dark: { primary: '#111' },
-        black: { primary: '#222' },
-        sepia: { primary: '#333' },
-        nature: { primary: '#444' },
-        sunset: { primary: '#555' },
-        mauve: { primary: '#666' },
-        night: { primary: '#777' },
-      },
-      compare: {
-        LSG: true,
-      },
-      customHighlightColors: [],
+    notifications: {
+      verseOfTheDay: '07:00',
+      notificationId: '',
     },
-  },
-}) as unknown as UserState
+    changelog: {
+      isLoading: true,
+      lastSeen: 0,
+      data: [],
+    },
+    needsUpdate: {},
+    fontFamily: 'Avenir',
+    bible: {
+      changelog: {},
+      bookmarks: {},
+      highlights: {},
+      notes: {},
+      links: {},
+      studies: {},
+      tags: {},
+      strongsHebreu: {},
+      strongsGrec: {},
+      words: {},
+      naves: {},
+      settings: {
+        defaultBibleVersion: 'LSG',
+        alignContent: 'left',
+        lineHeight: 'normal',
+        fontSizeScale: 0,
+        textDisplay: 'inline',
+        preferredColorScheme: 'auto',
+        preferredLightTheme: 'default',
+        preferredDarkTheme: 'dark',
+        press: 'longPress',
+        notesDisplay: 'inline',
+        linksDisplay: 'inline',
+        commentsDisplay: false,
+        shareVerses: {
+          hasVerseNumbers: true,
+          hasInlineVerses: true,
+          hasQuotes: true,
+          hasAppName: true,
+        },
+        fontFamily: 'Avenir',
+        theme: 'default',
+        colors: {
+          default: { primary: '#000' },
+          dark: { primary: '#111' },
+          black: { primary: '#222' },
+          sepia: { primary: '#333' },
+          nature: { primary: '#444' },
+          sunset: { primary: '#555' },
+          mauve: { primary: '#666' },
+          night: { primary: '#777' },
+        },
+        compare: {
+          LSG: true,
+        },
+        customHighlightColors: [],
+      },
+    },
+  }) as unknown as UserState
 
 // Helper to create partial state for testing
 const createState = (overrides: Partial<UserState>): UserState =>
@@ -166,61 +166,52 @@ describe('User Reducer', () => {
     initialState = getInitialState()
   })
 
-  describe('EMAIL_VERIFIED', () => {
+  describe('verifyEmail', () => {
     it('should set emailVerified to true', () => {
       const state = createState({ emailVerified: false })
-      const newState = reducer(state, { type: EMAIL_VERIFIED })
+      const newState = reducer(state, verifyEmail())
       expect(newState.emailVerified).toBe(true)
     })
   })
 
-  describe('APP_FETCH_DATA', () => {
+  describe('appFetchData', () => {
     it('should set isLoading to true', () => {
       const state = createState({ isLoading: false })
-      const newState = reducer(state, { type: APP_FETCH_DATA })
+      const newState = reducer(state, appFetchData())
       expect(newState.isLoading).toBe(true)
     })
   })
 
-  describe('APP_FETCH_DATA_FAIL', () => {
+  describe('appFetchDataFail', () => {
     it('should set isLoading to false', () => {
       const state = createState({ isLoading: true })
-      const newState = reducer(state, { type: APP_FETCH_DATA_FAIL })
+      const newState = reducer(state, appFetchDataFail())
       expect(newState.isLoading).toBe(false)
     })
   })
 
-  describe('SET_FONT_FAMILY', () => {
+  describe('setFontFamily', () => {
     it('should set font family', () => {
-      const newState = reducer(initialState, {
-        type: SET_FONT_FAMILY,
-        payload: 'Roboto',
-      })
+      const newState = reducer(initialState, setFontFamily('Roboto'))
       expect(newState.fontFamily).toBe('Roboto')
     })
   })
 
-  describe('SET_NOTIFICATION_VOD', () => {
+  describe('setNotificationVOD', () => {
     it('should set verse of the day notification time', () => {
-      const newState = reducer(initialState, {
-        type: SET_NOTIFICATION_VOD,
-        payload: '08:30',
-      })
+      const newState = reducer(initialState, setNotificationVOD('08:30'))
       expect(newState.notifications.verseOfTheDay).toBe('08:30')
     })
   })
 
-  describe('SET_NOTIFICATION_ID', () => {
+  describe('setNotificationId', () => {
     it('should set notification id', () => {
-      const newState = reducer(initialState, {
-        type: SET_NOTIFICATION_ID,
-        payload: 'notification-123',
-      })
+      const newState = reducer(initialState, setNotificationId('notification-123'))
       expect(newState.notifications.notificationId).toBe('notification-123')
     })
   })
 
-  describe('USER_LOGIN_SUCCESS', () => {
+  describe('onUserLoginSuccess', () => {
     it('should set user profile on login', () => {
       const profile = {
         id: 'user-123',
@@ -231,10 +222,7 @@ describe('User Reducer', () => {
         emailVerified: true,
         createdAt: '2023-01-01',
       }
-      const newState = reducer(initialState, {
-        type: USER_LOGIN_SUCCESS,
-        profile,
-      })
+      const newState = reducer(initialState, onUserLoginSuccess({ profile }))
       expect(newState.id).toBe('user-123')
       expect(newState.email).toBe('test@example.com')
       expect(newState.displayName).toBe('Test User')
@@ -255,46 +243,32 @@ describe('User Reducer', () => {
         provider: 'email',
         emailVerified: false,
       }
-      const newState = reducer(state, { type: USER_LOGIN_SUCCESS, profile })
+      const newState = reducer(state, onUserLoginSuccess({ profile }))
       expect(newState.displayName).toBe('Existing Name')
     })
   })
 
-  describe('USER_UPDATE_PROFILE', () => {
+  describe('onUserUpdateProfile', () => {
     it('should update displayName', () => {
-      const newState = reducer(initialState, {
-        type: USER_UPDATE_PROFILE,
-        payload: { displayName: 'Updated Name' },
-      })
+      const newState = reducer(initialState, onUserUpdateProfile({ displayName: 'Updated Name' }))
       expect(newState.displayName).toBe('Updated Name')
     })
 
     it('should update photoURL', () => {
-      const newState = reducer(initialState, {
-        type: USER_UPDATE_PROFILE,
-        payload: { photoURL: 'https://new-photo.com' },
-      })
+      const newState = reducer(
+        initialState,
+        onUserUpdateProfile({ photoURL: 'https://new-photo.com' })
+      )
       expect(newState.photoURL).toBe('https://new-photo.com')
     })
 
     it('should update emailVerified', () => {
-      const newState = reducer(initialState, {
-        type: USER_UPDATE_PROFILE,
-        payload: { emailVerified: true },
-      })
+      const newState = reducer(initialState, onUserUpdateProfile({ emailVerified: true }))
       expect(newState.emailVerified).toBe(true)
-    })
-
-    it('should handle profile in action.profile format', () => {
-      const newState = reducer(initialState, {
-        type: USER_UPDATE_PROFILE,
-        profile: { displayName: 'Via Profile' },
-      })
-      expect(newState.displayName).toBe('Via Profile')
     })
   })
 
-  describe('USER_LOGOUT', () => {
+  describe('onUserLogout', () => {
     it('should reset state but keep changelog', () => {
       const loggedInState = {
         ...initialState,
@@ -304,10 +278,19 @@ describe('User Reducer', () => {
         bible: {
           ...initialState.bible,
           changelog: { '2023-01-01': true },
-          bookmarks: { 'bookmark-1': { id: 'bookmark-1', book: 1, chapter: 1, verse: 1, version: 'LSG', date: Date.now() } },
+          bookmarks: {
+            'bookmark-1': {
+              id: 'bookmark-1',
+              book: 1,
+              chapter: 1,
+              verse: 1,
+              version: 'LSG',
+              date: Date.now(),
+            },
+          },
         },
       } as unknown as UserState
-      const newState = reducer(loggedInState, { type: USER_LOGOUT })
+      const newState = reducer(loggedInState, onUserLogout())
 
       expect(newState.id).toBe('')
       expect(newState.email).toBe('')
@@ -317,27 +300,18 @@ describe('User Reducer', () => {
     })
   })
 
-  describe('SAVE_ALL_LOGS_AS_SEEN', () => {
+  describe('saveAllLogsAsSeen', () => {
     it('should mark all logs as seen', () => {
-      const logs = [
-        { date: '2023-01-01' },
-        { date: '2023-01-02' },
-      ]
-      const newState = reducer(initialState, {
-        type: SAVE_ALL_LOGS_AS_SEEN,
-        payload: logs,
-      })
+      const logs = [{ date: '2023-01-01' }, { date: '2023-01-02' }]
+      const newState = reducer(initialState, saveAllLogsAsSeen(logs))
       expect((newState.bible.changelog as Record<string, boolean>)['2023-01-01']).toBe(true)
       expect((newState.bible.changelog as Record<string, boolean>)['2023-01-02']).toBe(true)
     })
   })
 
-  describe('TOGGLE_COMPARE_VERSION', () => {
+  describe('toggleCompareVersion', () => {
     it('should add version when not present', () => {
-      const newState = reducer(initialState, {
-        type: TOGGLE_COMPARE_VERSION,
-        payload: 'OST',
-      })
+      const newState = reducer(initialState, toggleCompareVersion('OST'))
       expect(newState.bible.settings.compare['OST']).toBe(true)
     })
 
@@ -352,15 +326,12 @@ describe('User Reducer', () => {
           },
         },
       } as UserState
-      const newState = reducer(state, {
-        type: TOGGLE_COMPARE_VERSION,
-        payload: 'OST',
-      })
+      const newState = reducer(state, toggleCompareVersion('OST'))
       expect(newState.bible.settings.compare['OST']).toBeUndefined()
     })
   })
 
-  describe('RESET_COMPARE_VERSION', () => {
+  describe('resetCompareVersion', () => {
     it('should reset compare to single version', () => {
       const state = {
         ...initialState,
@@ -372,24 +343,18 @@ describe('User Reducer', () => {
           },
         },
       } as UserState
-      const newState = reducer(state, {
-        type: RESET_COMPARE_VERSION,
-        payload: 'KJV',
-      })
+      const newState = reducer(state, resetCompareVersion('KJV'))
       expect(newState.bible.settings.compare).toEqual({ KJV: true })
     })
   })
 
-  describe('GET_CHANGELOG_SUCCESS', () => {
+  describe('addChangelog', () => {
     it('should add changelog entries and update lastSeen', () => {
       const changelogEntries = [
         { date: '2023-01-01', title: 'Update 1' },
         { date: '2023-01-02', title: 'Update 2' },
-      ]
-      const newState = reducer(initialState, {
-        type: GET_CHANGELOG_SUCCESS,
-        payload: changelogEntries,
-      })
+      ] as any
+      const newState = reducer(initialState, addChangelog(changelogEntries))
       expect(newState.changelog.isLoading).toBe(false)
       expect(newState.changelog.data).toEqual(changelogEntries)
       expect(newState.changelog.lastSeen).toBeTruthy()
@@ -403,40 +368,38 @@ describe('User Reducer', () => {
           data: [{ date: '2023-01-01', title: 'Old' }],
         },
       } as UserState
-      const newState = reducer(state, {
-        type: GET_CHANGELOG_SUCCESS,
-        payload: [{ date: '2023-01-02', title: 'New' }],
-      })
+      const newState = reducer(state, addChangelog([{ date: '2023-01-02', title: 'New' }] as any))
       expect(newState.changelog.data).toHaveLength(2)
     })
   })
 
-  describe('GET_CHANGELOG_FAIL', () => {
+  describe('getChangelogFail', () => {
     it('should set isLoading to false', () => {
-      const newState = reducer(initialState, { type: GET_CHANGELOG_FAIL })
+      const newState = reducer(initialState, getChangelogFail())
       expect(newState.changelog.isLoading).toBe(false)
     })
   })
 
-  describe('SET_SUBSCRIPTION', () => {
-    it('should set subscription type', () => {
-      const newState = reducer(initialState, {
-        type: SET_SUBSCRIPTION,
-        payload: 'premium',
-      })
-      expect(newState.subscription).toBe('premium')
-    })
-  })
-
-  describe('RECEIVE_SUBCOLLECTION_UPDATES', () => {
+  describe('receiveSubcollectionUpdates', () => {
     it('should update bookmarks collection', () => {
       const bookmarksData = {
-        'bookmark-1': { id: 'bookmark-1', book: 1, chapter: 1, verse: 1, version: 'LSG', date: Date.now() },
+        'bookmark-1': {
+          id: 'bookmark-1',
+          book: 1,
+          chapter: 1,
+          verse: 1,
+          version: 'LSG',
+          date: Date.now(),
+        },
       }
-      const newState = reducer(initialState, {
-        type: RECEIVE_SUBCOLLECTION_UPDATES,
-        payload: { collection: 'bookmarks', data: bookmarksData, isInitialLoad: true },
-      })
+      const newState = reducer(
+        initialState,
+        receiveSubcollectionUpdates({
+          collection: 'bookmarks',
+          data: bookmarksData,
+          isInitialLoad: true,
+        })
+      )
       expect(newState.bible.bookmarks).toEqual(bookmarksData)
     })
 
@@ -444,10 +407,14 @@ describe('User Reducer', () => {
       const highlightsData = {
         '1-1-1': { color: 'yellow', tags: {}, date: Date.now() },
       }
-      const newState = reducer(initialState, {
-        type: RECEIVE_SUBCOLLECTION_UPDATES,
-        payload: { collection: 'highlights', data: highlightsData, isInitialLoad: true },
-      })
+      const newState = reducer(
+        initialState,
+        receiveSubcollectionUpdates({
+          collection: 'highlights',
+          data: highlightsData,
+          isInitialLoad: true,
+        })
+      )
       expect(newState.bible.highlights).toEqual(highlightsData)
     })
 
@@ -455,10 +422,10 @@ describe('User Reducer', () => {
       const notesData = {
         '1-1-1': { title: 'Test', description: 'Note', date: Date.now() },
       }
-      const newState = reducer(initialState, {
-        type: RECEIVE_SUBCOLLECTION_UPDATES,
-        payload: { collection: 'notes', data: notesData, isInitialLoad: true },
-      })
+      const newState = reducer(
+        initialState,
+        receiveSubcollectionUpdates({ collection: 'notes', data: notesData, isInitialLoad: true })
+      )
       expect(newState.bible.notes).toEqual(notesData)
     })
 
@@ -466,10 +433,10 @@ describe('User Reducer', () => {
       const linksData = {
         '1-1-1': { url: 'https://example.com', linkType: 'website', date: Date.now() },
       }
-      const newState = reducer(initialState, {
-        type: RECEIVE_SUBCOLLECTION_UPDATES,
-        payload: { collection: 'links', data: linksData, isInitialLoad: true },
-      })
+      const newState = reducer(
+        initialState,
+        receiveSubcollectionUpdates({ collection: 'links', data: linksData, isInitialLoad: true })
+      )
       expect(newState.bible.links).toEqual(linksData)
     })
 
@@ -477,46 +444,54 @@ describe('User Reducer', () => {
       const tagsData = {
         'tag-1': { id: 'tag-1', name: 'Test Tag', date: Date.now() },
       }
-      const newState = reducer(initialState, {
-        type: RECEIVE_SUBCOLLECTION_UPDATES,
-        payload: { collection: 'tags', data: tagsData, isInitialLoad: true },
-      })
+      const newState = reducer(
+        initialState,
+        receiveSubcollectionUpdates({ collection: 'tags', data: tagsData, isInitialLoad: true })
+      )
       expect(newState.bible.tags).toEqual(tagsData)
     })
 
     it('should update strongsHebreu collection', () => {
       const strongsData = { H1: { title: 'Test' } }
-      const newState = reducer(initialState, {
-        type: RECEIVE_SUBCOLLECTION_UPDATES,
-        payload: { collection: 'strongsHebreu', data: strongsData, isInitialLoad: true },
-      })
+      const newState = reducer(
+        initialState,
+        receiveSubcollectionUpdates({
+          collection: 'strongsHebreu',
+          data: strongsData,
+          isInitialLoad: true,
+        })
+      )
       expect(newState.bible.strongsHebreu).toEqual(strongsData)
     })
 
     it('should update strongsGrec collection', () => {
       const strongsData = { G1: { title: 'Test' } }
-      const newState = reducer(initialState, {
-        type: RECEIVE_SUBCOLLECTION_UPDATES,
-        payload: { collection: 'strongsGrec', data: strongsData, isInitialLoad: true },
-      })
+      const newState = reducer(
+        initialState,
+        receiveSubcollectionUpdates({
+          collection: 'strongsGrec',
+          data: strongsData,
+          isInitialLoad: true,
+        })
+      )
       expect(newState.bible.strongsGrec).toEqual(strongsData)
     })
 
     it('should update words collection', () => {
       const wordsData = { word1: { title: 'Test' } }
-      const newState = reducer(initialState, {
-        type: RECEIVE_SUBCOLLECTION_UPDATES,
-        payload: { collection: 'words', data: wordsData, isInitialLoad: true },
-      })
+      const newState = reducer(
+        initialState,
+        receiveSubcollectionUpdates({ collection: 'words', data: wordsData, isInitialLoad: true })
+      )
       expect(newState.bible.words).toEqual(wordsData)
     })
 
     it('should update naves collection', () => {
       const navesData = { nave1: { title: 'Test' } }
-      const newState = reducer(initialState, {
-        type: RECEIVE_SUBCOLLECTION_UPDATES,
-        payload: { collection: 'naves', data: navesData, isInitialLoad: true },
-      })
+      const newState = reducer(
+        initialState,
+        receiveSubcollectionUpdates({ collection: 'naves', data: navesData, isInitialLoad: true })
+      )
       expect(newState.bible.naves).toEqual(navesData)
     })
   })

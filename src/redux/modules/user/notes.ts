@@ -1,32 +1,22 @@
-import produce from 'immer'
+import { createAction } from '@reduxjs/toolkit'
 import { VerseIds } from '~common/types'
 import orderVerses from '~helpers/orderVerses'
 import { Note } from '../user'
-import { removeEntityInTags } from '../utils'
 
+// Action type constants for backward compatibility
 export const ADD_NOTE = 'user/ADD_NOTE'
 export const REMOVE_NOTE = 'user/REMOVE_NOTE'
 
-export default produce((draft, action) => {
-  switch (action.type) {
-    case ADD_NOTE: {
-      draft.bible.notes = {
-        ...draft.bible.notes,
-        ...action.payload,
-      }
-      break
-    }
-    case REMOVE_NOTE: {
-      delete draft.bible.notes[action.payload]
-      removeEntityInTags(draft, 'notes', action.payload)
-      break
-    }
-    default:
-      break
-  }
-})
+// RTK Action Creators
+export const addNoteAction = createAction(ADD_NOTE, (noteData: { [key: string]: Note }) => ({
+  payload: noteData,
+}))
 
-// NOTES
+export const deleteNote = createAction(REMOVE_NOTE, (noteId: string) => ({
+  payload: noteId,
+}))
+
+// Helper function that creates the note with proper key
 export function addNote(note: Note, selectedVerses: VerseIds) {
   selectedVerses = orderVerses(selectedVerses)
   const key = Object.keys(selectedVerses).join('/')
@@ -34,12 +24,5 @@ export function addNote(note: Note, selectedVerses: VerseIds) {
   if (!key) {
     return
   }
-  return { type: ADD_NOTE, payload: { [key]: note } }
-}
-
-export function deleteNote(noteId: string) {
-  return {
-    type: REMOVE_NOTE,
-    payload: noteId,
-  }
+  return addNoteAction({ [key]: note })
 }

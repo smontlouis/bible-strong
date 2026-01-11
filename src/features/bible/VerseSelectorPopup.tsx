@@ -17,12 +17,7 @@ export const VerseSelectorPopup = ({ bibleAtom }: { bibleAtom: PrimitiveAtom<Bib
   const { onClose } = usePopOver()
 
   const {
-    data: {
-      selectedVersion: version,
-      selectedBook: book,
-      selectedChapter: chapter,
-      selectedVerse: verse,
-    },
+    data: { selectedVersion: version, selectedBook: book, selectedChapter: chapter },
   } = bible
 
   const { setSelectedVerse } = actions
@@ -34,7 +29,7 @@ export const VerseSelectorPopup = ({ bibleAtom }: { bibleAtom: PrimitiveAtom<Bib
 
   const { data: verses } = useQuery({
     queryKey: ['bible', version, book.Numero.toString(), chapter.toString()],
-    queryFn: () => loadBibleChapter(book.Numero, chapter, version) as Promise<Verse[]>,
+    queryFn: () => loadBibleChapter(book.Numero, chapter, version),
   })
 
   const renderItem = ({ item }: { item: Verse[] }) => (
@@ -56,11 +51,13 @@ export const VerseSelectorPopup = ({ bibleAtom }: { bibleAtom: PrimitiveAtom<Bib
     </HStack>
   )
 
-  const groupedVerses = verses
-    ? Array.from({ length: Math.ceil(verses.length / 5) }, (_, i) =>
-        verses.slice(i * 5, (i + 1) * 5)
-      )
-    : []
+  const groupedVerses =
+    verses?.data && verses.data.length
+      ? Array.from(
+          { length: Math.ceil(verses.data.length / 5) },
+          (_, i) => verses.data?.slice(i * 5, (i + 1) * 5) || []
+        )
+      : []
 
   return (
     <Box width={260} maxHeight={300}>

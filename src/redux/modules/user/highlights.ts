@@ -1,13 +1,34 @@
-import produce from 'immer'
+import { createAction } from '@reduxjs/toolkit'
 import { Dispatch } from 'redux'
 import { SelectedVerses } from 'src/state/tabs'
-import { clearSelectedVerses } from '../bible.old'
-import { removeEntityInTags } from '../utils'
+import { TagsObj } from '~common/types'
+import { HighlightsObj } from '../user'
 
+// Action type constants for backward compatibility
 export const ADD_HIGHLIGHT = 'user/ADD_HIGHLIGHT'
 export const REMOVE_HIGHLIGHT = 'user/REMOVE_HIGHLIGHT'
 export const CHANGE_HIGHLIGHT_COLOR = 'user/CHANGE_HIGHLIGHT_COLOR'
 
+// RTK Action Creators
+export const addHighlightAction = createAction(ADD_HIGHLIGHT, (selectedVerses: HighlightsObj) => ({
+  payload: { selectedVerses },
+}))
+
+export const removeHighlight = createAction(
+  REMOVE_HIGHLIGHT,
+  ({ selectedVerses }: { selectedVerses: SelectedVerses }) => ({
+    payload: { selectedVerses },
+  })
+)
+
+export const changeHighlightColor = createAction(
+  CHANGE_HIGHLIGHT_COLOR,
+  (verseIds: Record<string, any>, color: string) => ({
+    payload: { verseIds, color },
+  })
+)
+
+// Helper to add date and color to verses
 const addDateAndColorToVerses = (verses: any, highlightedVerses: any, color: any) => {
   const date = Date.now()
   const formattedObj = Object.keys(verses).reduce((obj, verse) => {
@@ -26,34 +47,7 @@ const addDateAndColorToVerses = (verses: any, highlightedVerses: any, color: any
   return formattedObj
 }
 
-export default produce((draft, action) => {
-  switch (action.type) {
-    case ADD_HIGHLIGHT: {
-      draft.bible.highlights = {
-        ...draft.bible.highlights,
-        ...action.selectedVerses,
-      }
-      break
-    }
-    case CHANGE_HIGHLIGHT_COLOR: {
-      Object.keys(action.verseIds).forEach(key => {
-        draft.bible.highlights[key].color = action.color
-      })
-      break
-    }
-    case REMOVE_HIGHLIGHT: {
-      Object.keys(action.selectedVerses).forEach(key => {
-        delete draft.bible.highlights[key]
-        removeEntityInTags(draft, 'highlights', key)
-      })
-      break
-    }
-    default:
-      break
-  }
-})
-
-// HIGHLIGHTS
+// Thunk that adds date and color before dispatching
 export function addHighlight({
   color,
   selectedVerses,
@@ -64,20 +58,8 @@ export function addHighlight({
   return (dispatch: Dispatch, getState: any) => {
     const highlightedVerses = getState().user.bible.highlights
 
-    return dispatch({
-      type: ADD_HIGHLIGHT,
-      selectedVerses: addDateAndColorToVerses(selectedVerses, highlightedVerses, color),
-    })
+    return dispatch(
+      addHighlightAction(addDateAndColorToVerses(selectedVerses, highlightedVerses, color))
+    )
   }
-}
-
-export function removeHighlight({ selectedVerses }: { selectedVerses: SelectedVerses }) {
-  return {
-    type: REMOVE_HIGHLIGHT,
-    selectedVerses,
-  }
-}
-
-export function changeHighlightColor(verseIds: any, color: any) {
-  return { type: CHANGE_HIGHLIGHT_COLOR, verseIds, color }
 }
