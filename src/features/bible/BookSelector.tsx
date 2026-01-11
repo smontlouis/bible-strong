@@ -1,15 +1,12 @@
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import React, { useCallback } from 'react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, ScrollView, SectionList } from 'react-native'
-import books, { Book, sections } from '~assets/bible_versions/books-desc'
-import { LinkBox } from '~common/Link'
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
+import { FlatList } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import books, { Book } from '~assets/bible_versions/books-desc'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import BookSelectorItem from './BookSelectorItem'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 interface BookSelectorScreenProps {
   bibleAtom: PrimitiveAtom<BibleTab>
