@@ -73,10 +73,7 @@ const EditStudyScreen = ({
   }>()
 
   // Use props if provided, otherwise parse from URL params
-  const studyId = useMemo(
-    () => propStudyId ?? params.studyId ?? '',
-    [propStudyId, params.studyId]
-  )
+  const studyId = useMemo(() => propStudyId ?? params.studyId ?? '', [propStudyId, params.studyId])
   const canEdit = useMemo(
     () => propCanEdit ?? params.canEdit === 'true',
     [propCanEdit, params.canEdit]

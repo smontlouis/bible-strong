@@ -20,10 +20,7 @@ const setFeatureWithAttributes = (androidManifest, options) => {
       $: {
         'android:name': options.name,
         ...Object.fromEntries(
-          Object.entries(options.attributes).map(([key, value]) => [
-            `android:${key}`,
-            value,
-          ])
+          Object.entries(options.attributes).map(([key, value]) => [`android:${key}`, value])
         ),
       },
     }

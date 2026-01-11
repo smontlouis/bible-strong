@@ -353,9 +353,11 @@ export default memo(
         if (canStartAnimation.get() === 1) {
           if (!isReady.get()) {
             opacity.set(1)
-            x.set(withTiming(entrance ? 0 : lowerBoundX, { duration: 1000 }, () => {
-              isReady.set(1)
-            }))
+            x.set(
+              withTiming(entrance ? 0 : lowerBoundX, { duration: 1000 }, () => {
+                isReady.set(1)
+              })
+            )
           }
         }
       }
@@ -404,40 +406,48 @@ export default memo(
             !isFirst &&
             (x.get() - upperBoundX > 100 || e.velocityX > 1800)
           ) {
-            x.set(withTiming(upperBoundX + wpUI(100), { duration: 300 }, () => {
-              runOnJS(onPrev)()
-            }))
+            x.set(
+              withTiming(upperBoundX + wpUI(100), { duration: 300 }, () => {
+                runOnJS(onPrev)()
+              })
+            )
           } else if (
             direction === 'right' &&
             !isLast &&
             (x.get() - lowerBoundX < -100 || e.velocityX < -1800)
           ) {
-            x.set(withTiming(lowerBoundX - wpUI(100), { duration: 300 }, () => {
-              runOnJS(onNext)()
-            }))
+            x.set(
+              withTiming(lowerBoundX - wpUI(100), { duration: 300 }, () => {
+                runOnJS(onNext)()
+              })
+            )
           } else {
             x.set(withTiming(Math.max(lowerBoundX, Math.min(upperBoundX, x.get()))))
           }
         } else {
-          x.set(withDecay({
-            velocity: e.velocityX,
-            clamp: [lowerBoundX, upperBoundX],
-            rubberBandEffect: true,
-            rubberBandFactor: 1,
-            velocityFactor: 0.6,
-          }))
+          x.set(
+            withDecay({
+              velocity: e.velocityX,
+              clamp: [lowerBoundX, upperBoundX],
+              rubberBandEffect: true,
+              rubberBandFactor: 1,
+              velocityFactor: 0.6,
+            })
+          )
         }
         const isInBoundY = y.get() >= lowerBoundY && y.get() <= upperBoundY
         if (!isInBoundY) {
           y.set(withTiming(Math.max(lowerBoundY, Math.min(upperBoundY, y.get()))))
         } else {
-          y.set(withDecay({
-            velocity: e.velocityY,
-            clamp: [lowerBoundY, upperBoundY],
-            rubberBandEffect: true,
-            rubberBandFactor: 1,
-            velocityFactor: 0.6,
-          }))
+          y.set(
+            withDecay({
+              velocity: e.velocityY,
+              clamp: [lowerBoundY, upperBoundY],
+              rubberBandEffect: true,
+              rubberBandFactor: 1,
+              velocityFactor: 0.6,
+            })
+          )
         }
       })
 

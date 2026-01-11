@@ -31,7 +31,9 @@ const ConcordanceByBook = () => {
   const [verses, setVerses] = useState<Verse[]>([])
 
   const book = params.book ? Number(params.book) : 0
-  const strongReference = params.strongReference ? JSON.parse(params.strongReference) : { Code: 0, Mot: '' }
+  const strongReference = params.strongReference
+    ? JSON.parse(params.strongReference)
+    : { Code: 0, Mot: '' }
   const { Code, Mot } = strongReference
 
   useEffect(() => {

@@ -62,11 +62,7 @@ jest.mock('~themes/nightColors', () => ({ primary: '#777' }))
 
 import type { Bookmark } from '~common/types'
 import userReducer, { UserState } from '../user'
-import {
-  setVersionUpdated,
-  getVersionUpdate,
-  getDatabaseUpdate,
-} from '../user/versionUpdate'
+import { setVersionUpdated, getVersionUpdate, getDatabaseUpdate } from '../user/versionUpdate'
 
 const getInitialState = (): UserState =>
   ({

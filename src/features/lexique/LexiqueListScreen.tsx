@@ -57,7 +57,11 @@ interface LexiqueListScreenProps {
   onStrongSelect?: (book: number, reference: string) => void
 }
 
-const LexiqueListScreen = ({ strongAtom, hasBackButton, onStrongSelect }: LexiqueListScreenProps) => {
+const LexiqueListScreen = ({
+  strongAtom,
+  hasBackButton,
+  onStrongSelect,
+}: LexiqueListScreenProps) => {
   const { t } = useTranslation()
   const [error, setError] = useState(false)
   const [letter, setLetter] = useState('a')

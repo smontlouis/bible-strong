@@ -6,8 +6,9 @@ import { RootState } from '~redux/modules/reducer'
 export const selectBookmarksObj = (state: RootState) => state.user.bible.bookmarks || {}
 
 // Selector for bookmarks count
-export const selectBookmarksCount = createSelector([selectBookmarksObj], bookmarks =>
-  Object.keys(bookmarks).length
+export const selectBookmarksCount = createSelector(
+  [selectBookmarksObj],
+  bookmarks => Object.keys(bookmarks).length
 )
 
 // Selector factory for bookmark by chapter (book + chapter + verse=1)

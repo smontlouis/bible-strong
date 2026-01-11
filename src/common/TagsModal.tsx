@@ -29,7 +29,6 @@ interface TagsModalProps {
 }
 
 const TagsModal = ({ ref, onClosed, onSelected, selectedChip }: TagsModalProps) => {
-
   const dispatch = useDispatch()
   const tags = useSelector(sortedTagsSelector, shallowEqual)
   const { keyword, result, search, resetSearch } = useFuzzy(tags, {

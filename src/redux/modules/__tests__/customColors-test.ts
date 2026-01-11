@@ -265,7 +265,10 @@ describe('Custom Colors Reducer', () => {
           },
         },
       } as UserState
-      const newState = userReducer(state, updateCustomColor('custom-1', '#00ff00', 'New', 'textColor'))
+      const newState = userReducer(
+        state,
+        updateCustomColor('custom-1', '#00ff00', 'New', 'textColor')
+      )
       expect(newState.bible.settings.customHighlightColors[0].hex).toBe('#00ff00')
       expect(newState.bible.settings.customHighlightColors[0].name).toBe('New')
       expect(newState.bible.settings.customHighlightColors[0].type).toBe('textColor')
@@ -279,7 +282,9 @@ describe('Custom Colors Reducer', () => {
           ...initialState.bible,
           settings: {
             ...initialState.bible.settings,
-            customHighlightColors: [createCustomColor('custom-1', { createdAt: originalCreatedAt })],
+            customHighlightColors: [
+              createCustomColor('custom-1', { createdAt: originalCreatedAt }),
+            ],
           },
         },
       } as UserState

@@ -18,7 +18,7 @@ const PlanScreen = () => {
 
   // Parse complex object from URL string
   const planParams: ComputedPlanItem | undefined = params.plan ? JSON.parse(params.plan) : undefined
-  const { id, title, image, description, author } = planParams || {} as ComputedPlanItem
+  const { id, title, image, description, author } = planParams || ({} as ComputedPlanItem)
   const modalRef = React.useRef<BottomSheetMethods | null>(null)
   const modalRefDetails = React.useRef<BottomSheetModal | null>(null)
   const cacheImage = useFireStorage(image)
@@ -41,9 +41,7 @@ const PlanScreen = () => {
         title={title}
         hasBackButton
         rightComponent={
-          <PopOverMenu
-            popover={<Menu modalRefDetails={modalRefDetails} planId={id} />}
-          />
+          <PopOverMenu popover={<Menu modalRefDetails={modalRefDetails} planId={id} />} />
         }
       />
       {plan?.sections && <PlanSectionList {...plan} />}

@@ -39,14 +39,7 @@ const Container = styled(Box)(({ theme }) => ({
   borderBottomWidth: 1,
 }))
 
-const VerseComponent = ({
-  color,
-  date,
-  verseIds,
-  stringIds,
-  tags,
-  setSettings,
-}: any) => {
+const VerseComponent = ({ color, date, verseIds, stringIds, tags, setSettings }: any) => {
   const router = useRouter()
   const verses = useBibleVerses(verseIds)
   const { t } = useTranslation()

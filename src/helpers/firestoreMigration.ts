@@ -512,7 +512,9 @@ export async function resumableMigrateUserData(
         update.overallProgress ?? completedCollections.length / SUBCOLLECTION_NAMES.length,
       message: update.message ?? '',
     }
-    console.log(`[FirestoreMigration] ${progress.message} (${Math.round(progress.overallProgress * 100)}%)`)
+    console.log(
+      `[FirestoreMigration] ${progress.message} (${Math.round(progress.overallProgress * 100)}%)`
+    )
     onProgress(progress)
   }
 

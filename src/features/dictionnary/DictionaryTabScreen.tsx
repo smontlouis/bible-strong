@@ -43,11 +43,7 @@ const DictionaryTabScreen = ({ dictionaryAtom }: DictionaryTabScreenProps) => {
     )
   }
 
-  return (
-    <DictionaryDetailTabScreen
-      dictionaryAtom={dictionaryAtom}
-    />
-  )
+  return <DictionaryDetailTabScreen dictionaryAtom={dictionaryAtom} />
 }
 
 export default DictionaryTabScreen

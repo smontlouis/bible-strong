@@ -1,4 +1,3 @@
-
 function SvgComponent(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg

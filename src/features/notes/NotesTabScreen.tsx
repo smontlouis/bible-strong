@@ -19,20 +19,10 @@ const NotesTabScreen = ({ notesAtom }: NotesTabScreenProps) => {
   } = notesTab
 
   if (!noteId) {
-    return (
-      <AllNotesTabScreen
-        hasBackButton={hasBackButton}
-        notesAtom={notesAtom}
-      />
-    )
+    return <AllNotesTabScreen hasBackButton={hasBackButton} notesAtom={notesAtom} />
   }
 
-  return (
-    <NoteDetailTabScreen
-      notesAtom={notesAtom}
-      noteId={noteId}
-    />
-  )
+  return <NoteDetailTabScreen notesAtom={notesAtom} noteId={noteId} />
 }
 
 export default NotesTabScreen

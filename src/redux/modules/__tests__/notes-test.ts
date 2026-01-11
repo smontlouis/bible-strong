@@ -176,7 +176,10 @@ describe('Notes Reducer', () => {
           },
         },
       } as UserState
-      const newState = userReducer(state, addNoteAction({ '1-1-2': createNote({ title: 'New Note' }) }))
+      const newState = userReducer(
+        state,
+        addNoteAction({ '1-1-2': createNote({ title: 'New Note' }) })
+      )
       expect(newState.bible.notes['1-1-1'].title).toBe('Existing Note')
       expect(newState.bible.notes['1-1-2'].title).toBe('New Note')
     })

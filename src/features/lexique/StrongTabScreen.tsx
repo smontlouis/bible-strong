@@ -45,11 +45,7 @@ const StrongTabScreen = ({ strongAtom }: StrongTabScreenProps) => {
     )
   }
 
-  return (
-    <StrongDetailScreen
-      strongAtom={strongAtom}
-    />
-  )
+  return <StrongDetailScreen strongAtom={strongAtom} />
 }
 
 export default StrongTabScreen

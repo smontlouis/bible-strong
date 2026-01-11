@@ -23,12 +23,7 @@ const CachedTabScreens = () => {
     <>
       {filteredTabsAtoms.map(tabAtom => {
         const tab = getDefaultStore().get(tabAtom)
-        return (
-          <TabScreenRefMemoize
-            key={tab.id}
-            tabAtom={tabAtom}
-          />
-        )
+        return <TabScreenRefMemoize key={tab.id} tabAtom={tabAtom} />
       })}
     </>
   )

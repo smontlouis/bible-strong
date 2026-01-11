@@ -258,7 +258,9 @@ export const More = ({ closeMenu }: MoreProps) => {
           </CardLinkItem>
           {!appleIsReviewing && (
             <CardLinkItem
-              href={lang === 'fr' ? 'https://bible-strong.app/fr/give' : 'https://bible-strong.app/give'}
+              href={
+                lang === 'fr' ? 'https://bible-strong.app/fr/give' : 'https://bible-strong.app/give'
+              }
             >
               <IconCircle bg="rgba(236, 72, 153, 0.1)">
                 <FeatherIcon name="heart" size={20} color="color2" />
@@ -295,14 +297,19 @@ export const More = ({ closeMenu }: MoreProps) => {
           </LinkItem>
           <LinkItem
             style={{ paddingVertical: 10, paddingHorizontal: 0 }}
-            href={lang === 'fr' ? 'https://bible-strong.app/eula' : 'https://bible-strong.app/eula-en'}
+            href={
+              lang === 'fr' ? 'https://bible-strong.app/eula' : 'https://bible-strong.app/eula-en'
+            }
           >
             <Text fontSize={14} color="grey">
               {t("Conditions d'utilisation")}
             </Text>
           </LinkItem>
           {isLogged && (
-            <LinkItem style={{ paddingVertical: 10, paddingHorizontal: 0 }} onPress={promptDeleteAccount}>
+            <LinkItem
+              style={{ paddingVertical: 10, paddingHorizontal: 0 }}
+              onPress={promptDeleteAccount}
+            >
               <Text fontSize={14} color="grey">
                 {t('app.deleteAccount')}
               </Text>

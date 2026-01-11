@@ -12,9 +12,7 @@ const selectPlanState = (state: RootState) => state.plan
 export const selectSortedOnlinePlans = createSelector(
   [selectOnlinePlans],
   (onlinePlans): OnlinePlan[] => {
-    return [...onlinePlans].sort((a, b) =>
-      a.featured === b.featured ? 0 : a.featured ? -1 : 1
-    )
+    return [...onlinePlans].sort((a, b) => (a.featured === b.featured ? 0 : a.featured ? -1 : 1))
   }
 )
 
@@ -39,11 +37,7 @@ export const makeOngoingPlanByIdSelector = () =>
 // Combined selector for plan and ongoing plan
 export const makePlanWithOngoingSelector = () =>
   createSelector(
-    [
-      selectMyPlans,
-      selectOngoingPlans,
-      (_: RootState, id: string) => id,
-    ],
+    [selectMyPlans, selectOngoingPlans, (_: RootState, id: string) => id],
     (myPlans, ongoingPlans, id) => ({
       plan: myPlans.find(p => p.id === id),
       ongoingPlan: ongoingPlans.find(p => p.id === id),

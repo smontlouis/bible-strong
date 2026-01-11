@@ -93,9 +93,7 @@ export const useWaitForDatabase = () => {
         } catch (e) {
           console.log('[Timeline] Download error:', e)
           toast.error(
-            t(
-              "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
-            )
+            t("Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.")
           )
           setProposeDownload(true)
           setStartDownload(false)

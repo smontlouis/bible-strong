@@ -1,6 +1,7 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { AnyAction, createSlice, PayloadAction, ThunkAction } from '@reduxjs/toolkit'
 import { getDefaultStore } from 'jotai/vanilla'
 import { Appearance } from 'react-native'
+
 import {
   BookmarksObj,
   ChangelogItem,
@@ -8,15 +9,14 @@ import {
   PreferredColorScheme,
   PreferredDarkTheme,
   PreferredLightTheme,
-  SubscriptionType,
   Tag,
   TagsObj,
 } from '~common/types'
 import { FireAuthProfile } from '~helpers/FireAuth'
 import { firebaseDb } from '~helpers/firebase'
-import { getLanguage } from '~i18n'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
-import { tabGroupsAtom } from '~state/tabs'
+import { getLanguage } from '~i18n'
+import { TabGroup, tabGroupsAtom } from '~state/tabs'
 import blackColors from '~themes/blackColors'
 import defaultColors from '~themes/colors'
 import darkColors from '~themes/darkColors'
@@ -25,46 +25,59 @@ import natureColors from '~themes/natureColors'
 import nightColors from '~themes/nightColors'
 import sepiaColors from '~themes/sepiaColors'
 import sunsetColors from '~themes/sunsetColors'
+import type { RootState } from '../store'
 
 // Import action creators from sub-modules
-import { addBookmarkAction, removeBookmark, updateBookmark, moveBookmark } from './user/bookmarks'
-import { addCustomColor, updateCustomColor, deleteCustomColor } from './user/customColors'
-import { addHighlightAction, removeHighlight, changeHighlightColor } from './user/highlights'
-import { addLinkAction, updateLink, deleteLink } from './user/links'
+import { addBookmarkAction, moveBookmark, removeBookmark, updateBookmark } from './user/bookmarks'
+import { addCustomColor, deleteCustomColor, updateCustomColor } from './user/customColors'
+import { addHighlightAction, changeHighlightColor, removeHighlight } from './user/highlights'
+import { addLinkAction, deleteLink, updateLink } from './user/links'
 import { addNoteAction, deleteNote } from './user/notes'
 import {
-  setSettingsAlignContent,
-  setSettingsLineHeight,
-  setSettingsTextDisplay,
-  setSettingsPreferredColorScheme,
-  setSettingsPreferredLightTheme,
-  setSettingsPreferredDarkTheme,
-  setSettingsNotesDisplay,
-  setSettingsLinksDisplay,
-  setSettingsCommentaires,
-  increaseSettingsFontSizeScale,
-  decreaseSettingsFontSizeScale,
-  setSettingsPress,
   changeColor,
-  toggleSettingsShareVerseNumbers,
-  toggleSettingsShareLineBreaks,
-  toggleSettingsShareQuotes,
-  toggleSettingsShareAppName,
+  decreaseSettingsFontSizeScale,
+  increaseSettingsFontSizeScale,
+  setDefaultBibleVersion,
   setDefaultColorName,
   setDefaultColorType,
-  setDefaultBibleVersion,
+  setSettingsAlignContent,
+  setSettingsCommentaires,
+  setSettingsLineHeight,
+  setSettingsLinksDisplay,
+  setSettingsNotesDisplay,
+  setSettingsPreferredColorScheme,
+  setSettingsPreferredDarkTheme,
+  setSettingsPreferredLightTheme,
+  setSettingsPress,
+  setSettingsTextDisplay,
+  toggleSettingsShareAppName,
+  toggleSettingsShareLineBreaks,
+  toggleSettingsShareQuotes,
+  toggleSettingsShareVerseNumbers,
 } from './user/settings'
-import {
-  updateStudy,
-  addStudies,
-  deleteStudy,
-  publishStudyAction,
-  type StudyMutation,
-} from './user/studies'
-import { addTag, updateTag, removeTag, toggleTagEntity, entitiesArray } from './user/tags'
-import { setVersionUpdated, getVersionUpdate, getDatabaseUpdate } from './user/versionUpdate'
+import { addStudies, deleteStudy, publishStudyAction, updateStudy } from './user/studies'
+import { addTag, entitiesArray, removeTag, toggleTagEntity, updateTag } from './user/tags'
+import { getDatabaseUpdate, getVersionUpdate, setVersionUpdated } from './user/versionUpdate'
 
 const deepmerge = require('@fastify/deepmerge')()
+
+// Type for color keys (used for dynamic theme color access)
+type ColorKeys = keyof typeof defaultColors
+
+// Type for entity tag references (simplified Tag without all properties)
+type EntityTagRef = {
+  id: string
+  name: string
+}
+
+// Type for entities that can have tags
+type EntityWithTags = {
+  tags?: Record<string, EntityTagRef>
+  [key: string]: unknown
+}
+
+// Type for bible entity collections (used in toggleTagEntity)
+type BibleEntityCollection = Record<string, EntityWithTags>
 
 // Re-export everything from sub-modules for backward compatibility
 export * from './user/bookmarks'
@@ -218,6 +231,13 @@ export interface FireStoreUserData {
   bible: UserState['bible']
   plan: OngoingPlan[]
 }
+
+export interface ImportDataPayload {
+  bible: Partial<UserState['bible']>
+  studies: StudiesObj
+  tabGroups?: TabGroup[]
+}
+
 export interface UserState {
   id: string
   email: string
@@ -242,7 +262,7 @@ export interface UserState {
   }
   fontFamily: string
   bible: {
-    changelog: {}
+    changelog: Record<string, boolean>
     bookmarks: BookmarksObj
     highlights: HighlightsObj
     notes: NotesObj
@@ -392,9 +412,8 @@ const userSlice = createSlice({
     setFontFamily(state, action: PayloadAction<string>) {
       state.fontFamily = action.payload
     },
-    saveAllLogsAsSeen(state, action: PayloadAction<any[]>) {
-      action.payload.forEach((log: any) => {
-        // @ts-ignore
+    saveAllLogsAsSeen(state, action: PayloadAction<ChangelogItem[]>) {
+      action.payload.forEach(log => {
         state.bible.changelog[log.date] = true
       })
     },
@@ -526,7 +545,7 @@ const userSlice = createSlice({
           break
       }
     },
-    importData(state, action: PayloadAction<any>) {
+    importData(state, action: PayloadAction<ImportDataPayload>) {
       const { bible, studies, tabGroups } = action.payload
       const currentChangelog = state.bible.changelog
 
@@ -540,7 +559,7 @@ const userSlice = createSlice({
 
       // Restaurer les onglets via Jotai
       // Le groupe actif sera automatiquement reset sur groups[0] via activeGroupAtom
-      if (tabGroups && Array.isArray(tabGroups) && tabGroups.length > 0) {
+      if (tabGroups && tabGroups.length > 0) {
         const store = getDefaultStore()
         store.set(tabGroupsAtom, tabGroups)
       }
@@ -565,8 +584,7 @@ const userSlice = createSlice({
     },
     addChangelog(state, action: PayloadAction<ChangelogItem[]>) {
       state.changelog.isLoading = false
-      // @ts-ignore
-      state.changelog.lastSeen = Date.now().toString()
+      state.changelog.lastSeen = Date.now()
       state.changelog.data = [...state.changelog.data, ...action.payload]
     },
     getChangelogFail(state) {
@@ -744,36 +762,28 @@ const userSlice = createSlice({
         return preferredLightTheme
       })()
 
-      const getColorValue = () => {
+      type ThemeKey = keyof typeof state.bible.settings.colors
+      const colorName = action.payload.name as ColorKeys
+      const themeColors = state.bible.settings.colors[currentTheme as ThemeKey]
+
+      const getColorValue = (): string => {
         if (action.payload.color) {
           return action.payload.color as string
         }
-        if (currentTheme === 'black') {
-          return blackColors[action.payload.name as keyof typeof blackColors]
+        const themeColorMaps: Record<string, typeof defaultColors> = {
+          black: blackColors,
+          mauve: mauveColors,
+          nature: natureColors,
+          night: nightColors,
+          sepia: sepiaColors,
+          sunset: sunsetColors,
+          dark: darkColors,
+          default: defaultColors,
         }
-        if (currentTheme === 'mauve') {
-          return mauveColors[action.payload.name as keyof typeof mauveColors]
-        }
-        if (currentTheme === 'nature') {
-          return natureColors[action.payload.name as keyof typeof natureColors]
-        }
-        if (currentTheme === 'night') {
-          return nightColors[action.payload.name as keyof typeof nightColors]
-        }
-        if (currentTheme === 'sepia') {
-          return sepiaColors[action.payload.name as keyof typeof sepiaColors]
-        }
-        if (currentTheme === 'sunset') {
-          return sunsetColors[action.payload.name as keyof typeof sunsetColors]
-        }
-        if (currentTheme === 'dark') {
-          return darkColors[action.payload.name as keyof typeof darkColors]
-        }
-        return defaultColors[action.payload.name as keyof typeof defaultColors]
+        return themeColorMaps[currentTheme]?.[colorName] ?? defaultColors[colorName]
       }
 
-      // @ts-ignore
-      state.bible.settings.colors[currentTheme][action.payload.name] = getColorValue()
+      themeColors[colorName] = getColorValue()
     })
     builder.addCase(toggleSettingsShareVerseNumbers, state => {
       state.bible.settings.shareVerses.hasVerseNumbers =
@@ -905,58 +915,65 @@ const userSlice = createSlice({
     })
     builder.addCase(toggleTagEntity, (state, action) => {
       const { item, tagId } = action.payload
+      // Use type assertion for dynamic entity access
+      const entityCollection = state.bible[item.entity] as unknown as BibleEntityCollection
 
       if (item.ids) {
-        const hasTag = state.bible[item.entity][Object.keys(item.ids)[0]]?.tags?.[tagId]
+        const firstId = Object.keys(item.ids)[0]
+        const hasTag = entityCollection[firstId]?.tags?.[tagId]
 
         Object.keys(item.ids).forEach(id => {
           // DELETE OPERATION - In order to have a true toggle, check only for first item with Object.keys(item.ids)[0]
           if (hasTag) {
             try {
               delete state.bible.tags[tagId][item.entity]?.[id]
-              delete state.bible[item.entity][id].tags[tagId]
+              delete entityCollection[id].tags?.[tagId]
 
               // Delete highlight if it has no color and no remaining tags
               if (item.entity === 'highlights') {
-                const highlight = state.bible[item.entity][id]
+                const highlight = state.bible.highlights[id]
                 if (
                   highlight &&
                   highlight.color === '' &&
                   Object.keys(highlight.tags || {}).length === 0
                 ) {
-                  delete state.bible[item.entity][id]
+                  delete state.bible.highlights[id]
                 }
               }
-            } catch (e) {}
+            } catch {}
 
             // ADD OPERATION
           } else {
             if (!state.bible.tags[tagId][item.entity]) {
               state.bible.tags[tagId][item.entity] = {}
             }
-            state.bible.tags[tagId][item.entity][id] = true
+            state.bible.tags[tagId][item.entity]![id] = true
 
             // Create highlight if it doesn't exist (for highlights entity only)
-            if (item.entity === 'highlights' && !state.bible[item.entity][id]) {
-              state.bible[item.entity][id] = {
+            if (item.entity === 'highlights' && !state.bible.highlights[id]) {
+              state.bible.highlights[id] = {
                 color: '',
                 date: Date.now(),
                 tags: {},
               }
             }
 
-            if (!state.bible[item.entity][id].tags) {
-              state.bible[item.entity][id].tags = {}
+            if (!entityCollection[id]) {
+              entityCollection[id] = { tags: {} }
             }
-            state.bible[item.entity][id].tags[tagId] = {
+            if (!entityCollection[id].tags) {
+              entityCollection[id].tags = {}
+            }
+            entityCollection[id].tags![tagId] = {
               id: tagId,
               name: state.bible.tags[tagId].name,
             }
           }
         })
       } else {
-        if (!state.bible[item.entity][item.id!]) {
-          state.bible[item.entity][item.id!] = {
+        const entityId = item.id!
+        if (!entityCollection[entityId]) {
+          entityCollection[entityId] = {
             id: item.id,
             title: item.title,
             tags: {},
@@ -964,17 +981,16 @@ const userSlice = createSlice({
         }
 
         // DELETE OPERATION
-        // eslint-disable-next-line no-lonely-if
-        if (state.bible[item.entity][item.id!]?.tags?.[tagId]) {
-          delete state.bible.tags[tagId][item.entity][item.id!]
-          delete state.bible[item.entity][item.id!].tags[tagId]
+        if (entityCollection[entityId]?.tags?.[tagId]) {
+          delete state.bible.tags[tagId][item.entity]?.[entityId]
+          delete entityCollection[entityId].tags?.[tagId]
 
           // If words / strongs / nave, delete unused entity
           if (['naves', 'strongsHebreu', 'strongsGrec', 'words'].includes(item.entity)) {
-            const hasTags = Object.keys(state.bible[item.entity][item.id!].tags).length
+            const hasTags = Object.keys(entityCollection[entityId].tags || {}).length
 
             if (!hasTags) {
-              delete state.bible[item.entity][item.id!]
+              delete entityCollection[entityId]
             }
           }
 
@@ -983,12 +999,12 @@ const userSlice = createSlice({
           if (!state.bible.tags[tagId][item.entity]) {
             state.bible.tags[tagId][item.entity] = {}
           }
-          state.bible.tags[tagId][item.entity][item.id!] = true
+          state.bible.tags[tagId][item.entity]![entityId] = true
 
-          if (!state.bible[item.entity][item.id!].tags) {
-            state.bible[item.entity][item.id!].tags = {}
+          if (!entityCollection[entityId].tags) {
+            entityCollection[entityId].tags = {}
           }
-          state.bible[item.entity][item.id!].tags[tagId] = {
+          entityCollection[entityId].tags![tagId] = {
             id: tagId,
             name: state.bible.tags[tagId].name,
           }
@@ -1051,8 +1067,8 @@ export const IMPORT_DATA = importData.type
 export const GET_CHANGELOG = 'user/GET_CHANGELOG'
 
 // Changelog thunk
-export function getChangelog() {
-  return async (dispatch: any, getState: any) => {
+export function getChangelog(): ThunkAction<Promise<void>, RootState, undefined, AnyAction> {
+  return async (dispatch, getState) => {
     dispatch({ type: GET_CHANGELOG })
     const lastChangelog = getState().user.changelog.lastSeen.toString()
     const changelogDoc = firebaseDb
@@ -1064,15 +1080,15 @@ export function getChangelog() {
     try {
       const querySnapshot = await changelogDoc.get({ source: 'server' })
 
-      const changelog: any = []
-      querySnapshot.forEach((doc: any) => {
-        changelog.push(doc.data())
+      const changelog: ChangelogItem[] = []
+      querySnapshot.forEach(doc => {
+        changelog.push(doc.data() as ChangelogItem)
       })
 
-      return dispatch(addChangelog(changelog))
+      dispatch(addChangelog(changelog))
     } catch (e) {
       console.log(e)
-      return dispatch(getChangelogFail())
+      dispatch(getChangelogFail())
     }
   }
 }

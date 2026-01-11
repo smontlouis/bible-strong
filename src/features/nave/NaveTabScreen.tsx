@@ -44,11 +44,7 @@ const NaveTabScreen = ({ naveAtom }: NaveTabScreenProps) => {
     )
   }
 
-  return (
-    <NaveDetailTabScreen
-      naveAtom={naveAtom}
-    />
-  )
+  return <NaveDetailTabScreen naveAtom={naveAtom} />
 }
 
 export default NaveTabScreen

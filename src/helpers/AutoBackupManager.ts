@@ -292,8 +292,7 @@ class AutoBackupManager {
               linksCount: Object.keys(backup.data?.bible?.links || {}).length,
               tagsCount: Object.keys(backup.data?.bible?.tags || {}).length,
               tabGroupsCount: backup.data?.tabGroups?.length || 0,
-              tabsCount:
-                backup.data?.tabGroups?.reduce((acc, g) => acc + g.tabs.length, 0) || 0,
+              tabsCount: backup.data?.tabGroups?.reduce((acc, g) => acc + g.tabs.length, 0) || 0,
             }
           } catch (error) {
             console.warn(`[AutoBackup] Failed to read stats for ${file}:`, error)

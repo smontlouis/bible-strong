@@ -684,9 +684,7 @@ const VersesRenderer = ({
               : null
 
             // Calculate last focus verse for close context button
-            const lastFocusVerse = focusVerses
-              ? Math.max(...focusVerses.map(Number))
-              : null
+            const lastFocusVerse = focusVerses ? Math.max(...focusVerses.map(Number)) : null
 
             return verses.map((verse, i) => {
               if (verse.Verset == 0) return null

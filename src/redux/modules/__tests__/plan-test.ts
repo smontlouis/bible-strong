@@ -179,7 +179,13 @@ describe('Plan Reducer', () => {
       const state = {
         ...initialState,
         myPlans: [createPlan('plan-1')],
-        ongoingPlans: [{ id: 'plan-1', status: 'Progress' as const, readingSlices: { 'slice-1': 'Completed' as const } }],
+        ongoingPlans: [
+          {
+            id: 'plan-1',
+            status: 'Progress' as const,
+            readingSlices: { 'slice-1': 'Completed' as const },
+          },
+        ],
       }
       const newState = reducer(state, resetPlan('plan-1'))
       expect(newState.myPlans).toHaveLength(1)
@@ -241,11 +247,13 @@ describe('Plan Reducer', () => {
       const state = {
         ...initialState,
         myPlans: [plan],
-        ongoingPlans: [{
-          id: 'plan-1',
-          status: 'Progress' as const,
-          readingSlices: { 'slice-1': 'Completed' as const, 'slice-2': 'Next' as const },
-        }],
+        ongoingPlans: [
+          {
+            id: 'plan-1',
+            status: 'Progress' as const,
+            readingSlices: { 'slice-1': 'Completed' as const, 'slice-2': 'Next' as const },
+          },
+        ],
       }
 
       const newState = reducer(state, markAsRead({ readingSliceId: 'slice-1', planId: 'plan-1' }))
@@ -256,18 +264,18 @@ describe('Plan Reducer', () => {
     })
 
     it('should set plan status to Progress', () => {
-      const section = createSection('section-1', [
-        createReadingSlice('slice-1'),
-      ])
+      const section = createSection('section-1', [createReadingSlice('slice-1')])
       const plan = createPlan('plan-1', [section])
       const state = {
         ...initialState,
         myPlans: [plan],
-        ongoingPlans: [{
-          id: 'plan-1',
-          status: 'Idle' as const,
-          readingSlices: {},
-        }],
+        ongoingPlans: [
+          {
+            id: 'plan-1',
+            status: 'Idle' as const,
+            readingSlices: {},
+          },
+        ],
       }
 
       const newState = reducer(state, markAsRead({ readingSliceId: 'slice-1', planId: 'plan-1' }))
@@ -275,18 +283,18 @@ describe('Plan Reducer', () => {
     })
 
     it('should set plan status to Completed when all slices are done', () => {
-      const section = createSection('section-1', [
-        createReadingSlice('slice-1'),
-      ])
+      const section = createSection('section-1', [createReadingSlice('slice-1')])
       const plan = createPlan('plan-1', [section])
       const state = {
         ...initialState,
         myPlans: [plan],
-        ongoingPlans: [{
-          id: 'plan-1',
-          status: 'Progress' as const,
-          readingSlices: {},
-        }],
+        ongoingPlans: [
+          {
+            id: 'plan-1',
+            status: 'Progress' as const,
+            readingSlices: {},
+          },
+        ],
       }
 
       const newState = reducer(state, markAsRead({ readingSliceId: 'slice-1', planId: 'plan-1' }))
@@ -301,11 +309,13 @@ describe('Plan Reducer', () => {
       const state = {
         ...initialState,
         myPlans: [plan1, plan2],
-        ongoingPlans: [{
-          id: 'plan-1',
-          status: 'Progress' as const,
-          readingSlices: {},
-        }],
+        ongoingPlans: [
+          {
+            id: 'plan-1',
+            status: 'Progress' as const,
+            readingSlices: {},
+          },
+        ],
       }
 
       const newState = reducer(state, markAsRead({ readingSliceId: 'slice-2', planId: 'plan-2' }))
@@ -329,9 +339,7 @@ describe('Plan Reducer', () => {
     })
 
     it('should set onlineStatus to Resolved and update onlinePlans when fulfilled', () => {
-      const onlinePlans = [
-        { id: 'plan-1', title: 'Plan 1', downloads: 100 },
-      ] as OnlinePlan[]
+      const onlinePlans = [{ id: 'plan-1', title: 'Plan 1', downloads: 100 }] as OnlinePlan[]
       const action = { type: fetchPlans.fulfilled.type, payload: onlinePlans }
       const newState = reducer(initialState, action)
       expect(newState.onlineStatus).toBe('Resolved')
@@ -376,11 +384,13 @@ describe('Plan Reducer', () => {
     it('should not duplicate ongoingPlan if already exists', () => {
       const state = {
         ...initialState,
-        ongoingPlans: [{
-          id: 'plan-1',
-          status: 'Progress' as const,
-          readingSlices: { 'slice-1': 'Completed' as const },
-        }],
+        ongoingPlans: [
+          {
+            id: 'plan-1',
+            status: 'Progress' as const,
+            readingSlices: { 'slice-1': 'Completed' as const },
+          },
+        ],
       }
       const plan = createPlan('plan-1')
       const action = { type: fetchPlan.fulfilled.type, payload: plan }
@@ -394,7 +404,11 @@ describe('Plan Reducer', () => {
   describe('RECEIVE_LIVE_UPDATES', () => {
     it('should update ongoingPlans from remote data', () => {
       const remoteOngoingPlans = [
-        { id: 'plan-1', status: 'Progress' as const, readingSlices: { 'slice-1': 'Completed' as const } },
+        {
+          id: 'plan-1',
+          status: 'Progress' as const,
+          readingSlices: { 'slice-1': 'Completed' as const },
+        },
       ]
       const action = {
         type: RECEIVE_LIVE_UPDATES,
@@ -424,9 +438,7 @@ describe('Plan Reducer', () => {
 
   describe('IMPORT_DATA', () => {
     it('should import ongoingPlans', () => {
-      const importedPlans = [
-        { id: 'plan-1', status: 'Completed' as const, readingSlices: {} },
-      ]
+      const importedPlans = [{ id: 'plan-1', status: 'Completed' as const, readingSlices: {} }]
       const action = {
         type: IMPORT_DATA,
         payload: { plan: importedPlans },

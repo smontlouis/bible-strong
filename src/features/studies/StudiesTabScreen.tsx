@@ -35,12 +35,7 @@ const StudiesTabScreen = ({ studyAtom }: StudiesTabScreenProps) => {
   )
 
   if (!studyId) {
-    return (
-      <AllStudiesTabScreen
-        hasBackButton={hasBackButton}
-        onStudySelect={onStudySelect}
-      />
-    )
+    return <AllStudiesTabScreen hasBackButton={hasBackButton} onStudySelect={onStudySelect} />
   }
 
   console.log('[StudiesTabScreen] studyId', studyId)

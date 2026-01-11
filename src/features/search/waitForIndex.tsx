@@ -81,9 +81,7 @@ export const useWaitForIndex = () => {
         } catch (e) {
           console.log('[Search] Download error:', e)
           toast.error(
-            t(
-              "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
-            )
+            t("Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.")
           )
           setProposeDownload(true)
           setStartDownload(false)

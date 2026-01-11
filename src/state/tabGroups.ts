@@ -106,9 +106,7 @@ export const updateGroupAtom = atom(
 
     set(
       tabGroupsAtom,
-      groups.map(g =>
-        g.id === groupId ? { ...g, name, ...(color && { color }) } : g
-      )
+      groups.map(g => (g.id === groupId ? { ...g, name, ...(color && { color }) } : g))
     )
   }
 )

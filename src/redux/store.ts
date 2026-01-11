@@ -67,3 +67,6 @@ function configureStore() {
 }
 
 export const { store, persistor } = configureStore()
+
+export type RootState = ReturnType<typeof store.getState>
+export type AppDispatch = typeof store.dispatch

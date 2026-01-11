@@ -1,11 +1,7 @@
 import BottomSheet from '@gorhom/bottom-sheet'
 import { atom, PrimitiveAtom } from 'jotai/vanilla'
 import React, { createContext, useContext, useRef, useState, useCallback, useEffect } from 'react'
-import {
-  BibleTab,
-  BibleTabActions,
-  useBibleTabActions,
-} from '../../../state/tabs'
+import { BibleTab, BibleTabActions, useBibleTabActions } from '../../../state/tabs'
 import BookSelectorBottomSheet, { bookSelectorDataAtom } from './BookSelectorBottomSheet'
 import VersionSelectorBottomSheet, {
   versionSelectorDataAtom,

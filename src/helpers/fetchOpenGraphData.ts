@@ -121,18 +121,19 @@ export function getLinkDisplayTitle(link: {
 /**
  * Mapping des icônes par type de lien
  */
-export const linkTypeConfig: Record<LinkType, { icon: string; color: string; textIcon?: string }> = {
-  youtube: { icon: 'youtube', color: '#FF0000' },
-  twitter: { icon: 'twitter', color: '#000000', textIcon: '𝕏' },
-  instagram: { icon: 'instagram', color: '#E4405F' },
-  tiktok: { icon: 'music', color: '#000000' },
-  vimeo: { icon: 'video', color: '#1AB7EA' },
-  spotify: { icon: 'music', color: '#1DB954' },
-  facebook: { icon: 'facebook', color: '#1877F2' },
-  linkedin: { icon: 'linkedin', color: '#0A66C2' },
-  github: { icon: 'github', color: '#333333' },
-  website: { icon: 'link', color: '#888888' },
-}
+export const linkTypeConfig: Record<LinkType, { icon: string; color: string; textIcon?: string }> =
+  {
+    youtube: { icon: 'youtube', color: '#FF0000' },
+    twitter: { icon: 'twitter', color: '#000000', textIcon: '𝕏' },
+    instagram: { icon: 'instagram', color: '#E4405F' },
+    tiktok: { icon: 'music', color: '#000000' },
+    vimeo: { icon: 'video', color: '#1AB7EA' },
+    spotify: { icon: 'music', color: '#1DB954' },
+    facebook: { icon: 'facebook', color: '#1877F2' },
+    linkedin: { icon: 'linkedin', color: '#0A66C2' },
+    github: { icon: 'github', color: '#333333' },
+    website: { icon: 'link', color: '#888888' },
+  }
 
 /**
  * Retourne l'icône et la couleur pour un lien

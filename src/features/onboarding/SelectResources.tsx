@@ -20,7 +20,9 @@ import ResourceItem from './ResourceItem'
 const DownloadFiles = ({ setStep }: { setStep: React.Dispatch<React.SetStateAction<number>> }) => {
   const { t } = useTranslation()
   const lang = useLanguage()
-  const databases = Object.values(getDatabases()).filter(db => (lang !== 'fr' ? db.id !== 'MHY' : true))
+  const databases = Object.values(getDatabases()).filter(db =>
+    lang !== 'fr' ? db.id !== 'MHY' : true
+  )
   const [selectedResources, setSelectedResources] = useAtom(selectedResourcesAtom)
 
   const getDefaultVersionResource = (): ResourceToDownload => {

@@ -74,7 +74,6 @@ const Login = ({ theme }: any) => {
     setLoading(isStillLoading)
   }
 
-
   return (
     <Box>
       <Box>

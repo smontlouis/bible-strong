@@ -229,9 +229,7 @@ describe('Studies Reducer', () => {
       )
       expect(newState.bible.studies['study-1'].user.id).toBe('user-123')
       expect(newState.bible.studies['study-1'].user.displayName).toBe('Test User')
-      expect(newState.bible.studies['study-1'].user.photoUrl).toBe(
-        'https://example.com/photo.jpg'
-      )
+      expect(newState.bible.studies['study-1'].user.photoUrl).toBe('https://example.com/photo.jpg')
     })
 
     it('should update content', () => {
