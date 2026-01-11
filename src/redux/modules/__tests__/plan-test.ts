@@ -1,5 +1,69 @@
 /* eslint-env jest */
 
+// Mock react-native before any imports
+jest.mock('react-native', () => ({
+  Appearance: {
+    getColorScheme: jest.fn(() => 'light'),
+  },
+}))
+
+// Mock expo-file-system
+jest.mock('expo-file-system/legacy', () => ({}))
+jest.mock('expo-file-system', () => ({}))
+
+// Mock expo-sqlite
+jest.mock('expo-sqlite', () => ({}))
+
+// Mock bibleVersions and databases to avoid deep import chains
+jest.mock('~helpers/bibleVersions', () => ({
+  versions: {},
+  getIfVersionNeedsUpdate: jest.fn(),
+}))
+
+jest.mock('~helpers/databases', () => ({
+  databases: {},
+  getIfDatabaseNeedsUpdate: jest.fn(),
+}))
+
+// Mock modules before importing reducer
+jest.mock('~helpers/firebase', () => ({
+  firebaseDb: {},
+  increment: {},
+  collection: jest.fn(),
+  doc: jest.fn(),
+  getDoc: jest.fn(),
+  getDocs: jest.fn(),
+  updateDoc: jest.fn(),
+}))
+
+jest.mock('~state/tabs', () => ({
+  tabGroupsAtom: {},
+}))
+
+jest.mock('jotai/vanilla', () => ({
+  getDefaultStore: jest.fn(() => ({
+    set: jest.fn(),
+  })),
+}))
+
+jest.mock('~i18n', () => ({
+  getLanguage: jest.fn(() => 'fr'),
+}))
+
+jest.mock('~helpers/languageUtils', () => ({
+  getDefaultBibleVersion: jest.fn(() => 'LSG'),
+}))
+
+// Mock theme imports
+jest.mock('~themes/colors', () => ({ primary: '#000' }))
+jest.mock('~themes/darkColors', () => ({ primary: '#111' }))
+jest.mock('~themes/blackColors', () => ({ primary: '#222' }))
+jest.mock('~themes/sepiaColors', () => ({ primary: '#333' }))
+jest.mock('~themes/natureColors', () => ({ primary: '#444' }))
+jest.mock('~themes/sunsetColors', () => ({ primary: '#555' }))
+jest.mock('~themes/mauveColors', () => ({ primary: '#666' }))
+jest.mock('~themes/nightColors', () => ({ primary: '#777' }))
+
 import reducer, {
   cacheImage,
   removePlan,
@@ -11,17 +75,6 @@ import reducer, {
 } from '../plan'
 import { RECEIVE_LIVE_UPDATES, IMPORT_DATA, USER_LOGOUT } from '../user'
 import type { Plan, OngoingPlan, OnlinePlan, Section, ReadingSlice } from '~common/types'
-
-// Mock external dependencies
-jest.mock('~helpers/firebase', () => ({
-  firebaseDb: {},
-  increment: {},
-  collection: jest.fn(),
-  doc: jest.fn(),
-  getDoc: jest.fn(),
-  getDocs: jest.fn(),
-  updateDoc: jest.fn(),
-}))
 
 const createPlan = (id: string, sections: Section[] = []): Plan => ({
   id,
@@ -195,7 +248,8 @@ describe('Plan Reducer', () => {
 
       const newState = reducer(state, markAsRead({ readingSliceId: 'slice-1', planId: 'plan-1' }))
 
-      expect(newState.ongoingPlans[0].readingSlices['slice-1']).toBeUndefined()
+      // When uncompleting, the current slice becomes 'Next' and previous 'Next' markers are cleared
+      expect(newState.ongoingPlans[0].readingSlices['slice-1']).toBe('Next')
       expect(newState.ongoingPlans[0].readingSlices['slice-2']).toBeUndefined()
     })
 

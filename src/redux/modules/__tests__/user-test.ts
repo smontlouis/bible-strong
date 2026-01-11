@@ -1,35 +1,45 @@
 /* eslint-env jest */
 
-import reducer, {
-  USER_LOGIN_SUCCESS,
-  USER_UPDATE_PROFILE,
-  USER_LOGOUT,
-  SET_FONT_FAMILY,
-  SET_NOTIFICATION_VOD,
-  SET_NOTIFICATION_ID,
-  TOGGLE_COMPARE_VERSION,
-  RESET_COMPARE_VERSION,
-  GET_CHANGELOG_SUCCESS,
-  GET_CHANGELOG_FAIL,
-  SET_SUBSCRIPTION,
-  EMAIL_VERIFIED,
-  APP_FETCH_DATA,
-  APP_FETCH_DATA_FAIL,
-  SAVE_ALL_LOGS_AS_SEEN,
-  RECEIVE_SUBCOLLECTION_UPDATES,
-} from '../user'
-
-// Mock external dependencies
-jest.mock('~helpers/firebase', () => ({
-  firebaseDb: {
-    collection: jest.fn(),
+// Mock react-native before any imports
+jest.mock('react-native', () => ({
+  Appearance: {
+    getColorScheme: jest.fn(() => 'light'),
   },
+}))
+
+// Mock expo-file-system
+jest.mock('expo-file-system/legacy', () => ({}))
+jest.mock('expo-file-system', () => ({}))
+
+// Mock expo-sqlite
+jest.mock('expo-sqlite', () => ({}))
+
+// Mock bibleVersions and databases to avoid deep import chains
+jest.mock('~helpers/bibleVersions', () => ({
+  versions: {},
+  getIfVersionNeedsUpdate: jest.fn(),
+}))
+
+jest.mock('~helpers/databases', () => ({
+  databases: {},
+  getIfDatabaseNeedsUpdate: jest.fn(),
+}))
+
+// Mock modules before importing reducer
+jest.mock('~state/tabs', () => ({
+  tabGroupsAtom: {},
 }))
 
 jest.mock('jotai/vanilla', () => ({
   getDefaultStore: jest.fn(() => ({
     set: jest.fn(),
   })),
+}))
+
+jest.mock('~helpers/firebase', () => ({
+  firebaseDb: {
+    collection: jest.fn(),
+  },
 }))
 
 jest.mock('~i18n', () => ({
@@ -49,6 +59,25 @@ jest.mock('~themes/natureColors', () => ({ primary: '#444' }))
 jest.mock('~themes/sunsetColors', () => ({ primary: '#555' }))
 jest.mock('~themes/mauveColors', () => ({ primary: '#666' }))
 jest.mock('~themes/nightColors', () => ({ primary: '#777' }))
+
+import reducer, {
+  USER_LOGIN_SUCCESS,
+  USER_UPDATE_PROFILE,
+  USER_LOGOUT,
+  SET_FONT_FAMILY,
+  SET_NOTIFICATION_VOD,
+  SET_NOTIFICATION_ID,
+  TOGGLE_COMPARE_VERSION,
+  RESET_COMPARE_VERSION,
+  GET_CHANGELOG_SUCCESS,
+  GET_CHANGELOG_FAIL,
+  SET_SUBSCRIPTION,
+  EMAIL_VERIFIED,
+  APP_FETCH_DATA,
+  APP_FETCH_DATA_FAIL,
+  SAVE_ALL_LOGS_AS_SEEN,
+  RECEIVE_SUBCOLLECTION_UPDATES,
+} from '../user'
 
 const getInitialState = () => ({
   id: '',
