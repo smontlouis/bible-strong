@@ -12,6 +12,7 @@ import { Verse } from '~common/types'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import generateUUID from '~helpers/generateUUID'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import loadBibleChapter from '~helpers/loadBibleChapter'
 import { useQuery } from '~helpers/react-query-lite'
@@ -81,7 +82,7 @@ const VerseBottomSheet = ({
     setTimeout(() => {
       openInNewTab(
         {
-          id: `bible-${Date.now()}`,
+          id: `bible-${generateUUID()}`,
           title: t('tabs.new'),
           isRemovable: true,
           type: 'bible',

@@ -26,6 +26,7 @@ import TagList from '~common/TagList'
 import MenuOption from '~common/ui/MenuOption'
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
 import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
 import { timeout } from '~helpers/timeout'
@@ -208,7 +209,7 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
                 <MenuOption
                   onSelect={() => {
                     openInNewTab({
-                      id: `dictionary-${Date.now()}`,
+                      id: `dictionary-${generateUUID()}`,
                       title: t('tabs.new'),
                       isRemovable: true,
                       type: 'dictionary',

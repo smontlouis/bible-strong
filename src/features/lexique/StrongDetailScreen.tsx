@@ -37,6 +37,7 @@ import PopOverMenu from '~common/PopOverMenu'
 import { StrongReference } from '~common/types'
 import MenuOption from '~common/ui/MenuOption'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
 import { RootState } from '~redux/modules/reducer'
 import { makeStrongTagsSelector } from '~redux/selectors/bible'
@@ -256,7 +257,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
                 <MenuOption
                   onSelect={() => {
                     openInNewTab({
-                      id: `strong-${Date.now()}`,
+                      id: `strong-${generateUUID()}`,
                       title: t('tabs.new'),
                       isRemovable: true,
                       type: 'strong',

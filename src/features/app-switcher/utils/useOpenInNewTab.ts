@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner-native'
+import generateUUID from '~helpers/generateUUID'
 import { TabItem, tabsAtomsAtom } from '../../../state/tabs'
 import { useSlideNewTab } from './useSlideNewTab'
 
@@ -12,7 +13,7 @@ export const useOpenInNewTab = () => {
   const { triggerSlideNewTab } = useSlideNewTab()
 
   const openInNewTab = (data?: TabItem, params: { autoRedirect?: true } = {}) => {
-    const newTabId = `new-${Date.now()}`
+    const newTabId = `new-${generateUUID()}`
     dispatchTabs({
       type: 'insert',
       value: {
@@ -26,7 +27,6 @@ export const useOpenInNewTab = () => {
     })
 
     if (!params.autoRedirect) {
-      console.log('openInNewTab', t('tabs.created'))
       toast(t('tabs.created'), {
         action: {
           label: t('common.goTo'),

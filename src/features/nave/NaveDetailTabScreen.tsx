@@ -22,6 +22,7 @@ import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
 import waitForNaveDB from '~common/waitForNaveDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
 import loadNaveItem from '~helpers/loadNaveItem'
 import { timeout } from '~helpers/timeout'
@@ -204,7 +205,7 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
                 <MenuOption
                   onSelect={() => {
                     openInNewTab({
-                      id: `nave-${Date.now()}`,
+                      id: `nave-${generateUUID()}`,
                       title: t('tabs.new'),
                       isRemovable: true,
                       type: 'nave',

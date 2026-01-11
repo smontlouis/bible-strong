@@ -2,6 +2,7 @@ import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import generateUUID from '~helpers/generateUUID'
 import { CompareTab } from '../../state/tabs'
 import CompareVersesTabScreen from './CompareVersesTabScreen'
 
@@ -15,7 +16,7 @@ const CompareVersesScreen = () => {
   const onTheFlyAtom = useMemo(
     () =>
       atom<CompareTab>({
-        id: `compare-${Date.now()}`,
+        id: `compare-${generateUUID()}`,
         title: 'Comparer',
         isRemovable: true,
         hasBackButton: true,

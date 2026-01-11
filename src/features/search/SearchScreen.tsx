@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
+import generateUUID from '~helpers/generateUUID'
 import { SearchTab } from '../../state/tabs'
 import SearchTabScreen from './SearchTabScreen'
 
@@ -8,7 +9,7 @@ const SearchScreen = () => {
   const onTheFlyAtom = useMemo(
     () =>
       atom<SearchTab>({
-        id: `search-${Date.now()}`,
+        id: `search-${generateUUID()}`,
         title: 'Recherche',
         isRemovable: true,
         type: 'search',

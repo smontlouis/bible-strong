@@ -2,6 +2,7 @@ import produce from 'immer'
 import { useMemo } from 'react'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
+import generateUUID from '~helpers/generateUUID'
 
 import { useLocalSearchParams } from 'expo-router'
 import { atom } from 'jotai/vanilla'
@@ -32,7 +33,7 @@ const BibleScreen = () => {
   const defaultVersion = useDefaultBibleVersion()
 
   const initialValues = produce(getDefaultBibleTab(version || defaultVersion), draft => {
-    draft.id = `bible-${Date.now()}`
+    draft.id = `bible-${generateUUID()}`
     if (book)
       draft.data.selectedBook = Number.isInteger(book)
         ? books[(book as number) - 1]

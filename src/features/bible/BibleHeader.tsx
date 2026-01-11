@@ -45,14 +45,6 @@ interface BibleHeaderProps {
   hasBackButton?: boolean
   onBibleParamsClick: () => void
   commentsDisplay?: boolean
-  version: string
-  bookName: string
-  chapter: number
-  verseFormatted: string
-  isSelectionMode?: boolean
-  isParallel?: boolean
-  selectedVerses?: VerseIds
-  isReadOnly?: boolean
 }
 
 const Header = ({
@@ -60,14 +52,6 @@ const Header = ({
   bibleAtom,
   onBibleParamsClick,
   commentsDisplay,
-  version,
-  bookName,
-  chapter,
-  verseFormatted,
-  isSelectionMode,
-  isParallel,
-  selectedVerses,
-  isReadOnly,
 }: BibleHeaderProps) => {
   const router = useRouter()
   const { t } = useTranslation()
@@ -82,11 +66,24 @@ const Header = ({
   // Bookmark ref
   const bookmarkModalRef = useRef<BottomSheetModal>(null)
   const bible = useAtomValue(bibleAtom)
-  const bookNumber = bible.data.selectedBook.Numero
+  const {
+    selectedBook: book,
+    selectedChapter: chapter,
+    selectedVersion: version,
+    selectedVerses,
+    isReadOnly,
+    isSelectionMode,
+    parallelVersions,
+    focusVerses,
+  } = bible.data
+  const bookNumber = book.Numero
+  const bookName = book.Nom
+  const isParallel = parallelVersions.length > 0
+  const displayVerses = focusVerses
 
   // Check if verses are selected
   const hasSelectedVerses = selectedVerses && Object.keys(selectedVerses).length > 0
-  const selectedVersesReference = hasSelectedVerses ? verseToReference(selectedVerses) : ''
+  const selectedVersesReference = verseToReference(selectedVerses)
 
   // Check if current chapter has a bookmark
   const selectBookmarkForChapter = useMemo(() => makeSelectBookmarkForChapter(), [])
@@ -97,14 +94,26 @@ const Header = ({
   // Track previous book and chapter to avoid overwriting custom titles
   const prevBook = usePrevious(bookName)
   const prevChapter = usePrevious(chapter)
+  const prevFocusVerses = usePrevious(JSON.stringify(bible.data.focusVerses))
 
   useEffect(() => {
     // Only update title if book or chapter changed (not on first mount)
     // prevBook is undefined on first render, so we skip the update
-    if (prevBook !== undefined && (prevBook !== bookName || prevChapter !== chapter)) {
-      actions.setTitle(`${t(bookName)} ${chapter} - ${version}`)
+    if (
+      prevBook !== undefined &&
+      (prevBook !== bookName ||
+        prevChapter !== chapter ||
+        prevFocusVerses !== JSON.stringify(bible.data.focusVerses))
+    ) {
+      const { selectedBook, selectedChapter, selectedVersion, focusVerses } = bible.data
+      const ref = verseToReference({
+        bookNum: selectedBook.Numero,
+        chapterNum: selectedChapter,
+        verses: focusVerses,
+      })
+      actions.setTitle(`${ref} - ${selectedVersion}`)
     }
-  }, [actions, bookName, chapter, version, t, prevBook, prevChapter])
+  }, [actions, bookName, chapter, prevBook, prevChapter, prevFocusVerses, bible.data])
 
   const { addParallelVersion, removeAllParallelVersions } = actions
 
@@ -200,7 +209,6 @@ const Header = ({
               justifyContent="center"
               width={50}
               height={32}
-              // @ts-ignore
               animate={backButtonTranslateY}
               {...motiTransition}
             >
@@ -221,7 +229,7 @@ const Header = ({
           <>
             <Box flex={1} center>
               <Text fontWeight="bold" fontSize={14}>
-                {`${t(bookName)} ${chapter}:${verseFormatted} - ${version}`}
+                {`${verseToReference({ bookNum: bookNumber, chapterNum: chapter, verses: displayVerses })} - ${version}`}
               </Text>
             </Box>
             <Box width={50} />

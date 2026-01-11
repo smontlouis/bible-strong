@@ -1,5 +1,6 @@
 import { useSetAtom } from 'jotai/react'
 import { getDefaultBibleTab, tabsAtom } from 'src/state/tabs'
+import generateUUID from '~helpers/generateUUID'
 import { HStack, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 
@@ -10,7 +11,7 @@ export const DebugView = () => {
       ...s,
       ...Array.from({ length: 100 }, (_, i) => ({
         ...getDefaultBibleTab(),
-        id: `tab-${i}-${Date.now()}`,
+        id: `tab-${i}-${generateUUID()}`,
         isRemovable: true,
       })),
     ])

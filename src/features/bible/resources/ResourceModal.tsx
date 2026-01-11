@@ -21,6 +21,7 @@ import { Slide, Slides } from '~common/ui/Slider'
 import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import generateUUID from '~helpers/generateUUID'
 import CommentariesCard from '~features/commentaries/CommentariesCard'
 import DictionnaireVerseDetailCard from '~features/dictionnary/DictionnaireVerseDetailCard'
 import NaveModalCard from '~features/nave/NaveModalCard'
@@ -115,7 +116,7 @@ const ResourcesModal = memo(
                   <MenuOption
                     onSelect={() => {
                       openInNewTab({
-                        id: `commentary-${Date.now()}`,
+                        id: `commentary-${generateUUID()}`,
                         title: t('tabs.new'),
                         isRemovable: true,
                         type: 'commentary',

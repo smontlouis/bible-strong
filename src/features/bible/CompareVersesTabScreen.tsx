@@ -22,6 +22,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import generateUUID from '~helpers/generateUUID'
 import { versions } from '~helpers/bibleVersions'
 import { CompareTab, SelectedVerses } from '../../state/tabs'
 
@@ -106,7 +107,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
                 <MenuOption
                   onSelect={() => {
                     openInNewTab({
-                      id: `compare-${Date.now()}`,
+                      id: `compare-${generateUUID()}`,
                       title: t('tabs.new'),
                       isRemovable: true,
                       type: 'compare',

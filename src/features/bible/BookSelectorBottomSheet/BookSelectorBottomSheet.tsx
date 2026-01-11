@@ -13,6 +13,7 @@ import books from '~assets/bible_versions/books-desc'
 import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import generateUUID from '~helpers/generateUUID'
 import { HelpTip } from '~features/tips/HelpTip'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import { bookSelectorSortAtom, bookSelectorVersesAtom } from './atom'
@@ -78,7 +79,7 @@ const BookSelectorBottomSheet = ({ bottomSheetRef }: BookSelectorBottomSheetProp
         setTimeout(() => {
           openInNewTab(
             {
-              id: `bible-${Date.now()}`,
+              id: `bible-${generateUUID()}`,
               title: t('tabs.new'),
               isRemovable: true,
               type: 'bible',

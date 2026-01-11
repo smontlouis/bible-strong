@@ -2,6 +2,7 @@ import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import generateUUID from '~helpers/generateUUID'
 import { StudyTab } from '../../state/tabs'
 import StudiesTabScreen from './StudiesTabScreen'
 
@@ -13,7 +14,7 @@ const StudiesScreen = () => {
   const onTheFlyAtom = useMemo(
     () =>
       atom<StudyTab>({
-        id: `study-${Date.now()}`,
+        id: `study-${generateUUID()}`,
         title: 'Etudes',
         isRemovable: true,
         hasBackButton: true,

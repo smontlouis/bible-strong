@@ -4,6 +4,7 @@ import { atom, getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { atomWithDefault, splitAtom } from 'jotai/vanilla/utils'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
+import generateUUID from '~helpers/generateUUID'
 import { StrongReference, StudyNavigateBibleType, VerseIds } from '~common/types'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
 import { storage } from '~helpers/storage'
@@ -173,7 +174,7 @@ export const DEFAULT_GROUP_ID = 'default-group'
 // ============================================================================
 
 export const getDefaultBibleTab = (version?: VersionCode): BibleTab => ({
-  id: `bible-${Date.now()}`,
+  id: `bible-${generateUUID()}`,
   isRemovable: true,
   title: 'Genèse 1:1',
   type: 'bible',
@@ -317,9 +318,7 @@ const migrateTabsToRemovable = (tabs: TabItem[]): TabItem[] => {
     if (needsIdMigration || needsRemovableMigration) {
       return {
         ...tab,
-        id: needsIdMigration
-          ? `bible-${Date.now()}-${Math.random().toString(36).slice(2)}`
-          : tab.id,
+        id: needsIdMigration ? `bible-${generateUUID()}` : tab.id,
         isRemovable: true,
       }
     }
@@ -813,6 +812,21 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     )
   }
 
+  const pinSelectedVerses = () => {
+    setBibleTab(
+      produce(draft => {
+        const selectedKeys = Object.keys(draft.data.selectedVerses)
+        if (selectedKeys.length === 0) return
+
+        // Extract verse numbers from keys (format: "book-chapter-verse")
+        const verseNumbers = selectedKeys.map(key => key.split('-')[2]).map(Number)
+        draft.data.focusVerses = verseNumbers
+        draft.data.isReadOnly = true
+        draft.data.selectedVerses = {}
+      })
+    )
+  }
+
   const goToPrevChapter = () => {
     setBibleTab(
       produce(draft => {
@@ -953,6 +967,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     selectSelectedVerse,
     exitReadOnlyMode,
     enterReadOnlyMode,
+    pinSelectedVerses,
 
     goToNextChapter,
     goToPrevChapter,
