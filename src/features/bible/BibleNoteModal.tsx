@@ -26,6 +26,7 @@ import Paragraph from '~common/ui/Paragraph'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import generateUUID from '~helpers/generateUUID'
 import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
 import orderVerses from '~helpers/orderVerses'
 import { timeout } from '~helpers/timeout'
@@ -114,7 +115,7 @@ const BibleNoteModal = ({ noteVerses, ref }: BibleNoteModalProps) => {
     close()
     setTimeout(() => {
       openInNewTab({
-        id: `notes-${Date.now()}`,
+        id: `notes-${generateUUID()}`,
         title: t('Notes'),
         isRemovable: true,
         type: 'notes',

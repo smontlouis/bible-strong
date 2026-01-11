@@ -5,6 +5,7 @@ import { Alert } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import Modal from '~common/Modal'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import generateUUID from '~helpers/generateUUID'
 import { RootState } from '~redux/modules/reducer'
 import { deleteStudy } from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
@@ -56,7 +57,7 @@ const StudySettingsModal = ({ ref, studyId, onClosed, openRenameModal }: Props) 
           close()
           openInNewTab(
             {
-              id: `study-${Date.now()}`,
+              id: `study-${generateUUID()}`,
               title: study.title,
               isRemovable: true,
               type: 'study',

@@ -30,6 +30,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import { HStack } from '~common/ui/Stack'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import generateUUID from '~helpers/generateUUID'
 import { firebaseDb } from '~helpers/firebase'
 import memoize from '~helpers/memoize'
 import useLanguage from '~helpers/useLanguage'
@@ -237,7 +238,7 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
                     <MenuOption
                       onSelect={() => {
                         openInNewTab({
-                          id: `commentary-${Date.now()}`,
+                          id: `commentary-${generateUUID()}`,
                           title: t('tabs.new'),
                           isRemovable: true,
                           type: 'commentary',

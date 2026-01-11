@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { BibleTab } from 'src/state/tabs'
+import generateUUID from '~helpers/generateUUID'
 import Button from '~common/ui/Button'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 
@@ -14,7 +15,7 @@ export const OpenInNewTabButton = ({ bibleTab }: OpenInNewTabButtonProps) => {
   const openInBibleTab = () => {
     openInNewTab({
       ...bibleTab,
-      id: `bible-${Date.now()}`,
+      id: `bible-${generateUUID()}`,
       data: {
         ...bibleTab.data,
         isReadOnly: true,

@@ -1,4 +1,5 @@
 import produce from 'immer'
+import generateUUID from '~helpers/generateUUID'
 import { CustomColor, HighlightType } from '../user'
 
 export const ADD_CUSTOM_COLOR = 'user/ADD_CUSTOM_COLOR'
@@ -49,7 +50,7 @@ export function addCustomColor(
   return {
     type: ADD_CUSTOM_COLOR,
     payload: {
-      id: `custom-${Date.now()}`,
+      id: `custom-${generateUUID()}`,
       hex,
       createdAt: Date.now(),
       name,

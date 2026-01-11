@@ -2,6 +2,7 @@ import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import generateUUID from '~helpers/generateUUID'
 import { DictionaryTab } from '../../state/tabs'
 import DictionaryDetailTabScreen from './DictionaryDetailTabScreen'
 
@@ -15,7 +16,7 @@ const DictionaryDetailScreen = () => {
   const onTheFlyAtom = useMemo(
     () =>
       atom<DictionaryTab>({
-        id: `dictionary-${Date.now()}`,
+        id: `dictionary-${generateUUID()}`,
         title: 'Dictionary',
         isRemovable: true,
         hasBackButton: true,

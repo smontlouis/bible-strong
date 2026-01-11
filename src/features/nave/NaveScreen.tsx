@@ -2,6 +2,7 @@ import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
+import generateUUID from '~helpers/generateUUID'
 import { NaveTab } from '../../state/tabs'
 import NaveListScreen from './NaveListScreen'
 
@@ -10,7 +11,7 @@ const NaveScreen = () => {
   const onTheFlyAtom = useMemo(
     () =>
       atom<NaveTab>({
-        id: `nave-${Date.now()}`,
+        id: `nave-${generateUUID()}`,
         title: t('Thèmes Nave'),
         isRemovable: true,
         hasBackButton: true,

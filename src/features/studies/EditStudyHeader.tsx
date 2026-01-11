@@ -13,6 +13,7 @@ import Modal from '~common/Modal'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import generateUUID from '~helpers/generateUUID'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { deleteStudy, Study } from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
@@ -87,7 +88,7 @@ const EditHeader = ({
               close()
               openInNewTab(
                 {
-                  id: `study-${Date.now()}`,
+                  id: `study-${generateUUID()}`,
                   title: study.title,
                   isRemovable: true,
                   type: 'study',

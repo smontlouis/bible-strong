@@ -56,6 +56,7 @@ type Props = {
   version: VersionCode
   onAddToStudy: () => void
   onAddBookmark: () => void
+  onPinVerses: () => void
 }
 
 const VersesModal = ({
@@ -74,6 +75,7 @@ const VersesModal = ({
   version,
   onAddToStudy,
   onAddBookmark,
+  onPinVerses,
 }: Props) => {
   const router = useRouter()
   const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
@@ -304,6 +306,7 @@ const VersesModal = ({
                   onPress={onAddToStudy}
                   label={t('study.addToStudy')}
                 />
+                <TouchableChip name="map-pin" onPress={onPinVerses} label={t('tab.pinVerses')} />
                 <TouchableChip name="copy" onPress={copyToClipboard} label={t('Copier')} />
                 <TouchableChip name="share-2" onPress={shareVerse} label={t('Partager')} />
                 <TouchableChip onPress={selectAllVerses} label={t('Tout sélectionner')} />

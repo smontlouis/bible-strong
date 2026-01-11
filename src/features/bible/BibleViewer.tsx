@@ -6,51 +6,51 @@ import Empty from '~common/Empty'
 import QuickTagsModal from '~common/QuickTagsModal'
 import Box, { MotiBox, motiTransition } from '~common/ui/Box'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
+import { BibleError } from '~helpers/bibleErrors'
 import getBiblePericope from '~helpers/getBiblePericope'
 import loadBibleChapter from '~helpers/loadBibleChapter'
 import loadMhyComments from '~helpers/loadMhyComments'
 import { usePrevious } from '~helpers/usePrevious'
 import BibleHeader from './BibleHeader'
-import { BibleError, BibleErrorType } from '~helpers/bibleErrors'
 
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
+import { useTranslation } from 'react-i18next'
 import { useDerivedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useTranslation } from 'react-i18next'
+import type { Bookmark } from '~common/types'
 import { BibleResource, Pericope, SelectedCode, Verse, VerseIds } from '~common/types'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
+import BookmarkModal from '~features/bookmarks/BookmarkModal'
 import AddToStudyModal from '~features/studies/AddToStudyModal'
 import { useAddVerseToStudy } from '~features/studies/hooks/useAddVerseToStudy'
 import VerseFormatBottomSheet from '~features/studies/VerseFormatBottomSheet'
 import getVersesContent from '~helpers/getVersesContent'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { useBottomSheet, useBottomSheetModal } from '~helpers/useBottomSheet'
 import useLanguage from '~helpers/useLanguage'
-import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { RootState } from '~redux/modules/reducer'
 import { addHighlight, removeHighlight } from '~redux/modules/user'
 import {
   makeHighlightsByChapterSelector,
-  makeNotesByChapterSelector,
-  makeLinksByChapterSelector,
   makeIsSelectedVerseHighlightedSelector,
+  makeLinksByChapterSelector,
+  makeNotesByChapterSelector,
 } from '~redux/selectors/bible'
 import { makeSelectBookmarksInChapter } from '~redux/selectors/bookmarks'
 import { historyAtom, isFullScreenBibleValue, multipleTagsModalAtom } from '../../state/app'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import { BibleDOMWrapper, ParallelVerse } from './BibleDOM/BibleDOMWrapper'
-import type { Bookmark } from '~common/types'
 import BibleLinkModal from './BibleLinkModal'
 import BibleNoteModal from './BibleNoteModal'
 import BibleParamsModal from './BibleParamsModal'
 import BibleFooter from './footer/BibleFooter'
+import { LoadingView } from './LoadingView'
 import { OpenInNewTabButton } from './OpenInNewTabButton'
 import ResourcesModal from './resources/ResourceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
-import { LoadingView } from './LoadingView'
-import BookmarkModal from '~features/bookmarks/BookmarkModal'
 
 const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: number) => {
   if (pericope && pericope[book] && pericope[book][chapter]) {
@@ -84,26 +84,6 @@ const getErrorMessage = (error: BibleError, t: (key: string) => string): string 
       return t('bible.error.unknown')
   }
 }
-
-const formatVerses = (verses: string[]) =>
-  verses.reduce((acc, v, i, array) => {
-    // @ts-ignore
-    if (v === array[i - 1] + 1 && v === array[i + 1] - 1) {
-      // if suite > 2
-      return acc
-    }
-    // @ts-ignore
-    if (v === array[i - 1] + 1 && v !== array[i + 1] - 1) {
-      // if endSuite
-      return `${acc}-${v}`
-    }
-    // @ts-ignore
-    if (array[i - 1] && v - 1 !== array[i - 1]) {
-      // if not preceded by - 1
-      return `${acc},${v}`
-    }
-    return acc + v
-  }, '')
 
 const BibleViewer = ({
   bibleAtom,
@@ -450,6 +430,11 @@ const BibleViewer = ({
     [pendingVerseData, addVerseToStudy, verseFormatModal, addToStudyModal, actions]
   )
 
+  // Pin verses handler
+  const handlePinVerses = () => {
+    actions.pinSelectedVerses()
+  }
+
   // Bookmark handler
   const handleAddBookmark = useCallback(() => {
     // Get the first selected verse for the bookmark
@@ -496,7 +481,7 @@ const BibleViewer = ({
     }
   })
 
-  console.log('[Bible] BibleViewer', version, book.Numero, chapter, verse, isReadOnly)
+  console.log('[Bible] BibleViewer', version, book.Numero, chapter, verse, focusVerses)
 
   // Wait for onboarding to complete before rendering Bible content
   // This prevents FileNotFoundException when Bible files don't exist yet
@@ -514,17 +499,7 @@ const BibleViewer = ({
         bibleAtom={bibleAtom}
         onBibleParamsClick={bibleParamsModal.open}
         commentsDisplay={settings.commentsDisplay}
-        verseFormatted={
-          // @ts-ignore
-          focusVerses ? formatVerses(focusVerses) : verse.toString()
-        }
-        isParallel={parallelVersions.length > 0}
-        version={version}
-        bookName={book.Nom}
-        chapter={chapter}
         hasBackButton={withNavigation}
-        selectedVerses={selectedVerses}
-        isReadOnly={isReadOnly}
       />
       {error && (
         <Box flex={1} zIndex={-1}>
@@ -626,6 +601,7 @@ const BibleViewer = ({
         version={version}
         onAddToStudy={handleOpenAddToStudy}
         onAddBookmark={handleAddBookmark}
+        onPinVerses={handlePinVerses}
       />
       <QuickTagsModal
         item={quickTagsModal}

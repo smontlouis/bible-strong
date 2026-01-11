@@ -2,6 +2,7 @@ import React from 'react'
 import { atom } from 'jotai/vanilla'
 import { useMemo } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import generateUUID from '~helpers/generateUUID'
 import { StrongTab } from '../../state/tabs'
 import StrongDetailScreen from '~features/lexique/StrongDetailScreen'
 
@@ -21,7 +22,7 @@ const StrongScreen = () => {
   const onTheFlyAtom = useMemo(
     () =>
       atom<StrongTab>({
-        id: `strong-${Date.now()}`,
+        id: `strong-${generateUUID()}`,
         title: 'Lexique',
         isRemovable: true,
         hasBackButton: true,

@@ -2,6 +2,7 @@ import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
 import { useLocalSearchParams } from 'expo-router'
+import generateUUID from '~helpers/generateUUID'
 import { CommentaryTab } from '../../state/tabs'
 import CommentariesTabScreen from './CommentariesTabScreen'
 
@@ -14,7 +15,7 @@ const CommentariesScreen = () => {
   const onTheFlyAtom = useMemo(
     () =>
       atom<CommentaryTab>({
-        id: `commentary-${Date.now()}`,
+        id: `commentary-${generateUUID()}`,
         title: 'Commentaire',
         isRemovable: true,
         hasBackButton: true,

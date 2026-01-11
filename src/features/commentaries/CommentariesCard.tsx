@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
+import generateUUID from '~helpers/generateUUID'
 import { CommentaryTab } from '../../state/tabs'
 import CommentariesTabScreen from './CommentariesTabScreen'
 import { useAtom } from 'jotai/react'
@@ -15,7 +16,7 @@ const CommentariesCard = ({
   const onTheFlyAtom = useMemo(
     () =>
       atom<CommentaryTab>({
-        id: `commentary-${Date.now()}`,
+        id: `commentary-${generateUUID()}`,
         title: 'Commentaire',
         isRemovable: true,
         hasBackButton: true,

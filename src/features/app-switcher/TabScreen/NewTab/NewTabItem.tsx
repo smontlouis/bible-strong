@@ -17,7 +17,7 @@ import { useSelectBibleReference } from './SelectBibleReferenceModalProvider'
 
 interface NewTabItemProps {
   type: TabItem['type']
-  newAtom: PrimitiveAtom<NewTab>
+  newAtom: PrimitiveAtom<TabItem>
 }
 
 const useOpenTabByType = ({ type, newAtom }: NewTabItemProps) => {
@@ -54,10 +54,8 @@ const useOpenTabByType = ({ type, newAtom }: NewTabItemProps) => {
     // Bible: ouvrir directement avec les données par défaut
     if (type === 'bible') {
       setTab({
-        ...tab,
-        // @ts-ignore
-        type: 'bible',
-        data: getDefaultBibleTab(defaultVersion).data,
+        ...getDefaultBibleTab(defaultVersion),
+        id: tab.id,
       })
       return
     }

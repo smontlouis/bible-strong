@@ -15,7 +15,7 @@ import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
-import FlatList from '~common/ui/FlatList'
+import { LegendList } from '@legendapp/list'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import useFuzzy from '~helpers/useFuzzy'
@@ -185,7 +185,7 @@ const TagsScreen = () => {
         </Box>
       </Header>
       {result.length ? (
-        <FlatList
+        <LegendList
           data={result}
           renderItem={({ item }: { item: Tag }) => <TagItem setOpen={setOpen} item={item} />}
           keyExtractor={(item: Tag) => item.id}

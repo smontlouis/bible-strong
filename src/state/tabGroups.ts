@@ -2,6 +2,7 @@ import { useAtomValue, useSetAtom } from 'jotai/react'
 import { atom } from 'jotai/vanilla'
 import { getDefaultStore } from 'jotai/vanilla'
 
+import generateUUID from '~helpers/generateUUID'
 import {
   tabGroupsAtom,
   activeGroupIdAtom,
@@ -21,7 +22,7 @@ import {
 // HELPER FUNCTIONS
 // ============================================================================
 
-export const generateGroupId = () => `group-${Date.now()}`
+export const generateGroupId = () => `group-${generateUUID()}`
 
 // ============================================================================
 // ACTION ATOMS

@@ -2,6 +2,7 @@ import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
+import generateUUID from '~helpers/generateUUID'
 import { DictionaryTab } from '../../state/tabs'
 import DictionaryListScreen from './DictionaryListScreen'
 
@@ -10,7 +11,7 @@ const DictionaryScreen = () => {
   const onTheFlyAtom = useMemo(
     () =>
       atom<DictionaryTab>({
-        id: `dictionary-${Date.now()}`,
+        id: `dictionary-${generateUUID()}`,
         title: t('Dictionnaire'),
         isRemovable: true,
         hasBackButton: true,

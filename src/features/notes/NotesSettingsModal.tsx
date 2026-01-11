@@ -9,6 +9,7 @@ import { useDispatch } from 'react-redux'
 import Modal from '~common/Modal'
 import books from '~assets/bible_versions/books-desc'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import generateUUID from '~helpers/generateUUID'
 import { deleteNote } from '~redux/modules/user'
 import { NotesTab } from '~state/tabs'
 
@@ -68,7 +69,7 @@ const NotesSettingsModal = ({ ref, noteId, onClosed, notesAtom }: Props) => {
     close()
     setTimeout(() => {
       openInNewTab({
-        id: `notes-${Date.now()}`,
+        id: `notes-${generateUUID()}`,
         title: t('Notes'),
         isRemovable: true,
         type: 'notes',
