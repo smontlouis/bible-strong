@@ -1,10 +1,7 @@
-import { useTheme } from '@emotion/react'
-import BottomSheet, { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
-import { Portal } from '@gorhom/portal'
+import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import React, { useRef, useState } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'
 import { Share } from 'react-native'
-import * as Animatable from 'react-native-animatable'
 import DateTimePicker from 'react-native-modal-datetime-picker'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
@@ -21,22 +18,21 @@ import { removeBreakLines } from '~helpers/utils'
 import { zeroFill } from '~helpers/zeroFill'
 import { RootState } from '~redux/modules/reducer'
 import { setNotificationVOD } from '~redux/modules/user'
-import ShowMoreImage from './ShowMoreImage'
+import VerseImageModal from './VerseImageModal'
 import { useImageUrls } from './useImageUrls'
 import { useVerseOfTheDay } from './useVerseOfTheDay'
+import Paragraph from '~common/ui/Paragraph'
 
-const AnimatableBox = Animatable.createAnimatableComponent(Box)
+export const VERSE_CARD_HEIGHT = 240
 
 interface Props {
   addDay: number
-  isFirst: boolean
-  isLast: boolean
-  currentVOD: boolean
-  setCurrentVOD: React.Dispatch<React.SetStateAction<number>>
 }
 
 const dayToAgo = (day: number, t: TFunction<'translation'>) => {
   switch (day) {
+    case 0:
+      return t("Aujourd'hui")
     case -1:
       return t('Hier')
     case -2:
@@ -45,26 +41,23 @@ const dayToAgo = (day: number, t: TFunction<'translation'>) => {
       return t('Il y a trois jours')
     case -4:
       return t('Il y a quatre jours')
-    case -5:
-      return t('Il y a cinq jours')
     default:
       return undefined
   }
 }
 
-const VerseOfTheDay = ({ addDay, isFirst, isLast, currentVOD, setCurrentVOD }: Props) => {
+const VerseOfTheDay = ({ addDay }: Props) => {
   const { t } = useTranslation()
   const [timerPickerOpen, setTimePicker] = useState(false)
   const verseOfTheDay = useVerseOfTheDay(addDay)
   const imageUrls = useImageUrls(verseOfTheDay)
   const dispatch = useDispatch()
-  const theme = useTheme()
-  const [open, setOpen] = useState(false)
+  const imageModalRef = React.useRef<BottomSheetModal>(null)
   const verseOfTheDayTime = useSelector(
     (state: RootState) => state.user.notifications.verseOfTheDay
   )
   const insets = useSafeAreaInsets()
-  const { current: ago } = useRef(dayToAgo(addDay, t))
+  const ago = dayToAgo(addDay, t)
   const notificationModalRef = React.useRef<BottomSheetModal>(null)
 
   const [initialHour, initialMinutes] = verseOfTheDayTime.split(':').map((n: any) => Number(n))
@@ -88,13 +81,12 @@ const VerseOfTheDay = ({ addDay, isFirst, isLast, currentVOD, setCurrentVOD }: P
 
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
-  if (!currentVOD) {
-    return null
-  }
-
   if (!verseOfTheDay) {
     return (
-      <Box>
+      <Box paddingHorizontal={20} borderRadius={30} bg="reverse" py={20} height={VERSE_CARD_HEIGHT}>
+        <Text color="grey" fontWeight="bold" fontSize={14}>
+          {ago}
+        </Text>
         <Box marginTop={10}>
           <Placeholder Animation={Fade}>
             <PlaceholderLine width={80} style={{ marginTop: 5 }} />
@@ -109,73 +101,63 @@ const VerseOfTheDay = ({ addDay, isFirst, isLast, currentVOD, setCurrentVOD }: P
   // @ts-ignore
   if (verseOfTheDay.error) {
     return (
-      <Empty
-        source={require('~assets/images/empty.json')}
-        message="Impossible de charger le verset du jour..."
-      />
+      <Box paddingHorizontal={20} borderRadius={30} bg="reverse" py={20} height={VERSE_CARD_HEIGHT}>
+        <Empty
+          source={require('~assets/images/empty.json')}
+          message="Impossible de charger le verset du jour..."
+        />
+      </Box>
     )
   }
 
-  const { title, version, content, all, book, chapter, verse } = verseOfTheDay
+  const { version, content, all, book, chapter, verse, title } = verseOfTheDay
   const shareVerse = () => {
     Share.share({ message: all })
   }
 
   return (
-    <Box>
-      <AnimatableBox animation="fadeIn">
-        <Link
-          route="BibleView"
-          params={{
-            isReadOnly: true,
-            book,
-            chapter,
-            verse,
-            version,
-            focusVerses: [verse],
-          }}
-          style={{ marginTop: 10 }}
-        >
-          {ago && (
-            <Text color="grey" fontSize={10}>
-              {ago}
-            </Text>
+    <Box paddingHorizontal={20} borderRadius={30} bg="reverse" py={20} height={VERSE_CARD_HEIGHT}>
+      <Text color="grey" fontWeight="bold" fontSize={14}>
+        {ago}
+      </Text>
+      <Link
+        route="BibleView"
+        params={{
+          isReadOnly: true,
+          book,
+          chapter,
+          verse,
+          version,
+          focusVerses: [verse],
+        }}
+        style={{ marginTop: 10 }}
+      >
+        <Paragraph numberOfLines={4} fontWeight="bold" scaleLineHeight={-1}>
+          {removeBreakLines(content)}
+        </Paragraph>
+        <Text color="grey" fontSize={12} mt={5}>
+          {title} - {version}
+        </Text>
+      </Link>
+      <Box row alignItems="center" mt="auto">
+        <Box row center opacity={0.5}>
+          {!addDay && (
+            <Link onPress={() => notificationModalRef.current?.present()} size={30}>
+              <FeatherIcon size={16} name="bell" />
+            </Link>
           )}
-          <Text color="grey" fontSize={14} lineHeight={20}>
-            {removeBreakLines(content)}
-          </Text>
-        </Link>
-        <Box row alignItems="center">
-          <Box row center mt={5} opacity={0.5}>
-            {!addDay && (
-              <Link onPress={() => notificationModalRef.current?.present()} size={30}>
-                <FeatherIcon size={16} name="bell" />
-              </Link>
-            )}
-            <Link size={30} onPress={shareVerse}>
-              <FeatherIcon size={16} name="share-2" />
-            </Link>
-            <Link size={30} onPress={() => setOpen(s => !s)}>
-              <FeatherIcon size={16} name="image" />
-            </Link>
-            {!isLast && (
-              <Link size={30} onPress={() => setCurrentVOD(s => s - 1)}>
-                <FeatherIcon size={16} name="chevron-left" />
-              </Link>
-            )}
-            {!isFirst && (
-              <Link size={30} onPress={() => setCurrentVOD(s => s + 1)}>
-                <FeatherIcon size={16} name="chevron-right" />
-              </Link>
-            )}
-          </Box>
+          <Link size={30} onPress={shareVerse}>
+            <FeatherIcon size={16} name="share-2" />
+          </Link>
+          <Link size={30} onPress={() => imageModalRef.current?.present()}>
+            <FeatherIcon size={16} name="image" />
+          </Link>
         </Box>
-      </AnimatableBox>
-      <ShowMoreImage
+      </Box>
+      <VerseImageModal
+        modalRef={imageModalRef}
         imageUrls={imageUrls}
         verseOfTheDay={verseOfTheDay}
-        open={open}
-        setOpen={setOpen}
       />
       <DateTimePicker
         date={initialDate}

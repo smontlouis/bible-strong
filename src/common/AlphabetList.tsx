@@ -50,8 +50,12 @@ const AlphabetList = ({ color, setLetter, letter }: any) => {
             justifyContent: 'center',
             alignItems: 'center',
           }}
-          width={25}
-          height={30}
+          contentContainerStyle={{
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          itemWidth={25}
+          itemHeight={30}
           data={alphabet}
           renderItem={({ item: section, index: itemIndex }: any) => (
             <TouchableOpacity

@@ -275,6 +275,7 @@
   "Aucun marque-page...": "Aucun marque-page...",
   "bookmark.maxReached": "Limite de 8 marque-pages atteinte.",
   "Nouveau marque-page": "Nouveau marque-page",
+  "Aujourd'hui": "Aujourd'hui",
   "Hier": "Hier",
   "Il y a deux jours": "Il y a deux jours",
   "Il y a trois jours": "Il y a trois jours",
@@ -593,6 +594,9 @@
   "tabs.create": "Créer un onglet",
   "tabs.createGroupFromTag": "Créer un groupe d'onglets",
   "tabs.groupCreatedWithCount": "Groupe créé avec {{count}} onglets",
+  "tabs.viewMyGroups": "Voir mes groupes",
+  "tabs.createdAgo": "Créé {{date}}",
+  "tabs.defaultGroup": "Groupe principal",
 
   "common.create": "Créer",
   "common.cancel": "Annuler",

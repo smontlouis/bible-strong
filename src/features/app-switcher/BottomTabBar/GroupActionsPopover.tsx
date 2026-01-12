@@ -39,10 +39,11 @@ interface GroupActionsPopoverProps {
   group: TabGroup
   onCreateGroup: () => void
   onEditGroup: () => void
+  onViewGroups: () => void
 }
 
 const GroupActionsPopover = memo(
-  ({ group, onCreateGroup, onEditGroup }: GroupActionsPopoverProps) => {
+  ({ group, onCreateGroup, onEditGroup, onViewGroups }: GroupActionsPopoverProps) => {
     const { t } = useTranslation()
     const { onClose } = usePopOver()
     const closeAllTabs = useSetAtom(closeAllTabsAtom)
@@ -93,6 +94,14 @@ const GroupActionsPopover = memo(
       }, 100)
     }
 
+    const handleViewGroups = () => {
+      onClose()
+      // Small delay to let the popover close before opening the bottom sheet
+      setTimeout(() => {
+        onViewGroups()
+      }, 100)
+    }
+
     return (
       <Box minWidth={200}>
         <PopoverItem icon="x-circle" label={t('tabs.closeAll')} onPress={handleCloseAllTabs} />
@@ -109,6 +118,7 @@ const GroupActionsPopover = memo(
         )}
         <Box height={1} bg="border" marginVertical={4} />
         <PopoverItem icon="plus" label={t('tabs.newGroup')} onPress={handleCreateGroup} />
+        <PopoverItem icon="layers" label={t('tabs.viewMyGroups')} onPress={handleViewGroups} />
       </Box>
     )
   }

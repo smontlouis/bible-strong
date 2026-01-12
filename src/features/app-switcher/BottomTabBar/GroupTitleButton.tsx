@@ -9,6 +9,7 @@ import { tabsCountAtom } from '../../../state/tabs'
 import { useAtomValue } from 'jotai/react'
 import GroupActionsPopover from './GroupActionsPopover'
 import EditGroupModal from './EditGroupModal'
+import ViewGroupsModal from './ViewGroupsModal'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import { LinearTransition } from 'react-native-reanimated'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
@@ -21,6 +22,7 @@ const GroupTitleButton = () => {
   const tabsCount = useAtomValue(tabsCountAtom)
   const updateGroup = useUpdateGroup()
   const editSheetRef = useRef<BottomSheetModal>(null)
+  const viewGroupsSheetRef = useRef<BottomSheetModal>(null)
   const { groupPager } = useAppSwitcherContext()
   const { colorScheme } = useCurrentThemeSelector()
 
@@ -41,6 +43,10 @@ const GroupTitleButton = () => {
 
   const handleOpenEdit = () => {
     editSheetRef.current?.present()
+  }
+
+  const handleOpenViewGroups = () => {
+    viewGroupsSheetRef.current?.present()
   }
 
   const handleEdit = ({ name, color }: { name: string; color: string }) => {
@@ -92,6 +98,7 @@ const GroupTitleButton = () => {
             group={activeGroup}
             onCreateGroup={handleOpenCreateGroup}
             onEditGroup={handleOpenEdit}
+            onViewGroups={handleOpenViewGroups}
           />
         }
       />
@@ -103,6 +110,7 @@ const GroupTitleButton = () => {
           onSave={handleEdit}
         />
       )}
+      <ViewGroupsModal bottomSheetRef={viewGroupsSheetRef} />
     </Box>
   )
 }

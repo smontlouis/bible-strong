@@ -54,7 +54,13 @@ const Media = ({
             {t('Images')}
           </Paragraph>
           <Carousel
+            itemWidth={imageWidth + 20}
+            itemHeight={imageWidth + 60}
             data={images}
+            contentContainerStyle={{
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
             renderItem={({ item }: { item: TimelineEventDetail['images'][0] }) => (
               <Box>
                 <Image

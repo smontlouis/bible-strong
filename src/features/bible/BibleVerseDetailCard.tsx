@@ -263,8 +263,8 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
             ref={carouselRef}
             mode="horizontal-stack"
             scrollAnimationDuration={300}
-            width={itemWidth}
-            height={carouselContainerSize.height}
+            itemWidth={itemWidth}
+            itemHeight={carouselContainerSize.height}
             onConfigurePanGesture={gestureChain => {
               gestureChain.activeOffsetX([-10, 10])
             }}
@@ -278,6 +278,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
               paddingLeft: 20,
               overflow: 'visible',
               flex: 1,
+              width: '100%',
             }}
             data={state.strongReferences}
             renderItem={renderItem}

@@ -275,6 +275,7 @@
   "Aucun marque-page...": "No bookmarks yet...",
   "bookmark.maxReached": "8 bookmarks limit reached.",
   "Nouveau marque-page": "New bookmark",
+  "Aujourd'hui": "Today",
   "Hier": "Yesterday",
   "Il y a deux jours": "Two days ago",
   "Il y a trois jours": "Three days ago",
@@ -593,6 +594,9 @@
   "tabs.create": "Create a tab",
   "tabs.createGroupFromTag": "Create tab group",
   "tabs.groupCreatedWithCount": "Group created with {{count}} tabs",
+  "tabs.viewMyGroups": "View my groups",
+  "tabs.createdAgo": "Created {{date}}",
+  "tabs.defaultGroup": "Main group",
 
   "common.create": "Create",
   "common.cancel": "Cancel",

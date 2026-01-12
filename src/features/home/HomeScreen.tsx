@@ -41,7 +41,7 @@ export const Home = ({ closeHome }: HomeProps) => {
       <HomeScrollView showsVerticalScrollIndicator={false}>
         <Events />
         <UserWidget />
-        <Box bg="lightGrey" pt={20} px={20}>
+        <Box pt={40} px={20}>
           <Text title fontSize={23} flex>
             {t('Apprendre')}
           </Text>
@@ -80,7 +80,7 @@ export const Home = ({ closeHome }: HomeProps) => {
           <TryAudibibleWidget />
         </VStack>
 
-        <Box bg="lightGrey" pt={40} px={20}>
+        <Box bg="lightGrey" px={20}>
           <Text title fontSize={23} flex>
             {t('Aller plus loin')}
           </Text>

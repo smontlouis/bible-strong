@@ -1,6 +1,6 @@
 {
   "name": "bible-strong",
-  "version": "22.0.12",
+  "version": "23.0.0",
   "main": "expo-router/entry",
   "scripts": {
     "eas-build-pre-install": "corepack enable",
@@ -131,7 +131,7 @@
     "react-native-popup-menu": "^0.18.0",
     "react-native-progress": "^5.0.0",
     "react-native-reanimated": "^4.2.1",
-    "react-native-reanimated-carousel": "^4.0.3",
+    "react-native-reanimated-carousel": "^5.0.0-beta.3",
     "react-native-redash": "^18.1.3",
     "react-native-restart": "^0.0.17",
     "react-native-root-siblings": "5.0.1",
