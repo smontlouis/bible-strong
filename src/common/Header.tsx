@@ -32,7 +32,7 @@ const Header = ({
 }: Props) => {
   return (
     <Box bg={background ? 'reverse' : undefined} {...props}>
-      <Box height={60} row>
+      <Box height={54} row>
         <Box>
           {hasBackButton ? (
             <Back onCustomPress={onCustomBackPress} padding>

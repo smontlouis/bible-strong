@@ -2,8 +2,7 @@ import { BottomSheetModal } from '@gorhom/bottom-sheet/'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { useFocusEffect } from 'expo-router'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router'
 import produce from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
@@ -26,7 +25,6 @@ type EditStudyScreenProps = {
   studyAtom?: PrimitiveAtom<StudyTab>
   // Props passed directly (when called from StudiesTabScreen)
   studyId?: string
-  canEdit?: boolean
   hasBackButton?: boolean
   openedFromTab?: boolean
   onGoBack?: () => void
@@ -58,18 +56,14 @@ const TabTitleUpdater = ({
 const EditStudyScreen = ({
   studyAtom,
   studyId: propStudyId,
-  canEdit: propCanEdit,
-  hasBackButton: propHasBackButton,
-  openedFromTab: propOpenedFromTab,
+  hasBackButton = true,
+  openedFromTab = false,
   onGoBack,
 }: EditStudyScreenProps) => {
   const { t } = useTranslation()
   const router = useRouter()
   const params = useLocalSearchParams<{
     studyId?: string
-    canEdit?: string
-    hasBackButton?: string
-    openedFromTab?: string
     type?: string
     title?: string
     content?: string
@@ -79,21 +73,9 @@ const EditStudyScreen = ({
 
   // Use props if provided, otherwise parse from URL params
   const studyId = useMemo(() => propStudyId ?? params.studyId ?? '', [propStudyId, params.studyId])
-  const canEdit = useMemo(
-    () => propCanEdit ?? params.canEdit === 'true',
-    [propCanEdit, params.canEdit]
-  )
-  const hasBackButton = useMemo(
-    () => propHasBackButton ?? params.hasBackButton === 'true',
-    [propHasBackButton, params.hasBackButton]
-  )
-  const openedFromTab = useMemo(
-    () => propOpenedFromTab ?? params.openedFromTab === 'true',
-    [propOpenedFromTab, params.openedFromTab]
-  )
 
   const dispatch = useDispatch()
-  const [isReadOnly, setIsReadOnly] = useState(!canEdit)
+  const [isReadOnly, setIsReadOnly] = useState(true)
   const renameModalRef = useRef<BottomSheetModal>(null)
   const setOpenedFromTab = useSetAtom(openedFromTabAtom)
 
@@ -119,7 +101,7 @@ const EditStudyScreen = ({
 
   // Control weither bible webview send back to study tab or not
   useEffect(() => {
-    setOpenedFromTab(openedFromTab || false)
+    setOpenedFromTab(openedFromTab)
   }, [])
 
   useFocusEffect(
@@ -154,7 +136,6 @@ const EditStudyScreen = ({
         }}
         title={currentStudy.title}
         study={currentStudy}
-        navigation={router}
       />
       <StudiesDomWrapper
         isReadOnly={isReadOnly}

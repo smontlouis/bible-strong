@@ -101,9 +101,6 @@ type LexiqueScreenProps = {}
 
 export type EditStudyScreenProps = {
   studyId: string
-  canEdit?: boolean
-  hasBackButton?: boolean
-  openedFromTab?: boolean
 }
 
 type DictionaryDetailScreenProps = {

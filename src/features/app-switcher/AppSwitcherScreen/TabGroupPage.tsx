@@ -239,6 +239,7 @@ const TabGroupPage = ({ group, index, isBuffered, scrollX, groupCount }: TabGrou
       <FlashList
         ref={flashListRef}
         data={tabsAtoms}
+        extraData={tabsAtoms.length}
         numColumns={TABS_PER_ROW}
         keyExtractor={keyExtractorActive}
         renderItem={renderActiveItem}
