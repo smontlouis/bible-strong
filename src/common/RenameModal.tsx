@@ -72,16 +72,11 @@ const RenameModal = ({
       onChange={handleSheetChange}
       topInset={insets.top}
       enableDynamicSizing
+      enableScrollView={false}
       headerComponent={<ModalHeader title={title} />}
       footerComponent={props => (
-        <BottomSheetFooter {...props}>
-          <HStack
-            py={5}
-            px={20}
-            justifyContent="flex-end"
-            paddingBottom={insets.bottom + 5}
-            bg="reverse"
-          >
+        <BottomSheetFooter bottomInset={insets.bottom} {...props}>
+          <HStack py={5} px={20} justifyContent="flex-end" bg="reverse">
             <Box>
               <Button disabled={isDisabled} onPress={handleSave}>
                 {t('Sauvegarder')}

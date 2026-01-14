@@ -1,13 +1,11 @@
-import styled from '@emotion/native'
 import * as Sentry from '@sentry/react-native'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { createSelector } from '@reduxjs/toolkit'
-import { Alert, ScrollView, Share } from 'react-native'
+import { Alert, Share } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { useTheme } from '@emotion/react'
-import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet/'
+import { BottomSheetFooter, BottomSheetModal } from '@gorhom/bottom-sheet/'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -17,12 +15,12 @@ import ModalHeader from '~common/ModalHeader'
 import PopOverMenu from '~common/PopOverMenu'
 import TagList from '~common/TagList'
 import { VerseIds } from '~common/types'
+import VerseAccordion from '~common/VerseAccordion'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Fab from '~common/ui/Fab'
 import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
-import Paragraph from '~common/ui/Paragraph'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
@@ -34,29 +32,7 @@ import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addNote, deleteNote, Note } from '~redux/modules/user'
 import { multipleTagsModalAtom } from '../../state/app'
-
-const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
-  color: theme.colors.default,
-  height: 48,
-  borderColor: theme.colors.border,
-  borderWidth: 2,
-  borderRadius: 10,
-  paddingHorizontal: 15,
-  fontSize: 16,
-}))
-
-const StyledTextArea = styled(BottomSheetTextInput)(({ theme }) => ({
-  color: theme.colors.default,
-  borderColor: theme.colors.border,
-  borderWidth: 2,
-  borderRadius: 10,
-  maxHeight: 300,
-  minHeight: 150,
-  paddingHorizontal: 15,
-  paddingVertical: 15,
-  fontSize: 16,
-  textAlignVertical: 'top',
-}))
+import NoteEditorBottomSheet from './NoteEditorDOM/NoteEditorBottomSheet'
 
 interface BibleNoteModalProps {
   noteVerses: VerseIds | undefined
@@ -92,10 +68,8 @@ const useCurrentNote = ({ noteVerses }: { noteVerses: VerseIds | undefined }) =>
 
 const BibleNoteModal = ({ noteVerses, ref }: BibleNoteModalProps) => {
   const insets = useSafeAreaInsets()
-  const theme = useTheme()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-
   const [isEditing, setIsEditing] = useState(false)
 
   const dispatch = useDispatch()
@@ -110,7 +84,7 @@ const BibleNoteModal = ({ noteVerses, ref }: BibleNoteModalProps) => {
     ref?.current?.dismiss()
   }, [ref])
 
-  const openNoteInNewTab = useCallback(() => {
+  const openNoteInNewTab = () => {
     if (!currentNote?.id) return
     close()
     setTimeout(() => {
@@ -122,7 +96,7 @@ const BibleNoteModal = ({ noteVerses, ref }: BibleNoteModalProps) => {
         data: { noteId: currentNote.id },
       })
     }, 300)
-  }, [currentNote?.id, close, openInNewTab, t])
+  }
 
   useEffect(() => {
     if (noteVerses) {
@@ -164,13 +138,14 @@ const BibleNoteModal = ({ noteVerses, ref }: BibleNoteModalProps) => {
   }
 
   const shareNote = async () => {
+    if (!currentNote) return
     try {
       const message = `
 Note pour ${reference}
 
-${currentNote?.title}
+${currentNote.title}
 
-${currentNote?.description}
+${currentNote.description}
       `
       await timeout(400)
       Share.share({ message })
@@ -194,6 +169,7 @@ ${currentNote?.description}
       ref={ref}
       topInset={useSafeAreaInsets().top}
       enableDynamicSizing
+      enableContentPanningGesture={false}
       headerComponent={
         <ModalHeader
           title={reference}
@@ -252,8 +228,15 @@ ${currentNote?.description}
       }
       footerComponent={props =>
         isEditing ? (
-          <BottomSheetFooter {...props}>
-            <HStack py={5} px={20} justifyContent="flex-end" paddingBottom={insets.bottom}>
+          <BottomSheetFooter bottomInset={insets.bottom} {...props}>
+            <HStack
+              py={5}
+              px={20}
+              justifyContent="flex-end"
+              bg="reverse"
+              borderTopWidth={1}
+              borderColor="border"
+            >
               {currentNote && (
                 <Box h={MODAL_FOOTER_HEIGHT}>
                   <Button reverse onPress={cancelEditing}>
@@ -269,14 +252,8 @@ ${currentNote?.description}
             </HStack>
           </BottomSheetFooter>
         ) : (
-          <BottomSheetFooter {...props}>
-            <HStack
-              py={10}
-              px={20}
-              justifyContent="flex-end"
-              paddingBottom={insets.bottom + 5}
-              bg="reverse"
-            >
+          <BottomSheetFooter bottomInset={insets.bottom} {...props}>
+            <HStack py={10} px={20} justifyContent="flex-end">
               <Box>
                 <Fab icon="edit-2" onPress={onEditNote} />
               </Box>
@@ -285,37 +262,20 @@ ${currentNote?.description}
         )
       }
     >
-      <Box paddingHorizontal={20} gap={10} pb={20}>
-        {isEditing && (
+      <Box paddingHorizontal={20} gap={20} py={20}>
+        {noteVerses && (
           <>
-            <StyledTextInput
-              placeholder={t('Titre')}
-              placeholderTextColor={theme.colors.grey}
-              onChangeText={setTitle}
-              value={title}
-              style={{ marginTop: 20 }}
+            <VerseAccordion noteVerses={noteVerses} />
+            <NoteEditorBottomSheet
+              defaultTitle={currentNote?.title || ''}
+              defaultDescription={currentNote?.description || ''}
+              isEditing={isEditing}
+              placeholderTitle={t('Titre')}
+              placeholderDescription={t('Description')}
+              onTitleChange={setTitle}
+              onDescriptionChange={setDescription}
             />
-            <StyledTextArea
-              placeholder={t('Description')}
-              placeholderTextColor={theme.colors.grey}
-              onChangeText={setDescription}
-              value={description}
-              multiline
-            />
-          </>
-        )}
-        {!isEditing && (
-          <>
-            <Box py={20}>
-              <Text title fontSize={20} marginBottom={10}>
-                {currentNote?.title}
-              </Text>
-              <ScrollView style={{ flex: 1 }}>
-                <Paragraph small>{currentNote?.description}</Paragraph>
-                {/* @ts-ignore */}
-                <TagList tags={currentNote?.tags} />
-              </ScrollView>
-            </Box>
+            <TagList tags={currentNote?.tags} />
           </>
         )}
       </Box>

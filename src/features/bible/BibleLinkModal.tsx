@@ -282,8 +282,8 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
       }
       footerComponent={props =>
         isEditing ? (
-          <BottomSheetFooter {...props}>
-            <HStack py={10} px={20} justifyContent="flex-end" paddingBottom={insets.bottom}>
+          <BottomSheetFooter bottomInset={insets.bottom} {...props}>
+            <HStack py={10} px={20} justifyContent="flex-end" bg="reverse">
               {currentLink && (
                 <Box>
                   <Button reverse onPress={cancelEditing}>
@@ -299,8 +299,8 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
             </HStack>
           </BottomSheetFooter>
         ) : (
-          <BottomSheetFooter {...props}>
-            <HStack py={5} px={20} justifyContent="flex-end" paddingBottom={insets.bottom}>
+          <BottomSheetFooter bottomInset={insets.bottom} {...props}>
+            <HStack py={5} px={20} justifyContent="flex-end" bg="reverse">
               <Box h={MODAL_FOOTER_HEIGHT} center>
                 <Fab icon="edit-2" onPress={onEditLink} />
               </Box>
@@ -401,8 +401,7 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
             )}
 
             {/* Tags */}
-            {/* @ts-ignore */}
-            <TagList tags={currentLink?.tags} style={{ marginTop: 15 }} />
+            <TagList tags={currentLink?.tags} />
           </Box>
         )}
       </VStack>

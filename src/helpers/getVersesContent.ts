@@ -58,7 +58,7 @@ export default async ({
       const quoteStartContent = hasQuotes && index === 0 ? '« ' : ''
       const quoteEndContent = hasQuotes && index === selectedVerses.length - 1 ? ' »' : ''
 
-      versesContent += `${quoteStartContent}${verseNumberContent}${text}${quoteEndContent}${inlineVerseContent}`
+      versesContent += `${quoteStartContent}${verseNumberContent}${text}${quoteEndContent}${inlineVerseContent} `
     } catch (e) {
       if (version !== 'POV') {
         Sentry.withScope(scope => {

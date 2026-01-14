@@ -3,9 +3,8 @@ import React, { useCallback } from 'react'
 import withLoginModal from '~common/withLoginModal'
 
 import produce from 'immer'
-import { PrimitiveAtom } from 'jotai/vanilla'
 import { useAtom } from 'jotai/react'
-import { useRouter } from 'expo-router'
+import { PrimitiveAtom } from 'jotai/vanilla'
 import { StudyTab } from '../../state/tabs'
 import AllStudiesTabScreen from './AllStudiesTabScreen'
 import EditStudyScreen from './EditStudyScreen'
@@ -15,7 +14,6 @@ interface StudiesTabScreenProps {
 }
 
 const StudiesTabScreen = ({ studyAtom }: StudiesTabScreenProps) => {
-  const router = useRouter()
   const [studyTab, setStudyTab] = useAtom(studyAtom)
 
   const {
@@ -34,11 +32,18 @@ const StudiesTabScreen = ({ studyAtom }: StudiesTabScreenProps) => {
     [setStudyTab]
   )
 
+  const onGoBack = useCallback(() => {
+    setStudyTab(
+      produce(draft => {
+        draft.data.studyId = undefined
+        draft.title = 'Études'
+      })
+    )
+  }, [setStudyTab])
+
   if (!studyId) {
     return <AllStudiesTabScreen hasBackButton={hasBackButton} onStudySelect={onStudySelect} />
   }
-
-  console.log('[StudiesTabScreen] studyId', studyId)
 
   return (
     <EditStudyScreen
@@ -46,6 +51,7 @@ const StudiesTabScreen = ({ studyAtom }: StudiesTabScreenProps) => {
       studyId={studyId}
       hasBackButton={false}
       openedFromTab={true}
+      onGoBack={onGoBack}
     />
   )
 }

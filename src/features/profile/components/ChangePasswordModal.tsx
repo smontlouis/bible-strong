@@ -76,8 +76,8 @@ const ChangePasswordModal = ({ modalRef }: ChangePasswordModalProps) => {
       onModalClose={resetForm}
       headerComponent={<ModalHeader title={t('profile.changePassword')} />}
       footerComponent={props => (
-        <BottomSheetFooter {...props}>
-          <HStack px={20} gap={10} justifyContent="flex-end" paddingBottom={insets.bottom}>
+        <BottomSheetFooter bottomInset={insets.bottom} {...props}>
+          <HStack px={20} gap={10} justifyContent="flex-end" bg="reverse">
             <Box h={MODAL_FOOTER_HEIGHT}>
               <Button reverse onPress={handleClose} disabled={isLoading}>
                 {t('Annuler')}

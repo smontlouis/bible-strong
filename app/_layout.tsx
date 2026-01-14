@@ -52,6 +52,7 @@ import { persistor, store } from '~redux/store'
 import getTheme, { Theme, baseTheme } from '~themes/index'
 import { setI18n } from '../i18n'
 import { PlaybackService } from '../playbackService'
+import ThemedToaster from '~common/ThemedToaster'
 
 TrackPlayer.registerPlaybackService(() => PlaybackService)
 
@@ -252,12 +253,7 @@ function InnerApp() {
                           <Stack screenOptions={{ headerShown: false }}>
                             <Stack.Screen name="index" />
                           </Stack>
-                          <Toaster
-                            duration={3000}
-                            theme={colorScheme}
-                            position="top-center"
-                            icons={{ info: <></> }}
-                          />
+                          <ThemedToaster />
                           <ChangelogModal />
                           <OnBoardingModal />
                           <MultipleTagsModal />

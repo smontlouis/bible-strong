@@ -613,7 +613,7 @@ export const cachedTabIdsAtom = atom(
 export const useIsCurrentTab = () => {
   const activeTabId = useAtomValue(activeTabIdAtom)
 
-  return (tabAtom: PrimitiveAtom<TabItem>) => {
+  return <T extends TabItem>(tabAtom: PrimitiveAtom<T>) => {
     const tab = getDefaultStore().get(tabAtom)
     return activeTabId === tab.id
   }

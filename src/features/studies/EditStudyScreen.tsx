@@ -9,8 +9,11 @@ import { useAtom, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { isFullScreenBibleValue } from 'src/state/app'
 import RenameModal from '~common/RenameModal'
+import Box from '~common/ui/Box'
+import Button from '~common/ui/Button'
 import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
+import Text from '~common/ui/Text'
 import { RootState } from '~redux/modules/reducer'
 import { updateStudy } from '~redux/modules/user'
 import EditStudyHeader from './EditStudyHeader'
@@ -26,6 +29,7 @@ type EditStudyScreenProps = {
   canEdit?: boolean
   hasBackButton?: boolean
   openedFromTab?: boolean
+  onGoBack?: () => void
 }
 
 // Component to update tab title when study title changes
@@ -57,6 +61,7 @@ const EditStudyScreen = ({
   canEdit: propCanEdit,
   hasBackButton: propHasBackButton,
   openedFromTab: propOpenedFromTab,
+  onGoBack,
 }: EditStudyScreenProps) => {
   const { t } = useTranslation()
   const router = useRouter()
@@ -101,6 +106,7 @@ const EditStudyScreen = ({
     deltaOld: string | null,
     changeSource: string | null
   ) => {
+    if (!currentStudy) return
     console.log('[Studies] delta', delta)
     dispatch(
       updateStudy({
@@ -122,9 +128,18 @@ const EditStudyScreen = ({
     }, [])
   )
 
-  // prevent rendering if studyId is not set
+  // Show message if study doesn't exist
   if (studyId === '' || !currentStudy) {
-    return null
+    return (
+      <Container>
+        <Box flex center px={20}>
+          <Text fontSize={18} color="grey" textAlign="center" mb={20}>
+            {t("Cette étude n'existe plus")}
+          </Text>
+          <Button onPress={onGoBack ?? (() => router.back())}>{t('Retour aux études')}</Button>
+        </Box>
+      </Container>
+    )
   }
 
   return (

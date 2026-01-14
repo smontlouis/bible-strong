@@ -231,8 +231,7 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
       />
       {tags && (
         <Box mt={10} px={20}>
-          {/* @ts-ignore */}
-          <TagList tags={tags} limit={undefined} />
+          <TagList tags={tags} />
         </Box>
       )}
       <Box

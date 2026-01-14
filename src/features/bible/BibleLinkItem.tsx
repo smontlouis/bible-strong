@@ -87,7 +87,6 @@ const BibleLinkItem = ({ item, onPress, onMenuPress }: Props) => {
             {item.link.url}
           </Paragraph>
           {item.link.tags && Object.keys(item.link.tags).length > 0 && (
-            // @ts-ignore
             <TagList tags={item.link.tags} />
           )}
         </Box>

@@ -132,7 +132,6 @@ const VerseComponent = ({ color, date, verseIds, stringIds, tags, setSettings }:
         <Paragraph scale={-2} medium marginBottom={15}>
           {truncate(removeBreakLines(content), 200)}
         </Paragraph>
-        {/* @ts-ignore */}
         <TagList tags={tags} />
       </Container>
     </TouchableOpacity>

@@ -59,7 +59,6 @@ const BibleNoteItem = ({ item, onPress, onMenuPress }: Props) => {
               {truncate(item.notes.description, 100)}
             </Paragraph>
           )}
-          {/* @ts-ignore */}
           <TagList tags={item.notes.tags} />
         </Box>
         <Link padding onPress={() => onMenuPress(item.noteId)}>

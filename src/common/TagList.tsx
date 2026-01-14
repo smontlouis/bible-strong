@@ -1,11 +1,12 @@
 import styled from '@emotion/native'
 import { useRouter } from 'expo-router'
-import React from 'react'
+import React, { useState } from 'react'
 
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { Tag } from './types'
 
-const Tag = styled(Box)(({ theme }) => ({
+const StyledTag = styled(Box)(({ theme }) => ({
   borderRadius: 20,
   backgroundColor: theme.colors.lightPrimary,
   paddingTop: 3,
@@ -17,14 +18,25 @@ const Tag = styled(Box)(({ theme }) => ({
   marginTop: 5,
 }))
 
-const TagList = ({ tags, limit }: { tags: any; limit: any }) => {
+const TagList = ({
+  tags,
+  limit = 0,
+}: {
+  tags?: {
+    [x: string]: Tag
+  }
+  limit?: number
+}) => {
   const router = useRouter()
+  const [isExpanded, setIsExpanded] = useState(false)
 
   if (!tags || !Object.values(tags).length) {
     return null
   }
 
-  const array = limit ? Object.values(tags).slice(0, limit) : Object.values(tags)
+  const allTags = Object.values(tags)
+  const hasMoreTags = limit > 0 && allTags.length > limit
+  const array = limit && !isExpanded ? allTags.slice(0, limit) : allTags
 
   return (
     <Box wrap row>
@@ -38,29 +50,31 @@ const TagList = ({ tags, limit }: { tags: any; limit: any }) => {
             })
           }
         >
-          <Tag>
+          <StyledTag>
             <Text fontSize={10} color="primary">
               {tag.name}
             </Text>
-          </Tag>
+          </StyledTag>
         </TouchableBox>
       ))}
-      {!!(Object.values(tags).length - limit) && (
-        <Text
-          fontSize={10}
-          color="primary"
-          style={{
-            paddingTop: 3,
-            paddingBottom: 3,
-            paddingLeft: 0,
-            paddingRight: 7,
-            marginRight: 5,
-            marginBottom: 2,
-            marginTop: 4,
-          }}
-        >
-          + {Object.values(tags).length - limit}
-        </Text>
+      {hasMoreTags && (
+        <TouchableBox onPress={() => setIsExpanded(!isExpanded)}>
+          <Text
+            fontSize={10}
+            color="primary"
+            style={{
+              paddingTop: 3,
+              paddingBottom: 3,
+              paddingLeft: 0,
+              paddingRight: 7,
+              marginRight: 5,
+              marginBottom: 2,
+              marginTop: 4,
+            }}
+          >
+            {isExpanded ? '−' : `+ ${allTags.length - limit}`}
+          </Text>
+        </TouchableBox>
       )}
     </Box>
   )

@@ -228,7 +228,6 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
       />
       {tags && (
         <Box mt={10} px={20}>
-          {/* @ts-ignore */}
           <TagList tags={tags} />
         </Box>
       )}

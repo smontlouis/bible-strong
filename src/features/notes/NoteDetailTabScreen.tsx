@@ -1,61 +1,40 @@
-import styled from '@emotion/native'
-import { useTheme } from '@emotion/react'
 import * as Sentry from '@sentry/react-native'
 import produce from 'immer'
 import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, ScrollView, Share, TextInput } from 'react-native'
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, Share } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'sonner-native'
 
 import { createSelector } from '@reduxjs/toolkit'
-import * as Icon from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
 import TagList from '~common/TagList'
+import { VerseIds } from '~common/types'
+import VerseAccordion from '~common/VerseAccordion'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Container from '~common/ui/Container'
 import Fab from '~common/ui/Fab'
 import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
-import Paragraph from '~common/ui/Paragraph'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import books from '~assets/bible_versions/books-desc'
 import { timeout } from '~helpers/timeout'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addNote, deleteNote, Note } from '~redux/modules/user'
 import { isFullScreenBibleValue, multipleTagsModalAtom } from '~state/app'
 import { NotesTab, useIsCurrentTab } from '~state/tabs'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
+import NoteEditorDOMComponent from '~features/bible/NoteEditorDOM/NoteEditorDOMComponent'
 
-const StyledTextInput = styled(TextInput)(({ theme }) => ({
-  color: theme.colors.default,
-  height: 48,
-  borderColor: theme.colors.border,
-  borderWidth: 2,
-  borderRadius: 10,
-  paddingHorizontal: 15,
-  fontSize: 16,
-}))
-
-const StyledTextArea = styled(TextInput)(({ theme }) => ({
-  color: theme.colors.default,
-  borderColor: theme.colors.border,
-  borderWidth: 2,
-  borderRadius: 10,
-  maxHeight: 300,
-  minHeight: 150,
-  paddingHorizontal: 15,
-  paddingVertical: 15,
-  fontSize: 16,
-  textAlignVertical: 'top',
-}))
+const FOOTER_HEIGHT = 54
 
 interface NoteDetailTabScreenProps {
   notesAtom: PrimitiveAtom<NotesTab>
@@ -78,7 +57,6 @@ const makeCurrentNoteSelector = () =>
   )
 
 const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) => {
-  const theme = useTheme()
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
@@ -89,7 +67,13 @@ const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) =>
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [isEditing, setIsEditing] = useState(false)
+  const [webViewHeight, setWebViewHeight] = useState(100)
   const { bottomBarHeight } = useBottomBarHeightInTab()
+  const { colorScheme } = useCurrentThemeSelector()
+
+  const handleSizeChange = (_width: number, height: number) => {
+    setWebViewHeight(height)
+  }
 
   // Force full screen bible mode off when this tab becomes active
   const getIsCurrentTab = useIsCurrentTab()
@@ -106,13 +90,10 @@ const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) =>
 
   // Parse noteId to get verse references for display
   const noteVerses = useMemo(() => {
-    return noteId.split('/').reduce(
-      (acc, key) => {
-        acc[key] = true
-        return acc
-      },
-      {} as Record<string, boolean>
-    )
+    return noteId.split('/').reduce((acc, key) => {
+      acc[key] = true as const
+      return acc
+    }, {} as VerseIds)
   }, [noteId])
 
   const reference = verseToReference(noteVerses)
@@ -133,9 +114,6 @@ const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) =>
       setTitle(currentNote.title || '')
       setDescription(currentNote.description || '')
       setIsEditing(false)
-    } else {
-      // Note doesn't exist anymore, go back to list
-      goBack()
     }
   }, [noteId])
 
@@ -179,13 +157,14 @@ const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) =>
   }
 
   const shareNote = async () => {
+    if (!currentNote) return
     try {
       const message = `
 Note pour ${reference}
 
-${currentNote?.title}
+${currentNote.title}
 
-${currentNote?.description}
+${currentNote.description}
       `
       await timeout(400)
       Share.share({ message })
@@ -218,8 +197,18 @@ ${currentNote?.description}
 
   const submitIsDisabled = !title || !description
 
+  // Show message if note doesn't exist
   if (!currentNote) {
-    return null
+    return (
+      <Container>
+        <Box flex center px={20}>
+          <Text fontSize={18} color="grey" textAlign="center" mb={20}>
+            {t("Cette note n'existe plus")}
+          </Text>
+          <Button onPress={goBack}>{t('Retour aux notes')}</Button>
+        </Box>
+      </Container>
+    )
   }
 
   return (
@@ -275,45 +264,58 @@ ${currentNote?.description}
           />
         }
       />
-      <ScrollView
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 100 }}
       >
-        {isEditing ? (
-          <Box gap={10}>
-            <StyledTextInput
-              placeholder={t('Titre')}
-              placeholderTextColor={theme.colors.grey}
-              onChangeText={setTitle}
-              value={title}
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{
+            padding: 20,
+            paddingBottom: isEditing ? FOOTER_HEIGHT + bottomBarHeight + 20 : insets.bottom + 100,
+          }}
+        >
+          <Box gap={20}>
+            <VerseAccordion noteVerses={noteVerses} />
+            <NoteEditorDOMComponent
+              defaultTitle={currentNote?.title || ''}
+              defaultDescription={currentNote?.description || ''}
+              isEditing={isEditing}
+              colorScheme={colorScheme}
+              placeholderTitle={t('Titre')}
+              placeholderDescription={t('Description')}
+              onTitleChange={setTitle}
+              onDescriptionChange={setDescription}
+              onSizeChange={handleSizeChange}
+              dom={{
+                containerStyle: { height: webViewHeight, overflow: 'hidden' },
+                style: { overflow: 'hidden' },
+                scrollEnabled: false,
+                hideKeyboardAccessoryView: true,
+              }}
             />
-            <StyledTextArea
-              placeholder={t('Description')}
-              placeholderTextColor={theme.colors.grey}
-              onChangeText={setDescription}
-              value={description}
-              multiline
-            />
-            <HStack justifyContent="flex-end" gap={10} marginTop={20}>
-              <Button reverse onPress={cancelEditing}>
-                {t('Annuler')}
-              </Button>
-              <Button disabled={submitIsDisabled} onPress={onSaveNote}>
-                {t('Sauvegarder')}
-              </Button>
-            </HStack>
-          </Box>
-        ) : (
-          <Box>
-            <Text title fontSize={20} marginBottom={10}>
-              {currentNote?.title}
-            </Text>
-            <Paragraph>{currentNote?.description}</Paragraph>
-            {/* @ts-ignore */}
             <TagList tags={currentNote?.tags} />
           </Box>
+        </ScrollView>
+        {isEditing && (
+          <HStack
+            py={10}
+            px={20}
+            justifyContent="flex-end"
+            bg="reverse"
+            borderTopWidth={1}
+            borderColor="border"
+            gap={10}
+          >
+            <Button reverse onPress={cancelEditing}>
+              {t('Annuler')}
+            </Button>
+            <Button disabled={submitIsDisabled} onPress={onSaveNote}>
+              {t('Sauvegarder')}
+            </Button>
+          </HStack>
         )}
-      </ScrollView>
+      </KeyboardAvoidingView>
       {!isEditing && (
         <Box position="absolute" bottom={bottomBarHeight + 20} right={20}>
           <Fab icon="edit-2" onPress={onEditNote} />

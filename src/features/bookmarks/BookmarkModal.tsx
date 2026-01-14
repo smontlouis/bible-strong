@@ -253,14 +253,8 @@ const BookmarkModal = ({
       headerComponent={<ModalHeader title={`${t('Marque-page')} ${reference}`} />}
       footerComponent={props =>
         mode === 'select' ? null : (
-          <BottomSheetFooter {...props}>
-            <HStack
-              py={5}
-              px={20}
-              justifyContent="flex-end"
-              paddingBottom={insets.bottom + 5}
-              bg="reverse"
-            >
+          <BottomSheetFooter bottomInset={insets.bottom} {...props}>
+            <HStack py={5} px={20} justifyContent="flex-end" bg="reverse">
               {isEditing && (
                 <Box>
                   <Button reverse onPress={handleDelete}>

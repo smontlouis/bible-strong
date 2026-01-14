@@ -74,7 +74,6 @@ const NoteItem = ({ item, t, lang }: { item: any; t: any; lang: ActiveLanguage }
             {truncate(item.description, 100)}
           </Paragraph>
         )}
-        {/* @ts-ignore */}
         <TagList tags={item.tags} />
       </Box>
       <Border />
@@ -134,10 +133,7 @@ const LinkItem = ({ item, t, lang }: { item: LinkItemType; t: any; lang: ActiveL
           <Paragraph scale={-3} scaleLineHeight={-1} color="tertiary" numberOfLines={1}>
             {item.url}
           </Paragraph>
-          {item.tags && Object.keys(item.tags).length > 0 && (
-            // @ts-ignore
-            <TagList tags={item.tags} />
-          )}
+          {item.tags && Object.keys(item.tags).length > 0 && <TagList tags={item.tags} />}
         </Box>
       </Box>
       <Border />
