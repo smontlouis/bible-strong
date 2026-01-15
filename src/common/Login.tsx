@@ -45,6 +45,7 @@ const Login = ({ theme }: any) => {
   const [isLoading, setLoading] = useState(false)
   const [email, setEmail] = useState(defaultEmail)
   const [password, setPassword] = useState(defaultPassword)
+  const [customToken, setCustomToken] = useState('')
 
   const onGoogleLogin = async () => {
     setLoading(true)
@@ -71,6 +72,16 @@ const Login = ({ theme }: any) => {
   const onAppleLogin = async () => {
     setLoading(true)
     const isStillLoading: any = await FireAuth.appleLogin()
+    setLoading(isStillLoading)
+  }
+
+  const onCustomTokenLogin = async () => {
+    if (!customToken.trim()) {
+      toast.error('Veuillez coller un token')
+      return
+    }
+    setLoading(true)
+    const isStillLoading: any = await FireAuth.loginWithCustomToken(customToken.trim())
     setLoading(isStillLoading)
   }
 
@@ -142,6 +153,23 @@ const Login = ({ theme }: any) => {
           <Text underline>{t('Pas de compte ? Inscrivez-vous.')}</Text>
         </Link>
       </Box>
+      {__DEV__ && (
+        <>
+          <Box height={1} bg="lightGrey" my={20} />
+          <Text bold color="darkGrey" fontSize={12} mb={10}>
+            🔧 DEBUG: Custom Token Login
+          </Text>
+          <TextInput
+            placeholder="Coller le custom token ici"
+            onChangeText={setCustomToken}
+            value={customToken}
+          />
+          <Spacer />
+          <Button isLoading={isLoading} onPress={onCustomTokenLogin} secondary>
+            Login with Token
+          </Button>
+        </>
+      )}
     </Box>
   )
 }

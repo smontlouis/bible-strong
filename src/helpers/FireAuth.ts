@@ -5,6 +5,7 @@ import {
   onAuthStateChanged,
   signInWithCredential,
   signInWithEmailAndPassword,
+  signInWithCustomToken,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
   signOut,
@@ -404,6 +405,24 @@ const FireAuth = class {
       return false
     }
   }
+
+  loginWithCustomToken = (token: string) =>
+    new Promise(async resolve => {
+      if (!__DEV__) {
+        console.log('[Auth] Custom token login only available in dev')
+        resolve(false)
+        return
+      }
+      try {
+        await signInWithCustomToken(getAuth(), token)
+        toast.success(i18n.t('Connexion réussie'))
+        resolve(true)
+      } catch (e) {
+        console.log('[Auth] Custom token error:', e)
+        toast.error(i18n.t('Token invalide'))
+        resolve(false)
+      }
+    })
 
   logout = async () => {
     // Cleanup Firestore subscriptions BEFORE signOut to avoid permission-denied errors
