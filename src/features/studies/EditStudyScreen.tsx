@@ -144,6 +144,7 @@ const EditStudyScreen = ({
         fontFamily={fontFamily}
         params={params as any}
         studyAtom={studyAtom}
+        studyId={studyId}
       />
       <RenameModal
         bottomSheetRef={renameModalRef}

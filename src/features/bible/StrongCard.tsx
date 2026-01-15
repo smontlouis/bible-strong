@@ -14,8 +14,9 @@ import capitalize from '~helpers/capitalize'
 import truncate from '~helpers/truncate'
 import { cleanParams, wp } from '~helpers/utils'
 import { useAtomValue } from 'jotai/react'
+import { getDefaultStore } from 'jotai/vanilla'
 import { useRouter } from 'expo-router'
-import { openedFromTabAtom } from '~features/studies/atom'
+import { currentStudyIdAtom, openedFromTabAtom } from '~features/studies/atom'
 import { ScrollView } from 'react-native'
 import { StrongReference, StudyNavigateBibleType } from '~common/types'
 import { Theme } from '@emotion/react'
@@ -105,11 +106,14 @@ const StrongCard = (props: Props) => {
     // onClosed?.()
 
     if (isSelectionMode) {
+      const store = getDefaultStore()
+      const currentStudyId = store.get(currentStudyIdAtom)
       const pathname = openedFromTab ? '/' : '/edit-study'
       router.dismissTo({
         pathname,
         params: {
           ...cleanParams(),
+          studyId: currentStudyId,
           type: isSelectionMode,
           title: Mot,
           codeStrong: Code,

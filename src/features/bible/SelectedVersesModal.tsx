@@ -7,6 +7,7 @@ import { ScrollView } from 'react-native-gesture-handler'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import { useRouter } from 'expo-router'
 import { useAtomValue } from 'jotai/react'
+import { getDefaultStore } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import CommentIcon from '~common/CommentIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
@@ -19,7 +20,7 @@ import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { useShareOptions } from '~features/settings/BibleShareOptionsScreen'
-import { openedFromTabAtom } from '~features/studies/atom'
+import { currentStudyIdAtom, openedFromTabAtom } from '~features/studies/atom'
 import { onAnimateModalClose, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import getVersesContent from '~helpers/getVersesContent'
 import { cleanParams, wp } from '~helpers/utils'
@@ -155,11 +156,14 @@ const VersesModal = ({
       verses: selectedVerses,
       version,
     })
+    const store = getDefaultStore()
+    const currentStudyId = store.get(currentStudyIdAtom)
     const pathname = openedFromTab ? '/' : '/edit-study'
     router.dismissTo({
       pathname,
       params: {
         ...cleanParams(),
+        studyId: currentStudyId,
         type: isSelectionMode,
         title,
         content,

@@ -28,14 +28,8 @@ class VerseBlock extends Embed {
     node.addEventListener('click', () => {
       const isReadOnly = document.querySelector('#editor').classList.contains('ql-disabled')
       if (isReadOnly) {
-        const [book, chapter, verse] = verses[0].split('-')
-
         dispatch('VIEW_BIBLE_VERSE', {
-          isReadOnly: true,
           arrayVerses: verses,
-          book,
-          chapter,
-          verse,
         })
       }
     })

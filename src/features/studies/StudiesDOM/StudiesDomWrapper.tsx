@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Keyboard, KeyboardAvoidingView, Platform } from 'react-native'
 import { WebViewMessageEvent } from 'react-native-webview'
 
-import { PrimitiveAtom } from 'jotai/vanilla'
+import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { StudyTab, TabItem, useIsCurrentTab } from 'src/state/tabs'
 import books from '~assets/bible_versions/books-desc'
 import { StudyNavigateBibleType } from '~common/types'
@@ -13,6 +13,7 @@ import i18n from '~i18n'
 import { EditStudyScreenProps } from '~navigation/type'
 import StudyFooter from '../StudyFooter'
 import StudiesDOMComponent, { StudyDOMRef } from './StudiesDOMComponent'
+import { currentStudyIdAtom } from '../atom'
 
 type Props = {
   params: Readonly<EditStudyScreenProps>
@@ -28,6 +29,7 @@ type Props = {
   }
   fontFamily: string
   studyAtom?: PrimitiveAtom<StudyTab>
+  studyId: string
 }
 const StudiesDomWrapper = ({
   params,
@@ -36,6 +38,7 @@ const StudiesDomWrapper = ({
   contentToDisplay,
   fontFamily,
   studyAtom,
+  studyId,
 }: Props) => {
   const ref = useRef<StudyDOMRef>(null)
   const router = useRouter()
@@ -102,6 +105,8 @@ const StudiesDomWrapper = ({
   const navigateBibleView = async (type: StudyNavigateBibleType) => {
     dispatchToWebView('BLUR_EDITOR')
     await timeout(300)
+    // Store current studyId for dismissTo navigation
+    getDefaultStore().set(currentStudyIdAtom, studyId)
     router.push({
       pathname: '/bible-view',
       params: { isSelectionMode: type },
@@ -124,12 +129,14 @@ const StudiesDomWrapper = ({
           }
           break
         case 'VIEW_BIBLE_VERSE': {
+          const arrayVerses = JSON.parse(msgData.payload.arrayVerses) as string[]
           router.push({
             pathname: '/bible-view',
             params: {
-              ...msgData.payload,
-              arrayVerses: null,
-              book: JSON.stringify(books[msgData.payload.book - 1]),
+              isReadOnly: 'true',
+              book: arrayVerses[0].split('-')[0],
+              chapter: arrayVerses[0].split('-')[1],
+              focusVerses: JSON.stringify(arrayVerses.map(verse => Number(verse.split('-')[2]))),
             },
           })
           return
