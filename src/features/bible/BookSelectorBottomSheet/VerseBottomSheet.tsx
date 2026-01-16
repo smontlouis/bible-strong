@@ -50,7 +50,7 @@ const VerseBottomSheet = ({
   const { selectedVersion: version } = data || {}
   const { setTempSelectedVerse, validateTempSelected } = actions || {}
 
-  const { data: verses } = useQuery({
+  const { data: result } = useQuery({
     queryKey: [
       'bible',
       version || '',
@@ -58,9 +58,11 @@ const VerseBottomSheet = ({
       tempSelectedChapter?.toString() || '',
     ],
     queryFn: () =>
-      loadBibleChapter(tempSelectedBook?.Numero, tempSelectedChapter, version) as Promise<Verse[]>,
+      loadBibleChapter(tempSelectedBook?.Numero, tempSelectedChapter, version),
     enabled: !!tempSelectedBook && !!tempSelectedChapter && !!version,
   })
+
+  const verses = result?.success ? (result.data as Verse[]) : undefined
 
   const handleSelect = useCallback(
     (verse: Verse) => {
