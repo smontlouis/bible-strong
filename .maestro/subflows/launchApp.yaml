@@ -1,0 +1,9 @@
+# Subflow: Launch the app and wait for it to be ready
+# Usage: - runFlow: subflows/launchApp.yaml
+
+appId: com.smontlouis.biblestrong
+---
+- launchApp:
+    clearState: true
+- waitForAnimationToEnd:
+    timeout: 5000
