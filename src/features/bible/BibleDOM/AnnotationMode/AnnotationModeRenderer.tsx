@@ -231,20 +231,25 @@ const AnnotationModeRenderer = ({
     const selectionRects = highlightRects.filter(r => r.type === 'selection')
     if (selectionRects.length === 0) return { start: null, end: null }
 
+    // Read direction from DOM
+    const isRTL = containerRef.current
+      ? getComputedStyle(containerRef.current).direction === 'rtl'
+      : false
+
     // Sort rects by position (top to bottom, then left to right for LTR, right to left for RTL)
     const sortedRects = [...selectionRects].sort((a, b) => {
       if (Math.abs(a.top - b.top) > 5) return a.top - b.top
-      return isHebreu ? b.left - a.left : a.left - b.left
+      return isRTL ? b.left - a.left : a.left - b.left
     })
 
     const firstRect = sortedRects[0]
     const lastRect = sortedRects[sortedRects.length - 1]
 
     return {
-      start: isHebreu
+      start: isRTL
         ? { x: firstRect.left + firstRect.width, y: firstRect.top }
         : { x: firstRect.left, y: firstRect.top },
-      end: isHebreu
+      end: isRTL
         ? { x: lastRect.left, y: lastRect.top + lastRect.height }
         : { x: lastRect.left + lastRect.width, y: lastRect.top + lastRect.height },
     }
@@ -333,7 +338,6 @@ const AnnotationModeRenderer = ({
     selection,
     setSelection: fn => setSelection(fn),
     verses,
-    isHebreu,
     getTokens,
     getSelectionHandlePositions,
     highlightRects,
@@ -436,7 +440,6 @@ const AnnotationModeRenderer = ({
                 verse={verse}
                 verseKey={verseKey}
                 tokens={tokens}
-                isHebreu={isHebreu}
                 settings={settings}
                 pericopeChapter={pericopeChapter}
                 onVerseClick={handleVerseClick}

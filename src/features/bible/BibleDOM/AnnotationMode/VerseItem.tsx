@@ -51,45 +51,37 @@ const Span = styled('span')({
   zIndex: 1,
 })
 
-const H1 = styled('h1')<RootStyles & { isHebreu: boolean }>(
-  ({ settings: { fontSizeScale, fontFamily }, isHebreu }) => ({
-    fontFamily,
-    fontSize: scaleFontSize(28, fontSizeScale),
-    textAlign: isHebreu ? 'right' : 'left',
-    position: 'relative',
-    zIndex: 1,
-  })
-)
+const H1 = styled('h1')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
+  fontFamily,
+  fontSize: scaleFontSize(28, fontSizeScale),
+  textAlign: 'start',
+  position: 'relative',
+  zIndex: 1,
+}))
 
-const H2 = styled('h2')<RootStyles & { isHebreu: boolean }>(
-  ({ settings: { fontSizeScale, fontFamily }, isHebreu }) => ({
-    fontFamily,
-    fontSize: scaleFontSize(24, fontSizeScale),
-    textAlign: isHebreu ? 'right' : 'left',
-    position: 'relative',
-    zIndex: 1,
-  })
-)
+const H2 = styled('h2')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
+  fontFamily,
+  fontSize: scaleFontSize(24, fontSizeScale),
+  textAlign: 'start',
+  position: 'relative',
+  zIndex: 1,
+}))
 
-const H3 = styled('h3')<RootStyles & { isHebreu: boolean }>(
-  ({ settings: { fontSizeScale, fontFamily }, isHebreu }) => ({
-    fontFamily,
-    fontSize: scaleFontSize(20, fontSizeScale),
-    textAlign: isHebreu ? 'right' : 'left',
-    position: 'relative',
-    zIndex: 1,
-  })
-)
+const H3 = styled('h3')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
+  fontFamily,
+  fontSize: scaleFontSize(20, fontSizeScale),
+  textAlign: 'start',
+  position: 'relative',
+  zIndex: 1,
+}))
 
-const H4 = styled('h4')<RootStyles & { isHebreu: boolean }>(
-  ({ settings: { fontSizeScale, fontFamily }, isHebreu }) => ({
-    fontFamily,
-    fontSize: scaleFontSize(18, fontSizeScale),
-    textAlign: isHebreu ? 'right' : 'left',
-    position: 'relative',
-    zIndex: 1,
-  })
-)
+const H4 = styled('h4')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
+  fontFamily,
+  fontSize: scaleFontSize(18, fontSizeScale),
+  textAlign: 'start',
+  position: 'relative',
+  zIndex: 1,
+}))
 
 const getPericopeVerse = (pericopeChapter: PericopeChapter, verse: number) => {
   if (pericopeChapter && pericopeChapter[verse]) {
@@ -102,7 +94,6 @@ export interface VerseItemProps {
   verse: TVerse
   verseKey: string
   tokens: WordToken[]
-  isHebreu: boolean
   settings: RootStyles['settings']
   pericopeChapter: PericopeChapter
   onVerseClick: (e: React.MouseEvent, verseKey: string, tokens: WordToken[]) => void
@@ -112,7 +103,6 @@ export function VerseItem({
   verse,
   verseKey,
   tokens,
-  isHebreu,
   settings,
   pericopeChapter,
   onVerseClick,
@@ -126,22 +116,22 @@ export function VerseItem({
   return (
     <Span>
       {h1 && (
-        <H1 isHebreu={isHebreu} settings={settings}>
+        <H1 settings={settings}>
           {h1}
         </H1>
       )}
       {h2 && (
-        <H2 isHebreu={isHebreu} settings={settings}>
+        <H2 settings={settings}>
           {h2}
         </H2>
       )}
       {h3 && (
-        <H3 isHebreu={isHebreu} settings={settings}>
+        <H3 settings={settings}>
           {h3}
         </H3>
       )}
       {h4 && (
-        <H4 isHebreu={isHebreu} settings={settings}>
+        <H4 settings={settings}>
           {h4}
         </H4>
       )}

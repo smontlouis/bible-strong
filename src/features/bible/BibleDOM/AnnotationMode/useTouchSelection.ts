@@ -26,7 +26,6 @@ export interface TouchSelectionConfig {
   selection: SelectionRange | null
   setSelection: (fn: (prev: SelectionRange | null) => SelectionRange | null) => void
   verses: TVerse[]
-  isHebreu: boolean
   getTokens: (verseKey: string, text: string) => WordToken[]
   getSelectionHandlePositions: () => { start: Position | null; end: Position | null }
   highlightRects: HighlightRect[]
@@ -45,7 +44,6 @@ export function useTouchSelection({
   selection,
   setSelection,
   verses,
-  isHebreu,
   getTokens,
   getSelectionHandlePositions,
   safeAreaTop,
@@ -298,7 +296,7 @@ export function useTouchSelection({
       container.removeEventListener('touchend', handleTouchEnd)
       container.removeEventListener('touchcancel', handleTouchEnd)
     }
-  }, [selection, verses, isHebreu, onDragStart])
+  }, [selection, verses, onDragStart])
 
   return { lastDragEndRef }
 }

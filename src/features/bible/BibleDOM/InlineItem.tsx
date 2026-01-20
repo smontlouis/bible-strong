@@ -21,10 +21,11 @@ export const InlineItemContainer = styled('span')<
     ? `0 0 10px 0 rgba(255, 255, 255, 0.1)`
     : `0 0 10px 0 rgba(0, 0, 0, 0.2)`,
   borderRadius: '8px',
-  padding: '4px 8px 4px 4px',
+  paddingInlineEnd: '8px',
+  paddingInlineStart: '4px',
+  paddingBlock: '4px',
   wordBreak: 'break-word',
-  marginRight: '4px',
-  marginLeft: '4px',
+  marginInline: '4px',
 
   ...(isButton && {
     cursor: 'pointer',
@@ -37,9 +38,10 @@ export const InlineItemContainer = styled('span')<
 export const InlineItemIconWrapper = styled('span')<RootStyles & { isButton?: boolean }>(
   ({ isButton, settings: { theme, colors, fontFamily } }) => ({
     fontFamily,
-    borderRight: `1px solid rgba(0, 0, 0, 0.2)`,
-    padding: '0 4px',
-    marginRight: '6px',
+    borderInlineEnd: `1px solid rgba(0, 0, 0, 0.2)`,
+    paddingBlock: '0px',
+    paddingInline: '4px',
+    marginInlineEnd: '6px',
     ...(isButton && {
       cursor: 'pointer',
       '&:active': {

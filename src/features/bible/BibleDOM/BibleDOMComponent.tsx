@@ -54,7 +54,6 @@ declare global {
 }
 
 const forwardProps = [
-  'isHebreu',
   'isFocused',
   'isParallel',
   'isParallelVerse',
@@ -166,57 +165,49 @@ const IntMode = styled('div')<RootStyles>(({ settings: { theme, colors } }) => (
 
 const Span = styled('span')({})
 
-const H1 = styled('h1')<RootStyles & { isHebreu: boolean }>(
-  ({ settings: { fontSizeScale, fontFamily }, isHebreu }) => ({
-    fontFamily,
-    fontSize: scaleFontSize(28, fontSizeScale),
-    textAlign: isHebreu ? 'right' : 'left',
-    WebkitTouchCallout: 'none',
-    MozUserSelect: 'none',
-    msUserSelect: 'none',
-    KhtmlUserSelect: 'none',
-    WebkitUserSelect: 'none',
-  })
-)
+const H1 = styled('h1')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
+  fontFamily,
+  fontSize: scaleFontSize(28, fontSizeScale),
+  textAlign: 'start',
+  WebkitTouchCallout: 'none',
+  MozUserSelect: 'none',
+  msUserSelect: 'none',
+  KhtmlUserSelect: 'none',
+  WebkitUserSelect: 'none',
+}))
 
-const H2 = styled('h2')<RootStyles & { isHebreu: boolean }>(
-  ({ settings: { fontSizeScale, fontFamily }, isHebreu }) => ({
-    fontFamily,
-    fontSize: scaleFontSize(24, fontSizeScale),
-    textAlign: isHebreu ? 'right' : 'left',
-    WebkitTouchCallout: 'none',
-    MozUserSelect: 'none',
-    msUserSelect: 'none',
-    KhtmlUserSelect: 'none',
-    WebkitUserSelect: 'none',
-  })
-)
+const H2 = styled('h2')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
+  fontFamily,
+  fontSize: scaleFontSize(24, fontSizeScale),
+  textAlign: 'start',
+  WebkitTouchCallout: 'none',
+  MozUserSelect: 'none',
+  msUserSelect: 'none',
+  KhtmlUserSelect: 'none',
+  WebkitUserSelect: 'none',
+}))
 
-const H3 = styled('h3')<RootStyles & { isHebreu: boolean }>(
-  ({ settings: { fontSizeScale, fontFamily }, isHebreu }) => ({
-    fontFamily,
-    fontSize: scaleFontSize(20, fontSizeScale),
-    textAlign: isHebreu ? 'right' : 'left',
-    WebkitTouchCallout: 'none',
-    MozUserSelect: 'none',
-    msUserSelect: 'none',
-    KhtmlUserSelect: 'none',
-    WebkitUserSelect: 'none',
-  })
-)
+const H3 = styled('h3')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
+  fontFamily,
+  fontSize: scaleFontSize(20, fontSizeScale),
+  textAlign: 'start',
+  WebkitTouchCallout: 'none',
+  MozUserSelect: 'none',
+  msUserSelect: 'none',
+  KhtmlUserSelect: 'none',
+  WebkitUserSelect: 'none',
+}))
 
-const H4 = styled('h4')<RootStyles & { isHebreu: boolean }>(
-  ({ settings: { fontSizeScale, fontFamily }, isHebreu }) => ({
-    fontFamily,
-    fontSize: scaleFontSize(18, fontSizeScale),
-    textAlign: isHebreu ? 'right' : 'left',
-    WebkitTouchCallout: 'none',
-    MozUserSelect: 'none',
-    msUserSelect: 'none',
-    KhtmlUserSelect: 'none',
-    WebkitUserSelect: 'none',
-  })
-)
+const H4 = styled('h4')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
+  fontFamily,
+  fontSize: scaleFontSize(18, fontSizeScale),
+  textAlign: 'start',
+  WebkitTouchCallout: 'none',
+  MozUserSelect: 'none',
+  msUserSelect: 'none',
+  KhtmlUserSelect: 'none',
+  WebkitUserSelect: 'none',
+}))
 
 const VersionTitle = styled('div')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
   fontFamily,
@@ -850,25 +841,25 @@ const VersesRenderer = ({
               return (
                 <Span key={verseKey}>
                   {h1 && (
-                    <H1 isHebreu={isHebreu} settings={settings} onClick={navigateToPericope}>
+                    <H1 settings={settings} onClick={navigateToPericope}>
                       {h1}
                       <ExternalIcon />
                     </H1>
                   )}
                   {h2 && (
-                    <H2 isHebreu={isHebreu} settings={settings} onClick={navigateToPericope}>
+                    <H2 settings={settings} onClick={navigateToPericope}>
                       {h2}
                       <ExternalIcon />
                     </H2>
                   )}
                   {h3 && (
-                    <H3 isHebreu={isHebreu} settings={settings} onClick={navigateToPericope}>
+                    <H3 settings={settings} onClick={navigateToPericope}>
                       {h3}
                       <ExternalIcon />
                     </H3>
                   )}
                   {h4 && (
-                    <H4 isHebreu={isHebreu} settings={settings} onClick={navigateToPericope}>
+                    <H4 settings={settings} onClick={navigateToPericope}>
                       {h4}
                       <ExternalIcon />
                     </H4>
