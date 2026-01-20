@@ -82,7 +82,7 @@
   "conflict.words": "Dictionary word",
   "conflict.naves": "Novel themes",
   "conflict.added": "Adds",
-  "conflict.updated": "Modifications",
+  "conflict.updated": "Updates",
   "conflict.deleted": "Deletions",
   "Téléchargement nécessaire": "Download required",
   "Télécharger": "Download",
@@ -832,5 +832,13 @@
   "bible.error.unknown": "An unexpected error occurred. Please try again.",
   "bible.error.parallelVersionNotFound": "Version not downloaded",
   "bible.error.parallelChapterNotFound": "Chapter unavailable",
-  "bible.error.parallelLoadError": "Loading error"
+  "bible.error.parallelLoadError": "Loading error",
+
+  "créé par": "created by",
+  "Une erreur est survenue, vérifiez votre connexion ou contactez-nous.": "An error occurred, please check your connection or contact us.",
+  "premium.onemonth.min.detail3": "Unlimited comment translations",
+  "premium.basic.description": "You are a sponsor.\nThank you for your symbolic help to the evolution of this project.",
+  "premium.premium.description": "You are a premium sponsor.\nThank you for your commitment to the evolution of this project and your willingness to invest financially. I warmly thank you for your support.",
+  "premium.premium_plus.description": "You are a super premium sponsor.\nThe manna has fallen from heaven! It is a blessing to see that you believe in this project and that you are ready to invest financially. I warmly thank you for your support.",
+  "premium.investor.description": "You are an investor.\nThe manna has fallen from heaven! It is a blessing to see that you believe in this project and that you are ready to invest financially. I warmly thank you for your support."
 }

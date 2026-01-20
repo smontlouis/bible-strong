@@ -1,5 +1,6 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai/react'
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import * as Sentry from '@sentry/react-native'
 
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -48,7 +49,7 @@ const events = [
   Event.PlaybackProgressUpdated,
 ]
 
-const getAllTracks = (version: string) => {
+const getAllTracks = (version: string, t: (key: string) => string) => {
   try {
     // @ts-expect-error
     const bibleVersion = getVersions()[version] as Version
@@ -57,7 +58,7 @@ const getAllTracks = (version: string) => {
         book,
         chapter: i + 1,
         url: bibleVersion?.getAudioUrl?.(book.Numero, i + 1) || '',
-        title: `${book.Nom} ${i + 1} ${version}`,
+        title: `${t(book.Nom)} ${i + 1} ${version}`,
         artist: bibleVersion?.name,
         artwork: require('~assets/images/icon.png'),
       }))
@@ -82,6 +83,7 @@ const useLoadSound = ({
   goToChapter,
   bibleAtom,
 }: UseLoadSoundProps) => {
+  const { t } = useTranslation()
   const bibleTab = useAtomValue(bibleAtom)
   const [isExpanded, setExpandedMode] = useState(false)
   const [playerState, setPlayerState] = useState<State>(State.None)
@@ -158,7 +160,7 @@ const useLoadSound = ({
   }
 
   // Create tracks for the current book
-  const tracks = useMemo(() => getAllTracks(version), [version])
+  const tracks = useMemo(() => getAllTracks(version, t), [version, t])
 
   // Unmounting
   // useEffect(() => {
