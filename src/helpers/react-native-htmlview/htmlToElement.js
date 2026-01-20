@@ -52,11 +52,18 @@ function htmlToElement(rawHtml, opts, done) {
             // Use book 1 for Hebrew (H), book 40 for Greek (G)
             const book = prefix === 'H' ? 1 : 40
 
+            // Merge parent style with link style to preserve formatting (italic, bold)
+            // while adding underline for the link
+            const linkStyle = {
+              ...style,
+              textDecorationLine: 'underline',
+            }
+
             parts.push(
               <Text
                 selectable
                 key={`${index}-link-${match.index}`}
-                style={opts.styles.a || style}
+                style={linkStyle}
                 onPress={() => opts.linkHandler(numberPart, book)}
               >
                 {fullRef}

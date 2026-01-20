@@ -79,6 +79,13 @@ const smallTextStyle = (theme: Theme) => ({
   fontFamily: theme.fontFamily.paragraph,
 })
 
+const smallLinkStyle = (theme: Theme) => ({
+  ...smallTextStyle(theme),
+  color: theme.colors.quart,
+  textDecorationLine: 'underline' as const,
+  textDecorationColor: theme.colors.quart,
+})
+
 type Props = {
   index?: number
   theme: Theme
@@ -208,7 +215,7 @@ const StrongCard = (props: Props) => {
                 p: { ...smallTextStyle(theme) },
                 em: { ...smallTextStyle(theme) },
                 strong: { ...smallTextStyle(theme) },
-                a: { ...smallTextStyle(theme) },
+                a: { ...smallLinkStyle(theme) },
                 i: { ...smallTextStyle(theme) },
                 li: { ...smallTextStyle(theme) },
                 ol: { ...smallTextStyle(theme) },
@@ -227,7 +234,7 @@ const StrongCard = (props: Props) => {
                 p: { ...smallTextStyle(theme) },
                 em: { ...smallTextStyle(theme) },
                 strong: { ...smallTextStyle(theme) },
-                a: { ...smallTextStyle(theme) },
+                a: { ...smallLinkStyle(theme) },
                 i: { ...smallTextStyle(theme) },
                 li: { ...smallTextStyle(theme) },
                 ol: { ...smallTextStyle(theme) },
