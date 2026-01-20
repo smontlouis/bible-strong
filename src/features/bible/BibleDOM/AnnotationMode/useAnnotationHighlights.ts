@@ -1,10 +1,10 @@
 'use dom'
 
-import { useEffect, useState, RefObject } from 'react'
+import { RefObject, useEffect, useState } from 'react'
 import { Verse as TVerse } from '~common/types'
-import { tokenizeVerseText, getTokenByWordIndex } from '~helpers/wordTokenizer'
+import { getTokenByWordIndex, tokenizeVerseText } from '~helpers/wordTokenizer'
 import { RootStyles, WebViewProps } from '../BibleDOMWrapper'
-import { HighlightRect, AnnotationType } from './HighlightComponents'
+import { AnnotationType, HighlightRect } from './HighlightComponents'
 
 /**
  * Represents a text node and its character offset within the combined verse text.
@@ -66,11 +66,7 @@ function createRangeAcrossNodes(
 
   for (const info of textNodes) {
     // Find start node (startCharIndex falls within this node's range)
-    if (
-      !startNode &&
-      startCharIndex >= info.startOffset &&
-      startCharIndex < info.endOffset
-    ) {
+    if (!startNode && startCharIndex >= info.startOffset && startCharIndex < info.endOffset) {
       startNode = info.node
       startOffset = startCharIndex - info.startOffset
     }
@@ -136,6 +132,8 @@ interface UseAnnotationHighlightsProps {
   containerRef: RefObject<HTMLDivElement | null>
   wordAnnotations: WebViewProps['wordAnnotations']
   version: string
+  book: number
+  chapter: number
   verses: TVerse[]
   settings: RootStyles['settings']
 }
@@ -144,14 +142,31 @@ export function useAnnotationHighlights({
   containerRef,
   wordAnnotations,
   version,
+  book,
+  chapter,
   verses,
   settings,
 }: UseAnnotationHighlightsProps) {
   const [highlightRects, setHighlightRects] = useState<HighlightRect[]>([])
+  // Track if we're waiting for new rects to be calculated after a chapter change
+  const [isPending, setIsPending] = useState(true)
+
+  // Create a stable key based on annotation IDs and dates
+  // Includes the date to detect modifications (color, type, etc.)
+  const annotationKey = wordAnnotations
+    ? Object.entries(wordAnnotations)
+        .map(([id, ann]) => `${id}:${ann.date}`)
+        .sort()
+        .join(',')
+    : ''
 
   useEffect(() => {
+    // Mark as pending immediately when deps change
+    setIsPending(true)
+
     if (!wordAnnotations || !containerRef.current) {
       setHighlightRects([])
+      setIsPending(false)
       return
     }
 
@@ -218,7 +233,9 @@ export function useAnnotationHighlights({
 
     requestAnimationFrame(() => {
       const rects = calculateRects()
+
       setHighlightRects(rects)
+      setIsPending(false)
     })
 
     const handleResize = () => {
@@ -242,7 +259,8 @@ export function useAnnotationHighlights({
       window.removeEventListener('resize', handleResize)
       window.removeEventListener('layoutChanged', handleLayoutChanged)
     }
-  }, [wordAnnotations, version, verses, settings])
+  }, [version, book, chapter, annotationKey])
 
-  return highlightRects
+  // Return empty array while pending to prevent flash of old positions
+  return isPending ? [] : highlightRects
 }

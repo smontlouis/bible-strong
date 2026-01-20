@@ -99,6 +99,7 @@ type Props = Pick<
   | 'isReadOnly'
   | 'version'
   | 'pericopeChapter'
+  | 'book'
   | 'chapter'
   | 'isSelectionMode'
   | 'selectedCode'
@@ -311,6 +312,7 @@ const VersesRenderer = ({
   isReadOnly,
   version,
   pericopeChapter,
+  book,
   chapter,
   isSelectionMode,
   selectedCode,
@@ -337,6 +339,8 @@ const VersesRenderer = ({
     containerRef,
     wordAnnotations,
     version,
+    book: book.Numero,
+    chapter,
     verses,
     settings,
   })

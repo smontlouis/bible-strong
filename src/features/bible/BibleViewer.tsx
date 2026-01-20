@@ -180,6 +180,11 @@ const BibleViewer = ({
     },
   } = bible
 
+  // Displayed values - updated only when verses are loaded to keep annotations in sync
+  const [displayedBook, setDisplayedBook] = useState(book.Numero)
+  const [displayedChapter, setDisplayedChapter] = useState(chapter)
+  const [displayedVersion, setDisplayedVersion] = useState(version)
+
   // Handler for entering annotation mode (from SelectedVersesModal)
   const handleEnterAnnotationMode = useCallback(() => {
     // Get the first selected verse to scroll to
@@ -247,20 +252,21 @@ const BibleViewer = ({
     []
   )
 
+  // Use displayed values for selectors to keep annotations in sync with verses
   const highlightedVersesByChapter = useSelector((state: RootState) =>
-    selectHighlightsByChapter(state, book.Numero, chapter)
+    selectHighlightsByChapter(state, displayedBook, displayedChapter)
   )
 
   const notesByChapter = useSelector((state: RootState) =>
-    selectNotesByChapter(state, book.Numero, chapter)
+    selectNotesByChapter(state, displayedBook, displayedChapter)
   )
 
   const linksByChapter = useSelector((state: RootState) =>
-    selectLinksByChapter(state, book.Numero, chapter)
+    selectLinksByChapter(state, displayedBook, displayedChapter)
   )
 
   const wordAnnotationsByChapter = useSelector((state: RootState) =>
-    selectWordAnnotationsByChapter(state, book.Numero, chapter, version)
+    selectWordAnnotationsByChapter(state, displayedBook, displayedChapter, displayedVersion)
   )
 
   const isSelectedVerseHighlighted = useSelector((state: RootState) =>
@@ -268,19 +274,21 @@ const BibleViewer = ({
   )
 
   const bookmarkedVerses = useSelector((state: RootState) =>
-    selectBookmarksInChapter(state, book.Numero, chapter)
+    selectBookmarksInChapter(state, displayedBook, displayedChapter)
   )
 
   const wordAnnotationsInOtherVersions = useSelector((state: RootState) =>
-    selectWordAnnotationsInOtherVersions(state, book.Numero, chapter, version)
+    selectWordAnnotationsInOtherVersions(state, displayedBook, displayedChapter, displayedVersion)
   )
 
   const loadVerses = async () => {
-    setPericope(await getBiblePericope(version))
     setIsLoading(true)
 
-    // Load main Bible version
-    const mainResult = await loadBibleChapter(book.Numero, chapter, version)
+    // Load pericopes and main Bible version in parallel
+    const [pericopeToLoad, mainResult] = await Promise.all([
+      getBiblePericope(version),
+      loadBibleChapter(book.Numero, chapter, version),
+    ])
 
     // If main Bible version fails, set error and stop
     if (!mainResult.success || !mainResult.data) {
@@ -326,7 +334,12 @@ const BibleViewer = ({
       setComments(null)
     }
 
+    // Update all states together to prevent UI flashes
     setIsLoading(false)
+    setDisplayedBook(book.Numero)
+    setDisplayedChapter(chapter)
+    setDisplayedVersion(version)
+    setPericope(pericopeToLoad)
     setVerses(versesToLoad)
     setParallelVerses(parallelVersesToLoad)
     setSecondaryVerses(secondaryVersesToLoad)
@@ -648,7 +661,7 @@ const BibleViewer = ({
           wordAnnotations={wordAnnotationsByChapter}
           settings={settings}
           verseToScroll={verse}
-          pericopeChapter={getPericopeChapter(pericope, book.Numero, chapter)}
+          pericopeChapter={getPericopeChapter(pericope, displayedBook, displayedChapter)}
           openNoteModal={openNoteModal}
           openLinkModal={openLinkModal}
           setSelectedCode={setSelectedCode}

@@ -183,6 +183,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     isReadOnly,
     version,
     pericopeChapter,
+    book,
     chapter,
     isSelectionMode,
     selectedCode,
@@ -534,6 +535,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         isReadOnly={isReadOnly}
         version={version}
         pericopeChapter={pericopeChapter}
+        book={book}
         chapter={chapter}
         isSelectionMode={isSelectionMode}
         selectedCode={selectedCode}
