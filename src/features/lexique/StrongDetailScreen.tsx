@@ -75,6 +75,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
   const [strongTab, setStrongTab] = useAtom(strongAtom)
   const { isInTab } = useTabContext()
 
+
   const {
     hasBackButton,
     data: { book, reference, strongReference: strongReferenceParam },
@@ -174,13 +175,13 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
     Share.share({ message: toCopy })
   }
 
-  const linkToStrong = (url: string, ref: number) => {
+  const linkToStrong = (reference: string, bookFromRef: number) => {
     if (isInTab) {
       // In tab context, update the tab data instead of navigating
       setStrongTab(
         produce(draft => {
-          draft.data.book = book
-          draft.data.reference = String(ref)
+          draft.data.book = bookFromRef
+          draft.data.reference = String(reference)
           draft.data.strongReference = undefined
         })
       )
@@ -188,8 +189,8 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
       router.push({
         pathname: '/strong',
         params: {
-          book: String(book),
-          reference: String(ref),
+          book: String(bookFromRef),
+          reference: String(reference),
         },
       })
     }

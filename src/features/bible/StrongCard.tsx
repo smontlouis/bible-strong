@@ -94,6 +94,17 @@ const StrongCard = (props: Props) => {
   const router = useRouter()
   const openedFromTab = useAtomValue(openedFromTabAtom)
 
+
+  const linkToStrong = (reference: string, bookFromRef: number) => {
+    router.push({
+      pathname: '/strong',
+      params: {
+        book: String(bookFromRef),
+        reference: reference,
+      },
+    })
+  }
+
   const openStrong = () => {
     const {
       book,
@@ -204,7 +215,7 @@ const StrongCard = (props: Props) => {
                 ul: { ...smallTextStyle(theme) },
               }}
               value={Definition}
-              onLinkPress={() => {}}
+              onLinkPress={linkToStrong}
             />
           </ViewItem>
         )}
