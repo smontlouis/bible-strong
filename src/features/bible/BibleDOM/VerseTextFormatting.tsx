@@ -7,14 +7,18 @@ import { scaleFontSize } from './scaleFontSize'
 import NotesCount from './NotesCount'
 import NotesText from './NotesText'
 import { ContainerText } from './ContainerText'
-import { NotedVerse, RootStyles, TaggedVerse } from './BibleDOMWrapper'
+import { LinkedVerse, NotedVerse, RootStyles, TaggedVerse } from './BibleDOMWrapper'
 import { SelectedCode, StudyNavigateBibleType, Verse } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import VerseTags from './VerseTags'
 import { scaleLineHeight } from './scaleLineHeight'
+import CloseContextTag from './CloseContextTag'
+import LinksText from './LinksText'
+import VersionAnnotationIndicator, { CrossVersionAnnotation } from './VersionAnnotationIndicator'
 
 export const Wrapper = styled('span')<RootStyles>(({ settings: { textDisplay } }) => ({
   display: textDisplay,
+  zIndex: 1,
   ...(textDisplay === 'block'
     ? {
         marginBottom: '5px',
@@ -56,6 +60,11 @@ interface Props {
   navigateToNote: (id: string) => void
   navigateToVerseNotes: () => void
   tag: TaggedVerse | undefined
+  linksText?: LinkedVerse[]
+  navigateToLink: (id: string) => void
+  isLastFocusVerse?: boolean
+  otherVersionAnnotations?: CrossVersionAnnotation[]
+  openCrossVersionModal: () => void
 }
 
 const VerseTextFormatting = ({
@@ -79,6 +88,11 @@ const VerseTextFormatting = ({
   navigateToNote,
   navigateToVerseNotes,
   tag,
+  linksText,
+  navigateToLink,
+  isLastFocusVerse,
+  otherVersionAnnotations,
+  openCrossVersionModal,
 }: Props) => {
   const [text, setText] = useState<any>(verse.Texte)
 
@@ -89,8 +103,11 @@ const VerseTextFormatting = ({
   useEffect(() => {
     verseToStrong({ Texte: verse.Texte, Livre: verse.Livre }).then(formattedText => {
       setText(formattedText)
+      // Dispatch after React render (next frame) to recalculate highlight overlays
+      requestAnimationFrame(() => {
+        window.dispatchEvent(new CustomEvent('layoutChanged'))
+      })
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [verse.Livre, verse.Texte])
 
   return (
@@ -121,17 +138,34 @@ const VerseTextFormatting = ({
             onTouchEnd={onTouchEnd}
             onTouchMove={onTouchMove}
             onTouchCancel={onTouchCancel}
+            id={`verse-text-${verse.Livre}-${verse.Chapitre}-${verse.Verset}`}
           >
             {text}
           </VerseText>
-          {tag && <VerseTags settings={settings} tag={tag} />}
         </ContainerText>
-        {notesText && inlineNotedVerses && !isSelectionMode && (
+        {otherVersionAnnotations && otherVersionAnnotations.length > 0 && !isSelectionMode && (
+          <VersionAnnotationIndicator
+            versions={otherVersionAnnotations}
+            settings={settings}
+            onClick={openCrossVersionModal}
+          />
+        )}
+        {tag && <VerseTags settings={settings} tag={tag} />}
+        {isLastFocusVerse && <CloseContextTag settings={settings} />}
+        {notesText && settings.notesDisplay === 'inline' && !isSelectionMode && (
           <NotesText
             isParallel={isParallel}
             settings={settings}
             onClick={navigateToNote}
             notesText={notesText}
+          />
+        )}
+        {linksText && (settings.linksDisplay || 'inline') === 'inline' && !isSelectionMode && (
+          <LinksText
+            isParallel={isParallel}
+            settings={settings}
+            onClick={navigateToLink}
+            linksText={linksText}
           />
         )}
       </Wrapper>

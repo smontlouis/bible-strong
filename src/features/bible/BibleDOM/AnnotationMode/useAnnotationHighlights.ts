@@ -6,6 +6,132 @@ import { tokenizeVerseText, getTokenByWordIndex } from '~helpers/wordTokenizer'
 import { RootStyles, WebViewProps } from '../BibleDOMWrapper'
 import { HighlightRect, AnnotationType } from './HighlightComponents'
 
+/**
+ * Represents a text node and its character offset within the combined verse text.
+ * Used to map character positions across multiple DOM text nodes (needed for LSGS/KJVS
+ * versions where Strong's references create a complex DOM structure).
+ */
+interface TextNodeInfo {
+  node: Text
+  startOffset: number // character offset in combined text
+  endOffset: number
+}
+
+/**
+ * Collects all text nodes within an element and tracks their character offsets.
+ * This allows mapping character positions to the correct DOM nodes even when
+ * the verse text is split across multiple text nodes (e.g., around Strong's refs).
+ */
+function collectTextNodes(element: Element): {
+  fullText: string
+  textNodes: TextNodeInfo[]
+} {
+  const textNodes: TextNodeInfo[] = []
+  let currentOffset = 0
+
+  const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT)
+  let node: Text | null
+
+  while ((node = walker.nextNode() as Text | null)) {
+    const length = node.textContent?.length || 0
+    if (length > 0) {
+      textNodes.push({
+        node,
+        startOffset: currentOffset,
+        endOffset: currentOffset + length,
+      })
+      currentOffset += length
+    }
+  }
+
+  return {
+    fullText: textNodes.map(t => t.node.textContent).join(''),
+    textNodes,
+  }
+}
+
+/**
+ * Creates a DOM range that spans multiple text nodes based on character indices.
+ * Returns null if the start or end position cannot be found in the text nodes.
+ */
+function createRangeAcrossNodes(
+  textNodes: TextNodeInfo[],
+  startCharIndex: number,
+  endCharIndex: number
+): Range | null {
+  let startNode: Text | null = null
+  let startOffset = 0
+  let endNode: Text | null = null
+  let endOffset = 0
+
+  for (const info of textNodes) {
+    // Find start node (startCharIndex falls within this node's range)
+    if (
+      !startNode &&
+      startCharIndex >= info.startOffset &&
+      startCharIndex < info.endOffset
+    ) {
+      startNode = info.node
+      startOffset = startCharIndex - info.startOffset
+    }
+    // Find end node (endCharIndex falls within this node's range)
+    if (endCharIndex > info.startOffset && endCharIndex <= info.endOffset) {
+      endNode = info.node
+      endOffset = endCharIndex - info.startOffset
+    }
+  }
+
+  if (!startNode || !endNode) return null
+
+  const range = document.createRange()
+  range.setStart(startNode, startOffset)
+  range.setEnd(endNode, endOffset)
+  return range
+}
+
+/**
+ * Merges all DOMRects on the same line into single rectangles.
+ * This creates cleaner highlights when text spans multiple DOM nodes (e.g., LSGS verses
+ * where Strong's references create gaps between text nodes).
+ */
+function mergeRectsOnSameLine(rects: DOMRect[]): DOMRect[] {
+  if (rects.length === 0) return []
+
+  // Group rects by line (using top position with tolerance)
+  const lineGroups: Map<number, DOMRect[]> = new Map()
+  const LINE_TOLERANCE = 5 // pixels
+
+  for (const rect of rects) {
+    // Find existing line group or create new one
+    let foundLine: number | null = null
+    for (const lineTop of lineGroups.keys()) {
+      if (Math.abs(rect.top - lineTop) < LINE_TOLERANCE) {
+        foundLine = lineTop
+        break
+      }
+    }
+
+    if (foundLine !== null) {
+      lineGroups.get(foundLine)!.push(rect)
+    } else {
+      lineGroups.set(rect.top, [rect])
+    }
+  }
+
+  // Merge each line group into a single rect spanning from leftmost to rightmost
+  const merged: DOMRect[] = []
+  for (const lineRects of lineGroups.values()) {
+    const left = Math.min(...lineRects.map(r => r.left))
+    const right = Math.max(...lineRects.map(r => r.right))
+    const top = Math.min(...lineRects.map(r => r.top))
+    const height = Math.max(...lineRects.map(r => r.height))
+    merged.push(new DOMRect(left, top, right - left, height))
+  }
+
+  // Sort by top position for consistent ordering
+  return merged.sort((a, b) => a.top - b.top)
+}
+
 interface UseAnnotationHighlightsProps {
   containerRef: RefObject<HTMLDivElement | null>
   wordAnnotations: WebViewProps['wordAnnotations']
@@ -42,27 +168,33 @@ export function useAnnotationHighlights({
           const verseTextEl = document.getElementById(`verse-text-${verseKey}`)
           if (!verseTextEl) return
 
-          const textNode = verseTextEl.firstChild
-          if (!textNode || textNode.nodeType !== Node.TEXT_NODE) return
+          // Collect all text nodes to handle LSGS/KJVS verses with Strong's refs
+          const { fullText, textNodes } = collectTextNodes(verseTextEl)
+          if (!fullText || textNodes.length === 0) return
 
-          const text = textNode.textContent || ''
-          const tokens = tokenizeVerseText(text)
+          const tokens = tokenizeVerseText(fullText)
           const startToken = getTokenByWordIndex(tokens, startWordIndex)
           const endToken = getTokenByWordIndex(tokens, endWordIndex)
+
           if (!startToken || !endToken) return
 
           try {
-            const domRange = document.createRange()
-            domRange.setStart(textNode, startToken.charStart)
-            domRange.setEnd(textNode, endToken.charEnd)
+            // Create range across potentially multiple text nodes
+            const domRange = createRangeAcrossNodes(
+              textNodes,
+              startToken.charStart,
+              endToken.charEnd
+            )
+            if (!domRange) return
 
-            const clientRects = domRange.getClientRects()
+            // Merge adjacent rects on same line for cleaner highlights
+            const clientRects = mergeRectsOnSameLine(Array.from(domRange.getClientRects()))
             const colorValue =
               settings.colors[settings.theme][
                 annotation.color as keyof (typeof settings.colors)[typeof settings.theme]
               ] || annotation.color
 
-            Array.from(clientRects).forEach((rect, rectIdx) => {
+            clientRects.forEach((rect, rectIdx) => {
               rects.push({
                 id: `${annotationId}-${rangeIdx}-${rectIdx}`,
                 top: rect.top - containerRect.top,

@@ -402,56 +402,6 @@ const Verse = ({
     )
   }
 
-  if (version === 'LSGS' || version === 'KJVS') {
-    return (
-      <VerseTextFormatting
-        isParallel={isParallel}
-        selectedCode={selectedCode}
-        verse={verse}
-        settings={settings}
-        isFocused={isFocused}
-        isTouched={isTouched}
-        isSelected={isSelected}
-        isVerseToScroll={isVerseToScroll && Number(verse.Verset) !== 1}
-        highlightedColor={highlightedColor}
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
-        onTouchMove={onTouchMove}
-        onTouchCancel={onTouchCancel}
-        notesCount={notesCount}
-        inlineNotedVerses={settings.notesDisplay === 'inline'}
-        isSelectionMode={isSelectionMode}
-        notesText={notesText}
-        navigateToVerseNotes={navigateToVerseNotes}
-        navigateToNote={navigateToNote}
-        tag={tag}
-      />
-    )
-  }
-
-  if (version === 'INT' || version === 'INT_EN') {
-    if (isINTComplete) {
-      return (
-        <InterlinearVerseComplete
-          secondaryVerse={secondaryVerse}
-          isHebreu={isHebreu}
-          settings={settings}
-          verse={verse}
-          selectedCode={selectedCode}
-        />
-      )
-    }
-    return (
-      <InterlinearVerse
-        secondaryVerse={secondaryVerse}
-        isHebreu={isHebreu}
-        settings={settings}
-        verse={verse}
-        selectedCode={selectedCode}
-      />
-    )
-  }
-
   let array: (string | JSX.Element)[] = verse.Texte.split(/(\n)/g)
 
   if (array.length > 1) {
@@ -481,6 +431,61 @@ const Verse = ({
       // Calculate contrast text color for readability
       numberHighlightColor = getContrastTextColor(highlightInfo.hex, isDarkTheme(theme))
     }
+  }
+
+  if (version === 'LSGS' || version === 'KJVS') {
+    return (
+      <VerseTextFormatting
+        isParallel={isParallel}
+        selectedCode={selectedCode}
+        verse={verse}
+        settings={settings}
+        isFocused={isFocused}
+        isTouched={isTouched}
+        isSelected={isSelected}
+        isVerseToScroll={isVerseToScroll && Number(verse.Verset) !== 1}
+        highlightedColor={highlightedColor}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+        onTouchMove={onTouchMove}
+        onTouchCancel={onTouchCancel}
+        notesCount={notesCount}
+        inlineNotedVerses={settings.notesDisplay === 'inline'}
+        isSelectionMode={isSelectionMode}
+        notesText={notesText}
+        navigateToVerseNotes={navigateToVerseNotes}
+        navigateToNote={navigateToNote}
+        tag={tag}
+        linksText={linksText}
+        navigateToLink={navigateToLink}
+        isLastFocusVerse={isLastFocusVerse}
+        otherVersionAnnotations={otherVersionAnnotations}
+        openCrossVersionModal={openCrossVersionModal}
+      />
+    )
+  }
+
+  if (version === 'INT' || version === 'INT_EN') {
+    if (isINTComplete) {
+      return (
+        <InterlinearVerseComplete
+          secondaryVerse={secondaryVerse}
+          isHebreu={isHebreu}
+          settings={settings}
+          verse={verse}
+          selectedCode={selectedCode}
+        />
+      )
+    }
+    return (
+      <InterlinearVerse
+        secondaryVerse={secondaryVerse}
+        isHebreu={isHebreu}
+        settings={settings}
+        verse={verse}
+        selectedCode={selectedCode}
+      />
+    )
   }
 
   return (

@@ -10,9 +10,10 @@ const StyledReference = styled('div')<RootStyles & { isSelected: boolean }>(
   ({ isSelected, settings: { theme, colors } }) => ({
     display: 'inline-block',
     transition: 'background 0.3s ease',
-    borderRadius: '4px',
+    borderRadius: '8px',
     padding: '0 5px',
     background: colors[theme].lightPrimary,
+    opacity: 0.7,
 
     ...(isSelected
       ? {

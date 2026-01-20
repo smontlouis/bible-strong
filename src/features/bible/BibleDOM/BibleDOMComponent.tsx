@@ -163,7 +163,10 @@ const IntMode = styled('div')<RootStyles>(({ settings: { theme, colors } }) => (
   color: colors[theme].default,
 }))
 
-const Span = styled('span')({})
+const Span = styled('span')({
+  zIndex: 1,
+  position: 'relative',
+})
 
 const H1 = styled('h1')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
   fontFamily,
@@ -830,9 +833,7 @@ const VersesRenderer = ({
               const hasWordAnnotations =
                 wordAnnotations &&
                 Object.values(wordAnnotations).some(
-                  ann =>
-                    ann.version === version &&
-                    ann.ranges.some(r => r.verseKey === verseKey)
+                  ann => ann.version === version && ann.ranges.some(r => r.verseKey === verseKey)
                 )
 
               // Get annotations in other versions for this verse
