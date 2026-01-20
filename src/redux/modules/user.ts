@@ -34,6 +34,15 @@ import { addHighlightAction, changeHighlightColor, removeHighlight } from './use
 import { addLinkAction, deleteLink, updateLink } from './user/links'
 import { addNoteAction, deleteNote } from './user/notes'
 import {
+  addWordAnnotationAction,
+  changeWordAnnotationColorAction,
+  changeWordAnnotationTypeAction,
+  removeWordAnnotationAction,
+  removeWordAnnotationsInRangeAction,
+  updateWordAnnotationAction,
+  WordAnnotationsObj,
+} from './user/wordAnnotations'
+import {
   changeColor,
   decreaseSettingsFontSizeScale,
   increaseSettingsFontSizeScale,
@@ -89,6 +98,7 @@ export * from './user/settings'
 export * from './user/studies'
 export * from './user/tags'
 export * from './user/versionUpdate'
+export * from './user/wordAnnotations'
 
 // Re-export types
 export type { Tag }
@@ -123,7 +133,7 @@ const cleanCorruptedFirestoreData = (obj: any): any => {
 // Helper function to remove entity from tags
 const removeEntityInTags = (
   draft: UserState,
-  entity: 'notes' | 'links' | 'highlights' | 'studies',
+  entity: 'notes' | 'links' | 'highlights' | 'studies' | 'wordAnnotations',
   key: string
 ) => {
   for (const tag in draft.bible.tags) {
@@ -273,6 +283,7 @@ export interface UserState {
     strongsGrec: {}
     words: {}
     naves: {}
+    wordAnnotations: WordAnnotationsObj
     settings: {
       defaultBibleVersion?: string
       alignContent: 'left' | 'justify'
@@ -361,6 +372,7 @@ const getInitialState = (): UserState => ({
     strongsGrec: {},
     words: {},
     naves: {},
+    wordAnnotations: {},
     settings: {
       defaultBibleVersion: getDefaultBibleVersion(getLanguage()),
       alignContent: 'left',
@@ -476,6 +488,7 @@ const userSlice = createSlice({
       const currentNaves = state.bible.naves
       const currentStudies = state.bible.studies
       const currentChangelog = state.bible.changelog
+      const currentWordAnnotations = state.bible.wordAnnotations
 
       // Merge bible (only settings and other non-subcollection data)
       // Clean corrupted data before merging (removes {_type: 'delete'} objects)
@@ -494,6 +507,7 @@ const userSlice = createSlice({
       state.bible.naves = currentNaves
       state.bible.studies = currentStudies
       state.bible.changelog = currentChangelog
+      state.bible.wordAnnotations = currentWordAnnotations
     },
     receiveSubcollectionUpdates(
       state,
@@ -508,6 +522,7 @@ const userSlice = createSlice({
           | 'strongsGrec'
           | 'words'
           | 'naves'
+          | 'wordAnnotations'
         data: Record<string, unknown>
         isInitialLoad: boolean
       }>
@@ -542,6 +557,9 @@ const userSlice = createSlice({
           break
         case 'naves':
           state.bible.naves = data
+          break
+        case 'wordAnnotations':
+          state.bible.wordAnnotations = data as WordAnnotationsObj
           break
       }
     },
@@ -666,6 +684,183 @@ const userSlice = createSlice({
     builder.addCase(changeHighlightColor, (state, action) => {
       Object.keys(action.payload.verseIds).forEach(key => {
         state.bible.highlights[key].color = action.payload.color
+      })
+    })
+
+    // Word Annotations
+    builder.addCase(addWordAnnotationAction, (state, action) => {
+      const annotation = action.payload.annotation
+
+      // Helper to compare verse keys (e.g., "1-1-5" vs "1-1-10")
+      const parseVerseKey = (key: string) => {
+        const [book, chapter, verse] = key.split('-').map(Number)
+        return { book, chapter, verse }
+      }
+
+      const compareVerseKeys = (a: string, b: string): number => {
+        const pa = parseVerseKey(a)
+        const pb = parseVerseKey(b)
+        if (pa.book !== pb.book) return pa.book - pb.book
+        if (pa.chapter !== pb.chapter) return pa.chapter - pb.chapter
+        return pa.verse - pb.verse
+      }
+
+      // Get the bounds of the new annotation
+      const newRanges = annotation.ranges
+      if (newRanges.length > 0) {
+        const firstRange = newRanges[0]
+        const lastRange = newRanges[newRanges.length - 1]
+        const start = { verseKey: firstRange.verseKey, wordIndex: firstRange.startWordIndex }
+        const end = { verseKey: lastRange.verseKey, wordIndex: lastRange.endWordIndex }
+
+        // Find and remove overlapping annotations
+        const annotationIds = Object.keys(state.bible.wordAnnotations)
+        annotationIds.forEach(id => {
+          const existingAnnotation = state.bible.wordAnnotations[id]
+          if (existingAnnotation.version !== annotation.version) return
+
+          const overlaps = existingAnnotation.ranges.some(range => {
+            const rangeVerseCompareStart = compareVerseKeys(range.verseKey, start.verseKey)
+            const rangeVerseCompareEnd = compareVerseKeys(range.verseKey, end.verseKey)
+
+            // Check if this range's verse is within the selection verses
+            if (rangeVerseCompareStart < 0 || rangeVerseCompareEnd > 0) {
+              return false
+            }
+
+            // Same verse as both start and end
+            if (rangeVerseCompareStart === 0 && rangeVerseCompareEnd === 0) {
+              return (
+                range.endWordIndex >= start.wordIndex && range.startWordIndex <= end.wordIndex
+              )
+            }
+
+            // Verse is same as start verse only
+            if (rangeVerseCompareStart === 0) {
+              return range.endWordIndex >= start.wordIndex
+            }
+
+            // Verse is same as end verse only
+            if (rangeVerseCompareEnd === 0) {
+              return range.startWordIndex <= end.wordIndex
+            }
+
+            // Verse is strictly between start and end
+            return true
+          })
+
+          if (overlaps) {
+            delete state.bible.wordAnnotations[id]
+            removeEntityInTags(state, 'wordAnnotations', id)
+          }
+        })
+      }
+
+      // Add the new annotation
+      state.bible.wordAnnotations[annotation.id] = annotation
+    })
+    builder.addCase(updateWordAnnotationAction, (state, action) => {
+      const { id, changes } = action.payload
+      if (state.bible.wordAnnotations[id]) {
+        state.bible.wordAnnotations[id] = {
+          ...state.bible.wordAnnotations[id],
+          ...changes,
+        }
+      }
+    })
+    builder.addCase(removeWordAnnotationAction, (state, action) => {
+      const id = action.payload.id
+      delete state.bible.wordAnnotations[id]
+      removeEntityInTags(state, 'wordAnnotations', id)
+    })
+    builder.addCase(changeWordAnnotationColorAction, (state, action) => {
+      const { id, color } = action.payload
+      if (state.bible.wordAnnotations[id]) {
+        state.bible.wordAnnotations[id].color = color
+      }
+    })
+    builder.addCase(changeWordAnnotationTypeAction, (state, action) => {
+      const { id, type } = action.payload
+      if (state.bible.wordAnnotations[id]) {
+        state.bible.wordAnnotations[id].type = type
+      }
+    })
+    builder.addCase(removeWordAnnotationsInRangeAction, (state, action) => {
+      const { version, start, end } = action.payload
+
+      // Helper to compare verse keys (e.g., "1-1-5" vs "1-1-10")
+      const parseVerseKey = (key: string) => {
+        const [book, chapter, verse] = key.split('-').map(Number)
+        return { book, chapter, verse }
+      }
+
+      const compareVerseKeys = (a: string, b: string): number => {
+        const pa = parseVerseKey(a)
+        const pb = parseVerseKey(b)
+        if (pa.book !== pb.book) return pa.book - pb.book
+        if (pa.chapter !== pb.chapter) return pa.chapter - pb.chapter
+        return pa.verse - pb.verse
+      }
+
+      // Normalize start and end (ensure start <= end)
+      let normalizedStart = start
+      let normalizedEnd = end
+      const verseCompare = compareVerseKeys(start.verseKey, end.verseKey)
+      if (verseCompare > 0 || (verseCompare === 0 && start.wordIndex > end.wordIndex)) {
+        normalizedStart = end
+        normalizedEnd = start
+      }
+
+      // Find all annotations that overlap with the selection range
+      const annotationIds = Object.keys(state.bible.wordAnnotations)
+      const idsToRemove: string[] = []
+
+      annotationIds.forEach(id => {
+        const annotation = state.bible.wordAnnotations[id]
+        if (annotation.version !== version) return
+
+        // Check if any range of this annotation overlaps with the selection
+        const overlaps = annotation.ranges.some(range => {
+          const rangeVerseCompare = compareVerseKeys(range.verseKey, normalizedStart.verseKey)
+          const rangeVerseCompareEnd = compareVerseKeys(range.verseKey, normalizedEnd.verseKey)
+
+          // Check if this range's verse is within the selection verses
+          if (rangeVerseCompare < 0 || rangeVerseCompareEnd > 0) {
+            return false // Verse is outside selection
+          }
+
+          // Same verse as start
+          if (rangeVerseCompare === 0 && rangeVerseCompareEnd === 0) {
+            // Single verse selection - check word indices
+            return (
+              range.endWordIndex >= normalizedStart.wordIndex &&
+              range.startWordIndex <= normalizedEnd.wordIndex
+            )
+          }
+
+          // Verse is same as start verse only
+          if (rangeVerseCompare === 0) {
+            return range.endWordIndex >= normalizedStart.wordIndex
+          }
+
+          // Verse is same as end verse only
+          if (rangeVerseCompareEnd === 0) {
+            return range.startWordIndex <= normalizedEnd.wordIndex
+          }
+
+          // Verse is strictly between start and end
+          return true
+        })
+
+        if (overlaps) {
+          idsToRemove.push(id)
+        }
+      })
+
+      // Remove the overlapping annotations
+      idsToRemove.forEach(id => {
+        delete state.bible.wordAnnotations[id]
+        removeEntityInTags(state, 'wordAnnotations', id)
       })
     })
 

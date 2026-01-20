@@ -1,7 +1,7 @@
 'use dom'
 
 import { setup, styled } from 'goober'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { TagsObj, Verse as TVerse } from '~common/types'
 import { HighlightsObj, NotesObj, LinksObj } from '~redux/modules/user'
 import {
@@ -28,8 +28,8 @@ import {
   SWIPE_DOWN,
   SWIPE_UP,
 } from './dispatch'
-import { DispatchProvider, useDispatch } from './DispatchProvider'
-import { TranslationsProvider, BibleDOMTranslations, useTranslations } from './TranslationsContext'
+import { DispatchProvider } from './DispatchProvider'
+import { TranslationsProvider, BibleDOMTranslations } from './TranslationsContext'
 import ExternalIcon from './ExternalIcon'
 import MinusIcon from './MinusIcon'
 import PlusIcon from './PlusIcon'
@@ -39,6 +39,13 @@ import './swiped-events'
 import Verse from './Verse'
 import { useFonts } from 'expo-font'
 import { HEADER_HEIGHT, HEADER_HEIGHT_MIN } from '~features/app-switcher/utils/constants'
+import { AnnotationModeRenderer, AnnotationType } from './AnnotationMode'
+import {
+  HighlightLayer,
+  HighlightRectDiv,
+  getAnimationDelay,
+} from './AnnotationMode/HighlightComponents'
+import { useAnnotationHighlights } from './AnnotationMode/useAnnotationHighlights'
 
 declare global {
   interface Window {
@@ -76,6 +83,8 @@ type Props = Pick<
   | 'notedVerses'
   | 'bookmarkedVerses'
   | 'linkedVerses'
+  | 'wordAnnotations'
+  | 'wordAnnotationsInOtherVersions'
   | 'settings'
   | 'verseToScroll'
   | 'isReadOnly'
@@ -89,6 +98,15 @@ type Props = Pick<
   dispatch: Dispatch
   dom: import('expo/dom').DOMProps
   translations: BibleDOMTranslations
+  // Annotation mode props (uncontrolled - DOM manages local annotation state)
+  annotationMode?: boolean
+  clearSelectionTrigger?: number
+  applyAnnotationTrigger?: { count: number; color: string; type: AnnotationType }
+  eraseSelectionTrigger?: number
+  clearAnnotationSelectionTrigger?: number
+  selectedAnnotationId?: string | null
+  // Safe area inset from native side (CSS env vars don't work in Expo DOM WebView)
+  safeAreaTop?: number
 }
 
 const extractParallelVerse = (
@@ -116,6 +134,7 @@ const extractParallelVersionTitles = (parallelVerses: ParallelVerse[], currentVe
 
 const Container = styled('div')<RootStyles & { rtl: boolean; isParallelVerse: boolean }>(
   ({ settings: { alignContent, theme, colors }, rtl, isParallelVerse }) => ({
+    position: 'relative', // For highlight layer positioning
     maxWidth: isParallelVerse ? 'none' : '800px',
     margin: '0 auto',
     padding: isParallelVerse ? '10px 5px' : '10px 15px',
@@ -152,6 +171,11 @@ const H1 = styled('h1')<RootStyles & { isHebreu: boolean }>(
     fontFamily,
     fontSize: scaleFontSize(28, fontSizeScale),
     textAlign: isHebreu ? 'right' : 'left',
+    WebkitTouchCallout: 'none',
+    MozUserSelect: 'none',
+    msUserSelect: 'none',
+    KhtmlUserSelect: 'none',
+    WebkitUserSelect: 'none',
   })
 )
 
@@ -160,6 +184,11 @@ const H2 = styled('h2')<RootStyles & { isHebreu: boolean }>(
     fontFamily,
     fontSize: scaleFontSize(24, fontSizeScale),
     textAlign: isHebreu ? 'right' : 'left',
+    WebkitTouchCallout: 'none',
+    MozUserSelect: 'none',
+    msUserSelect: 'none',
+    KhtmlUserSelect: 'none',
+    WebkitUserSelect: 'none',
   })
 )
 
@@ -168,6 +197,11 @@ const H3 = styled('h3')<RootStyles & { isHebreu: boolean }>(
     fontFamily,
     fontSize: scaleFontSize(20, fontSizeScale),
     textAlign: isHebreu ? 'right' : 'left',
+    WebkitTouchCallout: 'none',
+    MozUserSelect: 'none',
+    msUserSelect: 'none',
+    KhtmlUserSelect: 'none',
+    WebkitUserSelect: 'none',
   })
 )
 
@@ -176,6 +210,11 @@ const H4 = styled('h4')<RootStyles & { isHebreu: boolean }>(
     fontFamily,
     fontSize: scaleFontSize(18, fontSizeScale),
     textAlign: isHebreu ? 'right' : 'left',
+    WebkitTouchCallout: 'none',
+    MozUserSelect: 'none',
+    msUserSelect: 'none',
+    KhtmlUserSelect: 'none',
+    WebkitUserSelect: 'none',
   })
 )
 
@@ -246,6 +285,10 @@ const getPericopeVerse = (pericopeChapter: PericopeChapter, verse: number) => {
   return {}
 }
 
+// ============================================================================
+// MAIN VERSES RENDERER
+// ============================================================================
+
 const VersesRenderer = ({
   verses,
   parallelVerses,
@@ -257,6 +300,8 @@ const VersesRenderer = ({
   notedVerses,
   bookmarkedVerses,
   linkedVerses,
+  wordAnnotations,
+  wordAnnotationsInOtherVersions,
   settings,
   verseToScroll,
   isReadOnly,
@@ -267,14 +312,32 @@ const VersesRenderer = ({
   selectedCode,
   dispatch,
   translations,
+  annotationMode,
+  clearSelectionTrigger,
+  applyAnnotationTrigger,
+  eraseSelectionTrigger,
+  clearAnnotationSelectionTrigger,
+  selectedAnnotationId,
+  safeAreaTop,
 }: Props) => {
   const [isINTComplete, setIsINTComplete] = useState(true)
   const [loaded, error] = useFonts({
     'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
   })
 
+  // Ref for highlight layer
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // Use shared hook for annotation highlights
+  const highlightRects = useAnnotationHighlights({
+    containerRef,
+    wordAnnotations,
+    version,
+    verses,
+    settings,
+  })
+
   useEffect(() => {
-    // Notify parent component that we've mounted
     console.log('[Bible] WEB: DOM component mounted')
     dispatch({
       type: 'DOM_COMPONENT_MOUNTED',
@@ -393,6 +456,26 @@ const VersesRenderer = ({
       }
     })
   }, [verseToScroll, hasVerses])
+
+  if (annotationMode) {
+    return (
+      <AnnotationModeRenderer
+        verses={verses}
+        settings={settings}
+        dispatch={dispatch}
+        translations={translations}
+        wordAnnotations={wordAnnotations}
+        version={version}
+        pericopeChapter={pericopeChapter}
+        clearSelectionTrigger={clearSelectionTrigger}
+        applyAnnotationTrigger={applyAnnotationTrigger}
+        eraseSelectionTrigger={eraseSelectionTrigger}
+        clearAnnotationSelectionTrigger={clearAnnotationSelectionTrigger}
+        selectedAnnotationId={selectedAnnotationId}
+        safeAreaTop={safeAreaTop}
+      />
+    )
+  }
 
   const sortVersesToTags = (highlightedVerses: HighlightsObj): TaggedVerse[] | null => {
     if (!highlightedVerses) return null
@@ -624,11 +707,29 @@ const VersesRenderer = ({
     <TranslationsProvider translations={translations}>
       <DispatchProvider dispatch={dispatch}>
         <Container
+          ref={containerRef}
           rtl={isHebreu}
           settings={settings}
           isParallelVerse={isParallelVerse}
           data-swipe-threshold="100"
         >
+          {/* Highlight layer for word annotations */}
+          {highlightRects.length > 0 && (
+            <HighlightLayer $dimmed={Object.keys(selectedVerses).length > 0}>
+              {highlightRects.map(rect => (
+                <HighlightRectDiv
+                  key={rect.id}
+                  $top={rect.top}
+                  $left={rect.left}
+                  $width={rect.width}
+                  $height={rect.height}
+                  $color={rect.color}
+                  $annotationType={rect.annotationType}
+                  $animationDelay={getAnimationDelay(rect.id)}
+                />
+              ))}
+            </HighlightLayer>
+          )}
           {isParallelVerse && (
             <VersionsContainer settings={settings}>
               {parallelVersionTitles?.map((p, i) => (
@@ -728,12 +829,26 @@ const VersesRenderer = ({
 
               const bookmark = bookmarkedVerses?.[Number(Verset)]
 
+              const verseKey = `${Livre}-${Chapitre}-${Verset}`
+
               // Show close context button on last focus verse when not in readonly mode
               const isLastFocusVerse =
                 !isReadOnly && lastFocusVerse !== null && Number(Verset) === lastFocusVerse
 
+              // Check if this verse has word annotations
+              const hasWordAnnotations =
+                wordAnnotations &&
+                Object.values(wordAnnotations).some(
+                  ann =>
+                    ann.version === version &&
+                    ann.ranges.some(r => r.verseKey === verseKey)
+                )
+
+              // Get annotations in other versions for this verse
+              const otherVersionAnnotations = wordAnnotationsInOtherVersions?.[verseKey]
+
               return (
-                <Span key={`${Livre}-${Chapitre}-${Verset}`}>
+                <Span key={verseKey}>
                   {h1 && (
                     <H1 isHebreu={isHebreu} settings={settings} onClick={navigateToPericope}>
                       {h1}
@@ -782,6 +897,8 @@ const VersesRenderer = ({
                     bookmark={bookmark}
                     fadePosition={fadePosition}
                     isLastFocusVerse={isLastFocusVerse}
+                    hasWordAnnotations={hasWordAnnotations}
+                    otherVersionAnnotations={otherVersionAnnotations}
                   />
                   {!!comment && settings.commentsDisplay && (
                     <Comment id={`comment-${verse.Verset}`} settings={settings} comment={comment} />

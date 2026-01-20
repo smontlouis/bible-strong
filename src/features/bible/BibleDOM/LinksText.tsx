@@ -4,6 +4,7 @@ import { scaleFontSize } from './scaleFontSize'
 import { RootState } from '~redux/modules/reducer'
 import { LinkedVerse, RootStyles } from './BibleDOMWrapper'
 import { getLinkTypeIconComponent, getLinkTypeColor } from './LinkIcons'
+import { InlineItemContainer, InlineItemIconWrapper, InlineItemText } from './InlineItem'
 
 const Div = styled('span')<RootStyles & { isParallel?: boolean }>(
   ({ isParallel, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
@@ -35,8 +36,8 @@ const LinkTypeIndicator = styled('span')<RootStyles>(({ settings: { fontSizeScal
   marginRight: '4px',
   verticalAlign: 'middle',
   '& svg': {
-    width: scaleFontSize(20, fontSizeScale),
-    height: scaleFontSize(20, fontSizeScale),
+    width: scaleFontSize(14, fontSizeScale),
+    height: scaleFontSize(16, fontSizeScale),
   },
 }))
 
@@ -63,17 +64,20 @@ const LinksText = ({ linksText, settings, onClick, isParallel }: Props) => {
     <span>
       {linksText.map(link => {
         return (
-          <Div
+          <InlineItemContainer
             key={link.key}
             settings={settings}
             isParallel={isParallel}
             onClick={() => onClick(link.key)}
+            isButton
           >
-            <LinkTypeIndicator settings={settings}>
-              {renderLinkTypeIcon(link.linkType, iconSize)}
-            </LinkTypeIndicator>
-            <span>{truncate(link.title, 36)}</span>
-          </Div>
+            <InlineItemIconWrapper settings={settings}>
+              <LinkTypeIndicator settings={settings}>
+                {renderLinkTypeIcon(link.linkType, iconSize)}
+              </LinkTypeIndicator>
+            </InlineItemIconWrapper>
+            <InlineItemText settings={settings}>{truncate(link.title, 36)}</InlineItemText>
+          </InlineItemContainer>
         )
       })}
     </span>

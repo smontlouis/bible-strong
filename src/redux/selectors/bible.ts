@@ -1,7 +1,16 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { RootState } from '~redux/modules/reducer'
-import { HighlightsObj, NotesObj, LinksObj, Note, Highlight, Link } from '~redux/modules/user'
+import {
+  HighlightsObj,
+  NotesObj,
+  LinksObj,
+  Note,
+  Highlight,
+  Link,
+  WordAnnotationsObj,
+} from '~redux/modules/user'
 import { Tag, CurrentTheme } from '~common/types'
+import { VersionCode } from '~state/tabs'
 
 // Base selectors
 const selectHighlights = (state: RootState) => state.user.bible.highlights
@@ -14,6 +23,7 @@ const selectStrongsGrec = (state: RootState) => state.user.bible.strongsGrec
 const selectStrongsHebreu = (state: RootState) => state.user.bible.strongsHebreu
 const selectSettings = (state: RootState) => state.user.bible.settings
 const selectColors = (state: RootState) => state.user.bible.settings.colors
+const selectWordAnnotations = (state: RootState) => state.user.bible.wordAnnotations
 
 // Selector factory for highlights by chapter
 // Usage: const selectHighlightsByChapter = useMemo(() => makeHighlightsByChapterSelector(), [])
@@ -64,6 +74,36 @@ export const makeLinksByChapterSelector = () =>
       for (const key in links) {
         if (key.startsWith(prefix)) {
           result[key] = links[key]
+        }
+      }
+      return result
+    }
+  )
+
+// Selector factory for word annotations by chapter and version
+// Note: Word annotations are filtered by version since they're version-specific
+export const makeWordAnnotationsByChapterSelector = () =>
+  createSelector(
+    [
+      selectWordAnnotations,
+      (_: RootState, bookNumber: number, chapter: number, version: string) => ({
+        prefix: `${bookNumber}-${chapter}-`,
+        version,
+      }),
+    ],
+    (wordAnnotations, { prefix, version }): WordAnnotationsObj => {
+      const result: WordAnnotationsObj = {}
+      // Filter annotations by version and chapter
+      for (const annotationId in wordAnnotations) {
+        const annotation = wordAnnotations[annotationId]
+        // Only include annotations for the current version
+        if (annotation.version !== version) continue
+
+        // Check if any range belongs to this chapter
+        const hasRangeInChapter = annotation.ranges.some(range => range.verseKey.startsWith(prefix))
+
+        if (hasRangeInChapter) {
+          result[annotationId] = annotation
         }
       }
       return result
@@ -265,4 +305,48 @@ export const makeNaveTagsSelector = () =>
   createSelector(
     [selectNaves, (_: RootState, nameLower: string) => nameLower],
     (naves, nameLower) => (naves as Record<string, { tags?: Record<string, any> }>)[nameLower]?.tags
+  )
+
+// Type for cross-version annotations per verse
+export type CrossVersionAnnotation = {
+  version: VersionCode
+  count: number
+}
+
+// Selector factory for finding word annotations in OTHER versions
+// Used to show indicators when viewing one version but annotations exist in another
+export const makeWordAnnotationsInOtherVersionsSelector = () =>
+  createSelector(
+    [
+      selectWordAnnotations,
+      (_: RootState, bookNumber: number, chapter: number, currentVersion: string) => ({
+        prefix: `${bookNumber}-${chapter}-`,
+        currentVersion,
+      }),
+    ],
+    (wordAnnotations, { prefix, currentVersion }): Record<string, CrossVersionAnnotation[]> => {
+      const result: Record<string, CrossVersionAnnotation[]> = {}
+
+      for (const annotationId in wordAnnotations) {
+        const annotation = wordAnnotations[annotationId]
+        // Exclude annotations from the current version
+        if (annotation.version === currentVersion) continue
+
+        for (const range of annotation.ranges) {
+          if (range.verseKey.startsWith(prefix)) {
+            if (!result[range.verseKey]) {
+              result[range.verseKey] = []
+            }
+            let versionEntry = result[range.verseKey].find(v => v.version === annotation.version)
+            if (!versionEntry) {
+              versionEntry = { version: annotation.version, count: 0 }
+              result[range.verseKey].push(versionEntry!)
+            }
+            versionEntry!.count++
+          }
+        }
+      }
+
+      return result
+    }
   )

@@ -99,7 +99,7 @@ export default function NoteEditorDOMComponent({
   return (
     <div
       ref={containerRef}
-      style={{ fontFamily: 'system-ui', color: textColor, overflow: 'hidden' }}
+      style={{ fontFamily: 'system-ui', color: textColor, overflow: 'hidden', width: '100%' }}
     >
       {/* Title */}
       <div
@@ -135,6 +135,7 @@ export default function NoteEditorDOMComponent({
           fontSize: 14,
           outline: 'none',
           whiteSpace: 'pre-wrap',
+          minHeight: 200,
         }}
       />
       <style>{`

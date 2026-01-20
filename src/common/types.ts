@@ -174,6 +174,9 @@ export interface Tag {
   naves?: {
     [id: string]: true
   }
+  wordAnnotations?: {
+    [id: string]: true
+  }
 }
 
 export interface TagsObj {

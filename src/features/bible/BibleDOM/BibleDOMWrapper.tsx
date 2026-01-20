@@ -22,13 +22,16 @@ import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import { HelpTip } from '~features/tips/HelpTip'
 import { RootState } from '~redux/modules/reducer'
 import type { Bookmark } from '~common/types'
-import { HighlightsObj, NotesObj, LinksObj } from '~redux/modules/user'
+import { HighlightsObj, NotesObj, LinksObj, WordAnnotationsObj } from '~redux/modules/user'
 import { useBookAndVersionSelector } from '../BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 import { BibleError } from '~helpers/bibleErrors'
 import { BibleDOMTranslations } from './TranslationsContext'
 import {
   ADD_PARALLEL_VERSION,
+  ANNOTATION_SELECTED,
+  CREATE_ANNOTATION,
   ENTER_READONLY_MODE,
+  ERASE_SELECTION,
   EXIT_READONLY_MODE,
   NAVIGATE_TO_BIBLE_LINK,
   NAVIGATE_TO_BIBLE_NOTE,
@@ -43,12 +46,16 @@ import {
   OPEN_BOOKMARK_MODAL,
   OPEN_HIGHLIGHT_TAGS,
   REMOVE_PARALLEL_VERSION,
+  SELECTION_CHANGED,
   SWIPE_DOWN,
   SWIPE_LEFT,
   SWIPE_RIGHT,
   SWIPE_UP,
   TOGGLE_SELECTED_VERSE,
+  OPEN_CROSS_VERSION_MODAL,
 } from './dispatch'
+import type { CrossVersionAnnotation } from '~redux/selectors/bible'
+import type { AnnotationType, WordPosition, SelectionRange } from '../hooks/useAnnotationMode'
 
 export type ParallelVerse = {
   id: VersionCode
@@ -94,6 +101,7 @@ export type WebViewProps = {
   notedVerses: NotesObj
   bookmarkedVerses: Record<number, Bookmark>
   linkedVerses: LinksObj
+  wordAnnotations: WordAnnotationsObj
   settings: RootState['user']['bible']['settings']
   verseToScroll: number | undefined
   pericopeChapter: PericopeChapter
@@ -112,6 +120,25 @@ export type WebViewProps = {
   onOpenBookmarkModal?: (bookmark: Bookmark) => void
   exitReadOnlyMode?: () => void
   enterReadOnlyMode?: () => void
+  // Annotation mode props
+  annotationMode?: boolean
+  clearSelectionTrigger?: number
+  applyAnnotationTrigger?: { count: number; color: string; type: AnnotationType }
+  eraseSelectionTrigger?: number
+  // Annotation mode handlers
+  onSelectionChanged?: (hasSelection: boolean, selection: SelectionRange | null) => void
+  onCreateAnnotation?: (payload: {
+    ranges: { verseKey: string; startWordIndex: number; endWordIndex: number; text: string }[]
+    color: string
+    type: AnnotationType
+  }) => void
+  onEraseSelection?: (payload: { start: WordPosition; end: WordPosition }) => void
+  onAnnotationSelected?: (annotationId: string | null) => void
+  clearAnnotationSelectionTrigger?: number
+  selectedAnnotationId?: string | null
+  // Cross-version annotations
+  wordAnnotationsInOtherVersions?: Record<string, CrossVersionAnnotation[]>
+  onOpenCrossVersionModal?: (verseKey: string, versions: CrossVersionAnnotation[]) => void
 }
 
 export type NotedVerse = {
@@ -150,6 +177,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     notedVerses,
     bookmarkedVerses,
     linkedVerses,
+    wordAnnotations,
     settings,
     verseToScroll,
     isReadOnly,
@@ -162,6 +190,18 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     isLoading,
     onMountTimeout,
     isBibleViewReloadingAtom,
+    annotationMode,
+    clearSelectionTrigger,
+    applyAnnotationTrigger,
+    eraseSelectionTrigger,
+    onSelectionChanged,
+    onCreateAnnotation,
+    onEraseSelection,
+    onAnnotationSelected,
+    clearAnnotationSelectionTrigger,
+    selectedAnnotationId,
+    wordAnnotationsInOtherVersions,
+    onOpenCrossVersionModal,
   } = props
   const { openVersionSelector } = useBookAndVersionSelector()
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
@@ -339,8 +379,8 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
       case SWIPE_LEFT: {
-        // Disable chapter navigation in readonly mode
-        if (isReadOnly) break
+        // Disable chapter navigation in readonly or annotation mode
+        if (isReadOnly || annotationMode) break
 
         const { goToNextChapter, book, chapter } = props
         const hasNextChapter = !(book.Numero === 66 && chapter === 22)
@@ -351,8 +391,8 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
       case SWIPE_RIGHT: {
-        // Disable chapter navigation in readonly mode
-        if (isReadOnly) break
+        // Disable chapter navigation in readonly or annotation mode
+        if (isReadOnly || annotationMode) break
 
         const { goToPrevChapter, book, chapter } = props
         const hasPreviousChapter = !(book.Numero === 1 && chapter === 1)
@@ -413,6 +453,39 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
 
+      case SELECTION_CHANGED: {
+        // DOM notifies us when selection changes
+        const { hasSelection, selection } = action.payload
+        onSelectionChanged?.(hasSelection, selection)
+        break
+      }
+
+      case CREATE_ANNOTATION: {
+        // DOM requests to create an annotation with the current selection
+        onCreateAnnotation?.(action.payload)
+        break
+      }
+
+      case ERASE_SELECTION: {
+        // DOM requests to erase annotations in the current selection
+        onEraseSelection?.(action.payload)
+        break
+      }
+
+      case ANNOTATION_SELECTED: {
+        // DOM notifies us when an annotation is selected/deselected
+        const { annotationId } = action.payload
+        onAnnotationSelected?.(annotationId)
+        break
+      }
+
+      case OPEN_CROSS_VERSION_MODAL: {
+        // DOM requests to open the cross-version annotations modal
+        const { verseKey, versions } = action.payload
+        onOpenCrossVersionModal?.(verseKey, versions)
+        break
+      }
+
       default: {
         break
       }
@@ -455,6 +528,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         notedVerses={notedVerses}
         bookmarkedVerses={bookmarkedVerses}
         linkedVerses={linkedVerses}
+        wordAnnotations={wordAnnotations}
         settings={settings}
         verseToScroll={verseToScroll}
         isReadOnly={isReadOnly}
@@ -466,6 +540,14 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         comments={comments}
         dispatch={dispatch}
         translations={translations}
+        annotationMode={annotationMode}
+        clearSelectionTrigger={clearSelectionTrigger}
+        applyAnnotationTrigger={applyAnnotationTrigger}
+        eraseSelectionTrigger={eraseSelectionTrigger}
+        clearAnnotationSelectionTrigger={clearAnnotationSelectionTrigger}
+        selectedAnnotationId={selectedAnnotationId}
+        safeAreaTop={Platform.OS === 'ios' ? insets.top : 0}
+        wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
       />
       {Platform.OS === 'android' && Platform.Version < 30 && (
         <HelpTip

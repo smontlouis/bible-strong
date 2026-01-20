@@ -1,19 +1,21 @@
 import { useEffect, useMemo, useRef } from 'react'
+import { TouchableOpacity } from 'react-native'
 
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useRouter } from 'expo-router'
 import { useAtomValue } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { useDerivedValue } from 'react-native-reanimated'
+import { FadeIn, FadeOut, useDerivedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'sonner-native'
-import { isFullScreenBibleValue } from 'src/state/app'
+import { isFullScreenBibleValue, isFullScreenBibleAtom } from 'src/state/app'
 import Back from '~common/Back'
 import ParallelIcon from '~common/ParallelIcon'
 import PopOverMenu from '~common/PopOverMenu'
 import Box, {
+  AnimatedHStack,
   HStack,
   MotiBox,
   MotiHStack,
@@ -44,6 +46,9 @@ interface BibleHeaderProps {
   hasBackButton?: boolean
   onBibleParamsClick: () => void
   commentsDisplay?: boolean
+  onEnterAnnotationMode?: () => void
+  onExitAnnotationMode?: () => void
+  annotationModeEnabled?: boolean
 }
 
 const Header = ({
@@ -51,6 +56,9 @@ const Header = ({
   bibleAtom,
   onBibleParamsClick,
   commentsDisplay,
+  onEnterAnnotationMode,
+  onExitAnnotationMode,
+  annotationModeEnabled,
 }: BibleHeaderProps) => {
   const router = useRouter()
   const { t } = useTranslation()
@@ -61,6 +69,7 @@ const Header = ({
   const actions = useBibleTabActions(bibleAtom)
   const insets = useSafeAreaInsets()
   const { openBookSelector, openVersionSelector } = useBookAndVersionSelector()
+  const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
 
   // Bookmark ref
   const bookmarkModalRef = useRef<BottomSheetModal>(null)
@@ -94,6 +103,7 @@ const Header = ({
   const prevBook = usePrevious(bookName)
   const prevChapter = usePrevious(chapter)
   const prevFocusVerses = usePrevious(JSON.stringify(bible.data.focusVerses))
+  const prevSelectedVersion = usePrevious(version)
 
   useEffect(() => {
     // Only update title if book or chapter changed (not on first mount)
@@ -102,7 +112,8 @@ const Header = ({
       prevBook !== undefined &&
       (prevBook !== bookName ||
         prevChapter !== chapter ||
-        prevFocusVerses !== JSON.stringify(bible.data.focusVerses))
+        prevFocusVerses !== JSON.stringify(bible.data.focusVerses) ||
+        prevSelectedVersion !== version)
     ) {
       const { selectedBook, selectedChapter, selectedVersion, focusVerses } = bible.data
       const ref = verseToReference({
@@ -112,16 +123,19 @@ const Header = ({
       })
       actions.setTitle(`${ref} - ${selectedVersion}`)
     }
-  }, [actions, bookName, chapter, prevBook, prevChapter, prevFocusVerses, bible.data])
+  }, [
+    actions,
+    bookName,
+    chapter,
+    prevBook,
+    prevChapter,
+    prevFocusVerses,
+    prevSelectedVersion,
+    version,
+    bible.data,
+  ])
 
   const { addParallelVersion, removeAllParallelVersions } = actions
-
-  // useDerivedValue hooks must be at the top level
-  const headerHeight = useDerivedValue(() => {
-    return {
-      height: isFullScreenBibleValue.get() ? 20 + insets.top : HEADER_HEIGHT + insets.top,
-    }
-  })
 
   const backButtonTranslateY = useDerivedValue(() => {
     return {
@@ -177,23 +191,118 @@ const Header = ({
     dispatch(setSettingsCommentaires(true))
   }
 
+  if (annotationModeEnabled) {
+    return (
+      <AnimatedHStack
+        width="100%"
+        bg="primary"
+        px={15}
+        paddingTop={insets.top}
+        height={HEADER_HEIGHT + insets.top}
+        borderBottomWidth={1}
+        borderColor="border"
+        position="absolute"
+        top={0}
+        left={0}
+        overflow="visible"
+        entering={FadeIn}
+        exiting={FadeOut}
+        key="annotation-mode-header"
+      >
+        <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
+          {hasBackButton && (
+            <Back
+              onGoBack={() => {
+                isFullScreenBibleValue.set(false)
+                console.log('[Bible] onGoBack')
+              }}
+            >
+              <Box alignItems="center" justifyContent="center" width={50} height={32}>
+                <FeatherIcon name="arrow-left" size={20} />
+              </Box>
+            </Back>
+          )}
+          <>
+            <Box flex={1} center>
+              <Text fontWeight="bold" color="reverse" fontSize={14}>
+                {`${verseToReference({ bookNum: bookNumber, chapterNum: chapter, verses: displayVerses })} - ${version}`}
+              </Text>
+            </Box>
+
+            <TouchableBox onPress={onExitAnnotationMode} position="absolute" right={0} bottom={10}>
+              <Box bg="reverse" borderRadius={8} height={28} px={12} center>
+                <Text color="primary" bold fontSize={12}>
+                  {t('Terminer')}
+                </Text>
+              </Box>
+            </TouchableBox>
+          </>
+        </HStack>
+      </AnimatedHStack>
+    )
+  }
+
+  if (hasSelectedVerses) {
+    return (
+      <AnimatedHStack
+        width="100%"
+        bg="reverse"
+        px={15}
+        paddingTop={insets.top}
+        height={HEADER_HEIGHT + insets.top}
+        borderBottomWidth={1}
+        borderColor="border"
+        position="absolute"
+        top={0}
+        left={0}
+        overflow="visible"
+        entering={FadeIn}
+        exiting={FadeOut}
+        key="selected-verses-header"
+      >
+        <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
+          {hasBackButton && (
+            <Back
+              onGoBack={() => {
+                isFullScreenBibleValue.set(false)
+                console.log('[Bible] onGoBack')
+              }}
+            >
+              <Box alignItems="center" justifyContent="center" width={50} height={32}>
+                <FeatherIcon name="arrow-left" size={20} />
+              </Box>
+            </Back>
+          )}
+          <Box flex={1} center>
+            <Text fontWeight="bold" fontSize={14}>
+              {selectedVersesReference}
+            </Text>
+          </Box>
+        </HStack>
+      </AnimatedHStack>
+    )
+  }
+
   return (
-    <MotiHStack
+    <AnimatedHStack
       width="100%"
       bg="reverse"
       px={15}
       paddingTop={insets.top}
-      height={HEADER_HEIGHT + insets.top}
       borderBottomWidth={1}
       borderColor="border"
       position="absolute"
       top={0}
       left={0}
-      // zIndex={1}
-      // @ts-ignore
-      animate={headerHeight}
       overflow="visible"
-      {...motiTransition}
+      style={{
+        height: isFullScreenBible ? 20 + insets.top : HEADER_HEIGHT + insets.top,
+        transitionProperty: 'height',
+        transitionDuration: 300,
+      }}
+      key="default-header"
+      entering={FadeIn}
+      exiting={FadeOut}
     >
       <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
         {hasBackButton && (
@@ -215,16 +324,7 @@ const Header = ({
             </MotiBox>
           </Back>
         )}
-        {hasSelectedVerses ? (
-          <>
-            <Box flex={1} center>
-              <Text fontWeight="bold" fontSize={14}>
-                {selectedVersesReference}
-              </Text>
-            </Box>
-            <Box width={50} />
-          </>
-        ) : isReadOnly ? (
+        {isReadOnly ? (
           <>
             <Box flex={1} center>
               <Text fontWeight="bold" fontSize={14}>
@@ -392,6 +492,16 @@ const Header = ({
                           </Text>
                         </Box>
                       </MenuOption>
+                      {onEnterAnnotationMode && (
+                        <MenuOption onSelect={onEnterAnnotationMode}>
+                          <Box row alignItems="center" bg="primary" borderRadius={8} px={12} py={8}>
+                            <FeatherIcon name="edit-2" size={18} color="reverse" />
+                            <Text marginLeft={10} color="reverse">
+                              {t('Annoter')}
+                            </Text>
+                          </Box>
+                        </MenuOption>
+                      )}
                     </>
                   }
                 />
@@ -414,7 +524,7 @@ const Header = ({
           </TouchableBox>
         </MotiBox>
       )}
-    </MotiHStack>
+    </AnimatedHStack>
   )
 }
 

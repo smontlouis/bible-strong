@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import Clipboard from '@react-native-clipboard/clipboard'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback } from 'react'
 import { Share } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 
@@ -57,6 +57,7 @@ type Props = {
   onAddToStudy: () => void
   onAddBookmark: () => void
   onPinVerses: () => void
+  onEnterAnnotationMode?: () => void
 }
 
 const VersesModal = ({
@@ -76,11 +77,12 @@ const VersesModal = ({
   onAddToStudy,
   onAddBookmark,
   onPinVerses,
+  onEnterAnnotationMode,
 }: Props) => {
   const router = useRouter()
-  const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
   const { t } = useTranslation()
   const openedFromTab = useAtomValue(openedFromTabAtom)
+  const selectedVersesTitle = verseToReference(selectedVerses)
 
   const close = useCallback(() => {
     ref?.current?.close()
@@ -88,11 +90,6 @@ const VersesModal = ({
 
   const { hasVerseNumbers, hasInlineVerses, hasQuotes, hasAppName } = useShareOptions()
   const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
-
-  useEffect(() => {
-    const title = verseToReference(selectedVerses)
-    setSelectedVersesTitle(title)
-  }, [selectedVerses, version])
 
   const shareVerse = async () => {
     const { all: message } = await getVersesContent({
@@ -292,6 +289,13 @@ const VersesModal = ({
                 }}
               >
                 <TouchableChip name="layers" onPress={compareVerses} label={t('Comparer')} />
+                {onEnterAnnotationMode && (
+                  <TouchableChip
+                    name="edit-3"
+                    onPress={onEnterAnnotationMode}
+                    label={t('Annoter')}
+                  />
+                )}
                 <TouchableChip name="tag" onPress={addTag} label={t('Tag')} />
                 <TouchableChip name="file-plus" onPress={onCreateNoteClick} label={t('Note')} />
                 <TouchableChip
