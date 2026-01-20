@@ -13,6 +13,16 @@ const expandWidth = keyframes`
   }
 `
 
+// Animation de dessin progressif pour le cercle (style crayon)
+const drawCircle = keyframes`
+  from {
+    --draw-angle: 0deg;
+  }
+  to {
+    --draw-angle: 360deg;
+  }
+`
+
 export type AnnotationType = 'background' | 'underline' | 'circle'
 
 // Generate a consistent pseudo-random delay (0-0.5s) based on a string id
@@ -188,6 +198,12 @@ export const HighlightRectDiv = styled('div')<{
             boxSizing: 'border-box',
             // Soft glow effect
             boxShadow: `0 0 8px ${glowColor}, inset 0 0 4px ${glowColor}`,
+            // Progressive drawing animation with conic-gradient mask
+            maskImage:
+              'conic-gradient(from -90deg, black var(--draw-angle), transparent var(--draw-angle))',
+            WebkitMaskImage:
+              'conic-gradient(from -90deg, black var(--draw-angle), transparent var(--draw-angle))',
+            animation: `${drawCircle} 0.3s ease-in-out ${$animationDelay}s forwards`,
           },
           '&::before': {
             border: `3px solid ${softBorder}`,
@@ -196,6 +212,8 @@ export const HighlightRectDiv = styled('div')<{
           '&::after': {
             border: `1px solid ${thinBorder}`,
             transform: `rotate(${rotation}deg)`,
+            // Start after first circle finishes (1s animation duration)
+            animationDelay: `${$animationDelay + 0.3}s`,
           },
         }
       })()),

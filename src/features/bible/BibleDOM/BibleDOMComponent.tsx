@@ -1,6 +1,7 @@
 'use dom'
 
 import { setup, styled } from 'goober'
+import { createGlobalStyles } from 'goober/global'
 import React, { useEffect, useState, useRef } from 'react'
 import { TagsObj, Verse as TVerse } from '~common/types'
 import { HighlightsObj, NotesObj, LinksObj } from '~redux/modules/user'
@@ -70,6 +71,15 @@ setup(React.createElement, undefined, undefined, (props: { [key: string]: any })
     }
   }
 })
+
+// Global CSS for @property (required for animating CSS custom properties)
+const GlobalStyles = createGlobalStyles`
+  @property --draw-angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+  }
+` as React.FC
 
 type Props = Pick<
   WebViewProps,
@@ -699,6 +709,7 @@ const VersesRenderer = ({
 
   return (
     <TranslationsProvider translations={translations}>
+      <GlobalStyles />
       <DispatchProvider dispatch={dispatch}>
         <Container
           ref={containerRef}
