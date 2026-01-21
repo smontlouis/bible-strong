@@ -36,14 +36,14 @@ type EditingColor =
 const MIN_ITEM_WIDTH = 40 // Minimum width (circle size + margins)
 
 type Props = {
-  isSelectedVerseHighlighted: boolean
+  selectedVerseHighlightColor: string | null
   addHighlight: (color: string) => void
   removeHighlight: () => void
   onClose: () => void
 }
 
 const ColorCirclesBar = ({
-  isSelectedVerseHighlighted,
+  selectedVerseHighlightColor,
   addHighlight,
   removeHighlight,
   onClose,
@@ -110,9 +110,17 @@ const ColorCirclesBar = ({
     let count = 5 // 5 default colors
     count += customHighlightColors.length // custom colors
     if (customHighlightColors.length < 5) count += 1 // plus button
-    if (isSelectedVerseHighlighted) count += 1 // x button
     return count
-  }, [customHighlightColors.length, isSelectedVerseHighlighted])
+  }, [customHighlightColors.length])
+
+  // Handle color press with toggle behavior
+  const handleColorPress = (colorKey: string) => {
+    if (selectedVerseHighlightColor === colorKey) {
+      removeHighlight() // Toggle off
+    } else {
+      addHighlight(colorKey) // Apply new color
+    }
+  }
 
   const colorItemWidth = Math.max(screenWidth / colorItemCount, MIN_ITEM_WIDTH)
 
@@ -128,21 +136,17 @@ const ColorCirclesBar = ({
           alignItems: 'center',
         }}
       >
-        {isSelectedVerseHighlighted && (
-          <Box width={colorItemWidth} height={60} center>
-            <TouchableIcon name="x-circle" onPress={removeHighlight} noFlex />
-          </Box>
-        )}
-        {(['color1', 'color2', 'color3', 'color4', 'color5'] as const).map((colorKey, index) => {
+        {(['color1', 'color2', 'color3', 'color4', 'color5'] as const).map(colorKey => {
           const currentHex = colors[colorKey]
           const currentType = defaultColorTypes[colorKey] || 'background'
           const currentName = defaultColorNames[colorKey]
+          const isSelected = selectedVerseHighlightColor === colorKey
           return (
             <Box key={colorKey} width={colorItemWidth} height={60} center>
               <HighlightTypeIndicator
                 color={currentHex}
                 type={currentType}
-                onPress={() => addHighlight(colorKey)}
+                onPress={() => handleColorPress(colorKey)}
                 onLongPress={() =>
                   openEditModal({
                     type: 'default',
@@ -153,21 +157,26 @@ const ColorCirclesBar = ({
                   })
                 }
                 size={20}
+                isSelected={isSelected}
               />
             </Box>
           )
         })}
-        {customHighlightColors.map((customColor: CustomColor) => (
-          <Box key={customColor.id} width={colorItemWidth} height={60} center>
-            <HighlightTypeIndicator
-              color={customColor.hex}
-              type={customColor.type || 'background'}
-              onPress={() => addHighlight(customColor.id)}
-              onLongPress={() => openEditModal({ type: 'custom', color: customColor })}
-              size={20}
-            />
-          </Box>
-        ))}
+        {customHighlightColors.map((customColor: CustomColor) => {
+          const isSelected = selectedVerseHighlightColor === customColor.id
+          return (
+            <Box key={customColor.id} width={colorItemWidth} height={60} center>
+              <HighlightTypeIndicator
+                color={customColor.hex}
+                type={customColor.type || 'background'}
+                onPress={() => handleColorPress(customColor.id)}
+                onLongPress={() => openEditModal({ type: 'custom', color: customColor })}
+                size={20}
+                isSelected={isSelected}
+              />
+            </Box>
+          )
+        })}
 
         <Box width={colorItemWidth} height={60} center>
           <TouchableIcon

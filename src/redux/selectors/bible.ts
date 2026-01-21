@@ -122,6 +122,37 @@ export const makeIsSelectedVerseHighlightedSelector = () =>
     }
   )
 
+// Selector for getting the highlight color of selected verses
+// Returns the color key if all selected verses have the same highlight color, null otherwise
+export const makeSelectedVerseHighlightColorSelector = () =>
+  createSelector(
+    [
+      selectHighlights,
+      (_: RootState, selectedVerses: { [key: string]: boolean }) => selectedVerses,
+    ],
+    (highlights, selectedVerses): string | null => {
+      const verseKeys = Object.keys(selectedVerses)
+      if (verseKeys.length === 0) return null
+
+      // Get the colors of all highlighted verses
+      const colors = verseKeys
+        .map(verse => highlights[verse]?.color)
+        .filter((color): color is string => Boolean(color))
+
+      // If no verses are highlighted, return null
+      if (colors.length === 0) return null
+
+      // If not all selected verses are highlighted, return null
+      if (colors.length !== verseKeys.length) return null
+
+      // Check if all colors are the same
+      const firstColor = colors[0]
+      const allSameColor = colors.every(color => color === firstColor)
+
+      return allSameColor ? firstColor : null
+    }
+  )
+
 // Selector factory for colors by theme
 export const makeColorsByThemeSelector = () =>
   createSelector(

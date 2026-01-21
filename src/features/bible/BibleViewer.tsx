@@ -34,7 +34,7 @@ import { RootState } from '~redux/modules/reducer'
 import { addHighlight, removeHighlight } from '~redux/modules/user'
 import {
   makeHighlightsByChapterSelector,
-  makeIsSelectedVerseHighlightedSelector,
+  makeSelectedVerseHighlightColorSelector,
   makeLinksByChapterSelector,
   makeNotesByChapterSelector,
   makeWordAnnotationsByChapterSelector,
@@ -242,8 +242,8 @@ const BibleViewer = ({
   const selectNotesByChapter = useMemo(() => makeNotesByChapterSelector(), [])
   const selectLinksByChapter = useMemo(() => makeLinksByChapterSelector(), [])
   const selectWordAnnotationsByChapter = useMemo(() => makeWordAnnotationsByChapterSelector(), [])
-  const selectIsSelectedVerseHighlighted = useMemo(
-    () => makeIsSelectedVerseHighlightedSelector(),
+  const selectSelectedVerseHighlightColor = useMemo(
+    () => makeSelectedVerseHighlightColorSelector(),
     []
   )
   const selectBookmarksInChapter = useMemo(() => makeSelectBookmarksInChapter(), [])
@@ -269,8 +269,8 @@ const BibleViewer = ({
     selectWordAnnotationsByChapter(state, displayedBook, displayedChapter, displayedVersion)
   )
 
-  const isSelectedVerseHighlighted = useSelector((state: RootState) =>
-    selectIsSelectedVerseHighlighted(state, selectedVerses)
+  const selectedVerseHighlightColor = useSelector((state: RootState) =>
+    selectSelectedVerseHighlightColor(state, selectedVerses)
   )
 
   const bookmarkedVerses = useSelector((state: RootState) =>
@@ -723,7 +723,7 @@ const BibleViewer = ({
       <SelectedVersesModal
         ref={versesModal.getRef()}
         isSelectionMode={isSelectionMode}
-        isSelectedVerseHighlighted={isSelectedVerseHighlighted}
+        selectedVerseHighlightColor={selectedVerseHighlightColor}
         onChangeResourceType={val => {
           onChangeResourceType(val)
           resourceModal.open()
@@ -735,7 +735,6 @@ const BibleViewer = ({
         removeHighlight={() => {
           // @ts-ignore
           dispatch(removeHighlight({ selectedVerses }))
-          actions.clearSelectedVerses()
         }}
         clearSelectedVerses={actions.clearSelectedVerses}
         selectedVerses={selectedVerses}

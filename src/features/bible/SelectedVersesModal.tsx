@@ -43,7 +43,7 @@ const HalfContainer = styled.View<{ border?: boolean }>(({ border, theme }) => (
 type Props = {
   ref?: React.RefObject<BottomSheet | null>
   isSelectionMode: StudyNavigateBibleType | undefined
-  isSelectedVerseHighlighted: boolean
+  selectedVerseHighlightColor: string | null
   onChangeResourceType: (type: BibleResource) => void
   onCreateNoteClick: () => void
   onCreateLinkClick: () => void
@@ -63,7 +63,7 @@ type Props = {
 const VersesModal = ({
   ref,
   isSelectionMode,
-  isSelectedVerseHighlighted,
+  selectedVerseHighlightColor,
   onChangeResourceType,
   onCreateNoteClick,
   onCreateLinkClick,
@@ -208,9 +208,9 @@ const VersesModal = ({
           <></>
         ) : (
           <>
-            <HalfContainer border>
+            <HalfContainer border style={{ alignItems: 'center' }}>
               <ColorCirclesBar
-                isSelectedVerseHighlighted={isSelectedVerseHighlighted}
+                selectedVerseHighlightColor={selectedVerseHighlightColor}
                 addHighlight={addHighlight}
                 removeHighlight={removeHighlight}
                 onClose={close}
@@ -289,13 +289,6 @@ const VersesModal = ({
                 }}
               >
                 <TouchableChip name="layers" onPress={compareVerses} label={t('Comparer')} />
-                {onEnterAnnotationMode && (
-                  <TouchableChip
-                    name="edit-3"
-                    onPress={onEnterAnnotationMode}
-                    label={t('Annoter')}
-                  />
-                )}
                 <TouchableChip name="tag" onPress={addTag} label={t('Tag')} />
                 <TouchableChip name="file-plus" onPress={onCreateNoteClick} label={t('Note')} />
                 <TouchableChip
