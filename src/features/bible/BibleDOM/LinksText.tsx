@@ -46,6 +46,7 @@ interface Props {
   settings: RootState['user']['bible']['settings']
   onClick: (x: string) => void
   isParallel?: boolean
+  isDisabled?: boolean
 }
 
 const renderLinkTypeIcon = (linkType: string, size: number) => {
@@ -57,7 +58,7 @@ const renderLinkTypeIcon = (linkType: string, size: number) => {
 const calculateIconSize = (baseSize: number, scale: number): number =>
   baseSize + scale * 0.1 * baseSize
 
-const LinksText = ({ linksText, settings, onClick, isParallel }: Props) => {
+const LinksText = ({ linksText, settings, onClick, isParallel, isDisabled }: Props) => {
   const iconSize = calculateIconSize(isParallel ? 12 : 14, settings.fontSizeScale)
 
   return (
@@ -70,6 +71,7 @@ const LinksText = ({ linksText, settings, onClick, isParallel }: Props) => {
             isParallel={isParallel}
             onClick={() => onClick(link.key)}
             isButton
+            isDisabled={isDisabled}
           >
             <InlineItemIconWrapper settings={settings}>
               <LinkTypeIndicator settings={settings}>

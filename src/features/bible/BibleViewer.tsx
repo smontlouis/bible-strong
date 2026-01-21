@@ -187,24 +187,30 @@ const BibleViewer = ({
 
   // Handler for entering annotation mode (from SelectedVersesModal)
   const handleEnterAnnotationMode = useCallback(() => {
-    // Get the first selected verse to scroll to
-    const firstVerseKey = Object.keys(selectedVerses)[0]
     // Clear selected verses and close the modal
     actions.clearSelectedVerses()
     versesModal.close()
-    // Enter annotation mode with version
-    annotationMode.enterMode(version, firstVerseKey)
+    // Enter annotation mode
+    annotationMode.enterMode(version)
     // Open the annotation toolbar
     annotationToolbar.open()
-  }, [selectedVerses, actions, versesModal, annotationMode, annotationToolbar, version])
+  }, [actions, versesModal, annotationMode, annotationToolbar, version])
 
-  // Handler for entering annotation mode (from header - no scroll)
+  // Handler for entering annotation mode (from header)
   const handleEnterAnnotationModeFromHeader = useCallback(() => {
-    // Enter annotation mode without scrolling
+    // Enter annotation mode
     annotationMode.enterMode(version)
     // Open the annotation toolbar
     annotationToolbar.open()
   }, [annotationMode, annotationToolbar, version])
+
+  // Handler for entering annotation mode (from double-tap on verse)
+  const handleEnterAnnotationModeFromDoubleTap = () => {
+    // Enter annotation mode
+    annotationMode.enterMode(version)
+    // Open the annotation toolbar
+    annotationToolbar.open()
+  }
 
   // Handler for exiting annotation mode
   const handleExitAnnotationMode = useCallback(() => {
@@ -605,7 +611,7 @@ const BibleViewer = ({
     }
   })
 
-  console.log('[Bible] BibleViewer', version, book.Numero, chapter, verse)
+  // console.log('[Bible] BibleViewer', version, book.Numero, chapter, verse)
 
   // Wait for onboarding to complete before rendering Bible content
   // This prevents FileNotFoundException when Bible files don't exist yet
@@ -691,6 +697,8 @@ const BibleViewer = ({
           // Cross-version annotations
           wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
           onOpenCrossVersionModal={handleOpenCrossVersionModal}
+          // Double-tap to enter annotation mode
+          onEnterAnnotationMode={handleEnterAnnotationModeFromDoubleTap}
         />
       )}
       {!(withNavigation || isReadOnly) && (

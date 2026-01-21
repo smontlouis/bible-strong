@@ -19,6 +19,7 @@ import ChevronDownIcon from './ChevronDownIcon'
 import Comment from './Comment'
 import {
   ADD_PARALLEL_VERSION,
+  ENTER_ANNOTATION_MODE,
   ENTER_READONLY_MODE,
   EXIT_READONLY_MODE,
   NAVIGATE_TO_PERICOPE,
@@ -28,25 +29,32 @@ import {
   SWIPE_RIGHT,
   SWIPE_DOWN,
   SWIPE_UP,
+  NAVIGATE_TO_BIBLE_VERSE_DETAIL,
+  TOGGLE_SELECTED_VERSE,
 } from './dispatch'
 import { DispatchProvider } from './DispatchProvider'
 import { TranslationsProvider, BibleDOMTranslations } from './TranslationsContext'
-import ExternalIcon from './ExternalIcon'
 import MinusIcon from './MinusIcon'
 import PlusIcon from './PlusIcon'
 import './polyfills'
 import { scaleFontSize } from './scaleFontSize'
-import './swiped-events'
-import Verse from './Verse'
 import { useFonts } from 'expo-font'
 import { HEADER_HEIGHT, HEADER_HEIGHT_MIN } from '~features/app-switcher/utils/constants'
-import { AnnotationModeRenderer, AnnotationType } from './AnnotationMode'
+// Annotation mode imports
+import { AnnotationType } from './AnnotationMode'
 import {
   HighlightLayer,
   HighlightRectDiv,
   getAnimationDelay,
 } from './AnnotationMode/HighlightComponents'
 import { useAnnotationHighlights } from './AnnotationMode/useAnnotationHighlights'
+import { SelectionHandles } from './AnnotationMode/SelectionHandles'
+import { useAnnotationModeController } from './AnnotationMode/useAnnotationModeController'
+import { SelectionRange } from './AnnotationMode/selectionUtils'
+import { tokenizeVerseText, WordToken, getWordIndexFromCharOffset } from '~helpers/wordTokenizer'
+import { getCaretInfoFromPoint } from './AnnotationMode/domUtils'
+// Unified verse renderer
+import { UnifiedVersesRenderer } from './UnifiedVersesRenderer'
 
 declare global {
   interface Window {
@@ -119,20 +127,6 @@ type Props = Pick<
   safeAreaTop?: number
 }
 
-const extractParallelVerse = (
-  i: number,
-  parallelVerses: ParallelVerse[],
-  verse: TVerse,
-  version: string
-) => [
-  { version, verse, error: undefined },
-  ...parallelVerses.map(p => ({
-    version: p.id,
-    verse: p.verses[i],
-    error: p.error,
-  })),
-]
-
 const extractParallelVersionTitles = (parallelVerses: ParallelVerse[], currentVersion: string) => {
   if (!parallelVerses?.length) return []
 
@@ -174,55 +168,6 @@ const IntMode = styled('div')<RootStyles>(({ settings: { theme, colors } }) => (
   color: colors[theme].default,
 }))
 
-const Span = styled('span')({
-  zIndex: 1,
-  position: 'relative',
-})
-
-const H1 = styled('h1')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
-  fontFamily,
-  fontSize: scaleFontSize(28, fontSizeScale),
-  textAlign: 'start',
-  WebkitTouchCallout: 'none',
-  MozUserSelect: 'none',
-  msUserSelect: 'none',
-  KhtmlUserSelect: 'none',
-  WebkitUserSelect: 'none',
-}))
-
-const H2 = styled('h2')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
-  fontFamily,
-  fontSize: scaleFontSize(24, fontSizeScale),
-  textAlign: 'start',
-  WebkitTouchCallout: 'none',
-  MozUserSelect: 'none',
-  msUserSelect: 'none',
-  KhtmlUserSelect: 'none',
-  WebkitUserSelect: 'none',
-}))
-
-const H3 = styled('h3')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
-  fontFamily,
-  fontSize: scaleFontSize(20, fontSizeScale),
-  textAlign: 'start',
-  WebkitTouchCallout: 'none',
-  MozUserSelect: 'none',
-  msUserSelect: 'none',
-  KhtmlUserSelect: 'none',
-  WebkitUserSelect: 'none',
-}))
-
-const H4 = styled('h4')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
-  fontFamily,
-  fontSize: scaleFontSize(18, fontSizeScale),
-  textAlign: 'start',
-  WebkitTouchCallout: 'none',
-  MozUserSelect: 'none',
-  msUserSelect: 'none',
-  KhtmlUserSelect: 'none',
-  WebkitUserSelect: 'none',
-}))
-
 const VersionTitle = styled('div')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
   fontFamily,
   fontWeight: 'bold',
@@ -243,6 +188,7 @@ const VersionsContainer = styled('div')<RootStyles>(({ settings: { theme, colors
   paddingTop: '5px',
   paddingBottom: '10px',
   transition: 'top 0.3s cubic-bezier(.13,.69,.5,.98)',
+  zIndex: 2,
 }))
 
 const mediaQueries = ['@media (min-width: 640px)']
@@ -282,14 +228,6 @@ const ReadWholeChapterButton = styled('button')<RootStyles>(({ settings: { theme
   },
 }))
 
-const getPericopeVerse = (pericopeChapter: PericopeChapter, verse: number) => {
-  if (pericopeChapter && pericopeChapter[verse]) {
-    return pericopeChapter[verse]
-  }
-
-  return {}
-}
-
 // ============================================================================
 // MAIN VERSES RENDERER
 // ============================================================================
@@ -324,7 +262,7 @@ const VersesRenderer = ({
   eraseSelectionTrigger,
   clearAnnotationSelectionTrigger,
   selectedAnnotationId,
-  safeAreaTop,
+  safeAreaTop = 0,
 }: Props) => {
   const [isINTComplete, setIsINTComplete] = useState(true)
   const [loaded, error] = useFonts({
@@ -334,8 +272,23 @@ const VersesRenderer = ({
   // Ref for highlight layer
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Use shared hook for annotation highlights
-  const highlightRects = useAnnotationHighlights({
+  // Annotation mode state (lifted here to break circular dependency)
+  const [selection, setSelection] = useState<SelectionRange | null>(null)
+  const [tokensCache] = useState<Map<string, WordToken[]>>(() => new Map())
+
+  // State for touched verse (for visual feedback)
+  const [touchedVerseKey, setTouchedVerseKey] = useState<string | null>(null)
+
+  // Tokens getter function with caching
+  const getTokens = (verseKey: string, text: string): WordToken[] => {
+    if (!tokensCache.has(verseKey)) {
+      tokensCache.set(verseKey, tokenizeVerseText(text))
+    }
+    return tokensCache.get(verseKey)!
+  }
+
+  // Use shared hook for annotation highlights (with selection support when in annotation mode)
+  const { highlightRects, selectionHandlePositions } = useAnnotationHighlights({
     containerRef,
     wordAnnotations,
     version,
@@ -343,6 +296,265 @@ const VersesRenderer = ({
     chapter,
     verses,
     settings,
+    // Pass selection only when in annotation mode
+    selection: annotationMode ? selection : undefined,
+    getTokens: annotationMode ? getTokens : undefined,
+  })
+
+  // Gesture handlers for unified touch selection
+
+  const handleTapVerseAnnotationMode = (verseKey: string, position: { x: number; y: number }) => {
+    const containerRect = containerRef.current?.getBoundingClientRect()
+    if (!containerRect) return
+
+    const clickX = position.x - containerRect.left
+    const clickY = position.y - containerRect.top
+
+    // Check if clicked on an annotation
+    const clickedAnnotationRect = highlightRects.find(
+      rect =>
+        rect.type === 'annotation' &&
+        rect.annotationId &&
+        clickX >= rect.left &&
+        clickX <= rect.left + rect.width &&
+        clickY >= rect.top &&
+        clickY <= rect.top + rect.height
+    )
+
+    if (clickedAnnotationRect?.annotationId) {
+      setSelection(null)
+      const newAnnotationId =
+        clickedAnnotationRect.annotationId === selectedAnnotationId
+          ? null
+          : clickedAnnotationRect.annotationId
+      dispatch({
+        type: 'ANNOTATION_SELECTED',
+        payload: { annotationId: newAnnotationId },
+      }).catch(console.error)
+      return
+    }
+
+    // Check if clicked inside current selection
+    const clickedInsideSelection = highlightRects.some(
+      rect =>
+        rect.type === 'selection' &&
+        clickX >= rect.left &&
+        clickX <= rect.left + rect.width &&
+        clickY >= rect.top &&
+        clickY <= rect.top + rect.height
+    )
+
+    if (clickedInsideSelection) {
+      return // Don't clear selection if clicking inside it
+    }
+
+    // Clear annotation selection if any
+    if (selectedAnnotationId) {
+      dispatch({
+        type: 'ANNOTATION_SELECTED',
+        payload: { annotationId: null },
+      }).catch(console.error)
+    }
+
+    // If there's already a selection, clear it
+    if (selection) {
+      setSelection(null)
+      return
+    }
+
+    // No selection exists → create one on the clicked word
+    const verse = verses.find(v => `${v.Livre}-${v.Chapitre}-${v.Verset}` === verseKey)
+    if (!verse) return
+
+    const tokens = getTokens(verseKey, verse.Texte)
+    const caretInfo = getCaretInfoFromPoint(position.x, position.y)
+    if (!caretInfo) return
+
+    const wordIndex = getWordIndexFromCharOffset(tokens, caretInfo.charOffset)
+    if (wordIndex === null) return
+
+    setSelection({
+      start: { verseKey, wordIndex },
+      end: { verseKey, wordIndex },
+    })
+  }
+
+  const handleTapVerseSelectionMode = (verseKey: string) => {
+    if (isSelectionMode?.includes('verse')) {
+      dispatch({
+        type: TOGGLE_SELECTED_VERSE,
+        payload: verseKey,
+      }).catch(console.error)
+      return
+    }
+
+    if (isSelectionMode?.includes('strong')) {
+      const verse = verses.find(v => `${v.Livre}-${v.Chapitre}-${v.Verset}` === verseKey)
+      if (verse) {
+        dispatch({
+          type: NAVIGATE_TO_BIBLE_VERSE_DETAIL,
+          params: {
+            isSelectionMode,
+            verse,
+          },
+        }).catch(console.error)
+      }
+    }
+  }
+
+  const handleTapVerseNormalMode = (verseKey: string) => {
+    const isSelectedMode = Boolean(Object.keys(selectedVerses).length)
+    if (isSelectedMode || settings.press === 'longPress') {
+      dispatch({
+        type: TOGGLE_SELECTED_VERSE,
+        payload: verseKey,
+      }).catch(console.error)
+    } else {
+      const verse = verses.find(v => `${v.Livre}-${v.Chapitre}-${v.Verset}` === verseKey)
+      if (verse) {
+        dispatch({
+          type: NAVIGATE_TO_BIBLE_VERSE_DETAIL,
+          params: { verse },
+        }).catch(console.error)
+      }
+    }
+  }
+
+  const handleTapVerse = (verseKey: string, position: { x: number; y: number }) => {
+    if (annotationMode) {
+      handleTapVerseAnnotationMode(verseKey, position)
+      return
+    }
+
+    if (isSelectionMode) {
+      handleTapVerseSelectionMode(verseKey)
+      return
+    }
+
+    handleTapVerseNormalMode(verseKey)
+  }
+
+  const handleDoubleTapVerse = (verseKey: string, position: { x: number; y: number }) => {
+    // Find the word at the double-tap position
+    const verse = verses.find(v => `${v.Livre}-${v.Chapitre}-${v.Verset}` === verseKey)
+    if (!verse) return
+
+    const tokens = getTokens(verseKey, verse.Texte)
+    const caretInfo = getCaretInfoFromPoint(position.x, position.y)
+
+    let newSelection: SelectionRange | null = null
+    if (caretInfo) {
+      const wordIndex = getWordIndexFromCharOffset(tokens, caretInfo.charOffset)
+      if (wordIndex !== null) {
+        newSelection = {
+          start: { verseKey, wordIndex },
+          end: { verseKey, wordIndex },
+        }
+      }
+    }
+
+    if (annotationMode) {
+      // In annotation mode, double-tap creates/updates selection on the word
+      if (newSelection) {
+        // Clear annotation selection if any
+        if (selectedAnnotationId) {
+          dispatch({
+            type: 'ANNOTATION_SELECTED',
+            payload: { annotationId: null },
+          }).catch(console.error)
+        }
+        setSelection(newSelection)
+      }
+      return
+    }
+
+    // Normal mode: don't enter annotation mode if verses are selected
+    if (Object.keys(selectedVerses).length > 0) return
+
+    // Enter annotation mode and set the initial selection
+    dispatch({
+      type: ENTER_ANNOTATION_MODE,
+      payload: {},
+    }).catch(console.error)
+
+    if (newSelection) {
+      setSelection(newSelection)
+    }
+  }
+
+  const handleLongPressVerse = (verseKey: string) => {
+    if (annotationMode) return // No long-press action in annotation mode
+    if (isSelectionMode) return // No long-press in selection mode
+
+    if (settings.press === 'shortPress') {
+      dispatch({
+        type: TOGGLE_SELECTED_VERSE,
+        payload: verseKey,
+      }).catch(console.error)
+    } else {
+      const verse = verses.find(v => `${v.Livre}-${v.Chapitre}-${v.Verset}` === verseKey)
+      if (verse) {
+        dispatch({
+          type: NAVIGATE_TO_BIBLE_VERSE_DETAIL,
+          params: { verse },
+        }).catch(console.error)
+      }
+    }
+  }
+
+  // Check if any verses are selected (disables drag-to-annotation in normal mode)
+  const hasSelectedVerses = Object.keys(selectedVerses).length > 0
+
+  // Annotation mode controller (handles touch selection and annotation events)
+  useAnnotationModeController({
+    containerRef,
+    annotationMode,
+    verses,
+    dispatch,
+    selection,
+    setSelection,
+    getTokens,
+    highlightRects,
+    selectionHandlePositions,
+    selectedAnnotationId,
+    canDragToAnnotate: !hasSelectedVerses,
+    triggers: {
+      clearSelectionTrigger,
+      applyAnnotationTrigger,
+      eraseSelectionTrigger,
+    },
+    callbacks: {
+      onEnterAnnotationModeFromDrag: () => {
+        // Note: canDragToAnnotate already prevents this from being called when verses are selected
+        dispatch({
+          type: ENTER_ANNOTATION_MODE,
+          payload: {},
+        }).catch(console.error)
+      },
+      onTapVerse: handleTapVerse,
+      onDoubleTapVerse: handleDoubleTapVerse,
+      onLongPressVerse: handleLongPressVerse,
+      onTouchedVerseChange: setTouchedVerseKey,
+      onTapEmpty: () => {
+        // In annotation mode, tapping on empty space clears selection
+        if (annotationMode) {
+          if (selectedAnnotationId) {
+            dispatch({
+              type: 'ANNOTATION_SELECTED',
+              payload: { annotationId: null },
+            }).catch(console.error)
+          }
+          if (selection) {
+            setSelection(null)
+          }
+        }
+      },
+      onSwipe: direction => {
+        dispatch({
+          type: direction === 'left' ? SWIPE_LEFT : SWIPE_RIGHT,
+        }).catch(console.error)
+      },
+    },
   })
 
   useEffect(() => {
@@ -417,20 +629,6 @@ const VersesRenderer = ({
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  useEffect(() => {
-    document.addEventListener('swiped-left', function (e) {
-      dispatch({
-        type: SWIPE_LEFT,
-      })
-    })
-
-    document.addEventListener('swiped-right', function (e) {
-      dispatch({
-        type: SWIPE_RIGHT,
-      })
-    })
-  }, [])
-
   const hasVerses = verses.length > 0
   useEffect(() => {
     if (!hasVerses) return
@@ -464,26 +662,6 @@ const VersesRenderer = ({
       }
     })
   }, [verseToScroll, hasVerses])
-
-  if (annotationMode) {
-    return (
-      <AnnotationModeRenderer
-        verses={verses}
-        settings={settings}
-        dispatch={dispatch}
-        translations={translations}
-        wordAnnotations={wordAnnotations}
-        version={version}
-        pericopeChapter={pericopeChapter}
-        clearSelectionTrigger={clearSelectionTrigger}
-        applyAnnotationTrigger={applyAnnotationTrigger}
-        eraseSelectionTrigger={eraseSelectionTrigger}
-        clearAnnotationSelectionTrigger={clearAnnotationSelectionTrigger}
-        selectedAnnotationId={selectedAnnotationId}
-        safeAreaTop={safeAreaTop}
-      />
-    )
-  }
 
   const sortVersesToTags = (highlightedVerses: HighlightsObj): TaggedVerse[] | null => {
     if (!highlightedVerses) return null
@@ -720,11 +898,10 @@ const VersesRenderer = ({
           rtl={isHebreu}
           settings={settings}
           isParallelVerse={isParallelVerse}
-          data-swipe-threshold="100"
         >
-          {/* Highlight layer for word annotations */}
-          {highlightRects.length > 0 && (
-            <HighlightLayer $dimmed={Object.keys(selectedVerses).length > 0}>
+          {/* Highlight layer for word annotations and selection */}
+          {(highlightRects.length > 0 || (annotationMode && selection)) && (
+            <HighlightLayer $dimmed={!annotationMode && Object.keys(selectedVerses).length > 0}>
               {highlightRects.map(rect => (
                 <HighlightRectDiv
                   key={rect.id}
@@ -734,9 +911,20 @@ const VersesRenderer = ({
                   $height={rect.height}
                   $color={rect.color}
                   $annotationType={rect.annotationType}
-                  $animationDelay={getAnimationDelay(rect.id)}
+                  $isSelected={rect.annotationId === selectedAnnotationId}
+                  $primaryColor={settings.colors[settings.theme].primary}
+                  $backgroundColor={settings.colors[settings.theme].reverse}
+                  $animationDelay={rect.type === 'annotation' ? getAnimationDelay(rect.id) : 0}
                 />
               ))}
+              {/* Selection handles - only in annotation mode */}
+              {annotationMode && (
+                <SelectionHandles
+                  hasSelection={selection !== null}
+                  startPosition={selectionHandlePositions.start}
+                  endPosition={selectionHandlePositions.end}
+                />
+              )}
             </HighlightLayer>
           )}
           {isParallelVerse && (
@@ -784,136 +972,37 @@ const VersesRenderer = ({
             <Comment isIntro id="comment-0" settings={settings} comment={introComment} />
           )}
 
-          {(() => {
-            // Calculate adjacent verses for fade effect in readonly mode
-            const adjacentVerses = focusVerses
-              ? {
-                  prev: Math.min(...focusVerses.map(Number)) - 1,
-                  next: Math.max(...focusVerses.map(Number)) + 1,
-                }
-              : null
-
-            // Calculate last focus verse for close context button
-            const lastFocusVerse = focusVerses ? Math.max(...focusVerses.map(Number)) : null
-
-            return verses.map((verse, i) => {
-              if (verse.Verset == 0) return null
-
-              const { Livre, Chapitre, Verset } = verse
-
-              // In readonly mode, only show focused verses and adjacent fading verses
-              const isFocused = focusVerses ? focusVerses.includes(Number(Verset)) : undefined
-              const fadePosition =
-                isReadOnly && adjacentVerses
-                  ? Number(Verset) === adjacentVerses.prev
-                    ? 'top'
-                    : Number(Verset) === adjacentVerses.next
-                      ? 'bottom'
-                      : undefined
-                  : undefined
-              if (isReadOnly && focusVerses && !isFocused && !fadePosition) return null
-              const isSelected = Boolean(selectedVerses[`${Livre}-${Chapitre}-${Verset}`])
-              const isSelectedMode = Boolean(Object.keys(selectedVerses).length)
-              const isHighlighted = Boolean(highlightedVerses[`${Livre}-${Chapitre}-${Verset}`])
-              const tag: TaggedVerse | undefined = taggedVerses?.find(
-                v => v.lastVerse === `${Livre}-${Chapitre}-${Verset}`
-              )
-              const highlightedColor = isHighlighted
-                ? (highlightedVerses[`${Livre}-${Chapitre}-${Verset}`]
-                    .color as keyof RootStyles['settings']['colors'][keyof RootStyles['settings']['colors']])
-                : undefined
-
-              const notesCount = notedVersesCount[Verset]
-              const notesText = notedVersesText[Verset]
-              const linksCount = linkedVersesCount[Verset]
-              const linksText = linkedVersesText[Verset]
-              const comment = comments?.[Verset]
-              const isVerseToScroll = !isReadOnly && verseToScroll == Verset
-              const secondaryVerse = secondaryVerses && secondaryVerses[i]
-              const parallelVerse = isParallelVerse
-                ? extractParallelVerse(i, parallelVerses, verse, version)
-                : []
-
-              const { h1, h2, h3, h4 } = getPericopeVerse(pericopeChapter, Number(Verset))
-
-              const bookmark = bookmarkedVerses?.[Number(Verset)]
-
-              const verseKey = `${Livre}-${Chapitre}-${Verset}`
-
-              // Show close context button on last focus verse when not in readonly mode
-              const isLastFocusVerse =
-                !isReadOnly && lastFocusVerse !== null && Number(Verset) === lastFocusVerse
-
-              // Check if this verse has word annotations
-              const hasWordAnnotations =
-                wordAnnotations &&
-                Object.values(wordAnnotations).some(
-                  ann => ann.version === version && ann.ranges.some(r => r.verseKey === verseKey)
-                )
-
-              // Get annotations in other versions for this verse
-              const otherVersionAnnotations = wordAnnotationsInOtherVersions?.[verseKey]
-
-              return (
-                <Span key={verseKey}>
-                  {h1 && (
-                    <H1 settings={settings} onClick={navigateToPericope}>
-                      {h1}
-                      <ExternalIcon />
-                    </H1>
-                  )}
-                  {h2 && (
-                    <H2 settings={settings} onClick={navigateToPericope}>
-                      {h2}
-                      <ExternalIcon />
-                    </H2>
-                  )}
-                  {h3 && (
-                    <H3 settings={settings} onClick={navigateToPericope}>
-                      {h3}
-                      <ExternalIcon />
-                    </H3>
-                  )}
-                  {h4 && (
-                    <H4 settings={settings} onClick={navigateToPericope}>
-                      {h4}
-                      <ExternalIcon />
-                    </H4>
-                  )}
-                  <Verse
-                    isHebreu={isHebreu}
-                    version={version}
-                    verse={verse}
-                    isParallelVerse={isParallelVerse}
-                    parallelVerse={parallelVerse}
-                    secondaryVerse={secondaryVerse}
-                    settings={settings}
-                    isSelected={isSelected}
-                    isSelectedMode={isSelectedMode}
-                    isSelectionMode={isSelectionMode}
-                    highlightedColor={highlightedColor}
-                    notesCount={notesCount}
-                    notesText={notesText}
-                    linksCount={linksCount}
-                    linksText={linksText}
-                    isVerseToScroll={isVerseToScroll}
-                    selectedCode={selectedCode}
-                    isFocused={isFocused}
-                    isINTComplete={isINTComplete}
-                    tag={tag}
-                    bookmark={bookmark}
-                    fadePosition={fadePosition}
-                    isLastFocusVerse={isLastFocusVerse}
-                    hasWordAnnotations={hasWordAnnotations}
-                    otherVersionAnnotations={otherVersionAnnotations}
-                  />
-                  {!!comment && settings.commentsDisplay && (
-                    <Comment id={`comment-${verse.Verset}`} settings={settings} comment={comment} />
-                  )}
-                </Span>
-              )
-            })
-          })()}
+          {/* Unified verse rendering for all modes */}
+          <UnifiedVersesRenderer
+            verses={verses}
+            parallelVerses={parallelVerses}
+            focusVerses={focusVerses}
+            secondaryVerses={secondaryVerses}
+            selectedVerses={selectedVerses}
+            highlightedVerses={highlightedVerses}
+            settings={settings}
+            verseToScroll={verseToScroll}
+            isReadOnly={isReadOnly}
+            version={version}
+            pericopeChapter={pericopeChapter}
+            isSelectionMode={isSelectionMode}
+            selectedCode={selectedCode}
+            isINTComplete={isINTComplete}
+            isHebreu={isHebreu}
+            isParallelVerse={isParallelVerse}
+            comments={comments}
+            wordAnnotations={wordAnnotations}
+            wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
+            taggedVerses={taggedVerses}
+            bookmarkedVerses={bookmarkedVerses}
+            notedVersesCount={notedVersesCount}
+            notedVersesText={notedVersesText}
+            linkedVersesCount={linkedVersesCount}
+            linkedVersesText={linkedVersesText}
+            navigateToPericope={navigateToPericope}
+            annotationMode={annotationMode}
+            touchedVerseKey={touchedVerseKey}
+          />
           {isReadOnly && focusVerses && focusVerses.length > 0 && (
             <ReadWholeChapterButtonContainer>
               <ReadWholeChapterButton

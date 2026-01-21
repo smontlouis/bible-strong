@@ -35,7 +35,6 @@ export interface SelectedAnnotation {
 
 export interface AnnotationModeState {
   enabled: boolean
-  scrollToVerseKey?: string
   version?: VersionCode
   hasSelection: boolean
   selection: SelectionRange | null
@@ -55,7 +54,7 @@ export interface WebViewRef {
 }
 
 export interface UseAnnotationModeReturn extends AnnotationModeState {
-  enterMode: (version: VersionCode, scrollToVerseKey?: string) => void
+  enterMode: (version: VersionCode) => void
   exitMode: () => void
   setVerses: (verses: Verse[]) => void
   setWebViewRef: (ref: WebViewRef | null) => void
@@ -78,7 +77,6 @@ export interface UseAnnotationModeReturn extends AnnotationModeState {
 
 const INITIAL_STATE: AnnotationModeState = {
   enabled: false,
-  scrollToVerseKey: undefined,
   hasSelection: false,
   selection: null,
   clearSelectionTrigger: 0,
@@ -102,11 +100,10 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
     versesRef.current = verses
   }
 
-  const enterMode = (version: VersionCode, scrollToVerseKey?: string) => {
+  const enterMode = (version: VersionCode) => {
     setState({
       ...INITIAL_STATE,
       enabled: true,
-      scrollToVerseKey,
       version,
     })
   }

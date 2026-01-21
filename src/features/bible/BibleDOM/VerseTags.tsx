@@ -62,9 +62,10 @@ const ExpandButton = styled('div')<RootStyles>(
 interface Props {
   settings: RootState['user']['bible']['settings']
   tag: TaggedVerse
+  isDisabled?: boolean
 }
 
-const VerseTags = ({ tag, settings }: Props) => {
+const VerseTags = ({ tag, settings, isDisabled }: Props) => {
   const dispatch = useDispatch()
   const [isExpanded, setIsExpanded] = useState(false)
 
@@ -115,7 +116,7 @@ const VerseTags = ({ tag, settings }: Props) => {
   }
 
   return (
-    <InlineItemContainer settings={settings}>
+    <InlineItemContainer settings={settings} isDisabled={isDisabled}>
       {/* Tag icon - opens MultipleTagsModal */}
 
       <InlineItemIconWrapper settings={settings} isButton onClick={handleTagIconClick}>

@@ -2,12 +2,14 @@ import { styled } from 'goober'
 import { RootStyles } from './BibleDOMWrapper'
 import { RootState } from '~redux/modules/reducer'
 import { getLinkTypeIconComponent, getLinkTypeColor } from './LinkIcons'
+import { getDisabledStyles } from './disabledStyles'
 
-const Div = styled<RootStyles>('div')(({ settings: { theme } }) => ({
+const Div = styled<RootStyles & { isDisabled?: boolean }>('div')(({ settings: { theme }, isDisabled }) => ({
   position: 'relative',
   display: 'inline-block',
   transform: 'translateY(5px)',
   marginRight: '10px',
+  ...getDisabledStyles(isDisabled),
 }))
 
 const Count = styled<RootStyles>('div')(({ settings: { theme, colors } }) => ({
@@ -32,6 +34,7 @@ interface Props {
   linkType?: string
   settings: RootState['user']['bible']['settings']
   onClick: () => void
+  isDisabled?: boolean
 }
 
 const renderIcon = (linkType: string, onClick: () => void) => {
@@ -40,8 +43,8 @@ const renderIcon = (linkType: string, onClick: () => void) => {
   return <IconComponent size={24} color={color} onClick={onClick} />
 }
 
-const LinksCount = ({ count, linkType, settings, onClick }: Props) => (
-  <Div settings={settings}>
+const LinksCount = ({ count, linkType, settings, onClick, isDisabled }: Props) => (
+  <Div settings={settings} isDisabled={isDisabled}>
     {renderIcon(linkType || 'website', onClick)}
     {count > 1 && <Count settings={settings}>{count}</Count>}
   </Div>

@@ -18,75 +18,32 @@ export interface CaretInfo {
  *
  * @param clientX - X coordinate in screen/client space
  * @param clientY - Y coordinate in screen/client space
- * @param safeAreaTop - Safe area inset from native side (on iOS, touch coordinates include safe area offset)
  */
 export function getCaretInfoFromPoint(
   clientX: number,
-  clientY: number,
-  safeAreaTop: number = 0
+  clientY: number
 ): CaretInfo | null {
-  // DEBUG: Test both coordinate systems to understand which one is correct
-  const viewportYWithSafeArea = clientY - safeAreaTop
-  const viewportYWithoutSafeArea = clientY
+  const viewportY = clientY
+  const elements = document.elementsFromPoint(clientX, viewportY)
 
-  // Try both to see which one finds the verse
-  const elementsWithSafeArea = document.elementsFromPoint(clientX, viewportYWithSafeArea)
-  const elementsWithoutSafeArea = document.elementsFromPoint(clientX, viewportYWithoutSafeArea)
+  // Find verse container in elements
+  let verseContainer: Element | null = null
+  let targetElement: Element | null = null
 
-  // Check which one finds a verse container
-  const findVerseInElements = (els: Element[]) => {
-    for (const el of els) {
-      const container = findVerseContainer(el)
-      if (container) return { element: el, container }
+  for (const el of elements) {
+    const container = findVerseContainer(el)
+    if (container) {
+      targetElement = el
+      verseContainer = container
+      break
     }
+  }
+
+  if (!verseContainer) {
     return null
   }
 
-  const resultWithSafeArea = findVerseInElements(elementsWithSafeArea)
-  const resultWithoutSafeArea = findVerseInElements(elementsWithoutSafeArea)
-
-  console.log('[DEBUG caret] coordinate comparison', {
-    input: { clientX, clientY },
-    safeAreaTop,
-    viewportYWithSafeArea,
-    viewportYWithoutSafeArea,
-    scrollY: window.scrollY,
-    withSafeArea: {
-      elements: elementsWithSafeArea.slice(0, 3).map(e => e.tagName),
-      foundVerse: resultWithSafeArea?.container?.getAttribute('data-verse-key') ?? null,
-    },
-    withoutSafeArea: {
-      elements: elementsWithoutSafeArea.slice(0, 3).map(e => e.tagName),
-      foundVerse: resultWithoutSafeArea?.container?.getAttribute('data-verse-key') ?? null,
-    },
-  })
-
-  // On iOS, touch coordinates from native DON'T need safeAreaTop adjustment
-  // The DOM component already receives coordinates in the correct viewport space
-  // IMPORTANT: Never use withSafeArea as fallback - it gives wrong results (different verse)
-  // If withoutSafeArea doesn't find a verse (e.g., touching empty space or verse number),
-  // return null and let the caller handle it (e.g., keep last known position during drag)
-  const result = resultWithoutSafeArea
-  const viewportY = viewportYWithoutSafeArea
-  const elements = elementsWithoutSafeArea
-
-  let isCaretRangeValid = false
-  let usedFallback = false
-
-  if (!result) {
-    console.log('[DEBUG caret] No verse container found with either coordinate system')
-    return null
-  }
-
-  const { element, container: verseContainer } = result
-
-  console.log('[DEBUG caret] Found verse container', {
-    verseKey: verseContainer.getAttribute('data-verse-key'),
-    element: element.tagName,
-    usedSafeAreaAdjustment: result === resultWithSafeArea,
-  })
-
-  // Step 3: Try caretRangeFromPoint but VALIDATE its result
+  // Try caretRangeFromPoint but VALIDATE its result
   // @ts-ignore - caretRangeFromPoint is not in TypeScript's DOM types
   if (document.caretRangeFromPoint) {
     // @ts-ignore
@@ -95,39 +52,18 @@ export function getCaretInfoFromPoint(
       const rangeRect = range.getBoundingClientRect()
       const yDistance = Math.abs(rangeRect.top - viewportY)
 
-      console.log('[DEBUG caretRange]', {
-        charOffset: range.startOffset,
-        rangeRect: { top: rangeRect.top, left: rangeRect.left },
-        yDistance,
-        textContent: range.startContainer.textContent?.substring(0, 30),
-      })
-
       // Only trust result if it's near where we touched (within 50px)
       if (yDistance < 50) {
-        isCaretRangeValid = true
         return {
           charOffset: range.startOffset,
           targetElement: range.startContainer.parentElement,
         }
-      } else {
-        console.log('[DEBUG caretRange] rejected - too far from touch point:', yDistance)
       }
     }
   }
 
-  // Step 4: Fallback - find word by examining element bounds
-  usedFallback = true
-  const fallbackResult = findWordInElementByPosition(element, clientX, viewportY)
-
-  console.log('[DEBUG caret] result', {
-    isCaretRangeValid,
-    usedFallback,
-    fallbackResult: fallbackResult
-      ? { charOffset: fallbackResult.charOffset, element: fallbackResult.targetElement?.tagName }
-      : null,
-  })
-
-  return fallbackResult
+  // Fallback - find word by examining element bounds
+  return findWordInElementByPosition(targetElement!, clientX, viewportY)
 }
 
 /**
@@ -139,38 +75,16 @@ function findWordInElementByPosition(
   clientX: number,
   viewportY: number
 ): CaretInfo | null {
-  // Get all text nodes in the element
   const textNodes = getTextNodesIn(element)
-
-  console.log('[DEBUG fallback] searching in element', {
-    element: element.tagName,
-    textContent: element.textContent?.substring(0, 50),
-    textNodesCount: textNodes.length,
-    touchPoint: { clientX, viewportY },
-  })
 
   for (const textNode of textNodes) {
     const range = document.createRange()
     range.selectNodeContents(textNode)
     const rects = range.getClientRects()
 
-    const rectsArray = Array.from(rects)
-    console.log('[DEBUG fallback] textNode', {
-      text: textNode.textContent?.substring(0, 30),
-      rectsCount: rectsArray.length,
-      rects: rectsArray.map(r => ({
-        top: Math.round(r.top),
-        bottom: Math.round(r.bottom),
-        left: Math.round(r.left),
-        right: Math.round(r.right),
-      })),
-    })
-
-    for (const rect of rectsArray) {
+    for (const rect of Array.from(rects)) {
       if (isPointInRect(clientX, viewportY, rect)) {
-        // Found the text node, now find char offset using binary search
         const charOffset = findCharOffsetInTextNode(textNode, clientX, viewportY)
-        console.log('[DEBUG fallback] FOUND in rect!', { charOffset })
         return {
           charOffset,
           targetElement: textNode.parentElement,
@@ -179,17 +93,13 @@ function findWordInElementByPosition(
     }
   }
 
-  console.log('[DEBUG fallback] no exact match, trying closest')
-
   // If no exact match, find the closest text node vertically
   const closestResult = findClosestTextNode(textNodes, clientX, viewportY)
   if (closestResult) {
-    console.log('[DEBUG fallback] found closest', { charOffset: closestResult.charOffset })
     return closestResult
   }
 
   // Ultimate fallback: return first text node with offset 0
-  console.log('[DEBUG fallback] using ultimate fallback (first text node, offset 0)')
   if (textNodes.length > 0) {
     return {
       charOffset: 0,

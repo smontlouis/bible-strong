@@ -11,9 +11,10 @@ interface Props {
   settings: RootState['user']['bible']['settings']
   onClick: (x: string) => void
   isParallel?: boolean
+  isDisabled?: boolean
 }
 
-const NotesText = ({ notesText, settings, onClick, isParallel }: Props) => {
+const NotesText = ({ notesText, settings, onClick, isParallel, isDisabled }: Props) => {
   return (
     <span>
       {notesText.map(note => (
@@ -23,6 +24,7 @@ const NotesText = ({ notesText, settings, onClick, isParallel }: Props) => {
           isParallel={isParallel}
           onClick={() => onClick(note.key)}
           isButton
+          isDisabled={isDisabled}
         >
           <InlineItemIconWrapper settings={settings}>
             <Icon.Ionicons

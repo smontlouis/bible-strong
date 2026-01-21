@@ -36,16 +36,17 @@ interface Props {
   versions: CrossVersionAnnotation[]
   settings: RootStyles['settings']
   onClick: () => void
+  isDisabled?: boolean
 }
 
-const VersionAnnotationIndicator = ({ versions, settings, onClick }: Props) => {
+const VersionAnnotationIndicator = ({ versions, settings, onClick, isDisabled }: Props) => {
   if (!versions || versions.length === 0) return null
 
   const displayVersion = versions[0].version
   const moreCount = versions.length - 1
 
   return (
-    <InlineItemContainer settings={settings} onClick={onClick} isButton>
+    <InlineItemContainer settings={settings} onClick={onClick} isButton isDisabled={isDisabled}>
       <InlineItemIconWrapper settings={settings}>
         <Icon.Feather color={settings.colors[settings.theme].secondary} name="edit-3" size={16} />
       </InlineItemIconWrapper>

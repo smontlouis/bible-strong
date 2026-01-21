@@ -2,9 +2,11 @@
 
 import { RefObject, useEffect, useState } from 'react'
 import { Verse as TVerse } from '~common/types'
-import { getTokenByWordIndex, tokenizeVerseText } from '~helpers/wordTokenizer'
+import { getTokenByWordIndex, tokenizeVerseText, WordToken } from '~helpers/wordTokenizer'
 import { RootStyles, WebViewProps } from '../BibleDOMWrapper'
 import { AnnotationType, HighlightRect } from './HighlightComponents'
+import { SelectionRange, normalizeRange, getVersesBetween } from './selectionUtils'
+import { usePrevious } from '~helpers/usePrevious'
 
 /**
  * Represents a text node and its character offset within the combined verse text.
@@ -136,6 +138,121 @@ interface UseAnnotationHighlightsProps {
   chapter: number
   verses: TVerse[]
   settings: RootStyles['settings']
+  // Optional: Selection support for annotation mode
+  selection?: SelectionRange | null
+  getTokens?: (verseKey: string, text: string) => WordToken[]
+}
+
+/**
+ * Common parameters for calculating highlight rects for a word range within a verse.
+ */
+interface CalculateRectsParams {
+  verseKey: string
+  startWordIndex: number
+  endWordIndex: number
+  containerRect: DOMRect
+  tokens: WordToken[]
+}
+
+/**
+ * Calculates DOMRects for a word range within a verse.
+ * Returns merged rects relative to the container.
+ */
+function calculateRectsForWordRange({
+  verseKey,
+  startWordIndex,
+  endWordIndex,
+  containerRect,
+  tokens,
+}: CalculateRectsParams): Array<{ top: number; left: number; width: number; height: number }> {
+  const verseEl = document.getElementById(`verse-text-${verseKey}`)
+  if (!verseEl) return []
+
+  // Collect all text nodes to handle LSGS/KJVS verses with Strong's refs
+  const { fullText, textNodes } = collectTextNodes(verseEl)
+  if (!fullText || textNodes.length === 0) return []
+
+  const startToken = getTokenByWordIndex(tokens, startWordIndex)
+  const endToken = getTokenByWordIndex(tokens, endWordIndex)
+  if (!startToken || !endToken) return []
+
+  try {
+    // Create range across potentially multiple text nodes
+    const domRange = createRangeAcrossNodes(textNodes, startToken.charStart, endToken.charEnd)
+    if (!domRange) return []
+
+    // Merge adjacent rects on same line for cleaner highlights
+    const clientRects = mergeRectsOnSameLine(Array.from(domRange.getClientRects()))
+
+    return clientRects.map(rect => ({
+      top: rect.top - containerRect.top,
+      left: rect.left - containerRect.left,
+      width: rect.width,
+      height: rect.height,
+    }))
+  } catch (e) {
+    console.error('[Bible] Error calculating rects:', e)
+    return []
+  }
+}
+
+/**
+ * Calculates highlight rectangles for a selection range.
+ * Used in annotation mode to show the current word selection.
+ */
+function getRectsForSelection(
+  containerRef: RefObject<HTMLDivElement | null>,
+  range: SelectionRange,
+  verses: TVerse[],
+  getTokens: (verseKey: string, text: string) => WordToken[]
+): HighlightRect[] {
+  const rects: HighlightRect[] = []
+  const containerRect = containerRef.current?.getBoundingClientRect()
+  if (!containerRect) return rects
+
+  const { start: normalizedStart, end: normalizedEnd } = normalizeRange(range, verses)
+  const versesToHighlight = getVersesBetween(
+    verses,
+    normalizedStart.verseKey,
+    normalizedEnd.verseKey
+  )
+
+  versesToHighlight.forEach((verse, idx) => {
+    if (verse.Verset === 0) return
+
+    const verseKey = `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`
+    const tokens = getTokens(verseKey, verse.Texte)
+    const wordTokens = tokens.filter(t => !t.isWhitespace)
+    if (wordTokens.length === 0) return
+
+    const isFirst = idx === 0
+    const isLast = idx === versesToHighlight.length - 1
+
+    const startWordIdx = isFirst ? normalizedStart.wordIndex : 0
+    const endWordIdx = isLast ? normalizedEnd.wordIndex : wordTokens[wordTokens.length - 1].index
+
+    const verseRects = calculateRectsForWordRange({
+      verseKey,
+      startWordIndex: startWordIdx,
+      endWordIndex: endWordIdx,
+      containerRect,
+      tokens,
+    })
+
+    verseRects.forEach((rect, rectIdx) => {
+      rects.push({
+        id: `selection-${verseKey}-${rectIdx}`,
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+        color: 'rgba(0, 122, 255, 0.3)',
+        type: 'selection',
+      })
+    })
+  })
+
+  return rects
 }
 
 export function useAnnotationHighlights({
@@ -146,7 +263,15 @@ export function useAnnotationHighlights({
   chapter,
   verses,
   settings,
-}: UseAnnotationHighlightsProps) {
+  selection,
+  getTokens,
+}: UseAnnotationHighlightsProps): {
+  highlightRects: HighlightRect[]
+  selectionHandlePositions: {
+    start: { x: number; y: number } | null
+    end: { x: number; y: number } | null
+  }
+} {
   const [highlightRects, setHighlightRects] = useState<HighlightRect[]>([])
   // Track if we're waiting for new rects to be calculated after a chapter change
   const [isPending, setIsPending] = useState(true)
@@ -160,20 +285,31 @@ export function useAnnotationHighlights({
         .join(',')
     : ''
 
-  useEffect(() => {
-    // Mark as pending immediately when deps change
-    setIsPending(true)
+  // Track previous values to detect chapter changes vs annotation/selection changes
+  const prevBook = usePrevious(book)
+  const prevChapter = usePrevious(chapter)
 
-    if (!wordAnnotations || !containerRef.current) {
+  useEffect(() => {
+    // Only set isPending on chapter/book changes (not annotation or selection changes)
+    // This prevents the flash when annotations are added/deleted/modified
+    const isChapterChange = prevBook !== book || prevChapter !== chapter
+
+    if (isChapterChange) {
+      setIsPending(true)
+    }
+
+    if (!containerRef.current) {
       setHighlightRects([])
-      setIsPending(false)
+      if (isChapterChange) {
+        setIsPending(false)
+      }
       return
     }
 
-    const calculateRects = (): HighlightRect[] => {
+    const calculateAnnotationRects = (): HighlightRect[] => {
       const rects: HighlightRect[] = []
       const containerRect = containerRef.current?.getBoundingClientRect()
-      if (!containerRect) return rects
+      if (!containerRect || !wordAnnotations) return rects
 
       Object.entries(wordAnnotations).forEach(([annotationId, annotation]) => {
         if (annotation.version !== version) return
@@ -183,64 +319,67 @@ export function useAnnotationHighlights({
           const verseTextEl = document.getElementById(`verse-text-${verseKey}`)
           if (!verseTextEl) return
 
-          // Collect all text nodes to handle LSGS/KJVS verses with Strong's refs
-          const { fullText, textNodes } = collectTextNodes(verseTextEl)
-          if (!fullText || textNodes.length === 0) return
+          // Collect text from DOM to handle LSGS/KJVS verses with Strong's refs
+          const { fullText } = collectTextNodes(verseTextEl)
+          if (!fullText) return
 
           const tokens = tokenizeVerseText(fullText)
-          const startToken = getTokenByWordIndex(tokens, startWordIndex)
-          const endToken = getTokenByWordIndex(tokens, endWordIndex)
 
-          if (!startToken || !endToken) return
+          const verseRects = calculateRectsForWordRange({
+            verseKey,
+            startWordIndex,
+            endWordIndex,
+            containerRect,
+            tokens,
+          })
 
-          try {
-            // Create range across potentially multiple text nodes
-            const domRange = createRangeAcrossNodes(
-              textNodes,
-              startToken.charStart,
-              endToken.charEnd
-            )
-            if (!domRange) return
+          const colorValue =
+            settings.colors[settings.theme][
+              annotation.color as keyof (typeof settings.colors)[typeof settings.theme]
+            ] || annotation.color
 
-            // Merge adjacent rects on same line for cleaner highlights
-            const clientRects = mergeRectsOnSameLine(Array.from(domRange.getClientRects()))
-            const colorValue =
-              settings.colors[settings.theme][
-                annotation.color as keyof (typeof settings.colors)[typeof settings.theme]
-              ] || annotation.color
-
-            clientRects.forEach((rect, rectIdx) => {
-              rects.push({
-                id: `${annotationId}-${rangeIdx}-${rectIdx}`,
-                top: rect.top - containerRect.top,
-                left: rect.left - containerRect.left,
-                width: rect.width,
-                height: rect.height,
-                color: colorValue as string,
-                type: 'annotation',
-                annotationType: annotation.type as AnnotationType,
-                annotationId,
-              })
+          verseRects.forEach((rect, rectIdx) => {
+            rects.push({
+              id: `${annotationId}-${rangeIdx}-${rectIdx}`,
+              top: rect.top,
+              left: rect.left,
+              width: rect.width,
+              height: rect.height,
+              color: colorValue as string,
+              type: 'annotation',
+              annotationType: annotation.type as AnnotationType,
+              annotationId,
             })
-          } catch (e) {
-            console.error('[Bible] Error calculating annotation rects:', e)
-          }
+          })
         })
       })
 
       return rects
     }
 
-    requestAnimationFrame(() => {
-      const rects = calculateRects()
+    const calculateAllRects = (): HighlightRect[] => {
+      const annotationRects = calculateAnnotationRects()
 
+      // Add selection rects if we have a selection and getTokens function
+      if (selection && getTokens) {
+        const selectionRects = getRectsForSelection(containerRef, selection, verses, getTokens)
+        return [...annotationRects, ...selectionRects]
+      }
+
+      return annotationRects
+    }
+
+    requestAnimationFrame(() => {
+      const rects = calculateAllRects()
       setHighlightRects(rects)
-      setIsPending(false)
+      if (isChapterChange) {
+        setIsPending(false)
+      }
     })
 
     const handleResize = () => {
       requestAnimationFrame(() => {
-        const rects = calculateRects()
+        const rects = calculateAllRects()
         setHighlightRects(rects)
       })
     }
@@ -248,7 +387,7 @@ export function useAnnotationHighlights({
     // Listen for layout changes (e.g., VerseTags expand/collapse)
     const handleLayoutChanged = () => {
       requestAnimationFrame(() => {
-        const rects = calculateRects()
+        const rects = calculateAllRects()
         setHighlightRects(rects)
       })
     }
@@ -259,8 +398,44 @@ export function useAnnotationHighlights({
       window.removeEventListener('resize', handleResize)
       window.removeEventListener('layoutChanged', handleLayoutChanged)
     }
-  }, [version, book, chapter, annotationKey])
+  }, [version, book, chapter, annotationKey, selection, verses, settings])
+
+  // Calculate selection handle positions from highlight rects
+  const getSelectionHandlePositions = (): {
+    start: { x: number; y: number } | null
+    end: { x: number; y: number } | null
+  } => {
+    const selectionRects = highlightRects.filter(r => r.type === 'selection')
+    if (selectionRects.length === 0) return { start: null, end: null }
+
+    // Read direction from DOM
+    const isRTL = containerRef.current
+      ? getComputedStyle(containerRef.current).direction === 'rtl'
+      : false
+
+    // Sort rects by position (top to bottom, then left to right for LTR, right to left for RTL)
+    const sortedRects = [...selectionRects].sort((a, b) => {
+      if (Math.abs(a.top - b.top) > 5) return a.top - b.top
+      return isRTL ? b.left - a.left : a.left - b.left
+    })
+
+    const firstRect = sortedRects[0]
+    const lastRect = sortedRects[sortedRects.length - 1]
+
+    return {
+      start: isRTL
+        ? { x: firstRect.left + firstRect.width, y: firstRect.top }
+        : { x: firstRect.left, y: firstRect.top },
+      end: isRTL
+        ? { x: lastRect.left, y: lastRect.top + lastRect.height }
+        : { x: lastRect.left + lastRect.width, y: lastRect.top + lastRect.height },
+    }
+  }
 
   // Return empty array while pending to prevent flash of old positions
-  return isPending ? [] : highlightRects
+  // BUT allow selection to show during isPending (for drag-to-select feedback)
+  return {
+    highlightRects: isPending && !selection ? [] : highlightRects,
+    selectionHandlePositions: getSelectionHandlePositions(),
+  }
 }

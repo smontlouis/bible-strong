@@ -30,6 +30,7 @@ import {
   ADD_PARALLEL_VERSION,
   ANNOTATION_SELECTED,
   CREATE_ANNOTATION,
+  ENTER_ANNOTATION_MODE,
   ENTER_READONLY_MODE,
   ERASE_SELECTION,
   EXIT_READONLY_MODE,
@@ -139,6 +140,8 @@ export type WebViewProps = {
   // Cross-version annotations
   wordAnnotationsInOtherVersions?: Record<string, CrossVersionAnnotation[]>
   onOpenCrossVersionModal?: (verseKey: string, versions: CrossVersionAnnotation[]) => void
+  // Enter annotation mode from double-tap
+  onEnterAnnotationMode?: () => void
 }
 
 export type NotedVerse = {
@@ -248,6 +251,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
   }, [])
 
   const dispatch: Dispatch = async action => {
+    console.log('[Bible] DISPATCH:', action.type)
     switch (action.type) {
       case 'DOM_COMPONENT_MOUNTED': {
         // Mark component as mounted
@@ -451,6 +455,12 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
       case ENTER_READONLY_MODE: {
         const { enterReadOnlyMode } = props
         enterReadOnlyMode?.()
+        break
+      }
+
+      case ENTER_ANNOTATION_MODE: {
+        const { onEnterAnnotationMode } = props
+        onEnterAnnotationMode?.()
         break
       }
 

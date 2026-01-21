@@ -2,6 +2,7 @@ import { styled } from 'goober'
 import { RootStyles } from './BibleDOMWrapper'
 import { RootState } from '~redux/modules/reducer'
 import { SvgProps } from 'react-native-svg'
+import { getDisabledStyles } from './disabledStyles'
 
 // @ts-ignore
 const SvgContainer = styled<RootStyles & SvgProps & { color: string }>(
@@ -13,21 +14,23 @@ const SvgContainer = styled<RootStyles & SvgProps & { color: string }>(
 }))
 
 // @ts-ignore
-const Div = styled<RootStyles & { onClick?: () => void }>('div')(({ settings: { theme } }) => ({
+const Div = styled<RootStyles & { onClick?: () => void; isDisabled?: boolean }>('div')(({ settings: { theme }, isDisabled }) => ({
   position: 'relative',
   display: 'inline-block',
   transform: 'translateY(5px)',
   marginRight: '8px',
   cursor: 'pointer',
+  ...getDisabledStyles(isDisabled),
 }))
 
 interface Props {
   color: string
   settings: RootState['user']['bible']['settings']
   onClick?: () => void
+  isDisabled?: boolean
 }
 
-const BookmarkIcon = ({ color, settings, onClick }: Props) => {
+const BookmarkIcon = ({ color, settings, onClick, isDisabled }: Props) => {
   const handleClick = () => {
     if (onClick) {
       onClick()
@@ -35,7 +38,7 @@ const BookmarkIcon = ({ color, settings, onClick }: Props) => {
   }
 
   return (
-    <Div settings={settings} onClick={handleClick}>
+    <Div settings={settings} onClick={handleClick} isDisabled={isDisabled}>
       <SvgContainer
         width="18"
         height="18"

@@ -3,8 +3,9 @@ import { styled } from 'goober'
 import { RootState } from '~redux/modules/reducer'
 import { RootStyles } from './BibleDOMWrapper'
 import { isDarkTheme } from './utils'
+import { getDisabledStyles } from './disabledStyles'
 
-const Div = styled('span')<RootStyles>(({ settings: { theme, colors } }) => ({
+const Div = styled('span')<RootStyles & { isDisabled?: boolean }>(({ settings: { theme, colors }, isDisabled }) => ({
   backgroundColor: colors[theme].reverse,
   boxShadow: isDarkTheme(theme)
     ? `0 0 10px 0 rgba(255, 255, 255, 0.1)`
@@ -20,6 +21,7 @@ const Div = styled('span')<RootStyles>(({ settings: { theme, colors } }) => ({
   '&:active': {
     opacity: 0.6,
   },
+  ...getDisabledStyles(isDisabled),
 }))
 
 const Count = styled<RootStyles>('div')(({ settings: { theme, colors } }) => ({
@@ -42,11 +44,12 @@ interface Props {
   count: number
   settings: RootState['user']['bible']['settings']
   onClick: () => void
+  isDisabled?: boolean
 }
 
-const NotesCount = ({ count, settings, onClick }: Props) => {
+const NotesCount = ({ count, settings, onClick, isDisabled }: Props) => {
   return (
-    <Div settings={settings} onClick={() => onClick()}>
+    <Div settings={settings} onClick={() => onClick()} isDisabled={isDisabled}>
       <Icon.Ionicons
         color={settings.colors[settings.theme].default}
         name="document-text-outline"

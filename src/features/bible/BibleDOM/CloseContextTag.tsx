@@ -5,8 +5,9 @@ import { RootStyles } from './BibleDOMWrapper'
 import { RootState } from '~redux/modules/reducer'
 import { useDispatch } from './DispatchProvider'
 import { useTranslations } from './TranslationsContext'
+import { getDisabledStyles } from './disabledStyles'
 
-const Tag = styled('div')<RootStyles>(({ settings: { theme, colors, fontSizeScale } }) => ({
+const Tag = styled('div')<RootStyles & { isDisabled?: boolean }>(({ settings: { theme, colors, fontSizeScale }, isDisabled }) => ({
   fontFamily: 'arial',
   padding: '2px 8px',
   borderRadius: '40px',
@@ -19,13 +20,15 @@ const Tag = styled('div')<RootStyles>(({ settings: { theme, colors, fontSizeScal
   '&:active': {
     opacity: 0.5,
   },
+  ...getDisabledStyles(isDisabled),
 }))
 
 interface Props {
   settings: RootState['user']['bible']['settings']
+  isDisabled?: boolean
 }
 
-const CloseContextTag = ({ settings }: Props) => {
+const CloseContextTag = ({ settings, isDisabled }: Props) => {
   const dispatch = useDispatch()
   const translations = useTranslations()
 
@@ -35,7 +38,7 @@ const CloseContextTag = ({ settings }: Props) => {
   }
 
   return (
-    <Tag settings={settings} onClick={handleClick}>
+    <Tag settings={settings} onClick={handleClick} isDisabled={isDisabled}>
       {translations.closeContext}
     </Tag>
   )
