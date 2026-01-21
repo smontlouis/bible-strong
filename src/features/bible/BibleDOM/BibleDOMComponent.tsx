@@ -453,9 +453,37 @@ const VersesRenderer = ({
       }
     }
 
+    // Check if double-tap is on an existing annotation
+    const containerRect = containerRef.current?.getBoundingClientRect()
+    let clickedAnnotationId: string | null = null
+    if (containerRect) {
+      const clickX = position.x - containerRect.left
+      const clickY = position.y - containerRect.top
+      const clickedAnnotationRect = highlightRects.find(
+        rect =>
+          rect.type === 'annotation' &&
+          rect.annotationId &&
+          clickX >= rect.left &&
+          clickX <= rect.left + rect.width &&
+          clickY >= rect.top &&
+          clickY <= rect.top + rect.height
+      )
+      if (clickedAnnotationRect?.annotationId) {
+        clickedAnnotationId = clickedAnnotationRect.annotationId
+      }
+    }
+
     if (annotationMode) {
-      // In annotation mode, double-tap creates/updates selection on the word
-      if (newSelection) {
+      // In annotation mode, double-tap on annotation selects it, otherwise creates/updates selection
+      if (clickedAnnotationId) {
+        setSelection(null)
+        const newAnnotationId =
+          clickedAnnotationId === selectedAnnotationId ? null : clickedAnnotationId
+        dispatch({
+          type: 'ANNOTATION_SELECTED',
+          payload: { annotationId: newAnnotationId },
+        }).catch(console.error)
+      } else if (newSelection) {
         // Clear annotation selection if any
         if (selectedAnnotationId) {
           dispatch({
@@ -471,13 +499,19 @@ const VersesRenderer = ({
     // Normal mode: don't enter annotation mode if verses are selected
     if (Object.keys(selectedVerses).length > 0) return
 
-    // Enter annotation mode and set the initial selection
+    // Enter annotation mode
     dispatch({
       type: ENTER_ANNOTATION_MODE,
       payload: {},
     }).catch(console.error)
 
-    if (newSelection) {
+    // If double-tap is on an annotation, select it; otherwise create a selection on the word
+    if (clickedAnnotationId) {
+      dispatch({
+        type: 'ANNOTATION_SELECTED',
+        payload: { annotationId: clickedAnnotationId },
+      }).catch(console.error)
+    } else if (newSelection) {
       setSelection(newSelection)
     }
   }
@@ -710,22 +744,71 @@ const VersesRenderer = ({
     }))
   }
 
-  const getNotedVersesCount = (verses: any, notedVerses: any) => {
-    const newNotedVerses: { [key: string]: number } = {}
-    if (verses?.length) {
-      const { Livre, Chapitre } = verses[0]
-      Object.keys(notedVerses).map(key => {
-        const firstVerseRef = key.split('/')[0]
-        const bookNumber = parseInt(firstVerseRef.split('-')[0])
-        const chapterNumber = parseInt(firstVerseRef.split('-')[1])
-        const verseNumber = firstVerseRef.split('-')[2]
-        if (bookNumber === Livre && chapterNumber === Chapitre) {
-          if (newNotedVerses[verseNumber])
-            newNotedVerses[verseNumber] = newNotedVerses[verseNumber] + 1
-          else newNotedVerses[verseNumber] = 1
+  interface AnnotationNotesInfo {
+    versesWithAnnotationNotes: Set<string>
+    annotationNotesCountByVerse: { [key: string]: number }
+  }
+
+  const getAnnotationNotesInfo = (
+    verses: TVerse[],
+    wordAnnotations: WebViewProps['wordAnnotations'],
+    version: string
+  ): AnnotationNotesInfo => {
+    const versesWithAnnotationNotes = new Set<string>()
+    const annotationNotesCountByVerse: { [key: string]: number } = {}
+
+    if (!verses?.length || !wordAnnotations) {
+      return { versesWithAnnotationNotes, annotationNotesCountByVerse }
+    }
+
+    const { Livre, Chapitre } = verses[0]
+
+    Object.values(wordAnnotations).forEach(annotation => {
+      if (annotation.version !== version || !annotation.noteId) return
+
+      annotation.ranges.forEach(range => {
+        const [bookStr, chapterStr, verseStr] = range.verseKey.split('-')
+        if (parseInt(bookStr) === Livre && parseInt(chapterStr) === Chapitre) {
+          versesWithAnnotationNotes.add(verseStr)
+          annotationNotesCountByVerse[verseStr] =
+            (annotationNotesCountByVerse[verseStr] || 0) + 1
         }
       })
-    }
+    })
+
+    return { versesWithAnnotationNotes, annotationNotesCountByVerse }
+  }
+
+  const getNotedVersesCount = (
+    verses: TVerse[],
+    notedVerses: NotesObj,
+    annotationNotesCountByVerse: { [key: string]: number }
+  ) => {
+    const newNotedVerses: { [key: string]: number } = {}
+    if (!verses?.length) return newNotedVerses
+
+    const { Livre, Chapitre } = verses[0]
+
+    // Count classic verse notes
+    Object.keys(notedVerses).forEach(key => {
+      // Ignore annotation notes (counted separately)
+      if (key.startsWith('annotation:')) return
+
+      const firstVerseRef = key.split('/')[0]
+      const [bookStr, chapterStr, verseStr] = firstVerseRef.split('-')
+      const bookNumber = parseInt(bookStr)
+      const chapterNumber = parseInt(chapterStr)
+
+      if (bookNumber === Livre && chapterNumber === Chapitre) {
+        newNotedVerses[verseStr] = (newNotedVerses[verseStr] || 0) + 1
+      }
+    })
+
+    // Add annotation notes (already calculated)
+    Object.entries(annotationNotesCountByVerse).forEach(([verseStr, count]) => {
+      newNotedVerses[verseStr] = (newNotedVerses[verseStr] || 0) + count
+    })
+
     return newNotedVerses
   }
 
@@ -884,7 +967,12 @@ const VersesRenderer = ({
     : []
 
   const taggedVerses = sortVersesToTags(highlightedVerses)
-  const notedVersesCount = getNotedVersesCount(verses, notedVerses)
+  const { versesWithAnnotationNotes, annotationNotesCountByVerse } = getAnnotationNotesInfo(
+    verses,
+    wordAnnotations,
+    version
+  )
+  const notedVersesCount = getNotedVersesCount(verses, notedVerses, annotationNotesCountByVerse)
   const notedVersesText = getNotedVersesText(verses, notedVerses)
   const linkedVersesCount = getLinkedVersesCount(verses, linkedVerses)
   const linkedVersesText = getLinkedVersesText(verses, linkedVerses)
@@ -999,6 +1087,7 @@ const VersesRenderer = ({
             notedVersesText={notedVersesText}
             linkedVersesCount={linkedVersesCount}
             linkedVersesText={linkedVersesText}
+            versesWithAnnotationNotes={versesWithAnnotationNotes}
             navigateToPericope={navigateToPericope}
             annotationMode={annotationMode}
             touchedVerseKey={touchedVerseKey}
@@ -1018,6 +1107,8 @@ const VersesRenderer = ({
                         top: window.scrollY + elementPosition - 100,
                       })
                     }
+                    // Trigger highlight recalculation after layout change
+                    window.dispatchEvent(new CustomEvent('layoutChanged'))
                   }, 400)
                 }}
               >
@@ -1031,6 +1122,10 @@ const VersesRenderer = ({
                 settings={settings}
                 onClick={() => {
                   dispatch({ type: ENTER_READONLY_MODE })
+                  // Trigger highlight recalculation after layout change
+                  setTimeout(() => {
+                    window.dispatchEvent(new CustomEvent('layoutChanged'))
+                  }, 100)
                 }}
               >
                 {translations.closeContext}

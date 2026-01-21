@@ -517,6 +517,24 @@ const firestoreMiddleware: Middleware = store => next => async action => {
         state
       )
     }
+
+    // Si des notes ont aussi changé (cascade delete from annotation), sync les notes
+    if (diffState?.user?.bible?.notes) {
+      await handleSyncWithRetry(
+        async () => {
+          await syncSubcollectionChanges(
+            userId,
+            'notes',
+            diffState.user.bible.notes,
+            user.bible.notes,
+            deleteMarker
+          )
+        },
+        userId,
+        'notes_sync_from_word_annotation',
+        state
+      )
+    }
     return result
   }
 

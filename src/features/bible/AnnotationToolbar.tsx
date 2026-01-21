@@ -34,6 +34,7 @@ interface SelectedAnnotation {
   text: string
   color: string
   type: AnnotationType
+  noteId?: string
 }
 
 const formatSelectionRange = (selection: SelectionRange): string => {
@@ -66,6 +67,7 @@ type Props = {
   onChangeAnnotationType?: (type: AnnotationType) => void
   onDeleteAnnotation?: () => void
   onClearAnnotationSelection?: () => void
+  onNotePress?: () => void
   isEnabled: boolean
 }
 
@@ -121,6 +123,7 @@ const AnnotationToolbar = ({
   onChangeAnnotationType,
   onDeleteAnnotation,
   onClearAnnotationSelection,
+  onNotePress,
   isEnabled,
 }: Props) => {
   const { t } = useTranslation()
@@ -222,6 +225,24 @@ const AnnotationToolbar = ({
                 <FadingText fontSize={16} numberOfLines={1} maxWidth={200}>
                   {selectedAnnotation.text}
                 </FadingText>
+              </AnimatedBox>
+              <AnimatedBox layout={LinearTransition} center>
+                <TouchableOpacity onPress={onNotePress} disabled={disabled}>
+                  <Box
+                    width={32}
+                    height={32}
+                    borderRadius={8}
+                    center
+                    borderColor="opacity5"
+                    borderWidth={1}
+                  >
+                    <FeatherIcon
+                      name={selectedAnnotation?.noteId ? 'file-text' : 'edit-3'}
+                      size={18}
+                      color={selectedAnnotation?.noteId ? 'primary' : 'quart'}
+                    />
+                  </Box>
+                </TouchableOpacity>
               </AnimatedBox>
               <AnimatedBox layout={LinearTransition} center>
                 <TouchableOpacity onPress={onDeleteAnnotation} disabled={disabled}>

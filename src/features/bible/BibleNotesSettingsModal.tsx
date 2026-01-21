@@ -3,10 +3,11 @@ import { useRouter } from 'expo-router'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import Modal from '~common/Modal'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
+import { RootState } from '~redux/modules/reducer'
 import { deleteNote } from '~redux/modules/user'
 import books from '~assets/bible_versions/books-desc'
 
@@ -21,6 +22,7 @@ const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
   const dispatch = useDispatch()
   const router = useRouter()
   const openInNewTab = useOpenInNewTab()
+  const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
 
   const close = useCallback(() => {
     ref?.current?.dismiss()
@@ -57,7 +59,23 @@ const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
 
   const navigateToBible = () => {
     if (!noteId) return
-    const [Livre, Chapitre, Verset] = noteId.split('/')[0].split('-')
+
+    let verseKey: string
+    let version: string | undefined
+
+    // Handle annotation notes
+    if (noteId.startsWith('annotation:')) {
+      const annotationId = noteId.replace('annotation:', '')
+      const annotation = wordAnnotations[annotationId]
+      if (!annotation) return
+      verseKey = annotation.ranges[0]?.verseKey
+      version = annotation.version
+    } else {
+      // Handle regular verse notes
+      verseKey = noteId.split('/')[0]
+    }
+
+    const [Livre, Chapitre, Verset] = verseKey.split('-')
     close()
     setTimeout(() => {
       router.push({
@@ -68,6 +86,7 @@ const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
           chapter: String(Chapitre),
           verse: String(Verset),
           focusVerses: JSON.stringify([Number(Verset)]),
+          ...(version && { version }),
         },
       })
     }, 300)

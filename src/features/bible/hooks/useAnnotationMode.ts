@@ -12,6 +12,7 @@ import {
 } from '~redux/modules/user/wordAnnotations'
 import { VersionCode } from '~state/tabs'
 import { RootState } from '~redux/modules/reducer'
+import generateUUID from '~helpers/generateUUID'
 
 export type AnnotationType = 'background' | 'underline' | 'circle'
 
@@ -31,6 +32,7 @@ export interface SelectedAnnotation {
   text: string
   color: string
   type: AnnotationType
+  noteId?: string
 }
 
 export interface AnnotationModeState {
@@ -73,6 +75,7 @@ export interface UseAnnotationModeReturn extends AnnotationModeState {
   changeAnnotationType: (type: AnnotationType) => void
   deleteSelectedAnnotation: () => void
   clearAnnotationSelection: () => void
+  updateSelectedAnnotationNoteId: (noteId: string | undefined) => void
 }
 
 const INITIAL_STATE: AnnotationModeState = {
@@ -165,8 +168,12 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
       text: r.text,
     }))
 
+    // Generate ID before dispatch so we can use it for auto-selection
+    const annotationId = generateUUID()
+
     reduxDispatch(
       addWordAnnotation({
+        id: annotationId,
         version: state.version,
         ranges,
         color: payload.color,
@@ -174,10 +181,19 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
       })
     )
 
+    // Auto-select the newly created annotation
+    const firstRange = ranges[0]
     setState(prev => ({
       ...prev,
       hasSelection: false,
       selection: null,
+      selectedAnnotation: {
+        id: annotationId,
+        verseKey: firstRange.verseKey,
+        text: firstRange.text,
+        color: payload.color,
+        type: payload.type,
+      },
     }))
   }
 
@@ -216,6 +232,7 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
         text: firstRange.text,
         color: annotation.color,
         type: annotation.type,
+        noteId: annotation.noteId,
       },
       hasSelection: false,
       selection: null,
@@ -254,6 +271,15 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
     }))
   }
 
+  const updateSelectedAnnotationNoteId = (noteId: string | undefined) => {
+    setState(prev => ({
+      ...prev,
+      selectedAnnotation: prev.selectedAnnotation
+        ? { ...prev.selectedAnnotation, noteId }
+        : null,
+    }))
+  }
+
   useEffect(() => {
     return () => {
       webViewRef.current = null
@@ -277,5 +303,6 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
     changeAnnotationType,
     deleteSelectedAnnotation,
     clearAnnotationSelection,
+    updateSelectedAnnotationNoteId,
   }
 }

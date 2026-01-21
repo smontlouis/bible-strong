@@ -7,6 +7,7 @@ import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Container from '~common/ui/Container'
 import FlatList from '~common/ui/FlatList'
+import AnnotationNoteModal from './AnnotationNoteModal'
 import BibleNoteItem from './BibleNoteItem'
 import BibleNoteModal from './BibleNoteModal'
 
@@ -36,8 +37,17 @@ const BibleVerseNotes = () => {
   const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
   const [selectedChip, setSelectedChip] = useState<Tag | null>(null)
   const [noteSettingsId, setNoteSettingsId] = useState<string | null>(null)
+  const [selectedAnnotationNote, setSelectedAnnotationNote] = useState<{
+    annotationId: string
+    text: string
+    verseKey: string
+    noteId: string
+    version: string
+  } | null>(null)
   const _notes = useSelector((state: RootState) => state.user.bible.notes)
+  const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
   const noteModal = useBottomSheetModal()
+  const annotationNoteModal = useBottomSheetModal()
   const tagsModal = useBottomSheetModal()
   const noteSettingsModal = useBottomSheetModal()
 
@@ -48,7 +58,7 @@ const BibleVerseNotes = () => {
 
   useEffect(() => {
     loadPage()
-  }, [verse, _notes])
+  }, [verse, _notes, wordAnnotations])
 
   const loadPage = async () => {
     let title
@@ -61,31 +71,75 @@ const BibleVerseNotes = () => {
       title = 'Notes'
     }
 
-    await Promise.all(
-      Object.entries(_notes)
-        .filter(note => {
-          if (verse) {
-            const firstVerseRef = note[0].split('/')[0]
-            return firstVerseRef === verse
-          }
-          return true
-        })
-        .map(note => {
-          const verseNumbers: any = {}
-          note[0].split('/').map(ref => {
-            verseNumbers[ref] = true
-          })
+    Object.entries(_notes).forEach(([noteKey, note]) => {
+      // Handle annotation notes (key format: annotation:{annotationId})
+      if (noteKey.startsWith('annotation:')) {
+        const annotationId = noteKey.replace('annotation:', '')
+        const annotation = wordAnnotations[annotationId]
 
-          const reference = verseToReference(verseNumbers)
-          filtered_notes.push({ noteId: note[0], reference, notes: note[1] })
-        })
-    )
+        if (!annotation) {
+          // Skip orphaned annotation notes
+          return
+        }
+
+        // If filtering by verse, check if annotation is on this verse
+        if (verse) {
+          const isOnVerse = annotation.ranges.some(range => range.verseKey === verse)
+          if (!isOnVerse) {
+            return
+          }
+        }
+
+        const firstRange = annotation.ranges[0]
+        const reference = `${verseToReference({ [firstRange.verseKey]: true })} (${t('annotation')})`
+        filtered_notes.push({ noteId: noteKey, reference, notes: note })
+        return
+      }
+
+      // Handle regular verse notes
+      // If filtering by verse, check if note is on this verse
+      if (verse) {
+        const firstVerseRef = noteKey.split('/')[0]
+        if (firstVerseRef !== verse) {
+          return
+        }
+      }
+
+      const verseNumbers: Record<string, boolean> = {}
+      noteKey.split('/').forEach(ref => {
+        verseNumbers[ref] = true
+      })
+
+      const reference = verseToReference(verseNumbers)
+      filtered_notes.push({ noteId: noteKey, reference, notes: note })
+    })
+
+    // Sort by date, newest first
+    filtered_notes.sort((a, b) => Number(b.notes.date) - Number(a.notes.date))
 
     setTitle(title)
     setNotes(filtered_notes)
   }
 
   const openNoteEditor = (noteId: string) => {
+    // Handle annotation notes with AnnotationNoteModal
+    if (noteId.startsWith('annotation:')) {
+      const annotationId = noteId.replace('annotation:', '')
+      const annotation = wordAnnotations[annotationId]
+      if (annotation) {
+        setSelectedAnnotationNote({
+          annotationId,
+          text: annotation.ranges.map(r => r.text).join(' '),
+          verseKey: annotation.ranges[0]?.verseKey || '',
+          noteId,
+          version: annotation.version,
+        })
+        annotationNoteModal.open()
+      }
+      return
+    }
+
+    // Handle regular verse notes with BibleNoteModal
     const noteVerses = noteId.split('/').reduce((accuRefs, key) => {
       accuRefs[key] = true
       return accuRefs
@@ -137,6 +191,14 @@ const BibleVerseNotes = () => {
         />
       )}
       <BibleNoteModal ref={noteModal.ref} noteVerses={noteVerses} />
+      <AnnotationNoteModal
+        ref={annotationNoteModal.ref}
+        annotationId={selectedAnnotationNote?.annotationId ?? null}
+        annotationText={selectedAnnotationNote?.text ?? ''}
+        annotationVerseKey={selectedAnnotationNote?.verseKey ?? ''}
+        existingNoteId={selectedAnnotationNote?.noteId}
+        version={selectedAnnotationNote?.version as any}
+      />
       <TagsModal
         ref={tagsModal.ref}
         onClosed={() => {}}

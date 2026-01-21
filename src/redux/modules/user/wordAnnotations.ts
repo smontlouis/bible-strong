@@ -68,6 +68,7 @@ export const removeWordAnnotationsInRangeAction = createAction(
 )
 
 export function addWordAnnotation({
+  id,
   version,
   ranges,
   color,
@@ -75,6 +76,7 @@ export function addWordAnnotation({
   noteId,
   tags,
 }: {
+  id?: string
   version: VersionCode
   ranges: AnnotationRange[]
   color: string
@@ -84,7 +86,7 @@ export function addWordAnnotation({
 }) {
   return (dispatch: Dispatch) => {
     const annotation: WordAnnotation = {
-      id: generateUUID(),
+      id: id ?? generateUUID(),
       version,
       ranges,
       color,
@@ -93,7 +95,7 @@ export function addWordAnnotation({
       ...(noteId && { noteId }),
       ...(tags && { tags }),
     }
-    return dispatch(addWordAnnotationAction(annotation))
+    dispatch(addWordAnnotationAction(annotation))
   }
 }
 

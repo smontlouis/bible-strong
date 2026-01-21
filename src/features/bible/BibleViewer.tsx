@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react-native'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ActivityIndicator } from 'react-native'
+import { ActivityIndicator, Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import Empty from '~common/Empty'
 import QuickTagsModal from '~common/QuickTagsModal'
@@ -54,6 +54,7 @@ import { OpenInNewTabButton } from './OpenInNewTabButton'
 import ResourcesModal from './resources/ResourceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
+import AnnotationNoteModal from './AnnotationNoteModal'
 import AnnotationToolbar from './AnnotationToolbar'
 import { useAnnotationMode } from './hooks'
 import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
@@ -134,6 +135,7 @@ const BibleViewer = ({
   // Annotation mode
   const annotationMode = useAnnotationMode()
   const annotationToolbar = useBottomSheet()
+  const annotationNoteModal = useBottomSheetModal()
 
   // Cross-version annotations modal
   const crossVersionModal = useBottomSheetModal()
@@ -218,6 +220,42 @@ const BibleViewer = ({
     annotationMode.exitMode()
     annotationToolbar.close()
   }, [annotationMode, annotationToolbar])
+
+  // Handler for opening annotation note modal
+  const handleAnnotationNotePress = useCallback(() => {
+    if (!annotationMode.selectedAnnotation) return
+    annotationNoteModal.open()
+  }, [annotationMode.selectedAnnotation, annotationNoteModal])
+
+  // Handler for updating annotation noteId after save/delete
+  const handleAnnotationNoteIdUpdate = useCallback(
+    (noteId: string | undefined) => {
+      annotationMode.updateSelectedAnnotationNoteId(noteId)
+    },
+    [annotationMode]
+  )
+
+  // Handler for deleting annotation with confirmation if it has a note
+  const handleDeleteAnnotation = useCallback(() => {
+    if (!annotationMode.selectedAnnotation) return
+
+    if (annotationMode.selectedAnnotation.noteId) {
+      Alert.alert(
+        t('Attention'),
+        t('Cette annotation a une note associée. Voulez-vous vraiment la supprimer ?'),
+        [
+          { text: t('Non'), style: 'cancel' },
+          {
+            text: t('Oui'),
+            style: 'destructive',
+            onPress: () => annotationMode.deleteSelectedAnnotation(),
+          },
+        ]
+      )
+    } else {
+      annotationMode.deleteSelectedAnnotation()
+    }
+  }, [annotationMode, t])
 
   // Keep annotation mode's verses reference updated
   const { enabled: annotationModeEnabled, setVerses: setAnnotationVerses } = annotationMode
@@ -807,9 +845,19 @@ const BibleViewer = ({
         selectedAnnotation={annotationMode.selectedAnnotation}
         onChangeAnnotationColor={annotationMode.changeAnnotationColor}
         onChangeAnnotationType={annotationMode.changeAnnotationType}
-        onDeleteAnnotation={annotationMode.deleteSelectedAnnotation}
+        onDeleteAnnotation={handleDeleteAnnotation}
         onClearAnnotationSelection={annotationMode.clearAnnotationSelection}
+        onNotePress={handleAnnotationNotePress}
         isEnabled={annotationMode.enabled}
+      />
+      <AnnotationNoteModal
+        ref={annotationNoteModal.getRef()}
+        annotationId={annotationMode.selectedAnnotation?.id ?? null}
+        annotationText={annotationMode.selectedAnnotation?.text ?? ''}
+        annotationVerseKey={annotationMode.selectedAnnotation?.verseKey ?? ''}
+        existingNoteId={annotationMode.selectedAnnotation?.noteId}
+        version={version}
+        onNoteIdUpdate={handleAnnotationNoteIdUpdate}
       />
       <CrossVersionAnnotationsModal
         bottomSheetRef={crossVersionModal.getRef()}

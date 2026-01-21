@@ -39,6 +39,7 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
   const [noteSettingsId, setNoteSettingsId] = useState<string | null>(null)
 
   const _notes = useSelector((state: RootState) => state.user.bible.notes)
+  const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
   const tagsModal = useBottomSheetModal()
   const noteSettingsModal = useBottomSheetModal()
 
@@ -49,16 +50,25 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
     },
     [noteSettingsModal]
   )
-
-  useEffect(() => {
-    loadNotes()
-  }, [_notes])
-
   const loadNotes = async () => {
     const formattedNotes: TNote[] = []
 
     await Promise.all(
       Object.entries(_notes).map(([noteKey, note]) => {
+        // Handle annotation notes (key format: annotation:{annotationId})
+        if (noteKey.startsWith('annotation:')) {
+          const annotationId = noteKey.replace('annotation:', '')
+          const annotation = wordAnnotations[annotationId]
+          if (annotation) {
+            const firstRange = annotation.ranges[0]
+            const reference = `${verseToReference({ [firstRange.verseKey]: true })} (${t('annotation')})`
+            formattedNotes.push({ noteId: noteKey, reference, notes: note })
+          }
+          // Skip orphaned annotation notes (annotation was deleted but note somehow remained)
+          return
+        }
+
+        // Handle regular verse notes
         const verseNumbers: Record<string, boolean> = {}
         noteKey.split('/').forEach(ref => {
           verseNumbers[ref] = true
@@ -74,6 +84,10 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
 
     setNotes(formattedNotes)
   }
+
+  useEffect(() => {
+    loadNotes()
+  }, [_notes, wordAnnotations])
 
   const openNoteDetail = useCallback(
     (noteId: string) => {
@@ -128,13 +142,13 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
         />
       )}
       <TagsModal
-        ref={tagsModal.ref}
+        ref={tagsModal.getRef()}
         onClosed={() => {}}
         onSelected={(chip: Tag | null) => setSelectedChip(chip)}
         selectedChip={selectedChip}
       />
       <NotesSettingsModal
-        ref={noteSettingsModal.ref}
+        ref={noteSettingsModal.getRef()}
         noteId={noteSettingsId}
         onClosed={() => setNoteSettingsId(null)}
         notesAtom={notesAtom}

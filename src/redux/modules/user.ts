@@ -770,6 +770,14 @@ const userSlice = createSlice({
     })
     builder.addCase(removeWordAnnotationAction, (state, action) => {
       const id = action.payload.id
+      const annotation = state.bible.wordAnnotations[id]
+
+      // Cascade delete: remove associated note if it exists
+      if (annotation?.noteId && state.bible.notes[annotation.noteId]) {
+        delete state.bible.notes[annotation.noteId]
+        removeEntityInTags(state, 'notes', annotation.noteId)
+      }
+
       delete state.bible.wordAnnotations[id]
       removeEntityInTags(state, 'wordAnnotations', id)
     })

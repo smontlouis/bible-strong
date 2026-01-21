@@ -202,6 +202,7 @@ interface Props {
   fadePosition?: 'top' | 'bottom'
   isLastFocusVerse?: boolean
   hasWordAnnotations?: boolean
+  hasAnnotationNotes?: boolean
   otherVersionAnnotations?: CrossVersionAnnotation[]
   // Prop for touch visual feedback (managed by parent via useTouchSelection)
   isTouched?: boolean
@@ -235,6 +236,7 @@ const Verse = ({
   fadePosition,
   isLastFocusVerse,
   hasWordAnnotations,
+  hasAnnotationNotes,
   otherVersionAnnotations,
   isTouched = false,
   annotationMode = false,
@@ -454,7 +456,7 @@ const Verse = ({
             isDisabled={annotationMode}
           />
         )}
-        {notesCount && settings.notesDisplay !== 'inline' && !isSelectionMode && (
+        {notesCount && (settings.notesDisplay !== 'inline' || hasAnnotationNotes) && !isSelectionMode && (
           <NotesCount
             settings={settings}
             onClick={navigateToVerseNotes}

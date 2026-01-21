@@ -35,6 +35,10 @@ const CloseContextTag = ({ settings, isDisabled }: Props) => {
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
     dispatch({ type: ENTER_READONLY_MODE })
+    // Trigger highlight recalculation after layout change
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('layoutChanged'))
+    }, 100)
   }
 
   return (
