@@ -59,10 +59,10 @@ export default function NoteEditorDOMComponent({
   // Set initial content only on mount (uncontrolled)
   useEffect(() => {
     if (titleRef.current) {
-      titleRef.current.textContent = defaultTitle
+      titleRef.current.innerText = defaultTitle
     }
     if (descriptionRef.current) {
-      descriptionRef.current.textContent = defaultDescription
+      descriptionRef.current.innerText = defaultDescription
     }
   }, []) // Empty deps = only on mount
 
@@ -75,11 +75,11 @@ export default function NoteEditorDOMComponent({
 
   // Appel direct des native actions (async par nature)
   const handleTitleInput = () => {
-    onTitleChange(titleRef.current?.textContent || '')
+    onTitleChange(titleRef.current?.innerText || '')
   }
 
   const handleDescriptionInput = () => {
-    onDescriptionChange(descriptionRef.current?.textContent || '')
+    onDescriptionChange(descriptionRef.current?.innerText || '')
   }
 
   // Wrap focus/blur to avoid passing DOM event objects (not serializable)

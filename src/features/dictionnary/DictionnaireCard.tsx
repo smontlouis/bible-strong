@@ -14,8 +14,9 @@ import { cleanParams, wp } from '~helpers/utils'
 import truncate from '~helpers/truncate'
 import { useRouter } from 'expo-router'
 import { useAtomValue } from 'jotai/react'
+import { getDefaultStore } from 'jotai/vanilla'
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
-import { openedFromTabAtom } from '~features/studies/atom'
+import { currentStudyIdAtom, openedFromTabAtom } from '~features/studies/atom'
 import { StudyNavigateBibleType } from '~common/types'
 import { Theme } from '@emotion/react'
 
@@ -78,11 +79,14 @@ const DictionnaireCard = ({ dictionnaireRef, isSelectionMode }: Props) => {
 
   const openDictionnaire = () => {
     if (isSelectionMode) {
+      const store = getDefaultStore()
+      const currentStudyId = store.get(currentStudyIdAtom)
       const pathname = openedFromTab ? '/' : '/edit-study'
       router.dismissTo({
         pathname,
         params: {
           ...cleanParams(),
+          studyId: currentStudyId,
           type: isSelectionMode,
           title: word,
         },
