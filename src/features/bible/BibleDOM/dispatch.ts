@@ -34,3 +34,6 @@ export const OPEN_CROSS_VERSION_MODAL = 'OPEN_CROSS_VERSION_MODAL'
 
 // Verse tags modal
 export const OPEN_VERSE_TAGS_MODAL = 'OPEN_VERSE_TAGS_MODAL'
+
+// Verse notes modal
+export const OPEN_VERSE_NOTES_MODAL = 'OPEN_VERSE_NOTES_MODAL'

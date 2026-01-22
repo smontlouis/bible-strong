@@ -1,10 +1,8 @@
-import { useLocalSearchParams } from 'expo-router'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 
 import Empty from '~common/Empty'
-import Header from '~common/Header'
 import Container from '~common/ui/Container'
 import FlatList from '~common/ui/FlatList'
 import AnnotationNoteModal from './AnnotationNoteModal'
@@ -27,13 +25,8 @@ type TNote = {
 }
 
 const BibleVerseNotes = () => {
-  const params = useLocalSearchParams<{ withBack?: string; verse?: string }>()
-  const withBack = params.withBack === 'true'
-  const verse = params.verse || ''
   const { t } = useTranslation()
 
-  const [title, setTitle] = useState('')
-  const [notes, setNotes] = useState<TNote[]>([])
   const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
   const [selectedChip, setSelectedChip] = useState<Tag | null>(null)
   const [noteSettingsId, setNoteSettingsId] = useState<string | null>(null)
@@ -44,81 +37,56 @@ const BibleVerseNotes = () => {
     noteId: string
     version: string
   } | null>(null)
-  const _notes = useSelector((state: RootState) => state.user.bible.notes)
+
+  const notesObj = useSelector((state: RootState) => state.user.bible.notes)
   const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
+
   const noteModal = useBottomSheetModal()
   const annotationNoteModal = useBottomSheetModal()
   const tagsModal = useBottomSheetModal()
   const noteSettingsModal = useBottomSheetModal()
 
-  const openNoteSettings = (noteId: string) => {
-    setNoteSettingsId(noteId)
-    noteSettingsModal.open()
-  }
+  // Compute notes directly (React Compiler handles memoization)
+  const notes: TNote[] = []
 
-  useEffect(() => {
-    loadPage()
-  }, [verse, _notes, wordAnnotations])
+  Object.entries(notesObj).forEach(([noteKey, note]) => {
+    // Handle annotation notes (key format: annotation:{annotationId})
+    if (noteKey.startsWith('annotation:')) {
+      const annotationId = noteKey.replace('annotation:', '')
+      const annotation = wordAnnotations[annotationId]
 
-  const loadPage = async () => {
-    let title
-    const filtered_notes: TNote[] = []
-
-    if (verse) {
-      title = verseToReference(verse)
-      title = `${t('Notes sur')} ${title}...`
-    } else {
-      title = 'Notes'
-    }
-
-    Object.entries(_notes).forEach(([noteKey, note]) => {
-      // Handle annotation notes (key format: annotation:{annotationId})
-      if (noteKey.startsWith('annotation:')) {
-        const annotationId = noteKey.replace('annotation:', '')
-        const annotation = wordAnnotations[annotationId]
-
-        if (!annotation) {
-          // Skip orphaned annotation notes
-          return
-        }
-
-        // If filtering by verse, check if annotation is on this verse
-        if (verse) {
-          const isOnVerse = annotation.ranges.some(range => range.verseKey === verse)
-          if (!isOnVerse) {
-            return
-          }
-        }
-
-        const firstRange = annotation.ranges[0]
-        const reference = `${verseToReference({ [firstRange.verseKey]: true })} (${t('annotation')})`
-        filtered_notes.push({ noteId: noteKey, reference, notes: note })
+      if (!annotation) {
+        // Skip orphaned annotation notes
         return
       }
 
-      // Handle regular verse notes
-      // If filtering by verse, check if note is on this verse
-      if (verse) {
-        const firstVerseRef = noteKey.split('/')[0]
-        if (firstVerseRef !== verse) {
-          return
-        }
-      }
+      const firstRange = annotation.ranges[0]
+      const reference = `${verseToReference({ [firstRange.verseKey]: true })} (${t('annotation')})`
+      notes.push({ noteId: noteKey, reference, notes: note })
+      return
+    }
 
-      const verseNumbers: Record<string, boolean> = {}
-      noteKey.split('/').forEach(ref => {
-        verseNumbers[ref] = true
-      })
-
-      const reference = verseToReference(verseNumbers)
-      filtered_notes.push({ noteId: noteKey, reference, notes: note })
+    // Handle regular verse notes
+    const verseNumbers: Record<string, boolean> = {}
+    noteKey.split('/').forEach(ref => {
+      verseNumbers[ref] = true
     })
 
-    // Sort by date, newest first
-    filtered_notes.sort((a, b) => Number(b.notes.date) - Number(a.notes.date))
+    const reference = verseToReference(verseNumbers)
+    notes.push({ noteId: noteKey, reference, notes: note })
+  })
 
-    setTitle(title)
-    setNotes(filtered_notes)
+  // Sort by date, newest first
+  notes.sort((a, b) => Number(b.notes.date) - Number(a.notes.date))
+
+  // Filter by selected tag
+  const filteredNotes = selectedChip
+    ? notes.filter(s => s.notes.tags && s.notes.tags[selectedChip.id])
+    : notes
+
+  const openNoteSettings = (noteId: string) => {
+    setNoteSettingsId(noteId)
+    noteSettingsModal.open()
   }
 
   const openNoteEditor = (noteId: string) => {
@@ -140,48 +108,33 @@ const BibleVerseNotes = () => {
     }
 
     // Handle regular verse notes with BibleNoteModal
-    const noteVerses = noteId.split('/').reduce((accuRefs, key) => {
-      accuRefs[key] = true
-      return accuRefs
-    }, {} as any)
+    const verses = noteId.split('/').reduce((acc, key) => {
+      acc[key] = true
+      return acc
+    }, {} as VerseIds)
 
-    setNoteVerses(noteVerses)
+    setNoteVerses(verses)
     noteModal.open()
   }
 
-  const renderNote = ({ item, index }: { item: TNote; index: number }) => {
-    return (
-      <BibleNoteItem
-        key={index}
-        item={item}
-        onPress={openNoteEditor}
-        onMenuPress={openNoteSettings}
-      />
-    )
-  }
-
-  const filteredNotes = notes.filter(s =>
-    selectedChip ? s.notes.tags && s.notes.tags[selectedChip.id] : true
+  const renderNote = ({ item }: { item: TNote }) => (
+    <BibleNoteItem item={item} onPress={openNoteEditor} onMenuPress={openNoteSettings} />
   )
 
   return (
     <Container>
-      {verse ? (
-        <Header hasBackButton={withBack} title={title || t('Chargement...')} />
-      ) : (
-        <TagsHeader
-          title="Notes"
-          setIsOpen={tagsModal.open}
-          isOpen={false}
-          selectedChip={selectedChip}
-          hasBackButton
-        />
-      )}
+      <TagsHeader
+        title="Notes"
+        setIsOpen={tagsModal.open}
+        isOpen={false}
+        selectedChip={selectedChip}
+        hasBackButton
+      />
       {filteredNotes.length ? (
         <FlatList
           data={filteredNotes}
           renderItem={renderNote}
-          keyExtractor={(item: TNote, index: number) => index.toString()}
+          keyExtractor={(item: TNote) => item.noteId}
           style={{ paddingBottom: 30 }}
         />
       ) : (
@@ -190,9 +143,9 @@ const BibleVerseNotes = () => {
           message={t("Vous n'avez pas encore de notes...")}
         />
       )}
-      <BibleNoteModal ref={noteModal.ref} noteVerses={noteVerses} />
+      <BibleNoteModal ref={noteModal.getRef()} noteVerses={noteVerses} />
       <AnnotationNoteModal
-        ref={annotationNoteModal.ref}
+        ref={annotationNoteModal.getRef()}
         annotationId={selectedAnnotationNote?.annotationId ?? null}
         annotationText={selectedAnnotationNote?.text ?? ''}
         annotationVerseKey={selectedAnnotationNote?.verseKey ?? ''}
@@ -200,13 +153,13 @@ const BibleVerseNotes = () => {
         version={selectedAnnotationNote?.version as any}
       />
       <TagsModal
-        ref={tagsModal.ref}
+        ref={tagsModal.getRef()}
         onClosed={() => {}}
         onSelected={(chip: Tag | null) => setSelectedChip(chip)}
         selectedChip={selectedChip}
       />
       <BibleNotesSettingsModal
-        ref={noteSettingsModal.ref}
+        ref={noteSettingsModal.getRef()}
         noteId={noteSettingsId}
         onClosed={() => setNoteSettingsId(null)}
       />

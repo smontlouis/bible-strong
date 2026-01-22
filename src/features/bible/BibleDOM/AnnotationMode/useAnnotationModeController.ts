@@ -42,7 +42,9 @@ interface UseAnnotationModeControllerProps {
   dispatch: Dispatch
   // Selection state (managed by parent)
   selection: SelectionRange | null
-  setSelection: (value: SelectionRange | null | ((prev: SelectionRange | null) => SelectionRange | null)) => void
+  setSelection: (
+    value: SelectionRange | null | ((prev: SelectionRange | null) => SelectionRange | null)
+  ) => void
   getTokens: (verseKey: string, text: string) => WordToken[]
   // Highlight data
   highlightRects: HighlightRect[]

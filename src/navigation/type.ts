@@ -47,12 +47,7 @@ type BibleVerseDetailScreenProps = {
   insets: EdgeInsets
 }
 
-type BibleVerseNotesScreenProps = {
-  book?: number
-  chapter?: number
-  verse: string
-  withBack: boolean
-}
+type BibleVerseNotesScreenProps = undefined
 
 type BibleVerseLinksScreenProps = {
   verse?: string

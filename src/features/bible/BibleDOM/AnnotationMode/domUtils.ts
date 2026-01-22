@@ -19,10 +19,7 @@ export interface CaretInfo {
  * @param clientX - X coordinate in screen/client space
  * @param clientY - Y coordinate in screen/client space
  */
-export function getCaretInfoFromPoint(
-  clientX: number,
-  clientY: number
-): CaretInfo | null {
+export function getCaretInfoFromPoint(clientX: number, clientY: number): CaretInfo | null {
   const viewportY = clientY
   const elements = document.elementsFromPoint(clientX, viewportY)
 

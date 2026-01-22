@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import distanceInWords from 'date-fns/formatDistance'
 import styled from '@emotion/native'
 
-import Box from '~common/ui/Box'
+import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { LinkBox } from '~common/Link'
@@ -22,6 +22,7 @@ import type { RootState } from '~redux/modules/reducer'
 import type { GroupedWordAnnotation } from '~redux/selectors/bible'
 import type { TagsObj } from '~common/types'
 import { EMPTY_ARRAY } from '~helpers/emptyReferences'
+import { Chip } from '~common/ui/NewChip'
 
 const DateText = styled.Text(({ theme }) => ({
   color: theme.colors.tertiary,
@@ -78,16 +79,20 @@ const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
     >
       <AnnotationContainer>
         <Box row style={{ marginBottom: 10 }} alignItems="center">
-          <Box flex row alignItems="center">
-            <HighlightTypeIndicator
-              color={item.color}
-              type={item.type as 'background' | 'underline'}
-              size={15}
-            />
-            <Text fontSize={14} marginLeft={10} title>
-              {title} ({t('annotation')}) - {item.version}
-            </Text>
-          </Box>
+          <HStack flex row alignItems="center" gap={10}>
+            <HStack>
+              <HighlightTypeIndicator
+                color={item.color}
+                type={item.type as 'background' | 'underline'}
+                size={15}
+              />
+              <Text fontSize={14} marginLeft={10} title>
+                {title}
+              </Text>
+            </HStack>
+
+            <Chip>{item.version}</Chip>
+          </HStack>
           <DateText style={{ fontSize: 10 }}>
             {t('Il y a {{formattedDate}}', { formattedDate })}
           </DateText>
@@ -102,7 +107,7 @@ const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
           </LinkBox>
         </Box>
         <Text fontSize={14} marginBottom={15}>
-          {`"${item.text}"`}
+          {`...${item.text}...`}
         </Text>
         {item.tags && Object.keys(item.tags).length > 0 && <TagList tags={item.tags as TagsObj} />}
       </AnnotationContainer>

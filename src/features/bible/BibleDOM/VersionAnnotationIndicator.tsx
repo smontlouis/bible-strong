@@ -54,8 +54,6 @@ const VersionAnnotationIndicator = ({ versions, settings, onClick, isDisabled }:
         settings={settings}
         style={{
           fontSize: scaleFontSize(12, settings.fontSizeScale),
-          fontWeight: 'bold',
-          color: settings.colors[settings.theme].grey,
         }}
       >
         {displayVersion}

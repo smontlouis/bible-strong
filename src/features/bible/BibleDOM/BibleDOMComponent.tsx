@@ -774,8 +774,7 @@ const VersesRenderer = ({
         const [bookStr, chapterStr, verseStr] = range.verseKey.split('-')
         if (parseInt(bookStr) === Livre && parseInt(chapterStr) === Chapitre) {
           versesWithAnnotationNotes.add(verseStr)
-          annotationNotesCountByVerse[verseStr] =
-            (annotationNotesCountByVerse[verseStr] || 0) + 1
+          annotationNotesCountByVerse[verseStr] = (annotationNotesCountByVerse[verseStr] || 0) + 1
         }
       })
     })
@@ -888,7 +887,8 @@ const VersesRenderer = ({
         const verseNumber = lastVerseRef.split('-')[2]
 
         if (bookNumber === Livre && chapterNumber === Chapitre) {
-          const title = value.customTitle || value.ogData?.title || value.url
+          const formattedUrl = value.url?.replace(/^https?:\/\//, '')
+          const title = value.customTitle || value.ogData?.title || formattedUrl
           const verseToPush: LinkedVerse = {
             key,
             verses:

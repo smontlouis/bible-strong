@@ -42,7 +42,6 @@ import {
   NAVIGATE_TO_STRONG,
   NAVIGATE_TO_TAG,
   NAVIGATE_TO_VERSE_LINKS,
-  NAVIGATE_TO_VERSE_NOTES,
   NAVIGATE_TO_VERSION,
   OPEN_BOOKMARK_MODAL,
   OPEN_HIGHLIGHT_TAGS,
@@ -55,6 +54,7 @@ import {
   TOGGLE_SELECTED_VERSE,
   OPEN_CROSS_VERSION_MODAL,
   OPEN_VERSE_TAGS_MODAL,
+  OPEN_VERSE_NOTES_MODAL,
 } from './dispatch'
 import type { CrossVersionAnnotation } from '~redux/selectors/bible'
 import type { AnnotationType, WordPosition, SelectionRange } from '../hooks/useAnnotationMode'
@@ -145,6 +145,8 @@ export type WebViewProps = {
   taggedVersesInChapter?: Record<number, number>
   versesWithNonHighlightTags?: Record<number, boolean>
   onOpenVerseTagsModal?: (verseKey: string) => void
+  // Verse notes modal
+  onOpenVerseNotesModal?: (verseKey: string) => void
   // Enter annotation mode from double-tap
   onEnterAnnotationMode?: () => void
 }
@@ -274,14 +276,10 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
 
         break
       }
-      case NAVIGATE_TO_VERSE_NOTES: {
-        router.push({
-          pathname: '/bible-verse-notes',
-          params: {
-            verse: action.payload,
-            withBack: 'true',
-          },
-        })
+      case OPEN_VERSE_NOTES_MODAL: {
+        // DOM requests to open the verse notes modal
+        const { onOpenVerseNotesModal } = props
+        onOpenVerseNotesModal?.(action.payload)
         break
       }
       case NAVIGATE_TO_VERSE_LINKS: {

@@ -241,9 +241,8 @@ const TagScreen = () => {
   const createTabGroupFromTag = useCreateTabGroupFromTag()
 
   // Annotation settings state
-  const [annotationSettingsData, setAnnotationSettingsData] = useState<GroupedWordAnnotation | null>(
-    null
-  )
+  const [annotationSettingsData, setAnnotationSettingsData] =
+    useState<GroupedWordAnnotation | null>(null)
   const {
     ref: annotationSettingsRef,
     open: openAnnotationSettings,
@@ -256,24 +255,20 @@ const TagScreen = () => {
   }, [annotationSettingsData, openAnnotationSettings])
 
   const handleDeleteAnnotation = () => {
-    Alert.alert(
-      t('Attention'),
-      t('Êtes-vous vraiment sur de supprimer cette annotation ?'),
-      [
-        { text: t('Non'), onPress: () => null, style: 'cancel' },
-        {
-          text: t('Oui'),
-          onPress: () => {
-            if (annotationSettingsData) {
-              dispatch(removeWordAnnotationAction(annotationSettingsData.id))
-            }
-            setAnnotationSettingsData(null)
-            closeAnnotationSettings()
-          },
-          style: 'destructive',
+    Alert.alert(t('Attention'), t('Êtes-vous vraiment sur de supprimer cette annotation ?'), [
+      { text: t('Non'), onPress: () => null, style: 'cancel' },
+      {
+        text: t('Oui'),
+        onPress: () => {
+          if (annotationSettingsData) {
+            dispatch(removeWordAnnotationAction(annotationSettingsData.id))
+          }
+          setAnnotationSettingsData(null)
+          closeAnnotationSettings()
         },
-      ]
-    )
+        style: 'destructive',
+      },
+    ])
   }
 
   const handleDelete = () => {

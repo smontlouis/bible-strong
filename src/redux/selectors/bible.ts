@@ -509,9 +509,12 @@ export const makeTaggedItemsForVerseSelector = () =>
       selectWordAnnotations,
       selectNotes,
       selectLinks,
-      (_: RootState, verseKey: string) => verseKey,
+      (_: RootState, verseKey: string, currentVersion?: string) => ({
+        verseKey,
+        currentVersion,
+      }),
     ],
-    (highlights, wordAnnotations, notes, links, verseKey): TaggedItem[] => {
+    (highlights, wordAnnotations, notes, links, { verseKey, currentVersion }): TaggedItem[] => {
       const items: TaggedItem[] = []
       const [bookStr, chapterStr, verseStr] = verseKey.split('-')
       const book = parseInt(bookStr)
@@ -524,8 +527,10 @@ export const makeTaggedItemsForVerseSelector = () =>
         items.push({ type: 'highlight', data: highlight, verseKey })
       }
 
-      // Word annotations on this verse (any version)
+      // Word annotations on this verse (filtered by version if provided)
       Object.entries(wordAnnotations).forEach(([id, annotation]) => {
+        // Filter by version if specified
+        if (currentVersion && annotation.version !== currentVersion) return
         if (annotation.tags && Object.keys(annotation.tags).length > 0) {
           // Check if the annotation is on this verse
           const matchesVerse = annotation.ranges.some(r => {
@@ -590,14 +595,18 @@ export const makeTaggedVersesInChapterSelector = () =>
       selectWordAnnotations,
       selectNotes,
       selectLinks,
-      (_: RootState, bookNumber: number, chapter: number) => ({ bookNumber, chapter }),
+      (_: RootState, bookNumber: number, chapter: number, currentVersion: string) => ({
+        bookNumber,
+        chapter,
+        currentVersion,
+      }),
     ],
     (
       highlights,
       wordAnnotations,
       notes,
       links,
-      { bookNumber, chapter }
+      { bookNumber, chapter, currentVersion }
     ): TaggedVersesInChapterResult => {
       const counts: Record<number, number> = {}
       const hasNonHighlightTags: Record<number, boolean> = {}
@@ -615,8 +624,10 @@ export const makeTaggedVersesInChapterSelector = () =>
       }
 
       // Check word annotations (COUNTS for hasNonHighlightTags)
+      // Filter by version - annotations from other versions are shown in VersionAnnotationIndicator
       for (const id in wordAnnotations) {
         const annotation = wordAnnotations[id]
+        if (annotation.version !== currentVersion) continue
         if (annotation.tags && Object.keys(annotation.tags).length > 0) {
           for (const range of annotation.ranges) {
             if (range.verseKey.startsWith(prefix)) {
@@ -660,5 +671,73 @@ export const makeTaggedVersesInChapterSelector = () =>
       }
 
       return { counts, hasNonHighlightTags }
+    }
+  )
+
+// Type for notes on a specific verse
+export type NoteItem = {
+  id: string
+  title: string
+  description: string
+  date: number
+  tags?: TagsObj
+  isAnnotationNote: boolean
+  // For annotation notes
+  annotationId?: string
+  annotationText?: string
+  annotationVerseKey?: string
+  version?: VersionCode
+}
+
+// Selector factory for getting all notes on a specific verse
+export const makeNotesForVerseSelector = () =>
+  createSelector(
+    [selectNotes, selectWordAnnotations, (_: RootState, verseKey: string) => verseKey],
+    (notes, wordAnnotations, verseKey): NoteItem[] => {
+      const items: NoteItem[] = []
+
+      // 1. Regular notes that include this verse
+      Object.entries(notes).forEach(([noteKey, note]) => {
+        // Skip annotation notes
+        if (noteKey.startsWith('annotation:')) return
+
+        // Note keys can be "1-1-1" or "1-1-1/1-1-2" for verse ranges
+        const versesInKey = noteKey.split('/')
+        if (versesInKey.includes(verseKey)) {
+          items.push({
+            id: noteKey,
+            title: note.title,
+            description: note.description,
+            date: note.date,
+            tags: note.tags,
+            isAnnotationNote: false,
+          })
+        }
+      })
+
+      // 2. Annotation notes on this verse
+      Object.entries(wordAnnotations).forEach(([annotationId, annotation]) => {
+        const isOnVerse = annotation.ranges.some(r => r.verseKey === verseKey)
+        if (isOnVerse && annotation.noteId) {
+          const note = notes[annotation.noteId]
+          if (note) {
+            items.push({
+              id: annotation.noteId,
+              title: note.title,
+              description: note.description,
+              date: note.date,
+              tags: note.tags,
+              isAnnotationNote: true,
+              annotationId,
+              annotationText: annotation.ranges.map(r => r.text).join(' '),
+              annotationVerseKey: annotation.ranges[0]?.verseKey,
+              version: annotation.version,
+            })
+          }
+        }
+      })
+
+      // Sort by date (newest first)
+      return items.sort((a, b) => b.date - a.date)
     }
   )

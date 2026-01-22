@@ -4,24 +4,25 @@ import { RootState } from '~redux/modules/reducer'
 import { SvgProps } from 'react-native-svg'
 import { getDisabledStyles } from './disabledStyles'
 
-// @ts-ignore
-const SvgContainer = styled<RootStyles & SvgProps & { color: string }>(
-  'svg'
-  // @ts-ignore
-)(({ color }) => ({
+const SvgContainer = styled<RootStyles & SvgProps & { color: string }>('svg')(({ color }) => ({
   cursor: 'pointer',
   color: color,
 }))
 
-// @ts-ignore
-const Div = styled<RootStyles & { onClick?: () => void; isDisabled?: boolean }>('div')(({ settings: { theme }, isDisabled }) => ({
-  position: 'relative',
-  display: 'inline-block',
-  transform: 'translateY(5px)',
-  marginRight: '8px',
-  cursor: 'pointer',
-  ...getDisabledStyles(isDisabled),
-}))
+const Div = styled<RootStyles & { onClick?: () => void; isDisabled?: boolean }>('div')(
+  ({ settings: { theme }, isDisabled }) => ({
+    position: 'relative',
+    display: 'inline-block',
+    transform: 'translateY(5px)',
+    marginRight: '8px',
+    cursor: 'pointer',
+    transition: 'opacity 0.2s ease-in-out',
+    '&:active': {
+      opacity: 0.6,
+    },
+    ...getDisabledStyles(isDisabled),
+  })
+)
 
 interface Props {
   color: string

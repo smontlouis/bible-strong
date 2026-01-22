@@ -245,7 +245,7 @@ const AnnotationToolbar = ({
                     <FeatherIcon
                       name={selectedAnnotation?.noteId ? 'file-text' : 'file-plus'}
                       size={18}
-                      color={selectedAnnotation?.noteId ? 'primary' : 'default'}
+                      color={selectedAnnotation?.noteId ? 'primary' : 'grey'}
                     />
                   </Box>
                 </TouchableOpacity>
@@ -268,7 +268,7 @@ const AnnotationToolbar = ({
                       <FeatherIcon
                         name="tag"
                         size={18}
-                        color={tagsCount > 0 ? 'primary' : 'default'}
+                        color={tagsCount > 0 ? 'primary' : 'grey'}
                       />
                     </Box>
                     {tagsCount > 0 && (

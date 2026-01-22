@@ -3,13 +3,13 @@ import { styled } from 'goober'
 
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
-  NAVIGATE_TO_VERSE_NOTES,
   NAVIGATE_TO_VERSE_LINKS,
   NAVIGATE_TO_BIBLE_NOTE,
   OPEN_BOOKMARK_MODAL,
   NAVIGATE_TO_BIBLE_LINK,
   OPEN_CROSS_VERSION_MODAL,
   OPEN_VERSE_TAGS_MODAL,
+  OPEN_VERSE_NOTES_MODAL,
 } from './dispatch'
 import VersionAnnotationIndicator, { CrossVersionAnnotation } from './VersionAnnotationIndicator'
 
@@ -252,10 +252,10 @@ const Verse = ({
   const dispatch = useDispatch()
   const translations = useTranslations()
 
-  const navigateToVerseNotes = () => {
+  const openVerseNotesModal = () => {
     const { Livre, Chapitre, Verset } = verse
     dispatch({
-      type: NAVIGATE_TO_VERSE_NOTES,
+      type: OPEN_VERSE_NOTES_MODAL,
       payload: `${Livre}-${Chapitre}-${Verset}`,
     })
   }
@@ -472,14 +472,16 @@ const Verse = ({
             isDisabled={annotationMode}
           />
         )}
-        {notesCount && (settings.notesDisplay !== 'inline' || hasAnnotationNotes) && !isSelectionMode && (
-          <NotesCount
-            settings={settings}
-            onClick={navigateToVerseNotes}
-            count={notesCount}
-            isDisabled={annotationMode}
-          />
-        )}
+        {notesCount &&
+          (settings.notesDisplay !== 'inline' || hasAnnotationNotes) &&
+          !isSelectionMode && (
+            <NotesCount
+              settings={settings}
+              onClick={openVerseNotesModal}
+              count={notesCount}
+              isDisabled={annotationMode}
+            />
+          )}
         {linksCount && (settings.linksDisplay || 'inline') !== 'inline' && !isSelectionMode && (
           <LinksCount
             settings={settings}

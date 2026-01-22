@@ -4,38 +4,31 @@ import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 import styled from '@emotion/native'
 import Modal from '~common/Modal'
-import ModalHeader from '~common/ModalHeader'
-import Box, { HStack, VStack } from '~common/ui/Box'
+import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import books from '~assets/bible_versions/books-desc'
 import type { CrossVersionAnnotation } from '~redux/selectors/bible'
 import { VersionCode } from '~state/tabs'
+import ModalHeader from '~common/ModalHeader'
+import { Chip } from '~common/ui/NewChip'
 
-const VersionCard = styled(TouchableOpacity)(({ theme }) => ({
+const ItemRow = styled.View(({ theme }) => ({
   flexDirection: 'row',
   alignItems: 'center',
-  padding: 16,
-  marginBottom: 8,
-  marginHorizontal: 16,
+  padding: 15,
+  borderBottomWidth: 1,
+  borderBottomColor: theme.colors.border,
+}))
+
+const IconContainer = styled.View(({ theme }) => ({
+  width: 36,
+  height: 36,
   borderRadius: 12,
   backgroundColor: theme.colors.lightGrey,
-}))
-
-const VersionBadge = styled.View(({ theme }) => ({
-  backgroundColor: theme.colors.primary,
-  paddingHorizontal: 10,
-  paddingVertical: 4,
-  borderRadius: 6,
-}))
-
-const ActionButton = styled(TouchableOpacity)(({ theme }) => ({
-  flexDirection: 'row',
   alignItems: 'center',
-  paddingHorizontal: 12,
-  paddingVertical: 8,
-  borderRadius: 8,
-  backgroundColor: theme.colors.opacity5,
+  justifyContent: 'center',
+  marginRight: 12,
 }))
 
 interface CrossVersionAnnotationsModalProps {
@@ -96,47 +89,56 @@ const CrossVersionAnnotationsModal = ({
       withPortal
       snapPoints={['50%']}
       headerComponent={
-        <ModalHeader title={reference} subTitle={t('bible.crossVersionAnnotations.subtitle')} />
+        <ModalHeader title={t('bible.crossVersionAnnotations.subtitle')} subTitle={reference} />
       }
     >
-      <VStack paddingVertical={16}>
+      <Box>
         {versions.map((versionData, index) => (
-          <VersionCard key={`${versionData.version}-${index}`} activeOpacity={0.8}>
-            <VStack flex gap={12}>
-              <HStack alignItems="center" justifyContent="space-between">
-                <HStack alignItems="center" gap={12}>
-                  <VersionBadge>
-                    <Text bold fontSize={14} color="white">
-                      {versionData.version}
+          <ItemRow key={index}>
+            <IconContainer>
+              <FeatherIcon name="edit-3" size={18} color="secondary" />
+            </IconContainer>
+            <Box flex>
+              <HStack gap={10} alignItems="center">
+                <Text fontSize={14} fontWeight="600">
+                  {t('bible.crossVersionAnnotations.annotationCount', {
+                    count: versionData.count,
+                  })}
+                </Text>
+                <Chip>{versionData.version}</Chip>
+              </HStack>
+              <HStack gap={12} marginTop={8}>
+                <TouchableOpacity
+                  onPress={e => {
+                    e.stopPropagation()
+                    handleSwitchVersion(versionData.version)
+                  }}
+                >
+                  <HStack alignItems="center">
+                    <FeatherIcon name="refresh-cw" size={14} color="tertiary" />
+                    <Text fontSize={11} color="tertiary" marginLeft={4}>
+                      {t('bible.crossVersionAnnotations.switchVersion')}
                     </Text>
-                  </VersionBadge>
-                  <Text fontSize={13} color="tertiary">
-                    {t('bible.crossVersionAnnotations.annotationCount', {
-                      count: versionData.count,
-                    })}
-                  </Text>
-                </HStack>
+                  </HStack>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={e => {
+                    e.stopPropagation()
+                    handleOpenInNewTab(versionData.version)
+                  }}
+                >
+                  <HStack alignItems="center">
+                    <FeatherIcon name="plus-square" size={14} color="tertiary" />
+                    <Text fontSize={11} color="tertiary" marginLeft={4}>
+                      {t('bible.crossVersionAnnotations.newTab')}
+                    </Text>
+                  </HStack>
+                </TouchableOpacity>
               </HStack>
-
-              <HStack gap={8}>
-                <ActionButton onPress={() => handleSwitchVersion(versionData.version)}>
-                  <FeatherIcon name="refresh-cw" size={16} />
-                  <Text fontSize={13} marginLeft={6}>
-                    {t('bible.crossVersionAnnotations.switchVersion')}
-                  </Text>
-                </ActionButton>
-
-                <ActionButton onPress={() => handleOpenInNewTab(versionData.version)}>
-                  <FeatherIcon name="plus-square" size={16} />
-                  <Text fontSize={13} marginLeft={6}>
-                    {t('bible.crossVersionAnnotations.newTab')}
-                  </Text>
-                </ActionButton>
-              </HStack>
-            </VStack>
-          </VersionCard>
+            </Box>
+          </ItemRow>
         ))}
-      </VStack>
+      </Box>
     </Modal.Body>
   )
 }

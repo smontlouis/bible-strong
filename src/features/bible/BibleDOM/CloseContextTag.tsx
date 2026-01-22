@@ -7,21 +7,23 @@ import { useDispatch } from './DispatchProvider'
 import { useTranslations } from './TranslationsContext'
 import { getDisabledStyles } from './disabledStyles'
 
-const Tag = styled('div')<RootStyles & { isDisabled?: boolean }>(({ settings: { theme, colors, fontSizeScale }, isDisabled }) => ({
-  fontFamily: 'arial',
-  padding: '2px 8px',
-  borderRadius: '40px',
-  color: colors[theme].primary,
-  backgroundColor: colors[theme].opacity5,
-  fontSize: scaleFontSize(12, fontSizeScale),
-  marginLeft: '5px',
-  display: 'inline-flex',
-  cursor: 'pointer',
-  '&:active': {
-    opacity: 0.5,
-  },
-  ...getDisabledStyles(isDisabled),
-}))
+const Tag = styled('div')<RootStyles & { isDisabled?: boolean }>(
+  ({ settings: { theme, colors, fontSizeScale }, isDisabled }) => ({
+    fontFamily: 'arial',
+    padding: '2px 8px',
+    borderRadius: '40px',
+    color: colors[theme].primary,
+    backgroundColor: colors[theme].opacity5,
+    fontSize: scaleFontSize(12, fontSizeScale),
+    marginLeft: '5px',
+    display: 'inline-flex',
+    cursor: 'pointer',
+    '&:active': {
+      opacity: 0.5,
+    },
+    ...getDisabledStyles(isDisabled),
+  })
+)
 
 interface Props {
   settings: RootState['user']['bible']['settings']

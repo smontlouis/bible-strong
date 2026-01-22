@@ -4,13 +4,15 @@ import { RootState } from '~redux/modules/reducer'
 import { getLinkTypeIconComponent, getLinkTypeColor } from './LinkIcons'
 import { getDisabledStyles } from './disabledStyles'
 
-const Div = styled<RootStyles & { isDisabled?: boolean }>('div')(({ settings: { theme }, isDisabled }) => ({
-  position: 'relative',
-  display: 'inline-block',
-  transform: 'translateY(5px)',
-  marginRight: '10px',
-  ...getDisabledStyles(isDisabled),
-}))
+const Div = styled<RootStyles & { isDisabled?: boolean }>('div')(
+  ({ settings: { theme }, isDisabled }) => ({
+    position: 'relative',
+    display: 'inline-block',
+    transform: 'translateY(5px)',
+    marginRight: '10px',
+    ...getDisabledStyles(isDisabled),
+  })
+)
 
 const Count = styled<RootStyles>('div')(({ settings: { theme, colors } }) => ({
   background: colors[theme].primary,

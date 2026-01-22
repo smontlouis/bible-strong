@@ -185,7 +185,7 @@ ${currentNote.description}
       headerComponent={
         <ModalHeader
           title={reference}
-          subTitle={t('Note (annotation)')}
+          subTitle={t("Note d'annotation")}
           rightComponent={
             currentNote ? (
               <PopOverMenu
@@ -273,10 +273,10 @@ ${currentNote.description}
           <>
             <Box bg="opacity5" borderRadius={8} py={12} px={16}>
               <Text fontSize={14} color="grey" mb={4}>
-                {t('Texte annote')}
+                {t('Texte annoté')}
               </Text>
               <Text fontSize={16} fontWeight="600">
-                {annotationText}
+                {`...${annotationText}...`}
               </Text>
             </Box>
             <NoteEditorBottomSheet

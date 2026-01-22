@@ -35,6 +35,16 @@ const Tag = styled('span')<RootStyles>(
     fontSize: scaleFontSize(16, fontSizeScale),
     marginRight: '5px',
     cursor: 'pointer',
+    userSelect: 'none',
+    MozUserSelect: 'none',
+    msUserSelect: 'none',
+    KhtmlUserSelect: 'none',
+    WebkitUserSelect: 'none',
+    WebkitTouchCallout: 'none',
+    mozUserSelect: 'none',
+    khtmlUserSelect: 'none',
+    webkitUserSelect: 'none',
+
     '&:active': {
       opacity: 0.5,
     },

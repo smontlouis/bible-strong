@@ -18,18 +18,10 @@ export function SelectionHandles({
   return (
     <>
       {startPosition && (
-        <SelectionHandle
-          $top={startPosition.y}
-          $left={startPosition.x}
-          $position="start"
-        />
+        <SelectionHandle $top={startPosition.y} $left={startPosition.x} $position="start" />
       )}
       {endPosition && (
-        <SelectionHandle
-          $top={endPosition.y}
-          $left={endPosition.x}
-          $position="end"
-        />
+        <SelectionHandle $top={endPosition.y} $left={endPosition.x} $position="end" />
       )}
     </>
   )

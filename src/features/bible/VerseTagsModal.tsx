@@ -6,9 +6,11 @@ import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 import { useSelector } from 'react-redux'
 import Modal from '~common/Modal'
+import ModalHeader from '~common/ModalHeader'
 import TagList from '~common/TagList'
-import Box from '~common/ui/Box'
+import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import { Chip } from '~common/ui/NewChip'
 import Text from '~common/ui/Text'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
@@ -26,7 +28,7 @@ const ItemRow = styled.View(({ theme }) => ({
 const IconContainer = styled.View(({ theme }) => ({
   width: 36,
   height: 36,
-  borderRadius: 18,
+  borderRadius: 12,
   backgroundColor: theme.colors.lightGrey,
   alignItems: 'center',
   justifyContent: 'center',
@@ -35,6 +37,7 @@ const IconContainer = styled.View(({ theme }) => ({
 
 interface VerseTagsModalProps {
   verseKey: string | null
+  version: string
 }
 
 const getItemIcon = (type: TaggedItem['type']): 'edit-3' | 'type' | 'file-text' | 'link' => {
@@ -42,7 +45,7 @@ const getItemIcon = (type: TaggedItem['type']): 'edit-3' | 'type' | 'file-text' 
     case 'highlight':
       return 'edit-3'
     case 'annotation':
-      return 'type'
+      return 'edit-3'
     case 'note':
       return 'file-text'
     case 'link':
@@ -69,7 +72,7 @@ const TaggedItemRow = ({ item, onEditTags }: { item: TaggedItem; onEditTags: () 
   const subtitle = (() => {
     switch (item.type) {
       case 'annotation':
-        return item.data.ranges[0]?.text || ''
+        return `...${item.data.ranges[0]?.text || ''}...`
       case 'note':
         return item.data.title || ''
       case 'link':
@@ -83,12 +86,19 @@ const TaggedItemRow = ({ item, onEditTags }: { item: TaggedItem; onEditTags: () 
     <TouchableOpacity onPress={onEditTags}>
       <ItemRow>
         <IconContainer>
-          <FeatherIcon name={icon} size={18} color="primary" />
+          <FeatherIcon
+            name={icon}
+            size={18}
+            color={item.type === 'annotation' ? 'secondary' : 'primary'}
+          />
         </IconContainer>
         <Box flex>
-          <Text bold fontSize={14}>
-            {label}
-          </Text>
+          <HStack gap={6} alignItems="center">
+            <Text bold fontSize={14}>
+              {label}
+            </Text>
+            {item.type === 'annotation' ? <Chip>{item.data.version}</Chip> : null}
+          </HStack>
           {subtitle ? (
             <Text fontSize={12} color="grey" numberOfLines={1}>
               {subtitle}
@@ -102,86 +112,84 @@ const TaggedItemRow = ({ item, onEditTags }: { item: TaggedItem; onEditTags: () 
   )
 }
 
-const VerseTagsModal = forwardRef<BottomSheetModal, VerseTagsModalProps>(({ verseKey }, ref) => {
-  const { t } = useTranslation()
-  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+const VerseTagsModal = forwardRef<BottomSheetModal, VerseTagsModalProps>(
+  ({ verseKey, version }, ref) => {
+    const { t } = useTranslation()
+    const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
 
-  // Create selector for this verse
-  const selectTaggedItems = useMemo(() => makeTaggedItemsForVerseSelector(), [])
+    // Create selector for this verse
+    const selectTaggedItems = useMemo(() => makeTaggedItemsForVerseSelector(), [])
 
-  const taggedItems = useSelector((state: RootState) =>
-    verseKey ? selectTaggedItems(state, verseKey) : []
-  )
+    const taggedItems = useSelector((state: RootState) =>
+      verseKey ? selectTaggedItems(state, verseKey, version) : []
+    )
 
-  // Get verse reference for header
-  const reference = verseKey ? verseToReference({ [verseKey]: true }) : ''
+    // Get verse reference for header
+    const reference = verseKey ? verseToReference({ [verseKey]: true }) : ''
 
-  const handleEditTags = (item: TaggedItem) => {
-    // Open MultipleTagsModal with the appropriate entity
-    switch (item.type) {
-      case 'highlight':
-        setMultipleTagsItem({
-          ids: { [item.verseKey]: true as const },
-          entity: 'highlights',
-        })
-        break
-      case 'annotation':
-        setMultipleTagsItem({
-          id: item.data.id,
-          entity: 'wordAnnotations',
-          title: item.data.ranges[0]?.text,
-        })
-        break
-      case 'note':
-        setMultipleTagsItem({
-          id: item.data.id,
-          entity: 'notes',
-          title: item.data.title,
-        })
-        break
-      case 'link':
-        setMultipleTagsItem({
-          id: item.data.id,
-          entity: 'links',
-          title: item.data.customTitle || item.data.ogData?.title || item.data.url,
-        })
-        break
-    }
-  }
-
-  return (
-    <Modal.Body
-      ref={ref}
-      snapPoints={['50%']}
-      headerComponent={
-        <Box px={20} pt={10} pb={10}>
-          <Text bold fontSize={16}>
-            {t('Étiquettes pour')} {reference}
-          </Text>
-          <Text fontSize={12} color="grey">
-            {t('Cliquez sur un élément pour modifier ses étiquettes')}
-          </Text>
-        </Box>
+    const handleEditTags = (item: TaggedItem) => {
+      // Open MultipleTagsModal with the appropriate entity
+      switch (item.type) {
+        case 'highlight':
+          setMultipleTagsItem({
+            ids: { [item.verseKey]: true as const },
+            entity: 'highlights',
+          })
+          break
+        case 'annotation':
+          setMultipleTagsItem({
+            id: item.data.id,
+            entity: 'wordAnnotations',
+            title: item.data.ranges[0]?.text,
+          })
+          break
+        case 'note':
+          setMultipleTagsItem({
+            id: item.data.id,
+            entity: 'notes',
+            title: item.data.title,
+          })
+          break
+        case 'link':
+          setMultipleTagsItem({
+            id: item.data.id,
+            entity: 'links',
+            title: item.data.customTitle || item.data.ogData?.title || item.data.url,
+          })
+          break
       }
-    >
-      <Box>
-        {taggedItems.length === 0 ? (
-          <Box center py={40}>
-            <Text color="grey">{t('Aucun élément avec des étiquettes')}</Text>
-          </Box>
-        ) : (
-          taggedItems.map((item, index) => (
-            <TaggedItemRow
-              key={`${item.type}-${index}`}
-              item={item}
-              onEditTags={() => handleEditTags(item)}
-            />
-          ))
-        )}
-      </Box>
-    </Modal.Body>
-  )
-})
+    }
+
+    return (
+      <Modal.Body
+        ref={ref}
+        snapPoints={['50%']}
+        headerComponent={
+          <ModalHeader
+            title={`${t('Étiquettes pour')} ${reference}`}
+            subTitle={t('Cliquez sur un élément pour modifier ses étiquettes')}
+          />
+        }
+      >
+        <Box>
+          {taggedItems.length === 0 ? (
+            <Box center py={40}>
+              <Text color="grey">{t('Aucun élément avec des étiquettes')}</Text>
+            </Box>
+          ) : (
+            taggedItems.map((item, index) => (
+              <TaggedItemRow
+                key={`${item.type}-${index}`}
+                item={item}
+                onEditTags={() => handleEditTags(item)}
+              />
+            ))
+          )}
+        </Box>
+      </Modal.Body>
+    )
+  }
+)
 
 VerseTagsModal.displayName = 'VerseTagsModal'
 

@@ -5,11 +5,7 @@ import { Verse as TVerse } from '~common/types'
 import { WordToken } from '~helpers/wordTokenizer'
 import { Dispatch } from '../BibleDOMWrapper'
 import { AnnotationType } from './HighlightComponents'
-import {
-  SelectionRange,
-  normalizeRange,
-  buildRangesFromSelection,
-} from './selectionUtils'
+import { SelectionRange, normalizeRange, buildRangesFromSelection } from './selectionUtils'
 
 export interface AnnotationEventsConfig {
   selection: SelectionRange | null

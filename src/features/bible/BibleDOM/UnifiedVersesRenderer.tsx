@@ -92,9 +92,7 @@ const extractParallelVerse = (
   verse: TVerse,
   version: string
 ): { version: string; verse: TVerse; error?: BibleError }[] => {
-  const result: { version: string; verse: TVerse; error?: BibleError }[] = [
-    { version, verse },
-  ]
+  const result: { version: string; verse: TVerse; error?: BibleError }[] = [{ version, verse }]
 
   parallelVerses.forEach(({ id, verses, error }) => {
     const parallelVerse = verses?.[i]
@@ -275,9 +273,7 @@ export function UnifiedVersesRenderer({
         const isSelected = Boolean(selectedVerses[verseKey])
         const isSelectedMode = Boolean(Object.keys(selectedVerses).length)
         const isHighlighted = Boolean(highlightedVerses[verseKey])
-        const tag: TaggedVerse | undefined = taggedVerses?.find(
-          v => v.lastVerse === verseKey
-        )
+        const tag: TaggedVerse | undefined = taggedVerses?.find(v => v.lastVerse === verseKey)
         const highlightedColor = isHighlighted
           ? (highlightedVerses[verseKey]
               .color as keyof RootStyles['settings']['colors'][keyof RootStyles['settings']['colors']])

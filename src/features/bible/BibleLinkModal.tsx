@@ -136,42 +136,39 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
 
     setIsSaving(true)
 
-    try {
-      const linkType = detectLinkType(url)
-      const videoId = extractVideoId(url, linkType)
+    const linkType = detectLinkType(url)
+    const videoId = extractVideoId(url, linkType)
 
-      // Déterminer si on doit fetch les OG data
-      const shouldFetchOG =
-        !currentLink?.ogData?.title || // Nouveau lien ou pas de titre
-        currentLink?.url !== url // URL changée
+    // Déterminer si on doit fetch les OG data
+    const shouldFetchOG =
+      !currentLink?.ogData?.title || // Nouveau lien ou pas de titre
+      currentLink?.url !== url // URL changée
 
-      let ogData = currentLink?.ogData
-      if (shouldFetchOG) {
-        // Tenter le fetch (retourne null si offline)
-        const fetchedData = await fetchOpenGraphData(url)
-        if (fetchedData) {
-          ogData = fetchedData
-        }
+    let ogData = currentLink?.ogData
+    if (shouldFetchOG) {
+      // Tenter le fetch (retourne null si offline)
+      const fetchedData = await fetchOpenGraphData(url)
+      if (fetchedData) {
+        ogData = fetchedData
       }
-
-      const linkData: Link = {
-        ...currentLink,
-        url,
-        customTitle: customTitle || undefined,
-        ogData,
-        linkType,
-        videoId: videoId || undefined,
-        date: Date.now(),
-      }
-
-      dispatch(
-        // @ts-ignore
-        addLink(linkData, linkVerses!)
-      )
-      setIsEditing(false)
-    } finally {
-      setIsSaving(false)
     }
+
+    const linkData: Link = {
+      ...currentLink,
+      url,
+      customTitle: customTitle || undefined,
+      ogData,
+      linkType,
+      videoId: videoId || undefined,
+      date: Date.now(),
+    }
+
+    dispatch(
+      // @ts-ignore
+      addLink(linkData, linkVerses!)
+    )
+    setIsEditing(false)
+    setIsSaving(false)
   }
 
   const deleteLinkFunc = (linkId: string) => {
@@ -258,7 +255,11 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
                           ...currentLink,
                           id: currentLink.id!,
                           entity: 'links',
-                          title: currentLink.ogData?.title || currentLink.customTitle || '',
+                          title:
+                            currentLink.ogData?.title ||
+                            currentLink.customTitle ||
+                            currentLink.url ||
+                            '',
                         })
                       }
                     >

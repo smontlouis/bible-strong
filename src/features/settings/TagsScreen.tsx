@@ -22,7 +22,11 @@ import useFuzzy from '~helpers/useFuzzy'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { addTag, removeTag, updateTag } from '~redux/modules/user'
 import { sortedTagsSelector } from '~redux/selectors/tags'
-import { makeTagDataSelector, makeGroupedHighlightsCountSelector, makeGroupedWordAnnotationsCountSelector } from '~redux/selectors/bible'
+import {
+  makeTagDataSelector,
+  makeGroupedHighlightsCountSelector,
+  makeGroupedWordAnnotationsCountSelector,
+} from '~redux/selectors/bible'
 import { Tag } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import { useCreateTabGroupFromTag } from './useCreateTabGroupFromTag'
@@ -47,7 +51,10 @@ type TagItemProps = {
 const TagItem = ({ item, setOpen }: TagItemProps) => {
   const { t } = useTranslation()
   const selectGroupedHighlightsCount = useMemo(() => makeGroupedHighlightsCountSelector(), [])
-  const selectGroupedWordAnnotationsCount = useMemo(() => makeGroupedWordAnnotationsCountSelector(), [])
+  const selectGroupedWordAnnotationsCount = useMemo(
+    () => makeGroupedWordAnnotationsCountSelector(),
+    []
+  )
   const highlightsNumber = useSelector((state: RootState) =>
     selectGroupedHighlightsCount(state, item.highlights)
   )

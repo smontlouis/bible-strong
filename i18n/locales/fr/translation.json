@@ -145,6 +145,11 @@
   "Voulez-vous vraiment supprimer cette note?": "Voulez-vous vraiment supprimer cette note?",
   "Erreur lors du partage.": "Erreur lors du partage.",
   "Note pour": "Note pour",
+  "Notes pour": "Notes pour",
+  "Cliquez sur une note pour la modifier": "Cliquez sur une note pour la modifier",
+  "Aucune note pour ce verset": "Aucune note pour ce verset",
+  "Note d'annotation": "Note d'annotation",
+  "Texte annoté": "Texte annoté",
   "Titre": "Titre",
   "Description": "Description",
   "Annuler": "Annuler",
@@ -873,6 +878,6 @@
   "bible.crossVersionAnnotations.subtitle": "Annotations dans d'autres versions",
   "bible.crossVersionAnnotations.annotationCount": "{{count}} annotation",
   "bible.crossVersionAnnotations.annotationCount_plural": "{{count}} annotations",
-  "bible.crossVersionAnnotations.switchVersion": "Changer",
+  "bible.crossVersionAnnotations.switchVersion": "Changer de version",
   "bible.crossVersionAnnotations.newTab": "Nouvel onglet"
 }

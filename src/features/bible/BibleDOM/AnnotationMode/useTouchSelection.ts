@@ -164,11 +164,7 @@ export function useTouchSelection({
   }
 
   // Check if a touch point is near a selection handle
-  const isNearHandle = (
-    touchX: number,
-    touchY: number,
-    handlePos: Position | null
-  ): boolean => {
+  const isNearHandle = (touchX: number, touchY: number, handlePos: Position | null): boolean => {
     if (!handlePos) return false
     const containerRect = containerRef.current?.getBoundingClientRect()
     if (!containerRect) return false
@@ -291,7 +287,8 @@ export function useTouchSelection({
       // Find verse at touch point
       const wordPos = getWordAtPoint(touch.clientX, touch.clientY)
       touchState.startWord = wordPos
-      touchState.startVerseKey = wordPos?.verseKey || getVerseKeyAtPoint(touch.clientX, touch.clientY)
+      touchState.startVerseKey =
+        wordPos?.verseKey || getVerseKeyAtPoint(touch.clientX, touch.clientY)
 
       // Notify touched verse for visual feedback
       if (touchState.startVerseKey) {
@@ -404,11 +401,7 @@ export function useTouchSelection({
         onTouchedVerseChange?.(null)
 
         // Calculate velocity to decide between swipe and drag
-        const velocity = calculateAverageVelocity(
-          touchState.velocitySamples,
-          now,
-          touch.clientX
-        )
+        const velocity = calculateAverageVelocity(touchState.velocitySamples, now, touch.clientX)
 
         if (velocity >= SWIPE_VELOCITY_THRESHOLD) {
           // Fast movement -> swipe (chapter navigation)
@@ -576,7 +569,19 @@ export function useTouchSelection({
       container.removeEventListener('touchcancel', handleTouchCancel)
       clearTimers()
     }
-  }, [selection, verses, annotationMode, canDragToAnnotate, onDragStart, onEnterAnnotationModeFromDrag, onTapVerse, onDoubleTapVerse, onLongPressVerse, onTouchedVerseChange, onSwipe])
+  }, [
+    selection,
+    verses,
+    annotationMode,
+    canDragToAnnotate,
+    onDragStart,
+    onEnterAnnotationModeFromDrag,
+    onTapVerse,
+    onDoubleTapVerse,
+    onLongPressVerse,
+    onTouchedVerseChange,
+    onSwipe,
+  ])
 
   return { lastDragEndRef }
 }
