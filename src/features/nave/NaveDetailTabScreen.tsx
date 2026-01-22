@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Share } from 'react-native'
 import { WebView } from 'react-native-webview'
 import { useSelector } from 'react-redux'
@@ -65,7 +65,7 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
   const [naveItem, setNaveItem] = useState<any>(null)
   const { t } = useTranslation()
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
-  const selectNaveTags = useMemo(() => makeNaveTagsSelector(), [])
+  const selectNaveTags = makeNaveTagsSelector()
   const tags = useSelector((state: RootState) => selectNaveTags(state, name_lower ?? ''))
   const openInNewTab = useOpenInNewTab()
 
@@ -174,7 +174,6 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
     <Container>
       <DetailedHeader
         hasBackButton={!isInTab}
-        onCustomBackPress={goBack}
         title={naveItem?.name || name}
         subtitle={naveItem?.name_lower}
         borderColor="quint"

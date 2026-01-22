@@ -1,5 +1,5 @@
 import to from 'await-to-js'
-import React, { useMemo } from 'react'
+import React from 'react'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import i18n from '~i18n'
 
@@ -126,8 +126,8 @@ const transformSections = (
  * @param id
  */
 export const useComputedPlan = (id: string): ComputedPlan | undefined => {
-  const selectPlanById = useMemo(() => makePlanByIdSelector(), [])
-  const selectOngoingPlanById = useMemo(() => makeOngoingPlanByIdSelector(), [])
+  const selectPlanById = makePlanByIdSelector()
+  const selectOngoingPlanById = makeOngoingPlanByIdSelector()
 
   const plan = useSelector((state: RootState) => selectPlanById(state, id))
   const ongoingPlan = useSelector((state: RootState) => selectOngoingPlanById(state, id))

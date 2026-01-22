@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react-native'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import Empty from '~common/Empty'
@@ -303,21 +303,15 @@ const BibleViewer = ({
     }
   }, [selectedVerses, versesModal])
 
-  // Create memoized selectors
-  const selectHighlightsByChapter = useMemo(() => makeHighlightsByChapterSelector(), [])
-  const selectNotesByChapter = useMemo(() => makeNotesByChapterSelector(), [])
-  const selectLinksByChapter = useMemo(() => makeLinksByChapterSelector(), [])
-  const selectWordAnnotationsByChapter = useMemo(() => makeWordAnnotationsByChapterSelector(), [])
-  const selectSelectedVerseHighlightColor = useMemo(
-    () => makeSelectedVerseHighlightColorSelector(),
-    []
-  )
-  const selectBookmarksInChapter = useMemo(() => makeSelectBookmarksInChapter(), [])
-  const selectWordAnnotationsInOtherVersions = useMemo(
-    () => makeWordAnnotationsInOtherVersionsSelector(),
-    []
-  )
-  const selectTaggedVersesInChapter = useMemo(() => makeTaggedVersesInChapterSelector(), [])
+  // Create selectors (React Compiler handles memoization)
+  const selectHighlightsByChapter = makeHighlightsByChapterSelector()
+  const selectNotesByChapter = makeNotesByChapterSelector()
+  const selectLinksByChapter = makeLinksByChapterSelector()
+  const selectWordAnnotationsByChapter = makeWordAnnotationsByChapterSelector()
+  const selectSelectedVerseHighlightColor = makeSelectedVerseHighlightColorSelector()
+  const selectBookmarksInChapter = makeSelectBookmarksInChapter()
+  const selectWordAnnotationsInOtherVersions = makeWordAnnotationsInOtherVersionsSelector()
+  const selectTaggedVersesInChapter = makeTaggedVersesInChapterSelector()
 
   // Use displayed values for selectors to keep annotations in sync with verses
   const highlightedVersesByChapter = useSelector((state: RootState) =>

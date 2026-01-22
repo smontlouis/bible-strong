@@ -12,6 +12,7 @@ import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { Chip } from '~common/ui/NewChip'
 import Text from '~common/ui/Text'
+import { EMPTY_ARRAY } from '~helpers/emptyReferences'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { makeTaggedItemsForVerseSelector, TaggedItem } from '~redux/selectors/bible'
@@ -120,7 +121,7 @@ const VerseTagsModal = forwardRef<BottomSheetModal, VerseTagsModalProps>(
     const selectTaggedItems = makeTaggedItemsForVerseSelector()
 
     const taggedItems = useSelector((state: RootState) =>
-      verseKey ? selectTaggedItems(state, verseKey, version) : []
+      verseKey ? selectTaggedItems(state, verseKey, version) : EMPTY_ARRAY
     )
 
     // Get verse reference for header

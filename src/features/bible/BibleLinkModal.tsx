@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { createSelector } from '@reduxjs/toolkit'
 import { ActivityIndicator, Alert, Dimensions, Image, Linking } from 'react-native'
@@ -71,11 +71,9 @@ const makeCurrentLinkSelector = () =>
   )
 
 const useCurrentLink = ({ linkVerses }: { linkVerses: VerseIds | undefined }) => {
-  const selectCurrentLink = useMemo(() => makeCurrentLinkSelector(), [])
-  const linkKey = useMemo(() => {
-    const orderedVerses = orderVerses(linkVerses || {})
-    return Object.keys(orderedVerses).join('/')
-  }, [linkVerses])
+  const selectCurrentLink = makeCurrentLinkSelector()
+  const orderedVerses = orderVerses(linkVerses || {})
+  const linkKey = Object.keys(orderedVerses).join('/')
 
   const link = useSelector((state: RootState) => selectCurrentLink(state, linkKey))
 

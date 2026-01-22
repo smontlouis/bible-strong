@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Share } from 'react-native'
 import { useSelector } from 'react-redux'
 import truncHTML from 'trunc-html'
@@ -73,7 +73,7 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
     }
   }, [isInTab, setDictionaryTab, router])
 
-  const selectWordTags = useMemo(() => makeWordTagsSelector(), [])
+  const selectWordTags = makeWordTagsSelector()
   const tags = useSelector((state: RootState) => selectWordTags(state, word ?? ''))
 
   const setTitle = (title: string) =>
@@ -179,7 +179,6 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
     <Container>
       <DetailedHeader
         hasBackButton={!isInTab}
-        onCustomBackPress={goBack}
         title={word}
         borderColor="secondary"
         rightComponent={

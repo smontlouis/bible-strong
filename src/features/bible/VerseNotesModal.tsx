@@ -11,6 +11,7 @@ import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { EMPTY_ARRAY } from '~helpers/emptyReferences'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { makeNotesForVerseSelector, NoteItem } from '~redux/selectors/bible'
@@ -97,7 +98,7 @@ const VerseNotesModal = forwardRef<BottomSheetModal, VerseNotesModalProps>(({ ve
   const selectNotesForVerse = makeNotesForVerseSelector()
 
   const notes = useSelector((state: RootState) =>
-    verseKey ? selectNotesForVerse(state, verseKey) : []
+    verseKey ? selectNotesForVerse(state, verseKey) : EMPTY_ARRAY
   )
 
   // Get verse reference for header

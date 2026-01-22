@@ -32,7 +32,6 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'expo-router'
 import DetailedHeader from '~common/DetailedHeader'
-import LanguageMenuOption from '~common/LanguageMenuOption'
 import PopOverMenu from '~common/PopOverMenu'
 import { StrongReference } from '~common/types'
 import MenuOption from '~common/ui/MenuOption'
@@ -226,7 +225,6 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
     <Container>
       <DetailedHeader
         hasBackButton={!isInTab}
-        onCustomBackPress={goBack}
         title={capitalize(Mot)}
         detail={Phonetique}
         subtitle={Type}

@@ -24,6 +24,7 @@ import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { versions } from '~helpers/bibleVersions'
+import { selectCompareVersions } from '~redux/selectors/user'
 import { CompareTab, SelectedVerses } from '../../state/tabs'
 
 interface CompareVersesTabScreenProps {
@@ -82,11 +83,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
     }
   }, [selectedVerses])
 
-  const versionsToCompare = useSelector(
-    // @ts-ignore
-    (state: any) => Object.keys(state.user.bible.settings.compare),
-    shallowEqual
-  )
+  const versionsToCompare = useSelector(selectCompareVersions, shallowEqual)
 
   return (
     <Container>

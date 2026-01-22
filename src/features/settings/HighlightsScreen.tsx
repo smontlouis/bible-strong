@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
@@ -85,7 +85,7 @@ const HighlightsScreen = () => {
   const setColorChangeModal = useSetAtom(colorChangeModalAtom)
 
   // Word annotations selector
-  const selectAllWordAnnotations = useMemo(() => makeAllWordAnnotationsSelector(), [])
+  const selectAllWordAnnotations = makeAllWordAnnotationsSelector()
   const wordAnnotations = useSelector((state: RootState) => selectAllWordAnnotations(state))
 
   // Filters hook - encapsulates all filter logic

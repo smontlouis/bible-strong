@@ -1,7 +1,6 @@
 import * as Sentry from '@sentry/react-native'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
-import { createSelector } from '@reduxjs/toolkit'
 import { Alert, Share } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -30,7 +29,8 @@ import orderVerses from '~helpers/orderVerses'
 import { timeout } from '~helpers/timeout'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
-import { addNote, deleteNote, Note } from '~redux/modules/user'
+import { addNote, deleteNote } from '~redux/modules/user'
+import { makeNoteByKeySelector } from '~redux/selectors/bible'
 import { multipleTagsModalAtom } from '../../state/app'
 import NoteEditorBottomSheet from './NoteEditorDOM/NoteEditorBottomSheet'
 
@@ -39,29 +39,12 @@ interface BibleNoteModalProps {
   ref?: React.RefObject<BottomSheetModal | null>
 }
 
-// Create a memoized selector factory for current note
-const makeCurrentNoteSelector = () =>
-  createSelector(
-    [(state: RootState) => state.user.bible.notes, (_: RootState, noteKey: string) => noteKey],
-    (notes, noteKey): (Note & { id: string }) | null => {
-      if (noteKey && notes[noteKey]) {
-        return {
-          id: noteKey,
-          ...notes[noteKey],
-        }
-      }
-      return null
-    }
-  )
-
 const useCurrentNote = ({ noteVerses }: { noteVerses: VerseIds | undefined }) => {
-  const selectCurrentNote = useMemo(() => makeCurrentNoteSelector(), [])
-  const noteKey = useMemo(() => {
-    const orderedVerses = orderVerses(noteVerses || {})
-    return Object.keys(orderedVerses).join('/')
-  }, [noteVerses])
+  const selectNoteByKey = makeNoteByKeySelector()
+  const orderedVerses = orderVerses(noteVerses || {})
+  const noteKey = Object.keys(orderedVerses).join('/')
 
-  const note = useSelector((state: RootState) => selectCurrentNote(state, noteKey))
+  const note = useSelector((state: RootState) => selectNoteByKey(state, noteKey))
 
   return note
 }

@@ -187,9 +187,9 @@ const TagScreen = () => {
   const { t } = useTranslation()
   const lang = useLanguage()
 
-  // Create memoized selectors
-  const selectTagById = useMemo(() => makeTagByIdSelector(), [])
-  const selectTagData = useMemo(() => makeTagDataSelector(), [])
+  // Create selectors (React Compiler handles memoization)
+  const selectTagById = makeTagByIdSelector()
+  const selectTagData = makeTagDataSelector()
 
   const tag = useSelector((state: RootState) => selectTagById(state, tagId))
 

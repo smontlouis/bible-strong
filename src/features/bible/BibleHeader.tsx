@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { TouchableOpacity } from 'react-native'
 
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
@@ -94,7 +94,7 @@ const Header = ({
   const selectedVersesReference = verseToReference(selectedVerses)
 
   // Check if current chapter has a bookmark
-  const selectBookmarkForChapter = useMemo(() => makeSelectBookmarkForChapter(), [])
+  const selectBookmarkForChapter = makeSelectBookmarkForChapter()
   const currentChapterBookmark = useSelector((state: RootState) =>
     selectBookmarkForChapter(state, bookNumber, chapter)
   )

@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { shallowEqual, useSelector } from 'react-redux'
 
 import type { RootState } from '~redux/modules/reducer'
@@ -6,7 +5,7 @@ import type { CustomColor, HighlightType } from '~redux/modules/user'
 import { makeColorsSelector } from '~redux/selectors/user'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { resolveHighlightColor } from '~helpers/highlightColors'
-import { DEFAULT_COLOR_KEYS, type DefaultColorKey } from '~helpers/constants'
+import { DEFAULT_COLOR_KEYS, DefaultColorKey } from '~helpers/constants'
 import { EMPTY_ARRAY, EMPTY_OBJECT } from '~helpers/emptyReferences'
 import type { ColorItem } from '~common/ColorCircleGrid'
 
@@ -24,7 +23,7 @@ interface HighlightColorsData {
  */
 export function useHighlightColors(): HighlightColorsData {
   const { theme: currentTheme } = useCurrentThemeSelector()
-  const selectColors = useMemo(() => makeColorsSelector(), [])
+  const selectColors = makeColorsSelector()
   const colors = useSelector((state: RootState) => selectColors(state, currentTheme))
 
   const customHighlightColors = useSelector(

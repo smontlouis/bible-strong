@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import { BottomSheetModal } from '@gorhom/bottom-sheet/'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Alert } from 'react-native'
 import { shallowEqual, useDispatch, useSelector, useStore } from 'react-redux'
 
@@ -50,11 +50,8 @@ type TagItemProps = {
 
 const TagItem = ({ item, setOpen }: TagItemProps) => {
   const { t } = useTranslation()
-  const selectGroupedHighlightsCount = useMemo(() => makeGroupedHighlightsCountSelector(), [])
-  const selectGroupedWordAnnotationsCount = useMemo(
-    () => makeGroupedWordAnnotationsCountSelector(),
-    []
-  )
+  const selectGroupedHighlightsCount = makeGroupedHighlightsCountSelector()
+  const selectGroupedWordAnnotationsCount = makeGroupedWordAnnotationsCountSelector()
   const highlightsNumber = useSelector((state: RootState) =>
     selectGroupedHighlightsCount(state, item.highlights)
   )
@@ -68,7 +65,7 @@ const TagItem = ({ item, setOpen }: TagItemProps) => {
   const strongsNumber =
     item.strongsHebreu &&
     Object.keys(item.strongsHebreu).length +
-      (item.strongsGrec && Object.keys(item.strongsGrec).length)
+      ((item.strongsGrec && Object.keys(item.strongsGrec).length) || 0)
   const wordsNumber = item.words && Object.keys(item.words).length
   const navesNumber = item.naves && Object.keys(item.naves).length
 
@@ -153,7 +150,7 @@ const TagsScreen = () => {
   const dispatch = useDispatch()
   const { ref, open, close } = useBottomSheetModal()
   const store = useStore<RootState>()
-  const selectTagData = useMemo(() => makeTagDataSelector(), [])
+  const selectTagData = makeTagDataSelector()
   const createTabGroupFromTag = useCreateTabGroupFromTag()
 
   useEffect(() => {
@@ -168,7 +165,7 @@ const TagsScreen = () => {
       {
         text: t('Oui'),
         onPress: () => {
-          dispatch(removeTag(isOpen?.id))
+          dispatch(removeTag(isOpen?.id || ''))
           close()
         },
         style: 'destructive',

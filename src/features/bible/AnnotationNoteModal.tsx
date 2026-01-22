@@ -1,7 +1,6 @@
 import * as Sentry from '@sentry/react-native'
 import React, { useEffect, useState } from 'react'
 
-import { createSelector } from '@reduxjs/toolkit'
 import { Alert, Share } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -25,7 +24,8 @@ import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
 import { timeout } from '~helpers/timeout'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
-import { addNote, deleteNote, Note } from '~redux/modules/user'
+import { addNote, deleteNote } from '~redux/modules/user'
+import { makeNoteByKeySelector } from '~redux/selectors/bible'
 import { updateWordAnnotation } from '~redux/modules/user/wordAnnotations'
 import { multipleTagsModalAtom } from '../../state/app'
 import { VersionCode } from '../../state/tabs'
@@ -40,21 +40,6 @@ interface AnnotationNoteModalProps {
   version: VersionCode
   onNoteIdUpdate?: (noteId: string | undefined) => void
 }
-
-// Create a memoized selector factory for current note
-const makeCurrentNoteSelector = () =>
-  createSelector(
-    [(state: RootState) => state.user.bible.notes, (_: RootState, noteKey: string) => noteKey],
-    (notes, noteKey): (Note & { id: string }) | null => {
-      if (noteKey && notes[noteKey]) {
-        return {
-          id: noteKey,
-          ...notes[noteKey],
-        }
-      }
-      return null
-    }
-  )
 
 const AnnotationNoteModal = ({
   ref,
@@ -76,8 +61,8 @@ const AnnotationNoteModal = ({
   // Note key for annotation notes: annotation:{annotationId}
   const noteKey = annotationId ? `annotation:${annotationId}` : ''
 
-  const selectCurrentNote = makeCurrentNoteSelector()
-  const currentNote = useSelector((state: RootState) => selectCurrentNote(state, noteKey))
+  const selectNoteByKey = makeNoteByKeySelector()
+  const currentNote = useSelector((state: RootState) => selectNoteByKey(state, noteKey))
 
   // Get verse reference for display
   const reference = annotationVerseKey

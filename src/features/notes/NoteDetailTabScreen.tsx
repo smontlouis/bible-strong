@@ -1,14 +1,12 @@
 import * as Sentry from '@sentry/react-native'
 import produce from 'immer'
 import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, Share } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'sonner-native'
-
-import { createSelector } from '@reduxjs/toolkit'
 import { useRouter } from 'expo-router'
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
@@ -28,8 +26,8 @@ import { timeout } from '~helpers/timeout'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
-import { addNote, deleteNote, Note } from '~redux/modules/user'
-import { WordAnnotation } from '~redux/modules/user/wordAnnotations'
+import { addNote, deleteNote } from '~redux/modules/user'
+import { makeNoteByKeySelector, makeWordAnnotationByIdSelector } from '~redux/selectors/bible'
 import { isFullScreenBibleValue, multipleTagsModalAtom } from '~state/app'
 import { NotesTab, useIsCurrentTab } from '~state/tabs'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
@@ -41,35 +39,6 @@ interface NoteDetailTabScreenProps {
   notesAtom: PrimitiveAtom<NotesTab>
   noteId: string
 }
-
-// Create a memoized selector factory for current note
-const makeCurrentNoteSelector = () =>
-  createSelector(
-    [(state: RootState) => state.user.bible.notes, (_: RootState, noteKey: string) => noteKey],
-    (notes, noteKey): (Note & { id: string }) | null => {
-      if (noteKey && notes[noteKey]) {
-        return {
-          id: noteKey,
-          ...notes[noteKey],
-        }
-      }
-      return null
-    }
-  )
-
-// Create a memoized selector factory for annotation (if noteId is annotation note)
-const makeAnnotationSelector = () =>
-  createSelector(
-    [
-      (state: RootState) => state.user.bible.wordAnnotations,
-      (_: RootState, noteId: string) => noteId,
-    ],
-    (wordAnnotations, noteId): WordAnnotation | null => {
-      if (!noteId.startsWith('annotation:')) return null
-      const annotationId = noteId.replace('annotation:', '')
-      return wordAnnotations[annotationId] || null
-    }
-  )
 
 const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) => {
   const router = useRouter()
@@ -100,13 +69,14 @@ const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) =>
     }
   }, [isCurrentTab])
 
-  const selectCurrentNote = useMemo(() => makeCurrentNoteSelector(), [])
-  const currentNote = useSelector((state: RootState) => selectCurrentNote(state, noteId))
+  const selectNoteByKey = makeNoteByKeySelector()
+  const currentNote = useSelector((state: RootState) => selectNoteByKey(state, noteId))
 
   // Get annotation data if this is an annotation note
-  const selectAnnotation = useMemo(() => makeAnnotationSelector(), [])
-  const annotation = useSelector((state: RootState) => selectAnnotation(state, noteId))
   const isAnnotationNote = noteId.startsWith('annotation:')
+  const annotationId = isAnnotationNote ? noteId.replace('annotation:', '') : ''
+  const selectAnnotationById = makeWordAnnotationByIdSelector()
+  const annotation = useSelector((state: RootState) => selectAnnotationById(state, annotationId))
 
   // Parse noteId to get verse references for display
   const noteVerses = useMemo(() => {

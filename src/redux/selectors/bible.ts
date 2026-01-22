@@ -13,9 +13,8 @@ import { WordAnnotation } from '~redux/modules/user/wordAnnotations'
 import { Tag, CurrentTheme, TagsObj } from '~common/types'
 import { VersionCode } from '~state/tabs'
 
-// Base selectors
+// Base selectors - private
 const selectHighlights = (state: RootState) => state.user.bible.highlights
-const selectNotes = (state: RootState) => state.user.bible.notes
 const selectLinks = (state: RootState) => state.user.bible.links
 const selectStudies = (state: RootState) => state.user.bible.studies
 const selectNaves = (state: RootState) => state.user.bible.naves
@@ -24,10 +23,13 @@ const selectStrongsGrec = (state: RootState) => state.user.bible.strongsGrec
 const selectStrongsHebreu = (state: RootState) => state.user.bible.strongsHebreu
 const selectSettings = (state: RootState) => state.user.bible.settings
 const selectColors = (state: RootState) => state.user.bible.settings.colors
-const selectWordAnnotations = (state: RootState) => state.user.bible.wordAnnotations
+
+// Base selectors - exported for use by other selectors and components
+export const selectNotes = (state: RootState) => state.user.bible.notes
+export const selectWordAnnotations = (state: RootState) => state.user.bible.wordAnnotations
 
 // Selector factory for highlights by chapter
-// Usage: const selectHighlightsByChapter = useMemo(() => makeHighlightsByChapterSelector(), [])
+// Usage: const selectHighlightsByChapter = makeHighlightsByChapterSelector()
 export const makeHighlightsByChapterSelector = () =>
   createSelector(
     [
@@ -739,5 +741,31 @@ export const makeNotesForVerseSelector = () =>
 
       // Sort by date (newest first)
       return items.sort((a, b) => b.date - a.date)
+    }
+  )
+
+// Selector factory for note by key (replaces makeCurrentNoteSelector in multiple files)
+// Usage: const selectNoteByKey = makeNoteByKeySelector()
+export const makeNoteByKeySelector = () =>
+  createSelector(
+    [selectNotes, (_: RootState, noteKey: string) => noteKey],
+    (notes, noteKey): (Note & { id: string }) | null => {
+      if (noteKey && notes[noteKey]) {
+        return {
+          id: noteKey,
+          ...notes[noteKey],
+        }
+      }
+      return null
+    }
+  )
+
+// Selector factory for word annotation by id
+// Usage: const selectAnnotationById = makeWordAnnotationByIdSelector()
+export const makeWordAnnotationByIdSelector = () =>
+  createSelector(
+    [selectWordAnnotations, (_: RootState, annotationId: string) => annotationId],
+    (wordAnnotations, annotationId): WordAnnotation | null => {
+      return wordAnnotations[annotationId] || null
     }
   )
