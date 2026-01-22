@@ -1,6 +1,4 @@
-import React from 'react'
 import { TouchableOpacity } from 'react-native'
-import { useSelector } from 'react-redux'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import distanceInWords from 'date-fns/formatDistance'
@@ -12,16 +10,13 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { LinkBox } from '~common/Link'
 import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
 import TagList from '~common/TagList'
-import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import useLanguage from '~helpers/useLanguage'
 import { getDateLocale } from '~helpers/languageUtils'
 import formatVerseContent from '~helpers/formatVerseContent'
-import { resolveHighlightColor } from '~helpers/highlightColors'
+import { useResolvedColor } from '~helpers/useHighlightColors'
 import books from '~assets/bible_versions/books-desc'
-import type { RootState } from '~redux/modules/reducer'
 import type { GroupedWordAnnotation } from '~redux/selectors/bible'
 import type { TagsObj } from '~common/types'
-import { EMPTY_ARRAY } from '~helpers/emptyReferences'
 import { Chip } from '~common/ui/NewChip'
 
 const DateText = styled.Text(({ theme }) => ({
@@ -45,14 +40,8 @@ const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
   const router = useRouter()
   const { t } = useTranslation()
   const lang = useLanguage()
-  const { theme: currentTheme } = useCurrentThemeSelector()
 
-  const themeColors = useSelector(
-    (state: RootState) => state.user.bible.settings.colors[currentTheme]
-  )
-  const customHighlightColors = useSelector(
-    (state: RootState) => state.user.bible.settings.customHighlightColors ?? EMPTY_ARRAY
-  )
+  const resolvedColor = useResolvedColor(item.color)
 
   const [Livre, Chapitre, Verset] = item.verseKey.split('-').map(Number)
   const { title } = formatVerseContent([{ Livre, Chapitre, Verset }])
@@ -82,7 +71,7 @@ const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
           <HStack flex row alignItems="center" gap={10}>
             <HStack>
               <HighlightTypeIndicator
-                color={item.color}
+                color={resolvedColor}
                 type={item.type as 'background' | 'underline'}
                 size={15}
               />

@@ -18,6 +18,7 @@ const CircleContainer = styled.View<{ color: string; size: number; isSelected?: 
     backgroundColor: color,
     transitionProperty: 'boxShadow',
     transitionDuration: 300,
+    overflow: 'visible',
     ...(isSelected && {
       boxShadow: `0 0 0 3px ${theme.colors.reverse}, 0 0 0 5px ${theme.colors.primary}`,
     }),

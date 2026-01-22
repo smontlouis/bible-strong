@@ -24,6 +24,7 @@ import TryAudibibleWidget from './TryAudibibleWidget'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { Events } from './Events'
+import ProfileStats from '~features/profile/components/ProfileStats'
 
 // local react props
 type HomeProps = {
@@ -41,6 +42,7 @@ export const Home = ({ closeHome }: HomeProps) => {
       <HomeScrollView showsVerticalScrollIndicator={false}>
         <Events />
         <UserWidget />
+        <ProfileStats />
         <Box pt={40} px={20}>
           <Text title fontSize={23} flex>
             {t('Apprendre')}

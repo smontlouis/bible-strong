@@ -1,10 +1,9 @@
-import React from 'react'
 import { TouchableOpacity } from 'react-native'
 import distanceInWords from 'date-fns/formatDistance'
 
 import styled from '@emotion/native'
 import { useRouter } from 'expo-router'
-import { shallowEqual, useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 
 import TagList from '~common/TagList'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -18,14 +17,10 @@ import formatVerseContent from '~helpers/formatVerseContent'
 import books from '~assets/bible_versions/books-desc'
 import useBibleVerses from '~helpers/useBibleVerses'
 import { removeBreakLines } from '~helpers/utils'
-import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
 import { getDateLocale } from '~helpers/languageUtils'
-import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
-import { RootState } from '~redux/modules/reducer'
-import { CustomColor, HighlightType } from '~redux/modules/user'
-import { resolveHighlightColor } from '~helpers/highlightColors'
-import { EMPTY_ARRAY, EMPTY_OBJECT } from '~helpers/emptyReferences'
+import { useHighlightColors, useResolvedColor } from '~helpers/useHighlightColors'
+import type { CustomColor, HighlightType } from '~redux/modules/user'
 
 const DateText = styled.Text(({ theme }) => ({
   color: theme.colors.tertiary,
@@ -44,20 +39,9 @@ const VerseComponent = ({ color, date, verseIds, stringIds, tags, setSettings }:
   const verses = useBibleVerses(verseIds)
   const { t } = useTranslation()
   const lang = useLanguage()
-  const { theme: currentTheme } = useCurrentThemeSelector()
 
-  // Use separate selectors to avoid reference instability
-  const themeColors = useSelector(
-    (state: RootState) => state.user.bible.settings.colors[currentTheme]
-  )
-  const customHighlightColors = useSelector(
-    (state: RootState) => state.user.bible.settings.customHighlightColors ?? EMPTY_ARRAY
-  )
-  const defaultColorTypes = useSelector(
-    (state: RootState) => state.user.bible.settings.defaultColorTypes ?? EMPTY_OBJECT
-  )
-
-  const resolvedColor = resolveHighlightColor(color, themeColors, customHighlightColors)
+  const { customHighlightColors, defaultColorTypes } = useHighlightColors()
+  const resolvedColor = useResolvedColor(color)
 
   // Resolve highlight type based on color ID
   const resolveHighlightType = (colorId: string): HighlightType => {

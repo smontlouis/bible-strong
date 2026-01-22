@@ -4,6 +4,7 @@ import { FlatList } from 'react-native'
 import styled from '@emotion/native'
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { useRouter } from 'expo-router'
+import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
@@ -35,6 +36,7 @@ import {
   setSettingsTagsDisplay,
   setSettingsTextDisplay,
 } from '~redux/modules/user'
+import { colorPickerModalAtom } from '~state/app'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
 
@@ -135,6 +137,7 @@ interface BibleParamsModalprops {
 const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
   const { t } = useTranslation()
   const router = useRouter()
+  const setColorPickerModal = useSetAtom(colorPickerModalAtom)
 
   const {
     alignContentToString,
@@ -414,11 +417,11 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
           alignItems="center"
           row
           onPress={() => {
-            router.push('/custom-highlight-colors')
             modalRef.current?.close()
+            setColorPickerModal({})
           }}
         >
-          <Text flex>{t('Couleurs de surlignage')}</Text>
+          <Text flex>{t('Palette de couleurs')}</Text>
           <FeatherIcon name="chevron-right" size={20} color="grey" />
         </TouchableBox>
         <Border />

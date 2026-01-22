@@ -18,7 +18,11 @@ export function PopOverMenu({ element, popover, disabled, ...props }: PopOverMen
   }
 
   return (
-    <Menu renderer={Popover} rendererProps={{ placement: 'top' }} {...props}>
+    <Menu
+      renderer={Popover}
+      rendererProps={{ placement: 'top', anchorStyle: { opacity: 0 } }}
+      {...props}
+    >
       <MenuTrigger>{element}</MenuTrigger>
       <MenuOptions
         optionsContainerStyle={{

@@ -333,10 +333,13 @@ export function useAnnotationHighlights({
             tokens,
           })
 
+          // Resolve color: check default colors, then custom colors, then fallback to raw value
           const colorValue =
             settings.colors[settings.theme][
               annotation.color as keyof (typeof settings.colors)[typeof settings.theme]
-            ] || annotation.color
+            ] ||
+            settings.customHighlightColors?.find(c => c.id === annotation.color)?.hex ||
+            annotation.color
 
           verseRects.forEach((rect, rectIdx) => {
             rects.push({

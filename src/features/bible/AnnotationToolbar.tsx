@@ -25,8 +25,9 @@ import { isFullScreenBibleAtom } from 'src/state/app'
 import type { AnnotationType, SelectionRange } from './hooks/useAnnotationMode'
 
 import { PopOverMenu } from './components/PopOverMenu'
-import { ColorPopover } from './components/ColorPopover'
+import AnnotationColorSelector from './components/AnnotationColorSelector'
 import { LinearTransition } from 'react-native-reanimated'
+import { useResolvedColor } from '~helpers/useHighlightColors'
 
 interface SelectedAnnotation {
   id: string
@@ -136,13 +137,13 @@ const AnnotationToolbar = ({
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
   const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
   const { bottomBarHeight } = useBottomBarHeightInTab()
-
   const disabled = !selectedAnnotation && !hasSelection
-  // const isActive = selectedAnnotation || hasSelection
+
+  const resolvedColor = useResolvedColor(selectedAnnotation?.color)
 
   const getColor = (type: AnnotationType) => {
     if (selectedAnnotation) {
-      return selectedAnnotation.type === type ? selectedAnnotation.color : theme.colors.grey
+      return selectedAnnotation.type === type ? resolvedColor : theme.colors.grey
     }
     return theme.colors.grey
   }
@@ -357,15 +358,14 @@ const AnnotationToolbar = ({
                   </IconButton>
                 }
                 popover={
-                  <ColorPopover
-                    type="background"
-                    onApply={handleApply}
-                    ctx={ctx}
-                    currentColor={
+                  <AnnotationColorSelector
+                    onSelectColor={colorKey => handleApply(colorKey, 'background')}
+                    selectedColor={
                       selectedAnnotation?.type === 'background'
                         ? selectedAnnotation.color
                         : undefined
                     }
+                    ctx={ctx}
                   />
                 }
               />
@@ -381,15 +381,14 @@ const AnnotationToolbar = ({
                   </IconButton>
                 }
                 popover={
-                  <ColorPopover
-                    type="underline"
-                    onApply={handleApply}
-                    ctx={ctx}
-                    currentColor={
+                  <AnnotationColorSelector
+                    onSelectColor={colorKey => handleApply(colorKey, 'underline')}
+                    selectedColor={
                       selectedAnnotation?.type === 'underline'
                         ? selectedAnnotation.color
                         : undefined
                     }
+                    ctx={ctx}
                   />
                 }
               />
@@ -406,26 +405,16 @@ const AnnotationToolbar = ({
                   </IconButton>
                 }
                 popover={
-                  <ColorPopover
-                    type="circle"
-                    onApply={handleApply}
-                    ctx={ctx}
-                    currentColor={
+                  <AnnotationColorSelector
+                    onSelectColor={colorKey => handleApply(colorKey, 'circle')}
+                    selectedColor={
                       selectedAnnotation?.type === 'circle' ? selectedAnnotation.color : undefined
                     }
+                    ctx={ctx}
                   />
                 }
               />
             </HStack>
-
-            {/* <TouchableOpacity
-              onPress={selectedAnnotation ? onClearAnnotationSelection : onClearSelection}
-              disabled={disabled}
-            >
-              <IconButton disabled={disabled} borderRadius={8}>
-                <FeatherIcon name="x" size={20} color="grey" />
-              </IconButton>
-            </TouchableOpacity> */}
           </HStack>
         </AnimatedBox>
       </BottomSheetView>

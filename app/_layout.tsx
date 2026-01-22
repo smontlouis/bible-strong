@@ -31,6 +31,8 @@ import ChangelogModal from '~common/Changelog'
 import ErrorBoundary from '~common/ErrorBoundary'
 import InitHooks from '~common/InitHooks'
 import MultipleTagsModal from '~common/MultipleTagsModal'
+import ColorPickerModal from '~common/ColorPickerModal'
+import ColorChangeModal from '~common/ColorChangeModal'
 import { CurrentTheme } from '~common/types'
 import { AppSwitcherProvider } from '~features/app-switcher/AppSwitcherProvider'
 import { BookSelectorBottomSheetProvider } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
@@ -257,6 +259,8 @@ function InnerApp() {
                           <ChangelogModal />
                           <OnBoardingModal />
                           <MultipleTagsModal />
+                          <ColorPickerModal />
+                          <ColorChangeModal />
                         </BookSelectorBottomSheetProvider>
                       </BottomSheetModalProvider>
                     </PortalProvider>

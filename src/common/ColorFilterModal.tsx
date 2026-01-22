@@ -76,7 +76,7 @@ const ColorFilterModal = forwardRef<BottomSheetModal, Props>(
             <Box
               width={24}
               height={24}
-              borderRadius={12}
+              borderRadius={6}
               marginRight={12}
               borderWidth={2}
               borderColor="border"

@@ -51,7 +51,7 @@ const TagList = ({
           }
         >
           <StyledTag>
-            <Text fontSize={10} color="primary">
+            <Text fontSize={12} color="primary">
               {tag.name}
             </Text>
           </StyledTag>

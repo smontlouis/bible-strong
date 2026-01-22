@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useAtom } from 'jotai/react'
+import { useAtom, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { Alert, ScrollView } from 'react-native'
 
@@ -11,30 +11,25 @@ import ColorFilterModal from '~common/ColorFilterModal'
 import TagsFilterModal from '~common/TagsFilterModal'
 import Container from '~common/ui/Container'
 import Modal from '~common/Modal'
-import Box from '~common/ui/Box'
-import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
-import { wp } from '~helpers/utils'
 import { useHighlightFilters } from '~helpers/useHighlightFilters'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
-import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import type { RootState } from '~redux/modules/reducer'
-import { selectHighlightsObj, makeColorsSelector } from '~redux/selectors/user'
-import { makeAllWordAnnotationsSelector, GroupedWordAnnotation } from '~redux/selectors/bible'
+import { selectHighlightsObj } from '~redux/selectors/user'
+import { makeAllWordAnnotationsSelector, type GroupedWordAnnotation } from '~redux/selectors/bible'
 import {
   changeHighlightColor,
-  type CustomColor,
   type Highlight,
   type HighlightsObj,
   removeHighlight,
 } from '~redux/modules/user'
-import { removeWordAnnotationAction } from '~redux/modules/user/wordAnnotations'
-import { multipleTagsModalAtom } from '../../state/app'
+import {
+  removeWordAnnotationAction,
+  changeWordAnnotationColor,
+} from '~redux/modules/user/wordAnnotations'
+import { multipleTagsModalAtom, colorChangeModalAtom } from '../../state/app'
 import VerseComponent from './Verse'
 import AnnotationItem from './AnnotationItem'
 import type { TagsObj, Verse, VerseIds } from '~common/types'
-import { EMPTY_ARRAY, EMPTY_OBJECT } from '~helpers/emptyReferences'
-
-const MIN_ITEM_WIDTH = 40
 
 export type GroupedHighlightData = {
   date: number
@@ -86,16 +81,8 @@ const HighlightsScreen = () => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const highlightsObj = useSelector(selectHighlightsObj)
-  const { theme: currentTheme } = useCurrentThemeSelector()
-  const selectColors = useMemo(() => makeColorsSelector(), [])
-  const colors = useSelector((state: RootState) => selectColors(state, currentTheme))
-  const customHighlightColors = useSelector(
-    (state: RootState) => state.user.bible.settings.customHighlightColors ?? EMPTY_ARRAY
-  )
-  const defaultColorTypes = useSelector(
-    (state: RootState) => state.user.bible.settings.defaultColorTypes ?? EMPTY_OBJECT
-  )
   const [, setMultipleTagsItem] = useAtom(multipleTagsModalAtom)
+  const setColorChangeModal = useSetAtom(colorChangeModalAtom)
 
   // Word annotations selector
   const selectAllWordAnnotations = useMemo(() => makeAllWordAnnotationsSelector(), [])
@@ -121,13 +108,7 @@ const HighlightsScreen = () => {
 
   // Settings modal (for highlight actions)
   const [settingsData, setSettingsData] = useState<{ stringIds: VerseIds } | null>(null)
-  const [changeColorData, setChangeColorData] = useState<VerseIds | null>(null)
   const { ref: settingsRef, open: openSettings, close: closeSettings } = useBottomSheetModal()
-  const {
-    ref: colorChangeRef,
-    open: openColorChange,
-    close: closeColorChange,
-  } = useBottomSheetModal()
 
   // Annotation settings modal
   const [annotationSettingsData, setAnnotationSettingsData] =
@@ -141,10 +122,6 @@ const HighlightsScreen = () => {
   useEffect(() => {
     if (settingsData) openSettings()
   }, [settingsData, openSettings])
-
-  useEffect(() => {
-    if (changeColorData) openColorChange()
-  }, [changeColorData, openColorChange])
 
   useEffect(() => {
     if (annotationSettingsData) openAnnotationSettings()
@@ -196,11 +173,6 @@ const HighlightsScreen = () => {
     )
   }, [groupedHighlights, wordAnnotations, filters])
 
-  // Dynamic width for color circles
-  const screenWidth = wp(100, 500)
-  const colorItemCount = 5 + customHighlightColors.length
-  const colorItemWidth = Math.max(screenWidth / colorItemCount, MIN_ITEM_WIDTH)
-
   const handleDelete = () => {
     Alert.alert(t('Attention'), t('Êtes-vous vraiment sur de supprimer cette surbrillance ?'), [
       { text: t('Non'), onPress: () => null, style: 'cancel' },
@@ -216,13 +188,6 @@ const HighlightsScreen = () => {
         style: 'destructive',
       },
     ])
-  }
-
-  const handleColorChange = (color: string) => {
-    if (changeColorData) {
-      dispatch(changeHighlightColor(changeColorData, color))
-    }
-    closeColorChange()
   }
 
   const handleDeleteAnnotation = () => {
@@ -318,7 +283,12 @@ const HighlightsScreen = () => {
         <Modal.Item
           onPress={() => {
             if (settingsData?.stringIds) {
-              setChangeColorData(settingsData.stringIds)
+              const verseIds = settingsData.stringIds
+              setColorChangeModal({
+                onSelectColor: (colorId: string) => {
+                  dispatch(changeHighlightColor(verseIds, colorId))
+                },
+              })
             }
           }}
         >
@@ -341,80 +311,28 @@ const HighlightsScreen = () => {
         </Modal.Item>
       </Modal.Body>
 
-      {/* Color change modal */}
-      <Modal.Body
-        ref={colorChangeRef}
-        onModalClose={() => setChangeColorData(null)}
-        enableDynamicSizing
-      >
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingVertical: 10,
-          }}
-        >
-          <Box width={colorItemWidth} height={60} center>
-            <HighlightTypeIndicator
-              color={colors.color1}
-              type={defaultColorTypes.color1 || 'background'}
-              onPress={() => handleColorChange('color1')}
-              size={20}
-            />
-          </Box>
-          <Box width={colorItemWidth} height={60} center>
-            <HighlightTypeIndicator
-              color={colors.color2}
-              type={defaultColorTypes.color2 || 'background'}
-              onPress={() => handleColorChange('color2')}
-              size={20}
-            />
-          </Box>
-          <Box width={colorItemWidth} height={60} center>
-            <HighlightTypeIndicator
-              color={colors.color3}
-              type={defaultColorTypes.color3 || 'background'}
-              onPress={() => handleColorChange('color3')}
-              size={20}
-            />
-          </Box>
-          <Box width={colorItemWidth} height={60} center>
-            <HighlightTypeIndicator
-              color={colors.color4}
-              type={defaultColorTypes.color4 || 'background'}
-              onPress={() => handleColorChange('color4')}
-              size={20}
-            />
-          </Box>
-          <Box width={colorItemWidth} height={60} center>
-            <HighlightTypeIndicator
-              color={colors.color5}
-              type={defaultColorTypes.color5 || 'background'}
-              onPress={() => handleColorChange('color5')}
-              size={20}
-            />
-          </Box>
-          {customHighlightColors.map((customColor: CustomColor) => (
-            <Box key={customColor.id} width={colorItemWidth} height={60} center>
-              <HighlightTypeIndicator
-                color={customColor.hex}
-                type={customColor.type || 'background'}
-                onPress={() => handleColorChange(customColor.id)}
-                size={20}
-              />
-            </Box>
-          ))}
-        </ScrollView>
-      </Modal.Body>
-
       {/* Annotation settings modal */}
       <Modal.Body
         ref={annotationSettingsRef}
         onModalClose={() => setAnnotationSettingsData(null)}
         enableDynamicSizing
       >
+        <Modal.Item
+          onPress={() => {
+            if (annotationSettingsData) {
+              const annotationId = annotationSettingsData.id
+              const annotationColor = annotationSettingsData.color
+              setColorChangeModal({
+                selectedColor: annotationColor,
+                onSelectColor: (colorId: string) => {
+                  dispatch(changeWordAnnotationColor(annotationId, colorId))
+                },
+              })
+            }
+          }}
+        >
+          {t('Changer la couleur')}
+        </Modal.Item>
         <Modal.Item
           onPress={() => {
             if (annotationSettingsData) {

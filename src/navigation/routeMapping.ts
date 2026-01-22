@@ -30,7 +30,6 @@ export const routeMapping: Record<keyof MainStackProps, string> = {
   DictionnaryDetail: '/dictionnary-detail',
   Login: '/login',
   Support: '/support',
-  CustomHighlightColors: '/custom-highlight-colors',
   Changelog: '/changelog',
   ImportExport: '/import-export',
   Backup: '/backup',

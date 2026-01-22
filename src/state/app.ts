@@ -32,6 +32,24 @@ type MultipleTagsModalProps =
 
 export const multipleTagsModalAtom = atom<MultipleTagsModalProps>(false)
 
+export type ColorPickerModalProps =
+  | {
+      selectedColor?: string
+      onSelectColor?: (colorId: string) => void // If present = selection mode
+    }
+  | false
+
+export const colorPickerModalAtom = atom<ColorPickerModalProps>(false)
+
+export type ColorChangeModalProps =
+  | {
+      selectedColor?: string
+      onSelectColor: (colorId: string) => void
+    }
+  | false
+
+export const colorChangeModalAtom = atom<ColorChangeModalProps>(false)
+
 // Atom to trigger animation state reset in AppSwitcherProvider
 export const resetTabAnimationTriggerAtom = atom(0)
 

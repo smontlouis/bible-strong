@@ -1,15 +1,9 @@
-import { useMemo } from 'react'
-import { useSelector } from 'react-redux'
+import { shallowEqual, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import type { RootState } from '~redux/modules/reducer'
 import type { CustomColor } from '~redux/modules/user'
-import { makeColorsSelector } from '~redux/selectors/user'
-import useCurrentThemeSelector from './useCurrentThemeSelector'
-
-// Define empty defaults outside component to maintain reference stability
-// This prevents Redux selector warnings about returning different references
-const EMPTY_COLOR_NAMES = {} as Record<string, string>
-const EMPTY_CUSTOM_COLORS = [] as CustomColor[]
+import { useHighlightColors } from './useHighlightColors'
+import { EMPTY_OBJECT } from './emptyReferences'
 
 /**
  * Hook to get the display name and hex color for a given color ID
@@ -17,15 +11,11 @@ const EMPTY_CUSTOM_COLORS = [] as CustomColor[]
  */
 export function useColorInfo(colorId?: string): { name: string; hex: string } | undefined {
   const { t } = useTranslation()
-  const { theme: currentTheme } = useCurrentThemeSelector()
-  const selectColors = useMemo(() => makeColorsSelector(), [])
-  const themeColors = useSelector((state: RootState) => selectColors(state, currentTheme))
+  const { colors: themeColors, customHighlightColors } = useHighlightColors()
 
   const defaultColorNames = useSelector(
-    (state: RootState) => state.user.bible.settings.defaultColorNames ?? EMPTY_COLOR_NAMES
-  )
-  const customHighlightColors = useSelector(
-    (state: RootState) => state.user.bible.settings.customHighlightColors ?? EMPTY_CUSTOM_COLORS
+    (state: RootState) => state.user.bible.settings.defaultColorNames ?? EMPTY_OBJECT,
+    shallowEqual
   )
 
   if (!colorId) return undefined
@@ -53,49 +43,53 @@ export function useColorInfo(colorId?: string): { name: string; hex: string } | 
   return undefined
 }
 
+export interface ColorInfo {
+  id: string
+  name: string
+  hex: string
+  hasCustomName: boolean
+}
+
 /**
  * Hook to get all available colors (default + custom)
+ * Returns hasCustomName to indicate if the color has a user-defined name
  */
-export function useAllColors(): { id: string; name: string; hex: string }[] {
+export function useAllColors(): ColorInfo[] {
   const { t } = useTranslation()
-  const { theme: currentTheme } = useCurrentThemeSelector()
-  const selectColors = useMemo(() => makeColorsSelector(), [])
-  const themeColors = useSelector((state: RootState) => selectColors(state, currentTheme))
+  const { colors: themeColors, customHighlightColors } = useHighlightColors()
 
   const defaultColorNames = useSelector(
-    (state: RootState) => state.user.bible.settings.defaultColorNames ?? EMPTY_COLOR_NAMES
-  )
-  const customHighlightColors = useSelector(
-    (state: RootState) => state.user.bible.settings.customHighlightColors ?? EMPTY_CUSTOM_COLORS
+    (state: RootState) => state.user.bible.settings.defaultColorNames ?? EMPTY_OBJECT,
+    shallowEqual
   )
 
-  return useMemo(() => {
-    const colors: { id: string; name: string; hex: string }[] = []
+  const colors: ColorInfo[] = []
 
-    // Add default colors
-    for (let i = 1; i <= 5; i++) {
-      const colorKey = `color${i}` as keyof typeof themeColors
-      const nameValue = defaultColorNames[colorKey as keyof typeof defaultColorNames]
-      colors.push({
-        id: `color${i}`,
-        // Defensive check: ensure name is a string (protect against corrupted data like {_type: 'delete'})
-        name: typeof nameValue === 'string' ? nameValue : `${t('Couleur')} ${i}`,
-        hex: themeColors[colorKey] as string,
-      })
-    }
-
-    // Add custom colors
-    customHighlightColors.forEach((color: CustomColor, index: number) => {
-      // Defensive check: ensure name is a string (protect against corrupted data)
-      const colorName =
-        typeof color.name === 'string' ? color.name : `${t('Couleur personnalisée')} ${index + 1}`
-      colors.push({
-        id: color.id,
-        name: colorName,
-        hex: color.hex,
-      })
+  // Add default colors
+  for (let i = 1; i <= 5; i++) {
+    const colorKey = `color${i}` as keyof typeof themeColors
+    const nameValue = defaultColorNames[colorKey as keyof typeof defaultColorNames]
+    const hasCustomName = typeof nameValue === 'string' && nameValue.length > 0
+    colors.push({
+      id: `color${i}`,
+      // Defensive check: ensure name is a string (protect against corrupted data like {_type: 'delete'})
+      name: hasCustomName ? nameValue : `${t('Couleur')} ${i}`,
+      hex: themeColors[colorKey] as string,
+      hasCustomName,
     })
+  }
 
-    return colors
-  }, [themeColors, defaultColorNames, customHighlightColors, t])
+  // Add custom colors
+  customHighlightColors.forEach((color: CustomColor, index: number) => {
+    // Defensive check: ensure name is a string (protect against corrupted data)
+    const hasCustomName = typeof color.name === 'string' && color.name.length > 0
+    colors.push({
+      id: color.id,
+      name: hasCustomName ? (color.name as string) : `${t('Couleur personnalisée')} ${index + 1}`,
+      hex: color.hex,
+      hasCustomName,
+    })
+  })
+
+  return colors
 }

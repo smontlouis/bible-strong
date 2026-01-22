@@ -211,32 +211,32 @@ const Header = ({
       >
         <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
           {hasBackButton && (
-            <Back
-              onGoBack={() => {
-                isFullScreenBibleValue.set(false)
-                console.log('[Bible] onGoBack')
-              }}
-            >
-              <Box alignItems="center" justifyContent="center" width={50} height={32}>
-                <FeatherIcon name="arrow-left" size={20} />
-              </Box>
-            </Back>
+            <Box position="absolute" left={0} top={5} zIndex={2}>
+              <Back
+                onGoBack={() => {
+                  isFullScreenBibleValue.set(false)
+                  console.log('[Bible] onGoBack')
+                }}
+              >
+                <Box alignItems="center" justifyContent="center" width={50} height={32}>
+                  <FeatherIcon name="arrow-left" size={20} color="white" />
+                </Box>
+              </Back>
+            </Box>
           )}
-          <>
-            <Box flex={1} center>
-              <Text fontWeight="bold" color="reverse" fontSize={14}>
-                {`${verseToReference({ bookNum: bookNumber, chapterNum: chapter, verses: displayVerses })} - ${version}`}
+          <Box flex={1} center>
+            <Text fontWeight="bold" color="reverse" fontSize={14}>
+              {`${verseToReference({ bookNum: bookNumber, chapterNum: chapter, verses: displayVerses })} - ${version}`}
+            </Text>
+          </Box>
+
+          <TouchableBox onPress={onExitAnnotationMode} position="absolute" right={0} bottom={10}>
+            <Box bg="reverse" borderRadius={8} height={28} px={12} center>
+              <Text color="primary" bold fontSize={12}>
+                {t('Terminer')}
               </Text>
             </Box>
-
-            <TouchableBox onPress={onExitAnnotationMode} position="absolute" right={0} bottom={10}>
-              <Box bg="reverse" borderRadius={8} height={28} px={12} center>
-                <Text color="primary" bold fontSize={12}>
-                  {t('Terminer')}
-                </Text>
-              </Box>
-            </TouchableBox>
-          </>
+          </TouchableBox>
         </HStack>
       </AnimatedHStack>
     )
