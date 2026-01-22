@@ -35,6 +35,9 @@ function collectTextNodes(element: Element): {
   let node: Text | null
 
   while ((node = walker.nextNode() as Text | null)) {
+    // Skip detached nodes (safety check)
+    if (!node.parentElement || !document.contains(node)) continue
+
     const length = node.textContent?.length || 0
     if (length > 0) {
       textNodes.push({
@@ -333,13 +336,15 @@ export function useAnnotationHighlights({
             tokens,
           })
 
-          // Resolve color: check default colors, then custom colors, then fallback to raw value
+          // Resolve color: check default colors, then custom colors, then fallback to raw value or default
+          const DEFAULT_HIGHLIGHT_COLOR = 'rgba(255, 255, 0, 0.3)' // Yellow fallback
           const colorValue =
             settings.colors[settings.theme][
               annotation.color as keyof (typeof settings.colors)[typeof settings.theme]
             ] ||
             settings.customHighlightColors?.find(c => c.id === annotation.color)?.hex ||
-            annotation.color
+            annotation.color ||
+            DEFAULT_HIGHLIGHT_COLOR
 
           verseRects.forEach((rect, rectIdx) => {
             rects.push({
@@ -425,13 +430,15 @@ export function useAnnotationHighlights({
     const firstRect = sortedRects[0]
     const lastRect = sortedRects[sortedRects.length - 1]
 
+    // Add small vertical offset for better visual alignment with text
+    const HANDLE_OFFSET = 2
     return {
       start: isRTL
-        ? { x: firstRect.left + firstRect.width, y: firstRect.top }
-        : { x: firstRect.left, y: firstRect.top },
+        ? { x: firstRect.left + firstRect.width, y: firstRect.top + HANDLE_OFFSET }
+        : { x: firstRect.left, y: firstRect.top + HANDLE_OFFSET },
       end: isRTL
-        ? { x: lastRect.left, y: lastRect.top + lastRect.height }
-        : { x: lastRect.left + lastRect.width, y: lastRect.top + lastRect.height },
+        ? { x: lastRect.left, y: lastRect.top + lastRect.height - HANDLE_OFFSET }
+        : { x: lastRect.left + lastRect.width, y: lastRect.top + lastRect.height - HANDLE_OFFSET },
     }
   }
 

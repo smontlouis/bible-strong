@@ -212,7 +212,7 @@ const VersesModal = ({
           <></>
         ) : (
           <>
-            <HalfContainer border style={{ alignItems: 'center' }}>
+            <HalfContainer border>
               <ColorCirclesBar
                 selectedVerseHighlightColor={selectedVerseHighlightColor}
                 addHighlight={addHighlight}

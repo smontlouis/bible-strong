@@ -41,6 +41,7 @@ const VerseText = styled('span')<RootStyles & { isParallel?: boolean }>(
   ({ isParallel, settings: { fontSizeScale, lineHeight } }) => ({
     fontSize: scaleFontSize(isParallel ? 16 : 19, fontSizeScale),
     lineHeight: scaleLineHeight(isParallel ? 26 : 32, lineHeight, fontSizeScale),
+    whiteSpace: 'pre-line',
   })
 )
 
@@ -90,10 +91,6 @@ const Wrapper = styled('span')<
     : {}),
 }))
 
-const Spacer = styled('div')(() => ({
-  marginTop: '5px',
-}))
-
 const ParallelError = styled('div')<RootStyles>(
   ({ settings: { theme, colors, fontFamily, fontSizeScale } }) => ({
     fontFamily,
@@ -136,8 +133,7 @@ const getVerseText = ({
         })
   }
 
-  const array = verse.Texte.split(/(\n)/g)
-  return array.length > 1 ? array.map((c, i) => (c === '\n' ? <Spacer key={i} /> : c)) : array
+  return [verse.Texte]
 }
 
 // When verse has both a background-type highlight AND word annotations,

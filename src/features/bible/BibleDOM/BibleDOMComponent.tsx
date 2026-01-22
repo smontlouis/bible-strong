@@ -280,15 +280,23 @@ const VersesRenderer = ({
   const [selection, setSelection] = useState<SelectionRange | null>(null)
   const [tokensCache] = useState<Map<string, WordToken[]>>(() => new Map())
 
+  // Clear tokens cache and selection when version changes to avoid stale word indices
+  useEffect(() => {
+    tokensCache.clear()
+    setSelection(null)
+  }, [version])
+
   // State for touched verse (for visual feedback)
   const [touchedVerseKey, setTouchedVerseKey] = useState<string | null>(null)
 
   // Tokens getter function with caching
+  // Cache key includes text length and first char to detect content mismatch
   const getTokens = (verseKey: string, text: string): WordToken[] => {
-    if (!tokensCache.has(verseKey)) {
-      tokensCache.set(verseKey, tokenizeVerseText(text))
+    const cacheKey = `${verseKey}:${text.length}:${text.charCodeAt(0) || 0}`
+    if (!tokensCache.has(cacheKey)) {
+      tokensCache.set(cacheKey, tokenizeVerseText(text))
     }
-    return tokensCache.get(verseKey)!
+    return tokensCache.get(cacheKey)!
   }
 
   // Use shared hook for annotation highlights (with selection support when in annotation mode)
@@ -503,6 +511,9 @@ const VersesRenderer = ({
     // Normal mode: don't enter annotation mode if verses are selected
     if (Object.keys(selectedVerses).length > 0) return
 
+    // Don't enter annotation mode for interlinear versions (different DOM structure)
+    if (version === 'INT' || version === 'INT_EN') return
+
     // Enter annotation mode
     dispatch({
       type: ENTER_ANNOTATION_MODE,
@@ -543,6 +554,9 @@ const VersesRenderer = ({
   // Check if any verses are selected (disables drag-to-annotation in normal mode)
   const hasSelectedVerses = Object.keys(selectedVerses).length > 0
 
+  // Interlinear versions have different DOM structure, disable annotation mode
+  const isInterlinearVersion = version === 'INT' || version === 'INT_EN'
+
   // Annotation mode controller (handles touch selection and annotation events)
   useAnnotationModeController({
     containerRef,
@@ -555,7 +569,7 @@ const VersesRenderer = ({
     highlightRects,
     selectionHandlePositions,
     selectedAnnotationId,
-    canDragToAnnotate: !hasSelectedVerses,
+    canDragToAnnotate: !hasSelectedVerses && !isInterlinearVersion,
     triggers: {
       clearSelectionTrigger,
       applyAnnotationTrigger,
