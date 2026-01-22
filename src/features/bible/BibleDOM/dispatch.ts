@@ -31,3 +31,6 @@ export const SET_SCROLL_ENABLED = 'SET_SCROLL_ENABLED'
 
 // Cross-version annotation indicator actions
 export const OPEN_CROSS_VERSION_MODAL = 'OPEN_CROSS_VERSION_MODAL'
+
+// Verse tags modal
+export const OPEN_VERSE_TAGS_MODAL = 'OPEN_VERSE_TAGS_MODAL'

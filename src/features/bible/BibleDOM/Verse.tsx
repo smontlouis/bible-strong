@@ -9,6 +9,7 @@ import {
   OPEN_BOOKMARK_MODAL,
   NAVIGATE_TO_BIBLE_LINK,
   OPEN_CROSS_VERSION_MODAL,
+  OPEN_VERSE_TAGS_MODAL,
 } from './dispatch'
 import VersionAnnotationIndicator, { CrossVersionAnnotation } from './VersionAnnotationIndicator'
 
@@ -19,6 +20,7 @@ import LinksText from './LinksText'
 import NotesCount from './NotesCount'
 import NotesText from './NotesText'
 import BookmarkIcon from './BookmarkIcon'
+import TagsIndicator from './TagsIndicator'
 import { RootState } from '~redux/modules/reducer'
 import { useDispatch } from './DispatchProvider'
 import { Bookmark, SelectedCode, StudyNavigateBibleType, Verse as TVerse } from '~common/types'
@@ -208,6 +210,10 @@ interface Props {
   isTouched?: boolean
   // Prop to dim decorations in annotation mode
   annotationMode?: boolean
+  // Prop to show tags indicator with count
+  taggedItemsCount?: number
+  // Prop indicating if this verse has non-highlight tags (for conditional display)
+  hasNonHighlightTags?: boolean
 }
 
 const Verse = ({
@@ -240,6 +246,8 @@ const Verse = ({
   otherVersionAnnotations,
   isTouched = false,
   annotationMode = false,
+  taggedItemsCount = 0,
+  hasNonHighlightTags = false,
 }: Props) => {
   const dispatch = useDispatch()
   const translations = useTranslations()
@@ -248,6 +256,14 @@ const Verse = ({
     const { Livre, Chapitre, Verset } = verse
     dispatch({
       type: NAVIGATE_TO_VERSE_NOTES,
+      payload: `${Livre}-${Chapitre}-${Verset}`,
+    })
+  }
+
+  const navigateToVerseTags = () => {
+    const { Livre, Chapitre, Verset } = verse
+    dispatch({
+      type: OPEN_VERSE_TAGS_MODAL,
       payload: `${Livre}-${Chapitre}-${Verset}`,
     })
   }
@@ -473,6 +489,16 @@ const Verse = ({
             isDisabled={annotationMode}
           />
         )}
+        {taggedItemsCount > 0 &&
+          (settings.tagsDisplay !== 'inline' || hasNonHighlightTags) &&
+          !isSelectionMode && (
+            <TagsIndicator
+              count={taggedItemsCount}
+              settings={settings}
+              onClick={navigateToVerseTags}
+              isDisabled={annotationMode}
+            />
+          )}
 
         <VerseText
           isParallel={isParallel}
@@ -491,7 +517,9 @@ const Verse = ({
           isDisabled={annotationMode}
         />
       )}
-      {tag && <VerseTags settings={settings} tag={tag} isDisabled={annotationMode} />}
+      {tag && settings.tagsDisplay === 'inline' && (
+        <VerseTags settings={settings} tag={tag} isDisabled={annotationMode} />
+      )}
       {isLastFocusVerse && <CloseContextTag settings={settings} isDisabled={annotationMode} />}
       {notesText && settings.notesDisplay === 'inline' && !isSelectionMode && (
         <NotesText

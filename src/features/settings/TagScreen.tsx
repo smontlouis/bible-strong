@@ -1,12 +1,14 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet/'
 import distanceInWords from 'date-fns/formatDistance'
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
+import { useAtom } from 'jotai/react'
 
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
 import RenameModal from '~common/RenameModal'
+import Modal from '~common/Modal'
 import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
@@ -14,7 +16,10 @@ import ScrollView from '~common/ui/ScrollView'
 import HighlightItem from '~features/settings/Verse'
 import formatVerseContent from '~helpers/formatVerseContent'
 import { updateTag, removeTag, Link as LinkModel, LinkType } from '~redux/modules/user'
+import { removeWordAnnotationAction } from '~redux/modules/user/wordAnnotations'
 import { useCreateTabGroupFromTag, TagData } from './useCreateTabGroupFromTag'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { multipleTagsModalAtom } from '../../state/app'
 
 import styled from '@emotion/native'
 import { useTranslation } from 'react-i18next'
@@ -32,12 +37,13 @@ import DictionnaryResultItem from '~features/dictionnary/DictionaryResultItem'
 import LexiqueResultItem from '~features/lexique/LexiqueResultItem'
 import NaveResultItem from '~features/nave/NaveResultItem'
 import StudyItem from '~features/studies/StudyItem'
+import AnnotationItem from './AnnotationItem'
 import truncate from '~helpers/truncate'
 import useLanguage from '~helpers/useLanguage'
 import { getDateLocale, type ActiveLanguage } from '~helpers/languageUtils'
 import { RootState } from '~redux/modules/reducer'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { makeTagDataSelector } from '~redux/selectors/bible'
+import { makeTagDataSelector, GroupedWordAnnotation } from '~redux/selectors/bible'
 import { makeTagByIdSelector } from '~redux/selectors/tags'
 
 const NoteItem = ({ item, t, lang }: { item: any; t: any; lang: ActiveLanguage }) => {
@@ -92,6 +98,17 @@ const LinkTypeIcon = styled(Box)<{ bgColor: string }>(({ bgColor }) => ({
 }))
 
 type LinkItemType = LinkModel & { id: string }
+
+type HighlightData = {
+  date: number
+  color: string
+  verseIds: any[]
+  tags: any
+}
+
+type UnifiedTagItem =
+  | { type: 'highlight'; data: HighlightData }
+  | { type: 'annotation'; data: GroupedWordAnnotation }
 
 const LinkItem = ({ item, t, lang }: { item: LinkItemType; t: any; lang: ActiveLanguage }) => {
   const [Livre, Chapitre, Verset] = item.id.split('-').map(Number)
@@ -176,24 +193,88 @@ const TagScreen = () => {
 
   const tag = useSelector((state: RootState) => selectTagById(state, tagId))
 
-  const { highlights, notes, links, studies, naves, words, strongsGrec, strongsHebreu } =
-    useSelector((state: RootState) =>
-      tag
-        ? selectTagData(state, tag)
-        : {
-            highlights: [],
-            notes: [],
-            links: [],
-            studies: [],
-            naves: [],
-            words: [],
-            strongsGrec: [],
-            strongsHebreu: [],
-          }
+  const {
+    highlights,
+    notes,
+    links,
+    studies,
+    naves,
+    words,
+    strongsGrec,
+    strongsHebreu,
+    wordAnnotations,
+  } = useSelector((state: RootState) =>
+    tag
+      ? selectTagData(state, tag)
+      : {
+          highlights: [],
+          notes: [],
+          links: [],
+          studies: [],
+          naves: [],
+          words: [],
+          strongsGrec: [],
+          strongsHebreu: [],
+          wordAnnotations: [],
+        }
+  )
+
+  // Create unified list of highlights and annotations sorted by date
+  const unifiedHighlightsAndAnnotations = useMemo(() => {
+    const highlightItems: UnifiedTagItem[] = highlights.map((h: HighlightData) => ({
+      type: 'highlight' as const,
+      data: h,
+    }))
+
+    const annotationItems: UnifiedTagItem[] = wordAnnotations.map((a: GroupedWordAnnotation) => ({
+      type: 'annotation' as const,
+      data: a,
+    }))
+
+    return [...highlightItems, ...annotationItems].sort(
+      (a, b) => Number(b.data.date) - Number(a.data.date)
     )
+  }, [highlights, wordAnnotations])
+
   const renameModalRef = useRef<BottomSheetModal>(null)
   const [tagToRename, setTagToRename] = useState<{ id: string; name: string } | null>(null)
   const createTabGroupFromTag = useCreateTabGroupFromTag()
+
+  // Annotation settings state
+  const [annotationSettingsData, setAnnotationSettingsData] = useState<GroupedWordAnnotation | null>(
+    null
+  )
+  const {
+    ref: annotationSettingsRef,
+    open: openAnnotationSettings,
+    close: closeAnnotationSettings,
+  } = useBottomSheetModal()
+  const [, setMultipleTagsItem] = useAtom(multipleTagsModalAtom)
+
+  useEffect(() => {
+    if (annotationSettingsData) openAnnotationSettings()
+  }, [annotationSettingsData, openAnnotationSettings])
+
+  const handleDeleteAnnotation = () => {
+    Alert.alert(
+      t('Attention'),
+      t('Êtes-vous vraiment sur de supprimer cette annotation ?'),
+      [
+        { text: t('Non'), onPress: () => null, style: 'cancel' },
+        {
+          text: t('Oui'),
+          onPress: () => {
+            if (annotationSettingsData) {
+              dispatch(removeWordAnnotationAction(annotationSettingsData.id))
+            }
+            setAnnotationSettingsData(null)
+            closeAnnotationSettings()
+          },
+          style: 'destructive',
+        },
+      ]
+    )
+  }
 
   const handleDelete = () => {
     if (!tag) return
@@ -222,6 +303,7 @@ const TagScreen = () => {
       words,
       strongsGrec,
       strongsHebreu,
+      wordAnnotations,
     }
 
     createTabGroupFromTag(tag, tagData)
@@ -279,7 +361,7 @@ const TagScreen = () => {
         }
       />
       <ScrollView>
-        {!highlights.length &&
+        {!unifiedHighlightsAndAnnotations.length &&
           !notes.length &&
           !links.length &&
           !studies.length &&
@@ -367,16 +449,34 @@ const TagScreen = () => {
             </Accordion>
           </Box>
         )}
-        {!!highlights.length && (
+        {!!unifiedHighlightsAndAnnotations.length && (
           <Box px={20}>
             <Accordion
               defaultExpanded
-              title={<SectionHeader title={t('Surbrillances')} count={highlights.length} />}
+              title={
+                <SectionHeader
+                  title={t('Surbrillances')}
+                  count={unifiedHighlightsAndAnnotations.length}
+                />
+              }
             >
-              {highlights.map((h: any) => {
-                const { color, date, verseIds, tags } = h
-                return <HighlightItem key={date} {...{ color, date, verseIds, tags }} />
-              })}
+              {unifiedHighlightsAndAnnotations.map(item =>
+                item.type === 'highlight' ? (
+                  <HighlightItem
+                    key={`highlight-${item.data.date}`}
+                    color={item.data.color}
+                    date={item.data.date}
+                    verseIds={item.data.verseIds}
+                    tags={item.data.tags}
+                  />
+                ) : (
+                  <AnnotationItem
+                    key={`annotation-${item.data.id}`}
+                    item={item.data}
+                    onSettingsPress={setAnnotationSettingsData}
+                  />
+                )
+              )}
             </Accordion>
           </Box>
         )}
@@ -433,6 +533,30 @@ const TagScreen = () => {
           }
         }}
       />
+
+      {/* Annotation settings modal */}
+      <Modal.Body
+        ref={annotationSettingsRef}
+        onModalClose={() => setAnnotationSettingsData(null)}
+        enableDynamicSizing
+      >
+        <Modal.Item
+          onPress={() => {
+            if (annotationSettingsData) {
+              setMultipleTagsItem({
+                entity: 'wordAnnotations',
+                id: annotationSettingsData.id,
+              })
+            }
+            closeAnnotationSettings()
+          }}
+        >
+          {t('Éditer les tags')}
+        </Modal.Item>
+        <Modal.Item color="quart" onPress={handleDeleteAnnotation}>
+          {t('Supprimer')}
+        </Modal.Item>
+      </Modal.Body>
     </Container>
   )
 }

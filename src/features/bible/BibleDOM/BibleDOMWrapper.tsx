@@ -54,6 +54,7 @@ import {
   SWIPE_UP,
   TOGGLE_SELECTED_VERSE,
   OPEN_CROSS_VERSION_MODAL,
+  OPEN_VERSE_TAGS_MODAL,
 } from './dispatch'
 import type { CrossVersionAnnotation } from '~redux/selectors/bible'
 import type { AnnotationType, WordPosition, SelectionRange } from '../hooks/useAnnotationMode'
@@ -140,6 +141,10 @@ export type WebViewProps = {
   // Cross-version annotations
   wordAnnotationsInOtherVersions?: Record<string, CrossVersionAnnotation[]>
   onOpenCrossVersionModal?: (verseKey: string, versions: CrossVersionAnnotation[]) => void
+  // Verse tags
+  taggedVersesInChapter?: Record<number, number>
+  versesWithNonHighlightTags?: Record<number, boolean>
+  onOpenVerseTagsModal?: (verseKey: string) => void
   // Enter annotation mode from double-tap
   onEnterAnnotationMode?: () => void
 }
@@ -206,6 +211,9 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     selectedAnnotationId,
     wordAnnotationsInOtherVersions,
     onOpenCrossVersionModal,
+    taggedVersesInChapter,
+    versesWithNonHighlightTags,
+    onOpenVerseTagsModal,
   } = props
   const { openVersionSelector } = useBookAndVersionSelector()
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
@@ -497,6 +505,12 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
 
+      case OPEN_VERSE_TAGS_MODAL: {
+        // DOM requests to open the verse tags modal
+        onOpenVerseTagsModal?.(action.payload)
+        break
+      }
+
       default: {
         break
       }
@@ -560,6 +574,8 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         selectedAnnotationId={selectedAnnotationId}
         safeAreaTop={Platform.OS === 'ios' ? insets.top : 0}
         wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
+        taggedVersesInChapter={taggedVersesInChapter}
+        versesWithNonHighlightTags={versesWithNonHighlightTags}
       />
       {Platform.OS === 'android' && Platform.Version < 30 && (
         <HelpTip

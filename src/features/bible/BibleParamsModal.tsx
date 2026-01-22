@@ -32,6 +32,7 @@ import {
   setSettingsPreferredDarkTheme,
   setSettingsPreferredLightTheme,
   setSettingsPress,
+  setSettingsTagsDisplay,
   setSettingsTextDisplay,
 } from '~redux/modules/user'
 import TouchableIcon from './TouchableIcon'
@@ -108,6 +109,11 @@ export const useParamsModalLabels = () => {
     block: t('En icone'),
   }
 
+  const tagsDisplayToString = {
+    inline: t('À la ligne'),
+    block: t('En icone'),
+  }
+
   return {
     alignContentToString,
     lineHeightToString,
@@ -118,6 +124,7 @@ export const useParamsModalLabels = () => {
     pressToString,
     notesDisplayToString,
     linksDisplayToString,
+    tagsDisplayToString,
   }
 }
 
@@ -139,6 +146,7 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
     pressToString,
     notesDisplayToString,
     linksDisplayToString,
+    tagsDisplayToString,
   } = useParamsModalLabels()
 
   const dispatch = useDispatch()
@@ -159,6 +167,7 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
   const textDisplay = useSelector((state: RootState) => state.user.bible.settings.textDisplay)
   const notesDisplay = useSelector((state: RootState) => state.user.bible.settings.notesDisplay)
   const linksDisplay = useSelector((state: RootState) => state.user.bible.settings.linksDisplay)
+  const tagsDisplay = useSelector((state: RootState) => state.user.bible.settings.tagsDisplay)
   const press = useSelector((state: RootState) => state.user.bible.settings.press)
 
   const fontsViewRef = React.useRef(null)
@@ -328,14 +337,28 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
         <HalfContainer border>
           <Text flex={5}>{t('Affichage des liens')}</Text>
           <Text marginLeft={5} fontSize={12} bold>
-            {linksDisplayToString[linksDisplay || 'inline']}
+            {linksDisplayToString[linksDisplay]}
           </Text>
           <TouchableIcon
             isSelected
             name={linksDisplay === 'inline' ? 'align-left' : 'link'}
             onPress={() => {
-              const nextDisplay = (linksDisplay || 'inline') === 'inline' ? 'block' : 'inline'
+              const nextDisplay = linksDisplay === 'inline' ? 'block' : 'inline'
               dispatch(setSettingsLinksDisplay(nextDisplay))
+            }}
+          />
+        </HalfContainer>
+        <HalfContainer border>
+          <Text flex={5}>{t('Affichage des tags')}</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {tagsDisplayToString[tagsDisplay]}
+          </Text>
+          <TouchableIcon
+            isSelected
+            name={tagsDisplay === 'inline' ? 'align-left' : 'tag'}
+            onPress={() => {
+              const nextDisplay = tagsDisplay === 'inline' ? 'block' : 'inline'
+              dispatch(setSettingsTagsDisplay(nextDisplay))
             }}
           />
         </HalfContainer>

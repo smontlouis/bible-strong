@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { Verse } from '~common/types'
@@ -33,6 +33,23 @@ export interface SelectedAnnotation {
   color: string
   type: AnnotationType
   noteId?: string
+  tags?: { [id: string]: { id: string; name: string } }
+}
+
+interface AnnotationModeInternalState {
+  enabled: boolean
+  version?: VersionCode
+  hasSelection: boolean
+  selection: SelectionRange | null
+  clearSelectionTrigger: number
+  applyAnnotationTrigger: {
+    count: number
+    color: string
+    type: AnnotationType
+  }
+  eraseSelectionTrigger: number
+  selectedAnnotationId: string | null
+  clearAnnotationSelectionTrigger: number
 }
 
 export interface AnnotationModeState {
@@ -75,25 +92,48 @@ export interface UseAnnotationModeReturn extends AnnotationModeState {
   changeAnnotationType: (type: AnnotationType) => void
   deleteSelectedAnnotation: () => void
   clearAnnotationSelection: () => void
-  updateSelectedAnnotationNoteId: (noteId: string | undefined) => void
 }
 
-const INITIAL_STATE: AnnotationModeState = {
+const INITIAL_STATE: AnnotationModeInternalState = {
   enabled: false,
   hasSelection: false,
   selection: null,
   clearSelectionTrigger: 0,
   applyAnnotationTrigger: { count: 0, color: '', type: 'background' },
   eraseSelectionTrigger: 0,
-  selectedAnnotation: null,
+  selectedAnnotationId: null,
   clearAnnotationSelectionTrigger: 0,
 }
 
 export function useAnnotationMode(): UseAnnotationModeReturn {
-  const [state, setState] = useState<AnnotationModeState>(INITIAL_STATE)
+  const [state, setState] = useState<AnnotationModeInternalState>(INITIAL_STATE)
   const reduxDispatch = useDispatch()
   const versesRef = useRef<Verse[]>([])
   const webViewRef = useRef<WebViewRef | null>(null)
+
+  // Get word annotations from Redux - single source of truth
+  const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
+
+  // Derive selectedAnnotation from Redux based on selectedAnnotationId
+  const selectedAnnotation = useMemo((): SelectedAnnotation | null => {
+    if (!state.selectedAnnotationId) return null
+
+    const annotation = wordAnnotations?.[state.selectedAnnotationId]
+    if (!annotation) return null
+
+    const firstRange = annotation.ranges[0]
+    if (!firstRange) return null
+
+    return {
+      id: state.selectedAnnotationId,
+      verseKey: firstRange.verseKey,
+      text: firstRange.text,
+      color: annotation.color,
+      type: annotation.type,
+      noteId: annotation.noteId,
+      tags: annotation.tags,
+    }
+  }, [state.selectedAnnotationId, wordAnnotations])
 
   const setWebViewRef = (ref: WebViewRef | null) => {
     webViewRef.current = ref
@@ -182,18 +222,11 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
     )
 
     // Auto-select the newly created annotation
-    const firstRange = ranges[0]
     setState(prev => ({
       ...prev,
       hasSelection: false,
       selection: null,
-      selectedAnnotation: {
-        id: annotationId,
-        verseKey: firstRange.verseKey,
-        text: firstRange.text,
-        color: payload.color,
-        type: payload.type,
-      },
+      selectedAnnotationId: annotationId,
     }))
   }
 
@@ -209,74 +242,36 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
     }))
   }
 
-  const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
-
   const handleAnnotationSelected = (annotationId: string | null) => {
-    if (!annotationId) {
-      setState(prev => ({ ...prev, selectedAnnotation: null }))
-      return
-    }
-
-    const annotation = wordAnnotations?.[annotationId]
-    if (!annotation) {
-      setState(prev => ({ ...prev, selectedAnnotation: null }))
-      return
-    }
-
-    const firstRange = annotation.ranges[0]
     setState(prev => ({
       ...prev,
-      selectedAnnotation: {
-        id: annotationId,
-        verseKey: firstRange.verseKey,
-        text: firstRange.text,
-        color: annotation.color,
-        type: annotation.type,
-        noteId: annotation.noteId,
-      },
+      selectedAnnotationId: annotationId,
       hasSelection: false,
       selection: null,
     }))
   }
 
   const changeAnnotationColor = (color: string) => {
-    if (!state.selectedAnnotation) return
-    reduxDispatch(changeWordAnnotationColorAction(state.selectedAnnotation.id, color))
-    setState(prev => ({
-      ...prev,
-      selectedAnnotation: prev.selectedAnnotation ? { ...prev.selectedAnnotation, color } : null,
-    }))
+    if (!state.selectedAnnotationId) return
+    reduxDispatch(changeWordAnnotationColorAction(state.selectedAnnotationId, color))
   }
 
   const changeAnnotationType = (type: AnnotationType) => {
-    if (!state.selectedAnnotation) return
-    reduxDispatch(changeWordAnnotationTypeAction(state.selectedAnnotation.id, type))
-    setState(prev => ({
-      ...prev,
-      selectedAnnotation: prev.selectedAnnotation ? { ...prev.selectedAnnotation, type } : null,
-    }))
+    if (!state.selectedAnnotationId) return
+    reduxDispatch(changeWordAnnotationTypeAction(state.selectedAnnotationId, type))
   }
 
   const deleteSelectedAnnotation = () => {
-    if (!state.selectedAnnotation) return
-    reduxDispatch(removeWordAnnotationAction(state.selectedAnnotation.id))
-    setState(prev => ({ ...prev, selectedAnnotation: null }))
+    if (!state.selectedAnnotationId) return
+    reduxDispatch(removeWordAnnotationAction(state.selectedAnnotationId))
+    setState(prev => ({ ...prev, selectedAnnotationId: null }))
   }
 
   const clearAnnotationSelection = () => {
     setState(prev => ({
       ...prev,
-      selectedAnnotation: null,
+      selectedAnnotationId: null,
       clearAnnotationSelectionTrigger: (prev.clearAnnotationSelectionTrigger ?? 0) + 1,
-    }))
-  }
-
-  const updateSelectedAnnotationNoteId = (noteId: string | undefined) => {
-    setState(prev => ({
-      ...prev,
-      selectedAnnotation: prev.selectedAnnotation
-        ? { ...prev.selectedAnnotation, noteId }
-        : null,
     }))
   }
 
@@ -287,7 +282,15 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
   }, [])
 
   return {
-    ...state,
+    enabled: state.enabled,
+    version: state.version,
+    hasSelection: state.hasSelection,
+    selection: state.selection,
+    clearSelectionTrigger: state.clearSelectionTrigger,
+    applyAnnotationTrigger: state.applyAnnotationTrigger,
+    eraseSelectionTrigger: state.eraseSelectionTrigger,
+    selectedAnnotation,
+    clearAnnotationSelectionTrigger: state.clearAnnotationSelectionTrigger,
     enterMode,
     exitMode,
     setVerses,
@@ -303,6 +306,5 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
     changeAnnotationType,
     deleteSelectedAnnotation,
     clearAnnotationSelection,
-    updateSelectedAnnotationNoteId,
   }
 }

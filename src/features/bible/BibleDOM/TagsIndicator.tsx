@@ -12,7 +12,7 @@ const Div = styled('span')<RootStyles & { isDisabled?: boolean }>(
       ? `0 0 10px 0 rgba(255, 255, 255, 0.1)`
       : `0 0 10px 0 rgba(0, 0, 0, 0.2)`,
     borderRadius: '8px',
-    padding: '4px 8px 4px 6px',
+    padding: '4px 8px 4px 8px',
     wordBreak: 'break-word',
     marginRight: '4px',
     marginLeft: '4px',
@@ -49,17 +49,13 @@ interface Props {
   isDisabled?: boolean
 }
 
-const NotesCount = ({ count, settings, onClick, isDisabled }: Props) => {
+const TagsIndicator = ({ count, settings, onClick, isDisabled }: Props) => {
   return (
     <Div settings={settings} onClick={() => onClick()} isDisabled={isDisabled}>
-      <Icon.Ionicons
-        color={settings.colors[settings.theme].quart}
-        name="document-text-outline"
-        size={16}
-      />
+      <Icon.Feather color={settings.colors[settings.theme].primary} name="tag" size={14} />
       <Count settings={settings}>{count}</Count>
     </Div>
   )
 }
 
-export default NotesCount
+export default TagsIndicator

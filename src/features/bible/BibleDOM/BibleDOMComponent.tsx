@@ -102,6 +102,8 @@ type Props = Pick<
   | 'linkedVerses'
   | 'wordAnnotations'
   | 'wordAnnotationsInOtherVersions'
+  | 'taggedVersesInChapter'
+  | 'versesWithNonHighlightTags'
   | 'settings'
   | 'verseToScroll'
   | 'isReadOnly'
@@ -245,6 +247,8 @@ const VersesRenderer = ({
   linkedVerses,
   wordAnnotations,
   wordAnnotationsInOtherVersions,
+  taggedVersesInChapter,
+  versesWithNonHighlightTags,
   settings,
   verseToScroll,
   isReadOnly,
@@ -1091,6 +1095,8 @@ const VersesRenderer = ({
             navigateToPericope={navigateToPericope}
             annotationMode={annotationMode}
             touchedVerseKey={touchedVerseKey}
+            taggedVersesInChapter={taggedVersesInChapter}
+            versesWithNonHighlightTags={versesWithNonHighlightTags}
           />
           {isReadOnly && focusVerses && focusVerses.length > 0 && (
             <ReadWholeChapterButtonContainer>

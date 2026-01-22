@@ -35,6 +35,7 @@ interface SelectedAnnotation {
   color: string
   type: AnnotationType
   noteId?: string
+  tags?: { [id: string]: { id: string; name: string } }
 }
 
 const formatSelectionRange = (selection: SelectionRange): string => {
@@ -68,6 +69,8 @@ type Props = {
   onDeleteAnnotation?: () => void
   onClearAnnotationSelection?: () => void
   onNotePress?: () => void
+  onTagsPress?: () => void
+  tagsCount?: number
   isEnabled: boolean
 }
 
@@ -124,6 +127,8 @@ const AnnotationToolbar = ({
   onDeleteAnnotation,
   onClearAnnotationSelection,
   onNotePress,
+  onTagsPress,
+  tagsCount = 0,
   isEnabled,
 }: Props) => {
   const { t } = useTranslation()
@@ -220,6 +225,7 @@ const AnnotationToolbar = ({
               justifyContent="center"
               gap={10}
               layout={LinearTransition}
+              overflow="visible"
             >
               <AnimatedBox layout={LinearTransition} bg="opacity5" borderRadius={8} py={8} px={10}>
                 <FadingText fontSize={16} numberOfLines={1} maxWidth={200}>
@@ -237,10 +243,50 @@ const AnnotationToolbar = ({
                     borderWidth={1}
                   >
                     <FeatherIcon
-                      name={selectedAnnotation?.noteId ? 'file-text' : 'edit-3'}
+                      name={selectedAnnotation?.noteId ? 'file-text' : 'file-plus'}
                       size={18}
-                      color={selectedAnnotation?.noteId ? 'primary' : 'quart'}
+                      color={selectedAnnotation?.noteId ? 'primary' : 'default'}
                     />
+                  </Box>
+                </TouchableOpacity>
+              </AnimatedBox>
+              <AnimatedBox layout={LinearTransition} center overflow="visible">
+                <TouchableOpacity
+                  onPress={onTagsPress}
+                  disabled={disabled}
+                  style={{ overflow: 'visible' }}
+                >
+                  <Box position="relative" overflow="visible">
+                    <Box
+                      width={32}
+                      height={32}
+                      borderRadius={8}
+                      center
+                      borderColor="opacity5"
+                      borderWidth={1}
+                    >
+                      <FeatherIcon
+                        name="tag"
+                        size={18}
+                        color={tagsCount > 0 ? 'primary' : 'default'}
+                      />
+                    </Box>
+                    {tagsCount > 0 && (
+                      <Box
+                        position="absolute"
+                        bottom={-1}
+                        right={-4}
+                        bg="primary"
+                        borderRadius={8}
+                        width={14}
+                        height={14}
+                        center
+                      >
+                        <Text fontSize={8} color="reverse" bold>
+                          {tagsCount}
+                        </Text>
+                      </Box>
+                    )}
                   </Box>
                 </TouchableOpacity>
               </AnimatedBox>

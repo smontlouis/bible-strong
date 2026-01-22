@@ -153,6 +153,10 @@ export interface UnifiedVersesRendererProps {
   annotationMode?: boolean
   // Currently touched verse key (for visual feedback)
   touchedVerseKey?: string | null
+  // Verses with tagged items count (for showing tags indicator with count)
+  taggedVersesInChapter?: Record<number, number>
+  // Verses with non-highlight tags (for showing tags indicator when tagsDisplay is 'inline')
+  versesWithNonHighlightTags?: Record<number, boolean>
 }
 
 export function UnifiedVersesRenderer({
@@ -185,6 +189,8 @@ export function UnifiedVersesRenderer({
   navigateToPericope,
   annotationMode,
   touchedVerseKey,
+  taggedVersesInChapter,
+  versesWithNonHighlightTags,
 }: UnifiedVersesRendererProps) {
   // Calculate adjacent verses for fade effect in readonly mode
   const adjacentVerses = focusVerses
@@ -250,6 +256,8 @@ export function UnifiedVersesRenderer({
                 isTouched={isTouched}
                 otherVersionAnnotations={otherVersionAnnotations}
                 hasAnnotationNotes={versesWithAnnotationNotes?.has(String(Verset))}
+                taggedItemsCount={taggedVersesInChapter?.[Number(Verset)] || 0}
+                hasNonHighlightTags={versesWithNonHighlightTags?.[Number(Verset)]}
               />
             </Span>
           )
@@ -362,6 +370,8 @@ export function UnifiedVersesRenderer({
               otherVersionAnnotations={otherVersionAnnotations}
               isTouched={isTouched}
               annotationMode={annotationMode}
+              taggedItemsCount={taggedVersesInChapter?.[Number(Verset)] || 0}
+              hasNonHighlightTags={versesWithNonHighlightTags?.[Number(Verset)]}
             />
             {!!comment && settings.commentsDisplay && (
               <Comment id={`comment-${verse.Verset}`} settings={settings} comment={comment} />

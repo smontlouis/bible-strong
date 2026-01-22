@@ -9,7 +9,8 @@ import {
   Link,
   WordAnnotationsObj,
 } from '~redux/modules/user'
-import { Tag, CurrentTheme } from '~common/types'
+import { WordAnnotation } from '~redux/modules/user/wordAnnotations'
+import { Tag, CurrentTheme, TagsObj } from '~common/types'
 import { VersionCode } from '~state/tabs'
 
 // Base selectors
@@ -177,6 +178,26 @@ export const makeGroupedHighlightsCountSelector = () =>
     }
   )
 
+// Selector factory for counting grouped word annotations (by unique date) for a tag
+export const makeGroupedWordAnnotationsCountSelector = () =>
+  createSelector(
+    [
+      selectWordAnnotations,
+      (_: RootState, tagWordAnnotations: Object | undefined) => tagWordAnnotations,
+    ],
+    (wordAnnotations, tagWordAnnotations): number => {
+      if (!tagWordAnnotations) return 0
+      const uniqueDates = new Set<number>()
+      for (const id of Object.keys(tagWordAnnotations)) {
+        const annotation = wordAnnotations[id]
+        if (annotation?.date) {
+          uniqueDates.add(annotation.date)
+        }
+      }
+      return uniqueDates.size
+    }
+  )
+
 // Helper function for TagScreen - sorts verses by date
 const sortVersesByDate = (p: Record<string, Highlight>) =>
   Object.keys(p).reduce((arr: any[], verse) => {
@@ -206,6 +227,21 @@ const sortVersesByDate = (p: Record<string, Highlight>) =>
     return arr
   }, [])
 
+// Helper function for sorting word annotations by date (for TagScreen)
+const sortWordAnnotationsByDate = (annotations: Record<string, WordAnnotation>) =>
+  Object.entries(annotations)
+    .map(([id, annotation]) => ({
+      id,
+      date: annotation.date,
+      color: annotation.color,
+      type: annotation.type,
+      version: annotation.version,
+      text: annotation.ranges[0]?.text || '',
+      verseKey: annotation.ranges[0]?.verseKey || '',
+      tags: annotation.tags,
+    }))
+    .sort((a, b) => b.date - a.date)
+
 // Complex selector for TagScreen - extracts all data related to a tag
 export const makeTagDataSelector = () =>
   createSelector(
@@ -218,9 +254,21 @@ export const makeTagDataSelector = () =>
       selectWords,
       selectStrongsGrec,
       selectStrongsHebreu,
+      selectWordAnnotations,
       (_: RootState, tag: Tag) => tag,
     ],
-    (highlights, notes, links, studies, naves, words, strongsGrec, strongsHebreu, tag) => {
+    (
+      highlights,
+      notes,
+      links,
+      studies,
+      naves,
+      words,
+      strongsGrec,
+      strongsHebreu,
+      wordAnnotations,
+      tag
+    ) => {
       return {
         highlights: tag.highlights
           ? sortVersesByDate(
@@ -271,9 +319,50 @@ export const makeTagDataSelector = () =>
               .map(id => (strongsHebreu as Record<string, any>)[id])
               .filter(c => c)
           : [],
+        wordAnnotations: tag.wordAnnotations
+          ? sortWordAnnotationsByDate(
+              Object.keys(tag.wordAnnotations).reduce<Record<string, WordAnnotation>>(
+                (acc, id) => ({
+                  ...acc,
+                  ...(wordAnnotations[id] && { [id]: wordAnnotations[id] }),
+                }),
+                {}
+              )
+            )
+          : [],
       }
     }
   )
+
+// Type for grouped word annotations (for HighlightsScreen)
+export type GroupedWordAnnotation = {
+  id: string
+  date: number
+  color: string
+  type: 'background' | 'underline' | 'circle'
+  version: string
+  text: string
+  verseKey: string
+  tags?: Record<string, { id: string; name: string }>
+}
+
+// Selector for all word annotations sorted by date (for HighlightsScreen)
+export const makeAllWordAnnotationsSelector = () =>
+  createSelector([selectWordAnnotations], (wordAnnotations): GroupedWordAnnotation[] => {
+    return Object.entries(wordAnnotations)
+      .map(([id, annotation]) => ({
+        id,
+        date: annotation.date,
+        color: annotation.color,
+        type: annotation.type,
+        version: annotation.version,
+        text: annotation.ranges[0]?.text || '',
+        verseKey: annotation.ranges[0]?.verseKey || '',
+        tags: annotation.tags,
+      }))
+      .sort((a, b) => b.date - a.date)
+      .slice(0, 100) // Limit to 100 items like highlights
+  })
 
 // Selector for note by id (for BibleNoteModal)
 export const makeNoteByIdSelector = () =>
@@ -379,5 +468,197 @@ export const makeWordAnnotationsInOtherVersionsSelector = () =>
       }
 
       return result
+    }
+  )
+
+// Types for tagged items on a verse
+export type TaggedItemHighlight = {
+  type: 'highlight'
+  data: Highlight
+  verseKey: string
+}
+
+export type TaggedItemAnnotation = {
+  type: 'annotation'
+  data: WordAnnotation & { id: string }
+}
+
+export type TaggedItemNote = {
+  type: 'note'
+  data: Note & { id: string }
+  verseKey: string
+}
+
+export type TaggedItemLink = {
+  type: 'link'
+  data: Link & { id: string }
+  verseKey: string
+}
+
+export type TaggedItem =
+  | TaggedItemHighlight
+  | TaggedItemAnnotation
+  | TaggedItemNote
+  | TaggedItemLink
+
+// Selector factory for getting all tagged items for a specific verse
+export const makeTaggedItemsForVerseSelector = () =>
+  createSelector(
+    [
+      selectHighlights,
+      selectWordAnnotations,
+      selectNotes,
+      selectLinks,
+      (_: RootState, verseKey: string) => verseKey,
+    ],
+    (highlights, wordAnnotations, notes, links, verseKey): TaggedItem[] => {
+      const items: TaggedItem[] = []
+      const [bookStr, chapterStr, verseStr] = verseKey.split('-')
+      const book = parseInt(bookStr)
+      const chapter = parseInt(chapterStr)
+      const verse = parseInt(verseStr)
+
+      // Highlight for this verse
+      const highlight = highlights[verseKey]
+      if (highlight?.tags && Object.keys(highlight.tags).length > 0) {
+        items.push({ type: 'highlight', data: highlight, verseKey })
+      }
+
+      // Word annotations on this verse (any version)
+      Object.entries(wordAnnotations).forEach(([id, annotation]) => {
+        if (annotation.tags && Object.keys(annotation.tags).length > 0) {
+          // Check if the annotation is on this verse
+          const matchesVerse = annotation.ranges.some(r => {
+            const [rBook, rChapter, rVerse] = r.verseKey.split('-').map(Number)
+            return rBook === book && rChapter === chapter && rVerse === verse
+          })
+          if (matchesVerse) {
+            items.push({ type: 'annotation', data: { ...annotation, id } })
+          }
+        }
+      })
+
+      // Notes for this verse (check all note keys that include this verse)
+      Object.entries(notes).forEach(([noteKey, note]) => {
+        // Skip annotation notes
+        if (noteKey.startsWith('annotation:')) return
+
+        if (note?.tags && Object.keys(note.tags).length > 0) {
+          // Note keys can be "1-1-1" or "1-1-1/1-1-2" for verse ranges
+          const versesInKey = noteKey.split('/')
+          const matchesVerse = versesInKey.some(vk => vk === verseKey)
+          if (matchesVerse) {
+            items.push({ type: 'note', data: { ...note, id: noteKey }, verseKey: noteKey })
+          }
+        }
+      })
+
+      // Links for this verse
+      Object.entries(links).forEach(([linkKey, link]) => {
+        if (link?.tags && Object.keys(link.tags).length > 0) {
+          // Link keys can be "1-1-1" or "1-1-1/1-1-2" for verse ranges
+          const versesInKey = linkKey.split('/')
+          const matchesVerse = versesInKey.some(vk => vk === verseKey)
+          if (matchesVerse) {
+            items.push({ type: 'link', data: { ...link, id: linkKey }, verseKey: linkKey })
+          }
+        }
+      })
+
+      return items
+    }
+  )
+
+// Selector factory to check if a verse has any tagged items
+export const makeHasTaggedItemsForVerseSelector = () => {
+  const taggedItemsSelector = makeTaggedItemsForVerseSelector()
+  return createSelector([taggedItemsSelector], (items): boolean => items.length > 0)
+}
+
+// Type for tagged verses selector result
+export type TaggedVersesInChapterResult = {
+  counts: Record<number, number>
+  hasNonHighlightTags: Record<number, boolean>
+}
+
+// Selector factory for getting verses with tagged items in a chapter
+// Returns counts per verse and which verses have non-highlight tags
+export const makeTaggedVersesInChapterSelector = () =>
+  createSelector(
+    [
+      selectHighlights,
+      selectWordAnnotations,
+      selectNotes,
+      selectLinks,
+      (_: RootState, bookNumber: number, chapter: number) => ({ bookNumber, chapter }),
+    ],
+    (
+      highlights,
+      wordAnnotations,
+      notes,
+      links,
+      { bookNumber, chapter }
+    ): TaggedVersesInChapterResult => {
+      const counts: Record<number, number> = {}
+      const hasNonHighlightTags: Record<number, boolean> = {}
+      const prefix = `${bookNumber}-${chapter}-`
+
+      // Check highlights (does NOT count for hasNonHighlightTags)
+      for (const key in highlights) {
+        if (key.startsWith(prefix)) {
+          const highlight = highlights[key]
+          if (highlight?.tags && Object.keys(highlight.tags).length > 0) {
+            const verseNum = parseInt(key.split('-')[2])
+            counts[verseNum] = (counts[verseNum] || 0) + 1
+          }
+        }
+      }
+
+      // Check word annotations (COUNTS for hasNonHighlightTags)
+      for (const id in wordAnnotations) {
+        const annotation = wordAnnotations[id]
+        if (annotation.tags && Object.keys(annotation.tags).length > 0) {
+          for (const range of annotation.ranges) {
+            if (range.verseKey.startsWith(prefix)) {
+              const verseNum = parseInt(range.verseKey.split('-')[2])
+              counts[verseNum] = (counts[verseNum] || 0) + 1
+              hasNonHighlightTags[verseNum] = true
+            }
+          }
+        }
+      }
+
+      // Check notes (COUNTS for hasNonHighlightTags)
+      for (const noteKey in notes) {
+        if (noteKey.startsWith('annotation:')) continue
+        const note = notes[noteKey]
+        if (note?.tags && Object.keys(note.tags).length > 0) {
+          const versesInKey = noteKey.split('/')
+          for (const vk of versesInKey) {
+            if (vk.startsWith(prefix)) {
+              const verseNum = parseInt(vk.split('-')[2])
+              counts[verseNum] = (counts[verseNum] || 0) + 1
+              hasNonHighlightTags[verseNum] = true
+            }
+          }
+        }
+      }
+
+      // Check links (COUNTS for hasNonHighlightTags)
+      for (const linkKey in links) {
+        const link = links[linkKey]
+        if (link?.tags && Object.keys(link.tags).length > 0) {
+          const versesInKey = linkKey.split('/')
+          for (const vk of versesInKey) {
+            if (vk.startsWith(prefix)) {
+              const verseNum = parseInt(vk.split('-')[2])
+              counts[verseNum] = (counts[verseNum] || 0) + 1
+              hasNonHighlightTags[verseNum] = true
+            }
+          }
+        }
+      }
+
+      return { counts, hasNonHighlightTags }
     }
   )

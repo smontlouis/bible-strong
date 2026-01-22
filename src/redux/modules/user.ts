@@ -58,6 +58,7 @@ import {
   setSettingsPreferredDarkTheme,
   setSettingsPreferredLightTheme,
   setSettingsPress,
+  setSettingsTagsDisplay,
   setSettingsTextDisplay,
   toggleSettingsShareAppName,
   toggleSettingsShareLineBreaks,
@@ -296,6 +297,7 @@ export interface UserState {
       press: 'shortPress' | 'longPress'
       notesDisplay: 'inline' | 'block'
       linksDisplay: 'inline' | 'block'
+      tagsDisplay: 'inline' | 'block'
       commentsDisplay: boolean
       shareVerses: {
         hasVerseNumbers: boolean
@@ -385,6 +387,7 @@ const getInitialState = (): UserState => ({
       press: 'longPress',
       notesDisplay: 'inline',
       linksDisplay: 'inline',
+      tagsDisplay: 'inline',
       commentsDisplay: false,
       shareVerses: {
         hasVerseNumbers: true,
@@ -730,9 +733,7 @@ const userSlice = createSlice({
 
             // Same verse as both start and end
             if (rangeVerseCompareStart === 0 && rangeVerseCompareEnd === 0) {
-              return (
-                range.endWordIndex >= start.wordIndex && range.startWordIndex <= end.wordIndex
-              )
+              return range.endWordIndex >= start.wordIndex && range.startWordIndex <= end.wordIndex
             }
 
             // Verse is same as start verse only
@@ -929,6 +930,9 @@ const userSlice = createSlice({
     })
     builder.addCase(setSettingsLinksDisplay, (state, action) => {
       state.bible.settings.linksDisplay = action.payload
+    })
+    builder.addCase(setSettingsTagsDisplay, (state, action) => {
+      state.bible.settings.tagsDisplay = action.payload
     })
     builder.addCase(setSettingsCommentaires, (state, action) => {
       state.bible.settings.commentsDisplay = action.payload
