@@ -29,6 +29,7 @@ import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addNote, deleteNote, Note } from '~redux/modules/user'
+import { WordAnnotation } from '~redux/modules/user/wordAnnotations'
 import { isFullScreenBibleValue, multipleTagsModalAtom } from '~state/app'
 import { NotesTab, useIsCurrentTab } from '~state/tabs'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
@@ -53,6 +54,20 @@ const makeCurrentNoteSelector = () =>
         }
       }
       return null
+    }
+  )
+
+// Create a memoized selector factory for annotation (if noteId is annotation note)
+const makeAnnotationSelector = () =>
+  createSelector(
+    [
+      (state: RootState) => state.user.bible.wordAnnotations,
+      (_: RootState, noteId: string) => noteId,
+    ],
+    (wordAnnotations, noteId): WordAnnotation | null => {
+      if (!noteId.startsWith('annotation:')) return null
+      const annotationId = noteId.replace('annotation:', '')
+      return wordAnnotations[annotationId] || null
     }
   )
 
@@ -88,15 +103,32 @@ const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) =>
   const selectCurrentNote = useMemo(() => makeCurrentNoteSelector(), [])
   const currentNote = useSelector((state: RootState) => selectCurrentNote(state, noteId))
 
+  // Get annotation data if this is an annotation note
+  const selectAnnotation = useMemo(() => makeAnnotationSelector(), [])
+  const annotation = useSelector((state: RootState) => selectAnnotation(state, noteId))
+  const isAnnotationNote = noteId.startsWith('annotation:')
+
   // Parse noteId to get verse references for display
   const noteVerses = useMemo(() => {
+    // For annotation notes, use the annotation's first range verseKey
+    if (isAnnotationNote && annotation) {
+      const verseKey = annotation.ranges[0]?.verseKey
+      return verseKey ? { [verseKey]: true as const } : ({} as VerseIds)
+    }
+    // For regular notes, parse the noteId
     return noteId.split('/').reduce((acc, key) => {
       acc[key] = true as const
       return acc
     }, {} as VerseIds)
-  }, [noteId])
+  }, [noteId, isAnnotationNote, annotation])
 
-  const reference = verseToReference(noteVerses)
+  const reference = useMemo(() => {
+    const baseRef = verseToReference(noteVerses)
+    if (isAnnotationNote && annotation) {
+      return `${baseRef} (${t('annotation')} - ${annotation.version})`
+    }
+    return baseRef
+  }, [noteVerses, isAnnotationNote, annotation, t])
 
   // Go back to notes list
   const goBack = useCallback(() => {
@@ -182,7 +214,19 @@ ${currentNote.description}
   }
 
   const navigateToBible = () => {
-    const [Livre, Chapitre, Verset] = noteId.split('/')[0].split('-')
+    let verseKey: string
+    let version: string | undefined
+
+    if (isAnnotationNote && annotation) {
+      // For annotation notes, use the annotation's verseKey and version
+      verseKey = annotation.ranges[0]?.verseKey
+      version = annotation.version
+    } else {
+      // For regular notes, use the first verse from noteId
+      verseKey = noteId.split('/')[0]
+    }
+
+    const [Livre, Chapitre, Verset] = verseKey.split('-')
     router.push({
       pathname: '/bible-view',
       params: {
@@ -191,6 +235,7 @@ ${currentNote.description}
         chapter: String(Number(Chapitre)),
         verse: String(Number(Verset)),
         focusVerses: JSON.stringify([Number(Verset)]),
+        ...(version && { version }),
       },
     })
   }
@@ -276,7 +321,18 @@ ${currentNote.description}
           }}
         >
           <Box gap={20}>
-            <VerseAccordion noteVerses={noteVerses} />
+            {isAnnotationNote && annotation ? (
+              <Box bg="opacity5" borderRadius={8} py={12} px={16}>
+                <Text fontSize={14} color="grey" mb={4}>
+                  {t('Texte annoté')}
+                </Text>
+                <Text fontSize={16} fontWeight="600">
+                  {annotation.ranges.map(r => r.text).join(' ')}
+                </Text>
+              </Box>
+            ) : (
+              <VerseAccordion noteVerses={noteVerses} />
+            )}
             <NoteEditorDOMComponent
               defaultTitle={currentNote?.title || ''}
               defaultDescription={currentNote?.description || ''}

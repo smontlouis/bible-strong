@@ -25,6 +25,10 @@ const Stack = ({
   )
 }
 
+/**
+ *
+ * Deprecated: Use VStack from Box instead
+ */
 export const VStack = ({ children, spacing = 1, ...boxProps }: StackProps & BoxProps) => {
   return (
     <Stack direction="vertical" spacing={spacing} {...boxProps}>
@@ -33,6 +37,9 @@ export const VStack = ({ children, spacing = 1, ...boxProps }: StackProps & BoxP
   )
 }
 
+/**
+ * Deprecated: Use HStack from Box instead
+ */
 export const HStack = ({ children, spacing = 0.5, ...boxProps }: StackProps & BoxProps) => {
   return (
     <Stack row direction="horizontal" spacing={spacing} {...boxProps}>

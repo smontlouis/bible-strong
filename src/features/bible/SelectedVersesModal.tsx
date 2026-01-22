@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import Clipboard from '@react-native-clipboard/clipboard'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback } from 'react'
 import { Share } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 
@@ -44,7 +44,7 @@ const HalfContainer = styled.View<{ border?: boolean }>(({ border, theme }) => (
 type Props = {
   ref?: React.RefObject<BottomSheet | null>
   isSelectionMode: StudyNavigateBibleType | undefined
-  isSelectedVerseHighlighted: boolean
+  selectedVerseHighlightColor: string | null
   onChangeResourceType: (type: BibleResource) => void
   onCreateNoteClick: () => void
   onCreateLinkClick: () => void
@@ -58,12 +58,13 @@ type Props = {
   onAddToStudy: () => void
   onAddBookmark: () => void
   onPinVerses: () => void
+  onEnterAnnotationMode?: () => void
 }
 
 const VersesModal = ({
   ref,
   isSelectionMode,
-  isSelectedVerseHighlighted,
+  selectedVerseHighlightColor,
   onChangeResourceType,
   onCreateNoteClick,
   onCreateLinkClick,
@@ -77,11 +78,12 @@ const VersesModal = ({
   onAddToStudy,
   onAddBookmark,
   onPinVerses,
+  onEnterAnnotationMode,
 }: Props) => {
   const router = useRouter()
-  const [selectedVersesTitle, setSelectedVersesTitle] = useState('')
   const { t } = useTranslation()
   const openedFromTab = useAtomValue(openedFromTabAtom)
+  const selectedVersesTitle = verseToReference(selectedVerses)
 
   const close = useCallback(() => {
     ref?.current?.close()
@@ -89,11 +91,6 @@ const VersesModal = ({
 
   const { hasVerseNumbers, hasInlineVerses, hasQuotes, hasAppName } = useShareOptions()
   const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
-
-  useEffect(() => {
-    const title = verseToReference(selectedVerses)
-    setSelectedVersesTitle(title)
-  }, [selectedVerses, version])
 
   const shareVerse = async () => {
     const { all: message } = await getVersesContent({
@@ -215,9 +212,9 @@ const VersesModal = ({
           <></>
         ) : (
           <>
-            <HalfContainer border>
+            <HalfContainer border style={{ alignItems: 'center' }}>
               <ColorCirclesBar
-                isSelectedVerseHighlighted={isSelectedVerseHighlighted}
+                selectedVerseHighlightColor={selectedVerseHighlightColor}
                 addHighlight={addHighlight}
                 removeHighlight={removeHighlight}
                 onClose={close}

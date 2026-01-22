@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react-native'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ActivityIndicator } from 'react-native'
+import { ActivityIndicator, Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import Empty from '~common/Empty'
 import QuickTagsModal from '~common/QuickTagsModal'
@@ -34,13 +34,17 @@ import { RootState } from '~redux/modules/reducer'
 import { addHighlight, removeHighlight } from '~redux/modules/user'
 import {
   makeHighlightsByChapterSelector,
-  makeIsSelectedVerseHighlightedSelector,
+  makeSelectedVerseHighlightColorSelector,
   makeLinksByChapterSelector,
   makeNotesByChapterSelector,
+  makeWordAnnotationsByChapterSelector,
+  makeWordAnnotationsInOtherVersionsSelector,
+  makeTaggedVersesInChapterSelector,
+  CrossVersionAnnotation,
 } from '~redux/selectors/bible'
 import { makeSelectBookmarksInChapter } from '~redux/selectors/bookmarks'
 import { historyAtom, isFullScreenBibleValue, multipleTagsModalAtom } from '../../state/app'
-import { BibleTab, useBibleTabActions } from '../../state/tabs'
+import { BibleTab, useBibleTabActions, VersionCode } from '../../state/tabs'
 import { BibleDOMWrapper, ParallelVerse } from './BibleDOM/BibleDOMWrapper'
 import BibleLinkModal from './BibleLinkModal'
 import BibleNoteModal from './BibleNoteModal'
@@ -51,6 +55,15 @@ import { OpenInNewTabButton } from './OpenInNewTabButton'
 import ResourcesModal from './resources/ResourceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
+import AnnotationNoteModal from './AnnotationNoteModal'
+import AnnotationToolbar from './AnnotationToolbar'
+import { useAnnotationMode } from './hooks'
+import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
+import VerseTagsModal from './VerseTagsModal'
+import VerseNotesModal from './VerseNotesModal'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import generateUUID from '~helpers/generateUUID'
+import { Version } from '~helpers/bibleVersions'
 
 const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: number) => {
   if (pericope && pericope[book] && pericope[book][chapter]) {
@@ -122,6 +135,27 @@ const BibleViewer = ({
   const linkModal = useBottomSheetModal()
   const noteModal = useBottomSheetModal()
 
+  // Annotation mode
+  const annotationMode = useAnnotationMode()
+  const annotationToolbar = useBottomSheet()
+  const annotationNoteModal = useBottomSheetModal()
+
+  // Cross-version annotations modal
+  const crossVersionModal = useBottomSheetModal()
+  const [crossVersionModalData, setCrossVersionModalData] = useState<{
+    verseKey: string
+    versions: CrossVersionAnnotation[]
+  } | null>(null)
+  const openInNewTab = useOpenInNewTab()
+
+  // Verse tags modal
+  const verseTagsModal = useBottomSheetModal()
+  const [verseTagsModalKey, setVerseTagsModalKey] = useState<string | null>(null)
+
+  // Verse notes modal
+  const verseNotesModal = useBottomSheetModal()
+  const [verseNotesModalKey, setVerseNotesModalKey] = useState<string | null>(null)
+
   // Add to study modal states
   const addToStudyModal = useBottomSheetModal()
   const verseFormatModal = useBottomSheetModal()
@@ -159,6 +193,100 @@ const BibleViewer = ({
     },
   } = bible
 
+  // Displayed values - updated only when verses are loaded to keep annotations in sync
+  const [displayedBook, setDisplayedBook] = useState(book.Numero)
+  const [displayedChapter, setDisplayedChapter] = useState(chapter)
+  const [displayedVersion, setDisplayedVersion] = useState(version)
+
+  // Handler for entering annotation mode (from SelectedVersesModal)
+  const handleEnterAnnotationMode = useCallback(() => {
+    // Clear selected verses and close the modal
+    actions.clearSelectedVerses()
+    versesModal.close()
+    // Enter annotation mode
+    annotationMode.enterMode(version)
+    // Open the annotation toolbar
+    annotationToolbar.open()
+  }, [actions, versesModal, annotationMode, annotationToolbar, version])
+
+  // Handler for entering annotation mode (from header)
+  const handleEnterAnnotationModeFromHeader = useCallback(() => {
+    // Enter annotation mode
+    annotationMode.enterMode(version)
+    // Open the annotation toolbar
+    annotationToolbar.open()
+  }, [annotationMode, annotationToolbar, version])
+
+  // Handler for entering annotation mode (from double-tap on verse)
+  const handleEnterAnnotationModeFromDoubleTap = () => {
+    // Enter annotation mode
+    annotationMode.enterMode(version)
+    // Open the annotation toolbar
+    annotationToolbar.open()
+  }
+
+  // Handler for exiting annotation mode
+  const handleExitAnnotationMode = useCallback(() => {
+    // exitMode will auto-save any pending annotations
+    annotationMode.exitMode()
+    annotationToolbar.close()
+  }, [annotationMode, annotationToolbar])
+
+  // Handler for opening annotation note modal
+  const handleAnnotationNotePress = useCallback(() => {
+    if (!annotationMode.selectedAnnotation) return
+    annotationNoteModal.open()
+  }, [annotationMode.selectedAnnotation, annotationNoteModal])
+
+  // Handler for opening annotation tags modal
+  const handleAnnotationTagsPress = useCallback(() => {
+    if (!annotationMode.selectedAnnotation) return
+    setMultipleTagsItem({
+      title: annotationMode.selectedAnnotation.text,
+      id: annotationMode.selectedAnnotation.id,
+      entity: 'wordAnnotations',
+    })
+  }, [annotationMode.selectedAnnotation, setMultipleTagsItem])
+
+  // Handler for deleting annotation with confirmation if it has a note or tags
+  const handleDeleteAnnotation = useCallback(() => {
+    if (!annotationMode.selectedAnnotation) return
+
+    const hasNote = !!annotationMode.selectedAnnotation.noteId
+    const hasTags = Object.keys(annotationMode.selectedAnnotation.tags || {}).length > 0
+
+    if (hasNote || hasTags) {
+      const warnings = []
+      if (hasNote) warnings.push(t('une note'))
+      if (hasTags) warnings.push(t('des tags'))
+
+      Alert.alert(
+        t('Attention'),
+        t('Cette annotation a {{items}} associé(s). Voulez-vous vraiment la supprimer ?', {
+          items: warnings.join(' ' + t('et') + ' '),
+        }),
+        [
+          { text: t('Non'), style: 'cancel' },
+          {
+            text: t('Oui'),
+            style: 'destructive',
+            onPress: () => annotationMode.deleteSelectedAnnotation(),
+          },
+        ]
+      )
+    } else {
+      annotationMode.deleteSelectedAnnotation()
+    }
+  }, [annotationMode, t])
+
+  // Keep annotation mode's verses reference updated
+  const { enabled: annotationModeEnabled, setVerses: setAnnotationVerses } = annotationMode
+  useEffect(() => {
+    if (annotationModeEnabled && verses.length > 0) {
+      setAnnotationVerses(verses)
+    }
+  }, [verses, annotationModeEnabled, setAnnotationVerses])
+
   const selectAllVerses = () => {
     const selectedVersesToAdd: VerseIds = Object.fromEntries(
       verses.map(v => [`${v.Livre}-${v.Chapitre}-${v.Verset}`, true])
@@ -179,38 +307,61 @@ const BibleViewer = ({
   const selectHighlightsByChapter = useMemo(() => makeHighlightsByChapterSelector(), [])
   const selectNotesByChapter = useMemo(() => makeNotesByChapterSelector(), [])
   const selectLinksByChapter = useMemo(() => makeLinksByChapterSelector(), [])
-  const selectIsSelectedVerseHighlighted = useMemo(
-    () => makeIsSelectedVerseHighlightedSelector(),
+  const selectWordAnnotationsByChapter = useMemo(() => makeWordAnnotationsByChapterSelector(), [])
+  const selectSelectedVerseHighlightColor = useMemo(
+    () => makeSelectedVerseHighlightColorSelector(),
     []
   )
   const selectBookmarksInChapter = useMemo(() => makeSelectBookmarksInChapter(), [])
+  const selectWordAnnotationsInOtherVersions = useMemo(
+    () => makeWordAnnotationsInOtherVersionsSelector(),
+    []
+  )
+  const selectTaggedVersesInChapter = useMemo(() => makeTaggedVersesInChapterSelector(), [])
 
+  // Use displayed values for selectors to keep annotations in sync with verses
   const highlightedVersesByChapter = useSelector((state: RootState) =>
-    selectHighlightsByChapter(state, book.Numero, chapter)
+    selectHighlightsByChapter(state, displayedBook, displayedChapter)
   )
 
   const notesByChapter = useSelector((state: RootState) =>
-    selectNotesByChapter(state, book.Numero, chapter)
+    selectNotesByChapter(state, displayedBook, displayedChapter)
   )
 
   const linksByChapter = useSelector((state: RootState) =>
-    selectLinksByChapter(state, book.Numero, chapter)
+    selectLinksByChapter(state, displayedBook, displayedChapter)
   )
 
-  const isSelectedVerseHighlighted = useSelector((state: RootState) =>
-    selectIsSelectedVerseHighlighted(state, selectedVerses)
+  const wordAnnotationsByChapter = useSelector((state: RootState) =>
+    selectWordAnnotationsByChapter(state, displayedBook, displayedChapter, displayedVersion)
+  )
+
+  const selectedVerseHighlightColor = useSelector((state: RootState) =>
+    selectSelectedVerseHighlightColor(state, selectedVerses)
   )
 
   const bookmarkedVerses = useSelector((state: RootState) =>
-    selectBookmarksInChapter(state, book.Numero, chapter)
+    selectBookmarksInChapter(state, displayedBook, displayedChapter)
   )
 
+  const wordAnnotationsInOtherVersions = useSelector((state: RootState) =>
+    selectWordAnnotationsInOtherVersions(state, displayedBook, displayedChapter, displayedVersion)
+  )
+
+  const taggedVersesData = useSelector((state: RootState) =>
+    selectTaggedVersesInChapter(state, displayedBook, displayedChapter, displayedVersion)
+  )
+  const taggedVersesInChapter = taggedVersesData.counts
+  const versesWithNonHighlightTags = taggedVersesData.hasNonHighlightTags
+
   const loadVerses = async () => {
-    setPericope(await getBiblePericope(version))
     setIsLoading(true)
 
-    // Load main Bible version
-    const mainResult = await loadBibleChapter(book.Numero, chapter, version)
+    // Load pericopes and main Bible version in parallel
+    const [pericopeToLoad, mainResult] = await Promise.all([
+      getBiblePericope(version),
+      loadBibleChapter(book.Numero, chapter, version),
+    ])
 
     // If main Bible version fails, set error and stop
     if (!mainResult.success || !mainResult.data) {
@@ -256,7 +407,12 @@ const BibleViewer = ({
       setComments(null)
     }
 
+    // Update all states together to prevent UI flashes
     setIsLoading(false)
+    setDisplayedBook(book.Numero)
+    setDisplayedChapter(chapter)
+    setDisplayedVersion(version)
+    setPericope(pericopeToLoad)
     setVerses(versesToLoad)
     setParallelVerses(parallelVersesToLoad)
     setSecondaryVerses(secondaryVersesToLoad)
@@ -474,6 +630,65 @@ const BibleViewer = ({
     setSelectedCodeState(null)
   }, [])
 
+  // Cross-version annotations modal handlers
+  const handleOpenCrossVersionModal = useCallback(
+    (verseKey: string, versions: CrossVersionAnnotation[]) => {
+      setCrossVersionModalData({ verseKey, versions })
+      crossVersionModal.open()
+    },
+    [crossVersionModal]
+  )
+
+  // Verse tags modal handler
+  const handleOpenVerseTagsModal = useCallback(
+    (verseKey: string) => {
+      setVerseTagsModalKey(verseKey)
+      verseTagsModal.open()
+    },
+    [verseTagsModal]
+  )
+
+  // Verse notes modal handler
+  const handleOpenVerseNotesModal = useCallback(
+    (verseKey: string) => {
+      setVerseNotesModalKey(verseKey)
+      verseNotesModal.open()
+    },
+    [verseNotesModal]
+  )
+
+  const handleCrossVersionSwitchVersion = useCallback(
+    (newVersion: VersionCode, verse: number) => {
+      actions.setSelectedVersion(newVersion)
+      actions.setSelectedVerse(verse)
+      crossVersionModal.close()
+      setCrossVersionModalData(null)
+    },
+    [actions, crossVersionModal]
+  )
+
+  const handleCrossVersionOpenInNewTab = useCallback(
+    (newVersion: VersionCode) => {
+      openInNewTab(
+        {
+          ...bible,
+          id: `bible-${generateUUID()}`,
+          data: {
+            ...bible.data,
+            selectedVersion: newVersion,
+            isReadOnly: false,
+          },
+        },
+        {
+          autoRedirect: true,
+        }
+      )
+      crossVersionModal.close()
+      setCrossVersionModalData(null)
+    },
+    [bible, openInNewTab, crossVersionModal]
+  )
+
   // Déplacer le hook en dehors de la condition de rendu
   const translationY = useDerivedValue(() => {
     return {
@@ -481,7 +696,7 @@ const BibleViewer = ({
     }
   })
 
-  console.log('[Bible] BibleViewer', version, book.Numero, chapter, verse)
+  // console.log('[Bible] BibleViewer', version, book.Numero, chapter, verse)
 
   // Wait for onboarding to complete before rendering Bible content
   // This prevents FileNotFoundException when Bible files don't exist yet
@@ -500,6 +715,9 @@ const BibleViewer = ({
         onBibleParamsClick={bibleParamsModal.open}
         commentsDisplay={settings.commentsDisplay}
         hasBackButton={withNavigation}
+        onEnterAnnotationMode={handleEnterAnnotationModeFromHeader}
+        onExitAnnotationMode={handleExitAnnotationMode}
+        annotationModeEnabled={annotationMode.enabled}
       />
       {error && (
         <Box flex={1} zIndex={-1}>
@@ -531,9 +749,10 @@ const BibleViewer = ({
           notedVerses={notesByChapter}
           bookmarkedVerses={bookmarkedVerses}
           linkedVerses={linksByChapter}
+          wordAnnotations={wordAnnotationsByChapter}
           settings={settings}
           verseToScroll={verse}
-          pericopeChapter={getPericopeChapter(pericope, book.Numero, chapter)}
+          pericopeChapter={getPericopeChapter(pericope, displayedBook, displayedChapter)}
           openNoteModal={openNoteModal}
           openLinkModal={openLinkModal}
           setSelectedCode={setSelectedCode}
@@ -549,6 +768,28 @@ const BibleViewer = ({
           onOpenBookmarkModal={handleOpenBookmarkModal}
           exitReadOnlyMode={actions.exitReadOnlyMode}
           enterReadOnlyMode={actions.enterReadOnlyMode}
+          // Annotation mode props
+          annotationMode={annotationMode.enabled}
+          clearSelectionTrigger={annotationMode.clearSelectionTrigger}
+          applyAnnotationTrigger={annotationMode.applyAnnotationTrigger}
+          eraseSelectionTrigger={annotationMode.eraseSelectionTrigger}
+          onSelectionChanged={annotationMode.handleSelectionChanged}
+          onCreateAnnotation={annotationMode.handleCreateAnnotation}
+          onEraseSelection={annotationMode.handleEraseSelection}
+          onAnnotationSelected={annotationMode.handleAnnotationSelected}
+          clearAnnotationSelectionTrigger={annotationMode.clearAnnotationSelectionTrigger}
+          selectedAnnotationId={annotationMode.selectedAnnotation?.id ?? null}
+          // Cross-version annotations
+          wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
+          onOpenCrossVersionModal={handleOpenCrossVersionModal}
+          // Verse tags
+          taggedVersesInChapter={taggedVersesInChapter}
+          versesWithNonHighlightTags={versesWithNonHighlightTags}
+          onOpenVerseTagsModal={handleOpenVerseTagsModal}
+          // Verse notes modal
+          onOpenVerseNotesModal={handleOpenVerseNotesModal}
+          // Double-tap to enter annotation mode
+          onEnterAnnotationMode={handleEnterAnnotationModeFromDoubleTap}
         />
       )}
       {!(withNavigation || isReadOnly) && (
@@ -581,7 +822,7 @@ const BibleViewer = ({
       <SelectedVersesModal
         ref={versesModal.getRef()}
         isSelectionMode={isSelectionMode}
-        isSelectedVerseHighlighted={isSelectedVerseHighlighted}
+        selectedVerseHighlightColor={selectedVerseHighlightColor}
         onChangeResourceType={val => {
           onChangeResourceType(val)
           resourceModal.open()
@@ -593,7 +834,6 @@ const BibleViewer = ({
         removeHighlight={() => {
           // @ts-ignore
           dispatch(removeHighlight({ selectedVerses }))
-          actions.clearSelectedVerses()
         }}
         clearSelectedVerses={actions.clearSelectedVerses}
         selectedVerses={selectedVerses}
@@ -602,6 +842,7 @@ const BibleViewer = ({
         onAddToStudy={handleOpenAddToStudy}
         onAddBookmark={handleAddBookmark}
         onPinVerses={handlePinVerses}
+        onEnterAnnotationMode={handleEnterAnnotationMode}
       />
       <QuickTagsModal
         item={quickTagsModal}
@@ -646,6 +887,46 @@ const BibleViewer = ({
         version={version}
         existingBookmark={editingBookmark || undefined}
       />
+      <AnnotationToolbar
+        ref={annotationToolbar.getRef()}
+        hasSelection={annotationMode.hasSelection}
+        selection={annotationMode.selection}
+        onApplyAnnotation={annotationMode.applyAnnotation}
+        onClearSelection={annotationMode.clearSelection}
+        onEraseAnnotations={annotationMode.eraseSelection}
+        onClose={handleExitAnnotationMode}
+        selectedAnnotation={annotationMode.selectedAnnotation}
+        onChangeAnnotationColor={annotationMode.changeAnnotationColor}
+        onChangeAnnotationType={annotationMode.changeAnnotationType}
+        onDeleteAnnotation={handleDeleteAnnotation}
+        onClearAnnotationSelection={annotationMode.clearAnnotationSelection}
+        onNotePress={handleAnnotationNotePress}
+        onTagsPress={handleAnnotationTagsPress}
+        tagsCount={Object.keys(annotationMode.selectedAnnotation?.tags || {}).length}
+        isEnabled={annotationMode.enabled}
+      />
+      <AnnotationNoteModal
+        ref={annotationNoteModal.getRef()}
+        annotationId={annotationMode.selectedAnnotation?.id ?? null}
+        annotationText={annotationMode.selectedAnnotation?.text ?? ''}
+        annotationVerseKey={annotationMode.selectedAnnotation?.verseKey ?? ''}
+        existingNoteId={annotationMode.selectedAnnotation?.noteId}
+        version={version}
+      />
+      <CrossVersionAnnotationsModal
+        bottomSheetRef={crossVersionModal.getRef()}
+        verseKey={crossVersionModalData?.verseKey ?? null}
+        versions={crossVersionModalData?.versions ?? []}
+        onSwitchVersion={handleCrossVersionSwitchVersion}
+        onOpenInNewTab={handleCrossVersionOpenInNewTab}
+        onClose={() => setCrossVersionModalData(null)}
+      />
+      <VerseTagsModal
+        ref={verseTagsModal.getRef()}
+        verseKey={verseTagsModalKey}
+        version={displayedVersion}
+      />
+      <VerseNotesModal ref={verseNotesModal.getRef()} verseKey={verseNotesModalKey} />
     </Box>
   )
 }

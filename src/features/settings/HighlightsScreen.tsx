@@ -13,12 +13,13 @@ import Container from '~common/ui/Container'
 import Modal from '~common/Modal'
 import Box from '~common/ui/Box'
 import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
-import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { wp } from '~helpers/utils'
 import { useHighlightFilters } from '~helpers/useHighlightFilters'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import type { RootState } from '~redux/modules/reducer'
 import { selectHighlightsObj, makeColorsSelector } from '~redux/selectors/user'
+import { makeAllWordAnnotationsSelector, GroupedWordAnnotation } from '~redux/selectors/bible'
 import {
   changeHighlightColor,
   type CustomColor,
@@ -26,20 +27,28 @@ import {
   type HighlightsObj,
   removeHighlight,
 } from '~redux/modules/user'
+import { removeWordAnnotationAction } from '~redux/modules/user/wordAnnotations'
 import { multipleTagsModalAtom } from '../../state/app'
-import VersesList from './VersesList'
+import VerseComponent from './Verse'
+import AnnotationItem from './AnnotationItem'
 import type { TagsObj, Verse, VerseIds } from '~common/types'
 import { EMPTY_ARRAY, EMPTY_OBJECT } from '~helpers/emptyReferences'
 
 const MIN_ITEM_WIDTH = 40
 
-export type GroupedHighlights = {
+export type GroupedHighlightData = {
   date: number
   color: string
   highlightsObj: Verse[]
   stringIds: VerseIds
   tags: TagsObj
-}[]
+}
+
+export type GroupedHighlights = GroupedHighlightData[]
+
+type UnifiedHighlightItem =
+  | { type: 'highlight'; data: GroupedHighlightData }
+  | { type: 'annotation'; data: GroupedWordAnnotation }
 
 const filterByTag =
   (tagId: string, highlightsObj: HighlightsObj) =>
@@ -88,6 +97,10 @@ const HighlightsScreen = () => {
   )
   const [, setMultipleTagsItem] = useAtom(multipleTagsModalAtom)
 
+  // Word annotations selector
+  const selectAllWordAnnotations = useMemo(() => makeAllWordAnnotationsSelector(), [])
+  const wordAnnotations = useSelector((state: RootState) => selectAllWordAnnotations(state))
+
   // Filters hook - encapsulates all filter logic
   const {
     filters,
@@ -116,6 +129,15 @@ const HighlightsScreen = () => {
     close: closeColorChange,
   } = useBottomSheetModal()
 
+  // Annotation settings modal
+  const [annotationSettingsData, setAnnotationSettingsData] =
+    useState<GroupedWordAnnotation | null>(null)
+  const {
+    ref: annotationSettingsRef,
+    open: openAnnotationSettings,
+    close: closeAnnotationSettings,
+  } = useBottomSheetModal()
+
   useEffect(() => {
     if (settingsData) openSettings()
   }, [settingsData, openSettings])
@@ -123,6 +145,10 @@ const HighlightsScreen = () => {
   useEffect(() => {
     if (changeColorData) openColorChange()
   }, [changeColorData, openColorChange])
+
+  useEffect(() => {
+    if (annotationSettingsData) openAnnotationSettings()
+  }, [annotationSettingsData, openAnnotationSettings])
 
   // Filter highlights
   const groupedHighlights = useMemo(() => {
@@ -140,6 +166,35 @@ const HighlightsScreen = () => {
       .slice(0, 100)
       .reduce(groupHighlightsByDate, [])
   }, [filters, highlightsObj])
+
+  // Create unified list of highlights and annotations sorted by date
+  const unifiedItems = useMemo(() => {
+    // Transform highlights to unified format
+    const highlightItems: UnifiedHighlightItem[] = groupedHighlights.map(h => ({
+      type: 'highlight' as const,
+      data: h,
+    }))
+
+    // Filter and transform annotations to unified format
+    let filteredAnnotations = wordAnnotations
+    if (filters.colorId) {
+      filteredAnnotations = filteredAnnotations.filter(a => a.color === filters.colorId)
+    }
+    const tagIdFilter = filters.tagId
+    if (tagIdFilter) {
+      filteredAnnotations = filteredAnnotations.filter(a => a.tags?.[tagIdFilter])
+    }
+
+    const annotationItems: UnifiedHighlightItem[] = filteredAnnotations.map(a => ({
+      type: 'annotation' as const,
+      data: a,
+    }))
+
+    // Combine and sort by date descending
+    return [...highlightItems, ...annotationItems].sort(
+      (a, b) => Number(b.data.date) - Number(a.data.date)
+    )
+  }, [groupedHighlights, wordAnnotations, filters])
 
   // Dynamic width for color circles
   const screenWidth = wp(100, 500)
@@ -168,6 +223,23 @@ const HighlightsScreen = () => {
       dispatch(changeHighlightColor(changeColorData, color))
     }
     closeColorChange()
+  }
+
+  const handleDeleteAnnotation = () => {
+    Alert.alert(t('Attention'), t('Êtes-vous vraiment sur de supprimer cette annotation ?'), [
+      { text: t('Non'), onPress: () => null, style: 'cancel' },
+      {
+        text: t('Oui'),
+        onPress: () => {
+          if (annotationSettingsData?.id) {
+            dispatch(removeWordAnnotationAction(annotationSettingsData.id))
+          }
+          setAnnotationSettingsData(null)
+          closeAnnotationSettings()
+        },
+        style: 'destructive',
+      },
+    ])
   }
 
   return (
@@ -212,8 +284,28 @@ const HighlightsScreen = () => {
       />
 
       {/* Content */}
-      {groupedHighlights.length ? (
-        <VersesList setSettings={setSettingsData} groupedHighlights={groupedHighlights} />
+      {unifiedItems.length ? (
+        <ScrollView>
+          {unifiedItems.map(item =>
+            item.type === 'highlight' ? (
+              <VerseComponent
+                key={`highlight-${item.data.date}`}
+                color={item.data.color}
+                date={item.data.date}
+                verseIds={item.data.highlightsObj}
+                stringIds={item.data.stringIds}
+                tags={item.data.tags}
+                setSettings={setSettingsData}
+              />
+            ) : (
+              <AnnotationItem
+                key={`annotation-${item.data.id}`}
+                item={item.data}
+                onSettingsPress={setAnnotationSettingsData}
+              />
+            )
+          )}
+        </ScrollView>
       ) : (
         <Empty
           icon={require('~assets/images/empty-state-icons/highlight.svg')}
@@ -315,6 +407,29 @@ const HighlightsScreen = () => {
             </Box>
           ))}
         </ScrollView>
+      </Modal.Body>
+
+      {/* Annotation settings modal */}
+      <Modal.Body
+        ref={annotationSettingsRef}
+        onModalClose={() => setAnnotationSettingsData(null)}
+        enableDynamicSizing
+      >
+        <Modal.Item
+          onPress={() => {
+            if (annotationSettingsData) {
+              setMultipleTagsItem({
+                entity: 'wordAnnotations',
+                id: annotationSettingsData.id,
+              })
+            }
+          }}
+        >
+          {t('Éditer les tags')}
+        </Modal.Item>
+        <Modal.Item color="quart" onPress={handleDeleteAnnotation}>
+          {t('Supprimer')}
+        </Modal.Item>
       </Modal.Body>
     </Container>
   )

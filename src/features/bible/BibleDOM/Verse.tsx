@@ -1,15 +1,17 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useEffect } from 'react'
 import { styled } from 'goober'
 
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
-  NAVIGATE_TO_VERSE_NOTES,
   NAVIGATE_TO_VERSE_LINKS,
-  TOGGLE_SELECTED_VERSE,
   NAVIGATE_TO_BIBLE_NOTE,
   OPEN_BOOKMARK_MODAL,
   NAVIGATE_TO_BIBLE_LINK,
+  OPEN_CROSS_VERSION_MODAL,
+  OPEN_VERSE_TAGS_MODAL,
+  OPEN_VERSE_NOTES_MODAL,
 } from './dispatch'
+import VersionAnnotationIndicator, { CrossVersionAnnotation } from './VersionAnnotationIndicator'
 
 import { scaleFontSize } from './scaleFontSize'
 import { scaleLineHeight } from './scaleLineHeight'
@@ -18,12 +20,16 @@ import LinksText from './LinksText'
 import NotesCount from './NotesCount'
 import NotesText from './NotesText'
 import BookmarkIcon from './BookmarkIcon'
+import TagsIndicator from './TagsIndicator'
 import { RootState } from '~redux/modules/reducer'
 import { useDispatch } from './DispatchProvider'
 import { Bookmark, SelectedCode, StudyNavigateBibleType, Verse as TVerse } from '~common/types'
 import { LinkedVerse, NotedVerse, RootStyles, TaggedVerse } from './BibleDOMWrapper'
-import VerseTextFormatting from './VerseTextFormatting'
-import { ContainerText } from './ContainerText'
+import verseToStrong from './verseToStrong'
+import { ContainerText, resolveHighlightInfo } from './ContainerText'
+import { convertHex } from './convertHex'
+import { HIGHLIGHT_BACKGROUND_OPACITY, getContrastTextColor } from '~helpers/highlightUtils'
+import { isDarkTheme } from './utils'
 import InterlinearVerseComplete from './InterlinearVerseComplete'
 import InterlinearVerse from './InterlinearVerse'
 import VerseTags from './VerseTags'
@@ -38,11 +44,22 @@ const VerseText = styled('span')<RootStyles & { isParallel?: boolean }>(
   })
 )
 
-const NumberText = styled<RootStyles & { isFocused?: boolean }>('span')(
-  ({ isFocused, settings: { fontSizeScale } }) => ({
-    fontSize: scaleFontSize(14, fontSizeScale),
-  })
-)
+const NumberText = styled<
+  RootStyles & { isFocused?: boolean; highlightBg?: string; highlightColor?: string }
+>('span')(({ isFocused, highlightBg, highlightColor, settings: { fontSizeScale } }) => ({
+  fontSize: scaleFontSize(14, fontSizeScale),
+  display: 'inline-flex',
+  marginRight: '4px',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '2px 2px',
+  minWidth: '18px',
+  ...(highlightBg && {
+    backgroundColor: highlightBg,
+    borderRadius: '3px',
+    ...(highlightColor && { color: highlightColor }),
+  }),
+}))
 
 const Wrapper = styled('span')<
   RootStyles & {
@@ -53,6 +70,8 @@ const Wrapper = styled('span')<
 >(({ settings: { textDisplay, theme, colors }, isSelectedMode, isSelected, fadePosition }) => ({
   display: textDisplay,
   transition: 'opacity 0.3s ease',
+  position: 'relative',
+  zIndex: 1,
   ...(textDisplay === 'block'
     ? {
         marginBottom: '5px',
@@ -65,17 +84,8 @@ const Wrapper = styled('span')<
     : {}),
   ...(fadePosition
     ? {
-        // background:
-        //   fadePosition === 'top'
-        //     ? `linear-gradient(to left, ${colors[theme].default}, transparent)`
-        //     : `linear-gradient(to right, ${colors[theme].default}, transparent)`,
-        // WebkitBackgroundClip: 'text',
-        // backgroundClip: 'text',
-        // color: 'transparent',
-        // WebkitTextFillColor: 'transparent',
         pointerEvents: 'none',
         filter: 'blur(4px)',
-        // opacity: 0.5,
       }
     : {}),
 }))
@@ -95,6 +105,74 @@ const ParallelError = styled('div')<RootStyles>(
     lineHeight: 1.4,
   })
 )
+
+const getVerseText = ({
+  verse,
+  version,
+  annotationMode,
+  isParallel,
+  selectedCode,
+  settings,
+}: {
+  verse: TVerse
+  version: string
+  annotationMode: boolean
+  isParallel?: boolean
+  selectedCode: SelectedCode | null
+  settings: RootState['user']['bible']['settings']
+}): (string | JSX.Element)[] => {
+  const isStrongVersion = version === 'LSGS' || version === 'KJVS'
+
+  if (isStrongVersion) {
+    return annotationMode
+      ? [verse.Texte]
+      : verseToStrong({
+          Texte: verse.Texte,
+          Livre: verse.Livre,
+          isParallel,
+          isDisabled: annotationMode,
+          selectedCode,
+          settings,
+        })
+  }
+
+  const array = verse.Texte.split(/(\n)/g)
+  return array.length > 1 ? array.map((c, i) => (c === '\n' ? <Spacer key={i} /> : c)) : array
+}
+
+// When verse has both a background-type highlight AND word annotations,
+// show highlight on number instead of full verse background
+const getNumberHighlight = ({
+  highlightedColor,
+  hasWordAnnotations,
+  settings,
+}: {
+  highlightedColor?: keyof RootStyles['settings']['colors'][keyof RootStyles['settings']['colors']]
+  hasWordAnnotations?: boolean
+  settings: RootState['user']['bible']['settings']
+}): { show: boolean; bg?: string; color?: string } => {
+  if (!highlightedColor || !hasWordAnnotations) {
+    return { show: false }
+  }
+
+  const { theme, colors, customHighlightColors, defaultColorTypes } = settings
+  const highlightInfo = resolveHighlightInfo(
+    highlightedColor,
+    colors[theme],
+    customHighlightColors,
+    defaultColorTypes || {}
+  )
+
+  if (highlightInfo.type !== 'background' || highlightInfo.hex === 'transparent') {
+    return { show: false }
+  }
+
+  return {
+    show: true,
+    bg: convertHex(highlightInfo.hex, HIGHLIGHT_BACKGROUND_OPACITY),
+    color: getContrastTextColor(highlightInfo.hex, isDarkTheme(theme)),
+  }
+}
 
 interface Props {
   verse: TVerse
@@ -125,6 +203,17 @@ interface Props {
   bookmark?: Bookmark
   fadePosition?: 'top' | 'bottom'
   isLastFocusVerse?: boolean
+  hasWordAnnotations?: boolean
+  hasAnnotationNotes?: boolean
+  otherVersionAnnotations?: CrossVersionAnnotation[]
+  // Prop for touch visual feedback (managed by parent via useTouchSelection)
+  isTouched?: boolean
+  // Prop to dim decorations in annotation mode
+  annotationMode?: boolean
+  // Prop to show tags indicator with count
+  taggedItemsCount?: number
+  // Prop indicating if this verse has non-highlight tags (for conditional display)
+  hasNonHighlightTags?: boolean
 }
 
 const Verse = ({
@@ -152,157 +241,108 @@ const Verse = ({
   bookmark,
   fadePosition,
   isLastFocusVerse,
+  hasWordAnnotations,
+  hasAnnotationNotes,
+  otherVersionAnnotations,
+  isTouched = false,
+  annotationMode = false,
+  taggedItemsCount = 0,
+  hasNonHighlightTags = false,
 }: Props) => {
-  const [isTouched, setIsTouched] = useState(false)
-  const detectScrollRef = useRef<any>()
-  const movedRef = useRef(false)
-  const shouldShortPressRef = useRef(false)
-  const buttonPressTimerRef = useRef<any>()
   const dispatch = useDispatch()
   const translations = useTranslations()
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!movedRef.current) movedRef.current = true
-    }
-
-    detectScrollRef.current = window.addEventListener('scroll', handleScroll)
-
-    return () => {
-      window.removeEventListener('scroll', detectScrollRef.current)
-    }
-  }, [])
-
-  const navigateToVerseNotes = useCallback(() => {
+  const openVerseNotesModal = () => {
     const { Livre, Chapitre, Verset } = verse
     dispatch({
-      type: NAVIGATE_TO_VERSE_NOTES,
+      type: OPEN_VERSE_NOTES_MODAL,
       payload: `${Livre}-${Chapitre}-${Verset}`,
     })
-  }, [verse])
+  }
 
-  const navigateToBibleVerseDetail = useCallback(
-    (additionnalParams = {}) => {
-      dispatch({
-        type: NAVIGATE_TO_BIBLE_VERSE_DETAIL,
-        params: {
-          ...additionnalParams,
-          verse,
-        },
-      })
-    },
-    [verse]
-  )
+  const navigateToVerseTags = () => {
+    const { Livre, Chapitre, Verset } = verse
+    dispatch({
+      type: OPEN_VERSE_TAGS_MODAL,
+      payload: `${Livre}-${Chapitre}-${Verset}`,
+    })
+  }
 
-  const navigateToNote = useCallback((id: string) => {
+  const navigateToBibleVerseDetail = (additionnalParams = {}) => {
+    dispatch({
+      type: NAVIGATE_TO_BIBLE_VERSE_DETAIL,
+      params: {
+        ...additionnalParams,
+        verse,
+      },
+    })
+  }
+
+  const navigateToNote = (id: string) => {
     dispatch({
       type: NAVIGATE_TO_BIBLE_NOTE,
       payload: id,
     })
-  }, [])
+  }
 
-  const openBookmarkModal = useCallback(() => {
+  const openBookmarkModal = () => {
     if (bookmark) {
       dispatch({
         type: OPEN_BOOKMARK_MODAL,
         payload: bookmark,
       })
     }
-  }, [bookmark])
-  const navigateToVerseLinks = useCallback(() => {
+  }
+  const navigateToVerseLinks = () => {
     const { Livre, Chapitre, Verset } = verse
     dispatch({
       type: NAVIGATE_TO_VERSE_LINKS,
       payload: `${Livre}-${Chapitre}-${Verset}`,
     })
-  }, [verse])
+  }
 
-  const navigateToLink = useCallback((id: string) => {
+  const navigateToLink = (id: string) => {
     dispatch({
       type: NAVIGATE_TO_BIBLE_LINK,
       payload: id,
     })
-  }, [])
+  }
 
-  const toggleSelectVerse = useCallback(() => {
-    const { Livre, Chapitre, Verset } = verse
-    dispatch({
-      type: TOGGLE_SELECTED_VERSE,
-      payload: `${Livre}-${Chapitre}-${Verset}`,
+  const openCrossVersionModal = () => {
+    if (otherVersionAnnotations && otherVersionAnnotations.length > 0) {
+      const { Livre, Chapitre, Verset } = verse
+      dispatch({
+        type: OPEN_CROSS_VERSION_MODAL,
+        payload: {
+          verseKey: `${Livre}-${Chapitre}-${Verset}`,
+          versions: otherVersionAnnotations,
+        },
+      })
+    }
+  }
+
+  const isStrongVersion = version === 'LSGS' || version === 'KJVS'
+
+  const text = getVerseText({
+    verse,
+    version,
+    annotationMode,
+    isParallel,
+    selectedCode,
+    settings,
+  })
+
+  const verseKey = `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`
+
+  const numberHighlight = getNumberHighlight({ highlightedColor, hasWordAnnotations, settings })
+
+  // Dispatch layoutChanged for Strong's versions when content changes
+  useEffect(() => {
+    if (!isStrongVersion) return
+    requestAnimationFrame(() => {
+      window.dispatchEvent(new CustomEvent('layoutChanged'))
     })
-  }, [verse])
-
-  const onPress = useCallback(() => {
-    // If selection mode verse, always toggle on press
-    if (isSelectionMode && isSelectionMode.includes('verse')) {
-      toggleSelectVerse()
-      return
-    }
-
-    // If selection mode verse, always toggle on press
-    if (isSelectionMode && isSelectionMode.includes('strong')) {
-      navigateToBibleVerseDetail({ isSelectionMode })
-      return
-    }
-
-    if (isSelectedMode || settings.press === 'longPress') {
-      toggleSelectVerse()
-    } else {
-      navigateToBibleVerseDetail()
-    }
-  }, [
-    isSelectionMode,
-    isSelectedMode,
-    settings.press,
-    toggleSelectVerse,
-    navigateToBibleVerseDetail,
-  ])
-
-  const onLongPress = useCallback(() => {
-    // If selection mode, do nothing on long press
-    if (isSelectionMode) {
-      return
-    }
-
-    shouldShortPressRef.current = false
-
-    if (movedRef.current === false) {
-      if (settings.press === 'shortPress') {
-        toggleSelectVerse()
-      } else {
-        setIsTouched(false)
-        navigateToBibleVerseDetail()
-      }
-    }
-  }, [isSelectionMode, settings.press, toggleSelectVerse, navigateToBibleVerseDetail])
-
-  const onTouchStart = useCallback(() => {
-    shouldShortPressRef.current = true
-    movedRef.current = false
-
-    setIsTouched(true)
-
-    // On long press
-    buttonPressTimerRef.current = setTimeout(onLongPress, 400)
-  }, [onLongPress])
-
-  const onTouchEnd = useCallback(() => {
-    setIsTouched(false)
-    clearTimeout(buttonPressTimerRef.current)
-
-    if (shouldShortPressRef.current && movedRef.current === false) {
-      onPress()
-    }
-  }, [onPress])
-
-  const onTouchCancel = useCallback(() => {
-    clearTimeout(buttonPressTimerRef.current)
-  }, [])
-
-  const onTouchMove = useCallback(() => {
-    movedRef.current = true
-    if (isTouched) setIsTouched(false)
-  }, [isTouched])
+  }, [isStrongVersion, verse.Livre, verse.Texte, annotationMode])
 
   if (isParallelVerse && parallelVerse) {
     return (
@@ -368,38 +408,12 @@ const Verse = ({
                 selectedCode={selectedCode}
                 isFocused={isFocused}
                 tag={tag}
+                isTouched={isTouched}
               />
             </div>
           )
         })}
       </div>
-    )
-  }
-
-  if (version === 'LSGS' || version === 'KJVS') {
-    return (
-      <VerseTextFormatting
-        isParallel={isParallel}
-        selectedCode={selectedCode}
-        verse={verse}
-        settings={settings}
-        isFocused={isFocused}
-        isTouched={isTouched}
-        isSelected={isSelected}
-        isVerseToScroll={isVerseToScroll && Number(verse.Verset) !== 1}
-        highlightedColor={highlightedColor}
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
-        onTouchMove={onTouchMove}
-        onTouchCancel={onTouchCancel}
-        notesCount={notesCount}
-        inlineNotedVerses={settings.notesDisplay === 'inline'}
-        isSelectionMode={isSelectionMode}
-        notesText={notesText}
-        navigateToVerseNotes={navigateToVerseNotes}
-        navigateToNote={navigateToNote}
-        tag={tag}
-      />
     )
   }
 
@@ -426,12 +440,6 @@ const Verse = ({
     )
   }
 
-  let array: (string | JSX.Element)[] = verse.Texte.split(/(\n)/g)
-
-  if (array.length > 1) {
-    array = array.map((c, i) => (c === '\n' ? <Spacer key={i} /> : c))
-  }
-
   return (
     <Wrapper
       settings={settings}
@@ -446,44 +454,82 @@ const Verse = ({
         isTouched={isTouched}
         isSelected={isSelected}
         isVerseToScroll={isVerseToScroll && Number(verse.Verset) !== 1}
-        highlightedColor={highlightedColor}
+        highlightedColor={numberHighlight.show ? undefined : highlightedColor}
       >
-        <NumberText isFocused={isFocused} settings={settings}>
+        <NumberText
+          isFocused={isFocused}
+          settings={settings}
+          highlightBg={numberHighlight.bg}
+          highlightColor={numberHighlight.color}
+        >
           {verse.Verset}{' '}
         </NumberText>
         {bookmark && !isSelectionMode && (
-          <BookmarkIcon settings={settings} color={bookmark.color} onClick={openBookmarkModal} />
+          <BookmarkIcon
+            settings={settings}
+            color={bookmark.color}
+            onClick={openBookmarkModal}
+            isDisabled={annotationMode}
+          />
         )}
-        {notesCount && settings.notesDisplay !== 'inline' && !isSelectionMode && (
-          <NotesCount settings={settings} onClick={navigateToVerseNotes} count={notesCount} />
-        )}
+        {notesCount &&
+          (settings.notesDisplay !== 'inline' || hasAnnotationNotes) &&
+          !isSelectionMode && (
+            <NotesCount
+              settings={settings}
+              onClick={openVerseNotesModal}
+              count={notesCount}
+              isDisabled={annotationMode}
+            />
+          )}
         {linksCount && (settings.linksDisplay || 'inline') !== 'inline' && !isSelectionMode && (
           <LinksCount
             settings={settings}
             onClick={navigateToVerseLinks}
             count={linksCount}
             linkType={linksText?.[0]?.linkType}
+            isDisabled={annotationMode}
           />
         )}
+        {taggedItemsCount > 0 &&
+          (settings.tagsDisplay !== 'inline' || hasNonHighlightTags) &&
+          !isSelectionMode && (
+            <TagsIndicator
+              count={taggedItemsCount}
+              settings={settings}
+              onClick={navigateToVerseTags}
+              isDisabled={annotationMode}
+            />
+          )}
+
         <VerseText
           isParallel={isParallel}
           settings={settings}
-          onTouchStart={onTouchStart}
-          onTouchEnd={onTouchEnd}
-          onTouchMove={onTouchMove}
-          onTouchCancel={onTouchCancel}
+          id={`verse-text-${verseKey}`}
+          data-verse-key={verseKey}
         >
-          {array}
+          {text}
         </VerseText>
-        {tag && <VerseTags settings={settings} tag={tag} />}
       </ContainerText>
-      {isLastFocusVerse && <CloseContextTag settings={settings} />}
+      {otherVersionAnnotations && otherVersionAnnotations.length > 0 && !isSelectionMode && (
+        <VersionAnnotationIndicator
+          versions={otherVersionAnnotations}
+          settings={settings}
+          onClick={openCrossVersionModal}
+          isDisabled={annotationMode}
+        />
+      )}
+      {tag && settings.tagsDisplay === 'inline' && (
+        <VerseTags settings={settings} tag={tag} isDisabled={annotationMode} />
+      )}
+      {isLastFocusVerse && <CloseContextTag settings={settings} isDisabled={annotationMode} />}
       {notesText && settings.notesDisplay === 'inline' && !isSelectionMode && (
         <NotesText
           isParallel={isParallel}
           settings={settings}
           onClick={navigateToNote}
           notesText={notesText}
+          isDisabled={annotationMode}
         />
       )}
       {linksText && (settings.linksDisplay || 'inline') === 'inline' && !isSelectionMode && (
@@ -492,6 +538,7 @@ const Verse = ({
           settings={settings}
           onClick={navigateToLink}
           linksText={linksText}
+          isDisabled={annotationMode}
         />
       )}
     </Wrapper>

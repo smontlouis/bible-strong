@@ -2,10 +2,11 @@ import { keyframes, styled } from 'goober'
 import { convertHex } from './convertHex'
 import { RootStyles } from './BibleDOMWrapper'
 import { HIGHLIGHT_BACKGROUND_OPACITY, getContrastTextColor } from '../../../helpers/highlightUtils'
+import { isDarkTheme } from './utils'
 
-type HighlightType = 'background' | 'textColor' | 'underline'
+export type HighlightType = 'background' | 'textColor' | 'underline'
 
-interface HighlightInfo {
+export interface HighlightInfo {
   hex: string
   type: HighlightType
 }
@@ -23,7 +24,7 @@ const zoom = keyframes({
 })
 
 // Resolve a color ID to its hex value and type
-const resolveHighlightInfo = (
+export const resolveHighlightInfo = (
   colorId: string,
   themeColors: Record<string, string>,
   customHighlightColors: Array<{ id: string; hex: string; type?: HighlightType }> = [],
@@ -48,9 +49,7 @@ const resolveHighlightInfo = (
 const getHighlightStyles = (hex: string, type: HighlightType, theme: string) => {
   switch (type) {
     case 'background': {
-      const isDarkTheme =
-        theme === 'dark' || theme === 'black' || theme === 'night' || theme === 'mauve'
-      const textColor = getContrastTextColor(hex, isDarkTheme)
+      const textColor = getContrastTextColor(hex, isDarkTheme(theme))
 
       return {
         background: convertHex(hex, HIGHLIGHT_BACKGROUND_OPACITY),
@@ -67,7 +66,7 @@ const getHighlightStyles = (hex: string, type: HighlightType, theme: string) => 
     case 'underline':
       // Partial background at bottom - like a real highlighter marker
       return {
-        background: `linear-gradient(to top, ${convertHex(hex, 60)} 15%, transparent 15%)`,
+        background: `linear-gradient(to top, ${convertHex(hex, 60)} 12%, transparent 12%)`,
         borderRadius: '0px',
         color: undefined,
       }

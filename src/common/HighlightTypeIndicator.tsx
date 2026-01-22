@@ -10,21 +10,35 @@ const Touchable = styled.TouchableOpacity({
   justifyContent: 'center',
 })
 
-const CircleContainer = styled.View<{ color: string; size: number }>(({ color, size }) => ({
-  width: size,
-  height: size,
-  borderRadius: size / 3,
-  backgroundColor: color,
-}))
+const CircleContainer = styled.View<{ color: string; size: number; isSelected?: boolean }>(
+  ({ color, size, isSelected, theme }) => ({
+    width: size,
+    height: size,
+    borderRadius: size / 3,
+    backgroundColor: color,
+    transitionProperty: 'boxShadow',
+    transitionDuration: 300,
+    ...(isSelected && {
+      boxShadow: `0 0 0 3px ${theme.colors.reverse}, 0 0 0 5px ${theme.colors.primary}`,
+    }),
+  })
+)
 
-const TextContainer = styled.View<{ size: number }>(({ size }) => ({
-  width: size,
-  height: size,
-  alignItems: 'center',
-  justifyContent: 'center',
-  boxShadow: 'inset 0 0 2px 0 rgba(0, 0, 0, 0.15)',
-  borderRadius: size / 3,
-}))
+const TextContainer = styled.View<{ size: number; isSelected?: boolean }>(
+  ({ size, isSelected, theme }) => ({
+    width: size,
+    height: size,
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: 'inset 0 0 2px 0 rgba(0, 0, 0, 0.15)',
+    transitionProperty: 'boxShadow',
+    transitionDuration: 300,
+    borderRadius: size / 3,
+    ...(isSelected && {
+      boxShadow: `inset 0 0 2px 0 rgba(0, 0, 0, 0.15), 0 0 0 2px ${theme.colors.reverse}, 0 0 0 4px ${theme.colors.primary}`,
+    }),
+  })
+)
 
 type Props = {
   color: string
@@ -33,6 +47,7 @@ type Props = {
   onPress?: () => void
   onLongPress?: () => void
   disabled?: boolean
+  isSelected?: boolean
 }
 
 const HighlightTypeIndicator = ({
@@ -42,6 +57,7 @@ const HighlightTypeIndicator = ({
   onPress,
   onLongPress,
   disabled = false,
+  isSelected = false,
 }: Props) => {
   const theme = useTheme()
   const fontSize = size * 0.85
@@ -50,7 +66,7 @@ const HighlightTypeIndicator = ({
     switch (type) {
       case 'textColor':
         return (
-          <TextContainer size={size}>
+          <TextContainer size={size} isSelected={isSelected}>
             <Text
               style={{
                 fontSize,
@@ -65,7 +81,7 @@ const HighlightTypeIndicator = ({
 
       case 'underline':
         return (
-          <TextContainer size={size}>
+          <TextContainer size={size} isSelected={isSelected}>
             <Text
               style={{
                 fontSize,
@@ -94,13 +110,19 @@ const HighlightTypeIndicator = ({
 
       case 'background':
       default:
-        return <CircleContainer color={color} size={size} />
+        return <CircleContainer color={color} size={size} isSelected={isSelected} />
     }
   }
 
   if (onPress || onLongPress) {
     return (
-      <Touchable onPress={onPress} onLongPress={onLongPress} disabled={disabled} hitSlop={10}>
+      <Touchable
+        activeOpacity={0.7}
+        onPress={onPress}
+        onLongPress={onLongPress}
+        disabled={disabled}
+        hitSlop={10}
+      >
         {renderIndicator()}
       </Touchable>
     )

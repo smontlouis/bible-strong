@@ -39,6 +39,7 @@ const COLLECTION_LABELS: Record<SubcollectionName, string> = {
   words: 'mots',
   naves: 'thèmes Nave',
   tabGroups: 'onglets',
+  wordAnnotations: 'annotations de mots',
 }
 
 /**

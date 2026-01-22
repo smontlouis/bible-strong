@@ -301,6 +301,8 @@ const BasicTouchableBox = Box.withComponent(TouchableOpacity)
 export const TouchableBox = BasicTouchableBox
 
 export const AnimatedBox = Animated.createAnimatedComponent(Box)
+export const AnimatedHStack = Animated.createAnimatedComponent(HStack)
+export const AnimatedVStack = Animated.createAnimatedComponent(VStack)
 export const AnimatedTouchableBox = Animated.createAnimatedComponent(BasicTouchableBox)
 export const AnimatableBox = Animatable.createAnimatableComponent(Box)
 
