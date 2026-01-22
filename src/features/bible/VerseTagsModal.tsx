@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useSetAtom } from 'jotai/react'
-import React, { forwardRef, useMemo } from 'react'
+import React, { forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 import { useSelector } from 'react-redux'
@@ -40,10 +40,9 @@ interface VerseTagsModalProps {
   version: string
 }
 
-const getItemIcon = (type: TaggedItem['type']): 'edit-3' | 'type' | 'file-text' | 'link' => {
+const getItemIcon = (type: TaggedItem['type']): 'edit-3' | 'file-text' | 'link' => {
   switch (type) {
     case 'highlight':
-      return 'edit-3'
     case 'annotation':
       return 'edit-3'
     case 'note':
@@ -118,7 +117,7 @@ const VerseTagsModal = forwardRef<BottomSheetModal, VerseTagsModalProps>(
     const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
 
     // Create selector for this verse
-    const selectTaggedItems = useMemo(() => makeTaggedItemsForVerseSelector(), [])
+    const selectTaggedItems = makeTaggedItemsForVerseSelector()
 
     const taggedItems = useSelector((state: RootState) =>
       verseKey ? selectTaggedItems(state, verseKey, version) : []

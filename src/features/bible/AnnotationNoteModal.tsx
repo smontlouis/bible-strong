@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react-native'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { createSelector } from '@reduxjs/toolkit'
 import { Alert, Share } from 'react-native'
@@ -76,14 +76,13 @@ const AnnotationNoteModal = ({
   // Note key for annotation notes: annotation:{annotationId}
   const noteKey = annotationId ? `annotation:${annotationId}` : ''
 
-  const selectCurrentNote = useMemo(() => makeCurrentNoteSelector(), [])
+  const selectCurrentNote = makeCurrentNoteSelector()
   const currentNote = useSelector((state: RootState) => selectCurrentNote(state, noteKey))
 
   // Get verse reference for display
-  const reference = useMemo(() => {
-    if (!annotationVerseKey) return ''
-    return `${verseToReference({ [annotationVerseKey]: true })} (${version})`
-  }, [annotationVerseKey, version])
+  const reference = annotationVerseKey
+    ? `${verseToReference({ [annotationVerseKey]: true })} (${version})`
+    : ''
 
   const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { Verse } from '~common/types'
@@ -115,7 +115,7 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
   const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
 
   // Derive selectedAnnotation from Redux based on selectedAnnotationId
-  const selectedAnnotation = useMemo((): SelectedAnnotation | null => {
+  const deriveSelectedAnnotation = (): SelectedAnnotation | null => {
     if (!state.selectedAnnotationId) return null
 
     const annotation = wordAnnotations?.[state.selectedAnnotationId]
@@ -133,7 +133,9 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
       noteId: annotation.noteId,
       tags: annotation.tags,
     }
-  }, [state.selectedAnnotationId, wordAnnotations])
+  }
+
+  const selectedAnnotation = deriveSelectedAnnotation()
 
   const setWebViewRef = (ref: WebViewRef | null) => {
     webViewRef.current = ref

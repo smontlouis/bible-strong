@@ -28,9 +28,7 @@ const AnnotationColorSelector = ({
     ctx.menuActions.closeMenu()
     setColorPickerModal({
       selectedColor,
-      onSelectColor: (colorId: string) => {
-        onSelectColor(colorId)
-      },
+      onSelectColor,
     })
   }
 

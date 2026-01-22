@@ -1,9 +1,9 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import { useAtomValue } from 'jotai/react'
-import React, { memo, useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ScrollView, TouchableOpacity } from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import Box from '~common/ui/Box'
 import Chip from '~common/ui/Chip'
@@ -18,7 +18,6 @@ import { multipleTagsModalAtom } from '../state/app'
 import BottomSheetSearchInput from './BottomSheetSearchInput'
 import Modal from './Modal'
 import { FeatherIcon } from './ui/Icon'
-import Spacer from './ui/Spacer'
 
 // @ts-ignore
 const StyledIcon = styled(Icon.Feather)(({ theme, isDisabled }) => ({
@@ -50,24 +49,19 @@ const MultipleTagsModal = () => {
     item?.entity ? state.user.bible[item.entity] : undefined
   )
 
-  const currentItems = useMemo(() => {
-    // @ts-ignore
-    if (item.ids) {
-      // @ts-ignore
-      return Object.keys(item.ids).map((id: any) => ({
+  // @ts-ignore
+  const currentItems = item.ids
+    ? // @ts-ignore
+      Object.keys(item.ids).map((id: any) => ({
         id,
         ...entityData?.[id],
       }))
-    }
-
-    return [
-      entityData
-        ? // @ts-ignore
-          { id: item.id, ...entityData[item.id] }
-        : {},
-    ]
-    // @ts-ignore
-  }, [item.ids, item.id, entityData])
+    : [
+        entityData
+          ? // @ts-ignore
+            { id: item.id, ...entityData[item.id] }
+          : {},
+      ]
 
   const selectedChips = currentItems.reduce(
     (acc: any, curr: any) => ({ ...acc, ...(curr.tags && curr.tags) }),
@@ -153,4 +147,4 @@ const MultipleTagsModal = () => {
   )
 }
 
-export default memo(MultipleTagsModal)
+export default MultipleTagsModal

@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import React, { forwardRef, useMemo, useState } from 'react'
+import React, { forwardRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 import { useSelector } from 'react-redux'
@@ -94,7 +94,7 @@ const VerseNotesModal = forwardRef<BottomSheetModal, VerseNotesModalProps>(({ ve
   const annotationNoteModal = useBottomSheetModal()
 
   // Create selector for this verse
-  const selectNotesForVerse = useMemo(() => makeNotesForVerseSelector(), [])
+  const selectNotesForVerse = makeNotesForVerseSelector()
 
   const notes = useSelector((state: RootState) =>
     verseKey ? selectNotesForVerse(state, verseKey) : []
