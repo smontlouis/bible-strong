@@ -33,7 +33,7 @@ const AnnotationContainer = styled(Box)(({ theme }) => ({
 
 export type AnnotationItemProps = {
   item: GroupedWordAnnotation
-  onSettingsPress: (item: GroupedWordAnnotation) => void
+  onSettingsPress?: (item: GroupedWordAnnotation) => void
 }
 
 const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
@@ -85,15 +85,17 @@ const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
           <DateText style={{ fontSize: 10 }}>
             {t('Il y a {{formattedDate}}', { formattedDate })}
           </DateText>
-          <LinkBox
-            p={4}
-            ml={10}
-            // @ts-ignore
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            onPress={() => onSettingsPress(item)}
-          >
-            <FeatherIcon name="more-vertical" size={20} />
-          </LinkBox>
+          {onSettingsPress && (
+            <LinkBox
+              p={4}
+              ml={10}
+              // @ts-ignore
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              onPress={() => onSettingsPress(item)}
+            >
+              <FeatherIcon name="more-vertical" size={20} />
+            </LinkBox>
+          )}
         </Box>
         <Text fontSize={14} marginBottom={15}>
           {`...${item.text}...`}

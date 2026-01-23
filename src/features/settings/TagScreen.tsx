@@ -1,14 +1,12 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet/'
 import distanceInWords from 'date-fns/formatDistance'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import { Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
-import { useSetAtom } from 'jotai/react'
 
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
 import RenameModal from '~common/RenameModal'
-import Modal from '~common/Modal'
 import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
@@ -16,10 +14,7 @@ import ScrollView from '~common/ui/ScrollView'
 import HighlightItem from '~features/settings/Verse'
 import formatVerseContent from '~helpers/formatVerseContent'
 import { updateTag, removeTag, Link as LinkModel, LinkType } from '~redux/modules/user'
-import { removeWordAnnotationAction } from '~redux/modules/user/wordAnnotations'
 import { useCreateTabGroupFromTag, TagData } from './useCreateTabGroupFromTag'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
-import { unifiedTagsModalAtom } from '../../state/app'
 
 import styled from '@emotion/native'
 import { useTranslation } from 'react-i18next'
@@ -240,37 +235,6 @@ const TagScreen = () => {
   const [tagToRename, setTagToRename] = useState<{ id: string; name: string } | null>(null)
   const createTabGroupFromTag = useCreateTabGroupFromTag()
 
-  // Annotation settings state
-  const [annotationSettingsData, setAnnotationSettingsData] =
-    useState<GroupedWordAnnotation | null>(null)
-  const {
-    ref: annotationSettingsRef,
-    open: openAnnotationSettings,
-    close: closeAnnotationSettings,
-  } = useBottomSheetModal()
-  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
-
-  useEffect(() => {
-    if (annotationSettingsData) openAnnotationSettings()
-  }, [annotationSettingsData, openAnnotationSettings])
-
-  const handleDeleteAnnotation = () => {
-    Alert.alert(t('Attention'), t('Êtes-vous vraiment sur de supprimer cette annotation ?'), [
-      { text: t('Non'), onPress: () => null, style: 'cancel' },
-      {
-        text: t('Oui'),
-        onPress: () => {
-          if (annotationSettingsData) {
-            dispatch(removeWordAnnotationAction(annotationSettingsData.id))
-          }
-          setAnnotationSettingsData(null)
-          closeAnnotationSettings()
-        },
-        style: 'destructive',
-      },
-    ])
-  }
-
   const handleDelete = () => {
     if (!tag) return
     Alert.alert(t('Attention'), t('Êtes-vous vraiment sur de supprimer ce tag ?'), [
@@ -465,11 +429,7 @@ const TagScreen = () => {
                     tags={item.data.tags}
                   />
                 ) : (
-                  <AnnotationItem
-                    key={`annotation-${item.data.id}`}
-                    item={item.data}
-                    onSettingsPress={setAnnotationSettingsData}
-                  />
+                  <AnnotationItem key={`annotation-${item.data.id}`} item={item.data} />
                 )
               )}
             </Accordion>
@@ -528,31 +488,6 @@ const TagScreen = () => {
           }
         }}
       />
-
-      {/* Annotation settings modal */}
-      <Modal.Body
-        ref={annotationSettingsRef}
-        onModalClose={() => setAnnotationSettingsData(null)}
-        enableDynamicSizing
-      >
-        <Modal.Item
-          onPress={() => {
-            if (annotationSettingsData) {
-              setUnifiedTagsModal({
-                mode: 'select',
-                entity: 'wordAnnotations',
-                id: annotationSettingsData.id,
-              })
-            }
-            closeAnnotationSettings()
-          }}
-        >
-          {t('Éditer les tags')}
-        </Modal.Item>
-        <Modal.Item color="quart" onPress={handleDeleteAnnotation}>
-          {t('Supprimer')}
-        </Modal.Item>
-      </Modal.Body>
     </Container>
   )
 }
