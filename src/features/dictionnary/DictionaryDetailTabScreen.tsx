@@ -32,7 +32,7 @@ import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
 import { timeout } from '~helpers/timeout'
 import { RootState } from '~redux/modules/reducer'
 import { makeWordTagsSelector } from '~redux/selectors/bible'
-import { historyAtom, multipleTagsModalAtom } from '../../state/app'
+import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
 import { DictionaryTab } from '../../state/tabs'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
@@ -56,7 +56,7 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
   const openInNewTab = useOpenInNewTab()
   const { t } = useTranslation()
   const [dictionnaireItem, setDictionnaireItem] = useState<any>(null)
-  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const addHistory = useSetAtom(historyAtom)
 
   // Go back to list view (for tab context)
@@ -187,7 +187,8 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
               <>
                 <MenuOption
                   onSelect={() =>
-                    setMultipleTagsItem({
+                    setUnifiedTagsModal({
+                      mode: 'select',
                       id: word,
                       title: word,
                       entity: 'words',

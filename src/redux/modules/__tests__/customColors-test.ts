@@ -1,6 +1,10 @@
 /* eslint-env jest */
 
 // Mock react-native before any imports
+import type { Bookmark } from '~common/types'
+import userReducer, { UserState, CustomColor, HighlightType } from '../user'
+import { addCustomColor, updateCustomColor, deleteCustomColor } from '../user/customColors'
+
 jest.mock('react-native', () => ({
   Appearance: {
     getColorScheme: jest.fn(() => 'light'),
@@ -65,10 +69,6 @@ jest.mock('~helpers/generateUUID', () => {
   let counter = 0
   return jest.fn(() => `uuid-${++counter}`)
 })
-
-import type { Bookmark } from '~common/types'
-import userReducer, { UserState, CustomColor, HighlightType } from '../user'
-import { addCustomColor, updateCustomColor, deleteCustomColor } from '../user/customColors'
 
 const getInitialState = (): UserState =>
   ({

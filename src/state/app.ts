@@ -1,6 +1,6 @@
 import produce from 'immer'
 import { atom } from 'jotai/vanilla'
-import { VerseIds } from '~common/types'
+import { Tag, VerseIds } from '~common/types'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
 import {
   tabGroupsAtom,
@@ -11,6 +11,7 @@ import {
   appSwitcherModeAtom,
 } from './tabs'
 import { makeMutable } from 'react-native-reanimated'
+import { entitiesArray } from '~redux/modules/user/tags'
 
 export interface Diff {
   added?: {
@@ -25,12 +26,23 @@ export const isFullScreenBibleValue = makeMutable(false)
 
 export const IAPInitializedAtom = atom(false)
 
-type MultipleTagsModalProps =
-  | { ids: VerseIds; entity: string; title?: string }
-  | { id: string; entity: string; title?: string }
+export type UnifiedTagsModalProps =
+  | {
+      mode: 'filter'
+      selectedTag?: Tag
+      onSelect: (tag?: Tag) => void
+      title?: string
+    }
+  | {
+      mode: 'select'
+      entity: (typeof entitiesArray)[number]
+      id?: string
+      ids?: VerseIds
+      title?: string
+    }
   | false
 
-export const multipleTagsModalAtom = atom<MultipleTagsModalProps>(false)
+export const unifiedTagsModalAtom = atom<UnifiedTagsModalProps>(false)
 
 export type ColorPickerModalProps =
   | {

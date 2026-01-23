@@ -1,13 +1,11 @@
-import { BottomSheetModal } from '@gorhom/bottom-sheet/'
 import produce from 'immer'
-import { PrimitiveAtom, useAtom } from 'jotai'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 
 import Empty from '~common/Empty'
 import TagsHeader from '~common/TagsHeader'
-import TagsModal from '~common/TagsModal'
 import { Tag } from '~common/types'
 import Container from '~common/ui/Container'
 import FlatList from '~common/ui/FlatList'
@@ -16,6 +14,7 @@ import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { Note } from '~redux/modules/user'
 import { NotesTab } from '~state/tabs'
+import { unifiedTagsModalAtom } from '~state/app'
 import BibleNoteItem from '../bible/BibleNoteItem'
 import NotesSettingsModal from './NotesSettingsModal'
 
@@ -40,16 +39,21 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
 
   const _notes = useSelector((state: RootState) => state.user.bible.notes)
   const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
-  const tagsModal = useBottomSheetModal()
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const noteSettingsModal = useBottomSheetModal()
 
-  const openNoteSettings = useCallback(
-    (noteId: string) => {
-      setNoteSettingsId(noteId)
-      noteSettingsModal.open()
-    },
-    [noteSettingsModal]
-  )
+  const openTagsModal = () => {
+    setUnifiedTagsModal({
+      mode: 'filter',
+      selectedTag: selectedChip ?? undefined,
+      onSelect: (tag?: Tag) => setSelectedChip(tag ?? null),
+    })
+  }
+
+  const openNoteSettings = (noteId: string) => {
+    setNoteSettingsId(noteId)
+    noteSettingsModal.open()
+  }
   const loadNotes = async () => {
     const formattedNotes: TNote[] = []
 
@@ -89,41 +93,34 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
     loadNotes()
   }, [_notes, wordAnnotations])
 
-  const openNoteDetail = useCallback(
-    (noteId: string) => {
-      setNotesTab(
-        produce(draft => {
-          draft.data.noteId = noteId
-        })
-      )
-    },
-    [setNotesTab]
-  )
+  const openNoteDetail = (noteId: string) => {
+    setNotesTab(
+      produce(draft => {
+        draft.data.noteId = noteId
+      })
+    )
+  }
 
-  const renderNote = useCallback(
-    ({ item, index }: { item: TNote; index: number }) => {
-      return (
-        <BibleNoteItem
-          key={index}
-          item={item}
-          onPress={openNoteDetail}
-          onMenuPress={openNoteSettings}
-        />
-      )
-    },
-    [openNoteDetail, openNoteSettings]
-  )
+  const renderNote = ({ item, index }: { item: TNote; index: number }) => {
+    return (
+      <BibleNoteItem
+        key={index}
+        item={item}
+        onPress={openNoteDetail}
+        onMenuPress={openNoteSettings}
+      />
+    )
+  }
 
-  const filteredNotes = useMemo(
-    () => notes.filter(s => (selectedChip ? s.notes.tags && s.notes.tags[selectedChip.id] : true)),
-    [notes, selectedChip]
+  const filteredNotes = notes.filter(s =>
+    selectedChip ? s.notes.tags && s.notes.tags[selectedChip.id] : true
   )
 
   return (
     <Container>
       <TagsHeader
         title={t('Notes')}
-        setIsOpen={tagsModal.open}
+        setIsOpen={openTagsModal}
         isOpen={false}
         selectedChip={selectedChip}
         hasBackButton={hasBackButton}
@@ -141,12 +138,6 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
           message={t("Vous n'avez pas encore de notes...")}
         />
       )}
-      <TagsModal
-        ref={tagsModal.getRef()}
-        onClosed={() => {}}
-        onSelected={(chip: Tag | null) => setSelectedChip(chip)}
-        selectedChip={selectedChip}
-      />
       <NotesSettingsModal
         ref={noteSettingsModal.getRef()}
         noteId={noteSettingsId}

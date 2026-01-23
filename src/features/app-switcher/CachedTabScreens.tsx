@@ -11,9 +11,10 @@ const CachedTabScreens = () => {
   const tabsAtoms = useAtomValue(tabsAtomsAtom)
 
   // Filter tabs using stable tab.id instead of atom.toString()
+  // Add null check to prevent crash during navigation transitions
   const filteredTabsAtoms = tabsAtoms.filter(tabAtom => {
     const tab = getDefaultStore().get(tabAtom)
-    return cachedTabIds.includes(tab.id)
+    return tab && cachedTabIds.includes(tab.id)
   })
 
   // Debug log for cached tabs
@@ -23,6 +24,7 @@ const CachedTabScreens = () => {
     <>
       {filteredTabsAtoms.map(tabAtom => {
         const tab = getDefaultStore().get(tabAtom)
+        if (!tab) return null
         return <TabScreenRefMemoize key={tab.id} tabAtom={tabAtom} />
       })}
     </>
@@ -32,6 +34,7 @@ const CachedTabScreens = () => {
 const TabScreenRefMemoize = memo((props: TabScreenProps) => {
   const [, setRef] = useDynamicRefs<View>()
   const tab = getDefaultStore().get(props.tabAtom)
+  if (!tab) return null
   const ref = setRef(tab.id)
 
   return <TabScreen {...props} ref={ref} />

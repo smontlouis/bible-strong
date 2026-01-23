@@ -1,5 +1,5 @@
 import { useSetAtom } from 'jotai/react'
-import React, { useCallback } from 'react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
@@ -8,7 +8,7 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { RootState } from '~redux/modules/reducer'
 import { deleteStudy } from '~redux/modules/user'
-import { multipleTagsModalAtom } from '../../state/app'
+import { unifiedTagsModalAtom } from '../../state/app'
 import PublishStudyMenuItem from './PublishStudyMenuItem'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 
@@ -27,11 +27,11 @@ const StudySettingsModal = ({ ref, studyId, onClosed, openRenameModal }: Props) 
     shallowEqual
   )
   const openInNewTab = useOpenInNewTab()
-  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
 
-  const close = useCallback(() => {
+  const close = () => {
     ref?.current?.dismiss()
-  }, [ref])
+  }
 
   const deleteStudyConfirmation = (id: string) => {
     Alert.alert(t('Attention'), t('Voulez-vous vraiment supprimer cette étude?'), [
@@ -76,7 +76,7 @@ const StudySettingsModal = ({ ref, studyId, onClosed, openRenameModal }: Props) 
           if (!study) return
 
           close()
-          setMultipleTagsItem({ ...study, entity: 'studies' })
+          setUnifiedTagsModal({ mode: 'select', id: study.id, entity: 'studies' })
         }}
       >
         {t('Éditer les tags')}

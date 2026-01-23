@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import Empty from '~common/Empty'
-import QuickTagsModal from '~common/QuickTagsModal'
 import Box, { MotiBox, motiTransition } from '~common/ui/Box'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 import { BibleError } from '~helpers/bibleErrors'
@@ -22,10 +21,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { Bookmark } from '~common/types'
 import { BibleResource, Pericope, SelectedCode, Verse, VerseIds } from '~common/types'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import BookmarkModal from '~features/bookmarks/BookmarkModal'
 import AddToStudyModal from '~features/studies/AddToStudyModal'
 import { useAddVerseToStudy } from '~features/studies/hooks/useAddVerseToStudy'
 import VerseFormatBottomSheet from '~features/studies/VerseFormatBottomSheet'
+import generateUUID from '~helpers/generateUUID'
 import getVersesContent from '~helpers/getVersesContent'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { useBottomSheet, useBottomSheetModal } from '~helpers/useBottomSheet'
@@ -33,37 +34,34 @@ import useLanguage from '~helpers/useLanguage'
 import { RootState } from '~redux/modules/reducer'
 import { addHighlight, removeHighlight } from '~redux/modules/user'
 import {
+  CrossVersionAnnotation,
   makeHighlightsByChapterSelector,
-  makeSelectedVerseHighlightColorSelector,
   makeLinksByChapterSelector,
   makeNotesByChapterSelector,
+  makeSelectedVerseHighlightColorSelector,
+  makeTaggedVersesInChapterSelector,
   makeWordAnnotationsByChapterSelector,
   makeWordAnnotationsInOtherVersionsSelector,
-  makeTaggedVersesInChapterSelector,
-  CrossVersionAnnotation,
 } from '~redux/selectors/bible'
 import { makeSelectBookmarksInChapter } from '~redux/selectors/bookmarks'
-import { historyAtom, isFullScreenBibleValue, multipleTagsModalAtom } from '../../state/app'
+import { historyAtom, isFullScreenBibleValue, unifiedTagsModalAtom } from '../../state/app'
 import { BibleTab, useBibleTabActions, VersionCode } from '../../state/tabs'
+import AnnotationNoteModal from './AnnotationNoteModal'
+import AnnotationToolbar from './AnnotationToolbar'
 import { BibleDOMWrapper, ParallelVerse } from './BibleDOM/BibleDOMWrapper'
 import BibleLinkModal from './BibleLinkModal'
 import BibleNoteModal from './BibleNoteModal'
 import BibleParamsModal from './BibleParamsModal'
+import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
 import BibleFooter from './footer/BibleFooter'
+import { useAnnotationMode } from './hooks'
 import { LoadingView } from './LoadingView'
 import { OpenInNewTabButton } from './OpenInNewTabButton'
 import ResourcesModal from './resources/ResourceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
-import AnnotationNoteModal from './AnnotationNoteModal'
-import AnnotationToolbar from './AnnotationToolbar'
-import { useAnnotationMode } from './hooks'
-import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
-import VerseTagsModal from './VerseTagsModal'
 import VerseNotesModal from './VerseNotesModal'
-import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
-import generateUUID from '~helpers/generateUUID'
-import { Version } from '~helpers/bibleVersions'
+import VerseTagsModal from './VerseTagsModal'
 
 const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: number) => {
   if (pericope && pericope[book] && pericope[book][chapter]) {
@@ -114,14 +112,11 @@ const BibleViewer = ({
   const [parallelVerses, setParallelVerses] = useState<ParallelVerse[]>([])
   const [secondaryVerses, setSecondaryVerses] = useState<Verse[] | null>(null)
   const [comments, setComments] = useState<{ [key: string]: string } | null>(null)
-  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
   const [linkVerses, setLinkVerses] = useState<VerseIds | undefined>(undefined)
   const strongModal = useBottomSheet()
   const [selectedCode, setSelectedCodeState] = useState<SelectedCode | null>(null)
-  const [quickTagsModal, setQuickTagsModal] = useState<
-    { ids: VerseIds; entity: string } | { id: string; entity: string } | false
-  >(false)
   const bookmarkModalRef = useRef<BottomSheetModal>(null)
   const [selectedVerseForBookmark, setSelectedVerseForBookmark] = useState<{
     book: number
@@ -241,12 +236,13 @@ const BibleViewer = ({
   // Handler for opening annotation tags modal
   const handleAnnotationTagsPress = useCallback(() => {
     if (!annotationMode.selectedAnnotation) return
-    setMultipleTagsItem({
+    setUnifiedTagsModal({
+      mode: 'select',
       title: annotationMode.selectedAnnotation.text,
       id: annotationMode.selectedAnnotation.id,
       entity: 'wordAnnotations',
     })
-  }, [annotationMode.selectedAnnotation, setMultipleTagsItem])
+  }, [annotationMode.selectedAnnotation, setUnifiedTagsModal])
 
   // Handler for deleting annotation with confirmation if it has a note or tags
   const handleDeleteAnnotation = useCallback(() => {
@@ -472,16 +468,12 @@ const BibleViewer = ({
   }, [])
 
   const addHiglightAndOpenQuickTags = (color: string) => {
-    // setTimeout(() => {
-    //   setQuickTagsModal({ ids: selectedVerses, entity: 'highlights' })
-    // }, 300)
-    // // @ts-ignore
     dispatch(addHighlight({ color, selectedVerses }))
-    // actions.clearSelectedVerses()
   }
 
   const addTag = () => {
-    setMultipleTagsItem({
+    setUnifiedTagsModal({
+      mode: 'select',
       entity: 'highlights',
       ids: selectedVerses,
     })
@@ -756,7 +748,7 @@ const BibleViewer = ({
           addParallelVersion={actions.addParallelVersion}
           goToPrevChapter={actions.goToPrevChapter}
           goToNextChapter={actions.goToNextChapter}
-          setMultipleTagsItem={setMultipleTagsItem}
+          setUnifiedTagsModal={setUnifiedTagsModal}
           onChangeResourceTypeSelectVerse={onChangeResourceTypeSelectVerse}
           onMountTimeout={onMountTimeout}
           onOpenBookmarkModal={handleOpenBookmarkModal}
@@ -837,11 +829,6 @@ const BibleViewer = ({
         onAddBookmark={handleAddBookmark}
         onPinVerses={handlePinVerses}
         onEnterAnnotationMode={handleEnterAnnotationMode}
-      />
-      <QuickTagsModal
-        item={quickTagsModal}
-        onClosed={() => setQuickTagsModal(false)}
-        setMultipleTagsItem={setMultipleTagsItem}
       />
       <BibleNoteModal ref={noteModal.getRef()} noteVerses={noteVerses} />
       <BibleLinkModal ref={linkModal.getRef()} linkVerses={linkVerses} />

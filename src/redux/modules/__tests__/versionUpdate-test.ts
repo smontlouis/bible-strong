@@ -1,6 +1,10 @@
 /* eslint-env jest */
 
 // Mock react-native before any imports
+import type { Bookmark } from '~common/types'
+import userReducer, { UserState } from '../user'
+import { setVersionUpdated, getVersionUpdate, getDatabaseUpdate } from '../user/versionUpdate'
+
 jest.mock('react-native', () => ({
   Appearance: {
     getColorScheme: jest.fn(() => 'light'),
@@ -59,10 +63,6 @@ jest.mock('~themes/natureColors', () => ({ primary: '#444' }))
 jest.mock('~themes/sunsetColors', () => ({ primary: '#555' }))
 jest.mock('~themes/mauveColors', () => ({ primary: '#666' }))
 jest.mock('~themes/nightColors', () => ({ primary: '#777' }))
-
-import type { Bookmark } from '~common/types'
-import userReducer, { UserState } from '../user'
-import { setVersionUpdated, getVersionUpdate, getDatabaseUpdate } from '../user/versionUpdate'
 
 const getInitialState = (): UserState =>
   ({

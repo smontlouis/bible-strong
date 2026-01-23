@@ -27,7 +27,7 @@ import { RootState } from '~redux/modules/reducer'
 import { addNote, deleteNote } from '~redux/modules/user'
 import { makeNoteByKeySelector } from '~redux/selectors/bible'
 import { updateWordAnnotation } from '~redux/modules/user/wordAnnotations'
-import { multipleTagsModalAtom } from '../../state/app'
+import { unifiedTagsModalAtom } from '../../state/app'
 import { VersionCode } from '../../state/tabs'
 import NoteEditorBottomSheet from './NoteEditorDOM/NoteEditorBottomSheet'
 
@@ -69,7 +69,7 @@ const AnnotationNoteModal = ({
     ? `${verseToReference({ [annotationVerseKey]: true })} (${version})`
     : ''
 
-  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
 
   const close = () => {
     ref?.current?.dismiss()
@@ -191,8 +191,8 @@ ${currentNote.description}
                     </MenuOption>
                     <MenuOption
                       onSelect={() =>
-                        setMultipleTagsItem({
-                          ...currentNote,
+                        setUnifiedTagsModal({
+                          mode: 'select',
                           id: currentNote.id!,
                           entity: 'notes',
                         })

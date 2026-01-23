@@ -36,7 +36,7 @@ import orderVerses from '~helpers/orderVerses'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addLink, deleteLink, Link } from '~redux/modules/user'
-import { multipleTagsModalAtom } from '../../state/app'
+import { unifiedTagsModalAtom } from '../../state/app'
 import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
 
 interface BibleLinkModalProps {
@@ -100,7 +100,7 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
 
   const currentLink = useCurrentLink({ linkVerses })
   const reference = verseToReference(linkVerses)
-  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const insets = useSafeAreaInsets()
   const theme = useTheme()
 
@@ -249,8 +249,8 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
                     </MenuOption>
                     <MenuOption
                       onSelect={() =>
-                        setMultipleTagsItem({
-                          ...currentLink,
+                        setUnifiedTagsModal({
+                          mode: 'select',
                           id: currentLink.id!,
                           entity: 'links',
                           title:

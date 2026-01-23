@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
+import { useSetAtom } from 'jotai/react'
 
 import Empty from '~common/Empty'
 import Container from '~common/ui/Container'
@@ -10,9 +11,9 @@ import BibleNoteItem from './BibleNoteItem'
 import BibleNoteModal from './BibleNoteModal'
 
 import TagsHeader from '~common/TagsHeader'
-import TagsModal from '~common/TagsModal'
 import { Tag, VerseIds } from '~common/types'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { unifiedTagsModalAtom } from '~state/app'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { Note } from '~redux/modules/user'
@@ -43,8 +44,16 @@ const BibleVerseNotes = () => {
 
   const noteModal = useBottomSheetModal()
   const annotationNoteModal = useBottomSheetModal()
-  const tagsModal = useBottomSheetModal()
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const noteSettingsModal = useBottomSheetModal()
+
+  const openTagsModal = useCallback(() => {
+    setUnifiedTagsModal({
+      mode: 'filter',
+      selectedTag: selectedChip ?? undefined,
+      onSelect: (tag?: Tag) => setSelectedChip(tag ?? null),
+    })
+  }, [selectedChip, setUnifiedTagsModal])
 
   // Compute notes directly (React Compiler handles memoization)
   const notes: TNote[] = []
@@ -125,7 +134,7 @@ const BibleVerseNotes = () => {
     <Container>
       <TagsHeader
         title="Notes"
-        setIsOpen={tagsModal.open}
+        setIsOpen={openTagsModal}
         isOpen={false}
         selectedChip={selectedChip}
         hasBackButton
@@ -151,12 +160,6 @@ const BibleVerseNotes = () => {
         annotationVerseKey={selectedAnnotationNote?.verseKey ?? ''}
         existingNoteId={selectedAnnotationNote?.noteId}
         version={selectedAnnotationNote?.version as any}
-      />
-      <TagsModal
-        ref={tagsModal.getRef()}
-        onClosed={() => {}}
-        onSelected={(chip: Tag | null) => setSelectedChip(chip)}
-        selectedChip={selectedChip}
       />
       <BibleNotesSettingsModal
         ref={noteSettingsModal.getRef()}

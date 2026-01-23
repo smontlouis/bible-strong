@@ -3,7 +3,7 @@ import distanceInWords from 'date-fns/formatDistance'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
-import { useAtom } from 'jotai/react'
+import { useSetAtom } from 'jotai/react'
 
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
@@ -19,7 +19,7 @@ import { updateTag, removeTag, Link as LinkModel, LinkType } from '~redux/module
 import { removeWordAnnotationAction } from '~redux/modules/user/wordAnnotations'
 import { useCreateTabGroupFromTag, TagData } from './useCreateTabGroupFromTag'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
-import { multipleTagsModalAtom } from '../../state/app'
+import { unifiedTagsModalAtom } from '../../state/app'
 
 import styled from '@emotion/native'
 import { useTranslation } from 'react-i18next'
@@ -248,7 +248,7 @@ const TagScreen = () => {
     open: openAnnotationSettings,
     close: closeAnnotationSettings,
   } = useBottomSheetModal()
-  const [, setMultipleTagsItem] = useAtom(multipleTagsModalAtom)
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
 
   useEffect(() => {
     if (annotationSettingsData) openAnnotationSettings()
@@ -538,7 +538,8 @@ const TagScreen = () => {
         <Modal.Item
           onPress={() => {
             if (annotationSettingsData) {
-              setMultipleTagsItem({
+              setUnifiedTagsModal({
+                mode: 'select',
                 entity: 'wordAnnotations',
                 id: annotationSettingsData.id,
               })

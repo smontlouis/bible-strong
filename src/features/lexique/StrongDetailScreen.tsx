@@ -41,7 +41,7 @@ import { useTabContext } from '~features/app-switcher/context/TabContext'
 import { RootState } from '~redux/modules/reducer'
 import { makeStrongTagsSelector } from '~redux/selectors/bible'
 import { StrongTab } from '../../state/tabs'
-import { historyAtom, multipleTagsModalAtom } from '../../state/app'
+import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
 import { timeout } from '~helpers/timeout'
 
 const LinkBox = Box.withComponent(Link)
@@ -84,7 +84,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
   const [verses, setVerses] = useState<any[]>([])
   const [count, setCount] = useState<number>(0)
   const [concordanceLoading, setConcordanceLoading] = useState(true)
-  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
 
   const addHistory = useSetAtom(historyAtom)
 
@@ -234,7 +234,8 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
               <>
                 <MenuOption
                   onSelect={() =>
-                    setMultipleTagsItem({
+                    setUnifiedTagsModal({
+                      mode: 'select',
                       id: Code!,
                       title: Mot!,
                       entity: Grec ? 'strongsGrec' : 'strongsHebreu',

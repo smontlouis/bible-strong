@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import { useTheme } from '@emotion/react'
+import { useTheme, Theme } from '@emotion/react'
 import truncHTML from 'trunc-html'
 
 import Empty from '~common/Empty'
@@ -18,7 +18,6 @@ import { getDefaultStore } from 'jotai/vanilla'
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { currentStudyIdAtom, openedFromTabAtom } from '~features/studies/atom'
 import { StudyNavigateBibleType } from '~common/types'
-import { Theme } from '@emotion/react'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)

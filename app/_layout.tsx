@@ -1,4 +1,3 @@
-import { installReduxDevToolsPolyfill } from '~devtools/reduxDevtoolsPolyfill'
 // installReduxDevToolsPolyfill()
 
 import { ThemeProvider } from '@emotion/react'
@@ -20,20 +19,19 @@ import { configureReanimatedLogger } from 'react-native-reanimated'
 import { RootSiblingParent } from 'react-native-root-siblings'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { Provider as ReduxProvider, useSelector } from 'react-redux'
-import { Toaster } from 'sonner-native'
 
 import notifee, { EventType } from '@notifee/react-native'
 import { useKeepAwake } from 'expo-keep-awake'
-import { useAtomsDevtools } from 'jotai-devtools/utils'
 import TrackPlayer from 'react-native-track-player'
 import { PersistGate } from 'redux-persist/integration/react'
 import ChangelogModal from '~common/Changelog'
+import ColorChangeModal from '~common/ColorChangeModal'
+import ColorPickerModal from '~common/ColorPickerModal'
 import ErrorBoundary from '~common/ErrorBoundary'
 import InitHooks from '~common/InitHooks'
-import MultipleTagsModal from '~common/MultipleTagsModal'
-import ColorPickerModal from '~common/ColorPickerModal'
-import ColorChangeModal from '~common/ColorChangeModal'
+import ThemedToaster from '~common/ThemedToaster'
 import { CurrentTheme } from '~common/types'
+import UnifiedTagsModal from '~common/UnifiedTagsModal'
 import { AppSwitcherProvider } from '~features/app-switcher/AppSwitcherProvider'
 import { BookSelectorBottomSheetProvider } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 import OnBoardingModal from '~features/onboarding/OnBoarding'
@@ -54,7 +52,6 @@ import { persistor, store } from '~redux/store'
 import getTheme, { Theme, baseTheme } from '~themes/index'
 import { setI18n } from '../i18n'
 import { PlaybackService } from '../playbackService'
-import ThemedToaster from '~common/ThemedToaster'
 
 TrackPlayer.registerPlaybackService(() => PlaybackService)
 
@@ -258,7 +255,7 @@ function InnerApp() {
                           <ThemedToaster />
                           <ChangelogModal />
                           <OnBoardingModal />
-                          <MultipleTagsModal />
+                          <UnifiedTagsModal />
                           <ColorPickerModal />
                           <ColorChangeModal />
                         </BookSelectorBottomSheetProvider>

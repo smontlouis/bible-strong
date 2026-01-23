@@ -3,6 +3,9 @@ import * as RNLocalize from 'react-native-localize'
 import { initReactI18next } from 'react-i18next'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import 'react-native-url-polyfill/auto'
+
+import type { ActiveLanguage } from '~helpers/languageUtils'
+import { DEFAULT_LANGUAGE, isActiveLanguage } from '~helpers/languageUtils'
 const enTranslation = require('./locales/en/translation.json')
 const enBooksTranslation = require('./locales/en/translation_book.json')
 const frTranslation = require('./locales/fr/translation.json')
@@ -59,9 +62,6 @@ export const setI18n = async () =>
       },
       cleanCode: true,
     })
-
-import type { ActiveLanguage } from '~helpers/languageUtils'
-import { DEFAULT_LANGUAGE, isActiveLanguage } from '~helpers/languageUtils'
 
 /**
  * Get the current language code

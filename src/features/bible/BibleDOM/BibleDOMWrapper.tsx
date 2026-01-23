@@ -116,7 +116,7 @@ export type WebViewProps = {
   addParallelVersion?: any
   goToPrevChapter?: any
   goToNextChapter?: any
-  setMultipleTagsItem?: any
+  setUnifiedTagsModal?: any
   onChangeResourceTypeSelectVerse?: any
   onMountTimeout?: () => void
   onOpenBookmarkModal?: (bookmark: Bookmark) => void
@@ -425,13 +425,14 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
       case OPEN_HIGHLIGHT_TAGS: {
-        const { setMultipleTagsItem } = props
+        const { setUnifiedTagsModal } = props
         const { verseIds } = action.payload
         const obj = {
+          mode: 'select' as const,
           entity: 'highlights',
           ids: Object.fromEntries(verseIds.map((v: any) => [v, true])),
         }
-        setMultipleTagsItem(obj)
+        setUnifiedTagsModal(obj)
         break
       }
 

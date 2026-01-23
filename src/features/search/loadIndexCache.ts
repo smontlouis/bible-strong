@@ -9,7 +9,7 @@ require('~helpers/lunr.fr.min.js')(lunr)
 require('~helpers/lunr.unicodeNormalizer')(lunr)
 
 // Cache per language
-const loadedIndexes: { [lang: string]: Object } = {}
+const loadedIndexes: { [lang: string]: object } = {}
 
 const loadIndexCache = (idxFile: FileSystem.FileInfo, lang: ResourceLanguage = 'fr') =>
   new Promise(async resolve => {

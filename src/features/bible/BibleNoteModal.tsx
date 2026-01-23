@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react-native'
-import React, { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Alert, Share } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -31,7 +31,7 @@ import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addNote, deleteNote } from '~redux/modules/user'
 import { makeNoteByKeySelector } from '~redux/selectors/bible'
-import { multipleTagsModalAtom } from '../../state/app'
+import { unifiedTagsModalAtom } from '../../state/app'
 import NoteEditorBottomSheet from './NoteEditorDOM/NoteEditorBottomSheet'
 
 interface BibleNoteModalProps {
@@ -60,12 +60,12 @@ const BibleNoteModal = ({ noteVerses, ref }: BibleNoteModalProps) => {
 
   const currentNote = useCurrentNote({ noteVerses })
   const reference = verseToReference(noteVerses)
-  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const openInNewTab = useOpenInNewTab()
 
-  const close = useCallback(() => {
+  const close = () => {
     ref?.current?.dismiss()
-  }, [ref])
+  }
 
   const openNoteInNewTab = () => {
     if (!currentNote?.id) return
@@ -178,8 +178,8 @@ ${currentNote.description}
                     </MenuOption>
                     <MenuOption
                       onSelect={() =>
-                        setMultipleTagsItem({
-                          ...currentNote,
+                        setUnifiedTagsModal({
+                          mode: 'select',
                           id: currentNote.id!,
                           entity: 'notes',
                         })

@@ -1,13 +1,10 @@
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSetAtom } from 'jotai/react'
 import type { BottomSheetModal } from '@gorhom/bottom-sheet'
-import type { HighlightFilters } from '~common/types'
+import type { HighlightFilters, Tag } from '~common/types'
 import { useColorInfo } from './useColorName'
-
-interface Tag {
-  id: string
-  name: string
-}
+import { unifiedTagsModalAtom } from '~state/app'
 
 interface UseHighlightFiltersReturn {
   // Filter state
@@ -29,7 +26,6 @@ interface UseHighlightFiltersReturn {
   // Modal refs (imperative API)
   mainModalRef: React.RefObject<BottomSheetModal | null>
   colorModalRef: React.RefObject<BottomSheetModal | null>
-  tagsModalRef: React.RefObject<BottomSheetModal | null>
   typeModalRef: React.RefObject<BottomSheetModal | null>
 
   // Modal actions
@@ -49,8 +45,10 @@ export function useHighlightFilters(): UseHighlightFiltersReturn {
   // Modal refs (imperative API - no booleans)
   const mainModalRef = useRef<BottomSheetModal>(null)
   const colorModalRef = useRef<BottomSheetModal>(null)
-  const tagsModalRef = useRef<BottomSheetModal>(null)
   const typeModalRef = useRef<BottomSheetModal>(null)
+
+  // Atom-based modal for tags
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
 
   // Derived values
   const colorInfo = useColorInfo(filters.colorId)
@@ -117,7 +115,11 @@ export function useHighlightFilters(): UseHighlightFiltersReturn {
   }
 
   const openTagsFromMain = () => {
-    tagsModalRef.current?.present()
+    setUnifiedTagsModal({
+      mode: 'filter',
+      selectedTag,
+      onSelect: setTagFilter,
+    })
   }
 
   const openTypeFromMain = () => {
@@ -137,7 +139,6 @@ export function useHighlightFilters(): UseHighlightFiltersReturn {
     typeFilterLabel,
     mainModalRef,
     colorModalRef,
-    tagsModalRef,
     typeModalRef,
     openMainModal,
     openColorFromMain,

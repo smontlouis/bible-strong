@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useSetAtom } from 'jotai/react'
-import React, { forwardRef } from 'react'
+import { forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 import { useSelector } from 'react-redux'
@@ -16,7 +16,7 @@ import { EMPTY_ARRAY } from '~helpers/emptyReferences'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { makeTaggedItemsForVerseSelector, TaggedItem } from '~redux/selectors/bible'
-import { multipleTagsModalAtom } from '~state/app'
+import { unifiedTagsModalAtom } from '~state/app'
 
 const ItemRow = styled.View(({ theme }) => ({
   flexDirection: 'row',
@@ -115,7 +115,7 @@ const TaggedItemRow = ({ item, onEditTags }: { item: TaggedItem; onEditTags: () 
 const VerseTagsModal = forwardRef<BottomSheetModal, VerseTagsModalProps>(
   ({ verseKey, version }, ref) => {
     const { t } = useTranslation()
-    const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+    const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
 
     // Create selector for this verse
     const selectTaggedItems = makeTaggedItemsForVerseSelector()
@@ -128,30 +128,34 @@ const VerseTagsModal = forwardRef<BottomSheetModal, VerseTagsModalProps>(
     const reference = verseKey ? verseToReference({ [verseKey]: true }) : ''
 
     const handleEditTags = (item: TaggedItem) => {
-      // Open MultipleTagsModal with the appropriate entity
+      // Open UnifiedTagsModal with the appropriate entity
       switch (item.type) {
         case 'highlight':
-          setMultipleTagsItem({
+          setUnifiedTagsModal({
+            mode: 'select',
             ids: { [item.verseKey]: true as const },
             entity: 'highlights',
           })
           break
         case 'annotation':
-          setMultipleTagsItem({
+          setUnifiedTagsModal({
+            mode: 'select',
             id: item.data.id,
             entity: 'wordAnnotations',
             title: item.data.ranges[0]?.text,
           })
           break
         case 'note':
-          setMultipleTagsItem({
+          setUnifiedTagsModal({
+            mode: 'select',
             id: item.data.id,
             entity: 'notes',
             title: item.data.title,
           })
           break
         case 'link':
-          setMultipleTagsItem({
+          setUnifiedTagsModal({
+            mode: 'select',
             id: item.data.id,
             entity: 'links',
             title: item.data.customTitle || item.data.ogData?.title || item.data.url,

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useAtom, useSetAtom } from 'jotai/react'
+import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { Alert, ScrollView } from 'react-native'
 
@@ -8,7 +8,6 @@ import Empty from '~common/Empty'
 import FiltersHeader from '~common/FiltersHeader'
 import FilterModal from '~common/FilterModal'
 import ColorFilterModal from '~common/ColorFilterModal'
-import TagsFilterModal from '~common/TagsFilterModal'
 import TypeFilterModal from '~common/TypeFilterModal'
 import Container from '~common/ui/Container'
 import Modal from '~common/Modal'
@@ -31,7 +30,7 @@ import {
   removeWordAnnotationAction,
   changeWordAnnotationColor,
 } from '~redux/modules/user/wordAnnotations'
-import { multipleTagsModalAtom, colorChangeModalAtom } from '../../state/app'
+import { unifiedTagsModalAtom, colorChangeModalAtom } from '../../state/app'
 import VerseComponent from './Verse'
 import AnnotationItem from './AnnotationItem'
 import type { TagsObj, Verse, VerseIds } from '~common/types'
@@ -86,7 +85,7 @@ const HighlightsScreen = () => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const highlightsObj = useSelector(selectHighlightsObj)
-  const [, setMultipleTagsItem] = useAtom(multipleTagsModalAtom)
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const setColorChangeModal = useSetAtom(colorChangeModalAtom)
 
   // Word annotations selector
@@ -100,7 +99,6 @@ const HighlightsScreen = () => {
   const {
     filters,
     setColorFilter,
-    setTagFilter,
     setTypeFilter,
     resetFilters,
     filterLabel,
@@ -110,7 +108,6 @@ const HighlightsScreen = () => {
     activeFiltersCount,
     mainModalRef,
     colorModalRef,
-    tagsModalRef,
     typeModalRef,
     openMainModal,
     openColorFromMain,
@@ -276,15 +273,6 @@ const HighlightsScreen = () => {
         }}
       />
 
-      <TagsFilterModal
-        ref={tagsModalRef}
-        selectedTag={selectedTag}
-        onSelect={tag => {
-          setTagFilter(tag)
-          tagsModalRef.current?.dismiss()
-        }}
-      />
-
       <TypeFilterModal
         ref={typeModalRef}
         selectedType={filters.typeFilter}
@@ -344,7 +332,8 @@ const HighlightsScreen = () => {
         <Modal.Item
           onPress={() => {
             if (settingsData?.stringIds) {
-              setMultipleTagsItem({
+              setUnifiedTagsModal({
+                mode: 'select',
                 entity: 'highlights',
                 ids: settingsData.stringIds,
               })
@@ -383,7 +372,8 @@ const HighlightsScreen = () => {
         <Modal.Item
           onPress={() => {
             if (annotationSettingsData) {
-              setMultipleTagsItem({
+              setUnifiedTagsModal({
+                mode: 'select',
                 entity: 'wordAnnotations',
                 id: annotationSettingsData.id,
               })

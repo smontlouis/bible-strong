@@ -496,12 +496,12 @@ export const versionsBySections: VersionsBySection[] = Object.values(versions).r
       }
     }
   },
-  <VersionsBySection[]>[
+  [
     { title: 'Versions Louis Segond', data: [] },
     { title: 'Autres versions', data: [] },
     { title: 'Versions anglaises', data: [] },
     { title: 'Versions étrangères', data: [] },
-  ]
+  ] as VersionsBySection[]
 )
 
 export const versionsBySections_en: VersionsBySection[] = Object.values(versions).reduce(
@@ -565,11 +565,11 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(versions
       }
     }
   },
-  <VersionsBySection[]>[
+  [
     { title: 'English versions', data: [] },
     { title: 'French versions', data: [] },
     { title: 'Other versions', data: [] },
-  ]
+  ] as VersionsBySection[]
 )
 
 export const getVersionsBySections = () => {

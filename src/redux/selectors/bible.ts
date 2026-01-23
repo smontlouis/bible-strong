@@ -166,7 +166,7 @@ export const makeColorsByThemeSelector = () =>
 // Selector factory for counting grouped highlights (by unique date) for a tag
 export const makeGroupedHighlightsCountSelector = () =>
   createSelector(
-    [selectHighlights, (_: RootState, tagHighlights: Object | undefined) => tagHighlights],
+    [selectHighlights, (_: RootState, tagHighlights: object | undefined) => tagHighlights],
     (highlights, tagHighlights): number => {
       if (!tagHighlights) return 0
       const uniqueDates = new Set<number>()
@@ -185,7 +185,7 @@ export const makeGroupedWordAnnotationsCountSelector = () =>
   createSelector(
     [
       selectWordAnnotations,
-      (_: RootState, tagWordAnnotations: Object | undefined) => tagWordAnnotations,
+      (_: RootState, tagWordAnnotations: object | undefined) => tagWordAnnotations,
     ],
     (wordAnnotations, tagWordAnnotations): number => {
       if (!tagWordAnnotations) return 0

@@ -29,7 +29,7 @@ import { timeout } from '~helpers/timeout'
 import useHTMLView from '~helpers/useHTMLView'
 import { RootState } from '~redux/modules/reducer'
 import { makeNaveTagsSelector } from '~redux/selectors/bible'
-import { historyAtom, multipleTagsModalAtom } from '../../state/app'
+import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
 import { NaveTab } from '../../state/tabs'
 
 interface NaveDetailScreenProps {
@@ -64,7 +64,7 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
 
   const [naveItem, setNaveItem] = useState<any>(null)
   const { t } = useTranslation()
-  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const selectNaveTags = makeNaveTagsSelector()
   const tags = useSelector((state: RootState) => selectNaveTags(state, name_lower ?? ''))
   const openInNewTab = useOpenInNewTab()
@@ -183,7 +183,8 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
               <>
                 <MenuOption
                   onSelect={() =>
-                    setMultipleTagsItem({
+                    setUnifiedTagsModal({
+                      mode: 'select',
                       id: naveItem.name_lower,
                       title: naveItem.name,
                       entity: 'naves',

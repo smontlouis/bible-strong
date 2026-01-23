@@ -1,6 +1,31 @@
 /* eslint-env jest */
 
 // Mock react-native before any imports
+import type { Bookmark } from '~common/types'
+import userReducer, { UserState } from '../user'
+import {
+  setSettingsAlignContent,
+  setSettingsLineHeight,
+  increaseSettingsFontSizeScale,
+  decreaseSettingsFontSizeScale,
+  setSettingsTextDisplay,
+  setSettingsPreferredColorScheme,
+  setSettingsPreferredLightTheme,
+  setSettingsPreferredDarkTheme,
+  setSettingsPress,
+  setSettingsNotesDisplay,
+  setSettingsLinksDisplay,
+  setSettingsCommentaires,
+  toggleSettingsShareVerseNumbers,
+  toggleSettingsShareLineBreaks,
+  toggleSettingsShareQuotes,
+  toggleSettingsShareAppName,
+  setDefaultColorName,
+  setDefaultColorType,
+  setDefaultBibleVersion,
+  changeColor,
+} from '../user/settings'
+
 jest.mock('react-native', () => ({
   Appearance: {
     getColorScheme: jest.fn(() => 'light'),
@@ -59,31 +84,6 @@ jest.mock('~themes/natureColors', () => ({ primary: '#888', secondary: '#999' })
 jest.mock('~themes/sunsetColors', () => ({ primary: '#aaa', secondary: '#bbb' }))
 jest.mock('~themes/mauveColors', () => ({ primary: '#ccc', secondary: '#ddd' }))
 jest.mock('~themes/nightColors', () => ({ primary: '#eee', secondary: '#fff' }))
-
-import type { Bookmark } from '~common/types'
-import userReducer, { UserState } from '../user'
-import {
-  setSettingsAlignContent,
-  setSettingsLineHeight,
-  increaseSettingsFontSizeScale,
-  decreaseSettingsFontSizeScale,
-  setSettingsTextDisplay,
-  setSettingsPreferredColorScheme,
-  setSettingsPreferredLightTheme,
-  setSettingsPreferredDarkTheme,
-  setSettingsPress,
-  setSettingsNotesDisplay,
-  setSettingsLinksDisplay,
-  setSettingsCommentaires,
-  toggleSettingsShareVerseNumbers,
-  toggleSettingsShareLineBreaks,
-  toggleSettingsShareQuotes,
-  toggleSettingsShareAppName,
-  setDefaultColorName,
-  setDefaultColorType,
-  setDefaultBibleVersion,
-  changeColor,
-} from '../user/settings'
 
 const getInitialState = (): UserState =>
   ({

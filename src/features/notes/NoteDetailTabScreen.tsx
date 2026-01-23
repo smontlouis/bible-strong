@@ -28,7 +28,7 @@ import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addNote, deleteNote } from '~redux/modules/user'
 import { makeNoteByKeySelector, makeWordAnnotationByIdSelector } from '~redux/selectors/bible'
-import { isFullScreenBibleValue, multipleTagsModalAtom } from '~state/app'
+import { isFullScreenBibleValue, unifiedTagsModalAtom } from '~state/app'
 import { NotesTab, useIsCurrentTab } from '~state/tabs'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import NoteEditorDOMComponent from '~features/bible/NoteEditorDOM/NoteEditorDOMComponent'
@@ -46,7 +46,7 @@ const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) =>
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const [, setNotesTab] = useAtom(notesAtom)
-  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -250,8 +250,8 @@ ${currentNote.description}
                 </MenuOption>
                 <MenuOption
                   onSelect={() =>
-                    setMultipleTagsItem({
-                      ...currentNote,
+                    setUnifiedTagsModal({
+                      mode: 'select',
                       id: currentNote.id!,
                       entity: 'notes',
                     })
