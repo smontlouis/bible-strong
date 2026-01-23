@@ -879,5 +879,64 @@
   "bible.crossVersionAnnotations.annotationCount": "{{count}} annotation",
   "bible.crossVersionAnnotations.annotationCount_plural": "{{count}} annotations",
   "bible.crossVersionAnnotations.switchVersion": "Switch version",
-  "bible.crossVersionAnnotations.newTab": "New tab"
+  "bible.crossVersionAnnotations.newTab": "New tab",
+
+  "Aucun élément avec des étiquettes": "No items with tags",
+  "Aucune couleur personnalisée": "No custom colors",
+  "Cliquez sur un élément pour modifier ses étiquettes": "Click on an item to edit its tags",
+  "Copié !": "Copied!",
+  "Mode": "Mode",
+  "Recherche": "Search",
+  "Terminer": "Done",
+  "Version": "Version",
+  "OK": "OK",
+
+  "Créer un nouveau marque-page": "Create a new bookmark",
+  "Déplacer un marque-page existant": "Move an existing bookmark",
+  "Marque-page déplacé": "Bookmark moved",
+
+  "Lien": "Link",
+  "Liens sur": "Links for",
+  "Vous n'avez pas encore de liens...": "You don't have any links yet...",
+  "Titre personnalisé (optionnel)": "Custom title (optional)",
+  "Ouvrir dans le navigateur": "Open in browser",
+  "Impossible d'ouvrir ce lien": "Unable to open this link",
+  "Erreur lors de l'ouverture du lien": "Error opening the link",
+
+  "Interlinéaire": "Interlinear",
+  "Texte interlinéaire hébreu/grec": "Hebrew/Greek interlinear text",
+  "Chronologie des événements bibliques": "Biblical events timeline",
+  "Impossible de charger le dictionnaire...": "Unable to load dictionary...",
+
+  "Hauteur de ligne": "Line height",
+  "Voir dans la Bible": "View in Bible",
+
+  "Retour aux études": "Back to studies",
+  "Retour aux notes": "Back to notes",
+  "Cette étude n'existe plus": "This study no longer exists",
+  "Cette note n'existe plus": "This note no longer exists",
+
+  "Cette étiquette n'existe pas...": "This tag doesn't exist...",
+  "Surbrillance": "Highlight",
+
+  "Ancien Testament": "Old Testament",
+  "Nouveau Testament": "New Testament",
+
+  "Limite de groupes atteinte": "Group limit reached",
+
+  "Bible Strong - Migration Issue": "Bible Strong - Migration Issue",
+  "Token invalide": "Invalid token",
+  "Traduction en cours...": "Translating...",
+  "Une erreur est survenue, vérifiez votre connexion ou contactez-nous.": "An error occurred, check your connection or contact us.",
+
+  "en": "en",
+  "fr": "fr",
+  "English": "English",
+  "Français": "French",
+
+  "premium.onemonth.min.detail3": "Unlimited comment translation",
+  "premium.basic.description": "You are a sponsor.\nThank you for your symbolic help to the evolution of this project.",
+  "premium.premium.description": "You are a premium sponsor.\nThank you for your commitment to the evolution of this project and your willingness to invest financially. Thank you warmly for your support.",
+  "premium.premium_plus.description": "You are a super premium sponsor.\nManna fell from the sky! It is a blessing to see that you believe in this project and are ready to invest financially. Thank you warmly for your support.",
+  "premium.investor.description": "You are an investor.\nManna fell from the sky! It is a blessing to see that you believe in this project and are ready to invest financially. Thank you warmly for your support."
 }
