@@ -4,7 +4,6 @@ import { ImageStyle } from 'expo-image'
 import React, { Ref } from 'react'
 import { TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native'
 
-import * as Animatable from 'react-native-animatable'
 import Animated, {
   AnimatedProps,
   ComplexAnimationBuilder,
@@ -304,7 +303,6 @@ export const AnimatedBox = Animated.createAnimatedComponent(Box)
 export const AnimatedHStack = Animated.createAnimatedComponent(HStack)
 export const AnimatedVStack = Animated.createAnimatedComponent(VStack)
 export const AnimatedTouchableBox = Animated.createAnimatedComponent(BasicTouchableBox)
-export const AnimatableBox = Animatable.createAnimatableComponent(Box)
 
 export const MotiTouchableBox = motify(BasicTouchableBox)()
 export const MotiBox = motify(Box)()

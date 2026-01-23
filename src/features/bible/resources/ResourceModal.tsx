@@ -2,18 +2,17 @@ import BottomSheet, {
   BottomSheetFooter,
   BottomSheetFooterProps,
   BottomSheetScrollView,
-  BottomSheetView,
 } from '@gorhom/bottom-sheet/'
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import React, { memo, useCallback, useMemo } from 'react'
+import React, { memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { View } from 'react-native-animatable'
+import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import LanguagePopOver from '~common/LanguagePopOver'
 import ModalHeader from '~common/ModalHeader'
 import PopOverMenu from '~common/PopOverMenu'
-import { BibleResource, StudyNavigateBibleType, Verse } from '~common/types'
+import { BibleResource, StudyNavigateBibleType } from '~common/types'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
@@ -21,12 +20,12 @@ import { Slide, Slides } from '~common/ui/Slider'
 import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
-import generateUUID from '~helpers/generateUUID'
 import CommentariesCard from '~features/commentaries/CommentariesCard'
 import DictionnaireVerseDetailCard from '~features/dictionnary/DictionnaireVerseDetailCard'
 import NaveModalCard from '~features/nave/NaveModalCard'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import formatVerseContent from '~helpers/formatVerseContent'
+import generateUUID from '~helpers/generateUUID'
 import { BibleTab, useBibleTabActions } from '../../../state/tabs'
 import BibleVerseDetailCard from '../BibleVerseDetailCard'
 import { ReferenceCard } from '../ReferenceCard'
@@ -172,7 +171,6 @@ const ResourcesModal = memo(
           title={title}
           subTitle={getSubtitleByResourceType()}
           rightComponent={getOptionsByResourceType()}
-          onClose={() => resourceModalRef.current?.close()}
         />
         {resourceType && (
           <View style={{ flex: 1 }}>

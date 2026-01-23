@@ -8,7 +8,7 @@ import { Image } from 'expo-image'
 import Link from '~common/Link'
 import { ComputedSection } from '~common/types'
 import Border from '~common/ui/Border'
-import Box, { AnimatableBox } from '~common/ui/Box'
+import Box, { AnimatedBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { Theme } from '~themes'
@@ -87,23 +87,18 @@ const Section = ({
           {subTitle && <Text opacity={0.6}>{subTitle}</Text>}
         </Box>
         <Box width={40} center>
-          {/* @ts-expect-error */}
-          <AnimatableBox
+          <AnimatedBox
             width={17}
             height={17}
             center
-            animation={{
-              from: {
-                rotate: !isCollapsed ? '180deg' : '0deg',
-              },
-              to: {
-                rotate: isCollapsed ? '180deg' : '0deg',
-              },
+            style={{
+              transform: [{ rotate: isCollapsed ? '180deg' : '0deg' }],
+              transitionProperty: 'transform',
+              transitionDuration: 500,
             }}
-            duration={500}
           >
             <FeatherIcon color="grey" name="chevron-down" size={17} />
-          </AnimatableBox>
+          </AnimatedBox>
         </Box>
       </Box>
       <Border />

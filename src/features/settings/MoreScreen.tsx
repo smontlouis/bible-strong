@@ -2,18 +2,18 @@ import styled from '@emotion/native'
 import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
 import React, { memo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, Alert, Platform, StyleSheet } from 'react-native'
-import * as Animatable from 'react-native-animatable'
+import { Alert, Platform } from 'react-native'
 import { useSelector } from 'react-redux'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import Header from '~common/Header'
 import LexiqueIcon from '~common/LexiqueIcon'
-import Link, { LinkBox, LinkProps } from '~common/Link'
+import Link, { LinkProps } from '~common/Link'
 import NaveIcon from '~common/NaveIcon'
-import Box, { HStack, SafeAreaBox } from '~common/ui/Box'
+import Box, { SafeAreaBox } from '~common/ui/Box'
 import CardLinkItem from '~common/ui/CardLinkItem'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import IconCircle from '~common/ui/IconCircle'
+import PulsingDot from '~common/ui/PulsingDot'
 import ScrollView from '~common/ui/ScrollView'
 import SectionCard, { SectionCardHeader } from '~common/ui/SectionCard'
 import Text from '~common/ui/Text'
@@ -32,18 +32,6 @@ export const LinkItem = styled(Link)<LinkProps<keyof MainStackProps>>(() => ({
   paddingHorizontal: 20,
   paddingVertical: 15,
 }))
-
-const Circle = styled.View(({ theme }) => ({
-  position: 'absolute',
-  width: 10,
-  height: 10,
-  borderRadius: 10,
-  top: 0,
-  right: 8,
-  backgroundColor: theme.colors.success,
-}))
-
-const AnimatedCircle = Animatable.createAnimatableComponent(Circle)
 
 const ProfileContainer = styled.View(({ theme }) => ({
   width: 50,
@@ -239,9 +227,7 @@ export const More = ({ closeMenu }: MoreProps) => {
           <CardLinkItem route="Downloads" isLast>
             <IconCircle bg="rgba(107, 114, 128, 0.1)">
               <Box>
-                {hasUpdate && (
-                  <AnimatedCircle animation="pulse" easing="ease-out" iterationCount="infinite" />
-                )}
+                {hasUpdate && <PulsingDot style={{ position: 'absolute', top: 0, right: 8 }} />}
                 <FeatherIcon name="download" size={20} color="grey" />
               </Box>
             </IconCircle>

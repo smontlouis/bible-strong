@@ -83,7 +83,6 @@ const ChapterSlice = ({ id, chapters, subType }: ChapterSliceProps) => {
                             {'\n\n'}
                           </Paragraph>
                         )}
-                        {/* <Paragraph>{c.Verset}</Paragraph> */}
                         <Paragraph scaleLineHeight={1}>
                           {c.Texte}
                           {isLast ? '' : ' '}

@@ -1,25 +1,24 @@
 import * as Sentry from '@sentry/react-native'
 import to from 'await-to-js'
 import { Image } from 'expo-image'
+import { useRouter } from 'expo-router'
+import { useAtomValue } from 'jotai'
 import React, { memo, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking, Share } from 'react-native'
-import { useRouter } from 'expo-router'
+import { toast } from 'sonner-native'
+import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import truncHTML from 'trunc-html'
 import books, { bookMappingComments } from '~assets/bible_versions/books-desc-2'
 import Link, { LinkBox } from '~common/Link'
-import { toast } from 'sonner-native'
 import StylizedHTMLView from '~common/StylizedHTMLView'
 import { Status } from '~common/types'
-import Box, { AnimatableBox } from '~common/ui/Box'
+import Box, { AnimatedBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useFireStorage } from '~features/plans/plan.hooks'
 import { firebaseDb } from '~helpers/firebase'
-import { useAtomValue } from 'jotai'
-import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import { Comment as CommentProps, EGWComment } from './types'
-import { timeout } from '~helpers/timeout'
 
 const findBookNumber = (bookName: string) => {
   bookName = bookMappingComments[bookName] || bookName
@@ -56,7 +55,7 @@ const useCommentTranslation = (id: string, content: string) => {
         // Check cache first
         const commentRef = await firebaseDb.collection('commentaries-FR').doc(id.toString()).get()
 
-        if (commentRef.exists) {
+        if (commentRef.exists()) {
           setTranslatedContent(commentRef.data()!.content)
           setStatus('Resolved')
           return
@@ -185,23 +184,16 @@ https://bible-strong.app
         </Box>
         <Box width={30} center>
           {!isCollapsed && (
-            // @ts-ignore
-            <AnimatableBox
+            <AnimatedBox
               width={17}
               height={17}
               center
-              animation={{
-                from: {
-                  rotate: !isCollapsed ? '0deg' : '180deg',
-                },
-                to: {
-                  rotate: isCollapsed ? '0deg' : '180deg',
-                },
+              style={{
+                transform: [{ rotate: '180deg' }],
               }}
-              duration={500}
             >
               <FeatherIcon color="grey" name="chevron-down" size={17} />
-            </AnimatableBox>
+            </AnimatedBox>
           )}
         </Box>
         <LinkBox width={30} center onPress={shareDefinition}>
@@ -221,7 +213,7 @@ https://bible-strong.app
             </Box>
           )}
         </Box>
-        <Box row center>
+        <Box row center borderTopWidth={1} borderColor="border">
           {status === 'Pending' && (
             <Box center style={{ marginRight: 'auto' }}>
               <Text color="grey" fontSize={12}>
@@ -230,23 +222,18 @@ https://bible-strong.app
             </Box>
           )}
           <LinkBox center height={40} onPress={() => setCollapsed(s => !s)}>
-            {/* @ts-expect-error */}
-            <AnimatableBox
+            <AnimatedBox
               width={17}
               height={17}
               center
-              animation={{
-                from: {
-                  rotate: !isCollapsed ? '0deg' : '180deg',
-                },
-                to: {
-                  rotate: isCollapsed ? '0deg' : '180deg',
-                },
+              style={{
+                transform: [{ rotate: isCollapsed ? '0deg' : '180deg' }],
+                transitionProperty: 'transform',
+                transitionDuration: 500,
               }}
-              duration={500}
             >
               <FeatherIcon color="grey" name="chevron-down" size={17} />
-            </AnimatableBox>
+            </AnimatedBox>
           </LinkBox>
         </Box>
       </Box>
