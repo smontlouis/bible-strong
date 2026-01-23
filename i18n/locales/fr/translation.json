@@ -111,6 +111,8 @@
   "Ajouter un tag": "Ajouter un tag",
   "Filtrer": "Filtrer",
   "Étiquettes": "Étiquettes",
+  "tagsSelected": "{{count}} étiquette sélectionnée",
+  "tagsSelected_plural": "{{count}} étiquettes sélectionnées",
   "Tout": "Tout",
   "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.": "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.",
   "Téléchargement du dictionnaire...": "Téléchargement du dictionnaire...",

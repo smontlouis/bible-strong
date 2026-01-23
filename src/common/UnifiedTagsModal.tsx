@@ -2,12 +2,12 @@ import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { useAtom } from 'jotai/react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ScrollView, TouchableOpacity } from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { Tag } from '~common/types'
-import Box, { TouchableBox } from '~common/ui/Box'
+import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
@@ -20,16 +20,27 @@ import { addTag, toggleTagEntity } from '~redux/modules/user'
 import { sortedTagsSelector } from '~redux/selectors/tags'
 import { unifiedTagsModalAtom } from '~state/app'
 import BottomSheetSearchInput from './BottomSheetSearchInput'
+import { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated'
 
 const RemovableChip = ({ label, onRemove }: { label: string; onRemove: () => void }) => (
-  <Box row bg="primary" borderRadius={20} px={12} py={5} mr={8} alignItems="center">
-    <Text color="reverse" fontSize={14}>
+  <AnimatedBox
+    entering={FadeIn}
+    exiting={FadeOut}
+    layout={LinearTransition}
+    row
+    bg="primary"
+    borderRadius={20}
+    px={12}
+    py={5}
+    alignItems="center"
+  >
+    <Text color="reverse" fontSize={14} numberOfLines={1} maxWidth={200}>
       {label}
     </Text>
     <TouchableOpacity onPress={onRemove} style={{ marginLeft: 6 }}>
       <FeatherIcon name="x" size={14} color="reverse" />
     </TouchableOpacity>
-  </Box>
+  </AnimatedBox>
 )
 
 const UnifiedTagsModal = () => {
@@ -186,19 +197,26 @@ const UnifiedTagsModal = () => {
 
       {/* Selected tags chips (select mode only) */}
       {hasSelectedTags && (
-        <Box px={16} py={8} borderBottomWidth={1} borderColor="border">
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <Box row>
-              {selectedTagsList.map(tag => (
-                <RemovableChip
-                  key={tag.id}
-                  label={tag.name}
-                  onRemove={() => handleRemoveTag(tag.id)}
-                />
-              ))}
-            </Box>
-          </ScrollView>
-        </Box>
+        <AnimatedBox
+          layout={LinearTransition}
+          px={16}
+          py={8}
+          borderBottomWidth={1}
+          borderColor="border"
+        >
+          <Text fontSize={12} color="grey" mb={6}>
+            {t('tagsSelected', { count: selectedTagsList.length })}
+          </Text>
+          <Box row wrap style={{ gap: 8 }}>
+            {selectedTagsList.map(tag => (
+              <RemovableChip
+                key={tag.id}
+                label={tag.name}
+                onRemove={() => handleRemoveTag(tag.id)}
+              />
+            ))}
+          </Box>
+        </AnimatedBox>
       )}
 
       <BottomSheetScrollView
@@ -255,15 +273,15 @@ const UnifiedTagsModal = () => {
                     borderRadius={6}
                     mr={12}
                     borderWidth={2}
-                    borderColor="border"
+                    borderColor={isSelected ? 'primary' : 'border'}
+                    bg={isSelected ? 'primary' : undefined}
                     center
                   >
-                    {isSelected && <FeatherIcon name="check" size={14} color="primary" />}
+                    {isSelected && <FeatherIcon name="check" size={14} color="white" />}
                   </Box>
                   <Text flex={1} fontSize={16}>
                     {tag.name}
                   </Text>
-                  {isSelected && <FeatherIcon name="check" size={20} color="primary" />}
                 </TouchableBox>
               )
             })}

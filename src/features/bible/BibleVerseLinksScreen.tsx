@@ -55,10 +55,6 @@ const BibleVerseLinks = () => {
     linkSettingsModal.open()
   }
 
-  useEffect(() => {
-    loadPage()
-  }, [verse, _links])
-
   const loadPage = async () => {
     let title
     const filtered_links: TLink[] = []
@@ -93,6 +89,10 @@ const BibleVerseLinks = () => {
     setTitle(title)
     setLinks(filtered_links)
   }
+
+  useEffect(() => {
+    loadPage()
+  }, [verse, _links])
 
   const openLinkModal = (linkId: string) => {
     const linkVerses = linkId.split('/').reduce((accuRefs, key) => {
@@ -147,10 +147,15 @@ const BibleVerseLinks = () => {
           message={t("Vous n'avez pas encore de liens...")}
         />
       )}
-      <BibleLinkModal ref={linkModal.ref} linkVerses={linkVerses} />
+      <BibleLinkModal ref={linkModal.getRef()} linkVerses={linkVerses} />
       <BibleLinksSettingsModal
-        ref={linkSettingsModal.ref}
-        title={selectedLink?.link.ogData?.title || selectedLink?.link.customTitle || ''}
+        ref={linkSettingsModal.getRef()}
+        title={
+          selectedLink?.link.ogData?.title ||
+          selectedLink?.link.customTitle ||
+          selectedLink?.link.url ||
+          ''
+        }
         linkId={linkSettingsId}
         onClosed={() => setLinkSettingsId(null)}
       />

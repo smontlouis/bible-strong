@@ -111,6 +111,8 @@
   "Ajouter un tag": "Add tag",
   "Filtrer": "Filter",
   "Étiquettes": "Tags",
+  "tagsSelected": "{{count}} tag selected",
+  "tagsSelected_plural": "{{count}} tags selected",
   "Tout": "All",
   "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.": "Unable to start downloading. Make sure you are connected to the internet.",
   "Téléchargement du dictionnaire...": "Downloading Dictionary...",
