@@ -9,13 +9,18 @@ import FiltersHeader from '~common/FiltersHeader'
 import FilterModal from '~common/FilterModal'
 import ColorFilterModal from '~common/ColorFilterModal'
 import TagsFilterModal from '~common/TagsFilterModal'
+import TypeFilterModal from '~common/TypeFilterModal'
 import Container from '~common/ui/Container'
 import Modal from '~common/Modal'
 import { useHighlightFilters } from '~helpers/useHighlightFilters'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import type { RootState } from '~redux/modules/reducer'
 import { selectHighlightsObj } from '~redux/selectors/user'
-import { makeAllWordAnnotationsSelector, type GroupedWordAnnotation } from '~redux/selectors/bible'
+import {
+  makeAllWordAnnotationsSelector,
+  selectAvailableAnnotationVersions,
+  type GroupedWordAnnotation,
+} from '~redux/selectors/bible'
 import {
   changeHighlightColor,
   type Highlight,
@@ -88,22 +93,29 @@ const HighlightsScreen = () => {
   const selectAllWordAnnotations = makeAllWordAnnotationsSelector()
   const wordAnnotations = useSelector((state: RootState) => selectAllWordAnnotations(state))
 
+  // Available annotation versions for type filter
+  const availableAnnotationVersions = useSelector(selectAvailableAnnotationVersions)
+
   // Filters hook - encapsulates all filter logic
   const {
     filters,
     setColorFilter,
     setTagFilter,
+    setTypeFilter,
     resetFilters,
     filterLabel,
     colorInfo,
     selectedTag,
+    typeFilterLabel,
     activeFiltersCount,
     mainModalRef,
     colorModalRef,
     tagsModalRef,
+    typeModalRef,
     openMainModal,
     openColorFromMain,
     openTagsFromMain,
+    openTypeFromMain,
   } = useHighlightFilters()
 
   // Settings modal (for highlight actions)
@@ -128,7 +140,7 @@ const HighlightsScreen = () => {
   }, [annotationSettingsData, openAnnotationSettings])
 
   // Filter highlights
-  const groupedHighlights = useMemo(() => {
+  const groupedHighlights = (() => {
     let highlights = Object.entries(highlightsObj)
 
     if (filters.colorId) {
@@ -142,16 +154,10 @@ const HighlightsScreen = () => {
       .sort((a, b) => Number(b[1].date) - Number(a[1].date))
       .slice(0, 100)
       .reduce(groupHighlightsByDate, [])
-  }, [filters, highlightsObj])
+  })()
 
   // Create unified list of highlights and annotations sorted by date
-  const unifiedItems = useMemo(() => {
-    // Transform highlights to unified format
-    const highlightItems: UnifiedHighlightItem[] = groupedHighlights.map(h => ({
-      type: 'highlight' as const,
-      data: h,
-    }))
-
+  const unifiedItems = (() => {
     // Filter and transform annotations to unified format
     let filteredAnnotations = wordAnnotations
     if (filters.colorId) {
@@ -162,6 +168,35 @@ const HighlightsScreen = () => {
       filteredAnnotations = filteredAnnotations.filter(a => a.tags?.[tagIdFilter])
     }
 
+    // Type filter logic
+    const typeFilter = filters.typeFilter
+
+    // If type is 'annotations' - only show annotations (no highlights)
+    if (typeFilter === 'annotations') {
+      const annotationItems: UnifiedHighlightItem[] = filteredAnnotations.map(a => ({
+        type: 'annotation' as const,
+        data: a,
+      }))
+      return annotationItems.sort((a, b) => Number(b.data.date) - Number(a.data.date))
+    }
+
+    // If type is a version code - only show annotations for that version
+    if (typeFilter && typeFilter !== 'all') {
+      const versionAnnotations = filteredAnnotations.filter(a => a.version === typeFilter)
+      const annotationItems: UnifiedHighlightItem[] = versionAnnotations.map(a => ({
+        type: 'annotation' as const,
+        data: a,
+      }))
+      return annotationItems.sort((a, b) => Number(b.data.date) - Number(a.data.date))
+    }
+
+    // Default ('all' or undefined): show everything
+    // Transform highlights to unified format
+    const highlightItems: UnifiedHighlightItem[] = groupedHighlights.map(h => ({
+      type: 'highlight' as const,
+      data: h,
+    }))
+
     const annotationItems: UnifiedHighlightItem[] = filteredAnnotations.map(a => ({
       type: 'annotation' as const,
       data: a,
@@ -171,7 +206,7 @@ const HighlightsScreen = () => {
     return [...highlightItems, ...annotationItems].sort(
       (a, b) => Number(b.data.date) - Number(a.data.date)
     )
-  }, [groupedHighlights, wordAnnotations, filters])
+  })()
 
   const handleDelete = () => {
     Alert.alert(t('Attention'), t('Êtes-vous vraiment sur de supprimer cette surbrillance ?'), [
@@ -226,6 +261,8 @@ const HighlightsScreen = () => {
         onColorPress={openColorFromMain}
         selectedTagName={selectedTag?.name}
         onTagPress={openTagsFromMain}
+        selectedTypeLabel={typeFilterLabel}
+        onTypePress={openTypeFromMain}
         onReset={resetFilters}
         hasActiveFilters={activeFiltersCount > 0}
       />
@@ -245,6 +282,16 @@ const HighlightsScreen = () => {
         onSelect={tag => {
           setTagFilter(tag)
           tagsModalRef.current?.dismiss()
+        }}
+      />
+
+      <TypeFilterModal
+        ref={typeModalRef}
+        selectedType={filters.typeFilter}
+        availableVersions={availableAnnotationVersions}
+        onSelect={type => {
+          setTypeFilter(type)
+          typeModalRef.current?.dismiss()
         }}
       />
 

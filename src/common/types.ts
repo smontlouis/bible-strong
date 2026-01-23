@@ -239,6 +239,7 @@ export type SelectedCode = {
 export interface HighlightFilters {
   colorId?: string // 'color1', 'color2', 'custom-xxx', ou undefined (tous)
   tagId?: string // ID du tag, ou undefined (tous)
+  typeFilter?: 'all' | 'annotations' | string // 'all', 'annotations', ou VersionCode
 }
 export interface Bookmark {
   id: string

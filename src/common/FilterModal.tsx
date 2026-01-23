@@ -47,6 +47,8 @@ type Props = {
   onColorPress: () => void
   selectedTagName?: string
   onTagPress: () => void
+  selectedTypeLabel?: string
+  onTypePress: () => void
   onReset: () => void
   hasActiveFilters: boolean
 }
@@ -60,6 +62,8 @@ const FilterModal = forwardRef<BottomSheetModal, Props>(
       onColorPress,
       selectedTagName,
       onTagPress,
+      selectedTypeLabel,
+      onTypePress,
       onReset,
       hasActiveFilters,
     },
@@ -94,6 +98,22 @@ const FilterModal = forwardRef<BottomSheetModal, Props>(
             )}
           </Header>
 
+          {/* Filtre Type */}
+          <FilterRow onPress={onTypePress}>
+            <Box row flex={1}>
+              <FeatherIcon name="layers" size={20} color="tertiary" />
+              <Text marginLeft={12} fontSize={16}>
+                {t('Type')}
+              </Text>
+            </Box>
+            <Box row center>
+              <Text color="tertiary" fontSize={14} marginRight={8} numberOfLines={1} maxWidth={200}>
+                {selectedTypeLabel || t('Tout')}
+              </Text>
+              <FeatherIcon name="chevron-right" size={20} color="tertiary" />
+            </Box>
+          </FilterRow>
+
           {/* Filtre Couleur */}
           <FilterRow onPress={onColorPress}>
             <Box row flex={1}>
@@ -104,7 +124,7 @@ const FilterModal = forwardRef<BottomSheetModal, Props>(
             </Box>
             <Box row center>
               {selectedColorId && selectedColorHex && <ColorCircle color={selectedColorHex} />}
-              <Text color="tertiary" fontSize={14} marginRight={8}>
+              <Text color="tertiary" fontSize={14} marginRight={8} numberOfLines={1} maxWidth={200}>
                 {selectedColorName || t('Toutes')}
               </Text>
               <FeatherIcon name="chevron-right" size={20} color="tertiary" />
@@ -120,7 +140,7 @@ const FilterModal = forwardRef<BottomSheetModal, Props>(
               </Text>
             </Box>
             <Box row center>
-              <Text color="tertiary" fontSize={14} marginRight={8}>
+              <Text color="tertiary" fontSize={14} marginRight={8} numberOfLines={1} maxWidth={200}>
                 {selectedTagName || t('Tous')}
               </Text>
               <FeatherIcon name="chevron-right" size={20} color="tertiary" />

@@ -366,6 +366,18 @@ export const makeAllWordAnnotationsSelector = () =>
       .slice(0, 100) // Limit to 100 items like highlights
   })
 
+// Selector for available annotation versions (for type filter in HighlightsScreen)
+export const selectAvailableAnnotationVersions = createSelector(
+  [selectWordAnnotations],
+  (annotations): string[] => {
+    const versions = new Set<string>()
+    for (const id in annotations) {
+      versions.add(annotations[id].version)
+    }
+    return Array.from(versions).sort()
+  }
+)
+
 // Selector for note by id (for BibleNoteModal)
 export const makeNoteByIdSelector = () =>
   createSelector(
