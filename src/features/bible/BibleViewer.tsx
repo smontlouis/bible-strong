@@ -198,25 +198,14 @@ const BibleViewer = ({
     // Clear selected verses and close the modal
     actions.clearSelectedVerses()
     versesModal.close()
-    // Enter annotation mode
+
     annotationMode.enterMode(version)
-    // Open the annotation toolbar
     annotationToolbar.open()
   }, [actions, versesModal, annotationMode, annotationToolbar, version])
 
-  // Handler for entering annotation mode (from header)
-  const handleEnterAnnotationModeFromHeader = useCallback(() => {
-    // Enter annotation mode
-    annotationMode.enterMode(version)
-    // Open the annotation toolbar
-    annotationToolbar.open()
-  }, [annotationMode, annotationToolbar, version])
-
   // Handler for entering annotation mode (from double-tap on verse)
   const handleEnterAnnotationModeFromDoubleTap = () => {
-    // Enter annotation mode
     annotationMode.enterMode(version)
-    // Open the annotation toolbar
     annotationToolbar.open()
   }
 
@@ -710,7 +699,6 @@ const BibleViewer = ({
         onBibleParamsClick={bibleParamsModal.open}
         commentsDisplay={settings.commentsDisplay}
         hasBackButton={withNavigation}
-        onEnterAnnotationMode={handleEnterAnnotationModeFromHeader}
         onExitAnnotationMode={handleExitAnnotationMode}
         annotationModeEnabled={annotationMode.enabled}
       />

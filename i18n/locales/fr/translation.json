@@ -887,5 +887,26 @@
   "bible.crossVersionAnnotations.annotationCount": "{{count}} annotation",
   "bible.crossVersionAnnotations.annotationCount_plural": "{{count}} annotations",
   "bible.crossVersionAnnotations.switchVersion": "Changer de version",
-  "bible.crossVersionAnnotations.newTab": "Nouvel onglet"
+  "bible.crossVersionAnnotations.newTab": "Nouvel onglet",
+
+  "onboarding.annotationMode.intro.title": "Mode libre",
+  "onboarding.annotationMode.intro.subtitle": "Annotez votre Bible mot par mot",
+  "onboarding.annotationMode.intro.button": "Découvrir",
+  "onboarding.annotationMode.step1.label": "Annotations",
+  "onboarding.annotationMode.step1.title": "Des annotations mot par mot",
+  "onboarding.annotationMode.step1.description": "Le mode libre vous permet de surligner, souligner ou encercler des mots individuels ou des groupes de mots dans le texte biblique.",
+  "onboarding.annotationMode.step2.label": "Version",
+  "onboarding.annotationMode.step2.title": "Spécifique à chaque version",
+  "onboarding.annotationMode.step2.description": "Vos annotations sont enregistrées pour la version de Bible choisie. Chaque version peut avoir ses propres annotations.",
+  "onboarding.annotationMode.step3.label": "Organisation",
+  "onboarding.annotationMode.step3.title": "Notes et étiquettes",
+  "onboarding.annotationMode.step3.description": "Ajoutez des notes à vos sélections et organisez-les avec des étiquettes pour les retrouver facilement.",
+  "onboarding.annotationMode.step4.label": "Interaction",
+  "onboarding.annotationMode.step4.title": "Comment sélectionner",
+  "onboarding.annotationMode.step4.description": "Double-tapez sur un mot pour le sélectionner, ou glissez pour sélectionner plusieurs mots. Tapez sur 'Terminé' pour quitter le mode.",
+  "onboarding.annotationMode.step5.title": "Comment y accéder",
+  "onboarding.annotationMode.step5.description": "Pour entrer dans le mode libre, double-tapez sur un mot ou glissez pour sélectionner directement dans le texte biblique.",
+  "onboarding.next": "Suivant",
+  "onboarding.start": "Commencer",
+  "onboarding.back": "Retour"
 }

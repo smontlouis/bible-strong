@@ -177,9 +177,9 @@ const AnnotationToolbar = ({
       >
         <TouchableBox
           bg="primary"
-          borderRadius={8}
-          py={8}
-          px={10}
+          borderRadius={14}
+          py={10}
+          px={14}
           row
           gap={10}
           alignItems="center"

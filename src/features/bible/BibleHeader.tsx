@@ -46,7 +46,6 @@ interface BibleHeaderProps {
   hasBackButton?: boolean
   onBibleParamsClick: () => void
   commentsDisplay?: boolean
-  onEnterAnnotationMode?: () => void
   onExitAnnotationMode?: () => void
   annotationModeEnabled?: boolean
 }
@@ -56,7 +55,6 @@ const Header = ({
   bibleAtom,
   onBibleParamsClick,
   commentsDisplay,
-  onEnterAnnotationMode,
   onExitAnnotationMode,
   annotationModeEnabled,
 }: BibleHeaderProps) => {
@@ -233,7 +231,7 @@ const Header = ({
           <TouchableBox onPress={onExitAnnotationMode} position="absolute" right={0} bottom={10}>
             <Box bg="reverse" borderRadius={8} height={28} px={12} center>
               <Text color="primary" bold fontSize={12}>
-                {t('Terminer')}
+                {t('Terminé')}
               </Text>
             </Box>
           </TouchableBox>

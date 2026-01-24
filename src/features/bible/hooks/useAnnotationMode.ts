@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { Verse } from '~common/types'
+import { useFeatureOnboarding, ONBOARDING_IDS } from '~features/feature-onboarding'
 import {
   addWordAnnotation,
   AnnotationRange,
@@ -110,6 +111,7 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
   const reduxDispatch = useDispatch()
   const versesRef = useRef<Verse[]>([])
   const webViewRef = useRef<WebViewRef | null>(null)
+  const featureOnboarding = useFeatureOnboarding()
 
   // Get word annotations from Redux - single source of truth
   const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
@@ -151,6 +153,7 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
       enabled: true,
       version,
     })
+    featureOnboarding.triggerIfNeeded(ONBOARDING_IDS.ANNOTATION_MODE)
   }
 
   const exitMode = () => {

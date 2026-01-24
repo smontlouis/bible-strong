@@ -891,7 +891,7 @@
   "Copié !": "Copied!",
   "Mode": "Mode",
   "Recherche": "Search",
-  "Terminer": "Done",
+  "Terminé": "Done",
   "Version": "Version",
   "OK": "OK",
 
@@ -942,5 +942,26 @@
   "premium.basic.description": "You are a sponsor.\nThank you for your symbolic help to the evolution of this project.",
   "premium.premium.description": "You are a premium sponsor.\nThank you for your commitment to the evolution of this project and your willingness to invest financially. Thank you warmly for your support.",
   "premium.premium_plus.description": "You are a super premium sponsor.\nManna fell from the sky! It is a blessing to see that you believe in this project and are ready to invest financially. Thank you warmly for your support.",
-  "premium.investor.description": "You are an investor.\nManna fell from the sky! It is a blessing to see that you believe in this project and are ready to invest financially. Thank you warmly for your support."
+  "premium.investor.description": "You are an investor.\nManna fell from the sky! It is a blessing to see that you believe in this project and are ready to invest financially. Thank you warmly for your support.",
+
+  "onboarding.annotationMode.intro.title": "Free Mode",
+  "onboarding.annotationMode.intro.subtitle": "Annotate your Bible word by word",
+  "onboarding.annotationMode.intro.button": "Discover",
+  "onboarding.annotationMode.step1.label": "Annotations",
+  "onboarding.annotationMode.step1.title": "Word-by-word annotations",
+  "onboarding.annotationMode.step1.description": "Free mode allows you to highlight, underline, or circle individual words or groups of words in the biblical text.",
+  "onboarding.annotationMode.step2.label": "Version",
+  "onboarding.annotationMode.step2.title": "Version-specific",
+  "onboarding.annotationMode.step2.description": "Your annotations are saved for the selected Bible version. Each version can have its own annotations.",
+  "onboarding.annotationMode.step3.label": "Organization",
+  "onboarding.annotationMode.step3.title": "Notes and tags",
+  "onboarding.annotationMode.step3.description": "Add notes to your selections and organize them with tags to find them easily.",
+  "onboarding.annotationMode.step4.label": "Interaction",
+  "onboarding.annotationMode.step4.title": "How to select",
+  "onboarding.annotationMode.step4.description": "Double-tap a word to select it, or drag to select multiple words. Tap 'Done' to exit the mode.",
+  "onboarding.annotationMode.step5.title": "How to access",
+  "onboarding.annotationMode.step5.description": "To enter free mode, double-tap on a word or drag to select directly in the biblical text.",
+  "onboarding.next": "Next",
+  "onboarding.start": "Start",
+  "onboarding.back": "Back"
 }
