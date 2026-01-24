@@ -572,9 +572,18 @@ const BibleViewer = ({
     [pendingVerseData, addVerseToStudy, verseFormatModal, addToStudyModal, actions]
   )
 
-  // Pin verses handler
+  // Pin verses handler - toggles focus on/off
   const handlePinVerses = () => {
-    actions.pinSelectedVerses()
+    // Check if any selected verse is already in focus
+    const selectedKeys = Object.keys(selectedVerses)
+    const hasFocusActive =
+      focusVerses?.some(v => selectedKeys.some(key => key.endsWith(`-${v}`))) ?? false
+
+    if (hasFocusActive) {
+      actions.clearFocusVerses()
+    } else {
+      actions.pinSelectedVerses()
+    }
   }
 
   // Bookmark handler
@@ -829,6 +838,7 @@ const BibleViewer = ({
         onAddBookmark={handleAddBookmark}
         onPinVerses={handlePinVerses}
         onEnterAnnotationMode={handleEnterAnnotationMode}
+        focusVerses={focusVerses}
       />
       <BibleNoteModal ref={noteModal.getRef()} noteVerses={noteVerses} />
       <BibleLinkModal ref={linkModal.getRef()} linkVerses={linkVerses} />

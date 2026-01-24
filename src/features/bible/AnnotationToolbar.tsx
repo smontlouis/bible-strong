@@ -186,7 +186,7 @@ const AnnotationToolbar = ({
           onPress={onClose}
         >
           <Text fontSize={14} bold color="reverse">
-            {t('Mode annotation')}
+            {t('Mode libre')}
           </Text>
           <Box bg="reverse" borderRadius={20} size={16} center lightShadow opacity={0.5}>
             <FeatherIcon name="x" size={12} color="primary" />

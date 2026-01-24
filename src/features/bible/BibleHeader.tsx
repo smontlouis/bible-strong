@@ -492,16 +492,6 @@ const Header = ({
                           </Text>
                         </Box>
                       </MenuOption>
-                      {onEnterAnnotationMode && (
-                        <MenuOption onSelect={onEnterAnnotationMode}>
-                          <Box row alignItems="center" bg="primary" borderRadius={8} px={12} py={8}>
-                            <FeatherIcon name="edit-2" size={18} color="reverse" />
-                            <Text marginLeft={10} color="reverse">
-                              {t('Annoter')}
-                            </Text>
-                          </Box>
-                        </MenuOption>
-                      )}
                     </>
                   }
                 />
