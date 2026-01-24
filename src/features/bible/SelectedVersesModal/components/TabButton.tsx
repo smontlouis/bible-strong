@@ -1,23 +1,23 @@
 import { Pressable } from 'react-native'
-import Animated from 'react-native-reanimated'
 import Box from '~common/ui/Box'
+import { AnimatedText } from '~common/ui/Text'
 import type { TabButtonProps } from '../types'
 
 const TabButton = ({ label, isActive, onPress }: TabButtonProps) => (
   <Pressable onPress={onPress} style={{ flex: 1, zIndex: 1 }}>
     <Box py={10}>
-      <Animated.Text
+      <AnimatedText
+        fontSize={14}
+        fontWeight={isActive ? '600' : '400'}
+        color={isActive ? 'primary' : 'default'}
+        textAlign="center"
         style={{
-          fontSize: 14,
-          fontWeight: isActive ? '600' : '400',
-          textAlign: 'center',
-          // @ts-ignore - CSS Transitions for Reanimated 4
           transitionProperty: 'color',
           transitionDuration: 150,
         }}
       >
         {label}
-      </Animated.Text>
+      </AnimatedText>
     </Box>
   </Pressable>
 )

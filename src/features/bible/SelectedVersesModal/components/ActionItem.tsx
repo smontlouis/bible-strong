@@ -43,7 +43,7 @@ const ActionItem = ({
             height: ICON_BOX_SIZE,
             borderRadius: 16,
             backgroundColor:
-              variant === 'emphasized' ? theme.colors.primary : theme.colors.lightPrimary,
+              variant === 'emphasized' ? theme.colors.primary : theme.colors.lightGrey,
             alignItems: 'center',
             justifyContent: 'center',
             transitionProperty: ['backgroundColor', 'boxShadow'],

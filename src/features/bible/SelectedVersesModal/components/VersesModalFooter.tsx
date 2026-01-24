@@ -40,10 +40,10 @@ const VersesModalFooter = ({
     <BottomSheetFooter {...bottomSheetFooterProps}>
       <AnimatedBox
         bg="lightGrey"
-        borderRadius={10}
+        borderRadius={18}
         p={3}
         mx={16}
-        mb={(isFullScreenBible ? BOTTOM_INSET : bottomBarHeight) + 10}
+        mb={(isFullScreenBible ? BOTTOM_INSET : bottomBarHeight) + 5}
         position="relative"
         style={{
           transitionProperty: 'margin',
@@ -59,7 +59,7 @@ const VersesModalFooter = ({
               bottom: TAB_CONTAINER_PADDING,
               width: tabWidth,
               backgroundColor: theme.colors.reverse,
-              borderRadius: 8,
+              borderRadius: 14,
             },
             indicatorAnimatedStyle,
           ]}
