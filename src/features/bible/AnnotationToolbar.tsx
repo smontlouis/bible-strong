@@ -100,7 +100,7 @@ const IconButton = ({
     borderBottomLeftRadius={buttonPosition === 'start' ? 8 : 0}
     borderBottomRightRadius={buttonPosition === 'end' ? 8 : 0}
     borderWidth={1}
-    bg={disabled ? 'lightGrey' : isSelected ? 'lightPrimary' : 'transparent'}
+    bg={disabled ? 'lightGrey' : 'transparent'}
     opacity={disabled ? 0.5 : 1}
     style={{
       // @ts-ignore

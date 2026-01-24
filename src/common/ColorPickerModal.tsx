@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Alert, TouchableOpacity } from 'react-native'
 import styled from '@emotion/native'
-import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { BottomSheetHandle, BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
@@ -256,6 +256,16 @@ const ColorPickerModal = () => {
     setColorPickerModal(false)
   }
 
+  const renderHandle = useCallback(
+    (handleProps: React.ComponentProps<typeof BottomSheetHandle>) => (
+      <>
+        <BottomSheetHandle {...handleProps} />
+        <ModalHeader title={t('Palette de couleurs')} />
+      </>
+    ),
+    []
+  )
+
   return (
     <>
       <BottomSheetModal
@@ -266,10 +276,10 @@ const ColorPickerModal = () => {
         backdropComponent={renderBackdrop}
         activeOffsetY={[-20, 20]}
         onDismiss={handleModalClose}
+        handleComponent={renderHandle}
         key={key}
         {...bottomSheetStyles}
       >
-        <ModalHeader title={t('Palette de couleurs')} />
         <BottomSheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}>
           <SectionTitle>{t('Couleurs par défaut')}</SectionTitle>
           {([1, 2, 3, 4, 5] as const).map(i => {
@@ -384,13 +394,13 @@ const ColorPickerModal = () => {
                   width={30}
                   height={30}
                   borderRadius={10}
-                  backgroundColor="opacity5"
+                  backgroundColor="lightPrimary"
                   marginRight={10}
                   center
                 >
-                  <FeatherIcon name="plus" size={20} />
+                  <FeatherIcon name="plus" size={20} color="primary" />
                 </Box>
-                <Text bold color="primary">
+                <Text bold color="primary" fontSize={14}>
                   {t('Ajouter une couleur')}
                 </Text>
               </Box>

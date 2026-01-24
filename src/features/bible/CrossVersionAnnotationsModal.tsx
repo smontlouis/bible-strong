@@ -115,7 +115,7 @@ const CrossVersionAnnotationsModal = ({
                   }}
                 >
                   <HStack alignItems="center">
-                    <FeatherIcon name="refresh-cw" size={14} color="tertiary" />
+                    <FeatherIcon name="refresh-cw" size={10} color="tertiary" />
                     <Text fontSize={11} color="tertiary" marginLeft={4}>
                       {t('bible.crossVersionAnnotations.switchVersion')}
                     </Text>
@@ -128,7 +128,7 @@ const CrossVersionAnnotationsModal = ({
                   }}
                 >
                   <HStack alignItems="center">
-                    <FeatherIcon name="plus-square" size={14} color="tertiary" />
+                    <FeatherIcon name="plus-square" size={10} color="tertiary" />
                     <Text fontSize={11} color="tertiary" marginLeft={4}>
                       {t('bible.crossVersionAnnotations.newTab')}
                     </Text>
