@@ -129,7 +129,12 @@ const StudiesDomWrapper = ({
           }
           break
         case 'VIEW_BIBLE_VERSE': {
-          const arrayVerses = JSON.parse(msgData.payload.arrayVerses) as string[]
+          const arrayVerses = (
+            typeof msgData.payload.arrayVerses === 'string'
+              ? JSON.parse(msgData.payload.arrayVerses)
+              : msgData.payload.arrayVerses
+          ) as string[]
+
           router.push({
             pathname: '/bible-view',
             params: {
