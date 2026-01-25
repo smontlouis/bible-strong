@@ -19,6 +19,7 @@ import verseToReference from '~helpers/verseToReference'
 import { Tag, VerseIds } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import { Link } from '~redux/modules/user'
+import { selectLinks } from '~redux/selectors/bible'
 
 type TLink = {
   linkId: string
@@ -37,7 +38,7 @@ const BibleVerseLinks = () => {
   const [linkVerses, setLinkVerses] = useState<VerseIds | undefined>(undefined)
   const [selectedChip, setSelectedChip] = useState<Tag | null>(null)
   const [linkSettingsId, setLinkSettingsId] = useState<string | null>(null)
-  const _links = useSelector((state: RootState) => state.user.bible.links)
+  const _links = useSelector(selectLinks)
   const linkModal = useBottomSheetModal()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const linkSettingsModal = useBottomSheetModal()

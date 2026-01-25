@@ -17,7 +17,7 @@ import { VersionCode } from '~state/tabs'
 // All selectors use nullish coalescing to prevent crashes when state is undefined
 // (e.g., during Redux rehydration or state corruption)
 const selectHighlights = (state: RootState) => state.user.bible.highlights ?? {}
-const selectLinks = (state: RootState) => state.user.bible.links ?? {}
+export const selectLinks = (state: RootState) => state.user.bible.links ?? {}
 const selectStudies = (state: RootState) => state.user.bible.studies ?? {}
 const selectNaves = (state: RootState) => state.user.bible.naves ?? {}
 const selectWords = (state: RootState) => state.user.bible.words ?? {}

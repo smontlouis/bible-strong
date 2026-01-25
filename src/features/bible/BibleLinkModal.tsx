@@ -36,6 +36,7 @@ import orderVerses from '~helpers/orderVerses'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addLink, deleteLink, Link } from '~redux/modules/user'
+import { selectLinks } from '~redux/selectors/bible'
 import { unifiedTagsModalAtom } from '../../state/app'
 import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
 
@@ -58,7 +59,7 @@ const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
 // Create a memoized selector factory for current link
 const makeCurrentLinkSelector = () =>
   createSelector(
-    [(state: RootState) => state.user.bible.links, (_: RootState, linkKey: string) => linkKey],
+    [selectLinks, (_: RootState, linkKey: string) => linkKey],
     (links, linkKey): (Link & { id: string }) | null => {
       if (linkKey && links[linkKey]) {
         return {
