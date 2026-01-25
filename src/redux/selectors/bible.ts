@@ -14,19 +14,21 @@ import { Tag, CurrentTheme, TagsObj } from '~common/types'
 import { VersionCode } from '~state/tabs'
 
 // Base selectors - private
-const selectHighlights = (state: RootState) => state.user.bible.highlights
-const selectLinks = (state: RootState) => state.user.bible.links
-const selectStudies = (state: RootState) => state.user.bible.studies
-const selectNaves = (state: RootState) => state.user.bible.naves
-const selectWords = (state: RootState) => state.user.bible.words
-const selectStrongsGrec = (state: RootState) => state.user.bible.strongsGrec
-const selectStrongsHebreu = (state: RootState) => state.user.bible.strongsHebreu
-const selectSettings = (state: RootState) => state.user.bible.settings
-const selectColors = (state: RootState) => state.user.bible.settings.colors
+// All selectors use nullish coalescing to prevent crashes when state is undefined
+// (e.g., during Redux rehydration or state corruption)
+const selectHighlights = (state: RootState) => state.user.bible.highlights ?? {}
+const selectLinks = (state: RootState) => state.user.bible.links ?? {}
+const selectStudies = (state: RootState) => state.user.bible.studies ?? {}
+const selectNaves = (state: RootState) => state.user.bible.naves ?? {}
+const selectWords = (state: RootState) => state.user.bible.words ?? {}
+const selectStrongsGrec = (state: RootState) => state.user.bible.strongsGrec ?? {}
+const selectStrongsHebreu = (state: RootState) => state.user.bible.strongsHebreu ?? {}
+const selectSettings = (state: RootState) => state.user.bible.settings ?? {}
+const selectColors = (state: RootState) => state.user.bible.settings?.colors ?? {}
 
 // Base selectors - exported for use by other selectors and components
-export const selectNotes = (state: RootState) => state.user.bible.notes
-export const selectWordAnnotations = (state: RootState) => state.user.bible.wordAnnotations
+export const selectNotes = (state: RootState) => state.user.bible.notes ?? {}
+export const selectWordAnnotations = (state: RootState) => state.user.bible.wordAnnotations ?? {}
 
 // Selector factory for highlights by chapter
 // Usage: const selectHighlightsByChapter = makeHighlightsByChapterSelector()
