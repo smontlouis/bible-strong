@@ -1,7 +1,7 @@
 import { useSetAtom } from 'jotai/react'
 import { useEffect, useRef } from 'react'
 import { useDispatch, useStore } from 'react-redux'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import FireAuth, { FireAuthProfile } from '~helpers/FireAuth'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
 import i18n from '~i18n'

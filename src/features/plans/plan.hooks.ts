@@ -20,7 +20,7 @@ import {
 } from 'src/common/types'
 import { RootState } from 'src/redux/modules/reducer'
 import books from '~assets/bible_versions/books-desc'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import getBiblePericope from '~helpers/getBiblePericope'
 import loadBible from '~helpers/loadBible'
 import { range } from '~helpers/range'

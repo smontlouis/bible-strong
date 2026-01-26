@@ -61,8 +61,8 @@ import {
 import { deleteStudy, publishStudyAction, updateStudy } from './modules/user/studies'
 import { addTag, removeTag, toggleTagEntity, updateTag } from './modules/user/tags'
 
-import { toast } from 'sonner-native'
 import { diff } from '~helpers/deep-obj'
+import { toast } from '~helpers/toast'
 import { migrateImportedDataToSubcollections } from '~helpers/firestoreMigration'
 import {
   batchWriteSubcollection,

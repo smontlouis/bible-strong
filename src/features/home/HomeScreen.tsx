@@ -16,7 +16,7 @@ import TimelineWidget from './TimelineWidget'
 import UserWidget from './UserWidget'
 import WordOfTheDay from './WordOfTheDay'
 
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import { useTheme } from '@emotion/react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useTranslation } from 'react-i18next'

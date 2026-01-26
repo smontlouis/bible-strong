@@ -4,7 +4,7 @@ import React, { PropsWithChildren } from 'react'
 import { ScrollView, TextInput, Platform } from 'react-native'
 import Clipboard from '@react-native-clipboard/clipboard'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import * as Updates from 'expo-updates'
 
 import Box from '~common/ui/Box'

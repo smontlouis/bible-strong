@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next'
 // @ts-ignore
 import books from '~assets/bible_versions/books'
 import { Book } from '~assets/bible_versions/books-desc'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import { Pericope, SelectedCode, StudyNavigateBibleType, Tag, Verse, VerseIds } from '~common/types'
 import Box from '~common/ui/Box'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'

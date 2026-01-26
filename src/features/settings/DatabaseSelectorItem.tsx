@@ -18,7 +18,7 @@ import type { ResourceLanguage, DatabaseId } from '~helpers/databaseTypes'
 import { dbManager } from '~helpers/sqlite'
 
 import { withTranslation } from 'react-i18next'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'

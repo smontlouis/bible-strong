@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import generateUUID from '~helpers/generateUUID'
 import { TabItem, tabsAtomsAtom } from '../../../state/tabs'
 import { useSlideNewTab } from './useSlideNewTab'

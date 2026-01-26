@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { ResourcesLanguageState, useResourceLanguage } from 'src/state/resourcesLanguage'
 
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'

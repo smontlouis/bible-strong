@@ -1,7 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy'
 import React, { useEffect, useState } from 'react'
 
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 
 import { useTranslation } from 'react-i18next'
 import DownloadRequired from '~common/DownloadRequired'

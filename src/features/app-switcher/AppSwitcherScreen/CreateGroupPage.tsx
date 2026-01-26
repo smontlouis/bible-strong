@@ -2,7 +2,7 @@ import { useTheme } from '@emotion/react'
 import React, { memo, useRef, useState } from 'react'
 import { Keyboard, TextInput, useWindowDimensions, ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import {
   useAnimatedStyle,
   useAnimatedReaction,

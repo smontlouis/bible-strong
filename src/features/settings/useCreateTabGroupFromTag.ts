@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useSetAtom } from 'jotai/react'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import books from '~assets/bible_versions/books-desc'
 import { Tag } from '~common/types'
 import generateUUID from '~helpers/generateUUID'
