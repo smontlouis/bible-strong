@@ -1,6 +1,6 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet/'
 import distanceInWords from 'date-fns/formatDistance'
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -10,36 +10,38 @@ import RenameModal from '~common/RenameModal'
 import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
-import ScrollView from '~common/ui/ScrollView'
+import SectionList from '~common/ui/SectionList'
 import HighlightItem from '~features/settings/Verse'
 import formatVerseContent from '~helpers/formatVerseContent'
-import { updateTag, removeTag, Link as LinkModel, LinkType } from '~redux/modules/user'
-import { useCreateTabGroupFromTag, TagData } from './useCreateTabGroupFromTag'
+import { Link as LinkModel, LinkType, removeTag, updateTag } from '~redux/modules/user'
+import { TagData, useCreateTabGroupFromTag } from './useCreateTabGroupFromTag'
 
 import styled from '@emotion/native'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import books from '~assets/bible_versions/books-desc'
+import DictionnaryIcon from '~common/DictionnaryIcon'
 import Empty from '~common/Empty'
+import LexiqueIcon from '~common/LexiqueIcon'
 import Link from '~common/Link'
+import NaveIcon from '~common/NaveIcon'
 import TagList from '~common/TagList'
-import Accordion from '~common/ui/Accordion'
 import Border from '~common/ui/Border'
-import Box from '~common/ui/Box'
+import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import { linkTypeConfig } from '~helpers/fetchOpenGraphData'
-import DictionnaryResultItem from '~features/dictionnary/DictionaryResultItem'
-import LexiqueResultItem from '~features/lexique/LexiqueResultItem'
-import NaveResultItem from '~features/nave/NaveResultItem'
 import StudyItem from '~features/studies/StudyItem'
-import AnnotationItem from './AnnotationItem'
+import { linkTypeConfig } from '~helpers/fetchOpenGraphData'
+import { getDateLocale, type ActiveLanguage } from '~helpers/languageUtils'
 import truncate from '~helpers/truncate'
 import useLanguage from '~helpers/useLanguage'
-import { getDateLocale, type ActiveLanguage } from '~helpers/languageUtils'
 import { RootState } from '~redux/modules/reducer'
-import { useLocalSearchParams, useRouter } from 'expo-router'
-import { makeTagDataSelector, GroupedWordAnnotation } from '~redux/selectors/bible'
+import { GroupedWordAnnotation, makeTagDataSelector } from '~redux/selectors/bible'
 import { makeTagByIdSelector } from '~redux/selectors/tags'
+import AnnotationItem from './AnnotationItem'
+import TagStrongItem, { TagStrongItemData } from './TagStrongItem'
+import TagNaveItem, { TagNaveItemData } from './TagNaveItem'
+import TagDictionaryItem, { TagDictionaryItemData } from './TagDictionaryItem'
 
 const NoteItem = ({ item, t, lang }: { item: any; t: any; lang: ActiveLanguage }) => {
   const [Livre, Chapitre, Verset] = item.id.split('-')
@@ -161,17 +163,95 @@ const CountChip = styled(Box)(({ theme }) => ({
   marginLeft: 8,
 }))
 
-const SectionHeader = ({ title, count }: { title: string; count: number }) => (
-  <Box row alignItems="center">
-    <Text fontSize={18} bold>
-      {title}
-    </Text>
-    <CountChip>
-      <Text fontSize={12} color="default" bold>
-        {count}
-      </Text>
-    </CountChip>
-  </Box>
+// Types for SectionList
+type TagSectionItem =
+  | { type: 'strong-grec'; data: TagStrongItemData }
+  | { type: 'strong-hebreu'; data: TagStrongItemData }
+  | { type: 'nave'; data: TagNaveItemData }
+  | { type: 'word'; data: TagDictionaryItemData }
+  | { type: 'highlight'; data: HighlightData }
+  | { type: 'annotation'; data: GroupedWordAnnotation }
+  | { type: 'note'; data: any }
+  | { type: 'link'; data: LinkItemType }
+  | { type: 'study'; data: any }
+
+type TagSection = {
+  id: string
+  title: string
+  count: number
+  data: TagSectionItem[]
+}
+
+// Section icon component based on section type
+const SectionIcon = ({ sectionId }: { sectionId: string }) => {
+  switch (sectionId) {
+    case 'strongs':
+      return <LexiqueIcon color="primary" size={20} />
+    case 'naves':
+      return <NaveIcon color="quint" size={20} />
+    case 'words':
+      return <DictionnaryIcon color="secondary" size={20} />
+    case 'highlights':
+      return <FeatherIcon name="edit-3" size={18} color="color1" />
+    case 'notes':
+      return <FeatherIcon name="file-text" size={18} color="color2" />
+    case 'links':
+      return <FeatherIcon name="link" size={18} color="tertiary" />
+    case 'studies':
+      return <FeatherIcon name="feather" size={18} color="quart" />
+    default:
+      return null
+  }
+}
+
+// Section header component for collapsible sections
+const TagSectionHeader = ({
+  sectionId,
+  title,
+  count,
+  isExpanded,
+  toggle,
+}: {
+  sectionId: string
+  title: string
+  count: number
+  isExpanded: boolean
+  toggle: (sectionId: string) => void
+}) => (
+  <TouchableBox
+    row
+    onPress={() => toggle(sectionId)}
+    alignItems="center"
+    py={30}
+    px={20}
+    backgroundColor="reverse"
+    borderBottomWidth={1}
+    borderColor="border"
+  >
+    <Box flex row alignItems="center">
+      <Box mr={12}>
+        <SectionIcon sectionId={sectionId} />
+      </Box>
+      <Text>{title}</Text>
+      <CountChip>
+        <Text fontSize={12} color="default" bold>
+          {count}
+        </Text>
+      </CountChip>
+    </Box>
+    <AnimatedBox
+      width={17}
+      height={17}
+      center
+      style={{
+        transform: [{ rotate: isExpanded ? '180deg' : '0deg' }],
+        transitionProperty: 'transform',
+        transitionDuration: 500,
+      }}
+    >
+      <FeatherIcon color="grey" name="chevron-down" size={17} />
+    </AnimatedBox>
+  </TouchableBox>
 )
 
 const TagScreen = () => {
@@ -215,25 +295,142 @@ const TagScreen = () => {
   )
 
   // Create unified list of highlights and annotations sorted by date
-  const unifiedHighlightsAndAnnotations = useMemo(() => {
-    const highlightItems: UnifiedTagItem[] = highlights.map((h: HighlightData) => ({
-      type: 'highlight' as const,
-      data: h,
-    }))
+  const highlightItems: UnifiedTagItem[] = highlights.map((h: HighlightData) => ({
+    type: 'highlight' as const,
+    data: h,
+  }))
 
-    const annotationItems: UnifiedTagItem[] = wordAnnotations.map((a: GroupedWordAnnotation) => ({
-      type: 'annotation' as const,
-      data: a,
-    }))
+  const annotationItems: UnifiedTagItem[] = wordAnnotations.map((a: GroupedWordAnnotation) => ({
+    type: 'annotation' as const,
+    data: a,
+  }))
 
-    return [...highlightItems, ...annotationItems].sort(
-      (a, b) => Number(b.data.date) - Number(a.data.date)
-    )
-  }, [highlights, wordAnnotations])
+  const unifiedHighlightsAndAnnotations = [...highlightItems, ...annotationItems].sort(
+    (a, b) => Number(b.data.date) - Number(a.data.date)
+  )
 
   const renameModalRef = useRef<BottomSheetModal>(null)
   const [tagToRename, setTagToRename] = useState<{ id: string; name: string } | null>(null)
   const createTabGroupFromTag = useCreateTabGroupFromTag()
+
+  // Expandable section state
+  const [expandedSectionIds, setExpandedSectionIds] = useState<string[]>([])
+
+  const toggle = (sectionId: string) => {
+    setExpandedSectionIds(s =>
+      s.includes(sectionId) ? s.filter(i => i !== sectionId) : [...s, sectionId]
+    )
+  }
+
+  // Build sections array - only include non-empty sections
+  const allSections: (TagSection | false)[] = [
+    (strongsGrec.length > 0 || strongsHebreu.length > 0) && {
+      id: 'strongs',
+      title: 'Strongs',
+      count: strongsGrec.length + strongsHebreu.length,
+      data: expandedSectionIds.includes('strongs')
+        ? [
+            ...strongsGrec.map((s: { id: string; title: string }) => ({
+              type: 'strong-grec' as const,
+              data: s,
+            })),
+            ...strongsHebreu.map((s: { id: string; title: string }) => ({
+              type: 'strong-hebreu' as const,
+              data: s,
+            })),
+          ]
+        : [],
+    },
+    naves.length > 0 && {
+      id: 'naves',
+      title: t('Thèmes nave'),
+      count: naves.length,
+      data: expandedSectionIds.includes('naves')
+        ? naves.map((s: { id: string; title: string }) => ({ type: 'nave' as const, data: s }))
+        : [],
+    },
+    words.length > 0 && {
+      id: 'words',
+      title: t('Dictionnaire'),
+      count: words.length,
+      data: expandedSectionIds.includes('words')
+        ? words.map((s: { id: string; title: string }) => ({ type: 'word' as const, data: s }))
+        : [],
+    },
+    unifiedHighlightsAndAnnotations.length > 0 && {
+      id: 'highlights',
+      title: t('Surbrillances'),
+      count: unifiedHighlightsAndAnnotations.length,
+      data: expandedSectionIds.includes('highlights')
+        ? unifiedHighlightsAndAnnotations.map(item =>
+            item.type === 'highlight'
+              ? { type: 'highlight' as const, data: item.data }
+              : { type: 'annotation' as const, data: item.data }
+          )
+        : [],
+    },
+    notes.length > 0 && {
+      id: 'notes',
+      title: 'Notes',
+      count: notes.length,
+      data: expandedSectionIds.includes('notes')
+        ? notes.map((n: any) => ({ type: 'note' as const, data: n }))
+        : [],
+    },
+    links.length > 0 && {
+      id: 'links',
+      title: t('Liens'),
+      count: links.length,
+      data: expandedSectionIds.includes('links')
+        ? links.map((l: LinkItemType) => ({ type: 'link' as const, data: l }))
+        : [],
+    },
+    studies.length > 0 && {
+      id: 'studies',
+      title: t('Études'),
+      count: studies.length,
+      data: expandedSectionIds.includes('studies')
+        ? studies.map((s: any) => ({ type: 'study' as const, data: s }))
+        : [],
+    },
+  ]
+
+  const sections = allSections.filter((s): s is TagSection => !!s)
+
+  // Render item based on type
+  const renderItem = ({ item }: { item: TagSectionItem }) => {
+    switch (item.type) {
+      case 'strong-grec':
+        return <TagStrongItem item={item.data} variant="grec" />
+      case 'strong-hebreu':
+        return <TagStrongItem item={item.data} variant="hebreu" />
+      case 'nave':
+        return <TagNaveItem item={item.data} />
+      case 'word':
+        return <TagDictionaryItem item={item.data} />
+      case 'highlight':
+        return (
+          <HighlightItem
+            color={item.data.color}
+            date={item.data.date}
+            verseIds={item.data.verseIds}
+            tags={item.data.tags}
+          />
+        )
+      case 'annotation':
+        return <AnnotationItem item={item.data} />
+      case 'note':
+        return <NoteItem t={t} lang={lang} item={item.data} />
+      case 'link':
+        return <LinkItem t={t} lang={lang} item={item.data} />
+      case 'study':
+        return <StudyItem study={item.data} />
+      default:
+        return null
+    }
+  }
+
+  const isEmpty = sections.length === 0
 
   const handleDelete = () => {
     if (!tag) return
@@ -319,164 +516,33 @@ const TagScreen = () => {
           />
         }
       />
-      <ScrollView>
-        {!unifiedHighlightsAndAnnotations.length &&
-          !notes.length &&
-          !links.length &&
-          !studies.length &&
-          !naves.length &&
-          !words.length &&
-          !strongsGrec.length &&
-          !strongsHebreu.length && (
-            <Box pt={40} px={20}>
-              <Empty
-                icon={require('~assets/images/empty-state-icons/tag.svg')}
-                message={t("Vous n'avez rien enregistré avec cette étiquette...")}
+      {isEmpty ? (
+        <Box flex pt={40} px={20}>
+          <Empty
+            icon={require('~assets/images/empty-state-icons/tag.svg')}
+            message={t("Vous n'avez rien enregistré avec cette étiquette...")}
+          />
+        </Box>
+      ) : (
+        <SectionList
+          sections={sections}
+          keyExtractor={(item, index) => `${item.type}-${index}`}
+          renderSectionHeader={({ section }) => {
+            const tagSection = section as TagSection
+            return (
+              <TagSectionHeader
+                sectionId={tagSection.id}
+                title={tagSection.title}
+                count={tagSection.count}
+                isExpanded={expandedSectionIds.includes(tagSection.id)}
+                toggle={toggle}
               />
-            </Box>
-          )}
-        {(!!strongsGrec.length || !!strongsHebreu.length) && (
-          <Box px={20}>
-            <Accordion
-              defaultExpanded
-              title={
-                <SectionHeader title="Strongs" count={strongsGrec.length + strongsHebreu.length} />
-              }
-            >
-              <Box row wrap>
-                {strongsGrec.map(s => {
-                  return (
-                    <LexiqueResultItem
-                      key={s.id + s.title}
-                      id={s.id}
-                      title={s.title}
-                      variant="grec"
-                    />
-                  )
-                })}
-                {strongsHebreu.map(s => {
-                  return (
-                    <LexiqueResultItem
-                      key={s.id + s.title}
-                      id={s.id}
-                      title={s.title}
-                      variant="hebreu"
-                    />
-                  )
-                })}
-              </Box>
-            </Accordion>
-          </Box>
-        )}
-        {!!naves.length && (
-          <Box px={20}>
-            <Accordion
-              defaultExpanded
-              title={<SectionHeader title={t('Thèmes nave')} count={naves.length} />}
-            >
-              <Box row wrap>
-                {naves.map((s: any) => {
-                  return (
-                    // @ts-ignore
-                    <NaveResultItem
-                      // @ts-ignore
-                      key={s.id}
-                      // @ts-ignore
-                      name_lower={s.id}
-                      // @ts-ignore
-                      name={s.title}
-                      // @ts-ignore
-                      variant="grec"
-                    />
-                  )
-                })}
-              </Box>
-            </Accordion>
-          </Box>
-        )}
-        {!!words.length && (
-          <Box px={20}>
-            <Accordion
-              defaultExpanded
-              title={<SectionHeader title={t('Dictionnaire')} count={words.length} />}
-            >
-              <Box row wrap>
-                {words.map(s => {
-                  return <DictionnaryResultItem key={s.id} word={s.title} />
-                })}
-              </Box>
-            </Accordion>
-          </Box>
-        )}
-        {!!unifiedHighlightsAndAnnotations.length && (
-          <Box px={20}>
-            <Accordion
-              defaultExpanded
-              title={
-                <SectionHeader
-                  title={t('Surbrillances')}
-                  count={unifiedHighlightsAndAnnotations.length}
-                />
-              }
-            >
-              {unifiedHighlightsAndAnnotations.map(item =>
-                item.type === 'highlight' ? (
-                  <HighlightItem
-                    key={`highlight-${item.data.date}`}
-                    color={item.data.color}
-                    date={item.data.date}
-                    verseIds={item.data.verseIds}
-                    tags={item.data.tags}
-                  />
-                ) : (
-                  <AnnotationItem key={`annotation-${item.data.id}`} item={item.data} />
-                )
-              )}
-            </Accordion>
-          </Box>
-        )}
-
-        {!!notes.length && (
-          <Box px={20}>
-            <Accordion defaultExpanded title={<SectionHeader title="Notes" count={notes.length} />}>
-              {notes.map(n => {
-                return <NoteItem t={t} lang={lang} key={n.date.toString()} item={n} />
-              })}
-            </Accordion>
-          </Box>
-        )}
-
-        {!!links.length && (
-          <Box px={20}>
-            <Accordion
-              defaultExpanded
-              title={<SectionHeader title={t('Liens')} count={links.length} />}
-            >
-              {links.map(l => {
-                return <LinkItem t={t} lang={lang} key={l.id} item={l} />
-              })}
-            </Accordion>
-          </Box>
-        )}
-
-        {!!studies.length && (
-          <Box px={20}>
-            <Accordion
-              defaultExpanded
-              title={<SectionHeader title={t('Études')} count={studies.length} />}
-            >
-              <Box row style={{ flexWrap: 'wrap' }}>
-                {studies.map(item => {
-                  {
-                    /* @ts-ignore */
-                  }
-                  return <StudyItem key={tag.id} study={item} />
-                })}
-              </Box>
-            </Accordion>
-          </Box>
-        )}
-      </ScrollView>
+            )
+          }}
+          renderItem={renderItem}
+          stickySectionHeadersEnabled={false}
+        />
+      )}
       <RenameModal
         bottomSheetRef={renameModalRef}
         title={t("Renommer l'étiquette")}
