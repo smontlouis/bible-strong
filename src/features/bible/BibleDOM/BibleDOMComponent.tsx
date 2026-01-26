@@ -242,7 +242,7 @@ const ExitFocusButton = styled('button')<RootStyles>(({ settings: { theme, color
   color: colors[theme].primary,
   border: 'none',
   borderRadius: '50%',
-  fontSize: '24px',
+  fontSize: '20px',
   lineHeight: '24px',
   fontWeight: 'bold',
   cursor: 'pointer',

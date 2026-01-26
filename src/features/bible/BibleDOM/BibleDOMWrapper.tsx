@@ -7,7 +7,7 @@ import { useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
+import { isFullScreenBibleAtom, isFullScreenBibleValue, tagDetailModalAtom } from 'src/state/app'
 import { BibleTab, VersionCode } from 'src/state/tabs'
 import BibleDOMComponent from './BibleDOMComponent'
 import { useEffect, useRef } from 'react'
@@ -221,6 +221,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
   } = props
   const { openVersionSelector } = useBookAndVersionSelector()
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
+  const setTagDetailModal = useSetAtom(tagDetailModalAtom)
   const setIsBibleViewReloading = useSetAtom(isBibleViewReloadingAtom)
   const theme = useTheme()
   const insets = useSafeAreaInsets()
@@ -449,10 +450,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
 
       case NAVIGATE_TO_TAG: {
         const { tagId } = action.payload
-        router.push({
-          pathname: '/tag',
-          params: { tagId },
-        })
+        setTagDetailModal({ tagId })
         break
       }
 

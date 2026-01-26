@@ -204,6 +204,7 @@ const ResourcesModal = memo(
         enablePanDownToClose
         enableDynamicSizing={false}
         backdropComponent={renderBackdrop}
+        activeOffsetY={[-20, 20]}
         snapPoints={['100%']}
         footerComponent={footerComponent}
         {...bottomSheetStyles}

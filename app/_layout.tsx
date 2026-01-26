@@ -27,6 +27,7 @@ import { PersistGate } from 'redux-persist/integration/react'
 import ChangelogModal from '~common/Changelog'
 import ColorChangeModal from '~common/ColorChangeModal'
 import ColorPickerModal from '~common/ColorPickerModal'
+import TagDetailModal from '~common/TagDetailModal'
 import ErrorBoundary from '~common/ErrorBoundary'
 import InitHooks from '~common/InitHooks'
 import ThemedToaster from '~common/ThemedToaster'
@@ -259,6 +260,7 @@ function InnerApp() {
                           <UnifiedTagsModal />
                           <ColorPickerModal />
                           <ColorChangeModal />
+                          <TagDetailModal />
                           <FeatureOnboardingModal />
                         </BookSelectorBottomSheetProvider>
                       </BottomSheetModalProvider>
