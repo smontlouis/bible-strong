@@ -29,6 +29,7 @@ import { BibleDOMTranslations } from './TranslationsContext'
 import {
   ADD_PARALLEL_VERSION,
   ANNOTATION_SELECTED,
+  CLEAR_FOCUS_VERSES,
   CREATE_ANNOTATION,
   ENTER_ANNOTATION_MODE,
   ENTER_READONLY_MODE,
@@ -122,6 +123,7 @@ export type WebViewProps = {
   onOpenBookmarkModal?: (bookmark: Bookmark) => void
   exitReadOnlyMode?: () => void
   enterReadOnlyMode?: () => void
+  clearFocusVerses?: () => void
   // Annotation mode props
   annotationMode?: boolean
   clearSelectionTrigger?: number
@@ -232,6 +234,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     parallelLoadError: t('bible.error.parallelLoadError'),
     readWholeChapter: t('tab.readWholeChapter'),
     closeContext: t('tab.closeContext'),
+    exitFocus: t('tab.exitFocus'),
   }
   // Add this to track component mounting
   const mountedRef = useRef(false)
@@ -462,6 +465,12 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
       case ENTER_READONLY_MODE: {
         const { enterReadOnlyMode } = props
         enterReadOnlyMode?.()
+        break
+      }
+
+      case CLEAR_FOCUS_VERSES: {
+        const { clearFocusVerses } = props
+        clearFocusVerses?.()
         break
       }
 

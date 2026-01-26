@@ -19,6 +19,7 @@ import ChevronDownIcon from './ChevronDownIcon'
 import Comment from './Comment'
 import {
   ADD_PARALLEL_VERSION,
+  CLEAR_FOCUS_VERSES,
   ENTER_ANNOTATION_MODE,
   ENTER_READONLY_MODE,
   EXIT_READONLY_MODE,
@@ -211,6 +212,7 @@ const ResponsivePlusIcon = styled(PlusIcon)<RootStyles>(({ settings: { theme, co
 const ReadWholeChapterButtonContainer = styled('div')({
   display: 'flex',
   justifyContent: 'center',
+  alignItems: 'center',
   marginTop: '20px',
   marginBottom: '20px',
 })
@@ -225,6 +227,27 @@ const ReadWholeChapterButton = styled('button')<RootStyles>(({ settings: { theme
   fontWeight: 'bold',
   cursor: 'pointer',
   transition: 'all 0.2s',
+  '&:hover': {
+    opacity: 0.6,
+  },
+}))
+
+const ExitFocusButton = styled('button')<RootStyles>(({ settings: { theme, colors } }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '40px',
+  height: '40px',
+  backgroundColor: colors[theme].opacity5,
+  color: colors[theme].primary,
+  border: 'none',
+  borderRadius: '50%',
+  fontSize: '24px',
+  lineHeight: '24px',
+  fontWeight: 'bold',
+  cursor: 'pointer',
+  transition: 'all 0.2s',
+  marginLeft: '10px',
   '&:hover': {
     opacity: 0.6,
   },
@@ -1134,6 +1157,19 @@ const VersesRenderer = ({
               >
                 {translations.readWholeChapter}
               </ReadWholeChapterButton>
+              <ExitFocusButton
+                settings={settings}
+                onClick={() => {
+                  dispatch({ type: CLEAR_FOCUS_VERSES })
+                  // Trigger highlight recalculation after layout change
+                  setTimeout(() => {
+                    window.dispatchEvent(new CustomEvent('layoutChanged'))
+                  }, 100)
+                }}
+                title={translations.exitFocus}
+              >
+                ✕
+              </ExitFocusButton>
             </ReadWholeChapterButtonContainer>
           )}
           {!isReadOnly && focusVerses && focusVerses.length > 0 && (
@@ -1150,6 +1186,19 @@ const VersesRenderer = ({
               >
                 {translations.closeContext}
               </ReadWholeChapterButton>
+              <ExitFocusButton
+                settings={settings}
+                onClick={() => {
+                  dispatch({ type: CLEAR_FOCUS_VERSES })
+                  // Trigger highlight recalculation after layout change
+                  setTimeout(() => {
+                    window.dispatchEvent(new CustomEvent('layoutChanged'))
+                  }, 100)
+                }}
+                title={translations.exitFocus}
+              >
+                ✕
+              </ExitFocusButton>
             </ReadWholeChapterButtonContainer>
           )}
         </Container>

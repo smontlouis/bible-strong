@@ -751,6 +751,7 @@ const BibleViewer = ({
           onOpenBookmarkModal={handleOpenBookmarkModal}
           exitReadOnlyMode={actions.exitReadOnlyMode}
           enterReadOnlyMode={actions.enterReadOnlyMode}
+          clearFocusVerses={actions.clearFocusVerses}
           // Annotation mode props
           annotationMode={annotationMode.enabled}
           clearSelectionTrigger={annotationMode.clearSelectionTrigger}

@@ -8,6 +8,7 @@ export interface BibleDOMTranslations {
   // Readonly mode
   readWholeChapter: string
   closeContext: string
+  exitFocus: string
 }
 
 const TranslationsContext = createContext<BibleDOMTranslations | null>(null)
