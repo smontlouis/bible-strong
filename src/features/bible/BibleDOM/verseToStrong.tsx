@@ -23,7 +23,8 @@ const StyledReference = styled('span')<
     msUserSelect: 'none',
     khtmlUserSelect: 'none',
     webkitUserSelect: 'none',
-    color: isSelected ? colors[theme].primary : 'inherit',
+    color: isSelected ? colors[theme].reverse : 'inherit',
+    backgroundColor: isSelected ? colors[theme].primary : 'inherit',
     fontSize: scaleFontSize(isParallel ? 10 : 14, fontSizeScale),
     lineHeight: scaleFontSize(isParallel ? 18 : 26, fontSizeScale),
     boxShadow: isDarkTheme(theme)
