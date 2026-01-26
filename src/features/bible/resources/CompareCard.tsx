@@ -28,17 +28,13 @@ const CompareCard = ({ selectedVerses, onChangeVerse }: CompareCardProps) => {
   const hasPrevNextButtons = Object.keys(selectedVerses).length === 1
 
   useEffect(() => {
-    const loadPrevNextData = async () => {
+    if (hasPrevNextButtons) {
       const [livre, chapitre, verse] = Object.keys(selectedVerses)[0].split('-')
       const versesInCurrentChapter = countLsgChapters[`${livre}-${chapitre}`]
       setPrevNextItems({
         verseNumber: verse,
         versesInCurrentChapter,
       })
-    }
-
-    if (hasPrevNextButtons) {
-      loadPrevNextData()
     } else {
       setPrevNextItems(null)
     }
