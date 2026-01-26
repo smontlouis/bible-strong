@@ -17,11 +17,13 @@ import {
 import OnboardingFooter from './components/OnboardingFooter'
 import OnboardingStep from './components/OnboardingStep'
 import { getOnboardingConfig, type OnboardingId } from './onboardingConfig'
+import { useTheme } from '@emotion/react'
 
 const FeatureOnboardingModal = () => {
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const { key } = useBottomSheetStyles()
+  const theme = useTheme()
 
   const [modalState, setModalState] = useAtom(featureOnboardingModalAtom)
   const completeOnboarding = useSetAtom(completeOnboardingAtom)
@@ -95,6 +97,9 @@ const FeatureOnboardingModal = () => {
         marginHorizontal: 20,
         borderRadius: 30,
         overflow: 'hidden',
+      }}
+      backgroundStyle={{
+        backgroundColor: theme.colors.reverse,
       }}
     >
       <BottomSheetView>

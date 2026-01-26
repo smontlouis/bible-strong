@@ -5,7 +5,7 @@ import {
   featureOnboardingModalAtom,
   resetOnboardingAtom,
 } from '../atoms'
-import type { OnboardingId } from '../config'
+import { OnboardingId } from '../onboardingConfig'
 
 export const useFeatureOnboarding = () => {
   const completedOnboardings = useAtomValue(completedOnboardingsAtom)
