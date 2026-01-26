@@ -227,7 +227,13 @@ export type VerseIds = {
   [verse: string]: true
 }
 
-export type BibleResource = 'strong' | 'commentary' | 'dictionary' | 'nave' | 'reference'
+export type BibleResource =
+  | 'strong'
+  | 'commentary'
+  | 'dictionary'
+  | 'nave'
+  | 'reference'
+  | 'compare'
 
 export type RemoteConfigValue = 'enable_tts_public'
 

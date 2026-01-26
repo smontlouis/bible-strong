@@ -70,10 +70,7 @@ const useVerseActions = ({
   }
 
   const compareVerses = () => {
-    router.push({
-      pathname: '/bible-compare-verses',
-      params: { selectedVerses: JSON.stringify(selectedVerses) },
-    })
+    onChangeResourceType('compare')
   }
 
   const onOpenReferences = () => {
