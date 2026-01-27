@@ -156,6 +156,7 @@ const StudiesDomWrapper = ({
         case 'SELECT_BIBLE_VERSE': {
           dispatchToWebView('BLUR_EDITOR')
           await timeout(300)
+          getDefaultStore().set(currentStudyIdAtom, studyId)
           router.push({
             pathname: '/bible-view',
             params: { isSelectionMode: 'verse' },
@@ -165,6 +166,7 @@ const StudiesDomWrapper = ({
         case 'SELECT_BIBLE_STRONG': {
           dispatchToWebView('BLUR_EDITOR')
           await timeout(300)
+          getDefaultStore().set(currentStudyIdAtom, studyId)
           router.push({
             pathname: '/bible-view',
             params: { isSelectionMode: 'strong' },
@@ -174,6 +176,7 @@ const StudiesDomWrapper = ({
         case 'SELECT_BIBLE_VERSE_BLOCK': {
           dispatchToWebView('BLUR_EDITOR')
           await timeout(300)
+          getDefaultStore().set(currentStudyIdAtom, studyId)
           router.push({
             pathname: '/bible-view',
             params: { isSelectionMode: 'verse-block' },
@@ -183,6 +186,7 @@ const StudiesDomWrapper = ({
         case 'SELECT_BIBLE_STRONG_BLOCK': {
           dispatchToWebView('BLUR_EDITOR')
           await timeout(300)
+          getDefaultStore().set(currentStudyIdAtom, studyId)
           router.push({
             pathname: '/bible-view',
             params: { isSelectionMode: 'strong-block' },

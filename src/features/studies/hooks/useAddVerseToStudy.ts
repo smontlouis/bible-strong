@@ -41,7 +41,9 @@ export const useAddVerseToStudy = () => {
     let delta: QuillDelta
     if (study?.content) {
       try {
-        delta = typeof study.content === 'string' ? JSON.parse(study.content) : study.content
+        const parsed = typeof study.content === 'string' ? JSON.parse(study.content) : study.content
+        // Create a copy to avoid mutating Redux state
+        delta = { ops: [...parsed.ops] }
       } catch (e) {
         console.error('Error parsing study content:', e)
         delta = { ops: [] }

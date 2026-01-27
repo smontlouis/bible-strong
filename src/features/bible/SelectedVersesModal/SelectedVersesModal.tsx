@@ -90,16 +90,19 @@ const SelectedVersesModal = ({
     clearSelectedVerses()
   }
 
-  const renderFooter = (props: BottomSheetFooterProps) => (
-    <VersesModalFooter
-      bottomSheetFooterProps={props}
-      panGesture={panGesture}
-      indicatorAnimatedStyle={indicatorAnimatedStyle}
-      tabWidth={tabWidth}
-      activeTabIndex={activeTabIndex}
-      goToTab={goToTab}
-    />
-  )
+  const renderFooter =
+    typeof isSelectionMode === 'string' && isSelectionMode.includes('verse')
+      ? undefined
+      : (props: BottomSheetFooterProps) => (
+          <VersesModalFooter
+            bottomSheetFooterProps={props}
+            panGesture={panGesture}
+            indicatorAnimatedStyle={indicatorAnimatedStyle}
+            tabWidth={tabWidth}
+            activeTabIndex={activeTabIndex}
+            goToTab={goToTab}
+          />
+        )
 
   return (
     <BottomSheet
@@ -118,7 +121,14 @@ const SelectedVersesModal = ({
     >
       <BottomSheetView style={{ flex: 0 }}>
         {typeof isSelectionMode === 'string' && isSelectionMode.includes('verse') ? (
-          <HStack gap={10} width="100%" alignItems="center" justifyContent="center" py={10}>
+          <HStack
+            gap={10}
+            width="100%"
+            alignItems="center"
+            justifyContent="center"
+            pt={10}
+            pb={BOTTOM_INSET}
+          >
             <Text bold fontSize={18} textAlign="center">
               {selectedVersesTitle.toUpperCase()}
             </Text>
