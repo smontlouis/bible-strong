@@ -1,29 +1,11 @@
-import { useTheme } from '@emotion/react'
 import Lottie from 'lottie-react-native'
 import React from 'react'
-import ProgressCircle from 'react-native-progress/Circle'
 
-import styled from '@emotion/native'
-import { Image } from 'expo-image'
 import { ComputedPlanItem } from 'src/common/types'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { Theme } from '~themes'
-import { useFireStorage } from '../plan.hooks'
-
-const CircleImage = styled(Box)(({ theme }) => ({
-  position: 'absolute',
-  top: 4,
-  right: 0,
-  left: 4,
-  bottom: 0,
-  width: 32,
-  height: 32,
-  borderRadius: 16,
-  backgroundColor: theme.colors.lightGrey,
-}))
 
 const PlanItem = ({
   id,
@@ -34,8 +16,6 @@ const PlanItem = ({
   progress,
   author,
 }: ComputedPlanItem) => {
-  const theme: Theme = useTheme()
-  const cacheImage = useFireStorage(image)
   const isPlanCompleted = status === 'Completed'
   return (
     <Link

@@ -1,7 +1,7 @@
 import { useTheme } from '@emotion/react'
 import Lottie from 'lottie-react-native'
 import React from 'react'
-import ProgressCircle from 'react-native-progress/Circle'
+import { AnimatedProgressCircle } from '@convective/react-native-reanimated-progress'
 
 import styled from '@emotion/native'
 import { Image } from 'expo-image'
@@ -55,13 +55,12 @@ const Section = ({
             source={require('../../../assets/images/medal.json')}
           />
         ) : (
-          <ProgressCircle
+          <AnimatedProgressCircle
             size={38}
             progress={progress}
-            borderWidth={0}
             color={theme.colors.primary}
             unfilledColor={progress ? 'rgb(230,230,230)' : undefined}
-            fill="none"
+            animationDuration={300}
           >
             <CircleImage center>
               {cacheImage && (
@@ -80,7 +79,7 @@ const Section = ({
                 </Box>
               )}
             </CircleImage>
-          </ProgressCircle>
+          </AnimatedProgressCircle>
         )}
 
         <Box flex paddingLeft={20} justifyContent="center">

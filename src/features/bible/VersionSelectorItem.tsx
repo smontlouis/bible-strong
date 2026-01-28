@@ -2,7 +2,7 @@ import * as Icon from '@expo/vector-icons'
 import * as FileSystem from 'expo-file-system/legacy'
 import React from 'react'
 import { Alert, TouchableOpacity } from 'react-native'
-import ProgressCircle from 'react-native-progress/Circle'
+import { AnimatedProgressCircle } from '@convective/react-native-reanimated-progress'
 import { useDispatch, useSelector } from 'react-redux'
 import { biblesRef, getDatabaseUrl } from '~helpers/firebase'
 import { dbManager } from '~helpers/sqlite'
@@ -297,14 +297,13 @@ const VersionSelectorItem = ({
           )}
           {isLoading && (
             <Box width={80} justifyContent="center" alignItems="flex-end" mr={10}>
-              <ProgressCircle
+              <AnimatedProgressCircle
                 size={20}
                 progress={fileProgress}
-                borderWidth={0}
                 thickness={3}
                 color={theme.colors.primary}
                 unfilledColor={theme.colors.lightGrey}
-                fill="none"
+                animationDuration={300}
               />
             </Box>
           )}

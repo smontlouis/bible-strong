@@ -1,5 +1,5 @@
 import React from 'react'
-import ProgressCircle from 'react-native-progress/Circle'
+import { AnimatedProgressCircle } from '@convective/react-native-reanimated-progress'
 import { useTheme } from '@emotion/react'
 
 import Loading from '~common/Loading'
@@ -37,14 +37,13 @@ export const DownloadingWidget = ({ progress }: { progress?: number }) => {
   const { t } = useTranslation()
   return (
     <WidgetContainer>
-      <ProgressCircle
+      <AnimatedProgressCircle
         size={30}
         progress={progress}
-        borderWidth={0}
         thickness={2}
         color={theme.colors.primary}
         unfilledColor={theme.colors.lightGrey}
-        fill="none"
+        animationDuration={300}
       />
       <Text color="grey" marginTop={20} fontSize={12}>
         {t('Téléchargement en cours')}

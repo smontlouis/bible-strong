@@ -9,7 +9,7 @@ import { useAtom, useSetAtom } from 'jotai/react'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet } from 'react-native'
-import ProgressCircle from 'react-native-progress/Circle'
+import { AnimatedProgressCircle } from '@convective/react-native-reanimated-progress'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import { VStack } from '~common/ui/Stack'
@@ -87,21 +87,20 @@ const DownloadResources = () => {
         </VStack>
       ) : (
         <>
-          <ProgressCircle
+          <AnimatedProgressCircle
             size={100}
             progress={fileProgress}
-            borderWidth={0}
             thickness={5}
             color={theme.colors.primary}
             unfilledColor={theme.colors.lightGrey}
-            fill="none"
+            animationDuration={300}
           >
             <Box style={StyleSheet.absoluteFillObject} center>
               <Text fontSize={20}>
                 {downloadedResources} / {selectedResources.length}
               </Text>
             </Box>
-          </ProgressCircle>
+          </AnimatedProgressCircle>
           <Box center mt={20}>
             <Text opacity={0.6}>{t('app.downloading')}</Text>
             <Text bold>{downloadingResource}</Text>
