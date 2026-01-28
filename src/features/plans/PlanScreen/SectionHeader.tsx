@@ -47,6 +47,7 @@ const Section = ({
         {isSectionCompleted ? (
           <Lottie
             autoPlay
+            loop={false}
             style={{
               width: 40,
               height: 40,

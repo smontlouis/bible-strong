@@ -73,6 +73,7 @@ const PlanItem = ({
         {isPlanCompleted ? (
           <Lottie
             autoPlay
+            loop={false}
             style={{
               width: 40,
               height: 40,

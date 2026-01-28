@@ -13,7 +13,7 @@ const FineLine = styled(Box)(({ theme }) => ({
   position: 'absolute',
   top: 0,
   bottom: 0,
-  left: 35,
+  left: 36,
   width: 2,
   backgroundColor: theme.colors.lightPrimary,
 }))
