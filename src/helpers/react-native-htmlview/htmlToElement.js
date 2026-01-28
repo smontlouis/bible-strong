@@ -8,6 +8,10 @@ const LINE_BREAK = '\n'
 const PARAGRAPH_BREAK = '\n'
 const BULLET = '\n'
 
+// Pattern to match Strong's references like H7311, G1234
+// Captures: group 1 = H or G, group 2 = the number
+const STRONG_REF_PATTERN = /\b([HG])(\d+)\b/g
+
 function htmlToElement(rawHtml, opts, done) {
   function domToElement(dom, parent) {
     if (!dom) return null
@@ -19,9 +23,71 @@ function htmlToElement(rawHtml, opts, done) {
       }
 
       if (node.type === 'text') {
+        const text = entities.decodeHTML(node.data)
+        const style = parent ? opts.styles[parent.name] : opts.styles.p
+
+        // Check if text contains Strong's references and we have a link handler
+        if (opts.linkHandler && STRONG_REF_PATTERN.test(text)) {
+          // Reset regex state
+          STRONG_REF_PATTERN.lastIndex = 0
+
+          const parts = []
+          let lastIndex = 0
+          let match
+
+          while ((match = STRONG_REF_PATTERN.exec(text)) !== null) {
+            // Add text before the match
+            if (match.index > lastIndex) {
+              parts.push(
+                <Text selectable key={`${index}-text-${lastIndex}`} style={style}>
+                  {text.substring(lastIndex, match.index)}
+                </Text>
+              )
+            }
+
+            // Extract prefix (H/G) and number
+            const prefix = match[1] // 'H' or 'G'
+            const numberPart = match[2] // e.g., '7311'
+            const fullRef = prefix + numberPart // e.g., 'H7311'
+            // Use book 1 for Hebrew (H), book 40 for Greek (G)
+            const book = prefix === 'H' ? 1 : 40
+
+            // Merge parent style with link style to preserve formatting (italic, bold)
+            // while adding underline for the link
+            const linkStyle = {
+              ...style,
+              textDecorationLine: 'underline',
+            }
+
+            parts.push(
+              <Text
+                selectable
+                key={`${index}-link-${match.index}`}
+                style={linkStyle}
+                onPress={() => opts.linkHandler(numberPart, book)}
+              >
+                {fullRef}
+              </Text>
+            )
+
+            lastIndex = match.index + match[0].length
+          }
+
+          // Add remaining text after last match
+          if (lastIndex < text.length) {
+            parts.push(
+              <Text selectable key={`${index}-text-${lastIndex}`} style={style}>
+                {text.substring(lastIndex)}
+              </Text>
+            )
+          }
+
+          return <Text selectable key={index}>{parts}</Text>
+        }
+
         return (
-          <Text selectable key={index} style={parent ? opts.styles[parent.name] : opts.styles.p}>
-            {entities.decodeHTML(node.data)}
+          <Text selectable key={index} style={style}>
+            {text}
           </Text>
         )
       }
