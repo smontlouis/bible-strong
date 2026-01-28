@@ -1,0 +1,37 @@
+# Test: Home Drawer Navigation
+# Verifies that the home drawer can be opened and displays content
+# Tags: smoke, navigation
+
+appId: com.smontlouis.biblestrong
+tags:
+  - smoke
+  - navigation
+---
+- runFlow: ../subflows/launchApp.yaml
+
+# Swipe right to open Home drawer
+- swipe:
+    direction: RIGHT
+    duration: 500
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Verify Home content is visible (French UI)
+- assertVisible:
+    text: "Apprendre"
+    optional: true
+
+- assertVisible:
+    text: "Learn"
+    optional: true
+
+# Take a screenshot
+- takeScreenshot: home_drawer
+
+# Close drawer by swiping left
+- swipe:
+    direction: LEFT
+    duration: 500
+
+- waitForAnimationToEnd

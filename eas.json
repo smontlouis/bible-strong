@@ -33,6 +33,16 @@
       "android": {
         "buildType": "apk"
       }
+    },
+    "e2e": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "simulator": true
+      }
     }
   },
   "submit": {
