@@ -826,7 +826,7 @@ const BibleViewer = ({
         onAddToStudy={handleOpenAddToStudy}
         onAddBookmark={handleAddBookmark}
         onPinVerses={handlePinVerses}
-        onEnterAnnotationMode={handleEnterAnnotationMode}
+        onEnterAnnotationMode={parallelVersions.length > 0 ? undefined : handleEnterAnnotationMode}
         focusVerses={focusVerses}
       />
       <BibleNoteModal ref={noteModal.getRef()} noteVerses={noteVerses} />

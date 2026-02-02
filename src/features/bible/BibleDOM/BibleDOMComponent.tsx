@@ -18,14 +18,12 @@ import {
 import ChevronDownIcon from './ChevronDownIcon'
 import Comment from './Comment'
 import {
-  ADD_PARALLEL_VERSION,
   CLEAR_FOCUS_VERSES,
   ENTER_ANNOTATION_MODE,
   ENTER_READONLY_MODE,
   EXIT_READONLY_MODE,
   NAVIGATE_TO_PERICOPE,
   NAVIGATE_TO_VERSION,
-  REMOVE_PARALLEL_VERSION,
   SWIPE_LEFT,
   SWIPE_RIGHT,
   SWIPE_DOWN,
@@ -35,8 +33,6 @@ import {
 } from './dispatch'
 import { DispatchProvider } from './DispatchProvider'
 import { TranslationsProvider, BibleDOMTranslations } from './TranslationsContext'
-import MinusIcon from './MinusIcon'
-import PlusIcon from './PlusIcon'
 import './polyfills'
 import { scaleFontSize } from './scaleFontSize'
 import { useFonts } from 'expo-font'
@@ -56,6 +52,7 @@ import { tokenizeVerseText, WordToken, getWordIndexFromCharOffset } from '~helpe
 import { getCaretInfoFromPoint } from './AnnotationMode/domUtils'
 // Unified verse renderer
 import { UnifiedVersesRenderer } from './UnifiedVersesRenderer'
+import { isDarkTheme } from './utils'
 
 declare global {
   interface Window {
@@ -144,7 +141,7 @@ const Container = styled('div')<RootStyles & { rtl: boolean; isParallelVerse: bo
     position: 'relative', // For highlight layer positioning
     maxWidth: isParallelVerse ? 'none' : '800px',
     margin: '0 auto',
-    padding: isParallelVerse ? '10px 5px' : '10px 15px',
+    padding: '10px 15px',
     paddingBottom: '300px',
     textAlign: alignContent,
     background: colors[theme].reverse,
@@ -171,11 +168,38 @@ const IntMode = styled('div')<RootStyles>(({ settings: { theme, colors } }) => (
   color: colors[theme].default,
 }))
 
-const VersionTitle = styled('div')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
-  fontFamily,
-  fontWeight: 'bold',
-  fontSize: scaleFontSize(18, fontSizeScale),
-}))
+const VersionTitle = styled('div')<RootStyles>(
+  ({ settings: { fontSizeScale, fontFamily, colors, theme } }) => ({
+    fontFamily,
+    fontWeight: 'bold',
+    fontSize: scaleFontSize(16, fontSizeScale),
+    position: 'sticky',
+    left: 0,
+    // Use CSS variable for translateX - more performant than direct style manipulation
+    transform: 'translateX(var(--translate-x, 0px))',
+    webkitTouchCallout: 'none',
+    mozUserSelect: 'none',
+    msUserSelect: 'none',
+    khtmlUserSelect: 'none',
+    webkitUserSelect: 'none',
+    color: colors[theme].default,
+
+    backgroundColor: colors[theme].reverse,
+    boxShadow: isDarkTheme(theme)
+      ? `0 0 10px 0 rgba(255, 255, 255, 0.1)`
+      : `0 0 10px 0 rgba(0, 0, 0, 0.2)`,
+    borderRadius: '8px',
+    paddingInlineEnd: '8px',
+    paddingInlineStart: '4px',
+    paddingBlock: '4px',
+    wordBreak: 'break-word',
+    marginInline: '4px',
+    cursor: 'pointer',
+    '&:active': {
+      opacity: 0.6,
+    },
+  })
+)
 
 const VersionErrorIndicator = styled('span')<RootStyles>(({ settings: { theme, colors } }) => ({
   color: colors[theme].quart,
@@ -183,30 +207,51 @@ const VersionErrorIndicator = styled('span')<RootStyles>(({ settings: { theme, c
   fontSize: '12px',
 }))
 
-const VersionsContainer = styled('div')<RootStyles>(({ settings: { theme, colors } }) => ({
+const VersionsContainer = styled('div')<{ columnCount: number }>(({ columnCount }) => ({
+  position: 'relative',
   display: 'flex',
-  position: 'sticky',
-  top: 'var(--header-height)',
-  background: colors[theme].reverse,
   paddingTop: '5px',
   paddingBottom: '10px',
-  transition: 'top 0.3s cubic-bezier(.13,.69,.5,.98)',
-  zIndex: 2,
+  // Largeur totale = colonnes * 75vw
+  width: columnCount > 1 ? `${columnCount * 75}vw` : '100%',
+  minWidth: columnCount > 1 ? `${columnCount * 75}vw` : '100%',
 }))
 
-const mediaQueries = ['@media (min-width: 640px)']
+// Wrapper pour le scroll horizontal (content)
+const HorizontalScrollWrapper = styled('div')<{ columnCount: number }>(({ columnCount }) => ({
+  overflowX: columnCount > 1 ? 'auto' : 'visible',
+  scrollBehavior: 'smooth',
+  WebkitOverflowScrolling: 'touch',
+  scrollbarWidth: 'none',
+  '&::-webkit-scrollbar': { display: 'none' },
+}))
 
-const ResponsivePlusIcon = styled(PlusIcon)<RootStyles>(({ settings: { theme, colors } }) => ({
-  position: 'absolute',
-  top: '50%',
-  transform: 'translateY(-50%)',
-  right: '0',
-  color: colors[theme].primary,
-  display: 'none',
+// Wrapper pour le header avec scroll synchronisé (pas de scrollbar visible)
+const HeaderScrollWrapper = styled('div')<RootStyles & { columnCount: number }>(
+  ({ settings: { theme, colors }, columnCount }) => ({
+    position: 'sticky',
+    top: 'var(--header-height)',
+    zIndex: 2,
+    transition: 'top 0.3s cubic-bezier(.13,.69,.5,.98)',
+    overflowX: columnCount > 1 ? 'auto' : 'visible',
+    scrollbarWidth: 'none',
+    '&::-webkit-scrollbar': { display: 'none' },
+    // Disable pointer events on wrapper to prevent direct scroll, enable on children
+    pointerEvents: columnCount > 1 ? 'none' : 'auto',
+    '& > *': {
+      pointerEvents: 'auto',
+    },
+  })
+)
 
-  [mediaQueries[0]]: {
-    display: 'block',
-  },
+// Colonne pour chaque version dans le header
+const VersionTitleColumn = styled('div')<{ columnCount: number }>(({ columnCount }) => ({
+  width: columnCount > 1 ? '75vw' : '100%',
+  minWidth: columnCount > 1 ? '75vw' : '100%',
+  flexShrink: 0,
+  display: 'flex',
+  alignItems: 'center',
+  position: 'relative',
 }))
 
 const ReadWholeChapterButtonContainer = styled('div')({
@@ -298,6 +343,10 @@ const VersesRenderer = ({
 
   // Ref for highlight layer
   const containerRef = useRef<HTMLDivElement>(null)
+
+  // Refs for horizontal scroll sync between header and content
+  const headerScrollRef = useRef<HTMLDivElement>(null)
+  const contentScrollRef = useRef<HTMLDivElement>(null)
 
   // Annotation mode state (lifted here to break circular dependency)
   const [selection, setSelection] = useState<SelectionRange | null>(null)
@@ -537,6 +586,9 @@ const VersesRenderer = ({
     // Don't enter annotation mode for interlinear versions (different DOM structure)
     if (version === 'INT' || version === 'INT_EN') return
 
+    // Don't enter annotation mode in parallel verse mode
+    if (isParallelVerseMode) return
+
     // Enter annotation mode
     dispatch({
       type: ENTER_ANNOTATION_MODE,
@@ -580,6 +632,9 @@ const VersesRenderer = ({
   // Interlinear versions have different DOM structure, disable annotation mode
   const isInterlinearVersion = version === 'INT' || version === 'INT_EN'
 
+  // Check if parallel verse mode (disables horizontal gestures for scroll)
+  const isParallelVerseMode = Boolean(parallelVerses?.length)
+
   // Annotation mode controller (handles touch selection and annotation events)
   useAnnotationModeController({
     containerRef,
@@ -592,20 +647,24 @@ const VersesRenderer = ({
     highlightRects,
     selectionHandlePositions,
     selectedAnnotationId,
-    canDragToAnnotate: !hasSelectedVerses && !isInterlinearVersion,
+    // Disable drag-to-annotation in parallel mode (conflicts with horizontal scroll)
+    canDragToAnnotate: !hasSelectedVerses && !isInterlinearVersion && !isParallelVerseMode,
     triggers: {
       clearSelectionTrigger,
       applyAnnotationTrigger,
       eraseSelectionTrigger,
     },
     callbacks: {
-      onEnterAnnotationModeFromDrag: () => {
-        // Note: canDragToAnnotate already prevents this from being called when verses are selected
-        dispatch({
-          type: ENTER_ANNOTATION_MODE,
-          payload: {},
-        }).catch(console.error)
-      },
+      // Disable drag-to-annotation in parallel mode
+      onEnterAnnotationModeFromDrag: isParallelVerseMode
+        ? undefined
+        : () => {
+            // Note: canDragToAnnotate already prevents this from being called when verses are selected
+            dispatch({
+              type: ENTER_ANNOTATION_MODE,
+              payload: {},
+            }).catch(console.error)
+          },
       onTapVerse: handleTapVerse,
       onDoubleTapVerse: handleDoubleTapVerse,
       onLongPressVerse: handleLongPressVerse,
@@ -624,11 +683,14 @@ const VersesRenderer = ({
           }
         }
       },
-      onSwipe: direction => {
-        dispatch({
-          type: direction === 'left' ? SWIPE_LEFT : SWIPE_RIGHT,
-        }).catch(console.error)
-      },
+      // Disable swipe to change chapter in parallel mode (conflicts with horizontal scroll)
+      onSwipe: isParallelVerseMode
+        ? undefined
+        : direction => {
+            dispatch({
+              type: direction === 'left' ? SWIPE_LEFT : SWIPE_RIGHT,
+            }).catch(console.error)
+          },
     },
   })
 
@@ -641,6 +703,57 @@ const VersesRenderer = ({
     // Set initial header height CSS variable
     document.documentElement.style.setProperty('--header-height', `${HEADER_HEIGHT}px`)
   }, [])
+
+  // Sync horizontal scroll between header and content for parallel versions
+  // Also calculate translateX for each title to make them "sticky" at the left edge
+  useEffect(() => {
+    // Only run when in parallel mode
+    const hasParallelVersions = Boolean(parallelVerses?.length)
+    if (!hasParallelVersions) return
+
+    const headerEl = headerScrollRef.current
+    if (!headerEl) return
+
+    const columnWidth = window.innerWidth * 0.75 // 75vw in pixels
+
+    let rafId: number | null = null
+
+    const handleScroll = () => {
+      const scrollLeft = document.documentElement.scrollLeft
+      headerEl.scrollLeft = scrollLeft
+
+      const titleRefs = headerEl.querySelectorAll('[data-version-title]')
+      if (titleRefs.length === 0) return
+
+      // Use RAF for smooth transform updates
+      if (rafId) cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(() => {
+        titleRefs.forEach((titleEl, i) => {
+          const columnStart = i * columnWidth
+          const maxTranslate = columnWidth - 100 // Leave some margin for the title width
+
+          // Calculate how much to translate to keep title at left edge
+          let translateX = 0
+          if (scrollLeft > columnStart) {
+            translateX = Math.min(scrollLeft - columnStart - 10, maxTranslate)
+          }
+
+          ;(titleEl as HTMLElement).style.setProperty('--translate-x', `${translateX}px`)
+        })
+      })
+    }
+
+    // Initial call
+    handleScroll()
+
+    // Listen to scroll on document (HorizontalScrollWrapper doesn't fire scroll events)
+    document.addEventListener('scroll', handleScroll, { passive: true })
+
+    return () => {
+      document.removeEventListener('scroll', handleScroll)
+      if (rafId) cancelAnimationFrame(rafId)
+    }
+  }, [parallelVerses?.length])
 
   useEffect(() => {
     let lastScrollTop = 0
@@ -983,19 +1096,6 @@ const VersesRenderer = ({
     })
   }
 
-  const removeParallelVersion = (index: number) => {
-    dispatch({
-      type: REMOVE_PARALLEL_VERSION,
-      payload: index,
-    })
-  }
-
-  const addParallelVersion = () => {
-    dispatch({
-      type: ADD_PARALLEL_VERSION,
-    })
-  }
-
   const comments = transformComments(originalComments, verses.length)
 
   const isHebreu =
@@ -1057,84 +1157,81 @@ const VersesRenderer = ({
             </HighlightLayer>
           )}
           {isParallelVerse && (
-            <VersionsContainer settings={settings}>
-              {parallelVersionTitles?.map((p, i) => (
-                <div
-                  key={i}
-                  style={{
-                    flex: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                >
-                  <VersionTitle
-                    onClick={() => navigateToVersion(p.id, i)}
-                    style={{ paddingLeft: i === 0 ? '0px' : '10px' }}
-                    settings={settings}
-                  >
-                    {p.id}
-                    {p.error && (
-                      <VersionErrorIndicator settings={settings}>⚠</VersionErrorIndicator>
-                    )}
-                    <ChevronDownIcon style={{ marginLeft: 4 }} />
-                  </VersionTitle>
-                  {i !== 0 && (
-                    <MinusIcon
-                      onClick={() => removeParallelVersion(i)}
-                      style={{ marginLeft: 20, opacity: 0.5 }}
-                    />
-                  )}
-                </div>
-              ))}
-              {parallelVerses.length < 3 && (
-                <ResponsivePlusIcon settings={settings} onClick={() => addParallelVersion()} />
-              )}
-            </VersionsContainer>
+            <HeaderScrollWrapper
+              ref={headerScrollRef}
+              settings={settings}
+              columnCount={parallelVersionTitles.length}
+            >
+              <VersionsContainer columnCount={parallelVersionTitles.length}>
+                {parallelVersionTitles?.map((p, i) => (
+                  <VersionTitleColumn key={i} columnCount={parallelVersionTitles.length}>
+                    <VersionTitle
+                      data-version-title={i}
+                      onClick={() => navigateToVersion(p.id, i)}
+                      style={{ paddingLeft: '5px' }}
+                      settings={settings}
+                    >
+                      {p.id}
+                      {p.error && (
+                        <VersionErrorIndicator settings={settings}>⚠</VersionErrorIndicator>
+                      )}
+                      <ChevronDownIcon style={{ marginLeft: 4 }} />
+                    </VersionTitle>
+                  </VersionTitleColumn>
+                ))}
+              </VersionsContainer>
+            </HeaderScrollWrapper>
           )}
-          {(version === 'INT' || version === 'INT_EN') && (
-            <IntMode settings={settings} onClick={() => setIsINTComplete(!isINTComplete)}>
-              {isINTComplete ? 'Mode 1' : 'Mode 2'}
-            </IntMode>
-          )}
-          {isHebreu && <RightDirection settings={settings}>Sens de la lecture ←</RightDirection>}
-          {!!introComment && settings.commentsDisplay && (
-            <Comment isIntro id="comment-0" settings={settings} comment={introComment} />
-          )}
+          <HorizontalScrollWrapper
+            ref={contentScrollRef}
+            columnCount={isParallelVerse ? parallelVersionTitles.length : 1}
+          >
+            {(version === 'INT' || version === 'INT_EN') && (
+              <IntMode settings={settings} onClick={() => setIsINTComplete(!isINTComplete)}>
+                {isINTComplete ? 'Mode 1' : 'Mode 2'}
+              </IntMode>
+            )}
+            {isHebreu && <RightDirection settings={settings}>Sens de la lecture ←</RightDirection>}
+            {!!introComment && settings.commentsDisplay && (
+              <Comment isIntro id="comment-0" settings={settings} comment={introComment} />
+            )}
 
-          {/* Unified verse rendering for all modes */}
-          <UnifiedVersesRenderer
-            verses={verses}
-            parallelVerses={parallelVerses}
-            focusVerses={focusVerses}
-            secondaryVerses={secondaryVerses}
-            selectedVerses={selectedVerses}
-            highlightedVerses={highlightedVerses}
-            settings={settings}
-            verseToScroll={verseToScroll}
-            isReadOnly={isReadOnly}
-            version={version}
-            pericopeChapter={pericopeChapter}
-            isSelectionMode={isSelectionMode}
-            selectedCode={selectedCode}
-            isINTComplete={isINTComplete}
-            isHebreu={isHebreu}
-            isParallelVerse={isParallelVerse}
-            comments={comments}
-            wordAnnotations={wordAnnotations}
-            wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
-            taggedVerses={taggedVerses}
-            bookmarkedVerses={bookmarkedVerses}
-            notedVersesCount={notedVersesCount}
-            notedVersesText={notedVersesText}
-            linkedVersesCount={linkedVersesCount}
-            linkedVersesText={linkedVersesText}
-            versesWithAnnotationNotes={versesWithAnnotationNotes}
-            navigateToPericope={navigateToPericope}
-            annotationMode={annotationMode}
-            touchedVerseKey={touchedVerseKey}
-            taggedVersesInChapter={taggedVersesInChapter}
-            versesWithNonHighlightTags={versesWithNonHighlightTags}
-          />
+            {/* Unified verse rendering for all modes */}
+            <UnifiedVersesRenderer
+              verses={verses}
+              parallelVerses={parallelVerses}
+              focusVerses={focusVerses}
+              secondaryVerses={secondaryVerses}
+              selectedVerses={selectedVerses}
+              highlightedVerses={highlightedVerses}
+              settings={settings}
+              verseToScroll={verseToScroll}
+              isReadOnly={isReadOnly}
+              version={version}
+              pericopeChapter={pericopeChapter}
+              isSelectionMode={isSelectionMode}
+              selectedCode={selectedCode}
+              isINTComplete={isINTComplete}
+              isHebreu={isHebreu}
+              isParallelVerse={isParallelVerse}
+              comments={comments}
+              wordAnnotations={wordAnnotations}
+              wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
+              taggedVerses={taggedVerses}
+              bookmarkedVerses={bookmarkedVerses}
+              notedVersesCount={notedVersesCount}
+              notedVersesText={notedVersesText}
+              linkedVersesCount={linkedVersesCount}
+              linkedVersesText={linkedVersesText}
+              versesWithAnnotationNotes={versesWithAnnotationNotes}
+              navigateToPericope={navigateToPericope}
+              annotationMode={annotationMode}
+              touchedVerseKey={touchedVerseKey}
+              taggedVersesInChapter={taggedVersesInChapter}
+              versesWithNonHighlightTags={versesWithNonHighlightTags}
+              columnCount={isParallelVerse ? parallelVersionTitles.length : 1}
+            />
+          </HorizontalScrollWrapper>
           {isReadOnly && focusVerses && focusVerses.length > 0 && (
             <ReadWholeChapterButtonContainer>
               <ReadWholeChapterButton

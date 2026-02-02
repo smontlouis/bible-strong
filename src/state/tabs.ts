@@ -393,6 +393,12 @@ export const tabGroupsAtom = atomWithAsyncStorage<TabGroup[]>(
 // Active group ID (persisted)
 export const activeGroupIdAtom = atomWithAsyncStorage<string>('activeGroupIdAtom', DEFAULT_GROUP_ID)
 
+// Persisted atom for global parallel versions preference
+export const savedParallelVersionsAtom = atomWithAsyncStorage<VersionCode[]>(
+  'savedParallelVersions',
+  []
+)
+
 // Get current active group (derived)
 export const activeGroupAtom = atom(get => {
   const groups = get(tabGroupsAtom)
@@ -672,26 +678,58 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
       })
     )
 
-  const addParallelVersion = () =>
+  const addParallelVersion = () => {
+    const store = getDefaultStore()
+    const currentTab = store.get(tabAtom)
+    const currentParallelVersions = currentTab.data.parallelVersions
+
     setBibleTab(
       produce(draft => {
-        draft.data.parallelVersions.push(getDefaultBibleVersion(getLanguage()))
+        if (currentParallelVersions.length === 0) {
+          // Entering parallel mode - restore saved versions
+          const savedVersions = store.get(savedParallelVersionsAtom)
+          if (savedVersions.length > 0) {
+            draft.data.parallelVersions = [...savedVersions]
+          } else {
+            draft.data.parallelVersions.push(getDefaultBibleVersion(getLanguage()))
+          }
+        } else {
+          // Already in parallel mode - add a version
+          draft.data.parallelVersions.push(getDefaultBibleVersion(getLanguage()))
+        }
       })
     )
 
-  const setParallelVersion = (version: VersionCode, index: number) =>
+    // Save updated versions
+    const updatedTab = store.get(tabAtom)
+    if (updatedTab.data.parallelVersions.length > 0) {
+      store.set(savedParallelVersionsAtom, updatedTab.data.parallelVersions)
+    }
+  }
+
+  const setParallelVersion = (version: VersionCode, index: number) => {
     setBibleTab(
       produce(draft => {
         draft.data.parallelVersions[index] = version
       })
     )
 
-  const removeParallelVersion = (index: number) =>
+    // Save updated versions
+    const store = getDefaultStore()
+    store.set(savedParallelVersionsAtom, store.get(tabAtom).data.parallelVersions)
+  }
+
+  const removeParallelVersion = (index: number) => {
     setBibleTab(
       produce(draft => {
-        draft.data.parallelVersions = draft.data.parallelVersions.filter((p, i) => i !== index)
+        draft.data.parallelVersions = draft.data.parallelVersions.filter((_, i) => i !== index)
       })
     )
+
+    // Save updated versions
+    const store = getDefaultStore()
+    store.set(savedParallelVersionsAtom, store.get(tabAtom).data.parallelVersions)
+  }
 
   const removeAllParallelVersions = () =>
     setBibleTab(

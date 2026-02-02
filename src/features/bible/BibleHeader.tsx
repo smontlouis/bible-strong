@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react'
-import { TouchableOpacity } from 'react-native'
 
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useRouter } from 'expo-router'
@@ -18,7 +17,6 @@ import Box, {
   AnimatedHStack,
   HStack,
   MotiBox,
-  MotiHStack,
   MotiText,
   motiTransition,
   TouchableBox,
@@ -39,6 +37,7 @@ import { setSettingsCommentaires } from '~redux/modules/user'
 import { makeSelectBookmarkForChapter } from '~redux/selectors/bookmarks'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import { useBookAndVersionSelector } from './BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
+import ParallelVersionsPopover from './ParallelVersionsPopover'
 import { VerseSelectorPopup } from './VerseSelectorPopup'
 
 interface BibleHeaderProps {
@@ -133,7 +132,7 @@ const Header = ({
     bible.data,
   ])
 
-  const { addParallelVersion, removeAllParallelVersions } = actions
+  const { addParallelVersion, removeParallelVersion, removeAllParallelVersions } = actions
 
   const backButtonTranslateY = useDerivedValue(() => {
     return {
@@ -424,6 +423,48 @@ const Header = ({
             />
             {!isSelectionMode && (
               <HStack marginLeft="auto">
+                {isParallel && (
+                  <PopOverMenu
+                    element={
+                      <MotiBox
+                        center
+                        width={40}
+                        height="100%"
+                        // @ts-ignore
+                        animate={menuOpacity}
+                      >
+                        <Box position="relative" overflow="visible">
+                          <ParallelIcon color="primary" />
+                          <Box
+                            position="absolute"
+                            bottom={-2}
+                            right={-4}
+                            bg="grey"
+                            borderRadius={99}
+                            width={12}
+                            height={12}
+                            center
+                          >
+                            <Text fontSize={9} color="reverse" fontWeight="bold">
+                              {parallelVersions.length + 1}
+                            </Text>
+                          </Box>
+                        </Box>
+                      </MotiBox>
+                    }
+                    popover={
+                      <ParallelVersionsPopover
+                        version={version}
+                        parallelVersions={parallelVersions}
+                        addParallelVersion={addParallelVersion}
+                        removeParallelVersion={removeParallelVersion}
+                        removeAllParallelVersions={removeAllParallelVersions}
+                      />
+                    }
+                  />
+                )}
+
+                {/* Three-dots menu */}
                 <PopOverMenu
                   element={
                     <MotiBox

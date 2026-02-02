@@ -7,6 +7,7 @@ import { RootState } from '~redux/modules/reducer'
 import { scaleFontSize } from './scaleFontSize'
 import { isDarkTheme } from './utils'
 import { getDisabledStyles } from './disabledStyles'
+import { scaleLineHeight } from './scaleLineHeight'
 
 const StyledReference = styled('span')<
   RootStyles & { isSelected: boolean; isParallel?: boolean; isDisabled?: boolean }
@@ -15,7 +16,7 @@ const StyledReference = styled('span')<
     isSelected,
     isParallel,
     isDisabled,
-    settings: { theme, colors, fontFamily, fontSizeScale },
+    settings: { theme, colors, fontFamily, fontSizeScale, lineHeight },
   }) => ({
     fontFamily,
     webkitTouchCallout: 'none',
@@ -25,8 +26,8 @@ const StyledReference = styled('span')<
     webkitUserSelect: 'none',
     color: isSelected ? colors[theme].reverse : 'inherit',
     backgroundColor: isSelected ? colors[theme].primary : 'inherit',
-    fontSize: scaleFontSize(isParallel ? 10 : 14, fontSizeScale),
-    lineHeight: scaleFontSize(isParallel ? 18 : 26, fontSizeScale),
+    fontSize: scaleFontSize(isParallel ? 16 : 19, fontSizeScale),
+    lineHeight: scaleLineHeight(isParallel ? 26 : 32, lineHeight, fontSizeScale),
     boxShadow: isDarkTheme(theme)
       ? `0 0 10px 0 rgba(255, 255, 255, 0.1)`
       : `0 0 10px 0 rgba(0, 0, 0, 0.2)`,

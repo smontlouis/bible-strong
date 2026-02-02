@@ -210,6 +210,8 @@ interface Props {
   taggedItemsCount?: number
   // Prop indicating if this verse has non-highlight tags (for conditional display)
   hasNonHighlightTags?: boolean
+  // Number of columns for parallel verse display (1 = single version, 2+ = parallel)
+  columnCount?: number
 }
 
 const Verse = ({
@@ -244,6 +246,7 @@ const Verse = ({
   annotationMode = false,
   taggedItemsCount = 0,
   hasNonHighlightTags = false,
+  columnCount = 1,
 }: Props) => {
   const dispatch = useDispatch()
   const translations = useTranslations()
@@ -342,7 +345,12 @@ const Verse = ({
 
   if (isParallelVerse && parallelVerse) {
     return (
-      <div style={{ display: 'flex' }}>
+      <div
+        style={{
+          display: 'flex',
+          width: columnCount > 1 ? `${columnCount * 75}vw` : '100%',
+        }}
+      >
         {parallelVerse.map((p, i) => {
           // Show error message if parallel version failed to load
           if (p.error) {
@@ -356,9 +364,12 @@ const Verse = ({
               <div
                 key={i}
                 style={{
-                  flex: 1,
-                  padding: '5px 0',
+                  width: columnCount > 1 ? '75vw' : '100%',
+                  flexShrink: 0,
+                  scrollSnapAlign: 'start',
+                  padding: '5px 5px',
                   paddingLeft: i === 0 ? '0px' : '10px',
+                  boxSizing: 'border-box',
                 }}
               >
                 <ParallelError settings={settings}>{errorMessage}</ParallelError>
@@ -370,9 +381,12 @@ const Verse = ({
               <div
                 key={i}
                 style={{
-                  flex: 1,
-                  padding: '5px 0',
+                  width: columnCount > 1 ? '75vw' : '100%',
+                  flexShrink: 0,
+                  scrollSnapAlign: 'start',
+                  padding: '5px 5px',
                   paddingLeft: i === 0 ? '0px' : '10px',
+                  boxSizing: 'border-box',
                 }}
               />
             )
@@ -381,9 +395,12 @@ const Verse = ({
             <div
               key={i}
               style={{
-                flex: 1,
-                padding: '5px 0',
+                width: columnCount > 1 ? '75vw' : '100%',
+                flexShrink: 0,
+                scrollSnapAlign: 'start',
+                padding: '5px 5px',
                 paddingLeft: i === 0 ? '0px' : '10px',
+                boxSizing: 'border-box',
               }}
             >
               <Verse
