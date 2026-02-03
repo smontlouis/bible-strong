@@ -399,6 +399,13 @@ export const savedParallelVersionsAtom = atomWithAsyncStorage<VersionCode[]>(
   []
 )
 
+// Persisted atom for parallel column width preference (75 or 50 percent)
+export type ParallelColumnWidth = 100 | 75 | 50
+export const parallelColumnWidthAtom = atomWithAsyncStorage<ParallelColumnWidth>(
+  'parallelColumnWidth',
+  50
+)
+
 // Get current active group (derived)
 export const activeGroupAtom = atom(get => {
   const groups = get(tabGroupsAtom)

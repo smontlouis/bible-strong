@@ -2,14 +2,14 @@ import { useEffect, useRef } from 'react'
 
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useRouter } from 'expo-router'
-import { useAtomValue } from 'jotai/react'
+import { useAtomValue, useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { FadeIn, FadeOut, useDerivedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
-import { toast } from '~helpers/toast'
-import { isFullScreenBibleValue, isFullScreenBibleAtom } from 'src/state/app'
+import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
+import { parallelColumnWidthAtom } from 'src/state/tabs'
 import Back from '~common/Back'
 import ParallelIcon from '~common/ParallelIcon'
 import PopOverMenu from '~common/PopOverMenu'
@@ -27,6 +27,7 @@ import Text from '~common/ui/Text'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import BookmarkModal from '~features/bookmarks/BookmarkModal'
 import { getIfDatabaseNeedsDownload } from '~helpers/databases'
+import { toast } from '~helpers/toast'
 import truncate from '~helpers/truncate'
 import useDimensions from '~helpers/useDimensions'
 import useLanguage from '~helpers/useLanguage'
@@ -67,6 +68,8 @@ const Header = ({
   const insets = useSafeAreaInsets()
   const { openBookSelector, openVersionSelector } = useBookAndVersionSelector()
   const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
+  const columnWidth = useAtomValue(parallelColumnWidthAtom)
+  const setColumnWidth = useSetAtom(parallelColumnWidthAtom)
 
   // Bookmark ref
   const bookmarkModalRef = useRef<BottomSheetModal>(null)
@@ -459,6 +462,8 @@ const Header = ({
                         addParallelVersion={addParallelVersion}
                         removeParallelVersion={removeParallelVersion}
                         removeAllParallelVersions={removeAllParallelVersions}
+                        columnWidth={columnWidth}
+                        setColumnWidth={setColumnWidth}
                       />
                     }
                   />

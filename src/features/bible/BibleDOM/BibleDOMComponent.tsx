@@ -91,6 +91,7 @@ type Props = Pick<
   WebViewProps,
   | 'verses'
   | 'parallelVerses'
+  | 'parallelColumnWidth'
   | 'focusVerses'
   | 'secondaryVerses'
   | 'selectedVerses'
@@ -207,15 +208,18 @@ const VersionErrorIndicator = styled('span')<RootStyles>(({ settings: { theme, c
   fontSize: '12px',
 }))
 
-const VersionsContainer = styled('div')<{ columnCount: number }>(({ columnCount }) => ({
-  position: 'relative',
-  display: 'flex',
-  paddingTop: '5px',
-  paddingBottom: '10px',
-  // Largeur totale = colonnes * 75vw
-  width: columnCount > 1 ? `${columnCount * 75}vw` : '100%',
-  minWidth: columnCount > 1 ? `${columnCount * 75}vw` : '100%',
-}))
+const VersionsContainer = styled('div')<{ columnCount: number; columnWidth: number }>(
+  ({ columnCount, columnWidth }) => ({
+    position: 'relative',
+    display: 'flex',
+    paddingTop: '5px',
+    paddingBottom: '10px',
+    // Largeur totale = colonnes * columnWidth vw
+    width: columnCount > 1 ? `${columnCount * columnWidth}vw` : '100%',
+    minWidth: columnCount > 1 ? `${columnCount * columnWidth}vw` : '100%',
+    transition: 'width 0.4s ease-in-out',
+  })
+)
 
 // Wrapper pour le scroll horizontal (content)
 const HorizontalScrollWrapper = styled('div')<{ columnCount: number }>(({ columnCount }) => ({
@@ -245,14 +249,17 @@ const HeaderScrollWrapper = styled('div')<RootStyles & { columnCount: number }>(
 )
 
 // Colonne pour chaque version dans le header
-const VersionTitleColumn = styled('div')<{ columnCount: number }>(({ columnCount }) => ({
-  width: columnCount > 1 ? '75vw' : '100%',
-  minWidth: columnCount > 1 ? '75vw' : '100%',
-  flexShrink: 0,
-  display: 'flex',
-  alignItems: 'center',
-  position: 'relative',
-}))
+const VersionTitleColumn = styled('div')<{ columnCount: number; columnWidth: number }>(
+  ({ columnCount, columnWidth }) => ({
+    width: columnCount > 1 ? `${columnWidth}vw` : '100%',
+    minWidth: columnCount > 1 ? `${columnWidth}vw` : '100%',
+    transition: 'width 0.4s ease-in-out',
+    flexShrink: 0,
+    display: 'flex',
+    alignItems: 'center',
+    position: 'relative',
+  })
+)
 
 const ReadWholeChapterButtonContainer = styled('div')({
   display: 'flex',
@@ -305,6 +312,7 @@ const ExitFocusButton = styled('button')<RootStyles>(({ settings: { theme, color
 const VersesRenderer = ({
   verses,
   parallelVerses,
+  parallelColumnWidth = 75,
   focusVerses,
   secondaryVerses,
   comments: originalComments,
@@ -714,7 +722,7 @@ const VersesRenderer = ({
     const headerEl = headerScrollRef.current
     if (!headerEl) return
 
-    const columnWidth = window.innerWidth * 0.75 // 75vw in pixels
+    const columnWidthPx = window.innerWidth * (parallelColumnWidth / 100) // columnWidth vw in pixels
 
     let rafId: number | null = null
 
@@ -729,8 +737,8 @@ const VersesRenderer = ({
       if (rafId) cancelAnimationFrame(rafId)
       rafId = requestAnimationFrame(() => {
         titleRefs.forEach((titleEl, i) => {
-          const columnStart = i * columnWidth
-          const maxTranslate = columnWidth - 100 // Leave some margin for the title width
+          const columnStart = i * columnWidthPx
+          const maxTranslate = columnWidthPx - 100 // Leave some margin for the title width
 
           // Calculate how much to translate to keep title at left edge
           let translateX = 0
@@ -753,7 +761,7 @@ const VersesRenderer = ({
       document.removeEventListener('scroll', handleScroll)
       if (rafId) cancelAnimationFrame(rafId)
     }
-  }, [parallelVerses?.length])
+  }, [parallelVerses?.length, parallelColumnWidth])
 
   useEffect(() => {
     let lastScrollTop = 0
@@ -1128,8 +1136,8 @@ const VersesRenderer = ({
           settings={settings}
           isParallelVerse={isParallelVerse}
         >
-          {/* Highlight layer for word annotations and selection */}
-          {(highlightRects.length > 0 || (annotationMode && selection)) && (
+          {/* Highlight layer for word annotations and selection (disabled in parallel mode) */}
+          {!isParallelVerse && (highlightRects.length > 0 || (annotationMode && selection)) && (
             <HighlightLayer $dimmed={!annotationMode && Object.keys(selectedVerses).length > 0}>
               {highlightRects.map(rect => (
                 <HighlightRectDiv
@@ -1162,9 +1170,16 @@ const VersesRenderer = ({
               settings={settings}
               columnCount={parallelVersionTitles.length}
             >
-              <VersionsContainer columnCount={parallelVersionTitles.length}>
+              <VersionsContainer
+                columnCount={parallelVersionTitles.length}
+                columnWidth={parallelColumnWidth}
+              >
                 {parallelVersionTitles?.map((p, i) => (
-                  <VersionTitleColumn key={i} columnCount={parallelVersionTitles.length}>
+                  <VersionTitleColumn
+                    key={i}
+                    columnCount={parallelVersionTitles.length}
+                    columnWidth={parallelColumnWidth}
+                  >
                     <VersionTitle
                       data-version-title={i}
                       onClick={() => navigateToVersion(p.id, i)}
@@ -1230,6 +1245,7 @@ const VersesRenderer = ({
               taggedVersesInChapter={taggedVersesInChapter}
               versesWithNonHighlightTags={versesWithNonHighlightTags}
               columnCount={isParallelVerse ? parallelVersionTitles.length : 1}
+              columnWidth={parallelColumnWidth}
             />
           </HorizontalScrollWrapper>
           {isReadOnly && focusVerses && focusVerses.length > 0 && (

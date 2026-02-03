@@ -45,7 +45,12 @@ import {
 } from '~redux/selectors/bible'
 import { makeSelectBookmarksInChapter } from '~redux/selectors/bookmarks'
 import { historyAtom, isFullScreenBibleValue, unifiedTagsModalAtom } from '../../state/app'
-import { BibleTab, useBibleTabActions, VersionCode } from '../../state/tabs'
+import {
+  BibleTab,
+  useBibleTabActions,
+  VersionCode,
+  parallelColumnWidthAtom,
+} from '../../state/tabs'
 import AnnotationNoteModal from './AnnotationNoteModal'
 import AnnotationToolbar from './AnnotationToolbar'
 import { BibleDOMWrapper, ParallelVerse } from './BibleDOM/BibleDOMWrapper'
@@ -171,6 +176,7 @@ const BibleViewer = ({
   const [resourceType, onChangeResourceType] = useState<BibleResource>('strong')
   const addHistory = useSetAtom(historyAtom)
   const bible = useAtomValue(bibleAtom)
+  const parallelColumnWidth = useAtomValue(parallelColumnWidthAtom)
   const actions = useBibleTabActions(bibleAtom)
   const insets = useSafeAreaInsets()
 
@@ -725,6 +731,7 @@ const BibleViewer = ({
           isSelectionMode={isSelectionMode}
           verses={verses}
           parallelVerses={parallelVerses}
+          parallelColumnWidth={parallelColumnWidth}
           focusVerses={focusVerses}
           secondaryVerses={secondaryVerses}
           selectedVerses={selectedVerses}

@@ -8,7 +8,7 @@ import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isFullScreenBibleAtom, isFullScreenBibleValue, tagDetailModalAtom } from 'src/state/app'
-import { BibleTab, VersionCode } from 'src/state/tabs'
+import { BibleTab, VersionCode, ParallelColumnWidth } from 'src/state/tabs'
 import BibleDOMComponent from './BibleDOMComponent'
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -96,6 +96,7 @@ export type WebViewProps = {
   isSelectionMode: StudyNavigateBibleType | undefined
   verses: Verse[]
   parallelVerses: ParallelVerse[]
+  parallelColumnWidth?: ParallelColumnWidth
 
   focusVerses: (string | number)[] | undefined
   secondaryVerses: Verse[] | null
@@ -182,6 +183,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
   const {
     verses,
     parallelVerses,
+    parallelColumnWidth = 75,
     focusVerses,
     secondaryVerses,
     selectedVerses,
@@ -552,6 +554,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         }}
         verses={verses}
         parallelVerses={parallelVerses}
+        parallelColumnWidth={parallelColumnWidth}
         focusVerses={focusVerses}
         secondaryVerses={secondaryVerses}
         selectedVerses={selectedVerses}

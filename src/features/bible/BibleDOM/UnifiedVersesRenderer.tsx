@@ -157,6 +157,8 @@ export interface UnifiedVersesRendererProps {
   versesWithNonHighlightTags?: Record<number, boolean>
   // Number of columns for parallel verse display (1 = single version, 2+ = parallel)
   columnCount?: number
+  // Width of each column in parallel mode (percentage: 75 or 50)
+  columnWidth?: number
 }
 
 export function UnifiedVersesRenderer({
@@ -192,6 +194,7 @@ export function UnifiedVersesRenderer({
   taggedVersesInChapter,
   versesWithNonHighlightTags,
   columnCount = 1,
+  columnWidth = 75,
 }: UnifiedVersesRendererProps) {
   // Calculate adjacent verses for fade effect in readonly mode
   const adjacentVerses = focusVerses
@@ -372,6 +375,7 @@ export function UnifiedVersesRenderer({
               taggedItemsCount={taggedVersesInChapter?.[Number(Verset)] || 0}
               hasNonHighlightTags={versesWithNonHighlightTags?.[Number(Verset)]}
               columnCount={columnCount}
+              columnWidth={columnWidth}
             />
             {!!comment && settings.commentsDisplay && (
               <Comment id={`comment-${verse.Verset}`} settings={settings} comment={comment} />

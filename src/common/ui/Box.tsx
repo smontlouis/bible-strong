@@ -129,6 +129,8 @@ export type BoxProps = {
 
     elevation: number
   }
+  inset?: number
+  in?: number
 }
 const Box = styled.View<BoxProps>(props => ({
   // container
@@ -137,6 +139,7 @@ const Box = styled.View<BoxProps>(props => ({
   left: props.left ?? props.l,
   right: props.right ?? props.r,
   bottom: props.bottom ?? props.b,
+  inset: props.inset ?? props.in,
   hitSlop: props.hitSlop,
 
   padding: props.padding ?? props.p,

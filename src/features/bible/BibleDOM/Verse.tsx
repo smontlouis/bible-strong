@@ -212,6 +212,8 @@ interface Props {
   hasNonHighlightTags?: boolean
   // Number of columns for parallel verse display (1 = single version, 2+ = parallel)
   columnCount?: number
+  // Width of each column in parallel mode (percentage: 75 or 50)
+  columnWidth?: number
 }
 
 const Verse = ({
@@ -247,6 +249,7 @@ const Verse = ({
   taggedItemsCount = 0,
   hasNonHighlightTags = false,
   columnCount = 1,
+  columnWidth = 75,
 }: Props) => {
   const dispatch = useDispatch()
   const translations = useTranslations()
@@ -344,11 +347,13 @@ const Verse = ({
   }, [isStrongVersion, verse.Livre, verse.Texte, annotationMode])
 
   if (isParallelVerse && parallelVerse) {
+    const divWidth = `calc(${columnWidth}vw - 10px)`
     return (
       <div
         style={{
           display: 'flex',
-          width: columnCount > 1 ? `${columnCount * 75}vw` : '100%',
+          width: divWidth,
+          transition: 'width 0.4s ease-in-out',
         }}
       >
         {parallelVerse.map((p, i) => {
@@ -364,7 +369,8 @@ const Verse = ({
               <div
                 key={i}
                 style={{
-                  width: columnCount > 1 ? '75vw' : '100%',
+                  width: divWidth,
+                  transition: 'width 0.4s ease-in-out',
                   flexShrink: 0,
                   scrollSnapAlign: 'start',
                   padding: '5px 5px',
@@ -381,7 +387,8 @@ const Verse = ({
               <div
                 key={i}
                 style={{
-                  width: columnCount > 1 ? '75vw' : '100%',
+                  width: divWidth,
+                  transition: 'width 0.4s ease-in-out',
                   flexShrink: 0,
                   scrollSnapAlign: 'start',
                   padding: '5px 5px',
@@ -395,7 +402,8 @@ const Verse = ({
             <div
               key={i}
               style={{
-                width: columnCount > 1 ? '75vw' : '100%',
+                width: divWidth,
+                transition: 'width 0.4s ease-in-out',
                 flexShrink: 0,
                 scrollSnapAlign: 'start',
                 padding: '5px 5px',
