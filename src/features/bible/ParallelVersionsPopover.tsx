@@ -1,11 +1,10 @@
 import { useTranslation } from 'react-i18next'
 
-import Box, { AnimatedBox, HStack } from '~common/ui/Box'
+import Box, { AnimatedBox, FadingBox, FadingText, HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
-import { ParallelColumnWidth, VersionCode } from '../../state/tabs'
-import { useEffect } from 'react'
+import { ParallelColumnWidth, ParallelDisplayMode, VersionCode } from '../../state/tabs'
 
 interface ParallelVersionsPopoverProps {
   version: VersionCode
@@ -15,6 +14,8 @@ interface ParallelVersionsPopoverProps {
   removeAllParallelVersions: () => void
   columnWidth: ParallelColumnWidth
   setColumnWidth: (width: ParallelColumnWidth) => void
+  displayMode: ParallelDisplayMode
+  setDisplayMode: (mode: ParallelDisplayMode) => void
 }
 
 const ParallelVersionsPopover = ({
@@ -25,6 +26,8 @@ const ParallelVersionsPopover = ({
   removeAllParallelVersions,
   columnWidth,
   setColumnWidth,
+  displayMode,
+  setDisplayMode,
 }: ParallelVersionsPopoverProps) => {
   const { t } = useTranslation()
 
@@ -33,6 +36,12 @@ const ParallelVersionsPopover = ({
     const nextWidth = columnWidth === 50 ? 75 : columnWidth === 75 ? 100 : 50
     setColumnWidth(nextWidth)
   }
+
+  const toggleDisplayMode = () => {
+    setDisplayMode(displayMode === 'horizontal' ? 'vertical' : 'horizontal')
+  }
+
+  const isVertical = displayMode === 'vertical'
 
   return (
     <>
@@ -65,34 +74,52 @@ const ParallelVersionsPopover = ({
         </MenuOption>
       )}
 
-      <MenuOption onSelect={toggleColumnWidth} closeOnSelect={false}>
+      <MenuOption onSelect={toggleDisplayMode} closeOnSelect={false}>
         <Box row alignItems="center">
-          <FeatherIcon name="columns" size={18} />
-          <Text marginLeft={10}>{t('Largeur des colonnes')}</Text>
-          <HStack ml="auto" width={40} height={20}>
-            <AnimatedBox
-              height={20}
-              style={{
-                transitionProperty: 'width',
-                transitionDuration: '0.4s',
-                width: `${columnWidth}%`,
-              }}
-            >
-              <Box position="absolute" inset={2} bg="primary" borderRadius={3} />
-            </AnimatedBox>
-            <AnimatedBox
-              height={20}
-              style={{
-                transitionProperty: 'width',
-                transitionDuration: '0.4s',
-                width: `${100 - columnWidth}%`,
-              }}
-            >
-              <Box position="absolute" inset={2} bg="tertiary" borderRadius={3} />
-            </AnimatedBox>
-          </HStack>
+          <FeatherIcon name={isVertical ? 'arrow-down' : 'arrow-right'} size={18} />
+          <FadingText marginLeft={10}>
+            {isVertical ? t('Affichage vertical') : t('Affichage horizontal')}
+          </FadingText>
         </Box>
       </MenuOption>
+
+      {!isVertical && (
+        <MenuOption onSelect={toggleColumnWidth} closeOnSelect={false}>
+          <FadingBox
+            keyProp="columnWidth"
+            skipEntering={false}
+            skipExiting={false}
+            direction="bottom"
+            row
+            alignItems="center"
+          >
+            <FeatherIcon name="columns" size={18} />
+            <Text marginLeft={10}>{t('Largeur des colonnes')}</Text>
+            <HStack ml="auto" width={40} height={20}>
+              <AnimatedBox
+                height={20}
+                style={{
+                  transitionProperty: 'width',
+                  transitionDuration: '0.4s',
+                  width: `${columnWidth}%`,
+                }}
+              >
+                <Box position="absolute" inset={2} bg="primary" borderRadius={3} />
+              </AnimatedBox>
+              <AnimatedBox
+                height={20}
+                style={{
+                  transitionProperty: 'width',
+                  transitionDuration: '0.4s',
+                  width: `${100 - columnWidth}%`,
+                }}
+              >
+                <Box position="absolute" inset={2} bg="tertiary" borderRadius={3} />
+              </AnimatedBox>
+            </HStack>
+          </FadingBox>
+        </MenuOption>
+      )}
 
       <MenuOption onSelect={removeAllParallelVersions}>
         <Box row alignItems="center">

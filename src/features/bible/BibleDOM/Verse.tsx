@@ -25,6 +25,7 @@ import { RootState } from '~redux/modules/reducer'
 import { useDispatch } from './DispatchProvider'
 import { Bookmark, SelectedCode, StudyNavigateBibleType, Verse as TVerse } from '~common/types'
 import { LinkedVerse, NotedVerse, RootStyles, TaggedVerse } from './BibleDOMWrapper'
+import { ParallelDisplayMode } from 'src/state/tabs'
 import verseToStrong from './verseToStrong'
 import { ContainerText, resolveHighlightInfo } from './ContainerText'
 import { convertHex } from './convertHex'
@@ -102,6 +103,39 @@ const ParallelError = styled('div')<RootStyles>(
     lineHeight: 1.4,
   })
 )
+
+// Version title for vertical display mode (matches header VersionTitle style)
+const VerticalVersionTitle = styled('div')<RootStyles>(
+  ({ settings: { fontSizeScale, fontFamily, colors, theme } }) => ({
+    fontFamily,
+    fontWeight: 'bold',
+    fontSize: scaleFontSize(14, fontSizeScale),
+    display: 'inline-block',
+    color: colors[theme].default,
+    backgroundColor: colors[theme].reverse,
+    boxShadow: isDarkTheme(theme)
+      ? `0 0 10px 0 rgba(255, 255, 255, 0.1)`
+      : `0 0 10px 0 rgba(0, 0, 0, 0.2)`,
+    borderRadius: '8px',
+    paddingInlineEnd: '8px',
+    paddingInlineStart: '8px',
+    paddingBlock: '4px',
+    marginTop: '8px',
+    marginBottom: '4px',
+    cursor: 'pointer',
+    '&:active': {
+      opacity: 0.6,
+    },
+  })
+)
+
+// Separator between verse groups in vertical mode
+const VerseGroupSeparator = styled('div')<RootStyles>(({ settings: { theme, colors } }) => ({
+  height: '1px',
+  backgroundColor: colors[theme].border,
+  marginTop: '40px',
+  marginBottom: '40px',
+}))
 
 const getVerseText = ({
   verse,
@@ -183,9 +217,9 @@ interface Props {
   secondaryVerse?: TVerse | null
   isSelected: boolean
   highlightedColor?: keyof RootStyles['settings']['colors'][keyof RootStyles['settings']['colors']]
-  notesCount: number
+  notesCount?: number
   isVerseToScroll: boolean
-  notesText: NotedVerse[]
+  notesText?: NotedVerse[]
   linksCount?: number
   linksText?: LinkedVerse[]
   version: string
@@ -214,6 +248,8 @@ interface Props {
   columnCount?: number
   // Width of each column in parallel mode (percentage: 75 or 50)
   columnWidth?: number
+  // Display mode for parallel verses (horizontal = side by side, vertical = stacked)
+  parallelDisplayMode?: ParallelDisplayMode
 }
 
 const Verse = ({
@@ -250,6 +286,7 @@ const Verse = ({
   hasNonHighlightTags = false,
   columnCount = 1,
   columnWidth = 75,
+  parallelDisplayMode = 'horizontal',
 }: Props) => {
   const dispatch = useDispatch()
   const translations = useTranslations()
@@ -347,6 +384,81 @@ const Verse = ({
   }, [isStrongVersion, verse.Livre, verse.Texte, annotationMode])
 
   if (isParallelVerse && parallelVerse) {
+    // Vertical display mode: stack versions with inline titles, grouped by verse
+    if (parallelDisplayMode === 'vertical') {
+      const navigateToVersion = (versionId: string, index: number) => {
+        dispatch({
+          type: 'NAVIGATE_TO_VERSION',
+          payload: { version: versionId, index },
+        })
+      }
+
+      return (
+        <div>
+          {parallelVerse.map((p, i) => {
+            // Show error message if parallel version failed to load
+            if (p.error) {
+              const errorMessage =
+                p.error.type === 'BIBLE_NOT_FOUND'
+                  ? translations.parallelVersionNotFound
+                  : p.error.type === 'CHAPTER_NOT_FOUND'
+                    ? translations.parallelChapterNotFound
+                    : translations.parallelLoadError
+              return (
+                <div key={i}>
+                  <VerticalVersionTitle
+                    settings={settings}
+                    onClick={() => navigateToVersion(p.version, i)}
+                  >
+                    {p.version}
+                  </VerticalVersionTitle>
+                  <ParallelError settings={settings}>{errorMessage}</ParallelError>
+                </div>
+              )
+            }
+            if (!p.verse) {
+              return null
+            }
+            // First version (i === 0) keeps all decorations, others are clean for readability
+            const isMainVersion = i === 0
+            return (
+              <div key={i}>
+                <VerticalVersionTitle
+                  settings={settings}
+                  onClick={() => navigateToVersion(p.version, i)}
+                >
+                  {p.version}
+                </VerticalVersionTitle>
+                {/* Don't pass isParallel in vertical mode to keep normal text size */}
+                <Verse
+                  isHebreu={isHebreu}
+                  verse={p.verse}
+                  version={p.version}
+                  settings={settings}
+                  isSelected={isSelected}
+                  isSelectedMode={isSelectedMode}
+                  isSelectionMode={isSelectionMode}
+                  highlightedColor={isMainVersion ? highlightedColor : undefined}
+                  notesCount={isMainVersion ? notesCount : undefined}
+                  notesText={isMainVersion ? notesText : undefined}
+                  linksCount={isMainVersion ? linksCount : undefined}
+                  linksText={isMainVersion ? linksText : undefined}
+                  isVerseToScroll={isMainVersion ? isVerseToScroll : false}
+                  selectedCode={selectedCode}
+                  isFocused={isFocused}
+                  tag={isMainVersion ? tag : undefined}
+                  isTouched={isTouched}
+                />
+              </div>
+            )
+          })}
+          {/* Separator between verse groups */}
+          <VerseGroupSeparator settings={settings} />
+        </div>
+      )
+    }
+
+    // Horizontal display mode: side by side columns
     const divWidth = `calc(${columnWidth}vw - 10px)`
     return (
       <div
@@ -398,6 +510,8 @@ const Verse = ({
               />
             )
           }
+          // First version (i === 0) keeps all decorations, others are clean for readability
+          const isMainVersion = i === 0
           return (
             <div
               key={i}
@@ -420,15 +534,15 @@ const Verse = ({
                 isSelected={isSelected}
                 isSelectedMode={isSelectedMode}
                 isSelectionMode={isSelectionMode}
-                highlightedColor={highlightedColor}
-                notesCount={notesCount}
-                notesText={notesText}
-                linksCount={linksCount}
-                linksText={linksText}
-                isVerseToScroll={isVerseToScroll}
+                highlightedColor={isMainVersion ? highlightedColor : undefined}
+                notesCount={isMainVersion ? notesCount : undefined}
+                notesText={isMainVersion ? notesText : undefined}
+                linksCount={isMainVersion ? linksCount : undefined}
+                linksText={isMainVersion ? linksText : undefined}
+                isVerseToScroll={isMainVersion ? isVerseToScroll : false}
                 selectedCode={selectedCode}
                 isFocused={isFocused}
-                tag={tag}
+                tag={isMainVersion ? tag : undefined}
                 isTouched={isTouched}
               />
             </div>

@@ -50,6 +50,7 @@ import {
   useBibleTabActions,
   VersionCode,
   parallelColumnWidthAtom,
+  parallelDisplayModeAtom,
 } from '../../state/tabs'
 import AnnotationNoteModal from './AnnotationNoteModal'
 import AnnotationToolbar from './AnnotationToolbar'
@@ -177,6 +178,7 @@ const BibleViewer = ({
   const addHistory = useSetAtom(historyAtom)
   const bible = useAtomValue(bibleAtom)
   const parallelColumnWidth = useAtomValue(parallelColumnWidthAtom)
+  const parallelDisplayMode = useAtomValue(parallelDisplayModeAtom)
   const actions = useBibleTabActions(bibleAtom)
   const insets = useSafeAreaInsets()
 
@@ -732,6 +734,7 @@ const BibleViewer = ({
           verses={verses}
           parallelVerses={parallelVerses}
           parallelColumnWidth={parallelColumnWidth}
+          parallelDisplayMode={parallelDisplayMode}
           focusVerses={focusVerses}
           secondaryVerses={secondaryVerses}
           selectedVerses={selectedVerses}

@@ -12,6 +12,7 @@ import {
   TaggedVerse,
   WebViewProps,
 } from './BibleDOMWrapper'
+import { ParallelDisplayMode } from 'src/state/tabs'
 import Comment from './Comment'
 import ExternalIcon from './ExternalIcon'
 import Verse from './Verse'
@@ -159,6 +160,8 @@ export interface UnifiedVersesRendererProps {
   columnCount?: number
   // Width of each column in parallel mode (percentage: 75 or 50)
   columnWidth?: number
+  // Display mode for parallel verses (horizontal = side by side, vertical = stacked)
+  parallelDisplayMode?: ParallelDisplayMode
 }
 
 export function UnifiedVersesRenderer({
@@ -195,6 +198,7 @@ export function UnifiedVersesRenderer({
   versesWithNonHighlightTags,
   columnCount = 1,
   columnWidth = 75,
+  parallelDisplayMode = 'horizontal',
 }: UnifiedVersesRendererProps) {
   // Calculate adjacent verses for fade effect in readonly mode
   const adjacentVerses = focusVerses
@@ -376,6 +380,7 @@ export function UnifiedVersesRenderer({
               hasNonHighlightTags={versesWithNonHighlightTags?.[Number(Verset)]}
               columnCount={columnCount}
               columnWidth={columnWidth}
+              parallelDisplayMode={parallelDisplayMode}
             />
             {!!comment && settings.commentsDisplay && (
               <Comment id={`comment-${verse.Verset}`} settings={settings} comment={comment} />

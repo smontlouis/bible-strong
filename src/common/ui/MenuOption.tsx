@@ -1,7 +1,8 @@
 import React from 'react'
-import { MenuOption as BaseMenuOption, MenuOptionProps } from 'react-native-popup-menu'
+import { MenuOptionProps } from 'react-native-popup-menu'
+import { LinearTransition } from 'react-native-reanimated'
 import { usePopOver } from '../PopOverContext'
-import Box, { TouchableBox } from './Box'
+import { AnimatedTouchableBox } from './Box'
 
 interface ExtendedMenuOptionProps extends Omit<MenuOptionProps, 'onSelect'> {
   closeOnSelect?: boolean
@@ -20,7 +21,15 @@ const MenuOption = ({ onSelect, closeOnSelect = true, ...props }: ExtendedMenuOp
     }
   }
 
-  return <TouchableBox {...props} onPress={handleSelect} py={8} px={15} />
+  return (
+    <AnimatedTouchableBox
+      layout={LinearTransition}
+      {...props}
+      onPress={handleSelect}
+      py={8}
+      px={15}
+    />
+  )
 }
 
 export default MenuOption

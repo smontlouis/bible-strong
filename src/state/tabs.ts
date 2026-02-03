@@ -406,6 +406,13 @@ export const parallelColumnWidthAtom = atomWithAsyncStorage<ParallelColumnWidth>
   50
 )
 
+// Persisted atom for parallel display mode preference (horizontal or vertical)
+export type ParallelDisplayMode = 'horizontal' | 'vertical'
+export const parallelDisplayModeAtom = atomWithAsyncStorage<ParallelDisplayMode>(
+  'parallelDisplayMode',
+  'horizontal'
+)
+
 // Get current active group (derived)
 export const activeGroupAtom = atom(get => {
   const groups = get(tabGroupsAtom)

@@ -92,6 +92,7 @@ type Props = Pick<
   | 'verses'
   | 'parallelVerses'
   | 'parallelColumnWidth'
+  | 'parallelDisplayMode'
   | 'focusVerses'
   | 'secondaryVerses'
   | 'selectedVerses'
@@ -313,6 +314,7 @@ const VersesRenderer = ({
   verses,
   parallelVerses,
   parallelColumnWidth = 75,
+  parallelDisplayMode = 'horizontal',
   focusVerses,
   secondaryVerses,
   comments: originalComments,
@@ -642,6 +644,8 @@ const VersesRenderer = ({
 
   // Check if parallel verse mode (disables horizontal gestures for scroll)
   const isParallelVerseMode = Boolean(parallelVerses?.length)
+  // Only disable swipe/drag in horizontal parallel mode (vertical mode has no horizontal scroll)
+  const isHorizontalParallelMode = isParallelVerseMode && parallelDisplayMode === 'horizontal'
 
   // Annotation mode controller (handles touch selection and annotation events)
   useAnnotationModeController({
@@ -655,7 +659,7 @@ const VersesRenderer = ({
     highlightRects,
     selectionHandlePositions,
     selectedAnnotationId,
-    // Disable drag-to-annotation in parallel mode (conflicts with horizontal scroll)
+    // Disable drag-to-annotation in all parallel modes (annotation not supported)
     canDragToAnnotate: !hasSelectedVerses && !isInterlinearVersion && !isParallelVerseMode,
     triggers: {
       clearSelectionTrigger,
@@ -663,7 +667,7 @@ const VersesRenderer = ({
       eraseSelectionTrigger,
     },
     callbacks: {
-      // Disable drag-to-annotation in parallel mode
+      // Disable drag-to-annotation in all parallel modes
       onEnterAnnotationModeFromDrag: isParallelVerseMode
         ? undefined
         : () => {
@@ -691,8 +695,8 @@ const VersesRenderer = ({
           }
         }
       },
-      // Disable swipe to change chapter in parallel mode (conflicts with horizontal scroll)
-      onSwipe: isParallelVerseMode
+      // Disable swipe to change chapter in horizontal parallel mode (conflicts with horizontal scroll)
+      onSwipe: isHorizontalParallelMode
         ? undefined
         : direction => {
             dispatch({
@@ -1164,7 +1168,7 @@ const VersesRenderer = ({
               )}
             </HighlightLayer>
           )}
-          {isParallelVerse && (
+          {isParallelVerse && parallelDisplayMode === 'horizontal' && (
             <HeaderScrollWrapper
               ref={headerScrollRef}
               settings={settings}
@@ -1199,7 +1203,7 @@ const VersesRenderer = ({
           )}
           <HorizontalScrollWrapper
             ref={contentScrollRef}
-            columnCount={isParallelVerse ? parallelVersionTitles.length : 1}
+            columnCount={isParallelVerse && parallelDisplayMode === 'horizontal' ? parallelVersionTitles.length : 1}
           >
             {(version === 'INT' || version === 'INT_EN') && (
               <IntMode settings={settings} onClick={() => setIsINTComplete(!isINTComplete)}>
@@ -1246,6 +1250,7 @@ const VersesRenderer = ({
               versesWithNonHighlightTags={versesWithNonHighlightTags}
               columnCount={isParallelVerse ? parallelVersionTitles.length : 1}
               columnWidth={parallelColumnWidth}
+              parallelDisplayMode={parallelDisplayMode}
             />
           </HorizontalScrollWrapper>
           {isReadOnly && focusVerses && focusVerses.length > 0 && (

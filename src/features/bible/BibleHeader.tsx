@@ -9,7 +9,7 @@ import { FadeIn, FadeOut, useDerivedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
-import { parallelColumnWidthAtom } from 'src/state/tabs'
+import { parallelColumnWidthAtom, parallelDisplayModeAtom } from 'src/state/tabs'
 import Back from '~common/Back'
 import ParallelIcon from '~common/ParallelIcon'
 import PopOverMenu from '~common/PopOverMenu'
@@ -70,6 +70,8 @@ const Header = ({
   const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
   const columnWidth = useAtomValue(parallelColumnWidthAtom)
   const setColumnWidth = useSetAtom(parallelColumnWidthAtom)
+  const displayMode = useAtomValue(parallelDisplayModeAtom)
+  const setDisplayMode = useSetAtom(parallelDisplayModeAtom)
 
   // Bookmark ref
   const bookmarkModalRef = useRef<BottomSheetModal>(null)
@@ -464,6 +466,8 @@ const Header = ({
                         removeAllParallelVersions={removeAllParallelVersions}
                         columnWidth={columnWidth}
                         setColumnWidth={setColumnWidth}
+                        displayMode={displayMode}
+                        setDisplayMode={setDisplayMode}
                       />
                     }
                   />
