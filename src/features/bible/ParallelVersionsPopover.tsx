@@ -42,6 +42,7 @@ const ParallelVersionsPopover = ({
   }
 
   const isVertical = displayMode === 'vertical'
+  const columnWidthIconPadding = 3
 
   return (
     <>
@@ -69,7 +70,7 @@ const ParallelVersionsPopover = ({
         <MenuOption onSelect={addParallelVersion}>
           <Box row alignItems="center">
             <FeatherIcon name="plus-circle" size={18} />
-            <Text marginLeft={10}>{t('Ajouter une version')}</Text>
+            <Text marginLeft={5}>{t('Ajouter une version')}</Text>
           </Box>
         </MenuOption>
       )}
@@ -77,7 +78,7 @@ const ParallelVersionsPopover = ({
       <MenuOption onSelect={toggleDisplayMode} closeOnSelect={false}>
         <Box row alignItems="center">
           <FeatherIcon name={isVertical ? 'arrow-down' : 'arrow-right'} size={18} />
-          <FadingText marginLeft={10}>
+          <FadingText marginLeft={5}>
             {isVertical ? t('Affichage vertical') : t('Affichage horizontal')}
           </FadingText>
         </Box>
@@ -94,27 +95,50 @@ const ParallelVersionsPopover = ({
             alignItems="center"
           >
             <FeatherIcon name="columns" size={18} />
-            <Text marginLeft={10}>{t('Largeur des colonnes')}</Text>
-            <HStack ml="auto" width={40} height={20}>
+            <Text marginLeft={5}>{t('Largeur des colonnes')}</Text>
+            <HStack
+              ml={15}
+              width={30}
+              height={17}
+              borderRadius={5}
+              bg="lightPrimary"
+              alignItems="center"
+            >
               <AnimatedBox
-                height={20}
+                height={17}
                 style={{
                   transitionProperty: 'width',
                   transitionDuration: '0.4s',
-                  width: `${columnWidth}%`,
+                  width: `${columnWidth === 75 ? 60 : columnWidth}%`,
                 }}
               >
-                <Box position="absolute" inset={2} bg="primary" borderRadius={3} />
+                <Box
+                  position="absolute"
+                  top={columnWidthIconPadding}
+                  bottom={columnWidthIconPadding}
+                  left={columnWidthIconPadding}
+                  right={columnWidth === 100 ? columnWidthIconPadding : columnWidthIconPadding / 2}
+                  bg="primary"
+                  borderRadius={3}
+                />
               </AnimatedBox>
               <AnimatedBox
-                height={20}
+                height={17}
                 style={{
                   transitionProperty: 'width',
                   transitionDuration: '0.4s',
-                  width: `${100 - columnWidth}%`,
+                  width: `${100 - (columnWidth === 75 ? 60 : columnWidth)}%`,
                 }}
               >
-                <Box position="absolute" inset={2} bg="tertiary" borderRadius={3} />
+                <Box
+                  position="absolute"
+                  top={columnWidthIconPadding}
+                  bottom={columnWidthIconPadding}
+                  left={columnWidthIconPadding / 2}
+                  right={columnWidthIconPadding}
+                  bg="tertiary"
+                  borderRadius={3}
+                />
               </AnimatedBox>
             </HStack>
           </FadingBox>
