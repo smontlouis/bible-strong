@@ -42,7 +42,7 @@ const ParallelVersionsPopover = ({
   }
 
   const isVertical = displayMode === 'vertical'
-  const columnWidthIconPadding = 3
+  const columnWidthIconPadding = 2.5
 
   return (
     <>
@@ -70,7 +70,7 @@ const ParallelVersionsPopover = ({
         <MenuOption onSelect={addParallelVersion}>
           <Box row alignItems="center">
             <FeatherIcon name="plus-circle" size={18} />
-            <Text marginLeft={5}>{t('Ajouter une version')}</Text>
+            <Text marginLeft={10}>{t('Ajouter une version')}</Text>
           </Box>
         </MenuOption>
       )}
@@ -78,7 +78,7 @@ const ParallelVersionsPopover = ({
       <MenuOption onSelect={toggleDisplayMode} closeOnSelect={false}>
         <Box row alignItems="center">
           <FeatherIcon name={isVertical ? 'arrow-down' : 'arrow-right'} size={18} />
-          <FadingText marginLeft={5}>
+          <FadingText marginLeft={10}>
             {isVertical ? t('Affichage vertical') : t('Affichage horizontal')}
           </FadingText>
         </Box>
@@ -94,22 +94,20 @@ const ParallelVersionsPopover = ({
             row
             alignItems="center"
           >
-            <FeatherIcon name="columns" size={18} />
-            <Text marginLeft={5}>{t('Largeur des colonnes')}</Text>
             <HStack
-              ml={15}
-              width={30}
-              height={17}
+              mr={5}
+              width={22}
+              height={22}
               borderRadius={5}
               bg="lightPrimary"
               alignItems="center"
             >
               <AnimatedBox
-                height={17}
+                height={22}
                 style={{
                   transitionProperty: 'width',
                   transitionDuration: '0.4s',
-                  width: `${columnWidth === 75 ? 60 : columnWidth}%`,
+                  width: `${columnWidth === 75 ? 65 : columnWidth}%`,
                 }}
               >
                 <Box
@@ -119,15 +117,15 @@ const ParallelVersionsPopover = ({
                   left={columnWidthIconPadding}
                   right={columnWidth === 100 ? columnWidthIconPadding : columnWidthIconPadding / 2}
                   bg="primary"
-                  borderRadius={3}
+                  borderRadius={2}
                 />
               </AnimatedBox>
               <AnimatedBox
-                height={17}
+                height={22}
                 style={{
                   transitionProperty: 'width',
                   transitionDuration: '0.4s',
-                  width: `${100 - (columnWidth === 75 ? 60 : columnWidth)}%`,
+                  width: `${100 - (columnWidth === 75 ? 65 : columnWidth)}%`,
                 }}
               >
                 <Box
@@ -137,10 +135,11 @@ const ParallelVersionsPopover = ({
                   left={columnWidthIconPadding / 2}
                   right={columnWidthIconPadding}
                   bg="tertiary"
-                  borderRadius={3}
+                  borderRadius={2}
                 />
               </AnimatedBox>
             </HStack>
+            <Text marginLeft={2}>{t('Largeur des colonnes')}</Text>
           </FadingBox>
         </MenuOption>
       )}
