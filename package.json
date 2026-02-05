@@ -123,7 +123,6 @@
     "react-native-keyboard-aware-scroll-view": "^0.9.4",
     "react-native-localize": "^1.4.0",
     "react-native-mmkv": "4.1.0",
-    "react-native-modal": "patch:react-native-modal@npm%3A11.10.0#~/.yarn/patches/react-native-modal-npm-11.10.0-f32ba02b9e.patch",
     "react-native-modal-datetime-picker": "^17.1.0",
     "react-native-modalbox": "^2.0.0",
     "react-native-nitro-modules": "^0.31.10",

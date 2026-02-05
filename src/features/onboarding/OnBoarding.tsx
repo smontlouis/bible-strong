@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
 import { useAtom } from 'jotai/react'
 import React, { useEffect, useState } from 'react'
-import Modal from 'react-native-modal'
+import { Modal } from 'react-native'
 import { useDispatch } from 'react-redux'
 import { deleteAllDatabases } from '~helpers/sqlite'
 import useLanguage from '~helpers/useLanguage'
@@ -14,12 +14,9 @@ import DownloadResources from './DownloadResources'
 import OnBoardingSlides from './OnBoardingSlides'
 import SelectResources from './SelectResources'
 
-// @ts-ignore
-const StylizedModal = styled(Modal)(({ theme }) => ({
+const ModalContainer = styled.View(({ theme }) => ({
+  flex: 1,
   backgroundColor: theme.colors.reverse,
-  width: '100%',
-  margin: 0,
-  padding: 0,
 }))
 
 const useCheckMandatoryVersions = () => {
@@ -69,12 +66,13 @@ const OnBoarding = () => {
   const showOnboarding = useCheckMandatoryVersions()
 
   return (
-    // @ts-ignore
-    <StylizedModal isVisible={showOnboarding}>
-      {step === 0 && <OnBoardingSlides setStep={setStep} />}
-      {step === 1 && <SelectResources setStep={setStep} />}
-      {step === 2 && <DownloadResources />}
-    </StylizedModal>
+    <Modal visible={showOnboarding} animationType="slide" presentationStyle="fullScreen">
+      <ModalContainer>
+        {step === 0 && <OnBoardingSlides setStep={setStep} />}
+        {step === 1 && <SelectResources setStep={setStep} />}
+        {step === 2 && <DownloadResources />}
+      </ModalContainer>
+    </Modal>
   )
 }
 

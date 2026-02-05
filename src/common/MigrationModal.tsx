@@ -1,6 +1,5 @@
 import React from 'react'
-import { Linking, ActivityIndicator } from 'react-native'
-import Modal from 'react-native-modal'
+import { Linking, ActivityIndicator, Modal } from 'react-native'
 import styled from '@emotion/native'
 import { useAtomValue } from 'jotai'
 import { useTranslation } from 'react-i18next'
@@ -40,6 +39,11 @@ const ErrorBox = styled.View(({ theme }: { theme: Theme }) => ({
   width: '100%',
 }))
 
+const Backdrop = styled.View({
+  flex: 1,
+  backgroundColor: 'rgba(0, 0, 0, 0.9)',
+})
+
 const SUPPORT_EMAIL = 'smontlouis.music@gmail.com'
 
 const MigrationModal = () => {
@@ -64,85 +68,80 @@ const MigrationModal = () => {
   const hasError = progress.error !== null
 
   return (
-    <Modal
-      isVisible={progress.isActive}
-      backdropOpacity={0.9}
-      style={{ margin: 0 }}
-      coverScreen={true}
-      animationIn="fadeIn"
-      animationOut="fadeOut"
-    >
-      <ModalContent>
-        <IconContainer>
-          <FeatherIcon name={hasError ? 'alert-circle' : 'database'} size={50} color="primary" />
-        </IconContainer>
+    <Modal visible={progress.isActive} animationType="fade" transparent statusBarTranslucent>
+      <Backdrop>
+        <ModalContent>
+          <IconContainer>
+            <FeatherIcon name={hasError ? 'alert-circle' : 'database'} size={50} color="primary" />
+          </IconContainer>
 
-        <Text bold fontSize={24} textAlign="center" marginBottom={10}>
-          {hasError
-            ? progress.hasPartialFailure
-              ? t('migration.partiallyFailed')
-              : t('migration.failed')
-            : progress.isResuming
-              ? t('migration.resuming')
-              : t('migration.inProgress')}
-        </Text>
+          <Text bold fontSize={24} textAlign="center" marginBottom={10}>
+            {hasError
+              ? progress.hasPartialFailure
+                ? t('migration.partiallyFailed')
+                : t('migration.failed')
+              : progress.isResuming
+                ? t('migration.resuming')
+                : t('migration.inProgress')}
+          </Text>
 
-        <Text textAlign="center" color="grey" marginBottom={20}>
-          {hasError ? t('migration.errorDescription') : t('migration.description')}
-        </Text>
+          <Text textAlign="center" color="grey" marginBottom={20}>
+            {hasError ? t('migration.errorDescription') : t('migration.description')}
+          </Text>
 
-        {!hasError && (
-          <Box row center marginBottom={25}>
-            <FeatherIcon name="wifi" size={16} color="grey" />
-            <Text marginLeft={8} fontSize={12} color="grey">
-              {t('migration.internetRequired')}
-            </Text>
-          </Box>
-        )}
-
-        {!hasError && (
-          <Box width="100%" marginBottom={30}>
-            <Box marginBottom={10}>
-              <ProgressBar progress={progress.overallProgress} />
+          {!hasError && (
+            <Box row center marginBottom={25}>
+              <FeatherIcon name="wifi" size={16} color="grey" />
+              <Text marginLeft={8} fontSize={12} color="grey">
+                {t('migration.internetRequired')}
+              </Text>
             </Box>
-            <Text textAlign="center" fontSize={16} bold>
-              {Math.round(progress.overallProgress * 100)}%
-            </Text>
-            {progress.message && (
-              <Text textAlign="center" fontSize={12} color="grey" marginTop={8}>
-                {progress.message}
+          )}
+
+          {!hasError && (
+            <Box width="100%" marginBottom={30}>
+              <Box marginBottom={10}>
+                <ProgressBar progress={progress.overallProgress} />
+              </Box>
+              <Text textAlign="center" fontSize={16} bold>
+                {Math.round(progress.overallProgress * 100)}%
               </Text>
-            )}
-          </Box>
-        )}
+              {progress.message && (
+                <Text textAlign="center" fontSize={12} color="grey" marginTop={8}>
+                  {progress.message}
+                </Text>
+              )}
+            </Box>
+          )}
 
-        {hasError && (
-          <Box width="100%">
-            <ErrorBox>
-              <Text fontSize={12} color="grey">
-                {progress.hasPartialFailure
-                  ? t('migration.partialError') +
-                    progress.failedCollections.map(c => getCollectionLabel(c)).join(', ')
-                  : progress.error}
+          {hasError && (
+            <Box width="100%">
+              <ErrorBox>
+                <Text fontSize={12} color="grey">
+                  {progress.hasPartialFailure
+                    ? t('migration.partialError') +
+                      progress.failedCollections.map(c => getCollectionLabel(c)).join(', ')
+                    : progress.error}
+                </Text>
+              </ErrorBox>
+
+              <Text textAlign="center" fontSize={14} color="grey" marginBottom={20}>
+                {t('migration.contactSupport')}
               </Text>
-            </ErrorBox>
 
-            <Text textAlign="center" fontSize={14} color="grey" marginBottom={20}>
-              {t('migration.contactSupport')}
-            </Text>
+              <Button onPress={handleContactSupport} secondary>
+                {t('migration.contactButton')}
+              </Button>
+            </Box>
+          )}
 
-            <Button onPress={handleContactSupport} secondary>
-              {t('migration.contactButton')}
-            </Button>
-          </Box>
-        )}
-
-        {!hasError && (
-          <Box marginTop={10}>
-            <ActivityIndicator size="large" color="#3498db" />
-          </Box>
-        )}
-      </ModalContent>
+          {!hasError && (
+            <Box marginTop={10}>
+              <ActivityIndicator size="large" color="#3498db" />
+            </Box>
+          )}
+        </ModalContent>
+      </Backdrop>
     </Modal>
   )
 }

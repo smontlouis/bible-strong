@@ -6920,7 +6920,6 @@ __metadata:
     react-native-keyboard-aware-scroll-view: "npm:^0.9.4"
     react-native-localize: "npm:^1.4.0"
     react-native-mmkv: "npm:4.1.0"
-    react-native-modal: "patch:react-native-modal@npm%3A11.10.0#~/.yarn/patches/react-native-modal-npm-11.10.0-f32ba02b9e.patch"
     react-native-modal-datetime-picker: "npm:^17.1.0"
     react-native-modalbox: "npm:^2.0.0"
     react-native-nitro-modules: "npm:^0.31.10"
@@ -14032,15 +14031,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-animatable@npm:1.3.3":
-  version: 1.3.3
-  resolution: "react-native-animatable@npm:1.3.3"
-  dependencies:
-    prop-types: "npm:^15.7.2"
-  checksum: 10c0/ce18b871c29d17377c08aa143be64d06e20df8e669720d2fe4eed5465c37ac4e6ebbfb4464aecb23e3e22d82114768dfacb65b0c49c33dd736f54a0507265641
-  languageName: node
-  linkType: hard
-
 "react-native-boring-avatars@npm:^1.0.1":
   version: 1.0.1
   resolution: "react-native-boring-avatars@npm:1.0.1"
@@ -14146,32 +14136,6 @@ __metadata:
     "@react-native-community/datetimepicker": ">=6.7.0"
     react-native: ">=0.65.0"
   checksum: 10c0/831ebb04f1f5de92f1bcf220063c92fce7fe745713524e889bca045e7256dde39934c10b67570394d1499da966af575355f466f66e6012247fcc0e8a6846a2a6
-  languageName: node
-  linkType: hard
-
-"react-native-modal@npm:11.10.0":
-  version: 11.10.0
-  resolution: "react-native-modal@npm:11.10.0"
-  dependencies:
-    prop-types: "npm:^15.6.2"
-    react-native-animatable: "npm:1.3.3"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 10c0/9f61c4b9299fa068f046cc0763208c8448cb3283f1570ebe2ccda3ad6baebffc08e0c2f56df59b3a5e17ef2bebf98918908804f6565c0330340c7764c22f2361
-  languageName: node
-  linkType: hard
-
-"react-native-modal@patch:react-native-modal@npm%3A11.10.0#~/.yarn/patches/react-native-modal-npm-11.10.0-f32ba02b9e.patch":
-  version: 11.10.0
-  resolution: "react-native-modal@patch:react-native-modal@npm%3A11.10.0#~/.yarn/patches/react-native-modal-npm-11.10.0-f32ba02b9e.patch::version=11.10.0&hash=f1ce70"
-  dependencies:
-    prop-types: "npm:^15.6.2"
-    react-native-animatable: "npm:1.3.3"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 10c0/bba459764077bfa5ea1916a286ad61a21825eecd8437bad58869fb351a83a0310c48eee74c63fb7dfd95d98302be5fda7ec56826ac604b280e71490887d2a7cf
   languageName: node
   linkType: hard
 
