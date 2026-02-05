@@ -58,6 +58,7 @@ import {
   setSettingsPreferredDarkTheme,
   setSettingsPreferredLightTheme,
   setSettingsPress,
+  setSettingsRedWordsDisplay,
   setSettingsTagsDisplay,
   setSettingsTextDisplay,
   toggleSettingsShareAppName,
@@ -299,6 +300,7 @@ export interface UserState {
       linksDisplay: 'inline' | 'block'
       tagsDisplay: 'inline' | 'block'
       commentsDisplay: boolean
+      redWordsDisplay: boolean
       shareVerses: {
         hasVerseNumbers: boolean
         hasInlineVerses: boolean
@@ -389,6 +391,7 @@ const getInitialState = (): UserState => ({
       linksDisplay: 'inline',
       tagsDisplay: 'inline',
       commentsDisplay: false,
+      redWordsDisplay: true,
       shareVerses: {
         hasVerseNumbers: true,
         hasInlineVerses: true,
@@ -936,6 +939,9 @@ const userSlice = createSlice({
     })
     builder.addCase(setSettingsCommentaires, (state, action) => {
       state.bible.settings.commentsDisplay = action.payload
+    })
+    builder.addCase(setSettingsRedWordsDisplay, (state, action) => {
+      state.bible.settings.redWordsDisplay = action.payload
     })
     builder.addCase(increaseSettingsFontSizeScale, state => {
       if (state.bible.settings.fontSizeScale < 5) {

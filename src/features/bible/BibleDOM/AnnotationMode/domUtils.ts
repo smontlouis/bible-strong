@@ -52,7 +52,7 @@ export function getCaretInfoFromPoint(clientX: number, clientY: number): CaretIn
       // Only trust result if it's near where we touched (within 50px)
       if (yDistance < 50) {
         return {
-          charOffset: range.startOffset,
+          charOffset: toGlobalCharOffset(range.startContainer as Text, range.startOffset),
           targetElement: range.startContainer.parentElement,
         }
       }
@@ -83,7 +83,7 @@ function findWordInElementByPosition(
       if (isPointInRect(clientX, viewportY, rect)) {
         const charOffset = findCharOffsetInTextNode(textNode, clientX, viewportY)
         return {
-          charOffset,
+          charOffset: toGlobalCharOffset(textNode, charOffset),
           targetElement: textNode.parentElement,
         }
       }
@@ -99,7 +99,7 @@ function findWordInElementByPosition(
   // Ultimate fallback: return first text node with offset 0
   if (textNodes.length > 0) {
     return {
-      charOffset: 0,
+      charOffset: toGlobalCharOffset(textNodes[0], 0),
       targetElement: textNodes[0].parentElement,
     }
   }
@@ -236,12 +236,44 @@ function findClosestTextNode(
   if (closestNode) {
     const charOffset = findCharOffsetInTextNode(closestNode, clientX, viewportY)
     return {
-      charOffset,
+      charOffset: toGlobalCharOffset(closestNode, charOffset),
       targetElement: closestNode.parentElement,
     }
   }
 
   return null
+}
+
+/**
+ * Converts a text-node-local character offset to a global offset
+ * relative to the verse text element (the [id^="verse-text-"] ancestor).
+ *
+ * This is needed because inline elements (like red words spans or Strong's refs)
+ * split the verse text into multiple DOM text nodes, but the word tokenizer
+ * expects offsets relative to the full verse text string.
+ *
+ * When there is only a single text node (no inline spans), this is a no-op.
+ */
+function toGlobalCharOffset(textNode: Text, localOffset: number): number {
+  let verseTextEl: Element | null = textNode.parentElement
+  while (verseTextEl && !(verseTextEl.id && verseTextEl.id.startsWith('verse-text-'))) {
+    verseTextEl = verseTextEl.parentElement
+  }
+
+  if (!verseTextEl) return localOffset
+
+  const walker = document.createTreeWalker(verseTextEl, NodeFilter.SHOW_TEXT)
+  let offset = 0
+  let node: Text | null
+
+  while ((node = walker.nextNode() as Text | null)) {
+    if (node === textNode) {
+      return offset + localOffset
+    }
+    offset += node.textContent?.length || 0
+  }
+
+  return localOffset
 }
 
 /**

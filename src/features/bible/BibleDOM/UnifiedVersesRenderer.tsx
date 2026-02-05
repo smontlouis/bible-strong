@@ -162,6 +162,8 @@ export interface UnifiedVersesRendererProps {
   columnWidth?: number
   // Display mode for parallel verses (horizontal = side by side, vertical = stacked)
   parallelDisplayMode?: ParallelDisplayMode
+  // Red words data
+  redWords?: Record<string, { start: number; end: number }[]> | null
 }
 
 export function UnifiedVersesRenderer({
@@ -199,6 +201,7 @@ export function UnifiedVersesRenderer({
   columnCount = 1,
   columnWidth = 75,
   parallelDisplayMode = 'horizontal',
+  redWords,
 }: UnifiedVersesRendererProps) {
   // Calculate adjacent verses for fade effect in readonly mode
   const adjacentVerses = focusVerses
@@ -266,6 +269,7 @@ export function UnifiedVersesRenderer({
                 hasAnnotationNotes={versesWithAnnotationNotes?.has(String(Verset))}
                 taggedItemsCount={taggedVersesInChapter?.[Number(Verset)] || 0}
                 hasNonHighlightTags={versesWithNonHighlightTags?.[Number(Verset)]}
+                redWords={redWords}
               />
             </Span>
           )
@@ -381,6 +385,7 @@ export function UnifiedVersesRenderer({
               columnCount={columnCount}
               columnWidth={columnWidth}
               parallelDisplayMode={parallelDisplayMode}
+              redWords={redWords}
             />
             {!!comment && settings.commentsDisplay && (
               <Comment id={`comment-${verse.Verset}`} settings={settings} comment={comment} />

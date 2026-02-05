@@ -457,4 +457,19 @@ export default {
       },
     }
   },
+  32: (state: RootState) => {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        bible: {
+          ...state.user.bible,
+          settings: {
+            ...state.user.bible.settings,
+            redWordsDisplay: true,
+          },
+        },
+      },
+    }
+  },
 }

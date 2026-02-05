@@ -153,6 +153,8 @@ export type WebViewProps = {
   onOpenVerseNotesModal?: (verseKey: string) => void
   // Enter annotation mode from double-tap
   onEnterAnnotationMode?: () => void
+  // Red words data
+  redWords?: Record<string, { start: number; end: number }[]> | null
 }
 
 export type NotedVerse = {
@@ -588,6 +590,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
         taggedVersesInChapter={taggedVersesInChapter}
         versesWithNonHighlightTags={versesWithNonHighlightTags}
+        redWords={props.redWords}
       />
       {Platform.OS === 'android' && Platform.Version < 30 && (
         <HelpTip

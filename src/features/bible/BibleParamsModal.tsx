@@ -33,6 +33,7 @@ import {
   setSettingsPreferredDarkTheme,
   setSettingsPreferredLightTheme,
   setSettingsPress,
+  setSettingsRedWordsDisplay,
   setSettingsTagsDisplay,
   setSettingsTextDisplay,
 } from '~redux/modules/user'
@@ -172,6 +173,9 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
   const linksDisplay = useSelector((state: RootState) => state.user.bible.settings.linksDisplay)
   const tagsDisplay = useSelector((state: RootState) => state.user.bible.settings.tagsDisplay)
   const press = useSelector((state: RootState) => state.user.bible.settings.press)
+  const redWordsDisplay = useSelector(
+    (state: RootState) => state.user.bible.settings.redWordsDisplay
+  )
 
   const fontsViewRef = React.useRef(null)
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
@@ -363,6 +367,17 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
               const nextDisplay = tagsDisplay === 'inline' ? 'block' : 'inline'
               dispatch(setSettingsTagsDisplay(nextDisplay))
             }}
+          />
+        </HalfContainer>
+        <HalfContainer border>
+          <Text flex={5}>{t('Paroles de Jésus en rouge')}</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {redWordsDisplay ? t('Activé') : t('Désactivé')}
+          </Text>
+          <TouchableIcon
+            isSelected={redWordsDisplay}
+            name="type"
+            onPress={() => dispatch(setSettingsRedWordsDisplay(!redWordsDisplay))}
           />
         </HalfContainer>
         <HalfContainer border>

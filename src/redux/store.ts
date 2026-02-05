@@ -17,7 +17,7 @@ function configureStore() {
     keyPrefix: '',
     storage: mmkvStorage,
     stateReconciler: autoMergeLevel2,
-    version: 31,
+    version: 32,
     // debug: true,
     blacklist: ['plan'],
     // @ts-ignore

@@ -27,6 +27,7 @@ import { Bookmark, SelectedCode, StudyNavigateBibleType, Verse as TVerse } from 
 import { LinkedVerse, NotedVerse, RootStyles, TaggedVerse } from './BibleDOMWrapper'
 import { ParallelDisplayMode } from 'src/state/tabs'
 import verseToStrong from './verseToStrong'
+import { verseToRedWords } from './verseToRedWords'
 import { ContainerText, resolveHighlightInfo } from './ContainerText'
 import { convertHex } from './convertHex'
 import { HIGHLIGHT_BACKGROUND_OPACITY, getContrastTextColor } from '~helpers/highlightUtils'
@@ -137,6 +138,13 @@ const VerseGroupSeparator = styled('div')<RootStyles>(({ settings: { theme, colo
   marginBottom: '40px',
 }))
 
+const getRedColor = (settings: RootState['user']['bible']['settings']): string => {
+  const { theme } = settings
+  return theme === 'dark' || theme === 'black' || theme === 'mauve' || theme === 'night'
+    ? '#FF6B6B'
+    : '#CC0000'
+}
+
 const getVerseText = ({
   verse,
   version,
@@ -144,6 +152,7 @@ const getVerseText = ({
   isParallel,
   selectedCode,
   settings,
+  redWords,
 }: {
   verse: TVerse
   version: string
@@ -151,8 +160,10 @@ const getVerseText = ({
   isParallel?: boolean
   selectedCode: SelectedCode | null
   settings: RootState['user']['bible']['settings']
+  redWords?: Record<string, { start: number; end: number }[]> | null
 }): (string | JSX.Element)[] => {
   const isStrongVersion = version === 'LSGS' || version === 'KJVS'
+  const verseKey = `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`
 
   if (isStrongVersion) {
     return annotationMode
@@ -165,6 +176,12 @@ const getVerseText = ({
           selectedCode,
           settings,
         })
+  }
+
+  // Red words - only in non-annotation mode, when data exists
+  if (!annotationMode && redWords && redWords[verseKey]) {
+    const redColor = getRedColor(settings)
+    return verseToRedWords(verse.Texte, redWords[verseKey], redColor)
   }
 
   return [verse.Texte]
@@ -250,6 +267,8 @@ interface Props {
   columnWidth?: number
   // Display mode for parallel verses (horizontal = side by side, vertical = stacked)
   parallelDisplayMode?: ParallelDisplayMode
+  // Red words data
+  redWords?: Record<string, { start: number; end: number }[]> | null
 }
 
 const Verse = ({
@@ -287,6 +306,7 @@ const Verse = ({
   columnCount = 1,
   columnWidth = 75,
   parallelDisplayMode = 'horizontal',
+  redWords,
 }: Props) => {
   const dispatch = useDispatch()
   const translations = useTranslations()
@@ -369,6 +389,7 @@ const Verse = ({
     isParallel,
     selectedCode,
     settings,
+    redWords,
   })
 
   const verseKey = `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`

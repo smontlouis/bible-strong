@@ -114,6 +114,7 @@ type Props = Pick<
   | 'isSelectionMode'
   | 'selectedCode'
   | 'comments'
+  | 'redWords'
 > & {
   dispatch: Dispatch
   dom: import('expo/dom').DOMProps
@@ -345,6 +346,7 @@ const VersesRenderer = ({
   clearAnnotationSelectionTrigger,
   selectedAnnotationId,
   safeAreaTop = 0,
+  redWords,
 }: Props) => {
   const [isINTComplete, setIsINTComplete] = useState(true)
   const [loaded, error] = useFonts({
@@ -1251,6 +1253,7 @@ const VersesRenderer = ({
               columnCount={isParallelVerse ? parallelVersionTitles.length : 1}
               columnWidth={parallelColumnWidth}
               parallelDisplayMode={parallelDisplayMode}
+              redWords={redWords}
             />
           </HorizontalScrollWrapper>
           {isReadOnly && focusVerses && focusVerses.length > 0 && (

@@ -8,6 +8,7 @@ import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 import { BibleError } from '~helpers/bibleErrors'
 import getBiblePericope from '~helpers/getBiblePericope'
 import loadBibleChapter from '~helpers/loadBibleChapter'
+import { loadRedWords } from '~helpers/loadRedWords'
 import loadMhyComments from '~helpers/loadMhyComments'
 import { usePrevious } from '~helpers/usePrevious'
 import BibleHeader from './BibleHeader'
@@ -118,6 +119,9 @@ const BibleViewer = ({
   const [parallelVerses, setParallelVerses] = useState<ParallelVerse[]>([])
   const [secondaryVerses, setSecondaryVerses] = useState<Verse[] | null>(null)
   const [comments, setComments] = useState<{ [key: string]: string } | null>(null)
+  const [redWords, setRedWords] = useState<Record<string, { start: number; end: number }[]> | null>(
+    null
+  )
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
   const [linkVerses, setLinkVerses] = useState<VerseIds | undefined>(undefined)
@@ -393,6 +397,11 @@ const BibleViewer = ({
     } else if (comments) {
       setComments(null)
     }
+
+    // Load red words data (memoized, fast on subsequent calls)
+    loadRedWords(version)
+      .then(setRedWords)
+      .catch(() => setRedWords(null))
 
     // Update all states together to prevent UI flashes
     setIsLoading(false)
@@ -784,6 +793,8 @@ const BibleViewer = ({
           onOpenVerseNotesModal={handleOpenVerseNotesModal}
           // Double-tap to enter annotation mode
           onEnterAnnotationMode={handleEnterAnnotationModeFromDoubleTap}
+          // Red words
+          redWords={settings.redWordsDisplay ? redWords : null}
         />
       )}
       {!(withNavigation || isReadOnly) && (
