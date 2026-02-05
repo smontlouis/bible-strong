@@ -19,6 +19,7 @@ import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import { getIfVersionNeedsDownload, isStrongVersion, Version } from '~helpers/bibleVersions'
 import { requireBiblePath } from '~helpers/requireBiblePath'
+import { downloadRedWordsFile, deleteRedWordsFile, versionHasRedWords } from '~helpers/redWords'
 import useLanguage from '~helpers/useLanguage'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
@@ -147,6 +148,10 @@ const VersionSelectorItem = ({
 
       console.log('[Bible] Download finished')
 
+      if (versionHasRedWords(version.id)) {
+        downloadRedWordsFile(version.id)
+      }
+
       if (version.id === 'INT' || version.id === 'INT_EN') {
         const lang = version.id === 'INT' ? 'fr' : 'en'
         await dbManager.getDB('INTERLINEAIRE', lang).init()
@@ -235,6 +240,7 @@ const VersionSelectorItem = ({
       return
     }
     FileSystem.deleteAsync(file.uri)
+    deleteRedWordsFile(version.id)
     setVersionNeedsDownload(true)
 
     if (version.id === 'INT' || version.id === 'INT_EN') {

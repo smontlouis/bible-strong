@@ -17,6 +17,7 @@ import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { requireBiblePath } from '~helpers/requireBiblePath'
+import { downloadRedWordsFile, versionHasRedWords } from '~helpers/redWords'
 import { isOnboardingCompletedAtom, selectedResourcesAtom } from './atom'
 
 const DownloadResources = () => {
@@ -56,6 +57,10 @@ const DownloadResources = () => {
         if (err) {
           setError(err)
           return
+        }
+
+        if (versionHasRedWords(resource.id)) {
+          downloadRedWordsFile(resource.id)
         }
       }
 
