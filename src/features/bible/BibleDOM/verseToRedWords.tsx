@@ -1,5 +1,4 @@
 import { styled } from 'goober'
-import { tokenizeVerseText } from '~helpers/wordTokenizer'
 
 type RedWordsRange = { start: number; end: number }
 
@@ -7,42 +6,57 @@ const RedSpan = styled('span')<{ redColor: string }>(({ redColor }) => ({
   color: redColor,
 }))
 
+const WORD_REGEX = /\S+/g
+
 export function verseToRedWords(
   text: string,
   ranges: RedWordsRange[],
   redColor: string
 ): (string | JSX.Element)[] {
-  const tokens = tokenizeVerseText(text)
-  // Build set of word indices that are red
-  const redIndices = new Set<number>()
-  for (const { start, end } of ranges) {
-    for (let i = start; i <= end; i++) redIndices.add(i)
+  // Find character boundaries of each word via regex
+  const wordBounds: [number, number][] = []
+  let m: RegExpExecArray | null
+  while ((m = WORD_REGEX.exec(text))) {
+    wordBounds.push([m.index, m.index + m[0].length])
   }
-  // Group consecutive tokens into red/normal segments
-  const segments: { text: string; isRed: boolean }[] = []
-  let current = { text: '', isRed: false }
-  for (const token of tokens) {
-    const isRed = !token.isWhitespace && redIndices.has(token.index)
-    // Whitespace inherits the color of the surrounding context
-    const effectiveRed = token.isWhitespace ? current.isRed : isRed
-    if (segments.length === 0 && current.text === '') {
-      current = { text: token.word, isRed: effectiveRed }
-    } else if (effectiveRed === current.isRed) {
-      current.text += token.word
+  WORD_REGEX.lastIndex = 0
+
+  if (wordBounds.length === 0) return [text]
+
+  // Convert word-index ranges to character ranges
+  const charRanges: [number, number][] = []
+  for (const { start, end } of ranges) {
+    if (start >= wordBounds.length) continue
+    const cEnd = Math.min(end, wordBounds.length - 1)
+    charRanges.push([wordBounds[start][0], wordBounds[cEnd][1]])
+  }
+
+  // Sort & merge overlapping/adjacent ranges
+  charRanges.sort((a, b) => a[0] - b[0])
+  const merged: [number, number][] = []
+  for (const r of charRanges) {
+    const last = merged[merged.length - 1]
+    if (last && r[0] <= last[1]) {
+      last[1] = Math.max(last[1], r[1])
     } else {
-      segments.push(current)
-      current = { text: token.word, isRed: effectiveRed }
+      merged.push([r[0], r[1]])
     }
   }
-  if (current.text) segments.push(current)
-  // Convert to JSX
-  return segments.map((seg, i) =>
-    seg.isRed ? (
+
+  // Slice text into alternating normal/red segments
+  const result: (string | JSX.Element)[] = []
+  let pos = 0
+  for (let i = 0; i < merged.length; i++) {
+    const [s, e] = merged[i]
+    if (pos < s) result.push(text.slice(pos, s))
+    result.push(
       <RedSpan key={i} redColor={redColor}>
-        {seg.text}
+        {text.slice(s, e)}
       </RedSpan>
-    ) : (
-      seg.text
     )
-  )
+    pos = e
+  }
+  if (pos < text.length) result.push(text.slice(pos))
+
+  return result
 }
