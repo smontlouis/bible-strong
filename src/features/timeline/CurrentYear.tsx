@@ -1,14 +1,13 @@
 import React from 'react'
-import {
+import { Platform, TextInput } from 'react-native'
+import Animated, {
   Extrapolation,
   SharedValue,
   interpolate,
+  useAnimatedProps,
   useAnimatedStyle,
   useDerivedValue,
 } from 'react-native-reanimated'
-import { ReText } from 'react-native-redash'
-
-import { Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Link from '~common/Link'
 import Box, { AnimatedBox } from '~common/ui/Box'
@@ -16,6 +15,8 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { wp, wpUI } from '~helpers/utils'
 import { offset } from './constants'
+
+const AnimatedTextInput = Animated.createAnimatedComponent(TextInput)
 
 const LinkBox = Box.withComponent(Link)
 
@@ -110,13 +111,19 @@ const CurrentYear = ({
         borderTopRightRadius={5}
         paddingTop={Platform.OS === 'android' ? 8 : 0}
       >
-        <ReText
-          text={year}
+        <AnimatedTextInput
+          underlineColorAndroid="transparent"
+          editable={false}
+          animatedProps={useAnimatedProps(() => ({
+            text: year.get(),
+          } as any))}
+          defaultValue={year.get()}
           style={{
             color: 'white',
             width: 120,
             textAlign: 'center',
             fontWeight: 'bold',
+            padding: 0,
             ...(Platform.OS === 'android' && {
               lineHeight: 1,
               textAlignVertical: 'center',

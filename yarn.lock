@@ -5992,13 +5992,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"abs-svg-path@npm:^0.1.1":
-  version: 0.1.1
-  resolution: "abs-svg-path@npm:0.1.1"
-  checksum: 10c0/aa763f3843cd4d7c3eabcddc91834ab27def4c1f470b98a3bf01ebe82928629c5aeaa97766252781449e0c722e1785f8e512fea79f86d3d10f8eca220d6aa292
-  languageName: node
-  linkType: hard
-
 "accepts@npm:^1.3.7, accepts@npm:^1.3.8, accepts@npm:~1.3.8":
   version: 1.3.8
   resolution: "accepts@npm:1.3.8"
@@ -6927,7 +6920,6 @@ __metadata:
     react-native-popup-menu: "npm:^0.18.0"
     react-native-reanimated: "npm:^4.2.1"
     react-native-reanimated-carousel: "npm:^5.0.0-beta.3"
-    react-native-redash: "npm:^18.1.3"
     react-native-restart: "npm:^0.0.17"
     react-native-root-siblings: "npm:5.0.1"
     react-native-safe-area-context: "npm:~5.6.0"
@@ -6951,7 +6943,6 @@ __metadata:
     redux-persist-filesystem-storage: "npm:^2.1.0"
     redux-thunk: "npm:^2.3.0"
     rn-fetch-blob: "npm:^0.12.0"
-    rn-placeholder: "npm:^3.0.3"
     slugify: "npm:^1.4.0"
     sonner-native: "npm:^0.22.2"
     trunc-html: "npm:^1.1.2"
@@ -13008,15 +12999,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"normalize-svg-path@npm:^1.0.1":
-  version: 1.1.0
-  resolution: "normalize-svg-path@npm:1.1.0"
-  dependencies:
-    svg-arc-to-cubic-bezier: "npm:^3.0.0"
-  checksum: 10c0/2e24e1d0a9ca7f172cec161d9c14fef616c57040664d82f6077d97c42e6e8a113f288dc0cb55e19fc4873baa0c5ddc7857d24d4a1b6df594924451d1adbb1b41
-  languageName: node
-  linkType: hard
-
 "npm-package-arg@npm:^11.0.0":
   version: 11.0.3
   resolution: "npm-package-arg@npm:11.0.3"
@@ -13418,13 +13400,6 @@ __metadata:
   dependencies:
     pngjs: "npm:^3.3.0"
   checksum: 10c0/5157a8bbb976ae1ca990fc53c7014d42aac0967cb30e2daf36c3fef1876c8db0d551e695400c904f33c5c5add76a572c65b5044721d62417d8cc7abe4c4ffa41
-  languageName: node
-  linkType: hard
-
-"parse-svg-path@npm:^0.1.2":
-  version: 0.1.2
-  resolution: "parse-svg-path@npm:0.1.2"
-  checksum: 10c0/005af72d535f47bbe4673108e51d657b81cb19dcc4f10ab425dd9f824066ef300ddbc83640607ef318f853a9fce7065114705531dcf88fb87fe58c287b562f2b
   languageName: node
   linkType: hard
 
@@ -14199,22 +14174,6 @@ __metadata:
     react-native: "*"
     react-native-worklets: ">=0.7.0"
   checksum: 10c0/1458fb634d374125931c5815b2b0941e12b1a880ba12b4ff6bba12b6c101e0ce1f5c32a2226034ae762558e38077ae112d8498eb2c8af6bd967524c7e7f87c6b
-  languageName: node
-  linkType: hard
-
-"react-native-redash@npm:^18.1.3":
-  version: 18.1.4
-  resolution: "react-native-redash@npm:18.1.4"
-  dependencies:
-    abs-svg-path: "npm:^0.1.1"
-    normalize-svg-path: "npm:^1.0.1"
-    parse-svg-path: "npm:^0.1.2"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-    react-native-gesture-handler: "*"
-    react-native-reanimated: ">=2.0.0"
-  checksum: 10c0/2c87e31b38d3c02cb99194f76d2ac5c85faadd869ea7f2a4ecf4f8ef413d01791c3f675ccca4d3706c1ed5a9cb84cf8ce23e9a89533c667b203e48c4189a74de
   languageName: node
   linkType: hard
 
@@ -15089,16 +15048,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rn-placeholder@npm:^3.0.3":
-  version: 3.0.3
-  resolution: "rn-placeholder@npm:3.0.3"
-  peerDependencies:
-    react: ^16.13.1
-    react-native: ^0.63.2
-  checksum: 10c0/c5b2439eb73a94303bb8ee0c70d2e9f552c09b4137dd3ca843a1c837012d508960ec99c03a7e8703415621a7fad804fe1e30fbf489a806814b659a0ba6b717ae
-  languageName: node
-  linkType: hard
-
 "run-parallel@npm:^1.1.9":
   version: 1.2.0
   resolution: "run-parallel@npm:1.2.0"
@@ -15962,13 +15911,6 @@ __metadata:
   version: 1.0.0
   resolution: "supports-preserve-symlinks-flag@npm:1.0.0"
   checksum: 10c0/6c4032340701a9950865f7ae8ef38578d8d7053f5e10518076e6554a9381fa91bd9c6850193695c141f32b21f979c985db07265a758867bac95de05f7d8aeb39
-  languageName: node
-  linkType: hard
-
-"svg-arc-to-cubic-bezier@npm:^3.0.0":
-  version: 3.2.0
-  resolution: "svg-arc-to-cubic-bezier@npm:3.2.0"
-  checksum: 10c0/6dddbaff9defa55a891593b48ba6bd5f1b3c89d747cf818a8342ec4cac10b06de6cd37478dc9483cba5e8d1a7d3dac2d0bbab47858d207a2d1a6a61b5acdd442
   languageName: node
   linkType: hard
 
