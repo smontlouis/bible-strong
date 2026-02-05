@@ -101,41 +101,15 @@ const Header = ({
     selectBookmarkForChapter(state, bookNumber, chapter)
   )
 
-  // Track previous book and chapter to avoid overwriting custom titles
-  const prevBook = usePrevious(bookName)
-  const prevChapter = usePrevious(chapter)
-  const prevFocusVerses = usePrevious(JSON.stringify(bible.data.focusVerses))
-  const prevSelectedVersion = usePrevious(version)
-
   useEffect(() => {
-    // Only update title if book or chapter changed (not on first mount)
-    // prevBook is undefined on first render, so we skip the update
-    if (
-      prevBook !== undefined &&
-      (prevBook !== bookName ||
-        prevChapter !== chapter ||
-        prevFocusVerses !== JSON.stringify(bible.data.focusVerses) ||
-        prevSelectedVersion !== version)
-    ) {
-      const { selectedBook, selectedChapter, selectedVersion, focusVerses } = bible.data
-      const ref = verseToReference({
-        bookNum: selectedBook.Numero,
-        chapterNum: selectedChapter,
-        verses: focusVerses,
-      })
-      actions.setTitle(`${ref} - ${selectedVersion}`)
-    }
-  }, [
-    actions,
-    bookName,
-    chapter,
-    prevBook,
-    prevChapter,
-    prevFocusVerses,
-    prevSelectedVersion,
-    version,
-    bible.data,
-  ])
+    const { selectedBook, selectedChapter, selectedVersion, focusVerses } = bible.data
+    const ref = verseToReference({
+      bookNum: selectedBook.Numero,
+      chapterNum: selectedChapter,
+      verses: focusVerses,
+    })
+    actions.setTitle(`${ref} - ${selectedVersion}`)
+  }, [actions, bible])
 
   const { addParallelVersion, removeParallelVersion, removeAllParallelVersions } = actions
 
