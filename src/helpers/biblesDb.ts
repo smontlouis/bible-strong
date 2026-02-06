@@ -15,6 +15,7 @@ export interface BibleVerse {
 }
 
 export interface SearchResult {
+  version: string
   book: number
   chapter: number
   verse: number
@@ -393,7 +394,7 @@ export async function searchVerses(
   const { where, params } = buildSearchFilter(ftsQuery, options)
 
   const sql = `
-    SELECT v.book, v.chapter, v.verse, v.text,
+    SELECT v.version, v.book, v.chapter, v.verse, v.text,
            highlight(verses_fts, 0, '{{', '}}') AS highlighted
     FROM verses_fts
     JOIN verses v ON v.id = verses_fts.rowid

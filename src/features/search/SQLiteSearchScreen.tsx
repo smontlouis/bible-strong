@@ -10,7 +10,7 @@ import DropdownMenu from '~common/DropdownMenu'
 import Empty from '~common/Empty'
 import Loading from '~common/Loading'
 import SearchInput from '~common/SearchInput'
-import Box from '~common/ui/Box'
+import Box, { HStack } from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import formatVerseContent from '~helpers/formatVerseContent'
@@ -22,6 +22,7 @@ import {
   SearchOptions,
 } from '~helpers/biblesDb'
 import useDebounce from '~helpers/useDebounce'
+import { Chip } from '~common/ui/NewChip'
 
 type Props = {
   searchValue: string
@@ -144,7 +145,6 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
         horizontal
         style={{
           maxHeight: 55,
-          paddingHorizontal: 10,
         }}
         contentContainerStyle={{
           flexDirection: 'row',
@@ -191,18 +191,14 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           keyboardShouldPersistTaps="handled"
           enableResetScrollToCoords={false}
           style={{
-            padding: 20,
-            paddingTop: 0,
             paddingBottom: 40,
             flex: 1,
             backgroundColor: theme.colors.reverse,
-            borderTopLeftRadius: 30,
-            borderTopRightRadius: 30,
           }}
           removeClippedSubviews
           data={results}
           keyExtractor={(result: SearchResult) =>
-            `${result.book}-${result.chapter}-${result.verse}`
+            `${result.version}-${result.book}-${result.chapter}-${result.verse}`
           }
           renderItem={({ item: result }: { item: SearchResult }) => {
             const { title } = formatVerseContent([
@@ -212,8 +208,8 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
             return (
               <SearchResultItem
                 reference={title}
+                version={result.version}
                 highlighted={result.highlighted}
-                text={result.text}
                 onPress={() =>
                   router.push({
                     pathname: '/bible-view',
@@ -241,13 +237,13 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
 
 const SearchResultItem = ({
   reference,
+  version,
   highlighted,
-  text,
   onPress,
 }: {
   reference: string
+  version: string
   highlighted: string
-  text: string
   onPress: () => void
 }) => {
   // Parse {{ and }} markers from FTS5 highlight() into bold Text elements
@@ -256,16 +252,19 @@ const SearchResultItem = ({
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
       <Box paddingTop={15} paddingBottom={20} borderBottomWidth={1} borderColor="border">
-        <Text title fontSize={16} marginBottom={5}>
-          {reference}
-        </Text>
+        <HStack alignItems="center" gap={4} mb={4}>
+          <Text title fontSize={14}>
+            {reference}
+          </Text>
+          <Chip>{version}</Chip>
+        </HStack>
         <Paragraph small>
           {parts.map((part, i) => {
             if (part.startsWith('{{') && part.endsWith('}}')) {
               return (
-                <Text bold color="primary" key={i}>
+                <Paragraph small bold color="primary" key={i}>
                   {part.slice(2, -2)}
-                </Text>
+                </Paragraph>
               )
             }
             return part
