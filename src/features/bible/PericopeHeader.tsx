@@ -1,6 +1,5 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import React from 'react'
 
 import Back from '~common/Back'
 import Box from '~common/ui/Box'
@@ -16,22 +15,19 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
-const Header = ({
-  hasBackButton,
-  isModal,
-  title,
-}: {
+interface PericopeHeaderProps {
   hasBackButton?: boolean
-  isModal?: boolean
   title: string
-}) => {
+}
+
+function PericopeHeader({ hasBackButton, title }: PericopeHeaderProps) {
   return (
     // @ts-ignore
     <HeaderBox row overflow="visibility">
       <Box justifyContent="center">
         {hasBackButton && (
           <Back padding>
-            <FeatherIcon name={isModal ? 'x' : 'arrow-left'} size={20} />
+            <FeatherIcon name="arrow-left" size={20} />
           </Back>
         )}
       </Box>
@@ -45,4 +41,4 @@ const Header = ({
   )
 }
 
-export default Header
+export default PericopeHeader

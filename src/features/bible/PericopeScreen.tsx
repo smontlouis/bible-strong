@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { TouchableOpacity } from 'react-native'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
@@ -18,29 +18,8 @@ import { useQuery } from '~helpers/react-query-lite'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 
-const H1 = styled(Paragraph)(() => ({
-  fontSize: 24,
-  marginLeft: 20,
-  marginBottom: 20,
-  fontWeight: 'bold',
-}))
-
-const H2 = styled(Paragraph)(() => ({
-  fontSize: 20,
-  marginLeft: 20,
-  marginBottom: 20,
-  fontWeight: 'bold',
-}))
-
-const H3 = styled(Paragraph)(() => ({
-  fontSize: 18,
-  marginLeft: 20,
-  marginBottom: 20,
-  fontWeight: 'bold',
-}))
-
-const H4 = styled(Paragraph)(() => ({
-  fontSize: 16,
+const PericopeHeading = styled(Paragraph)<{ size: number }>(({ size }) => ({
+  fontSize: size,
   marginLeft: 20,
   marginBottom: 20,
   fontWeight: 'bold',
@@ -50,16 +29,16 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
+/**
+ * Recursively removes empty object branches from pericope data.
+ * Note: this mutates the input object for performance on large pericope trees.
+ */
 function clearEmpties(o: any) {
   for (const k in o) {
-    if (!o[k] || typeof o[k] !== 'object') {
-      continue // If null or not an object, skip to the next iteration
-    }
-
-    // The property is an object
-    clearEmpties(o[k]) // <-- Make a recursive call on the nested object
+    if (!o[k] || typeof o[k] !== 'object') continue
+    clearEmpties(o[k])
     if (Object.keys(o[k]).length === 0) {
-      delete o[k] // The object had no properties, so delete that property
+      delete o[k]
     }
   }
   return o
@@ -78,7 +57,7 @@ const PericopeScreen = () => {
     queryKey: ['bible-pericope', defaultVersion],
     queryFn: () => getBiblePericope(defaultVersion),
   })
-  const pericopeBook = pericope ? clearEmpties(pericope[book.Numero]) : []
+  const pericopeBook = pericope ? clearEmpties(pericope[book.Numero]) : {}
 
   return (
     <Container>
@@ -94,42 +73,40 @@ const PericopeScreen = () => {
               message={t('Aucun péricope pour ce Livre, essayez avec une autre version.')}
             />
           ) : (
-            Object.entries(pericopeBook).map(([chapterKey, chapterObject]: any) => {
-              return (
-                <React.Fragment key={chapterKey}>
-                  {!!Object.keys(chapterObject).length && (
-                    <Text color="tertiary" fontSize={12} marginBottom={10}>
-                      {t('CHAPITRE')} {chapterKey}
-                    </Text>
-                  )}
-                  {Object.entries(chapterObject).map(([verseKey, verseObject]: any) => {
-                    const { h1, h2, h3, h4 } = verseObject
-                    return (
-                      <TouchableOpacity
-                        key={verseKey}
-                        onPress={() =>
-                          router.push({
-                            pathname: '/bible-view',
-                            params: {
-                              isReadOnly: 'true',
-                              book: JSON.stringify(book),
-                              chapter: String(chapterKey),
-                              version: defaultVersion,
-                              verse: '1',
-                            },
-                          })
-                        }
-                      >
-                        {h1 && <H1>{h1}</H1>}
-                        {h2 && <H2>{h2}</H2>}
-                        {h3 && <H3>{h3}</H3>}
-                        {h4 && <H4>{h4}</H4>}
-                      </TouchableOpacity>
-                    )
-                  })}
-                </React.Fragment>
-              )
-            })
+            Object.entries(pericopeBook).map(([chapterKey, chapterObject]: any) => (
+              <Fragment key={chapterKey}>
+                {!!Object.keys(chapterObject).length && (
+                  <Text color="tertiary" fontSize={12} marginBottom={10}>
+                    {t('CHAPITRE')} {chapterKey}
+                  </Text>
+                )}
+                {Object.entries(chapterObject).map(([verseKey, verseObject]: any) => {
+                  const { h1, h2, h3, h4 } = verseObject
+                  return (
+                    <TouchableOpacity
+                      key={verseKey}
+                      onPress={() =>
+                        router.push({
+                          pathname: '/bible-view',
+                          params: {
+                            isReadOnly: 'true',
+                            book: JSON.stringify(book),
+                            chapter: String(chapterKey),
+                            version: defaultVersion,
+                            verse: '1',
+                          },
+                        })
+                      }
+                    >
+                      {h1 && <PericopeHeading size={24}>{h1}</PericopeHeading>}
+                      {h2 && <PericopeHeading size={20}>{h2}</PericopeHeading>}
+                      {h3 && <PericopeHeading size={18}>{h3}</PericopeHeading>}
+                      {h4 && <PericopeHeading size={16}>{h4}</PericopeHeading>}
+                    </TouchableOpacity>
+                  )
+                })}
+              </Fragment>
+            ))
           )}
         </Box>
       </ScrollView>
