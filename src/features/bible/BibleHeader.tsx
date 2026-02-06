@@ -281,7 +281,7 @@ const Header = ({
       exiting={FadeOut}
     >
       <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
-        {hasBackButton && (
+        {hasBackButton ? (
           <Back
             onGoBack={() => {
               isFullScreenBibleValue.set(false)
@@ -299,7 +299,9 @@ const Header = ({
               <FeatherIcon name="arrow-left" size={20} />
             </MotiBox>
           </Back>
-        )}
+        ) : isReadOnly ? (
+          <Box width={50} />
+        ) : null}
         {isReadOnly ? (
           <>
             <Box flex={1} center>
@@ -307,7 +309,22 @@ const Header = ({
                 {`${verseToReference({ bookNum: bookNumber, chapterNum: chapter, verses: displayVerses })} - ${version}`}
               </Text>
             </Box>
-            <Box width={50} />
+            {focusVerses && focusVerses.length > 0 ? (
+              <TouchableBox
+                onPress={() => actions.clearFocusVerses()}
+                center
+                width={40}
+                height={40}
+                alignItems="center"
+                justifyContent="center"
+              >
+                <Box width={24} height={24} bg="lightGrey" borderRadius={10} center>
+                  <FeatherIcon name="x" size={16} />
+                </Box>
+              </TouchableBox>
+            ) : (
+              <Box width={50} />
+            )}
           </>
         ) : (
           <>
@@ -517,6 +534,16 @@ const Header = ({
                     </>
                   }
                 />
+                {focusVerses && focusVerses.length > 0 && (
+                  <TouchableBox
+                    onPress={() => actions.clearFocusVerses()}
+                    center
+                    width={40}
+                    height={32}
+                  >
+                    <FeatherIcon name="x" size={20} />
+                  </TouchableBox>
+                )}
               </HStack>
             )}
           </>
