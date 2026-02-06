@@ -49,7 +49,7 @@ const InitHooks = ({}: InitHooksProps) => {
           message: '',
         })
 
-        await migrateBibleJsonToSqlite((current, total, versionId) => {
+        const failedVersions = await migrateBibleJsonToSqlite((current, total, versionId) => {
           setMigrationProgressFromOutsideReact({
             overallProgress: current / total,
             message: `${versionId} (${current}/${total})`,
@@ -58,12 +58,23 @@ const InitHooks = ({}: InitHooksProps) => {
           })
         })
 
-        setMigrationProgressFromOutsideReact({
-          overallProgress: 1,
-          message: 'Terminé !',
-        })
-
-        setTimeout(() => Updates.reloadAsync(), 1000)
+        if (failedVersions.length > 0) {
+          setMigrationProgressFromOutsideReact({
+            overallProgress: 1,
+            message: `${failedVersions.length} version(s) non migrée(s)`,
+          })
+          setTimeout(async () => {
+            try { await Updates.reloadAsync() } catch {}
+          }, 2000)
+        } else {
+          setMigrationProgressFromOutsideReact({
+            overallProgress: 1,
+            message: 'Terminé !',
+          })
+          setTimeout(async () => {
+            try { await Updates.reloadAsync() } catch {}
+          }, 1000)
+        }
       })
       .catch(err => {
         console.error('[InitHooks] Failed to open bibles.sqlite:', err)

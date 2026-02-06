@@ -1,3 +1,4 @@
+import * as FileSystem from 'expo-file-system/legacy'
 import * as SQLite from 'expo-sqlite'
 import { getSharedSqliteDirPath } from '~helpers/databaseTypes'
 import { databaseBiblesName } from '~helpers/databases'
@@ -46,6 +47,10 @@ export async function openBiblesDb(): Promise<SQLite.SQLiteDatabase> {
 
   openPromise = (async () => {
     const dir = getSharedSqliteDirPath()
+    const dirInfo = await FileSystem.getInfoAsync(dir)
+    if (!dirInfo.exists) {
+      await FileSystem.makeDirectoryAsync(dir, { intermediates: true })
+    }
     const instance = await SQLite.openDatabaseAsync(databaseBiblesName, { useNewConnection: true }, dir)
 
     await instance.execAsync(`
@@ -250,6 +255,12 @@ export async function insertBibleVersion(
 
   await d.withExclusiveTransactionAsync(async () => {
     // Delete any existing data for this version first (re-download case)
+    // Remove FTS entries before deleting verses (content-sync table needs explicit delete)
+    await d.runAsync(
+      `INSERT INTO verses_fts(verses_fts, rowid, text)
+       SELECT 'delete', id, text FROM verses WHERE version = ?`,
+      [version]
+    )
     await d.runAsync('DELETE FROM verses WHERE version = ?', [version])
     await d.runAsync('DELETE FROM versions_meta WHERE version = ?', [version])
 
@@ -336,6 +347,30 @@ export async function removeBibleVersion(version: string): Promise<void> {
 // ---------------------------------------------------------------------------
 
 /**
+ * Build the WHERE clause and params shared by search and count queries.
+ */
+function buildSearchFilter(ftsQuery: string, options?: SearchOptions) {
+  let where = 'WHERE verses_fts MATCH ?'
+  const params: (string | number)[] = [ftsQuery]
+
+  if (options?.version) {
+    where += ' AND v.version = ?'
+    params.push(options.version)
+  }
+  if (options?.book) {
+    where += ' AND v.book = ?'
+    params.push(options.book)
+  }
+  if (options?.section === 'ot') {
+    where += ' AND v.book <= 39'
+  } else if (options?.section === 'nt') {
+    where += ' AND v.book > 39'
+  }
+
+  return { where, params }
+}
+
+/**
  * Search verses using FTS5 full-text search.
  *
  * Supports:
@@ -355,34 +390,16 @@ export async function searchVerses(
 
   const limit = options?.limit ?? 100
   const offset = options?.offset ?? 0
+  const { where, params } = buildSearchFilter(ftsQuery, options)
 
-  let sql = `
+  const sql = `
     SELECT v.book, v.chapter, v.verse, v.text,
            highlight(verses_fts, 0, '{{', '}}') AS highlighted
     FROM verses_fts
     JOIN verses v ON v.id = verses_fts.rowid
-    WHERE verses_fts MATCH ?
+    ${where}
+    ORDER BY rank LIMIT ? OFFSET ?
   `
-
-  const params: (string | number)[] = [ftsQuery]
-
-  if (options?.version) {
-    sql += ' AND v.version = ?'
-    params.push(options.version)
-  }
-
-  if (options?.book) {
-    sql += ' AND v.book = ?'
-    params.push(options.book)
-  }
-
-  if (options?.section === 'ot') {
-    sql += ' AND v.book <= 39'
-  } else if (options?.section === 'nt') {
-    sql += ' AND v.book > 39'
-  }
-
-  sql += ' ORDER BY rank LIMIT ? OFFSET ?'
   params.push(limit, offset)
 
   return d.getAllAsync<SearchResult>(sql, params)
@@ -396,30 +413,14 @@ export async function searchVersesCount(query: string, options?: SearchOptions):
   const ftsQuery = sanitizeFtsQuery(query)
   if (!ftsQuery) return 0
 
-  let sql = `
+  const { where, params } = buildSearchFilter(ftsQuery, options)
+
+  const sql = `
     SELECT COUNT(*) as cnt
     FROM verses_fts
     JOIN verses v ON v.id = verses_fts.rowid
-    WHERE verses_fts MATCH ?
+    ${where}
   `
-
-  const params: (string | number)[] = [ftsQuery]
-
-  if (options?.version) {
-    sql += ' AND v.version = ?'
-    params.push(options.version)
-  }
-
-  if (options?.book) {
-    sql += ' AND v.book = ?'
-    params.push(options.book)
-  }
-
-  if (options?.section === 'ot') {
-    sql += ' AND v.book <= 39'
-  } else if (options?.section === 'nt') {
-    sql += ' AND v.book > 39'
-  }
 
   const row = await d.getFirstAsync<{ cnt: number }>(sql, params)
   return row?.cnt ?? 0

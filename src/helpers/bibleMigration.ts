@@ -7,6 +7,8 @@ import { isStrongVersion } from '~helpers/bibleVersions'
 
 const MIGRATION_KEY = 'hasMigratedBiblesToSqlite'
 const MIGRATED_VERSIONS_KEY = 'migratedBibleVersions'
+const ATTEMPTS_KEY = 'bibleMigrationAttempts'
+const MAX_ATTEMPTS = 3
 
 /**
  * Check if the full migration has been completed.
@@ -54,11 +56,15 @@ function markVersionMigrated(versionId: string): void {
  */
 export async function migrateBibleJsonToSqlite(
   onProgress?: (current: number, total: number, versionId: string) => void
-): Promise<void> {
+): Promise<string[]> {
   if (hasMigratedBibles()) {
     console.log('[BibleMigration] Already migrated, skipping')
-    return
+    return []
   }
+
+  const attempts = (storage.getNumber(ATTEMPTS_KEY) ?? 0) + 1
+  storage.set(ATTEMPTS_KEY, attempts)
+  console.log(`[BibleMigration] Attempt ${attempts}/${MAX_ATTEMPTS}`)
 
   console.log('[BibleMigration] Starting JSON -> SQLite migration...')
   const start = performance.now()
@@ -114,12 +120,14 @@ export async function migrateBibleJsonToSqlite(
       continue
     }
 
-    const fullPath = file.includes('/') ? `${docDir}${file}` : `${docDir}${file}`
+    const fullPath = `${docDir}${file}`
     filesToMigrate.push({ versionId, filePath: fullPath })
   }
 
   const total = filesToMigrate.length
   console.log(`[BibleMigration] Found ${total} Bible(s) to migrate`)
+
+  const failedVersions: string[] = []
 
   for (let i = 0; i < filesToMigrate.length; i++) {
     const { versionId, filePath } = filesToMigrate[i]
@@ -143,6 +151,7 @@ export async function migrateBibleJsonToSqlite(
       console.log(`[BibleMigration] Migrated ${versionId} successfully`)
     } catch (e) {
       console.error(`[BibleMigration] Failed to migrate ${versionId}:`, e)
+      failedVersions.push(versionId)
       // Continue with next version - don't block migration
     }
   }
@@ -160,9 +169,19 @@ export async function migrateBibleJsonToSqlite(
     }
   }
 
-  // Mark full migration as done
-  storage.set(MIGRATION_KEY, true)
+  // Mark full migration as done only if all versions succeeded or max attempts reached
+  if (failedVersions.length === 0 || attempts >= MAX_ATTEMPTS) {
+    storage.set(MIGRATION_KEY, true)
+    storage.remove(ATTEMPTS_KEY)
+    if (failedVersions.length > 0) {
+      console.warn(
+        `[BibleMigration] Marking done after ${attempts} attempts with ${failedVersions.length} failure(s):`,
+        failedVersions
+      )
+    }
+  }
 
   const elapsed = performance.now() - start
   console.log(`[BibleMigration] Migration complete in ${elapsed.toFixed(0)}ms`)
+  return failedVersions
 }
