@@ -20,6 +20,7 @@ import Text from '~common/ui/Text'
 import { getIfVersionNeedsDownload, isStrongVersion, Version } from '~helpers/bibleVersions'
 import { requireBiblePath } from '~helpers/requireBiblePath'
 import { downloadRedWordsFile, deleteRedWordsFile, versionHasRedWords } from '~helpers/redWords'
+import { downloadPericopeFile, deletePericopeFile, versionHasPericope } from '~helpers/pericopes'
 import useLanguage from '~helpers/useLanguage'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
@@ -152,6 +153,10 @@ const VersionSelectorItem = ({
         downloadRedWordsFile(version.id)
       }
 
+      if (versionHasPericope(version.id)) {
+        downloadPericopeFile(version.id)
+      }
+
       if (version.id === 'INT' || version.id === 'INT_EN') {
         const lang = version.id === 'INT' ? 'fr' : 'en'
         await dbManager.getDB('INTERLINEAIRE', lang).init()
@@ -241,6 +246,7 @@ const VersionSelectorItem = ({
     }
     FileSystem.deleteAsync(file.uri)
     deleteRedWordsFile(version.id)
+    deletePericopeFile(version.id)
     setVersionNeedsDownload(true)
 
     if (version.id === 'INT' || version.id === 'INT_EN') {

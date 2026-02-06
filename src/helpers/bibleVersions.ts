@@ -135,6 +135,7 @@ export interface Version {
   type?: 'en' | 'fr' | 'other'
   hasAudio?: boolean
   hasRedWords?: boolean
+  hasPericope?: boolean
   getAudioUrl?: (bookNum: number, chapterNum: number) => string
 }
 
@@ -161,6 +162,7 @@ export const versions = {
     c: '1910 - Libre de droit',
     type: 'fr',
     hasRedWords: true,
+    hasPericope: true,
     hasAudio: true,
     getAudioUrl: getLsgAudioUrl,
   },
@@ -178,6 +180,7 @@ export const versions = {
     c: '© 2002 Société Biblique Française',
     type: 'fr',
     hasRedWords: true,
+    hasPericope: true,
   },
   NEG79: {
     id: 'NEG79',
@@ -185,6 +188,7 @@ export const versions = {
     c: '© 1979 Société Biblique de Genève',
     type: 'fr',
     hasRedWords: true,
+    hasPericope: true,
   },
   NVS78P: {
     id: 'NVS78P',
@@ -192,6 +196,7 @@ export const versions = {
     c: '© Alliance Biblique Française',
     type: 'fr',
     hasRedWords: true,
+    hasPericope: true,
   },
   S21: {
     id: 'S21',
@@ -199,6 +204,7 @@ export const versions = {
     c: '© 2007 Société Biblique de Genève',
     type: 'fr',
     hasRedWords: true,
+    hasPericope: true,
   },
   INT: {
     id: 'INT',
@@ -246,6 +252,7 @@ export const versions = {
     c: '© 2000 Société Biblique Internationale',
     type: 'fr',
     hasRedWords: true,
+    hasPericope: true,
     hasAudio: true,
     getAudioUrl: (bookNum: number, chapterNum: number) => {
       return `https://www.bible.audio/media/sem/${
@@ -259,6 +266,7 @@ export const versions = {
     c: '1744 Libre de droit',
     type: 'fr',
     hasRedWords: true,
+    hasPericope: true,
   },
   BFC: {
     id: 'BFC',
@@ -266,6 +274,7 @@ export const versions = {
     c: '© Alliance Biblique Française',
     type: 'fr',
     hasRedWords: true,
+    hasPericope: true,
   },
   FRC97: {
     id: 'FRC97',
@@ -273,6 +282,7 @@ export const versions = {
     c: '© Alliance Biblique Française',
     type: 'fr',
     hasRedWords: true,
+    hasPericope: true,
   },
   NFC: {
     id: 'NFC',
@@ -280,6 +290,7 @@ export const versions = {
     c: "Alliance biblique française Bibli'0, ©2019",
     type: 'fr',
     hasRedWords: true,
+    hasPericope: true,
   },
   KJV: {
     id: 'KJV',
@@ -287,6 +298,7 @@ export const versions = {
     c: '1611 Libre de droit',
     type: 'en',
     hasRedWords: true,
+    hasPericope: true,
     hasAudio: true,
     getAudioUrl: (bookNum: number, chapterNum: number) => {
       return `https://www.wordpocket.org/bibles/app/audio/1/${bookNum}/${chapterNum}.mp3`
@@ -315,6 +327,7 @@ export const versions = {
     c: '© 1982 Thomas Nelson, Inc',
     type: 'en',
     hasRedWords: true,
+    hasPericope: true,
   },
   ESV: {
     id: 'ESV',
@@ -322,6 +335,7 @@ export const versions = {
     c: '© 2001 Crossway Bibles',
     type: 'en',
     hasRedWords: true,
+    hasPericope: true,
     hasAudio: true,
     getAudioUrl: (bookNum: number, chapterNum: number) => {
       return `https://content.swncdn.com/biblestudytools/audio/esv-mp3/${bookNum
@@ -337,6 +351,7 @@ export const versions = {
     c: '© NIV® 1973, 1978, 1984, 2011 Biblica',
     type: 'en',
     hasRedWords: true,
+    hasPericope: true,
     hasAudio: true,
     getAudioUrl: (bookNum: number, chapterNum: number) => {
       return `https://www.bible.audio/media/niv/${bookNum > 39 ? 'nt' : 'at'}/${(bookNum > 39
@@ -353,6 +368,7 @@ export const versions = {
     c: '© mission-web.com',
     type: 'fr',
     hasRedWords: true,
+    hasPericope: true,
   },
   PDV2017: {
     id: 'PDV2017',
@@ -360,6 +376,7 @@ export const versions = {
     c: "© 2000 Société biblique française - Bibli'O",
     type: 'fr',
     hasRedWords: true,
+    hasPericope: true,
   },
   POV: {
     id: 'POV',
@@ -374,6 +391,7 @@ export const versions = {
     c: 'Copyright © MissionAssist 2018',
     type: 'en',
     hasRedWords: true,
+    hasPericope: true,
   },
   TLV: {
     id: 'TLV',
@@ -388,6 +406,7 @@ export const versions = {
     c: '© 2020 The Lockman Foundation',
     type: 'en',
     hasRedWords: true,
+    hasPericope: true,
   },
   NET: {
     id: 'NET',
@@ -395,6 +414,7 @@ export const versions = {
     c: '© 1996-2016 Biblical Studies Press, L.L.C.',
     type: 'en',
     hasRedWords: true,
+    hasPericope: true,
   },
   GW: {
     id: 'GW',
@@ -402,6 +422,7 @@ export const versions = {
     c: '\u00a9 1995 God\u2019s Word to the Nations Bible Society',
     type: 'en',
     hasRedWords: true,
+    hasPericope: true,
   },
   CSB: {
     id: 'CSB',
@@ -409,6 +430,7 @@ export const versions = {
     c: '© 2017 Holman Bible Publishers',
     type: 'en',
     hasRedWords: true,
+    hasPericope: true,
   },
   NLT: {
     id: 'NLT',
@@ -416,6 +438,7 @@ export const versions = {
     c: '© 1996, 2004, 2015 Tyndale House Foundation',
     type: 'en',
     hasRedWords: true,
+    hasPericope: true,
     hasAudio: true,
     getAudioUrl: (bookNum: number, chapterNum: number) => {
       return `https://content.swncdn.com/biblestudytools/audio/nlt-mp3/${bookNum
@@ -431,6 +454,7 @@ export const versions = {
     c: '© 2015 by The Lockman Foundation, La Habra, CA 90631',
     type: 'en',
     hasRedWords: true,
+    hasPericope: true,
   },
   BHS: {
     id: 'BHS',

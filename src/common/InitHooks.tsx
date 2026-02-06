@@ -8,6 +8,7 @@ import useInitFireAuth from '~helpers/useInitFireAuth'
 import useLiveUpdates from '~helpers/useLiveUpdates'
 import useTabGroupsSync from '~state/useTabGroupsSync'
 import useDownloadRedWords from '~helpers/useDownloadRedWords'
+import useDownloadPericopes from '~helpers/useDownloadPericopes'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
 import { getChangelog, getDatabaseUpdate, getVersionUpdate } from '~redux/modules/user'
 import MigrationModal from '~common/MigrationModal'
@@ -54,6 +55,7 @@ const InitHooks = ({}: InitHooksProps) => {
   useLiveUpdates()
   useTabGroupsSync()
   useDownloadRedWords()
+  useDownloadPericopes()
 
   return <MigrationModal />
 }

@@ -303,7 +303,11 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
       case NAVIGATE_TO_PERICOPE: {
-        router.push('/pericope')
+        const { book } = props
+        router.push({
+          pathname: '/pericope',
+          params: { book: String(book.Numero) },
+        })
         break
       }
       case NAVIGATE_TO_VERSION: {

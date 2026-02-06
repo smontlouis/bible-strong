@@ -18,6 +18,7 @@ import useLanguage from '~helpers/useLanguage'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { requireBiblePath } from '~helpers/requireBiblePath'
 import { downloadRedWordsFile, versionHasRedWords } from '~helpers/redWords'
+import { downloadPericopeFile, versionHasPericope } from '~helpers/pericopes'
 import { isOnboardingCompletedAtom, selectedResourcesAtom } from './atom'
 
 const DownloadResources = () => {
@@ -61,6 +62,10 @@ const DownloadResources = () => {
 
         if (versionHasRedWords(resource.id)) {
           downloadRedWordsFile(resource.id)
+        }
+
+        if (versionHasPericope(resource.id)) {
+          downloadPericopeFile(resource.id)
         }
       }
 
