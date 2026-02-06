@@ -29,7 +29,6 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
 import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
-import { timeout } from '~helpers/timeout'
 import { RootState } from '~redux/modules/reducer'
 import { makeWordTagsSelector } from '~redux/selectors/bible'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
@@ -152,7 +151,6 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
           // @ts-ignore
           return String.fromCharCode(parseInt(arguments[1], 16))
         })} \n\nLa suite sur https://bible-strong.app`
-      await timeout(400)
       Share.share({ message })
     } catch (e) {
       toast.error('Erreur lors du partage.')
@@ -200,7 +198,7 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
                     <Text marginLeft={10}>{t('Étiquettes')}</Text>
                   </Box>
                 </MenuOption>
-                <MenuOption onSelect={shareDefinition}>
+                <MenuOption onSelect={shareDefinition} closeBeforeSelect>
                   <Box row alignItems="center">
                     <FeatherIcon name="share-2" size={15} />
                     <Text marginLeft={10}>{t('Partager')}</Text>

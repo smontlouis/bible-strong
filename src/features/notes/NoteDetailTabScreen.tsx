@@ -22,7 +22,6 @@ import MenuOption from '~common/ui/MenuOption'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import books from '~assets/bible_versions/books-desc'
-import { timeout } from '~helpers/timeout'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
@@ -169,7 +168,6 @@ ${currentNote.title}
 
 ${currentNote.description}
       `
-      await timeout(400)
       Share.share({ message })
     } catch (e) {
       toast.error(t('Erreur lors du partage.'))
@@ -237,7 +235,7 @@ ${currentNote.description}
             height={54}
             popover={
               <>
-                <MenuOption onSelect={shareNote}>
+                <MenuOption onSelect={shareNote} closeBeforeSelect>
                   <Box row alignItems="center">
                     <FeatherIcon name="share" size={15} />
                     <Text marginLeft={10}>{t('Partager')}</Text>

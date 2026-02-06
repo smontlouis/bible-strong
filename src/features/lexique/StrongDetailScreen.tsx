@@ -42,7 +42,6 @@ import { RootState } from '~redux/modules/reducer'
 import { makeStrongTagsSelector } from '~redux/selectors/bible'
 import { StrongTab } from '../../state/tabs'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
-import { timeout } from '~helpers/timeout'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -169,7 +168,6 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
     }
     toCopy += LSG ? `${t('Généralement traduit par')}:\n${LSG}` : ''
     toCopy += '\n\n https://bible-strong.app'
-    await timeout(400)
     Share.share({ message: toCopy })
   }
 
@@ -247,7 +245,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
                     <Text marginLeft={10}>{t('Étiquettes')}</Text>
                   </Box>
                 </MenuOption>
-                <MenuOption onSelect={shareContent}>
+                <MenuOption onSelect={shareContent} closeBeforeSelect>
                   <Box row alignItems="center">
                     <FeatherIcon name="share-2" size={15} />
                     <Text marginLeft={10}>{t('Partager')}</Text>

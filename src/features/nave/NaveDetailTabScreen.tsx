@@ -25,7 +25,6 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
 import loadNaveItem from '~helpers/loadNaveItem'
-import { timeout } from '~helpers/timeout'
 import useHTMLView from '~helpers/useHTMLView'
 import { RootState } from '~redux/modules/reducer'
 import { makeNaveTagsSelector } from '~redux/selectors/bible'
@@ -147,7 +146,6 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
         .replace(/\\x([0-9A-F]+);/gi, function () {
           return String.fromCharCode(parseInt(arguments[1], 16))
         })} \n\nLa suite sur https://bible-strong.app`
-      await timeout(400)
       Share.share({ message })
     } catch (e) {
       toast.error('Erreur lors du partage.')
@@ -196,7 +194,7 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
                     <Text marginLeft={10}>{t('Étiquettes')}</Text>
                   </Box>
                 </MenuOption>
-                <MenuOption onSelect={shareDefinition}>
+                <MenuOption onSelect={shareDefinition} closeBeforeSelect>
                   <Box row alignItems="center">
                     <FeatherIcon name="share-2" size={15} />
                     <Text marginLeft={10}>{t('Partager')}</Text>

@@ -30,7 +30,6 @@ import { chapterSliceToText, verseSliceToText, videoSliceToText } from './share'
 import BottomSheet from '@gorhom/bottom-sheet'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useBookAndVersionSelector } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
-import { timeout } from '~helpers/timeout'
 
 const extractTitle = (slice: EntitySlice) => {
   switch (slice.type) {
@@ -92,7 +91,7 @@ const PlanSliceMenuContent = ({
           <Text marginLeft={10}>{t('Mise en forme')}</Text>
         </Box>
       </MenuOption>
-      <MenuOption onSelect={onShare}>
+      <MenuOption onSelect={onShare} closeBeforeSelect>
         <Box row alignItems="center">
           <FeatherIcon name="share-2" size={17} style={{ marginRight: 10 }} />
           <Text marginLeft={10}>{t('Partager')}</Text>
@@ -185,7 +184,6 @@ const PlanSliceScreen = () => {
 
     const message = `${sliceTitle || title}\n\n${textSlices.join('\n\n')}`
     try {
-      await timeout(400)
       Share.share({ message })
     } catch (e) {
       toast.error('Erreur lors du partage.')
