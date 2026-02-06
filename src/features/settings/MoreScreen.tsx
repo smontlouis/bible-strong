@@ -25,6 +25,7 @@ import { RootState } from '~redux/modules/reducer'
 import app from '../../../package.json'
 
 import { useRouter } from 'expo-router'
+import { useTheme } from '@emotion/react'
 
 export const LinkItem = styled(Link)<LinkProps<keyof MainStackProps>>(() => ({
   flexDirection: 'row',
@@ -73,6 +74,7 @@ type MoreProps = {
 
 export const More = ({ closeMenu }: MoreProps) => {
   const { isLogged, user, logout, promptDeleteAccount } = useLogin()
+  const theme = useTheme()
 
   const lang = useLanguage()
   const hasUpdate = useSelector((state: RootState) =>
@@ -96,9 +98,9 @@ export const More = ({ closeMenu }: MoreProps) => {
       <Header title={t('Plus')} onCustomBackPress={closeMenu} hasBackButton />
       <ScrollView
         style={{ flex: 1 }}
-        backgroundColor="lightGrey"
         contentContainerStyle={{
           paddingBottom: 20,
+          backgroundColor: theme.colors.lightGrey,
         }}
       >
         <SectionCard mt={8}>

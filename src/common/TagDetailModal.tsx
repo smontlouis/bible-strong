@@ -1,4 +1,9 @@
-import { BottomSheetHandle, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
+import {
+  BottomSheetHandle,
+  BottomSheetModal,
+  BottomSheetSectionList,
+  BottomSheetView,
+} from '@gorhom/bottom-sheet'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import React, { useEffect, useRef, useState } from 'react'
 import { Alert } from 'react-native'
@@ -135,7 +140,7 @@ const TagDetailContent = ({ tagId }: { tagId: string }) => {
   }
 
   return (
-    <SectionList
+    <BottomSheetSectionList
       sections={sections}
       keyExtractor={(item, index) => `${item.type}-${index}`}
       renderSectionHeader={({ section }) => {
@@ -293,9 +298,7 @@ const TagDetailModal = () => {
         key={key}
         {...bottomSheetStyles}
       >
-        <BottomSheetView style={{ flex: 1 }}>
-          <TagDetailContent tagId={props.tagId} />
-        </BottomSheetView>
+        <TagDetailContent tagId={props.tagId} />
       </BottomSheetModal>
 
       <RenameModal
