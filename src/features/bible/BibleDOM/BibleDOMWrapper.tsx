@@ -3,13 +3,14 @@ import * as Sentry from '@sentry/react-native'
 import * as Haptics from 'expo-haptics'
 import { useRouter } from 'expo-router'
 import produce from 'immer'
-import { useSetAtom } from 'jotai/react'
+import { useAtom, useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isFullScreenBibleAtom, tagDetailModalAtom } from 'src/state/app'
 import { BibleTab, ParallelColumnWidth, ParallelDisplayMode, VersionCode } from 'src/state/tabs'
+import { isINTCompleteAtom } from '../footer/atom'
 import BibleDOMComponent from './BibleDOMComponent'
 // @ts-ignore
 import books from '~assets/bible_versions/books'
@@ -56,6 +57,7 @@ import {
   SWIPE_LEFT,
   SWIPE_RIGHT,
   SWIPE_UP,
+  TOGGLE_INT_COMPLETE,
   TOGGLE_SELECTED_VERSE,
 } from './dispatch'
 
@@ -240,6 +242,7 @@ export const BibleDOMWrapper = ({
   redWords,
 }: WebViewProps) => {
   const { openVersionSelector } = useBookAndVersionSelector()
+  const [isINTComplete, setIsINTComplete] = useAtom(isINTCompleteAtom)
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
   const setTagDetailModal = useSetAtom(tagDetailModalAtom)
   const theme = useTheme()
@@ -255,6 +258,8 @@ export const BibleDOMWrapper = ({
     readWholeChapter: t('tab.readWholeChapter'),
     closeContext: t('tab.closeContext'),
     exitFocus: t('tab.exitFocus'),
+    interlinearDetailed: t('bible.interlinear.detailed'),
+    interlinearCompact: t('bible.interlinear.compact'),
   }
   const dispatch: Dispatch = async action => {
     if (__DEV__) console.log('[Bible] DISPATCH:', action.type)
@@ -475,6 +480,11 @@ export const BibleDOMWrapper = ({
         break
       }
 
+      case TOGGLE_INT_COMPLETE: {
+        setIsINTComplete(prev => !prev)
+        break
+      }
+
       default: {
         break
       }
@@ -535,6 +545,7 @@ export const BibleDOMWrapper = ({
         taggedVersesInChapter={taggedVersesInChapter}
         versesWithNonHighlightTags={versesWithNonHighlightTags}
         redWords={redWords}
+        isINTComplete={isINTComplete}
       />
       {Platform.OS === 'android' && Platform.Version < 30 && (
         <HelpTip

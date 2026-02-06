@@ -894,6 +894,9 @@
   "bible.error.parallelChapterNotFound": "Chapitre indisponible",
   "bible.error.parallelLoadError": "Erreur de chargement",
 
+  "bible.interlinear.detailed": "Détaillé",
+  "bible.interlinear.compact": "Compact",
+
   "bible.crossVersionAnnotations.subtitle": "Annotations dans d'autres versions",
   "bible.crossVersionAnnotations.annotationCount": "{{count}} annotation",
   "bible.crossVersionAnnotations.annotationCount_plural": "{{count}} annotations",

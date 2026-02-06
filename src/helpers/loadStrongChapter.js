@@ -8,7 +8,8 @@ const loadStrongChapter = (Livre, Chapitre) =>
       `SELECT * 
             FROM ${part}
             WHERE LIVRE = ${Livre}
-            AND CHAPITRE  = ${Chapitre}`
+            AND CHAPITRE  = ${Chapitre}
+            ORDER BY VERSET ASC`
     )
     return result
   })

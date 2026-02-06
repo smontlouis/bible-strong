@@ -146,7 +146,17 @@ const VerseBottomSheet = ({
             onPress={() => handleSelect(verse)}
             onLongPress={() => handleLongPress(verse)}
           >
-            <Text>{verse.Verset}</Text>
+            <Box
+              style={{
+                position: 'absolute',
+                inset: 0,
+                justifyContent: 'center',
+                alignItems: 'center',
+                display: 'flex',
+              }}
+            >
+              <Text textAlign="center">{verse.Verset}</Text>
+            </Box>
           </TouchableBox>
         ))}
       </BottomSheetScrollView>

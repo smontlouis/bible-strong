@@ -9,6 +9,9 @@ export interface BibleDOMTranslations {
   readWholeChapter: string
   closeContext: string
   exitFocus: string
+  // Interlinear mode
+  interlinearDetailed: string
+  interlinearCompact: string
 }
 
 const TranslationsContext = createContext<BibleDOMTranslations | null>(null)

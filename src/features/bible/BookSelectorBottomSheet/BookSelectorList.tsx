@@ -30,16 +30,13 @@ export const BookSelectorList = ({
     expandedBook.set(expandedBook.get() === book.Numero ? null : book.Numero)
   }
 
-  const renderItem = useCallback(
-    ({ item: book }: { item: Book }) => (
-      <BookItem
-        book={book}
-        isSelected={book.Numero === bookSelectorData?.selectedBook.Numero}
-        onBookSelect={handleBookSelect}
-        expandedBook={expandedBook}
-      />
-    ),
-    [bookSelectorData?.selectedBook.Numero]
+  const renderItem = ({ item: book }: { item: Book }) => (
+    <BookItem
+      book={book}
+      isSelected={book.Numero === bookSelectorData?.selectedBook.Numero}
+      onBookSelect={handleBookSelect}
+      expandedBook={expandedBook}
+    />
   )
 
   useEffect(() => {

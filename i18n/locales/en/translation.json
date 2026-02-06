@@ -890,6 +890,9 @@
   "bible.error.parallelChapterNotFound": "Chapter unavailable",
   "bible.error.parallelLoadError": "Loading error",
 
+  "bible.interlinear.detailed": "Detailed",
+  "bible.interlinear.compact": "Compact",
+
   "bible.crossVersionAnnotations.subtitle": "Annotations in other versions",
   "bible.crossVersionAnnotations.annotationCount": "{{count}} annotation",
   "bible.crossVersionAnnotations.annotationCount_plural": "{{count}} annotations",

@@ -28,6 +28,7 @@ import {
   SWIPE_DOWN,
   SWIPE_UP,
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
+  TOGGLE_INT_COMPLETE,
   TOGGLE_SELECTED_VERSE,
 } from './dispatch'
 import { DispatchProvider } from './DispatchProvider'
@@ -118,6 +119,7 @@ type Props = Pick<
   dispatch: Dispatch
   dom: import('expo/dom').DOMProps
   translations: BibleDOMTranslations
+  isINTComplete: boolean
   // Annotation mode props (uncontrolled - DOM manages local annotation state)
   annotationMode?: boolean
   clearSelectionTrigger?: number
@@ -162,12 +164,32 @@ const RightDirection = styled('div')<RootStyles>(({ settings: { theme, colors } 
   color: colors[theme].darkGrey,
 }))
 
-const IntMode = styled('div')<RootStyles>(({ settings: { theme, colors } }) => ({
-  textAlign: 'right',
-  marginBottom: '20px',
-  fontFamily: 'arial',
-  fontSize: '13px',
+const IntMode = styled('div')<RootStyles>(({ settings: { theme, colors, fontFamily } }) => ({
+  fontFamily,
+  webkitTouchCallout: 'none',
+  mozUserSelect: 'none',
+  msUserSelect: 'none',
+  khtmlUserSelect: 'none',
+  webkitUserSelect: 'none',
   color: colors[theme].default,
+  fontSize: '14px',
+  display: 'inline-block',
+
+  backgroundColor: colors[theme].reverse,
+  boxShadow: isDarkTheme(theme)
+    ? `0 0 10px 0 rgba(255, 255, 255, 0.1)`
+    : `0 0 10px 0 rgba(0, 0, 0, 0.2)`,
+  borderRadius: '8px',
+  paddingInline: '8px',
+  paddingBlock: '4px',
+  wordBreak: 'break-word',
+  marginInline: '4px',
+  transition: 'opacity 0.2s ease-in-out',
+
+  cursor: 'pointer',
+  '&:active': {
+    opacity: 0.6,
+  },
 }))
 
 const VersionTitle = styled('div')<RootStyles>(
@@ -325,8 +347,8 @@ const VersesRenderer = ({
   selectedAnnotationId,
   safeAreaTop = 0,
   redWords,
+  isINTComplete,
 }: Props) => {
-  const [isINTComplete, setIsINTComplete] = useState(true)
   const [loaded, error] = useFonts({
     'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
   })
@@ -1183,12 +1205,18 @@ const VersesRenderer = ({
           )}
           <HorizontalScrollWrapper
             ref={contentScrollRef}
-            columnCount={isParallelVerse && parallelDisplayMode === 'horizontal' ? parallelVersionTitles.length : 1}
+            columnCount={
+              isParallelVerse && parallelDisplayMode === 'horizontal'
+                ? parallelVersionTitles.length
+                : 1
+            }
           >
-            {(version === 'INT' || version === 'INT_EN') && (
-              <IntMode settings={settings} onClick={() => setIsINTComplete(!isINTComplete)}>
-                {isINTComplete ? 'Mode 1' : 'Mode 2'}
-              </IntMode>
+            {(version === 'INT' || version === 'INT_EN') && !isParallelVerse && (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '40px' }}>
+                <IntMode settings={settings} onClick={() => dispatch({ type: TOGGLE_INT_COMPLETE })}>
+                  {isINTComplete ? translations.interlinearDetailed : translations.interlinearCompact}
+                </IntMode>
+              </div>
             )}
             {isHebreu && <RightDirection settings={settings}>Sens de la lecture ←</RightDirection>}
             {!!introComment && settings.commentsDisplay && (

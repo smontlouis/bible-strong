@@ -38,3 +38,6 @@ export const OPEN_VERSE_TAGS_MODAL = 'OPEN_VERSE_TAGS_MODAL'
 
 // Verse notes modal
 export const OPEN_VERSE_NOTES_MODAL = 'OPEN_VERSE_NOTES_MODAL'
+
+// Interlinear mode toggle
+export const TOGGLE_INT_COMPLETE = 'TOGGLE_INT_COMPLETE'

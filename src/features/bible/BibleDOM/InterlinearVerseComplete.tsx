@@ -57,11 +57,17 @@ const Hebreu = styled('div')<RootStyles & { isSelected: boolean }>(
 )
 
 const Code = styled('div')<RootStyles & { isSelected?: boolean }>(
-  ({ settings: { fontSizeScale, theme, colors } }) => ({
+  ({ isSelected, settings: { fontSizeScale, colors, theme } }) => ({
     fontSize: scaleFontSize(11, fontSizeScale),
     fontFamily: 'arial',
     color: colors[theme].default,
     opacity: 0.5,
+
+    ...(isSelected
+      ? {
+          color: colors[theme].reverse,
+        }
+      : {}),
   })
 )
 
@@ -129,11 +135,18 @@ const Phonetique = styled('div')<RootStyles & { isSelected: boolean }>(
 )
 
 const ParsingTag = styled('div')<RootStyles & { isSelected?: boolean }>(
-  ({ settings: { fontSizeScale } }) => ({
+  ({ isSelected, settings: { fontSizeScale, colors, theme } }) => ({
     fontSize: scaleFontSize(10, fontSizeScale),
     lineHeight: scaleFontSize(20, fontSizeScale),
     fontFamily: 'arial',
-    color: 'rgba(0,0,0,0.3)',
+    color: colors[theme].default,
+    opacity: 0.5,
+
+    ...(isSelected
+      ? {
+          color: colors[theme].reverse,
+        }
+      : {}),
   })
 )
 
@@ -185,7 +198,9 @@ const InterlinearVerse = ({ verse, settings, isHebreu, secondaryVerse, selectedC
             settings={settings}
             isSelected={isSelected}
           >
-            <Code settings={settings}>{code}</Code>
+            <Code isSelected={isSelected} settings={settings}>
+              {code}
+            </Code>
             <Hebreu isSelected={isSelected} settings={settings}>
               {hebreu}
             </Hebreu>
@@ -197,7 +212,11 @@ const InterlinearVerse = ({ verse, settings, isHebreu, secondaryVerse, selectedC
                 {phonetique}
               </Phonetique>
             )}
-            {parsingTag && <ParsingTag settings={settings}>{parsingTag}</ParsingTag>}
+            {parsingTag && (
+              <ParsingTag isSelected={isSelected} settings={settings}>
+                {parsingTag}
+              </ParsingTag>
+            )}
           </Section>
         )
       })}
