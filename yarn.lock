@@ -6895,7 +6895,6 @@ __metadata:
     jotai: "npm:^2.16.0"
     jotai-devtools: "npm:^0.13.0"
     lottie-react-native: "npm:~7.3.4"
-    lunr: "npm:^2.3.9"
     lunr-languages: "npm:^1.9.0"
     metro: "npm:^0.83.1"
     postinstall-postinstall: "npm:^2.1.0"
@@ -12041,13 +12040,6 @@ __metadata:
   version: 1.14.0
   resolution: "lunr-languages@npm:1.14.0"
   checksum: 10c0/5dc26fa75c8f3f14a69b3d54ae1228907b3552bc26727a14c5f302aab05d2547a924d095f075c9d3439756a38e2dafb78d1b74fc862dc290a13ddce236a55e87
-  languageName: node
-  linkType: hard
-
-"lunr@npm:^2.3.9":
-  version: 2.3.9
-  resolution: "lunr@npm:2.3.9"
-  checksum: 10c0/77d7dbb4fbd602aac161e2b50887d8eda28c0fa3b799159cee380fbb311f1e614219126ecbbd2c3a9c685f1720a8109b3c1ca85cc893c39b6c9cc6a62a1d8a8b
   languageName: node
   linkType: hard
 

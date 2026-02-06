@@ -1,1 +1,1 @@
-export { default } from '~features/search/LocalSearchScreen'
+export { default } from '~features/search/SQLiteSearchScreen'

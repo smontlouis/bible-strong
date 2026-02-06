@@ -26,10 +26,12 @@ const getLanguageSpecificDatabases = (lang: ResourceLanguage) => {
     }))
 }
 
-// Get shared databases (like TRESOR)
+// Get shared databases (like TRESOR), excluding internal-only ones (BIBLES)
 const getSharedDatabases = () => {
   const allDbs = databases('fr') // Language doesn't matter for shared
-  return SHARED_DBS.map(dbId => allDbs[dbId as keyof typeof allDbs])
+  return SHARED_DBS.filter(dbId => dbId in allDbs).map(
+    dbId => allDbs[dbId as keyof typeof allDbs]
+  )
 }
 
 const DLScreen = () => {

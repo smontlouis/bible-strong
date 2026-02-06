@@ -1,4 +1,3 @@
-import loadBible from '~helpers/loadBible'
 import loadInterlineaireChapter from '~helpers/loadInterlineaireChapter'
 import loadStrongChapter from '~helpers/loadStrongChapter'
 import { strongDB } from '~helpers/sqlite'
@@ -10,6 +9,7 @@ import {
   createBibleError,
 } from '~helpers/bibleErrors'
 import { Verse } from '~common/types'
+import { getChapterVerses } from '~helpers/biblesDb'
 
 type InterlineaireVerse = {
   Texte: string
@@ -60,29 +60,11 @@ const loadBibleChapter = async (
       return successResult(res)
     }
 
-    const res = await loadBible(version)
-
-    // Check if book exists in this Bible version
-    if (!res[bookNb]) {
-      return errorResult(createBibleError('CHAPTER_NOT_FOUND', version, bookNb, chapterNb))
-    }
-
-    // Check if chapter exists in this book
-    if (!res[bookNb][chapterNb]) {
-      return errorResult(createBibleError('CHAPTER_NOT_FOUND', version, bookNb, chapterNb))
-    }
-
-    const verses = Object.keys(res[bookNb][chapterNb]).map(v => ({
-      Verset: v,
-      Texte: res[bookNb][chapterNb][v],
-      Livre: bookNb,
-      Chapitre: chapterNb,
-    }))
-
+    // Regular versions: query SQLite
+    const verses = await getChapterVerses(version, bookNb, chapterNb)
     if (verses.length === 0) {
       return errorResult(createBibleError('CHAPTER_NOT_FOUND', version, bookNb, chapterNb))
     }
-
     return successResult(verses)
   } catch (e) {
     console.log('[loadBibleChapter] Error:', e)

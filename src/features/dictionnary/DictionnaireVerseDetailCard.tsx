@@ -11,7 +11,7 @@ import Paragraph from '~common/ui/Paragraph'
 import RoundedCorner from '~common/ui/RoundedCorner'
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { CarouselProvider } from '~helpers/CarouselContext'
-import loadBible from '~helpers/loadBible'
+import { getChapterVerses } from '~helpers/biblesDb'
 
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { useRouter } from 'expo-router'
@@ -123,7 +123,19 @@ const useFormattedText = ({
         return
       }
       setCurrentWord(wordsInVerse[0])
-      const bible = await loadBible(getDefaultBibleVersion(resourceLang))
+
+      const defaultVersion = getDefaultBibleVersion(resourceLang)
+      const chapterVerses = await getChapterVerses(
+        defaultVersion,
+        Number(Livre),
+        Number(Chapitre)
+      )
+      const bible = {
+        [Livre]: {
+          [Chapitre]: Object.fromEntries(chapterVerses.map(v => [v.Verset, v.Texte])),
+        },
+      }
+
       const verseToDictionnaryText = await verseToDictionnary(verse, wordsInVerse, bible)
       setFormattedText(verseToDictionnaryText)
       setVersesInCurrentChapter(Object.keys(bible[Livre][Chapitre]).length)

@@ -12,7 +12,7 @@ import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import * as Sentry from '@sentry/react-native'
 import { Version, getVersions } from '~helpers/bibleVersions'
-import loadBible from '~helpers/loadBible'
+import { getChapterVerses } from '~helpers/biblesDb'
 import AudioContainer from './AudioContainer'
 import BasicFooter from './BasicFooter'
 import ChapterButton from './ChapterButton'
@@ -122,9 +122,14 @@ const useLoadSound = ({
       try {
         if (isPlaying) {
           setError(false)
-          const bible = await loadBible(version)
-          const verses = bible[book.Numero][chapter]
-          totalVerses.current = Object.keys(verses).length
+
+          const versesObj: Record<number, string> = {}
+          const rows = await getChapterVerses(version, book.Numero, chapter)
+          for (const row of rows) {
+            versesObj[Number(row.Verset)] = row.Texte
+          }
+
+          totalVerses.current = Object.keys(versesObj).length
 
           // IOS hack to play tts in silent mode
           if (Platform.OS === 'ios') {
@@ -134,7 +139,7 @@ const useLoadSound = ({
             silentPlayer?.play()
           }
 
-          Speech.speak(verses[currentVerse.current], {
+          Speech.speak(versesObj[currentVerse.current], {
             voice: selectedVoice !== 'default' ? selectedVoice : undefined,
             rate: rate ?? 1,
             pitch: pitch ?? 1,

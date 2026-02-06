@@ -11,9 +11,8 @@ import NaveResultsWidget from '~features/nave/NaveResultsWidget'
 import Empty from '~common/Empty'
 import Highlight from './Highlight'
 import { useTranslation } from 'react-i18next'
-import { useAtomValue } from 'jotai'
-import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
+import useLanguage from '~helpers/useLanguage'
 import VerseResultWidget from '~features/bible/VerseResultWidget'
 
 interface Props {
@@ -35,8 +34,7 @@ const InfiniteHits = ({
   error,
 }: Props) => {
   const { t } = useTranslation()
-  const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
-  const searchLang = resourcesLanguage.SEARCH
+  const searchLang = useLanguage()
   return (
     <Box flex>
       <FlatList

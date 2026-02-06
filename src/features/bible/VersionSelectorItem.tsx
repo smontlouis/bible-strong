@@ -18,6 +18,8 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import { getIfVersionNeedsDownload, isStrongVersion, Version } from '~helpers/bibleVersions'
+import { isVersionInstalled, removeBibleVersion } from '~helpers/biblesDb'
+import { downloadAndInsertBible } from '~helpers/downloadBibleToSqlite'
 import { requireBiblePath } from '~helpers/requireBiblePath'
 import { downloadRedWordsFile, deleteRedWordsFile, versionHasRedWords } from '~helpers/redWords'
 import { downloadPericopeFile, deletePericopeFile, versionHasPericope } from '~helpers/pericopes'
@@ -130,22 +132,35 @@ const VersionSelectorItem = ({
   const startDownload = React.useCallback(async () => {
     setIsLoading(true)
 
-    const path = requireBiblePath(version.id)
-    const uri =
-      version.id === 'INT'
-        ? getDatabaseUrl('INTERLINEAIRE', 'fr')
-        : version.id === 'INT_EN'
-          ? getDatabaseUrl('INTERLINEAIRE', 'en')
-          : biblesRef[version.id]
-
-    console.log(`[Bible] Downloading ${uri} to ${path}`)
     try {
-      await FileSystem.createDownloadResumable(
-        uri,
-        path,
-        undefined,
-        calculateProgress
-      ).downloadAsync()
+      if (isStrongVersion(version.id)) {
+        // Strong/Interlinear versions use their own SQLite databases
+        const path = requireBiblePath(version.id)
+        const uri =
+          version.id === 'INT'
+            ? getDatabaseUrl('INTERLINEAIRE', 'fr')
+            : version.id === 'INT_EN'
+              ? getDatabaseUrl('INTERLINEAIRE', 'en')
+              : biblesRef[version.id]
+
+        console.log(`[Bible] Downloading ${uri} to ${path}`)
+        await FileSystem.createDownloadResumable(
+          uri,
+          path,
+          undefined,
+          calculateProgress
+        ).downloadAsync()
+
+        if (version.id === 'INT' || version.id === 'INT_EN') {
+          const lang = version.id === 'INT' ? 'fr' : 'en'
+          await dbManager.getDB('INTERLINEAIRE', lang).init()
+        }
+      } else {
+        // Regular Bible versions: download JSON and insert into bibles.sqlite
+        const uri = biblesRef[version.id]
+        console.log(`[Bible] Downloading ${version.id} to SQLite`)
+        await downloadAndInsertBible(version.id, uri, calculateProgress)
+      }
 
       console.log('[Bible] Download finished')
 
@@ -157,15 +172,9 @@ const VersionSelectorItem = ({
         downloadPericopeFile(version.id)
       }
 
-      if (version.id === 'INT' || version.id === 'INT_EN') {
-        const lang = version.id === 'INT' ? 'fr' : 'en'
-        await dbManager.getDB('INTERLINEAIRE', lang).init()
-      }
-
       setVersionNeedsDownload(false)
       setIsLoading(false)
 
-      // Call onDownloadComplete callback if provided
       if (onDownloadComplete) {
         onDownloadComplete(version.id as VersionCode)
       }
@@ -238,21 +247,34 @@ const VersionSelectorItem = ({
       jotaiStore.set(tabsAtom, updatedTabs)
     }
 
-    const path = requireBiblePath(version.id)
-    const file = await FileSystem.getInfoAsync(path)
-    if (!file.uri) {
-      console.log(`[Bible] Nothing to delete for ${version.id}`)
-      return
+    if (isStrongVersion(version.id)) {
+      // Strong/Interlinear: delete their own SQLite file
+      const path = requireBiblePath(version.id)
+      const file = await FileSystem.getInfoAsync(path)
+      if (file.exists) {
+        await FileSystem.deleteAsync(file.uri)
+      }
+      if (version.id === 'INT' || version.id === 'INT_EN') {
+        const lang = version.id === 'INT' ? 'fr' : 'en'
+        dbManager.getDB('INTERLINEAIRE', lang).delete()
+      }
+    } else {
+      // Regular versions: remove from bibles.sqlite + legacy JSON if exists
+      const installed = await isVersionInstalled(version.id)
+      if (installed) {
+        await removeBibleVersion(version.id)
+      }
+      // Also clean up legacy JSON file if it exists
+      const legacyPath = `${FileSystem.documentDirectory}bible-${version.id}.json`
+      const legacyFile = await FileSystem.getInfoAsync(legacyPath)
+      if (legacyFile.exists) {
+        await FileSystem.deleteAsync(legacyFile.uri)
+      }
     }
-    FileSystem.deleteAsync(file.uri)
+
     deleteRedWordsFile(version.id)
     deletePericopeFile(version.id)
     setVersionNeedsDownload(true)
-
-    if (version.id === 'INT' || version.id === 'INT_EN') {
-      const lang = version.id === 'INT' ? 'fr' : 'en'
-      dbManager.getDB('INTERLINEAIRE', lang).delete()
-    }
   }
 
   const confirmDelete = () => {

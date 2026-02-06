@@ -106,7 +106,6 @@
     "jotai": "^2.16.0",
     "jotai-devtools": "^0.13.0",
     "lottie-react-native": "~7.3.4",
-    "lunr": "^2.3.9",
     "lunr-languages": "^1.9.0",
     "metro": "^0.83.1",
     "postinstall-postinstall": "^2.1.0",

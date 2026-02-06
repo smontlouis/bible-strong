@@ -1,10 +1,9 @@
 import algoliasearch from 'algoliasearch/lite'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAtomValue } from 'jotai'
 import { Configure, InstantSearch } from 'react-instantsearch-native'
-import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
+import useLanguage from '~helpers/useLanguage'
 import Filters from './Filters'
 import SearchBox from './SearchBox'
 import SearchResults from './SearchResults'
@@ -21,8 +20,7 @@ interface SearchScreenProps {
 
 const OnlineSearchScreen = ({ searchValue, setSearchValue }: SearchScreenProps) => {
   const { t } = useTranslation()
-  const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
-  const searchLang = resourcesLanguage.SEARCH
+  const searchLang = useLanguage()
   const [canQuery, setCanQuery] = React.useState(true)
   const [submittedValue, setSubmittedValue] = React.useState('')
 

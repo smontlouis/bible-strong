@@ -1,7 +1,7 @@
 import books from '~assets/bible_versions/books-desc'
 import i18n, { getLanguage } from '~i18n'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
-import loadBible from './loadBible'
+import { getChapterVerseCount } from '~helpers/biblesDb'
 
 export interface VerseBase {
   book: number
@@ -12,7 +12,7 @@ export interface VerseBase {
 export const searchReference = async (ref?: string): Promise<VerseBase | null> => {
   if (!ref) return null
   let reference = ref.trim().toLowerCase()
-  const bible = await loadBible(getDefaultBibleVersion(getLanguage()))
+  const defaultVersion = getDefaultBibleVersion(getLanguage())
 
   const findBook = books.find(book => reference.includes(i18n.t(book.Nom).toLowerCase()))
 
@@ -38,6 +38,10 @@ export const searchReference = async (ref?: string): Promise<VerseBase | null> =
     return null
   }
 
+  const getVerseCount = (bookNum: number, chapter: number): Promise<number> => {
+    return getChapterVerseCount(defaultVersion, bookNum, chapter)
+  }
+
   if (numbers.length === 1) {
     if (numbers[0] <= findBook.Chapitres) {
       return {
@@ -46,7 +50,7 @@ export const searchReference = async (ref?: string): Promise<VerseBase | null> =
         verse: 1,
       }
     } else {
-      const count = Object.keys(bible[findBook.Numero][findBook.Chapitres]).length
+      const count = await getVerseCount(findBook.Numero, findBook.Chapitres)
 
       return {
         book: findBook.Numero,
@@ -59,7 +63,7 @@ export const searchReference = async (ref?: string): Promise<VerseBase | null> =
   if (numbers.length > 1) {
     const [chapter, verse] = numbers
     if (chapter <= findBook.Chapitres) {
-      const count = Object.keys(bible[findBook.Numero][chapter]).length
+      const count = await getVerseCount(findBook.Numero, chapter)
 
       return {
         book: findBook.Numero,

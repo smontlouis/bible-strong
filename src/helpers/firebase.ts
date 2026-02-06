@@ -52,7 +52,6 @@ export const databasesRef = {
   NAVE: cdnUrl('databases/nave-fr.sqlite'),
   STRONG: cdnUrl('databases/strong.sqlite'),
   TIMELINE: cdnUrl('databases/bible-timeline-events.json'),
-  SEARCH: cdnUrl('databases/idx-light.json'),
 }
 
 // English database URLs
@@ -64,7 +63,6 @@ export const databasesEnRef = {
   NAVE: cdnUrl('databases/en/nave.sqlite'),
   STRONG: cdnUrl('databases/en/strong.sqlite'),
   TIMELINE: cdnUrl('databases/en/bible-timeline-events.json'),
-  SEARCH: cdnUrl('databases/en/idx-light.json'),
 }
 
 interface DatabasesRef {
@@ -76,11 +74,13 @@ interface DatabasesRef {
   NAVE: string
   STRONG: string
   TIMELINE: string
-  SEARCH: string
 }
 
+// Database IDs that have remote URLs (excludes BIBLES which is local-only)
+type RemoteDatabaseId = Exclude<DatabaseId, 'BIBLES'>
+
 // Get database URL for a specific database and language
-export const getDatabaseUrl = (dbId: DatabaseId, lang: ResourceLanguage): string => {
+export const getDatabaseUrl = (dbId: RemoteDatabaseId, lang: ResourceLanguage): string => {
   // Shared databases always use the same URL
   if (isSharedDB(dbId)) {
     return databasesRef[dbId]

@@ -2,9 +2,9 @@ import { createBibleResourceHelpers } from './bibleResource'
 
 const helpers = createBibleResourceHelpers({
   label: 'RedWords',
-  getFileName: (versionId) => `red-words-${versionId}.json`,
-  getCdnPath: (versionId) => `bibles/red-words-${versionId.toLowerCase()}.json`,
-  versionHasFeature: (version) => !!version.hasRedWords,
+  getFileName: versionId => `red-words-${versionId}.json`,
+  getCdnPath: versionId => `bibles/red-words-${versionId.toLowerCase()}.json`,
+  versionHasFeature: version => !!version.hasRedWords,
 })
 
 export const requireRedWordsPath = helpers.getFilePath

@@ -15,6 +15,9 @@ import Container from '~common/ui/Container'
 import { VStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
+import { isStrongVersion } from '~helpers/bibleVersions'
+import { isVersionInstalled } from '~helpers/biblesDb'
+import { downloadAndInsertBible } from '~helpers/downloadBibleToSqlite'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { requireBiblePath } from '~helpers/requireBiblePath'
 import { downloadRedWordsFile, versionHasRedWords } from '~helpers/redWords'
@@ -46,18 +49,32 @@ const DownloadResources = () => {
         setDownloadingResource(resource.name)
         setDowloadedResources(s => s + 1)
 
-        const [err] = await to(
-          FileSystem.createDownloadResumable(
-            resource.uri,
-            resource.path,
-            undefined,
-            calculateProgress(resource.fileSize)
-          ).downloadAsync()
-        )
+        // Use SQLite path for regular Bible versions, file download for others
+        if (!isStrongVersion(resource.id) && resource.path.endsWith('.json')) {
+          // Regular Bible: download JSON -> insert into bibles.sqlite
+          const [err] = await to(
+            downloadAndInsertBible(resource.id, resource.uri, calculateProgress(resource.fileSize))
+          )
 
-        if (err) {
-          setError(err)
-          return
+          if (err) {
+            setError(err)
+            return
+          }
+        } else {
+          // Strong/Interlinear/database: download file directly
+          const [err] = await to(
+            FileSystem.createDownloadResumable(
+              resource.uri,
+              resource.path,
+              undefined,
+              calculateProgress(resource.fileSize)
+            ).downloadAsync()
+          )
+
+          if (err) {
+            setError(err)
+            return
+          }
         }
 
         if (versionHasRedWords(resource.id)) {
@@ -69,14 +86,17 @@ const DownloadResources = () => {
         }
       }
 
-      // Verify that the default Bible file was downloaded successfully
-      const defaultBiblePath = requireBiblePath(getDefaultBibleVersion(lang))
-      const fileInfo = await FileSystem.getInfoAsync(defaultBiblePath)
-      if (!fileInfo.exists) {
-        setError(
-          new Error(`Download verification failed: Bible file not found at ${defaultBiblePath}`)
-        )
-        return
+      // Verify that the default Bible was downloaded successfully
+      const defaultVersion = getDefaultBibleVersion(lang)
+      const installed = await isVersionInstalled(defaultVersion)
+      if (!installed) {
+        // Fallback: check legacy file path
+        const defaultBiblePath = requireBiblePath(defaultVersion)
+        const fileInfo = await FileSystem.getInfoAsync(defaultBiblePath)
+        if (!fileInfo.exists) {
+          setError(new Error(`Download verification failed: Bible ${defaultVersion} not found`))
+          return
+        }
       }
 
       // Mark onboarding as complete - persisted in MMKV for instant starts

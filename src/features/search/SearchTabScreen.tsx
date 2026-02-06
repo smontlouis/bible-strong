@@ -4,14 +4,12 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import Header from '~common/Header'
-import LanguageMenuOption from '~common/LanguageMenuOption'
-import PopOverMenu from '~common/PopOverMenu'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import Switch from '~common/ui/Switch'
 import i18n from '~i18n'
 import { SearchTab } from '../../state/tabs'
-import LocalSearchScreen from './LocalSearchScreen'
+import SQLiteSearchScreen from './SQLiteSearchScreen'
 import OnlineSearchScreen from './OnlineSearchScreen'
 
 interface SearchScreenProps {
@@ -61,20 +59,13 @@ const SearchTabScreen = ({ searchAtom }: SearchScreenProps) => {
             <Box mr={10}>
               <Switch value={searchMode === 'online'} onValueChange={toggleSearchMode} />
             </Box>
-            <PopOverMenu
-              popover={
-                <>
-                  <LanguageMenuOption resourceId="SEARCH" />
-                </>
-              }
-            />
           </Box>
         }
       />
       {searchMode === 'online' ? (
         <OnlineSearchScreen searchValue={searchValue} setSearchValue={setSearchValue} />
       ) : (
-        <LocalSearchScreen searchValue={searchValue} setSearchValue={setSearchValue} />
+        <SQLiteSearchScreen searchValue={searchValue} setSearchValue={setSearchValue} />
       )}
     </Container>
   )

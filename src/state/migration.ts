@@ -1,21 +1,24 @@
 import { atom, getDefaultStore } from 'jotai/vanilla'
-import { SubcollectionName } from '~helpers/firestoreSubcollections'
+
+export type MigrationType = 'firestore' | 'bible'
 
 export interface MigrationProgress {
+  type: MigrationType
   isActive: boolean
   isResuming: boolean
   isMigrating: boolean // Flag to indicate migration in progress (prevents listener race conditions)
-  currentCollection: SubcollectionName | null
+  currentCollection: string | null
   collectionsCompleted: number
   totalCollections: number
   overallProgress: number // 0-1
   message: string
   error: string | null
   hasPartialFailure: boolean
-  failedCollections: SubcollectionName[]
+  failedCollections: string[]
 }
 
 const initialMigrationProgress: MigrationProgress = {
+  type: 'firestore',
   isActive: false,
   isResuming: false,
   isMigrating: false,
