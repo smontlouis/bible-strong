@@ -1,6 +1,6 @@
-import { Easing, useAnimatedStyle, withTiming } from 'react-native-reanimated'
+import { useAtomValue } from 'jotai/react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { isFullScreenBibleValue } from 'src/state/app'
+import { isFullScreenBibleAtom } from 'src/state/app'
 import { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { TAB_ICON_SIZE } from '../utils/constants'
@@ -22,19 +22,7 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
   const { onPress, listStyles, viewStyles } = useBottomTabBar()
   const insets = useSafeAreaInsets()
   const bottomBarHeight = TAB_ICON_SIZE + insets.bottom
-
-  const bottomBarStyles = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          translateY: withTiming(isFullScreenBibleValue.get() ? bottomBarHeight : 0, {
-            duration: 300,
-            easing: Easing.bezier(0.13, 0.69, 0.5, 0.98),
-          }),
-        },
-      ],
-    }
-  })
+  const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
 
   return (
     <AnimatedBox
@@ -47,7 +35,11 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
       borderTopWidth={1}
       borderColor="border"
       height={bottomBarHeight}
-      style={bottomBarStyles}
+      style={{
+        transform: [{ translateY: isFullScreenBible ? bottomBarHeight : 0 }],
+        transitionProperty: 'transform',
+        transitionDuration: 300,
+      }}
     >
       <AnimatedBox
         row

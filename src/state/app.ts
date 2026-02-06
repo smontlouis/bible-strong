@@ -10,7 +10,6 @@ import {
   DEFAULT_GROUP_ID,
   appSwitcherModeAtom,
 } from './tabs'
-import { makeMutable } from 'react-native-reanimated'
 import { entitiesArray } from '~redux/modules/user/tags'
 
 export interface Diff {
@@ -22,7 +21,6 @@ export interface Diff {
 }
 
 export const isFullScreenBibleAtom = atom(false)
-export const isFullScreenBibleValue = makeMutable(false)
 
 export const IAPInitializedAtom = atom(false)
 
@@ -62,9 +60,7 @@ export type ColorChangeModalProps =
 
 export const colorChangeModalAtom = atom<ColorChangeModalProps>(false)
 
-export type TagDetailModalProps =
-  | { tagId: string }
-  | false
+export type TagDetailModalProps = { tagId: string } | false
 
 export const tagDetailModalAtom = atom<TagDetailModalProps>(false)
 

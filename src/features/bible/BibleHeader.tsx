@@ -5,25 +5,29 @@ import { useRouter } from 'expo-router'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { FadeIn, FadeOut, useDerivedValue } from 'react-native-reanimated'
+import { FadeIn, FadeOut } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
-import { isFullScreenBibleAtom, isFullScreenBibleValue } from 'src/state/app'
-import { parallelColumnWidthAtom, parallelDisplayModeAtom } from 'src/state/tabs'
+import { isFullScreenBibleAtom } from 'src/state/app'
+import {
+  parallelColumnWidthAtom,
+  parallelDisplayModeAtom,
+  BibleTab,
+  useBibleTabActions,
+} from 'src/state/tabs'
 import Back from '~common/Back'
 import ParallelIcon from '~common/ParallelIcon'
 import PopOverMenu from '~common/PopOverMenu'
 import Box, {
+  AnimatedBox,
   AnimatedHStack,
+  AnimatedTouchableBox,
   HStack,
-  MotiBox,
-  MotiText,
-  motiTransition,
   TouchableBox,
 } from '~common/ui/Box'
 import { FeatherIcon, IonIcon, MaterialIcon, TextIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
-import Text from '~common/ui/Text'
+import Text, { AnimatedText } from '~common/ui/Text'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import BookmarkModal from '~features/bookmarks/BookmarkModal'
 import { getIfDatabaseNeedsDownload } from '~helpers/databases'
@@ -31,12 +35,10 @@ import { toast } from '~helpers/toast'
 import truncate from '~helpers/truncate'
 import useDimensions from '~helpers/useDimensions'
 import useLanguage from '~helpers/useLanguage'
-import { usePrevious } from '~helpers/usePrevious'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { makeSelectBookmarkForChapter } from '~redux/selectors/bookmarks'
-import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import { useBookAndVersionSelector } from './BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 import ParallelVersionsPopover from './ParallelVersionsPopover'
 import { VerseSelectorPopup } from './VerseSelectorPopup'
@@ -68,6 +70,7 @@ const Header = ({
   const insets = useSafeAreaInsets()
   const { openBookSelector, openVersionSelector } = useBookAndVersionSelector()
   const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
+  const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
   const columnWidth = useAtomValue(parallelColumnWidthAtom)
   const setColumnWidth = useSetAtom(parallelColumnWidthAtom)
   const displayMode = useAtomValue(parallelDisplayModeAtom)
@@ -101,6 +104,8 @@ const Header = ({
     selectBookmarkForChapter(state, bookNumber, chapter)
   )
 
+  const hasFocusVerses = focusVerses && focusVerses.length > 0
+
   useEffect(() => {
     const { selectedBook, selectedChapter, selectedVersion, focusVerses } = bible.data
     const ref = verseToReference({
@@ -113,47 +118,20 @@ const Header = ({
 
   const { addParallelVersion, removeParallelVersion, removeAllParallelVersions } = actions
 
-  const backButtonTranslateY = useDerivedValue(() => {
-    return {
-      translateY: isFullScreenBibleValue.get() ? -2 : 0,
-    }
-  })
+  const fullScreenOpacity = isFullScreenBible ? 0 : 1
+  const fullScreenTranslateY = isFullScreenBible ? -4 : 0
 
-  const bookSelectorOpacity = useDerivedValue(() => {
-    return {
-      opacity: isFullScreenBibleValue.get() ? 0 : 1,
-    }
-  })
+  const opacityTransitionStyle = {
+    opacity: fullScreenOpacity,
+    transitionProperty: 'opacity',
+    transitionDuration: 300,
+  } as const
 
-  const bookSelectorTranslateY = useDerivedValue(() => {
-    return {
-      translateY: isFullScreenBibleValue.get() ? -2 : 0,
-    }
-  })
-
-  const versionSelectorOpacity = useDerivedValue(() => {
-    return {
-      opacity: isFullScreenBibleValue.get() ? 0 : 1,
-    }
-  })
-
-  const versionSelectorTranslateY = useDerivedValue(() => {
-    return {
-      translateY: isFullScreenBibleValue.get() ? -2 : 0,
-    }
-  })
-
-  const verseSelectorOpacity = useDerivedValue(() => {
-    return {
-      opacity: isFullScreenBibleValue.get() ? 0 : 1,
-    }
-  })
-
-  const menuOpacity = useDerivedValue(() => {
-    return {
-      opacity: isFullScreenBibleValue.get() ? 0 : 1,
-    }
-  })
+  const translateYTransitionStyle = {
+    transform: [{ translateY: fullScreenTranslateY }],
+    transitionProperty: 'transform',
+    transitionDuration: 300,
+  } as const
 
   const onOpenCommentaire = async () => {
     const needsDownload = await getIfDatabaseNeedsDownload('MHY')
@@ -190,7 +168,7 @@ const Header = ({
             <Box position="absolute" left={0} top={5} zIndex={2}>
               <Back
                 onGoBack={() => {
-                  isFullScreenBibleValue.set(false)
+                  setIsFullScreenBible(false)
                   console.log('[Bible] onGoBack')
                 }}
               >
@@ -206,13 +184,18 @@ const Header = ({
             </Text>
           </Box>
 
-          <TouchableBox onPress={onExitAnnotationMode} position="absolute" right={0} bottom={10}>
+          <AnimatedTouchableBox
+            onPress={onExitAnnotationMode}
+            position="absolute"
+            right={0}
+            bottom={10}
+          >
             <Box bg="reverse" borderRadius={8} height={28} px={12} center>
               <Text color="primary" bold fontSize={12}>
                 {t('Terminé')}
               </Text>
             </Box>
-          </TouchableBox>
+          </AnimatedTouchableBox>
         </HStack>
       </AnimatedHStack>
     )
@@ -240,7 +223,7 @@ const Header = ({
           {hasBackButton && (
             <Back
               onGoBack={() => {
-                isFullScreenBibleValue.set(false)
+                setIsFullScreenBible(false)
                 console.log('[Bible] onGoBack')
               }}
             >
@@ -258,6 +241,9 @@ const Header = ({
       </AnimatedHStack>
     )
   }
+
+  console.log('hasFocusVerses', hasFocusVerses)
+  console.log('isReadOnly', isReadOnly)
 
   return (
     <AnimatedHStack
@@ -284,44 +270,44 @@ const Header = ({
         {hasBackButton ? (
           <Back
             onGoBack={() => {
-              isFullScreenBibleValue.set(false)
+              setIsFullScreenBible(false)
               console.log('[Bible] onGoBack')
             }}
           >
-            <MotiBox
+            <AnimatedBox
               alignItems="center"
               justifyContent="center"
               width={50}
               height={32}
-              animate={backButtonTranslateY}
-              {...motiTransition}
+              style={translateYTransitionStyle}
             >
               <FeatherIcon name="arrow-left" size={20} />
-            </MotiBox>
+            </AnimatedBox>
           </Back>
-        ) : isReadOnly ? (
+        ) : hasFocusVerses ? (
           <Box width={50} />
         ) : null}
-        {isReadOnly ? (
+        {hasFocusVerses ? (
           <>
-            <Box flex={1} center>
+            <AnimatedBox flex={1} center style={translateYTransitionStyle}>
               <Text fontWeight="bold" fontSize={14}>
                 {`${verseToReference({ bookNum: bookNumber, chapterNum: chapter, verses: displayVerses })} - ${version}`}
               </Text>
-            </Box>
+            </AnimatedBox>
             {focusVerses && focusVerses.length > 0 ? (
-              <TouchableBox
+              <AnimatedTouchableBox
                 onPress={() => actions.clearFocusVerses()}
                 center
                 width={40}
                 height={40}
                 alignItems="center"
                 justifyContent="center"
+                style={opacityTransitionStyle}
               >
                 <Box width={24} height={24} bg="lightGrey" borderRadius={10} center>
                   <FeatherIcon name="x" size={16} />
                 </Box>
-              </TouchableBox>
+              </AnimatedTouchableBox>
             ) : (
               <Box width={50} />
             )}
@@ -342,7 +328,7 @@ const Header = ({
                   pr={7}
                   height={32}
                 >
-                  <MotiBox
+                  <AnimatedBox
                     bg="lightGrey"
                     borderTopLeftRadius={20}
                     borderBottomLeftRadius={20}
@@ -351,20 +337,13 @@ const Header = ({
                     bottom={0}
                     right={0}
                     top={0}
-                    // @ts-ignore
-                    animate={bookSelectorOpacity}
+                    style={opacityTransitionStyle}
                   />
-                  <MotiText
-                    fontWeight="bold"
-                    fontSize={14}
-                    // @ts-ignore
-                    animate={bookSelectorTranslateY}
-                    {...motiTransition}
-                  >
+                  <AnimatedText fontWeight="bold" fontSize={14} style={translateYTransitionStyle}>
                     {isSmall
                       ? truncate(`${t(bookName)} ${chapter}`, 10)
                       : `${t(bookName)} ${chapter}`}
-                  </MotiText>
+                  </AnimatedText>
                 </TouchableBox>
               </HStack>
               <TouchableBox
@@ -379,7 +358,7 @@ const Header = ({
                 pr={12}
                 height={32}
               >
-                <MotiBox
+                <AnimatedBox
                   bg="lightGrey"
                   borderTopRightRadius={20}
                   borderBottomRightRadius={20}
@@ -388,32 +367,19 @@ const Header = ({
                   bottom={0}
                   right={0}
                   top={0}
-                  // @ts-ignore
-                  animate={versionSelectorOpacity}
+                  style={opacityTransitionStyle}
                 />
-                <MotiText
-                  fontWeight="bold"
-                  fontSize={14}
-                  // @ts-ignore
-                  animate={versionSelectorTranslateY}
-                  {...motiTransition}
-                >
+                <AnimatedText fontWeight="bold" fontSize={14} style={translateYTransitionStyle}>
                   {version}
-                </MotiText>
+                </AnimatedText>
               </TouchableBox>
             </HStack>
 
             <PopOverMenu
               element={
-                <MotiBox
-                  center
-                  width={40}
-                  height="100%"
-                  // @ts-ignore
-                  animate={verseSelectorOpacity}
-                >
+                <AnimatedBox center width={40} height="100%" style={opacityTransitionStyle}>
                   <FeatherIcon name="chevrons-down" size={20} style={{ opacity: 0.3 }} />
-                </MotiBox>
+                </AnimatedBox>
               }
               popover={<VerseSelectorPopup bibleAtom={bibleAtom} />}
             />
@@ -422,12 +388,15 @@ const Header = ({
                 {isParallel && (
                   <PopOverMenu
                     element={
-                      <MotiBox
+                      <AnimatedBox
                         center
                         width={40}
                         height="100%"
-                        // @ts-ignore
-                        animate={menuOpacity}
+                        style={{
+                          opacity: fullScreenOpacity,
+                          transitionProperty: 'opacity',
+                          transitionDuration: 300,
+                        }}
                       >
                         <Box position="relative" overflow="visible">
                           <ParallelIcon color="primary" />
@@ -446,7 +415,7 @@ const Header = ({
                             </Text>
                           </Box>
                         </Box>
-                      </MotiBox>
+                      </AnimatedBox>
                     }
                     popover={
                       <ParallelVersionsPopover
@@ -467,15 +436,18 @@ const Header = ({
                 {/* Three-dots menu */}
                 <PopOverMenu
                   element={
-                    <MotiBox
+                    <AnimatedBox
                       center
                       width={40}
                       height="100%"
-                      // @ts-ignore
-                      animate={menuOpacity}
+                      style={{
+                        opacity: fullScreenOpacity,
+                        transitionProperty: 'opacity',
+                        transitionDuration: 300,
+                      }}
                     >
                       <FeatherIcon name="more-vertical" size={18} />
-                    </MotiBox>
+                    </AnimatedBox>
                   }
                   popover={
                     <>
@@ -557,11 +529,11 @@ const Header = ({
         existingBookmark={currentChapterBookmark || undefined}
       />
       {currentChapterBookmark && (
-        <MotiBox position="absolute" right={24} bottom={-18}>
+        <Box position="absolute" right={24} bottom={-18}>
           <TouchableBox center height="100%" onPress={() => bookmarkModalRef.current?.present()}>
             <IonIcon name="bookmark" size={24} color={currentChapterBookmark.color} />
           </TouchableBox>
-        </MotiBox>
+        </Box>
       )}
     </AnimatedHStack>
   )

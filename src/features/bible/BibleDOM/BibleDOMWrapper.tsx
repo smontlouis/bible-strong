@@ -7,7 +7,7 @@ import { useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { isFullScreenBibleAtom, isFullScreenBibleValue, tagDetailModalAtom } from 'src/state/app'
+import { isFullScreenBibleAtom, tagDetailModalAtom } from 'src/state/app'
 import { BibleTab, VersionCode, ParallelColumnWidth, ParallelDisplayMode } from 'src/state/tabs'
 import BibleDOMComponent from './BibleDOMComponent'
 import { useEffect, useRef } from 'react'
@@ -430,12 +430,10 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
       case SWIPE_DOWN: {
         console.log('[Bible] SWIPE_DOWN')
         setIsFullScreenBible(true)
-        isFullScreenBibleValue.set(true)
         break
       }
       case SWIPE_UP: {
         setIsFullScreenBible(false)
-        isFullScreenBibleValue.set(false)
         break
       }
       case OPEN_HIGHLIGHT_TAGS: {

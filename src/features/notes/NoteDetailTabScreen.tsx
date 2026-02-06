@@ -28,7 +28,7 @@ import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addNote, deleteNote } from '~redux/modules/user'
 import { makeNoteByKeySelector, makeWordAnnotationByIdSelector } from '~redux/selectors/bible'
-import { isFullScreenBibleValue, unifiedTagsModalAtom } from '~state/app'
+import { isFullScreenBibleAtom, unifiedTagsModalAtom } from '~state/app'
 import { NotesTab, useIsCurrentTab } from '~state/tabs'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import NoteEditorDOMComponent from '~features/bible/NoteEditorDOM/NoteEditorDOMComponent'
@@ -47,6 +47,7 @@ const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) =>
   const dispatch = useDispatch()
   const [, setNotesTab] = useAtom(notesAtom)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
+  const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -65,9 +66,9 @@ const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) =>
 
   useEffect(() => {
     if (isCurrentTab) {
-      isFullScreenBibleValue.set(false)
+      setIsFullScreenBible(false)
     }
-  }, [isCurrentTab])
+  }, [isCurrentTab, setIsFullScreenBible])
 
   const selectNoteByKey = makeNoteByKeySelector()
   const currentNote = useSelector((state: RootState) => selectNoteByKey(state, noteId))

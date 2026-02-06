@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import Empty from '~common/Empty'
-import Box, { MotiBox, motiTransition } from '~common/ui/Box'
+import Box from '~common/ui/Box'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 import { BibleError } from '~helpers/bibleErrors'
 import getBiblePericope from '~helpers/getBiblePericope'
@@ -17,11 +17,8 @@ import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { useDerivedValue } from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { Bookmark } from '~common/types'
 import { BibleResource, Pericope, SelectedCode, Verse, VerseIds } from '~common/types'
-import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import BookmarkModal from '~features/bookmarks/BookmarkModal'
 import AddToStudyModal from '~features/studies/AddToStudyModal'
@@ -45,7 +42,7 @@ import {
   makeWordAnnotationsInOtherVersionsSelector,
 } from '~redux/selectors/bible'
 import { makeSelectBookmarksInChapter } from '~redux/selectors/bookmarks'
-import { historyAtom, isFullScreenBibleValue, unifiedTagsModalAtom } from '../../state/app'
+import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
 import {
   BibleTab,
   useBibleTabActions,
@@ -184,7 +181,6 @@ const BibleViewer = ({
   const parallelColumnWidth = useAtomValue(parallelColumnWidthAtom)
   const parallelDisplayMode = useAtomValue(parallelDisplayModeAtom)
   const actions = useBibleTabActions(bibleAtom)
-  const insets = useSafeAreaInsets()
 
   const {
     data: {
@@ -690,13 +686,6 @@ const BibleViewer = ({
     [bible, openInNewTab, crossVersionModal]
   )
 
-  // Déplacer le hook en dehors de la condition de rendu
-  const translationY = useDerivedValue(() => {
-    return {
-      translateY: isFullScreenBibleValue.value ? HEADER_HEIGHT + insets.bottom + 20 : 0,
-    }
-  })
-
   // console.log('[Bible] BibleViewer', version, book.Numero, chapter, verse)
 
   // Wait for onboarding to complete before rendering Bible content
@@ -809,21 +798,7 @@ const BibleViewer = ({
           version={version}
         />
       )}
-      {withNavigation && !error && (
-        <MotiBox
-          center
-          paddingBottom={insets.bottom}
-          position="absolute"
-          bottom={0}
-          left={0}
-          right={0}
-          // @ts-ignore
-          animate={translationY}
-          {...motiTransition}
-        >
-          <OpenInNewTabButton bibleTab={bible} />
-        </MotiBox>
-      )}
+      {withNavigation && !error && <OpenInNewTabButton bibleTab={bible} />}
       <SelectedVersesModal
         ref={versesModal.getRef()}
         isSelectionMode={isSelectionMode}
