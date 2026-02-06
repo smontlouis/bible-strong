@@ -258,6 +258,13 @@ function getRectsForSelection(
   return rects
 }
 
+type HandlePositions = {
+  start: { x: number; y: number } | null
+  end: { x: number; y: number } | null
+}
+
+const EMPTY_HANDLE_POSITIONS: HandlePositions = { start: null, end: null }
+
 export function useAnnotationHighlights({
   containerRef,
   wordAnnotations,
@@ -270,10 +277,7 @@ export function useAnnotationHighlights({
   getTokens,
 }: UseAnnotationHighlightsProps): {
   highlightRects: HighlightRect[]
-  selectionHandlePositions: {
-    start: { x: number; y: number } | null
-    end: { x: number; y: number } | null
-  }
+  selectionHandlePositions: HandlePositions
 } {
   const [highlightRects, setHighlightRects] = useState<HighlightRect[]>([])
   // Track if we're waiting for new rects to be calculated after a chapter change
@@ -314,19 +318,27 @@ export function useAnnotationHighlights({
       const containerRect = containerRef.current?.getBoundingClientRect()
       if (!containerRect || !wordAnnotations) return rects
 
+      // Cache tokenization results by verse key to avoid re-tokenizing
+      // when multiple annotations reference the same verse
+      const tokensByVerse = new Map<string, ReturnType<typeof tokenizeVerseText>>()
+
       Object.entries(wordAnnotations).forEach(([annotationId, annotation]) => {
         if (annotation.version !== version) return
 
         annotation.ranges.forEach((range, rangeIdx) => {
           const { verseKey, startWordIndex, endWordIndex } = range
-          const verseTextEl = document.getElementById(`verse-text-${verseKey}`)
-          if (!verseTextEl) return
 
-          // Collect text from DOM to handle LSGS/KJVS verses with Strong's refs
-          const { fullText } = collectTextNodes(verseTextEl)
-          if (!fullText) return
+          let tokens = tokensByVerse.get(verseKey)
+          if (!tokens) {
+            const verseTextEl = document.getElementById(`verse-text-${verseKey}`)
+            if (!verseTextEl) return
 
-          const tokens = tokenizeVerseText(fullText)
+            const { fullText } = collectTextNodes(verseTextEl)
+            if (!fullText) return
+
+            tokens = tokenizeVerseText(fullText)
+            tokensByVerse.set(verseKey, tokens)
+          }
 
           const verseRects = calculateRectsForWordRange({
             verseKey,
@@ -408,13 +420,12 @@ export function useAnnotationHighlights({
     }
   }, [version, book, chapter, annotationKey, selection, verses, settings])
 
-  // Calculate selection handle positions from highlight rects
-  const getSelectionHandlePositions = (): {
-    start: { x: number; y: number } | null
-    end: { x: number; y: number } | null
-  } => {
+  // Calculate selection handle positions synchronously from highlight rects
+  const selectionHandlePositions = (() => {
     const selectionRects = highlightRects.filter(r => r.type === 'selection')
-    if (selectionRects.length === 0) return { start: null, end: null }
+    if (selectionRects.length === 0) {
+      return EMPTY_HANDLE_POSITIONS
+    }
 
     // Read direction from DOM
     const isRTL = containerRef.current
@@ -440,12 +451,12 @@ export function useAnnotationHighlights({
         ? { x: lastRect.left, y: lastRect.top + lastRect.height - HANDLE_OFFSET }
         : { x: lastRect.left + lastRect.width, y: lastRect.top + lastRect.height - HANDLE_OFFSET },
     }
-  }
+  })()
 
   // Return empty array while pending to prevent flash of old positions
   // BUT allow selection to show during isPending (for drag-to-select feedback)
   return {
     highlightRects: isPending && !selection ? [] : highlightRects,
-    selectionHandlePositions: getSelectionHandlePositions(),
+    selectionHandlePositions,
   }
 }

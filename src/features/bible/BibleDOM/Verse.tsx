@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { styled } from 'goober'
 
 import {
@@ -138,11 +138,27 @@ const VerseGroupSeparator = styled('div')<RootStyles>(({ settings: { theme, colo
   marginBottom: '40px',
 }))
 
+const DARK_THEMES = new Set(['dark', 'black', 'mauve', 'night'])
+
 const getRedColor = (settings: RootState['user']['bible']['settings']): string => {
-  const { theme } = settings
-  return theme === 'dark' || theme === 'black' || theme === 'mauve' || theme === 'night'
-    ? '#FF6B6B'
-    : '#CC0000'
+  return DARK_THEMES.has(settings.theme) ? '#FF6B6B' : '#CC0000'
+}
+
+/**
+ * Resolves a BibleError to its user-facing translation string.
+ */
+function getParallelErrorMessage(
+  error: BibleError,
+  translations: ReturnType<typeof useTranslations>
+): string {
+  switch (error.type) {
+    case 'BIBLE_NOT_FOUND':
+      return translations.parallelVersionNotFound
+    case 'CHAPTER_NOT_FOUND':
+      return translations.parallelChapterNotFound
+    default:
+      return translations.parallelLoadError
+  }
 }
 
 const getVerseText = ({
@@ -396,7 +412,12 @@ const Verse = ({
 
   const numberHighlight = getNumberHighlight({ highlightedColor, hasWordAnnotations, settings })
 
-  // Dispatch layoutChanged for Strong's versions when content changes
+  // Notify the annotation highlight system that DOM layout may have changed.
+  // This fires per-verse rather than once at the parent level because each verse
+  // independently determines when its Strong's content renders (based on its own
+  // Texte/Livre/annotationMode). A single parent-level effect would need to track
+  // all verse texts, adding complexity without a clear performance win since the
+  // event is debounced by requestAnimationFrame.
   useEffect(() => {
     if (!isStrongVersion) return
     requestAnimationFrame(() => {
@@ -417,30 +438,6 @@ const Verse = ({
       return (
         <div>
           {parallelVerse.map((p, i) => {
-            // Show error message if parallel version failed to load
-            if (p.error) {
-              const errorMessage =
-                p.error.type === 'BIBLE_NOT_FOUND'
-                  ? translations.parallelVersionNotFound
-                  : p.error.type === 'CHAPTER_NOT_FOUND'
-                    ? translations.parallelChapterNotFound
-                    : translations.parallelLoadError
-              return (
-                <div key={i}>
-                  <VerticalVersionTitle
-                    settings={settings}
-                    onClick={() => navigateToVersion(p.version, i)}
-                  >
-                    {p.version}
-                  </VerticalVersionTitle>
-                  <ParallelError settings={settings}>{errorMessage}</ParallelError>
-                </div>
-              )
-            }
-            if (!p.verse) {
-              return null
-            }
-            // First version (i === 0) keeps all decorations, others are clean for readability
             const isMainVersion = i === 0
             return (
               <div key={i}>
@@ -450,30 +447,34 @@ const Verse = ({
                 >
                   {p.version}
                 </VerticalVersionTitle>
-                {/* Don't pass isParallel in vertical mode to keep normal text size */}
-                <Verse
-                  isHebreu={isHebreu}
-                  verse={p.verse}
-                  version={p.version}
-                  settings={settings}
-                  isSelected={isSelected}
-                  isSelectedMode={isSelectedMode}
-                  isSelectionMode={isSelectionMode}
-                  highlightedColor={isMainVersion ? highlightedColor : undefined}
-                  notesCount={isMainVersion ? notesCount : undefined}
-                  notesText={isMainVersion ? notesText : undefined}
-                  linksCount={isMainVersion ? linksCount : undefined}
-                  linksText={isMainVersion ? linksText : undefined}
-                  isVerseToScroll={isMainVersion ? isVerseToScroll : false}
-                  selectedCode={selectedCode}
-                  isFocused={isFocused}
-                  tag={isMainVersion ? tag : undefined}
-                  isTouched={isTouched}
-                />
+                {p.error ? (
+                  <ParallelError settings={settings}>
+                    {getParallelErrorMessage(p.error, translations)}
+                  </ParallelError>
+                ) : p.verse ? (
+                  <Verse
+                    isHebreu={isHebreu}
+                    verse={p.verse}
+                    version={p.version}
+                    settings={settings}
+                    isSelected={isSelected}
+                    isSelectedMode={isSelectedMode}
+                    isSelectionMode={isSelectionMode}
+                    highlightedColor={isMainVersion ? highlightedColor : undefined}
+                    notesCount={isMainVersion ? notesCount : undefined}
+                    notesText={isMainVersion ? notesText : undefined}
+                    linksCount={isMainVersion ? linksCount : undefined}
+                    linksText={isMainVersion ? linksText : undefined}
+                    isVerseToScroll={isMainVersion ? isVerseToScroll : false}
+                    selectedCode={selectedCode}
+                    isFocused={isFocused}
+                    tag={isMainVersion ? tag : undefined}
+                    isTouched={isTouched}
+                  />
+                ) : null}
               </div>
             )
           })}
-          {/* Separator between verse groups */}
           <VerseGroupSeparator settings={settings} />
         </div>
       )
@@ -481,6 +482,16 @@ const Verse = ({
 
     // Horizontal display mode: side by side columns
     const divWidth = `calc(${columnWidth}vw - 10px)`
+    const columnStyle = (index: number): React.CSSProperties => ({
+      width: divWidth,
+      transition: 'width 0.4s ease-in-out',
+      flexShrink: 0,
+      scrollSnapAlign: 'start',
+      padding: '5px 5px',
+      paddingLeft: index === 0 ? '0px' : '10px',
+      boxSizing: 'border-box',
+    })
+
     return (
       <div
         style={{
@@ -490,62 +501,26 @@ const Verse = ({
         }}
       >
         {parallelVerse.map((p, i) => {
-          // Show error message if parallel version failed to load
+          const isMainVersion = i === 0
+
+          // Error state: show translated error message
           if (p.error) {
-            const errorMessage =
-              p.error.type === 'BIBLE_NOT_FOUND'
-                ? translations.parallelVersionNotFound
-                : p.error.type === 'CHAPTER_NOT_FOUND'
-                  ? translations.parallelChapterNotFound
-                  : translations.parallelLoadError
             return (
-              <div
-                key={i}
-                style={{
-                  width: divWidth,
-                  transition: 'width 0.4s ease-in-out',
-                  flexShrink: 0,
-                  scrollSnapAlign: 'start',
-                  padding: '5px 5px',
-                  paddingLeft: i === 0 ? '0px' : '10px',
-                  boxSizing: 'border-box',
-                }}
-              >
-                <ParallelError settings={settings}>{errorMessage}</ParallelError>
+              <div key={i} style={columnStyle(i)}>
+                <ParallelError settings={settings}>
+                  {getParallelErrorMessage(p.error, translations)}
+                </ParallelError>
               </div>
             )
           }
+
+          // Missing verse: render empty column to preserve layout
           if (!p.verse) {
-            return (
-              <div
-                key={i}
-                style={{
-                  width: divWidth,
-                  transition: 'width 0.4s ease-in-out',
-                  flexShrink: 0,
-                  scrollSnapAlign: 'start',
-                  padding: '5px 5px',
-                  paddingLeft: i === 0 ? '0px' : '10px',
-                  boxSizing: 'border-box',
-                }}
-              />
-            )
+            return <div key={i} style={columnStyle(i)} />
           }
-          // First version (i === 0) keeps all decorations, others are clean for readability
-          const isMainVersion = i === 0
+
           return (
-            <div
-              key={i}
-              style={{
-                width: divWidth,
-                transition: 'width 0.4s ease-in-out',
-                flexShrink: 0,
-                scrollSnapAlign: 'start',
-                padding: '5px 5px',
-                paddingLeft: i === 0 ? '0px' : '10px',
-                boxSizing: 'border-box',
-              }}
-            >
+            <div key={i} style={columnStyle(i)}>
               <Verse
                 isParallel
                 isHebreu={isHebreu}

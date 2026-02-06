@@ -5,15 +5,14 @@ import { WebViewMessageEvent } from 'react-native-webview'
 
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { StudyTab, TabItem, useIsCurrentTab } from 'src/state/tabs'
-import books from '~assets/bible_versions/books-desc'
 import { StudyNavigateBibleType } from '~common/types'
 import { timeout } from '~helpers/timeout'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import i18n from '~i18n'
 import { EditStudyScreenProps } from '~navigation/type'
+import { currentStudyIdAtom } from '../atom'
 import StudyFooter from '../StudyFooter'
 import StudiesDOMComponent, { StudyDOMRef } from './StudiesDOMComponent'
-import { currentStudyIdAtom } from '../atom'
 
 type Props = {
   params: Readonly<EditStudyScreenProps>
@@ -31,7 +30,15 @@ type Props = {
   studyAtom?: PrimitiveAtom<StudyTab>
   studyId: string
 }
-const StudiesDomWrapper = ({
+
+const SELECTION_MODE_MAP: Record<string, StudyNavigateBibleType> = {
+  SELECT_BIBLE_VERSE: 'verse',
+  SELECT_BIBLE_STRONG: 'strong',
+  SELECT_BIBLE_VERSE_BLOCK: 'verse-block',
+  SELECT_BIBLE_STRONG_BLOCK: 'strong-block',
+}
+
+export default function StudiesDomWrapper({
   params,
   isReadOnly,
   onDeltaChangeCallback,
@@ -39,7 +46,7 @@ const StudiesDomWrapper = ({
   fontFamily,
   studyAtom,
   studyId,
-}: Props) => {
+}: Props) {
   const ref = useRef<StudyDOMRef>(null)
   const router = useRouter()
   const [isKeyboardOpened, setIsKeyboardOpened] = useState(false)
@@ -50,11 +57,12 @@ const StudiesDomWrapper = ({
     const updateListener = Platform.OS === 'android' ? 'keyboardDidShow' : 'keyboardWillShow'
     const resetListener = Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide'
 
-    const showKeyboard = () => setIsKeyboardOpened(true)
-    const hideKeyboard = () => setIsKeyboardOpened(false)
-
-    const keyboardShowListener = Keyboard.addListener(updateListener, showKeyboard)
-    const keyboardHideListener = Keyboard.addListener(resetListener, hideKeyboard)
+    const keyboardShowListener = Keyboard.addListener(updateListener, () =>
+      setIsKeyboardOpened(true)
+    )
+    const keyboardHideListener = Keyboard.addListener(resetListener, () =>
+      setIsKeyboardOpened(false)
+    )
 
     return () => {
       keyboardShowListener.remove()
@@ -64,6 +72,7 @@ const StudiesDomWrapper = ({
 
   const getIsCurrentTab = useIsCurrentTab()
   const isCurrentTab = studyAtom ? getIsCurrentTab(studyAtom as PrimitiveAtom<TabItem>) : false
+
   useEffect(() => {
     console.log('[Studies] isCurrentTab', isCurrentTab)
 
@@ -73,61 +82,55 @@ const StudiesDomWrapper = ({
     }
   }, [isCurrentTab])
 
-  const dispatchToWebView = (type: string, payload?: any) => {
+  function dispatchToWebView(type: string, payload?: any): void {
     if (ref.current) {
       console.log('[Studies] RN DISPATCH:', type)
-      console.log('[Studies] Ref:', ref.current)
-      ref.current?.dispatch({ type, payload })
+      ref.current.dispatch({ type, payload })
     }
   }
 
-  useEffect(() => {
-    ;(async () => {
-      // @ts-ignore
-      if (!params?.type) return
-
-      // @ts-ignore
-      if (params.type.includes('verse')) {
-        // @ts-ignore
-        const isBlock = params.type.includes('block')
-        dispatchToWebView('FOCUS_EDITOR')
-
-        dispatchToWebView(isBlock ? 'GET_BIBLE_VERSES_BLOCK' : 'GET_BIBLE_VERSES', params)
-      } else {
-        // @ts-ignore
-        const isBlock = params.type.includes('block')
-        dispatchToWebView('FOCUS_EDITOR')
-        dispatchToWebView(isBlock ? 'GET_BIBLE_STRONG_BLOCK' : 'GET_BIBLE_STRONG', params)
-      }
-    })()
-  }, [JSON.stringify(params)])
-
-  const navigateBibleView = async (type: StudyNavigateBibleType) => {
+  async function navigateToSelectionMode(selectionMode: StudyNavigateBibleType): Promise<void> {
     dispatchToWebView('BLUR_EDITOR')
     await timeout(300)
-    // Store current studyId for dismissTo navigation
     getDefaultStore().set(currentStudyIdAtom, studyId)
     router.push({
       pathname: '/bible-view',
-      params: { isSelectionMode: type },
+      params: { isSelectionMode: selectionMode },
     })
   }
 
-  const dispatch = async (event: WebViewMessageEvent) => {
-    let msgData
+  useEffect(() => {
+    const paramsWithType = params as EditStudyScreenProps & { type?: string }
+    if (!paramsWithType.type) return
+
+    const isVerse = paramsWithType.type.includes('verse')
+    const isBlock = paramsWithType.type.includes('block')
+
+    dispatchToWebView('FOCUS_EDITOR')
+
+    if (isVerse) {
+      dispatchToWebView(isBlock ? 'GET_BIBLE_VERSES_BLOCK' : 'GET_BIBLE_VERSES', params)
+    } else {
+      dispatchToWebView(isBlock ? 'GET_BIBLE_STRONG_BLOCK' : 'GET_BIBLE_STRONG', params)
+    }
+  }, [JSON.stringify(params)])
+
+  function handleMessage(event: WebViewMessageEvent): void {
+    let msgData: any
     try {
       msgData = JSON.parse(event.nativeEvent.data)
-
       console.log('[Studies] DISPATCH:', msgData.type)
 
       switch (msgData.type) {
-        case 'TEXT_CHANGED':
+        case 'TEXT_CHANGED': {
           if (onDeltaChangeCallback) {
             delete msgData.payload.type
             const { delta, deltaChange, deltaOld, changeSource } = msgData.payload
             onDeltaChangeCallback(delta, deltaChange, deltaOld, changeSource)
           }
           break
+        }
+
         case 'VIEW_BIBLE_VERSE': {
           const arrayVerses = (
             typeof msgData.payload.arrayVerses === 'string'
@@ -146,6 +149,7 @@ const StudiesDomWrapper = ({
           })
           return
         }
+
         case 'VIEW_BIBLE_STRONG': {
           router.push({
             pathname: '/strong',
@@ -153,46 +157,16 @@ const StudiesDomWrapper = ({
           })
           return
         }
-        case 'SELECT_BIBLE_VERSE': {
-          dispatchToWebView('BLUR_EDITOR')
-          await timeout(300)
-          getDefaultStore().set(currentStudyIdAtom, studyId)
-          router.push({
-            pathname: '/bible-view',
-            params: { isSelectionMode: 'verse' },
-          })
-          return
-        }
-        case 'SELECT_BIBLE_STRONG': {
-          dispatchToWebView('BLUR_EDITOR')
-          await timeout(300)
-          getDefaultStore().set(currentStudyIdAtom, studyId)
-          router.push({
-            pathname: '/bible-view',
-            params: { isSelectionMode: 'strong' },
-          })
-          return
-        }
-        case 'SELECT_BIBLE_VERSE_BLOCK': {
-          dispatchToWebView('BLUR_EDITOR')
-          await timeout(300)
-          getDefaultStore().set(currentStudyIdAtom, studyId)
-          router.push({
-            pathname: '/bible-view',
-            params: { isSelectionMode: 'verse-block' },
-          })
-          return
-        }
+
+        case 'SELECT_BIBLE_VERSE':
+        case 'SELECT_BIBLE_STRONG':
+        case 'SELECT_BIBLE_VERSE_BLOCK':
         case 'SELECT_BIBLE_STRONG_BLOCK': {
-          dispatchToWebView('BLUR_EDITOR')
-          await timeout(300)
-          getDefaultStore().set(currentStudyIdAtom, studyId)
-          router.push({
-            pathname: '/bible-view',
-            params: { isSelectionMode: 'strong-block' },
-          })
+          const selectionMode = SELECTION_MODE_MAP[msgData.type]
+          navigateToSelectionMode(selectionMode)
           return
         }
+
         case 'ACTIVE_FORMATS': {
           setActiveFormats(JSON.parse(msgData.payload))
           return
@@ -226,7 +200,7 @@ const StudiesDomWrapper = ({
         isReadOnly={isReadOnly}
         colorScheme={colorScheme}
         dom={{
-          onMessage: dispatch,
+          onMessage: handleMessage,
           keyboardDisplayRequiresUserAction: false,
           bounces: false,
           scrollEnabled: false,
@@ -235,7 +209,7 @@ const StudiesDomWrapper = ({
       />
       {isKeyboardOpened && (
         <StudyFooter
-          navigateBibleView={navigateBibleView}
+          navigateBibleView={navigateToSelectionMode}
           dispatchToWebView={dispatchToWebView}
           activeFormats={activeFormats}
         />
@@ -243,5 +217,3 @@ const StudiesDomWrapper = ({
     </KeyboardAvoidingView>
   )
 }
-
-export default StudiesDomWrapper

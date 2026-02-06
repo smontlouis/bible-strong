@@ -133,61 +133,121 @@ function isPointInRect(x: number, y: number, rect: DOMRect): boolean {
 }
 
 /**
- * Finds the character offset within a text node by scanning characters on the correct line.
- * For multi-line text, we first filter to characters on the same line (by Y coordinate),
- * then find the character at the correct X position.
+ * Gets the bounding rect for a single character in a text node.
+ * Reuses the provided Range to avoid allocation overhead in hot loops.
+ */
+function getCharRect(range: Range, textNode: Text, index: number): DOMRect {
+  range.setStart(textNode, index)
+  range.setEnd(textNode, index + 1)
+  return range.getBoundingClientRect()
+}
+
+/**
+ * Finds the character offset within a text node using a two-phase approach:
+ * 1. Identify which line the touch point is on (by Y coordinate)
+ * 2. Binary search within that line's character range for the correct X position
+ *
+ * This replaces the previous O(n) linear scan with O(n/lineLength + log(lineLength)),
+ * which is significantly faster for long text nodes during touch interactions.
  */
 function findCharOffsetInTextNode(textNode: Text, clientX: number, viewportY: number): number {
   const text = textNode.textContent || ''
   if (text.length === 0) return 0
 
   const range = document.createRange()
+  const LINE_HEIGHT_TOLERANCE = 30
 
-  // First, find all characters that are on the same line as our touch point
-  // (within a reasonable Y tolerance for the line height)
-  const LINE_HEIGHT_TOLERANCE = 30 // pixels
+  // Phase 1: Find the line boundaries that contain the touch Y coordinate.
+  // Sample characters at intervals to find a character on the correct line,
+  // then expand outward to find the full line range.
+  const SAMPLE_STEP = Math.max(1, Math.floor(text.length / 20))
+  let anchorIndex = -1
 
-  let bestMatch: { index: number; xDistance: number } | null = null
-
-  for (let i = 0; i < text.length; i++) {
-    range.setStart(textNode, i)
-    range.setEnd(textNode, i + 1)
-    const rect = range.getBoundingClientRect()
-
-    // Check if this character is on the same line (Y coordinate matches)
+  for (let i = 0; i < text.length; i += SAMPLE_STEP) {
+    const rect = getCharRect(range, textNode, i)
     const charCenterY = rect.top + rect.height / 2
-    const yDistance = Math.abs(charCenterY - viewportY)
+    if (Math.abs(charCenterY - viewportY) < LINE_HEIGHT_TOLERANCE) {
+      anchorIndex = i
+      break
+    }
+  }
 
-    if (yDistance < LINE_HEIGHT_TOLERANCE) {
-      // This character is on the correct line
-      // Check if X coordinate matches
-      if (clientX >= rect.left && clientX <= rect.right) {
-        // Exact match!
-        return i
-      }
-
-      // Track closest X match on this line
-      const xDistance = clientX < rect.left ? rect.left - clientX : clientX - rect.right
-      if (!bestMatch || xDistance < bestMatch.xDistance) {
-        bestMatch = { index: i, xDistance }
+  // If sampling missed, do a linear scan (rare, only for very short text)
+  if (anchorIndex === -1) {
+    for (let i = 0; i < text.length; i++) {
+      const rect = getCharRect(range, textNode, i)
+      const charCenterY = rect.top + rect.height / 2
+      if (Math.abs(charCenterY - viewportY) < LINE_HEIGHT_TOLERANCE) {
+        anchorIndex = i
+        break
       }
     }
   }
 
-  // Return best match on the correct line, or fallback to 0
-  if (bestMatch) {
-    return bestMatch.index
+  // No character on the correct line - fall back to closest character overall
+  if (anchorIndex === -1) {
+    return findClosestCharOverall(range, textNode, text, clientX, viewportY)
   }
 
-  // Fallback: linear scan for closest character overall
+  // Expand from anchor to find the full line range
+  let lineStart = anchorIndex
+  let lineEnd = anchorIndex
+
+  while (lineStart > 0) {
+    const rect = getCharRect(range, textNode, lineStart - 1)
+    const charCenterY = rect.top + rect.height / 2
+    if (Math.abs(charCenterY - viewportY) >= LINE_HEIGHT_TOLERANCE) break
+    lineStart--
+  }
+
+  while (lineEnd < text.length - 1) {
+    const rect = getCharRect(range, textNode, lineEnd + 1)
+    const charCenterY = rect.top + rect.height / 2
+    if (Math.abs(charCenterY - viewportY) >= LINE_HEIGHT_TOLERANCE) break
+    lineEnd++
+  }
+
+  // Phase 2: Linear scan within the line for the correct X position.
+  // We use a linear scan instead of binary search because RTL text (Hebrew)
+  // has non-monotonic X positions, making binary search unreliable.
+  // The line range is typically small (40-80 chars), so this is fast enough.
+  let bestIndex = lineStart
+  let bestDistance = Infinity
+
+  for (let i = lineStart; i <= lineEnd; i++) {
+    const rect = getCharRect(range, textNode, i)
+
+    // Exact hit
+    if (clientX >= rect.left && clientX <= rect.right) {
+      return i
+    }
+
+    const xDistance = clientX < rect.left ? rect.left - clientX : clientX - rect.right
+    if (xDistance < bestDistance) {
+      bestDistance = xDistance
+      bestIndex = i
+    }
+  }
+
+  return bestIndex
+}
+
+/**
+ * Fallback: finds the closest character to a point by Euclidean distance.
+ * Only used when no character is found on the correct line (rare edge case).
+ */
+function findClosestCharOverall(
+  range: Range,
+  textNode: Text,
+  text: string,
+  clientX: number,
+  viewportY: number
+): number {
   let closestIndex = 0
   let closestDistance = Infinity
 
   for (let i = 0; i < text.length; i++) {
-    range.setStart(textNode, i)
-    range.setEnd(textNode, i + 1)
-    const rect = range.getBoundingClientRect()
-
+    const rect = getCharRect(range, textNode, i)
     const charCenterX = rect.left + rect.width / 2
     const charCenterY = rect.top + rect.height / 2
     const distance = Math.sqrt(

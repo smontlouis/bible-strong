@@ -2,7 +2,7 @@ import { keyframes, styled } from 'goober'
 import { convertHex } from './convertHex'
 import { RootStyles } from './BibleDOMWrapper'
 import { HIGHLIGHT_BACKGROUND_OPACITY, getContrastTextColor } from '../../../helpers/highlightUtils'
-import { isDarkTheme } from './utils'
+import { isDarkTheme, noSelect } from './utils'
 
 export type HighlightType = 'background' | 'textColor' | 'underline'
 
@@ -112,9 +112,6 @@ export const ContainerText = styled('span')<
       highlightStyles = getHighlightStyles(hex, type, theme)
     }
   }
-  if (isTouched) {
-    // background = 'rgba(0,0,0,0.05)'
-  }
   return {
     fontFamily,
     transition: 'background 0.3s ease, color 0.3s ease',
@@ -124,16 +121,7 @@ export const ContainerText = styled('span')<
     padding: '4px',
     WebkitBoxDecorationBreak: 'clone',
     borderBottom: isSelected ? `2px dashed ${colors[theme]['default']}` : 'none',
-    WebkitTouchCallout: 'none',
-    MozUserSelect: 'none',
-    msUserSelect: 'none',
-    KhtmlUserSelect: 'none',
-    WebkitUserSelect: 'none',
-    // ...(highlightedColor && !isSelected
-    //   ? {
-    //       filter: 'url(#goo)',
-    //     }
-    //   : {}),
+    ...noSelect,
     ...(isVerseToScroll
       ? {
           animation: `0.5s ease 0s 3 normal none running ${zoom}`,

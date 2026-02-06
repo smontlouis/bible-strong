@@ -5,15 +5,12 @@ import { RootState } from '~redux/modules/reducer'
 import { LinkedVerse, RootStyles } from './BibleDOMWrapper'
 import { getLinkTypeIconComponent, getLinkTypeColor } from './LinkIcons'
 import { InlineItemContainer, InlineItemIconWrapper, InlineItemText } from './InlineItem'
+import { noSelect } from './utils'
 
 const Div = styled('span')<RootStyles & { isParallel?: boolean }>(
   ({ isParallel, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
     fontFamily,
-    webkitTouchCallout: 'none',
-    mozUserSelect: 'none',
-    msUserSelect: 'none',
-    khtmlUserSelect: 'none',
-    webkitUserSelect: 'none',
+    ...noSelect,
     fontSize: scaleFontSize(isParallel ? 10 : 14, fontSizeScale),
     lineHeight: scaleFontSize(isParallel ? 18 : 26, fontSizeScale),
     backgroundColor: colors[theme].reverse,

@@ -70,6 +70,79 @@ export const HighlightLayer = styled('div')<{ $dimmed?: boolean }>(({ $dimmed })
   transition: 'opacity 0.3s ease',
 }))
 
+/**
+ * Returns the rotation angle (in degrees) for the sketchy circle effect.
+ * Shorter content gets more rotation for a hand-drawn appearance;
+ * wider content uses less rotation to avoid visual distortion.
+ */
+function getCircleRotation(width: number): number {
+  if (width > 150) return 1
+  if (width > 100) return 2
+  if (width > 75) return 3
+  if (width > 50) return 7
+  return 10
+}
+
+/**
+ * Builds the CSS-in-JS style object for the hand-drawn circle annotation type.
+ * Uses two pseudo-elements (::before, ::after) with slightly different rotations
+ * to create an organic, sketchy look.
+ */
+function createCircleStyle(
+  colorStr: string,
+  width: number,
+  height: number,
+  animationDelay: number
+): Record<string, unknown> {
+  const c = Color(colorStr)
+  const [r, g, b] = c.rgb().array()
+  const softBorder = `rgba(${r}, ${g}, ${b}, 0.6)`
+  const thinBorder = `rgba(${r}, ${g}, ${b}, 0.4)`
+  const glowColor = `rgba(${r}, ${g}, ${b}, 0.15)`
+
+  // Dynamic sizing: cap overflow at max pixels instead of fixed percentage
+  const overflowX = Math.min(width * 0.1, 20)
+  const overflowY = Math.min(height * 0.1, 8)
+
+  const widthPercent = ((width + overflowX * 2) / width) * 100
+  const heightPercent = ((height + overflowY * 2) / height) * 100
+  const offsetX = (widthPercent - 100) / 2
+  const offsetY = (heightPercent - 100) / 2
+
+  const rotation = getCircleRotation(width)
+  const conicMask =
+    'conic-gradient(from -90deg, black var(--draw-angle), transparent var(--draw-angle))'
+
+  return {
+    zIndex: 1,
+    borderRadius: '4px',
+    '&::before, &::after': {
+      content: '""',
+      width: `${widthPercent}%`,
+      height: `${heightPercent}%`,
+      position: 'absolute',
+      top: `-${offsetY}%`,
+      left: `-${offsetX}%`,
+      zIndex: -1,
+      borderRadius: '100%',
+      boxSizing: 'border-box',
+      boxShadow: `0 0 8px ${glowColor}, inset 0 0 4px ${glowColor}`,
+      maskImage: conicMask,
+      WebkitMaskImage: conicMask,
+      animation: `${drawCircle} 0.3s ease-in-out ${animationDelay}s forwards`,
+    },
+    '&::before': {
+      border: `3px solid ${softBorder}`,
+      transform: `rotate(-${rotation}deg)`,
+    },
+    '&::after': {
+      border: `1px solid ${thinBorder}`,
+      transform: `rotate(${rotation}deg)`,
+      animationDelay: `${animationDelay + 0.3}s`,
+    },
+  }
+}
+
 export const HighlightRectDiv = styled('div')<{
   $top: number
   $left: number
@@ -149,74 +222,8 @@ export const HighlightRectDiv = styled('div')<{
         },
       }),
 
-    // Circle: effet de cercle dessiné à la main (sketchy) - Snippflow style
-    ...(isCircle &&
-      (() => {
-        // Create soft color variations using Color library
-        const c = Color($color)
-        const [r, g, b] = c.rgb().array()
-        const softBorder = `rgba(${r}, ${g}, ${b}, 0.6)`
-        const thinBorder = `rgba(${r}, ${g}, ${b}, 0.4)`
-        const glowColor = `rgba(${r}, ${g}, ${b}, 0.15)`
-
-        // Dynamic sizing: cap overflow at max pixels instead of fixed percentage
-        const maxOverflowX = 20 // max horizontal overflow in pixels per side
-        const maxOverflowY = 8 // max vertical overflow in pixels per side
-        const percentOverflowX = $width * 0.1 // 10% per side = 120% total
-        const percentOverflowY = $height * 0.1
-
-        const overflowX = Math.min(percentOverflowX, maxOverflowX)
-        const overflowY = Math.min(percentOverflowY, maxOverflowY)
-
-        const widthPercent = (($width + overflowX * 2) / $width) * 100
-        const heightPercent = (($height + overflowY * 2) / $height) * 100
-        const offsetX = (widthPercent - 100) / 2
-        const offsetY = (heightPercent - 100) / 2
-
-        // Dynamic rotation: reduce for longer content
-        const getRotation = (width: number) => {
-          if (width > 150) return 1
-          if (width > 100) return 2
-          if (width > 75) return 3
-          if (width > 50) return 7
-          return 10
-        }
-        const rotation = getRotation($width)
-
-        return {
-          zIndex: 1,
-          borderRadius: '4px',
-          '&::before, &::after': {
-            content: '""',
-            width: `${widthPercent}%`,
-            height: `${heightPercent}%`,
-            position: 'absolute',
-            top: `-${offsetY}%`,
-            left: `-${offsetX}%`,
-            zIndex: -1,
-            borderRadius: '100%',
-            boxSizing: 'border-box',
-            // Soft glow effect
-            boxShadow: `0 0 8px ${glowColor}, inset 0 0 4px ${glowColor}`,
-            // Progressive drawing animation with conic-gradient mask
-            maskImage:
-              'conic-gradient(from -90deg, black var(--draw-angle), transparent var(--draw-angle))',
-            WebkitMaskImage:
-              'conic-gradient(from -90deg, black var(--draw-angle), transparent var(--draw-angle))',
-            animation: `${drawCircle} 0.3s ease-in-out ${$animationDelay}s forwards`,
-          },
-          '&::before': {
-            border: `3px solid ${softBorder}`,
-            transform: `rotate(-${rotation}deg)`,
-          },
-          '&::after': {
-            border: `1px solid ${thinBorder}`,
-            transform: `rotate(${rotation}deg)`,
-            // Start after first circle finishes (1s animation duration)
-            animationDelay: `${$animationDelay + 0.3}s`,
-          },
-        }
-      })()),
+    // Circle: hand-drawn sketchy circle effect
+    ...(isCircle && createCircleStyle($color, $width, $height, $animationDelay)),
   }
 })
 

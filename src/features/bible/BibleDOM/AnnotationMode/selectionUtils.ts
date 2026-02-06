@@ -21,7 +21,7 @@ export interface AnnotationRangeData {
 }
 
 /** Returns negative if a < b, 0 if equal, positive if a > b */
-export const comparePositions = (a: WordPosition, b: WordPosition, verses: TVerse[]): number => {
+export function comparePositions(a: WordPosition, b: WordPosition, verses: TVerse[]): number {
   const aVerseIdx = verses.findIndex(v => `${v.Livre}-${v.Chapitre}-${v.Verset}` === a.verseKey)
   const bVerseIdx = verses.findIndex(v => `${v.Livre}-${v.Chapitre}-${v.Verset}` === b.verseKey)
 
@@ -31,21 +31,21 @@ export const comparePositions = (a: WordPosition, b: WordPosition, verses: TVers
   return a.wordIndex - b.wordIndex
 }
 
-export const normalizeRange = (
+export function normalizeRange(
   range: SelectionRange,
   verses: TVerse[]
-): { start: WordPosition; end: WordPosition } => {
+): { start: WordPosition; end: WordPosition } {
   if (comparePositions(range.start, range.end, verses) > 0) {
     return { start: range.end, end: range.start }
   }
   return { start: range.start, end: range.end }
 }
 
-export const getVersesBetween = (
+export function getVersesBetween(
   allVerses: TVerse[],
   startKey: string,
   endKey: string
-): TVerse[] => {
+): TVerse[] {
   const startIdx = allVerses.findIndex(v => `${v.Livre}-${v.Chapitre}-${v.Verset}` === startKey)
   const endIdx = allVerses.findIndex(v => `${v.Livre}-${v.Chapitre}-${v.Verset}` === endKey)
 
@@ -57,11 +57,11 @@ export const getVersesBetween = (
   return allVerses.slice(minIdx, maxIdx + 1)
 }
 
-export const buildRangesFromSelection = (
+export function buildRangesFromSelection(
   selection: SelectionRange,
   verses: TVerse[],
   getTokens: (verseKey: string, text: string) => WordToken[]
-): AnnotationRangeData[] => {
+): AnnotationRangeData[] {
   const { start: normalizedStart, end: normalizedEnd } = normalizeRange(selection, verses)
   const selectedVerses = getVersesBetween(verses, normalizedStart.verseKey, normalizedEnd.verseKey)
   const ranges: AnnotationRangeData[] = []

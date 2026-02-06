@@ -5,7 +5,7 @@ import { useDispatch } from './DispatchProvider'
 import { SelectedCode, Verse } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import { scaleFontSize } from './scaleFontSize'
-import { isDarkTheme } from './utils'
+import { isDarkTheme, noSelect } from './utils'
 import { getDisabledStyles } from './disabledStyles'
 import { scaleLineHeight } from './scaleLineHeight'
 
@@ -19,11 +19,7 @@ const StyledReference = styled('span')<
     settings: { theme, colors, fontFamily, fontSizeScale, lineHeight },
   }) => ({
     fontFamily,
-    webkitTouchCallout: 'none',
-    mozUserSelect: 'none',
-    msUserSelect: 'none',
-    khtmlUserSelect: 'none',
-    webkitUserSelect: 'none',
+    ...noSelect,
     color: isSelected ? colors[theme].reverse : 'inherit',
     backgroundColor: isSelected ? colors[theme].primary : 'inherit',
     fontSize: scaleFontSize(isParallel ? 16 : 19, fontSizeScale),

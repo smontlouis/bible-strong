@@ -46,6 +46,35 @@ interface TouchState {
   velocitySamples: VelocitySample[]
 }
 
+const INITIAL_TOUCH_STATE: Omit<TouchState, 'longPressTimer' | 'lastTapTime' | 'lastTapVerseKey'> =
+  {
+    startPos: { x: 0, y: 0 },
+    startWord: null,
+    startVerseKey: null,
+    isDragging: false,
+    isSwipe: false,
+    hasMoved: false,
+    dragHandle: null,
+    longPressFired: false,
+    startTime: 0,
+    velocitySamples: [],
+  }
+
+/**
+ * Resets the mutable touch state fields that should be cleared between gestures.
+ * Does NOT reset lastTapTime/lastTapVerseKey (needed for double-tap detection across gestures).
+ */
+function resetTouchState(state: TouchState): void {
+  state.isDragging = false
+  state.isSwipe = false
+  state.hasMoved = false
+  state.dragHandle = null
+  state.startWord = null
+  state.startVerseKey = null
+  state.longPressFired = false
+  state.velocitySamples = []
+}
+
 /** Callbacks for gesture handling */
 export interface TouchSelectionCallbacks {
   /** Called on single tap - receives verseKey and touch position for word-level selection */
@@ -100,35 +129,42 @@ export function useTouchSelection({
 }: TouchSelectionConfig): {
   lastDragEndRef: RefObject<number>
 } {
-  const {
-    onTapVerse,
-    onDoubleTapVerse,
-    onLongPressVerse,
-    onDragStart,
-    onEnterAnnotationModeFromDrag,
-    onTouchedVerseChange,
-    onTapEmpty,
-    onSwipe,
-  } = callbacks
   const touchStateRef = useRef<TouchState>({
-    startPos: { x: 0, y: 0 },
-    startWord: null,
-    startVerseKey: null,
-    isDragging: false,
-    isSwipe: false,
-    hasMoved: false,
-    dragHandle: null,
+    ...INITIAL_TOUCH_STATE,
     longPressTimer: null,
     lastTapTime: 0,
     lastTapVerseKey: null,
-    longPressFired: false,
-    startTime: 0,
-    velocitySamples: [],
   })
   const autoScrollRef = useRef<number | null>(null)
   const currentTouchPosRef = useRef<Position | null>(null)
   const lastDragEndRef = useRef<number>(0)
   const singleTapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Store frequently-changing values in refs so the touch listener effect
+  // does not need to tear down and re-attach on every change.
+  const selectionRef = useRef(selection)
+  selectionRef.current = selection
+
+  const versesRef = useRef(verses)
+  versesRef.current = verses
+
+  const getTokensRef = useRef(getTokens)
+  getTokensRef.current = getTokens
+
+  const getSelectionHandlePositionsRef = useRef(getSelectionHandlePositions)
+  getSelectionHandlePositionsRef.current = getSelectionHandlePositions
+
+  const annotationModeRef = useRef(annotationMode)
+  annotationModeRef.current = annotationMode
+
+  const canDragToAnnotateRef = useRef(canDragToAnnotate)
+  canDragToAnnotateRef.current = canDragToAnnotate
+
+  const setSelectionRef = useRef(setSelection)
+  setSelectionRef.current = setSelection
+
+  const callbacksRef = useRef(callbacks)
+  callbacksRef.current = callbacks
 
   // Get word position at a given screen coordinate
   const getWordAtPoint = (clientX: number, clientY: number): WordPosition | null => {
@@ -141,10 +177,12 @@ export function useTouchSelection({
     const verseKey = verseContainer.getAttribute('data-verse-key')
     if (!verseKey) return null
 
-    const verse = verses.find(v => `${v.Livre}-${v.Chapitre}-${v.Verset}` === verseKey)
+    const verse = versesRef.current.find(
+      v => `${v.Livre}-${v.Chapitre}-${v.Verset}` === verseKey
+    )
     if (!verse) return null
 
-    const tokens = getTokens(verseKey, verse.Texte)
+    const tokens = getTokensRef.current(verseKey, verse.Texte)
     const wordIndex = getWordIndexFromCharOffset(tokens, caretInfo.charOffset)
 
     if (wordIndex === null) return null
@@ -209,18 +247,15 @@ export function useTouchSelection({
   const updateSelectionDuringDrag = (wordPos: WordPosition) => {
     const touchState = touchStateRef.current
 
-    setSelection(prev => {
+    setSelectionRef.current(prev => {
       if (!prev) {
-        // Create initial selection from start word to current word
         if (!touchState.startWord) return null
         return { start: touchState.startWord, end: wordPos }
       }
 
       if (touchState.dragHandle === 'start') {
-        // Dragging start handle: update start position
         return { start: wordPos, end: prev.end }
       } else {
-        // Dragging end handle or normal drag: update end position
         return { start: prev.start, end: wordPos }
       }
     })
@@ -256,7 +291,8 @@ export function useTouchSelection({
     return distanceDelta / timeDelta // px/ms
   }
 
-  // Native touch event handlers with { passive: false } to allow preventDefault
+  // Attach native touch event handlers once and read latest values from refs.
+  // This avoids tearing down and re-attaching listeners when props change.
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
@@ -266,13 +302,12 @@ export function useTouchSelection({
 
       const touch = e.touches[0]
       const touchState = touchStateRef.current
+      const cbs = callbacksRef.current
 
-      // Clear previous timers
       clearTimers()
 
       const now = Date.now()
 
-      // Reset touch state
       touchState.startPos = { x: touch.clientX, y: touch.clientY }
       touchState.isDragging = false
       touchState.isSwipe = false
@@ -284,32 +319,30 @@ export function useTouchSelection({
 
       currentTouchPosRef.current = { x: touch.clientX, y: touch.clientY }
 
-      // Find verse at touch point
       const wordPos = getWordAtPoint(touch.clientX, touch.clientY)
       touchState.startWord = wordPos
       touchState.startVerseKey =
         wordPos?.verseKey || getVerseKeyAtPoint(touch.clientX, touch.clientY)
 
-      // Notify touched verse for visual feedback
       if (touchState.startVerseKey) {
-        onTouchedVerseChange?.(touchState.startVerseKey)
+        cbs.onTouchedVerseChange?.(touchState.startVerseKey)
       }
 
-      // Check if touching a selection handle - if so, immediately start dragging (annotation mode only)
-      if (selection && annotationMode) {
-        const handlePositions = getSelectionHandlePositions()
+      // Check if touching a selection handle (annotation mode only)
+      if (selectionRef.current && annotationModeRef.current) {
+        const handlePositions = getSelectionHandlePositionsRef.current()
 
         if (isNearHandle(touch.clientX, touch.clientY, handlePositions.start)) {
           touchState.dragHandle = 'start'
           touchState.isDragging = true
-          e.preventDefault() // Block scroll immediately for handle drag
+          e.preventDefault()
           return
         }
 
         if (isNearHandle(touch.clientX, touch.clientY, handlePositions.end)) {
           touchState.dragHandle = 'end'
           touchState.isDragging = true
-          e.preventDefault() // Block scroll immediately for handle drag
+          e.preventDefault()
           return
         }
       }
@@ -319,8 +352,8 @@ export function useTouchSelection({
         touchState.longPressTimer = setTimeout(() => {
           if (!touchState.hasMoved && !touchState.isDragging && touchState.startVerseKey) {
             touchState.longPressFired = true
-            onTouchedVerseChange?.(null) // Clear touched state
-            onLongPressVerse?.(touchState.startVerseKey)
+            callbacksRef.current.onTouchedVerseChange?.(null)
+            callbacksRef.current.onLongPressVerse?.(touchState.startVerseKey)
           }
         }, LONG_PRESS_DELAY)
       }
@@ -331,6 +364,7 @@ export function useTouchSelection({
 
       const touch = e.touches[0]
       const touchState = touchStateRef.current
+      const cbs = callbacksRef.current
       const now = Date.now()
 
       currentTouchPosRef.current = { x: touch.clientX, y: touch.clientY }
@@ -350,7 +384,6 @@ export function useTouchSelection({
           updateSelectionDuringDrag(wordPos)
         }
 
-        // Auto-scroll when near edges
         const screenY = touch.clientY
         if (screenY < AUTO_SCROLL_ZONE_TOP) {
           startAutoScroll(-AUTO_SCROLL_SPEED)
@@ -362,76 +395,60 @@ export function useTouchSelection({
         return
       }
 
-      // If already in swipe mode, let browser handle the swipe
-      if (touchState.isSwipe) {
-        return
-      }
-
-      // If already marked as scroll, do nothing
-      if (touchState.hasMoved) {
-        return
-      }
+      if (touchState.isSwipe) return
+      if (touchState.hasMoved) return
 
       const deltaX = Math.abs(touch.clientX - touchState.startPos.x)
       const deltaY = Math.abs(touch.clientY - touchState.startPos.y)
 
-      // Direction detection for horizontal drag (not handle)
+      // Vertical movement dominant -> scroll
       if (deltaY > DRAG_THRESHOLD) {
-        // Vertical movement dominant -> it's a scroll, let it happen
         touchState.hasMoved = true
-        // Clear long-press timer
         if (touchState.longPressTimer) {
           clearTimeout(touchState.longPressTimer)
           touchState.longPressTimer = null
         }
-        // Clear touched state
-        onTouchedVerseChange?.(null)
+        cbs.onTouchedVerseChange?.(null)
         return
       }
 
       // Horizontal movement detection - use velocity to decide swipe vs drag
       if (deltaX > DRAG_THRESHOLD && deltaX > deltaY) {
-        // Clear long-press timer
         if (touchState.longPressTimer) {
           clearTimeout(touchState.longPressTimer)
           touchState.longPressTimer = null
         }
+        cbs.onTouchedVerseChange?.(null)
 
-        // Clear touched state
-        onTouchedVerseChange?.(null)
-
-        // Calculate velocity to decide between swipe and drag
         const velocity = calculateAverageVelocity(touchState.velocitySamples, now, touch.clientX)
 
         if (velocity >= SWIPE_VELOCITY_THRESHOLD) {
-          // Fast movement -> swipe (chapter navigation)
           touchState.isSwipe = true
-          // Don't preventDefault - let browser handle the natural scroll/swipe
           return
         }
 
         // Slow movement -> drag (text selection)
-        // Only activate drag mode if we have a word to start from
         if (touchState.startWord) {
-          if (!annotationMode) {
-            // Normal mode - check if drag-to-annotation is allowed
-            if (!canDragToAnnotate) {
-              // Drag not allowed (verses are selected), treat as scroll
+          if (!annotationModeRef.current) {
+            if (!canDragToAnnotateRef.current) {
               touchState.hasMoved = true
               return
             }
-            // Enter annotation mode via drag
             touchState.isDragging = true
-            e.preventDefault() // Start blocking scroll now
-            onEnterAnnotationModeFromDrag?.()
-            // Create initial selection
-            setSelection(() => ({ start: touchState.startWord!, end: touchState.startWord! }))
+            e.preventDefault()
+            cbs.onEnterAnnotationModeFromDrag?.()
+            setSelectionRef.current(() => ({
+              start: touchState.startWord!,
+              end: touchState.startWord!,
+            }))
           } else {
-            // Annotation mode - continue with selection
             touchState.isDragging = true
-            e.preventDefault() // Start blocking scroll now
-            onDragStart?.() // Clear any selected annotation
-            setSelection(() => ({ start: touchState.startWord!, end: touchState.startWord! }))
+            e.preventDefault()
+            cbs.onDragStart?.()
+            setSelectionRef.current(() => ({
+              start: touchState.startWord!,
+              end: touchState.startWord!,
+            }))
           }
         }
       }
@@ -439,45 +456,34 @@ export function useTouchSelection({
 
     const handleTouchEnd = (e: TouchEvent) => {
       const touchState = touchStateRef.current
+      const cbs = callbacksRef.current
       const now = Date.now()
 
       stopAutoScroll()
 
-      // Get final touch position for swipe detection
       const changedTouch = e.changedTouches?.[0]
       const finalX = changedTouch?.clientX ?? currentTouchPosRef.current?.x ?? touchState.startPos.x
 
       currentTouchPosRef.current = null
 
-      // Clear long-press timer
       if (touchState.longPressTimer) {
         clearTimeout(touchState.longPressTimer)
         touchState.longPressTimer = null
       }
 
-      // Clear touched state
-      onTouchedVerseChange?.(null)
+      cbs.onTouchedVerseChange?.(null)
 
-      // Check for swipe completion
+      // Swipe completion
       if (touchState.isSwipe) {
         const elapsedTime = now - touchState.startTime
         const totalDistance = Math.abs(finalX - touchState.startPos.x)
         const direction = finalX < touchState.startPos.x ? 'left' : 'right'
 
-        // Validate swipe: enough distance and within time window
         if (totalDistance >= SWIPE_MIN_DISTANCE && elapsedTime < SWIPE_MAX_TIME) {
-          onSwipe?.(direction)
+          cbs.onSwipe?.(direction)
         }
 
-        // Reset swipe state and return early
-        touchState.isSwipe = false
-        touchState.isDragging = false
-        touchState.hasMoved = false
-        touchState.dragHandle = null
-        touchState.startWord = null
-        touchState.startVerseKey = null
-        touchState.longPressFired = false
-        touchState.velocitySamples = []
+        resetTouchState(touchState)
         return
       }
 
@@ -489,66 +495,46 @@ export function useTouchSelection({
       if (!touchState.isDragging && !touchState.hasMoved && !touchState.longPressFired) {
         const verseKey = touchState.startVerseKey
         if (verseKey) {
-          // Check for double-tap
           if (
             touchState.lastTapVerseKey === verseKey &&
             now - touchState.lastTapTime < DOUBLE_TAP_DELAY
           ) {
-            // Double-tap detected - clear pending single tap timer
+            // Double-tap detected
             if (singleTapTimerRef.current) {
               clearTimeout(singleTapTimerRef.current)
               singleTapTimerRef.current = null
             }
-            // Store position of the second tap for word selection
             const doubleTapPosition = { ...touchState.startPos }
             touchState.lastTapTime = 0
             touchState.lastTapVerseKey = null
-            onDoubleTapVerse?.(verseKey, doubleTapPosition)
+            cbs.onDoubleTapVerse?.(verseKey, doubleTapPosition)
           } else {
             // Potential single tap - defer to allow double-tap detection
-            // Store position for the tap callback
             const tapPosition = { ...touchState.startPos }
             touchState.lastTapTime = now
             touchState.lastTapVerseKey = verseKey
             singleTapTimerRef.current = setTimeout(() => {
-              // Only fire if no double-tap happened
               if (touchState.lastTapVerseKey === verseKey) {
-                onTapVerse?.(verseKey, tapPosition)
+                callbacksRef.current.onTapVerse?.(verseKey, tapPosition)
                 touchState.lastTapVerseKey = null
               }
               singleTapTimerRef.current = null
             }, DOUBLE_TAP_DELAY)
           }
         } else {
-          // Tapped on empty space (not on a verse)
-          onTapEmpty?.()
+          cbs.onTapEmpty?.()
         }
       }
 
-      // Reset touch state
-      touchState.isDragging = false
-      touchState.isSwipe = false
-      touchState.hasMoved = false
-      touchState.dragHandle = null
-      touchState.startWord = null
-      touchState.startVerseKey = null
-      touchState.longPressFired = false
-      touchState.velocitySamples = []
+      resetTouchState(touchState)
     }
 
     const handleTouchCancel = () => {
       clearTimers()
-      onTouchedVerseChange?.(null)
+      callbacksRef.current.onTouchedVerseChange?.(null)
 
       const touchState = touchStateRef.current
-      touchState.isDragging = false
-      touchState.isSwipe = false
-      touchState.hasMoved = false
-      touchState.dragHandle = null
-      touchState.startWord = null
-      touchState.startVerseKey = null
-      touchState.longPressFired = false
-      touchState.velocitySamples = []
+      resetTouchState(touchState)
       touchState.lastTapTime = 0
       touchState.lastTapVerseKey = null
 
@@ -569,19 +555,7 @@ export function useTouchSelection({
       container.removeEventListener('touchcancel', handleTouchCancel)
       clearTimers()
     }
-  }, [
-    selection,
-    verses,
-    annotationMode,
-    canDragToAnnotate,
-    onDragStart,
-    onEnterAnnotationModeFromDrag,
-    onTapVerse,
-    onDoubleTapVerse,
-    onLongPressVerse,
-    onTouchedVerseChange,
-    onSwipe,
-  ])
+  }, [])
 
   return { lastDragEndRef }
 }

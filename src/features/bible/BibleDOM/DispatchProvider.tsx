@@ -18,7 +18,7 @@ export const useDispatch = () => {
   const context = useContext(DispatchContext)
 
   if (!context) {
-    throw new Error('useAppSwitcherContext must be used within an AppSwitcherProvider')
+    throw new Error('useDispatch must be used within a DispatchProvider')
   }
 
   return context

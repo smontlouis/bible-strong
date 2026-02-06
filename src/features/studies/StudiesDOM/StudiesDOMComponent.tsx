@@ -2,10 +2,11 @@
 
 import debounce from 'debounce'
 import { DOMImperativeFactory, useDOMImperativeHandle } from 'expo/dom'
+import { useFonts } from 'expo-font'
 import { Ref, useEffect, useRef } from 'react'
 import { dispatch } from './dispatch'
-// @ts-ignore
 import Quill from './quill'
+import type { QuillInstance } from './quill'
 import './quill.snow.css'
 
 import './InlineStrong'
@@ -13,7 +14,6 @@ import './InlineVerse'
 import './StrongBlock'
 import './VerseBlock'
 
-import { useFonts } from 'expo-font'
 import './DividerBlock'
 import './ModuleBlockVerse'
 import './ModuleFormat'
@@ -33,6 +33,15 @@ interface Props {
 
 export interface StudyDOMRef extends DOMImperativeFactory {
   dispatch: (event: any) => void
+  reloadEditor: (content: any) => void
+}
+
+function focusEditor(quill: QuillInstance): void {
+  quill.focus()
+  setTimeout(() => {
+    const editor = document.querySelector<HTMLElement>('.ql-editor')
+    editor?.focus()
+  }, 0)
 }
 
 export default function StudiesDOMComponent({
@@ -43,60 +52,52 @@ export default function StudiesDOMComponent({
   colorScheme,
   ref,
 }: Props) {
-  const [loaded] = useFonts({
+  const [_loaded] = useFonts({
     'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
   })
 
-  const onChangeText = (delta: any, oldDelta: any, source: any) => {
+  const quillRef = useRef<QuillInstance | null>(null)
+
+  function onChangeText(delta: any, oldDelta: any, source: any): void {
     dispatch('TEXT_CHANGED', {
       type: 'success',
-      // @ts-ignore
-      delta: quillRef.current.getContents(),
+      delta: quillRef.current!.getContents(),
       deltaChange: delta,
       deltaOld: oldDelta,
       changeSource: source,
     })
   }
 
-  const addTextChangeEventToEditor = () => {
-    // @ts-ignore
-    quillRef.current.on('text-change', debounce(onChangeText, 500))
+  function addTextChangeEventToEditor(): void {
+    const quill = quillRef.current!
 
-    // @ts-ignore
-    quillRef.current.on(Quill.events.EDITOR_CHANGE, (type: any, range: any) => {
-      const isReadOnly =
-        // @ts-ignore
-        quillRef.current.container.classList.contains('ql-disabled')
+    quill.on('text-change', debounce(onChangeText, 500))
 
-      if (isReadOnly) return
+    quill.on(Quill.events.EDITOR_CHANGE, (type: string, range: any) => {
+      const editorDisabled = quill.container.classList.contains('ql-disabled')
+      if (editorDisabled) return
       if (type !== Quill.events.SELECTION_CHANGE) return
 
       if (range) {
-        // @ts-ignore
-        const selectedBottom = quillRef.current.getBounds(range).bottom
+        const selectedBottom = quill.getBounds(range).bottom
 
         setTimeout(() => {
           const windowHeight = document.body.getBoundingClientRect().height
 
           if (selectedBottom > windowHeight) {
-            // @ts-ignore
-            document
-              .querySelector('.ql-editor')
-              // @ts-ignore
-              .scrollTo(
-                0,
-                // @ts-ignore
-                document.querySelector('.ql-editor').scrollTop + selectedBottom - windowHeight + 30
-              )
+            const editor = document.querySelector<HTMLElement>('.ql-editor')
+            if (editor) {
+              editor.scrollTo(0, editor.scrollTop + selectedBottom - windowHeight + 30)
+            }
           }
         }, 300)
       }
     })
   }
 
-  const loadEditor = ({ fontFamily, language }: { fontFamily: string; language: string }) => {
-    document.getElementById('editor')!.style.fontFamily = fontFamily
-    // @ts-ignore
+  function loadEditor(options: { fontFamily: string; language: string }): void {
+    document.getElementById('editor')!.style.fontFamily = options.fontFamily
+
     quillRef.current = new Quill('#editor', {
       theme: 'snow',
       modules: {
@@ -105,185 +106,116 @@ export default function StudiesDOMComponent({
         'block-verse': true,
         format: true,
       },
-      placeholder: language === 'fr' ? 'Créer votre étude...' : 'Create your study...',
+      placeholder: options.language === 'fr' ? 'Cr\u00e9er votre \u00e9tude...' : 'Create your study...',
       readOnly: true,
     })
 
-    console.log('[Studies] Loading editor')
-    // @ts-ignore
-    quillRef.current.focus()
-
+    const quill = quillRef.current
     console.log('[Studies] Editor initialized')
 
-    // @ts-ignore
-    quillRef.current.setContents(contentToDisplay, Quill.sources.SILENT)
+    quill.focus()
+    quill.setContents(contentToDisplay, Quill.sources.SILENT)
 
     addTextChangeEventToEditor()
   }
-
-  const quillRef = useRef<any>(null)
-  const inlineVerseModuleRef = useRef<any>(null)
-  const blockVerseModuleRef = useRef<any>(null)
-  const formatModuleRef = useRef<any>(null)
 
   useEffect(() => {
     loadEditor({ fontFamily, language })
   }, [])
 
   useEffect(() => {
+    const quill = quillRef.current
+    if (!quill) return
+
     if (!isReadOnly) {
-      // Can edit
-      // @ts-ignore
-      quillRef.current.enable()
-      // @ts-ignore
-      quillRef.current.focus()
-
-      // @ts-ignore
-      quillRef.current.focus()
-      setTimeout(() => {
-        // @ts-ignore
-        document.querySelector('.ql-editor').focus()
-      }, 0)
+      quill.enable()
+      focusEditor(quill)
     } else {
-      // Read only
-      // @ts-ignore
-      quillRef.current.blur()
-      // @ts-ignore
-      quillRef.current.enable(false)
-
-      // Blur
-      // @ts-ignore
-      quillRef.current.blur()
+      quill.blur()
+      quill.enable(false)
     }
   }, [isReadOnly])
 
-  useDOMImperativeHandle(
-    // @ts-ignore - ref is optional in React 19 pattern
-    ref,
-    () => ({
-      dispatch: (event: any) => {
-        try {
-          const msgData = event
+  function handleDispatch(event: any): void {
+    const quill = quillRef.current
+    if (!quill) return
 
-          switch (msgData.type) {
-            case 'FOCUS_EDITOR':
-              // @ts-ignore
-              quillRef.current.focus()
-              setTimeout(() => {
-                // @ts-ignore
-                document.querySelector('.ql-editor').focus()
-              }, 0)
-              break
-            case 'BLUR_EDITOR':
-              // @ts-ignore
-              quillRef.current.blur()
-              break
-            case 'GET_BIBLE_VERSES':
-              // @ts-ignore
-              inlineVerseModuleRef.current =
-                // @ts-ignore
-                quillRef.current.getModule('inline-verse')
-              // @ts-ignore
-              inlineVerseModuleRef.current.receiveVerseLink(msgData.payload)
-              break
-            case 'GET_BIBLE_STRONG':
-              // @ts-ignore
-              inlineVerseModuleRef.current =
-                // @ts-ignore
-                quillRef.current.getModule('inline-verse')
-              // @ts-ignore
-              inlineVerseModuleRef.current.receiveStrongLink(msgData.payload)
-              break
-            case 'GET_BIBLE_VERSES_BLOCK':
-              // @ts-ignore
-              blockVerseModuleRef.current =
-                // @ts-ignore
-                quillRef.current.getModule('block-verse')
-              // @ts-ignore
-              blockVerseModuleRef.current.receiveVerseBlock(msgData.payload)
-              break
-            case 'GET_BIBLE_STRONG_BLOCK':
-              // @ts-ignore
-              blockVerseModuleRef.current =
-                // @ts-ignore
-                quillRef.current.getModule('block-verse')
-              // @ts-ignore
-              blockVerseModuleRef.current.receiveStrongBlock(msgData.payload)
-              break
-            case 'BLOCK_DIVIDER': {
-              // @ts-ignore
-              const range = quillRef.current.getSelection(true)
-              // @ts-ignore
-              quillRef.current.insertEmbed(range.index, 'divider', true, Quill.sources.USER)
-              // @ts-ignore
-              quillRef.current.setSelection(range.index + 1, Quill.sources.SILENT)
-              break
-            }
-            case 'TOGGLE_FORMAT': {
-              // @ts-ignore
-              formatModuleRef.current = quillRef.current.getModule('format')
-              const { type, value } = msgData.payload
+    try {
+      switch (event.type) {
+        case 'FOCUS_EDITOR':
+          focusEditor(quill)
+          break
 
-              console.log(`[Studies] ${type} ${value}`)
+        case 'BLUR_EDITOR':
+          quill.blur()
+          break
 
-              switch (type) {
-                case 'UNDO':
-                  // @ts-ignore
-                  quillRef.current.history.undo()
-                  break
-                case 'REDO':
-                  // @ts-ignore
-                  quillRef.current.history.redo()
-                  break
-                case 'BOLD':
-                  // @ts-ignore
-                  formatModuleRef.current.format('bold', value)
-                  break
-                case 'ITALIC':
-                  // @ts-ignore
-                  formatModuleRef.current.format('italic', value)
-                  break
-                case 'UNDERLINE':
-                  // @ts-ignore
-                  formatModuleRef.current.format('underline', value)
-                  break
-                case 'BLOCKQUOTE':
-                  // @ts-ignore
-                  formatModuleRef.current.format('blockquote', value)
-                  break
-                case 'LIST':
-                  // @ts-ignore
-                  formatModuleRef.current.format('list', value)
-                  break
-                case 'HEADER':
-                  // @ts-ignore
-                  formatModuleRef.current.format('header', value)
-                  break
-                case 'BACKGROUND':
-                  // @ts-ignore
-                  formatModuleRef.current.format('background', value)
-                  break
-                case 'COLOR':
-                  // @ts-ignore
-                  formatModuleRef.current.format('color', value)
-                  break
-                default:
-                  break
-              }
-              break
-            }
-            default:
-              console.log(
-                `[Studies] reactQuillEditor Error: Unhandled message type received "${msgData.type}"`
-              )
-          }
-        } catch (err) {
-          console.log(`[Studies] reactQuillEditor error: ${err}`)
+        case 'GET_BIBLE_VERSES': {
+          const inlineModule = quill.getModule('inline-verse')
+          inlineModule.receiveVerseLink(event.payload)
+          break
         }
-      },
+
+        case 'GET_BIBLE_STRONG': {
+          const inlineModule = quill.getModule('inline-verse')
+          inlineModule.receiveStrongLink(event.payload)
+          break
+        }
+
+        case 'GET_BIBLE_VERSES_BLOCK': {
+          const blockModule = quill.getModule('block-verse')
+          blockModule.receiveVerseBlock(event.payload)
+          break
+        }
+
+        case 'GET_BIBLE_STRONG_BLOCK': {
+          const blockModule = quill.getModule('block-verse')
+          blockModule.receiveStrongBlock(event.payload)
+          break
+        }
+
+        case 'BLOCK_DIVIDER': {
+          const range = quill.getSelection(true)
+          if (range) {
+            quill.insertEmbed(range.index, 'divider', true, Quill.sources.USER)
+            quill.setSelection(range.index + 1, Quill.sources.SILENT)
+          }
+          break
+        }
+
+        case 'TOGGLE_FORMAT': {
+          const formatModule = quill.getModule('format')
+          const { type, value } = event.payload
+
+          console.log(`[Studies] ${type} ${value}`)
+
+          if (type === 'UNDO') {
+            quill.history.undo()
+          } else if (type === 'REDO') {
+            quill.history.redo()
+          } else {
+            const formatName = type.toLowerCase()
+            formatModule.format(formatName, value)
+          }
+          break
+        }
+
+        default:
+          console.log(
+            `[Studies] reactQuillEditor Error: Unhandled message type received "${event.type}"`
+          )
+      }
+    } catch (err) {
+      console.log(`[Studies] reactQuillEditor error: ${err}`)
+    }
+  }
+
+  useDOMImperativeHandle(
+    ref as Ref<StudyDOMRef>,
+    () => ({
+      dispatch: handleDispatch,
       reloadEditor: (content: any) => {
         if (quillRef.current) {
-          // @ts-ignore
           quillRef.current.setContents(content, Quill.sources.SILENT)
         }
       },

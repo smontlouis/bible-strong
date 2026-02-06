@@ -166,6 +166,66 @@ export interface UnifiedVersesRendererProps {
   redWords?: Record<string, { start: number; end: number }[]> | null
 }
 
+/**
+ * Renders pericope headers (h1-h4) for a verse.
+ * In normal mode, headers are clickable and show an external icon.
+ * In annotation mode, headers are plain text.
+ */
+function PericopeHeaders({
+  pericope,
+  settings,
+  annotationMode,
+  navigateToPericope,
+}: {
+  pericope: ReturnType<typeof getPericopeVerse>
+  settings: RootStyles['settings']
+  annotationMode?: boolean
+  navigateToPericope: () => void
+}): JSX.Element | null {
+  const { h1, h2, h3, h4 } = pericope
+  if (!h1 && !h2 && !h3 && !h4) return null
+
+  if (annotationMode) {
+    return (
+      <>
+        {h1 && <H1 settings={settings}>{h1}</H1>}
+        {h2 && <H2 settings={settings}>{h2}</H2>}
+        {h3 && <H3 settings={settings}>{h3}</H3>}
+        {h4 && <H4 settings={settings}>{h4}</H4>}
+      </>
+    )
+  }
+
+  return (
+    <>
+      {h1 && (
+        <H1 settings={settings} onClick={navigateToPericope}>
+          {h1}
+          <ExternalIcon />
+        </H1>
+      )}
+      {h2 && (
+        <H2 settings={settings} onClick={navigateToPericope}>
+          {h2}
+          <ExternalIcon />
+        </H2>
+      )}
+      {h3 && (
+        <H3 settings={settings} onClick={navigateToPericope}>
+          {h3}
+          <ExternalIcon />
+        </H3>
+      )}
+      {h4 && (
+        <H4 settings={settings} onClick={navigateToPericope}>
+          {h4}
+          <ExternalIcon />
+        </H4>
+      )}
+    </>
+  )
+}
+
 export function UnifiedVersesRenderer({
   verses,
   parallelVerses,
@@ -203,16 +263,22 @@ export function UnifiedVersesRenderer({
   parallelDisplayMode = 'horizontal',
   redWords,
 }: UnifiedVersesRendererProps) {
+  // Pre-compute numeric focus verses once to avoid repeated .map(Number) calls
+  const focusVersesNumeric = focusVerses ? focusVerses.map(Number) : null
+
   // Calculate adjacent verses for fade effect in readonly mode
-  const adjacentVerses = focusVerses
+  const adjacentVerses = focusVersesNumeric
     ? {
-        prev: Math.min(...focusVerses.map(Number)) - 1,
-        next: Math.max(...focusVerses.map(Number)) + 1,
+        prev: Math.min(...focusVersesNumeric) - 1,
+        next: Math.max(...focusVersesNumeric) + 1,
       }
     : null
 
   // Calculate last focus verse for close context button
-  const lastFocusVerse = focusVerses ? Math.max(...focusVerses.map(Number)) : null
+  const lastFocusVerse = focusVersesNumeric ? Math.max(...focusVersesNumeric) : null
+
+  // Pre-compute whether any verses are selected (avoids Object.keys() per iteration)
+  const hasSelectedVerses = Object.keys(selectedVerses).length > 0
 
   return (
     <>
@@ -220,32 +286,29 @@ export function UnifiedVersesRenderer({
         if (verse.Verset == 0) return null
 
         const { Livre, Chapitre, Verset } = verse
+        const verseNumber = Number(Verset)
         const verseKey = `${Livre}-${Chapitre}-${Verset}`
 
-        // In annotation mode, skip complex rendering for parallel verses, interlinear, etc.
-        // Use simplified rendering
+        const pericope = getPericopeVerse(pericopeChapter, verseNumber)
+        const tag = taggedVerses?.find(v => v.lastVerse === verseKey)
+        const bookmark = bookmarkedVerses?.[verseNumber]
+        const notesCount = notedVersesCount[Verset]
+        const notesText = notedVersesText[Verset]
+        const linksCount = linkedVersesCount[Verset]
+        const linksText = linkedVersesText[Verset]
+        const otherVersionAnnotations = wordAnnotationsInOtherVersions?.[verseKey]
+        const isTouched = touchedVerseKey === verseKey
+
+        // In annotation mode, use simplified rendering (no parallel, interlinear, etc.)
         if (annotationMode) {
-          // Skip verse 0
-          if (Verset === 0) return null
-
-          const { h1, h2, h3, h4 } = getPericopeVerse(pericopeChapter, Number(Verset))
-
-          // Get decoration data for this verse
-          const tag = taggedVerses?.find(v => v.lastVerse === verseKey)
-          const bookmark = bookmarkedVerses?.[Number(Verset)]
-          const notesCount = notedVersesCount[Verset]
-          const notesText = notedVersesText[Verset]
-          const linksCount = linkedVersesCount[Verset]
-          const linksText = linkedVersesText[Verset]
-          const otherVersionAnnotations = wordAnnotationsInOtherVersions?.[verseKey]
-          const isTouched = touchedVerseKey === verseKey
-
           return (
             <Span key={verseKey}>
-              {h1 && <H1 settings={settings}>{h1}</H1>}
-              {h2 && <H2 settings={settings}>{h2}</H2>}
-              {h3 && <H3 settings={settings}>{h3}</H3>}
-              {h4 && <H4 settings={settings}>{h4}</H4>}
+              <PericopeHeaders
+                pericope={pericope}
+                settings={settings}
+                annotationMode={annotationMode}
+                navigateToPericope={navigateToPericope}
+              />
               <Verse
                 isHebreu={isHebreu}
                 version={version}
@@ -267,36 +330,30 @@ export function UnifiedVersesRenderer({
                 isTouched={isTouched}
                 otherVersionAnnotations={otherVersionAnnotations}
                 hasAnnotationNotes={versesWithAnnotationNotes?.has(String(Verset))}
-                taggedItemsCount={taggedVersesInChapter?.[Number(Verset)] || 0}
-                hasNonHighlightTags={versesWithNonHighlightTags?.[Number(Verset)]}
+                taggedItemsCount={taggedVersesInChapter?.[verseNumber] || 0}
+                hasNonHighlightTags={versesWithNonHighlightTags?.[verseNumber]}
                 redWords={redWords}
               />
             </Span>
           )
         }
 
-        // Normal mode rendering (existing NormalVersesRenderer logic)
+        // Normal mode rendering
 
         // In readonly mode, only show focused verses and adjacent fading verses
-        const isFocused = focusVerses
-          ? focusVerses.some(v => Number(v) === Number(Verset))
+        const isFocused = focusVersesNumeric
+          ? focusVersesNumeric.includes(verseNumber)
           : undefined
-        const fadePosition = getFadePosition(Number(Verset), isReadOnly, adjacentVerses)
+        const fadePosition = getFadePosition(verseNumber, isReadOnly, adjacentVerses)
         if (isReadOnly && focusVerses && !isFocused && !fadePosition) return null
 
         const isSelected = Boolean(selectedVerses[verseKey])
-        const isSelectedMode = Boolean(Object.keys(selectedVerses).length)
         const isHighlighted = Boolean(highlightedVerses[verseKey])
-        const tag: TaggedVerse | undefined = taggedVerses?.find(v => v.lastVerse === verseKey)
         const highlightedColor = isHighlighted
           ? (highlightedVerses[verseKey]
               .color as keyof RootStyles['settings']['colors'][keyof RootStyles['settings']['colors']])
           : undefined
 
-        const notesCount = notedVersesCount[Verset]
-        const notesText = notedVersesText[Verset]
-        const linksCount = linkedVersesCount[Verset]
-        const linksText = linkedVersesText[Verset]
         const comment = comments?.[Verset]
         const isVerseToScroll = !isReadOnly && verseToScroll == Verset
         const secondaryVerse = secondaryVerses && secondaryVerses[i]
@@ -304,53 +361,24 @@ export function UnifiedVersesRenderer({
           ? extractParallelVerse(i, parallelVerses, verse, version)
           : []
 
-        const { h1, h2, h3, h4 } = getPericopeVerse(pericopeChapter, Number(Verset))
-
-        const bookmark = bookmarkedVerses?.[Number(Verset)]
-
         // Show close context button on last focus verse when not in readonly mode
         const isLastFocusVerse =
-          !isReadOnly && lastFocusVerse !== null && Number(Verset) === lastFocusVerse
+          !isReadOnly && lastFocusVerse !== null && verseNumber === lastFocusVerse
 
-        // Check if this verse has word annotations
         const hasWordAnnotations =
           wordAnnotations &&
           Object.values(wordAnnotations).some(
             ann => ann.version === version && ann.ranges.some(r => r.verseKey === verseKey)
           )
 
-        // Get annotations in other versions for this verse
-        const otherVersionAnnotations = wordAnnotationsInOtherVersions?.[verseKey]
-
-        // Check if this verse is currently touched
-        const isTouched = touchedVerseKey === verseKey
-
         return (
           <Span key={verseKey}>
-            {h1 && (
-              <H1 settings={settings} onClick={navigateToPericope}>
-                {h1}
-                <ExternalIcon />
-              </H1>
-            )}
-            {h2 && (
-              <H2 settings={settings} onClick={navigateToPericope}>
-                {h2}
-                <ExternalIcon />
-              </H2>
-            )}
-            {h3 && (
-              <H3 settings={settings} onClick={navigateToPericope}>
-                {h3}
-                <ExternalIcon />
-              </H3>
-            )}
-            {h4 && (
-              <H4 settings={settings} onClick={navigateToPericope}>
-                {h4}
-                <ExternalIcon />
-              </H4>
-            )}
+            <PericopeHeaders
+              pericope={pericope}
+              settings={settings}
+              annotationMode={annotationMode}
+              navigateToPericope={navigateToPericope}
+            />
             <Verse
               isHebreu={isHebreu}
               version={version}
@@ -360,7 +388,7 @@ export function UnifiedVersesRenderer({
               secondaryVerse={secondaryVerse}
               settings={settings}
               isSelected={isSelected}
-              isSelectedMode={isSelectedMode}
+              isSelectedMode={hasSelectedVerses}
               isSelectionMode={isSelectionMode}
               highlightedColor={highlightedColor}
               notesCount={notesCount}
@@ -380,8 +408,8 @@ export function UnifiedVersesRenderer({
               otherVersionAnnotations={otherVersionAnnotations}
               isTouched={isTouched}
               annotationMode={annotationMode}
-              taggedItemsCount={taggedVersesInChapter?.[Number(Verset)] || 0}
-              hasNonHighlightTags={versesWithNonHighlightTags?.[Number(Verset)]}
+              taggedItemsCount={taggedVersesInChapter?.[verseNumber] || 0}
+              hasNonHighlightTags={versesWithNonHighlightTags?.[verseNumber]}
               columnCount={columnCount}
               columnWidth={columnWidth}
               parallelDisplayMode={parallelDisplayMode}

@@ -1,7 +1,7 @@
 import { styled } from 'goober'
 import { RootStyles } from './BibleDOMWrapper'
 import { scaleFontSize } from './scaleFontSize'
-import { isDarkTheme } from './utils'
+import { isDarkTheme, noSelect } from './utils'
 import { getDisabledStyles } from './disabledStyles'
 
 export const InlineItemContainer = styled('span')<
@@ -14,11 +14,7 @@ export const InlineItemContainer = styled('span')<
     settings: { fontSizeScale, theme, colors, fontFamily },
   }) => ({
     fontFamily,
-    webkitTouchCallout: 'none',
-    mozUserSelect: 'none',
-    msUserSelect: 'none',
-    khtmlUserSelect: 'none',
-    webkitUserSelect: 'none',
+    ...noSelect,
     color: colors[theme].default,
     fontSize: scaleFontSize(isParallel ? 10 : 16, fontSizeScale),
     lineHeight: scaleFontSize(isParallel ? 18 : 26, fontSizeScale),
@@ -62,17 +58,9 @@ export const InlineItemIconWrapper = styled('span')<RootStyles & { isButton?: bo
 )
 
 export const InlineItemText = styled('span')<RootStyles>(
-  ({ settings: { theme, colors, fontFamily } }) => ({
+  ({ settings: { fontFamily } }) => ({
     fontFamily,
     pointerEvents: 'none',
-    userSelect: 'none',
-    MozUserSelect: 'none',
-    msUserSelect: 'none',
-    KhtmlUserSelect: 'none',
-    WebkitUserSelect: 'none',
-    WebkitTouchCallout: 'none',
-    mozUserSelect: 'none',
-    khtmlUserSelect: 'none',
-    webkitUserSelect: 'none',
+    ...noSelect,
   })
 )

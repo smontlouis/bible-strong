@@ -1,4 +1,3 @@
-import React from 'react'
 import { styled } from 'goober'
 import { RootStyles } from './BibleDOMWrapper'
 import { scaleFontSize } from './scaleFontSize'

@@ -7,6 +7,7 @@ import { RootStyles, TaggedVerse } from './BibleDOMWrapper'
 import { RootState } from '~redux/modules/reducer'
 import { useDispatch } from './DispatchProvider'
 import { InlineItemContainer, InlineItemIconWrapper } from './InlineItem'
+import { noSelect } from './utils'
 
 const IconButton = styled('div')<RootStyles>(
   ({ settings: { theme, colors, fontSizeScale, fontFamily } }) => ({
@@ -35,15 +36,7 @@ const Tag = styled('span')<RootStyles>(
     fontSize: scaleFontSize(16, fontSizeScale),
     marginRight: '5px',
     cursor: 'pointer',
-    userSelect: 'none',
-    MozUserSelect: 'none',
-    msUserSelect: 'none',
-    KhtmlUserSelect: 'none',
-    WebkitUserSelect: 'none',
-    WebkitTouchCallout: 'none',
-    mozUserSelect: 'none',
-    khtmlUserSelect: 'none',
-    webkitUserSelect: 'none',
+    ...noSelect,
 
     '&:active': {
       opacity: 0.5,
@@ -63,15 +56,7 @@ const ExpandButton = styled('div')<RootStyles>(
     opacity: 0.5,
     cursor: 'pointer',
     display: 'inline-flex',
-    userSelect: 'none',
-    MozUserSelect: 'none',
-    msUserSelect: 'none',
-    KhtmlUserSelect: 'none',
-    WebkitUserSelect: 'none',
-    WebkitTouchCallout: 'none',
-    mozUserSelect: 'none',
-    khtmlUserSelect: 'none',
-    webkitUserSelect: 'none',
+    ...noSelect,
     '&:active': {
       opacity: 0.4,
     },

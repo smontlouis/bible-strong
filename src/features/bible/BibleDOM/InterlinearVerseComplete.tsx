@@ -4,14 +4,10 @@ import { styled } from 'goober'
 import { scaleFontSize } from './scaleFontSize'
 import { NAVIGATE_TO_STRONG } from './dispatch'
 import { RootStyles } from './BibleDOMWrapper'
-import { SelectedCode } from '~common/types'
-import { Verse } from '~common/types'
+import { CloseVerseText, VerseText, Wrapper } from './interlinearStyles'
+import { SelectedCode, Verse } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import { useDispatch } from './DispatchProvider'
-
-const Wrapper = styled('div')<RootStyles>(({ settings: { textDisplay } }) => ({
-  display: textDisplay,
-}))
 
 const Section = styled('div')<RootStyles & { isSelected: boolean }>(
   ({ isSelected, settings: { theme, colors } }) => ({
@@ -70,39 +66,6 @@ const Code = styled('div')<RootStyles & { isSelected?: boolean }>(
       : {}),
   })
 )
-
-const VerseText = styled('div')<RootStyles & { isSelected?: boolean }>(
-  ({ settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
-    fontSize: scaleFontSize(16, fontSizeScale),
-    lineHeight: scaleFontSize(25, fontSizeScale),
-    fontFamily,
-    direction: 'ltr',
-    textAlign: 'left',
-    padding: '10px',
-    margin: '10px 0',
-    background: colors[theme].lightGrey,
-    borderRadius: '4px',
-    position: 'relative',
-    paddingRight: '30px',
-  })
-)
-
-const CloseVerseText = styled('div')(() => ({
-  width: '30px',
-  height: '30px',
-  top: '5px',
-  right: '5px',
-  position: 'absolute',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  fontSize: '17px',
-  webkitTouchCallout: 'none',
-  mozUserSelect: 'none',
-  msUserSelect: 'none',
-  khtmlUserSelect: 'none',
-  webkitUserSelect: 'none',
-}))
 
 const Mot = styled('div')<RootStyles & { isSelected: boolean }>(
   ({ isSelected, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
