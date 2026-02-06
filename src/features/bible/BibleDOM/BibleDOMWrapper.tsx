@@ -5,26 +5,27 @@ import { useRouter } from 'expo-router'
 import produce from 'immer'
 import { useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
+import { useTranslation } from 'react-i18next'
 import { Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isFullScreenBibleAtom, tagDetailModalAtom } from 'src/state/app'
-import { BibleTab, VersionCode, ParallelColumnWidth, ParallelDisplayMode } from 'src/state/tabs'
+import { BibleTab, ParallelColumnWidth, ParallelDisplayMode, VersionCode } from 'src/state/tabs'
 import BibleDOMComponent from './BibleDOMComponent'
-import { useEffect, useRef } from 'react'
-import { useTranslation } from 'react-i18next'
 // @ts-ignore
 import books from '~assets/bible_versions/books'
 import { Book } from '~assets/bible_versions/books-desc'
-import { toast } from '~helpers/toast'
+import type { Bookmark } from '~common/types'
 import { Pericope, SelectedCode, StudyNavigateBibleType, Tag, Verse, VerseIds } from '~common/types'
 import Box from '~common/ui/Box'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import { HelpTip } from '~features/tips/HelpTip'
-import { RootState } from '~redux/modules/reducer'
-import type { Bookmark } from '~common/types'
-import { HighlightsObj, NotesObj, LinksObj, WordAnnotationsObj } from '~redux/modules/user'
-import { useBookAndVersionSelector } from '../BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 import { BibleError } from '~helpers/bibleErrors'
+import { toast } from '~helpers/toast'
+import { RootState } from '~redux/modules/reducer'
+import { HighlightsObj, LinksObj, NotesObj, WordAnnotationsObj } from '~redux/modules/user'
+import type { CrossVersionAnnotation } from '~redux/selectors/bible'
+import { useBookAndVersionSelector } from '../BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
+import type { AnnotationType, SelectionRange, WordPosition } from '../hooks/useAnnotationMode'
 import { BibleDOMTranslations } from './TranslationsContext'
 import {
   ADD_PARALLEL_VERSION,
@@ -45,7 +46,10 @@ import {
   NAVIGATE_TO_VERSE_LINKS,
   NAVIGATE_TO_VERSION,
   OPEN_BOOKMARK_MODAL,
+  OPEN_CROSS_VERSION_MODAL,
   OPEN_HIGHLIGHT_TAGS,
+  OPEN_VERSE_NOTES_MODAL,
+  OPEN_VERSE_TAGS_MODAL,
   REMOVE_PARALLEL_VERSION,
   SELECTION_CHANGED,
   SWIPE_DOWN,
@@ -53,12 +57,7 @@ import {
   SWIPE_RIGHT,
   SWIPE_UP,
   TOGGLE_SELECTED_VERSE,
-  OPEN_CROSS_VERSION_MODAL,
-  OPEN_VERSE_TAGS_MODAL,
-  OPEN_VERSE_NOTES_MODAL,
 } from './dispatch'
-import type { CrossVersionAnnotation } from '~redux/selectors/bible'
-import type { AnnotationType, WordPosition, SelectionRange } from '../hooks/useAnnotationMode'
 
 export type ParallelVerse = {
   id: VersionCode
@@ -182,53 +181,67 @@ export type LinkedVerse = {
   verses: string
 }
 
-export const BibleDOMWrapper = (props: WebViewProps) => {
-  const {
-    verses,
-    parallelVerses,
-    parallelColumnWidth = 75,
-    parallelDisplayMode = 'horizontal',
-    focusVerses,
-    secondaryVerses,
-    selectedVerses,
-    highlightedVerses,
-    notedVerses,
-    bookmarkedVerses,
-    linkedVerses,
-    wordAnnotations,
-    settings,
-    verseToScroll,
-    isReadOnly,
-    version,
-    pericopeChapter,
-    book,
-    chapter,
-    isSelectionMode,
-    selectedCode,
-    comments,
-    isLoading,
-    onMountTimeout,
-    isBibleViewReloadingAtom,
-    annotationMode,
-    clearSelectionTrigger,
-    applyAnnotationTrigger,
-    eraseSelectionTrigger,
-    onSelectionChanged,
-    onCreateAnnotation,
-    onEraseSelection,
-    onAnnotationSelected,
-    clearAnnotationSelectionTrigger,
-    selectedAnnotationId,
-    wordAnnotationsInOtherVersions,
-    onOpenCrossVersionModal,
-    taggedVersesInChapter,
-    versesWithNonHighlightTags,
-    onOpenVerseTagsModal,
-  } = props
+export const BibleDOMWrapper = ({
+  verses,
+  parallelVerses,
+  parallelColumnWidth = 75,
+  parallelDisplayMode = 'horizontal',
+  focusVerses,
+  secondaryVerses,
+  selectedVerses,
+  highlightedVerses,
+  notedVerses,
+  bookmarkedVerses,
+  linkedVerses,
+  wordAnnotations,
+  settings,
+  verseToScroll,
+  isReadOnly,
+  version,
+  pericopeChapter,
+  book,
+  chapter,
+  isSelectionMode,
+  selectedCode,
+  comments,
+  annotationMode,
+  clearSelectionTrigger,
+  applyAnnotationTrigger,
+  eraseSelectionTrigger,
+  clearAnnotationSelectionTrigger,
+  selectedAnnotationId,
+  wordAnnotationsInOtherVersions,
+  taggedVersesInChapter,
+  versesWithNonHighlightTags,
+  onChangeResourceTypeSelectVerse,
+  onOpenVerseNotesModal,
+  openNoteModal,
+  openLinkModal,
+  removeParallelVersion,
+  addParallelVersion,
+  setSelectedCode,
+  removeSelectedVerse,
+  addSelectedVerse,
+  exitReadOnlyMode,
+  enterReadOnlyMode,
+  clearFocusVerses,
+  onSelectionChanged,
+  onCreateAnnotation,
+  onEraseSelection,
+  onAnnotationSelected,
+  onOpenBookmarkModal,
+  onOpenCrossVersionModal,
+  onOpenVerseTagsModal,
+  setUnifiedTagsModal,
+  bibleAtom,
+  goToPrevChapter,
+  goToNextChapter,
+  onEnterAnnotationMode,
+  redWords,
+}: WebViewProps) => {
   const { openVersionSelector } = useBookAndVersionSelector()
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
   const setTagDetailModal = useSetAtom(tagDetailModalAtom)
-  const setIsBibleViewReloading = useSetAtom(isBibleViewReloadingAtom)
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
@@ -243,52 +256,17 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
     closeContext: t('tab.closeContext'),
     exitFocus: t('tab.exitFocus'),
   }
-  // Add this to track component mounting
-  const mountedRef = useRef(false)
-
-  // This is a workaround to reload the component when it doesn't mount
-  // It's an issue on Android only
-  useEffect(() => {
-    if (Platform.OS === 'ios' || 1) {
-      return
-    }
-    // Reset mount status when component is mounted
-    mountedRef.current = false
-
-    // Set up timeout to check if DOM component has mounted
-    const timeoutId = setTimeout(() => {
-      if (!mountedRef.current) {
-        // If component hasn't mounted after 1 second, notify parent
-        console.log('[Bible] DOM component NOT mounted')
-        onMountTimeout?.()
-      } else {
-        console.log('[Bible] DOM component mounted')
-        setIsBibleViewReloading(false)
-      }
-    }, 2000)
-
-    return () => clearTimeout(timeoutId)
-  }, [])
-
   const dispatch: Dispatch = async action => {
-    console.log('[Bible] DISPATCH:', action.type)
+    if (__DEV__) console.log('[Bible] DISPATCH:', action.type)
     switch (action.type) {
-      case 'DOM_COMPONENT_MOUNTED': {
-        // Mark component as mounted
-        mountedRef.current = true
-        break
-      }
       case NAVIGATE_TO_BIBLE_VERSE_DETAIL: {
-        const { onChangeResourceTypeSelectVerse } = props
         const { Livre, Chapitre, Verset } = action.params.verse
-        console.log(`[Bible] ${Livre}-${Chapitre}-${Verset}`)
-        onChangeResourceTypeSelectVerse('strong', `${Livre}-${Chapitre}-${Verset}`)
+        if (__DEV__) console.log(`[Bible] ${Livre}-${Chapitre}-${Verset}`)
+        onChangeResourceTypeSelectVerse?.('strong', `${Livre}-${Chapitre}-${Verset}`)
 
         break
       }
       case OPEN_VERSE_NOTES_MODAL: {
-        // DOM requests to open the verse notes modal
-        const { onOpenVerseNotesModal } = props
         onOpenVerseNotesModal?.(action.payload)
         break
       }
@@ -303,7 +281,6 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
       case NAVIGATE_TO_PERICOPE: {
-        const { book } = props
         router.push({
           pathname: '/pericope',
           params: { book: String(book.Numero) },
@@ -311,7 +288,6 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
       case NAVIGATE_TO_VERSION: {
-        const { bibleAtom } = props
         const { version, index } = action.payload
 
         // index = 0 is Default one
@@ -338,17 +314,14 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
       case REMOVE_PARALLEL_VERSION: {
-        const { removeParallelVersion } = props
         removeParallelVersion(action.payload - 1)
         break
       }
       case ADD_PARALLEL_VERSION: {
-        const { addParallelVersion } = props
         addParallelVersion()
         break
       }
       case NAVIGATE_TO_STRONG: {
-        const { setSelectedCode } = props
         setSelectedCode(action.payload) // { reference, book }
         break
       }
@@ -357,14 +330,8 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
           Haptics.selectionAsync()
         }
         const verseId = action.payload
-        const { addSelectedVerse, removeSelectedVerse } = props
 
-        const isVerseSelected = (verseId: any) => {
-          const { selectedVerses } = props
-          return !!selectedVerses[verseId]
-        }
-
-        if (isVerseSelected(verseId)) {
+        if (selectedVerses[verseId]) {
           removeSelectedVerse(verseId)
         } else {
           addSelectedVerse(verseId)
@@ -374,11 +341,11 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
       }
 
       case NAVIGATE_TO_BIBLE_NOTE: {
-        props.openNoteModal(action.payload)
+        openNoteModal(action.payload)
         break
       }
       case NAVIGATE_TO_BIBLE_LINK: {
-        props.openLinkModal?.(action.payload)
+        openLinkModal?.(action.payload)
         break
       }
       case NAVIGATE_TO_BIBLE_VIEW: {
@@ -407,7 +374,6 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         // Disable chapter navigation in readonly or annotation mode
         if (isReadOnly || annotationMode) break
 
-        const { goToNextChapter, book, chapter } = props
         const hasNextChapter = !(book.Numero === 66 && chapter === 22)
 
         if (hasNextChapter) {
@@ -419,7 +385,6 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         // Disable chapter navigation in readonly or annotation mode
         if (isReadOnly || annotationMode) break
 
-        const { goToPrevChapter, book, chapter } = props
         const hasPreviousChapter = !(book.Numero === 1 && chapter === 1)
 
         if (hasPreviousChapter) {
@@ -428,7 +393,6 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
       case SWIPE_DOWN: {
-        console.log('[Bible] SWIPE_DOWN')
         setIsFullScreenBible(true)
         break
       }
@@ -437,7 +401,6 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         break
       }
       case OPEN_HIGHLIGHT_TAGS: {
-        const { setUnifiedTagsModal } = props
         const { verseIds } = action.payload
         const obj = {
           mode: 'select' as const,
@@ -449,10 +412,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
       }
 
       case OPEN_BOOKMARK_MODAL: {
-        const { onOpenBookmarkModal } = props
-        if (onOpenBookmarkModal) {
-          onOpenBookmarkModal(action.payload)
-        }
+        onOpenBookmarkModal?.(action.payload)
         break
       }
 
@@ -463,64 +423,54 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
       }
 
       case EXIT_READONLY_MODE: {
-        const { exitReadOnlyMode } = props
         exitReadOnlyMode?.()
         break
       }
 
       case ENTER_READONLY_MODE: {
-        const { enterReadOnlyMode } = props
         enterReadOnlyMode?.()
         break
       }
 
       case CLEAR_FOCUS_VERSES: {
-        const { clearFocusVerses } = props
         clearFocusVerses?.()
         break
       }
 
       case ENTER_ANNOTATION_MODE: {
-        const { onEnterAnnotationMode } = props
         onEnterAnnotationMode?.()
         break
       }
 
       case SELECTION_CHANGED: {
-        // DOM notifies us when selection changes
         const { hasSelection, selection } = action.payload
         onSelectionChanged?.(hasSelection, selection)
         break
       }
 
       case CREATE_ANNOTATION: {
-        // DOM requests to create an annotation with the current selection
         onCreateAnnotation?.(action.payload)
         break
       }
 
       case ERASE_SELECTION: {
-        // DOM requests to erase annotations in the current selection
         onEraseSelection?.(action.payload)
         break
       }
 
       case ANNOTATION_SELECTED: {
-        // DOM notifies us when an annotation is selected/deselected
         const { annotationId } = action.payload
         onAnnotationSelected?.(annotationId)
         break
       }
 
       case OPEN_CROSS_VERSION_MODAL: {
-        // DOM requests to open the cross-version annotations modal
         const { verseKey, versions } = action.payload
         onOpenCrossVersionModal?.(verseKey, versions)
         break
       }
 
       case OPEN_VERSE_TAGS_MODAL: {
-        // DOM requests to open the verse tags modal
         onOpenVerseTagsModal?.(action.payload)
         break
       }
@@ -530,14 +480,6 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
       }
     }
   }
-
-  // if (isLoading && !verses.length) {
-  //   return (
-  //     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-  //       <ActivityIndicator />
-  //     </View>
-  //   )
-  // }
 
   return (
     <Box
@@ -592,7 +534,7 @@ export const BibleDOMWrapper = (props: WebViewProps) => {
         wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
         taggedVersesInChapter={taggedVersesInChapter}
         versesWithNonHighlightTags={versesWithNonHighlightTags}
-        redWords={props.redWords}
+        redWords={redWords}
       />
       {Platform.OS === 'android' && Platform.Version < 30 && (
         <HelpTip

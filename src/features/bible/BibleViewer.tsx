@@ -75,6 +75,16 @@ const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: nu
   return {}
 }
 
+// Module-scope selectors - created once, memoization cache persists across renders
+const selectHighlightsByChapter = makeHighlightsByChapterSelector()
+const selectNotesByChapter = makeNotesByChapterSelector()
+const selectLinksByChapter = makeLinksByChapterSelector()
+const selectWordAnnotationsByChapter = makeWordAnnotationsByChapterSelector()
+const selectSelectedVerseHighlightColor = makeSelectedVerseHighlightColorSelector()
+const selectBookmarksInChapter = makeSelectBookmarksInChapter()
+const selectWordAnnotationsInOtherVersions = makeWordAnnotationsInOtherVersionsSelector()
+const selectTaggedVersesInChapter = makeTaggedVersesInChapterSelector()
+
 interface BibleViewerProps {
   bibleAtom: PrimitiveAtom<BibleTab>
   commentsDisplay?: boolean
@@ -296,16 +306,6 @@ const BibleViewer = ({
     }
   }, [selectedVerses, versesModal])
 
-  // Create selectors (React Compiler handles memoization)
-  const selectHighlightsByChapter = makeHighlightsByChapterSelector()
-  const selectNotesByChapter = makeNotesByChapterSelector()
-  const selectLinksByChapter = makeLinksByChapterSelector()
-  const selectWordAnnotationsByChapter = makeWordAnnotationsByChapterSelector()
-  const selectSelectedVerseHighlightColor = makeSelectedVerseHighlightColorSelector()
-  const selectBookmarksInChapter = makeSelectBookmarksInChapter()
-  const selectWordAnnotationsInOtherVersions = makeWordAnnotationsInOtherVersionsSelector()
-  const selectTaggedVersesInChapter = makeTaggedVersesInChapterSelector()
-
   // Use displayed values for selectors to keep annotations in sync with verses
   const highlightedVersesByChapter = useSelector((state: RootState) =>
     selectHighlightsByChapter(state, displayedBook, displayedChapter)
@@ -359,16 +359,18 @@ const BibleViewer = ({
 
     const versesToLoad = mainResult.data as Verse[]
 
-    // Load parallel versions independently - don't let one failure break others
+    // Load parallel versions in parallel - don't let one failure break others
     const parallelVersesToLoad: ParallelVerse[] = []
     if (parallelVersions.length) {
-      for (const p of parallelVersions) {
-        const pResult = await loadBibleChapter(book.Numero, chapter, p)
+      const parallelResults = await Promise.all(
+        parallelVersions.map(p => loadBibleChapter(book.Numero, chapter, p))
+      )
+      for (let i = 0; i < parallelVersions.length; i++) {
+        const pResult = parallelResults[i]
         if (pResult.success && pResult.data) {
-          parallelVersesToLoad.push({ id: p, verses: pResult.data as Verse[] })
+          parallelVersesToLoad.push({ id: parallelVersions[i], verses: pResult.data as Verse[] })
         } else {
-          // Include the parallel version with error info instead of breaking
-          parallelVersesToLoad.push({ id: p, verses: [], error: pResult.error })
+          parallelVersesToLoad.push({ id: parallelVersions[i], verses: [], error: pResult.error })
         }
       }
     }
@@ -427,6 +429,7 @@ const BibleViewer = ({
 
   const prevBook = usePrevious(book.Numero)
   const prevChapter = usePrevious(chapter)
+  const parallelVersionsKey = parallelVersions.join(',')
 
   useEffect(() => {
     // Don't load verses if onboarding is not completed
@@ -450,24 +453,7 @@ const BibleViewer = ({
     if (prevBook !== undefined && (prevBook !== book.Numero || prevChapter !== chapter)) {
       actions.clearSelectedVerses()
     }
-  }, [book, chapter, version, JSON.stringify(parallelVersions), isOnboardingCompleted])
-
-  useEffect(() => {
-    ;(async () => {
-      if (settings.commentsDisplay && !comments) {
-        const mhyComments = await loadMhyComments(book.Numero, chapter)
-        try {
-          setComments(JSON.parse(mhyComments.commentaires))
-        } catch {
-          Sentry.withScope(scope => {
-            scope.setExtra('Reference', `${book.Numero}-${chapter}`)
-            scope.setExtra('Comments', mhyComments.commentaires)
-            Sentry.captureException('Comments corrupted')
-          })
-        }
-      }
-    })()
-  }, [])
+  }, [book, chapter, version, parallelVersionsKey, isOnboardingCompleted, settings.commentsDisplay])
 
   const addHiglightAndOpenQuickTags = (color: string) => {
     dispatch(addHighlight({ color, selectedVerses }))

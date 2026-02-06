@@ -113,31 +113,30 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
   const webViewRef = useRef<WebViewRef | null>(null)
   const featureOnboarding = useFeatureOnboarding()
 
-  // Get word annotations from Redux - single source of truth
-  const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
+  // Only subscribe to the specific selected annotation, not the entire map
+  const selectedAnnotationId = state.selectedAnnotationId
+  const selectedAnnotationFromRedux = useSelector((state: RootState) => {
+    if (!selectedAnnotationId) return null
+    return (state.user.bible.wordAnnotations ?? {})[selectedAnnotationId] ?? null
+  })
 
-  // Derive selectedAnnotation from Redux based on selectedAnnotationId
-  const deriveSelectedAnnotation = (): SelectedAnnotation | null => {
-    if (!state.selectedAnnotationId) return null
+  // Derive selectedAnnotation from the targeted Redux subscription
+  const selectedAnnotation: SelectedAnnotation | null = (() => {
+    if (!selectedAnnotationId || !selectedAnnotationFromRedux) return null
 
-    const annotation = wordAnnotations?.[state.selectedAnnotationId]
-    if (!annotation) return null
-
-    const firstRange = annotation.ranges[0]
+    const firstRange = selectedAnnotationFromRedux.ranges[0]
     if (!firstRange) return null
 
     return {
-      id: state.selectedAnnotationId,
+      id: selectedAnnotationId,
       verseKey: firstRange.verseKey,
       text: firstRange.text,
-      color: annotation.color,
-      type: annotation.type,
-      noteId: annotation.noteId,
-      tags: annotation.tags,
+      color: selectedAnnotationFromRedux.color,
+      type: selectedAnnotationFromRedux.type,
+      noteId: selectedAnnotationFromRedux.noteId,
+      tags: selectedAnnotationFromRedux.tags,
     }
-  }
-
-  const selectedAnnotation = deriveSelectedAnnotation()
+  })()
 
   const setWebViewRef = (ref: WebViewRef | null) => {
     webViewRef.current = ref

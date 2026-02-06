@@ -242,9 +242,6 @@ const Header = ({
     )
   }
 
-  console.log('hasFocusVerses', hasFocusVerses)
-  console.log('isReadOnly', isReadOnly)
-
   return (
     <AnimatedHStack
       width="100%"
