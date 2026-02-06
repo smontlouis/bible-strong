@@ -41,11 +41,7 @@ export function normalizeRange(
   return { start: range.start, end: range.end }
 }
 
-export function getVersesBetween(
-  allVerses: TVerse[],
-  startKey: string,
-  endKey: string
-): TVerse[] {
+export function getVersesBetween(allVerses: TVerse[], startKey: string, endKey: string): TVerse[] {
   const startIdx = allVerses.findIndex(v => `${v.Livre}-${v.Chapitre}-${v.Verset}` === startKey)
   const endIdx = allVerses.findIndex(v => `${v.Livre}-${v.Chapitre}-${v.Verset}` === endKey)
 

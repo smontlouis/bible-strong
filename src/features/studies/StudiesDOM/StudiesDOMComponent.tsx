@@ -106,7 +106,8 @@ export default function StudiesDOMComponent({
         'block-verse': true,
         format: true,
       },
-      placeholder: options.language === 'fr' ? 'Cr\u00e9er votre \u00e9tude...' : 'Create your study...',
+      placeholder:
+        options.language === 'fr' ? 'Cr\u00e9er votre \u00e9tude...' : 'Create your study...',
       readOnly: true,
     })
 

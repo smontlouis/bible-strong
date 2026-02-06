@@ -114,9 +114,12 @@ const CurrentYear = ({
         <AnimatedTextInput
           underlineColorAndroid="transparent"
           editable={false}
-          animatedProps={useAnimatedProps(() => ({
-            text: year.get(),
-          } as any))}
+          animatedProps={useAnimatedProps(
+            () =>
+              ({
+                text: year.get(),
+              }) as any
+          )}
           defaultValue={year.get()}
           style={{
             color: 'white',
