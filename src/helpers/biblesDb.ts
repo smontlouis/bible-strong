@@ -52,7 +52,11 @@ export async function openBiblesDb(): Promise<SQLite.SQLiteDatabase> {
     if (!dirInfo.exists) {
       await FileSystem.makeDirectoryAsync(dir, { intermediates: true })
     }
-    const instance = await SQLite.openDatabaseAsync(databaseBiblesName, { useNewConnection: true }, dir)
+    const instance = await SQLite.openDatabaseAsync(
+      databaseBiblesName,
+      { useNewConnection: true },
+      dir
+    )
 
     await instance.execAsync(`
       PRAGMA journal_mode = WAL;
@@ -248,9 +252,15 @@ export async function getInstalledVersions(): Promise<string[]> {
  *
  * Uses withExclusiveTransactionAsync for safe bulk insert.
  */
+export interface InsertBibleOptions {
+  onInsertProgress?: (progress: number) => void
+  isCancelled?: () => boolean
+}
+
 export async function insertBibleVersion(
   version: string,
-  jsonData: Record<string, Record<string, Record<string, string>>>
+  jsonData: Record<string, Record<string, Record<string, string>>>,
+  options?: InsertBibleOptions
 ): Promise<void> {
   const d = await getDb()
 
@@ -289,8 +299,15 @@ export async function insertBibleVersion(
       }
     }
 
+    const totalBatches = Math.ceil(allRows.length / BATCH_SIZE)
+
     // Batch insert
     for (let i = 0; i < allRows.length; i += BATCH_SIZE) {
+      // Check for cancellation between batches
+      if (options?.isCancelled?.()) {
+        throw new Error('CANCELLED')
+      }
+
       const batch = allRows.slice(i, i + BATCH_SIZE)
       const placeholders = batch.map(() => '(?, ?, ?, ?, ?)').join(', ')
       const flatParams: (string | number)[] = []
@@ -303,6 +320,10 @@ export async function insertBibleVersion(
         flatParams
       )
       totalCount += batch.length
+
+      // Report progress after each batch
+      const batchIndex = Math.floor(i / BATCH_SIZE) + 1
+      options?.onInsertProgress?.(batchIndex / totalBatches)
     }
 
     // Populate FTS index for this version

@@ -920,5 +920,41 @@
   "onboarding.annotationMode.step5.description": "Pour entrer dans le mode libre, double-tapez sur un mot ou glissez pour sélectionner directement dans le texte biblique.",
   "onboarding.next": "Suivant",
   "onboarding.start": "Commencer",
-  "onboarding.back": "Retour"
+  "onboarding.back": "Retour",
+
+  "downloads.title": "Gestion des téléchargements",
+  "downloads.select": "Sélectionner",
+  "downloads.done": "Terminé",
+  "downloads.search": "Rechercher...",
+  "downloads.deleteCount": "Supprimer {{count}} éléments ?",
+  "downloads.deleteConfirm": "Êtes-vous vraiment sûr de supprimer cet élément ?",
+  "downloads.redownloadConfirm": "Retélécharger cette version ? Cela peut corriger les problèmes de chargement.",
+
+  "downloads.section.dbFr": "Bases de données FR",
+  "downloads.section.dbEn": "Bases de données EN",
+  "downloads.section.crossReferences": "Références croisées",
+  "downloads.section.bibleSegond": "Bibles - Versions Segond",
+  "downloads.section.bibleFrOther": "Bibles - Autres versions françaises",
+  "downloads.section.bibleEn": "Bibles - Versions anglaises",
+  "downloads.section.bibleFr": "Bibles françaises",
+  "downloads.section.bibleOther": "Bibles - Langues originales",
+
+  "downloads.filter.all": "Tous",
+  "downloads.filter.downloaded": "Téléchargés",
+  "downloads.filter.notDownloaded": "Non téléchargés",
+  "downloads.filter.originalLangs": "Originales",
+
+  "downloads.queue": "En file d'attente",
+  "downloads.inserting": "Insertion...",
+  "downloads.retry": "Réessayer",
+
+  "downloads.storageUsed": "{{used}} utilisés",
+  "downloads.progress": "Téléchargement {{current}}/{{total}}",
+  "downloads.selectedCount": "{{count}} sélectionnés",
+  "downloads.download": "Télécharger",
+
+  "downloads.size.gb": "{{value}} Go",
+  "downloads.size.mb": "{{value}} Mo",
+  "downloads.size.kb": "{{value}} Ko",
+  "downloads.size.b": "{{value}} o"
 }
