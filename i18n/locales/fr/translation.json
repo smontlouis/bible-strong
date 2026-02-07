@@ -8,6 +8,7 @@
   "Valider": "Valider",
   "app.deleteAccount": "Supprimer mon compte",
   "app.deleteAccountBody": "Cette action est irréversible. Toutes vos données seront définitivement supprimées (notes, surlignages, études, favoris...).",
+  "app.deleteAccountConfirmationText": "SUPPRIMER",
   "app.deleteAccountTypeConfirm": "Tapez «\u00a0{{text}}\u00a0» pour confirmer la suppression :",
   "app.deleteAccountConfirmButton": "Supprimer",
   "app.deleteAccountRequiresRecentLogin": "Cette opération est sensible et nécessite une authentification récente. Veuillez vous déconnecter puis vous reconnecter avant de supprimer votre compte.",

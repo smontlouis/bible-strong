@@ -8,6 +8,7 @@
   "Valider": "Validate",
   "app.deleteAccount": "Delete account",
   "app.deleteAccountBody": "This action is irreversible. All your data will be permanently deleted (notes, highlights, studies, bookmarks...).",
+  "app.deleteAccountConfirmationText": "DELETE",
   "app.deleteAccountTypeConfirm": "Type \"{{text}}\" to confirm the deletion:",
   "app.deleteAccountConfirmButton": "Delete",
   "app.deleteAccountRequiresRecentLogin": "This is a sensitive operation that requires recent authentication. Please sign out and sign back in before deleting your account.",

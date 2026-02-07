@@ -19,17 +19,16 @@ type DeleteAccountModalProps = {
   modalRef: React.RefObject<BottomSheetModal | null>
 }
 
-const CONFIRMATION_TEXT = 'SUPPRIMER'
-
 const DeleteAccountModal = ({ modalRef }: DeleteAccountModalProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
 
+  const confirmationText = t('app.deleteAccountConfirmationText')
   const [confirmText, setConfirmText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  const isValid = confirmText === CONFIRMATION_TEXT
+  const isValid = confirmText === confirmationText
 
   const resetForm = () => {
     setConfirmText('')
@@ -96,10 +95,10 @@ const DeleteAccountModal = ({ modalRef }: DeleteAccountModalProps) => {
       <VStack gap={15} paddingHorizontal={20} py={20}>
         <Text fontSize={15}>{t('app.deleteAccountBody')}</Text>
         <Text fontSize={14} color="grey">
-          {t('app.deleteAccountTypeConfirm', { text: CONFIRMATION_TEXT })}
+          {t('app.deleteAccountTypeConfirm', { text: confirmationText })}
         </Text>
         <StyledInput
-          placeholder={CONFIRMATION_TEXT}
+          placeholder={confirmationText}
           placeholderTextColor={theme.colors.grey}
           value={confirmText}
           onChangeText={setConfirmText}
