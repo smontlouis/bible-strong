@@ -2,9 +2,7 @@ import * as Icon from '@expo/vector-icons'
 import * as FileSystem from 'expo-file-system/legacy'
 import React from 'react'
 import { Alert, TouchableOpacity } from 'react-native'
-import { AnimatedProgressCircle } from '@convective/react-native-reanimated-progress'
 import { useDispatch, useSelector } from 'react-redux'
-import { biblesRef, getDatabaseUrl } from '~helpers/firebase'
 import { dbManager } from '~helpers/sqlite'
 
 import styled from '@emotion/native'
@@ -12,25 +10,28 @@ import { useTheme } from '@emotion/react'
 import { useAtomValue } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { toast } from '~helpers/toast'
+import Animated from 'react-native-reanimated'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import { getIfVersionNeedsDownload, isStrongVersion, Version } from '~helpers/bibleVersions'
+import { isVersionInstalled, removeBibleVersion } from '~helpers/biblesDb'
 import { requireBiblePath } from '~helpers/requireBiblePath'
-import { downloadRedWordsFile, deleteRedWordsFile, versionHasRedWords } from '~helpers/redWords'
-import { downloadPericopeFile, deletePericopeFile, versionHasPericope } from '~helpers/pericopes'
+import { deleteRedWordsFile } from '~helpers/redWords'
+import { deletePericopeFile } from '~helpers/pericopes'
 import useLanguage from '~helpers/useLanguage'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
+import { installedVersionsSignalAtom } from '~state/app'
+import { downloadManager } from '~helpers/downloadManager'
+import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
+import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
 import { RootState } from '~redux/modules/reducer'
 import { setDefaultBibleVersion, setVersionUpdated } from '~redux/modules/user'
 import { Theme } from '~themes'
 import { VersionCode, tabsAtom, BibleTab } from 'src/state/tabs'
 import { store } from '~redux/store'
-
-const BIBLE_FILESIZE = 2500000
 
 const Container = styled.View(
   ({ needsUpdate, theme }: { needsUpdate?: boolean; theme: Theme }) => ({
@@ -101,11 +102,17 @@ const VersionSelectorItem = ({
   const lang = useLanguage()
   const theme: Theme = useTheme()
   const [versionNeedsDownload, setVersionNeedsDownload] = React.useState<boolean>()
-  const [fileProgress, setFileProgress] = React.useState(0)
-  const [isLoading, setIsLoading] = React.useState(false)
   const needsUpdate = useSelector((state: RootState) => state.user.needsUpdate[version.id])
   const dispatch = useDispatch()
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
+  const installedVersionsSignal = useAtomValue(installedVersionsSignalAtom)
+
+  // Subscribe to download queue state for this item
+  const itemId = `bible:${version.id}`
+  const queueState = useDownloadItemStatus(itemId)
+  const isLoading = queueState?.status === 'downloading' || queueState?.status === 'inserting'
+  const isQueued = queueState?.status === 'queued'
+  const downloadProgress = queueState?.downloadProgress ?? 0
 
   React.useEffect(() => {
     ;(async () => {
@@ -120,67 +127,26 @@ const VersionSelectorItem = ({
       setVersionNeedsDownload(v)
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOnboardingCompleted]) // Re-check when onboarding completes
+  }, [isOnboardingCompleted, installedVersionsSignal])
 
-  const calculateProgress: FileSystem.DownloadProgressCallback = ({ totalBytesWritten }) => {
-    const fileProgress = Math.floor((totalBytesWritten / BIBLE_FILESIZE) * 100) / 100
-    setFileProgress(fileProgress)
-  }
-
-  const startDownload = React.useCallback(async () => {
-    setIsLoading(true)
-
-    const path = requireBiblePath(version.id)
-    const uri =
-      version.id === 'INT'
-        ? getDatabaseUrl('INTERLINEAIRE', 'fr')
-        : version.id === 'INT_EN'
-          ? getDatabaseUrl('INTERLINEAIRE', 'en')
-          : biblesRef[version.id]
-
-    console.log(`[Bible] Downloading ${uri} to ${path}`)
-    try {
-      await FileSystem.createDownloadResumable(
-        uri,
-        path,
-        undefined,
-        calculateProgress
-      ).downloadAsync()
-
-      console.log('[Bible] Download finished')
-
-      if (versionHasRedWords(version.id)) {
-        downloadRedWordsFile(version.id)
-      }
-
-      if (versionHasPericope(version.id)) {
-        downloadPericopeFile(version.id)
-      }
-
-      if (version.id === 'INT' || version.id === 'INT_EN') {
-        const lang = version.id === 'INT' ? 'fr' : 'en'
-        await dbManager.getDB('INTERLINEAIRE', lang).init()
-      }
-
+  // Watch for download completion
+  React.useEffect(() => {
+    if (queueState?.status === 'completed') {
       setVersionNeedsDownload(false)
-      setIsLoading(false)
-
-      // Call onDownloadComplete callback if provided
       if (onDownloadComplete) {
         onDownloadComplete(version.id as VersionCode)
       }
-    } catch (e) {
-      console.log('[Bible] Download error:', e)
-      toast.error(
-        t("Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet.")
-      )
-      setIsLoading(false)
     }
-  }, [version.id, onDownloadComplete])
+  }, [queueState?.status])
+
+  const startDownload = () => {
+    const item = createBibleDownloadItem(version.id)
+    downloadManager.enqueue([item])
+  }
 
   const updateVersion = async () => {
     await deleteVersion()
-    await startDownload()
+    startDownload()
     dispatch(setVersionUpdated(version.id))
   }
 
@@ -191,9 +157,7 @@ const VersionSelectorItem = ({
     const fallback: VersionCode = getDefaultBibleVersion(lang)
 
     if (version.id === defaultVersion) {
-      // Switch to fallback version (LSG for French, KJV for English)
       dispatch(setDefaultBibleVersion(fallback))
-      toast.info(t('bibleDefaults.switchedToFallback', { version: fallback }))
     }
 
     // Update all tabs that use this version
@@ -203,23 +167,21 @@ const VersionSelectorItem = ({
       if (tab.type !== 'bible') return tab
 
       const bibleTab = tab as BibleTab
-      let needsUpdate = false
+      let tabNeedsUpdate = false
       let newSelectedVersion = bibleTab.data.selectedVersion
       let newParallelVersions = bibleTab.data.parallelVersions
 
-      // Check if selectedVersion matches deleted version
       if (bibleTab.data.selectedVersion === version.id) {
         newSelectedVersion = fallback
-        needsUpdate = true
+        tabNeedsUpdate = true
       }
 
-      // Check if any parallelVersions match deleted version
       if (bibleTab.data.parallelVersions.includes(version.id as VersionCode)) {
         newParallelVersions = bibleTab.data.parallelVersions.filter(v => v !== version.id)
-        needsUpdate = true
+        tabNeedsUpdate = true
       }
 
-      if (needsUpdate) {
+      if (tabNeedsUpdate) {
         return {
           ...bibleTab,
           data: {
@@ -233,30 +195,41 @@ const VersionSelectorItem = ({
       return tab
     })
 
-    // Only update if there were changes
     if (JSON.stringify(tabs) !== JSON.stringify(updatedTabs)) {
       jotaiStore.set(tabsAtom, updatedTabs)
     }
 
-    const path = requireBiblePath(version.id)
-    const file = await FileSystem.getInfoAsync(path)
-    if (!file.uri) {
-      console.log(`[Bible] Nothing to delete for ${version.id}`)
-      return
+    if (isStrongVersion(version.id)) {
+      const path = requireBiblePath(version.id)
+      const file = await FileSystem.getInfoAsync(path)
+      if (file.exists) {
+        await FileSystem.deleteAsync(file.uri)
+      }
+      if (version.id === 'INT' || version.id === 'INT_EN') {
+        const vLang = version.id === 'INT' ? 'fr' : 'en'
+        dbManager.getDB('INTERLINEAIRE', vLang).delete()
+      }
+    } else {
+      const installed = await isVersionInstalled(version.id)
+      if (installed) {
+        await removeBibleVersion(version.id)
+      }
+      const legacyPath = `${FileSystem.documentDirectory}bible-${version.id}.json`
+      const legacyFile = await FileSystem.getInfoAsync(legacyPath)
+      if (legacyFile.exists) {
+        await FileSystem.deleteAsync(legacyFile.uri)
+      }
     }
-    FileSystem.deleteAsync(file.uri)
+
     deleteRedWordsFile(version.id)
     deletePericopeFile(version.id)
     setVersionNeedsDownload(true)
 
-    if (version.id === 'INT' || version.id === 'INT_EN') {
-      const lang = version.id === 'INT' ? 'fr' : 'en'
-      dbManager.getDB('INTERLINEAIRE', lang).delete()
-    }
+    jotaiStore.set(installedVersionsSignalAtom, (c: number) => c + 1)
   }
 
   const confirmDelete = () => {
-    Alert.alert(t('Attention'), t('Êtes-vous vraiment sur de supprimer cette version ?'), [
+    Alert.alert(t('Attention'), t('Etes-vous vraiment sur de supprimer cette version ?'), [
       { text: t('Non'), onPress: () => null, style: 'cancel' },
       {
         text: t('Oui'),
@@ -294,7 +267,7 @@ const VersionSelectorItem = ({
             {/* @ts-ignore */}
             <TextCopyright>{version.c}</TextCopyright>
           </Box>
-          {!isLoading && version.id !== 'LSGS' && version.id !== 'KJVS' && (
+          {!isLoading && !isQueued && version.id !== 'LSGS' && version.id !== 'KJVS' && (
             <TouchableOpacity
               onPress={startDownload}
               style={{ padding: 10, alignItems: 'flex-end' }}
@@ -302,21 +275,30 @@ const VersionSelectorItem = ({
               <FeatherIcon name="download" size={20} />
               {(version.id === 'INT' || version.id === 'INT_EN') && (
                 <Box center marginTop={5}>
-                  <Text fontSize={10}>⚠️ {t('Taille de')} 20Mo</Text>
+                  <Text fontSize={10}>20Mo</Text>
                 </Box>
               )}
             </TouchableOpacity>
           )}
+          {isQueued && (
+            <Box width={80} justifyContent="center" alignItems="flex-end" mr={10}>
+              <FeatherIcon name="clock" size={18} color="tertiary" />
+            </Box>
+          )}
           {isLoading && (
             <Box width={80} justifyContent="center" alignItems="flex-end" mr={10}>
-              <AnimatedProgressCircle
-                size={20}
-                progress={fileProgress}
-                thickness={3}
-                color={theme.colors.primary}
-                unfilledColor={theme.colors.lightGrey}
-                animationDuration={300}
-              />
+              <Box width={60} height={4} borderRadius={2} bg="border" overflow="hidden">
+                <Animated.View
+                  style={{
+                    height: 4,
+                    borderRadius: 2,
+                    backgroundColor: theme.colors.primary,
+                    width: `${Math.round(downloadProgress * 100)}%` as any,
+                    transitionProperty: 'width',
+                    transitionDuration: 150,
+                  }}
+                />
+              </Box>
             </Box>
           )}
         </Box>
@@ -339,13 +321,11 @@ const VersionSelectorItem = ({
             <TouchableOpacity onPress={updateVersion} style={{ padding: 10 }}>
               <UpdateIcon name="download" size={18} />
             </TouchableOpacity>
-          ) : (
-            version.id !== getDefaultBibleVersion(lang) && (
-              <TouchableOpacity onPress={confirmDelete} style={{ padding: 10 }}>
-                <DeleteIcon name="trash-2" size={18} />
-              </TouchableOpacity>
-            )
-          )}
+          ) : version.id !== getDefaultBibleVersion(lang) ? (
+            <TouchableOpacity onPress={confirmDelete} style={{ padding: 10 }}>
+              <DeleteIcon name="trash-2" size={18} />
+            </TouchableOpacity>
+          ) : null}
         </Box>
       </Container>
     )

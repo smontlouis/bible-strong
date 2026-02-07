@@ -1,5 +1,5 @@
 import { VerseIds, VerseRefContent } from '~common/types'
-import loadBible from '~helpers/loadBible'
+import { getMultipleVerses } from '~helpers/biblesDb'
 import { VersionCode } from '../state/tabs'
 import verseToReference from './verseToReference'
 import * as Sentry from '@sentry/react-native'
@@ -47,12 +47,15 @@ export default async ({
 
   let versesContent = ''
   let reference = verseToReference(selectedVerses)
-  const bible = await loadBible(version, position)
 
-  selectedVerses.map(async (key, index) => {
+  const versesMap = await getMultipleVerses(version, selectedVerses)
+
+  for (let index = 0; index < selectedVerses.length; index++) {
+    const key = selectedVerses[index]
     try {
-      const [book, chapter, verse] = key.split('-')
-      const text = bible[book][chapter][verse]
+      const [, , verse] = key.split('-')
+      const text = versesMap[key]
+      if (!text) throw new Error('Verse not found')
       const inlineVerseContent = hasInlineVerses && index !== selectedVerses.length - 1 ? '' : '\n'
       const verseNumberContent = hasVerseNumbers ? `${verse}. ` : ''
       const quoteStartContent = hasQuotes && index === 0 ? '« ' : ''
@@ -68,7 +71,7 @@ export default async ({
       }
       versesContent = 'Impossible de charger ce verset.'
     }
-  })
+  }
 
   return {
     title: reference || '',

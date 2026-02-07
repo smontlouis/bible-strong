@@ -21,6 +21,8 @@ export const databaseTresorName = 'commentaires-tresor.sqlite'
 export const databaseMhyName = 'mhy.sqlite'
 export const databaseNaveName = 'nave.sqlite'
 
+export const databaseBiblesName = 'bibles.sqlite'
+
 // Map DatabaseId to file names
 export const databaseFileNames: Record<DatabaseId, string> = {
   STRONG: databaseStrongName,
@@ -30,7 +32,7 @@ export const databaseFileNames: Record<DatabaseId, string> = {
   MHY: databaseMhyName,
   INTERLINEAIRE: databaseInterlineaireName,
   TIMELINE: 'bible-timeline-events.json',
-  SEARCH: 'idx-light.json',
+  BIBLES: databaseBiblesName,
 }
 
 // Get the file name for a database
@@ -45,8 +47,8 @@ export const getDbPath = (dbId: DatabaseId, lang: ResourceLanguage): string => {
     return `${getSharedSqliteDirPath()}/${fileName}`
   }
 
-  // JSON files (TIMELINE, SEARCH) go to language-specific document folder
-  if (dbId === 'TIMELINE' || dbId === 'SEARCH') {
+  // JSON files (TIMELINE) go to language-specific document folder
+  if (dbId === 'TIMELINE') {
     return `${getJsonDirPath(lang)}/${fileName}`
   }
 
@@ -58,7 +60,7 @@ export const getDbPath = (dbId: DatabaseId, lang: ResourceLanguage): string => {
 export const getLegacyDbPath = (dbId: DatabaseId): string => {
   const fileName = getDbFileName(dbId)
 
-  if (dbId === 'TIMELINE' || dbId === 'SEARCH') {
+  if (dbId === 'TIMELINE') {
     return `${FileSystem.documentDirectory}${fileName}`
   }
 
@@ -204,13 +206,6 @@ export const databases = (lang?: ResourceLanguage) => {
       desc: i18n.t('Chronologie des événements bibliques'),
       fileSize: 3187836,
       path: getDbPath('TIMELINE', effectiveLang),
-    },
-    SEARCH: {
-      id: 'SEARCH' as const,
-      name: i18n.t('Index de recherche'),
-      desc: i18n.t('Index permettant une recherche hors-ligne dans la Bible'),
-      fileSize: 16795170,
-      path: getDbPath('SEARCH', effectiveLang),
     },
   }
 }

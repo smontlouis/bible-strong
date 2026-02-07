@@ -27,7 +27,6 @@ const icons = {
   dictionary: require('~assets/images/tab-icons/dictionary.svg'),
   nave: require('~assets/images/tab-icons/nave.svg'),
   commentary: require('~assets/images/tab-icons/comment.svg'),
-  search: require('~assets/images/tab-icons/search.svg'),
 }
 
 // Resource configuration
@@ -75,13 +74,6 @@ const RESOURCES_CONFIG: ResourceConfig[] = [
     descriptionKey: 'resourceLanguage.timelineDesc',
     iconType: 'feather',
     icon: 'clock',
-  },
-  {
-    id: 'SEARCH',
-    labelKey: 'Index de recherche',
-    descriptionKey: 'resourceLanguage.searchDesc',
-    iconType: 'svg',
-    icon: 'search',
   },
   {
     id: 'COMMENTARIES',

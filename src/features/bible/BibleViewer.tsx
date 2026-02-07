@@ -2,8 +2,12 @@ import * as Sentry from '@sentry/react-native'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
+import { useRouter } from 'expo-router'
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
+import Button from '~common/ui/Button'
+import { resetBiblesDb } from '~helpers/biblesDb'
+import { toast } from '~helpers/toast'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 import { BibleError } from '~helpers/bibleErrors'
 import getBiblePericope from '~helpers/getBiblePericope'
@@ -694,14 +698,7 @@ const BibleViewer = ({
         onExitAnnotationMode={handleExitAnnotationMode}
         annotationModeEnabled={annotationMode.enabled}
       />
-      {error && (
-        <Box flex={1} zIndex={-1}>
-          <Empty
-            source={require('~assets/images/empty.json')}
-            message={getErrorMessage(error, t)}
-          />
-        </Box>
-      )}
+      {error && <BibleErrorView error={error} t={t} />}
       {!error && verses.length > 0 && (
         <BibleDOMWrapper
           bibleAtom={bibleAtom}
@@ -889,6 +886,43 @@ const BibleViewer = ({
         version={displayedVersion}
       />
       <VerseNotesModal ref={verseNotesModal.getRef()} verseKey={verseNotesModalKey} />
+    </Box>
+  )
+}
+
+const BibleErrorView = ({ error, t }: { error: BibleError; t: (key: string) => string }) => {
+  const router = useRouter()
+  const [isResetting, setIsResetting] = useState(false)
+  const showActions = error.type === 'DATABASE_CORRUPTED' || error.type === 'BIBLE_NOT_FOUND'
+
+  const handleReset = async () => {
+    setIsResetting(true)
+    try {
+      await resetBiblesDb()
+      toast.success(t('bible.error.databaseRecovered'))
+    } catch {
+      toast.error(t('bible.error.databaseOpenFailed'))
+    } finally {
+      setIsResetting(false)
+    }
+  }
+
+  return (
+    <Box flex={1} zIndex={-1}>
+      <Empty source={require('~assets/images/empty.json')} message={getErrorMessage(error, t)}>
+        {showActions && (
+          <Box mt={20} gap={10} alignItems="center">
+            <Button onPress={() => router.push('/downloads')}>
+              {t('bible.error.goToDownloads')}
+            </Button>
+            {error.type === 'DATABASE_CORRUPTED' && (
+              <Button secondary onPress={handleReset} isLoading={isResetting}>
+                {t('bible.error.resetDatabase')}
+              </Button>
+            )}
+          </Box>
+        )}
+      </Empty>
     </Box>
   )
 }

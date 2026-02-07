@@ -253,22 +253,20 @@ const HorizontalScrollWrapper = styled('div')<{ columnCount: number }>(({ column
 }))
 
 // Wrapper pour le header avec scroll synchronisé (pas de scrollbar visible)
-const HeaderScrollWrapper = styled('div')<{ columnCount: number }>(
-  ({ columnCount }) => ({
-    position: 'sticky',
-    top: 'var(--header-height)',
-    zIndex: 2,
-    transition: 'top 0.3s cubic-bezier(.13,.69,.5,.98)',
-    overflowX: columnCount > 1 ? 'auto' : 'visible',
-    scrollbarWidth: 'none',
-    '&::-webkit-scrollbar': { display: 'none' },
-    // Disable pointer events on wrapper to prevent direct scroll, enable on children
-    pointerEvents: columnCount > 1 ? 'none' : 'auto',
-    '& > *': {
-      pointerEvents: 'auto',
-    },
-  })
-)
+const HeaderScrollWrapper = styled('div')<{ columnCount: number }>(({ columnCount }) => ({
+  position: 'sticky',
+  top: 'var(--header-height)',
+  zIndex: 2,
+  transition: 'top 0.3s cubic-bezier(.13,.69,.5,.98)',
+  overflowX: columnCount > 1 ? 'auto' : 'visible',
+  scrollbarWidth: 'none',
+  '&::-webkit-scrollbar': { display: 'none' },
+  // Disable pointer events on wrapper to prevent direct scroll, enable on children
+  pointerEvents: columnCount > 1 ? 'none' : 'auto',
+  '& > *': {
+    pointerEvents: 'auto',
+  },
+}))
 
 // Colonne pour chaque version dans le header
 const VersionTitleColumn = styled('div')<{ columnCount: number; columnWidth: number }>(
@@ -590,7 +588,14 @@ function buildVersesMap(verses: TVerse[]): Map<string, TVerse> {
  * Returns the annotationId if found, or null.
  */
 function findClickedAnnotationId(
-  highlightRects: { type: string; annotationId?: string; left: number; top: number; width: number; height: number }[],
+  highlightRects: {
+    type: string
+    annotationId?: string
+    left: number
+    top: number
+    width: number
+    height: number
+  }[],
   containerRect: DOMRect,
   position: { x: number; y: number }
 ): string | null {
@@ -1227,10 +1232,7 @@ const VersesRenderer = ({
             </HighlightLayer>
           )}
           {isParallelVerse && parallelDisplayMode === 'horizontal' && (
-            <HeaderScrollWrapper
-              ref={headerScrollRef}
-              columnCount={parallelVersionTitles.length}
-            >
+            <HeaderScrollWrapper ref={headerScrollRef} columnCount={parallelVersionTitles.length}>
               <VersionsContainer
                 columnCount={parallelVersionTitles.length}
                 columnWidth={parallelColumnWidth}
@@ -1268,8 +1270,13 @@ const VersesRenderer = ({
           >
             {(version === 'INT' || version === 'INT_EN') && !isParallelVerse && (
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '40px' }}>
-                <IntMode settings={settings} onClick={() => dispatch({ type: TOGGLE_INT_COMPLETE })}>
-                  {isINTComplete ? translations.interlinearDetailed : translations.interlinearCompact}
+                <IntMode
+                  settings={settings}
+                  onClick={() => dispatch({ type: TOGGLE_INT_COMPLETE })}
+                >
+                  {isINTComplete
+                    ? translations.interlinearDetailed
+                    : translations.interlinearCompact}
                 </IntMode>
               </div>
             )}

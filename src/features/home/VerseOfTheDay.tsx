@@ -62,9 +62,33 @@ const SkeletonLines = () => {
         transitionDuration: 800,
       }}
     >
-      <View style={{ height: 12, borderRadius: 4, backgroundColor: '#E0E0E0', width: '80%', marginTop: 5 }} />
-      <View style={{ height: 12, borderRadius: 4, backgroundColor: '#E0E0E0', width: '100%', marginTop: 8 }} />
-      <View style={{ height: 12, borderRadius: 4, backgroundColor: '#E0E0E0', width: '30%', marginTop: 8 }} />
+      <View
+        style={{
+          height: 12,
+          borderRadius: 4,
+          backgroundColor: '#E0E0E0',
+          width: '80%',
+          marginTop: 5,
+        }}
+      />
+      <View
+        style={{
+          height: 12,
+          borderRadius: 4,
+          backgroundColor: '#E0E0E0',
+          width: '100%',
+          marginTop: 8,
+        }}
+      />
+      <View
+        style={{
+          height: 12,
+          borderRadius: 4,
+          backgroundColor: '#E0E0E0',
+          width: '30%',
+          marginTop: 8,
+        }}
+      />
     </Animated.View>
   )
 }

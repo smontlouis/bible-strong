@@ -1,6 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy'
 
 import { getLanguage } from '~i18n'
+import { isVersionInstalled } from '~helpers/biblesDb'
 import { audioDefault, audioV2 } from './topBibleAudio'
 import { zeroFill } from './zeroFill'
 import { getDatabases, getDbPath } from './databases'
@@ -27,8 +28,6 @@ export const getIfVersionNeedsDownload = async (versionId: string) => {
   }
 
   if (versionId === 'LSGS' || versionId === 'KJVS') {
-    const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
-
     await initSQLiteDir()
 
     const dbPath = getDatabases().STRONG.path
@@ -41,15 +40,15 @@ export const getIfVersionNeedsDownload = async (versionId: string) => {
     return false
   }
 
+  // Check bibles.sqlite first
+  const installed = await isVersionInstalled(versionId)
+  if (installed) {
+    return false
+  }
+
+  // Fallback: check legacy JSON file (for versions not yet migrated)
   const path = `${FileSystem.documentDirectory}bible-${versionId}.json`
   const file = await FileSystem.getInfoAsync(path)
-
-  // if (__DEV__) {
-  //   if (file.exists) {
-  //     FileSystem.deleteAsync(file.uri)
-  //     file = await FileSystem.getInfoAsync(path)
-  //   }
-  // }
 
   if (!file.exists) {
     return true

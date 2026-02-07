@@ -30,7 +30,7 @@ const SQLITE_DBS_TO_MIGRATE: DatabaseId[] = [
 ]
 
 // JSON files that need migration
-const JSON_DBS_TO_MIGRATE: DatabaseId[] = ['TIMELINE', 'SEARCH']
+const JSON_DBS_TO_MIGRATE: DatabaseId[] = ['TIMELINE']
 
 /**
  * Migrate databases from old flat structure to new language-based folder structure.

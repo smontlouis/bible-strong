@@ -21,8 +21,8 @@ import {
 import { RootState } from 'src/redux/modules/reducer'
 import books from '~assets/bible_versions/books-desc'
 import { toast } from '~helpers/toast'
+import { getChapterVerses, getVerseText } from '~helpers/biblesDb'
 import getBiblePericope from '~helpers/getBiblePericope'
-import loadBible from '~helpers/loadBible'
 import { range } from '~helpers/range'
 import verseToReference from '~helpers/verseToReference'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
@@ -304,30 +304,35 @@ export const getChaptersForPlan = async (
   const book = chapters.split('|').map(Number)[0]
   const bookName = i18n.t(books[book - 1].Nom)
   const chaptersRange = chapterStringToArray(chapters)
-  const [bible, pericope] = await Promise.all([loadBible(version), getBiblePericope(version)])
 
-  const content: ChapterForPlanContent[] = chaptersRange.map((cRange: string[]) => {
-    const [, chapter] = cRange.map(Number)
-    const chapterContent = Object.keys(bible[book][chapter]).map((v: any) => ({
-      Pericope: pericope?.[book]?.[chapter]?.[v] || {},
-      Verset: v,
-      Texte: bible[book][chapter][v],
-    }))
+  const pericope = await getBiblePericope(version)
 
-    return {
-      title: `${i18n.t('Chapitre')} ${chapter}`,
-      verses: chapterContent,
-      viewMore: {
-        route: 'BibleView',
-        params: {
-          isReadOnly: true,
-          book,
-          chapter,
-          verse: 1,
+  const content: ChapterForPlanContent[] = await Promise.all(
+    chaptersRange.map(async (cRange: string[]) => {
+      const [, chapter] = cRange.map(Number)
+
+      const verses = await getChapterVerses(version, book, chapter)
+      const chapterContent: VerseContent[] = verses.map(v => ({
+        Pericope: pericope?.[book]?.[chapter]?.[v.Verset] || {},
+        Verset: `${v.Verset}`,
+        Texte: v.Texte,
+      }))
+
+      return {
+        title: `${i18n.t('Chapitre')} ${chapter}`,
+        verses: chapterContent,
+        viewMore: {
+          route: 'BibleView',
+          params: {
+            isReadOnly: true,
+            book,
+            chapter,
+            verse: 1,
+          },
         },
-      },
-    }
-  })
+      }
+    })
+  )
 
   return { bookName, chapters: content }
 }
@@ -374,18 +379,21 @@ export const getVersesForPlan = async (
       : [`${book}-${chapter}-${startVerse}`]
   ).map(c => c.split('-').map(Number))
 
-  const [bible, pericope] = await Promise.all([loadBible(version), getBiblePericope(version)])
+  const pericope = await getBiblePericope(version)
 
-  const content: VerseContent[] = versesRange.map((vRange: number[]) => {
-    const [, , verse] = vRange
-    const verseContent = {
-      Pericope: pericope?.[book]?.[chapter]?.[verse] || {},
-      Verset: `${verse}`,
-      Texte: bible[book][chapter][verse],
-    }
+  const content: VerseContent[] = await Promise.all(
+    versesRange.map(async (vRange: number[]) => {
+      const [bookNum, chapterNum, verse] = vRange
 
-    return verseContent
-  })
+      const text = (await getVerseText(version, bookNum, chapterNum, verse)) ?? ''
+
+      return {
+        Pericope: pericope?.[book]?.[chapter]?.[verse] || {},
+        Verset: `${verse}`,
+        Texte: text,
+      }
+    })
+  )
 
   return {
     bookName,

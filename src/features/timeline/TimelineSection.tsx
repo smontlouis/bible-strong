@@ -1,10 +1,7 @@
 import BottomSheet, { BottomSheetModal, BottomSheetScrollViewMethods } from '@gorhom/bottom-sheet'
-import algoliasearch from 'algoliasearch/lite'
 import React from 'react'
-import { InstantSearch } from 'react-instantsearch-native'
 import { useSharedValue } from 'react-native-reanimated'
 import Box from '~common/ui/Box'
-import useLanguage from '~helpers/useLanguage'
 import CurrentSectionImage from './CurrentSectionImage'
 import CurrentYear from './CurrentYear'
 import Datebar from './Datebar'
@@ -24,11 +21,6 @@ import {
   TimelineEvent as TimelineEventProps,
   TimelineSection as TimelineSectionProps,
 } from './types'
-const searchClient = algoliasearch(
-  process.env.EXPO_PUBLIC_ALGOLIA_APP_ID || '',
-  process.env.EXPO_PUBLIC_ALGOLIA_API_KEY || ''
-)
-
 interface Props extends TimelineSectionProps {
   onPrev: () => void
   onNext: () => void
@@ -65,7 +57,6 @@ const Timeline = ({
   prevEvent,
   nextEvent,
 }: Props) => {
-  const lang = useLanguage()
   const isReady = useSharedValue(0)
   const modalRef = React.useRef<BottomSheet>(null)
   const eventModalRef = React.useRef<BottomSheet>(null)
@@ -192,18 +183,11 @@ const Timeline = ({
             interval,
           }}
         />
-        {/* @ts-ignore */}
-        <InstantSearch
-          indexName={lang === 'fr' ? 'bible-timeline' : 'bible-timeline-en'}
-          searchClient={searchClient}
-        >
-          {/* @ts-ignore */}
-          <SearchInTimelineModal
-            modalRef={searchModalRef}
-            eventModalRef={eventModalRef}
-            setEvent={setEvent}
-          />
-        </InstantSearch>
+        <SearchInTimelineModal
+          modalRef={searchModalRef}
+          eventModalRef={eventModalRef}
+          setEvent={setEvent}
+        />
         <EventDetailsModal
           modalRef={eventModalRef}
           scrollViewRef={eventScrollViewRef}

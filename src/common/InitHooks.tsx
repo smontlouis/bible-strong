@@ -1,4 +1,5 @@
 import * as Speech from 'expo-speech'
+import * as Updates from 'expo-updates'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppState, AppStateStatus, Platform } from 'react-native'
@@ -9,6 +10,10 @@ import useLiveUpdates from '~helpers/useLiveUpdates'
 import useTabGroupsSync from '~state/useTabGroupsSync'
 import useDownloadBibleResources from '~helpers/useDownloadBibleResources'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
+import { openBiblesDb, checkBiblesDbHealth, resetBiblesDb } from '~helpers/biblesDb'
+import { toast } from '~helpers/toast'
+import { needsBibleMigration, migrateBibleJsonToSqlite } from '~helpers/bibleMigration'
+import { setMigrationProgressFromOutsideReact } from 'src/state/migration'
 import { getChangelog, getDatabaseUpdate, getVersionUpdate } from '~redux/modules/user'
 import MigrationModal from '~common/MigrationModal'
 
@@ -33,6 +38,66 @@ const InitHooks = ({}: InitHooksProps) => {
   const dispatch = useDispatch()
 
   useEffect(() => {
+    // Initialize bibles.sqlite and run blocking migration if needed
+    openBiblesDb()
+      .then(async () => {
+        // Health check — detect corruption early
+        const health = await checkBiblesDbHealth()
+        if (health !== 'ok') {
+          console.warn(`[InitHooks] Bibles DB health: ${health}, resetting...`)
+          await resetBiblesDb()
+          toast.warning(t('bible.error.databaseRecovered'))
+          return // Skip migration — DB was just recreated empty
+        }
+
+        if (!needsBibleMigration()) return
+
+        setMigrationProgressFromOutsideReact({
+          isActive: true,
+          type: 'bible',
+          overallProgress: 0,
+          message: '',
+        })
+
+        const failedVersions = await migrateBibleJsonToSqlite((current, total, versionId) => {
+          setMigrationProgressFromOutsideReact({
+            overallProgress: current / total,
+            message: `${versionId} (${current}/${total})`,
+            collectionsCompleted: current,
+            totalCollections: total,
+          })
+        })
+
+        if (failedVersions.length > 0) {
+          setMigrationProgressFromOutsideReact({
+            overallProgress: 1,
+            message: `${failedVersions.length} version(s) non migrée(s)`,
+          })
+          setTimeout(async () => {
+            try { await Updates.reloadAsync() } catch {}
+          }, 2000)
+        } else {
+          setMigrationProgressFromOutsideReact({
+            overallProgress: 1,
+            message: 'Terminé !',
+          })
+          setTimeout(async () => {
+            try { await Updates.reloadAsync() } catch {}
+          }, 1000)
+        }
+      })
+      .catch(async err => {
+        console.error('[InitHooks] Failed to open bibles.sqlite:', err)
+        // Attempt recovery by resetting the DB
+        try {
+          await resetBiblesDb()
+          toast.warning(t('bible.error.databaseRecovered'))
+        } catch (resetErr) {
+          console.error('[InitHooks] Recovery failed:', resetErr)
+          toast.error(t('bible.error.databaseOpenFailed'))
+        }
+      })
+
     // Initialiser le système de backup automatique
     autoBackupManager.initialize().catch(err => {
       console.error('Failed to initialize AutoBackupManager:', err)

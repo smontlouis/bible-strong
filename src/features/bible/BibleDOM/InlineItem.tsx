@@ -57,10 +57,8 @@ export const InlineItemIconWrapper = styled('span')<RootStyles & { isButton?: bo
   })
 )
 
-export const InlineItemText = styled('span')<RootStyles>(
-  ({ settings: { fontFamily } }) => ({
-    fontFamily,
-    pointerEvents: 'none',
-    ...noSelect,
-  })
-)
+export const InlineItemText = styled('span')<RootStyles>(({ settings: { fontFamily } }) => ({
+  fontFamily,
+  pointerEvents: 'none',
+  ...noSelect,
+}))

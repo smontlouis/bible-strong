@@ -1,89 +1,85 @@
 import { useTheme } from '@emotion/react'
-import to from 'await-to-js'
-import * as FileSystem from 'expo-file-system/legacy'
-import {
-  DownloadProgressData,
-  FileSystemNetworkTaskProgressCallback,
-} from 'expo-file-system/legacy'
-import { useAtom, useSetAtom } from 'jotai/react'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet } from 'react-native'
-import { AnimatedProgressCircle } from '@convective/react-native-reanimated-progress'
+import { useAtom, useSetAtom } from 'jotai/react'
+import { useAtomValue } from 'jotai/react'
+import Animated from 'react-native-reanimated'
+
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import { VStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
+import { isStrongVersion } from '~helpers/bibleVersions'
+import { isVersionInstalled } from '~helpers/biblesDb'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { requireBiblePath } from '~helpers/requireBiblePath'
-import { downloadRedWordsFile, versionHasRedWords } from '~helpers/redWords'
-import { downloadPericopeFile, versionHasPericope } from '~helpers/pericopes'
+import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
+import { downloadManager } from '~helpers/downloadManager'
+import { overallProgressAtom, activeQueueAtom, failedItemsAtom } from '~state/downloadQueue'
 import { isOnboardingCompletedAtom, selectedResourcesAtom } from './atom'
+
+import * as FileSystem from 'expo-file-system/legacy'
 
 const DownloadResources = () => {
   const [selectedResources] = useAtom(selectedResourcesAtom)
   const setIsOnboardingCompleted = useSetAtom(isOnboardingCompletedAtom)
-  const [downloadingResource, setDownloadingResource] = React.useState('')
-  const [fileProgress, setFileProgress] = React.useState(0)
-  const [downloadedResources, setDowloadedResources] = React.useState(0)
   const [error, setError] = React.useState<Error | null>(null)
   const { t } = useTranslation()
   const theme = useTheme()
   const lang = useLanguage()
 
-  const calculateProgress: (
-    fileSize: number
-  ) => FileSystemNetworkTaskProgressCallback<DownloadProgressData> =
-    (fileSize: number) =>
-    ({ totalBytesWritten }) => {
-      setFileProgress(Math.floor((totalBytesWritten / fileSize) * 100) / 100)
-    }
+  const progress = useAtomValue(overallProgressAtom)
+  const activeQueue = useAtomValue(activeQueueAtom)
+  const failedItems = useAtomValue(failedItemsAtom)
 
+  // Enqueue all resources on mount
   useEffect(() => {
-    ;(async () => {
-      for (const resource of selectedResources) {
-        setDownloadingResource(resource.name)
-        setDowloadedResources(s => s + 1)
+    const items = selectedResources.map(resource => {
+      // Create DownloadItem from the onboarding resource format
+      return createBibleDownloadItem(resource.id)
+    })
 
-        const [err] = await to(
-          FileSystem.createDownloadResumable(
-            resource.uri,
-            resource.path,
-            undefined,
-            calculateProgress(resource.fileSize)
-          ).downloadAsync()
-        )
+    if (items.length > 0) {
+      downloadManager.enqueue(items)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-        if (err) {
-          setError(err)
-          return
-        }
+  // Watch for completion (all active items done)
+  useEffect(() => {
+    // If queue was started and is now empty, check completion
+    if (activeQueue.length === 0 && progress.total > 0 && progress.completed === progress.total) {
+      verifyAndComplete()
+    }
+  }, [activeQueue.length, progress.total, progress.completed])
 
-        if (versionHasRedWords(resource.id)) {
-          downloadRedWordsFile(resource.id)
-        }
+  // Watch for failures
+  useEffect(() => {
+    if (failedItems.length > 0) {
+      setError(new Error(failedItems[0].error || 'Download failed'))
+    }
+  }, [failedItems.length])
 
-        if (versionHasPericope(resource.id)) {
-          downloadPericopeFile(resource.id)
-        }
-      }
-
-      // Verify that the default Bible file was downloaded successfully
-      const defaultBiblePath = requireBiblePath(getDefaultBibleVersion(lang))
+  const verifyAndComplete = async () => {
+    // Verify that the default Bible was downloaded successfully
+    const defaultVersion = getDefaultBibleVersion(lang)
+    const installed = await isVersionInstalled(defaultVersion)
+    if (!installed) {
+      const defaultBiblePath = requireBiblePath(defaultVersion)
       const fileInfo = await FileSystem.getInfoAsync(defaultBiblePath)
       if (!fileInfo.exists) {
-        setError(
-          new Error(`Download verification failed: Bible file not found at ${defaultBiblePath}`)
-        )
+        setError(new Error(`Download verification failed: Bible ${defaultVersion} not found`))
         return
       }
+    }
 
-      // Mark onboarding as complete - persisted in MMKV for instant starts
-      setIsOnboardingCompleted(true)
-    })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Run only once on mount - download should not restart on dependency changes
+    downloadManager.clearCompleted()
+    setIsOnboardingCompleted(true)
+  }
+
+  const displayProgress = progress.total > 0 ? progress.progress : 0
 
   return (
     <Container center>
@@ -92,28 +88,43 @@ const DownloadResources = () => {
           <Text title fontSize={20} color="quart">
             {t('Une erreur est survenue')}
           </Text>
-          <Text>{downloadingResource}</Text>
           <Text>{error.message}</Text>
         </VStack>
       ) : (
         <>
-          <AnimatedProgressCircle
-            size={100}
-            progress={fileProgress}
-            thickness={5}
-            color={theme.colors.primary}
-            unfilledColor={theme.colors.lightGrey}
-            animationDuration={300}
-          >
-            <Box style={StyleSheet.absoluteFillObject} center>
+          {/* Circular-style progress using a simple ring */}
+          <Box size={100} center>
+            <Box
+              size={100}
+              borderRadius={50}
+              borderWidth={5}
+              borderColor="border"
+              center
+              overflow="visible"
+            >
+              <Animated.View
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  borderRadius: 50,
+                  borderWidth: 5,
+                  borderColor: theme.colors.primary,
+                  opacity: displayProgress,
+                  transitionProperty: 'opacity',
+                  transitionDuration: 300,
+                }}
+              />
               <Text fontSize={20}>
-                {downloadedResources} / {selectedResources.length}
+                {progress.completed} / {progress.total || selectedResources.length}
               </Text>
             </Box>
-          </AnimatedProgressCircle>
+          </Box>
           <Box center mt={20}>
             <Text opacity={0.6}>{t('app.downloading')}</Text>
-            <Text bold>{downloadingResource}</Text>
+            <Text bold>{Math.round(displayProgress * 100)}%</Text>
           </Box>
         </>
       )}

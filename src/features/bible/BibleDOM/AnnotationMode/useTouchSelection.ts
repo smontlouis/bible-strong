@@ -177,9 +177,7 @@ export function useTouchSelection({
     const verseKey = verseContainer.getAttribute('data-verse-key')
     if (!verseKey) return null
 
-    const verse = versesRef.current.find(
-      v => `${v.Livre}-${v.Chapitre}-${v.Verset}` === verseKey
-    )
+    const verse = versesRef.current.find(v => `${v.Livre}-${v.Chapitre}-${v.Verset}` === verseKey)
     if (!verse) return null
 
     const tokens = getTokensRef.current(verseKey, verse.Texte)

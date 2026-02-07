@@ -152,7 +152,7 @@ dispatch(resetPlan(plan.id))
 ## Intégrations
 
 ### Avec la feature Bible
-- Chargement des versets via `loadBible`
+- Chargement des versets via `biblesDb` (SQLite)
 - Navigation vers la lecture complète
 - Support du changement de version biblique
 - Récupération des titres de sections (péricopes)

@@ -15,7 +15,14 @@ const DictionnaryResultItem = ({ word }: Props) => {
 
   return (
     <Link key={word} route="DictionnaryDetail" params={{ word }}>
-      <Box center rounded marginRight={10} marginBottom={10} height={height} paddingHorizontal={10}>
+      <Box
+        center
+        borderRadius={8}
+        marginRight={10}
+        marginBottom={10}
+        height={height}
+        paddingHorizontal={10}
+      >
         <Box
           style={{
             position: 'absolute',

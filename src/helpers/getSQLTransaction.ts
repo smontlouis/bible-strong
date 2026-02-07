@@ -38,7 +38,6 @@ const getLanguageAwareSQLTransaction = (dbId: DatabaseId) => {
         'MHY',
         'INTERLINEAIRE',
         'TIMELINE',
-        'SEARCH',
       ]
       if (selectableDbIds.includes(dbId as keyof ResourcesLanguageState)) {
         lang = getResourceLanguage(dbId as keyof ResourcesLanguageState)

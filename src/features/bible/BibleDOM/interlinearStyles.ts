@@ -3,11 +3,9 @@ import { styled } from 'goober'
 import { scaleFontSize } from './scaleFontSize'
 import { RootStyles } from './BibleDOMWrapper'
 
-export const Wrapper = styled('div')<RootStyles>(
-  ({ settings: { textDisplay } }) => ({
-    display: textDisplay,
-  })
-)
+export const Wrapper = styled('div')<RootStyles>(({ settings: { textDisplay } }) => ({
+  display: textDisplay,
+}))
 
 export const VerseText = styled('div')<RootStyles>(
   ({ settings: { fontSizeScale, theme, colors, fontFamily } }) => ({

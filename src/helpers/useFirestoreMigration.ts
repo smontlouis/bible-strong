@@ -26,8 +26,10 @@ export const useFirestoreMigration = () => {
 
   const resetProgress = () => {
     setProgress({
+      type: 'firestore',
       isActive: false,
       isResuming: false,
+      isMigrating: false,
       currentCollection: null,
       collectionsCompleted: 0,
       totalCollections: 7,
@@ -83,8 +85,10 @@ export const useFirestoreMigration = () => {
 
       // Initialize progress UI
       setProgress({
+        type: 'firestore',
         isActive: true,
         isResuming,
+        isMigrating: true,
         currentCollection: null,
         collectionsCompleted: 0,
         totalCollections: 7,

@@ -2,7 +2,8 @@ import { useEffect } from 'react'
 import { InteractionManager } from 'react-native'
 import * as FileSystem from 'expo-file-system/legacy'
 
-import { versions } from '~helpers/bibleVersions'
+import { versions, isStrongVersion } from '~helpers/bibleVersions'
+import { isVersionInstalled } from '~helpers/biblesDb'
 import { requireBiblePath } from '~helpers/requireBiblePath'
 import { versionHasRedWords, hasRedWordsFile, downloadRedWordsFile } from '~helpers/redWords'
 import { versionHasPericope, hasPericopeFile, downloadPericopeFile } from '~helpers/pericopes'
@@ -41,16 +42,25 @@ function useDownloadBibleResources(): void {
       console.log('[BibleResources] Starting migration check...')
 
       for (const version of Object.values(versions)) {
-        const biblePath = requireBiblePath(version.id)
-        const bibleInfo = await FileSystem.getInfoAsync(biblePath)
-        if (!bibleInfo.exists) continue
+        // Check if this version is installed (SQLite or legacy file)
+        let versionExists = false
+        if (!isStrongVersion(version.id)) {
+          versionExists = await isVersionInstalled(version.id)
+        }
+        if (!versionExists) {
+          const biblePath = requireBiblePath(version.id)
+          const bibleInfo = await FileSystem.getInfoAsync(biblePath)
+          if (!bibleInfo.exists) continue
+        }
 
         for (const resource of resources) {
           if (!resource.versionSupported(version.id)) continue
           const exists = await resource.hasFile(version.id)
           if (exists) continue
 
-          console.log(`[BibleResources] Missing ${resource.label} for ${version.id}, downloading...`)
+          console.log(
+            `[BibleResources] Missing ${resource.label} for ${version.id}, downloading...`
+          )
           await resource.downloadFile(version.id)
         }
       }

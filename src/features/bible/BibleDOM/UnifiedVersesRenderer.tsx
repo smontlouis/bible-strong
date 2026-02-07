@@ -341,9 +341,7 @@ export function UnifiedVersesRenderer({
         // Normal mode rendering
 
         // In readonly mode, only show focused verses and adjacent fading verses
-        const isFocused = focusVersesNumeric
-          ? focusVersesNumeric.includes(verseNumber)
-          : undefined
+        const isFocused = focusVersesNumeric ? focusVersesNumeric.includes(verseNumber) : undefined
         const fadePosition = getFadePosition(verseNumber, isReadOnly, adjacentVerses)
         if (isReadOnly && focusVerses && !isFocused && !fadePosition) return null
 

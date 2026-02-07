@@ -13,7 +13,7 @@ export type DatabaseId =
   | 'MHY'
   | 'INTERLINEAIRE'
   | 'TIMELINE'
-  | 'SEARCH'
+  | 'BIBLES'
 
 // Databases that have language-specific content
 export const LANGUAGE_SPECIFIC_DBS: DatabaseId[] = [
@@ -23,11 +23,10 @@ export const LANGUAGE_SPECIFIC_DBS: DatabaseId[] = [
   'MHY',
   'INTERLINEAIRE',
   'TIMELINE',
-  'SEARCH',
 ]
 
 // Databases that are shared across languages (no translation needed)
-export const SHARED_DBS: DatabaseId[] = ['TRESOR']
+export const SHARED_DBS: DatabaseId[] = ['TRESOR', 'BIBLES']
 
 // Databases that can have their language changed by the user
 export const USER_SELECTABLE_DBS: DatabaseId[] = [
@@ -37,7 +36,6 @@ export const USER_SELECTABLE_DBS: DatabaseId[] = [
   'MHY',
   'INTERLINEAIRE',
   'TIMELINE',
-  'SEARCH',
 ]
 
 // Databases that only exist in French

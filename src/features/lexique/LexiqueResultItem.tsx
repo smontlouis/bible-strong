@@ -19,7 +19,14 @@ const LexiqueResultItem = ({ variant, id, title }: Props) => {
 
   return (
     <Link key={id + title} route="Strong" params={{ book: isGrec ? 40 : 1, reference: id }}>
-      <Box center rounded marginRight={10} marginBottom={10} height={height} paddingHorizontal={20}>
+      <Box
+        center
+        borderRadius={8}
+        marginRight={10}
+        marginBottom={10}
+        height={height}
+        paddingHorizontal={20}
+      >
         <Box
           style={{
             position: 'absolute',

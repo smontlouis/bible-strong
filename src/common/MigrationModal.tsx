@@ -12,6 +12,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { Theme } from '~themes'
 import { migrationProgressAtom } from 'src/state/migration'
 import { getCollectionLabel } from '~helpers/firestoreMigration'
+import type { SubcollectionName } from '~helpers/firestoreSubcollections'
 
 const ModalContent = styled.View(({ theme }: { theme: Theme }) => ({
   flex: 1,
@@ -50,9 +51,13 @@ const MigrationModal = () => {
   const { t } = useTranslation()
   const progress = useAtomValue(migrationProgressAtom)
 
+  const isBibleMigration = progress.type === 'bible'
+
   const handleContactSupport = () => {
     const subject = encodeURIComponent('Bible Strong - Migration Issue')
-    const failedLabels = progress.failedCollections.map(c => getCollectionLabel(c)).join(', ')
+    const failedLabels = isBibleMigration
+      ? progress.failedCollections.join(', ')
+      : progress.failedCollections.map(c => getCollectionLabel(c as SubcollectionName)).join(', ')
     const body = encodeURIComponent(
       `Bonjour,\n\nJ'ai rencontré un problème lors de la migration de mes données.\n\nCollections échouées: ${
         failedLabels || 'N/A'
@@ -80,16 +85,18 @@ const MigrationModal = () => {
               ? progress.hasPartialFailure
                 ? t('migration.partiallyFailed')
                 : t('migration.failed')
-              : progress.isResuming
-                ? t('migration.resuming')
-                : t('migration.inProgress')}
+              : isBibleMigration
+                ? 'Migration des données...'
+                : progress.isResuming
+                  ? t('migration.resuming')
+                  : t('migration.inProgress')}
           </Text>
 
           <Text textAlign="center" color="grey" marginBottom={20}>
-            {hasError ? t('migration.errorDescription') : t('migration.description')}
+            {hasError ? t('migration.errorDescription') : isBibleMigration ? 'Veuillez patienter, cette opération ne prendra que quelques instants.' : t('migration.description')}
           </Text>
 
-          {!hasError && (
+          {!hasError && !isBibleMigration && (
             <Box row center marginBottom={25}>
               <FeatherIcon name="wifi" size={16} color="grey" />
               <Text marginLeft={8} fontSize={12} color="grey">
@@ -120,7 +127,9 @@ const MigrationModal = () => {
                 <Text fontSize={12} color="grey">
                   {progress.hasPartialFailure
                     ? t('migration.partialError') +
-                      progress.failedCollections.map(c => getCollectionLabel(c)).join(', ')
+                      (isBibleMigration
+                        ? progress.failedCollections.join(', ')
+                        : progress.failedCollections.map(c => getCollectionLabel(c as SubcollectionName)).join(', '))
                     : progress.error}
                 </Text>
               </ErrorBox>
