@@ -898,6 +898,11 @@
   "bible.error.parallelVersionNotFound": "Version not downloaded",
   "bible.error.parallelChapterNotFound": "Chapter unavailable",
   "bible.error.parallelLoadError": "Loading error",
+  "bible.error.goToDownloads": "Go to downloads",
+  "bible.error.resetDatabase": "Reset Bible database",
+  "bible.error.databaseRecovered": "Bible database has been reset. You can re-download your versions.",
+  "bible.error.databaseOpenFailed": "Failed to open Bible database. Please restart the app.",
+  "search.error.searchFailed": "Search encountered an error. Try restarting the app.",
 
   "bible.interlinear.detailed": "Detailed",
   "bible.interlinear.compact": "Compact",

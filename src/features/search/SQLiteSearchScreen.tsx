@@ -47,6 +47,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const [results, setResults] = useState<SearchResult[] | null>(null)
   const [totalCount, setTotalCount] = useState(0)
   const [isSearching, setIsSearching] = useState(false)
+  const [searchError, setSearchError] = useState<string | null>(null)
   const [hasInstalledVersions, setHasInstalledVersions] = useState(true)
 
   const [section, setSection] = useState('')
@@ -104,6 +105,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     if (trimmed.length < MIN_SEARCH_LENGTH) {
       setResults(null)
       setTotalCount(0)
+      setSearchError(null)
       return
     }
 
@@ -111,11 +113,13 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     if (STRONG_CODE_REGEX.test(trimmed)) {
       setResults([])
       setTotalCount(0)
+      setSearchError(null)
       return
     }
 
     const doSearch = async () => {
       setIsSearching(true)
+      setSearchError(null)
       try {
         const sectionMap: Record<string, 'ot' | 'nt'> = { at: 'ot', nt: 'nt' }
         const options: SearchOptions = {
@@ -137,6 +141,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
         console.error('[Search] FTS5 error:', e)
         setResults([])
         setTotalCount(0)
+        setSearchError(t('search.error.searchFailed'))
       }
       setIsSearching(false)
     }
@@ -152,6 +157,16 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const showResultsList = hasSearchQuery && (hasInstalledVersions ? Array.isArray(results) : true)
 
   function renderStatusMessage(): ReactNode {
+    if (searchError) {
+      return (
+        <Box py={10}>
+          <Text title fontSize={14} color="quart">
+            {searchError}
+          </Text>
+        </Box>
+      )
+    }
+
     if (hasInstalledVersions && !isStrongCode) {
       return (
         <Box py={10}>

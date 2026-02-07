@@ -10,7 +10,8 @@ import useLiveUpdates from '~helpers/useLiveUpdates'
 import useTabGroupsSync from '~state/useTabGroupsSync'
 import useDownloadBibleResources from '~helpers/useDownloadBibleResources'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
-import { openBiblesDb } from '~helpers/biblesDb'
+import { openBiblesDb, checkBiblesDbHealth, resetBiblesDb } from '~helpers/biblesDb'
+import { toast } from '~helpers/toast'
 import { needsBibleMigration, migrateBibleJsonToSqlite } from '~helpers/bibleMigration'
 import { setMigrationProgressFromOutsideReact } from 'src/state/migration'
 import { getChangelog, getDatabaseUpdate, getVersionUpdate } from '~redux/modules/user'
@@ -40,6 +41,15 @@ const InitHooks = ({}: InitHooksProps) => {
     // Initialize bibles.sqlite and run blocking migration if needed
     openBiblesDb()
       .then(async () => {
+        // Health check — detect corruption early
+        const health = await checkBiblesDbHealth()
+        if (health !== 'ok') {
+          console.warn(`[InitHooks] Bibles DB health: ${health}, resetting...`)
+          await resetBiblesDb()
+          toast.warning(t('bible.error.databaseRecovered'))
+          return // Skip migration — DB was just recreated empty
+        }
+
         if (!needsBibleMigration()) return
 
         setMigrationProgressFromOutsideReact({
@@ -76,8 +86,16 @@ const InitHooks = ({}: InitHooksProps) => {
           }, 1000)
         }
       })
-      .catch(err => {
+      .catch(async err => {
         console.error('[InitHooks] Failed to open bibles.sqlite:', err)
+        // Attempt recovery by resetting the DB
+        try {
+          await resetBiblesDb()
+          toast.warning(t('bible.error.databaseRecovered'))
+        } catch (resetErr) {
+          console.error('[InitHooks] Recovery failed:', resetErr)
+          toast.error(t('bible.error.databaseOpenFailed'))
+        }
       })
 
     // Initialiser le système de backup automatique

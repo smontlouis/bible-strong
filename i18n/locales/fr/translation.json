@@ -902,6 +902,11 @@
   "bible.error.parallelVersionNotFound": "Version non téléchargée",
   "bible.error.parallelChapterNotFound": "Chapitre indisponible",
   "bible.error.parallelLoadError": "Erreur de chargement",
+  "bible.error.goToDownloads": "Aller aux telechargements",
+  "bible.error.resetDatabase": "Reinitialiser la base de donnees",
+  "bible.error.databaseRecovered": "La base de donnees a ete reinitialisee. Vous pouvez retelecharger vos versions.",
+  "bible.error.databaseOpenFailed": "Impossible d'ouvrir la base de donnees. Veuillez redemarrer l'application.",
+  "search.error.searchFailed": "La recherche a rencontre une erreur. Essayez de redemarrer l'application.",
 
   "bible.interlinear.detailed": "Détaillé",
   "bible.interlinear.compact": "Compact",

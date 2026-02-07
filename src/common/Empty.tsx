@@ -15,9 +15,10 @@ interface Props {
   message: string
   source?: any
   icon?: ImageSource
+  children?: React.ReactNode
 }
 
-const Empty = ({ message, source, icon, ...props }: Props) => {
+const Empty = ({ message, source, icon, children, ...props }: Props) => {
   const theme = useTheme()
   const animation = useRef<Lottie>(null)
 
@@ -57,6 +58,7 @@ const Empty = ({ message, source, icon, ...props }: Props) => {
             {message}
           </Text>
         )}
+        {children}
       </Box>
     </Container>
   )
