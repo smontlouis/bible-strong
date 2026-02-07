@@ -34,26 +34,12 @@ const StorageSummaryCard = () => {
 
   const calculateStorage = async () => {
     try {
-      // Calculate used storage from SQLite dir + document dir JSON files
+      // Calculate used storage from SQLite directory
       let total = 0
 
       const sqliteDir = await FileSystem.getInfoAsync(BASE_SQLITE_DIR)
       if (sqliteDir.exists) {
         total += await getDirSize(BASE_SQLITE_DIR)
-      }
-
-      // Count JSON Bible files in documentDirectory
-      const docDir = FileSystem.documentDirectory
-      if (docDir) {
-        const files = await FileSystem.readDirectoryAsync(docDir)
-        for (const file of files) {
-          if (file.startsWith('bible-') && file.endsWith('.json')) {
-            const info = await FileSystem.getInfoAsync(`${docDir}${file}`)
-            if (info.exists && info.size) {
-              total += info.size
-            }
-          }
-        }
       }
 
       setUsedBytes(total)

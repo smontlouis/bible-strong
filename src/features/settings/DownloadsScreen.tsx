@@ -494,8 +494,6 @@ const DownloadsScreen = () => {
         contentContainerStyle={{ paddingBottom: 100 }}
         ListHeaderComponent={
           <>
-            <StorageSummaryCard />
-
             {/* Search */}
             <Box
               mx={16}
@@ -535,6 +533,8 @@ const DownloadsScreen = () => {
               onStatusToggle={handleStatusToggle}
               onLangToggle={handleLangToggle}
             />
+
+            <StorageSummaryCard />
           </>
         }
         renderSectionHeader={({ section }: { section: any }) => {
