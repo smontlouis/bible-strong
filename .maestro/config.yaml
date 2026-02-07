@@ -1,0 +1,13 @@
+# Maestro configuration
+# https://maestro.mobile.dev/
+
+# Default app ID (Android)
+# For iOS, use: com.smontlouis.biblestrong or com.smontlouis.biblestrong.dev
+appId: com.smontlouis.biblestrong
+
+# Execution settings
+executionOrder:
+  continueOnFailure: false
+  flowsOrder:
+    - subflows/launchApp.yaml
+    - flows/*.yaml

@@ -1,0 +1,28 @@
+# Test: Settings/More Drawer Navigation
+# Verifies that the settings drawer can be opened
+# Tags: smoke, navigation
+
+appId: com.smontlouis.biblestrong
+tags:
+  - smoke
+  - navigation
+---
+- runFlow: ../subflows/launchApp.yaml
+
+# Swipe left to open Settings/More drawer
+- swipe:
+    direction: LEFT
+    duration: 500
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Take a screenshot
+- takeScreenshot: settings_drawer
+
+# Close drawer by swiping right
+- swipe:
+    direction: RIGHT
+    duration: 500
+
+- waitForAnimationToEnd
