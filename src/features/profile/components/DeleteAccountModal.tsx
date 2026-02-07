@@ -85,7 +85,7 @@ const DeleteAccountModal = ({ modalRef }: DeleteAccountModalProps) => {
                 {isLoading ? (
                   <ActivityIndicator color="white" size="small" />
                 ) : (
-                  t('app.deleteAccountConfirmButton')
+                  'Supprimer'
                 )}
               </Button>
             </Box>
@@ -94,9 +94,12 @@ const DeleteAccountModal = ({ modalRef }: DeleteAccountModalProps) => {
       )}
     >
       <VStack gap={15} paddingHorizontal={20} py={20}>
-        <Text fontSize={15}>{t('app.deleteAccountBody')}</Text>
+        <Text fontSize={15}>
+          Cette action est irréversible. Toutes vos données seront définitivement supprimées (notes,
+          surlignages, études, favoris...).
+        </Text>
         <Text fontSize={14} color="grey">
-          {t('app.deleteAccountTypeConfirm', { text: CONFIRMATION_TEXT })}
+          Tapez «&nbsp;{CONFIRMATION_TEXT}&nbsp;» pour confirmer la suppression :
         </Text>
         <StyledInput
           placeholder={CONFIRMATION_TEXT}
