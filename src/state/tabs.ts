@@ -52,7 +52,6 @@ export interface SearchTab extends TabBase {
   type: 'search'
   data: {
     searchValue: string
-    searchMode: 'online' | 'offline'
   }
 }
 
@@ -218,7 +217,6 @@ export const getDefaultData = <T extends TabItem>(
       return {
         data: {
           searchValue: '',
-          searchMode: 'online',
         },
       }
     }

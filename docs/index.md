@@ -53,7 +53,7 @@
 | Bible | [README.md](../src/features/bible/README.md) | Lecteur biblique multi-onglets |
 | Studies | [README.md](../src/features/studies/README.md) | Éditeur d'études |
 | Plans | [README.md](../src/features/plans/README.md) | Plans de lecture |
-| Search | [README.md](../src/features/search/README.md) | Recherche Algolia/Lunr |
+| Search | [README.md](../src/features/search/README.md) | Recherche SQLite FTS5 |
 | Timeline | [README.md](../src/features/timeline/README.md) | Frise historique |
 | Dictionary | [README.md](../src/features/dictionnary/README.md) | Dictionnaire biblique |
 | Nave | [README.md](../src/features/nave/README.md) | Bible thématique |
@@ -95,7 +95,7 @@
 |-------------|-------|
 | expo-sqlite | Bases locales |
 | Firebase Firestore | Sync cloud |
-| Algolia + Lunr.js | Recherche |
+| SQLite FTS5 | Recherche |
 
 ## Commandes essentielles
 

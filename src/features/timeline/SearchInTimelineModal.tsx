@@ -1,66 +1,73 @@
-import { useTheme } from '@emotion/react'
-import React, { useCallback } from 'react'
-import { Theme } from '~themes'
-
-import { TimelineEvent as TimelineEventProps } from './types'
-
-import BottomSheet, { BottomSheetFlatList, BottomSheetView } from '@gorhom/bottom-sheet'
-import { Image } from 'expo-image'
+import React, { useState } from 'react'
+import { Keyboard } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { connectInfiniteHits, connectStateResults } from 'react-instantsearch-native'
+
+import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet'
+import { Image } from 'expo-image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Empty from '~common/Empty'
 import { LinkBox } from '~common/Link'
+import SearchInput from '~common/SearchInput'
 import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
+import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import SearchBox from '~features/search/SearchBox'
+import bibleMemoize from '~helpers/bibleStupidMemoize'
 import { useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
-import Filters from './Filters'
-import Highlight from './Highlight'
-import Snippet from './Snippet'
+import { TimelineEventDetail, TimelineEvent as TimelineEventProps } from './types'
 
 interface Props {
   modalRef: React.RefObject<BottomSheet | null>
   eventModalRef: React.RefObject<BottomSheet | null>
   setEvent: (event: Partial<TimelineEventProps>) => void
-  hits?: any
-  hasMore?: any
-  refine?: any
-  allSearchResults?: any
-  error?: any
-  searching?: any
 }
-const SearchInTimelineModal = ({
-  modalRef,
-  hits,
-  hasMore,
-  refine,
-  allSearchResults,
-  error,
-  searching,
-  setEvent,
-  eventModalRef,
-}: Props) => {
+
+const SearchInTimelineModal = ({ modalRef, setEvent, eventModalRef }: Props) => {
   const { t } = useTranslation()
-  const theme: Theme = useTheme()
-  const [searchValue, setSearchValue] = React.useState('')
-  const [submittedValue, setSubmittedValue] = React.useState('')
-  const [canQuery, setCanQuery] = React.useState(true)
+  const [searchValue, setSearchValue] = useState('')
+  const [results, setResults] = useState<TimelineEventDetail[]>([])
+  const [hasSearched, setHasSearched] = useState(false)
 
-  const onSubmit = useCallback((callback: Function, value: string) => {
-    callback()
-    setSubmittedValue(value)
-  }, [])
+  const doSearch = (query: string) => {
+    if (!query.trim()) {
+      setResults([])
+      setHasSearched(false)
+      return
+    }
 
-  const onClear = useCallback(() => {
-    setSubmittedValue('')
+    const timeline = bibleMemoize.timeline as TimelineEventDetail[] | undefined
+    if (!timeline) {
+      setResults([])
+      setHasSearched(true)
+      return
+    }
+
+    const lowerQuery = query.toLowerCase()
+    const filtered = timeline.filter(event => {
+      const title = event.title?.toLowerCase() ?? ''
+      const description = event.description?.toLowerCase() ?? ''
+      const article = event.article?.toLowerCase() ?? ''
+      return title.includes(lowerQuery) || description.includes(lowerQuery) || article.includes(lowerQuery)
+    })
+
+    setResults(filtered)
+    setHasSearched(true)
+  }
+
+  const onSubmit = () => {
+    Keyboard.dismiss()
+    doSearch(searchValue)
+  }
+
+  const onClear = () => {
     setSearchValue('')
-  }, [])
+    setResults([])
+    setHasSearched(false)
+  }
 
-  const onOpenEvent = (event: any) => {
+  const onOpenEvent = (event: TimelineEventDetail) => {
     eventModalRef.current?.expand()
-    setEvent(event)
+    setEvent(event as unknown as Partial<TimelineEventProps>)
   }
 
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
@@ -77,67 +84,62 @@ const SearchInTimelineModal = ({
       {...bottomSheetStyles}
     >
       <Box pt={20}>
-        {/* @ts-ignore */}
-        <SearchBox
-          value={searchValue}
-          onChange={setSearchValue}
-          onSubmit={onSubmit}
-          onClear={onClear}
-          placeholder={t('Rechercher un événement dans la Bible')}
-        />
-        <Filters />
+        <Box px={20}>
+          <SearchInput
+            value={searchValue}
+            onChangeText={setSearchValue}
+            placeholder={t('Rechercher un événement dans la Bible')}
+            onDelete={onClear}
+            onSubmitEditing={onSubmit}
+            returnKeyType="search"
+          />
+        </Box>
       </Box>
       <BottomSheetFlatList
         ItemSeparatorComponent={() => <Border />}
-        data={submittedValue ? hits : []}
-        // @ts-ignore
-        keyExtractor={(item: any) => item.objectID}
-        onEndReached={() => {
-          hasMore && refine()
-        }}
+        data={results}
+        keyExtractor={(item) => item.slug}
         ListHeaderComponent={
-          !submittedValue || !canQuery ? (
+          !hasSearched ? (
             <Empty
               icon={require('~assets/images/empty-state-icons/search.svg')}
               message={t('Faites une recherche dans la Bible !')}
             />
-          ) : error ? (
+          ) : results.length === 0 ? (
             <Empty
               source={require('~assets/images/empty.json')}
-              message={t("Une erreur est survenue. Assurez-vous d'être connecté à Internet.")}
+              message={t('Aucun résultat')}
             />
           ) : (
             <Box paddingHorizontal={20}>
               <Text title fontSize={16} color="grey">
                 {t('{{nbHits}} occurences trouvées dans la bible', {
-                  nbHits: allSearchResults?.nbHits,
+                  nbHits: results.length,
                 })}
               </Text>
             </Box>
           )
         }
-        // @ts-ignore
-        renderItem={({ item }: any) => (
+        renderItem={({ item }) => (
           <LinkBox mx={20} my={20} onPress={() => onOpenEvent(item)} row>
-            {/* @ts-ignore */}
-            {item.image && (
+            {item.images?.[0]?.file && (
               <Box mr={20}>
                 <Image
                   style={{ width: 70, height: 70, borderRadius: 10 }}
-                  source={{
-                    // @ts-ignore
-                    uri: item.image,
-                  }}
+                  source={{ uri: item.images[0].file }}
                 />
               </Box>
             )}
-            <Box>
-              {/* @ts-ignore */}
-              <Highlight attribute="title" hit={item} />
-              {/* @ts-ignore */}
-              <Snippet attribute="description" hit={item} />
-              {/* @ts-ignore */}
-              <Snippet attribute="article" hit={item} />
+            <Box flex>
+              <Paragraph small fontFamily="title">
+                {item.title}
+                {item.dates ? ` (${item.dates})` : ''}
+              </Paragraph>
+              {item.description ? (
+                <Paragraph small numberOfLines={2}>
+                  {item.description}
+                </Paragraph>
+              ) : null}
             </Box>
           </LinkBox>
         )}
@@ -146,4 +148,4 @@ const SearchInTimelineModal = ({
   )
 }
 
-export default connectInfiniteHits(connectStateResults(SearchInTimelineModal))
+export default SearchInTimelineModal

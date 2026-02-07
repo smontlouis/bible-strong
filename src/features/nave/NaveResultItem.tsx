@@ -16,7 +16,14 @@ const NaveResultItem = ({ name_lower, name }: Props) => {
 
   return (
     <Link key={name_lower} route="NaveDetail" params={{ name_lower, name }}>
-      <Box center rounded marginRight={10} marginBottom={10} height={height} paddingHorizontal={10}>
+      <Box
+        center
+        borderRadius={8}
+        marginRight={10}
+        marginBottom={10}
+        height={height}
+        paddingHorizontal={10}
+      >
         <Box
           style={{
             position: 'absolute',

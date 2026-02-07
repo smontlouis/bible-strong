@@ -128,11 +128,7 @@ bible-strong-app/
 │   │   ├── search/            # Recherche biblique
 │   │   │   ├── SearchScreen.tsx           # Écran principal
 │   │   │   ├── SearchTabScreen.tsx        # Tab wrapper
-│   │   │   ├── OnlineSearchScreen.tsx     # Recherche Algolia
-│   │   │   ├── LocalSearchScreen.tsx      # Recherche Lunr.js
-│   │   │   ├── Filters.tsx                # Filtres de recherche
-│   │   │   ├── RefinementList.tsx         # Liste de raffinement
-│   │   │   └── bibleLSG.ts                # Index Bible LSG
+│   │   │   └── SQLiteSearchScreen.tsx     # Recherche SQLite FTS5
 │   │   │
 │   │   ├── lexique/           # Lexique Strong
 │   │   │   ├── LexiqueScreen.tsx          # Liste des entrées

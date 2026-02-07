@@ -26,6 +26,7 @@ import { downloadPericopeFile, deletePericopeFile, versionHasPericope } from '~h
 import useLanguage from '~helpers/useLanguage'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
+import { installedVersionsSignalAtom } from '~state/app'
 import { RootState } from '~redux/modules/reducer'
 import { setDefaultBibleVersion, setVersionUpdated } from '~redux/modules/user'
 import { Theme } from '~themes'
@@ -108,6 +109,7 @@ const VersionSelectorItem = ({
   const needsUpdate = useSelector((state: RootState) => state.user.needsUpdate[version.id])
   const dispatch = useDispatch()
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
+  const installedVersionsSignal = useAtomValue(installedVersionsSignalAtom)
 
   React.useEffect(() => {
     ;(async () => {
@@ -122,7 +124,7 @@ const VersionSelectorItem = ({
       setVersionNeedsDownload(v)
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOnboardingCompleted]) // Re-check when onboarding completes
+  }, [isOnboardingCompleted, installedVersionsSignal])
 
   const calculateProgress: FileSystem.DownloadProgressCallback = ({ totalBytesWritten }) => {
     const fileProgress = Math.floor((totalBytesWritten / BIBLE_FILESIZE) * 100) / 100
@@ -174,6 +176,9 @@ const VersionSelectorItem = ({
 
       setVersionNeedsDownload(false)
       setIsLoading(false)
+
+      // Notify all other VersionSelectorItem instances to re-check
+      getDefaultStore().set(installedVersionsSignalAtom, (c: number) => c + 1)
 
       if (onDownloadComplete) {
         onDownloadComplete(version.id as VersionCode)
@@ -275,6 +280,9 @@ const VersionSelectorItem = ({
     deleteRedWordsFile(version.id)
     deletePericopeFile(version.id)
     setVersionNeedsDownload(true)
+
+    // Notify all other VersionSelectorItem instances to re-check
+    jotaiStore.set(installedVersionsSignalAtom, (c: number) => c + 1)
   }
 
   const confirmDelete = () => {

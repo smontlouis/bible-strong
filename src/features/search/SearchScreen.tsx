@@ -15,7 +15,6 @@ const SearchScreen = () => {
         type: 'search',
         data: {
           searchValue: '',
-          searchMode: 'online',
         },
       } as SearchTab),
     []

@@ -23,6 +23,10 @@ import {
 } from '~helpers/biblesDb'
 import useDebounce from '~helpers/useDebounce'
 import { Chip } from '~common/ui/NewChip'
+import LexiqueResultsWidget from '~features/lexique/LexiqueResultsWidget'
+import DictionnaryResultsWidget from '~features/dictionnary/DictionnaryResultsWidget'
+import NaveResultsWidget from '~features/nave/NaveResultsWidget'
+import VerseResultWidget from '~features/bible/VerseResultWidget'
 
 type Props = {
   searchValue: string
@@ -124,15 +128,6 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     doSearch()
   }, [debouncedSearchValue, section, book, selectedVersion])
 
-  if (!hasInstalledVersions) {
-    return (
-      <Empty
-        icon={require('~assets/images/empty-state-icons/search.svg')}
-        message={t('Téléchargez une Bible pour activer la recherche hors-ligne.')}
-      />
-    )
-  }
-
   return (
     <Box px={20} flex={1}>
       <SearchInput
@@ -141,50 +136,68 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
         value={searchValue}
         onDelete={() => setSearchValue('')}
       />
-      <ScrollView
-        horizontal
-        style={{
-          maxHeight: 55,
-        }}
-        contentContainerStyle={{
-          flexDirection: 'row',
-        }}
-      >
-        <DropdownMenu
-          title={t('Section')}
-          currentValue={section}
-          setValue={setSection}
-          choices={sectionValues}
-        />
-        <DropdownMenu
-          title={t('Livre')}
-          // @ts-ignore
-          currentValue={book}
-          // @ts-ignore
-          setValue={setBook}
-          // @ts-ignore
-          choices={books}
-        />
-        {installedVersions.length > 1 && (
+      {hasInstalledVersions && (
+        <ScrollView
+          horizontal
+          style={{
+            maxHeight: 55,
+          }}
+          contentContainerStyle={{
+            flexDirection: 'row',
+          }}
+        >
           <DropdownMenu
-            title={t('Version')}
-            currentValue={selectedVersion}
-            setValue={setSelectedVersion}
-            choices={versionValues}
+            title={t('Section')}
+            currentValue={section}
+            setValue={setSection}
+            choices={sectionValues}
           />
-        )}
-      </ScrollView>
+          <DropdownMenu
+            title={t('Livre')}
+            // @ts-ignore
+            currentValue={book}
+            // @ts-ignore
+            setValue={setBook}
+            // @ts-ignore
+            choices={books}
+          />
+          {installedVersions.length > 1 && (
+            <DropdownMenu
+              title={t('Version')}
+              currentValue={selectedVersion}
+              setValue={setSelectedVersion}
+              choices={versionValues}
+            />
+          )}
+        </ScrollView>
+      )}
       {isSearching ? (
         <Loading message={t('Recherche en cours...')} />
-      ) : debouncedSearchValue && Array.isArray(results) ? (
+      ) : debouncedSearchValue && (hasInstalledVersions ? Array.isArray(results) : true) ? (
         <KeyboardAwareFlatList
           ListHeaderComponent={
-            <Box paddingVertical={10}>
-              <Text title fontSize={16} color="grey">
-                {t('{{nbHits}} occurences trouvées dans la bible', {
-                  nbHits: totalCount,
-                })}
-              </Text>
+            <Box>
+              <Box row wrap py={10}>
+                <LexiqueResultsWidget searchValue={debouncedSearchValue} />
+                <DictionnaryResultsWidget searchValue={debouncedSearchValue} />
+                <NaveResultsWidget searchValue={debouncedSearchValue} />
+                <VerseResultWidget searchValue={debouncedSearchValue} />
+              </Box>
+              {hasInstalledVersions ? (
+                <Box paddingVertical={10}>
+                  <Text title fontSize={16} color="grey">
+                    {t('{{nbHits}} occurences trouvées dans la bible', {
+                      nbHits: totalCount,
+                    })}
+                  </Text>
+                </Box>
+              ) : (
+                <Box paddingVertical={10}>
+                  <Text title fontSize={14} color="grey">
+                    {t('Téléchargez une Bible pour activer la recherche hors-ligne.')}
+                  </Text>
+                </Box>
+              )}
             </Box>
           }
           enableOnAndroid={true}
@@ -196,7 +209,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
             backgroundColor: theme.colors.reverse,
           }}
           removeClippedSubviews
-          data={results}
+          data={hasInstalledVersions ? (results ?? []) : []}
           keyExtractor={(result: SearchResult) =>
             `${result.version}-${result.book}-${result.chapter}-${result.verse}`
           }

@@ -326,7 +326,6 @@ interface SearchTab extends TabBase {
   type: 'search'
   data: {
     searchValue: string
-    searchMode: 'online' | 'offline'
   }
 }
 ```

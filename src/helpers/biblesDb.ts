@@ -444,7 +444,7 @@ function sanitizeFtsQuery(raw: string): string {
     return trimmed.replace(/[^\p{L}\p{N}\s"*\-]/gu, '')
   }
 
-  // Simple query: split into tokens and join with implicit AND
+  // Simple query: split into tokens and add prefix matching (*)
   const tokens = trimmed
     .replace(/[^\p{L}\p{N}\s*]/gu, '')
     .split(/\s+/)
@@ -452,5 +452,6 @@ function sanitizeFtsQuery(raw: string): string {
 
   if (tokens.length === 0) return ''
 
-  return tokens.join(' ')
+  // Add * to each token for prefix matching (e.g. "amour" -> "amour*")
+  return tokens.map(t => (t.endsWith('*') ? t : t + '*')).join(' ')
 }

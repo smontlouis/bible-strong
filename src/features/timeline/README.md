@@ -22,7 +22,7 @@ La feature Timeline offre une chronologie biblique interactive permettant de nav
 - Tap sur un événement pour voir les détails
 - Swipe horizontal pour naviguer dans le temps
 - Modal de détails avec description complète
-- Recherche d'événements via Algolia
+- Recherche d'événements en local (filtrage en mémoire)
 
 ## Architecture
 

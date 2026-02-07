@@ -58,7 +58,7 @@ const LexiqueResultsWidget = ({ searchValue }: any) => {
           <Box
             opacity={0.5}
             center
-            rounded
+            borderRadius={8}
             marginRight={10}
             marginBottom={10}
             height={height}

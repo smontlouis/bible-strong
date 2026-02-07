@@ -67,6 +67,10 @@ export const tagDetailModalAtom = atom<TagDetailModalProps>(false)
 // Atom to trigger animation state reset in AppSwitcherProvider
 export const resetTabAnimationTriggerAtom = atom(0)
 
+// Signal atom — incremented whenever a Bible version is downloaded or deleted,
+// so that all mounted VersionSelectorItem instances re-check install status.
+export const installedVersionsSignalAtom = atom(0)
+
 export const resetUserAtomsAtom = atom(null, (get, set) => {
   // Reset to a single default group with one Bible tab
   set(tabGroupsAtom, [createDefaultGroup()])
