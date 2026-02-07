@@ -65,6 +65,7 @@
     "@types/react-native-modalbox": "^1.4.8",
     "@types/react-redux": "^7.1.33",
     "await-to-js": "^2.1.1",
+    "bible-passage-reference-parser": "^3.2.0",
     "color": "^4.2.3",
     "colorsys": "^1.0.22",
     "date-fns": "^2.9.0",

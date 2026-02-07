@@ -7,7 +7,7 @@ import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view'
 
 import booksDesc from '~assets/bible_versions/books-desc'
 import DropdownMenu from '~common/DropdownMenu'
-import Empty from '~common/Empty'
+import SearchEmptyState from '~features/search/SearchEmptyState'
 import Loading from '~common/Loading'
 import SearchInput from '~common/SearchInput'
 import Box, { HStack } from '~common/ui/Box'
@@ -20,18 +20,22 @@ import {
   searchVersesCount,
   SearchResult,
   SearchOptions,
+  SearchSortOrder,
 } from '~helpers/biblesDb'
 import useDebounce from '~helpers/useDebounce'
 import { Chip } from '~common/ui/NewChip'
 import LexiqueResultsWidget from '~features/lexique/LexiqueResultsWidget'
 import DictionnaryResultsWidget from '~features/dictionnary/DictionnaryResultsWidget'
 import NaveResultsWidget from '~features/nave/NaveResultsWidget'
-import VerseResultWidget from '~features/bible/VerseResultWidget'
+import BibleReferenceWidget, { parseBibleReference } from '~features/search/BibleReferenceWidget'
 
 type Props = {
   searchValue: string
   setSearchValue: (value: string) => void
 }
+
+const MIN_SEARCH_LENGTH = 2
+const STRONG_CODE_REGEX = /^[HG]\d+$/i
 
 const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const { t } = useTranslation()
@@ -47,6 +51,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const [section, setSection] = useState('')
   const [book, setBook] = useState(0)
   const [selectedVersion, setSelectedVersion] = useState('')
+  const [sortOrder, setSortOrder] = useState<SearchSortOrder>('relevance')
   const [installedVersions, setInstalledVersions] = useState<string[]>([])
 
   // Load installed versions on mount
@@ -81,10 +86,29 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     ...installedVersions.map(v => ({ value: v, label: v })),
   ]
 
+  const sortOrderValues = [
+    { value: 'relevance', label: t('Pertinence') },
+    { value: 'book', label: t('Ordre biblique') },
+  ]
+
+  const isStrongCode = debouncedSearchValue
+    ? STRONG_CODE_REGEX.test(debouncedSearchValue.trim())
+    : false
+
   // Run search
   useEffect(() => {
-    if (!debouncedSearchValue) {
+    const trimmed = debouncedSearchValue?.trim() ?? ''
+
+    // Not enough characters → clear & show empty state
+    if (trimmed.length < MIN_SEARCH_LENGTH) {
       setResults(null)
+      setTotalCount(0)
+      return
+    }
+
+    // Strong's code → skip Bible FTS, only widgets will search
+    if (STRONG_CODE_REGEX.test(trimmed)) {
+      setResults([])
       setTotalCount(0)
       return
     }
@@ -94,6 +118,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       try {
         const options: SearchOptions = {
           limit: 200,
+          sortOrder,
         }
 
         if (selectedVersion) {
@@ -126,21 +151,29 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     }
 
     doSearch()
-  }, [debouncedSearchValue, section, book, selectedVersion])
+  }, [debouncedSearchValue, section, book, selectedVersion, sortOrder])
+
+  const hasReference = debouncedSearchValue
+    ? parseBibleReference(debouncedSearchValue).length > 0
+    : false
 
   return (
-    <Box px={20} flex={1}>
-      <SearchInput
-        placeholder={t('search.placeholder')}
-        onChangeText={setSearchValue}
-        value={searchValue}
-        onDelete={() => setSearchValue('')}
-      />
-      {hasInstalledVersions && (
+    <Box flex={1}>
+      <Box px={20}>
+        <SearchInput
+          placeholder={t('search.placeholder')}
+          onChangeText={setSearchValue}
+          value={searchValue}
+          onDelete={() => setSearchValue('')}
+        />
+      </Box>
+      {hasInstalledVersions && !hasReference && (
         <ScrollView
           horizontal
+          showsHorizontalScrollIndicator={false}
           style={{
             maxHeight: 55,
+            paddingHorizontal: 20,
           }}
           contentContainerStyle={{
             flexDirection: 'row',
@@ -169,21 +202,32 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
               choices={versionValues}
             />
           )}
+          <DropdownMenu
+            title={t('Ordre')}
+            currentValue={sortOrder}
+            setValue={(v: string) => setSortOrder(v as SearchSortOrder)}
+            choices={sortOrderValues}
+          />
         </ScrollView>
       )}
       {isSearching ? (
         <Loading message={t('Recherche en cours...')} />
+      ) : debouncedSearchValue && hasReference ? (
+        <ScrollView keyboardShouldPersistTaps="handled" style={{ flex: 1 }}>
+          <Box py={10}>
+            <BibleReferenceWidget searchValue={debouncedSearchValue} />
+          </Box>
+        </ScrollView>
       ) : debouncedSearchValue && (hasInstalledVersions ? Array.isArray(results) : true) ? (
         <KeyboardAwareFlatList
           ListHeaderComponent={
-            <Box>
+            <Box px={20}>
               <Box row wrap py={10}>
                 <LexiqueResultsWidget searchValue={debouncedSearchValue} />
                 <DictionnaryResultsWidget searchValue={debouncedSearchValue} />
                 <NaveResultsWidget searchValue={debouncedSearchValue} />
-                <VerseResultWidget searchValue={debouncedSearchValue} />
               </Box>
-              {hasInstalledVersions ? (
+              {hasInstalledVersions && !isStrongCode ? (
                 <Box paddingVertical={10}>
                   <Text title fontSize={16} color="grey">
                     {t('{{nbHits}} occurences trouvées dans la bible', {
@@ -191,13 +235,13 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
                     })}
                   </Text>
                 </Box>
-              ) : (
+              ) : !hasInstalledVersions ? (
                 <Box paddingVertical={10}>
                   <Text title fontSize={14} color="grey">
                     {t('Téléchargez une Bible pour activer la recherche hors-ligne.')}
                   </Text>
                 </Box>
-              )}
+              ) : null}
             </Box>
           }
           enableOnAndroid={true}
@@ -231,6 +275,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
                       book: JSON.stringify(booksDesc[result.book - 1]),
                       chapter: String(result.chapter),
                       verse: String(result.verse),
+                      focusVerses: JSON.stringify([result.verse]),
                     },
                   })
                 }
@@ -239,10 +284,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           }}
         />
       ) : (
-        <Empty
-          icon={require('~assets/images/empty-state-icons/search.svg')}
-          message={t('Fais une recherche dans la Bible !')}
-        />
+        <SearchEmptyState onExamplePress={setSearchValue} />
       )}
     </Box>
   )
@@ -264,7 +306,7 @@ const SearchResultItem = ({
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-      <Box paddingTop={15} paddingBottom={20} borderBottomWidth={1} borderColor="border">
+      <Box px={20} paddingTop={15} paddingBottom={20} borderBottomWidth={1} borderColor="border">
         <HStack alignItems="center" gap={4} mb={4}>
           <Text title fontSize={14}>
             {reference}

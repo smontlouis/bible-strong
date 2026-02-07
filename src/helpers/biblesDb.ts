@@ -23,10 +23,13 @@ export interface SearchResult {
   highlighted: string
 }
 
+export type SearchSortOrder = 'relevance' | 'book'
+
 export interface SearchOptions {
   version?: string
   book?: number
   section?: 'ot' | 'nt'
+  sortOrder?: SearchSortOrder
   limit?: number
   offset?: number
 }
@@ -393,12 +396,36 @@ function buildSearchFilter(ftsQuery: string, options?: SearchOptions) {
 }
 
 /**
+ * Build a NEAR query from raw user input for proximity-boosted ranking.
+ * Returns null for single-word queries or inputs with explicit operators.
+ */
+function buildNearQuery(raw: string, distance: number = 5): string | null {
+  const trimmed = raw.trim()
+
+  // Skip if user typed explicit FTS5 operators or quoted phrases
+  if (/\b(AND|OR|NOT)\b/.test(trimmed) || trimmed.includes('"')) return null
+
+  const tokens = trimmed
+    .replace(/[^\p{L}\p{N}\s]/gu, '')
+    .split(/\s+/)
+    .filter(Boolean)
+
+  if (tokens.length < 2) return null
+
+  return `NEAR(${tokens.join(' ')}, ${distance})`
+}
+
+/**
  * Search verses using FTS5 full-text search.
  *
  * Supports:
  * - Prefix search: "amou*"
  * - Phrase search: "\"amour de Dieu\""
  * - Boolean: "amour OR grace", "amour NOT colere"
+ *
+ * For multi-word queries sorted by relevance, uses two-tier proximity ranking:
+ * 1. NEAR results (words within 5 tokens of each other), ranked by BM25
+ * 2. Broad results (standard prefix search), ranked by BM25, deduped
  *
  * Results are highlighted with {{ and }} markers.
  */
@@ -412,15 +439,65 @@ export async function searchVerses(
 
   const limit = options?.limit ?? 100
   const offset = options?.offset ?? 0
-  const { where, params } = buildSearchFilter(ftsQuery, options)
+  const orderBy = options?.sortOrder === 'book' ? 'v.book, v.chapter, v.verse' : 'rank'
 
+  const nearQuery = buildNearQuery(query)
+
+  // Two-tier proximity search for multi-word + relevance sort
+  if (nearQuery && options?.sortOrder !== 'book') {
+    try {
+      const { where: nearWhere, params: nearParams } = buildSearchFilter(nearQuery, options)
+      const nearSql = `
+        SELECT v.version, v.book, v.chapter, v.verse, v.text,
+               highlight(verses_fts, 0, '{{', '}}') AS highlighted
+        FROM verses_fts
+        JOIN verses v ON v.id = verses_fts.rowid
+        ${nearWhere}
+        ORDER BY rank LIMIT ?
+      `
+      nearParams.push(limit)
+      const nearResults = await d.getAllAsync<SearchResult>(nearSql, nearParams)
+
+      if (nearResults.length >= limit) return nearResults
+
+      // Fill remaining slots with broader results
+      const remaining = limit - nearResults.length
+      const { where: broadWhere, params: broadParams } = buildSearchFilter(ftsQuery, options)
+      const broadSql = `
+        SELECT v.version, v.book, v.chapter, v.verse, v.text,
+               highlight(verses_fts, 0, '{{', '}}') AS highlighted
+        FROM verses_fts
+        JOIN verses v ON v.id = verses_fts.rowid
+        ${broadWhere}
+        ORDER BY rank LIMIT ?
+      `
+      // Over-fetch to account for dedup
+      broadParams.push(remaining + nearResults.length)
+      const broadResults = await d.getAllAsync<SearchResult>(broadSql, broadParams)
+
+      // Dedup: remove broad results already in NEAR results
+      const nearKeys = new Set(
+        nearResults.map(r => `${r.version}-${r.book}-${r.chapter}-${r.verse}`)
+      )
+      const extra = broadResults.filter(
+        r => !nearKeys.has(`${r.version}-${r.book}-${r.chapter}-${r.verse}`)
+      )
+
+      return [...nearResults, ...extra].slice(0, limit)
+    } catch {
+      // NEAR query failed (e.g. syntax issue) → fall through to standard search
+    }
+  }
+
+  // Standard single-tier search (single word, book order, or NEAR fallback)
+  const { where, params } = buildSearchFilter(ftsQuery, options)
   const sql = `
     SELECT v.version, v.book, v.chapter, v.verse, v.text,
            highlight(verses_fts, 0, '{{', '}}') AS highlighted
     FROM verses_fts
     JOIN verses v ON v.id = verses_fts.rowid
     ${where}
-    ORDER BY rank LIMIT ? OFFSET ?
+    ORDER BY ${orderBy} LIMIT ? OFFSET ?
   `
   params.push(limit, offset)
 

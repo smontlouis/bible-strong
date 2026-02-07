@@ -6393,6 +6393,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"bible-passage-reference-parser@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "bible-passage-reference-parser@npm:3.2.0"
+  checksum: 10c0/0ea26feff399827bbc501b2f45ffaf709658cf3885004dd00cf0613f061112af4fe4244afec3334a57422861e601d473f52ddaa44fa6a7a800d5d29b2657edef
+  languageName: node
+  linkType: hard
+
 "bible-strong@workspace:.":
   version: 0.0.0-use.local
   resolution: "bible-strong@workspace:."
@@ -6446,6 +6453,7 @@ __metadata:
     babel-plugin-module-resolver: "npm:^3.2.0"
     babel-plugin-transform-remove-console: "npm:^6.9.4"
     babel-preset-expo: "npm:^54.0.9"
+    bible-passage-reference-parser: "npm:^3.2.0"
     color: "npm:^4.2.3"
     colorsys: "npm:^1.0.22"
     date-fns: "npm:^2.9.0"
