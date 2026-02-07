@@ -1,8 +1,9 @@
 import produce from 'immer'
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+
 import Header from '~common/Header'
 import Container from '~common/ui/Container'
 import i18n from '~i18n'

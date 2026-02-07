@@ -1,8 +1,8 @@
-import React from 'react'
 import { ScrollView, TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@emotion/react'
 import { Image } from 'expo-image'
+
 import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 
@@ -10,29 +10,23 @@ type Props = {
   onExamplePress: (value: string) => void
 }
 
-const ExampleChip = ({ label, onPress }: { label: string; onPress: () => void }) => {
-  const theme = useTheme()
+const ExampleChip = ({ label, onPress }: { label: string; onPress: () => void }) => (
+  <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+    <Box px={12} py={4} borderRadius={20} bg="lightGrey" borderWidth={1} borderColor="border">
+      <Text fontSize={14} color="default">
+        {label}
+      </Text>
+    </Box>
+  </TouchableOpacity>
+)
 
-  return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-      <Box px={12} py={4} borderRadius={20} bg="lightGrey" borderWidth={1} borderColor="border">
-        <Text fontSize={14} color="default">
-          {label}
-        </Text>
-      </Box>
-    </TouchableOpacity>
-  )
-}
-
-const Section = ({
-  title,
-  examples,
-  onExamplePress,
-}: {
+type SectionProps = {
   title: string
   examples: string[]
   onExamplePress: (value: string) => void
-}) => (
+}
+
+const Section = ({ title, examples, onExamplePress }: SectionProps) => (
   <Box mb={20}>
     <Text fontSize={13} color="tertiary" bold mb={8}>
       {title}

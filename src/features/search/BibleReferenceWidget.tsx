@@ -1,18 +1,17 @@
-import React from 'react'
 import { TouchableOpacity } from 'react-native'
 import { useRouter } from 'expo-router'
 
-import { parseResponse } from '~helpers/bcvParser'
 import booksDesc from '~assets/bible_versions/books-desc'
-import formatVerseContent from '~helpers/formatVerseContent'
-import i18n from '~i18n'
-import useBibleVerses from '~helpers/useBibleVerses'
-import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
-import { removeBreakLines } from '~helpers/utils'
 import Box, { HStack } from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import Paragraph from '~common/ui/Paragraph'
 import { Chip } from '~common/ui/NewChip'
+import Paragraph from '~common/ui/Paragraph'
+import Text from '~common/ui/Text'
+import { parseResponse } from '~helpers/bcvParser'
+import formatVerseContent from '~helpers/formatVerseContent'
+import useBibleVerses from '~helpers/useBibleVerses'
+import { removeBreakLines } from '~helpers/utils'
+import i18n from '~i18n'
+import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 
 interface ParsedSegment {
   book: number
@@ -55,7 +54,6 @@ function parseParsedString(parsed: string): ParsedSegment[] {
 
 export function parseBibleReference(searchValue: string): ParsedSegment[] {
   const { parsed } = parseResponse(searchValue)
-  console.log(parsed)
   return parseParsedString(parsed)
 }
 
@@ -84,10 +82,12 @@ const ReferenceItem = ({ segment }: { segment: ParsedSegment }) => {
   const router = useRouter()
   const version = useDefaultBibleVersion()
 
-  const verseIds: { Livre: number; Chapitre: number; Verset: number }[] = []
-  for (let v = segment.startVerse; v <= segment.endVerse; v++) {
-    verseIds.push({ Livre: segment.book, Chapitre: segment.chapter, Verset: v })
-  }
+  const verseCount = segment.endVerse - segment.startVerse + 1
+  const verseIds = Array.from({ length: verseCount }, (_, i) => ({
+    Livre: segment.book,
+    Chapitre: segment.chapter,
+    Verset: segment.startVerse + i,
+  }))
 
   const verses = useBibleVerses(verseIds)
 
@@ -114,7 +114,7 @@ const ReferenceItem = ({ segment }: { segment: ParsedSegment }) => {
         })
       }
     >
-      <Box paddingTop={15} paddingBottom={20} borderBottomWidth={1} borderColor="border">
+      <Box pt={15} pb={20} borderBottomWidth={1} borderColor="border">
         <HStack alignItems="center" gap={4} mb={4}>
           <Text title fontSize={14}>
             {title}

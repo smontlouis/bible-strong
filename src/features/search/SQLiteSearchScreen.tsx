@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, TouchableOpacity } from 'react-native'
 import { useRouter } from 'expo-router'
@@ -7,13 +8,12 @@ import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view'
 
 import booksDesc from '~assets/bible_versions/books-desc'
 import DropdownMenu from '~common/DropdownMenu'
-import SearchEmptyState from '~features/search/SearchEmptyState'
 import Loading from '~common/Loading'
 import SearchInput from '~common/SearchInput'
 import Box, { HStack } from '~common/ui/Box'
+import { Chip } from '~common/ui/NewChip'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import formatVerseContent from '~helpers/formatVerseContent'
 import {
   getInstalledVersions,
   searchVerses,
@@ -22,12 +22,13 @@ import {
   SearchOptions,
   SearchSortOrder,
 } from '~helpers/biblesDb'
+import formatVerseContent from '~helpers/formatVerseContent'
 import useDebounce from '~helpers/useDebounce'
-import { Chip } from '~common/ui/NewChip'
-import LexiqueResultsWidget from '~features/lexique/LexiqueResultsWidget'
 import DictionnaryResultsWidget from '~features/dictionnary/DictionnaryResultsWidget'
+import LexiqueResultsWidget from '~features/lexique/LexiqueResultsWidget'
 import NaveResultsWidget from '~features/nave/NaveResultsWidget'
 import BibleReferenceWidget, { parseBibleReference } from '~features/search/BibleReferenceWidget'
+import SearchEmptyState from '~features/search/SearchEmptyState'
 
 type Props = {
   searchValue: string
@@ -91,9 +92,9 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     { value: 'book', label: t('Ordre biblique') },
   ]
 
-  const isStrongCode = debouncedSearchValue
-    ? STRONG_CODE_REGEX.test(debouncedSearchValue.trim())
-    : false
+  const isStrongCode = Boolean(
+    debouncedSearchValue && STRONG_CODE_REGEX.test(debouncedSearchValue.trim())
+  )
 
   // Run search
   useEffect(() => {
@@ -116,23 +117,13 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     const doSearch = async () => {
       setIsSearching(true)
       try {
+        const sectionMap: Record<string, 'ot' | 'nt'> = { at: 'ot', nt: 'nt' }
         const options: SearchOptions = {
           limit: 200,
           sortOrder,
-        }
-
-        if (selectedVersion) {
-          options.version = selectedVersion
-        }
-
-        if (book) {
-          options.book = book
-        }
-
-        if (section === 'at') {
-          options.section = 'ot'
-        } else if (section === 'nt') {
-          options.section = 'nt'
+          ...(selectedVersion && { version: selectedVersion }),
+          ...(book && { book }),
+          ...(sectionMap[section] && { section: sectionMap[section] }),
         }
 
         const [searchResults, count] = await Promise.all([
@@ -153,72 +144,56 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     doSearch()
   }, [debouncedSearchValue, section, book, selectedVersion, sortOrder])
 
-  const hasReference = debouncedSearchValue
-    ? parseBibleReference(debouncedSearchValue).length > 0
-    : false
+  const hasReference = Boolean(
+    debouncedSearchValue && parseBibleReference(debouncedSearchValue).length > 0
+  )
 
-  return (
-    <Box flex={1}>
-      <Box px={20}>
-        <SearchInput
-          placeholder={t('search.placeholder')}
-          onChangeText={setSearchValue}
-          value={searchValue}
-          onDelete={() => setSearchValue('')}
-        />
-      </Box>
-      {hasInstalledVersions && !hasReference && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={{
-            maxHeight: 55,
-            paddingHorizontal: 20,
-          }}
-          contentContainerStyle={{
-            flexDirection: 'row',
-          }}
-        >
-          <DropdownMenu
-            title={t('Section')}
-            currentValue={section}
-            setValue={setSection}
-            choices={sectionValues}
-          />
-          <DropdownMenu
-            title={t('Livre')}
-            // @ts-ignore
-            currentValue={book}
-            // @ts-ignore
-            setValue={setBook}
-            // @ts-ignore
-            choices={books}
-          />
-          {installedVersions.length > 1 && (
-            <DropdownMenu
-              title={t('Version')}
-              currentValue={selectedVersion}
-              setValue={setSelectedVersion}
-              choices={versionValues}
-            />
-          )}
-          <DropdownMenu
-            title={t('Ordre')}
-            currentValue={sortOrder}
-            setValue={(v: string) => setSortOrder(v as SearchSortOrder)}
-            choices={sortOrderValues}
-          />
-        </ScrollView>
-      )}
-      {isSearching ? (
-        <Loading message={t('Recherche en cours...')} />
-      ) : debouncedSearchValue && hasReference ? (
+  const hasSearchQuery = Boolean(debouncedSearchValue)
+  const showResultsList = hasSearchQuery && (hasInstalledVersions ? Array.isArray(results) : true)
+
+  function renderStatusMessage(): ReactNode {
+    if (hasInstalledVersions && !isStrongCode) {
+      return (
+        <Box py={10}>
+          <Text title fontSize={16} color="grey">
+            {t('{{nbHits}} occurences trouvées dans la bible', {
+              nbHits: totalCount,
+            })}
+          </Text>
+        </Box>
+      )
+    }
+
+    if (!hasInstalledVersions) {
+      return (
+        <Box py={10}>
+          <Text title fontSize={14} color="grey">
+            {t('Téléchargez une Bible pour activer la recherche hors-ligne.')}
+          </Text>
+        </Box>
+      )
+    }
+
+    return null
+  }
+
+  function renderContent(): ReactNode {
+    if (isSearching) {
+      return <Loading message={t('Recherche en cours...')} />
+    }
+
+    if (hasSearchQuery && hasReference) {
+      return (
         <ScrollView keyboardShouldPersistTaps="handled" style={{ flex: 1 }}>
           <Box py={10}>
             <BibleReferenceWidget searchValue={debouncedSearchValue} />
           </Box>
         </ScrollView>
-      ) : debouncedSearchValue && (hasInstalledVersions ? Array.isArray(results) : true) ? (
+      )
+    }
+
+    if (showResultsList) {
+      return (
         <KeyboardAwareFlatList
           ListHeaderComponent={
             <Box px={20}>
@@ -227,24 +202,10 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
                 <DictionnaryResultsWidget searchValue={debouncedSearchValue} />
                 <NaveResultsWidget searchValue={debouncedSearchValue} />
               </Box>
-              {hasInstalledVersions && !isStrongCode ? (
-                <Box paddingVertical={10}>
-                  <Text title fontSize={16} color="grey">
-                    {t('{{nbHits}} occurences trouvées dans la bible', {
-                      nbHits: totalCount,
-                    })}
-                  </Text>
-                </Box>
-              ) : !hasInstalledVersions ? (
-                <Box paddingVertical={10}>
-                  <Text title fontSize={14} color="grey">
-                    {t('Téléchargez une Bible pour activer la recherche hors-ligne.')}
-                  </Text>
-                </Box>
-              ) : null}
+              {renderStatusMessage()}
             </Box>
           }
-          enableOnAndroid={true}
+          enableOnAndroid
           keyboardShouldPersistTaps="handled"
           enableResetScrollToCoords={false}
           style={{
@@ -283,30 +244,77 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
             )
           }}
         />
-      ) : (
-        <SearchEmptyState onExamplePress={setSearchValue} />
+      )
+    }
+
+    return <SearchEmptyState onExamplePress={setSearchValue} />
+  }
+
+  return (
+    <Box flex={1}>
+      <Box px={20}>
+        <SearchInput
+          placeholder={t('search.placeholder')}
+          onChangeText={setSearchValue}
+          value={searchValue}
+          onDelete={() => setSearchValue('')}
+        />
+      </Box>
+      {hasInstalledVersions && !hasReference && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={{ maxHeight: 55, paddingHorizontal: 20 }}
+        >
+          <DropdownMenu
+            title={t('Section')}
+            currentValue={section}
+            setValue={setSection}
+            choices={sectionValues}
+          />
+          <DropdownMenu
+            title={t('Livre')}
+            // @ts-ignore - DropdownMenu expects string but book filter uses number values
+            currentValue={book}
+            // @ts-ignore
+            setValue={setBook}
+            // @ts-ignore
+            choices={books}
+          />
+          {installedVersions.length > 1 && (
+            <DropdownMenu
+              title={t('Version')}
+              currentValue={selectedVersion}
+              setValue={setSelectedVersion}
+              choices={versionValues}
+            />
+          )}
+          <DropdownMenu
+            title={t('Ordre')}
+            currentValue={sortOrder}
+            setValue={(v: string) => setSortOrder(v as SearchSortOrder)}
+            choices={sortOrderValues}
+          />
+        </ScrollView>
       )}
+      {renderContent()}
     </Box>
   )
 }
 
-const SearchResultItem = ({
-  reference,
-  version,
-  highlighted,
-  onPress,
-}: {
+type SearchResultItemProps = {
   reference: string
   version: string
   highlighted: string
   onPress: () => void
-}) => {
-  // Parse {{ and }} markers from FTS5 highlight() into bold Text elements
+}
+
+const SearchResultItem = ({ reference, version, highlighted, onPress }: SearchResultItemProps) => {
   const parts = highlighted.split(/(\{\{.*?\}\})/g)
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-      <Box px={20} paddingTop={15} paddingBottom={20} borderBottomWidth={1} borderColor="border">
+      <Box px={20} pt={15} pb={20} borderBottomWidth={1} borderColor="border">
         <HStack alignItems="center" gap={4} mb={4}>
           <Text title fontSize={14}>
             {reference}
