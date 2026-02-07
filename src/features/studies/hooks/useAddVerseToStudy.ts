@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import type { RootState } from '~redux/modules/reducer'
 import { updateStudy } from '~redux/modules/user'
 import { StudyTab, tabsAtom, tabsAtomsAtom } from '../../../state/tabs'
@@ -41,7 +41,9 @@ export const useAddVerseToStudy = () => {
     let delta: QuillDelta
     if (study?.content) {
       try {
-        delta = typeof study.content === 'string' ? JSON.parse(study.content) : study.content
+        const parsed = typeof study.content === 'string' ? JSON.parse(study.content) : study.content
+        // Create a copy to avoid mutating Redux state
+        delta = { ops: [...parsed.ops] }
       } catch (e) {
         console.error('Error parsing study content:', e)
         delta = { ops: [] }

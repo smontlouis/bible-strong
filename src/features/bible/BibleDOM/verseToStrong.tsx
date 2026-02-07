@@ -1,31 +1,63 @@
-import { useContext } from 'react'
 import { styled } from 'goober'
-import VerseContext from './VerseContext'
 import { NAVIGATE_TO_STRONG } from './dispatch'
 import { RootStyles } from './BibleDOMWrapper'
 import { useDispatch } from './DispatchProvider'
-import { Verse } from '~common/types'
+import { SelectedCode, Verse } from '~common/types'
+import { RootState } from '~redux/modules/reducer'
+import { scaleFontSize } from './scaleFontSize'
+import { isDarkTheme, noSelect } from './utils'
+import { getDisabledStyles } from './disabledStyles'
+import { scaleLineHeight } from './scaleLineHeight'
 
-const StyledReference = styled('div')<RootStyles & { isSelected: boolean }>(
-  ({ isSelected, settings: { theme, colors } }) => ({
-    display: 'inline-block',
-    transition: 'background 0.3s ease',
-    borderRadius: '4px',
-    padding: '0 5px',
-    background: colors[theme].lightPrimary,
+const StyledReference = styled('span')<
+  RootStyles & { isSelected: boolean; isParallel?: boolean; isDisabled?: boolean }
+>(
+  ({
+    isSelected,
+    isParallel,
+    isDisabled,
+    settings: { theme, colors, fontFamily, fontSizeScale, lineHeight },
+  }) => ({
+    fontFamily,
+    ...noSelect,
+    color: isSelected ? colors[theme].reverse : 'inherit',
+    backgroundColor: isSelected ? colors[theme].primary : 'inherit',
+    fontSize: scaleFontSize(isParallel ? 16 : 19, fontSizeScale),
+    lineHeight: scaleLineHeight(isParallel ? 26 : 32, lineHeight, fontSizeScale),
+    boxShadow: isDarkTheme(theme)
+      ? `0 0 10px 0 rgba(255, 255, 255, 0.1)`
+      : `0 0 10px 0 rgba(0, 0, 0, 0.2)`,
+    borderRadius: '8px',
+    paddingInlineEnd: '4px',
+    paddingInlineStart: '4px',
+    paddingBlock: '4px',
+    wordBreak: 'break-word',
+    marginInline: '4px',
 
-    ...(isSelected
-      ? {
-          background: colors[theme].primary,
-          color: 'white',
-        }
-      : {}),
+    cursor: 'pointer',
+    '&:active': {
+      opacity: 0.6,
+    },
+    ...getDisabledStyles(isDisabled),
   })
 )
 
-const BibleStrongRef = ({ book, reference }: { book: string | number; reference: string }) => {
+const BibleStrongRef = ({
+  book,
+  reference,
+  isParallel,
+  isDisabled,
+  selectedCode,
+  settings,
+}: {
+  book: string | number
+  reference: string
+  isParallel?: boolean
+  isDisabled?: boolean
+  selectedCode?: SelectedCode | null
+  settings: RootState['user']['bible']['settings']
+}) => {
   const dispatch = useDispatch()
-  const { selectedCode, settings, onTouchMove } = useContext(VerseContext)
   const isSelected = Number(selectedCode?.reference) === Number(reference)
 
   const navigateToStrong = () => {
@@ -37,10 +69,10 @@ const BibleStrongRef = ({ book, reference }: { book: string | number; reference:
 
   return (
     <StyledReference
-      onTouchStart={onTouchMove}
-      onTouchEnd={onTouchMove}
       onClick={navigateToStrong}
       isSelected={isSelected}
+      isParallel={isParallel}
+      isDisabled={isDisabled}
       settings={settings}
     >
       {reference}
@@ -51,17 +83,32 @@ const BibleStrongRef = ({ book, reference }: { book: string | number; reference:
 const verseToStrong = ({
   Texte,
   Livre,
-}: Pick<Verse, 'Texte' | 'Livre'>): Promise<(string | JSX.Element)[]> =>
-  new Promise(resolve => {
-    // STRONG
-    const splittedTexte = Texte.split(/(\d+[^{.|\s}]?\d+(?!\.?\d))/g).map((item, i) => {
-      if (Number.isInteger(Number(item))) {
-        return <BibleStrongRef book={Livre} reference={item} key={i} />
-      }
-
-      return item
-    })
-    return resolve(splittedTexte)
+  isParallel,
+  isDisabled,
+  selectedCode,
+  settings,
+}: Pick<Verse, 'Texte' | 'Livre'> & {
+  isParallel?: boolean
+  isDisabled?: boolean
+  selectedCode?: SelectedCode | null
+  settings: RootState['user']['bible']['settings']
+}): (string | JSX.Element)[] => {
+  return Texte.split(/(\d+[^{.|\s}]?\d+(?!\.?\d))/g).map((item, i) => {
+    if (Number.isInteger(Number(item))) {
+      return (
+        <BibleStrongRef
+          book={Livre}
+          reference={item}
+          key={i}
+          isParallel={isParallel}
+          isDisabled={isDisabled}
+          selectedCode={selectedCode}
+          settings={settings}
+        />
+      )
+    }
+    return item
   })
+}
 
 export default verseToStrong

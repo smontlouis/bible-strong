@@ -1,7 +1,6 @@
 import * as Sentry from '@sentry/react-native'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 
-import { createSelector } from '@reduxjs/toolkit'
 import { Alert, Share } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -9,7 +8,7 @@ import { BottomSheetFooter, BottomSheetModal } from '@gorhom/bottom-sheet/'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import PopOverMenu from '~common/PopOverMenu'
@@ -27,11 +26,11 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
 import orderVerses from '~helpers/orderVerses'
-import { timeout } from '~helpers/timeout'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
-import { addNote, deleteNote, Note } from '~redux/modules/user'
-import { multipleTagsModalAtom } from '../../state/app'
+import { addNote, deleteNote } from '~redux/modules/user'
+import { makeNoteByKeySelector } from '~redux/selectors/bible'
+import { unifiedTagsModalAtom } from '../../state/app'
 import NoteEditorBottomSheet from './NoteEditorDOM/NoteEditorBottomSheet'
 
 interface BibleNoteModalProps {
@@ -39,29 +38,12 @@ interface BibleNoteModalProps {
   ref?: React.RefObject<BottomSheetModal | null>
 }
 
-// Create a memoized selector factory for current note
-const makeCurrentNoteSelector = () =>
-  createSelector(
-    [(state: RootState) => state.user.bible.notes, (_: RootState, noteKey: string) => noteKey],
-    (notes, noteKey): (Note & { id: string }) | null => {
-      if (noteKey && notes[noteKey]) {
-        return {
-          id: noteKey,
-          ...notes[noteKey],
-        }
-      }
-      return null
-    }
-  )
-
 const useCurrentNote = ({ noteVerses }: { noteVerses: VerseIds | undefined }) => {
-  const selectCurrentNote = useMemo(() => makeCurrentNoteSelector(), [])
-  const noteKey = useMemo(() => {
-    const orderedVerses = orderVerses(noteVerses || {})
-    return Object.keys(orderedVerses).join('/')
-  }, [noteVerses])
+  const selectNoteByKey = makeNoteByKeySelector()
+  const orderedVerses = orderVerses(noteVerses || {})
+  const noteKey = Object.keys(orderedVerses).join('/')
 
-  const note = useSelector((state: RootState) => selectCurrentNote(state, noteKey))
+  const note = useSelector((state: RootState) => selectNoteByKey(state, noteKey))
 
   return note
 }
@@ -77,12 +59,12 @@ const BibleNoteModal = ({ noteVerses, ref }: BibleNoteModalProps) => {
 
   const currentNote = useCurrentNote({ noteVerses })
   const reference = verseToReference(noteVerses)
-  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const openInNewTab = useOpenInNewTab()
 
-  const close = useCallback(() => {
+  const close = () => {
     ref?.current?.dismiss()
-  }, [ref])
+  }
 
   const openNoteInNewTab = () => {
     if (!currentNote?.id) return
@@ -147,7 +129,6 @@ ${currentNote.title}
 
 ${currentNote.description}
       `
-      await timeout(400)
       Share.share({ message })
     } catch (e) {
       toast.error(t('Erreur lors du partage.'))
@@ -181,7 +162,7 @@ ${currentNote.description}
                 height={54}
                 popover={
                   <>
-                    <MenuOption onSelect={shareNote}>
+                    <MenuOption onSelect={shareNote} closeBeforeSelect>
                       <Box row alignItems="center">
                         <FeatherIcon name="share" size={15} />
                         <Text marginLeft={10}>{t('Partager')}</Text>
@@ -195,8 +176,8 @@ ${currentNote.description}
                     </MenuOption>
                     <MenuOption
                       onSelect={() =>
-                        setMultipleTagsItem({
-                          ...currentNote,
+                        setUnifiedTagsModal({
+                          mode: 'select',
                           id: currentNote.id!,
                           entity: 'notes',
                         })

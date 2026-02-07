@@ -1,25 +1,31 @@
 import styled from '@emotion/native'
-import * as Icon from '@expo/vector-icons'
+import { useAtom } from 'jotai/react'
 import React, { memo, useState } from 'react'
 import { TouchableOpacity } from 'react-native'
-import { Menu, MenuOptions, MenuTrigger, renderers, withMenuContext } from 'react-native-popup-menu'
-import { useAtom } from 'jotai/react'
+import {
+  MenuOption as BaseMenuOption,
+  Menu,
+  MenuOptionProps,
+  MenuOptions,
+  MenuTrigger,
+  renderers,
+  withMenuContext,
+} from 'react-native-popup-menu'
 
+import { useTheme } from '@emotion/react'
 import { useTranslation } from 'react-i18next'
+import type { ColorFormatsObject } from 'reanimated-color-picker'
 import BackgroundIcon from '~assets/images/BackgroundIcon'
 import ColorIcon from '~assets/images/ColorIcon'
 import QuoteIcon from '~assets/images/QuoteIcon'
-import Link from '~common/Link'
 import ColorPicker from '~common/ColorPicker'
+import Link from '~common/Link'
 import Border from '~common/ui/Border'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import useMediaQueries from '~helpers/useMediaQueries'
-import { MenuOption as BaseMenuOption, MenuOptionProps } from 'react-native-popup-menu'
-import { useTheme } from '@emotion/react'
-import type { ColorFormatsObject } from 'reanimated-color-picker'
 import { recentColorsAtom } from './atom'
 
 const { Popover } = renderers

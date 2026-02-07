@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
 import { BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet'
 
-import Box, { HStack } from '~common/ui/Box'
+import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Button from '~common/ui/Button'
 import ColorPicker from '~common/ColorPicker'
@@ -16,11 +16,12 @@ import ModalHeader from '~common/ModalHeader'
 import type { HighlightType } from '~redux/modules/user'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { HIGHLIGHT_BACKGROUND_OPACITY_HEX, getContrastTextColor } from '~helpers/highlightUtils'
+import { FeatherIcon } from './ui/Icon'
 
 const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
   flex: 1,
-  fontSize: 14,
-  paddingVertical: 8,
+  fontSize: 16,
+  paddingVertical: 10,
   paddingHorizontal: 12,
   backgroundColor: theme.colors.opacity5,
   borderRadius: 8,
@@ -29,14 +30,14 @@ const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
 
 const TypeSelectorContainer = styled.View({
   flexDirection: 'row',
-  marginTop: 15,
+  marginTop: 10,
 })
 
 const TypeButton = styled(TouchableOpacity)<{ isSelected: boolean }>(({ theme, isSelected }) => ({
   flex: 1,
   paddingVertical: 10,
   paddingHorizontal: 8,
-  borderRadius: 20,
+  borderRadius: 8,
   backgroundColor: isSelected ? theme.colors.primary : theme.colors.opacity5,
   alignItems: 'center',
 }))
@@ -58,6 +59,7 @@ export type ColorEditModalProps = {
   initialType?: HighlightType
   onSave: (hex: string, name: string | undefined, type: HighlightType) => void
   onClose?: () => void
+  onDelete?: () => void
 }
 
 const ColorEditModal = ({
@@ -68,6 +70,7 @@ const ColorEditModal = ({
   initialType = 'background',
   onSave,
   onClose,
+  onDelete,
 }: ColorEditModalProps) => {
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
@@ -101,7 +104,9 @@ const ColorEditModal = ({
   }
 
   const getModalTitle = () => {
-    return mode === 'add' ? t('Nouvelle couleur') : t('Modifier la couleur')
+    return mode === 'add'
+      ? t('Nouvelle couleur')
+      : `${t('Modifier {{name}}', { name: chosenName })}`
   }
 
   return (
@@ -110,7 +115,18 @@ const ColorEditModal = ({
       topInset={insets.top}
       enableDynamicSizing
       onModalClose={handleClose}
-      headerComponent={<ModalHeader title={getModalTitle()} />}
+      headerComponent={
+        <ModalHeader
+          title={getModalTitle()}
+          rightComponent={
+            onDelete ? (
+              <TouchableBox onPress={onDelete} width={48} height={48} center marginRight={10}>
+                <FeatherIcon name="trash-2" size={16} color="quart" />
+              </TouchableBox>
+            ) : undefined
+          }
+        />
+      }
     >
       <Box paddingHorizontal={20} pb={20}>
         <Box height={250}>
@@ -126,73 +142,74 @@ const ColorEditModal = ({
           />
         </Box>
 
-        <Text fontSize={12} color="tertiary" marginTop={20}>
-          {t('Type de surlignage')}
-        </Text>
-        <TypeSelectorContainer>
-          <TypeButton
-            isSelected={chosenType === 'background'}
-            onPress={() => setChosenType('background')}
-            style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
-          >
-            <Text fontSize={12} bold color={chosenType === 'background' ? 'reverse' : 'default'}>
-              {t('Fond')}
-            </Text>
-          </TypeButton>
-          <TypeButton
-            isSelected={chosenType === 'textColor'}
-            onPress={() => setChosenType('textColor')}
-            style={{ borderRadius: 0 }}
-          >
-            <Text fontSize={12} bold color={chosenType === 'textColor' ? 'reverse' : 'default'}>
-              {t('Texte')}
-            </Text>
-          </TypeButton>
-          <TypeButton
-            isSelected={chosenType === 'underline'}
-            onPress={() => setChosenType('underline')}
-            style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
-          >
-            <Text fontSize={12} bold color={chosenType === 'underline' ? 'reverse' : 'default'}>
-              {t('Soulignement')}
-            </Text>
-          </TypeButton>
-        </TypeSelectorContainer>
-
-        <PreviewContainer>
-          <HStack gap={10}>
-            <Text fontSize={12} color="tertiary" marginBottom={8}>
-              {t('Aperçu')}
-            </Text>
-            <Text fontSize={12} color="default">
-              {chosenHex}
-            </Text>
-          </HStack>
-          <Text
-            fontSize={18}
-            style={
-              chosenType === 'background'
-                ? {
-                    backgroundColor: `${chosenHex}${HIGHLIGHT_BACKGROUND_OPACITY_HEX}`,
-                    borderRadius: 4,
-                    paddingHorizontal: 4,
-                    paddingVertical: 2,
-                    color:
-                      getContrastTextColor(chosenHex, colorScheme === 'dark') ??
-                      theme.colors.default,
-                  }
-                : chosenType === 'textColor'
-                  ? { color: chosenHex }
-                  : {
-                      borderBottomWidth: 4,
-                      borderBottomColor: `${chosenHex}99`,
-                    }
-            }
-          >
-            {t('Exemple de verset')}
+        <Box my={40}>
+          <Text fontSize={12} color="tertiary">
+            {t('Type de surlignage')}
           </Text>
-        </PreviewContainer>
+          <TypeSelectorContainer>
+            <TypeButton
+              isSelected={chosenType === 'background'}
+              onPress={() => setChosenType('background')}
+              style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+            >
+              <Text fontSize={12} bold color={chosenType === 'background' ? 'reverse' : 'default'}>
+                {t('Fond')}
+              </Text>
+            </TypeButton>
+            <TypeButton
+              isSelected={chosenType === 'textColor'}
+              onPress={() => setChosenType('textColor')}
+              style={{ borderRadius: 0 }}
+            >
+              <Text fontSize={12} bold color={chosenType === 'textColor' ? 'reverse' : 'default'}>
+                {t('Texte')}
+              </Text>
+            </TypeButton>
+            <TypeButton
+              isSelected={chosenType === 'underline'}
+              onPress={() => setChosenType('underline')}
+              style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+            >
+              <Text fontSize={12} bold color={chosenType === 'underline' ? 'reverse' : 'default'}>
+                {t('Soulignement')}
+              </Text>
+            </TypeButton>
+          </TypeSelectorContainer>
 
+          <PreviewContainer>
+            <HStack gap={10}>
+              <Text fontSize={12} color="tertiary" marginBottom={8}>
+                {t('Aperçu')}
+              </Text>
+              <Text fontSize={12} color="default">
+                {chosenHex}
+              </Text>
+            </HStack>
+            <Text
+              fontSize={18}
+              style={
+                chosenType === 'background'
+                  ? {
+                      backgroundColor: `${chosenHex}${HIGHLIGHT_BACKGROUND_OPACITY_HEX}`,
+                      borderRadius: 4,
+                      paddingHorizontal: 4,
+                      paddingVertical: 2,
+                      color:
+                        getContrastTextColor(chosenHex, colorScheme === 'dark') ??
+                        theme.colors.default,
+                    }
+                  : chosenType === 'textColor'
+                    ? { color: chosenHex }
+                    : {
+                        borderBottomWidth: 4,
+                        borderBottomColor: `${chosenHex}99`,
+                      }
+              }
+            >
+              {t('Exemple de verset')}
+            </Text>
+          </PreviewContainer>
+        </Box>
         <Button onPress={handleSave}>{t('Valider')}</Button>
       </Box>
     </Modal.Body>

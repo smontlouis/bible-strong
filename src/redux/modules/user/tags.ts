@@ -16,6 +16,7 @@ export const entitiesArray = [
   'strongsGrec',
   'words',
   'naves',
+  'wordAnnotations',
 ] as const
 
 // RTK Action Creators

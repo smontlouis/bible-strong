@@ -32,7 +32,6 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'expo-router'
 import DetailedHeader from '~common/DetailedHeader'
-import LanguageMenuOption from '~common/LanguageMenuOption'
 import PopOverMenu from '~common/PopOverMenu'
 import { StrongReference } from '~common/types'
 import MenuOption from '~common/ui/MenuOption'
@@ -42,8 +41,7 @@ import { useTabContext } from '~features/app-switcher/context/TabContext'
 import { RootState } from '~redux/modules/reducer'
 import { makeStrongTagsSelector } from '~redux/selectors/bible'
 import { StrongTab } from '../../state/tabs'
-import { historyAtom, multipleTagsModalAtom } from '../../state/app'
-import { timeout } from '~helpers/timeout'
+import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -85,7 +83,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
   const [verses, setVerses] = useState<any[]>([])
   const [count, setCount] = useState<number>(0)
   const [concordanceLoading, setConcordanceLoading] = useState(true)
-  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
 
   const addHistory = useSetAtom(historyAtom)
 
@@ -170,7 +168,6 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
     }
     toCopy += LSG ? `${t('Généralement traduit par')}:\n${LSG}` : ''
     toCopy += '\n\n https://bible-strong.app'
-    await timeout(400)
     Share.share({ message: toCopy })
   }
 
@@ -226,7 +223,6 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
     <Container>
       <DetailedHeader
         hasBackButton={!isInTab}
-        onCustomBackPress={goBack}
         title={capitalize(Mot)}
         detail={Phonetique}
         subtitle={Type}
@@ -236,7 +232,8 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
               <>
                 <MenuOption
                   onSelect={() =>
-                    setMultipleTagsItem({
+                    setUnifiedTagsModal({
+                      mode: 'select',
                       id: Code!,
                       title: Mot!,
                       entity: Grec ? 'strongsGrec' : 'strongsHebreu',
@@ -248,7 +245,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
                     <Text marginLeft={10}>{t('Étiquettes')}</Text>
                   </Box>
                 </MenuOption>
-                <MenuOption onSelect={shareContent}>
+                <MenuOption onSelect={shareContent} closeBeforeSelect>
                   <Box row alignItems="center">
                     <FeatherIcon name="share-2" size={15} />
                     <Text marginLeft={10}>{t('Partager')}</Text>

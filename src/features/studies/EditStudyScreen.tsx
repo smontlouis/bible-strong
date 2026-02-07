@@ -6,7 +6,7 @@ import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router'
 import produce from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { isFullScreenBibleValue } from 'src/state/app'
+import { isFullScreenBibleAtom } from 'src/state/app'
 import RenameModal from '~common/RenameModal'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -78,6 +78,7 @@ const EditStudyScreen = ({
   const [isReadOnly, setIsReadOnly] = useState(true)
   const renameModalRef = useRef<BottomSheetModal>(null)
   const setOpenedFromTab = useSetAtom(openedFromTabAtom)
+  const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
 
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
   const currentStudy = useSelector((state: RootState) => state.user.bible.studies[studyId])
@@ -106,8 +107,8 @@ const EditStudyScreen = ({
 
   useFocusEffect(
     useCallback(() => {
-      isFullScreenBibleValue.set(false)
-    }, [])
+      setIsFullScreenBible(false)
+    }, [setIsFullScreenBible])
   )
 
   // Show message if study doesn't exist

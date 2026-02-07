@@ -1,10 +1,11 @@
 import styled from '@emotion/native'
-import { useRouter } from 'expo-router'
+import { useSetAtom } from 'jotai/react'
 import React, { useState } from 'react'
 
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { Tag } from './types'
+import { tagDetailModalAtom } from '~state/app'
 
 const StyledTag = styled(Box)(({ theme }) => ({
   borderRadius: 20,
@@ -27,7 +28,7 @@ const TagList = ({
   }
   limit?: number
 }) => {
-  const router = useRouter()
+  const setTagDetailModal = useSetAtom(tagDetailModalAtom)
   const [isExpanded, setIsExpanded] = useState(false)
 
   if (!tags || !Object.values(tags).length) {
@@ -41,17 +42,9 @@ const TagList = ({
   return (
     <Box wrap row>
       {array.map((tag: any) => (
-        <TouchableBox
-          key={tag.id}
-          onPress={() =>
-            router.push({
-              pathname: '/tag',
-              params: { tagId: tag.id },
-            })
-          }
-        >
+        <TouchableBox key={tag.id} onPress={() => setTagDetailModal({ tagId: tag.id })}>
           <StyledTag>
-            <Text fontSize={10} color="primary">
+            <Text fontSize={12} color="primary" numberOfLines={1} maxWidth={100}>
               {tag.name}
             </Text>
           </StyledTag>

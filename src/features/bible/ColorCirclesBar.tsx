@@ -1,14 +1,13 @@
-import React, { useMemo, useRef, useState } from 'react'
-import { ScrollView } from 'react-native'
-import { useRouter } from 'expo-router'
-import { shallowEqual, useSelector, useDispatch } from 'react-redux'
+import { useRef, useState } from 'react'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { useSetAtom } from 'jotai/react'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 
-import Box from '~common/ui/Box'
-import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
+import ColorCircleGrid from '~common/ColorCircleGrid'
 import ColorEditModal from '~common/ColorEditModal'
-import { wp } from '~helpers/utils'
-import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
+import { useColorItems, useHighlightColors } from '~helpers/useHighlightColors'
+import { DEFAULT_COLOR_KEYS, type DefaultColorKey } from '~helpers/constants'
+import { EMPTY_OBJECT } from '~helpers/emptyReferences'
 import type { RootState } from '~redux/modules/reducer'
 import type { CustomColor, HighlightType } from '~redux/modules/user'
 import {
@@ -17,11 +16,7 @@ import {
   setDefaultColorType,
   updateCustomColor,
 } from '~redux/modules/user'
-import { makeColorsSelector } from '~redux/selectors/user'
-import { EMPTY_ARRAY, EMPTY_OBJECT } from '~helpers/emptyReferences'
-import TouchableIcon from './TouchableIcon'
-
-type DefaultColorKey = 'color1' | 'color2' | 'color3' | 'color4' | 'color5'
+import { colorPickerModalAtom } from '~state/app'
 
 type EditingColor =
   | {
@@ -33,36 +28,22 @@ type EditingColor =
     }
   | { type: 'custom'; color: CustomColor }
 
-const MIN_ITEM_WIDTH = 40 // Minimum width (circle size + margins)
-
 type Props = {
-  isSelectedVerseHighlighted: boolean
+  selectedVerseHighlightColor: string | null
   addHighlight: (color: string) => void
   removeHighlight: () => void
-  onClose: () => void
+  onClose?: () => void
 }
 
-const ColorCirclesBar = ({
-  isSelectedVerseHighlighted,
-  addHighlight,
-  removeHighlight,
-  onClose,
-}: Props) => {
-  const router = useRouter()
+const ColorCirclesBar = ({ selectedVerseHighlightColor, addHighlight, removeHighlight }: Props) => {
   const dispatch = useDispatch()
+  const setColorPickerModal = useSetAtom(colorPickerModalAtom)
   const modalRef = useRef<BottomSheetModal>(null)
   const [editingColor, setEditingColor] = useState<EditingColor | null>(null)
 
-  const { theme: currentTheme } = useCurrentThemeSelector()
-  const selectColors = useMemo(() => makeColorsSelector(), [])
-  const colors = useSelector((state: RootState) => selectColors(state, currentTheme))
-  const customHighlightColors = useSelector(
-    (state: RootState) => state.user.bible.settings.customHighlightColors ?? EMPTY_ARRAY
-  )
-  const defaultColorTypes = useSelector(
-    (state: RootState) => state.user.bible.settings.defaultColorTypes ?? EMPTY_OBJECT,
-    shallowEqual
-  )
+  const { colors, customHighlightColors, defaultColorTypes } = useHighlightColors()
+  const colorItems = useColorItems({ includeTypes: true })
+
   const defaultColorNames = useSelector(
     (state: RootState) => state.user.bible.settings.defaultColorNames ?? EMPTY_OBJECT,
     shallowEqual
@@ -104,81 +85,56 @@ const ColorCirclesBar = ({
     }
   }
 
-  // Calculate dynamic item width for color circles
-  const screenWidth = wp(100, 500)
-  const colorItemCount = useMemo(() => {
-    let count = 5 // 5 default colors
-    count += customHighlightColors.length // custom colors
-    if (customHighlightColors.length < 5) count += 1 // plus button
-    if (isSelectedVerseHighlighted) count += 1 // x button
-    return count
-  }, [customHighlightColors.length, isSelectedVerseHighlighted])
+  // Handle color press with toggle behavior
+  const handleColorPress = (colorKey: string) => {
+    if (selectedVerseHighlightColor === colorKey) {
+      removeHighlight() // Toggle off
+    } else {
+      addHighlight(colorKey) // Apply new color
+    }
+  }
 
-  const colorItemWidth = Math.max(screenWidth / colorItemCount, MIN_ITEM_WIDTH)
+  // Handle long press to open edit modal
+  const handleLongPress = (colorKey: string) => {
+    if (DEFAULT_COLOR_KEYS.includes(colorKey as DefaultColorKey)) {
+      const key = colorKey as DefaultColorKey
+      openEditModal({
+        type: 'default',
+        colorKey: key,
+        hex: colors[key],
+        name: defaultColorNames[key],
+        highlightType: defaultColorTypes[key] || 'background',
+      })
+    } else {
+      const customColor = customHighlightColors.find((c: CustomColor) => c.id === colorKey)
+      if (customColor) {
+        openEditModal({ type: 'custom', color: customColor })
+      }
+    }
+  }
+
+  const handleOpenColorPicker = () => {
+    setColorPickerModal({
+      selectedColor: selectedVerseHighlightColor ?? undefined,
+      onSelectColor: (colorId: string) => {
+        addHighlight(colorId)
+      },
+    })
+  }
 
   const modalProps = getModalProps()
 
   return (
     <>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{
-          flexDirection: 'row',
-          alignItems: 'center',
-        }}
-      >
-        {isSelectedVerseHighlighted && (
-          <Box width={colorItemWidth} height={60} center>
-            <TouchableIcon name="x-circle" onPress={removeHighlight} noFlex />
-          </Box>
-        )}
-        {(['color1', 'color2', 'color3', 'color4', 'color5'] as const).map((colorKey, index) => {
-          const currentHex = colors[colorKey]
-          const currentType = defaultColorTypes[colorKey] || 'background'
-          const currentName = defaultColorNames[colorKey]
-          return (
-            <Box key={colorKey} width={colorItemWidth} height={60} center>
-              <HighlightTypeIndicator
-                color={currentHex}
-                type={currentType}
-                onPress={() => addHighlight(colorKey)}
-                onLongPress={() =>
-                  openEditModal({
-                    type: 'default',
-                    colorKey,
-                    hex: currentHex,
-                    name: currentName,
-                    highlightType: currentType,
-                  })
-                }
-                size={20}
-              />
-            </Box>
-          )
-        })}
-        {customHighlightColors.map((customColor: CustomColor) => (
-          <Box key={customColor.id} width={colorItemWidth} height={60} center>
-            <HighlightTypeIndicator
-              color={customColor.hex}
-              type={customColor.type || 'background'}
-              onPress={() => addHighlight(customColor.id)}
-              onLongPress={() => openEditModal({ type: 'custom', color: customColor })}
-              size={20}
-            />
-          </Box>
-        ))}
-
-        <Box width={colorItemWidth} height={60} center>
-          <TouchableIcon
-            name={customHighlightColors.length < 5 ? 'plus-circle' : 'arrow-right-circle'}
-            onPress={() => {
-              router.push('/custom-highlight-colors')
-            }}
-            noFlex
-          />
-        </Box>
-      </ScrollView>
+      <ColorCircleGrid
+        colors={colorItems}
+        selectedColor={selectedVerseHighlightColor ?? undefined}
+        onSelect={handleColorPress}
+        onLongPress={handleLongPress}
+        showAddButton
+        onAddPress={handleOpenColorPicker}
+        layout="scroll"
+      />
 
       <ColorEditModal
         modalRef={modalRef}

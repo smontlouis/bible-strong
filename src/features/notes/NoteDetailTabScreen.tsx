@@ -1,14 +1,12 @@
 import * as Sentry from '@sentry/react-native'
 import produce from 'immer'
 import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, Share } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
-import { toast } from 'sonner-native'
-
-import { createSelector } from '@reduxjs/toolkit'
+import { toast } from '~helpers/toast'
 import { useRouter } from 'expo-router'
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
@@ -24,12 +22,12 @@ import MenuOption from '~common/ui/MenuOption'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import books from '~assets/bible_versions/books-desc'
-import { timeout } from '~helpers/timeout'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
-import { addNote, deleteNote, Note } from '~redux/modules/user'
-import { isFullScreenBibleValue, multipleTagsModalAtom } from '~state/app'
+import { addNote, deleteNote } from '~redux/modules/user'
+import { makeNoteByKeySelector, makeWordAnnotationByIdSelector } from '~redux/selectors/bible'
+import { isFullScreenBibleAtom, unifiedTagsModalAtom } from '~state/app'
 import { NotesTab, useIsCurrentTab } from '~state/tabs'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import NoteEditorDOMComponent from '~features/bible/NoteEditorDOM/NoteEditorDOMComponent'
@@ -41,28 +39,14 @@ interface NoteDetailTabScreenProps {
   noteId: string
 }
 
-// Create a memoized selector factory for current note
-const makeCurrentNoteSelector = () =>
-  createSelector(
-    [(state: RootState) => state.user.bible.notes, (_: RootState, noteKey: string) => noteKey],
-    (notes, noteKey): (Note & { id: string }) | null => {
-      if (noteKey && notes[noteKey]) {
-        return {
-          id: noteKey,
-          ...notes[noteKey],
-        }
-      }
-      return null
-    }
-  )
-
 const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) => {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const [, setNotesTab] = useAtom(notesAtom)
-  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
+  const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -81,22 +65,40 @@ const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) =>
 
   useEffect(() => {
     if (isCurrentTab) {
-      isFullScreenBibleValue.set(false)
+      setIsFullScreenBible(false)
     }
-  }, [isCurrentTab])
+  }, [isCurrentTab, setIsFullScreenBible])
 
-  const selectCurrentNote = useMemo(() => makeCurrentNoteSelector(), [])
-  const currentNote = useSelector((state: RootState) => selectCurrentNote(state, noteId))
+  const selectNoteByKey = makeNoteByKeySelector()
+  const currentNote = useSelector((state: RootState) => selectNoteByKey(state, noteId))
+
+  // Get annotation data if this is an annotation note
+  const isAnnotationNote = noteId.startsWith('annotation:')
+  const annotationId = isAnnotationNote ? noteId.replace('annotation:', '') : ''
+  const selectAnnotationById = makeWordAnnotationByIdSelector()
+  const annotation = useSelector((state: RootState) => selectAnnotationById(state, annotationId))
 
   // Parse noteId to get verse references for display
   const noteVerses = useMemo(() => {
+    // For annotation notes, use the annotation's first range verseKey
+    if (isAnnotationNote && annotation) {
+      const verseKey = annotation.ranges[0]?.verseKey
+      return verseKey ? { [verseKey]: true as const } : ({} as VerseIds)
+    }
+    // For regular notes, parse the noteId
     return noteId.split('/').reduce((acc, key) => {
       acc[key] = true as const
       return acc
     }, {} as VerseIds)
-  }, [noteId])
+  }, [noteId, isAnnotationNote, annotation])
 
-  const reference = verseToReference(noteVerses)
+  const reference = useMemo(() => {
+    const baseRef = verseToReference(noteVerses)
+    if (isAnnotationNote && annotation) {
+      return `${baseRef} (${t('annotation')} - ${annotation.version})`
+    }
+    return baseRef
+  }, [noteVerses, isAnnotationNote, annotation, t])
 
   // Go back to notes list
   const goBack = useCallback(() => {
@@ -166,7 +168,6 @@ ${currentNote.title}
 
 ${currentNote.description}
       `
-      await timeout(400)
       Share.share({ message })
     } catch (e) {
       toast.error(t('Erreur lors du partage.'))
@@ -182,7 +183,19 @@ ${currentNote.description}
   }
 
   const navigateToBible = () => {
-    const [Livre, Chapitre, Verset] = noteId.split('/')[0].split('-')
+    let verseKey: string
+    let version: string | undefined
+
+    if (isAnnotationNote && annotation) {
+      // For annotation notes, use the annotation's verseKey and version
+      verseKey = annotation.ranges[0]?.verseKey
+      version = annotation.version
+    } else {
+      // For regular notes, use the first verse from noteId
+      verseKey = noteId.split('/')[0]
+    }
+
+    const [Livre, Chapitre, Verset] = verseKey.split('-')
     router.push({
       pathname: '/bible-view',
       params: {
@@ -191,6 +204,7 @@ ${currentNote.description}
         chapter: String(Number(Chapitre)),
         verse: String(Number(Verset)),
         focusVerses: JSON.stringify([Number(Verset)]),
+        ...(version && { version }),
       },
     })
   }
@@ -221,7 +235,7 @@ ${currentNote.description}
             height={54}
             popover={
               <>
-                <MenuOption onSelect={shareNote}>
+                <MenuOption onSelect={shareNote} closeBeforeSelect>
                   <Box row alignItems="center">
                     <FeatherIcon name="share" size={15} />
                     <Text marginLeft={10}>{t('Partager')}</Text>
@@ -235,8 +249,8 @@ ${currentNote.description}
                 </MenuOption>
                 <MenuOption
                   onSelect={() =>
-                    setMultipleTagsItem({
-                      ...currentNote,
+                    setUnifiedTagsModal({
+                      mode: 'select',
                       id: currentNote.id!,
                       entity: 'notes',
                     })
@@ -276,7 +290,18 @@ ${currentNote.description}
           }}
         >
           <Box gap={20}>
-            <VerseAccordion noteVerses={noteVerses} />
+            {isAnnotationNote && annotation ? (
+              <Box bg="opacity5" borderRadius={8} py={12} px={16}>
+                <Text fontSize={14} color="grey" mb={4}>
+                  {t('Texte annoté')}
+                </Text>
+                <Text fontSize={16} fontWeight="600">
+                  {annotation.ranges.map(r => r.text).join(' ')}
+                </Text>
+              </Box>
+            ) : (
+              <VerseAccordion noteVerses={noteVerses} />
+            )}
             <NoteEditorDOMComponent
               defaultTitle={currentNote?.title || ''}
               defaultDescription={currentNote?.description || ''}

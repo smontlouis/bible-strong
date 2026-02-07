@@ -1,28 +1,28 @@
+import { AnimatedProgressCircle } from '@convective/react-native-reanimated-progress'
 import styled from '@emotion/native'
 import { withTheme } from '@emotion/react'
 import * as Icon from '@expo/vector-icons'
 import * as FileSystem from 'expo-file-system/legacy'
 import React from 'react'
 import { Alert, TouchableOpacity } from 'react-native'
-import ProgressCircle from 'react-native-progress/Circle'
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 import {
+  getDbPath,
   getIfDatabaseNeedsDownload,
   getIfDatabaseNeedsDownloadForLang,
-  getDbPath,
 } from '~helpers/databases'
+import type { DatabaseId } from '~helpers/databaseTypes'
 import { getDatabasesRef, getDatabaseUrl } from '~helpers/firebase'
-import type { ResourceLanguage, DatabaseId } from '~helpers/databaseTypes'
 
 import { dbManager } from '~helpers/sqlite'
 
 import { withTranslation } from 'react-i18next'
-import { toast } from 'sonner-native'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { DBStateContext } from '~helpers/databaseState'
+import { toast } from '~helpers/toast'
 import { setSettingsCommentaires, setVersionUpdated } from '~redux/modules/user'
 import { Theme } from '~themes'
 
@@ -227,14 +227,13 @@ class DBSelectorItem extends React.Component<any, any> {
             )}
             {isLoading && (
               <Box width={100} justifyContent="center" alignItems="flex-end" mr={10}>
-                <ProgressCircle
+                <AnimatedProgressCircle
                   size={25}
                   progress={fileProgress}
-                  borderWidth={0}
                   thickness={3}
                   color={theme.colors.primary}
                   unfilledColor={theme.colors.lightGrey}
-                  fill="none"
+                  animationDuration={300}
                 />
               </Box>
             )}

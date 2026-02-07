@@ -10,7 +10,7 @@ interface Props {
   colorScheme: 'light' | 'dark'
   placeholderTitle: string
   placeholderDescription: string
-  // Native actions (callbacks passées directement - async côté DOM, void côté RN)
+  // Native action callbacks
   onTitleChange: (value: string) => void
   onDescriptionChange: (value: string) => void
   onSizeChange: (width: number, height: number) => void
@@ -73,7 +73,6 @@ export default function NoteEditorDOMComponent({
     }
   }, [isEditing])
 
-  // Appel direct des native actions (async par nature)
   const handleTitleInput = () => {
     onTitleChange(titleRef.current?.innerText || '')
   }
@@ -82,7 +81,6 @@ export default function NoteEditorDOMComponent({
     onDescriptionChange(descriptionRef.current?.innerText || '')
   }
 
-  // Wrap focus/blur to avoid passing DOM event objects (not serializable)
   const handleFocus = () => {
     onFocus?.()
   }
@@ -99,7 +97,7 @@ export default function NoteEditorDOMComponent({
   return (
     <div
       ref={containerRef}
-      style={{ fontFamily: 'system-ui', color: textColor, overflow: 'hidden' }}
+      style={{ fontFamily: 'system-ui', color: textColor, overflow: 'hidden', width: '100%' }}
     >
       {/* Title */}
       <div
@@ -135,6 +133,7 @@ export default function NoteEditorDOMComponent({
           fontSize: 14,
           outline: 'none',
           whiteSpace: 'pre-wrap',
+          minHeight: 200,
         }}
       />
       <style>{`

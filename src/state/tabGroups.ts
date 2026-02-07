@@ -1,6 +1,5 @@
 import { useAtomValue, useSetAtom } from 'jotai/react'
-import { atom } from 'jotai/vanilla'
-import { getDefaultStore } from 'jotai/vanilla'
+import { atom, getDefaultStore } from 'jotai/vanilla'
 
 import generateUUID from '~helpers/generateUUID'
 import {

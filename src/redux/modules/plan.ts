@@ -70,14 +70,14 @@ export const fetchPlan = createAsyncThunk(
 export const updatePlans = createAsyncThunk(
   'plan/updatesPlans',
   async (arg, { dispatch, getState }) => {
-    const myPlans: Plan[] = (<RootState>getState()).plan.myPlans
+    const myPlans: Plan[] = (getState() as RootState).plan.myPlans
 
     if (!myPlans.length) {
       return
     }
 
     await dispatch(fetchPlans())
-    const onlinePlans = (<RootState>getState()).plan.onlinePlans
+    const onlinePlans = (getState() as RootState).plan.onlinePlans
 
     const planIdsNeedsUpdate = myPlans
       .filter(myPlan => {

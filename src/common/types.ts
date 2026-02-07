@@ -174,6 +174,9 @@ export interface Tag {
   naves?: {
     [id: string]: true
   }
+  wordAnnotations?: {
+    [id: string]: true
+  }
 }
 
 export interface TagsObj {
@@ -224,7 +227,13 @@ export type VerseIds = {
   [verse: string]: true
 }
 
-export type BibleResource = 'strong' | 'commentary' | 'dictionary' | 'nave' | 'reference'
+export type BibleResource =
+  | 'strong'
+  | 'commentary'
+  | 'dictionary'
+  | 'nave'
+  | 'reference'
+  | 'compare'
 
 export type RemoteConfigValue = 'enable_tts_public'
 
@@ -236,6 +245,7 @@ export type SelectedCode = {
 export interface HighlightFilters {
   colorId?: string // 'color1', 'color2', 'custom-xxx', ou undefined (tous)
   tagId?: string // ID du tag, ou undefined (tous)
+  typeFilter?: 'all' | 'annotations' | string // 'all', 'annotations', ou VersionCode
 }
 export interface Bookmark {
   id: string

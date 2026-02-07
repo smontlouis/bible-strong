@@ -57,3 +57,9 @@ export const makeColorsSelector = () =>
 
 // Selector for highlights (used in HighlightsScreen)
 export const selectHighlightsObj = (state: RootState) => state.user.bible.highlights
+
+// Selector for compare versions (used in CompareVersesTabScreen)
+export const selectCompareVersions = createSelector(
+  [(state: RootState) => state.user.bible.settings.compare],
+  compare => Object.keys(compare)
+)

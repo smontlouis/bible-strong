@@ -2,6 +2,7 @@ import { createContext, useContext } from 'react'
 
 interface PopOverContextType {
   onClose: () => void
+  closeAndWait: () => Promise<void>
 }
 
 export const PopOverContext = createContext<PopOverContextType | undefined>(undefined)

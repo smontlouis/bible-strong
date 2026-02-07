@@ -18,7 +18,7 @@ import {
 } from '@react-native-firebase/auth'
 import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import * as Sentry from '@sentry/react-native'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import { firebaseDb, doc, setDoc, getDoc } from '~helpers/firebase'
 import { tokenManager } from '~helpers/TokenManager'
 import { runAllCleanups } from '~helpers/cleanupRegistry'

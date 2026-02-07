@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Share } from 'react-native'
 import { useSelector } from 'react-redux'
 import truncHTML from 'trunc-html'
@@ -21,7 +21,7 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import DetailedHeader from '~common/DetailedHeader'
 import PopOverMenu from '~common/PopOverMenu'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import TagList from '~common/TagList'
 import MenuOption from '~common/ui/MenuOption'
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
@@ -29,10 +29,9 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
 import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
-import { timeout } from '~helpers/timeout'
 import { RootState } from '~redux/modules/reducer'
 import { makeWordTagsSelector } from '~redux/selectors/bible'
-import { historyAtom, multipleTagsModalAtom } from '../../state/app'
+import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
 import { DictionaryTab } from '../../state/tabs'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
@@ -56,7 +55,7 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
   const openInNewTab = useOpenInNewTab()
   const { t } = useTranslation()
   const [dictionnaireItem, setDictionnaireItem] = useState<any>(null)
-  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const addHistory = useSetAtom(historyAtom)
 
   // Go back to list view (for tab context)
@@ -73,7 +72,7 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
     }
   }, [isInTab, setDictionaryTab, router])
 
-  const selectWordTags = useMemo(() => makeWordTagsSelector(), [])
+  const selectWordTags = makeWordTagsSelector()
   const tags = useSelector((state: RootState) => selectWordTags(state, word ?? ''))
 
   const setTitle = (title: string) =>
@@ -152,7 +151,6 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
           // @ts-ignore
           return String.fromCharCode(parseInt(arguments[1], 16))
         })} \n\nLa suite sur https://bible-strong.app`
-      await timeout(400)
       Share.share({ message })
     } catch (e) {
       toast.error('Erreur lors du partage.')
@@ -179,7 +177,6 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
     <Container>
       <DetailedHeader
         hasBackButton={!isInTab}
-        onCustomBackPress={goBack}
         title={word}
         borderColor="secondary"
         rightComponent={
@@ -188,7 +185,8 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
               <>
                 <MenuOption
                   onSelect={() =>
-                    setMultipleTagsItem({
+                    setUnifiedTagsModal({
+                      mode: 'select',
                       id: word,
                       title: word,
                       entity: 'words',
@@ -200,7 +198,7 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
                     <Text marginLeft={10}>{t('Étiquettes')}</Text>
                   </Box>
                 </MenuOption>
-                <MenuOption onSelect={shareDefinition}>
+                <MenuOption onSelect={shareDefinition} closeBeforeSelect>
                   <Box row alignItems="center">
                     <FeatherIcon name="share-2" size={15} />
                     <Text marginLeft={10}>{t('Partager')}</Text>

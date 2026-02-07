@@ -16,7 +16,7 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { deleteStudy, Study } from '~redux/modules/user'
-import { multipleTagsModalAtom } from '../../state/app'
+import { unifiedTagsModalAtom } from '../../state/app'
 import PublishStudyMenuItem from './PublishStudyMenuItem'
 
 const HeaderBox = styled(Box)({
@@ -50,7 +50,7 @@ const EditHeader = ({
   const openInNewTab = useOpenInNewTab()
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const { ref, open, close } = useBottomSheetModal()
 
   const deleteStudyConfirmation = useCallback(() => {
@@ -105,7 +105,7 @@ const EditHeader = ({
           <Modal.Item
             onPress={() => {
               close()
-              setMultipleTagsItem({ ...study, entity: 'studies' })
+              setUnifiedTagsModal({ mode: 'select', id: study.id, entity: 'studies' })
             }}
           >
             {t('Éditer les tags')}

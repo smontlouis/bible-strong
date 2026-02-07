@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { useTheme } from '@emotion/react'
 import Popover from 'react-native-popover-view'
 
@@ -16,14 +16,37 @@ interface Props extends PopoverProps {
   height?: number
 }
 
-const PopOverMenu = ({ element, popover, width = 60, height = 60, ...props }: Props) => {
+const PopOverMenu = ({
+  element,
+  popover,
+  width = 60,
+  height = 60,
+  onCloseComplete: externalOnCloseComplete,
+  ...restProps
+}: Props) => {
   const theme: Theme = useTheme()
   const [showPopover, setShowPopover] = useState(false)
+  const closeResolverRef = useRef<(() => void) | null>(null)
+
+  const closeAndWait = (): Promise<void> => {
+    if (!showPopover) return Promise.resolve()
+    return new Promise<void>(resolve => {
+      closeResolverRef.current = resolve
+      setShowPopover(false)
+    })
+  }
+
+  const handleCloseComplete = () => {
+    closeResolverRef.current?.()
+    closeResolverRef.current = null
+    externalOnCloseComplete?.()
+  }
 
   return (
     <Popover
       isVisible={showPopover}
       onRequestClose={() => setShowPopover(false)}
+      onCloseComplete={handleCloseComplete}
       popoverStyle={{
         backgroundColor: theme.colors.reverse,
         borderRadius: 10,
@@ -41,9 +64,9 @@ const PopOverMenu = ({ element, popover, width = 60, height = 60, ...props }: Pr
           )}
         </TouchableOpacity>
       }
-      {...props}
+      {...restProps}
     >
-      <PopOverContext.Provider value={{ onClose: () => setShowPopover(false) }}>
+      <PopOverContext.Provider value={{ onClose: () => setShowPopover(false), closeAndWait }}>
         <Box paddingVertical={10}>{popover}</Box>
       </PopOverContext.Provider>
     </Popover>

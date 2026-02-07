@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { createSelector } from '@reduxjs/toolkit'
 import { ActivityIndicator, Alert, Dimensions, Image, Linking } from 'react-native'
@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import PopOverMenu from '~common/PopOverMenu'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import TagList from '~common/TagList'
 import { VerseIds } from '~common/types'
 import Box, { VStack } from '~common/ui/Box'
@@ -36,7 +36,8 @@ import orderVerses from '~helpers/orderVerses'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addLink, deleteLink, Link } from '~redux/modules/user'
-import { multipleTagsModalAtom } from '../../state/app'
+import { selectLinks } from '~redux/selectors/bible'
+import { unifiedTagsModalAtom } from '../../state/app'
 import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
 
 interface BibleLinkModalProps {
@@ -58,7 +59,7 @@ const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
 // Create a memoized selector factory for current link
 const makeCurrentLinkSelector = () =>
   createSelector(
-    [(state: RootState) => state.user.bible.links, (_: RootState, linkKey: string) => linkKey],
+    [selectLinks, (_: RootState, linkKey: string) => linkKey],
     (links, linkKey): (Link & { id: string }) | null => {
       if (linkKey && links[linkKey]) {
         return {
@@ -71,11 +72,9 @@ const makeCurrentLinkSelector = () =>
   )
 
 const useCurrentLink = ({ linkVerses }: { linkVerses: VerseIds | undefined }) => {
-  const selectCurrentLink = useMemo(() => makeCurrentLinkSelector(), [])
-  const linkKey = useMemo(() => {
-    const orderedVerses = orderVerses(linkVerses || {})
-    return Object.keys(orderedVerses).join('/')
-  }, [linkVerses])
+  const selectCurrentLink = makeCurrentLinkSelector()
+  const orderedVerses = orderVerses(linkVerses || {})
+  const linkKey = Object.keys(orderedVerses).join('/')
 
   const link = useSelector((state: RootState) => selectCurrentLink(state, linkKey))
 
@@ -102,7 +101,7 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
 
   const currentLink = useCurrentLink({ linkVerses })
   const reference = verseToReference(linkVerses)
-  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const insets = useSafeAreaInsets()
   const theme = useTheme()
 
@@ -136,42 +135,39 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
 
     setIsSaving(true)
 
-    try {
-      const linkType = detectLinkType(url)
-      const videoId = extractVideoId(url, linkType)
+    const linkType = detectLinkType(url)
+    const videoId = extractVideoId(url, linkType)
 
-      // Déterminer si on doit fetch les OG data
-      const shouldFetchOG =
-        !currentLink?.ogData?.title || // Nouveau lien ou pas de titre
-        currentLink?.url !== url // URL changée
+    // Déterminer si on doit fetch les OG data
+    const shouldFetchOG =
+      !currentLink?.ogData?.title || // Nouveau lien ou pas de titre
+      currentLink?.url !== url // URL changée
 
-      let ogData = currentLink?.ogData
-      if (shouldFetchOG) {
-        // Tenter le fetch (retourne null si offline)
-        const fetchedData = await fetchOpenGraphData(url)
-        if (fetchedData) {
-          ogData = fetchedData
-        }
+    let ogData = currentLink?.ogData
+    if (shouldFetchOG) {
+      // Tenter le fetch (retourne null si offline)
+      const fetchedData = await fetchOpenGraphData(url)
+      if (fetchedData) {
+        ogData = fetchedData
       }
-
-      const linkData: Link = {
-        ...currentLink,
-        url,
-        customTitle: customTitle || undefined,
-        ogData,
-        linkType,
-        videoId: videoId || undefined,
-        date: Date.now(),
-      }
-
-      dispatch(
-        // @ts-ignore
-        addLink(linkData, linkVerses!)
-      )
-      setIsEditing(false)
-    } finally {
-      setIsSaving(false)
     }
+
+    const linkData: Link = {
+      ...currentLink,
+      url,
+      customTitle: customTitle || undefined,
+      ogData,
+      linkType,
+      videoId: videoId || undefined,
+      date: Date.now(),
+    }
+
+    dispatch(
+      // @ts-ignore
+      addLink(linkData, linkVerses!)
+    )
+    setIsEditing(false)
+    setIsSaving(false)
   }
 
   const deleteLinkFunc = (linkId: string) => {
@@ -254,11 +250,15 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
                     </MenuOption>
                     <MenuOption
                       onSelect={() =>
-                        setMultipleTagsItem({
-                          ...currentLink,
+                        setUnifiedTagsModal({
+                          mode: 'select',
                           id: currentLink.id!,
                           entity: 'links',
-                          title: currentLink.ogData?.title || currentLink.customTitle || '',
+                          title:
+                            currentLink.ogData?.title ||
+                            currentLink.customTitle ||
+                            currentLink.url ||
+                            '',
                         })
                       }
                     >

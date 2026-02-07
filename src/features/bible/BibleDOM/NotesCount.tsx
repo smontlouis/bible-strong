@@ -1,36 +1,43 @@
+import * as Icon from '@expo/vector-icons'
 import { styled } from 'goober'
-import { RootStyles } from './BibleDOMWrapper'
 import { RootState } from '~redux/modules/reducer'
-import { SvgProps } from 'react-native-svg'
+import { RootStyles } from './BibleDOMWrapper'
+import { isDarkTheme } from './utils'
+import { getDisabledStyles } from './disabledStyles'
 
-// @ts-ignore
-const SvgContainer = styled<RootStyles & SvgProps>(
-  'svg'
-  // @ts-ignore
-)(({ settings: { fontSizeScale } }) => ({}))
+const Div = styled('span')<RootStyles & { isDisabled?: boolean }>(
+  ({ settings: { theme, colors }, isDisabled }) => ({
+    backgroundColor: colors[theme].reverse,
+    boxShadow: isDarkTheme(theme)
+      ? `0 0 10px 0 rgba(255, 255, 255, 0.1)`
+      : `0 0 10px 0 rgba(0, 0, 0, 0.2)`,
+    borderRadius: '8px',
+    padding: '4px 8px 4px 6px',
+    wordBreak: 'break-word',
+    marginRight: '4px',
+    marginLeft: '4px',
+    position: 'relative',
+    display: 'inline-block',
 
-// @ts-ignore
-const Div = styled<RootStyles>('div')(({ settings: { theme } }) => ({
-  position: 'relative',
-  display: 'inline-block',
-  transform: 'translateY(5px)',
-  marginRight: '10px',
-}))
+    '&:active': {
+      opacity: 0.6,
+    },
+    ...getDisabledStyles(isDisabled),
+  })
+)
 
-// @ts-ignore
 const Count = styled<RootStyles>('div')(({ settings: { theme, colors } }) => ({
-  background: colors[theme].primary,
+  background: colors[theme].grey,
   position: 'absolute',
-  width: '15px',
-  height: '15px',
-  borderRadius: '15px',
+  width: '12px',
+  height: '12px',
+  borderRadius: '12px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   fontFamily: 'arial',
-  fontSize: '13px',
-  fontWeight: 'bold',
-  color: 'white',
+  fontSize: '10px',
+  color: colors[theme].reverse,
   bottom: '0',
   right: '0px',
 }))
@@ -39,30 +46,17 @@ interface Props {
   count: number
   settings: RootState['user']['bible']['settings']
   onClick: () => void
+  isDisabled?: boolean
 }
 
-const NotesCount = ({ count, settings, onClick }: Props) => {
+const NotesCount = ({ count, settings, onClick, isDisabled }: Props) => {
   return (
-    <Div settings={settings}>
-      <SvgContainer
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        settings={settings}
-        // @ts-ignore
-        onClick={onClick}
-      >
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-        <polyline points="14 2 14 8 20 8" />
-        <line x1="16" y1="13" x2="8" y2="13" />
-        <line x1="16" y1="17" x2="8" y2="17" />
-        <polyline points="10 9 9 9 8 9" />
-      </SvgContainer>
+    <Div settings={settings} onClick={() => onClick()} isDisabled={isDisabled}>
+      <Icon.Ionicons
+        color={settings.colors[settings.theme].quart}
+        name="document-text-outline"
+        size={16}
+      />
       <Count settings={settings}>{count}</Count>
     </Div>
   )

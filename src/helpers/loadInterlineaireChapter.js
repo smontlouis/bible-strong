@@ -8,7 +8,8 @@ const loadInterlineaireChapter = (Livre, Chapitre, lang = 'fr') =>
       `SELECT *
             FROM INTERLINEAIRE
             WHERE LIVRE = (?)
-            AND CHAPITRE  = (?)`,
+            AND CHAPITRE  = (?)
+            ORDER BY VERSET ASC`,
       [Livre, Chapitre]
     )
     return result

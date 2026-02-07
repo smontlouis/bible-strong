@@ -2,12 +2,11 @@ import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import MenuOption from '~common/ui/MenuOption'
 
-import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Share } from 'react-native'
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import { ComputedReadingSlice, EntitySlice } from '~common/types'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
@@ -19,6 +18,7 @@ import chapterToReference from '~helpers/chapterToReference'
 import verseToReference from '~helpers/verseToReference'
 import { markAsRead } from '~redux/modules/plan'
 import { RootState } from '~redux/modules/reducer'
+import { makeIsReadSelector } from '~redux/selectors/plan'
 import { setDefaultBibleVersion } from '~redux/modules/user'
 import { useDefaultBibleVersion } from '../../../state/useDefaultBibleVersion'
 import { BibleTab } from '../../../state/tabs'
@@ -30,7 +30,6 @@ import { chapterSliceToText, verseSliceToText, videoSliceToText } from './share'
 import BottomSheet from '@gorhom/bottom-sheet'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useBookAndVersionSelector } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
-import { timeout } from '~helpers/timeout'
 
 const extractTitle = (slice: EntitySlice) => {
   switch (slice.type) {
@@ -41,6 +40,65 @@ const extractTitle = (slice: EntitySlice) => {
     default:
       return ''
   }
+}
+
+// Constants for versionData optimization
+const DEFAULT_BOOK = { Numero: 1, Nom: 'Genèse', Chapitres: 50 }
+const EMPTY_ARRAY: never[] = []
+const EMPTY_OBJECT = {}
+
+interface PlanSliceMenuContentProps {
+  isRead: boolean
+  onMarkAsRead: () => void
+  onOpenVersionSelector: () => void
+  onOpenParams: () => void
+  onShare: () => void
+  version: string
+}
+
+const PlanSliceMenuContent = ({
+  isRead,
+  onMarkAsRead,
+  onOpenVersionSelector,
+  onOpenParams,
+  onShare,
+  version,
+}: PlanSliceMenuContentProps) => {
+  const { t } = useTranslation()
+
+  return (
+    <>
+      <MenuOption onSelect={onMarkAsRead}>
+        <Box row alignItems="center">
+          <MaterialIcon
+            name="check"
+            size={20}
+            color="success"
+            style={{ opacity: isRead ? 0.3 : 1 }}
+          />
+          <Text marginLeft={10}>{isRead ? t('Marquer comme non lu') : t('Marquer comme lu')}</Text>
+        </Box>
+      </MenuOption>
+      <MenuOption onSelect={onOpenVersionSelector}>
+        <Box row alignItems="center">
+          <TextIcon style={{ fontSize: 12 }}>{version}</TextIcon>
+          <Text marginLeft={10}>{t('Changer de version')}</Text>
+        </Box>
+      </MenuOption>
+      <MenuOption onSelect={onOpenParams}>
+        <Box row alignItems="center">
+          <TextIcon>Aa</TextIcon>
+          <Text marginLeft={10}>{t('Mise en forme')}</Text>
+        </Box>
+      </MenuOption>
+      <MenuOption onSelect={onShare} closeBeforeSelect>
+        <Box row alignItems="center">
+          <FeatherIcon name="share-2" size={17} style={{ marginRight: 10 }} />
+          <Text marginLeft={10}>{t('Partager')}</Text>
+        </Box>
+      </MenuOption>
+    </>
+  )
 }
 
 const PlanSliceScreen = () => {
@@ -57,35 +115,35 @@ const PlanSliceScreen = () => {
   const dispatch = useDispatch()
   const paramsModalRef = React.useRef<BottomSheet>(null)
 
-  const isRead = useSelector(
-    (state: RootState) =>
-      state.plan.ongoingPlans.find(oP => oP.id === planId)?.readingSlices[id] === 'Completed'
-  )
+  const selectIsRead = makeIsReadSelector()
+  const isRead = useSelector((state: RootState) => selectIsRead(state, planId ?? '', id ?? ''))
   const version = useDefaultBibleVersion()
   const { openVersionSelector } = useBookAndVersionSelector()
 
   // Actions that dispatch to Redux for changing default version
-  const versionActions = useMemo(
-    () => ({
-      setSelectedVersion: (v: string) => dispatch(setDefaultBibleVersion(v)),
-      setParallelVersion: () => {}, // Not used in plans
-    }),
-    [dispatch]
-  )
+  const versionActions = {
+    setSelectedVersion: (v: string) => dispatch(setDefaultBibleVersion(v)),
+    setParallelVersion: () => {}, // Not used in plans
+  }
 
   // Minimal data required for version selector
-  const versionData: BibleTab['data'] = useMemo(
-    () => ({
-      selectedVersion: version,
-      parallelVersions: [],
-      selectedBook: { Numero: 1, Nom: 'Genèse', Chapitres: 50 },
+  const versionData: BibleTab['data'] = {
+    selectedVersion: version,
+    parallelVersions: EMPTY_ARRAY,
+    selectedBook: DEFAULT_BOOK,
+    selectedChapter: 1,
+    selectedVerse: 1,
+    focusVerses: undefined,
+    temp: {
+      selectedBook: DEFAULT_BOOK,
       selectedChapter: 1,
       selectedVerse: 1,
-      focusVerses: undefined,
-      tab: 'bible',
-    }),
-    [version]
-  )
+    },
+    selectedVerses: EMPTY_OBJECT,
+    selectionMode: 'grid',
+    isSelectionMode: undefined,
+    isReadOnly: true,
+  }
 
   const onMarkAsReadSelect = () => {
     dispatch(markAsRead({ readingSliceId: id, planId }))
@@ -124,9 +182,8 @@ const PlanSliceScreen = () => {
       })
     )
 
+    const message = `${sliceTitle || title}\n\n${textSlices.join('\n\n')}`
     try {
-      const message = `${sliceTitle || title}\n\n${textSlices.join('\n\n')}`
-      await timeout(400)
       Share.share({ message })
     } catch (e) {
       toast.error('Erreur lors du partage.')
@@ -142,48 +199,16 @@ const PlanSliceScreen = () => {
         rightComponent={
           <PopOverMenu
             popover={
-              <>
-                <MenuOption onSelect={onMarkAsReadSelect}>
-                  <Box row alignItems="center">
-                    <MaterialIcon
-                      name="check"
-                      size={20}
-                      color="success"
-                      style={{ opacity: isRead ? 0.3 : 1 }}
-                    />
-                    <Text marginLeft={10}>
-                      {isRead ? t('Marquer comme non lu') : t('Marquer comme lu')}
-                    </Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption
-                  onSelect={() =>
-                    openVersionSelector({ actions: versionActions, data: versionData })
-                  }
-                >
-                  <Box row alignItems="center">
-                    <TextIcon style={{ fontSize: 12 }}>{version}</TextIcon>
-                    <Text marginLeft={10}>{t('Changer de version')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption onSelect={() => paramsModalRef.current?.expand()}>
-                  <Box row alignItems="center">
-                    <TextIcon>Aa</TextIcon>
-                    <Text marginLeft={10}>{t('Mise en forme')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption onSelect={share}>
-                  <Box row alignItems="center">
-                    <FeatherIcon
-                      name="share-2"
-                      size={17}
-                      onPress={share}
-                      style={{ marginRight: 10 }}
-                    />
-                    <Text marginLeft={10}>{t('Partager')}</Text>
-                  </Box>
-                </MenuOption>
-              </>
+              <PlanSliceMenuContent
+                isRead={isRead}
+                onMarkAsRead={onMarkAsReadSelect}
+                onOpenVersionSelector={() =>
+                  openVersionSelector({ actions: versionActions, data: versionData })
+                }
+                onOpenParams={() => paramsModalRef.current?.expand()}
+                onShare={share}
+                version={version}
+              />
             }
           />
         }

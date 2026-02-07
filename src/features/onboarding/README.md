@@ -250,4 +250,4 @@ Pour ajouter une nouvelle ressource :
 - `jotai` : État global des ressources
 - `react-native-modal` : Modal fullscreen
 - Firebase Storage : Hébergement des fichiers
-- `react-native-progress` : Barres de progression
+- `@convective/react-native-reanimated-progress` : Barres de progression animées

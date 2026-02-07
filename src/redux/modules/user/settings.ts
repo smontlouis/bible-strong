@@ -12,6 +12,7 @@ export const SET_SETTINGS_TEXT_DISPLAY = 'user/SET_SETTINGS_TEXT_DISPLAY'
 export const SET_SETTINGS_PRESS = 'user/SET_SETTINGS_PRESS'
 export const SET_SETTINGS_NOTES_DISPLAY = 'user/SET_SETTINGS_NOTES_DISPLAY'
 export const SET_SETTINGS_LINKS_DISPLAY = 'user/SET_SETTINGS_LINKS_DISPLAY'
+export const SET_SETTINGS_TAGS_DISPLAY = 'user/SET_SETTINGS_TAGS_DISPLAY'
 export const SET_SETTINGS_COMMENTS_DISPLAY = 'user/SET_SETTINGS_COMMENTS_DISPLAY'
 export const CHANGE_COLOR = 'user/CHANGE_COLOR'
 export const SET_SETTINGS_PREFERRED_COLOR_SCHEME = 'user/SET_SETTINGS_PREFERRED_COLOR_SCHEME'
@@ -24,6 +25,7 @@ export const TOGGLE_SETTINGS_SHARE_APP_NAME = 'user/SET_SETTINGS_SHARE_APP_NAME'
 export const SET_DEFAULT_COLOR_NAME = 'user/SET_DEFAULT_COLOR_NAME'
 export const SET_DEFAULT_COLOR_TYPE = 'user/SET_DEFAULT_COLOR_TYPE'
 export const SET_DEFAULT_BIBLE_VERSION = 'user/SET_DEFAULT_BIBLE_VERSION'
+export const SET_SETTINGS_RED_WORDS_DISPLAY = 'user/SET_SETTINGS_RED_WORDS_DISPLAY'
 
 // RTK Action Creators
 export const setSettingsAlignContent = createAction(
@@ -63,6 +65,11 @@ export const setSettingsNotesDisplay = createAction(
 
 export const setSettingsLinksDisplay = createAction(
   SET_SETTINGS_LINKS_DISPLAY,
+  (payload: 'inline' | 'block') => ({ payload })
+)
+
+export const setSettingsTagsDisplay = createAction(
+  SET_SETTINGS_TAGS_DISPLAY,
   (payload: 'inline' | 'block') => ({ payload })
 )
 
@@ -111,4 +118,9 @@ export const setDefaultColorType = createAction(
 export const setDefaultBibleVersion = createAction(
   SET_DEFAULT_BIBLE_VERSION,
   (payload: string) => ({ payload })
+)
+
+export const setSettingsRedWordsDisplay = createAction(
+  SET_SETTINGS_RED_WORDS_DISPLAY,
+  (payload: boolean) => ({ payload })
 )

@@ -198,7 +198,7 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
       })
     )
 
-  const { status, data, loadMore, canLoad, moreStatus } = useComments(verse)
+  const { status, data, error, loadMore, canLoad, moreStatus } = useComments(verse)
   const verseFormatted = useMemo(() => verseStringToObject([verse]), [verse])
 
   // @ts-ignore
@@ -293,7 +293,11 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
           ) : status === 'Rejected' ? (
             <Empty
               icon={require('~assets/images/empty-state-icons/comment.svg')}
-              message={t("Une erreur est survenue. Assurez-vous d'être connecté à Internet.")}
+              message={
+                error?.message === 'NOT_FOUND'
+                  ? t('Aucun commentaire disponible pour ce verset.')
+                  : t("Une erreur est survenue. Assurez-vous d'être connecté à Internet.")
+              }
             />
           ) : (
             <>

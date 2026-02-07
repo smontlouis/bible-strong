@@ -29,6 +29,14 @@ import {
 import { addLinkAction, deleteLink, updateLink } from './modules/user/links'
 import { addNoteAction, deleteNote } from './modules/user/notes'
 import {
+  addWordAnnotationAction,
+  changeWordAnnotationColorAction,
+  changeWordAnnotationTypeAction,
+  removeWordAnnotationAction,
+  removeWordAnnotationsInRangeAction,
+  updateWordAnnotationAction,
+} from './modules/user/wordAnnotations'
+import {
   changeColor,
   decreaseSettingsFontSizeScale,
   increaseSettingsFontSizeScale,
@@ -43,6 +51,7 @@ import {
   setSettingsPreferredDarkTheme,
   setSettingsPreferredLightTheme,
   setSettingsPress,
+  setSettingsTagsDisplay,
   setSettingsTextDisplay,
   toggleSettingsShareAppName,
   toggleSettingsShareLineBreaks,
@@ -52,8 +61,8 @@ import {
 import { deleteStudy, publishStudyAction, updateStudy } from './modules/user/studies'
 import { addTag, removeTag, toggleTagEntity, updateTag } from './modules/user/tags'
 
-import { toast } from 'sonner-native'
 import { diff } from '~helpers/deep-obj'
+import { toast } from '~helpers/toast'
 import { migrateImportedDataToSubcollections } from '~helpers/firestoreMigration'
 import {
   batchWriteSubcollection,
@@ -224,6 +233,7 @@ const isSettingsAction = isAnyOf(
   setSettingsPress,
   setSettingsNotesDisplay,
   setSettingsLinksDisplay,
+  setSettingsTagsDisplay,
   setSettingsCommentaires,
   changeColor,
   toggleCompareVersion,
@@ -246,6 +256,15 @@ const isNoteAction = isAnyOf(addNoteAction, deleteNote)
 const isLinkAction = isAnyOf(addLinkAction, updateLink, deleteLink)
 
 const isHighlightAction = isAnyOf(addHighlightAction, removeHighlight, changeHighlightColor)
+
+const isWordAnnotationAction = isAnyOf(
+  addWordAnnotationAction,
+  updateWordAnnotationAction,
+  removeWordAnnotationAction,
+  removeWordAnnotationsInRangeAction,
+  changeWordAnnotationColorAction,
+  changeWordAnnotationTypeAction
+)
 
 const isTagAction = isAnyOf(addTag, removeTag, updateTag)
 
@@ -458,6 +477,63 @@ const firestoreMiddleware: Middleware = store => next => async action => {
         },
         userId,
         'tags_sync_from_highlight',
+        state
+      )
+    }
+    return result
+  }
+
+  // ========== WORD ANNOTATIONS SYNC (sous-collection) ==========
+  if (isWordAnnotationAction(action)) {
+    if (!diffState?.user?.bible?.wordAnnotations) return result
+
+    await handleSyncWithRetry(
+      async () => {
+        await syncSubcollectionChanges(
+          userId,
+          'wordAnnotations',
+          diffState.user.bible.wordAnnotations,
+          user.bible.wordAnnotations,
+          deleteMarker
+        )
+      },
+      userId,
+      'word_annotations_sync',
+      state
+    )
+
+    // Si des tags ont aussi changé (via removeEntityInTags), sync les tags
+    if (diffState?.user?.bible?.tags) {
+      await handleSyncWithRetry(
+        async () => {
+          await syncSubcollectionChanges(
+            userId,
+            'tags',
+            diffState.user.bible.tags,
+            user.bible.tags,
+            deleteMarker
+          )
+        },
+        userId,
+        'tags_sync_from_word_annotation',
+        state
+      )
+    }
+
+    // Si des notes ont aussi changé (cascade delete from annotation), sync les notes
+    if (diffState?.user?.bible?.notes) {
+      await handleSyncWithRetry(
+        async () => {
+          await syncSubcollectionChanges(
+            userId,
+            'notes',
+            diffState.user.bible.notes,
+            user.bible.notes,
+            deleteMarker
+          )
+        },
+        userId,
+        'notes_sync_from_word_annotation',
         state
       )
     }

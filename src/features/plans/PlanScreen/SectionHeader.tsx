@@ -1,14 +1,14 @@
 import { useTheme } from '@emotion/react'
 import Lottie from 'lottie-react-native'
 import React from 'react'
-import ProgressCircle from 'react-native-progress/Circle'
+import { AnimatedProgressCircle } from '@convective/react-native-reanimated-progress'
 
 import styled from '@emotion/native'
 import { Image } from 'expo-image'
 import Link from '~common/Link'
 import { ComputedSection } from '~common/types'
 import Border from '~common/ui/Border'
-import Box, { AnimatableBox } from '~common/ui/Box'
+import Box, { AnimatedBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { Theme } from '~themes'
@@ -47,6 +47,7 @@ const Section = ({
         {isSectionCompleted ? (
           <Lottie
             autoPlay
+            loop={false}
             style={{
               width: 40,
               height: 40,
@@ -54,13 +55,12 @@ const Section = ({
             source={require('../../../assets/images/medal.json')}
           />
         ) : (
-          <ProgressCircle
+          <AnimatedProgressCircle
             size={38}
             progress={progress}
-            borderWidth={0}
             color={theme.colors.primary}
             unfilledColor={progress ? 'rgb(230,230,230)' : undefined}
-            fill="none"
+            animationDuration={300}
           >
             <CircleImage center>
               {cacheImage && (
@@ -79,7 +79,7 @@ const Section = ({
                 </Box>
               )}
             </CircleImage>
-          </ProgressCircle>
+          </AnimatedProgressCircle>
         )}
 
         <Box flex paddingLeft={20} justifyContent="center">
@@ -87,23 +87,18 @@ const Section = ({
           {subTitle && <Text opacity={0.6}>{subTitle}</Text>}
         </Box>
         <Box width={40} center>
-          {/* @ts-expect-error */}
-          <AnimatableBox
+          <AnimatedBox
             width={17}
             height={17}
             center
-            animation={{
-              from: {
-                rotate: !isCollapsed ? '180deg' : '0deg',
-              },
-              to: {
-                rotate: isCollapsed ? '180deg' : '0deg',
-              },
+            style={{
+              transform: [{ rotate: isCollapsed ? '180deg' : '0deg' }],
+              transitionProperty: 'transform',
+              transitionDuration: 500,
             }}
-            duration={500}
           >
             <FeatherIcon color="grey" name="chevron-down" size={17} />
-          </AnimatableBox>
+          </AnimatedBox>
         </Box>
       </Box>
       <Border />

@@ -1,11 +1,9 @@
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { useDerivedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-// @ts-ignore
-import { isFullScreenBibleValue } from 'src/state/app'
+import { isFullScreenBibleAtom } from 'src/state/app'
 import { Book } from '~assets/bible_versions/books-desc'
-import { MotiHStack, MotiTouchableBox, motiTransition, TouchableBox } from '~common/ui/Box'
+import { AnimatedHStack, AnimatedTouchableBox, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
@@ -37,10 +35,14 @@ const BackToAudioFooter = ({
   const { t } = useTranslation()
   const { bottomBarHeight } = useBottomBarHeightInTab()
   const insets = useSafeAreaInsets()
+  const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
+
+  const fullScreenTranslateY = isFullScreenBible ? HEADER_HEIGHT + insets.bottom + 60 : 0
+  const centerTranslateY = isFullScreenBible ? HEADER_HEIGHT : 0
 
   return (
     <>
-      <MotiTouchableBox
+      <AnimatedTouchableBox
         disabled={disabled}
         width={40}
         height={40}
@@ -54,17 +56,15 @@ const BackToAudioFooter = ({
         position="absolute"
         bottom={10 + bottomBarHeight}
         left={10}
-        // @ts-ignore
-        animate={useDerivedValue(() => {
-          return {
-            translateY: isFullScreenBibleValue.get() ? HEADER_HEIGHT + insets.bottom + 60 : 0,
-          }
-        })}
-        {...motiTransition}
+        style={{
+          transform: [{ translateY: fullScreenTranslateY }],
+          transitionProperty: 'transform',
+          transitionDuration: 300,
+        }}
       >
         <FeatherIcon name="arrow-left" size={20} color="tertiary" />
-      </MotiTouchableBox>
-      <MotiHStack
+      </AnimatedTouchableBox>
+      <AnimatedHStack
         position="absolute"
         alignSelf="center"
         bottom={10 + bottomBarHeight}
@@ -73,13 +73,11 @@ const BackToAudioFooter = ({
         padding={2}
         borderRadius={50}
         overflow="visible"
-        // @ts-ignore
-        animate={useDerivedValue(() => {
-          return {
-            translateY: isFullScreenBibleValue.get() ? HEADER_HEIGHT : 0,
-          }
-        })}
-        {...motiTransition}
+        style={{
+          transform: [{ translateY: centerTranslateY }],
+          transitionProperty: 'transform',
+          transitionDuration: 300,
+        }}
       >
         <TouchableBox
           center
@@ -96,8 +94,8 @@ const BackToAudioFooter = ({
           <Text color="reverse">{t('audio.goBack')}</Text>
           <FeatherIcon name="volume-2" style={{ marginLeft: 10 }} size={20} color="reverse" />
         </TouchableBox>
-      </MotiHStack>
-      <MotiTouchableBox
+      </AnimatedHStack>
+      <AnimatedTouchableBox
         disabled={disabled}
         width={40}
         height={40}
@@ -111,16 +109,14 @@ const BackToAudioFooter = ({
         position="absolute"
         bottom={10 + bottomBarHeight}
         right={10}
-        // @ts-ignore
-        animate={useDerivedValue(() => {
-          return {
-            translateY: isFullScreenBibleValue.get() ? HEADER_HEIGHT + insets.bottom + 60 : 0,
-          }
-        })}
-        {...motiTransition}
+        style={{
+          transform: [{ translateY: fullScreenTranslateY }],
+          transitionProperty: 'transform',
+          transitionDuration: 300,
+        }}
       >
         <FeatherIcon name="arrow-right" size={20} color="tertiary" />
-      </MotiTouchableBox>
+      </AnimatedTouchableBox>
     </>
   )
 }

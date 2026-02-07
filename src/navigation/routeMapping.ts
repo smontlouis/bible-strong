@@ -30,7 +30,6 @@ export const routeMapping: Record<keyof MainStackProps, string> = {
   DictionnaryDetail: '/dictionnary-detail',
   Login: '/login',
   Support: '/support',
-  CustomHighlightColors: '/custom-highlight-colors',
   Changelog: '/changelog',
   ImportExport: '/import-export',
   Backup: '/backup',
@@ -63,6 +62,7 @@ export const routeMapping: Record<keyof MainStackProps, string> = {
   ResourceLanguage: '/resource-language',
   BibleDefaults: '/bible-defaults',
   Theme: '/theme',
+  WordAnnotations: '/word-annotations',
 }
 
 /**

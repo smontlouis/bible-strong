@@ -4,7 +4,7 @@ import styled from '@emotion/native'
 import { withTheme } from '@emotion/react'
 import appleAuth, { AppleButton } from '@invertase/react-native-apple-authentication'
 
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import Link from '~common/Link'
 import TextInput from '~common/ui/TextInput'
 import Button from '~common/ui/Button'

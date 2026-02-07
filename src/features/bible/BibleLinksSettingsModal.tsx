@@ -4,11 +4,11 @@ import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { useDispatch } from 'react-redux'
-import { useAtom } from 'jotai/react'
+import { useSetAtom } from 'jotai/react'
 import Modal from '~common/Modal'
 import { deleteLink } from '~redux/modules/user'
 import books from '~assets/bible_versions/books-desc'
-import { multipleTagsModalAtom } from '../../state/app'
+import { unifiedTagsModalAtom } from '../../state/app'
 
 type Props = {
   ref?: React.RefObject<BottomSheetModal | null>
@@ -21,7 +21,7 @@ const LinksSettingsModal = ({ ref, linkId, onClosed, title }: Props) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const router = useRouter()
-  const [, setMultipleTagsItem] = useAtom(multipleTagsModalAtom)
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
 
   const close = useCallback(() => {
     ref?.current?.dismiss()
@@ -62,7 +62,8 @@ const LinksSettingsModal = ({ ref, linkId, onClosed, title }: Props) => {
 
   const editTags = () => {
     if (!linkId) return
-    setMultipleTagsItem({
+    setUnifiedTagsModal({
+      mode: 'select',
       title,
       entity: 'links',
       ids: { [linkId]: true },

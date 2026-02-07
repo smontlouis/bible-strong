@@ -1,7 +1,7 @@
 import * as Updates from 'expo-updates'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 
 export const useUpdates = () => {
   const { t } = useTranslation()

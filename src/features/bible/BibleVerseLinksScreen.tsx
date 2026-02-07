@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { useLocalSearchParams } from 'expo-router'
+import { useSetAtom } from 'jotai/react'
 
 import BibleLinkModal from './BibleLinkModal'
 import BibleLinkItem from './BibleLinkItem'
@@ -12,12 +13,13 @@ import Header from '~common/Header'
 import Empty from '~common/Empty'
 
 import TagsHeader from '~common/TagsHeader'
-import TagsModal from '~common/TagsModal'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { unifiedTagsModalAtom } from '~state/app'
 import verseToReference from '~helpers/verseToReference'
 import { Tag, VerseIds } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import { Link } from '~redux/modules/user'
+import { selectLinks } from '~redux/selectors/bible'
 
 type TLink = {
   linkId: string
@@ -36,19 +38,23 @@ const BibleVerseLinks = () => {
   const [linkVerses, setLinkVerses] = useState<VerseIds | undefined>(undefined)
   const [selectedChip, setSelectedChip] = useState<Tag | null>(null)
   const [linkSettingsId, setLinkSettingsId] = useState<string | null>(null)
-  const _links = useSelector((state: RootState) => state.user.bible.links)
+  const _links = useSelector(selectLinks)
   const linkModal = useBottomSheetModal()
-  const tagsModal = useBottomSheetModal()
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const linkSettingsModal = useBottomSheetModal()
+
+  const openTagsModal = useCallback(() => {
+    setUnifiedTagsModal({
+      mode: 'filter',
+      selectedTag: selectedChip ?? undefined,
+      onSelect: (tag?: Tag) => setSelectedChip(tag ?? null),
+    })
+  }, [selectedChip, setUnifiedTagsModal])
 
   const openLinkSettings = (linkId: string) => {
     setLinkSettingsId(linkId)
     linkSettingsModal.open()
   }
-
-  useEffect(() => {
-    loadPage()
-  }, [verse, _links])
 
   const loadPage = async () => {
     let title
@@ -85,6 +91,10 @@ const BibleVerseLinks = () => {
     setLinks(filtered_links)
   }
 
+  useEffect(() => {
+    loadPage()
+  }, [verse, _links])
+
   const openLinkModal = (linkId: string) => {
     const linkVerses = linkId.split('/').reduce((accuRefs, key) => {
       accuRefs[key] = true
@@ -119,7 +129,7 @@ const BibleVerseLinks = () => {
       ) : (
         <TagsHeader
           title={t('Liens')}
-          setIsOpen={tagsModal.open}
+          setIsOpen={openTagsModal}
           isOpen={false}
           selectedChip={selectedChip}
           hasBackButton
@@ -138,16 +148,15 @@ const BibleVerseLinks = () => {
           message={t("Vous n'avez pas encore de liens...")}
         />
       )}
-      <BibleLinkModal ref={linkModal.ref} linkVerses={linkVerses} />
-      <TagsModal
-        ref={tagsModal.ref}
-        onClosed={() => {}}
-        onSelected={(chip: Tag | null) => setSelectedChip(chip)}
-        selectedChip={selectedChip}
-      />
+      <BibleLinkModal ref={linkModal.getRef()} linkVerses={linkVerses} />
       <BibleLinksSettingsModal
-        ref={linkSettingsModal.ref}
-        title={selectedLink?.link.ogData?.title || selectedLink?.link.customTitle || ''}
+        ref={linkSettingsModal.getRef()}
+        title={
+          selectedLink?.link.ogData?.title ||
+          selectedLink?.link.customTitle ||
+          selectedLink?.link.url ||
+          ''
+        }
         linkId={linkSettingsId}
         onClosed={() => setLinkSettingsId(null)}
       />

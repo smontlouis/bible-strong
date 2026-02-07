@@ -105,7 +105,17 @@ const BookItem = memo(
                   alignItems="center"
                   justifyContent="center"
                 >
-                  <Text>{chapter}</Text>
+                  <Box
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      justifyContent: 'center',
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Text textAlign="center">{chapter}</Text>
+                  </Box>
                 </Box>
               </TouchableOpacity>
             ))}

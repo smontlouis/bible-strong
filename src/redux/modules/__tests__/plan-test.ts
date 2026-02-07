@@ -1,6 +1,18 @@
 /* eslint-env jest */
 
 // Mock react-native before any imports
+import reducer, {
+  cacheImage,
+  removePlan,
+  resetPlan,
+  addPlan,
+  markAsRead,
+  fetchPlans,
+  fetchPlan,
+} from '../plan'
+import { RECEIVE_LIVE_UPDATES, IMPORT_DATA, USER_LOGOUT } from '../user'
+import type { Plan, OngoingPlan, OnlinePlan, Section, ReadingSlice } from '~common/types'
+
 jest.mock('react-native', () => ({
   Appearance: {
     getColorScheme: jest.fn(() => 'light'),
@@ -63,18 +75,6 @@ jest.mock('~themes/natureColors', () => ({ primary: '#444' }))
 jest.mock('~themes/sunsetColors', () => ({ primary: '#555' }))
 jest.mock('~themes/mauveColors', () => ({ primary: '#666' }))
 jest.mock('~themes/nightColors', () => ({ primary: '#777' }))
-
-import reducer, {
-  cacheImage,
-  removePlan,
-  resetPlan,
-  addPlan,
-  markAsRead,
-  fetchPlans,
-  fetchPlan,
-} from '../plan'
-import { RECEIVE_LIVE_UPDATES, IMPORT_DATA, USER_LOGOUT } from '../user'
-import type { Plan, OngoingPlan, OnlinePlan, Section, ReadingSlice } from '~common/types'
 
 const createPlan = (id: string, sections: Section[] = []): Plan => ({
   id,

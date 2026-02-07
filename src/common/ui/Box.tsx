@@ -4,7 +4,6 @@ import { ImageStyle } from 'expo-image'
 import React, { Ref } from 'react'
 import { TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native'
 
-import * as Animatable from 'react-native-animatable'
 import Animated, {
   AnimatedProps,
   ComplexAnimationBuilder,
@@ -130,6 +129,8 @@ export type BoxProps = {
 
     elevation: number
   }
+  inset?: number
+  in?: number
 }
 const Box = styled.View<BoxProps>(props => ({
   // container
@@ -138,6 +139,7 @@ const Box = styled.View<BoxProps>(props => ({
   left: props.left ?? props.l,
   right: props.right ?? props.r,
   bottom: props.bottom ?? props.b,
+  inset: props.inset ?? props.in,
   hitSlop: props.hitSlop,
 
   padding: props.padding ?? props.p,
@@ -301,8 +303,9 @@ const BasicTouchableBox = Box.withComponent(TouchableOpacity)
 export const TouchableBox = BasicTouchableBox
 
 export const AnimatedBox = Animated.createAnimatedComponent(Box)
+export const AnimatedHStack = Animated.createAnimatedComponent(HStack)
+export const AnimatedVStack = Animated.createAnimatedComponent(VStack)
 export const AnimatedTouchableBox = Animated.createAnimatedComponent(BasicTouchableBox)
-export const AnimatableBox = Animatable.createAnimatableComponent(Box)
 
 export const MotiTouchableBox = motify(BasicTouchableBox)()
 export const MotiBox = motify(Box)()

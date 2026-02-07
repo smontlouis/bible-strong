@@ -1,14 +1,14 @@
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'
-import { Share } from 'react-native'
+import { Share, View } from 'react-native'
 import DateTimePicker from 'react-native-modal-datetime-picker'
+import Animated from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
-import { Fade, Placeholder, PlaceholderLine } from 'rn-placeholder'
 import Empty from '~common/Empty'
 import Link, { LinkBox } from '~common/Link'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Switch from '~common/ui/Switch'
@@ -44,6 +44,29 @@ const dayToAgo = (day: number, t: TFunction<'translation'>) => {
     default:
       return undefined
   }
+}
+
+const SkeletonLines = () => {
+  const [pulse, setPulse] = useState(false)
+
+  useEffect(() => {
+    const interval = setInterval(() => setPulse(p => !p), 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <Animated.View
+      style={{
+        opacity: pulse ? 0.4 : 1,
+        transitionProperty: 'opacity',
+        transitionDuration: 800,
+      }}
+    >
+      <View style={{ height: 12, borderRadius: 4, backgroundColor: '#E0E0E0', width: '80%', marginTop: 5 }} />
+      <View style={{ height: 12, borderRadius: 4, backgroundColor: '#E0E0E0', width: '100%', marginTop: 8 }} />
+      <View style={{ height: 12, borderRadius: 4, backgroundColor: '#E0E0E0', width: '30%', marginTop: 8 }} />
+    </Animated.View>
+  )
 }
 
 const VerseOfTheDay = ({ addDay }: Props) => {
@@ -88,11 +111,7 @@ const VerseOfTheDay = ({ addDay }: Props) => {
           {ago}
         </Text>
         <Box marginTop={10}>
-          <Placeholder Animation={Fade}>
-            <PlaceholderLine width={80} style={{ marginTop: 5 }} />
-            <PlaceholderLine style={{ marginTop: 2 }} />
-            <PlaceholderLine width={30} style={{ marginTop: 3 }} />
-          </Placeholder>
+          <SkeletonLines />
         </Box>
       </Box>
     )

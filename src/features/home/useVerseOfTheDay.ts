@@ -11,7 +11,7 @@ import setMinutes from 'date-fns/fp/setMinutes'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 
 import VOD from '~assets/bible_versions/bible-vod.json'
 import booksDesc2 from '~assets/bible_versions/books-desc-2'

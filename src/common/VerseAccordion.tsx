@@ -1,8 +1,7 @@
 import { useTheme } from '@emotion/react'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator } from 'react-native'
-import Animated from 'react-native-reanimated'
-import { useSharedValue } from 'react-native-reanimated'
+import Animated, { useSharedValue } from 'react-native-reanimated'
 
 import { VerseIds, VerseRefContent } from '~common/types'
 import Box, { TouchableBox } from '~common/ui/Box'

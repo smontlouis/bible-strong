@@ -1,12 +1,12 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet/'
-import React, { useCallback, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { FlatList } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { useSetAtom } from 'jotai/react'
 
 import Empty from '~common/Empty'
 import RenameModal from '~common/RenameModal'
 import TagsHeader from '~common/TagsHeader'
-import TagsModal from '~common/TagsModal'
 import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
 import withLoginModal from '~common/withLoginModal'
@@ -21,6 +21,7 @@ import { Tag } from '~common/types'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
 import generateUUID from '~helpers/generateUUID'
 import { RootState } from '~redux/modules/reducer'
+import { unifiedTagsModalAtom } from '~state/app'
 import StudyItem from './StudyItem'
 import StudySettingsModal from './StudySettingsModal'
 
@@ -37,41 +38,44 @@ const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => 
   const dispatch = useDispatch()
   const r = useMediaQueriesArray()
 
-  const tagsModal = useBottomSheetModal()
-  const [studySettingsId, setStudySettingsId] = React.useState<string | false>(false)
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
+  const [studySettingsId, setStudySettingsId] = useState<string | false>(false)
   const studySettingsModal = useBottomSheetModal()
   const renameModalRef = useRef<BottomSheetModal>(null)
   const [studyToRename, setStudyToRename] = useState<{ id: string; title: string } | null>(null)
-  const [pendingStudyId, setPendingStudyId] = React.useState<string | null>(null)
+  const [pendingStudyId, setPendingStudyId] = useState<string | null>(null)
 
-  const openStudySettings = useCallback(
-    (studyId: string) => {
-      setStudySettingsId(studyId)
-      studySettingsModal.open()
-    },
-    [studySettingsModal]
-  )
+  const openStudySettings = (studyId: string) => {
+    setStudySettingsId(studyId)
+    studySettingsModal.open()
+  }
 
-  const openRenameModal = useCallback((data: { id: string; title: string }) => {
+  const openRenameModal = (data: { id: string; title: string }) => {
     setStudyToRename(data)
     renameModalRef.current?.present()
-  }, [])
+  }
 
-  const onStudyPress = useCallback(
-    (studyId: string) => {
-      if (isInTab && onStudySelect) {
-        onStudySelect(studyId)
-      } else {
-        router.push({
-          pathname: '/edit-study',
-          params: { studyId },
-        })
-      }
-    },
-    [isInTab, onStudySelect, router]
-  )
+  const onStudyPress = (studyId: string) => {
+    if (isInTab && onStudySelect) {
+      onStudySelect(studyId)
+    } else {
+      router.push({
+        pathname: '/edit-study',
+        params: { studyId },
+      })
+    }
+  }
 
-  const [selectedChip, setSelectedChip] = React.useState<Tag | null>(null)
+  const [selectedChip, setSelectedChip] = useState<Tag | null>(null)
+
+  const openTagsModal = () => {
+    setUnifiedTagsModal({
+      mode: 'filter',
+      selectedTag: selectedChip ?? undefined,
+      onSelect: (tag?: Tag) => setSelectedChip(tag ?? null),
+    })
+  }
+
   const studies = useSelector(
     (state: RootState) => Object.values(state.user.bible.studies),
     shallowEqual
@@ -82,7 +86,7 @@ const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => 
   )
 
   // Open the study when a new study is created
-  React.useEffect(() => {
+  useEffect(() => {
     if (pendingStudyId && pendingStudy) {
       onStudyPress(pendingStudyId)
       setPendingStudyId(null)
@@ -103,7 +107,7 @@ const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => 
           ListHeaderComponent={
             <TagsHeader
               title={t('Études')}
-              setIsOpen={tagsModal.open}
+              setIsOpen={openTagsModal}
               isOpen={false}
               selectedChip={selectedChip}
               hasBackButton={hasBackButton}
@@ -126,7 +130,7 @@ const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => 
         <>
           <TagsHeader
             title={t('Études')}
-            setIsOpen={tagsModal.open}
+            setIsOpen={openTagsModal}
             isOpen={false}
             selectedChip={selectedChip}
             hasBackButton={hasBackButton}
@@ -156,12 +160,6 @@ const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => 
           }}
         />
       )}
-      <TagsModal
-        ref={tagsModal.ref}
-        onClosed={() => {}}
-        onSelected={(chip: Tag | null) => setSelectedChip(chip)}
-        selectedChip={selectedChip}
-      />
       <StudySettingsModal
         ref={studySettingsModal.ref}
         studyId={studySettingsId}

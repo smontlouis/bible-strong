@@ -1,11 +1,11 @@
 import to from 'await-to-js'
-import React, { useMemo } from 'react'
+import React from 'react'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import i18n from '~i18n'
 
 import { cdnUrl } from '~helpers/firebase'
 import { cacheImage, fetchPlan, updatePlans } from '~redux/modules/plan'
-import { makePlanByIdSelector, makeOngoingPlanByIdSelector } from '~redux/selectors/plan'
+import { getPlanByIdSelector, getOngoingPlanByIdSelector } from '~redux/selectors/plan'
 
 import {
   ComputedPlan,
@@ -20,12 +20,13 @@ import {
 } from 'src/common/types'
 import { RootState } from 'src/redux/modules/reducer'
 import books from '~assets/bible_versions/books-desc'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import getBiblePericope from '~helpers/getBiblePericope'
 import loadBible from '~helpers/loadBible'
 import { range } from '~helpers/range'
 import verseToReference from '~helpers/verseToReference'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
+import { VersionCode } from '~state/tabs'
 
 interface VerseContent {
   Pericope: {
@@ -84,13 +85,13 @@ const calculateProgress = (
     return 0
   }
 
-  return (
-    ongoingReadingSlices.filter(oReadingSlice =>
-      readingSlices.find(
-        rSlice => rSlice.id === oReadingSlice.id && oReadingSlice.status === 'Completed'
-      )
-    ).length / readingSlices.length
+  // Use a Set for O(1) lookup instead of nested find
+  const completedIds = new Set(
+    ongoingReadingSlices.filter(s => s.status === 'Completed').map(s => s.id)
   )
+
+  const completedCount = readingSlices.filter(s => completedIds.has(s.id)).length
+  return completedCount / readingSlices.length
 }
 
 /**
@@ -101,33 +102,29 @@ const calculateProgress = (
 const transformSections = (
   sections: Section[],
   ongoingReadingSlices?: OngoingReadingSlice[]
-): ComputedSection[] =>
-  sections.map((s, i) => ({
+): ComputedSection[] => {
+  // Create a Map for O(1) status lookup instead of find for each slice
+  const statusMap = new Map(ongoingReadingSlices?.map(s => [s.id, s.status]))
+
+  return sections.map(s => ({
     ...s,
     progress: calculateProgress(s.readingSlices, ongoingReadingSlices),
     readingSlices: undefined,
-    data: s.readingSlices.map(rSlice => {
-      const ongoingReadingSlice = ongoingReadingSlices?.find(r => r.id === rSlice.id)
-      if (ongoingReadingSlice) {
-        return {
-          ...rSlice,
-          status: ongoingReadingSlice.status,
-        }
-      }
-      return {
-        ...rSlice,
-        status: 'Idle',
-      }
-    }),
+    data: s.readingSlices.map(rSlice => ({
+      ...rSlice,
+      status: statusMap.get(rSlice.id) ?? 'Idle',
+    })),
   }))
+}
 
 /**
  * Return computedPlan based on id
  * @param id
  */
 export const useComputedPlan = (id: string): ComputedPlan | undefined => {
-  const selectPlanById = useMemo(() => makePlanByIdSelector(), [])
-  const selectOngoingPlanById = useMemo(() => makeOngoingPlanByIdSelector(), [])
+  // Use cached selectors to avoid recreating them on every render
+  const selectPlanById = getPlanByIdSelector(id)
+  const selectOngoingPlanById = getOngoingPlanByIdSelector(id)
 
   const plan = useSelector((state: RootState) => selectPlanById(state, id))
   const ongoingPlan = useSelector((state: RootState) => selectOngoingPlanById(state, id))
@@ -137,17 +134,11 @@ export const useComputedPlan = (id: string): ComputedPlan | undefined => {
   }
 
   if (ongoingPlan) {
-    // Calculate progress
-    const flattenedReadingSlices: ReadingSlice[] = plan.sections.reduce(
-      (acc: ReadingSlice[], curr) => [...acc, ...curr.readingSlices],
-      []
-    )
+    // Use flatMap for cleaner flattening
+    const flattenedReadingSlices = plan.sections.flatMap(s => s.readingSlices)
 
-    const onGoingReadingSlicesArray = Object.entries(ongoingPlan?.readingSlices).map(
-      ([id, status]) => ({
-        id,
-        status,
-      })
+    const onGoingReadingSlicesArray = Object.entries(ongoingPlan.readingSlices).map(
+      ([id, status]) => ({ id, status })
     )
 
     return {
@@ -308,15 +299,12 @@ const chapterStringToArray = (chapters: string) => {
  */
 export const getChaptersForPlan = async (
   chapters: string,
-  version: string
+  version: VersionCode
 ): Promise<ChapterForPlan> => {
   const book = chapters.split('|').map(Number)[0]
   const bookName = i18n.t(books[book - 1].Nom)
   const chaptersRange = chapterStringToArray(chapters)
-  // @ts-ignore
-  const bible = await loadBible(version)
-  // @ts-ignore
-  const pericope = await getBiblePericope(version)
+  const [bible, pericope] = await Promise.all([loadBible(version), getBiblePericope(version)])
 
   const content: ChapterForPlanContent[] = chaptersRange.map((cRange: string[]) => {
     const [, chapter] = cRange.map(Number)
@@ -371,7 +359,10 @@ export const useChapterToContent = (chapters: string) => {
  * @param verses
  * @param version
  */
-export const getVersesForPlan = async (verses: string, version: string): Promise<VerseForPlan> => {
+export const getVersesForPlan = async (
+  verses: string,
+  version: VersionCode
+): Promise<VerseForPlan> => {
   const [book, rest] = verses.split('|')
   const bookName = verseToReference(verses, { isPlan: true })
 
@@ -383,10 +374,7 @@ export const getVersesForPlan = async (verses: string, version: string): Promise
       : [`${book}-${chapter}-${startVerse}`]
   ).map(c => c.split('-').map(Number))
 
-  // @ts-ignore
-  const bible = await loadBible(version)
-  // @ts-ignore
-  const pericope = await getBiblePericope(version)
+  const [bible, pericope] = await Promise.all([loadBible(version), getBiblePericope(version)])
 
   const content: VerseContent[] = versesRange.map((vRange: number[]) => {
     const [, , verse] = vRange

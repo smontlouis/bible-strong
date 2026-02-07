@@ -13,7 +13,7 @@ const FineLine = styled(Box)(({ theme }) => ({
   position: 'absolute',
   top: 0,
   bottom: 0,
-  left: 35,
+  left: 36,
   width: 2,
   backgroundColor: theme.colors.lightPrimary,
 }))
@@ -44,6 +44,9 @@ const ReadingSlice = ({
   isSectionCompleted,
 }: ComputedReadingSlice & Props) => {
   const isNext = status === 'Next'
+  // Pre-filter slices to avoid double filtering in map
+  const filteredSlices = slices.filter(f => f.type !== 'Image')
+
   return (
     <Link route="PlanSlice" params={{ readingSlice: { id, planId, title, slices } }}>
       <Box paddingLeft={28} paddingTop={15} backgroundColor="reverse" position="relative">
@@ -60,17 +63,15 @@ const ReadingSlice = ({
                 type="Title"
               />
             )}
-            {slices
-              .filter(f => f.type !== 'Image')
-              .map((slice, i) => (
-                <EntitySlice
-                  status={status}
-                  isSectionCompleted={isSectionCompleted}
-                  isLast={i === slices.filter(f => f.type !== 'Image').length - 1}
-                  key={slice.id}
-                  {...slice}
-                />
-              ))}
+            {filteredSlices.map((slice, i) => (
+              <EntitySlice
+                status={status}
+                isSectionCompleted={isSectionCompleted}
+                isLast={i === filteredSlices.length - 1}
+                key={slice.id}
+                {...slice}
+              />
+            ))}
           </Box>
           <Box paddingHorizontal={10} alignItems="center" row>
             {isNext && <NextButton>LIRE</NextButton>}

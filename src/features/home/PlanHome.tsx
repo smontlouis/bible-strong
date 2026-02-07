@@ -5,7 +5,7 @@ import { Image } from 'expo-image'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet } from 'react-native'
-import { Circle as ProgressCircle } from 'react-native-progress'
+import { AnimatedProgressCircle } from '@convective/react-native-reanimated-progress'
 import { useDispatch, useSelector } from 'react-redux'
 import Link from '~common/Link'
 import PlanIcon from '~common/PlanIcon'
@@ -98,15 +98,13 @@ const PlanHome = () => {
             params={{ plan: { id, title, image, description, author } }}
             px={20}
           >
-            <ProgressCircle
-              style={{ marginRight: 15 }}
+            <AnimatedProgressCircle
               size={40}
               progress={progress}
-              borderWidth={0}
               color={status === 'Completed' ? theme.colors.success : theme.colors.primary}
               unfilledColor={theme.colors.lightGrey}
               thickness={2}
-              fill="none"
+              animationDuration={300}
             >
               <Box style={StyleSheet.absoluteFillObject} center>
                 <CircleImage size={35} center>
@@ -120,8 +118,8 @@ const PlanHome = () => {
                   )}
                 </CircleImage>
               </Box>
-            </ProgressCircle>
-            <Box flex justifyContent="center">
+            </AnimatedProgressCircle>
+            <Box flex justifyContent="center" ml={15}>
               <Paragraph fontFamily="title" scale={-2} scaleLineHeight={-2}>
                 {title}
               </Paragraph>

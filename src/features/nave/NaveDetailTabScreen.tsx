@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Share } from 'react-native'
 import { WebView } from 'react-native-webview'
 import { useSelector } from 'react-redux'
@@ -13,7 +13,7 @@ import DetailedHeader from '~common/DetailedHeader'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import PopOverMenu from '~common/PopOverMenu'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import TagList from '~common/TagList'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
@@ -25,11 +25,10 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
 import loadNaveItem from '~helpers/loadNaveItem'
-import { timeout } from '~helpers/timeout'
 import useHTMLView from '~helpers/useHTMLView'
 import { RootState } from '~redux/modules/reducer'
 import { makeNaveTagsSelector } from '~redux/selectors/bible'
-import { historyAtom, multipleTagsModalAtom } from '../../state/app'
+import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
 import { NaveTab } from '../../state/tabs'
 
 interface NaveDetailScreenProps {
@@ -64,8 +63,8 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
 
   const [naveItem, setNaveItem] = useState<any>(null)
   const { t } = useTranslation()
-  const setMultipleTagsItem = useSetAtom(multipleTagsModalAtom)
-  const selectNaveTags = useMemo(() => makeNaveTagsSelector(), [])
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
+  const selectNaveTags = makeNaveTagsSelector()
   const tags = useSelector((state: RootState) => selectNaveTags(state, name_lower ?? ''))
   const openInNewTab = useOpenInNewTab()
 
@@ -147,7 +146,6 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
         .replace(/\\x([0-9A-F]+);/gi, function () {
           return String.fromCharCode(parseInt(arguments[1], 16))
         })} \n\nLa suite sur https://bible-strong.app`
-      await timeout(400)
       Share.share({ message })
     } catch (e) {
       toast.error('Erreur lors du partage.')
@@ -174,7 +172,6 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
     <Container>
       <DetailedHeader
         hasBackButton={!isInTab}
-        onCustomBackPress={goBack}
         title={naveItem?.name || name}
         subtitle={naveItem?.name_lower}
         borderColor="quint"
@@ -184,7 +181,8 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
               <>
                 <MenuOption
                   onSelect={() =>
-                    setMultipleTagsItem({
+                    setUnifiedTagsModal({
+                      mode: 'select',
                       id: naveItem.name_lower,
                       title: naveItem.name,
                       entity: 'naves',
@@ -196,7 +194,7 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
                     <Text marginLeft={10}>{t('Étiquettes')}</Text>
                   </Box>
                 </MenuOption>
-                <MenuOption onSelect={shareDefinition}>
+                <MenuOption onSelect={shareDefinition} closeBeforeSelect>
                   <Box row alignItems="center">
                     <FeatherIcon name="share-2" size={15} />
                     <Text marginLeft={10}>{t('Partager')}</Text>

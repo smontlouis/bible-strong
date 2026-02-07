@@ -47,12 +47,7 @@ type BibleVerseDetailScreenProps = {
   insets: EdgeInsets
 }
 
-type BibleVerseNotesScreenProps = {
-  book?: number
-  chapter?: number
-  verse: string
-  withBack: boolean
-}
+type BibleVerseNotesScreenProps = undefined
 
 type BibleVerseLinksScreenProps = {
   verse?: string
@@ -168,7 +163,6 @@ export type MainStackProps = {
   DictionnaryDetail: DictionaryDetailScreenProps
   Login: undefined
   Support: undefined
-  CustomHighlightColors: undefined
   Changelog: undefined
   ImportExport: undefined
   Backup: undefined
@@ -201,6 +195,7 @@ export type MainStackProps = {
   ResourceLanguage: undefined
   BibleDefaults: undefined
   Theme: undefined
+  WordAnnotations: undefined
 }
 
 declare global {

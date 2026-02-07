@@ -12,7 +12,7 @@ import Spacer from '~common/ui/Spacer'
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
 import Header from '~common/Header'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import { useTranslation } from 'react-i18next'
 
 const RegisterScreen = () => {

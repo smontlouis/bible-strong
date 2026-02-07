@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useSetAtom } from 'jotai/react'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import books from '~assets/bible_versions/books-desc'
 import { Tag } from '~common/types'
 import generateUUID from '~helpers/generateUUID'
@@ -48,6 +48,18 @@ interface TaggedEntity {
   tags?: Record<string, { id: string; name: string }>
 }
 
+// Type pour les word annotations retournées par le sélecteur
+interface WordAnnotationData {
+  id: string
+  date: number
+  color: string
+  type: 'background' | 'underline' | 'circle'
+  version: string
+  text: string
+  verseKey: string
+  tags?: Record<string, { id: string; name: string }>
+}
+
 // Type pour les données du tag (retour de makeTagDataSelector)
 export interface TagData {
   highlights: HighlightData[]
@@ -58,6 +70,7 @@ export interface TagData {
   words: TaggedEntity[]
   strongsGrec: TaggedEntity[]
   strongsHebreu: TaggedEntity[]
+  wordAnnotations: WordAnnotationData[]
 }
 
 export const useCreateTabGroupFromTag = () => {
@@ -201,6 +214,31 @@ export const useCreateTabGroupFromTag = () => {
           selectedBook: books[livre - 1],
           selectedChapter: chapitre,
           selectedVerse: verset,
+          focusVerses: [verset],
+          isReadOnly: true,
+        },
+      })
+    })
+
+    // WordAnnotations → BibleTab (ouvre le verset associé avec la version correcte)
+    tagData.wordAnnotations?.forEach(a => {
+      const [livre, chapitre, verset] = a.verseKey.split('-').map(Number)
+      // Generate title from verse reference + annotation text
+      const { title: annotationTitle } = formatVerseContent([
+        { Livre: livre, Chapitre: chapitre, Verset: verset },
+      ])
+
+      tabs.push({
+        id: `bible-${generateUUID()}`,
+        title: `${annotationTitle} - "${a.text}"` || t('Bible'),
+        isRemovable: true,
+        type: 'bible',
+        data: {
+          ...getDefaultBibleTab().data,
+          selectedBook: books[livre - 1],
+          selectedChapter: chapitre,
+          selectedVerse: verset,
+          selectedVersion: a.version,
           focusVerses: [verset],
           isReadOnly: true,
         },

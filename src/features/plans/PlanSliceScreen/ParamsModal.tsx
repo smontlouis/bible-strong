@@ -27,6 +27,9 @@ import {
   setSettingsPreferredLightTheme,
 } from '~redux/modules/user'
 
+// Extracted constant to avoid recreation on each render
+const FONTS_DATA = ['Literata Book', ...fonts]
+
 interface Props {
   paramsModalRef: React.RefObject<BottomSheet>
 }
@@ -35,6 +38,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
   const dispatch = useDispatch()
   const { t } = useTranslation()
   const fontsViewRef = React.useRef(null)
+  const insets = useSafeAreaInsets()
   const {
     fontFamily,
     fontSizeScale,
@@ -60,7 +64,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
       {...bottomSheetStyles}
     >
       <BottomSheetScrollView scrollEnabled={false}>
-        <Box padding={20} paddingBottom={20 + useSafeAreaInsets().bottom}>
+        <Box padding={20} paddingBottom={20 + insets.bottom}>
           <HalfContainer border>
             <Text flex={5}>{t('Taille du texte')}</Text>
             <Text marginLeft={5} fontSize={12} bold>{`${100 + fontSizeScale * 10}%`}</Text>
@@ -147,7 +151,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
               })}
               initialScrollIndex={initialScrollIndex === -1 ? 0 : initialScrollIndex}
               style={{ paddingVertical: 15 }}
-              data={['Literata Book', ...fonts]}
+              data={FONTS_DATA}
               keyExtractor={item => item}
               renderItem={({ item }) => {
                 const isSelected = fontFamily === item

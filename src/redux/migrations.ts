@@ -445,4 +445,31 @@ export default {
       },
     }
   },
+  31: (state: RootState) => {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        bible: {
+          ...state.user.bible,
+          wordAnnotations: state.user.bible.wordAnnotations ?? {},
+        },
+      },
+    }
+  },
+  32: (state: RootState) => {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        bible: {
+          ...state.user.bible,
+          settings: {
+            ...state.user.bible.settings,
+            redWordsDisplay: true,
+          },
+        },
+      },
+    }
+  },
 }

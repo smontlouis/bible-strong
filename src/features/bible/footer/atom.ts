@@ -13,3 +13,5 @@ export const audioSpeedAtom = atomWithAsyncStorage('audioSpeed', 1)
 export const audioRepeatAtom = atomWithAsyncStorage<RepeatMode>('audioRepeat', RepeatMode.Off)
 
 export const playingBibleTabIdAtom = atom<string>('')
+
+export const isINTCompleteAtom = atomWithAsyncStorage('isINTComplete', true)

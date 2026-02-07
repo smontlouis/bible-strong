@@ -1,6 +1,25 @@
 /* eslint-env jest */
 
 // Mock react-native before any imports
+import reducer, {
+  UserState,
+  verifyEmail,
+  setFontFamily,
+  saveAllLogsAsSeen,
+  onUserLoginSuccess,
+  onUserLogout,
+  onUserUpdateProfile,
+  receiveSubcollectionUpdates,
+  setNotificationVOD,
+  setNotificationId,
+  toggleCompareVersion,
+  resetCompareVersion,
+  addChangelog,
+  getChangelogFail,
+  appFetchData,
+  appFetchDataFail,
+} from '../user'
+
 jest.mock('react-native', () => ({
   Appearance: {
     getColorScheme: jest.fn(() => 'light'),
@@ -59,25 +78,6 @@ jest.mock('~themes/natureColors', () => ({ primary: '#444' }))
 jest.mock('~themes/sunsetColors', () => ({ primary: '#555' }))
 jest.mock('~themes/mauveColors', () => ({ primary: '#666' }))
 jest.mock('~themes/nightColors', () => ({ primary: '#777' }))
-
-import reducer, {
-  UserState,
-  verifyEmail,
-  setFontFamily,
-  saveAllLogsAsSeen,
-  onUserLoginSuccess,
-  onUserLogout,
-  onUserUpdateProfile,
-  receiveSubcollectionUpdates,
-  setNotificationVOD,
-  setNotificationId,
-  toggleCompareVersion,
-  resetCompareVersion,
-  addChangelog,
-  getChangelogFail,
-  appFetchData,
-  appFetchDataFail,
-} from '../user'
 
 const getInitialState = (): UserState =>
   ({

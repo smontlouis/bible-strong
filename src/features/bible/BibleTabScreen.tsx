@@ -14,13 +14,13 @@ import sepiaColors from '~themes/sepiaColors'
 import sunsetColors from '~themes/sunsetColors'
 
 import BibleViewer from './BibleViewer'
-const deepmerge = require('@fastify/deepmerge')()
 
 import { atom, getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { getDatabases } from '~helpers/databases'
 import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { BibleTab } from '../../state/tabs'
+const deepmerge = require('@fastify/deepmerge')()
 
 interface BibleTabScreenProps {
   bibleAtom: PrimitiveAtom<BibleTab>

@@ -1,21 +1,19 @@
-import { Theme } from '@emotion/react'
 import styled from '@emotion/native'
-import * as Icon from '@expo/vector-icons'
 import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
 import React, { memo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, Alert, Platform, StyleSheet } from 'react-native'
-import * as Animatable from 'react-native-animatable'
+import { Alert, Platform } from 'react-native'
 import { useSelector } from 'react-redux'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import Header from '~common/Header'
 import LexiqueIcon from '~common/LexiqueIcon'
-import Link, { LinkBox, LinkProps } from '~common/Link'
+import Link, { LinkProps } from '~common/Link'
 import NaveIcon from '~common/NaveIcon'
-import Box, { HStack, SafeAreaBox, VStack } from '~common/ui/Box'
+import Box, { SafeAreaBox } from '~common/ui/Box'
 import CardLinkItem from '~common/ui/CardLinkItem'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import IconCircle from '~common/ui/IconCircle'
+import PulsingDot from '~common/ui/PulsingDot'
 import ScrollView from '~common/ui/ScrollView'
 import SectionCard, { SectionCardHeader } from '~common/ui/SectionCard'
 import Text from '~common/ui/Text'
@@ -27,44 +25,13 @@ import { RootState } from '~redux/modules/reducer'
 import app from '../../../package.json'
 
 import { useRouter } from 'expo-router'
+import { useTheme } from '@emotion/react'
 
 export const LinkItem = styled(Link)<LinkProps<keyof MainStackProps>>(() => ({
   flexDirection: 'row',
   alignItems: 'center',
   paddingHorizontal: 20,
   paddingVertical: 15,
-}))
-
-const Circle = styled.View(({ theme }) => ({
-  position: 'absolute',
-  width: 10,
-  height: 10,
-  borderRadius: 10,
-  top: 0,
-  right: 8,
-  backgroundColor: theme.colors.success,
-}))
-
-const AnimatedCircle = Animatable.createAnimatableComponent(Circle)
-
-const Chip = styled(Link)(({ theme }: { theme: Theme }) => ({
-  borderRadius: 10,
-  backgroundColor: theme.colors.lightGrey,
-  paddingVertical: 10,
-  paddingHorizontal: 10,
-  shadowColor: 'rgb(89,131,240)',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.1,
-  shadowRadius: 7,
-  elevation: 1,
-  overflow: 'visible',
-  flex: 1,
-}))
-
-const ChipIcon = styled(Icon.Feather)(({ theme, color }: any) => ({
-  // @ts-ignore
-  color: theme.colors[color] || theme.colors.grey,
-  marginRight: 5,
 }))
 
 const ProfileContainer = styled.View(({ theme }) => ({
@@ -107,23 +74,13 @@ type MoreProps = {
 
 export const More = ({ closeMenu }: MoreProps) => {
   const { isLogged, user, logout, promptDeleteAccount } = useLogin()
+  const theme = useTheme()
 
   const lang = useLanguage()
   const hasUpdate = useSelector((state: RootState) =>
     Object.values(state.user.needsUpdate).some(v => v)
   )
   const isLoading = useSelector((state: RootState) => state.user.isLoading)
-
-  const highlights = useSelector(
-    (state: RootState) => Object.keys(state.user.bible.highlights).length
-  )
-  const notes = useSelector((state: RootState) => Object.keys(state.user.bible.notes).length)
-  const studies = useSelector((state: RootState) => Object.keys(state.user.bible.studies).length)
-  const tags = useSelector((state: RootState) => Object.keys(state.user.bible.tags).length)
-  const bookmarks = useSelector(
-    (state: RootState) => Object.keys(state.user.bible.bookmarks || {}).length
-  )
-  const links = useSelector((state: RootState) => Object.keys(state.user.bible.links || {}).length)
 
   const { t } = useTranslation()
 
@@ -141,9 +98,9 @@ export const More = ({ closeMenu }: MoreProps) => {
       <Header title={t('Plus')} onCustomBackPress={closeMenu} hasBackButton />
       <ScrollView
         style={{ flex: 1 }}
-        backgroundColor="lightGrey"
         contentContainerStyle={{
           paddingBottom: 20,
+          backgroundColor: theme.colors.lightGrey,
         }}
       >
         <SectionCard mt={8}>
@@ -156,116 +113,19 @@ export const More = ({ closeMenu }: MoreProps) => {
           {isLogged ? (
             <>
               {/* Profile header avec avatar */}
-              <LinkBox route="Profile">
-                <Box px={16} py={12} row alignItems="center" justifyContent="space-between">
-                  <HStack alignItems="center" gap={12}>
-                    <ProfileContainer>
-                      <UserAvatar
-                        size={50}
-                        photoURL={user.photoURL}
-                        displayName={user.displayName}
-                        email={user.email}
-                      />
-                      {isLoading && (
-                        <Box
-                          backgroundColor="rgba(255,255,255,0.8)"
-                          center
-                          style={StyleSheet.absoluteFillObject}
-                        >
-                          <ActivityIndicator color="black" />
-                        </Box>
-                      )}
-                    </ProfileContainer>
-                    <Text title fontSize={18}>
-                      {extractFirstName(user.displayName)}
-                    </Text>
-                  </HStack>
-                  <Box bg="primary" borderRadius={20} px={10} py={5} row center>
-                    <Text fontSize={12} color="reverse">
-                      {t('profile.title')}
-                    </Text>
-                    <FeatherIcon name="arrow-right" size={14} color="reverse" />
-                  </Box>
-                </Box>
-              </LinkBox>
+              <CardLinkItem route="Profile">
+                <UserAvatar
+                  size={36}
+                  photoURL={user.photoURL}
+                  displayName={user.displayName}
+                  email={user.email}
+                />
+                <Text flex fontSize={15}>
+                  {extractFirstName(user.displayName)}
+                </Text>
+                <FeatherIcon name="chevron-right" size={20} color="grey" />
+              </CardLinkItem>
 
-              {/* Mon contenu - chips */}
-              <Box px={12} py={12}>
-                <VStack gap={10}>
-                  <HStack gap={10}>
-                    <Chip route="Highlights">
-                      <Box row>
-                        <ChipIcon name="edit-3" size={20} />
-                        <Text bold fontSize={20}>
-                          {highlights}
-                        </Text>
-                      </Box>
-                      <Text fontSize={11} numberOfLines={1}>
-                        {t('surbrillance', { count: highlights })}
-                      </Text>
-                    </Chip>
-                    <Chip route="Bookmarks">
-                      <Box row>
-                        <ChipIcon name="bookmark" size={20} />
-                        <Text bold fontSize={20}>
-                          {bookmarks}
-                        </Text>
-                      </Box>
-                      <Text fontSize={11} numberOfLines={1}>
-                        {t('marque-page', { count: bookmarks })}
-                      </Text>
-                    </Chip>
-                    <Chip route="BibleVerseNotes">
-                      <Box row>
-                        <ChipIcon name="file-text" size={20} />
-                        <Text bold fontSize={20}>
-                          {notes}
-                        </Text>
-                      </Box>
-                      <Text fontSize={11} numberOfLines={1}>
-                        {t('note', { count: notes })}
-                      </Text>
-                    </Chip>
-                  </HStack>
-                  <HStack gap={10}>
-                    <Chip route="Studies">
-                      <Box row>
-                        <ChipIcon name="feather" size={20} />
-                        <Text bold fontSize={20}>
-                          {studies}
-                        </Text>
-                      </Box>
-                      <Text fontSize={11} numberOfLines={1}>
-                        {t('étude', { count: studies })}
-                      </Text>
-                    </Chip>
-                    <Chip route="BibleVerseLinks">
-                      <Box row>
-                        <ChipIcon name="link" size={20} />
-                        <Text bold fontSize={20}>
-                          {links}
-                        </Text>
-                      </Box>
-                      <Text fontSize={11} numberOfLines={1}>
-                        {t('lien', { count: links })}
-                      </Text>
-                    </Chip>
-                    <Chip route="Tags">
-                      <Box row>
-                        <ChipIcon name="tag" size={20} />
-                        <Text bold fontSize={20}>
-                          {tags}
-                        </Text>
-                      </Box>
-                      <Text fontSize={11} numberOfLines={1}>
-                        {t('étiquette', { count: tags })}
-                      </Text>
-                    </Chip>
-                  </HStack>
-                </VStack>
-              </Box>
-
-              {/* Logout */}
               <CardLinkItem onPress={promptLogout} isLast>
                 <IconCircle bg="rgba(239, 68, 68, 0.1)">
                   <FeatherIcon name="log-out" size={20} color="quart" />
@@ -280,7 +140,7 @@ export const More = ({ closeMenu }: MoreProps) => {
               <IconCircle bg="lightPrimary">
                 <FeatherIcon name="log-in" size={20} color="primary" />
               </IconCircle>
-              <Text color="primary" bold fontSize={15}>
+              <Text color="primary" fontSize={15}>
                 {t('Se connecter')}
               </Text>
             </CardLinkItem>
@@ -290,7 +150,7 @@ export const More = ({ closeMenu }: MoreProps) => {
         <SectionCard>
           <SectionCardHeader>
             <FeatherIcon name="book" size={16} color="grey" />
-            <Text ml={8} fontSize={12} color="grey" bold style={{ textTransform: 'uppercase' }}>
+            <Text ml={8} fontSize={12} color="grey" style={{ textTransform: 'uppercase' }}>
               {t('settings.resources')}
             </Text>
           </SectionCardHeader>
@@ -298,25 +158,28 @@ export const More = ({ closeMenu }: MoreProps) => {
             <IconCircle bg="rgba(59, 130, 246, 0.1)">
               <LexiqueIcon size={20} color="primary" />
             </IconCircle>
-            <Text color="primary" bold fontSize={15}>
+            <Text flex color="primary" fontSize={15}>
               {t('Lexique')}
             </Text>
+            <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
           <CardLinkItem route="Dictionnaire">
             <IconCircle bg="rgba(251, 191, 36, 0.1)">
               <DictionnaryIcon size={20} color="secondary" />
             </IconCircle>
-            <Text color="secondary" bold fontSize={15}>
+            <Text flex color="secondary" fontSize={15}>
               {t('Dictionnaire')}
             </Text>
+            <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
           <CardLinkItem route="Nave">
             <IconCircle bg="rgba(147, 51, 234, 0.1)">
               <NaveIcon size={20} color="quint" />
             </IconCircle>
-            <Text color="quint" bold fontSize={15}>
+            <Text flex color="quint" fontSize={15}>
               {t('Bible Thématique Nave')}
             </Text>
+            <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
           <CardLinkItem route="Plans" isLast>
             <IconCircle bg="rgba(107, 114, 128, 0.1)">
@@ -366,9 +229,7 @@ export const More = ({ closeMenu }: MoreProps) => {
           <CardLinkItem route="Downloads" isLast>
             <IconCircle bg="rgba(107, 114, 128, 0.1)">
               <Box>
-                {hasUpdate && (
-                  <AnimatedCircle animation="pulse" easing="ease-out" iterationCount="infinite" />
-                )}
+                {hasUpdate && <PulsingDot style={{ position: 'absolute', top: 0, right: 8 }} />}
                 <FeatherIcon name="download" size={20} color="grey" />
               </Box>
             </IconCircle>

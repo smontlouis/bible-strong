@@ -18,7 +18,7 @@ const Container = styled.View(({ theme }) => ({
 interface Props {
   message?: string
   subMessage?: string
-  style?: Object
+  style?: object
   children?: React.ReactNode
 }
 

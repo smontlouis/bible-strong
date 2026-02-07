@@ -1,16 +1,18 @@
 import styled from '@emotion/native'
+import * as Icon from '@expo/vector-icons'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
-import * as Icon from '@expo/vector-icons'
 
 import Link from '~common/Link'
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import useLogin from '~helpers/useLogin'
 import { RootState } from '~redux/modules/reducer'
 
 const ProfileStats = () => {
   const { t } = useTranslation()
+  const { isLogged } = useLogin()
 
   const highlights = useSelector(
     (state: RootState) => Object.keys(state.user.bible.highlights).length
@@ -23,11 +25,12 @@ const ProfileStats = () => {
   )
   const links = useSelector((state: RootState) => Object.keys(state.user.bible.links || {}).length)
 
+  if (!isLogged) {
+    return null
+  }
+
   return (
     <Box bg="lightGrey" borderRadius={30} paddingVertical={20} marginHorizontal={20}>
-      <Text bold fontSize={16} marginBottom={15} paddingHorizontal={20}>
-        {t('profile.stats')}
-      </Text>
       <VStack gap={10} paddingHorizontal={20}>
         <HStack gap={10}>
           <StatCard route="Highlights">

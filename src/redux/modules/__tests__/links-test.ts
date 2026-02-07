@@ -1,6 +1,10 @@
 /* eslint-env jest */
 
 // Mock react-native before any imports
+import type { Bookmark } from '~common/types'
+import userReducer, { UserState, Link, LinksObj } from '../user'
+import { addLinkAction, updateLink, deleteLink } from '../user/links'
+
 jest.mock('react-native', () => ({
   Appearance: {
     getColorScheme: jest.fn(() => 'light'),
@@ -59,10 +63,6 @@ jest.mock('~themes/natureColors', () => ({ primary: '#444' }))
 jest.mock('~themes/sunsetColors', () => ({ primary: '#555' }))
 jest.mock('~themes/mauveColors', () => ({ primary: '#666' }))
 jest.mock('~themes/nightColors', () => ({ primary: '#777' }))
-
-import type { Bookmark } from '~common/types'
-import userReducer, { UserState, Link, LinksObj } from '../user'
-import { addLinkAction, updateLink, deleteLink } from '../user/links'
 
 const getInitialState = (): UserState =>
   ({
@@ -407,7 +407,7 @@ describe('Links Reducer', () => {
   })
 
   describe('link types', () => {
-    const linkTypes: Array<Link['linkType']> = [
+    const linkTypes: Link['linkType'][] = [
       'youtube',
       'twitter',
       'instagram',

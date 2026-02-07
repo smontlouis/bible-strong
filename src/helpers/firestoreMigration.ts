@@ -8,9 +8,6 @@ import {
   clearSubcollection,
   type ChunkProgressCallback,
 } from './firestoreSubcollections'
-
-// Batch chunk size (must match firestoreSubcollections.ts)
-const BATCH_CHUNK_SIZE = 400
 import { RootState } from '~redux/modules/reducer'
 import type { MigrationState } from './migrationState'
 import {
@@ -24,6 +21,9 @@ import {
   setMigrationProgressFromOutsideReact,
   resetMigrationProgressFromOutsideReact,
 } from 'src/state/migration'
+
+// Batch chunk size (must match firestoreSubcollections.ts)
+const BATCH_CHUNK_SIZE = 400
 
 /**
  * Mapping des noms de collections vers des labels lisibles en français
@@ -39,6 +39,7 @@ const COLLECTION_LABELS: Record<SubcollectionName, string> = {
   words: 'mots',
   naves: 'thèmes Nave',
   tabGroups: 'onglets',
+  wordAnnotations: 'annotations de mots',
 }
 
 /**

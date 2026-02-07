@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react-native'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import i18n from '~i18n'
 
 const catchDBError = async <T>(fn: () => Promise<T>, cb?: () => void) => {

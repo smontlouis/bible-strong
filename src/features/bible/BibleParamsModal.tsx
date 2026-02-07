@@ -4,6 +4,7 @@ import { FlatList } from 'react-native'
 import styled from '@emotion/native'
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { useRouter } from 'expo-router'
+import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
@@ -32,8 +33,11 @@ import {
   setSettingsPreferredDarkTheme,
   setSettingsPreferredLightTheme,
   setSettingsPress,
+  setSettingsRedWordsDisplay,
+  setSettingsTagsDisplay,
   setSettingsTextDisplay,
 } from '~redux/modules/user'
+import { colorPickerModalAtom } from '~state/app'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
 
@@ -108,6 +112,11 @@ export const useParamsModalLabels = () => {
     block: t('En icone'),
   }
 
+  const tagsDisplayToString = {
+    inline: t('À la ligne'),
+    block: t('En icone'),
+  }
+
   return {
     alignContentToString,
     lineHeightToString,
@@ -118,6 +127,7 @@ export const useParamsModalLabels = () => {
     pressToString,
     notesDisplayToString,
     linksDisplayToString,
+    tagsDisplayToString,
   }
 }
 
@@ -128,6 +138,7 @@ interface BibleParamsModalprops {
 const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
   const { t } = useTranslation()
   const router = useRouter()
+  const setColorPickerModal = useSetAtom(colorPickerModalAtom)
 
   const {
     alignContentToString,
@@ -139,6 +150,7 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
     pressToString,
     notesDisplayToString,
     linksDisplayToString,
+    tagsDisplayToString,
   } = useParamsModalLabels()
 
   const dispatch = useDispatch()
@@ -159,7 +171,11 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
   const textDisplay = useSelector((state: RootState) => state.user.bible.settings.textDisplay)
   const notesDisplay = useSelector((state: RootState) => state.user.bible.settings.notesDisplay)
   const linksDisplay = useSelector((state: RootState) => state.user.bible.settings.linksDisplay)
+  const tagsDisplay = useSelector((state: RootState) => state.user.bible.settings.tagsDisplay)
   const press = useSelector((state: RootState) => state.user.bible.settings.press)
+  const redWordsDisplay = useSelector(
+    (state: RootState) => state.user.bible.settings.redWordsDisplay
+  )
 
   const fontsViewRef = React.useRef(null)
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
@@ -328,15 +344,40 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
         <HalfContainer border>
           <Text flex={5}>{t('Affichage des liens')}</Text>
           <Text marginLeft={5} fontSize={12} bold>
-            {linksDisplayToString[linksDisplay || 'inline']}
+            {linksDisplayToString[linksDisplay]}
           </Text>
           <TouchableIcon
             isSelected
             name={linksDisplay === 'inline' ? 'align-left' : 'link'}
             onPress={() => {
-              const nextDisplay = (linksDisplay || 'inline') === 'inline' ? 'block' : 'inline'
+              const nextDisplay = linksDisplay === 'inline' ? 'block' : 'inline'
               dispatch(setSettingsLinksDisplay(nextDisplay))
             }}
+          />
+        </HalfContainer>
+        <HalfContainer border>
+          <Text flex={5}>{t('Affichage des tags')}</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {tagsDisplayToString[tagsDisplay]}
+          </Text>
+          <TouchableIcon
+            isSelected
+            name={tagsDisplay === 'inline' ? 'align-left' : 'tag'}
+            onPress={() => {
+              const nextDisplay = tagsDisplay === 'inline' ? 'block' : 'inline'
+              dispatch(setSettingsTagsDisplay(nextDisplay))
+            }}
+          />
+        </HalfContainer>
+        <HalfContainer border>
+          <Text flex={5}>{t('Paroles de Jésus en rouge')}</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {redWordsDisplay ? t('Activé') : t('Désactivé')}
+          </Text>
+          <TouchableIcon
+            isSelected={redWordsDisplay}
+            name="type"
+            onPress={() => dispatch(setSettingsRedWordsDisplay(!redWordsDisplay))}
           />
         </HalfContainer>
         <HalfContainer border>
@@ -391,11 +432,11 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
           alignItems="center"
           row
           onPress={() => {
-            router.push('/custom-highlight-colors')
             modalRef.current?.close()
+            setColorPickerModal({})
           }}
         >
-          <Text flex>{t('Couleurs de surlignage')}</Text>
+          <Text flex>{t('Palette de couleurs')}</Text>
           <FeatherIcon name="chevron-right" size={20} color="grey" />
         </TouchableBox>
         <Border />

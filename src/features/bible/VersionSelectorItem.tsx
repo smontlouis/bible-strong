@@ -2,7 +2,7 @@ import * as Icon from '@expo/vector-icons'
 import * as FileSystem from 'expo-file-system/legacy'
 import React from 'react'
 import { Alert, TouchableOpacity } from 'react-native'
-import ProgressCircle from 'react-native-progress/Circle'
+import { AnimatedProgressCircle } from '@convective/react-native-reanimated-progress'
 import { useDispatch, useSelector } from 'react-redux'
 import { biblesRef, getDatabaseUrl } from '~helpers/firebase'
 import { dbManager } from '~helpers/sqlite'
@@ -12,13 +12,15 @@ import { useTheme } from '@emotion/react'
 import { useAtomValue } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import { getIfVersionNeedsDownload, isStrongVersion, Version } from '~helpers/bibleVersions'
 import { requireBiblePath } from '~helpers/requireBiblePath'
+import { downloadRedWordsFile, deleteRedWordsFile, versionHasRedWords } from '~helpers/redWords'
+import { downloadPericopeFile, deletePericopeFile, versionHasPericope } from '~helpers/pericopes'
 import useLanguage from '~helpers/useLanguage'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
@@ -147,6 +149,14 @@ const VersionSelectorItem = ({
 
       console.log('[Bible] Download finished')
 
+      if (versionHasRedWords(version.id)) {
+        downloadRedWordsFile(version.id)
+      }
+
+      if (versionHasPericope(version.id)) {
+        downloadPericopeFile(version.id)
+      }
+
       if (version.id === 'INT' || version.id === 'INT_EN') {
         const lang = version.id === 'INT' ? 'fr' : 'en'
         await dbManager.getDB('INTERLINEAIRE', lang).init()
@@ -235,6 +245,8 @@ const VersionSelectorItem = ({
       return
     }
     FileSystem.deleteAsync(file.uri)
+    deleteRedWordsFile(version.id)
+    deletePericopeFile(version.id)
     setVersionNeedsDownload(true)
 
     if (version.id === 'INT' || version.id === 'INT_EN') {
@@ -297,14 +309,13 @@ const VersionSelectorItem = ({
           )}
           {isLoading && (
             <Box width={80} justifyContent="center" alignItems="flex-end" mr={10}>
-              <ProgressCircle
+              <AnimatedProgressCircle
                 size={20}
                 progress={fileProgress}
-                borderWidth={0}
                 thickness={3}
                 color={theme.colors.primary}
                 unfilledColor={theme.colors.lightGrey}
-                fill="none"
+                animationDuration={300}
               />
             </Box>
           )}

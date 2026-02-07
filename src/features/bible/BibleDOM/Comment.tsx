@@ -2,18 +2,11 @@ import { styled } from 'goober'
 import { NAVIGATE_TO_BIBLE_VIEW } from './dispatch'
 
 import { scaleFontSize } from './scaleFontSize'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { RootStyles } from './BibleDOMWrapper'
 import { RootState } from '~redux/modules/reducer'
 import { useDispatch } from './DispatchProvider'
-
-export function usePrevious<T>(value: T) {
-  const ref = useRef<T>()
-  useEffect(() => {
-    ref.current = value
-  })
-  return ref.current
-}
+import { usePrevious } from '~helpers/usePrevious'
 
 const StyledComment = styled('div')<RootStyles>(
   ({ settings: { fontSizeScale, fontFamily, theme, colors } }) => ({

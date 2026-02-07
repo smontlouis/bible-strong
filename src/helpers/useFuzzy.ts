@@ -10,7 +10,7 @@ function removeAccents(obj: any) {
 
 function getFn(obj: any, path: any) {
   // @ts-ignore
-  var value = Fuse.config.getFn(obj, path)
+  let value = Fuse.config.getFn(obj, path)
   if (Array.isArray(value)) {
     return value.map(el => el)
   }

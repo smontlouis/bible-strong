@@ -1,11 +1,12 @@
 import * as Icon from '@expo/vector-icons'
 import * as Sentry from '@sentry/react-native'
 import React, { PropsWithChildren } from 'react'
-import { ScrollView, TextInput, Platform } from 'react-native'
+import { ScrollView, TextInput, Platform, ActivityIndicator } from 'react-native'
 import Clipboard from '@react-native-clipboard/clipboard'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner-native'
+import { toast } from '~helpers/toast'
 import * as Updates from 'expo-updates'
+import { useQuery } from '~helpers/react-query-lite'
 
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -69,6 +70,29 @@ const ErrorFallback = ({ error, errorInfo }: ErrorFallbackProps) => {
   const { t } = useTranslation()
   const { logout } = useLogin()
 
+  const { isLoading, data } = useQuery({
+    queryKey: ['errorBoundaryUpdate'],
+    queryFn: async () => {
+      if (__DEV__) {
+        return { updated: false }
+      }
+
+      const check = await Updates.checkForUpdateAsync()
+      if (!check.isAvailable) {
+        return { updated: false }
+      }
+
+      await Updates.fetchUpdateAsync()
+
+      // Auto-reload after a short delay
+      setTimeout(() => {
+        Updates.reloadAsync()
+      }, 1000)
+
+      return { updated: true }
+    },
+  })
+
   const errorDetails = `
 Error: ${error?.name || 'Unknown'}
 Message: ${error?.message || 'No message'}
@@ -108,6 +132,27 @@ Date: ${new Date().toISOString()}
           <Text textAlign="center" fontSize={15} mt={10} color="grey">
             {t('app.error')}
           </Text>
+
+          {/* Update status */}
+          {(isLoading || data?.updated) && (
+            <Box
+              mt={20}
+              p={16}
+              bg="rgba(59, 130, 246, 0.1)"
+              borderRadius={8}
+              borderWidth={1}
+              borderColor="rgba(59, 130, 246, 0.2)"
+              width="100%"
+              row
+              alignItems="center"
+            >
+              <ActivityIndicator size="small" color="#3B82F6" />
+              <Text fontSize={14} color="primary" ml={12}>
+                {isLoading && t('app.updateChecking')}
+                {data?.updated && t('app.updateReady')}
+              </Text>
+            </Box>
+          )}
 
           {/* Error details box */}
           <Box

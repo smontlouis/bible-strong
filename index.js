@@ -1,3 +1,11 @@
+import 'expo-asset'
+import 'react-native-gesture-handler'
+import { registerRootComponent } from 'expo'
+import App from './App'
+import TrackPlayer from 'react-native-track-player'
+import { PlaybackService } from './playbackService'
+import notifee, { EventType } from '@notifee/react-native'
+
 Object.fromEntries =
   Object.fromEntries ||
   function (arr) {
@@ -6,14 +14,6 @@ Object.fromEntries =
       return acc
     }, {})
   }
-
-import 'expo-asset'
-import 'react-native-gesture-handler'
-import { registerRootComponent } from 'expo'
-import App from './App'
-import TrackPlayer from 'react-native-track-player'
-import { PlaybackService } from './playbackService'
-import notifee, { EventType } from '@notifee/react-native'
 
 TrackPlayer.registerPlaybackService(() => PlaybackService)
 

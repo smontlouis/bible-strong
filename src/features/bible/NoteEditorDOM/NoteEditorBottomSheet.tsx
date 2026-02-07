@@ -17,7 +17,7 @@ interface Props {
  * Wrapper for NoteEditorDOMComponent that integrates with BottomSheet keyboard handling.
  * Must be used inside a BottomSheet context.
  */
-const NoteEditorBottomSheet = ({
+export default function NoteEditorBottomSheet({
   defaultTitle,
   defaultDescription,
   isEditing,
@@ -25,7 +25,7 @@ const NoteEditorBottomSheet = ({
   placeholderDescription,
   onTitleChange,
   onDescriptionChange,
-}: Props) => {
+}: Props) {
   const { colorScheme } = useCurrentThemeSelector()
   const [webViewHeight, setWebViewHeight] = useState(100)
   const { animatedKeyboardState } = useBottomSheetInternal()
@@ -73,5 +73,3 @@ const NoteEditorBottomSheet = ({
     />
   )
 }
-
-export default NoteEditorBottomSheet

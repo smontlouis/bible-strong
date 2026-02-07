@@ -2,18 +2,18 @@ import BottomSheet, {
   BottomSheetFooter,
   BottomSheetFooterProps,
   BottomSheetScrollView,
-  BottomSheetView,
 } from '@gorhom/bottom-sheet/'
+import { useRouter } from 'expo-router'
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import React, { memo, useCallback, useMemo } from 'react'
+import React, { memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { View } from 'react-native-animatable'
+import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import LanguagePopOver from '~common/LanguagePopOver'
 import ModalHeader from '~common/ModalHeader'
 import PopOverMenu from '~common/PopOverMenu'
-import { BibleResource, StudyNavigateBibleType, Verse } from '~common/types'
+import { BibleResource, StudyNavigateBibleType } from '~common/types'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
@@ -21,12 +21,13 @@ import { Slide, Slides } from '~common/ui/Slider'
 import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
-import generateUUID from '~helpers/generateUUID'
 import CommentariesCard from '~features/commentaries/CommentariesCard'
 import DictionnaireVerseDetailCard from '~features/dictionnary/DictionnaireVerseDetailCard'
 import NaveModalCard from '~features/nave/NaveModalCard'
+import CompareCard from './CompareCard'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import formatVerseContent from '~helpers/formatVerseContent'
+import generateUUID from '~helpers/generateUUID'
 import { BibleTab, useBibleTabActions } from '../../../state/tabs'
 import BibleVerseDetailCard from '../BibleVerseDetailCard'
 import { ReferenceCard } from '../ReferenceCard'
@@ -69,6 +70,7 @@ type Props = {
 const ResourcesModal = memo(
   ({ resourceModalRef, resourceType, onChangeResourceType, bibleAtom, isSelectionMode }: Props) => {
     const { t } = useTranslation()
+    const router = useRouter()
     const openInNewTab = useOpenInNewTab()
     const bible = useAtomValue(bibleAtom)
     const { key, ...bottomSheetStyles } = useBottomSheetStyles()
@@ -92,6 +94,8 @@ const ResourcesModal = memo(
           return t('Par thèmes')
         case 'reference':
           return t('Références croisées')
+        case 'compare':
+          return t('Comparer les versions')
         default:
           return ''
       }
@@ -136,6 +140,42 @@ const ResourcesModal = memo(
             </Box>
           )
         }
+        case 'compare': {
+          return (
+            <PopOverMenu
+              width={24}
+              height={54}
+              popover={
+                <>
+                  <MenuOption onSelect={() => router.push('/toggle-compare-verses')}>
+                    <Box row alignItems="center">
+                      <FeatherIcon name="check-square" size={15} />
+                      <Text marginLeft={10}>{t('common.chooseCompareVersions')}</Text>
+                    </Box>
+                  </MenuOption>
+                  <MenuOption
+                    onSelect={() => {
+                      openInNewTab({
+                        id: `compare-${generateUUID()}`,
+                        title: t('tabs.new'),
+                        isRemovable: true,
+                        type: 'compare',
+                        data: {
+                          selectedVerses,
+                        },
+                      })
+                    }}
+                  >
+                    <Box row alignItems="center">
+                      <FeatherIcon name="external-link" size={15} />
+                      <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
+                    </Box>
+                  </MenuOption>
+                </>
+              }
+            />
+          )
+        }
         default:
           return undefined
       }
@@ -164,6 +204,7 @@ const ResourcesModal = memo(
         enablePanDownToClose
         enableDynamicSizing={false}
         backdropComponent={renderBackdrop}
+        activeOffsetY={[-20, 20]}
         snapPoints={['100%']}
         footerComponent={footerComponent}
         {...bottomSheetStyles}
@@ -172,7 +213,6 @@ const ResourcesModal = memo(
           title={title}
           subTitle={getSubtitleByResourceType()}
           rightComponent={getOptionsByResourceType()}
-          onClose={() => resourceModalRef.current?.close()}
         />
         {resourceType && (
           <View style={{ flex: 1 }}>
@@ -188,7 +228,7 @@ const ResourcesModal = memo(
   }
 )
 
-const resources = ['strong', 'dictionary', 'nave', 'reference', 'commentary']
+const resources = ['strong', 'dictionary', 'nave', 'reference', 'commentary', 'compare']
 
 const Resource = ({
   bibleAtom,
@@ -273,6 +313,18 @@ const Resource = ({
           }}
         >
           <CommentariesCard verse={selectedVerse} onChangeVerse={actions.selectSelectedVerse} />
+        </BottomSheetScrollView>
+      </Slide>
+      <Slide key="compare">
+        <BottomSheetScrollView
+          contentContainerStyle={{
+            paddingBottom: bottomBarHeight + 54,
+          }}
+        >
+          <CompareCard
+            selectedVerses={selectedVerses}
+            onChangeVerse={actions.selectSelectedVerse}
+          />
         </BottomSheetScrollView>
       </Slide>
     </Slides>

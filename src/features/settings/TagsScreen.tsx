@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import { BottomSheetModal } from '@gorhom/bottom-sheet/'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Alert } from 'react-native'
 import { shallowEqual, useDispatch, useSelector, useStore } from 'react-redux'
 
@@ -22,7 +22,11 @@ import useFuzzy from '~helpers/useFuzzy'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { addTag, removeTag, updateTag } from '~redux/modules/user'
 import { sortedTagsSelector } from '~redux/selectors/tags'
-import { makeTagDataSelector, makeGroupedHighlightsCountSelector } from '~redux/selectors/bible'
+import {
+  makeTagDataSelector,
+  makeGroupedHighlightsCountSelector,
+  makeGroupedWordAnnotationsCountSelector,
+} from '~redux/selectors/bible'
 import { Tag } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import { useCreateTabGroupFromTag } from './useCreateTabGroupFromTag'
@@ -46,9 +50,13 @@ type TagItemProps = {
 
 const TagItem = ({ item, setOpen }: TagItemProps) => {
   const { t } = useTranslation()
-  const selectGroupedHighlightsCount = useMemo(() => makeGroupedHighlightsCountSelector(), [])
+  const selectGroupedHighlightsCount = makeGroupedHighlightsCountSelector()
+  const selectGroupedWordAnnotationsCount = makeGroupedWordAnnotationsCountSelector()
   const highlightsNumber = useSelector((state: RootState) =>
     selectGroupedHighlightsCount(state, item.highlights)
+  )
+  const annotationsNumber = useSelector((state: RootState) =>
+    selectGroupedWordAnnotationsCount(state, item.wordAnnotations)
   )
   const notesNumber = item.notes && Object.keys(item.notes).length
   const linksNumber = item.links && Object.keys(item.links).length
@@ -57,7 +65,7 @@ const TagItem = ({ item, setOpen }: TagItemProps) => {
   const strongsNumber =
     item.strongsHebreu &&
     Object.keys(item.strongsHebreu).length +
-      (item.strongsGrec && Object.keys(item.strongsGrec).length)
+      ((item.strongsGrec && Object.keys(item.strongsGrec).length) || 0)
   const wordsNumber = item.words && Object.keys(item.words).length
   const navesNumber = item.naves && Object.keys(item.naves).length
 
@@ -89,10 +97,11 @@ const TagItem = ({ item, setOpen }: TagItemProps) => {
                   </Text>
                 </Chip>
               )}
-              {!!highlightsNumber && (
+              {!!(highlightsNumber + annotationsNumber) && (
                 <Chip>
                   <Text fontSize={10} color="default">
-                    {highlightsNumber} {t('surbrillance', { count: highlightsNumber })}
+                    {highlightsNumber + annotationsNumber}{' '}
+                    {t('surbrillance', { count: highlightsNumber + annotationsNumber })}
                   </Text>
                 </Chip>
               )}
@@ -141,7 +150,7 @@ const TagsScreen = () => {
   const dispatch = useDispatch()
   const { ref, open, close } = useBottomSheetModal()
   const store = useStore<RootState>()
-  const selectTagData = useMemo(() => makeTagDataSelector(), [])
+  const selectTagData = makeTagDataSelector()
   const createTabGroupFromTag = useCreateTabGroupFromTag()
 
   useEffect(() => {
@@ -156,7 +165,7 @@ const TagsScreen = () => {
       {
         text: t('Oui'),
         onPress: () => {
-          dispatch(removeTag(isOpen?.id))
+          dispatch(removeTag(isOpen?.id || ''))
           close()
         },
         style: 'destructive',

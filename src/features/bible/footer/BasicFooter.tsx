@@ -1,8 +1,7 @@
-import { useDerivedValue } from 'react-native-reanimated'
+import { useAtomValue } from 'jotai/react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-// @ts-ignore
-import { isFullScreenBibleValue } from 'src/state/app'
-import { MotiHStack, MotiTouchableBox, motiTransition, TouchableBox } from '~common/ui/Box'
+import { isFullScreenBibleAtom } from 'src/state/app'
+import { AnimatedHStack, AnimatedTouchableBox, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
@@ -31,10 +30,14 @@ const BasicFooter = ({
 }: BasicFooterProps) => {
   const { bottomBarHeight } = useBottomBarHeightInTab()
   const insets = useSafeAreaInsets()
+  const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
+
+  const fullScreenTranslateY = isFullScreenBible ? HEADER_HEIGHT + insets.bottom + 60 : 0
+  const centerTranslateY = isFullScreenBible ? HEADER_HEIGHT : 0
 
   return (
     <>
-      <MotiTouchableBox
+      <AnimatedTouchableBox
         disabled={isDisabled}
         width={40}
         height={40}
@@ -48,16 +51,14 @@ const BasicFooter = ({
         position="absolute"
         bottom={10 + bottomBarHeight}
         left={10}
-        // @ts-ignore
-        animate={useDerivedValue(() => {
-          return {
-            translateY: isFullScreenBibleValue.get() ? HEADER_HEIGHT + insets.bottom + 60 : 0,
-          }
-        })}
-        {...motiTransition}
+        style={{
+          transform: [{ translateY: fullScreenTranslateY }],
+          transitionProperty: 'transform',
+          transitionDuration: 300,
+        }}
       >
         <FeatherIcon name="arrow-left" size={20} color="tertiary" />
-      </MotiTouchableBox>
+      </AnimatedTouchableBox>
       <PlayableButtons
         onPlay={onPlay}
         isPlaying={isPlaying}
@@ -65,8 +66,9 @@ const BasicFooter = ({
         isLoading={isLoading}
         hasError={hasError}
         type={type}
+        centerTranslateY={centerTranslateY}
       />
-      <MotiTouchableBox
+      <AnimatedTouchableBox
         disabled={isDisabled}
         width={40}
         height={40}
@@ -80,16 +82,14 @@ const BasicFooter = ({
         position="absolute"
         bottom={10 + bottomBarHeight}
         right={10}
-        // @ts-ignore
-        animate={useDerivedValue(() => {
-          return {
-            translateY: isFullScreenBibleValue.get() ? HEADER_HEIGHT + insets.bottom + 60 : 0,
-          }
-        })}
-        {...motiTransition}
+        style={{
+          transform: [{ translateY: fullScreenTranslateY }],
+          transitionProperty: 'transform',
+          transitionDuration: 300,
+        }}
       >
         <FeatherIcon name="arrow-right" size={20} color="tertiary" />
-      </MotiTouchableBox>
+      </AnimatedTouchableBox>
     </>
   )
 }
@@ -97,7 +97,9 @@ const BasicFooter = ({
 type PlayableButtonsProps = Pick<
   BasicFooterProps,
   'onPlay' | 'isPlaying' | 'isDisabled' | 'isLoading' | 'hasError' | 'type'
->
+> & {
+  centerTranslateY: number
+}
 
 const PlayableButtons = ({
   onPlay,
@@ -106,10 +108,11 @@ const PlayableButtons = ({
   isLoading,
   hasError,
   type,
+  centerTranslateY,
 }: PlayableButtonsProps) => {
   const { bottomBarHeight } = useBottomBarHeightInTab()
   return (
-    <MotiHStack
+    <AnimatedHStack
       position="absolute"
       alignSelf="center"
       bottom={10 + bottomBarHeight}
@@ -118,13 +121,11 @@ const PlayableButtons = ({
       padding={2}
       borderRadius={50}
       overflow="visible"
-      // @ts-ignore
-      animate={useDerivedValue(() => {
-        return {
-          translateY: isFullScreenBibleValue.get() ? HEADER_HEIGHT : 0,
-        }
-      })}
-      {...motiTransition}
+      style={{
+        transform: [{ translateY: centerTranslateY }],
+        transitionProperty: 'transform',
+        transitionDuration: 300,
+      }}
     >
       <TouchableBox
         center
@@ -148,7 +149,7 @@ const PlayableButtons = ({
           type={type}
         />
       </TouchableBox>
-    </MotiHStack>
+    </AnimatedHStack>
   )
 }
 
