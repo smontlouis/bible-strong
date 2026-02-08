@@ -47,7 +47,11 @@ const SearchInTimelineModal = ({ modalRef, setEvent, eventModalRef }: Props) => 
       const title = event.title?.toLowerCase() ?? ''
       const description = event.description?.toLowerCase() ?? ''
       const article = event.article?.toLowerCase() ?? ''
-      return title.includes(lowerQuery) || description.includes(lowerQuery) || article.includes(lowerQuery)
+      return (
+        title.includes(lowerQuery) ||
+        description.includes(lowerQuery) ||
+        article.includes(lowerQuery)
+      )
     })
 
     setResults(filtered)
@@ -98,7 +102,7 @@ const SearchInTimelineModal = ({ modalRef, setEvent, eventModalRef }: Props) => 
       <BottomSheetFlatList
         ItemSeparatorComponent={() => <Border />}
         data={results}
-        keyExtractor={(item) => item.slug}
+        keyExtractor={item => item.slug}
         ListHeaderComponent={
           !hasSearched ? (
             <Empty
@@ -106,10 +110,7 @@ const SearchInTimelineModal = ({ modalRef, setEvent, eventModalRef }: Props) => 
               message={t('Faites une recherche dans la Bible !')}
             />
           ) : results.length === 0 ? (
-            <Empty
-              source={require('~assets/images/empty.json')}
-              message={t('Aucun résultat')}
-            />
+            <Empty source={require('~assets/images/empty.json')} message={t('Aucun résultat')} />
           ) : (
             <Box paddingHorizontal={20}>
               <Text title fontSize={16} color="grey">

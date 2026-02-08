@@ -157,5 +157,5 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   experiments: {
     reactCompiler: true,
   },
-  runtimeVersion: '2.0.2',
+  runtimeVersion: '2.0.3',
 })

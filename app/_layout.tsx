@@ -53,6 +53,7 @@ import { persistor, store } from '~redux/store'
 import getTheme, { Theme, baseTheme } from '~themes/index'
 import { setI18n } from '../i18n'
 import { PlaybackService } from '../playbackService'
+import { AppRatingModal } from '~features/app-rating'
 
 // Register background event handler for Notifee
 // This prevents ANR when notifications fire while app is in background
@@ -200,6 +201,7 @@ function DeferredModals() {
       <ColorChangeModal />
       <TagDetailModal />
       <FeatureOnboardingModal />
+      <AppRatingModal />
     </>
   )
 }

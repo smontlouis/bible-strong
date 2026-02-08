@@ -20,8 +20,7 @@ const Changelog = () => {
   const { t } = useTranslation()
   const lang = useLanguage()
 
-  // @ts-ignore
-  changelog.sort((a, b) => b.date - a.date)
+  const sortedChangelog = [...changelog].sort((a, b) => b.date - a.date)
 
   return (
     <Container>
@@ -36,7 +35,7 @@ const Changelog = () => {
           </Text>
           <Border marginTop={15} />
           <Box marginTop={10}>
-            {changelog.map(log => {
+            {sortedChangelog.map(log => {
               const formattedDate = distanceInWords(Number(log.date), Date.now(), {
                 locale: getDateLocale(lang),
               })

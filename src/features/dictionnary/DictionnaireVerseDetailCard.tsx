@@ -125,11 +125,7 @@ const useFormattedText = ({
       setCurrentWord(wordsInVerse[0])
 
       const defaultVersion = getDefaultBibleVersion(resourceLang)
-      const chapterVerses = await getChapterVerses(
-        defaultVersion,
-        Number(Livre),
-        Number(Chapitre)
-      )
+      const chapterVerses = await getChapterVerses(defaultVersion, Number(Livre), Number(Chapitre))
       const bible = {
         [Livre]: {
           [Chapitre]: Object.fromEntries(chapterVerses.map(v => [v.Verset, v.Texte])),

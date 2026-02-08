@@ -17,6 +17,7 @@ config.resolver = {
     'json',
     'txt',
     'html',
+    'lottie',
   ],
 }
 

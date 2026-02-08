@@ -1,4 +1,4 @@
-const { withAndroidManifest } = require('@expo/config-plugins')
+const { withAndroidManifest } = require('expo/config-plugins')
 
 // Fonction pour modifier ou ajouter le uses-feature selon les options
 const setFeatureWithAttributes = (androidManifest, options) => {
