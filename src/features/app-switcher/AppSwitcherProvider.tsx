@@ -1,23 +1,17 @@
 import { FlashListRef } from '@shopify/flash-list'
 import { PrimitiveAtom, getDefaultStore } from 'jotai'
 import { useAtomValue } from 'jotai/react'
-import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react'
+import React, { createContext, useCallback, useContext, useRef } from 'react'
 import { ScrollView, View, useWindowDimensions } from 'react-native'
 import { AnimatedRef, SharedValue, useSharedValue, withSpring } from 'react-native-reanimated'
-import { resetTabAnimationTriggerAtom } from '~state/app'
-import {
-  TabItem,
-  activeGroupIdAtom,
-  activeTabIndexAtom,
-  tabGroupsAtom,
-  tabsAtomsAtom,
-  tabsCountAtom,
-} from '~state/tabs'
+import { TabItem, activeGroupIdAtom, tabGroupsAtom, tabsCountAtom } from '~state/tabs'
 import { useOnceAtoms } from './utils/useOnceAtoms'
+import { useProviderEffects } from './utils/useProviderEffects'
 import useTabConstants from './utils/useTabConstants'
 
 type AppSwitcherContextValues = {
-  isBottomTabBarVisible: SharedValue<number>
+  // === Tab Expand/Collapse ===
+  // Mutated by: useTabAnimations, useTabBarSwipeGesture, useTabPreview
   activeTabPreview: {
     index: SharedValue<number>
     top: SharedValue<number>
@@ -26,10 +20,35 @@ type AppSwitcherContextValues = {
     animationProgress: SharedValue<number>
     zIndex: SharedValue<number>
   }
+
+  // === Active Tab Screen ===
+  // Mutated by: useTabAnimations, useTabBarSwipeGesture (via tabHelpers)
   activeTabScreen: {
     opacity: SharedValue<number>
     tabId: SharedValue<string | null>
   }
+
+  // === Preview Carousel (overlay during swipe) ===
+  // Mutated by: useTabAnimations, useTabBarSwipeGesture
+  tabPreviewCarousel: {
+    translateY: SharedValue<number>
+    opacity: SharedValue<number>
+  }
+
+  // === Group Pagination ===
+  // Mutated by: TabGroupPager, navigateToPage, useProviderEffects (reset)
+  activeGroupIndex: SharedValue<number>
+  groupPager: {
+    ref: React.RefObject<ScrollView | null>
+    translateX: SharedValue<number>
+    scrollX: SharedValue<number>
+    navigateToPage: (pageIndex: number, groupsLength: number) => void
+  }
+  createGroupPage: {
+    isFullyVisible: SharedValue<boolean>
+  }
+
+  // === Refs & Registries (non-animated) ===
   flashListRefs: {
     registerRef: (
       groupId: string,
@@ -47,23 +66,8 @@ type AppSwitcherContextValues = {
     visibleIndices: React.RefObject<Set<number>>
     setVisibleIndices: (indices: number[]) => void
   }
-  tabPreviewCarousel: {
-    translateY: SharedValue<number>
-    opacity: SharedValue<number>
-  }
-  // Tab groups pagination
-  activeGroupIndex: SharedValue<number>
-  groupPager: {
-    ref: React.RefObject<ScrollView | null>
-    translateX: SharedValue<number>
-    scrollX: SharedValue<number>
-    navigateToPage: (pageIndex: number, groupsLength: number) => void
-  }
-  // Create group page
-  createGroupPage: {
-    isFullyVisible: SharedValue<boolean>
-  }
-  // Tabs count for UI thread access
+
+  // === Tabs count for UI thread access (worklets can't read Jotai) ===
   tabsCountShared: SharedValue<number>
 }
 
@@ -81,8 +85,6 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
 
   const tabPreviewRefs = useRef(new Array(100))
   const visibleIndicesRef = useRef(new Set<number>())
-
-  const isBottomTabBarVisible = useSharedValue(1)
 
   const scrollView = {
     y: useSharedValue(0),
@@ -156,51 +158,19 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
   const pagerScrollX = useSharedValue(0)
   const createGroupPageIsFullyVisible = useSharedValue(false)
 
-  // Tabs count shared value for UI thread access (worklets can't read Jotai)
+  // Tabs count shared value for UI thread access
   const tabsCount = useAtomValue(tabsCountAtom)
   const tabsCountShared = useSharedValue(tabsCount)
 
-  useEffect(() => {
-    tabsCountShared.set(tabsCount)
-  }, [tabsCount])
-
-  // Listen to reset trigger (login/logout) and reset to first tab expanded
-  const resetTrigger = useAtomValue(resetTabAnimationTriggerAtom)
-
-  useEffect(() => {
-    if (resetTrigger > 0) {
-      console.log('[AppSwitcherProvider] RESET TRIGGER', resetTrigger)
-      const store = getDefaultStore()
-      const tabsAtoms = store.get(tabsAtomsAtom)
-
-      // Reset to first tab expanded
-      activeTabPreview.index.set(0)
-      activeTabPreview.animationProgress.set(1) // Expanded state
-      activeTabPreview.zIndex.set(3) // On top
-      activeTabPreview.opacity.set(0)
-      activeTabPreview.top.set(0)
-      activeTabPreview.left.set(0)
-
-      // Update activeTabIndex Jotai atom (critical for tab content to show!)
-      store.set(activeTabIndexAtom, 0)
-
-      // Set the first tab as active (using stable tab.id)
-      // Note: cache is already updated by activeTabIndexAtom setter above
-      if (tabsAtoms.length > 0) {
-        const tab = store.get(tabsAtoms[0])
-        activeTabScreen.tabId.set(tab.id)
-        activeTabScreen.opacity.set(1)
-      } else {
-        activeTabScreen.tabId.set(null)
-        activeTabScreen.opacity.set(0)
-      }
-
-      // Reset group pager to first group
-      activeGroupIndex.set(0)
-      pagerTranslateX.set(0)
-      pagerScrollX.set(0)
-    }
-  }, [resetTrigger])
+  // Side-effects: sync tabsCount, handle login/logout reset
+  useProviderEffects({
+    activeTabPreview,
+    activeTabScreen,
+    activeGroupIndex,
+    pagerTranslateX,
+    pagerScrollX,
+    tabsCountShared,
+  })
 
   const navigateToPage = (pageIndex: number, groupsLength: number) => {
     const store = getDefaultStore()
@@ -248,7 +218,6 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
   }
 
   const contextValue: AppSwitcherContextValues = {
-    isBottomTabBarVisible,
     activeTabPreview,
     activeTabScreen,
     flashListRefs,

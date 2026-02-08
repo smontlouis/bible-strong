@@ -1,23 +1,20 @@
 import * as Haptics from 'expo-haptics'
-import { useSetAtom } from 'jotai/react'
-import { getDefaultStore } from 'jotai/vanilla'
 import { useWindowDimensions } from 'react-native'
 import { Gesture } from 'react-native-gesture-handler'
-import { useSharedValue, withDelay, withTiming } from 'react-native-reanimated'
+import { useSharedValue, withTiming } from 'react-native-reanimated'
 import { runOnJS } from 'react-native-worklets'
-import { activeTabIndexAtom, tabsAtomsAtom } from '~state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
+import { rubberBand } from '../utils/tabHelpers'
 import useTabConstants from '../utils/useTabConstants'
-import useTakeActiveTabSnapshot from '../utils/useTakeActiveTabSnapshot'
+import { useTabAnimations } from '../utils/useTabAnimations'
 
 const DRAG_SCALE = 1.5
 const VELOCITY_THRESHOLD = 800
 
 const useTabBarSwipeGesture = () => {
   const { width: WIDTH } = useWindowDimensions()
-  const { GAP, HEIGHT } = useTabConstants()
-  const setActiveTabIndex = useSetAtom(activeTabIndexAtom)
-  const takeActiveTabSnapshot = useTakeActiveTabSnapshot()
+  const { GAP } = useTabConstants()
+  const { completeTabSwitch } = useTabAnimations()
 
   const { activeTabPreview, activeTabScreen, tabPreviewCarousel, tabsCountShared } =
     useAppSwitcherContext()
@@ -25,28 +22,6 @@ const useTabBarSwipeGesture = () => {
   const startIndex = useSharedValue(0)
   const isActive = useSharedValue(false)
   const lastSnappedIndex = useSharedValue(-1)
-
-  const setTabId = (index: number) => {
-    const store = getDefaultStore()
-    const tabsAtoms = store.get(tabsAtomsAtom)
-    if (tabsAtoms.length === 0) return
-    const safeIndex = Math.max(0, Math.min(index, tabsAtoms.length - 1))
-    const tab = store.get(tabsAtoms[safeIndex])
-    activeTabScreen.tabId.set(tab.id)
-  }
-
-  const setActiveTabOpacity = () => {
-    setTimeout(() => {
-      activeTabScreen.opacity.set(
-        withTiming(1, undefined, () => {
-          runOnJS(takeActiveTabSnapshot)(
-            activeTabPreview.index.get(),
-            activeTabScreen.tabId.get() || ''
-          )
-        })
-      )
-    }, 50)
-  }
 
   const triggerSelectionHaptic = () => {
     Haptics.selectionAsync()
@@ -57,41 +32,11 @@ const useTabBarSwipeGesture = () => {
   }
 
   const finishSwipe = (targetIndex: number) => {
-    setActiveTabIndex(targetIndex)
-    setTabId(targetIndex)
-
-    // Animate carousel index to the target
-    activeTabPreview.index.set(
-      withTiming(targetIndex, { duration: 300 }, finished => {
-        if (!finished) return
-
-        // Hide carousel and show tab content
-        tabPreviewCarousel.opacity.set(
-          withDelay(
-            150,
-            withTiming(0, undefined, finish => {
-              if (!finish) {
-                tabPreviewCarousel.opacity.set(1)
-                return
-              }
-              tabPreviewCarousel.translateY.set(HEIGHT)
-            })
-          )
-        )
-        runOnJS(setActiveTabOpacity)()
-      })
-    )
-  }
-
-  const rubberBand = (value: number, min: number, max: number) => {
-    'worklet'
-    if (value < min) {
-      return min + (value - min) * 0.3
-    }
-    if (value > max) {
-      return max + (value - max) * 0.3
-    }
-    return value
+    completeTabSwitch(targetIndex, {
+      setTabIdImmediately: true,
+      duration: 300,
+      carouselFadeDelay: 150,
+    })
   }
 
   const panGesture = Gesture.Pan()

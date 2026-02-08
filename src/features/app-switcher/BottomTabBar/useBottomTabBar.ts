@@ -1,61 +1,20 @@
 import { useAtom } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
 import { useEffect } from 'react'
-import {
-  SharedValue,
-  WithTimingConfig,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { usePrevious } from '~helpers/usePrevious'
+import { ViewStyle } from 'react-native'
 import { appSwitcherModeAtom, tabsCountAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
-import { TAB_ICON_SIZE } from '../utils/constants'
 import useMeasureTabPreview from '../utils/useMesureTabPreview'
 import useScrollToTab from '../utils/useScrollToTab'
 import { useTabAnimations } from '../utils/useTabAnimations'
 
-type Animation = {
-  animatedValue: SharedValue<number>
-  fromValue: number
-  toValue: number
-  options?: WithTimingConfig | undefined
-  onFinishValue?: number
-}
-
-const fromTo = (animations: Animation[]) => {
-  'worklet'
-
-  animations.forEach(animation => {
-    const { animatedValue } = animation
-    animatedValue.set(animation.fromValue)
-    animatedValue.set(
-      withTiming(animation.toValue, animation.options, () => {
-        if (animation.onFinishValue !== undefined) {
-          animatedValue.set(animation.onFinishValue)
-        }
-      })
-    )
-  })
-}
-
 const useBottomTabBar = () => {
   const [appSwitcherMode, setAppSwitcherMode] = useAtom(appSwitcherModeAtom)
-  const prevAppSwitcherMode = usePrevious(appSwitcherMode)
 
   const { expandTab } = useTabAnimations()
   const { activeTabPreview } = useAppSwitcherContext()
   const { measureTabPreview, isTabVisible } = useMeasureTabPreview()
   const scrollToTab = useScrollToTab()
-
-  const HIDDEN_HEIGHT = TAB_ICON_SIZE + useSafeAreaInsets().bottom
-  const bottomBarViewY = useSharedValue(0)
-  const bottomBarViewOpacity = useSharedValue(1)
-
-  const bottomBarListY = useSharedValue(HIDDEN_HEIGHT)
-  const bottomBarListOpacity = useSharedValue(0)
 
   const onPress = async () => {
     const index = activeTabPreview.index.get()
@@ -80,86 +39,23 @@ const useBottomTabBar = () => {
     }
   }, [])
 
-  useEffect(() => {
-    // From view to list
-    if (appSwitcherMode === 'list' && prevAppSwitcherMode === 'view') {
-      const animations = [
-        {
-          animatedValue: bottomBarListY,
-          fromValue: 30,
-          toValue: 0,
-        },
-        {
-          animatedValue: bottomBarListOpacity,
-          fromValue: 0,
-          toValue: 1,
-        },
-        {
-          animatedValue: bottomBarViewY,
-          fromValue: 0,
-          toValue: -30,
-          onFinishValue: HIDDEN_HEIGHT,
-        },
-        {
-          animatedValue: bottomBarViewOpacity,
-          fromValue: 1,
-          toValue: 0,
-        },
-      ]
+  const isViewMode = appSwitcherMode === 'view'
 
-      fromTo(animations)
-    }
+  const viewStyles: ViewStyle & Record<string, unknown> = {
+    transform: [{ translateY: isViewMode ? 0 : -30 }],
+    opacity: isViewMode ? 1 : 0,
+    transitionProperty: ['transform', 'opacity'],
+    transitionDuration: 300,
+    pointerEvents: isViewMode ? ('auto' as const) : ('none' as const),
+  }
 
-    // From list to view
-    if (appSwitcherMode === 'view' && prevAppSwitcherMode === 'list') {
-      const animations = [
-        {
-          animatedValue: bottomBarListY,
-          fromValue: 0,
-          toValue: -30,
-          onFinishValue: HIDDEN_HEIGHT,
-        },
-        {
-          animatedValue: bottomBarListOpacity,
-          fromValue: 1,
-          toValue: 0,
-        },
-        {
-          animatedValue: bottomBarViewY,
-          fromValue: 30,
-          toValue: 0,
-        },
-        {
-          animatedValue: bottomBarViewOpacity,
-          fromValue: 0,
-          toValue: 1,
-        },
-      ]
-      fromTo(animations)
-    }
-  }, [appSwitcherMode, prevAppSwitcherMode])
-
-  const listStyles = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          translateY: bottomBarListY.get(),
-        },
-      ],
-      opacity: bottomBarListOpacity.get(),
-    }
-  })
-
-  const viewStyles = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          translateY: bottomBarViewY.get(),
-        },
-      ],
-      opacity: bottomBarViewOpacity.get(),
-    }
-  })
+  const listStyles: ViewStyle & Record<string, unknown> = {
+    transform: [{ translateY: isViewMode ? 30 : 0 }],
+    opacity: isViewMode ? 0 : 1,
+    transitionProperty: ['transform', 'opacity'],
+    transitionDuration: 300,
+    pointerEvents: isViewMode ? ('none' as const) : ('auto' as const),
+  }
 
   return {
     onPress,

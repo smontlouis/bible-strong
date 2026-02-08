@@ -15,24 +15,11 @@ import {
   appSwitcherModeAtom,
 } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
+import { rubberBand } from '../utils/tabHelpers'
 import CreateGroupPage from './CreateGroupPage'
 import TabGroupPage from './TabGroupPage'
 
 const VELOCITY_THRESHOLD = 500
-const OVERSCROLL_RESISTANCE = 0.3
-const MAX_OVERSCROLL = 100
-
-const rubberBandClamp = (value: number, min: number, max: number): number => {
-  'worklet'
-  if (value > max) {
-    const overscroll = value - max
-    return max + Math.min(overscroll * OVERSCROLL_RESISTANCE, MAX_OVERSCROLL)
-  } else if (value < min) {
-    const overscroll = min - value
-    return min - Math.min(overscroll * OVERSCROLL_RESISTANCE, MAX_OVERSCROLL)
-  }
-  return value
-}
 
 const TabGroupPager = () => {
   const { width } = useWindowDimensions()
@@ -86,7 +73,7 @@ const TabGroupPager = () => {
       const maxTranslateX = 0
 
       const newX = startX.get() + event.translationX
-      translateX.set(rubberBandClamp(newX, minTranslateX, maxTranslateX))
+      translateX.set(rubberBand(newX, minTranslateX, maxTranslateX, 0.3, 100))
       scrollX.set(-translateX.get())
 
       const pageIndex = Math.round(-translateX.get() / width)
