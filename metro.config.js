@@ -20,4 +20,13 @@ config.resolver = {
   ],
 }
 
+config.transformer = {
+  ...config.transformer,
+  getTransformOptions: async () => ({
+    transform: {
+      inlineRequires: true,
+    },
+  }),
+}
+
 module.exports = config

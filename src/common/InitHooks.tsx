@@ -2,7 +2,7 @@ import * as Speech from 'expo-speech'
 import * as Updates from 'expo-updates'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AppState, AppStateStatus, Platform } from 'react-native'
+import { AppState, AppStateStatus, InteractionManager, Platform } from 'react-native'
 import { useDispatch } from 'react-redux'
 
 import useInitFireAuth from '~helpers/useInitFireAuth'
@@ -74,7 +74,9 @@ const InitHooks = ({}: InitHooksProps) => {
             message: `${failedVersions.length} version(s) non migrée(s)`,
           })
           setTimeout(async () => {
-            try { await Updates.reloadAsync() } catch {}
+            try {
+              await Updates.reloadAsync()
+            } catch {}
           }, 2000)
         } else {
           setMigrationProgressFromOutsideReact({
@@ -82,7 +84,9 @@ const InitHooks = ({}: InitHooksProps) => {
             message: 'Terminé !',
           })
           setTimeout(async () => {
-            try { await Updates.reloadAsync() } catch {}
+            try {
+              await Updates.reloadAsync()
+            } catch {}
           }, 1000)
         }
       })
@@ -98,21 +102,22 @@ const InitHooks = ({}: InitHooksProps) => {
         }
       })
 
-    // Initialiser le système de backup automatique
-    autoBackupManager.initialize().catch(err => {
-      console.error('Failed to initialize AutoBackupManager:', err)
-    })
-
-    // @ts-ignore
-    dispatch(getChangelog())
-    // @ts-ignore
-    dispatch(getVersionUpdate())
-    // @ts-ignore
-    dispatch(getDatabaseUpdate())
     const event = AppState.addEventListener('change', handleAppStateChange)
+
+    // Defer non-critical operations to after first interactions
+    const deferred = InteractionManager.runAfterInteractions(() => {
+      autoBackupManager.initialize().catch(err => {
+        console.error('Failed to initialize AutoBackupManager:', err)
+      })
+
+      dispatch(getChangelog())
+      dispatch(getVersionUpdate())
+      dispatch(getDatabaseUpdate())
+    })
 
     return () => {
       event.remove()
+      deferred.cancel()
     }
   }, [dispatch, t])
 

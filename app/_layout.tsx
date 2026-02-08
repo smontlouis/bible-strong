@@ -1,23 +1,22 @@
 // installReduxDevToolsPolyfill()
 
 import { ThemeProvider } from '@emotion/react'
-import * as Icon from '@expo/vector-icons'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { PortalProvider } from '@gorhom/portal'
 import { getAnalytics, logScreenView } from '@react-native-firebase/analytics'
 import * as Sentry from '@sentry/react-native'
-import * as Font from 'expo-font'
+
 import { Stack, useLocalSearchParams, usePathname, useSegments } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { setAutoFreeze } from 'immer'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ActivityIndicator, LogBox, Text, View } from 'react-native'
+import { ActivityIndicator, InteractionManager, LogBox, View } from 'react-native'
 import { SystemBars } from 'react-native-edge-to-edge'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { MenuProvider } from 'react-native-popup-menu'
 import { configureReanimatedLogger } from 'react-native-reanimated'
 import { RootSiblingParent } from 'react-native-root-siblings'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-context'
 import { Provider as ReduxProvider, useSelector } from 'react-redux'
 
 import notifee, { EventType } from '@notifee/react-native'
@@ -29,14 +28,14 @@ import ColorChangeModal from '~common/ColorChangeModal'
 import ColorPickerModal from '~common/ColorPickerModal'
 import TagDetailModal from '~common/TagDetailModal'
 import ErrorBoundary from '~common/ErrorBoundary'
+import UnifiedTagsModal from '~common/UnifiedTagsModal'
+import OnBoardingModal from '~features/onboarding/OnBoarding'
+import { FeatureOnboardingModal } from '~features/feature-onboarding'
 import InitHooks from '~common/InitHooks'
 import ThemedToaster from '~common/ThemedToaster'
 import { CurrentTheme } from '~common/types'
-import UnifiedTagsModal from '~common/UnifiedTagsModal'
 import { AppSwitcherProvider } from '~features/app-switcher/AppSwitcherProvider'
 import { BookSelectorBottomSheetProvider } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
-import OnBoardingModal from '~features/onboarding/OnBoarding'
-import { FeatureOnboardingModal } from '~features/feature-onboarding'
 import { DBStateProvider } from '~helpers/databaseState'
 import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
 import { QueryClient, QueryClientProvider } from '~helpers/react-query-lite'
@@ -54,8 +53,6 @@ import { persistor, store } from '~redux/store'
 import getTheme, { Theme, baseTheme } from '~themes/index'
 import { setI18n } from '../i18n'
 import { PlaybackService } from '../playbackService'
-
-TrackPlayer.registerPlaybackService(() => PlaybackService)
 
 // Register background event handler for Notifee
 // This prevents ANR when notifications fire while app is in background
@@ -95,39 +92,31 @@ SplashScreen.setOptions({
 setAutoFreeze(false)
 LogBox.ignoreLogs(['Require cycle', 'EventEmitter.removeListener'])
 
-// Initialize Sentry
-Sentry.init({
-  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-  sampleRate: 0.5,
-  ignoreErrors: ignoreSentryErrors,
-})
+// Sentry init is deferred to after splash screen via initSentry()
+let sentryInitialized = false
+const initSentry = () => {
+  if (sentryInitialized) return
+  sentryInitialized = true
+  Sentry.init({
+    dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+    sampleRate: 0.5,
+    ignoreErrors: ignoreSentryErrors,
+  })
+}
 
 const queryClient = new QueryClient()
-
-const loadResourcesAsync = async () => {
-  return Promise.all([
-    Font.loadAsync({
-      ...Icon.Feather.font,
-      ...Icon.Ionicons.font,
-      'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
-      'eina-03-bold': require('~assets/fonts/eina-03-bold.otf'),
-    }),
-  ])
-}
 
 // Hook to load app resources
 const useAppLoad = () => {
   const [isLoadingCompleted, setIsLoadingCompleted] = useState(false)
-  const hasMigratedFromAsyncStorage = useMigrateFromAsyncStorage()
-  const hasMigratedFromFileSystem = useMigrateFromFileSystemStorage()
-  const hasMigratedToLanguageFolders = useMigrateToLanguageFolders()
-  const [status, setStatus] = useState('')
+
+  // Run migrations in background - don't block startup
+  useMigrateFromAsyncStorage()
+  useMigrateFromFileSystemStorage()
+  useMigrateToLanguageFolders()
 
   useEffect(() => {
     ;(async () => {
-      setStatus('Load resources')
-      await loadResourcesAsync()
-      setStatus('Set i18n')
       await setI18n()
       await checkDatabasesStorage()
       setIsLoadingCompleted(true)
@@ -142,15 +131,8 @@ const useAppLoad = () => {
 
   useRemoteConfig()
 
-  const isCompleted =
-    isLoadingCompleted &&
-    hasMigratedFromAsyncStorage &&
-    hasMigratedFromFileSystem &&
-    hasMigratedToLanguageFolders
-
   return {
-    isLoadingCompleted: isCompleted,
-    status,
+    isLoadingCompleted,
   }
 }
 
@@ -198,12 +180,43 @@ const useNavigationTracking = () => {
   }, [pathname, segments, params])
 }
 
+// Deferred modal components - mounted after first interactions complete
+function DeferredModals() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    const handle = InteractionManager.runAfterInteractions(() => setMounted(true))
+    return () => handle.cancel()
+  }, [])
+
+  if (!mounted) return null
+
+  return (
+    <>
+      <ChangelogModal />
+      <OnBoardingModal />
+      <UnifiedTagsModal />
+      <ColorPickerModal />
+      <ColorChangeModal />
+      <TagDetailModal />
+      <FeatureOnboardingModal />
+    </>
+  )
+}
+
 // Inner app with all providers (needs Redux context)
 function InnerApp() {
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
   const { theme: currentTheme, colorScheme } = useCurrentThemeSelector()
 
   useKeepAwake()
+
+  useEffect(() => {
+    // Defer TrackPlayer registration to after first interactions
+    InteractionManager.runAfterInteractions(() => {
+      TrackPlayer.registerPlaybackService(() => PlaybackService)
+    })
+  }, [])
   useUpdates()
   useNavigationTracking()
   // useAtomsDevtools('jotai')
@@ -255,13 +268,7 @@ function InnerApp() {
                             <Stack.Screen name="index" />
                           </Stack>
                           <ThemedToaster />
-                          <ChangelogModal />
-                          <OnBoardingModal />
-                          <UnifiedTagsModal />
-                          <ColorPickerModal />
-                          <ColorChangeModal />
-                          <TagDetailModal />
-                          <FeatureOnboardingModal />
+                          <DeferredModals />
                         </BookSelectorBottomSheetProvider>
                       </BottomSheetModalProvider>
                     </PortalProvider>
@@ -278,11 +285,12 @@ function InnerApp() {
 
 // Root layout component
 function RootLayout() {
-  const { isLoadingCompleted, status } = useAppLoad()
+  const { isLoadingCompleted } = useAppLoad()
 
   const onLayoutRootView = useCallback(() => {
     if (isLoadingCompleted) {
       SplashScreen.hide()
+      initSentry()
     }
   }, [isLoadingCompleted])
 
@@ -290,7 +298,6 @@ function RootLayout() {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <ActivityIndicator />
-        <Text>{status}</Text>
       </View>
     )
   }
@@ -299,7 +306,7 @@ function RootLayout() {
     <>
       <SystemBars style="light" />
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <SafeAreaProvider>
+        <SafeAreaProvider initialMetrics={initialWindowMetrics}>
           <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
             <ReduxProvider store={store}>
               <InnerApp />
