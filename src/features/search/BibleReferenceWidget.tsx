@@ -114,7 +114,7 @@ const ReferenceItem = ({ segment }: { segment: ParsedSegment }) => {
         })
       }
     >
-      <Box pt={15} pb={20} borderBottomWidth={1} borderColor="border">
+      <Box pt={15} pb={20} borderBottomWidth={1} borderColor="border" px={20}>
         <HStack alignItems="center" gap={4} mb={4}>
           <Text title fontSize={14}>
             {title}
