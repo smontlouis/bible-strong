@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react'
-import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
+import { useEffect } from 'react'
 
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import RatingPrompt from './RatingPrompt'
 import { useAppRating } from './useAppRating'
 
@@ -10,21 +10,20 @@ import { useAppRating } from './useAppRating'
  * It checks after a delay whether conditions are met and shows the prompt.
  */
 const AppRatingModal = () => {
-  const ratingModalRef = React.useRef<BottomSheetMethods | null>(null)
+  const { ref, open, close } = useBottomSheetModal()
   const { shouldShowRatingPrompt } = useAppRating()
 
   useEffect(() => {
-    // Wait for the app to fully settle before checking
     const timer = setTimeout(() => {
       if (shouldShowRatingPrompt('engagement_milestone')) {
-        ratingModalRef.current?.expand()
+        open()
       }
     }, 5000)
 
     return () => clearTimeout(timer)
   }, [])
 
-  return <RatingPrompt modalRef={ratingModalRef} />
+  return <RatingPrompt modalRef={ref} onClose={close} />
 }
 
 export default AppRatingModal

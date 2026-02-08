@@ -6,7 +6,6 @@ import { Linking, Platform } from 'react-native'
 import { appRatingAtom, AppRatingState } from '~state/appRating'
 import { RootState } from '~redux/modules/reducer'
 
-const MIN_DAYS_SINCE_INSTALL = 14
 const MIN_DAYS_BETWEEN_PROMPTS = 90
 const MIN_ENGAGEMENT_SCORE = 10
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -31,34 +30,29 @@ function computeEngagementScore(state: RootState): number {
 function canShowRatingPrompt(ratingState: AppRatingState, engagementScore: number): boolean {
   const now = Date.now()
 
+  console.log('[AppRating] Checking conditions:', {
+    hasDeclined: ratingState.hasDeclined,
+    hasRated: ratingState.hasRated,
+    firstOpenDate: ratingState.firstOpenDate,
+    appOpenCount: ratingState.appOpenCount,
+    engagementScore,
+    lastPromptDate: ratingState.lastPromptDate,
+  })
+
   // User already declined or rated
-  if (ratingState.hasDeclined || ratingState.hasRated) {
-    return false
-  }
+  if (ratingState.hasDeclined || ratingState.hasRated) return false
 
   // Must have a recorded first open
-  if (ratingState.firstOpenDate === 0) {
-    return false
-  }
-
-  // At least MIN_DAYS_SINCE_INSTALL since first open
-  const daysSinceInstall = (now - ratingState.firstOpenDate) / DAY_MS
-  if (daysSinceInstall < MIN_DAYS_SINCE_INSTALL) {
-    return false
-  }
+  if (ratingState.firstOpenDate === 0) return false
 
   // At least MIN_DAYS_BETWEEN_PROMPTS since last prompt
   if (ratingState.lastPromptDate) {
     const daysSinceLastPrompt = (now - ratingState.lastPromptDate) / DAY_MS
-    if (daysSinceLastPrompt < MIN_DAYS_BETWEEN_PROMPTS) {
-      return false
-    }
+    if (daysSinceLastPrompt < MIN_DAYS_BETWEEN_PROMPTS) return false
   }
 
   // Sufficient engagement
-  if (engagementScore < MIN_ENGAGEMENT_SCORE) {
-    return false
-  }
+  if (engagementScore < MIN_ENGAGEMENT_SCORE) return false
 
   return true
 }
@@ -88,20 +82,26 @@ export function useAppRating() {
 
   /** Check whether a rating prompt should be shown for the given trigger. */
   const shouldShowRatingPrompt = (trigger: RatingTrigger): boolean => {
-    if (!canShowRatingPrompt(ratingState, engagementScore)) {
+    const canShow = canShowRatingPrompt(ratingState, engagementScore)
+    if (!canShow) {
+      console.log(`[AppRating] canShow=false for trigger="${trigger}"`)
       return false
     }
 
+    let result = false
     switch (trigger) {
       case 'plan_completed':
-        // Always show after completing a plan if conditions are met
-        return true
+        result = true
+        break
       case 'engagement_milestone':
-        // Show on the 5th app open within a qualifying window
-        return ratingState.appOpenCount >= 5 && ratingState.appOpenCount % 10 === 0
-      default:
-        return false
+        result = ratingState.appOpenCount >= 3 && ratingState.appOpenCount % 5 === 0
+        break
     }
+
+    console.log(`[AppRating] trigger="${trigger}" result=${result}`, {
+      appOpenCount: ratingState.appOpenCount,
+    })
+    return result
   }
 
   /** User chose "Oui, noter" — trigger the native review API. */

@@ -7,6 +7,7 @@ import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
 import Container from '~common/ui/Container'
 import { usePrevious } from '~helpers/usePrevious'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { useAppRating } from '~features/app-rating/useAppRating'
 import RatingPrompt from '~features/app-rating/RatingPrompt'
 import { useComputedPlan, useFireStorage } from '../plan.hooks'
@@ -22,7 +23,7 @@ const PlanScreen = () => {
   const planParams: ComputedPlanItem | undefined = params.plan ? JSON.parse(params.plan) : undefined
   const { id, title, image, description, author } = planParams || ({} as ComputedPlanItem)
   const modalRef = React.useRef<BottomSheetMethods | null>(null)
-  const ratingModalRef = React.useRef<BottomSheetMethods | null>(null)
+  const { ref: ratingModalRef, open: openRating, close: closeRating } = useBottomSheetModal()
   const modalRefDetails = React.useRef<BottomSheetModal | null>(null)
   const cacheImage = useFireStorage(image)
 
@@ -47,7 +48,7 @@ const PlanScreen = () => {
       // Small delay so the success modal finishes closing
       setTimeout(() => {
         if (shouldShowRatingPrompt('plan_completed')) {
-          ratingModalRef.current?.expand()
+          openRating()
         }
       }, 500)
     }
@@ -68,7 +69,7 @@ const PlanScreen = () => {
         isPlanCompleted={isPlanCompleted}
         onClose={handleSuccessModalClose}
       />
-      <RatingPrompt modalRef={ratingModalRef} />
+      <RatingPrompt modalRef={ratingModalRef} onClose={closeRating} />
       <DetailsModal
         modalRefDetails={modalRefDetails}
         title={title}
