@@ -9,6 +9,7 @@ import useInitFireAuth from '~helpers/useInitFireAuth'
 import useLiveUpdates from '~helpers/useLiveUpdates'
 import useTabGroupsSync from '~state/useTabGroupsSync'
 import useDownloadBibleResources from '~helpers/useDownloadBibleResources'
+import { useAppRatingCheck } from '~features/app-rating/useAppRatingCheck'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
 import { openBiblesDb, checkBiblesDbHealth, resetBiblesDb } from '~helpers/biblesDb'
 import { toast } from '~helpers/toast'
@@ -119,6 +120,7 @@ const InitHooks = ({}: InitHooksProps) => {
   useLiveUpdates()
   useTabGroupsSync()
   useDownloadBibleResources()
+  useAppRatingCheck()
 
   return <MigrationModal />
 }

@@ -12,10 +12,17 @@ import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
 interface Props {
   modalRef: React.RefObject<BottomSheetMethods | null>
   isPlanCompleted: boolean
+  onClose?: () => void
 }
 
-const SuccessModal = ({ modalRef, isPlanCompleted }: Props) => {
+const SuccessModal = ({ modalRef, isPlanCompleted, onClose }: Props) => {
   const { t } = useTranslation()
+
+  const handleClose = () => {
+    modalRef?.current?.close()
+    onClose?.()
+  }
+
   return (
     <BottomSheet
       ref={modalRef}
@@ -73,7 +80,7 @@ const SuccessModal = ({ modalRef, isPlanCompleted }: Props) => {
               </>
             )}
           </Box>
-          <Button fullWidth onPress={() => modalRef?.current?.close()}>
+          <Button fullWidth onPress={handleClose}>
             {t('Continuer')}
           </Button>
         </Box>

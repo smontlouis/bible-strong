@@ -37,6 +37,7 @@ import { AppSwitcherProvider } from '~features/app-switcher/AppSwitcherProvider'
 import { BookSelectorBottomSheetProvider } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 import OnBoardingModal from '~features/onboarding/OnBoarding'
 import { FeatureOnboardingModal } from '~features/feature-onboarding'
+import { AppRatingModal } from '~features/app-rating'
 import { DBStateProvider } from '~helpers/databaseState'
 import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
 import { QueryClient, QueryClientProvider } from '~helpers/react-query-lite'
@@ -262,6 +263,7 @@ function InnerApp() {
                           <ColorChangeModal />
                           <TagDetailModal />
                           <FeatureOnboardingModal />
+                          <AppRatingModal />
                         </BookSelectorBottomSheetProvider>
                       </BottomSheetModalProvider>
                     </PortalProvider>

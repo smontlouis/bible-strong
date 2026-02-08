@@ -972,5 +972,11 @@
   "downloads.size.gb": "{{value}} Go",
   "downloads.size.mb": "{{value}} Mo",
   "downloads.size.kb": "{{value}} Ko",
-  "downloads.size.b": "{{value}} o"
+  "downloads.size.b": "{{value}} o",
+
+  "rating.title": "Vous appréciez Bible Strong ?",
+  "rating.subtitle": "Votre avis sur le store nous aide énormément à faire connaître l'application. Merci !",
+  "rating.accept": "Oui, noter l'app",
+  "rating.later": "Plus tard",
+  "rating.decline": "Non merci"
 }

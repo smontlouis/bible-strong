@@ -1034,5 +1034,11 @@
   "downloads.size.gb": "{{value}} GB",
   "downloads.size.mb": "{{value}} MB",
   "downloads.size.kb": "{{value}} KB",
-  "downloads.size.b": "{{value}} B"
+  "downloads.size.b": "{{value}} B",
+
+  "rating.title": "Enjoying Bible Strong?",
+  "rating.subtitle": "Your review on the store really helps others discover the app. Thank you!",
+  "rating.accept": "Yes, rate the app",
+  "rating.later": "Later",
+  "rating.decline": "No thanks"
 }
