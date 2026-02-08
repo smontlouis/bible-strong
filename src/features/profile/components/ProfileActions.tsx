@@ -11,11 +11,13 @@ import IconCircle from '~common/ui/IconCircle'
 import SectionCard, { SectionCardHeader } from '~common/ui/SectionCard'
 import useLogin from '~helpers/useLogin'
 import ChangePasswordModal from './ChangePasswordModal'
+import DeleteAccountModal from './DeleteAccountModal'
 
 const ProfileActions = () => {
   const { t } = useTranslation()
-  const { user, logout, promptDeleteAccount } = useLogin()
+  const { user, logout } = useLogin()
   const passwordModalRef = useRef<BottomSheetModal>(null)
+  const deleteAccountModalRef = useRef<BottomSheetModal>(null)
 
   const isEmailProvider = user.provider === 'password'
 
@@ -67,7 +69,7 @@ const ProfileActions = () => {
           </Text>
         </CardLinkItem>
 
-        <CardLinkItem onPress={promptDeleteAccount} isLast>
+        <CardLinkItem onPress={() => deleteAccountModalRef.current?.present()} isLast>
           <IconCircle bg="rgba(239, 68, 68, 0.1)">
             <FeatherIcon name="trash-2" size={20} color="quart" />
           </IconCircle>
@@ -78,6 +80,7 @@ const ProfileActions = () => {
       </SectionCard>
 
       <ChangePasswordModal modalRef={passwordModalRef} />
+      <DeleteAccountModal modalRef={deleteAccountModalRef} />
     </Box>
   )
 }
