@@ -271,26 +271,27 @@ const isTagAction = isAnyOf(addTag, removeTag, updateTag)
 const isStudyUpdateAction = isAnyOf(updateStudy, publishStudyAction)
 
 const firestoreMiddleware: Middleware = store => next => async action => {
-  const oldState = store.getState()
-  const result = next(action)
-
   // Early return for logout - prevent race conditions with app lifecycle
   if (onUserLogout.match(action)) {
+    return next(action)
+  }
+
+  const oldState = store.getState()
+  const result = next(action)
+  const state = store.getState() as RootState
+
+  // Check auth early before expensive diff computation
+  if (!state.user.id) {
     return result
   }
 
-  const state = store.getState() as RootState
+  const currentUser = getAuth().currentUser
+  if (!currentUser) {
+    return result
+  }
 
   const deleteMarker = deleteField()
   const diffState: any = diff(oldState, state, deleteMarker)
-
-  // FIX BUG #1: Vérifier Firebase Auth au lieu de Redux user.id
-  const currentUser = getAuth().currentUser
-
-  if (!currentUser || !state.user.id) {
-    // Pas d'utilisateur Firebase Auth authentifié
-    return result
-  }
 
   const userId = currentUser.uid
   const { user, plan } = state

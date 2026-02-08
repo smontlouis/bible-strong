@@ -1,9 +1,10 @@
 import styled from '@emotion/native'
 import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
-import React, { memo } from 'react'
+import React, { memo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, Platform } from 'react-native'
 import { useSelector } from 'react-redux'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import Header from '~common/Header'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -21,6 +22,7 @@ import UserAvatar from '~common/ui/UserAvatar'
 import extractFirstName from '~helpers/extractFirstName'
 import useLanguage from '~helpers/useLanguage'
 import useLogin from '~helpers/useLogin'
+import DeleteAccountModal from '~features/profile/components/DeleteAccountModal'
 import { RootState } from '~redux/modules/reducer'
 import app from '../../../package.json'
 
@@ -73,8 +75,9 @@ type MoreProps = {
 }
 
 export const More = ({ closeMenu }: MoreProps) => {
-  const { isLogged, user, logout, promptDeleteAccount } = useLogin()
+  const { isLogged, user, logout } = useLogin()
   const theme = useTheme()
+  const deleteAccountModalRef = useRef<BottomSheetModal>(null)
 
   const lang = useLanguage()
   const hasUpdate = useSelector((state: RootState) =>
@@ -368,7 +371,7 @@ export const More = ({ closeMenu }: MoreProps) => {
           {isLogged && (
             <LinkItem
               style={{ paddingVertical: 10, paddingHorizontal: 0 }}
-              onPress={promptDeleteAccount}
+              onPress={() => deleteAccountModalRef.current?.present()}
             >
               <Text fontSize={14} color="grey">
                 {t('app.deleteAccount')}
@@ -379,6 +382,7 @@ export const More = ({ closeMenu }: MoreProps) => {
 
         <Infos />
       </ScrollView>
+      {isLogged && <DeleteAccountModal modalRef={deleteAccountModalRef} />}
     </SafeAreaBox>
   )
 }
