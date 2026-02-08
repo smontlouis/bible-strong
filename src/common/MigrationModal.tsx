@@ -93,7 +93,11 @@ const MigrationModal = () => {
           </Text>
 
           <Text textAlign="center" color="grey" marginBottom={20}>
-            {hasError ? t('migration.errorDescription') : isBibleMigration ? 'Veuillez patienter, cette opération ne prendra que quelques instants.' : t('migration.description')}
+            {hasError
+              ? t('migration.errorDescription')
+              : isBibleMigration
+                ? 'Veuillez patienter, cette opération ne prendra que quelques instants.'
+                : t('migration.description')}
           </Text>
 
           {!hasError && !isBibleMigration && (
@@ -129,7 +133,9 @@ const MigrationModal = () => {
                     ? t('migration.partialError') +
                       (isBibleMigration
                         ? progress.failedCollections.join(', ')
-                        : progress.failedCollections.map(c => getCollectionLabel(c as SubcollectionName)).join(', '))
+                        : progress.failedCollections
+                            .map(c => getCollectionLabel(c as SubcollectionName))
+                            .join(', '))
                     : progress.error}
                 </Text>
               </ErrorBox>
