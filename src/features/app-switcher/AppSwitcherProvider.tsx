@@ -11,6 +11,7 @@ import {
   activeTabIndexAtom,
   tabGroupsAtom,
   tabsAtomsAtom,
+  tabsCountAtom,
 } from '~state/tabs'
 import { useOnceAtoms } from './utils/useOnceAtoms'
 import useTabConstants from './utils/useTabConstants'
@@ -62,6 +63,8 @@ type AppSwitcherContextValues = {
   createGroupPage: {
     isFullyVisible: SharedValue<boolean>
   }
+  // Tabs count for UI thread access
+  tabsCountShared: SharedValue<number>
 }
 
 const AppSwitcherContext = createContext<AppSwitcherContextValues | undefined>(undefined)
@@ -152,6 +155,14 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
   const pagerTranslateX = useSharedValue(0)
   const pagerScrollX = useSharedValue(0)
   const createGroupPageIsFullyVisible = useSharedValue(false)
+
+  // Tabs count shared value for UI thread access (worklets can't read Jotai)
+  const tabsCount = useAtomValue(tabsCountAtom)
+  const tabsCountShared = useSharedValue(tabsCount)
+
+  useEffect(() => {
+    tabsCountShared.set(tabsCount)
+  }, [tabsCount])
 
   // Listen to reset trigger (login/logout) and reset to first tab expanded
   const resetTrigger = useAtomValue(resetTabAnimationTriggerAtom)
@@ -247,6 +258,7 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
     activeGroupIndex,
     groupPager,
     createGroupPage,
+    tabsCountShared,
   }
 
   return <AppSwitcherContext.Provider value={contextValue}>{children}</AppSwitcherContext.Provider>

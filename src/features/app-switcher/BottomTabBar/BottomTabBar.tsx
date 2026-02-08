@@ -1,4 +1,5 @@
 import { useAtomValue } from 'jotai/react'
+import { GestureDetector } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isFullScreenBibleAtom } from 'src/state/app'
 import { AnimatedBox, TouchableBox } from '~common/ui/Box'
@@ -12,6 +13,7 @@ import SearchButton from './Buttons/SearchButton'
 import TabButton from './Buttons/TabButton'
 import GroupTitleButton from './GroupTitleButton'
 import useBottomTabBar from './useBottomTabBar'
+import useTabBarSwipeGesture from './useTabBarSwipeGesture'
 
 type BottomTabBarProps = {
   openMenu: () => void
@@ -20,6 +22,7 @@ type BottomTabBarProps = {
 
 const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
   const { onPress, listStyles, viewStyles } = useBottomTabBar()
+  const { panGesture } = useTabBarSwipeGesture()
   const insets = useSafeAreaInsets()
   const bottomBarHeight = TAB_ICON_SIZE + insets.bottom
   const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
@@ -41,22 +44,24 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
         transitionDuration: 300,
       }}
     >
-      <AnimatedBox
-        row
-        alignItems="center"
-        justifyContent="space-around"
-        px={20}
-        absoluteFill
-        paddingBottom={insets.bottom}
-        style={viewStyles}
-        key="view"
-      >
-        <HomeButton openHome={openHome} />
-        <SearchButton />
-        <BibleButton />
-        <TabButton />
-        <MenuButton openMenu={openMenu} />
-      </AnimatedBox>
+      <GestureDetector gesture={panGesture}>
+        <AnimatedBox
+          row
+          alignItems="center"
+          justifyContent="space-around"
+          px={20}
+          absoluteFill
+          paddingBottom={insets.bottom}
+          style={viewStyles}
+          key="view"
+        >
+          <HomeButton openHome={openHome} />
+          <SearchButton />
+          <BibleButton />
+          <TabButton />
+          <MenuButton openMenu={openMenu} />
+        </AnimatedBox>
+      </GestureDetector>
       <AnimatedBox
         row
         alignItems="center"

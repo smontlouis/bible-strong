@@ -1,7 +1,7 @@
 import { useAtomValue } from 'jotai/react'
 import React, { useDeferredValue } from 'react'
 import { useAnimatedStyle } from 'react-native-reanimated'
-import { AnimatedBox } from '~common/ui/Box'
+import Box, { AnimatedBox } from '~common/ui/Box'
 import { tabsAtomsAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import useTabConstants from '../utils/useTabConstants'
@@ -31,7 +31,16 @@ const TabPreviewCarousel = () => {
   })
 
   return (
-    <AnimatedBox row position="absolute" top={0} left={0} bg="lightGrey" style={styles}>
+    <AnimatedBox
+      row
+      position="absolute"
+      top={0}
+      left={0}
+      bg="lightGrey"
+      style={styles}
+      overflow="visible"
+    >
+      <Box position="absolute" inset={-300} bg="lightGrey" />
       {deferredTabsAtoms.map((tabAtom, i) => (
         <TabPreview key={`${tabAtom}`} index={i} tabAtom={tabAtom} />
       ))}

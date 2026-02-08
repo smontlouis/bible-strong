@@ -8,7 +8,12 @@ import { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reani
 import { runOnJS } from 'react-native-worklets'
 
 import { AnimatedBox } from '~common/ui/Box'
-import { activeGroupIdAtom, tabGroupsAtom, bufferedGroupIdsAtom } from '../../../state/tabs'
+import {
+  activeGroupIdAtom,
+  tabGroupsAtom,
+  bufferedGroupIdsAtom,
+  appSwitcherModeAtom,
+} from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import CreateGroupPage from './CreateGroupPage'
 import TabGroupPage from './TabGroupPage'
@@ -33,6 +38,7 @@ const TabGroupPager = () => {
   const { width } = useWindowDimensions()
   const groups = useAtomValue(tabGroupsAtom)
   const bufferedGroupIds = useAtomValue(bufferedGroupIdsAtom)
+  const appSwitcherMode = useAtomValue(appSwitcherModeAtom)
   // Différer le chargement des groupes adjacents (basse priorité)
   const deferredBufferedGroupIds = useDeferredValue(bufferedGroupIds)
   const { activeGroupIndex, groupPager, createGroupPage } = useAppSwitcherContext()
@@ -146,28 +152,30 @@ const TabGroupPager = () => {
   )
 
   return (
-    <GestureDetector gesture={panGesture}>
-      <AnimatedBox flex={1} bg="lightGrey">
-        <AnimatedBox row style={[{ width: totalPages * width, height: '100%' }, containerStyle]}>
-          {groups.map((group, index) => (
-            <TabGroupPage
-              key={group.id}
-              group={group}
-              index={index}
-              isBuffered={isGroupBuffered(group.id)}
+    <>
+      <GestureDetector gesture={panGesture}>
+        <AnimatedBox flex={1} bg="lightGrey">
+          <AnimatedBox row style={[{ width: totalPages * width, height: '100%' }, containerStyle]}>
+            {groups.map((group, index) => (
+              <TabGroupPage
+                key={group.id}
+                group={group}
+                index={index}
+                isBuffered={isGroupBuffered(group.id)}
+                scrollX={scrollX}
+                groupCount={groups.length}
+              />
+            ))}
+            <CreateGroupPage
               scrollX={scrollX}
               groupCount={groups.length}
+              onCancel={scrollToPreviousGroup}
+              onGroupCreated={handleGroupCreated}
             />
-          ))}
-          <CreateGroupPage
-            scrollX={scrollX}
-            groupCount={groups.length}
-            onCancel={scrollToPreviousGroup}
-            onGroupCreated={handleGroupCreated}
-          />
+          </AnimatedBox>
         </AnimatedBox>
-      </AnimatedBox>
-    </GestureDetector>
+      </GestureDetector>
+    </>
   )
 }
 
