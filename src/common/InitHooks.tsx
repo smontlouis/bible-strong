@@ -5,11 +5,13 @@ import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppState, AppStateStatus, InteractionManager, Platform } from 'react-native'
 import { useDispatch } from 'react-redux'
+import { getDefaultStore } from 'jotai/vanilla'
 
 import {
   resetMigrationProgressFromOutsideReact,
   setMigrationProgressFromOutsideReact,
 } from 'src/state/migration'
+import { bibleDataRefreshSignalAtom } from '~state/app'
 import MigrationModal from '~common/MigrationModal'
 import { useAppRatingCheck } from '~features/app-rating/useAppRatingCheck'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
@@ -79,6 +81,11 @@ const InitHooks = ({}: InitHooksProps) => {
             message: `${failedVersions.length} version(s) non migrée(s)`,
           })
 
+          // Even with failures, some Bibles may have migrated successfully
+          // Increment signal to trigger Bible tabs reload
+          const store = getDefaultStore()
+          store.set(bibleDataRefreshSignalAtom, (c: number) => c + 1)
+
           setTimeout(() => {
             resetMigrationProgressFromOutsideReact()
             console.warn('[InitHooks] Bible migration completed with failures:', failedVersions)
@@ -89,11 +96,14 @@ const InitHooks = ({}: InitHooksProps) => {
             message: 'Migration terminée !',
           })
 
+          // Increment signal to trigger Bible tabs reload
+          const store = getDefaultStore()
+          store.set(bibleDataRefreshSignalAtom, (c: number) => c + 1)
+
           // Hide modal after showing success message
           setTimeout(() => {
             resetMigrationProgressFromOutsideReact()
-            // No reload - app continues normally with migrated data
-            console.log('[InitHooks] Bible migration complete, app continues normally')
+            console.log('[InitHooks] Bible migration complete, Bible tabs reloaded')
           }, 2000)
         }
       })

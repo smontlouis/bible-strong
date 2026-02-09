@@ -71,6 +71,10 @@ export const resetTabAnimationTriggerAtom = atom(0)
 // so that all mounted VersionSelectorItem instances re-check install status.
 export const installedVersionsSignalAtom = atom(0)
 
+// Signal atom — incremented after Bible migration completes,
+// so that all mounted BibleViewer instances reload verses from SQLite.
+export const bibleDataRefreshSignalAtom = atom(0)
+
 export const resetUserAtomsAtom = atom(null, (get, set) => {
   // Reset to a single default group with one Bible tab
   set(tabGroupsAtom, [createDefaultGroup()])

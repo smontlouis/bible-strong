@@ -46,7 +46,7 @@ import {
   makeWordAnnotationsInOtherVersionsSelector,
 } from '~redux/selectors/bible'
 import { makeSelectBookmarksInChapter } from '~redux/selectors/bookmarks'
-import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
+import { historyAtom, unifiedTagsModalAtom, bibleDataRefreshSignalAtom } from '../../state/app'
 import {
   BibleTab,
   useBibleTabActions,
@@ -123,6 +123,7 @@ const BibleViewer = ({
 }: BibleViewerProps) => {
   const { t } = useTranslation()
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
+  const bibleDataRefreshSignal = useAtomValue(bibleDataRefreshSignalAtom)
 
   const [error, setError] = useState<BibleError | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -457,7 +458,15 @@ const BibleViewer = ({
     if (prevBook !== undefined && (prevBook !== book.Numero || prevChapter !== chapter)) {
       actions.clearSelectedVerses()
     }
-  }, [book, chapter, version, parallelVersionsKey, isOnboardingCompleted, settings.commentsDisplay])
+  }, [
+    book,
+    chapter,
+    version,
+    parallelVersionsKey,
+    isOnboardingCompleted,
+    settings.commentsDisplay,
+    bibleDataRefreshSignal,
+  ])
 
   const addHiglightAndOpenQuickTags = (color: string) => {
     dispatch(addHighlight({ color, selectedVerses }))
