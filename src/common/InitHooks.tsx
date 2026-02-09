@@ -1,25 +1,26 @@
+import * as Icon from '@expo/vector-icons'
+import * as Font from 'expo-font'
 import * as Speech from 'expo-speech'
-import * as Updates from 'expo-updates'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppState, AppStateStatus, InteractionManager, Platform } from 'react-native'
 import { useDispatch } from 'react-redux'
 
-import useInitFireAuth from '~helpers/useInitFireAuth'
-import useLiveUpdates from '~helpers/useLiveUpdates'
-import useTabGroupsSync from '~state/useTabGroupsSync'
-import useDownloadBibleResources from '~helpers/useDownloadBibleResources'
+import {
+  resetMigrationProgressFromOutsideReact,
+  setMigrationProgressFromOutsideReact,
+} from 'src/state/migration'
+import MigrationModal from '~common/MigrationModal'
 import { useAppRatingCheck } from '~features/app-rating/useAppRatingCheck'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
-import { openBiblesDb, checkBiblesDbHealth, resetBiblesDb } from '~helpers/biblesDb'
+import { migrateBibleJsonToSqlite, needsBibleMigration } from '~helpers/bibleMigration'
+import { checkBiblesDbHealth, openBiblesDb, resetBiblesDb } from '~helpers/biblesDb'
 import { toast } from '~helpers/toast'
-import { needsBibleMigration, migrateBibleJsonToSqlite } from '~helpers/bibleMigration'
-import {
-  setMigrationProgressFromOutsideReact,
-  resetMigrationProgressFromOutsideReact,
-} from 'src/state/migration'
+import useDownloadBibleResources from '~helpers/useDownloadBibleResources'
+import useInitFireAuth from '~helpers/useInitFireAuth'
+import useLiveUpdates from '~helpers/useLiveUpdates'
 import { getChangelog, getDatabaseUpdate, getVersionUpdate } from '~redux/modules/user'
-import MigrationModal from '~common/MigrationModal'
+import useTabGroupsSync from '~state/useTabGroupsSync'
 
 export interface InitHooksProps {}
 
@@ -112,6 +113,16 @@ const InitHooks = ({}: InitHooksProps) => {
 
     // Defer non-critical operations to after first interactions
     const deferred = InteractionManager.runAfterInteractions(() => {
+      // Load custom fonts (deferred for performance)
+      Font.loadAsync({
+        ...Icon.Feather.font,
+        ...Icon.Ionicons.font,
+        'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
+        'eina-03-bold': require('~assets/fonts/eina-03-bold.otf'),
+      }).catch(err => {
+        console.error('Failed to load fonts:', err)
+      })
+
       autoBackupManager.initialize().catch(err => {
         console.error('Failed to initialize AutoBackupManager:', err)
       })
