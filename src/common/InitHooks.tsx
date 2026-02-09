@@ -14,7 +14,10 @@ import { autoBackupManager } from '~helpers/AutoBackupManager'
 import { openBiblesDb, checkBiblesDbHealth, resetBiblesDb } from '~helpers/biblesDb'
 import { toast } from '~helpers/toast'
 import { needsBibleMigration, migrateBibleJsonToSqlite } from '~helpers/bibleMigration'
-import { setMigrationProgressFromOutsideReact } from 'src/state/migration'
+import {
+  setMigrationProgressFromOutsideReact,
+  resetMigrationProgressFromOutsideReact,
+} from 'src/state/migration'
 import { getChangelog, getDatabaseUpdate, getVersionUpdate } from '~redux/modules/user'
 import MigrationModal from '~common/MigrationModal'
 
@@ -74,21 +77,23 @@ const InitHooks = ({}: InitHooksProps) => {
             overallProgress: 1,
             message: `${failedVersions.length} version(s) non migrée(s)`,
           })
-          setTimeout(async () => {
-            try {
-              await Updates.reloadAsync()
-            } catch {}
-          }, 2000)
+
+          setTimeout(() => {
+            resetMigrationProgressFromOutsideReact()
+            console.warn('[InitHooks] Bible migration completed with failures:', failedVersions)
+          }, 3000)
         } else {
           setMigrationProgressFromOutsideReact({
             overallProgress: 1,
-            message: 'Terminé !',
+            message: 'Migration terminée !',
           })
-          setTimeout(async () => {
-            try {
-              await Updates.reloadAsync()
-            } catch {}
-          }, 1000)
+
+          // Hide modal after showing success message
+          setTimeout(() => {
+            resetMigrationProgressFromOutsideReact()
+            // No reload - app continues normally with migrated data
+            console.log('[InitHooks] Bible migration complete, app continues normally')
+          }, 2000)
         }
       })
       .catch(async err => {
