@@ -42,6 +42,7 @@ const DownloadFiles = ({ setStep }: { setStep: React.Dispatch<React.SetStateActi
       path,
       uri,
       fileSize: 2500000,
+      type: 'bible',
     }
   }
 
@@ -95,6 +96,8 @@ const DownloadFiles = ({ setStep }: { setStep: React.Dispatch<React.SetStateActi
                     path: db.path,
                     uri: getDatabasesRef()[db.id],
                     fileSize: db.fileSize,
+                    type: 'database',
+                    lang,
                   })
                 }
               />
@@ -137,6 +140,7 @@ const DownloadFiles = ({ setStep }: { setStep: React.Dispatch<React.SetStateActi
                   path,
                   uri,
                   fileSize: 2500000,
+                  type: 'bible',
                 })
               }}
             />

@@ -65,8 +65,16 @@ export default async ({
     } catch (e) {
       if (version !== 'POV') {
         Sentry.withScope(scope => {
+          const [book, chapter, verse] = key.split('-')
           scope.setExtra('reference', `${reference} ${version}`)
-          Sentry.captureException('getVersesContent error')
+          scope.setExtra('failedVerseKey', key)
+          scope.setExtra('book', book)
+          scope.setExtra('chapter', chapter)
+          scope.setExtra('verse', verse)
+          scope.setExtra('version', version)
+          scope.setExtra('allSelectedVerses', selectedVerses)
+          scope.setExtra('versesMapKeys', Object.keys(versesMap))
+          Sentry.captureException(e)
         })
       }
       versesContent = 'Impossible de charger ce verset.'

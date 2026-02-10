@@ -7,6 +7,8 @@ export type ResourceToDownload = {
   path: string
   uri: string
   fileSize: number
+  type: 'bible' | 'database'  // Discriminate between resource types
+  lang?: string               // Language for database downloads (required for databases)
 }
 
 export const selectedResourcesAtom = atom<ResourceToDownload[]>([])

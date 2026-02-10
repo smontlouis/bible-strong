@@ -15,7 +15,8 @@ import { isStrongVersion } from '~helpers/bibleVersions'
 import { isVersionInstalled } from '~helpers/biblesDb'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { requireBiblePath } from '~helpers/requireBiblePath'
-import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
+import { createBibleDownloadItem, createDatabaseDownloadItem } from '~helpers/downloadItemFactory'
+import type { DatabaseId } from '~helpers/databaseTypes'
 import { downloadManager } from '~helpers/downloadManager'
 import { overallProgressAtom, activeQueueAtom, failedItemsAtom } from '~state/downloadQueue'
 import { isOnboardingCompletedAtom, selectedResourcesAtom } from './atom'
@@ -37,8 +38,21 @@ const DownloadResources = () => {
   // Enqueue all resources on mount
   useEffect(() => {
     const items = selectedResources.map(resource => {
-      // Create DownloadItem from the onboarding resource format
-      return createBibleDownloadItem(resource.id)
+      try {
+        if (resource.type === 'bible') {
+          return createBibleDownloadItem(resource.id)
+        } else {
+          // Database: use the language that was stored when resource was selected
+          return createDatabaseDownloadItem(
+            resource.id as DatabaseId,
+            resource.lang || 'fr'  // Fallback to 'fr' for safety
+          )
+        }
+      } catch (error) {
+        // Log error but don't crash the app
+        console.error(`Failed to create download item for ${resource.id}:`, error)
+        throw error  // Re-throw to trigger the error UI
+      }
     })
 
     if (items.length > 0) {

@@ -16,11 +16,11 @@ const DAY_MS = 24 * 60 * 60 * 1000
 function computeEngagementScore(state: RootState): number {
   const { highlights, notes, studies, bookmarks } = state.user.bible
 
-  return (
-    Object.keys(highlights).length * 1 +
-    Object.keys(notes).length * 2 +
-    Object.keys(studies).length * 3 +
-    Object.keys(bookmarks).length * 0.5
+  return Math.round(
+    Object.keys(highlights ?? {}).length * 1 +
+      Object.keys(notes ?? {}).length * 2 +
+      Object.keys(studies ?? {}).length * 3 +
+      Object.keys(bookmarks ?? {}).length * 0.5
   )
 }
 
