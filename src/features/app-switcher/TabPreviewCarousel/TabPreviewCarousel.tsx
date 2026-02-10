@@ -40,7 +40,7 @@ const TabPreviewCarousel = () => {
       style={styles}
       overflow="visible"
     >
-      <Box position="absolute" inset={-300} bg="lightGrey" />
+      <Box position="absolute" inset={-300} bg="lightGrey" pointerEvents="none" />
       {deferredTabsAtoms.map((tabAtom, i) => (
         <TabPreview key={`${tabAtom}`} index={i} tabAtom={tabAtom} />
       ))}
