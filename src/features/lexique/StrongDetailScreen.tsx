@@ -73,7 +73,6 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
   const [strongTab, setStrongTab] = useAtom(strongAtom)
   const { isInTab } = useTabContext()
 
-
   const {
     hasBackButton,
     data: { book, reference, strongReference: strongReferenceParam },
@@ -172,13 +171,27 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
     Share.share({ message: toCopy })
   }
 
-  const linkToStrong = (reference: string, bookFromRef: number) => {
+  const linkToStrong = (str1: string, str2: number) => {
+    console.log('linkToStrong', str1, str2)
+
+    let bookNum: string | undefined
+    let reference: string | undefined
+
+    // FRENCH STRONG REFERENCES W/ URLS
+    if (str1.includes('.htm')) {
+      bookNum = String(book)
+      reference = str2.toString()
+    } else {
+      bookNum = String(str2)
+      reference = str1
+    }
+
     if (isInTab) {
       // In tab context, update the tab data instead of navigating
       setStrongTab(
         produce(draft => {
-          draft.data.book = bookFromRef
-          draft.data.reference = String(reference)
+          draft.data.book = Number(bookNum)
+          draft.data.reference = reference
           draft.data.strongReference = undefined
         })
       )
@@ -186,8 +199,8 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
       router.push({
         pathname: '/strong',
         params: {
-          book: String(bookFromRef),
-          reference: String(reference),
+          book: String(bookNum),
+          reference: reference,
         },
       })
     }
@@ -321,7 +334,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
           {!!LSG && (
             <ViewItem>
               <SubTitle color="tertiary">{t('Généralement traduit par')}</SubTitle>
-              <StylizedHTMLView value={LSG} />
+              <StylizedHTMLView value={LSG} onLinkPress={linkToStrong} />
             </ViewItem>
           )}
           {!!Origine && (

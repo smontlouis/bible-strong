@@ -82,7 +82,11 @@ function htmlToElement(rawHtml, opts, done) {
             )
           }
 
-          return <Text selectable key={index}>{parts}</Text>
+          return (
+            <Text selectable key={index}>
+              {parts}
+            </Text>
+          )
         }
 
         return (

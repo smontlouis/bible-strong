@@ -101,12 +101,25 @@ const StrongCard = (props: Props) => {
   const router = useRouter()
   const openedFromTab = useAtomValue(openedFromTabAtom)
 
+  const linkToStrong = (str1: string, str2: number) => {
+    const { book } = props
 
-  const linkToStrong = (reference: string, bookFromRef: number) => {
+    let bookNum: string | undefined
+    let reference: string | undefined
+
+    // FRENCH STRONG REFERENCES W/ URLS
+    if (str1.includes('.htm')) {
+      bookNum = book
+      reference = str2.toString()
+    } else {
+      bookNum = String(str2)
+      reference = str1
+    }
+
     router.push({
       pathname: '/strong',
       params: {
-        book: String(bookFromRef),
+        book: bookNum,
         reference: reference,
       },
     })
