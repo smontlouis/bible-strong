@@ -46,6 +46,7 @@ import {
   useMigrateToLanguageFolders,
 } from '~helpers/storage'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
+import useNotificationNavigation from '~helpers/useNotificationNavigation'
 import { useRemoteConfig } from '~helpers/useRemoteConfig'
 import { useUpdates } from '~helpers/useUpdates'
 import { RootState } from '~redux/modules/reducer'
@@ -220,6 +221,7 @@ function InnerApp() {
     })
   }, [])
   useUpdates()
+  useNotificationNavigation()
   useNavigationTracking()
   // useAtomsDevtools('jotai')
 

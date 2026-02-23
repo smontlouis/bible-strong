@@ -111,12 +111,21 @@ export const useVerseOfTheDay = (addDay: number) => {
           timestamp: date.getTime(),
         }
 
+        const scheduledVerse = !addDay ? verseOfTheDay : verseOfTheDayPlus1
+
         await notifee.createTriggerNotification(
           {
             title: `${t('Bonjour')} ${extractFirstName(displayName)}`,
             body: !addDay
               ? removeBreakLines(verseOfTheDayContent)
               : removeBreakLines(verseOfTheDayPlus1Content),
+            data: {
+              type: 'verseOfTheDay',
+              book: String(scheduledVerse.book),
+              chapter: String(scheduledVerse.chapter),
+              verse: String(scheduledVerse.verse),
+              version,
+            },
             android: {
               channelId,
               pressAction: {
