@@ -46,9 +46,8 @@ const PlanSectionList = ({ id, sections }: ComputedPlan) => {
   }
 
   // Flatten sections into a single array for LegendList
-  const { flattenedData, stickyIndices, headerIndexMap } = React.useMemo(() => {
+  const { flattenedData, headerIndexMap } = React.useMemo(() => {
     const data: ListItem[] = []
-    const headerIndices: number[] = []
     const indexMap: Record<string, number> = {}
 
     for (const section of sections) {
@@ -56,11 +55,6 @@ const PlanSectionList = ({ id, sections }: ComputedPlan) => {
 
       // Track header index for scrolling
       indexMap[section.id] = data.length
-
-      // Only make header sticky if section is expanded
-      if (isExpanded) {
-        headerIndices.push(data.length)
-      }
 
       // Add section header
       data.push({ type: 'header', section })
@@ -79,7 +73,7 @@ const PlanSectionList = ({ id, sections }: ComputedPlan) => {
       }
     }
 
-    return { flattenedData: data, stickyIndices: headerIndices, headerIndexMap: indexMap }
+    return { flattenedData: data, headerIndexMap: indexMap }
   }, [sections, expandedSectionIds])
 
   // Scroll to expanded section after data updates
@@ -146,7 +140,6 @@ const PlanSectionList = ({ id, sections }: ComputedPlan) => {
       renderItem={renderItem}
       getItemType={getItemType}
       keyExtractor={keyExtractor}
-      stickyIndices={stickyIndices}
     />
   )
 }
