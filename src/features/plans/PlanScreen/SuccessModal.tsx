@@ -1,16 +1,15 @@
 import Lottie from 'lottie-react-native'
 import React from 'react'
 
-import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useTranslation } from 'react-i18next'
+import Modal from '~common/Modal'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Paragraph from '~common/ui/Paragraph'
-import { renderBackdrop } from '~helpers/bottomSheetHelpers'
-import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
 
 interface Props {
-  modalRef: React.RefObject<BottomSheetMethods | null>
+  modalRef: React.RefObject<BottomSheetModal | null>
   isPlanCompleted: boolean
   onClose?: () => void
 }
@@ -19,73 +18,70 @@ const SuccessModal = ({ modalRef, isPlanCompleted, onClose }: Props) => {
   const { t } = useTranslation()
 
   const handleClose = () => {
-    modalRef?.current?.close()
+    modalRef?.current?.dismiss()
     onClose?.()
   }
 
   return (
-    <BottomSheet
+    <Modal.Body
       ref={modalRef}
-      index={-1}
+      enableDynamicSizing
+      enableScrollView={false}
+      onModalClose={onClose}
       handleIndicatorStyle={{
         opacity: 0,
       }}
-      backdropComponent={renderBackdrop}
-      enableDynamicSizing
-      enablePanDownToClose
       backgroundStyle={{
         backgroundColor: 'transparent',
       }}
     >
-      <BottomSheetScrollView scrollEnabled={false}>
-        <Box flex={1} justifyContent="flex-end" paddingVertical={40} paddingHorizontal={20}>
-          <Box center>
-            <Lottie
-              autoPlay
-              style={{
-                width: '100%',
-                height: 280,
-              }}
-              source={
-                isPlanCompleted
-                  ? require('../../../assets/images/crown.json')
-                  : require('../../../assets/images/medal.json')
-              }
-            />
-          </Box>
-          <Box
-            backgroundColor="reverse"
-            lightShadow
-            borderRadius={30}
-            marginBottom={30}
-            padding={20}
-          >
-            {isPlanCompleted ? (
-              <>
-                <Paragraph fontFamily="text" textAlign="center" bold>
-                  {t('Félicitations')} !!
-                </Paragraph>
-                <Paragraph scale={-1} fontFamily="text" textAlign="center">
-                  {t('Vous avez complété ce plan')} !
-                </Paragraph>
-              </>
-            ) : (
-              <>
-                <Paragraph fontFamily="text" textAlign="center" bold>
-                  {t('Félicitations')} !
-                </Paragraph>
-                <Paragraph scale={-1} fontFamily="text" textAlign="center">
-                  {t('Vous venez de finir votre lecture.')}
-                </Paragraph>
-              </>
-            )}
-          </Box>
-          <Button fullWidth onPress={handleClose}>
-            {t('Continuer')}
-          </Button>
+      <Box flex={1} justifyContent="flex-end" paddingVertical={40} paddingHorizontal={20}>
+        <Box center>
+          <Lottie
+            autoPlay
+            style={{
+              width: '100%',
+              height: 280,
+            }}
+            source={
+              isPlanCompleted
+                ? require('../../../assets/images/crown.json')
+                : require('../../../assets/images/medal.json')
+            }
+          />
         </Box>
-      </BottomSheetScrollView>
-    </BottomSheet>
+        <Box
+          backgroundColor="reverse"
+          lightShadow
+          borderRadius={30}
+          marginBottom={30}
+          padding={20}
+        >
+          {isPlanCompleted ? (
+            <>
+              <Paragraph fontFamily="text" textAlign="center" bold>
+                {t('Félicitations')} !!
+              </Paragraph>
+              <Paragraph scale={-1} fontFamily="text" textAlign="center">
+                {t('Vous avez complété ce plan')} !
+              </Paragraph>
+            </>
+          ) : (
+            <>
+              <Paragraph fontFamily="text" textAlign="center" bold>
+                {t('Félicitations')} !
+              </Paragraph>
+              <Paragraph scale={-1} fontFamily="text" textAlign="center">
+                {t('Vous venez de finir votre lecture.')}
+              </Paragraph>
+            </>
+          )}
+        </Box>
+        <Button fullWidth onPress={handleClose}>
+          {t('Continuer')}
+        </Button>
+      </Box>
+    </Modal.Body>
   )
 }
 
