@@ -468,23 +468,43 @@ export function removeBibleVersion(version: string): Promise<void> {
 
 /**
  * Build the WHERE clause and params shared by search and count queries.
+ *
+ * Uses a correlated `EXISTS` predicate instead of JOIN conditions to ensure
+ * the FTS5 virtual table remains the outer driver. This avoids planner flips
+ * to the `verses` table and also avoids materializing huge `rowid IN (...)`
+ * lists when filters are broad (e.g. NT only), which can block the connection.
  */
 function buildSearchFilter(ftsQuery: string, options?: SearchOptions) {
   let where = 'WHERE verses_fts MATCH ?'
   const params: (string | number)[] = [ftsQuery]
 
+  const existsConditions: string[] = []
+  const existsParams: (string | number)[] = []
+
   if (options?.version) {
-    where += ' AND v.version = ?'
-    params.push(options.version)
+    existsConditions.push('vf.version = ?')
+    existsParams.push(options.version)
   }
   if (options?.book) {
-    where += ' AND v.book = ?'
-    params.push(options.book)
+    existsConditions.push('vf.book = ?')
+    existsParams.push(options.book)
   }
   if (options?.section === 'ot') {
-    where += ' AND v.book <= 39'
+    existsConditions.push('vf.book <= 39')
   } else if (options?.section === 'nt') {
-    where += ' AND v.book > 39'
+    existsConditions.push('vf.book > 39')
+  }
+
+  if (existsConditions.length > 0) {
+    where += `
+      AND EXISTS (
+        SELECT 1
+        FROM verses vf
+        WHERE vf.id = verses_fts.rowid
+          AND ${existsConditions.join(' AND ')}
+      )
+    `
+    params.push(...existsParams)
   }
 
   return { where, params }
@@ -541,12 +561,16 @@ export function searchVerses(query: string, options?: SearchOptions): Promise<Se
       try {
         const { where: nearWhere, params: nearParams } = buildSearchFilter(nearQuery, options)
         const nearSql = `
-          SELECT v.version, v.book, v.chapter, v.verse, v.text,
-                 highlight(verses_fts, 0, '{{', '}}') AS highlighted
-          FROM verses_fts
-          JOIN verses v ON v.id = verses_fts.rowid
-          ${nearWhere}
-          ORDER BY rank LIMIT ?
+          WITH fts AS MATERIALIZED (
+            SELECT rowid, highlight(verses_fts, 0, '{{', '}}') AS highlighted, rank
+            FROM verses_fts
+            ${nearWhere}
+            ORDER BY rank LIMIT ?
+          )
+          SELECT v.version, v.book, v.chapter, v.verse, v.text, fts.highlighted
+          FROM fts
+          JOIN verses v ON v.id = fts.rowid
+          ORDER BY fts.rank
         `
         nearParams.push(limit)
         const nearResults = await d.getAllAsync<SearchResult>(nearSql, nearParams)
@@ -557,12 +581,16 @@ export function searchVerses(query: string, options?: SearchOptions): Promise<Se
         const remaining = limit - nearResults.length
         const { where: broadWhere, params: broadParams } = buildSearchFilter(ftsQuery, options)
         const broadSql = `
-          SELECT v.version, v.book, v.chapter, v.verse, v.text,
-                 highlight(verses_fts, 0, '{{', '}}') AS highlighted
-          FROM verses_fts
-          JOIN verses v ON v.id = verses_fts.rowid
-          ${broadWhere}
-          ORDER BY rank LIMIT ?
+          WITH fts AS MATERIALIZED (
+            SELECT rowid, highlight(verses_fts, 0, '{{', '}}') AS highlighted, rank
+            FROM verses_fts
+            ${broadWhere}
+            ORDER BY rank LIMIT ?
+          )
+          SELECT v.version, v.book, v.chapter, v.verse, v.text, fts.highlighted
+          FROM fts
+          JOIN verses v ON v.id = fts.rowid
+          ORDER BY fts.rank
         `
         // Over-fetch to account for dedup
         broadParams.push(remaining + nearResults.length)
@@ -584,15 +612,39 @@ export function searchVerses(query: string, options?: SearchOptions): Promise<Se
 
     // Standard single-tier search (single word, book order, or NEAR fallback)
     const { where, params } = buildSearchFilter(ftsQuery, options)
-    const sql = `
-      SELECT v.version, v.book, v.chapter, v.verse, v.text,
-             highlight(verses_fts, 0, '{{', '}}') AS highlighted
-      FROM verses_fts
-      JOIN verses v ON v.id = verses_fts.rowid
-      ${where}
-      ORDER BY ${orderBy} LIMIT ? OFFSET ?
-    `
-    params.push(limit, offset)
+
+    let sql: string
+    if (orderBy === 'rank') {
+      // Relevance sort: paginate inside CTE, outer just joins for metadata
+      sql = `
+        WITH fts AS MATERIALIZED (
+          SELECT rowid, highlight(verses_fts, 0, '{{', '}}') AS highlighted, rank
+          FROM verses_fts
+          ${where}
+          ORDER BY rank LIMIT ? OFFSET ?
+        )
+        SELECT v.version, v.book, v.chapter, v.verse, v.text, fts.highlighted
+        FROM fts
+        JOIN verses v ON v.id = fts.rowid
+        ORDER BY fts.rank
+      `
+      params.push(limit, offset)
+    } else {
+      // Book sort: CTE does MATCH + filter only, outer does ordering + pagination
+      sql = `
+        WITH fts AS MATERIALIZED (
+          SELECT rowid, highlight(verses_fts, 0, '{{', '}}') AS highlighted
+          FROM verses_fts
+          ${where}
+        )
+        SELECT v.version, v.book, v.chapter, v.verse, v.text, fts.highlighted
+        FROM fts
+        JOIN verses v ON v.id = fts.rowid
+        ORDER BY v.book, v.chapter, v.verse
+        LIMIT ? OFFSET ?
+      `
+      params.push(limit, offset)
+    }
 
     return d.getAllAsync<SearchResult>(sql, params)
   })
@@ -609,10 +661,10 @@ export function searchVersesCount(query: string, options?: SearchOptions): Promi
 
     const { where, params } = buildSearchFilter(ftsQuery, options)
 
+    // No JOIN needed: filtering is handled via correlated EXISTS inside buildSearchFilter
     const sql = `
       SELECT COUNT(*) as cnt
       FROM verses_fts
-      JOIN verses v ON v.id = verses_fts.rowid
       ${where}
     `
 
