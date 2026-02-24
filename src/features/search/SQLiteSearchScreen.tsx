@@ -117,6 +117,8 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       return
     }
 
+    let cancelled = false
+
     const doSearch = async () => {
       setIsSearching(true)
       setSearchError(null)
@@ -135,18 +137,29 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           searchVersesCount(debouncedSearchValue, options),
         ])
 
-        setResults(searchResults)
-        setTotalCount(count)
+        if (!cancelled) {
+          setResults(searchResults)
+          setTotalCount(count)
+        }
       } catch (e) {
-        console.error('[Search] FTS5 error:', e)
-        setResults([])
-        setTotalCount(0)
-        setSearchError(t('search.error.searchFailed'))
+        if (!cancelled) {
+          console.error('[Search] FTS5 error:', e)
+          setResults([])
+          setTotalCount(0)
+          setSearchError(t('search.error.searchFailed'))
+        }
       }
-      setIsSearching(false)
+      if (!cancelled) {
+        setIsSearching(false)
+      }
     }
 
     doSearch()
+
+    return () => {
+      cancelled = true
+      setIsSearching(false)
+    }
   }, [debouncedSearchValue, section, book, selectedVersion, sortOrder])
 
   const hasReference = Boolean(

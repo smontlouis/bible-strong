@@ -468,23 +468,38 @@ export function removeBibleVersion(version: string): Promise<void> {
 
 /**
  * Build the WHERE clause and params shared by search and count queries.
+ *
+ * Uses `verses_fts.rowid IN (SELECT id FROM verses WHERE ...)` instead of
+ * JOIN conditions to guarantee that the FTS5 virtual table is always the
+ * driving table in the query plan. Without this, SQLite can choose to drive
+ * from the `verses` table (using its secondary index) when combined filters
+ * are highly selective, forcing expensive per-row reverse FTS5 lookups that
+ * cause the query to appear to hang indefinitely.
  */
 function buildSearchFilter(ftsQuery: string, options?: SearchOptions) {
   let where = 'WHERE verses_fts MATCH ?'
   const params: (string | number)[] = [ftsQuery]
 
+  const subConditions: string[] = []
+  const subParams: (string | number)[] = []
+
   if (options?.version) {
-    where += ' AND v.version = ?'
-    params.push(options.version)
+    subConditions.push('version = ?')
+    subParams.push(options.version)
   }
   if (options?.book) {
-    where += ' AND v.book = ?'
-    params.push(options.book)
+    subConditions.push('book = ?')
+    subParams.push(options.book)
   }
   if (options?.section === 'ot') {
-    where += ' AND v.book <= 39'
+    subConditions.push('book <= 39')
   } else if (options?.section === 'nt') {
-    where += ' AND v.book > 39'
+    subConditions.push('book > 39')
+  }
+
+  if (subConditions.length > 0) {
+    where += ` AND verses_fts.rowid IN (SELECT id FROM verses WHERE ${subConditions.join(' AND ')})`
+    params.push(...subParams)
   }
 
   return { where, params }
@@ -609,10 +624,10 @@ export function searchVersesCount(query: string, options?: SearchOptions): Promi
 
     const { where, params } = buildSearchFilter(ftsQuery, options)
 
+    // No JOIN needed: filtering is handled via rowid IN subquery inside buildSearchFilter
     const sql = `
       SELECT COUNT(*) as cnt
       FROM verses_fts
-      JOIN verses v ON v.id = verses_fts.rowid
       ${where}
     `
 
