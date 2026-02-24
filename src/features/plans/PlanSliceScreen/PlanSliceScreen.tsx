@@ -27,7 +27,7 @@ import PauseText from './PauseText'
 import ReadButton from './ReadButton'
 import Slice from './Slice'
 import { chapterSliceToText, verseSliceToText, videoSliceToText } from './share'
-import BottomSheet from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useBookAndVersionSelector } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 
@@ -113,7 +113,7 @@ const PlanSliceScreen = () => {
 
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const paramsModalRef = React.useRef<BottomSheet>(null)
+  const paramsModalRef = React.useRef<BottomSheetModal>(null)
 
   const selectIsRead = makeIsReadSelector()
   const isRead = useSelector((state: RootState) => selectIsRead(state, planId ?? '', id ?? ''))
@@ -205,7 +205,7 @@ const PlanSliceScreen = () => {
                 onOpenVersionSelector={() =>
                   openVersionSelector({ actions: versionActions, data: versionData })
                 }
-                onOpenParams={() => paramsModalRef.current?.expand()}
+                onOpenParams={() => paramsModalRef.current?.present()}
                 onShare={share}
                 version={version}
               />
