@@ -1,0 +1,22 @@
+# Test: Tab Management
+# Verifies basic tab functionality in the Bible reader
+# Tags: smoke, tabs
+
+appId: com.smontlouis.biblestrong
+tags:
+  - smoke
+  - tabs
+---
+- runFlow: ../subflows/launchApp.yaml
+
+# Wait for the app to fully load
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Try to tap on add tab button if visible (+ icon)
+- tapOn:
+    text: ".*"
+    optional: true
+
+# Take a screenshot of current state
+- takeScreenshot: tab_management

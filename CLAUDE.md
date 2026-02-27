@@ -222,9 +222,27 @@ Translation files: `i18n/locales/{fr,en}/translation.json`
 
 ## Testing
 
+### Unit Tests
 - Framework: Jest with `jest-expo`
-- Limited test coverage currently
 - Run: `yarn test`
+
+### E2E Tests (Maestro)
+
+End-to-end tests use [Maestro](https://maestro.mobile.dev/). Tests are located in `.maestro/`.
+
+```bash
+# Build app for E2E testing
+yarn build:android:e2e    # Android APK
+yarn build:ios:e2e        # iOS Simulator
+
+# Run all E2E tests
+yarn test:e2e
+
+# Run smoke tests only
+yarn test:e2e:smoke
+```
+
+See `.maestro/README.md` for detailed documentation on writing and running E2E tests.
 
 ## Environment Configuration
 

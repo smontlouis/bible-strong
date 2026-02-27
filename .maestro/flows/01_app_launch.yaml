@@ -1,0 +1,17 @@
+# Test: App Launch
+# Verifies that the app launches successfully and displays the main screen
+# Tags: smoke, critical
+
+appId: com.smontlouis.biblestrong
+tags:
+  - smoke
+  - critical
+---
+- runFlow: ../subflows/launchApp.yaml
+
+# The app should launch to the AppSwitcher screen with tabs
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# Take a screenshot for verification
+- takeScreenshot: app_launch

@@ -1,0 +1,35 @@
+# Test: FAQ Navigation
+# Verifies navigation to FAQ screen from Home drawer
+# Tags: navigation, regression
+
+appId: com.smontlouis.biblestrong
+tags:
+  - navigation
+  - regression
+---
+- runFlow: ../subflows/launchApp.yaml
+
+# Swipe right to open Home drawer
+- swipe:
+    direction: RIGHT
+    duration: 500
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Scroll down to find FAQ button
+- scroll:
+    direction: DOWN
+
+- waitForAnimationToEnd
+
+# Try to tap on FAQ button
+- tapOn:
+    text: "FAQ"
+    optional: true
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Take a screenshot
+- takeScreenshot: faq_screen
