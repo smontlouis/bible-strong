@@ -834,7 +834,216 @@ CREATE INDEX ON bible_embeddings USING ivfflat (embedding vector_cosine_ops)
 
 ---
 
-## 12. Résumé des Décisions Clés
+## 12. Modèle Économique & Abonnement
+
+### 12.1 Contexte
+
+- **100 000 MAU** actuels, app entièrement gratuite
+- L'abonnement est **uniquement pour le module IA** (le reste reste gratuit)
+- Objectif : couvrir les coûts LLM + dégager une marge
+
+### 12.2 Hypothèses d'Usage
+
+| Paramètre | Valeur | Justification |
+|-----------|--------|---------------|
+| MAU total | 100 000 | Base actuelle |
+| % qui essaient l'IA | ~30% | Taux d'adoption typique d'une nouvelle feature |
+| DAU IA | ~15 000 | ~50% des 30K adoptants utilisent l'IA chaque jour |
+| Messages moyens/jour (free) | 2-3 | La majorité pose 1-3 questions, pas le max |
+| Tokens input/message | ~1 200 | System prompt (~400) + contexte RAG (~700) + question (~100) |
+| Tokens output/message | ~400 | Réponse biblique typique |
+
+### 12.3 Coût Unitaire par Message
+
+```
+Modèle : GPT-4o mini ($0.15 input / $0.60 output par 1M tokens)
+
+Input:  1 200 tokens × $0.15/1M = $0.000 18
+Output:   400 tokens × $0.60/1M = $0.000 24
+                                   ─────────
+Coût par message :                 $0.000 42  (~0.04 centimes)
+
+Avec cache sémantique (70% hit rate) :
+  30% × $0.000 42 = $0.000 126 coût effectif moyen
+```
+
+### 12.4 Scénarios de Coût Mensuel (Free Tier)
+
+| Scénario | Calcul | Sans cache | Avec cache (70%) |
+|----------|--------|------------|-------------------|
+| **Réaliste** | 15K DAU × 5 msg × 30j = 2.25M msg | $945 | **$285** |
+| **Optimiste** | 20K DAU × 8 msg × 30j = 4.8M msg | $2 016 | **$605** |
+| **Cauchemar** | 100K × 20 msg × 30j = 60M msg | $25 200 | **$7 560** |
+
+> ⚠️ **Le scénario cauchemar** (tous les utilisateurs envoient le max chaque jour) est le risque
+> principal d'un free tier trop généreux.
+
+### 12.5 Tiers d'Abonnement Recommandés
+
+| Tier | Limite | Prix | Cible | Modèle LLM |
+|------|--------|------|-------|-------------|
+| **Gratuit** | 5 msg/jour | $0 | Découverte | GPT-4o mini |
+| **Premium** | 50 msg/jour + réponses Sonnet | $2.99/mois | Utilisateurs réguliers | GPT-4o mini + Claude Sonnet |
+| **Premium+** | Illimité + études guidées IA | $5.99/mois | Étudiants sérieux | Claude Sonnet prioritaire |
+
+#### Pourquoi 5 messages gratuits (et pas 20)
+
+| | 5 msg/jour gratuit | 20 msg/jour gratuit |
+|---|---|---|
+| Coût max free tier/mois | ~$1 890 | ~$7 560 |
+| Coût réaliste free tier/mois | ~$190 | ~$760 |
+| Incitation à payer | Forte (on veut plus) | Faible (20 suffit à la plupart) |
+| Risque financier | Maîtrisé | Dangereux si adoption massive |
+
+**5 messages gratuits** = assez pour **goûter** la feature (2-3 questions → être impressionné),
+pas assez pour une session d'étude complète → **conversion naturelle vers premium**.
+
+### 12.6 Projection Financière
+
+```
+Hypothèse de conversion : 3% Premium + 1% Premium+
+
+┌─────────────────────────────────────────────────────────┐
+│  REVENUS MENSUELS                                       │
+│                                                         │
+│  Premium  : 3 000 users × $2.99 = $8 970               │
+│  Premium+ : 1 000 users × $5.99 = $5 990               │
+│                                                         │
+│  Total revenus :                   $14 960/mois         │
+├─────────────────────────────────────────────────────────┤
+│  COÛTS MENSUELS                                         │
+│                                                         │
+│  Free tier :                                            │
+│    95K users × 2 msg/jour avg × 30j = 5.7M msg         │
+│    Avec cache 70% : 5.7M × 0.3 × $0.00042 = $718      │
+│                                                         │
+│  Premium :                                              │
+│    3K users × 15 msg/jour avg × 30j = 1.35M msg        │
+│    Mix GPT-4o mini (80%) + Sonnet (20%)                 │
+│    Coût moyen/msg : ~$0.0013                            │
+│    Avec cache 50% : 1.35M × 0.5 × $0.0013 = $878      │
+│                                                         │
+│  Premium+ :                                             │
+│    1K users × 30 msg/jour avg × 30j = 900K msg         │
+│    Principalement Sonnet : ~$0.002/msg                  │
+│    Avec cache 50% : 900K × 0.5 × $0.002 = $900        │
+│                                                         │
+│  Infrastructure :                                       │
+│    Supabase Pro : $25                                   │
+│    Monitoring/autres : ~$25                             │
+│                                                         │
+│  Total coûts :                     ~$2 546/mois         │
+├─────────────────────────────────────────────────────────┤
+│  MARGE                                                  │
+│                                                         │
+│  $14 960 - $2 546 = $12 414/mois (~83% de marge)       │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 12.7 Garde-fous Techniques
+
+Ces protections sont **obligatoires** pour éviter une explosion des coûts :
+
+```
+┌──────────────────────────────────────────────────────────┐
+│  GARDE-FOUS ANTI-EXPLOSION DE COÛTS                      │
+│                                                          │
+│  1. Rate Limiting côté serveur                           │
+│     ├── Vérification dans l'Edge Function (pas UI)       │
+│     ├── Compteur par user_id dans Supabase               │
+│     ├── Reset quotidien à minuit UTC                     │
+│     └── Limites : 5 / 50 / illimité selon tier           │
+│                                                          │
+│  2. Circuit Breaker (coût global)                        │
+│     ├── Seuil alerte : $X/jour (configurable)            │
+│     ├── Action : dégrader vers Groq/Llama (ultra cheap)  │
+│     └── Notification admin par webhook                   │
+│                                                          │
+│  3. Budget Cap par utilisateur                           │
+│     ├── Free : max $0.01/jour (~24 messages)             │
+│     ├── Premium : max $0.10/jour                         │
+│     └── Premium+ : max $0.50/jour                        │
+│                                                          │
+│  4. Monitoring temps réel                                │
+│     ├── Dashboard coût/jour dans Supabase                │
+│     ├── Alerte si coût dépasse projection de +50%        │
+│     └── Kill switch manuel pour désactiver l'IA          │
+│                                                          │
+│  5. Anti-abus                                            │
+│     ├── Détection de messages automatisés (burst rate)   │
+│     ├── Bloquer les comptes sans Firebase Auth            │
+│     └── Cooldown progressif : 1 msg/3s min               │
+└──────────────────────────────────────────────────────────┘
+```
+
+### 12.8 Stratégie de Lancement
+
+| Phase | Durée | Action |
+|-------|-------|--------|
+| **Beta fermée** | 2-4 semaines | 500-1000 testeurs, tout gratuit, mesurer l'usage réel |
+| **Beta ouverte** | 4 semaines | Free tier 10 msg/jour pour tous, mesurer adoption et conversion |
+| **Lancement** | - | Free tier 5 msg/jour + abonnements actifs |
+| **Ajustement** | Continu | Ajuster les limites selon les données réelles |
+
+> **Point clé** : les chiffres ci-dessus sont des projections. La phase beta
+> permettra de mesurer le **taux d'adoption réel**, le **nombre moyen de messages**,
+> et le **hit rate du cache** pour affiner le modèle avant de fixer les prix.
+
+### 12.9 Implémentation Côté App
+
+```typescript
+// Vérification du quota dans l'Edge Function Supabase
+interface UserQuota {
+  tier: 'free' | 'premium' | 'premium_plus'
+  messages_today: number
+  daily_limit: number    // 5 | 50 | 999999
+  cost_today_usd: number
+  cost_limit_usd: number // 0.01 | 0.10 | 0.50
+}
+
+async function checkQuota(userId: string): Promise<{
+  allowed: boolean
+  remaining: number
+  upgrade_prompt?: boolean
+}> {
+  const quota = await getQuota(userId)
+
+  if (quota.messages_today >= quota.daily_limit) {
+    return {
+      allowed: false,
+      remaining: 0,
+      upgrade_prompt: quota.tier === 'free',
+    }
+  }
+
+  if (quota.cost_today_usd >= quota.cost_limit_usd) {
+    return { allowed: false, remaining: 0 }
+  }
+
+  return {
+    allowed: true,
+    remaining: quota.daily_limit - quota.messages_today,
+  }
+}
+```
+
+```typescript
+// Côté client : affichage du compteur de messages restants
+const MessageCounter = ({ remaining, limit }: { remaining: number; limit: number }) => (
+  <HStack alignItems="center" gap={4}>
+    <Text style={{ color: remaining <= 1 ? theme.colors.error : theme.colors.grey }}>
+      {t('ai.messagesRemaining', { count: remaining, limit })}
+    </Text>
+    {remaining <= 1 && (
+      <UpgradeButton onPress={() => navigation.navigate('Subscription')} />
+    )}
+  </HStack>
+)
+```
+
+---
+
+## 13. Résumé des Décisions Clés
 
 | Décision | Choix | Justification |
 |----------|-------|---------------|
@@ -851,7 +1060,7 @@ CREATE INDEX ON bible_embeddings USING ivfflat (embedding vector_cosine_ops)
 
 ---
 
-## 13. Sources & Références
+## 14. Sources & Références
 
 ### SDK & Frameworks
 - [Vercel AI SDK — Expo Getting Started](https://ai-sdk.dev/docs/getting-started/expo)
