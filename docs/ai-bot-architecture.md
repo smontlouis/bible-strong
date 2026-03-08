@@ -70,16 +70,35 @@ L'objectif : un bot **RAG** (Retrieval Augmented Generation) qui donne des répo
 
 L'idée clé : **ne pas utiliser le même modèle pour tout**. 80% des requêtes sont simples et ne nécessitent pas un modèle coûteux.
 
-| Palier | Modèle | Coût (par 1M tokens) | Cas d'usage |
-|--------|--------|---------------------|-------------|
-| **Routeur** | Claude Haiku 4.5 | ~$0.25 input / $1.25 output | Classifier la requête (simple/complexe), détecter l'intention |
-| **Standard** | Claude Haiku 4.5 | ~$0.25 input / $1.25 output | Questions factuelles, recherche de versets, définitions |
-| **Avancé** | Claude Sonnet 4.6 | ~$3 input / $15 output | Études approfondies, analyses doctrinales, méditations |
+| Palier | Modèle | Coût (input / output par 1M tokens) | Cas d'usage |
+|--------|--------|--------------------------------------|-------------|
+| **Tier 0** | Cache sémantique | $0 | Questions déjà posées (60-85% hit rate estimé) |
+| **Tier 1 — Économique** | GPT-4o mini | $0.15 / $0.60 | Questions factuelles, recherche de versets, définitions |
+| **Tier 2 — Standard** | GPT-4o mini + RAG | $0.15 / $0.60 | Questions théologiques avec contexte enrichi |
+| **Tier 3 — Avancé** | Claude Sonnet 4.6 | $3 / $15 | Études approfondies, analyses doctrinales, méditations |
+
+**Alternatives ultra low-cost** (si budget très serré) :
+| Modèle | Input / Output par 1M tokens | Notes |
+|--------|------------------------------|-------|
+| GPT-5 nano | $0.05 / $0.40 | Le moins cher côté OpenAI |
+| Groq (Llama 3 8B) | ~$0.05 / $0.08 | Le plus rapide (500+ tok/s), le moins cher |
+| Gemini 2.0 Flash | ~$0.10 / $0.40 | Long context, budget Google |
+| On-device (Llama 3.2 3B) | $0 | Qualité limitée, pas viable pour théologie |
+
+> **Note** : Claude Haiku 4.5 ($1.00/$5.00) est plus cher que GPT-4o mini ($0.15/$0.60).
+> Pour le tier standard, GPT-4o mini offre un meilleur rapport qualité/prix.
+> Le Vercel AI SDK est **provider-agnostique** — on peut switcher facilement.
 
 **Estimation de coût mensuel** (1000 utilisateurs actifs, ~10 messages/jour) :
-- 80% requêtes Haiku : ~300K tokens/jour × $0.0015/1K = **$13.50/mois**
-- 20% requêtes Sonnet : ~100K tokens/jour × $0.018/1K = **$54/mois**
-- **Total estimé : ~$70-100/mois** pour 1000 utilisateurs actifs
+
+| Scénario | Coût/mois |
+|----------|-----------|
+| GPT-4o mini seul, sans cache | ~$30-60 |
+| GPT-4o mini + cache sémantique (70% hit) | ~$10-20 |
+| Tiered (GPT-4o mini + Sonnet pour 5% des requêtes) + cache | ~$20-50 |
+| Groq Llama 3 + cache | ~$5-15 |
+
+**Recommandation** : Commencer avec **GPT-4o mini + cache sémantique** (~$10-20/mois), puis ajouter Claude Sonnet pour les questions complexes si la qualité le justifie.
 
 ### 2.2 Architecture du Backend — **Tool Use (Function Calling)** plutôt que RAG vectoriel pur
 
@@ -623,14 +642,15 @@ Pré-générer des réponses pour :
 
 | Composant | Technologie | Coût mensuel |
 |-----------|-------------|-------------|
-| **LLM principal** | Claude Haiku 4.5 (standard) + Sonnet 4.6 (avancé) | ~$70-100 |
-| **Embeddings** | text-embedding-3-small (OpenAI) | ~$2 |
+| **LLM standard** | GPT-4o mini (tier 1-2) | ~$10-30 |
+| **LLM avancé** | Claude Sonnet 4.6 (tier 3, ~5% des requêtes) | ~$5-20 |
+| **Embeddings** | text-embedding-3-small (OpenAI) | ~$0.02 (unique) |
 | **Vector DB + Backend** | Supabase (pgvector + Edge Functions + Auth) | $0-25 |
-| **Cache** | Supabase (même instance) | Inclus |
+| **Cache sémantique** | Supabase (même instance, 60-85% hit rate) | Inclus |
 | **Monitoring** | Supabase Tables + Alertes webhook | Inclus |
 | **Frontend SDK** | Vercel AI SDK (`@ai-sdk/react`) | $0 |
 | **Streaming** | `expo/fetch` natif (Expo SDK 54) | $0 |
-| **Total estimé** | | **~$75-130/mois** pour 1000 utilisateurs |
+| **Total estimé** | | **~$20-75/mois** pour 1000 utilisateurs |
 
 ### Dépendances NPM à Ajouter
 
@@ -707,15 +727,18 @@ src/features/ai-chat/
 ## 10. Alternatives et Trade-offs Considérés
 
 ### Pourquoi pas un LLM on-device ?
-- `callstackincubator/ai` permet de lancer des LLMs sur le device
-- **Problème** : les modèles on-device (Llama 3.2 3B) sont trop limités pour de l'analyse biblique de qualité
-- **Verdict** : intéressant pour le futur (2-3 ans), pas viable aujourd'hui pour ce cas d'usage
+- [`react-native-executorch`](https://docs.swmansion.com/react-native-executorch/) supporte Llama 3.2, Qwen 3, SmolLM 2 sur Expo SDK 54
+- [`llama.rn`](https://github.com/mybigday/llama.rn) permet de lancer n'importe quel modèle GGUF avec accélération GPU
+- [`callstackincubator/ai`](https://github.com/callstackincubator/ai) fournit une API compatible Vercel AI SDK
+- **Problème** : les modèles on-device (~3B paramètres max) sont trop limités pour de l'analyse biblique de qualité
+- **Verdict** : intéressant comme fallback offline ou pour les questions très simples. Viable comme complément futur.
 
-### Pourquoi pas OpenAI au lieu de Claude ?
-- GPT-4o-mini est comparable en coût à Haiku
-- Claude excelle en Tool Use (plus fiable, mieux structuré)
-- Le Vercel AI SDK supporte les deux → facile de switcher si besoin
-- **Verdict** : commencer avec Claude, architecture agnostique du provider
+### Pourquoi GPT-4o mini plutôt que Claude Haiku ?
+- GPT-4o mini ($0.15/$0.60) est **6-8x moins cher** que Claude Haiku 4.5 ($1.00/$5.00)
+- Qualité comparable pour ce cas d'usage
+- Le Vercel AI SDK est provider-agnostique → un changement d'une ligne pour switcher
+- Claude Sonnet reste recommandé pour le tier avancé (meilleur Tool Use, raisonnement supérieur)
+- **Verdict** : GPT-4o mini pour le quotidien, Claude Sonnet pour les analyses profondes
 
 ### Pourquoi pas tout côté client ?
 - Les clés API seraient exposées → faille de sécurité critique
@@ -816,12 +839,41 @@ CREATE INDEX ON bible_embeddings USING ivfflat (embedding vector_cosine_ops)
 | Décision | Choix | Justification |
 |----------|-------|---------------|
 | **Approche RAG** | Tool Use + Vectoriel hybride | Données structurées = SQL, questions ouvertes = vectoriel |
-| **LLM** | Claude (Haiku + Sonnet tiered) | Meilleur Tool Use, coût maîtrisé |
+| **LLM** | GPT-4o mini (standard) + Sonnet (avancé) | Meilleur rapport qualité/prix, architecture provider-agnostique |
 | **Backend** | Supabase Edge Functions | Edge rapide, pgvector inclus, monitoring natif |
 | **Vector DB** | Supabase pgvector | Même infra, gratuit jusqu'à 500MB |
 | **Frontend SDK** | Vercel AI SDK + expo/fetch | Standard de l'industrie, streaming natif Expo 54 |
 | **Widgets** | Markdown enrichi → parseur React Native | Format simple, extensible, compatible streaming |
 | **Auth** | Firebase existant (JWT passé au backend) | Réutilise l'infra existante |
 | **Monitoring** | Tables Supabase + webhooks | Simple, SQL queryable, pas de service tiers |
-| **Cache** | Sémantique (embeddings) + TTL 30j | 30-50% d'économie sur les appels LLM |
+| **Cache** | Sémantique (embeddings) + TTL 30j | 60-85% hit rate pour les questions bibliques récurrentes |
 | **Sécurité** | Pattern detection + classification LLM | Couverture maximale, coût minimal |
+
+---
+
+## 13. Sources & Références
+
+### SDK & Frameworks
+- [Vercel AI SDK — Expo Getting Started](https://ai-sdk.dev/docs/getting-started/expo)
+- [Evan Bacon's expo-ai](https://github.com/EvanBacon/expo-ai) — Implémentation de référence
+- [Callstack react-native-ai (on-device)](https://github.com/callstackincubator/ai)
+- [React Native ExecuTorch](https://docs.swmansion.com/react-native-executorch/) — LLMs on-device
+- [llama.rn](https://github.com/mybigday/llama.rn) — React Native llama.cpp binding
+
+### Pricing & Optimisation
+- [LLM API Pricing Comparison 2026](https://www.tldl.io/resources/llm-api-pricing-2026)
+- [LLM Cost Optimization Guide](https://ai.koombea.com/blog/llm-cost-optimization)
+- [Semantic Caching for Tiered LLM Architectures](https://arxiv.org/html/2602.13165v1)
+- [LLM Token Optimization (Redis)](https://redis.io/blog/llm-token-optimization-speed-up-apps/)
+- [Semantic Cache Eviction Policies](https://arxiv.org/html/2603.03301)
+
+### RAG & Vector Search
+- [RAG for Ancient Scriptures — DharmaSutra case study](https://www.gauraw.com/production-rag-system-based-app-ancient-scriptures-2026/)
+- [bible-rag GitHub project](https://github.com/jacobweiss2305/bible-rag)
+- [Best Chunking Strategies for RAG 2025](https://www.firecrawl.dev/blog/best-chunking-strategies-rag)
+- [pgvector vs Pinecone comparison](https://supabase.com/blog/pgvector-vs-pinecone)
+- [Vector Databases for RAG 2025](https://dev.to/klement_gunndu_e16216829c/vector-databases-guide-rag-applications-2025-55oj)
+
+### Sécurité
+- [OWASP LLM Prompt Injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/)
+- [Prompt Injection Prevention (APIsec)](https://www.apisec.ai/blog/prompt-injection-and-llm-api-security-risks-protect-your-ai)
