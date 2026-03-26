@@ -398,21 +398,28 @@ const BibleViewer = ({
 
     // Parallel versions
     if (parallelVersions.length) {
-      Promise.all(
-        parallelVersions.map(p => loadBibleChapter(book.Numero, chapter, p))
-      ).then(parallelResults => {
-        if (loadIdRef.current !== currentLoadId) return
-        const parallelVersesToLoad: ParallelVerse[] = []
-        for (let i = 0; i < parallelVersions.length; i++) {
-          const pResult = parallelResults[i]
-          if (pResult.success && pResult.data) {
-            parallelVersesToLoad.push({ id: parallelVersions[i], verses: pResult.data as Verse[] })
-          } else {
-            parallelVersesToLoad.push({ id: parallelVersions[i], verses: [], error: pResult.error })
+      Promise.all(parallelVersions.map(p => loadBibleChapter(book.Numero, chapter, p))).then(
+        parallelResults => {
+          if (loadIdRef.current !== currentLoadId) return
+          const parallelVersesToLoad: ParallelVerse[] = []
+          for (let i = 0; i < parallelVersions.length; i++) {
+            const pResult = parallelResults[i]
+            if (pResult.success && pResult.data) {
+              parallelVersesToLoad.push({
+                id: parallelVersions[i],
+                verses: pResult.data as Verse[],
+              })
+            } else {
+              parallelVersesToLoad.push({
+                id: parallelVersions[i],
+                verses: [],
+                error: pResult.error,
+              })
+            }
           }
+          setParallelVerses(parallelVersesToLoad)
         }
-        setParallelVerses(parallelVersesToLoad)
-      })
+      )
     } else {
       setParallelVerses([])
     }

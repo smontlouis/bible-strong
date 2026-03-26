@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router'
 import produce from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -91,6 +92,22 @@ export type RootStyles = {
 export type PericopeChapter = Pericope[string][string]
 
 export type Dispatch = (props: { type: string; [key: string]: any }) => Promise<void>
+
+/**
+ * Prevents rapid empty→loaded prop updates on the Expo DOM bridge.
+ * Skips updates when loading with no verses, so the DOM component
+ * only receives the real data once it's ready.
+ */
+function useStabilizedVerses(verses: Verse[], isLoading: boolean) {
+  const [stable, setStable] = useState<Verse[]>(verses)
+
+  useEffect(() => {
+    if (isLoading && verses.length === 0) return
+    setStable(verses)
+  }, [verses, isLoading])
+
+  return stable
+}
 
 export type WebViewProps = {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -249,6 +266,7 @@ export const BibleDOMWrapper = ({
   goToNextChapter,
   onEnterAnnotationMode,
   redWords,
+  isLoading,
 }: WebViewProps) => {
   const { openVersionSelector } = useBookAndVersionSelector()
   const [isINTComplete, setIsINTComplete] = useAtom(isINTCompleteAtom)
@@ -258,6 +276,8 @@ export const BibleDOMWrapper = ({
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
   const router = useRouter()
+
+  const stableVerses = useStabilizedVerses(verses, isLoading)
 
   // Translations for the DOM component (which can't access i18n directly)
   const translations: BibleDOMTranslations = {
@@ -501,17 +521,21 @@ export const BibleDOMWrapper = ({
   }
 
   // Pre-compute verse metadata on native side (avoids DOM JS thread work)
-  const computedComments = transformComments(comments, verses.length)
+  const computedComments = transformComments(comments, stableVerses.length)
   const taggedVerses = sortVersesToTags(highlightedVerses)
   const { versesWithAnnotationNotes, annotationNotesCountByVerse } = getAnnotationNotesInfo(
-    verses,
+    stableVerses,
     wordAnnotations,
     version
   )
-  const notedVersesCount = getNotedVersesCount(verses, notedVerses, annotationNotesCountByVerse)
-  const notedVersesText = getNotedVersesText(verses, notedVerses)
-  const linkedVersesCount = getLinkedVersesCount(verses, linkedVerses)
-  const linkedVersesText = getLinkedVersesText(verses, linkedVerses)
+  const notedVersesCount = getNotedVersesCount(
+    stableVerses,
+    notedVerses,
+    annotationNotesCountByVerse
+  )
+  const notedVersesText = getNotedVersesText(stableVerses, notedVerses)
+  const linkedVersesCount = getLinkedVersesCount(stableVerses, linkedVerses)
+  const linkedVersesText = getLinkedVersesText(stableVerses, linkedVerses)
 
   return (
     <Box
@@ -532,7 +556,7 @@ export const BibleDOMWrapper = ({
             }),
           },
         }}
-        verses={verses}
+        verses={stableVerses}
         parallelVerses={parallelVerses}
         parallelColumnWidth={parallelColumnWidth}
         parallelDisplayMode={parallelDisplayMode}
