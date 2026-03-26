@@ -12,6 +12,15 @@ import { isFullScreenBibleAtom, tagDetailModalAtom } from 'src/state/app'
 import { BibleTab, ParallelColumnWidth, ParallelDisplayMode, VersionCode } from 'src/state/tabs'
 import { isINTCompleteAtom } from '../footer/atom'
 import BibleDOMComponent from './BibleDOMComponent'
+import {
+  sortVersesToTags,
+  getAnnotationNotesInfo,
+  getNotedVersesCount,
+  getNotedVersesText,
+  getLinkedVersesCount,
+  getLinkedVersesText,
+  transformComments,
+} from './computeVerseMetadata'
 // @ts-ignore
 import books from '~assets/bible_versions/books'
 import { Book } from '~assets/bible_versions/books-desc'
@@ -491,6 +500,19 @@ export const BibleDOMWrapper = ({
     }
   }
 
+  // Pre-compute verse metadata on native side (avoids DOM JS thread work)
+  const computedComments = transformComments(comments, verses.length)
+  const taggedVerses = sortVersesToTags(highlightedVerses)
+  const { versesWithAnnotationNotes, annotationNotesCountByVerse } = getAnnotationNotesInfo(
+    verses,
+    wordAnnotations,
+    version
+  )
+  const notedVersesCount = getNotedVersesCount(verses, notedVerses, annotationNotesCountByVerse)
+  const notedVersesText = getNotedVersesText(verses, notedVerses)
+  const linkedVersesCount = getLinkedVersesCount(verses, linkedVerses)
+  const linkedVersesText = getLinkedVersesText(verses, linkedVerses)
+
   return (
     <Box
       style={{
@@ -518,9 +540,7 @@ export const BibleDOMWrapper = ({
         secondaryVerses={secondaryVerses}
         selectedVerses={selectedVerses}
         highlightedVerses={highlightedVerses}
-        notedVerses={notedVerses}
         bookmarkedVerses={bookmarkedVerses}
-        linkedVerses={linkedVerses}
         wordAnnotations={wordAnnotations}
         settings={settings}
         verseToScroll={verseToScroll}
@@ -531,7 +551,7 @@ export const BibleDOMWrapper = ({
         chapter={chapter}
         isSelectionMode={isSelectionMode}
         selectedCode={selectedCode}
-        comments={comments}
+        comments={computedComments}
         dispatch={dispatch}
         translations={translations}
         annotationMode={annotationMode}
@@ -546,6 +566,12 @@ export const BibleDOMWrapper = ({
         versesWithNonHighlightTags={versesWithNonHighlightTags}
         redWords={redWords}
         isINTComplete={isINTComplete}
+        taggedVerses={taggedVerses}
+        versesWithAnnotationNotes={versesWithAnnotationNotes}
+        notedVersesCount={notedVersesCount}
+        notedVersesText={notedVersesText}
+        linkedVersesCount={linkedVersesCount}
+        linkedVersesText={linkedVersesText}
       />
       {Platform.OS === 'android' && Platform.Version < 30 && (
         <HelpTip

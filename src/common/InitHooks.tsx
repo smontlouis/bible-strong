@@ -68,14 +68,19 @@ const InitHooks = ({}: InitHooksProps) => {
 
         if (!needsBibleMigration()) return
 
-        setMigrationProgressFromOutsideReact({
-          isActive: true,
-          type: 'bible',
-          overallProgress: 0,
-          message: '',
-        })
-
+        let migrationModalShown = false
         const failedVersions = await migrateBibleJsonToSqlite((current, total, versionId) => {
+          // Only show migration modal when files are actually found
+          // (avoids showing empty modal on fresh install with 0 JSON files)
+          if (!migrationModalShown) {
+            migrationModalShown = true
+            setMigrationProgressFromOutsideReact({
+              isActive: true,
+              type: 'bible',
+              overallProgress: 0,
+              message: '',
+            })
+          }
           setMigrationProgressFromOutsideReact({
             overallProgress: current / total,
             message: `${versionId} (${current}/${total})`,
@@ -83,6 +88,12 @@ const InitHooks = ({}: InitHooksProps) => {
             totalCollections: total,
           })
         })
+
+        if (!migrationModalShown) {
+          // No files to migrate (fresh install) — nothing to show
+          console.log('[InitHooks] Bible migration: no files found, skipping UI')
+          return
+        }
 
         if (failedVersions.length > 0) {
           setMigrationProgressFromOutsideReact({

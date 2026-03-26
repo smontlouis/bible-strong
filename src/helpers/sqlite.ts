@@ -262,7 +262,7 @@ export const initSQLiteDir = async () => {
   const sqliteDir = await FileSystem.getInfoAsync(sqliteDirPath)
 
   if (!sqliteDir.exists) {
-    await FileSystem.makeDirectoryAsync(sqliteDirPath)
+    await FileSystem.makeDirectoryAsync(sqliteDirPath, { intermediates: true })
   } else if (!sqliteDir.isDirectory) {
     throw new Error('SQLite dir is not a directory')
   }

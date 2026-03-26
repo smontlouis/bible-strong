@@ -3,8 +3,7 @@
 import { setup, styled } from 'goober'
 import { createGlobalStyles } from 'goober/global'
 import React, { useEffect, useState, useRef } from 'react'
-import { TagsObj, Verse as TVerse } from '~common/types'
-import { HighlightsObj, NotesObj, LinksObj } from '~redux/modules/user'
+import { Verse as TVerse } from '~common/types'
 import {
   Dispatch,
   LinkedVerse,
@@ -96,9 +95,7 @@ type Props = Pick<
   | 'secondaryVerses'
   | 'selectedVerses'
   | 'highlightedVerses'
-  | 'notedVerses'
   | 'bookmarkedVerses'
-  | 'linkedVerses'
   | 'wordAnnotations'
   | 'wordAnnotationsInOtherVersions'
   | 'taggedVersesInChapter'
@@ -112,13 +109,20 @@ type Props = Pick<
   | 'chapter'
   | 'isSelectionMode'
   | 'selectedCode'
-  | 'comments'
   | 'redWords'
 > & {
   dispatch: Dispatch
   dom: import('expo/dom').DOMProps
   translations: BibleDOMTranslations
   isINTComplete: boolean
+  // Pre-computed metadata from native side
+  comments: { [key: string]: string } | null
+  taggedVerses: TaggedVerse[] | null
+  versesWithAnnotationNotes: Record<string, boolean>
+  notedVersesCount: { [key: string]: number }
+  notedVersesText: { [key: string]: NotedVerse[] }
+  linkedVersesCount: { [key: string]: number }
+  linkedVersesText: { [key: string]: LinkedVerse[] }
   // Annotation mode props (uncontrolled - DOM manages local annotation state)
   annotationMode?: boolean
   clearSelectionTrigger?: number
@@ -304,271 +308,6 @@ const ReadWholeChapterButton = styled('button')<RootStyles>(({ settings: { theme
   },
 }))
 
-// ============================================================================
-// PURE HELPER FUNCTIONS (no dependency on component state)
-// ============================================================================
-
-interface AnnotationNotesInfo {
-  versesWithAnnotationNotes: Set<string>
-  annotationNotesCountByVerse: { [key: string]: number }
-}
-
-function sortVersesToTags(highlightedVerses: HighlightsObj): TaggedVerse[] | null {
-  if (!highlightedVerses) return null
-
-  const grouped = Object.keys(highlightedVerses).reduce(
-    (
-      arr: {
-        date: number
-        color: string
-        verseIds: any[]
-        tags: TagsObj
-      }[],
-      verse
-    ) => {
-      const entry = highlightedVerses[verse]
-      let dateGroup = arr.find(a => a.date === entry.date)
-
-      if (!dateGroup) {
-        dateGroup = {
-          date: entry.date,
-          color: entry.color,
-          verseIds: [],
-          tags: {},
-        }
-        arr.push(dateGroup)
-      }
-
-      dateGroup.verseIds.push(verse)
-      dateGroup.tags = { ...dateGroup.tags, ...entry.tags }
-
-      return arr
-    },
-    []
-  )
-
-  // Sort once after grouping is complete (not inside each reduce iteration)
-  grouped.sort((a, b) => Number(b.date) - Number(a.date))
-  grouped.forEach(group => {
-    group.verseIds.sort((a: string, b: string) => {
-      const aVerset = Number(a.split('-')[2])
-      const bVerset = Number(b.split('-')[2])
-      return aVerset - bVerset
-    })
-  })
-
-  return grouped.map(group => ({
-    ...group,
-    lastVerse: group.verseIds[group.verseIds.length - 1],
-    tags: Object.values(group.tags),
-  }))
-}
-
-function getAnnotationNotesInfo(
-  verses: TVerse[],
-  wordAnnotations: WebViewProps['wordAnnotations'],
-  version: string
-): AnnotationNotesInfo {
-  const versesWithAnnotationNotes = new Set<string>()
-  const annotationNotesCountByVerse: { [key: string]: number } = {}
-
-  if (!verses?.length || !wordAnnotations) {
-    return { versesWithAnnotationNotes, annotationNotesCountByVerse }
-  }
-
-  const { Livre, Chapitre } = verses[0]
-
-  Object.values(wordAnnotations).forEach(annotation => {
-    if (annotation.version !== version || !annotation.noteId) return
-
-    annotation.ranges.forEach(range => {
-      const [bookStr, chapterStr, verseStr] = range.verseKey.split('-')
-      if (parseInt(bookStr) === Livre && parseInt(chapterStr) === Chapitre) {
-        versesWithAnnotationNotes.add(verseStr)
-        annotationNotesCountByVerse[verseStr] = (annotationNotesCountByVerse[verseStr] || 0) + 1
-      }
-    })
-  })
-
-  return { versesWithAnnotationNotes, annotationNotesCountByVerse }
-}
-
-function getNotedVersesCount(
-  verses: TVerse[],
-  notedVerses: NotesObj,
-  annotationNotesCountByVerse: { [key: string]: number }
-): { [key: string]: number } {
-  const newNotedVerses: { [key: string]: number } = {}
-  if (!verses?.length) return newNotedVerses
-
-  const { Livre, Chapitre } = verses[0]
-
-  // Count classic verse notes
-  Object.keys(notedVerses).forEach(key => {
-    // Ignore annotation notes (counted separately)
-    if (key.startsWith('annotation:')) return
-
-    const firstVerseRef = key.split('/')[0]
-    const [bookStr, chapterStr, verseStr] = firstVerseRef.split('-')
-    const bookNumber = parseInt(bookStr)
-    const chapterNumber = parseInt(chapterStr)
-
-    if (bookNumber === Livre && chapterNumber === Chapitre) {
-      newNotedVerses[verseStr] = (newNotedVerses[verseStr] || 0) + 1
-    }
-  })
-
-  // Add annotation notes (already calculated)
-  Object.entries(annotationNotesCountByVerse).forEach(([verseStr, count]) => {
-    newNotedVerses[verseStr] = (newNotedVerses[verseStr] || 0) + count
-  })
-
-  return newNotedVerses
-}
-
-function getNotedVersesText(
-  verses: TVerse[],
-  notedVerses: NotesObj
-): { [key: string]: NotedVerse[] } {
-  const newNotedVerses: { [key: string]: NotedVerse[] } = {}
-
-  if (!verses?.length) return newNotedVerses
-
-  const { Livre, Chapitre } = verses[0]
-  Object.entries(notedVerses).forEach(([key, value]) => {
-    const versesInArray = key.split('/')
-
-    const lastVerseRef = versesInArray[versesInArray.length - 1]
-    const bookNumber = parseInt(lastVerseRef.split('-')[0])
-    const chapterNumber = parseInt(lastVerseRef.split('-')[1])
-    const verseNumber = lastVerseRef.split('-')[2]
-
-    if (bookNumber === Livre && chapterNumber === Chapitre) {
-      const verseToPush = {
-        key,
-        verses:
-          versesInArray.length > 1
-            ? `${versesInArray[0].split('-')[2]}-${
-                versesInArray[versesInArray.length - 1].split('-')[2]
-              }`
-            : versesInArray[0].split('-')[2],
-        ...value,
-      }
-      if (newNotedVerses[verseNumber]) {
-        newNotedVerses[verseNumber].push(verseToPush)
-      } else {
-        newNotedVerses[verseNumber] = [verseToPush]
-      }
-    }
-  })
-
-  return newNotedVerses
-}
-
-function getLinkedVersesCount(
-  verses: TVerse[],
-  linkedVerses: LinksObj | undefined
-): { [key: string]: number } {
-  const newLinkedVerses: { [key: string]: number } = {}
-  if (!verses?.length || !linkedVerses) return newLinkedVerses
-
-  const { Livre, Chapitre } = verses[0]
-  Object.keys(linkedVerses).forEach(key => {
-    const firstVerseRef = key.split('/')[0]
-    const bookNumber = parseInt(firstVerseRef.split('-')[0])
-    const chapterNumber = parseInt(firstVerseRef.split('-')[1])
-    const verseNumber = firstVerseRef.split('-')[2]
-    if (bookNumber === Livre && chapterNumber === Chapitre) {
-      newLinkedVerses[verseNumber] = (newLinkedVerses[verseNumber] || 0) + 1
-    }
-  })
-
-  return newLinkedVerses
-}
-
-function getLinkedVersesText(
-  verses: TVerse[],
-  linkedVerses: LinksObj | undefined
-): { [key: string]: LinkedVerse[] } {
-  const newLinkedVerses: { [key: string]: LinkedVerse[] } = {}
-
-  if (!verses?.length || !linkedVerses) return newLinkedVerses
-
-  const { Livre, Chapitre } = verses[0]
-  Object.entries(linkedVerses).forEach(([key, value]) => {
-    const versesInArray = key.split('/')
-
-    const lastVerseRef = versesInArray[versesInArray.length - 1]
-    const bookNumber = parseInt(lastVerseRef.split('-')[0])
-    const chapterNumber = parseInt(lastVerseRef.split('-')[1])
-    const verseNumber = lastVerseRef.split('-')[2]
-
-    if (bookNumber === Livre && chapterNumber === Chapitre) {
-      const formattedUrl = value.url?.replace(/^https?:\/\//, '')
-      const title = value.customTitle || value.ogData?.title || formattedUrl
-      const verseToPush: LinkedVerse = {
-        key,
-        verses:
-          versesInArray.length > 1
-            ? `${versesInArray[0].split('-')[2]}-${
-                versesInArray[versesInArray.length - 1].split('-')[2]
-              }`
-            : versesInArray[0].split('-')[2],
-        url: value.url,
-        title,
-        linkType: value.linkType || 'website',
-        date: value.date,
-        tags: value.tags,
-      }
-      if (newLinkedVerses[verseNumber]) {
-        newLinkedVerses[verseNumber].push(verseToPush)
-      } else {
-        newLinkedVerses[verseNumber] = [verseToPush]
-      }
-    }
-  })
-
-  return newLinkedVerses
-}
-
-/**
- * Transform comment keys so that each comment is associated with the verse
- * number BEFORE the next comment starts (i.e., the last verse of its section).
- *
- * Original keys represent "insert before verse N". We remap them so:
- * - Key "0" stays as "0" (intro comment)
- * - Each subsequent key becomes (nextKey - 1), placing the comment after the last verse of its section
- * - The final entry gets the total verse count as its key (end of chapter)
- */
-function transformComments(
-  comments: { [key: string]: string } | null,
-  versesLength: number
-): { [key: string]: string } | null {
-  if (!comments) return null
-
-  const entries = Object.entries(comments)
-  const result: { [key: string]: string } = {}
-
-  for (let i = 0; i < entries.length; i++) {
-    const [key, value] = entries[i]
-
-    if (key === '0') {
-      result[key] = value
-      continue
-    }
-
-    const nextEntry = entries[i + 1]
-    if (nextEntry) {
-      const newKey = Number(nextEntry[0]) - 1
-      result[newKey] = value
-    } else {
-      result[versesLength] = value
-    }
-  }
-
-  return result
-}
-
 /** Build a verseKey ("Livre-Chapitre-Verset") for a verse */
 function verseKey(v: TVerse): string {
   return `${v.Livre}-${v.Chapitre}-${v.Verset}`
@@ -648,12 +387,10 @@ const VersesRenderer = ({
   parallelDisplayMode = 'horizontal',
   focusVerses,
   secondaryVerses,
-  comments: originalComments,
+  comments,
   selectedVerses,
   highlightedVerses,
-  notedVerses,
   bookmarkedVerses,
-  linkedVerses,
   wordAnnotations,
   wordAnnotationsInOtherVersions,
   taggedVersesInChapter,
@@ -676,6 +413,13 @@ const VersesRenderer = ({
   selectedAnnotationId,
   redWords,
   isINTComplete,
+  // Pre-computed metadata from native side
+  taggedVerses,
+  versesWithAnnotationNotes,
+  notedVersesCount,
+  notedVersesText,
+  linkedVersesCount,
+  linkedVersesText,
 }: Props) => {
   useFonts({
     'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
@@ -1171,7 +915,17 @@ const VersesRenderer = ({
     })
   }
 
-  const comments = transformComments(originalComments, verses.length)
+  // Early return: render minimal shell while WebView initializes (data not yet loaded)
+  if (!verses.length) {
+    return (
+      <TranslationsProvider translations={translations}>
+        <GlobalStyles />
+        <DispatchProvider dispatch={dispatch}>
+          <Container settings={settings} rtl={false} isParallelVerse={false} />
+        </DispatchProvider>
+      </TranslationsProvider>
+    )
+  }
 
   const isHebreu =
     version === 'BHS' ||
@@ -1181,17 +935,6 @@ const VersesRenderer = ({
   const parallelVersionTitles = isParallelVerse
     ? extractParallelVersionTitles(parallelVerses, version)
     : []
-
-  const taggedVerses = sortVersesToTags(highlightedVerses)
-  const { versesWithAnnotationNotes, annotationNotesCountByVerse } = getAnnotationNotesInfo(
-    verses,
-    wordAnnotations,
-    version
-  )
-  const notedVersesCount = getNotedVersesCount(verses, notedVerses, annotationNotesCountByVerse)
-  const notedVersesText = getNotedVersesText(verses, notedVerses)
-  const linkedVersesCount = getLinkedVersesCount(verses, linkedVerses)
-  const linkedVersesText = getLinkedVersesText(verses, linkedVerses)
 
   return (
     <TranslationsProvider translations={translations}>

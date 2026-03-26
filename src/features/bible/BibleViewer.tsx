@@ -346,10 +346,14 @@ const BibleViewer = ({
   const taggedVersesInChapter = taggedVersesData.counts
   const versesWithNonHighlightTags = taggedVersesData.hasNonHighlightTags
 
+  // Guard against stale background hydration results after chapter change
+  const loadIdRef = useRef(0)
+
   const loadVerses = async () => {
     setIsLoading(true)
+    const currentLoadId = ++loadIdRef.current
 
-    // Load pericopes and main Bible version in parallel
+    // Phase 1: Load main verses + pericopes (critical path)
     const [pericopeToLoad, mainResult] = await Promise.all([
       getBiblePericope(version),
       loadBibleChapter(book.Numero, chapter, version),
@@ -362,59 +366,18 @@ const BibleViewer = ({
       return
     }
 
+    // Stale check after async
+    if (loadIdRef.current !== currentLoadId) return
+
     const versesToLoad = mainResult.data as Verse[]
 
-    // Load parallel versions in parallel - don't let one failure break others
-    const parallelVersesToLoad: ParallelVerse[] = []
-    if (parallelVersions.length) {
-      const parallelResults = await Promise.all(
-        parallelVersions.map(p => loadBibleChapter(book.Numero, chapter, p))
-      )
-      for (let i = 0; i < parallelVersions.length; i++) {
-        const pResult = parallelResults[i]
-        if (pResult.success && pResult.data) {
-          parallelVersesToLoad.push({ id: parallelVersions[i], verses: pResult.data as Verse[] })
-        } else {
-          parallelVersesToLoad.push({ id: parallelVersions[i], verses: [], error: pResult.error })
-        }
-      }
-    }
-
-    // Load secondary verses for interlinear mode
-    let secondaryVersesToLoad: Verse[] | null = null
-    if (version === 'INT' || version === 'INT_EN') {
-      const secondaryResult = await loadBibleChapter(
-        book.Numero,
-        chapter,
-        getDefaultBibleVersion(lang)
-      )
-      if (secondaryResult.success && secondaryResult.data) {
-        secondaryVersesToLoad = secondaryResult.data as Verse[]
-      }
-    }
-
-    // Load comments if enabled
-    if (settings.commentsDisplay) {
-      const commentsToLoad = await loadMhyComments(book.Numero, chapter)
-      setComments(JSON.parse(commentsToLoad.commentaires))
-    } else if (comments) {
-      setComments(null)
-    }
-
-    // Load red words data (memoized, fast on subsequent calls)
-    loadRedWords(version)
-      .then(setRedWords)
-      .catch(() => setRedWords(null))
-
-    // Update all states together to prevent UI flashes
+    // Display main verses immediately
     setIsLoading(false)
     setDisplayedBook(book.Numero)
     setDisplayedChapter(chapter)
     setDisplayedVersion(version)
     setPericope(pericopeToLoad)
     setVerses(versesToLoad)
-    setParallelVerses(parallelVersesToLoad)
-    setSecondaryVerses(secondaryVersesToLoad)
     setError(null)
 
     addHistory({
@@ -430,6 +393,66 @@ const BibleViewer = ({
       message: 'Load verses',
       data: { book: book.Numero, chapter, verse, version },
     })
+
+    // Phase 2: Hydrate secondary data in background (non-blocking)
+
+    // Parallel versions
+    if (parallelVersions.length) {
+      Promise.all(
+        parallelVersions.map(p => loadBibleChapter(book.Numero, chapter, p))
+      ).then(parallelResults => {
+        if (loadIdRef.current !== currentLoadId) return
+        const parallelVersesToLoad: ParallelVerse[] = []
+        for (let i = 0; i < parallelVersions.length; i++) {
+          const pResult = parallelResults[i]
+          if (pResult.success && pResult.data) {
+            parallelVersesToLoad.push({ id: parallelVersions[i], verses: pResult.data as Verse[] })
+          } else {
+            parallelVersesToLoad.push({ id: parallelVersions[i], verses: [], error: pResult.error })
+          }
+        }
+        setParallelVerses(parallelVersesToLoad)
+      })
+    } else {
+      setParallelVerses([])
+    }
+
+    // Secondary verses for interlinear mode
+    if (version === 'INT' || version === 'INT_EN') {
+      loadBibleChapter(book.Numero, chapter, getDefaultBibleVersion(lang)).then(secondaryResult => {
+        if (loadIdRef.current !== currentLoadId) return
+        if (secondaryResult.success && secondaryResult.data) {
+          setSecondaryVerses(secondaryResult.data as Verse[])
+        } else {
+          setSecondaryVerses(null)
+        }
+      })
+    } else {
+      setSecondaryVerses(null)
+    }
+
+    // Comments
+    if (settings.commentsDisplay) {
+      loadMhyComments(book.Numero, chapter)
+        .then(c => {
+          if (loadIdRef.current !== currentLoadId) return
+          setComments(JSON.parse(c.commentaires))
+        })
+        .catch(() => {
+          if (loadIdRef.current !== currentLoadId) return
+          setComments(null)
+        })
+    } else if (comments) {
+      setComments(null)
+    }
+
+    // Red words (memoized, fast on subsequent calls)
+    loadRedWords(version)
+      .then(rw => {
+        if (loadIdRef.current !== currentLoadId) return
+        setRedWords(rw)
+      })
+      .catch(() => setRedWords(null))
   }
 
   const prevBook = usePrevious(book.Numero)
@@ -708,7 +731,7 @@ const BibleViewer = ({
         annotationModeEnabled={annotationMode.enabled}
       />
       {error && <BibleErrorView error={error} t={t} />}
-      {!error && verses.length > 0 && (
+      {!error && (
         <BibleDOMWrapper
           bibleAtom={bibleAtom}
           isBibleViewReloadingAtom={isBibleViewReloadingAtom}

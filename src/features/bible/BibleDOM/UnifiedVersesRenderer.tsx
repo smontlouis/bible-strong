@@ -146,7 +146,7 @@ export interface UnifiedVersesRendererProps {
   notedVersesText: { [key: string]: NotedVerse[] }
   linkedVersesCount: { [key: string]: number }
   linkedVersesText: { [key: string]: LinkedVerse[] }
-  versesWithAnnotationNotes?: Set<string>
+  versesWithAnnotationNotes?: Record<string, boolean>
   navigateToPericope: () => void
   // Annotation mode props
   annotationMode?: boolean
@@ -280,6 +280,21 @@ export function UnifiedVersesRenderer({
   // Pre-compute whether any verses are selected (avoids Object.keys() per iteration)
   const hasSelectedVerses = Object.keys(selectedVerses).length > 0
 
+  // Pre-compute tagged verses lookup: O(m) once instead of O(n*m) per verse
+  const taggedVersesByLastVerse = new Map(
+    taggedVerses?.map(v => [v.lastVerse, v] as const) ?? []
+  )
+
+  // Pre-compute which verses have word annotations: O(a*r) once instead of O(n*a*r)
+  const versesWithWordAnnotationsByKey = new Set<string>()
+  if (wordAnnotations) {
+    Object.values(wordAnnotations).forEach(ann => {
+      if (ann.version === version) {
+        ann.ranges.forEach(r => versesWithWordAnnotationsByKey.add(r.verseKey))
+      }
+    })
+  }
+
   return (
     <>
       {verses.map((verse, i) => {
@@ -290,7 +305,7 @@ export function UnifiedVersesRenderer({
         const verseKey = `${Livre}-${Chapitre}-${Verset}`
 
         const pericope = getPericopeVerse(pericopeChapter, verseNumber)
-        const tag = taggedVerses?.find(v => v.lastVerse === verseKey)
+        const tag = taggedVersesByLastVerse.get(verseKey)
         const bookmark = bookmarkedVerses?.[verseNumber]
         const notesCount = notedVersesCount[Verset]
         const notesText = notedVersesText[Verset]
@@ -329,7 +344,7 @@ export function UnifiedVersesRenderer({
                 bookmark={bookmark}
                 isTouched={isTouched}
                 otherVersionAnnotations={otherVersionAnnotations}
-                hasAnnotationNotes={versesWithAnnotationNotes?.has(String(Verset))}
+                hasAnnotationNotes={versesWithAnnotationNotes?.[String(Verset)]}
                 taggedItemsCount={taggedVersesInChapter?.[verseNumber] || 0}
                 hasNonHighlightTags={versesWithNonHighlightTags?.[verseNumber]}
                 redWords={redWords}
@@ -363,11 +378,7 @@ export function UnifiedVersesRenderer({
         const isLastFocusVerse =
           !isReadOnly && lastFocusVerse !== null && verseNumber === lastFocusVerse
 
-        const hasWordAnnotations =
-          wordAnnotations &&
-          Object.values(wordAnnotations).some(
-            ann => ann.version === version && ann.ranges.some(r => r.verseKey === verseKey)
-          )
+        const hasWordAnnotations = versesWithWordAnnotationsByKey.has(verseKey)
 
         return (
           <Span key={verseKey}>
@@ -402,7 +413,7 @@ export function UnifiedVersesRenderer({
               fadePosition={fadePosition}
               isLastFocusVerse={isLastFocusVerse}
               hasWordAnnotations={hasWordAnnotations}
-              hasAnnotationNotes={versesWithAnnotationNotes?.has(String(Verset))}
+              hasAnnotationNotes={versesWithAnnotationNotes?.[String(Verset)]}
               otherVersionAnnotations={otherVersionAnnotations}
               isTouched={isTouched}
               annotationMode={annotationMode}
