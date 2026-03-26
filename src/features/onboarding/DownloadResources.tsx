@@ -2,8 +2,7 @@ import { useTheme } from '@emotion/react'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet } from 'react-native'
-import { useAtom, useSetAtom } from 'jotai/react'
-import { useAtomValue } from 'jotai/react'
+import { useAtom, useSetAtom, useAtomValue } from 'jotai/react'
 import Animated from 'react-native-reanimated'
 
 import Box from '~common/ui/Box'
@@ -45,13 +44,13 @@ const DownloadResources = () => {
           // Database: use the language that was stored when resource was selected
           return createDatabaseDownloadItem(
             resource.id as DatabaseId,
-            resource.lang || 'fr'  // Fallback to 'fr' for safety
+            resource.lang || 'fr' // Fallback to 'fr' for safety
           )
         }
       } catch (error) {
         // Log error but don't crash the app
         console.error(`Failed to create download item for ${resource.id}:`, error)
-        throw error  // Re-throw to trigger the error UI
+        throw error // Re-throw to trigger the error UI
       }
     })
 

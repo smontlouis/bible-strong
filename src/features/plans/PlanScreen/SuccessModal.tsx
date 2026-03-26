@@ -50,13 +50,7 @@ const SuccessModal = ({ modalRef, isPlanCompleted, onClose }: Props) => {
             }
           />
         </Box>
-        <Box
-          backgroundColor="reverse"
-          lightShadow
-          borderRadius={30}
-          marginBottom={30}
-          padding={20}
-        >
+        <Box backgroundColor="reverse" lightShadow borderRadius={30} marginBottom={30} padding={20}>
           {isPlanCompleted ? (
             <>
               <Paragraph fontFamily="text" textAlign="center" bold>

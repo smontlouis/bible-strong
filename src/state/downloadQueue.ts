@@ -2,6 +2,12 @@ import { atom } from 'jotai/vanilla'
 import type { ResourceLanguage, DatabaseId } from '~helpers/databaseTypes'
 
 // ---------------------------------------------------------------------------
+// Per-item lookup atom factory
+// ---------------------------------------------------------------------------
+
+import type { Atom } from 'jotai/vanilla'
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -109,12 +115,6 @@ export const overallProgressAtom = atom(get => {
     progress: total > 0 ? progressSum / total : 0,
   }
 })
-
-// ---------------------------------------------------------------------------
-// Per-item lookup atom factory
-// ---------------------------------------------------------------------------
-
-import type { Atom } from 'jotai/vanilla'
 
 const itemStatusCache = new Map<string, Atom<DownloadItemState | undefined>>()
 

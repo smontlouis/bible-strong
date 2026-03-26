@@ -53,11 +53,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
   const initialScrollIndex = fonts.findIndex(f => f === fontFamily)
 
   return (
-    <Modal.Body
-      ref={paramsModalRef}
-      enableDynamicSizing
-      enableScrollView={false}
-    >
+    <Modal.Body ref={paramsModalRef} enableDynamicSizing enableScrollView={false}>
       <Box padding={20} paddingBottom={20 + insets.bottom}>
         <HalfContainer border>
           <Text flex={5}>{t('Taille du texte')}</Text>

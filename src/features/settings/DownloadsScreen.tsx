@@ -25,8 +25,11 @@ import {
   isStrongVersion,
   type Version,
 } from '~helpers/bibleVersions'
-import { databases } from '~helpers/databases'
-import { getIfDatabaseNeedsDownloadForLang, getIfDatabaseNeedsDownload } from '~helpers/databases'
+import {
+  databases,
+  getIfDatabaseNeedsDownloadForLang,
+  getIfDatabaseNeedsDownload,
+} from '~helpers/databases'
 import {
   LANGUAGE_SPECIFIC_DBS,
   SHARED_DBS,
