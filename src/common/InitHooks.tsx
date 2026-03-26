@@ -17,6 +17,8 @@ import { useAppRatingCheck } from '~features/app-rating/useAppRatingCheck'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
 import { migrateBibleJsonToSqlite, needsBibleMigration } from '~helpers/bibleMigration'
 import { checkBiblesDbHealth, openBiblesDb, resetBiblesDb } from '~helpers/biblesDb'
+import { checkDatabasesStorage } from '~helpers/sqlite'
+import { storage } from '~helpers/storage'
 import { toast } from '~helpers/toast'
 import useDownloadBibleResources from '~helpers/useDownloadBibleResources'
 import useInitFireAuth from '~helpers/useInitFireAuth'
@@ -48,13 +50,20 @@ const InitHooks = ({}: InitHooksProps) => {
     // Initialize bibles.sqlite and run blocking migration if needed
     openBiblesDb()
       .then(async () => {
-        // Health check — detect corruption early
-        const health = await checkBiblesDbHealth()
-        if (health !== 'ok') {
-          console.warn(`[InitHooks] Bibles DB health: ${health}, resetting...`)
-          await resetBiblesDb()
-          toast.warning(t('bible.error.databaseRecovered'))
-          return // Skip migration — DB was just recreated empty
+        // Periodic health check — only run full PRAGMA quick_check once per week
+        const HEALTH_CHECK_INTERVAL = 7 * 24 * 60 * 60 * 1000
+        const lastCheck = storage.getNumber('biblesDbLastHealthCheck') || 0
+        const needsFullCheck = Date.now() - lastCheck > HEALTH_CHECK_INTERVAL
+
+        if (needsFullCheck) {
+          const health = await checkBiblesDbHealth()
+          storage.set('biblesDbLastHealthCheck', Date.now())
+          if (health !== 'ok') {
+            console.warn(`[InitHooks] Bibles DB health: ${health}, resetting...`)
+            await resetBiblesDb()
+            toast.warning(t('bible.error.databaseRecovered'))
+            return // Skip migration — DB was just recreated empty
+          }
         }
 
         if (!needsBibleMigration()) return
@@ -123,6 +132,12 @@ const InitHooks = ({}: InitHooksProps) => {
 
     // Defer non-critical operations to after first interactions
     const deferred = InteractionManager.runAfterInteractions(() => {
+      // Check legacy database storage (renamed/duplicate cleanup)
+      // Safe to defer: useMigrateToLanguageFolders is also deferred via InteractionManager
+      checkDatabasesStorage().catch(err =>
+        console.error('[InitHooks] DB storage check failed:', err)
+      )
+
       // Load custom fonts (deferred for performance)
       Font.loadAsync({
         ...Icon.Feather.font,

@@ -34,20 +34,23 @@ const languageDetector = {
   },
 }
 
-export const setI18n = async () =>
-  await i18n
-    .use(initReactI18next)
-    // @ts-ignore
-    .use(languageDetector)
-    .init({
-      resources,
-      fallbackLng: 'fr',
-      keySeparator: false,
-      interpolation: {
-        escapeValue: false,
-      },
-      cleanCode: true,
-    })
+// Init at module level so the promise is already resolved when useAppLoad awaits it.
+// Resources are already in memory (require'd above) and languageDetector is synchronous.
+const initPromise = i18n
+  .use(initReactI18next)
+  // @ts-ignore
+  .use(languageDetector)
+  .init({
+    resources,
+    fallbackLng: 'fr',
+    keySeparator: false,
+    interpolation: {
+      escapeValue: false,
+    },
+    cleanCode: true,
+  })
+
+export const setI18n = () => initPromise
 
 /**
  * Get the current language code

@@ -39,7 +39,6 @@ import { BookSelectorBottomSheetProvider } from '~features/bible/BookSelectorBot
 import { DBStateProvider } from '~helpers/databaseState'
 import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
 import { QueryClient, QueryClientProvider } from '~helpers/react-query-lite'
-import { checkDatabasesStorage } from '~helpers/sqlite'
 import {
   useMigrateFromAsyncStorage,
   useMigrateFromFileSystemStorage,
@@ -86,7 +85,7 @@ SplashScreen.preventAutoHideAsync()
   .catch(console.warn)
 
 SplashScreen.setOptions({
-  duration: 1000,
+  duration: 300,
   fade: true,
 })
 
@@ -119,7 +118,6 @@ const useAppLoad = () => {
   useEffect(() => {
     ;(async () => {
       await setI18n()
-      await checkDatabasesStorage()
       setIsLoadingCompleted(true)
       if (!__DEV__) {
         logScreenView(getAnalytics(), {
