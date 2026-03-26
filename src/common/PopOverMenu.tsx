@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useTheme } from '@emotion/react'
 import Popover from 'react-native-popover-view'
 
@@ -27,6 +27,8 @@ const PopOverMenu = ({
   const theme: Theme = useTheme()
   const [showPopover, setShowPopover] = useState(false)
   const closeResolverRef = useRef<(() => void) | null>(null)
+
+  useEffect(() => () => setShowPopover(false), [])
 
   const closeAndWait = (): Promise<void> => {
     if (!showPopover) return Promise.resolve()

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTheme } from '@emotion/react'
 import { TouchableOpacity } from 'react-native'
 import Popover from 'react-native-popover-view'
@@ -18,6 +18,8 @@ const LanguagePopOver = ({ resourceId }: Props) => {
   const theme: Theme = useTheme()
   const [showPopover, setShowPopover] = useState(false)
   const [currentLang, setLang] = useResourceLanguage(resourceId)
+
+  useEffect(() => () => setShowPopover(false), [])
 
   const handleSelect = (lang: ResourceLanguage) => {
     setLang(lang)

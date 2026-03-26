@@ -1,5 +1,5 @@
 import { Theme, useTheme } from '@emotion/react'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DeviceEventEmitter, ScrollView, TouchableOpacity, useWindowDimensions } from 'react-native'
 import Popover from 'react-native-popover-view'
@@ -22,6 +22,8 @@ export const BookShortItem = ({ book, isSelected, isNT, onChange }: BookShortIte
   const bookName = t(book.Nom).replace(/\s/g, '').substr(0, 3)
   const [showPopover, setShowPopover] = useState(false)
   const { width: windowWidth } = useWindowDimensions()
+
+  useEffect(() => () => setShowPopover(false), [])
 
   const chapters = useMemo(() => Array.from({ length: book.Chapitres }, (_, i) => i + 1), [book])
 
