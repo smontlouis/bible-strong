@@ -6458,6 +6458,7 @@ __metadata:
     date-fns: "npm:^2.9.0"
     debounce: "npm:^1.2.0"
     deprecated-react-native-prop-types: "npm:^4.0.0"
+    dotenv-cli: "npm:^11.0.0"
     eslint: "npm:^9"
     eslint-config-expo: "npm:^10"
     eslint-config-prettier: "npm:^9"
@@ -7668,6 +7669,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dotenv-cli@npm:^11.0.0":
+  version: 11.0.0
+  resolution: "dotenv-cli@npm:11.0.0"
+  dependencies:
+    cross-spawn: "npm:^7.0.6"
+    dotenv: "npm:^17.1.0"
+    dotenv-expand: "npm:^12.0.0"
+    minimist: "npm:^1.2.6"
+  bin:
+    dotenv: cli.js
+  checksum: 10c0/c3e6e58a484b3204eeb167a8f78c9cb04c4bae951069e7860eccbbbf96964e3bd808b3632dfe841e5d882b2c5d77c447f20abd06edd4db623ce719d94a7fb44e
+  languageName: node
+  linkType: hard
+
+"dotenv-expand@npm:^12.0.0":
+  version: 12.0.3
+  resolution: "dotenv-expand@npm:12.0.3"
+  dependencies:
+    dotenv: "npm:^16.4.5"
+  checksum: 10c0/0824bdc74fc816a28b0744b7853a23e046602e9616c82121dfdae21ebc13c6e89afeb773e794e97c35d48be2be0a990fbca721ee3869a49c04210a58a3cf296f
+  languageName: node
+  linkType: hard
+
 "dotenv-expand@npm:~11.0.6":
   version: 11.0.7
   resolution: "dotenv-expand@npm:11.0.7"
@@ -7681,6 +7705,13 @@ __metadata:
   version: 16.6.1
   resolution: "dotenv@npm:16.6.1"
   checksum: 10c0/15ce56608326ea0d1d9414a5c8ee6dcf0fffc79d2c16422b4ac2268e7e2d76ff5a572d37ffe747c377de12005f14b3cc22361e79fc7f1061cce81f77d2c973dc
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:^17.1.0":
+  version: 17.3.1
+  resolution: "dotenv@npm:17.3.1"
+  checksum: 10c0/c78e0c2d5a549c751e544cc60e2b95e7cb67e0c551f42e094d161c6b297aa44b630a3c2dcacf5569e529a6c2a6b84e2ab9be8d37b299d425df5a18b81ce4a35f
   languageName: node
   linkType: hard
 

@@ -160,10 +160,11 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
   }
 
   const handleSelectionChanged = (hasSelection: boolean, selection: SelectionRange | null) => {
+    const isValid = hasSelection && selection?.start && selection?.end
     setState(prev => ({
       ...prev,
-      hasSelection,
-      selection,
+      hasSelection: !!isValid,
+      selection: isValid ? selection : null,
     }))
   }
 

@@ -164,6 +164,7 @@
     "babel-plugin-module-resolver": "^3.2.0",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "babel-preset-expo": "^54.0.9",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^9",
     "eslint-config-expo": "^10",
     "eslint-config-prettier": "^9",

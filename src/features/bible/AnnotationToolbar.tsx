@@ -306,7 +306,7 @@ const AnnotationToolbar = ({
                 </TouchableOpacity>
               </AnimatedBox>
             </AnimatedBox>
-          ) : hasSelection && selection ? (
+          ) : hasSelection && selection?.start && selection?.end ? (
             <AnimatedBox
               row
               alignItems="center"

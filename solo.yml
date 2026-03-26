@@ -1,0 +1,11 @@
+# Visit https://soloterm.com to learn more
+name: bible-strong-app
+icon: null
+processes:
+  'yarn: start':
+    command: yarn run start
+    working_dir: null
+    auto_start: false
+    auto_restart: false
+    restart_when_changed: []
+    env: {}
