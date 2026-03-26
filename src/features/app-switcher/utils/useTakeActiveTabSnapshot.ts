@@ -38,7 +38,9 @@ const useTakeActiveTabSnapshot = () => {
 
     setTabs(
       produce(draft => {
-        draft[activeTabIndex].base64Preview = base64
+        if (draft[activeTabIndex]) {
+          draft[activeTabIndex].base64Preview = base64
+        }
       })
     )
   }
