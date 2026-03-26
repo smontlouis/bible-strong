@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { ScrollView, TouchableOpacity } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTheme } from '@emotion/react'
+import { useAtomValue, useSetAtom } from 'jotai/react'
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view'
 
 import booksDesc from '~assets/bible_versions/books-desc'
@@ -29,6 +30,7 @@ import LexiqueResultsWidget from '~features/lexique/LexiqueResultsWidget'
 import NaveResultsWidget from '~features/nave/NaveResultsWidget'
 import BibleReferenceWidget, { parseBibleReference } from '~features/search/BibleReferenceWidget'
 import SearchEmptyState from '~features/search/SearchEmptyState'
+import { searchFiltersAtom, SearchSection } from '~state/searchFilters'
 
 type Props = {
   searchValue: string
@@ -43,6 +45,10 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const theme = useTheme()
   const router = useRouter()
 
+  // Global persisted filters — read once at mount, write on every change
+  const globalFilters = useAtomValue(searchFiltersAtom)
+  const setGlobalFilters = useSetAtom(searchFiltersAtom)
+
   const debouncedSearchValue = useDebounce(searchValue, 300)
   const [results, setResults] = useState<SearchResult[] | null>(null)
   const [totalCount, setTotalCount] = useState(0)
@@ -50,11 +56,28 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const [searchError, setSearchError] = useState<string | null>(null)
   const [hasInstalledVersions, setHasInstalledVersions] = useState(true)
 
-  const [section, setSection] = useState('')
-  const [book, setBook] = useState(0)
-  const [selectedVersion, setSelectedVersion] = useState('')
-  const [sortOrder, setSortOrder] = useState<SearchSortOrder>('relevance')
+  const [section, _setSection] = useState<SearchSection>(globalFilters.section)
+  const [book, _setBook] = useState(globalFilters.book)
+  const [selectedVersion, _setSelectedVersion] = useState(globalFilters.selectedVersion)
+  const [sortOrder, _setSortOrder] = useState<SearchSortOrder>(globalFilters.sortOrder)
   const [installedVersions, setInstalledVersions] = useState<string[]>([])
+
+  const setSection = (v: SearchSection) => {
+    _setSection(v)
+    setGlobalFilters(prev => ({ ...prev, section: v }))
+  }
+  const setBook = (v: number) => {
+    _setBook(v)
+    setGlobalFilters(prev => ({ ...prev, book: v }))
+  }
+  const setSelectedVersion = (v: string) => {
+    _setSelectedVersion(v)
+    setGlobalFilters(prev => ({ ...prev, selectedVersion: v }))
+  }
+  const setSortOrder = (v: SearchSortOrder) => {
+    _setSortOrder(v)
+    setGlobalFilters(prev => ({ ...prev, sortOrder: v }))
+  }
 
   // Load installed versions on mount
   useEffect(() => {
@@ -297,7 +320,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           <DropdownMenu
             title={t('Section')}
             currentValue={section}
-            setValue={setSection}
+            setValue={(v: string) => setSection(v as SearchSection)}
             choices={sectionValues}
           />
           <DropdownMenu
