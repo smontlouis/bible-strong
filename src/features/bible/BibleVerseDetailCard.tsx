@@ -126,7 +126,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
   const loadPage = async () => {
     const strongVerse = await loadStrongVerse(verse)
 
-    if (!strongVerse) {
+    if (!strongVerse?.Texte) {
       setState(prev => ({ ...prev, error: true }))
       return
     }
