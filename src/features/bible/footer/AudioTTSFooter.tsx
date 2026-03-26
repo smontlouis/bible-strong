@@ -44,7 +44,8 @@ const useLoadSound = ({
 }: UseLoadSoundProps) => {
   const ignoreSpeechDone = useRef(false)
   const totalVerses = useRef(0)
-  const currentVerse = useRef(1)
+  const currentVerseIndex = useRef(0)
+  const verseKeys = useRef<number[]>([])
   const [rendered, rerender] = React.useReducer(i => i + 1, 0)
 
   const [isExpanded, setExpandedMode] = useState(false)
@@ -58,13 +59,13 @@ const useLoadSound = ({
 
   const onNextChapter = ({ ignoreDone }: { ignoreDone?: boolean } = {}) => {
     ignoreSpeechDone.current = ignoreDone ?? isPlaying
-    currentVerse.current = 1
+    currentVerseIndex.current = 0
     goToNextChapter()
   }
 
   const onPrevChapter = () => {
     ignoreSpeechDone.current = isPlaying
-    currentVerse.current = 1
+    currentVerseIndex.current = 0
     goToPrevChapter()
   }
 
@@ -88,8 +89,8 @@ const useLoadSound = ({
   const goToNextVerse = () => {
     ignoreSpeechDone.current = true
 
-    if (currentVerse.current < totalVerses.current) {
-      currentVerse.current += 1
+    if (currentVerseIndex.current < totalVerses.current - 1) {
+      currentVerseIndex.current += 1
       rerender()
     } else {
       onNextChapter()
@@ -99,8 +100,8 @@ const useLoadSound = ({
   const goToPrevVerse = () => {
     ignoreSpeechDone.current = true
 
-    if (currentVerse.current > 1) {
-      currentVerse.current -= 1
+    if (currentVerseIndex.current > 0) {
+      currentVerseIndex.current -= 1
       rerender()
     } else {
       goToPrevChapter()
@@ -109,12 +110,14 @@ const useLoadSound = ({
 
   const bibleVersion = getVersions()[version] as Version
 
-  const audioTitle = `${t(book.Nom)} ${chapter}:${currentVerse.current} ${version}`
+  const currentVerseNum = verseKeys.current[currentVerseIndex.current] ?? 1
+  const audioTitle = `${t(book.Nom)} ${chapter}:${currentVerseNum} ${version}`
   const audioSubtitle = bibleVersion?.name
 
   useEffect(() => {
-    currentVerse.current = 1
+    currentVerseIndex.current = 0
     totalVerses.current = 0
+    verseKeys.current = []
   }, [book.Numero, chapter, version])
 
   useEffect(() => {
@@ -129,7 +132,20 @@ const useLoadSound = ({
             versesObj[Number(row.Verset)] = row.Texte
           }
 
-          totalVerses.current = Object.keys(versesObj).length
+          const sortedKeys = Object.keys(versesObj)
+            .map(Number)
+            .sort((a, b) => a - b)
+          verseKeys.current = sortedKeys
+          totalVerses.current = sortedKeys.length
+
+          const verseNum = sortedKeys[currentVerseIndex.current]
+          const text = verseNum != null ? versesObj[verseNum] : undefined
+
+          if (text == null) {
+            setIsPlaying(false)
+            setError(true)
+            return
+          }
 
           // IOS hack to play tts in silent mode
           if (Platform.OS === 'ios') {
@@ -139,7 +155,7 @@ const useLoadSound = ({
             silentPlayer?.play()
           }
 
-          Speech.speak(versesObj[currentVerse.current], {
+          Speech.speak(text, {
             voice: selectedVoice !== 'default' ? selectedVoice : undefined,
             rate: rate ?? 1,
             pitch: pitch ?? 1,
@@ -153,9 +169,9 @@ const useLoadSound = ({
                 return
               }
 
-              if (currentVerse.current === totalVerses.current) {
+              if (currentVerseIndex.current >= totalVerses.current - 1) {
                 if (isRepeat) {
-                  currentVerse.current = 1
+                  currentVerseIndex.current = 0
                   rerender()
                 } else {
                   onNextChapter({
@@ -166,7 +182,7 @@ const useLoadSound = ({
                 return
               }
 
-              currentVerse.current += 1
+              currentVerseIndex.current += 1
               rerender()
             },
           })
@@ -194,7 +210,7 @@ const useLoadSound = ({
     chapter,
     version,
     totalVerses,
-    currentVerse,
+    currentVerseIndex,
     selectedVoice,
     rate,
     pitch,
