@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/react-native'
+import { tokenManager } from './TokenManager'
 import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
 import {
   firebaseDb,
@@ -401,68 +402,106 @@ export function subscribeToSubcollection(
   collectionName: SubcollectionName,
   onChange: SubcollectionChangeCallback
 ): () => void {
-  const collectionRef = getSubcollectionRef(userId, collectionName)
-  let isFirstSnapshot = true
+  let currentUnsubscribe: (() => void) | null = null
+  let isDisposed = false
+  let hasRetried = false
 
-  const unsubscribe = onSnapshot(
-    collectionRef,
-    snapshot => {
-      // Ignorer les changements locaux
-      if (snapshot.metadata.hasPendingWrites) {
-        return
-      }
+  function setupSubscription() {
+    const collectionRef = getSubcollectionRef(userId, collectionName)
+    let isFirstSnapshot = true
 
-      // Construire l'objet complet (avec décodage des IDs)
-      const data: { [id: string]: any } = {}
-      snapshot.forEach((docSnap: FirebaseFirestoreTypes.QueryDocumentSnapshot) => {
-        data[decodeDocumentId(docSnap.id)] = docSnap.data()
-      })
+    const unsubscribe = onSnapshot(
+      collectionRef,
+      snapshot => {
+        // Connection is healthy — allow retry on next error
+        hasRetried = false
 
-      // Pour le premier snapshot, on envoie tout comme "added"
-      if (isFirstSnapshot) {
-        isFirstSnapshot = false
-        onChange(data, {
-          added: data,
-          modified: {},
-          removed: [],
-        })
-        return
-      }
-
-      // Pour les snapshots suivants, on détecte les changements
-      const added: { [id: string]: any } = {}
-      const modified: { [id: string]: any } = {}
-      const removed: string[] = []
-
-      snapshot.docChanges().forEach((change: FirebaseFirestoreTypes.DocumentChange) => {
-        const docData = change.doc.data()
-        const docId = decodeDocumentId(change.doc.id)
-
-        switch (change.type) {
-          case 'added':
-            added[docId] = docData
-            break
-          case 'modified':
-            modified[docId] = docData
-            break
-          case 'removed':
-            removed.push(docId)
-            break
+        // Ignorer les changements locaux
+        if (snapshot.metadata.hasPendingWrites) {
+          return
         }
-      })
 
-      onChange(data, { added, modified, removed })
-    },
-    error => {
-      console.error(`[Subcollections] Subscription error for ${collectionName}:`, error)
-      Sentry.captureException(error, {
-        tags: { feature: 'subcollections', action: 'subscribe', collection: collectionName },
-        extra: { userId },
-      })
+        // Construire l'objet complet (avec décodage des IDs)
+        const data: { [id: string]: any } = {}
+        snapshot.forEach((docSnap: FirebaseFirestoreTypes.QueryDocumentSnapshot) => {
+          data[decodeDocumentId(docSnap.id)] = docSnap.data()
+        })
+
+        // Pour le premier snapshot, on envoie tout comme "added"
+        if (isFirstSnapshot) {
+          isFirstSnapshot = false
+          onChange(data, {
+            added: data,
+            modified: {},
+            removed: [],
+          })
+          return
+        }
+
+        // Pour les snapshots suivants, on détecte les changements
+        const added: { [id: string]: any } = {}
+        const modified: { [id: string]: any } = {}
+        const removed: string[] = []
+
+        snapshot.docChanges().forEach((change: FirebaseFirestoreTypes.DocumentChange) => {
+          const docData = change.doc.data()
+          const docId = decodeDocumentId(change.doc.id)
+
+          switch (change.type) {
+            case 'added':
+              added[docId] = docData
+              break
+            case 'modified':
+              modified[docId] = docData
+              break
+            case 'removed':
+              removed.push(docId)
+              break
+          }
+        })
+
+        onChange(data, { added, modified, removed })
+      },
+      async (error: any) => {
+        const isPermissionDenied =
+          error?.code === 'permission-denied' || error?.code === 'firestore/permission-denied'
+
+        if (isPermissionDenied && !isDisposed && !hasRetried) {
+          hasRetried = true
+          console.warn(
+            `[Subcollections] Permission denied on ${collectionName}, attempting token refresh...`
+          )
+
+          const refreshed = await tokenManager.tryRefreshOrWait()
+
+          if (!isDisposed) {
+            console.log(`[Subcollections] Token ${refreshed ? 'refreshed' : 'recently refreshed'}, resubscribing to ${collectionName}...`)
+            unsubscribe()
+            setupSubscription()
+            return
+          }
+        }
+
+        console.error(`[Subcollections] Subscription error for ${collectionName}:`, error)
+        Sentry.captureException(error, {
+          tags: { feature: 'subcollections', action: 'subscribe', collection: collectionName },
+          extra: { userId },
+        })
+      }
+    )
+
+    currentUnsubscribe = unsubscribe
+  }
+
+  setupSubscription()
+
+  return () => {
+    isDisposed = true
+    if (currentUnsubscribe) {
+      currentUnsubscribe()
+      currentUnsubscribe = null
     }
-  )
-
-  return unsubscribe
+  }
 }
 
 /**

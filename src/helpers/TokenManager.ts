@@ -10,6 +10,7 @@ import * as Sentry from '@sentry/react-native'
  */
 class TokenManager {
   private lastRefreshTime: number = 0
+  private refreshPromise: Promise<boolean> | null = null
 
   // Cooldown de 5 minutes entre refreshes manuels
   // Empêche les refreshes trop fréquents si erreurs répétées
@@ -43,10 +44,48 @@ class TokenManager {
       return false
     }
 
+    // Deduplicate concurrent refresh calls
+    if (this.refreshPromise) {
+      return this.refreshPromise
+    }
+
+    this.refreshPromise = this._doRefresh(currentUser)
+    try {
+      return await this.refreshPromise
+    } finally {
+      this.refreshPromise = null
+    }
+  }
+
+  /**
+   * Like tryRefresh, but if cooldown is active (meaning a recent refresh
+   * succeeded), returns true instead of false — the token is already fresh.
+   * Returns false only on real failures (no user, refresh error).
+   * Used by subscription error handlers that need to resubscribe regardless.
+   */
+  async tryRefreshOrWait(): Promise<boolean> {
+    const currentUser = getAuth().currentUser
+    if (!currentUser) return false
+
+    // If a refresh is already in flight, wait for it
+    if (this.refreshPromise) {
+      return this.refreshPromise
+    }
+
+    // Cooldown active means a recent refresh succeeded — token is fresh
+    if (!this.canRefresh()) {
+      console.log('[TokenManager] Cooldown active, token already fresh')
+      return true
+    }
+
+    return this.tryRefresh()
+  }
+
+  private async _doRefresh(currentUser: { uid: string; getIdToken: (force: boolean) => Promise<string> }): Promise<boolean> {
     try {
       console.log('[TokenManager] Attempting manual token refresh (edge case fallback)...')
 
-      const token = await currentUser.getIdToken(true) // Force refresh
+      await currentUser.getIdToken(true) // Force refresh
 
       this.lastRefreshTime = Date.now()
 
@@ -84,6 +123,7 @@ class TokenManager {
    */
   reset() {
     this.lastRefreshTime = 0
+    this.refreshPromise = null
     console.log('[TokenManager] Reset')
   }
 
