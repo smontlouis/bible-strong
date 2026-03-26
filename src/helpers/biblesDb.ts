@@ -182,10 +182,36 @@ async function getDb(): Promise<SQLite.SQLiteDatabase> {
 // Error wrapper — logs + reports to Sentry, then re-throws
 // ---------------------------------------------------------------------------
 
+function isStaleHandleError(e: unknown): boolean {
+  const msg = e instanceof Error ? e.message : String(e)
+  return (
+    msg.includes('Access to closed resource') ||
+    msg.includes('SharedObject') ||
+    msg.includes('cannot be cast to type')
+  )
+}
+
 async function withDbError<T>(operation: string, fn: () => Promise<T>): Promise<T> {
   try {
     return await fn()
   } catch (e) {
+    if (isStaleHandleError(e)) {
+      console.warn(`[BiblesDB] ${operation}: stale handle detected, reconnecting...`)
+      db = null
+      openPromise = null
+      try {
+        return await fn()
+      } catch (retryErr) {
+        console.error(`[BiblesDB] ${operation} retry failed:`, retryErr)
+        Sentry.withScope(scope => {
+          scope.setTag('db.name', 'bibles')
+          scope.setExtra('operation', operation)
+          scope.setExtra('retryAfterReconnect', true)
+          Sentry.captureException(retryErr)
+        })
+        throw retryErr
+      }
+    }
     console.error(`[BiblesDB] ${operation} failed:`, e)
     Sentry.withScope(scope => {
       scope.setTag('db.name', 'bibles')
@@ -359,16 +385,16 @@ export function insertBibleVersion(
   return withDbError(`insertBibleVersion(${version})`, async () => {
     const d = await getDb()
 
-    await d.withExclusiveTransactionAsync(async () => {
+    await d.withExclusiveTransactionAsync(async txn => {
       // Delete any existing data for this version first (re-download case)
       // Remove FTS entries before deleting verses (content-sync table needs explicit delete)
-      await d.runAsync(
+      await txn.runAsync(
         `INSERT INTO verses_fts(verses_fts, rowid, text)
        SELECT 'delete', id, text FROM verses WHERE version = ?`,
         [version]
       )
-      await d.runAsync('DELETE FROM verses WHERE version = ?', [version])
-      await d.runAsync('DELETE FROM versions_meta WHERE version = ?', [version])
+      await txn.runAsync('DELETE FROM verses WHERE version = ?', [version])
+      await txn.runAsync('DELETE FROM versions_meta WHERE version = ?', [version])
 
       let totalCount = 0
       const BATCH_SIZE = 500
@@ -410,7 +436,7 @@ export function insertBibleVersion(
           flatParams.push(...row)
         }
 
-        await d.runAsync(
+        await txn.runAsync(
           `INSERT INTO verses (version, book, chapter, verse, text) VALUES ${placeholders}`,
           flatParams
         )
@@ -422,14 +448,14 @@ export function insertBibleVersion(
       }
 
       // Populate FTS index for this version
-      await d.runAsync(
+      await txn.runAsync(
         `INSERT INTO verses_fts(rowid, text)
        SELECT id, text FROM verses WHERE version = ?`,
         [version]
       )
 
       // Record metadata
-      await d.runAsync(
+      await txn.runAsync(
         'INSERT INTO versions_meta (version, installed_at, verse_count) VALUES (?, ?, ?)',
         [version, Date.now(), totalCount]
       )
@@ -446,16 +472,16 @@ export function removeBibleVersion(version: string): Promise<void> {
   return withDbError(`removeBibleVersion(${version})`, async () => {
     const d = await getDb()
 
-    await d.withExclusiveTransactionAsync(async () => {
+    await d.withExclusiveTransactionAsync(async txn => {
       // Remove FTS entries first (content-sync table needs explicit delete)
-      await d.runAsync(
+      await txn.runAsync(
         `INSERT INTO verses_fts(verses_fts, rowid, text)
          SELECT 'delete', id, text FROM verses WHERE version = ?`,
         [version]
       )
 
-      await d.runAsync('DELETE FROM verses WHERE version = ?', [version])
-      await d.runAsync('DELETE FROM versions_meta WHERE version = ?', [version])
+      await txn.runAsync('DELETE FROM verses WHERE version = ?', [version])
+      await txn.runAsync('DELETE FROM versions_meta WHERE version = ?', [version])
     })
 
     console.log(`[BiblesDB] Removed version ${version}`)
