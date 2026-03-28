@@ -1,4 +1,4 @@
-import * as Icon from '@expo/vector-icons'
+import Feather from '@expo/vector-icons/Feather'
 import { styled } from 'goober'
 import { RootState } from '~redux/modules/reducer'
 import { RootStyles } from './BibleDOMWrapper'
@@ -52,7 +52,7 @@ interface Props {
 const TagsIndicator = ({ count, settings, onClick, isDisabled }: Props) => {
   return (
     <Div settings={settings} onClick={() => onClick()} isDisabled={isDisabled}>
-      <Icon.Feather color={settings.colors[settings.theme].primary} name="tag" size={14} />
+      <Feather color={settings.colors[settings.theme].primary} name="tag" size={14} />
       <Count settings={settings}>{count}</Count>
     </Div>
   )

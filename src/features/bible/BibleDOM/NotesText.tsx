@@ -3,7 +3,7 @@ import truncate from './truncate'
 import { scaleFontSize } from './scaleFontSize'
 import { RootState } from '~redux/modules/reducer'
 import { NotedVerse, RootStyles } from './BibleDOMWrapper'
-import * as Icon from '@expo/vector-icons'
+import Ionicons from '@expo/vector-icons/Ionicons'
 import { InlineItemContainer, InlineItemIconWrapper, InlineItemText } from './InlineItem'
 
 interface Props {
@@ -27,7 +27,7 @@ const NotesText = ({ notesText, settings, onClick, isParallel, isDisabled }: Pro
           isDisabled={isDisabled}
         >
           <InlineItemIconWrapper settings={settings}>
-            <Icon.Ionicons
+            <Ionicons
               color={settings.colors[settings.theme].quart}
               name="document-text-outline"
               size={16}

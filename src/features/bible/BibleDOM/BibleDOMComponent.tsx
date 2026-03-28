@@ -31,7 +31,6 @@ import {
 } from './dispatch'
 import { DispatchProvider } from './DispatchProvider'
 import { TranslationsProvider, BibleDOMTranslations } from './TranslationsContext'
-import './polyfills'
 import { scaleFontSize } from './scaleFontSize'
 import { useFonts } from 'expo-font'
 import { HEADER_HEIGHT, HEADER_HEIGHT_MIN } from '~features/app-switcher/utils/constants'
@@ -377,10 +376,10 @@ function isClickInsideSelection(
 }
 
 // ============================================================================
-// MAIN VERSES RENDERER
+// LOADED BIBLE CONTENT (heavy component, only rendered when verses are available)
 // ============================================================================
 
-const VersesRenderer = ({
+const LoadedBibleContent = ({
   verses,
   parallelVerses,
   parallelColumnWidth = 75,
@@ -421,10 +420,6 @@ const VersesRenderer = ({
   linkedVersesCount,
   linkedVersesText,
 }: Props) => {
-  useFonts({
-    'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
-  })
-
   // Ref for highlight layer
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -750,11 +745,7 @@ const VersesRenderer = ({
     dispatch({
       type: 'DOM_COMPONENT_MOUNTED',
     }).catch(console.error)
-
-    // Set initial header height CSS variable
-    document.documentElement.style.setProperty('--header-height', `${HEADER_HEIGHT}px`)
   }, [])
-
   // Sync horizontal scroll between header and content for parallel versions
   // Also calculate translateX for each title to make them "sticky" at the left edge
   useEffect(() => {
@@ -877,12 +868,6 @@ const VersesRenderer = ({
   }, [chapter, verseToScroll, hasVerses])
 
   useEffect(() => {
-    if (settings?.theme) {
-      document.body.style.backgroundColor = settings.colors[settings.theme].reverse
-    }
-  }, [settings?.theme])
-
-  useEffect(() => {
     if (!verseToScroll || !hasVerses) return
 
     if (verseToScroll === 1) return
@@ -913,18 +898,6 @@ const VersesRenderer = ({
       type: NAVIGATE_TO_VERSION,
       payload: { version, index },
     })
-  }
-
-  // Early return: render minimal shell while WebView initializes (data not yet loaded)
-  if (!verses.length) {
-    return (
-      <TranslationsProvider translations={translations}>
-        <GlobalStyles />
-        <DispatchProvider dispatch={dispatch}>
-          <Container settings={settings} rtl={false} isParallelVerse={false} />
-        </DispatchProvider>
-      </TranslationsProvider>
-    )
   }
 
   const isHebreu =
@@ -1133,6 +1106,52 @@ const VersesRenderer = ({
         </svg>
       </DispatchProvider>
     </TranslationsProvider>
+  )
+}
+
+// ============================================================================
+// MAIN VERSES RENDERER (lightweight shell)
+// ============================================================================
+
+const VersesRenderer = ({ settings, dispatch, translations, verses, ...rest }: Props) => {
+  useFonts({
+    'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
+  })
+
+  useEffect(() => {
+    dispatch({
+      type: 'DOM_COMPONENT_MOUNTED',
+    }).catch(console.error)
+    document.documentElement.style.setProperty('--header-height', `${HEADER_HEIGHT}px`)
+    document.body.style.backgroundColor = settings.colors[settings.theme].reverse
+  }, [])
+
+  // Sync body background when theme changes
+  useEffect(() => {
+    if (settings?.theme) {
+      document.body.style.backgroundColor = settings.colors[settings.theme].reverse
+    }
+  }, [settings?.theme])
+
+  if (!verses.length) {
+    return (
+      <TranslationsProvider translations={translations}>
+        <GlobalStyles />
+        <DispatchProvider dispatch={dispatch}>
+          <Container settings={settings} rtl={false} isParallelVerse={false} />
+        </DispatchProvider>
+      </TranslationsProvider>
+    )
+  }
+
+  return (
+    <LoadedBibleContent
+      settings={settings}
+      dispatch={dispatch}
+      translations={translations}
+      verses={verses}
+      {...rest}
+    />
   )
 }
 

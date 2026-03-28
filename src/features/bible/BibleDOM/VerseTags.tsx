@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { styled } from 'goober'
-import * as Icon from '@expo/vector-icons'
+import Feather from '@expo/vector-icons/Feather'
 import { scaleFontSize } from './scaleFontSize'
 import { OPEN_HIGHLIGHT_TAGS, NAVIGATE_TO_TAG } from './dispatch'
 import { RootStyles, TaggedVerse } from './BibleDOMWrapper'
@@ -124,7 +124,7 @@ const VerseTags = ({ tag, settings, isDisabled }: Props) => {
       {/* Tag icon - opens MultipleTagsModal */}
 
       <InlineItemIconWrapper settings={settings} isButton onClick={handleTagIconClick}>
-        <Icon.Feather
+        <Feather
           name="tag"
           size={Number(scaleFontSize(14, settings.fontSizeScale).replace('px', ''))}
           color={colors[theme].primary}
@@ -148,7 +148,7 @@ const VerseTags = ({ tag, settings, isDisabled }: Props) => {
       {/* Collapse button - only visible when expanded */}
       {isExpanded && hasMoreTags && (
         <IconButton settings={settings} onClick={handleCollapseClick}>
-          <Icon.Feather
+          <Feather
             name="chevron-left"
             size={Number(scaleFontSize(14, settings.fontSizeScale).replace('px', ''))}
             color={defaultColor}

@@ -1,10 +1,14 @@
 import { useSetAtom } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
-import { withDelay, withTiming } from 'react-native-reanimated'
+import { Easing, withDelay, withTiming } from 'react-native-reanimated'
 import { runOnJS } from 'react-native-worklets'
 import { activeTabIndexAtom, appSwitcherModeAtom, tabsCountAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
-import { tabTimingConfig } from './constants'
+
+const tabTimingConfig = {
+  duration: 500,
+  easing: Easing.bezier(0.36, 0.77, 0.44, 1.0),
+}
 import { resolveAndSetTabId, fadeInTabScreen } from './tabHelpers'
 import useTabConstants from './useTabConstants'
 import useTakeActiveTabSnapshot from './useTakeActiveTabSnapshot'

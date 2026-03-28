@@ -1,7 +1,12 @@
 'use dom'
 
-import Color from 'color'
 import { styled, keyframes } from 'goober'
+
+/** Parse a hex color string to [r, g, b] array */
+function hexToRgb(hex: string): [number, number, number] {
+  const h = hex.replace('#', '')
+  return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]
+}
 
 // Animation de 0 à 100% de largeur avec clip-path (performant, GPU accelerated)
 const expandWidth = keyframes`
@@ -45,8 +50,7 @@ export interface HighlightRect {
 // intensity: 1.0 = normal, >1.0 = plus intense (max opacity capped at 1)
 function createMarkerGradient(colorStr: string, intensity: number = 1): string {
   try {
-    const c = Color(colorStr)
-    const [r, g, b] = c.rgb().array()
+    const [r, g, b] = hexToRgb(colorStr)
 
     // Helper to apply intensity with max cap at 1
     const o = (opacity: number) => Math.min(1, opacity * intensity)
@@ -94,8 +98,7 @@ function createCircleStyle(
   height: number,
   animationDelay: number
 ): Record<string, unknown> {
-  const c = Color(colorStr)
-  const [r, g, b] = c.rgb().array()
+  const [r, g, b] = hexToRgb(colorStr)
   const softBorder = `rgba(${r}, ${g}, ${b}, 0.6)`
   const thinBorder = `rgba(${r}, ${g}, ${b}, 0.4)`
   const glowColor = `rgba(${r}, ${g}, ${b}, 0.15)`

@@ -32,8 +32,8 @@ import { ContainerText, resolveHighlightInfo } from './ContainerText'
 import { convertHex } from './convertHex'
 import { HIGHLIGHT_BACKGROUND_OPACITY, getContrastTextColor } from '~helpers/highlightUtils'
 import { isDarkTheme } from './utils'
-import InterlinearVerseComplete from './InterlinearVerseComplete'
-import InterlinearVerse from './InterlinearVerse'
+const InterlinearVerseComplete = React.lazy(() => import('./InterlinearVerseComplete'))
+const InterlinearVerse = React.lazy(() => import('./InterlinearVerse'))
 import VerseTags from './VerseTags'
 import CloseContextTag from './CloseContextTag'
 import { BibleError } from '~helpers/bibleErrors'
@@ -78,6 +78,8 @@ const Wrapper = styled('span')<
   ...(textDisplay === 'block'
     ? {
         marginBottom: '5px',
+        contentVisibility: 'auto',
+        containIntrinsicSize: 'auto 80px',
       }
     : {}),
   ...(isSelectedMode && !isSelected
@@ -549,25 +551,26 @@ const Verse = ({
   }
 
   if (version === 'INT' || version === 'INT_EN') {
-    if (isINTComplete) {
-      return (
-        <InterlinearVerseComplete
-          secondaryVerse={secondaryVerse}
-          isHebreu={isHebreu}
-          settings={settings}
-          verse={verse}
-          selectedCode={selectedCode}
-        />
-      )
-    }
     return (
-      <InterlinearVerse
-        secondaryVerse={secondaryVerse}
-        isHebreu={isHebreu}
-        settings={settings}
-        verse={verse}
-        selectedCode={selectedCode}
-      />
+      <React.Suspense fallback={<span>{verse.Texte}</span>}>
+        {isINTComplete ? (
+          <InterlinearVerseComplete
+            secondaryVerse={secondaryVerse}
+            isHebreu={isHebreu}
+            settings={settings}
+            verse={verse}
+            selectedCode={selectedCode}
+          />
+        ) : (
+          <InterlinearVerse
+            secondaryVerse={secondaryVerse}
+            isHebreu={isHebreu}
+            settings={settings}
+            verse={verse}
+            selectedCode={selectedCode}
+          />
+        )}
+      </React.Suspense>
     )
   }
 

@@ -279,6 +279,12 @@ export const BibleDOMWrapper = ({
 
   const stableVerses = useStabilizedVerses(verses, isLoading)
 
+  // Trim settings to only include active theme colors (reduces bridge serialization by ~3.8KB)
+  const trimmedSettings = {
+    ...settings,
+    colors: { [settings.theme]: settings.colors[settings.theme] },
+  } as typeof settings
+
   // Translations for the DOM component (which can't access i18n directly)
   const translations: BibleDOMTranslations = {
     parallelVersionNotFound: t('bible.error.parallelVersionNotFound'),
@@ -555,6 +561,7 @@ export const BibleDOMWrapper = ({
               marginTop: insets.top,
             }),
           },
+          injectedJavaScriptBeforeContentLoaded: `document.documentElement.style.backgroundColor='${theme.colors.reverse}';document.body.style.backgroundColor='${theme.colors.reverse}';document.body.style.margin='0';true;`,
         }}
         verses={stableVerses}
         parallelVerses={parallelVerses}
@@ -566,7 +573,7 @@ export const BibleDOMWrapper = ({
         highlightedVerses={highlightedVerses}
         bookmarkedVerses={bookmarkedVerses}
         wordAnnotations={wordAnnotations}
-        settings={settings}
+        settings={trimmedSettings}
         verseToScroll={verseToScroll}
         isReadOnly={isReadOnly}
         version={version}

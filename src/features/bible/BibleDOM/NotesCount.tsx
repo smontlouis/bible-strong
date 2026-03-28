@@ -1,4 +1,4 @@
-import * as Icon from '@expo/vector-icons'
+import Ionicons from '@expo/vector-icons/Ionicons'
 import { styled } from 'goober'
 import { RootState } from '~redux/modules/reducer'
 import { RootStyles } from './BibleDOMWrapper'
@@ -52,7 +52,7 @@ interface Props {
 const NotesCount = ({ count, settings, onClick, isDisabled }: Props) => {
   return (
     <Div settings={settings} onClick={() => onClick()} isDisabled={isDisabled}>
-      <Icon.Ionicons
+      <Ionicons
         color={settings.colors[settings.theme].quart}
         name="document-text-outline"
         size={16}
