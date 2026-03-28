@@ -134,3 +134,6 @@ ios/
 
 
 .worktree/
+
+# Service account keys
+scripts/google-service-account.json
