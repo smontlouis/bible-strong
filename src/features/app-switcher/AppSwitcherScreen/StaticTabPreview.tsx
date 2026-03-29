@@ -58,7 +58,7 @@ const StaticTabPreview = ({ tab, index, ...props }: StaticTabPreviewProps & BoxP
               opacity: 0.15,
               ...StyleSheet.absoluteFillObject,
             }}
-            source={{ uri: `data:image/png;base64,${tab.base64Preview}` }}
+            source={{ uri: `data:image/jpeg;base64,${tab.base64Preview}` }}
           />
         )}
         <Box center width={80} height={80} borderRadius={40} backgroundColor="reverse">

@@ -1,6 +1,7 @@
 import { useSetAtom } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
-import { Easing, withDelay, withTiming } from 'react-native-reanimated'
+import { type AnimatedRef, Easing, measure, withDelay, withTiming } from 'react-native-reanimated'
+import { type View } from 'react-native'
 import { runOnJS } from 'react-native-worklets'
 import {
   activeTabIndexAtom,
@@ -35,19 +36,40 @@ const prepareTabSwitch = (targetIndex: number) => {
   }
 }
 
+/**
+ * Clear the pending Bible tab switch signal.
+ * Must be called on every tab-switch completion path (expand, swipe, slide).
+ */
+const clearPendingSwitch = () => {
+  getDefaultStore().set(pendingBibleTabSwitchAtom, null)
+}
+
+/**
+ * Batched: prepare Bible tab preload + switch app mode in a single JS hop.
+ * Called from expandTab worklet via runOnJS to minimize bridge crossings.
+ */
+const prepareAndSwitchMode = (targetIndex: number) => {
+  prepareTabSwitch(targetIndex)
+  getDefaultStore().set(appSwitcherModeAtom, 'view')
+}
+
 export const useTabAnimations = () => {
   const setActiveTabIndex = useSetAtom(activeTabIndexAtom)
   const setAppSwitcherMode = useSetAtom(appSwitcherModeAtom)
   const { HEIGHT } = useTabConstants()
-  const takeActiveTabSnapshot = useTakeActiveTabSnapshot()
+  const { captureDeferredSnapshot: takeActiveTabSnapshot } = useTakeActiveTabSnapshot()
 
   const { activeTabPreview, activeTabScreen, tabPreviewCarousel } = useAppSwitcherContext()
 
-  const setTabId = (index: number) => {
+  /**
+   * Batched expand completion: set active tab index, resolve tabId, cleanup
+   * pending switch, and start fade-in — all in a single JS hop from the
+   * UI thread animation callback.
+   */
+  const onExpandComplete = (index: number) => {
+    setActiveTabIndex(index)
     resolveAndSetTabId(activeTabScreen.tabId, index)
-  }
-
-  const setActiveTabOpacity = () => {
+    clearPendingSwitch()
     fadeInTabScreen(
       activeTabScreen.opacity,
       activeTabPreview.index,
@@ -62,20 +84,45 @@ export const useTabAnimations = () => {
    * This prevents the grid from flashing through two semi-transparent layers.
    */
   const fadeInThenHideCarousel = () => {
-    setTimeout(() => {
-      activeTabScreen.opacity.set(
-        withTiming(1, undefined, () => {
-          // Tab screen fully visible — safe to hide carousel
-          tabPreviewCarousel.opacity.set(0)
-          tabPreviewCarousel.translateY.set(HEIGHT)
-          activeTabPreview.zIndex.set(3)
-          runOnJS(takeActiveTabSnapshot)(
-            activeTabPreview.index.get(),
-            activeTabScreen.tabId.get() || ''
-          )
-        })
-      )
-    }, 50)
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        activeTabScreen.opacity.set(
+          withTiming(1, undefined, () => {
+            // Tab screen fully visible — safe to hide carousel
+            tabPreviewCarousel.opacity.set(0)
+            tabPreviewCarousel.translateY.set(HEIGHT)
+            activeTabPreview.zIndex.set(3)
+            runOnJS(takeActiveTabSnapshotAndCleanup)(
+              activeTabPreview.index.get(),
+              activeTabScreen.tabId.get() || ''
+            )
+          })
+        )
+      })
+    })
+  }
+
+  /**
+   * Snapshot + cleanup pending switch for paths that go through runOnJS.
+   */
+  const takeActiveTabSnapshotAndCleanup = (index: number, tabId: string) => {
+    clearPendingSwitch()
+    takeActiveTabSnapshot(index, tabId)
+  }
+
+  /**
+   * Set tabId for the slide path (called via runOnJS from worklet).
+   */
+  const slideSetTabId = (index: number) => {
+    resolveAndSetTabId(activeTabScreen.tabId, index)
+  }
+
+  /**
+   * Snapshot + cleanup for the slide path (called via runOnJS from worklet).
+   */
+  const slideSnapshotAndCleanup = (index: number, tabId: string) => {
+    clearPendingSwitch()
+    takeActiveTabSnapshot(index, tabId)
   }
 
   /**
@@ -112,17 +159,16 @@ export const useTabAnimations = () => {
    *   - useExpandNewTab: after creating a new tab
    *
    * Sequence:
-   *   1. appSwitcherMode = 'view' -> bottom bar cross-fades
+   *   1. prepareAndSwitchMode (single JS hop): preload Bible + set mode
    *   2. Position the overlay at measured coordinates (left, top)
    *   3. Animate animationProgress 0 -> 1 (scale to full screen)
-   *   4. On completion: set Jotai activeTabIndex, resolve tabId, fade in TabScreen
+   *   4. On completion: onExpandComplete (single JS hop): set index, tabId, fade in
    *   5. Take a screenshot for the future preview thumbnail
    */
   const expandTab = ({ index, left, top }: { index: number; left: number; top: number }) => {
     'worklet'
 
-    runOnJS(prepareTabSwitch)(index)
-    runOnJS(setAppSwitcherMode)('view')
+    runOnJS(prepareAndSwitchMode)(index)
     activeTabPreview.zIndex.set(3)
     activeTabPreview.left.set(left)
     activeTabPreview.top.set(top)
@@ -130,9 +176,30 @@ export const useTabAnimations = () => {
 
     activeTabPreview.animationProgress.set(
       withTiming(1, tabTimingConfig, () => {
-        runOnJS(setActiveTabIndex)(index)
-        runOnJS(setTabId)(index)
-        runOnJS(setActiveTabOpacity)()
+        runOnJS(onExpandComplete)(index)
+      })
+    )
+  }
+
+  /**
+   * Expand variant that measures the tab preview on the UI thread via
+   * Reanimated's measure() worklet, eliminating the async JS-side measure.
+   * Falls back silently if measure returns null (recycled FlashList view).
+   */
+  const expandTabWithMeasure = (index: number, ref: AnimatedRef<View>) => {
+    'worklet'
+    const m = measure(ref)
+    if (!m) return
+
+    runOnJS(prepareAndSwitchMode)(index)
+    activeTabPreview.zIndex.set(3)
+    activeTabPreview.left.set(m.pageX)
+    activeTabPreview.top.set(m.pageY)
+    activeTabPreview.index.set(index)
+
+    activeTabPreview.animationProgress.set(
+      withTiming(1, tabTimingConfig, () => {
+        runOnJS(onExpandComplete)(index)
       })
     )
   }
@@ -155,7 +222,7 @@ export const useTabAnimations = () => {
     prepareTabSwitch(targetIndex)
     setActiveTabIndex(targetIndex)
     if (setTabIdImmediately) {
-      setTabId(targetIndex)
+      resolveAndSetTabId(activeTabScreen.tabId, targetIndex)
     }
 
     activeTabPreview.index.set(
@@ -169,7 +236,7 @@ export const useTabAnimations = () => {
           runOnJS(fadeInThenHideCarousel)()
         } else {
           // Slide path: tab screen is already opaque, just fade carousel out.
-          runOnJS(setTabId)(targetIndex)
+          runOnJS(slideSetTabId)(targetIndex)
           tabPreviewCarousel.opacity.set(
             withDelay(
               carouselFadeDelay,
@@ -180,7 +247,7 @@ export const useTabAnimations = () => {
                 }
                 tabPreviewCarousel.translateY.set(HEIGHT)
                 activeTabPreview.zIndex.set(3)
-                runOnJS(takeActiveTabSnapshot)(
+                runOnJS(slideSnapshotAndCleanup)(
                   activeTabPreview.index.get(),
                   activeTabScreen.tabId.get() || ''
                 )
@@ -213,9 +280,14 @@ export const useTabAnimations = () => {
 
       // Si on est en mode 'view' et il y a des tabs, on doit quand même afficher l'écran
       if (currentMode === 'view' && tabsCount > 0) {
-        runOnJS(setActiveTabIndex)(index)
-        runOnJS(setTabId)(index)
-        runOnJS(setActiveTabOpacity)()
+        setActiveTabIndex(index)
+        resolveAndSetTabId(activeTabScreen.tabId, index)
+        fadeInTabScreen(
+          activeTabScreen.opacity,
+          activeTabPreview.index,
+          activeTabScreen.tabId,
+          takeActiveTabSnapshot
+        )
       }
       return
     }
@@ -227,5 +299,5 @@ export const useTabAnimations = () => {
     completeTabSwitch(index, { duration: 400, carouselFadeDelay: 200 })
   }
 
-  return { minimizeTab, expandTab, slideToIndex, completeTabSwitch }
+  return { minimizeTab, expandTab, expandTabWithMeasure, slideToIndex, completeTabSwitch }
 }

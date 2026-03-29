@@ -18,7 +18,7 @@ export const resolveAndSetTabId = (tabIdSharedValue: SharedValue<string | null>,
 
 /**
  * Fades in the active tab screen and takes a snapshot once visible.
- * Runs with a 50ms delay to let the WebView mount first.
+ * Uses double-rAF (~33ms, frame-aligned) to let the WebView settle.
  */
 export const fadeInTabScreen = (
   opacitySV: SharedValue<number>,
@@ -26,13 +26,15 @@ export const fadeInTabScreen = (
   tabIdSV: SharedValue<string | null>,
   snapshotFn: (index: number, tabId: string) => void
 ) => {
-  setTimeout(() => {
-    opacitySV.set(
-      withTiming(1, undefined, () => {
-        runOnJS(snapshotFn)(indexSV.get(), tabIdSV.get() || '')
-      })
-    )
-  }, 50)
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      opacitySV.set(
+        withTiming(1, undefined, () => {
+          runOnJS(snapshotFn)(indexSV.get(), tabIdSV.get() || '')
+        })
+      )
+    })
+  })
 }
 
 /**

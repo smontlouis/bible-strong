@@ -4,11 +4,7 @@ import { View, StyleSheet } from 'react-native'
 import { Portal } from 'react-native-teleport'
 import { useSelector } from 'react-redux'
 
-import {
-  activeBibleTabIdAtom,
-  sharedBibleDOMPropsAtom,
-  getDefaultBibleTab,
-} from '~state/tabs'
+import { activeBibleTabIdAtom, sharedBibleDOMPropsAtom, getDefaultBibleTab } from '~state/tabs'
 import type { WebViewProps } from './BibleDOM/BibleDOMWrapper'
 import { BibleDOMWrapper } from './BibleDOM/BibleDOMWrapper'
 import type { RootState } from '~redux/modules/reducer'
@@ -36,9 +32,7 @@ const SharedBibleDOM = () => {
   const sharedProps = useAtomValue(sharedBibleDOMPropsAtom)
   const settings = useSelector((state: RootState) => state.user.bible.settings)
 
-  const destination = activeBibleTabId
-    ? getBibleDOMDestination(activeBibleTabId)
-    : undefined
+  const destination = activeBibleTabId ? getBibleDOMDestination(activeBibleTabId) : undefined
 
   // Default props to pre-warm the WebView (empty verses, no-op callbacks)
   const defaultProps: WebViewProps = {

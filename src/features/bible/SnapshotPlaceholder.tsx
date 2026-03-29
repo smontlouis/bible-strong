@@ -19,7 +19,7 @@ const SnapshotPlaceholder = ({ base64 }: SnapshotPlaceholderProps) => {
 
   return (
     <Image
-      source={{ uri: `data:image/png;base64,${base64}` }}
+      source={{ uri: `data:image/jpeg;base64,${base64}` }}
       style={{ flex: 1, backgroundColor: theme.colors.reverse }}
       resizeMode="cover"
     />

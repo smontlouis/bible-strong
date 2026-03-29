@@ -9,6 +9,7 @@ import {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated'
+import { runOnUI } from 'react-native-worklets'
 import {
   activeGroupIdAtom,
   cachedTabIdsAtom,
@@ -17,7 +18,6 @@ import {
   tabsCountAtom,
 } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
-import useMeasureTabPreview from '../utils/useMesureTabPreview'
 import { useTabAnimations } from '../utils/useTabAnimations'
 import useTabConstants from '../utils/useTabConstants'
 
@@ -31,11 +31,10 @@ const useTabPreview = ({
   groupId: string
 }) => {
   const { activeTabPreview, tabPreviews, scrollView, flashListRefs } = useAppSwitcherContext()
-  const { measureTabPreview } = useMeasureTabPreview()
   // Utiliser l'atom per-group au lieu de l'atom global
   const groupTabsAtomsAtom = useMemo(() => getGroupTabsAtomsAtom(groupId), [groupId])
   const dispatchTabs = useSetAtom(groupTabsAtomsAtom)
-  const { expandTab } = useTabAnimations()
+  const { expandTabWithMeasure } = useTabAnimations()
 
   // Determine if this group is active - isolated subscription per TabPreview
   const activeGroupId = useAtomValue(activeGroupIdAtom)
@@ -54,13 +53,8 @@ const useTabPreview = ({
   const { TAB_PREVIEW_WIDTH, TAB_PREVIEW_HEIGHT, TAB_BORDER_RADIUS, WIDTH, HEIGHT, GAP } =
     useTabConstants()
 
-  const onOpen = async () => {
-    const { pageX, pageY } = await measureTabPreview(index)
-    expandTab({
-      index,
-      left: pageX,
-      top: pageY,
-    })
+  const onOpen = () => {
+    runOnUI(expandTabWithMeasure)(index, ref)
   }
 
   const onDelete = () => {

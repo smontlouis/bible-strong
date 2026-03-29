@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/react-native'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Alert } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import { useRouter } from 'expo-router'
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
@@ -800,11 +800,17 @@ const BibleViewer = ({
     redWords: settings.redWordsDisplay ? redWords : null,
   } satisfies Parameters<typeof BibleDOMWrapper>[0]
 
-  // Push props to shared atom when this is the active Bible tab or pending switch target
+  // Push props to shared atom when this is the active Bible tab or pending switch target.
+  // Use shallow-compare to avoid redundant pushes during tab expansion animation
+  // (where BibleViewer re-renders but domProps haven't actually changed).
+  const prevDomPropsRef = useRef<typeof domProps | null>(null)
   useLayoutEffect(() => {
     if (!useSharedDOM) return
     if (isActiveBibleTab || pendingSwitch === bible.id) {
-      setSharedProps(domProps)
+      if (!shallowEqual(prevDomPropsRef.current, domProps)) {
+        prevDomPropsRef.current = domProps
+        setSharedProps(domProps)
+      }
     }
   })
 

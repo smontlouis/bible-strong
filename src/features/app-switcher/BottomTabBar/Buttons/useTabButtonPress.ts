@@ -23,7 +23,7 @@ const useTabButtonPress = () => {
   const tabs = useAtomValue(tabsAtom)
   const tabsCount = useAtomValue(tabsCountAtom)
   const activeGroup = useAtomValue(activeGroupAtom)
-  const takeActiveTabSnapshot = useTakeActiveTabSnapshot()
+  const { captureSnapshot } = useTakeActiveTabSnapshot()
 
   const { minimizeTab } = useTabAnimations()
 
@@ -32,7 +32,7 @@ const useTabButtonPress = () => {
   const onPress = async () => {
     // If there are tabs, take a snapshot before minimizing
     if (tabs.length > 0 && !tabs[activeTabIndex]?.base64Preview) {
-      await takeActiveTabSnapshot(activeTabIndex, activeAtomId)
+      await captureSnapshot(activeTabIndex, activeAtomId)
     }
     minimizeTab()
   }

@@ -98,7 +98,7 @@ const TabPreview = ({ index, tabAtom, groupId, ...props }: TabPreviewProps & Box
             {base64Preview && (
               <Image
                 style={styles.previewImage}
-                source={{ uri: `data:image/png;base64,${base64Preview}` }}
+                source={{ uri: `data:image/jpeg;base64,${base64Preview}` }}
               />
             )}
             <Box center width={80} height={80} borderRadius={40} backgroundColor="reverse">

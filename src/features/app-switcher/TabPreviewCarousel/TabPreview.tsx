@@ -56,7 +56,7 @@ const TabPreview = ({ tabAtom }: TabPreviewProps & BoxProps) => {
       {deferredBase64 && (
         <Image
           style={styles.previewImage}
-          source={{ uri: `data:image/png;base64,${deferredBase64}` }}
+          source={{ uri: `data:image/jpeg;base64,${deferredBase64}` }}
         />
       )}
       <Box center>
