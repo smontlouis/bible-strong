@@ -279,6 +279,12 @@ export const BibleDOMWrapper = ({
 
   const stableVerses = useStabilizedVerses(verses, isLoading)
 
+  // Gate verses delivery: don't send real data until the DOM component
+  // has mounted and its bridge message listener is active. This prevents
+  // the race condition where prop updates are lost during WebView init.
+  const [isDOMMounted, setIsDOMMounted] = useState(false)
+  const versesToSend = isDOMMounted ? stableVerses : []
+
   // Trim settings to only include active theme colors (reduces bridge serialization by ~3.8KB)
   const trimmedSettings = {
     ...settings,
@@ -520,6 +526,11 @@ export const BibleDOMWrapper = ({
         break
       }
 
+      case 'DOM_COMPONENT_MOUNTED': {
+        setIsDOMMounted(true)
+        break
+      }
+
       default: {
         break
       }
@@ -527,21 +538,21 @@ export const BibleDOMWrapper = ({
   }
 
   // Pre-compute verse metadata on native side (avoids DOM JS thread work)
-  const computedComments = transformComments(comments, stableVerses.length)
+  const computedComments = transformComments(comments, versesToSend.length)
   const taggedVerses = sortVersesToTags(highlightedVerses)
   const { versesWithAnnotationNotes, annotationNotesCountByVerse } = getAnnotationNotesInfo(
-    stableVerses,
+    versesToSend,
     wordAnnotations,
     version
   )
   const notedVersesCount = getNotedVersesCount(
-    stableVerses,
+    versesToSend,
     notedVerses,
     annotationNotesCountByVerse
   )
-  const notedVersesText = getNotedVersesText(stableVerses, notedVerses)
-  const linkedVersesCount = getLinkedVersesCount(stableVerses, linkedVerses)
-  const linkedVersesText = getLinkedVersesText(stableVerses, linkedVerses)
+  const notedVersesText = getNotedVersesText(versesToSend, notedVerses)
+  const linkedVersesCount = getLinkedVersesCount(versesToSend, linkedVerses)
+  const linkedVersesText = getLinkedVersesText(versesToSend, linkedVerses)
 
   return (
     <Box
@@ -563,7 +574,7 @@ export const BibleDOMWrapper = ({
           },
           injectedJavaScriptBeforeContentLoaded: `document.documentElement.style.backgroundColor='${theme.colors.reverse}';document.body.style.backgroundColor='${theme.colors.reverse}';document.body.style.margin='0';true;`,
         }}
-        verses={stableVerses}
+        verses={versesToSend}
         parallelVerses={parallelVerses}
         parallelColumnWidth={parallelColumnWidth}
         parallelDisplayMode={parallelDisplayMode}
