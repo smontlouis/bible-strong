@@ -162,17 +162,15 @@ const useLoadSound = ({
   // Create tracks for the current book
   const tracks = useMemo(() => getAllTracks(version, t), [version, t])
 
-  // Unmounting
-  // useEffect(() => {
-  //   return () => {
-  //     TrackPlayer.pause()
-  //     TrackPlayer.reset()
-  //     setAudioSleepTime(0)
-  //     setAudioSleepMinutes('off')
-
-  //     console.log('----- UNMOUNT')
-  //   }
-  // }, [setAudioSleepMinutes, setAudioSleepTime])
+  useEffect(() => {
+    return () => {
+      TrackPlayer.pause()
+      TrackPlayer.reset()
+      setPlayingBibleTabId('')
+      setAudioSleepTime(0)
+      setAudioSleepMinutes('off')
+    }
+  }, [setPlayingBibleTabId, setAudioSleepMinutes, setAudioSleepTime])
 
   // Audio init on version change
   useEffect(() => {

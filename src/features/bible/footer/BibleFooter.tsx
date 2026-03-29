@@ -87,6 +87,7 @@ const BibleFooter = ({
         disabled={disabled}
         version={version}
         onChangeMode={canSwitch ? setAudioMode : undefined}
+        bibleAtom={bibleAtom}
       />
     )
   }
