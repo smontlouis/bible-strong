@@ -6533,6 +6533,7 @@ __metadata:
     react-native-section-list-get-item-layout: "npm:^2.2.3"
     react-native-svg: "npm:15.15.1"
     react-native-tab-view: "npm:^2.14.0"
+    react-native-teleport: "npm:^1.1.0"
     react-native-track-player: "patch:react-native-track-player@https%3A//github.com/weights-ai/react-native-track-player.git%23commit=17a3ac866b642405a6a21dddbec38ddf3f217cd0#~/.yarn/patches/react-native-track-player-https-0ed4312346.patch"
     react-native-url-polyfill: "npm:^2.0.0"
     react-native-view-shot: "npm:~4.0.3"
@@ -14026,6 +14027,17 @@ __metadata:
     react-native-gesture-handler: "*"
     react-native-reanimated: "*"
   checksum: 10c0/113891e3918549c09294550d011502ee81a36ce2006407d5cfae2210a6897ae8191ee94700f0dffd0ea03fdb322b56628be9da1678bbb84f7811ad19869fe67e
+  languageName: node
+  linkType: hard
+
+"react-native-teleport@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "react-native-teleport@npm:1.1.0"
+  peerDependencies:
+    react: "*"
+    react-dom: "*"
+    react-native: "*"
+  checksum: 10c0/504209514a2b0baf104ee813c080616bfaaff5d5269ff83f267f02ba3b187b9eb92245e2d58fe940e40edf75becc73a5cbfe7b51f4c390c72c96955527ffdc57
   languageName: node
   linkType: hard
 

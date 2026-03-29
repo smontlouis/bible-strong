@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react-native'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { useRouter } from 'expo-router'
@@ -53,7 +53,13 @@ import {
   VersionCode,
   parallelColumnWidthAtom,
   parallelDisplayModeAtom,
+  activeBibleTabIdAtom,
+  sharedBibleDOMPropsAtom,
+  pendingBibleTabSwitchAtom,
 } from '../../state/tabs'
+import { PortalHost } from 'react-native-teleport'
+import { getBibleDOMDestination } from './SharedBibleDOM'
+import SnapshotPlaceholder from './SnapshotPlaceholder'
 import AnnotationNoteModal from './AnnotationNoteModal'
 import AnnotationToolbar from './AnnotationToolbar'
 import { BibleDOMWrapper, ParallelVerse } from './BibleDOM/BibleDOMWrapper'
@@ -210,6 +216,13 @@ const BibleViewer = ({
       selectedVerses,
     },
   } = bible
+
+  // Shared Bible DOM: detect if this tab is the active Bible tab
+  const activeBibleTabId = useAtomValue(activeBibleTabIdAtom)
+  const pendingSwitch = useAtomValue(pendingBibleTabSwitchAtom)
+  const setSharedProps = useSetAtom(sharedBibleDOMPropsAtom)
+  const isActiveBibleTab = !withNavigation && activeBibleTabId === bible.id
+  const useSharedDOM = !withNavigation
 
   // Displayed values - updated only when verses are loaded to keep annotations in sync
   const [displayedBook, setDisplayedBook] = useState(book.Numero)
@@ -717,6 +730,91 @@ const BibleViewer = ({
 
   // console.log('[Bible] BibleViewer', version, book.Numero, chapter, verse)
 
+  // Build the props object for BibleDOMWrapper (same props as before, just extracted)
+  const domProps = {
+    bibleAtom,
+    isBibleViewReloadingAtom,
+    book,
+    chapter,
+    isLoading,
+    addSelectedVerse: actions.addSelectedVerse,
+    removeSelectedVerse: actions.removeSelectedVerse,
+    setSelectedVerse: actions.setSelectedVerse,
+    version,
+    isReadOnly,
+    isSelectionMode,
+    verses,
+    parallelVerses,
+    parallelColumnWidth,
+    parallelDisplayMode,
+    focusVerses,
+    secondaryVerses,
+    selectedVerses,
+    highlightedVerses: highlightedVersesByChapter,
+    notedVerses: notesByChapter,
+    bookmarkedVerses,
+    linkedVerses: linksByChapter,
+    wordAnnotations: wordAnnotationsByChapter,
+    settings,
+    verseToScroll: verse,
+    pericopeChapter: getPericopeChapter(pericope, displayedBook, displayedChapter),
+    openNoteModal,
+    openLinkModal,
+    setSelectedCode,
+    selectedCode,
+    comments,
+    removeParallelVersion: actions.removeParallelVersion,
+    addParallelVersion: actions.addParallelVersion,
+    goToPrevChapter: actions.goToPrevChapter,
+    goToNextChapter: actions.goToNextChapter,
+    setUnifiedTagsModal,
+    onChangeResourceTypeSelectVerse,
+    onMountTimeout,
+    onOpenBookmarkModal: handleOpenBookmarkModal,
+    exitReadOnlyMode: actions.exitReadOnlyMode,
+    enterReadOnlyMode: actions.enterReadOnlyMode,
+    clearFocusVerses: actions.clearFocusVerses,
+    // Annotation mode props
+    annotationMode: annotationMode.enabled,
+    clearSelectionTrigger: annotationMode.clearSelectionTrigger,
+    applyAnnotationTrigger: annotationMode.applyAnnotationTrigger,
+    eraseSelectionTrigger: annotationMode.eraseSelectionTrigger,
+    onSelectionChanged: annotationMode.handleSelectionChanged,
+    onCreateAnnotation: annotationMode.handleCreateAnnotation,
+    onEraseSelection: annotationMode.handleEraseSelection,
+    onAnnotationSelected: annotationMode.handleAnnotationSelected,
+    clearAnnotationSelectionTrigger: annotationMode.clearAnnotationSelectionTrigger,
+    selectedAnnotationId: annotationMode.selectedAnnotation?.id ?? null,
+    // Cross-version annotations
+    wordAnnotationsInOtherVersions,
+    onOpenCrossVersionModal: handleOpenCrossVersionModal,
+    // Verse tags
+    taggedVersesInChapter,
+    versesWithNonHighlightTags,
+    onOpenVerseTagsModal: handleOpenVerseTagsModal,
+    // Verse notes modal
+    onOpenVerseNotesModal: handleOpenVerseNotesModal,
+    // Double-tap to enter annotation mode
+    onEnterAnnotationMode: handleEnterAnnotationModeFromDoubleTap,
+    // Red words
+    redWords: settings.redWordsDisplay ? redWords : null,
+  } satisfies Parameters<typeof BibleDOMWrapper>[0]
+
+  // Push props to shared atom when this is the active Bible tab or pending switch target
+  useLayoutEffect(() => {
+    if (!useSharedDOM) return
+    if (isActiveBibleTab || pendingSwitch === bible.id) {
+      setSharedProps(domProps)
+    }
+  })
+
+  // Exit annotation mode when this tab becomes inactive
+  useEffect(() => {
+    if (useSharedDOM && !isActiveBibleTab && annotationMode.enabled) {
+      handleExitAnnotationMode()
+    }
+  }, [isActiveBibleTab])
+
   // Wait for onboarding to complete before rendering Bible content
   // This prevents FileNotFoundException when Bible files don't exist yet
   if (!isOnboardingCompleted) {
@@ -738,75 +836,16 @@ const BibleViewer = ({
         annotationModeEnabled={annotationMode.enabled}
       />
       {error && <BibleErrorView error={error} t={t} />}
-      {!error && (
-        <BibleDOMWrapper
-          bibleAtom={bibleAtom}
-          isBibleViewReloadingAtom={isBibleViewReloadingAtom}
-          book={book}
-          chapter={chapter}
-          isLoading={isLoading}
-          addSelectedVerse={actions.addSelectedVerse}
-          removeSelectedVerse={actions.removeSelectedVerse}
-          setSelectedVerse={actions.setSelectedVerse}
-          version={version}
-          isReadOnly={isReadOnly}
-          isSelectionMode={isSelectionMode}
-          verses={verses}
-          parallelVerses={parallelVerses}
-          parallelColumnWidth={parallelColumnWidth}
-          parallelDisplayMode={parallelDisplayMode}
-          focusVerses={focusVerses}
-          secondaryVerses={secondaryVerses}
-          selectedVerses={selectedVerses}
-          highlightedVerses={highlightedVersesByChapter}
-          notedVerses={notesByChapter}
-          bookmarkedVerses={bookmarkedVerses}
-          linkedVerses={linksByChapter}
-          wordAnnotations={wordAnnotationsByChapter}
-          settings={settings}
-          verseToScroll={verse}
-          pericopeChapter={getPericopeChapter(pericope, displayedBook, displayedChapter)}
-          openNoteModal={openNoteModal}
-          openLinkModal={openLinkModal}
-          setSelectedCode={setSelectedCode}
-          selectedCode={selectedCode}
-          comments={comments}
-          removeParallelVersion={actions.removeParallelVersion}
-          addParallelVersion={actions.addParallelVersion}
-          goToPrevChapter={actions.goToPrevChapter}
-          goToNextChapter={actions.goToNextChapter}
-          setUnifiedTagsModal={setUnifiedTagsModal}
-          onChangeResourceTypeSelectVerse={onChangeResourceTypeSelectVerse}
-          onMountTimeout={onMountTimeout}
-          onOpenBookmarkModal={handleOpenBookmarkModal}
-          exitReadOnlyMode={actions.exitReadOnlyMode}
-          enterReadOnlyMode={actions.enterReadOnlyMode}
-          clearFocusVerses={actions.clearFocusVerses}
-          // Annotation mode props
-          annotationMode={annotationMode.enabled}
-          clearSelectionTrigger={annotationMode.clearSelectionTrigger}
-          applyAnnotationTrigger={annotationMode.applyAnnotationTrigger}
-          eraseSelectionTrigger={annotationMode.eraseSelectionTrigger}
-          onSelectionChanged={annotationMode.handleSelectionChanged}
-          onCreateAnnotation={annotationMode.handleCreateAnnotation}
-          onEraseSelection={annotationMode.handleEraseSelection}
-          onAnnotationSelected={annotationMode.handleAnnotationSelected}
-          clearAnnotationSelectionTrigger={annotationMode.clearAnnotationSelectionTrigger}
-          selectedAnnotationId={annotationMode.selectedAnnotation?.id ?? null}
-          // Cross-version annotations
-          wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
-          onOpenCrossVersionModal={handleOpenCrossVersionModal}
-          // Verse tags
-          taggedVersesInChapter={taggedVersesInChapter}
-          versesWithNonHighlightTags={versesWithNonHighlightTags}
-          onOpenVerseTagsModal={handleOpenVerseTagsModal}
-          // Verse notes modal
-          onOpenVerseNotesModal={handleOpenVerseNotesModal}
-          // Double-tap to enter annotation mode
-          onEnterAnnotationMode={handleEnterAnnotationModeFromDoubleTap}
-          // Red words
-          redWords={settings.redWordsDisplay ? redWords : null}
-        />
+      {!error && useSharedDOM ? (
+        // Tab mode: use shared DOM via Portal or show snapshot
+        isActiveBibleTab ? (
+          <PortalHost name={getBibleDOMDestination(bible.id)} style={{ flex: 1, zIndex: -1 }} />
+        ) : (
+          <SnapshotPlaceholder base64={bible.base64Preview} />
+        )
+      ) : (
+        // Stack navigation mode or error: render own BibleDOMWrapper inline
+        !error && <BibleDOMWrapper {...domProps} />
       )}
       {!(withNavigation || isReadOnly) && (
         <BibleFooter

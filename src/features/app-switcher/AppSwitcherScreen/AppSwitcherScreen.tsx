@@ -9,6 +9,8 @@ import BottomTabBar from '~features/app-switcher/BottomTabBar/BottomTabBar'
 import { Home } from '~features/home/HomeScreen'
 import { More } from '~features/settings/MoreScreen'
 import { tabsCountAtom } from '../../../state/tabs'
+import { PortalProvider } from 'react-native-teleport'
+import SharedBibleDOM from '~features/bible/SharedBibleDOM'
 import CachedTabScreens from '../CachedTabScreens'
 import { TabContextProvider } from '../context/TabContext'
 import TabPreviewCarousel from '../TabPreviewCarousel/TabPreviewCarousel'
@@ -26,14 +28,17 @@ const MAX_DRAWER_WIDTH = 450
 
 const AppSwitcherScreen = ({ openHome, openMenu }: AppSwitcherScreenFuncs) => {
   return (
-    <TabContextProvider>
-      <Box flex={1} bg="lightGrey">
-        <TabGroupPager />
-        <CachedTabScreens />
-        <TabPreviewCarousel />
-        <BottomTabBar openMenu={openMenu} openHome={openHome} />
-      </Box>
-    </TabContextProvider>
+    <PortalProvider>
+      <TabContextProvider>
+        <Box flex={1} bg="lightGrey">
+          <TabGroupPager />
+          <CachedTabScreens />
+          <SharedBibleDOM />
+          <TabPreviewCarousel />
+          <BottomTabBar openMenu={openMenu} openHome={openHome} />
+        </Box>
+      </TabContextProvider>
+    </PortalProvider>
   )
 }
 

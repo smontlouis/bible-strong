@@ -1063,3 +1063,38 @@ export const closeAllTabsAtom = atom(null, (get, set) => {
 
 export type AppSwitcherMode = 'list' | 'view'
 export const appSwitcherModeAtom = atom<AppSwitcherMode>('view')
+
+// ============================================================================
+// SHARED BIBLE DOM (single WebView instance for all Bible tabs)
+// ============================================================================
+
+import type { WebViewProps } from '~features/bible/BibleDOM/BibleDOMWrapper'
+
+/**
+ * Active Bible tab ID - returns the active tab's ID only if it's a Bible tab,
+ * null otherwise. Used by SharedBibleDOM to know where to teleport.
+ */
+export const activeBibleTabIdAtom = atom<string | null>(get => {
+  const activeId = get(activeTabIdAtom)
+  const tabsAtoms = get(tabsAtomsAtom)
+  const activeTabIndex = get(activeTabIndexAtom)
+
+  if (activeTabIndex < 0 || activeTabIndex >= tabsAtoms.length) {
+    return null
+  }
+
+  const activeTab = get(tabsAtoms[activeTabIndex])
+  return activeTab.type === 'bible' ? activeId : null
+})
+
+/**
+ * Props for the shared BibleDOMWrapper instance.
+ * Updated by the active BibleViewer via useLayoutEffect.
+ */
+export const sharedBibleDOMPropsAtom = atom<WebViewProps | null>(null)
+
+/**
+ * Signal for pre-rendering: set to the target tab ID before the switch animation
+ * completes so BibleViewer can push its props early during the animation window.
+ */
+export const pendingBibleTabSwitchAtom = atom<string | null>(null)

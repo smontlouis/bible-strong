@@ -2,7 +2,13 @@ import { useSetAtom } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
 import { Easing, withDelay, withTiming } from 'react-native-reanimated'
 import { runOnJS } from 'react-native-worklets'
-import { activeTabIndexAtom, appSwitcherModeAtom, tabsCountAtom } from '../../../state/tabs'
+import {
+  activeTabIndexAtom,
+  appSwitcherModeAtom,
+  tabsCountAtom,
+  tabsAtomsAtom,
+  pendingBibleTabSwitchAtom,
+} from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 
 const tabTimingConfig = {
@@ -12,6 +18,22 @@ const tabTimingConfig = {
 import { resolveAndSetTabId, fadeInTabScreen } from './tabHelpers'
 import useTabConstants from './useTabConstants'
 import useTakeActiveTabSnapshot from './useTakeActiveTabSnapshot'
+
+/**
+ * Signal the target Bible tab to push its props into sharedBibleDOMPropsAtom
+ * BEFORE the switch animation completes, so the DOM re-renders during the
+ * animation window (~500ms) and content is ready when the tab fades in.
+ */
+const prepareTabSwitch = (targetIndex: number) => {
+  const store = getDefaultStore()
+  const atoms = store.get(tabsAtomsAtom)
+  const safeIndex = Math.max(0, Math.min(targetIndex, atoms.length - 1))
+  if (safeIndex >= atoms.length) return
+  const targetTab = store.get(atoms[safeIndex])
+  if (targetTab.type === 'bible') {
+    store.set(pendingBibleTabSwitchAtom, targetTab.id)
+  }
+}
 
 export const useTabAnimations = () => {
   const setActiveTabIndex = useSetAtom(activeTabIndexAtom)
@@ -99,6 +121,7 @@ export const useTabAnimations = () => {
   const expandTab = ({ index, left, top }: { index: number; left: number; top: number }) => {
     'worklet'
 
+    runOnJS(prepareTabSwitch)(index)
     runOnJS(setAppSwitcherMode)('view')
     activeTabPreview.zIndex.set(3)
     activeTabPreview.left.set(left)
@@ -129,6 +152,7 @@ export const useTabAnimations = () => {
   ) => {
     const { setTabIdImmediately = false, duration = 400, carouselFadeDelay = 200 } = options || {}
 
+    prepareTabSwitch(targetIndex)
     setActiveTabIndex(targetIndex)
     if (setTabIdImmediately) {
       setTabId(targetIndex)
