@@ -1,5 +1,5 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai/react'
-import React, { memo, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import * as Sentry from '@sentry/react-native'
 
@@ -49,26 +49,24 @@ const events = [
   Event.PlaybackProgressUpdated,
 ]
 
-const getAllTracks = (version: string, t: (key: string) => string) => {
+const getBookTracks = (version: string, book: Book, t: (key: string) => string) => {
   try {
     // @ts-expect-error
     const bibleVersion = getVersions()[version] as Version
-    const tracks = books.flatMap(book =>
-      [...Array(book.Chapitres).keys()].map(i => ({
-        book,
-        chapter: i + 1,
-        url: bibleVersion?.getAudioUrl?.(book.Numero, i + 1) || '',
-        title: `${t(book.Nom)} ${i + 1} ${version}`,
-        artist: bibleVersion?.name,
-        artwork: require('~assets/images/icon.png'),
-      }))
-    )
+    const tracks = [...Array(book.Chapitres).keys()].map(i => ({
+      book,
+      chapter: i + 1,
+      url: bibleVersion?.getAudioUrl?.(book.Numero, i + 1) || '',
+      title: `${t(book.Nom)} ${i + 1} ${version}`,
+      artist: bibleVersion?.name,
+      artwork: require('~assets/images/icon.png'),
+    }))
     return tracks
   } catch (e) {
     Sentry.withScope(scope => {
       scope.setExtra('Version', `${version}`)
-      scope.setExtra('Versions', getVersions())
-      Sentry.captureException('getAllTracks error')
+      scope.setExtra('Book', `${book.Numero}`)
+      Sentry.captureException('getBookTracks error')
     })
     return []
   }
@@ -118,7 +116,7 @@ const useLoadSound = ({
     if (event.type === Event.PlaybackProgressUpdated && isCurrentTabPlaying) {
       const track = await TrackPlayer.getTrack(event.track)
 
-      if (track && (track?.book?.Numero !== book.Numero || track?.chapter !== chapter)) {
+      if (track && track?.chapter !== chapter) {
         hasAutoTrackChange.current = true
         goToChapter({
           book: track?.book,
@@ -159,8 +157,8 @@ const useLoadSound = ({
     goToPrevChapter()
   }
 
-  // Create tracks for the current book
-  const tracks = useMemo(() => getAllTracks(version, t), [version, t])
+  // Only generate tracks for the current book (not all 1189 chapters)
+  const tracks = getBookTracks(version, book, t)
 
   useEffect(() => {
     return () => {
@@ -172,7 +170,7 @@ const useLoadSound = ({
     }
   }, [setPlayingBibleTabId, setAudioSleepMinutes, setAudioSleepTime])
 
-  // Audio init on version change
+  // Audio init on version or book change
   useEffect(() => {
     ;(async () => {
       try {
@@ -181,7 +179,7 @@ const useLoadSound = ({
         console.log('[Bible] Silent catch:', e)
       }
 
-      // Reset player and add tracks
+      // Reset player and add tracks for current book
       try {
         await TrackPlayer.reset()
 
@@ -208,16 +206,14 @@ const useLoadSound = ({
         })
 
         await TrackPlayer.add(tracks)
-        const trackIndex = tracks.findIndex(
-          track => track.book.Numero === book.Numero && track.chapter === chapter
-        )
+        const trackIndex = tracks.findIndex(track => track.chapter === chapter)
         await TrackPlayer.skip(trackIndex)
       } catch (e) {
         console.log('[Bible] Silent catch:', e)
       }
       setIsSetup(true)
     })()
-  }, [version, tracks])
+  }, [version, book.Numero])
 
   // Skip to track on chapter change
   useEffect(() => {
@@ -230,9 +226,7 @@ const useLoadSound = ({
     }
 
     ;(async () => {
-      const trackIndex = tracks.findIndex(
-        track => track.book.Numero === book.Numero && track.chapter === chapter
-      )
+      const trackIndex = tracks.findIndex(track => track.chapter === chapter)
       try {
         await TrackPlayer.skip(trackIndex)
 
@@ -244,7 +238,7 @@ const useLoadSound = ({
         console.log('[Bible] Silent catch')
       }
     })()
-  }, [book.Numero, chapter, isSetup, tracks])
+  }, [book.Numero, chapter, isSetup, version])
 
   return {
     error,
@@ -378,4 +372,4 @@ const AudioUrlFooter = ({
   )
 }
 
-export default memo(AudioUrlFooter)
+export default AudioUrlFooter

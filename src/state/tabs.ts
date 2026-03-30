@@ -1093,8 +1093,3 @@ export const activeBibleTabIdAtom = atom<string | null>(get => {
  */
 export const sharedBibleDOMPropsAtom = atom<WebViewProps | null>(null)
 
-/**
- * Signal for pre-rendering: set to the target tab ID before the switch animation
- * completes so BibleViewer can push its props early during the animation window.
- */
-export const pendingBibleTabSwitchAtom = atom<string | null>(null)

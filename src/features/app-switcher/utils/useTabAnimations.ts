@@ -3,53 +3,21 @@ import { getDefaultStore } from 'jotai/vanilla'
 import { type AnimatedRef, Easing, measure, withDelay, withTiming } from 'react-native-reanimated'
 import { type View } from 'react-native'
 import { runOnJS } from 'react-native-worklets'
-import {
-  activeTabIndexAtom,
-  appSwitcherModeAtom,
-  tabsCountAtom,
-  tabsAtomsAtom,
-  pendingBibleTabSwitchAtom,
-} from '../../../state/tabs'
+import { activeTabIndexAtom, appSwitcherModeAtom, tabsCountAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
+import { resolveAndSetTabId, fadeInTabScreen } from './tabHelpers'
+import useTabConstants from './useTabConstants'
+import useTakeActiveTabSnapshot from './useTakeActiveTabSnapshot'
 
 const tabTimingConfig = {
   duration: 500,
   easing: Easing.bezier(0.36, 0.77, 0.44, 1.0),
 }
-import { resolveAndSetTabId, fadeInTabScreen } from './tabHelpers'
-import useTabConstants from './useTabConstants'
-import useTakeActiveTabSnapshot from './useTakeActiveTabSnapshot'
 
 /**
- * Signal the target Bible tab to push its props into sharedBibleDOMPropsAtom
- * BEFORE the switch animation completes, so the DOM re-renders during the
- * animation window (~500ms) and content is ready when the tab fades in.
+ * Switch app mode to 'view'. Called from expandTab worklet via runOnJS.
  */
-const prepareTabSwitch = (targetIndex: number) => {
-  const store = getDefaultStore()
-  const atoms = store.get(tabsAtomsAtom)
-  const safeIndex = Math.max(0, Math.min(targetIndex, atoms.length - 1))
-  if (safeIndex >= atoms.length) return
-  const targetTab = store.get(atoms[safeIndex])
-  if (targetTab.type === 'bible') {
-    store.set(pendingBibleTabSwitchAtom, targetTab.id)
-  }
-}
-
-/**
- * Clear the pending Bible tab switch signal.
- * Must be called on every tab-switch completion path (expand, swipe, slide).
- */
-const clearPendingSwitch = () => {
-  getDefaultStore().set(pendingBibleTabSwitchAtom, null)
-}
-
-/**
- * Batched: prepare Bible tab preload + switch app mode in a single JS hop.
- * Called from expandTab worklet via runOnJS to minimize bridge crossings.
- */
-const prepareAndSwitchMode = (targetIndex: number) => {
-  prepareTabSwitch(targetIndex)
+const switchToViewMode = () => {
   getDefaultStore().set(appSwitcherModeAtom, 'view')
 }
 
@@ -62,14 +30,13 @@ export const useTabAnimations = () => {
   const { activeTabPreview, activeTabScreen, tabPreviewCarousel } = useAppSwitcherContext()
 
   /**
-   * Batched expand completion: set active tab index, resolve tabId, cleanup
-   * pending switch, and start fade-in — all in a single JS hop from the
-   * UI thread animation callback.
+   * Batched expand completion: set active tab index, resolve tabId,
+   * and start fade-in — all in a single JS hop from the UI thread
+   * animation callback.
    */
   const onExpandComplete = (index: number) => {
     setActiveTabIndex(index)
     resolveAndSetTabId(activeTabScreen.tabId, index)
-    clearPendingSwitch()
     fadeInTabScreen(
       activeTabScreen.opacity,
       activeTabPreview.index,
@@ -92,7 +59,7 @@ export const useTabAnimations = () => {
             tabPreviewCarousel.opacity.set(0)
             tabPreviewCarousel.translateY.set(HEIGHT)
             activeTabPreview.zIndex.set(3)
-            runOnJS(takeActiveTabSnapshotAndCleanup)(
+            runOnJS(takeActiveTabSnapshot)(
               activeTabPreview.index.get(),
               activeTabScreen.tabId.get() || ''
             )
@@ -103,26 +70,10 @@ export const useTabAnimations = () => {
   }
 
   /**
-   * Snapshot + cleanup pending switch for paths that go through runOnJS.
-   */
-  const takeActiveTabSnapshotAndCleanup = (index: number, tabId: string) => {
-    clearPendingSwitch()
-    takeActiveTabSnapshot(index, tabId)
-  }
-
-  /**
    * Set tabId for the slide path (called via runOnJS from worklet).
    */
   const slideSetTabId = (index: number) => {
     resolveAndSetTabId(activeTabScreen.tabId, index)
-  }
-
-  /**
-   * Snapshot + cleanup for the slide path (called via runOnJS from worklet).
-   */
-  const slideSnapshotAndCleanup = (index: number, tabId: string) => {
-    clearPendingSwitch()
-    takeActiveTabSnapshot(index, tabId)
   }
 
   /**
@@ -159,7 +110,7 @@ export const useTabAnimations = () => {
    *   - useExpandNewTab: after creating a new tab
    *
    * Sequence:
-   *   1. prepareAndSwitchMode (single JS hop): preload Bible + set mode
+   *   1. switchToViewMode: set app mode to 'view'
    *   2. Position the overlay at measured coordinates (left, top)
    *   3. Animate animationProgress 0 -> 1 (scale to full screen)
    *   4. On completion: onExpandComplete (single JS hop): set index, tabId, fade in
@@ -168,7 +119,7 @@ export const useTabAnimations = () => {
   const expandTab = ({ index, left, top }: { index: number; left: number; top: number }) => {
     'worklet'
 
-    runOnJS(prepareAndSwitchMode)(index)
+    runOnJS(switchToViewMode)()
     activeTabPreview.zIndex.set(3)
     activeTabPreview.left.set(left)
     activeTabPreview.top.set(top)
@@ -191,7 +142,7 @@ export const useTabAnimations = () => {
     const m = measure(ref)
     if (!m) return
 
-    runOnJS(prepareAndSwitchMode)(index)
+    runOnJS(switchToViewMode)()
     activeTabPreview.zIndex.set(3)
     activeTabPreview.left.set(m.pageX)
     activeTabPreview.top.set(m.pageY)
@@ -219,7 +170,6 @@ export const useTabAnimations = () => {
   ) => {
     const { setTabIdImmediately = false, duration = 400, carouselFadeDelay = 200 } = options || {}
 
-    prepareTabSwitch(targetIndex)
     setActiveTabIndex(targetIndex)
     if (setTabIdImmediately) {
       resolveAndSetTabId(activeTabScreen.tabId, targetIndex)
@@ -247,7 +197,7 @@ export const useTabAnimations = () => {
                 }
                 tabPreviewCarousel.translateY.set(HEIGHT)
                 activeTabPreview.zIndex.set(3)
-                runOnJS(slideSnapshotAndCleanup)(
+                runOnJS(takeActiveTabSnapshot)(
                   activeTabPreview.index.get(),
                   activeTabScreen.tabId.get() || ''
                 )
