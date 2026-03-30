@@ -4,6 +4,7 @@ import { View, StyleSheet } from 'react-native'
 import { Portal } from 'react-native-teleport'
 import { useSelector } from 'react-redux'
 
+import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 import { activeBibleTabIdAtom, sharedBibleDOMPropsAtom, getDefaultBibleTab } from '~state/tabs'
 import type { WebViewProps } from './BibleDOM/BibleDOMWrapper'
 import { BibleDOMWrapper } from './BibleDOM/BibleDOMWrapper'
@@ -28,11 +29,18 @@ const noop = () => {}
  * props, it just updates content — no init cost.
  */
 const SharedBibleDOM = () => {
+  const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
   const activeBibleTabId = useAtomValue(activeBibleTabIdAtom)
   const sharedProps = useAtomValue(sharedBibleDOMPropsAtom)
   const settings = useSelector((state: RootState) => state.user.bible.settings)
 
   const destination = activeBibleTabId ? getBibleDOMDestination(activeBibleTabId) : undefined
+
+  // Don't render Portal content until onboarding is completed.
+  // This prevents a race condition where the Portal's WebView exists
+  // before any PortalHost is mounted, causing a NullPointerException
+  // in react-native-teleport when the host finally appears.
+  if (!isOnboardingCompleted) return null
 
   // Default props to pre-warm the WebView (empty verses, no-op callbacks)
   const defaultProps: WebViewProps = {
