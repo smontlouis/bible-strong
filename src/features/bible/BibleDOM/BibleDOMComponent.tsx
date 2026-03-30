@@ -1,6 +1,6 @@
 'use dom'
 
-import { setup, styled } from 'goober'
+import { setup, styled, keyframes } from 'goober'
 import { createGlobalStyles } from 'goober/global'
 import React, { useEffect, useState, useRef } from 'react'
 import { Verse as TVerse } from '~common/types'
@@ -142,6 +142,11 @@ const extractParallelVersionTitles = (parallelVerses: ParallelVerse[], currentVe
   ]
 }
 
+const fadeIn = keyframes`
+  from { opacity: 0; }
+  to { opacity: 1; }
+`
+
 const Container = styled('div')<RootStyles & { rtl: boolean; isParallelVerse: boolean }>(
   ({ settings: { alignContent, theme, colors }, rtl, isParallelVerse }) => ({
     position: 'relative', // For highlight layer positioning
@@ -154,6 +159,7 @@ const Container = styled('div')<RootStyles & { rtl: boolean; isParallelVerse: bo
     color: colors[theme].default,
     direction: rtl ? 'rtl' : 'ltr',
     paddingTop: `${HEADER_HEIGHT + 10}px`,
+    animation: `${fadeIn} 300ms ease-out`,
     ...(rtl ? { textAlign: 'right' } : {}),
   })
 )
