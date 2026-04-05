@@ -2,14 +2,10 @@ import * as Sentry from '@sentry/react-native'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
-import { useRouter } from 'expo-router'
-import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
-import Button from '~common/ui/Button'
-import { resetBiblesDb } from '~helpers/biblesDb'
-import { toast } from '~helpers/toast'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 import { BibleError } from '~helpers/bibleErrors'
+import BibleErrorView from './BibleErrorView'
 import getBiblePericope from '~helpers/getBiblePericope'
 import loadBibleChapter from '~helpers/loadBibleChapter'
 import { loadRedWords } from '~helpers/loadRedWords'
@@ -101,22 +97,6 @@ interface BibleViewerProps {
   onMountTimeout?: () => void
   isBibleViewReloadingAtom: PrimitiveAtom<boolean>
   withNavigation?: boolean
-}
-
-/**
- * Get localized error message based on error type
- */
-const getErrorMessage = (error: BibleError, t: (key: string) => string): string => {
-  switch (error.type) {
-    case 'BIBLE_NOT_FOUND':
-      return t('bible.error.versionNotFound')
-    case 'CHAPTER_NOT_FOUND':
-      return t('bible.error.chapterNotFound')
-    case 'DATABASE_CORRUPTED':
-      return t('bible.error.databaseCorrupted')
-    default:
-      return t('bible.error.unknown')
-  }
 }
 
 const BibleViewer = ({
@@ -849,7 +829,7 @@ const BibleViewer = ({
         )}
         {error && (
           <Box position="absolute" top={0} left={0} right={0} bottom={0} bg="reverse" zIndex={10}>
-            <BibleErrorView error={error} t={t} />
+            <BibleErrorView error={error} />
           </Box>
         )}
       </Box>
@@ -970,43 +950,6 @@ const BibleViewer = ({
         version={displayedVersion}
       />
       <VerseNotesModal ref={verseNotesModal.getRef()} verseKey={verseNotesModalKey} />
-    </Box>
-  )
-}
-
-const BibleErrorView = ({ error, t }: { error: BibleError; t: (key: string) => string }) => {
-  const router = useRouter()
-  const [isResetting, setIsResetting] = useState(false)
-  const showActions = error.type === 'DATABASE_CORRUPTED' || error.type === 'BIBLE_NOT_FOUND'
-
-  const handleReset = async () => {
-    setIsResetting(true)
-    try {
-      await resetBiblesDb()
-      toast.success(t('bible.error.databaseRecovered'))
-    } catch {
-      toast.error(t('bible.error.databaseOpenFailed'))
-    } finally {
-      setIsResetting(false)
-    }
-  }
-
-  return (
-    <Box flex={1} zIndex={-1}>
-      <Empty source={require('~assets/images/empty.json')} message={getErrorMessage(error, t)}>
-        {showActions && (
-          <Box mt={20} gap={10} alignItems="center">
-            <Button onPress={() => router.push('/downloads')}>
-              {t('bible.error.goToDownloads')}
-            </Button>
-            {error.type === 'DATABASE_CORRUPTED' && (
-              <Button secondary onPress={handleReset} isLoading={isResetting}>
-                {t('bible.error.resetDatabase')}
-              </Button>
-            )}
-          </Box>
-        )}
-      </Empty>
     </Box>
   )
 }

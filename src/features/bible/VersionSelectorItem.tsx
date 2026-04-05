@@ -23,7 +23,7 @@ import { deletePericopeFile } from '~helpers/pericopes'
 import useLanguage from '~helpers/useLanguage'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
-import { installedVersionsSignalAtom } from '~state/app'
+import { installedVersionsSignalAtom, bibleDataRefreshSignalAtom } from '~state/app'
 import { downloadManager } from '~helpers/downloadManager'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
@@ -226,6 +226,9 @@ const VersionSelectorItem = ({
     setVersionNeedsDownload(true)
 
     jotaiStore.set(installedVersionsSignalAtom, (c: number) => c + 1)
+    // Trigger BibleViewer instances to reload so any tab that was showing
+    // this version updates (e.g. shows the BIBLE_NOT_FOUND error view).
+    jotaiStore.set(bibleDataRefreshSignalAtom, (c: number) => c + 1)
   }
 
   const confirmDelete = () => {

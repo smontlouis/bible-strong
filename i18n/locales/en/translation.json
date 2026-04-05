@@ -893,7 +893,7 @@
   "forgotPassword.description": "Enter your email address and we'll send you a link to reset your password.",
   "forgotPassword.send": "Send reset link",
 
-  "bible.error.versionNotFound": "This Bible version is not downloaded. Go to download management to download it.",
+  "bible.error.versionNotFound": "This Bible version is not downloaded.",
   "bible.error.chapterNotFound": "This chapter does not exist in this Bible version.",
   "bible.error.databaseCorrupted": "The database appears to be corrupted. Go to download management to re-download it.",
   "bible.error.unknown": "An unexpected error occurred. Please try again.",
@@ -901,6 +901,9 @@
   "bible.error.parallelChapterNotFound": "Chapter unavailable",
   "bible.error.parallelLoadError": "Loading error",
   "bible.error.goToDownloads": "Go to downloads",
+  "bible.error.downloadVersion": "Download this version",
+  "bible.error.downloading": "Downloading...",
+  "bible.error.inserting": "Inserting...",
   "bible.error.resetDatabase": "Reset Bible database",
   "bible.error.databaseRecovered": "Bible database has been reset. You can re-download your versions.",
   "bible.error.databaseOpenFailed": "Failed to open Bible database. Please restart the app.",

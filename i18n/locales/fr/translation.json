@@ -897,7 +897,7 @@
   "forgotPassword.description": "Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
   "forgotPassword.send": "Envoyer le lien",
 
-  "bible.error.versionNotFound": "Cette version de la Bible n'est pas téléchargée. Rendez-vous dans la gestion des téléchargements pour la télécharger.",
+  "bible.error.versionNotFound": "Cette version de la Bible n'est pas téléchargée.",
   "bible.error.chapterNotFound": "Ce chapitre n'existe pas dans cette version de la Bible.",
   "bible.error.databaseCorrupted": "La base de données semble corrompue. Rendez-vous dans la gestion des téléchargements pour la retélécharger.",
   "bible.error.unknown": "Une erreur inattendue s'est produite. Veuillez réessayer.",
@@ -905,6 +905,9 @@
   "bible.error.parallelChapterNotFound": "Chapitre indisponible",
   "bible.error.parallelLoadError": "Erreur de chargement",
   "bible.error.goToDownloads": "Aller aux telechargements",
+  "bible.error.downloadVersion": "Télécharger cette version",
+  "bible.error.downloading": "Téléchargement...",
+  "bible.error.inserting": "Insertion...",
   "bible.error.resetDatabase": "Reinitialiser la base de donnees",
   "bible.error.databaseRecovered": "La base de donnees a ete reinitialisee. Vous pouvez retelecharger vos versions.",
   "bible.error.databaseOpenFailed": "Impossible d'ouvrir la base de donnees. Veuillez redemarrer l'application.",
