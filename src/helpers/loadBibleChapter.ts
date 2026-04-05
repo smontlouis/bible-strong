@@ -10,6 +10,7 @@ import {
 } from '~helpers/bibleErrors'
 import { Verse } from '~common/types'
 import { getChapterVerses } from '~helpers/biblesDb'
+import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 
 type InterlineaireVerse = {
   Texte: string
@@ -21,6 +22,22 @@ type InterlineaireVerse = {
 }
 
 type LoadBibleChapterResult = Verse[] | InterlineaireVerse[] | null
+
+/**
+ * Build a "no verses" error: either BIBLE_NOT_FOUND (version not installed)
+ * or CHAPTER_NOT_FOUND (version installed but chapter missing, e.g. invalid ref).
+ */
+const buildNoVersesError = async (version: string, bookNb: number, chapterNb: number) => {
+  try {
+    const needsDownload = await getIfVersionNeedsDownload(version)
+    if (needsDownload) {
+      return createBibleError('BIBLE_NOT_FOUND', version, bookNb, chapterNb)
+    }
+  } catch {
+    // Fall through to CHAPTER_NOT_FOUND
+  }
+  return createBibleError('CHAPTER_NOT_FOUND', version, bookNb, chapterNb)
+}
 
 /**
  * Load a Bible chapter with structured error handling
@@ -38,7 +55,7 @@ const loadBibleChapter = async (
     if (version === 'INT') {
       const res = await loadInterlineaireChapter(bookNb, chapterNb, 'fr')
       if (!res || (Array.isArray(res) && res.length === 0)) {
-        return errorResult(createBibleError('CHAPTER_NOT_FOUND', version, bookNb, chapterNb))
+        return errorResult(await buildNoVersesError(version, bookNb, chapterNb))
       }
       return successResult(res)
     }
@@ -46,7 +63,7 @@ const loadBibleChapter = async (
     if (version === 'INT_EN') {
       const res = await loadInterlineaireChapter(bookNb, chapterNb, 'en')
       if (!res || (Array.isArray(res) && res.length === 0)) {
-        return errorResult(createBibleError('CHAPTER_NOT_FOUND', version, bookNb, chapterNb))
+        return errorResult(await buildNoVersesError(version, bookNb, chapterNb))
       }
       return successResult(res)
     }
@@ -55,7 +72,7 @@ const loadBibleChapter = async (
       if (!strongDB.get()) await strongDB.init()
       const res = await loadStrongChapter(bookNb, chapterNb)
       if (!res || (Array.isArray(res) && res.length === 0)) {
-        return errorResult(createBibleError('CHAPTER_NOT_FOUND', version, bookNb, chapterNb))
+        return errorResult(await buildNoVersesError(version, bookNb, chapterNb))
       }
       return successResult(res)
     }
@@ -63,7 +80,7 @@ const loadBibleChapter = async (
     // Regular versions: query SQLite
     const verses = await getChapterVerses(version, bookNb, chapterNb)
     if (verses.length === 0) {
-      return errorResult(createBibleError('CHAPTER_NOT_FOUND', version, bookNb, chapterNb))
+      return errorResult(await buildNoVersesError(version, bookNb, chapterNb))
     }
     return successResult(verses)
   } catch (e) {

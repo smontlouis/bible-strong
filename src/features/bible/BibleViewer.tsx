@@ -833,18 +833,26 @@ const BibleViewer = ({
         onExitAnnotationMode={handleExitAnnotationMode}
         annotationModeEnabled={annotationMode.enabled}
       />
-      {error && <BibleErrorView error={error} t={t} />}
-      {!error && useSharedDOM ? (
-        // Tab mode: use shared DOM via Portal or show snapshot
-        isActiveBibleTab ? (
-          <PortalHost name={getBibleDOMDestination(bible.id)} style={{ flex: 1, zIndex: -1 }} />
+      <Box flex={1} zIndex={-1}>
+        {useSharedDOM ? (
+          // Tab mode: use shared DOM via Portal or show snapshot.
+          // Keep PortalHost always mounted (even during error) so the shared
+          // WebView does not get reparented/lost when the error clears.
+          isActiveBibleTab ? (
+            <PortalHost name={getBibleDOMDestination(bible.id)} style={{ flex: 1, zIndex: -1 }} />
+          ) : (
+            <SnapshotPlaceholder base64={bible.base64Preview} />
+          )
         ) : (
-          <SnapshotPlaceholder base64={bible.base64Preview} />
-        )
-      ) : (
-        // Stack navigation mode or error: render own BibleDOMWrapper inline
-        !error && <BibleDOMWrapper {...domProps} />
-      )}
+          // Stack navigation mode: render own BibleDOMWrapper inline
+          !error && <BibleDOMWrapper {...domProps} />
+        )}
+        {error && (
+          <Box position="absolute" top={0} left={0} right={0} bottom={0} bg="reverse" zIndex={10}>
+            <BibleErrorView error={error} t={t} />
+          </Box>
+        )}
+      </Box>
       {!(withNavigation || isReadOnly) && (
         <BibleFooter
           bibleAtom={bibleAtom}

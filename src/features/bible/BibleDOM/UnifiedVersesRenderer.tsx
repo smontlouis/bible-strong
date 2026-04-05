@@ -281,9 +281,7 @@ export function UnifiedVersesRenderer({
   const hasSelectedVerses = Object.keys(selectedVerses).length > 0
 
   // Pre-compute tagged verses lookup: O(m) once instead of O(n*m) per verse
-  const taggedVersesByLastVerse = new Map(
-    taggedVerses?.map(v => [v.lastVerse, v] as const) ?? []
-  )
+  const taggedVersesByLastVerse = new Map(taggedVerses?.map(v => [v.lastVerse, v] as const) ?? [])
 
   // Pre-compute which verses have word annotations: O(a*r) once instead of O(n*a*r)
   const versesWithWordAnnotationsByKey = new Set<string>()

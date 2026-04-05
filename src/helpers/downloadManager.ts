@@ -10,7 +10,7 @@ import {
   type DownloadItemState,
   type DownloadStatus,
 } from '~state/downloadQueue'
-import { installedVersionsSignalAtom } from '~state/app'
+import { installedVersionsSignalAtom, bibleDataRefreshSignalAtom } from '~state/app'
 import { downloadAndInsertBible } from '~helpers/downloadBibleToSqlite'
 import { dbManager } from '~helpers/sqlite'
 import { downloadRedWordsFile, versionHasRedWords } from '~helpers/redWords'
@@ -243,6 +243,12 @@ class DownloadManager {
       // Signal to VersionSelectorItem instances
       this.jotaiStore.set(installedVersionsSignalAtom, (c: number) => c + 1)
       this.jotaiStore.set(downloadCompletionSignalAtom, (c: number) => c + 1)
+
+      // Signal to BibleViewer instances to reload verses (a version they
+      // were trying to display may now be available).
+      if (item.type === 'bible' || item.type === 'bible-strong') {
+        this.jotaiStore.set(bibleDataRefreshSignalAtom, (c: number) => c + 1)
+      }
     } catch (e: any) {
       if (e.message === 'CANCELLED' || this.cancelledIds.has(item.id)) {
         this.cancelledIds.delete(item.id)

@@ -564,7 +564,7 @@ export const BibleDOMWrapper = ({
     >
       <BibleDOMComponent
         dom={{
-          // webviewDebuggingEnabled: true,
+          webviewDebuggingEnabled: __DEV__,
           containerStyle: {
             flex: 1,
             backgroundColor: theme.colors.reverse,
