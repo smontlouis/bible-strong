@@ -2,6 +2,7 @@ import produce from 'immer'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { atom, getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { atomWithDefault, splitAtom } from 'jotai/vanilla/utils'
+import { shallowEqual } from 'react-redux'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
 import generateUUID from '~helpers/generateUUID'
@@ -1090,6 +1091,17 @@ export const activeBibleTabIdAtom = atom<string | null>(get => {
 /**
  * Props for the shared BibleDOMWrapper instance.
  * Updated by the active BibleViewer via useLayoutEffect.
+ * Uses shallowEqual to skip redundant updates that would cause render loops.
  */
-export const sharedBibleDOMPropsAtom = atom<WebViewProps | null>(null)
+const _sharedBibleDOMPropsBase = atom<WebViewProps | null>(null)
+
+export const sharedBibleDOMPropsAtom = atom(
+  (get) => get(_sharedBibleDOMPropsBase),
+  (get, set, newProps: WebViewProps | null) => {
+    const current = get(_sharedBibleDOMPropsBase)
+    if (!shallowEqual(current, newProps)) {
+      set(_sharedBibleDOMPropsBase, newProps)
+    }
+  }
+)
 
