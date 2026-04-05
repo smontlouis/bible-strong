@@ -1,22 +1,24 @@
-import * as React from 'react'
-
 const map = new Map<string, any>()
 
 const setRef =
   <T>(key: string) =>
-  (ref: T) => {
+  (ref: T | null) => {
     if (!key) throw new Error(`useDynamicRefs: Cannot set ref without key `)
+    if (ref === null) {
+      map.delete(key)
+      return
+    }
     map.set(key, ref)
   }
 
-function getRef<T>(key: string): React.RefObject<T> | undefined {
+function getRef<T>(key: string): T | undefined {
   if (!key) throw new Error(`useDynamicRefs: Cannot get ref without key`)
-  return { current: map.get(key) } as React.RefObject<T>
+  return map.get(key) as T | undefined
 }
 
 function useDynamicRefs<T>(): [
-  (key: string) => React.RefObject<T> | undefined,
-  (key: string) => (ref: T) => void,
+  (key: string) => T | undefined,
+  (key: string) => (ref: T | null) => void,
 ] {
   return [getRef, setRef]
 }

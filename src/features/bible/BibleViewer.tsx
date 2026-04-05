@@ -793,6 +793,36 @@ const BibleViewer = ({
     }
   }, [isActiveBibleTab])
 
+  // Track PortalHost lifecycle for Sentry (context for native Android crashes)
+  useEffect(() => {
+    if (!useSharedDOM) return
+    Sentry.addBreadcrumb({
+      category: 'bible-host',
+      message: 'PortalHost mount',
+      data: { tabId: bible.id },
+      level: 'info',
+    })
+    return () => {
+      Sentry.addBreadcrumb({
+        category: 'bible-host',
+        message: 'PortalHost unmount',
+        data: { tabId: bible.id },
+        level: 'info',
+      })
+    }
+  }, [useSharedDOM, bible.id])
+
+  // Track tab activation changes for Sentry
+  useEffect(() => {
+    if (!useSharedDOM) return
+    Sentry.addBreadcrumb({
+      category: 'bible-host',
+      message: `Tab ${isActiveBibleTab ? 'activated' : 'deactivated'}`,
+      data: { tabId: bible.id },
+      level: 'info',
+    })
+  }, [useSharedDOM, isActiveBibleTab, bible.id])
+
   // Wait for onboarding to complete before rendering Bible content
   // This prevents FileNotFoundException when Bible files don't exist yet
   if (!isOnboardingCompleted) {
@@ -815,14 +845,16 @@ const BibleViewer = ({
       />
       <Box flex={1} zIndex={-1}>
         {useSharedDOM ? (
-          // Tab mode: use shared DOM via Portal or show snapshot.
-          // Keep PortalHost always mounted (even during error) so the shared
-          // WebView does not get reparented/lost when the error clears.
-          isActiveBibleTab ? (
+          // Keep every host mounted so Android only retargets between
+          // stable native parents instead of unmounting/remounting hosts.
+          <Box flex={1}>
             <PortalHost name={getBibleDOMDestination(bible.id)} style={{ flex: 1, zIndex: -1 }} />
-          ) : (
-            <SnapshotPlaceholder base64={bible.base64Preview} />
-          )
+            {!isActiveBibleTab && (
+              <Box position="absolute" top={0} left={0} right={0} bottom={0}>
+                <SnapshotPlaceholder base64={bible.base64Preview} />
+              </Box>
+            )}
+          </Box>
         ) : (
           // Stack navigation mode: render own BibleDOMWrapper inline
           !error && <BibleDOMWrapper {...domProps} />

@@ -1,5 +1,5 @@
-import { InteractionManager } from 'react-native'
-import produce from 'immer'
+import { InteractionManager, type View } from 'react-native'
+import produceDraft from 'immer'
 import { useSetAtom } from 'jotai/react'
 import { captureRef } from 'react-native-view-shot'
 import useDynamicRefs from '~helpers/useDynamicRefs'
@@ -7,7 +7,7 @@ import { tabsAtom } from '../../../state/tabs'
 
 const useTakeActiveTabSnapshot = () => {
   const setTabs = useSetAtom(tabsAtom)
-  const [getRef] = useDynamicRefs()
+  const [getRef] = useDynamicRefs<View>()
 
   const captureSnapshot = async (activeTabIndex: number, activeAtomId: string) => {
     if (typeof activeTabIndex === 'undefined') {
@@ -20,18 +20,22 @@ const useTakeActiveTabSnapshot = () => {
       return
     }
 
-    const cachedTabScreenRef = getRef(activeAtomId)
+    const cachedTabScreen = getRef(activeAtomId)
 
-    if (!cachedTabScreenRef) {
+    if (!cachedTabScreen) {
       console.log('[useTakeActiveTabSnapshot] No active tab')
       return
     }
 
-    const data = await captureRef(cachedTabScreenRef, {
+    const data = await captureRef(cachedTabScreen, {
       result: 'base64',
       format: 'jpg',
       quality: 0.8,
     }).catch(error => console.error('Oops, snapshot failed', error))
+
+    if (!data) {
+      return
+    }
 
     // @ts-ignore
     const resolution = /^(\d+):(\d+)\|/g.exec(data)
@@ -39,7 +43,7 @@ const useTakeActiveTabSnapshot = () => {
     const base64 = data.substr((resolution || [''])[0].length || 0)
 
     setTabs(
-      produce(draft => {
+      produceDraft(draft => {
         if (draft[activeTabIndex]) {
           draft[activeTabIndex].base64Preview = base64
         }

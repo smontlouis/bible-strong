@@ -267,6 +267,7 @@ export const BibleDOMWrapper = ({
   onEnterAnnotationMode,
   redWords,
   isLoading,
+  onMountTimeout,
 }: WebViewProps) => {
   const { openVersionSelector } = useBookAndVersionSelector()
   const [isINTComplete, setIsINTComplete] = useAtom(isINTCompleteAtom)
@@ -284,6 +285,22 @@ export const BibleDOMWrapper = ({
   // the race condition where prop updates are lost during WebView init.
   const [isDOMMounted, setIsDOMMounted] = useState(false)
   const versesToSend = isDOMMounted ? stableVerses : []
+
+  // Watchdog: if the DOM component never signals DOM_COMPONENT_MOUNTED,
+  // the WebView is stuck (white screen). Fire onMountTimeout so the parent
+  // can force a remount.
+  useEffect(() => {
+    if (isDOMMounted) return
+    const MOUNT_TIMEOUT_MS = 5000
+    const timer = setTimeout(() => {
+      Sentry.captureMessage('BibleDOM mount timeout (no DOM_COMPONENT_MOUNTED)', {
+        level: 'warning',
+        tags: { component: 'BibleDOMWrapper' },
+      })
+      onMountTimeout?.()
+    }, MOUNT_TIMEOUT_MS)
+    return () => clearTimeout(timer)
+  }, [isDOMMounted, onMountTimeout])
 
   // Trim settings to only include active theme colors (reduces bridge serialization by ~3.8KB)
   const trimmedSettings = {
