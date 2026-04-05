@@ -41,6 +41,42 @@ export interface SearchOptions {
 
 let db: SQLite.SQLiteDatabase | null = null
 let openPromise: Promise<SQLite.SQLiteDatabase> | null = null
+let inFlightCount = 0
+let dbLockedForReset = false
+
+const POLL_MS = 20
+
+async function waitForResetLock(): Promise<void> {
+  while (dbLockedForReset) {
+    await new Promise(r => setTimeout(r, POLL_MS))
+  }
+}
+
+async function waitForInFlight(): Promise<void> {
+  while (inFlightCount > 0) {
+    await new Promise(r => setTimeout(r, POLL_MS))
+  }
+}
+
+/** Close the DB handle WITHOUT managing the reset lock — callers must hold it. */
+async function closeUnsafe(): Promise<void> {
+  // If an open is still in flight, wait for it to resolve so we close the
+  // instance it produced rather than orphaning it. Otherwise a concurrent
+  // reset could delete the files while a stale open is completing, leaving
+  // a zombie handle pointing at deleted files.
+  if (openPromise) {
+    try {
+      await openPromise
+    } catch {
+      // Open failed — singleton is already cleared in openBiblesDb's catch.
+    }
+  }
+  if (db) {
+    await db.closeAsync()
+    db = null
+    openPromise = null
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Lifecycle
@@ -112,11 +148,17 @@ export async function openBiblesDb(): Promise<SQLite.SQLiteDatabase> {
 }
 
 export async function closeBiblesDb(): Promise<void> {
-  if (db) {
-    await db.closeAsync()
-    db = null
-    openPromise = null
+  // Gate new queries while we're shutting down, then wait for in-flight
+  // operations to drain before releasing the handle. No timeout: cutting
+  // off a long write (e.g. insertBibleVersion exclusive transaction) would
+  // corrupt the import and defeat the purpose of this guard.
+  dbLockedForReset = true
+  try {
+    await waitForInFlight()
+    await closeUnsafe()
     console.log('[BiblesDB] Database closed')
+  } finally {
+    dbLockedForReset = false
   }
 }
 
@@ -138,9 +180,14 @@ export async function checkBiblesDbHealth(): Promise<DbHealthStatus> {
   if (!fileInfo.exists) return 'missing'
 
   try {
-    const d = await getDb()
-    const row = await d.getFirstAsync<{ quick_check: string }>('PRAGMA quick_check')
-    return row?.quick_check === 'ok' ? 'ok' : 'corrupted'
+    // Route through withDbError so the quick_check query participates in
+    // the reset lock / in-flight tracking like every other SQL operation.
+    const quickCheck = await withDbError('checkBiblesDbHealth', async () => {
+      const d = await getDb()
+      const row = await d.getFirstAsync<{ quick_check: string }>('PRAGMA quick_check')
+      return row?.quick_check
+    })
+    return quickCheck === 'ok' ? 'ok' : 'corrupted'
   } catch {
     return 'corrupted'
   }
@@ -151,21 +198,29 @@ export async function checkBiblesDbHealth(): Promise<DbHealthStatus> {
  * After this call all versions will appear as "not installed".
  */
 export async function resetBiblesDb(): Promise<void> {
-  await closeBiblesDb()
+  // Hold the reset lock across the entire close → delete → reopen sequence
+  // so no other query can grab the (soon-to-be-deleted) handle in between.
+  dbLockedForReset = true
+  try {
+    await waitForInFlight()
+    await closeUnsafe()
 
-  const dir = getSharedSqliteDirPath()
-  const basePath = `${dir}/${databaseBiblesName}`
+    const dir = getSharedSqliteDirPath()
+    const basePath = `${dir}/${databaseBiblesName}`
 
-  for (const suffix of ['', '-wal', '-shm']) {
-    const path = `${basePath}${suffix}`
-    const info = await FileSystem.getInfoAsync(path)
-    if (info.exists) {
-      await FileSystem.deleteAsync(path, { idempotent: true })
+    for (const suffix of ['', '-wal', '-shm']) {
+      const path = `${basePath}${suffix}`
+      const info = await FileSystem.getInfoAsync(path)
+      if (info.exists) {
+        await FileSystem.deleteAsync(path, { idempotent: true })
+      }
     }
-  }
 
-  console.log('[BiblesDB] Database files deleted, re-opening fresh')
-  await openBiblesDb()
+    console.log('[BiblesDB] Database files deleted, re-opening fresh')
+    await openBiblesDb()
+  } finally {
+    dbLockedForReset = false
+  }
 }
 
 /**
@@ -182,18 +237,64 @@ async function getDb(): Promise<SQLite.SQLiteDatabase> {
 // Error wrapper — logs + reports to Sentry, then re-throws
 // ---------------------------------------------------------------------------
 
-async function withDbError<T>(operation: string, fn: () => Promise<T>): Promise<T> {
-  try {
-    return await fn()
-  } catch (e) {
-    console.error(`[BiblesDB] ${operation} failed:`, e)
-    Sentry.withScope(scope => {
-      scope.setTag('db.name', 'bibles')
-      scope.setExtra('operation', operation)
-      Sentry.captureException(e)
-    })
-    throw e
+/**
+ * Detect errors thrown when an SQLite handle was released mid-operation
+ * (typically due to a concurrent close/reset).
+ *
+ * Matches only the specific "already released" wording — the Expo bridge
+ * prefixes every native rejection with "Call to function 'NativeDatabase.*'
+ * has been rejected" (see expo#28176), so matching NativeDatabase/
+ * NativeStatement would also retry on unrelated SQLite errors like
+ * "no such table" and mask real bugs.
+ */
+function isReleasedHandleError(e: unknown): boolean {
+  const msg = e instanceof Error ? e.message : String(e)
+  if (msg.includes('already released')) return true
+  const cause = (e as { cause?: unknown })?.cause
+  if (cause) {
+    const causeMsg = cause instanceof Error ? cause.message : String(cause)
+    if (causeMsg.includes('already released')) return true
   }
+  return false
+}
+
+async function withDbError<T>(operation: string, fn: () => Promise<T>): Promise<T> {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    // Acquire a slot: wait for the reset lock to clear, increment the
+    // counter, then re-check the lock. This TOCTOU re-check prevents a
+    // race where a reset sets the lock between our wait and our increment
+    // and then closes the handle while our fn() is running.
+    while (true) {
+      await waitForResetLock()
+      inFlightCount++
+      if (!dbLockedForReset) break
+      inFlightCount--
+    }
+
+    try {
+      return await fn()
+    } catch (e) {
+      if (attempt === 0 && isReleasedHandleError(e)) {
+        // DB handle was released concurrently — drop the singleton so the
+        // next getDb() reopens a fresh connection, then retry once.
+        db = null
+        openPromise = null
+        continue
+      }
+      console.error(`[BiblesDB] ${operation} failed:`, e)
+      Sentry.withScope(scope => {
+        scope.setTag('db.name', 'bibles')
+        scope.setExtra('operation', operation)
+        scope.setExtra('retried', attempt > 0)
+        Sentry.captureException(e)
+      })
+      throw e
+    } finally {
+      inFlightCount--
+    }
+  }
+  // Unreachable: loop either returns or throws on each iteration.
+  throw new Error('[BiblesDB] withDbError: unreachable')
 }
 
 // ---------------------------------------------------------------------------

@@ -46,7 +46,6 @@ import {
 } from '~helpers/storage'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { useRemoteConfig } from '~helpers/useRemoteConfig'
-import { useUpdates } from '~helpers/useUpdates'
 import { RootState } from '~redux/modules/reducer'
 import { persistor, store } from '~redux/store'
 import getTheme, { Theme, baseTheme } from '~themes/index'
@@ -217,7 +216,6 @@ function InnerApp() {
       TrackPlayer.registerPlaybackService(() => PlaybackService)
     })
   }, [])
-  useUpdates()
   useNavigationTracking()
   // useAtomsDevtools('jotai')
 

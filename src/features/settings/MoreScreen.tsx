@@ -1,8 +1,9 @@
 import styled from '@emotion/native'
 import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
-import React, { memo, useRef } from 'react'
+import * as Updates from 'expo-updates'
+import React, { memo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, Platform } from 'react-native'
+import { ActivityIndicator, Alert, Platform } from 'react-native'
 import { useSelector } from 'react-redux'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import DictionnaryIcon from '~common/DictionnaryIcon'
@@ -20,6 +21,8 @@ import SectionCard, { SectionCardHeader } from '~common/ui/SectionCard'
 import Text from '~common/ui/Text'
 import UserAvatar from '~common/ui/UserAvatar'
 import extractFirstName from '~helpers/extractFirstName'
+import { nukeApp } from '~helpers/nukeApp'
+import { toast } from '~helpers/toast'
 import useLanguage from '~helpers/useLanguage'
 import useLogin from '~helpers/useLogin'
 import DeleteAccountModal from '~features/profile/components/DeleteAccountModal'
@@ -78,6 +81,7 @@ export const More = ({ closeMenu }: MoreProps) => {
   const { isLogged, user, logout } = useLogin()
   const theme = useTheme()
   const deleteAccountModalRef = useRef<BottomSheetModal>(null)
+  const [isCheckingUpdate, setIsCheckingUpdate] = useState(false)
 
   const lang = useLanguage()
   const hasUpdate = useSelector((state: RootState) =>
@@ -94,7 +98,39 @@ export const More = ({ closeMenu }: MoreProps) => {
     ])
   }
 
+  const checkForUpdate = async () => {
+    if (isCheckingUpdate) return
+    setIsCheckingUpdate(true)
+    try {
+      const result = await Updates.checkForUpdateAsync()
+      if (result.isAvailable) {
+        toast.info(t('app.updateAvailable'))
+        await Updates.fetchUpdateAsync()
+        toast.success(t('app.updateReady'))
+        await Updates.reloadAsync()
+      } else {
+        toast.info(t('app.noUpdateAvailable'))
+      }
+    } catch (error) {
+      console.log(error)
+      toast.error(t('app.updateError'))
+    } finally {
+      setIsCheckingUpdate(false)
+    }
+  }
+
   const appleIsReviewing = getValue(getRemoteConfig(), 'apple_reviewing').asBoolean()
+
+  const promptNuke = () => {
+    Alert.alert(
+      '☢️ Nuke app',
+      'Reset TOTAL : MMKV, Firebase auth, databases, fichiers… puis reload. Continuer ?',
+      [
+        { text: 'Annuler', onPress: () => null, style: 'cancel' },
+        { text: 'Nuke', onPress: () => nukeApp(), style: 'destructive' },
+      ]
+    )
+  }
 
   return (
     <SafeAreaBox borderLeftWidth={1} borderColor="border" bg="lightGrey">
@@ -229,7 +265,7 @@ export const More = ({ closeMenu }: MoreProps) => {
             </Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
-          <CardLinkItem route="Downloads" isLast>
+          <CardLinkItem route="Downloads">
             <IconCircle bg="rgba(107, 114, 128, 0.1)">
               <Box>
                 {hasUpdate && <PulsingDot style={{ position: 'absolute', top: 0, right: 8 }} />}
@@ -240,6 +276,18 @@ export const More = ({ closeMenu }: MoreProps) => {
               {t('Gestion des téléchargements')}
             </Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
+          </CardLinkItem>
+          <CardLinkItem onPress={checkForUpdate} isLast>
+            <IconCircle bg="rgba(107, 114, 128, 0.1)">
+              {isCheckingUpdate ? (
+                <ActivityIndicator size="small" color={theme.colors.grey} />
+              ) : (
+                <FeatherIcon name="refresh-cw" size={20} color="grey" />
+              )}
+            </IconCircle>
+            <Text flex fontSize={15}>
+              {t('app.checkForUpdates')}
+            </Text>
           </CardLinkItem>
         </SectionCard>
 
@@ -379,6 +427,25 @@ export const More = ({ closeMenu }: MoreProps) => {
             </LinkItem>
           )}
         </Box>
+
+        {__DEV__ && (
+          <SectionCard>
+            <SectionCardHeader>
+              <FeatherIcon name="alert-triangle" size={16} color="quart" />
+              <Text ml={8} fontSize={12} color="quart" bold style={{ textTransform: 'uppercase' }}>
+                Dev
+              </Text>
+            </SectionCardHeader>
+            <CardLinkItem onPress={promptNuke} isLast>
+              <IconCircle bg="rgba(239, 68, 68, 0.1)">
+                <FeatherIcon name="trash-2" size={20} color="quart" />
+              </IconCircle>
+              <Text color="quart" fontSize={15}>
+                Nuke app (reset total)
+              </Text>
+            </CardLinkItem>
+          </SectionCard>
+        )}
 
         <Infos />
       </ScrollView>
