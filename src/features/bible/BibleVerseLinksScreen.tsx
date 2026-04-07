@@ -17,7 +17,6 @@ import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { unifiedTagsModalAtom } from '~state/app'
 import verseToReference from '~helpers/verseToReference'
 import { Tag, VerseIds } from '~common/types'
-import { RootState } from '~redux/modules/reducer'
 import { Link } from '~redux/modules/user'
 import { selectLinks } from '~redux/selectors/bible'
 
@@ -93,6 +92,7 @@ const BibleVerseLinks = () => {
 
   useEffect(() => {
     loadPage()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [verse, _links])
 
   const openLinkModal = (linkId: string) => {

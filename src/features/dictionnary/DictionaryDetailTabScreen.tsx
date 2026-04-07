@@ -15,7 +15,7 @@ import Text from '~common/ui/Text'
 import useHTMLView from '~helpers/useHTMLView'
 
 import { useRouter } from 'expo-router'
-import produce from 'immer'
+import { produce } from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
@@ -48,7 +48,6 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
   const { isInTab } = useTabContext()
 
   const {
-    hasBackButton,
     data: { word },
   } = dictionaryTab
 
@@ -87,6 +86,7 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
     if (word) {
       setTitle(word)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [word])
 
   useEffect(() => {
@@ -100,6 +100,7 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
         date: Date.now(),
       })
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [word])
 
   const openLink = ({ href, content, type }: any) => {
@@ -120,7 +121,7 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
             verse: String(parseInt(verse, 10)),
           },
         })
-      } catch (e) {
+      } catch {
         toast.error('Impossible de charger ce mot.')
       }
     } else {

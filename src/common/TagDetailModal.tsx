@@ -1,9 +1,4 @@
-import {
-  BottomSheetHandle,
-  BottomSheetModal,
-  BottomSheetSectionList,
-  BottomSheetView,
-} from '@gorhom/bottom-sheet'
+import { BottomSheetHandle, BottomSheetModal, BottomSheetSectionList } from '@gorhom/bottom-sheet'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import React, { useEffect, useRef, useState } from 'react'
 import { Alert } from 'react-native'
@@ -18,7 +13,6 @@ import RenameModal from '~common/RenameModal'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
-import SectionList from '~common/ui/SectionList'
 import Text from '~common/ui/Text'
 import AnnotationItem from '~features/settings/AnnotationItem'
 import TagDictionaryItem from '~features/settings/TagDictionaryItem'
@@ -142,8 +136,8 @@ const TagDetailContent = ({ tagId }: { tagId: string }) => {
   return (
     <BottomSheetSectionList
       sections={sections}
-      keyExtractor={(item, index) => `${item.type}-${index}`}
-      renderSectionHeader={({ section }) => {
+      keyExtractor={(item: TagSectionItem, index: number) => `${item.type}-${index}`}
+      renderSectionHeader={({ section }: { section: any }) => {
         const tagSection = section as TagSection
         return (
           <TagSectionHeader

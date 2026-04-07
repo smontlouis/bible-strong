@@ -4,9 +4,9 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { TAB_ICON_SIZE } from '../../utils/constants'
 import useSearchButtonPress from './useSearchButton'
 
-export interface SearchButtonProps {}
+export type SearchButtonProps = Record<string, never>
 
-const SearchButton = ({}: SearchButtonProps) => {
+const SearchButton = (_props: SearchButtonProps) => {
   const { onPress } = useSearchButtonPress()
 
   return (

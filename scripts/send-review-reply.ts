@@ -11,8 +11,7 @@ import * as path from 'path'
 
 const PACKAGE_NAME = process.env.PACKAGE_NAME ?? 'com.smontlouis.biblestrong'
 const SERVICE_ACCOUNT_PATH =
-  process.env.GOOGLE_SERVICE_ACCOUNT_PATH ??
-  path.join(__dirname, 'google-service-account.json')
+  process.env.GOOGLE_SERVICE_ACCOUNT_PATH ?? path.join(__dirname, 'google-service-account.json')
 
 async function main() {
   const reviewId = process.argv[2]
@@ -39,7 +38,7 @@ async function main() {
     auth: authClient as any,
   })
 
-  const response = await androidPublisher.reviews.reply({
+  await androidPublisher.reviews.reply({
     packageName: PACKAGE_NAME,
     reviewId,
     requestBody: { replyText },
@@ -48,7 +47,7 @@ async function main() {
   console.log(JSON.stringify({ success: true, reviewId }))
 }
 
-main().catch((err) => {
+main().catch(err => {
   console.error(JSON.stringify({ error: err.message }))
   process.exit(1)
 })

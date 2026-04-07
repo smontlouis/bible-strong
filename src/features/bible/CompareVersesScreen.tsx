@@ -1,13 +1,12 @@
 import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
 import generateUUID from '~helpers/generateUUID'
 import { CompareTab } from '../../state/tabs'
 import CompareVersesTabScreen from './CompareVersesTabScreen'
 
 const CompareVersesScreen = () => {
-  const router = useRouter()
   const params = useLocalSearchParams<{ selectedVerses?: string }>()
 
   // Parse params from URL strings
@@ -25,9 +24,10 @@ const CompareVersesScreen = () => {
           selectedVerses,
         },
       } as CompareTab),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   )
 
-  return <CompareVersesTabScreen compareAtom={onTheFlyAtom} navigation={router} />
+  return <CompareVersesTabScreen compareAtom={onTheFlyAtom} />
 }
 export default CompareVersesScreen

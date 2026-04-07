@@ -8,7 +8,7 @@ import useAsync from '~helpers/useAsync'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 
-const PreloadBible = ({ children }: PropsWithChildren<{}>) => {
+const PreloadBible = ({ children }: PropsWithChildren) => {
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
   const version = useDefaultBibleVersion()
 

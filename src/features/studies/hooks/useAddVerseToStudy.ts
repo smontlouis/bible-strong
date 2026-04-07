@@ -1,4 +1,3 @@
-import { useCallback } from 'react'
 import { useRouter } from 'expo-router'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'

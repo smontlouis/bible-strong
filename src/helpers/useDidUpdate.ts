@@ -9,6 +9,7 @@ const useDidUpdate = (callback: Function, deps: any[] = []) => {
     } else {
       hasMount.current = true
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps)
 }
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Status } from '~common/types'
-import to from 'await-to-js'
+import { to } from 'await-to-js'
 
 const useAsync = (fn: () => Promise<any>, deps: any[] = []) => {
   const [status, setStatus] = useState<Status>('Idle')
@@ -19,6 +19,7 @@ const useAsync = (fn: () => Promise<any>, deps: any[] = []) => {
         setError(err)
       }
     })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps)
 
   return { status, data, error }

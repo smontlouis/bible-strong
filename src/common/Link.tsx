@@ -63,16 +63,20 @@ const Link = <R extends keyof MainStackProps>({
       if (onPress) {
         onPress()
         setTimeout(() => {
-          replace
-            ? router.replace({ pathname, params: serializedParams })
-            : router.push({ pathname, params: serializedParams })
+          if (replace) {
+            router.replace({ pathname, params: serializedParams })
+          } else {
+            router.push({ pathname, params: serializedParams })
+          }
         }, 300)
         return
       }
 
-      replace
-        ? router.replace({ pathname, params: serializedParams })
-        : router.push({ pathname, params: serializedParams })
+      if (replace) {
+        router.replace({ pathname, params: serializedParams })
+      } else {
+        router.push({ pathname, params: serializedParams })
+      }
     }
 
     if (href) {

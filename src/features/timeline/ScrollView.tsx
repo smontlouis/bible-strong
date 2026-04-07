@@ -1,19 +1,17 @@
 import React, { memo, ReactNode, useEffect, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
-import { Gesture, GestureDetector, State } from 'react-native-gesture-handler'
+import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, {
   runOnJS,
   SharedValue,
   useAnimatedReaction,
   useAnimatedStyle,
-  useDerivedValue,
   useSharedValue,
   withDecay,
   withDelay,
-  withSpring,
   withTiming,
 } from 'react-native-reanimated'
-import { wp, wpUI } from '~helpers/utils'
+import { wpUI } from '~helpers/utils'
 
 function friction(value: number) {
   'worklet'
@@ -33,45 +31,45 @@ function friction(value: number) {
   return res
 }
 
-interface AnimationProps {
-  translateX: SharedValue<number>
-  translateY: SharedValue<number>
-  translationX: SharedValue<number>
-  velocityX: SharedValue<number>
-  translationY: SharedValue<number>
-  velocityY: SharedValue<number>
-  state: SharedValue<State>
-  containerHeight: number
-  containerWidth: number
-  onPrev: () => void
-  onNext: () => void
-  isFirst?: boolean
-  isLast?: boolean
-  contentWidth: number
-  contentHeight: number
-  isReady: SharedValue<number>
-  entrance: 0 | 1
-  opacity: SharedValue<number>
-}
+// interface AnimationProps {
+//   translateX: SharedValue<number>
+//   translateY: SharedValue<number>
+//   translationX: SharedValue<number>
+//   velocityX: SharedValue<number>
+//   translationY: SharedValue<number>
+//   velocityY: SharedValue<number>
+//   state: SharedValue<State>
+//   containerHeight: number
+//   containerWidth: number
+//   onPrev: () => void
+//   onNext: () => void
+//   isFirst?: boolean
+//   isLast?: boolean
+//   contentWidth: number
+//   contentHeight: number
+//   isReady: SharedValue<number>
+//   entrance: 0 | 1
+//   opacity: SharedValue<number>
+// }
 
-type WithScrollYParams = Pick<
-  AnimationProps,
-  'translationY' | 'velocityY' | 'state' | 'containerHeight' | 'contentHeight'
->
+// type WithScrollYParams = Pick<
+//   AnimationProps,
+//   'translationY' | 'velocityY' | 'state' | 'containerHeight' | 'contentHeight'
+// >
 
-type WithScrollXParams = Pick<
-  AnimationProps,
-  | 'translationX'
-  | 'velocityX'
-  | 'state'
-  | 'containerWidth'
-  | 'contentWidth'
-  | 'onNext'
-  | 'onPrev'
-  | 'isFirst'
-  | 'isLast'
-  | 'entrance'
->
+// type WithScrollXParams = Pick<
+//   AnimationProps,
+//   | 'translationX'
+//   | 'velocityX'
+//   | 'state'
+//   | 'containerWidth'
+//   | 'contentWidth'
+//   | 'onNext'
+//   | 'onPrev'
+//   | 'isFirst'
+//   | 'isLast'
+//   | 'entrance'
+// >
 
 // const withScrollY = ({
 //   translationY,
@@ -345,6 +343,7 @@ export default memo(
         x.set(entrance ? wpUI(100) : lowerBoundX - wpUI(100))
         canStartAnimation.set(withDelay(1500, withTiming(1, { duration: 0 })))
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useAnimatedReaction(

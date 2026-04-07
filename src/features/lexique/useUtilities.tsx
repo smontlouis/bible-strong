@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import * as Sentry from '@sentry/react-native'
 
 import useDebounce from '~helpers/useDebounce'

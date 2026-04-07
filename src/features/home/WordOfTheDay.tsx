@@ -24,7 +24,7 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
   const lang = useLanguage()
   const [error, setError] = useState(false)
   const [startRandom, setStartRandom] = useState(true)
-  const [strongReference, setStrongRef] = useState(null)
+  const [strongReference, setStrongRef] = useState<{ word: string } | null>(null)
   useEffect(() => {
     const loadStrong = async () => {
       if (!startRandom) return
@@ -33,8 +33,8 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
       const strongReference = await loadDictionnaireItemByRowId(
         lang === 'fr' ? randomIntFromInterval(5437, 10872) : randomIntFromInterval(1, 8620)
       )
-      if (!strongReference || strongReference.error) {
-        setError(strongReference?.error || true)
+      if (!strongReference || 'error' in strongReference) {
+        setError(true)
         return
       }
 

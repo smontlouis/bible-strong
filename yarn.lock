@@ -6515,6 +6515,7 @@ __metadata:
     react-i18next: "npm:11.18.6"
     react-native: "npm:0.81.5"
     react-native-boring-avatars: "npm:^1.0.1"
+    react-native-ease: "npm:^0.4.0"
     react-native-edge-to-edge: "npm:^1.4.3"
     react-native-gesture-handler: "npm:~2.28.0"
     react-native-keyboard-aware-scroll-view: "npm:^0.9.4"
@@ -13804,6 +13805,16 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10c0/da475c2df7d5fc40d2cc7de2ef65e6b824eb5490920f6ef4e6f046b34215f5de2850c502a6cb0e80325e5b363bfc7b36c55da3f7b798dafeda3194f8d681ac3c
+  languageName: node
+  linkType: hard
+
+"react-native-ease@npm:^0.4.0":
+  version: 0.4.0
+  resolution: "react-native-ease@npm:0.4.0"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/9f82f0d05cc60cb26971140288d17d0010a65686d9c21f26bed3ea0399ac444bb703935cb3f5dc82387da2ef5509e80cbe632f004fd7078b79512f4ab3295865
   languageName: node
   linkType: hard
 

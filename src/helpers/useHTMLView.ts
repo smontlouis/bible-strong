@@ -12,7 +12,7 @@ const fontRule = `@font-face { font-family: 'Literata Book'; src: local('Literat
 
 const useHTMLView = ({ onLinkClicked }: { onLinkClicked: (href: string) => void }) => {
   const theme: Theme = useTheme()
-  const ref = useRef<any>()
+  const ref = useRef<any>(null)
 
   const onMessage = (event: any) => {
     const action = JSON.parse(event.nativeEvent.data)

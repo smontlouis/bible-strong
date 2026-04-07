@@ -17,14 +17,14 @@ const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)'
   const { t } = useTranslation()
   const [error, setError] = useState(false)
   const [startRandom, setStartRandom] = useState(true)
-  const [naveReference, setNaveRef] = useState(null)
+  const [naveReference, setNaveRef] = useState<{ name: string; name_lower: string } | null>(null)
   useEffect(() => {
     const loadNave = async () => {
       if (!startRandom) return
 
       const naveReference = await loadNaveByRandom()
-      if (naveReference.error) {
-        setError(naveReference.error)
+      if (!naveReference || 'error' in naveReference) {
+        setError(true)
         return
       }
 

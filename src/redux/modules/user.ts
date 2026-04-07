@@ -70,6 +70,7 @@ import { addStudies, deleteStudy, publishStudyAction, updateStudy } from './user
 import { addTag, entitiesArray, removeTag, toggleTagEntity, updateTag } from './user/tags'
 import { getDatabaseUpdate, getVersionUpdate, setVersionUpdated } from './user/versionUpdate'
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const deepmerge = require('@fastify/deepmerge')()
 
 // Type for color keys (used for dynamic theme color access)
@@ -281,10 +282,10 @@ export interface UserState {
     links: LinksObj
     studies: StudiesObj
     tags: TagsObj
-    strongsHebreu: {}
-    strongsGrec: {}
-    words: {}
-    naves: {}
+    strongsHebreu: Record<string, unknown>
+    strongsGrec: Record<string, unknown>
+    words: Record<string, unknown>
+    naves: Record<string, unknown>
     wordAnnotations: WordAnnotationsObj
     settings: {
       defaultBibleVersion?: string

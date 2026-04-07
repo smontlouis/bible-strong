@@ -31,7 +31,7 @@ const ExplorePlanItem = ({
   const { t } = useTranslation()
   const modalRef = React.useRef<BottomSheetModal>(null)
   const planImage = useFireStorage(image)
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<any>()
   const hasAlreadyStarted = useSelector(
     (state: RootState) => !!state.plan.myPlans.find(p => id === p.id)
   )

@@ -14,6 +14,7 @@ import {
   getDefaultBibleTab,
   MAX_TAB_GROUPS,
   GROUP_COLORS,
+  VersionCode,
 } from '~state/tabs'
 import { Note, Link, Study } from '~redux/modules/user'
 import { useTabAnimations } from '~features/app-switcher/utils/useTabAnimations'
@@ -238,7 +239,7 @@ export const useCreateTabGroupFromTag = () => {
           selectedBook: books[livre - 1],
           selectedChapter: chapitre,
           selectedVerse: verset,
-          selectedVersion: a.version,
+          selectedVersion: a.version as VersionCode,
           focusVerses: [verset],
           isReadOnly: true,
         },

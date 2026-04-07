@@ -12,7 +12,7 @@ import BibleCompareVerseItem from '~features/bible/BibleCompareVerseItem'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
 
 import { useRouter } from 'expo-router'
-import produce from 'immer'
+import { produce } from 'immer'
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
@@ -59,6 +59,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
   const openInNewTab = useOpenInNewTab()
   useEffect(() => {
     setTitle(`${t('Comparer')} ${title}`)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title])
 
   const goToVerse = (value: any) => {

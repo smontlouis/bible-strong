@@ -5,13 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import TabIcon from '~features/app-switcher/utils/getIconByTabType'
-import {
-  BibleTab,
-  getDefaultBibleTab,
-  getDefaultData,
-  NewTab,
-  TabItem,
-} from '../../../../state/tabs'
+import { BibleTab, getDefaultBibleTab, getDefaultData, TabItem } from '../../../../state/tabs'
 import { useDefaultBibleVersion } from '../../../../state/useDefaultBibleVersion'
 import { useSelectBibleReference } from './SelectBibleReferenceModalProvider'
 
@@ -44,10 +38,9 @@ const useOpenTabByType = ({ type, newAtom }: NewTabItemProps) => {
     }
     setTab({
       ...tab,
-      // @ts-ignore
       type,
       data: getData(),
-    })
+    } as TabItem)
   }
 
   const onPress = () => {

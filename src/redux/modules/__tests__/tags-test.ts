@@ -221,11 +221,11 @@ describe('Tags Reducer', () => {
             },
           },
         },
-      } as UserState
+      } as unknown as UserState
       const newState = userReducer(state, updateTag('tag-1', 'New Name'))
       expect(newState.bible.tags['tag-1'].name).toBe('New Name')
-      expect(newState.bible.highlights['1-1-1'].tags['tag-1'].name).toBe('New Name')
-      expect(newState.bible.notes['1-1-2'].tags?.['tag-1'].name).toBe('New Name')
+      expect(newState.bible.highlights['1-1-1']!.tags!['tag-1'].name).toBe('New Name')
+      expect(newState.bible.notes['1-1-2'].tags?.['tag-1']!.name).toBe('New Name')
     })
   })
 
@@ -270,10 +270,10 @@ describe('Tags Reducer', () => {
             },
           },
         },
-      } as UserState
+      } as unknown as UserState
       const newState = userReducer(state, removeTag('tag-1'))
       expect(newState.bible.tags['tag-1']).toBeUndefined()
-      expect(newState.bible.highlights['1-1-1'].tags['tag-1']).toBeUndefined()
+      expect(newState.bible.highlights['1-1-1']!.tags!['tag-1']).toBeUndefined()
       expect(newState.bible.notes['1-1-2'].tags?.['tag-1']).toBeUndefined()
     })
   })
@@ -304,8 +304,8 @@ describe('Tags Reducer', () => {
             tagId: 'tag-1',
           })
         )
-        expect(newState.bible.highlights['1-1-1'].tags['tag-1']).toBeDefined()
-        expect(newState.bible.highlights['1-1-2'].tags['tag-1']).toBeDefined()
+        expect(newState.bible.highlights['1-1-1']!.tags!['tag-1']).toBeDefined()
+        expect(newState.bible.highlights['1-1-2']!.tags!['tag-1']).toBeDefined()
         expect(newState.bible.tags['tag-1'].highlights?.['1-1-1']).toBe(true)
         expect(newState.bible.tags['tag-1'].highlights?.['1-1-2']).toBe(true)
       })
@@ -333,7 +333,7 @@ describe('Tags Reducer', () => {
               },
             },
           },
-        } as UserState
+        } as unknown as UserState
         const newState = userReducer(
           state,
           toggleTagEntity({
@@ -344,8 +344,8 @@ describe('Tags Reducer', () => {
             tagId: 'tag-1',
           })
         )
-        expect(newState.bible.highlights['1-1-1'].tags['tag-1']).toBeUndefined()
-        expect(newState.bible.highlights['1-1-2'].tags['tag-1']).toBeUndefined()
+        expect(newState.bible.highlights['1-1-1']!.tags!['tag-1']).toBeUndefined()
+        expect(newState.bible.highlights['1-1-2']!.tags!['tag-1']).toBeUndefined()
         expect(newState.bible.tags['tag-1'].highlights?.['1-1-1']).toBeUndefined()
         expect(newState.bible.tags['tag-1'].highlights?.['1-1-2']).toBeUndefined()
       })
@@ -373,7 +373,7 @@ describe('Tags Reducer', () => {
         )
         expect(newState.bible.highlights['1-1-1']).toBeDefined()
         expect(newState.bible.highlights['1-1-1'].color).toBe('')
-        expect(newState.bible.highlights['1-1-1'].tags['tag-1']).toBeDefined()
+        expect(newState.bible.highlights['1-1-1']!.tags!['tag-1']).toBeDefined()
       })
 
       it('should delete highlight with no color and no tags after untag', () => {
@@ -394,7 +394,7 @@ describe('Tags Reducer', () => {
               },
             },
           },
-        } as UserState
+        } as unknown as UserState
         const newState = userReducer(
           state,
           toggleTagEntity({
@@ -426,7 +426,7 @@ describe('Tags Reducer', () => {
               },
             },
           },
-        } as UserState
+        } as unknown as UserState
         const newState = userReducer(
           state,
           toggleTagEntity({
@@ -463,7 +463,7 @@ describe('Tags Reducer', () => {
               },
             },
           },
-        } as UserState
+        } as unknown as UserState
         const newState = userReducer(
           state,
           toggleTagEntity({
@@ -500,7 +500,7 @@ describe('Tags Reducer', () => {
               },
             },
           },
-        } as UserState
+        } as unknown as UserState
         const newState = userReducer(
           state,
           toggleTagEntity({
@@ -538,8 +538,8 @@ describe('Tags Reducer', () => {
           })
         )
         expect(newState.bible.words['word-1']).toBeDefined()
-        expect(newState.bible.words['word-1'].title).toBe('Word Title')
-        expect(newState.bible.words['word-1'].tags['tag-1']).toBeDefined()
+        expect((newState.bible.words['word-1'] as any).title).toBe('Word Title')
+        expect((newState.bible.words['word-1'] as any).tags['tag-1']).toBeDefined()
       })
 
       it('should delete word/strongs/nave entity when last tag is removed', () => {
@@ -563,7 +563,7 @@ describe('Tags Reducer', () => {
                 },
               },
             },
-          } as UserState
+          } as unknown as UserState
           const newState = userReducer(
             state,
             toggleTagEntity({

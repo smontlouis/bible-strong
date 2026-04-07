@@ -9,7 +9,6 @@ import {
   databaseTresorName,
   getDatabases,
   getDbPath,
-  getDbFileName,
   initLanguageDirs,
 } from './databases'
 import {
@@ -18,7 +17,6 @@ import {
   isSharedDB,
   getSqliteDirPath,
   getSharedSqliteDirPath,
-  BASE_SQLITE_DIR,
 } from './databaseTypes'
 
 // Original DB class for backward compatibility

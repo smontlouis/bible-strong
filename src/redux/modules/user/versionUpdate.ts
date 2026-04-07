@@ -1,6 +1,6 @@
 import { createAction, createAsyncThunk } from '@reduxjs/toolkit'
 import { versions, getIfVersionNeedsUpdate } from '~helpers/bibleVersions'
-import { databases, getIfDatabaseNeedsUpdate } from '~helpers/databases'
+import { databases, getIfDatabaseNeedsUpdate, type IdDatabase } from '~helpers/databases'
 
 // Action type constants for backward compatibility
 export const GET_VERSION_UPDATE = 'user/GET_VERSION_UPDATE'
@@ -37,7 +37,7 @@ export const getDatabaseUpdate = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const databasesNeedUpdate = await Promise.all(
-        Object.keys(databases).map(async dbId => {
+        (Object.keys(databases()) as IdDatabase[]).map(async dbId => {
           const needsUpdate = await getIfDatabaseNeedsUpdate(dbId)
           return { [dbId]: needsUpdate }
         })

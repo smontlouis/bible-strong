@@ -1,13 +1,12 @@
 import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
 import generateUUID from '~helpers/generateUUID'
 import { NaveTab } from '../../state/tabs'
 import NaveDetailTabScreen from './NaveDetailTabScreen'
 
 const NaveDetailScreen = () => {
-  const router = useRouter()
   const params = useLocalSearchParams<{ name_lower?: string; name?: string }>()
 
   // Parse params from URL strings
@@ -27,9 +26,10 @@ const NaveDetailScreen = () => {
           name,
         },
       } as NaveTab),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   )
 
-  return <NaveDetailTabScreen naveAtom={onTheFlyAtom} navigation={router} />
+  return <NaveDetailTabScreen naveAtom={onTheFlyAtom} />
 }
 export default NaveDetailScreen

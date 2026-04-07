@@ -8,7 +8,7 @@ import Text from '~common/ui/Text'
 import { audioRepeatAtom } from './atom'
 import AudioChip from './AudioChip'
 
-export interface AudioRepeatButtonProps extends BoxProps {}
+export type AudioRepeatButtonProps = BoxProps
 
 const AudioRepeatButton = (props: AudioRepeatButtonProps) => {
   const { t } = useTranslation()

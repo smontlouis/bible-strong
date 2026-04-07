@@ -81,7 +81,10 @@ class TokenManager {
     return this.tryRefresh()
   }
 
-  private async _doRefresh(currentUser: { uid: string; getIdToken: (force: boolean) => Promise<string> }): Promise<boolean> {
+  private async _doRefresh(currentUser: {
+    uid: string
+    getIdToken: (force: boolean) => Promise<string>
+  }): Promise<boolean> {
     try {
       console.log('[TokenManager] Attempting manual token refresh (edge case fallback)...')
 

@@ -1,6 +1,6 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useRouter } from 'expo-router'
-import produce from 'immer'
+import { produce } from 'immer'
 import { PrimitiveAtom, useAtom } from 'jotai'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'

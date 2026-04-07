@@ -341,14 +341,15 @@ export async function migrateImportedDataToSubcollections(
 
   // Log data counts for debugging
   console.log('[FirestoreMigration] Data counts to import:')
+  const dataRecord = data as Record<string, { [id: string]: any } | undefined>
   for (const collection of SUBCOLLECTION_NAMES) {
-    const count = data[collection] ? Object.keys(data[collection]).length : 0
+    const count = dataRecord[collection] ? Object.keys(dataRecord[collection]!).length : 0
     console.log(`[FirestoreMigration]   - ${collection}: ${count} items`)
   }
 
   // Determine which collections have data to migrate
   const collectionsToMigrate = SUBCOLLECTION_NAMES.filter(
-    name => data[name] && Object.keys(data[name]).length > 0
+    name => dataRecord[name] && Object.keys(dataRecord[name]!).length > 0
   )
 
   if (collectionsToMigrate.length === 0) {
@@ -380,7 +381,7 @@ export async function migrateImportedDataToSubcollections(
     // Process each collection: clear existing data, then write new data
     for (let i = 0; i < totalCollections; i++) {
       const collection = collectionsToMigrate[i]
-      const collectionData = data[collection]!
+      const collectionData = dataRecord[collection]!
       const itemCount = Object.keys(collectionData).length
 
       // Base progress for this collection (0 to 1 range for each collection)

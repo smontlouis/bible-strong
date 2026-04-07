@@ -102,7 +102,7 @@ const SearchInTimelineModal = ({ modalRef, setEvent, eventModalRef }: Props) => 
       <BottomSheetFlatList
         ItemSeparatorComponent={() => <Border />}
         data={results}
-        keyExtractor={item => item.slug}
+        keyExtractor={(item: TimelineEventDetail) => item.slug}
         ListHeaderComponent={
           !hasSearched ? (
             <Empty
@@ -121,7 +121,7 @@ const SearchInTimelineModal = ({ modalRef, setEvent, eventModalRef }: Props) => 
             </Box>
           )
         }
-        renderItem={({ item }) => (
+        renderItem={({ item }: { item: TimelineEventDetail }) => (
           <LinkBox mx={20} my={20} onPress={() => onOpenEvent(item)} row>
             {item.images?.[0]?.file && (
               <Box mr={20}>

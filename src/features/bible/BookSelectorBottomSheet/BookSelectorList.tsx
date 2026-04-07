@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useMemo } from 'react'
+import React, { useEffect } from 'react'
 import { FlatList, ScrollView } from 'react-native'
-import { bookSelectorSelectionModeAtom, bookSelectorSortAtom } from './atom'
+import { bookSelectorSelectionModeAtom } from './atom'
 import { useAtomValue } from 'jotai/react'
 import books, { Book } from '~assets/bible_versions/books-desc'
 import BookItem, { itemHeight } from './BookItem'
@@ -14,7 +14,7 @@ interface BookSelectorListProps {
   expandedBook: SharedValue<number | null>
   data: Book[]
   bookSelectorData?: BibleTab['data']
-  flatListRef: React.RefObject<FlatList>
+  flatListRef: React.RefObject<FlatList | null>
 }
 export const BookSelectorList = ({
   data,
@@ -47,6 +47,7 @@ export const BookSelectorList = ({
         animated: false,
       })
     }, 100)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialScrollIndex])
 
   if (selectionMode === 'grid') {

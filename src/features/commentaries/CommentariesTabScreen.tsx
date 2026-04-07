@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import to from 'await-to-js'
+import { to } from 'await-to-js'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, ScrollView } from 'react-native'
@@ -19,7 +19,7 @@ import Comment from './Comment'
 import { Comment as CommentType, Comments } from './types'
 
 import { useTheme } from '@emotion/react'
-import produce from 'immer'
+import { produce } from 'immer'
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -33,7 +33,6 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { firebaseDb } from '~helpers/firebase'
 import memoize from '~helpers/memoize'
-import useLanguage from '~helpers/useLanguage'
 import { Theme } from '~themes'
 import { CommentaryTab } from '../../state/tabs'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
@@ -170,7 +169,6 @@ interface CommentariesScreenProps {
 
 const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: CommentariesScreenProps) => {
   const { t } = useTranslation()
-  const lang = useLanguage()
   const theme: Theme = useTheme()
 
   const [commentaryTab, setCommentaryTab] = useAtom(commentaryAtom)
@@ -220,6 +218,7 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
   const { bottomBarHeight } = useBottomBarHeightInTab()
   useEffect(() => {
     setTitle(headerTitle)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [headerTitle])
 
   return (

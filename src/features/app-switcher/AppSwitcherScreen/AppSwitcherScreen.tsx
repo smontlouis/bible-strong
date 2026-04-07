@@ -77,6 +77,7 @@ const AppSwitcherScreenWrapper = () => {
   useEffect(() => {
     closeHome()
     closeMenu()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabsCount])
 
   useEffect(() => {
@@ -95,6 +96,7 @@ const AppSwitcherScreenWrapper = () => {
     })
 
     return () => backHandler.remove()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const containerStyle = useAnimatedStyle(() => ({

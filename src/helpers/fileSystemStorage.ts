@@ -1,4 +1,4 @@
-import to from 'await-to-js'
+import { to } from 'await-to-js'
 import * as FileSystem from 'expo-file-system/legacy'
 
 const storagePath = `${FileSystem.documentDirectory}/persistAtoms`

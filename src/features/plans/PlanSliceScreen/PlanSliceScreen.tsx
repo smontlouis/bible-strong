@@ -14,7 +14,7 @@ import { FeatherIcon, MaterialIcon, TextIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
-import chapterToReference from '~helpers/chapterToReference'
+import { chapterToReference } from '~helpers/chapterToReference'
 import verseToReference from '~helpers/verseToReference'
 import { markAsRead } from '~redux/modules/plan'
 import { RootState } from '~redux/modules/reducer'
@@ -109,7 +109,9 @@ const PlanSliceScreen = () => {
   const readingSlice: ComputedReadingSlice | undefined = params.readingSlice
     ? JSON.parse(params.readingSlice)
     : undefined
-  const { id, title, slices, planId } = readingSlice || {}
+  const { id, title, slices, planId } = (readingSlice || {}) as Partial<
+    ComputedReadingSlice & { planId: string }
+  >
 
   const { t } = useTranslation()
   const dispatch = useDispatch()
@@ -146,18 +148,18 @@ const PlanSliceScreen = () => {
   }
 
   const onMarkAsReadSelect = () => {
-    dispatch(markAsRead({ readingSliceId: id, planId }))
+    dispatch(markAsRead({ readingSliceId: id!, planId: planId! }))
     router.back()
   }
 
-  const mainSlice: EntitySlice | undefined = slices.find(
+  const mainSlice: EntitySlice | undefined = slices?.find(
     s => s.type === 'Chapter' || s.type === 'Verse'
   )
   const sliceTitle = mainSlice ? extractTitle(mainSlice) : ''
 
   const share = async () => {
     const textSlices = await Promise.all(
-      slices.map(async slice => {
+      (slices ?? []).map(async slice => {
         switch (slice.type) {
           case 'Chapter': {
             return await chapterSliceToText(slice, version)
@@ -240,11 +242,11 @@ const PlanSliceScreen = () => {
             <Paragraph scale={3}>{title}</Paragraph>
           </Box>
         )}
-        {slices.map(slice => (
+        {slices?.map(slice => (
           <Slice key={slice.id} {...slice} />
         ))}
         <Box height={80} center marginTop={30}>
-          <ReadButton isRead={isRead} readingSliceId={id} planId={planId} />
+          <ReadButton isRead={isRead} readingSliceId={id!} planId={planId!} />
         </Box>
       </ScrollView>
       <ParamsModal paramsModalRef={paramsModalRef} />

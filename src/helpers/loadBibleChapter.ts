@@ -19,6 +19,7 @@ type InterlineaireVerse = {
   Chapitre: number
   Hebreu?: string
   Grec?: string
+  [key: string]: string | number | undefined
 }
 
 type LoadBibleChapterResult = Verse[] | InterlineaireVerse[] | null
@@ -54,27 +55,27 @@ const loadBibleChapter = async (
   try {
     if (version === 'INT') {
       const res = await loadInterlineaireChapter(bookNb, chapterNb, 'fr')
-      if (!res || (Array.isArray(res) && res.length === 0)) {
+      if (!res || 'error' in res || (Array.isArray(res) && res.length === 0)) {
         return errorResult(await buildNoVersesError(version, bookNb, chapterNb))
       }
-      return successResult(res)
+      return successResult(res as LoadBibleChapterResult)
     }
 
     if (version === 'INT_EN') {
       const res = await loadInterlineaireChapter(bookNb, chapterNb, 'en')
-      if (!res || (Array.isArray(res) && res.length === 0)) {
+      if (!res || 'error' in res || (Array.isArray(res) && res.length === 0)) {
         return errorResult(await buildNoVersesError(version, bookNb, chapterNb))
       }
-      return successResult(res)
+      return successResult(res as LoadBibleChapterResult)
     }
 
     if (version === 'LSGS' || version === 'KJVS') {
       if (!strongDB.get()) await strongDB.init()
       const res = await loadStrongChapter(bookNb, chapterNb)
-      if (!res || (Array.isArray(res) && res.length === 0)) {
+      if (!res || 'error' in res || (Array.isArray(res) && res.length === 0)) {
         return errorResult(await buildNoVersesError(version, bookNb, chapterNb))
       }
-      return successResult(res)
+      return successResult(res as LoadBibleChapterResult)
     }
 
     // Regular versions: query SQLite

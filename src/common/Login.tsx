@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import * as Icon from '@expo/vector-icons'
 import styled from '@emotion/native'
 import { withTheme } from '@emotion/react'
-import appleAuth, { AppleButton } from '@invertase/react-native-apple-authentication'
+import { appleAuth, AppleButton } from '@invertase/react-native-apple-authentication'
 
 import { toast } from '~helpers/toast'
 import Link from '~common/Link'

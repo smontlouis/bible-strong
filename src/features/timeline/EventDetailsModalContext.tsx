@@ -1,5 +1,5 @@
 import BottomSheet, { BottomSheetScrollViewMethods } from '@gorhom/bottom-sheet'
-import React, { createContext, useContext, useRef, useState } from 'react'
+import React, { createContext, useContext, useState } from 'react'
 import { TimelineEvent } from './types'
 
 interface EventDetailsModalContextValue {

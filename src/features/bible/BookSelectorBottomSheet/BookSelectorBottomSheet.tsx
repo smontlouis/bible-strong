@@ -1,5 +1,4 @@
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
-import { Portal } from '@gorhom/portal'
+import BottomSheet from '@gorhom/bottom-sheet'
 import React, { useEffect, useMemo, useRef } from 'react'
 
 import { useAtomValue, useSetAtom } from 'jotai/react'
@@ -24,7 +23,7 @@ import { BOOK_SELECTION_EVENT, SelectionEvent } from './constants'
 import VerseBottomSheet, { tempSelectedBookAtom, tempSelectedChapterAtom } from './VerseBottomSheet'
 interface BookSelectorBottomSheetProps {
   selectedBookNum?: number
-  bottomSheetRef: React.RefObject<BottomSheet>
+  bottomSheetRef: React.RefObject<BottomSheet | null>
 }
 
 export const bookSelectorDataAtom = atom<{
@@ -102,6 +101,7 @@ const BookSelectorBottomSheet = ({ bottomSheetRef }: BookSelectorBottomSheetProp
     return () => {
       subscription.remove()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookSelectorActions, openInNewTab, t, bookSelectorData, bookSelectorHasVerses])
 
   const data = useMemo(() => {

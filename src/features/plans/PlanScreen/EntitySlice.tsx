@@ -2,7 +2,7 @@ import React from 'react'
 
 import styled from '@emotion/native'
 import verseToReference from '~helpers/verseToReference'
-import chapterToReference from '~helpers/chapterToReference'
+import { chapterToReference } from '~helpers/chapterToReference'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'

@@ -2,7 +2,7 @@ import React, { useCallback } from 'react'
 
 import withLoginModal from '~common/withLoginModal'
 
-import produce from 'immer'
+import { produce } from 'immer'
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { StudyTab } from '../../state/tabs'

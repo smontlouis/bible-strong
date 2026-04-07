@@ -4,7 +4,6 @@ import { LegendList, LegendListRef } from '@legendapp/list'
 import { ComputedPlan, ComputedReadingSlice, ComputedSection } from '~common/types'
 import ReadingSlice from './ReadingSlice'
 import SectionHeader from './SectionHeader'
-import { View } from 'react-native'
 
 type SectionHeaderItem = {
   type: 'header'
@@ -31,6 +30,7 @@ const PlanSectionList = ({ id, sections }: ComputedPlan) => {
     if (currentSectionId) {
       setExpandedSectionIds([currentSectionId])
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const toggle = (sectionId: string) => {

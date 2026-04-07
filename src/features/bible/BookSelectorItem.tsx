@@ -1,9 +1,8 @@
-import styled from '@emotion/native'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 import { Book } from '~assets/bible_versions/books-desc'
-import Box, { HStack, TouchableBox } from '~common/ui/Box'
+import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 
 interface BookSelectorItemProps {

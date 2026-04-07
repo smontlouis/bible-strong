@@ -38,6 +38,7 @@ export const useProviderEffects = ({
   const tabsCount = useAtomValue(tabsCountAtom)
   useEffect(() => {
     tabsCountShared.set(tabsCount)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabsCount])
 
   // Listen to reset trigger (login/logout) and reset to first tab expanded
@@ -74,5 +75,6 @@ export const useProviderEffects = ({
       pagerTranslateX.set(0)
       pagerScrollX.set(0)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetTrigger])
 }

@@ -434,6 +434,7 @@ const BibleViewer = ({
       loadMhyComments(book.Numero, chapter)
         .then(c => {
           if (loadIdRef.current !== currentLoadId) return
+          if (!c || 'error' in c) return
           setComments(JSON.parse(c.commentaires))
         })
         .catch(() => {
@@ -479,6 +480,7 @@ const BibleViewer = ({
     if (prevBook !== undefined && (prevBook !== book.Numero || prevChapter !== chapter)) {
       actions.clearSelectedVerses()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     book,
     chapter,
@@ -623,6 +625,7 @@ const BibleViewer = ({
       // Use setTimeout to ensure state is updated before presenting
       setTimeout(() => bookmarkModalRef.current?.present(), 0)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedVerses, actions])
 
   // Handler for opening bookmark modal from DOM (existing bookmark)
@@ -791,6 +794,7 @@ const BibleViewer = ({
     if (useSharedDOM && !isActiveBibleTab && annotationMode.enabled) {
       handleExitAnnotationMode()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActiveBibleTab])
 
   // Track PortalHost lifecycle for Sentry (context for native Android crashes)

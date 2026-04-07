@@ -64,6 +64,7 @@ export default function NoteEditorDOMComponent({
     if (descriptionRef.current) {
       descriptionRef.current.innerText = defaultDescription
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Empty deps = only on mount
 
   // Focus title when entering edit mode

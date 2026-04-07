@@ -34,7 +34,7 @@ const sanitizeTabGroupsForBackup = (groups: TabGroup[]): TabGroup[] => {
  */
 class AutoBackupManager {
   private backupDir = `${FileSystem.documentDirectory}backups/`
-  private pendingBackup: NodeJS.Timeout | null = null
+  private pendingBackup: NodeJS.Timeout | number | null = null
   private readonly BACKUP_DEBOUNCE = 30 * 1000 // 30 secondes (debounce court pour éviter trop d'appels)
   private readonly AUTO_BACKUP_INTERVAL = 24 * 60 * 60 * 1000 // 24 heures entre auto backups
   private readonly MAX_BACKUPS = 10 // Garder les 10 derniers (tous types confondus)

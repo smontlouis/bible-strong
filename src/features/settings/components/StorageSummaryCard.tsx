@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import * as FileSystem from 'expo-file-system/legacy'
-import { useTheme } from '@emotion/react'
 import { useTranslation } from 'react-i18next'
 import { useAtomValue } from 'jotai/react'
 
@@ -23,7 +22,6 @@ const formatBytes = (
 
 const StorageSummaryCard = () => {
   const { t } = useTranslation()
-  const theme = useTheme()
   const [usedBytes, setUsedBytes] = useState(0)
   const [freeBytes, setFreeBytes] = useState(0)
   const completionSignal = useAtomValue(downloadCompletionSignalAtom)

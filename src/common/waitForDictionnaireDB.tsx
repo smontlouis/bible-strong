@@ -103,7 +103,7 @@ export const useWaitForDatabase = () => {
               })
               ;(window as any)[downloadKey] = false
             }
-          } catch (e) {
+          } catch {
             toast.error(
               t(
                 "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."

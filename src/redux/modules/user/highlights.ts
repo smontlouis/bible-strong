@@ -1,7 +1,6 @@
 import { createAction } from '@reduxjs/toolkit'
 import { Dispatch } from 'redux'
 import { SelectedVerses } from 'src/state/tabs'
-import { TagsObj } from '~common/types'
 import { HighlightsObj } from '../user'
 
 // Action type constants for backward compatibility

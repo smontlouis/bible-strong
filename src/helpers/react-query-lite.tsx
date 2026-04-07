@@ -89,7 +89,7 @@ export function useQuery<TData = unknown>({
 
   const [, rerender] = React.useReducer(i => i + 1, 0)
 
-  const observerRef = React.useRef<QueryObserver<TData>>()
+  const observerRef = React.useRef<QueryObserver<TData>>(null)
 
   if (
     (!observerRef.current && enabled) ||

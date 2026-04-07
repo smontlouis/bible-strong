@@ -1,5 +1,5 @@
 import * as FileSystem from 'expo-file-system/legacy'
-import produce from 'immer'
+import { produce } from 'immer'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Appearance } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -20,6 +20,7 @@ import { getDatabases } from '~helpers/databases'
 import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { BibleTab } from '../../state/tabs'
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const deepmerge = require('@fastify/deepmerge')()
 
 interface BibleTabScreenProps {

@@ -1,5 +1,5 @@
 import { useSetAtom } from 'jotai/react'
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { useDispatch, useStore } from 'react-redux'
 import { toast } from '~helpers/toast'
 import FireAuth, { FireAuthProfile } from '~helpers/FireAuth'

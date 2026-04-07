@@ -16,14 +16,12 @@ interface ReduxDevToolsExtension {
 type DevToolsClient = Awaited<ReturnType<typeof getDevToolsPluginClientAsync>>
 
 let client: DevToolsClient | null = null
-let isConnecting = false
 let connectionPromise: Promise<DevToolsClient | null> | null = null
 
 async function getClient(): Promise<DevToolsClient | null> {
   if (client) return client
   if (connectionPromise) return connectionPromise
 
-  isConnecting = true
   connectionPromise = (async () => {
     try {
       client = await getDevToolsPluginClientAsync('redux-devtools-expo-dev-plugin')
@@ -31,8 +29,6 @@ async function getClient(): Promise<DevToolsClient | null> {
     } catch (e) {
       console.warn('[Jotai DevTools] Failed to connect to Redux DevTools:', e)
       return null
-    } finally {
-      isConnecting = false
     }
   })()
 

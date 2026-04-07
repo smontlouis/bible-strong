@@ -66,6 +66,7 @@ const UnifiedTagsModal = () => {
       open()
       resetSearch()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item])
 
   // For select mode: get entity data and selected tags

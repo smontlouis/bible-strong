@@ -56,6 +56,7 @@ const useCheckMandatoryVersions = () => {
         dispatch(setDefaultBibleVersion(defaultVersion))
       }
     })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang, dispatch, isOnboardingCompleted])
 
   return showOnboarding
