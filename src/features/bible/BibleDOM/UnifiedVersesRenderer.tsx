@@ -1,7 +1,7 @@
 'use dom'
 
 import { styled } from 'goober'
-import { Verse as TVerse } from '~common/types'
+import { Bookmark, Verse as TVerse } from '~common/types'
 import { HighlightsObj } from '~redux/modules/user'
 import {
   LinkedVerse,
@@ -141,7 +141,7 @@ export interface UnifiedVersesRendererProps {
   wordAnnotations: WebViewProps['wordAnnotations']
   wordAnnotationsInOtherVersions?: Record<string, CrossVersionAnnotation[]>
   taggedVerses: TaggedVerse[] | null
-  bookmarkedVerses?: Record<number, any>
+  bookmarkedVerses?: Record<number, Bookmark>
   notedVersesCount: { [key: string]: number }
   notedVersesText: { [key: string]: NotedVerse[] }
   linkedVersesCount: { [key: string]: number }
@@ -277,7 +277,7 @@ export function UnifiedVersesRenderer({
   // Calculate last focus verse for close context button
   const lastFocusVerse = focusVersesNumeric ? Math.max(...focusVersesNumeric) : null
 
-  // Pre-compute whether any verses are selected (avoids Object.keys() per iteration)
+  // Pre-compute whether verses are selected (avoids Object.keys() per iteration)
   const hasSelectedVerses = Object.keys(selectedVerses).length > 0
 
   // Pre-compute tagged verses lookup: O(m) once instead of O(n*m) per verse

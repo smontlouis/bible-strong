@@ -1,6 +1,10 @@
 import React from 'react'
 
-const SvgComponent = ({ color, ...props }: { color: string; [key: string]: any }) => (
+type ArrowRightProps = React.SVGProps<SVGSVGElement> & {
+  color: string
+}
+
+const SvgComponent = ({ color, ...props }: ArrowRightProps) => (
   <svg height={20} width={20} viewBox="0 0 96 96" {...props}>
     <path
       fill={color}

@@ -13,6 +13,24 @@ import { WordAnnotation } from '~redux/modules/user/wordAnnotations'
 import { Tag, CurrentTheme, TagsObj } from '~common/types'
 import { VersionCode } from '~state/tabs'
 
+type TaggedEntity = { id: string | number; title: string; tags?: TagsObj }
+type HighlightVerseGroup = {
+  date: number
+  color: string
+  verseIds: { Livre: number; Chapitre: number; Verset: number; Texte: string }[]
+  stringIds: Record<string, true>
+  tags: TagsObj
+}
+
+const isTaggedEntity = (entity: unknown): entity is TaggedEntity =>
+  !!entity &&
+  typeof entity === 'object' &&
+  'id' in entity &&
+  'title' in entity &&
+  (typeof (entity as { id: unknown }).id === 'string' ||
+    typeof (entity as { id: unknown }).id === 'number') &&
+  typeof (entity as { title: unknown }).title === 'string'
+
 // Base selectors - private
 // All selectors use nullish coalescing to prevent crashes when state is undefined
 // (e.g., during Redux rehydration or state corruption)
@@ -103,7 +121,7 @@ export const makeWordAnnotationsByChapterSelector = () =>
         // Only include annotations for the current version
         if (annotation.version !== version) continue
 
-        // Check if any range belongs to this chapter
+        // Check if each range belongs to this chapter
         const hasRangeInChapter = annotation.ranges.some(range => range.verseKey.startsWith(prefix))
 
         if (hasRangeInChapter) {
@@ -114,7 +132,7 @@ export const makeWordAnnotationsByChapterSelector = () =>
     }
   )
 
-// Selector for checking if any selected verse is highlighted
+// Selector for checking if a selected verse is highlighted
 export const makeIsSelectedVerseHighlightedSelector = () =>
   createSelector(
     [
@@ -203,11 +221,11 @@ export const makeGroupedWordAnnotationsCountSelector = () =>
 
 // Helper function for TagScreen - sorts verses by date
 const sortVersesByDate = (p: Record<string, Highlight>) =>
-  Object.keys(p).reduce((arr: any[], verse) => {
+  Object.keys(p).reduce<HighlightVerseGroup[]>((arr, verse) => {
     const [Livre, Chapitre, Verset] = verse.split('-').map(Number)
     const formattedVerse = { Livre, Chapitre, Verset, Texte: '' }
 
-    if (!arr.find((a: any) => a.date === p[verse].date)) {
+    if (!arr.find(a => a.date === p[verse].date)) {
       arr.push({
         date: p[verse].date,
         color: p[verse].color,
@@ -217,15 +235,15 @@ const sortVersesByDate = (p: Record<string, Highlight>) =>
       })
     }
 
-    const dateInArray = arr.find((a: any) => a.date === p[verse].date)
+    const dateInArray = arr.find(a => a.date === p[verse].date)
     if (dateInArray) {
       dateInArray.stringIds[verse] = true
       dateInArray.verseIds.push(formattedVerse)
-      dateInArray.verseIds.sort((a: any, b: any) => Number(a.Verset) - Number(b.Verset))
+      dateInArray.verseIds.sort((a, b) => Number(a.Verset) - Number(b.Verset))
       dateInArray.tags = { ...dateInArray.tags, ...p[verse].tags }
     }
 
-    arr.sort((a: any, b: any) => Number(b.date) - Number(a.date))
+    arr.sort((a, b) => Number(b.date) - Number(a.date))
 
     return arr
   }, [])
@@ -304,23 +322,23 @@ export const makeTagDataSelector = () =>
           : [],
         naves: tag.naves
           ? Object.keys(tag.naves)
-              .map(id => (naves as Record<string, any>)[id])
-              .filter(c => c)
+              .map(id => naves[id])
+              .filter(isTaggedEntity)
           : [],
         words: tag.words
           ? Object.keys(tag.words)
-              .map(id => (words as Record<string, any>)[id])
-              .filter(c => c)
+              .map(id => words[id])
+              .filter(isTaggedEntity)
           : [],
         strongsGrec: tag.strongsGrec
           ? Object.keys(tag.strongsGrec)
-              .map(id => (strongsGrec as Record<string, any>)[id])
-              .filter(c => c)
+              .map(id => strongsGrec[id])
+              .filter(isTaggedEntity)
           : [],
         strongsHebreu: tag.strongsHebreu
           ? Object.keys(tag.strongsHebreu)
-              .map(id => (strongsHebreu as Record<string, any>)[id])
-              .filter(c => c)
+              .map(id => strongsHebreu[id])
+              .filter(isTaggedEntity)
           : [],
         wordAnnotations: tag.wordAnnotations
           ? sortWordAnnotationsByDate(
@@ -424,7 +442,7 @@ export const makeStrongTagsSelector = () =>
     ],
     (strongsGrec, strongsHebreu, { code, isGreek }) => {
       const strongs = isGreek ? strongsGrec : strongsHebreu
-      return (strongs as Record<string, { tags?: Record<string, any> }>)[code]?.tags
+      return (strongs as Record<string, TaggedEntity>)[code]?.tags
     }
   )
 
@@ -432,14 +450,14 @@ export const makeStrongTagsSelector = () =>
 export const makeWordTagsSelector = () =>
   createSelector(
     [selectWords, (_: RootState, word: string) => word],
-    (words, word) => (words as Record<string, { tags?: Record<string, any> }>)[word]?.tags
+    (words, word) => (words as Record<string, TaggedEntity>)[word]?.tags
   )
 
 // Selector for nave tags
 export const makeNaveTagsSelector = () =>
   createSelector(
     [selectNaves, (_: RootState, nameLower: string) => nameLower],
-    (naves, nameLower) => (naves as Record<string, { tags?: Record<string, any> }>)[nameLower]?.tags
+    (naves, nameLower) => (naves as Record<string, TaggedEntity>)[nameLower]?.tags
   )
 
 // Type for cross-version annotations per verse
@@ -589,7 +607,7 @@ export const makeTaggedItemsForVerseSelector = () =>
     }
   )
 
-// Selector factory to check if a verse has any tagged items
+// Selector factory to check if a verse has tagged items
 export const makeHasTaggedItemsForVerseSelector = () => {
   const taggedItemsSelector = makeTaggedItemsForVerseSelector()
   return createSelector([taggedItemsSelector], (items): boolean => items.length > 0)

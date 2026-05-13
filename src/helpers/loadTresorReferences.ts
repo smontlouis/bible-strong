@@ -3,7 +3,7 @@ import catchDatabaseError from '~helpers/catchDatabaseError.new'
 
 type TresorCommentaire = {
   id: string
-  commentaires: string[]
+  commentaires: string
 }
 
 const loadTresorCommentaires = (verse: string) =>

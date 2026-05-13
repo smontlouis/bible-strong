@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch } from 'react-redux'
 import { useAtom } from 'jotai'
 import { TouchableOpacity } from 'react-native'
-import Animated from 'react-native-reanimated'
+import Animated, { type AnimatedStyle } from 'react-native-reanimated'
 import { useTheme } from '@emotion/react'
 
 import { Image } from 'expo-image'
@@ -102,6 +102,34 @@ const SegmentedLanguageToggle = ({
   const containerWidth = isLarge ? 200 : 100
   const height = isLarge ? 44 : 36
   const indicatorWidth = containerWidth / 2 - 4
+  const indicatorStyle: AnimatedStyle = {
+    position: 'absolute',
+    top: 3,
+    left: value === 'fr' ? 3 : containerWidth / 2 + 1,
+    width: indicatorWidth,
+    height: height - 6,
+    backgroundColor: theme.colors.primary,
+    borderRadius: (height - 6) / 2,
+    transitionProperty: 'left',
+    transitionDuration: 250,
+    transitionTimingFunction: 'ease-out',
+  }
+  const frenchTextStyle: AnimatedStyle = {
+    fontSize: isLarge ? 16 : 13,
+    fontWeight: '600',
+    color: value === 'fr' ? '#FFFFFF' : theme.colors.grey,
+    textTransform: 'uppercase',
+    transitionProperty: 'color',
+    transitionDuration: 200,
+  }
+  const englishTextStyle: AnimatedStyle = {
+    fontSize: isLarge ? 16 : 13,
+    fontWeight: '600',
+    color: value === 'en' ? '#FFFFFF' : theme.colors.grey,
+    textTransform: 'uppercase',
+    transitionProperty: 'color',
+    transitionDuration: 200,
+  }
 
   return (
     <Box
@@ -114,21 +142,7 @@ const SegmentedLanguageToggle = ({
       position="relative"
     >
       {/* Animated sliding indicator */}
-      <Animated.View
-        style={{
-          position: 'absolute',
-          top: 3,
-          left: value === 'fr' ? 3 : containerWidth / 2 + 1,
-          width: indicatorWidth,
-          height: height - 6,
-          backgroundColor: theme.colors.primary,
-          borderRadius: (height - 6) / 2,
-          // @ts-ignore - CSS Transitions for Reanimated 4
-          transitionProperty: 'left',
-          transitionDuration: 250,
-          transitionTimingFunction: 'ease-out',
-        }}
-      />
+      <Animated.View style={indicatorStyle} />
 
       {/* FR Button */}
       <TouchableOpacity
@@ -136,19 +150,7 @@ const SegmentedLanguageToggle = ({
         activeOpacity={0.8}
         style={{ flex: 1, justifyContent: 'center', alignItems: 'center', zIndex: 1 }}
       >
-        <Animated.Text
-          style={{
-            fontSize: isLarge ? 16 : 13,
-            fontWeight: '600',
-            color: value === 'fr' ? '#FFFFFF' : theme.colors.grey,
-            textTransform: 'uppercase',
-            // @ts-ignore - CSS Transitions for Reanimated 4
-            transitionProperty: 'color',
-            transitionDuration: 200,
-          }}
-        >
-          {isLarge ? 'Français' : 'FR'}
-        </Animated.Text>
+        <Animated.Text style={frenchTextStyle}>{isLarge ? 'Français' : 'FR'}</Animated.Text>
       </TouchableOpacity>
 
       {/* EN Button */}
@@ -157,19 +159,7 @@ const SegmentedLanguageToggle = ({
         activeOpacity={0.8}
         style={{ flex: 1, justifyContent: 'center', alignItems: 'center', zIndex: 1 }}
       >
-        <Animated.Text
-          style={{
-            fontSize: isLarge ? 16 : 13,
-            fontWeight: '600',
-            color: value === 'en' ? '#FFFFFF' : theme.colors.grey,
-            textTransform: 'uppercase',
-            // @ts-ignore - CSS Transitions for Reanimated 4
-            transitionProperty: 'color',
-            transitionDuration: 200,
-          }}
-        >
-          {isLarge ? 'English' : 'EN'}
-        </Animated.Text>
+        <Animated.Text style={englishTextStyle}>{isLarge ? 'English' : 'EN'}</Animated.Text>
       </TouchableOpacity>
     </Box>
   )

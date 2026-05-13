@@ -1,6 +1,7 @@
 import React, { createContext, useContext } from 'react'
+import type { JSONValue } from 'expo/build/dom/dom.types'
 
-type DispatchContextType = (action: { type: string; payload?: any }) => void
+type DispatchContextType = (action: { type: string; payload?: JSONValue }) => void
 
 const DispatchContext = createContext<DispatchContextType | null>(null)
 

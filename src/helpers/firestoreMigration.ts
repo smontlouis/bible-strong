@@ -7,6 +7,7 @@ import {
   writeAllToSubcollection,
   clearSubcollection,
   type ChunkProgressCallback,
+  type SubcollectionData,
 } from './firestoreSubcollections'
 import { RootState } from '~redux/modules/reducer'
 import type { MigrationState } from './migrationState'
@@ -24,6 +25,16 @@ import {
 
 // Batch chunk size (must match firestoreSubcollections.ts)
 const BATCH_CHUNK_SIZE = 400
+type EmbeddedBibleData = Partial<Record<SubcollectionName, SubcollectionData>>
+type ImportedBibleData = Partial<Record<SubcollectionName, Record<string, unknown>>>
+
+const getErrorMessage = (error: unknown, fallback = 'Unknown error'): string => {
+  if (error instanceof Error) return error.message
+  if (error && typeof error === 'object' && 'message' in error) {
+    return String((error as { message?: unknown }).message ?? fallback)
+  }
+  return fallback
+}
 
 /**
  * Mapping des noms de collections vers des labels lisibles en français
@@ -79,7 +90,7 @@ export async function isUserMigrated(userId: string): Promise<boolean> {
     const userDocSnap = await getDoc(userDocRef)
     const userData = userDocSnap.data()
     return userData?._migrated === true
-  } catch (error: any) {
+  } catch (error) {
     console.error('[FirestoreMigration] Failed to check migration status:', error)
     Sentry.captureException(error, {
       tags: {
@@ -88,7 +99,7 @@ export async function isUserMigrated(userId: string): Promise<boolean> {
       },
       extra: {
         userId,
-        errorMessage: error?.message,
+        errorMessage: getErrorMessage(error),
       },
     })
     return false
@@ -114,7 +125,7 @@ export async function checkForEmbeddedData(userId: string): Promise<{
       return { hasEmbeddedData: false, collectionsWithData: [] }
     }
 
-    const bible = userData.bible
+    const bible = userData.bible as EmbeddedBibleData
     const collectionsWithData: SubcollectionName[] = []
 
     for (const collection of SUBCOLLECTION_NAMES) {
@@ -127,7 +138,7 @@ export async function checkForEmbeddedData(userId: string): Promise<{
       hasEmbeddedData: collectionsWithData.length > 0,
       collectionsWithData,
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('[FirestoreMigration] Failed to check for embedded data:', error)
     Sentry.captureException(error, {
       tags: {
@@ -136,7 +147,7 @@ export async function checkForEmbeddedData(userId: string): Promise<{
       },
       extra: {
         userId,
-        errorMessage: error?.message,
+        errorMessage: getErrorMessage(error),
       },
     })
     return { hasEmbeddedData: false, collectionsWithData: [] }
@@ -152,7 +163,7 @@ async function markAsMigrated(userId: string): Promise<void> {
     await updateDoc(userDocRef, {
       _migrated: true,
     })
-  } catch (error: any) {
+  } catch (error) {
     console.error('[FirestoreMigration] Failed to mark user as migrated:', error)
     Sentry.captureException(error, {
       tags: {
@@ -161,7 +172,7 @@ async function markAsMigrated(userId: string): Promise<void> {
       },
       extra: {
         userId,
-        errorMessage: error?.message,
+        errorMessage: getErrorMessage(error),
       },
     })
     throw error // Re-throw to let caller handle it
@@ -173,7 +184,7 @@ async function markAsMigrated(userId: string): Promise<void> {
  */
 async function removeEmbeddedData(userId: string): Promise<void> {
   try {
-    const updates: { [key: string]: any } = {}
+    const updates: Record<string, unknown> = {}
 
     for (const collectionName of SUBCOLLECTION_NAMES) {
       updates[`bible.${collectionName}`] = deleteField()
@@ -182,7 +193,7 @@ async function removeEmbeddedData(userId: string): Promise<void> {
     const userDocRef = doc(firebaseDb, 'users', userId)
     await updateDoc(userDocRef, updates)
     console.log('[FirestoreMigration] Embedded data removed from user document')
-  } catch (error: any) {
+  } catch (error) {
     console.error('[FirestoreMigration] Failed to remove embedded data:', error)
     Sentry.captureException(error, {
       tags: {
@@ -191,7 +202,7 @@ async function removeEmbeddedData(userId: string): Promise<void> {
       },
       extra: {
         userId,
-        errorMessage: error?.message,
+        errorMessage: getErrorMessage(error),
       },
     })
     throw error // Re-throw to let caller handle it
@@ -296,7 +307,7 @@ export async function migrateUserDataToSubcollections(
     console.log('[FirestoreMigration] Migration completed successfully')
 
     return { success: true }
-  } catch (error: any) {
+  } catch (error) {
     console.error('[FirestoreMigration] Migration failed:', error)
     Sentry.captureException(error, {
       tags: { feature: 'migration', action: 'migrate_to_subcollections' },
@@ -304,7 +315,7 @@ export async function migrateUserDataToSubcollections(
     })
     return {
       success: false,
-      error: error.message || 'Unknown error during migration',
+      error: getErrorMessage(error, 'Unknown error during migration'),
     }
   }
 }
@@ -323,17 +334,7 @@ export async function migrateUserDataToSubcollections(
  */
 export async function migrateImportedDataToSubcollections(
   userId: string,
-  data: {
-    bookmarks?: { [id: string]: any }
-    highlights?: { [id: string]: any }
-    notes?: { [id: string]: any }
-    tags?: { [id: string]: any }
-    strongsHebreu?: { [id: string]: any }
-    strongsGrec?: { [id: string]: any }
-    words?: { [id: string]: any }
-    naves?: { [id: string]: any }
-    links?: { [id: string]: any }
-  }
+  data: ImportedBibleData
 ): Promise<void> {
   console.log('[FirestoreMigration] ========================================')
   console.log('[FirestoreMigration] Starting imported data migration')
@@ -341,15 +342,14 @@ export async function migrateImportedDataToSubcollections(
 
   // Log data counts for debugging
   console.log('[FirestoreMigration] Data counts to import:')
-  const dataRecord = data as Record<string, { [id: string]: any } | undefined>
   for (const collection of SUBCOLLECTION_NAMES) {
-    const count = dataRecord[collection] ? Object.keys(dataRecord[collection]!).length : 0
+    const count = data[collection] ? Object.keys(data[collection]).length : 0
     console.log(`[FirestoreMigration]   - ${collection}: ${count} items`)
   }
 
   // Determine which collections have data to migrate
   const collectionsToMigrate = SUBCOLLECTION_NAMES.filter(
-    name => dataRecord[name] && Object.keys(dataRecord[name]!).length > 0
+    name => data[name] && Object.keys(data[name]).length > 0
   )
 
   if (collectionsToMigrate.length === 0) {
@@ -381,7 +381,7 @@ export async function migrateImportedDataToSubcollections(
     // Process each collection: clear existing data, then write new data
     for (let i = 0; i < totalCollections; i++) {
       const collection = collectionsToMigrate[i]
-      const collectionData = dataRecord[collection]!
+      const collectionData = data[collection]! as SubcollectionData
       const itemCount = Object.keys(collectionData).length
 
       // Base progress for this collection (0 to 1 range for each collection)
@@ -471,7 +471,7 @@ export async function migrateImportedDataToSubcollections(
 /**
  * Compte le nombre total d'éléments à migrer pour estimation
  */
-export function countItemsToMigrate(bible: any): number {
+export function countItemsToMigrate(bible: EmbeddedBibleData): number {
   let count = 0
   for (const collection of SUBCOLLECTION_NAMES) {
     if (bible[collection]) {
@@ -669,7 +669,8 @@ export async function resumableMigrateUserData(
           message: `${label} migrés avec succès`,
           overallProgress: endProgress,
         })
-      } catch (error: any) {
+      } catch (error) {
+        const errorMessage = getErrorMessage(error)
         console.error(`[FirestoreMigration] Failed to migrate ${collection}:`, error)
 
         // Capturer l'erreur dans Sentry avec contexte détaillé
@@ -685,12 +686,12 @@ export async function resumableMigrateUserData(
             itemCount,
             completedCollections: completedCollections.join(', '),
             failedCollections: failedCollections.join(', '),
-            errorMessage: error.message,
+            errorMessage,
           },
         })
 
         // Marquer comme échoué et continuer
-        updateCollectionStatus(collection, 'failed', itemCount, error.message)
+        updateCollectionStatus(collection, 'failed', itemCount, errorMessage)
         failedCollections.push(collection)
 
         // Continuer avec la prochaine collection
@@ -743,7 +744,7 @@ export async function resumableMigrateUserData(
         error: errorMessage,
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('[FirestoreMigration] Migration failed with unexpected error:', error)
 
     Sentry.captureException(error, {
@@ -762,7 +763,7 @@ export async function resumableMigrateUserData(
       success: false,
       partialFailure: completedCollections.length > 0,
       failedCollections,
-      error: error.message || 'Erreur inattendue lors de la migration',
+      error: getErrorMessage(error, 'Erreur inattendue lors de la migration'),
     }
   }
 }

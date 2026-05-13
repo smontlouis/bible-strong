@@ -13,11 +13,9 @@ import {
 import { entitiesArray } from '~redux/modules/user/tags'
 
 export interface Diff {
-  added?: {
-    [x: string]: any
-  }
-  updated?: any
-  deleted?: any
+  added?: Record<string, unknown>
+  updated?: unknown
+  deleted?: unknown
 }
 
 export const isFullScreenBibleAtom = atom(false)

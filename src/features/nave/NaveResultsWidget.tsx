@@ -1,31 +1,41 @@
-import React, { useState, useEffect } from 'react'
+import React, { ComponentType, useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import loadNaveBySearch from '~helpers/loadNaveBySearch'
+import loadNaveBySearch, { type NaveSearchRow } from '~helpers/loadNaveBySearch'
 import { useWaitForDatabase } from '~common/waitForNaveDB'
+import { DatabaseError } from '~helpers/catchDatabaseError'
 
 import { useResultsByLetterOrSearch } from '../lexique/useUtilities'
 import NaveResultItem from './NaveResultItem'
 
-const hideIfNoDatabase = (WrappedComponent: any) => (props: any) => {
-  const { isLoading, proposeDownload } = useWaitForDatabase()
+const hideIfNoDatabase =
+  <P extends object>(WrappedComponent: ComponentType<P>) =>
+  (props: P) => {
+    const { isLoading, proposeDownload } = useWaitForDatabase()
 
-  if (isLoading || proposeDownload) {
-    return null
+    if (isLoading || proposeDownload) {
+      return null
+    }
+    return <WrappedComponent {...props} />
   }
-  return <WrappedComponent {...props} />
-}
 
 const LIMIT = 5
 const height = 40
 const color1 = 'rgb(80, 83, 140)'
 const color2 = 'rgb(48, 51, 107)'
 
-const LexiqueResultsWidget = ({ searchValue }: any) => {
-  const [error, setError] = useState(false)
+interface LexiqueResultsWidgetProps {
+  searchValue: string
+}
+
+const isDatabaseError = (value: unknown): value is DatabaseError =>
+  typeof value === 'object' && value !== null && 'error' in value
+
+const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
+  const [error, setError] = useState<DatabaseError['error'] | null>(null)
   const [limit, setLimit] = useState(LIMIT)
 
   const { results } = useResultsByLetterOrSearch({
@@ -34,7 +44,7 @@ const LexiqueResultsWidget = ({ searchValue }: any) => {
   })
 
   useEffect(() => {
-    if (results.error) {
+    if (isDatabaseError(results)) {
       setError(results.error)
     }
   }, [results])
@@ -43,18 +53,20 @@ const LexiqueResultsWidget = ({ searchValue }: any) => {
     return null
   }
 
-  if (!results.length) {
+  const naveResults = Array.isArray(results) ? results : []
+
+  if (!naveResults.length) {
     return null
   }
 
   return (
     <>
-      {results.slice(0, limit).map((ref: any) => {
+      {naveResults.slice(0, limit).map((ref: NaveSearchRow) => {
         const { name_lower, name } = ref
         return <NaveResultItem key={name_lower} name={name} name_lower={name_lower} />
       })}
-      {results.length > limit && (
-        <Link onPress={() => setLimit((l: number) => l + 5)}>
+      {naveResults.length > limit && (
+        <Link onPress={() => setLimit(l => l + 5)}>
           <Box
             opacity={0.5}
             center
@@ -77,7 +89,7 @@ const LexiqueResultsWidget = ({ searchValue }: any) => {
               <LinearGradient start={[0.1, 0.2]} style={{ height }} colors={[color1, color2]} />
             </Box>
             <Text title fontSize={14} style={{ color: 'white' }}>
-              + {results.length - limit}
+              + {naveResults.length - limit}
             </Text>
           </Box>
         </Link>

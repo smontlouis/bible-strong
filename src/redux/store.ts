@@ -1,5 +1,11 @@
 import { configureStore as createRTKStore } from '@reduxjs/toolkit'
-import { persistStore, persistReducer, createMigrate, getStoredState } from 'redux-persist'
+import {
+  persistStore,
+  persistReducer,
+  createMigrate,
+  getStoredState,
+  type PersistConfig,
+} from 'redux-persist'
 import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2'
 import FilesystemStorage from 'redux-persist-filesystem-storage'
 import devToolsEnhancer from 'redux-devtools-expo-dev-plugin'
@@ -11,8 +17,15 @@ import migrations from './migrations'
 import reducer from '~redux/modules/reducer'
 import { mmkvStorage } from '~helpers/storage'
 
+type RootReducerState = ReturnType<typeof reducer>
+type HotModule = NodeJS.Module & {
+  hot?: {
+    accept: (callback: () => void) => void
+  }
+}
+
 function configureStore() {
-  const persistConfig: any = {
+  const persistConfig: PersistConfig<RootReducerState> = {
     key: 'root',
     keyPrefix: '',
     storage: mmkvStorage,
@@ -20,20 +33,20 @@ function configureStore() {
     version: 32,
     // debug: true,
     blacklist: ['plan'],
-    // @ts-ignore
-    migrate: createMigrate(migrations, { debug: true }),
-    timeout: null,
+    migrate: createMigrate(migrations as unknown as Parameters<typeof createMigrate>[0], {
+      debug: true,
+    }),
+    timeout: null as unknown as number,
   }
 
   // MMKV migration
-  // @ts-ignore
-  persistConfig.getStoredState = async (config: any) => {
-    return getStoredState(config).catch(err => {
+  persistConfig.getStoredState = async config => {
+    const storedState = getStoredState(config).catch(err => {
       return getStoredState({ ...config, storage: FilesystemStorage })
     })
+    return storedState as ReturnType<NonNullable<typeof persistConfig.getStoredState>>
   }
 
-  // @ts-ignore
   const persistedReducer = persistReducer(persistConfig, reducer)
 
   const store = createRTKStore({
@@ -53,10 +66,9 @@ function configureStore() {
   // storage.clearAll()
 
   if (__DEV__) {
-    // @ts-ignore
-    if (module.hot) {
-      // @ts-ignore
-      module.hot.accept(() => {
+    const hotModule = module as HotModule
+    if (hotModule.hot) {
+      hotModule.hot.accept(() => {
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const nextRootReducer = require('./modules/reducer').default
         store.replaceReducer(nextRootReducer)

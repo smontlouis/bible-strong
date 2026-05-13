@@ -1,7 +1,8 @@
 import Text from '~common/ui/Text'
+import React from 'react'
+import { TextStyle } from 'react-native'
+import type { HTMLNode, HTMLViewProps } from './HTMLView'
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const React = require('react')
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const htmlparser = require('./vendor/htmlparser2')
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -15,19 +16,40 @@ const BULLET = '\n'
 // Captures: group 1 = H or G, group 2 = the number
 const STRONG_REF_PATTERN = /\b([HG])(\d+)\b/g
 
-function htmlToElement(rawHtml: string, opts: any, done: (err: any, element?: any) => void) {
-  function domToElement(dom: any, parent?: any): any {
+interface HtmlToElementOptions {
+  linkHandler?: HTMLViewProps['onLinkPress']
+  styles: Record<string, TextStyle>
+  customRenderer?: HTMLViewProps['renderNode']
+}
+
+type HtmlParserHandler = new (callback: (err: unknown, dom: HTMLNode[]) => void) => unknown
+
+type HtmlParserParser = new (handler: unknown) => {
+  write: (html: string) => void
+  done: () => void
+}
+
+const DomHandler = htmlparser.DomHandler as HtmlParserHandler
+const Parser = htmlparser.Parser as HtmlParserParser
+const decodeHTML = entities.decodeHTML as (value?: string) => string
+
+function htmlToElement(
+  rawHtml: string,
+  opts: HtmlToElementOptions,
+  done: (err: unknown, element?: React.ReactNode) => void
+) {
+  function domToElement(dom: HTMLNode[] | undefined, parent?: HTMLNode): React.ReactNode {
     if (!dom) return null
 
-    return dom.map((node: any, index: number, list: any[]) => {
+    return dom.map((node, index, list) => {
       if (opts.customRenderer) {
         const rendered = opts.customRenderer(node, index, list, parent, domToElement)
         if (rendered || rendered === null) return rendered
       }
 
       if (node.type === 'text') {
-        const text = entities.decodeHTML(node.data)
-        const style = parent ? opts.styles[parent.name] : opts.styles.p
+        const text = decodeHTML(node.data)
+        const style = parent?.name ? opts.styles[parent.name] : opts.styles.p
 
         // Check if text contains Strong's references and we have a link handler
         if (opts.linkHandler && STRONG_REF_PATTERN.test(text)) {
@@ -67,7 +89,7 @@ function htmlToElement(rawHtml: string, opts: any, done: (err: any, element?: an
                 selectable
                 key={`${index}-link-${match.index}`}
                 style={linkStyle}
-                onPress={() => opts.linkHandler(numberPart, book)}
+                onPress={() => opts.linkHandler?.(numberPart, book)}
               >
                 {fullRef}
               </Text>
@@ -103,10 +125,10 @@ function htmlToElement(rawHtml: string, opts: any, done: (err: any, element?: an
         let linkPressHandler: (() => void) | undefined = undefined
         if (node.name === 'a' && node.attribs && node.attribs.href) {
           linkPressHandler = () =>
-            opts.linkHandler(
-              entities.decodeHTML(node.attribs.href),
-              entities.decodeHTML(node.children[0].data),
-              entities.decodeHTML(node.attribs.class)
+            opts.linkHandler?.(
+              decodeHTML(node.attribs?.href),
+              decodeHTML(node.children?.[0]?.data),
+              decodeHTML(node.attribs?.class)
             )
         }
 
@@ -132,11 +154,11 @@ function htmlToElement(rawHtml: string, opts: any, done: (err: any, element?: an
     })
   }
 
-  const handler = new htmlparser.DomHandler((err: any, dom: any) => {
+  const handler = new DomHandler((err, dom) => {
     if (err) done(err)
     done(null, domToElement(dom))
   })
-  const parser = new htmlparser.Parser(handler)
+  const parser = new Parser(handler)
   parser.write(rawHtml)
   parser.done()
 }

@@ -10,8 +10,8 @@ import Header from '~common/Header'
 import Link from '~common/Link'
 import SearchInput from '~common/SearchInput'
 import Loading from '~common/Loading'
-import loadNaveByLetter from '~helpers/loadNaveByLetter'
-import loadNaveBySearch from '~helpers/loadNaveBySearch'
+import loadNaveByLetter, { type NaveLetterRow } from '~helpers/loadNaveByLetter'
+import loadNaveBySearch, { type NaveSearchRow } from '~helpers/loadNaveBySearch'
 import Empty from '~common/Empty'
 import AlphabetList from '~common/AlphabetList'
 import SectionTitle from '~common/SectionTitle'
@@ -25,17 +25,34 @@ import { NaveTab } from '../../state/tabs'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import PopOverMenu from '~common/PopOverMenu'
 import LanguageMenuOption from '~common/LanguageMenuOption'
+import type { DatabaseError } from '~helpers/catchDatabaseError'
 
-const useSectionResults = (results: any) => {
-  const [sectionResults, setSectionResults] = useState<any>(null)
+type NaveRow = NaveLetterRow | NaveSearchRow
+type NaveSection = {
+  title: string
+  data: NaveRow[]
+}
+
+const isDatabaseError = (value: unknown): value is DatabaseError =>
+  !!value && typeof value === 'object' && 'error' in value
+
+const getNaveItemLayout = sectionListGetItemLayout({
+  getItemHeight: () => 60,
+  getSectionHeaderHeight: () => 50,
+  getSeparatorHeight: () => 0,
+  getSectionFooterHeight: () => 0,
+}) as (data: NaveSection[], index: number) => { length: number; offset: number; index: number }
+
+const useSectionResults = (results: NaveRow[]) => {
+  const [sectionResults, setSectionResults] = useState<NaveSection[]>([])
 
   useEffect(() => {
     if (!results.length) {
       setSectionResults([])
       return
     }
-    const sectionResults = results.reduce((list: any, naveItem: any) => {
-      const listItem = list.find((item: any) => item.title && item.title === naveItem.letter)
+    const sectionResults = results.reduce<NaveSection[]>((list, naveItem) => {
+      const listItem = list.find(item => item.title === naveItem.letter)
       if (!listItem) {
         list.push({ title: naveItem.letter, data: [naveItem] })
       } else {
@@ -59,7 +76,7 @@ interface NaveListScreenProps {
 const NaveListScreen = ({ hasBackButton, onNaveSelect }: NaveListScreenProps) => {
   const { t } = useTranslation()
   const lang = useLanguage()
-  const [error, setError] = useState(false)
+  const [error, setError] = useState<DatabaseError['error'] | null>(null)
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
 
@@ -67,12 +84,11 @@ const NaveListScreen = ({ hasBackButton, onNaveSelect }: NaveListScreenProps) =>
     { query: loadNaveBySearch, value: debouncedSearchValue },
     { query: loadNaveByLetter, value: letter }
   )
-  const sectionResults = useSectionResults(results)
+  const naveResults = Array.isArray(results) ? (results as NaveRow[]) : []
+  const sectionResults = useSectionResults(naveResults)
 
   useEffect(() => {
-    // @ts-ignore
-    if (results.error) {
-      // @ts-ignore
+    if (isDatabaseError(results)) {
       setError(results.error)
     }
   }, [results])
@@ -84,7 +100,6 @@ const NaveListScreen = ({ hasBackButton, onNaveSelect }: NaveListScreenProps) =>
         <Empty
           icon={require('~assets/images/empty-state-icons/inbox.svg')}
           message={`${t('Impossible de charger la nave...')}${
-            // @ts-ignore
             error === 'CORRUPTED_DATABASE'
               ? t(
                   '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
@@ -130,7 +145,7 @@ const NaveListScreen = ({ hasBackButton, onNaveSelect }: NaveListScreenProps) =>
         {isLoading ? (
           <Loading message={t('Chargement...')} />
         ) : sectionResults.length ? (
-          <SectionList
+          <SectionList<NaveRow, NaveSection>
             renderItem={({ item: { name_lower, name } }) => (
               <NaveItem
                 key={name_lower}
@@ -141,13 +156,7 @@ const NaveListScreen = ({ hasBackButton, onNaveSelect }: NaveListScreenProps) =>
             )}
             removeClippedSubviews
             maxToRenderPerBatch={100}
-            // @ts-ignore
-            getItemLayout={sectionListGetItemLayout({
-              getItemHeight: () => 60,
-              getSectionHeaderHeight: () => 50,
-              getSeparatorHeight: () => 0,
-              getSectionFooterHeight: () => 0,
-            })}
+            getItemLayout={(data, index) => getNaveItemLayout((data || []) as NaveSection[], index)}
             renderSectionHeader={({ section: { title } }) => (
               <SectionTitle color="quint">
                 <Text title fontWeight="bold" fontSize={16} style={{ color: 'white' }}>
@@ -157,7 +166,7 @@ const NaveListScreen = ({ hasBackButton, onNaveSelect }: NaveListScreenProps) =>
             )}
             stickySectionHeadersEnabled
             sections={sectionResults}
-            keyExtractor={(item: any) => item.name_lower}
+            keyExtractor={(item: NaveRow) => item.name_lower}
           />
         ) : (
           <Empty

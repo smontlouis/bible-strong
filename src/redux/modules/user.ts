@@ -1,4 +1,5 @@
 import { AnyAction, createSlice, PayloadAction, ThunkAction } from '@reduxjs/toolkit'
+import type { JSONValue } from 'expo/build/dom/dom.types'
 import { getDefaultStore } from 'jotai/vanilla'
 import { Appearance } from 'react-native'
 
@@ -91,6 +92,17 @@ type EntityWithTags = {
 // Type for bible entity collections (used in toggleTagEntity)
 type BibleEntityCollection = Record<string, EntityWithTags>
 
+type CleanedFirestoreData =
+  | string
+  | number
+  | boolean
+  | null
+  | CleanedFirestoreData[]
+  | { [key: string]: CleanedFirestoreData }
+
+const isObjectRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)
+
 // Re-export everything from sub-modules for backward compatibility
 export * from './user/bookmarks'
 export * from './user/customColors'
@@ -110,22 +122,25 @@ export type { Tag }
  * Nettoie les données corrompues de Firestore
  * Supprime les objets {_type: 'delete'} qui n'auraient pas dû être stockés
  */
-const cleanCorruptedFirestoreData = (obj: any): any => {
+const cleanCorruptedFirestoreData = (obj: unknown): CleanedFirestoreData | undefined => {
   if (obj === null || obj === undefined) return obj
-  if (typeof obj !== 'object') return obj
+  if (typeof obj === 'string' || typeof obj === 'number' || typeof obj === 'boolean') return obj
+  if (typeof obj !== 'object') return undefined
 
   // Detect corrupted Firestore sentinel that was serialized
-  if (obj._type === 'delete') {
+  if (isObjectRecord(obj) && obj._type === 'delete') {
     return undefined
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(cleanCorruptedFirestoreData).filter(v => v !== undefined)
+    return obj
+      .map(cleanCorruptedFirestoreData)
+      .filter((value): value is CleanedFirestoreData => value !== undefined)
   }
 
-  const result: any = {}
+  const result: { [key: string]: CleanedFirestoreData } = {}
   for (const key of Object.keys(obj)) {
-    const cleanedValue = cleanCorruptedFirestoreData(obj[key])
+    const cleanedValue = cleanCorruptedFirestoreData((obj as Record<string, unknown>)[key])
     if (cleanedValue !== undefined) {
       result[key] = cleanedValue
     }
@@ -152,8 +167,9 @@ export interface Study {
   created_at: number
   modified_at: number
   content: {
-    ops: string[]
-  }
+    ops: JSONValue[]
+    [key: string]: JSONValue | undefined
+  } | null
   published?: boolean
   user: {
     displayName: string
@@ -249,6 +265,7 @@ export interface ImportDataPayload {
   bible: Partial<UserState['bible']>
   studies: StudiesObj
   tabGroups?: TabGroup[]
+  plan?: OngoingPlan[]
 }
 
 export interface UserState {
@@ -832,7 +849,7 @@ const userSlice = createSlice({
         const annotation = state.bible.wordAnnotations[id]
         if (annotation.version !== version) return
 
-        // Check if any range of this annotation overlaps with the selection
+        // Check if a range of this annotation overlaps with the selection
         const overlaps = annotation.ranges.some(range => {
           const rangeVerseCompare = compareVerseKeys(range.verseKey, normalizedStart.verseKey)
           const rangeVerseCompareEnd = compareVerseKeys(range.verseKey, normalizedEnd.verseKey)
@@ -1105,8 +1122,8 @@ const userSlice = createSlice({
       state.bible.tags[id].name = value
 
       entitiesArray.forEach(ent => {
-        const entities = state.bible[ent]
-        Object.values(entities).forEach((entity: any) => {
+        const entities = (state.bible[ent] ?? {}) as BibleEntityCollection
+        Object.values(entities).forEach(entity => {
           const entityTags = entity.tags
           if (entityTags && entityTags[id]) {
             entityTags[id].name = value
@@ -1118,8 +1135,8 @@ const userSlice = createSlice({
       delete state.bible.tags[action.payload]
 
       entitiesArray.forEach(ent => {
-        const entities = state.bible[ent]
-        Object.values(entities).forEach((entity: any) => {
+        const entities = (state.bible[ent] ?? {}) as BibleEntityCollection
+        Object.values(entities).forEach(entity => {
           const entityTags = entity.tags
           if (entityTags && entityTags[action.payload]) {
             delete entityTags[action.payload]

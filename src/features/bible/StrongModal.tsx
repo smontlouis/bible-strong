@@ -3,7 +3,6 @@ import { ActivityIndicator } from 'react-native'
 
 import { useTheme } from '@emotion/react'
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
-import { useRouter } from 'expo-router'
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
 import waitForStrongModal from '~common/waitForStrongModal'
@@ -12,60 +11,70 @@ import { isStrongVersion } from '~helpers/bibleVersions'
 import { onAnimateModalClose, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import loadStrongReference from '~helpers/loadStrongReference'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import type { SelectedCode, StrongReference } from '~common/types'
 
-const StrongCardWrapper = waitForStrongModal(({ navigation, selectedCode, onClosed }: any) => {
-  const theme = useTheme()
-  const [isLoading, setIsLoading] = useState(true)
-  const [strongReference, setStrongReference] = useState<any>(null)
-  const [error, setError] = useState(false)
+interface StrongCardWrapperProps {
+  selectedCode: SelectedCode | null
+  onClosed: () => void
+}
 
-  useEffect(() => {
-    const loadStrong = async () => {
-      if (selectedCode?.reference) {
-        setError(false)
-        setIsLoading(true)
-        const strongReference = await loadStrongReference(selectedCode.reference, selectedCode.book)
-        setStrongReference(strongReference)
+const StrongCardWrapper = waitForStrongModal(
+  ({ selectedCode, onClosed }: StrongCardWrapperProps) => {
+    const theme = useTheme()
+    const [isLoading, setIsLoading] = useState(true)
+    const [strongReference, setStrongReference] = useState<StrongReference | null>(null)
+    const [error, setError] = useState(false)
 
-        if (strongReference?.error || !strongReference) {
-          setError(true)
+    useEffect(() => {
+      const loadStrong = async () => {
+        if (selectedCode?.reference) {
+          setError(false)
+          setIsLoading(true)
+          const strongReference = await loadStrongReference(
+            selectedCode.reference,
+            selectedCode.book
+          )
+          if (!strongReference || 'error' in strongReference) {
+            setError(true)
+            setIsLoading(false)
+            return
+          }
+
+          setStrongReference(strongReference)
           setIsLoading(false)
-          return
         }
+        if (!selectedCode?.reference) {
+          setError(true)
+        }
+      }
 
-        setIsLoading(false)
-      }
-      if (!selectedCode?.reference) {
-        setError(true)
-      }
+      loadStrong()
+    }, [selectedCode])
+
+    if (error) {
+      return (
+        <Empty source={require('~assets/images/empty.json')} message="Une erreur est survenue..." />
+      )
     }
 
-    loadStrong()
-  }, [selectedCode])
-
-  if (error) {
+    if (isLoading) {
+      return (
+        <Box flex center height={200}>
+          <ActivityIndicator color={theme.colors.grey} />
+        </Box>
+      )
+    }
     return (
-      <Empty source={require('~assets/images/empty.json')} message="Une erreur est survenue..." />
+      <StrongCard
+        theme={theme}
+        book={String(selectedCode?.book)}
+        strongReference={strongReference!}
+        isModal
+        onClosed={onClosed}
+      />
     )
   }
-
-  if (isLoading) {
-    return (
-      <Box flex center height={200}>
-        <ActivityIndicator color={theme.colors.grey} />
-      </Box>
-    )
-  }
-  return (
-    <StrongCard
-      theme={theme}
-      book={selectedCode?.book}
-      strongReference={strongReference}
-      isModal
-      onClosed={onClosed}
-    />
-  )
-})
+)
 
 interface StrongModalProps {
   ref?: React.RefObject<BottomSheet | null>
@@ -78,7 +87,6 @@ interface StrongModalProps {
 }
 
 const StrongModal = ({ ref, onClosed, selectedCode, version }: StrongModalProps) => {
-  const router = useRouter()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
 
@@ -109,7 +117,7 @@ const StrongModal = ({ ref, onClosed, selectedCode, version }: StrongModalProps)
       }}
     >
       <BottomSheetScrollView>
-        <StrongCardWrapper {...{ navigation: router, selectedCode, onClosed }} />
+        <StrongCardWrapper selectedCode={selectedCode} onClosed={onClosed} />
       </BottomSheetScrollView>
     </BottomSheet>
   )

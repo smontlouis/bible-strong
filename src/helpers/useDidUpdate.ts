@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { DependencyList, EffectCallback, useEffect, useRef } from 'react'
 
-const useDidUpdate = (callback: Function, deps: any[] = []) => {
+const useDidUpdate = (callback: EffectCallback, deps: DependencyList = []) => {
   const hasMount = useRef(false)
 
   useEffect(() => {

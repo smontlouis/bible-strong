@@ -1,4 +1,5 @@
 import { createAction } from '@reduxjs/toolkit'
+import { VerseIds } from '~common/types'
 import generateUUID from '~helpers/generateUUID'
 
 // Action type constants for backward compatibility
@@ -35,7 +36,7 @@ export const removeTag = createAction(REMOVE_TAG, (tagId: string) => ({
 export interface ToggleTagEntityItem {
   entity: (typeof entitiesArray)[number]
   id?: string
-  ids?: Record<string, any>
+  ids?: VerseIds
   title?: string
 }
 

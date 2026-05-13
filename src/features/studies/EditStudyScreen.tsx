@@ -14,7 +14,7 @@ import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
 import Text from '~common/ui/Text'
 import { RootState } from '~redux/modules/reducer'
-import { updateStudy } from '~redux/modules/user'
+import { updateStudy, Study } from '~redux/modules/user'
 import EditStudyHeader from './EditStudyHeader'
 import StudiesDomWrapper from './StudiesDOM/StudiesDomWrapper'
 import { openedFromTabAtom } from './atom'
@@ -84,7 +84,7 @@ const EditStudyScreen = ({
   const currentStudy = useSelector((state: RootState) => state.user.bible.studies[studyId])
 
   const onDeltaChangeCallback = (
-    delta: string | null,
+    delta: Study['content'] | null,
     deltaChange: string | null,
     deltaOld: string | null,
     changeSource: string | null
@@ -94,7 +94,7 @@ const EditStudyScreen = ({
     dispatch(
       updateStudy({
         id: currentStudy.id,
-        content: delta,
+        ...(delta && { content: delta }),
         modified_at: Date.now(),
       })
     )
@@ -144,7 +144,7 @@ const EditStudyScreen = ({
         onDeltaChangeCallback={onDeltaChangeCallback}
         contentToDisplay={currentStudy.content}
         fontFamily={fontFamily}
-        params={params as any}
+        params={{ studyId }}
         studyAtom={studyAtom}
         studyId={studyId}
       />
@@ -157,10 +157,7 @@ const EditStudyScreen = ({
           dispatch(updateStudy({ id: currentStudy.id, title: value, modified_at: Date.now() }))
         }}
       />
-      {isReadOnly && (
-        // @ts-ignore
-        <FabButton icon="edit-2" onPress={() => setIsReadOnly(false)} />
-      )}
+      {isReadOnly && <FabButton icon="edit-2" onPress={() => setIsReadOnly(false)} />}
     </Container>
   )
 }

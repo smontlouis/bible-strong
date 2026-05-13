@@ -2,10 +2,14 @@ import { SQLStrongTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError from '~helpers/catchDatabaseError'
 import { memoizeWithLang } from './memoize'
 
+interface StrongVersesCountRow {
+  versesCount: number
+}
+
 const loadStrongVersesCount = memoizeWithLang('STRONG', (book: number, reference: string) =>
   catchDatabaseError(async () => {
     const part = book > 39 ? 'LSGSNT2' : 'LSGSAT2'
-    const result = await SQLStrongTransaction(
+    const result = await SQLStrongTransaction<StrongVersesCountRow>(
       `SELECT count(*) as versesCount
       FROM ${part} 
       WHERE Texte LIKE '% ${reference} %' 

@@ -48,6 +48,12 @@ export const SUBCOLLECTION_NAMES: SubcollectionName[] = [
  */
 const BATCH_CHUNK_SIZE = 400
 
+export type SubcollectionDocument = FirebaseFirestoreTypes.DocumentData
+export type SubcollectionData = Record<string, SubcollectionDocument>
+type BatchOperation =
+  | { type: 'set'; docId: string; data: SubcollectionDocument }
+  | { type: 'delete'; docId: string }
+
 /**
  * Résultat de la validation d'un ID de document
  */
@@ -98,7 +104,7 @@ export async function writeToSubcollection(
   userId: string,
   collectionName: SubcollectionName,
   docId: string,
-  data: any
+  data: SubcollectionDocument
 ): Promise<void> {
   try {
     const docRef = doc(getSubcollectionRef(userId, collectionName), encodeDocumentId(docId))
@@ -138,7 +144,7 @@ export async function deleteFromSubcollection(
  * Interface pour les changements à appliquer en batch
  */
 export interface BatchChanges {
-  set: { [docId: string]: any }
+  set: SubcollectionData
   delete: string[]
 }
 
@@ -160,7 +166,7 @@ export async function batchWriteSubcollection(
   const collectionRef = getSubcollectionRef(userId, collectionName)
 
   // Préparer toutes les opérations
-  const operations: { type: 'set' | 'delete'; docId: string; data?: any }[] = []
+  const operations: BatchOperation[] = []
   const skippedItems: { docId: string; reason: string }[] = []
 
   // Ajouter les opérations set (avec validation et encodage des IDs)
@@ -272,7 +278,7 @@ export async function batchWriteSubcollection(
 export async function writeAllToSubcollection(
   userId: string,
   collection: SubcollectionName,
-  data: { [id: string]: any },
+  data: SubcollectionData,
   onChunkProgress?: ChunkProgressCallback
 ): Promise<void> {
   if (!data || Object.keys(data).length === 0) {
@@ -347,7 +353,7 @@ export async function clearSubcollection(
 export function fetchSubcollection(
   userId: string,
   collectionName: SubcollectionName
-): Promise<{ [id: string]: any }> {
+): Promise<SubcollectionData> {
   return new Promise((resolve, reject) => {
     const collectionRef = getSubcollectionRef(userId, collectionName)
 
@@ -355,7 +361,7 @@ export function fetchSubcollection(
     const unsubscribe = onSnapshot(
       collectionRef,
       snapshot => {
-        const result: { [id: string]: any } = {}
+        const result: SubcollectionData = {}
         snapshot.forEach((docSnap: FirebaseFirestoreTypes.QueryDocumentSnapshot) => {
           result[decodeDocumentId(docSnap.id)] = docSnap.data()
         })
@@ -385,10 +391,10 @@ export function fetchSubcollection(
  * Type pour le callback de changements
  */
 export type SubcollectionChangeCallback = (
-  data: { [id: string]: any },
+  data: SubcollectionData,
   changes: {
-    added: { [id: string]: any }
-    modified: { [id: string]: any }
+    added: SubcollectionData
+    modified: SubcollectionData
     removed: string[]
   }
 ) => void
@@ -422,7 +428,7 @@ export function subscribeToSubcollection(
         }
 
         // Construire l'objet complet (avec décodage des IDs)
-        const data: { [id: string]: any } = {}
+        const data: SubcollectionData = {}
         snapshot.forEach((docSnap: FirebaseFirestoreTypes.QueryDocumentSnapshot) => {
           data[decodeDocumentId(docSnap.id)] = docSnap.data()
         })
@@ -439,8 +445,8 @@ export function subscribeToSubcollection(
         }
 
         // Pour les snapshots suivants, on détecte les changements
-        const added: { [id: string]: any } = {}
-        const modified: { [id: string]: any } = {}
+        const added: SubcollectionData = {}
+        const modified: SubcollectionData = {}
         const removed: string[] = []
 
         snapshot.docChanges().forEach((change: FirebaseFirestoreTypes.DocumentChange) => {
@@ -462,9 +468,11 @@ export function subscribeToSubcollection(
 
         onChange(data, { added, modified, removed })
       },
-      async (error: any) => {
+      async error => {
+        const errorWithCode = error as Error & { code?: string }
         const isPermissionDenied =
-          error?.code === 'permission-denied' || error?.code === 'firestore/permission-denied'
+          errorWithCode.code === 'permission-denied' ||
+          errorWithCode.code === 'firestore/permission-denied'
 
         if (isPermissionDenied && !isDisposed && !hasRetried) {
           hasRetried = true

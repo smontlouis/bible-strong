@@ -11,7 +11,13 @@ import { getLanguage } from '../../i18n'
 
 const language = getLanguage()
 
-export const bcv: any = new bcv_parser(language === 'fr' ? fr : en)
+interface BcvParserWithTranslations extends bcv_parser {
+  translations: {
+    systems: Record<string, { chapters: Record<string, number[]>; order: Record<string, number> }>
+  }
+}
+
+export const bcv = new bcv_parser(language === 'fr' ? fr : en) as BcvParserWithTranslations
 
 bcv.set_options({
   consecutive_combination_strategy: 'separate',

@@ -8,6 +8,10 @@ import sepiaColors from '~themes/sepiaColors'
 import sunsetColors from '~themes/sunsetColors'
 import { RootState } from './modules/reducer'
 
+type LegacyRootState = RootState & {
+  bible?: Record<string, unknown>
+}
+
 export default {
   // Added 'press' in 'settings'
   0: (state: RootState) => {
@@ -75,12 +79,11 @@ export default {
     }
   },
   5: (state: RootState) => {
+    const legacyState = state as LegacyRootState
     return {
       ...state,
-      // @ts-ignore
       bible: {
-        // @ts-ignore
-        ...state.bible,
+        ...legacyState.bible,
       },
     }
   },
@@ -186,12 +189,11 @@ export default {
     }
   },
   12: (state: RootState) => {
+    const legacyState = state as LegacyRootState
     return {
       ...state,
-      // @ts-ignore
       bible: {
-        // @ts-ignore
-        ...state.bible,
+        ...legacyState.bible,
       },
     }
   },
@@ -249,12 +251,11 @@ export default {
     }
   },
   18: (state: RootState) => {
+    const legacyState = state as LegacyRootState
     return {
       ...state,
-      // @ts-ignore
       bible: {
-        // @ts-ignore
-        ...state.bible,
+        ...legacyState.bible,
         parallelVersions: [],
       },
     }
@@ -284,16 +285,15 @@ export default {
     }
   },
   21: (state: RootState) => {
+    const legacyState = state as LegacyRootState
     return {
       ...state,
       user: {
         ...state.user,
         subscription: undefined,
       },
-      // @ts-ignore
       bible: {
-        // @ts-ignore
-        ...state.bible,
+        ...legacyState.bible,
         selectionMode: 'grid',
       },
     }
@@ -390,8 +390,8 @@ export default {
       },
     }
   },
-  // @ts-ignore - Remove 'bible' from state (where all the bible selectors state were)
-  27: ({ bible, ...state }: RootState) => {
+  // Remove 'bible' from state (where all the bible selectors state were)
+  27: ({ bible: _bible, ...state }: LegacyRootState) => {
     return state
   },
   28: (state: RootState) => {

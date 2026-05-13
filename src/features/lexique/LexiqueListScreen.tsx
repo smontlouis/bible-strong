@@ -12,7 +12,8 @@ import Container from '~common/ui/Container'
 import SectionList from '~common/ui/SectionList'
 import Text from '~common/ui/Text'
 import { getFirstLetterFrom } from '~helpers/alphabet'
-import loadLexiqueByLetter from '~helpers/loadLexiqueByLetter'
+import { DatabaseError } from '~helpers/catchDatabaseError'
+import loadLexiqueByLetter, { type LexiqueRow } from '~helpers/loadLexiqueByLetter'
 import loadLexiqueBySearch from '~helpers/loadLexiqueBySearch'
 
 import { useResultsByLetterOrSearch, useSearchValue } from './useUtilities'
@@ -25,17 +26,32 @@ import LexiqueItem from './LexiqueItem'
 import PopOverMenu from '~common/PopOverMenu'
 import LanguageMenuOption from '~common/LanguageMenuOption'
 
-const useSectionResults = (results: any) => {
-  const [sectionResults, setSectionResults] = useState<any>(null)
+interface LexiqueSection {
+  title: string
+  data: LexiqueRow[]
+}
+
+const isDatabaseError = (value: unknown): value is DatabaseError =>
+  typeof value === 'object' && value !== null && 'error' in value
+
+const getLexiqueItemLayout = sectionListGetItemLayout({
+  getItemHeight: () => 80,
+  getSectionHeaderHeight: () => 50,
+  getSeparatorHeight: () => 0,
+  getSectionFooterHeight: () => 0,
+})
+
+const useSectionResults = (results: LexiqueRow[]) => {
+  const [sectionResults, setSectionResults] = useState<LexiqueSection[]>([])
 
   useEffect(() => {
     if (!results.length) {
       setSectionResults([])
       return
     }
-    const sectionResults = results.reduce((list: any, dbItem: any) => {
+    const sectionResults = results.reduce<LexiqueSection[]>((list, dbItem) => {
       const listItem = list.find(
-        (item: any) => item.title && item.title === getFirstLetterFrom(dbItem.Mot)
+        item => item.title && item.title === getFirstLetterFrom(dbItem.Mot)
       )
       if (!listItem) {
         list.push({ title: getFirstLetterFrom(dbItem.Mot), data: [dbItem] })
@@ -63,7 +79,7 @@ const LexiqueListScreen = ({
   onStrongSelect,
 }: LexiqueListScreenProps) => {
   const { t } = useTranslation()
-  const [error, setError] = useState(false)
+  const [error, setError] = useState<DatabaseError['error'] | null>(null)
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
 
@@ -72,10 +88,11 @@ const LexiqueListScreen = ({
     { query: loadLexiqueByLetter, value: letter }
   )
 
-  const sectionResults = useSectionResults(results)
+  const lexiqueResults = Array.isArray(results) ? results : []
+  const sectionResults = useSectionResults(lexiqueResults)
 
   useEffect(() => {
-    if (results.error) {
+    if (isDatabaseError(results)) {
       setError(results.error)
     }
   }, [results])
@@ -88,7 +105,6 @@ const LexiqueListScreen = ({
           icon={require('~assets/images/empty-state-icons/inbox.svg')}
           message={`${t('Impossible de charger la strong pour ce verset...')}
             ${
-              // @ts-ignore
               error === 'CORRUPTED_DATABASE'
                 ? t(
                     '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
@@ -127,23 +143,15 @@ const LexiqueListScreen = ({
         {isLoading ? (
           <Loading message={t('Chargement...')} />
         ) : sectionResults.length ? (
-          <SectionList
-            renderItem={({ item: { Mot, Grec, Hebreu, Code, lexiqueType }, index }) => (
-              <LexiqueItem
-                key={index}
-                {...{ Mot, Grec, Hebreu, Code, lexiqueType }}
-                onSelect={onStrongSelect}
-              />
+          <SectionList<LexiqueRow, LexiqueSection>
+            renderItem={({ item, index }) => (
+              <LexiqueItem key={index} {...item} onSelect={onStrongSelect} />
             )}
             removeClippedSubviews
             maxToRenderPerBatch={100}
-            // @ts-ignore
-            getItemLayout={sectionListGetItemLayout({
-              getItemHeight: () => 80,
-              getSectionHeaderHeight: () => 50,
-              getSeparatorHeight: () => 0,
-              getSectionFooterHeight: () => 0,
-            })}
+            getItemLayout={(data, index) =>
+              getLexiqueItemLayout((data || []) as LexiqueSection[], index)
+            }
             renderSectionHeader={({ section: { title } }) => (
               <SectionTitle color="primary">
                 <Text title fontWeight="bold" fontSize={16} color="reverse">
@@ -153,7 +161,7 @@ const LexiqueListScreen = ({
             )}
             stickySectionHeadersEnabled
             sections={sectionResults}
-            keyExtractor={(item: any) => item.Mot + item.Code}
+            keyExtractor={item => item.Mot + item.Code}
           />
         ) : (
           <Empty

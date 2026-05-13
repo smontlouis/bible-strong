@@ -90,14 +90,13 @@ const AnnotationNoteModal = ({
   const onSaveNote = () => {
     if (!annotationId) return
 
-    // Dispatch addNote with the annotation note key
-    dispatch(
-      // @ts-ignore - addNote accepts noteVerses as second arg but we're using a custom key format
-      addNote(
-        { ...currentNote, title, description, date: Date.now() },
-        { [noteKey]: true } // Use noteKey as the verse identifier
-      )
+    const action = addNote(
+      { ...currentNote, title, description, date: Date.now() },
+      { [noteKey]: true }
     )
+    if (action) {
+      dispatch(action)
+    }
 
     // If this is a new note, update the annotation with the noteId
     if (!existingNoteId) {

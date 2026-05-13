@@ -1,10 +1,11 @@
 import { SQLStrongTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError from '~helpers/catchDatabaseError'
+import { Verse } from '~common/types'
 
 const loadFoundVerses = (book: number, reference: string) =>
   catchDatabaseError(async () => {
     const part = book > 39 ? 'LSGSNT2' : 'LSGSAT2'
-    const result = await SQLStrongTransaction(
+    const result = await SQLStrongTransaction<Verse>(
       `SELECT *
       FROM ${part} 
       WHERE (Texte LIKE '% ${reference} %' 

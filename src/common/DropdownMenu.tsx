@@ -18,25 +18,25 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
-interface DropdownMenuProps {
-  currentValue?: string
-  setValue: (value: string) => void
-  choices: { value: string; label: string; subLabel?: string }[]
+interface DropdownMenuProps<T extends string | number = string> {
+  currentValue?: T
+  setValue: (value: T) => void
+  choices: { value: T; label: string; subLabel?: string }[]
   title: string
   customRender?: React.ReactNode
 }
 
-const DropdownMenu = ({
+const DropdownMenu = <T extends string | number = string>({
   currentValue,
   setValue,
   choices,
   title,
   customRender,
-}: DropdownMenuProps) => {
+}: DropdownMenuProps<T>) => {
   const choice = choices.find(l => l.value === currentValue)
   const { ref, open, close } = useBottomSheetModal()
 
-  const onItemPress = (value: string) => {
+  const onItemPress = (value: T) => {
     setValue(value)
     close()
   }
@@ -65,7 +65,7 @@ const DropdownMenu = ({
         }
       >
         {choices.map(({ value, label, subLabel }) => (
-          <Modal.Item key={value} tag={subLabel} onPress={() => onItemPress(value)}>
+          <Modal.Item key={String(value)} tag={subLabel} onPress={() => onItemPress(value)}>
             {label}
           </Modal.Item>
         ))}

@@ -18,8 +18,9 @@ import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { Note } from '~redux/modules/user'
 import BibleNotesSettingsModal from './BibleNotesSettingsModal'
+import type { VersionCode } from '~state/tabs'
 
-type TNote = {
+export type TNote = {
   noteId: string
   reference: string
   notes: Note
@@ -36,7 +37,7 @@ const BibleVerseNotes = () => {
     text: string
     verseKey: string
     noteId: string
-    version: string
+    version: VersionCode
   } | null>(null)
 
   const notesObj = useSelector((state: RootState) => state.user.bible.notes)
@@ -159,7 +160,7 @@ const BibleVerseNotes = () => {
         annotationText={selectedAnnotationNote?.text ?? ''}
         annotationVerseKey={selectedAnnotationNote?.verseKey ?? ''}
         existingNoteId={selectedAnnotationNote?.noteId}
-        version={selectedAnnotationNote?.version as any}
+        version={selectedAnnotationNote?.version ?? 'LSG'}
       />
       <BibleNotesSettingsModal
         ref={noteSettingsModal.getRef()}

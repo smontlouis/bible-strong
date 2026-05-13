@@ -31,6 +31,7 @@ import { useBottomSheet, useBottomSheetModal } from '~helpers/useBottomSheet'
 import useLanguage from '~helpers/useLanguage'
 import { RootState } from '~redux/modules/reducer'
 import { addHighlight, removeHighlight } from '~redux/modules/user'
+import type { AppDispatch } from '~redux/store'
 import {
   CrossVersionAnnotation,
   makeHighlightsByChapterSelector,
@@ -173,7 +174,7 @@ const BibleViewer = ({
   const addVerseToStudy = useAddVerseToStudy()
 
   const lang = useLanguage()
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
   const [pericope, setPericope] = useState<Pericope | null>(null)
   const [resourceType, onChangeResourceType] = useState<BibleResource>('strong')
   const addHistory = useSetAtom(historyAtom)
@@ -225,7 +226,7 @@ const BibleViewer = ({
 
   // Handler for exiting annotation mode
   const handleExitAnnotationMode = useCallback(() => {
-    // exitMode will auto-save any pending annotations
+    // exitMode will auto-save pending annotations
     annotationMode.exitMode()
     annotationToolbar.close()
   }, [annotationMode, annotationToolbar])
@@ -598,7 +599,7 @@ const BibleViewer = ({
 
   // Pin verses handler - toggles focus on/off
   const handlePinVerses = () => {
-    // Check if any selected verse is already in focus
+    // Check if a selected verse is already in focus
     const selectedKeys = Object.keys(selectedVerses)
     const hasFocusActive =
       focusVerses?.some(v => selectedKeys.some(key => key.endsWith(`-${v}`))) ?? false
@@ -895,7 +896,6 @@ const BibleViewer = ({
         addHighlight={addHiglightAndOpenQuickTags}
         addTag={addTag}
         removeHighlight={() => {
-          // @ts-ignore
           dispatch(removeHighlight({ selectedVerses }))
         }}
         clearSelectedVerses={actions.clearSelectedVerses}

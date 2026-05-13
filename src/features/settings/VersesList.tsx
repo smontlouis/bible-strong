@@ -1,20 +1,20 @@
 import React from 'react'
 
 import FlatList from '~common/ui/FlatList'
-import { GroupedHighlights } from './HighlightsScreen'
-import VerseComponent from './Verse'
+import { GroupedHighlightData, GroupedHighlights } from './HighlightsScreen'
+import VerseComponent, { HighlightSettingsData } from './Verse'
 
 interface Props {
   groupedHighlights: GroupedHighlights
-  setSettings: (settings: any) => void
+  setSettings: (settings: HighlightSettingsData) => void
 }
 
-const VersesList = React.memo(({ groupedHighlights, setSettings }: Props) => {
+const VersesList = ({ groupedHighlights, setSettings }: Props) => {
   return (
     <FlatList
       data={groupedHighlights}
-      keyExtractor={(item: any) => item.date.toString()}
-      renderItem={({ item: { color, date, highlightsObj, tags, stringIds } }: any) => (
+      keyExtractor={(item: GroupedHighlightData) => item.date.toString()}
+      renderItem={({ item: { color, date, highlightsObj, tags, stringIds } }) => (
         <VerseComponent
           {...{
             color,
@@ -28,6 +28,6 @@ const VersesList = React.memo(({ groupedHighlights, setSettings }: Props) => {
       )}
     />
   )
-})
+}
 
 export default VersesList

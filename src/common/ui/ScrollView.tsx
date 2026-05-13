@@ -1,32 +1,41 @@
 import styled from '@emotion/native'
 import React from 'react'
+import { ScrollViewProps, StyleProp, StyleSheet, ViewStyle } from 'react-native'
 
 import { useTheme } from '@emotion/react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import useDeviceOrientation from '~helpers/useDeviceOrientation'
+import useDeviceOrientation, { Orientation } from '~helpers/useDeviceOrientation'
 
-// @ts-ignore
-const ScrollView = styled.ScrollView(({ theme, orientation, backgroundColor }: any) => ({
-  backgroundColor: theme.colors[backgroundColor] || theme.colors.reverse,
-  borderTopLeftRadius: 30,
-  borderTopRightRadius: 30,
-  maxWidth: orientation.maxWidth,
-  marginLeft: 'auto',
-  marginRight: 'auto',
-  width: '100%',
+type StyledScrollViewProps = {
+  orientation: Orientation
+  backgroundColor?: string
+}
 
-  ...(orientation.tablet && {
-    marginTop: 20,
-    marginBottom: 50,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-  }),
-}))
+const ScrollView = styled.ScrollView<StyledScrollViewProps>(
+  ({ theme, orientation, backgroundColor }) => ({
+    backgroundColor: backgroundColor
+      ? theme.colors[backgroundColor as keyof typeof theme.colors] || backgroundColor
+      : theme.colors.reverse,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    maxWidth: orientation.maxWidth,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '100%',
 
-type HomeScrollViewProps = {
-  children: any
+    ...(orientation.tablet && {
+      marginTop: 20,
+      marginBottom: 50,
+      borderBottomLeftRadius: 30,
+      borderBottomRightRadius: 30,
+    }),
+  })
+)
+
+type HomeScrollViewProps = ScrollViewProps & {
+  children: React.ReactNode
   showsVerticalScrollIndicator: boolean
-  contentContainerStyle?: any
+  contentContainerStyle?: StyleProp<ViewStyle>
 }
 
 export const HomeScrollView = ({
@@ -39,7 +48,6 @@ export const HomeScrollView = ({
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   return (
-    // @ts-ignore
     <ScrollView
       {...props}
       orientation={orientation}
@@ -49,7 +57,7 @@ export const HomeScrollView = ({
         backgroundColor: theme.colors.lightGrey,
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
-        ...contentContainerStyle,
+        ...StyleSheet.flatten(contentContainerStyle),
       }}
     >
       {children}
@@ -57,20 +65,29 @@ export const HomeScrollView = ({
   )
 }
 
-export default ({ children, contentContainerStyle = {}, ...props }: any) => {
+type AppScrollViewProps = ScrollViewProps & {
+  children: React.ReactNode
+  backgroundColor?: string
+  contentContainerStyle?: StyleProp<ViewStyle>
+}
+
+const AppScrollView = ({ children, contentContainerStyle = {}, ...props }: AppScrollViewProps) => {
   const orientation = useDeviceOrientation()
+  const insets = useSafeAreaInsets()
+
   return (
-    // @ts-ignore
     <ScrollView
       {...props}
       orientation={orientation}
       contentContainerStyle={{
         paddingTop: 20,
-        paddingBottom: 10 + useSafeAreaInsets().bottom,
-        ...contentContainerStyle,
+        paddingBottom: 10 + insets.bottom,
+        ...StyleSheet.flatten(contentContainerStyle),
       }}
     >
       {children}
     </ScrollView>
   )
 }
+
+export default AppScrollView

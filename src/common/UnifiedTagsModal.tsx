@@ -69,15 +69,15 @@ const UnifiedTagsModal = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item])
 
+  // Calculate current items and selected tags for select mode
+  type EntityItem = { id?: string; title?: string; tags?: Record<string, Tag> }
+  type EntityData = Record<string, EntityItem>
+
   // For select mode: get entity data and selected tags
   const entityData = useSelector((state: RootState) => {
     if (!item || item.mode !== 'select') return undefined
-    // @ts-ignore - Dynamic entity access
-    return item.entity ? state.user.bible[item.entity] : undefined
-  }) as Record<string, { tags?: Record<string, Tag>; title?: string }> | undefined
-
-  // Calculate current items and selected tags for select mode
-  type EntityItem = { id?: string; title?: string; tags?: Record<string, Tag> }
+    return item.entity ? (state.user.bible[item.entity] as unknown as EntityData) : undefined
+  })
 
   const { currentItems, selectedTags } = ((): {
     currentItems: EntityItem[]

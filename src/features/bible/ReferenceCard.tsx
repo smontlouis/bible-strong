@@ -16,6 +16,10 @@ import getVersesContent from '~helpers/getVersesContent'
 import loadTresorReferences from '~helpers/loadTresorReferences'
 import { VersionCode } from '../../state/tabs'
 
+type TresorReferences = {
+  commentaires?: string
+}
+
 const ReferenceItem = ({ reference, version }: { reference: string; version: VersionCode }) => {
   const [Verse, setVerse] = useState<VerseRefContent | null>(null)
 
@@ -90,8 +94,21 @@ export const ReferenceCard = waitForTresorModal(
   }
 )
 
-const References = ({ references, version }: { references: any; version: VersionCode }) => {
-  const refs = references.commentaires ? JSON.parse(references.commentaires) : []
+const parseReferences = (references: TresorReferences): string[] => {
+  if (!references.commentaires) return []
+
+  const parsed: unknown = JSON.parse(references.commentaires)
+  return Array.isArray(parsed) ? parsed.filter((ref): ref is string => typeof ref === 'string') : []
+}
+
+const References = ({
+  references,
+  version,
+}: {
+  references: TresorReferences
+  version: VersionCode
+}) => {
+  const refs = parseReferences(references)
 
   if (!refs.length) {
     return (
@@ -104,9 +121,9 @@ const References = ({ references, version }: { references: any; version: Version
 
   return (
     <ScrollView>
-      {refs.map((ref: any, i: any) => {
+      {refs.map((ref, i) => {
         const splittedRef = ref.split('-')
-        if (splittedRef.length === 3 && splittedRef[0] > 0) {
+        if (splittedRef.length === 3 && Number(splittedRef[0]) > 0) {
           return <ReferenceItem key={ref + i} reference={ref} version={version} />
         }
 

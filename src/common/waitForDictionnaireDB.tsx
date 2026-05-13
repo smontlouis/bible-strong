@@ -72,8 +72,9 @@ export const useWaitForDatabase = () => {
 
           try {
             const downloadKey = `dictionnaireDownloadHasStarted_${resourceLang}`
-            if (!(window as any)[downloadKey]) {
-              ;(window as any)[downloadKey] = true
+            const downloadFlags = window as unknown as Window & Record<string, boolean>
+            if (!downloadFlags[downloadKey]) {
+              downloadFlags[downloadKey] = true
 
               const sqliteDbUri = getDatabaseUrl('DICTIONNAIRE', resourceLang)
 
@@ -101,7 +102,7 @@ export const useWaitForDatabase = () => {
                 type: 'dictionnaire.setLoading',
                 payload: false,
               })
-              ;(window as any)[downloadKey] = false
+              downloadFlags[downloadKey] = false
             }
           } catch {
             toast.error(
@@ -158,8 +159,8 @@ const waitForDatabase =
     size?: 'small' | 'large'
     hasHeader?: boolean
   } = {}) =>
-  <T,>(WrappedComponent: React.ComponentType<T>): React.ComponentType<T> =>
-  (props: any) => {
+  <T extends object>(WrappedComponent: React.ComponentType<T>): React.ComponentType<T> =>
+  (props: T) => {
     const { t } = useTranslation()
     const { isLoading, progress, proposeDownload, startDownload, setStartDownload, resourceLang } =
       useWaitForDatabase()

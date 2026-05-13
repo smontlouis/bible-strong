@@ -1,29 +1,40 @@
-import React, { useState, useEffect } from 'react'
+import React, { ComponentType, useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import loadLexiqueBySearch from '~helpers/loadLexiqueBySearch'
+import { DatabaseError } from '~helpers/catchDatabaseError'
+import { LexiqueRow } from '~helpers/loadLexiqueByLetter'
 import { useWaitForDatabase } from '~common/waitForStrongDB'
 
 import { useResultsByLetterOrSearch } from './useUtilities'
 import LexiqueResultItem from './LexiqueResultItem'
 
-const hideIfNoDatabase = (WrappedComponent: any) => (props: any) => {
-  const { isLoading, proposeDownload } = useWaitForDatabase()
+const hideIfNoDatabase =
+  <P extends object>(WrappedComponent: ComponentType<P>) =>
+  (props: P) => {
+    const { isLoading, proposeDownload } = useWaitForDatabase()
 
-  if (isLoading || proposeDownload) {
-    return null
+    if (isLoading || proposeDownload) {
+      return null
+    }
+    return <WrappedComponent {...props} />
   }
-  return <WrappedComponent {...props} />
-}
 
 const LIMIT = 5
 const height = 40
 
-const LexiqueResultsWidget = ({ searchValue }: any) => {
-  const [error, setError] = useState(false)
+interface LexiqueResultsWidgetProps {
+  searchValue: string
+}
+
+const isDatabaseError = (value: unknown): value is DatabaseError =>
+  typeof value === 'object' && value !== null && 'error' in value
+
+const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
+  const [error, setError] = useState<DatabaseError['error'] | null>(null)
   const [limit, setLimit] = useState(LIMIT)
 
   const { results } = useResultsByLetterOrSearch({
@@ -32,7 +43,7 @@ const LexiqueResultsWidget = ({ searchValue }: any) => {
   })
 
   useEffect(() => {
-    if (results.error) {
+    if (isDatabaseError(results)) {
       setError(results.error)
     }
   }, [results])
@@ -41,18 +52,20 @@ const LexiqueResultsWidget = ({ searchValue }: any) => {
     return null
   }
 
-  if (!results.length) {
+  const lexiqueResults = Array.isArray(results) ? results : []
+
+  if (!lexiqueResults.length) {
     return null
   }
 
   return (
     <>
-      {results.slice(0, limit).map((strong: any) => {
-        const { Grec, Mot, Code } = strong
-        const variant = Grec ? 'grec' : 'hebreu'
+      {lexiqueResults.slice(0, limit).map((strong: LexiqueRow) => {
+        const { Mot, Code } = strong
+        const variant = 'Grec' in strong ? 'grec' : 'hebreu'
         return <LexiqueResultItem key={Code + Mot} id={Code} title={Mot} variant={variant} />
       })}
-      {results.length > limit && (
+      {lexiqueResults.length > limit && (
         <Link onPress={() => setLimit(l => l + 5)}>
           <Box
             opacity={0.5}
@@ -80,7 +93,7 @@ const LexiqueResultsWidget = ({ searchValue }: any) => {
               />
             </Box>
             <Text title fontSize={14} style={{ color: 'white' }}>
-              + {results.length - limit}
+              + {lexiqueResults.length - limit}
             </Text>
           </Box>
         </Link>

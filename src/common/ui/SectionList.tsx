@@ -1,25 +1,21 @@
 import styled from '@emotion/native'
 import React, { useMemo } from 'react'
-import { SectionListProps, View } from 'react-native'
+import {
+  SectionList as RNSectionList,
+  SectionListProps,
+  StyleProp,
+  StyleSheet,
+  View,
+  ViewStyle,
+} from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import useDeviceOrientation from '~helpers/useDeviceOrientation'
+import useDeviceOrientation, { Orientation } from '~helpers/useDeviceOrientation'
 import { Theme } from '~themes'
 
 const SectionList = styled.SectionList(
-  ({
-    theme,
-    orientation,
-  }: {
-    theme: Theme
-    orientation: {
-      portrait: boolean
-      landscape: boolean
-      tablet: boolean
-      maxWidth: number
-    }
-  }) => ({
+  ({ theme, orientation }: { theme?: Theme; orientation: Orientation }) => ({
     paddingBottom: 30,
-    backgroundColor: theme.colors.reverse,
+    backgroundColor: theme?.colors.reverse,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     maxWidth: orientation.maxWidth,
@@ -36,26 +32,32 @@ const SectionList = styled.SectionList(
   })
 )
 
-const AnimatedSectionList = ({
+const AnimatedSectionList = <T, S = unknown>({
   contentContainerStyle,
   ref,
   ...props
-}: SectionListProps<any> & { ref?: any }) => {
+}: SectionListProps<T, S> & {
+  contentContainerStyle?: StyleProp<ViewStyle>
+  ref?: React.Ref<RNSectionList<T, S>>
+}) => {
   const orientation = useDeviceOrientation()
   const insets = useSafeAreaInsets()
   const style = useMemo(
     () => ({
       paddingBottom: 10 + insets.bottom,
-      // @ts-ignore
-      ...contentContainerStyle,
+      ...StyleSheet.flatten(contentContainerStyle),
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   )
   return (
     <View style={{ flex: 1 }}>
-      {/* @ts-ignore */}
-      <SectionList orientation={orientation} contentContainerStyle={style} ref={ref} {...props} />
+      <SectionList
+        orientation={orientation}
+        contentContainerStyle={style}
+        ref={ref as unknown as React.Ref<React.ComponentRef<typeof SectionList>>}
+        {...(props as unknown as SectionListProps<unknown, unknown>)}
+      />
     </View>
   )
 }

@@ -95,10 +95,11 @@ const BibleNoteModal = ({ noteVerses, ref }: BibleNoteModalProps) => {
   }, [noteVerses])
 
   const onSaveNoteFunc = () => {
-    dispatch(
-      // @ts-ignore
-      addNote({ ...currentNote, title, description, date: Date.now() }, noteVerses!)
-    )
+    if (!noteVerses) return
+    const action = addNote({ ...currentNote, title, description, date: Date.now() }, noteVerses)
+    if (action) {
+      dispatch(action)
+    }
     setIsEditing(false)
   }
 

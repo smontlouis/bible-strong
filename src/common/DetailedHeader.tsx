@@ -40,7 +40,6 @@ const DetailedHeader = ({
           )}
         </Text>
         {!!subtitle && (
-          // @ts-ignore
           <Text titleItalic color="darkGrey">
             {subtitle}
           </Text>

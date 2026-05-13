@@ -1,4 +1,4 @@
-import React, { Ref } from 'react'
+import React, { ComponentProps, ComponentType, Ref } from 'react'
 import { ImageStyle, TextStyle, View, ViewStyle } from 'react-native'
 import { AnimatedStyle } from 'react-native-reanimated'
 import { AnimatedBox } from '~common/ui/Box'
@@ -9,12 +9,15 @@ interface TabScreenWrapperProps {
   ref?: Ref<View>
 }
 
+const RefableAnimatedBox = AnimatedBox as ComponentType<
+  ComponentProps<typeof AnimatedBox> & { ref?: Ref<View> }
+>
+
 const TabScreenWrapper = ({ style, children, ref }: TabScreenWrapperProps) => {
   return (
-    // @ts-ignore
-    <AnimatedBox bg="reverse" style={style} ref={ref}>
+    <RefableAnimatedBox bg="reverse" style={style} ref={ref}>
       {children}
-    </AnimatedBox>
+    </RefableAnimatedBox>
   )
 }
 

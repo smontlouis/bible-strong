@@ -28,5 +28,5 @@ export const alphabet = [
   'Z',
 ]
 
-export const getFirstLetterFrom = (value: any) =>
+export const getFirstLetterFrom = (value: string) =>
   alphabet.includes(value.slice(0, 1).toUpperCase()) ? value.slice(0, 1).toUpperCase() : '#'

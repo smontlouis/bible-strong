@@ -15,6 +15,7 @@ import { toast } from '~helpers/toast'
 
 import VOD from '~assets/bible_versions/bible-vod.json'
 import booksDesc2 from '~assets/bible_versions/books-desc-2'
+import type { VerseRefContent } from '~common/types'
 import extractFirstName from '~helpers/extractFirstName'
 import getVersesContent from '~helpers/getVersesContent'
 import useLogin from '~helpers/useLogin'
@@ -25,8 +26,25 @@ import { VersionCode } from '../../state/tabs'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 import { getDayOfTheYear } from './getDayOfTheYear'
 
+export type VerseOfTheDayData =
+  | (VerseRefContent & {
+      v: string
+      book: number
+      chapter: number
+      verse: number
+    })
+  | { error: true }
+  | false
+
+const versesOfTheDay = VOD as Record<number, string>
+
+const hasVerseContent = (
+  verseOfTheDay: VerseOfTheDayData
+): verseOfTheDay is Exclude<VerseOfTheDayData, false | { error: true }> =>
+  !!verseOfTheDay && 'content' in verseOfTheDay
+
 const useGetVerseOfTheDay = (version: VersionCode, addDay: number) => {
-  const [verseOfTheDay, setVOD] = useState<any>(false)
+  const [verseOfTheDay, setVOD] = useState<VerseOfTheDayData>(false)
 
   useEffect(() => {
     const dayOfTheYear =
@@ -35,16 +53,15 @@ const useGetVerseOfTheDay = (version: VersionCode, addDay: number) => {
         : getDayOfTheYear(addDay) + 1
     const loadVerse = async () => {
       try {
-        // @ts-ignore
-        const [bookName, chapter, verse] = VOD[dayOfTheYear].split('.')
+        const reference = versesOfTheDay[dayOfTheYear]
+        const [bookName, chapter, verse] = reference.split('.')
         const book = booksDesc2.find(b => b[1] === bookName)?.[0]
         const vod = await getVersesContent({
           verses: `${book}-${chapter}-${verse}`,
           version,
         })
         setVOD({
-          // @ts-ignore
-          v: VOD[dayOfTheYear],
+          v: reference,
           book: Number(book),
           chapter: Number(chapter),
           verse: Number(verse),
@@ -74,8 +91,10 @@ export const useVerseOfTheDay = (addDay: number) => {
   const verseOfTheDay = useGetVerseOfTheDay(version, addDay)
   const verseOfTheDayPlus1 = useGetVerseOfTheDay(version, 1 + addDay)
 
-  const verseOfTheDayContent = verseOfTheDay?.content
-  const verseOfTheDayPlus1Content = verseOfTheDayPlus1?.content
+  const verseOfTheDayContent = hasVerseContent(verseOfTheDay) ? verseOfTheDay.content : undefined
+  const verseOfTheDayPlus1Content = hasVerseContent(verseOfTheDayPlus1)
+    ? verseOfTheDayPlus1.content
+    : undefined
 
   useEffect(() => {
     if (addDay || !verseOfTheDayContent || !verseOfTheDayPlus1Content || !verseOfTheDayTime) return
@@ -84,7 +103,7 @@ export const useVerseOfTheDay = (addDay: number) => {
       try {
         await notifee.cancelAllNotifications()
 
-        const [vodHours, vodMinutes] = verseOfTheDayTime.split(':').map((n: any) => Number(n))
+        const [vodHours, vodMinutes] = verseOfTheDayTime.split(':').map(n => Number(n))
         const nowDate = new Date(Date.now())
         const nowHour = nowDate.getHours()
         const nowMinutes = nowDate.getMinutes()
@@ -142,7 +161,7 @@ export const useVerseOfTheDay = (addDay: number) => {
       }
     }
     const initNotifications = async () => {
-      const hasPermissions = await new Promise<any>(resolve => {
+      const hasPermissions = await new Promise<boolean>(resolve => {
         notifee
           .requestPermission()
           .then(settings => {

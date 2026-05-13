@@ -13,7 +13,7 @@ const Container = styled.View({
 
 interface Props {
   message: string
-  source?: any
+  source?: React.ComponentProps<typeof Lottie>['source']
   icon?: ImageSource
   children?: React.ReactNode
 }

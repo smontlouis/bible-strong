@@ -6,7 +6,6 @@ import Link from '~common/Link'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { MainStackProps } from '~navigation/type'
 
-// @ts-ignore - styled(Link) doesn't infer theme correctly
 const StyledLink = styled(Link)(({ theme }) => ({
   backgroundColor: theme.colors.primary,
   width: 50,

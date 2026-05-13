@@ -22,7 +22,6 @@ type ChipProps = {
 }
 
 const Chip = ({ children, isActive, ...props }: ChipProps & BoxProps & TouchableOpacityProps) => (
-  // @ts-ignore
   <TouchableBox
     py={3}
     px={6}

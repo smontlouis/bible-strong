@@ -154,7 +154,7 @@ const getLsgAudioUrl = (bookNum: number, chapterNum: number) => {
   return `${audioBaseUrl}${zeroFill(bookNum, 2)}_${zeroFill(chapterNum, 2)}.mp3`
 }
 
-export const versions = {
+export const versions: Record<string, Version> = {
   LSG: {
     id: 'LSG',
     name: 'Bible Segond 1910',
@@ -510,7 +510,6 @@ export const versionsBySections: VersionsBySection[] = Object.values(versions).r
       case 'NEG79':
       case 'NVS78P':
       case 'S21': {
-        // @ts-ignore
         sectionArray[0].data.push(version)
         return sectionArray
       }
@@ -528,7 +527,6 @@ export const versionsBySections: VersionsBySection[] = Object.values(versions).r
       case 'CSB':
       case 'NLT':
       case 'INT_EN': {
-        // @ts-ignore
         sectionArray[2].data.push(version)
         return sectionArray
       }
@@ -538,12 +536,10 @@ export const versionsBySections: VersionsBySection[] = Object.values(versions).r
       case 'TR1894':
       case 'DEL':
       case 'LXX': {
-        // @ts-ignore
         sectionArray[3].data.push(version)
         return sectionArray
       }
       default: {
-        // @ts-ignore
         sectionArray[1].data.push(version)
         return sectionArray
       }
@@ -559,7 +555,6 @@ export const versionsBySections: VersionsBySection[] = Object.values(versions).r
 
 export const versionsBySections_en: VersionsBySection[] = Object.values(versions).reduce(
   (sectionArray, version) => {
-    // @ts-ignore
     const versionEn = { ...version, name: version.name_en || version.name }
     switch (version.id) {
       case 'KJV':
@@ -576,7 +571,6 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(versions
       case 'CSB':
       case 'NLT':
       case 'ESV': {
-        // @ts-ignore
         sectionArray[0].data.push(versionEn)
         return sectionArray
       }
@@ -599,7 +593,6 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(versions
       case 'BCC1923':
       case 'PDV2017':
       case 'POV': {
-        // @ts-ignore
         sectionArray[1].data.push(versionEn)
         return sectionArray
       }
@@ -609,7 +602,6 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(versions
       case 'TR1894':
       case 'DEL':
       case 'LXX': {
-        // @ts-ignore
         sectionArray[2].data.push(versionEn)
         return sectionArray
       }

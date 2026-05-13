@@ -1,5 +1,6 @@
 import { createAction } from '@reduxjs/toolkit'
 import { Study } from '../user'
+import type { Dispatch } from 'redux'
 
 // Action type constants for backward compatibility
 export const CREATE_STUDY = 'user/CREATE_STUDY'
@@ -13,8 +14,8 @@ export type StudyMutation = {
   created_at?: number
   modified_at?: number
   title?: string
-  content?: string | null
-  tags?: any
+  content?: Study['content']
+  tags?: Study['tags']
 }
 
 // RTK Action Creators
@@ -38,8 +39,8 @@ export const publishStudyAction = createAction(
 )
 
 // Thunk for async publish
-export function publishStudy(id: any, publish = true) {
-  return async (dispatch: any) => {
+export function publishStudy(id: string, publish = true) {
+  return async (dispatch: Dispatch) => {
     await dispatch(publishStudyAction(id, publish))
   }
 }

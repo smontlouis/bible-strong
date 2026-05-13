@@ -1,6 +1,6 @@
 /* eslint-env jest */
 
-// Mock react-native before any imports
+// Mock react-native before other imports
 import type { Bookmark } from '~common/types'
 import userReducer, { UserState } from '../user'
 import {
@@ -464,7 +464,7 @@ describe('Settings Reducer', () => {
 
   describe('default case', () => {
     it('should return state unchanged for unknown action', () => {
-      const newState = userReducer(initialState, { type: 'UNKNOWN_ACTION' } as any)
+      const newState = userReducer(initialState, { type: 'UNKNOWN_ACTION' })
       expect(newState.bible.settings).toEqual(initialState.bible.settings)
     })
   })

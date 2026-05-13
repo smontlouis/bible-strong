@@ -7,7 +7,7 @@ import { AnimatedTouchableBox } from './Box'
 interface ExtendedMenuOptionProps extends Omit<MenuOptionProps, 'onSelect'> {
   closeOnSelect?: boolean
   closeBeforeSelect?: boolean
-  onSelect?: (value?: any) => void
+  onSelect?: (value?: unknown) => void
 }
 
 const MenuOption = ({
@@ -18,7 +18,7 @@ const MenuOption = ({
 }: ExtendedMenuOptionProps) => {
   const { onClose, closeAndWait } = usePopOver()
 
-  const handleSelect = async (value?: any) => {
+  const handleSelect = async (value?: unknown) => {
     if (closeBeforeSelect) {
       await closeAndWait()
       onSelect?.(value)

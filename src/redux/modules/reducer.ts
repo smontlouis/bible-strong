@@ -1,17 +1,19 @@
 import { combineReducers } from 'redux'
 
-import { persistReducer } from 'redux-persist'
+import { persistReducer, type PersistConfig } from 'redux-persist'
 
 import { mmkvStorage } from '~helpers/storage'
 import plan from './plan'
 import user from './user'
 
-const planPersistConfig: any = {
+type PlanState = ReturnType<typeof plan>
+
+const planPersistConfig: PersistConfig<PlanState> = {
   key: 'plan',
   keyPrefix: '',
   storage: mmkvStorage,
   blacklist: ['onlinePlans', 'onlineStatus'],
-  timeout: null,
+  timeout: null as unknown as number,
 }
 
 const rootReducer = combineReducers({

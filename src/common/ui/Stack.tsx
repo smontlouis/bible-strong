@@ -15,8 +15,7 @@ const Stack = ({
   return (
     <Box {...boxProps}>
       {React.Children.map(children, (child, index) => {
-        if (!child) return null
-        // @ts-ignore
+        if (!React.isValidElement<Partial<BoxProps>>(child)) return child
         return React.cloneElement(child, {
           [direction === 'vertical' ? 'marginTop' : 'marginLeft']: index === 0 ? 0 : spacing * 15,
         })

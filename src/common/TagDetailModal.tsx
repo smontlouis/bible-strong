@@ -137,14 +137,13 @@ const TagDetailContent = ({ tagId }: { tagId: string }) => {
     <BottomSheetSectionList
       sections={sections}
       keyExtractor={(item: TagSectionItem, index: number) => `${item.type}-${index}`}
-      renderSectionHeader={({ section }: { section: any }) => {
-        const tagSection = section as TagSection
+      renderSectionHeader={({ section }: { section: TagSection }) => {
         return (
           <TagSectionHeader
-            sectionId={tagSection.id}
-            title={tagSection.title}
-            count={tagSection.count}
-            isExpanded={expandedSectionIds.includes(tagSection.id)}
+            sectionId={section.id}
+            title={section.title}
+            count={section.count}
+            isExpanded={expandedSectionIds.includes(section.id)}
             toggle={toggle}
           />
         )

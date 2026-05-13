@@ -1,8 +1,9 @@
 import { TFunction } from 'i18next'
+import type { ImageSourcePropType } from 'react-native'
 
 export interface Slide {
   title: string
-  image?: any
+  image?: ImageSourcePropType
   description: string
 }
 

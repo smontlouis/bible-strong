@@ -3,6 +3,7 @@ import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 
 import Text from '~common/ui/Text'
+import type { Theme } from '~themes'
 
 const Touchable = styled.TouchableOpacity(({ disabled, theme }) => ({
   flexDirection: 'row',
@@ -16,16 +17,20 @@ const Touchable = styled.TouchableOpacity(({ disabled, theme }) => ({
   borderRadius: 20,
 }))
 
-const StyledIcon = styled(Icon.Feather)<{ isSelected?: boolean }>(
-  // @ts-ignore
-  ({ color, isSelected, theme, disabled }: any) => ({
-    marginRight: 8,
-    color: disabled ? theme.colors.grey : theme.colors[color] || theme.colors.primary,
-    ...(isSelected && {
-      color: theme.colors.primary,
-    }),
-  })
-)
+const StyledIcon = styled(Icon.Feather)<{
+  color?: string
+  isSelected?: boolean
+  disabled?: boolean
+  theme?: Theme
+}>(({ color, isSelected, theme, disabled }) => ({
+  marginRight: 8,
+  color: disabled
+    ? theme.colors.grey
+    : theme.colors[color as keyof Theme['colors']] || color || theme.colors.primary,
+  ...(isSelected && {
+    color: theme.colors.primary,
+  }),
+}))
 
 type Props = {
   onPress: () => void
@@ -34,7 +39,7 @@ type Props = {
   size?: number
   label?: string
   disabled?: boolean
-  name?: any
+  name?: keyof typeof Icon.Feather.glyphMap
 }
 
 export default ({ onPress, color, isSelected, size = 17, label, disabled, name }: Props) => {

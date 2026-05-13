@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 
-export function useCallbackRef<T extends (...args: any[]) => any>(
+export function useCallbackRef<T extends (...args: never[]) => unknown>(
   callback: T | undefined,
   deps: React.DependencyList = []
 ) {

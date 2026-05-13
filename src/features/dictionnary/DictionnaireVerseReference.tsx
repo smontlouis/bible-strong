@@ -4,8 +4,11 @@ import React from 'react'
 import Paragraph from '~common/ui/Paragraph'
 import { CarouselConsumer } from '~helpers/CarouselContext'
 
-// @ts-ignore
-const StyledView = styled.TouchableOpacity(({ isSelected, theme }) => ({
+interface SelectedProps {
+  isSelected: boolean
+}
+
+const StyledView = styled.TouchableOpacity<SelectedProps>(({ isSelected, theme }) => ({
   backgroundColor: isSelected ? theme.colors.secondary : theme.colors.lightSecondary,
   borderRadius: 5,
   paddingLeft: 3,
@@ -14,30 +17,39 @@ const StyledView = styled.TouchableOpacity(({ isSelected, theme }) => ({
   overflow: 'hidden',
 }))
 
-// @ts-ignore
-const StyledText = styled(Paragraph)(({ isSelected, theme }) => ({
+const StyledText = styled(Paragraph)<SelectedProps>(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.reverse : theme.colors.default,
 }))
 
-const DictionnaireRef = ({ word }: any) => {
+interface DictionnaireRefProps {
+  word: string
+}
+
+const DictionnaireRef = ({ word }: DictionnaireRefProps) => {
+  const lowerWord = word.toLowerCase()
+
   return (
-    // @ts-ignore
     <CarouselConsumer>
-      {/* @ts-ignore */}
-      {({ current, setCurrent }) => (
-        <>
-          <StyledView
-            activeOpacity={0.5}
-            onPress={() => setCurrent(word.toLowerCase())}
-            // @ts-ignore
-            isSelected={current === word.toLowerCase()}
-          >
-            {/* @ts-ignore */}
-            <StyledText isSelected={current === word.toLowerCase()}>{word}</StyledText>
-          </StyledView>
-          <Paragraph> </Paragraph>
-        </>
-      )}
+      {value => {
+        if (!('current' in value)) {
+          return null
+        }
+
+        const isSelected = value.current === lowerWord
+
+        return (
+          <>
+            <StyledView
+              activeOpacity={0.5}
+              onPress={() => value.setCurrent(lowerWord)}
+              isSelected={isSelected}
+            >
+              <StyledText isSelected={isSelected}>{word}</StyledText>
+            </StyledView>
+            <Paragraph> </Paragraph>
+          </>
+        )
+      }}
     </CarouselConsumer>
   )
 }

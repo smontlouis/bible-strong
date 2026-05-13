@@ -13,21 +13,14 @@ import waitForStrongDB from '~common/waitForStrongDB'
 import ConcordanceVerse from './ConcordanceVerse'
 
 import books from '~assets/bible_versions/books-desc'
-import loadFoundVersesByBook from '~helpers/loadFoundVersesByBook'
+import loadFoundVersesByBook, { FoundVerseRow } from '~helpers/loadFoundVersesByBook'
 import truncate from '~helpers/truncate'
-
-interface Verse {
-  Livre: number
-  Chapitre: number
-  Verset: number
-  [key: string]: any
-}
 
 const ConcordanceByBook = () => {
   const router = useRouter()
   const params = useLocalSearchParams<{ book: string; strongReference: string }>()
   const { t } = useTranslation()
-  const [verses, setVerses] = useState<Verse[]>([])
+  const [verses, setVerses] = useState<FoundVerseRow[]>([])
 
   const book = params.book ? Number(params.book) : 0
   const strongReference = params.strongReference
@@ -71,8 +64,8 @@ const ConcordanceByBook = () => {
             contentContainerStyle={{ padding: 20 }}
             removeClippedSubviews
             data={verses}
-            keyExtractor={(item: any) => `${item.Livre}-${item.Chapitre}-${item.Verset}`}
-            renderItem={({ item }: any) => {
+            keyExtractor={(item: FoundVerseRow) => `${item.Livre}-${item.Chapitre}-${item.Verset}`}
+            renderItem={({ item }: { item: FoundVerseRow }) => {
               const props = {
                 router,
                 concordanceFor: Code,

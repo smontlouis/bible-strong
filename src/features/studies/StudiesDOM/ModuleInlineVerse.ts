@@ -1,31 +1,35 @@
 import Quill from './quill'
 import InlineTooltip from './InlineTooltip'
+import type {
+  InlineStrongPayload,
+  InlineVersePayload,
+  QuillInstance,
+  QuillModuleConstructor,
+  QuillRange,
+} from './quill-types'
 
-const InlineVerseBlot: any = Quill.import('formats/inline-verse')
-const InlineStrongBlot: any = Quill.import('formats/inline-strong')
-
-const Module: any = Quill.import('core/module')
+const Module = Quill.import('core/module') as QuillModuleConstructor
 
 class ModuleInlineVerse extends Module {
-  quill: any
-  tooltip: any
-  range: any
+  quill: QuillInstance
+  tooltip: InlineTooltip
+  range: QuillRange | null
 
-  constructor(quill: any, options: any) {
+  constructor(quill: QuillInstance, options: unknown) {
     super(quill, options)
 
     this.quill = quill
     this.tooltip = new InlineTooltip(this.quill, this.quill.container)
     this.range = null
 
-    this.quill.on(Quill.events.EDITOR_CHANGE, (type: string, range: any) => {
+    this.quill.on(Quill.events.EDITOR_CHANGE, (type, range) => {
       if (type === Quill.events.SELECTION_CHANGE) {
-        this.range = range
+        this.range = range as QuillRange | null
       }
     })
   }
 
-  receiveVerseLink = ({ title, verses }: { title: string; verses: string[] }) => {
+  receiveVerseLink = ({ title, verses }: InlineVersePayload) => {
     this.quill.focus()
     this.quill.setSelection(this.range, Quill.sources.SILENT)
 
@@ -47,7 +51,7 @@ class ModuleInlineVerse extends Module {
     }
   }
 
-  receiveStrongLink = ({ title, codeStrong, book }: { title: string; codeStrong: string; book: string }) => {
+  receiveStrongLink = ({ title, codeStrong, book }: InlineStrongPayload) => {
     this.quill.focus()
     this.quill.setSelection(this.range, Quill.sources.SILENT)
 

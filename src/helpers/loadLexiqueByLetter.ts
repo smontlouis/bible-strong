@@ -3,14 +3,14 @@ import catchDatabaseError from '~helpers/catchDatabaseError'
 import { memoizeWithLang } from './memoize'
 
 export interface LexiqueGrecRow {
-  Code: number
+  Code: string
   Grec: string
   Mot: string
   lexiqueType: 'Grec'
 }
 
 export interface LexiqueHebreuRow {
-  Code: number
+  Code: string
   Hebreu: string
   Mot: string
   lexiqueType: 'Hébreu'

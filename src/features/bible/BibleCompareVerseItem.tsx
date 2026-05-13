@@ -9,6 +9,8 @@ import Text from '~common/ui/Text'
 import { getIfVersionNeedsDownload, isStrongVersion } from '~helpers/bibleVersions'
 import { removeBreakLines } from '~helpers/utils'
 import books from '~assets/bible_versions/books-desc'
+import type { VerseIds } from '~common/types'
+import type { VersionCode } from '~state/tabs'
 
 const Container = styled.View(({ theme }) => ({
   padding: 20,
@@ -16,9 +18,25 @@ const Container = styled.View(({ theme }) => ({
   borderTopWidth: 1,
 }))
 
-class CompareVerseItem extends React.Component<any> {
+type CompareVerseItemProps = {
+  versionId: VersionCode
+  name: string
+  selectedVerses: VerseIds
+  position: number
+}
+
+type CompareVerseItemState = {
+  content: string
+  versionNeedsDownload: boolean
+}
+
+class CompareVerseItem extends React.Component<CompareVerseItemProps, CompareVerseItemState> {
+  state: CompareVerseItemState = {
+    content: '',
+    versionNeedsDownload: true,
+  }
+
   async componentDidMount() {
-    // @ts-ignore
     const { selectedVerses, versionId, position } = this.props
     const versionNeedsDownload = await getIfVersionNeedsDownload(versionId)
 
@@ -39,14 +57,8 @@ class CompareVerseItem extends React.Component<any> {
     }
   }
 
-  state = {
-    content: '',
-    versionNeedsDownload: true,
-  }
-
   render() {
     const { content, versionNeedsDownload } = this.state
-    // @ts-ignore
     const { versionId, name, selectedVerses } = this.props
 
     const focusVerses = Object.keys(selectedVerses)

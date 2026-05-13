@@ -8,10 +8,10 @@ import { toast as sonnerToast } from 'sonner-native'
  * with `import { toast } from '~helpers/toast'`
  */
 
-const safeCall = <T extends (...args: any[]) => any>(fn: T, fallbackMsg?: string) => {
+const safeCall = <T extends (...args: never[]) => unknown>(fn: T, fallbackMsg?: string) => {
   return (...args: Parameters<T>): ReturnType<T> | undefined => {
     try {
-      return fn(...args)
+      return fn(...args) as ReturnType<T>
     } catch {
       if (fallbackMsg) {
         console.warn('[Toast] Context not ready:', fallbackMsg, args[0])

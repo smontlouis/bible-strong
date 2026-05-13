@@ -1,14 +1,16 @@
 import Quill from './quill'
 import { dispatch } from './dispatch'
-const Inline: any = Quill.import('blots/inline')
+import type { InlineStrongPayload, QuillBlotConstructor } from './quill-types'
+
+const Inline = Quill.import('blots/inline') as QuillBlotConstructor
 
 class InlineStrong extends Inline {
   static blotName = 'inline-strong'
   static tagName = 'a'
   static className = 'inline-strong'
 
-  static create({ title, codeStrong, book }: { title: string; codeStrong: string; book: string }) {
-    let node = super.create()
+  static create({ title, codeStrong, book }: InlineStrongPayload) {
+    const node = super.create()
     node.setAttribute('data-title', title)
     node.setAttribute('data-codeStrong', codeStrong)
     node.setAttribute('data-book', book)

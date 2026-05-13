@@ -24,7 +24,6 @@ const TimelineWidget = () => {
         height={80}
       >
         <Box center size={50} bg="lightPrimary" borderRadius={10}>
-          {/* @ts-ignore */}
           <TimelineIcon color="primary" size={70} style={{ marginTop: 8 }} />
         </Box>
         <Text title fontSize={18} ml={20} flex>

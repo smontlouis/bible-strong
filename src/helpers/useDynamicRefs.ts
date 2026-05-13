@@ -1,4 +1,4 @@
-const map = new Map<string, any>()
+const map = new Map<string, unknown>()
 
 const setRef =
   <T>(key: string) =>

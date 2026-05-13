@@ -25,7 +25,7 @@ import {
   prepareTabGroupForSync,
   FirestoreTabGroup,
 } from '~helpers/tabGroupsFirestoreSync'
-import { batchWriteSubcollection } from '~helpers/firestoreSubcollections'
+import { batchWriteSubcollection, type BatchChanges } from '~helpers/firestoreSubcollections'
 import { registerCleanup } from '~helpers/cleanupRegistry'
 import useLogin from '~helpers/useLogin'
 import { usePrevious } from '~helpers/usePrevious'
@@ -157,8 +157,8 @@ export const useTabGroupsSync = () => {
           if (!hasTabGroupsMigrated() && localGroups.length > 0) {
             console.log('[TabGroupsSync] Migrating local groups to Firestore...')
 
-            const changes = {
-              set: {} as { [id: string]: any },
+            const changes: BatchChanges = {
+              set: {},
               delete: [] as string[],
             }
 
@@ -238,8 +238,9 @@ export const useTabGroupsSync = () => {
         // Filter out pending deletions to prevent re-adding groups that are being deleted
         const pendingDeletions = pendingDeletionsRef.current
         const remoteGroups: TabGroup[] = Object.values(data)
+          .map(g => g as FirestoreTabGroup)
           .filter(g => {
-            const id = (g as any).id
+            const id = g.id
             if (pendingDeletions.has(id)) {
               console.log(`[TabGroupsSync] Filtered out pending deletion: ${id}`)
               return false
@@ -248,8 +249,8 @@ export const useTabGroupsSync = () => {
           })
           .map(g =>
             hydrateTabGroup(
-              g as FirestoreTabGroup,
-              localWithoutDeleted.find(lg => lg.id === (g as any).id)
+              g,
+              localWithoutDeleted.find(lg => lg.id === g.id)
             )
           )
 

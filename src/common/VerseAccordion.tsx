@@ -71,7 +71,6 @@ const VerseAccordion = ({ noteVerses, version }: VerseAccordionProps) => {
           </Text>
         </HStack>
         <Animated.View
-          // @ts-ignore - CSS Transitions for Reanimated 4
           style={{
             transform: [{ rotate: isExpanded ? '180deg' : '0deg' }],
             transitionProperty: 'transform',

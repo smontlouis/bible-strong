@@ -41,7 +41,7 @@ const TagList = ({
 
   return (
     <Box wrap row>
-      {array.map((tag: any) => (
+      {array.map(tag => (
         <TouchableBox key={tag.id} onPress={() => setTagDetailModal({ tagId: tag.id })}>
           <StyledTag>
             <Text fontSize={12} color="primary" numberOfLines={1} maxWidth={100}>

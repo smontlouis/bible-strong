@@ -16,6 +16,7 @@ import Paragraph from '~common/ui/Paragraph'
 import truncate from '~helpers/truncate'
 import useLanguage from '~helpers/useLanguage'
 import { getDateLocale } from '~helpers/languageUtils'
+import type { TNote } from './BibleVerseNotesScreen'
 
 const NoteLink = styled(Link)(({ theme }: { theme: Theme }) => ({
   paddingVertical: 20,
@@ -25,7 +26,7 @@ const NoteLink = styled(Link)(({ theme }: { theme: Theme }) => ({
 }))
 
 type Props = {
-  item: any
+  item: TNote
   onPress: (noteId: string) => void
   onMenuPress: (noteId: string) => void
 }
@@ -49,8 +50,7 @@ const BibleNoteItem = ({ item, onPress, onMenuPress }: Props) => {
             </Text>
           </Box>
           {!!item.notes.title && (
-            // @ts-ignore
-            <Text title fontSize={16} scale={-2}>
+            <Text title fontSize={16}>
               {item.notes.title}
             </Text>
           )}

@@ -1,17 +1,23 @@
 import Quill from './quill'
 import { dispatch } from './dispatch'
+import type { QuillInstance, QuillModuleConstructor, QuillRange } from './quill-types'
 
-const Module: any = Quill.import('core/module')
+const Module = Quill.import('core/module') as QuillModuleConstructor
+
+interface FormatModuleContext {
+  quill: QuillInstance
+}
 
 class ModuleFormat extends Module {
-  quill: any
+  quill: QuillInstance
 
-  constructor(quill: any, options: any) {
+  constructor(quill: QuillInstance, options: unknown) {
     super(quill, options)
+    this.quill = quill
 
-    this.quill.on(Quill.events.EDITOR_CHANGE, (type: string, range: any) => {
+    this.quill.on(Quill.events.EDITOR_CHANGE, (type, range) => {
       if (type === Quill.events.SELECTION_CHANGE) {
-        this.update(range)
+        this.update(range as QuillRange | null)
       }
     })
     this.quill.on(Quill.events.SCROLL_OPTIMIZE, () => {
@@ -21,13 +27,13 @@ class ModuleFormat extends Module {
   }
 
   // This function is useful to toggle active class
-  update(range: any) {
+  update(range: QuillRange | null) {
     // Get what format are applied on given range
     const formats = range == null ? {} : this.quill.getFormat(range)
     dispatch('ACTIVE_FORMATS', JSON.stringify(formats))
   }
 
-  format(name: string, value: any = true) {
+  format(name: string, value: unknown = true) {
     this.quill.format(name, value, Quill.sources.USER)
     const range = this.quill.getSelection(true)
     this.update(range)
@@ -35,19 +41,19 @@ class ModuleFormat extends Module {
   }
 
   static DEFAULTS = {
-    container: null as any,
+    container: null as HTMLElement | null,
     handlers: {
-      indent(this: any, value: string) {
+      indent(this: FormatModuleContext, value: string) {
         const range = this.quill.getSelection()
         const formats = this.quill.getFormat(range)
-        const indent = parseInt(formats.indent || 0, 10)
+        const indent = parseInt(String(formats.indent || 0), 10)
         if (value === '+1' || value === '-1') {
           let modifier = value === '+1' ? 1 : -1
           if (formats.direction === 'rtl') modifier *= -1
           this.quill.format('indent', indent + modifier, Quill.sources.USER)
         }
       },
-      list(this: any, value: string) {
+      list(this: FormatModuleContext, value: string) {
         const range = this.quill.getSelection()
         const formats = this.quill.getFormat(range)
         if (value === 'check') {

@@ -162,10 +162,15 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
       date: Date.now(),
     }
 
-    dispatch(
-      // @ts-ignore
-      addLink(linkData, linkVerses!)
-    )
+    if (!linkVerses) {
+      setIsSaving(false)
+      return
+    }
+
+    const action = addLink(linkData, linkVerses)
+    if (action) {
+      dispatch(action)
+    }
     setIsEditing(false)
     setIsSaving(false)
   }
@@ -220,6 +225,7 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
   const linkIcon = currentLink
     ? getLinkIcon(currentLink)
     : { icon: 'link', color: theme.colors.grey, textIcon: undefined }
+  const linkIconName = linkIcon.icon as React.ComponentProps<typeof FeatherIcon>['name']
 
   // YouTube player dimensions
   const screenWidth = Dimensions.get('window').width
@@ -373,7 +379,7 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
                   {linkIcon.textIcon}
                 </Text>
               ) : (
-                <FeatherIcon name={linkIcon.icon as any} size={18} color={linkIcon.color} />
+                <FeatherIcon name={linkIconName} size={18} color={linkIcon.color} />
               )}
               <Text marginLeft={8} color="grey" fontSize={13}>
                 {currentLink.ogData?.siteName || getHostname(currentLink.url)}

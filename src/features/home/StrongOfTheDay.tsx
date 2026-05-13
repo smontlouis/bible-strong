@@ -15,10 +15,20 @@ import waitForStrongWidget from './waitForStrongWidget'
 import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
 import { StrongReference } from '~common/types'
 
-const StrongOfTheDay = ({ type, color1 = 'rgb(69,150,220)', color2 = 'rgb(89,131,240)' }: any) => {
+type StrongOfTheDayProps = {
+  type: 'grec' | 'hebreu'
+  color1?: string
+  color2?: string
+}
+
+const StrongOfTheDay = ({
+  type,
+  color1 = 'rgb(69,150,220)',
+  color2 = 'rgb(89,131,240)',
+}: StrongOfTheDayProps) => {
   const { t } = useTranslation()
 
-  const [error, setError] = useState<any>(false)
+  const [error, setError] = useState<'NOT_FOUND' | true | false>(false)
   const [startRandom, setStartRandom] = useState(true)
   const [strongReference, setStrongRef] = useState<StrongReference | undefined>(undefined)
 
@@ -29,7 +39,6 @@ const StrongOfTheDay = ({ type, color1 = 'rgb(69,150,220)', color2 = 'rgb(89,131
       const strongReference = await loadRandomStrongReference(type === 'grec' ? 40 : 1)
 
       if (!strongReference) {
-        // @ts-ignore
         setError('NOT_FOUND')
       }
 

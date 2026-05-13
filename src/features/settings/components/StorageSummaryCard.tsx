@@ -64,7 +64,7 @@ const StorageSummaryCard = () => {
             height={4}
             borderRadius={2}
             bg="primary"
-            width={`${Math.min(progressRatio * 100, 100)}%` as any}
+            width={`${Math.min(progressRatio * 100, 100)}%`}
           />
         </Box>
       </Box>

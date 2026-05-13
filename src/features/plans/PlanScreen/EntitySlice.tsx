@@ -38,7 +38,6 @@ const renderIcon = (props: EntitySliceProps, isComplete: boolean, isNext: boolea
       return isComplete ? (
         <FeatherIcon name="check" size={10} color="white" />
       ) : isNext ? null : (
-        // @ts-ignore
         <SmallCircle />
       )
 
@@ -46,14 +45,12 @@ const renderIcon = (props: EntitySliceProps, isComplete: boolean, isNext: boolea
       return isComplete ? (
         <FeatherIcon name="check" size={10} color="white" />
       ) : isNext ? null : (
-        // @ts-ignore
         <SmallCircle />
       )
   }
 }
 
-// @ts-ignore
-const SmallCircle = styled(Box)(({ theme }: { theme: any }) => ({
+const SmallCircle = styled(Box)(({ theme }: { theme: Theme }) => ({
   width: 6,
   height: 6,
   opacity: 0.5,
@@ -63,8 +60,13 @@ const SmallCircle = styled(Box)(({ theme }: { theme: any }) => ({
   justifyContent: 'center',
 }))
 
-// @ts-ignore
-const Circle = styled(Box)(({ theme, isComplete, isNext, isSectionCompleted }: any) => ({
+interface CircleProps {
+  isComplete: boolean
+  isNext: boolean
+  isSectionCompleted: boolean
+}
+
+const Circle = styled(Box)<CircleProps>(({ theme, isComplete, isNext, isSectionCompleted }) => ({
   width: 18,
   height: 18,
   backgroundColor: isSectionCompleted
@@ -81,27 +83,15 @@ const Circle = styled(Box)(({ theme, isComplete, isNext, isSectionCompleted }: a
   }),
 }))
 
-const Line = styled(Box)(
-  ({
-    theme,
-    isComplete,
-    isNext,
-    isSectionCompleted,
-  }: {
-    theme: Theme
-    isComplete: boolean
-    isNext: boolean
-    isSectionCompleted: boolean
-  }) => ({
-    height: 10,
-    width: isComplete || isNext ? 3 : 2,
-    backgroundColor: isSectionCompleted
-      ? theme.colors.success
-      : isComplete || isNext
-        ? theme.colors.primary
-        : theme.colors.lightPrimary,
-  })
-)
+const Line = styled(Box)<CircleProps>(({ theme, isComplete, isNext, isSectionCompleted }) => ({
+  height: 10,
+  width: isComplete || isNext ? 3 : 2,
+  backgroundColor: isSectionCompleted
+    ? theme.colors.success
+    : isComplete || isNext
+      ? theme.colors.primary
+      : theme.colors.lightPrimary,
+}))
 
 interface Props {
   isLast?: boolean
@@ -122,12 +112,10 @@ const EntitySlice = (props: EntitySliceProps & Props) => {
   return (
     <Box row>
       <Box marginRight={25} center>
-        {/* @ts-ignore */}
         <Circle isSectionCompleted={isSectionCompleted} isComplete={isComplete} isNext={isNext}>
           {renderIcon(props, isComplete, isNext)}
         </Circle>
         {!isLast && (
-          // @ts-ignore
           <Line isComplete={isComplete} isNext={isNext} isSectionCompleted={isSectionCompleted} />
         )}
       </Box>

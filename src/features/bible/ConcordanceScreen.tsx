@@ -10,6 +10,7 @@ import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
+import { DatabaseError } from '~helpers/catchDatabaseError'
 import loadStrongVersesCountByBook from '~helpers/loadStrongVersesCountByBook'
 import useAsync from '~helpers/useAsync'
 
@@ -32,6 +33,9 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
+const hasDatabaseError = (value: unknown): value is DatabaseError =>
+  typeof value === 'object' && value !== null && 'error' in value
+
 const ConcordanceScreen = () => {
   const router = useRouter()
   const params = useLocalSearchParams<{ strongReference?: string; book?: string }>()
@@ -43,6 +47,7 @@ const ConcordanceScreen = () => {
   const { data: versesCountByBook, status } = useAsync(
     async () => await loadStrongVersesCountByBook(book, strongReference.Code)
   )
+  const data = hasDatabaseError(versesCountByBook) ? [] : versesCountByBook
 
   return (
     <Container>
@@ -52,7 +57,7 @@ const ConcordanceScreen = () => {
         <FlatList
           style={{ marginTop: 5, padding: 20 }}
           removeClippedSubviews
-          data={versesCountByBook}
+          data={data}
           keyExtractor={item => `book${item.Livre}`}
           renderItem={({ item }) => (
             <TouchableOpacity

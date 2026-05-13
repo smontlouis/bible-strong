@@ -17,7 +17,8 @@ import formatVerseContent from '~helpers/formatVerseContent'
 import { linkTypeConfig } from '~helpers/fetchOpenGraphData'
 import { getDateLocale, type ActiveLanguage } from '~helpers/languageUtils'
 import truncate from '~helpers/truncate'
-import { LinkType, Link as LinkModel } from '~redux/modules/user'
+import type { TagsObj } from '~common/types'
+import { LinkType, Link as LinkModel, Note, Study } from '~redux/modules/user'
 import { GroupedWordAnnotation } from '~redux/selectors/bible'
 import type { TagStrongItemData } from './TagStrongItem'
 import type { TagNaveItemData } from './TagNaveItem'
@@ -29,9 +30,13 @@ export type LinkItemType = LinkModel & { id: string }
 export type HighlightData = {
   date: number
   color: string
-  verseIds: any[]
-  tags: any
+  verseIds: { Livre: number; Chapitre: number; Verset: number; Texte: string }[]
+  tags: TagsObj
 }
+
+export type NoteItemType = Note & { id: string; reference?: string }
+
+type Translate = (key: string, options?: Record<string, unknown>) => string
 
 export type UnifiedTagItem =
   | { type: 'highlight'; data: HighlightData }
@@ -44,9 +49,9 @@ export type TagSectionItem =
   | { type: 'word'; data: TagDictionaryItemData }
   | { type: 'highlight'; data: HighlightData }
   | { type: 'annotation'; data: GroupedWordAnnotation }
-  | { type: 'note'; data: any }
+  | { type: 'note'; data: NoteItemType }
   | { type: 'link'; data: LinkItemType }
-  | { type: 'study'; data: any }
+  | { type: 'study'; data: Study }
 
 export type TagSection = {
   id: string
@@ -80,11 +85,11 @@ export const NoteItem = ({
   t,
   lang,
 }: {
-  item: any
-  t: (key: string, options?: any) => string
+  item: NoteItemType
+  t: Translate
   lang: ActiveLanguage
 }) => {
-  const [Livre, Chapitre, Verset] = item.id.split('-')
+  const [Livre, Chapitre, Verset] = item.id.split('-').map(Number)
   const { title } = formatVerseContent([{ Livre, Chapitre, Verset }])
   const formattedDate = distanceInWords(Number(item.date), Date.now(), {
     locale: getDateLocale(lang),
@@ -107,8 +112,7 @@ export const NoteItem = ({
           </Text>
         </Box>
         {!!item.title && (
-          // @ts-ignore
-          <Text title fontSize={16} scale={-2}>
+          <Text title fontSize={16}>
             {item.title}
           </Text>
         )}
@@ -130,7 +134,7 @@ export const LinkItem = ({
   lang,
 }: {
   item: LinkItemType
-  t: (key: string, options?: any) => string
+  t: Translate
   lang: ActiveLanguage
 }) => {
   const [Livre, Chapitre, Verset] = item.id.split('-').map(Number)
@@ -139,6 +143,7 @@ export const LinkItem = ({
     locale: getDateLocale(lang),
   })
   const config = linkTypeConfig[item.linkType as LinkType] || linkTypeConfig.website
+  const iconName = config.icon as React.ComponentProps<typeof FeatherIcon>['name']
   const displayTitle = item.customTitle || item.ogData?.title || item.url
 
   return (
@@ -158,15 +163,14 @@ export const LinkItem = ({
               {config.textIcon}
             </Text>
           ) : (
-            <FeatherIcon name={config.icon as any} size={14} color="white" />
+            <FeatherIcon name={iconName} size={14} color="white" />
           )}
         </LinkTypeIcon>
         <Box flex>
           <Text color="darkGrey" bold fontSize={11}>
             {title} - {t('Il y a {{formattedDate}}', { formattedDate })}
           </Text>
-          {/* @ts-ignore */}
-          <Text title fontSize={16} scale={-2}>
+          <Text title fontSize={16}>
             {truncate(displayTitle, 50)}
           </Text>
           <Paragraph scale={-3} scaleLineHeight={-1} color="tertiary" numberOfLines={1}>
@@ -259,7 +263,7 @@ type SectionConfig<T> = {
   isExpanded: boolean
 }
 
-export const createSection = <T extends { id: string; title?: string }>({
+export const createSection = <T extends { id: string | number; title?: string }>({
   id,
   title,
   items,
@@ -277,8 +281,8 @@ export const createSection = <T extends { id: string; title?: string }>({
 
 // Combined Strong section helper
 export const createStrongsSection = (
-  strongsGrec: any[],
-  strongsHebreu: any[],
+  strongsGrec: TagStrongItemData[],
+  strongsHebreu: TagStrongItemData[],
   isExpanded: boolean
 ): TagSection | null => {
   if (strongsGrec.length === 0 && strongsHebreu.length === 0) return null
@@ -335,15 +339,15 @@ export const createHighlightsSection = (
 // Build all sections from tag data
 export const buildTagSections = (
   tagData: {
-    strongsGrec: any[]
-    strongsHebreu: any[]
-    naves: any[]
-    words: any[]
-    highlights: any[]
-    notes: any[]
-    links: any[]
-    studies: any[]
-    wordAnnotations: any[]
+    strongsGrec: TagStrongItemData[]
+    strongsHebreu: TagStrongItemData[]
+    naves: TagNaveItemData[]
+    words: TagDictionaryItemData[]
+    highlights: HighlightData[]
+    notes: NoteItemType[]
+    links: LinkItemType[]
+    studies: Study[]
+    wordAnnotations: GroupedWordAnnotation[]
   },
   expandedSectionIds: string[],
   t: (key: string) => string

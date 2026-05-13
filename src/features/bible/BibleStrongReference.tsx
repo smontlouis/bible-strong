@@ -4,8 +4,18 @@ import React from 'react'
 import { CarouselConsumer } from '~helpers/CarouselContext'
 
 import Paragraph from '~common/ui/Paragraph'
+import type { CarouselContextValue } from '~helpers/CarouselContext'
 
-const StyledView = styled.TouchableOpacity(({ isSelected, theme }: any) => ({
+type SelectableProps = {
+  isSelected?: boolean
+}
+
+const isStrongCarouselValue = (
+  value: CarouselContextValue
+): value is Extract<CarouselContextValue, { currentStrongReference: unknown }> =>
+  'currentStrongReference' in value
+
+const StyledView = styled.TouchableOpacity<SelectableProps>(({ isSelected, theme }) => ({
   backgroundColor: isSelected ? theme.colors.primary : theme.colors.lightPrimary,
   borderRadius: 5,
   paddingLeft: 3,
@@ -14,7 +24,7 @@ const StyledView = styled.TouchableOpacity(({ isSelected, theme }: any) => ({
   overflow: 'hidden',
 }))
 
-const StyledCircle = styled.TouchableOpacity(({ theme, isSelected }: any) => ({
+const StyledCircle = styled.TouchableOpacity<SelectableProps>(({ theme }) => ({
   width: 25,
   height: 25,
   borderRadius: 25 / 2,
@@ -23,38 +33,52 @@ const StyledCircle = styled.TouchableOpacity(({ theme, isSelected }: any) => ({
   justifyContent: 'center',
 }))
 
-const StyledInsideCircle = styled.View(({ theme, isSelected, isConcordance }: any) => ({
-  width: 15,
-  height: 15,
-  borderRadius: 15 / 2,
-  backgroundColor: isSelected || isConcordance ? theme.colors.primary : theme.colors.lightPrimary,
-  alignItems: 'center',
-  justifyContent: 'center',
-}))
+const StyledInsideCircle = styled.View<SelectableProps & { isConcordance?: boolean }>(
+  ({ theme, isSelected, isConcordance }) => ({
+    width: 15,
+    height: 15,
+    borderRadius: 15 / 2,
+    backgroundColor: isSelected || isConcordance ? theme.colors.primary : theme.colors.lightPrimary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  })
+)
 
-const StyledText = styled(Paragraph)(({ isFromConcordance, isSelected, theme }: any) => ({
-  color: isSelected ? theme.colors.reverse : theme.colors.default,
-  ...(isFromConcordance
-    ? {
-        color: 'red',
-        fontWeight: 'bold',
-        fontSize: 12,
-      }
-    : {}),
-}))
+const StyledText = styled(Paragraph)<SelectableProps & { isFromConcordance?: boolean }>(
+  ({ isFromConcordance, isSelected, theme }) => ({
+    color: isSelected ? theme.colors.reverse : theme.colors.default,
+    ...(isFromConcordance
+      ? {
+          color: 'red',
+          fontWeight: 'bold',
+          fontSize: 12,
+        }
+      : {}),
+  })
+)
 
-const ConcordanceText = styled(Paragraph)(({ isConcordance, theme }: any) => ({
-  ...(isConcordance
-    ? {
-        color: theme.colors.primary,
-        textDecorationLine: 'underline',
-        textDecorationStyle: 'solid',
-        textDecorationColor: theme.colors.primary,
-      }
-    : {}),
-}))
+const ConcordanceText = styled(Paragraph)<{ isConcordance?: boolean }>(
+  ({ isConcordance, theme }) => ({
+    ...(isConcordance
+      ? {
+          color: theme.colors.primary,
+          textDecorationLine: 'underline',
+          textDecorationStyle: 'solid',
+          textDecorationColor: theme.colors.primary,
+        }
+      : {}),
+  })
+)
 
-const BibleStrongRef = ({ small, reference, word, book, concordanceFor }: any) => {
+type BibleStrongRefProps = {
+  small?: boolean
+  reference: string
+  word?: string
+  book?: string | number
+  concordanceFor?: string | number
+}
+
+const BibleStrongRef = ({ small, reference, word, concordanceFor }: BibleStrongRefProps) => {
   if (concordanceFor) {
     const isConcordance = `0${concordanceFor}` === reference || `${concordanceFor}` === reference
 
@@ -63,10 +87,9 @@ const BibleStrongRef = ({ small, reference, word, book, concordanceFor }: any) =
     }
 
     if (!word) {
-      // @ts-ignore
       return <StyledInsideCircle isConcordance={isConcordance} />
     }
-    // @ts-ignore
+
     return (
       <ConcordanceText small={small} isConcordance={isConcordance}>
         {word}
@@ -76,31 +99,30 @@ const BibleStrongRef = ({ small, reference, word, book, concordanceFor }: any) =
 
   return (
     <CarouselConsumer>
-      {({ currentStrongReference, goToCarouselItem }: any) => {
-        const isSelected =
-          currentStrongReference && currentStrongReference.Code === Number(reference)
+      {value => {
+        if (!isStrongCarouselValue(value)) return null
+        const { currentStrongReference, goToCarouselItem } = value
+        const isSelected = currentStrongReference
+          ? Number(currentStrongReference.Code) === Number(reference)
+          : false
         if (!word) {
           return (
-            // @ts-ignore
             <StyledCircle
               activeOpacity={0.5}
               onPress={() => goToCarouselItem(reference)}
               isSelected={isSelected}
             >
-              {/* @ts-ignore */}
               <StyledInsideCircle isSelected={isSelected} />
             </StyledCircle>
           )
         }
 
         return (
-          // @ts-ignore
           <StyledView
             activeOpacity={0.5}
             onPress={() => goToCarouselItem(reference)}
             isSelected={isSelected}
           >
-            {/* @ts-ignore */}
             <StyledText isSelected={isSelected}>{word}</StyledText>
           </StyledView>
         )

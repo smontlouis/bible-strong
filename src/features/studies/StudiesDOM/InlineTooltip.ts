@@ -1,24 +1,35 @@
 import Quill from './quill'
 import { dispatch } from './dispatch'
+import type {
+  QuillBlot,
+  QuillBlotConstructor,
+  QuillInstance,
+  QuillRange,
+  QuillTooltipConstructor,
+} from './quill-types'
 
-const Tooltip: any = Quill.import('ui/tooltip')
-const InlineVerseBlot: any = Quill.import('formats/inline-verse')
-const InlineStrongBlot: any = Quill.import('formats/inline-strong')
+const Tooltip = Quill.import('ui/tooltip') as QuillTooltipConstructor
+const InlineVerseBlot = Quill.import('formats/inline-verse') as QuillBlotConstructor
+const InlineStrongBlot = Quill.import('formats/inline-strong') as QuillBlotConstructor
 
 class InlineTooltip extends Tooltip {
-  title: any
-  linkRange: any
+  title: HTMLElement
+  linkRange: [number, number] = [0, 0]
   type: string | undefined
-  quill: any
+  declare quill: QuillInstance
 
-  constructor(quill: any, boundsContainer: any) {
+  constructor(quill: QuillInstance, boundsContainer: HTMLElement) {
     super(quill, boundsContainer)
-    this.title = this.root.querySelector('div.ql-preview')
+    const title = this.root.querySelector<HTMLElement>('div.ql-preview')
+    if (!title) {
+      throw new Error('InlineTooltip preview element is missing')
+    }
+    this.title = title
     this.listen()
   }
 
   listen = () => {
-    this.root.querySelector('a.ql-remove').addEventListener('click', (event: Event) => {
+    this.root.querySelector('a.ql-remove')?.addEventListener('click', (event: Event) => {
       this.quill.setSelection(...this.linkRange)
 
       this.quill.format('inline-verse', false)
@@ -28,7 +39,7 @@ class InlineTooltip extends Tooltip {
       this.hide()
     })
 
-    this.root.querySelector('a.ql-action').addEventListener('click', (_event: Event) => {
+    this.root.querySelector('a.ql-action')?.addEventListener('click', (_event: Event) => {
       this.quill.focus()
 
       this.quill.setSelection(...this.linkRange)
@@ -40,29 +51,33 @@ class InlineTooltip extends Tooltip {
       }
     })
 
-    this.quill.on(Quill.events.EDITOR_CHANGE, (type: string, range: any) => {
+    this.quill.on(Quill.events.EDITOR_CHANGE, (type, rangeValue) => {
       const isReadOnly = this.quill.container.classList.contains('ql-disabled')
 
       if (type === Quill.events.SELECTION_CHANGE) {
+        const range = rangeValue as QuillRange | null
         if (!range) return
 
         if (isReadOnly) {
           return
         }
 
-        const [linkVerse, offsetVerse] = this.quill.scroll.descendant(InlineVerseBlot, range.index)
+        const [linkVerse, offsetVerse] = this.quill.scroll.descendant(
+          InlineVerseBlot,
+          range.index
+        ) as [QuillBlot | null, number]
 
         const [linkStrong, offsetStrong] = this.quill.scroll.descendant(
           InlineStrongBlot,
           range.index
-        )
+        ) as [QuillBlot | null, number]
 
         // IF VERSE
         if (this.quill.getFormat(range)['inline-verse'] && linkVerse) {
           this.linkRange = [range.index - offsetVerse, linkVerse.length()]
           this.type = 'inline-verse'
           const data = InlineVerseBlot.formats(linkVerse.domNode)
-          this.title.textContent = data.title
+          this.title.textContent = String(data.title || '')
 
           this.show()
           this.position(this.quill.getBounds(range))
@@ -72,7 +87,7 @@ class InlineTooltip extends Tooltip {
           this.linkRange = [range.index - offsetStrong, linkStrong.length()]
           this.type = 'inline-strong'
           const data = InlineStrongBlot.formats(linkStrong.domNode)
-          this.title.textContent = data.title
+          this.title.textContent = String(data.title || '')
 
           this.show()
           this.position(this.quill.getBounds(range))

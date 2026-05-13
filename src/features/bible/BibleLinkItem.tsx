@@ -59,6 +59,7 @@ const BibleLinkItem = ({ item, onPress, onMenuPress }: Props) => {
   })
 
   const config = linkTypeConfig[item.link.linkType] || linkTypeConfig.website
+  const iconName = config.icon as React.ComponentProps<typeof FeatherIcon>['name']
   const displayTitle = item.link.customTitle || item.link.ogData?.title || item.link.url
 
   return (
@@ -70,7 +71,7 @@ const BibleLinkItem = ({ item, onPress, onMenuPress }: Props) => {
               {config.textIcon}
             </Text>
           ) : (
-            <FeatherIcon name={config.icon as any} size={14} color="white" />
+            <FeatherIcon name={iconName} size={14} color="white" />
           )}
         </LinkTypeIcon>
         <Box flex>
@@ -79,8 +80,7 @@ const BibleLinkItem = ({ item, onPress, onMenuPress }: Props) => {
               {item.reference} - {t('Il y a {{formattedDate}}', { formattedDate })}
             </Text>
           </Box>
-          {/* @ts-ignore */}
-          <Text title fontSize={16} scale={-2}>
+          <Text title fontSize={16}>
             {truncate(displayTitle, 50)}
           </Text>
           <Paragraph scale={-3} scaleLineHeight={-1} color="tertiary" numberOfLines={1}>

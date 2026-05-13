@@ -10,6 +10,7 @@ import Switch from '~common/ui/Switch'
 import Text from '~common/ui/Text'
 import getVersesContent from '~helpers/getVersesContent'
 import { RootState } from '~redux/modules/reducer'
+import type { AppDispatch } from '~redux/store'
 import {
   toggleSettingsShareAppName,
   toggleSettingsShareLineBreaks,
@@ -41,7 +42,7 @@ export const useShareOptions = () => {
 
 const BibleShareOptionsScreen = () => {
   const { t } = useTranslation()
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
   const [message, setMessage] = useState('')
 
   const { hasVerseNumbers, hasInlineVerses, hasQuotes, hasAppName } = useShareOptions()
@@ -72,24 +73,27 @@ const BibleShareOptionsScreen = () => {
           <Text flex>{t('bible.settings.hasVerseNumbers')}</Text>
           <Switch
             value={hasVerseNumbers}
-            // @ts-ignore
-            onValueChange={() => dispatch(toggleSettingsShareVerseNumbers())}
+            onValueChange={() => {
+              dispatch(toggleSettingsShareVerseNumbers())
+            }}
           />
         </Box>
         <Box paddingHorizontal={20} paddingVertical={10} row alignItems="center">
           <Text flex>{t('bible.settings.hasInlineVerses')}</Text>
           <Switch
             value={hasInlineVerses}
-            // @ts-ignore
-            onValueChange={() => dispatch(toggleSettingsShareLineBreaks())}
+            onValueChange={() => {
+              dispatch(toggleSettingsShareLineBreaks())
+            }}
           />
         </Box>
         <Box paddingHorizontal={20} paddingVertical={10} row alignItems="center">
           <Text flex>{t('bible.settings.hasQuotes')}</Text>
           <Switch
             value={hasQuotes}
-            // @ts-ignore
-            onValueChange={() => dispatch(toggleSettingsShareQuotes())}
+            onValueChange={() => {
+              dispatch(toggleSettingsShareQuotes())
+            }}
           />
         </Box>
         <Box paddingHorizontal={20} paddingVertical={10} row alignItems="center">
@@ -98,8 +102,9 @@ const BibleShareOptionsScreen = () => {
           </Box>
           <Switch
             value={hasAppName}
-            // @ts-ignore
-            onValueChange={() => dispatch(toggleSettingsShareAppName())}
+            onValueChange={() => {
+              dispatch(toggleSettingsShareAppName())
+            }}
           />
         </Box>
         <Box p={20} m={20} borderRadius={20} bg="reverse">

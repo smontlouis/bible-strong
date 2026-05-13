@@ -1,7 +1,8 @@
 import Quill from './quill'
 import { dispatch } from './dispatch'
+import type { InlineVersePayload, QuillBlotConstructor } from './quill-types'
 
-const Inline: any = Quill.import('blots/inline')
+const Inline = Quill.import('blots/inline') as QuillBlotConstructor
 
 class InlineVerse extends Inline {
   static blotName = 'inline-verse'
@@ -10,7 +11,7 @@ class InlineVerse extends Inline {
 
   static className = 'inline-verse'
 
-  static create({ title, verses }: { title: string; verses: string[] }) {
+  static create({ title, verses }: InlineVersePayload) {
     const node = super.create()
     node.setAttribute('data-title', title)
     node.setAttribute('data-verses', JSON.stringify(verses))
@@ -30,7 +31,7 @@ class InlineVerse extends Inline {
   static formats(domNode: HTMLElement) {
     return {
       title: domNode.getAttribute('data-title'),
-      verses: JSON.parse(domNode.getAttribute('data-verses') || '[]'),
+      verses: JSON.parse(domNode.getAttribute('data-verses') || '[]') as string[],
     }
   }
 }

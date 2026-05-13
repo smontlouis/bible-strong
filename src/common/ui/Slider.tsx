@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef } from 'react'
 import {
   EntryAnimationsValues,
+  EntryOrExitLayoutType,
   EntryExitAnimationFunction,
   ExitAnimationsValues,
   SharedValue,
@@ -84,22 +85,28 @@ type SlideProps = {
 export const Slide = ({ slideIndex, ...props }: BoxProps & SlideProps) => {
   const { direction, isAnimationsEnabled, index } = useSlider()
 
-  const SlideIn = (values: EntryAnimationsValues & ExitAnimationsValues) => {
+  const SlideIn: EntryExitAnimationFunction = (values: EntryAnimationsValues) => {
     'worklet'
 
-    return direction.get() === 'left' ? slideInRightAnimation(values) : slideInLeftAnimation(values)
-  }
-
-  const SlideOut = (values: EntryAnimationsValues & ExitAnimationsValues) => {
-    'worklet'
+    const animationValues = values as EntryAnimationsValues & ExitAnimationsValues
 
     return direction.get() === 'left'
-      ? slideOutLeftAnimation(values)
-      : slideOutRightAnimation(values)
+      ? slideInRightAnimation(animationValues)
+      : slideInLeftAnimation(animationValues)
+  }
+
+  const SlideOut: EntryExitAnimationFunction = (values: ExitAnimationsValues) => {
+    'worklet'
+
+    const animationValues = values as EntryAnimationsValues & ExitAnimationsValues
+
+    return direction.get() === 'left'
+      ? slideOutLeftAnimation(animationValues)
+      : slideOutRightAnimation(animationValues)
   }
 
   //This is to check if the layouting took place and return the according animation
-  const ifEnabled = (animation: any): any => {
+  const ifEnabled = (animation: EntryOrExitLayoutType): EntryOrExitLayoutType | undefined => {
     return isAnimationsEnabled.current ? animation : undefined
   }
 

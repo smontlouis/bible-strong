@@ -7,7 +7,7 @@ import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
 import { toast } from '~helpers/toast'
 import { dbManager, initSQLiteDirForLang } from '~helpers/sqlite'
-import { useDBStateValue } from '~helpers/databaseState'
+import { DBAction, useDBStateValue } from '~helpers/databaseState'
 import { getDatabaseUrl } from '~helpers/firebase'
 import { getDbPath } from '~helpers/databases'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
@@ -17,7 +17,11 @@ import Progress from './ui/Progress'
 
 const STRONG_FILE_SIZE = 34941952
 
-const useStrong = (dispatch: any, startDownload: any, lang: ResourceLanguage) => {
+const useStrong = (
+  dispatch: React.Dispatch<DBAction>,
+  startDownload: boolean,
+  lang: ResourceLanguage
+) => {
   const { t } = useTranslation()
   const prevLangRef = useRef<ResourceLanguage>(lang)
 
@@ -61,8 +65,9 @@ const useStrong = (dispatch: any, startDownload: any, lang: ResourceLanguage) =>
 
           try {
             const downloadKey = `strongDownloadHasStarted_${lang}`
-            if (!(window as any)[downloadKey]) {
-              ;(window as any)[downloadKey] = true
+            const downloadFlags = window as unknown as Window & Record<string, boolean>
+            if (!downloadFlags[downloadKey]) {
+              downloadFlags[downloadKey] = true
 
               const sqliteDbUri = getDatabaseUrl('STRONG', lang)
 
@@ -89,7 +94,7 @@ const useStrong = (dispatch: any, startDownload: any, lang: ResourceLanguage) =>
                 type: 'strong.setLoading',
                 payload: false,
               })
-              ;(window as any)[downloadKey] = false
+              downloadFlags[downloadKey] = false
             }
           } catch (e) {
             console.log('[Strong] Download error:', e)
@@ -163,8 +168,8 @@ const waitForDatabase =
     size?: 'small' | 'large'
     hasHeader?: boolean
   } = {}) =>
-  <T,>(WrappedComponent: React.ComponentType<T>): React.ComponentType<T> =>
-  (props: any) => {
+  <T extends object>(WrappedComponent: React.ComponentType<T>): React.ComponentType<T> =>
+  (props: T) => {
     const { t } = useTranslation()
     const { isLoading, progress, proposeDownload, startDownload, setStartDownload, resourceLang } =
       useWaitForDatabase()

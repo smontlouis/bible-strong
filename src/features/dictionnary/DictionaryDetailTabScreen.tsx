@@ -12,7 +12,7 @@ import Container from '~common/ui/Container'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import Text from '~common/ui/Text'
-import useHTMLView from '~helpers/useHTMLView'
+import useHTMLView, { type HTMLViewLinkPayload } from '~helpers/useHTMLView'
 
 import { useRouter } from 'expo-router'
 import { produce } from 'immer'
@@ -28,7 +28,7 @@ import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
-import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
+import loadDictionnaireItem, { type DictionaryItem } from '~helpers/loadDictionnaireItem'
 import { RootState } from '~redux/modules/reducer'
 import { makeWordTagsSelector } from '~redux/selectors/bible'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
@@ -53,7 +53,7 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
 
   const openInNewTab = useOpenInNewTab()
   const { t } = useTranslation()
-  const [dictionnaireItem, setDictionnaireItem] = useState<any>(null)
+  const [dictionnaireItem, setDictionnaireItem] = useState<DictionaryItem | null>(null)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const addHistory = useSetAtom(historyAtom)
 
@@ -76,7 +76,6 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
 
   const setTitle = (title: string) =>
     setDictionaryTab(
-      // @ts-ignore
       produce(draft => {
         draft.title = title
       })
@@ -103,7 +102,7 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [word])
 
-  const openLink = ({ href, content, type }: any) => {
+  const openLink = ({ href, type }: HTMLViewLinkPayload) => {
     if (type === 'verse') {
       try {
         const sanitizedHref = href.replace(String.fromCharCode(160), ' ')
@@ -144,13 +143,13 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
   const { webviewProps } = useHTMLView({ onLinkClicked: openLink })
 
   const shareDefinition = async () => {
+    if (!dictionnaireItem) return
+
     try {
-      // @ts-ignore
       const message = `${word} \n\n${truncHTML(dictionnaireItem.definition, 4000)
         .text.replace(/&#/g, '\\')
-        .replace(/\\x([0-9A-F]+);/gi, function () {
-          // @ts-ignore
-          return String.fromCharCode(parseInt(arguments[1], 16))
+        .replace(/\\x([0-9A-F]+);/gi, (_, hex: string) => {
+          return String.fromCharCode(parseInt(hex, 16))
         })} \n\nLa suite sur https://bible-strong.app`
       Share.share({ message })
     } catch (e) {

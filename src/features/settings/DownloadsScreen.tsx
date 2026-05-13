@@ -28,6 +28,7 @@ import {
   databases,
   getIfDatabaseNeedsDownloadForLang,
   getIfDatabaseNeedsDownload,
+  type IdDatabase,
 } from '~helpers/databases'
 import {
   LANGUAGE_SPECIFIC_DBS,
@@ -249,14 +250,14 @@ function useDownloadedItems() {
       ).filter(dbId => (lang === 'en' ? !FRENCH_ONLY_DBS.includes(dbId) : true))
 
       for (const dbId of dbIds) {
-        const needs = await getIfDatabaseNeedsDownloadForLang(dbId as any, lang)
+        const needs = await getIfDatabaseNeedsDownloadForLang(dbId as IdDatabase, lang)
         if (!needs) set.add(`database:${dbId}:${lang}`)
       }
     }
 
     // Check shared databases
     for (const dbId of SHARED_DBS.filter(d => d !== 'BIBLES')) {
-      const needs = await getIfDatabaseNeedsDownload(dbId as any)
+      const needs = await getIfDatabaseNeedsDownload(dbId as IdDatabase)
       if (!needs) set.add(`database:${dbId}:fr`)
     }
 
@@ -489,7 +490,7 @@ const DownloadsScreen = () => {
         }
       />
 
-      <SectionList
+      <SectionList<UnifiedItem, UnifiedSection>
         sections={displaySections}
         keyExtractor={(item: UnifiedItem) => item.id}
         stickySectionHeadersEnabled={false}
@@ -539,7 +540,7 @@ const DownloadsScreen = () => {
             <StorageSummaryCard />
           </>
         }
-        renderSectionHeader={({ section }: { section: any }) => {
+        renderSectionHeader={({ section }) => {
           // Use the full (non-collapsed) data from filteredSections for counts
           const fullSection = filteredSections.find(s => s.key === section.key)
           const sectionItems = fullSection?.data || []
@@ -560,7 +561,7 @@ const DownloadsScreen = () => {
             />
           )
         }}
-        renderItem={({ item }: { item: any }) => {
+        renderItem={({ item }) => {
           const isDownloaded = downloadedSet.has(item.id)
           // Extract the raw database or version id for needsUpdate check
           let needsUpdateKey: string | undefined

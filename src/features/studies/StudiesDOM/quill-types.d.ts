@@ -1,9 +1,17 @@
-interface QuillRange {
+export type QuillJSONValue =
+  | boolean
+  | number
+  | string
+  | null
+  | QuillJSONValue[]
+  | { [key: string]: QuillJSONValue | undefined }
+
+export interface QuillRange {
   index: number
   length: number
 }
 
-interface QuillBounds {
+export interface QuillBounds {
   top: number
   bottom: number
   left: number
@@ -12,26 +20,56 @@ interface QuillBounds {
   height: number
 }
 
-interface DeltaStatic {
-  ops: any[]
+export interface DeltaStatic {
+  ops: QuillJSONValue[]
+  [key: string]: QuillJSONValue | undefined
 }
 
-interface QuillHistory {
+export interface QuillHistory {
   undo(): void
   redo(): void
 }
 
-interface QuillSelection {
-  getRange(): [QuillRange | null, ...any[]]
+export interface QuillSelection {
+  getRange(): [QuillRange | null, ...unknown[]]
   savedRange: QuillRange | null
 }
 
 export interface QuillModule {
-  format(name: string, value?: any): void
-  receiveVerseLink(payload: any): void
-  receiveStrongLink(payload: any): void
-  receiveVerseBlock(payload: any): void
-  receiveStrongBlock(payload: any): void
+  format(name: string, value?: unknown): void
+  receiveVerseLink(payload: InlineVersePayload): void
+  receiveStrongLink(payload: InlineStrongPayload): void
+  receiveVerseBlock(payload: VerseBlockPayload): void
+  receiveStrongBlock(payload: StrongBlockPayload): void
+}
+
+export interface InlineVersePayload {
+  title: string
+  verses: string[]
+}
+
+export interface InlineStrongPayload {
+  title: string
+  codeStrong: string
+  book: string
+}
+
+export interface VerseBlockPayload {
+  title: string
+  verses: string[]
+  content: string
+  version: string
+}
+
+export interface StrongBlockPayload {
+  title: string
+  codeStrong: string
+  book: string
+  strongType?: string
+  phonetique?: string
+  definition?: string
+  translatedBy?: string
+  original?: string
 }
 
 export interface QuillInstance {
@@ -39,16 +77,19 @@ export interface QuillInstance {
   container: HTMLElement
   selection: QuillSelection
   history: QuillHistory
-  clipboard: any
+  clipboard: unknown
+  scroll: {
+    descendant(blot: QuillBlotConstructor, index: number): [QuillBlot | null, number]
+  }
 
-  on(eventName: string, handler: (...args: any[]) => void): void
-  off(eventName: string, handler: (...args: any[]) => void): void
+  on(eventName: string, handler: (...args: unknown[]) => void): void
+  off(eventName: string, handler: (...args: unknown[]) => void): void
   focus(): void
   blur(): void
   enable(enabled?: boolean): void
 
   getContents(): DeltaStatic
-  setContents(delta: any, source?: string): DeltaStatic
+  setContents(delta: DeltaStatic, source?: string): DeltaStatic
   getText(index?: number, length?: number): string
   getLength(): number
 
@@ -58,19 +99,56 @@ export interface QuillInstance {
   setSelection(index: number, length: number, source?: string): void
   getBounds(range: QuillRange): QuillBounds
 
-  getFormat(range?: QuillRange): Record<string, any>
-  format(name: string, value: any, source?: string): void
-  formatLine(index: number, length: number, formats: Record<string, any>, source?: string): void
-  formatText(index: number, length: number, formats: Record<string, any>, source?: string): void
+  getFormat(range?: QuillRange | null): Record<string, unknown>
+  format(name: string, value: unknown, source?: string): void
+  formatLine(index: number, length: number, formats: Record<string, unknown>, source?: string): void
+  formatText(index: number, length: number, formats: Record<string, unknown>, source?: string): void
 
   insertText(index: number, text: string, source?: string): void
-  insertText(index: number, text: string, format: string, value: any, source?: string): void
-  insertEmbed(index: number, type: string, value: any, source?: string): void
+  insertText(index: number, text: string, format: string, value: unknown, source?: string): void
+  insertEmbed(index: number, type: string, value: unknown, source?: string): void
   deleteText(index: number, length: number, source?: string): void
 
   getModule(name: string): QuillModule
-  getLine(index: number): [any, number]
-  getLeaf(index: number): [any, number]
+  getLine(index: number): [unknown, number]
+  getLeaf(index: number): [unknown, number]
+}
+
+export interface QuillModuleConstructor {
+  new (quill: QuillInstance, options?: unknown): QuillModule
+}
+
+export interface QuillTooltip {
+  root: HTMLElement
+  quill: QuillInstance
+  show(): void
+  hide(): void
+  position(bounds: QuillBounds): void
+}
+
+export interface QuillTooltipConstructor {
+  new (quill: QuillInstance, boundsContainer: HTMLElement): QuillTooltip
+}
+
+export interface QuillBlot {
+  domNode: HTMLElement
+  length(): number
+}
+
+export interface QuillBlotConstructor {
+  new (): QuillBlot
+  create(value?: unknown): HTMLElement
+  formats(domNode: HTMLElement): Record<string, unknown>
+}
+
+export interface QuillEmbed {
+  remove(): void
+  update(mutations: MutationRecord[], context: unknown): void
+}
+
+export interface QuillEmbedConstructor {
+  new (): QuillEmbed
+  create(value?: unknown): HTMLElement
 }
 
 interface QuillStatic {
@@ -85,13 +163,13 @@ interface QuillStatic {
     SILENT: string
     USER: string
   }
-  import(path: string): any
-  register(definitions: Record<string, any>, overwrite?: boolean): void
+  import(path: string): unknown
+  register(definitions: Record<string, unknown>, overwrite?: boolean): void
 }
 
-interface QuillOptions {
+export interface QuillOptions {
   theme?: string
-  modules?: Record<string, any>
+  modules?: Record<string, unknown>
   placeholder?: string
   readOnly?: boolean
 }

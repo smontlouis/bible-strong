@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import React, { useEffect, useRef, useState } from 'react'
-import Carousel from 'react-native-reanimated-carousel'
+import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 
 import waitForStrongDB from '~common/waitForStrongDB'
 import loadStrongReferences from '~helpers/loadStrongReferences'
@@ -19,10 +19,9 @@ import StrongCard from './StrongCard'
 import BibleVerseDetailFooter from './BibleVerseDetailFooter'
 
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
-import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
-import { StudyNavigateBibleType } from '~common/types'
+import { StrongReference, StudyNavigateBibleType } from '~common/types'
 import { CarouselProvider } from '~helpers/CarouselContext'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
@@ -60,11 +59,6 @@ const StyledVerse = styled.View(({ theme }) => ({
   flexDirection: 'row',
 }))
 
-interface StrongReference {
-  Code: number
-  // Add other properties as needed
-}
-
 interface Verse {
   Livre: number
   Chapitre: number
@@ -88,10 +82,9 @@ interface State {
 }
 
 const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateVerse }) => {
-  const router = useRouter()
   const theme = useTheme()
   const { t } = useTranslation()
-  const carouselRef = useRef<any>(null)
+  const carouselRef = useRef<ICarouselInstance>(null)
   const [boxHeight, setBoxHeight] = useState(0)
   const {
     ref: carouselContainerRef,
@@ -124,8 +117,11 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
     formatVerse(strongVerse)
   }
 
-  const formatVerse = async (strongVerse: any) => {
-    const { formattedTexte, references } = await verseToStrong(strongVerse)
+  const formatVerse = async (strongVerse: { Texte: string }) => {
+    const { formattedTexte, references } = await verseToStrong({
+      ...strongVerse,
+      Livre: verse.Livre,
+    })
 
     setState(prev => ({ ...prev, formattedTexte }))
 
@@ -141,7 +137,9 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
       }))
       return
     }
-    const strongReferences = strongReferencesResult as unknown as StrongReference[]
+    const strongReferences = strongReferencesResult.filter(
+      (reference): reference is StrongReference => typeof reference !== 'string'
+    )
     setState(prev => ({
       ...prev,
       isCarouselLoading: false,
@@ -153,7 +151,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
   }
 
   const findRefIndex = (ref: string | number) =>
-    state.strongReferences.findIndex(r => r.Code === Number(ref))
+    state.strongReferences.findIndex(r => Number(r.Code) === Number(ref))
 
   const goToCarouselItem = (ref: string | number) => {
     const index = findRefIndex(ref)
@@ -162,7 +160,8 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
     }
     setState(prev => ({
       ...prev,
-      currentStrongReference: state.strongReferences.find(r => r.Code === Number(ref)) || null,
+      currentStrongReference:
+        state.strongReferences.find(r => Number(r.Code) === Number(ref)) || null,
     }))
   }
 
@@ -177,13 +176,8 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
     return (
       <StrongCard
         theme={theme}
-        // @ts-ignore
         isSelectionMode={isSelectionMode}
-        // @ts-ignore
-        navigation={router}
-        // @ts-ignore
-        book={verse.Livre}
-        // @ts-ignore
+        book={String(verse.Livre)}
         strongReference={item}
         index={index}
       />
@@ -219,7 +213,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
   }
 
   const currentStrongReferenceIndex = state.strongReferences.findIndex(
-    r => r?.Code === state.currentStrongReference?.Code
+    r => Number(r?.Code) === Number(state.currentStrongReference?.Code)
   )
 
   return (

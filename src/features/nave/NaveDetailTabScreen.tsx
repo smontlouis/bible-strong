@@ -24,8 +24,8 @@ import waitForNaveDB from '~common/waitForNaveDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
-import loadNaveItem from '~helpers/loadNaveItem'
-import useHTMLView from '~helpers/useHTMLView'
+import loadNaveItem, { type NaveItemRow } from '~helpers/loadNaveItem'
+import useHTMLView, { type HTMLViewLinkPayload } from '~helpers/useHTMLView'
 import { RootState } from '~redux/modules/reducer'
 import { makeNaveTagsSelector } from '~redux/selectors/bible'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
@@ -60,7 +60,7 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
     }
   }, [isInTab, setNaveTab, router])
 
-  const [naveItem, setNaveItem] = useState<any>(null)
+  const [naveItem, setNaveItem] = useState<NaveItemRow | null>(null)
   const { t } = useTranslation()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const selectNaveTags = makeNaveTagsSelector()
@@ -75,7 +75,7 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
     )
 
   useEffect(() => {
-    setTitle(naveItem?.name || name)
+    setTitle(naveItem?.name || name || '')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [naveItem?.name, name])
 
@@ -94,7 +94,7 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name, name_lower])
 
-  const openLink = ({ href }: any) => {
+  const openLink = ({ href }: HTMLViewLinkPayload) => {
     const [type, item] = href.split('=')
 
     if (type === 'v') {
@@ -141,12 +141,13 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
   const { webviewProps } = useHTMLView({ onLinkClicked: openLink })
 
   const shareDefinition = async () => {
+    if (!naveItem) return
+
     try {
       const message = `${name} \n\n${truncHTML(naveItem.description, 4000)
         .text.replace(/&#/g, '\\')
-        // @ts-ignore
-        .replace(/\\x([0-9A-F]+);/gi, function () {
-          return String.fromCharCode(parseInt(arguments[1], 16))
+        .replace(/\\x([0-9A-F]+);/gi, (_, hex: string) => {
+          return String.fromCharCode(parseInt(hex, 16))
         })} \n\nLa suite sur https://bible-strong.app`
       Share.share({ message })
     } catch (e) {
@@ -174,7 +175,7 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
     <Container>
       <DetailedHeader
         hasBackButton={!isInTab}
-        title={naveItem?.name || name}
+        title={naveItem.name || name || ''}
         subtitle={naveItem?.name_lower}
         borderColor="quint"
         rightComponent={
@@ -210,7 +211,7 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
                       isRemovable: true,
                       type: 'nave',
                       data: {
-                        name,
+                        name: name || naveItem.name,
                         name_lower,
                       },
                     })
@@ -240,10 +241,7 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
           borderTopRightRadius: 30,
         }}
       >
-        {naveItem?.description && (
-          // @ts-ignore
-          <WebView {...webviewProps(naveItem.description)} />
-        )}
+        {naveItem?.description && <WebView {...webviewProps(naveItem.description)} />}
       </Box>
     </Container>
   )

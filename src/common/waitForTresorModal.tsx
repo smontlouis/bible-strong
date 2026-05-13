@@ -13,6 +13,7 @@ import Box from './ui/Box'
 import Progress from './ui/Progress'
 
 const TRESOR_FILE_SIZE = 5434368
+const downloadState = window as Window & { tresorDownloadHasStarted?: boolean }
 
 export const useWaitForDatabase = () => {
   const { t } = useTranslation()
@@ -40,8 +41,8 @@ export const useWaitForDatabase = () => {
           }
 
           try {
-            if (!(window as any).tresorDownloadHasStarted) {
-              ;(window as any).tresorDownloadHasStarted = true
+            if (!downloadState.tresorDownloadHasStarted) {
+              downloadState.tresorDownloadHasStarted = true
 
               const sqliteDbUri = getDatabaseUrl('TRESOR', 'fr')
 
@@ -62,7 +63,7 @@ export const useWaitForDatabase = () => {
               await db.init()
 
               setLoading(false)
-              ;(window as any).tresorDownloadHasStarted = false
+              downloadState.tresorDownloadHasStarted = false
             }
           } catch (e) {
             console.log('[Tresor] Download error:', e)
@@ -94,8 +95,7 @@ export const useWaitForDatabase = () => {
 }
 
 const waitForDatabase =
-  <T,>(WrappedComponent: React.ComponentType<T>): React.ComponentType<T> =>
-  // @ts-ignore
+  <T extends object>(WrappedComponent: React.ComponentType<T>): React.ComponentType<T> =>
   (props: T) => {
     const { t } = useTranslation()
     const { isLoading, progress, proposeDownload, startDownload, setStartDownload } =
@@ -135,7 +135,6 @@ const waitForDatabase =
       )
     }
 
-    // @ts-ignore
     return <WrappedComponent {...props} />
   }
 

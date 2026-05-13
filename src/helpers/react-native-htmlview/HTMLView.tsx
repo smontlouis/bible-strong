@@ -1,13 +1,31 @@
 import React from 'react'
-import { Linking, StyleSheet, Text } from 'react-native'
+import { Linking, StyleSheet, Text, TextStyle } from 'react-native'
 import htmlToElement from './htmlToElement'
 
-interface HTMLViewProps {
+export interface HTMLNode {
+  type?: 'text' | 'tag' | string
+  name?: string
+  data?: string
+  attribs?: Record<string, string | undefined>
+  children?: HTMLNode[]
+}
+
+type LinkPressHandler = {
+  bivarianceHack(href: string, second?: string | number, third?: string): void
+}['bivarianceHack']
+
+export interface HTMLViewProps {
   value?: string
-  onLinkPress?: (...args: any[]) => void
-  onError?: (err: any) => void
-  stylesheet?: Record<string, any>
-  renderNode?: (...args: any[]) => any
+  onLinkPress?: LinkPressHandler
+  onError?: (err: unknown) => void
+  stylesheet?: Record<string, TextStyle>
+  renderNode?: (
+    node: HTMLNode,
+    index: number,
+    siblings: HTMLNode[],
+    parent: HTMLNode | undefined,
+    defaultRenderer: (nodes: HTMLNode[] | undefined, parent?: HTMLNode) => React.ReactNode
+  ) => React.ReactNode
 }
 
 interface HTMLViewState {
@@ -43,7 +61,7 @@ class HTMLView extends React.Component<HTMLViewProps, HTMLViewState> {
       customRenderer: this.props.renderNode,
     }
 
-    htmlToElement(value, opts, (err: any, element: React.ReactNode) => {
+    htmlToElement(value, opts, (err: unknown, element: React.ReactNode) => {
       if (err) return this.props.onError?.(err)
       this.setState({ element })
     })

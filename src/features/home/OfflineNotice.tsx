@@ -22,7 +22,7 @@ const OfflineNotice = () => {
       lightShadow
       borderRadius={3}
       borderLeftWidth={4}
-      {...({ borderLeftColor: 'rgb(255,188,0)' } as any)}
+      borderLeftColor="rgb(255,188,0)"
       marginTop={10}
       marginBottom={20}
     >

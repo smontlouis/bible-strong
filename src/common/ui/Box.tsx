@@ -21,7 +21,7 @@ import Text, { AnimatedText, TextProps } from './Text'
 export type BoxProps = {
   debug?: boolean
 
-  as?: React.ElementType<any> | undefined
+  as?: React.ElementType | undefined
   children?: React.ReactNode
 
   position?: 'absolute' | 'relative'
@@ -73,7 +73,8 @@ export type BoxProps = {
   borderLeftWidth?: number
   borderRightWidth?: number
   borderColor?: string
-  transform?: any
+  borderLeftColor?: string
+  transform?: ViewStyle['transform']
   borderRadius?: number
   borderTopLeftRadius?: number
   borderTopRightRadius?: number
@@ -167,6 +168,9 @@ const Box = styled.View<BoxProps>(props => ({
   borderRightWidth: props.borderRightWidth,
   borderColor:
     props.theme.colors[props.borderColor as keyof typeof props.theme.colors] ?? props.borderColor,
+  borderLeftColor:
+    props.theme.colors[props.borderLeftColor as keyof typeof props.theme.colors] ??
+    props.borderLeftColor,
   transform: props.transform,
   borderRadius: props.borderRadius,
   borderTopLeftRadius: props.borderTopLeftRadius,

@@ -10,8 +10,10 @@ import { useDeleteGroup } from '../../../state/tabGroups'
 import { TabGroup, closeAllTabsAtom, tabGroupsAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 
+type FeatherIconName = React.ComponentProps<typeof FeatherIcon>['name']
+
 interface PopoverItemProps {
-  icon: string
+  icon: FeatherIconName
   label: string
   onPress: () => void
   destructive?: boolean
@@ -21,7 +23,7 @@ const PopoverItem = memo(({ icon, label, onPress, destructive }: PopoverItemProp
   return (
     <TouchableBox row alignItems="center" py={8} px={16} onPress={onPress}>
       <FeatherIcon
-        name={icon as any}
+        name={icon}
         size={18}
         color={destructive ? 'quart' : 'default'}
         style={{ marginRight: 12 }}

@@ -1,4 +1,4 @@
-import { SQLiteDatabase } from 'expo-sqlite'
+import { SQLiteBindValue, SQLiteDatabase } from 'expo-sqlite'
 import { dbManager } from '~helpers/sqlite'
 import { DatabaseId, ResourceLanguage, isSharedDB } from '~helpers/databaseTypes'
 import { getResourceLanguage, type ResourcesLanguageState } from 'src/state/resourcesLanguage'
@@ -6,15 +6,15 @@ import { getResourceLanguage, type ResourcesLanguageState } from 'src/state/reso
 // Legacy transaction wrapper - kept for potential custom use cases
 const getSQLTransaction =
   (getDB: () => SQLiteDatabase | undefined, initDB?: () => Promise<unknown>) =>
-  (sqlReq: string, args = []) => {
-    return new Promise(async (resolve, reject) => {
+  <T = unknown>(sqlReq: string, args: SQLiteBindValue[] = []) => {
+    return new Promise<T[]>(async (resolve, reject) => {
       if (!getDB() && initDB) {
         await initDB()
       }
 
       try {
-        const allRows = await getDB()?.getAllAsync(sqlReq, args)
-        resolve(allRows)
+        const allRows = await getDB()?.getAllAsync<T>(sqlReq, args)
+        resolve(allRows || [])
       } catch (error) {
         console.log('[SQLTransaction] Error executing sql =>', error)
         reject(error)
@@ -25,7 +25,7 @@ const getSQLTransaction =
 // New language-aware transaction wrapper
 // Uses Redux store to get the current resource language
 const getLanguageAwareSQLTransaction = (dbId: DatabaseId) => {
-  return async <T = any>(sqlReq: string, args: any[] = []): Promise<T[]> => {
+  return async <T = unknown>(sqlReq: string, args: SQLiteBindValue[] = []): Promise<T[]> => {
     // Get current language from Redux (or default for shared DBs)
     let lang: ResourceLanguage = 'fr'
 
@@ -71,7 +71,7 @@ const getLanguageAwareSQLTransaction = (dbId: DatabaseId) => {
 // Transaction with explicit language parameter
 // Use this when you need to query a specific language regardless of Redux state
 const getSQLTransactionForLang = (dbId: DatabaseId, lang: ResourceLanguage) => {
-  return async <T = any>(sqlReq: string, args: any[] = []): Promise<T[]> => {
+  return async <T = unknown>(sqlReq: string, args: SQLiteBindValue[] = []): Promise<T[]> => {
     const db = dbManager.getDB(dbId, lang)
 
     if (!db.get()) {

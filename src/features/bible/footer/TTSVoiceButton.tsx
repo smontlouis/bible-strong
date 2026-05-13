@@ -16,6 +16,12 @@ export interface TTSVoiceButtonProps extends BoxProps {
   currentVersion: VersionCode
 }
 
+type VoiceChoice = {
+  value: string
+  label: string
+  subLabel?: string
+}
+
 const filterToKnownLanguages = (versionCode: VersionCode) => (voice: Speech.Voice) => {
   const bibleVersion = versions[versionCode]
 
@@ -33,22 +39,20 @@ const TTSVoiceButton = ({ currentVersion, ...props }: TTSVoiceButtonProps) => {
   const { t } = useTranslation()
   const [voices, setVoices] = React.useState<Speech.Voice[] | undefined>(undefined)
   const [selectedVoice, setSelectedVoice] = useAtom(ttsVoiceAtom)
-  const choices: any =
-    // @ts-ignore
-    [
-      {
-        value: 'default',
-        label: t('app.default'),
-      },
-      ...(voices
-        ?.filter(filterToKnownLanguages(currentVersion))
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map(voice => ({
-          value: voice.identifier,
-          label: voice.name,
-          subLabel: t(voice.language),
-        })) || []),
-    ] || []
+  const choices: VoiceChoice[] = [
+    {
+      value: 'default',
+      label: t('app.default'),
+    },
+    ...(voices
+      ?.filter(filterToKnownLanguages(currentVersion))
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map(voice => ({
+        value: voice.identifier,
+        label: voice.name,
+        subLabel: t(voice.language),
+      })) || []),
+  ]
 
   useEffect(() => {
     ;(async () => {

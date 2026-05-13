@@ -2,7 +2,7 @@ import * as FileSystem from 'expo-file-system/legacy'
 import type { ActiveLanguage } from '~helpers/languageUtils'
 
 // ResourceLanguage is an alias for ActiveLanguage
-// This allows resource databases to support any active language in the app
+// This allows resource databases to support every active language in the app
 export type ResourceLanguage = ActiveLanguage
 
 export type DatabaseId =

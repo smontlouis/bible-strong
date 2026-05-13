@@ -3,21 +3,53 @@ import { useRef } from 'react'
 import literata from '~assets/fonts/literata'
 import { Theme } from '~themes'
 import * as Sentry from '@sentry/react-native'
+import WebView from 'react-native-webview'
 import {
+  WebViewMessageEvent,
   WebViewRenderProcessGoneEvent,
   WebViewTerminatedEvent,
 } from 'react-native-webview/lib/WebViewTypes'
 
 const fontRule = `@font-face { font-family: 'Literata Book'; src: local('Literata Book'), url('${literata}') format('woff');}`
 
-const useHTMLView = ({ onLinkClicked }: { onLinkClicked: (href: string) => void }) => {
+export type HTMLViewLinkPayload = {
+  href: string
+  content: string
+  type: string
+}
+
+type HTMLViewMessage =
+  | {
+      type: 'link'
+      payload: HTMLViewLinkPayload
+    }
+  | {
+      type: string
+      payload?: unknown
+    }
+
+const isHTMLViewLinkPayload = (payload: unknown): payload is HTMLViewLinkPayload =>
+  typeof payload === 'object' &&
+  payload !== null &&
+  'href' in payload &&
+  typeof payload.href === 'string' &&
+  'content' in payload &&
+  typeof payload.content === 'string' &&
+  'type' in payload &&
+  typeof payload.type === 'string'
+
+const useHTMLView = ({
+  onLinkClicked,
+}: {
+  onLinkClicked: (payload: HTMLViewLinkPayload) => void
+}) => {
   const theme: Theme = useTheme()
-  const ref = useRef<any>(null)
+  const ref = useRef<WebView>(null)
 
-  const onMessage = (event: any) => {
-    const action = JSON.parse(event.nativeEvent.data)
+  const onMessage = (event: WebViewMessageEvent) => {
+    const action = JSON.parse(event.nativeEvent.data) as HTMLViewMessage
 
-    if (action.type === 'link') {
+    if (action.type === 'link' && isHTMLViewLinkPayload(action.payload)) {
       onLinkClicked(action.payload)
     }
   }

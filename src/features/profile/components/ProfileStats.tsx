@@ -112,7 +112,7 @@ const ProfileStats = () => {
   )
 }
 
-const StatCard = styled(Link)(({ theme }: { theme: any }) => ({
+const StatCard = styled(Link)(({ theme }) => ({
   flex: 1,
   backgroundColor: theme.colors.reverse,
   borderRadius: 12,

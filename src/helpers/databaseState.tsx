@@ -26,7 +26,7 @@ type DictionnaireAction =
   | { type: 'dictionnaire.setProgress'; payload: number }
   | { type: 'dictionnaire.reset' }
 
-type DBAction = StrongAction | DictionnaireAction
+export type DBAction = StrongAction | DictionnaireAction
 
 const initialState: DBState = {
   strong: {

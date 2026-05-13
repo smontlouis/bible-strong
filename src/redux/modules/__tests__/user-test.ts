@@ -1,6 +1,7 @@
 /* eslint-env jest */
 
-// Mock react-native before any imports
+// Mock react-native before other imports
+import type { ChangelogItem } from '~common/types'
 import reducer, {
   UserState,
   verifyEmail,
@@ -354,10 +355,24 @@ describe('User Reducer', () => {
 
   describe('addChangelog', () => {
     it('should add changelog entries and update lastSeen', () => {
-      const changelogEntries = [
-        { date: '2023-01-01', title: 'Update 1' },
-        { date: '2023-01-02', title: 'Update 2' },
-      ] as any
+      const changelogEntries: ChangelogItem[] = [
+        {
+          date: '2023-01-01',
+          title: 'Update 1',
+          title_en: 'Update 1',
+          description: 'Description 1',
+          description_en: 'Description 1',
+          type: 'INFO',
+        },
+        {
+          date: '2023-01-02',
+          title: 'Update 2',
+          title_en: 'Update 2',
+          description: 'Description 2',
+          description_en: 'Description 2',
+          type: 'INFO',
+        },
+      ]
       const newState = reducer(initialState, addChangelog(changelogEntries))
       expect(newState.changelog.isLoading).toBe(false)
       expect(newState.changelog.data).toEqual(changelogEntries)
@@ -372,7 +387,19 @@ describe('User Reducer', () => {
           data: [{ date: '2023-01-01', title: 'Old' }],
         },
       } as UserState
-      const newState = reducer(state, addChangelog([{ date: '2023-01-02', title: 'New' }] as any))
+      const newState = reducer(
+        state,
+        addChangelog([
+          {
+            date: '2023-01-02',
+            title: 'New',
+            title_en: 'New',
+            description: 'Description',
+            description_en: 'Description',
+            type: 'INFO',
+          },
+        ])
+      )
       expect(newState.changelog.data).toHaveLength(2)
     })
   })

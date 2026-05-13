@@ -1,13 +1,13 @@
 import React from 'react'
-// @ts-expect-error -- no @types/react-dom in this project
 import ReactDOMServer from 'react-dom/server'
 import Strong from './Strong'
 import { dispatch } from './dispatch'
 import Quill from './quill'
+import type { QuillEmbedConstructor, QuillInstance, StrongBlockPayload } from './quill-types'
 
-declare const quill: any
+declare const quill: QuillInstance
 
-const Embed: any = Quill.import('blots/embed')
+const Embed = Quill.import('blots/embed') as QuillEmbedConstructor
 
 class StrongBlock extends Embed {
   static blotName = 'block-strong'
@@ -16,7 +16,7 @@ class StrongBlock extends Embed {
 
   static className = 'block-strong'
 
-  static create(data: any) {
+  static create(data: StrongBlockPayload) {
     const node = super.create(data)
     const { title, codeStrong, strongType, phonetique, definition, translatedBy, book, original } =
       data
@@ -50,7 +50,7 @@ class StrongBlock extends Embed {
       }
     })
 
-    node.querySelector('.block-delete').addEventListener('click', () => {
+    node.querySelector('.block-delete')?.addEventListener('click', () => {
       node.remove()
     })
 
@@ -59,12 +59,12 @@ class StrongBlock extends Embed {
 
   static formats(domNode: HTMLElement) {
     const data = domNode.getAttribute('data')
-    return JSON.parse(data!)
+    return JSON.parse(data!) as StrongBlockPayload
   }
 
   static value(domNode: HTMLElement) {
     const data = domNode.getAttribute('data')
-    return JSON.parse(data!)
+    return JSON.parse(data!) as StrongBlockPayload
   }
 
   /**
@@ -73,7 +73,7 @@ class StrongBlock extends Embed {
    * It behaves differently than other cases and we need to handle the node
    * removal instead of the `characterData`.
    */
-  update(mutations: MutationRecord[], context: any) {
+  update(mutations: MutationRecord[], context: unknown) {
     // `childList` mutations are not handled on Quill
     // see `update` implementation on:
     // https://github.com/quilljs/quill/blob/master/blots/embed.js
@@ -93,7 +93,7 @@ class StrongBlock extends Embed {
     // NOTE: call this function as:
     // setTimeout(() => this._remove(), 0);
     // otherwise you'll get the error: "The given range isn't in document."
-    const cursorPosition = quill.getSelection().index - 1
+    const cursorPosition = (quill.getSelection()?.index || 0) - 1
 
     // see `remove` implementation on:
     // https://github.com/quilljs/parchment/blob/master/src/blot/abstract/shadow.ts

@@ -27,6 +27,7 @@ import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import DictionnaireCard from './DictionnaireCard'
 import DictionnaireVerseReference from './DictionnaireVerseReference'
+import type { DictionaryItem } from '~helpers/loadDictionnaireItem'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -61,10 +62,15 @@ const StyledVerse = styled.View(() => ({
   flexDirection: 'row',
 }))
 
+type BibleChapterText = Record<
+  string | number,
+  Record<string | number, Record<string | number, string>>
+>
+
 const verseToDictionnary = async (
   { Livre, Chapitre, Verset }: Verse,
   dictionnaryWordsInVerse: string[],
-  bible: any
+  bible: BibleChapterText
 ): Promise<JSX.Element | JSX.Element[] | undefined> => {
   try {
     const verseText = bible[Livre]?.[Chapitre]?.[Verset]
@@ -77,7 +83,7 @@ const verseToDictionnary = async (
     const regExp = new RegExp(regExpString, 'gmi')
     const splittedVerseText = verseText.split(regExp)
 
-    const formattedVerseText = splittedVerseText.map((item: any, i: any) => {
+    const formattedVerseText = splittedVerseText.map((item: string, i: number) => {
       if (dictionnaryWordsInVerse.includes(item.toLowerCase())) {
         return <DictionnaireVerseReference key={i} word={item} />
       }
@@ -85,7 +91,7 @@ const verseToDictionnary = async (
       const words = item.split(' ')
       return (
         <React.Fragment key={i}>
-          {words.map((w: any, j: any) => (
+          {words.map((w: string, j: number) => (
             <Paragraph key={j}>{w} </Paragraph>
           ))}
         </React.Fragment>
@@ -136,13 +142,12 @@ const useFormattedText = ({
     })()
   }, [wordsInVerse, verse, resourceLang, Chapitre, Livre])
 
-  // @ts-ignore
-  const { error: wordsError, data: words } = useQuery({
+  const { error: wordsError, data: words } = useQuery<(DictionaryItem | undefined)[]>({
     enabled: Boolean(wordsInVerse),
     queryKey: ['words', `${Livre}-${Chapitre}-${Verset}`, resourceLang],
     queryFn: () =>
       Promise.all(
-        wordsInVerse!.map(async (w: any) => {
+        (wordsInVerse ?? []).map(async w => {
           const word = await loadDictionnaireItem(w)
           return word
         })
@@ -180,12 +185,11 @@ const DictionnaireVerseDetailScreen = ({
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const resourceLang = resourcesLanguage.DICTIONNAIRE
 
-  // @ts-ignore
   const {
     status,
     error: dictionaryWordsError,
     data: wordsInVerse,
-  } = useQuery({
+  } = useQuery<string[]>({
     queryKey: ['dictionaryWords', `${Livre}-${Chapitre}-${Verset}`, resourceLang],
     queryFn: () => loadDictionnaireWords(`${Livre}-${Chapitre}-${Verset}`),
   })
@@ -217,7 +221,7 @@ const DictionnaireVerseDetailScreen = ({
     return <Loading />
   }
 
-  const currentWordIndex = wordsInVerse.findIndex((w: any) => w === currentWord)
+  const currentWordIndex = wordsInVerse.findIndex(w => w === currentWord)
 
   return (
     <Box flex={1} onLayout={e => setBoxHeight(e.nativeEvent.layout.height)}>
@@ -271,9 +275,9 @@ const DictionnaireVerseDetailScreen = ({
               width: '100%',
             }}
             defaultIndex={currentWordIndex === -1 ? 0 : currentWordIndex}
-            data={words}
-            renderItem={({ item, index }) => <DictionnaireCard dictionnaireRef={item} />}
-            onSnapToItem={(index: any) => setCurrentWord(wordsInVerse[index])}
+            data={words.filter((word): word is DictionaryItem => Boolean(word))}
+            renderItem={({ item }) => <DictionnaireCard dictionnaireRef={item} />}
+            onSnapToItem={(index: number) => setCurrentWord(wordsInVerse[index])}
           />
         ) : (
           <Empty

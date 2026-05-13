@@ -1,6 +1,7 @@
 import { appleAuth } from '@invertase/react-native-apple-authentication'
 import { getAnalytics, setUserId as analyticsSetUserId } from '@react-native-firebase/analytics'
 import {
+  FirebaseAuthTypes,
   getAuth,
   onAuthStateChanged,
   signInWithCredential,
@@ -23,6 +24,7 @@ import { firebaseDb, doc, setDoc, getDoc } from '~helpers/firebase'
 import { tokenManager } from '~helpers/TokenManager'
 import { runAllCleanups } from '~helpers/cleanupRegistry'
 import i18n from '~i18n'
+import type { AppDispatch } from '~redux/store'
 
 export type FireAuthProfile = {
   id: string
@@ -34,32 +36,44 @@ export type FireAuthProfile = {
   createdAt: string | null
 }
 
+type OnLoginCallback = (payload: { profile: FireAuthProfile }) => void
+type OnUserChangeCallback = (profile: FireAuthProfile) => void
+type VoidCallback = () => void
+type AuthErrorCallback = (error: unknown) => void
+
+const getErrorCode = (error: unknown): string | undefined => {
+  if (error && typeof error === 'object' && 'code' in error) {
+    return String((error as { code?: unknown }).code)
+  }
+  return undefined
+}
+
 const FireAuth = class {
   authFlag = false
 
-  user = null
+  user: FirebaseAuthTypes.User | null = null
 
-  profile = null
+  profile: FireAuthProfile | null = null
 
-  onUserChange = null
+  onUserChange: OnUserChangeCallback | null = null
 
-  onLogout = null
+  onLogout: VoidCallback | null = null
 
-  onEmailVerified = null
+  onEmailVerified: VoidCallback | null = null
 
-  onLogin = null
+  onLogin: OnLoginCallback | null = null
 
-  onError = null
+  onError: AuthErrorCallback | null = null
 
   previousEmailVerified = false
 
   async init(
-    onLogin: any,
-    onUserChange: any,
-    onLogout: any,
-    onEmailVerified: any,
-    onError: any,
-    dispatch: any
+    onLogin: OnLoginCallback,
+    onUserChange: OnUserChangeCallback,
+    onLogout: VoidCallback,
+    onEmailVerified: VoidCallback,
+    onError: AuthErrorCallback,
+    dispatch: AppDispatch
   ) {
     this.onUserChange = onUserChange
     this.onLogout = onLogout
@@ -125,11 +139,9 @@ const FireAuth = class {
             /**
              * 1.c. We call the onLogin callback dispatching onUserLoginSuccess
              */
-            // @ts-ignore
             this.onLogin({ profile })
           }
 
-          // @ts-ignore
           this.user = user // Store user
           this.previousEmailVerified = emailVerified
 
@@ -143,7 +155,6 @@ const FireAuth = class {
         // Check if emailVerified status changed (user verified email while app was open)
         if (!this.previousEmailVerified && emailVerified) {
           console.log('[Auth] Email verification detected!')
-          // @ts-ignore
           this.onEmailVerified?.()
         }
         this.previousEmailVerified = emailVerified
@@ -156,7 +167,7 @@ const FireAuth = class {
     })
   }
 
-  appleLogin = () =>
+  appleLogin = (): Promise<boolean> =>
     new Promise(async resolve => {
       try {
         const appleAuthRequestResponse = await appleAuth.performRequest({
@@ -177,8 +188,8 @@ const FireAuth = class {
         } else {
           resolve(false)
         }
-      } catch (e: any) {
-        if (e.code === 'ERR_CANCELED') {
+      } catch (e) {
+        if (getErrorCode(e) === 'ERR_CANCELED') {
           console.log('[Auth] ERR_CANCELED')
         } else {
           console.log('[Auth] OTHER_ERROR', e)
@@ -212,7 +223,7 @@ const FireAuth = class {
   //     }
   //   })
 
-  googleLogin = () =>
+  googleLogin = (): Promise<boolean> =>
     new Promise(async resolve => {
       try {
         await GoogleSignin.hasPlayServices()
@@ -232,40 +243,41 @@ const FireAuth = class {
       }
     })
 
-  onCredentialSuccess = async (credential: any, resolve: any) => {
+  onCredentialSuccess = async (
+    credential: FirebaseAuthTypes.AuthCredential,
+    resolve: (value: boolean) => void
+  ) => {
     try {
       const user = await signInWithCredential(getAuth(), credential)
 
       console.log('[Auth] User signed in', user)
       toast.success(i18n.t('Connexion réussie'))
       return resolve(true)
-    } catch (e: any) {
-      console.log('[Auth] Error code:', e.code)
-      if (e.code === 'auth/account-exists-with-different-credential') {
+    } catch (e) {
+      const code = getErrorCode(e)
+      console.log('[Auth] Error code:', code)
+      if (code === 'auth/account-exists-with-different-credential') {
         toast.error(i18n.t('Cet utilisateur existe déjà avec un autre compte.'))
       }
       return resolve(false)
     }
   }
 
-  login = (email: any, password: any) =>
-    new Promise(async resolve => {
+  login = (email: string, password: string): Promise<boolean> =>
+    new Promise(resolve => {
       try {
         signInWithEmailAndPassword(getAuth(), email.trim(), password.trim())
           .then(() => {
-            // @ts-ignore
             resolve(true)
           })
           .catch(err => {
             if (this.onError) {
-              // @ts-ignore
               this.onError(err)
             }
             resolve(false)
           })
       } catch (e) {
         if (this.onError) {
-          // @ts-ignore
           this.onError(e)
         }
         resolve(false)
@@ -275,11 +287,10 @@ const FireAuth = class {
   sendEmailVerification = async () => {
     const user = getAuth().currentUser
     try {
-      // @ts-ignore
-      await user.sendEmailVerification()
+      await user?.sendEmailVerification()
       toast.success(i18n.t('Email envoyé'))
-    } catch (e: any) {
-      if (e.code === 'auth/too-many-requests') {
+    } catch (e) {
+      if (getErrorCode(e) === 'auth/too-many-requests') {
         toast.error(i18n.t('Un mail a déjà été envoyé. Réessayez plus tard'))
       } else {
         toast.error(i18n.t("Impossible d'envoyer l'email"))
@@ -287,52 +298,46 @@ const FireAuth = class {
     }
   }
 
-  resetPassword = (email: any) =>
-    new Promise(async resolve => {
+  resetPassword = (email: string): Promise<boolean> =>
+    new Promise(resolve => {
       try {
         sendPasswordResetEmail(getAuth(), email)
           .then(() => {
             toast.success(i18n.t('Email envoyé.'))
-            // @ts-ignore
             resolve(false)
           })
           .catch(err => {
             if (this.onError) {
-              // @ts-ignore
               this.onError(err)
             }
             resolve(false)
           })
       } catch (e) {
         if (this.onError) {
-          // @ts-ignore
           this.onError(e)
         }
         resolve(false)
       }
     })
 
-  register = (username: any, email: any, password: any) =>
-    new Promise(async resolve => {
+  register = (username: string, email: string, password: string): Promise<boolean> =>
+    new Promise(resolve => {
       try {
         createUserWithEmailAndPassword(getAuth(), email, password)
           .then(({ user }) => {
             setDoc(doc(firebaseDb, 'users', user.uid), { displayName: username }, { merge: true })
 
             user.sendEmailVerification()
-            // @ts-ignore
             return resolve(true)
           })
           .catch(err => {
             if (this.onError) {
-              // @ts-ignore
               this.onError(err)
             }
             return resolve(false)
           })
       } catch (e) {
         if (this.onError) {
-          // @ts-ignore
           this.onError(e)
         }
         return resolve(false)
@@ -392,11 +397,12 @@ const FireAuth = class {
       await updatePassword(user, newPassword)
       toast.success(i18n.t('profile.passwordUpdated'))
       return true
-    } catch (e: any) {
-      console.log('[Auth] Error changing password:', e.code)
-      if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
+    } catch (e) {
+      const code = getErrorCode(e)
+      console.log('[Auth] Error changing password:', code)
+      if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
         toast.error(i18n.t('profile.wrongPassword'))
-      } else if (e.code === 'auth/weak-password') {
+      } else if (code === 'auth/weak-password') {
         toast.error(i18n.t('profile.weakPassword'))
       } else {
         toast.error(i18n.t('profile.updateError'))
@@ -406,7 +412,7 @@ const FireAuth = class {
     }
   }
 
-  loginWithCustomToken = (token: string) =>
+  loginWithCustomToken = (token: string): Promise<boolean> =>
     new Promise(async resolve => {
       if (!__DEV__) {
         console.log('[Auth] Custom token login only available in dev')
@@ -435,7 +441,6 @@ const FireAuth = class {
 
     // Sign-out successful.
     this.user = null
-    // @ts-ignore
     this.onLogout?.()
 
     // Reset token manager state
@@ -459,7 +464,6 @@ const FireAuth = class {
       if (refreshedUser?.emailVerified && !this.previousEmailVerified) {
         console.log('[Auth] Email verified after manual check!')
         this.previousEmailVerified = true
-        // @ts-ignore
         this.onEmailVerified?.()
         return true
       }

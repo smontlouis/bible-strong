@@ -96,8 +96,7 @@ const Comment = ({ id, settings, comment, isIntro }: Props) => {
     document.querySelectorAll(`#${id} a`).forEach(link => {
       link.addEventListener('click', e => {
         e.preventDefault()
-        //@ts-ignore
-        const href = (e.target as HTMLLinkElement).attributes.href.textContent
+        const href = (e.currentTarget as HTMLAnchorElement).href
         const bookCode = href.substr(0, 3)
         const splittedHref = href.substr(3).split('.')
         const [chapter] = splittedHref

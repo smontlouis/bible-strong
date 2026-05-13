@@ -1,5 +1,5 @@
 import React from 'react'
-import { ActivityIndicator } from 'react-native'
+import { ActivityIndicator, StyleProp, ViewStyle } from 'react-native'
 import { useTheme } from '@emotion/react'
 
 import Box from '~common/ui/Box'
@@ -18,12 +18,12 @@ const Container = styled.View(({ theme }) => ({
 interface Props {
   message?: string
   subMessage?: string
-  style?: object
+  style?: StyleProp<ViewStyle>
   children?: React.ReactNode
 }
 
 const Loading = ({ message, subMessage, style, children }: Props) => {
-  const [isReady] = useTimeout(3000) as [() => boolean, ...any[]]
+  const [isReady] = useTimeout(3000)
   const theme: Theme = useTheme()
 
   return (

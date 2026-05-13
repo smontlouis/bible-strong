@@ -19,7 +19,11 @@ const SectionItem = styled(Box)(({ theme }) => ({
   justifyContent: 'center',
 }))
 
-const Chip = styled(Box)(({ theme, isHebreu }: any) => ({
+interface ChipProps {
+  isHebreu?: boolean
+}
+
+const Chip = styled(Box)<ChipProps>(({ theme, isHebreu }) => ({
   borderRadius: 10,
   backgroundColor: isHebreu ? theme.colors.lightPrimary : theme.colors.border,
   paddingTop: 2,

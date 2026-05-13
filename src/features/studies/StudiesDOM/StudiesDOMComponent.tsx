@@ -2,11 +2,21 @@
 
 import debounce from 'debounce'
 import { DOMImperativeFactory, useDOMImperativeHandle } from 'expo/dom'
+import type { JSONValue } from 'expo/build/dom/dom.types'
 import { useFonts } from 'expo-font'
 import { Ref, useEffect, useRef } from 'react'
 import { dispatch } from './dispatch'
 import Quill from './quill'
-import type { QuillInstance } from './quill-types'
+import type {
+  DeltaStatic,
+  InlineStrongPayload,
+  InlineVersePayload,
+  QuillInstance,
+  QuillRange,
+  QuillJSONValue,
+  StrongBlockPayload,
+  VerseBlockPayload,
+} from './quill-types'
 import './quill.snow.css'
 
 import './InlineStrong'
@@ -23,17 +33,51 @@ interface Props {
   dom: import('expo/dom').DOMProps
   fontFamily: string
   language: string
-  contentToDisplay: {
-    ops: string[]
-  }
+  contentToDisplay: DeltaStatic
   isReadOnly: boolean
   colorScheme: 'light' | 'dark'
   ref?: Ref<StudyDOMRef>
 }
 
 export interface StudyDOMRef extends DOMImperativeFactory {
-  dispatch: (event: any) => void
-  reloadEditor: (content: any) => void
+  dispatch: (event: JSONValue) => void
+  reloadEditor: (content: JSONValue) => void
+}
+
+type StudyDOMAction =
+  | { type: 'FOCUS_EDITOR' }
+  | { type: 'BLUR_EDITOR' }
+  | { type: 'GET_BIBLE_VERSES'; payload: InlineVersePayload }
+  | { type: 'GET_BIBLE_STRONG'; payload: InlineStrongPayload }
+  | { type: 'GET_BIBLE_VERSES_BLOCK'; payload: VerseBlockPayload }
+  | { type: 'GET_BIBLE_STRONG_BLOCK'; payload: StrongBlockPayload }
+  | { type: 'BLOCK_DIVIDER' }
+  | { type: 'TOGGLE_FORMAT'; payload: { type: string; value?: unknown } }
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null
+
+const isDeltaStatic = (value: unknown): value is DeltaStatic =>
+  isRecord(value) && Array.isArray(value.ops)
+
+const isStudyDOMAction = (value: unknown): value is StudyDOMAction => {
+  if (!isRecord(value) || typeof value.type !== 'string') return false
+
+  switch (value.type) {
+    case 'FOCUS_EDITOR':
+    case 'BLUR_EDITOR':
+    case 'BLOCK_DIVIDER':
+      return true
+    case 'GET_BIBLE_VERSES':
+    case 'GET_BIBLE_STRONG':
+    case 'GET_BIBLE_VERSES_BLOCK':
+    case 'GET_BIBLE_STRONG_BLOCK':
+      return isRecord(value.payload)
+    case 'TOGGLE_FORMAT':
+      return isRecord(value.payload) && typeof value.payload.type === 'string'
+    default:
+      return false
+  }
 }
 
 function focusEditor(quill: QuillInstance): void {
@@ -58,13 +102,13 @@ export default function StudiesDOMComponent({
 
   const quillRef = useRef<QuillInstance | null>(null)
 
-  function onChangeText(delta: any, oldDelta: any, source: any): void {
+  function onChangeText(delta: unknown, oldDelta: unknown, source: unknown): void {
     dispatch('TEXT_CHANGED', {
       type: 'success',
       delta: quillRef.current!.getContents(),
-      deltaChange: delta,
-      deltaOld: oldDelta,
-      changeSource: source,
+      deltaChange: isDeltaStatic(delta) ? delta : { ops: [] },
+      deltaOld: isDeltaStatic(oldDelta) ? oldDelta : { ops: [] },
+      changeSource: String(source),
     })
   }
 
@@ -73,7 +117,8 @@ export default function StudiesDOMComponent({
 
     quill.on('text-change', debounce(onChangeText, 500))
 
-    quill.on(Quill.events.EDITOR_CHANGE, (type: string, range: any) => {
+    quill.on(Quill.events.EDITOR_CHANGE, (type, rangeValue) => {
+      const range = rangeValue as QuillRange | null
       const editorDisabled = quill.container.classList.contains('ql-disabled')
       if (editorDisabled) return
       if (type !== Quill.events.SELECTION_CHANGE) return
@@ -137,7 +182,7 @@ export default function StudiesDOMComponent({
     }
   }, [isReadOnly])
 
-  function handleDispatch(event: any): void {
+  function handleDispatch(event: StudyDOMAction): void {
     const quill = quillRef.current
     if (!quill) return
 
@@ -202,9 +247,7 @@ export default function StudiesDOMComponent({
         }
 
         default:
-          console.log(
-            `[Studies] reactQuillEditor Error: Unhandled message type received "${event.type}"`
-          )
+          console.log('[Studies] reactQuillEditor Error: Unhandled message type received')
       }
     } catch (err) {
       console.log(`[Studies] reactQuillEditor error: ${err}`)
@@ -214,9 +257,13 @@ export default function StudiesDOMComponent({
   useDOMImperativeHandle(
     ref as Ref<StudyDOMRef>,
     () => ({
-      dispatch: handleDispatch,
-      reloadEditor: (content: any) => {
-        if (quillRef.current) {
+      dispatch: (event: JSONValue) => {
+        if (isStudyDOMAction(event)) {
+          handleDispatch(event)
+        }
+      },
+      reloadEditor: (content: JSONValue) => {
+        if (quillRef.current && isDeltaStatic(content)) {
           quillRef.current.setContents(content, Quill.sources.SILENT)
         }
       },

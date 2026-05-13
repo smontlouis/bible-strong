@@ -29,7 +29,7 @@ const StudyLink = styled(Link)(({ theme }: { theme: Theme }) => ({
 export type StudyItemProps = {
   study: Study
   theme: Theme
-  setStudySettings?: any
+  setStudySettings?: (studyId: string) => void
   onPress?: (studyId: string) => void
 }
 
@@ -45,8 +45,6 @@ const StudyItem = ({ study, theme, setStudySettings, onPress }: StudyItemProps) 
   return (
     <Box width={r(['50%', '50%', '33%', '33%'])}>
       <StudyLink
-        // @ts-ignore
-        key={study.id}
         {...(onPress
           ? { onPress: () => onPress(study.id) }
           : {
@@ -68,8 +66,7 @@ const StudyItem = ({ study, theme, setStudySettings, onPress }: StudyItemProps) 
           </Text>
           {study.content ? (
             <>
-              {/* @ts-ignore */}
-              <Text bold scale={-2} marginTop={4}>
+              <Text bold fontSize={16} marginTop={4}>
                 {study.title}
               </Text>
 
@@ -84,8 +81,7 @@ const StudyItem = ({ study, theme, setStudySettings, onPress }: StudyItemProps) 
             </>
           ) : (
             <>
-              {/* @ts-ignore */}
-              <Text bold scale={-2} marginTop={4} color="border">
+              <Text bold fontSize={16} marginTop={4} color="border">
                 {t('Étude vide')}
               </Text>
             </>

@@ -50,13 +50,14 @@ const DeleteAccountModal = ({ modalRef }: DeleteAccountModalProps) => {
       await deleteUser(authUser)
       handleClose()
       FireAuth.logout()
-    } catch (error: any) {
+    } catch (error: unknown) {
       setIsLoading(false)
-      console.error('[Auth] Delete error:', error.code, error.message)
-      if (error.code === 'auth/requires-recent-login') {
+      const authError = error as { code?: string; message?: string }
+      console.error('[Auth] Delete error:', authError.code, authError.message)
+      if (authError.code === 'auth/requires-recent-login') {
         Alert.alert(t('Attention'), t('app.deleteAccountRequiresRecentLogin'))
       } else {
-        Alert.alert(t('Erreur'), error.message)
+        Alert.alert(t('Erreur'), authError.message)
       }
     }
   }

@@ -51,7 +51,6 @@ const events = [
 
 const getBookTracks = (version: string, book: Book, t: (key: string) => string) => {
   try {
-    // @ts-expect-error
     const bibleVersion = getVersions()[version] as Version
     const tracks = [...Array(book.Chapitres).keys()].map(i => ({
       book,

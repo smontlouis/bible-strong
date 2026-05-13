@@ -94,7 +94,7 @@ const ReferenceItem = ({ segment }: { segment: ParsedSegment }) => {
   const title = segment.isWholeChapter
     ? `${i18n.t(booksDesc[segment.book - 1]?.Nom)} ${segment.chapter}`
     : formatVerseContent(verseIds).title
-  const content = verses.map((v: any) => v.Texte).join(' ')
+  const content = verses.map(v => v.Texte).join(' ')
 
   return (
     <TouchableOpacity

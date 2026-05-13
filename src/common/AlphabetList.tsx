@@ -8,23 +8,27 @@ import { viewportWidth } from '~helpers/utils'
 import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { Theme } from '~themes'
 
-// @ts-ignore
-const StyledText = styled(Text)(({ theme, isSelected }: any) => ({
+const StyledText = styled(Text)<{ isSelected: boolean }>(({ isSelected }) => ({
   fontWeight: isSelected ? 'bold' : 'normal',
 }))
 
-// @ts-ignore
-const StyledUnderline = styled(Box)(({ theme, color }: any) => ({
+const StyledUnderline = styled(Box)<{ color?: keyof Theme['colors'] }>(({ theme, color }) => ({
   marginTop: 5,
   height: 8,
   width: 30,
   borderRadius: 5,
-  // @ts-ignore
   backgroundColor: color ? theme.colors[color] : theme.colors.primary,
 }))
 
-const AlphabetList = ({ color, setLetter, letter }: any) => {
+type AlphabetListProps = {
+  color?: keyof Theme['colors']
+  setLetter: (letter: string) => void
+  letter: string
+}
+
+const AlphabetList = ({ color, setLetter, letter }: AlphabetListProps) => {
   const CarouselAlphabet = useRef<ICarouselInstance>(null)
   const index = alphabet.findIndex(l => l === letter.toUpperCase())
 
@@ -57,26 +61,23 @@ const AlphabetList = ({ color, setLetter, letter }: any) => {
           itemWidth={25}
           itemHeight={30}
           data={alphabet}
-          renderItem={({ item: section, index: itemIndex }: any) => (
+          renderItem={({ item: section, index: itemIndex }) => (
             <TouchableOpacity
               onPress={() => {
                 CarouselAlphabet.current?.scrollTo({ index: itemIndex, animated: true })
                 setLetter(section)
               }}
             >
-              {/* @ts-ignore */}
-              <Box isSelected={letter === section}>
-                {/* @ts-ignore */}
+              <Box>
                 <StyledText isSelected={letter === section} textAlign="center" fontSize={26}>
                   {section.toUpperCase()}
                 </StyledText>
               </Box>
             </TouchableOpacity>
           )}
-          onSnapToItem={(index: any) => setLetter(alphabet[index])}
+          onSnapToItem={index => setLetter(alphabet[index])}
         />
         <Box center>
-          {/* @ts-ignore */}
           <StyledUnderline color={color} />
         </Box>
       </Box>

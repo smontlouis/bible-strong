@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { fetchPlans } from '~redux/modules/plan'
 import { RootState } from '~redux/modules/reducer'
 import { selectSortedOnlinePlans } from '~redux/selectors/plan'
+import type { AppDispatch } from '~redux/store'
 import ExplorePlanItem from './ExplorePlanItem'
 import Empty from '~common/Empty'
 import { useTranslation } from 'react-i18next'
@@ -42,13 +43,12 @@ const LangButton = ({
 const ExploreScreen = () => {
   const { t } = useTranslation()
   const currentLang = useLanguage()
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
   const [lang, setLang] = useState(currentLang)
   const status = useSelector((state: RootState) => state.plan.onlineStatus)
   const plans = useSelector(selectSortedOnlinePlans)
 
   React.useEffect(() => {
-    // @ts-ignore
     dispatch(fetchPlans())
   }, [dispatch])
 
@@ -56,11 +56,7 @@ const ExploreScreen = () => {
     return (
       <ScrollView
         refreshControl={
-          <RefreshControl
-            refreshing={false}
-            // @ts-ignore
-            onRefresh={() => dispatch(fetchPlans())}
-          />
+          <RefreshControl refreshing={false} onRefresh={() => dispatch(fetchPlans())} />
         }
       >
         <Empty
@@ -76,7 +72,6 @@ const ExploreScreen = () => {
       refreshControl={
         <RefreshControl
           refreshing={status === 'Pending'}
-          // @ts-ignore
           onRefresh={() => dispatch(fetchPlans())}
         />
       }
@@ -98,8 +93,8 @@ const ExploreScreen = () => {
         </LangButton>
       </Box>
       {plans
-        .filter((p: any) => p.lang === lang)
-        .map((plan: any) => (
+        .filter(p => p.lang === lang)
+        .map(plan => (
           <ExplorePlanItem key={plan.id} {...plan} />
         ))}
     </ScrollView>

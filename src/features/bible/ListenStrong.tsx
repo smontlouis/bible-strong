@@ -9,7 +9,7 @@ type AudioStatus = 'Idle' | 'Loading' | 'Playing'
 
 interface Props {
   type: 'hebreu' | 'grec'
-  code: number
+  code: string | number
 }
 
 const ListenToStrong = ({ type, code }: Props) => {

@@ -16,7 +16,7 @@ const LinkItem = styled(Link)<LinkProps<keyof MainStackProps>>(() => ({
   paddingVertical: 15,
 }))
 
-const StyledIcon = styled(Icon.Feather)(({ theme }: any) => ({
+const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.grey,
   marginRight: 15,
 }))

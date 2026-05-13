@@ -30,7 +30,7 @@ export default async ({
   hasAppName = true,
   position,
 }: {
-  verses: any
+  verses: string | VerseIds
   version?: VersionCode
   hasVerseNumbers?: boolean
   hasInlineVerses?: boolean
@@ -38,12 +38,13 @@ export default async ({
   hasAppName?: boolean
   position?: number
 }): Promise<VerseRefContent> => {
+  let verseIds = verses
   // if 1-1_1
-  if (typeof verses === 'string') {
-    verses = { [verses]: true }
+  if (typeof verseIds === 'string') {
+    verseIds = { [verseIds]: true }
   }
 
-  const selectedVerses = orderVerses(verses)
+  const selectedVerses = orderVerses(verseIds)
 
   let versesContent = ''
   let reference = verseToReference(selectedVerses)

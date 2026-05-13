@@ -5,7 +5,7 @@ import useDimensions, { MAX_WIDTH } from './useDimensions'
 
 const screen = Dimensions.get('screen')
 
-interface Orientation {
+export interface Orientation {
   portrait: boolean
   landscape: boolean
   tablet: boolean

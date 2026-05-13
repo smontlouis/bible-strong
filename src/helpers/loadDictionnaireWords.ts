@@ -6,7 +6,7 @@ type DictionaryRefQuery = {
   ref: string
 }[]
 
-const loadDictionnaireWords = async (v: string) =>
+const loadDictionnaireWords = async (v: string): Promise<string[]> =>
   catchDatabaseError(
     async () => {
       const result: DictionaryRefQuery = await SQLDictionnaireTransaction(

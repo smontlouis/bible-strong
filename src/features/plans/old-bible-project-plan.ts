@@ -1,9 +1,10 @@
 import { Plan } from 'src/common/types'
 
-// @ts-ignore
 export const bibleProjectPlan: Plan = {
   id: 'bible-project-plan',
   title: 'Lire les écritures',
+  type: 'yearly',
+  lang: 'fr',
   description:
     'Découvrez le plan "Lire les écritures" développé par The Bible Project. Ce plan se déroule généralement sur 365 jours, mais vous êtes libres de le lire à votre rythme !',
   image: 'readscripture',

@@ -16,6 +16,7 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { deleteStudy, Study } from '~redux/modules/user'
+import type { AppDispatch } from '~redux/store'
 import { unifiedTagsModalAtom } from '../../state/app'
 import PublishStudyMenuItem from './PublishStudyMenuItem'
 
@@ -49,7 +50,7 @@ const EditHeader = ({
   const router = useRouter()
   const openInNewTab = useOpenInNewTab()
   const { t } = useTranslation()
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const { ref, open, close } = useBottomSheetModal()
 
@@ -130,14 +131,7 @@ const EditHeader = ({
     <HeaderBox>
       <Box row height={50} center>
         <Box flex justifyContent="center">
-          <Link
-            // @ts-ignore
-            onPress={setReadOnly}
-            // @ts-ignore
-            underlayColor="transparent"
-            // @ts-ignore
-            style={{ marginRight: 15 }}
-          >
+          <Link onPress={setReadOnly} style={{ marginRight: 15 }}>
             <ValidateIcon name="check" size={25} />
           </Link>
         </Box>

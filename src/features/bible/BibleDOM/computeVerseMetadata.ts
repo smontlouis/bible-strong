@@ -15,7 +15,7 @@ export function sortVersesToTags(highlightedVerses: HighlightsObj): TaggedVerse[
       arr: {
         date: number
         color: string
-        verseIds: any[]
+        verseIds: string[]
         tags: TagsObj
       }[],
       verse

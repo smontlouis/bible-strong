@@ -53,7 +53,7 @@ const GlobalDownloadBar = () => {
                   height: 4,
                   borderRadius: 2,
                   backgroundColor: theme.colors.primary,
-                  width: `${Math.round(overallProgress.progress * 100)}%` as any,
+                  width: `${Math.round(overallProgress.progress * 100)}%`,
                   transitionProperty: 'width',
                   transitionDuration: 150,
                 }}

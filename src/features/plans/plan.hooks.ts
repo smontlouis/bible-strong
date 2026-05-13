@@ -27,6 +27,7 @@ import { range } from '~helpers/range'
 import verseToReference from '~helpers/verseToReference'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 import { VersionCode } from '~state/tabs'
+import type { AppDispatch } from '~redux/store'
 
 interface VerseContent {
   Pericope: {
@@ -48,7 +49,7 @@ interface ChapterForPlanContent {
       isReadOnly: true
       book: number
       chapter: number
-      verse: 1
+      verse: number
     }
   }
 }
@@ -67,7 +68,7 @@ interface VerseForPlan {
       isReadOnly: true
       book: number
       chapter: number
-      verse: 1
+      verse: number
     }
   }
 }
@@ -234,22 +235,21 @@ export const useComputedPlanItems = (): ComputedPlanItem[] => {
 export const useDownloadPlans = () => {
   const myPlans = useSelector((state: RootState) => state.plan.myPlans)
   const [isLoading, setIsLoading] = React.useState(false)
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
   const ongoingPlans = useSelector((state: RootState) => state.plan.ongoingPlans, shallowEqual)
 
   React.useEffect(() => {
     ;(async () => {
       const planNeedsToBeDownloaded = ongoingPlans.filter(
-        (plan: any) => !myPlans.find((myPlan: any) => myPlan.id === plan.id)
+        plan => !myPlans.find(myPlan => myPlan.id === plan.id)
       )
 
       let err
       ;[err] = await to(
         Promise.all(
-          planNeedsToBeDownloaded.map(async (planToDownload: any) => {
+          planNeedsToBeDownloaded.map(async planToDownload => {
             setIsLoading(true)
-            // @ts-ignore
-            return (await dispatch(fetchPlan({ id: planToDownload.id }))) as any
+            return dispatch(fetchPlan({ id: planToDownload.id })).unwrap()
           })
         )
       )
@@ -271,9 +271,8 @@ export const useDownloadPlans = () => {
  */
 
 export const useUpdatePlans = () => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
   React.useEffect(() => {
-    // @ts-ignore
     dispatch(updatePlans())
   }, [dispatch])
 }
@@ -405,7 +404,6 @@ export const getVersesForPlan = async (
         isReadOnly: true,
         book: Number(book),
         chapter: Number(chapter),
-        // @ts-ignore
         verse: startVerse,
       },
     },
@@ -436,7 +434,7 @@ export const useVersesToContent = (verses: string) => {
 
 export const useFireStorage = (src?: string) => {
   const [imageUrl, setImageUrl] = React.useState<string>()
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
   const cachedUri = useSelector((state: RootState) => src && state.plan.images[src])
 
   React.useEffect(() => {
@@ -450,7 +448,6 @@ export const useFireStorage = (src?: string) => {
       try {
         const uri = cdnUrl(`images/${src}.png`)
         setImageUrl(uri)
-        // @ts-ignore
         dispatch(cacheImage({ id: src, value: uri }))
       } catch {
         console.log(`[Plans] Can't find: images/${src}`)

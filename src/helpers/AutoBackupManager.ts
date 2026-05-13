@@ -4,6 +4,15 @@ import { getDefaultStore } from 'jotai/vanilla'
 import { RootState } from '~redux/modules/reducer'
 import { tabGroupsAtom, TabGroup } from '~state/tabs'
 
+type BackupBibleData = Omit<RootState['user']['bible'], 'changelog' | 'studies'>
+
+interface BackupPayload {
+  bible: BackupBibleData
+  plan: RootState['plan']['ongoingPlans']
+  studies: RootState['user']['bible']['studies']
+  tabGroups: TabGroup[]
+}
+
 /**
  * Nettoie les tab groups pour le backup en supprimant les base64Preview
  * (comme pour la sync Firestore)
@@ -11,10 +20,7 @@ import { tabGroupsAtom, TabGroup } from '~state/tabs'
 const sanitizeTabGroupsForBackup = (groups: TabGroup[]): TabGroup[] => {
   return groups.map(group => ({
     ...group,
-    tabs: group.tabs.map(tab => {
-      const { base64Preview, ...rest } = tab as any
-      return rest
-    }),
+    tabs: group.tabs.map(tab => ({ ...tab, base64Preview: undefined })),
   }))
 }
 
@@ -106,7 +112,11 @@ class AutoBackupManager {
 
     try {
       // Sanitize les données (enlève changelog et studies qui sont dans une autre collection)
-      const sanitizeUserBible = ({ changelog, studies, ...rest }: any) => rest
+      const sanitizeUserBible = ({
+        changelog,
+        studies,
+        ...rest
+      }: RootState['user']['bible']): BackupBibleData => rest
 
       // Récupérer les tab groups depuis Jotai
       const store = getDefaultStore()
@@ -187,7 +197,7 @@ class AutoBackupManager {
   /**
    * Vérifie si les données ont changé par rapport au dernier backup
    */
-  private async hasDataChanged(newData: any): Promise<boolean> {
+  private async hasDataChanged(newData: BackupPayload): Promise<boolean> {
     try {
       // Récupérer le dernier backup
       const backups = await this.listBackups()
@@ -379,9 +389,9 @@ export interface BackupData {
   timestamp: number
   trigger: BackupTrigger
   data: {
-    bible: any
-    plan: any
-    studies: any
+    bible: BackupBibleData
+    plan: RootState['plan']['ongoingPlans']
+    studies: RootState['user']['bible']['studies']
     tabGroups?: TabGroup[] // Optionnel pour rétrocompatibilité avec anciens backups
   }
 }

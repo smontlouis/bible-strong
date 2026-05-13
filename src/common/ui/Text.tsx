@@ -1,7 +1,7 @@
 import { bindStyles } from '~helpers/styledProps'
 import styled from '@emotion/native'
 import { Theme } from '~themes'
-import { TextProps as BaseTextProps } from 'react-native'
+import { TextProps as BaseTextProps, TextStyle, ViewStyle } from 'react-native'
 import Animated from 'react-native-reanimated'
 
 export interface TextProps extends BaseTextProps {
@@ -11,7 +11,7 @@ export interface TextProps extends BaseTextProps {
   fontSize?: number
   bold?: boolean
   textAlign?: string
-  fontWeight?: string
+  fontWeight?: TextStyle['fontWeight']
   position?: 'absolute' | 'relative'
   pos?: 'absolute' | 'relative'
   top?: number
@@ -57,7 +57,7 @@ export interface TextProps extends BaseTextProps {
 
   borderWidth?: number
   borderColor?: string
-  transform?: object
+  transform?: TextStyle['transform']
   borderRadius?: number
   borderTopLeftRadius?: number
   borderTopRightRadius?: number
@@ -105,29 +105,30 @@ export interface TextProps extends BaseTextProps {
   theme?: Theme
 
   title?: boolean
+  titleItalic?: boolean
   text?: boolean
   textTransform?: string
+  underline?: boolean
 }
 
-const Text = styled.Text((props: TextProps) => {
-  // @ts-ignore
-  const s = bindStyles(props.theme)
+const Text = styled.Text<TextProps>((props): TextStyle => {
+  const theme = props.theme as Theme
+  const s = bindStyles(theme)
+  const backgroundColor = props.backgroundColor ?? props.bg
+
   return {
-    // @ts-ignore
-    fontFamily: s.fontFamily(props),
+    fontFamily: s.fontFamily(
+      props as unknown as Record<string, unknown>
+    ) as TextStyle['fontFamily'],
 
     color:
-      // @ts-ignore
-      props.theme.colors[props.color] ||
-      props.color ||
-      // @ts-ignore
-      props.theme.colors.default,
+      theme.colors[props.color as keyof typeof theme.colors] || props.color || theme.colors.default,
     lineHeight: props.lineHeight,
     fontSize: props.fontSize || 16,
     fontWeight: props.fontWeight ?? (props.bold ? 'bold' : undefined),
-    textAlign: props.textAlign,
+    textAlign: props.textAlign as TextStyle['textAlign'],
 
-    textTransform: props.textTransform,
+    textTransform: props.textTransform as TextStyle['textTransform'],
     padding: props.padding ?? props.p,
     paddingTop: props.paddingTop ?? props.pt,
     paddingLeft: props.paddingLeft ?? props.pl,
@@ -151,8 +152,7 @@ const Text = styled.Text((props: TextProps) => {
     right: props.right ?? props.r,
     bottom: props.bottom ?? props.b,
     borderWidth: props.borderWidth,
-    // @ts-ignore
-    borderColor: props.theme.colors[props.borderColor] ?? props.borderColor,
+    borderColor: theme.colors[props.borderColor as keyof typeof theme.colors] ?? props.borderColor,
     transform: props.transform,
 
     overflow: props.overflow ? 'visible' : 'hidden',
@@ -162,32 +162,28 @@ const Text = styled.Text((props: TextProps) => {
     minHeight: props.minHeight ?? props.minH,
     height: props.height ?? props.h,
     // flex props
-    flexGrow: props.grow === true ? 1 : props.grow,
+    flexGrow: props.grow ? 1 : undefined,
     flexShrink: props.shrink ?? 0,
     flexBasis: props.basis ?? 'auto',
-    flex: props.flex === true ? 1 : props.flex,
-    justifyContent: props.justifyContent ?? (props.center && 'center'),
-    alignItems: props.alignItems ?? (props.center && 'center'),
-    alignContent: props.alignContent ?? 'flex-start',
-    alignSelf: props.alignSelf,
+    flex: props.flex === true ? 1 : props.flex || undefined,
+    justifyContent: props.justifyContent as ViewStyle['justifyContent'],
+    alignItems: props.alignItems as ViewStyle['alignItems'],
+    alignContent: (props.alignContent ?? 'flex-start') as ViewStyle['alignContent'],
+    alignSelf: props.alignSelf as ViewStyle['alignSelf'],
     // shorthands
-    flexWrap: (props.wrap && 'wrap') ?? (props.wrapReverse && 'wrap-reverse') ?? 'nowrap',
-    flexDirection: (props.row ? 'row' : 'column') + (props.reverse ? '-reverse' : ''),
+    flexWrap: props.wrap ? 'wrap' : props.wrapReverse ? 'wrap-reverse' : 'nowrap',
+    flexDirection: `${props.row ? 'row' : 'column'}${
+      props.reverse ? '-reverse' : ''
+    }` as ViewStyle['flexDirection'],
 
     opacity: props.disabled ? 0.3 : (props.opacity ?? 1),
 
-    // @ts-ignore
-    backgroundColor: props.theme.colors[props.backgroundColor ?? props.bg]
-      ? // @ts-ignore
-        props.theme.colors[props.backgroundColor ?? props.bg]
-      : (props.backgroundColor ?? props.bg),
+    backgroundColor: theme.colors[backgroundColor as keyof typeof theme.colors] || backgroundColor,
 
-    // @ts-ignore
     ...(props.underline && {
       textDecorationLine: 'underline',
       textDecorationStyle: 'solid',
-      // @ts-ignore
-      textDecorationColor: props.theme.colors.default,
+      textDecorationColor: theme.colors.default,
     }),
   }
 })

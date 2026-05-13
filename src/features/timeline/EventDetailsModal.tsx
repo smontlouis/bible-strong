@@ -15,6 +15,16 @@ interface Props {
   event: Partial<TimelineEventProps> | null
 }
 
+type EventDetailsProps = Pick<
+  TimelineEventProps,
+  'slug' | 'image' | 'title' | 'titleEn' | 'start' | 'end'
+>
+
+const hasEventDetails = (event: Partial<TimelineEventProps> | null): event is EventDetailsProps =>
+  Boolean(event?.slug && event.image && event.title && event.titleEn) &&
+  event?.start !== undefined &&
+  event.end !== undefined
+
 const EventDetailsModal = ({ modalRef, scrollViewRef, event }: Props) => {
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
@@ -31,7 +41,16 @@ const EventDetailsModal = ({ modalRef, scrollViewRef, event }: Props) => {
       {...bottomSheetStyles}
     >
       <BottomSheetScrollView ref={scrollViewRef}>
-        <EventDetails {...event} />
+        {hasEventDetails(event) && (
+          <EventDetails
+            slug={event.slug}
+            image={event.image}
+            title={event.title}
+            titleEn={event.titleEn}
+            start={event.start}
+            end={event.end}
+          />
+        )}
       </BottomSheetScrollView>
     </BottomSheet>
   )

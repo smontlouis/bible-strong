@@ -46,12 +46,11 @@ export default ({
   noFlex?: boolean
   label?: string
   disabled?: boolean
-  name: string
+  name: keyof typeof Icon.Feather.glyphMap
 } & TouchableOpacityProps) => {
   return (
     <Touchable onPress={onPress} noFlex={noFlex} disabled={disabled} {...props}>
       <StyledIcon
-        // @ts-ignore
         name={name}
         size={size}
         color={color}

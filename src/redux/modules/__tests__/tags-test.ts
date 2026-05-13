@@ -1,6 +1,6 @@
 /* eslint-env jest */
 
-// Mock react-native before any imports
+// Mock react-native before other imports
 import type { Bookmark, Tag, TagsObj } from '~common/types'
 import userReducer, { UserState } from '../user'
 import { addTag, updateTag, removeTag, toggleTagEntity, entitiesArray } from '../user/tags'
@@ -538,8 +538,12 @@ describe('Tags Reducer', () => {
           })
         )
         expect(newState.bible.words['word-1']).toBeDefined()
-        expect((newState.bible.words['word-1'] as any).title).toBe('Word Title')
-        expect((newState.bible.words['word-1'] as any).tags['tag-1']).toBeDefined()
+        const word = newState.bible.words['word-1'] as {
+          title: string
+          tags: TagsObj
+        }
+        expect(word.title).toBe('Word Title')
+        expect(word.tags['tag-1']).toBeDefined()
       })
 
       it('should delete word/strongs/nave entity when last tag is removed', () => {
@@ -604,7 +608,7 @@ describe('Tags Reducer', () => {
           },
         },
       } as UserState
-      const newState = userReducer(state, { type: 'UNKNOWN_ACTION' } as any)
+      const newState = userReducer(state, { type: 'UNKNOWN_ACTION' })
       expect(newState.bible.tags).toEqual(state.bible.tags)
     })
   })

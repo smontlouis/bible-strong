@@ -1,5 +1,8 @@
-// TODO : type nested screen
-import { BottomSheetFooter, BottomSheetModal } from '@gorhom/bottom-sheet'
+import {
+  BottomSheetFooter,
+  BottomSheetModal,
+  type BottomSheetFooterProps,
+} from '@gorhom/bottom-sheet'
 import { useRouter } from 'expo-router'
 import { Image } from 'expo-image'
 import React from 'react'
@@ -16,6 +19,12 @@ import { fetchPlan } from '~redux/modules/plan'
 import { RootState } from '~redux/modules/reducer'
 import DetailsModal from '../PlanScreen/DetailsModal'
 import { useFireStorage } from '../plan.hooks'
+import type { OnlinePlan } from '~common/types'
+import type { AppDispatch } from '~redux/store'
+
+type ExplorePlanItemProps = OnlinePlan & {
+  featured?: boolean
+}
 
 const ExplorePlanItem = ({
   id,
@@ -26,12 +35,12 @@ const ExplorePlanItem = ({
   author,
   type,
   featured,
-}: any) => {
+}: ExplorePlanItemProps) => {
   const router = useRouter()
   const { t } = useTranslation()
   const modalRef = React.useRef<BottomSheetModal>(null)
   const planImage = useFireStorage(image)
-  const dispatch = useDispatch<any>()
+  const dispatch = useDispatch<AppDispatch>()
   const hasAlreadyStarted = useSelector(
     (state: RootState) => !!state.plan.myPlans.find(p => id === p.id)
   )
@@ -95,8 +104,7 @@ const ExplorePlanItem = ({
         author={author}
         downloads={downloads}
         description={description}
-        // @ts-ignore
-        footerComponent={(props: any) => (
+        footerComponent={(props: BottomSheetFooterProps) => (
           <BottomSheetFooter {...props}>
             <Box paddingBottom={10 + insets.bottom} paddingHorizontal={20} paddingTop={10}>
               <Button
@@ -104,15 +112,15 @@ const ExplorePlanItem = ({
                 disabled={hasAlreadyStarted || isLoading}
                 onPress={() => {
                   setIsLoading(true)
-                  // @ts-ignore
                   dispatch(fetchPlan({ id, update: true }))
+                    .unwrap()
                     .then(() => {
                       setIsLoading(false)
                       router.back()
                       modalRef?.current?.dismiss()
                       toast.success(t('Plan ajouté avec succès'))
                     })
-                    .catch((e: any) => {
+                    .catch((e: unknown) => {
                       console.log('[Plans] Error adding plan:', e)
                       setIsLoading(false)
                       toast.error(

@@ -324,15 +324,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
             setValue={(v: string) => setSection(v as SearchSection)}
             choices={sectionValues}
           />
-          <DropdownMenu
-            title={t('Livre')}
-            // @ts-ignore - DropdownMenu expects string but book filter uses number values
-            currentValue={book}
-            // @ts-ignore
-            setValue={setBook}
-            // @ts-ignore
-            choices={books}
-          />
+          <DropdownMenu title={t('Livre')} currentValue={book} setValue={setBook} choices={books} />
           {installedVersions.length > 1 && (
             <DropdownMenu
               title={t('Version')}

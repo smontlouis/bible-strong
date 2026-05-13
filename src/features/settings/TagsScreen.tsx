@@ -45,7 +45,7 @@ const Chip = styled(Box)(({ theme }) => ({
 
 type TagItemProps = {
   item: Tag
-  setOpen: any
+  setOpen: (tag: Tag) => void
 }
 
 const TagItem = ({ item, setOpen }: TagItemProps) => {
@@ -237,7 +237,6 @@ const TagsScreen = () => {
           }
         }}
       />
-      {/* @ts-ignore */}
       <FabButton
         icon="plus"
         onPress={() => {

@@ -2,6 +2,7 @@ import { createAction } from '@reduxjs/toolkit'
 import { Dispatch } from 'redux'
 import { SelectedVerses } from 'src/state/tabs'
 import { HighlightsObj } from '../user'
+import type { RootState } from '../reducer'
 
 // Action type constants for backward compatibility
 export const ADD_HIGHLIGHT = 'user/ADD_HIGHLIGHT'
@@ -22,15 +23,19 @@ export const removeHighlight = createAction(
 
 export const changeHighlightColor = createAction(
   CHANGE_HIGHLIGHT_COLOR,
-  (verseIds: Record<string, any>, color: string) => ({
+  (verseIds: SelectedVerses, color: string) => ({
     payload: { verseIds, color },
   })
 )
 
 // Helper to add date and color to verses
-const addDateAndColorToVerses = (verses: any, highlightedVerses: any, color: any) => {
+const addDateAndColorToVerses = (
+  verses: SelectedVerses,
+  highlightedVerses: HighlightsObj,
+  color: string
+): HighlightsObj => {
   const date = Date.now()
-  const formattedObj = Object.keys(verses).reduce((obj, verse) => {
+  const formattedObj = Object.keys(verses).reduce<HighlightsObj>((obj, verse) => {
     return {
       ...obj,
       [verse]: {
@@ -54,7 +59,7 @@ export function addHighlight({
   color: string
   selectedVerses: SelectedVerses
 }) {
-  return (dispatch: Dispatch, getState: any) => {
+  return (dispatch: Dispatch, getState: () => RootState) => {
     const highlightedVerses = getState().user.bible.highlights
 
     return dispatch(

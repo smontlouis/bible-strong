@@ -152,7 +152,7 @@ export interface Tag {
   highlights?: {
     [verse: string]: true
   }
-  date: number
+  date?: number
   notes?: {
     [verse: string]: true
   }

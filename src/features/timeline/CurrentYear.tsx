@@ -17,6 +17,9 @@ import { wpUI } from '~helpers/utils'
 import { offset } from './constants'
 
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput)
+type AnimatedTextInputAnimatedProps = React.ComponentProps<
+  typeof AnimatedTextInput
+>['animatedProps']
 
 const LinkBox = Box.withComponent(Link)
 
@@ -114,13 +117,11 @@ const CurrentYear = ({
         <AnimatedTextInput
           underlineColorAndroid="transparent"
           editable={false}
-          // @ts-expect-error animatedProps text type mismatch with TextInput
-          animatedProps={useAnimatedProps(
-            () =>
-              ({
-                text: year.get(),
-              }) as any
-          )}
+          animatedProps={
+            useAnimatedProps<{ text: string }>(() => ({
+              text: year.get(),
+            })) as unknown as AnimatedTextInputAnimatedProps
+          }
           defaultValue={year.get()}
           style={{
             color: 'white',

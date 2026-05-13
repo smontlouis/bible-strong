@@ -1,12 +1,18 @@
 import Quill from './quill'
 import { dispatch } from './dispatch'
+import type {
+  QuillInstance,
+  QuillModuleConstructor,
+  StrongBlockPayload,
+  VerseBlockPayload,
+} from './quill-types'
 
-const Module: any = Quill.import('core/module')
+const Module = Quill.import('core/module') as QuillModuleConstructor
 
 class ModuleBlockVerse extends Module {
-  quill: any
+  quill: QuillInstance
 
-  constructor(quill: any, options: any) {
+  constructor(quill: QuillInstance, options: unknown) {
     super(quill, options)
     this.quill = quill
   }
@@ -15,7 +21,7 @@ class ModuleBlockVerse extends Module {
     dispatch('SELECT_BIBLE_VERSE_BLOCK')
   }
 
-  receiveVerseBlock = (data: any) => {
+  receiveVerseBlock = (data: VerseBlockPayload) => {
     this.quill.focus()
     console.log(`[Studies] VERSE RECEIVED: ${JSON.stringify(data)}`)
 
@@ -35,16 +41,15 @@ class ModuleBlockVerse extends Module {
     this.quill.setSelection(cursorPosition + 2, Quill.sources.API)
   }
 
-  openStrongBlock = (_value?: any) => {
+  openStrongBlock = (_value?: unknown) => {
     dispatch('SELECT_BIBLE_STRONG_BLOCK')
   }
 
-  receiveStrongBlock = (data: any) => {
+  receiveStrongBlock = (data: StrongBlockPayload) => {
     this.quill.focus()
     console.log(`[Studies] STRONG RECEIVED: ${JSON.stringify(data)}`)
 
-    const { title, codeStrong, phonetique, book, original } =
-      data
+    const { title, codeStrong, phonetique, book, original } = data
 
     const range = this.quill.selection.savedRange
     if (!range || range.length != 0) return

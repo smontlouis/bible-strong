@@ -8,16 +8,19 @@ interface ImageUrls {
 }
 
 interface VerseOfTheDay {
-  v: string
+  v?: string
+  error?: boolean
 }
 
-export const useImageUrls = (verseOfTheDay: VerseOfTheDay): ImageUrls | null => {
+export const useImageUrls = (verseOfTheDay: VerseOfTheDay | false): ImageUrls | null => {
   const [imageUrls, setImageUrls] = useState<ImageUrls | null>(null)
+  const verseId = verseOfTheDay && 'v' in verseOfTheDay ? verseOfTheDay.v : undefined
+
   useEffect(() => {
     const loadImageUrls = async () => {
       try {
         const imageRes = await fetch(
-          `https://nodejs.bible.com/api/images/items/3.1?page=1&category=prerendered&usfm%5B0%5D=${verseOfTheDay.v}&language_tag=${i18n.language}`
+          `https://nodejs.bible.com/api/images/items/3.1?page=1&category=prerendered&usfm%5B0%5D=${verseId}&language_tag=${i18n.language}`
         )
         const imageJSON = await imageRes.json()
         setImageUrls({
@@ -30,9 +33,9 @@ export const useImageUrls = (verseOfTheDay: VerseOfTheDay): ImageUrls | null => 
         })
       }
     }
-    if (verseOfTheDay.v) {
+    if (verseId) {
       loadImageUrls()
     }
-  }, [verseOfTheDay.v])
+  }, [verseId])
   return imageUrls
 }

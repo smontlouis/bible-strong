@@ -21,6 +21,7 @@ import useLanguage from '~helpers/useLanguage'
 import { getDateLocale } from '~helpers/languageUtils'
 import { useHighlightColors, useResolvedColor } from '~helpers/useHighlightColors'
 import type { CustomColor, HighlightType } from '~redux/modules/user'
+import type { TagsObj, Verse, VerseIds } from '~common/types'
 
 const DateText = styled.Text(({ theme }) => ({
   color: theme.colors.tertiary,
@@ -34,7 +35,27 @@ const Container = styled(Box)(({ theme }) => ({
   borderBottomWidth: 1,
 }))
 
-const VerseComponent = ({ color, date, verseIds, stringIds, tags, setSettings }: any) => {
+export type HighlightSettingsData = {
+  stringIds: VerseIds
+  verseIds: Verse[]
+  color: string
+  date: number
+  tags: TagsObj
+}
+
+type VerseComponentProps = Omit<HighlightSettingsData, 'stringIds'> & {
+  stringIds?: VerseIds
+  setSettings?: (settings: HighlightSettingsData) => void
+}
+
+const VerseComponent = ({
+  color,
+  date,
+  verseIds,
+  stringIds,
+  tags,
+  setSettings,
+}: VerseComponentProps) => {
   const router = useRouter()
   const verses = useBibleVerses(verseIds)
   const { t } = useTranslation()
@@ -92,11 +113,10 @@ const VerseComponent = ({ color, date, verseIds, stringIds, tags, setSettings }:
           <DateText style={{ fontSize: 10 }}>
             {t('Il y a {{formattedDate}}', { formattedDate })}
           </DateText>
-          {setSettings && (
+          {setSettings && stringIds && (
             <LinkBox
               p={4}
               ml={10}
-              // @ts-ignore
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               onPress={() =>
                 setSettings({

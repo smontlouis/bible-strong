@@ -1,13 +1,13 @@
-declare const quill: any
-
 import React from 'react'
-// @ts-expect-error -- no @types/react-dom in this project
 import ReactDOMServer from 'react-dom/server'
 import Verse from './Verse'
 import { dispatch } from './dispatch'
 import Quill from './quill'
+import type { QuillEmbedConstructor, QuillInstance, VerseBlockPayload } from './quill-types'
 
-const Embed: any = Quill.import('blots/embed')
+declare const quill: QuillInstance
+
+const Embed = Quill.import('blots/embed') as QuillEmbedConstructor
 
 class VerseBlock extends Embed {
   static blotName = 'block-verse'
@@ -16,7 +16,7 @@ class VerseBlock extends Embed {
 
   static className = 'block-verse'
 
-  static create(data: any) {
+  static create(data: VerseBlockPayload) {
     const node = super.create(data)
     const { title, content, version, verses } = data
     node.innerHTML = ReactDOMServer.renderToString(
@@ -37,7 +37,7 @@ class VerseBlock extends Embed {
       }
     })
 
-    node.querySelector('.block-delete').addEventListener('click', () => {
+    node.querySelector('.block-delete')?.addEventListener('click', () => {
       node.remove()
     })
 
@@ -46,12 +46,12 @@ class VerseBlock extends Embed {
 
   static formats(domNode: HTMLElement) {
     const data = domNode.getAttribute('data')
-    return JSON.parse(data!)
+    return JSON.parse(data!) as VerseBlockPayload
   }
 
   static value(domNode: HTMLElement) {
     const data = domNode.getAttribute('data')
-    return JSON.parse(data!)
+    return JSON.parse(data!) as VerseBlockPayload
   }
 
   /**
@@ -60,7 +60,7 @@ class VerseBlock extends Embed {
    * It behaves differently than other cases and we need to handle the node
    * removal instead of the `characterData`.
    */
-  update(mutations: MutationRecord[], context: any) {
+  update(mutations: MutationRecord[], context: unknown) {
     // `childList` mutations are not handled on Quill
     // see `update` implementation on:
     // https://github.com/quilljs/quill/blob/master/blots/embed.js
@@ -80,7 +80,7 @@ class VerseBlock extends Embed {
     // NOTE: call this function as:
     // setTimeout(() => this._remove(), 0);
     // otherwise you'll get the error: "The given range isn't in document."
-    const cursorPosition = quill.getSelection().index - 1
+    const cursorPosition = (quill.getSelection()?.index || 0) - 1
 
     // see `remove` implementation on:
     // https://github.com/quilljs/parchment/blob/master/src/blot/abstract/shadow.ts

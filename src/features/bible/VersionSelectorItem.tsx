@@ -33,41 +33,35 @@ import { Theme } from '~themes'
 import { VersionCode, tabsAtom, BibleTab } from 'src/state/tabs'
 import { store } from '~redux/store'
 
-const Container = styled.View(
-  ({ needsUpdate, theme }: { needsUpdate?: boolean; theme: Theme }) => ({
-    padding: 20,
-    paddingTop: 10,
-    paddingBottom: 10,
-    ...(needsUpdate
-      ? {
-          borderLeftColor: theme.colors.success,
-          borderLeftWidth: 5,
-        }
-      : {}),
-  })
-)
+const Container = styled.View<{ needsUpdate?: boolean }>(({ needsUpdate, theme }) => ({
+  padding: 20,
+  paddingTop: 10,
+  paddingBottom: 10,
+  ...(needsUpdate
+    ? {
+        borderLeftColor: theme.colors.success,
+        borderLeftWidth: 5,
+      }
+    : {}),
+}))
 
 const TouchableContainer = Container.withComponent(TouchableOpacity)
 
-const TextVersion = styled.Text(
-  ({ isSelected, theme }: { isSelected?: boolean; theme: Theme }) => ({
-    color: isSelected ? theme.colors.primary : theme.colors.default,
-    fontSize: 12,
-    opacity: 0.5,
-    fontWeight: 'bold',
-  })
-)
+const TextVersion = styled.Text<{ isSelected?: boolean }>(({ isSelected, theme }) => ({
+  color: isSelected ? theme.colors.primary : theme.colors.default,
+  fontSize: 12,
+  opacity: 0.5,
+  fontWeight: 'bold',
+}))
 
-const TextCopyright = styled.Text(
-  ({ isSelected, theme }: { isSelected?: boolean; theme: Theme }) => ({
-    color: isSelected ? theme.colors.primary : theme.colors.default,
-    fontSize: 10,
-    backgroundColor: 'transparent',
-    opacity: 0.5,
-  })
-)
+const TextCopyright = styled.Text<{ isSelected?: boolean }>(({ isSelected, theme }) => ({
+  color: isSelected ? theme.colors.primary : theme.colors.default,
+  fontSize: 10,
+  backgroundColor: 'transparent',
+  opacity: 0.5,
+}))
 
-const TextName = styled.Text(({ isSelected, theme }: { isSelected?: boolean; theme: Theme }) => ({
+const TextName = styled.Text<{ isSelected?: boolean }>(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
   fontSize: 16,
   backgroundColor: 'transparent',
@@ -134,7 +128,7 @@ const VersionSelectorItem = ({
     if (queueState?.status === 'completed') {
       setVersionNeedsDownload(false)
       if (onDownloadComplete) {
-        onDownloadComplete(version.id as VersionCode)
+        onDownloadComplete(version.id)
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -177,7 +171,7 @@ const VersionSelectorItem = ({
         tabNeedsUpdate = true
       }
 
-      if (bibleTab.data.parallelVersions.includes(version.id as VersionCode)) {
+      if (bibleTab.data.parallelVersions.includes(version.id)) {
         newParallelVersions = bibleTab.data.parallelVersions.filter(v => v !== version.id)
         tabNeedsUpdate = true
       }
@@ -227,7 +221,7 @@ const VersionSelectorItem = ({
     setVersionNeedsDownload(true)
 
     jotaiStore.set(installedVersionsSignalAtom, (c: number) => c + 1)
-    // Trigger BibleViewer instances to reload so any tab that was showing
+    // Trigger BibleViewer instances to reload so tabs that were showing
     // this version updates (e.g. shows the BIBLE_NOT_FOUND error view).
     jotaiStore.set(bibleDataRefreshSignalAtom, (c: number) => c + 1)
   }
@@ -253,14 +247,11 @@ const VersionSelectorItem = ({
 
   if (versionNeedsDownload) {
     return (
-      // @ts-ignore
       <Container>
         <Box flex row>
           <Box disabled flex>
-            {/* @ts-ignore */}
             <TextVersion>{version.id}</TextVersion>
             <HStack alignItems="center">
-              {/* @ts-ignore */}
               <TextName>{version.name}</TextName>
               {version?.hasAudio && (
                 <Box>
@@ -268,7 +259,6 @@ const VersionSelectorItem = ({
                 </Box>
               )}
             </HStack>
-            {/* @ts-ignore */}
             <TextCopyright>{version.c}</TextCopyright>
           </Box>
           {!isLoading && !isQueued && version.id !== 'LSGS' && version.id !== 'KJVS' && (
@@ -297,7 +287,7 @@ const VersionSelectorItem = ({
                     height: 4,
                     borderRadius: 2,
                     backgroundColor: theme.colors.primary,
-                    width: `${Math.round(downloadProgress * 100)}%` as any,
+                    width: `${Math.round(downloadProgress * 100)}%`,
                     transitionProperty: 'width',
                     transitionDuration: 150,
                   }}
@@ -312,13 +302,10 @@ const VersionSelectorItem = ({
 
   if (isParameters) {
     return (
-      // @ts-ignore
       <Container needsUpdate={needsUpdate}>
         <Box flex row center>
           <Box flex>
-            {/* @ts-ignore */}
             <TextVersion>{version.id}</TextVersion>
-            {/* @ts-ignore */}
             <TextName>{version.name}</TextName>
           </Box>
           {needsUpdate ? (
@@ -336,17 +323,10 @@ const VersionSelectorItem = ({
   }
 
   return (
-    // @ts-ignore
-    <TouchableContainer
-      needsUpdate={needsUpdate}
-      // @ts-ignore
-      onPress={() => onChange && onChange(version.id)}
-    >
+    <TouchableContainer needsUpdate={needsUpdate} onPress={() => onChange && onChange(version.id)}>
       <Box flex>
-        {/* @ts-ignore */}
         <TextVersion isSelected={isSelected}>{version.id}</TextVersion>
         <HStack alignItems="center">
-          {/* @ts-ignore */}
           <TextName isSelected={isSelected}>{version.name}</TextName>
           {version?.hasAudio && (
             <Box>
@@ -354,7 +334,6 @@ const VersionSelectorItem = ({
             </Box>
           )}
         </HStack>
-        {/* @ts-ignore */}
         <TextCopyright>{version.c}</TextCopyright>
       </Box>
     </TouchableContainer>

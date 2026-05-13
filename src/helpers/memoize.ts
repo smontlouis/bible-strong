@@ -5,12 +5,12 @@ import { getResourceLanguage, type ResourcesLanguageState } from 'src/state/reso
  *
  * @desc Creates a cache key from fn's arguments.
  *
- * @param {any[]} args Arguments from fn being memoized.
+ * @param {unknown[]} args Arguments from fn being memoized.
  * @return {string} Returns a cache key.
  */
-export const createCacheKeyFromArgs = (args: any[]) =>
+export const createCacheKeyFromArgs = (args: unknown[]): string =>
   args.reduce(
-    (cacheKey, arg) =>
+    (cacheKey: string, arg) =>
       (cacheKey += `_${typeof arg === 'object' ? JSON.stringify(args) : `${arg}`}_`),
     ''
   )

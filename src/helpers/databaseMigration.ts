@@ -136,7 +136,7 @@ async function moveFileIfExists(oldPath: string, newPath: string, dbId: string):
  * Check if migration is needed (i.e., if there are files in the old location)
  */
 export async function isMigrationNeeded(): Promise<boolean> {
-  // Check for any SQLite database in the old location
+  // Check for SQLite databases in the old location
   for (const dbId of SQLITE_DBS_TO_MIGRATE) {
     const fileName = getDbFileName(dbId)
     const oldPath = `${BASE_SQLITE_DIR}/${fileName}`

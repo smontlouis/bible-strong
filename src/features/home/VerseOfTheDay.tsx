@@ -107,7 +107,7 @@ const VerseOfTheDay = ({ addDay }: Props) => {
   const ago = dayToAgo(addDay, t)
   const notificationModalRef = React.useRef<BottomSheetModal>(null)
 
-  const [initialHour, initialMinutes] = verseOfTheDayTime.split(':').map((n: any) => Number(n))
+  const [initialHour, initialMinutes] = verseOfTheDayTime.split(':').map(n => Number(n))
 
   const initialDate = new Date()
   initialDate.setHours(initialHour || 0, initialMinutes || 0, 0, 0)
@@ -141,8 +141,7 @@ const VerseOfTheDay = ({ addDay }: Props) => {
     )
   }
 
-  // @ts-ignore
-  if (verseOfTheDay.error) {
+  if (verseOfTheDay && 'error' in verseOfTheDay) {
     return (
       <Box paddingHorizontal={20} borderRadius={30} bg="reverse" py={20} height={VERSE_CARD_HEIGHT}>
         <Empty

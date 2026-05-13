@@ -165,7 +165,7 @@ const DownloadableItem = ({
                       (visualState === 'inserting'
                         ? queueState.insertProgress
                         : queueState.downloadProgress) * 100
-                    )}%` as any,
+                    )}%`,
                     transitionProperty: 'width',
                     transitionDuration: 150,
                   }}

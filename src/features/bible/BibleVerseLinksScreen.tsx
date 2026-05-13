@@ -76,7 +76,7 @@ const BibleVerseLinks = () => {
           return true
         })
         .map(link => {
-          const verseNumbers: any = {}
+          const verseNumbers: VerseIds = {}
           link[0].split('/').map(ref => {
             verseNumbers[ref] = true
           })
@@ -99,7 +99,7 @@ const BibleVerseLinks = () => {
     const linkVerses = linkId.split('/').reduce((accuRefs, key) => {
       accuRefs[key] = true
       return accuRefs
-    }, {} as any)
+    }, {} as VerseIds)
 
     setLinkVerses(linkVerses)
     linkModal.open()

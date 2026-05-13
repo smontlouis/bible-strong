@@ -14,24 +14,46 @@ import Container from '~common/ui/Container'
 import SectionList from '~common/ui/SectionList'
 import Text from '~common/ui/Text'
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
+import { DatabaseError } from '~helpers/catchDatabaseError'
 import { getFirstLetterFrom } from '~helpers/alphabet'
-import loadDictionnaireByLetter from '~helpers/loadDictionnaireByLetter'
-import loadDictionnaireBySearch from '~helpers/loadDictionnaireBySearch'
+import loadDictionnaireByLetter, {
+  type DictionnaireLetterRow,
+} from '~helpers/loadDictionnaireByLetter'
+import loadDictionnaireBySearch, {
+  type DictionnaireSearchRow,
+} from '~helpers/loadDictionnaireBySearch'
 import { DictionaryTab } from '../../state/tabs'
 import { useResultsByLetterOrSearch, useSearchValue } from '../lexique/useUtilities'
 import DictionnaireItem from './DictionnaireItem'
 
-const useSectionResults = (results: any) => {
-  const [sectionResults, setSectionResults] = useState<any>(null)
+type DictionaryRow = DictionnaireLetterRow | DictionnaireSearchRow
+
+interface DictionarySection {
+  title: string
+  data: DictionaryRow[]
+}
+
+const isDatabaseError = (value: unknown): value is DatabaseError =>
+  typeof value === 'object' && value !== null && 'error' in value
+
+const getDictionaryItemLayout = sectionListGetItemLayout({
+  getItemHeight: () => 60,
+  getSectionHeaderHeight: () => 50,
+  getSeparatorHeight: () => 0,
+  getSectionFooterHeight: () => 0,
+})
+
+const useSectionResults = (results: DictionaryRow[]) => {
+  const [sectionResults, setSectionResults] = useState<DictionarySection[]>([])
 
   useEffect(() => {
     if (!results.length) {
       setSectionResults([])
       return
     }
-    const sectionResults = results.reduce((list: any, dbItem: any) => {
+    const sectionResults = results.reduce<DictionarySection[]>((list, dbItem) => {
       const listItem = list.find(
-        (item: any) => item.title && item.title === getFirstLetterFrom(dbItem.sanitized_word)
+        item => item.title && item.title === getFirstLetterFrom(dbItem.sanitized_word)
       )
       if (!listItem) {
         list.push({
@@ -58,7 +80,7 @@ interface DictionaryListScreenProps {
 
 const DictionaryListScreen = ({ hasBackButton, onWordSelect }: DictionaryListScreenProps) => {
   const { t } = useTranslation()
-  const [error, setError] = useState(false)
+  const [error, setError] = useState<DatabaseError['error'] | null>(null)
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
 
@@ -67,12 +89,11 @@ const DictionaryListScreen = ({ hasBackButton, onWordSelect }: DictionaryListScr
     { query: loadDictionnaireByLetter, value: letter }
   )
 
-  const sectionResults = useSectionResults(results)
+  const dictionaryResults = Array.isArray(results) ? results : []
+  const sectionResults = useSectionResults(dictionaryResults)
 
   useEffect(() => {
-    // @ts-ignore
-    if (results.error) {
-      // @ts-ignore
+    if (isDatabaseError(results)) {
       setError(results.error)
     }
   }, [results])
@@ -84,7 +105,6 @@ const DictionaryListScreen = ({ hasBackButton, onWordSelect }: DictionaryListScr
         <Empty
           icon={require('~assets/images/empty-state-icons/inbox.svg')}
           message={`${t('Impossible de charger le dictionnaire...')}${
-            // @ts-ignore
             error === 'CORRUPTED_DATABASE'
               ? t(
                   '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
@@ -111,19 +131,15 @@ const DictionaryListScreen = ({ hasBackButton, onWordSelect }: DictionaryListScr
         {isLoading ? (
           <Loading message={t('Chargement...')} />
         ) : sectionResults.length ? (
-          <SectionList
-            renderItem={({ item: { id, word } }) => (
-              <DictionnaireItem key={id} word={word} onSelect={onWordSelect} />
+          <SectionList<DictionaryRow, DictionarySection>
+            renderItem={({ item: { rowid, word } }) => (
+              <DictionnaireItem key={rowid} word={word} onSelect={onWordSelect} />
             )}
             removeClippedSubviews
             maxToRenderPerBatch={100}
-            // @ts-ignore
-            getItemLayout={sectionListGetItemLayout({
-              getItemHeight: () => 60,
-              getSectionHeaderHeight: () => 50,
-              getSeparatorHeight: () => 0,
-              getSectionFooterHeight: () => 0,
-            })}
+            getItemLayout={(data, index) =>
+              getDictionaryItemLayout((data || []) as DictionarySection[], index)
+            }
             renderSectionHeader={({ section: { title } }) => (
               <SectionTitle color="secondary">
                 <Text title fontWeight="bold" fontSize={16} color="reverse">
@@ -133,7 +149,7 @@ const DictionaryListScreen = ({ hasBackButton, onWordSelect }: DictionaryListScr
             )}
             stickySectionHeadersEnabled
             sections={sectionResults}
-            keyExtractor={item => item.id}
+            keyExtractor={item => String(item.rowid)}
           />
         ) : (
           <Empty

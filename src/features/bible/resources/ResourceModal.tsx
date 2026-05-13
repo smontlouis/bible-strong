@@ -33,6 +33,13 @@ import BibleVerseDetailCard from '../BibleVerseDetailCard'
 import { ReferenceCard } from '../ReferenceCard'
 import ResourcesModalFooter from './ResourcesModalFooter'
 
+type ResourceVerse = {
+  Livre: number
+  Chapitre: number
+  Verset: number
+  Texte: string
+}
+
 type Props = {
   resourceModalRef: React.RefObject<BottomSheet | null>
   resourceType: BibleResource | null
@@ -248,11 +255,10 @@ const Resource = ({
   const selectedVerse = Object.keys(selectedVerses)[0]
   const [Livre, Chapitre, Verset] = selectedVerse ? selectedVerse?.split('-') : []
 
-  // @ts-ignore
-  const verseObj: any = {
-    Livre,
-    Chapitre,
-    Verset,
+  const verseObj: ResourceVerse = {
+    Livre: Number(Livre),
+    Chapitre: Number(Chapitre),
+    Verset: Number(Verset),
     Texte: '',
   }
 

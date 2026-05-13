@@ -109,7 +109,7 @@ const TypeFilterModal = forwardRef<BottomSheetModal, Props>(
             {isAnnotationsSelected && <FeatherIcon name="check" size={20} color="primary" />}
           </TypeRow>
 
-          {/* Section versions if any */}
+          {/* Section versions when present */}
           {availableVersions.length > 0 && (
             <>
               <SectionHeader>

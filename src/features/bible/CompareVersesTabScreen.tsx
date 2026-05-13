@@ -25,10 +25,15 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { versions } from '~helpers/bibleVersions'
 import { selectCompareVersions } from '~redux/selectors/user'
-import { CompareTab, SelectedVerses } from '../../state/tabs'
+import { CompareTab, SelectedVerses, VersionCode } from '../../state/tabs'
 
 interface CompareVersesTabScreenProps {
   compareAtom: PrimitiveAtom<CompareTab>
+}
+
+type PrevNextItems = {
+  verseNumber: number
+  versesInCurrentChapter: number
 }
 
 const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) => {
@@ -54,7 +59,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
     data: { selectedVerses },
   } = compareTab
 
-  const [prevNextItems, setPrevNextItems] = React.useState<any>()
+  const [prevNextItems, setPrevNextItems] = React.useState<PrevNextItems>()
   const title = verseToReference(selectedVerses)
   const openInNewTab = useOpenInNewTab()
   useEffect(() => {
@@ -62,7 +67,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title])
 
-  const goToVerse = (value: any) => {
+  const goToVerse = (value: number) => {
     const [livre, chapitre, verse] = Object.keys(selectedVerses)[0].split('-').map(Number)
     setSelectedVerses({ [`${livre}-${chapitre}-${verse + value}`]: true })
   }
@@ -71,7 +76,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
     const hasPrevNextButtons = Object.keys(selectedVerses).length === 1
 
     const loadPrevNextData = async () => {
-      const [livre, chapitre, verse] = Object.keys(selectedVerses)[0].split('-')
+      const [livre, chapitre, verse] = Object.keys(selectedVerses)[0].split('-').map(Number)
       const versesInCurrentChapter = countLsgChapters[`${livre}-${chapitre}`]
       setPrevNextItems({
         verseNumber: verse,
@@ -138,7 +143,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
             .map(([versionId, obj], position) => (
               <BibleCompareVerseItem
                 key={`${versionId}-${title}`}
-                versionId={versionId}
+                versionId={versionId as VersionCode}
                 name={obj.name}
                 selectedVerses={selectedVerses}
                 position={position}

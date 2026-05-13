@@ -10,8 +10,9 @@ import Link from '~common/Link'
 import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
 import Header from '~common/Header'
+import { Theme } from '~themes'
 
-const LinkItem = styled(Link)(({ theme }: any) => ({
+const LinkItem = styled(Link)(({ theme }) => ({
   flexDirection: 'row',
   alignItems: 'center',
   paddingHorizontal: 20,
@@ -20,8 +21,8 @@ const LinkItem = styled(Link)(({ theme }: any) => ({
   borderBottomColor: theme.colors.border,
 }))
 
-const StyledIcon = styled(Icon.Feather)(({ theme, color }: any) => ({
-  color: theme.colors[color] || theme.colors.grey,
+const StyledIcon = styled(Icon.Feather)<{ color?: keyof Theme['colors'] }>(({ theme, color }) => ({
+  color: color ? theme.colors[color] : theme.colors.grey,
   marginLeft: 'auto',
   marginRight: 15,
 }))

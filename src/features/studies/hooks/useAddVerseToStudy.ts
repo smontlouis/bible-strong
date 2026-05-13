@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from '~helpers/toast'
 import type { RootState } from '~redux/modules/reducer'
-import { updateStudy } from '~redux/modules/user'
+import { updateStudy, type Study } from '~redux/modules/user'
+import type { AppDispatch } from '~redux/store'
 import { StudyTab, tabsAtom, tabsAtomsAtom } from '../../../state/tabs'
 import { useSlideNewTab } from '../../app-switcher/utils/useSlideNewTab'
 import { useTabAnimations } from '~features/app-switcher/utils/useTabAnimations'
@@ -18,12 +19,10 @@ interface VerseData {
 
 type VerseFormat = 'inline' | 'block'
 
-interface QuillDelta {
-  ops: unknown[]
-}
+type QuillDelta = NonNullable<Study['content']>
 
 export const useAddVerseToStudy = () => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
   const router = useRouter()
   const { t } = useTranslation()
   const tabs = useAtomValue(tabsAtom)
@@ -85,10 +84,8 @@ export const useAddVerseToStudy = () => {
     // Update study in Redux
     // If new study, also set title and created_at
     dispatch(
-      // @ts-ignore
       updateStudy({
         id: studyId,
-        // @ts-ignore
         content: delta,
         modified_at: Date.now(),
         ...(isNewStudy

@@ -6,6 +6,7 @@ import Back from '~common/Back'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
+import { Tag } from './types'
 
 const TouchableBox = styled.TouchableOpacity({
   flex: 1,
@@ -26,7 +27,15 @@ const HeaderBox = styled(Box)(({ theme }) => ({
   borderBottomColor: theme.colors.border,
 }))
 
-const Header = ({ title, setIsOpen, isOpen, selectedChip, hasBackButton }: any) => {
+type HeaderProps = {
+  title: string
+  setIsOpen: (isOpen: boolean) => void
+  isOpen: boolean
+  selectedChip?: Tag | null
+  hasBackButton?: boolean
+}
+
+const Header = ({ title, setIsOpen, isOpen, selectedChip, hasBackButton }: HeaderProps) => {
   const { t } = useTranslation()
   return (
     <HeaderBox row bg="reverse">

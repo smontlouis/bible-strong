@@ -132,10 +132,10 @@ const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) =>
   }, [currentNote?.title, setNotesTab])
 
   const onSaveNote = () => {
-    dispatch(
-      // @ts-ignore
-      addNote({ ...currentNote, title, description, date: Date.now() }, noteVerses)
-    )
+    const action = addNote({ ...currentNote, title, description, date: Date.now() }, noteVerses)
+    if (action) {
+      dispatch(action)
+    }
     setIsEditing(false)
   }
 

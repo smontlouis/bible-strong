@@ -33,7 +33,7 @@ import { useTranslation } from 'react-i18next'
 import { useRouter } from 'expo-router'
 import DetailedHeader from '~common/DetailedHeader'
 import PopOverMenu from '~common/PopOverMenu'
-import { StrongReference } from '~common/types'
+import { StrongReference, Verse } from '~common/types'
 import MenuOption from '~common/ui/MenuOption'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
@@ -79,7 +79,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
 
   const [error, setError] = useState<string | undefined>()
   const [strongReference, setStrongReference] = useState<StrongReference | undefined>()
-  const [verses, setVerses] = useState<any[]>([])
+  const [verses, setVerses] = useState<Verse[]>([])
   const [count, setCount] = useState<number>(0)
   const [concordanceLoading, setConcordanceLoading] = useState(true)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)

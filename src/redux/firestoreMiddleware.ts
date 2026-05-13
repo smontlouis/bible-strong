@@ -69,6 +69,8 @@ import {
   batchWriteSubcollection,
   SUBCOLLECTION_NAMES,
   type BatchChanges,
+  type SubcollectionData,
+  type SubcollectionDocument,
   type SubcollectionName,
 } from '~helpers/firestoreSubcollections'
 import i18n from '~i18n'
@@ -76,29 +78,57 @@ import { RootState } from '~redux/modules/reducer'
 import { deleteDoc, deleteField, doc, firebaseDb, getDoc, setDoc } from '../helpers/firebase'
 import { fetchPlan, markAsRead, removePlan, resetPlan } from './modules/plan'
 
-export const removeUndefinedVariables = (obj: any) => JSON.parse(JSON.stringify(obj)) // Remove undefined variables
+type SyncRecord = Record<string, unknown>
+type BibleSyncCollection = Exclude<SubcollectionName, 'tabGroups'>
+type BibleSyncData = Partial<Record<BibleSyncCollection, SubcollectionData>>
+type SyncDiffState = {
+  user: {
+    bible: BibleSyncData & {
+      studies?: SyncRecord
+      settings?: unknown
+    }
+  }
+}
+
+const isRecord = (value: unknown): value is SyncRecord =>
+  !!value && typeof value === 'object' && !Array.isArray(value)
+
+const isFirestoreSentinel = (value: unknown): boolean =>
+  isRecord(value) && ('_methodName' in value || typeof value.isEqual === 'function')
+
+const getErrorCode = (error: unknown): string | undefined => {
+  if (isRecord(error) && 'code' in error) {
+    return String(error.code)
+  }
+  return undefined
+}
+
+const getRecordTitle = (value: unknown): string =>
+  isRecord(value) && typeof value.title === 'string' ? value.title : 'unknown'
+
+export const removeUndefinedVariables = <T>(obj: T): T => JSON.parse(JSON.stringify(obj)) as T // Remove undefined variables
 
 /**
  * Nettoie un objet pour Firestore en supprimant les valeurs undefined/null
  * tout en préservant les sentinels Firestore (comme deleteField())
  * Retourne null (jamais undefined) pour éviter les erreurs Firestore
  */
-export const cleanForFirestore = (obj: any): any => {
+export const cleanForFirestore = (obj: unknown): unknown => {
   if (obj === undefined) return null
   if (obj === null) return null
   if (typeof obj !== 'object') return obj
 
   // Préserver les sentinels Firestore (comme deleteField())
   // Les sentinels ont une propriété _methodName ou isEqual
-  if (obj._methodName || typeof obj.isEqual === 'function') return obj
+  if (isFirestoreSentinel(obj)) return obj
 
   if (Array.isArray(obj)) {
     return obj.map(cleanForFirestore).filter(v => v !== undefined && v !== null)
   }
 
-  const result: any = {}
+  const result: SyncRecord = {}
   for (const key of Object.keys(obj)) {
-    const value = cleanForFirestore(obj[key])
+    const value = cleanForFirestore((obj as SyncRecord)[key])
     if (value !== undefined && value !== null) {
       result[key] = value
     }
@@ -110,7 +140,7 @@ export const cleanForFirestore = (obj: any): any => {
  * Détecte les changements dans une sous-collection à partir du diff
  * Retourne les éléments ajoutés/modifiés et supprimés
  */
-function extractSubcollectionChanges(diffData: any, deleteMarker: any): BatchChanges {
+function extractSubcollectionChanges(diffData: unknown, deleteMarker: unknown): BatchChanges {
   const changes: BatchChanges = {
     set: {},
     delete: [],
@@ -118,13 +148,15 @@ function extractSubcollectionChanges(diffData: any, deleteMarker: any): BatchCha
 
   if (!diffData) return changes
 
+  if (!isRecord(diffData)) return changes
+
   for (const [id, value] of Object.entries(diffData)) {
     if (value === deleteMarker) {
       // Élément supprimé
       changes.delete.push(id)
     } else if (value && typeof value === 'object') {
       // Élément ajouté ou modifié
-      changes.set[id] = value
+      changes.set[id] = value as SubcollectionDocument
     }
   }
 
@@ -137,9 +169,9 @@ function extractSubcollectionChanges(diffData: any, deleteMarker: any): BatchCha
 async function syncSubcollectionChanges(
   userId: string,
   collection: SubcollectionName,
-  diffData: any,
-  fullData: any,
-  deleteMarker: any
+  diffData: unknown,
+  fullData: SubcollectionData | undefined,
+  deleteMarker: unknown
 ): Promise<void> {
   const changes = extractSubcollectionChanges(diffData, deleteMarker)
 
@@ -180,11 +212,12 @@ async function handleSyncWithRetry(
   try {
     await operation()
     return true
-  } catch (error: any) {
+  } catch (error) {
     console.error(`[Sync] ${actionName} failed:`, error)
+    const errorCode = getErrorCode(error)
 
     // SAFETY NET: Si permission-denied, tente un refresh manuel du token
-    if (error.code === 'permission-denied') {
+    if (errorCode === 'permission-denied') {
       console.warn('[Sync] Permission denied detected, attempting manual token refresh...')
 
       const refreshed = await tokenManager.tryRefresh()
@@ -194,11 +227,11 @@ async function handleSyncWithRetry(
           await operation()
           console.log('[Sync] Retry succeeded after token refresh')
           return true
-        } catch (retryError: any) {
+        } catch (retryError) {
           console.error('[Sync] Retry failed after token refresh:', retryError)
           Sentry.captureException(retryError, {
             tags: { feature: 'sync', action: 'retry_after_refresh' },
-            extra: { userId, originalError: error.code },
+            extra: { userId, originalError: errorCode },
           })
         }
       }
@@ -206,7 +239,7 @@ async function handleSyncWithRetry(
 
     Sentry.captureException(error, {
       tags: { feature: 'sync', action: actionName },
-      extra: { userId, errorCode: error.code },
+      extra: { userId, errorCode },
     })
 
     // SAFETY: Créer un backup immédiat en cas d'erreur de sync
@@ -292,7 +325,7 @@ const firestoreMiddleware: Middleware = store => next => async action => {
   }
 
   const deleteMarker = deleteField()
-  const diffState: any = diff(oldState, state, deleteMarker)
+  const diffState = diff(oldState, state, deleteMarker) as SyncDiffState
 
   const userId = currentUser.uid
   const { user, plan } = state
@@ -587,14 +620,20 @@ const firestoreMiddleware: Middleware = store => next => async action => {
 
     // Sync les entités modifiées (highlights, notes, etc.)
     for (const collection of SUBCOLLECTION_NAMES) {
-      if (collection !== 'tags' && (diffState.user.bible as Record<string, any>)[collection]) {
+      if (collection === 'tags' || collection === 'tabGroups') continue
+
+      const bibleCollection = collection as BibleSyncCollection
+      const collectionDiff = diffState.user.bible[bibleCollection]
+      const collectionData = user.bible[bibleCollection] as SubcollectionData | undefined
+
+      if (collectionDiff) {
         await handleSyncWithRetry(
           async () => {
             await syncSubcollectionChanges(
               userId,
-              collection,
-              (diffState.user.bible as Record<string, any>)[collection],
-              (user.bible as Record<string, any>)[collection],
+              bibleCollection,
+              collectionDiff,
+              collectionData,
               deleteMarker
             )
           },
@@ -623,7 +662,7 @@ const firestoreMiddleware: Middleware = store => next => async action => {
             await setDoc(
               studyDocRef,
               {
-                ...removeUndefinedVariables(obj),
+                ...(removeUndefinedVariables(obj) as SyncRecord),
                 content: { ops: studyContent || [] },
               },
               { merge: true }
@@ -633,7 +672,7 @@ const firestoreMiddleware: Middleware = store => next => async action => {
             console.error(`Failed to sync study ${studyId}:`, studyError)
             Sentry.captureException(studyError, {
               tags: { feature: 'sync', action: 'study_sync', studyId },
-              extra: { userId, studyTitle: (obj as any)?.title || 'unknown' },
+              extra: { userId, studyTitle: getRecordTitle(obj) },
             })
             throw studyError
           }
@@ -687,7 +726,7 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       bible,
       studies,
       plan: importedPlan,
-    } = action.payload as ImportDataPayload & { plan?: any }
+    } = action.payload as ImportDataPayload & { plan?: RootState['plan']['ongoingPlans'] }
 
     await handleSyncWithRetry(
       async () => {

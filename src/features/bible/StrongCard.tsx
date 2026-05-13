@@ -24,8 +24,7 @@ const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
 const itemWidth = slideWidth
 
-// @ts-ignore
-const Container = styled(Box)(({ isModal }: any) => ({
+const Container = styled(Box)<{ isModal?: boolean }>(({ isModal }) => ({
   width: itemWidth,
   flex: 1,
   paddingHorizontal: itemHorizontalMargin,
@@ -167,8 +166,7 @@ const StrongCard = (props: Props) => {
   } = props
 
   return (
-    // @ts-ignore
-    <Container overflow isModal={isModal}>
+    <Container overflow="visible" isModal={isModal}>
       {/* <Shadow overflow /> */}
       <Box paddingTop={20}>
         <Box>
@@ -186,7 +184,6 @@ const StrongCard = (props: Props) => {
                 </Text>
               </Link>
               <Box mr={10} mt={3}>
-                {/* @ts-ignore */}
                 <ListenToStrong type={Hebreu ? 'hebreu' : 'grec'} code={Code} />
               </Box>
               <Link onPress={openStrong}>

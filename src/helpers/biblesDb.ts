@@ -461,7 +461,7 @@ export function insertBibleVersion(
     const d = await getDb()
 
     await d.withExclusiveTransactionAsync(async () => {
-      // Delete any existing data for this version first (re-download case)
+      // Delete existing data for this version first (re-download case)
       // Remove FTS entries before deleting verses (content-sync table needs explicit delete)
       await d.runAsync(
         `INSERT INTO verses_fts(verses_fts, rowid, text)

@@ -39,7 +39,6 @@ const RegisterScreen = () => {
     }
     setLoading(true)
     const isStillLoading = await FireAuth.register(username, email, password)
-    // @ts-ignore
     setLoading(isStillLoading)
   }
 

@@ -1,7 +1,7 @@
 export default function truncate(str: string, maxChars: number) {
   if (!str || str.length <= maxChars) return str
 
-  // Trim any leading/trailing spaces and collapse multiple spaces
+  // Trim leading/trailing spaces and collapse multiple spaces
   const cleanStr = str.replace(/\s+/g, ' ').trim()
   if (cleanStr.length <= maxChars) return cleanStr
 

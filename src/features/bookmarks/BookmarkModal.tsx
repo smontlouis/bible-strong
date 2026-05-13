@@ -67,7 +67,7 @@ interface BookmarkModalProps {
 }
 
 const getBookName = (bookNumber: number): string => {
-  const bookData = books.find((b: any) => b.Numero === bookNumber)
+  const bookData = books.find(b => b.Numero === bookNumber)
   return bookData?.Nom || `Livre ${bookNumber}`
 }
 

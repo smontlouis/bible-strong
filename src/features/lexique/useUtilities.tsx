@@ -1,9 +1,21 @@
 import { useEffect, useState } from 'react'
 import * as Sentry from '@sentry/react-native'
 
+import { DatabaseError } from '~helpers/catchDatabaseError'
 import useDebounce from '~helpers/useDebounce'
 
-export const useSearchValue = ({ onDebouncedValue }: any = {}) => {
+interface UseSearchValueOptions {
+  onDebouncedValue?: () => void
+}
+
+type QueryFunction<T> = (value: string) => Promise<T[] | DatabaseError>
+
+interface QueryConfig<T> {
+  query?: QueryFunction<T>
+  value?: string
+}
+
+export const useSearchValue = ({ onDebouncedValue }: UseSearchValueOptions = {}) => {
   const [searchValue, setSearchValue] = useState('')
   const debouncedSearchValue = useDebounce(searchValue, 300)
 
@@ -17,10 +29,10 @@ export const useSearchValue = ({ onDebouncedValue }: any = {}) => {
   return { searchValue, debouncedSearchValue, setSearchValue }
 }
 
-export const useResults = (asyncFunc: any, parameter: any) => {
-  const [results, setResults] = useState<any>([])
+export const useResults = <T, P>(asyncFunc: (parameter: P) => Promise<T>, parameter: P) => {
+  const [results, setResults] = useState<T | undefined>()
   useEffect(() => {
-    asyncFunc(parameter).then((results: any) => {
+    asyncFunc(parameter).then(results => {
       if (!results) {
         Sentry.captureMessage('useResults: Results is undefined', {
           extra: {
@@ -35,22 +47,25 @@ export const useResults = (asyncFunc: any, parameter: any) => {
   return results
 }
 
-export const useResultsByLetterOrSearch = (search: any = {}, letter: any = {}) => {
-  const [results, setResults] = useState<any>([])
+export const useResultsByLetterOrSearch = <T,>(
+  search: QueryConfig<T> = {},
+  letter: QueryConfig<T> = {}
+) => {
+  const [results, setResults] = useState<T[] | DatabaseError>([])
   const [isLoading, setLoading] = useState(true)
   useEffect(() => {
-    if (search.value) {
+    if (search.value && search.query) {
       setLoading(true)
-      search.query(search.value).then((results: any) => {
+      search.query(search.value).then(results => {
         setResults(results)
         setLoading(false)
       })
       return
     }
 
-    if (letter.value) {
+    if (letter.value && letter.query) {
       setLoading(true)
-      letter.query(letter.value).then((results: any) => {
+      letter.query(letter.value).then(results => {
         setResults(results)
         setLoading(false)
       })

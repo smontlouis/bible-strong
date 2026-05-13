@@ -2,15 +2,24 @@ import { getDevToolsPluginClientAsync } from 'expo/devtools'
 
 // Interface attendue par jotai-devtools
 interface ReduxDevToolsConnection {
-  init: (state: any) => void
-  send: (action: any, state: any) => void
-  subscribe: (listener: (message: any) => void) => () => void
+  init: (state: unknown) => void
+  send: (action: unknown, state: unknown) => void
+  subscribe: (listener: (message: unknown) => void) => () => void
   shouldInit?: boolean
 }
 
 interface ReduxDevToolsExtension {
   connect: (options?: { name?: string }) => ReduxDevToolsConnection
   disconnect: () => void
+}
+
+type DevToolsWindow = {
+  __REDUX_DEVTOOLS_EXTENSION__?: ReduxDevToolsExtension
+}
+
+type GlobalWithDevTools = typeof globalThis & {
+  window?: DevToolsWindow
+  __REDUX_DEVTOOLS_EXTENSION__?: ReduxDevToolsExtension
 }
 
 type DevToolsClient = Awaited<ReturnType<typeof getDevToolsPluginClientAsync>>
@@ -36,11 +45,11 @@ async function getClient(): Promise<DevToolsClient | null> {
 }
 
 const createConnection = (name: string): ReduxDevToolsConnection => {
-  const listeners: ((message: any) => void)[] = []
+  const listeners: ((message: unknown) => void)[] = []
 
   // Initialiser la connexion et écouter les messages
   getClient().then(c => {
-    c?.addMessageListener('respond', (data: any) => {
+    c?.addMessageListener('respond', data => {
       listeners.forEach(l => l(data))
     })
   })
@@ -96,13 +105,16 @@ export function installReduxDevToolsPolyfill() {
   // Donc on doit créer window si nécessaire ou l'assigner sur global
 
   if (typeof global !== 'undefined') {
+    const globalWithDevTools = global as GlobalWithDevTools
+
     // Créer window sur global si n'existe pas (React Native)
-    if (typeof (global as any).window === 'undefined') {
-      ;(global as any).window = global
+    if (typeof globalWithDevTools.window === 'undefined') {
+      Reflect.set(globalWithDevTools, 'window', globalWithDevTools)
     }
 
-    ;(global as any).__REDUX_DEVTOOLS_EXTENSION__ = reduxDevToolsExtension
-    ;(global as any).window.__REDUX_DEVTOOLS_EXTENSION__ = reduxDevToolsExtension
+    globalWithDevTools.__REDUX_DEVTOOLS_EXTENSION__ = reduxDevToolsExtension
+    ;(globalWithDevTools.window as DevToolsWindow).__REDUX_DEVTOOLS_EXTENSION__ =
+      reduxDevToolsExtension
 
     console.log('[Jotai DevTools Polyfill] Installed successfully')
   }

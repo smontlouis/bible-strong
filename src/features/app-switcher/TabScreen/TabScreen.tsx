@@ -16,7 +16,19 @@ import NaveTabScreen from '~features/nave/NaveTabScreen'
 import { NotesTabScreen } from '~features/notes'
 import SearchTabScreen from '~features/search/SearchTabScreen'
 import StudiesTabScreen from '~features/studies/StudiesTabScreen'
-import { TabItem } from '../../../state/tabs'
+import {
+  BibleTab,
+  CommentaryTab,
+  CompareTab,
+  DictionaryTab,
+  NaveTab,
+  NewTab,
+  NotesTab,
+  SearchTab,
+  StrongTab,
+  StudyTab,
+  TabItem,
+} from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import NewTabScreen from './NewTab/NewTabScreen'
 import useScrollToActiveTab from '../utils/useScrollToActiveTab'
@@ -24,58 +36,28 @@ import useScrollToActiveTab from '../utils/useScrollToActiveTab'
 import TabScreenWrapper from './TabScreenWrapper'
 import { useSafeAreaFrame } from 'react-native-safe-area-context'
 
-const getComponentTab = (tab: TabItem) => {
+const renderTabComponent = (tab: TabItem, tabAtom: PrimitiveAtom<TabItem>) => {
   switch (tab.type) {
     case 'bible':
-      return {
-        component: BibleTabScreen,
-        atomName: 'bibleAtom',
-      }
+      return <BibleTabScreen bibleAtom={tabAtom as PrimitiveAtom<BibleTab>} />
     case 'compare':
-      return {
-        component: CompareVersesTabScreen,
-        atomName: 'compareAtom',
-      }
+      return <CompareVersesTabScreen compareAtom={tabAtom as PrimitiveAtom<CompareTab>} />
     case 'strong':
-      return {
-        component: StrongTabScreen,
-        atomName: 'strongAtom',
-      }
+      return <StrongTabScreen strongAtom={tabAtom as PrimitiveAtom<StrongTab>} />
     case 'nave':
-      return {
-        component: NaveTabScreen,
-        atomName: 'naveAtom',
-      }
+      return <NaveTabScreen naveAtom={tabAtom as PrimitiveAtom<NaveTab>} />
     case 'dictionary':
-      return {
-        component: DictionaryTabScreen,
-        atomName: 'dictionaryAtom',
-      }
+      return <DictionaryTabScreen dictionaryAtom={tabAtom as PrimitiveAtom<DictionaryTab>} />
     case 'commentary':
-      return {
-        component: CommentariesTabScreen,
-        atomName: 'commentaryAtom',
-      }
+      return <CommentariesTabScreen commentaryAtom={tabAtom as PrimitiveAtom<CommentaryTab>} />
     case 'search':
-      return {
-        component: SearchTabScreen,
-        atomName: 'searchAtom',
-      }
+      return <SearchTabScreen searchAtom={tabAtom as PrimitiveAtom<SearchTab>} />
     case 'new':
-      return {
-        component: NewTabScreen,
-        atomName: 'newAtom',
-      }
+      return <NewTabScreen newAtom={tabAtom as PrimitiveAtom<NewTab>} />
     case 'study':
-      return {
-        component: StudiesTabScreen,
-        atomName: 'studyAtom',
-      }
+      return <StudiesTabScreen studyAtom={tabAtom as PrimitiveAtom<StudyTab>} />
     case 'notes':
-      return {
-        component: NotesTabScreen,
-        atomName: 'notesAtom',
-      }
+      return <NotesTabScreen notesAtom={tabAtom as PrimitiveAtom<NotesTab>} />
   }
 }
 
@@ -92,7 +74,7 @@ const TabScreen = ({ tabAtom, ref }: TabScreenProps) => {
 
   const tabId = tab.id
 
-  const { component: Component, atomName } = getComponentTab(tab) || {}
+  const tabComponent = renderTabComponent(tab, tabAtom)
 
   // Scroll to active tab in background when this tab becomes visible
   useAnimatedReaction(
@@ -120,15 +102,10 @@ const TabScreen = ({ tabAtom, ref }: TabScreenProps) => {
     }
   })
 
-  if (Component && atomName) {
+  if (tabComponent) {
     return (
       <TabScreenWrapper style={imageStyles} ref={ref}>
-        {/* @ts-ignore */}
-        <Component
-          {...{
-            [atomName]: tabAtom,
-          }}
-        />
+        {tabComponent}
       </TabScreenWrapper>
     )
   }

@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router'
+import type { JSONValue } from 'expo/build/dom/dom.types'
 import { useEffect, useRef, useState } from 'react'
 import { Keyboard, KeyboardAvoidingView, Platform } from 'react-native'
 import { WebViewMessageEvent } from 'react-native-webview'
@@ -10,6 +11,7 @@ import { timeout } from '~helpers/timeout'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import i18n from '~i18n'
 import { EditStudyScreenProps } from '~navigation/type'
+import { Study } from '~redux/modules/user'
 import { currentStudyIdAtom } from '../atom'
 import StudyFooter from '../StudyFooter'
 import StudiesDOMComponent, { StudyDOMRef } from './StudiesDOMComponent'
@@ -18,18 +20,23 @@ type Props = {
   params: Readonly<EditStudyScreenProps>
   isReadOnly: boolean
   onDeltaChangeCallback: (
-    delta: string | null,
+    delta: Study['content'],
     deltaChange: string | null,
     deltaOld: string | null,
     changeSource: string | null
   ) => void
-  contentToDisplay: {
-    ops: string[]
-  }
+  contentToDisplay: Study['content']
   fontFamily: string
   studyAtom?: PrimitiveAtom<StudyTab>
   studyId: string
 }
+
+type StudyDomMessage = {
+  type: string
+  payload?: Record<string, unknown>
+}
+
+type RouterParams = Record<string, string | number | (string | number)[] | null | undefined>
 
 const SELECTION_MODE_MAP: Record<string, StudyNavigateBibleType> = {
   SELECT_BIBLE_VERSE: 'verse',
@@ -78,11 +85,11 @@ export default function StudiesDomWrapper({
 
     if (ref.current?.reloadEditor && isCurrentTab) {
       console.log('[Studies] Reloading editor')
-      ref.current.reloadEditor(contentToDisplay)
+      ref.current.reloadEditor(contentToDisplay ?? { ops: [] })
     }
   }, [isCurrentTab])
 
-  function dispatchToWebView(type: string, payload?: any): void {
+  function dispatchToWebView(type: string, payload?: JSONValue): void {
     if (ref.current) {
       console.log('[Studies] RN DISPATCH:', type)
       ref.current.dispatch({ type, payload })
@@ -116,26 +123,29 @@ export default function StudiesDomWrapper({
   }, [JSON.stringify(params)])
 
   function handleMessage(event: WebViewMessageEvent): void {
-    let msgData: any
     try {
-      msgData = JSON.parse(event.nativeEvent.data)
+      const msgData = JSON.parse(event.nativeEvent.data) as StudyDomMessage
       console.log('[Studies] DISPATCH:', msgData.type)
 
       switch (msgData.type) {
         case 'TEXT_CHANGED': {
-          if (onDeltaChangeCallback) {
-            delete msgData.payload.type
+          if (onDeltaChangeCallback && msgData.payload) {
             const { delta, deltaChange, deltaOld, changeSource } = msgData.payload
-            onDeltaChangeCallback(delta, deltaChange, deltaOld, changeSource)
+            onDeltaChangeCallback(
+              delta as Study['content'],
+              typeof deltaChange === 'string' ? deltaChange : null,
+              typeof deltaOld === 'string' ? deltaOld : null,
+              typeof changeSource === 'string' ? changeSource : null
+            )
           }
           break
         }
 
         case 'VIEW_BIBLE_VERSE': {
           const arrayVerses = (
-            typeof msgData.payload.arrayVerses === 'string'
+            typeof msgData.payload?.arrayVerses === 'string'
               ? JSON.parse(msgData.payload.arrayVerses)
-              : msgData.payload.arrayVerses
+              : msgData.payload?.arrayVerses
           ) as string[]
 
           router.push({
@@ -153,7 +163,7 @@ export default function StudiesDomWrapper({
         case 'VIEW_BIBLE_STRONG': {
           router.push({
             pathname: '/strong',
-            params: msgData.payload,
+            params: msgData.payload as RouterParams | undefined,
           })
           return
         }
@@ -168,7 +178,9 @@ export default function StudiesDomWrapper({
         }
 
         case 'ACTIVE_FORMATS': {
-          setActiveFormats(JSON.parse(msgData.payload))
+          if (typeof msgData.payload === 'string') {
+            setActiveFormats(JSON.parse(msgData.payload))
+          }
           return
         }
 
@@ -196,7 +208,7 @@ export default function StudiesDomWrapper({
         ref={ref}
         fontFamily={fontFamily}
         language={i18n.language}
-        contentToDisplay={contentToDisplay}
+        contentToDisplay={contentToDisplay ?? { ops: [] }}
         isReadOnly={isReadOnly}
         colorScheme={colorScheme}
         dom={{

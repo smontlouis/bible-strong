@@ -1,15 +1,16 @@
 import Fuse from 'fuse.js'
 import { useEffect, useState } from 'react'
 
-function removeAccents(obj: any) {
+function removeAccents(obj: string): string
+function removeAccents<T>(obj: T): T
+function removeAccents<T>(obj: T) {
   if (typeof obj === 'string' || obj instanceof String) {
     return obj.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
   }
   return obj
 }
 
-function getFn(obj: any, path: any) {
-  // @ts-ignore
+const getFn = <T>(obj: T, path: string | string[]): readonly string[] | string => {
   let value = Fuse.config.getFn(obj, path)
   if (Array.isArray(value)) {
     return value.map(el => el)
@@ -40,7 +41,7 @@ function useFuzzy<T>(
     threshold: 0,
     ignoreFieldNorm: true,
   }
-  const searcher = new Fuse(data, { ...defaultOptions, ...options, getFn })
+  const searcher = new Fuse(data, { ...defaultOptions, ...options, getFn: getFn<T> })
 
   const result = keyword ? searcher.search(removeAccents(keyword)).map(c => c.item) : data
 

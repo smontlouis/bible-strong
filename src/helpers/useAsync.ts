@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
+import { DependencyList, useEffect, useState } from 'react'
 import { Status } from '~common/types'
 import { to } from 'await-to-js'
 
-const useAsync = (fn: () => Promise<any>, deps: any[] = []) => {
+const useAsync = <T>(fn: () => Promise<T>, deps: DependencyList = []) => {
   const [status, setStatus] = useState<Status>('Idle')
-  const [data, setData] = useState()
+  const [data, setData] = useState<T>()
   const [error, setError] = useState<Error>()
 
   useEffect(() => {

@@ -3,7 +3,7 @@ import { AnimatedProgressCircle } from '@convective/react-native-reanimated-prog
 import { useTheme } from '@emotion/react'
 
 import Loading from '~common/Loading'
-import Box from '~common/ui/Box'
+import Box, { BoxProps } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { wp } from '~helpers/utils'
 import { Theme } from '~themes'
@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next'
 export const itemWidth = wp(50) > 300 ? 300 : wp(50)
 export const itemHeight = 120
 
-export const WidgetContainer = (props: any) => (
+export const WidgetContainer = (props: BoxProps) => (
   <Box
     center
     rounded

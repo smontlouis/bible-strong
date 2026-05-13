@@ -22,8 +22,7 @@ interface PericopeHeaderProps {
 
 function PericopeHeader({ hasBackButton, title }: PericopeHeaderProps) {
   return (
-    // @ts-ignore
-    <HeaderBox row overflow="visibility">
+    <HeaderBox row overflow="visible">
       <Box justifyContent="center">
         {hasBackButton && (
           <Back padding>

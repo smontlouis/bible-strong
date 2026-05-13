@@ -4,12 +4,9 @@ export const getDayOfTheYear = (addDay?: number) => {
     now.setDate(now.getDate() + addDay)
   }
   const start = new Date(now.getFullYear(), 0, 0)
-  // @ts-ignore
-  const diff: any =
-    // @ts-ignore
-    now -
-    // @ts-ignore
-    start +
+  const diff =
+    now.getTime() -
+    start.getTime() +
     (start.getTimezoneOffset() - now.getTimezoneOffset()) * 60 * 1000
   const oneDay = 1000 * 60 * 60 * 24
   const day = Math.floor(diff / oneDay)

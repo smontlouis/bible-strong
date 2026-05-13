@@ -1,6 +1,7 @@
 import React, { memo } from 'react'
 import { withTheme } from '@emotion/react'
-import Svg, { G, Path } from 'react-native-svg'
+import Svg, { G, Path, SvgProps } from 'react-native-svg'
+import { Theme } from '~themes'
 /* SVGR has dropped some elements not supported by react-native-svg: title */
 
 const SvgComponent = ({
@@ -9,11 +10,10 @@ const SvgComponent = ({
   size = 22,
   ...props
 }: {
-  color: any
-  theme: any
+  color?: string
+  theme: Theme
   size?: number
-  [key: string]: any
-}) => (
+} & SvgProps) => (
   <Svg width={size} height={size} viewBox="0 0 18 22" {...props}>
     <G id="Page-1" stroke="none" strokeWidth={1} fill="none" fillRule="evenodd">
       <G id="Group" transform="translate(1.000000, 1.000000)">

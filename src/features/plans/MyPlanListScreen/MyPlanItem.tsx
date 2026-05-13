@@ -15,13 +15,15 @@ const PlanItem = ({
   status,
   progress,
   author,
+  type,
+  lang,
 }: ComputedPlanItem) => {
   const isPlanCompleted = status === 'Completed'
   return (
     <Link
       route="Plan"
       params={{
-        // @ts-ignore
+        planId: id,
         plan: {
           id,
           title,
@@ -30,6 +32,8 @@ const PlanItem = ({
           status,
           progress,
           author,
+          type,
+          lang,
         },
       }}
     >

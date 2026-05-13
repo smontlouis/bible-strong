@@ -1,6 +1,6 @@
 /* eslint-env jest */
 
-// Mock react-native before any imports
+// Mock react-native before other imports
 import type { Bookmark } from '~common/types'
 import userReducer, { UserState, CustomColor, HighlightType } from '../user'
 import { addCustomColor, updateCustomColor, deleteCustomColor } from '../user/customColors'
@@ -410,7 +410,7 @@ describe('Custom Colors Reducer', () => {
           },
         },
       } as UserState
-      const newState = userReducer(state, { type: 'UNKNOWN_ACTION' } as any)
+      const newState = userReducer(state, { type: 'UNKNOWN_ACTION' })
       expect(newState.bible.settings.customHighlightColors).toEqual(
         state.bible.settings.customHighlightColors
       )

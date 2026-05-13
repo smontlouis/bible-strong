@@ -1,5 +1,7 @@
 import { createAction } from '@reduxjs/toolkit'
 import type { Bookmark } from '~common/types'
+import type { RootState } from '../reducer'
+import type { Dispatch } from 'redux'
 
 // Action type constants for backward compatibility
 export const ADD_BOOKMARK = 'user/ADD_BOOKMARK'
@@ -34,7 +36,7 @@ export const moveBookmark = createAction(
 
 // Thunk that checks max bookmarks before adding
 export function addBookmark(bookmark: Bookmark) {
-  return (dispatch: any, getState: any) => {
+  return (dispatch: Dispatch, getState: () => RootState) => {
     const bookmarks = getState().user.bible.bookmarks || {}
     if (Object.keys(bookmarks).length >= MAX_BOOKMARKS) {
       return { error: 'MAX_BOOKMARKS_REACHED' }

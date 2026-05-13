@@ -6,8 +6,9 @@ import styled from '@emotion/native'
 import { MaterialIcon } from '~common/ui/Icon'
 import { useDispatch } from 'react-redux'
 import { markAsRead } from '~redux/modules/plan'
+import { Theme } from '~themes'
 
-const StyledLink = styled(Link)(({ theme }: any) => ({
+const StyledLink = styled(Link)(({ theme }: { theme: Theme }) => ({
   backgroundColor: theme.colors.success,
   width: 60,
   height: 60,

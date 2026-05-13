@@ -1,5 +1,12 @@
 import React, { PropsWithChildren } from 'react'
-import { Linking, Share, TouchableOpacity } from 'react-native'
+import {
+  Linking,
+  Share,
+  StyleProp,
+  TouchableOpacity,
+  TouchableOpacityProps,
+  ViewStyle,
+} from 'react-native'
 
 import { useRouter } from 'expo-router'
 import Box, { BoxProps } from '~common/ui/Box'
@@ -15,8 +22,9 @@ export interface LinkProps<R extends keyof MainStackProps> {
   onPress?: () => void
   padding?: boolean
   paddingSmall?: boolean
-  style?: any
+  style?: StyleProp<ViewStyle>
   size?: number
+  hitSlop?: TouchableOpacityProps['hitSlop']
 }
 
 /**
@@ -24,7 +32,7 @@ export interface LinkProps<R extends keyof MainStackProps> {
  * Complex objects/arrays are JSON.stringify'd, primitives are converted to strings
  */
 const serializeParams = (
-  params: Record<string, any> | undefined
+  params: Record<string, unknown> | undefined
 ): Record<string, string> | undefined => {
   if (!params) return undefined
 
@@ -58,7 +66,7 @@ const Link = <R extends keyof MainStackProps>({
   const handlePress = () => {
     if (route) {
       const pathname = routeMapping[route]
-      const serializedParams = serializeParams(params as Record<string, any>)
+      const serializedParams = serializeParams(params as Record<string, unknown>)
 
       if (onPress) {
         onPress()

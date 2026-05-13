@@ -4,20 +4,15 @@ import styled from '@emotion/native'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { SceneRendererProps, NavigationState } from 'react-native-tab-view'
-import { Theme } from '~themes'
 
-const TabItem = styled.TouchableOpacity(
-  ({
-    theme,
-    isRouteActive,
-    isFirst,
-    isLast,
-  }: {
-    theme: Theme
-    isRouteActive: boolean
-    isFirst: boolean
-    isLast: boolean
-  }) => ({
+interface TabItemProps {
+  isRouteActive: boolean
+  isFirst: boolean
+  isLast: boolean
+}
+
+const TabItem = styled.TouchableOpacity<TabItemProps>(
+  ({ theme, isRouteActive, isFirst, isLast }) => ({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -61,7 +56,6 @@ const EventDetailsTab = ({
         const isRouteActive = routeIndex === activeRouteIndex
 
         return (
-          // @ts-ignore
           <TabItem
             key={routeIndex}
             isFirst={routeIndex === 0}

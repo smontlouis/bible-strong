@@ -14,6 +14,7 @@ import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import useConnection from '~helpers/useConnection'
 import { publishStudy, Study } from '~redux/modules/user'
+import type { AppDispatch } from '~redux/store'
 import Clipboard from '@react-native-clipboard/clipboard'
 
 interface Props {
@@ -50,10 +51,9 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
   const { status, data, url } = useStudyStatus(study)
   const [pdfStatus, setPDFStatus] = useState<Status>('Idle')
   const isConnected = useConnection()
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
   const { t } = useTranslation()
 
-  // @ts-ignore
   const onPublishStudy = () => isConnected && dispatch(publishStudy(study.id))
 
   const copyToClipboard = async (url: string) => {
@@ -166,7 +166,6 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
                     row
                     alignItems="center"
                     py={10}
-                    // @ts-ignore
                     onPress={() => dispatch(publishStudy(study.id, false))}
                   >
                     <FeatherIcon name="link-2" color="success" size={20} />

@@ -14,8 +14,9 @@ import Text from '~common/ui/Text'
 import Header from '~common/Header'
 import { toast } from '~helpers/toast'
 import { useTranslation } from 'react-i18next'
+import { Theme } from '~themes'
 
-const ForgotPasswordScreen = ({ theme }: { theme: any }) => {
+const ForgotPasswordScreen = ({ theme }: { theme: Theme }) => {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [isLoading, setLoading] = useState(false)

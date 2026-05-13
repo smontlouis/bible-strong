@@ -1,17 +1,18 @@
 import React from 'react'
 import styled from '@emotion/native'
-import { ActivityIndicator } from 'react-native'
-import Link from '~common/Link'
+import { ActivityIndicator, StyleProp, TouchableOpacityProps, ViewStyle } from 'react-native'
+import Link, { LinkProps } from '~common/Link'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { MainStackProps } from '~navigation/type'
 import { Theme } from '~themes'
 
 interface Props {
   children: React.ReactNode
   onPress?: () => void
-  route?: string
-  style?: object
+  route?: keyof MainStackProps
+  style?: StyleProp<ViewStyle>
   small?: boolean
   reverse?: boolean
   secondary?: boolean
@@ -26,58 +27,67 @@ interface Props {
   theme?: Theme
 }
 
-const WrapperButton = styled.TouchableOpacity(
-  ({
-    theme,
-    small,
-    reverse,
-    secondary,
-    disabled,
-    color,
-    success,
-    fullWidth,
-  }: Partial<Props> & {
-    theme: Theme
-  }) => ({
-    backgroundColor: reverse ? theme.colors.reverse : theme.colors.primary,
-    borderWidth: reverse ? 1 : 0,
-    borderColor: theme.colors.darkGrey,
-    borderRadius: 24,
-    height: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingLeft: 15,
-    paddingRight: 15,
-    flexDirection: 'row',
+type WrapperButtonProps = Partial<Props> & {
+  theme: Theme
+}
 
-    ...(fullWidth && { flex: 1 }),
+const buttonStyles = ({
+  theme,
+  small,
+  reverse,
+  secondary,
+  disabled,
+  color,
+  success,
+  fullWidth,
+}: WrapperButtonProps): ViewStyle => ({
+  backgroundColor: reverse ? theme.colors.reverse : theme.colors.primary,
+  borderWidth: reverse ? 1 : 0,
+  borderColor: theme.colors.darkGrey,
+  borderRadius: 24,
+  height: 48,
+  alignItems: 'center',
+  justifyContent: 'center',
+  paddingLeft: 15,
+  paddingRight: 15,
+  flexDirection: 'row',
 
-    ...(color && { backgroundColor: color }),
+  ...(fullWidth && { flex: 1 }),
 
-    ...(secondary && { backgroundColor: theme.colors.secondary }),
-    ...(success && { backgroundColor: theme.colors.success }),
+  ...(color && { backgroundColor: color }),
 
-    ...(disabled && {
-      opacity: 0.5,
-    }),
+  ...(secondary && { backgroundColor: theme.colors.secondary }),
+  ...(success && { backgroundColor: theme.colors.success }),
 
-    ...(small && {
-      height: 30,
-      minWidth: 100,
-      paddingLeft: 5,
-      paddingRight: 5,
-      marginRight: 0,
-      marginLeft: 0,
-    }),
-  })
-)
+  ...(disabled && {
+    opacity: 0.5,
+  }),
 
-// @ts-ignore
-const WrapperLink = WrapperButton.withComponent(Link)
+  ...(small && {
+    height: 30,
+    minWidth: 100,
+    paddingLeft: 5,
+    paddingRight: 5,
+    marginRight: 0,
+    marginLeft: 0,
+  }),
+})
+
+const WrapperButton = styled.TouchableOpacity<Partial<Props>>(buttonStyles)
+
+type ButtonLinkProps = LinkProps<keyof MainStackProps> &
+  TouchableOpacityProps &
+  Partial<Props> & {
+    children?: React.ReactNode
+  }
+
+const ButtonLink = Link as React.ComponentType<ButtonLinkProps>
+
+const WrapperLink = styled(ButtonLink)<Partial<Props>>(buttonStyles)
 
 const TextButton = styled.Text(
-  ({ theme, small, reverse }: { theme: Theme; small?: boolean; reverse?: boolean }) => ({
-    color: reverse ? theme.colors.darkGrey : 'white',
+  ({ theme, small, reverse }: { theme?: Theme; small?: boolean; reverse?: boolean }) => ({
+    color: reverse ? theme?.colors.darkGrey : 'white',
     fontWeight: 'bold',
     fontSize: 16,
 
@@ -104,38 +114,49 @@ const Button = ({
   subTitle,
   fullWidth,
 }: Props) => {
-  const Component = onPress ? WrapperButton : WrapperLink
+  const sharedProps = {
+    fullWidth,
+    disabled: disabled || isLoading,
+    onPress: !disabled ? onPress : () => {},
+    style,
+    small,
+    reverse,
+    secondary,
+    success,
+    color,
+  }
 
   return (
-    // @ts-ignore
-    <Box flex={fullWidth}>
-      {/* @ts-ignore */}
-      <Component
-        fullWidth={fullWidth}
-        disabled={disabled || isLoading}
-        // @ts-ignore
-        route={route}
-        onPress={!disabled ? onPress : () => {}}
-        style={style}
-        small={small}
-        reverse={reverse}
-        secondary={secondary}
-        success={success}
-        color={color}
-      >
-        {isLoading ? (
-          <ActivityIndicator color="white" />
-        ) : (
-          <>
-            {leftIcon}
-            {/* @ts-ignore */}
-            <TextButton small={small} reverse={reverse}>
-              {children}
-            </TextButton>
-            {rightIcon}
-          </>
-        )}
-      </Component>
+    <Box flex={fullWidth ? true : undefined}>
+      {onPress ? (
+        <WrapperButton {...sharedProps}>
+          {isLoading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <>
+              {leftIcon}
+              <TextButton small={small} reverse={reverse}>
+                {children}
+              </TextButton>
+              {rightIcon}
+            </>
+          )}
+        </WrapperButton>
+      ) : (
+        <WrapperLink {...sharedProps} route={route}>
+          {isLoading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <>
+              {leftIcon}
+              <TextButton small={small} reverse={reverse}>
+                {children}
+              </TextButton>
+              {rightIcon}
+            </>
+          )}
+        </WrapperLink>
+      )}
       {subTitle && (
         <Box center marginTop={5}>
           <Text fontSize={10}>{subTitle}</Text>

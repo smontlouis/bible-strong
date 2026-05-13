@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native'
 import Animated, {
   SharedValue,
   useAnimatedStyle,
@@ -12,7 +12,7 @@ interface AccordionItemProps {
   isExpanded: SharedValue<boolean>
   children: React.ReactNode
   viewKey: string
-  style?: any
+  style?: StyleProp<ViewStyle>
   duration?: number
 }
 

@@ -46,7 +46,7 @@ export const useFirestoreMigration = () => {
     // This is more accurate than checking _migrated flag alone
     const { hasEmbeddedData } = await checkForEmbeddedData(userId)
     if (!hasEmbeddedData) {
-      // No embedded data - clear any stale local migration state
+      // No embedded data - clear stale local migration state
       clearMigrationState()
       return false
     }
@@ -139,8 +139,9 @@ export const useFirestoreMigration = () => {
 
         return false
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('[useFirestoreMigration] Unexpected error:', error)
+      const errorMessage = error instanceof Error ? error.message : String(error)
 
       Sentry.captureException(error, {
         tags: {
@@ -149,13 +150,13 @@ export const useFirestoreMigration = () => {
         },
         extra: {
           userId,
-          errorMessage: error.message,
+          errorMessage,
         },
       })
 
       setProgress((prev: MigrationProgress) => ({
         ...prev,
-        error: error.message || 'Une erreur inattendue est survenue',
+        error: errorMessage || 'Une erreur inattendue est survenue',
         hasPartialFailure: false,
         failedCollections: [],
         message: 'Erreur inattendue',

@@ -67,10 +67,11 @@ const forwardProps = [
   'highlightedColor',
   'rtl',
 ]
-setup(React.createElement, undefined, undefined, (props: { [key: string]: any }) => {
-  for (let prop in props) {
+setup(React.createElement, undefined, undefined, (props: object) => {
+  const forwardedProps = props as Record<string, unknown>
+  for (let prop in forwardedProps) {
     if (forwardProps.includes(prop)) {
-      delete props[prop]
+      delete forwardedProps[prop]
     }
   }
 })
@@ -361,7 +362,7 @@ function findClickedAnnotationId(
 
 /**
  * Hit-test a click position against selection rects.
- * Returns true if the click is inside any selection rect.
+ * Returns true if the click is inside a selection rect.
  */
 function isClickInsideSelection(
   highlightRects: { type: string; left: number; top: number; width: number; height: number }[],
@@ -498,7 +499,7 @@ const LoadedBibleContent = ({
       return
     }
 
-    // Clear annotation selection if any
+    // Clear annotation selection
     if (selectedAnnotationId) {
       dispatch({
         type: 'ANNOTATION_SELECTED',
@@ -619,7 +620,7 @@ const LoadedBibleContent = ({
           payload: { annotationId: newAnnotationId },
         }).catch(console.error)
       } else if (newSelection) {
-        // Clear annotation selection if any
+        // Clear annotation selection
         if (selectedAnnotationId) {
           dispatch({
             type: 'ANNOTATION_SELECTED',
@@ -677,7 +678,7 @@ const LoadedBibleContent = ({
     }
   }
 
-  // Check if any verses are selected (disables drag-to-annotation in normal mode)
+  // Check verses are selected (disables drag-to-annotation in normal mode)
   const hasSelectedVerses = Object.keys(selectedVerses).length > 0
 
   // Interlinear versions have different DOM structure, disable annotation mode

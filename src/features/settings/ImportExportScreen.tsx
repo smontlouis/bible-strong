@@ -16,7 +16,12 @@ import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
 import { importData } from '~redux/modules/user'
 import { selectUserAndPlan } from '~redux/selectors/plan'
+import type { RootState } from '~redux/modules/reducer'
+import type { AppDispatch } from '~redux/store'
 import { tabGroupsAtom, TabGroup } from '~state/tabs'
+
+type ExistingFileInfo = Extract<FileSystem.FileInfo, { exists: true }>
+type BackupBibleData = Omit<RootState['user']['bible'], 'changelog' | 'studies'>
 
 /**
  * Nettoie les tab groups pour l'export en supprimant les base64Preview
@@ -24,10 +29,7 @@ import { tabGroupsAtom, TabGroup } from '~state/tabs'
 const sanitizeTabGroupsForBackup = (groups: TabGroup[]): TabGroup[] => {
   return groups.map(group => ({
     ...group,
-    tabs: group.tabs.map(tab => {
-      const { base64Preview, ...rest } = tab as any
-      return rest
-    }),
+    tabs: group.tabs.map(tab => ({ ...tab, base64Preview: undefined })),
   }))
 }
 
@@ -63,7 +65,7 @@ const ImportExport = () => {
 
 const LastSave = () => {
   const { t } = useTranslation()
-  const [lastSave, setLastSave] = React.useState<FileSystem.FileInfo>()
+  const [lastSave, setLastSave] = React.useState<ExistingFileInfo>()
 
   useEffect(() => {
     const checkLastSave = async () => {
@@ -83,8 +85,7 @@ const LastSave = () => {
       <Text bold>{t('app.lastSave')}</Text>
       {lastSave ? (
         <Text marginTop={5} color="grey">
-          {/* @ts-ignore */}
-          {format((lastSave?.modificationTime || 0) * 1000, 'dd/MM/yyyy HH:mm')}
+          {format((lastSave.modificationTime || 0) * 1000, 'dd/MM/yyyy HH:mm')}
         </Text>
       ) : (
         <Text color="grey">{t('app.noSave')}</Text>
@@ -97,7 +98,7 @@ const LastSave = () => {
 const ExportButton = ({
   setLastSave,
 }: {
-  setLastSave: React.Dispatch<React.SetStateAction<FileSystem.FileInfo | undefined>>
+  setLastSave: React.Dispatch<React.SetStateAction<ExistingFileInfo | undefined>>
 }) => {
   const { t } = useTranslation()
 
@@ -118,7 +119,11 @@ const ExportButton = ({
     setIsSyncing(true)
 
     try {
-      const sanitizeUserBible = ({ changelog, studies, ...rest }: any) => rest
+      const sanitizeUserBible = ({
+        changelog,
+        studies,
+        ...rest
+      }: RootState['user']['bible']): BackupBibleData => rest
 
       // Récupérer les tab groups depuis Jotai
       const store = getDefaultStore()
@@ -159,7 +164,9 @@ const ExportButton = ({
       }
 
       const saveFile = await FileSystem.getInfoAsync(fileUri)
-      setLastSave(saveFile)
+      if (saveFile.exists) {
+        setLastSave(saveFile)
+      }
       toast.success(t('app.exported'))
     } catch {
       toast.error(t('Une erreur est survenue'))
@@ -177,7 +184,7 @@ const ExportButton = ({
 
 const ImportSave = () => {
   const { t } = useTranslation()
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
 
   const importSave = async () => {
     try {

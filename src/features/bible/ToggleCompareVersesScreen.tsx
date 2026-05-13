@@ -12,23 +12,33 @@ import { toggleCompareVersion } from '~redux/modules/user'
 import { getVersionsBySections, isStrongVersion } from '~helpers/bibleVersions'
 import { useTranslation } from 'react-i18next'
 import Switch from '~common/ui/Switch'
+import type { RootState } from '~redux/modules/reducer'
+import type { AppDispatch } from '~redux/store'
+import type { Version } from '~helpers/bibleVersions'
+import type { Theme } from '~themes'
 
-// @ts-ignore
-const TextVersion = styled.Text(({ isSelected, theme }: any) => ({
-  color: isSelected ? theme.colors.primary : theme.colors.default,
-  fontSize: 12,
-  opacity: 0.5,
-  fontWeight: 'bold',
-}))
+const TextVersion = styled.Text<{ isSelected?: boolean; theme?: Theme }>(
+  ({ isSelected, theme }) => ({
+    color: isSelected ? theme.colors.primary : theme.colors.default,
+    fontSize: 12,
+    opacity: 0.5,
+    fontWeight: 'bold',
+  })
+)
 
-// @ts-ignore
-const TextName = styled.Text(({ isSelected, theme }: any) => ({
+const TextName = styled.Text<{ isSelected?: boolean; theme?: Theme }>(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
   fontSize: 16,
   backgroundColor: 'transparent',
 }))
 
-const SwitchVersion = withTheme(({ version, isSelected, onChange, theme }: any) => {
+type SwitchVersionProps = {
+  version: Version
+  isSelected: boolean
+  onChange: () => void
+}
+
+const SwitchVersion = withTheme(({ version, isSelected, onChange }: SwitchVersionProps) => {
   if (isStrongVersion(version.id)) {
     return null
   }
@@ -36,8 +46,8 @@ const SwitchVersion = withTheme(({ version, isSelected, onChange, theme }: any) 
   return (
     <Box paddingHorizontal={20} paddingVertical={10} row>
       <Box flex>
-        <TextVersion>{version.id}</TextVersion>
-        <TextName>{version.name}</TextName>
+        <TextVersion isSelected={isSelected}>{version.id}</TextVersion>
+        <TextName isSelected={isSelected}>{version.name}</TextName>
       </Box>
       <Switch value={isSelected} onValueChange={onChange} />
     </Box>
@@ -46,16 +56,16 @@ const SwitchVersion = withTheme(({ version, isSelected, onChange, theme }: any) 
 
 const ToggleCompareVersesScreen = () => {
   const versionsToCompare = useSelector(
-    (state: any) => Object.keys(state.user.bible.settings.compare),
+    (state: RootState) => Object.keys(state.user.bible.settings.compare),
     shallowEqual
   )
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
   const { t } = useTranslation()
 
   return (
     <Container>
       <Header hasBackButton title={t('Sélectionner les versions')} />
-      <SectionList
+      <SectionList<Version, { title: string; data: Version[] }>
         contentContainerStyle={{ paddingTop: 0 }}
         stickySectionHeadersEnabled={false}
         sections={getVersionsBySections()}
@@ -72,7 +82,9 @@ const ToggleCompareVersesScreen = () => {
           <SwitchVersion
             version={item}
             isSelected={versionsToCompare.includes(item.id)}
-            onChange={() => dispatch(toggleCompareVersion(item.id))}
+            onChange={() => {
+              dispatch(toggleCompareVersion(item.id))
+            }}
           />
         )}
       />

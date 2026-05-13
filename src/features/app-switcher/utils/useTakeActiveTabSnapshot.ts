@@ -37,10 +37,8 @@ const useTakeActiveTabSnapshot = () => {
       return
     }
 
-    // @ts-ignore
     const resolution = /^(\d+):(\d+)\|/g.exec(data)
-    // @ts-ignore
-    const base64 = data.substr((resolution || [''])[0].length || 0)
+    const base64 = data.substring((resolution || [''])[0].length || 0)
 
     setTabs(
       produceDraft(draft => {

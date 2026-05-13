@@ -22,11 +22,18 @@ import {
   getLinkedVersesText,
   transformComments,
 } from './computeVerseMetadata'
-// @ts-ignore
-import books from '~assets/bible_versions/books'
+import booksJson from '~assets/bible_versions/books.json'
 import { Book } from '~assets/bible_versions/books-desc'
 import type { Bookmark } from '~common/types'
-import { Pericope, SelectedCode, StudyNavigateBibleType, Tag, Verse, VerseIds } from '~common/types'
+import {
+  BibleResource,
+  Pericope,
+  SelectedCode,
+  StudyNavigateBibleType,
+  Tag,
+  Verse,
+  VerseIds,
+} from '~common/types'
 import Box from '~common/ui/Box'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import { HelpTip } from '~features/tips/HelpTip'
@@ -78,11 +85,11 @@ export type ParallelVerse = {
 }
 
 export type TaggedVerse = {
-  lastVerse: any
+  lastVerse: string
   tags: Tag[]
   date: number
   color: string
-  verseIds: any[]
+  verseIds: string[]
 }
 
 export type RootStyles = {
@@ -91,7 +98,41 @@ export type RootStyles = {
 
 export type PericopeChapter = Pericope[string][string]
 
-export type Dispatch = (props: { type: string; [key: string]: any }) => Promise<void>
+type HighlightTagsModalPayload = {
+  mode: 'select'
+  entity: 'highlights'
+  ids: Record<string, true>
+}
+
+type DispatchAction = {
+  type: string
+  payload?: unknown
+  params?: {
+    verse: Verse
+    isSelectionMode?: StudyNavigateBibleType
+  }
+  bookCode?: string
+  chapter?: string | number
+  verse?: string | number
+}
+
+export type Dispatch = (props: DispatchAction) => Promise<void>
+
+const books = booksJson as Record<string, string[]>
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null
+
+const getStringPayload = (payload: unknown): string | undefined =>
+  typeof payload === 'string' ? payload : undefined
+
+const getNumberPayload = (payload: unknown): number | undefined =>
+  typeof payload === 'number' ? payload : undefined
+
+const getVerseIdsPayload = (payload: unknown): string[] => {
+  if (!isRecord(payload) || !Array.isArray(payload.verseIds)) return []
+  return payload.verseIds.filter((verseId): verseId is string => typeof verseId === 'string')
+}
 
 /**
  * Prevents rapid empty→loaded prop updates on the Expo DOM bridge.
@@ -137,17 +178,17 @@ export type WebViewProps = {
   settings: RootState['user']['bible']['settings']
   verseToScroll: number | undefined
   pericopeChapter: PericopeChapter
-  openNoteModal?: any
-  openLinkModal?: any
+  openNoteModal?: (verseKey: string) => void
+  openLinkModal?: (verseKey: string) => void
   setSelectedCode: (selectedCode: SelectedCode) => void
   selectedCode: SelectedCode | null
   comments: { [key: string]: string } | null
-  removeParallelVersion?: any
-  addParallelVersion?: any
-  goToPrevChapter?: any
-  goToNextChapter?: any
-  setUnifiedTagsModal?: any
-  onChangeResourceTypeSelectVerse?: any
+  removeParallelVersion?: (index: number) => void
+  addParallelVersion?: () => void
+  goToPrevChapter?: () => void
+  goToNextChapter?: () => void
+  setUnifiedTagsModal?: (payload: HighlightTagsModalPayload) => void
+  onChangeResourceTypeSelectVerse?: (resourceType: BibleResource, verseKey: string) => void
   onMountTimeout?: () => void
   onOpenBookmarkModal?: (bookmark: Bookmark) => void
   exitReadOnlyMode?: () => void
@@ -323,6 +364,7 @@ export const BibleDOMWrapper = ({
     if (__DEV__) console.log('[Bible] DISPATCH:', action.type)
     switch (action.type) {
       case NAVIGATE_TO_BIBLE_VERSE_DETAIL: {
+        if (!action.params) break
         const { Livre, Chapitre, Verset } = action.params.verse
         if (__DEV__) console.log(`[Bible] ${Livre}-${Chapitre}-${Verset}`)
         onChangeResourceTypeSelectVerse?.('strong', `${Livre}-${Chapitre}-${Verset}`)
@@ -330,14 +372,17 @@ export const BibleDOMWrapper = ({
         break
       }
       case OPEN_VERSE_NOTES_MODAL: {
-        onOpenVerseNotesModal?.(action.payload)
+        const verseKey = getStringPayload(action.payload)
+        if (verseKey) onOpenVerseNotesModal?.(verseKey)
         break
       }
       case NAVIGATE_TO_VERSE_LINKS: {
+        const verseKey = getStringPayload(action.payload)
+        if (!verseKey) break
         router.push({
           pathname: '/bible-verse-links',
           params: {
-            verse: action.payload,
+            verse: verseKey,
             withBack: 'true',
           },
         })
@@ -351,7 +396,9 @@ export const BibleDOMWrapper = ({
         break
       }
       case NAVIGATE_TO_VERSION: {
+        if (!isRecord(action.payload)) break
         const { version, index } = action.payload
+        if (typeof version !== 'string' || typeof index !== 'number') break
 
         // index = 0 is Default one
         openVersionSelector({
@@ -377,22 +424,26 @@ export const BibleDOMWrapper = ({
         break
       }
       case REMOVE_PARALLEL_VERSION: {
-        removeParallelVersion(action.payload - 1)
+        const index = getNumberPayload(action.payload)
+        if (typeof index === 'number') removeParallelVersion?.(index - 1)
         break
       }
       case ADD_PARALLEL_VERSION: {
-        addParallelVersion()
+        addParallelVersion?.()
         break
       }
       case NAVIGATE_TO_STRONG: {
-        setSelectedCode(action.payload) // { reference, book }
+        if (isRecord(action.payload)) {
+          setSelectedCode(action.payload as SelectedCode) // { reference, book }
+        }
         break
       }
       case TOGGLE_SELECTED_VERSE: {
         if (Platform.OS === 'ios') {
           Haptics.selectionAsync()
         }
-        const verseId = action.payload
+        const verseId = getStringPayload(action.payload)
+        if (!verseId) break
 
         if (selectedVerses[verseId]) {
           removeSelectedVerse(verseId)
@@ -404,18 +455,21 @@ export const BibleDOMWrapper = ({
       }
 
       case NAVIGATE_TO_BIBLE_NOTE: {
-        openNoteModal(action.payload)
+        const verseKey = getStringPayload(action.payload)
+        if (verseKey) openNoteModal?.(verseKey)
         break
       }
       case NAVIGATE_TO_BIBLE_LINK: {
-        openLinkModal?.(action.payload)
+        const verseKey = getStringPayload(action.payload)
+        if (verseKey) openLinkModal?.(verseKey)
         break
       }
       case NAVIGATE_TO_BIBLE_VIEW: {
-        // @ts-ignore
-        const book = Object.keys(books).find(key => books[key][0].toUpperCase() === action.bookCode)
+        const targetBook = Object.keys(books).find(
+          key => books[key]?.[0]?.toUpperCase() === action.bookCode
+        )
 
-        if (!book) {
+        if (!targetBook) {
           toast.error("Erreur lors de l'ouverture du verset")
           Sentry.captureMessage(JSON.stringify(action))
           return
@@ -425,9 +479,9 @@ export const BibleDOMWrapper = ({
           pathname: '/bible-view',
           params: {
             isReadOnly: 'true',
-            book: book,
-            chapter: action.chapter,
-            verse: action.verse,
+            book: targetBook,
+            chapter: String(action.chapter),
+            verse: String(action.verse),
           },
         })
 
@@ -440,7 +494,7 @@ export const BibleDOMWrapper = ({
         const hasNextChapter = !(book.Numero === 66 && chapter === 22)
 
         if (hasNextChapter) {
-          goToNextChapter()
+          goToNextChapter?.()
         }
         break
       }
@@ -451,7 +505,7 @@ export const BibleDOMWrapper = ({
         const hasPreviousChapter = !(book.Numero === 1 && chapter === 1)
 
         if (hasPreviousChapter) {
-          goToPrevChapter()
+          goToPrevChapter?.()
         }
         break
       }
@@ -464,22 +518,23 @@ export const BibleDOMWrapper = ({
         break
       }
       case OPEN_HIGHLIGHT_TAGS: {
-        const { verseIds } = action.payload
+        const verseIds = getVerseIdsPayload(action.payload)
         const obj = {
           mode: 'select' as const,
-          entity: 'highlights',
-          ids: Object.fromEntries(verseIds.map((v: any) => [v, true])),
+          entity: 'highlights' as const,
+          ids: Object.fromEntries(verseIds.map(v => [v, true])) as Record<string, true>,
         }
-        setUnifiedTagsModal(obj)
+        setUnifiedTagsModal?.(obj)
         break
       }
 
       case OPEN_BOOKMARK_MODAL: {
-        onOpenBookmarkModal?.(action.payload)
+        if (isRecord(action.payload)) onOpenBookmarkModal?.(action.payload as unknown as Bookmark)
         break
       }
 
       case NAVIGATE_TO_TAG: {
+        if (!isRecord(action.payload) || typeof action.payload.tagId !== 'string') break
         const { tagId } = action.payload
         setTagDetailModal({ tagId })
         break
@@ -506,35 +561,53 @@ export const BibleDOMWrapper = ({
       }
 
       case SELECTION_CHANGED: {
+        if (!isRecord(action.payload)) break
         const { hasSelection, selection } = action.payload
-        onSelectionChanged?.(hasSelection, selection)
+        if (typeof hasSelection === 'boolean') {
+          onSelectionChanged?.(hasSelection, (selection as SelectionRange | null) || null)
+        }
         break
       }
 
       case CREATE_ANNOTATION: {
-        onCreateAnnotation?.(action.payload)
+        if (isRecord(action.payload)) {
+          onCreateAnnotation?.(
+            action.payload as Parameters<NonNullable<WebViewProps['onCreateAnnotation']>>[0]
+          )
+        }
         break
       }
 
       case ERASE_SELECTION: {
-        onEraseSelection?.(action.payload)
+        if (isRecord(action.payload)) {
+          onEraseSelection?.(
+            action.payload as Parameters<NonNullable<WebViewProps['onEraseSelection']>>[0]
+          )
+        }
         break
       }
 
       case ANNOTATION_SELECTED: {
+        if (!isRecord(action.payload)) break
         const { annotationId } = action.payload
-        onAnnotationSelected?.(annotationId)
+        if (typeof annotationId === 'string' || annotationId === null) {
+          onAnnotationSelected?.(annotationId)
+        }
         break
       }
 
       case OPEN_CROSS_VERSION_MODAL: {
+        if (!isRecord(action.payload)) break
         const { verseKey, versions } = action.payload
-        onOpenCrossVersionModal?.(verseKey, versions)
+        if (typeof verseKey === 'string' && Array.isArray(versions)) {
+          onOpenCrossVersionModal?.(verseKey, versions as CrossVersionAnnotation[])
+        }
         break
       }
 
       case OPEN_VERSE_TAGS_MODAL: {
-        onOpenVerseTagsModal?.(action.payload)
+        const verseKey = getStringPayload(action.payload)
+        if (verseKey) onOpenVerseTagsModal?.(verseKey)
         break
       }
 

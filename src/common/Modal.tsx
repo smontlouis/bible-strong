@@ -7,6 +7,7 @@ import {
   BottomSheetView,
 } from '@gorhom/bottom-sheet'
 import React, { Ref } from 'react'
+import { StyleProp, ViewStyle } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Text, { TextProps } from '~common/ui/Text'
 import {
@@ -38,7 +39,7 @@ interface ModalBodyProps extends BottomSheetModalProps {
   children: React.ReactNode
   withPortal?: boolean
   modalRef?: React.RefObject<BottomSheetModal | null>
-  style?: any
+  style?: StyleProp<ViewStyle>
   onModalClose?: () => void
   enableScrollView?: boolean
   ref?: Ref<BottomSheetModal | null>

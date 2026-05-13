@@ -204,7 +204,7 @@ export function getWordCount(tokens: WordToken[]): number {
 }
 
 /**
- * Checks if a word index is adjacent to any range in the list
+ * Checks if a word index is adjacent to each range in the list
  * Adjacent means wordIndex === range[0] - 1 (before) or wordIndex === range[1] + 1 (after)
  *
  * @param wordIndex - Word index to check
@@ -325,7 +325,7 @@ export function removeWordFromRange(
 }
 
 /**
- * Checks if a word index is inside any of the ranges
+ * Checks if a word index is inside one of the ranges
  *
  * @param wordIndex - Word index to check
  * @param ranges - Array of [start, end] ranges

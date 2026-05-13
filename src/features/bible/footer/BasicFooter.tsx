@@ -15,7 +15,7 @@ export interface BasicFooterProps {
   hasError: boolean
   onPrevChapter?: () => void
   onNextChapter?: () => void
-  type?: 'audio' | 'tts'
+  type?: 'url' | 'tts'
 }
 
 const BasicFooter = ({
@@ -141,13 +141,7 @@ const PlayableButtons = ({
         position="relative"
         overflow="visible"
       >
-        <AudioButton
-          isPlaying={isPlaying}
-          isLoading={isLoading}
-          error={hasError}
-          // @ts-ignore
-          type={type}
-        />
+        <AudioButton isPlaying={isPlaying} isLoading={isLoading} error={hasError} type={type} />
       </TouchableBox>
     </AnimatedHStack>
   )

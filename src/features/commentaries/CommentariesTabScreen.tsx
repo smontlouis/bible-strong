@@ -151,9 +151,13 @@ const useComments = (verse: string) => {
   return { status, data, error, loadMore, canLoad: page < count, moreStatus }
 }
 
-const useVerseInCurrentChapter = (book: string, chapter: string) => {
+const useVerseInCurrentChapter = (
+  book: string | number | undefined,
+  chapter: string | number | undefined
+) => {
   const [versesInCurrentChapter, setVersesInCurrentChapter] = React.useState<number>()
   useEffect(() => {
+    if (!book || !chapter) return
     ;(async () => {
       const v = countLsgChapters[`${book}-${chapter}`]
       setVersesInCurrentChapter(v)
@@ -182,7 +186,6 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
 
   const setVerse = (v: string) =>
     setCommentaryTab(
-      // @ts-ignore
       produce(draft => {
         draft.data.verse = v
       })
@@ -190,7 +193,6 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
 
   const setTitle = (title: string) =>
     setCommentaryTab(
-      // @ts-ignore
       produce(draft => {
         draft.title = title
       })
@@ -199,16 +201,12 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
   const { status, data, error, loadMore, canLoad, moreStatus } = useComments(verse)
   const verseFormatted = useMemo(() => verseStringToObject([verse]), [verse])
 
-  // @ts-ignore
-  const { title: headerTitle } = verseFormatted ? formatVerseContent([verse]) : t('Chargement')
+  const { title: headerTitle } = verseFormatted
+    ? formatVerseContent([verse])
+    : { title: t('Chargement') }
 
   const [verseText] = useBibleVerses(verseFormatted)
-  const { versesInCurrentChapter } = useVerseInCurrentChapter(
-    // @ts-ignore
-    verseText?.Livre,
-    // @ts-ignore
-    verseText?.Chapitre
-  )
+  const { versesInCurrentChapter } = useVerseInCurrentChapter(verseText?.Livre, verseText?.Chapitre)
   const updateVerse = (value: -1 | 1) => {
     const [b, c, v] = verse.split('-').map(Number)
     setVerse(`${b}-${c}-${v + value}`)

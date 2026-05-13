@@ -249,8 +249,10 @@ class DownloadManager {
       if (item.type === 'bible' || item.type === 'bible-strong') {
         this.jotaiStore.set(bibleDataRefreshSignalAtom, (c: number) => c + 1)
       }
-    } catch (e: any) {
-      if (e.message === 'CANCELLED' || this.cancelledIds.has(item.id)) {
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : String(e)
+
+      if (errorMessage === 'CANCELLED' || this.cancelledIds.has(item.id)) {
         this.cancelledIds.delete(item.id)
         this.updateItemStatus(item.id, 'cancelled')
         return
@@ -272,7 +274,7 @@ class DownloadManager {
         })
         this.jotaiStore.set(downloadItemStatesAtom, states)
       } else {
-        this.updateItemStatus(item.id, 'failed', e.message || 'Unknown error')
+        this.updateItemStatus(item.id, 'failed', errorMessage || 'Unknown error')
       }
     }
 

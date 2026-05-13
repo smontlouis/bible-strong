@@ -1,9 +1,9 @@
 import { useTheme } from '@emotion/react'
 import BottomSheet, { BottomSheetHandle, BottomSheetView } from '@gorhom/bottom-sheet'
-import { TouchableOpacity } from 'react-native'
+import { TouchableOpacity, type ViewStyle } from 'react-native'
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { withMenuContext } from 'react-native-popup-menu'
+import { withMenuContext, type MenuContextProps } from 'react-native-popup-menu'
 
 import BackgroundIcon from '~assets/images/BackgroundIcon'
 import CircleSketchIcon from '~assets/images/CircleSketchIcon'
@@ -63,7 +63,7 @@ type Props = {
   onClearSelection: () => void
   onEraseAnnotations: () => void
   onClose: () => void
-  ctx: any
+  ctx: MenuContextProps['ctx']
   selectedAnnotation?: SelectedAnnotation | null
   onChangeAnnotationColor?: (color: string) => void
   onChangeAnnotationType?: (type: AnnotationType) => void
@@ -102,11 +102,12 @@ const IconButton = ({
     borderWidth={1}
     bg={disabled ? 'lightGrey' : 'transparent'}
     opacity={disabled ? 0.5 : 1}
-    style={{
-      // @ts-ignore
-      transitionProperty: ['backgroundColor', 'opacity'],
-      transitionDuration: 300,
-    }}
+    style={
+      {
+        transitionProperty: ['backgroundColor', 'opacity'],
+        transitionDuration: 300,
+      } as unknown as ViewStyle
+    }
     {...props}
   >
     {children}
@@ -169,11 +170,12 @@ const AnnotationToolbar = ({
         zIndex={1000}
         alignItems="center"
         justifyContent="center"
-        style={{
-          // @ts-ignore
-          transitionProperty: ['top'],
-          transitionDuration: 300,
-        }}
+        style={
+          {
+            transitionProperty: ['top'],
+            transitionDuration: 300,
+          } as unknown as ViewStyle
+        }
       >
         <TouchableBox
           bg="primary"

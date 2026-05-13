@@ -1,15 +1,16 @@
 import React from 'react'
 import { withTheme } from '@emotion/react'
-import { Text } from 'react-native'
+import { Text, TextStyle } from 'react-native'
 
-import HTMLView from '~helpers/react-native-htmlview'
+import HTMLView, { HTMLNode, HTMLViewProps } from '~helpers/react-native-htmlview'
+import { Theme } from '~themes'
 
 export const textStyle = {
   lineHeight: 29,
   fontSize: 19,
 }
 
-export const styles = (theme: any) => ({
+export const styles = (theme: Theme): Record<string, TextStyle> => ({
   h1: {
     fontWeight: 'bold',
     fontSize: 24,
@@ -87,8 +88,19 @@ export const styles = (theme: any) => ({
   },
 })
 
-const StylizedHTMLView = ({ htmlStyle, theme, ...props }: any) => {
-  function renderNode(node: any, index: any, siblings: any, parent: any, defaultRenderer: any) {
+type StylizedHTMLViewProps = HTMLViewProps & {
+  htmlStyle?: Record<string, TextStyle>
+  theme: Theme
+}
+
+const StylizedHTMLView = ({ htmlStyle, theme, ...props }: StylizedHTMLViewProps) => {
+  function renderNode(
+    node: HTMLNode,
+    index: number,
+    siblings: HTMLNode[],
+    parent: HTMLNode | undefined,
+    defaultRenderer: (nodes: HTMLNode[] | undefined, parent?: HTMLNode) => React.ReactNode
+  ) {
     if (node.name === 'span') {
       return (
         <Text selectable key={index}>
@@ -99,7 +111,6 @@ const StylizedHTMLView = ({ htmlStyle, theme, ...props }: any) => {
   }
 
   return (
-    // @ts-ignore
     <HTMLView stylesheet={{ ...styles(theme), ...htmlStyle }} {...props} renderNode={renderNode} />
   )
 }

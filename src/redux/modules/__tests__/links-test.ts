@@ -1,6 +1,6 @@
 /* eslint-env jest */
 
-// Mock react-native before any imports
+// Mock react-native before other imports
 import type { Bookmark } from '~common/types'
 import userReducer, { UserState, Link, LinksObj } from '../user'
 import { addLinkAction, updateLink, deleteLink } from '../user/links'
@@ -401,7 +401,7 @@ describe('Links Reducer', () => {
           },
         },
       } as UserState
-      const newState = userReducer(state, { type: 'UNKNOWN_ACTION' } as any)
+      const newState = userReducer(state, { type: 'UNKNOWN_ACTION' })
       expect(newState.bible.links).toEqual(state.bible.links)
     })
   })

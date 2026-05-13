@@ -1,31 +1,43 @@
-import React, { useState, useEffect } from 'react'
+import React, { ComponentType, useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import loadDictionnaireBySearch from '~helpers/loadDictionnaireBySearch'
+import loadDictionnaireBySearch, {
+  type DictionnaireSearchRow,
+} from '~helpers/loadDictionnaireBySearch'
 import { useWaitForDatabase } from '~common/waitForDictionnaireDB'
+import { DatabaseError } from '~helpers/catchDatabaseError'
 
 import { useResultsByLetterOrSearch } from '../lexique/useUtilities'
 import DictionnaryResultItem from './DictionaryResultItem'
 
-const hideIfNoDatabase = (WrappedComponent: any) => (props: any) => {
-  const { isLoading, proposeDownload } = useWaitForDatabase()
+const hideIfNoDatabase =
+  <P extends object>(WrappedComponent: ComponentType<P>) =>
+  (props: P) => {
+    const { isLoading, proposeDownload } = useWaitForDatabase()
 
-  if (isLoading || proposeDownload) {
-    return null
+    if (isLoading || proposeDownload) {
+      return null
+    }
+    return <WrappedComponent {...props} />
   }
-  return <WrappedComponent {...props} />
-}
 
 const LIMIT = 5
 const height = 40
 const color1 = '#ffd255'
 const color2 = '#ffbc00'
 
-const LexiqueResultsWidget = ({ searchValue }: any) => {
-  const [error, setError] = useState(false)
+interface LexiqueResultsWidgetProps {
+  searchValue: string
+}
+
+const isDatabaseError = (value: unknown): value is DatabaseError =>
+  typeof value === 'object' && value !== null && 'error' in value
+
+const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
+  const [error, setError] = useState<DatabaseError['error'] | null>(null)
   const [limit, setLimit] = useState(LIMIT)
 
   const { results } = useResultsByLetterOrSearch({
@@ -34,7 +46,7 @@ const LexiqueResultsWidget = ({ searchValue }: any) => {
   })
 
   useEffect(() => {
-    if (results.error) {
+    if (isDatabaseError(results)) {
       setError(results.error)
     }
   }, [results])
@@ -43,17 +55,19 @@ const LexiqueResultsWidget = ({ searchValue }: any) => {
     return null
   }
 
-  if (!results.length) {
+  const dictionaryResults = Array.isArray(results) ? results : []
+
+  if (!dictionaryResults.length) {
     return null
   }
 
   return (
     <>
-      {results.slice(0, limit).map((ref: any) => {
+      {dictionaryResults.slice(0, limit).map((ref: DictionnaireSearchRow) => {
         const { word } = ref
         return <DictionnaryResultItem key={word} word={word} />
       })}
-      {results.length > limit && (
+      {dictionaryResults.length > limit && (
         <Link onPress={() => setLimit(l => l + 5)}>
           <Box
             opacity={0.5}
@@ -77,7 +91,7 @@ const LexiqueResultsWidget = ({ searchValue }: any) => {
               <LinearGradient start={[0.1, 0.2]} style={{ height }} colors={[color1, color2]} />
             </Box>
             <Text title fontSize={14} style={{ color: 'white' }}>
-              + {results.length - limit}
+              + {dictionaryResults.length - limit}
             </Text>
           </Box>
         </Link>

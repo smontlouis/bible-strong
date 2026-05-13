@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router'
+import { Href, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 import type { ReactNode } from 'react'
@@ -8,7 +8,7 @@ import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 
 export type TagItemData = {
-  id: string
+  id: string | number
   title: string
   tags?: TagsObj
 }
@@ -21,25 +21,22 @@ type Props = {
   badge?: ReactNode
 }
 
-const getNavigationConfig = (
-  variant: TagItemVariant,
-  item: TagItemData
-): { pathname: string; params: Record<string, string> } => {
+const getNavigationConfig = (variant: TagItemVariant, item: TagItemData): Href => {
   switch (variant) {
     case 'strong-grec':
       return {
         pathname: '/strong',
-        params: { book: '40', reference: item.id },
+        params: { book: '40', reference: String(item.id) },
       }
     case 'strong-hebreu':
       return {
         pathname: '/strong',
-        params: { book: '1', reference: item.id },
+        params: { book: '1', reference: String(item.id) },
       }
     case 'nave':
       return {
         pathname: '/nave-detail',
-        params: { name_lower: item.id, name: item.title },
+        params: { name_lower: String(item.id), name: item.title },
       }
     case 'dictionary':
       return {
@@ -54,7 +51,7 @@ const TagItemCard = ({ item, variant, badge }: Props) => {
   const navigationConfig = getNavigationConfig(variant, item)
 
   return (
-    <TouchableOpacity activeOpacity={0.7} onPress={() => router.push(navigationConfig as any)}>
+    <TouchableOpacity activeOpacity={0.7} onPress={() => router.push(navigationConfig)}>
       <VStack gap={6} mx={20} paddingVertical={15} borderBottomWidth={1} borderColor="border">
         <HStack gap={10} alignItems="center">
           <Text fontSize={14} bold>

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, type BottomSheetFooterProps } from '@gorhom/bottom-sheet'
 import { Image } from 'expo-image'
 import { useTranslation } from 'react-i18next'
 import { Image as RNImage } from 'react-native'
@@ -15,7 +15,7 @@ const width = wp(100) - 20 > 600 ? 600 : wp(100) - 20
 interface Props extends Omit<ComputedPlanItem, 'status' | 'progress' | 'type' | 'lang'> {
   modalRefDetails: React.RefObject<BottomSheetModal | null>
   headerComponent?: React.ReactNode
-  footerComponent?: () => React.ReactNode
+  footerComponent?: (props: BottomSheetFooterProps) => React.ReactNode
 }
 
 const DetailsModal = ({

@@ -143,7 +143,6 @@ const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => 
         </>
       )}
       {isLogged && (
-        // @ts-ignore
         <FabButton
           icon="plus"
           onPress={() => {

@@ -14,24 +14,29 @@ import Container from '~common/ui/Container'
 import FlatList from '~common/ui/FlatList'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
+import { StrongReference } from '~common/types'
 import formatVerseContent from '~helpers/formatVerseContent'
 import useLanguage from '~helpers/useLanguage'
 import { getDateLocale } from '~helpers/languageUtils'
-import { deleteHistoryAtom, historyAtom } from '../../state/app'
+import {
+  deleteHistoryAtom,
+  historyAtom,
+  type HistoryItem as HistoryItemType,
+} from '../../state/app'
+import { VersionCode } from '~state/tabs'
 
 const Chip = styled.View<{ color: string }>(({ theme, color }) => ({
   height: 15,
   alignSelf: 'flex-end',
   borderRadius: 7,
-  // @ts-ignore
-  backgroundColor: color ? theme.colors[color] : theme.colors.border,
+  backgroundColor: theme.colors[color as keyof typeof theme.colors] || color || theme.colors.border,
   justifyContent: 'center',
   alignItems: 'center',
   paddingHorizontal: 5,
   marginBottom: 5,
 }))
 
-const HistoryItem = ({ item }: any) => {
+const HistoryItem = ({ item }: { item: HistoryItemType }) => {
   const { t } = useTranslation()
   const lang = useLanguage()
 
@@ -41,7 +46,7 @@ const HistoryItem = ({ item }: any) => {
       locale: getDateLocale(lang),
     })
     return (
-      <Link route="Strong" params={{ book, strongReference: item }}>
+      <Link route="Strong" params={{ book, strongReference: item as unknown as StrongReference }}>
         <Box padding={20} row alignItems="center">
           <Box>
             <Text bold>{Mot}</Text>
@@ -69,7 +74,12 @@ const HistoryItem = ({ item }: any) => {
     const ago = distanceInWords(Number(date), Date.now(), {
       locale: getDateLocale(lang),
     })
-    let { title } = formatVerseContent([{ Livre: book, Chapitre: chapter, Verset: verse }])
+    const bookNumber = Number(book)
+    const chapterNumber = Number(chapter)
+    const verseNumber = Number(verse)
+    let { title } = formatVerseContent([
+      { Livre: bookNumber, Chapitre: chapterNumber, Verset: verseNumber },
+    ])
     if (title.endsWith(':1')) {
       title = title.substring(0, title.length - 2)
     }
@@ -78,10 +88,10 @@ const HistoryItem = ({ item }: any) => {
         route="BibleView"
         params={{
           isReadOnly: true,
-          book: books[book - 1],
-          chapter,
-          verse,
-          version,
+          book: books[bookNumber - 1],
+          chapter: chapterNumber,
+          verse: verseNumber,
+          version: version as VersionCode,
         }}
       >
         <Box padding={20} row alignItems="center">
@@ -89,8 +99,7 @@ const HistoryItem = ({ item }: any) => {
             {title} {version}
           </Text>
           <Box marginLeft="auto">
-            {/* @ts-ignore */}
-            <Chip>
+            <Chip color="border">
               <Text bold fontSize={8}>
                 {t('Verset')}
               </Text>
@@ -177,8 +186,8 @@ const History = () => {
           <FlatList
             removeClippedSubviews
             data={history}
-            keyExtractor={(item: any) => item.date.toString()}
-            renderItem={({ item }: any) => <HistoryItem item={item} />}
+            keyExtractor={(item: HistoryItemType) => item.date.toString()}
+            renderItem={({ item }: { item: HistoryItemType }) => <HistoryItem item={item} />}
           />
         ) : (
           <Empty

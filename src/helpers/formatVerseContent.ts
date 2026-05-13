@@ -1,26 +1,38 @@
 import books from '~assets/bible_versions/books-desc'
+import { Verse } from '~common/types'
 import i18n from '~i18n'
 
-export default (verses: any) => {
-  verses = verses.filter((v: any) => v)
+type VerseReference = Pick<Verse, 'Livre' | 'Chapitre' | 'Verset'> & Partial<Pick<Verse, 'Texte'>>
+type VerseInput = VerseReference | string | null | undefined
+
+const normalizeVerse = (verse: VerseInput): VerseReference | null => {
+  if (!verse) {
+    return null
+  }
+
+  if (typeof verse === 'string') {
+    const [Livre, Chapitre, Verset] = verse.split('-')
+    return { Livre, Chapitre, Verset, Texte: '' }
+  }
+
+  return verse
+}
+
+export default (inputVerses: VerseInput[]) => {
+  const verses = inputVerses
+    .map(normalizeVerse)
+    .filter((verse): verse is VerseReference => Boolean(verse))
+
   if (!verses.length) {
     return { title: '', content: '' }
   }
 
-  verses = verses.map((v: any) => {
-    if (typeof v === 'string') {
-      const [Livre, Chapitre, Verset] = v.split('-')
-      return { Livre, Chapitre, Verset }
-    }
-    return v
-  })
-
-  const content: string = verses.map((v: any) => `${v.Texte}`).join(' ')
+  const content = verses.map(v => `${v.Texte}`).join(' ')
 
   const title: string = verses
-    .map((v: any) => Number(v.Verset))
+    .map(v => Number(v.Verset))
     .reduce(
-      (acc: any, v: any, i: any, array: any) => {
+      (acc, v, i, array) => {
         if (v === array[i - 1] + 1 && v === array[i + 1] - 1) {
           // if suite > 2
           return acc

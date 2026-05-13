@@ -9,6 +9,17 @@ import * as UserActions from '~redux/modules/user'
 import { resetUserAtomsAtom } from '../state/app'
 import { RootState } from '~redux/modules/reducer'
 
+interface AuthError {
+  code?: string
+}
+
+const getAuthError = (error: unknown): AuthError => {
+  if (error && typeof error === 'object' && 'code' in error) {
+    return error as AuthError
+  }
+  return {}
+}
+
 const useInitFireAuth = () => {
   const dispatch = useDispatch()
   const resetAtoms = useSetAtom(resetUserAtomsAtom)
@@ -21,7 +32,8 @@ const useInitFireAuth = () => {
     }
 
     const emailVerified = () => dispatch(UserActions.verifyEmail())
-    const onUserChange = (profile: any) => console.log('[Auth] User changed')
+    const onUserChange = (profile: FireAuthProfile) =>
+      console.log('[Auth] User changed', profile.id)
     const onLogout = async () => {
       // PROTECTION: Créer un backup avant de déconnecter
       // Garantit qu'aucune donnée non-sync ne peut être perdue
@@ -38,31 +50,33 @@ const useInitFireAuth = () => {
       dispatch(UserActions.onUserLogout())
       resetAtoms()
     }
-    const onError = (e: any) => {
-      if (e.code === 'auth/internal-error') {
+    const onError = (error: unknown) => {
+      const { code } = getAuthError(error)
+
+      if (code === 'auth/internal-error') {
         toast.error(i18n.t("Une erreur s'est produite"))
       }
       if (
-        e.code === 'auth/account-exists-with-different-credential' ||
-        e.code === 'auth/email-already-in-use'
+        code === 'auth/account-exists-with-different-credential' ||
+        code === 'auth/email-already-in-use'
       ) {
         toast.error(i18n.t('Cet utilisateur existe déjà avec un autre compte.'))
       }
-      if (e.code === 'auth/weak-password') {
+      if (code === 'auth/weak-password') {
         toast.error(i18n.t('Le mot de passe est trop court.'))
       }
-      if (e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') {
+      if (code === 'auth/wrong-password' || code === 'auth/user-not-found') {
         toast.error(i18n.t('Mot de passe invalide ou utilisateur inexistant.'))
       }
-      if (e.code === 'auth/invalid-email') {
+      if (code === 'auth/invalid-email') {
         toast.error(i18n.t('Format email invalide.'))
       }
 
-      if (e.code === 'auth/network-request-failed') {
+      if (code === 'auth/network-request-failed') {
         toast.error(i18n.t('A network error has occurred, please try again.'))
       }
-      console.log('[Auth] Error', e)
-      console.log('[Auth] Error code:', e.code)
+      console.log('[Auth] Error', error)
+      console.log('[Auth] Error code:', code)
     }
 
     FireAuth.init(onLogin, onUserChange, onLogout, emailVerified, onError, dispatch)

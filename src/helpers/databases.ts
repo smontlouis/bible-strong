@@ -91,10 +91,6 @@ export const initLanguageDirs = async (lang: ResourceLanguage) => {
 
 const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
 
-/**
- *
- * @TODO - MAKE IT WORK, NOT WORKING ANYMORE
- */
 export const getIfDatabaseNeedsUpdate = async (dbId: IdDatabase) => {
   const { path } = databases()[dbId]
 
@@ -104,16 +100,15 @@ export const getIfDatabaseNeedsUpdate = async (dbId: IdDatabase) => {
     return false
   }
 
-  // @ts-expect-error
-  const [errRF, remoteFile] = await to(getDatabasesRef()[dbId].getMetadata())
+  const [errRF, response] = await to(fetch(getDatabasesRef()[dbId], { method: 'HEAD' }))
 
   if (errF || errRF) {
     console.log(`Error for${dbId}`, errF, errRF)
     return false
   }
 
-  // @ts-expect-error
-  return file.size !== remoteFile?.size
+  const remoteSize = Number(response?.headers.get('content-length'))
+  return Number.isFinite(remoteSize) && file.size !== remoteSize
 }
 
 export const getIfDatabaseNeedsDownload = async (dbId: IdDatabase) => {

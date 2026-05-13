@@ -5,17 +5,20 @@ import './strong.css'
 interface StrongProps {
   title: string
   code?: string
-  phonetique: string
-  original: string
-  [key: string]: any
+  codeStrong?: string
+  strongType?: string
+  phonetique?: string
+  definition?: string
+  translatedBy?: string
+  original?: string
 }
 
-const Strong = ({ title, code, phonetique, original }: StrongProps) => (
+const Strong = ({ title, code, codeStrong, phonetique, original }: StrongProps) => (
   <>
     <div className="block-strong--content">
       <div className="block-strong--title">{title}</div>
       <div className="block-strong--desc">
-        [{phonetique}] - {code} - {original}
+        [{phonetique}] - {code || codeStrong} - {original}
       </div>
       <div className="block-strong--arrow">
         <ArrowRight color="rgb(9,132,227)" />

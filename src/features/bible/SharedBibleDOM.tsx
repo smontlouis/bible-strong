@@ -58,7 +58,7 @@ const SharedBibleDOM = () => {
 
   // Don't render Portal content until onboarding is completed.
   // This prevents a race condition where the Portal's WebView exists
-  // before any PortalHost is mounted, causing a NullPointerException
+  // before a PortalHost is mounted, causing a NullPointerException
   // in react-native-teleport when the host finally appears.
   if (!isOnboardingCompleted) return null
 

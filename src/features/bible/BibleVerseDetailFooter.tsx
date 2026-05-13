@@ -16,17 +16,27 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
+type BibleVerseDetailFooterProps = {
+  verseNumber: number | string
+  goToNextVerse: (versesInCurrentChapter: number) => void
+  goToPrevVerse: (versesInCurrentChapter: number) => void
+  versesInCurrentChapter?: number | null
+}
+
 const BibleVerseDetailFooter = ({
   verseNumber,
   goToNextVerse,
   goToPrevVerse,
   versesInCurrentChapter,
-}: any) => {
+}: BibleVerseDetailFooterProps) => {
   const { t } = useTranslation()
+  if (!versesInCurrentChapter) return null
+
+  const currentVerseNumber = Number(verseNumber)
+
   return (
     <Box row paddingLeft={20} paddingRight={20} my={20}>
-      {/* eslint-disable-next-line eqeqeq */}
-      {!(verseNumber == 1) && (
+      {currentVerseNumber !== 1 && (
         <IconButton activeOpacity={0.5} onPress={() => goToPrevVerse(versesInCurrentChapter)}>
           <FeatherIcon name="arrow-left-circle" size={20} />
           <Text paddingLeft={10} color="darkGrey">
@@ -35,8 +45,7 @@ const BibleVerseDetailFooter = ({
         </IconButton>
       )}
       <Box flex />
-      {/* eslint-disable-next-line eqeqeq */}
-      {!(verseNumber == versesInCurrentChapter) && (
+      {currentVerseNumber !== versesInCurrentChapter && (
         <IconButton activeOpacity={0.5} onPress={() => goToNextVerse(versesInCurrentChapter)}>
           <Text paddingRight={10} color="darkGrey">
             {t('Verset suivant')}

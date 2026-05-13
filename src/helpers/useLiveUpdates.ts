@@ -87,16 +87,16 @@ const useLiveUpdates = () => {
               '[LiveUpdates] Found embedded data to migrate:',
               collectionsWithData.join(', ')
             )
-            // @ts-ignore
-            const currentState = store.getState() as RootState
+            const currentState = store.getState()
             const result = await startMigration(user.id, currentState)
             if (!result) {
               console.error('[LiveUpdates] Migration failed or incomplete')
               // Continue anyway - the user can use the app with local data
             }
           }
-        } catch (error: any) {
+        } catch (error) {
           console.error('[LiveUpdates] Migration check failed:', error)
+          const errorMessage = error instanceof Error ? error.message : String(error)
           Sentry.captureException(error, {
             tags: {
               feature: 'firestore_migration',
@@ -104,7 +104,7 @@ const useLiveUpdates = () => {
             },
             extra: {
               userId: user.id,
-              errorMessage: error?.message,
+              errorMessage,
             },
           })
         }
@@ -141,8 +141,7 @@ const useLiveUpdates = () => {
             remoteUserData: {
               ...otherUserData,
               bible: otherBible,
-              // @ts-ignore
-            } as FireStoreUserData,
+            } as unknown as FireStoreUserData,
           })
         )
       })

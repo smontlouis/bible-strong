@@ -1,10 +1,10 @@
 import { useRouter } from 'expo-router'
 import React, { FC, PropsWithChildren } from 'react'
-import { TouchableOpacity } from 'react-native'
+import { StyleProp, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native'
 
 type BackProps = {
   padding?: boolean
-  style?: any
+  style?: StyleProp<ViewStyle>
   onCustomPress?: () => void
   onGoBack?: () => void
 }
@@ -28,7 +28,7 @@ const Back: FC<PropsWithChildren<BackProps>> = ({
       {...props}
       onPress={onCustomPress || handlePress}
       style={{
-        ...style,
+        ...StyleSheet.flatten(style),
         ...(padding && {
           width: 60,
           height: 60,

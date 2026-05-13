@@ -18,6 +18,16 @@ import { useQuery } from '~helpers/react-query-lite'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 
+type PericopeVerse = {
+  h1?: string
+  h2?: string
+  h3?: string
+  h4?: string
+  [key: string]: string | undefined
+}
+type PericopeChapter = Record<string, PericopeVerse>
+type PericopeBook = Record<string, PericopeChapter>
+
 const PericopeHeading = styled(Paragraph)<{ size: number }>(({ size }) => ({
   fontSize: size,
   marginLeft: 20,
@@ -33,11 +43,11 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
  * Recursively removes empty object branches from pericope data.
  * Note: this mutates the input object for performance on large pericope trees.
  */
-function clearEmpties(o: any) {
+function clearEmpties<T extends Record<string, unknown>>(o: T): T {
   for (const k in o) {
     if (!o[k] || typeof o[k] !== 'object') continue
-    clearEmpties(o[k])
-    if (Object.keys(o[k]).length === 0) {
+    clearEmpties(o[k] as Record<string, unknown>)
+    if (Object.keys(o[k] as Record<string, unknown>).length === 0) {
       delete o[k]
     }
   }
@@ -57,7 +67,9 @@ const PericopeScreen = () => {
     queryKey: ['bible-pericope', defaultVersion],
     queryFn: () => getBiblePericope(defaultVersion),
   })
-  const pericopeBook = pericope ? clearEmpties(pericope[book.Numero]) : {}
+  const pericopeBook: PericopeBook = pericope
+    ? clearEmpties((pericope[String(book.Numero)] || {}) as PericopeBook)
+    : {}
 
   return (
     <Container>
@@ -73,14 +85,14 @@ const PericopeScreen = () => {
               message={t('Aucun péricope pour ce Livre, essayez avec une autre version.')}
             />
           ) : (
-            Object.entries(pericopeBook).map(([chapterKey, chapterObject]: any) => (
+            Object.entries(pericopeBook).map(([chapterKey, chapterObject]) => (
               <Fragment key={chapterKey}>
                 {!!Object.keys(chapterObject).length && (
                   <Text color="tertiary" fontSize={12} marginBottom={10}>
                     {t('CHAPITRE')} {chapterKey}
                   </Text>
                 )}
-                {Object.entries(chapterObject).map(([verseKey, verseObject]: any) => {
+                {Object.entries(chapterObject).map(([verseKey, verseObject]) => {
                   const { h1, h2, h3, h4 } = verseObject
                   return (
                     <TouchableOpacity
@@ -117,14 +129,12 @@ const PericopeScreen = () => {
         paddingVertical={10}
         justifyContent="space-between"
       >
-        {/* eslint-disable-next-line eqeqeq */}
-        {book.Numero != 1 && (
+        {book.Numero !== 1 && (
           <Link onPress={() => setBook(books[book.Numero - 2])}>
             <StyledIcon name="arrow-left" size={30} />
           </Link>
         )}
-        {/* eslint-disable-next-line eqeqeq */}
-        {book.Numero != 66 && (
+        {book.Numero !== 66 && (
           <Link onPress={() => setBook(books[book.Numero])} style={{ marginLeft: 'auto' }}>
             <StyledIcon name="arrow-right" size={30} />
           </Link>

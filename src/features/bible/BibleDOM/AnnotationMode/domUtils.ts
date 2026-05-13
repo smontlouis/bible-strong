@@ -40,11 +40,13 @@ export function getCaretInfoFromPoint(clientX: number, clientY: number): CaretIn
     return null
   }
 
+  const documentWithCaretRange = document as Document & {
+    caretRangeFromPoint?: (x: number, y: number) => Range | null
+  }
+
   // Try caretRangeFromPoint but VALIDATE its result
-  // @ts-ignore - caretRangeFromPoint is not in TypeScript's DOM types
-  if (document.caretRangeFromPoint) {
-    // @ts-ignore
-    const range = document.caretRangeFromPoint(clientX, viewportY)
+  if (documentWithCaretRange.caretRangeFromPoint) {
+    const range = documentWithCaretRange.caretRangeFromPoint(clientX, viewportY)
     if (range && range.startContainer) {
       const rangeRect = range.getBoundingClientRect()
       const yDistance = Math.abs(rangeRect.top - viewportY)

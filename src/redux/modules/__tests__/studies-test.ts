@@ -1,6 +1,6 @@
 /* eslint-env jest */
 
-// Mock react-native before any imports
+// Mock react-native before other imports
 import type { Bookmark } from '~common/types'
 import userReducer, { UserState, Study, StudiesObj } from '../user'
 import { updateStudy, addStudies, deleteStudy, publishStudyAction } from '../user/studies'
@@ -165,7 +165,7 @@ describe('Studies Reducer', () => {
         updateStudy({
           id: 'study-1',
           title: 'New Study',
-          content: { ops: ['Content'] } as any,
+          content: { ops: ['Content'] },
           created_at: Date.now(),
           modified_at: Date.now(),
         })
@@ -247,7 +247,7 @@ describe('Studies Reducer', () => {
         state,
         updateStudy({
           id: 'study-1',
-          content: newContent as any,
+          content: newContent,
         })
       )
       expect(newState.bible.studies['study-1'].content).toEqual(newContent)
@@ -446,7 +446,7 @@ describe('Studies Reducer', () => {
           },
         },
       } as UserState
-      const newState = userReducer(state, { type: 'UNKNOWN_ACTION' } as any)
+      const newState = userReducer(state, { type: 'UNKNOWN_ACTION' })
       expect(newState.bible.studies).toEqual(state.bible.studies)
     })
   })

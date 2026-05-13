@@ -13,9 +13,9 @@ import Spacer from '~common/ui/Spacer'
 import Text from '~common/ui/Text'
 import FireAuth from '~helpers/FireAuth'
 import { useTranslation } from 'react-i18next'
+import { Theme } from '~themes'
 
-// @ts-ignore
-const SocialButton = styled.TouchableOpacity(({ theme, color }: any) => ({
+const SocialButton = styled.TouchableOpacity<{ color?: string }>(({ theme, color }) => ({
   flexDirection: 'row',
   borderRadius: 48,
   height: 48,
@@ -31,8 +31,7 @@ const ButtonIcon = styled(Icon.FontAwesome)(() => ({
   marginRight: 15,
 }))
 
-// @ts-ignore
-const ButtonText = styled(Text)(({ theme, color }: any) => ({
+const ButtonText = styled(Text)<{ color?: string }>(({ theme, color }) => ({
   fontSize: 16,
   color: color || theme.colors.default,
 }))
@@ -40,7 +39,7 @@ const ButtonText = styled(Text)(({ theme, color }: any) => ({
 const defaultEmail = __DEV__ ? 'test@test.com' : ''
 const defaultPassword = __DEV__ ? 'testtest' : ''
 
-const Login = ({ theme }: any) => {
+const Login = ({ theme }: { theme: Theme }) => {
   const { t } = useTranslation()
   const [isLoading, setLoading] = useState(false)
   const [email, setEmail] = useState(defaultEmail)
@@ -49,7 +48,7 @@ const Login = ({ theme }: any) => {
 
   const onGoogleLogin = async () => {
     setLoading(true)
-    const isStillLoading: any = await FireAuth.googleLogin()
+    const isStillLoading = await FireAuth.googleLogin()
     setLoading(isStillLoading)
   }
 
@@ -65,13 +64,13 @@ const Login = ({ theme }: any) => {
       return false
     }
     setLoading(true)
-    const isStillLoading: any = await FireAuth.login(email, password)
+    const isStillLoading = await FireAuth.login(email, password)
     setLoading(isStillLoading)
   }
 
   const onAppleLogin = async () => {
     setLoading(true)
-    const isStillLoading: any = await FireAuth.appleLogin()
+    const isStillLoading = await FireAuth.appleLogin()
     setLoading(isStillLoading)
   }
 
@@ -81,7 +80,7 @@ const Login = ({ theme }: any) => {
       return
     }
     setLoading(true)
-    const isStillLoading: any = await FireAuth.loginWithCustomToken(customToken.trim())
+    const isStillLoading = await FireAuth.loginWithCustomToken(customToken.trim())
     setLoading(isStillLoading)
   }
 
@@ -104,7 +103,6 @@ const Login = ({ theme }: any) => {
         />
         <Box alignItems="flex-end" marginTop={10}>
           <Link route="ForgotPassword">
-            {/* @ts-ignore */}
             <Text underline>{t('Mot de passe oublié ?')}</Text>
           </Link>
         </Box>
@@ -115,7 +113,6 @@ const Login = ({ theme }: any) => {
       </Box>
       <Spacer />
       <Box center>
-        {/* @ts-ignore */}
         <Text titleItalic fontSize={16}>
           {t('- ou -')}
         </Text>
@@ -131,7 +128,6 @@ const Login = ({ theme }: any) => {
       )}
       <Spacer />
       <Box row>
-        {/* @ts-ignore */}
         <SocialButton disabled={isLoading} onPress={onGoogleLogin} color="#D14C3E">
           <ButtonIcon size={20} name="google" color="white" />
           <ButtonText color="white">Google</ButtonText>
@@ -149,7 +145,6 @@ const Login = ({ theme }: any) => {
       <Spacer size={2} />
       <Box center pb={20}>
         <Link route="Register">
-          {/* @ts-ignore */}
           <Text underline>{t('Pas de compte ? Inscrivez-vous.')}</Text>
         </Link>
       </Box>
