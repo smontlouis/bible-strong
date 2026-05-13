@@ -10,7 +10,6 @@ import {
   TabGroup,
   TabItem,
   MAX_TAB_GROUPS,
-  DEFAULT_GROUP_ID,
   getDefaultBibleTab,
   groupsCountAtom,
   GROUP_COLORS,

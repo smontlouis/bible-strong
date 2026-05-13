@@ -1,16 +1,10 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { RootState } from '~redux/modules/reducer'
-import {
-  CurrentTheme,
-  PreferredColorScheme,
-  PreferredDarkTheme,
-  PreferredLightTheme,
-} from '~common/types'
+import type { CurrentTheme } from '~common/types'
 
 // Base selectors
 const selectUser = (state: RootState) => state.user
 const selectBibleSettings = (state: RootState) => state.user.bible.settings
-const selectHighlights = (state: RootState) => state.user.bible.highlights
 
 // Selector for user login info (used in useLogin hook)
 export const selectUserLoginInfo = createSelector([selectUser], user => ({

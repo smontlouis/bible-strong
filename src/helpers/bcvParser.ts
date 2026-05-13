@@ -21,24 +21,9 @@ bcv.set_options({
 type BookID = string
 
 const trans = 'default'
-const bookOrder: BookID[] = []
-
-function getBookOrder(): void {
-  if (bookOrder.length > 0) return
-
-  const order = bcv.translations.systems[trans].order
-  for (const book in order) {
-    const sortOrder = order[book]
-    bookOrder[sortOrder] = book
-  }
-}
 
 function getLastVerseInChapter(book: BookID, chapter: number): number {
   return bcv.translations.systems[trans].chapters[book][chapter - 1]
-}
-
-function getLastChapterInBook(book: BookID): number {
-  return bcv.translations.systems[trans].chapters[book].length
 }
 
 export function getIntermediateChapters(startRef: string, endRef: string) {
@@ -95,8 +80,8 @@ export const parseResponse = (res: string) => {
         return s
       }
 
-      const [sb, sc, sv] = startRef.split('.')
-      const [eb, ec, ev] = endRef.split('.')
+      const [sb, sc] = startRef.split('.')
+      const [eb, ec] = endRef.split('.')
 
       if (sb !== eb) {
         return undefined
@@ -108,12 +93,12 @@ export const parseResponse = (res: string) => {
 
       return s
     })
-    .filter(Boolean)
+    .filter((x): x is string => Boolean(x))
     .flat()
     .map(s => {
       const [startRef, endRef] = s.split('-')
       const [sb, sc, sv] = startRef.split('.')
-      const [eb, ec, ev] = endRef?.split('.') || []
+      const ev = endRef?.split('.')[2]
 
       const sbNum = bcv.translations.systems[trans].order[sb]
 

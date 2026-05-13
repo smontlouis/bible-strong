@@ -1,7 +1,7 @@
-import produce from 'immer'
+import { produce } from 'immer'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { atom, getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
-import { atomWithDefault, splitAtom } from 'jotai/vanilla/utils'
+import { splitAtom } from 'jotai/vanilla/utils'
 import { shallowEqual } from 'react-redux'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
@@ -12,6 +12,12 @@ import { storage } from '~helpers/storage'
 import { versions } from '~helpers/bibleVersions'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import i18n, { getLanguage } from '~i18n'
+
+// ============================================================================
+// SHARED BIBLE DOM (single WebView instance for all Bible tabs)
+// ============================================================================
+
+import type { WebViewProps } from '~features/bible/BibleDOM/BibleDOMWrapper'
 
 // ============================================================================
 // TAB TYPES
@@ -103,7 +109,7 @@ export interface NotesTab extends TabBase {
 
 export interface NewTab extends TabBase {
   type: 'new'
-  data: {}
+  data: Record<string, never>
 }
 
 export interface CommentaryTab extends TabBase {
@@ -1065,12 +1071,6 @@ export const closeAllTabsAtom = atom(null, (get, set) => {
 export type AppSwitcherMode = 'list' | 'view'
 export const appSwitcherModeAtom = atom<AppSwitcherMode>('view')
 
-// ============================================================================
-// SHARED BIBLE DOM (single WebView instance for all Bible tabs)
-// ============================================================================
-
-import type { WebViewProps } from '~features/bible/BibleDOM/BibleDOMWrapper'
-
 /**
  * Active Bible tab ID - returns the active tab's ID only if it's a Bible tab,
  * null otherwise. Used by SharedBibleDOM to know where to teleport.
@@ -1096,7 +1096,7 @@ export const activeBibleTabIdAtom = atom<string | null>(get => {
 const _sharedBibleDOMPropsBase = atom<WebViewProps | null>(null)
 
 export const sharedBibleDOMPropsAtom = atom(
-  (get) => get(_sharedBibleDOMPropsBase),
+  get => get(_sharedBibleDOMPropsBase),
   (get, set, newProps: WebViewProps | null) => {
     const current = get(_sharedBibleDOMPropsBase)
     if (!shallowEqual(current, newProps)) {
@@ -1104,4 +1104,3 @@ export const sharedBibleDOMPropsAtom = atom(
     }
   }
 )
-

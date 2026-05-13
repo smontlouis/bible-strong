@@ -25,6 +25,7 @@ const CommentariesCard = ({
           verse,
         },
       } as CommentaryTab),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   )
 
@@ -32,6 +33,7 @@ const CommentariesCard = ({
 
   useEffect(() => {
     onChangeVerse(commentaryTab.data.verse)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [commentaryTab.data.verse])
 
   return <CommentariesTabScreen hasHeader={false} commentaryAtom={onTheFlyAtom} />

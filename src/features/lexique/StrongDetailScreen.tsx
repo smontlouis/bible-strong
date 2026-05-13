@@ -26,7 +26,7 @@ import loadFirstFoundVerses from '~helpers/loadFirstFoundVerses'
 import loadStrongReference from '~helpers/loadStrongReference'
 import loadStrongVersesCount from '~helpers/loadStrongVersesCount'
 
-import produce from 'immer'
+import { produce } from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
@@ -74,7 +74,6 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
   const { isInTab } = useTabContext()
 
   const {
-    hasBackButton,
     data: { book, reference, strongReference: strongReferenceParam },
   } = strongTab
 
@@ -99,11 +98,12 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
     let loadedStrongReference = strongReferenceParam
 
     if (reference) {
-      loadedStrongReference = await loadStrongReference(reference, book || 1)
-      if (loadedStrongReference?.error) {
-        setError(loadedStrongReference.error)
+      const result = await loadStrongReference(reference, book || 1)
+      if (!result || 'error' in result) {
+        setError(result && 'error' in result ? result.error : undefined)
         return
       }
+      loadedStrongReference = result
     }
 
     if (!loadedStrongReference) {
@@ -117,11 +117,18 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
       type: 'strong',
     })
     setStrongReference(loadedStrongReference)
-    const firstFoundVerses = await loadFirstFoundVerses(book || 1, loadedStrongReference.Code)
-    const strongVersesCount = await loadStrongVersesCount(book || 1, loadedStrongReference.Code)
+    const firstFoundVersesResult = await loadFirstFoundVerses(book || 1, loadedStrongReference.Code)
+    const strongVersesCountResult = await loadStrongVersesCount(
+      book || 1,
+      loadedStrongReference.Code
+    )
 
-    setVerses(firstFoundVerses)
-    setCount(strongVersesCount[0]?.versesCount)
+    if (firstFoundVersesResult && !('error' in firstFoundVersesResult)) {
+      setVerses(firstFoundVersesResult)
+    }
+    if (strongVersesCountResult && !('error' in strongVersesCountResult)) {
+      setCount(strongVersesCountResult[0]?.versesCount)
+    }
     setConcordanceLoading(false)
   }
 
@@ -150,6 +157,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
 
   useEffect(() => {
     loadData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reference, book])
 
   const shareContent = async () => {
@@ -305,7 +313,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
                   <Word>{Hebreu}</Word>
                 </Paragraph>
                 <Box ml={15} mb={4}>
-                  <ListenToStrong type={Hebreu ? 'hebreu' : 'grec'} code={Code!} />
+                  <ListenToStrong type={Hebreu ? 'hebreu' : 'grec'} code={Number(Code!)} />
                 </Box>
               </Box>
             </ViewItem>
@@ -318,7 +326,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
                   <Word>{Grec}</Word>
                 </Paragraph>
                 <Box ml={15} mb={4}>
-                  <ListenToStrong type={Hebreu ? 'hebreu' : 'grec'} code={Code!} />
+                  <ListenToStrong type={Hebreu ? 'hebreu' : 'grec'} code={Number(Code!)} />
                 </Box>
               </Box>
             </ViewItem>

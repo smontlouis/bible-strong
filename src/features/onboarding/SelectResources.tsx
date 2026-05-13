@@ -1,5 +1,5 @@
 import { useAtom } from 'jotai/react'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SectionList } from 'react-native'
 import Border from '~common/ui/Border'
@@ -49,6 +49,7 @@ const DownloadFiles = ({ setStep }: { setStep: React.Dispatch<React.SetStateActi
   // Set default version
   useEffect(() => {
     setSelectedResources([getDefaultVersionResource()])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const onPressItem = (resource: ResourceToDownload) => {

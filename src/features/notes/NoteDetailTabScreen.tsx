@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react-native'
-import produce from 'immer'
+import { produce } from 'immer'
 import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
 import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -117,6 +117,7 @@ const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) =>
       setDescription(currentNote.description || '')
       setIsEditing(false)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [noteId])
 
   // Update tab title when note title changes

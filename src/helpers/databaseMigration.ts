@@ -2,23 +2,12 @@ import * as FileSystem from 'expo-file-system/legacy'
 import {
   ResourceLanguage,
   DatabaseId,
-  LANGUAGE_SPECIFIC_DBS,
-  SHARED_DBS,
   getSqliteDirPath,
   getSharedSqliteDirPath,
   getJsonDirPath,
   BASE_SQLITE_DIR,
 } from '~helpers/databaseTypes'
-import {
-  databaseStrongName,
-  databaseDictionnaireName,
-  databaseNaveName,
-  databaseTresorName,
-  databaseMhyName,
-  databaseInterlineaireName,
-  getDbFileName,
-  initLanguageDirs,
-} from '~helpers/databases'
+import { getDbFileName, initLanguageDirs } from '~helpers/databases'
 
 // SQLite databases that need migration
 const SQLITE_DBS_TO_MIGRATE: DatabaseId[] = [

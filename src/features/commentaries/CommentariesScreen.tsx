@@ -24,6 +24,7 @@ const CommentariesScreen = () => {
           verse,
         },
       } as CommentaryTab),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   )
 

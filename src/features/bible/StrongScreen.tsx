@@ -1,12 +1,11 @@
 import React, { useMemo } from 'react'
 import { atom } from 'jotai/vanilla'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
 import generateUUID from '~helpers/generateUUID'
 import { StrongTab } from '../../state/tabs'
 import StrongDetailScreen from '~features/lexique/StrongDetailScreen'
 
 const StrongScreen = () => {
-  const router = useRouter()
   const params = useLocalSearchParams<{
     book?: string
     reference?: string

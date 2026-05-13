@@ -12,7 +12,7 @@ import TrackPlayer, {
   useProgress,
   useTrackPlayerEvents,
 } from 'react-native-track-player'
-import books, { Book } from '~assets/bible_versions/books-desc'
+import { Book } from '~assets/bible_versions/books-desc'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
@@ -62,7 +62,7 @@ const getBookTracks = (version: string, book: Book, t: (key: string) => string) 
       artwork: require('~assets/images/icon.png'),
     }))
     return tracks
-  } catch (e) {
+  } catch {
     Sentry.withScope(scope => {
       scope.setExtra('Version', `${version}`)
       scope.setExtra('Book', `${book.Numero}`)
@@ -213,6 +213,7 @@ const useLoadSound = ({
       }
       setIsSetup(true)
     })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [version, book.Numero])
 
   // Skip to track on chapter change
@@ -238,6 +239,7 @@ const useLoadSound = ({
         console.log('[Bible] Silent catch')
       }
     })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [book.Numero, chapter, isSetup, version])
 
   return {

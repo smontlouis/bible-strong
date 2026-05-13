@@ -183,6 +183,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       cancelled = true
       setIsSearching(false)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearchValue, section, book, selectedVersion, sortOrder])
 
   const hasReference = Boolean(

@@ -12,7 +12,6 @@ import FireAuth from '~helpers/FireAuth'
 import { FeatherIcon, IonIcon } from '~common/ui/Icon'
 import { onUserUpdateProfile } from '~redux/modules/user'
 import ProfileAvatar from './ProfileAvatar'
-import SubscriptionBadge from './SubscriptionBadge'
 import EmailVerificationModal from './EmailVerificationModal'
 
 const getProviderIcon = (provider: string) => {

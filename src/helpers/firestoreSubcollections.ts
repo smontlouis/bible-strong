@@ -475,7 +475,9 @@ export function subscribeToSubcollection(
           const refreshed = await tokenManager.tryRefreshOrWait()
 
           if (!isDisposed) {
-            console.log(`[Subcollections] Token ${refreshed ? 'refreshed' : 'recently refreshed'}, resubscribing to ${collectionName}...`)
+            console.log(
+              `[Subcollections] Token ${refreshed ? 'refreshed' : 'recently refreshed'}, resubscribing to ${collectionName}...`
+            )
             unsubscribe()
             setupSubscription()
             return

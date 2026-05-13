@@ -117,11 +117,13 @@ const PericopeScreen = () => {
         paddingVertical={10}
         justifyContent="space-between"
       >
+        {/* eslint-disable-next-line eqeqeq */}
         {book.Numero != 1 && (
           <Link onPress={() => setBook(books[book.Numero - 2])}>
             <StyledIcon name="arrow-left" size={30} />
           </Link>
         )}
+        {/* eslint-disable-next-line eqeqeq */}
         {book.Numero != 66 && (
           <Link onPress={() => setBook(books[book.Numero])} style={{ marginLeft: 'auto' }}>
             <StyledIcon name="arrow-right" size={30} />

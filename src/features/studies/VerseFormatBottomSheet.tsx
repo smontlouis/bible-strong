@@ -1,5 +1,5 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet'
-import React, { memo, useCallback } from 'react'
+import React, { memo } from 'react'
 import { TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import Modal from '~common/Modal'

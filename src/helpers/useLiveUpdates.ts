@@ -163,7 +163,7 @@ const useLiveUpdates = () => {
           // Dispatch l'update pour cette collection spécifique
           dispatch(
             receiveSubcollectionUpdates({
-              collection,
+              collection: collection as Exclude<typeof collection, 'tabGroups'>,
               data,
               isInitialLoad: Object.keys(changes.added).length === Object.keys(data).length,
             })
@@ -233,6 +233,7 @@ const useLiveUpdates = () => {
       // Cleanup on unmount
       cleanupFirestoreSubscriptions()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLogged, isLoading])
 }
 

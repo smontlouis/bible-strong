@@ -13,6 +13,8 @@ module.exports = [
     rules: {
       'prettier/prettier': 'error',
       'react/display-name': 'off',
+      'react/no-unescaped-entities': 'off',
+      'react-compiler/react-compiler': 'off',
     },
   },
   {

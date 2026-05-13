@@ -13,7 +13,7 @@ import Link from '~common/Link'
 import Box, { AnimatedBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
-import { wp, wpUI } from '~helpers/utils'
+import { wpUI } from '~helpers/utils'
 import { offset } from './constants'
 
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput)
@@ -114,6 +114,7 @@ const CurrentYear = ({
         <AnimatedTextInput
           underlineColorAndroid="transparent"
           editable={false}
+          // @ts-expect-error animatedProps text type mismatch with TextInput
           animatedProps={useAnimatedProps(
             () =>
               ({

@@ -1,7 +1,10 @@
 import React from 'react'
-import Svg, { Path, Circle } from 'react-native-svg'
+import Svg, { SvgProps, Path, Circle } from 'react-native-svg'
 
-const SvgComponent = ({ color = 'black', ...props }) => (
+const SvgComponent = ({
+  color = 'black',
+  ...props
+}: { color?: string } & Omit<SvgProps, 'color'>) => (
   <Svg
     width={22}
     height={22}
@@ -10,7 +13,6 @@ const SvgComponent = ({ color = 'black', ...props }) => (
     strokeWidth={2}
     strokeLinecap="round"
     strokeLinejoin="round"
-    className="prefix__feather prefix__feather-pen-tool"
     {...props}
   >
     <Path d="M12 19l7-7 3 3-7 7-3-3z" />

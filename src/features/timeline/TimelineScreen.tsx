@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react'
+import React, { useCallback } from 'react'
 import { View } from 'react-native'
 
 import TimelineSection from './TimelineSection'

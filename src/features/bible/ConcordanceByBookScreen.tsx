@@ -15,7 +15,6 @@ import ConcordanceVerse from './ConcordanceVerse'
 import books from '~assets/bible_versions/books-desc'
 import loadFoundVersesByBook from '~helpers/loadFoundVersesByBook'
 import truncate from '~helpers/truncate'
-import { MainStackProps } from '~navigation/type'
 
 interface Verse {
   Livre: number
@@ -40,6 +39,7 @@ const ConcordanceByBook = () => {
     const loadVerses = async () => {
       if (!book || !Code) return
       const foundVerses = await loadFoundVersesByBook(book, Code)
+      if ('error' in foundVerses) return
       setVerses(foundVerses)
     }
     loadVerses()

@@ -11,8 +11,7 @@ import * as path from 'path'
 
 const PACKAGE_NAME = process.env.PACKAGE_NAME ?? 'com.smontlouis.biblestrong'
 const SERVICE_ACCOUNT_PATH =
-  process.env.GOOGLE_SERVICE_ACCOUNT_PATH ??
-  path.join(__dirname, 'google-service-account.json')
+  process.env.GOOGLE_SERVICE_ACCOUNT_PATH ?? path.join(__dirname, 'google-service-account.json')
 const UNREPLIED_ONLY = process.argv.includes('--unreplied-only')
 
 async function main() {
@@ -61,13 +60,13 @@ async function main() {
   })
 
   if (UNREPLIED_ONLY) {
-    results = results.filter((r) => !r.hasReply)
+    results = results.filter(r => !r.hasReply)
   }
 
   console.log(JSON.stringify(results, null, 2))
 }
 
-main().catch((err) => {
+main().catch(err => {
   console.error(JSON.stringify({ error: err.message }))
   process.exit(1)
 })

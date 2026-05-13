@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import Header from '~common/Header'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
-import { NewTab, tabTypes } from '../../../../state/tabs'
+import { NewTab, TabItem, tabTypes } from '../../../../state/tabs'
 import NewTabItem from './NewTabItem'
 import { SelectBibleReferenceModalProvider } from './SelectBibleReferenceModalProvider'
 
@@ -22,7 +22,11 @@ const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
         <Box flex center row>
           <Box row wrap center>
             {tabTypes.map(type => (
-              <NewTabItem key={type} type={type} newAtom={newAtom} />
+              <NewTabItem
+                key={type}
+                type={type}
+                newAtom={newAtom as unknown as PrimitiveAtom<TabItem>}
+              />
             ))}
           </Box>
         </Box>

@@ -1,6 +1,4 @@
 import React from 'react'
-import { Linking } from 'react-native'
-import * as Icon from '@expo/vector-icons'
 
 import Text from '~common/ui/Text'
 import ScrollView from '~common/ui/ScrollView'

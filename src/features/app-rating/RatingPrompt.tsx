@@ -68,6 +68,7 @@ const RatingPrompt = ({ modalRef, onClose }: Props) => {
               autoPlay
               loop={false}
               style={{ width: 230, height: 230 }}
+              // eslint-disable-next-line @typescript-eslint/no-require-imports
               source={require('../../assets/images/rating.lottie')}
             />
           </Box>

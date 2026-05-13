@@ -8,7 +8,7 @@ import Text from '~common/ui/Text'
 import { audioSpeedAtom } from './atom'
 import AudioChip from './AudioChip'
 
-export interface AudioSpeedButtonProps extends BoxProps {}
+export type AudioSpeedButtonProps = BoxProps
 
 const choices = [
   { value: '0.75', label: '0.75x' },
@@ -26,6 +26,7 @@ const AudioSpeedButton = (props: AudioSpeedButtonProps) => {
     ;(async () => {
       setRate(await TrackPlayer.getRate())
     })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const onChange = async (value: string) => {

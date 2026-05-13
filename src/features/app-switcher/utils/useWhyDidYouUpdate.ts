@@ -3,7 +3,7 @@ import { useRef, useEffect } from 'react'
 export default function useWhyDidYouUpdate(name: any, props: any) {
   // Get a mutable ref object where we can store props ...
   // ... for comparison next time this hook runs.
-  const previousProps = useRef<any>()
+  const previousProps = useRef<any>(null)
   useEffect(() => {
     if (previousProps.current) {
       // Get all keys from previous and current props

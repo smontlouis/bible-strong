@@ -37,6 +37,7 @@ const useBottomTabBar = () => {
     if (tabsCount === 0) {
       setAppSwitcherMode('list')
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const isViewMode = appSwitcherMode === 'view'

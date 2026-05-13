@@ -242,6 +242,7 @@ describe('User Reducer', () => {
         photoURL: '',
         provider: 'email',
         emailVerified: false,
+        createdAt: null,
       }
       const newState = reducer(state, onUserLoginSuccess({ profile }))
       expect(newState.displayName).toBe('Existing Name')
@@ -302,7 +303,10 @@ describe('User Reducer', () => {
 
   describe('saveAllLogsAsSeen', () => {
     it('should mark all logs as seen', () => {
-      const logs = [{ date: '2023-01-01' }, { date: '2023-01-02' }]
+      const logs = [
+        { date: '2023-01-01' },
+        { date: '2023-01-02' },
+      ] as unknown as import('~common/types').ChangelogItem[]
       const newState = reducer(initialState, saveAllLogsAsSeen(logs))
       expect((newState.bible.changelog as Record<string, boolean>)['2023-01-01']).toBe(true)
       expect((newState.bible.changelog as Record<string, boolean>)['2023-01-02']).toBe(true)

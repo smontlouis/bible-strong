@@ -1,13 +1,12 @@
 import React, { useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
 import generateUUID from '~helpers/generateUUID'
 import { DictionaryTab } from '../../state/tabs'
 import DictionaryDetailTabScreen from './DictionaryDetailTabScreen'
 
 const DictionaryDetailScreen = () => {
-  const router = useRouter()
   const params = useLocalSearchParams<{ word?: string }>()
 
   // Parse params from URL strings
@@ -25,9 +24,10 @@ const DictionaryDetailScreen = () => {
           word,
         },
       } as DictionaryTab),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   )
 
-  return <DictionaryDetailTabScreen dictionaryAtom={onTheFlyAtom} navigation={router} />
+  return <DictionaryDetailTabScreen dictionaryAtom={onTheFlyAtom} />
 }
 export default DictionaryDetailScreen

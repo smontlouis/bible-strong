@@ -1,4 +1,4 @@
-import { useAtom, useSetAtom } from 'jotai/react'
+import { useAtom } from 'jotai/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import DropdownMenu from '~common/DropdownMenu'
@@ -9,7 +9,7 @@ import { secondsToMinutes } from '~helpers/secondsToMinutes'
 import { audioSleepMinutesAtom, audioSleepTimeAtom } from './atom'
 import AudioChip from './AudioChip'
 
-export interface AudioSleepButtonProps extends BoxProps {}
+export type AudioSleepButtonProps = BoxProps
 
 const choices = [
   { value: 'off', label: 'Off' },

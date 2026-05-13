@@ -239,7 +239,7 @@ describe('Highlights Reducer', () => {
             '1-1-1': { color: 'red', date: originalDate, tags },
           },
         },
-      } as UserState
+      } as unknown as UserState
       const newState = userReducer(state, changeHighlightColor({ '1-1-1': true }, 'green'))
       expect(newState.bible.highlights['1-1-1'].date).toBe(originalDate)
       expect(newState.bible.highlights['1-1-1'].tags).toEqual(tags)
@@ -305,7 +305,7 @@ describe('Highlights Reducer', () => {
             },
           },
         },
-      } as UserState
+      } as unknown as UserState
       const newState = userReducer(state, removeHighlight({ selectedVerses: { '1-1-1': true } }))
       expect(newState.bible.highlights['1-1-1']).toBeUndefined()
       expect(newState.bible.tags['tag-1'].highlights?.['1-1-1']).toBeUndefined()

@@ -161,7 +161,7 @@ const ExportButton = ({
       const saveFile = await FileSystem.getInfoAsync(fileUri)
       setLastSave(saveFile)
       toast.success(t('app.exported'))
-    } catch (error) {
+    } catch {
       toast.error(t('Une erreur est survenue'))
     } finally {
       setIsSyncing(false)

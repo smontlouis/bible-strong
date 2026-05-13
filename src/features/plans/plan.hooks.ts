@@ -1,4 +1,4 @@
-import to from 'await-to-js'
+import { to } from 'await-to-js'
 import React from 'react'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import i18n from '~i18n'
@@ -260,6 +260,7 @@ export const useDownloadPlans = () => {
         toast.error('Impossible de télécharger vos plans, vérifiez votre connexion internet.')
       }
     })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return { isLoading }
@@ -350,7 +351,7 @@ export const useChapterToContent = (chapters: string) => {
         const result = await getChaptersForPlan(chapters, version)
         setContent(result)
         setStatus('Resolved')
-      } catch (e) {
+      } catch {
         setStatus('Rejected')
       }
     })()
@@ -424,7 +425,7 @@ export const useVersesToContent = (verses: string) => {
         const result = await getVersesForPlan(verses, version)
         setContent(result)
         setStatus('Resolved')
-      } catch (e) {
+      } catch {
         setStatus('Rejected')
       }
     })()
@@ -451,7 +452,7 @@ export const useFireStorage = (src?: string) => {
         setImageUrl(uri)
         // @ts-ignore
         dispatch(cacheImage({ id: src, value: uri }))
-      } catch (e) {
+      } catch {
         console.log(`[Plans] Can't find: images/${src}`)
       }
     })()

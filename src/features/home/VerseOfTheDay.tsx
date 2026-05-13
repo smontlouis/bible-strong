@@ -1,5 +1,5 @@
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'
 import { Share, View } from 'react-native'
 import DateTimePicker from 'react-native-modal-datetime-picker'

@@ -10,7 +10,7 @@ export function getBaseVersion(versionId: string): string {
   return versionId
 }
 
-export interface BibleResourceLoaderConfig<T> {
+export interface BibleResourceLoaderConfig {
   versionSupported: (versionId: string) => boolean
   getFilePath: (versionId: string) => string
 }
@@ -21,7 +21,7 @@ export interface BibleResourceLoader<T> {
 }
 
 export function createBibleResourceLoader<T>(
-  config: BibleResourceLoaderConfig<T>
+  config: BibleResourceLoaderConfig
 ): BibleResourceLoader<T> {
   const cache: Record<string, T> = {}
 

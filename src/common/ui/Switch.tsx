@@ -1,10 +1,7 @@
-import { useTheme } from '@emotion/react'
 import React from 'react'
 import { Switch as SwitchBase, SwitchProps } from 'react-native'
 
 const Switch = (props: SwitchProps) => {
-  const theme = useTheme()
-
   return (
     <SwitchBase
       //   ios_backgroundColor={theme.colors.opacity5}

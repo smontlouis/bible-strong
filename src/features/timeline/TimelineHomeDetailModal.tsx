@@ -11,7 +11,7 @@ import Text from '~common/ui/Text'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 
 interface Props {
-  modalRef: React.RefObject<BottomSheet>
+  modalRef: React.RefObject<BottomSheet | null>
   HeaderComponent?: React.ReactNode
   FooterComponent?: React.ReactNode
 }

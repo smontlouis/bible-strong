@@ -49,6 +49,7 @@ const AnimatedSectionList = ({
       // @ts-ignore
       ...contentContainerStyle,
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   )
   return (

@@ -13,7 +13,7 @@ import { TabItem } from '../../../state/tabs'
 import TabIcon from '../utils/getIconByTabType'
 import useTabConstants from '../utils/useTabConstants'
 import useTabPreview from './useTabPreview'
-import { LinearTransition, ZoomIn, ZoomOut } from 'react-native-reanimated'
+import { LinearTransition, ZoomOut } from 'react-native-reanimated'
 
 // Styles statiques hors du composant pour éviter les re-créations
 const styles = StyleSheet.create({

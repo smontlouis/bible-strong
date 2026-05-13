@@ -137,6 +137,7 @@ const VersionSelectorItem = ({
         onDownloadComplete(version.id as VersionCode)
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queueState?.status])
 
   const startDownload = () => {

@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux'
 import truncHTML from 'trunc-html'
 
 import { useRouter } from 'expo-router'
-import produce from 'immer'
+import { produce } from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
@@ -41,7 +41,6 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
   const { isInTab } = useTabContext()
 
   const {
-    hasBackButton,
     data: { name_lower, name },
   } = naveTab
 
@@ -77,11 +76,13 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
 
   useEffect(() => {
     setTitle(naveItem?.name || name)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [naveItem?.name, name])
 
   useEffect(() => {
     if (!name_lower) return
     loadNaveItem(name_lower).then(result => {
+      if (!result || 'error' in result) return
       setNaveItem(result)
       addHistory({
         name: result.name,
@@ -90,6 +91,7 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
         date: Date.now(),
       })
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name, name_lower])
 
   const openLink = ({ href }: any) => {

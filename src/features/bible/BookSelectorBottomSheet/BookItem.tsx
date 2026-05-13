@@ -71,7 +71,6 @@ const BookItem = memo(
                 type: 'timing',
                 duration: 300,
               }}
-              // @ts-expect-error
               animate={useDerivedValue(() => ({
                 transform: [{ rotate: isExpanded.get() ? '180deg' : '0deg' }],
               }))}

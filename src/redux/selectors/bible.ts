@@ -23,7 +23,6 @@ const selectNaves = (state: RootState) => state.user.bible.naves ?? {}
 const selectWords = (state: RootState) => state.user.bible.words ?? {}
 const selectStrongsGrec = (state: RootState) => state.user.bible.strongsGrec ?? {}
 const selectStrongsHebreu = (state: RootState) => state.user.bible.strongsHebreu ?? {}
-const selectSettings = (state: RootState) => state.user.bible.settings ?? {}
 const selectColors = (state: RootState) => state.user.bible.settings?.colors ?? {}
 
 // Base selectors - exported for use by other selectors and components

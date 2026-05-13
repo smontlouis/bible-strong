@@ -1,4 +1,4 @@
-import produce from 'immer'
+import { produce } from 'immer'
 import { useMemo } from 'react'
 
 import books, { Book } from '~assets/bible_versions/books-desc'
@@ -6,7 +6,8 @@ import generateUUID from '~helpers/generateUUID'
 
 import { useLocalSearchParams } from 'expo-router'
 import { atom } from 'jotai/vanilla'
-import { BibleTab, getDefaultBibleTab } from '../../state/tabs'
+import { BibleTab, getDefaultBibleTab, VersionCode } from '../../state/tabs'
+import { StudyNavigateBibleType } from '~common/types'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 import BibleTabScreen from './BibleTabScreen'
 
@@ -32,21 +33,25 @@ const BibleScreen = () => {
 
   const defaultVersion = useDefaultBibleVersion()
 
-  const initialValues = produce(getDefaultBibleTab(version || defaultVersion), draft => {
-    draft.id = `bible-${generateUUID()}`
-    if (book)
-      draft.data.selectedBook = Number.isInteger(book)
-        ? books[(book as number) - 1]
-        : (book as Book)
+  const initialValues = produce(
+    getDefaultBibleTab((version || defaultVersion) as VersionCode),
+    draft => {
+      draft.id = `bible-${generateUUID()}`
+      if (book)
+        draft.data.selectedBook = Number.isInteger(book)
+          ? books[(book as number) - 1]
+          : (book as Book)
 
-    if (chapter) draft.data.selectedChapter = chapter
-    if (verse) draft.data.selectedVerse = verse
-    if (focusVerses) draft.data.focusVerses = focusVerses
-    if (isSelectionMode) draft.data.isSelectionMode = isSelectionMode
-    if (isReadOnly) draft.data.isReadOnly = isReadOnly
-  })
+      if (chapter) draft.data.selectedChapter = chapter
+      if (verse) draft.data.selectedVerse = verse
+      if (focusVerses) draft.data.focusVerses = focusVerses
+      if (isSelectionMode) draft.data.isSelectionMode = isSelectionMode as StudyNavigateBibleType
+      if (isReadOnly) draft.data.isReadOnly = isReadOnly
+    }
+  )
 
   // Always create an on-the-fly atom for this screen
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const bibleAtom = useMemo(() => atom<BibleTab>(initialValues), [])
 
   return <BibleTabScreen bibleAtom={bibleAtom} withNavigation />

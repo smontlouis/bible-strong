@@ -22,17 +22,6 @@ const FlatList = styled.FlatList(({ theme, orientation, bg }: any) => ({
   }),
 }))
 
-const fadeIn = {
-  from: {
-    translateY: 10,
-    opacity: 0,
-  },
-  to: {
-    translateY: 0,
-    opacity: 1,
-  },
-}
-
 const AnimatedFlatList = ({ contentContainerStyle, ref, ...props }: any) => {
   const insets = useSafeAreaInsets()
   const orientation = useDeviceOrientation()
@@ -41,6 +30,7 @@ const AnimatedFlatList = ({ contentContainerStyle, ref, ...props }: any) => {
       paddingBottom: 10 + insets.bottom,
       ...contentContainerStyle,
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   )
   return (

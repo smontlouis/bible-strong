@@ -92,7 +92,7 @@ type StudiesScreenProps = {
   studyId?: string
 }
 
-type LexiqueScreenProps = {}
+type LexiqueScreenProps = undefined
 
 export type EditStudyScreenProps = {
   studyId: string
@@ -106,13 +106,9 @@ type TagScreenProps = {
   tagId: string
 }
 
-type SearchScreenProps = {
-  verse: string
-}
+type DictionaryScreenProps = undefined
 
-type DictionaryScreenProps = {}
-
-type NaveScreenProps = {}
+type NaveScreenProps = undefined
 
 type NaveDetailScreenProps = {
   name_lower: string
@@ -200,6 +196,7 @@ export type MainStackProps = {
 
 declare global {
   namespace ReactNavigation {
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
     interface RootParamList extends MainStackProps {}
   }
 }

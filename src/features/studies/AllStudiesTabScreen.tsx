@@ -55,6 +55,7 @@ const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => 
     renameModalRef.current?.present()
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const onStudyPress = (studyId: string) => {
     if (isInTab && onStudySelect) {
       onStudySelect(studyId)

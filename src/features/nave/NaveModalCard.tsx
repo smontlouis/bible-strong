@@ -1,7 +1,7 @@
 import { useTheme } from '@emotion/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, ScrollView } from 'react-native'
+import { ActivityIndicator } from 'react-native'
 import { useAtomValue } from 'jotai'
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'

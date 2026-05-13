@@ -17,7 +17,6 @@ import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import { useComputedPlanItems, useFireStorage, useUpdatePlans } from '~features/plans/plan.hooks'
 import useLanguage from '~helpers/useLanguage'
-import { MainStackProps } from '~navigation/type'
 import { addPlan } from '~redux/modules/plan'
 import { RootState } from '~redux/modules/reducer'
 import { Theme } from '~themes'
@@ -32,8 +31,10 @@ const useGetFirstPlans = () => {
   const getBibleProjectPlan = async () => {
     const [{ localUri }] = await Asset.loadAsync(
       lang === 'fr'
-        ? require('~assets/plans/bible-project-plan.txt')
-        : require('~assets/plans/bible-project-plan-en.txt')
+        ? // eslint-disable-next-line @typescript-eslint/no-require-imports
+          require('~assets/plans/bible-project-plan.txt')
+        : // eslint-disable-next-line @typescript-eslint/no-require-imports
+          require('~assets/plans/bible-project-plan-en.txt')
     )
     if (!localUri) return
     try {
@@ -50,13 +51,14 @@ const useGetFirstPlans = () => {
         await getBibleProjectPlan()
       })()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 }
 const PlanHome = () => {
   const { t } = useTranslation()
   const plans = useComputedPlanItems()
-  const { id, title, image, description, author, progress, status } =
-    plans.find(p => p.status === 'Progress') || plans[0] || {}
+  const currentPlan = plans.find(p => p.status === 'Progress') || plans[0]
+  const { id, title, image, progress, status } = currentPlan || {}
   const cacheImage = useFireStorage(image)
   const theme: Theme = useTheme()
 
@@ -95,7 +97,7 @@ const PlanHome = () => {
             row
             center
             route="Plan"
-            params={{ plan: { id, title, image, description, author } }}
+            params={{ planId: id!, plan: currentPlan! }}
             px={20}
           >
             <AnimatedProgressCircle

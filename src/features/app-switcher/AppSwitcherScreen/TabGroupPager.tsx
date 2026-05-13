@@ -25,7 +25,7 @@ const TabGroupPager = () => {
   const { width } = useWindowDimensions()
   const groups = useAtomValue(tabGroupsAtom)
   const bufferedGroupIds = useAtomValue(bufferedGroupIdsAtom)
-  const appSwitcherMode = useAtomValue(appSwitcherModeAtom)
+  useAtomValue(appSwitcherModeAtom)
   // Différer le chargement des groupes adjacents (basse priorité)
   const deferredBufferedGroupIds = useDeferredValue(bufferedGroupIds)
   const { activeGroupIndex, groupPager, createGroupPage } = useAppSwitcherContext()

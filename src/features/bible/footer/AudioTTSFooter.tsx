@@ -22,7 +22,13 @@ import TTSPitchButton from './TTSPitchButton'
 import TTSRepeatButton from './TTSRepeatButton'
 import TTSSpeedButton from './TTSSpeedButton'
 import TTSVoiceButton from './TTSVoiceButton'
-import { playingBibleTabIdAtom, ttsPitchAtom, ttsRepeatAtom, ttsSpeedAtom, ttsVoiceAtom } from './atom'
+import {
+  playingBibleTabIdAtom,
+  ttsPitchAtom,
+  ttsRepeatAtom,
+  ttsSpeedAtom,
+  ttsVoiceAtom,
+} from './atom'
 
 type UseLoadSoundProps = {
   book: Book

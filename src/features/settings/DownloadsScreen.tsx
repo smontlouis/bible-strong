@@ -9,7 +9,6 @@ import Header from '~common/Header'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import SectionList from '~common/ui/SectionList'
-import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 
 import DownloadableItem from './components/DownloadableItem'
@@ -49,7 +48,6 @@ import * as FileSystem from 'expo-file-system/legacy'
 import { dbManager } from '~helpers/sqlite'
 import { deleteRedWordsFile } from '~helpers/redWords'
 import { deletePericopeFile } from '~helpers/pericopes'
-import { toast } from '~helpers/toast'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 
 // ---------------------------------------------------------------------------
@@ -278,7 +276,7 @@ const DownloadsScreen = () => {
   const lang = useLanguage()
   const needsUpdateMap = useSelector((state: RootState) => state.user.needsUpdate)
   const defaultVersion = getDefaultBibleVersion(lang)
-  const { activeQueue, enqueue, cancelAll } = useDownloadQueue()
+  const { enqueue } = useDownloadQueue()
 
   // Local state
   const [isSelectMode, setIsSelectMode] = useState(false)
@@ -295,6 +293,7 @@ const DownloadsScreen = () => {
   const allSectionKeys = allSections.map(s => s.key).join(',')
   React.useEffect(() => {
     setCollapsedSections(new Set(allSections.map(s => s.key)))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allSectionKeys])
 
   const toggleCollapse = (sectionKey: string) => {

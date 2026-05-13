@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next'
 import Link from '~common/Link'
 import StylizedHTMLView from '~common/StylizedHTMLView'
 import Box from '~common/ui/Box'
-import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import ListenToStrong from './ListenStrong'
 
@@ -17,7 +16,6 @@ import { useAtomValue } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
 import { useRouter } from 'expo-router'
 import { currentStudyIdAtom, openedFromTabAtom } from '~features/studies/atom'
-import { ScrollView } from 'react-native'
 import { StrongReference, StudyNavigateBibleType } from '~common/types'
 import { Theme } from '@emotion/react'
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
@@ -52,11 +50,6 @@ const ViewItem = styled.View(() => ({
 const SubTitle = styled(Text)({
   fontSize: 13,
   marginBottom: 3,
-})
-
-const SmallParagraph = styled(Paragraph)({
-  fontSize: 14,
-  lineHeight: 20,
 })
 
 const Header = styled.View(() => ({
@@ -130,7 +123,6 @@ const StrongCard = (props: Props) => {
       book,
       strongReference,
       isSelectionMode,
-      onClosed,
       strongReference: { Code, Type, Mot, Phonetique, Definition, LSG, Hebreu, Grec },
     } = props
 
@@ -169,10 +161,9 @@ const StrongCard = (props: Props) => {
 
   const {
     isSelectionMode,
-    strongReference: { Code, Hebreu, Grec, Type, Mot, Phonetique, Definition, LSG },
+    strongReference: { Code, Hebreu, Grec, Mot, Phonetique, Definition, LSG },
     theme,
     isModal,
-    onClosed,
   } = props
 
   return (

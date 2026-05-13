@@ -1,7 +1,6 @@
 import { useTheme } from '@emotion/react'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { StyleSheet } from 'react-native'
 import { useAtom, useSetAtom, useAtomValue } from 'jotai/react'
 import Animated from 'react-native-reanimated'
 
@@ -10,7 +9,6 @@ import Container from '~common/ui/Container'
 import { VStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
-import { isStrongVersion } from '~helpers/bibleVersions'
 import { isVersionInstalled } from '~helpers/biblesDb'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { requireBiblePath } from '~helpers/requireBiblePath'
@@ -44,7 +42,7 @@ const DownloadResources = () => {
           // Database: use the language that was stored when resource was selected
           return createDatabaseDownloadItem(
             resource.id as DatabaseId,
-            resource.lang || 'fr' // Fallback to 'fr' for safety
+            (resource.lang || 'fr') as 'en' | 'fr' // Fallback to 'fr' for safety
           )
         }
       } catch (error) {
@@ -66,6 +64,7 @@ const DownloadResources = () => {
     if (activeQueue.length === 0 && progress.total > 0 && progress.completed === progress.total) {
       verifyAndComplete()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeQueue.length, progress.total, progress.completed])
 
   // Watch for failures
@@ -73,6 +72,7 @@ const DownloadResources = () => {
     if (failedItems.length > 0) {
       setError(new Error(failedItems[0].error || 'Download failed'))
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [failedItems.length])
 
   const verifyAndComplete = async () => {

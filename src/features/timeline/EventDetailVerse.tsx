@@ -6,7 +6,6 @@ import Paragraph from '~common/ui/Paragraph'
 
 import { useVersesToContent } from '~features/plans/plan.hooks'
 import Loading from '~common/Loading'
-import { FeatherIcon } from '~common/ui/Icon'
 import Link from '~common/Link'
 import { useTranslation } from 'react-i18next'
 

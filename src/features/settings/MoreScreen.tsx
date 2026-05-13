@@ -31,28 +31,13 @@ import app from '../../../package.json'
 
 import { useRouter } from 'expo-router'
 import { useTheme } from '@emotion/react'
+import { MainStackProps } from '~navigation/type'
 
 export const LinkItem = styled(Link)<LinkProps<keyof MainStackProps>>(() => ({
   flexDirection: 'row',
   alignItems: 'center',
   paddingHorizontal: 20,
   paddingVertical: 15,
-}))
-
-const ProfileContainer = styled.View(({ theme }) => ({
-  width: 50,
-  height: 50,
-  borderRadius: 25,
-  shadowColor: theme.colors.primary,
-  shadowOffset: { width: 0, height: 3 },
-  shadowOpacity: 0.3,
-  shadowRadius: 4,
-  elevation: 1,
-  backgroundColor: 'white',
-  position: 'relative',
-  overflow: 'hidden',
-  alignItems: 'center',
-  justifyContent: 'center',
 }))
 
 const shareMessage = () => {
@@ -87,8 +72,6 @@ export const More = ({ closeMenu }: MoreProps) => {
   const hasUpdate = useSelector((state: RootState) =>
     Object.values(state.user.needsUpdate).some(v => v)
   )
-  const isLoading = useSelector((state: RootState) => state.user.isLoading)
-
   const { t } = useTranslation()
 
   const promptLogout = () => {

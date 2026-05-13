@@ -116,7 +116,7 @@ export function useAppRating() {
       if (await StoreReview.hasAction()) {
         await StoreReview.requestReview()
       }
-    } catch (e) {
+    } catch {
       // Fallback: open store page directly
       const storeUrl =
         Platform.OS === 'ios'

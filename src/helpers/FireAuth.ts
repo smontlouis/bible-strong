@@ -1,4 +1,4 @@
-import appleAuth from '@invertase/react-native-apple-authentication'
+import { appleAuth } from '@invertase/react-native-apple-authentication'
 import { getAnalytics, setUserId as analyticsSetUserId } from '@react-native-firebase/analytics'
 import {
   getAuth,

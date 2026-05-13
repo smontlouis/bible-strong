@@ -1,16 +1,11 @@
 import BottomSheet from '@gorhom/bottom-sheet'
-import { atom, PrimitiveAtom } from 'jotai/vanilla'
-import React, { createContext, useContext, useRef, useState, useCallback, useEffect } from 'react'
-import { BibleTab, BibleTabActions, useBibleTabActions } from '../../../state/tabs'
+import React, { createContext, useContext, useRef } from 'react'
+import type { BibleTab, BibleTabActions } from '../../../state/tabs'
 import BookSelectorBottomSheet, { bookSelectorDataAtom } from './BookSelectorBottomSheet'
 import VersionSelectorBottomSheet, {
   versionSelectorDataAtom,
 } from '../VersionSelectorBottomSheet/VersionSelectorBottomSheet'
-import { useAtomValue, useSetAtom } from 'jotai/react'
-import { useTranslation } from 'react-i18next'
-import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
-import { Book } from '~assets/bible_versions/books-desc'
-import { DeviceEventEmitter } from 'react-native'
+import { useSetAtom } from 'jotai/react'
 
 interface BookSelectorContextType {
   openBookSelector: ({
@@ -46,8 +41,6 @@ export const BookSelectorBottomSheetProvider = ({ children }: { children: React.
   const versionBottomSheetRef = useRef<BottomSheet>(null)
   const setBookSelectorData = useSetAtom(bookSelectorDataAtom)
   const setVersionSelectorData = useSetAtom(versionSelectorDataAtom)
-
-  const { t } = useTranslation()
 
   const openBookSelector = ({
     actions,

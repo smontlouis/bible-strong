@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { InteractionManager } from 'react-native'
 import { createMMKV } from 'react-native-mmkv'
 import { Storage } from 'redux-persist'
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const deepmerge = require('@fastify/deepmerge')()
 
 export const storage = createMMKV()
@@ -58,7 +59,7 @@ export const useMigrateFromAsyncStorage = () => {
         try {
           await migrateFromAsyncStorage()
           setHasMigrated(true)
-        } catch (e) {
+        } catch {
           // TODO: fall back to AsyncStorage? Wipe storage clean and use MMKV? Crash app?
         }
       })

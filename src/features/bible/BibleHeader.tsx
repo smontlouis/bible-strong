@@ -84,7 +84,6 @@ const Header = ({
     selectedChapter: chapter,
     selectedVersion: version,
     selectedVerses,
-    isReadOnly,
     isSelectionMode,
     parallelVersions,
     focusVerses,

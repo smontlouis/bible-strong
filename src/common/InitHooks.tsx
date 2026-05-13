@@ -24,9 +24,9 @@ import useDownloadBibleResources from '~helpers/useDownloadBibleResources'
 import useInitFireAuth from '~helpers/useInitFireAuth'
 import useLiveUpdates from '~helpers/useLiveUpdates'
 import { getChangelog, getDatabaseUpdate, getVersionUpdate } from '~redux/modules/user'
-import useTabGroupsSync from '~state/useTabGroupsSync'
+import { useTabGroupsSync } from '~state/useTabGroupsSync'
 
-export interface InitHooksProps {}
+export type InitHooksProps = Record<string, never>
 
 const handleAppStateChange = async (nextAppState: AppStateStatus) => {
   if (nextAppState.match(/inactive|background/)) {
@@ -41,7 +41,7 @@ const handleAppStateChange = async (nextAppState: AppStateStatus) => {
   }
 }
 
-const InitHooks = ({}: InitHooksProps) => {
+const InitHooks = (_props: InitHooksProps) => {
   useInitFireAuth()
   const { t } = useTranslation()
   const dispatch = useDispatch()

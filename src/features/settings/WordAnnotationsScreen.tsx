@@ -7,7 +7,7 @@ import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 
 import Header from '~common/Header'
-import Box, { HStack, VStack } from '~common/ui/Box'
+import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { RootState } from '~redux/modules/reducer'
 import { WordAnnotation } from '~redux/modules/user/wordAnnotations'

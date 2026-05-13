@@ -1,4 +1,4 @@
-import BottomSheet, { BottomSheetModal, BottomSheetScrollViewMethods } from '@gorhom/bottom-sheet'
+import BottomSheet, { BottomSheetScrollViewMethods } from '@gorhom/bottom-sheet'
 import React from 'react'
 import { useSharedValue } from 'react-native-reanimated'
 import Box from '~common/ui/Box'

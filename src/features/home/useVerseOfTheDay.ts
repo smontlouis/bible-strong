@@ -50,11 +50,12 @@ const useGetVerseOfTheDay = (version: VersionCode, addDay: number) => {
           verse: Number(verse),
           ...vod,
         })
-      } catch (e) {
+      } catch {
         setVOD({ error: true })
       }
     }
     loadVerse()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [version])
 
   return verseOfTheDay

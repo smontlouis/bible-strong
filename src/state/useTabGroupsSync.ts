@@ -100,7 +100,6 @@ export const useTabGroupsSync = () => {
 
       try {
         const newGroupIds = new Set(newGroups.map(g => g.id))
-        const oldGroupIds = new Set(oldGroups.map(g => g.id))
 
         // Deleted groups
         for (const oldGroup of oldGroups) {
@@ -137,6 +136,7 @@ export const useTabGroupsSync = () => {
   )
 
   // Debounced version
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSync = useCallback(debounce(syncChangesToFirestore, SYNC_DEBOUNCE_MS), [
     syncChangesToFirestore,
   ])
