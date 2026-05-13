@@ -26,7 +26,7 @@ const LexiqueResultsWidget = ({ searchValue }: any) => {
   const [error, setError] = useState(false)
   const [limit, setLimit] = useState(LIMIT)
 
-  const { results, isLoading } = useResultsByLetterOrSearch({
+  const { results } = useResultsByLetterOrSearch({
     query: loadLexiqueBySearch,
     value: searchValue,
   })

@@ -2,7 +2,7 @@ import * as FileSystem from 'expo-file-system/legacy'
 
 import { storage } from '~helpers/storage'
 import { insertBibleVersion, isVersionInstalled, openBiblesDb } from '~helpers/biblesDb'
-import { versions, isStrongVersion } from '~helpers/bibleVersions'
+import { isStrongVersion } from '~helpers/bibleVersions'
 
 const MIGRATION_KEY = 'hasMigratedBiblesToSqlite'
 const MIGRATED_VERSIONS_KEY = 'migratedBibleVersions'

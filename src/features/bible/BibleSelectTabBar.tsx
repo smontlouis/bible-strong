@@ -4,7 +4,6 @@ import styled from '@emotion/native'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useTranslation } from 'react-i18next'
-import { BottomSheetView } from '@gorhom/bottom-sheet'
 
 const TabItem = styled.TouchableOpacity<{ isRouteActive?: boolean }>(
   ({ theme, isRouteActive }) => ({

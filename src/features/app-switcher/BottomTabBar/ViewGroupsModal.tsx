@@ -6,7 +6,6 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Modal from '~common/Modal'
-import ModalHeader from '~common/ModalHeader'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { getDateLocale } from '~helpers/languageUtils'
@@ -165,7 +164,6 @@ interface ViewGroupsModalProps {
 }
 
 const ViewGroupsModal = ({ bottomSheetRef, onClose }: ViewGroupsModalProps) => {
-  const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const groups = useAtomValue(tabGroupsAtom)
   const activeGroupId = useAtomValue(activeGroupIdAtom)

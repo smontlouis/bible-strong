@@ -60,29 +60,13 @@ const StyledVerse = styled.View(({ theme }) => ({
   flexDirection: 'row',
 }))
 
-const CountChip = styled.View(({ theme }) => ({
-  width: 14,
-  height: 14,
-  borderRadius: 7,
-  backgroundColor: theme.colors.border,
-  position: 'absolute',
-  justifyContent: 'center',
-  alignItems: 'center',
-  bottom: -5,
-  right: -5,
-}))
-
-const StyledScrollView = styled.ScrollView(({ theme }) => ({
-  backgroundColor: theme.colors.lightGrey,
-}))
-
 interface StrongReference {
   Code: number
   // Add other properties as needed
 }
 
 interface Verse {
-  Livre: string
+  Livre: number
   Chapitre: number
   Verset: number
   // Add other properties as needed
@@ -95,7 +79,7 @@ interface Props {
 }
 
 interface State {
-  error: boolean | 'CORRUPTED_DATABASE'
+  error: boolean | 'CORRUPTED_DATABASE' | 'DISK_IO' | 'UNKNOWN_ERROR'
   isCarouselLoading: boolean
   strongReferences: StrongReference[]
   currentStrongReference: StrongReference | null
@@ -126,8 +110,11 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
   const loadPage = async () => {
     const strongVerse = await loadStrongVerse(verse)
 
-    if (!strongVerse?.Texte) {
-      setState(prev => ({ ...prev, error: true }))
+    if (!strongVerse || 'error' in strongVerse || !strongVerse.Texte) {
+      setState(prev => ({
+        ...prev,
+        error: strongVerse && 'error' in strongVerse ? strongVerse.error : true,
+      }))
       return
     }
 
@@ -142,7 +129,19 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
 
     setState(prev => ({ ...prev, formattedTexte }))
 
-    const strongReferences = await loadStrongReferences(references, verse.Livre)
+    const strongReferencesResult = await loadStrongReferences(references, verse.Livre)
+    if (!strongReferencesResult || 'error' in strongReferencesResult) {
+      setState(prev => ({
+        ...prev,
+        isCarouselLoading: false,
+        error:
+          strongReferencesResult && 'error' in strongReferencesResult
+            ? strongReferencesResult.error
+            : true,
+      }))
+      return
+    }
+    const strongReferences = strongReferencesResult as unknown as StrongReference[]
     setState(prev => ({
       ...prev,
       isCarouselLoading: false,
@@ -193,6 +192,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
 
   useEffect(() => {
     loadPage()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [verse.Verset])
 
   const { isCarouselLoading, versesInCurrentChapter, error, formattedTexte } = state

@@ -91,6 +91,7 @@ const BibleNoteModal = ({ noteVerses, ref }: BibleNoteModalProps) => {
       setTitle('')
       setDescription('')
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [noteVerses])
 
   const onSaveNoteFunc = () => {

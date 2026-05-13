@@ -1,12 +1,17 @@
 import React from 'react'
-import Animated, { Extrapolation, interpolate, useAnimatedStyle } from 'react-native-reanimated'
+import {
+  Extrapolation,
+  interpolate,
+  useAnimatedStyle,
+  type SharedValue,
+} from 'react-native-reanimated'
 import { AnimatedBox } from '~common/ui/Box'
 import { wpUI } from '~helpers/utils'
 import SectionImage from './SectionImage'
 import { ShallowTimelineSection } from './types'
 
 interface Props {
-  x: Animated.SharedValue<number>
+  x: SharedValue<number>
   prevEvent: ShallowTimelineSection
 }
 

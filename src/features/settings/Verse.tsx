@@ -64,7 +64,6 @@ const VerseComponent = ({ color, date, verseIds, stringIds, tags, setSettings }:
   const formattedDate = distanceInWords(Number(date), Date.now(), {
     locale: getDateLocale(lang),
   })
-  // @ts-ignore
   const { Livre, Chapitre, Verset } = verses[0]
   return (
     <TouchableOpacity
@@ -74,7 +73,7 @@ const VerseComponent = ({ color, date, verseIds, stringIds, tags, setSettings }:
           pathname: '/bible-view',
           params: {
             isReadOnly: 'true',
-            book: JSON.stringify(books[Livre - 1]),
+            book: JSON.stringify(books[Number(Livre) - 1]),
             chapter: String(Chapitre),
             verse: String(Verset),
             focusVerses: JSON.stringify(verses.map(v => Number(v.Verset))),

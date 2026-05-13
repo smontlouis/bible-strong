@@ -9,9 +9,9 @@ import { activeTabIndexAtom, getDefaultBibleTab, tabsAtom } from '../../../../st
 import { getDefaultBibleVersionFromState } from '../../../../state/useDefaultBibleVersion'
 import { TAB_ICON_SIZE } from '../../utils/constants'
 
-export interface BibleButtonProps {}
+export type BibleButtonProps = Record<string, never>
 
-const BibleButton = ({}: BibleButtonProps) => {
+const BibleButton = (_props: BibleButtonProps) => {
   const tabs = useAtomValue(tabsAtom)
   const setTabs = useSetAtom(tabsAtom)
   const setActiveTabIndex = useSetAtom(activeTabIndexAtom)

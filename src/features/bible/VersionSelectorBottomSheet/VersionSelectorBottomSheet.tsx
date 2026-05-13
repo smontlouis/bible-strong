@@ -15,7 +15,7 @@ import { BibleTab, BibleTabActions, VersionCode } from '../../../state/tabs'
 import VersionSelectorItem from '../VersionSelectorItem'
 
 interface VersionSelectorBottomSheetProps {
-  bottomSheetRef: React.RefObject<BottomSheet>
+  bottomSheetRef: React.RefObject<BottomSheet | null>
 }
 
 export const versionSelectorDataAtom = atom<{

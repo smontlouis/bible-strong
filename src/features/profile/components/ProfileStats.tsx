@@ -112,13 +112,6 @@ const ProfileStats = () => {
   )
 }
 
-const Container = styled(Box)(({ theme }) => ({
-  backgroundColor: theme.colors.lightGrey,
-  paddingVertical: 20,
-  marginHorizontal: 20,
-  borderRadius: 30,
-}))
-
 const StatCard = styled(Link)(({ theme }: { theme: any }) => ({
   flex: 1,
   backgroundColor: theme.colors.reverse,

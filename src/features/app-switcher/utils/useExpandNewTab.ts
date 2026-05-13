@@ -38,6 +38,7 @@ export const useExpandNewTab = () => {
         setTabId(null)
       }
     })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabId, tabsCount, prevTabsCount])
 
   return { triggerExpandNewTab: setTabId }

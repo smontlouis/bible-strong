@@ -20,7 +20,7 @@ const Changelog = () => {
   const { t } = useTranslation()
   const lang = useLanguage()
 
-  const sortedChangelog = [...changelog].sort((a, b) => b.date - a.date)
+  const sortedChangelog = [...changelog].sort((a, b) => Number(b.date) - Number(a.date))
 
   return (
     <Container>

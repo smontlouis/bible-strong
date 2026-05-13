@@ -11,6 +11,7 @@ import {
   resetCompareVersion,
   saveAllLogsAsSeen,
   toggleCompareVersion,
+  type ImportDataPayload,
 } from './modules/user'
 
 // Import action creators from sub-modules
@@ -586,14 +587,14 @@ const firestoreMiddleware: Middleware = store => next => async action => {
 
     // Sync les entités modifiées (highlights, notes, etc.)
     for (const collection of SUBCOLLECTION_NAMES) {
-      if (collection !== 'tags' && diffState.user.bible[collection]) {
+      if (collection !== 'tags' && (diffState.user.bible as Record<string, any>)[collection]) {
         await handleSyncWithRetry(
           async () => {
             await syncSubcollectionChanges(
               userId,
               collection,
-              diffState.user.bible[collection],
-              user.bible[collection],
+              (diffState.user.bible as Record<string, any>)[collection],
+              (user.bible as Record<string, any>)[collection],
               deleteMarker
             )
           },
@@ -682,7 +683,11 @@ const firestoreMiddleware: Middleware = store => next => async action => {
 
   // ========== IMPORT DATA (migration vers sous-collections) ==========
   if (importData.match(action)) {
-    const { bible, studies, plan: importedPlan } = action.payload
+    const {
+      bible,
+      studies,
+      plan: importedPlan,
+    } = action.payload as ImportDataPayload & { plan?: any }
 
     await handleSyncWithRetry(
       async () => {

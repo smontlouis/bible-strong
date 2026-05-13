@@ -6,7 +6,7 @@ import { useFonts } from 'expo-font'
 import { Ref, useEffect, useRef } from 'react'
 import { dispatch } from './dispatch'
 import Quill from './quill'
-import type { QuillInstance } from './quill'
+import type { QuillInstance } from './quill-types'
 import './quill.snow.css'
 
 import './InlineStrong'
@@ -111,7 +111,7 @@ export default function StudiesDOMComponent({
       readOnly: true,
     })
 
-    const quill = quillRef.current
+    const quill = quillRef.current!
     console.log('[Studies] Editor initialized')
 
     quill.focus()

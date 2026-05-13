@@ -1,6 +1,4 @@
 import { Platform } from 'react-native'
-import colors from './colors'
-
 const theme = {
   measures: {
     headerHeight: 60,

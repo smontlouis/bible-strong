@@ -5,7 +5,8 @@
  * Instead of boolean checks like `isFR`, use language codes and helper functions.
  */
 
-import { fr, enGB, enUS, es, de, pt, it, nl, Locale } from 'date-fns/locale'
+import { fr, enGB, enUS, es, de, pt, it, nl } from 'date-fns/locale'
+import type { Locale } from 'date-fns'
 
 // Common Bible version codes used as defaults
 // Full VersionCode type is defined in src/state/tabs.ts

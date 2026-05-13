@@ -23,17 +23,6 @@ const ScrollView = styled.ScrollView(({ theme, orientation, backgroundColor }: a
   }),
 }))
 
-const fadeIn = {
-  from: {
-    translateY: 10,
-    opacity: 0,
-  },
-  to: {
-    translateY: 0,
-    opacity: 1,
-  },
-}
-
 type HomeScrollViewProps = {
   children: any
   showsVerticalScrollIndicator: boolean

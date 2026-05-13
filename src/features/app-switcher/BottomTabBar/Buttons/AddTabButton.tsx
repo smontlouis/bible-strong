@@ -7,9 +7,9 @@ import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 import { useExpandNewTab } from '~features/app-switcher/utils/useExpandNewTab'
 import { tabsAtomsAtom } from '../../../../state/tabs'
 
-export interface AddTabButtonProps {}
+export type AddTabButtonProps = Record<string, never>
 
-const AddTabButton = ({}: AddTabButtonProps) => {
+const AddTabButton = (_props: AddTabButtonProps) => {
   const { t } = useTranslation()
   const dispatchTabs = useSetAtom(tabsAtomsAtom)
   const { triggerExpandNewTab } = useExpandNewTab()

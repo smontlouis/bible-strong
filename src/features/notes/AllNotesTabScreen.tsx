@@ -1,4 +1,4 @@
-import produce from 'immer'
+import { produce } from 'immer'
 import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -91,6 +91,7 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
 
   useEffect(() => {
     loadNotes()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_notes, wordAnnotations])
 
   const openNoteDetail = (noteId: string) => {

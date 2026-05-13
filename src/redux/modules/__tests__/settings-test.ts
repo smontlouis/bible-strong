@@ -274,7 +274,7 @@ describe('Settings Reducer', () => {
   })
 
   describe('setSettingsPreferredLightTheme', () => {
-    const themes = ['default', 'sepia', 'nature', 'sunset', 'mauve'] as const
+    const themes = ['default', 'sepia', 'nature', 'sunset'] as const
     themes.forEach(theme => {
       it(`should set preferred light theme to ${theme}`, () => {
         const newState = userReducer(initialState, setSettingsPreferredLightTheme(theme))

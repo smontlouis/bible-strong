@@ -3,12 +3,7 @@ import { useSetAtom } from 'jotai'
 import * as Sentry from '@sentry/react-native'
 import { migrationProgressAtom, MigrationProgress } from 'src/state/migration'
 import { RootState } from '~redux/modules/reducer'
-import {
-  getMigrationState,
-  clearMigrationState,
-  hasPendingMigration,
-  getFailedCollections,
-} from './migrationState'
+import { getMigrationState, clearMigrationState, hasPendingMigration } from './migrationState'
 import {
   checkForEmbeddedData,
   resumableMigrateUserData,

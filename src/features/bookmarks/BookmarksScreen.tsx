@@ -1,4 +1,3 @@
-import styled from '@emotion/native'
 import React, { useState, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
@@ -18,14 +17,6 @@ import { selectSortedBookmarks } from '~redux/selectors/bookmarks'
 import type { Bookmark } from '~common/types'
 import BookmarkModal from './BookmarkModal'
 import books from '~assets/bible_versions/books-desc'
-
-const ColorIndicator = styled.View<{ color: string }>(({ color }) => ({
-  width: 12,
-  height: 12,
-  borderRadius: 6,
-  backgroundColor: color,
-  marginRight: 12,
-}))
 
 const getBookName = (bookNumber: number): string => {
   const bookData = books.find((b: any) => b.Numero === bookNumber)

@@ -17,8 +17,8 @@ import loadBibleChapter from '~helpers/loadBibleChapter'
 import { useQuery } from '~helpers/react-query-lite'
 
 interface VerseBottomSheetProps {
-  bottomSheetRef: React.RefObject<BottomSheet>
-  bookSelectorRef: React.RefObject<BottomSheet>
+  bottomSheetRef: React.RefObject<BottomSheet | null>
+  bookSelectorRef: React.RefObject<BottomSheet | null>
   actions?: BibleTabActions
   data?: BibleTab['data']
 }

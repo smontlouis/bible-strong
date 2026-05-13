@@ -118,7 +118,7 @@ const AddToStudyModal = ({ bottomSheetRef, onSelectStudy, onClose }: AddToStudyM
         ListHeaderComponent={renderNewStudyButton}
         data={result.filter(item => item.id)}
         renderItem={renderStudyItem}
-        keyExtractor={item => item.id}
+        keyExtractor={(item: Study) => item.id}
         estimatedItemSize={72}
         contentContainerStyle={{ paddingBottom: 20 }}
         ListEmptyComponent={

@@ -14,7 +14,6 @@ import { CarouselProvider } from '~helpers/CarouselContext'
 import { getChapterVerses } from '~helpers/biblesDb'
 
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
-import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { Verse } from '~common/types'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
@@ -113,7 +112,6 @@ const useFormattedText = ({
   const [currentWord, setCurrentWord] = useState<string>()
   const [versesInCurrentChapter, setVersesInCurrentChapter] = useState(0)
   const [formattedText, setFormattedText] = useState<JSX.Element | JSX.Element[] | undefined>()
-  const [boxHeight, setBoxHeight] = useState(0)
 
   const { Livre, Chapitre, Verset } = verse
 
@@ -161,10 +159,6 @@ const useFormattedText = ({
   }
 }
 
-const StyledScrollView = styled.ScrollView(({ theme }) => ({
-  backgroundColor: theme.colors.lightGrey,
-}))
-
 const DictionnaireVerseDetailScreen = ({
   verse,
   updateVerse,
@@ -175,7 +169,6 @@ const DictionnaireVerseDetailScreen = ({
   const { t } = useTranslation()
   const carousel = useRef<ICarouselInstance>(null)
   const { Livre, Chapitre, Verset } = verse
-  const router = useRouter()
   const [boxHeight, setBoxHeight] = useState(0)
   const {
     ref: carouselContainerRef,
@@ -236,7 +229,7 @@ const DictionnaireVerseDetailScreen = ({
             </VersetWrapper>
             <CarouselProvider
               value={{
-                current: currentWord,
+                current: currentWord ?? null,
                 setCurrent: goToWord,
               }}
             >
@@ -279,9 +272,7 @@ const DictionnaireVerseDetailScreen = ({
             }}
             defaultIndex={currentWordIndex === -1 ? 0 : currentWordIndex}
             data={words}
-            renderItem={({ item, index }) => (
-              <DictionnaireCard navigation={router} dictionnaireRef={item} index={index} />
-            )}
+            renderItem={({ item, index }) => <DictionnaireCard dictionnaireRef={item} />}
             onSnapToItem={(index: any) => setCurrentWord(wordsInVerse[index])}
           />
         ) : (

@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 
-import produce from 'immer'
+import { produce } from 'immer'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useAtom } from 'jotai/react'
 import { NaveTab } from '../../state/tabs'

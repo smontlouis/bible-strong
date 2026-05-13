@@ -30,7 +30,7 @@ class CompareVerseItem extends React.Component<any> {
           position,
         })
         this.setState({ content, versionNeedsDownload })
-      } catch (e) {
+      } catch {
         this.setState({
           content: 'Impossible de charger ce verset',
           versionNeedsDownload,

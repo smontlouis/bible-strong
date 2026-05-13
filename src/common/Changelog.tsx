@@ -1,10 +1,5 @@
 import React, { useRef, useEffect } from 'react'
-import {
-  BottomSheetBackdrop,
-  BottomSheetFooter,
-  BottomSheetModal,
-  BottomSheetScrollView,
-} from '@gorhom/bottom-sheet'
+import { BottomSheetFooter, BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import distanceInWords from 'date-fns/formatDistance'
 
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
@@ -23,7 +18,6 @@ import { RootState } from '~redux/modules/reducer'
 import { ChangelogItem, LogType } from './types'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types'
 
 const getTagColor = (type: LogType) => {
   switch (type) {

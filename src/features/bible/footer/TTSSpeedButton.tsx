@@ -7,7 +7,7 @@ import Text from '~common/ui/Text'
 import { ttsSpeedAtom } from './atom'
 import AudioChip from './AudioChip'
 
-export interface TTSSpeedButtonProps extends BoxProps {}
+export type TTSSpeedButtonProps = BoxProps
 
 const choices = [
   { value: '0.5', label: '0.5x' },

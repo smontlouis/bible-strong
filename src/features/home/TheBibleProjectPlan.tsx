@@ -1,4 +1,3 @@
-import { useTheme } from '@emotion/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import BibleProjectIcon from '~common/BibleProjectIcon'
@@ -9,7 +8,6 @@ import { ProgressBar } from '~common/ui/ProgressBar'
 import Text from '~common/ui/Text'
 import { useComputedPlanItems } from '~features/plans/plan.hooks'
 import useLanguage from '~helpers/useLanguage'
-import { Theme } from '~themes'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -18,10 +16,10 @@ const TheBibleProject = () => {
   const lang = useLanguage()
 
   const plans = useComputedPlanItems()
-  const { id, title, image, description, author, progress } =
-    plans.find(p => p.id === (lang === 'fr' ? 'bible-project-plan' : 'bible-project-plan-en')) || {}
-  const theme: Theme = useTheme()
-
+  const plan = plans.find(
+    p => p.id === (lang === 'fr' ? 'bible-project-plan' : 'bible-project-plan-en')
+  )
+  const { id, progress } = plan || {}
   if (!id) {
     return null
   }
@@ -29,13 +27,7 @@ const TheBibleProject = () => {
   return (
     <Box bg="lightGrey" pt={20}>
       <Box lightShadow bg="reverse" rounded height={80} px={20}>
-        <LinkBox
-          flex
-          row
-          center
-          route="Plan"
-          params={{ plan: { id, title, image, description, author } }}
-        >
+        <LinkBox flex row center route="Plan" params={{ planId: id, plan: plan! }}>
           <Box mr={20} center size={50} bg="lightPrimary" borderRadius={10}>
             <BibleProjectIcon />
           </Box>

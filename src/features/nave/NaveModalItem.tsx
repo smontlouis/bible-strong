@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import styled from '@emotion/native'
 import Color from 'color'
 
 import Link from '~common/Link'
-import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 
 const StyledNaveItem = styled.View(({ theme }) => ({

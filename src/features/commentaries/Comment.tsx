@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react-native'
-import to from 'await-to-js'
+import { to } from 'await-to-js'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { useAtomValue } from 'jotai'

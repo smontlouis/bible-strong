@@ -1,4 +1,4 @@
-import produce from 'immer'
+import { produce } from 'immer'
 import { atom } from 'jotai/vanilla'
 import { Tag, VerseIds } from '~common/types'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'

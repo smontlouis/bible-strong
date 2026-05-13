@@ -1,7 +1,6 @@
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React from 'react'
-import { useTranslation } from 'react-i18next'
 import { FlatList } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import books, { Book } from '~assets/bible_versions/books-desc'
@@ -14,12 +13,11 @@ interface BookSelectorScreenProps {
 }
 
 const BookSelector = ({ bibleAtom, onNavigate }: BookSelectorScreenProps) => {
-  const { t } = useTranslation()
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
   const insets = useSafeAreaInsets()
   const {
-    data: { selectionMode, selectedBook },
+    data: { selectedBook },
   } = bible
 
   const onBookChange = (book: Book) => {

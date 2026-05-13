@@ -9,7 +9,7 @@ import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
 import { MainStackProps } from '~navigation/type'
 
-const LinkItem = styled(Link)<LinkProps<keyof MainStackProps>>(({}) => ({
+const LinkItem = styled(Link)<LinkProps<keyof MainStackProps>>(() => ({
   flexDirection: 'row',
   alignItems: 'center',
   paddingHorizontal: 20,

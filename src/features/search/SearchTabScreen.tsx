@@ -1,4 +1,4 @@
-import produce from 'immer'
+import { produce } from 'immer'
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useEffect } from 'react'
@@ -39,6 +39,7 @@ const SearchTabScreen = ({ searchAtom }: SearchScreenProps) => {
 
   useEffect(() => {
     setTitle(searchValue || t('Recherche'))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchValue])
 
   return (

@@ -206,7 +206,7 @@ function DeferredModals() {
 // Inner app with all providers (needs Redux context)
 function InnerApp() {
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
-  const { theme: currentTheme, colorScheme } = useCurrentThemeSelector()
+  const { theme: currentTheme } = useCurrentThemeSelector()
 
   useKeepAwake()
 

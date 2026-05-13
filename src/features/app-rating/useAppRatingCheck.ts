@@ -22,6 +22,7 @@ export function useAppRatingCheck() {
         shouldShow.current = shouldShowRatingPrompt('engagement_milestone')
       }, 1000)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return {

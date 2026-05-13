@@ -263,6 +263,7 @@ const ColorPickerModal = () => {
         <ModalHeader title={t('Palette de couleurs')} />
       </>
     ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   )
 

@@ -25,6 +25,7 @@ const BibleVerseDetailFooter = ({
   const { t } = useTranslation()
   return (
     <Box row paddingLeft={20} paddingRight={20} my={20}>
+      {/* eslint-disable-next-line eqeqeq */}
       {!(verseNumber == 1) && (
         <IconButton activeOpacity={0.5} onPress={() => goToPrevVerse(versesInCurrentChapter)}>
           <FeatherIcon name="arrow-left-circle" size={20} />
@@ -34,6 +35,7 @@ const BibleVerseDetailFooter = ({
         </IconButton>
       )}
       <Box flex />
+      {/* eslint-disable-next-line eqeqeq */}
       {!(verseNumber == versesInCurrentChapter) && (
         <IconButton activeOpacity={0.5} onPress={() => goToNextVerse(versesInCurrentChapter)}>
           <Text paddingRight={10} color="darkGrey">

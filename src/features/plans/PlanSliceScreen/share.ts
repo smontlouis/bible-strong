@@ -1,9 +1,10 @@
 import { ChapterSlice, VerseSlice, VideoSlice } from '~common/types'
 import { getChaptersForPlan, getVersesForPlan } from '../plan.hooks'
-import to from 'await-to-js'
+import { to } from 'await-to-js'
 import i18n from '~i18n'
+import type { VersionCode } from '~state/tabs'
 export const chapterSliceToText = async (slice: ChapterSlice, version: string) => {
-  const [err, result] = await to(getChaptersForPlan(slice.chapters, version))
+  const [err, result] = await to(getChaptersForPlan(slice.chapters, version as VersionCode))
 
   if (err) {
     return i18n.t("Il semblerait que ce chapitre n'existe pas dans cette version.")
@@ -21,7 +22,7 @@ export const chapterSliceToText = async (slice: ChapterSlice, version: string) =
 }
 
 export const verseSliceToText = async (slice: VerseSlice, version: string) => {
-  const [err, result] = await to(getVersesForPlan(slice.verses, version))
+  const [err, result] = await to(getVersesForPlan(slice.verses, version as VersionCode))
 
   if (err) {
     return i18n.t("Il semblerait que ce chapitre n'existe pas dans cette version.")

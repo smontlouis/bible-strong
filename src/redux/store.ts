@@ -57,6 +57,7 @@ function configureStore() {
     if (module.hot) {
       // @ts-ignore
       module.hot.accept(() => {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const nextRootReducer = require('./modules/reducer').default
         store.replaceReducer(nextRootReducer)
       })

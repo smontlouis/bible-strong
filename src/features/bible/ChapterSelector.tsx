@@ -3,7 +3,6 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import React from 'react'
 import { ScrollView } from 'react-native'
 
-import i18n from '~i18n'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import SelectorItem from './SelectorItem'
 

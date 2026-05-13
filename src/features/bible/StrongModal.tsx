@@ -59,7 +59,6 @@ const StrongCardWrapper = waitForStrongModal(({ navigation, selectedCode, onClos
   return (
     <StrongCard
       theme={theme}
-      navigation={navigation}
       book={selectedCode?.book}
       strongReference={strongReference}
       isModal
@@ -87,6 +86,7 @@ const StrongModal = ({ ref, onClosed, selectedCode, version }: StrongModalProps)
     if (isStrongVersion(version)) {
       onClosed()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [version])
 
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()

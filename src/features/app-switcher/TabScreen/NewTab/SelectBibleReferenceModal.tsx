@@ -5,7 +5,7 @@ import Modal from '~common/Modal'
 import BibleSelect from '~features/bible/BibleSelect'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import wait from '~helpers/wait'
-import { BibleTab, getDefaultBibleTab, useBibleTabActions } from '../../../../state/tabs'
+import { getDefaultBibleTab, useBibleTabActions } from '../../../../state/tabs'
 import { selectBibleReferenceDataAtom } from './atoms'
 
 export interface SelectBibleReferenceModalProps {
@@ -42,6 +42,7 @@ const SelectBibleReferenceModal = ({ isOpen, onClose }: SelectBibleReferenceModa
       setCanGetData(false)
       actions.resetTempSelected()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bible, canGetData, onSelect])
 
   return (

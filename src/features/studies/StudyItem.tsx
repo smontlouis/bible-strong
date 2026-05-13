@@ -16,7 +16,7 @@ import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
 import { getDateLocale } from '~helpers/languageUtils'
-import { StudiesObj, Study } from '~redux/modules/user'
+import { Study } from '~redux/modules/user'
 
 export const LinkBox = Box.withComponent(Link)
 
@@ -74,7 +74,12 @@ const StudyItem = ({ study, theme, setStudySettings, onPress }: StudyItemProps) 
               </Text>
 
               <Paragraph marginTop={10} scale={-3}>
-                {truncate(deltaToPlainText(study.content.ops), 80)}
+                {truncate(
+                  deltaToPlainText(
+                    study.content.ops as unknown as Parameters<typeof deltaToPlainText>[0]
+                  ),
+                  80
+                )}
               </Paragraph>
             </>
           ) : (

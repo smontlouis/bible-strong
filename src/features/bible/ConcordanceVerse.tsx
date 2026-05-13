@@ -6,7 +6,7 @@ import books from '~assets/bible_versions/books-desc'
 
 import Loading from '~common/Loading'
 import verseToStrong from '~helpers/verseToStrong'
-import { TFunction, useTranslation, withTranslation } from 'react-i18next'
+import type { TFunction } from 'react-i18next'
 import { Router } from 'expo-router'
 
 const VerseText = styled.View(() => ({
