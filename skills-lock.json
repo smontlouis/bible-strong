@@ -37,6 +37,12 @@
       "skillPath": "skills/engineering/prototype/SKILL.md",
       "computedHash": "e4d0c8f8cb3fc096ee99405a15491da466545cf4a3694bee5a0c9db2fa621a43"
     },
+    "react-native-ease-refactor": {
+      "source": "appandflow/react-native-ease",
+      "sourceType": "github",
+      "skillPath": "skills/react-native-ease-refactor/SKILL.md",
+      "computedHash": "ff150edd2851a0d8bbddf30d07045e61431350f2c2459576bd0fd6f4b331dbb5"
+    },
     "setup-matt-pocock-skills": {
       "source": "mattpocock/skills",
       "sourceType": "github",

@@ -25,6 +25,8 @@ Two **category** roles:
 - `bug` — something is broken
 - `enhancement` — new feature or improvement
 
+Optional **domain** labels may also apply. Use `bible` when an issue asks to add, import, research, or update a Bible version, Bible translation, or Bible text resource.
+
 Five **state** roles:
 
 - `needs-triage` — maintainer needs to evaluate
