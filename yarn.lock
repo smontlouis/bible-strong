@@ -6551,6 +6551,7 @@ __metadata:
     redux-persist-filesystem-storage: "npm:^2.1.0"
     redux-thunk: "npm:^2.3.0"
     rn-fetch-blob: "npm:^0.12.0"
+    serve-sim: "npm:^0.1.28"
     slugify: "npm:^1.4.0"
     sonner-native: "npm:^0.22.2"
     trunc-html: "npm:^1.1.2"
@@ -10233,6 +10234,17 @@ __metadata:
     assignment: "npm:2.0.0"
     he: "npm:0.5.0"
   checksum: 10c0/e880a3a070a32732702a14877495c79b7a2a0d2a77a950de0fed4bed337323c4a3b9a4ef441bad1966bb876a9dd5d45c22a88f38f42cfcc19d7f5d09323db2ba
+  languageName: node
+  linkType: hard
+
+"inspect-webkit@npm:^0.0.3":
+  version: 0.0.3
+  resolution: "inspect-webkit@npm:0.0.3"
+  peerDependencies:
+    typescript: ^5
+  bin:
+    inspect-webkit: dist/cli.js
+  checksum: 10c0/68f203bd4de7e64d55fad909c744b3578ca56ac13e4eaaf628a058bd935bb1109c0308c07aed25dfecb97f26d5abe19a31cf55ebb79bcdd1f9a20955daaf83f1
   languageName: node
   linkType: hard
 
@@ -15004,6 +15016,17 @@ __metadata:
   version: 2.1.0
   resolution: "serialize-error@npm:2.1.0"
   checksum: 10c0/919c40d293cd36b16bb3fce38a3a460e0c51a34cf0ee59815bbeec7c48ffe0a66ea2dec08aa5340ef6dfc1f22e7317f6e1ed76cdbb2ec3c494c0c4debfb344f8
+  languageName: node
+  linkType: hard
+
+"serve-sim@npm:^0.1.28":
+  version: 0.1.28
+  resolution: "serve-sim@npm:0.1.28"
+  dependencies:
+    inspect-webkit: "npm:^0.0.3"
+  bin:
+    serve-sim: dist/serve-sim.js
+  checksum: 10c0/7da5e70aae5394f1590a6bc4dab3242114ce2ff231e1efccb5af6e11e821c8f57be4c9dcf6b7e9173be59cce6f6daaf4139f56977025d52c458e8d39def1a4b2
   languageName: node
   linkType: hard
 

@@ -413,3 +413,33 @@ const animatedStyle = useAnimatedStyle(() => ({
 Always use context7 when I need code generation, setup or configuration steps, or
 library/API documentation. This means you should automatically use the Context7 MCP
 tools to resolve library id and get library docs without me having to explicitly ask.
+
+## Agent skills
+
+### Issue tracker
+
+Issues and PRDs are tracked in GitHub Issues for `smontlouis/bible-strong`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Use the default canonical triage labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context repo: read root `CONTEXT.md` and `docs/adr/` when they exist. See `docs/agents/domain.md`.
+
+## Harness readiness
+
+Level 1 harness docs live in `docs/agents/harness-readiness.md`.
+
+Validation:
+- Commands and local checks: `docs/agents/validation.md`
+- Smoke tests: `docs/agents/smoke-tests.md`
+
+Risk policy:
+- Sensitive areas: `docs/agents/sensitive-areas.md`
+- Observability: `docs/agents/observability.md`
+
+Domain language:
+- Read `CONTEXT.md` or `CONTEXT-MAP.md` when present.
+- Read relevant ADRs under `docs/adr/` when present.

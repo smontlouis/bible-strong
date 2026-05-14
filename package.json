@@ -22,6 +22,7 @@
     "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx}\"",
     "typecheck": "tsc --noEmit",
     "i18n": "i18next 'src/**/*.{js,ts,tsx}' '!src/features/bible/bibleWebView/**' '!src/features/studies/studiesWebView/**'",
+    "serve-sim": "serve-sim",
     "android": "expo run:android",
     "ios": "expo run:ios"
   },
@@ -178,6 +179,7 @@
     "jest-expo": "~54.0.16",
     "prettier": "^3.8.1",
     "react-test-renderer": "18.3.1",
+    "serve-sim": "^0.1.28",
     "typescript": "~5.9.2"
   },
   "private": true,
