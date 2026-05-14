@@ -23,6 +23,7 @@ import {
   SearchOptions,
   SearchSortOrder,
 } from '~helpers/biblesDb'
+import { appLogger } from '~helpers/agentObservability'
 import formatVerseContent from '~helpers/formatVerseContent'
 import useDebounce from '~helpers/useDebounce'
 import DictionnaryResultsWidget from '~features/dictionnary/DictionnaryResultsWidget'
@@ -155,10 +156,22 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           ...(sectionMap[section] && { section: sectionMap[section] }),
         }
 
-        const [searchResults, count] = await Promise.all([
-          searchVerses(debouncedSearchValue, options),
-          searchVersesCount(debouncedSearchValue, options),
-        ])
+        const [searchResults, count] = await appLogger.measure(
+          'database',
+          'search.sqlite',
+          () =>
+            Promise.all([
+              searchVerses(debouncedSearchValue, options),
+              searchVersesCount(debouncedSearchValue, options),
+            ]),
+          {
+            queryLength: debouncedSearchValue.length,
+            version: selectedVersion,
+            book,
+            section,
+            sortOrder,
+          }
+        )
 
         if (!cancelled) {
           setResults(searchResults)
@@ -166,6 +179,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
         }
       } catch (e) {
         if (!cancelled) {
+          appLogger.error('database', 'search.sqlite.failed', { error: e })
           console.error('[Search] FTS5 error:', e)
           setResults([])
           setTotalCount(0)

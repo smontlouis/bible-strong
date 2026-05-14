@@ -18,6 +18,7 @@ import {
   getSqliteDirPath,
   getSharedSqliteDirPath,
 } from './databaseTypes'
+import { appLogger } from '~helpers/agentObservability'
 
 // Original DB class for backward compatibility
 class DB {
@@ -33,10 +34,13 @@ class DB {
 
     return new Promise(async (resolve, reject) => {
       try {
-        this.db = await SQLite.openDatabaseAsync(this.name)
+        this.db = await appLogger.measure('database', 'legacy.open', () =>
+          SQLite.openDatabaseAsync(this.name)
+        )
         console.log(`[DBManager] ${this.name} loaded`)
         resolve(true)
       } catch (error) {
+        appLogger.error('database', 'legacy.open.failed', { database: this.name, error })
         console.error('Error opening database:', error)
         reject(error)
       }
@@ -97,12 +101,21 @@ class LanguageAwareDB {
 
       // Get the file name from the path
       const fileName = this.path.split('/').pop()!
-      this.db = await SQLite.openDatabaseAsync(
-        fileName,
+      this.db = await appLogger.measure(
+        'database',
+        'language_aware.open',
+        () =>
+          SQLite.openDatabaseAsync(
+            fileName,
+            {
+              useNewConnection: true,
+            },
+            this.path.replace(`/${fileName}`, '')
+          ),
         {
-          useNewConnection: true,
-        },
-        this.path.replace(`/${fileName}`, '')
+          database: this.dbId,
+          language: this.lang,
+        }
       )
       console.log(`[DBManager] ${this.dbId} (${this.lang}) loaded from ${this.path}`)
     } catch (error) {

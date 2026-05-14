@@ -37,6 +37,7 @@ import {
 import Box from '~common/ui/Box'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import { HelpTip } from '~features/tips/HelpTip'
+import { appLogger } from '~helpers/agentObservability'
 import { BibleError } from '~helpers/bibleErrors'
 import { toast } from '~helpers/toast'
 import { RootState } from '~redux/modules/reducer'
@@ -334,6 +335,12 @@ export const BibleDOMWrapper = ({
     if (isDOMMounted) return
     const MOUNT_TIMEOUT_MS = 5000
     const timer = setTimeout(() => {
+      appLogger.warn('webview', 'bible_dom.mount.timeout', {
+        timeoutMs: MOUNT_TIMEOUT_MS,
+        version,
+        book: book.Numero,
+        chapter,
+      })
       Sentry.captureMessage('BibleDOM mount timeout (no DOM_COMPONENT_MOUNTED)', {
         level: 'warning',
         tags: { component: 'BibleDOMWrapper' },
@@ -361,6 +368,7 @@ export const BibleDOMWrapper = ({
     interlinearCompact: t('bible.interlinear.compact'),
   }
   const dispatch: Dispatch = async action => {
+    appLogger.debug('webview', 'bible_dom.dispatch', { actionType: action.type })
     if (__DEV__) console.log('[Bible] DISPATCH:', action.type)
     switch (action.type) {
       case NAVIGATE_TO_BIBLE_VERSE_DETAIL: {
@@ -617,6 +625,11 @@ export const BibleDOMWrapper = ({
       }
 
       case 'DOM_COMPONENT_MOUNTED': {
+        appLogger.info('webview', 'bible_dom.mounted', {
+          version,
+          book: book.Numero,
+          chapter,
+        })
         setIsDOMMounted(true)
         break
       }

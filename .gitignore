@@ -135,5 +135,10 @@ ios/
 
 .worktree/
 
+# Agent-generated local reports
+.scratch/architecture/
+.scratch/quality/
+.scratch/logs/
+
 # Service account keys
 scripts/google-service-account.json
