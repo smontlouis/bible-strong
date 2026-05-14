@@ -12,6 +12,7 @@ import { storage } from '~helpers/storage'
 import { versions } from '~helpers/bibleVersions'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import i18n, { getLanguage } from '~i18n'
+import { clampTabIndex, updateTabGroupActiveIndex, updateTabGroupTabs } from './tabWorkspace'
 
 // ============================================================================
 // SHARED BIBLE DOM (single WebView instance for all Bible tabs)
@@ -450,7 +451,7 @@ export const tabsAtom = atom(
 
     set(
       tabGroupsAtom,
-      groups.map(g => (g.id === activeId ? { ...g, tabs: newTabs } : g))
+      updateTabGroupTabs(groups, activeId, newTabs)
     )
   }
 )
@@ -481,7 +482,7 @@ const createGroupTabsAtom = (groupId: string) =>
 
       set(
         tabGroupsAtom,
-        groups.map(g => (g.id === groupId ? { ...g, tabs: newTabs } : g))
+        updateTabGroupTabs(groups, groupId, newTabs)
       )
     }
   )
@@ -546,13 +547,7 @@ export const activeTabIndexAtom = atom(
     const tabsAtoms = get(tabsAtomsAtom)
 
     // Bounds checking
-    if (activeGroup.activeTabIndex >= tabsAtoms.length) {
-      return Math.max(0, tabsAtoms.length - 1)
-    }
-    if (activeGroup.activeTabIndex < 0) {
-      return 0
-    }
-    return activeGroup.activeTabIndex
+    return clampTabIndex(activeGroup.activeTabIndex, tabsAtoms.length)
   },
   (get, set, value: number) => {
     const groups = get(tabGroupsAtom)
@@ -561,7 +556,7 @@ export const activeTabIndexAtom = atom(
     // Update the active tab index in the group
     set(
       tabGroupsAtom,
-      groups.map(g => (g.id === activeId ? { ...g, activeTabIndex: value } : g))
+      updateTabGroupActiveIndex(groups, activeId, value)
     )
 
     // Update cache - always persist to storage (LRU behavior: move to front)
