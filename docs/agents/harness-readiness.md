@@ -51,8 +51,10 @@ Initial Level 2 conventions now live in `docs/agents/orchestration.md`. The firs
 | Local checks | Commands exist in `package.json` | Agents can run test/lint/typecheck/format checks before finishing | 1 | Done |
 | Mobile UI smoke | `serve-sim` installed; app launch, Bible reading, search result, downloads, and annotation create/remove were smoke-tested on iOS Simulator | Keep smoke evidence updated when flows change | 1 | Done |
 | Sensitive areas | Auth, sync, backup, migrations, builds documented as sensitive | Agents ask before risky edits | 1 | Done |
-| Observability | Sentry, ErrorBoundary, logs, startup signals documented | Agents know where to inspect failures | 1 | Done |
-| CI/PR gates | `.github/workflows/pr-checks.yml` runs typecheck, lint, tests, and format checks on PRs; `master` branch protection requires the `Typecheck, lint, test, format` check | Exercise the gate on a real PR and adjust context name if needed | 2 | Started |
+| Observability | Sentry, ErrorBoundary, logs, startup signals documented; `[AgentLog]` emits structured dev events; `yarn agents:start:logged` captures queryable local sessions | Agents know where to inspect failures and can query structured local logs | 1 | Done |
+| Domain quality metrics | `yarn agents:quality` generates `docs/agents/quality-score.md` and `.scratch/quality/quality.json`; `yarn agents:quality:check` enforces a conservative PR threshold | Keep score current when domain boundaries, smoke paths, or quality signals change; tighten thresholds progressively | 2 | Done |
+| Architecture lint | `yarn agents:architecture` reports repo-specific boundaries; `yarn agents:architecture:check` blocks high-risk boundary errors while leaving brownfield warnings visible | Tighten warnings into errors after existing hotspots are reduced | 2 | Done |
+| CI/PR gates | `.github/workflows/pr-checks.yml` runs typecheck, lint, tests, format checks, and agent domain quality checks on PRs; `master` branch protection requires the `Typecheck, lint, test, format` check | Exercise the updated gate on a real PR and adjust context name if needed | 2 | Started |
 | Multi-agent orchestration | `docs/agents/orchestration.md` defines issue-to-PR, ownership, and sensitive-area PR rules; `.github/pull_request_template.md` captures PR validation and risk notes | Exercise the flow on real PRs and refine when conflicts appear | 2 | Started |
 
 ## Level 1 Status

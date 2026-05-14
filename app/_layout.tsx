@@ -37,6 +37,7 @@ import { CurrentTheme } from '~common/types'
 import { AppSwitcherProvider } from '~features/app-switcher/AppSwitcherProvider'
 import { BookSelectorBottomSheetProvider } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 import { DBStateProvider } from '~helpers/databaseState'
+import { appLogger } from '~helpers/agentObservability'
 import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
 import { QueryClient, QueryClientProvider } from '~helpers/react-query-lite'
 import {
@@ -80,8 +81,14 @@ configureReanimatedLogger({
 
 // Prevent native splash screen from autohiding
 SplashScreen.preventAutoHideAsync()
-  .then(result => console.log(`SplashScreen.preventAutoHideAsync() succeeded: ${result}`))
-  .catch(console.warn)
+  .then(result => {
+    appLogger.info('startup', 'splash.prevent_auto_hide.succeeded', { result })
+    console.log(`SplashScreen.preventAutoHideAsync() succeeded: ${result}`)
+  })
+  .catch(error => {
+    appLogger.warn('startup', 'splash.prevent_auto_hide.failed', { error })
+    console.warn(error)
+  })
 
 SplashScreen.setOptions({
   duration: 300,
@@ -96,6 +103,7 @@ let sentryInitialized = false
 const initSentry = () => {
   if (sentryInitialized) return
   sentryInitialized = true
+  appLogger.info('startup', 'sentry.init')
   Sentry.init({
     dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
     sampleRate: 0.5,
@@ -116,7 +124,9 @@ const useAppLoad = () => {
 
   useEffect(() => {
     ;(async () => {
+      appLogger.info('startup', 'i18n.init.started')
       await setI18n()
+      appLogger.info('startup', 'i18n.init.completed')
       setIsLoadingCompleted(true)
       if (!__DEV__) {
         logScreenView(getAnalytics(), {
@@ -153,6 +163,11 @@ const useNavigationTracking = () => {
   useEffect(() => {
     if (prevPathnameRef.current !== pathname) {
       const screenName = segments[segments.length - 1] || 'index'
+      appLogger.info('navigation', 'screen.changed', {
+        pathname,
+        screenName,
+        segments,
+      })
 
       if (__DEV__) {
         console.log('[Navigation]', {
@@ -287,6 +302,7 @@ function RootLayout() {
 
   const onLayoutRootView = useCallback(() => {
     if (isLoadingCompleted) {
+      appLogger.info('startup', 'root.layout.ready')
       SplashScreen.hide()
       initSentry()
     }

@@ -19,7 +19,19 @@ Copy `.env.example` to the appropriate local environment file and fill required 
 | Lint | `yarn lint` | Most code changes |
 | Typecheck | `yarn typecheck` | TypeScript, navigation params, Redux, Jotai, or helper changes |
 | Format check | `yarn format:check` | Before finishing docs/code formatting-sensitive changes |
+| Agent architecture | `yarn agents:architecture:check` | Feature boundary, helper, SQLite, Firebase, logging, or shared architecture changes |
+| Agent domain quality | `yarn agents:quality:check` | Feature/domain changes, PR readiness, or harness changes |
 | i18n extraction | `yarn i18n` | User-facing string additions or translation key changes |
+
+`yarn agents:architecture:check` regenerates `docs/agents/architecture-lint.md` and `.scratch/architecture/architecture.json`, then fails on high-risk boundary errors. Warnings are intentionally non-blocking for the current brownfield baseline.
+
+`yarn agents:quality:check` regenerates `docs/agents/quality-score.md` and `.scratch/quality/quality.json`, then fails if a feature domain drops below the conservative readiness threshold.
+
+If Jest fails before running tests because Watchman is unavailable in a sandboxed/local agent environment, rerun with:
+
+```bash
+yarn test --watchman=false
+```
 
 ## Simulator Preview
 

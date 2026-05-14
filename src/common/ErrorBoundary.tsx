@@ -13,6 +13,7 @@ import Button from '~common/ui/Button'
 import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
 import useLogin from '~helpers/useLogin'
+import { appLogger } from '~helpers/agentObservability'
 
 type ErrorBoundaryState = {
   hasError: boolean
@@ -32,6 +33,10 @@ class ErrorBoundary extends React.Component<PropsWithChildren, ErrorBoundaryStat
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    appLogger.fatal('error-boundary', 'render.crash', {
+      error,
+      componentStack: errorInfo.componentStack,
+    })
     console.error('[ErrorBoundary] Crash captured:', error.message)
 
     this.setState({ errorInfo })
