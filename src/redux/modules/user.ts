@@ -44,6 +44,11 @@ import {
   WordAnnotationsObj,
 } from './user/wordAnnotations'
 import {
+  findOverlappingWordAnnotationIds,
+  getSelectionRangeFromAnnotation,
+  normalizeWordSelectionRange,
+} from './user/wordAnnotationRanges'
+import {
   changeColor,
   decreaseSettingsFontSizeScale,
   increaseSettingsFontSizeScale,
@@ -715,66 +720,17 @@ const userSlice = createSlice({
     builder.addCase(addWordAnnotationAction, (state, action) => {
       const annotation = action.payload.annotation
 
-      // Helper to compare verse keys (e.g., "1-1-5" vs "1-1-10")
-      const parseVerseKey = (key: string) => {
-        const [book, chapter, verse] = key.split('-').map(Number)
-        return { book, chapter, verse }
-      }
+      const selection = getSelectionRangeFromAnnotation(annotation)
+      if (selection) {
+        const idsToRemove = findOverlappingWordAnnotationIds(
+          state.bible.wordAnnotations,
+          annotation.version,
+          selection
+        )
 
-      const compareVerseKeys = (a: string, b: string): number => {
-        const pa = parseVerseKey(a)
-        const pb = parseVerseKey(b)
-        if (pa.book !== pb.book) return pa.book - pb.book
-        if (pa.chapter !== pb.chapter) return pa.chapter - pb.chapter
-        return pa.verse - pb.verse
-      }
-
-      // Get the bounds of the new annotation
-      const newRanges = annotation.ranges
-      if (newRanges.length > 0) {
-        const firstRange = newRanges[0]
-        const lastRange = newRanges[newRanges.length - 1]
-        const start = { verseKey: firstRange.verseKey, wordIndex: firstRange.startWordIndex }
-        const end = { verseKey: lastRange.verseKey, wordIndex: lastRange.endWordIndex }
-
-        // Find and remove overlapping annotations
-        const annotationIds = Object.keys(state.bible.wordAnnotations)
-        annotationIds.forEach(id => {
-          const existingAnnotation = state.bible.wordAnnotations[id]
-          if (existingAnnotation.version !== annotation.version) return
-
-          const overlaps = existingAnnotation.ranges.some(range => {
-            const rangeVerseCompareStart = compareVerseKeys(range.verseKey, start.verseKey)
-            const rangeVerseCompareEnd = compareVerseKeys(range.verseKey, end.verseKey)
-
-            // Check if this range's verse is within the selection verses
-            if (rangeVerseCompareStart < 0 || rangeVerseCompareEnd > 0) {
-              return false
-            }
-
-            // Same verse as both start and end
-            if (rangeVerseCompareStart === 0 && rangeVerseCompareEnd === 0) {
-              return range.endWordIndex >= start.wordIndex && range.startWordIndex <= end.wordIndex
-            }
-
-            // Verse is same as start verse only
-            if (rangeVerseCompareStart === 0) {
-              return range.endWordIndex >= start.wordIndex
-            }
-
-            // Verse is same as end verse only
-            if (rangeVerseCompareEnd === 0) {
-              return range.startWordIndex <= end.wordIndex
-            }
-
-            // Verse is strictly between start and end
-            return true
-          })
-
-          if (overlaps) {
-            delete state.bible.wordAnnotations[id]
-            removeEntityInTags(state, 'wordAnnotations', id)
-          }
+        idsToRemove.forEach(id => {
+          delete state.bible.wordAnnotations[id]
+          removeEntityInTags(state, 'wordAnnotations', id)
         })
       }
 
@@ -817,75 +773,12 @@ const userSlice = createSlice({
     })
     builder.addCase(removeWordAnnotationsInRangeAction, (state, action) => {
       const { version, start, end } = action.payload
-
-      // Helper to compare verse keys (e.g., "1-1-5" vs "1-1-10")
-      const parseVerseKey = (key: string) => {
-        const [book, chapter, verse] = key.split('-').map(Number)
-        return { book, chapter, verse }
-      }
-
-      const compareVerseKeys = (a: string, b: string): number => {
-        const pa = parseVerseKey(a)
-        const pb = parseVerseKey(b)
-        if (pa.book !== pb.book) return pa.book - pb.book
-        if (pa.chapter !== pb.chapter) return pa.chapter - pb.chapter
-        return pa.verse - pb.verse
-      }
-
-      // Normalize start and end (ensure start <= end)
-      let normalizedStart = start
-      let normalizedEnd = end
-      const verseCompare = compareVerseKeys(start.verseKey, end.verseKey)
-      if (verseCompare > 0 || (verseCompare === 0 && start.wordIndex > end.wordIndex)) {
-        normalizedStart = end
-        normalizedEnd = start
-      }
-
-      // Find all annotations that overlap with the selection range
-      const annotationIds = Object.keys(state.bible.wordAnnotations)
-      const idsToRemove: string[] = []
-
-      annotationIds.forEach(id => {
-        const annotation = state.bible.wordAnnotations[id]
-        if (annotation.version !== version) return
-
-        // Check if a range of this annotation overlaps with the selection
-        const overlaps = annotation.ranges.some(range => {
-          const rangeVerseCompare = compareVerseKeys(range.verseKey, normalizedStart.verseKey)
-          const rangeVerseCompareEnd = compareVerseKeys(range.verseKey, normalizedEnd.verseKey)
-
-          // Check if this range's verse is within the selection verses
-          if (rangeVerseCompare < 0 || rangeVerseCompareEnd > 0) {
-            return false // Verse is outside selection
-          }
-
-          // Same verse as start
-          if (rangeVerseCompare === 0 && rangeVerseCompareEnd === 0) {
-            // Single verse selection - check word indices
-            return (
-              range.endWordIndex >= normalizedStart.wordIndex &&
-              range.startWordIndex <= normalizedEnd.wordIndex
-            )
-          }
-
-          // Verse is same as start verse only
-          if (rangeVerseCompare === 0) {
-            return range.endWordIndex >= normalizedStart.wordIndex
-          }
-
-          // Verse is same as end verse only
-          if (rangeVerseCompareEnd === 0) {
-            return range.startWordIndex <= normalizedEnd.wordIndex
-          }
-
-          // Verse is strictly between start and end
-          return true
-        })
-
-        if (overlaps) {
-          idsToRemove.push(id)
-        }
-      })
+      const selection = normalizeWordSelectionRange(start, end)
+      const idsToRemove = findOverlappingWordAnnotationIds(
+        state.bible.wordAnnotations,
+        version,
+        selection
+      )
 
       // Remove the overlapping annotations
       idsToRemove.forEach(id => {
