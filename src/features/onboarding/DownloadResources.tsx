@@ -2,7 +2,7 @@ import { useTheme } from '@emotion/react'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAtom, useSetAtom, useAtomValue } from 'jotai/react'
-import Animated from 'react-native-reanimated'
+import { EaseView } from 'react-native-ease'
 
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
@@ -115,7 +115,13 @@ const DownloadResources = () => {
               center
               overflow="visible"
             >
-              <Animated.View
+              <EaseView
+                animate={{ opacity: displayProgress }}
+                transition={{
+                  type: 'timing',
+                  duration: 300,
+                  easing: [0.455, 0.03, 0.515, 0.955],
+                }}
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -125,9 +131,6 @@ const DownloadResources = () => {
                   borderRadius: 50,
                   borderWidth: 5,
                   borderColor: theme.colors.primary,
-                  opacity: displayProgress,
-                  transitionProperty: 'opacity',
-                  transitionDuration: 300,
                 }}
               />
               <Text fontSize={20}>

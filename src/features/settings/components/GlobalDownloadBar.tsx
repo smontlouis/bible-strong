@@ -4,6 +4,7 @@ import { useTheme } from '@emotion/react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Animated from 'react-native-reanimated'
+import { EaseView } from 'react-native-ease'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -18,16 +19,18 @@ const GlobalDownloadBar = () => {
   const isVisible = activeQueue.length > 0
 
   return (
-    <Animated.View
+    <EaseView
+      animate={{ translateY: isVisible ? 0 : 100 }}
+      transition={{
+        type: 'timing',
+        duration: 300,
+        easing: 'easeOut',
+      }}
       style={{
         position: 'absolute',
         left: 0,
         right: 0,
         bottom: 0,
-        transform: [{ translateY: isVisible ? 0 : 100 }],
-        transitionProperty: 'transform',
-        transitionDuration: 300,
-        transitionTimingFunction: 'ease-out',
       }}
     >
       <Box
@@ -75,7 +78,7 @@ const GlobalDownloadBar = () => {
           </TouchableOpacity>
         </Box>
       </Box>
-    </Animated.View>
+    </EaseView>
   )
 }
 

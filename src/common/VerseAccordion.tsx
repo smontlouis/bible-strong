@@ -1,7 +1,8 @@
 import { useTheme } from '@emotion/react'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator } from 'react-native'
-import Animated, { useSharedValue } from 'react-native-reanimated'
+import { EaseView } from 'react-native-ease'
+import { useSharedValue } from 'react-native-reanimated'
 
 import { VerseIds, VerseRefContent } from '~common/types'
 import Box, { TouchableBox } from '~common/ui/Box'
@@ -70,15 +71,20 @@ const VerseAccordion = ({ noteVerses, version }: VerseAccordionProps) => {
             {reference}
           </Text>
         </HStack>
-        <Animated.View
+        <EaseView
+          animate={{ rotate: isExpanded ? 180 : 0 }}
+          transition={{
+            type: 'timing',
+            duration: 300,
+            easing: [0.455, 0.03, 0.515, 0.955],
+          }}
           style={{
-            transform: [{ rotate: isExpanded ? '180deg' : '0deg' }],
-            transitionProperty: 'transform',
-            transitionDuration: 300,
+            width: 20,
+            height: 20,
           }}
         >
           <FeatherIcon name="chevron-down" size={20} color={theme.colors.grey} />
-        </Animated.View>
+        </EaseView>
       </TouchableBox>
 
       <AccordionItem isExpanded={isExpandedShared} viewKey="verse-content">

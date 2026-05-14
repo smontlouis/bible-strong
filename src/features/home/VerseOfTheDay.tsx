@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'
 import { Share, View } from 'react-native'
 import DateTimePicker from 'react-native-modal-datetime-picker'
-import Animated from 'react-native-reanimated'
+import { EaseView } from 'react-native-ease'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import Empty from '~common/Empty'
@@ -55,11 +55,12 @@ const SkeletonLines = () => {
   }, [])
 
   return (
-    <Animated.View
-      style={{
-        opacity: pulse ? 0.4 : 1,
-        transitionProperty: 'opacity',
-        transitionDuration: 800,
+    <EaseView
+      animate={{ opacity: pulse ? 0.4 : 1 }}
+      transition={{
+        type: 'timing',
+        duration: 800,
+        easing: [0.455, 0.03, 0.515, 0.955],
       }}
     >
       <View
@@ -89,7 +90,7 @@ const SkeletonLines = () => {
           marginTop: 8,
         }}
       />
-    </Animated.View>
+    </EaseView>
   )
 }
 
