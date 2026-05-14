@@ -35,11 +35,11 @@ Non-blocking:
 
 ## Level 2 Deferred
 
-- CI or hosted PR gates.
-- Multi-agent branch orchestration.
 - Recurring maintenance automations.
 - Remote build/release validation.
 - App Store / Play Store deployment policy.
+
+Initial Level 2 conventions now live in `docs/agents/orchestration.md`. The first hosted PR gate is `.github/workflows/pr-checks.yml`, and PR descriptions use `.github/pull_request_template.md`.
 
 ## Readiness Matrix
 
@@ -52,7 +52,8 @@ Non-blocking:
 | Mobile UI smoke | `serve-sim` installed; app launch, Bible reading, search result, downloads, and annotation create/remove were smoke-tested on iOS Simulator | Keep smoke evidence updated when flows change | 1 | Done |
 | Sensitive areas | Auth, sync, backup, migrations, builds documented as sensitive | Agents ask before risky edits | 1 | Done |
 | Observability | Sentry, ErrorBoundary, logs, startup signals documented | Agents know where to inspect failures | 1 | Done |
-| CI/PR gates | No workflows found locally | Optional later orchestration policy | 2 | Deferred |
+| CI/PR gates | `.github/workflows/pr-checks.yml` runs typecheck, lint, tests, and format checks on PRs; `master` branch protection requires the `Typecheck, lint, test, format` check | Exercise the gate on a real PR and adjust context name if needed | 2 | Started |
+| Multi-agent orchestration | `docs/agents/orchestration.md` defines issue-to-PR, ownership, and sensitive-area PR rules; `.github/pull_request_template.md` captures PR validation and risk notes | Exercise the flow on real PRs and refine when conflicts appear | 2 | Started |
 
 ## Level 1 Status
 
