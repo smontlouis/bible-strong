@@ -174,10 +174,10 @@ const VerseOfTheDay = ({ addDay }: Props) => {
         }}
         style={{ marginTop: 10 }}
       >
-        <Paragraph numberOfLines={4} fontWeight="bold" scaleLineHeight={-1}>
+        <Paragraph numberOfLines={3} fontWeight="bold" scaleLineHeight={-1}>
           {removeBreakLines(content)}
         </Paragraph>
-        <Text color="grey" fontSize={12} mt={5}>
+        <Text color="grey" fontSize={12} mt={5} numberOfLines={2}>
           {title} - {version}
         </Text>
       </Link>

@@ -43,6 +43,10 @@ const hasVerseContent = (
 ): verseOfTheDay is Exclude<VerseOfTheDayData, false | { error: true }> =>
   !!verseOfTheDay && 'content' in verseOfTheDay
 
+const formatVerseOfTheDayNotificationBody = (
+  verseOfTheDay: Exclude<VerseOfTheDayData, false | { error: true }>
+) => `${removeBreakLines(verseOfTheDay.content)}\n${verseOfTheDay.title} - ${verseOfTheDay.version}`
+
 const useGetVerseOfTheDay = (version: VersionCode, addDay: number) => {
   const [verseOfTheDay, setVOD] = useState<VerseOfTheDayData>(false)
 
@@ -91,13 +95,11 @@ export const useVerseOfTheDay = (addDay: number) => {
   const verseOfTheDay = useGetVerseOfTheDay(version, addDay)
   const verseOfTheDayPlus1 = useGetVerseOfTheDay(version, 1 + addDay)
 
-  const verseOfTheDayContent = hasVerseContent(verseOfTheDay) ? verseOfTheDay.content : undefined
-  const verseOfTheDayPlus1Content = hasVerseContent(verseOfTheDayPlus1)
-    ? verseOfTheDayPlus1.content
-    : undefined
+  const hasTodayVerse = hasVerseContent(verseOfTheDay)
+  const hasNextVerse = hasVerseContent(verseOfTheDayPlus1)
 
   useEffect(() => {
-    if (addDay || !verseOfTheDayContent || !verseOfTheDayPlus1Content || !verseOfTheDayTime) return
+    if (addDay || !hasTodayVerse || !hasNextVerse || !verseOfTheDayTime) return
 
     const scheduleNotification = async () => {
       try {
@@ -134,9 +136,7 @@ export const useVerseOfTheDay = (addDay: number) => {
         await notifee.createTriggerNotification(
           {
             title: `${t('Bonjour')} ${extractFirstName(displayName)}`,
-            body: !addDay
-              ? removeBreakLines(verseOfTheDayContent)
-              : removeBreakLines(verseOfTheDayPlus1Content),
+            body: formatVerseOfTheDayNotificationBody(!addDay ? verseOfTheDay : verseOfTheDayPlus1),
             android: {
               channelId,
               pressAction: {
@@ -150,11 +150,9 @@ export const useVerseOfTheDay = (addDay: number) => {
         )
 
         console.log(
-          `[Notification] Notificationset at ${verseOfTheDayTime} on ${date} | addDay: ${addDay} | content: ${
-            !addDay
-              ? removeBreakLines(verseOfTheDayContent)
-              : removeBreakLines(verseOfTheDayPlus1Content)
-          }`
+          `[Notification] Notificationset at ${verseOfTheDayTime} on ${date} | addDay: ${addDay} | content: ${formatVerseOfTheDayNotificationBody(
+            !addDay ? verseOfTheDay : verseOfTheDayPlus1
+          )}`
         )
       } catch (e) {
         console.log(e)
@@ -184,8 +182,10 @@ export const useVerseOfTheDay = (addDay: number) => {
     initNotifications()
   }, [
     verseOfTheDayTime,
-    verseOfTheDayContent,
-    verseOfTheDayPlus1Content,
+    hasTodayVerse,
+    hasNextVerse,
+    verseOfTheDay,
+    verseOfTheDayPlus1,
     displayName,
     addDay,
     dispatch,
