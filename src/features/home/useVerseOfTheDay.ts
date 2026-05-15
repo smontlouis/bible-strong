@@ -92,12 +92,26 @@ export const useVerseOfTheDay = (addDay: number) => {
   const verseOfTheDayPlus1 = useGetVerseOfTheDay(version, 1 + addDay)
 
   const verseOfTheDayContent = hasVerseContent(verseOfTheDay) ? verseOfTheDay.content : undefined
+  const verseOfTheDayReference = hasVerseContent(verseOfTheDay)
+    ? `${verseOfTheDay.title} ${verseOfTheDay.version}`
+    : undefined
   const verseOfTheDayPlus1Content = hasVerseContent(verseOfTheDayPlus1)
     ? verseOfTheDayPlus1.content
     : undefined
+  const verseOfTheDayPlus1Reference = hasVerseContent(verseOfTheDayPlus1)
+    ? `${verseOfTheDayPlus1.title} ${verseOfTheDayPlus1.version}`
+    : undefined
 
   useEffect(() => {
-    if (addDay || !verseOfTheDayContent || !verseOfTheDayPlus1Content || !verseOfTheDayTime) return
+    if (
+      addDay ||
+      !verseOfTheDayContent ||
+      !verseOfTheDayReference ||
+      !verseOfTheDayPlus1Content ||
+      !verseOfTheDayPlus1Reference ||
+      !verseOfTheDayTime
+    )
+      return
 
     const scheduleNotification = async () => {
       try {
@@ -135,8 +149,8 @@ export const useVerseOfTheDay = (addDay: number) => {
           {
             title: `${t('Bonjour')} ${extractFirstName(displayName)}`,
             body: !addDay
-              ? removeBreakLines(verseOfTheDayContent)
-              : removeBreakLines(verseOfTheDayPlus1Content),
+              ? `${removeBreakLines(verseOfTheDayContent)}\n${verseOfTheDayReference}`
+              : `${removeBreakLines(verseOfTheDayPlus1Content)}\n${verseOfTheDayPlus1Reference}`,
             android: {
               channelId,
               pressAction: {
@@ -152,8 +166,8 @@ export const useVerseOfTheDay = (addDay: number) => {
         console.log(
           `[Notification] Notificationset at ${verseOfTheDayTime} on ${date} | addDay: ${addDay} | content: ${
             !addDay
-              ? removeBreakLines(verseOfTheDayContent)
-              : removeBreakLines(verseOfTheDayPlus1Content)
+              ? `${removeBreakLines(verseOfTheDayContent)} ${verseOfTheDayReference}`
+              : `${removeBreakLines(verseOfTheDayPlus1Content)} ${verseOfTheDayPlus1Reference}`
           }`
         )
       } catch (e) {
@@ -185,7 +199,9 @@ export const useVerseOfTheDay = (addDay: number) => {
   }, [
     verseOfTheDayTime,
     verseOfTheDayContent,
+    verseOfTheDayReference,
     verseOfTheDayPlus1Content,
+    verseOfTheDayPlus1Reference,
     displayName,
     addDay,
     dispatch,
