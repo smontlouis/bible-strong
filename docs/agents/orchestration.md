@@ -56,8 +56,7 @@ When `--run-codex` handles a UI or runtime issue, the agent should leave PR-read
 - `.scratch/issues/<issue-number>/change-summary.md` for the implementation summary used by PR packaging.
 - `.scratch/issues/<issue-number>/pr-notes.md` for PR-specific reviewer notes, evidence notes, risks, or follow-ups.
 
-Use `mobile-validation.md` status values `passed`, `blocked`, or `not-needed`. If no before screenshot exists, capture and label after evidence rather than inventing a baseline.
-For visual changes, prefer before/after pairs such as `before-home.png` and `after-home.png`; if the baseline cannot be captured, the validation report must say why.
+Use `mobile-validation.md` status values `passed`, `blocked`, or `not-needed`. For visual changes, capture after evidence that shows the implemented result. Do not create duplicate screenshots just to simulate a before/after pair.
 
 To simulate one local orchestration unit manually, run:
 
@@ -74,7 +73,7 @@ yarn agents:issue:pr <issue-number> [--dry-run] [--create] [--push] [--attach-ev
 ```
 
 This reads `.scratch/issues/<issue-number>/issue.json`, `codex-final.md`, `mobile-validation.md`, and `evidence/`, then writes `.scratch/issues/<issue-number>/pr-body.md`. It does not push or create a PR unless `--create` is passed; PRs are draft by default.
-When `--attach-evidence` is passed, the wrapper uploads supported files from `.scratch/issues/<issue-number>/evidence/` to a secret GitHub gist and posts a PR comment with inline image links and attachment metadata. This keeps screenshots out of the product branch while making them visible from GitHub.
+When `--attach-evidence` is passed, the wrapper pushes supported files from `.scratch/issues/<issue-number>/evidence/` to a dedicated GitHub evidence branch such as `codex-evidence-issue-208` and posts a PR comment with inline image links and attachment metadata. This keeps screenshots out of the product branch while making them visible from GitHub.
 
 ## Multi-Agent Ownership
 

@@ -1,4 +1,5 @@
 import fs from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import { execFileSync } from 'node:child_process'
 
@@ -27,7 +28,9 @@ const usage = () => {
   )
   console.log('  --create    Create the pull request with gh after writing the body.')
   console.log('  --push      Push the current branch before --create.')
-  console.log('  --attach-evidence  Upload evidence files to a secret gist and comment on the PR.')
+  console.log(
+    '  --attach-evidence  Push evidence files to a dedicated evidence branch and comment on the PR.'
+  )
   console.log('  --draft     Create as draft. This is the default.')
   console.log('  --ready     Create as ready for review.')
   console.log('  --base      Base branch for diff and PR creation. Defaults to master.')
@@ -67,7 +70,7 @@ if (attachEvidence && dryRun) {
 
 const run = (command, commandArgs, options = {}) =>
   execFileSync(command, commandArgs, {
-    cwd: repoRoot,
+    cwd: options.cwd ?? repoRoot,
     encoding: 'utf8',
     stdio: options.stdio ?? ['ignore', 'pipe', 'pipe'],
   })
@@ -128,14 +131,14 @@ const listEvidenceAttachmentPaths = () => {
     .sort((a, b) => a.localeCompare(b))
 }
 
-const extractGistId = gistUrl => {
-  const match = gistUrl.trim().match(/\/([a-f0-9]+)$/i)
-  return match?.[1] ?? ''
-}
-
 const getPrNumber = () => {
   const prJson = run('gh', ['pr', 'view', '--head', currentBranch, '--json', 'number,url'])
   return JSON.parse(prJson)
+}
+
+const getRepoNameWithOwner = () => {
+  const repoJson = run('gh', ['repo', 'view', '--json', 'nameWithOwner'])
+  return JSON.parse(repoJson).nameWithOwner
 }
 
 const uploadEvidenceAttachments = evidenceAttachmentPaths => {
@@ -143,30 +146,47 @@ const uploadEvidenceAttachments = evidenceAttachmentPaths => {
     return null
   }
 
-  const gistUrl = run('gh', [
-    'gist',
-    'create',
-    '--desc',
-    `Bible Strong PR evidence for issue #${issue.number}`,
-    ...evidenceAttachmentPaths,
-  ]).trim()
-  const gistId = extractGistId(gistUrl)
+  const branch = `codex-evidence-issue-${issue.number}`
+  const remoteUrl = run('git', ['remote', 'get-url', 'origin']).trim()
+  const repoNameWithOwner = getRepoNameWithOwner()
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `bible-strong-evidence-${issue.number}-`))
+  const tempEvidenceDir = path.join(tempDir, `issue-${issue.number}`)
 
-  if (!gistId) {
-    throw new Error(`Could not parse gist id from gh output: ${gistUrl}`)
+  fs.mkdirSync(tempEvidenceDir, { recursive: true })
+
+  for (const filePath of evidenceAttachmentPaths) {
+    fs.copyFileSync(filePath, path.join(tempEvidenceDir, path.basename(filePath)))
   }
 
-  const gist = JSON.parse(run('gh', ['api', `gists/${gistId}`]))
-  const files = Object.values(gist.files ?? {})
-    .map(file => ({
-      filename: file.filename,
-      rawUrl: file.raw_url,
-      size: file.size,
-    }))
-    .filter(file => file.filename && file.rawUrl)
+  run('git', ['init'], { cwd: tempDir })
+  run('git', ['checkout', '-b', branch], { cwd: tempDir })
+  run('git', ['config', 'user.email', 'agents@bible-strong.local'], { cwd: tempDir })
+  run('git', ['config', 'user.name', 'Bible Strong Agents'], { cwd: tempDir })
+  run('git', ['add', `issue-${issue.number}`], { cwd: tempDir })
+  run('git', ['commit', '-m', `docs(evidence): add issue ${issue.number} artifacts`], {
+    cwd: tempDir,
+  })
+  run('git', ['remote', 'add', 'origin', remoteUrl], { cwd: tempDir })
+  run('git', ['push', '-f', 'origin', branch], { cwd: tempDir, stdio: 'inherit' })
+
+  const files = evidenceAttachmentPaths
+    .map(filePath => {
+      const filename = path.basename(filePath)
+      return {
+        filename,
+        rawUrl: `https://raw.githubusercontent.com/${repoNameWithOwner}/${branch}/issue-${
+          issue.number
+        }/${encodeURIComponent(filename)}`,
+        size: fs.statSync(filePath).size,
+      }
+    })
     .sort((a, b) => a.filename.localeCompare(b.filename))
 
-  return { gistUrl, gistId, files }
+  return {
+    evidenceBranch: branch,
+    evidenceBranchUrl: `https://github.com/${repoNameWithOwner}/tree/${branch}`,
+    files,
+  }
 }
 
 const buildEvidenceComment = attachment => {
@@ -184,11 +204,13 @@ const buildEvidenceComment = attachment => {
 
   return `## UI Evidence For #${issue.number}
 
-Uploaded from \`${path.relative(repoRoot, evidenceDir)}\`.
+Uploaded from \`${path.relative(repoRoot, evidenceDir)}\` to evidence branch \`${
+    attachment.evidenceBranch
+  }\`.
 
 ${rows.join('\n\n')}
 
-Evidence bundle: ${attachment.gistUrl}
+Evidence bundle: ${attachment.evidenceBranchUrl}
 
 Mobile runtime status: \`${mobileStatus}\`
 `
@@ -426,7 +448,8 @@ if (attachEvidence) {
         pr: pr.number,
         prUrl: pr.url,
         uploadedAt: new Date().toISOString(),
-        gistUrl: attachment.gistUrl,
+        evidenceBranch: attachment.evidenceBranch,
+        evidenceBranchUrl: attachment.evidenceBranchUrl,
         files: attachment.files,
       },
       null,
@@ -437,5 +460,5 @@ if (attachEvidence) {
   run('gh', ['pr', 'comment', String(pr.number), '--body-file', evidenceCommentPath], {
     stdio: 'inherit',
   })
-  console.log(`Attached evidence to PR #${pr.number}: ${attachment.gistUrl}`)
+  console.log(`Attached evidence to PR #${pr.number}: ${attachment.evidenceBranchUrl}`)
 }

@@ -148,7 +148,7 @@ Level 2 gaps:
 - Architecture lint has 486 brownfield warnings; current gate blocks only high-risk errors.
 - Domain quality scores are conservative and directional.
 - Recurring maintenance/doc-gardening is documented as a candidate only.
-- Before/after UI evidence is manual, not automated; mobile validation is documented as sequential but does not yet have repo-native command wrappers.
+- After UI evidence is manual, not automated; mobile validation is documented as sequential but does not yet have repo-native command wrappers.
 - Agent-to-agent review, auto-fix loops, auto-merge, and prompt-to-merge autonomy are deferred.
 
 ## Harness Layout Resolution
@@ -271,7 +271,7 @@ Current HTML contract:
 | 2D Domain quality metrics | Verified locally | Generated domain score with threshold and machine artifact | `docs/agents/quality-score.md`, `.scratch/quality/quality.json`, `agents:quality:check` | Keep thresholds conservative until scores stabilize | No |
 | 2E Architecture and taste linting | Verified locally | Generated architecture scan with blocking errors separated from warnings | `docs/agents/architecture-lint.md`, `.scratch/architecture/architecture.json`, `agents:architecture:check` | Reduce brownfield warnings before tightening gates | No |
 | 2F Doc freshness and recurring maintenance | Documented for agents | Owner-approved cadence, destination, and output expectation | Candidate automations in `docs/agents/orchestration.md` | Defer until cadence and notification destination are chosen | No |
-| 2G Before/after UI evidence | Found in repo | Deterministic screenshot/video path tied to smoke flows and visible PR evidence | Manual smoke screenshots referenced in `docs/agents/smoke-tests.md`; `agents:issue:start` asks agents for before/after evidence when practical; `agents:issue:pr --attach-evidence` uploads evidence to a secret gist and comments on the PR | Exercise attachment flow on a real PR and refine unsupported file handling if needed | No |
+| 2G After UI evidence | Found in repo | Deterministic screenshot/video path tied to smoke flows and visible PR evidence | Manual smoke screenshots referenced in `docs/agents/smoke-tests.md`; `agents:issue:start` asks agents for after evidence for visual changes; `agents:issue:pr --attach-evidence` pushes evidence to a dedicated GitHub evidence branch and comments on the PR | Exercise attachment flow on real PRs and refine retention policy if needed | No |
 | 2H Agentic review and merge autonomy | Blocked or deferred | Explicit policy, checks, labels, branch protection, and sensitive-area exclusions | Explicitly deferred in orchestration docs; mobile PRs require smoke evidence unless the change is non-runtime/non-user-facing | Require explicit policy before enabling | No |
 | 2I Harness command wrappers and audit | Found in repo | Repo-native commands plus drift audit when drift recurs | Existing `agents:*` scripts in `package.json`, including `agents:issue:start` with dry-run, current-worktree branch support, optional `codex exec`, stable `.scratch/issues/<issue>/` evidence outputs, `agents:issue:pr` PR body packaging plus `--attach-evidence`, and `agents:issue:run` as a one-issue orchestration wrapper | Exercise `agents:issue:run` on a real issue branch and refine the start-to-commit-to-PR handoff from evidence | No |
 
@@ -286,7 +286,7 @@ Feedback:
 
 - Add feature-level tests around the highest-risk domains when touching them.
 - Rerun mobile smoke paths after navigation, Bible WebView, search, downloads, or annotation changes.
-- Keep before/after screenshot capture in the implementation agent loop; use `agents:issue:pr --attach-evidence` to publish supported evidence files to the PR without committing them to the product branch.
+- Keep after screenshot capture in the implementation agent loop; use `agents:issue:pr --attach-evidence` to publish supported evidence files to the PR without committing them to the product branch.
 
 Constraint:
 
