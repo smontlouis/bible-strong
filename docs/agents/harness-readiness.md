@@ -273,7 +273,7 @@ Current HTML contract:
 | 2F Doc freshness and recurring maintenance | Documented for agents | Owner-approved cadence, destination, and output expectation | Candidate automations in `docs/agents/orchestration.md` | Defer until cadence and notification destination are chosen | No |
 | 2G Before/after UI evidence | Documented for agents | Deterministic screenshot/video path tied to smoke flows | Manual smoke screenshots referenced in `docs/agents/smoke-tests.md`; PR template records mobile validation status, smoke paths, and evidence | Automate only after smoke flows are stable | No |
 | 2H Agentic review and merge autonomy | Blocked or deferred | Explicit policy, checks, labels, branch protection, and sensitive-area exclusions | Explicitly deferred in orchestration docs; mobile PRs require smoke evidence unless the change is non-runtime/non-user-facing | Require explicit policy before enabling | No |
-| 2I Harness command wrappers and audit | Found in repo | Repo-native commands plus drift audit when drift recurs | Existing `agents:*` scripts in `package.json`, including `agents:issue:start` with dry-run, current-worktree branch support, and optional Codex launch | Add `agents:issue:validate-mobile` only if the sequential local mobile loop proves useful in repeated work | No |
+| 2I Harness command wrappers and audit | Found in repo | Repo-native commands plus drift audit when drift recurs | Existing `agents:*` scripts in `package.json`, including `agents:issue:start` with dry-run, current-worktree branch support, optional `codex exec`, and `.scratch/issues/<issue>/codex-final.md` output | Add `agents:issue:validate-mobile` only if the sequential local mobile loop proves useful in repeated work | No |
 
 ## Harness Upgrade Candidates
 
@@ -307,7 +307,7 @@ No Level 1 patch is required to reach readiness.
 Small future batches, when useful:
 
 1. Exercise `.github/workflows/pr-checks.yml` on a real PR and update `docs/agents/orchestration.md` if the check context differs.
-2. Exercise `agents:issue:start <issue> --create-branch --run-codex` on a real ready-for-agent issue and refine the generated prompt if needed.
+2. Exercise `agents:issue:start <issue> --create-branch --run-codex` on a real ready-for-agent issue and refine the generated prompt if needed. `--run-codex` defaults to `danger-full-access` for the mobile runtime loop; use `--codex-sandbox workspace-write` explicitly for static-only runs.
 3. Add `agents:issue:validate-mobile` only if the sequential mobile loop proves useful in repeated work.
 4. Add ADRs for newly confirmed durable decisions.
 5. Add targeted feature tests or smoke coverage when changing low-score domains in `docs/agents/quality-score.md`.

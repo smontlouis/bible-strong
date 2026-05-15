@@ -29,7 +29,7 @@ Use GitHub Issues as the source of truth, as documented in `docs/agents/issue-tr
 To prepare a single issue for agent work, run:
 
 ```bash
-yarn agents:issue:start <issue-number> [--dry-run] [--create-branch] [--run-codex]
+yarn agents:issue:start <issue-number> [--dry-run] [--create-branch] [--run-codex] [--codex-sandbox <mode>]
 ```
 
 This writes `.scratch/issues/<issue-number>/issue.json`, `prompt.md`, and `summary.md`. It does not create or switch branches by default.
@@ -38,11 +38,22 @@ Options:
 
 - `--dry-run`: fetch the issue and print the planned branch and artifact paths without writing files or changing git state.
 - `--create-branch`: create and check out the recommended branch in the current worktree.
-- `--run-codex`: launch the Codex CLI with the generated prompt after preparation. Use it with `--create-branch` for the normal mobile-sequential loop.
+- `--run-codex`: run `codex exec` non-interactively with the generated prompt and write the final agent message to `.scratch/issues/<issue-number>/codex-final.md`.
+- `--codex-sandbox <mode>`: choose the sandbox passed to `codex exec` when using `--run-codex`. Supported modes are `read-only`, `workspace-write`, and `danger-full-access`; the default is `danger-full-access`.
 
 Do not use `--worktree` for Bible Strong mobile user-facing issue work. This repo currently uses `mobile-sequential`: one issue branch in the current worktree, one local mobile verification loop, then PR readiness.
 
+The default `danger-full-access` is intentional for this mobile-sequential harness because runtime validation needs host-level tools such as iOS Simulator/CoreSimulator. For routine static-only implementation work, pass `--codex-sandbox workspace-write` explicitly.
+
 The generated prompt is suitable for Codex direct work today. Sandcastle is not part of this MVP because mobile runtime validation remains host-only and sequential.
+
+When `--run-codex` handles a UI or runtime issue, the agent should leave PR-ready evidence in stable issue-local paths:
+
+- `.scratch/issues/<issue-number>/evidence/` for screenshots, recordings, and other UI artifacts.
+- `.scratch/issues/<issue-number>/mobile-validation.md` for simulator/device, smoke path, app logs, runtime status, and blockers.
+- `.scratch/issues/<issue-number>/codex-final.md` for the final implementation summary.
+
+Use `mobile-validation.md` status values `passed`, `blocked`, or `not-needed`. If no before screenshot exists, capture and label after evidence rather than inventing a baseline.
 
 ## Multi-Agent Ownership
 

@@ -8,10 +8,14 @@ const createBranch = process.argv.includes('--create-branch')
 const createWorktree = process.argv.includes('--worktree')
 const dryRun = process.argv.includes('--dry-run')
 const runCodex = process.argv.includes('--run-codex')
+const codexSandboxIndex = process.argv.indexOf('--codex-sandbox')
+const codexSandbox =
+  codexSandboxIndex === -1 ? 'danger-full-access' : process.argv[codexSandboxIndex + 1]
+const codexSandboxModes = new Set(['read-only', 'workspace-write', 'danger-full-access'])
 
 const usage = () => {
   console.log(
-    'Usage: yarn agents:issue:start <issue-number> [--dry-run] [--create-branch] [--run-codex]'
+    'Usage: yarn agents:issue:start <issue-number> [--dry-run] [--create-branch] [--run-codex] [--codex-sandbox <mode>]'
   )
   console.log('')
   console.log('Fetches a GitHub issue with gh, writes .scratch/issues/<number>/ artifacts,')
@@ -20,7 +24,13 @@ const usage = () => {
   console.log('Options:')
   console.log('  --dry-run        Print planned paths and git actions without writing files.')
   console.log('  --create-branch  Create and check out the recommended branch in this worktree.')
-  console.log('  --run-codex      Launch Codex with the generated prompt after preparation.')
+  console.log('  --run-codex      Run Codex non-interactively with the generated prompt.')
+  console.log(
+    '  --codex-sandbox  Sandbox for --run-codex: read-only, workspace-write, or danger-full-access.'
+  )
+  console.log(
+    '                   Defaults to danger-full-access for trusted local mobile runtime validation.'
+  )
 }
 
 if (!issueNumber || issueNumber === '--help' || issueNumber === '-h') {
@@ -49,6 +59,23 @@ if (dryRun && runCodex) {
   process.exit(1)
 }
 
+if (codexSandboxIndex !== -1 && !runCodex) {
+  console.error('Use --codex-sandbox only with --run-codex.')
+  process.exit(1)
+}
+
+if (codexSandboxIndex !== -1 && !codexSandbox) {
+  console.error('Expected a value after --codex-sandbox.')
+  usage()
+  process.exit(1)
+}
+
+if (!codexSandboxModes.has(codexSandbox)) {
+  console.error(`Unsupported --codex-sandbox mode: ${codexSandbox}`)
+  console.error('Expected one of: read-only, workspace-write, danger-full-access.')
+  process.exit(1)
+}
+
 const run = (command, args, options = {}) =>
   execFileSync(command, args, {
     cwd: repoRoot,
@@ -67,9 +94,10 @@ const slugify = value =>
     .replace(/-+$/g, '')
 
 const getCurrentBranch = () => run('git', ['branch', '--show-current']).trim()
-const branchExists = branchName => {
+
+const branchExists = branch => {
   try {
-    run('git', ['rev-parse', '--verify', '--quiet', branchName])
+    run('git', ['rev-parse', '--verify', '--quiet', branch])
     return true
   } catch {
     return false
@@ -102,6 +130,9 @@ const issueDir = path.join(repoRoot, '.scratch/issues', String(issue.number))
 const issuePath = path.join(issueDir, 'issue.json')
 const promptPath = path.join(issueDir, 'prompt.md')
 const summaryPath = path.join(issueDir, 'summary.md')
+const codexFinalPath = path.join(issueDir, 'codex-final.md')
+const evidenceDir = path.join(issueDir, 'evidence')
+const mobileValidationPath = path.join(issueDir, 'mobile-validation.md')
 
 const issueText = [
   issue.title,
@@ -190,6 +221,16 @@ Mobile runtime validation is host-only and sequential by default.
 
 If this issue changes runtime or user-facing behavior, run the required smoke paths from \`docs/agents/smoke-tests.md\` with \`serve-sim\` or equivalent simulator/device tooling before PR readiness.
 
+For UI or runtime changes, produce stable evidence for the future PR step:
+
+- write screenshots, screen recordings, or other UI artifacts under \`${path.relative(repoRoot, evidenceDir)}\`;
+- prefer descriptive names such as \`after-home.png\`, \`after-settings.png\`, or \`runtime-smoke.png\`;
+- write a concise mobile validation report to \`${path.relative(repoRoot, mobileValidationPath)}\`;
+- include the simulator/emulator/device used, the \`serve-sim\` URL when applicable, smoke path covered, relevant app logs, and whether runtime validation is \`passed\`, \`blocked\`, or \`not-needed\`;
+- stop \`serve-sim\`, Metro, or other helper processes you started unless the operator explicitly asks to keep them running.
+
+If before/after evidence is useful but no baseline screenshot exists, capture and label only the after evidence, then state that no before baseline was available from this run.
+
 ## Completion Output
 
 End with:
@@ -197,7 +238,8 @@ End with:
 - files changed;
 - branch used;
 - validation commands run and results;
-- whether mobile validation is not needed or passed;
+- mobile runtime status: \`passed\`, \`blocked\`, or \`not-needed\`;
+- evidence files written;
 - sensitive areas touched;
 - remaining blockers.
 `
@@ -228,6 +270,8 @@ ${
 - Work happens on one dedicated branch in the current worktree.
 - Static validation runs before the local mobile runtime smoke path.
 - Mobile runtime validation uses the host simulator/dev-client loop directly.
+- UI/runtime evidence should be written under \`${path.relative(repoRoot, evidenceDir)}\`.
+- Mobile validation summary should be written to \`${path.relative(repoRoot, mobileValidationPath)}\`.
 - User-facing/runtime PRs should not be opened or advanced until smoke passes, unless the change is non-runtime/non-user-facing.
 
 ## Suggested Next Step
@@ -246,7 +290,7 @@ if (createBranch) {
   try {
     if (!dryRun) {
       if (getCurrentBranch() === branchName) {
-        // Already on the prepared branch; keep going so reruns can refresh prompt artifacts.
+        // Reruns on the prepared branch should refresh issue artifacts and continue.
       } else if (branchExists(branchName)) {
         run('git', ['switch', branchName], { stdio: 'inherit' })
       } else {
@@ -287,22 +331,30 @@ if (sensitiveMatches.length > 0) {
 }
 
 if (runCodex) {
+  const promptRelativePath = path.relative(repoRoot, promptPath)
+  const finalRelativePath = path.relative(repoRoot, codexFinalPath)
+  console.log(`Running Codex exec with ${promptRelativePath}`)
+  console.log(`Codex sandbox: ${codexSandbox}`)
+  console.log(`Codex final message will be written to ${finalRelativePath}`)
+
   try {
     run(
       'codex',
       [
+        'exec',
         '--cd',
         repoRoot,
-        `Read ${path.relative(
-          repoRoot,
-          promptPath
-        )} and implement the issue using the repository harness contract. Continue until the required local checks pass or blockers are clearly documented.`,
+        '--sandbox',
+        codexSandbox,
+        '--output-last-message',
+        codexFinalPath,
+        `Read ${promptRelativePath} and implement the issue using the repository harness contract. Continue until the required local checks pass or blockers are clearly documented.`,
       ],
       { stdio: 'inherit' }
     )
   } catch {
-    console.error('Failed to launch Codex.')
-    console.error('Make sure the Codex CLI is installed and authenticated.')
+    console.error('Codex exec failed.')
+    console.error(`Inspect ${finalRelativePath} if it was written, then rerun or resume manually.`)
     process.exit(1)
   }
 }
