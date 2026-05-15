@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Readiness - Harness Report</title>
+<style>
+  :root{--bg:#f8f7f2;--panel:#fff;--ink:#171717;--muted:#6b6b63;--line:#d8d5ca;--soft:#eeece4;--ok:#3f7d4e;--warn:#b56a2f;--bad:#b23b3b;--info:#476d8f;--radius:10px;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--sans:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 var(--sans)} .report{max-width:1120px;margin:0 auto;padding:32px 20px 64px}
+  header{display:grid;gap:12px;margin-bottom:26px;border-bottom:1px solid var(--line);padding-bottom:18px}.eyebrow{font:11px/1.2 var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  h1,h2{margin:0;line-height:1.15} h1{font-size:clamp(28px,4vw,42px);font-weight:650} h2{font-size:18px;margin-bottom:10px} section{margin-top:28px}
+  nav{display:flex;flex-wrap:wrap;gap:8px} a{color:inherit;text-decoration-thickness:1px;text-underline-offset:3px} code{font-family:var(--mono);font-size:.92em;background:var(--soft);border:1px solid var(--line);border-radius:4px;padding:1px 4px}
+  .pill,.status{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:3px 8px;background:var(--panel);font:12px/1.3 var(--mono);white-space:nowrap}.status-documented{color:var(--warn)}.status-verified{color:var(--ok)}
+  .grid-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px}.note{color:var(--muted)}
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden} th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top} th{background:var(--soft);color:var(--muted);font:12px/1.3 var(--mono)} tr:last-child td{border-bottom:0}
+  @media(max-width:760px){.grid-two{grid-template-columns:1fr} table{display:block;overflow-x:auto}}
+</style>
+</head>
+<body>
+<main class="report" data-generated-by="harness-readiness" data-report-page="readiness">
+  <header>
+    <div class="eyebrow">Harness Report</div>
+    <h1>Readiness</h1>
+    <nav><a class="pill" href="./index.html">Summary</a><a class="pill" href="./validation.html">Validation</a><a class="pill" href="./quality.html">Quality</a><a class="pill" href="../harness-readiness.md">Markdown source</a></nav>
+  </header>
+  <section class="grid-two" aria-label="Page evidence summary">
+    <article class="card"><h2>Current State</h2><p class="note">Level 1 is Ready for solo-agent work in this brownfield Expo/React Native app.</p></article>
+    <article class="card"><h2>Evidence</h2><p class="note">Readiness matrix, latest local validation table, smoke evidence, and generated report pack refreshed on 2026-05-15.</p></article>
+    <article class="card"><h2>Gaps</h2><p class="note">No blocking Level 1 gaps. Automated feature tests and automated smoke remain sparse or deferred.</p></article>
+    <article class="card"><h2>Source</h2><p class="note"><a href="../harness-readiness.md">harness-readiness.md</a>, <a href="../smoke-tests.md">smoke-tests.md</a>, <a href="../validation.md">validation.md</a></p></article>
+  </section>
+  <section><h2>Readiness Matrix</h2><table><thead><tr><th>Code</th><th>Workstream</th><th>Status</th><th>Evidence</th><th>Next step</th></tr></thead><tbody>
+    <tr><td>1A</td><td>Local commands</td><td><span class="status status-verified">Verified locally</span></td><td><code>package.json</code> commands documented and checks passed.</td><td>Refresh after script changes.</td></tr>
+    <tr><td>1B</td><td>Local setup and environment</td><td><span class="status status-documented">Documented for agents</span></td><td><code>.env.example</code>, env boundaries, Node 20 Expo workaround.</td><td>Keep secret-like values blank.</td></tr>
+    <tr><td>1C</td><td>Validation tooling</td><td><span class="status status-verified">Verified locally</span></td><td>Static checks, harness checks, and <code>serve-sim</code> path.</td><td>Use selected path for mobile changes.</td></tr>
+    <tr><td>1D</td><td>Product smoke paths</td><td><span class="status status-verified">Verified locally</span></td><td>iOS Simulator evidence covers launch, Bible reading, search, downloads, and annotation create/remove.</td><td>Rerun after UI/navigation changes.</td></tr>
+    <tr><td>1E</td><td>Sensitive areas</td><td><span class="status status-documented">Documented for agents</span></td><td>Auth, sync, storage, backup, native config, release, and services documented.</td><td>Require explicit intent for risky flows.</td></tr>
+    <tr><td>1F</td><td>Local observability</td><td><span class="status status-verified">Verified locally</span></td><td>Sentry, ErrorBoundary, <code>[AgentLog]</code>, and log query scripts exist.</td><td>Add structured events only where useful.</td></tr>
+    <tr><td>1G</td><td>Entrypoint and repo map</td><td><span class="status status-documented">Documented for agents</span></td><td><code>AGENTS.md</code>, <code>CONTEXT.md</code>, <code>docs/index.md</code>, <code>docs/agents/</code>.</td><td>Add ADRs for durable decisions.</td></tr>
+    <tr><td>1H</td><td>Status, gaps, upgrades</td><td><span class="status status-documented">Documented for agents</span></td><td>Markdown readiness state and this report pack.</td><td>Refresh after harness changes.</td></tr>
+  </tbody></table></section>
+  <section><h2>Remaining Gaps</h2><table><thead><tr><th>Type</th><th>Gap</th><th>Blocking?</th></tr></thead><tbody>
+    <tr><td>Level 1</td><td>Feature-level automated tests are sparse; many domains rely on static checks plus manual smoke.</td><td>No</td></tr>
+    <tr><td>Level 1</td><td>Smoke execution is not automated and must be rerun manually after UI/navigation changes.</td><td>No</td></tr>
+    <tr><td>Level 2</td><td>PR gates need to be exercised on a real PR; architecture warnings remain brownfield debt.</td><td>No for Level 1</td></tr>
+  </tbody></table></section>
+</main>
+</body>
+</html>
