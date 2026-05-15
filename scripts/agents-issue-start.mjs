@@ -133,6 +133,9 @@ const summaryPath = path.join(issueDir, 'summary.md')
 const codexFinalPath = path.join(issueDir, 'codex-final.md')
 const evidenceDir = path.join(issueDir, 'evidence')
 const mobileValidationPath = path.join(issueDir, 'mobile-validation.md')
+const commitMessagePath = path.join(issueDir, 'commit-message.txt')
+const changeSummaryPath = path.join(issueDir, 'change-summary.md')
+const prNotesPath = path.join(issueDir, 'pr-notes.md')
 
 const issueText = [
   issue.title,
@@ -231,6 +234,16 @@ For UI or runtime changes, produce stable evidence for the future PR step:
 
 If before/after evidence is useful but no baseline screenshot exists, capture and label only the after evidence, then state that no before baseline was available from this run.
 
+## PR Handoff Artifacts
+
+Before ending, prepare deterministic handoff files for the local orchestration wrapper:
+
+- write a Conventional Commits subject to \`${path.relative(repoRoot, commitMessagePath)}\`;
+- write a concise implementation summary to \`${path.relative(repoRoot, changeSummaryPath)}\`;
+- write any PR-specific notes, risks, screenshots to mention, or reviewer guidance to \`${path.relative(repoRoot, prNotesPath)}\`;
+- keep these files factual and based on the implemented diff and validation evidence;
+- do not push, open a PR, or change remote state.
+
 ## Completion Output
 
 End with:
@@ -272,6 +285,7 @@ ${
 - Mobile runtime validation uses the host simulator/dev-client loop directly.
 - UI/runtime evidence should be written under \`${path.relative(repoRoot, evidenceDir)}\`.
 - Mobile validation summary should be written to \`${path.relative(repoRoot, mobileValidationPath)}\`.
+- Commit and PR handoff should be written to \`${path.relative(repoRoot, commitMessagePath)}\`, \`${path.relative(repoRoot, changeSummaryPath)}\`, and \`${path.relative(repoRoot, prNotesPath)}\`.
 - User-facing/runtime PRs should not be opened or advanced until smoke passes, unless the change is non-runtime/non-user-facing.
 
 ## Suggested Next Step

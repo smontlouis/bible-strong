@@ -106,6 +106,9 @@ const mobileValidationPath = path.join(issueDir, 'mobile-validation.md')
 const legacyRuntimeValidationPath = path.join(issueDir, 'codex-runtime-validation.md')
 const evidenceDir = path.join(issueDir, 'evidence')
 const prBodyPath = path.join(issueDir, 'pr-body.md')
+const commitMessagePath = path.join(issueDir, 'commit-message.txt')
+const changeSummaryPath = path.join(issueDir, 'change-summary.md')
+const prNotesPath = path.join(issueDir, 'pr-notes.md')
 
 if (!exists(issuePath)) {
   console.error(`Missing issue artifact: ${path.relative(repoRoot, issuePath)}`)
@@ -117,10 +120,19 @@ const issue = JSON.parse(readIfExists(issuePath))
 const codexFinal = readIfExists(codexFinalPath)
 const mobileValidation = readIfExists(mobileValidationPath)
 const legacyRuntimeValidation = readIfExists(legacyRuntimeValidationPath)
+const commitMessage = readIfExists(commitMessagePath)
+const changeSummary = readIfExists(changeSummaryPath)
+const prNotes = readIfExists(prNotesPath)
 const combinedReport = [codexFinal, mobileValidation, legacyRuntimeValidation]
   .filter(Boolean)
   .join('\n\n')
 const mobileStatus = extractStatus(combinedReport)
+
+if (ready && mobileStatus === 'blocked') {
+  console.error('Refusing to create a ready PR while mobile runtime status is blocked.')
+  console.error('Use the default draft PR mode, or fix validation and rerun with --ready.')
+  process.exit(1)
+}
 
 const currentBranch = run('git', ['branch', '--show-current']).trim()
 const statusShort = run('git', ['status', '--short']).trim()
@@ -139,6 +151,8 @@ const evidenceFiles = exists(evidenceDir)
 
 const prTitle = `#${issue.number} ${issue.title}`
 const reportExcerpt = truncate(combinedReport || 'No agent validation report found.', 1800)
+const changeSummaryExcerpt = truncate(changeSummary || 'No change summary artifact found.', 1200)
+const prNotesExcerpt = truncate(prNotes || 'No PR-specific notes artifact found.', 1200)
 const filesList = changedFiles.length
   ? changedFiles.map(file => `- \`${file}\``).join('\n')
   : '- No committed file changes detected against base branch.'
@@ -148,6 +162,9 @@ const evidenceList = [
     ? `- \`${path.relative(repoRoot, legacyRuntimeValidationPath)}\``
     : null,
   exists(codexFinalPath) ? `- \`${path.relative(repoRoot, codexFinalPath)}\`` : null,
+  exists(commitMessagePath) ? `- \`${path.relative(repoRoot, commitMessagePath)}\`` : null,
+  exists(changeSummaryPath) ? `- \`${path.relative(repoRoot, changeSummaryPath)}\`` : null,
+  exists(prNotesPath) ? `- \`${path.relative(repoRoot, prNotesPath)}\`` : null,
   ...evidenceFiles.map(file => `- \`${file}\``),
 ]
   .filter(Boolean)
@@ -158,11 +175,16 @@ const prBody = `## Summary
 - Closes #${issue.number}
 - ${issue.title}
 
+## Agent Change Summary
+
+${changeSummaryExcerpt}
+
 ## Scope
 
 - Issue/request: ${issue.url ?? `#${issue.number}`}
 - Branch: \`${currentBranch || '(detached)'}\`
 - Base: \`${baseBranch}\`
+- Proposed commit: ${commitMessage.trim() ? `\`${commitMessage.trim().split('\n')[0]}\`` : 'not recorded'}
 - Owned files or modules:
 ${filesList}
 - Sensitive areas touched: none identified by this wrapper
@@ -193,6 +215,10 @@ Smoke paths:
 Evidence:
 
 ${evidenceList || '- No stable evidence artifacts found.'}
+
+## PR Notes
+
+${prNotesExcerpt}
 
 ## Agent Validation Report
 

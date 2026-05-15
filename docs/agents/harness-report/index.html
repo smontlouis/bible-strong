@@ -262,10 +262,10 @@
           <h2>Next Decision</h2>
           <p class="note">
             Exercise
-            <code>agents:issue:start &lt;issue&gt; --create-branch --run-codex</code> on a real
-            ready-for-agent issue, then exercise the GitHub PR gate on a real PR when remote
-            validation is worth spending. Mobile validation, recurring maintenance, UI evidence
-            automation, and merge autonomy remain Level 2 work and do not block Level 1.
+            <code>agents:issue:run &lt;issue&gt; --create-pr --push</code> on a real ready-for-agent
+            issue when the branch output is acceptable, then exercise the GitHub PR gate on a real
+            PR when remote validation is worth spending. Mobile validation, recurring maintenance,
+            UI evidence automation, and merge autonomy remain Level 2 work and do not block Level 1.
           </p>
         </article>
       </section>
@@ -339,9 +339,10 @@
               Evidence: PR template, GitHub workflow, orchestration docs, mobile-sequential
               validation policy, agent scripts including <code>agents:issue:start</code> with
               current-worktree branch support, optional <code>codex exec</code> output, stable issue
-              evidence paths, and <code>agents:issue:pr</code> PR body packaging.<br />Gap: PR gate
-              not exercised on a real PR; PR body wrapper needs refinement on a real issue branch;
-              autonomy deferred.<br /><a href="./level-2.html">Details</a>
+              evidence paths, <code>agents:issue:pr</code> PR body packaging, and
+              <code>agents:issue:run</code> as a one-issue orchestration wrapper.<br />Gap: PR gate
+              not exercised on a real PR; start-to-commit-to-PR handoff needs refinement on a real
+              issue branch; autonomy deferred.<br /><a href="./level-2.html">Details</a>
             </p>
           </article>
         </div>

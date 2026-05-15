@@ -52,8 +52,19 @@ When `--run-codex` handles a UI or runtime issue, the agent should leave PR-read
 - `.scratch/issues/<issue-number>/evidence/` for screenshots, recordings, and other UI artifacts.
 - `.scratch/issues/<issue-number>/mobile-validation.md` for simulator/device, smoke path, app logs, runtime status, and blockers.
 - `.scratch/issues/<issue-number>/codex-final.md` for the final implementation summary.
+- `.scratch/issues/<issue-number>/commit-message.txt` for the Conventional Commits subject to use if the wrapper commits.
+- `.scratch/issues/<issue-number>/change-summary.md` for the implementation summary used by PR packaging.
+- `.scratch/issues/<issue-number>/pr-notes.md` for PR-specific reviewer notes, evidence notes, risks, or follow-ups.
 
 Use `mobile-validation.md` status values `passed`, `blocked`, or `not-needed`. If no before screenshot exists, capture and label after evidence rather than inventing a baseline.
+
+To simulate one local orchestration unit manually, run:
+
+```bash
+yarn agents:issue:run <issue-number> [--dry-run] [--no-commit] [--allow-dirty] [--create-pr] [--push] [--draft|--ready] [--base <branch>] [--codex-sandbox <mode>]
+```
+
+This wrapper refuses to start from a dirty worktree unless `--allow-dirty` is explicit. It then runs `agents:issue:start <issue-number> --create-branch --run-codex`, commits the resulting tracked repo changes using `commit-message.txt` unless `--no-commit` is passed, then runs `agents:issue:pr`. Without `--create-pr`, the PR step is a dry run; with `--create-pr --push`, it pushes the branch and opens the PR. The wrapper is the local stand-in for a future orchestrator task and should stay policy-driven rather than agent-reasoning-driven.
 
 To package an issue branch into a PR body after local evidence exists, run:
 
@@ -168,5 +179,5 @@ Enable recurring automation only after the owner chooses cadence, notification d
 
 - Decide whether to add scheduled maintenance automations.
 - Exercise the PR gate on a real pull request and adjust the required check context if GitHub reports a different check-run name.
-- Exercise `agents:issue:pr` on a real issue branch and refine PR body generation from stable `.scratch/issues/<issue>/` evidence.
+- Exercise `agents:issue:run` on a real issue branch and refine the start-to-commit-to-PR handoff from stable `.scratch/issues/<issue>/` evidence.
 - Revisit Sandcastle only if a future workflow provides a real parallel verification loop for the relevant surface.
