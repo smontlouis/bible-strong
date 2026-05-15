@@ -307,7 +307,7 @@ No Level 1 patch is required to reach readiness.
 Small future batches, when useful:
 
 1. Exercise `.github/workflows/pr-checks.yml` on a real PR and update `docs/agents/orchestration.md` if the check context differs.
-2. Exercise `agents:issue:run <issue> --create-pr --push` on a real ready-for-agent issue when the branch output is acceptable. `--run-codex` inside the wrapper defaults to `danger-full-access` for the mobile runtime loop; use `--codex-sandbox workspace-write` explicitly for static-only runs.
+2. Exercise `agents:issue:run <issue>` on a real ready-for-agent issue when the branch output is acceptable. The wrapper creates and pushes a draft PR by default after local commit; use `--dry-run` for no writes or `--no-pr` to stop after commit. `--run-codex` inside the wrapper defaults to `danger-full-access` for the mobile runtime loop; use `--codex-sandbox workspace-write` explicitly for static-only runs.
 3. Refine PR body generation from `commit-message.txt`, `change-summary.md`, `pr-notes.md`, `mobile-validation.md`, and stable `.scratch/issues/<issue>/evidence/` artifacts.
 4. Add ADRs for newly confirmed durable decisions.
 5. Add targeted feature tests or smoke coverage when changing low-score domains in `docs/agents/quality-score.md`.

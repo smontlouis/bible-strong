@@ -6,8 +6,9 @@ const repoRoot = process.cwd()
 const args = process.argv.slice(2)
 const issueNumber = args[0]
 const dryRun = args.includes('--dry-run')
-const createPr = args.includes('--create-pr')
-const pushBranch = args.includes('--push')
+const noPr = args.includes('--no-pr')
+const createPr = !dryRun && !noPr
+const pushBranch = createPr && !args.includes('--no-push')
 const ready = args.includes('--ready')
 const draft = args.includes('--draft') || !ready
 const noCommit = args.includes('--no-commit')
@@ -20,7 +21,7 @@ const codexSandboxModes = new Set(['read-only', 'workspace-write', 'danger-full-
 
 const usage = () => {
   console.log(
-    'Usage: yarn agents:issue:run <issue-number> [--dry-run] [--no-commit] [--allow-dirty] [--create-pr] [--push] [--draft|--ready] [--base <branch>] [--codex-sandbox <mode>]'
+    'Usage: yarn agents:issue:run <issue-number> [--dry-run] [--no-commit] [--no-pr] [--no-push] [--allow-dirty] [--draft|--ready] [--base <branch>] [--codex-sandbox <mode>]'
   )
   console.log('')
   console.log(
@@ -32,14 +33,12 @@ const usage = () => {
     '  --dry-run        Print the issue start plan without writing files or changing git state.'
   )
   console.log('  --no-commit      Do not create a local commit after the agent finishes.')
+  console.log('  --no-pr          Stop after commit and skip PR packaging/publication.')
+  console.log(
+    '  --no-push        Create the PR without pushing first; branch must already exist remote.'
+  )
   console.log('  --allow-dirty    Permit starting from a dirty worktree.')
-  console.log(
-    '  --create-pr      Create the pull request after packaging it. Without this, PR is dry-run.'
-  )
-  console.log(
-    '  --push           Push the current branch before creating the PR. Requires --create-pr.'
-  )
-  console.log('  --draft          Create the PR as draft. This is the default.')
+  console.log('  --draft          Create the PR as draft. This is the default for the full run.')
   console.log('  --ready          Create the PR as ready for review.')
   console.log('  --base           Base branch for diff and PR creation. Defaults to master.')
   console.log(
@@ -81,8 +80,11 @@ if (!codexSandboxModes.has(codexSandbox)) {
   process.exit(1)
 }
 
-if (pushBranch && !createPr) {
-  console.error('Use --push only with --create-pr.')
+if (args.includes('--create-pr') || args.includes('--push')) {
+  console.error('agents:issue:run now creates and pushes a draft PR by default.')
+  console.error(
+    'Use --dry-run for no writes, --no-pr to stop after commit, or --no-push if needed.'
+  )
   process.exit(1)
 }
 
@@ -203,14 +205,17 @@ if (!hasCommittedDiff()) {
   process.exit(1)
 }
 
+if (noPr) {
+  console.log('Skipped PR packaging/publication because --no-pr was passed.')
+  process.exit(0)
+}
+
 const prArgs = ['agents:issue:pr', issueNumber, '--base', baseBranch]
 
 if (createPr) {
   prArgs.push('--create')
   if (pushBranch) prArgs.push('--push')
   prArgs.push(draft ? '--draft' : '--ready')
-} else {
-  prArgs.push('--dry-run')
 }
 
 runStep('Issue PR packaging', 'yarn', prArgs)

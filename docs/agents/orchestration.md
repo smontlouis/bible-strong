@@ -61,10 +61,10 @@ Use `mobile-validation.md` status values `passed`, `blocked`, or `not-needed`. I
 To simulate one local orchestration unit manually, run:
 
 ```bash
-yarn agents:issue:run <issue-number> [--dry-run] [--no-commit] [--allow-dirty] [--create-pr] [--push] [--draft|--ready] [--base <branch>] [--codex-sandbox <mode>]
+yarn agents:issue:run <issue-number> [--dry-run] [--no-commit] [--no-pr] [--no-push] [--allow-dirty] [--draft|--ready] [--base <branch>] [--codex-sandbox <mode>]
 ```
 
-This wrapper refuses to start from a dirty worktree unless `--allow-dirty` is explicit. It then runs `agents:issue:start <issue-number> --create-branch --run-codex`, commits the resulting tracked repo changes using `commit-message.txt` unless `--no-commit` is passed, then runs `agents:issue:pr`. Without `--create-pr`, the PR step is a dry run; with `--create-pr --push`, it pushes the branch and opens the PR. The wrapper is the local stand-in for a future orchestrator task and should stay policy-driven rather than agent-reasoning-driven.
+This wrapper refuses to start from a dirty worktree unless `--allow-dirty` is explicit. It then runs `agents:issue:start <issue-number> --create-branch --run-codex`, commits the resulting tracked repo changes using `commit-message.txt` unless `--no-commit` is passed, then runs `agents:issue:pr --create --push --draft` by default. Use `--dry-run` to print the start plan without writes, `--no-pr` to stop after the local commit, or `--ready` only when runtime evidence clearly passed and the repo policy allows a ready-for-review PR. The wrapper is the local stand-in for a future orchestrator task and should stay policy-driven rather than agent-reasoning-driven.
 
 To package an issue branch into a PR body after local evidence exists, run:
 
