@@ -55,6 +55,14 @@ When `--run-codex` handles a UI or runtime issue, the agent should leave PR-read
 
 Use `mobile-validation.md` status values `passed`, `blocked`, or `not-needed`. If no before screenshot exists, capture and label after evidence rather than inventing a baseline.
 
+To package an issue branch into a PR body after local evidence exists, run:
+
+```bash
+yarn agents:issue:pr <issue-number> [--dry-run] [--create] [--push] [--draft|--ready] [--base <branch>]
+```
+
+This reads `.scratch/issues/<issue-number>/issue.json`, `codex-final.md`, `mobile-validation.md`, and `evidence/`, then writes `.scratch/issues/<issue-number>/pr-body.md`. It does not push or create a PR unless `--create` is passed; PRs are draft by default.
+
 ## Multi-Agent Ownership
 
 When multiple agents work in parallel, split by disjoint ownership boundaries before implementation starts.
@@ -160,5 +168,5 @@ Enable recurring automation only after the owner chooses cadence, notification d
 
 - Decide whether to add scheduled maintenance automations.
 - Exercise the PR gate on a real pull request and adjust the required check context if GitHub reports a different check-run name.
-- Add an `agents:issue:validate-mobile` wrapper only if the sequential local mobile loop proves useful in repeated work.
+- Exercise `agents:issue:pr` on a real issue branch and refine PR body generation from stable `.scratch/issues/<issue>/` evidence.
 - Revisit Sandcastle only if a future workflow provides a real parallel verification loop for the relevant surface.
