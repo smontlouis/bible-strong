@@ -3,7 +3,6 @@ import BottomSheet, {
   BottomSheetFooterProps,
   BottomSheetScrollView,
 } from '@gorhom/bottom-sheet/'
-import { useRouter } from 'expo-router'
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React, { memo, useCallback } from 'react'
@@ -30,6 +29,7 @@ import formatVerseContent from '~helpers/formatVerseContent'
 import generateUUID from '~helpers/generateUUID'
 import { BibleTab, useBibleTabActions } from '../../../state/tabs'
 import BibleVerseDetailCard from '../BibleVerseDetailCard'
+import CompareVersionSelectorBottomSheet from '../CompareVersionSelectorBottomSheet'
 import { ReferenceCard } from '../ReferenceCard'
 import ResourcesModalFooter from './ResourcesModalFooter'
 
@@ -77,7 +77,7 @@ type Props = {
 const ResourcesModal = memo(
   ({ resourceModalRef, resourceType, onChangeResourceType, bibleAtom, isSelectionMode }: Props) => {
     const { t } = useTranslation()
-    const router = useRouter()
+    const compareVersionSelectorRef = React.useRef<BottomSheet>(null)
     const openInNewTab = useOpenInNewTab()
     const bible = useAtomValue(bibleAtom)
     const { key, ...bottomSheetStyles } = useBottomSheetStyles()
@@ -154,7 +154,7 @@ const ResourcesModal = memo(
               height={54}
               popover={
                 <>
-                  <MenuOption onSelect={() => router.push('/toggle-compare-verses')}>
+                  <MenuOption onSelect={() => compareVersionSelectorRef.current?.expand()}>
                     <Box row alignItems="center">
                       <FeatherIcon name="check-square" size={15} />
                       <Text marginLeft={10}>{t('common.chooseCompareVersions')}</Text>
@@ -203,34 +203,37 @@ const ResourcesModal = memo(
     )
 
     return (
-      <BottomSheet
-        index={-1}
-        key={key}
-        ref={resourceModalRef}
-        topInset={insets.top}
-        enablePanDownToClose
-        enableDynamicSizing={false}
-        backdropComponent={renderBackdrop}
-        activeOffsetY={[-20, 20]}
-        snapPoints={['100%']}
-        footerComponent={footerComponent}
-        {...bottomSheetStyles}
-      >
-        <ModalHeader
-          title={title}
-          subTitle={getSubtitleByResourceType()}
-          rightComponent={getOptionsByResourceType()}
-        />
-        {resourceType && (
-          <View style={{ flex: 1 }}>
-            <Resource
-              resourceType={resourceType}
-              bibleAtom={bibleAtom}
-              isSelectionMode={isSelectionMode}
-            />
-          </View>
-        )}
-      </BottomSheet>
+      <>
+        <BottomSheet
+          index={-1}
+          key={key}
+          ref={resourceModalRef}
+          topInset={insets.top}
+          enablePanDownToClose
+          enableDynamicSizing={false}
+          backdropComponent={renderBackdrop}
+          activeOffsetY={[-20, 20]}
+          snapPoints={['100%']}
+          footerComponent={footerComponent}
+          {...bottomSheetStyles}
+        >
+          <ModalHeader
+            title={title}
+            subTitle={getSubtitleByResourceType()}
+            rightComponent={getOptionsByResourceType()}
+          />
+          {resourceType && (
+            <View style={{ flex: 1 }}>
+              <Resource
+                resourceType={resourceType}
+                bibleAtom={bibleAtom}
+                isSelectionMode={isSelectionMode}
+              />
+            </View>
+          )}
+        </BottomSheet>
+        <CompareVersionSelectorBottomSheet bottomSheetRef={compareVersionSelectorRef} />
+      </>
     )
   }
 )

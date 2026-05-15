@@ -11,7 +11,7 @@ This report is a directional agent-readability score, not a product quality verd
 | `app-rating` | 5/10 | 5 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README; 3 eslint-disable markers |
 | `app-switcher` | 5/10 | 54 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README; 7 eslint-disable markers |
 | `audio` | 7/10 | 0 | 0 | no | no | no colocated feature tests; no mapped smoke path |
-| `bible` | 8/10 | 157 | 1 | yes | no | 46 console calls; 19 eslint-disable markers |
+| `bible` | 8/10 | 158 | 1 | yes | no | 46 console calls; 19 eslint-disable markers |
 | `bookmarks` | 6/10 | 2 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README |
 | `commentaries` | 5/10 | 5 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README; 4 eslint-disable markers |
 | `dictionnary` | 7/10 | 11 | 0 | yes | no | no colocated feature tests; 4 eslint-disable markers |

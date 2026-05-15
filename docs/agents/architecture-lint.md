@@ -147,7 +147,7 @@ This is a repo-specific architecture scan for agent work. It is intentionally co
 - WARNING `raw-console` src/features/bible/footer/AudioUrlFooter.tsx:211 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/features/bible/footer/AudioUrlFooter.tsx:238 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `deep-relative-import` src/features/bible/footer/BackToAudioFooter.tsx:12 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/bible/resources/ResourceModal.tsx:31 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` src/features/bible/resources/ResourceModal.tsx:30 - Prefer path aliases or a small public module boundary over deep relative imports.
 - WARNING `feature-firebase-boundary` src/features/commentaries/Comment.tsx:20 - Feature code should prefer a local helper/hook boundary over direct Firebase access.
 - WARNING `raw-console` src/features/commentaries/Comment.tsx:81 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/features/commentaries/Comment.tsx:103 - Prefer appLogger for app-owned diagnostic events that agents should query.
