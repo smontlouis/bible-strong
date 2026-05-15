@@ -56,8 +56,7 @@ When `--run-codex` handles a UI or runtime issue, the agent should leave PR-read
 - `.scratch/issues/<issue-number>/change-summary.md` for the implementation summary used by PR packaging.
 - `.scratch/issues/<issue-number>/pr-notes.md` for PR-specific reviewer notes, evidence notes, risks, or follow-ups.
 
-Use `mobile-validation.md` status values `passed`, `blocked`, or `not-needed`. If no before screenshot exists, capture and label after evidence rather than inventing a baseline.
-For visual changes, prefer before/after pairs such as `before-home.png` and `after-home.png`; if the baseline cannot be captured, the validation report must say why.
+Use `mobile-validation.md` status values `passed`, `blocked`, or `not-needed`. For visual changes, capture after evidence that shows the implemented result. Do not create duplicate screenshots just to simulate a before/after pair.
 
 To simulate one local orchestration unit manually, run:
 

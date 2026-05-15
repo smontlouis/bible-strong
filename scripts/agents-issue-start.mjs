@@ -227,9 +227,9 @@ If this issue changes runtime or user-facing behavior, run the required smoke pa
 For UI or runtime changes, produce stable evidence for the future PR step:
 
 - write screenshots, screen recordings, or other UI artifacts under \`${path.relative(repoRoot, evidenceDir)}\`;
-- when the change is visual, capture before and after screenshots whenever practical;
-- prefer paired descriptive names such as \`before-home.png\` and \`after-home.png\`, or \`before-settings.png\` and \`after-settings.png\`;
-- if a before screenshot is not practical because the change already exists, capture after evidence and state why the baseline is missing;
+- when the change is visual, capture after screenshots that show the implemented result;
+- prefer descriptive names such as \`after-home.png\`, \`after-settings.png\`, or \`runtime-smoke.png\`;
+- do not create duplicate screenshots just to simulate a before/after pair;
 - write a concise mobile validation report to \`${path.relative(repoRoot, mobileValidationPath)}\`;
 - include the simulator/emulator/device used, the \`serve-sim\` URL when applicable, smoke path covered, relevant app logs, and whether runtime validation is \`passed\`, \`blocked\`, or \`not-needed\`;
 - stop \`serve-sim\`, Metro, or other helper processes you started unless the operator explicitly asks to keep them running.
