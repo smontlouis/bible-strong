@@ -18,6 +18,7 @@ This directory is the repo-level reference set for agents and humans working on 
 | Document | Purpose |
 |---|---|
 | `agents/harness-readiness.md` | Current readiness level and gaps. |
+| `agents/harness-report/index.html` | Self-contained human report hub with dashboard and links to full readiness, validation, quality, risk, observability, commands, Level 2, and decisions pages. |
 | `agents/validation.md` | Canonical checks before finishing work. |
 | `agents/smoke-tests.md` | Manual/mobile smoke paths and evidence expectations. |
 | `agents/sensitive-areas.md` | Areas requiring extra care or explicit approval. |
@@ -29,4 +30,3 @@ This directory is the repo-level reference set for agents and humans working on 
 ## Decision Records
 
 ADRs live in `adr/`. Do not invent ADRs retroactively; add one when a new durable engineering decision is made or when an existing implicit decision is confirmed.
-

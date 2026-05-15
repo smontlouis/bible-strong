@@ -1,68 +1,310 @@
 # Harness Readiness
 
-## Current State
+Generated: 2026-05-15 11:58 CEST  
+Repo: `bible-strong`  
+Branch: `codex/architecture-deepening`  
+Commit inspected: `04bb9d802`
 
-Bible Strong is an Expo SDK 54 / React Native 0.81 mobile app using TypeScript, Expo Router, Redux Toolkit, Jotai, Firebase, SQLite, Sentry, and EAS local builds.
+## Current Harness State
 
-The repository has Matt Pocock-compatible agent setup in `AGENTS.md` and `docs/agents/`. This first Level 1 harness pass adds reproducible local checks, smoke-test expectations, sensitive-area policy, and observability notes.
+### Project Mode
 
-## Assumptions Made
+Brownfield.
 
-- Level 1 only is in scope.
-- GitHub Issues is the issue tracker, based on the configured `origin` remote and prior setup.
-- This is a single-context repo for agent/domain docs.
-- UI smoke execution requires a custom Expo development client. `serve-sim` is installed as a dev dependency. In this environment, Expo startup required Node 20 because Node 22 triggered a `freeport-async` bad-port crash before Metro could bind.
+Evidence: the repo has a full Expo/React Native app, `package.json` scripts, `app/` routes, feature modules under `src/features/`, Firebase config directories, EAS build profiles, existing product docs, `AGENTS.md`, `CONTEXT.md`, ADR scaffolding, and canonical `docs/agents/` harness files.
 
-## Level 1 Completed
+### Detected Stack
 
-- Added a stable `## Harness readiness` pointer in `AGENTS.md`.
-- Added canonical harness docs under `docs/agents/`.
-- Added `.env.example` with required variable names and blank placeholders for secret-like values.
-- Documented validation commands that exist in `package.json`.
-- Documented and executed critical mobile smoke paths.
-- Documented sensitive areas and local observability/debugging signals.
+- Expo SDK 54, React Native 0.81, React 19, TypeScript.
+- Expo Router entrypoint via `expo-router/entry`; routes live under `app/`.
+- Redux Toolkit, Redux Persist, Jotai, MMKV, SQLite, Firebase, Sentry.
+- Emotion Native for styling and feature-based modules under `src/features/`.
+- Yarn 4 with Corepack.
 
-## Level 1 Gaps
+### Existing Commands
 
-No blocking Level 1 gaps remain from this pass.
+Detected in `package.json`:
 
-The app was launched and representative read/search/download/annotation smoke paths were executed on iOS Simulator with `serve-sim`.
+| Purpose | Command |
+|---|---|
+| Install | `corepack enable`, then `yarn install` |
+| Start dev client Metro | `yarn start` |
+| iOS simulator/device run | `yarn ios` |
+| Android emulator/device run | `yarn android` |
+| Simulator control | `yarn serve-sim` |
+| Unit tests | `yarn test` |
+| Lint | `yarn lint` |
+| Typecheck | `yarn typecheck` |
+| Format check | `yarn format:check` |
+| i18n extraction | `yarn i18n` |
+| Agent architecture check | `yarn agents:architecture:check` |
+| Agent domain quality check | `yarn agents:quality:check` |
+| Query captured local logs | `yarn agents:logs:*` |
+| EAS local builds | `yarn build:android:*`, `yarn build:ios:*` |
 
-Non-blocking:
+No intended or proposed Level 1 commands are documented as canonical unless they exist in `package.json`.
 
-- ADR infrastructure exists under `docs/adr/`, but no durable decisions have been recorded yet. Add ADRs only when real decisions are made or confirmed.
-- Unit tests are reducer-heavy; feature-level and UI smoke coverage is mostly manual.
+### Existing Docs
 
-## Level 2 Deferred
+- `AGENTS.md`: always-loaded repo guidance, project overview, commands, conventions, agent skills, harness pointer block.
+- `CONTEXT.md`: product/domain language and invariants.
+- `docs/index.md`: repo documentation index.
+- `docs/architecture.md`, `docs/source-tree.md`, `docs/dev-guide.md`, `docs/data-models.md`, `docs/conventions.md`: product and architecture docs.
+- `docs/agents/`: issue tracker, triage labels, domain consumption, validation, smoke tests, sensitive areas, observability, orchestration, architecture lint, quality score, this readiness state, and the HTML harness state report.
+- `docs/adr/README.md`: ADR location exists, but no durable ADRs are recorded yet.
 
-- Recurring maintenance automations.
-- Remote build/release validation.
-- App Store / Play Store deployment policy.
+### Repo Knowledge Source Of Truth
 
-Initial Level 2 conventions now live in `docs/agents/orchestration.md`. The first hosted PR gate is `.github/workflows/pr-checks.yml`, and PR descriptions use `.github/pull_request_template.md`.
+The source of truth is split deliberately:
 
-## Readiness Matrix
+- Always-loaded map: `AGENTS.md`.
+- Product/domain language: `CONTEXT.md`.
+- Detailed architecture and conventions: `docs/`.
+- Agent harness: `docs/agents/`.
+- Decisions: `docs/adr/` when durable decisions are made.
+- Generated Level 2 reports: `docs/agents/architecture-lint.md`, `docs/agents/quality-score.md`, plus JSON under `.scratch/`.
 
-| Area | Current State | Target | Level | Priority |
-|---|---|---|---|---|
-| Agent entrypoint | `AGENTS.md` exists with skill and harness blocks | Agents can find issue tracker, validation, smoke, and risk docs | 1 | Done |
-| Harness docs | Canonical `docs/agents/` files exist | Short deterministic docs for solo agent work | 1 | Done |
-| Environment setup | Real `.env*` files exist; `.env.example` added | Agents know required variable names without secrets | 1 | Done |
-| Local checks | Commands exist in `package.json` | Agents can run test/lint/typecheck/format checks before finishing | 1 | Done |
-| Mobile UI smoke | `serve-sim` installed; app launch, Bible reading, search result, downloads, and annotation create/remove were smoke-tested on iOS Simulator | Keep smoke evidence updated when flows change | 1 | Done |
-| Sensitive areas | Auth, sync, backup, migrations, builds documented as sensitive | Agents ask before risky edits | 1 | Done |
-| Observability | Sentry, ErrorBoundary, logs, startup signals documented; `[AgentLog]` emits structured dev events; `yarn agents:start:logged` captures queryable local sessions | Agents know where to inspect failures and can query structured local logs | 1 | Done |
-| Domain quality metrics | `yarn agents:quality` generates `docs/agents/quality-score.md` and `.scratch/quality/quality.json`; `yarn agents:quality:check` enforces a conservative PR threshold | Keep score current when domain boundaries, smoke paths, or quality signals change; tighten thresholds progressively | 2 | Done |
-| Architecture lint | `yarn agents:architecture` reports repo-specific boundaries; `yarn agents:architecture:check` blocks high-risk boundary errors while leaving brownfield warnings visible | Tighten warnings into errors after existing hotspots are reduced | 2 | Done |
-| CI/PR gates | `.github/workflows/pr-checks.yml` runs typecheck, lint, tests, format checks, and agent domain quality checks on PRs; `master` branch protection requires the `Typecheck, lint, test, format` check | Exercise the updated gate on a real PR and adjust context name if needed | 2 | Started |
-| Multi-agent orchestration | `docs/agents/orchestration.md` defines issue-to-PR, ownership, and sensitive-area PR rules; `.github/pull_request_template.md` captures PR validation and risk notes | Exercise the flow on real PRs and refine when conflicts appear | 2 | Started |
+Freshness risk: several generated docs depend on `package.json`, static scans, and smoke evidence. They should be refreshed after command changes, navigation changes, large feature moves, or smoke-path changes.
+
+### Validation Surface
+
+Primary surface: mobile app.
+
+Selected `1C` validation path:
+
+- Local static checks: `yarn typecheck`, `yarn lint`, `yarn test`, `yarn format:check`.
+- Harness checks: `yarn agents:quality:check`, `yarn agents:architecture:check`.
+- Mobile UI validation: `serve-sim` with an Expo custom development client.
+
+Reason for selected path: this is a UI-driven mobile app, `serve-sim` is already installed as a dev dependency, and existing smoke evidence was captured against an iOS Simulator.
+
+### Inferred Architecture
+
+Inferred from source tree and docs:
+
+- Feature modules live under `src/features/`.
+- Shared UI and utilities live under `src/common/`, `src/helpers/`, `src/redux/`, `src/state/`, and `src/themes/`.
+- Bible and studies content use WebView/DOM wrappers inside the native shell.
+- User data persists locally through Redux/MMKV/SQLite and syncs through Firebase/Firestore when authenticated.
+- App startup goes through `app/_layout.tsx`, provider setup, Sentry, Firebase, migrations, Redux persist, and navigation.
+
+### Inferred Product Surface
+
+Bible Strong is a Bible study app for French-speaking users with English support. Critical user-facing surfaces include Bible reading, search, Strong's concordance, notes/highlights/bookmarks, reading plans, Nave/dictionary/timeline study tools, downloads/offline resources, audio/TTS, settings, auth, backups, and sync.
+
+### Sensitive Areas
+
+Documented in `docs/agents/sensitive-areas.md`:
+
+- Authentication and account deletion.
+- Firestore sync and user-owned data.
+- SQLite/local storage migrations and destructive reset.
+- Backup, import, and export.
+- Native config, bundle identity, build profiles, release behavior, EAS updates.
+- External services: Firebase, Sentry, DeepL, Bible/resource/audio endpoints, store review scripts.
+
+### Existing Feedback Loops
+
+- Jest unit tests through `yarn test`.
+- ESLint through `yarn lint`.
+- TypeScript through `yarn typecheck`.
+- Prettier check through `yarn format:check`.
+- Agent architecture scan through `yarn agents:architecture:check`.
+- Agent domain quality scan through `yarn agents:quality:check`.
+- GitHub Actions PR check under `.github/workflows/pr-checks.yml`.
+- Manual/mobile smoke checklist and recent iOS Simulator evidence in `docs/agents/smoke-tests.md`.
+- Queryable local log capture via `yarn agents:start:logged` and `yarn agents:logs:*`.
+
+### Existing Mechanical Constraints
+
+- TypeScript compiler.
+- ESLint and React Compiler lint plugin.
+- Prettier.
+- Agent architecture lint script with high-risk errors and brownfield warnings.
+- Agent domain quality script with conservative thresholds.
+- PR template requiring validation and sensitive-area notes.
+- GitHub Actions PR gate for typecheck, lint, test, format, quality, and architecture checks.
+
+### Operating Model
+
+Agent-assisted.
+
+Evidence: the repo has `AGENTS.md`, issue-tracker/triage docs, `docs/agents/`, harness checks, PR orchestration docs, and multi-agent ownership rules. It is not agent-first because merge autonomy, recurring agents, auto-merge, and prompt-to-merge are explicitly deferred.
+
+### Harness Gaps
+
+Blocking Level 1 gaps: none currently documented.
+
+Non-blocking Level 1 gaps:
+
+- Feature-level automated tests are sparse; many domains rely on manual smoke plus static checks.
+- ADR infrastructure exists, but durable decisions have not yet been captured as ADRs.
+- Recent UI smoke evidence exists, but smoke execution is not automated and must be rerun manually after UI/navigation changes.
+
+Level 2 gaps:
+
+- PR gates need to be exercised on a real PR to confirm hosted check names.
+- Architecture lint has 486 brownfield warnings; current gate blocks only high-risk errors.
+- Domain quality scores are conservative and directional.
+- Recurring maintenance/doc-gardening is documented as a candidate only.
+- Before/after UI evidence is manual, not automated.
+- Agent-to-agent review, auto-fix loops, auto-merge, and prompt-to-merge autonomy are deferred.
+
+## Harness Layout Resolution
+
+### Detected
+
+- project mode: brownfield
+- `CLAUDE.md`: no
+- `AGENTS.md`: yes
+- `docs/agents/`: yes
+- `.harness/`: no
+- `CONTEXT.md`: yes
+- `CONTEXT-MAP.md`: no
+- `docs/adr/`: yes
+- `.scratch/`: yes, used for generated agent reports
+- Existing non-canonical harness docs: `docs/agents/harness-readiness.html` and `docs/agents/harness-state.html` existed from previous report naming and were migrated to `docs/agents/harness-report/index.html`.
+
+### Selected Layout
+
+- agent entrypoint: `AGENTS.md`
+- harness docs: `docs/agents/`
+- human-readable harness report: `docs/agents/harness-report/index.html`
+- domain docs: `CONTEXT.md`
+- decisions: `docs/adr/`
+- repo knowledge source of truth: `AGENTS.md`, `CONTEXT.md`, `docs/`, and generated reports under `docs/agents/`
+- local issues: not configured; issue tracker is GitHub Issues
+- machine-readable harness specs: `.harness/` not selected; Level 2 specs are deferred
+
+## Recommended Scope
+
+Selected scope: Level 1 baseline plus documentation of existing Level 2 guardrails.
+
+Level 1 makes the repo readable, runnable, testable, and safer for one human plus one agent. Level 2 items already present are documented as started or deferred, but missing Level 2 work is not blocking Level 1 readiness.
+
+## Proposed Smoke Paths
+
+### Must Run For Level 1 Ready
+
+- App launch and home/onboarding render with no ErrorBoundary fallback.
+- Bible reading and navigation through the default Bible tab.
+- Search to passage, then open a result in Bible view.
+- Safe local annotation flow: create and remove a highlight or note created during the test.
+- Downloads/resource awareness without deleting existing resources.
+
+### Optional Follow-Up
+
+- Strong concordance lookup from a verse.
+- Nave or dictionary detail navigation.
+- Reading plan list and one plan detail.
+- Timeline home and event details.
+- Audio/TTS play/pause without background-mode assertions.
+- Theme switch and return to the previous theme.
+- Import/export backup flow with a throwaway file only.
+
+### Blocked Or Requires Human Context
+
+- Auth, registration, Google Sign-In, Apple Sign-In, and email verification.
+- Account deletion.
+- Account-backed Firestore sync validation.
+- Production/staging builds, EAS updates, App Store / Play Store validation.
+- Destructive resource deletion or backup overwrite outside throwaway data.
+
+## Harness Readiness Matrix
+
+| Code | Workstream | Current State | Target | Status | Priority |
+|---|---|---|---|---|---|
+| 1A | Local commands | Commands detected in `package.json` and documented in `docs/agents/validation.md` | Agents know canonical install, run, check, and build commands | Verified locally | Done |
+| 1B | Local setup and environment | `.env.example` exists; environment files and Node 20 Expo workaround documented | Agents know required env variables, secrets boundaries, and local setup caveats | Documented for agents | Done |
+| 1C | Validation tooling | Static checks, harness checks, and `serve-sim` path documented; prior smoke validation used iOS Simulator | Agents have a practical validation path for mobile changes | Verified locally | Done |
+| 1D | Product smoke paths | Must-run mobile smoke paths documented; recent iOS Simulator evidence recorded | Critical ordinary flows are documented and executable | Verified locally | Done |
+| 1E | Sensitive areas | Risk policy documented for auth, sync, storage, backup, native config, release, and external services | Agents know approval boundaries | Documented for agents | Done |
+| 1F | Local observability | Sentry, ErrorBoundary, `[AgentLog]`, startup prefixes, and log query scripts documented | Agents know where to find startup/errors/debugging evidence | Verified locally | Done |
+| 1G | Agent entrypoint and repo knowledge map | `AGENTS.md`, `CONTEXT.md`, `docs/index.md`, `docs/agents/`, and ADR directory exist | Entrypoint maps to focused docs without becoming a monolith | Documented for agents | Done |
+| 1H | Readiness status, gaps, upgrades | This file and `docs/agents/harness-report/index.html` summarize gaps, status, smoke evidence, and next upgrades | Remaining gaps are visible and actionable | Documented for agents | Done |
 
 ## Level 1 Status
 
 Ready.
 
-The Level 1 harness baseline is complete for local agent work. Existing caveats are documented and non-blocking.
+Can this repo be considered Level 1 ready now? Yes.
+
+- Were must-run smoke paths documented? Yes.
+- Were must-run smoke paths executed? Yes, based on the recent iOS Simulator evidence recorded in `docs/agents/smoke-tests.md`.
+- If not executed, did the user explicitly defer them? Not applicable.
+
+Level 1 readiness is based on existing documented evidence plus the current canonical command and harness documentation. If navigation, Bible WebView behavior, downloads, or annotation flows change, rerun the must-run smoke paths before claiming readiness for that patch.
+
+### Validation Performed In This Pass
+
+| Check | Result | Notes |
+|---|---|---|
+| `yarn typecheck` | Passed | No TypeScript errors reported. |
+| `yarn format:check` | Passed after formatting two files | `src/helpers/resourceDatabaseInstallation.ts` and `src/state/tabs.ts` needed mechanical Prettier formatting. |
+| `yarn lint` | Passed with warnings | ESLint reported flat-config migration warnings for `/* eslint-env */` comments in tests and one existing unused import warning in `src/features/bible/BibleViewer.tsx`. |
+| `yarn test --watchman=false` | Passed | 14 test suites, 247 tests. |
+| `yarn agents:quality:check` | Passed | Regenerated `docs/agents/quality-score.md` and `.scratch/quality/quality.json`; all domains are at least `5/10`. |
+| `yarn agents:architecture:check` | Passed with warnings | Regenerated `docs/agents/architecture-lint.md` and `.scratch/architecture/architecture.json`; 0 errors and 486 warnings. |
+
+### HTML Harness Report
+
+`docs/agents/harness-report/index.html` is the canonical self-contained human report hub for harness state. It replaces the earlier `docs/agents/harness-readiness.html` and `docs/agents/harness-state.html` names.
+
+The index is a dashboard and table of contents. Full HTML detail pages live beside it for readiness, validation, quality, risks, observability, commands, Level 2, and decisions. Markdown remains the source of truth for agents.
+
+Current HTML contract:
+
+- the index separates covered workstreams from verified evidence;
+- the dashboard exposes warnings and dates instead of showing false-green completion;
+- each detail page starts with current state, evidence, gaps, and source;
+- `level-2.html` separates orchestration maturity from Level 1 readiness;
+- status labels use the canonical taxonomy: `Missing`, `Found in repo`, `Documented for agents`, `Verified locally`, `Blocked or deferred`.
+
+## Level 2 Advanced Harness Status
+
+| Capability | Status | Minimum Evidence Required | Current Evidence | Next Mechanical Constraint | Required For Level 1? |
+|---|---|---|---|---|---|
+| 2A PR and branch orchestration | Found in repo | Documented issue-to-branch-to-PR flow and ownership rules | `docs/agents/orchestration.md`, PR template, issue tracker docs | Exercise on real PRs and refine conflict/ownership rules | No |
+| 2B PR gates and remote validation | Found in repo | Hosted workflow names and required check context confirmed | `.github/workflows/pr-checks.yml` runs typecheck, lint, test, format, quality, architecture | Confirm required check name on a real PR | No |
+| 2C Queryable local observability | Found in repo | Agent-queryable logs for startup, errors, and navigation | `agents:start:logged`, `agents:logs:*`, `[AgentLog]`, `.scratch/logs/` convention | Add more structured events only when they help real debugging | No |
+| 2D Domain quality metrics | Verified locally | Generated domain score with threshold and machine artifact | `docs/agents/quality-score.md`, `.scratch/quality/quality.json`, `agents:quality:check` | Keep thresholds conservative until scores stabilize | No |
+| 2E Architecture and taste linting | Verified locally | Generated architecture scan with blocking errors separated from warnings | `docs/agents/architecture-lint.md`, `.scratch/architecture/architecture.json`, `agents:architecture:check` | Reduce brownfield warnings before tightening gates | No |
+| 2F Doc freshness and recurring maintenance | Documented for agents | Owner-approved cadence, destination, and output expectation | Candidate automations in `docs/agents/orchestration.md` | Defer until cadence and notification destination are chosen | No |
+| 2G Before/after UI evidence | Documented for agents | Deterministic screenshot/video path tied to smoke flows | Manual smoke screenshots referenced in `docs/agents/smoke-tests.md` | Automate only after smoke flows are stable | No |
+| 2H Agentic review and merge autonomy | Blocked or deferred | Explicit policy, checks, labels, branch protection, and sensitive-area exclusions | Explicitly deferred in orchestration docs | Require explicit policy before enabling | No |
+| 2I Harness command wrappers and audit | Found in repo | Repo-native commands plus drift audit when drift recurs | Existing `agents:*` scripts in `package.json` | Add a semantic audit only if harness drift becomes recurring | No |
+
+## Harness Upgrade Candidates
+
+Knowledge:
+
+- Add ADRs when durable architecture decisions are made or confirmed.
+- Keep `docs/index.md`, `CONTEXT.md`, and `AGENTS.md` aligned when product boundaries move.
+
+Feedback:
+
+- Add feature-level tests around the highest-risk domains when touching them.
+- Rerun mobile smoke paths after navigation, Bible WebView, search, downloads, or annotation changes.
+- Consider a stable screenshot evidence script only after the manual smoke flow stops changing.
+
+Constraint:
+
+- Gradually convert architecture warnings to errors only after reducing brownfield debt.
+- Keep `agents:quality:check` conservative until each domain has realistic tests or smoke coverage.
+
+Orchestration:
+
+- Exercise the GitHub PR gate on a real PR.
+- Add recurring doc-gardening only after the owner chooses cadence and destination.
+- Defer `.harness/` machine-readable specs until a specific Level 2 guardrail needs them.
 
 ## Next Patch Batch
 
-No further documentation patch is required for the Level 1 baseline.
+No Level 1 patch is required to reach readiness.
+
+Small future batches, when useful:
+
+1. Exercise `.github/workflows/pr-checks.yml` on a real PR and update `docs/agents/orchestration.md` if the check context differs.
+2. Add ADRs for newly confirmed durable decisions.
+3. Add targeted feature tests or smoke coverage when changing low-score domains in `docs/agents/quality-score.md`.
+4. Add a semantic harness audit only if command/doc drift recurs.

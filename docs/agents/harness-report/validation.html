@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Validation - Harness Report</title>
+<style>
+  :root{--bg:#f8f7f2;--panel:#fff;--ink:#171717;--muted:#6b6b63;--line:#d8d5ca;--soft:#eeece4;--ok:#3f7d4e;--warn:#b56a2f;--bad:#b23b3b;--info:#476d8f;--radius:10px;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--sans:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 var(--sans)} .report{max-width:1120px;margin:0 auto;padding:32px 20px 64px}
+  header{display:grid;gap:12px;margin-bottom:26px;border-bottom:1px solid var(--line);padding-bottom:18px}.eyebrow{font:11px/1.2 var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  h1,h2{margin:0;line-height:1.15} h1{font-size:clamp(28px,4vw,42px);font-weight:650} h2{font-size:18px;margin-bottom:10px} section{margin-top:28px}
+  nav{display:flex;flex-wrap:wrap;gap:8px} a{color:inherit;text-decoration-thickness:1px;text-underline-offset:3px} code{font-family:var(--mono);font-size:.92em;background:var(--soft);border:1px solid var(--line);border-radius:4px;padding:1px 4px}
+  .pill,.status{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:3px 8px;background:var(--panel);font:12px/1.3 var(--mono);white-space:nowrap}.status-verified{color:var(--ok)}.status-documented{color:var(--warn)}.status-blocked{color:var(--muted)}
+  .grid-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px}.note{color:var(--muted)}
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden} th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top} th{background:var(--soft);color:var(--muted);font:12px/1.3 var(--mono)} tr:last-child td{border-bottom:0} ul{margin:8px 0 0;padding-left:18px}
+  @media(max-width:760px){.grid-two{grid-template-columns:1fr} table{display:block;overflow-x:auto}}
+</style>
+</head>
+<body>
+<main class="report" data-generated-by="harness-readiness" data-report-page="validation">
+  <header><div class="eyebrow">Harness Report</div><h1>Validation</h1><nav><a class="pill" href="./index.html">Summary</a><a class="pill" href="../validation.md">Validation source</a><a class="pill" href="../smoke-tests.md">Smoke source</a></nav></header>
+  <section class="grid-two" aria-label="Page evidence summary">
+    <article class="card"><h2>Current State</h2><p class="note">Validation is usable and Level 1 ready, but it is not warning-free.</p></article>
+    <article class="card"><h2>Evidence</h2><p class="note">Latest harness pass: typecheck passed, format passed, lint passed with warnings, tests passed, quality passed, architecture passed with 0 errors / 486 warnings.</p></article>
+    <article class="card"><h2>Gaps</h2><p class="note">Smoke is manual. Firebase-backed sync, account flows, and release/build validation require human context or explicit scope.</p></article>
+    <article class="card"><h2>Source</h2><p class="note"><a href="../validation.md">validation.md</a>, <a href="../smoke-tests.md">smoke-tests.md</a></p></article>
+  </section>
+  <section><h2>Canonical Checks</h2><table><thead><tr><th>Task</th><th>Command</th><th>Status</th><th>Evidence or warning</th></tr></thead><tbody>
+    <tr><td>Typecheck</td><td><code>yarn typecheck</code></td><td><span class="status status-verified">Verified locally</span></td><td>Passed in latest harness pass.</td></tr>
+    <tr><td>Format</td><td><code>yarn format:check</code></td><td><span class="status status-verified">Verified locally</span></td><td>Passed after mechanical formatting.</td></tr>
+    <tr><td>Lint</td><td><code>yarn lint</code></td><td><span class="status status-verified">Verified locally</span></td><td>Passed with non-failing flat-config warnings and one existing unused import warning.</td></tr>
+    <tr><td>Tests</td><td><code>yarn test --watchman=false</code></td><td><span class="status status-verified">Verified locally</span></td><td>14 test suites and 247 tests passed.</td></tr>
+    <tr><td>Quality</td><td><code>yarn agents:quality:check</code></td><td><span class="status status-verified">Verified locally</span></td><td>All domains meet the conservative 5/10 floor.</td></tr>
+    <tr><td>Architecture</td><td><code>yarn agents:architecture:check</code></td><td><span class="status status-verified">Verified locally</span></td><td>Passed with 0 errors and 486 warnings.</td></tr>
+  </tbody></table></section>
+  <section><h2>Surface Validation</h2><table><thead><tr><th>Surface</th><th>Validation path</th><th>Status</th><th>Blocker or caveat</th></tr></thead><tbody>
+    <tr><td>Mobile app</td><td><code>serve-sim</code>, Expo dev client, iOS Simulator evidence, static checks.</td><td><span class="status status-verified">Verified locally</span></td><td>Rerun smoke after UI/navigation changes.</td></tr>
+    <tr><td>WebView content</td><td>Validated through mobile shell.</td><td><span class="status status-documented">Documented for agents</span></td><td>No standalone web harness expected.</td></tr>
+    <tr><td>Firebase-backed sync</td><td>Development Firebase config plus test account.</td><td><span class="status status-blocked">Blocked or deferred</span></td><td>Requires credentials and explicit environment choice.</td></tr>
+    <tr><td>Release/build</td><td>EAS local build scripts.</td><td><span class="status status-blocked">Blocked or deferred</span></td><td>Expensive; run only when native/release behavior changes.</td></tr>
+  </tbody></table></section>
+  <section><h2>Must-Run Smoke Paths</h2><ul><li>App launch and home/onboarding render without ErrorBoundary fallback.</li><li>Bible reading and navigation through the default Bible tab.</li><li>Search to passage and open a result in Bible view.</li><li>Create and remove a safe local annotation.</li><li>Open downloads/resource awareness without deleting existing data.</li></ul></section>
+</main>
+</body>
+</html>

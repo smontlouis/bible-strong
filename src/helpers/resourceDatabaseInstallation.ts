@@ -60,10 +60,7 @@ const installBible = async (item: DownloadItem, callbacks: ResourceInstallationC
   downloadSidecarBibleFiles(item, versionId)
 }
 
-const installBibleStrong = async (
-  item: DownloadItem,
-  callbacks: ResourceInstallationCallbacks
-) => {
+const installBibleStrong = async (item: DownloadItem, callbacks: ResourceInstallationCallbacks) => {
   await downloadFile(item, callbacks)
 
   const versionId = item.versionId!

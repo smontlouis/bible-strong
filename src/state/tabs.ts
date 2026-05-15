@@ -449,10 +449,7 @@ export const tabsAtom = atom(
     const newTabs =
       typeof newTabsOrUpdater === 'function' ? newTabsOrUpdater(currentTabs) : newTabsOrUpdater
 
-    set(
-      tabGroupsAtom,
-      updateTabGroupTabs(groups, activeId, newTabs)
-    )
+    set(tabGroupsAtom, updateTabGroupTabs(groups, activeId, newTabs))
   }
 )
 
@@ -480,10 +477,7 @@ const createGroupTabsAtom = (groupId: string) =>
       const newTabs =
         typeof newTabsOrUpdater === 'function' ? newTabsOrUpdater(currentTabs) : newTabsOrUpdater
 
-      set(
-        tabGroupsAtom,
-        updateTabGroupTabs(groups, groupId, newTabs)
-      )
+      set(tabGroupsAtom, updateTabGroupTabs(groups, groupId, newTabs))
     }
   )
 
@@ -554,10 +548,7 @@ export const activeTabIndexAtom = atom(
     const activeId = get(activeGroupIdAtom)
 
     // Update the active tab index in the group
-    set(
-      tabGroupsAtom,
-      updateTabGroupActiveIndex(groups, activeId, value)
-    )
+    set(tabGroupsAtom, updateTabGroupActiveIndex(groups, activeId, value))
 
     // Update cache - always persist to storage (LRU behavior: move to front)
     if (value !== -1) {

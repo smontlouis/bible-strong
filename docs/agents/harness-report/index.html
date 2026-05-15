@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harness Report - Bible Strong</title>
+<style>
+  :root { --bg:#f8f7f2; --panel:#fff; --ink:#171717; --muted:#6b6b63; --line:#d8d5ca; --soft:#eeece4; --ok:#3f7d4e; --warn:#b56a2f; --bad:#b23b3b; --info:#476d8f; --radius:10px; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; --sans:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.55 var(--sans); }
+  .report { max-width:1180px; margin:0 auto; padding:32px 20px 64px; }
+  header { display:grid; gap:12px; margin-bottom:26px; border-bottom:1px solid var(--line); padding-bottom:18px; }
+  .eyebrow { font:11px/1.2 var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.08em; }
+  h1,h2,h3 { margin:0; line-height:1.15; letter-spacing:0; }
+  h1 { font-size:clamp(28px,4vw,42px); font-weight:650; }
+  h2 { font-size:18px; margin-bottom:10px; }
+  h3 { font-size:14px; margin-bottom:8px; }
+  section { margin-top:28px; }
+  nav,.meta { display:flex; flex-wrap:wrap; gap:8px; }
+  a { color:inherit; text-decoration-thickness:1px; text-underline-offset:3px; }
+  code { font-family:var(--mono); font-size:.92em; background:var(--soft); border:1px solid var(--line); border-radius:4px; padding:1px 4px; }
+  .pill,.status { display:inline-flex; align-items:center; border:1px solid var(--line); border-radius:999px; padding:3px 8px; background:var(--panel); font:12px/1.3 var(--mono); white-space:nowrap; }
+  .status-missing{color:var(--bad)} .status-found{color:var(--info)} .status-documented{color:var(--warn)} .status-verified{color:var(--ok)} .status-blocked{color:var(--muted)}
+  .priority-blocking{border-left:4px solid var(--bad)} .priority-ok{border-left:4px solid var(--ok)} .priority-warn{border-left:4px solid var(--warn)}
+  .grid-two{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px}
+  .grid-three{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px}
+  .kpis{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:12px}
+  .health-map{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:14px}
+  .kpi-value{font-size:28px; line-height:1; font-weight:700; margin-bottom:6px}
+  .kpi-label,.note{color:var(--muted)}
+  .meter{height:9px; border-radius:999px; background:var(--soft); overflow:hidden; margin-top:10px}
+  .meter span{display:block; height:100%; background:var(--ok)}
+  .meter.warn span{background:var(--warn)} .meter.info span{background:var(--info)}
+  table{width:100%; border-collapse:collapse; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden}
+  th,td{padding:10px 12px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top}
+  th{background:var(--soft); color:var(--muted); font:12px/1.3 var(--mono)}
+  tr:last-child td{border-bottom:0}
+  @media (max-width:900px){.grid-three,.kpis,.health-map{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-two{grid-template-columns:1fr}}
+  @media (max-width:760px){.grid-three,.kpis,.health-map{grid-template-columns:1fr} table{display:block; overflow-x:auto}}
+</style>
+</head>
+<body>
+<main class="report" data-generated-by="harness-readiness" data-report-page="index">
+  <header>
+    <div class="eyebrow">Harness Report</div>
+    <h1>Bible Strong</h1>
+    <div class="meta">
+      <span class="pill">Mode: brownfield</span>
+      <span class="pill">Operating model: agent-assisted</span>
+      <span class="pill">Scope: Level 1 + existing Level 2 status</span>
+      <span class="status status-verified">Level 1: Ready</span>
+      <span class="pill">Generated: 2026-05-15 11:58 CEST</span>
+    </div>
+    <nav aria-label="Report pages">
+      <a class="pill" href="./readiness.html">Readiness</a>
+      <a class="pill" href="./validation.html">Validation</a>
+      <a class="pill" href="./quality.html">Quality</a>
+      <a class="pill" href="./risks.html">Risks</a>
+      <a class="pill" href="./observability.html">Observability</a>
+      <a class="pill" href="./commands.html">Commands</a>
+      <a class="pill" href="./level-2.html">Level 2</a>
+      <a class="pill" href="./decisions.html">Decisions</a>
+    </nav>
+  </header>
+
+  <section class="grid-two">
+    <article class="card priority-ok">
+      <h2>Executive Summary</h2>
+      <p class="note">Bible Strong is Level 1 ready for solo-agent work. The repo has an agent map, canonical validation docs, sensitive-area policy, queryable local logs, manual mobile smoke evidence, and generated quality and architecture reports. The dashboard now separates documented coverage from verified evidence so the report does not hide warnings or stale checks.</p>
+    </article>
+    <article class="card priority-warn">
+      <h2>Next Decision</h2>
+      <p class="note">Exercise the GitHub PR gate on a real PR when remote validation is worth spending. Recurring maintenance, UI evidence automation, and merge autonomy remain Level 2 work and do not block Level 1.</p>
+    </article>
+  </section>
+
+  <section class="kpis" aria-label="Harness summary">
+    <article class="card"><div class="kpi-value">8/8</div><div class="kpi-label">Level 1 covered; 4 verified / 4 documented</div></article>
+    <article class="card"><div class="kpi-value">0</div><div class="kpi-label">Blocking Level 1 gaps</div></article>
+    <article class="card"><div class="kpi-value">2/9</div><div class="kpi-label">Level 2 verified; 6 documented or found / 1 deferred</div></article>
+    <article class="card"><div class="kpi-value">5/10</div><div class="kpi-label">Quality floor; 8 domains at floor / 3 sensitive</div></article>
+    <article class="card"><div class="kpi-value">Manual</div><div class="kpi-label">Smoke evidence; last dated by report: 2026-05-15</div></article>
+    <article class="card priority-warn"><div class="kpi-value">0/486</div><div class="kpi-label">Architecture errors / warnings</div></article>
+  </section>
+
+  <section>
+    <h2>Harness Health Map</h2>
+    <div class="health-map">
+      <article class="card">
+        <h3>Knowledge</h3>
+        <p><span class="status status-documented">Documented for agents</span></p>
+        <p class="note">Evidence: <code>AGENTS.md</code>, <code>CONTEXT.md</code>, <code>docs/index.md</code>, <code>docs/agents/</code>.<br>Gap: ADR directory exists, but no durable ADRs yet.<br><a href="./readiness.html">Details</a></p>
+      </article>
+      <article class="card">
+        <h3>Feedback</h3>
+        <p><span class="status status-verified">Verified locally</span></p>
+        <p class="note">Evidence: typecheck, lint, tests, format, quality, architecture, and iOS Simulator smoke evidence.<br>Gap: smoke remains manual.<br><a href="./validation.html">Details</a></p>
+      </article>
+      <article class="card">
+        <h3>Constraint</h3>
+        <p><span class="status status-verified">Verified locally</span></p>
+        <p class="note">Evidence: TypeScript, ESLint, Prettier, quality floor, architecture lint with 0 errors / 486 warnings.<br>Gap: warnings remain brownfield debt.<br><a href="./quality.html">Details</a></p>
+      </article>
+      <article class="card">
+        <h3>Orchestration</h3>
+        <p><span class="status status-found">Found in repo</span></p>
+        <p class="note">Evidence: PR template, GitHub workflow, orchestration docs, agent scripts.<br>Gap: PR gate not exercised on a real PR; autonomy deferred.<br><a href="./level-2.html">Details</a></p>
+      </article>
+    </div>
+  </section>
+
+  <section class="grid-three">
+    <article class="card">
+      <h3>Level 1 Readiness</h3>
+      <span class="status status-verified">Verified locally</span>
+      <div class="meter"><span style="width:100%"></span></div>
+      <p class="note">Ready. All 1A-1H workstreams are covered; verified claims point to commands, smoke evidence, or generated artifacts.</p>
+    </article>
+    <article class="card">
+      <h3>Level 2 Guardrails</h3>
+      <span class="status status-found">Found in repo</span>
+      <div class="meter info"><span style="width:78%"></span></div>
+      <p class="note">2D and 2E are verified; 2A, 2B, 2C, and 2I are found in repo; 2F and 2G are documented; 2H is deferred.</p>
+    </article>
+    <article class="card">
+      <h3>Validation Health</h3>
+      <span class="status status-verified">Verified locally</span>
+      <div class="meter warn"><span style="width:85%"></span></div>
+      <p class="note">Checks passed, but lint has existing non-failing warnings and architecture lint reports 486 warnings.</p>
+    </article>
+    <article class="card">
+      <h3>Domain Quality</h3>
+      <span class="status status-verified">Verified locally</span>
+      <div class="meter warn"><span style="width:50%"></span></div>
+      <p class="note">All domains meet the 5/10 floor. Weakest domains include app-rating, app-switcher, commentaries, home, notes, profile, settings, and studies.</p>
+    </article>
+    <article class="card">
+      <h3>Smoke Coverage</h3>
+      <span class="status status-verified">Verified locally</span>
+      <div class="meter warn"><span style="width:80%"></span></div>
+      <p class="note">Manual iOS Simulator evidence covers launch, Bible reading, search, downloads, and annotation create/remove. Rerun after UI or navigation changes.</p>
+    </article>
+    <article class="card">
+      <h3>Risk Policy</h3>
+      <span class="status status-documented">Documented for agents</span>
+      <p class="note">Six sensitive-area groups are documented; auth, sync, backup, migration, release, and external-service work needs explicit intent.</p>
+    </article>
+  </section>
+
+  <section>
+    <h2>Table Of Contents</h2>
+    <table>
+      <thead><tr><th>Page</th><th>What it answers</th><th>Status</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td><a href="./readiness.html">Readiness</a></td><td>Can agents work safely now?</td><td><span class="status status-verified">Verified locally</span></td><td><a href="../harness-readiness.md">harness-readiness.md</a></td></tr>
+        <tr><td><a href="./validation.html">Validation</a></td><td>What checks and smoke paths should agents run?</td><td><span class="status status-verified">Verified locally</span></td><td><a href="../validation.md">validation.md</a>, <a href="../smoke-tests.md">smoke-tests.md</a></td></tr>
+        <tr><td><a href="./quality.html">Quality</a></td><td>What are the domain scores and architecture warnings?</td><td><span class="status status-verified">Verified locally</span></td><td><a href="../quality-score.md">quality-score.md</a>, <a href="../architecture-lint.md">architecture-lint.md</a></td></tr>
+        <tr><td><a href="./risks.html">Risks</a></td><td>What needs human approval?</td><td><span class="status status-documented">Documented for agents</span></td><td><a href="../sensitive-areas.md">sensitive-areas.md</a></td></tr>
+        <tr><td><a href="./observability.html">Observability</a></td><td>Where can agents debug failures?</td><td><span class="status status-documented">Documented for agents</span></td><td><a href="../observability.md">observability.md</a></td></tr>
+        <tr><td><a href="./commands.html">Commands</a></td><td>Are wrapper commands and audit stable?</td><td><span class="status status-found">Found in repo</span></td><td><a href="../validation.md">validation.md</a>, <a href="../observability.md">observability.md</a></td></tr>
+        <tr><td><a href="./level-2.html">Level 2</a></td><td>What orchestration and guardrails exist beyond Level 1?</td><td><span class="status status-found">Found in repo</span></td><td><a href="../orchestration.md">orchestration.md</a></td></tr>
+        <tr><td><a href="./decisions.html">Decisions</a></td><td>What decisions affect future work?</td><td><span class="status status-documented">Documented for agents</span></td><td><a href="../../adr/">ADRs</a></td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+</body>
+</html>
