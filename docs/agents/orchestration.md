@@ -74,7 +74,7 @@ yarn agents:issue:pr <issue-number> [--dry-run] [--create] [--push] [--attach-ev
 ```
 
 This reads `.scratch/issues/<issue-number>/issue.json`, `codex-final.md`, `mobile-validation.md`, and `evidence/`, then writes `.scratch/issues/<issue-number>/pr-body.md`. It does not push or create a PR unless `--create` is passed; PRs are draft by default.
-When `--attach-evidence` is passed, the wrapper uploads supported files from `.scratch/issues/<issue-number>/evidence/` to a secret GitHub gist and posts a PR comment with inline image links and attachment metadata. This keeps screenshots out of the product branch while making them visible from GitHub.
+When `--attach-evidence` is passed, the wrapper pushes supported files from `.scratch/issues/<issue-number>/evidence/` to a dedicated GitHub evidence branch such as `codex-evidence-issue-208` and posts a PR comment with inline image links and attachment metadata. This keeps screenshots out of the product branch while making them visible from GitHub.
 
 ## Multi-Agent Ownership
 
