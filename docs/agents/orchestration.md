@@ -57,6 +57,7 @@ When `--run-codex` handles a UI or runtime issue, the agent should leave PR-read
 - `.scratch/issues/<issue-number>/pr-notes.md` for PR-specific reviewer notes, evidence notes, risks, or follow-ups.
 
 Use `mobile-validation.md` status values `passed`, `blocked`, or `not-needed`. If no before screenshot exists, capture and label after evidence rather than inventing a baseline.
+For visual changes, prefer before/after pairs such as `before-home.png` and `after-home.png`; if the baseline cannot be captured, the validation report must say why.
 
 To simulate one local orchestration unit manually, run:
 
@@ -64,15 +65,16 @@ To simulate one local orchestration unit manually, run:
 yarn agents:issue:run <issue-number> [--dry-run] [--no-commit] [--no-pr] [--no-push] [--allow-dirty] [--draft|--ready] [--base <branch>] [--codex-sandbox <mode>]
 ```
 
-This wrapper refuses to start from a dirty worktree unless `--allow-dirty` is explicit. It then runs `agents:issue:start <issue-number> --create-branch --run-codex`, commits the resulting tracked repo changes using `commit-message.txt` unless `--no-commit` is passed, then runs `agents:issue:pr --create --push --draft` by default. Use `--dry-run` to print the start plan without writes, `--no-pr` to stop after the local commit, or `--ready` only when runtime evidence clearly passed and the repo policy allows a ready-for-review PR. The wrapper is the local stand-in for a future orchestrator task and should stay policy-driven rather than agent-reasoning-driven.
+This wrapper refuses to start from a dirty worktree unless `--allow-dirty` is explicit. It then runs `agents:issue:start <issue-number> --create-branch --run-codex`, commits the resulting tracked repo changes using `commit-message.txt` unless `--no-commit` is passed, then runs `agents:issue:pr --create --push --attach-evidence --draft` by default. Use `--dry-run` to print the start plan without writes, `--no-pr` to stop after the local commit, or `--ready` only when runtime evidence clearly passed and the repo policy allows a ready-for-review PR. The wrapper is the local stand-in for a future orchestrator task and should stay policy-driven rather than agent-reasoning-driven.
 
 To package an issue branch into a PR body after local evidence exists, run:
 
 ```bash
-yarn agents:issue:pr <issue-number> [--dry-run] [--create] [--push] [--draft|--ready] [--base <branch>]
+yarn agents:issue:pr <issue-number> [--dry-run] [--create] [--push] [--attach-evidence] [--draft|--ready] [--base <branch>]
 ```
 
 This reads `.scratch/issues/<issue-number>/issue.json`, `codex-final.md`, `mobile-validation.md`, and `evidence/`, then writes `.scratch/issues/<issue-number>/pr-body.md`. It does not push or create a PR unless `--create` is passed; PRs are draft by default.
+When `--attach-evidence` is passed, the wrapper uploads supported files from `.scratch/issues/<issue-number>/evidence/` to a secret GitHub gist and posts a PR comment with inline image links and attachment metadata. This keeps screenshots out of the product branch while making them visible from GitHub.
 
 ## Multi-Agent Ownership
 

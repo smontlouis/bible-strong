@@ -41,6 +41,7 @@ const usage = () => {
   console.log('  --draft          Create the PR as draft. This is the default for the full run.')
   console.log('  --ready          Create the PR as ready for review.')
   console.log('  --base           Base branch for diff and PR creation. Defaults to master.')
+  console.log('                   Full runs attach evidence to the PR by default when present.')
   console.log(
     '  --codex-sandbox  Sandbox for Codex execution: read-only, workspace-write, or danger-full-access.'
   )
@@ -215,6 +216,7 @@ const prArgs = ['agents:issue:pr', issueNumber, '--base', baseBranch]
 if (createPr) {
   prArgs.push('--create')
   if (pushBranch) prArgs.push('--push')
+  prArgs.push('--attach-evidence')
   prArgs.push(draft ? '--draft' : '--ready')
 }
 

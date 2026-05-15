@@ -227,12 +227,12 @@ If this issue changes runtime or user-facing behavior, run the required smoke pa
 For UI or runtime changes, produce stable evidence for the future PR step:
 
 - write screenshots, screen recordings, or other UI artifacts under \`${path.relative(repoRoot, evidenceDir)}\`;
-- prefer descriptive names such as \`after-home.png\`, \`after-settings.png\`, or \`runtime-smoke.png\`;
+- when the change is visual, capture before and after screenshots whenever practical;
+- prefer paired descriptive names such as \`before-home.png\` and \`after-home.png\`, or \`before-settings.png\` and \`after-settings.png\`;
+- if a before screenshot is not practical because the change already exists, capture after evidence and state why the baseline is missing;
 - write a concise mobile validation report to \`${path.relative(repoRoot, mobileValidationPath)}\`;
 - include the simulator/emulator/device used, the \`serve-sim\` URL when applicable, smoke path covered, relevant app logs, and whether runtime validation is \`passed\`, \`blocked\`, or \`not-needed\`;
 - stop \`serve-sim\`, Metro, or other helper processes you started unless the operator explicitly asks to keep them running.
-
-If before/after evidence is useful but no baseline screenshot exists, capture and label only the after evidence, then state that no before baseline was available from this run.
 
 ## PR Handoff Artifacts
 

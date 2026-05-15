@@ -271,9 +271,9 @@ Current HTML contract:
 | 2D Domain quality metrics | Verified locally | Generated domain score with threshold and machine artifact | `docs/agents/quality-score.md`, `.scratch/quality/quality.json`, `agents:quality:check` | Keep thresholds conservative until scores stabilize | No |
 | 2E Architecture and taste linting | Verified locally | Generated architecture scan with blocking errors separated from warnings | `docs/agents/architecture-lint.md`, `.scratch/architecture/architecture.json`, `agents:architecture:check` | Reduce brownfield warnings before tightening gates | No |
 | 2F Doc freshness and recurring maintenance | Documented for agents | Owner-approved cadence, destination, and output expectation | Candidate automations in `docs/agents/orchestration.md` | Defer until cadence and notification destination are chosen | No |
-| 2G Before/after UI evidence | Documented for agents | Deterministic screenshot/video path tied to smoke flows | Manual smoke screenshots referenced in `docs/agents/smoke-tests.md`; PR template records mobile validation status, smoke paths, and evidence | Automate only after smoke flows are stable | No |
+| 2G Before/after UI evidence | Found in repo | Deterministic screenshot/video path tied to smoke flows and visible PR evidence | Manual smoke screenshots referenced in `docs/agents/smoke-tests.md`; `agents:issue:start` asks agents for before/after evidence when practical; `agents:issue:pr --attach-evidence` uploads evidence to a secret gist and comments on the PR | Exercise attachment flow on a real PR and refine unsupported file handling if needed | No |
 | 2H Agentic review and merge autonomy | Blocked or deferred | Explicit policy, checks, labels, branch protection, and sensitive-area exclusions | Explicitly deferred in orchestration docs; mobile PRs require smoke evidence unless the change is non-runtime/non-user-facing | Require explicit policy before enabling | No |
-| 2I Harness command wrappers and audit | Found in repo | Repo-native commands plus drift audit when drift recurs | Existing `agents:*` scripts in `package.json`, including `agents:issue:start` with dry-run, current-worktree branch support, optional `codex exec`, stable `.scratch/issues/<issue>/` evidence outputs, `agents:issue:pr` PR body packaging, and `agents:issue:run` as a one-issue orchestration wrapper | Exercise `agents:issue:run` on a real issue branch and refine the start-to-commit-to-PR handoff from evidence | No |
+| 2I Harness command wrappers and audit | Found in repo | Repo-native commands plus drift audit when drift recurs | Existing `agents:*` scripts in `package.json`, including `agents:issue:start` with dry-run, current-worktree branch support, optional `codex exec`, stable `.scratch/issues/<issue>/` evidence outputs, `agents:issue:pr` PR body packaging plus `--attach-evidence`, and `agents:issue:run` as a one-issue orchestration wrapper | Exercise `agents:issue:run` on a real issue branch and refine the start-to-commit-to-PR handoff from evidence | No |
 
 ## Harness Upgrade Candidates
 
@@ -286,7 +286,7 @@ Feedback:
 
 - Add feature-level tests around the highest-risk domains when touching them.
 - Rerun mobile smoke paths after navigation, Bible WebView, search, downloads, or annotation changes.
-- Consider a stable screenshot evidence script only after the manual smoke flow stops changing.
+- Keep before/after screenshot capture in the implementation agent loop; use `agents:issue:pr --attach-evidence` to publish supported evidence files to the PR without committing them to the product branch.
 
 Constraint:
 
@@ -307,8 +307,8 @@ No Level 1 patch is required to reach readiness.
 Small future batches, when useful:
 
 1. Exercise `.github/workflows/pr-checks.yml` on a real PR and update `docs/agents/orchestration.md` if the check context differs.
-2. Exercise `agents:issue:run <issue>` on a real ready-for-agent issue when the branch output is acceptable. The wrapper creates and pushes a draft PR by default after local commit; use `--dry-run` for no writes or `--no-pr` to stop after commit. `--run-codex` inside the wrapper defaults to `danger-full-access` for the mobile runtime loop; use `--codex-sandbox workspace-write` explicitly for static-only runs.
-3. Refine PR body generation from `commit-message.txt`, `change-summary.md`, `pr-notes.md`, `mobile-validation.md`, and stable `.scratch/issues/<issue>/evidence/` artifacts.
+2. Exercise `agents:issue:run <issue>` on a real ready-for-agent issue when the branch output is acceptable. The wrapper creates, pushes, attaches evidence, and opens a draft PR by default after local commit; use `--dry-run` for no writes or `--no-pr` to stop after commit. `--run-codex` inside the wrapper defaults to `danger-full-access` for the mobile runtime loop; use `--codex-sandbox workspace-write` explicitly for static-only runs.
+3. Refine PR body generation from `commit-message.txt`, `change-summary.md`, `pr-notes.md`, `mobile-validation.md`, stable `.scratch/issues/<issue>/evidence/` artifacts, and `evidence-attachments.json`.
 4. Add ADRs for newly confirmed durable decisions.
 5. Add targeted feature tests or smoke coverage when changing low-score domains in `docs/agents/quality-score.md`.
 6. Add a semantic harness audit only if command/doc drift recurs.

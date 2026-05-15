@@ -282,13 +282,17 @@
             <tr>
               <td>2G</td>
               <td>Before/after UI evidence</td>
-              <td><span class="status status-documented">Documented for agents</span></td>
-              <td>Deterministic screenshot/video path tied to smoke flows.</td>
+              <td><span class="status status-found">Found in repo</span></td>
               <td>
-                Manual smoke screenshots referenced in smoke docs; PR template now records mobile
-                validation status, smoke paths, and evidence.
+                Deterministic screenshot/video path tied to smoke flows and visible PR evidence.
               </td>
-              <td>Automate after smoke flows are stable.</td>
+              <td>
+                Manual smoke screenshots referenced in smoke docs;
+                <code>agents:issue:start</code> asks for before/after evidence when practical;
+                <code>agents:issue:pr --attach-evidence</code> uploads evidence to a secret gist and
+                comments on the PR.
+              </td>
+              <td>Exercise attachment flow on a real PR and refine unsupported file handling.</td>
               <td>No</td>
             </tr>
             <tr>
@@ -315,8 +319,8 @@
                 Existing <code>agents:*</code> package scripts, including
                 <code>agents:issue:start</code> with dry-run, current-worktree branch support, and
                 optional <code>codex exec</code> output, stable issue evidence paths, and
-                <code>agents:issue:pr</code> PR body packaging, plus
-                <code>agents:issue:run</code> as a one-issue orchestration wrapper.
+                <code>agents:issue:pr</code> PR body packaging plus <code>--attach-evidence</code>,
+                and <code>agents:issue:run</code> as a one-issue orchestration wrapper.
               </td>
               <td>
                 Exercise <code>agents:issue:run</code> on a real issue branch and refine the

@@ -8,6 +8,7 @@ const issueNumber = args[0]
 const dryRun = args.includes('--dry-run')
 const createPr = args.includes('--create')
 const pushBranch = args.includes('--push')
+const attachEvidence = args.includes('--attach-evidence')
 const ready = args.includes('--ready')
 const draft = args.includes('--draft') || !ready
 const baseIndex = args.indexOf('--base')
@@ -15,7 +16,7 @@ const baseBranch = baseIndex === -1 ? 'master' : args[baseIndex + 1]
 
 const usage = () => {
   console.log(
-    'Usage: yarn agents:issue:pr <issue-number> [--dry-run] [--create] [--push] [--draft|--ready] [--base <branch>]'
+    'Usage: yarn agents:issue:pr <issue-number> [--dry-run] [--create] [--push] [--attach-evidence] [--draft|--ready] [--base <branch>]'
   )
   console.log('')
   console.log('Builds a PR body from .scratch issue artifacts and optionally opens a GitHub PR.')
@@ -26,6 +27,7 @@ const usage = () => {
   )
   console.log('  --create    Create the pull request with gh after writing the body.')
   console.log('  --push      Push the current branch before --create.')
+  console.log('  --attach-evidence  Upload evidence files to a secret gist and comment on the PR.')
   console.log('  --draft     Create as draft. This is the default.')
   console.log('  --ready     Create as ready for review.')
   console.log('  --base      Base branch for diff and PR creation. Defaults to master.')
@@ -58,6 +60,11 @@ if (pushBranch && !createPr) {
   process.exit(1)
 }
 
+if (attachEvidence && dryRun) {
+  console.error('Use either --dry-run or --attach-evidence, not both.')
+  process.exit(1)
+}
+
 const run = (command, commandArgs, options = {}) =>
   execFileSync(command, commandArgs, {
     cwd: repoRoot,
@@ -86,6 +93,105 @@ const checkbox = passed => (passed ? '[x]' : '[ ]')
 const hasPassed = (text, commandPattern) => {
   const escaped = commandPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   return new RegExp(`${escaped}[^\\n]*(passed|succeeded|success)`, 'i').test(text)
+}
+
+const evidenceAttachmentExtensions = new Set([
+  '.gif',
+  '.jpeg',
+  '.jpg',
+  '.log',
+  '.md',
+  '.mov',
+  '.mp4',
+  '.pdf',
+  '.png',
+  '.svg',
+  '.txt',
+  '.webm',
+  '.webp',
+  '.zip',
+])
+
+const imageExtensions = new Set(['.gif', '.jpeg', '.jpg', '.png', '.svg', '.webp'])
+
+const isSupportedEvidenceFile = filePath =>
+  evidenceAttachmentExtensions.has(path.extname(filePath).toLowerCase())
+
+const listEvidenceAttachmentPaths = () => {
+  if (!exists(evidenceDir)) return []
+
+  return fs
+    .readdirSync(evidenceDir, { withFileTypes: true })
+    .filter(entry => entry.isFile())
+    .map(entry => path.join(evidenceDir, entry.name))
+    .filter(isSupportedEvidenceFile)
+    .sort((a, b) => a.localeCompare(b))
+}
+
+const extractGistId = gistUrl => {
+  const match = gistUrl.trim().match(/\/([a-f0-9]+)$/i)
+  return match?.[1] ?? ''
+}
+
+const getPrNumber = () => {
+  const prJson = run('gh', ['pr', 'view', '--head', currentBranch, '--json', 'number,url'])
+  return JSON.parse(prJson)
+}
+
+const uploadEvidenceAttachments = evidenceAttachmentPaths => {
+  if (!evidenceAttachmentPaths.length) {
+    return null
+  }
+
+  const gistUrl = run('gh', [
+    'gist',
+    'create',
+    '--desc',
+    `Bible Strong PR evidence for issue #${issue.number}`,
+    ...evidenceAttachmentPaths,
+  ]).trim()
+  const gistId = extractGistId(gistUrl)
+
+  if (!gistId) {
+    throw new Error(`Could not parse gist id from gh output: ${gistUrl}`)
+  }
+
+  const gist = JSON.parse(run('gh', ['api', `gists/${gistId}`]))
+  const files = Object.values(gist.files ?? {})
+    .map(file => ({
+      filename: file.filename,
+      rawUrl: file.raw_url,
+      size: file.size,
+    }))
+    .filter(file => file.filename && file.rawUrl)
+    .sort((a, b) => a.filename.localeCompare(b.filename))
+
+  return { gistUrl, gistId, files }
+}
+
+const buildEvidenceComment = attachment => {
+  const rows = attachment.files.map(file => {
+    const extension = path.extname(file.filename).toLowerCase()
+    const label = file.filename.replace(/\|/g, '\\|')
+    const link = `[${label}](${file.rawUrl})`
+
+    if (imageExtensions.has(extension)) {
+      return `### ${label}\n\n![${label}](${file.rawUrl})`
+    }
+
+    return `- ${link}${file.size ? ` (${file.size} bytes)` : ''}`
+  })
+
+  return `## UI Evidence For #${issue.number}
+
+Uploaded from \`${path.relative(repoRoot, evidenceDir)}\`.
+
+${rows.join('\n\n')}
+
+Evidence bundle: ${attachment.gistUrl}
+
+Mobile runtime status: \`${mobileStatus}\`
+`
 }
 
 const extractStatus = text => {
@@ -251,6 +357,16 @@ console.log(`Branch: ${currentBranch}`)
 console.log(`Base: ${baseBranch}`)
 console.log(`Mobile runtime status: ${mobileStatus}`)
 console.log(`${dryRun ? 'Would write' : 'Wrote'} ${path.relative(repoRoot, prBodyPath)}`)
+if (attachEvidence) {
+  const evidenceAttachmentPaths = listEvidenceAttachmentPaths()
+  console.log(
+    `Evidence attachments: ${
+      evidenceAttachmentPaths.length
+        ? evidenceAttachmentPaths.map(file => path.relative(repoRoot, file)).join(', ')
+        : 'none'
+    }`
+  )
+}
 
 if (statusShort) {
   console.log('Warning: working tree has uncommitted changes:')
@@ -285,4 +401,41 @@ if (createPr) {
   }
 
   run('gh', ghArgs, { stdio: 'inherit' })
+}
+
+if (attachEvidence) {
+  const evidenceAttachmentPaths = listEvidenceAttachmentPaths()
+
+  if (!evidenceAttachmentPaths.length) {
+    console.log('No supported evidence files found to attach.')
+    process.exit(0)
+  }
+
+  const attachment = uploadEvidenceAttachments(evidenceAttachmentPaths)
+  const pr = getPrNumber()
+  const evidenceCommentPath = path.join(issueDir, 'evidence-comment.md')
+  const evidenceAttachmentPath = path.join(issueDir, 'evidence-attachments.json')
+  const comment = buildEvidenceComment(attachment)
+
+  fs.writeFileSync(evidenceCommentPath, comment)
+  fs.writeFileSync(
+    evidenceAttachmentPath,
+    `${JSON.stringify(
+      {
+        issue: issue.number,
+        pr: pr.number,
+        prUrl: pr.url,
+        uploadedAt: new Date().toISOString(),
+        gistUrl: attachment.gistUrl,
+        files: attachment.files,
+      },
+      null,
+      2
+    )}\n`
+  )
+
+  run('gh', ['pr', 'comment', String(pr.number), '--body-file', evidenceCommentPath], {
+    stdio: 'inherit',
+  })
+  console.log(`Attached evidence to PR #${pr.number}: ${attachment.gistUrl}`)
 }
