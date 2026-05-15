@@ -22,6 +22,19 @@
 - [ ] Manual smoke run using `docs/agents/smoke-tests.md`
 - [ ] Deferred, with reason:
 
+## Mobile Validation
+
+- [ ] Not needed: non-runtime or non-user-facing change
+- [ ] Passed via `serve-sim` or equivalent simulator/device flow
+
+Smoke paths:
+
+-
+
+Evidence:
+
+-
+
 ## Sensitive-Area Notes
 
 Use `docs/agents/sensitive-areas.md` before changing auth, sync, migrations, backup/import/export, build identity, native config, external services, or user-owned data.

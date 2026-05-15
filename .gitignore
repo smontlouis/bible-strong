@@ -139,6 +139,7 @@ ios/
 .scratch/architecture/
 .scratch/quality/
 .scratch/logs/
+.scratch/issues/
 
 # Service account keys
 scripts/google-service-account.json

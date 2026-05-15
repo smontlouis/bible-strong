@@ -32,6 +32,7 @@
     "agents:logs:errors": "node scripts/agents-log-session.mjs errors",
     "agents:logs:startup": "node scripts/agents-log-session.mjs startup",
     "agents:logs:navigation": "node scripts/agents-log-session.mjs navigation",
+    "agents:issue:start": "node scripts/agents-issue-start.mjs",
     "serve-sim": "serve-sim",
     "android": "expo run:android",
     "ios": "expo run:ios"

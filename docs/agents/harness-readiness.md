@@ -113,6 +113,7 @@ Documented in `docs/agents/sensitive-areas.md`:
 - Agent domain quality scan through `yarn agents:quality:check`.
 - GitHub Actions PR check under `.github/workflows/pr-checks.yml`.
 - Manual/mobile smoke checklist and recent iOS Simulator evidence in `docs/agents/smoke-tests.md`.
+- Mobile-sequential orchestration policy in `docs/agents/orchestration.md`: Bible Strong issue work uses one branch in the current worktree with a local mobile verification loop before PR readiness.
 - Queryable local log capture via `yarn agents:start:logged` and `yarn agents:logs:*`.
 
 ### Existing Mechanical Constraints
@@ -122,14 +123,14 @@ Documented in `docs/agents/sensitive-areas.md`:
 - Prettier.
 - Agent architecture lint script with high-risk errors and brownfield warnings.
 - Agent domain quality script with conservative thresholds.
-- PR template requiring validation and sensitive-area notes.
+- PR template requiring validation, mobile validation status, evidence, and sensitive-area notes.
 - GitHub Actions PR gate for typecheck, lint, test, format, quality, and architecture checks.
 
 ### Operating Model
 
 Agent-assisted.
 
-Evidence: the repo has `AGENTS.md`, issue-tracker/triage docs, `docs/agents/`, harness checks, PR orchestration docs, and multi-agent ownership rules. It is not agent-first because merge autonomy, recurring agents, auto-merge, and prompt-to-merge are explicitly deferred.
+Evidence: the repo has `AGENTS.md`, issue-tracker/triage docs, `docs/agents/`, harness checks, PR orchestration docs, branch ownership rules, and a mobile-sequential orchestration policy. It is not agent-first because merge autonomy, recurring agents, auto-merge, prompt-to-merge, and automated mobile validation command wrappers are explicitly deferred.
 
 ### Harness Gaps
 
@@ -147,7 +148,7 @@ Level 2 gaps:
 - Architecture lint has 486 brownfield warnings; current gate blocks only high-risk errors.
 - Domain quality scores are conservative and directional.
 - Recurring maintenance/doc-gardening is documented as a candidate only.
-- Before/after UI evidence is manual, not automated.
+- Before/after UI evidence is manual, not automated; mobile validation is documented as sequential but does not yet have repo-native command wrappers.
 - Agent-to-agent review, auto-fix loops, auto-merge, and prompt-to-merge autonomy are deferred.
 
 ## Harness Layout Resolution
@@ -264,15 +265,15 @@ Current HTML contract:
 
 | Capability | Status | Minimum Evidence Required | Current Evidence | Next Mechanical Constraint | Required For Level 1? |
 |---|---|---|---|---|---|
-| 2A PR and branch orchestration | Found in repo | Documented issue-to-branch-to-PR flow and ownership rules | `docs/agents/orchestration.md`, PR template, issue tracker docs | Exercise on real PRs and refine conflict/ownership rules | No |
+| 2A PR and branch orchestration | Documented for agents | Documented issue-to-branch-to-PR flow, ownership rules, and mobile-sequential loop | `docs/agents/orchestration.md`, PR template, issue tracker docs; mobile issue work uses one branch in the current worktree with local mobile verification before PR readiness | Exercise on real PRs and refine conflict/ownership rules | No |
 | 2B PR gates and remote validation | Found in repo | Hosted workflow names and required check context confirmed | `.github/workflows/pr-checks.yml` runs typecheck, lint, test, format, quality, architecture | Confirm required check name on a real PR | No |
 | 2C Queryable local observability | Found in repo | Agent-queryable logs for startup, errors, and navigation | `agents:start:logged`, `agents:logs:*`, `[AgentLog]`, `.scratch/logs/` convention | Add more structured events only when they help real debugging | No |
 | 2D Domain quality metrics | Verified locally | Generated domain score with threshold and machine artifact | `docs/agents/quality-score.md`, `.scratch/quality/quality.json`, `agents:quality:check` | Keep thresholds conservative until scores stabilize | No |
 | 2E Architecture and taste linting | Verified locally | Generated architecture scan with blocking errors separated from warnings | `docs/agents/architecture-lint.md`, `.scratch/architecture/architecture.json`, `agents:architecture:check` | Reduce brownfield warnings before tightening gates | No |
 | 2F Doc freshness and recurring maintenance | Documented for agents | Owner-approved cadence, destination, and output expectation | Candidate automations in `docs/agents/orchestration.md` | Defer until cadence and notification destination are chosen | No |
-| 2G Before/after UI evidence | Documented for agents | Deterministic screenshot/video path tied to smoke flows | Manual smoke screenshots referenced in `docs/agents/smoke-tests.md` | Automate only after smoke flows are stable | No |
-| 2H Agentic review and merge autonomy | Blocked or deferred | Explicit policy, checks, labels, branch protection, and sensitive-area exclusions | Explicitly deferred in orchestration docs | Require explicit policy before enabling | No |
-| 2I Harness command wrappers and audit | Found in repo | Repo-native commands plus drift audit when drift recurs | Existing `agents:*` scripts in `package.json` | Add a semantic audit only if harness drift becomes recurring | No |
+| 2G Before/after UI evidence | Documented for agents | Deterministic screenshot/video path tied to smoke flows | Manual smoke screenshots referenced in `docs/agents/smoke-tests.md`; PR template records mobile validation status, smoke paths, and evidence | Automate only after smoke flows are stable | No |
+| 2H Agentic review and merge autonomy | Blocked or deferred | Explicit policy, checks, labels, branch protection, and sensitive-area exclusions | Explicitly deferred in orchestration docs; mobile PRs require smoke evidence unless the change is non-runtime/non-user-facing | Require explicit policy before enabling | No |
+| 2I Harness command wrappers and audit | Found in repo | Repo-native commands plus drift audit when drift recurs | Existing `agents:*` scripts in `package.json`, including `agents:issue:start` with dry-run and current-worktree branch support | Add `agents:issue:validate-mobile` only if the sequential local mobile loop proves useful in repeated work | No |
 
 ## Harness Upgrade Candidates
 
@@ -295,6 +296,7 @@ Constraint:
 Orchestration:
 
 - Exercise the GitHub PR gate on a real PR.
+- Use the mobile orchestration policy for agentic issue work: one dedicated branch in the current worktree, static checks, local mobile smoke, fix loop, then PR readiness.
 - Add recurring doc-gardening only after the owner chooses cadence and destination.
 - Defer `.harness/` machine-readable specs until a specific Level 2 guardrail needs them.
 
@@ -305,6 +307,8 @@ No Level 1 patch is required to reach readiness.
 Small future batches, when useful:
 
 1. Exercise `.github/workflows/pr-checks.yml` on a real PR and update `docs/agents/orchestration.md` if the check context differs.
-2. Add ADRs for newly confirmed durable decisions.
-3. Add targeted feature tests or smoke coverage when changing low-score domains in `docs/agents/quality-score.md`.
-4. Add a semantic harness audit only if command/doc drift recurs.
+2. Exercise `agents:issue:start <issue> --create-branch` on a real ready-for-agent issue and refine the generated prompt if needed.
+3. Add `agents:issue:validate-mobile` only if the sequential mobile loop proves useful in repeated work.
+4. Add ADRs for newly confirmed durable decisions.
+5. Add targeted feature tests or smoke coverage when changing low-score domains in `docs/agents/quality-score.md`.
+6. Add a semantic harness audit only if command/doc drift recurs.

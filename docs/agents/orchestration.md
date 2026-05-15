@@ -11,6 +11,7 @@ This first Level 2 pass covers:
 - GitHub issue to branch to PR flow.
 - PR validation gates.
 - Multi-agent ownership rules.
+- Mobile-sequential implementation and validation loop.
 - Release and build boundaries.
 
 It does not automate releases, app store submission, production data operations, or account-backed destructive tests.
@@ -24,6 +25,23 @@ Use GitHub Issues as the source of truth, as documented in `docs/agents/issue-tr
 3. Create branches with the `codex/` prefix unless the user asks for another name.
 4. Keep each branch focused on one issue or one coherent patch batch.
 5. Open PRs as drafts until local validation has run or any missing validation is clearly explained.
+
+To prepare a single issue for agent work, run:
+
+```bash
+yarn agents:issue:start <issue-number> [--dry-run] [--create-branch]
+```
+
+This writes `.scratch/issues/<issue-number>/issue.json`, `prompt.md`, and `summary.md`. It does not create or switch branches by default.
+
+Options:
+
+- `--dry-run`: fetch the issue and print the planned branch and artifact paths without writing files or changing git state.
+- `--create-branch`: create and check out the recommended branch in the current worktree.
+
+Do not use `--worktree` for Bible Strong mobile user-facing issue work. This repo currently uses `mobile-sequential`: one issue branch in the current worktree, one local mobile verification loop, then PR readiness.
+
+The generated prompt is suitable for Codex direct work today. Sandcastle is not part of this MVP because mobile runtime validation remains host-only and sequential.
 
 ## Multi-Agent Ownership
 
@@ -43,8 +61,35 @@ Each agent must state in its PR:
 - issue or request covered;
 - owned files or modules;
 - validation commands run;
-- smoke paths run or deferred;
+- smoke paths run or marked not needed;
 - sensitive areas touched, if any.
+
+## Mobile Orchestration Mode
+
+Bible Strong is a mobile-first Expo/React Native app. Treat runtime validation as host-only unless a future runner explicitly proves simulator or device access.
+
+Selected mode: `mobile-sequential`.
+
+Use this orchestration shape for mobile user-facing or runtime issue work:
+
+1. Branch start.
+   - Create or switch to one dedicated `codex/issue-<number>-<slug>` branch in the current worktree.
+   - Do not create a per-issue worktree for the normal mobile loop.
+2. Implementation loop.
+   - Work on one issue at a time.
+   - Keep the branch focused on the issue or a tightly scoped prerequisite.
+   - Run the smallest relevant static checks, then broaden when touching shared state, navigation, storage, startup, sync, or sensitive areas.
+3. Mobile verification loop.
+   - Start the required local runtime and execute the selected smoke paths in `docs/agents/smoke-tests.md`.
+   - Use `serve-sim` or equivalent simulator/device tooling for user-facing changes.
+   - Record screenshots, logs, or a concise evidence note before PR readiness.
+4. Fix loop.
+   - If mobile smoke fails, fix on the same branch and rerun the relevant checks.
+   - Do not open or advance the PR just because static checks passed.
+5. PR readiness.
+   - A mobile PR can be opened or advanced only after required mobile smoke paths pass, or when the change is documented as non-runtime and non-user-facing.
+
+Parallel mobile work is allowed only if every lane has an independent implementation state and a credible independent mobile verification loop before PR readiness. If that cannot be provided, use `mobile-sequential`.
 
 ## PR Gates
 
@@ -60,6 +105,8 @@ Required checks:
 These checks are intentionally JavaScript-only. Native EAS builds, simulator smoke checks, Firebase-backed sync tests, and app store release validation are separate gates because they need credentials, installed simulator assets, or expensive external resources.
 
 Use `.github/pull_request_template.md` for PR descriptions. Do not delete sections that are not applicable; mark them as not needed and explain why when the change touches user-facing behavior or sensitive areas.
+
+For mobile changes, the hosted PR gate is not enough to mark the PR ready for review. Use the mobile validation section in the PR template to record whether simulator smoke passed or is not needed because the change is non-runtime and non-user-facing.
 
 Branch protection is enabled on `master` with the `Typecheck, lint, test, format` check required before merge.
 
@@ -101,3 +148,5 @@ Enable recurring automation only after the owner chooses cadence, notification d
 
 - Decide whether to add scheduled maintenance automations.
 - Exercise the PR gate on a real pull request and adjust the required check context if GitHub reports a different check-run name.
+- Add an `agents:issue:validate-mobile` wrapper only if the sequential local mobile loop proves useful in repeated work.
+- Revisit Sandcastle only if a future workflow provides a real parallel verification loop for the relevant surface.
