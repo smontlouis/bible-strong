@@ -261,7 +261,8 @@
         <article class="card priority-warn">
           <h2>Next Decision</h2>
           <p class="note">
-            Exercise <code>agents:issue:start &lt;issue&gt; --create-branch</code> on a real
+            Exercise
+            <code>agents:issue:start &lt;issue&gt; --create-branch --run-codex</code> on a real
             ready-for-agent issue, then exercise the GitHub PR gate on a real PR when remote
             validation is worth spending. Mobile validation, recurring maintenance, UI evidence
             automation, and merge autonomy remain Level 2 work and do not block Level 1.
@@ -337,8 +338,11 @@
             <p class="note">
               Evidence: PR template, GitHub workflow, orchestration docs, mobile-sequential
               validation policy, agent scripts including <code>agents:issue:start</code> with
-              current-worktree branch support.<br />Gap: PR gate not exercised on a real PR; mobile
-              validation wrapper and autonomy deferred.<br /><a href="./level-2.html">Details</a>
+              current-worktree branch support and optional Codex launch.<br />Gap: PR gate not
+              exercised on a real PR; mobile validation wrapper and autonomy deferred.<br /><a
+                href="./level-2.html"
+                >Details</a
+              >
             </p>
           </article>
         </div>

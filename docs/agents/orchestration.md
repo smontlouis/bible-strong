@@ -29,7 +29,7 @@ Use GitHub Issues as the source of truth, as documented in `docs/agents/issue-tr
 To prepare a single issue for agent work, run:
 
 ```bash
-yarn agents:issue:start <issue-number> [--dry-run] [--create-branch]
+yarn agents:issue:start <issue-number> [--dry-run] [--create-branch] [--run-codex]
 ```
 
 This writes `.scratch/issues/<issue-number>/issue.json`, `prompt.md`, and `summary.md`. It does not create or switch branches by default.
@@ -38,6 +38,7 @@ Options:
 
 - `--dry-run`: fetch the issue and print the planned branch and artifact paths without writing files or changing git state.
 - `--create-branch`: create and check out the recommended branch in the current worktree.
+- `--run-codex`: launch the Codex CLI with the generated prompt after preparation. Use it with `--create-branch` for the normal mobile-sequential loop.
 
 Do not use `--worktree` for Bible Strong mobile user-facing issue work. This repo currently uses `mobile-sequential`: one issue branch in the current worktree, one local mobile verification loop, then PR readiness.
 

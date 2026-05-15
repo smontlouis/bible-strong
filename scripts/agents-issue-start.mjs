@@ -7,9 +7,12 @@ const issueNumber = process.argv[2]
 const createBranch = process.argv.includes('--create-branch')
 const createWorktree = process.argv.includes('--worktree')
 const dryRun = process.argv.includes('--dry-run')
+const runCodex = process.argv.includes('--run-codex')
 
 const usage = () => {
-  console.log('Usage: yarn agents:issue:start <issue-number> [--dry-run] [--create-branch]')
+  console.log(
+    'Usage: yarn agents:issue:start <issue-number> [--dry-run] [--create-branch] [--run-codex]'
+  )
   console.log('')
   console.log('Fetches a GitHub issue with gh, writes .scratch/issues/<number>/ artifacts,')
   console.log('and prepares a mobile-sequential implementation prompt for Codex.')
@@ -17,6 +20,7 @@ const usage = () => {
   console.log('Options:')
   console.log('  --dry-run        Print planned paths and git actions without writing files.')
   console.log('  --create-branch  Create and check out the recommended branch in this worktree.')
+  console.log('  --run-codex      Launch Codex with the generated prompt after preparation.')
 }
 
 if (!issueNumber || issueNumber === '--help' || issueNumber === '-h') {
@@ -39,6 +43,12 @@ if (createWorktree) {
   process.exit(1)
 }
 
+if (dryRun && runCodex) {
+  console.error('Use either --dry-run or --run-codex, not both.')
+  console.error('--dry-run does not write the generated prompt that Codex should read.')
+  process.exit(1)
+}
+
 const run = (command, args, options = {}) =>
   execFileSync(command, args, {
     cwd: repoRoot,
@@ -55,6 +65,16 @@ const slugify = value =>
     .replace(/^-+|-+$/g, '')
     .slice(0, 60)
     .replace(/-+$/g, '')
+
+const getCurrentBranch = () => run('git', ['branch', '--show-current']).trim()
+const branchExists = branchName => {
+  try {
+    run('git', ['rev-parse', '--verify', '--quiet', branchName])
+    return true
+  } catch {
+    return false
+  }
+}
 
 const issueJson = (() => {
   try {
@@ -225,10 +245,16 @@ if (!dryRun) {
 if (createBranch) {
   try {
     if (!dryRun) {
-      run('git', ['switch', '-c', branchName], { stdio: 'inherit' })
+      if (getCurrentBranch() === branchName) {
+        // Already on the prepared branch; keep going so reruns can refresh prompt artifacts.
+      } else if (branchExists(branchName)) {
+        run('git', ['switch', branchName], { stdio: 'inherit' })
+      } else {
+        run('git', ['switch', '-c', branchName], { stdio: 'inherit' })
+      }
     }
   } catch {
-    console.error(`Failed to create branch ${branchName}.`)
+    console.error(`Failed to create or switch to branch ${branchName}.`)
     process.exit(1)
   }
 }
@@ -236,8 +262,8 @@ if (createBranch) {
 console.log(`${dryRun ? 'Planned' : 'Prepared'} issue #${issue.number}: ${issue.title}`)
 const branchStatus = createBranch
   ? dryRun
-    ? ' (would create and check out)'
-    : ' (created and checked out)'
+    ? ' (would create or switch)'
+    : ' (created or checked out)'
   : ' (not created)'
 console.log(`Branch: ${branchName}${branchStatus}`)
 console.log('Orchestration mode: mobile-sequential')
@@ -257,5 +283,26 @@ if (sensitiveMatches.length > 0) {
   console.log('Sensitive-area scan found possible matches:')
   for (const [area] of sensitiveMatches) {
     console.log(`- ${area}`)
+  }
+}
+
+if (runCodex) {
+  try {
+    run(
+      'codex',
+      [
+        '--cd',
+        repoRoot,
+        `Read ${path.relative(
+          repoRoot,
+          promptPath
+        )} and implement the issue using the repository harness contract. Continue until the required local checks pass or blockers are clearly documented.`,
+      ],
+      { stdio: 'inherit' }
+    )
+  } catch {
+    console.error('Failed to launch Codex.')
+    console.error('Make sure the Codex CLI is installed and authenticated.')
+    process.exit(1)
   }
 }
