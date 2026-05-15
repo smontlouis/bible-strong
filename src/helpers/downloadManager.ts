@@ -11,12 +11,8 @@ import {
   type DownloadStatus,
 } from '~state/downloadQueue'
 import { installedVersionsSignalAtom, bibleDataRefreshSignalAtom } from '~state/app'
-import { downloadAndInsertBible } from '~helpers/downloadBibleToSqlite'
-import { dbManager } from '~helpers/sqlite'
-import { downloadRedWordsFile, versionHasRedWords } from '~helpers/redWords'
-import { downloadPericopeFile, versionHasPericope } from '~helpers/pericopes'
 import { storage } from '~helpers/storage'
-import type { DatabaseId } from '~helpers/databaseTypes'
+import { installResourceDatabaseItem } from '~helpers/resourceDatabaseInstallation'
 
 const PERSIST_KEY = 'downloadQueue'
 const MAX_RETRIES = 2
@@ -226,17 +222,15 @@ class DownloadManager {
     try {
       this.updateItemStatus(item.id, 'downloading')
 
-      switch (item.type) {
-        case 'bible':
-          await this.processBible(item)
-          break
-        case 'bible-strong':
-          await this.processBibleStrong(item)
-          break
-        case 'database':
-          await this.processDatabase(item)
-          break
-      }
+      await installResourceDatabaseItem(item, {
+        onDownloadProgress: progress => this.updateItemProgress(item.id, progress, 0),
+        onInsertProgress: progress => this.updateItemProgress(item.id, 1, progress),
+        onStatusInserting: () => this.updateItemStatus(item.id, 'inserting'),
+        onResumable: resumable => {
+          this.currentResumable = resumable
+        },
+        isCancelled: () => this.cancelledIds.has(item.id),
+      })
 
       this.updateItemStatus(item.id, 'completed')
 
@@ -279,100 +273,6 @@ class DownloadManager {
     }
 
     this.schedulePersist()
-  }
-
-  // -----------------------------------------------------------------------
-  // Download strategies by type
-  // -----------------------------------------------------------------------
-
-  private async processBible(item: DownloadItem): Promise<void> {
-    const isCancelled = () => this.cancelledIds.has(item.id)
-
-    await downloadAndInsertBible(item.versionId!, item.url, {
-      onDownloadProgress: ({ totalBytesWritten }) => {
-        const progress = Math.min(totalBytesWritten / item.estimatedSize, 1)
-        this.updateItemProgress(item.id, progress, 0)
-      },
-      onResumable: resumable => {
-        this.currentResumable = resumable
-      },
-      onInsertProgress: progress => {
-        this.updateItemStatus(item.id, 'inserting')
-        this.updateItemProgress(item.id, 1, progress)
-      },
-      isCancelled,
-    })
-
-    this.currentResumable = null
-
-    // Download red words and pericopes
-    if (item.hasRedWords && versionHasRedWords(item.versionId!)) {
-      downloadRedWordsFile(item.versionId!)
-    }
-    if (item.hasPericope && versionHasPericope(item.versionId!)) {
-      downloadPericopeFile(item.versionId!)
-    }
-  }
-
-  private async processBibleStrong(item: DownloadItem): Promise<void> {
-    const path = item.destinationPath!
-
-    const resumable = FileSystem.createDownloadResumable(
-      item.url,
-      path,
-      undefined,
-      ({ totalBytesWritten }) => {
-        const progress = Math.min(totalBytesWritten / item.estimatedSize, 1)
-        this.updateItemProgress(item.id, progress, 0)
-      }
-    )
-
-    this.currentResumable = resumable
-    await resumable.downloadAsync()
-    this.currentResumable = null
-
-    if (this.cancelledIds.has(item.id)) throw new Error('CANCELLED')
-
-    // Initialize the DB after download
-    const versionId = item.versionId!
-    if (versionId === 'INT' || versionId === 'INT_EN') {
-      const lang = versionId === 'INT' ? 'fr' : 'en'
-      await dbManager.getDB('INTERLINEAIRE', lang).init()
-    }
-
-    // Download red words and pericopes
-    if (item.hasRedWords && versionHasRedWords(versionId)) {
-      downloadRedWordsFile(versionId)
-    }
-    if (item.hasPericope && versionHasPericope(versionId)) {
-      downloadPericopeFile(versionId)
-    }
-  }
-
-  private async processDatabase(item: DownloadItem): Promise<void> {
-    const path = item.destinationPath!
-
-    const resumable = FileSystem.createDownloadResumable(
-      item.url,
-      path,
-      undefined,
-      ({ totalBytesWritten }) => {
-        const progress = Math.min(totalBytesWritten / item.estimatedSize, 1)
-        this.updateItemProgress(item.id, progress, 0)
-      }
-    )
-
-    this.currentResumable = resumable
-    await resumable.downloadAsync()
-    this.currentResumable = null
-
-    if (this.cancelledIds.has(item.id)) throw new Error('CANCELLED')
-
-    // Initialize the database
-    const dbId = item.databaseId!
-    const lang = item.lang || 'fr'
-    const db = dbManager.getDB(dbId as DatabaseId, lang)
-    await db.init()
   }
 
   // -----------------------------------------------------------------------

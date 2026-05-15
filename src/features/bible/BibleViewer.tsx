@@ -6,10 +6,6 @@ import Box from '~common/ui/Box'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 import { BibleError } from '~helpers/bibleErrors'
 import BibleErrorView from './BibleErrorView'
-import getBiblePericope from '~helpers/getBiblePericope'
-import loadBibleChapter from '~helpers/loadBibleChapter'
-import { loadRedWords } from '~helpers/loadRedWords'
-import loadMhyComments from '~helpers/loadMhyComments'
 import { usePrevious } from '~helpers/usePrevious'
 import BibleHeader from './BibleHeader'
 
@@ -59,6 +55,19 @@ import SnapshotPlaceholder from './SnapshotPlaceholder'
 import AnnotationNoteModal from './AnnotationNoteModal'
 import AnnotationToolbar from './AnnotationToolbar'
 import { BibleDOMWrapper, ParallelVerse } from './BibleDOM/BibleDOMWrapper'
+import {
+  loadBibleReadingComments,
+  loadBibleReadingMain,
+  loadBibleReadingParallelVerses,
+  loadBibleReadingRedWords,
+  loadBibleReadingSecondaryVerses,
+  RedWordsByVerse,
+} from './bibleReadingChapter'
+import {
+  getFirstSelectedVerseLocation,
+  selectAllChapterVerses,
+  selectedVersesIncludeFocus,
+} from './selectedVersesActions'
 import BibleLinkModal from './BibleLinkModal'
 import BibleNoteModal from './BibleNoteModal'
 import BibleParamsModal from './BibleParamsModal'
@@ -117,9 +126,7 @@ const BibleViewer = ({
   const [parallelVerses, setParallelVerses] = useState<ParallelVerse[]>([])
   const [secondaryVerses, setSecondaryVerses] = useState<Verse[] | null>(null)
   const [comments, setComments] = useState<{ [key: string]: string } | null>(null)
-  const [redWords, setRedWords] = useState<Record<string, { start: number; end: number }[]> | null>(
-    null
-  )
+  const [redWords, setRedWords] = useState<RedWordsByVerse | null>(null)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
   const [linkVerses, setLinkVerses] = useState<VerseIds | undefined>(undefined)
@@ -288,10 +295,7 @@ const BibleViewer = ({
   }, [verses, annotationModeEnabled, setAnnotationVerses])
 
   const selectAllVerses = () => {
-    const selectedVersesToAdd: VerseIds = Object.fromEntries(
-      verses.map(v => [`${v.Livre}-${v.Chapitre}-${v.Verset}`, true])
-    )
-    actions.selectAllVerses(selectedVersesToAdd)
+    actions.selectAllVerses(selectAllChapterVerses(verses))
   }
 
   // Open/close verses modal based on selected verses
@@ -346,10 +350,11 @@ const BibleViewer = ({
     const currentLoadId = ++loadIdRef.current
 
     // Phase 1: Load main verses + pericopes (critical path)
-    const [pericopeToLoad, mainResult] = await Promise.all([
-      getBiblePericope(version),
-      loadBibleChapter(book.Numero, chapter, version),
-    ])
+    const { pericope: pericopeToLoad, mainResult } = await loadBibleReadingMain({
+      book: book.Numero,
+      chapter,
+      version,
+    })
 
     // If main Bible version fails, set error and stop
     if (!mainResult.success || !mainResult.data) {
@@ -387,70 +392,43 @@ const BibleViewer = ({
     })
 
     // Phase 2: Hydrate secondary data in background (non-blocking)
+    const extrasRequest = {
+      book: book.Numero,
+      chapter,
+      version,
+      parallelVersions,
+      commentsDisplay: settings.commentsDisplay,
+      lang,
+    }
 
     // Parallel versions
-    if (parallelVersions.length) {
-      Promise.all(parallelVersions.map(p => loadBibleChapter(book.Numero, chapter, p))).then(
-        parallelResults => {
-          if (loadIdRef.current !== currentLoadId) return
-          const parallelVersesToLoad: ParallelVerse[] = []
-          for (let i = 0; i < parallelVersions.length; i++) {
-            const pResult = parallelResults[i]
-            if (pResult.success && pResult.data) {
-              parallelVersesToLoad.push({
-                id: parallelVersions[i],
-                verses: pResult.data as Verse[],
-              })
-            } else {
-              parallelVersesToLoad.push({
-                id: parallelVersions[i],
-                verses: [],
-                error: pResult.error,
-              })
-            }
-          }
-          setParallelVerses(parallelVersesToLoad)
-        }
-      )
-    } else {
-      setParallelVerses([])
-    }
+    loadBibleReadingParallelVerses(extrasRequest).then(parallelVersesToLoad => {
+      if (loadIdRef.current !== currentLoadId) return
+      setParallelVerses(parallelVersesToLoad)
+    })
 
     // Secondary verses for interlinear mode
-    if (version === 'INT' || version === 'INT_EN') {
-      loadBibleChapter(book.Numero, chapter, getDefaultBibleVersion(lang)).then(secondaryResult => {
-        if (loadIdRef.current !== currentLoadId) return
-        if (secondaryResult.success && secondaryResult.data) {
-          setSecondaryVerses(secondaryResult.data as Verse[])
-        } else {
-          setSecondaryVerses(null)
-        }
-      })
-    } else {
-      setSecondaryVerses(null)
-    }
+    loadBibleReadingSecondaryVerses(extrasRequest).then(secondaryVersesToLoad => {
+      if (loadIdRef.current !== currentLoadId) return
+      setSecondaryVerses(secondaryVersesToLoad)
+    })
 
     // Comments
-    if (settings.commentsDisplay) {
-      loadMhyComments(book.Numero, chapter)
-        .then(c => {
-          if (loadIdRef.current !== currentLoadId) return
-          if (!c || 'error' in c) return
-          setComments(JSON.parse(c.commentaires))
-        })
-        .catch(() => {
-          if (loadIdRef.current !== currentLoadId) return
-          setComments(null)
-        })
-    } else if (comments) {
-      setComments(null)
-    }
+    loadBibleReadingComments(extrasRequest)
+      .then(commentsToLoad => {
+        if (loadIdRef.current !== currentLoadId) return
+        setComments(commentsToLoad)
+      })
+      .catch(() => {
+        if (loadIdRef.current !== currentLoadId) return
+        setComments(null)
+      })
 
     // Red words (memoized, fast on subsequent calls)
-    loadRedWords(version)
-      .then(rw => {
+    loadBibleReadingRedWords(extrasRequest)
+      .then(redWordsToLoad => {
         if (loadIdRef.current !== currentLoadId) return
-        setRedWords(rw)
+        setRedWords(redWordsToLoad)
       })
       .catch(() => setRedWords(null))
   }
@@ -599,12 +577,7 @@ const BibleViewer = ({
 
   // Pin verses handler - toggles focus on/off
   const handlePinVerses = () => {
-    // Check if a selected verse is already in focus
-    const selectedKeys = Object.keys(selectedVerses)
-    const hasFocusActive =
-      focusVerses?.some(v => selectedKeys.some(key => key.endsWith(`-${v}`))) ?? false
-
-    if (hasFocusActive) {
+    if (selectedVersesIncludeFocus(selectedVerses, focusVerses)) {
       actions.clearFocusVerses()
     } else {
       actions.pinSelectedVerses()
@@ -613,14 +586,12 @@ const BibleViewer = ({
 
   // Bookmark handler
   const handleAddBookmark = useCallback(() => {
-    // Get the first selected verse for the bookmark
-    const firstVerseKey = Object.keys(selectedVerses)[0]
-    if (firstVerseKey) {
-      const [bookNum, chapterNum, verseNum] = firstVerseKey.split('-').map(Number)
+    const location = getFirstSelectedVerseLocation(selectedVerses)
+    if (location) {
       setSelectedVerseForBookmark({
-        book: bookNum,
-        chapter: chapterNum,
-        verse: verseNum,
+        book: location.book,
+        chapter: location.chapter,
+        verse: location.verse,
       })
       setEditingBookmark(null)
       // Use setTimeout to ensure state is updated before presenting
