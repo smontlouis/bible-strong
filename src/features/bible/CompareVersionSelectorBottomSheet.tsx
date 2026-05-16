@@ -89,6 +89,7 @@ const CompareVersionSelectorBottomSheet = ({
             isSelected={versionsToCompare.includes(item.id)}
             onChange={toggleVersion}
             onDownloadComplete={addCompletedDownload}
+            showSelectionCheckbox
           />
         )}
       />
