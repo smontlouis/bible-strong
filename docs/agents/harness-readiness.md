@@ -144,11 +144,11 @@ Non-blocking Level 1 gaps:
 
 Level 2 gaps:
 
-- PR gates need to be exercised on a real PR to confirm hosted check names.
+- PR gates have now been exercised through real merged PRs, including #219 and #220. Keep watching check context drift when the GitHub workflow changes.
 - Architecture lint has 486 brownfield warnings; current gate blocks only high-risk errors.
 - Domain quality scores are conservative and directional.
 - Recurring maintenance/doc-gardening is documented as a candidate only.
-- After UI evidence is manual, not automated; mobile validation is documented as sequential but does not yet have repo-native command wrappers.
+- After UI evidence publication has been exercised through dedicated evidence branches for issues 195, 198, and 208. Retention policy and broader automation remain deferred.
 - Agent-to-agent review, auto-fix loops, auto-merge, and prompt-to-merge autonomy are deferred.
 
 ## Harness Layout Resolution
@@ -265,15 +265,15 @@ Current HTML contract:
 
 | Capability | Status | Minimum Evidence Required | Current Evidence | Next Mechanical Constraint | Required For Level 1? |
 |---|---|---|---|---|---|
-| 2A PR and branch orchestration | Documented for agents | Documented issue-to-branch-to-PR flow, ownership rules, and mobile-sequential loop | `docs/agents/orchestration.md`, PR template, issue tracker docs; mobile issue work uses one branch in the current worktree with local mobile verification before PR readiness | Exercise on real PRs and refine conflict/ownership rules | No |
-| 2B PR gates and remote validation | Found in repo | Hosted workflow names and required check context confirmed | `.github/workflows/pr-checks.yml` runs typecheck, lint, test, format, quality, architecture | Confirm required check name on a real PR | No |
+| 2A PR and branch orchestration | Verified locally | Documented issue-to-branch-to-PR flow, ownership rules, and mobile-sequential loop | `docs/agents/orchestration.md`, PR template, issue tracker docs, merged PRs #219 and #220; issue artifacts exist under `.scratch/issues/198` and `.scratch/issues/208` | Continue refining ownership/conflict rules as real PRs reveal gaps | No |
+| 2B PR gates and remote validation | Verified locally | Hosted workflow names and required check context confirmed | `.github/workflows/pr-checks.yml` runs typecheck, lint, test, format, quality, architecture; real PRs #219 and #220 have been merged through the hosted gate | Reconfirm check names only when workflow or branch protection changes | No |
 | 2C Queryable local observability | Found in repo | Agent-queryable logs for startup, errors, and navigation | `agents:start:logged`, `agents:logs:*`, `[AgentLog]`, `.scratch/logs/` convention | Add more structured events only when they help real debugging | No |
 | 2D Domain quality metrics | Verified locally | Generated domain score with threshold and machine artifact | `docs/agents/quality-score.md`, `.scratch/quality/quality.json`, `agents:quality:check` | Keep thresholds conservative until scores stabilize | No |
 | 2E Architecture and taste linting | Verified locally | Generated architecture scan with blocking errors separated from warnings | `docs/agents/architecture-lint.md`, `.scratch/architecture/architecture.json`, `agents:architecture:check` | Reduce brownfield warnings before tightening gates | No |
 | 2F Doc freshness and recurring maintenance | Documented for agents | Owner-approved cadence, destination, and output expectation | Candidate automations in `docs/agents/orchestration.md` | Defer until cadence and notification destination are chosen | No |
-| 2G After UI evidence | Found in repo | Deterministic screenshot/video path tied to smoke flows and visible PR evidence | Manual smoke screenshots referenced in `docs/agents/smoke-tests.md`; `agents:issue:start` asks agents for after evidence for visual changes; `agents:issue:pr --attach-evidence` pushes evidence to a dedicated GitHub evidence branch and comments on the PR | Exercise attachment flow on real PRs and refine retention policy if needed | No |
+| 2G After UI evidence | Verified locally | Deterministic screenshot/video path tied to smoke flows and visible PR evidence | Manual smoke screenshots referenced in `docs/agents/smoke-tests.md`; issue evidence artifacts exist for 195, 198, and 208; `agents:issue:pr --attach-evidence` published dedicated evidence branches such as `codex-evidence-issue-198` | Refine retention policy and evidence expectations as more UI PRs use the flow | No |
 | 2H Agentic review and merge autonomy | Blocked or deferred | Explicit policy, checks, labels, branch protection, and sensitive-area exclusions | Explicitly deferred in orchestration docs; mobile PRs require smoke evidence unless the change is non-runtime/non-user-facing | Require explicit policy before enabling | No |
-| 2I Harness command wrappers and audit | Found in repo | Repo-native commands plus drift audit when drift recurs | Existing `agents:*` scripts in `package.json`, including `agents:issue:start` with dry-run, current-worktree branch support, optional `codex exec`, stable `.scratch/issues/<issue>/` evidence outputs, `agents:issue:pr` PR body packaging plus `--attach-evidence`, and `agents:issue:run` as a one-issue orchestration wrapper | Exercise `agents:issue:run` on a real issue branch and refine the start-to-commit-to-PR handoff from evidence | No |
+| 2I Harness command wrappers and audit | Verified locally | Repo-native commands plus drift audit when drift recurs | Existing `agents:*` scripts in `package.json`, including `agents:issue:start`, `agents:issue:pr --attach-evidence`, and `agents:issue:run`; real issue artifacts under `.scratch/issues/195`, `.scratch/issues/198`, and `.scratch/issues/208` show the handoff contract in use | Add a drift audit only if command/doc mismatch recurs | No |
 
 ## Harness Upgrade Candidates
 
@@ -295,7 +295,7 @@ Constraint:
 
 Orchestration:
 
-- Exercise the GitHub PR gate on a real PR.
+- Continue using the exercised GitHub PR gate on real PRs; update docs only if check context or branch protection changes.
 - Use the mobile orchestration policy for agentic issue work: one dedicated branch in the current worktree, static checks, local mobile smoke, fix loop, then PR readiness.
 - Add recurring doc-gardening only after the owner chooses cadence and destination.
 - Defer `.harness/` machine-readable specs until a specific Level 2 guardrail needs them.
@@ -306,9 +306,9 @@ No Level 1 patch is required to reach readiness.
 
 Small future batches, when useful:
 
-1. Exercise `.github/workflows/pr-checks.yml` on a real PR and update `docs/agents/orchestration.md` if the check context differs.
-2. Exercise `agents:issue:run <issue>` on a real ready-for-agent issue when the branch output is acceptable. The wrapper creates, pushes, attaches evidence, and opens a draft PR by default after local commit; use `--dry-run` for no writes or `--no-pr` to stop after commit. `--run-codex` inside the wrapper defaults to `danger-full-access` for the mobile runtime loop; use `--codex-sandbox workspace-write` explicitly for static-only runs.
-3. Refine PR body generation from `commit-message.txt`, `change-summary.md`, `pr-notes.md`, `mobile-validation.md`, stable `.scratch/issues/<issue>/evidence/` artifacts, and `evidence-attachments.json`.
+1. Keep `.github/workflows/pr-checks.yml` and branch protection names aligned when workflow jobs change.
+2. Refine PR body generation from `commit-message.txt`, `change-summary.md`, `pr-notes.md`, `mobile-validation.md`, stable `.scratch/issues/<issue>/evidence/` artifacts, and `evidence-attachments.json`.
+3. Decide an evidence retention policy for dedicated evidence branches such as `codex-evidence-issue-198`.
 4. Add ADRs for newly confirmed durable decisions.
 5. Add targeted feature tests or smoke coverage when changing low-score domains in `docs/agents/quality-score.md`.
 6. Add a semantic harness audit only if command/doc drift recurs.

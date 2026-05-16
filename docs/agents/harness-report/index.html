@@ -261,13 +261,10 @@
         <article class="card priority-warn">
           <h2>Next Decision</h2>
           <p class="note">
-            Exercise
-            <code>agents:issue:run &lt;issue&gt;</code> on a real ready-for-agent issue when the
-            branch output is acceptable. The wrapper creates, pushes, attaches evidence, and opens a
-            draft PR by default; use <code>--dry-run</code> for no writes or <code>--no-pr</code> to
-            stop after commit. Then exercise the GitHub PR gate on a real PR when remote validation
-            is worth spending. Mobile validation, recurring maintenance, UI evidence automation, and
-            merge autonomy remain Level 2 work and do not block Level 1.
+            The real-PR exercise has been completed through recent issue branches and merged PRs.
+            Next decisions are narrower: keep workflow check names aligned when GitHub Actions
+            changes, choose an evidence retention policy for dedicated evidence branches, and decide
+            whether recurring maintenance is worth enabling. Merge autonomy remains deferred.
           </p>
         </article>
       </section>
@@ -282,8 +279,8 @@
           <div class="kpi-label">Blocking Level 1 gaps</div>
         </article>
         <article class="card">
-          <div class="kpi-value">2/9</div>
-          <div class="kpi-label">Level 2 verified; 6 documented or found / 1 deferred</div>
+          <div class="kpi-value">6/9</div>
+          <div class="kpi-label">Level 2 verified; 2 documented or found / 1 deferred</div>
         </article>
         <article class="card">
           <div class="kpi-value">5/10</div>
@@ -339,12 +336,11 @@
             <p><span class="status status-found">Found in repo</span></p>
             <p class="note">
               Evidence: PR template, GitHub workflow, orchestration docs, mobile-sequential
-              validation policy, agent scripts including <code>agents:issue:start</code> with
-              current-worktree branch support, optional <code>codex exec</code> output, stable issue
-              evidence paths, <code>agents:issue:pr</code> PR body packaging, and
-              <code>agents:issue:run</code> as a one-issue orchestration wrapper.<br />Gap: PR gate
-              not exercised on a real PR; start-to-commit-to-PR handoff needs refinement on a real
-              issue branch; autonomy deferred.<br /><a href="./level-2.html">Details</a>
+              validation policy, merged PRs #219 and #220, agent scripts including
+              <code>agents:issue:start</code>, stable issue evidence paths,
+              <code>agents:issue:pr --attach-evidence</code>, and <code>agents:issue:run</code> as a
+              one-issue orchestration wrapper.<br />Gap: evidence retention policy, recurring
+              maintenance, and autonomy remain deferred.<br /><a href="./level-2.html">Details</a>
             </p>
           </article>
         </div>

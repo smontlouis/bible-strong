@@ -174,15 +174,16 @@
         <article class="card">
           <h2>Evidence</h2>
           <p class="note">
-            2 verified, 4 found in repo, 2 documented for agents, 1 blocked or deferred. Mobile
-            runtime validation is documented as a sequential host-only loop.
+            6 verified, 1 found in repo, 1 documented for agents, 1 blocked or deferred. Mobile
+            runtime validation is documented as a sequential host-only loop, and issue-to-PR
+            evidence flow has been exercised on real PRs.
           </p>
         </article>
         <article class="card">
           <h2>Gaps</h2>
           <p class="note">
-            PR gate needs a real PR; mobile validation command wrappers, UI evidence automation,
-            recurring maintenance, and merge autonomy are deferred.
+            Recurring maintenance, evidence retention policy, broader UI evidence automation, and
+            merge autonomy are deferred.
           </p>
         </article>
         <article class="card">
@@ -212,25 +213,28 @@
             <tr>
               <td>2A</td>
               <td>PR and branch orchestration</td>
-              <td><span class="status status-documented">Documented for agents</span></td>
+              <td><span class="status status-verified">Verified locally</span></td>
               <td>
                 Documented issue-to-branch-to-PR flow, ownership rules, and mobile-sequential loop.
               </td>
               <td>
-                <code>docs/agents/orchestration.md</code>, PR template, issue tracker docs; mobile
-                issue work uses one branch in the current worktree with local mobile verification
-                before PR readiness.
+                <code>docs/agents/orchestration.md</code>, PR template, issue tracker docs, merged
+                PRs #219 and #220; mobile issue work uses one branch in the current worktree with
+                local mobile verification before PR readiness.
               </td>
-              <td>Exercise on real PRs and refine ownership/conflict rules.</td>
+              <td>Continue refining ownership/conflict rules as real PRs reveal gaps.</td>
               <td>No</td>
             </tr>
             <tr>
               <td>2B</td>
               <td>PR gates and remote validation</td>
-              <td><span class="status status-found">Found in repo</span></td>
+              <td><span class="status status-verified">Verified locally</span></td>
               <td>Hosted workflow names and required check context confirmed.</td>
-              <td><code>.github/workflows/pr-checks.yml</code> runs JS and agent checks.</td>
-              <td>Confirm required check context on a real PR.</td>
+              <td>
+                <code>.github/workflows/pr-checks.yml</code> runs JS and agent checks; real PRs #219
+                and #220 have been merged through the hosted gate.
+              </td>
+              <td>Reconfirm check names only when workflow or branch protection changes.</td>
               <td>No</td>
             </tr>
             <tr>
@@ -287,12 +291,11 @@
                 Deterministic screenshot/video path tied to smoke flows and visible PR evidence.
               </td>
               <td>
-                Manual smoke screenshots referenced in smoke docs;
-                <code>agents:issue:start</code> asks for after evidence for visual changes;
-                <code>agents:issue:pr --attach-evidence</code> pushes evidence to a dedicated GitHub
-                evidence branch and comments on the PR.
+                Manual smoke screenshots referenced in smoke docs; issue evidence artifacts exist
+                for 195, 198, and 208; <code>agents:issue:pr --attach-evidence</code> published
+                dedicated evidence branches such as <code>codex-evidence-issue-198</code>.
               </td>
-              <td>Exercise attachment flow on real PRs and refine retention policy.</td>
+              <td>Refine retention policy and evidence expectations as more UI PRs use the flow.</td>
               <td>No</td>
             </tr>
             <tr>
@@ -313,19 +316,16 @@
             <tr>
               <td>2I</td>
               <td>Harness command wrappers and audit</td>
-              <td><span class="status status-found">Found in repo</span></td>
+              <td><span class="status status-verified">Verified locally</span></td>
               <td>Repo-native commands plus drift audit when drift recurs.</td>
               <td>
                 Existing <code>agents:*</code> package scripts, including
-                <code>agents:issue:start</code> with dry-run, current-worktree branch support, and
-                optional <code>codex exec</code> output, stable issue evidence paths, and
-                <code>agents:issue:pr</code> PR body packaging plus <code>--attach-evidence</code>,
-                and <code>agents:issue:run</code> as a one-issue orchestration wrapper.
+                <code>agents:issue:start</code>, <code>agents:issue:pr --attach-evidence</code>, and
+                <code>agents:issue:run</code>; real issue artifacts under
+                <code>.scratch/issues/195</code>, <code>.scratch/issues/198</code>, and
+                <code>.scratch/issues/208</code> show the handoff contract in use.
               </td>
-              <td>
-                Exercise <code>agents:issue:run</code> on a real issue branch and refine the
-                start-to-commit-to-PR handoff from evidence.
-              </td>
+              <td>Add a drift audit only if command/doc mismatch recurs.</td>
               <td>No</td>
             </tr>
           </tbody>
