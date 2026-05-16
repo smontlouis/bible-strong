@@ -82,6 +82,7 @@ interface Props {
   isParameters?: boolean
   shareFn?: (fn: () => void) => void
   onDownloadComplete?: (id: VersionCode) => void
+  showSelectionCheckbox?: boolean
 }
 
 const VersionSelectorItem = ({
@@ -91,6 +92,7 @@ const VersionSelectorItem = ({
   isParameters,
   shareFn,
   onDownloadComplete,
+  showSelectionCheckbox,
 }: Props) => {
   const { t } = useTranslation()
   const lang = useLanguage()
@@ -237,6 +239,29 @@ const VersionSelectorItem = ({
     ])
   }
 
+  const renderSelectionCheckbox = (disabled?: boolean) => {
+    if (!showSelectionCheckbox) {
+      return null
+    }
+
+    return (
+      <Box
+        width={32}
+        height={32}
+        alignItems="center"
+        justifyContent="center"
+        ml={12}
+        opacity={disabled ? 0.45 : 1}
+      >
+        <FeatherIcon
+          name={isSelected ? 'check-square' : 'square'}
+          size={22}
+          color={isSelected ? 'primary' : 'tertiary'}
+        />
+      </Box>
+    )
+  }
+
   if (
     typeof versionNeedsDownload === 'undefined' ||
     (isParameters && version.id === 'LSGS') ||
@@ -248,7 +273,7 @@ const VersionSelectorItem = ({
   if (versionNeedsDownload) {
     return (
       <Container>
-        <Box flex row>
+        <Box flex row alignItems="center">
           <Box disabled flex>
             <TextVersion>{version.id}</TextVersion>
             <HStack alignItems="center">
@@ -274,6 +299,7 @@ const VersionSelectorItem = ({
               )}
             </TouchableOpacity>
           )}
+          {renderSelectionCheckbox(true)}
           {isQueued && (
             <Box width={80} justifyContent="center" alignItems="flex-end" mr={10}>
               <FeatherIcon name="clock" size={18} color="tertiary" />
@@ -324,17 +350,20 @@ const VersionSelectorItem = ({
 
   return (
     <TouchableContainer needsUpdate={needsUpdate} onPress={() => onChange && onChange(version.id)}>
-      <Box flex>
-        <TextVersion isSelected={isSelected}>{version.id}</TextVersion>
-        <HStack alignItems="center">
-          <TextName isSelected={isSelected}>{version.name}</TextName>
-          {version?.hasAudio && (
-            <Box>
-              <FeatherIcon name="volume-2" size={16} color="primary" />
-            </Box>
-          )}
-        </HStack>
-        <TextCopyright>{version.c}</TextCopyright>
+      <Box flex row alignItems="center">
+        <Box flex>
+          <TextVersion isSelected={isSelected}>{version.id}</TextVersion>
+          <HStack alignItems="center">
+            <TextName isSelected={isSelected}>{version.name}</TextName>
+            {version?.hasAudio && (
+              <Box>
+                <FeatherIcon name="volume-2" size={16} color="primary" />
+              </Box>
+            )}
+          </HStack>
+          <TextCopyright>{version.c}</TextCopyright>
+        </Box>
+        {renderSelectionCheckbox()}
       </Box>
     </TouchableContainer>
   )

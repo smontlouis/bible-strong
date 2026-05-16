@@ -11,7 +11,6 @@ import ScrollView from '~common/ui/ScrollView'
 import BibleCompareVerseItem from '~features/bible/BibleCompareVerseItem'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
 
-import { useRouter } from 'expo-router'
 import { produce } from 'immer'
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -26,6 +25,8 @@ import generateUUID from '~helpers/generateUUID'
 import { versions } from '~helpers/bibleVersions'
 import { selectCompareVersions } from '~redux/selectors/user'
 import { CompareTab, SelectedVerses, VersionCode } from '../../state/tabs'
+import CompareVersionSelectorBottomSheet from './CompareVersionSelectorBottomSheet'
+import type BottomSheet from '@gorhom/bottom-sheet'
 
 interface CompareVersesTabScreenProps {
   compareAtom: PrimitiveAtom<CompareTab>
@@ -37,7 +38,7 @@ type PrevNextItems = {
 }
 
 const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) => {
-  const router = useRouter()
+  const compareVersionSelectorRef = React.useRef<BottomSheet>(null)
   const [compareTab, setCompareTab] = useAtom(compareAtom)
   const { t } = useTranslation()
   const setSelectedVerses = (v: SelectedVerses) =>
@@ -101,7 +102,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
           <PopOverMenu
             popover={
               <>
-                <MenuOption onSelect={() => router.push('/toggle-compare-verses')}>
+                <MenuOption onSelect={() => compareVersionSelectorRef.current?.expand()}>
                   <Box row alignItems="center">
                     <FeatherIcon name="check-square" size={15} />
                     <Text marginLeft={10}>{t('common.chooseCompareVersions')}</Text>
@@ -161,6 +162,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
           />
         </Box>
       )}
+      <CompareVersionSelectorBottomSheet bottomSheetRef={compareVersionSelectorRef} />
     </Container>
   )
 }

@@ -132,7 +132,7 @@ const listEvidenceAttachmentPaths = () => {
 }
 
 const getPrNumber = () => {
-  const prJson = run('gh', ['pr', 'view', '--head', currentBranch, '--json', 'number,url'])
+  const prJson = run('gh', ['pr', 'view', currentBranch, '--json', 'number,url'])
   return JSON.parse(prJson)
 }
 
