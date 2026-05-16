@@ -159,9 +159,9 @@ This is a repo-specific architecture scan for agent work. It is intentionally co
 - WARNING `raw-console` src/features/home/PlanHome.tsx:44 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/features/home/StrongOfTheDay.tsx:46 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/features/home/VerseImageModal.tsx:60 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/home/useVerseOfTheDay.ts:152 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/home/useVerseOfTheDay.ts:160 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/home/useVerseOfTheDay.ts:175 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` src/features/home/useVerseOfTheDay.ts:166 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` src/features/home/useVerseOfTheDay.ts:174 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` src/features/home/useVerseOfTheDay.ts:189 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/features/lexique/StrongDetailScreen.tsx:183 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/features/nave/NaveDetailTabScreen.tsx:115 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/features/nave/NaveDetailTabScreen.tsx:155 - Prefer appLogger for app-owned diagnostic events that agents should query.
@@ -185,7 +185,7 @@ This is a repo-specific architecture scan for agent work. It is intentionally co
 - WARNING `raw-console` src/features/plans/plan.hooks.ts:453 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `feature-firebase-boundary` src/features/profile/components/DeleteAccountModal.tsx:8 - Feature code should prefer a local helper/hook boundary over direct Firebase access.
 - WARNING `raw-console` src/features/profile/components/DeleteAccountModal.tsx:56 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/search/SQLiteSearchScreen.tsx:183 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` src/features/search/SQLiteSearchScreen.tsx:184 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/features/settings/AutomaticBackupsScreen.tsx:54 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/features/settings/AutomaticBackupsScreen.tsx:89 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/features/settings/AutomaticBackupsScreen.tsx:131 - Prefer appLogger for app-owned diagnostic events that agents should query.
