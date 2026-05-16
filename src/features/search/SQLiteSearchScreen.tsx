@@ -31,6 +31,7 @@ import LexiqueResultsWidget from '~features/lexique/LexiqueResultsWidget'
 import NaveResultsWidget from '~features/nave/NaveResultsWidget'
 import BibleReferenceWidget, { parseBibleReference } from '~features/search/BibleReferenceWidget'
 import SearchEmptyState from '~features/search/SearchEmptyState'
+import { getBibleViewParamsForSearchResult } from '~features/search/searchNavigation'
 import { searchFiltersAtom, SearchSection } from '~state/searchFilters'
 
 type Props = {
@@ -297,13 +298,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
                 onPress={() =>
                   router.push({
                     pathname: '/bible-view',
-                    params: {
-                      isReadOnly: 'true',
-                      book: JSON.stringify(booksDesc[result.book - 1]),
-                      chapter: String(result.chapter),
-                      verse: String(result.verse),
-                      focusVerses: JSON.stringify([result.verse]),
-                    },
+                    params: getBibleViewParamsForSearchResult(result),
                   })
                 }
               />
