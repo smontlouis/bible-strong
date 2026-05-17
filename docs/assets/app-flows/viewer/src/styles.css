@@ -1,0 +1,385 @@
+:root {
+  color-scheme: light;
+  --bg: #f6f4ef;
+  --panel: #ffffff;
+  --ink: #24211d;
+  --muted: #726b62;
+  --line: #d9d2c8;
+  --accent: #1f7a70;
+  --accent-soft: #dff0ed;
+  --warn: #ad6b1f;
+  --danger: #b13d34;
+  --external: #5c5ca8;
+  --webview: #537da6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  width: 100%;
+  height: 100%;
+  min-width: 920px;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+  height: 100%;
+  overflow: auto;
+  border-right: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.76);
+  padding: 22px 18px;
+}
+
+.sidebar h1 {
+  margin: 0 0 7px;
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.lede,
+.sidebar p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.sidebar section {
+  display: grid;
+  gap: 10px;
+}
+
+.sidebar h2,
+.search span {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.search {
+  display: grid;
+  gap: 8px;
+}
+
+.search input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--ink);
+  padding: 11px 12px;
+  outline: none;
+}
+
+.search input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.button-list,
+.risk-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.button-list button,
+.risk-grid button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  padding: 10px 11px;
+  text-align: left;
+}
+
+.button-list button:hover,
+.button-list button.is-active,
+.risk-grid button:hover,
+.risk-grid button.is-active {
+  border-color: var(--line);
+  background: var(--panel);
+}
+
+.button-list small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.dot--mutating {
+  background: var(--warn);
+}
+
+.dot--destructive {
+  background: var(--danger);
+}
+
+.dot--external {
+  background: var(--external);
+}
+
+.selected-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 12px;
+}
+
+.selected-card--empty {
+  padding: 16px;
+}
+
+.selected-card img {
+  display: block;
+  width: 100%;
+  max-height: 420px;
+  object-fit: contain;
+  object-position: top;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f2ede6;
+}
+
+.selected-card h2 {
+  margin: 13px 0 6px;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.selected-card dl {
+  display: grid;
+  gap: 8px;
+  margin: 13px 0 0;
+}
+
+.selected-card dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+
+.selected-card dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.selected-card dd {
+  margin: 0;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.flow-shell {
+  position: relative;
+  min-width: 0;
+  height: 100%;
+}
+
+.react-flow {
+  background:
+    linear-gradient(rgba(36, 33, 29, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(36, 33, 29, 0.035) 1px, transparent 1px),
+    var(--bg);
+  background-size: 48px 48px;
+}
+
+.flow-node {
+  position: relative;
+  width: 210px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 10px 30px rgba(30, 25, 18, 0.1);
+}
+
+.flow-handle {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--accent);
+  background: var(--panel);
+  opacity: 0;
+}
+
+.flow-node.is-selected {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 4px var(--accent-soft),
+    0 18px 46px rgba(30, 25, 18, 0.16);
+}
+
+.flow-node__thumb {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1179 / 2556;
+  border-bottom: 1px solid var(--line);
+  background: #f1ece5;
+}
+
+.flow-node__thumb img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: none;
+  object-fit: contain;
+  object-position: top;
+}
+
+.flow-node__body {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.flow-node__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.flow-node h3 {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.24;
+}
+
+.flow-node p {
+  margin: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.risk {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  padding: 4px 7px;
+  font-weight: 800;
+}
+
+.risk--mutating {
+  background: #f8ebd9;
+  color: var(--warn);
+}
+
+.risk--destructive {
+  background: #f8dfdc;
+  color: var(--danger);
+}
+
+.risk--external {
+  background: #e7e6f7;
+  color: var(--external);
+}
+
+.react-flow__edge-path {
+  stroke-linecap: round;
+}
+
+.react-flow__edge-textbg {
+  fill: rgba(255, 255, 255, 0.84);
+}
+
+.flow-panel {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px;
+  box-shadow: 0 12px 32px rgba(30, 25, 18, 0.1);
+}
+
+.flow-panel button {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--panel);
+  color: var(--ink);
+  padding: 7px 9px;
+  font-weight: 760;
+}
+
+.flow-panel span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.minimap {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.react-flow__controls {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(30, 25, 18, 0.1);
+}
+
+.react-flow__controls-button {
+  border-bottom-color: var(--line);
+  background: var(--panel);
+}

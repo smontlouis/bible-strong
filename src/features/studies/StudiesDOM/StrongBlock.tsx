@@ -1,5 +1,5 @@
 import React from 'react'
-import ReactDOMServer from 'react-dom/server'
+import { renderToString } from 'react-dom/server.browser'
 import Strong from './Strong'
 import { dispatch } from './dispatch'
 import Quill from './quill'
@@ -20,7 +20,7 @@ class StrongBlock extends Embed {
     const node = super.create(data)
     const { title, codeStrong, strongType, phonetique, definition, translatedBy, book, original } =
       data
-    node.innerHTML = ReactDOMServer.renderToString(
+    node.innerHTML = renderToString(
       <Strong
         {...{
           title,

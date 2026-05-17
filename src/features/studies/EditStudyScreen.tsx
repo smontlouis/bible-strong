@@ -120,7 +120,9 @@ const EditStudyScreen = ({
           <Text fontSize={18} color="grey" textAlign="center" mb={20}>
             {t("Cette étude n'existe plus")}
           </Text>
-          <Button onPress={onGoBack ?? (() => router.back())}>{t('Retour aux études')}</Button>
+          <Button onPress={onGoBack ?? (() => router.navigate('/'))}>
+            {t('Retour aux études')}
+          </Button>
         </Box>
       </Container>
     )

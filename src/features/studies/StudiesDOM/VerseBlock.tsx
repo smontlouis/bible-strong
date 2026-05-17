@@ -1,5 +1,5 @@
 import React from 'react'
-import ReactDOMServer from 'react-dom/server'
+import { renderToString } from 'react-dom/server.browser'
 import Verse from './Verse'
 import { dispatch } from './dispatch'
 import Quill from './quill'
@@ -19,9 +19,7 @@ class VerseBlock extends Embed {
   static create(data: VerseBlockPayload) {
     const node = super.create(data)
     const { title, content, version, verses } = data
-    node.innerHTML = ReactDOMServer.renderToString(
-      <Verse {...{ title, content, version, verses }} />
-    )
+    node.innerHTML = renderToString(<Verse {...{ title, content, version, verses }} />)
     node.setAttribute('data', JSON.stringify(data))
     node.setAttribute('spellcheck', 'false')
     node.setAttribute('autocomplete', 'off')

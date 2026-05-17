@@ -16,7 +16,6 @@ class InlineTooltip extends Tooltip {
   title: HTMLElement
   linkRange: [number, number] = [0, 0]
   type: string | undefined
-  declare quill: QuillInstance
 
   constructor(quill: QuillInstance, boundsContainer: HTMLElement) {
     super(quill, boundsContainer)

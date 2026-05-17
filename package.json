@@ -35,6 +35,9 @@
     "agents:issue:start": "node scripts/agents-issue-start.mjs",
     "agents:issue:pr": "node scripts/agents-issue-pr.mjs",
     "agents:issue:run": "node scripts/agents-issue-run.mjs",
+    "docs:flows:data": "node docs/assets/app-flows/scripts/generate-app-flow-data.mjs",
+    "docs:flows:build": "yarn docs:flows:data && vite build --config docs/assets/app-flows/viewer/vite.config.mjs",
+    "docs:flows:dev": "yarn docs:flows:data && vite --config docs/assets/app-flows/viewer/vite.config.mjs",
     "serve-sim": "serve-sim",
     "android": "expo run:android",
     "ios": "expo run:ios"
@@ -172,11 +175,14 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@babel/runtime": "^7.28.4",
+    "@dagrejs/dagre": "^3.0.0",
     "@types/babel__preset-env": "^7",
     "@types/debounce": "^1.2.4",
     "@types/jest": "^29.5.12",
     "@types/react": "~19.1.10",
     "@types/react-test-renderer": "^18.3.0",
+    "@vitejs/plugin-react": "^6.0.2",
+    "@xyflow/react": "^12.10.2",
     "babel-plugin-module-resolver": "^3.2.0",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "babel-preset-expo": "^54.0.9",
@@ -193,7 +199,8 @@
     "prettier": "^3.8.1",
     "react-test-renderer": "18.3.1",
     "serve-sim": "^0.1.28",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "vite": "^8.0.13"
   },
   "private": true,
   "packageManager": "yarn@4.12.0",

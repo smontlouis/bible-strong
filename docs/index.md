@@ -8,6 +8,11 @@ This directory is the repo-level reference set for agents and humans working on 
 |---|---|
 | `../CONTEXT.md` | Product/domain context, glossary, and invariants. |
 | `architecture.md` | System architecture and cross-cutting flows. |
+| `app-flows.md` | Detailed product flows, screens, states, and route inventory. |
+| `assets/app-flows/dist/index.html` | Built React Flow app journey map with pan, zoom, drag, filters, thumbnails, and detail panel. |
+| `assets/app-flows/data/app-flows.json` | Structured app-flow graph generated from the screenshot manifest. |
+| `assets/app-flows/data/screenshots.json` | Versioned screenshot manifest for visual and agent-consumable flow mapping. |
+| `assets/app-flows/capture-notes.md` | Argent capture notes, limitations, state mutations, and remaining capture targets. |
 | `source-tree.md` | Annotated map of important folders and files. |
 | `dev-guide.md` | Setup, scripts, simulator workflow, and validation. |
 | `data-models.md` | Persisted state, local databases, Firestore sync, and identifiers. |
