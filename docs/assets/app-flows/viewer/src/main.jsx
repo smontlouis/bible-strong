@@ -36,14 +36,27 @@ const riskLabels = {
 
 const allJourney = {
   id: 'all',
-  title: 'Tous les parcours',
-  description: 'Toutes les captures versionnées, regroupées par journey.',
+  title: 'Toutes les captures',
+  description: 'Inventaire complet des captures versionnees.',
 }
 
-const curatedJourney = {
+const curatedScope = {
   id: 'curated',
-  title: 'Transitions explicites',
-  description: 'Parcours manuellement reliés lorsque la transition est connue.',
+  title: 'Tous les flows curates',
+  description: 'Toutes les captures rattachees a au moins un parcours manuel.',
+}
+
+const defaultFlowId = flowData.flows.find((flow) => flow.id === 'bible-read-navigate')?.id
+  ?? flowData.flows[0]?.id
+  ?? null
+
+function scopeId(kind, id) {
+  return `${kind}:${id}`
+}
+
+function parseScope(scope) {
+  const [kind, ...parts] = scope.split(':')
+  return { kind, id: parts.join(':') }
 }
 
 function resolveImage(node) {
@@ -201,8 +214,8 @@ function buildEdges() {
 }
 
 function Sidebar({
-  activeJourney,
-  setActiveJourney,
+  activeScope,
+  setActiveScope,
   selectedNode,
   setSelectedNodeId,
   search,
@@ -215,14 +228,27 @@ function Sidebar({
     journeyCounts.set(node.journey, (journeyCounts.get(node.journey) ?? 0) + 1)
   }
 
+  const surfaceCounts = new Map()
+  for (const node of flowData.nodes) {
+    for (const surface of node.surfaces ?? []) {
+      surfaceCounts.set(surface, (surfaceCounts.get(surface) ?? 0) + 1)
+    }
+  }
+
+  function selectScope(nextScope) {
+    setActiveScope(nextScope)
+    setSelectedNodeId(null)
+  }
+
   const risks = Object.keys(flowData.riskLegend)
-  const journeys = [allJourney, curatedJourney, ...flowData.journeys]
+  const journeys = [allJourney, ...flowData.journeys]
+  const active = parseScope(activeScope)
 
   return (
     <aside className="sidebar">
       <div>
         <h1>App Flow Map</h1>
-        <p className="lede">React Flow viewer pour les 275 captures Argent et les parcours utilisateur Bible Strong.</p>
+        <p className="lede">React Flow viewer pour {flowData.nodes.length} captures Argent et {flowData.flows.length} flows curates Bible Strong.</p>
       </div>
 
       <label className="search">
@@ -235,23 +261,62 @@ function Sidebar({
       </label>
 
       <section>
-        <h2>Journeys</h2>
+        <h2>Flows curates</h2>
+        <div className="button-list">
+          <button
+            className={active.kind === 'curated' ? 'is-active' : ''}
+            onClick={() => selectScope(scopeId('curated', curatedScope.id))}
+            type="button"
+          >
+            <span>{curatedScope.title}</span>
+            <small>{flowData.edges.filter((edge) => edge.inferred === false).length}</small>
+          </button>
+
+          {flowData.surfaces.map((surface) => {
+            const surfaceFlows = flowData.flows.filter((flow) => flow.surface === surface.id)
+            return (
+              <div className="surface-group" key={surface.id}>
+                <button
+                  className={active.kind === 'surface' && active.id === surface.id ? 'is-active' : ''}
+                  onClick={() => selectScope(scopeId('surface', surface.id))}
+                  type="button"
+                >
+                  <span>{surface.title}</span>
+                  <small>{surfaceCounts.get(surface.id) ?? 0}</small>
+                </button>
+
+                {surfaceFlows.map((flow) => (
+                  <button
+                    className={`flow-button ${active.kind === 'flow' && active.id === flow.id ? 'is-active' : ''}`}
+                    key={flow.id}
+                    onClick={() => selectScope(scopeId('flow', flow.id))}
+                    type="button"
+                  >
+                    <span>{flow.title}</span>
+                    <small>{flow.nodes.length}</small>
+                  </button>
+                ))}
+              </div>
+            )
+          })}
+        </div>
+      </section>
+
+      <section>
+        <h2>Inventaire auto</h2>
         <div className="button-list">
           {journeys.map((journey) => {
-            const count =
-              journey.id === 'all'
-                ? flowData.nodes.length
-                : journey.id === 'curated'
-                  ? flowData.edges.filter((edge) => edge.inferred === false).length
-                  : journeyCounts.get(journey.id) ?? 0
+            const count = journey.id === 'all' ? flowData.nodes.length : journeyCounts.get(journey.id) ?? 0
+            const nextScope = journey.id === 'all' ? scopeId('all', journey.id) : scopeId('journey', journey.id)
+            const isActive = journey.id === 'all'
+              ? active.kind === 'all'
+              : active.kind === 'journey' && active.id === journey.id
+
             return (
               <button
-                className={activeJourney === journey.id ? 'is-active' : ''}
+                className={isActive ? 'is-active' : ''}
                 key={journey.id}
-                onClick={() => {
-                  setActiveJourney(journey.id)
-                  setSelectedNodeId(null)
-                }}
+                onClick={() => selectScope(nextScope)}
                 type="button"
               >
                 <span>{journey.title}</span>
@@ -297,8 +362,12 @@ function Sidebar({
               <dd>{selectedNode.screenshotId}</dd>
             </div>
             <div>
-              <dt>Journey</dt>
-              <dd>{flowData.journeys.find((journey) => journey.id === selectedNode.journey)?.title}</dd>
+              <dt>Surface</dt>
+              <dd>{(selectedNode.surfaces ?? []).map((surfaceId) => flowData.surfaces.find((surface) => surface.id === surfaceId)?.title ?? surfaceId).join(', ') || selectedNode.surface}</dd>
+            </div>
+            <div>
+              <dt>Flows</dt>
+              <dd>{selectedNode.flows?.length ?? 0}</dd>
             </div>
             <div>
               <dt>Type</dt>
@@ -320,12 +389,13 @@ function Sidebar({
   )
 }
 
-function FlowCanvas({ activeJourney, search, activeRisk, selectedNodeId, setSelectedNodeId }) {
+function FlowCanvas({ activeScope, search, activeRisk, selectedNodeId, setSelectedNodeId }) {
   const [nodes, setNodes, onNodesChange] = useNodesState(buildNodes())
   const [edges, , onEdgesChange] = useEdgesState(buildEdges())
   const { fitView } = useReactFlow()
 
   const normalizedSearch = search.trim().toLowerCase()
+  const active = parseScope(activeScope)
   const explicitNodeIds = new Set(
     flowData.edges
       .filter((edge) => edge.inferred === false)
@@ -335,28 +405,32 @@ function FlowCanvas({ activeJourney, search, activeRisk, selectedNodeId, setSele
   const visibleNodeIds = new Set(
     flowData.nodes
       .filter((node) => {
-        const matchesJourney =
-          activeJourney === 'all'
-          || node.journey === activeJourney
-          || (activeJourney === 'curated' && explicitNodeIds.has(node.id))
+        const matchesScope =
+          active.kind === 'all'
+          || (active.kind === 'curated' && explicitNodeIds.has(node.id))
+          || (active.kind === 'flow' && node.flows?.includes(active.id))
+          || (active.kind === 'surface' && node.surfaces?.includes(active.id))
+          || (active.kind === 'journey' && node.journey === active.id)
         const matchesSearch =
           !normalizedSearch
           || node.title.toLowerCase().includes(normalizedSearch)
           || node.slug.toLowerCase().includes(normalizedSearch)
           || node.screenshotId.includes(normalizedSearch)
         const matchesRisk = activeRisk === 'all' || node.risk === activeRisk
-        return matchesJourney && matchesSearch && matchesRisk
+        return matchesScope && matchesSearch && matchesRisk
       })
       .map((node) => node.id),
   )
 
   const visibleEdges = edges.filter((edge) => {
     const visible = visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target)
-    const matchesJourney =
-      activeJourney === 'all'
-      || edge.data.journey === activeJourney
-      || (activeJourney === 'curated' && edge.data.inferred === false)
-    return visible && matchesJourney
+    const matchesScope =
+      active.kind === 'all'
+      || (active.kind === 'curated' && edge.data.inferred === false)
+      || (active.kind === 'flow' && edge.data.flowId === active.id)
+      || (active.kind === 'surface' && edge.data.surface === active.id)
+      || (active.kind === 'journey' && edge.data.journey === active.id && edge.data.inferred === true)
+    return visible && matchesScope
   })
 
   React.useEffect(() => {
@@ -367,7 +441,7 @@ function FlowCanvas({ activeJourney, search, activeRisk, selectedNodeId, setSele
       hidden: !visibleNodeIds.has(node.id),
       position: layoutPositions.get(node.id) ?? node.position,
     })))
-  }, [activeJourney, activeRisk, search])
+  }, [activeScope, activeRisk, search])
 
   const renderedNodes = nodes.map((node) => ({
     ...node,
@@ -392,7 +466,7 @@ function FlowCanvas({ activeJourney, search, activeRisk, selectedNodeId, setSele
 
   React.useEffect(() => {
     window.requestAnimationFrame(() => window.requestAnimationFrame(fitFilteredNodes))
-  }, [activeJourney, activeRisk, search])
+  }, [activeScope, activeRisk, search])
 
   return (
     <ReactFlow
@@ -434,7 +508,7 @@ function FlowCanvas({ activeJourney, search, activeRisk, selectedNodeId, setSele
 }
 
 function App() {
-  const [activeJourney, setActiveJourney] = React.useState('curated')
+  const [activeScope, setActiveScope] = React.useState(defaultFlowId ? scopeId('flow', defaultFlowId) : scopeId('curated', curatedScope.id))
   const [activeRisk, setActiveRisk] = React.useState('all')
   const [selectedNodeId, setSelectedNodeId] = React.useState(null)
   const [search, setSearch] = React.useState('')
@@ -444,8 +518,8 @@ function App() {
     <ReactFlowProvider>
       <div className="app-shell">
         <Sidebar
-          activeJourney={activeJourney}
-          setActiveJourney={setActiveJourney}
+          activeScope={activeScope}
+          setActiveScope={setActiveScope}
           selectedNode={selectedNode}
           setSelectedNodeId={setSelectedNodeId}
           search={search}
@@ -455,7 +529,7 @@ function App() {
         />
         <main className="flow-shell">
           <FlowCanvas
-            activeJourney={activeJourney}
+            activeScope={activeScope}
             activeRisk={activeRisk}
             selectedNodeId={selectedNodeId}
             setSelectedNodeId={setSelectedNodeId}

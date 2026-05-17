@@ -6,11 +6,18 @@ Ce document décrit les principaux parcours utilisateur de Bible Strong: surface
 
 Les captures exploitables pour la cartographie visuelle sont versionnées sous `docs/assets/app-flows/screenshots/` au format WebP optimisé. Le manifest `docs/assets/app-flows/data/screenshots.json` liste chaque capture avec son identifiant, son titre et son chemin d'image.
 
-La source structurée du graphe est `docs/assets/app-flows/data/app-flows.json`. Elle contient les journeys, noeuds, edges, risques, types d'écrans, positions initiales et chemins d'images. Elle est générée depuis `screenshots.json` par `docs/assets/app-flows/scripts/generate-app-flow-data.mjs`.
+La source maintenue à la main est `docs/assets/app-flows/data/curated-flows.json`. Elle définit les surfaces produit, les vrais flows utilisateur et les transitions explicites entre captures.
 
-Le manifest `screenshots.json` exclut les captures obsolètes où une WebView/DOM affichait seulement un écran blanc, offline ou erreur transitoire alors qu'une capture fonctionnelle existe maintenant. Ces suppressions sont listées dans sa section `pruned`.
+La source générée du graphe est `docs/assets/app-flows/data/app-flows.json`. Elle combine:
 
-Le viewer principal React Flow est dans `docs/assets/app-flows/viewer/` et se build vers `docs/assets/app-flows/dist/`. Il fournit zoom, pan, drag de noeuds, MiniMap, filtres par journey, recherche, filtre par risque, thumbnails et panneau détail.
+- l'inventaire automatique des captures depuis `screenshots.json`;
+- les flows curatés depuis `curated-flows.json`;
+- les edges d'ordre de capture, marqués `relation: "capture-order"`;
+- les transitions utilisateur, marquées `relation: "user-action"`.
+
+Les captures obsolètes où une WebView/DOM affichait seulement un écran blanc, offline ou erreur transitoire sont documentées dans `capture-notes.md` quand une capture fonctionnelle les remplace.
+
+Le viewer principal React Flow est dans `docs/assets/app-flows/viewer/` et se build vers `docs/assets/app-flows/dist/`. Il fournit zoom, pan, drag de noeuds, MiniMap, filtres par flow curaté, surface, inventaire automatique, recherche, risque, thumbnails et panneau détail.
 
 Commandes:
 
@@ -23,6 +30,35 @@ yarn docs:flows:dev
 Les notes complètes de capture Argent sont conservées dans `docs/assets/app-flows/capture-notes.md`: elles documentent le contexte du simulateur, les limites observées, les mutations de données effectuées pendant l'exploration et les cibles restantes.
 
 `.scratch/argent-feature-map/` reste une zone de travail locale pour les captures Argent brutes et n'est pas une source durable, car elle est ignorée par Git.
+
+## Modèle De Cartographie
+
+La cartographie sépare volontairement quatre notions qui étaient faciles à mélanger:
+
+| Notion | Définition | Exemple |
+|---|---|---|
+| Capture | État visuel observé dans l'app. | `screen-003`, lecteur biblique avec sélection. |
+| Surface | Zone produit stable. | Bible, Workspace, Ressources locales, Données personnelles. |
+| Flow | Objectif utilisateur avec début, actions et résultat. | Lire un chapitre, comparer des versions, annoter une sélection. |
+| Transition | Action explicite entre deux captures. | `Annoter`, `changer version`, `partage natif`. |
+
+Les anciens regroupements automatiques restent utiles pour retrouver rapidement une capture, mais ils ne doivent pas être traités comme des workflows produit. Un flow fiable doit être ajouté dans `curated-flows.json`.
+
+Surfaces curatées:
+
+| Surface | Rôle |
+|---|---|
+| Workspace | Onglets, groupes, drawers et nouvel onglet. |
+| Bible | Lecture, navigation, sélection, comparaison, annotations et ressources contextuelles. |
+| Données personnelles | Notes, highlights, liens, favoris, tags et annotations de mots. |
+| Ressources locales | Téléchargements et ressources bibliques installées. |
+| Recherche | Recherche biblique et filtres. |
+| Études | Liste, édition riche, insertion de versets et actions d'étude. |
+| Plans | Exploration, suivi, lecture de tranche et partage. |
+| Chronologie | Sections, événements et module chronologique. |
+| Accueil | Découverte, reprise, verset du jour et handoffs. |
+| Compte et réglages | Profil, préférences, sauvegardes, aide et actions sensibles. |
+| Audio | Audio distant et TTS. |
 
 ## Vue D'ensemble
 
@@ -213,7 +249,19 @@ Flows:
 
 Routes: `/bible-view`, `/bible-select`, `/version-selector`, `/bible-verse-detail`, onglet `bible`; composants principaux: `BibleScreen`, `BibleTabScreen`, `BibleViewer`, `BibleDOM`, `BibleHeader`, `BibleFooter`.
 
-But: lire, naviguer, comparer, sélectionner et annoter le texte biblique.
+But: décrire la surface Bible. Les workflows concrets sont séparés dans `curated-flows.json` pour éviter de mélanger lecture, réglages, téléchargement, comparaison, péricopes et annotations dans un seul parcours.
+
+Flows curatés de la surface Bible:
+
+| Flow | Contenu | Hors scope |
+|---|---|---|
+| Lire et naviguer dans la Bible | Lecteur, choix livre/chapitre/version, menu lecteur, historique. | Paramètres d'apparence, comparaison, téléchargement. |
+| Régler l'apparence de lecture | Réglages rapides, bottom sheet lecteur, options de partage, thème. | Changement de passage ou données utilisateur. |
+| Changer ou installer une version | Sélecteur de version, ressource absente, téléchargement BHS, retour au lecteur. | Gestion globale des téléchargements. |
+| Comparer des versions | Versions parallèles, compare-verses, sélection locale des versions à comparer. | Réglages généraux du lecteur. |
+| Agir sur une sélection de versets | Annoter, note, lien, favori, tag, ajout à une étude, copie et partage natif. | Consultation ultérieure des collections personnelles. |
+| Gérer couleurs et annotations du lecteur | Palette, couleurs personnalisées, labels de versets, annotations cross-version, annotations de mots. | Liste globale Notes/Highlights/Tags. |
+| Étudier Strong et langues originales | Numéros Strong, détail lexical, concordance, BHS. | Téléchargements génériques hors besoin Strong/BHS. |
 
 Structure:
 

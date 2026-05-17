@@ -3,9 +3,13 @@ import path from 'node:path'
 
 const root = path.resolve(import.meta.dirname, '..')
 const manifestPath = path.join(root, 'data', 'screenshots.json')
+const curatedFlowsPath = path.join(root, 'data', 'curated-flows.json')
 const outputPath = path.join(root, 'data', 'app-flows.json')
 
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+const curatedSource = fs.existsSync(curatedFlowsPath)
+  ? JSON.parse(fs.readFileSync(curatedFlowsPath, 'utf8'))
+  : { surfaces: [], flows: [] }
 
 const journeyRules = [
   {
@@ -110,6 +114,39 @@ const typeFor = (title, slug) => {
 
 const pickJourney = (slug) => journeyRules.find((journey) => journey.match.test(slug)) ?? fallbackJourney
 
+const toNodeId = (id) => String(id).startsWith('screen-') ? String(id) : `screen-${id}`
+
+const curatedFlows = (curatedSource.flows ?? []).map((flow) => {
+  const edgeNodeIds = (flow.edges ?? []).flatMap((edge) => [edge.source, edge.target])
+  const nodeIds = [...new Set([...(flow.nodes ?? []), ...edgeNodeIds].map(toNodeId))]
+  const edges = (flow.edges ?? []).map((edge, index) => ({
+    id: `${flow.id}-${toNodeId(edge.source)}-${toNodeId(edge.target)}-${index}`,
+    source: toNodeId(edge.source),
+    target: toNodeId(edge.target),
+    label: edge.label,
+  }))
+
+  return {
+    ...flow,
+    nodes: nodeIds,
+    edges,
+  }
+})
+
+const surfaceById = new Map((curatedSource.surfaces ?? []).map((surface) => [surface.id, surface]))
+const flowIdsByNode = new Map()
+const surfaceIdsByNode = new Map()
+
+for (const flow of curatedFlows) {
+  for (const nodeId of flow.nodes) {
+    if (!flowIdsByNode.has(nodeId)) flowIdsByNode.set(nodeId, [])
+    flowIdsByNode.get(nodeId).push(flow.id)
+
+    if (!surfaceIdsByNode.has(nodeId)) surfaceIdsByNode.set(nodeId, new Set())
+    surfaceIdsByNode.get(nodeId).add(flow.surface)
+  }
+}
+
 const journeysById = new Map([...journeyRules, fallbackJourney].map((journey) => [journey.id, {
   id: journey.id,
   title: journey.title,
@@ -130,6 +167,7 @@ for (const journey of journeysById.values()) {
 const perJourneyIndex = new Map()
 const nodes = manifest.screenshots.map((screenshot) => {
   const journey = pickJourney(screenshot.slug)
+  const id = `screen-${screenshot.id}`
   const index = perJourneyIndex.get(journey.id) ?? 0
   perJourneyIndex.set(journey.id, index + 1)
   const column = index % 6
@@ -137,11 +175,14 @@ const nodes = manifest.screenshots.map((screenshot) => {
   const layout = journeyLayout.get(journey.id)
 
   return {
-    id: `screen-${screenshot.id}`,
+    id,
     screenshotId: screenshot.id,
     slug: screenshot.slug,
     title: screenshot.title,
     journey: journey.id,
+    surface: [...(surfaceIdsByNode.get(id) ?? [])][0] ?? journey.id,
+    surfaces: [...(surfaceIdsByNode.get(id) ?? [])],
+    flows: flowIdsByNode.get(id) ?? [],
     type: typeFor(screenshot.title, screenshot.slug),
     risk: riskFor(screenshot.title, screenshot.slug),
     image: `../screenshots/${screenshot.id}-${screenshot.slug}.webp`,
@@ -166,43 +207,59 @@ for (const [journeyId, group] of groupedNodes) {
       target: group[i + 1].id,
       label: 'next captured state',
       journey: journeyId,
+      relation: 'capture-order',
       inferred: true,
     })
   }
 }
 
-const explicitEdges = [
-  ['screen-001', 'screen-003', 'open Bible'],
-  ['screen-003', 'screen-056', 'Annoter'],
-  ['screen-056', 'screen-274', 'Note'],
-  ['screen-274', 'screen-275', 'expand context'],
-  ['screen-139', 'screen-271', 'Study'],
-  ['screen-271', 'screen-272', 'style menu'],
-  ['screen-271', 'screen-273', 'more formatting'],
-  ['screen-003', 'screen-098', 'Étudier'],
-  ['screen-098', 'screen-105', 'add to study'],
-  ['screen-105', 'screen-106', 'choose insertion mode'],
-  ['screen-106', 'screen-107', 'confirm add'],
-]
+const validNodeIds = new Set(nodes.map((node) => node.id))
+const missingCuratedRefs = []
 
-for (const [source, target, label] of explicitEdges) {
-  if (nodes.some((node) => node.id === source) && nodes.some((node) => node.id === target)) {
-    edges.push({
-      id: `${source}-${target}-explicit`,
-      source,
-      target,
-      label,
-      journey: 'curated',
-      inferred: false,
-    })
+for (const flow of curatedFlows) {
+  for (const nodeId of flow.nodes) {
+    if (!validNodeIds.has(nodeId)) missingCuratedRefs.push(`${flow.id}: ${nodeId}`)
   }
+
+  for (const edge of flow.edges) {
+    if (validNodeIds.has(edge.source) && validNodeIds.has(edge.target)) {
+      edges.push({
+        id: edge.id,
+        source: edge.source,
+        target: edge.target,
+        label: edge.label,
+        journey: flow.id,
+        flowId: flow.id,
+        surface: flow.surface,
+        relation: 'user-action',
+        inferred: false,
+      })
+    } else {
+      missingCuratedRefs.push(`${flow.id}: ${edge.source} -> ${edge.target}`)
+    }
+  }
+}
+
+if (missingCuratedRefs.length > 0) {
+  throw new Error(`curated-flows.json references missing screenshots:\n${missingCuratedRefs.join('\n')}`)
 }
 
 const data = {
   version: 1,
   generatedFrom: 'docs/assets/app-flows/data/screenshots.json',
+  curatedFrom: 'docs/assets/app-flows/data/curated-flows.json',
   generatedAt: new Date().toISOString(),
-  description: 'Agent-friendly app-flow graph. Inferred edges preserve capture order inside each journey; explicit edges model known transitions.',
+  description: 'Agent-friendly app-flow graph. Capture-order edges preserve screenshot inventory order; curated flow edges model intentional user transitions.',
+  surfaces: curatedSource.surfaces ?? [],
+  flows: curatedFlows.map((flow) => ({
+    id: flow.id,
+    title: flow.title,
+    surface: flow.surface,
+    surfaceTitle: surfaceById.get(flow.surface)?.title ?? flow.surface,
+    description: flow.description,
+    nodes: flow.nodes,
+    edges: flow.edges.map((edge) => edge.id),
+  })),
   journeys: [...journeysById.values()],
   nodes,
   edges,

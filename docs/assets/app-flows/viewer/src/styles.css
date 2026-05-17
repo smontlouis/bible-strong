@@ -117,6 +117,11 @@ button {
   gap: 8px;
 }
 
+.surface-group {
+  display: grid;
+  gap: 6px;
+}
+
 .button-list button,
 .risk-grid button {
   display: flex;
@@ -143,6 +148,22 @@ button {
 .button-list small {
   color: var(--muted);
   font-size: 12px;
+}
+
+.button-list .flow-button {
+  margin-left: 12px;
+  width: calc(100% - 12px);
+  padding: 8px 10px;
+}
+
+.button-list .flow-button span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.button-list .flow-button.is-active span,
+.button-list .flow-button:hover span {
+  color: var(--ink);
 }
 
 .dot {

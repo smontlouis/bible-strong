@@ -1,0 +1,432 @@
+{
+  "version": 1,
+  "description": "Manual user-flow layer. Screenshots remain an inventory; these flows define intentional product journeys and transitions.",
+  "surfaces": [
+    {
+      "id": "workspace",
+      "title": "Workspace",
+      "description": "Onglets, groupes, drawers et creation de nouveaux onglets."
+    },
+    {
+      "id": "bible",
+      "title": "Bible",
+      "description": "Lecture, navigation, selection, comparaison, annotations et ressources contextuelles."
+    },
+    {
+      "id": "personal-data",
+      "title": "Donnees personnelles",
+      "description": "Notes, highlights, liens, favoris, tags et annotations de mots."
+    },
+    {
+      "id": "resources",
+      "title": "Ressources locales",
+      "description": "Telechargements et ressources bibliques locales: Strong, Nave, dictionnaire, commentaires et langues."
+    },
+    {
+      "id": "search",
+      "title": "Recherche",
+      "description": "Recherche biblique et filtres."
+    },
+    {
+      "id": "studies",
+      "title": "Etudes",
+      "description": "Liste, edition riche, insertion de versets, tags et actions d'etude."
+    },
+    {
+      "id": "plans",
+      "title": "Plans",
+      "description": "Exploration, suivi, lecture de tranche et partage des plans."
+    },
+    {
+      "id": "timeline",
+      "title": "Chronologie",
+      "description": "Accueil chronologie, sections, evenements et module de contenu."
+    },
+    {
+      "id": "home",
+      "title": "Accueil",
+      "description": "Decouverte, verset du jour, widgets d'apprentissage et handoffs."
+    },
+    {
+      "id": "account-settings",
+      "title": "Compte et reglages",
+      "description": "Profil, preferences, sauvegardes, aide, communaute et actions sensibles."
+    },
+    {
+      "id": "audio",
+      "title": "Audio",
+      "description": "Lecture audio et TTS."
+    }
+  ],
+  "flows": [
+    {
+      "id": "workspace-manage-tabs",
+      "title": "Gerer le workspace et les onglets",
+      "surface": "workspace",
+      "description": "Voir les onglets ouverts, gerer les groupes et creer un nouvel onglet sans melanger ces actions avec la lecture biblique.",
+      "nodes": ["screen-001", "screen-009", "screen-228", "screen-229", "screen-230", "screen-231", "screen-139"],
+      "edges": [
+        { "source": "screen-001", "target": "screen-009", "label": "ouvrir switcher" },
+        { "source": "screen-009", "target": "screen-228", "label": "menu groupe" },
+        { "source": "screen-228", "target": "screen-229", "label": "voir groupes" },
+        { "source": "screen-228", "target": "screen-230", "label": "editer groupe" },
+        { "source": "screen-228", "target": "screen-231", "label": "nouveau groupe" },
+        { "source": "screen-009", "target": "screen-139", "label": "nouvel onglet" }
+      ]
+    },
+    {
+      "id": "workspace-create-bible-tab",
+      "title": "Creer un onglet Bible",
+      "surface": "workspace",
+      "description": "Creation d'un onglet Bible depuis le selecteur de nouvel onglet.",
+      "nodes": ["screen-139", "screen-140", "screen-141", "screen-142", "screen-003"],
+      "edges": [
+        { "source": "screen-139", "target": "screen-140", "label": "choisir Bible" },
+        { "source": "screen-140", "target": "screen-141", "label": "choisir livre" },
+        { "source": "screen-141", "target": "screen-142", "label": "choisir chapitre" },
+        { "source": "screen-142", "target": "screen-003", "label": "ouvrir passage" }
+      ]
+    },
+    {
+      "id": "bible-read-navigate",
+      "title": "Lire et naviguer dans la Bible",
+      "surface": "bible",
+      "description": "Parcours strictement centre sur la lecture: passage, livre, chapitre, version et menu du lecteur.",
+      "nodes": ["screen-003", "screen-004", "screen-005", "screen-006", "screen-007", "screen-119", "screen-120"],
+      "edges": [
+        { "source": "screen-003", "target": "screen-004", "label": "changer livre" },
+        { "source": "screen-004", "target": "screen-005", "label": "choisir livre" },
+        { "source": "screen-003", "target": "screen-006", "label": "changer version" },
+        { "source": "screen-003", "target": "screen-007", "label": "ouvrir menu" },
+        { "source": "screen-007", "target": "screen-119", "label": "historique" },
+        { "source": "screen-119", "target": "screen-120", "label": "vider historique" }
+      ]
+    },
+    {
+      "id": "bible-reading-appearance",
+      "title": "Regler l'apparence de lecture",
+      "surface": "bible",
+      "description": "Preferences de confort de lecture et options de partage, separees du flow de lecture.",
+      "nodes": ["screen-003", "screen-008", "screen-124", "screen-125", "screen-126", "screen-019"],
+      "edges": [
+        { "source": "screen-003", "target": "screen-008", "label": "ouvrir reglages rapides" },
+        { "source": "screen-003", "target": "screen-124", "label": "ouvrir reglages lecteur" },
+        { "source": "screen-124", "target": "screen-125", "label": "defiler options" },
+        { "source": "screen-125", "target": "screen-126", "label": "options de partage" },
+        { "source": "screen-125", "target": "screen-019", "label": "theme global" }
+      ]
+    },
+    {
+      "id": "bible-versions-download",
+      "title": "Changer ou installer une version",
+      "surface": "bible",
+      "description": "Selection d'une version et installation d'une Bible originale quand elle manque.",
+      "nodes": ["screen-006", "screen-084", "screen-085", "screen-086", "screen-087", "screen-088"],
+      "edges": [
+        { "source": "screen-006", "target": "screen-084", "label": "version absente" },
+        { "source": "screen-084", "target": "screen-085", "label": "telecharger BHS" },
+        { "source": "screen-085", "target": "screen-086", "label": "telechargement termine" },
+        { "source": "screen-086", "target": "screen-087", "label": "revenir au selecteur" },
+        { "source": "screen-087", "target": "screen-088", "label": "ouvrir BHS" }
+      ]
+    },
+    {
+      "id": "bible-parallel-compare",
+      "title": "Comparer des versions",
+      "surface": "bible",
+      "description": "Versions paralleles et ecran de comparaison, sans inclure les reglages generaux du lecteur.",
+      "nodes": ["screen-121", "screen-122", "screen-123", "screen-135", "screen-201", "screen-234", "screen-235", "screen-236"],
+      "edges": [
+        { "source": "screen-121", "target": "screen-122", "label": "gerer versions paralleles" },
+        { "source": "screen-122", "target": "screen-123", "label": "ajouter version" },
+        { "source": "screen-003", "target": "screen-135", "label": "selectionner versions a comparer" },
+        { "source": "screen-135", "target": "screen-234", "label": "ouvrir comparaison" },
+        { "source": "screen-234", "target": "screen-235", "label": "menu comparaison" },
+        { "source": "screen-235", "target": "screen-236", "label": "changer versions" },
+        { "source": "screen-235", "target": "screen-201", "label": "reglages versions comparees" }
+      ]
+    },
+    {
+      "id": "bible-selected-verse-actions",
+      "title": "Agir sur une selection de versets",
+      "surface": "bible",
+      "description": "Flow central apres selection: annoter, etudier, partager et creer des donnees personnelles.",
+      "nodes": ["screen-003", "screen-056", "screen-059", "screen-060", "screen-061", "screen-062", "screen-274", "screen-275", "screen-098", "screen-105", "screen-106", "screen-107", "screen-264", "screen-265", "screen-266"],
+      "edges": [
+        { "source": "screen-003", "target": "screen-056", "label": "Annoter" },
+        { "source": "screen-056", "target": "screen-059", "label": "Tags" },
+        { "source": "screen-056", "target": "screen-060", "label": "Lien" },
+        { "source": "screen-056", "target": "screen-061", "label": "Favori" },
+        { "source": "screen-061", "target": "screen-062", "label": "creer favori" },
+        { "source": "screen-056", "target": "screen-274", "label": "Note" },
+        { "source": "screen-274", "target": "screen-275", "label": "afficher contexte" },
+        { "source": "screen-003", "target": "screen-098", "label": "Etudier" },
+        { "source": "screen-098", "target": "screen-105", "label": "ajouter a une etude" },
+        { "source": "screen-105", "target": "screen-106", "label": "choisir mode" },
+        { "source": "screen-106", "target": "screen-107", "label": "confirmer" },
+        { "source": "screen-003", "target": "screen-264", "label": "Partager" },
+        { "source": "screen-264", "target": "screen-265", "label": "copier" },
+        { "source": "screen-264", "target": "screen-266", "label": "partage natif" }
+      ]
+    },
+    {
+      "id": "bible-annotations-colors",
+      "title": "Gerer couleurs et annotations du lecteur",
+      "surface": "bible",
+      "description": "Palette, couleurs personnalisees, labels de versets et annotations presentes dans d'autres versions.",
+      "nodes": ["screen-242", "screen-243", "screen-244", "screen-262", "screen-263", "screen-129", "screen-187", "screen-189", "screen-188"],
+      "edges": [
+        { "source": "screen-242", "target": "screen-243", "label": "nouvelle couleur" },
+        { "source": "screen-242", "target": "screen-244", "label": "editer couleur" },
+        { "source": "screen-003", "target": "screen-262", "label": "ouvrir labels verset" },
+        { "source": "screen-262", "target": "screen-263", "label": "voir autres versions" },
+        { "source": "screen-129", "target": "screen-187", "label": "actions annotation" },
+        { "source": "screen-187", "target": "screen-189", "label": "modifier tags" },
+        { "source": "screen-187", "target": "screen-188", "label": "supprimer" }
+      ]
+    },
+    {
+      "id": "bible-strong-original-languages",
+      "title": "Etudier Strong et langues originales",
+      "surface": "bible",
+      "description": "Passage du texte biblique aux numeros Strong, detail lexical et concordance.",
+      "nodes": ["screen-054", "screen-077", "screen-078", "screen-091", "screen-092", "screen-093", "screen-094", "screen-095", "screen-096", "screen-097", "screen-237", "screen-240", "screen-241"],
+      "edges": [
+        { "source": "screen-054", "target": "screen-077", "label": "telecharger Strong" },
+        { "source": "screen-077", "target": "screen-078", "label": "telechargement termine" },
+        { "source": "screen-078", "target": "screen-091", "label": "ouvrir texte Strong" },
+        { "source": "screen-091", "target": "screen-092", "label": "taper numero Strong" },
+        { "source": "screen-092", "target": "screen-093", "label": "developper" },
+        { "source": "screen-093", "target": "screen-094", "label": "plein ecran" },
+        { "source": "screen-094", "target": "screen-095", "label": "concordance" },
+        { "source": "screen-095", "target": "screen-096", "label": "choisir livre" },
+        { "source": "screen-095", "target": "screen-097", "label": "langue" },
+        { "source": "screen-094", "target": "screen-237", "label": "concordance directe" },
+        { "source": "screen-094", "target": "screen-240", "label": "menu actions" },
+        { "source": "screen-240", "target": "screen-241", "label": "tags" }
+      ]
+    },
+    {
+      "id": "resources-download-manage",
+      "title": "Installer et gerer les ressources locales",
+      "surface": "resources",
+      "description": "Gestion des ressources telechargeables separee de la lecture et des ressources consultees.",
+      "nodes": ["screen-021", "screen-067", "screen-068", "screen-069", "screen-075", "screen-076", "screen-165", "screen-166", "screen-167", "screen-168", "screen-169", "screen-170", "screen-171"],
+      "edges": [
+        { "source": "screen-021", "target": "screen-067", "label": "ouvrir bases FR" },
+        { "source": "screen-067", "target": "screen-068", "label": "telecharger Nave" },
+        { "source": "screen-068", "target": "screen-069", "label": "installe" },
+        { "source": "screen-021", "target": "screen-075", "label": "references croisees" },
+        { "source": "screen-075", "target": "screen-076", "label": "installer" },
+        { "source": "screen-021", "target": "screen-165", "label": "filtrer" },
+        { "source": "screen-165", "target": "screen-166", "label": "selection multiple" },
+        { "source": "screen-166", "target": "screen-167", "label": "action supprimer" },
+        { "source": "screen-167", "target": "screen-168", "label": "confirmer lot" },
+        { "source": "screen-166", "target": "screen-171", "label": "actions mixtes" },
+        { "source": "screen-021", "target": "screen-169", "label": "supprimer item" },
+        { "source": "screen-021", "target": "screen-170", "label": "retelecharger version defaut" }
+      ]
+    },
+    {
+      "id": "resources-browse-study",
+      "title": "Consulter Nave, dictionnaire, commentaires",
+      "surface": "resources",
+      "description": "Consultation des ressources bibliques une fois installees.",
+      "nodes": ["screen-012", "screen-013", "screen-014", "screen-070", "screen-071", "screen-072", "screen-238", "screen-080", "screen-081", "screen-082", "screen-083", "screen-146", "screen-147", "screen-267", "screen-268", "screen-269"],
+      "edges": [
+        { "source": "screen-014", "target": "screen-070", "label": "Nave installe" },
+        { "source": "screen-070", "target": "screen-071", "label": "ouvrir theme" },
+        { "source": "screen-071", "target": "screen-072", "label": "menu actions" },
+        { "source": "screen-070", "target": "screen-238", "label": "langue Nave" },
+        { "source": "screen-013", "target": "screen-080", "label": "dictionnaire installe" },
+        { "source": "screen-080", "target": "screen-081", "label": "ouvrir entree" },
+        { "source": "screen-081", "target": "screen-082", "label": "menu actions" },
+        { "source": "screen-082", "target": "screen-083", "label": "tags" },
+        { "source": "screen-267", "target": "screen-268", "label": "menu commentaires" },
+        { "source": "screen-267", "target": "screen-269", "label": "verset suivant" },
+        { "source": "screen-146", "target": "screen-147", "label": "partager commentaire" }
+      ]
+    },
+    {
+      "id": "personal-data-review-organize",
+      "title": "Retrouver et organiser les contenus personnels",
+      "surface": "personal-data",
+      "description": "Listes de notes, highlights, favoris, liens, tags et annotations, hors creation depuis la Bible.",
+      "nodes": ["screen-023", "screen-037", "screen-039", "screen-184", "screen-185", "screen-186", "screen-024", "screen-163", "screen-164", "screen-025", "screen-199", "screen-202", "screen-200", "screen-203", "screen-193", "screen-028", "screen-172", "screen-176", "screen-177", "screen-178", "screen-029", "screen-033", "screen-034", "screen-158", "screen-159", "screen-160", "screen-161", "screen-162"],
+      "edges": [
+        { "source": "screen-023", "target": "screen-037", "label": "filtrer highlights" },
+        { "source": "screen-023", "target": "screen-184", "label": "actions highlight" },
+        { "source": "screen-184", "target": "screen-185", "label": "tags" },
+        { "source": "screen-184", "target": "screen-186", "label": "supprimer" },
+        { "source": "screen-024", "target": "screen-163", "label": "editer favori" },
+        { "source": "screen-163", "target": "screen-164", "label": "supprimer favori" },
+        { "source": "screen-025", "target": "screen-199", "label": "ouvrir note" },
+        { "source": "screen-199", "target": "screen-202", "label": "menu note" },
+        { "source": "screen-202", "target": "screen-200", "label": "editer" },
+        { "source": "screen-202", "target": "screen-203", "label": "tags" },
+        { "source": "screen-202", "target": "screen-193", "label": "supprimer" },
+        { "source": "screen-028", "target": "screen-172", "label": "liste detaillee" },
+        { "source": "screen-172", "target": "screen-176", "label": "ouvrir lien" },
+        { "source": "screen-176", "target": "screen-177", "label": "menu lien" },
+        { "source": "screen-177", "target": "screen-178", "label": "editer" },
+        { "source": "screen-029", "target": "screen-033", "label": "ouvrir tag" },
+        { "source": "screen-033", "target": "screen-034", "label": "menu tag" },
+        { "source": "screen-029", "target": "screen-158", "label": "actions tag" },
+        { "source": "screen-158", "target": "screen-159", "label": "renommer" },
+        { "source": "screen-158", "target": "screen-160", "label": "supprimer" },
+        { "source": "screen-034", "target": "screen-161", "label": "creer groupe onglets" },
+        { "source": "screen-029", "target": "screen-162", "label": "nouveau tag" }
+      ]
+    },
+    {
+      "id": "search-find-passage",
+      "title": "Rechercher un passage",
+      "surface": "search",
+      "description": "Recherche textuelle, filtres et ouverture d'un resultat dans la Bible.",
+      "nodes": ["screen-052", "screen-002", "screen-049", "screen-050", "screen-051", "screen-137", "screen-003"],
+      "edges": [
+        { "source": "screen-052", "target": "screen-002", "label": "saisir requete" },
+        { "source": "screen-002", "target": "screen-049", "label": "filtrer section" },
+        { "source": "screen-002", "target": "screen-050", "label": "filtrer livre" },
+        { "source": "screen-002", "target": "screen-051", "label": "filtrer version" },
+        { "source": "screen-002", "target": "screen-003", "label": "ouvrir resultat" },
+        { "source": "screen-052", "target": "screen-137", "label": "recherche locale vide" }
+      ]
+    },
+    {
+      "id": "studies-write-edit",
+      "title": "Ecrire et organiser une etude",
+      "surface": "studies",
+      "description": "Liste d'etudes, edition riche, menus, tags, suppression et ouverture dans un onglet.",
+      "nodes": ["screen-026", "screen-156", "screen-155", "screen-157", "screen-271", "screen-272", "screen-273", "screen-206", "screen-207", "screen-208", "screen-209"],
+      "edges": [
+        { "source": "screen-026", "target": "screen-156", "label": "filtrer tags" },
+        { "source": "screen-026", "target": "screen-155", "label": "menu etude" },
+        { "source": "screen-155", "target": "screen-157", "label": "renommer" },
+        { "source": "screen-026", "target": "screen-271", "label": "ouvrir editeur" },
+        { "source": "screen-271", "target": "screen-272", "label": "styles" },
+        { "source": "screen-271", "target": "screen-273", "label": "formatage avance" },
+        { "source": "screen-271", "target": "screen-206", "label": "menu editeur" },
+        { "source": "screen-206", "target": "screen-207", "label": "tags" },
+        { "source": "screen-206", "target": "screen-208", "label": "supprimer" },
+        { "source": "screen-206", "target": "screen-209", "label": "ouvrir dans onglet" }
+      ]
+    },
+    {
+      "id": "plans-follow-reading",
+      "title": "Suivre un plan ou une meditation",
+      "surface": "plans",
+      "description": "Exploration, plan actif, lecture, reglages et partage d'une tranche.",
+      "nodes": ["screen-015", "screen-016", "screen-017", "screen-063", "screen-064", "screen-148", "screen-149", "screen-150", "screen-151", "screen-065", "screen-152", "screen-153", "screen-154", "screen-270", "screen-224", "screen-225"],
+      "edges": [
+        { "source": "screen-015", "target": "screen-016", "label": "explorer" },
+        { "source": "screen-016", "target": "screen-017", "label": "ouvrir plan" },
+        { "source": "screen-015", "target": "screen-063", "label": "mes plans" },
+        { "source": "screen-063", "target": "screen-064", "label": "plan actif" },
+        { "source": "screen-064", "target": "screen-148", "label": "menu plan" },
+        { "source": "screen-148", "target": "screen-149", "label": "details" },
+        { "source": "screen-148", "target": "screen-150", "label": "reset" },
+        { "source": "screen-148", "target": "screen-151", "label": "arreter" },
+        { "source": "screen-064", "target": "screen-065", "label": "lire etape" },
+        { "source": "screen-065", "target": "screen-152", "label": "menu tranche" },
+        { "source": "screen-152", "target": "screen-153", "label": "apparence" },
+        { "source": "screen-152", "target": "screen-154", "label": "version" },
+        { "source": "screen-152", "target": "screen-270", "label": "partager" },
+        { "source": "screen-224", "target": "screen-225", "label": "ouvrir meditation" }
+      ]
+    },
+    {
+      "id": "timeline-explore-events",
+      "title": "Explorer la chronologie",
+      "surface": "timeline",
+      "description": "Accueil, section, recherche, telechargement du module et detail d'evenement.",
+      "nodes": ["screen-256", "screen-257", "screen-258", "screen-245", "screen-246", "screen-247", "screen-248", "screen-249", "screen-250", "screen-251", "screen-252", "screen-253", "screen-254", "screen-255", "screen-259", "screen-260", "screen-261"],
+      "edges": [
+        { "source": "screen-256", "target": "screen-257", "label": "info" },
+        { "source": "screen-257", "target": "screen-258", "label": "ouvrir FAQ" },
+        { "source": "screen-256", "target": "screen-245", "label": "ouvrir section" },
+        { "source": "screen-245", "target": "screen-246", "label": "rechercher" },
+        { "source": "screen-246", "target": "screen-247", "label": "requete sans resultat" },
+        { "source": "screen-245", "target": "screen-248", "label": "voir evenements" },
+        { "source": "screen-248", "target": "screen-249", "label": "detail section" },
+        { "source": "screen-248", "target": "screen-250", "label": "ouvrir evenement" },
+        { "source": "screen-250", "target": "screen-251", "label": "telecharger module" },
+        { "source": "screen-251", "target": "screen-252", "label": "contenu disponible" },
+        { "source": "screen-252", "target": "screen-253", "label": "defiler" },
+        { "source": "screen-253", "target": "screen-254", "label": "evenements lies" },
+        { "source": "screen-254", "target": "screen-255", "label": "ouvrir Cain" },
+        { "source": "screen-245", "target": "screen-259", "label": "section suivante" },
+        { "source": "screen-259", "target": "screen-260", "label": "voir evenements" },
+        { "source": "screen-260", "target": "screen-261", "label": "ouvrir Noe" }
+      ]
+    },
+    {
+      "id": "home-discover-content",
+      "title": "Decouvrir depuis l'accueil",
+      "surface": "home",
+      "description": "Accueil comme surface de reprise et de decouverte, distincte des flows metier profonds.",
+      "nodes": ["screen-001", "screen-210", "screen-211", "screen-212", "screen-213", "screen-214", "screen-215", "screen-216", "screen-217", "screen-218", "screen-219", "screen-220", "screen-221", "screen-222", "screen-223"],
+      "edges": [
+        { "source": "screen-001", "target": "screen-210", "label": "ouvrir accueil" },
+        { "source": "screen-210", "target": "screen-211", "label": "image verset" },
+        { "source": "screen-210", "target": "screen-212", "label": "notification" },
+        { "source": "screen-211", "target": "screen-213", "label": "partager" },
+        { "source": "screen-210", "target": "screen-214", "label": "defiler" },
+        { "source": "screen-214", "target": "screen-215", "label": "mot grec" },
+        { "source": "screen-214", "target": "screen-216", "label": "mot hebreu" },
+        { "source": "screen-214", "target": "screen-217", "label": "Audibible" },
+        { "source": "screen-214", "target": "screen-218", "label": "support/social" },
+        { "source": "screen-218", "target": "screen-219", "label": "Facebook" },
+        { "source": "screen-210", "target": "screen-220", "label": "plans et meditations" },
+        { "source": "screen-220", "target": "screen-221", "label": "explorer FR" },
+        { "source": "screen-221", "target": "screen-222", "label": "explorer EN" },
+        { "source": "screen-221", "target": "screen-223", "label": "detail meditation" }
+      ]
+    },
+    {
+      "id": "account-settings-manage",
+      "title": "Gerer compte, reglages et sauvegardes",
+      "surface": "account-settings",
+      "description": "Menu Plus, profil, preferences, sauvegardes, aide et actions sensibles.",
+      "nodes": ["screen-011", "screen-018", "screen-019", "screen-020", "screen-116", "screen-117", "screen-022", "screen-190", "screen-191", "screen-053", "screen-042", "screen-043", "screen-044", "screen-045", "screen-046", "screen-181", "screen-182", "screen-183", "screen-047", "screen-048", "screen-110", "screen-111", "screen-112", "screen-113", "screen-114", "screen-118", "screen-192"],
+      "edges": [
+        { "source": "screen-011", "target": "screen-018", "label": "langue app" },
+        { "source": "screen-011", "target": "screen-019", "label": "theme" },
+        { "source": "screen-011", "target": "screen-020", "label": "Bible par defaut" },
+        { "source": "screen-011", "target": "screen-116", "label": "langue ressources" },
+        { "source": "screen-116", "target": "screen-117", "label": "par ressource" },
+        { "source": "screen-011", "target": "screen-022", "label": "profil" },
+        { "source": "screen-022", "target": "screen-190", "label": "compte" },
+        { "source": "screen-190", "target": "screen-191", "label": "email non verifie" },
+        { "source": "screen-022", "target": "screen-053", "label": "modifier nom" },
+        { "source": "screen-022", "target": "screen-042", "label": "mot de passe" },
+        { "source": "screen-011", "target": "screen-043", "label": "sauvegardes" },
+        { "source": "screen-043", "target": "screen-044", "label": "import/export" },
+        { "source": "screen-044", "target": "screen-045", "label": "exporter" },
+        { "source": "screen-043", "target": "screen-046", "label": "automatiques" },
+        { "source": "screen-046", "target": "screen-181", "label": "restaurer" },
+        { "source": "screen-046", "target": "screen-182", "label": "exporter backup" },
+        { "source": "screen-182", "target": "screen-183", "label": "succes" },
+        { "source": "screen-011", "target": "screen-047", "label": "deconnexion" },
+        { "source": "screen-011", "target": "screen-048", "label": "supprimer compte" },
+        { "source": "screen-011", "target": "screen-110", "label": "defiler plus" },
+        { "source": "screen-110", "target": "screen-111", "label": "changelog" },
+        { "source": "screen-110", "target": "screen-112", "label": "FAQ" },
+        { "source": "screen-112", "target": "screen-113", "label": "ouvrir question" },
+        { "source": "screen-110", "target": "screen-114", "label": "partager app" },
+        { "source": "screen-110", "target": "screen-118", "label": "verifier updates" },
+        { "source": "screen-110", "target": "screen-192", "label": "nuke dev" }
+      ]
+    },
+    {
+      "id": "audio-playback",
+      "title": "Ecouter un chapitre",
+      "surface": "audio",
+      "description": "Deux modes audio visibles: lecteur audio distant et TTS.",
+      "nodes": ["screen-035", "screen-036"],
+      "edges": [
+        { "source": "screen-035", "target": "screen-036", "label": "basculer TTS" }
+      ]
+    }
+  ]
+}
