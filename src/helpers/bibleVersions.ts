@@ -226,6 +226,12 @@ export const versions: Record<string, Version> = {
     type: 'fr',
     hasRedWords: true,
   },
+  DBR: {
+    id: 'DBR',
+    name: 'Bible Darby révisée',
+    c: '© Bibles et Publications Chrétiennes - CC BY-NC-ND',
+    type: 'fr',
+  },
   OST: {
     id: 'OST',
     name: 'Ostervald',
@@ -583,6 +589,7 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(versions
       case 'S21':
       case 'KJF':
       case 'DBY':
+      case 'DBR':
       case 'OST':
       case 'CHU':
       case 'BDS':
