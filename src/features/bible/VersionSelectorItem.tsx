@@ -373,7 +373,9 @@ const VersionSelectorItem = ({
               </Box>
             )}
           </HStack>
-          <CopyrightText onPress={openSourceUrl}>{version.c}</CopyrightText>
+          <CopyrightText onPress={version.sourceUrl ? openSourceUrl : undefined}>
+            {version.c}
+          </CopyrightText>
         </Box>
         {renderSelectionCheckbox()}
       </Box>
