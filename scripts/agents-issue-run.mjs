@@ -9,8 +9,8 @@ const dryRun = args.includes('--dry-run')
 const noPr = args.includes('--no-pr')
 const createPr = !dryRun && !noPr
 const pushBranch = createPr && !args.includes('--no-push')
-const ready = args.includes('--ready')
-const draft = args.includes('--draft') || !ready
+const draft = args.includes('--draft')
+const ready = args.includes('--ready') || !draft
 const noCommit = args.includes('--no-commit')
 const allowDirty = args.includes('--allow-dirty')
 const baseIndex = args.indexOf('--base')
@@ -38,8 +38,8 @@ const usage = () => {
     '  --no-push        Create the PR without pushing first; branch must already exist remote.'
   )
   console.log('  --allow-dirty    Permit starting from a dirty worktree.')
-  console.log('  --draft          Create the PR as draft. This is the default for the full run.')
-  console.log('  --ready          Create the PR as ready for review.')
+  console.log('  --draft          Create the PR as draft.')
+  console.log('  --ready          Create the PR as ready for review. This is the default.')
   console.log('  --base           Base branch for diff and PR creation. Defaults to master.')
   console.log('                   Full runs attach evidence to the PR by default when present.')
   console.log(
@@ -82,7 +82,7 @@ if (!codexSandboxModes.has(codexSandbox)) {
 }
 
 if (args.includes('--create-pr') || args.includes('--push')) {
-  console.error('agents:issue:run now creates and pushes a draft PR by default.')
+  console.error('agents:issue:run now creates and pushes a ready PR by default.')
   console.error(
     'Use --dry-run for no writes, --no-pr to stop after commit, or --no-push if needed.'
   )

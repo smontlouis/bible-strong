@@ -10,8 +10,8 @@ const dryRun = args.includes('--dry-run')
 const createPr = args.includes('--create')
 const pushBranch = args.includes('--push')
 const attachEvidence = args.includes('--attach-evidence')
-const ready = args.includes('--ready')
-const draft = args.includes('--draft') || !ready
+const draft = args.includes('--draft')
+const ready = args.includes('--ready') || !draft
 const baseIndex = args.indexOf('--base')
 const baseBranch = baseIndex === -1 ? 'master' : args[baseIndex + 1]
 
@@ -31,8 +31,8 @@ const usage = () => {
   console.log(
     '  --attach-evidence  Push evidence files to a dedicated evidence branch and comment on the PR.'
   )
-  console.log('  --draft     Create as draft. This is the default.')
-  console.log('  --ready     Create as ready for review.')
+  console.log('  --draft     Create as draft.')
+  console.log('  --ready     Create as ready for review. This is the default.')
   console.log('  --base      Base branch for diff and PR creation. Defaults to master.')
 }
 
@@ -258,7 +258,7 @@ const mobileStatus = extractStatus(combinedReport)
 
 if (ready && mobileStatus === 'blocked') {
   console.error('Refusing to create a ready PR while mobile runtime status is blocked.')
-  console.error('Use the default draft PR mode, or fix validation and rerun with --ready.')
+  console.error('Use --draft, or fix validation and rerun.')
   process.exit(1)
 }
 
