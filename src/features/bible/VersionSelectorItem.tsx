@@ -1,7 +1,7 @@
 import * as Icon from '@expo/vector-icons'
 import * as FileSystem from 'expo-file-system/legacy'
 import React from 'react'
-import { Alert, TouchableOpacity } from 'react-native'
+import { Alert, Linking, TouchableOpacity } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { dbManager } from '~helpers/sqlite'
 
@@ -61,6 +61,12 @@ const TextCopyright = styled.Text<{ isSelected?: boolean }>(({ isSelected, theme
   opacity: 0.5,
 }))
 
+const TextSourceLink = styled(TextCopyright)(({ theme }) => ({
+  color: theme.colors.primary,
+  textDecorationLine: 'underline',
+  opacity: 0.75,
+}))
+
 const TextName = styled.Text<{ isSelected?: boolean }>(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
   fontSize: 16,
@@ -109,6 +115,12 @@ const VersionSelectorItem = ({
   const isLoading = queueState?.status === 'downloading' || queueState?.status === 'inserting'
   const isQueued = queueState?.status === 'queued'
   const downloadProgress = queueState?.downloadProgress ?? 0
+  const CopyrightText = version.sourceUrl ? TextSourceLink : TextCopyright
+  const openSourceUrl = () => {
+    if (version.sourceUrl) {
+      Linking.openURL(version.sourceUrl)
+    }
+  }
 
   React.useEffect(() => {
     ;(async () => {
@@ -284,7 +296,7 @@ const VersionSelectorItem = ({
                 </Box>
               )}
             </HStack>
-            <TextCopyright>{version.c}</TextCopyright>
+            <CopyrightText onPress={openSourceUrl}>{version.c}</CopyrightText>
           </Box>
           {!isLoading && !isQueued && version.id !== 'LSGS' && version.id !== 'KJVS' && (
             <TouchableOpacity
@@ -361,7 +373,7 @@ const VersionSelectorItem = ({
               </Box>
             )}
           </HStack>
-          <TextCopyright>{version.c}</TextCopyright>
+          <CopyrightText onPress={openSourceUrl}>{version.c}</CopyrightText>
         </Box>
         {renderSelectionCheckbox()}
       </Box>

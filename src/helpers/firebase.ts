@@ -138,6 +138,7 @@ export const biblesRef: {
   PDV2017: cdnUrl('bibles/bible-pdv2017.json'),
   BFC: cdnUrl('bibles/bible-bfc.json'),
   BCC1923: cdnUrl('bibles/bible-bcc1923.json'),
+  LXX_FR: cdnUrl('bibles/bible-lxx-french.json'),
   // JER: cdnUrl('bibles/bible-jer.json'),
   LXX: cdnUrl('bibles/bible-lxx.json'),
   TR1624: cdnUrl('bibles/bible-TR1624.json'),
