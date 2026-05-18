@@ -46,9 +46,10 @@ const curatedScope = {
   description: 'Toutes les captures rattachees a au moins un parcours manuel.',
 }
 
-const defaultFlowId = flowData.flows.find((flow) => flow.id === 'bible-read-navigate')?.id
-  ?? flowData.flows[0]?.id
-  ?? null
+const defaultFlowId =
+  flowData.flows.find(flow => flow.id === 'bible-read-navigate')?.id ??
+  flowData.flows[0]?.id ??
+  null
 
 function scopeId(kind, id) {
   return `${kind}:${id}`
@@ -79,7 +80,9 @@ function AppFlowNode({ data, selected }) {
           <span>{data.type}</span>
         </div>
         <h3>{data.title}</h3>
-        <p>{data.screenshotId} · {data.slug}</p>
+        <p>
+          {data.screenshotId} · {data.slug}
+        </p>
       </div>
     </article>
   )
@@ -95,8 +98,8 @@ const nodeDimensions = {
 }
 
 function getLayoutedPositions(nodes, edges) {
-  const nodeById = new Map(nodes.map((node) => [node.id, node]))
-  const neighbors = new Map(nodes.map((node) => [node.id, new Set()]))
+  const nodeById = new Map(nodes.map(node => [node.id, node]))
+  const neighbors = new Map(nodes.map(node => [node.id, new Set()]))
 
   for (const edge of edges) {
     if (!nodeById.has(edge.source) || !nodeById.has(edge.target)) continue
@@ -123,12 +126,12 @@ function getLayoutedPositions(nodes, edges) {
       }
     }
 
-    components.push(componentIds.map((id) => nodeById.get(id)))
+    components.push(componentIds.map(id => nodeById.get(id)))
   }
 
   components.sort((a, b) => {
-    const firstA = Math.min(...a.map((node) => Number(node.data.screenshotId)))
-    const firstB = Math.min(...b.map((node) => Number(node.data.screenshotId)))
+    const firstA = Math.min(...a.map(node => Number(node.data.screenshotId)))
+    const firstB = Math.min(...b.map(node => Number(node.data.screenshotId)))
     return firstA - firstB
   })
 
@@ -136,8 +139,10 @@ function getLayoutedPositions(nodes, edges) {
   let yOffset = 0
 
   for (const component of components) {
-    const componentIds = new Set(component.map((node) => node.id))
-    const componentEdges = edges.filter((edge) => componentIds.has(edge.source) && componentIds.has(edge.target))
+    const componentIds = new Set(component.map(node => node.id))
+    const componentEdges = edges.filter(
+      edge => componentIds.has(edge.source) && componentIds.has(edge.target)
+    )
     const graph = new Graph({ multigraph: true }).setDefaultEdgeLabel(() => ({}))
 
     graph.setGraph({
@@ -177,7 +182,7 @@ function getLayoutedPositions(nodes, edges) {
 }
 
 function buildNodes() {
-  return flowData.nodes.map((node) => ({
+  return flowData.nodes.map(node => ({
     id: node.id,
     type: 'appFlow',
     position: node.position,
@@ -186,7 +191,7 @@ function buildNodes() {
 }
 
 function buildEdges() {
-  return flowData.edges.map((edge) => {
+  return flowData.edges.map(edge => {
     const explicit = edge.inferred === false
     return {
       id: edge.id,
@@ -248,14 +253,17 @@ function Sidebar({
     <aside className="sidebar">
       <div>
         <h1>App Flow Map</h1>
-        <p className="lede">React Flow viewer pour {flowData.nodes.length} captures Argent et {flowData.flows.length} flows curates Bible Strong.</p>
+        <p className="lede">
+          React Flow viewer pour {flowData.nodes.length} captures Argent et {flowData.flows.length}{' '}
+          flows curates Bible Strong.
+        </p>
       </div>
 
       <label className="search">
         <span>Recherche</span>
         <input
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
+          onChange={event => setSearch(event.target.value)}
           placeholder="note, timeline, Strong..."
         />
       </label>
@@ -269,15 +277,17 @@ function Sidebar({
             type="button"
           >
             <span>{curatedScope.title}</span>
-            <small>{flowData.edges.filter((edge) => edge.inferred === false).length}</small>
+            <small>{flowData.edges.filter(edge => edge.inferred === false).length}</small>
           </button>
 
-          {flowData.surfaces.map((surface) => {
-            const surfaceFlows = flowData.flows.filter((flow) => flow.surface === surface.id)
+          {flowData.surfaces.map(surface => {
+            const surfaceFlows = flowData.flows.filter(flow => flow.surface === surface.id)
             return (
               <div className="surface-group" key={surface.id}>
                 <button
-                  className={active.kind === 'surface' && active.id === surface.id ? 'is-active' : ''}
+                  className={
+                    active.kind === 'surface' && active.id === surface.id ? 'is-active' : ''
+                  }
                   onClick={() => selectScope(scopeId('surface', surface.id))}
                   type="button"
                 >
@@ -285,7 +295,7 @@ function Sidebar({
                   <small>{surfaceCounts.get(surface.id) ?? 0}</small>
                 </button>
 
-                {surfaceFlows.map((flow) => (
+                {surfaceFlows.map(flow => (
                   <button
                     className={`flow-button ${active.kind === 'flow' && active.id === flow.id ? 'is-active' : ''}`}
                     key={flow.id}
@@ -305,12 +315,15 @@ function Sidebar({
       <section>
         <h2>Inventaire auto</h2>
         <div className="button-list">
-          {journeys.map((journey) => {
-            const count = journey.id === 'all' ? flowData.nodes.length : journeyCounts.get(journey.id) ?? 0
-            const nextScope = journey.id === 'all' ? scopeId('all', journey.id) : scopeId('journey', journey.id)
-            const isActive = journey.id === 'all'
-              ? active.kind === 'all'
-              : active.kind === 'journey' && active.id === journey.id
+          {journeys.map(journey => {
+            const count =
+              journey.id === 'all' ? flowData.nodes.length : (journeyCounts.get(journey.id) ?? 0)
+            const nextScope =
+              journey.id === 'all' ? scopeId('all', journey.id) : scopeId('journey', journey.id)
+            const isActive =
+              journey.id === 'all'
+                ? active.kind === 'all'
+                : active.kind === 'journey' && active.id === journey.id
 
             return (
               <button
@@ -337,7 +350,7 @@ function Sidebar({
           >
             Tous
           </button>
-          {risks.map((risk) => (
+          {risks.map(risk => (
             <button
               className={activeRisk === risk ? 'is-active' : ''}
               key={risk}
@@ -363,7 +376,15 @@ function Sidebar({
             </div>
             <div>
               <dt>Surface</dt>
-              <dd>{(selectedNode.surfaces ?? []).map((surfaceId) => flowData.surfaces.find((surface) => surface.id === surfaceId)?.title ?? surfaceId).join(', ') || selectedNode.surface}</dd>
+              <dd>
+                {(selectedNode.surfaces ?? [])
+                  .map(
+                    surfaceId =>
+                      flowData.surfaces.find(surface => surface.id === surfaceId)?.title ??
+                      surfaceId
+                  )
+                  .join(', ') || selectedNode.surface}
+              </dd>
             </div>
             <div>
               <dt>Flows</dt>
@@ -398,58 +419,60 @@ function FlowCanvas({ activeScope, search, activeRisk, selectedNodeId, setSelect
   const active = parseScope(activeScope)
   const explicitNodeIds = new Set(
     flowData.edges
-      .filter((edge) => edge.inferred === false)
-      .flatMap((edge) => [edge.source, edge.target]),
+      .filter(edge => edge.inferred === false)
+      .flatMap(edge => [edge.source, edge.target])
   )
 
   const visibleNodeIds = new Set(
     flowData.nodes
-      .filter((node) => {
+      .filter(node => {
         const matchesScope =
-          active.kind === 'all'
-          || (active.kind === 'curated' && explicitNodeIds.has(node.id))
-          || (active.kind === 'flow' && node.flows?.includes(active.id))
-          || (active.kind === 'surface' && node.surfaces?.includes(active.id))
-          || (active.kind === 'journey' && node.journey === active.id)
+          active.kind === 'all' ||
+          (active.kind === 'curated' && explicitNodeIds.has(node.id)) ||
+          (active.kind === 'flow' && node.flows?.includes(active.id)) ||
+          (active.kind === 'surface' && node.surfaces?.includes(active.id)) ||
+          (active.kind === 'journey' && node.journey === active.id)
         const matchesSearch =
-          !normalizedSearch
-          || node.title.toLowerCase().includes(normalizedSearch)
-          || node.slug.toLowerCase().includes(normalizedSearch)
-          || node.screenshotId.includes(normalizedSearch)
+          !normalizedSearch ||
+          node.title.toLowerCase().includes(normalizedSearch) ||
+          node.slug.toLowerCase().includes(normalizedSearch) ||
+          node.screenshotId.includes(normalizedSearch)
         const matchesRisk = activeRisk === 'all' || node.risk === activeRisk
         return matchesScope && matchesSearch && matchesRisk
       })
-      .map((node) => node.id),
+      .map(node => node.id)
   )
 
-  const visibleEdges = edges.filter((edge) => {
+  const visibleEdges = edges.filter(edge => {
     const visible = visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target)
     const matchesScope =
-      active.kind === 'all'
-      || (active.kind === 'curated' && edge.data.inferred === false)
-      || (active.kind === 'flow' && edge.data.flowId === active.id)
-      || (active.kind === 'surface' && edge.data.surface === active.id)
-      || (active.kind === 'journey' && edge.data.journey === active.id && edge.data.inferred === true)
+      active.kind === 'all' ||
+      (active.kind === 'curated' && edge.data.inferred === false) ||
+      (active.kind === 'flow' && edge.data.flowId === active.id) ||
+      (active.kind === 'surface' && edge.data.surface === active.id) ||
+      (active.kind === 'journey' && edge.data.journey === active.id && edge.data.inferred === true)
     return visible && matchesScope
   })
 
   React.useEffect(() => {
-    const layoutNodes = nodes.filter((node) => visibleNodeIds.has(node.id))
+    const layoutNodes = nodes.filter(node => visibleNodeIds.has(node.id))
     const layoutPositions = getLayoutedPositions(layoutNodes, visibleEdges)
-    setNodes((currentNodes) => currentNodes.map((node) => ({
-      ...node,
-      hidden: !visibleNodeIds.has(node.id),
-      position: layoutPositions.get(node.id) ?? node.position,
-    })))
+    setNodes(currentNodes =>
+      currentNodes.map(node => ({
+        ...node,
+        hidden: !visibleNodeIds.has(node.id),
+        position: layoutPositions.get(node.id) ?? node.position,
+      }))
+    )
   }, [activeScope, activeRisk, search])
 
-  const renderedNodes = nodes.map((node) => ({
+  const renderedNodes = nodes.map(node => ({
     ...node,
     selected: node.id === selectedNodeId,
   }))
 
-  const visibleEdgeIds = new Set(visibleEdges.map((edge) => edge.id))
-  const filteredEdges = edges.map((edge) => ({
+  const visibleEdgeIds = new Set(visibleEdges.map(edge => edge.id))
+  const filteredEdges = edges.map(edge => ({
     ...edge,
     hidden: !visibleEdgeIds.has(edge.id),
   }))
@@ -457,7 +480,7 @@ function FlowCanvas({ activeScope, search, activeRisk, selectedNodeId, setSelect
   function fitFilteredNodes() {
     const ids = [...visibleNodeIds]
     fitView({
-      nodes: ids.map((id) => ({ id })),
+      nodes: ids.map(id => ({ id })),
       padding: 0.16,
       duration: 350,
       includeHiddenNodes: false,
@@ -477,8 +500,8 @@ function FlowCanvas({ activeScope, search, activeRisk, selectedNodeId, setSelect
       onNodeClick={(_, node) => setSelectedNodeId(node.id)}
       onPaneClick={() => setSelectedNodeId(null)}
       onNodeDragStop={(_, draggedNode) => {
-        setNodes((currentNodes) =>
-          currentNodes.map((node) => node.id === draggedNode.id ? draggedNode : node),
+        setNodes(currentNodes =>
+          currentNodes.map(node => (node.id === draggedNode.id ? draggedNode : node))
         )
       }}
       nodeTypes={nodeTypes}
@@ -494,13 +517,15 @@ function FlowCanvas({ activeScope, search, activeRisk, selectedNodeId, setSelect
       <Controls position="bottom-left" showInteractive={false} />
       <MiniMap
         className="minimap"
-        nodeColor={(node) => riskColors[node.data.risk] ?? '#8c857d'}
+        nodeColor={node => riskColors[node.data.risk] ?? '#8c857d'}
         nodeStrokeWidth={2}
         pannable
         zoomable
       />
       <Panel position="top-left" className="flow-panel">
-        <button onClick={fitFilteredNodes} type="button">Fit visible</button>
+        <button onClick={fitFilteredNodes} type="button">
+          Fit visible
+        </button>
         <span>{visibleNodeIds.size} noeuds visibles</span>
       </Panel>
     </ReactFlow>
@@ -508,11 +533,13 @@ function FlowCanvas({ activeScope, search, activeRisk, selectedNodeId, setSelect
 }
 
 function App() {
-  const [activeScope, setActiveScope] = React.useState(defaultFlowId ? scopeId('flow', defaultFlowId) : scopeId('curated', curatedScope.id))
+  const [activeScope, setActiveScope] = React.useState(
+    defaultFlowId ? scopeId('flow', defaultFlowId) : scopeId('curated', curatedScope.id)
+  )
   const [activeRisk, setActiveRisk] = React.useState('all')
   const [selectedNodeId, setSelectedNodeId] = React.useState(null)
   const [search, setSearch] = React.useState('')
-  const selectedNode = flowData.nodes.find((node) => node.id === selectedNodeId)
+  const selectedNode = flowData.nodes.find(node => node.id === selectedNodeId)
 
   return (
     <ReactFlowProvider>
