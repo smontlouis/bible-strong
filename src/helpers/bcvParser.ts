@@ -17,6 +17,27 @@ interface BcvParserWithTranslations extends bcv_parser {
   }
 }
 
+interface OsisAndIndices {
+  osis: string
+  indices: number[]
+  translations: string[]
+}
+
+export interface BibleReferenceTarget {
+  book: number
+  chapter: number
+  verse: number
+  focusVerses?: number[]
+  osis: string
+}
+
+export interface InlineBibleReference {
+  text: string
+  start: number
+  end: number
+  target: BibleReferenceTarget
+}
+
 export const bcv = new bcv_parser(language === 'fr' ? fr : en) as BcvParserWithTranslations
 
 bcv.set_options({
@@ -30,6 +51,107 @@ const trans = 'default'
 
 function getLastVerseInChapter(book: BookID, chapter: number): number {
   return bcv.translations.systems[trans].chapters[book][chapter - 1]
+}
+
+const getBookNumber = (book: BookID): number | undefined => {
+  return bcv.translations.systems[trans].order[book]
+}
+
+const parseOsisRef = (osisRef: string) => {
+  const [book, chapterStr, verseStr] = osisRef.split('.')
+  const bookNumber = getBookNumber(book)
+  const chapter = Number(chapterStr)
+  const verse = verseStr ? Number(verseStr) : undefined
+
+  if (!bookNumber || !Number.isFinite(chapter)) {
+    return undefined
+  }
+
+  return {
+    book,
+    bookNumber,
+    chapter,
+    verse: verse && Number.isFinite(verse) ? verse : undefined,
+  }
+}
+
+const getFocusVersesFromOsis = (osis: string) => {
+  const focusVerses: number[] = []
+  let commonBook: string | undefined
+  let commonChapter: number | undefined
+
+  for (const segment of osis.split(',')) {
+    const [startRef, endRef] = segment.split('-')
+    const start = parseOsisRef(startRef)
+
+    if (!start?.verse) {
+      return undefined
+    }
+
+    if (commonBook === undefined) commonBook = start.book
+    if (commonChapter === undefined) commonChapter = start.chapter
+
+    if (commonBook !== start.book || commonChapter !== start.chapter) {
+      return undefined
+    }
+
+    if (!endRef) {
+      focusVerses.push(start.verse)
+      continue
+    }
+
+    const end = parseOsisRef(endRef)
+
+    if (!end?.verse || end.book !== commonBook || end.chapter !== commonChapter) {
+      return undefined
+    }
+
+    for (let verse = start.verse; verse <= end.verse; verse += 1) {
+      focusVerses.push(verse)
+    }
+  }
+
+  return [...new Set(focusVerses)]
+}
+
+export const osisToBibleReferenceTarget = (osis: string): BibleReferenceTarget | undefined => {
+  const firstSegment = osis.split(',')[0]
+  const firstRef = firstSegment.split('-')[0]
+  const start = parseOsisRef(firstRef)
+
+  if (!start) {
+    return undefined
+  }
+
+  return {
+    book: start.bookNumber,
+    chapter: start.chapter,
+    verse: start.verse ?? 1,
+    focusVerses: getFocusVersesFromOsis(osis),
+    osis,
+  }
+}
+
+export const parseInlineBibleReferences = (text: string): InlineBibleReference[] => {
+  const references = bcv.parse(text).osis_and_indices() as OsisAndIndices[]
+
+  return references
+    .map(({ osis, indices }) => {
+      const [start, end] = indices
+      const target = osisToBibleReferenceTarget(osis)
+
+      if (!target || start === undefined || end === undefined || end <= start) {
+        return undefined
+      }
+
+      return {
+        text: text.slice(start, end),
+        start,
+        end,
+        target,
+      }
+    })
+    .filter((reference): reference is InlineBibleReference => Boolean(reference))
 }
 
 export function getIntermediateChapters(startRef: string, endRef: string) {
@@ -106,9 +228,9 @@ export const parseResponse = (res: string) => {
       const [sb, sc, sv] = startRef.split('.')
       const ev = endRef?.split('.')[2]
 
-      const sbNum = bcv.translations.systems[trans].order[sb]
+      const sbNum = getBookNumber(sb)
 
-      if (!sc) {
+      if (!sbNum || !sc) {
         return undefined
       }
 

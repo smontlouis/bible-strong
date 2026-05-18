@@ -3,10 +3,10 @@ import React from 'react'
 import YoutubePlayer from 'react-native-youtube-iframe'
 
 import Box from '~common/ui/Box'
-import Paragraph from '~common/ui/Paragraph'
 import { wp } from '~helpers/utils'
 
 import { VideoSlice as VideoSliceProps } from 'src/common/types'
+import ReferenceParagraph from './ReferenceParagraph'
 
 const iframeWidth = wp(100) > 600 ? 600 : wp(100)
 const iframeHeight = (iframeWidth * 9) / 16
@@ -17,7 +17,7 @@ const VideoSlice = ({ title, description, url }: VideoSliceProps) => {
     <Box marginBottom={40}>
       {description && (
         <Box padding={20}>
-          <Paragraph>{description}</Paragraph>
+          <ReferenceParagraph>{description}</ReferenceParagraph>
         </Box>
       )}
       <YoutubePlayer

@@ -25,6 +25,7 @@ import { BibleTab } from '../../../state/tabs'
 import ParamsModal from './ParamsModal'
 import PauseText from './PauseText'
 import ReadButton from './ReadButton'
+import ReferenceParagraph from './ReferenceParagraph'
 import Slice from './Slice'
 import { chapterSliceToText, verseSliceToText, videoSliceToText } from './share'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
@@ -239,7 +240,7 @@ const PlanSliceScreen = () => {
         </PauseText>
         {title && (
           <Box paddingHorizontal={20} marginBottom={50}>
-            <Paragraph scale={3}>{title}</Paragraph>
+            <ReferenceParagraph scale={3}>{title}</ReferenceParagraph>
           </Box>
         )}
         {slices?.map(slice => (

@@ -175,7 +175,7 @@ This is a repo-specific architecture scan for agent work. It is intentionally co
 - WARNING `raw-console` src/features/plans/Explore/ExplorePlanItem.tsx:124 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `deep-relative-import` src/features/plans/PlanSliceScreen/PlanSliceScreen.tsx:23 - Prefer path aliases or a small public module boundary over deep relative imports.
 - WARNING `deep-relative-import` src/features/plans/PlanSliceScreen/PlanSliceScreen.tsx:24 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `raw-console` src/features/plans/PlanSliceScreen/PlanSliceScreen.tsx:192 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` src/features/plans/PlanSliceScreen/PlanSliceScreen.tsx:193 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/features/plans/PlanSliceScreen/Slice.tsx:22 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/features/plans/PlanSliceScreen/VideoSlice.tsx:27 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/features/plans/PlanSliceScreen/VideoSlice.tsx:28 - Prefer appLogger for app-owned diagnostic events that agents should query.
