@@ -1,9 +1,9 @@
 import React from 'react'
+import styled from '@emotion/native'
 import { useRouter } from 'expo-router'
 
 import booksDesc from '~assets/bible_versions/books-desc'
 import Paragraph from '~common/ui/Paragraph'
-import Text from '~common/ui/Text'
 import { BibleReferenceTarget, parseInlineBibleReferences } from '~helpers/bcvParser'
 
 type ParagraphProps = React.ComponentProps<typeof Paragraph>
@@ -19,6 +19,11 @@ const getBibleViewParams = (target: BibleReferenceTarget) => ({
   verse: String(target.verse),
   ...(target.focusVerses ? { focusVerses: JSON.stringify(target.focusVerses) } : {}),
 })
+
+const ReferenceText = styled.Text(({ theme }) => ({
+  color: theme.colors.primary,
+  textDecorationLine: 'underline',
+}))
 
 const ReferenceParagraph = ({ children, ...props }: ReferenceParagraphProps) => {
   const router = useRouter()
@@ -39,11 +44,9 @@ const ReferenceParagraph = ({ children, ...props }: ReferenceParagraphProps) => 
         return (
           <React.Fragment key={`${reference.start}-${reference.end}-${reference.target.osis}`}>
             {before}
-            <Text
+            <ReferenceText
               accessibilityLabel={reference.text}
               accessibilityRole="link"
-              color="primary"
-              underline
               onPress={() =>
                 router.push({
                   pathname: '/bible-view',
@@ -52,7 +55,7 @@ const ReferenceParagraph = ({ children, ...props }: ReferenceParagraphProps) => 
               }
             >
               {reference.text}
-            </Text>
+            </ReferenceText>
           </React.Fragment>
         )
       })}
