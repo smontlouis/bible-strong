@@ -22,19 +22,22 @@ const journeyRules = [
     id: 'bible-reader',
     title: 'Lecture Bible',
     description: 'Lecture, sélection, versions, réglages de lecteur et partage biblique.',
-    match: /(bible-reader|bible-book|bible-chapter|bible-version|version-picker|reader-|parallel|pericope|compare-verses|compare-version|color-palette|verse-labels|cross-version|original-bhs)/,
+    match:
+      /(bible-reader|bible-book|bible-chapter|bible-version|version-picker|reader-|parallel|pericope|compare-verses|compare-version|color-palette|verse-labels|cross-version|original-bhs)/,
   },
   {
     id: 'selected-verse',
     title: 'Actions sur verset',
     description: 'Étudier, annoter, partager, lier et ajouter un verset à une étude.',
-    match: /(selected-verse|selected-verses|verse-note|verse-tags|verse-link|verse-bookmark|verse-add|verse-strong)/,
+    match:
+      /(selected-verse|selected-verses|verse-note|verse-tags|verse-link|verse-bookmark|verse-add|verse-strong)/,
   },
   {
     id: 'notes-links-tags',
     title: 'Notes, liens et tags',
     description: 'Collections utilisateur, détail, édition, filtres, tags et confirmations.',
-    match: /(notes|note-|annotation-note|links|link-|tags|tag-|bookmark|highlight|annotation-|word-annotation)/,
+    match:
+      /(notes|note-|annotation-note|links|link-|tags|tag-|bookmark|highlight|annotation-|word-annotation)/,
   },
   {
     id: 'studies',
@@ -46,7 +49,8 @@ const journeyRules = [
     id: 'resources',
     title: 'Ressources bibliques',
     description: 'Téléchargements, Nave, dictionnaire, lexique Strong, commentaires et langues.',
-    match: /(download|nave|dictionary|lexique|strong|concordance|commentary|commentaries|resource-language|default-bible)/,
+    match:
+      /(download|nave|dictionary|lexique|strong|concordance|commentary|commentaries|resource-language|default-bible)/,
   },
   {
     id: 'plans',
@@ -76,7 +80,8 @@ const journeyRules = [
     id: 'settings-profile',
     title: 'Compte et réglages',
     description: 'Plus, profil, auth, sauvegardes, thème, langue, aide, dev et confirmations.',
-    match: /(more|profile|forgot-password|language|theme|backup|export|import|password|logout|delete-account|faq|changelog|rate-app|share-app|updates|nuke|automatic-backup)/,
+    match:
+      /(more|profile|forgot-password|language|theme|backup|export|import|password|logout|delete-account|faq|changelog|rate-app|share-app|updates|nuke|automatic-backup)/,
   },
   {
     id: 'audio',
@@ -95,8 +100,15 @@ const fallbackJourney = {
 const riskFor = (title, slug) => {
   const text = `${title} ${slug}`.toLowerCase()
   if (/(delete|deletion|suppression|reset|stop|nuke|destructive)/.test(text)) return 'destructive'
-  if (/(share sheet|handoff|store|facebook|paypal|tipeee|github|audibible|external|export)/.test(text)) return 'external'
-  if (/(edit|editor|create|creation|rename|save|tag editing|selector|download progress|download success|installed|copy|confirmation|add|restore|redownload|clear|new-study|group result)/.test(text)) {
+  if (
+    /(share sheet|handoff|store|facebook|paypal|tipeee|github|audibible|external|export)/.test(text)
+  )
+    return 'external'
+  if (
+    /(edit|editor|create|creation|rename|save|tag editing|selector|download progress|download success|installed|copy|confirmation|add|restore|redownload|clear|new-study|group result)/.test(
+      text
+    )
+  ) {
     return 'mutating'
   }
   return 'safe'
@@ -112,12 +124,13 @@ const typeFor = (title, slug) => {
   return 'screen'
 }
 
-const pickJourney = (slug) => journeyRules.find((journey) => journey.match.test(slug)) ?? fallbackJourney
+const pickJourney = slug =>
+  journeyRules.find(journey => journey.match.test(slug)) ?? fallbackJourney
 
-const toNodeId = (id) => String(id).startsWith('screen-') ? String(id) : `screen-${id}`
+const toNodeId = id => (String(id).startsWith('screen-') ? String(id) : `screen-${id}`)
 
-const curatedFlows = (curatedSource.flows ?? []).map((flow) => {
-  const edgeNodeIds = (flow.edges ?? []).flatMap((edge) => [edge.source, edge.target])
+const curatedFlows = (curatedSource.flows ?? []).map(flow => {
+  const edgeNodeIds = (flow.edges ?? []).flatMap(edge => [edge.source, edge.target])
   const nodeIds = [...new Set([...(flow.nodes ?? []), ...edgeNodeIds].map(toNodeId))]
   const edges = (flow.edges ?? []).map((edge, index) => ({
     id: `${flow.id}-${toNodeId(edge.source)}-${toNodeId(edge.target)}-${index}`,
@@ -133,7 +146,7 @@ const curatedFlows = (curatedSource.flows ?? []).map((flow) => {
   }
 })
 
-const surfaceById = new Map((curatedSource.surfaces ?? []).map((surface) => [surface.id, surface]))
+const surfaceById = new Map((curatedSource.surfaces ?? []).map(surface => [surface.id, surface]))
 const flowIdsByNode = new Map()
 const surfaceIdsByNode = new Map()
 
@@ -147,13 +160,21 @@ for (const flow of curatedFlows) {
   }
 }
 
-const journeysById = new Map([...journeyRules, fallbackJourney].map((journey) => [journey.id, {
-  id: journey.id,
-  title: journey.title,
-  description: journey.description,
-}]))
+const journeysById = new Map(
+  [...journeyRules, fallbackJourney].map(journey => [
+    journey.id,
+    {
+      id: journey.id,
+      title: journey.title,
+      description: journey.description,
+    },
+  ])
+)
 
-const screenshotsByJourney = Map.groupBy(manifest.screenshots, (screenshot) => pickJourney(screenshot.slug).id)
+const screenshotsByJourney = Map.groupBy(
+  manifest.screenshots,
+  screenshot => pickJourney(screenshot.slug).id
+)
 const journeyLayout = new Map()
 let yOffset = 0
 
@@ -165,7 +186,7 @@ for (const journey of journeysById.values()) {
 }
 
 const perJourneyIndex = new Map()
-const nodes = manifest.screenshots.map((screenshot) => {
+const nodes = manifest.screenshots.map(screenshot => {
   const journey = pickJourney(screenshot.slug)
   const id = `screen-${screenshot.id}`
   const index = perJourneyIndex.get(journey.id) ?? 0
@@ -197,7 +218,7 @@ const nodes = manifest.screenshots.map((screenshot) => {
 })
 
 const edges = []
-const groupedNodes = Map.groupBy(nodes, (node) => node.journey)
+const groupedNodes = Map.groupBy(nodes, node => node.journey)
 
 for (const [journeyId, group] of groupedNodes) {
   for (let i = 0; i < group.length - 1; i += 1) {
@@ -213,7 +234,7 @@ for (const [journeyId, group] of groupedNodes) {
   }
 }
 
-const validNodeIds = new Set(nodes.map((node) => node.id))
+const validNodeIds = new Set(nodes.map(node => node.id))
 const missingCuratedRefs = []
 
 for (const flow of curatedFlows) {
@@ -241,7 +262,9 @@ for (const flow of curatedFlows) {
 }
 
 if (missingCuratedRefs.length > 0) {
-  throw new Error(`curated-flows.json references missing screenshots:\n${missingCuratedRefs.join('\n')}`)
+  throw new Error(
+    `curated-flows.json references missing screenshots:\n${missingCuratedRefs.join('\n')}`
+  )
 }
 
 const data = {
@@ -249,16 +272,17 @@ const data = {
   generatedFrom: 'docs/assets/app-flows/data/screenshots.json',
   curatedFrom: 'docs/assets/app-flows/data/curated-flows.json',
   generatedAt: new Date().toISOString(),
-  description: 'Agent-friendly app-flow graph. Capture-order edges preserve screenshot inventory order; curated flow edges model intentional user transitions.',
+  description:
+    'Agent-friendly app-flow graph. Capture-order edges preserve screenshot inventory order; curated flow edges model intentional user transitions.',
   surfaces: curatedSource.surfaces ?? [],
-  flows: curatedFlows.map((flow) => ({
+  flows: curatedFlows.map(flow => ({
     id: flow.id,
     title: flow.title,
     surface: flow.surface,
     surfaceTitle: surfaceById.get(flow.surface)?.title ?? flow.surface,
     description: flow.description,
     nodes: flow.nodes,
-    edges: flow.edges.map((edge) => edge.id),
+    edges: flow.edges.map(edge => edge.id),
   })),
   journeys: [...journeysById.values()],
   nodes,

@@ -25,6 +25,7 @@ module.exports = [
       'ios/**',
       'builds/**',
       'dist/**',
+      'docs/assets/app-flows/dist/**',
       '*.config.js',
       'babel.config.js',
       'metro.config.js',
