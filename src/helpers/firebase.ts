@@ -116,6 +116,7 @@ export const biblesRef: {
 } = {
   LSG: cdnUrl('bibles/bible-lsg.json'),
   DBY: cdnUrl('bibles/bible-dby.json'),
+  DBR: cdnUrl('bibles/bible-dbr.json'),
   OST: cdnUrl('bibles/bible-ost.json'),
   BDS: cdnUrl('bibles/bible-bds.json'),
   CHU: cdnUrl('bibles/bible-chu.json'),
