@@ -12,6 +12,7 @@ jest.mock('bible-passage-reference-parser/esm/bcv_parser.js', () => ({
           order: {
             Gen: 1,
             Ps: 19,
+            Acts: 44,
             John: 43,
             '1Cor': 46,
           },
@@ -34,6 +35,13 @@ jest.mock('bible-passage-reference-parser/esm/bcv_parser.js', () => ({
 
           if (text === 'Psaume 23') {
             return [{ osis: 'Ps.23', translations: [''], indices: [0, 9] }]
+          }
+
+          if (text === 'Actes 7:59, 60') {
+            return [
+              { osis: 'Acts.7.59', translations: [''], indices: [0, 10] },
+              { osis: 'Acts.7.60', translations: [''], indices: [12, 14] },
+            ]
           }
 
           return []
@@ -91,6 +99,23 @@ describe('bcvParser', () => {
             verse: 1,
             focusVerses: undefined,
             osis: 'Ps.23',
+          },
+        },
+      ])
+    })
+
+    it('keeps same-chapter comma sequences as one inline link', () => {
+      expect(parseInlineBibleReferences('Actes 7:59, 60')).toEqual([
+        {
+          text: 'Actes 7:59, 60',
+          start: 0,
+          end: 14,
+          target: {
+            book: 44,
+            chapter: 7,
+            verse: 59,
+            focusVerses: [59, 60],
+            osis: 'Acts.7.59,Acts.7.60',
           },
         },
       ])

@@ -132,10 +132,50 @@ export const osisToBibleReferenceTarget = (osis: string): BibleReferenceTarget |
   }
 }
 
+const mergeSameChapterSequence = (
+  text: string,
+  references: InlineBibleReference[]
+): InlineBibleReference[] => {
+  const merged: InlineBibleReference[] = []
+
+  for (const reference of references) {
+    const previous = merged.at(-1)
+    const separator = previous ? text.slice(previous.end, reference.start) : ''
+
+    if (
+      previous &&
+      /^[,\s]+$/.test(separator) &&
+      previous.target.book === reference.target.book &&
+      previous.target.chapter === reference.target.chapter
+    ) {
+      const focusVerses = [
+        ...(previous.target.focusVerses ?? [previous.target.verse]),
+        ...(reference.target.focusVerses ?? [reference.target.verse]),
+      ]
+
+      merged[merged.length - 1] = {
+        text: text.slice(previous.start, reference.end),
+        start: previous.start,
+        end: reference.end,
+        target: {
+          ...previous.target,
+          osis: `${previous.target.osis},${reference.target.osis}`,
+          focusVerses: [...new Set(focusVerses)],
+        },
+      }
+      continue
+    }
+
+    merged.push(reference)
+  }
+
+  return merged
+}
+
 export const parseInlineBibleReferences = (text: string): InlineBibleReference[] => {
   const references = bcv.parse(text).osis_and_indices() as OsisAndIndices[]
 
-  return references
+  const parsedReferences = references
     .map(({ osis, indices }) => {
       const [start, end] = indices
       const target = osisToBibleReferenceTarget(osis)
@@ -152,6 +192,8 @@ export const parseInlineBibleReferences = (text: string): InlineBibleReference[]
       }
     })
     .filter((reference): reference is InlineBibleReference => Boolean(reference))
+
+  return mergeSameChapterSequence(text, parsedReferences)
 }
 
 export function getIntermediateChapters(startRef: string, endRef: string) {
