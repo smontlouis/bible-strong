@@ -30,6 +30,7 @@ export interface TimelineEvent {
   row: number
   isFixed?: boolean
   type: 'major' | 'minor'
+  sectionIndex?: number
 }
 
 export interface TimelineEventDetail {

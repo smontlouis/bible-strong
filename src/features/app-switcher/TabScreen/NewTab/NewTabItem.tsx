@@ -81,17 +81,16 @@ const NewTabItem = ({ type, newAtom, onPlanPress }: NewTabItemProps) => {
 
   return (
     <TouchableBox
-      width={150}
-      height={100}
-      mt={20}
-      mx={10}
-      center
+      height={72}
+      px={18}
+      row
+      alignItems="center"
       bg="reverse"
       rounded
       onPress={onPress}
     >
       <TabIcon type={type} size={26} />
-      <Text opacity={0.4} title mt={8} fontSize={14} lightShadow>
+      <Text title ml={16} fontSize={16} lightShadow>
         {t(`tabs.${type}`)}
       </Text>
     </TouchableBox>

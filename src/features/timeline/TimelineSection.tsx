@@ -1,7 +1,12 @@
 import BottomSheet, { BottomSheetScrollViewMethods } from '@gorhom/bottom-sheet'
 import React from 'react'
 import { useSharedValue } from 'react-native-reanimated'
+import bibleMemoize from '~helpers/bibleStupidMemoize'
 import Box from '~common/ui/Box'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import generateUUID from '~helpers/generateUUID'
+import useLanguage from '~helpers/useLanguage'
+import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import CurrentSectionImage from './CurrentSectionImage'
 import CurrentYear from './CurrentYear'
 import Datebar from './Datebar'
@@ -19,17 +24,20 @@ import { useTimeline } from './timeline.hooks'
 import {
   ShallowTimelineSection,
   TimelineEvent as TimelineEventProps,
+  TimelineEventDetail,
   TimelineSection as TimelineSectionProps,
 } from './types'
 interface Props extends TimelineSectionProps {
   onPrev: () => void
   onNext: () => void
+  onBackPress?: () => void
   isCurrent: boolean
   isFirst?: boolean
   isLast?: boolean
   entrance: 0 | 1
   prevEvent: ShallowTimelineSection
   nextEvent: ShallowTimelineSection
+  sectionIndex?: number
 }
 
 const Timeline = ({
@@ -50,23 +58,41 @@ const Timeline = ({
   color,
   onPrev,
   onNext,
+  onBackPress,
   isCurrent,
   isFirst,
   isLast,
   entrance,
   prevEvent,
   nextEvent,
+  sectionIndex,
 }: Props) => {
   const isReady = useSharedValue(0)
   const modalRef = React.useRef<BottomSheet>(null)
   const eventModalRef = React.useRef<BottomSheet>(null)
   const eventScrollViewRef = React.useRef<BottomSheetScrollViewMethods>(null)
   const searchModalRef = React.useRef<BottomSheet>(null)
+  const openInNewTab = useOpenInNewTab()
+  const lang = useLanguage()
 
   const [event, setEvent] = React.useState<Partial<TimelineEventProps> | null>(null)
+  const timeline = bibleMemoize.timeline as TimelineEventDetail[] | undefined
+  const eventDetailSlugs = timeline ? new Set(timeline.map(e => e.slug)) : undefined
 
   const onTimelineDetailsOpen = () => {
     modalRef.current?.expand()
+  }
+
+  const openSectionInNewTab = () => {
+    openInNewTab({
+      id: `timeline-${generateUUID()}`,
+      title: getLegacyLocalizedField(lang, { fr: title, en: titleEn }),
+      isRemovable: true,
+      type: 'timeline',
+      data: {
+        sectionIndex,
+      },
+    })
   }
 
   const { x, y, lineX, year, width, height, yearsToPx, calculateEventWidth } = useTimeline({
@@ -92,6 +118,8 @@ const Timeline = ({
           title={title}
           titleEn={titleEn}
           onPress={onTimelineDetailsOpen}
+          onBackPress={onBackPress}
+          onOpenInNewTab={openSectionInNewTab}
           searchModalRef={searchModalRef}
         />
 
@@ -138,6 +166,8 @@ const Timeline = ({
                   calculateEventWidth={calculateEventWidth}
                   eventModalRef={eventModalRef}
                   setEvent={setEvent}
+                  hasDetails={eventDetailSlugs ? eventDetailSlugs.has(event.slug) : true}
+                  sectionIndex={sectionIndex}
                   {...event}
                 />
               ))}

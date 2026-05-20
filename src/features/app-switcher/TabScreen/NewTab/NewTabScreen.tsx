@@ -10,6 +10,7 @@ import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
 import Spacer from '~common/ui/Spacer'
+import ScrollView from '~common/ui/ScrollView'
 import PlanItem from '~features/plans/MyPlanListScreen/MyPlanItem'
 import { useComputedPlanItems } from '~features/plans/plan.hooks'
 import { NewTab, TabItem, tabTypes } from '../../../../state/tabs'
@@ -30,8 +31,8 @@ const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
     <SelectBibleReferenceModalProvider>
       <Container>
         <Header title={t('tabs.new')} />
-        <Box flex center row>
-          <Box row wrap center>
+        <ScrollView backgroundColor="lightGrey">
+          <Box px={20} pt={20} pb={40} gap={12}>
             {tabTypes.map(type => (
               <NewTabItem
                 key={type}
@@ -41,7 +42,7 @@ const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
               />
             ))}
           </Box>
-        </Box>
+        </ScrollView>
         <Modal.Body ref={planSelectorRef} snapPoints={['70%']} enableDynamicSizing={false}>
           <Box px={20} pt={10} pb={15}>
             <Text title fontSize={18}>

@@ -33,6 +33,10 @@ const TabIcon = ({ type, size = 14, color }: TabIconProps) => {
     return <MaterialIcon name="playlist-add-check" size={size} color={tintColor} />
   }
 
+  if (type === 'timeline') {
+    return <MaterialIcon name="timeline" size={size} color={tintColor} />
+  }
+
   return (
     <Image
       source={source}

@@ -65,3 +65,5 @@ export const useEventDetailsModal = () => {
   }
   return context
 }
+
+export const useOptionalEventDetailsModal = () => useContext(EventDetailsModalContext)

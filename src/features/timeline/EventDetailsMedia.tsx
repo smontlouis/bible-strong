@@ -9,7 +9,7 @@ import Paragraph from '~common/ui/Paragraph'
 import { useQuery } from '~helpers/react-query-lite'
 import { wp } from '~helpers/utils'
 import EventDetailVerse from './EventDetailVerse'
-import { useEventDetailsModal } from './EventDetailsModalContext'
+import { useOptionalEventDetailsModal } from './EventDetailsModalContext'
 import { getEvents } from './events'
 import { TimelineEvent, TimelineEventDetail } from './types'
 
@@ -21,17 +21,20 @@ const Media = ({
   scriptures,
   videos,
   related,
-}: Pick<TimelineEventDetail, 'images' | 'scriptures' | 'videos' | 'related'>) => {
+  onOpenEvent,
+}: Pick<TimelineEventDetail, 'images' | 'scriptures' | 'videos' | 'related'> & {
+  onOpenEvent?: (event: TimelineEvent) => void
+}) => {
   const { t } = useTranslation()
-  const { openEvent } = useEventDetailsModal()
+  const eventDetailsModal = useOptionalEventDetailsModal()
 
   const { data: events } = useQuery({
     queryKey: 'timeline',
     queryFn: getEvents,
   })
 
-  const flattenedEvents = events?.reduce((acc: TimelineEvent[], curr) => {
-    return [...acc, ...curr.events]
+  const flattenedEvents = events?.reduce((acc: TimelineEvent[], curr, sectionIndex) => {
+    return [...acc, ...curr.events.map(event => ({ ...event, sectionIndex }))]
   }, [])
 
   return (
@@ -98,7 +101,8 @@ const Media = ({
               key={r.slug}
               onPress={() => {
                 const foundEvent = flattenedEvents?.find(ev => ev.slug === r.slug)
-                if (foundEvent) {
+                const openEvent = onOpenEvent || eventDetailsModal?.openEvent
+                if (foundEvent && openEvent) {
                   openEvent(foundEvent)
                 } else {
                   console.log("[Timeline] Can't open this event.")

@@ -121,6 +121,23 @@ export interface PlanTab extends TabBase {
   }
 }
 
+export interface TimelineTab extends TabBase {
+  type: 'timeline'
+  data: {
+    sectionIndex?: number
+    eventSlug?: string
+    event?: {
+      slug: string
+      title: string
+      titleEn: string
+      image?: string
+      start: number
+      end: number
+      sectionIndex?: number
+    }
+  }
+}
+
 export interface NewTab extends TabBase {
   type: 'new'
   data: Record<string, never>
@@ -143,6 +160,7 @@ export type TabItem =
   | StudyTab
   | NotesTab
   | PlanTab
+  | TimelineTab
   | CommentaryTab
   | NewTab
 
@@ -151,6 +169,7 @@ export const tabTypes = [
   'search',
   'compare',
   'plan',
+  'timeline',
   'study',
   'notes',
   'strong',
@@ -288,6 +307,12 @@ export const getDefaultData = <T extends TabItem>(
         data: {
           planId: '',
         },
+      }
+    }
+    case 'timeline': {
+      return {
+        title: i18n.t('Chronologie de la Bible'),
+        data: {},
       }
     }
     case 'commentary': {

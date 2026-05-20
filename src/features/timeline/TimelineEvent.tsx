@@ -26,6 +26,8 @@ interface Props extends TimelineEventProps {
   eventModalRef: React.RefObject<BottomSheet | null>
   setEvent: (event: Partial<TimelineEventProps>) => void
   calculateEventWidth: (yearStart: number, yearEnd: number, isFixed?: boolean) => number
+  hasDetails?: boolean
+  sectionIndex?: number
 }
 
 const descSize = 140
@@ -46,6 +48,8 @@ const TimelineEvent = ({
   calculateEventWidth,
   eventModalRef,
   setEvent,
+  hasDetails = true,
+  sectionIndex,
 }: Props) => {
   const lang = useLanguage()
   const { current: top } = React.useRef(rowToPx(row))
@@ -55,8 +59,10 @@ const TimelineEvent = ({
   const label = calculateLabel(start, end)
 
   const onOpenEvent = () => {
+    if (!hasDetails) return
+
     eventModalRef.current?.expand()
-    setEvent({ slug, title, titleEn, image, start, end })
+    setEvent({ slug, title, titleEn, image, start, end, sectionIndex })
   }
 
   const posX = useDerivedValue(() => {
@@ -76,6 +82,8 @@ const TimelineEvent = ({
     return (
       <LinkBox
         onPress={onOpenEvent}
+        disabled={!hasDetails}
+        opacity={hasDetails ? 1 : 0.6}
         pos="absolute"
         h={25}
         left={left + offset}
@@ -106,6 +114,8 @@ const TimelineEvent = ({
   return (
     <LinkBox
       onPress={onOpenEvent}
+      disabled={!hasDetails}
+      opacity={hasDetails ? 1 : 0.6}
       pos="absolute"
       h={60}
       w={width}

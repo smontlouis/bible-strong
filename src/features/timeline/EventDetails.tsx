@@ -14,6 +14,11 @@ import { TimelineEventDetail, TimelineEvent as TimelineEventProps } from './type
 import { Image } from 'expo-image'
 import Media from './EventDetailsMedia'
 
+export type EventDetailsProps = Pick<
+  TimelineEventProps,
+  'slug' | 'image' | 'title' | 'titleEn' | 'start' | 'end'
+>
+
 const Description = ({ description, article }: Partial<TimelineEventDetail>) => {
   return (
     <Box px={20}>
@@ -30,59 +35,71 @@ const Description = ({ description, article }: Partial<TimelineEventDetail>) => 
   )
 }
 
-const EventDetails = waitForTimeline(
-  ({
-    slug,
-    image,
-    title,
-    titleEn,
-    start,
-    end,
-  }: Pick<TimelineEventProps, 'slug' | 'image' | 'title' | 'titleEn' | 'start' | 'end'>) => {
-    const lang = useLanguage()
-    const { goBack, canGoBack } = useEventDetailsModal()
-    const date = calculateLabel(start, end)
-    const event = useMemo(() => {
-      return (bibleMemoize.timeline as TimelineEventDetail[]).find(e => e.slug === slug)
-    }, [slug])
+export const EventDetailsContent = ({
+  slug,
+  image,
+  title,
+  titleEn,
+  start,
+  end,
+  canGoBack = false,
+  onBack,
+  onOpenEvent,
+}: EventDetailsProps & {
+  canGoBack?: boolean
+  onBack?: () => void
+  onOpenEvent?: (event: TimelineEventProps) => void
+}) => {
+  const lang = useLanguage()
+  const date = calculateLabel(start, end)
+  const event = useMemo(() => {
+    return (bibleMemoize.timeline as TimelineEventDetail[]).find(e => e.slug === slug)
+  }, [slug])
 
-    if (!event) {
-      return null
-    }
-
-    return (
-      <Box py={10}>
-        {canGoBack && (
-          <Link onPress={goBack}>
-            <Box row alignItems="center" px={20} py={10}>
-              <FeatherIcon name="arrow-left" size={20} />
-              <Paragraph ml={10}>Retour</Paragraph>
-            </Box>
-          </Link>
-        )}
-        {image && (
-          <Box center my={30}>
-            <Image
-              style={{ width: 150, height: 150, borderRadius: 10 }}
-              source={{
-                uri: image,
-              }}
-            />
-          </Box>
-        )}
-        <Box mb={30} px={20}>
-          <Paragraph textAlign="center" fontFamily="title" scale={3} flex>
-            {getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
-          </Paragraph>
-          <Paragraph color="grey" scale={-2} textAlign="center" fontFamily="text">
-            {date}
-          </Paragraph>
-        </Box>
-        <Description {...event} />
-        <Media {...event} />
-      </Box>
-    )
+  if (!event) {
+    return null
   }
-)
+
+  return (
+    <Box py={10}>
+      {canGoBack && (
+        <Link onPress={onBack}>
+          <Box row alignItems="center" px={20} py={10}>
+            <FeatherIcon name="arrow-left" size={20} />
+            <Paragraph ml={10}>Retour</Paragraph>
+          </Box>
+        </Link>
+      )}
+      {image && (
+        <Box center my={30}>
+          <Image
+            style={{ width: 150, height: 150, borderRadius: 10 }}
+            source={{
+              uri: image,
+            }}
+          />
+        </Box>
+      )}
+      <Box mb={30} px={20}>
+        <Paragraph textAlign="center" fontFamily="title" scale={3} flex>
+          {getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
+        </Paragraph>
+        <Paragraph color="grey" scale={-2} textAlign="center" fontFamily="text">
+          {date}
+        </Paragraph>
+      </Box>
+      <Description {...event} />
+      <Media {...event} onOpenEvent={onOpenEvent} />
+    </Box>
+  )
+}
+
+const EventDetails = waitForTimeline((props: EventDetailsProps) => {
+  const { goBack, canGoBack, openEvent } = useEventDetailsModal()
+
+  return (
+    <EventDetailsContent {...props} canGoBack={canGoBack} onBack={goBack} onOpenEvent={openEvent} />
+  )
+})
 
 export default EventDetails

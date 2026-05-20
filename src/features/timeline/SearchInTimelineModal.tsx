@@ -15,6 +15,8 @@ import Text from '~common/ui/Text'
 import bibleMemoize from '~helpers/bibleStupidMemoize'
 import { useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import { TimelineEventDetail, TimelineEvent as TimelineEventProps } from './types'
+import { useQuery } from '~helpers/react-query-lite'
+import { getEvents } from './events'
 
 interface Props {
   modalRef: React.RefObject<BottomSheet | null>
@@ -27,6 +29,10 @@ const SearchInTimelineModal = ({ modalRef, setEvent, eventModalRef }: Props) => 
   const [searchValue, setSearchValue] = useState('')
   const [results, setResults] = useState<TimelineEventDetail[]>([])
   const [hasSearched, setHasSearched] = useState(false)
+  const { data: sections } = useQuery({
+    queryKey: 'timeline',
+    queryFn: getEvents,
+  })
 
   const doSearch = (query: string) => {
     if (!query.trim()) {
@@ -70,8 +76,12 @@ const SearchInTimelineModal = ({ modalRef, setEvent, eventModalRef }: Props) => 
   }
 
   const onOpenEvent = (event: TimelineEventDetail) => {
+    const visualEvent = sections
+      ?.flatMap((section, sectionIndex) => section.events.map(e => ({ ...e, sectionIndex })))
+      .find(e => e.slug === event.slug)
+
     eventModalRef.current?.expand()
-    setEvent(event as unknown as Partial<TimelineEventProps>)
+    setEvent((visualEvent || event) as unknown as Partial<TimelineEventProps>)
   }
 
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()

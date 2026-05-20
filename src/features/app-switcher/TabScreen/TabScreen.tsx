@@ -17,6 +17,7 @@ import { NotesTabScreen } from '~features/notes'
 import PlanTabScreen from '~features/plans/PlanTabScreen'
 import SearchTabScreen from '~features/search/SearchTabScreen'
 import StudiesTabScreen from '~features/studies/StudiesTabScreen'
+import TimelineTabScreen from '~features/timeline/TimelineTabScreen'
 import {
   BibleTab,
   CommentaryTab,
@@ -30,6 +31,7 @@ import {
   StrongTab,
   StudyTab,
   TabItem,
+  TimelineTab,
 } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherProvider'
 import NewTabScreen from './NewTab/NewTabScreen'
@@ -62,6 +64,8 @@ const renderTabComponent = (tab: TabItem, tabAtom: PrimitiveAtom<TabItem>) => {
       return <NotesTabScreen notesAtom={tabAtom as PrimitiveAtom<NotesTab>} />
     case 'plan':
       return <PlanTabScreen planAtom={tabAtom as PrimitiveAtom<PlanTab>} />
+    case 'timeline':
+      return <TimelineTabScreen timelineAtom={tabAtom as PrimitiveAtom<TimelineTab>} />
   }
 }
 

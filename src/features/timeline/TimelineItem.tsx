@@ -20,10 +20,19 @@ const TimelineItem = ({
   subTitleEn,
   color,
   goTo,
-}: TimelineSection & { goTo: number }) => {
+  onPress,
+}: TimelineSection & { goTo: number; onPress?: (goTo: number) => void }) => {
   const lang = useLanguage()
   return (
-    <LinkBox row px={20} center mb={30} route="Timeline" params={{ goTo }}>
+    <LinkBox
+      row
+      px={20}
+      center
+      mb={30}
+      route={onPress ? undefined : 'Timeline'}
+      params={onPress ? undefined : { goTo }}
+      onPress={onPress ? () => onPress(goTo) : undefined}
+    >
       <Box
         position="relative"
         zIndex={2}
