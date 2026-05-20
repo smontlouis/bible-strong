@@ -42,11 +42,22 @@ Core user activities:
 | Bookmark | Named marker for one Bible location. | `src/features/bookmarks/`, `src/features/bookmarks/BookmarkModal.tsx` |
 | Link | User URL attached to a verse selection. | `src/features/bible/BibleLinkModal.tsx` |
 | Study | Rich text document authored by the user; can be tagged and can receive verse references. | `src/features/studies/`, `src/redux/modules/user.ts` |
+| Reading plan | Structured sequence of Bible readings, meditations, media, or teaching slices followed by the user. | `src/features/plans/`, `src/redux/modules/plan.ts` |
+| Plan slice | One reading unit inside a reading plan; it can contain Bible text, meditation text, image, video, or a chapter/verse reference. | `src/features/plans/PlanSliceScreen/` |
+| Plan tab | App tab anchored to one reading plan, with a plan slice optionally opened inside the tab. | `src/features/plans/`, `src/state/tabs.ts` |
 | Strong | Hebrew/Greek lexical identifiers and concordance resources. | `src/features/bible/Strong*`, `src/helpers/loadStrong*` |
 | Interlinear | Original-language verse display with lexical/translation alignment. | `src/helpers/loadInterlineaireChapter.ts`, `src/features/bible/BibleDOM/InterlinearVerse*` |
 | Nave | Nave's topical Bible resource. | `src/features/nave/`, `src/helpers/loadNaveItem.ts` |
 | Resource database | Downloaded SQLite/JSON file used by study features. | `src/helpers/databases.ts`, `src/helpers/databaseTypes.ts` |
 | Tab group | A group of app tabs persisted through Jotai/MMKV and optionally synced. | `src/state/tabs.ts`, `src/state/tabGroups.ts` |
+
+## Domain Relationships
+
+- A **Reading plan** contains one or more **Plan slices**.
+- A **Plan tab** is anchored to exactly one followed **Reading plan** and may display one active **Plan slice**.
+- Leaving a **Plan slice** inside a **Plan tab** returns to the parent **Reading plan**.
+- Any **Plan slice** can be the active content of a **Plan tab**, regardless of whether it contains Bible text, meditation text, image, video, chapter, or verse content.
+- If the followed **Reading plan** no longer exists, its **Plan tab** has no reading content to recover.
 
 ## Invariants
 
@@ -64,4 +75,3 @@ Core user activities:
 - Read `docs/agents/sensitive-areas.md` before touching auth, sync, storage, backups, migrations, native config, releases, or destructive flows.
 - Use the domain terms in this file in issues, plans, tests, and PR descriptions.
 - When a new domain decision is made, add an ADR under `docs/adr/`.
-
