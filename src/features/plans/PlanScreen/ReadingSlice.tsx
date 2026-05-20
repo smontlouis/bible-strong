@@ -5,7 +5,7 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Border from '~common/ui/Border'
 import { FeatherIcon } from '~common/ui/Icon'
-import { ComputedReadingSlice } from '~common/types'
+import { ComputedReadingSlice, Plan } from '~common/types'
 import Link from '~common/Link'
 import EntitySlice from './EntitySlice'
 
@@ -31,6 +31,7 @@ const NextButton = styled(Text)(({ theme }) => ({
 interface Props {
   isLast?: boolean
   planId: string
+  planLanguage?: Plan['lang']
   isSectionCompleted: boolean
 }
 
@@ -38,6 +39,7 @@ const ReadingSlice = ({
   id,
   title,
   planId,
+  planLanguage,
   slices,
   status,
   isLast,
@@ -48,7 +50,7 @@ const ReadingSlice = ({
   const filteredSlices = slices.filter(f => f.type !== 'Image')
 
   return (
-    <Link route="PlanSlice" params={{ readingSlice: { id, planId, title, slices } }}>
+    <Link route="PlanSlice" params={{ readingSlice: { id, planId, planLanguage, title, slices } }}>
       <Box paddingLeft={28} paddingTop={15} backgroundColor="reverse" position="relative">
         <FineLine />
         <Box row marginBottom={15}>

@@ -2,10 +2,16 @@ jest.mock('../../../i18n', () => ({
   getLanguage: jest.fn(() => 'fr'),
 }))
 
-jest.mock('bible-passage-reference-parser/esm/lang/fr.js', () => ({}))
-jest.mock('bible-passage-reference-parser/esm/lang/en.js', () => ({}))
+jest.mock('bible-passage-reference-parser/esm/lang/fr.js', () => ({ language: 'fr' }))
+jest.mock('bible-passage-reference-parser/esm/lang/en.js', () => ({ language: 'en' }))
 jest.mock('bible-passage-reference-parser/esm/bcv_parser.js', () => ({
   bcv_parser: class {
+    language: 'fr' | 'en'
+
+    constructor(languageModule: { language?: 'fr' | 'en' }) {
+      this.language = languageModule.language ?? 'fr'
+    }
+
     translations = {
       systems: {
         default: {
@@ -41,6 +47,13 @@ jest.mock('bible-passage-reference-parser/esm/bcv_parser.js', () => ({
             return [
               { osis: 'Acts.7.59', translations: [''], indices: [0, 10] },
               { osis: 'Acts.7.60', translations: [''], indices: [12, 14] },
+            ]
+          }
+
+          if (this.language === 'en' && text === 'Read Acts 7:59, 60') {
+            return [
+              { osis: 'Acts.7.59', translations: [''], indices: [5, 14] },
+              { osis: 'Acts.7.60', translations: [''], indices: [16, 18] },
             ]
           }
 
@@ -110,6 +123,23 @@ describe('bcvParser', () => {
           text: 'Actes 7:59, 60',
           start: 0,
           end: 14,
+          target: {
+            book: 44,
+            chapter: 7,
+            verse: 59,
+            focusVerses: [59, 60],
+            osis: 'Acts.7.59,Acts.7.60',
+          },
+        },
+      ])
+    })
+
+    it('can parse with the explicit plan language instead of the UI language', () => {
+      expect(parseInlineBibleReferences('Read Acts 7:59, 60', 'en')).toEqual([
+        {
+          text: 'Acts 7:59, 60',
+          start: 5,
+          end: 18,
           target: {
             book: 44,
             chapter: 7,

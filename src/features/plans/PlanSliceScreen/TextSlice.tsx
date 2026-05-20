@@ -1,11 +1,15 @@
 import React from 'react'
 
 import Box from '~common/ui/Box'
-import { TextSlice as TextSliceProps } from '~common/types'
+import { Plan, TextSlice as TextSliceProps } from '~common/types'
 import { FeatherIcon } from '~common/ui/Icon'
 import ReferenceParagraph from './ReferenceParagraph'
 
-const TextSlice = ({ description, subType }: TextSliceProps) => {
+type Props = TextSliceProps & {
+  planLanguage?: Plan['lang']
+}
+
+const TextSlice = ({ description, subType, planLanguage }: Props) => {
   const isDevotional = subType === 'devotional'
   const content = isDevotional
     ? description.replace(/^\n|\n$/g, '')
@@ -27,6 +31,7 @@ const TextSlice = ({ description, subType }: TextSliceProps) => {
         scaleLineHeight={1}
         color={isDevotional ? 'primary' : 'default'}
         textAlign={isDevotional ? 'center' : 'left'}
+        planLanguage={planLanguage}
       >
         {content}
       </ReferenceParagraph>

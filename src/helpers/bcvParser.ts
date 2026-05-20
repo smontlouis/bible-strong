@@ -10,6 +10,7 @@ import { getLanguage } from '../../i18n'
 // }
 
 const language = getLanguage()
+export type BcvLanguage = 'fr' | 'en'
 
 interface BcvParserWithTranslations extends bcv_parser {
   translations: {
@@ -38,28 +39,42 @@ export interface InlineBibleReference {
   target: BibleReferenceTarget
 }
 
-export const bcv = new bcv_parser(language === 'fr' ? fr : en) as BcvParserWithTranslations
+const createBcvParser = (parserLanguage: BcvLanguage): BcvParserWithTranslations => {
+  const parser = new bcv_parser(parserLanguage === 'fr' ? fr : en) as BcvParserWithTranslations
 
-bcv.set_options({
-  consecutive_combination_strategy: 'separate',
-  sequence_combination_strategy: 'separate',
-})
+  parser.set_options({
+    consecutive_combination_strategy: 'separate',
+    sequence_combination_strategy: 'separate',
+  })
+
+  return parser
+}
+
+const bcvByLanguage: Record<BcvLanguage, BcvParserWithTranslations> = {
+  fr: createBcvParser('fr'),
+  en: createBcvParser('en'),
+}
+
+const getBcvParser = (parserLanguage: BcvLanguage = language === 'fr' ? 'fr' : 'en') =>
+  bcvByLanguage[parserLanguage]
+
+export const bcv = getBcvParser()
 
 type BookID = string
 
 const trans = 'default'
 
 function getLastVerseInChapter(book: BookID, chapter: number): number {
-  return bcv.translations.systems[trans].chapters[book][chapter - 1]
+  return getBcvParser().translations.systems[trans].chapters[book][chapter - 1]
 }
 
-const getBookNumber = (book: BookID): number | undefined => {
-  return bcv.translations.systems[trans].order[book]
+const getBookNumber = (book: BookID, parserLanguage?: BcvLanguage): number | undefined => {
+  return getBcvParser(parserLanguage).translations.systems[trans].order[book]
 }
 
-const parseOsisRef = (osisRef: string) => {
+const parseOsisRef = (osisRef: string, parserLanguage?: BcvLanguage) => {
   const [book, chapterStr, verseStr] = osisRef.split('.')
-  const bookNumber = getBookNumber(book)
+  const bookNumber = getBookNumber(book, parserLanguage)
   const chapter = Number(chapterStr)
   const verse = verseStr ? Number(verseStr) : undefined
 
@@ -75,14 +90,14 @@ const parseOsisRef = (osisRef: string) => {
   }
 }
 
-const getFocusVersesFromOsis = (osis: string) => {
+const getFocusVersesFromOsis = (osis: string, parserLanguage?: BcvLanguage) => {
   const focusVerses: number[] = []
   let commonBook: string | undefined
   let commonChapter: number | undefined
 
   for (const segment of osis.split(',')) {
     const [startRef, endRef] = segment.split('-')
-    const start = parseOsisRef(startRef)
+    const start = parseOsisRef(startRef, parserLanguage)
 
     if (!start?.verse) {
       return undefined
@@ -100,7 +115,7 @@ const getFocusVersesFromOsis = (osis: string) => {
       continue
     }
 
-    const end = parseOsisRef(endRef)
+    const end = parseOsisRef(endRef, parserLanguage)
 
     if (!end?.verse || end.book !== commonBook || end.chapter !== commonChapter) {
       return undefined
@@ -114,10 +129,13 @@ const getFocusVersesFromOsis = (osis: string) => {
   return [...new Set(focusVerses)]
 }
 
-export const osisToBibleReferenceTarget = (osis: string): BibleReferenceTarget | undefined => {
+export const osisToBibleReferenceTarget = (
+  osis: string,
+  parserLanguage?: BcvLanguage
+): BibleReferenceTarget | undefined => {
   const firstSegment = osis.split(',')[0]
   const firstRef = firstSegment.split('-')[0]
-  const start = parseOsisRef(firstRef)
+  const start = parseOsisRef(firstRef, parserLanguage)
 
   if (!start) {
     return undefined
@@ -127,7 +145,7 @@ export const osisToBibleReferenceTarget = (osis: string): BibleReferenceTarget |
     book: start.bookNumber,
     chapter: start.chapter,
     verse: start.verse ?? 1,
-    focusVerses: getFocusVersesFromOsis(osis),
+    focusVerses: getFocusVersesFromOsis(osis, parserLanguage),
     osis,
   }
 }
@@ -172,13 +190,16 @@ const mergeSameChapterSequence = (
   return merged
 }
 
-export const parseInlineBibleReferences = (text: string): InlineBibleReference[] => {
-  const references = bcv.parse(text).osis_and_indices() as OsisAndIndices[]
+export const parseInlineBibleReferences = (
+  text: string,
+  parserLanguage?: BcvLanguage
+): InlineBibleReference[] => {
+  const references = getBcvParser(parserLanguage).parse(text).osis_and_indices() as OsisAndIndices[]
 
   const parsedReferences = references
     .map(({ osis, indices }) => {
       const [start, end] = indices
-      const target = osisToBibleReferenceTarget(osis)
+      const target = osisToBibleReferenceTarget(osis, parserLanguage)
 
       if (!target || start === undefined || end === undefined || end <= start) {
         return undefined

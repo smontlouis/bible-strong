@@ -7,7 +7,7 @@ import { Share } from 'react-native'
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
 import { toast } from '~helpers/toast'
-import { ComputedReadingSlice, EntitySlice } from '~common/types'
+import { ComputedReadingSlice, EntitySlice, Plan } from '~common/types'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import { FeatherIcon, MaterialIcon, TextIcon } from '~common/ui/Icon'
@@ -110,8 +110,8 @@ const PlanSliceScreen = () => {
   const readingSlice: ComputedReadingSlice | undefined = params.readingSlice
     ? JSON.parse(params.readingSlice)
     : undefined
-  const { id, title, slices, planId } = (readingSlice || {}) as Partial<
-    ComputedReadingSlice & { planId: string }
+  const { id, title, slices, planId, planLanguage } = (readingSlice || {}) as Partial<
+    ComputedReadingSlice & { planId: string; planLanguage: Plan['lang'] }
   >
 
   const { t } = useTranslation()
@@ -240,11 +240,13 @@ const PlanSliceScreen = () => {
         </PauseText>
         {title && (
           <Box paddingHorizontal={20} marginBottom={50}>
-            <ReferenceParagraph scale={3}>{title}</ReferenceParagraph>
+            <ReferenceParagraph scale={3} planLanguage={planLanguage}>
+              {title}
+            </ReferenceParagraph>
           </Box>
         )}
         {slices?.map(slice => (
-          <Slice key={slice.id} {...slice} />
+          <Slice key={slice.id} {...slice} planLanguage={planLanguage} />
         ))}
         <Box height={80} center marginTop={30}>
           <ReadButton isRead={isRead} readingSliceId={id!} planId={planId!} />

@@ -4,12 +4,13 @@ import { useRouter } from 'expo-router'
 
 import booksDesc from '~assets/bible_versions/books-desc'
 import Paragraph from '~common/ui/Paragraph'
-import { BibleReferenceTarget, parseInlineBibleReferences } from '~helpers/bcvParser'
+import { BcvLanguage, BibleReferenceTarget, parseInlineBibleReferences } from '~helpers/bcvParser'
 
 type ParagraphProps = React.ComponentProps<typeof Paragraph>
 
 interface ReferenceParagraphProps extends Omit<ParagraphProps, 'children'> {
   children: string
+  planLanguage?: BcvLanguage
 }
 
 const getBibleViewParams = (target: BibleReferenceTarget) => ({
@@ -25,9 +26,9 @@ const ReferenceText = styled.Text(({ theme }) => ({
   textDecorationLine: 'underline',
 }))
 
-const ReferenceParagraph = ({ children, ...props }: ReferenceParagraphProps) => {
+const ReferenceParagraph = ({ children, planLanguage, ...props }: ReferenceParagraphProps) => {
   const router = useRouter()
-  const references = parseInlineBibleReferences(children)
+  const references = parseInlineBibleReferences(children, planLanguage)
 
   if (!references.length) {
     return <Paragraph {...props}>{children}</Paragraph>
