@@ -50,7 +50,7 @@ const Paragraph = ({
         children,
       }}
       {...props}
-      selectable
+      selectable={props.selectable ?? true}
     />
   )
 }

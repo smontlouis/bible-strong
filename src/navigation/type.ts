@@ -121,7 +121,7 @@ type PlanScreenProps = {
 }
 
 type PlanSliceScreenProps = {
-  readingSlice: ComputedReadingSlice & { planId: string }
+  readingSlice: ComputedReadingSlice & { planId: string; planLanguage?: 'fr' | 'en' }
 }
 
 type TimelineScreenProps = {

@@ -21,7 +21,7 @@ This report is a directional agent-readability score, not a product quality verd
 | `nave` | 7/10 | 12 | 0 | yes | no | no colocated feature tests; 4 eslint-disable markers |
 | `notes` | 5/10 | 5 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README; 2 eslint-disable markers |
 | `onboarding` | 6/10 | 7 | 0 | yes | yes | no colocated feature tests; 5 eslint-disable markers; sensitive user/account surface |
-| `plans` | 7/10 | 26 | 0 | yes | no | no colocated feature tests; 2 eslint-disable markers |
+| `plans` | 7/10 | 27 | 0 | yes | no | no colocated feature tests; 2 eslint-disable markers |
 | `profile` | 5/10 | 9 | 0 | no | yes | no colocated feature tests; no mapped smoke path; no feature README; sensitive user/account surface |
 | `search` | 9/10 | 7 | 1 | yes | no | 2 eslint-disable markers |
 | `settings` | 5/10 | 35 | 0 | yes | yes | no colocated feature tests; 12 console calls; 1 eslint-disable markers; sensitive user/account surface |

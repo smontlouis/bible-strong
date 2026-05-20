@@ -20,7 +20,7 @@ type SectionDataItem = {
 
 type ListItem = SectionHeaderItem | SectionDataItem
 
-const PlanSectionList = ({ id, sections }: ComputedPlan) => {
+const PlanSectionList = ({ id, sections, lang }: ComputedPlan) => {
   const listRef = React.useRef<LegendListRef>(null)
   const [expandedSectionIds, setExpandedSectionIds] = React.useState<string[]>([])
   const pendingScrollToSection = React.useRef<string | null>(null)
@@ -110,6 +110,7 @@ const PlanSectionList = ({ id, sections }: ComputedPlan) => {
     return (
       <ReadingSlice
         planId={id}
+        planLanguage={lang}
         id={item.slice.id}
         title={item.slice.title}
         slices={item.slice.slices}
