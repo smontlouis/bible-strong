@@ -5,6 +5,8 @@
   "scripts": {
     "eas-build-pre-install": "corepack enable",
     "start": "expo start --dev-client",
+    "update:staging": "npx eas update --channel staging",
+    "update:production": "npx eas update --channel production",
     "build:android:dev": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c development -- eas build -p android --local --profile development --non-interactive",
     "build:android:staging": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c staging -- eas build -p android --local --profile staging --non-interactive",
     "build:android:prod": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c production -- eas build -p android --local --profile production --non-interactive",
