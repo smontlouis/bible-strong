@@ -13,6 +13,7 @@ import { versions } from '~helpers/bibleVersions'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import i18n, { getLanguage } from '~i18n'
 import { clampTabIndex, updateTabGroupActiveIndex, updateTabGroupTabs } from './tabWorkspace'
+import type { BibleVersionCoverage } from '~helpers/biblesDb'
 
 // ============================================================================
 // SHARED BIBLE DOM (single WebView instance for all Bible tabs)
@@ -652,6 +653,18 @@ export const checkTabType = <Type extends TabItem>(
 
 export type BibleTabActions = ReturnType<typeof useBibleTabActions>
 
+const getCanonicalChapters = (book: Book) => Array.from({ length: book.Chapitres }, (_, i) => i + 1)
+
+const getAvailableBookNumbers = (coverage?: BibleVersionCoverage) =>
+  coverage?.books.length ? coverage.books : books.map(book => book.Numero)
+
+const getAvailableChapters = (book: Book, coverage?: BibleVersionCoverage) => {
+  const chapters = coverage?.chaptersByBook[book.Numero]
+  return chapters?.length ? chapters : getCanonicalChapters(book)
+}
+
+const findBook = (bookNumber: number) => books.find(book => book.Numero === bookNumber)
+
 export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const setBibleTab = useSetAtom(tabAtom)
 
@@ -880,78 +893,88 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     )
   }
 
-  const goToPrevChapter = () => {
+  const goToPrevChapter = (coverage?: BibleVersionCoverage) => {
     setBibleTab(
       produce(draft => {
-        if (draft.data.selectedBook.Numero === 1 && draft.data.selectedChapter === 1) {
-          return
-        }
-
         const currentChapter = draft.data.selectedChapter
+        const currentBook = draft.data.selectedBook
+        const currentChapters = getAvailableChapters(currentBook, coverage)
+        const previousChapter = [...currentChapters]
+          .reverse()
+          .find(chapter => chapter < currentChapter)
 
-        if (currentChapter === 1) {
-          const currentBook = draft.data.selectedBook
-          const currentBookIndex = books.findIndex(b => b.Numero === currentBook.Numero)
-
-          const prevBook = books[currentBookIndex - 1]
-          draft.data.selectedBook = prevBook
-          draft.data.selectedChapter = prevBook.Chapitres
+        if (previousChapter) {
+          draft.data.selectedChapter = previousChapter
           draft.data.selectedVerse = 1
-          draft.data.temp = {
-            selectedBook: prevBook,
-            selectedChapter: prevBook.Chapitres,
-            selectedVerse: 1,
-          }
-
+          draft.data.focusVerses = undefined
+          draft.data.temp.selectedChapter = previousChapter
+          draft.data.temp.selectedVerse = 1
           return
         }
 
-        draft.data.selectedChapter = currentChapter - 1
+        const availableBookNumbers = getAvailableBookNumbers(coverage)
+        const currentBookIndex = availableBookNumbers.indexOf(currentBook.Numero)
+        if (currentBookIndex <= 0) return
+
+        const prevBook = findBook(availableBookNumbers[currentBookIndex - 1])
+        if (!prevBook) return
+
+        const prevBookChapters = getAvailableChapters(prevBook, coverage)
+        const targetChapter = prevBookChapters[prevBookChapters.length - 1]
+        if (!targetChapter) return
+
+        draft.data.selectedBook = prevBook
+        draft.data.selectedChapter = targetChapter
         draft.data.selectedVerse = 1
         draft.data.focusVerses = undefined
-        draft.data.temp.selectedChapter = currentChapter - 1
-        draft.data.temp.selectedVerse = 1
+        draft.data.temp = {
+          selectedBook: prevBook,
+          selectedChapter: targetChapter,
+          selectedVerse: 1,
+        }
 
         return
       })
     )
   }
 
-  const goToNextChapter = () => {
+  const goToNextChapter = (coverage?: BibleVersionCoverage) => {
     setBibleTab(
       produce(draft => {
-        if (
-          draft.data.selectedBook.Numero === 66 &&
-          draft.data.selectedChapter === draft.data.selectedBook.Chapitres
-        ) {
-          return
-        }
-
         const currentChapter = draft.data.selectedChapter
         const currentBook = draft.data.selectedBook
+        const currentChapters = getAvailableChapters(currentBook, coverage)
+        const nextChapter = currentChapters.find(chapter => chapter > currentChapter)
 
-        if (currentChapter === currentBook.Chapitres) {
-          const currentBookIndex = books.findIndex(b => b.Numero === currentBook.Numero)
-
-          const nextBook = books[currentBookIndex + 1]
-
-          draft.data.selectedBook = nextBook
-          draft.data.selectedChapter = 1
+        if (nextChapter) {
+          draft.data.selectedChapter = nextChapter
           draft.data.selectedVerse = 1
-          draft.data.temp = {
-            selectedBook: nextBook,
-            selectedChapter: 1,
-            selectedVerse: 1,
-          }
-
+          draft.data.focusVerses = undefined
+          draft.data.temp.selectedChapter = nextChapter
+          draft.data.temp.selectedVerse = 1
           return
         }
 
-        draft.data.selectedChapter = currentChapter + 1
+        const availableBookNumbers = getAvailableBookNumbers(coverage)
+        const currentBookIndex = availableBookNumbers.indexOf(currentBook.Numero)
+        if (currentBookIndex === -1 || currentBookIndex >= availableBookNumbers.length - 1) return
+
+        const nextBook = findBook(availableBookNumbers[currentBookIndex + 1])
+        if (!nextBook) return
+
+        const nextBookChapters = getAvailableChapters(nextBook, coverage)
+        const targetChapter = nextBookChapters[0]
+        if (!targetChapter) return
+
+        draft.data.selectedBook = nextBook
+        draft.data.selectedChapter = targetChapter
         draft.data.selectedVerse = 1
         draft.data.focusVerses = undefined
-        draft.data.temp.selectedChapter = currentChapter + 1
-        draft.data.temp.selectedVerse = 1
+        draft.data.temp = {
+          selectedBook: nextBook,
+          selectedChapter: targetChapter,
+          selectedVerse: 1,
+        }
 
         return
       })
