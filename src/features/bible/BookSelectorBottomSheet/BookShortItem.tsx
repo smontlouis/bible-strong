@@ -12,11 +12,12 @@ import { BOOK_SELECTION_EVENT } from './constants'
 
 interface BookShortItemProps {
   book: Book
+  chapters?: number[]
   isSelected: boolean
   isNT: boolean
   onChange: (book: Book) => void
 }
-export const BookShortItem = ({ book, isSelected, isNT, onChange }: BookShortItemProps) => {
+export const BookShortItem = ({ book, chapters: availableChapters, isSelected, isNT, onChange }: BookShortItemProps) => {
   const { t } = useTranslation()
   const theme: Theme = useTheme()
   const bookName = t(book.Nom).replace(/\s/g, '').substr(0, 3)
@@ -25,7 +26,10 @@ export const BookShortItem = ({ book, isSelected, isNT, onChange }: BookShortIte
 
   useEffect(() => () => setShowPopover(false), [])
 
-  const chapters = useMemo(() => Array.from({ length: book.Chapitres }, (_, i) => i + 1), [book])
+  const chapters = useMemo(
+    () => availableChapters || Array.from({ length: book.Chapitres }, (_, i) => i + 1),
+    [availableChapters, book]
+  )
 
   // Configuration pour le centrage des éléments
   const ITEM_WIDTH = 40

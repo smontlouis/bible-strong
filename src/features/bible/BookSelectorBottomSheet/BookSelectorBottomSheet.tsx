@@ -21,6 +21,8 @@ import { BookSelectorList } from './BookSelectorList'
 import { BookSelectorParams } from './BookSelectorParams'
 import { BOOK_SELECTION_EVENT, SelectionEvent } from './constants'
 import VerseBottomSheet, { tempSelectedBookAtom, tempSelectedChapterAtom } from './VerseBottomSheet'
+import { useQuery } from '~helpers/react-query-lite'
+import { getBibleVersionCoverage } from '~helpers/biblesDb'
 interface BookSelectorBottomSheetProps {
   selectedBookNum?: number
   bottomSheetRef: React.RefObject<BottomSheet | null>
@@ -47,6 +49,13 @@ const BookSelectorBottomSheet = ({ bottomSheetRef }: BookSelectorBottomSheetProp
     useAtomValue(bookSelectorDataAtom)
   const openInNewTab = useOpenInNewTab()
   const verseBottomSheetRef = useRef<BottomSheet>(null)
+  const selectedVersion = bookSelectorData?.selectedVersion
+
+  const { data: coverageData } = useQuery({
+    queryKey: ['bible-version-coverage', selectedVersion || ''],
+    queryFn: () => getBibleVersionCoverage(selectedVersion || 'LSG'),
+    enabled: !!selectedVersion,
+  })
 
   // On écoute les événements de sélection
   useEffect(() => {
@@ -105,12 +114,15 @@ const BookSelectorBottomSheet = ({ bottomSheetRef }: BookSelectorBottomSheetProp
   }, [bookSelectorActions, openInNewTab, t, bookSelectorData, bookSelectorHasVerses])
 
   const data = useMemo(() => {
-    const booksArray = Object.values(books)
+    const booksArray = Object.values(books).filter(book => {
+      if (!coverageData?.books?.length) return true
+      return coverageData.books.includes(book.Numero)
+    })
     if (isAlphabetical) {
       return [...booksArray].sort((a, b) => a.Nom.localeCompare(b.Nom))
     }
     return booksArray
-  }, [isAlphabetical])
+  }, [coverageData?.books, isAlphabetical])
 
   const initialScrollIndex = data.findIndex(
     book => book.Numero === (bookSelectorData?.selectedBook.Numero || 1)
@@ -164,6 +176,7 @@ const BookSelectorBottomSheet = ({ bottomSheetRef }: BookSelectorBottomSheetProp
           expandedBook={expandedBook}
           bookSelectorData={bookSelectorData}
           flatListRef={flatListRef}
+          chaptersByBook={coverageData?.chaptersByBook}
         />
       </BottomSheet>
       <VerseBottomSheet

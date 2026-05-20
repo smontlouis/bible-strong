@@ -35,6 +35,12 @@ export interface SearchOptions {
   offset?: number
 }
 
+export interface BibleVersionCoverage {
+  books: number[]
+  chaptersByBook: Record<number, number[]>
+  verseCountByBookChapter: Record<string, number>
+}
+
 // ---------------------------------------------------------------------------
 // Singleton with mutex to prevent concurrent opens
 // ---------------------------------------------------------------------------
@@ -410,6 +416,43 @@ export function getChapterVerseCount(
       [version, book, chapter]
     )
     return row?.cnt ?? 0
+  })
+}
+
+export function getBibleVersionCoverage(version: string): Promise<BibleVersionCoverage> {
+  return withDbError('getBibleVersionCoverage', async () => {
+    const d = await getDb()
+    const rows = await d.getAllAsync<{
+      book: number
+      chapter: number
+      verseCount: number
+    }>(
+      `SELECT book, chapter, COUNT(*) as verseCount
+       FROM verses
+       WHERE version = ?
+       GROUP BY book, chapter
+       ORDER BY book, chapter`,
+      [version]
+    )
+
+    const books: number[] = []
+    const chaptersByBook: Record<number, number[]> = {}
+    const verseCountByBookChapter: Record<string, number> = {}
+
+    rows.forEach(({ book, chapter, verseCount }) => {
+      if (!chaptersByBook[book]) {
+        chaptersByBook[book] = []
+        books.push(book)
+      }
+      chaptersByBook[book].push(chapter)
+      verseCountByBookChapter[`${book}-${chapter}`] = verseCount
+    })
+
+    return {
+      books,
+      chaptersByBook,
+      verseCountByBookChapter,
+    }
   })
 }
 
