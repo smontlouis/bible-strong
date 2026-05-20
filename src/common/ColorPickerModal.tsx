@@ -411,7 +411,7 @@ const ColorPickerModal = () => {
           {customHighlightColors.length >= MAX_CUSTOM_COLORS && (
             <Box padding={15}>
               <Text color="tertiary" fontSize={12}>
-                {t('Limite de 5 couleurs personnalisées atteinte')}
+                {t('Limite de 20 couleurs personnalisées atteinte')}
               </Text>
             </Box>
           )}

@@ -439,7 +439,7 @@
   "Modifier {{name}}": "Edit {{name}}",
   "Supprimer la couleur": "Delete color",
   "Cette couleur est utilisée par {{count}} surbrillance(s). Elles seront également supprimées.": "This color is used by {{count}} highlight(s). They will also be deleted.",
-  "Limite de 5 couleurs personnalisées atteinte": "Limit of 5 custom colors reached",
+  "Limite de 20 couleurs personnalisées atteinte": "Limit of 20 custom colors reached",
   "surbrillance(s)": "highlight(s)",
   "Nom de la couleur (optionnel)": "Color name (optional)",
   "Type de surlignage": "Highlight type",

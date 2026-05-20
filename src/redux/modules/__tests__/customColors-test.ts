@@ -184,20 +184,20 @@ describe('Custom Colors Reducer', () => {
       expect(state.bible.settings.customHighlightColors).toHaveLength(3)
     })
 
-    it('should not exceed maximum of 5 custom colors', () => {
+    it('should not exceed maximum of 20 custom colors', () => {
       let state = initialState
-      for (let i = 0; i < 7; i++) {
+      for (let i = 0; i < 22; i++) {
         state = userReducer(state, addCustomColor(`#ff000${i}`))
       }
-      expect(state.bible.settings.customHighlightColors).toHaveLength(5)
+      expect(state.bible.settings.customHighlightColors).toHaveLength(20)
     })
 
-    it('should allow exactly 5 custom colors', () => {
+    it('should allow exactly 20 custom colors', () => {
       let state = initialState
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 20; i++) {
         state = userReducer(state, addCustomColor(`#ff000${i}`))
       }
-      expect(state.bible.settings.customHighlightColors).toHaveLength(5)
+      expect(state.bible.settings.customHighlightColors).toHaveLength(20)
     })
   })
 

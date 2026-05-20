@@ -441,7 +441,7 @@ const getInitialState = (): UserState => ({
   },
 })
 
-const MAX_CUSTOM_COLORS = 5
+const MAX_CUSTOM_COLORS = 20
 
 const userSlice = createSlice({
   name: 'user',
