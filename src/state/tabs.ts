@@ -13,6 +13,11 @@ import { versions } from '~helpers/bibleVersions'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import i18n, { getLanguage } from '~i18n'
 import { clampTabIndex, updateTabGroupActiveIndex, updateTabGroupTabs } from './tabWorkspace'
+import type { BibleVersionCoverage } from '~helpers/biblesDb'
+import {
+  getNextAvailableChapterLocation,
+  getPreviousAvailableChapterLocation,
+} from '~helpers/bibleCoverage'
 
 // ============================================================================
 // SHARED BIBLE DOM (single WebView instance for all Bible tabs)
@@ -880,78 +885,52 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     )
   }
 
-  const goToPrevChapter = () => {
+  const goToPrevChapter = (coverage?: BibleVersionCoverage) => {
     setBibleTab(
       produce(draft => {
-        if (draft.data.selectedBook.Numero === 1 && draft.data.selectedChapter === 1) {
-          return
-        }
+        const currentBook = draft.data.selectedBook
+        const target = getPreviousAvailableChapterLocation(
+          currentBook,
+          draft.data.selectedChapter,
+          coverage
+        )
+        if (!target) return
 
-        const currentChapter = draft.data.selectedChapter
-
-        if (currentChapter === 1) {
-          const currentBook = draft.data.selectedBook
-          const currentBookIndex = books.findIndex(b => b.Numero === currentBook.Numero)
-
-          const prevBook = books[currentBookIndex - 1]
-          draft.data.selectedBook = prevBook
-          draft.data.selectedChapter = prevBook.Chapitres
-          draft.data.selectedVerse = 1
-          draft.data.temp = {
-            selectedBook: prevBook,
-            selectedChapter: prevBook.Chapitres,
-            selectedVerse: 1,
-          }
-
-          return
-        }
-
-        draft.data.selectedChapter = currentChapter - 1
+        draft.data.selectedBook = target.book
+        draft.data.selectedChapter = target.chapter
         draft.data.selectedVerse = 1
         draft.data.focusVerses = undefined
-        draft.data.temp.selectedChapter = currentChapter - 1
-        draft.data.temp.selectedVerse = 1
+        draft.data.temp = {
+          selectedBook: target.book,
+          selectedChapter: target.chapter,
+          selectedVerse: 1,
+        }
 
         return
       })
     )
   }
 
-  const goToNextChapter = () => {
+  const goToNextChapter = (coverage?: BibleVersionCoverage) => {
     setBibleTab(
       produce(draft => {
-        if (
-          draft.data.selectedBook.Numero === 66 &&
-          draft.data.selectedChapter === draft.data.selectedBook.Chapitres
-        ) {
-          return
-        }
-
-        const currentChapter = draft.data.selectedChapter
         const currentBook = draft.data.selectedBook
+        const target = getNextAvailableChapterLocation(
+          currentBook,
+          draft.data.selectedChapter,
+          coverage
+        )
+        if (!target) return
 
-        if (currentChapter === currentBook.Chapitres) {
-          const currentBookIndex = books.findIndex(b => b.Numero === currentBook.Numero)
-
-          const nextBook = books[currentBookIndex + 1]
-
-          draft.data.selectedBook = nextBook
-          draft.data.selectedChapter = 1
-          draft.data.selectedVerse = 1
-          draft.data.temp = {
-            selectedBook: nextBook,
-            selectedChapter: 1,
-            selectedVerse: 1,
-          }
-
-          return
-        }
-
-        draft.data.selectedChapter = currentChapter + 1
+        draft.data.selectedBook = target.book
+        draft.data.selectedChapter = target.chapter
         draft.data.selectedVerse = 1
         draft.data.focusVerses = undefined
-        draft.data.temp.selectedChapter = currentChapter + 1
-        draft.data.temp.selectedVerse = 1
+        draft.data.temp = {
+          selectedBook: target.book,
+          selectedChapter: target.chapter,
+          selectedVerse: 1,
+        }
 
         return
       })

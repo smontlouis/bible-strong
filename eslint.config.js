@@ -2,10 +2,17 @@ const expoConfig = require('eslint-config-expo/flat')
 const prettierPlugin = require('eslint-plugin-prettier')
 const prettierConfig = require('eslint-config-prettier')
 const reactCompiler = require('eslint-plugin-react-compiler')
+const globals = require('globals')
 module.exports = [
   ...expoConfig,
   prettierConfig,
   reactCompiler.configs.recommended,
+  {
+    files: ['**/__tests__/**/*.ts', '**/*-test.ts'],
+    languageOptions: {
+      globals: globals.jest,
+    },
+  },
   {
     plugins: {
       prettier: prettierPlugin,

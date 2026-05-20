@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { FlatList, ScrollView } from 'react-native'
 import { bookSelectorSelectionModeAtom } from './atom'
 import { useAtomValue } from 'jotai/react'
-import books, { Book } from '~assets/bible_versions/books-desc'
+import { Book } from '~assets/bible_versions/books-desc'
 import BookItem, { itemHeight } from './BookItem'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SharedValue } from 'react-native-reanimated'
@@ -15,6 +15,7 @@ interface BookSelectorListProps {
   data: Book[]
   bookSelectorData?: BibleTab['data']
   flatListRef: React.RefObject<FlatList | null>
+  chaptersByBook?: Record<number, number[]>
 }
 export const BookSelectorList = ({
   data,
@@ -22,6 +23,7 @@ export const BookSelectorList = ({
   expandedBook,
   bookSelectorData,
   flatListRef,
+  chaptersByBook,
 }: BookSelectorListProps) => {
   const insets = useSafeAreaInsets()
   const selectionMode = useAtomValue(bookSelectorSelectionModeAtom)
@@ -33,6 +35,7 @@ export const BookSelectorList = ({
   const renderItem = ({ item: book }: { item: Book }) => (
     <BookItem
       book={book}
+      chapters={chaptersByBook?.[book.Numero]}
       isSelected={book.Numero === bookSelectorData?.selectedBook.Numero}
       onBookSelect={handleBookSelect}
       expandedBook={expandedBook}
@@ -40,6 +43,7 @@ export const BookSelectorList = ({
   )
 
   useEffect(() => {
+    if (data.length === 0) return
     setTimeout(() => {
       flatListRef.current?.scrollToIndex({
         index: initialScrollIndex,
@@ -48,7 +52,7 @@ export const BookSelectorList = ({
       })
     }, 100)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialScrollIndex])
+  }, [data.length, initialScrollIndex])
 
   if (selectionMode === 'grid') {
     return (
@@ -62,12 +66,13 @@ export const BookSelectorList = ({
           paddingBottom: insets.bottom,
         }}
       >
-        {Object.values(books).map(book => (
+        {data.map(book => (
           <BookShortItem
             isNT={book.Numero >= 40}
             key={book.Numero}
             onChange={() => {}}
             book={book}
+            chapters={chaptersByBook?.[book.Numero]}
             isSelected={book.Numero === bookSelectorData?.selectedBook.Numero}
           />
         ))}

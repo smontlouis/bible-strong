@@ -23,8 +23,10 @@ import { useTranslation } from 'react-i18next'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { StrongReference, StudyNavigateBibleType } from '~common/types'
 import { CarouselProvider } from '~helpers/CarouselContext'
+import { getChapterVerseCountSafe } from '~helpers/bibleCoverage'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
+import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -84,6 +86,7 @@ interface State {
 const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateVerse }) => {
   const theme = useTheme()
   const { t } = useTranslation()
+  const defaultVersion = useDefaultBibleVersion()
   const carouselRef = useRef<ICarouselInstance>(null)
   const [boxHeight, setBoxHeight] = useState(0)
   const {
@@ -111,7 +114,9 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
       return
     }
 
-    const versesInCurrentChapter = countLsgChapters[`${verse.Livre}-${verse.Chapitre}`]
+    const versesInCurrentChapter =
+      (await getChapterVerseCountSafe(defaultVersion, verse.Livre, verse.Chapitre)) ||
+      countLsgChapters[`${verse.Livre}-${verse.Chapitre}`]
 
     setState(prev => ({ ...prev, versesInCurrentChapter }))
     formatVerse(strongVerse)
@@ -187,7 +192,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
   useEffect(() => {
     loadPage()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [verse.Verset])
+  }, [verse.Verset, defaultVersion])
 
   const { isCarouselLoading, versesInCurrentChapter, error, formattedTexte } = state
 

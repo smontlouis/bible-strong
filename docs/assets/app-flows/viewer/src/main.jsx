@@ -416,55 +416,70 @@ function FlowCanvas({ activeScope, search, activeRisk, selectedNodeId, setSelect
   const { fitView } = useReactFlow()
 
   const normalizedSearch = search.trim().toLowerCase()
-  const active = parseScope(activeScope)
-  const explicitNodeIds = new Set(
-    flowData.edges
-      .filter(edge => edge.inferred === false)
-      .flatMap(edge => [edge.source, edge.target])
+  const active = React.useMemo(() => parseScope(activeScope), [activeScope])
+  const explicitNodeIds = React.useMemo(
+    () =>
+      new Set(
+        flowData.edges
+          .filter(edge => edge.inferred === false)
+          .flatMap(edge => [edge.source, edge.target])
+      ),
+    []
   )
 
-  const visibleNodeIds = new Set(
-    flowData.nodes
-      .filter(node => {
+  const visibleNodeIds = React.useMemo(
+    () =>
+      new Set(
+        flowData.nodes
+          .filter(node => {
+            const matchesScope =
+              active.kind === 'all' ||
+              (active.kind === 'curated' && explicitNodeIds.has(node.id)) ||
+              (active.kind === 'flow' && node.flows?.includes(active.id)) ||
+              (active.kind === 'surface' && node.surfaces?.includes(active.id)) ||
+              (active.kind === 'journey' && node.journey === active.id)
+            const matchesSearch =
+              !normalizedSearch ||
+              node.title.toLowerCase().includes(normalizedSearch) ||
+              node.slug.toLowerCase().includes(normalizedSearch) ||
+              node.screenshotId.includes(normalizedSearch)
+            const matchesRisk = activeRisk === 'all' || node.risk === activeRisk
+            return matchesScope && matchesSearch && matchesRisk
+          })
+          .map(node => node.id)
+      ),
+    [active, activeRisk, explicitNodeIds, normalizedSearch]
+  )
+
+  const visibleEdges = React.useMemo(
+    () =>
+      edges.filter(edge => {
+        const visible = visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target)
         const matchesScope =
           active.kind === 'all' ||
-          (active.kind === 'curated' && explicitNodeIds.has(node.id)) ||
-          (active.kind === 'flow' && node.flows?.includes(active.id)) ||
-          (active.kind === 'surface' && node.surfaces?.includes(active.id)) ||
-          (active.kind === 'journey' && node.journey === active.id)
-        const matchesSearch =
-          !normalizedSearch ||
-          node.title.toLowerCase().includes(normalizedSearch) ||
-          node.slug.toLowerCase().includes(normalizedSearch) ||
-          node.screenshotId.includes(normalizedSearch)
-        const matchesRisk = activeRisk === 'all' || node.risk === activeRisk
-        return matchesScope && matchesSearch && matchesRisk
-      })
-      .map(node => node.id)
+          (active.kind === 'curated' && edge.data.inferred === false) ||
+          (active.kind === 'flow' && edge.data.flowId === active.id) ||
+          (active.kind === 'surface' && edge.data.surface === active.id) ||
+          (active.kind === 'journey' &&
+            edge.data.journey === active.id &&
+            edge.data.inferred === true)
+        return visible && matchesScope
+      }),
+    [active, edges, visibleNodeIds]
   )
 
-  const visibleEdges = edges.filter(edge => {
-    const visible = visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target)
-    const matchesScope =
-      active.kind === 'all' ||
-      (active.kind === 'curated' && edge.data.inferred === false) ||
-      (active.kind === 'flow' && edge.data.flowId === active.id) ||
-      (active.kind === 'surface' && edge.data.surface === active.id) ||
-      (active.kind === 'journey' && edge.data.journey === active.id && edge.data.inferred === true)
-    return visible && matchesScope
-  })
-
   React.useEffect(() => {
-    const layoutNodes = nodes.filter(node => visibleNodeIds.has(node.id))
-    const layoutPositions = getLayoutedPositions(layoutNodes, visibleEdges)
-    setNodes(currentNodes =>
-      currentNodes.map(node => ({
+    setNodes(currentNodes => {
+      const layoutNodes = currentNodes.filter(node => visibleNodeIds.has(node.id))
+      const layoutPositions = getLayoutedPositions(layoutNodes, visibleEdges)
+
+      return currentNodes.map(node => ({
         ...node,
         hidden: !visibleNodeIds.has(node.id),
         position: layoutPositions.get(node.id) ?? node.position,
       }))
-    )
-  }, [activeScope, activeRisk, search])
+    })
+  }, [setNodes, visibleEdges, visibleNodeIds])
 
   const renderedNodes = nodes.map(node => ({
     ...node,
@@ -477,7 +492,7 @@ function FlowCanvas({ activeScope, search, activeRisk, selectedNodeId, setSelect
     hidden: !visibleEdgeIds.has(edge.id),
   }))
 
-  function fitFilteredNodes() {
+  const fitFilteredNodes = React.useCallback(() => {
     const ids = [...visibleNodeIds]
     fitView({
       nodes: ids.map(id => ({ id })),
@@ -485,11 +500,11 @@ function FlowCanvas({ activeScope, search, activeRisk, selectedNodeId, setSelect
       duration: 350,
       includeHiddenNodes: false,
     })
-  }
+  }, [fitView, visibleNodeIds])
 
   React.useEffect(() => {
     window.requestAnimationFrame(() => window.requestAnimationFrame(fitFilteredNodes))
-  }, [activeScope, activeRisk, search])
+  }, [fitFilteredNodes])
 
   return (
     <ReactFlow

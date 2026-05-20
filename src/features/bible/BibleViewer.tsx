@@ -20,9 +20,10 @@ import BookmarkModal from '~features/bookmarks/BookmarkModal'
 import AddToStudyModal from '~features/studies/AddToStudyModal'
 import { useAddVerseToStudy } from '~features/studies/hooks/useAddVerseToStudy'
 import VerseFormatBottomSheet from '~features/studies/VerseFormatBottomSheet'
+import { getBibleVersionCoverage } from '~helpers/biblesDb'
 import generateUUID from '~helpers/generateUUID'
 import getVersesContent from '~helpers/getVersesContent'
-import { getDefaultBibleVersion } from '~helpers/languageUtils'
+import { useQuery } from '~helpers/react-query-lite'
 import { useBottomSheet, useBottomSheetModal } from '~helpers/useBottomSheet'
 import useLanguage from '~helpers/useLanguage'
 import { RootState } from '~redux/modules/reducer'
@@ -203,6 +204,13 @@ const BibleViewer = ({
       selectedVerses,
     },
   } = bible
+  const { data: coverageData } = useQuery({
+    queryKey: ['bible-version-coverage', version],
+    queryFn: () => getBibleVersionCoverage(version),
+    enabled: !!version,
+  })
+  const goToPrevAvailableChapter = () => actions.goToPrevChapter(coverageData)
+  const goToNextAvailableChapter = () => actions.goToNextChapter(coverageData)
 
   // Shared Bible DOM: detect if this tab is the active Bible tab
   const activeBibleTabId = useAtomValue(activeBibleTabIdAtom)
@@ -718,8 +726,8 @@ const BibleViewer = ({
     comments,
     removeParallelVersion: actions.removeParallelVersion,
     addParallelVersion: actions.addParallelVersion,
-    goToPrevChapter: actions.goToPrevChapter,
-    goToNextChapter: actions.goToNextChapter,
+    goToPrevChapter: goToPrevAvailableChapter,
+    goToNextChapter: goToNextAvailableChapter,
     setUnifiedTagsModal,
     onChangeResourceTypeSelectVerse,
     onMountTimeout,
@@ -847,8 +855,9 @@ const BibleViewer = ({
           disabled={isLoading}
           book={book}
           chapter={chapter}
-          goToPrevChapter={actions.goToPrevChapter}
-          goToNextChapter={actions.goToNextChapter}
+          coverage={coverageData}
+          goToPrevChapter={goToPrevAvailableChapter}
+          goToNextChapter={goToNextAvailableChapter}
           goToChapter={actions.goToChapter}
           version={version}
         />

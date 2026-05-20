@@ -5,13 +5,16 @@ import { ScrollView } from 'react-native'
 
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import SelectorItem from './SelectorItem'
+import { getAvailableChapters } from '~helpers/bibleCoverage'
+import type { BibleVersionCoverage } from '~helpers/biblesDb'
 
 interface ChapterSelectorScreenProps {
   bibleAtom: PrimitiveAtom<BibleTab>
   onNavigate: (index: number) => void
+  coverage?: BibleVersionCoverage
 }
 
-const ChapterSelector = ({ bibleAtom, onNavigate }: ChapterSelectorScreenProps) => {
+const ChapterSelector = ({ bibleAtom, onNavigate, coverage }: ChapterSelectorScreenProps) => {
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
   const {
@@ -25,7 +28,7 @@ const ChapterSelector = ({ bibleAtom, onNavigate }: ChapterSelectorScreenProps) 
     actions.setTempSelectedChapter(chapter)
   }
 
-  const array = Array(...Array(selectedBook.Chapitres)).map((_, i) => i)
+  const chapters = getAvailableChapters(selectedBook, coverage)
 
   return (
     <ScrollView
@@ -37,11 +40,11 @@ const ChapterSelector = ({ bibleAtom, onNavigate }: ChapterSelectorScreenProps) 
         paddingTop: 10,
       }}
     >
-      {array.map(c => (
+      {chapters.map(chapter => (
         <SelectorItem
-          key={c}
-          item={c + 1}
-          isSelected={selectedChapter === c + 1}
+          key={chapter}
+          item={chapter}
+          isSelected={selectedChapter === chapter}
           onChange={onChapterChange}
         />
       ))}

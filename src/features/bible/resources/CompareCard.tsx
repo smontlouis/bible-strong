@@ -9,6 +9,7 @@ import { VerseIds } from '~common/types'
 import BibleCompareVerseItem from '~features/bible/BibleCompareVerseItem'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
 import { versions } from '~helpers/bibleVersions'
+import { getMaxChapterVerseCount } from '~helpers/bibleCoverage'
 import { selectCompareVersions } from '~redux/selectors/user'
 
 interface CompareCardProps {
@@ -28,17 +29,29 @@ const CompareCard = ({ selectedVerses, onChangeVerse }: CompareCardProps) => {
   const hasPrevNextButtons = Object.keys(selectedVerses).length === 1
 
   useEffect(() => {
-    if (hasPrevNextButtons) {
+    let cancelled = false
+
+    const loadPrevNextItems = async () => {
       const [livre, chapitre, verse] = Object.keys(selectedVerses)[0].split('-')
-      const versesInCurrentChapter = countLsgChapters[`${livre}-${chapitre}`]
+      const versesInCurrentChapter =
+        (await getMaxChapterVerseCount(versionsToCompare, Number(livre), Number(chapitre))) ||
+        countLsgChapters[`${livre}-${chapitre}`]
+      if (cancelled) return
       setPrevNextItems({
         verseNumber: verse,
         versesInCurrentChapter,
       })
+    }
+
+    if (hasPrevNextButtons) {
+      loadPrevNextItems()
     } else {
       setPrevNextItems(null)
     }
-  }, [selectedVerses, hasPrevNextButtons])
+    return () => {
+      cancelled = true
+    }
+  }, [selectedVerses, hasPrevNextButtons, versionsToCompare])
 
   const goToVerse = (value: number) => {
     const [livre, chapitre, verse] = Object.keys(selectedVerses)[0].split('-').map(Number)

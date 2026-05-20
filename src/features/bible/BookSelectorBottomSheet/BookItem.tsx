@@ -13,6 +13,7 @@ import { BOOK_SELECTION_EVENT } from './constants'
 
 interface BookItemProps {
   book: Book
+  chapters?: number[]
   isSelected: boolean
   onBookSelect: (book: Book) => void
   expandedBook: SharedValue<number | null>
@@ -21,12 +22,21 @@ interface BookItemProps {
 export const itemHeight = 46
 
 const BookItem = memo(
-  ({ book, isSelected, onBookSelect, expandedBook }: BookItemProps) => {
+  ({
+    book,
+    chapters: availableChapters,
+    isSelected,
+    onBookSelect,
+    expandedBook,
+  }: BookItemProps) => {
     const { t } = useTranslation()
     const { width: windowWidth } = useWindowDimensions()
     const isExpanded = useDerivedValue(() => expandedBook.get() === book.Numero)
 
-    const chapters = useMemo(() => Array.from({ length: book.Chapitres }, (_, i) => i + 1), [book])
+    const chapters = useMemo(
+      () => availableChapters || Array.from({ length: book.Chapitres }, (_, i) => i + 1),
+      [availableChapters, book]
+    )
 
     const ITEM_WIDTH = 60
     const ITEM_GAP = 10
