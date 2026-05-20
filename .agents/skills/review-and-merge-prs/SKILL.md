@@ -1,15 +1,17 @@
 ---
 name: review-and-merge-prs
-description: Review open GitHub pull requests before merge. Use when the user asks to pull PRs, summarize what each PR does, identify what must be tested, evaluate review comments and CI, then merge only after explicit user validation.
+description: Sequentially review and merge GitHub pull requests one at a time. Use when the user asks to process PRs by checking out each PR, running checks, preparing simulator/manual test instructions, waiting for explicit validation, then merging before moving to the next PR.
 ---
 
 # Review And Merge PRs
 
-Review PRs as a merge gate: first produce a factual readiness report, then merge only after the maintainer explicitly approves.
+Process PRs as a sequential human-in-the-loop merge gate. Work on one PR, make it ready for manual testing, stop for maintainer validation, merge only after approval, then move to the next PR.
 
 ## Core rule
 
-Do not merge a PR until the user explicitly validates it in the current conversation. A prior request to review, check, pull, rebase, or prepare PRs is not merge approval.
+Do not merge a PR or start deep work on the next PR until the user explicitly validates the current PR in the current conversation. A prior request to review, check, pull, rebase, prepare, or "start" PRs is not merge approval.
+
+Approval must be specific enough to mean the maintainer tested or accepts the current PR, for example: "ok merge", "validé", "merge celle-ci", or "c'est bon pour la #123".
 
 ## Source of truth
 
@@ -24,22 +26,103 @@ Read these when relevant:
 
 If the user names PR numbers, inspect only those PRs. Otherwise, inspect open PRs targeting `master`.
 
-Use GitHub CLI as the default interface:
+Build a lightweight queue first. Do not checkout every PR before processing the first one.
 
 ```bash
 gh pr list --state open --base master --json number,title,headRefName,baseRefName,isDraft,mergeStateStatus,reviewDecision,statusCheckRollup,updatedAt,url
 ```
 
-For each PR:
+Default queue order:
+
+1. PRs named by the user, in the order given.
+2. Otherwise, open non-draft PRs targeting `master`, oldest first unless the user asks for a different priority.
+
+Before starting the first PR, briefly report the queue and say which PR is first.
+
+## Per-PR cycle
+
+Repeat this cycle for exactly one PR at a time.
+
+### 1. Checkout and update
+
+Fetch and inspect the current PR:
 
 ```bash
 gh pr view <number> --json number,title,body,url,headRefName,baseRefName,isDraft,mergeStateStatus,reviewDecision,comments,reviews,statusCheckRollup,files,commits
 gh api repos/smontlouis/bible-strong/pulls/<number>/comments --paginate
 ```
 
+Then check it out:
+
+```bash
+gh pr checkout <number>
+```
+
+If the PR is behind `origin/master`, rebase it before asking the maintainer to test:
+
+```bash
+git fetch origin master
+git rebase origin/master
+```
+
+If the rebase changes the branch, run validation and push the rebased branch:
+
+```bash
+git push --force-with-lease
+```
+
+### 2. Review and fix blockers
+
+Inspect the diff against the target base:
+
+```bash
+git diff --stat origin/master...HEAD
+git diff --name-only origin/master...HEAD
+git diff origin/master...HEAD
+```
+
+Identify and resolve, before the manual test handoff:
+
+- merge conflicts;
+- red or missing checks that can be reproduced locally;
+- action-worthy review comments;
+- obvious regressions found in the diff;
+- stale generated docs or validation artifacts that would create avoidable conflicts.
+
+If a fix is needed, implement it on the PR branch, run relevant validation, commit, push, and mention the new commit in the handoff.
+
+### 3. Run automated checks
+
+Run the smallest useful validation set for the PR:
+
+- focused ESLint for touched code;
+- `yarn format:check` when formatting-sensitive files changed;
+- `yarn typecheck` for TypeScript, navigation params, Redux, Jotai, helper, or shared API changes;
+- focused `yarn test ...` for touched tests or helpers;
+- resource checks such as CDN `curl -I -L` or generator commands when the PR changes downloadable resources.
+
+Use full `yarn lint`, `yarn test`, or broader agent checks only when the change scope justifies it or focused checks are insufficient.
+
+### 4. Handoff for manual testing
+
+Stop after the current PR is ready to test. Do not merge and do not move to the next PR.
+
+Give the maintainer a concise handoff:
+
+- PR number, title, and URL;
+- branch currently checked out;
+- what changed in product terms;
+- automated checks run and their result;
+- review comments handled or still open;
+- risk level and reason;
+- exact simulator/manual test checklist;
+- explicit next instruction: ask the maintainer to test and reply with approval to merge, or describe what failed.
+
+Do not claim mobile behavior is verified unless you actually ran a simulator/emulator or inspected a real device flow. If simulator testing is expected from the maintainer, say that clearly.
+
 ## Preflight
 
-Before checking out or rebasing:
+Before starting or switching PRs:
 
 1. Run `git status --short`.
 2. If the worktree is dirty, stop and report the files unless the user explicitly allowed continuing with the dirty state.
@@ -49,56 +132,9 @@ Before checking out or rebasing:
 git fetch origin master
 ```
 
-## Review one PR
-
-For each PR:
-
-1. Check out the branch:
-
-```bash
-gh pr checkout <number>
-```
-
-2. Inspect the diff against the target base:
-
-```bash
-git diff --stat origin/master...HEAD
-git diff --name-only origin/master...HEAD
-git diff origin/master...HEAD
-```
-
-3. Identify:
-   - what changed, in product terms;
-   - touched high-risk areas;
-   - migrations, generated assets, data imports, or remote resources;
-   - automated checks already passing or failing;
-   - unresolved or action-worthy review comments;
-   - manual tests the maintainer should run.
-
-4. Run local validation when it is useful and scoped:
-   - `yarn lint` or focused ESLint for code changes;
-   - `yarn format:check` for formatting-sensitive changes;
-   - `yarn typecheck` for TypeScript or API-shape changes;
-   - focused `yarn test ...` for touched tests or helpers.
-
-Do not claim mobile behavior is verified unless you actually ran a simulator/emulator or inspected a real device flow.
-
-## Readiness report
-
-Report PRs in a compact table or bullets. For each PR include:
-
-- **Done**: what the PR changes.
-- **Risk**: low / medium / high, with the reason.
-- **Checks**: green / red / pending / not run, with notable failures.
-- **Review comments**: none / needs action / informational.
-- **Manual tests**: concrete flows the maintainer should test.
-- **Recommendation**: merge / rework / wait.
-
-If any PR needs rework, say exactly why and what should change before merge.
-
 ## Merge after approval
 
-Only after explicit user approval:
+Only after explicit user approval for the current PR:
 
 1. Re-check the worktree is clean.
 2. Update `master`:
@@ -108,14 +144,13 @@ git checkout master
 git pull --ff-only origin master
 ```
 
-3. For each approved PR, in dependency order:
-   - check out the PR branch;
-   - rebase on `origin/master` when needed;
+3. Re-check the approved PR:
+   - check out the PR branch again if needed;
+   - rebase on `origin/master` if `master` changed since the handoff;
    - resolve conflicts without discarding unrelated user changes;
-   - run relevant local validation;
+   - rerun the relevant local validation if the branch changed;
    - force-push only if the branch was rebased;
-   - confirm GitHub checks are green;
-   - merge using the repository's existing merge style.
+   - confirm GitHub checks are green.
 
 Prefer GitHub CLI merge commands over manual local merges:
 
@@ -125,18 +160,15 @@ gh pr merge <number> --squash --delete-branch
 
 If the repo clearly uses a different merge strategy for the active PR set, follow that strategy and say so.
 
-## After each merge
+After the merge:
 
-After a PR is merged:
-
-1. Fetch `origin/master`.
-2. Rebase remaining open PRs that depend on files or behavior changed by the merge.
-3. Force-push rebased branches.
-4. Wait for or re-check CI before recommending the next merge.
+1. Fetch and update local `master`.
+2. Report the merge result.
+3. Return to the queue and start the next PR's per-PR cycle, unless the user asked to stop.
 
 ## Stop conditions
 
-Stop and report instead of merging when:
+Stop and report instead of asking for manual testing or merging when:
 
 - CI is red or missing for the PR head;
 - the PR is draft;
@@ -146,13 +178,15 @@ Stop and report instead of merging when:
 - a sensitive area changed without clear validation evidence;
 - the user has not explicitly approved merging.
 
+If the maintainer rejects the PR during manual testing, do not merge. Either fix the issue on the PR branch and produce a new handoff, or skip the PR if the maintainer asks to move on.
+
 ## Final report
 
-When done, report:
+After all approved PRs have been merged, or when stopping, report:
 
 - PRs merged, with URLs;
 - PRs left open and why;
-- branches rebased or force-pushed;
-- validation run locally;
+- current branch;
+- validation run locally for the current or last processed PR;
 - GitHub checks status;
-- remaining manual tests, if any.
+- remaining manual tests or next PR in the queue, if any.
