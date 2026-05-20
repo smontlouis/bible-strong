@@ -1,5 +1,3 @@
-/* eslint-env jest */
-
 // Mock react-native before other imports
 import type { ChangelogItem } from '~common/types'
 import reducer, {

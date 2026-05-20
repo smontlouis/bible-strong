@@ -1,5 +1,3 @@
-/* eslint-env jest */
-
 import { clampTabIndex, updateTabGroupActiveIndex, updateTabGroupTabs } from '../tabWorkspace'
 import type { TabGroup, TabItem } from '../tabs'
 

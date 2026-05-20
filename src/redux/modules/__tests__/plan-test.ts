@@ -1,5 +1,3 @@
-/* eslint-env jest */
-
 // Mock react-native before other imports
 import reducer, {
   cacheImage,

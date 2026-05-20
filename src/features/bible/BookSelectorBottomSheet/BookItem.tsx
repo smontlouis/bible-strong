@@ -22,7 +22,13 @@ interface BookItemProps {
 export const itemHeight = 46
 
 const BookItem = memo(
-  ({ book, chapters: availableChapters, isSelected, onBookSelect, expandedBook }: BookItemProps) => {
+  ({
+    book,
+    chapters: availableChapters,
+    isSelected,
+    onBookSelect,
+    expandedBook,
+  }: BookItemProps) => {
     const { t } = useTranslation()
     const { width: windowWidth } = useWindowDimensions()
     const isExpanded = useDerivedValue(() => expandedBook.get() === book.Numero)

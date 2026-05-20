@@ -1,5 +1,3 @@
-/* eslint-env jest */
-
 // Mock react-native before other imports
 import type { Bookmark } from '~common/types'
 import userReducer, { UserState } from '../user'

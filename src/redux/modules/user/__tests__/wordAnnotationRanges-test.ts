@@ -1,5 +1,3 @@
-/* eslint-env jest */
-
 import {
   annotationRangeOverlapsSelection,
   findOverlappingWordAnnotationIds,

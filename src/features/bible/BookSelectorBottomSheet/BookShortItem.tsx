@@ -17,7 +17,13 @@ interface BookShortItemProps {
   isNT: boolean
   onChange: (book: Book) => void
 }
-export const BookShortItem = ({ book, chapters: availableChapters, isSelected, isNT, onChange }: BookShortItemProps) => {
+export const BookShortItem = ({
+  book,
+  chapters: availableChapters,
+  isSelected,
+  isNT,
+  onChange,
+}: BookShortItemProps) => {
   const { t } = useTranslation()
   const theme: Theme = useTheme()
   const bookName = t(book.Nom).replace(/\s/g, '').substr(0, 3)
