@@ -296,7 +296,9 @@ const VersionSelectorItem = ({
                 </Box>
               )}
             </HStack>
-            <CopyrightText onPress={openSourceUrl}>{version.c}</CopyrightText>
+            <CopyrightText onPress={version.sourceUrl ? openSourceUrl : undefined}>
+              {version.c}
+            </CopyrightText>
           </Box>
           {!isLoading && !isQueued && version.id !== 'LSGS' && version.id !== 'KJVS' && (
             <TouchableOpacity
