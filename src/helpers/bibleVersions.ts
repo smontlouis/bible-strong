@@ -131,6 +131,7 @@ export interface Version {
   name: string
   name_en?: string
   c?: string
+  sourceUrl?: string
   type?: 'en' | 'fr' | 'other'
   hasAudio?: boolean
   hasRedWords?: boolean
@@ -390,6 +391,14 @@ export const versions: Record<string, Version> = {
     type: 'fr',
     hasRedWords: true,
   },
+  LXX_FR: {
+    id: 'LXX_FR',
+    name: 'Septante française (AT)',
+    name_en: 'French Septuagint (OT)',
+    c: 'Texte grec-français édité par ThéoTeX Éditions - theotex.org',
+    sourceUrl: 'https://theotex.org/',
+    type: 'fr',
+  },
   EASY: {
     id: 'EASY',
     name: 'EasyEnglish Bible 2018',
@@ -599,6 +608,7 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(versions
       case 'NFC':
       case 'BCC1923':
       case 'PDV2017':
+      case 'LXX_FR':
       case 'POV': {
         sectionArray[1].data.push(versionEn)
         return sectionArray
