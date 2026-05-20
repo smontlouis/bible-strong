@@ -5,11 +5,11 @@ import BottomSheet, {
 } from '@gorhom/bottom-sheet/'
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import React, { memo, useCallback } from 'react'
+import React, { memo, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { View } from 'react-native'
+import { BackHandler, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import LanguagePopOver from '~common/LanguagePopOver'
+import LanguageMenuOption from '~common/LanguageMenuOption'
 import ModalHeader from '~common/ModalHeader'
 import PopOverMenu from '~common/PopOverMenu'
 import { BibleResource, StudyNavigateBibleType } from '~common/types'
@@ -78,6 +78,7 @@ const ResourcesModal = memo(
   ({ resourceModalRef, resourceType, onChangeResourceType, bibleAtom, isSelectionMode }: Props) => {
     const { t } = useTranslation()
     const compareVersionSelectorRef = React.useRef<BottomSheet>(null)
+    const [isOpen, setIsOpen] = useState(false)
     const openInNewTab = useOpenInNewTab()
     const bible = useAtomValue(bibleAtom)
     const { key, ...bottomSheetStyles } = useBottomSheetStyles()
@@ -108,84 +109,97 @@ const ResourcesModal = memo(
       }
     }
 
-    const getOptionsByResourceType = () => {
+    const getMenuOptionsByResourceType = () => {
       switch (resourceType) {
         case 'strong':
-          return <LanguagePopOver resourceId="STRONG" />
+          return <LanguageMenuOption resourceId="STRONG" />
         case 'dictionary':
-          return <LanguagePopOver resourceId="DICTIONNAIRE" />
+          return <LanguageMenuOption resourceId="DICTIONNAIRE" />
         case 'nave':
-          return <LanguagePopOver resourceId="NAVE" />
+          return <LanguageMenuOption resourceId="NAVE" />
         case 'commentary': {
           return (
-            <Box row alignItems="center">
-              <LanguagePopOver resourceId="COMMENTARIES" />
-              <PopOverMenu
-                width={24}
-                height={54}
-                popover={
-                  <MenuOption
-                    onSelect={() => {
-                      openInNewTab({
-                        id: `commentary-${generateUUID()}`,
-                        title: t('tabs.new'),
-                        isRemovable: true,
-                        type: 'commentary',
-                        data: {
-                          verse: selectedVerse,
-                        },
-                      })
-                    }}
-                  >
-                    <Box row alignItems="center">
-                      <FeatherIcon name="external-link" size={15} />
-                      <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
-                    </Box>
-                  </MenuOption>
-                }
-              />
-            </Box>
+            <>
+              <LanguageMenuOption resourceId="COMMENTARIES" />
+              <MenuOption
+                onSelect={() => {
+                  openInNewTab({
+                    id: `commentary-${generateUUID()}`,
+                    title: t('tabs.new'),
+                    isRemovable: true,
+                    type: 'commentary',
+                    data: {
+                      verse: selectedVerse,
+                    },
+                  })
+                }}
+              >
+                <Box row alignItems="center">
+                  <FeatherIcon name="external-link" size={15} />
+                  <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
+                </Box>
+              </MenuOption>
+            </>
           )
         }
         case 'compare': {
           return (
-            <PopOverMenu
-              width={24}
-              height={54}
-              popover={
-                <>
-                  <MenuOption onSelect={() => compareVersionSelectorRef.current?.expand()}>
-                    <Box row alignItems="center">
-                      <FeatherIcon name="check-square" size={15} />
-                      <Text marginLeft={10}>{t('common.chooseCompareVersions')}</Text>
-                    </Box>
-                  </MenuOption>
-                  <MenuOption
-                    onSelect={() => {
-                      openInNewTab({
-                        id: `compare-${generateUUID()}`,
-                        title: t('tabs.new'),
-                        isRemovable: true,
-                        type: 'compare',
-                        data: {
-                          selectedVerses,
-                        },
-                      })
-                    }}
-                  >
-                    <Box row alignItems="center">
-                      <FeatherIcon name="external-link" size={15} />
-                      <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
-                    </Box>
-                  </MenuOption>
-                </>
-              }
-            />
+            <>
+              <MenuOption onSelect={() => compareVersionSelectorRef.current?.expand()}>
+                <Box row alignItems="center">
+                  <FeatherIcon name="check-square" size={15} />
+                  <Text marginLeft={10}>{t('common.chooseCompareVersions')}</Text>
+                </Box>
+              </MenuOption>
+              <MenuOption
+                onSelect={() => {
+                  openInNewTab({
+                    id: `compare-${generateUUID()}`,
+                    title: t('tabs.new'),
+                    isRemovable: true,
+                    type: 'compare',
+                    data: {
+                      selectedVerses,
+                    },
+                  })
+                }}
+              >
+                <Box row alignItems="center">
+                  <FeatherIcon name="external-link" size={15} />
+                  <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
+                </Box>
+              </MenuOption>
+            </>
           )
         }
         default:
           return undefined
       }
+    }
+
+    const closeModal = () => {
+      resourceModalRef.current?.close()
+    }
+
+    useEffect(() => {
+      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+        if (!isOpen) return false
+
+        closeModal()
+        return true
+      })
+
+      return () => subscription.remove()
+    }, [isOpen])
+
+    const renderRightComponent = () => {
+      const menuOptions = getMenuOptionsByResourceType()
+
+      return (
+        <Box row alignItems="center">
+          {menuOptions ? <PopOverMenu width={44} height={54} popover={menuOptions} /> : null}
+        </Box>
+      )
     }
 
     const footerComponent = useCallback(
@@ -215,12 +229,16 @@ const ResourcesModal = memo(
           activeOffsetY={[-20, 20]}
           snapPoints={['100%']}
           footerComponent={footerComponent}
+          onChange={index => setIsOpen(index >= 0)}
+          onClose={() => setIsOpen(false)}
           {...bottomSheetStyles}
         >
           <ModalHeader
+            hasBackButton
+            onBackPress={closeModal}
             title={title}
             subTitle={getSubtitleByResourceType()}
-            rightComponent={getOptionsByResourceType()}
+            rightComponent={renderRightComponent()}
           />
           {resourceType && (
             <View style={{ flex: 1 }}>
