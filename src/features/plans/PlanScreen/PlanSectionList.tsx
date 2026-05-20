@@ -20,7 +20,23 @@ type SectionDataItem = {
 
 type ListItem = SectionHeaderItem | SectionDataItem
 
-const PlanSectionList = ({ id, sections, lang }: ComputedPlan) => {
+interface Props {
+  onReadingSlicePress?: (
+    slice: ComputedReadingSlice & {
+      planId: string
+      planTitle: string
+      planLanguage?: ComputedPlan['lang']
+    }
+  ) => void
+}
+
+const PlanSectionList = ({
+  id,
+  title,
+  sections,
+  lang,
+  onReadingSlicePress,
+}: ComputedPlan & Props) => {
   const listRef = React.useRef<LegendListRef>(null)
   const [expandedSectionIds, setExpandedSectionIds] = React.useState<string[]>([])
   const pendingScrollToSection = React.useRef<string | null>(null)
@@ -110,6 +126,7 @@ const PlanSectionList = ({ id, sections, lang }: ComputedPlan) => {
     return (
       <ReadingSlice
         planId={id}
+        planTitle={title}
         planLanguage={lang}
         id={item.slice.id}
         title={item.slice.title}
@@ -117,6 +134,7 @@ const PlanSectionList = ({ id, sections, lang }: ComputedPlan) => {
         status={item.slice.status}
         isSectionCompleted={item.section.progress === 1}
         isLast={item.isLast}
+        onPress={onReadingSlicePress}
       />
     )
   }

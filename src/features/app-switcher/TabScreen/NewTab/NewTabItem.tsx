@@ -12,9 +12,10 @@ import { useSelectBibleReference } from './SelectBibleReferenceModalProvider'
 interface NewTabItemProps {
   type: TabItem['type']
   newAtom: PrimitiveAtom<TabItem>
+  onPlanPress?: () => void
 }
 
-const useOpenTabByType = ({ type, newAtom }: NewTabItemProps) => {
+const useOpenTabByType = ({ type, newAtom, onPlanPress }: NewTabItemProps) => {
   const [tab, setTab] = useAtom(newAtom)
   const { openBibleReferenceModal } = useSelectBibleReference()
   const defaultVersion = useDefaultBibleVersion()
@@ -44,6 +45,11 @@ const useOpenTabByType = ({ type, newAtom }: NewTabItemProps) => {
   }
 
   const onPress = () => {
+    if (type === 'plan') {
+      onPlanPress?.()
+      return
+    }
+
     // Bible: ouvrir directement avec les données par défaut
     if (type === 'bible') {
       setTab({
@@ -69,9 +75,9 @@ const useOpenTabByType = ({ type, newAtom }: NewTabItemProps) => {
   }
 }
 
-const NewTabItem = ({ type, newAtom }: NewTabItemProps) => {
+const NewTabItem = ({ type, newAtom, onPlanPress }: NewTabItemProps) => {
   const { t } = useTranslation()
-  const { onPress } = useOpenTabByType({ type, newAtom })
+  const { onPress } = useOpenTabByType({ type, newAtom, onPlanPress })
 
   return (
     <TouchableBox

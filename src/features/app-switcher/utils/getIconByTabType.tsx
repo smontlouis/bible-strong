@@ -2,6 +2,7 @@ import { useTheme } from '@emotion/react'
 import { Image } from 'expo-image'
 import React from 'react'
 import { TabItem } from '../../../state/tabs'
+import { MaterialIcon } from '~common/ui/Icon'
 
 const icons = {
   bible: require('~assets/images/tab-icons/book-open.svg'),
@@ -27,6 +28,10 @@ const TabIcon = ({ type, size = 14, color }: TabIconProps) => {
   const theme = useTheme()
   const source = icons[type as keyof typeof icons] || icons.default
   const tintColor = color || theme.colors.default
+
+  if (type === 'plan') {
+    return <MaterialIcon name="playlist-add-check" size={size} color={tintColor} />
+  }
 
   return (
     <Image

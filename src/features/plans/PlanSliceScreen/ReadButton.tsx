@@ -27,14 +27,19 @@ interface Props {
   readingSliceId: string
   planId: string
   isRead: boolean
+  onRead?: () => void
 }
 
-const ReadButton = ({ readingSliceId, planId, isRead }: Props) => {
+const ReadButton = ({ readingSliceId, planId, isRead, onRead }: Props) => {
   const router = useRouter()
   const dispatch = useDispatch()
 
   const onPress = () => {
     dispatch(markAsRead({ readingSliceId, planId }))
+    if (onRead) {
+      onRead()
+      return
+    }
     router.back()
   }
   return (

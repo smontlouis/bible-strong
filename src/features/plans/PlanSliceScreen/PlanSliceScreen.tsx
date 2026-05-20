@@ -31,6 +31,8 @@ import { chapterSliceToText, verseSliceToText, videoSliceToText } from './share'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useBookAndVersionSelector } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import generateUUID from '~helpers/generateUUID'
 
 const extractTitle = (slice: EntitySlice) => {
   switch (slice.type) {
@@ -53,6 +55,7 @@ interface PlanSliceMenuContentProps {
   onMarkAsRead: () => void
   onOpenVersionSelector: () => void
   onOpenParams: () => void
+  onOpenInNewTab: () => void
   onShare: () => void
   version: string
 }
@@ -62,6 +65,7 @@ const PlanSliceMenuContent = ({
   onMarkAsRead,
   onOpenVersionSelector,
   onOpenParams,
+  onOpenInNewTab,
   onShare,
   version,
 }: PlanSliceMenuContentProps) => {
@@ -92,6 +96,12 @@ const PlanSliceMenuContent = ({
           <Text marginLeft={10}>{t('Mise en forme')}</Text>
         </Box>
       </MenuOption>
+      <MenuOption onSelect={onOpenInNewTab}>
+        <Box row alignItems="center">
+          <FeatherIcon name="external-link" size={17} style={{ marginRight: 10 }} />
+          <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
+        </Box>
+      </MenuOption>
       <MenuOption onSelect={onShare} closeBeforeSelect>
         <Box row alignItems="center">
           <FeatherIcon name="share-2" size={17} style={{ marginRight: 10 }} />
@@ -102,16 +112,46 @@ const PlanSliceMenuContent = ({
   )
 }
 
-const PlanSliceScreen = () => {
+interface Props {
+  readingSlice?: ComputedReadingSlice & {
+    planId: string
+    planTitle?: string
+    planLanguage?: Plan['lang']
+  }
+  planTitle?: string
+  onBack?: () => void
+  onRead?: () => void
+}
+
+const PlanSliceScreen = ({
+  readingSlice: readingSliceFromProps,
+  planTitle,
+  onBack,
+  onRead,
+}: Props) => {
   const router = useRouter()
   const params = useLocalSearchParams<{ readingSlice?: string }>()
+  const openInNewTab = useOpenInNewTab()
 
   // Parse complex object from URL string
-  const readingSlice: ComputedReadingSlice | undefined = params.readingSlice
-    ? JSON.parse(params.readingSlice)
-    : undefined
-  const { id, title, slices, planId, planLanguage } = (readingSlice || {}) as Partial<
-    ComputedReadingSlice & { planId: string; planLanguage: Plan['lang'] }
+  const readingSlice =
+    readingSliceFromProps ||
+    (params.readingSlice
+      ? (JSON.parse(params.readingSlice) as ComputedReadingSlice & {
+          planId: string
+          planTitle?: string
+          planLanguage?: Plan['lang']
+        })
+      : undefined)
+  const {
+    id,
+    title,
+    slices,
+    planId,
+    planTitle: routePlanTitle,
+    planLanguage,
+  } = (readingSlice || {}) as Partial<
+    ComputedReadingSlice & { planId: string; planTitle?: string; planLanguage: Plan['lang'] }
   >
 
   const { t } = useTranslation()
@@ -150,7 +190,30 @@ const PlanSliceScreen = () => {
 
   const onMarkAsReadSelect = () => {
     dispatch(markAsRead({ readingSliceId: id!, planId: planId! }))
+    if (onRead) {
+      onRead()
+      return
+    }
     router.back()
+  }
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack()
+      return
+    }
+    router.back()
+  }
+
+  const openSliceInNewTab = () => {
+    if (!planId || !id) return
+    openInNewTab({
+      id: `plan-${generateUUID()}`,
+      title: planTitle || routePlanTitle || title || '',
+      isRemovable: true,
+      type: 'plan',
+      data: { planId, readingSliceId: id },
+    })
   }
 
   const mainSlice: EntitySlice | undefined = slices?.find(
@@ -199,6 +262,7 @@ const PlanSliceScreen = () => {
       <Header
         title={sliceTitle}
         hasBackButton
+        onCustomBackPress={handleBack}
         rightComponent={
           <PopOverMenu
             popover={
@@ -209,6 +273,7 @@ const PlanSliceScreen = () => {
                   openVersionSelector({ actions: versionActions, data: versionData })
                 }
                 onOpenParams={() => paramsModalRef.current?.present()}
+                onOpenInNewTab={openSliceInNewTab}
                 onShare={share}
                 version={version}
               />
@@ -249,7 +314,7 @@ const PlanSliceScreen = () => {
           <Slice key={slice.id} {...slice} planLanguage={planLanguage} />
         ))}
         <Box height={80} center marginTop={30}>
-          <ReadButton isRead={isRead} readingSliceId={id!} planId={planId!} />
+          <ReadButton isRead={isRead} readingSliceId={id!} planId={planId!} onRead={onRead} />
         </Box>
       </ScrollView>
       <ParamsModal paramsModalRef={paramsModalRef} />

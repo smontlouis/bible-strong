@@ -31,26 +31,41 @@ const NextButton = styled(Text)(({ theme }) => ({
 interface Props {
   isLast?: boolean
   planId: string
+  planTitle: string
   planLanguage?: Plan['lang']
   isSectionCompleted: boolean
+  onPress?: (
+    slice: ComputedReadingSlice & {
+      planId: string
+      planTitle: string
+      planLanguage?: Plan['lang']
+    }
+  ) => void
 }
 
 const ReadingSlice = ({
   id,
   title,
   planId,
+  planTitle,
   planLanguage,
   slices,
   status,
   isLast,
   isSectionCompleted,
+  onPress,
 }: ComputedReadingSlice & Props) => {
   const isNext = status === 'Next'
   // Pre-filter slices to avoid double filtering in map
   const filteredSlices = slices.filter(f => f.type !== 'Image')
+  const readingSlice = { id, planId, planTitle, planLanguage, title, slices, status }
 
   return (
-    <Link route="PlanSlice" params={{ readingSlice: { id, planId, planLanguage, title, slices } }}>
+    <Link
+      route={onPress ? undefined : 'PlanSlice'}
+      params={onPress ? undefined : { readingSlice }}
+      onPress={onPress ? () => onPress(readingSlice) : undefined}
+    >
       <Box paddingLeft={28} paddingTop={15} backgroundColor="reverse" position="relative">
         <FineLine />
         <Box row marginBottom={15}>

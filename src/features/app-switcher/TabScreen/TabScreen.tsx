@@ -14,6 +14,7 @@ import CommentariesTabScreen from '~features/commentaries/CommentariesTabScreen'
 import DictionaryTabScreen from '~features/dictionnary/DictionaryTabScreen'
 import NaveTabScreen from '~features/nave/NaveTabScreen'
 import { NotesTabScreen } from '~features/notes'
+import PlanTabScreen from '~features/plans/PlanTabScreen'
 import SearchTabScreen from '~features/search/SearchTabScreen'
 import StudiesTabScreen from '~features/studies/StudiesTabScreen'
 import {
@@ -24,6 +25,7 @@ import {
   NaveTab,
   NewTab,
   NotesTab,
+  PlanTab,
   SearchTab,
   StrongTab,
   StudyTab,
@@ -58,6 +60,8 @@ const renderTabComponent = (tab: TabItem, tabAtom: PrimitiveAtom<TabItem>) => {
       return <StudiesTabScreen studyAtom={tabAtom as PrimitiveAtom<StudyTab>} />
     case 'notes':
       return <NotesTabScreen notesAtom={tabAtom as PrimitiveAtom<NotesTab>} />
+    case 'plan':
+      return <PlanTabScreen planAtom={tabAtom as PrimitiveAtom<PlanTab>} />
   }
 }
 

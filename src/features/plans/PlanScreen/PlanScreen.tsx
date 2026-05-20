@@ -1,7 +1,7 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useLocalSearchParams } from 'expo-router'
 import React from 'react'
-import { ComputedPlanItem } from 'src/common/types'
+import { ComputedReadingSlice, ComputedPlanItem, Plan } from 'src/common/types'
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
 import Container from '~common/ui/Container'
@@ -12,17 +12,37 @@ import Menu from './Menu'
 import PlanSectionList from './PlanSectionList'
 import SuccessModal from './SuccessModal'
 
-const PlanScreen = () => {
+interface Props {
+  planId?: string
+  hasBackButton?: boolean
+  onReadingSlicePress?: (
+    slice: ComputedReadingSlice & { planId: string; planTitle: string; planLanguage?: Plan['lang'] }
+  ) => void
+  onRemove?: () => void
+}
+
+const PlanScreen = ({
+  planId: planIdFromProps,
+  hasBackButton = true,
+  onReadingSlicePress,
+  onRemove,
+}: Props) => {
   const params = useLocalSearchParams<{ plan?: string }>()
 
   // Parse complex object from URL string
   const planParams: ComputedPlanItem | undefined = params.plan ? JSON.parse(params.plan) : undefined
-  const { id, title, image, description, author } = planParams || ({} as ComputedPlanItem)
+  const id = planIdFromProps || planParams?.id || ''
   const modalRef = React.useRef<BottomSheetModal | null>(null)
   const modalRefDetails = React.useRef<BottomSheetModal | null>(null)
-  const cacheImage = useFireStorage(image)
 
   const plan = useComputedPlan(id)
+  const {
+    title = planParams?.title,
+    image = planParams?.image,
+    description = planParams?.description,
+    author = planParams?.author,
+  } = plan || {}
+  const cacheImage = useFireStorage(image)
   const progress = plan?.progress
   const prevProgress: number | undefined = usePrevious<number | undefined>(progress)
   const isPlanCompleted = progress === 1
@@ -39,19 +59,28 @@ const PlanScreen = () => {
     <Container>
       <Header
         title={title}
-        hasBackButton
+        hasBackButton={hasBackButton}
         rightComponent={
-          <PopOverMenu popover={<Menu modalRefDetails={modalRefDetails} planId={id} />} />
+          <PopOverMenu
+            popover={
+              <Menu
+                modalRefDetails={modalRefDetails}
+                planId={id}
+                title={title || ''}
+                onRemove={onRemove}
+              />
+            }
+          />
         }
       />
-      {plan?.sections && <PlanSectionList {...plan} />}
+      {plan?.sections && <PlanSectionList {...plan} onReadingSlicePress={onReadingSlicePress} />}
       <SuccessModal modalRef={modalRef} isPlanCompleted={isPlanCompleted} />
       <DetailsModal
         modalRefDetails={modalRefDetails}
-        title={title}
+        title={title || ''}
         image={cacheImage}
         id={id}
-        author={author}
+        author={author || { id: '', displayName: '', photoUrl: '' }}
         description={description}
       />
     </Container>

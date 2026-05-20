@@ -7,6 +7,10 @@ import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 
+type Props = ComputedPlanItem & {
+  onPress?: () => void
+}
+
 const PlanItem = ({
   id,
   title,
@@ -17,26 +21,31 @@ const PlanItem = ({
   author,
   type,
   lang,
-}: ComputedPlanItem) => {
+  onPress,
+}: Props) => {
   const isPlanCompleted = status === 'Completed'
-  return (
-    <Link
-      route="Plan"
-      params={{
-        planId: id,
-        plan: {
-          id,
-          title,
-          image,
-          description,
-          status,
-          progress,
-          author,
-          type,
-          lang,
+  const linkProps = onPress
+    ? { onPress }
+    : {
+        route: 'Plan' as const,
+        params: {
+          planId: id,
+          plan: {
+            id,
+            title,
+            image,
+            description,
+            status,
+            progress,
+            author,
+            type,
+            lang,
+          },
         },
-      }}
-    >
+      }
+
+  return (
+    <Link {...linkProps}>
       <Box
         bg="reverse"
         lightShadow

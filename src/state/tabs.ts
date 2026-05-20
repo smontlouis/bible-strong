@@ -113,6 +113,14 @@ export interface NotesTab extends TabBase {
   }
 }
 
+export interface PlanTab extends TabBase {
+  type: 'plan'
+  data: {
+    planId: string
+    readingSliceId?: string
+  }
+}
+
 export interface NewTab extends TabBase {
   type: 'new'
   data: Record<string, never>
@@ -134,6 +142,7 @@ export type TabItem =
   | DictionaryTab
   | StudyTab
   | NotesTab
+  | PlanTab
   | CommentaryTab
   | NewTab
 
@@ -141,6 +150,7 @@ export const tabTypes = [
   'bible',
   'search',
   'compare',
+  'plan',
   'study',
   'notes',
   'strong',
@@ -270,6 +280,14 @@ export const getDefaultData = <T extends TabItem>(
       return {
         title: i18n.t('Notes'),
         data: {},
+      }
+    }
+    case 'plan': {
+      return {
+        title: i18n.t('Plans'),
+        data: {
+          planId: '',
+        },
       }
     }
     case 'commentary': {

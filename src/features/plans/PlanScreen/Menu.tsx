@@ -4,6 +4,8 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { useDispatch } from 'react-redux'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import generateUUID from '~helpers/generateUUID'
 import Box from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
@@ -13,12 +15,15 @@ import { removePlan, resetPlan } from '~redux/modules/plan'
 interface Props {
   modalRefDetails: React.RefObject<BottomSheetModal | null>
   planId: string
+  title: string
+  onRemove?: () => void
 }
 
-const Menu = ({ modalRefDetails, planId }: Props) => {
+const Menu = ({ modalRefDetails, planId, title, onRemove }: Props) => {
   const router = useRouter()
   const dispatch = useDispatch()
   const { t } = useTranslation()
+  const openInNewTab = useOpenInNewTab()
 
   const onResetPress = () => {
     Alert.alert(
@@ -46,7 +51,11 @@ const Menu = ({ modalRefDetails, planId }: Props) => {
         text: t('Supprimer'),
         onPress: () => {
           dispatch(removePlan(planId))
-          router.back()
+          if (onRemove) {
+            onRemove()
+          } else {
+            router.back()
+          }
         },
         style: 'destructive',
       },
@@ -59,6 +68,22 @@ const Menu = ({ modalRefDetails, planId }: Props) => {
         <Box row alignItems="center">
           <FeatherIcon name="eye" size={15} />
           <Text marginLeft={10}>{t('Détails')}</Text>
+        </Box>
+      </MenuOption>
+      <MenuOption
+        onSelect={() =>
+          openInNewTab({
+            id: `plan-${generateUUID()}`,
+            title,
+            isRemovable: true,
+            type: 'plan',
+            data: { planId },
+          })
+        }
+      >
+        <Box row alignItems="center">
+          <FeatherIcon name="external-link" size={15} />
+          <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
         </Box>
       </MenuOption>
       <MenuOption onSelect={onResetPress}>
