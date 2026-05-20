@@ -14,6 +14,11 @@ import Text from '~common/ui/Text'
 import * as Sentry from '@sentry/react-native'
 import { Version, getVersions } from '~helpers/bibleVersions'
 import { getChapterVerses } from '~helpers/biblesDb'
+import {
+  getNextAvailableChapterLocation,
+  getPreviousAvailableChapterLocation,
+} from '~helpers/bibleCoverage'
+import type { BibleVersionCoverage } from '~helpers/biblesDb'
 import AudioContainer from './AudioContainer'
 import BasicFooter from './BasicFooter'
 import ChapterButton from './ChapterButton'
@@ -295,6 +300,7 @@ type AudioTTSFooterProps = {
   version: VersionCode
   onChangeMode?: React.Dispatch<React.SetStateAction<'tts' | 'url' | undefined>>
   bibleAtom: PrimitiveAtom<BibleTab>
+  coverage?: BibleVersionCoverage
 }
 
 const AudioTTSFooter = ({
@@ -306,9 +312,10 @@ const AudioTTSFooter = ({
   version,
   onChangeMode,
   bibleAtom,
+  coverage,
 }: AudioTTSFooterProps) => {
-  const hasPreviousChapter = !(book.Numero === 1 && chapter === 1)
-  const hasNextChapter = !(book.Numero === 66 && chapter === 22)
+  const hasPreviousChapter = !!getPreviousAvailableChapterLocation(book, chapter, coverage)
+  const hasNextChapter = !!getNextAvailableChapterLocation(book, chapter, coverage)
 
   const {
     error,

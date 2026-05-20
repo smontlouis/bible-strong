@@ -855,6 +855,7 @@ const BibleViewer = ({
           disabled={isLoading}
           book={book}
           chapter={chapter}
+          coverage={coverageData}
           goToPrevChapter={goToPrevAvailableChapter}
           goToNextChapter={goToNextAvailableChapter}
           goToChapter={actions.goToChapter}

@@ -43,6 +43,7 @@ export const BookSelectorList = ({
   )
 
   useEffect(() => {
+    if (data.length === 0) return
     setTimeout(() => {
       flatListRef.current?.scrollToIndex({
         index: initialScrollIndex,
@@ -51,7 +52,7 @@ export const BookSelectorList = ({
       })
     }, 100)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialScrollIndex])
+  }, [data.length, initialScrollIndex])
 
   if (selectionMode === 'grid') {
     return (

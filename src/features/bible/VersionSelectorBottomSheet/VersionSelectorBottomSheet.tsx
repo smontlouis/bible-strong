@@ -1,5 +1,5 @@
 import BottomSheet from '@gorhom/bottom-sheet'
-import { useAtomValue } from 'jotai/react'
+import { useAtomValue, useSetAtom } from 'jotai/react'
 import { atom } from 'jotai/vanilla'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -13,6 +13,7 @@ import { getVersionsBySections } from '~helpers/bibleVersions'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import { BibleTab, BibleTabActions, VersionCode } from '../../../state/tabs'
 import VersionSelectorItem from '../VersionSelectorItem'
+import { bookSelectorDataAtom } from '../BookSelectorBottomSheet/BookSelectorBottomSheet'
 
 interface VersionSelectorBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>
@@ -30,12 +31,22 @@ const VersionSelectorBottomSheet = ({ bottomSheetRef }: VersionSelectorBottomShe
   const { t } = useTranslation()
 
   const { actions, data, parallelVersionIndex } = useAtomValue(versionSelectorDataAtom)
+  const setBookSelectorData = useSetAtom(bookSelectorDataAtom)
 
   const handleVersionSelect = (vers: VersionCode) => {
     if (!actions) return
 
     if (parallelVersionIndex === undefined) {
       actions.setSelectedVersion(vers)
+      setBookSelectorData(current => ({
+        ...current,
+        data: current.data
+          ? {
+              ...current.data,
+              selectedVersion: vers,
+            }
+          : current.data,
+      }))
     } else {
       actions.setParallelVersion(vers, parallelVersionIndex)
     }

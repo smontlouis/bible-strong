@@ -127,6 +127,7 @@ const BookSelectorBottomSheet = ({ bottomSheetRef }: BookSelectorBottomSheetProp
   const initialScrollIndex = data.findIndex(
     book => book.Numero === (bookSelectorData?.selectedBook.Numero || 1)
   )
+  const safeInitialScrollIndex = Math.max(initialScrollIndex, 0)
 
   return (
     <>
@@ -142,9 +143,9 @@ const BookSelectorBottomSheet = ({ bottomSheetRef }: BookSelectorBottomSheetProp
         backdropComponent={renderBackdrop}
         onAnimate={(fromIndex, toIndex) => {
           // Opening the bottom sheet
-          if (fromIndex === -1 && toIndex === 0) {
+          if (fromIndex === -1 && toIndex === 0 && data.length > 0) {
             flatListRef.current?.scrollToIndex({
-              index: initialScrollIndex,
+              index: safeInitialScrollIndex,
               viewOffset: itemHeight * 2,
               animated: false,
             })
@@ -171,8 +172,9 @@ const BookSelectorBottomSheet = ({ bottomSheetRef }: BookSelectorBottomSheetProp
         </HStack>
         <HelpTip id="chapter-selector" description={t('tips.chapterSelector')} />
         <BookSelectorList
+          key={selectedVersion}
           data={data}
-          initialScrollIndex={initialScrollIndex}
+          initialScrollIndex={safeInitialScrollIndex}
           expandedBook={expandedBook}
           bookSelectorData={bookSelectorData}
           flatListRef={flatListRef}

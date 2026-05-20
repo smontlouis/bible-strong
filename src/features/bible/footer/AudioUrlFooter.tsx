@@ -17,6 +17,12 @@ import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import { Version, getVersions } from '~helpers/bibleVersions'
+import {
+  getAvailableChapters,
+  getNextAvailableChapterLocation,
+  getPreviousAvailableChapterLocation,
+} from '~helpers/bibleCoverage'
+import type { BibleVersionCoverage } from '~helpers/biblesDb'
 import { BibleTab, VersionCode } from '../../../state/tabs'
 import AudioBar from './AudioBar'
 import AudioContainer from './AudioContainer'
@@ -40,6 +46,7 @@ type UseLoadSoundProps = {
   getToNextChapter?: () => void
   getToPrevChapter?: () => void
   bibleAtom: PrimitiveAtom<BibleTab>
+  coverage?: BibleVersionCoverage
 }
 
 const events = [
@@ -49,14 +56,19 @@ const events = [
   Event.PlaybackProgressUpdated,
 ]
 
-const getBookTracks = (version: string, book: Book, t: (key: string) => string) => {
+const getBookTracks = (
+  version: string,
+  book: Book,
+  t: (key: string) => string,
+  coverage?: BibleVersionCoverage
+) => {
   try {
     const bibleVersion = getVersions()[version] as Version
-    const tracks = [...Array(book.Chapitres).keys()].map(i => ({
+    const tracks = getAvailableChapters(book, coverage).map(chapter => ({
       book,
-      chapter: i + 1,
-      url: bibleVersion?.getAudioUrl?.(book.Numero, i + 1) || '',
-      title: `${t(book.Nom)} ${i + 1} ${version}`,
+      chapter,
+      url: bibleVersion?.getAudioUrl?.(book.Numero, chapter) || '',
+      title: `${t(book.Nom)} ${chapter} ${version}`,
       artist: bibleVersion?.name,
       artwork: require('~assets/images/icon.png'),
     }))
@@ -79,6 +91,7 @@ const useLoadSound = ({
   goToPrevChapter,
   goToChapter,
   bibleAtom,
+  coverage,
 }: UseLoadSoundProps) => {
   const { t } = useTranslation()
   const bibleTab = useAtomValue(bibleAtom)
@@ -157,7 +170,7 @@ const useLoadSound = ({
   }
 
   // Only generate tracks for the current book (not all 1189 chapters)
-  const tracks = getBookTracks(version, book, t)
+  const tracks = getBookTracks(version, book, t, coverage)
 
   useEffect(() => {
     return () => {
@@ -206,7 +219,9 @@ const useLoadSound = ({
 
         await TrackPlayer.add(tracks)
         const trackIndex = tracks.findIndex(track => track.chapter === chapter)
-        await TrackPlayer.skip(trackIndex)
+        if (trackIndex !== -1) {
+          await TrackPlayer.skip(trackIndex)
+        }
       } catch (e) {
         console.log('[Bible] Silent catch:', e)
       }
@@ -227,6 +242,7 @@ const useLoadSound = ({
 
     ;(async () => {
       const trackIndex = tracks.findIndex(track => track.chapter === chapter)
+      if (trackIndex === -1) return
       try {
         await TrackPlayer.skip(trackIndex)
 
@@ -265,6 +281,7 @@ type AudioUrlFooterProps = {
   version: VersionCode
   onChangeMode?: React.Dispatch<React.SetStateAction<'tts' | 'url' | undefined>>
   bibleAtom: PrimitiveAtom<BibleTab>
+  coverage?: BibleVersionCoverage
 }
 
 const AudioUrlFooter = ({
@@ -277,9 +294,10 @@ const AudioUrlFooter = ({
   version,
   onChangeMode,
   bibleAtom,
+  coverage,
 }: AudioUrlFooterProps) => {
-  const hasPreviousChapter = !(book.Numero === 1 && chapter === 1)
-  const hasNextChapter = !(book.Numero === 66 && chapter === 22)
+  const hasPreviousChapter = !!getPreviousAvailableChapterLocation(book, chapter, coverage)
+  const hasNextChapter = !!getNextAvailableChapterLocation(book, chapter, coverage)
 
   const {
     error,
@@ -300,6 +318,7 @@ const AudioUrlFooter = ({
     goToPrevChapter,
     goToChapter,
     bibleAtom,
+    coverage,
   })
 
   const progress = useProgress(200)

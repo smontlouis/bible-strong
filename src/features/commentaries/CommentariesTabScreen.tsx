@@ -36,6 +36,8 @@ import memoize from '~helpers/memoize'
 import { Theme } from '~themes'
 import { CommentaryTab } from '../../state/tabs'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
+import { getChapterVerseCountSafe } from '~helpers/bibleCoverage'
+import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 
 const VersetWrapper = styled.View(() => ({
   width: 25,
@@ -156,13 +158,16 @@ const useVerseInCurrentChapter = (
   chapter: string | number | undefined
 ) => {
   const [versesInCurrentChapter, setVersesInCurrentChapter] = React.useState<number>()
+  const defaultVersion = useDefaultBibleVersion()
   useEffect(() => {
     if (!book || !chapter) return
     ;(async () => {
-      const v = countLsgChapters[`${book}-${chapter}`]
+      const v =
+        (await getChapterVerseCountSafe(defaultVersion, Number(book), Number(chapter))) ||
+        countLsgChapters[`${book}-${chapter}`]
       setVersesInCurrentChapter(v)
     })()
-  }, [book, chapter])
+  }, [book, chapter, defaultVersion])
   return { versesInCurrentChapter }
 }
 

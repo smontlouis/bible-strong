@@ -23,6 +23,7 @@ import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { versions } from '~helpers/bibleVersions'
+import { getMaxChapterVerseCount } from '~helpers/bibleCoverage'
 import { selectCompareVersions } from '~redux/selectors/user'
 import { CompareTab, SelectedVerses, VersionCode } from '../../state/tabs'
 import CompareVersionSelectorBottomSheet from './CompareVersionSelectorBottomSheet'
@@ -63,6 +64,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
   const [prevNextItems, setPrevNextItems] = React.useState<PrevNextItems>()
   const title = verseToReference(selectedVerses)
   const openInNewTab = useOpenInNewTab()
+  const versionsToCompare = useSelector(selectCompareVersions, shallowEqual)
   useEffect(() => {
     setTitle(`${t('Comparer')} ${title}`)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -75,10 +77,14 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
 
   React.useEffect(() => {
     const hasPrevNextButtons = Object.keys(selectedVerses).length === 1
+    let cancelled = false
 
     const loadPrevNextData = async () => {
       const [livre, chapitre, verse] = Object.keys(selectedVerses)[0].split('-').map(Number)
-      const versesInCurrentChapter = countLsgChapters[`${livre}-${chapitre}`]
+      const versesInCurrentChapter =
+        (await getMaxChapterVerseCount(versionsToCompare, livre, chapitre)) ||
+        countLsgChapters[`${livre}-${chapitre}`]
+      if (cancelled) return
       setPrevNextItems({
         verseNumber: verse,
         versesInCurrentChapter,
@@ -88,9 +94,10 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
     if (hasPrevNextButtons) {
       loadPrevNextData()
     }
-  }, [selectedVerses])
-
-  const versionsToCompare = useSelector(selectCompareVersions, shallowEqual)
+    return () => {
+      cancelled = true
+    }
+  }, [selectedVerses, versionsToCompare])
 
   return (
     <Container>
