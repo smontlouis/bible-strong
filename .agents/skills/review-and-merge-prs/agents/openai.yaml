@@ -1,0 +1,6 @@
+interface:
+  display_name: "Review And Merge PRs"
+  short_description: "Review PRs, test gates, then merge on approval"
+  default_prompt: "Use $review-and-merge-prs to review open PRs, summarize risks and tests, then wait for my approval before merging."
+policy:
+  allow_implicit_invocation: true
