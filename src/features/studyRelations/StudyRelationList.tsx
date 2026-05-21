@@ -1,15 +1,17 @@
 import { BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet'
 import { type ComponentProps, useRef, useState } from 'react'
-import { Alert, TouchableOpacity } from 'react-native'
+import { Alert } from 'react-native'
 import styled from '@emotion/native'
 import { useDispatch, useSelector } from 'react-redux'
 import DropdownMenu from '~common/DropdownMenu'
 import LexiqueIcon from '~common/LexiqueIcon'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
+import PopOverMenu from '~common/PopOverMenu'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
+import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
 import type { RootState } from '~redux/modules/reducer'
 import {
@@ -67,23 +69,13 @@ const targetIconConfig: Record<
   strong: { name: 'hash', color: 'primary' },
 }
 
-const ItemRow = styled.View(({ theme }) => ({
+const ItemRow = styled(TouchableBox)(({ theme }) => ({
   flexDirection: 'row',
   alignItems: 'center',
   paddingVertical: 14,
   paddingHorizontal: 0,
   borderBottomWidth: 1,
   borderBottomColor: theme.colors.border,
-}))
-
-const IconContainer = styled.View(({ theme }) => ({
-  width: 36,
-  height: 36,
-  borderRadius: 12,
-  backgroundColor: theme.colors.lightGrey,
-  alignItems: 'center',
-  justifyContent: 'center',
-  marginRight: 12,
 }))
 
 const LabelInput = styled(BottomSheetTextInput)(({ theme }) => ({
@@ -98,15 +90,11 @@ const LabelInput = styled(BottomSheetTextInput)(({ theme }) => ({
 
 const TargetIcon = ({ type }: { type: RelationEndpoint['type'] }) => {
   const config = targetIconConfig[type]
-  return (
-    <IconContainer>
-      {type === 'strong' ? (
-        <LexiqueIcon color={config.color} size={18} />
-      ) : (
-        <FeatherIcon name={config.name} size={18} color={config.color} />
-      )}
-    </IconContainer>
-  )
+  if (type === 'strong') {
+    return <LexiqueIcon color={config.color} size={15} />
+  }
+
+  return <FeatherIcon name={config.name} size={15} color={config.color} />
 }
 
 const relationTitlePrefixes: Record<string, string> = {
@@ -118,9 +106,9 @@ const relationTitlePrefixes: Record<string, string> = {
   'expliqué par': 'est expliqué par',
 }
 
-const getRelationTitle = (model: RelationDisplayModel) => {
+const getRelationTitleParts = (model: RelationDisplayModel) => {
   const prefix = relationTitlePrefixes[model.relationText] || model.relationText
-  return `${prefix} ${model.targetLabel}`
+  return { prefix, target: model.targetLabel }
 }
 
 const isDirectionalType = (type: RelationType) => directionalTypes.includes(type)
@@ -198,8 +186,8 @@ const StudyRelationList = ({
     closeEditModal()
   }
 
-  const confirmDelete = () => {
-    if (!editingModel) return
+  const confirmDelete = (model = editingModel) => {
+    if (!model) return
 
     Alert.alert('Supprimer la relation', 'Voulez-vous supprimer cette relation?', [
       { text: 'Annuler', style: 'cancel' },
@@ -207,7 +195,7 @@ const StudyRelationList = ({
         text: 'Supprimer',
         style: 'destructive',
         onPress: () => {
-          dispatch(deleteStudyRelation(editingModel.relation.id))
+          dispatch(deleteStudyRelation(model.relation.id))
           closeEditModal()
         },
       },
@@ -227,41 +215,56 @@ const StudyRelationList = ({
       {relations.length === 0 ? (
         <Text color="grey">Aucune relation</Text>
       ) : (
-        relations.map(model => (
-          <ItemRow key={model.relation.id}>
-            <TargetIcon type={model.targetEndpoint.type} />
-            <Box flex>
-              <TouchableBox onPress={() => onOpenEndpoint(model.targetEndpoint)} py={2}>
-                <Text bold numberOfLines={1}>
-                  {getRelationTitle(model)}
-                </Text>
-              </TouchableBox>
-              <Text fontSize={13} color="tertiary" numberOfLines={1}>
-                {model.subtitle}
-              </Text>
-              {model.relation.label ? (
-                <Text fontSize={13} color="tertiary" numberOfLines={1}>
-                  {model.relation.label}
-                </Text>
-              ) : null}
-              <TouchableOpacity
-                onPress={() => {
-                  openEditModal(model)
-                }}
-              >
-                <HStack mt={8} alignItems="center">
-                  <FeatherIcon name="edit-3" size={11} color="tertiary" />
-                  <Text fontSize={11} color="tertiary" ml={4}>
-                    Modifier
+        relations.map(model => {
+          const relationTitle = getRelationTitleParts(model)
+          return (
+            <ItemRow key={model.relation.id} onPress={() => onOpenEndpoint(model.targetEndpoint)}>
+              <Box flex>
+                <HStack alignItems="center">
+                  <Text bold numberOfLines={1}>
+                    {relationTitle.prefix}
+                  </Text>
+                  <Box mx={6}>
+                    <TargetIcon type={model.targetEndpoint.type} />
+                  </Box>
+                  <Text bold numberOfLines={1} shrink={1}>
+                    {relationTitle.target}
                   </Text>
                 </HStack>
-              </TouchableOpacity>
-            </Box>
-            <TouchableBox onPress={() => onOpenEndpoint(model.targetEndpoint)} p={8} ml={8}>
-              <FeatherIcon name="arrow-right" size={18} color="grey" />
-            </TouchableBox>
-          </ItemRow>
-        ))
+                <Text fontSize={13} color="tertiary" numberOfLines={1}>
+                  {model.subtitle}
+                </Text>
+                {model.relation.label ? (
+                  <Text fontSize={13} color="tertiary" numberOfLines={1}>
+                    {model.relation.label}
+                  </Text>
+                ) : null}
+              </Box>
+              <PopOverMenu
+                width={42}
+                height={42}
+                popover={
+                  <>
+                    <MenuOption onSelect={() => openEditModal(model)} closeBeforeSelect>
+                      <HStack alignItems="center">
+                        <FeatherIcon name="edit-3" size={15} />
+                        <Text ml={10}>Modifier</Text>
+                      </HStack>
+                    </MenuOption>
+                    <MenuOption onSelect={() => confirmDelete(model)}>
+                      <HStack alignItems="center">
+                        <FeatherIcon name="trash-2" size={15} color="quart" />
+                        <Text ml={10} color="quart">
+                          Supprimer
+                        </Text>
+                      </HStack>
+                    </MenuOption>
+                  </>
+                }
+              />
+            </ItemRow>
+          )
+        })
       )}
 
       <Modal.Body
@@ -335,7 +338,7 @@ const StudyRelationList = ({
               </Button>
             </HStack>
 
-            <TouchableBox onPress={confirmDelete} py={6}>
+            <TouchableBox onPress={() => confirmDelete()} py={6}>
               <Text bold color="quart">
                 Supprimer
               </Text>
