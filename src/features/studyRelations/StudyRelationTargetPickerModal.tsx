@@ -1,6 +1,6 @@
 import { BottomSheetFlashList, BottomSheetModal } from '@gorhom/bottom-sheet'
 import Fuse from 'fuse.js'
-import { ComponentProps, Ref, useEffect, useState } from 'react'
+import { ComponentProps, Ref, useDeferredValue, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import AlphabetList from '~common/AlphabetList'
 import BottomSheetSearchInput from '~common/BottomSheetSearchInput'
@@ -399,31 +399,44 @@ const StudyRelationTargetPickerModal = ({
   const [isStrongLoading, setIsStrongLoading] = useState(false)
   const [strongError, setStrongError] = useState<string | null>(null)
   const debouncedSearchValue = useDebounce(searchValue, 300)
+  const deferredSearchValue = useDeferredValue(debouncedSearchValue)
+  const deferredBrowseMode = useDeferredValue(browseMode)
+  const deferredSearchHasValue = Boolean(deferredSearchValue.trim())
+  const isListPending =
+    browseMode !== deferredBrowseMode || debouncedSearchValue !== deferredSearchValue
 
   const notes = useSelector((state: RootState) => state.user.bible.notes)
   const studies = useSelector((state: RootState) => state.user.bible.studies)
-  const noteTargets = getNoteTargetItems(notes).sort((a, b) => {
-    const left = notes[(a.endpoint as Extract<RelationEndpoint, { type: 'note' }>).noteId]
-    const right = notes[(b.endpoint as Extract<RelationEndpoint, { type: 'note' }>).noteId]
-    return Number(right?.date || 0) - Number(left?.date || 0)
-  })
-  const studyTargets = getStudyTargetItems(studies).sort((a, b) => {
-    const left = studies[(a.endpoint as Extract<RelationEndpoint, { type: 'study' }>).studyId]
-    const right = studies[(b.endpoint as Extract<RelationEndpoint, { type: 'study' }>).studyId]
-    return Number(right?.modified_at || 0) - Number(left?.modified_at || 0)
-  })
-  const fuzzyNoteTargets = searchWithMatches(noteTargets, debouncedSearchValue)
-  const fuzzyStudyTargets = searchWithMatches(studyTargets, debouncedSearchValue)
+  const shouldBuildNoteTargets =
+    deferredBrowseMode === 'note' || (!deferredBrowseMode && deferredSearchHasValue)
+  const shouldBuildStudyTargets =
+    deferredBrowseMode === 'study' || (!deferredBrowseMode && deferredSearchHasValue)
+  const noteTargets = shouldBuildNoteTargets
+    ? getNoteTargetItems(notes).sort((a, b) => {
+        const left = notes[(a.endpoint as Extract<RelationEndpoint, { type: 'note' }>).noteId]
+        const right = notes[(b.endpoint as Extract<RelationEndpoint, { type: 'note' }>).noteId]
+        return Number(right?.date || 0) - Number(left?.date || 0)
+      })
+    : []
+  const studyTargets = shouldBuildStudyTargets
+    ? getStudyTargetItems(studies).sort((a, b) => {
+        const left = studies[(a.endpoint as Extract<RelationEndpoint, { type: 'study' }>).studyId]
+        const right = studies[(b.endpoint as Extract<RelationEndpoint, { type: 'study' }>).studyId]
+        return Number(right?.modified_at || 0) - Number(left?.modified_at || 0)
+      })
+    : []
+  const fuzzyNoteTargets = searchWithMatches(noteTargets, deferredSearchValue)
+  const fuzzyStudyTargets = searchWithMatches(studyTargets, deferredSearchValue)
 
   useEffect(() => {
-    if (browseMode !== 'strong') return
+    if (deferredBrowseMode !== 'strong') return
 
     let isMounted = true
     setIsStrongLoading(true)
     setStrongError(null)
 
-    const loader = debouncedSearchValue.trim()
-      ? loadLexiqueBySearch(debouncedSearchValue)
+    const loader = deferredSearchValue.trim()
+      ? loadLexiqueBySearch(deferredSearchValue)
       : loadLexiqueByLetter(strongLetter)
 
     loader.then(results => {
@@ -440,7 +453,7 @@ const StudyRelationTargetPickerModal = ({
     return () => {
       isMounted = false
     }
-  }, [browseMode, debouncedSearchValue, strongLetter])
+  }, [deferredBrowseMode, deferredSearchValue, strongLetter])
 
   const handleSearch = (value: string) => {
     setSearchValue(value)
@@ -466,13 +479,17 @@ const StudyRelationTargetPickerModal = ({
     allowedTypes ? allowedTypes.includes(type) : true
 
   const unifiedResults = [
-    ...searchReferenceAndStrongTargets(debouncedSearchValue),
-    ...(debouncedSearchValue.trim() ? fuzzyNoteTargets.slice(0, 12) : []),
-    ...(debouncedSearchValue.trim() ? fuzzyStudyTargets.slice(0, 12) : []),
+    ...searchReferenceAndStrongTargets(deferredSearchValue),
+    ...(deferredSearchHasValue ? fuzzyNoteTargets.slice(0, 12) : []),
+    ...(deferredSearchHasValue ? fuzzyStudyTargets.slice(0, 12) : []),
   ].filter(result => isAllowed(result.type))
 
   const browseResults =
-    browseMode === 'note' ? fuzzyNoteTargets : browseMode === 'study' ? fuzzyStudyTargets : []
+    deferredBrowseMode === 'note'
+      ? fuzzyNoteTargets
+      : deferredBrowseMode === 'study'
+        ? fuzzyStudyTargets
+        : []
 
   const placeholder = browseMode
     ? {
@@ -494,7 +511,7 @@ const StudyRelationTargetPickerModal = ({
 
   const emptyMessage = browseMode
     ? `Aucun élément trouvé dans ${browseModeLabels[browseMode].toLowerCase()}`
-    : debouncedSearchValue.trim()
+    : deferredSearchHasValue
       ? 'Aucune cible trouvée'
       : 'Rechercher un passage, un Strong, une note ou une étude'
 
@@ -591,13 +608,13 @@ const StudyRelationTargetPickerModal = ({
               keyExtractor={(item: LexiqueRow) => `${item.lexiqueType}-${item.Code}-${item.Mot}`}
               estimatedItemSize={72}
               ListEmptyComponent={
-                isStrongLoading
+                isStrongLoading || isListPending
                   ? renderEmptyState('Chargement du lexique Strong...')
                   : renderEmptyState()
               }
             />
           )}
-          {!debouncedSearchValue.trim() && (
+          {!deferredSearchHasValue && (
             <AlphabetList letter={strongLetter} setLetter={setStrongLetter} />
           )}
         </VStack>
@@ -607,7 +624,9 @@ const StudyRelationTargetPickerModal = ({
           renderItem={renderTargetItem}
           keyExtractor={(item: RelationTargetResult) => item.id}
           estimatedItemSize={72}
-          ListEmptyComponent={renderEmptyState()}
+          ListEmptyComponent={
+            isListPending ? renderEmptyState('Chargement...') : renderEmptyState()
+          }
         />
       )}
     </Modal.Body>
