@@ -27,7 +27,13 @@ import { useQuery } from '~helpers/react-query-lite'
 import { useBottomSheet, useBottomSheetModal } from '~helpers/useBottomSheet'
 import useLanguage from '~helpers/useLanguage'
 import { RootState } from '~redux/modules/reducer'
-import { addHighlight, removeHighlight } from '~redux/modules/user'
+import {
+  addHighlight,
+  createStudyRelation,
+  createVerseEndpoint,
+  removeHighlight,
+  type RelationEndpoint,
+} from '~redux/modules/user'
 import type { AppDispatch } from '~redux/store'
 import {
   CrossVersionAnnotation,
@@ -35,6 +41,7 @@ import {
   makeLinksByChapterSelector,
   makeNotesByChapterSelector,
   makeSelectedVerseHighlightColorSelector,
+  makeStudyRelationsByChapterSelector,
   makeTaggedVersesInChapterSelector,
   makeWordAnnotationsByChapterSelector,
   makeWordAnnotationsInOtherVersionsSelector,
@@ -82,6 +89,8 @@ import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
 import VerseNotesModal from './VerseNotesModal'
 import VerseTagsModal from './VerseTagsModal'
+import VerseStudyRelationsModal from './VerseStudyRelationsModal'
+import StudyRelationTargetPickerModal from '~features/studyRelations/StudyRelationTargetPickerModal'
 
 const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: number) => {
   if (pericope && pericope[book] && pericope[book][chapter]) {
@@ -95,6 +104,7 @@ const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: nu
 const selectHighlightsByChapter = makeHighlightsByChapterSelector()
 const selectNotesByChapter = makeNotesByChapterSelector()
 const selectLinksByChapter = makeLinksByChapterSelector()
+const selectStudyRelationsByChapter = makeStudyRelationsByChapterSelector()
 const selectWordAnnotationsByChapter = makeWordAnnotationsByChapterSelector()
 const selectSelectedVerseHighlightColor = makeSelectedVerseHighlightColorSelector()
 const selectBookmarksInChapter = makeSelectBookmarksInChapter()
@@ -145,6 +155,7 @@ const BibleViewer = ({
   const versesModal = useBottomSheet()
   const linkModal = useBottomSheetModal()
   const noteModal = useBottomSheetModal()
+  const relationTargetPickerModal = useBottomSheetModal()
 
   // Annotation mode
   const annotationMode = useAnnotationMode()
@@ -166,6 +177,13 @@ const BibleViewer = ({
   // Verse notes modal
   const verseNotesModal = useBottomSheetModal()
   const [verseNotesModalKey, setVerseNotesModalKey] = useState<string | null>(null)
+  const verseStudyRelationsModal = useBottomSheetModal()
+  const [verseStudyRelationsModalKey, setVerseStudyRelationsModalKey] = useState<string | null>(
+    null
+  )
+  const [relationSourceEndpoint, setRelationSourceEndpoint] = useState<RelationEndpoint | null>(
+    null
+  )
 
   // Add to study modal states
   const addToStudyModal = useBottomSheetModal()
@@ -326,6 +344,10 @@ const BibleViewer = ({
 
   const linksByChapter = useSelector((state: RootState) =>
     selectLinksByChapter(state, displayedBook, displayedChapter)
+  )
+
+  const studyRelationsByChapter = useSelector((state: RootState) =>
+    selectStudyRelationsByChapter(state, displayedBook, displayedChapter)
   )
 
   const wordAnnotationsByChapter = useSelector((state: RootState) =>
@@ -498,6 +520,29 @@ const BibleViewer = ({
   const toggleCreateLink = () => {
     setLinkVerses(selectedVerses)
     linkModal.open()
+  }
+
+  const toggleCreateStudyRelation = () => {
+    const verseKeys = Object.keys(selectedVerses)
+    if (!verseKeys.length) return
+    setRelationSourceEndpoint(createVerseEndpoint(verseKeys))
+    relationTargetPickerModal.open()
+  }
+
+  const createRelationToTarget = (targetEndpoint: RelationEndpoint) => {
+    if (!relationSourceEndpoint) return
+    dispatch(
+      createStudyRelation({
+        endpoints: [relationSourceEndpoint, targetEndpoint],
+      })
+    )
+    relationTargetPickerModal.close()
+    actions.clearSelectedVerses()
+  }
+
+  const openVerseStudyRelationsModal = (verseKey: string) => {
+    setVerseStudyRelationsModalKey(verseKey)
+    verseStudyRelationsModal.open()
   }
 
   const openLinkModal = (linkId: string) => {
@@ -715,6 +760,7 @@ const BibleViewer = ({
     notedVerses: notesByChapter,
     bookmarkedVerses,
     linkedVerses: linksByChapter,
+    studyRelations: studyRelationsByChapter,
     wordAnnotations: wordAnnotationsByChapter,
     settings,
     verseToScroll: verse,
@@ -755,6 +801,7 @@ const BibleViewer = ({
     onOpenVerseTagsModal: handleOpenVerseTagsModal,
     // Verse notes modal
     onOpenVerseNotesModal: handleOpenVerseNotesModal,
+    onOpenStudyRelationsModal: openVerseStudyRelationsModal,
     // Double-tap to enter annotation mode
     onEnterAnnotationMode: handleEnterAnnotationModeFromDoubleTap,
     // Red words
@@ -873,6 +920,7 @@ const BibleViewer = ({
         }}
         onCreateNoteClick={toggleCreateNote}
         onCreateLinkClick={toggleCreateLink}
+        onCreateStudyRelationClick={toggleCreateStudyRelation}
         addHighlight={addHiglightAndOpenQuickTags}
         addTag={addTag}
         removeHighlight={() => {
@@ -890,6 +938,20 @@ const BibleViewer = ({
       />
       <BibleNoteModal ref={noteModal.getRef()} noteVerses={noteVerses} />
       <BibleLinkModal ref={linkModal.getRef()} linkVerses={linkVerses} />
+      <StudyRelationTargetPickerModal
+        ref={relationTargetPickerModal.getRef()}
+        onSelect={createRelationToTarget}
+      />
+      <VerseStudyRelationsModal
+        ref={verseStudyRelationsModal.getRef()}
+        verseKey={verseStudyRelationsModalKey}
+        onCreateRelation={() => {
+          if (!verseStudyRelationsModalKey) return
+          setRelationSourceEndpoint(createVerseEndpoint([verseStudyRelationsModalKey]))
+          verseStudyRelationsModal.close()
+          relationTargetPickerModal.open()
+        }}
+      />
       <StrongModal
         ref={strongModal.getRef()}
         version={version}

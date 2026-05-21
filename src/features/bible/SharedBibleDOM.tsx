@@ -84,6 +84,7 @@ const SharedBibleDOM = () => {
     notedVerses: {},
     bookmarkedVerses: {},
     linkedVerses: {},
+    studyRelations: {},
     wordAnnotations: {},
     settings,
     verseToScroll: undefined,

@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import type { RootState } from '~redux/modules/reducer'
 import {
   makeLinksByChapterSelector,
+  makeStudyRelationsByChapterSelector,
   makeNotesForVerseSelector,
   makeHasTaggedItemsForVerseSelector,
 } from '~redux/selectors/bible'
@@ -23,6 +24,7 @@ const useVerseActiveStates = ({
   const selectNotesForVerse = useMemo(() => makeNotesForVerseSelector(), [])
   const selectHasTaggedItems = useMemo(() => makeHasTaggedItemsForVerseSelector(), [])
   const selectLinksByChapter = useMemo(() => makeLinksByChapterSelector(), [])
+  const selectStudyRelationsByChapter = useMemo(() => makeStudyRelationsByChapterSelector(), [])
   const selectBookmarkForVerse = useMemo(() => makeSelectBookmarkForVerse(), [])
 
   // Get the first selected verse for checking active states
@@ -52,6 +54,16 @@ const useVerseActiveStates = ({
     return !!links[firstVerseKey]
   })
 
+  const hasStudyRelation = useSelector((state: RootState) => {
+    if (!firstVerseKey || !book || !chapter) return false
+    const relations = selectStudyRelationsByChapter(state, book, chapter)
+    return Object.values(relations).some(relation =>
+      relation.endpoints.some(
+        endpoint => endpoint.type === 'verse' && endpoint.verseKeys.includes(firstVerseKey)
+      )
+    )
+  })
+
   // Check if the selected verse has a bookmark
   const hasBookmark = useSelector((state: RootState) => {
     if (!book || !chapter || !verse) return false
@@ -66,6 +78,7 @@ const useVerseActiveStates = ({
     hasNote,
     hasTags,
     hasLink,
+    hasStudyRelation,
     hasBookmark,
     hasFocus,
   }

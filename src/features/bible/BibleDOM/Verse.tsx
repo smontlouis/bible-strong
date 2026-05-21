@@ -4,6 +4,7 @@ import { styled } from 'goober'
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_VERSE_LINKS,
+  NAVIGATE_TO_VERSE_STUDY_RELATIONS,
   NAVIGATE_TO_BIBLE_NOTE,
   OPEN_BOOKMARK_MODAL,
   NAVIGATE_TO_BIBLE_LINK,
@@ -257,6 +258,7 @@ interface Props {
   notesText?: NotedVerse[]
   linksCount?: number
   linksText?: LinkedVerse[]
+  relationsCount?: number
   version: string
   isHebreu: boolean
   selectedCode: SelectedCode | null
@@ -301,6 +303,7 @@ const Verse = ({
   notesText,
   linksCount,
   linksText,
+  relationsCount,
   isSelectionMode,
   version,
   isHebreu,
@@ -374,6 +377,14 @@ const Verse = ({
     const { Livre, Chapitre, Verset } = verse
     dispatch({
       type: NAVIGATE_TO_VERSE_LINKS,
+      payload: `${Livre}-${Chapitre}-${Verset}`,
+    })
+  }
+
+  const navigateToVerseStudyRelations = () => {
+    const { Livre, Chapitre, Verset } = verse
+    dispatch({
+      type: NAVIGATE_TO_VERSE_STUDY_RELATIONS,
       payload: `${Livre}-${Chapitre}-${Verset}`,
     })
   }
@@ -622,6 +633,15 @@ const Verse = ({
             onClick={navigateToVerseLinks}
             count={linksCount}
             linkType={linksText?.[0]?.linkType}
+            isDisabled={annotationMode}
+          />
+        )}
+        {relationsCount && !isSelectionMode && (
+          <LinksCount
+            settings={settings}
+            onClick={navigateToVerseStudyRelations}
+            count={relationsCount}
+            linkType="website"
             isDisabled={annotationMode}
           />
         )}

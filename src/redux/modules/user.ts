@@ -35,6 +35,16 @@ import { addHighlightAction, changeHighlightColor, removeHighlight } from './use
 import { addLinkAction, deleteLink, updateLink } from './user/links'
 import { addNoteAction, deleteNote } from './user/notes'
 import {
+  addStudyRelationAction,
+  deleteStudyRelation,
+  StudyRelationsObj,
+  updateStudyRelation,
+} from './user/studyRelations'
+import {
+  hasDuplicateStudyRelation,
+  normalizeStudyRelation,
+} from '~features/studyRelations/domain'
+import {
   addWordAnnotationAction,
   changeWordAnnotationColorAction,
   changeWordAnnotationTypeAction,
@@ -115,6 +125,7 @@ export * from './user/highlights'
 export * from './user/links'
 export * from './user/notes'
 export * from './user/settings'
+export * from './user/studyRelations'
 export * from './user/studies'
 export * from './user/tags'
 export * from './user/versionUpdate'
@@ -302,6 +313,7 @@ export interface UserState {
     highlights: HighlightsObj
     notes: NotesObj
     links: LinksObj
+    studyRelations: StudyRelationsObj
     studies: StudiesObj
     tags: TagsObj
     strongsHebreu: Record<string, unknown>
@@ -393,6 +405,7 @@ const getInitialState = (): UserState => ({
     highlights: {},
     notes: {},
     links: {},
+    studyRelations: {},
     studies: {},
     tags: {},
     strongsHebreu: {},
@@ -510,6 +523,7 @@ const userSlice = createSlice({
       const currentHighlights = state.bible.highlights
       const currentNotes = state.bible.notes
       const currentLinks = state.bible.links
+      const currentStudyRelations = state.bible.studyRelations
       const currentTags = state.bible.tags
       const currentStrongsHebreu = state.bible.strongsHebreu
       const currentStrongsGrec = state.bible.strongsGrec
@@ -529,6 +543,7 @@ const userSlice = createSlice({
       state.bible.highlights = currentHighlights
       state.bible.notes = currentNotes
       state.bible.links = currentLinks
+      state.bible.studyRelations = currentStudyRelations
       state.bible.tags = currentTags
       state.bible.strongsHebreu = currentStrongsHebreu
       state.bible.strongsGrec = currentStrongsGrec
@@ -546,6 +561,7 @@ const userSlice = createSlice({
           | 'highlights'
           | 'notes'
           | 'links'
+          | 'studyRelations'
           | 'tags'
           | 'strongsHebreu'
           | 'strongsGrec'
@@ -571,6 +587,9 @@ const userSlice = createSlice({
           break
         case 'links':
           state.bible.links = data as LinksObj
+          break
+        case 'studyRelations':
+          state.bible.studyRelations = data as StudyRelationsObj
           break
         case 'tags':
           state.bible.tags = data as TagsObj
@@ -806,6 +825,29 @@ const userSlice = createSlice({
     builder.addCase(deleteLink, (state, action) => {
       delete state.bible.links[action.payload]
       removeEntityInTags(state, 'links', action.payload)
+    })
+
+    // Study Relations
+    builder.addCase(addStudyRelationAction, (state, action) => {
+      const relation = normalizeStudyRelation(action.payload)
+      if (hasDuplicateStudyRelation(state.bible.studyRelations, relation)) return
+      state.bible.studyRelations[relation.id] = relation
+    })
+    builder.addCase(updateStudyRelation, (state, action) => {
+      const currentRelation = state.bible.studyRelations[action.payload.id]
+      if (!currentRelation) return
+
+      const relation = normalizeStudyRelation({
+        ...currentRelation,
+        ...action.payload.changes,
+        updatedAt: Date.now(),
+      })
+
+      if (hasDuplicateStudyRelation(state.bible.studyRelations, relation, relation.id)) return
+      state.bible.studyRelations[relation.id] = relation
+    })
+    builder.addCase(deleteStudyRelation, (state, action) => {
+      delete state.bible.studyRelations[action.payload]
     })
 
     // Notes

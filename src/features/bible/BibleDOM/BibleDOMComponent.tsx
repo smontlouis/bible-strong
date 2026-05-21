@@ -123,6 +123,7 @@ type Props = Pick<
   notedVersesText: { [key: string]: NotedVerse[] }
   linkedVersesCount: { [key: string]: number }
   linkedVersesText: { [key: string]: LinkedVerse[] }
+  studyRelationsCount: { [key: string]: number }
   // Annotation mode props (uncontrolled - DOM manages local annotation state)
   annotationMode?: boolean
   clearSelectionTrigger?: number
@@ -426,6 +427,7 @@ const LoadedBibleContent = ({
   notedVersesText,
   linkedVersesCount,
   linkedVersesText,
+  studyRelationsCount,
 }: Props) => {
   // Ref for highlight layer
   const containerRef = useRef<HTMLDivElement>(null)
@@ -1035,6 +1037,7 @@ const LoadedBibleContent = ({
               notedVersesText={notedVersesText}
               linkedVersesCount={linkedVersesCount}
               linkedVersesText={linkedVersesText}
+              studyRelationsCount={studyRelationsCount}
               versesWithAnnotationNotes={versesWithAnnotationNotes}
               navigateToPericope={navigateToPericope}
               annotationMode={annotationMode}

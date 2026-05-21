@@ -8,10 +8,18 @@ import {
   Highlight,
   Link,
   WordAnnotationsObj,
+  StudyRelationsObj,
+  RelationEndpoint,
+  StudyRelation,
 } from '~redux/modules/user'
 import { WordAnnotation } from '~redux/modules/user/wordAnnotations'
 import { Tag, CurrentTheme, TagsObj } from '~common/types'
 import { VersionCode } from '~state/tabs'
+import {
+  getRelationDisplayModel,
+  relationIncludesEndpoint,
+  relationIncludesVerseKey,
+} from '~features/studyRelations/domain'
 
 type TaggedEntity = { id: string | number; title: string; tags?: TagsObj }
 type HighlightVerseGroup = {
@@ -36,6 +44,7 @@ const isTaggedEntity = (entity: unknown): entity is TaggedEntity =>
 // (e.g., during Redux rehydration or state corruption)
 const selectHighlights = (state: RootState) => state.user.bible.highlights ?? {}
 export const selectLinks = (state: RootState) => state.user.bible.links ?? {}
+export const selectStudyRelations = (state: RootState) => state.user.bible.studyRelations ?? {}
 const selectStudies = (state: RootState) => state.user.bible.studies ?? {}
 const selectNaves = (state: RootState) => state.user.bible.naves ?? {}
 const selectWords = (state: RootState) => state.user.bible.words ?? {}
@@ -96,6 +105,88 @@ export const makeLinksByChapterSelector = () =>
       for (const key in links) {
         if (key.startsWith(prefix)) {
           result[key] = links[key]
+        }
+      }
+      return result
+    }
+  )
+
+export const makeStudyRelationsByChapterSelector = () =>
+  createSelector(
+    [
+      selectStudyRelations,
+      (_: RootState, bookNumber: number, chapter: number) => `${bookNumber}-${chapter}-`,
+    ],
+    (studyRelations, prefix): StudyRelationsObj => {
+      const result: StudyRelationsObj = {}
+      for (const [id, relation] of Object.entries(studyRelations)) {
+        if (
+          relation.endpoints.some(
+            endpoint =>
+              endpoint.type === 'verse' && endpoint.verseKeys.some(key => key.startsWith(prefix))
+          )
+        ) {
+          result[id] = relation
+        }
+      }
+      return result
+    }
+  )
+
+export const makeStudyRelationsForEndpointSelector = () =>
+  createSelector(
+    [
+      selectStudyRelations,
+      (_: RootState, endpoint: RelationEndpoint) => endpoint,
+    ],
+    (studyRelations, endpoint): StudyRelation[] =>
+      Object.values(studyRelations)
+        .filter(relation => relationIncludesEndpoint(relation, endpoint))
+        .sort((a, b) => b.updatedAt - a.updatedAt)
+  )
+
+export const makeStudyRelationDisplayModelsSelector = () =>
+  createSelector(
+    [
+      selectStudyRelations,
+      selectNotes,
+      selectStudies,
+      selectStrongsGrec,
+      selectStrongsHebreu,
+      (_: RootState, endpoint: RelationEndpoint) => endpoint,
+    ],
+    (studyRelations, notes, studies, strongsGrec, strongsHebreu, endpoint) =>
+      Object.values(studyRelations)
+        .filter(relation => relationIncludesEndpoint(relation, endpoint))
+        .map(relation =>
+          getRelationDisplayModel(relation, endpoint, {
+            notes,
+            studies,
+            strongsGrec,
+            strongsHebreu,
+          })
+        )
+        .filter((model): model is NonNullable<typeof model> => Boolean(model))
+        .sort((a, b) => b.relation.updatedAt - a.relation.updatedAt)
+  )
+
+export const makeStudyRelationIndicatorsByChapterSelector = () =>
+  createSelector(
+    [
+      selectStudyRelations,
+      (_: RootState, bookNumber: number, chapter: number) => `${bookNumber}-${chapter}-`,
+    ],
+    (studyRelations, prefix): Record<string, number> => {
+      const result: Record<string, number> = {}
+      for (const relation of Object.values(studyRelations)) {
+        for (const endpoint of relation.endpoints) {
+          if (endpoint.type !== 'verse') continue
+          for (const verseKey of endpoint.verseKeys) {
+            if (verseKey.startsWith(prefix) && relationIncludesVerseKey(relation, verseKey)) {
+              const verse = verseKey.split('-')[2]
+              result[verse] = (result[verse] || 0) + 1
+            }
+          }
         }
       }
       return result
