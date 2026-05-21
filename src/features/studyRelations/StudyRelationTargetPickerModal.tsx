@@ -26,7 +26,7 @@ import {
 } from './targetSearch'
 
 type BrowseMode = 'note' | 'study' | 'strong'
-type MatchRange = readonly [number, number]
+type MatchRange = [number, number]
 type MatchedRelationTargetResult = RelationTargetResult & {
   matches?: readonly Fuse.FuseResultMatch[]
 }
@@ -100,6 +100,39 @@ const fuzzyOptions: Fuse.IFuseOptions<RelationTargetResult> = {
   getFn: getFuzzyValue,
 }
 
+const normalizeSearchText = (value: string) => removeAccents(value).toLowerCase()
+
+const findExactNormalizedRange = (value: string | undefined, keyword: string): MatchRange[] => {
+  if (!value) return []
+
+  const normalizedValue = normalizeSearchText(value)
+  const normalizedKeyword = normalizeSearchText(keyword.trim())
+  if (normalizedKeyword.length < 3) return []
+
+  const start = normalizedValue.indexOf(normalizedKeyword)
+  if (start === -1) return []
+
+  return [[start, start + normalizedKeyword.length - 1]]
+}
+
+const getExactMatches = (
+  target: RelationTargetResult,
+  keyword: string
+): readonly Fuse.FuseResultMatch[] => {
+  const titleRanges = findExactNormalizedRange(target.title, keyword)
+  const descriptionRanges = findExactNormalizedRange(target.description, keyword)
+  const matches: Fuse.FuseResultMatch[] = []
+
+  if (titleRanges.length) {
+    matches.push({ key: 'title', value: target.title, indices: titleRanges })
+  }
+  if (target.description && descriptionRanges.length) {
+    matches.push({ key: 'description', value: target.description, indices: descriptionRanges })
+  }
+
+  return matches
+}
+
 const searchWithMatches = (
   targets: RelationTargetResult[],
   keyword: string
@@ -107,10 +140,13 @@ const searchWithMatches = (
   const trimmed = keyword.trim()
   if (!trimmed) return targets
 
-  return new Fuse(targets, fuzzyOptions).search(removeAccents(trimmed)).map(result => ({
-    ...result.item,
-    matches: result.matches,
-  }))
+  return new Fuse(targets, fuzzyOptions)
+    .search(removeAccents(trimmed))
+    .map(result => ({
+      ...result.item,
+      matches: getExactMatches(result.item, trimmed),
+    }))
+    .filter(result => result.matches?.length)
 }
 
 const mergeRanges = (ranges: readonly MatchRange[]) =>
