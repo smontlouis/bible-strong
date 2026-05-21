@@ -14,12 +14,16 @@ import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
 import Text from '~common/ui/Text'
 import { RootState } from '~redux/modules/reducer'
-import { updateStudy, Study } from '~redux/modules/user'
+import { createStudyRelation, updateStudy, Study, type RelationEndpoint } from '~redux/modules/user'
 import EditStudyHeader from './EditStudyHeader'
 import StudiesDomWrapper from './StudiesDOM/StudiesDomWrapper'
 import { openedFromTabAtom } from './atom'
 import { StudyTab } from 'src/state/tabs'
 import { PrimitiveAtom } from 'jotai/vanilla'
+import StudyRelationList from '~features/studyRelations/StudyRelationList'
+import StudyRelationTargetPickerModal from '~features/studyRelations/StudyRelationTargetPickerModal'
+import { useOpenRelationEndpoint } from '~features/studyRelations/useOpenRelationEndpoint'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
 
 type EditStudyScreenProps = {
   studyAtom?: PrimitiveAtom<StudyTab>
@@ -77,11 +81,18 @@ const EditStudyScreen = ({
   const dispatch = useDispatch()
   const [isReadOnly, setIsReadOnly] = useState(true)
   const renameModalRef = useRef<BottomSheetModal>(null)
+  const relationTargetPickerModal = useBottomSheetModal()
+  const openRelationEndpoint = useOpenRelationEndpoint()
   const setOpenedFromTab = useSetAtom(openedFromTabAtom)
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
 
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
   const currentStudy = useSelector((state: RootState) => state.user.bible.studies[studyId])
+  const studyEndpoint: Extract<RelationEndpoint, { type: 'study' }> = {
+    type: 'study',
+    studyId,
+    label: currentStudy?.title || t('Études'),
+  }
 
   const onDeltaChangeCallback = (
     delta: Study['content'] | null,
@@ -98,6 +109,15 @@ const EditStudyScreen = ({
         modified_at: Date.now(),
       })
     )
+  }
+
+  const createRelationToTarget = (targetEndpoint: RelationEndpoint) => {
+    dispatch(
+      createStudyRelation({
+        endpoints: [studyEndpoint, targetEndpoint],
+      })
+    )
+    relationTargetPickerModal.close()
   }
 
   // Control weither bible webview send back to study tab or not
@@ -150,6 +170,15 @@ const EditStudyScreen = ({
         studyAtom={studyAtom}
         studyId={studyId}
       />
+      {isReadOnly && (
+        <Box px={20} py={12} borderTopWidth={1} borderColor="border" bg="reverse">
+          <StudyRelationList
+            endpoint={studyEndpoint}
+            onOpenEndpoint={openRelationEndpoint}
+            onCreateRelation={() => relationTargetPickerModal.open()}
+          />
+        </Box>
+      )}
       <RenameModal
         bottomSheetRef={renameModalRef}
         title={t("Renommer l'étude")}
@@ -158,6 +187,10 @@ const EditStudyScreen = ({
         onSave={value => {
           dispatch(updateStudy({ id: currentStudy.id, title: value, modified_at: Date.now() }))
         }}
+      />
+      <StudyRelationTargetPickerModal
+        ref={relationTargetPickerModal.getRef()}
+        onSelect={createRelationToTarget}
       />
       {isReadOnly && <FabButton icon="edit-2" onPress={() => setIsReadOnly(false)} />}
     </Container>
