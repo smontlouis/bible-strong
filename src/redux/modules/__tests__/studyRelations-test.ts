@@ -1,4 +1,4 @@
-import userReducer, { UserState } from '../user'
+import userReducer, { Link, UserState } from '../user'
 import {
   addStudyRelationAction,
   deleteStudyRelation,
@@ -110,5 +110,37 @@ describe('study relation reducer', () => {
     const nextState = userReducer(state, deleteStudyRelation('relation-1'))
 
     expect(nextState.bible.studyRelations).toEqual({})
+  })
+
+  it('keeps external links and tags separate from study relations', () => {
+    const link: Link = {
+      url: 'https://example.com',
+      linkType: 'website',
+      date: 1,
+      tags: { tag1: { id: 'tag1', name: 'Theme' } },
+    }
+    const state: UserState = {
+      ...initialState,
+      bible: {
+        ...initialState.bible,
+        links: { '1-1-1': link },
+        notes: { note1: { title: 'Note', description: 'Body', date: 1 } },
+        tags: {
+          tag1: {
+            id: 'tag1',
+            name: 'Theme',
+            date: 1,
+            links: { '1-1-1': true },
+          },
+        },
+      },
+    }
+
+    const withRelation = userReducer(state, addStudyRelationAction(createRelation()))
+    const withoutRelation = userReducer(withRelation, deleteStudyRelation('relation-1'))
+
+    expect(withoutRelation.bible.links).toEqual(state.bible.links)
+    expect(withoutRelation.bible.notes).toEqual(state.bible.notes)
+    expect(withoutRelation.bible.tags).toEqual(state.bible.tags)
   })
 })
