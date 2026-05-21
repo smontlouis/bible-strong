@@ -108,7 +108,30 @@ const relationTitlePrefixes: Record<string, string> = {
 
 const getRelationTitleParts = (model: RelationDisplayModel) => {
   const prefix = relationTitlePrefixes[model.relationText] || model.relationText
-  return { prefix, target: model.targetLabel }
+  const target = (() => {
+    switch (model.targetEndpoint.type) {
+      case 'note':
+        return 'une note'
+      case 'strong':
+        return model.targetEndpoint.originalWord || model.targetLabel
+      default:
+        return model.targetLabel
+    }
+  })()
+
+  return { prefix, target }
+}
+
+const getRelationSubtitle = (model: RelationDisplayModel) => {
+  switch (model.targetEndpoint.type) {
+    case 'note':
+      return model.targetLabel
+    case 'verse':
+    case 'strong':
+      return ''
+    default:
+      return model.subtitle
+  }
 }
 
 const isDirectionalType = (type: RelationType) => directionalTypes.includes(type)
@@ -217,6 +240,7 @@ const StudyRelationList = ({
       ) : (
         relations.map(model => {
           const relationTitle = getRelationTitleParts(model)
+          const relationSubtitle = getRelationSubtitle(model)
           return (
             <ItemRow key={model.relation.id} onPress={() => onOpenEndpoint(model.targetEndpoint)}>
               <Box flex>
@@ -231,9 +255,11 @@ const StudyRelationList = ({
                     {relationTitle.target}
                   </Text>
                 </HStack>
-                <Text fontSize={13} color="tertiary" numberOfLines={1}>
-                  {model.subtitle}
-                </Text>
+                {relationSubtitle ? (
+                  <Text fontSize={13} color="tertiary" numberOfLines={1}>
+                    {relationSubtitle}
+                  </Text>
+                ) : null}
                 {model.relation.label ? (
                   <Text fontSize={13} color="tertiary" numberOfLines={1}>
                     {model.relation.label}
