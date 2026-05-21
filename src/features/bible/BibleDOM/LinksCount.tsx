@@ -12,13 +12,12 @@ const Div = styled('span')<RootStyles & { isDisabled?: boolean }>(
       ? `0 0 10px 0 rgba(255, 255, 255, 0.1)`
       : `0 0 10px 0 rgba(0, 0, 0, 0.2)`,
     borderRadius: '8px',
-    padding: '4px 8px 4px 8px',
+    padding: '4px 8px 4px 6px',
     wordBreak: 'break-word',
     marginRight: '4px',
     marginLeft: '4px',
     position: 'relative',
     display: 'inline-block',
-    lineHeight: 0,
 
     '&:active': {
       opacity: 0.6,
@@ -51,15 +50,15 @@ interface Props {
   isDisabled?: boolean
 }
 
-const renderIcon = (linkType: string, onClick: () => void) => {
+const renderIcon = (linkType: string) => {
   const IconComponent = getLinkTypeIconComponent(linkType)
   const color = getLinkTypeColor(linkType)
-  return <IconComponent size={14} color={color} onClick={onClick} />
+  return <IconComponent size={16} color={color} />
 }
 
 const LinksCount = ({ count, linkType, settings, onClick, isDisabled }: Props) => (
   <Div settings={settings} onClick={() => onClick()} isDisabled={isDisabled}>
-    {renderIcon(linkType || 'website', onClick)}
+    {renderIcon(linkType || 'website')}
     <Count settings={settings}>{count}</Count>
   </Div>
 )

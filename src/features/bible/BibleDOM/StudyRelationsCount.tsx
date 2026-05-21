@@ -51,7 +51,7 @@ interface Props {
 
 const StudyRelationsCount = ({ count, settings, onClick, isDisabled }: Props) => (
   <Div settings={settings} onClick={() => onClick()} isDisabled={isDisabled}>
-    <Feather color={settings.colors[settings.theme].primary} name="link-2" size={14} />
+    <Feather color={settings.colors[settings.theme].primary} name="git-merge" size={16} />
     <Count settings={settings}>{count}</Count>
   </Div>
 )
