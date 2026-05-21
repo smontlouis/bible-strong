@@ -371,13 +371,13 @@ const StudyRelationTargetPickerModal = ({
   onSelect,
   allowedTypes,
 }: Props) => {
-  const [query, setQuery] = useState('')
+  const [searchValue, setSearchValue] = useState('')
   const [browseMode, setBrowseMode] = useState<BrowseMode | null>(null)
   const [strongLetter, setStrongLetter] = useState('a')
   const [strongResults, setStrongResults] = useState<LexiqueRow[]>([])
   const [isStrongLoading, setIsStrongLoading] = useState(false)
   const [strongError, setStrongError] = useState<string | null>(null)
-  const debouncedQuery = useDebounce(query, 300)
+  const debouncedSearchValue = useDebounce(searchValue, 300)
 
   const notes = useSelector((state: RootState) => state.user.bible.notes)
   const studies = useSelector((state: RootState) => state.user.bible.studies)
@@ -391,8 +391,8 @@ const StudyRelationTargetPickerModal = ({
     const right = studies[(b.endpoint as Extract<RelationEndpoint, { type: 'study' }>).studyId]
     return Number(right?.modified_at || 0) - Number(left?.modified_at || 0)
   })
-  const fuzzyNoteTargets = searchWithMatches(noteTargets, query)
-  const fuzzyStudyTargets = searchWithMatches(studyTargets, query)
+  const fuzzyNoteTargets = searchWithMatches(noteTargets, debouncedSearchValue)
+  const fuzzyStudyTargets = searchWithMatches(studyTargets, debouncedSearchValue)
 
   useEffect(() => {
     if (browseMode !== 'strong') return
@@ -401,8 +401,8 @@ const StudyRelationTargetPickerModal = ({
     setIsStrongLoading(true)
     setStrongError(null)
 
-    const loader = debouncedQuery.trim()
-      ? loadLexiqueBySearch(debouncedQuery)
+    const loader = debouncedSearchValue.trim()
+      ? loadLexiqueBySearch(debouncedSearchValue)
       : loadLexiqueByLetter(strongLetter)
 
     loader.then(results => {
@@ -419,10 +419,10 @@ const StudyRelationTargetPickerModal = ({
     return () => {
       isMounted = false
     }
-  }, [browseMode, debouncedQuery, strongLetter])
+  }, [browseMode, debouncedSearchValue, strongLetter])
 
   const handleSearch = (value: string) => {
-    setQuery(value)
+    setSearchValue(value)
   }
 
   const enterBrowseMode = (mode: BrowseMode) => {
@@ -445,9 +445,9 @@ const StudyRelationTargetPickerModal = ({
     allowedTypes ? allowedTypes.includes(type) : true
 
   const unifiedResults = [
-    ...searchReferenceAndStrongTargets(query),
-    ...(query.trim() ? fuzzyNoteTargets.slice(0, 12) : []),
-    ...(query.trim() ? fuzzyStudyTargets.slice(0, 12) : []),
+    ...searchReferenceAndStrongTargets(debouncedSearchValue),
+    ...(debouncedSearchValue.trim() ? fuzzyNoteTargets.slice(0, 12) : []),
+    ...(debouncedSearchValue.trim() ? fuzzyStudyTargets.slice(0, 12) : []),
   ].filter(result => isAllowed(result.type))
 
   const browseResults =
@@ -473,7 +473,7 @@ const StudyRelationTargetPickerModal = ({
 
   const emptyMessage = browseMode
     ? `Aucun élément trouvé dans ${browseModeLabels[browseMode].toLowerCase()}`
-    : query.trim()
+    : debouncedSearchValue.trim()
       ? 'Aucune cible trouvée'
       : 'Rechercher un passage, un Strong, une note ou une étude'
 
@@ -494,7 +494,7 @@ const StudyRelationTargetPickerModal = ({
   const headerComponent = (
     <Box px={20} pt={8} pb={12}>
       <BottomSheetSearchInput
-        value={query}
+        value={searchValue}
         onChangeText={handleSearch}
         onDelete={() => handleSearch('')}
         placeholder={placeholder}
@@ -576,7 +576,9 @@ const StudyRelationTargetPickerModal = ({
               }
             />
           )}
-          {!query.trim() && <AlphabetList letter={strongLetter} setLetter={setStrongLetter} />}
+          {!debouncedSearchValue.trim() && (
+            <AlphabetList letter={strongLetter} setLetter={setStrongLetter} />
+          )}
         </VStack>
       ) : (
         <BottomSheetFlashList
