@@ -58,6 +58,7 @@ declare global {
 }
 
 const forwardProps = [
+  'settings',
   'isFocused',
   'isParallel',
   'isParallelVerse',
@@ -65,12 +66,21 @@ const forwardProps = [
   'isSelected',
   'isVerseToScroll',
   'highlightedColor',
+  'highlightBg',
+  'highlightColor',
+  'redColor',
+  'isSelectedMode',
+  'fadePosition',
+  'isButton',
+  'isDisabled',
+  'columnCount',
+  'columnWidth',
   'rtl',
 ]
 setup(React.createElement, undefined, undefined, (props: object) => {
   const forwardedProps = props as Record<string, unknown>
   for (let prop in forwardedProps) {
-    if (forwardProps.includes(prop)) {
+    if (prop[0] === '$' || forwardProps.includes(prop)) {
       delete forwardedProps[prop]
     }
   }
