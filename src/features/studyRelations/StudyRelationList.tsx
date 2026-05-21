@@ -152,6 +152,7 @@ const StudyRelationList = ({
     type: 'linked',
     direction: 'none',
   })
+  const [isLabelExpanded, setIsLabelExpanded] = useState(false)
   const relations = useSelector((state: RootState) => selectDisplayModels(state, endpoint))
 
   if (relations.length === 0 && !onCreateRelation && !showEmptyState) return null
@@ -163,6 +164,7 @@ const StudyRelationList = ({
       type: model.relation.type,
       direction: model.relation.direction,
     })
+    setIsLabelExpanded(Boolean(model.relation.label))
     editModalRef.current?.present()
   }
 
@@ -440,17 +442,39 @@ const StudyRelationList = ({
               ) : null}
             </VStack>
 
-            <VStack gap={8} mt="auto">
-              <Text fontSize={13} color="tertiary">
-                Libellé
-              </Text>
-              <LabelInput
-                value={draft.label}
-                onChangeText={label => setDraft(current => ({ ...current, label }))}
-                placeholder="Libellé court"
-                maxLength={80}
-                returnKeyType="done"
-              />
+            <VStack gap={8} mt="auto" alignItems="flex-end">
+              {isLabelExpanded ? (
+                <VStack gap={8} alignSelf="stretch">
+                  <Text fontSize={13} color="tertiary">
+                    Libellé
+                  </Text>
+                  <LabelInput
+                    value={draft.label}
+                    onChangeText={label => setDraft(current => ({ ...current, label }))}
+                    placeholder="Libellé court"
+                    maxLength={80}
+                    returnKeyType="done"
+                  />
+                </VStack>
+              ) : (
+                <TouchableBox
+                  row
+                  alignItems="center"
+                  justifyContent="flex-end"
+                  py={6}
+                  onPress={() => setIsLabelExpanded(true)}
+                >
+                  <Text fontSize={12} color="tertiary">
+                    Ajouter un libellé
+                  </Text>
+                  <FeatherIcon
+                    name="chevron-down"
+                    size={14}
+                    color="tertiary"
+                    style={{ marginLeft: 4 }}
+                  />
+                </TouchableBox>
+              )}
             </VStack>
           </VStack>
         ) : null}
