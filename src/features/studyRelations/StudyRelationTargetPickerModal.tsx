@@ -1,4 +1,5 @@
 import { BottomSheetFlashList, BottomSheetModal } from '@gorhom/bottom-sheet'
+import Fuse from 'fuse.js'
 import { ComponentProps, Ref, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import AlphabetList from '~common/AlphabetList'
@@ -12,7 +13,6 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import useBibleVerses from '~helpers/useBibleVerses'
 import useDebounce from '~helpers/useDebounce'
-import useFuzzy from '~helpers/useFuzzy'
 import loadLexiqueByLetter, { type LexiqueRow } from '~helpers/loadLexiqueByLetter'
 import loadLexiqueBySearch from '~helpers/loadLexiqueBySearch'
 import { removeBreakLines } from '~helpers/utils'
@@ -26,6 +26,10 @@ import {
 } from './targetSearch'
 
 type BrowseMode = 'note' | 'study' | 'strong'
+type MatchRange = readonly [number, number]
+type MatchedRelationTargetResult = RelationTargetResult & {
+  matches?: readonly Fuse.FuseResultMatch[]
+}
 
 type Props = {
   ref?: Ref<BottomSheetModal | null>
@@ -66,6 +70,153 @@ const getStrongSubtitle = (strong: LexiqueRow) =>
 
 const isDatabaseError = (value: unknown): value is { error: string } =>
   typeof value === 'object' && value !== null && 'error' in value
+
+function removeAccents(obj: string): string
+function removeAccents<T>(obj: T): T
+function removeAccents<T>(obj: T) {
+  if (typeof obj === 'string' || obj instanceof String) {
+    return obj.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  }
+  return obj
+}
+
+const getFuzzyValue = <T,>(obj: T, path: string | string[]): readonly string[] | string => {
+  const value = Fuse.config.getFn(obj, path)
+  return Array.isArray(value)
+    ? value.map(item => removeAccents(String(item)))
+    : removeAccents(value)
+}
+
+const fuzzyOptions: Fuse.IFuseOptions<RelationTargetResult> = {
+  keys: [
+    { name: 'title', weight: 0.6 },
+    { name: 'description', weight: 0.35 },
+    { name: 'subtitle', weight: 0.05 },
+  ],
+  threshold: 0.35,
+  ignoreLocation: true,
+  ignoreFieldNorm: true,
+  includeMatches: true,
+  findAllMatches: true,
+  minMatchCharLength: 2,
+  getFn: getFuzzyValue,
+}
+
+const searchWithMatches = (
+  targets: RelationTargetResult[],
+  keyword: string
+): MatchedRelationTargetResult[] => {
+  const trimmed = keyword.trim()
+  if (!trimmed) return targets
+
+  return new Fuse(targets, fuzzyOptions).search(removeAccents(trimmed)).map(result => ({
+    ...result.item,
+    matches: result.matches,
+  }))
+}
+
+const mergeRanges = (ranges: readonly MatchRange[]) =>
+  ranges
+    .slice()
+    .sort((a, b) => a[0] - b[0])
+    .reduce<MatchRange[]>((merged, range) => {
+      const previous = merged[merged.length - 1]
+      if (previous && range[0] <= previous[1] + 1) {
+        merged[merged.length - 1] = [previous[0], Math.max(previous[1], range[1])]
+      } else {
+        merged.push([range[0], range[1]])
+      }
+      return merged
+    }, [])
+
+const getExcerpt = (value: string, ranges: readonly MatchRange[], context = 26) => {
+  const firstRange = ranges[0]
+  if (!firstRange || value.length <= 90) {
+    return {
+      text: removeBreakLines(value),
+      ranges,
+    }
+  }
+
+  const start = Math.max(0, firstRange[0] - context)
+  const end = Math.min(value.length, firstRange[1] + context)
+  const prefix = start > 0 ? '...' : ''
+  const suffix = end < value.length ? '...' : ''
+  const text = `${prefix}${value.slice(start, end)}${suffix}`
+  const offset = start - prefix.length
+
+  return {
+    text: removeBreakLines(text),
+    ranges: ranges
+      .map(([rangeStart, rangeEnd]) => [
+        Math.max(0, rangeStart - offset),
+        Math.min(text.length - 1, rangeEnd - offset),
+      ])
+      .filter(([rangeStart, rangeEnd]) => rangeEnd >= 0 && rangeStart < text.length),
+  }
+}
+
+const HighlightedText = ({
+  value,
+  ranges,
+  bold,
+  color = 'tertiary',
+}: {
+  value: string
+  ranges?: readonly MatchRange[]
+  bold?: boolean
+  color?: string
+}) => {
+  const mergedRanges = ranges ? mergeRanges(ranges) : []
+
+  if (!mergedRanges.length) {
+    return (
+      <Text
+        bold={bold}
+        fontSize={bold ? 16 : 13}
+        color={bold ? undefined : color}
+        numberOfLines={1}
+      >
+        {removeBreakLines(value)}
+      </Text>
+    )
+  }
+
+  const { text, ranges: excerptRanges } = getExcerpt(value, mergedRanges)
+  const chunks: { text: string; highlighted: boolean }[] = []
+  let cursor = 0
+
+  excerptRanges.forEach(([start, end]) => {
+    if (start > cursor) {
+      chunks.push({ text: text.slice(cursor, start), highlighted: false })
+    }
+    chunks.push({ text: text.slice(start, end + 1), highlighted: true })
+    cursor = end + 1
+  })
+
+  if (cursor < text.length) {
+    chunks.push({ text: text.slice(cursor), highlighted: false })
+  }
+
+  return (
+    <Text bold={bold} fontSize={bold ? 16 : 13} color={bold ? undefined : color} numberOfLines={1}>
+      {chunks.map((chunk, index) => (
+        <Text
+          key={`${chunk.text}-${index}`}
+          bold
+          fontSize={bold ? 16 : 13}
+          color={chunk.highlighted ? 'primary' : bold ? undefined : color}
+          bg={chunk.highlighted ? 'lightPrimary' : undefined}
+        >
+          {chunk.text}
+        </Text>
+      ))}
+    </Text>
+  )
+}
+
+const getMatchForKey = (item: MatchedRelationTargetResult, key: string) =>
+  item.matches?.find(match => match.key === key)
 
 const getVerseIds = (endpoint: RelationEndpoint) =>
   endpoint.type === 'verse'
@@ -116,10 +267,14 @@ const RelationTargetRow = ({
   item,
   onPress,
 }: {
-  item: RelationTargetResult
+  item: MatchedRelationTargetResult
   onPress: () => void
 }) => {
   const description = item.description || item.subtitle
+  const titleMatch = getMatchForKey(item, 'title')
+  const descriptionMatch = getMatchForKey(item, 'description')
+  const subtitleMatch = getMatchForKey(item, 'subtitle')
+  const descriptionRanges = descriptionMatch?.indices || subtitleMatch?.indices
 
   return (
     <TouchableBox
@@ -134,15 +289,11 @@ const RelationTargetRow = ({
     >
       <TargetIcon type={item.type} />
       <VStack flex={1} gap={3}>
-        <Text bold numberOfLines={1}>
-          {item.title}
-        </Text>
+        <HighlightedText value={item.title} ranges={titleMatch?.indices} bold />
         {item.endpoint.type === 'verse' ? (
           <VerseTargetDescription endpoint={item.endpoint} />
         ) : description ? (
-          <Text fontSize={13} color="tertiary" numberOfLines={1}>
-            {removeBreakLines(description)}
-          </Text>
+          <HighlightedText value={description} ranges={descriptionRanges} />
         ) : null}
       </VStack>
       <FeatherIcon name="plus" size={20} color="grey" />
@@ -203,22 +354,8 @@ const StudyRelationTargetPickerModal = ({
     const right = studies[(b.endpoint as Extract<RelationEndpoint, { type: 'study' }>).studyId]
     return Number(right?.modified_at || 0) - Number(left?.modified_at || 0)
   })
-  const fuzzyOptions = {
-    keys: [
-      { name: 'title', weight: 0.75 },
-      { name: 'subtitle', weight: 0.25 },
-    ],
-    threshold: 0.35,
-    ignoreLocation: true,
-  }
-  const { result: fuzzyNoteTargets, search: searchNotes } = useFuzzy<RelationTargetResult>(
-    noteTargets,
-    fuzzyOptions
-  )
-  const { result: fuzzyStudyTargets, search: searchStudies } = useFuzzy<RelationTargetResult>(
-    studyTargets,
-    fuzzyOptions
-  )
+  const fuzzyNoteTargets = searchWithMatches(noteTargets, query)
+  const fuzzyStudyTargets = searchWithMatches(studyTargets, query)
 
   useEffect(() => {
     if (browseMode !== 'strong') return
@@ -249,8 +386,6 @@ const StudyRelationTargetPickerModal = ({
 
   const handleSearch = (value: string) => {
     setQuery(value)
-    searchNotes(value)
-    searchStudies(value)
   }
 
   const enterBrowseMode = (mode: BrowseMode) => {

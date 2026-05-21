@@ -1,4 +1,5 @@
 import { parseBibleReference } from '~features/search/BibleReferenceWidget'
+import { deltaToPlainText } from '~helpers/deltaToPlainText'
 import type { NotesObj, StudiesObj } from '~redux/modules/user'
 import type { RelationEndpoint, RelationEndpointType } from './domain'
 import { normalizeStrongCode } from './domain'
@@ -98,17 +99,23 @@ export const getNoteTargetItems = (notes: NotesObj = {}): RelationTargetResult[]
   })
 
 export const getStudyTargetItems = (studies: StudiesObj = {}): RelationTargetResult[] =>
-  Object.values(studies).map(study => ({
-    id: `study:${study.id}`,
-    type: 'study',
-    title: study.title || 'Étude sans titre',
-    subtitle: 'Étude',
-    endpoint: {
+  Object.values(studies).map(study => {
+    const title = study.title || 'Étude sans titre'
+    return {
+      id: `study:${study.id}`,
       type: 'study',
-      studyId: study.id,
-      label: study.title || 'Étude sans titre',
-    },
-  }))
+      title,
+      subtitle: 'Étude',
+      description: study.content?.ops
+        ? deltaToPlainText(study.content.ops as Parameters<typeof deltaToPlainText>[0])
+        : undefined,
+      endpoint: {
+        type: 'study',
+        studyId: study.id,
+        label: title,
+      },
+    }
+  })
 
 const searchNoteTargets = (query: string, notes: NotesObj = {}): RelationTargetResult[] => {
   const normalizedQuery = normalizeText(query)
