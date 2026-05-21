@@ -39,9 +39,7 @@ jest.mock('~i18n', () => ({
 jest.mock('~helpers/languageUtils', () => ({
   getDefaultBibleVersion: jest.fn(() => 'LSG'),
 }))
-jest.mock('~assets/bible_versions/books-desc', () => [
-  { Numero: 1, Nom: 'Genèse', Chapitres: 50 },
-])
+jest.mock('~assets/bible_versions/books-desc', () => [{ Numero: 1, Nom: 'Genèse', Chapitres: 50 }])
 jest.mock('~themes/colors', () => ({ primary: '#000' }))
 jest.mock('~themes/darkColors', () => ({ primary: '#111' }))
 jest.mock('~themes/blackColors', () => ({ primary: '#222' }))

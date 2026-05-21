@@ -135,10 +135,7 @@ export const makeStudyRelationsByChapterSelector = () =>
 
 export const makeStudyRelationsForEndpointSelector = () =>
   createSelector(
-    [
-      selectStudyRelations,
-      (_: RootState, endpoint: RelationEndpoint) => endpoint,
-    ],
+    [selectStudyRelations, (_: RootState, endpoint: RelationEndpoint) => endpoint],
     (studyRelations, endpoint): StudyRelation[] =>
       Object.values(studyRelations)
         .filter(relation => relationIncludesEndpoint(relation, endpoint))

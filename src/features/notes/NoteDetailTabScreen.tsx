@@ -35,10 +35,7 @@ import StudyRelationList from '~features/studyRelations/StudyRelationList'
 import StudyRelationTargetPickerModal from '~features/studyRelations/StudyRelationTargetPickerModal'
 import { useOpenRelationEndpoint } from '~features/studyRelations/useOpenRelationEndpoint'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
-import {
-  createStudyRelation,
-  type RelationEndpoint,
-} from '~redux/modules/user'
+import { createStudyRelation, type RelationEndpoint } from '~redux/modules/user'
 
 const FOOTER_HEIGHT = 54
 

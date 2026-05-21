@@ -78,9 +78,7 @@ const StudyRelationList = ({ endpoint, onOpenEndpoint, onCreateRelation }: Props
                 <Text fontSize={13} color="grey">
                   {model.relationText} · {model.subtitle}
                 </Text>
-                {model.relation.label ? (
-                  <Text fontSize={13}>{model.relation.label}</Text>
-                ) : null}
+                {model.relation.label ? <Text fontSize={13}>{model.relation.label}</Text> : null}
               </VStack>
             </TouchableBox>
 
@@ -123,7 +121,8 @@ const StudyRelationList = ({ endpoint, onOpenEndpoint, onCreateRelation }: Props
                       updateStudyRelation({
                         id: model.relation.id,
                         changes: {
-                          direction: model.relation.direction === 'forward' ? 'backward' : 'forward',
+                          direction:
+                            model.relation.direction === 'forward' ? 'backward' : 'forward',
                         },
                       })
                     )

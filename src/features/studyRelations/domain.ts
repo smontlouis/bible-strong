@@ -128,7 +128,10 @@ export const normalizeRelationEndpoint = (endpoint: RelationEndpoint): RelationE
       return {
         ...endpoint,
         code: normalizeStrongCode(endpoint.code),
-        label: endpoint.label || endpoint.originalWord || `${endpoint.language === 'greek' ? 'G' : 'H'}${normalizeStrongCode(endpoint.code)}`,
+        label:
+          endpoint.label ||
+          endpoint.originalWord ||
+          `${endpoint.language === 'greek' ? 'G' : 'H'}${normalizeStrongCode(endpoint.code)}`,
       }
   }
 }
@@ -192,7 +195,8 @@ export const endpointsMatch = (left: RelationEndpoint, right: RelationEndpoint):
 export const relationIncludesEndpoint = (
   relation: StudyRelation,
   endpoint: RelationEndpoint
-): boolean => relation.endpoints.some(relationEndpoint => endpointsMatch(relationEndpoint, endpoint))
+): boolean =>
+  relation.endpoints.some(relationEndpoint => endpointsMatch(relationEndpoint, endpoint))
 
 export const relationIncludesVerseKey = (relation: StudyRelation, verseKey: string): boolean =>
   relation.endpoints.some(
@@ -271,7 +275,9 @@ export const getRelationDisplayModel = (
   activeEndpoint: RelationEndpoint,
   data?: Parameters<typeof getResolvedEndpointLabel>[1]
 ): RelationDisplayModel | undefined => {
-  const targetEndpoint = relation.endpoints.find(endpoint => !endpointsMatch(endpoint, activeEndpoint))
+  const targetEndpoint = relation.endpoints.find(
+    endpoint => !endpointsMatch(endpoint, activeEndpoint)
+  )
   if (!targetEndpoint) return undefined
 
   const target = getResolvedEndpointLabel(targetEndpoint, data)

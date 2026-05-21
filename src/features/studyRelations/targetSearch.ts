@@ -18,8 +18,9 @@ type SearchData = {
 }
 
 const createVerseKeys = (book: number, chapter: number, startVerse: number, endVerse: number) =>
-  Array.from({ length: endVerse - startVerse + 1 }, (_, index) =>
-    `${book}-${chapter}-${startVerse + index}`
+  Array.from(
+    { length: endVerse - startVerse + 1 },
+    (_, index) => `${book}-${chapter}-${startVerse + index}`
   )
 
 const searchVerseTargets = (query: string): RelationTargetResult[] =>

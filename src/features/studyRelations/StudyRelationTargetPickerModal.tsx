@@ -57,7 +57,9 @@ const StudyRelationTargetPickerModal = ({
       {results.length === 0 ? (
         <Box px={20} py={24}>
           <Text color="grey">
-            {query.trim() ? 'Aucune cible trouvée' : 'Rechercher un passage, un Strong, une note ou une étude'}
+            {query.trim()
+              ? 'Aucune cible trouvée'
+              : 'Rechercher un passage, un Strong, une note ou une étude'}
           </Text>
         </Box>
       ) : (

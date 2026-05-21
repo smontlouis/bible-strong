@@ -40,10 +40,7 @@ import {
   StudyRelationsObj,
   updateStudyRelation,
 } from './user/studyRelations'
-import {
-  hasDuplicateStudyRelation,
-  normalizeStudyRelation,
-} from '~features/studyRelations/domain'
+import { hasDuplicateStudyRelation, normalizeStudyRelation } from '~features/studyRelations/domain'
 import {
   addWordAnnotationAction,
   changeWordAnnotationColorAction,
