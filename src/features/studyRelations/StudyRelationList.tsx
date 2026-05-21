@@ -1,4 +1,7 @@
 import { Alert } from 'react-native'
+import { useState } from 'react'
+import { BottomSheetTextInput } from '@gorhom/bottom-sheet'
+import styled from '@emotion/native'
 import { useDispatch, useSelector } from 'react-redux'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -27,8 +30,19 @@ const getNextType = (type: RelationType): RelationType => {
 
 const selectDisplayModels = makeStudyRelationDisplayModelsSelector()
 
+const LabelInput = styled(BottomSheetTextInput)(({ theme }) => ({
+  minHeight: 42,
+  borderWidth: 1,
+  borderColor: theme.colors.border,
+  borderRadius: 8,
+  paddingHorizontal: 10,
+  color: theme.colors.default,
+}))
+
 const StudyRelationList = ({ endpoint, onOpenEndpoint, onCreateRelation }: Props) => {
   const dispatch = useDispatch()
+  const [editingLabelId, setEditingLabelId] = useState<string | null>(null)
+  const [labelDraft, setLabelDraft] = useState('')
   const relations = useSelector((state: RootState) => selectDisplayModels(state, endpoint))
 
   if (relations.length === 0 && !onCreateRelation) return null
@@ -71,6 +85,16 @@ const StudyRelationList = ({ endpoint, onOpenEndpoint, onCreateRelation }: Props
             </TouchableBox>
 
             <HStack mt={10} gap={8} wrap>
+              <Button
+                small
+                secondary
+                onPress={() => {
+                  setEditingLabelId(model.relation.id)
+                  setLabelDraft(model.relation.label || '')
+                }}
+              >
+                Libellé
+              </Button>
               <Button
                 small
                 secondary
@@ -125,6 +149,44 @@ const StudyRelationList = ({ endpoint, onOpenEndpoint, onCreateRelation }: Props
                 Supprimer
               </Button>
             </HStack>
+            {editingLabelId === model.relation.id ? (
+              <VStack mt={10} gap={8}>
+                <LabelInput
+                  value={labelDraft}
+                  onChangeText={setLabelDraft}
+                  placeholder="Libellé court"
+                  maxLength={80}
+                  returnKeyType="done"
+                />
+                <HStack gap={8}>
+                  <Button
+                    small
+                    onPress={() => {
+                      dispatch(
+                        updateStudyRelation({
+                          id: model.relation.id,
+                          changes: { label: labelDraft },
+                        })
+                      )
+                      setEditingLabelId(null)
+                      setLabelDraft('')
+                    }}
+                  >
+                    Enregistrer
+                  </Button>
+                  <Button
+                    small
+                    secondary
+                    onPress={() => {
+                      setEditingLabelId(null)
+                      setLabelDraft('')
+                    }}
+                  >
+                    Annuler
+                  </Button>
+                </HStack>
+              </VStack>
+            ) : null}
           </Box>
         ))
       )}
