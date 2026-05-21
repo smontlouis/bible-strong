@@ -218,68 +218,75 @@ const StudyRelationTargetPickerModal = ({
       ? 'Aucune cible trouvée'
       : 'Rechercher un passage, un Strong, une note ou une étude'
 
+  const headerComponent = (
+    <Box px={20} pt={8} pb={12}>
+      <BottomSheetSearchInput
+        value={query}
+        onChangeText={handleSearch}
+        onDelete={() => handleSearch('')}
+        placeholder={placeholder}
+        autoFocus
+      />
+
+      {browseMode ? (
+        <HStack mt={10} alignItems="center" gap={10}>
+          <TouchableBox onPress={exitBrowseMode} px={10} py={8} bg="lightGrey" borderRadius={8}>
+            <Text fontSize={13}>← Recherche</Text>
+          </TouchableBox>
+          <Text bold>{browseModeLabels[browseMode]}</Text>
+        </HStack>
+      ) : (
+        <HStack mt={10} gap={8}>
+          {isAllowed('note') && (
+            <TouchableBox
+              onPress={() => enterBrowseMode('note')}
+              px={10}
+              py={8}
+              bg="lightGrey"
+              borderRadius={8}
+            >
+              <Text fontSize={13}>Notes</Text>
+            </TouchableBox>
+          )}
+          {isAllowed('study') && (
+            <TouchableBox
+              onPress={() => enterBrowseMode('study')}
+              px={10}
+              py={8}
+              bg="lightGrey"
+              borderRadius={8}
+            >
+              <Text fontSize={13}>Études</Text>
+            </TouchableBox>
+          )}
+          {isAllowed('strong') && (
+            <TouchableBox
+              onPress={() => enterBrowseMode('strong')}
+              px={10}
+              py={8}
+              bg="lightGrey"
+              borderRadius={8}
+            >
+              <Text fontSize={13}>Strong</Text>
+            </TouchableBox>
+          )}
+        </HStack>
+      )}
+    </Box>
+  )
+
   return (
     <Modal.Body
       ref={ref}
       snapPoints={['75%']}
-      headerComponent={<ModalHeader title={title} />}
-      enableScrollView={false}
+      headerComponent={
+        <>
+          <ModalHeader title={title} />
+          {headerComponent}
+        </>
+      }
+      enableContentWrapper={false}
     >
-      <Box px={20} pt={8} pb={12}>
-        <BottomSheetSearchInput
-          value={query}
-          onChangeText={handleSearch}
-          onDelete={() => handleSearch('')}
-          placeholder={placeholder}
-          autoFocus
-        />
-
-        {browseMode ? (
-          <HStack mt={10} alignItems="center" gap={10}>
-            <TouchableBox onPress={exitBrowseMode} px={10} py={8} bg="lightGrey" borderRadius={8}>
-              <Text fontSize={13}>← Recherche</Text>
-            </TouchableBox>
-            <Text bold>{browseModeLabels[browseMode]}</Text>
-          </HStack>
-        ) : (
-          <HStack mt={10} gap={8}>
-            {isAllowed('note') && (
-              <TouchableBox
-                onPress={() => enterBrowseMode('note')}
-                px={10}
-                py={8}
-                bg="lightGrey"
-                borderRadius={8}
-              >
-                <Text fontSize={13}>Notes</Text>
-              </TouchableBox>
-            )}
-            {isAllowed('study') && (
-              <TouchableBox
-                onPress={() => enterBrowseMode('study')}
-                px={10}
-                py={8}
-                bg="lightGrey"
-                borderRadius={8}
-              >
-                <Text fontSize={13}>Études</Text>
-              </TouchableBox>
-            )}
-            {isAllowed('strong') && (
-              <TouchableBox
-                onPress={() => enterBrowseMode('strong')}
-                px={10}
-                py={8}
-                bg="lightGrey"
-                borderRadius={8}
-              >
-                <Text fontSize={13}>Strong</Text>
-              </TouchableBox>
-            )}
-          </HStack>
-        )}
-      </Box>
-
       {browseMode === 'strong' ? (
         <VStack flex={1}>
           {strongError ? (
