@@ -101,6 +101,7 @@ const fuzzyOptions: Fuse.IFuseOptions<RelationTargetResult> = {
 }
 
 const normalizeSearchText = (value: string) => removeAccents(value).toLowerCase()
+const normalizeDisplayedText = (value: string) => removeBreakLines(value)
 
 const findExactNormalizedRange = (value: string | undefined, keyword: string): MatchRange[] => {
   if (!value) return []
@@ -168,28 +169,48 @@ const filterUsefulRanges = (ranges: readonly MatchRange[]) =>
 
 const getExcerpt = (value: string, ranges: readonly MatchRange[], context = 26) => {
   const firstRange = ranges[0]
-  if (!firstRange || value.length <= 90) {
+  const sourceText = normalizeDisplayedText(value)
+  const normalizedSourceText = normalizeSearchText(sourceText)
+  const matchedText = firstRange ? value.slice(firstRange[0], firstRange[1] + 1) : ''
+  const normalizedMatchedText = normalizeSearchText(matchedText)
+  const displayedMatchStart = normalizedMatchedText
+    ? normalizedSourceText.indexOf(normalizedMatchedText)
+    : -1
+
+  if (displayedMatchStart === -1) {
     return {
-      text: removeBreakLines(value),
-      ranges,
+      text: sourceText,
+      ranges: [],
     }
   }
 
-  const start = Math.max(0, firstRange[0] - context)
-  const end = Math.min(value.length, firstRange[1] + context)
+  const displayedRange: MatchRange = [
+    displayedMatchStart,
+    displayedMatchStart + normalizedMatchedText.length - 1,
+  ]
+
+  if (!firstRange || value.length <= 90) {
+    return {
+      text: sourceText,
+      ranges: [displayedRange],
+    }
+  }
+
+  const start = Math.max(0, displayedRange[0] - context)
+  const end = Math.min(sourceText.length, displayedRange[1] + context)
   const prefix = start > 0 ? '...' : ''
-  const suffix = end < value.length ? '...' : ''
-  const text = `${prefix}${value.slice(start, end)}${suffix}`
+  const suffix = end < sourceText.length ? '...' : ''
+  const text = `${prefix}${sourceText.slice(start, end)}${suffix}`
   const offset = start - prefix.length
 
   return {
-    text: removeBreakLines(text),
-    ranges: ranges
-      .map(([rangeStart, rangeEnd]) => [
-        Math.max(0, rangeStart - offset),
-        Math.min(text.length - 1, rangeEnd - offset),
-      ])
-      .filter(([rangeStart, rangeEnd]) => rangeEnd >= 0 && rangeStart < text.length),
+    text,
+    ranges: [
+      [
+        Math.max(0, displayedRange[0] - offset),
+        Math.min(text.length - 1, displayedRange[1] - offset),
+      ],
+    ],
   }
 }
 
@@ -214,7 +235,7 @@ const HighlightedText = ({
         color={bold ? undefined : color}
         numberOfLines={1}
       >
-        {removeBreakLines(value)}
+        {normalizeDisplayedText(value)}
       </Text>
     )
   }
