@@ -70,53 +70,60 @@ const searchStrongTargets = (query: string): RelationTargetResult[] => {
   ]
 }
 
+export const searchReferenceAndStrongTargets = (query: string): RelationTargetResult[] => {
+  const trimmed = query.trim()
+  if (!trimmed) return []
+
+  return [...searchVerseTargets(trimmed), ...searchStrongTargets(trimmed)]
+}
+
 const normalizeText = (text: string) => text.toLowerCase().trim()
+
+export const getNoteTargetItems = (notes: NotesObj = {}): RelationTargetResult[] =>
+  Object.entries(notes).map(([noteId, note]) => {
+    const title = note.title || note.description || 'Note sans titre'
+    return {
+      id: `note:${noteId}`,
+      type: 'note',
+      title,
+      subtitle: 'Note',
+      endpoint: {
+        type: 'note',
+        noteId,
+        label: title,
+      },
+    }
+  })
+
+export const getStudyTargetItems = (studies: StudiesObj = {}): RelationTargetResult[] =>
+  Object.values(studies).map(study => ({
+    id: `study:${study.id}`,
+    type: 'study',
+    title: study.title || 'Étude sans titre',
+    subtitle: 'Étude',
+    endpoint: {
+      type: 'study',
+      studyId: study.id,
+      label: study.title || 'Étude sans titre',
+    },
+  }))
 
 const searchNoteTargets = (query: string, notes: NotesObj = {}): RelationTargetResult[] => {
   const normalizedQuery = normalizeText(query)
   if (!normalizedQuery) return []
 
-  return Object.entries(notes)
-    .filter(([, note]) => {
-      const title = normalizeText(note.title || '')
-      const description = normalizeText(note.description || '')
-      return title.includes(normalizedQuery) || description.includes(normalizedQuery)
-    })
+  return getNoteTargetItems(notes)
+    .filter(note => normalizeText(`${note.title} ${note.subtitle || ''}`).includes(normalizedQuery))
     .slice(0, 12)
-    .map(([noteId, note]) => {
-      const title = note.title || note.description || 'Note sans titre'
-      return {
-        id: `note:${noteId}`,
-        type: 'note',
-        title,
-        subtitle: 'Note',
-        endpoint: {
-          type: 'note',
-          noteId,
-          label: title,
-        },
-      }
-    })
 }
 
 const searchStudyTargets = (query: string, studies: StudiesObj = {}): RelationTargetResult[] => {
   const normalizedQuery = normalizeText(query)
   if (!normalizedQuery) return []
 
-  return Object.values(studies)
-    .filter(study => normalizeText(study.title || '').includes(normalizedQuery))
+  return getStudyTargetItems(studies)
+    .filter(study => normalizeText(study.title).includes(normalizedQuery))
     .slice(0, 12)
-    .map(study => ({
-      id: `study:${study.id}`,
-      type: 'study',
-      title: study.title || 'Étude sans titre',
-      subtitle: 'Étude',
-      endpoint: {
-        type: 'study',
-        studyId: study.id,
-        label: study.title || 'Étude sans titre',
-      },
-    }))
 }
 
 export const searchRelationTargets = (

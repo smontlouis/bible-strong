@@ -43,6 +43,7 @@ Core user activities:
 | Link | User URL attached to a verse selection. | `src/features/bible/BibleLinkModal.tsx` |
 | Study relation | User-created relationship between two relation endpoints that can be opened inside Bible Strong. | Planned |
 | Relation endpoint | Openable study object that can participate in a study relation; initially a verse, note, study, or Strong entry. | Planned |
+| Relation target picker | Surface for choosing the target endpoint of a study relation through unified search or by browsing a specific endpoint type. | Planned |
 | Relation type | Meaning assigned to a study relation; initially linked, references, explains, or contrasts. | Planned |
 | Study | Rich text document authored by the user; can be tagged and can receive verse references. | `src/features/studies/`, `src/redux/modules/user.ts` |
 | Reading plan | Structured sequence of Bible readings, meditations, media, or teaching slices followed by the user. | `src/features/plans/`, `src/redux/modules/plan.ts` |
