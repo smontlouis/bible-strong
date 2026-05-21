@@ -89,16 +89,14 @@ const getFuzzyValue = <T,>(obj: T, path: string | string[]): readonly string[] |
 
 const fuzzyOptions: Fuse.IFuseOptions<RelationTargetResult> = {
   keys: [
-    { name: 'title', weight: 0.6 },
-    { name: 'description', weight: 0.35 },
-    { name: 'subtitle', weight: 0.05 },
+    { name: 'title', weight: 0.7 },
+    { name: 'description', weight: 0.3 },
   ],
-  threshold: 0.35,
+  threshold: 0.22,
   ignoreLocation: true,
   ignoreFieldNorm: true,
   includeMatches: true,
-  findAllMatches: true,
-  minMatchCharLength: 2,
+  minMatchCharLength: 3,
   getFn: getFuzzyValue,
 }
 
@@ -128,6 +126,9 @@ const mergeRanges = (ranges: readonly MatchRange[]) =>
       }
       return merged
     }, [])
+
+const filterUsefulRanges = (ranges: readonly MatchRange[]) =>
+  mergeRanges(ranges).filter(([start, end]) => end - start + 1 >= 3)
 
 const getExcerpt = (value: string, ranges: readonly MatchRange[], context = 26) => {
   const firstRange = ranges[0]
@@ -167,7 +168,7 @@ const HighlightedText = ({
   bold?: boolean
   color?: string
 }) => {
-  const mergedRanges = ranges ? mergeRanges(ranges) : []
+  const mergedRanges = ranges ? filterUsefulRanges(ranges) : []
 
   if (!mergedRanges.length) {
     return (
