@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import AlphabetList from '~common/AlphabetList'
 import BottomSheetSearchInput from '~common/BottomSheetSearchInput'
 import Empty from '~common/Empty'
+import LexiqueIcon from '~common/LexiqueIcon'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
@@ -48,7 +49,7 @@ const targetIconConfig: Record<
 > = {
   verse: { name: 'book-open', color: 'color1' },
   note: { name: 'file-text', color: 'color2' },
-  study: { name: 'feather', color: 'quart' },
+  study: { name: 'feather', color: 'tertiary' },
   strong: { name: 'hash', color: 'primary' },
 }
 
@@ -85,7 +86,11 @@ const TargetIcon = ({ type }: { type: RelationEndpoint['type'] }) => {
       alignItems="center"
       justifyContent="center"
     >
-      <FeatherIcon name={config.name} size={18} color={config.color} />
+      {type === 'strong' ? (
+        <LexiqueIcon color={config.color} size={18} />
+      ) : (
+        <FeatherIcon name={config.name} size={18} color={config.color} />
+      )}
     </Box>
   )
 }
