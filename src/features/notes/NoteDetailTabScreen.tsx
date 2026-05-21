@@ -31,6 +31,14 @@ import { isFullScreenBibleAtom, unifiedTagsModalAtom } from '~state/app'
 import { NotesTab, useIsCurrentTab } from '~state/tabs'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import NoteEditorDOMComponent from '~features/bible/NoteEditorDOM/NoteEditorDOMComponent'
+import StudyRelationList from '~features/studyRelations/StudyRelationList'
+import StudyRelationTargetPickerModal from '~features/studyRelations/StudyRelationTargetPickerModal'
+import { useOpenRelationEndpoint } from '~features/studyRelations/useOpenRelationEndpoint'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import {
+  createStudyRelation,
+  type RelationEndpoint,
+} from '~redux/modules/user'
 
 const FOOTER_HEIGHT = 54
 
@@ -47,6 +55,8 @@ const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) =>
   const [, setNotesTab] = useAtom(notesAtom)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
+  const relationTargetPickerModal = useBottomSheetModal()
+  const openRelationEndpoint = useOpenRelationEndpoint()
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -99,6 +109,12 @@ const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) =>
     }
     return baseRef
   }, [noteVerses, isAnnotationNote, annotation, t])
+
+  const noteEndpoint: Extract<RelationEndpoint, { type: 'note' }> = {
+    type: 'note',
+    noteId,
+    label: currentNote?.title || currentNote?.description || reference,
+  }
 
   // Go back to notes list
   const goBack = useCallback(() => {
@@ -181,6 +197,15 @@ ${currentNote.description}
     setTitle(currentNote?.title || '')
     setDescription(currentNote?.description || '')
     setIsEditing(true)
+  }
+
+  const createRelationToTarget = (targetEndpoint: RelationEndpoint) => {
+    dispatch(
+      createStudyRelation({
+        endpoints: [noteEndpoint, targetEndpoint],
+      })
+    )
+    relationTargetPickerModal.close()
   }
 
   const navigateToBible = () => {
@@ -321,6 +346,13 @@ ${currentNote.description}
               }}
             />
             <TagList tags={currentNote?.tags} />
+            {!isEditing && (
+              <StudyRelationList
+                endpoint={noteEndpoint}
+                onOpenEndpoint={openRelationEndpoint}
+                onCreateRelation={() => relationTargetPickerModal.open()}
+              />
+            )}
           </Box>
         </ScrollView>
         {isEditing && (
@@ -347,6 +379,10 @@ ${currentNote.description}
           <Fab icon="edit-2" onPress={onEditNote} />
         </Box>
       )}
+      <StudyRelationTargetPickerModal
+        ref={relationTargetPickerModal.getRef()}
+        onSelect={createRelationToTarget}
+      />
     </Container>
   )
 }
