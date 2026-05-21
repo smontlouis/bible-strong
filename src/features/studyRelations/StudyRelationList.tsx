@@ -113,7 +113,7 @@ const getRelationTitleParts = (model: RelationDisplayModel) => {
       case 'note':
         return 'une note'
       case 'strong':
-        return model.targetEndpoint.originalWord || model.targetLabel
+        return model.targetLabel
       default:
         return model.targetLabel
     }
