@@ -398,14 +398,16 @@ const StudyRelationTargetPickerModal = ({
   const [strongResults, setStrongResults] = useState<LexiqueRow[]>([])
   const [isStrongLoading, setIsStrongLoading] = useState(false)
   const [strongError, setStrongError] = useState<string | null>(null)
-  const debouncedSearchValue = useDebounce(searchValue, 300)
-  const deferredSearchValue = useDeferredValue(debouncedSearchValue)
+  const debouncedStrongSearchValue = useDebounce(searchValue, 300)
+  const deferredSearchValue = useDeferredValue(searchValue)
+  const deferredStrongSearchValue = useDeferredValue(debouncedStrongSearchValue)
   const deferredBrowseMode = useDeferredValue(browseMode)
   const immediateSearchHasValue = Boolean(searchValue.trim())
   const deferredSearchHasValue = Boolean(deferredSearchValue.trim())
-  const isListPending =
+  const isStrongPending =
+    browseMode === 'strong' &&
     immediateSearchHasValue &&
-    (browseMode !== deferredBrowseMode || debouncedSearchValue !== deferredSearchValue)
+    debouncedStrongSearchValue !== deferredStrongSearchValue
 
   const notes = useSelector((state: RootState) => state.user.bible.notes)
   const studies = useSelector((state: RootState) => state.user.bible.studies)
@@ -437,8 +439,8 @@ const StudyRelationTargetPickerModal = ({
     setIsStrongLoading(true)
     setStrongError(null)
 
-    const loader = deferredSearchValue.trim()
-      ? loadLexiqueBySearch(deferredSearchValue)
+    const loader = deferredStrongSearchValue.trim()
+      ? loadLexiqueBySearch(deferredStrongSearchValue)
       : loadLexiqueByLetter(strongLetter)
 
     loader.then(results => {
@@ -455,7 +457,7 @@ const StudyRelationTargetPickerModal = ({
     return () => {
       isMounted = false
     }
-  }, [deferredBrowseMode, deferredSearchValue, strongLetter])
+  }, [deferredBrowseMode, deferredStrongSearchValue, strongLetter])
 
   const handleSearch = (value: string) => {
     setSearchValue(value)
@@ -611,7 +613,7 @@ const StudyRelationTargetPickerModal = ({
               keyExtractor={(item: LexiqueRow) => `${item.lexiqueType}-${item.Code}-${item.Mot}`}
               estimatedItemSize={72}
               ListEmptyComponent={
-                isStrongLoading || isListPending
+                isStrongLoading || isStrongPending
                   ? renderEmptyState('Chargement du lexique Strong...')
                   : renderEmptyState()
               }
@@ -627,9 +629,7 @@ const StudyRelationTargetPickerModal = ({
           renderItem={renderTargetItem}
           keyExtractor={(item: RelationTargetResult) => item.id}
           estimatedItemSize={72}
-          ListEmptyComponent={
-            isListPending ? renderEmptyState('Chargement...') : renderEmptyState()
-          }
+          ListEmptyComponent={renderEmptyState()}
         />
       )}
     </Modal.Body>
