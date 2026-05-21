@@ -74,4 +74,60 @@ describe('study relation domain', () => {
       'référencé par'
     )
   })
+
+  it('keeps missing note and study endpoints visible with fallback labels', () => {
+    const relation: StudyRelation = {
+      id: 'r1',
+      endpoints: [
+        { type: 'note', noteId: 'missing-note', label: 'Ancienne note' },
+        { type: 'study', studyId: 'missing-study', label: 'Ancienne étude' },
+      ],
+      type: 'linked',
+      direction: 'none',
+      createdAt: 1,
+      updatedAt: 1,
+    }
+
+    const model = getRelationDisplayModel(relation, relation.endpoints[0], {
+      notes: {},
+      studies: {},
+    })
+
+    expect(model).toMatchObject({
+      targetLabel: 'Ancienne étude',
+      isTargetAvailable: false,
+      subtitle: 'Étude indisponible',
+    })
+  })
+
+  it('resolves available endpoint labels from current user data', () => {
+    const relation: StudyRelation = {
+      id: 'r1',
+      endpoints: [
+        { type: 'note', noteId: 'note-1', label: 'Fallback note' },
+        { type: 'study', studyId: 'study-1', label: 'Fallback study' },
+      ],
+      type: 'linked',
+      direction: 'none',
+      createdAt: 1,
+      updatedAt: 1,
+    }
+
+    const model = getRelationDisplayModel(relation, relation.endpoints[0], {
+      notes: { 'note-1': { title: 'Note actuelle', description: '', date: 1 } },
+      studies: {
+        'study-1': {
+          id: 'study-1',
+          title: 'Étude actuelle',
+          created_at: 1,
+          modified_at: 1,
+          content: null,
+          user: { id: 'user', displayName: 'User', photoUrl: '' },
+        },
+      },
+    })
+
+    expect(model?.targetLabel).toBe('Étude actuelle')
+    expect(model?.isTargetAvailable).toBe(true)
+  })
 })
