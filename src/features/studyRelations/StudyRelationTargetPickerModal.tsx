@@ -48,7 +48,7 @@ const targetIconConfig: Record<
 > = {
   verse: { name: 'book-open', color: 'primary' },
   note: { name: 'file-text', color: 'primary' },
-  study: { name: 'edit-3', color: 'secondary' },
+  study: { name: 'feather', color: 'secondary' },
   strong: { name: 'hash', color: 'quint' },
 }
 
