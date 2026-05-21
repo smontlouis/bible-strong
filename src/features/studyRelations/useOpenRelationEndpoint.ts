@@ -1,13 +1,9 @@
 import { useRouter } from 'expo-router'
 import books from '~assets/bible_versions/books-desc'
-import generateUUID from '~helpers/generateUUID'
-import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import type { RelationEndpoint } from './domain'
-import { getEndpointFallbackLabel } from './domain'
 
 export const useOpenRelationEndpoint = () => {
   const router = useRouter()
-  const openInNewTab = useOpenInNewTab()
 
   return (endpoint: RelationEndpoint) => {
     switch (endpoint.type) {
@@ -26,16 +22,10 @@ export const useOpenRelationEndpoint = () => {
         break
       }
       case 'note':
-        openInNewTab(
-          {
-            id: `notes-${generateUUID()}`,
-            title: endpoint.label || 'Note',
-            type: 'notes',
-            isRemovable: true,
-            data: { noteId: endpoint.noteId },
-          },
-          { autoRedirect: true }
-        )
+        router.push({
+          pathname: '/note',
+          params: { noteId: endpoint.noteId },
+        })
         break
       case 'study':
         router.push({
@@ -44,18 +34,13 @@ export const useOpenRelationEndpoint = () => {
         })
         break
       case 'strong':
-        openInNewTab(
-          {
-            id: `strong-${generateUUID()}`,
-            title: getEndpointFallbackLabel(endpoint),
-            type: 'strong',
-            isRemovable: true,
-            data: {
-              reference: endpoint.code,
-            },
+        router.push({
+          pathname: '/strong',
+          params: {
+            book: endpoint.language === 'hebrew' ? '1' : '40',
+            reference: endpoint.code,
           },
-          { autoRedirect: true }
-        )
+        })
         break
     }
   }

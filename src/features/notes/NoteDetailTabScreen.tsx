@@ -42,9 +42,10 @@ const FOOTER_HEIGHT = 54
 interface NoteDetailTabScreenProps {
   notesAtom: PrimitiveAtom<NotesTab>
   noteId: string
+  onBackPress?: () => void
 }
 
-const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) => {
+const NoteDetailTabScreen = ({ notesAtom, noteId, onBackPress }: NoteDetailTabScreenProps) => {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
@@ -115,13 +116,18 @@ const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) =>
 
   // Go back to notes list
   const goBack = useCallback(() => {
+    if (onBackPress) {
+      onBackPress()
+      return
+    }
+
     setNotesTab(
       produce(draft => {
         draft.title = t('Notes')
         draft.data.noteId = undefined
       })
     )
-  }, [setNotesTab, t])
+  }, [onBackPress, setNotesTab, t])
 
   // Initialize form when note loads
   useEffect(() => {
@@ -252,6 +258,8 @@ ${currentNote.description}
     <Container>
       <Header
         title={reference}
+        hasBackButton={Boolean(onBackPress)}
+        onCustomBackPress={goBack}
         rightComponent={
           <PopOverMenu
             width={54}

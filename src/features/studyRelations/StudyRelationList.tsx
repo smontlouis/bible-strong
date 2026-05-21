@@ -1,5 +1,5 @@
 import { BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet'
-import { useRef, useState } from 'react'
+import { type ComponentProps, useRef, useState } from 'react'
 import { Alert, TouchableOpacity } from 'react-native'
 import styled from '@emotion/native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -26,6 +26,8 @@ type Props = {
   endpoint: RelationEndpoint
   onOpenEndpoint: (endpoint: RelationEndpoint) => void
   onCreateRelation?: () => void
+  showCreateButton?: boolean
+  showEmptyState?: boolean
 }
 
 type RelationDraft = {
@@ -55,7 +57,7 @@ const relationTypeLabels: Record<RelationType, string> = {
 const targetIconConfig: Record<
   RelationEndpoint['type'],
   {
-    name: React.ComponentProps<typeof FeatherIcon>['name']
+    name: ComponentProps<typeof FeatherIcon>['name']
     color: string
   }
 > = {
@@ -65,7 +67,7 @@ const targetIconConfig: Record<
   strong: { name: 'hash', color: 'primary' },
 }
 
-const ItemRow = styled(TouchableBox)(({ theme }) => ({
+const ItemRow = styled.View(({ theme }) => ({
   flexDirection: 'row',
   alignItems: 'center',
   paddingVertical: 14,
@@ -117,7 +119,13 @@ const normalizeDirection = (
   return direction === 'none' ? 'forward' : direction
 }
 
-const StudyRelationList = ({ endpoint, onOpenEndpoint, onCreateRelation }: Props) => {
+const StudyRelationList = ({
+  endpoint,
+  onOpenEndpoint,
+  onCreateRelation,
+  showCreateButton = true,
+  showEmptyState = false,
+}: Props) => {
   const dispatch = useDispatch()
   const editModalRef = useRef<BottomSheetModal>(null)
   const [editingModel, setEditingModel] = useState<RelationDisplayModel | null>(null)
@@ -128,7 +136,7 @@ const StudyRelationList = ({ endpoint, onOpenEndpoint, onCreateRelation }: Props
   })
   const relations = useSelector((state: RootState) => selectDisplayModels(state, endpoint))
 
-  if (relations.length === 0 && !onCreateRelation) return null
+  if (relations.length === 0 && !onCreateRelation && !showEmptyState) return null
 
   const openEditModal = (model: RelationDisplayModel) => {
     setEditingModel(model)
@@ -198,7 +206,7 @@ const StudyRelationList = ({ endpoint, onOpenEndpoint, onCreateRelation }: Props
         <Text title fontSize={16}>
           Relations d’étude
         </Text>
-        {onCreateRelation ? (
+        {showCreateButton && onCreateRelation ? (
           <Button small onPress={onCreateRelation}>
             Ajouter
           </Button>
@@ -209,12 +217,14 @@ const StudyRelationList = ({ endpoint, onOpenEndpoint, onCreateRelation }: Props
         <Text color="grey">Aucune relation</Text>
       ) : (
         relations.map(model => (
-          <ItemRow key={model.relation.id} onPress={() => onOpenEndpoint(model.targetEndpoint)}>
+          <ItemRow key={model.relation.id}>
             <TargetIcon type={model.targetEndpoint.type} />
             <Box flex>
-              <Text bold numberOfLines={1}>
-                {model.targetLabel}
-              </Text>
+              <TouchableBox onPress={() => onOpenEndpoint(model.targetEndpoint)} py={2}>
+                <Text bold numberOfLines={1}>
+                  {model.targetLabel}
+                </Text>
+              </TouchableBox>
               <Text fontSize={13} color="tertiary" numberOfLines={1}>
                 {model.relationText} · {model.subtitle}
               </Text>
@@ -224,8 +234,7 @@ const StudyRelationList = ({ endpoint, onOpenEndpoint, onCreateRelation }: Props
                 </Text>
               ) : null}
               <TouchableOpacity
-                onPress={event => {
-                  event.stopPropagation()
+                onPress={() => {
                   openEditModal(model)
                 }}
               >
@@ -237,7 +246,9 @@ const StudyRelationList = ({ endpoint, onOpenEndpoint, onCreateRelation }: Props
                 </HStack>
               </TouchableOpacity>
             </Box>
-            <FeatherIcon name="arrow-right" size={18} color="grey" />
+            <TouchableBox onPress={() => onOpenEndpoint(model.targetEndpoint)} p={8} ml={8}>
+              <FeatherIcon name="arrow-right" size={18} color="grey" />
+            </TouchableBox>
           </ItemRow>
         ))
       )}
