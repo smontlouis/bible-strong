@@ -3,6 +3,7 @@ import { Ref, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import AlphabetList from '~common/AlphabetList'
 import BottomSheetSearchInput from '~common/BottomSheetSearchInput'
+import Empty from '~common/Empty'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
@@ -218,6 +219,20 @@ const StudyRelationTargetPickerModal = ({
       ? 'Aucune cible trouvée'
       : 'Rechercher un passage, un Strong, une note ou une étude'
 
+  const emptyIcon = browseMode
+    ? {
+        note: require('~assets/images/empty-state-icons/note.svg'),
+        study: require('~assets/images/empty-state-icons/study.svg'),
+        strong: require('~assets/images/empty-state-icons/word.svg'),
+      }[browseMode]
+    : require('~assets/images/empty-state-icons/search.svg')
+
+  const renderEmptyState = (message = emptyMessage) => (
+    <Box flex minHeight={260} justifyContent="center" px={20}>
+      <Empty icon={emptyIcon} message={message} />
+    </Box>
+  )
+
   const headerComponent = (
     <Box px={20} pt={8} pb={12}>
       <BottomSheetSearchInput
@@ -300,9 +315,9 @@ const StudyRelationTargetPickerModal = ({
               keyExtractor={(item: LexiqueRow) => `${item.lexiqueType}-${item.Code}-${item.Mot}`}
               estimatedItemSize={72}
               ListEmptyComponent={
-                <Box px={20} py={24}>
-                  <Text color="grey">{isStrongLoading ? 'Chargement...' : emptyMessage}</Text>
-                </Box>
+                isStrongLoading
+                  ? renderEmptyState('Chargement du lexique Strong...')
+                  : renderEmptyState()
               }
             />
           )}
@@ -314,11 +329,7 @@ const StudyRelationTargetPickerModal = ({
           renderItem={renderTargetItem}
           keyExtractor={(item: RelationTargetResult) => item.id}
           estimatedItemSize={72}
-          ListEmptyComponent={
-            <Box px={20} py={24}>
-              <Text color="grey">{emptyMessage}</Text>
-            </Box>
-          }
+          ListEmptyComponent={renderEmptyState()}
         />
       )}
     </Modal.Body>
