@@ -145,7 +145,7 @@ const RelationTargetRow = ({
           </Text>
         ) : null}
       </VStack>
-      <FeatherIcon name="chevron-right" size={20} color="grey" />
+      <FeatherIcon name="plus" size={20} color="grey" />
     </TouchableBox>
   )
 }
@@ -173,7 +173,7 @@ const StrongTargetRow = ({ item, onPress }: { item: LexiqueRow; onPress: () => v
     <Text fontSize={16} color="tertiary">
       {'Grec' in item ? item.Grec : item.Hebreu}
     </Text>
-    <FeatherIcon name="chevron-right" size={20} color="grey" />
+    <FeatherIcon name="plus" size={20} color="grey" />
   </TouchableBox>
 )
 
@@ -289,6 +289,8 @@ const StudyRelationTargetPickerModal = ({
       }[browseMode]
     : 'Jean 3:16, G26, note, étude...'
 
+  const modalTitle = browseMode ? browseModeLabels[browseMode] : title
+
   const renderTargetItem = ({ item }: { item: RelationTargetResult }) => (
     <RelationTargetRow item={item} onPress={() => selectTarget(item.endpoint)} />
   )
@@ -327,14 +329,7 @@ const StudyRelationTargetPickerModal = ({
         autoFocus
       />
 
-      {browseMode ? (
-        <HStack mt={10} alignItems="center" gap={10}>
-          <TouchableBox onPress={exitBrowseMode} px={10} py={8} bg="lightGrey" borderRadius={8}>
-            <Text fontSize={13}>← Recherche</Text>
-          </TouchableBox>
-          <Text bold>{browseModeLabels[browseMode]}</Text>
-        </HStack>
-      ) : (
+      {!browseMode && (
         <HStack mt={10} gap={8}>
           {isAllowed('note') && (
             <TouchableBox
@@ -380,7 +375,11 @@ const StudyRelationTargetPickerModal = ({
       snapPoints={['75%']}
       headerComponent={
         <>
-          <ModalHeader title={title} />
+          <ModalHeader
+            title={modalTitle}
+            hasBackButton={Boolean(browseMode)}
+            onBackPress={exitBrowseMode}
+          />
           {headerComponent}
         </>
       }
