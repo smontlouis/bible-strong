@@ -40,19 +40,19 @@ const VerseStudyRelationsModal = ({ ref, verseKey, onCreateRelation }: Props) =>
                 mr={20}
                 borderRadius={18}
                 bg="primary"
-                width={36}
-                height={36}
+                width={24}
+                height={24}
                 alignItems="center"
                 justifyContent="center"
               >
-                <FeatherIcon name="plus" size={18} color="reverse" />
+                <FeatherIcon name="plus" size={14} color="reverse" />
               </TouchableBox>
             ) : undefined
           }
         />
       }
     >
-      <Box px={20} py={10}>
+      <Box pl={10} pr={20}>
         {endpoint ? (
           <StudyRelationList
             endpoint={endpoint}

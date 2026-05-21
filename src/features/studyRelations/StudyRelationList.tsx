@@ -69,15 +69,6 @@ const targetIconConfig: Record<
   strong: { name: 'hash', color: 'primary' },
 }
 
-const ItemRow = styled(TouchableBox)(({ theme }) => ({
-  flexDirection: 'row',
-  alignItems: 'center',
-  paddingVertical: 14,
-  paddingHorizontal: 0,
-  borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border,
-}))
-
 const LabelInput = styled(BottomSheetTextInput)(({ theme }) => ({
   minHeight: 44,
   borderWidth: 1,
@@ -241,57 +232,91 @@ const StudyRelationList = ({
       {relations.length === 0 ? (
         <Text color="grey">Aucune relation</Text>
       ) : (
-        relations.map(model => {
+        relations.map((model, index) => {
           const relationTitle = getRelationTitleParts(model)
           const relationSubtitle = getRelationSubtitle(model)
           return (
-            <ItemRow key={model.relation.id} onPress={() => onOpenEndpoint(model.targetEndpoint)}>
-              <Box flex>
-                <HStack alignItems="center">
-                  <Text bold numberOfLines={1}>
-                    {relationTitle.prefix}
-                  </Text>
-                  <Box mx={6}>
-                    <TargetIcon type={model.targetEndpoint.type} />
-                  </Box>
-                  <Text bold numberOfLines={1} shrink={1}>
-                    {relationTitle.target}
-                  </Text>
-                </HStack>
-                {relationSubtitle ? (
-                  <Text fontSize={13} color="tertiary" numberOfLines={1}>
-                    {relationSubtitle}
-                  </Text>
-                ) : null}
-                {model.relation.label ? (
-                  <Text fontSize={13} color="tertiary" numberOfLines={1}>
-                    {model.relation.label}
-                  </Text>
-                ) : null}
-              </Box>
-              <PopOverMenu
-                width={42}
-                height={42}
-                popover={
-                  <>
-                    <MenuOption onSelect={() => openEditModal(model)} closeBeforeSelect>
-                      <HStack alignItems="center">
-                        <FeatherIcon name="edit-3" size={15} />
-                        <Text ml={10}>Modifier</Text>
-                      </HStack>
-                    </MenuOption>
-                    <MenuOption onSelect={() => confirmDelete(model)}>
-                      <HStack alignItems="center">
-                        <FeatherIcon name="trash-2" size={15} color="quart" />
-                        <Text ml={10} color="quart">
-                          Supprimer
-                        </Text>
-                      </HStack>
-                    </MenuOption>
-                  </>
-                }
+            <Box key={model.relation.id}>
+              <Box
+                pos="absolute"
+                top={0}
+                left={10}
+                borderLeftWidth={4}
+                borderBottomWidth={4}
+                borderBottomLeftRadius={50}
+                height={35}
+                width={25}
+                borderColor="border"
               />
-            </ItemRow>
+              {index !== relations.length - 1 && (
+                <Box
+                  pos="absolute"
+                  top={0}
+                  bottom={0}
+                  left={10}
+                  borderLeftWidth={4}
+                  width={25}
+                  borderColor="border"
+                />
+              )}
+              <TouchableBox
+                flex
+                row
+                alignItems="center"
+                paddingVertical={14}
+                ml={40}
+                pl={10}
+                borderBottomWidth={1}
+                borderColor="border"
+                onPress={() => onOpenEndpoint(model.targetEndpoint)}
+              >
+                <Box flex>
+                  <HStack alignItems="center">
+                    <Text bold numberOfLines={1}>
+                      {relationTitle.prefix}
+                    </Text>
+                    <Box mx={6}>
+                      <TargetIcon type={model.targetEndpoint.type} />
+                    </Box>
+                    <Text bold numberOfLines={1} shrink={1}>
+                      {relationTitle.target}
+                    </Text>
+                  </HStack>
+                  {relationSubtitle ? (
+                    <Text fontSize={13} color="tertiary" numberOfLines={1}>
+                      {relationSubtitle}
+                    </Text>
+                  ) : null}
+                  {model.relation.label ? (
+                    <Text fontSize={13} color="tertiary" numberOfLines={1}>
+                      {model.relation.label}
+                    </Text>
+                  ) : null}
+                </Box>
+                <PopOverMenu
+                  width={42}
+                  height={42}
+                  popover={
+                    <>
+                      <MenuOption onSelect={() => openEditModal(model)} closeBeforeSelect>
+                        <HStack alignItems="center">
+                          <FeatherIcon name="edit-3" size={15} />
+                          <Text ml={10}>Modifier</Text>
+                        </HStack>
+                      </MenuOption>
+                      <MenuOption onSelect={() => confirmDelete(model)}>
+                        <HStack alignItems="center">
+                          <FeatherIcon name="trash-2" size={15} color="quart" />
+                          <Text ml={10} color="quart">
+                            Supprimer
+                          </Text>
+                        </HStack>
+                      </MenuOption>
+                    </>
+                  }
+                />
+              </TouchableBox>
+            </Box>
           )
         })
       )}
