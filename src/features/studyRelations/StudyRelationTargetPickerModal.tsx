@@ -1,6 +1,8 @@
 import { BottomSheetFlashList, BottomSheetModal } from '@gorhom/bottom-sheet'
+import { useTheme } from '@emotion/react'
 import Fuse from 'fuse.js'
 import { ComponentProps, Ref, useDeferredValue, useEffect, useState } from 'react'
+import { ActivityIndicator } from 'react-native'
 import { useSelector } from 'react-redux'
 import AlphabetList from '~common/AlphabetList'
 import BottomSheetSearchInput from '~common/BottomSheetSearchInput'
@@ -386,6 +388,15 @@ const StrongTargetRow = ({ item, onPress }: { item: LexiqueRow; onPress: () => v
   </TouchableBox>
 )
 
+const LoadingIndicator = () => {
+  const theme = useTheme()
+  return (
+    <Box flex minHeight={180} justifyContent="center" alignItems="center">
+      <ActivityIndicator color={theme.colors.grey} />
+    </Box>
+  )
+}
+
 const StudyRelationTargetPickerModal = ({
   ref,
   title = 'Ajouter une relation',
@@ -408,6 +419,8 @@ const StudyRelationTargetPickerModal = ({
     browseMode === 'strong' &&
     immediateSearchHasValue &&
     debouncedStrongSearchValue !== deferredStrongSearchValue
+  const isLocalSearchPending =
+    browseMode !== 'strong' && immediateSearchHasValue && searchValue !== deferredSearchValue
 
   const notes = useSelector((state: RootState) => state.user.bible.notes)
   const studies = useSelector((state: RootState) => state.user.bible.studies)
@@ -533,6 +546,7 @@ const StudyRelationTargetPickerModal = ({
       <Empty icon={emptyIcon} message={message} />
     </Box>
   )
+  const renderLoadingState = () => <LoadingIndicator />
 
   const headerComponent = (
     <Box px={20} pt={8} pb={12}>
@@ -613,9 +627,7 @@ const StudyRelationTargetPickerModal = ({
               keyExtractor={(item: LexiqueRow) => `${item.lexiqueType}-${item.Code}-${item.Mot}`}
               estimatedItemSize={72}
               ListEmptyComponent={
-                isStrongLoading || isStrongPending
-                  ? renderEmptyState('Chargement du lexique Strong...')
-                  : renderEmptyState()
+                isStrongLoading || isStrongPending ? renderLoadingState() : renderEmptyState()
               }
             />
           )}
@@ -629,7 +641,7 @@ const StudyRelationTargetPickerModal = ({
           renderItem={renderTargetItem}
           keyExtractor={(item: RelationTargetResult) => item.id}
           estimatedItemSize={72}
-          ListEmptyComponent={renderEmptyState()}
+          ListEmptyComponent={isLocalSearchPending ? renderLoadingState() : renderEmptyState()}
         />
       )}
     </Modal.Body>
