@@ -46,10 +46,10 @@ const targetIconConfig: Record<
     color: string
   }
 > = {
-  verse: { name: 'book-open', color: 'primary' },
-  note: { name: 'file-text', color: 'primary' },
-  study: { name: 'feather', color: 'secondary' },
-  strong: { name: 'hash', color: 'quint' },
+  verse: { name: 'book-open', color: 'color1' },
+  note: { name: 'file-text', color: 'color2' },
+  study: { name: 'feather', color: 'quart' },
+  strong: { name: 'hash', color: 'primary' },
 }
 
 const getStrongEndpoint = (strong: LexiqueRow): RelationEndpoint => ({
