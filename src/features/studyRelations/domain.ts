@@ -99,8 +99,8 @@ export const normalizeVerseKeys = (verseKeys: string[]): string[] => {
   })
 }
 
-export const normalizeStrongCode = (code: string): string => {
-  const trimmed = code.trim().toUpperCase()
+export const normalizeStrongCode = (code: string | number): string => {
+  const trimmed = String(code).trim().toUpperCase()
   return trimmed.replace(/^[GH]/, '').replace(/^0+(\d)/, '$1')
 }
 

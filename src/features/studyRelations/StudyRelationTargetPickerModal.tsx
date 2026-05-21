@@ -59,16 +59,26 @@ const targetIconConfig: Record<
   strong: { name: 'hash', color: 'primary' },
 }
 
+const getStrongCode = (strong: LexiqueRow) =>
+  String(
+    (strong as LexiqueRow & { code?: string | number }).Code ??
+      (strong as { code?: string | number }).code ??
+      ''
+  )
+
+const getStrongOriginalWord = (strong: LexiqueRow) =>
+  'Grec' in strong ? strong.Grec : strong.Hebreu
+
 const getStrongEndpoint = (strong: LexiqueRow): RelationEndpoint => ({
   type: 'strong',
   language: strong.lexiqueType === 'Grec' ? 'greek' : 'hebrew',
-  code: strong.Code,
+  code: getStrongCode(strong),
   label: strong.Mot,
-  originalWord: 'Grec' in strong ? strong.Grec : strong.Hebreu,
+  originalWord: getStrongOriginalWord(strong),
 })
 
 const getStrongSubtitle = (strong: LexiqueRow) =>
-  `${strong.lexiqueType} · ${strong.lexiqueType === 'Grec' ? 'G' : 'H'}${strong.Code}`
+  `${strong.lexiqueType} · ${strong.lexiqueType === 'Grec' ? 'G' : 'H'}${getStrongCode(strong)}`
 
 const isDatabaseError = (value: unknown): value is { error: string } =>
   typeof value === 'object' && value !== null && 'error' in value
@@ -382,7 +392,7 @@ const StrongTargetRow = ({ item, onPress }: { item: LexiqueRow; onPress: () => v
       </Text>
     </VStack>
     <Text fontSize={16} color="tertiary">
-      {'Grec' in item ? item.Grec : item.Hebreu}
+      {getStrongOriginalWord(item)}
     </Text>
     <FeatherIcon name="arrow-right" size={20} color="grey" />
   </TouchableBox>
