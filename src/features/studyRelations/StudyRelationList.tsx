@@ -109,6 +109,20 @@ const TargetIcon = ({ type }: { type: RelationEndpoint['type'] }) => {
   )
 }
 
+const relationTitlePrefixes: Record<string, string> = {
+  'lié à': 'est lié à',
+  référence: 'référence',
+  explique: 'explique',
+  'contraste avec': 'contraste avec',
+  'référencé par': 'est référencé par',
+  'expliqué par': 'est expliqué par',
+}
+
+const getRelationTitle = (model: RelationDisplayModel) => {
+  const prefix = relationTitlePrefixes[model.relationText] || model.relationText
+  return `${prefix} ${model.targetLabel}`
+}
+
 const isDirectionalType = (type: RelationType) => directionalTypes.includes(type)
 
 const normalizeDirection = (
@@ -202,16 +216,13 @@ const StudyRelationList = ({
 
   return (
     <VStack>
-      <HStack alignItems="center" justifyContent="space-between" px={0} mb={4}>
-        <Text title fontSize={16}>
-          Relations d’étude
-        </Text>
-        {showCreateButton && onCreateRelation ? (
+      {showCreateButton && onCreateRelation ? (
+        <HStack alignItems="center" justifyContent="flex-end" px={0} mb={4}>
           <Button small onPress={onCreateRelation}>
             Ajouter
           </Button>
-        ) : null}
-      </HStack>
+        </HStack>
+      ) : null}
 
       {relations.length === 0 ? (
         <Text color="grey">Aucune relation</Text>
@@ -222,11 +233,11 @@ const StudyRelationList = ({
             <Box flex>
               <TouchableBox onPress={() => onOpenEndpoint(model.targetEndpoint)} py={2}>
                 <Text bold numberOfLines={1}>
-                  {model.targetLabel}
+                  {getRelationTitle(model)}
                 </Text>
               </TouchableBox>
               <Text fontSize={13} color="tertiary" numberOfLines={1}>
-                {model.relationText} · {model.subtitle}
+                {model.subtitle}
               </Text>
               {model.relation.label ? (
                 <Text fontSize={13} color="tertiary" numberOfLines={1}>

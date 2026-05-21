@@ -3,7 +3,7 @@ import { Ref } from 'react'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import Box, { TouchableBox } from '~common/ui/Box'
-import Text from '~common/ui/Text'
+import { FeatherIcon } from '~common/ui/Icon'
 import StudyRelationList from '~features/studyRelations/StudyRelationList'
 import { useOpenRelationEndpoint } from '~features/studyRelations/useOpenRelationEndpoint'
 import verseToReference from '~helpers/verseToReference'
@@ -30,22 +30,22 @@ const VerseStudyRelationsModal = ({ ref, verseKey, onCreateRelation }: Props) =>
       snapPoints={['60%']}
       headerComponent={
         <ModalHeader
-          title={endpoint?.label || 'Relations d’étude'}
-          subTitle={endpoint ? 'Relations d’étude' : undefined}
+          title={endpoint?.label || 'Relations'}
+          subTitle={endpoint ? 'Relations' : undefined}
           rightComponent={
             endpoint && onCreateRelation ? (
               <TouchableBox
                 onPress={onCreateRelation}
                 alignSelf="center"
                 mr={20}
-                px={14}
-                py={7}
                 borderRadius={18}
                 bg="primary"
+                width={36}
+                height={36}
+                alignItems="center"
+                justifyContent="center"
               >
-                <Text bold color="reverse" fontSize={13}>
-                  Ajouter
-                </Text>
+                <FeatherIcon name="plus" size={18} color="reverse" />
               </TouchableBox>
             ) : undefined
           }
