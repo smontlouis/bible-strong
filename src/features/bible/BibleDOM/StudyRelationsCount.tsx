@@ -1,7 +1,7 @@
+import Feather from '@expo/vector-icons/Feather'
 import { styled } from 'goober'
-import { RootStyles } from './BibleDOMWrapper'
 import { RootState } from '~redux/modules/reducer'
-import { getLinkTypeIconComponent, getLinkTypeColor } from './LinkIcons'
+import { RootStyles } from './BibleDOMWrapper'
 import { getDisabledStyles } from './disabledStyles'
 import { isDarkTheme } from './utils'
 
@@ -18,7 +18,6 @@ const Div = styled('span')<RootStyles & { isDisabled?: boolean }>(
     marginLeft: '4px',
     position: 'relative',
     display: 'inline-block',
-    lineHeight: 0,
 
     '&:active': {
       opacity: 0.6,
@@ -45,23 +44,16 @@ const Count = styled<RootStyles>('div')(({ settings: { theme, colors } }) => ({
 
 interface Props {
   count: number
-  linkType?: string
   settings: RootState['user']['bible']['settings']
   onClick: () => void
   isDisabled?: boolean
 }
 
-const renderIcon = (linkType: string, onClick: () => void) => {
-  const IconComponent = getLinkTypeIconComponent(linkType)
-  const color = getLinkTypeColor(linkType)
-  return <IconComponent size={14} color={color} onClick={onClick} />
-}
-
-const LinksCount = ({ count, linkType, settings, onClick, isDisabled }: Props) => (
+const StudyRelationsCount = ({ count, settings, onClick, isDisabled }: Props) => (
   <Div settings={settings} onClick={() => onClick()} isDisabled={isDisabled}>
-    {renderIcon(linkType || 'website', onClick)}
+    <Feather color={settings.colors[settings.theme].primary} name="link-2" size={14} />
     <Count settings={settings}>{count}</Count>
   </Div>
 )
 
-export default LinksCount
+export default StudyRelationsCount

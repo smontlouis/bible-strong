@@ -21,6 +21,7 @@ import LinksText from './LinksText'
 import NotesCount from './NotesCount'
 import NotesText from './NotesText'
 import BookmarkIcon from './BookmarkIcon'
+import StudyRelationsCount from './StudyRelationsCount'
 import TagsIndicator from './TagsIndicator'
 import { RootState } from '~redux/modules/reducer'
 import { useDispatch } from './DispatchProvider'
@@ -637,11 +638,10 @@ const Verse = ({
           />
         )}
         {relationsCount && !isSelectionMode && (
-          <LinksCount
+          <StudyRelationsCount
             settings={settings}
             onClick={navigateToVerseStudyRelations}
             count={relationsCount}
-            linkType="website"
             isDisabled={annotationMode}
           />
         )}
