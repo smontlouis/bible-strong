@@ -9,6 +9,7 @@ export type RelationTargetResult = {
   type: RelationEndpointType
   title: string
   subtitle?: string
+  description?: string
   endpoint: RelationEndpoint
 }
 
@@ -87,6 +88,7 @@ export const getNoteTargetItems = (notes: NotesObj = {}): RelationTargetResult[]
       type: 'note',
       title,
       subtitle: 'Note',
+      description: note.description,
       endpoint: {
         type: 'note',
         noteId,

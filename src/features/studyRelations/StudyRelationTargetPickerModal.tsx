@@ -1,5 +1,5 @@
 import { BottomSheetFlashList, BottomSheetModal } from '@gorhom/bottom-sheet'
-import { Ref, useEffect, useState } from 'react'
+import { ComponentProps, Ref, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import AlphabetList from '~common/AlphabetList'
 import BottomSheetSearchInput from '~common/BottomSheetSearchInput'
@@ -7,11 +7,14 @@ import Empty from '~common/Empty'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
+import useBibleVerses from '~helpers/useBibleVerses'
 import useDebounce from '~helpers/useDebounce'
 import useFuzzy from '~helpers/useFuzzy'
 import loadLexiqueByLetter, { type LexiqueRow } from '~helpers/loadLexiqueByLetter'
 import loadLexiqueBySearch from '~helpers/loadLexiqueBySearch'
+import { removeBreakLines } from '~helpers/utils'
 import { RootState } from '~redux/modules/reducer'
 import type { RelationEndpoint } from './domain'
 import {
@@ -30,17 +33,23 @@ type Props = {
   allowedTypes?: RelationEndpoint['type'][]
 }
 
-const typeLabels: Record<RelationEndpoint['type'], string> = {
-  verse: 'Verset',
-  note: 'Note',
-  study: 'Étude',
-  strong: 'Strong',
-}
-
 const browseModeLabels: Record<BrowseMode, string> = {
   note: 'Notes',
   study: 'Études',
   strong: 'Strong',
+}
+
+const targetIconConfig: Record<
+  RelationEndpoint['type'],
+  {
+    name: ComponentProps<typeof FeatherIcon>['name']
+    color: string
+  }
+> = {
+  verse: { name: 'book-open', color: 'primary' },
+  note: { name: 'file-text', color: 'primary' },
+  study: { name: 'edit-3', color: 'secondary' },
+  strong: { name: 'hash', color: 'quint' },
 }
 
 const getStrongEndpoint = (strong: LexiqueRow): RelationEndpoint => ({
@@ -56,6 +65,112 @@ const getStrongSubtitle = (strong: LexiqueRow) =>
 
 const isDatabaseError = (value: unknown): value is { error: string } =>
   typeof value === 'object' && value !== null && 'error' in value
+
+const getVerseIds = (endpoint: RelationEndpoint) =>
+  endpoint.type === 'verse'
+    ? endpoint.verseKeys.map(key => {
+        const [Livre, Chapitre, Verset] = key.split('-')
+        return { Livre, Chapitre, Verset }
+      })
+    : []
+
+const TargetIcon = ({ type }: { type: RelationEndpoint['type'] }) => {
+  const config = targetIconConfig[type]
+  return (
+    <Box
+      width={36}
+      height={36}
+      borderRadius={10}
+      bg="lightGrey"
+      alignItems="center"
+      justifyContent="center"
+    >
+      <FeatherIcon name={config.name} size={18} color={config.color} />
+    </Box>
+  )
+}
+
+const VerseTargetDescription = ({
+  endpoint,
+}: {
+  endpoint: Extract<RelationEndpoint, { type: 'verse' }>
+}) => {
+  const verses = useBibleVerses(getVerseIds(endpoint))
+  const description = verses.map(verse => verse.Texte).join(' ')
+
+  if (!description) return null
+
+  return (
+    <Text fontSize={13} color="tertiary" numberOfLines={1}>
+      {removeBreakLines(description)}
+    </Text>
+  )
+}
+
+const RelationTargetRow = ({
+  item,
+  onPress,
+}: {
+  item: RelationTargetResult
+  onPress: () => void
+}) => {
+  const description = item.description || item.subtitle
+
+  return (
+    <TouchableBox
+      px={20}
+      py={14}
+      borderBottomWidth={1}
+      borderColor="border"
+      onPress={onPress}
+      row
+      alignItems="center"
+      gap={12}
+    >
+      <TargetIcon type={item.type} />
+      <VStack flex={1} gap={3}>
+        <Text bold numberOfLines={1}>
+          {item.title}
+        </Text>
+        {item.endpoint.type === 'verse' ? (
+          <VerseTargetDescription endpoint={item.endpoint} />
+        ) : description ? (
+          <Text fontSize={13} color="tertiary" numberOfLines={1}>
+            {removeBreakLines(description)}
+          </Text>
+        ) : null}
+      </VStack>
+      <FeatherIcon name="chevron-right" size={20} color="grey" />
+    </TouchableBox>
+  )
+}
+
+const StrongTargetRow = ({ item, onPress }: { item: LexiqueRow; onPress: () => void }) => (
+  <TouchableBox
+    px={20}
+    py={14}
+    borderBottomWidth={1}
+    borderColor="border"
+    onPress={onPress}
+    row
+    alignItems="center"
+    gap={12}
+  >
+    <TargetIcon type="strong" />
+    <VStack flex={1} gap={3}>
+      <Text bold numberOfLines={1}>
+        {item.Mot}
+      </Text>
+      <Text fontSize={13} color="tertiary" numberOfLines={1}>
+        {getStrongSubtitle(item)}
+      </Text>
+    </VStack>
+    <Text fontSize={16} color="tertiary">
+      {'Grec' in item ? item.Grec : item.Hebreu}
+    </Text>
+    <FeatherIcon name="chevron-right" size={20} color="grey" />
+  </TouchableBox>
+)
 
 const StudyRelationTargetPickerModal = ({
   ref,
@@ -170,47 +285,11 @@ const StudyRelationTargetPickerModal = ({
     : 'Jean 3:16, G26, note, étude...'
 
   const renderTargetItem = ({ item }: { item: RelationTargetResult }) => (
-    <TouchableBox
-      px={20}
-      py={14}
-      borderBottomWidth={1}
-      borderColor="border"
-      onPress={() => selectTarget(item.endpoint)}
-    >
-      <HStack alignItems="center" justifyContent="space-between" gap={12}>
-        <VStack flex={1} gap={4}>
-          <Text bold>{item.title}</Text>
-          {item.subtitle ? (
-            <Text fontSize={13} color="grey">
-              {item.subtitle}
-            </Text>
-          ) : null}
-        </VStack>
-        <Box bg="lightGrey" px={8} py={4} borderRadius={4}>
-          <Text fontSize={12}>{typeLabels[item.type]}</Text>
-        </Box>
-      </HStack>
-    </TouchableBox>
+    <RelationTargetRow item={item} onPress={() => selectTarget(item.endpoint)} />
   )
 
   const renderStrongItem = ({ item }: { item: LexiqueRow }) => (
-    <TouchableBox
-      px={20}
-      py={14}
-      borderBottomWidth={1}
-      borderColor="border"
-      onPress={() => selectTarget(getStrongEndpoint(item))}
-    >
-      <HStack alignItems="center" justifyContent="space-between" gap={12}>
-        <VStack flex={1} gap={4}>
-          <Text bold>{item.Mot}</Text>
-          <Text fontSize={13} color="grey">
-            {getStrongSubtitle(item)}
-          </Text>
-        </VStack>
-        <Text fontSize={16}>{'Grec' in item ? item.Grec : item.Hebreu}</Text>
-      </HStack>
-    </TouchableBox>
+    <StrongTargetRow item={item} onPress={() => selectTarget(getStrongEndpoint(item))} />
   )
 
   const emptyMessage = browseMode
