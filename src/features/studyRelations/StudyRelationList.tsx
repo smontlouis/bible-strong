@@ -1,9 +1,9 @@
-import { BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet'
+import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet'
 import { type ComponentProps, useRef, useState } from 'react'
 import { Alert } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import styled from '@emotion/native'
 import { useDispatch, useSelector } from 'react-redux'
-import DropdownMenu from '~common/DropdownMenu'
 import LexiqueIcon from '~common/LexiqueIcon'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
@@ -22,7 +22,7 @@ import {
   updateStudyRelation,
 } from '~redux/modules/user'
 import { makeStudyRelationDisplayModelsSelector } from '~redux/selectors/bible'
-import type { RelationDisplayModel } from './domain'
+import { getEndpointFallbackLabel, getRelationText, type RelationDisplayModel } from './domain'
 
 type Props = {
   endpoint: RelationEndpoint
@@ -49,12 +49,7 @@ const relationTypeChoices: { value: RelationType; label: string; subLabel?: stri
   { value: 'contrasts', label: 'Contraste' },
 ]
 
-const relationTypeLabels: Record<RelationType, string> = {
-  linked: 'Lié',
-  references: 'Renvoi',
-  explains: 'Explique',
-  contrasts: 'Contraste',
-}
+const relationTypeCycle = relationTypeChoices.map(choice => choice.value)
 
 const targetIconConfig: Record<
   RelationEndpoint['type'],
@@ -128,6 +123,9 @@ const getRelationSubtitle = (model: RelationDisplayModel) => {
   }
 }
 
+const getEndpointLabel = (endpoint: RelationEndpoint) =>
+  endpoint.label || getEndpointFallbackLabel(endpoint)
+
 const isDirectionalType = (type: RelationType) => directionalTypes.includes(type)
 
 const normalizeDirection = (
@@ -146,6 +144,7 @@ const StudyRelationList = ({
   showEmptyState = false,
 }: Props) => {
   const dispatch = useDispatch()
+  const insets = useSafeAreaInsets()
   const editModalRef = useRef<BottomSheetModal>(null)
   const [editingModel, setEditingModel] = useState<RelationDisplayModel | null>(null)
   const [draft, setDraft] = useState<RelationDraft>({
@@ -167,12 +166,17 @@ const StudyRelationList = ({
     editModalRef.current?.present()
   }
 
-  const setDraftType = (type: RelationType) => {
-    setDraft(current => ({
-      ...current,
-      type,
-      direction: normalizeDirection(type, current.direction),
-    }))
+  const cycleDraftType = () => {
+    setDraft(current => {
+      const currentIndex = relationTypeCycle.indexOf(current.type)
+      const nextType = relationTypeCycle[(currentIndex + 1) % relationTypeCycle.length]
+
+      return {
+        ...current,
+        type: nextType,
+        direction: normalizeDirection(nextType, current.direction),
+      }
+    })
   }
 
   const toggleDirection = () => {
@@ -218,6 +222,22 @@ const StudyRelationList = ({
       },
     ])
   }
+
+  const getDraftRelationText = (model: RelationDisplayModel) => {
+    const relationText = getRelationText(
+      {
+        ...model.relation,
+        type: draft.type,
+        direction: normalizeDirection(draft.type, draft.direction),
+      },
+      model.activeEndpoint
+    )
+
+    return relationTitlePrefixes[relationText] || relationText
+  }
+
+  const getDraftTargetTitle = (model: RelationDisplayModel) =>
+    getRelationTitleParts({ ...model, relationText: getDraftRelationText(model) }).target
 
   return (
     <VStack>
@@ -325,11 +345,102 @@ const StudyRelationList = ({
         ref={editModalRef}
         enableDynamicSizing
         enableScrollView={false}
-        headerComponent={<ModalHeader title="Modifier la relation" />}
+        headerComponent={
+          <ModalHeader
+            title="Modifier la relation"
+            rightComponent={
+              editingModel ? (
+                <PopOverMenu
+                  width={54}
+                  height={54}
+                  popover={
+                    <MenuOption onSelect={() => confirmDelete()}>
+                      <HStack alignItems="center">
+                        <FeatherIcon name="trash-2" size={15} color="quart" />
+                        <Text ml={10} color="quart">
+                          Supprimer
+                        </Text>
+                      </HStack>
+                    </MenuOption>
+                  }
+                />
+              ) : undefined
+            }
+          />
+        }
+        footerComponent={props => (
+          <BottomSheetFooter bottomInset={insets.bottom} {...props}>
+            <HStack px={20} gap={10} justifyContent="flex-end" bg="reverse">
+              <Box h={54}>
+                <Button reverse onPress={closeEditModal}>
+                  Annuler
+                </Button>
+              </Box>
+              <Box h={54}>
+                <Button onPress={saveEdit}>Enregistrer</Button>
+              </Box>
+            </HStack>
+          </BottomSheetFooter>
+        )}
       >
         {editingModel ? (
-          <VStack p={20} gap={18}>
-            <VStack gap={8}>
+          <VStack p={20} gap={22}>
+            <VStack gap={10}>
+              <HStack alignItems="center" wrap>
+                <Text bold numberOfLines={1} shrink={1}>
+                  {getEndpointLabel(editingModel.activeEndpoint)}
+                </Text>
+                <TouchableBox
+                  mx={6}
+                  px={10}
+                  py={6}
+                  borderRadius={16}
+                  bg="lightGrey"
+                  onPress={cycleDraftType}
+                >
+                  <Text bold fontSize={13} color="primary">
+                    {getDraftRelationText(editingModel)}
+                  </Text>
+                </TouchableBox>
+                {isDirectionalType(draft.type) ? (
+                  <TouchableBox
+                    mr={6}
+                    width={32}
+                    height={32}
+                    borderRadius={16}
+                    bg="lightGrey"
+                    alignItems="center"
+                    justifyContent="center"
+                    onPress={toggleDirection}
+                  >
+                    <FeatherIcon name="refresh-cw" size={16} color="primary" />
+                  </TouchableBox>
+                ) : null}
+                <Text bold>
+                  {editingModel.targetEndpoint.type === 'note' ||
+                  editingModel.targetEndpoint.type === 'study'
+                    ? 'une '
+                    : ''}
+                </Text>
+                <Box mx={4}>
+                  <TargetIcon type={editingModel.targetEndpoint.type} />
+                </Box>
+                <Text bold numberOfLines={1} shrink={1}>
+                  {editingModel.targetEndpoint.type === 'note'
+                    ? 'note'
+                    : editingModel.targetEndpoint.type === 'study'
+                      ? 'étude'
+                      : getDraftTargetTitle(editingModel)}
+                </Text>
+              </HStack>
+              {getRelationSubtitle(editingModel) ? (
+                <Text fontSize={13} color="tertiary" numberOfLines={1}>
+                  {getRelationSubtitle(editingModel)}
+                </Text>
+              ) : null}
+            </VStack>
+
+            <VStack gap={8} mt="auto">
               <Text fontSize={13} color="tertiary">
                 Libellé
               </Text>
@@ -341,62 +452,6 @@ const StudyRelationList = ({
                 returnKeyType="done"
               />
             </VStack>
-
-            <DropdownMenu
-              title="Type"
-              currentValue={draft.type}
-              setValue={setDraftType}
-              choices={relationTypeChoices}
-              customRender={
-                <TouchableBox py={8}>
-                  <Text fontSize={13} color="tertiary">
-                    Type
-                  </Text>
-                  <HStack mt={8} alignItems="center" justifyContent="space-between">
-                    <Text bold>{relationTypeLabels[draft.type]}</Text>
-                    <FeatherIcon name="chevron-down" size={18} color="grey" />
-                  </HStack>
-                </TouchableBox>
-              }
-            />
-
-            {isDirectionalType(draft.type) ? (
-              <VStack gap={8}>
-                <Text fontSize={13} color="tertiary">
-                  Direction
-                </Text>
-                <TouchableBox
-                  onPress={toggleDirection}
-                  width={48}
-                  height={40}
-                  borderRadius={12}
-                  bg="lightGrey"
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <FeatherIcon
-                    name={draft.direction === 'backward' ? 'arrow-left' : 'arrow-right'}
-                    size={20}
-                    color="primary"
-                  />
-                </TouchableBox>
-              </VStack>
-            ) : null}
-
-            <HStack gap={10}>
-              <Button small onPress={saveEdit}>
-                Enregistrer
-              </Button>
-              <Button small secondary onPress={closeEditModal}>
-                Annuler
-              </Button>
-            </HStack>
-
-            <TouchableBox onPress={() => confirmDelete()} py={6}>
-              <Text bold color="quart">
-                Supprimer
-              </Text>
-            </TouchableBox>
           </VStack>
         ) : null}
       </Modal.Body>
