@@ -112,6 +112,8 @@ const getRelationTitleParts = (model: RelationDisplayModel) => {
     switch (model.targetEndpoint.type) {
       case 'note':
         return 'une note'
+      case 'study':
+        return 'une étude'
       case 'strong':
         return model.targetLabel
       default:
@@ -125,6 +127,7 @@ const getRelationTitleParts = (model: RelationDisplayModel) => {
 const getRelationSubtitle = (model: RelationDisplayModel) => {
   switch (model.targetEndpoint.type) {
     case 'note':
+    case 'study':
       return model.targetLabel
     case 'verse':
     case 'strong':
