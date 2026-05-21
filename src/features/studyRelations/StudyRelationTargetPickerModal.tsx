@@ -401,9 +401,11 @@ const StudyRelationTargetPickerModal = ({
   const debouncedSearchValue = useDebounce(searchValue, 300)
   const deferredSearchValue = useDeferredValue(debouncedSearchValue)
   const deferredBrowseMode = useDeferredValue(browseMode)
+  const immediateSearchHasValue = Boolean(searchValue.trim())
   const deferredSearchHasValue = Boolean(deferredSearchValue.trim())
   const isListPending =
-    browseMode !== deferredBrowseMode || debouncedSearchValue !== deferredSearchValue
+    immediateSearchHasValue &&
+    (browseMode !== deferredBrowseMode || debouncedSearchValue !== deferredSearchValue)
 
   const notes = useSelector((state: RootState) => state.user.bible.notes)
   const studies = useSelector((state: RootState) => state.user.bible.studies)
@@ -478,8 +480,9 @@ const StudyRelationTargetPickerModal = ({
   const isAllowed = (type: RelationEndpoint['type']) =>
     allowedTypes ? allowedTypes.includes(type) : true
 
+  const immediateReferenceResults = searchReferenceAndStrongTargets(searchValue)
   const unifiedResults = [
-    ...searchReferenceAndStrongTargets(deferredSearchValue),
+    ...immediateReferenceResults,
     ...(deferredSearchHasValue ? fuzzyNoteTargets.slice(0, 12) : []),
     ...(deferredSearchHasValue ? fuzzyStudyTargets.slice(0, 12) : []),
   ].filter(result => isAllowed(result.type))
@@ -511,7 +514,7 @@ const StudyRelationTargetPickerModal = ({
 
   const emptyMessage = browseMode
     ? `Aucun élément trouvé dans ${browseModeLabels[browseMode].toLowerCase()}`
-    : deferredSearchHasValue
+    : immediateSearchHasValue
       ? 'Aucune cible trouvée'
       : 'Rechercher un passage, un Strong, une note ou une étude'
 
