@@ -42,14 +42,14 @@ const directionalTypes: RelationType[] = ['references', 'explains']
 
 const relationTypeChoices: { value: RelationType; label: string; subLabel?: string }[] = [
   { value: 'linked', label: 'Lié' },
-  { value: 'references', label: 'Référence' },
+  { value: 'references', label: 'Renvoi' },
   { value: 'explains', label: 'Explique' },
   { value: 'contrasts', label: 'Contraste' },
 ]
 
 const relationTypeLabels: Record<RelationType, string> = {
   linked: 'Lié',
-  references: 'Référence',
+  references: 'Renvoi',
   explains: 'Explique',
   contrasts: 'Contraste',
 }
@@ -111,7 +111,7 @@ const TargetIcon = ({ type }: { type: RelationEndpoint['type'] }) => {
 
 const relationTitlePrefixes: Record<string, string> = {
   'lié à': 'est lié à',
-  référence: 'référence',
+  'renvoie vers': 'renvoie vers',
   explique: 'explique',
   'contraste avec': 'contraste avec',
   'référencé par': 'est référencé par',

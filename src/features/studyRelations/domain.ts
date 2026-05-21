@@ -66,7 +66,7 @@ const nonDirectionalTypes: RelationType[] = ['linked', 'contrasts']
 
 const relationLabels: Record<RelationType, string> = {
   linked: 'lié à',
-  references: 'référence',
+  references: 'renvoie vers',
   explains: 'explique',
   contrasts: 'contraste avec',
 }

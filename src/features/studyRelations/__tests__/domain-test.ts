@@ -69,7 +69,9 @@ describe('study relation domain', () => {
       updatedAt: 1,
     }
 
-    expect(getRelationDisplayModel(relation, relation.endpoints[0])?.relationText).toBe('référence')
+    expect(getRelationDisplayModel(relation, relation.endpoints[0])?.relationText).toBe(
+      'renvoie vers'
+    )
     expect(getRelationDisplayModel(relation, relation.endpoints[1])?.relationText).toBe(
       'référencé par'
     )
