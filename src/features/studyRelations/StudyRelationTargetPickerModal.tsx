@@ -356,7 +356,7 @@ const RelationTargetRow = ({
           <HighlightedText value={description} ranges={descriptionRanges} />
         ) : null}
       </VStack>
-      <FeatherIcon name="plus" size={20} color="grey" />
+      <FeatherIcon name="arrow-right" size={20} color="grey" />
     </TouchableBox>
   )
 }
@@ -384,7 +384,7 @@ const StrongTargetRow = ({ item, onPress }: { item: LexiqueRow; onPress: () => v
     <Text fontSize={16} color="tertiary">
       {'Grec' in item ? item.Grec : item.Hebreu}
     </Text>
-    <FeatherIcon name="plus" size={20} color="grey" />
+    <FeatherIcon name="arrow-right" size={20} color="grey" />
   </TouchableBox>
 )
 
