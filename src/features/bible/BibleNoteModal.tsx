@@ -203,6 +203,12 @@ ${currentNote.description}
                           <Text marginLeft={10}>{t('Éditer les tags')}</Text>
                         </Box>
                       </MenuOption>
+                      <MenuOption onSelect={() => relationModal.open()}>
+                        <Box row alignItems="center">
+                          <FeatherIcon name="git-merge" size={15} />
+                          <Text marginLeft={10}>{t('Éditer les relations')}</Text>
+                        </Box>
+                      </MenuOption>
                       <MenuOption onSelect={openNoteInNewTab}>
                         <Box row alignItems="center">
                           <FeatherIcon name="external-link" size={15} />

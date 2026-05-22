@@ -212,6 +212,12 @@ ${currentNote.description}
                           <Text marginLeft={10}>{t('Editer les tags')}</Text>
                         </Box>
                       </MenuOption>
+                      <MenuOption onSelect={() => relationModal.open()}>
+                        <Box row alignItems="center">
+                          <FeatherIcon name="git-merge" size={15} />
+                          <Text marginLeft={10}>{t('Éditer les relations')}</Text>
+                        </Box>
+                      </MenuOption>
                       <MenuOption onSelect={deleteNoteFunc}>
                         <Box row alignItems="center">
                           <FeatherIcon name="trash-2" size={15} />
