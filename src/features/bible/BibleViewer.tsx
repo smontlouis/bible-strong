@@ -89,7 +89,7 @@ import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
 import VerseNotesModal from './VerseNotesModal'
 import VerseTagsModal from './VerseTagsModal'
-import VerseStudyRelationsModal from './VerseStudyRelationsModal'
+import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
 import StudyRelationTargetPickerModal from '~features/studyRelations/StudyRelationTargetPickerModal'
 
 const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: number) => {
@@ -942,9 +942,11 @@ const BibleViewer = ({
         ref={relationTargetPickerModal.getRef()}
         onSelect={createRelationToTarget}
       />
-      <VerseStudyRelationsModal
+      <EntityRelationsModal
         ref={verseStudyRelationsModal.getRef()}
-        verseKey={verseStudyRelationsModalKey}
+        endpoint={
+          verseStudyRelationsModalKey ? createVerseEndpoint([verseStudyRelationsModalKey]) : null
+        }
         onCreateRelation={() => {
           if (!verseStudyRelationsModalKey) return
           setRelationSourceEndpoint(createVerseEndpoint([verseStudyRelationsModalKey]))
