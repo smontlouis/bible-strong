@@ -21,7 +21,7 @@ import { removeBreakLines } from '~helpers/utils'
 import { RootState } from '~redux/modules/reducer'
 import { createStudyRelation } from '~redux/modules/user'
 import type { AppDispatch } from '~redux/store'
-import type { RelationEndpoint } from './domain'
+import { getEndpointFallbackLabel, type RelationEndpoint } from './domain'
 import {
   getNoteTargetItems,
   getStudyTargetItems,
@@ -82,6 +82,21 @@ const getStrongEndpoint = (strong: LexiqueRow): RelationEndpoint => ({
 
 const getStrongSubtitle = (strong: LexiqueRow) =>
   `${strong.lexiqueType} · ${strong.lexiqueType === 'Grec' ? 'G' : 'H'}${getStrongCode(strong)}`
+
+const getSourceEndpointSubtitle = (endpoint: RelationEndpoint | null) => {
+  if (!endpoint) return undefined
+
+  switch (endpoint.type) {
+    case 'verse':
+      return getEndpointFallbackLabel(endpoint)
+    case 'note':
+      return 'Note'
+    case 'study':
+      return 'Étude'
+    case 'strong':
+      return endpoint.originalWord || endpoint.label || getEndpointFallbackLabel(endpoint)
+  }
+}
 
 const isDatabaseError = (value: unknown): value is { error: string } =>
   typeof value === 'object' && value !== null && 'error' in value
@@ -540,6 +555,7 @@ const CreateEntityRelationModal = ({
     : 'Jean 3:16, G26, note, étude...'
 
   const modalTitle = browseMode ? browseModeLabels[browseMode] : title
+  const modalSubtitle = getSourceEndpointSubtitle(sourceEndpoint)
 
   const renderTargetItem = ({ item }: { item: RelationTargetResult }) => (
     <RelationTargetRow item={item} onPress={() => selectTarget(item.endpoint)} />
@@ -628,6 +644,7 @@ const CreateEntityRelationModal = ({
         <>
           <ModalHeader
             title={modalTitle}
+            subTitle={modalSubtitle}
             hasBackButton={Boolean(browseMode)}
             onBackPress={exitBrowseMode}
           />
