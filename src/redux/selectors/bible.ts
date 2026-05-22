@@ -17,6 +17,8 @@ import { Tag, CurrentTheme, TagsObj } from '~common/types'
 import { VersionCode } from '~state/tabs'
 import {
   getRelationDisplayModel,
+  getEndpointFallbackLabel,
+  endpointIdentity,
   relationIncludesEndpoint,
   relationIncludesVerseKey,
 } from '~features/studyRelations/domain'
@@ -165,6 +167,62 @@ export const makeStudyRelationDisplayModelsSelector = () =>
         )
         .filter((model): model is NonNullable<typeof model> => Boolean(model))
         .sort((a, b) => b.relation.updatedAt - a.relation.updatedAt)
+  )
+
+export const makeStudyRelationDisplaySectionsForVerseKeySelector = () =>
+  createSelector(
+    [
+      selectStudyRelations,
+      selectNotes,
+      selectStudies,
+      selectStrongsGrec,
+      selectStrongsHebreu,
+      (_: RootState, verseKey: string) => verseKey,
+    ],
+    (studyRelations, notes, studies, strongsGrec, strongsHebreu, verseKey) => {
+      const sections = new Map<
+        string,
+        {
+          id: string
+          title: string
+          data: NonNullable<ReturnType<typeof getRelationDisplayModel>>[]
+        }
+      >()
+
+      for (const relation of Object.values(studyRelations)) {
+        if (!relationIncludesVerseKey(relation, verseKey)) continue
+
+        const endpoint = relation.endpoints.find(
+          relationEndpoint =>
+            relationEndpoint.type === 'verse' && relationEndpoint.verseKeys.includes(verseKey)
+        )
+        if (!endpoint) continue
+
+        const model = getRelationDisplayModel(relation, endpoint, {
+          notes,
+          studies,
+          strongsGrec,
+          strongsHebreu,
+        })
+        if (!model) continue
+
+        const id = endpointIdentity(endpoint)
+        const section = sections.get(id) || {
+          id,
+          title: getEndpointFallbackLabel(endpoint),
+          data: [],
+        }
+        section.data.push(model)
+        sections.set(id, section)
+      }
+
+      return [...sections.values()]
+        .map(section => ({
+          ...section,
+          data: section.data.sort((a, b) => b.relation.updatedAt - a.relation.updatedAt),
+        }))
+        .sort((a, b) => b.data[0].relation.updatedAt - a.data[0].relation.updatedAt)
+    }
   )
 
 export const makeStudyRelationIndicatorsByChapterSelector = () =>

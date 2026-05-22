@@ -18,7 +18,10 @@ type Props = {
 const EntityRelationsModal = ({ ref, endpoint }: Props) => {
   const openEndpoint = useOpenRelationEndpoint()
   const createRelationModal = useBottomSheetModal()
-  const title = endpoint ? getEndpointFallbackLabel(endpoint) : 'Relations'
+  const isSingleVerseEndpoint = endpoint?.type === 'verse' && endpoint.verseKeys.length === 1
+  const endpointLabel = endpoint ? getEndpointFallbackLabel(endpoint) : ''
+  const title = isSingleVerseEndpoint ? 'Relations' : endpointLabel || 'Relations'
+  const subTitle = isSingleVerseEndpoint ? endpointLabel : endpoint ? 'Relations' : undefined
 
   return (
     <>
@@ -28,7 +31,7 @@ const EntityRelationsModal = ({ ref, endpoint }: Props) => {
         headerComponent={
           <ModalHeader
             title={title}
-            subTitle={endpoint ? 'Relations' : undefined}
+            subTitle={subTitle}
             rightComponent={
               endpoint ? (
                 <TouchableBox
@@ -51,7 +54,12 @@ const EntityRelationsModal = ({ ref, endpoint }: Props) => {
       >
         <Box pl={5} pr={20}>
           {endpoint ? (
-            <StudyRelationList endpoint={endpoint} onOpenEndpoint={openEndpoint} showEmptyState />
+            <StudyRelationList
+              endpoint={endpoint}
+              onOpenEndpoint={openEndpoint}
+              showEmptyState
+              includeContainingVerseRelations={isSingleVerseEndpoint}
+            />
           ) : null}
         </Box>
       </Modal.Body>

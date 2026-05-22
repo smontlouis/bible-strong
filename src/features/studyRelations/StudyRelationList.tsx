@@ -21,13 +21,17 @@ import {
   type RelationType,
   updateStudyRelation,
 } from '~redux/modules/user'
-import { makeStudyRelationDisplayModelsSelector } from '~redux/selectors/bible'
+import {
+  makeStudyRelationDisplayModelsSelector,
+  makeStudyRelationDisplaySectionsForVerseKeySelector,
+} from '~redux/selectors/bible'
 import { getEndpointFallbackLabel, getRelationText, type RelationDisplayModel } from './domain'
 
 type Props = {
   endpoint: RelationEndpoint
   onOpenEndpoint: (endpoint: RelationEndpoint) => void
   showEmptyState?: boolean
+  includeContainingVerseRelations?: boolean
 }
 
 type RelationDraft = {
@@ -37,6 +41,7 @@ type RelationDraft = {
 }
 
 const selectDisplayModels = makeStudyRelationDisplayModelsSelector()
+const selectDisplaySectionsForVerseKey = makeStudyRelationDisplaySectionsForVerseKeySelector()
 
 const directionalTypes: RelationType[] = ['references', 'explains']
 
@@ -134,7 +139,12 @@ const normalizeDirection = (
   return direction === 'none' ? 'forward' : direction
 }
 
-const StudyRelationList = ({ endpoint, onOpenEndpoint, showEmptyState = false }: Props) => {
+const StudyRelationList = ({
+  endpoint,
+  onOpenEndpoint,
+  showEmptyState = false,
+  includeContainingVerseRelations = false,
+}: Props) => {
   const dispatch = useDispatch()
   const insets = useSafeAreaInsets()
   const editModalRef = useRef<BottomSheetModal>(null)
@@ -145,7 +155,16 @@ const StudyRelationList = ({ endpoint, onOpenEndpoint, showEmptyState = false }:
     direction: 'none',
   })
   const [isLabelExpanded, setIsLabelExpanded] = useState(false)
-  const relations = useSelector((state: RootState) => selectDisplayModels(state, endpoint))
+  const exactRelations = useSelector((state: RootState) => selectDisplayModels(state, endpoint))
+  const containingVerseSections = useSelector((state: RootState) =>
+    includeContainingVerseRelations && endpoint.type === 'verse' && endpoint.verseKeys.length === 1
+      ? selectDisplaySectionsForVerseKey(state, endpoint.verseKeys[0])
+      : []
+  )
+  const sections = includeContainingVerseRelations
+    ? containingVerseSections
+    : [{ id: 'relations', title: '', data: exactRelations }]
+  const relations = sections.flatMap(section => section.data)
 
   if (relations.length === 0 && !showEmptyState) return null
 
@@ -233,98 +252,110 @@ const StudyRelationList = ({ endpoint, onOpenEndpoint, showEmptyState = false }:
   const getDraftTargetTitle = (model: RelationDisplayModel) =>
     getRelationTitleParts({ ...model, relationText: getDraftRelationText(model) }).target
 
+  const renderRelation = (model: RelationDisplayModel, index: number, sectionLength: number) => {
+    const relationTitle = getRelationTitleParts(model)
+    const relationSubtitle = getRelationSubtitle(model)
+
+    return (
+      <Box key={model.relation.id}>
+        <Box
+          pos="absolute"
+          top={0}
+          left={10}
+          borderLeftWidth={4}
+          borderBottomWidth={4}
+          borderBottomLeftRadius={50}
+          height={35}
+          width={25}
+          borderColor="border"
+        />
+        {index !== sectionLength - 1 && (
+          <Box
+            pos="absolute"
+            top={0}
+            bottom={0}
+            left={10}
+            borderLeftWidth={4}
+            width={25}
+            borderColor="border"
+          />
+        )}
+        <TouchableBox
+          flex
+          row
+          alignItems="center"
+          paddingVertical={14}
+          ml={40}
+          pl={10}
+          borderBottomWidth={1}
+          borderColor="border"
+          onPress={() => onOpenEndpoint(model.targetEndpoint)}
+        >
+          <Box flex>
+            <HStack alignItems="center">
+              <Text bold numberOfLines={1}>
+                {relationTitle.prefix}
+              </Text>
+              <Box mx={6}>
+                <TargetIcon type={model.targetEndpoint.type} />
+              </Box>
+              <Text bold numberOfLines={1} shrink={1}>
+                {relationTitle.target}
+              </Text>
+            </HStack>
+            {relationSubtitle ? (
+              <Text fontSize={13} color="tertiary" numberOfLines={1}>
+                {relationSubtitle}
+              </Text>
+            ) : null}
+            {model.relation.label ? (
+              <Text fontSize={13} color="tertiary" numberOfLines={1}>
+                {model.relation.label}
+              </Text>
+            ) : null}
+          </Box>
+          <PopOverMenu
+            width={42}
+            height={42}
+            popover={
+              <>
+                <MenuOption onSelect={() => openEditModal(model)} closeBeforeSelect>
+                  <HStack alignItems="center">
+                    <FeatherIcon name="edit-3" size={15} />
+                    <Text ml={10}>Modifier</Text>
+                  </HStack>
+                </MenuOption>
+                <MenuOption onSelect={() => confirmDelete(model)}>
+                  <HStack alignItems="center">
+                    <FeatherIcon name="trash-2" size={15} color="quart" />
+                    <Text ml={10} color="quart">
+                      Supprimer
+                    </Text>
+                  </HStack>
+                </MenuOption>
+              </>
+            }
+          />
+        </TouchableBox>
+      </Box>
+    )
+  }
+
   return (
     <VStack>
       {relations.length === 0 ? (
         <Text color="grey">Aucune relation</Text>
       ) : (
-        relations.map((model, index) => {
-          const relationTitle = getRelationTitleParts(model)
-          const relationSubtitle = getRelationSubtitle(model)
-          return (
-            <Box key={model.relation.id}>
-              <Box
-                pos="absolute"
-                top={0}
-                left={10}
-                borderLeftWidth={4}
-                borderBottomWidth={4}
-                borderBottomLeftRadius={50}
-                height={35}
-                width={25}
-                borderColor="border"
-              />
-              {index !== relations.length - 1 && (
-                <Box
-                  pos="absolute"
-                  top={0}
-                  bottom={0}
-                  left={10}
-                  borderLeftWidth={4}
-                  width={25}
-                  borderColor="border"
-                />
-              )}
-              <TouchableBox
-                flex
-                row
-                alignItems="center"
-                paddingVertical={14}
-                ml={40}
-                pl={10}
-                borderBottomWidth={1}
-                borderColor="border"
-                onPress={() => onOpenEndpoint(model.targetEndpoint)}
-              >
-                <Box flex>
-                  <HStack alignItems="center">
-                    <Text bold numberOfLines={1}>
-                      {relationTitle.prefix}
-                    </Text>
-                    <Box mx={6}>
-                      <TargetIcon type={model.targetEndpoint.type} />
-                    </Box>
-                    <Text bold numberOfLines={1} shrink={1}>
-                      {relationTitle.target}
-                    </Text>
-                  </HStack>
-                  {relationSubtitle ? (
-                    <Text fontSize={13} color="tertiary" numberOfLines={1}>
-                      {relationSubtitle}
-                    </Text>
-                  ) : null}
-                  {model.relation.label ? (
-                    <Text fontSize={13} color="tertiary" numberOfLines={1}>
-                      {model.relation.label}
-                    </Text>
-                  ) : null}
-                </Box>
-                <PopOverMenu
-                  width={42}
-                  height={42}
-                  popover={
-                    <>
-                      <MenuOption onSelect={() => openEditModal(model)} closeBeforeSelect>
-                        <HStack alignItems="center">
-                          <FeatherIcon name="edit-3" size={15} />
-                          <Text ml={10}>Modifier</Text>
-                        </HStack>
-                      </MenuOption>
-                      <MenuOption onSelect={() => confirmDelete(model)}>
-                        <HStack alignItems="center">
-                          <FeatherIcon name="trash-2" size={15} color="quart" />
-                          <Text ml={10} color="quart">
-                            Supprimer
-                          </Text>
-                        </HStack>
-                      </MenuOption>
-                    </>
-                  }
-                />
-              </TouchableBox>
-            </Box>
-          )
-        })
+        sections.map(section => (
+          <VStack key={section.id} mb={12}>
+            {section.title ? (
+              <Text bold fontSize={14} color="tertiary" ml={40} mb={4}>
+                {section.title}
+              </Text>
+            ) : null}
+            {section.data.map((model, index) => renderRelation(model, index, section.data.length))}
+          </VStack>
+        ))
       )}
 
       <Modal.Body
