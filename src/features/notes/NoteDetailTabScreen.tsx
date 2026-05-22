@@ -83,10 +83,14 @@ const NoteDetailTabScreen = ({ notesAtom, noteId, onBackPress }: NoteDetailTabSc
   const annotationId = isAnnotationNote ? noteId.replace('annotation:', '') : ''
   const selectAnnotationById = makeWordAnnotationByIdSelector()
   const annotation = useSelector((state: RootState) => selectAnnotationById(state, annotationId))
+  const isMissingAnnotation = isAnnotationNote && !annotation
 
   // Parse noteId to get verse references for display
   const noteVerses = useMemo(() => {
     // For annotation notes, use the annotation's first range verseKey
+    if (isAnnotationNote && !annotation) {
+      return {} as VerseIds
+    }
     if (isAnnotationNote && annotation) {
       const verseKey = annotation.ranges[0]?.verseKey
       return verseKey ? { [verseKey]: true as const } : ({} as VerseIds)
@@ -99,12 +103,16 @@ const NoteDetailTabScreen = ({ notesAtom, noteId, onBackPress }: NoteDetailTabSc
   }, [noteId, isAnnotationNote, annotation])
 
   const reference = useMemo(() => {
+    if (isMissingAnnotation) {
+      return t('Annotation introuvable')
+    }
+
     const baseRef = verseToReference(noteVerses)
     if (isAnnotationNote && annotation) {
       return `${baseRef} (${t('annotation')} - ${annotation.version})`
     }
     return baseRef
-  }, [noteVerses, isAnnotationNote, annotation, t])
+  }, [noteVerses, isAnnotationNote, annotation, isMissingAnnotation, t])
 
   const noteEndpoint: Extract<RelationEndpoint, { type: 'note' }> = {
     type: 'note',
@@ -205,6 +213,11 @@ ${currentNote.description}
     let verseKey: string
     let version: string | undefined
 
+    if (isMissingAnnotation) {
+      toast.error(t('Annotation introuvable'))
+      return
+    }
+
     if (isAnnotationNote && annotation) {
       // For annotation notes, use the annotation's verseKey and version
       verseKey = annotation.ranges[0]?.verseKey
@@ -214,7 +227,17 @@ ${currentNote.description}
       verseKey = noteId.split('/')[0]
     }
 
+    if (!verseKey) {
+      toast.error(t('Référence introuvable'))
+      return
+    }
+
     const [Livre, Chapitre, Verset] = verseKey.split('-')
+    if (!Livre || !Chapitre || !Verset) {
+      toast.error(t('Référence introuvable'))
+      return
+    }
+
     router.push({
       pathname: '/bible-view',
       params: {
@@ -237,6 +260,24 @@ ${currentNote.description}
         <Box flex center px={20}>
           <Text fontSize={18} color="grey" textAlign="center" mb={20}>
             {t("Cette note n'existe plus")}
+          </Text>
+          <Button onPress={goBack}>{t('Retour aux notes')}</Button>
+        </Box>
+      </Container>
+    )
+  }
+
+  if (isMissingAnnotation) {
+    return (
+      <Container>
+        <Header
+          title={t('Annotation introuvable')}
+          hasBackButton={Boolean(onBackPress)}
+          onCustomBackPress={goBack}
+        />
+        <Box flex center px={20}>
+          <Text fontSize={18} color="grey" textAlign="center" mb={20}>
+            {t("Cette annotation n'existe plus")}
           </Text>
           <Button onPress={goBack}>{t('Retour aux notes')}</Button>
         </Box>
