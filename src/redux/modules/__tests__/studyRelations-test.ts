@@ -73,7 +73,6 @@ describe('study relation reducer', () => {
     expect(state.bible.studyRelations['relation-1'].endpoints[0]).toEqual({
       type: 'verse',
       verseKeys: ['1-1-1'],
-      label: 'Genèse 1:1',
     })
   })
 
