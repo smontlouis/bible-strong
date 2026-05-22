@@ -15,14 +15,13 @@ import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
 import Text from '~common/ui/Text'
 import { RootState } from '~redux/modules/reducer'
-import { createStudyRelation, updateStudy, Study, type RelationEndpoint } from '~redux/modules/user'
+import { updateStudy, Study, type RelationEndpoint } from '~redux/modules/user'
 import EditStudyHeader from './EditStudyHeader'
 import StudiesDomWrapper from './StudiesDOM/StudiesDomWrapper'
 import { openedFromTabAtom } from './atom'
 import { StudyTab } from 'src/state/tabs'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
-import StudyRelationTargetPickerModal from '~features/studyRelations/StudyRelationTargetPickerModal'
 import { useRelationChips } from '~features/studyRelations/useRelationChips'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 
@@ -82,7 +81,6 @@ const EditStudyScreen = ({
   const dispatch = useDispatch()
   const [isReadOnly, setIsReadOnly] = useState(true)
   const renameModalRef = useRef<BottomSheetModal>(null)
-  const relationTargetPickerModal = useBottomSheetModal()
   const relationListModal = useBottomSheetModal()
   const setOpenedFromTab = useSetAtom(openedFromTabAtom)
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
@@ -114,15 +112,6 @@ const EditStudyScreen = ({
         modified_at: Date.now(),
       })
     )
-  }
-
-  const createRelationToTarget = (targetEndpoint: RelationEndpoint) => {
-    dispatch(
-      createStudyRelation({
-        endpoints: [studyEndpoint, targetEndpoint],
-      })
-    )
-    relationTargetPickerModal.close()
   }
 
   // Control weither bible webview send back to study tab or not
@@ -190,15 +179,7 @@ const EditStudyScreen = ({
           dispatch(updateStudy({ id: currentStudy.id, title: value, modified_at: Date.now() }))
         }}
       />
-      <StudyRelationTargetPickerModal
-        ref={relationTargetPickerModal.getRef()}
-        onSelect={createRelationToTarget}
-      />
-      <EntityRelationsModal
-        ref={relationListModal.getRef()}
-        endpoint={studyEndpoint}
-        onCreateRelation={() => relationTargetPickerModal.open()}
-      />
+      <EntityRelationsModal ref={relationListModal.getRef()} endpoint={studyEndpoint} />
       {isReadOnly && <FabButton icon="edit-2" onPress={() => setIsReadOnly(false)} />}
     </Container>
   )

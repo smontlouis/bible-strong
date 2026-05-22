@@ -29,7 +29,6 @@ import useLanguage from '~helpers/useLanguage'
 import { RootState } from '~redux/modules/reducer'
 import {
   addHighlight,
-  createStudyRelation,
   createVerseEndpoint,
   removeHighlight,
   type RelationEndpoint,
@@ -89,8 +88,8 @@ import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
 import VerseNotesModal from './VerseNotesModal'
 import VerseTagsModal from './VerseTagsModal'
+import CreateEntityRelationModal from '~features/studyRelations/CreateEntityRelationModal'
 import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
-import StudyRelationTargetPickerModal from '~features/studyRelations/StudyRelationTargetPickerModal'
 
 const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: number) => {
   if (pericope && pericope[book] && pericope[book][chapter]) {
@@ -155,7 +154,7 @@ const BibleViewer = ({
   const versesModal = useBottomSheet()
   const linkModal = useBottomSheetModal()
   const noteModal = useBottomSheetModal()
-  const relationTargetPickerModal = useBottomSheetModal()
+  const createRelationModal = useBottomSheetModal()
 
   // Annotation mode
   const annotationMode = useAnnotationMode()
@@ -181,9 +180,8 @@ const BibleViewer = ({
   const [verseStudyRelationsModalKey, setVerseStudyRelationsModalKey] = useState<string | null>(
     null
   )
-  const [relationSourceEndpoint, setRelationSourceEndpoint] = useState<RelationEndpoint | null>(
-    null
-  )
+  const [createRelationSourceEndpoint, setCreateRelationSourceEndpoint] =
+    useState<RelationEndpoint | null>(null)
 
   // Add to study modal states
   const addToStudyModal = useBottomSheetModal()
@@ -525,18 +523,12 @@ const BibleViewer = ({
   const toggleCreateStudyRelation = () => {
     const verseKeys = Object.keys(selectedVerses)
     if (!verseKeys.length) return
-    setRelationSourceEndpoint(createVerseEndpoint(verseKeys))
-    relationTargetPickerModal.open()
+    setCreateRelationSourceEndpoint(createVerseEndpoint(verseKeys))
+    createRelationModal.open()
   }
 
-  const createRelationToTarget = (targetEndpoint: RelationEndpoint) => {
-    if (!relationSourceEndpoint) return
-    dispatch(
-      createStudyRelation({
-        endpoints: [relationSourceEndpoint, targetEndpoint],
-      })
-    )
-    relationTargetPickerModal.close()
+  const handleRelationCreatedFromSelection = () => {
+    createRelationModal.close()
     actions.clearSelectedVerses()
   }
 
@@ -938,21 +930,16 @@ const BibleViewer = ({
       />
       <BibleNoteModal ref={noteModal.getRef()} noteVerses={noteVerses} />
       <BibleLinkModal ref={linkModal.getRef()} linkVerses={linkVerses} />
-      <StudyRelationTargetPickerModal
-        ref={relationTargetPickerModal.getRef()}
-        onSelect={createRelationToTarget}
+      <CreateEntityRelationModal
+        ref={createRelationModal.getRef()}
+        sourceEndpoint={createRelationSourceEndpoint}
+        onCreated={handleRelationCreatedFromSelection}
       />
       <EntityRelationsModal
         ref={verseStudyRelationsModal.getRef()}
         endpoint={
           verseStudyRelationsModalKey ? createVerseEndpoint([verseStudyRelationsModalKey]) : null
         }
-        onCreateRelation={() => {
-          if (!verseStudyRelationsModalKey) return
-          setRelationSourceEndpoint(createVerseEndpoint([verseStudyRelationsModalKey]))
-          verseStudyRelationsModal.close()
-          relationTargetPickerModal.open()
-        }}
       />
       <StrongModal
         ref={strongModal.getRef()}

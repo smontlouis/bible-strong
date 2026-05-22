@@ -3,7 +3,7 @@ import { useTheme } from '@emotion/react'
 import Fuse from 'fuse.js'
 import { ComponentProps, Ref, useDeferredValue, useEffect, useState } from 'react'
 import { ActivityIndicator } from 'react-native'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import AlphabetList from '~common/AlphabetList'
 import BottomSheetSearchInput from '~common/BottomSheetSearchInput'
 import Empty from '~common/Empty'
@@ -19,6 +19,8 @@ import loadLexiqueByLetter, { type LexiqueRow } from '~helpers/loadLexiqueByLett
 import loadLexiqueBySearch from '~helpers/loadLexiqueBySearch'
 import { removeBreakLines } from '~helpers/utils'
 import { RootState } from '~redux/modules/reducer'
+import { createStudyRelation } from '~redux/modules/user'
+import type { AppDispatch } from '~redux/store'
 import type { RelationEndpoint } from './domain'
 import {
   getNoteTargetItems,
@@ -36,7 +38,8 @@ type MatchedRelationTargetResult = RelationTargetResult & {
 type Props = {
   ref?: Ref<BottomSheetModal | null>
   title?: string
-  onSelect: (endpoint: RelationEndpoint) => void
+  sourceEndpoint: RelationEndpoint | null
+  onCreated?: () => void
   allowedTypes?: RelationEndpoint['type'][]
 }
 
@@ -407,12 +410,14 @@ const LoadingIndicator = () => {
   )
 }
 
-const StudyRelationTargetPickerModal = ({
+const CreateEntityRelationModal = ({
   ref,
   title = 'Ajouter une relation',
-  onSelect,
+  sourceEndpoint,
+  onCreated,
   allowedTypes,
 }: Props) => {
+  const dispatch = useDispatch<AppDispatch>()
   const [searchValue, setSearchValue] = useState('')
   const [browseMode, setBrowseMode] = useState<BrowseMode | null>(null)
   const [strongLetter, setStrongLetter] = useState('a')
@@ -497,9 +502,16 @@ const StudyRelationTargetPickerModal = ({
   }
 
   const selectTarget = (endpoint: RelationEndpoint) => {
-    onSelect(endpoint)
+    if (!sourceEndpoint) return
+
+    dispatch(
+      createStudyRelation({
+        endpoints: [sourceEndpoint, endpoint],
+      })
+    )
     handleSearch('')
     setBrowseMode(null)
+    onCreated?.()
   }
 
   const isAllowed = (type: RelationEndpoint['type']) =>
@@ -658,4 +670,4 @@ const StudyRelationTargetPickerModal = ({
   )
 }
 
-export default StudyRelationTargetPickerModal
+export default CreateEntityRelationModal

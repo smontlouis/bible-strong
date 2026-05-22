@@ -32,10 +32,9 @@ import { NotesTab, useIsCurrentTab } from '~state/tabs'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import NoteEditorDOMComponent from '~features/bible/NoteEditorDOM/NoteEditorDOMComponent'
 import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
-import StudyRelationTargetPickerModal from '~features/studyRelations/StudyRelationTargetPickerModal'
 import { useRelationChips } from '~features/studyRelations/useRelationChips'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
-import { createStudyRelation, type RelationEndpoint } from '~redux/modules/user'
+import type { RelationEndpoint } from '~redux/modules/user'
 
 const FOOTER_HEIGHT = 54
 
@@ -53,7 +52,6 @@ const NoteDetailTabScreen = ({ notesAtom, noteId, onBackPress }: NoteDetailTabSc
   const [, setNotesTab] = useAtom(notesAtom)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
-  const relationTargetPickerModal = useBottomSheetModal()
   const relationListModal = useBottomSheetModal()
 
   const [title, setTitle] = useState('')
@@ -201,15 +199,6 @@ ${currentNote.description}
     setTitle(currentNote?.title || '')
     setDescription(currentNote?.description || '')
     setIsEditing(true)
-  }
-
-  const createRelationToTarget = (targetEndpoint: RelationEndpoint) => {
-    dispatch(
-      createStudyRelation({
-        endpoints: [noteEndpoint, targetEndpoint],
-      })
-    )
-    relationTargetPickerModal.close()
   }
 
   const navigateToBible = () => {
@@ -388,15 +377,7 @@ ${currentNote.description}
           <Fab icon="edit-2" onPress={onEditNote} />
         </Box>
       )}
-      <StudyRelationTargetPickerModal
-        ref={relationTargetPickerModal.getRef()}
-        onSelect={createRelationToTarget}
-      />
-      <EntityRelationsModal
-        ref={relationListModal.getRef()}
-        endpoint={noteEndpoint}
-        onCreateRelation={() => relationTargetPickerModal.open()}
-      />
+      <EntityRelationsModal ref={relationListModal.getRef()} endpoint={noteEndpoint} />
     </Container>
   )
 }

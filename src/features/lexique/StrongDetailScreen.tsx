@@ -2,7 +2,7 @@ import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Share } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 
 import Empty from '~common/Empty'
 import Header from '~common/Header'
@@ -43,11 +43,9 @@ import { makeStrongTagsSelector } from '~redux/selectors/bible'
 import { StrongTab } from '../../state/tabs'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
 import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
-import StudyRelationTargetPickerModal from '~features/studyRelations/StudyRelationTargetPickerModal'
 import { useRelationChips } from '~features/studyRelations/useRelationChips'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
-import { createStudyRelation, type RelationEndpoint } from '~redux/modules/user'
-import type { AppDispatch } from '~redux/store'
+import type { RelationEndpoint } from '~redux/modules/user'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -89,9 +87,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
   const [count, setCount] = useState<number>(0)
   const [concordanceLoading, setConcordanceLoading] = useState(true)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
-  const relationTargetPickerModal = useBottomSheetModal()
   const relationListModal = useBottomSheetModal()
-  const dispatch = useDispatch<AppDispatch>()
 
   const addHistory = useSetAtom(historyAtom)
 
@@ -231,25 +227,6 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
         },
       })
     }
-  }
-
-  const createRelationToTarget = (targetEndpoint: RelationEndpoint) => {
-    if (!strongReference) return
-    dispatch(
-      createStudyRelation({
-        endpoints: [
-          {
-            type: 'strong',
-            language: strongReference.Grec ? 'greek' : 'hebrew',
-            code: String(strongReference.Code),
-            label: strongReference.Mot,
-            originalWord: strongReference.Grec || strongReference.Hebreu,
-          },
-          targetEndpoint,
-        ],
-      })
-    )
-    relationTargetPickerModal.close()
   }
 
   if (error) {
@@ -464,15 +441,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
           </Box>
         </Box>
       </ScrollView>
-      <StudyRelationTargetPickerModal
-        ref={relationTargetPickerModal.getRef()}
-        onSelect={createRelationToTarget}
-      />
-      <EntityRelationsModal
-        ref={relationListModal.getRef()}
-        endpoint={strongEndpoint}
-        onCreateRelation={() => relationTargetPickerModal.open()}
-      />
+      <EntityRelationsModal ref={relationListModal.getRef()} endpoint={strongEndpoint} />
     </Container>
   )
 }
