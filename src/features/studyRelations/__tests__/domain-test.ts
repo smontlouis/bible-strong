@@ -145,4 +145,28 @@ describe('study relation domain', () => {
     expect(model?.targetLabel).toBe('Étude actuelle')
     expect(model?.isTargetAvailable).toBe(true)
   })
+
+  it('supports Nave and dictionary endpoints as relation targets', () => {
+    const relation: StudyRelation = {
+      id: 'r1',
+      endpoints: [
+        { type: 'nave', nameLower: 'amour', label: 'Amour' },
+        { type: 'dictionary', word: 'Alliance', label: 'Alliance' },
+      ],
+      type: 'linked',
+      direction: 'none',
+      createdAt: 1,
+      updatedAt: 1,
+    }
+
+    const model = getRelationDisplayModel(relation, relation.endpoints[0], {
+      naves: { amour: { title: 'Amour' } },
+      words: { Alliance: { title: 'Alliance biblique' } },
+    })
+
+    expect(endpointIdentity(relation.endpoints[0])).toBe('nave:amour')
+    expect(endpointIdentity(relation.endpoints[1])).toBe('dictionary:Alliance')
+    expect(model?.targetLabel).toBe('Alliance biblique')
+    expect(model?.subtitle).toBe('Dictionnaire')
+  })
 })

@@ -5,7 +5,7 @@ import i18n from '~i18n'
 
 export type RelationType = 'linked' | 'references' | 'explains' | 'contrasts'
 export type RelationDirection = 'none' | 'forward' | 'backward'
-export type RelationEndpointType = 'verse' | 'note' | 'study' | 'strong'
+export type RelationEndpointType = 'verse' | 'note' | 'study' | 'strong' | 'nave' | 'dictionary'
 
 export type VerseRelationEndpoint = {
   type: 'verse'
@@ -33,11 +33,25 @@ export type StrongRelationEndpoint = {
   originalWord?: string
 }
 
+export type NaveRelationEndpoint = {
+  type: 'nave'
+  nameLower: string
+  label?: string
+}
+
+export type DictionaryRelationEndpoint = {
+  type: 'dictionary'
+  word: string
+  label?: string
+}
+
 export type RelationEndpoint =
   | VerseRelationEndpoint
   | NoteRelationEndpoint
   | StudyRelationEndpoint
   | StrongRelationEndpoint
+  | NaveRelationEndpoint
+  | DictionaryRelationEndpoint
 
 export type StudyRelation = {
   id: string
@@ -82,6 +96,8 @@ const endpointTypeLabels: Record<RelationEndpointType, string> = {
   note: 'Note',
   study: 'Étude',
   strong: 'Strong',
+  nave: 'Nave',
+  dictionary: 'Dictionnaire',
 }
 
 const parseVerseKey = (verseKey: string) => {
@@ -133,6 +149,16 @@ export const normalizeRelationEndpoint = (endpoint: RelationEndpoint): RelationE
           endpoint.originalWord ||
           `${endpoint.language === 'greek' ? 'G' : 'H'}${normalizeStrongCode(endpoint.code)}`,
       }
+    case 'nave':
+      return {
+        ...endpoint,
+        nameLower: endpoint.nameLower.trim().toLowerCase(),
+      }
+    case 'dictionary':
+      return {
+        ...endpoint,
+        word: endpoint.word.trim(),
+      }
   }
 }
 
@@ -166,6 +192,10 @@ export const endpointIdentity = (endpoint: RelationEndpoint): string => {
       return `study:${normalized.studyId}`
     case 'strong':
       return `strong:${normalized.language}:${normalized.code}`
+    case 'nave':
+      return `nave:${normalized.nameLower}`
+    case 'dictionary':
+      return `dictionary:${normalized.word}`
   }
 }
 
@@ -216,6 +246,12 @@ export const getEndpointFallbackLabel = (endpoint: RelationEndpoint): string => 
     case 'strong':
       if (endpoint.label) return endpoint.label
       return `${endpoint.language === 'greek' ? 'G' : 'H'}${endpoint.code}`
+    case 'nave':
+      if (endpoint.label) return endpoint.label
+      return endpoint.nameLower || i18n.t('Nave supprimé')
+    case 'dictionary':
+      if (endpoint.label) return endpoint.label
+      return endpoint.word || i18n.t('Mot supprimé')
   }
 }
 
@@ -226,6 +262,8 @@ export const getResolvedEndpointLabel = (
     studies?: Record<string, Study>
     strongsGrec?: Record<string, unknown>
     strongsHebreu?: Record<string, unknown>
+    naves?: Record<string, unknown>
+    words?: Record<string, unknown>
   } = {}
 ): { label: string; isAvailable: boolean } => {
   switch (endpoint.type) {
@@ -251,6 +289,20 @@ export const getResolvedEndpointLabel = (
       return {
         label: strong?.Mot || strong?.title || getEndpointFallbackLabel(endpoint),
         isAvailable: Boolean(strong) || Boolean(endpoint.label || endpoint.originalWord),
+      }
+    }
+    case 'nave': {
+      const nave = data.naves?.[endpoint.nameLower] as { title?: string; name?: string } | undefined
+      return {
+        label: nave?.name || nave?.title || getEndpointFallbackLabel(endpoint),
+        isAvailable: Boolean(nave) || Boolean(endpoint.label),
+      }
+    }
+    case 'dictionary': {
+      const word = data.words?.[endpoint.word] as { title?: string } | undefined
+      return {
+        label: word?.title || getEndpointFallbackLabel(endpoint),
+        isAvailable: Boolean(word) || Boolean(endpoint.label),
       }
     }
   }

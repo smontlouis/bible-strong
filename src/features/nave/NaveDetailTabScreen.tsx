@@ -30,6 +30,10 @@ import { RootState } from '~redux/modules/reducer'
 import { makeNaveTagsSelector } from '~redux/selectors/bible'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
 import { NaveTab } from '../../state/tabs'
+import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
+import { useRelationCount } from '~features/studyRelations/useRelationCount'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import type { RelationEndpoint } from '~redux/modules/user'
 
 interface NaveDetailScreenProps {
   naveAtom: PrimitiveAtom<NaveTab>
@@ -66,6 +70,16 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
   const selectNaveTags = makeNaveTagsSelector()
   const tags = useSelector((state: RootState) => selectNaveTags(state, name_lower ?? ''))
   const openInNewTab = useOpenInNewTab()
+  const relationListModal = useBottomSheetModal()
+  const naveEndpoint: Extract<RelationEndpoint, { type: 'nave' }> | null =
+    name_lower && naveItem
+      ? {
+          type: 'nave',
+          nameLower: name_lower,
+          label: naveItem.name || name || name_lower,
+        }
+      : null
+  const relationCount = useRelationCount(naveEndpoint)
 
   const setTitle = (title: string) =>
     setNaveTab(
@@ -203,6 +217,12 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
                     <Text marginLeft={10}>{t('Partager')}</Text>
                   </Box>
                 </MenuOption>
+                <MenuOption onSelect={() => relationListModal.open()}>
+                  <Box row alignItems="center">
+                    <FeatherIcon name="git-merge" size={15} />
+                    <Text marginLeft={10}>{t('Éditer les relations')}</Text>
+                  </Box>
+                </MenuOption>
                 <MenuOption
                   onSelect={() => {
                     openInNewTab({
@@ -227,9 +247,13 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
           />
         }
       />
-      {tags && (
+      {(tags || relationCount > 0) && (
         <Box mt={10} px={20}>
-          <EntityChipList tags={tags} />
+          <EntityChipList
+            tags={tags}
+            relationCount={relationCount}
+            onRelationPress={() => relationListModal.open()}
+          />
         </Box>
       )}
       <Box
@@ -243,6 +267,7 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
       >
         {naveItem?.description && <WebView {...webviewProps(naveItem.description)} />}
       </Box>
+      <EntityRelationsModal ref={relationListModal.getRef()} endpoint={naveEndpoint} />
     </Container>
   )
 }

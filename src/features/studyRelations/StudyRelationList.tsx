@@ -5,9 +5,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import styled from '@emotion/native'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
+import DictionnaryIcon from '~common/DictionnaryIcon'
 import LexiqueIcon from '~common/LexiqueIcon'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
+import NaveIcon from '~common/NaveIcon'
 import PopOverMenu from '~common/PopOverMenu'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -59,7 +61,7 @@ const relationTypeCycle = relationTypeChoices.map(choice => choice.value)
 const targetIconConfig: Record<
   RelationEndpoint['type'],
   {
-    name: ComponentProps<typeof FeatherIcon>['name']
+    name?: ComponentProps<typeof FeatherIcon>['name']
     color: string
   }
 > = {
@@ -67,6 +69,8 @@ const targetIconConfig: Record<
   note: { name: 'file-text', color: 'color2' },
   study: { name: 'feather', color: 'tertiary' },
   strong: { name: 'hash', color: 'primary' },
+  nave: { name: 'layers', color: 'quint' },
+  dictionary: { name: 'book', color: 'secondary' },
 }
 
 const LabelInput = styled(BottomSheetTextInput)(({ theme }) => ({
@@ -81,11 +85,17 @@ const LabelInput = styled(BottomSheetTextInput)(({ theme }) => ({
 
 const TargetIcon = ({ type }: { type: RelationEndpoint['type'] }) => {
   const config = targetIconConfig[type]
-  if (type === 'strong') {
-    return <LexiqueIcon color={config.color} size={15} />
-  }
 
-  return <FeatherIcon name={config.name} size={15} color={config.color} />
+  switch (type) {
+    case 'strong':
+      return <LexiqueIcon color={config.color} size={15} />
+    case 'nave':
+      return <NaveIcon color={config.color} size={15} />
+    case 'dictionary':
+      return <DictionnaryIcon color={config.color} size={15} />
+    default:
+      return <FeatherIcon name={config.name!} size={15} color={config.color} />
+  }
 }
 
 const getRelationTitleParts = (
@@ -101,6 +111,8 @@ const getRelationTitleParts = (
       case 'study':
         return t('une étude')
       case 'strong':
+      case 'nave':
+      case 'dictionary':
         return model.targetLabel
       default:
         return model.targetLabel
@@ -117,6 +129,8 @@ const getRelationSubtitle = (model: RelationDisplayModel) => {
       return model.targetLabel
     case 'verse':
     case 'strong':
+    case 'nave':
+    case 'dictionary':
       return ''
     default:
       return model.subtitle

@@ -7,10 +7,12 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import AlphabetList from '~common/AlphabetList'
 import BottomSheetSearchInput from '~common/BottomSheetSearchInput'
+import DictionnaryIcon from '~common/DictionnaryIcon'
 import Empty from '~common/Empty'
 import LexiqueIcon from '~common/LexiqueIcon'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
+import NaveIcon from '~common/NaveIcon'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -18,6 +20,14 @@ import useBibleVerses from '~helpers/useBibleVerses'
 import useDebounce from '~helpers/useDebounce'
 import loadLexiqueByLetter, { type LexiqueRow } from '~helpers/loadLexiqueByLetter'
 import loadLexiqueBySearch from '~helpers/loadLexiqueBySearch'
+import loadDictionnaireByLetter, {
+  type DictionnaireLetterRow,
+} from '~helpers/loadDictionnaireByLetter'
+import loadDictionnaireBySearch, {
+  type DictionnaireSearchRow,
+} from '~helpers/loadDictionnaireBySearch'
+import loadNaveByLetter, { type NaveLetterRow } from '~helpers/loadNaveByLetter'
+import loadNaveBySearch, { type NaveSearchRow } from '~helpers/loadNaveBySearch'
 import { removeBreakLines } from '~helpers/utils'
 import { RootState } from '~redux/modules/reducer'
 import { createStudyRelation } from '~redux/modules/user'
@@ -30,8 +40,10 @@ import {
   type RelationTargetResult,
 } from './targetSearch'
 
-type BrowseMode = 'note' | 'study' | 'strong'
+type BrowseMode = 'note' | 'study' | 'strong' | 'nave' | 'dictionary'
 type MatchRange = [number, number]
+type NaveRow = NaveLetterRow | NaveSearchRow
+type DictionaryRow = DictionnaireLetterRow | DictionnaireSearchRow
 type MatchedRelationTargetResult = RelationTargetResult & {
   matches?: readonly Fuse.FuseResultMatch[]
 }
@@ -48,12 +60,14 @@ const browseModeLabelKeys: Record<BrowseMode, string> = {
   note: 'Notes',
   study: 'Études',
   strong: 'Strong',
+  nave: 'Nave',
+  dictionary: 'Dictionnaire',
 }
 
 const targetIconConfig: Record<
   RelationEndpoint['type'],
   {
-    name: ComponentProps<typeof FeatherIcon>['name']
+    name?: ComponentProps<typeof FeatherIcon>['name']
     color: string
   }
 > = {
@@ -61,6 +75,8 @@ const targetIconConfig: Record<
   note: { name: 'file-text', color: 'color2' },
   study: { name: 'feather', color: 'tertiary' },
   strong: { name: 'hash', color: 'primary' },
+  nave: { name: 'layers', color: 'quint' },
+  dictionary: { name: 'book', color: 'secondary' },
 }
 
 const getStrongCode = (strong: LexiqueRow) =>
@@ -84,6 +100,44 @@ const getStrongEndpoint = (strong: LexiqueRow): RelationEndpoint => ({
 const getStrongSubtitle = (strong: LexiqueRow) =>
   `${strong.lexiqueType} · ${strong.lexiqueType === 'Grec' ? 'G' : 'H'}${getStrongCode(strong)}`
 
+const getNaveEndpoint = (nave: NaveRow): RelationEndpoint => ({
+  type: 'nave',
+  nameLower: nave.name_lower,
+  label: nave.name,
+})
+
+const getDictionaryEndpoint = (dictionary: DictionaryRow): RelationEndpoint => ({
+  type: 'dictionary',
+  word: dictionary.word,
+  label: dictionary.word,
+})
+
+const getNaveTargetResult = (nave: NaveRow): RelationTargetResult => ({
+  id: `nave:${nave.name_lower}`,
+  type: 'nave',
+  title: nave.name,
+  subtitle: 'Nave',
+  endpoint: getNaveEndpoint(nave),
+})
+
+const getDictionaryTargetResult = (dictionary: DictionaryRow): RelationTargetResult => ({
+  id: getDictionaryTargetKey(dictionary),
+  type: 'dictionary',
+  title: dictionary.word,
+  subtitle: 'Dictionnaire',
+  endpoint: getDictionaryEndpoint(dictionary),
+})
+
+const getDictionaryTargetKey = (dictionary: DictionaryRow, index?: number) =>
+  [
+    'dictionary',
+    dictionary.rowid ?? dictionary.sanitized_word ?? dictionary.word,
+    dictionary.word,
+    index,
+  ]
+    .filter(value => value !== undefined && value !== null && value !== '')
+    .join(':')
+
 const getSourceEndpointSubtitle = (
   endpoint: RelationEndpoint | null,
   t: (key: string) => string
@@ -99,6 +153,10 @@ const getSourceEndpointSubtitle = (
       return t('Étude')
     case 'strong':
       return endpoint.originalWord || endpoint.label || getEndpointFallbackLabel(endpoint)
+    case 'nave':
+      return endpoint.label || getEndpointFallbackLabel(endpoint)
+    case 'dictionary':
+      return endpoint.label || getEndpointFallbackLabel(endpoint)
   }
 }
 
@@ -320,6 +378,21 @@ const getVerseIds = (endpoint: RelationEndpoint) =>
 
 const TargetIcon = ({ type }: { type: RelationEndpoint['type'] }) => {
   const config = targetIconConfig[type]
+  const size = 18
+
+  const icon = (() => {
+    switch (type) {
+      case 'strong':
+        return <LexiqueIcon color={config.color} size={size} />
+      case 'nave':
+        return <NaveIcon color={config.color} size={size} />
+      case 'dictionary':
+        return <DictionnaryIcon color={config.color} size={size} />
+      default:
+        return <FeatherIcon name={config.name!} size={size} color={config.color} />
+    }
+  })()
+
   return (
     <Box
       width={36}
@@ -329,11 +402,7 @@ const TargetIcon = ({ type }: { type: RelationEndpoint['type'] }) => {
       alignItems="center"
       justifyContent="center"
     >
-      {type === 'strong' ? (
-        <LexiqueIcon color={config.color} size={18} />
-      ) : (
-        <FeatherIcon name={config.name} size={18} color={config.color} />
-      )}
+      {icon}
     </Box>
   )
 }
@@ -420,6 +489,14 @@ const StrongTargetRow = ({ item, onPress }: { item: LexiqueRow; onPress: () => v
   </TouchableBox>
 )
 
+const NaveTargetRow = ({ item, onPress }: { item: NaveRow; onPress: () => void }) => (
+  <RelationTargetRow item={getNaveTargetResult(item)} onPress={onPress} />
+)
+
+const DictionaryTargetRow = ({ item, onPress }: { item: DictionaryRow; onPress: () => void }) => (
+  <RelationTargetRow item={getDictionaryTargetResult(item)} onPress={onPress} />
+)
+
 const LoadingIndicator = () => {
   const theme = useTheme()
   return (
@@ -441,12 +518,22 @@ const CreateEntityRelationModal = ({
   const [searchValue, setSearchValue] = useState('')
   const [browseMode, setBrowseMode] = useState<BrowseMode | null>(null)
   const [strongLetter, setStrongLetter] = useState('a')
+  const [naveLetter, setNaveLetter] = useState('a')
+  const [dictionaryLetter, setDictionaryLetter] = useState('a')
   const [strongResults, setStrongResults] = useState<LexiqueRow[]>([])
+  const [naveResults, setNaveResults] = useState<NaveRow[]>([])
+  const [dictionaryResults, setDictionaryResults] = useState<DictionaryRow[]>([])
   const [isStrongLoading, setIsStrongLoading] = useState(false)
+  const [isNaveLoading, setIsNaveLoading] = useState(false)
+  const [isDictionaryLoading, setIsDictionaryLoading] = useState(false)
   const [strongError, setStrongError] = useState<string | null>(null)
+  const [naveError, setNaveError] = useState<string | null>(null)
+  const [dictionaryError, setDictionaryError] = useState<string | null>(null)
   const debouncedStrongSearchValue = useDebounce(searchValue, 300)
+  const debouncedResourceSearchValue = useDebounce(searchValue, 300)
   const deferredSearchValue = useDeferredValue(searchValue)
   const deferredStrongSearchValue = useDeferredValue(debouncedStrongSearchValue)
+  const deferredResourceSearchValue = useDeferredValue(debouncedResourceSearchValue)
   const deferredBrowseMode = useDeferredValue(browseMode)
   const immediateSearchHasValue = Boolean(searchValue.trim())
   const deferredSearchHasValue = Boolean(deferredSearchValue.trim())
@@ -456,6 +543,14 @@ const CreateEntityRelationModal = ({
     debouncedStrongSearchValue !== deferredStrongSearchValue
   const isLocalSearchPending =
     browseMode !== 'strong' && immediateSearchHasValue && searchValue !== deferredSearchValue
+  const isNavePending =
+    browseMode === 'nave' &&
+    immediateSearchHasValue &&
+    debouncedResourceSearchValue !== deferredResourceSearchValue
+  const isDictionaryPending =
+    browseMode === 'dictionary' &&
+    immediateSearchHasValue &&
+    debouncedResourceSearchValue !== deferredResourceSearchValue
 
   const notes = useSelector((state: RootState) => state.user.bible.notes)
   const studies = useSelector((state: RootState) => state.user.bible.studies)
@@ -479,6 +574,8 @@ const CreateEntityRelationModal = ({
     : []
   const fuzzyNoteTargets = searchWithMatches(noteTargets, deferredSearchValue)
   const fuzzyStudyTargets = searchWithMatches(studyTargets, deferredSearchValue)
+  const isAllowed = (type: RelationEndpoint['type']) =>
+    allowedTypes ? allowedTypes.includes(type) : true
 
   useEffect(() => {
     if (deferredBrowseMode !== 'strong') return
@@ -506,6 +603,73 @@ const CreateEntityRelationModal = ({
       isMounted = false
     }
   }, [deferredBrowseMode, deferredStrongSearchValue, strongLetter])
+
+  const shouldLoadNaveTargets =
+    isAllowed('nave') &&
+    (deferredBrowseMode === 'nave' || (!deferredBrowseMode && deferredSearchHasValue))
+  const shouldLoadDictionaryTargets =
+    isAllowed('dictionary') &&
+    (deferredBrowseMode === 'dictionary' || (!deferredBrowseMode && deferredSearchHasValue))
+
+  useEffect(() => {
+    if (!shouldLoadNaveTargets) {
+      setNaveResults([])
+      return
+    }
+
+    let isMounted = true
+    setIsNaveLoading(true)
+    setNaveError(null)
+
+    const loader = deferredResourceSearchValue.trim()
+      ? loadNaveBySearch(deferredResourceSearchValue)
+      : loadNaveByLetter(naveLetter)
+
+    loader.then(results => {
+      if (!isMounted) return
+      if (isDatabaseError(results)) {
+        setNaveResults([])
+        setNaveError(results.error)
+      } else {
+        setNaveResults(results)
+      }
+      setIsNaveLoading(false)
+    })
+
+    return () => {
+      isMounted = false
+    }
+  }, [deferredResourceSearchValue, naveLetter, shouldLoadNaveTargets])
+
+  useEffect(() => {
+    if (!shouldLoadDictionaryTargets) {
+      setDictionaryResults([])
+      return
+    }
+
+    let isMounted = true
+    setIsDictionaryLoading(true)
+    setDictionaryError(null)
+
+    const loader = deferredResourceSearchValue.trim()
+      ? loadDictionnaireBySearch(deferredResourceSearchValue)
+      : loadDictionnaireByLetter(dictionaryLetter)
+
+    loader.then(results => {
+      if (!isMounted) return
+      if (isDatabaseError(results)) {
+        setDictionaryResults([])
+        setDictionaryError(results.error)
+      } else {
+        setDictionaryResults(results)
+      }
+      setIsDictionaryLoading(false)
+    })
+
+    return () => {
+      isMounted = false
+    }
+  }, [deferredResourceSearchValue, dictionaryLetter, shouldLoadDictionaryTargets])
 
   const handleSearch = (value: string) => {
     setSearchValue(value)
@@ -535,14 +699,18 @@ const CreateEntityRelationModal = ({
     onCreated?.()
   }
 
-  const isAllowed = (type: RelationEndpoint['type']) =>
-    allowedTypes ? allowedTypes.includes(type) : true
-
   const immediateReferenceResults = searchReferenceAndStrongTargets(searchValue)
   const unifiedResults = [
     ...immediateReferenceResults,
     ...(deferredSearchHasValue ? fuzzyNoteTargets.slice(0, 12) : []),
     ...(deferredSearchHasValue ? fuzzyStudyTargets.slice(0, 12) : []),
+    ...(deferredSearchHasValue ? naveResults.slice(0, 12).map(getNaveTargetResult) : []),
+    ...(deferredSearchHasValue
+      ? dictionaryResults.slice(0, 12).map((dictionary, index) => ({
+          ...getDictionaryTargetResult(dictionary),
+          id: getDictionaryTargetKey(dictionary, index),
+        }))
+      : []),
   ].filter(result => isAllowed(result.type))
 
   const browseResults =
@@ -557,8 +725,10 @@ const CreateEntityRelationModal = ({
         note: t('Rechercher dans les notes'),
         study: t('Rechercher dans les études'),
         strong: t('Rechercher un code Strong'),
+        nave: t('Rechercher dans Nave'),
+        dictionary: t('Rechercher dans le dictionnaire'),
       }[browseMode]
-    : t('Jean 3:16, G26, note, étude...')
+    : t('Passage, Strong, note, étude...')
 
   const modalTitle: string = browseMode
     ? t(browseModeLabelKeys[browseMode])
@@ -573,19 +743,29 @@ const CreateEntityRelationModal = ({
     <StrongTargetRow item={item} onPress={() => selectTarget(getStrongEndpoint(item))} />
   )
 
+  const renderNaveItem = ({ item }: { item: NaveRow }) => (
+    <NaveTargetRow item={item} onPress={() => selectTarget(getNaveEndpoint(item))} />
+  )
+
+  const renderDictionaryItem = ({ item }: { item: DictionaryRow }) => (
+    <DictionaryTargetRow item={item} onPress={() => selectTarget(getDictionaryEndpoint(item))} />
+  )
+
   const emptyMessage = browseMode
     ? t('Aucun élément trouvé dans {{target}}', {
         target: t(browseModeLabelKeys[browseMode]).toLowerCase(),
       })
     : immediateSearchHasValue
       ? t('Aucune cible trouvée')
-      : t('Rechercher un passage, un Strong, une note ou une étude')
+      : t('Rechercher un passage, un Strong, une note, une étude, Nave ou un mot')
 
   const emptyIcon = browseMode
     ? {
         note: require('~assets/images/empty-state-icons/note.svg'),
         study: require('~assets/images/empty-state-icons/study.svg'),
         strong: require('~assets/images/empty-state-icons/word.svg'),
+        nave: require('~assets/images/empty-state-icons/word.svg'),
+        dictionary: require('~assets/images/empty-state-icons/word.svg'),
       }[browseMode]
     : require('~assets/images/empty-state-icons/search.svg')
 
@@ -641,6 +821,28 @@ const CreateEntityRelationModal = ({
               <Text fontSize={13}>{t('Strong')}</Text>
             </TouchableBox>
           )}
+          {isAllowed('nave') && (
+            <TouchableBox
+              onPress={() => enterBrowseMode('nave')}
+              px={10}
+              py={8}
+              bg="lightGrey"
+              borderRadius={8}
+            >
+              <Text fontSize={13}>{t('Nave')}</Text>
+            </TouchableBox>
+          )}
+          {isAllowed('dictionary') && (
+            <TouchableBox
+              onPress={() => enterBrowseMode('dictionary')}
+              px={10}
+              py={8}
+              bg="lightGrey"
+              borderRadius={8}
+            >
+              <Text fontSize={13}>{t('Dictionnaire')}</Text>
+            </TouchableBox>
+          )}
         </HStack>
       )}
     </Box>
@@ -682,6 +884,56 @@ const CreateEntityRelationModal = ({
           )}
           {!deferredSearchHasValue && (
             <AlphabetList letter={strongLetter} setLetter={setStrongLetter} />
+          )}
+        </VStack>
+      ) : browseMode === 'nave' ? (
+        <VStack flex={1}>
+          {naveError ? (
+            <Box px={20} py={24}>
+              <Text color="grey">{t('Impossible de charger la nave...')}</Text>
+            </Box>
+          ) : (
+            <BottomSheetFlashList
+              data={naveResults}
+              renderItem={renderNaveItem}
+              keyExtractor={(item: NaveRow) => item.name_lower}
+              estimatedItemSize={72}
+              ListEmptyComponent={
+                isNaveLoading || isNavePending ? renderLoadingState() : renderEmptyState()
+              }
+            />
+          )}
+          {!deferredSearchHasValue && (
+            <AlphabetList color="quint" letter={naveLetter} setLetter={setNaveLetter} />
+          )}
+        </VStack>
+      ) : browseMode === 'dictionary' ? (
+        <VStack flex={1}>
+          {dictionaryError ? (
+            <Box px={20} py={24}>
+              <Text color="grey">{t('Impossible de charger le dictionnaire...')}</Text>
+            </Box>
+          ) : (
+            <BottomSheetFlashList
+              data={dictionaryResults}
+              renderItem={renderDictionaryItem}
+              keyExtractor={(item: DictionaryRow, index: number) =>
+                getDictionaryTargetKey(item, index)
+              }
+              estimatedItemSize={72}
+              ListEmptyComponent={
+                isDictionaryLoading || isDictionaryPending
+                  ? renderLoadingState()
+                  : renderEmptyState()
+              }
+            />
+          )}
+          {!deferredSearchHasValue && (
+            <AlphabetList
+              color="secondary"
+              letter={dictionaryLetter}
+              setLetter={setDictionaryLetter}
+            />
           )}
         </VStack>
       ) : (

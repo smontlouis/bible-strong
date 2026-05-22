@@ -11,7 +11,7 @@ Core user activities:
 - Read Bible chapters across many translations.
 - Compare translations and original-language resources.
 - Select verses or words and attach highlights, notes, tags, links, bookmarks, and study references.
-- Search text and navigate back into the reading surface.
+- Search text and navigate to matching passages or study objects.
 - Download Bible/resource databases for offline use.
 - Track reading plans and study documents.
 - Listen through TTS or remote audio.
@@ -26,7 +26,7 @@ Core user activities:
 | Annotation mode / Mode libre | Word-level annotation mode for selecting and styling individual words or ranges. |
 | Downloads | Resource installation screen for Bible versions and local databases. |
 | Study editor | User-authored rich-text study documents. |
-| Search | Global/local text search that returns passages and opens them in Bible view. |
+| Search | Global/local search that returns openable Bible passages and study objects such as Strong entries, Nave topics, dictionary entries, notes, and studies. |
 
 ## Core Domain Terms
 

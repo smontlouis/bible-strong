@@ -33,6 +33,10 @@ import { RootState } from '~redux/modules/reducer'
 import { makeWordTagsSelector } from '~redux/selectors/bible'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
 import { DictionaryTab } from '../../state/tabs'
+import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
+import { useRelationCount } from '~features/studyRelations/useRelationCount'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import type { RelationEndpoint } from '~redux/modules/user'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -73,6 +77,15 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
 
   const selectWordTags = makeWordTagsSelector()
   const tags = useSelector((state: RootState) => selectWordTags(state, word ?? ''))
+  const relationListModal = useBottomSheetModal()
+  const dictionaryEndpoint: Extract<RelationEndpoint, { type: 'dictionary' }> | null = word
+    ? {
+        type: 'dictionary',
+        word,
+        label: word,
+      }
+    : null
+  const relationCount = useRelationCount(dictionaryEndpoint)
 
   const setTitle = (title: string) =>
     setDictionaryTab(
@@ -204,6 +217,12 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
                     <Text marginLeft={10}>{t('Partager')}</Text>
                   </Box>
                 </MenuOption>
+                <MenuOption onSelect={() => relationListModal.open()}>
+                  <Box row alignItems="center">
+                    <FeatherIcon name="git-merge" size={15} />
+                    <Text marginLeft={10}>{t('Éditer les relations')}</Text>
+                  </Box>
+                </MenuOption>
                 <MenuOption
                   onSelect={() => {
                     openInNewTab({
@@ -227,9 +246,13 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
           />
         }
       />
-      {tags && (
+      {(tags || relationCount > 0) && (
         <Box mt={10} px={20}>
-          <EntityChipList tags={tags} />
+          <EntityChipList
+            tags={tags}
+            relationCount={relationCount}
+            onRelationPress={() => relationListModal.open()}
+          />
         </Box>
       )}
       <Box
@@ -245,6 +268,7 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
           <WebView {...webviewProps(dictionnaireItem.definition.replace(/\n/gi, ''))} />
         )}
       </Box>
+      <EntityRelationsModal ref={relationListModal.getRef()} endpoint={dictionaryEndpoint} />
     </Container>
   )
 }

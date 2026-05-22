@@ -42,6 +42,21 @@ export const useOpenRelationEndpoint = () => {
           },
         })
         break
+      case 'nave':
+        router.push({
+          pathname: '/nave-detail',
+          params: {
+            name_lower: endpoint.nameLower,
+            name: endpoint.label || endpoint.nameLower,
+          },
+        })
+        break
+      case 'dictionary':
+        router.push({
+          pathname: '/dictionnary-detail',
+          params: { word: endpoint.word },
+        })
+        break
     }
   }
 }

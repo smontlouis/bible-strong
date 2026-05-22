@@ -167,9 +167,11 @@ export const makeStudyRelationDisplayModelsSelector = () =>
       selectStudies,
       selectStrongsGrec,
       selectStrongsHebreu,
+      selectNaves,
+      selectWords,
       (_: RootState, endpoint: RelationEndpoint) => endpoint,
     ],
-    (studyRelations, notes, studies, strongsGrec, strongsHebreu, endpoint) =>
+    (studyRelations, notes, studies, strongsGrec, strongsHebreu, naves, words, endpoint) =>
       Object.values(studyRelations)
         .filter(relation => relationIncludesEndpoint(relation, endpoint))
         .map(relation =>
@@ -178,6 +180,8 @@ export const makeStudyRelationDisplayModelsSelector = () =>
             studies,
             strongsGrec,
             strongsHebreu,
+            naves,
+            words,
           })
         )
         .filter((model): model is NonNullable<typeof model> => Boolean(model))
@@ -192,9 +196,11 @@ export const makeStudyRelationDisplaySectionsForStartingVerseKeySelector = () =>
       selectStudies,
       selectStrongsGrec,
       selectStrongsHebreu,
+      selectNaves,
+      selectWords,
       (_: RootState, verseKey: string) => verseKey,
     ],
-    (studyRelations, notes, studies, strongsGrec, strongsHebreu, verseKey) => {
+    (studyRelations, notes, studies, strongsGrec, strongsHebreu, naves, words, verseKey) => {
       const sections = new Map<
         string,
         {
@@ -216,6 +222,8 @@ export const makeStudyRelationDisplaySectionsForStartingVerseKeySelector = () =>
           studies,
           strongsGrec,
           strongsHebreu,
+          naves,
+          words,
         })
         if (!model) continue
 
