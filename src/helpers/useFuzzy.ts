@@ -1,4 +1,4 @@
-import Fuse from 'fuse.js'
+import Fuse, { type IFuseOptions } from 'fuse.js'
 import { useEffect, useState } from 'react'
 
 function removeAccents(obj: string): string
@@ -25,11 +25,7 @@ export type IFuzzyClient<T> = {
   search: (keyword: string) => void
 }
 
-function useFuzzy<T>(
-  data: T[],
-  options: Fuse.IFuseOptions<T>,
-  defaultValue?: string
-): IFuzzyClient<T> {
+function useFuzzy<T>(data: T[], options: IFuseOptions<T>, defaultValue?: string): IFuzzyClient<T> {
   const [keyword, setKeyword] = useState('')
   const resetSearch = () => setKeyword('')
 
@@ -37,7 +33,7 @@ function useFuzzy<T>(
     setKeyword(defaultValue || '')
   }, [defaultValue])
 
-  const defaultOptions: Fuse.IFuseOptions<T> = {
+  const defaultOptions: IFuseOptions<T> = {
     threshold: 0,
     ignoreFieldNorm: true,
   }

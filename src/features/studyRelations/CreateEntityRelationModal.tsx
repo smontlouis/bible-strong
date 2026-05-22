@@ -1,6 +1,6 @@
 import { BottomSheetFlashList, BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useTheme } from '@emotion/react'
-import Fuse from 'fuse.js'
+import Fuse, { type FuseResultMatch, type IFuseOptions } from 'fuse.js'
 import { ComponentProps, Ref, useDeferredValue, useEffect, useState } from 'react'
 import { ActivityIndicator } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -45,7 +45,7 @@ type MatchRange = [number, number]
 type NaveRow = NaveLetterRow | NaveSearchRow
 type DictionaryRow = DictionnaireLetterRow | DictionnaireSearchRow
 type MatchedRelationTargetResult = RelationTargetResult & {
-  matches?: readonly Fuse.FuseResultMatch[]
+  matches?: readonly FuseResultMatch[]
 }
 
 type Props = {
@@ -179,7 +179,7 @@ const getFuzzyValue = <T,>(obj: T, path: string | string[]): readonly string[] |
     : removeAccents(value)
 }
 
-const fuzzyOptions: Fuse.IFuseOptions<RelationTargetResult> = {
+const fuzzyOptions: IFuseOptions<RelationTargetResult> = {
   keys: [
     { name: 'title', weight: 0.7 },
     { name: 'description', weight: 0.3 },
@@ -211,10 +211,10 @@ const findExactNormalizedRange = (value: string | undefined, keyword: string): M
 const getExactMatches = (
   target: RelationTargetResult,
   keyword: string
-): readonly Fuse.FuseResultMatch[] => {
+): readonly FuseResultMatch[] => {
   const titleRanges = findExactNormalizedRange(target.title, keyword)
   const descriptionRanges = findExactNormalizedRange(target.description, keyword)
-  const matches: Fuse.FuseResultMatch[] = []
+  const matches: FuseResultMatch[] = []
 
   if (titleRanges.length) {
     matches.push({ key: 'title', value: target.title, indices: titleRanges })

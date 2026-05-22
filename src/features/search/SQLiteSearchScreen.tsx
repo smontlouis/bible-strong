@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next'
 import { ScrollView, TouchableOpacity } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTheme } from '@emotion/react'
+import { Image } from 'expo-image'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view'
-import Fuse from 'fuse.js'
+import Fuse, { type FuseResultMatch } from 'fuse.js'
 
 import booksDesc from '~assets/bible_versions/books-desc'
 import DictionnaryIcon from '~common/DictionnaryIcon'
@@ -36,7 +37,8 @@ import loadLexiqueBySearch from '~helpers/loadLexiqueBySearch'
 import { LexiqueRow } from '~helpers/loadLexiqueByLetter'
 import loadNaveBySearch, { NaveSearchRow } from '~helpers/loadNaveBySearch'
 import useDebounce from '~helpers/useDebounce'
-import verseToReference from '~helpers/verseToReference'
+import useBibleVerses from '~helpers/useBibleVerses'
+import { removeBreakLines } from '~helpers/utils'
 import { useWaitForDatabase as useWaitForDictionaryDatabase } from '~common/waitForDictionnaireDB'
 import { useWaitForDatabase as useWaitForNaveDatabase } from '~common/waitForNaveDB'
 import { useWaitForDatabase as useWaitForStrongDatabase } from '~common/waitForStrongDB'
@@ -49,6 +51,7 @@ import type { RootState } from '~redux/modules/reducer'
 import type { Note, Study } from '~redux/modules/user'
 import { useSelector } from 'react-redux'
 import { searchFiltersAtom, SearchItemType, SearchSection } from '~state/searchFilters'
+import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 import i18n from '~i18n'
 
 type Props = {
@@ -80,7 +83,8 @@ type SearchEntityResult = {
   iconType: SearchItemType
   endpoint?: RelationEndpoint
   passage?: SearchResult
-  matches?: readonly Fuse.FuseResultMatch[]
+  referenceSegment?: ReturnType<typeof parseBibleReference>[number]
+  matches?: readonly FuseResultMatch[]
 }
 
 type SearchResultSection = {
@@ -100,6 +104,14 @@ const itemFilterOrder: SearchItemType[] = [
   'nave',
 ]
 
+const allItemFilters = itemFilterOrder.reduce(
+  (filters, type) => ({
+    ...filters,
+    [type]: true,
+  }),
+  {} as Record<SearchItemType, boolean>
+)
+
 const itemFilterConfig: Record<
   SearchItemType,
   {
@@ -118,48 +130,7 @@ const itemFilterConfig: Record<
 const isDatabaseError = (value: unknown): value is DatabaseError =>
   typeof value === 'object' && value !== null && 'error' in value
 
-function removeAccents(obj: string): string
-function removeAccents<T>(obj: T): T
-function removeAccents<T>(obj: T) {
-  if (typeof obj === 'string' || obj instanceof String) {
-    return obj.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-  }
-  return obj
-}
-
-const normalizeSearchText = (value: string) => removeAccents(value).toLowerCase()
 const normalizeDisplayedText = (value: string = '') => value.replace(/\n/g, ' ')
-
-const findExactNormalizedRange = (value: string | undefined, keyword: string): MatchRange[] => {
-  if (!value) return []
-
-  const normalizedValue = normalizeSearchText(value)
-  const normalizedKeyword = normalizeSearchText(keyword.trim())
-  if (normalizedKeyword.length < 3) return []
-
-  const start = normalizedValue.indexOf(normalizedKeyword)
-  if (start === -1) return []
-
-  return [[start, start + normalizedKeyword.length - 1]]
-}
-
-const getExactMatches = (
-  target: SearchEntityResult,
-  keyword: string
-): readonly Fuse.FuseResultMatch[] => {
-  const matches: Fuse.FuseResultMatch[] = []
-  const titleRanges = findExactNormalizedRange(target.title, keyword)
-  const descriptionRanges = findExactNormalizedRange(target.description, keyword)
-
-  if (titleRanges.length) {
-    matches.push({ key: 'title', value: target.title, indices: titleRanges })
-  }
-  if (target.description && descriptionRanges.length) {
-    matches.push({ key: 'description', value: target.description, indices: descriptionRanges })
-  }
-
-  return matches
-}
 
 const searchWithMatches = (
   targets: SearchEntityResult[],
@@ -168,12 +139,17 @@ const searchWithMatches = (
   const trimmed = keyword.trim()
   if (trimmed.length < MIN_SEARCH_LENGTH) return []
 
-  return targets
-    .map(target => ({
-      ...target,
-      matches: getExactMatches(target, trimmed),
+  return new Fuse(targets, {
+    keys: ['title', 'description'],
+    includeMatches: true,
+    threshold: 0.15,
+    ignoreDiacritics: true,
+  })
+    .search(trimmed)
+    .map(result => ({
+      ...result.item,
+      matches: result.matches,
     }))
-    .filter(result => result.matches?.length)
 }
 
 const mergeRanges = (ranges: readonly MatchRange[]) =>
@@ -249,7 +225,7 @@ const getStudySearchItems = (studies: Record<string, Study>, t: (key: string) =>
     }
   })
 
-const getReferenceSearchItems = (query: string, t: (key: string) => string): SearchEntityResult[] =>
+const getReferenceSearchItems = (query: string): SearchEntityResult[] =>
   parseBibleReference(query).map((segment, index) => {
     const verseKeys = createVerseKeys(
       segment.book,
@@ -257,14 +233,22 @@ const getReferenceSearchItems = (query: string, t: (key: string) => string): Sea
       segment.startVerse,
       segment.endVerse
     )
-    const title = verseToReference(verseKeys)
+    const verseCount = segment.endVerse - segment.startVerse + 1
+    const verseIds = Array.from({ length: verseCount }, (_, i) => ({
+      Livre: segment.book,
+      Chapitre: segment.chapter,
+      Verset: segment.startVerse + i,
+    }))
+    const title = segment.isWholeChapter
+      ? `${i18n.t(booksDesc[segment.book - 1]?.Nom)} ${segment.chapter}`
+      : formatVerseContent(verseIds).title
 
     return {
       id: `reference:${verseKeys.join('/')}:${index}`,
       type: 'passages',
       iconType: 'passages',
       title,
-      subtitle: t('Référence biblique'),
+      referenceSegment: segment,
       endpoint: {
         type: 'verse',
         verseKeys,
@@ -391,10 +375,23 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     setGlobalFilters(prev => ({ ...prev, sortOrder: v }))
   }
   const toggleItemFilter = (type: SearchItemType) => {
-    const activeCount = Object.values(itemFilters).filter(Boolean).length
-    if (itemFilters[type] && activeCount === 1) return
+    const activeTypes = itemFilterOrder.filter(itemType => itemFilters[itemType])
+    const areAllActive = activeTypes.length === itemFilterOrder.length
+    const next = (() => {
+      if (areAllActive) {
+        return itemFilterOrder.reduce(
+          (filters, itemType) => ({
+            ...filters,
+            [itemType]: itemType === type,
+          }),
+          {} as Record<SearchItemType, boolean>
+        )
+      }
 
-    const next = { ...itemFilters, [type]: !itemFilters[type] }
+      const toggled = { ...itemFilters, [type]: !itemFilters[type] }
+      const hasActiveFilter = itemFilterOrder.some(itemType => toggled[itemType])
+      return hasActiveFilter ? toggled : allItemFilters
+    })()
     _setItemFilters(next)
     setGlobalFilters(prev => ({ ...prev, itemFilters: next }))
   }
@@ -442,10 +439,6 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     { value: 'relevance', label: t('Pertinence') },
     { value: 'book', label: t('Ordre biblique') },
   ]
-
-  const isStrongCode = Boolean(
-    debouncedSearchValue && STRONG_CODE_REGEX.test(debouncedSearchValue.trim())
-  )
 
   useEffect(() => {
     setVisibleCounts({})
@@ -690,9 +683,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     hasSearchQuery &&
     searchValue.trim().length >= MIN_SEARCH_LENGTH &&
     debouncedSearchValue.trim().length >= MIN_SEARCH_LENGTH
-  const referenceItems = itemFilters.passages
-    ? getReferenceSearchItems(debouncedSearchValue, t)
-    : []
+  const referenceItems = itemFilters.passages ? getReferenceSearchItems(debouncedSearchValue) : []
   const noteItems = itemFilters.notes ? noteResults : []
   const studyItems = itemFilters.studies ? studyResults : []
   const strongItems = itemFilters.strong ? getStrongSearchItems(strongResults, t) : []
@@ -779,25 +770,15 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
         ]
       : []),
   ]
+  const showNoResults =
+    showResultsList && !isSearching && searchSections.length === 0 && !searchError
 
-  function renderStatusMessage(): ReactNode {
+  function renderPassageError(): ReactNode {
     if (searchError) {
       return (
         <Box py={10}>
           <Text title fontSize={14} color="quart">
             {searchError}
-          </Text>
-        </Box>
-      )
-    }
-
-    if (hasInstalledVersions && !isStrongCode) {
-      return (
-        <Box py={10}>
-          <Text title fontSize={16} color="grey">
-            {t('{{nbHits}} occurences trouvées dans la bible', {
-              nbHits: totalCount,
-            })}
           </Text>
         </Box>
       )
@@ -840,13 +821,11 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
         row
         center
         gap={6}
-        px={10}
-        py={8}
+        px={6}
         mr={8}
-        borderRadius={10}
-        bg={isActive ? 'lightGrey' : 'reverse'}
-        borderWidth={1}
-        borderColor={isActive ? config.color : 'border'}
+        borderRadius={8}
+        bg="lightGrey"
+        opacity={isActive ? 1 : 0.6}
       >
         <SearchTypeIcon type={type} size={15} color={isActive ? config.color : 'grey'} />
         <Text fontSize={13} color={isActive ? undefined : 'grey'} numberOfLines={1}>
@@ -871,14 +850,20 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           removeClippedSubviews
           data={searchSections}
           keyExtractor={(section: SearchResultSection) => section.id}
-          ListEmptyComponent={<SearchEmptyState onExamplePress={setSearchValue} />}
+          ListEmptyComponent={
+            showNoResults ? (
+              <SearchNoResultsState query={debouncedSearchValue} />
+            ) : (
+              <SearchEmptyState onExamplePress={setSearchValue} />
+            )
+          }
           renderItem={({ item: section }: { item: SearchResultSection }) => (
             <SearchSectionBlock
               section={section}
               visibleCount={visibleCounts[section.id] || SEARCH_SECTION_PREVIEW_LIMIT}
               onLoadMore={() => increaseVisibleCount(section.id)}
               onPressItem={openSearchItem}
-              statusMessage={section.id === 'passages' ? renderStatusMessage() : null}
+              statusMessage={section.id === 'passages' ? renderPassageError() : null}
               isLoading={section.id === 'passages' && isSearching}
             />
           )}
@@ -899,11 +884,23 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           onDelete={() => setSearchValue('')}
         />
       </Box>
-      {itemFilters.passages && hasInstalledVersions && !hasReference && (
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{ maxHeight: 28, paddingHorizontal: 20, marginBottom: 4, marginTop: 10 }}
+      >
+        {itemFilterOrder.map(renderItemFilter)}
+      </ScrollView>
+      {hasInstalledVersions && !hasReference && (
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          style={{ maxHeight: 55, paddingHorizontal: 20 }}
+          style={{
+            maxHeight: 55,
+            paddingHorizontal: 20,
+            opacity: itemFilters.passages ? 1 : 0.3,
+            pointerEvents: itemFilters.passages ? 'auto' : 'none',
+          }}
         >
           <DropdownMenu
             title={t('Section')}
@@ -928,14 +925,32 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           />
         </ScrollView>
       )}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={{ maxHeight: 48, paddingHorizontal: 20, marginBottom: 4 }}
-      >
-        {itemFilterOrder.map(renderItemFilter)}
-      </ScrollView>
+
       {renderContent()}
+    </Box>
+  )
+}
+
+const SearchNoResultsState = ({ query }: { query: string }) => {
+  const { t } = useTranslation()
+  const theme = useTheme()
+
+  return (
+    <Box flex={1} alignItems="center" justifyContent="center" px={20} py={60}>
+      <Box mb={18}>
+        <Image
+          source={require('~assets/images/empty-state-icons/search.svg')}
+          style={{ width: 80, height: 80, opacity: 0.6 }}
+          tintColor={theme.colors.tertiary}
+          contentFit="contain"
+        />
+      </Box>
+      <Text title fontSize={18} textAlign="center" mb={8}>
+        {t('Aucun résultat')}
+      </Text>
+      <Text color="tertiary" textAlign="center">
+        {t('Aucun résultat trouvé pour "{{query}}"', { query })}
+      </Text>
     </Box>
   )
 }
@@ -974,7 +989,7 @@ const HighlightedText = ({
   color = 'grey',
 }: {
   value?: string
-  match?: Fuse.FuseResultMatch
+  match?: FuseResultMatch
   bold?: boolean
   color?: string
 }) => {
@@ -1047,6 +1062,58 @@ const PassageDescription = ({ highlighted }: { highlighted?: string }) => {
   )
 }
 
+const ReferenceSearchResultRow = ({ item }: { item: SearchEntityResult }) => {
+  const router = useRouter()
+  const version = useDefaultBibleVersion()
+  const segment = item.referenceSegment!
+
+  const verseCount = segment.endVerse - segment.startVerse + 1
+  const verseIds = Array.from({ length: verseCount }, (_, i) => ({
+    Livre: segment.book,
+    Chapitre: segment.chapter,
+    Verset: segment.startVerse + i,
+  }))
+  const verses = useBibleVerses(verseIds)
+  const content = verses.map(v => v.Texte).join(' ')
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={() =>
+        router.push({
+          pathname: '/bible-view',
+          params: {
+            isReadOnly: 'true',
+            book: JSON.stringify(booksDesc[segment.book - 1]),
+            chapter: String(segment.chapter),
+            verse: String(segment.startVerse),
+            ...(segment.isWholeChapter
+              ? {}
+              : { focusVerses: JSON.stringify(verseIds.map(v => v.Verset)) }),
+          },
+        })
+      }
+    >
+      <Box px={20} py={12} borderBottomWidth={1} borderColor="border">
+        <VStack>
+          <HStack alignItems="center" gap={6} mb={2}>
+            <Text bold fontSize={15} numberOfLines={1}>
+              {item.title}
+            </Text>
+            <Chip>{version}</Chip>
+          </HStack>
+          {content ? (
+            <Paragraph small numberOfLines={5}>
+              {removeBreakLines(content)}
+              {segment.isWholeChapter ? '...' : ''}
+            </Paragraph>
+          ) : null}
+        </VStack>
+      </Box>
+    </TouchableOpacity>
+  )
+}
+
 const SearchEntityResultRow = ({
   item,
   onPress,
@@ -1110,11 +1177,10 @@ const SearchSectionBlock = ({
   return (
     <Box pt={10}>
       <HStack px={20} py={8} alignItems="center" gap={8}>
-        <SearchTypeIcon type={section.itemFilterType} size={16} />
-        <Text title fontSize={16}>
+        <Text title fontSize={16} opacity={0.6}>
           {section.title}
         </Text>
-        <Chip>{section.count}</Chip>
+        <Chip variant="bold">{section.count}</Chip>
       </HStack>
       {statusMessage}
       {isLoading && !visibleItems.length ? (
@@ -1122,20 +1188,20 @@ const SearchSectionBlock = ({
           <Text color="grey">{String(i18n.t('Recherche en cours...'))}</Text>
         </Box>
       ) : null}
-      {visibleItems.map(item => (
-        <SearchEntityResultRow key={item.id} item={item} onPress={() => onPressItem(item)} />
-      ))}
+      {visibleItems.map(item =>
+        item.referenceSegment ? (
+          <ReferenceSearchResultRow key={item.id} item={item} />
+        ) : (
+          <SearchEntityResultRow key={item.id} item={item} onPress={() => onPressItem(item)} />
+        )
+      )}
       {remaining > 0 ? (
-        <TouchableBox
-          onPress={onLoadMore}
-          px={20}
-          py={12}
-          borderBottomWidth={1}
-          borderColor="border"
-        >
-          <Text color="primary" fontSize={14} bold>
-            {String(i18n.t('Voir plus'))} (+{Math.min(SEARCH_SECTION_LOAD_MORE_COUNT, remaining)})
-          </Text>
+        <TouchableBox onPress={onLoadMore} py={10} px={20} alignItems="flex-start">
+          <Box px={10} py={6} bg="lightGrey" borderRadius={6}>
+            <Text color="primary" fontSize={13} bold>
+              {String(i18n.t('Voir plus'))}
+            </Text>
+          </Box>
         </TouchableBox>
       ) : null}
     </Box>

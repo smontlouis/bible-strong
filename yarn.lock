@@ -6782,7 +6782,7 @@ __metadata:
     expo-system-ui: "npm:~6.0.9"
     expo-updates: "npm:~29.0.15"
     firestore-size: "npm:^2.0.7"
-    fuse.js: "npm:^6.4.6"
+    fuse.js: "npm:^7.3.0"
     global: "npm:^4.4.0"
     goober: "npm:^2.1.16"
     googleapis: "npm:^171.4.0"
@@ -9883,10 +9883,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fuse.js@npm:^6.4.6":
-  version: 6.6.2
-  resolution: "fuse.js@npm:6.6.2"
-  checksum: 10c0/c2fe4f234f516e9ea83b06f06f8f3c8b7117f51aa75bbccd052eed0c0423364bf1e360ffbf29cadae8ef6aa39476b7961eaf9d07bed779cea5c83d62b34e2df9
+"fuse.js@npm:^7.3.0":
+  version: 7.3.0
+  resolution: "fuse.js@npm:7.3.0"
+  checksum: 10c0/5e60b6687f3f23dc242d387f355ba970caf6f5cbaedb5767e849ef4014fa71a6109c71810ff06a1c3d4f05e4a6ab7d1fc3c8e2ef98e286a60ff0052ae30e930a
   languageName: node
   linkType: hard
 

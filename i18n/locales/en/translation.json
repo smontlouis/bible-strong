@@ -1037,6 +1037,7 @@
   "Jean 3:16, G26, note, étude...": "John 3:16, G26, note, study...",
   "Aucun élément trouvé dans {{target}}": "No item found in {{target}}",
   "Aucune cible trouvée": "No target found",
+  "Aucun résultat trouvé pour \"{{query}}\"": "No results found for \"{{query}}\"",
   "Rechercher un passage, un Strong, une note ou une étude": "Search for a passage, Strong, note, or study",
   "Rechercher un passage, un Strong, une note, une étude, Nave ou un mot": "Search for a passage, Strong, note, study, Nave, or word",
   "Impossible de charger le lexique Strong.": "Unable to load the Strong lexicon.",
