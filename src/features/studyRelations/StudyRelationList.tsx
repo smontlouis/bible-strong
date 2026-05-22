@@ -27,8 +27,6 @@ import { getEndpointFallbackLabel, getRelationText, type RelationDisplayModel } 
 type Props = {
   endpoint: RelationEndpoint
   onOpenEndpoint: (endpoint: RelationEndpoint) => void
-  onCreateRelation?: () => void
-  showCreateButton?: boolean
   showEmptyState?: boolean
 }
 
@@ -136,13 +134,7 @@ const normalizeDirection = (
   return direction === 'none' ? 'forward' : direction
 }
 
-const StudyRelationList = ({
-  endpoint,
-  onOpenEndpoint,
-  onCreateRelation,
-  showCreateButton = true,
-  showEmptyState = false,
-}: Props) => {
+const StudyRelationList = ({ endpoint, onOpenEndpoint, showEmptyState = false }: Props) => {
   const dispatch = useDispatch()
   const insets = useSafeAreaInsets()
   const editModalRef = useRef<BottomSheetModal>(null)
@@ -155,7 +147,7 @@ const StudyRelationList = ({
   const [isLabelExpanded, setIsLabelExpanded] = useState(false)
   const relations = useSelector((state: RootState) => selectDisplayModels(state, endpoint))
 
-  if (relations.length === 0 && !onCreateRelation && !showEmptyState) return null
+  if (relations.length === 0 && !showEmptyState) return null
 
   const openEditModal = (model: RelationDisplayModel) => {
     setEditingModel(model)
@@ -243,14 +235,6 @@ const StudyRelationList = ({
 
   return (
     <VStack>
-      {showCreateButton && onCreateRelation ? (
-        <HStack alignItems="center" justifyContent="flex-end" px={0} mb={4}>
-          <Button small onPress={onCreateRelation}>
-            Ajouter
-          </Button>
-        </HStack>
-      ) : null}
-
       {relations.length === 0 ? (
         <Text color="grey">Aucune relation</Text>
       ) : (

@@ -48,13 +48,7 @@ const EntityRelationsModal = ({ ref, endpoint, onCreateRelation }: Props) => {
     >
       <Box px={20} py={10}>
         {endpoint ? (
-          <StudyRelationList
-            endpoint={endpoint}
-            onOpenEndpoint={openEndpoint}
-            onCreateRelation={onCreateRelation}
-            showCreateButton={false}
-            showEmptyState
-          />
+          <StudyRelationList endpoint={endpoint} onOpenEndpoint={openEndpoint} showEmptyState />
         ) : null}
       </Box>
     </Modal.Body>
