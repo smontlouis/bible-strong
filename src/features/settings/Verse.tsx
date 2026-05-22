@@ -46,6 +46,8 @@ export type HighlightSettingsData = {
 type VerseComponentProps = Omit<HighlightSettingsData, 'stringIds'> & {
   stringIds?: VerseIds
   setSettings?: (settings: HighlightSettingsData) => void
+  relationCount?: number
+  onRelationPress?: () => void
 }
 
 const VerseComponent = ({
@@ -55,6 +57,8 @@ const VerseComponent = ({
   stringIds,
   tags,
   setSettings,
+  relationCount,
+  onRelationPress,
 }: VerseComponentProps) => {
   const router = useRouter()
   const verses = useBibleVerses(verseIds)
@@ -135,7 +139,11 @@ const VerseComponent = ({
         <Paragraph scale={-2} medium marginBottom={15}>
           {truncate(removeBreakLines(content), 200)}
         </Paragraph>
-        <EntityChipList tags={tags} />
+        <EntityChipList
+          tags={tags}
+          relationCount={relationCount}
+          onRelationPress={onRelationPress}
+        />
       </Container>
     </TouchableOpacity>
   )

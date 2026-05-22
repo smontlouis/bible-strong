@@ -31,9 +31,18 @@ export type StudyItemProps = {
   theme: Theme
   setStudySettings?: (studyId: string) => void
   onPress?: (studyId: string) => void
+  relationCount?: number
+  onRelationPress?: () => void
 }
 
-const StudyItem = ({ study, theme, setStudySettings, onPress }: StudyItemProps) => {
+const StudyItem = ({
+  study,
+  theme,
+  setStudySettings,
+  onPress,
+  relationCount,
+  onRelationPress,
+}: StudyItemProps) => {
   const { t } = useTranslation()
   const lang = useLanguage()
 
@@ -88,7 +97,12 @@ const StudyItem = ({ study, theme, setStudySettings, onPress }: StudyItemProps) 
           )}
 
           <Box marginTop="auto">
-            <EntityChipList limit={1} tags={study.tags} />
+            <EntityChipList
+              limit={1}
+              tags={study.tags}
+              relationCount={relationCount}
+              onRelationPress={onRelationPress}
+            />
           </Box>
           {!!setStudySettings && (
             <LinkBox

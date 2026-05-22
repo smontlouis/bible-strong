@@ -21,7 +21,10 @@ import { Tag } from '~common/types'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
 import generateUUID from '~helpers/generateUUID'
 import { RootState } from '~redux/modules/reducer'
+import { selectRelationCountsByEndpointIdentity } from '~redux/selectors/bible'
 import { unifiedTagsModalAtom } from '~state/app'
+import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
+import { endpointIdentity, type RelationEndpoint } from '~features/studyRelations/domain'
 import StudyItem from './StudyItem'
 import StudySettingsModal from './StudySettingsModal'
 
@@ -40,7 +43,9 @@ const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => 
 
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const [studySettingsId, setStudySettingsId] = useState<string | false>(false)
+  const [relationEndpoint, setRelationEndpoint] = useState<RelationEndpoint | null>(null)
   const studySettingsModal = useBottomSheetModal()
+  const relationModal = useBottomSheetModal()
   const renameModalRef = useRef<BottomSheetModal>(null)
   const [studyToRename, setStudyToRename] = useState<{ id: string; title: string } | null>(null)
   const [pendingStudyId, setPendingStudyId] = useState<string | null>(null)
@@ -81,6 +86,7 @@ const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => 
     (state: RootState) => Object.values(state.user.bible.studies),
     shallowEqual
   )
+  const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
 
   const pendingStudy = useSelector((state: RootState) =>
     pendingStudyId ? state.user.bible.studies[pendingStudyId] : null
@@ -124,6 +130,23 @@ const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => 
               study={item}
               setStudySettings={openStudySettings}
               onPress={onStudyPress}
+              relationCount={
+                relationCountsByEndpoint[
+                  endpointIdentity({
+                    type: 'study',
+                    studyId: item.id,
+                    label: item.title,
+                  })
+                ] || 0
+              }
+              onRelationPress={() => {
+                setRelationEndpoint({
+                  type: 'study',
+                  studyId: item.id,
+                  label: item.title,
+                })
+                relationModal.open()
+              }}
             />
           )}
         />
@@ -177,6 +200,7 @@ const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => 
           }
         }}
       />
+      <EntityRelationsModal ref={relationModal.getRef()} endpoint={relationEndpoint} />
     </Container>
   )
 }

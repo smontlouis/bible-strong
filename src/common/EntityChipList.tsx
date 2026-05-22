@@ -5,10 +5,10 @@ import React, { useState } from 'react'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { Tag } from './types'
 import { tagDetailModalAtom } from '~state/app'
+import { Tag } from './types'
 
-const StyledTag = styled(Box)(({ theme }) => ({
+const StyledChip = styled(Box)(({ theme }) => ({
   borderRadius: 20,
   backgroundColor: theme.colors.lightPrimary,
   paddingTop: 3,
@@ -20,57 +20,67 @@ const StyledTag = styled(Box)(({ theme }) => ({
   marginTop: 5,
 }))
 
-export type RelationChip = {
-  id: string
-  label: string
-  onPress: () => void
-}
+type EntityChipListItem =
+  | {
+      type: 'tag'
+      id: string
+      label: string
+      onPress: () => void
+    }
+  | {
+      type: 'relation'
+      id: string
+      label: string
+      onPress: () => void
+    }
 
 const EntityChipList = ({
   tags,
-  relationList,
+  relationCount = 0,
+  onRelationPress,
   limit = 0,
 }: {
   tags?: {
     [x: string]: Tag
   }
-  relationList?: RelationChip[]
+  relationCount?: number
+  onRelationPress?: () => void
   limit?: number
 }) => {
   const setTagDetailModal = useSetAtom(tagDetailModalAtom)
   const [isExpanded, setIsExpanded] = useState(false)
 
   const allTags = Object.values(tags || {})
-  const allRelations = relationList || []
-  const allItems = [
-    ...allTags.map(tag => ({ type: 'tag' as const, id: tag.id, label: tag.name, tag })),
-    ...allRelations.map(relation => ({
-      type: 'relation' as const,
-      id: relation.id,
-      label: relation.label,
-      relation,
+  const hasMoreTags = limit > 0 && allTags.length > limit
+  const visibleTags = limit && !isExpanded ? allTags.slice(0, limit) : allTags
+  const items: EntityChipListItem[] = [
+    ...visibleTags.map(tag => ({
+      type: 'tag' as const,
+      id: tag.id,
+      label: tag.name,
+      onPress: () => setTagDetailModal({ tagId: tag.id }),
     })),
+    ...(relationCount > 0 && onRelationPress
+      ? [
+          {
+            type: 'relation' as const,
+            id: 'relations',
+            label: String(relationCount),
+            onPress: onRelationPress,
+          },
+        ]
+      : []),
   ]
 
-  if (!allItems.length) {
+  if (!items.length) {
     return null
   }
 
-  const hasMoreItems = limit > 0 && allItems.length > limit
-  const array = limit && !isExpanded ? allItems.slice(0, limit) : allItems
-
   return (
     <Box wrap row>
-      {array.map(item => (
-        <TouchableBox
-          key={`${item.type}-${item.id}`}
-          onPress={() =>
-            item.type === 'tag'
-              ? setTagDetailModal({ tagId: item.tag.id })
-              : item.relation.onPress()
-          }
-        >
-          <StyledTag>
+      {items.map(item => (
+        <TouchableBox key={`${item.type}-${item.id}`} onPress={item.onPress}>
+          <StyledChip>
             <Box row alignItems="center">
               <FeatherIcon
                 name={item.type === 'tag' ? 'tag' : 'git-merge'}
@@ -81,10 +91,10 @@ const EntityChipList = ({
                 {item.label}
               </Text>
             </Box>
-          </StyledTag>
+          </StyledChip>
         </TouchableBox>
       ))}
-      {hasMoreItems && (
+      {hasMoreTags && (
         <TouchableBox onPress={() => setIsExpanded(!isExpanded)}>
           <Text
             fontSize={10}
@@ -99,7 +109,7 @@ const EntityChipList = ({
               marginTop: 4,
             }}
           >
-            {isExpanded ? '−' : `+ ${allItems.length - limit}`}
+            {isExpanded ? '−' : `+ ${allTags.length - limit}`}
           </Text>
         </TouchableBox>
       )}

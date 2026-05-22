@@ -43,7 +43,7 @@ import { makeStrongTagsSelector } from '~redux/selectors/bible'
 import { StrongTab } from '../../state/tabs'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
 import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
-import { useRelationChips } from '~features/studyRelations/useRelationChips'
+import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import type { RelationEndpoint } from '~redux/modules/user'
 
@@ -107,7 +107,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
         originalWord: strongReference.Grec || strongReference.Hebreu,
       }
     : null
-  const { relationList } = useRelationChips(strongEndpoint)
+  const relationCount = useRelationCount(strongEndpoint)
 
   const loadData = async () => {
     let loadedStrongReference = strongReferenceParam
@@ -322,12 +322,19 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
         <Box>
           {tags && (
             <Box marginBottom={10}>
-              <EntityChipList tags={tags} relationList={relationList} />
+              <EntityChipList
+                tags={tags}
+                relationCount={relationCount}
+                onRelationPress={() => relationListModal.open()}
+              />
             </Box>
           )}
-          {!tags && relationList.length > 0 && (
+          {!tags && relationCount > 0 && (
             <Box marginBottom={10}>
-              <EntityChipList relationList={relationList} />
+              <EntityChipList
+                relationCount={relationCount}
+                onRelationPress={() => relationListModal.open()}
+              />
             </Box>
           )}
 

@@ -18,6 +18,7 @@ import { selectHighlightsObj } from '~redux/selectors/user'
 import {
   makeAllWordAnnotationsSelector,
   selectAvailableAnnotationVersions,
+  selectRelationCountsByEndpointIdentity,
   type GroupedWordAnnotation,
 } from '~redux/selectors/bible'
 import {
@@ -34,6 +35,13 @@ import { unifiedTagsModalAtom, colorChangeModalAtom } from '../../state/app'
 import VerseComponent from './Verse'
 import AnnotationItem from './AnnotationItem'
 import type { TagsObj, Verse, VerseIds } from '~common/types'
+import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
+import {
+  endpointIdentity,
+  normalizeVerseKeys,
+  type RelationEndpoint,
+} from '~features/studyRelations/domain'
+import verseToReference from '~helpers/verseToReference'
 
 export type GroupedHighlightData = {
   date: number
@@ -94,6 +102,7 @@ const HighlightsScreen = () => {
 
   // Available annotation versions for type filter
   const availableAnnotationVersions = useSelector(selectAvailableAnnotationVersions)
+  const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
 
   // Filters hook - encapsulates all filter logic
   const {
@@ -117,7 +126,9 @@ const HighlightsScreen = () => {
 
   // Settings modal (for highlight actions)
   const [settingsData, setSettingsData] = useState<{ stringIds: VerseIds } | null>(null)
+  const [relationEndpoint, setRelationEndpoint] = useState<RelationEndpoint | null>(null)
   const { ref: settingsRef, open: openSettings, close: closeSettings } = useBottomSheetModal()
+  const relationModal = useBottomSheetModal()
 
   // Annotation settings modal
   const [annotationSettingsData, setAnnotationSettingsData] =
@@ -286,25 +297,41 @@ const HighlightsScreen = () => {
       {/* Content */}
       {unifiedItems.length ? (
         <ScrollView>
-          {unifiedItems.map(item =>
-            item.type === 'highlight' ? (
-              <VerseComponent
-                key={`highlight-${item.data.date}`}
-                color={item.data.color}
-                date={item.data.date}
-                verseIds={item.data.highlightsObj}
-                stringIds={item.data.stringIds}
-                tags={item.data.tags}
-                setSettings={setSettingsData}
-              />
-            ) : (
+          {unifiedItems.map(item => {
+            if (item.type === 'highlight') {
+              const verseKeys = normalizeVerseKeys(Object.keys(item.data.stringIds))
+              const endpoint: Extract<RelationEndpoint, { type: 'verse' }> = {
+                type: 'verse',
+                verseKeys,
+                label: verseToReference(verseKeys),
+              }
+
+              return (
+                <VerseComponent
+                  key={`highlight-${item.data.date}`}
+                  color={item.data.color}
+                  date={item.data.date}
+                  verseIds={item.data.highlightsObj}
+                  stringIds={item.data.stringIds}
+                  tags={item.data.tags}
+                  setSettings={setSettingsData}
+                  relationCount={relationCountsByEndpoint[endpointIdentity(endpoint)] || 0}
+                  onRelationPress={() => {
+                    setRelationEndpoint(endpoint)
+                    relationModal.open()
+                  }}
+                />
+              )
+            }
+
+            return (
               <AnnotationItem
                 key={`annotation-${item.data.id}`}
                 item={item.data}
                 onSettingsPress={setAnnotationSettingsData}
               />
             )
-          )}
+          })}
         </ScrollView>
       ) : (
         <Empty
@@ -386,6 +413,7 @@ const HighlightsScreen = () => {
           {t('Supprimer')}
         </Modal.Item>
       </Modal.Body>
+      <EntityRelationsModal ref={relationModal.getRef()} endpoint={relationEndpoint} />
     </Container>
   )
 }

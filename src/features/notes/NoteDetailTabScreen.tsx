@@ -32,7 +32,7 @@ import { NotesTab, useIsCurrentTab } from '~state/tabs'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import NoteEditorDOMComponent from '~features/bible/NoteEditorDOM/NoteEditorDOMComponent'
 import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
-import { useRelationChips } from '~features/studyRelations/useRelationChips'
+import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import type { RelationEndpoint } from '~redux/modules/user'
 
@@ -119,7 +119,7 @@ const NoteDetailTabScreen = ({ notesAtom, noteId, onBackPress }: NoteDetailTabSc
     noteId,
     label: currentNote?.title || currentNote?.description || reference,
   }
-  const { relationList } = useRelationChips(noteEndpoint)
+  const relationCount = useRelationCount(noteEndpoint)
 
   // Go back to notes list
   const goBack = useCallback(() => {
@@ -391,7 +391,11 @@ ${currentNote.description}
                 hideKeyboardAccessoryView: true,
               }}
             />
-            <EntityChipList tags={currentNote?.tags} relationList={relationList} />
+            <EntityChipList
+              tags={currentNote?.tags}
+              relationCount={relationCount}
+              onRelationPress={() => relationListModal.open()}
+            />
           </Box>
         </ScrollView>
         {isEditing && (

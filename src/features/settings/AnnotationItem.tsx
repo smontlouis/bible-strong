@@ -99,7 +99,9 @@ const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
         <Text fontSize={14} marginBottom={15}>
           {`...${item.text}...`}
         </Text>
-        {item.tags && Object.keys(item.tags).length > 0 && <EntityChipList tags={item.tags as TagsObj} />}
+        {item.tags && Object.keys(item.tags).length > 0 && (
+          <EntityChipList tags={item.tags as TagsObj} />
+        )}
       </AnnotationContainer>
     </TouchableOpacity>
   )

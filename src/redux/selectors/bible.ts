@@ -57,6 +57,22 @@ const selectColors = (state: RootState) => state.user.bible.settings?.colors ?? 
 export const selectNotes = (state: RootState) => state.user.bible.notes ?? {}
 export const selectWordAnnotations = (state: RootState) => state.user.bible.wordAnnotations ?? {}
 
+export const selectRelationCountsByEndpointIdentity = createSelector(
+  [selectStudyRelations],
+  (studyRelations): Record<string, number> => {
+    const counts: Record<string, number> = {}
+
+    for (const relation of Object.values(studyRelations)) {
+      for (const endpoint of relation.endpoints) {
+        const identity = endpointIdentity(endpoint)
+        counts[identity] = (counts[identity] || 0) + 1
+      }
+    }
+
+    return counts
+  }
+)
+
 // Selector factory for highlights by chapter
 // Usage: const selectHighlightsByChapter = makeHighlightsByChapterSelector()
 export const makeHighlightsByChapterSelector = () =>

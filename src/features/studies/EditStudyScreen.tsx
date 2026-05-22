@@ -22,7 +22,7 @@ import { openedFromTabAtom } from './atom'
 import { StudyTab } from 'src/state/tabs'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
-import { useRelationChips } from '~features/studyRelations/useRelationChips'
+import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 
 type EditStudyScreenProps = {
@@ -92,10 +92,9 @@ const EditStudyScreen = ({
     studyId,
     label: currentStudy?.title || t('Études'),
   }
-  const { relationList } = useRelationChips(studyEndpoint)
+  const relationCount = useRelationCount(studyEndpoint)
   const hasTagOrRelationChips =
-    Boolean(currentStudy?.tags && Object.keys(currentStudy.tags).length > 0) ||
-    relationList.length > 0
+    Boolean(currentStudy?.tags && Object.keys(currentStudy.tags).length > 0) || relationCount > 0
 
   const onDeltaChangeCallback = (
     delta: Study['content'] | null,
@@ -167,7 +166,11 @@ const EditStudyScreen = ({
       />
       {isReadOnly && hasTagOrRelationChips && (
         <Box px={20} py={12} borderTopWidth={1} borderColor="border" bg="reverse">
-          <EntityChipList tags={currentStudy.tags} relationList={relationList} />
+          <EntityChipList
+            tags={currentStudy.tags}
+            relationCount={relationCount}
+            onRelationPress={() => relationListModal.open()}
+          />
         </Box>
       )}
       <RenameModal
