@@ -74,4 +74,23 @@ describe('searchRelationTargets', () => {
     expect(results[0].endpoint).toMatchObject({ type: 'note', noteId: 'note1' })
     expect(results[1].endpoint).toMatchObject({ type: 'study', studyId: 'study1' })
   })
+
+  it('falls back to the study map key when persisted studies have no id field', () => {
+    const [result] = searchRelationTargets('grâce', {
+      studies: {
+        legacyStudy: {
+          title: 'Étude sur la grâce',
+          created_at: 1,
+          modified_at: 1,
+          content: null,
+          user: { id: 'user', displayName: 'User', photoUrl: '' },
+        } as any,
+      },
+    })
+
+    expect(result).toMatchObject({
+      id: 'study:legacyStudy',
+      endpoint: { type: 'study', studyId: 'legacyStudy' },
+    })
+  })
 })

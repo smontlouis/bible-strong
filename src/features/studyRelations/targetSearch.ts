@@ -100,10 +100,11 @@ export const getNoteTargetItems = (notes: NotesObj = {}): RelationTargetResult[]
   })
 
 export const getStudyTargetItems = (studies: StudiesObj = {}): RelationTargetResult[] =>
-  Object.values(studies).map(study => {
+  Object.entries(studies).map(([studyId, study]) => {
+    const id = study.id || studyId
     const title = study.title || i18n.t('Étude sans titre')
     return {
-      id: `study:${study.id}`,
+      id: `study:${id}`,
       type: 'study',
       title,
       subtitle: i18n.t('Étude'),
@@ -112,7 +113,7 @@ export const getStudyTargetItems = (studies: StudiesObj = {}): RelationTargetRes
         : undefined,
       endpoint: {
         type: 'study',
-        studyId: study.id,
+        studyId: id,
         label: title,
       },
     }

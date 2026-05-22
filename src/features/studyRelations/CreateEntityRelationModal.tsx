@@ -22,7 +22,7 @@ import { removeBreakLines } from '~helpers/utils'
 import { RootState } from '~redux/modules/reducer'
 import { createStudyRelation } from '~redux/modules/user'
 import type { AppDispatch } from '~redux/store'
-import { getEndpointFallbackLabel, type RelationEndpoint } from './domain'
+import { endpointsMatch, getEndpointFallbackLabel, type RelationEndpoint } from './domain'
 import {
   getNoteTargetItems,
   getStudyTargetItems,
@@ -523,6 +523,7 @@ const CreateEntityRelationModal = ({
 
   const selectTarget = (endpoint: RelationEndpoint) => {
     if (!sourceEndpoint) return
+    if (endpointsMatch(sourceEndpoint, endpoint)) return
 
     dispatch(
       createStudyRelation({
