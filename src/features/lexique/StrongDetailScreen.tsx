@@ -42,9 +42,9 @@ import { RootState } from '~redux/modules/reducer'
 import { makeStrongTagsSelector } from '~redux/selectors/bible'
 import { StrongTab } from '../../state/tabs'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
-import StudyRelationList from '~features/studyRelations/StudyRelationList'
+import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
 import StudyRelationTargetPickerModal from '~features/studyRelations/StudyRelationTargetPickerModal'
-import { useOpenRelationEndpoint } from '~features/studyRelations/useOpenRelationEndpoint'
+import { useRelationChips } from '~features/studyRelations/useRelationChips'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { createStudyRelation, type RelationEndpoint } from '~redux/modules/user'
 import type { AppDispatch } from '~redux/store'
@@ -90,7 +90,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
   const [concordanceLoading, setConcordanceLoading] = useState(true)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const relationTargetPickerModal = useBottomSheetModal()
-  const openRelationEndpoint = useOpenRelationEndpoint()
+  const relationListModal = useBottomSheetModal()
   const dispatch = useDispatch<AppDispatch>()
 
   const addHistory = useSetAtom(historyAtom)
@@ -102,6 +102,16 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
   const code = strongReferenceParam?.Code || reference || ''
   const isGreek = (book || 1) > 39
   const tags = useSelector((state: RootState) => selectStrongTags(state, code, isGreek))
+  const strongEndpoint: Extract<RelationEndpoint, { type: 'strong' }> | null = strongReference
+    ? {
+        type: 'strong',
+        language: strongReference.Grec ? 'greek' : 'hebrew',
+        code: String(strongReference.Code),
+        label: strongReference.Mot,
+        originalWord: strongReference.Grec || strongReference.Hebreu,
+      }
+    : null
+  const { relationList } = useRelationChips(strongEndpoint)
 
   const loadData = async () => {
     let loadedStrongReference = strongReferenceParam
@@ -301,6 +311,12 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
                     <Text marginLeft={10}>{t('Partager')}</Text>
                   </Box>
                 </MenuOption>
+                <MenuOption onSelect={() => relationListModal.open()}>
+                  <Box row alignItems="center">
+                    <FeatherIcon name="git-merge" size={15} />
+                    <Text marginLeft={10}>{t('Éditer les relations')}</Text>
+                  </Box>
+                </MenuOption>
                 <MenuOption
                   onSelect={() => {
                     openInNewTab({
@@ -329,22 +345,14 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
         <Box>
           {tags && (
             <Box marginBottom={10}>
-              <TagList tags={tags} />
+              <TagList tags={tags} relationList={relationList} />
             </Box>
           )}
-          <Box marginBottom={10}>
-            <StudyRelationList
-              endpoint={{
-                type: 'strong',
-                language: Grec ? 'greek' : 'hebrew',
-                code: String(Code),
-                label: Mot,
-                originalWord: Grec || Hebreu,
-              }}
-              onOpenEndpoint={openRelationEndpoint}
-              onCreateRelation={() => relationTargetPickerModal.open()}
-            />
-          </Box>
+          {!tags && relationList.length > 0 && (
+            <Box marginBottom={10}>
+              <TagList relationList={relationList} />
+            </Box>
+          )}
 
           {!!Hebreu && (
             <ViewItem>
@@ -459,6 +467,11 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
       <StudyRelationTargetPickerModal
         ref={relationTargetPickerModal.getRef()}
         onSelect={createRelationToTarget}
+      />
+      <EntityRelationsModal
+        ref={relationListModal.getRef()}
+        endpoint={strongEndpoint}
+        onCreateRelation={() => relationTargetPickerModal.open()}
       />
     </Container>
   )

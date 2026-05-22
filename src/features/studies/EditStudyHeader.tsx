@@ -35,6 +35,7 @@ type EditHeaderProps = {
   setReadOnly: () => void
   title: string
   openRenameModal: () => void
+  openRelationsModal: () => void
   hasBackButton?: boolean
   study: Study
 }
@@ -44,6 +45,7 @@ const EditHeader = ({
   setReadOnly,
   title,
   openRenameModal,
+  openRelationsModal,
   hasBackButton = true,
   study,
 }: EditHeaderProps) => {
@@ -110,6 +112,14 @@ const EditHeader = ({
             }}
           >
             {t('Éditer les tags')}
+          </Modal.Item>
+          <Modal.Item
+            onPress={() => {
+              close()
+              openRelationsModal()
+            }}
+          >
+            {t('Éditer les relations')}
           </Modal.Item>
           <Modal.Item
             onPress={() => {

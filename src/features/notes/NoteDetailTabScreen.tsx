@@ -31,9 +31,9 @@ import { isFullScreenBibleAtom, unifiedTagsModalAtom } from '~state/app'
 import { NotesTab, useIsCurrentTab } from '~state/tabs'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import NoteEditorDOMComponent from '~features/bible/NoteEditorDOM/NoteEditorDOMComponent'
-import StudyRelationList from '~features/studyRelations/StudyRelationList'
+import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
 import StudyRelationTargetPickerModal from '~features/studyRelations/StudyRelationTargetPickerModal'
-import { useOpenRelationEndpoint } from '~features/studyRelations/useOpenRelationEndpoint'
+import { useRelationChips } from '~features/studyRelations/useRelationChips'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { createStudyRelation, type RelationEndpoint } from '~redux/modules/user'
 
@@ -54,7 +54,7 @@ const NoteDetailTabScreen = ({ notesAtom, noteId, onBackPress }: NoteDetailTabSc
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
   const relationTargetPickerModal = useBottomSheetModal()
-  const openRelationEndpoint = useOpenRelationEndpoint()
+  const relationListModal = useBottomSheetModal()
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -113,6 +113,7 @@ const NoteDetailTabScreen = ({ notesAtom, noteId, onBackPress }: NoteDetailTabSc
     noteId,
     label: currentNote?.title || currentNote?.description || reference,
   }
+  const { relationList } = useRelationChips(noteEndpoint)
 
   // Go back to notes list
   const goBack = useCallback(() => {
@@ -292,6 +293,16 @@ ${currentNote.description}
                     <Text marginLeft={10}>{t('Éditer les tags')}</Text>
                   </Box>
                 </MenuOption>
+                <MenuOption
+                  onSelect={() => {
+                    relationListModal.open()
+                  }}
+                >
+                  <Box row alignItems="center">
+                    <FeatherIcon name="git-merge" size={15} />
+                    <Text marginLeft={10}>{t('Éditer les relations')}</Text>
+                  </Box>
+                </MenuOption>
                 <MenuOption onSelect={navigateToBible}>
                   <Box row alignItems="center">
                     <FeatherIcon name="book-open" size={15} />
@@ -350,14 +361,7 @@ ${currentNote.description}
                 hideKeyboardAccessoryView: true,
               }}
             />
-            <TagList tags={currentNote?.tags} />
-            {!isEditing && (
-              <StudyRelationList
-                endpoint={noteEndpoint}
-                onOpenEndpoint={openRelationEndpoint}
-                onCreateRelation={() => relationTargetPickerModal.open()}
-              />
-            )}
+            <TagList tags={currentNote?.tags} relationList={relationList} />
           </Box>
         </ScrollView>
         {isEditing && (
@@ -387,6 +391,11 @@ ${currentNote.description}
       <StudyRelationTargetPickerModal
         ref={relationTargetPickerModal.getRef()}
         onSelect={createRelationToTarget}
+      />
+      <EntityRelationsModal
+        ref={relationListModal.getRef()}
+        endpoint={noteEndpoint}
+        onCreateRelation={() => relationTargetPickerModal.open()}
       />
     </Container>
   )

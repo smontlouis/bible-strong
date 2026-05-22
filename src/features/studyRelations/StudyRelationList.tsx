@@ -10,7 +10,7 @@ import ModalHeader from '~common/ModalHeader'
 import PopOverMenu from '~common/PopOverMenu'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
-import { FeatherIcon } from '~common/ui/Icon'
+import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
 import type { RootState } from '~redux/modules/reducer'
@@ -407,15 +407,15 @@ const StudyRelationList = ({
                 {isDirectionalType(draft.type) ? (
                   <TouchableBox
                     mr={6}
-                    width={32}
-                    height={32}
+                    width={26}
+                    height={28}
                     borderRadius={16}
                     bg="lightGrey"
                     alignItems="center"
                     justifyContent="center"
                     onPress={toggleDirection}
                   >
-                    <FeatherIcon name="refresh-cw" size={16} color="primary" />
+                    <MaterialIcon name="swap-horiz" size={16} color="primary" />
                   </TouchableBox>
                 ) : null}
                 <Text bold>
