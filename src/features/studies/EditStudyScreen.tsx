@@ -8,18 +8,22 @@ import { useAtom, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { isFullScreenBibleAtom } from 'src/state/app'
 import RenameModal from '~common/RenameModal'
+import EntityChipList from '~common/EntityChipList'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
 import Text from '~common/ui/Text'
 import { RootState } from '~redux/modules/reducer'
-import { updateStudy, Study } from '~redux/modules/user'
+import { updateStudy, Study, type RelationEndpoint } from '~redux/modules/user'
 import EditStudyHeader from './EditStudyHeader'
 import StudiesDomWrapper from './StudiesDOM/StudiesDomWrapper'
 import { openedFromTabAtom } from './atom'
 import { StudyTab } from 'src/state/tabs'
 import { PrimitiveAtom } from 'jotai/vanilla'
+import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
+import { useRelationCount } from '~features/studyRelations/useRelationCount'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
 
 type EditStudyScreenProps = {
   studyAtom?: PrimitiveAtom<StudyTab>
@@ -77,11 +81,20 @@ const EditStudyScreen = ({
   const dispatch = useDispatch()
   const [isReadOnly, setIsReadOnly] = useState(true)
   const renameModalRef = useRef<BottomSheetModal>(null)
+  const relationListModal = useBottomSheetModal()
   const setOpenedFromTab = useSetAtom(openedFromTabAtom)
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
 
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
   const currentStudy = useSelector((state: RootState) => state.user.bible.studies[studyId])
+  const studyEndpoint: Extract<RelationEndpoint, { type: 'study' }> = {
+    type: 'study',
+    studyId,
+    label: currentStudy?.title || t('Études'),
+  }
+  const relationCount = useRelationCount(studyEndpoint)
+  const hasTagOrRelationChips =
+    Boolean(currentStudy?.tags && Object.keys(currentStudy.tags).length > 0) || relationCount > 0
 
   const onDeltaChangeCallback = (
     delta: Study['content'] | null,
@@ -135,6 +148,7 @@ const EditStudyScreen = ({
         isReadOnly={isReadOnly}
         hasBackButton={hasBackButton}
         openRenameModal={() => renameModalRef.current?.present()}
+        openRelationsModal={() => relationListModal.open()}
         setReadOnly={() => {
           setIsReadOnly(true)
         }}
@@ -150,6 +164,15 @@ const EditStudyScreen = ({
         studyAtom={studyAtom}
         studyId={studyId}
       />
+      {isReadOnly && hasTagOrRelationChips && (
+        <Box px={20} py={12} borderTopWidth={1} borderColor="border" bg="reverse">
+          <EntityChipList
+            tags={currentStudy.tags}
+            relationCount={relationCount}
+            onRelationPress={() => relationListModal.open()}
+          />
+        </Box>
+      )}
       <RenameModal
         bottomSheetRef={renameModalRef}
         title={t("Renommer l'étude")}
@@ -159,6 +182,7 @@ const EditStudyScreen = ({
           dispatch(updateStudy({ id: currentStudy.id, title: value, modified_at: Date.now() }))
         }}
       />
+      <EntityRelationsModal ref={relationListModal.getRef()} endpoint={studyEndpoint} />
       {isReadOnly && <FabButton icon="edit-2" onPress={() => setIsReadOnly(false)} />}
     </Container>
   )

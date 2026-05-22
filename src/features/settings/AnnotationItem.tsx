@@ -9,7 +9,7 @@ import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { LinkBox } from '~common/Link'
 import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
-import TagList from '~common/TagList'
+import EntityChipList from '~common/EntityChipList'
 import useLanguage from '~helpers/useLanguage'
 import { getDateLocale } from '~helpers/languageUtils'
 import formatVerseContent from '~helpers/formatVerseContent'
@@ -99,7 +99,9 @@ const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
         <Text fontSize={14} marginBottom={15}>
           {`...${item.text}...`}
         </Text>
-        {item.tags && Object.keys(item.tags).length > 0 && <TagList tags={item.tags as TagsObj} />}
+        {item.tags && Object.keys(item.tags).length > 0 && (
+          <EntityChipList tags={item.tags as TagsObj} />
+        )}
       </AnnotationContainer>
     </TouchableOpacity>
   )

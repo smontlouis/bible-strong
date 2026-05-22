@@ -14,7 +14,7 @@ import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import PopOverMenu from '~common/PopOverMenu'
 import { toast } from '~helpers/toast'
-import TagList from '~common/TagList'
+import EntityChipList from '~common/EntityChipList'
 import { VerseIds } from '~common/types'
 import Box, { VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -239,8 +239,8 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
       enableDynamicSizing
       headerComponent={
         <ModalHeader
-          title={reference}
-          subTitle={t('Lien')}
+          title={t('Lien')}
+          subTitle={reference}
           rightComponent={
             currentLink ? (
               <PopOverMenu
@@ -407,7 +407,7 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
             )}
 
             {/* Tags */}
-            <TagList tags={currentLink?.tags} />
+            <EntityChipList tags={currentLink?.tags} />
           </Box>
         )}
       </VStack>

@@ -32,6 +32,7 @@ const SelectedVersesModal = ({
   onChangeResourceType,
   onCreateNoteClick,
   onCreateLinkClick,
+  onCreateStudyRelationClick,
   addHighlight,
   addTag,
   removeHighlight,
@@ -165,6 +166,7 @@ const SelectedVersesModal = ({
                 onCreateNoteClick={onCreateNoteClick}
                 addTag={addTag}
                 onCreateLinkClick={onCreateLinkClick}
+                onCreateStudyRelationClick={onCreateStudyRelationClick}
                 onAddBookmark={onAddBookmark}
                 onAddToStudy={onAddToStudy}
                 onPinVerses={onPinVerses}

@@ -8,6 +8,7 @@ interface AnnotateTabProps {
   onCreateNoteClick: () => void
   addTag: () => void
   onCreateLinkClick: () => void
+  onCreateStudyRelationClick: () => void
   onAddBookmark: () => void
   onAddToStudy: () => void
   onPinVerses: () => void
@@ -21,6 +22,7 @@ const AnnotateTab = ({
   onCreateNoteClick,
   addTag,
   onCreateLinkClick,
+  onCreateStudyRelationClick,
   onAddBookmark,
   onAddToStudy,
   onPinVerses,
@@ -29,7 +31,7 @@ const AnnotateTab = ({
   activeStates,
 }: AnnotateTabProps) => {
   const { t } = useTranslation()
-  const { hasNote, hasTags, hasLink, hasBookmark, hasFocus } = activeStates
+  const { hasNote, hasTags, hasLink, hasStudyRelation, hasBookmark, hasFocus } = activeStates
 
   return (
     <ScrollView
@@ -46,6 +48,12 @@ const AnnotateTab = ({
       />
       <ActionItem name="tag" label={t('Tag')} onPress={addTag} isActive={hasTags} />
       <ActionItem name="link" label={t('Lien')} onPress={onCreateLinkClick} isActive={hasLink} />
+      <ActionItem
+        name="git-merge"
+        label={t('Relation')}
+        onPress={onCreateStudyRelationClick}
+        isActive={hasStudyRelation}
+      />
       <ActionItem
         name="bookmark"
         label={t('Marque-page')}

@@ -286,25 +286,29 @@ const HighlightsScreen = () => {
       {/* Content */}
       {unifiedItems.length ? (
         <ScrollView>
-          {unifiedItems.map(item =>
-            item.type === 'highlight' ? (
-              <VerseComponent
-                key={`highlight-${item.data.date}`}
-                color={item.data.color}
-                date={item.data.date}
-                verseIds={item.data.highlightsObj}
-                stringIds={item.data.stringIds}
-                tags={item.data.tags}
-                setSettings={setSettingsData}
-              />
-            ) : (
+          {unifiedItems.map(item => {
+            if (item.type === 'highlight') {
+              return (
+                <VerseComponent
+                  key={`highlight-${item.data.date}`}
+                  color={item.data.color}
+                  date={item.data.date}
+                  verseIds={item.data.highlightsObj}
+                  stringIds={item.data.stringIds}
+                  tags={item.data.tags}
+                  setSettings={setSettingsData}
+                />
+              )
+            }
+
+            return (
               <AnnotationItem
                 key={`annotation-${item.data.id}`}
                 item={item.data}
                 onSettingsPress={setAnnotationSettingsData}
               />
             )
-          )}
+          })}
         </ScrollView>
       ) : (
         <Empty

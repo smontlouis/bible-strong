@@ -28,6 +28,7 @@ export interface VerseActiveStates {
   hasNote: boolean
   hasTags: boolean
   hasLink: boolean
+  hasStudyRelation: boolean
   hasBookmark: boolean
   hasFocus: boolean
 }
@@ -39,6 +40,7 @@ export interface SelectedVersesModalProps {
   onChangeResourceType: (type: BibleResource) => void
   onCreateNoteClick: () => void
   onCreateLinkClick: () => void
+  onCreateStudyRelationClick: () => void
   addHighlight: (color: string) => void
   addTag: () => void
   removeHighlight: () => void

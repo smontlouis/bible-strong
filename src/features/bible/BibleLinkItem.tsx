@@ -5,7 +5,7 @@ import React from 'react'
 import * as Icon from '@expo/vector-icons'
 
 import Link from '~common/Link'
-import TagList from '~common/TagList'
+import EntityChipList from '~common/EntityChipList'
 import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -87,7 +87,7 @@ const BibleLinkItem = ({ item, onPress, onMenuPress }: Props) => {
             {item.link.url}
           </Paragraph>
           {item.link.tags && Object.keys(item.link.tags).length > 0 && (
-            <TagList tags={item.link.tags} />
+            <EntityChipList tags={item.link.tags} />
           )}
         </Box>
         <Link padding onPress={() => onMenuPress(item.linkId)}>

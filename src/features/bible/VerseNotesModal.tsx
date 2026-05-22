@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 import { useSelector } from 'react-redux'
 import Modal from '~common/Modal'
-import TagList from '~common/TagList'
+import EntityChipList from '~common/EntityChipList'
 import { VerseIds } from '~common/types'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -14,12 +14,18 @@ import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { EMPTY_ARRAY } from '~helpers/emptyReferences'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
-import { makeNotesForVerseSelector, NoteItem } from '~redux/selectors/bible'
+import {
+  makeNotesForVerseSelector,
+  NoteItem,
+  selectRelationCountsByEndpointIdentity,
+} from '~redux/selectors/bible'
 import { VersionCode } from '~state/tabs'
 import AnnotationNoteModal from './AnnotationNoteModal'
 import BibleNoteModal from './BibleNoteModal'
 import { Chip } from '~common/ui/NewChip'
 import ModalHeader from '~common/ModalHeader'
+import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
+import { endpointIdentity, type RelationEndpoint } from '~features/studyRelations/domain'
 
 const ItemRow = styled.View(({ theme }) => ({
   flexDirection: 'row',
@@ -43,7 +49,17 @@ interface VerseNotesModalProps {
   verseKey: string | null
 }
 
-const NoteItemRow = ({ item, onPress }: { item: NoteItem; onPress: () => void }) => {
+const NoteItemRow = ({
+  item,
+  onPress,
+  relationCount,
+  onRelationPress,
+}: {
+  item: NoteItem
+  onPress: () => void
+  relationCount?: number
+  onRelationPress?: () => void
+}) => {
   const { t } = useTranslation()
 
   const label = item.isAnnotationNote ? t('Note (annotation)') : t('Note')
@@ -70,7 +86,11 @@ const NoteItemRow = ({ item, onPress }: { item: NoteItem; onPress: () => void })
               {label}
             </Text>
           )}
-          <TagList tags={item.tags} />
+          <EntityChipList
+            tags={item.tags}
+            relationCount={relationCount}
+            onRelationPress={onRelationPress}
+          />
         </Box>
         <FeatherIcon name="chevron-right" size={20} color="grey" />
       </ItemRow>
@@ -90,9 +110,11 @@ const VerseNotesModal = forwardRef<BottomSheetModal, VerseNotesModalProps>(({ ve
     noteId: string
     version: VersionCode
   } | null>(null)
+  const [relationEndpoint, setRelationEndpoint] = useState<RelationEndpoint | null>(null)
 
   const noteModal = useBottomSheetModal()
   const annotationNoteModal = useBottomSheetModal()
+  const relationModal = useBottomSheetModal()
 
   // Create selector for this verse
   const selectNotesForVerse = makeNotesForVerseSelector()
@@ -100,6 +122,7 @@ const VerseNotesModal = forwardRef<BottomSheetModal, VerseNotesModalProps>(({ ve
   const notes = useSelector((state: RootState) =>
     verseKey ? selectNotesForVerse(state, verseKey) : EMPTY_ARRAY
   )
+  const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
 
   // Get verse reference for header
   const reference = verseKey ? verseToReference({ [verseKey]: true }) : ''
@@ -131,12 +154,7 @@ const VerseNotesModal = forwardRef<BottomSheetModal, VerseNotesModalProps>(({ ve
       <Modal.Body
         ref={ref}
         snapPoints={['50%']}
-        headerComponent={
-          <ModalHeader
-            title={`${t('Notes pour')} ${reference}`}
-            subTitle={t('Cliquez sur une note pour la modifier')}
-          />
-        }
+        headerComponent={<ModalHeader title={t('Notes')} subTitle={reference} />}
       >
         <Box>
           {notes.length === 0 ? (
@@ -144,13 +162,26 @@ const VerseNotesModal = forwardRef<BottomSheetModal, VerseNotesModalProps>(({ ve
               <Text color="grey">{t('Aucune note pour ce verset')}</Text>
             </Box>
           ) : (
-            notes.map((item, index) => (
-              <NoteItemRow
-                key={`${item.id}-${index}`}
-                item={item}
-                onPress={() => handleOpenNote(item)}
-              />
-            ))
+            notes.map((item, index) => {
+              const endpoint: Extract<RelationEndpoint, { type: 'note' }> = {
+                type: 'note',
+                noteId: item.id,
+                label: item.title || item.description || reference,
+              }
+
+              return (
+                <NoteItemRow
+                  key={`${item.id}-${index}`}
+                  item={item}
+                  onPress={() => handleOpenNote(item)}
+                  relationCount={relationCountsByEndpoint[endpointIdentity(endpoint)] || 0}
+                  onRelationPress={() => {
+                    setRelationEndpoint(endpoint)
+                    relationModal.open()
+                  }}
+                />
+              )
+            })
           )}
         </Box>
       </Modal.Body>
@@ -163,6 +194,7 @@ const VerseNotesModal = forwardRef<BottomSheetModal, VerseNotesModalProps>(({ ve
         existingNoteId={selectedAnnotationNote?.noteId}
         version={selectedAnnotationNote?.version as VersionCode}
       />
+      <EntityRelationsModal ref={relationModal.getRef()} endpoint={relationEndpoint} />
     </>
   )
 })

@@ -46,9 +46,9 @@ const BookmarkIcon = ({ color, settings, onClick, isDisabled }: Props) => {
         viewBox="0 0 24 24"
         fill={color}
         stroke={color}
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
         settings={settings}
         color={color}
       >

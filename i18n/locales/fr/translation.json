@@ -9,7 +9,7 @@
   "app.deleteAccount": "Supprimer mon compte",
   "app.deleteAccountBody": "Cette action est irréversible. Toutes vos données seront définitivement supprimées (notes, surlignages, études, favoris...).",
   "app.deleteAccountConfirmationText": "SUPPRIMER",
-  "app.deleteAccountTypeConfirm": "Tapez «\u00a0{{text}}\u00a0» pour confirmer la suppression :",
+  "app.deleteAccountTypeConfirm": "Tapez « {{text}} » pour confirmer la suppression :",
   "app.deleteAccountConfirmButton": "Supprimer",
   "app.deleteAccountRequiresRecentLogin": "Cette opération est sensible et nécessite une authentification récente. Veuillez vous déconnecter puis vous reconnecter avant de supprimer votre compte.",
   "app.deletePermanently": "Supprimer définitivement",
@@ -618,7 +618,6 @@
   "Par pertinence": "Par pertinence",
   "Par ordre alphabétique": "Par ordre alphabétique",
   "Suggéré": "Suggéré",
-
   "Auto": "Auto",
   "Blanc": "Blanc",
   "Sépia": "Sépia",
@@ -630,11 +629,9 @@
   "Mauve": "Mauve",
   "Couleur Jour": "Couleur Jour",
   "Couleur Nuit": "Couleur Nuit",
-
   "tabs.study": "Étudier",
   "tabs.annotate": "Annoter",
   "tabs.share": "Partager",
-
   "tabs.new": "Nouvel onglet",
   "tabs.bible": "Bible",
   "tabs.search": "Recherche",
@@ -670,11 +667,9 @@
   "tabs.viewMyGroups": "Voir mes groupes",
   "tabs.createdAgo": "Créé {{date}}",
   "tabs.defaultGroup": "Groupe principal",
-
   "common.create": "Créer",
   "common.cancel": "Annuler",
   "common.delete": "Supprimer",
-
   "study.addToStudy": "Vers étude",
   "study.selectStudy": "Sélectionner une étude",
   "study.searchStudy": "Rechercher une étude...",
@@ -687,10 +682,8 @@
   "study.verseAdded": "Verset ajouté à l'étude",
   "study.openStudy": "Ouvrir",
   "study.noStudies": "Aucune étude trouvée",
-
   "common.goTo": "Aller à l'onglet",
   "common.chooseCompareVersions": "Choisir les versions à comparer",
-
   "premium.earlyAccess": "Accès anticipé",
   "premium.earlyAccess.description": "Cette fonctionnalité est disponible en accès anticipé pour les sponsors. Elle sera disponible pour tous les utilisateurs dans les prochaines semaines.",
   "premium.objectives": "Objectifs",
@@ -703,14 +696,12 @@
   "premium.earnings.500.description": "Cette somme représente les différents coûts de fonctionnement de l'app (serveurs, services, etc.) et augmente proportionnellement au nombre d'abonnés.",
   "premium.earnings.1500.description": "Avec votre soutien, je peux travailer à temps partiel sur l'application et faire appel à des prestataires pour la rendre encore plus qualitative! Les nouvelles fonctionnalités et améliorations seront alors plus nombreuses et plus rapides.",
   "premium.learnMore": "En savoir plus",
-
   "premium.onemonth.min.title": "Symbolique 🙏",
   "premium.onemonth.min.description": "Merci pour votre aide symbolique à l'évolution de ce projet.",
   "premium.onemonth.min.detail1": "Recherche bible illimitée",
   "premium.onemonth.min.detail2": "Recherche chronologie illimitée",
   "premium.onemonth.min.detail3": "Traduction commentaires illimitée",
   "premium.onemonth.min.detail4": "Nombre d'onglets illimités",
-
   "premium.onemonth.title": "Sponsor ⭐",
   "premium.onemonth.description": "Merci pour votre engagement envers l'évolution de ce projet et votre volonté de vous y investir financièrement. Je vous remercie chaleureusement pour votre soutien.",
   "premium.onemonth.detail1": "Tout ce que contient Symbolique",
@@ -719,23 +710,19 @@
   "premium.onemonth.detail4": "Mémorisation de versets",
   "premium.onemonth.detail5": "Version web",
   "premium.onemonth.detail6": "Musique d'ambiance",
-
   "premium.onemonth.max.title": "Sponsor ✨Premium✨",
   "premium.onemonth.max.description": "La manne est tombée du ciel! C'est une bénédiction de voir que vous croyez en ce projet et que vous êtes prêt à vous investir financièrement. Je vous remercie chaleureusement pour votre soutien.",
   "premium.onemonth.max.detail1": "Tout ce que contient Sponsor",
   "premium.onemonth.max.detail2": "Assistant biblique IA",
   "premium.onemonth.max.detail3": "Bible Audio IA",
-
   "bible.settings.shareOptions": "Options de partage",
   "bible.settings.hasVerseNumbers": "Numéros de versets",
   "bible.settings.hasInlineVerses": "Versets à la suite",
   "bible.settings.hasQuotes": "Montrer les guillements",
   "bible.settings.hasAppName": "Montrer le nom de l'application",
-
   "premium.sponsorsOnlyFeature": "Cette fonctionnalité est réservée aux sponsors.",
   "premium.sponsorsOnlyOption": "Cette option est réservée aux sponsors.",
   "premium.searchQuotaRemaining": "Recherches restantes",
-
   "app.downloading": "Téléchargement...",
   "app.imported": "Importé",
   "app.exported": "Exporté",
@@ -744,9 +731,7 @@
   "app.syncError": "Erreur de synchronisation, sauvegardez manuellement vos données",
   "app.exportDesc": "Normalement vos données sont synchronisées automatiquement, mais dans certains cas, il peut arriver que vous ayez besoin de le faire manuellement. \n\nLorsque vous exportez vos données, un fichier est créé sur votre téléphone. Vous pouvez ensuite le partager par mail ou autre moyen de votre choix.",
   "app.importDesc": "Le fichier d'import doit être au format .biblestrong et contenir les données de votre compte. \n\nATTENTION, l'import écrase toutes les données existantes. Assurez-vous d'avoir une sauvegarde récente avant de continuer.",
-
   "backup.title": "Sauvegarde",
-
   "backups.title": "Sauvegardes Automatiques",
   "backups.description": "Vos données sont automatiquement sauvegardées de manière régulière. Les 10 sauvegardes les plus récentes sont conservées.",
   "backups.none": "Aucune sauvegarde disponible pour le moment.\nLes sauvegardes seront créées automatiquement.",
@@ -769,14 +754,12 @@
   "backups.links": "{{count}} lien(s)",
   "backups.tags": "{{count}} tag(s)",
   "backups.tabs": "{{count}} onglet(s)",
-
   "audio.speed": "Vitesse",
   "audio.pitch": "Tonalité",
   "audio.repeat": "Répéter",
   "audio.voice": "Voix",
   "audio.timer": "Minuteur",
   "audio.goBack": "Retour à l'audio",
-
   "fr-FR": "Français",
   "fr-CA": "Français CA",
   "en-GB": "Anglais UK",
@@ -784,13 +767,10 @@
   "en-US": "Anglais US",
   "he-IL": "Hébreu Israël",
   "el-GR": "Grec moderne",
-
   "donation.title": "Offrir votre soutien",
   "donation.description": "Aidez à faire la différence",
-
   "audibible.try": "Essayez audibible",
   "audibible.description": "Écouter, lire, méditer",
-
   "premium.basic.description": "Vous êtes sponsor.\nMerci pour votre aide symbolique à l'évolution de ce projet.",
   "premium.premium.description": "Vous êtes sponsor premium.\nMerci pour votre engagement envers l'évolution de ce projet et votre volonté de vous y investir financièrement. Je vous remercie chaleureusement pour votre soutien.",
   "premium.premium_plus.description": "Vous êtes sponsor super premium.\nLa manne est tombée du ciel! C'est une bénédiction de voir que vous croyez en ce projet et que vous êtes prêt à vous investir financièrement. Je vous remercie chaleureusement pour votre soutien.",
@@ -802,23 +782,18 @@
   "tips.manual-backup": "En cas de problème de synchronisation, vous pouvez sauvegarder vos données localement dans l'onglet Import/Export.",
   "tips.bible-dom-wrapper-android": "Vous êtes sur une version Android 10 ou inférieure. Si vous avez un écran blanc, merci de mettre à jour votre Android Webview dans le Play Store.",
   "goToVerse": "Aller au verset",
-
   "Normal": "Normal",
   "Petit": "Petit",
   "Grand": "Grand",
-
   "bookSelector.sort.classical": "Ordre classique",
   "bookSelector.sort.alphabetical": "Ordre alphabétique",
   "bookSelector.selectionMode.grid": "Grille",
   "bookSelector.selectionMode.list": "Liste",
   "bookSelector.withVerses": "Avec versets",
   "bookSelector.withoutVerses": "Sans versets",
-
   "reset": "Réinitialiser",
-
   "language.appLanguage": "Langue de l'application",
   "language.appLanguageDesc": "Change la langue de l'interface et réinitialise toutes les ressources dans cette langue.",
-
   "resourceLanguage.title": "Changer la langue",
   "resourceLanguage.description": "Vous pouvez personnaliser la langue de chaque ressource individuellement.",
   "resourceLanguage.setAllTo": "Tout mettre en",
@@ -832,14 +807,11 @@
   "resourceLanguage.timelineDesc": "Chronologie biblique",
   "resourceLanguage.searchDesc": "Index de recherche plein texte",
   "resourceLanguage.note": "Note: Changer la langue d'une ressource peut nécessiter un nouveau téléchargement si la base de données pour cette langue n'est pas encore disponible.",
-
   "downloads.databasesFr": "Bases de données - Français",
   "downloads.databasesEn": "Bases de données - English",
   "downloads.crossReferences": "Références croisées",
-
   "menu.language": "Langue",
   "menu.languageChanged": "Langue de la ressource changée en {{language}}",
-
   "migration.inProgress": "Migration en cours...",
   "migration.resuming": "Reprise de la migration...",
   "migration.failed": "Migration échouée",
@@ -850,14 +822,12 @@
   "migration.partialError": "Certaines données n'ont pas pu être migrées: ",
   "migration.contactSupport": "Veuillez contacter le développeur pour assistance.",
   "migration.contactButton": "Contacter le support",
-
   "bibleDefaults.title": "Bible par défaut",
   "bibleDefaults.defaultVersion": "Version par défaut",
   "bibleDefaults.defaultVersionDescription": "Cette version sera utilisée pour les versets du jour, les plans de lecture, les nouveaux onglets Bible, etc.",
   "bibleDefaults.frenchVersions": "Versions françaises",
   "bibleDefaults.englishVersions": "Versions anglaises",
   "bibleDefaults.switchedToFallback": "La Bible par défaut a été changée pour {{version}}",
-
   "profile.title": "Mon profil",
   "profile.editName": "Modifier le nom",
   "profile.enterName": "Entrez votre nom",
@@ -889,7 +859,6 @@
   "profile.photoEditComingSoon": "La modification de photo arrive bientôt",
   "Enregistrer": "Enregistrer",
   "Delete": "Supprimer",
-
   "settings.resources": "Ressources",
   "settings.myContent": "Mon contenu",
   "settings.account": "Compte",
@@ -898,11 +867,9 @@
   "settings.community": "Communauté",
   "settings.legal": "Légal",
   "settings.theme": "Thème",
-
   "forgotPassword.title": "Mot de passe oublié",
   "forgotPassword.description": "Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
   "forgotPassword.send": "Envoyer le lien",
-
   "bible.error.versionNotFound": "Cette version de la Bible n'est pas téléchargée.",
   "bible.error.chapterNotFound": "Ce chapitre n'existe pas dans cette version de la Bible.",
   "bible.error.databaseCorrupted": "La base de données semble corrompue. Rendez-vous dans la gestion des téléchargements pour la retélécharger.",
@@ -918,16 +885,13 @@
   "bible.error.databaseRecovered": "La base de donnees a ete reinitialisee. Vous pouvez retelecharger vos versions.",
   "bible.error.databaseOpenFailed": "Impossible d'ouvrir la base de donnees. Veuillez redemarrer l'application.",
   "search.error.searchFailed": "La recherche a rencontre une erreur. Essayez de redemarrer l'application.",
-
   "bible.interlinear.detailed": "Détaillé",
   "bible.interlinear.compact": "Compact",
-
   "bible.crossVersionAnnotations.subtitle": "Annotations dans d'autres versions",
   "bible.crossVersionAnnotations.annotationCount": "{{count}} annotation",
   "bible.crossVersionAnnotations.annotationCount_plural": "{{count}} annotations",
   "bible.crossVersionAnnotations.switchVersion": "Changer de version",
   "bible.crossVersionAnnotations.newTab": "Nouvel onglet",
-
   "onboarding.annotationMode.intro.title": "Mode libre",
   "onboarding.annotationMode.intro.subtitle": "Annotez votre Bible mot par mot",
   "onboarding.annotationMode.intro.button": "Découvrir",
@@ -948,7 +912,6 @@
   "onboarding.next": "Suivant",
   "onboarding.start": "Commencer",
   "onboarding.back": "Retour",
-
   "downloads.title": "Gestion des téléchargements",
   "downloads.select": "Sélectionner",
   "downloads.done": "Terminé",
@@ -956,7 +919,6 @@
   "downloads.deleteCount": "Supprimer {{count}} éléments ?",
   "downloads.deleteConfirm": "Êtes-vous vraiment sûr de supprimer cet élément ?",
   "downloads.redownloadConfirm": "Retélécharger cette version ? Cela peut corriger les problèmes de chargement.",
-
   "downloads.section.dbFr": "Bases de données FR",
   "downloads.section.dbEn": "Bases de données EN",
   "downloads.section.crossReferences": "Références croisées",
@@ -965,29 +927,64 @@
   "downloads.section.bibleEn": "Bibles - Versions anglaises",
   "downloads.section.bibleFr": "Bibles françaises",
   "downloads.section.bibleOther": "Bibles - Langues originales",
-
   "downloads.filter.all": "Tous",
   "downloads.filter.downloaded": "Téléchargés",
   "downloads.filter.notDownloaded": "Non téléchargés",
   "downloads.filter.originalLangs": "Originales",
-
   "downloads.queue": "En file d'attente",
   "downloads.inserting": "Insertion...",
   "downloads.retry": "Réessayer",
-
   "downloads.storageUsed": "{{used}} utilisés",
   "downloads.progress": "Téléchargement {{current}}/{{total}}",
   "downloads.selectedCount": "{{count}} sélectionnés",
   "downloads.download": "Télécharger",
-
   "downloads.size.gb": "{{value}} Go",
   "downloads.size.mb": "{{value}} Mo",
   "downloads.size.kb": "{{value}} Ko",
   "downloads.size.b": "{{value}} o",
-
   "rating.title": "Vous appréciez Bible Strong ?",
   "rating.subtitle": "Votre avis sur le store nous aide énormément à faire connaître l'application. Merci !",
   "rating.accept": "Oui, noter l'app",
   "rating.later": "Plus tard",
-  "rating.decline": "Non merci"
+  "rating.decline": "Non merci",
+  "studyRelations.type.linked": "lié à",
+  "studyRelations.type.references": "renvoie vers",
+  "studyRelations.type.explains": "explique",
+  "studyRelations.type.contrasts": "contraste avec",
+  "studyRelations.type.referencedBy": "référencé par",
+  "studyRelations.type.explainedBy": "expliqué par",
+  "studyRelations.title.linked": "est lié à",
+  "studyRelations.title.references": "renvoie vers",
+  "studyRelations.title.explains": "explique",
+  "studyRelations.title.contrasts": "contraste avec",
+  "studyRelations.title.referencedBy": "est référencé par",
+  "studyRelations.title.explainedBy": "est expliqué par",
+  "Relations": "Relations",
+  "Modifier la relation": "Modifier la relation",
+  "Supprimer la relation": "Supprimer la relation",
+  "Voulez-vous supprimer cette relation?": "Voulez-vous supprimer cette relation?",
+  "Aucune relation": "Aucune relation",
+  "Ajouter une relation": "Ajouter une relation",
+  "Ajouter un libellé": "Ajouter un libellé",
+  "Libellé": "Libellé",
+  "Libellé court": "Libellé court",
+  "une": "une",
+  "une étude": "une étude",
+  "indisponible": "indisponible",
+  "Note supprimée": "Note supprimée",
+  "Étude supprimée": "Étude supprimée",
+  "Livre {{bookNumber}}": "Livre {{bookNumber}}",
+  "Passage biblique": "Passage biblique",
+  "Strong grec": "Strong grec",
+  "Strong hébreu": "Strong hébreu",
+  "Note sans titre": "Note sans titre",
+  "Étude sans titre": "Étude sans titre",
+  "Rechercher dans les notes": "Rechercher dans les notes",
+  "Rechercher dans les études": "Rechercher dans les études",
+  "Rechercher un code Strong": "Rechercher un code Strong",
+  "Jean 3:16, G26, note, étude...": "Jean 3:16, G26, note, étude...",
+  "Aucun élément trouvé dans {{target}}": "Aucun élément trouvé dans {{target}}",
+  "Aucune cible trouvée": "Aucune cible trouvée",
+  "Rechercher un passage, un Strong, une note ou une étude": "Rechercher un passage, un Strong, une note ou une étude",
+  "Impossible de charger le lexique Strong.": "Impossible de charger le lexique Strong."
 }

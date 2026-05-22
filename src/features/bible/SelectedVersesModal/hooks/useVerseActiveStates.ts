@@ -3,12 +3,15 @@ import { useSelector } from 'react-redux'
 import type { RootState } from '~redux/modules/reducer'
 import {
   makeLinksByChapterSelector,
+  makeStudyRelationsByChapterSelector,
   makeNotesForVerseSelector,
   makeHasTaggedItemsForVerseSelector,
 } from '~redux/selectors/bible'
 import { makeSelectBookmarkForVerse } from '~redux/selectors/bookmarks'
 import type { VerseIds } from '~common/types'
 import type { VerseActiveStates } from '../types'
+import { createVerseEndpoint } from '~redux/modules/user'
+import { endpointIdentity } from '~features/studyRelations/domain'
 
 interface UseVerseActiveStatesParams {
   selectedVerses: VerseIds
@@ -23,6 +26,7 @@ const useVerseActiveStates = ({
   const selectNotesForVerse = useMemo(() => makeNotesForVerseSelector(), [])
   const selectHasTaggedItems = useMemo(() => makeHasTaggedItemsForVerseSelector(), [])
   const selectLinksByChapter = useMemo(() => makeLinksByChapterSelector(), [])
+  const selectStudyRelationsByChapter = useMemo(() => makeStudyRelationsByChapterSelector(), [])
   const selectBookmarkForVerse = useMemo(() => makeSelectBookmarkForVerse(), [])
 
   // Get the first selected verse for checking active states
@@ -52,6 +56,21 @@ const useVerseActiveStates = ({
     return !!links[firstVerseKey]
   })
 
+  const hasStudyRelation = useSelector((state: RootState) => {
+    if (!firstVerseKey || !book || !chapter) return false
+    const relations = selectStudyRelationsByChapter(state, book, chapter)
+    const selectedEndpointIdentity = endpointIdentity(
+      createVerseEndpoint(Object.keys(selectedVerses))
+    )
+
+    return Object.values(relations).some(relation =>
+      relation.endpoints.some(
+        endpoint =>
+          endpoint.type === 'verse' && endpointIdentity(endpoint) === selectedEndpointIdentity
+      )
+    )
+  })
+
   // Check if the selected verse has a bookmark
   const hasBookmark = useSelector((state: RootState) => {
     if (!book || !chapter || !verse) return false
@@ -66,6 +85,7 @@ const useVerseActiveStates = ({
     hasNote,
     hasTags,
     hasLink,
+    hasStudyRelation,
     hasBookmark,
     hasFocus,
   }

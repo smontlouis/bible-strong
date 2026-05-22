@@ -42,6 +42,7 @@ interface ModalBodyProps extends BottomSheetModalProps {
   style?: StyleProp<ViewStyle>
   onModalClose?: () => void
   enableScrollView?: boolean
+  enableContentWrapper?: boolean
   ref?: Ref<BottomSheetModal | null>
 }
 
@@ -56,6 +57,7 @@ const Body = ({
   children,
   headerComponent,
   enableScrollView = true,
+  enableContentWrapper = true,
   ref,
   ...props
 }: ModalBodyProps) => {
@@ -91,7 +93,9 @@ const Body = ({
       {...bottomSheetStyles}
       {...props}
     >
-      {enableScrollView ? (
+      {!enableContentWrapper ? (
+        children
+      ) : enableScrollView ? (
         <BottomSheetScrollView
           contentContainerStyle={{
             paddingBottom: props.footerComponent ? MODAL_FOOTER_HEIGHT_BOTTOM_INSET : BOTTOM_INSET,

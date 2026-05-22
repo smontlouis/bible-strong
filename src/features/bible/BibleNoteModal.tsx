@@ -12,7 +12,7 @@ import { toast } from '~helpers/toast'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import PopOverMenu from '~common/PopOverMenu'
-import TagList from '~common/TagList'
+import EntityChipList from '~common/EntityChipList'
 import { VerseIds } from '~common/types'
 import VerseAccordion from '~common/VerseAccordion'
 import Box from '~common/ui/Box'
@@ -23,8 +23,11 @@ import MenuOption from '~common/ui/MenuOption'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
+import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import generateUUID from '~helpers/generateUUID'
 import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import orderVerses from '~helpers/orderVerses'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
@@ -59,6 +62,15 @@ const BibleNoteModal = ({ noteVerses, ref }: BibleNoteModalProps) => {
 
   const currentNote = useCurrentNote({ noteVerses })
   const reference = verseToReference(noteVerses)
+  const noteEndpoint = currentNote?.id
+    ? {
+        type: 'note' as const,
+        noteId: currentNote.id,
+        label: currentNote.title || currentNote.description || reference,
+      }
+    : null
+  const relationCount = useRelationCount(noteEndpoint)
+  const relationModal = useBottomSheetModal()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const openInNewTab = useOpenInNewTab()
 
@@ -148,121 +160,134 @@ ${currentNote.description}
   const submitIsDisabled = !title || !description
 
   return (
-    <Modal.Body
-      ref={ref}
-      topInset={useSafeAreaInsets().top}
-      enableDynamicSizing
-      enableContentPanningGesture={false}
-      headerComponent={
-        <ModalHeader
-          title={reference}
-          subTitle={t('Note')}
-          rightComponent={
-            currentNote ? (
-              <PopOverMenu
-                width={54}
-                height={54}
-                popover={
-                  <>
-                    <MenuOption onSelect={shareNote} closeBeforeSelect>
-                      <Box row alignItems="center">
-                        <FeatherIcon name="share" size={15} />
-                        <Text marginLeft={10}>{t('Partager')}</Text>
-                      </Box>
-                    </MenuOption>
-                    <MenuOption onSelect={onEditNote}>
-                      <Box row alignItems="center">
-                        <FeatherIcon name="edit-2" size={15} />
-                        <Text marginLeft={10}>{t('Éditer')}</Text>
-                      </Box>
-                    </MenuOption>
-                    <MenuOption
-                      onSelect={() =>
-                        setUnifiedTagsModal({
-                          mode: 'select',
-                          id: currentNote.id!,
-                          entity: 'notes',
-                        })
-                      }
-                    >
-                      <Box row alignItems="center">
-                        <FeatherIcon name="tag" size={15} />
-                        <Text marginLeft={10}>{t('Éditer les tags')}</Text>
-                      </Box>
-                    </MenuOption>
-                    <MenuOption onSelect={openNoteInNewTab}>
-                      <Box row alignItems="center">
-                        <FeatherIcon name="external-link" size={15} />
-                        <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
-                      </Box>
-                    </MenuOption>
-                    <MenuOption onSelect={() => deleteNoteFunc(currentNote?.id!)}>
-                      <Box row alignItems="center">
-                        <FeatherIcon name="trash-2" size={15} />
-                        <Text marginLeft={10}>{t('Supprimer')}</Text>
-                      </Box>
-                    </MenuOption>
-                  </>
-                }
-              />
-            ) : undefined
-          }
-        />
-      }
-      footerComponent={props =>
-        isEditing ? (
-          <BottomSheetFooter bottomInset={insets.bottom} {...props}>
-            <HStack
-              py={5}
-              px={20}
-              justifyContent="flex-end"
-              bg="reverse"
-              borderTopWidth={1}
-              borderColor="border"
-            >
-              {currentNote && (
+    <>
+      <Modal.Body
+        ref={ref}
+        topInset={useSafeAreaInsets().top}
+        enableDynamicSizing
+        enableContentPanningGesture={false}
+        headerComponent={
+          <ModalHeader
+            title={t('Note')}
+            subTitle={reference}
+            rightComponent={
+              currentNote ? (
+                <PopOverMenu
+                  width={54}
+                  height={54}
+                  popover={
+                    <>
+                      <MenuOption onSelect={shareNote} closeBeforeSelect>
+                        <Box row alignItems="center">
+                          <FeatherIcon name="share" size={15} />
+                          <Text marginLeft={10}>{t('Partager')}</Text>
+                        </Box>
+                      </MenuOption>
+                      <MenuOption onSelect={onEditNote}>
+                        <Box row alignItems="center">
+                          <FeatherIcon name="edit-2" size={15} />
+                          <Text marginLeft={10}>{t('Éditer')}</Text>
+                        </Box>
+                      </MenuOption>
+                      <MenuOption
+                        onSelect={() =>
+                          setUnifiedTagsModal({
+                            mode: 'select',
+                            id: currentNote.id!,
+                            entity: 'notes',
+                          })
+                        }
+                      >
+                        <Box row alignItems="center">
+                          <FeatherIcon name="tag" size={15} />
+                          <Text marginLeft={10}>{t('Éditer les tags')}</Text>
+                        </Box>
+                      </MenuOption>
+                      <MenuOption onSelect={() => relationModal.open()}>
+                        <Box row alignItems="center">
+                          <FeatherIcon name="git-merge" size={15} />
+                          <Text marginLeft={10}>{t('Éditer les relations')}</Text>
+                        </Box>
+                      </MenuOption>
+                      <MenuOption onSelect={openNoteInNewTab}>
+                        <Box row alignItems="center">
+                          <FeatherIcon name="external-link" size={15} />
+                          <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
+                        </Box>
+                      </MenuOption>
+                      <MenuOption onSelect={() => deleteNoteFunc(currentNote?.id!)}>
+                        <Box row alignItems="center">
+                          <FeatherIcon name="trash-2" size={15} />
+                          <Text marginLeft={10}>{t('Supprimer')}</Text>
+                        </Box>
+                      </MenuOption>
+                    </>
+                  }
+                />
+              ) : undefined
+            }
+          />
+        }
+        footerComponent={props =>
+          isEditing ? (
+            <BottomSheetFooter bottomInset={insets.bottom} {...props}>
+              <HStack
+                py={5}
+                px={20}
+                justifyContent="flex-end"
+                bg="reverse"
+                borderTopWidth={1}
+                borderColor="border"
+              >
+                {currentNote && (
+                  <Box h={MODAL_FOOTER_HEIGHT}>
+                    <Button reverse onPress={cancelEditing}>
+                      {t('Annuler')}
+                    </Button>
+                  </Box>
+                )}
                 <Box h={MODAL_FOOTER_HEIGHT}>
-                  <Button reverse onPress={cancelEditing}>
-                    {t('Annuler')}
+                  <Button disabled={submitIsDisabled} onPress={onSaveNoteFunc}>
+                    {t('Sauvegarder')}
                   </Button>
                 </Box>
-              )}
-              <Box h={MODAL_FOOTER_HEIGHT}>
-                <Button disabled={submitIsDisabled} onPress={onSaveNoteFunc}>
-                  {t('Sauvegarder')}
-                </Button>
-              </Box>
-            </HStack>
-          </BottomSheetFooter>
-        ) : (
-          <BottomSheetFooter bottomInset={insets.bottom} {...props}>
-            <HStack py={10} px={20} justifyContent="flex-end">
-              <Box>
-                <Fab icon="edit-2" onPress={onEditNote} />
-              </Box>
-            </HStack>
-          </BottomSheetFooter>
-        )
-      }
-    >
-      <Box paddingHorizontal={20} gap={20} py={20}>
-        {noteVerses && (
-          <>
-            <VerseAccordion noteVerses={noteVerses} />
-            <NoteEditorBottomSheet
-              defaultTitle={currentNote?.title || ''}
-              defaultDescription={currentNote?.description || ''}
-              isEditing={isEditing}
-              placeholderTitle={t('Titre')}
-              placeholderDescription={t('Description')}
-              onTitleChange={setTitle}
-              onDescriptionChange={setDescription}
-            />
-            <TagList tags={currentNote?.tags} />
-          </>
-        )}
-      </Box>
-    </Modal.Body>
+              </HStack>
+            </BottomSheetFooter>
+          ) : (
+            <BottomSheetFooter bottomInset={insets.bottom} {...props}>
+              <HStack py={10} px={20} justifyContent="flex-end">
+                <Box>
+                  <Fab icon="edit-2" onPress={onEditNote} />
+                </Box>
+              </HStack>
+            </BottomSheetFooter>
+          )
+        }
+      >
+        <Box paddingHorizontal={20} gap={20} py={20}>
+          {noteVerses && (
+            <>
+              <VerseAccordion noteVerses={noteVerses} />
+              <NoteEditorBottomSheet
+                defaultTitle={currentNote?.title || ''}
+                defaultDescription={currentNote?.description || ''}
+                isEditing={isEditing}
+                placeholderTitle={t('Titre')}
+                placeholderDescription={t('Description')}
+                onTitleChange={setTitle}
+                onDescriptionChange={setDescription}
+              />
+              <EntityChipList
+                tags={currentNote?.tags}
+                relationCount={relationCount}
+                onRelationPress={() => relationModal.open()}
+              />
+            </>
+          )}
+        </Box>
+      </Modal.Body>
+      <EntityRelationsModal ref={relationModal.getRef()} endpoint={noteEndpoint} />
+    </>
   )
 }
 

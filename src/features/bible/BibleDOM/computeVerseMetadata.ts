@@ -1,5 +1,5 @@
 import { TagsObj, Verse } from '~common/types'
-import { HighlightsObj, NotesObj, LinksObj } from '~redux/modules/user'
+import { HighlightsObj, NotesObj, LinksObj, StudyRelationsObj } from '~redux/modules/user'
 import type { TaggedVerse, NotedVerse, LinkedVerse, WebViewProps } from './BibleDOMWrapper'
 
 export interface AnnotationNotesInfo {
@@ -223,6 +223,36 @@ export function getLinkedVersesText(
   })
 
   return newLinkedVerses
+}
+
+export function getStudyRelationsCount(
+  verses: Verse[] | undefined,
+  studyRelations: StudyRelationsObj | undefined
+): { [key: string]: number } {
+  const counts: { [key: string]: number } = {}
+  if (!verses?.length || !studyRelations) return counts
+
+  const visibleVerseKeys = new Set(
+    verses.map(verse => `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`)
+  )
+
+  for (const relation of Object.values(studyRelations)) {
+    const countedVerseKeys = new Set<string>()
+    for (const endpoint of relation.endpoints) {
+      if (endpoint.type !== 'verse') continue
+      const verseKey = endpoint.verseKeys[0]
+      if (verseKey && visibleVerseKeys.has(verseKey)) {
+        countedVerseKeys.add(verseKey)
+      }
+    }
+
+    for (const verseKey of countedVerseKeys) {
+      const verse = verseKey.split('-')[2]
+      counts[verse] = (counts[verse] || 0) + 1
+    }
+  }
+
+  return counts
 }
 
 /**

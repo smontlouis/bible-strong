@@ -5,7 +5,7 @@ import React from 'react'
 import * as Icon from '@expo/vector-icons'
 
 import Link from '~common/Link'
-import TagList from '~common/TagList'
+import EntityChipList from '~common/EntityChipList'
 import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -29,9 +29,11 @@ type Props = {
   item: TNote
   onPress: (noteId: string) => void
   onMenuPress: (noteId: string) => void
+  relationCount?: number
+  onRelationPress?: () => void
 }
 
-const BibleNoteItem = ({ item, onPress, onMenuPress }: Props) => {
+const BibleNoteItem = ({ item, onPress, onMenuPress, relationCount, onRelationPress }: Props) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const lang = useLanguage()
@@ -59,7 +61,11 @@ const BibleNoteItem = ({ item, onPress, onMenuPress }: Props) => {
               {truncate(item.notes.description, 100)}
             </Paragraph>
           )}
-          <TagList tags={item.notes.tags} />
+          <EntityChipList
+            tags={item.notes.tags}
+            relationCount={relationCount}
+            onRelationPress={onRelationPress}
+          />
         </Box>
         <Link padding onPress={() => onMenuPress(item.noteId)}>
           <Icon.Feather name="more-vertical" size={20} color={theme.colors.tertiary} />

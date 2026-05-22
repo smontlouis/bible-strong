@@ -8,10 +8,19 @@ import {
   Highlight,
   Link,
   WordAnnotationsObj,
+  StudyRelationsObj,
+  RelationEndpoint,
+  StudyRelation,
 } from '~redux/modules/user'
 import { WordAnnotation } from '~redux/modules/user/wordAnnotations'
 import { Tag, CurrentTheme, TagsObj } from '~common/types'
 import { VersionCode } from '~state/tabs'
+import {
+  getRelationDisplayModel,
+  getEndpointFallbackLabel,
+  endpointIdentity,
+  relationIncludesEndpoint,
+} from '~features/studyRelations/domain'
 
 type TaggedEntity = { id: string | number; title: string; tags?: TagsObj }
 type HighlightVerseGroup = {
@@ -36,6 +45,7 @@ const isTaggedEntity = (entity: unknown): entity is TaggedEntity =>
 // (e.g., during Redux rehydration or state corruption)
 const selectHighlights = (state: RootState) => state.user.bible.highlights ?? {}
 export const selectLinks = (state: RootState) => state.user.bible.links ?? {}
+export const selectStudyRelations = (state: RootState) => state.user.bible.studyRelations ?? {}
 const selectStudies = (state: RootState) => state.user.bible.studies ?? {}
 const selectNaves = (state: RootState) => state.user.bible.naves ?? {}
 const selectWords = (state: RootState) => state.user.bible.words ?? {}
@@ -46,6 +56,22 @@ const selectColors = (state: RootState) => state.user.bible.settings?.colors ?? 
 // Base selectors - exported for use by other selectors and components
 export const selectNotes = (state: RootState) => state.user.bible.notes ?? {}
 export const selectWordAnnotations = (state: RootState) => state.user.bible.wordAnnotations ?? {}
+
+export const selectRelationCountsByEndpointIdentity = createSelector(
+  [selectStudyRelations],
+  (studyRelations): Record<string, number> => {
+    const counts: Record<string, number> = {}
+
+    for (const relation of Object.values(studyRelations)) {
+      for (const endpoint of relation.endpoints) {
+        const identity = endpointIdentity(endpoint)
+        counts[identity] = (counts[identity] || 0) + 1
+      }
+    }
+
+    return counts
+  }
+)
 
 // Selector factory for highlights by chapter
 // Usage: const selectHighlightsByChapter = makeHighlightsByChapterSelector()
@@ -96,6 +122,138 @@ export const makeLinksByChapterSelector = () =>
       for (const key in links) {
         if (key.startsWith(prefix)) {
           result[key] = links[key]
+        }
+      }
+      return result
+    }
+  )
+
+export const makeStudyRelationsByChapterSelector = () =>
+  createSelector(
+    [
+      selectStudyRelations,
+      (_: RootState, bookNumber: number, chapter: number) => `${bookNumber}-${chapter}-`,
+    ],
+    (studyRelations, prefix): StudyRelationsObj => {
+      const result: StudyRelationsObj = {}
+      for (const [id, relation] of Object.entries(studyRelations)) {
+        if (
+          relation.endpoints.some(
+            endpoint =>
+              endpoint.type === 'verse' && endpoint.verseKeys.some(key => key.startsWith(prefix))
+          )
+        ) {
+          result[id] = relation
+        }
+      }
+      return result
+    }
+  )
+
+export const makeStudyRelationsForEndpointSelector = () =>
+  createSelector(
+    [selectStudyRelations, (_: RootState, endpoint: RelationEndpoint) => endpoint],
+    (studyRelations, endpoint): StudyRelation[] =>
+      Object.values(studyRelations)
+        .filter(relation => relationIncludesEndpoint(relation, endpoint))
+        .sort((a, b) => b.updatedAt - a.updatedAt)
+  )
+
+export const makeStudyRelationDisplayModelsSelector = () =>
+  createSelector(
+    [
+      selectStudyRelations,
+      selectNotes,
+      selectStudies,
+      selectStrongsGrec,
+      selectStrongsHebreu,
+      (_: RootState, endpoint: RelationEndpoint) => endpoint,
+    ],
+    (studyRelations, notes, studies, strongsGrec, strongsHebreu, endpoint) =>
+      Object.values(studyRelations)
+        .filter(relation => relationIncludesEndpoint(relation, endpoint))
+        .map(relation =>
+          getRelationDisplayModel(relation, endpoint, {
+            notes,
+            studies,
+            strongsGrec,
+            strongsHebreu,
+          })
+        )
+        .filter((model): model is NonNullable<typeof model> => Boolean(model))
+        .sort((a, b) => b.relation.updatedAt - a.relation.updatedAt)
+  )
+
+export const makeStudyRelationDisplaySectionsForStartingVerseKeySelector = () =>
+  createSelector(
+    [
+      selectStudyRelations,
+      selectNotes,
+      selectStudies,
+      selectStrongsGrec,
+      selectStrongsHebreu,
+      (_: RootState, verseKey: string) => verseKey,
+    ],
+    (studyRelations, notes, studies, strongsGrec, strongsHebreu, verseKey) => {
+      const sections = new Map<
+        string,
+        {
+          id: string
+          title: string
+          data: NonNullable<ReturnType<typeof getRelationDisplayModel>>[]
+        }
+      >()
+
+      for (const relation of Object.values(studyRelations)) {
+        const endpoint = relation.endpoints.find(
+          relationEndpoint =>
+            relationEndpoint.type === 'verse' && relationEndpoint.verseKeys[0] === verseKey
+        )
+        if (!endpoint) continue
+
+        const model = getRelationDisplayModel(relation, endpoint, {
+          notes,
+          studies,
+          strongsGrec,
+          strongsHebreu,
+        })
+        if (!model) continue
+
+        const id = endpointIdentity(endpoint)
+        const section = sections.get(id) || {
+          id,
+          title: getEndpointFallbackLabel(endpoint),
+          data: [],
+        }
+        section.data.push(model)
+        sections.set(id, section)
+      }
+
+      return [...sections.values()]
+        .map(section => ({
+          ...section,
+          data: section.data.sort((a, b) => b.relation.updatedAt - a.relation.updatedAt),
+        }))
+        .sort((a, b) => b.data[0].relation.updatedAt - a.data[0].relation.updatedAt)
+    }
+  )
+
+export const makeStudyRelationIndicatorsByChapterSelector = () =>
+  createSelector(
+    [
+      selectStudyRelations,
+      (_: RootState, bookNumber: number, chapter: number) => `${bookNumber}-${chapter}-`,
+    ],
+    (studyRelations, prefix): Record<string, number> => {
+      const result: Record<string, number> = {}
+      for (const relation of Object.values(studyRelations)) {
+        for (const endpoint of relation.endpoints) {
+          if (endpoint.type !== 'verse') continue
+          const verseKey = endpoint.verseKeys[0]
+          if (verseKey?.startsWith(prefix)) {
+            const verse = verseKey.split('-')[2]
+            result[verse] = (result[verse] || 0) + 1
+          }
         }
       }
       return result

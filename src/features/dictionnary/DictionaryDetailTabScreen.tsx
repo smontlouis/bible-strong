@@ -22,7 +22,7 @@ import { useTranslation } from 'react-i18next'
 import DetailedHeader from '~common/DetailedHeader'
 import PopOverMenu from '~common/PopOverMenu'
 import { toast } from '~helpers/toast'
-import TagList from '~common/TagList'
+import EntityChipList from '~common/EntityChipList'
 import MenuOption from '~common/ui/MenuOption'
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
@@ -229,7 +229,7 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
       />
       {tags && (
         <Box mt={10} px={20}>
-          <TagList tags={tags} />
+          <EntityChipList tags={tags} />
         </Box>
       )}
       <Box

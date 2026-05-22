@@ -3,32 +3,43 @@ import { RootStyles } from './BibleDOMWrapper'
 import { RootState } from '~redux/modules/reducer'
 import { getLinkTypeIconComponent, getLinkTypeColor } from './LinkIcons'
 import { getDisabledStyles } from './disabledStyles'
+import { isDarkTheme } from './utils'
 
-const Div = styled<RootStyles & { isDisabled?: boolean }>('div')(
-  ({ settings: { theme }, isDisabled }) => ({
+const Div = styled('span')<RootStyles & { isDisabled?: boolean }>(
+  ({ settings: { theme, colors }, isDisabled }) => ({
+    backgroundColor: colors[theme].reverse,
+    boxShadow: isDarkTheme(theme)
+      ? `0 0 10px 0 rgba(255, 255, 255, 0.1)`
+      : `0 0 10px 0 rgba(0, 0, 0, 0.2)`,
+    borderRadius: '8px',
+    padding: '4px 8px 4px 6px',
+    wordBreak: 'break-word',
+    marginRight: '4px',
+    marginLeft: '4px',
     position: 'relative',
     display: 'inline-block',
-    transform: 'translateY(5px)',
-    marginRight: '10px',
+
+    '&:active': {
+      opacity: 0.6,
+    },
     ...getDisabledStyles(isDisabled),
   })
 )
 
 const Count = styled<RootStyles>('div')(({ settings: { theme, colors } }) => ({
-  background: colors[theme].primary,
+  background: colors[theme].grey,
   position: 'absolute',
-  width: '13px',
-  height: '13px',
-  borderRadius: '13px',
+  width: '12px',
+  height: '12px',
+  borderRadius: '12px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   fontFamily: 'arial',
   fontSize: '10px',
-  fontWeight: 'bold',
-  color: 'white',
-  bottom: '3px',
-  right: '-5px',
+  color: colors[theme].reverse,
+  bottom: '0',
+  right: '0px',
 }))
 
 interface Props {
@@ -39,16 +50,16 @@ interface Props {
   isDisabled?: boolean
 }
 
-const renderIcon = (linkType: string, onClick: () => void) => {
+const renderIcon = (linkType: string) => {
   const IconComponent = getLinkTypeIconComponent(linkType)
   const color = getLinkTypeColor(linkType)
-  return <IconComponent size={24} color={color} onClick={onClick} />
+  return <IconComponent size={16} color={color} />
 }
 
 const LinksCount = ({ count, linkType, settings, onClick, isDisabled }: Props) => (
-  <Div settings={settings} isDisabled={isDisabled}>
-    {renderIcon(linkType || 'website', onClick)}
-    {count > 1 && <Count settings={settings}>{count}</Count>}
+  <Div settings={settings} onClick={() => onClick()} isDisabled={isDisabled}>
+    {renderIcon(linkType || 'website')}
+    <Count settings={settings}>{count}</Count>
   </Div>
 )
 

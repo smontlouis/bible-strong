@@ -7,6 +7,7 @@ import { shallowEqual, useSelector } from 'react-redux'
 import BottomSheetSearchInput from '~common/BottomSheetSearchInput'
 import Empty from '~common/Empty'
 import Modal from '~common/Modal'
+import ModalHeader from '~common/ModalHeader'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -20,10 +21,16 @@ import type { Study } from '~redux/modules/user'
 interface AddToStudyModalProps {
   bottomSheetRef: React.RefObject<BottomSheetModal | null>
   onSelectStudy: (studyId: string) => void
+  reference?: string
   onClose?: () => void
 }
 
-const AddToStudyModal = ({ bottomSheetRef, onSelectStudy, onClose }: AddToStudyModalProps) => {
+const AddToStudyModal = ({
+  bottomSheetRef,
+  onSelectStudy,
+  reference,
+  onClose,
+}: AddToStudyModalProps) => {
   const { t } = useTranslation()
   const lang = useLanguage()
 
@@ -102,15 +109,17 @@ const AddToStudyModal = ({ bottomSheetRef, onSelectStudy, onClose }: AddToStudyM
       withPortal
       snapPoints={['100%']}
       headerComponent={
-        <Box px={20} pt={10} gap={5}>
-          <Text bold>{t('study.selectStudy')}</Text>
-          <BottomSheetSearchInput
-            placeholder={t('study.searchStudy')}
-            onChangeText={search}
-            onDelete={resetSearch}
-            value={keyword}
-            returnKeyType="done"
-          />
+        <Box gap={5}>
+          <ModalHeader title={t('study.selectStudy')} subTitle={reference} />
+          <Box px={20}>
+            <BottomSheetSearchInput
+              placeholder={t('study.searchStudy')}
+              onChangeText={search}
+              onDelete={resetSearch}
+              value={keyword}
+              returnKeyType="done"
+            />
+          </Box>
         </Box>
       }
     >

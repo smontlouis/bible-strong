@@ -30,6 +30,11 @@ import {
 import { addLinkAction, deleteLink, updateLink } from './modules/user/links'
 import { addNoteAction, deleteNote } from './modules/user/notes'
 import {
+  addStudyRelationAction,
+  deleteStudyRelation,
+  updateStudyRelation,
+} from './modules/user/studyRelations'
+import {
   addWordAnnotationAction,
   changeWordAnnotationColorAction,
   changeWordAnnotationTypeAction,
@@ -289,6 +294,12 @@ const isNoteAction = isAnyOf(addNoteAction, deleteNote)
 
 const isLinkAction = isAnyOf(addLinkAction, updateLink, deleteLink)
 
+const isStudyRelationAction = isAnyOf(
+  addStudyRelationAction,
+  updateStudyRelation,
+  deleteStudyRelation
+)
+
 const isHighlightAction = isAnyOf(addHighlightAction, removeHighlight, changeHighlightColor)
 
 const isWordAnnotationAction = isAnyOf(
@@ -476,6 +487,27 @@ const firestoreMiddleware: Middleware = store => next => async action => {
         state
       )
     }
+    return result
+  }
+
+  // ========== STUDY RELATIONS SYNC (sous-collection) ==========
+  if (isStudyRelationAction(action)) {
+    if (!diffState?.user?.bible?.studyRelations) return result
+
+    await handleSyncWithRetry(
+      async () => {
+        await syncSubcollectionChanges(
+          userId,
+          'studyRelations',
+          diffState.user.bible.studyRelations,
+          user.bible.studyRelations,
+          deleteMarker
+        )
+      },
+      userId,
+      'study_relations_sync',
+      state
+    )
     return result
   }
 
@@ -741,6 +773,7 @@ const firestoreMiddleware: Middleware = store => next => async action => {
           strongsGrec: bible?.strongsGrec,
           words: bible?.words,
           naves: bible?.naves,
+          studyRelations: bible?.studyRelations,
         })
 
         // 2. Sync settings dans le document user

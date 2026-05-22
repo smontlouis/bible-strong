@@ -23,7 +23,6 @@ export type AgentLogEvent = {
 }
 
 const MAX_AGENT_LOG_EVENTS = 500
-const AGENT_LOG_PREFIX = '[AgentLog]'
 
 declare global {
   var __BIBLE_STRONG_AGENT_LOGS__: AgentLogEvent[] | undefined
@@ -79,19 +78,7 @@ const writeAgentLog = (
     buffer.splice(0, buffer.length - MAX_AGENT_LOG_EVENTS)
   }
 
-  const serialized = JSON.stringify(entry)
-
-  if (level === 'error' || level === 'fatal') {
-    console.error(AGENT_LOG_PREFIX, serialized)
-    return
-  }
-
-  if (level === 'warn') {
-    console.warn(AGENT_LOG_PREFIX, serialized)
-    return
-  }
-
-  console.log(AGENT_LOG_PREFIX, serialized)
+  // Keep agent logs in the in-memory buffer without duplicating them in Metro logs.
 }
 
 export const getAgentLogEvents = () => getEventBuffer()
