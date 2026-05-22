@@ -8,7 +8,7 @@ import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Link from '~common/Link'
 import Loading from '~common/Loading'
-import TagList from '~common/TagList'
+import EntityChipList from '~common/EntityChipList'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Container from '~common/ui/Container'
@@ -322,12 +322,12 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
         <Box>
           {tags && (
             <Box marginBottom={10}>
-              <TagList tags={tags} relationList={relationList} />
+              <EntityChipList tags={tags} relationList={relationList} />
             </Box>
           )}
           {!tags && relationList.length > 0 && (
             <Box marginBottom={10}>
-              <TagList relationList={relationList} />
+              <EntityChipList relationList={relationList} />
             </Box>
           )}
 

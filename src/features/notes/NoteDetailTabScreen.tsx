@@ -10,7 +10,7 @@ import { toast } from '~helpers/toast'
 import { useRouter } from 'expo-router'
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
-import TagList from '~common/TagList'
+import EntityChipList from '~common/EntityChipList'
 import { VerseIds } from '~common/types'
 import VerseAccordion from '~common/VerseAccordion'
 import Box from '~common/ui/Box'
@@ -391,7 +391,7 @@ ${currentNote.description}
                 hideKeyboardAccessoryView: true,
               }}
             />
-            <TagList tags={currentNote?.tags} relationList={relationList} />
+            <EntityChipList tags={currentNote?.tags} relationList={relationList} />
           </Box>
         </ScrollView>
         {isEditing && (

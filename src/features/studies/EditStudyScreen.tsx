@@ -8,7 +8,7 @@ import { useAtom, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { isFullScreenBibleAtom } from 'src/state/app'
 import RenameModal from '~common/RenameModal'
-import TagList from '~common/TagList'
+import EntityChipList from '~common/EntityChipList'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Container from '~common/ui/Container'
@@ -167,7 +167,7 @@ const EditStudyScreen = ({
       />
       {isReadOnly && hasTagOrRelationChips && (
         <Box px={20} py={12} borderTopWidth={1} borderColor="border" bg="reverse">
-          <TagList tags={currentStudy.tags} relationList={relationList} />
+          <EntityChipList tags={currentStudy.tags} relationList={relationList} />
         </Box>
       )}
       <RenameModal

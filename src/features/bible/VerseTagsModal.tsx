@@ -7,7 +7,7 @@ import { TouchableOpacity } from 'react-native'
 import { useSelector } from 'react-redux'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
-import TagList from '~common/TagList'
+import EntityChipList from '~common/EntityChipList'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { Chip } from '~common/ui/NewChip'
@@ -104,7 +104,7 @@ const TaggedItemRow = ({ item, onEditTags }: { item: TaggedItem; onEditTags: () 
               {subtitle}
             </Text>
           ) : null}
-          <TagList tags={tags} />
+          <EntityChipList tags={tags} />
         </Box>
         <FeatherIcon name="chevron-right" size={20} color="grey" />
       </ItemRow>

@@ -5,7 +5,7 @@ import styled from '@emotion/native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 
-import TagList from '~common/TagList'
+import EntityChipList from '~common/EntityChipList'
 import { FeatherIcon } from '~common/ui/Icon'
 import { LinkBox } from '~common/Link'
 import Box from '~common/ui/Box'
@@ -135,7 +135,7 @@ const VerseComponent = ({
         <Paragraph scale={-2} medium marginBottom={15}>
           {truncate(removeBreakLines(content), 200)}
         </Paragraph>
-        <TagList tags={tags} />
+        <EntityChipList tags={tags} />
       </Container>
     </TouchableOpacity>
   )

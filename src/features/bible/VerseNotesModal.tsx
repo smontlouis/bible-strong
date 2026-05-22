@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 import { useSelector } from 'react-redux'
 import Modal from '~common/Modal'
-import TagList from '~common/TagList'
+import EntityChipList from '~common/EntityChipList'
 import { VerseIds } from '~common/types'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -70,7 +70,7 @@ const NoteItemRow = ({ item, onPress }: { item: NoteItem; onPress: () => void })
               {label}
             </Text>
           )}
-          <TagList tags={item.tags} />
+          <EntityChipList tags={item.tags} />
         </Box>
         <FeatherIcon name="chevron-right" size={20} color="grey" />
       </ItemRow>

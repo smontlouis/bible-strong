@@ -26,7 +26,7 @@ export type RelationChip = {
   onPress: () => void
 }
 
-const TagList = ({
+const EntityChipList = ({
   tags,
   relationList,
   limit = 0,
@@ -107,4 +107,4 @@ const TagList = ({
   )
 }
 
-export default TagList
+export default EntityChipList

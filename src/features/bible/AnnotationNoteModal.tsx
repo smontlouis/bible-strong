@@ -12,7 +12,7 @@ import { toast } from '~helpers/toast'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import PopOverMenu from '~common/PopOverMenu'
-import TagList from '~common/TagList'
+import EntityChipList from '~common/EntityChipList'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Fab from '~common/ui/Fab'
@@ -269,7 +269,7 @@ ${currentNote.description}
               onTitleChange={setTitle}
               onDescriptionChange={setDescription}
             />
-            <TagList tags={currentNote?.tags} />
+            <EntityChipList tags={currentNote?.tags} />
           </>
         )}
       </Box>

@@ -5,7 +5,7 @@ import React from 'react'
 import * as Icon from '@expo/vector-icons'
 
 import Link from '~common/Link'
-import TagList from '~common/TagList'
+import EntityChipList from '~common/EntityChipList'
 import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -59,7 +59,7 @@ const BibleNoteItem = ({ item, onPress, onMenuPress }: Props) => {
               {truncate(item.notes.description, 100)}
             </Paragraph>
           )}
-          <TagList tags={item.notes.tags} />
+          <EntityChipList tags={item.notes.tags} />
         </Box>
         <Link padding onPress={() => onMenuPress(item.noteId)}>
           <Icon.Feather name="more-vertical" size={20} color={theme.colors.tertiary} />

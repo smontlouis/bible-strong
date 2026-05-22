@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { useSelector } from 'react-redux'
-import type { RelationChip } from '~common/TagList'
+import type { RelationChip } from '~common/EntityChipList'
 import type { RootState } from '~redux/modules/reducer'
 import { makeStudyRelationDisplayModelsSelector } from '~redux/selectors/bible'
 import type { RelationEndpoint } from './domain'
