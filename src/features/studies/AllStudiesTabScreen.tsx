@@ -83,7 +83,11 @@ const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => 
   }
 
   const studies = useSelector(
-    (state: RootState) => Object.values(state.user.bible.studies),
+    (state: RootState) =>
+      Object.entries(state.user.bible.studies).map(([studyId, study]) => ({
+        ...study,
+        id: study.id || studyId,
+      })),
     shallowEqual
   )
   const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
