@@ -168,12 +168,7 @@ const VerseTagsModal = forwardRef<BottomSheetModal, VerseTagsModalProps>(
       <Modal.Body
         ref={ref}
         snapPoints={['50%']}
-        headerComponent={
-          <ModalHeader
-            title={`${t('Étiquettes pour')} ${reference}`}
-            subTitle={t('Cliquez sur un élément pour modifier ses étiquettes')}
-          />
-        }
+        headerComponent={<ModalHeader title={t('Étiquettes')} subTitle={reference} />}
       >
         <Box>
           {taggedItems.length === 0 ? (

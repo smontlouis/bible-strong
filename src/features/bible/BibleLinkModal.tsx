@@ -239,8 +239,8 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
       enableDynamicSizing
       headerComponent={
         <ModalHeader
-          title={reference}
-          subTitle={t('Lien')}
+          title={t('Lien')}
+          subTitle={reference}
           rightComponent={
             currentLink ? (
               <PopOverMenu

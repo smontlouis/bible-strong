@@ -131,12 +131,7 @@ const VerseNotesModal = forwardRef<BottomSheetModal, VerseNotesModalProps>(({ ve
       <Modal.Body
         ref={ref}
         snapPoints={['50%']}
-        headerComponent={
-          <ModalHeader
-            title={`${t('Notes pour')} ${reference}`}
-            subTitle={t('Cliquez sur une note pour la modifier')}
-          />
-        }
+        headerComponent={<ModalHeader title={t('Notes')} subTitle={reference} />}
       >
         <Box>
           {notes.length === 0 ? (

@@ -155,8 +155,8 @@ ${currentNote.description}
       enableContentPanningGesture={false}
       headerComponent={
         <ModalHeader
-          title={reference}
-          subTitle={t('Note')}
+          title={t('Note')}
+          subTitle={reference}
           rightComponent={
             currentNote ? (
               <PopOverMenu
