@@ -20,7 +20,6 @@ import {
   getEndpointFallbackLabel,
   endpointIdentity,
   relationIncludesEndpoint,
-  relationIncludesVerseKey,
 } from '~features/studyRelations/domain'
 
 type TaggedEntity = { id: string | number; title: string; tags?: TagsObj }
@@ -169,7 +168,7 @@ export const makeStudyRelationDisplayModelsSelector = () =>
         .sort((a, b) => b.relation.updatedAt - a.relation.updatedAt)
   )
 
-export const makeStudyRelationDisplaySectionsForVerseKeySelector = () =>
+export const makeStudyRelationDisplaySectionsForStartingVerseKeySelector = () =>
   createSelector(
     [
       selectStudyRelations,
@@ -190,11 +189,9 @@ export const makeStudyRelationDisplaySectionsForVerseKeySelector = () =>
       >()
 
       for (const relation of Object.values(studyRelations)) {
-        if (!relationIncludesVerseKey(relation, verseKey)) continue
-
         const endpoint = relation.endpoints.find(
           relationEndpoint =>
-            relationEndpoint.type === 'verse' && relationEndpoint.verseKeys.includes(verseKey)
+            relationEndpoint.type === 'verse' && relationEndpoint.verseKeys[0] === verseKey
         )
         if (!endpoint) continue
 
@@ -236,11 +233,10 @@ export const makeStudyRelationIndicatorsByChapterSelector = () =>
       for (const relation of Object.values(studyRelations)) {
         for (const endpoint of relation.endpoints) {
           if (endpoint.type !== 'verse') continue
-          for (const verseKey of endpoint.verseKeys) {
-            if (verseKey.startsWith(prefix) && relationIncludesVerseKey(relation, verseKey)) {
-              const verse = verseKey.split('-')[2]
-              result[verse] = (result[verse] || 0) + 1
-            }
+          const verseKey = endpoint.verseKeys[0]
+          if (verseKey?.startsWith(prefix)) {
+            const verse = verseKey.split('-')[2]
+            result[verse] = (result[verse] || 0) + 1
           }
         }
       }

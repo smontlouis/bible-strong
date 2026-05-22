@@ -23,7 +23,7 @@ import {
 } from '~redux/modules/user'
 import {
   makeStudyRelationDisplayModelsSelector,
-  makeStudyRelationDisplaySectionsForVerseKeySelector,
+  makeStudyRelationDisplaySectionsForStartingVerseKeySelector,
 } from '~redux/selectors/bible'
 import { getEndpointFallbackLabel, getRelationText, type RelationDisplayModel } from './domain'
 
@@ -31,7 +31,7 @@ type Props = {
   endpoint: RelationEndpoint
   onOpenEndpoint: (endpoint: RelationEndpoint) => void
   showEmptyState?: boolean
-  includeContainingVerseRelations?: boolean
+  includeStartingVerseRelations?: boolean
 }
 
 type RelationDraft = {
@@ -41,7 +41,8 @@ type RelationDraft = {
 }
 
 const selectDisplayModels = makeStudyRelationDisplayModelsSelector()
-const selectDisplaySectionsForVerseKey = makeStudyRelationDisplaySectionsForVerseKeySelector()
+const selectDisplaySectionsForStartingVerseKey =
+  makeStudyRelationDisplaySectionsForStartingVerseKeySelector()
 
 const directionalTypes: RelationType[] = ['references', 'explains']
 
@@ -143,7 +144,7 @@ const StudyRelationList = ({
   endpoint,
   onOpenEndpoint,
   showEmptyState = false,
-  includeContainingVerseRelations = false,
+  includeStartingVerseRelations = false,
 }: Props) => {
   const dispatch = useDispatch()
   const insets = useSafeAreaInsets()
@@ -156,13 +157,13 @@ const StudyRelationList = ({
   })
   const [isLabelExpanded, setIsLabelExpanded] = useState(false)
   const exactRelations = useSelector((state: RootState) => selectDisplayModels(state, endpoint))
-  const containingVerseSections = useSelector((state: RootState) =>
-    includeContainingVerseRelations && endpoint.type === 'verse' && endpoint.verseKeys.length === 1
-      ? selectDisplaySectionsForVerseKey(state, endpoint.verseKeys[0])
+  const startingVerseSections = useSelector((state: RootState) =>
+    includeStartingVerseRelations && endpoint.type === 'verse' && endpoint.verseKeys.length === 1
+      ? selectDisplaySectionsForStartingVerseKey(state, endpoint.verseKeys[0])
       : []
   )
-  const sections = includeContainingVerseRelations
-    ? containingVerseSections
+  const sections = includeStartingVerseRelations
+    ? startingVerseSections
     : [{ id: 'relations', title: '', data: exactRelations }]
   const relations = sections.flatMap(section => section.data)
 

@@ -240,10 +240,9 @@ export function getStudyRelationsCount(
     const countedVerseKeys = new Set<string>()
     for (const endpoint of relation.endpoints) {
       if (endpoint.type !== 'verse') continue
-      for (const verseKey of endpoint.verseKeys) {
-        if (visibleVerseKeys.has(verseKey)) {
-          countedVerseKeys.add(verseKey)
-        }
+      const verseKey = endpoint.verseKeys[0]
+      if (verseKey && visibleVerseKeys.has(verseKey)) {
+        countedVerseKeys.add(verseKey)
       }
     }
 

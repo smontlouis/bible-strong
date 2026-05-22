@@ -58,7 +58,7 @@ const EntityRelationsModal = ({ ref, endpoint }: Props) => {
               endpoint={endpoint}
               onOpenEndpoint={openEndpoint}
               showEmptyState
-              includeContainingVerseRelations={isSingleVerseEndpoint}
+              includeStartingVerseRelations={isSingleVerseEndpoint}
             />
           ) : null}
         </Box>
