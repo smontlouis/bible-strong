@@ -262,7 +262,7 @@ const StudyRelationList = ({
         <Box
           pos="absolute"
           top={0}
-          left={10}
+          left={20}
           borderLeftWidth={4}
           borderBottomWidth={4}
           borderBottomLeftRadius={50}
@@ -275,7 +275,7 @@ const StudyRelationList = ({
             pos="absolute"
             top={0}
             bottom={0}
-            left={10}
+            left={20}
             borderLeftWidth={4}
             width={25}
             borderColor="border"
@@ -285,32 +285,32 @@ const StudyRelationList = ({
           flex
           row
           alignItems="center"
-          paddingVertical={14}
-          ml={40}
-          pl={10}
+          paddingVertical={10}
+          ml={60}
+          pl={0}
           borderBottomWidth={1}
           borderColor="border"
           onPress={() => onOpenEndpoint(model.targetEndpoint)}
         >
           <Box flex>
             <HStack alignItems="center">
-              <Text bold numberOfLines={1}>
+              <Text bold numberOfLines={1} fontSize={14}>
                 {relationTitle.prefix}
               </Text>
               <Box mx={6}>
                 <TargetIcon type={model.targetEndpoint.type} />
               </Box>
-              <Text bold numberOfLines={1} shrink={1}>
+              <Text bold numberOfLines={1} shrink={1} fontSize={14}>
                 {relationTitle.target}
               </Text>
             </HStack>
             {relationSubtitle ? (
-              <Text fontSize={13} color="tertiary" numberOfLines={1}>
+              <Text fontSize={12} color="tertiary" numberOfLines={1}>
                 {relationSubtitle}
               </Text>
             ) : null}
             {model.relation.label ? (
-              <Text fontSize={13} color="tertiary" numberOfLines={1}>
+              <Text fontSize={12} color="tertiary" numberOfLines={1}>
                 {model.relation.label}
               </Text>
             ) : null}
@@ -350,9 +350,12 @@ const StudyRelationList = ({
         sections.map(section => (
           <VStack key={section.id} mb={12}>
             {section.title ? (
-              <Text bold fontSize={14} color="tertiary" ml={40} mb={4}>
-                {section.title}
-              </Text>
+              <HStack alignItems="center" ml={20} py={20}>
+                <TargetIcon type="verse" />
+                <Text bold color="tertiary" ml={8}>
+                  {section.title}
+                </Text>
+              </HStack>
             ) : null}
             {section.data.map((model, index) => renderRelation(model, index, section.data.length))}
           </VStack>
