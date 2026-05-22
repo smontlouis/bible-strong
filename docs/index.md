@@ -18,6 +18,9 @@ This directory is the repo-level reference set for agents and humans working on 
 | `dev-guide.md` | Setup, scripts, simulator workflow, and validation. |
 | `data-models.md` | Persisted state, local databases, Firestore sync, and identifiers. |
 | `conventions.md` | Coding conventions and project-specific rules. |
+| `bible-viewer-native-migration-audit.md` | Synthesis for migrating the Bible reader from DOM/WebView to native SwiftUI/Compose components. |
+| `bible-viewer-swiftui-audit.md` | iOS-specific audit for a SwiftUI/native Bible reader. |
+| `bible-viewer-compose-audit.md` | Android-specific audit for a Jetpack Compose/native Bible reader. |
 
 ## Agent-Specific Docs
 

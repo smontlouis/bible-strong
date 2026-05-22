@@ -14,7 +14,7 @@ import Header from '~common/Header'
 import Loading from '~common/Loading'
 import PopOverMenu from '~common/PopOverMenu'
 import { toast } from '~helpers/toast'
-import TagList from '~common/TagList'
+import EntityChipList from '~common/EntityChipList'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -229,7 +229,7 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
       />
       {tags && (
         <Box mt={10} px={20}>
-          <TagList tags={tags} />
+          <EntityChipList tags={tags} />
         </Box>
       )}
       <Box

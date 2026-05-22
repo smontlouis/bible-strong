@@ -10,7 +10,7 @@ import { toast } from '~helpers/toast'
 import { useRouter } from 'expo-router'
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
-import TagList from '~common/TagList'
+import EntityChipList from '~common/EntityChipList'
 import { VerseIds } from '~common/types'
 import VerseAccordion from '~common/VerseAccordion'
 import Box from '~common/ui/Box'
@@ -31,15 +31,20 @@ import { isFullScreenBibleAtom, unifiedTagsModalAtom } from '~state/app'
 import { NotesTab, useIsCurrentTab } from '~state/tabs'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import NoteEditorDOMComponent from '~features/bible/NoteEditorDOM/NoteEditorDOMComponent'
+import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
+import { useRelationCount } from '~features/studyRelations/useRelationCount'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import type { RelationEndpoint } from '~redux/modules/user'
 
 const FOOTER_HEIGHT = 54
 
 interface NoteDetailTabScreenProps {
   notesAtom: PrimitiveAtom<NotesTab>
   noteId: string
+  onBackPress?: () => void
 }
 
-const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) => {
+const NoteDetailTabScreen = ({ notesAtom, noteId, onBackPress }: NoteDetailTabScreenProps) => {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
@@ -47,6 +52,7 @@ const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) =>
   const [, setNotesTab] = useAtom(notesAtom)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
+  const relationListModal = useBottomSheetModal()
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -77,10 +83,14 @@ const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) =>
   const annotationId = isAnnotationNote ? noteId.replace('annotation:', '') : ''
   const selectAnnotationById = makeWordAnnotationByIdSelector()
   const annotation = useSelector((state: RootState) => selectAnnotationById(state, annotationId))
+  const isMissingAnnotation = isAnnotationNote && !annotation
 
   // Parse noteId to get verse references for display
   const noteVerses = useMemo(() => {
     // For annotation notes, use the annotation's first range verseKey
+    if (isAnnotationNote && !annotation) {
+      return {} as VerseIds
+    }
     if (isAnnotationNote && annotation) {
       const verseKey = annotation.ranges[0]?.verseKey
       return verseKey ? { [verseKey]: true as const } : ({} as VerseIds)
@@ -93,22 +103,38 @@ const NoteDetailTabScreen = ({ notesAtom, noteId }: NoteDetailTabScreenProps) =>
   }, [noteId, isAnnotationNote, annotation])
 
   const reference = useMemo(() => {
+    if (isMissingAnnotation) {
+      return t('Annotation introuvable')
+    }
+
     const baseRef = verseToReference(noteVerses)
     if (isAnnotationNote && annotation) {
       return `${baseRef} (${t('annotation')} - ${annotation.version})`
     }
     return baseRef
-  }, [noteVerses, isAnnotationNote, annotation, t])
+  }, [noteVerses, isAnnotationNote, annotation, isMissingAnnotation, t])
+
+  const noteEndpoint: Extract<RelationEndpoint, { type: 'note' }> = {
+    type: 'note',
+    noteId,
+    label: currentNote?.title || currentNote?.description || reference,
+  }
+  const relationCount = useRelationCount(noteEndpoint)
 
   // Go back to notes list
   const goBack = useCallback(() => {
+    if (onBackPress) {
+      onBackPress()
+      return
+    }
+
     setNotesTab(
       produce(draft => {
         draft.title = t('Notes')
         draft.data.noteId = undefined
       })
     )
-  }, [setNotesTab, t])
+  }, [onBackPress, setNotesTab, t])
 
   // Initialize form when note loads
   useEffect(() => {
@@ -187,6 +213,11 @@ ${currentNote.description}
     let verseKey: string
     let version: string | undefined
 
+    if (isMissingAnnotation) {
+      toast.error(t('Annotation introuvable'))
+      return
+    }
+
     if (isAnnotationNote && annotation) {
       // For annotation notes, use the annotation's verseKey and version
       verseKey = annotation.ranges[0]?.verseKey
@@ -196,7 +227,17 @@ ${currentNote.description}
       verseKey = noteId.split('/')[0]
     }
 
+    if (!verseKey) {
+      toast.error(t('Référence introuvable'))
+      return
+    }
+
     const [Livre, Chapitre, Verset] = verseKey.split('-')
+    if (!Livre || !Chapitre || !Verset) {
+      toast.error(t('Référence introuvable'))
+      return
+    }
+
     router.push({
       pathname: '/bible-view',
       params: {
@@ -226,10 +267,30 @@ ${currentNote.description}
     )
   }
 
+  if (isMissingAnnotation) {
+    return (
+      <Container>
+        <Header
+          title={t('Annotation introuvable')}
+          hasBackButton={Boolean(onBackPress)}
+          onCustomBackPress={goBack}
+        />
+        <Box flex center px={20}>
+          <Text fontSize={18} color="grey" textAlign="center" mb={20}>
+            {t("Cette annotation n'existe plus")}
+          </Text>
+          <Button onPress={goBack}>{t('Retour aux notes')}</Button>
+        </Box>
+      </Container>
+    )
+  }
+
   return (
     <Container>
       <Header
         title={reference}
+        hasBackButton={Boolean(onBackPress)}
+        onCustomBackPress={goBack}
         rightComponent={
           <PopOverMenu
             width={54}
@@ -260,6 +321,16 @@ ${currentNote.description}
                   <Box row alignItems="center">
                     <FeatherIcon name="tag" size={15} />
                     <Text marginLeft={10}>{t('Éditer les tags')}</Text>
+                  </Box>
+                </MenuOption>
+                <MenuOption
+                  onSelect={() => {
+                    relationListModal.open()
+                  }}
+                >
+                  <Box row alignItems="center">
+                    <FeatherIcon name="git-merge" size={15} />
+                    <Text marginLeft={10}>{t('Éditer les relations')}</Text>
                   </Box>
                 </MenuOption>
                 <MenuOption onSelect={navigateToBible}>
@@ -320,7 +391,11 @@ ${currentNote.description}
                 hideKeyboardAccessoryView: true,
               }}
             />
-            <TagList tags={currentNote?.tags} />
+            <EntityChipList
+              tags={currentNote?.tags}
+              relationCount={relationCount}
+              onRelationPress={() => relationListModal.open()}
+            />
           </Box>
         </ScrollView>
         {isEditing && (
@@ -347,6 +422,7 @@ ${currentNote.description}
           <Fab icon="edit-2" onPress={onEditNote} />
         </Box>
       )}
+      <EntityRelationsModal ref={relationListModal.getRef()} endpoint={noteEndpoint} />
     </Container>
   )
 }

@@ -146,6 +146,7 @@ export interface UnifiedVersesRendererProps {
   notedVersesText: { [key: string]: NotedVerse[] }
   linkedVersesCount: { [key: string]: number }
   linkedVersesText: { [key: string]: LinkedVerse[] }
+  studyRelationsCount: { [key: string]: number }
   versesWithAnnotationNotes?: Record<string, boolean>
   navigateToPericope: () => void
   // Annotation mode props
@@ -252,6 +253,7 @@ export function UnifiedVersesRenderer({
   notedVersesText,
   linkedVersesCount,
   linkedVersesText,
+  studyRelationsCount,
   versesWithAnnotationNotes,
   navigateToPericope,
   annotationMode,
@@ -309,6 +311,7 @@ export function UnifiedVersesRenderer({
         const notesText = notedVersesText[Verset]
         const linksCount = linkedVersesCount[Verset]
         const linksText = linkedVersesText[Verset]
+        const relationsCount = studyRelationsCount[Verset]
         const otherVersionAnnotations = wordAnnotationsInOtherVersions?.[verseKey]
         const isTouched = touchedVerseKey === verseKey
 
@@ -335,6 +338,7 @@ export function UnifiedVersesRenderer({
                 notesText={notesText}
                 linksCount={linksCount}
                 linksText={linksText}
+                relationsCount={relationsCount}
                 isVerseToScroll={false}
                 selectedCode={null}
                 tag={tag}
@@ -402,6 +406,7 @@ export function UnifiedVersesRenderer({
               notesText={notesText}
               linksCount={linksCount}
               linksText={linksText}
+              relationsCount={relationsCount}
               isVerseToScroll={isVerseToScroll}
               selectedCode={selectedCode}
               isFocused={isFocused}

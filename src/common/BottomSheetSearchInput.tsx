@@ -57,7 +57,7 @@ const BottomSheetSearchInput = ({
             {...props}
           />
         </Box>
-        <FeatherIcon name="x" size={20} onPress={onDelete} />
+        {value ? <FeatherIcon name="x" size={20} onPress={onDelete} /> : null}
       </Box>
     </Box>
   )

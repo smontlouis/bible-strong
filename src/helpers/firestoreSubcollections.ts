@@ -21,6 +21,7 @@ export type SubcollectionName =
   | 'highlights'
   | 'notes'
   | 'links'
+  | 'studyRelations'
   | 'tags'
   | 'strongsHebreu'
   | 'strongsGrec'
@@ -34,6 +35,7 @@ export const SUBCOLLECTION_NAMES: SubcollectionName[] = [
   'highlights',
   'notes',
   'links',
+  'studyRelations',
   'tags',
   'strongsHebreu',
   'strongsGrec',

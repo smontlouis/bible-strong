@@ -7,7 +7,7 @@ import DictionnaryIcon from '~common/DictionnaryIcon'
 import LexiqueIcon from '~common/LexiqueIcon'
 import Link from '~common/Link'
 import NaveIcon from '~common/NaveIcon'
-import TagList from '~common/TagList'
+import EntityChipList from '~common/EntityChipList'
 import Border from '~common/ui/Border'
 import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -121,7 +121,7 @@ export const NoteItem = ({
             {truncate(item.description, 100)}
           </Paragraph>
         )}
-        <TagList tags={item.tags} />
+        <EntityChipList tags={item.tags} />
       </Box>
       <Border />
     </Link>
@@ -176,7 +176,7 @@ export const LinkItem = ({
           <Paragraph scale={-3} scaleLineHeight={-1} color="tertiary" numberOfLines={1}>
             {item.url}
           </Paragraph>
-          {item.tags && Object.keys(item.tags).length > 0 && <TagList tags={item.tags} />}
+          {item.tags && Object.keys(item.tags).length > 0 && <EntityChipList tags={item.tags} />}
         </Box>
       </Box>
       <Border />

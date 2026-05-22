@@ -26,8 +26,14 @@ import getVersesContent from '~helpers/getVersesContent'
 import { useQuery } from '~helpers/react-query-lite'
 import { useBottomSheet, useBottomSheetModal } from '~helpers/useBottomSheet'
 import useLanguage from '~helpers/useLanguage'
+import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
-import { addHighlight, removeHighlight } from '~redux/modules/user'
+import {
+  addHighlight,
+  createVerseEndpoint,
+  removeHighlight,
+  type RelationEndpoint,
+} from '~redux/modules/user'
 import type { AppDispatch } from '~redux/store'
 import {
   CrossVersionAnnotation,
@@ -35,6 +41,7 @@ import {
   makeLinksByChapterSelector,
   makeNotesByChapterSelector,
   makeSelectedVerseHighlightColorSelector,
+  makeStudyRelationsByChapterSelector,
   makeTaggedVersesInChapterSelector,
   makeWordAnnotationsByChapterSelector,
   makeWordAnnotationsInOtherVersionsSelector,
@@ -82,6 +89,8 @@ import SelectedVersesModal from './SelectedVersesModal'
 import StrongModal from './StrongModal'
 import VerseNotesModal from './VerseNotesModal'
 import VerseTagsModal from './VerseTagsModal'
+import CreateEntityRelationModal from '~features/studyRelations/CreateEntityRelationModal'
+import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
 
 const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: number) => {
   if (pericope && pericope[book] && pericope[book][chapter]) {
@@ -95,6 +104,7 @@ const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: nu
 const selectHighlightsByChapter = makeHighlightsByChapterSelector()
 const selectNotesByChapter = makeNotesByChapterSelector()
 const selectLinksByChapter = makeLinksByChapterSelector()
+const selectStudyRelationsByChapter = makeStudyRelationsByChapterSelector()
 const selectWordAnnotationsByChapter = makeWordAnnotationsByChapterSelector()
 const selectSelectedVerseHighlightColor = makeSelectedVerseHighlightColorSelector()
 const selectBookmarksInChapter = makeSelectBookmarksInChapter()
@@ -145,6 +155,7 @@ const BibleViewer = ({
   const versesModal = useBottomSheet()
   const linkModal = useBottomSheetModal()
   const noteModal = useBottomSheetModal()
+  const createRelationModal = useBottomSheetModal()
 
   // Annotation mode
   const annotationMode = useAnnotationMode()
@@ -166,6 +177,12 @@ const BibleViewer = ({
   // Verse notes modal
   const verseNotesModal = useBottomSheetModal()
   const [verseNotesModalKey, setVerseNotesModalKey] = useState<string | null>(null)
+  const verseStudyRelationsModal = useBottomSheetModal()
+  const [verseStudyRelationsModalKey, setVerseStudyRelationsModalKey] = useState<string | null>(
+    null
+  )
+  const [createRelationSourceEndpoint, setCreateRelationSourceEndpoint] =
+    useState<RelationEndpoint | null>(null)
 
   // Add to study modal states
   const addToStudyModal = useBottomSheetModal()
@@ -204,6 +221,7 @@ const BibleViewer = ({
       selectedVerses,
     },
   } = bible
+  const selectedVersesReference = verseToReference(selectedVerses)
   const { data: coverageData } = useQuery({
     queryKey: ['bible-version-coverage', version],
     queryFn: () => getBibleVersionCoverage(version),
@@ -326,6 +344,10 @@ const BibleViewer = ({
 
   const linksByChapter = useSelector((state: RootState) =>
     selectLinksByChapter(state, displayedBook, displayedChapter)
+  )
+
+  const studyRelationsByChapter = useSelector((state: RootState) =>
+    selectStudyRelationsByChapter(state, displayedBook, displayedChapter)
   )
 
   const wordAnnotationsByChapter = useSelector((state: RootState) =>
@@ -498,6 +520,23 @@ const BibleViewer = ({
   const toggleCreateLink = () => {
     setLinkVerses(selectedVerses)
     linkModal.open()
+  }
+
+  const toggleCreateStudyRelation = () => {
+    const verseKeys = Object.keys(selectedVerses)
+    if (!verseKeys.length) return
+    setCreateRelationSourceEndpoint(createVerseEndpoint(verseKeys))
+    createRelationModal.open()
+  }
+
+  const handleRelationCreatedFromSelection = () => {
+    createRelationModal.close()
+    actions.clearSelectedVerses()
+  }
+
+  const openVerseStudyRelationsModal = (verseKey: string) => {
+    setVerseStudyRelationsModalKey(verseKey)
+    verseStudyRelationsModal.open()
   }
 
   const openLinkModal = (linkId: string) => {
@@ -715,6 +754,7 @@ const BibleViewer = ({
     notedVerses: notesByChapter,
     bookmarkedVerses,
     linkedVerses: linksByChapter,
+    studyRelations: studyRelationsByChapter,
     wordAnnotations: wordAnnotationsByChapter,
     settings,
     verseToScroll: verse,
@@ -755,6 +795,7 @@ const BibleViewer = ({
     onOpenVerseTagsModal: handleOpenVerseTagsModal,
     // Verse notes modal
     onOpenVerseNotesModal: handleOpenVerseNotesModal,
+    onOpenStudyRelationsModal: openVerseStudyRelationsModal,
     // Double-tap to enter annotation mode
     onEnterAnnotationMode: handleEnterAnnotationModeFromDoubleTap,
     // Red words
@@ -873,6 +914,7 @@ const BibleViewer = ({
         }}
         onCreateNoteClick={toggleCreateNote}
         onCreateLinkClick={toggleCreateLink}
+        onCreateStudyRelationClick={toggleCreateStudyRelation}
         addHighlight={addHiglightAndOpenQuickTags}
         addTag={addTag}
         removeHighlight={() => {
@@ -890,6 +932,17 @@ const BibleViewer = ({
       />
       <BibleNoteModal ref={noteModal.getRef()} noteVerses={noteVerses} />
       <BibleLinkModal ref={linkModal.getRef()} linkVerses={linkVerses} />
+      <CreateEntityRelationModal
+        ref={createRelationModal.getRef()}
+        sourceEndpoint={createRelationSourceEndpoint}
+        onCreated={handleRelationCreatedFromSelection}
+      />
+      <EntityRelationsModal
+        ref={verseStudyRelationsModal.getRef()}
+        endpoint={
+          verseStudyRelationsModalKey ? createVerseEndpoint([verseStudyRelationsModalKey]) : null
+        }
+      />
       <StrongModal
         ref={strongModal.getRef()}
         version={version}
@@ -908,10 +961,12 @@ const BibleViewer = ({
       <AddToStudyModal
         bottomSheetRef={addToStudyModal.getRef()}
         onSelectStudy={handleSelectStudy}
+        reference={selectedVersesReference}
       />
       <VerseFormatBottomSheet
         bottomSheetRef={verseFormatModal.getRef()}
         onSelectFormat={handleSelectFormat}
+        reference={pendingVerseData?.verseData.title || selectedVersesReference}
       />
       <LoadingView isBibleViewReloadingAtom={isBibleViewReloadingAtom} />
       <BookmarkModal

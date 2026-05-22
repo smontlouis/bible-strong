@@ -7,7 +7,7 @@ import { TouchableOpacity } from 'react-native'
 import { useSelector } from 'react-redux'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
-import TagList from '~common/TagList'
+import EntityChipList from '~common/EntityChipList'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { Chip } from '~common/ui/NewChip'
@@ -104,7 +104,7 @@ const TaggedItemRow = ({ item, onEditTags }: { item: TaggedItem; onEditTags: () 
               {subtitle}
             </Text>
           ) : null}
-          <TagList tags={tags} />
+          <EntityChipList tags={tags} />
         </Box>
         <FeatherIcon name="chevron-right" size={20} color="grey" />
       </ItemRow>
@@ -168,12 +168,7 @@ const VerseTagsModal = forwardRef<BottomSheetModal, VerseTagsModalProps>(
       <Modal.Body
         ref={ref}
         snapPoints={['50%']}
-        headerComponent={
-          <ModalHeader
-            title={`${t('Étiquettes pour')} ${reference}`}
-            subTitle={t('Cliquez sur un élément pour modifier ses étiquettes')}
-          />
-        }
+        headerComponent={<ModalHeader title={t('Étiquettes')} subTitle={reference} />}
       >
         <Box>
           {taggedItems.length === 0 ? (

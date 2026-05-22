@@ -8,7 +8,7 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
 import Link from '~common/Link'
-import TagList from '~common/TagList'
+import EntityChipList from '~common/EntityChipList'
 import { deltaToPlainText } from '~helpers/deltaToPlainText'
 import truncate from '~helpers/truncate'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -31,9 +31,18 @@ export type StudyItemProps = {
   theme: Theme
   setStudySettings?: (studyId: string) => void
   onPress?: (studyId: string) => void
+  relationCount?: number
+  onRelationPress?: () => void
 }
 
-const StudyItem = ({ study, theme, setStudySettings, onPress }: StudyItemProps) => {
+const StudyItem = ({
+  study,
+  theme,
+  setStudySettings,
+  onPress,
+  relationCount,
+  onRelationPress,
+}: StudyItemProps) => {
   const { t } = useTranslation()
   const lang = useLanguage()
 
@@ -88,7 +97,12 @@ const StudyItem = ({ study, theme, setStudySettings, onPress }: StudyItemProps) 
           )}
 
           <Box marginTop="auto">
-            <TagList limit={1} tags={study.tags} />
+            <EntityChipList
+              limit={1}
+              tags={study.tags}
+              relationCount={relationCount}
+              onRelationPress={onRelationPress}
+            />
           </Box>
           {!!setStudySettings && (
             <LinkBox

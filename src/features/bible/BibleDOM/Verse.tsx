@@ -4,6 +4,7 @@ import { styled } from 'goober'
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_VERSE_LINKS,
+  NAVIGATE_TO_VERSE_STUDY_RELATIONS,
   NAVIGATE_TO_BIBLE_NOTE,
   OPEN_BOOKMARK_MODAL,
   NAVIGATE_TO_BIBLE_LINK,
@@ -20,6 +21,7 @@ import LinksText from './LinksText'
 import NotesCount from './NotesCount'
 import NotesText from './NotesText'
 import BookmarkIcon from './BookmarkIcon'
+import StudyRelationsCount from './StudyRelationsCount'
 import TagsIndicator from './TagsIndicator'
 import { RootState } from '~redux/modules/reducer'
 import { useDispatch } from './DispatchProvider'
@@ -257,6 +259,7 @@ interface Props {
   notesText?: NotedVerse[]
   linksCount?: number
   linksText?: LinkedVerse[]
+  relationsCount?: number
   version: string
   isHebreu: boolean
   selectedCode: SelectedCode | null
@@ -301,6 +304,7 @@ const Verse = ({
   notesText,
   linksCount,
   linksText,
+  relationsCount,
   isSelectionMode,
   version,
   isHebreu,
@@ -374,6 +378,14 @@ const Verse = ({
     const { Livre, Chapitre, Verset } = verse
     dispatch({
       type: NAVIGATE_TO_VERSE_LINKS,
+      payload: `${Livre}-${Chapitre}-${Verset}`,
+    })
+  }
+
+  const navigateToVerseStudyRelations = () => {
+    const { Livre, Chapitre, Verset } = verse
+    dispatch({
+      type: NAVIGATE_TO_VERSE_STUDY_RELATIONS,
       payload: `${Livre}-${Chapitre}-${Verset}`,
     })
   }
@@ -622,6 +634,14 @@ const Verse = ({
             onClick={navigateToVerseLinks}
             count={linksCount}
             linkType={linksText?.[0]?.linkType}
+            isDisabled={annotationMode}
+          />
+        )}
+        {relationsCount && !isSelectionMode && (
+          <StudyRelationsCount
+            settings={settings}
+            onClick={navigateToVerseStudyRelations}
+            count={relationsCount}
             isDisabled={annotationMode}
           />
         )}

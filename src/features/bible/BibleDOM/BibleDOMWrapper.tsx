@@ -20,6 +20,7 @@ import {
   getNotedVersesText,
   getLinkedVersesCount,
   getLinkedVersesText,
+  getStudyRelationsCount,
   transformComments,
 } from './computeVerseMetadata'
 import booksJson from '~assets/bible_versions/books.json'
@@ -41,7 +42,13 @@ import { appLogger } from '~helpers/agentObservability'
 import { BibleError } from '~helpers/bibleErrors'
 import { toast } from '~helpers/toast'
 import { RootState } from '~redux/modules/reducer'
-import { HighlightsObj, LinksObj, NotesObj, WordAnnotationsObj } from '~redux/modules/user'
+import {
+  HighlightsObj,
+  LinksObj,
+  NotesObj,
+  StudyRelationsObj,
+  WordAnnotationsObj,
+} from '~redux/modules/user'
 import type { CrossVersionAnnotation } from '~redux/selectors/bible'
 import { useBookAndVersionSelector } from '../BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 import type { AnnotationType, SelectionRange, WordPosition } from '../hooks/useAnnotationMode'
@@ -63,6 +70,7 @@ import {
   NAVIGATE_TO_STRONG,
   NAVIGATE_TO_TAG,
   NAVIGATE_TO_VERSE_LINKS,
+  NAVIGATE_TO_VERSE_STUDY_RELATIONS,
   NAVIGATE_TO_VERSION,
   OPEN_BOOKMARK_MODAL,
   OPEN_CROSS_VERSION_MODAL,
@@ -175,6 +183,7 @@ export type WebViewProps = {
   notedVerses: NotesObj
   bookmarkedVerses: Record<number, Bookmark>
   linkedVerses: LinksObj
+  studyRelations: StudyRelationsObj
   wordAnnotations: WordAnnotationsObj
   settings: RootState['user']['bible']['settings']
   verseToScroll: number | undefined
@@ -220,6 +229,7 @@ export type WebViewProps = {
   onOpenVerseTagsModal?: (verseKey: string) => void
   // Verse notes modal
   onOpenVerseNotesModal?: (verseKey: string) => void
+  onOpenStudyRelationsModal?: (verseKey: string) => void
   // Enter annotation mode from double-tap
   onEnterAnnotationMode?: () => void
   // Red words data
@@ -263,6 +273,7 @@ export const BibleDOMWrapper = ({
   notedVerses,
   bookmarkedVerses,
   linkedVerses,
+  studyRelations,
   wordAnnotations,
   settings,
   verseToScroll,
@@ -285,6 +296,7 @@ export const BibleDOMWrapper = ({
   versesWithNonHighlightTags,
   onChangeResourceTypeSelectVerse,
   onOpenVerseNotesModal,
+  onOpenStudyRelationsModal,
   openNoteModal,
   openLinkModal,
   removeParallelVersion,
@@ -394,6 +406,11 @@ export const BibleDOMWrapper = ({
             withBack: 'true',
           },
         })
+        break
+      }
+      case NAVIGATE_TO_VERSE_STUDY_RELATIONS: {
+        const verseKey = getStringPayload(action.payload)
+        if (verseKey) onOpenStudyRelationsModal?.(verseKey)
         break
       }
       case NAVIGATE_TO_PERICOPE: {
@@ -656,6 +673,7 @@ export const BibleDOMWrapper = ({
   const notedVersesText = getNotedVersesText(versesToSend, notedVerses)
   const linkedVersesCount = getLinkedVersesCount(versesToSend, linkedVerses)
   const linkedVersesText = getLinkedVersesText(versesToSend, linkedVerses)
+  const studyRelationsCount = getStudyRelationsCount(versesToSend, studyRelations)
 
   return (
     <Box
@@ -717,6 +735,7 @@ export const BibleDOMWrapper = ({
         notedVersesText={notedVersesText}
         linkedVersesCount={linkedVersesCount}
         linkedVersesText={linkedVersesText}
+        studyRelationsCount={studyRelationsCount}
       />
       {Platform.OS === 'android' && Platform.Version < 30 && (
         <HelpTip

@@ -44,6 +44,7 @@ const COLLECTION_LABELS: Record<SubcollectionName, string> = {
   highlights: 'surlignages',
   notes: 'notes',
   links: 'liens',
+  studyRelations: 'relations d’étude',
   tags: 'tags',
   strongsHebreu: 'Strong hébreu',
   strongsGrec: 'Strong grec',

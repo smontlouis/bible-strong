@@ -58,6 +58,7 @@ declare global {
 }
 
 const forwardProps = [
+  'settings',
   'isFocused',
   'isParallel',
   'isParallelVerse',
@@ -65,12 +66,21 @@ const forwardProps = [
   'isSelected',
   'isVerseToScroll',
   'highlightedColor',
+  'highlightBg',
+  'highlightColor',
+  'redColor',
+  'isSelectedMode',
+  'fadePosition',
+  'isButton',
+  'isDisabled',
+  'columnCount',
+  'columnWidth',
   'rtl',
 ]
 setup(React.createElement, undefined, undefined, (props: object) => {
   const forwardedProps = props as Record<string, unknown>
   for (let prop in forwardedProps) {
-    if (forwardProps.includes(prop)) {
+    if (prop[0] === '$' || forwardProps.includes(prop)) {
       delete forwardedProps[prop]
     }
   }
@@ -123,6 +133,7 @@ type Props = Pick<
   notedVersesText: { [key: string]: NotedVerse[] }
   linkedVersesCount: { [key: string]: number }
   linkedVersesText: { [key: string]: LinkedVerse[] }
+  studyRelationsCount: { [key: string]: number }
   // Annotation mode props (uncontrolled - DOM manages local annotation state)
   annotationMode?: boolean
   clearSelectionTrigger?: number
@@ -426,6 +437,7 @@ const LoadedBibleContent = ({
   notedVersesText,
   linkedVersesCount,
   linkedVersesText,
+  studyRelationsCount,
 }: Props) => {
   // Ref for highlight layer
   const containerRef = useRef<HTMLDivElement>(null)
@@ -1035,6 +1047,7 @@ const LoadedBibleContent = ({
               notedVersesText={notedVersesText}
               linkedVersesCount={linkedVersesCount}
               linkedVersesText={linkedVersesText}
+              studyRelationsCount={studyRelationsCount}
               versesWithAnnotationNotes={versesWithAnnotationNotes}
               navigateToPericope={navigateToPericope}
               annotationMode={annotationMode}
