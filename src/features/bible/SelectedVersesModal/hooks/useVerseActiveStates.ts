@@ -10,6 +10,8 @@ import {
 import { makeSelectBookmarkForVerse } from '~redux/selectors/bookmarks'
 import type { VerseIds } from '~common/types'
 import type { VerseActiveStates } from '../types'
+import { createVerseEndpoint } from '~redux/modules/user'
+import { endpointIdentity } from '~features/studyRelations/domain'
 
 interface UseVerseActiveStatesParams {
   selectedVerses: VerseIds
@@ -57,9 +59,14 @@ const useVerseActiveStates = ({
   const hasStudyRelation = useSelector((state: RootState) => {
     if (!firstVerseKey || !book || !chapter) return false
     const relations = selectStudyRelationsByChapter(state, book, chapter)
+    const selectedEndpointIdentity = endpointIdentity(
+      createVerseEndpoint(Object.keys(selectedVerses))
+    )
+
     return Object.values(relations).some(relation =>
       relation.endpoints.some(
-        endpoint => endpoint.type === 'verse' && endpoint.verseKeys.includes(firstVerseKey)
+        endpoint =>
+          endpoint.type === 'verse' && endpointIdentity(endpoint) === selectedEndpointIdentity
       )
     )
   })

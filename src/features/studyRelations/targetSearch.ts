@@ -44,7 +44,6 @@ const searchVerseTargets = (query: string): RelationTargetResult[] =>
       endpoint: {
         type: 'verse',
         verseKeys,
-        label: title,
       },
     }
   })

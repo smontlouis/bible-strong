@@ -123,8 +123,7 @@ const getRelationSubtitle = (model: RelationDisplayModel) => {
   }
 }
 
-const getEndpointLabel = (endpoint: RelationEndpoint) =>
-  endpoint.label || getEndpointFallbackLabel(endpoint)
+const getEndpointLabel = (endpoint: RelationEndpoint) => getEndpointFallbackLabel(endpoint)
 
 const isDirectionalType = (type: RelationType) => directionalTypes.includes(type)
 
@@ -351,6 +350,8 @@ const StudyRelationList = ({
     )
   }
 
+  const hasDirectionalType = isDirectionalType(draft.type)
+
   return (
     <VStack>
       {relations.length === 0 ? (
@@ -417,27 +418,36 @@ const StudyRelationList = ({
           <VStack p={20} gap={22}>
             <VStack gap={10}>
               <HStack alignItems="center" wrap>
-                <Text bold numberOfLines={1} shrink={1}>
+                <Text bold numberOfLines={1} shrink={1} fontSize={14}>
                   {getEndpointLabel(editingModel.activeEndpoint)}
                 </Text>
                 <TouchableBox
-                  mx={6}
-                  px={10}
+                  ml={6}
+                  mr={hasDirectionalType ? 0 : 6}
+                  pl={10}
+                  pr={hasDirectionalType ? 6 : 10}
                   py={6}
-                  borderRadius={16}
+                  borderTopLeftRadius={16}
+                  borderBottomLeftRadius={16}
+                  borderBottomRightRadius={hasDirectionalType ? 0 : 16}
+                  borderTopRightRadius={hasDirectionalType ? 0 : 16}
                   bg="lightGrey"
                   onPress={cycleDraftType}
                 >
-                  <Text bold fontSize={13} color="primary">
+                  <Text bold fontSize={12} color="primary">
                     {getDraftRelationText(editingModel)}
                   </Text>
                 </TouchableBox>
-                {isDirectionalType(draft.type) ? (
+                {hasDirectionalType ? (
                   <TouchableBox
                     mr={6}
-                    width={26}
+                    pl={4}
+                    pr={6}
                     height={28}
-                    borderRadius={16}
+                    borderTopRightRadius={16}
+                    borderBottomRightRadius={16}
+                    borderLeftWidth={1}
+                    borderColor="reverse"
                     bg="lightGrey"
                     alignItems="center"
                     justifyContent="center"
@@ -446,7 +456,7 @@ const StudyRelationList = ({
                     <MaterialIcon name="swap-horiz" size={16} color="primary" />
                   </TouchableBox>
                 ) : null}
-                <Text bold>
+                <Text bold fontSize={14}>
                   {editingModel.targetEndpoint.type === 'note' ||
                   editingModel.targetEndpoint.type === 'study'
                     ? `${t('une')} `
@@ -455,7 +465,7 @@ const StudyRelationList = ({
                 <Box mx={4}>
                   <TargetIcon type={editingModel.targetEndpoint.type} />
                 </Box>
-                <Text bold numberOfLines={1} shrink={1}>
+                <Text bold numberOfLines={1} shrink={1} fontSize={14}>
                   {editingModel.targetEndpoint.type === 'note'
                     ? t('note')
                     : editingModel.targetEndpoint.type === 'study'

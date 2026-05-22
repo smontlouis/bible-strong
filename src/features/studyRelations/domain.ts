@@ -112,7 +112,6 @@ export const normalizeRelationEndpoint = (endpoint: RelationEndpoint): RelationE
       return {
         ...endpoint,
         verseKeys,
-        label: endpoint.label || verseToReference(verseKeys),
       }
     }
     case 'note':
@@ -205,15 +204,17 @@ export const relationIncludesVerseKey = (relation: StudyRelation, verseKey: stri
   )
 
 export const getEndpointFallbackLabel = (endpoint: RelationEndpoint): string => {
-  if (endpoint.label) return endpoint.label
   switch (endpoint.type) {
     case 'verse':
-      return verseToReference(endpoint.verseKeys)
+      return verseToReference(endpoint.verseKeys) || endpoint.label || i18n.t('Passage supprimé')
     case 'note':
+      if (endpoint.label) return endpoint.label
       return i18n.t('Note supprimée')
     case 'study':
+      if (endpoint.label) return endpoint.label
       return i18n.t('Étude supprimée')
     case 'strong':
+      if (endpoint.label) return endpoint.label
       return `${endpoint.language === 'greek' ? 'G' : 'H'}${endpoint.code}`
   }
 }

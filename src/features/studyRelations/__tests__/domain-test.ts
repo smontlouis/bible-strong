@@ -56,7 +56,6 @@ describe('study relation domain', () => {
     expect(relation.endpoints[0]).toEqual({
       type: 'verse',
       verseKeys: ['1-1-1', '1-1-2'],
-      label: 'Genèse 1:1-2',
     })
   })
 
