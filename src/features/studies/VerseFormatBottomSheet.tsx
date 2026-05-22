@@ -3,6 +3,7 @@ import React, { memo } from 'react'
 import { TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import Modal from '~common/Modal'
+import ModalHeader from '~common/ModalHeader'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -10,12 +11,14 @@ import Text from '~common/ui/Text'
 interface VerseFormatBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheetModal | null>
   onSelectFormat: (format: 'inline' | 'block') => void
+  reference?: string
   onClose?: () => void
 }
 
 const VerseFormatBottomSheet = ({
   bottomSheetRef,
   onSelectFormat,
+  reference,
   onClose,
 }: VerseFormatBottomSheetProps) => {
   const { t } = useTranslation()
@@ -26,11 +29,7 @@ const VerseFormatBottomSheet = ({
       onModalClose={onClose}
       withPortal
       snapPoints={[280]}
-      headerComponent={
-        <Box px={20} py={20} gap={5}>
-          <Text bold>{t('study.formatChoice')}</Text>
-        </Box>
-      }
+      headerComponent={<ModalHeader title={t('study.formatChoice')} subTitle={reference} />}
     >
       <Box paddingHorizontal={20} paddingBottom={20}>
         {/* Inline format option */}

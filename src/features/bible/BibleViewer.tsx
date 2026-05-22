@@ -26,6 +26,7 @@ import getVersesContent from '~helpers/getVersesContent'
 import { useQuery } from '~helpers/react-query-lite'
 import { useBottomSheet, useBottomSheetModal } from '~helpers/useBottomSheet'
 import useLanguage from '~helpers/useLanguage'
+import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import {
   addHighlight,
@@ -220,6 +221,7 @@ const BibleViewer = ({
       selectedVerses,
     },
   } = bible
+  const selectedVersesReference = verseToReference(selectedVerses)
   const { data: coverageData } = useQuery({
     queryKey: ['bible-version-coverage', version],
     queryFn: () => getBibleVersionCoverage(version),
@@ -959,10 +961,12 @@ const BibleViewer = ({
       <AddToStudyModal
         bottomSheetRef={addToStudyModal.getRef()}
         onSelectStudy={handleSelectStudy}
+        reference={selectedVersesReference}
       />
       <VerseFormatBottomSheet
         bottomSheetRef={verseFormatModal.getRef()}
         onSelectFormat={handleSelectFormat}
+        reference={pendingVerseData?.verseData.title || selectedVersesReference}
       />
       <LoadingView isBibleViewReloadingAtom={isBibleViewReloadingAtom} />
       <BookmarkModal
