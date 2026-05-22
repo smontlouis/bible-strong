@@ -18,6 +18,8 @@ jest.mock('~assets/bible_versions/books-desc', () => {
 })
 
 jest.mock('~i18n', () => ({
+  __esModule: true,
+  default: { t: (key: string) => key },
   t: (key: string) => key,
 }))
 

@@ -33,6 +33,8 @@ jest.mock('~helpers/firebase', () => ({
   firebaseDb: { collection: jest.fn() },
 }))
 jest.mock('~i18n', () => ({
+  __esModule: true,
+  default: { t: (key: string) => key },
   getLanguage: jest.fn(() => 'fr'),
   t: (key: string) => key,
 }))

@@ -12,8 +12,22 @@ jest.mock('~assets/bible_versions/books-desc', () => [
   { Numero: 2, Nom: 'Exode', Chapitres: 40 },
 ])
 
+const translations: Record<string, string> = {
+  'studyRelations.type.linked': 'lié à',
+  'studyRelations.type.references': 'renvoie vers',
+  'studyRelations.type.explains': 'explique',
+  'studyRelations.type.contrasts': 'contraste avec',
+  'studyRelations.type.referencedBy': 'référencé par',
+  'studyRelations.type.explainedBy': 'expliqué par',
+}
+
 jest.mock('~i18n', () => ({
-  t: (key: string) => key,
+  __esModule: true,
+  default: {
+    t: (key: string, options?: Record<string, unknown>) =>
+      options?.bookNumber ? `Livre ${options.bookNumber}` : translations[key] || key,
+  },
+  t: (key: string) => translations[key] || key,
 }))
 
 describe('study relation domain', () => {

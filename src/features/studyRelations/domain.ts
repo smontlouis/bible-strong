@@ -1,6 +1,7 @@
 import books from '~assets/bible_versions/books-desc'
 import type { Note, Study } from '~redux/modules/user'
 import verseToReference from '~helpers/verseToReference'
+import i18n from '~i18n'
 
 export type RelationType = 'linked' | 'references' | 'explains' | 'contrasts'
 export type RelationDirection = 'none' | 'forward' | 'backward'
@@ -65,15 +66,15 @@ const directionalTypes: RelationType[] = ['references', 'explains']
 const nonDirectionalTypes: RelationType[] = ['linked', 'contrasts']
 
 const relationLabels: Record<RelationType, string> = {
-  linked: 'lié à',
-  references: 'renvoie vers',
-  explains: 'explique',
-  contrasts: 'contraste avec',
+  linked: 'studyRelations.type.linked',
+  references: 'studyRelations.type.references',
+  explains: 'studyRelations.type.explains',
+  contrasts: 'studyRelations.type.contrasts',
 }
 
 const passiveRelationLabels: Record<Extract<RelationType, 'references' | 'explains'>, string> = {
-  references: 'référencé par',
-  explains: 'expliqué par',
+  references: 'studyRelations.type.referencedBy',
+  explains: 'studyRelations.type.explainedBy',
 }
 
 const endpointTypeLabels: Record<RelationEndpointType, string> = {
@@ -209,9 +210,9 @@ export const getEndpointFallbackLabel = (endpoint: RelationEndpoint): string => 
     case 'verse':
       return verseToReference(endpoint.verseKeys)
     case 'note':
-      return 'Note supprimée'
+      return i18n.t('Note supprimée')
     case 'study':
-      return 'Étude supprimée'
+      return i18n.t('Étude supprimée')
     case 'strong':
       return `${endpoint.language === 'greek' ? 'G' : 'H'}${endpoint.code}`
   }
@@ -259,15 +260,15 @@ export const getRelationText = (
   activeEndpoint: RelationEndpoint
 ): string => {
   if (!directionalTypes.includes(relation.type)) {
-    return relationLabels[relation.type]
+    return i18n.t(relationLabels[relation.type])
   }
 
   const activeIsSource =
     (relation.direction === 'forward' && endpointsMatch(activeEndpoint, relation.endpoints[0])) ||
     (relation.direction === 'backward' && endpointsMatch(activeEndpoint, relation.endpoints[1]))
 
-  if (activeIsSource) return relationLabels[relation.type]
-  return passiveRelationLabels[relation.type as 'references' | 'explains']
+  if (activeIsSource) return i18n.t(relationLabels[relation.type])
+  return i18n.t(passiveRelationLabels[relation.type as 'references' | 'explains'])
 }
 
 export const getRelationDisplayModel = (
@@ -292,9 +293,9 @@ export const getRelationDisplayModel = (
     isTargetAvailable: target.isAvailable,
     relationText,
     title: relation.label || `${active.label} ${relationText} ${target.label}`,
-    subtitle: `${endpointTypeLabels[targetEndpoint.type]}${target.isAvailable ? '' : ' indisponible'}`,
+    subtitle: `${i18n.t(endpointTypeLabels[targetEndpoint.type])}${target.isAvailable ? '' : ` ${i18n.t('indisponible')}`}`,
   }
 }
 
 export const getBookName = (bookNumber: number): string =>
-  books[bookNumber - 1]?.Nom || `Livre ${bookNumber}`
+  books[bookNumber - 1]?.Nom || i18n.t('Livre {{bookNumber}}', { bookNumber })

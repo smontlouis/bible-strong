@@ -4,6 +4,8 @@ import type { RootState } from '~redux/modules/reducer'
 jest.mock('~assets/bible_versions/books-desc', () => [{ Numero: 1, Nom: 'Genèse', Chapitres: 50 }])
 
 jest.mock('~i18n', () => ({
+  __esModule: true,
+  default: { t: (key: string) => key },
   t: (key: string) => key,
 }))
 

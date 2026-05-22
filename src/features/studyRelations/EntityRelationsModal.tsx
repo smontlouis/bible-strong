@@ -1,5 +1,6 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { Ref } from 'react'
+import { useTranslation } from 'react-i18next'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import Box, { TouchableBox } from '~common/ui/Box'
@@ -16,12 +17,13 @@ type Props = {
 }
 
 const EntityRelationsModal = ({ ref, endpoint }: Props) => {
+  const { t } = useTranslation()
   const openEndpoint = useOpenRelationEndpoint()
   const createRelationModal = useBottomSheetModal()
   const isSingleVerseEndpoint = endpoint?.type === 'verse' && endpoint.verseKeys.length === 1
   const endpointLabel = endpoint ? getEndpointFallbackLabel(endpoint) : ''
-  const title = isSingleVerseEndpoint ? 'Relations' : endpointLabel || 'Relations'
-  const subTitle = isSingleVerseEndpoint ? endpointLabel : endpoint ? 'Relations' : undefined
+  const title = t('Relations')
+  const subTitle = endpointLabel
 
   return (
     <>

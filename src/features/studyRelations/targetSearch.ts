@@ -4,6 +4,7 @@ import type { NotesObj, StudiesObj } from '~redux/modules/user'
 import type { RelationEndpoint, RelationEndpointType } from './domain'
 import { normalizeStrongCode } from './domain'
 import verseToReference from '~helpers/verseToReference'
+import i18n from '~i18n'
 
 export type RelationTargetResult = {
   id: string
@@ -39,7 +40,7 @@ const searchVerseTargets = (query: string): RelationTargetResult[] =>
       id: `verse:${verseKeys.join('/')}:${index}`,
       type: 'verse',
       title,
-      subtitle: 'Passage biblique',
+      subtitle: i18n.t('Passage biblique'),
       endpoint: {
         type: 'verse',
         verseKeys,
@@ -61,7 +62,7 @@ const searchStrongTargets = (query: string): RelationTargetResult[] => {
       id: `strong:${language}:${code}`,
       type: 'strong',
       title: `${prefix}${code}`,
-      subtitle: language === 'greek' ? 'Strong grec' : 'Strong hébreu',
+      subtitle: language === 'greek' ? i18n.t('Strong grec') : i18n.t('Strong hébreu'),
       endpoint: {
         type: 'strong',
         language,
@@ -83,12 +84,12 @@ const normalizeText = (text: string) => text.toLowerCase().trim()
 
 export const getNoteTargetItems = (notes: NotesObj = {}): RelationTargetResult[] =>
   Object.entries(notes).map(([noteId, note]) => {
-    const title = note.title || note.description || 'Note sans titre'
+    const title = note.title || note.description || i18n.t('Note sans titre')
     return {
       id: `note:${noteId}`,
       type: 'note',
       title,
-      subtitle: 'Note',
+      subtitle: i18n.t('Note'),
       description: note.description,
       endpoint: {
         type: 'note',
@@ -100,12 +101,12 @@ export const getNoteTargetItems = (notes: NotesObj = {}): RelationTargetResult[]
 
 export const getStudyTargetItems = (studies: StudiesObj = {}): RelationTargetResult[] =>
   Object.values(studies).map(study => {
-    const title = study.title || 'Étude sans titre'
+    const title = study.title || i18n.t('Étude sans titre')
     return {
       id: `study:${study.id}`,
       type: 'study',
       title,
-      subtitle: 'Étude',
+      subtitle: i18n.t('Étude'),
       description: study.content?.ops
         ? deltaToPlainText(study.content.ops as Parameters<typeof deltaToPlainText>[0])
         : undefined,

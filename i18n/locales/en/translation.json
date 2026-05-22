@@ -612,13 +612,11 @@
   "Index de recherche": "Search index",
   "Index permettant une recherche hors-ligne dans la Bible": "Index allowing off-line search in the Bible",
   "Police et paramêtres": "Font and settings",
-
   "L'index de recherche est requis pour accéder à cette page.": "The search index is required to access this page.",
   "Téléchargement de l'index...": "Downloading the index ...",
   "Par pertinence": "Relevant",
   "Par ordre alphabétique": "In alphabetical order",
   "Suggéré": "Recommended",
-
   "Auto": "Auto",
   "Blanc": "White",
   "Sépia": "Sepia",
@@ -630,11 +628,9 @@
   "Mauve": "Mauve",
   "Couleur Jour": "Day Color",
   "Couleur Nuit": "Night Color",
-
   "tabs.study": "Study",
   "tabs.annotate": "Annotate",
   "tabs.share": "Share",
-
   "tabs.new": "New tab",
   "tabs.bible": "Bible",
   "tabs.search": "Search",
@@ -670,11 +666,9 @@
   "tabs.viewMyGroups": "View my groups",
   "tabs.createdAgo": "Created {{date}}",
   "tabs.defaultGroup": "Main group",
-
   "common.create": "Create",
   "common.cancel": "Cancel",
   "common.delete": "Delete",
-
   "study.addToStudy": "To study",
   "study.selectStudy": "Select a study",
   "study.searchStudy": "Search for a study...",
@@ -687,10 +681,8 @@
   "study.verseAdded": "Verse added to study",
   "study.openStudy": "Open",
   "study.noStudies": "No studies found",
-
   "common.goTo": "Go to tab",
   "common.chooseCompareVersions": "Choose versions to compare",
-
   "premium.earlyAccess": "Early access",
   "premium.earlyAccess.description": "This feature is available in early access for sponsors. It will be available to all users in the coming weeks.",
   "premium.objectives": "Objectives",
@@ -703,13 +695,11 @@
   "premium.earnings.500.description": "This amount represents the different operating costs of the app (servers, services, etc.) and increases in proportion to the number of subscribers.",
   "premium.earnings.1500.description": "With your support, I can work part-time on the application and use consultants to make it even more qualitative! The new features and improvements will be delivered faster.",
   "premium.learnMore": "Learn more",
-
   "premium.onemonth.min.title": "Symbolic 🙏",
   "premium.onemonth.min.description": "Thank you for your symbolic help to the evolution of this project.",
   "premium.onemonth.min.detail1": "Unlimited Biblesearch",
   "premium.onemonth.min.detail2": "Unlimited timeline search",
   "premium.onemonth.min.detail4": "Number of unlimited tabs",
-
   "premium.onemonth.title": "Sponsor ⭐",
   "premium.onemonth.description": "Thank you for your commitment to the evolution of this project and your desire to invest yourself financially.Thank you warmly for your support.",
   "premium.onemonth.detail1": "Everything that symbolic contains",
@@ -718,23 +708,19 @@
   "premium.onemonth.detail4": "Memorization of verses",
   "premium.onemonth.detail5": "Web version",
   "premium.onemonth.detail6": "Background music",
-
   "premium.onemonth.max.title": "✨Premium✨ Sponsor",
   "premium.onemonth.max.description": "The manna fell from the sky! It is a blessing to see that you believe in this project and that you are ready to invest yourself financially.Thank you warmly for your support.",
   "premium.onemonth.max.detail1": "Everything in Sponsor",
   "premium.onemonth.max.detail2": "AI Biblical Assistant",
   "premium.onemonth.max.detail3": "AI Audio Bible",
-
   "bible.settings.shareOptions": "Share options",
   "bible.settings.hasVerseNumbers": "Show verse numbers",
   "bible.settings.hasInlineVerses": "Inline verses",
   "bible.settings.hasQuotes": "Show quotes",
   "bible.settings.hasAppName": "Show app name",
-
   "premium.sponsorsOnlyFeature": "This feature is reserved for sponsors.",
   "premium.sponsorsOnlyOption": "This option is reserved for sponsors.",
   "premium.searchQuotaRemaining": "Remaining research",
-
   "app.downloading": "Downloading...",
   "app.imported": "Import completed",
   "app.exported": "Export completed",
@@ -743,9 +729,7 @@
   "app.syncError": "An error occurred while synchronizing your data. Please save your data manually",
   "app.exportDesc": "Normally your data is automatically synchronized, but in some cases it may happen that you need to do it manually. \n\nWhen you export your data, a file is created on your phone. You can then share it by email or other means of your choice.",
   "app.importDesc": "The import file must be in SAVE.BIBLESTRONG format and contain data from your account. \n\nWARNING, imports crushes all existing data. Make sure you have a recent backup before continuing.",
-
   "backup.title": "Backup",
-
   "backups.title": "Automatic Backups",
   "backups.description": "Your data is automatically backed up regularly. The 10 most recent backups are kept.",
   "backups.none": "No backups available at this time.\nBackups will be created automatically.",
@@ -768,20 +752,16 @@
   "backups.links": "{{count}} link(s)",
   "backups.tags": "{{count}} tag(s)",
   "backups.tabs": "{{count}} tab(s)",
-
   "audio.speed": "Speed",
   "audio.pitch": "Pitch",
   "audio.repeat": "Repeat",
   "audio.voice": "Voice",
   "audio.timer": "Timer",
   "audio.goBack": "Back to audio",
-
   "donation.title": "Offer your support",
   "donation.description": "Help make a difference",
-
   "audibible.try": "Try audibible",
   "audibible.description": "Listen, read, meditate",
-
   "fr-FR": "French",
   "fr-CA": "French Canada",
   "en-GB": "English UK",
@@ -789,32 +769,25 @@
   "en-US": "English US",
   "he-IL": "Hebrew Israel",
   "el-GR": "Modern Greek Greece",
-
   "Contribuer": "Contribute",
   "Document sans titre": "Untitled document",
   "event": "Event",
-
   "tips.chapterSelector": "You can open a new tab by long pressing on the chapter number.",
   "tips.manual-backup": "To prevent any data loss, you can manually export your data in the Import/Export tab",
   "tips.bible-dom-wrapper-android": "You are on Android 10 or lower. If you have a white screen, please update your Android WebView in the play store.",
   "goToVerse": "Go to verse",
-
   "Normal": "Normal",
   "Petit": "Small",
   "Grand": "Large",
-
   "bookSelector.sort.classical": "Classical order",
   "bookSelector.sort.alphabetical": "Alphabetical order",
   "bookSelector.selectionMode.grid": "Grid",
   "bookSelector.selectionMode.list": "List",
   "bookSelector.withVerses": "With verses",
   "bookSelector.withoutVerses": "Without verses",
-
   "reset": "Reset",
-
   "language.appLanguage": "App Language",
   "language.appLanguageDesc": "Changes the interface language and resets all resources to this language.",
-
   "resourceLanguage.title": "Change Language",
   "resourceLanguage.description": "You can customize each resource's language individually.",
   "resourceLanguage.setAllTo": "Set all to",
@@ -828,14 +801,11 @@
   "resourceLanguage.timelineDesc": "Biblical timeline",
   "resourceLanguage.searchDesc": "Full-text search index",
   "resourceLanguage.note": "Note: Changing a resource's language may require a new download if the database for that language is not yet available.",
-
   "downloads.databasesFr": "Databases - French",
   "downloads.databasesEn": "Databases - English",
   "downloads.crossReferences": "Cross-references",
-
   "menu.language": "Language",
   "menu.languageChanged": "Resource language changed to {{language}}",
-
   "migration.inProgress": "Migration in progress...",
   "migration.resuming": "Resuming migration...",
   "migration.failed": "Migration failed",
@@ -846,14 +816,12 @@
   "migration.partialError": "Some data could not be migrated: ",
   "migration.contactSupport": "Please contact the developer for assistance.",
   "migration.contactButton": "Contact support",
-
   "bibleDefaults.title": "Bible defaults",
   "bibleDefaults.defaultVersion": "Default version",
   "bibleDefaults.defaultVersionDescription": "This version will be used for daily verses, reading plans, new Bible tabs, etc.",
   "bibleDefaults.frenchVersions": "French versions",
   "bibleDefaults.englishVersions": "English versions",
   "bibleDefaults.switchedToFallback": "Default Bible has been changed to {{version}}",
-
   "profile.title": "My profile",
   "profile.editName": "Edit name",
   "profile.enterName": "Enter your name",
@@ -885,7 +853,6 @@
   "profile.photoEditComingSoon": "Photo editing coming soon",
   "Enregistrer": "Save",
   "Delete": "Delete",
-
   "settings.resources": "Resources",
   "settings.myContent": "My content",
   "settings.account": "Account",
@@ -894,11 +861,9 @@
   "settings.community": "Community",
   "settings.legal": "Legal",
   "settings.theme": "Theme",
-
   "forgotPassword.title": "Forgot password",
   "forgotPassword.description": "Enter your email address and we'll send you a link to reset your password.",
   "forgotPassword.send": "Send reset link",
-
   "bible.error.versionNotFound": "This Bible version is not downloaded.",
   "bible.error.chapterNotFound": "This chapter does not exist in this Bible version.",
   "bible.error.databaseCorrupted": "The database appears to be corrupted. Go to download management to re-download it.",
@@ -914,17 +879,14 @@
   "bible.error.databaseRecovered": "Bible database has been reset. You can re-download your versions.",
   "bible.error.databaseOpenFailed": "Failed to open Bible database. Please restart the app.",
   "search.error.searchFailed": "Search encountered an error. Try restarting the app.",
-
   "créé par": "created by",
   "bible.interlinear.detailed": "Detailed",
   "bible.interlinear.compact": "Compact",
-
   "bible.crossVersionAnnotations.subtitle": "Annotations in other versions",
   "bible.crossVersionAnnotations.annotationCount": "{{count}} annotation",
   "bible.crossVersionAnnotations.annotationCount_plural": "{{count}} annotations",
   "bible.crossVersionAnnotations.switchVersion": "Switch version",
   "bible.crossVersionAnnotations.newTab": "New tab",
-
   "Aucun élément avec des étiquettes": "No items with tags",
   "Aucune couleur personnalisée": "No custom colors",
   "Cliquez sur un élément pour modifier ses étiquettes": "Click on an item to edit its tags",
@@ -934,11 +896,9 @@
   "Terminé": "Done",
   "Version": "Version",
   "OK": "OK",
-
   "Créer un nouveau marque-page": "Create a new bookmark",
   "Déplacer un marque-page existant": "Move an existing bookmark",
   "Marque-page déplacé": "Bookmark moved",
-
   "Lien": "Link",
   "Liens sur": "Links for",
   "Vous n'avez pas encore de liens...": "You don't have any links yet...",
@@ -946,44 +906,34 @@
   "Ouvrir dans le navigateur": "Open in browser",
   "Impossible d'ouvrir ce lien": "Unable to open this link",
   "Erreur lors de l'ouverture du lien": "Error opening the link",
-
   "Interlinéaire": "Interlinear",
   "Texte interlinéaire hébreu/grec": "Hebrew/Greek interlinear text",
   "Chronologie des événements bibliques": "Biblical events timeline",
   "Impossible de charger le dictionnaire...": "Unable to load dictionary...",
-
   "Hauteur de ligne": "Line height",
   "Voir dans la Bible": "View in Bible",
-
   "Retour aux études": "Back to studies",
   "Retour aux notes": "Back to notes",
   "Cette étude n'existe plus": "This study no longer exists",
   "Cette note n'existe plus": "This note no longer exists",
-
   "Cette étiquette n'existe pas...": "This tag doesn't exist...",
   "Surbrillance": "Highlight",
-
   "Ancien Testament": "Old Testament",
   "Nouveau Testament": "New Testament",
-
   "Limite de groupes atteinte": "Group limit reached",
-
   "Bible Strong - Migration Issue": "Bible Strong - Migration Issue",
   "Token invalide": "Invalid token",
   "Traduction en cours...": "Translating...",
   "Une erreur est survenue, vérifiez votre connexion ou contactez-nous.": "An error occurred, check your connection or contact us.",
-
   "en": "en",
   "fr": "fr",
   "English": "English",
   "Français": "French",
-
   "premium.onemonth.min.detail3": "Unlimited comment translation",
   "premium.basic.description": "You are a sponsor.\nThank you for your symbolic help to the evolution of this project.",
   "premium.premium.description": "You are a premium sponsor.\nThank you for your commitment to the evolution of this project and your willingness to invest financially. Thank you warmly for your support.",
   "premium.premium_plus.description": "You are a super premium sponsor.\nManna fell from the sky! It is a blessing to see that you believe in this project and are ready to invest financially. Thank you warmly for your support.",
   "premium.investor.description": "You are an investor.\nManna fell from the sky! It is a blessing to see that you believe in this project and are ready to invest financially. Thank you warmly for your support.",
-
   "onboarding.annotationMode.intro.title": "Free Mode",
   "onboarding.annotationMode.intro.subtitle": "Annotate your Bible word by word",
   "onboarding.annotationMode.intro.button": "Discover",
@@ -1004,7 +954,6 @@
   "onboarding.next": "Next",
   "onboarding.start": "Start",
   "onboarding.back": "Back",
-
   "downloads.title": "Download manager",
   "downloads.select": "Select",
   "downloads.done": "Done",
@@ -1012,7 +961,6 @@
   "downloads.deleteCount": "Delete {{count}} items?",
   "downloads.deleteConfirm": "Are you sure you want to delete this item?",
   "downloads.redownloadConfirm": "Re-download this version? This can fix loading issues.",
-
   "downloads.section.dbFr": "French databases",
   "downloads.section.dbEn": "English databases",
   "downloads.section.crossReferences": "Cross-references",
@@ -1021,29 +969,64 @@
   "downloads.section.bibleEn": "Bibles - English versions",
   "downloads.section.bibleFr": "French Bibles",
   "downloads.section.bibleOther": "Bibles - Original languages",
-
   "downloads.filter.all": "All",
   "downloads.filter.downloaded": "Downloaded",
   "downloads.filter.notDownloaded": "Not downloaded",
   "downloads.filter.originalLangs": "Original",
-
   "downloads.queue": "Queued",
   "downloads.inserting": "Inserting...",
   "downloads.retry": "Retry",
-
   "downloads.storageUsed": "{{used}} used",
   "downloads.progress": "Downloading {{current}}/{{total}}",
   "downloads.selectedCount": "{{count}} selected",
   "downloads.download": "Download",
-
   "downloads.size.gb": "{{value}} GB",
   "downloads.size.mb": "{{value}} MB",
   "downloads.size.kb": "{{value}} KB",
   "downloads.size.b": "{{value}} B",
-
   "rating.title": "Enjoying Bible Strong?",
   "rating.subtitle": "Your review on the store really helps others discover the app. Thank you!",
   "rating.accept": "Yes, rate the app",
   "rating.later": "Later",
-  "rating.decline": "No thanks"
+  "rating.decline": "No thanks",
+  "studyRelations.type.linked": "linked to",
+  "studyRelations.type.references": "refers to",
+  "studyRelations.type.explains": "explains",
+  "studyRelations.type.contrasts": "contrasts with",
+  "studyRelations.type.referencedBy": "referenced by",
+  "studyRelations.type.explainedBy": "explained by",
+  "studyRelations.title.linked": "is linked to",
+  "studyRelations.title.references": "refers to",
+  "studyRelations.title.explains": "explains",
+  "studyRelations.title.contrasts": "contrasts with",
+  "studyRelations.title.referencedBy": "is referenced by",
+  "studyRelations.title.explainedBy": "is explained by",
+  "Relations": "Relations",
+  "Modifier la relation": "Edit relation",
+  "Supprimer la relation": "Delete relation",
+  "Voulez-vous supprimer cette relation?": "Do you want to delete this relation?",
+  "Aucune relation": "No relations",
+  "Ajouter une relation": "Add relation",
+  "Ajouter un libellé": "Add a label",
+  "Libellé": "Label",
+  "Libellé court": "Short label",
+  "une": "a",
+  "une étude": "a study",
+  "indisponible": "unavailable",
+  "Note supprimée": "Deleted note",
+  "Étude supprimée": "Deleted study",
+  "Livre {{bookNumber}}": "Book {{bookNumber}}",
+  "Passage biblique": "Bible passage",
+  "Strong grec": "Greek Strong",
+  "Strong hébreu": "Hebrew Strong",
+  "Note sans titre": "Untitled note",
+  "Étude sans titre": "Untitled study",
+  "Rechercher dans les notes": "Search in notes",
+  "Rechercher dans les études": "Search in studies",
+  "Rechercher un code Strong": "Search a Strong code",
+  "Jean 3:16, G26, note, étude...": "John 3:16, G26, note, study...",
+  "Aucun élément trouvé dans {{target}}": "No item found in {{target}}",
+  "Aucune cible trouvée": "No target found",
+  "Rechercher un passage, un Strong, une note ou une étude": "Search for a passage, Strong, note, or study",
+  "Impossible de charger le lexique Strong.": "Unable to load the Strong lexicon."
 }

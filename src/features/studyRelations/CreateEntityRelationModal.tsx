@@ -4,6 +4,7 @@ import Fuse from 'fuse.js'
 import { ComponentProps, Ref, useDeferredValue, useEffect, useState } from 'react'
 import { ActivityIndicator } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 import AlphabetList from '~common/AlphabetList'
 import BottomSheetSearchInput from '~common/BottomSheetSearchInput'
 import Empty from '~common/Empty'
@@ -43,7 +44,7 @@ type Props = {
   allowedTypes?: RelationEndpoint['type'][]
 }
 
-const browseModeLabels: Record<BrowseMode, string> = {
+const browseModeLabelKeys: Record<BrowseMode, string> = {
   note: 'Notes',
   study: 'Études',
   strong: 'Strong',
@@ -83,16 +84,19 @@ const getStrongEndpoint = (strong: LexiqueRow): RelationEndpoint => ({
 const getStrongSubtitle = (strong: LexiqueRow) =>
   `${strong.lexiqueType} · ${strong.lexiqueType === 'Grec' ? 'G' : 'H'}${getStrongCode(strong)}`
 
-const getSourceEndpointSubtitle = (endpoint: RelationEndpoint | null) => {
+const getSourceEndpointSubtitle = (
+  endpoint: RelationEndpoint | null,
+  t: (key: string) => string
+) => {
   if (!endpoint) return undefined
 
   switch (endpoint.type) {
     case 'verse':
       return getEndpointFallbackLabel(endpoint)
     case 'note':
-      return 'Note'
+      return t('Note')
     case 'study':
-      return 'Étude'
+      return t('Étude')
     case 'strong':
       return endpoint.originalWord || endpoint.label || getEndpointFallbackLabel(endpoint)
   }
@@ -427,11 +431,12 @@ const LoadingIndicator = () => {
 
 const CreateEntityRelationModal = ({
   ref,
-  title = 'Ajouter une relation',
+  title,
   sourceEndpoint,
   onCreated,
   allowedTypes,
 }: Props) => {
+  const { t } = useTranslation()
   const dispatch = useDispatch<AppDispatch>()
   const [searchValue, setSearchValue] = useState('')
   const [browseMode, setBrowseMode] = useState<BrowseMode | null>(null)
@@ -548,14 +553,16 @@ const CreateEntityRelationModal = ({
 
   const placeholder = browseMode
     ? {
-        note: 'Rechercher dans les notes',
-        study: 'Rechercher dans les études',
-        strong: 'Rechercher un code Strong',
+        note: t('Rechercher dans les notes'),
+        study: t('Rechercher dans les études'),
+        strong: t('Rechercher un code Strong'),
       }[browseMode]
-    : 'Jean 3:16, G26, note, étude...'
+    : t('Jean 3:16, G26, note, étude...')
 
-  const modalTitle = browseMode ? browseModeLabels[browseMode] : title
-  const modalSubtitle = getSourceEndpointSubtitle(sourceEndpoint)
+  const modalTitle: string = browseMode
+    ? t(browseModeLabelKeys[browseMode])
+    : title || t('Ajouter une relation')
+  const modalSubtitle = getSourceEndpointSubtitle(sourceEndpoint, t)
 
   const renderTargetItem = ({ item }: { item: RelationTargetResult }) => (
     <RelationTargetRow item={item} onPress={() => selectTarget(item.endpoint)} />
@@ -566,10 +573,12 @@ const CreateEntityRelationModal = ({
   )
 
   const emptyMessage = browseMode
-    ? `Aucun élément trouvé dans ${browseModeLabels[browseMode].toLowerCase()}`
+    ? t('Aucun élément trouvé dans {{target}}', {
+        target: t(browseModeLabelKeys[browseMode]).toLowerCase(),
+      })
     : immediateSearchHasValue
-      ? 'Aucune cible trouvée'
-      : 'Rechercher un passage, un Strong, une note ou une étude'
+      ? t('Aucune cible trouvée')
+      : t('Rechercher un passage, un Strong, une note ou une étude')
 
   const emptyIcon = browseMode
     ? {
@@ -606,7 +615,7 @@ const CreateEntityRelationModal = ({
               bg="lightGrey"
               borderRadius={8}
             >
-              <Text fontSize={13}>Notes</Text>
+              <Text fontSize={13}>{t('Notes')}</Text>
             </TouchableBox>
           )}
           {isAllowed('study') && (
@@ -617,7 +626,7 @@ const CreateEntityRelationModal = ({
               bg="lightGrey"
               borderRadius={8}
             >
-              <Text fontSize={13}>Études</Text>
+              <Text fontSize={13}>{t('Études')}</Text>
             </TouchableBox>
           )}
           {isAllowed('strong') && (
@@ -628,7 +637,7 @@ const CreateEntityRelationModal = ({
               bg="lightGrey"
               borderRadius={8}
             >
-              <Text fontSize={13}>Strong</Text>
+              <Text fontSize={13}>{t('Strong')}</Text>
             </TouchableBox>
           )}
         </HStack>
@@ -657,7 +666,7 @@ const CreateEntityRelationModal = ({
         <VStack flex={1}>
           {strongError ? (
             <Box px={20} py={24}>
-              <Text color="grey">Impossible de charger le lexique Strong.</Text>
+              <Text color="grey">{t('Impossible de charger le lexique Strong.')}</Text>
             </Box>
           ) : (
             <BottomSheetFlashList

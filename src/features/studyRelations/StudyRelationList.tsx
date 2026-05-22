@@ -4,6 +4,7 @@ import { Alert } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import styled from '@emotion/native'
 import { useDispatch, useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 import LexiqueIcon from '~common/LexiqueIcon'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
@@ -46,11 +47,11 @@ const selectDisplaySectionsForStartingVerseKey =
 
 const directionalTypes: RelationType[] = ['references', 'explains']
 
-const relationTypeChoices: { value: RelationType; label: string; subLabel?: string }[] = [
-  { value: 'linked', label: 'Lié' },
-  { value: 'references', label: 'Renvoi' },
-  { value: 'explains', label: 'Explique' },
-  { value: 'contrasts', label: 'Contraste' },
+const relationTypeChoices: { value: RelationType }[] = [
+  { value: 'linked' },
+  { value: 'references' },
+  { value: 'explains' },
+  { value: 'contrasts' },
 ]
 
 const relationTypeCycle = relationTypeChoices.map(choice => choice.value)
@@ -87,23 +88,18 @@ const TargetIcon = ({ type }: { type: RelationEndpoint['type'] }) => {
   return <FeatherIcon name={config.name} size={15} color={config.color} />
 }
 
-const relationTitlePrefixes: Record<string, string> = {
-  'lié à': 'est lié à',
-  'renvoie vers': 'renvoie vers',
-  explique: 'explique',
-  'contraste avec': 'contraste avec',
-  'référencé par': 'est référencé par',
-  'expliqué par': 'est expliqué par',
-}
-
-const getRelationTitleParts = (model: RelationDisplayModel) => {
+const getRelationTitleParts = (
+  model: RelationDisplayModel,
+  relationTitlePrefixes: Record<string, string>,
+  t: (key: string) => string
+) => {
   const prefix = relationTitlePrefixes[model.relationText] || model.relationText
   const target = (() => {
     switch (model.targetEndpoint.type) {
       case 'note':
-        return 'une note'
+        return t('une note')
       case 'study':
-        return 'une étude'
+        return t('une étude')
       case 'strong':
         return model.targetLabel
       default:
@@ -146,6 +142,7 @@ const StudyRelationList = ({
   showEmptyState = false,
   includeStartingVerseRelations = false,
 }: Props) => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const insets = useSafeAreaInsets()
   const editModalRef = useRef<BottomSheetModal>(null)
@@ -166,6 +163,14 @@ const StudyRelationList = ({
     ? startingVerseSections
     : [{ id: 'relations', title: '', data: exactRelations }]
   const relations = sections.flatMap(section => section.data)
+  const relationTitlePrefixes: Record<string, string> = {
+    [t('studyRelations.type.linked')]: t('studyRelations.title.linked'),
+    [t('studyRelations.type.references')]: t('studyRelations.title.references'),
+    [t('studyRelations.type.explains')]: t('studyRelations.title.explains'),
+    [t('studyRelations.type.contrasts')]: t('studyRelations.title.contrasts'),
+    [t('studyRelations.type.referencedBy')]: t('studyRelations.title.referencedBy'),
+    [t('studyRelations.type.explainedBy')]: t('studyRelations.title.explainedBy'),
+  }
 
   if (relations.length === 0 && !showEmptyState) return null
 
@@ -224,10 +229,10 @@ const StudyRelationList = ({
   const confirmDelete = (model = editingModel) => {
     if (!model) return
 
-    Alert.alert('Supprimer la relation', 'Voulez-vous supprimer cette relation?', [
-      { text: 'Annuler', style: 'cancel' },
+    Alert.alert(t('Supprimer la relation'), t('Voulez-vous supprimer cette relation?'), [
+      { text: t('Annuler'), style: 'cancel' },
       {
-        text: 'Supprimer',
+        text: t('Supprimer'),
         style: 'destructive',
         onPress: () => {
           dispatch(deleteStudyRelation(model.relation.id))
@@ -251,10 +256,14 @@ const StudyRelationList = ({
   }
 
   const getDraftTargetTitle = (model: RelationDisplayModel) =>
-    getRelationTitleParts({ ...model, relationText: getDraftRelationText(model) }).target
+    getRelationTitleParts(
+      { ...model, relationText: getDraftRelationText(model) },
+      relationTitlePrefixes,
+      t
+    ).target
 
   const renderRelation = (model: RelationDisplayModel, index: number, sectionLength: number) => {
-    const relationTitle = getRelationTitleParts(model)
+    const relationTitle = getRelationTitleParts(model, relationTitlePrefixes, t)
     const relationSubtitle = getRelationSubtitle(model)
 
     return (
@@ -323,14 +332,14 @@ const StudyRelationList = ({
                 <MenuOption onSelect={() => openEditModal(model)} closeBeforeSelect>
                   <HStack alignItems="center">
                     <FeatherIcon name="edit-3" size={15} />
-                    <Text ml={10}>Modifier</Text>
+                    <Text ml={10}>{t('Modifier')}</Text>
                   </HStack>
                 </MenuOption>
                 <MenuOption onSelect={() => confirmDelete(model)}>
                   <HStack alignItems="center">
                     <FeatherIcon name="trash-2" size={15} color="quart" />
                     <Text ml={10} color="quart">
-                      Supprimer
+                      {t('Supprimer')}
                     </Text>
                   </HStack>
                 </MenuOption>
@@ -345,7 +354,7 @@ const StudyRelationList = ({
   return (
     <VStack>
       {relations.length === 0 ? (
-        <Text color="grey">Aucune relation</Text>
+        <Text color="grey">{t('Aucune relation')}</Text>
       ) : (
         sections.map(section => (
           <VStack key={section.id} mb={12}>
@@ -368,7 +377,7 @@ const StudyRelationList = ({
         enableScrollView={false}
         headerComponent={
           <ModalHeader
-            title="Modifier la relation"
+            title={t('Modifier la relation')}
             rightComponent={
               editingModel ? (
                 <PopOverMenu
@@ -379,7 +388,7 @@ const StudyRelationList = ({
                       <HStack alignItems="center">
                         <FeatherIcon name="trash-2" size={15} color="quart" />
                         <Text ml={10} color="quart">
-                          Supprimer
+                          {t('Supprimer')}
                         </Text>
                       </HStack>
                     </MenuOption>
@@ -394,11 +403,11 @@ const StudyRelationList = ({
             <HStack px={20} gap={10} justifyContent="flex-end" bg="reverse">
               <Box h={54}>
                 <Button reverse onPress={closeEditModal}>
-                  Annuler
+                  {t('Annuler')}
                 </Button>
               </Box>
               <Box h={54}>
-                <Button onPress={saveEdit}>Enregistrer</Button>
+                <Button onPress={saveEdit}>{t('Enregistrer')}</Button>
               </Box>
             </HStack>
           </BottomSheetFooter>
@@ -440,7 +449,7 @@ const StudyRelationList = ({
                 <Text bold>
                   {editingModel.targetEndpoint.type === 'note' ||
                   editingModel.targetEndpoint.type === 'study'
-                    ? 'une '
+                    ? `${t('une')} `
                     : ''}
                 </Text>
                 <Box mx={4}>
@@ -448,9 +457,9 @@ const StudyRelationList = ({
                 </Box>
                 <Text bold numberOfLines={1} shrink={1}>
                   {editingModel.targetEndpoint.type === 'note'
-                    ? 'note'
+                    ? t('note')
                     : editingModel.targetEndpoint.type === 'study'
-                      ? 'étude'
+                      ? t('étude')
                       : getDraftTargetTitle(editingModel)}
                 </Text>
               </HStack>
@@ -465,12 +474,12 @@ const StudyRelationList = ({
               {isLabelExpanded ? (
                 <VStack gap={8} alignSelf="stretch">
                   <Text fontSize={13} color="tertiary">
-                    Libellé
+                    {t('Libellé')}
                   </Text>
                   <LabelInput
                     value={draft.label}
                     onChangeText={label => setDraft(current => ({ ...current, label }))}
-                    placeholder="Libellé court"
+                    placeholder={t('Libellé court')}
                     maxLength={80}
                     returnKeyType="done"
                   />
@@ -484,7 +493,7 @@ const StudyRelationList = ({
                   onPress={() => setIsLabelExpanded(true)}
                 >
                   <Text fontSize={12} color="tertiary">
-                    Ajouter un libellé
+                    {t('Ajouter un libellé')}
                   </Text>
                   <FeatherIcon
                     name="chevron-down"
