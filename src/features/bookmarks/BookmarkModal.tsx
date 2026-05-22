@@ -250,7 +250,7 @@ const BookmarkModal = ({
       onChange={handleSheetChange}
       topInset={insets.top}
       enableDynamicSizing
-      headerComponent={<ModalHeader title={`${t('Marque-page')} ${reference}`} />}
+      headerComponent={<ModalHeader title={t('Marque-page')} subTitle={reference} />}
       footerComponent={props =>
         mode === 'select' ? null : (
           <BottomSheetFooter bottomInset={insets.bottom} {...props}>
