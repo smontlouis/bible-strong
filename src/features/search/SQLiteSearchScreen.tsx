@@ -78,6 +78,7 @@ type SearchEntityResult = {
   id: string
   type: SearchItemType
   title: string
+  chip?: string
   subtitle?: string
   description?: string
   iconType: SearchItemType
@@ -185,6 +186,8 @@ const getStrongCode = (strong: LexiqueRow) =>
 const getStrongOriginalWord = (strong: LexiqueRow) =>
   'Grec' in strong ? strong.Grec : strong.Hebreu
 
+const isGreekStrong = (strong: LexiqueRow) => 'Grec' in strong
+
 const getNoteSearchItems = (notes: Record<string, Note>, t: (key: string) => string) =>
   Object.entries(notes).map<SearchEntityResult>(([noteId, note]) => {
     const title = note.title || t('Note sans titre')
@@ -259,14 +262,15 @@ const getReferenceSearchItems = (query: string): SearchEntityResult[] =>
 const getStrongSearchItems = (results: LexiqueRow[], t: (key: string) => string) =>
   results.map<SearchEntityResult>(strong => {
     const code = getStrongCode(strong)
-    const isGreek = strong.lexiqueType === 'Grec'
+    const isGreek = isGreekStrong(strong)
     const prefix = isGreek ? 'G' : 'H'
     return {
       id: `strong:${strong.lexiqueType}:${code}:${strong.Mot}`,
       type: 'strong',
       iconType: 'strong',
       title: strong.Mot,
-      subtitle: `${prefix}${code} · ${t(strong.lexiqueType)}`,
+      chip: `${prefix}${code}`,
+      subtitle: t(strong.lexiqueType),
       description: getStrongOriginalWord(strong),
       endpoint: {
         type: 'strong',
@@ -822,6 +826,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
         center
         gap={6}
         px={6}
+        py={6}
         mr={8}
         borderRadius={8}
         bg="lightGrey"
@@ -887,44 +892,45 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={{ maxHeight: 28, paddingHorizontal: 20, marginBottom: 4, marginTop: 10 }}
+        style={{ maxHeight: 28 + 55, paddingHorizontal: 20, marginBottom: 4, marginTop: 10 }}
       >
-        {itemFilterOrder.map(renderItemFilter)}
-      </ScrollView>
-      {hasInstalledVersions && !hasReference && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={{
-            maxHeight: 55,
-            paddingHorizontal: 20,
-            opacity: itemFilters.passages ? 1 : 0.3,
-            pointerEvents: itemFilters.passages ? 'auto' : 'none',
-          }}
-        >
-          <DropdownMenu
-            title={t('Section')}
-            currentValue={section}
-            setValue={(v: string) => setSection(v as SearchSection)}
-            choices={sectionValues}
-          />
-          <DropdownMenu title={t('Livre')} currentValue={book} setValue={setBook} choices={books} />
-          {installedVersions.length > 1 && (
-            <DropdownMenu
-              title={t('Version')}
-              currentValue={selectedVersion}
-              setValue={setSelectedVersion}
-              choices={versionValues}
-            />
+        <VStack>
+          <HStack>{itemFilterOrder.map(renderItemFilter)}</HStack>
+          {hasInstalledVersions && !hasReference && (
+            <HStack
+              opacity={itemFilters.passages ? 1 : 0.3}
+              pointerEvents={itemFilters.passages ? 'auto' : 'none'}
+            >
+              <DropdownMenu
+                title={t('Section')}
+                currentValue={section}
+                setValue={(v: string) => setSection(v as SearchSection)}
+                choices={sectionValues}
+              />
+              <DropdownMenu
+                title={t('Livre')}
+                currentValue={book}
+                setValue={setBook}
+                choices={books}
+              />
+              {installedVersions.length > 1 && (
+                <DropdownMenu
+                  title={t('Version')}
+                  currentValue={selectedVersion}
+                  setValue={setSelectedVersion}
+                  choices={versionValues}
+                />
+              )}
+              <DropdownMenu
+                title={t('Ordre')}
+                currentValue={sortOrder}
+                setValue={(v: string) => setSortOrder(v as SearchSortOrder)}
+                choices={sortOrderValues}
+              />
+            </HStack>
           )}
-          <DropdownMenu
-            title={t('Ordre')}
-            currentValue={sortOrder}
-            setValue={(v: string) => setSortOrder(v as SearchSortOrder)}
-            choices={sortOrderValues}
-          />
-        </ScrollView>
-      )}
+        </VStack>
+      </ScrollView>
 
       {renderContent()}
     </Box>
@@ -1136,6 +1142,7 @@ const SearchEntityResultRow = ({
       <VStack flex={1}>
         <HStack alignItems="center" gap={6} mb={2}>
           <HighlightedText value={item.title} match={getMatchForKey(item, 'title')} bold />
+          {item.chip ? <Chip>{item.chip}</Chip> : null}
           {item.subtitle && item.type === 'passages' ? <Chip>{item.subtitle}</Chip> : null}
         </HStack>
         {item.passage ? (

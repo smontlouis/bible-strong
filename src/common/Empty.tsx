@@ -15,10 +15,11 @@ interface Props {
   message: string
   source?: React.ComponentProps<typeof Lottie>['source']
   icon?: ImageSource
+  iconElement?: React.ReactNode
   children?: React.ReactNode
 }
 
-const Empty = ({ message, source, icon, children, ...props }: Props) => {
+const Empty = ({ message, source, icon, iconElement, children, ...props }: Props) => {
   const theme = useTheme()
   const animation = useRef<Lottie>(null)
 
@@ -42,7 +43,8 @@ const Empty = ({ message, source, icon, children, ...props }: Props) => {
             />
           </Box>
         )}
-        {source && !icon && (
+        {iconElement && !icon && <Box mb={20}>{iconElement}</Box>}
+        {source && !icon && !iconElement && (
           <Lottie
             ref={animation}
             style={{

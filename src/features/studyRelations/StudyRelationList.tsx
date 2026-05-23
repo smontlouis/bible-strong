@@ -6,6 +6,7 @@ import styled from '@emotion/native'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import DictionnaryIcon from '~common/DictionnaryIcon'
+import Empty from '~common/Empty'
 import LexiqueIcon from '~common/LexiqueIcon'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
@@ -369,7 +370,12 @@ const StudyRelationList = ({
   return (
     <VStack>
       {relations.length === 0 ? (
-        <Text color="grey">{t('Aucune relation')}</Text>
+        <Box minHeight={220}>
+          <Empty
+            iconElement={<FeatherIcon name="git-merge" size={64} color="primary" />}
+            message={t('Aucune relation')}
+          />
+        </Box>
       ) : (
         sections.map(section => (
           <VStack key={section.id} mb={12}>

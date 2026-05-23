@@ -9,9 +9,9 @@ import Text from '~common/ui/Text'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 
 const StyledText = styled(Text)({
-  fontSize: 14,
+  fontSize: 12,
   fontWeight: 'bold',
-  marginRight: 5,
+  marginRight: 3,
 })
 
 const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
@@ -48,7 +48,7 @@ const DropdownMenu = <T extends string | number = string>({
             <Text color="grey" fontSize={12}>
               {title}
             </Text>
-            <Box row pr={15} alignItems="center">
+            <Box row pr={5} alignItems="center">
               <StyledText>{choice?.label}</StyledText>
               <StyledIcon name="chevron-down" size={15} />
             </Box>
