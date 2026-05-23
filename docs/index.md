@@ -17,6 +17,7 @@ This directory is the repo-level reference set for agents and humans working on 
 | `source-tree.md` | Annotated map of important folders and files. |
 | `dev-guide.md` | Setup, scripts, simulator workflow, and validation. |
 | `data-models.md` | Persisted state, local databases, Firestore sync, and identifiers. |
+| `relations-architecture.md` | Target architecture for a unified relation graph, query strategy, and denormalized indexes. |
 | `conventions.md` | Coding conventions and project-specific rules. |
 | `bible-viewer-native-migration-audit.md` | Synthesis for migrating the Bible reader from DOM/WebView to native SwiftUI/Compose components. |
 | `bible-viewer-swiftui-audit.md` | iOS-specific audit for a SwiftUI/native Bible reader. |
