@@ -13,7 +13,7 @@ import { removeBreakLines } from '~helpers/utils'
 import i18n from '~i18n'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 
-interface ParsedSegment {
+export interface ParsedSegment {
   book: number
   chapter: number
   startVerse: number

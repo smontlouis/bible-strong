@@ -1,20 +1,15 @@
 import { BottomSheetFlashList, BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useTheme } from '@emotion/react'
-import Fuse, { type FuseResultMatch, type IFuseOptions } from 'fuse.js'
-import { ComponentProps, Ref, useDeferredValue, useEffect, useState } from 'react'
+import { Ref, useDeferredValue, useEffect, useState } from 'react'
 import { ActivityIndicator } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import AlphabetList from '~common/AlphabetList'
 import BottomSheetSearchInput from '~common/BottomSheetSearchInput'
-import DictionnaryIcon from '~common/DictionnaryIcon'
 import Empty from '~common/Empty'
-import LexiqueIcon from '~common/LexiqueIcon'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
-import NaveIcon from '~common/NaveIcon'
-import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
+import Box, { VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import useBibleVerses from '~helpers/useBibleVerses'
 import useDebounce from '~helpers/useDebounce'
@@ -28,10 +23,24 @@ import loadDictionnaireBySearch, {
 } from '~helpers/loadDictionnaireBySearch'
 import loadNaveByLetter, { type NaveLetterRow } from '~helpers/loadNaveByLetter'
 import loadNaveBySearch, { type NaveSearchRow } from '~helpers/loadNaveBySearch'
+import SharedSearchEntityResultRow from '~features/search/shared/SearchEntityResultRow'
+import SearchItemFilterBar, {
+  getNextSearchItemFilters,
+  searchItemFilterOrder,
+} from '~features/search/shared/SearchItemFilterBar'
+import SearchSectionBlock, {
+  SEARCH_SECTION_LOAD_MORE_COUNT,
+  SEARCH_SECTION_PREVIEW_LIMIT,
+  type SearchResultSection,
+} from '~features/search/shared/SearchSectionBlock'
+import { searchRelationTargetsWithMatches } from '~features/search/shared/searchFuzzy'
+import { getStrongSearchItems } from '~features/search/shared/searchItems'
+import type { SearchEntityResult } from '~features/search/shared/searchResultTypes'
 import { removeBreakLines } from '~helpers/utils'
 import { RootState } from '~redux/modules/reducer'
 import { createStudyRelation } from '~redux/modules/user'
 import type { AppDispatch } from '~redux/store'
+import type { SearchItemFilters, SearchItemType } from '~state/searchFilters'
 import { endpointsMatch, getEndpointFallbackLabel, type RelationEndpoint } from './domain'
 import {
   getNoteTargetItems,
@@ -41,12 +50,11 @@ import {
 } from './targetSearch'
 
 type BrowseMode = 'note' | 'study' | 'strong' | 'nave' | 'dictionary'
-type MatchRange = [number, number]
 type NaveRow = NaveLetterRow | NaveSearchRow
 type DictionaryRow = DictionnaireLetterRow | DictionnaireSearchRow
-type MatchedRelationTargetResult = RelationTargetResult & {
-  matches?: readonly FuseResultMatch[]
-}
+type MatchedRelationTargetResult = RelationTargetResult
+type RelationTargetSectionId = 'passages' | 'notes' | 'studies' | 'strong' | 'dictionary' | 'nave'
+type RelationTargetSection = SearchResultSection<RelationTargetSectionId>
 
 type Props = {
   ref?: Ref<BottomSheetModal | null>
@@ -64,41 +72,53 @@ const browseModeLabelKeys: Record<BrowseMode, string> = {
   dictionary: 'Dictionnaire',
 }
 
-const targetIconConfig: Record<
-  RelationEndpoint['type'],
-  {
-    name?: ComponentProps<typeof FeatherIcon>['name']
-    color: string
-  }
-> = {
-  verse: { name: 'book-open', color: 'color1' },
-  note: { name: 'file-text', color: 'color2' },
-  study: { name: 'feather', color: 'tertiary' },
-  strong: { name: 'hash', color: 'primary' },
-  nave: { name: 'layers', color: 'quint' },
-  dictionary: { name: 'book', color: 'secondary' },
+const relationTypeToSearchItemType: Record<RelationEndpoint['type'], SearchItemType> = {
+  verse: 'passages',
+  note: 'notes',
+  study: 'studies',
+  strong: 'strong',
+  nave: 'nave',
+  dictionary: 'dictionary',
 }
 
-const getStrongCode = (strong: LexiqueRow) =>
-  String(
-    (strong as LexiqueRow & { code?: string | number }).Code ??
-      (strong as { code?: string | number }).code ??
-      ''
+const searchItemTypeToBrowseMode: Record<SearchItemType, BrowseMode | null> = {
+  passages: null,
+  notes: 'note',
+  studies: 'study',
+  strong: 'strong',
+  dictionary: 'dictionary',
+  nave: 'nave',
+}
+
+const getAllowedSearchItemTypes = (allowedTypes?: RelationEndpoint['type'][]): SearchItemType[] => {
+  if (!allowedTypes) return searchItemFilterOrder
+
+  const allowedSet = new Set(allowedTypes.map(type => relationTypeToSearchItemType[type]))
+  return searchItemFilterOrder.filter(type => allowedSet.has(type))
+}
+
+const getAllowedSearchItemTypesFromKey = (allowedTypesKey: string): SearchItemType[] => {
+  if (!allowedTypesKey) return searchItemFilterOrder
+
+  const allowedSet = new Set(
+    allowedTypesKey
+      .split('|')
+      .map(type => relationTypeToSearchItemType[type as RelationEndpoint['type']])
+      .filter(Boolean)
   )
+  return searchItemFilterOrder.filter(type => allowedSet.has(type))
+}
 
-const getStrongOriginalWord = (strong: LexiqueRow) =>
-  'Grec' in strong ? strong.Grec : strong.Hebreu
-
-const getStrongEndpoint = (strong: LexiqueRow): RelationEndpoint => ({
-  type: 'strong',
-  language: strong.lexiqueType === 'Grec' ? 'greek' : 'hebrew',
-  code: getStrongCode(strong),
-  label: strong.Mot,
-  originalWord: getStrongOriginalWord(strong),
-})
-
-const getStrongSubtitle = (strong: LexiqueRow) =>
-  `${strong.lexiqueType} · ${strong.lexiqueType === 'Grec' ? 'G' : 'H'}${getStrongCode(strong)}`
+const getSearchItemFiltersForTypes = (enabledTypes: SearchItemType[]) => {
+  const enabledSet = new Set(enabledTypes)
+  return searchItemFilterOrder.reduce(
+    (filters, type) => ({
+      ...filters,
+      [type]: enabledSet.has(type),
+    }),
+    {} as SearchItemFilters
+  )
+}
 
 const getNaveEndpoint = (nave: NaveRow): RelationEndpoint => ({
   type: 'nave',
@@ -115,6 +135,7 @@ const getDictionaryEndpoint = (dictionary: DictionaryRow): RelationEndpoint => (
 const getNaveTargetResult = (nave: NaveRow): RelationTargetResult => ({
   id: `nave:${nave.name_lower}`,
   type: 'nave',
+  iconType: 'nave',
   title: nave.name,
   subtitle: 'Nave',
   endpoint: getNaveEndpoint(nave),
@@ -123,6 +144,7 @@ const getNaveTargetResult = (nave: NaveRow): RelationTargetResult => ({
 const getDictionaryTargetResult = (dictionary: DictionaryRow): RelationTargetResult => ({
   id: getDictionaryTargetKey(dictionary),
   type: 'dictionary',
+  iconType: 'dictionary',
   title: dictionary.word,
   subtitle: 'Dictionnaire',
   endpoint: getDictionaryEndpoint(dictionary),
@@ -163,210 +185,13 @@ const getSourceEndpointSubtitle = (
 const isDatabaseError = (value: unknown): value is { error: string } =>
   typeof value === 'object' && value !== null && 'error' in value
 
-function removeAccents(obj: string): string
-function removeAccents<T>(obj: T): T
-function removeAccents<T>(obj: T) {
-  if (typeof obj === 'string' || obj instanceof String) {
-    return obj.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-  }
-  return obj
-}
-
-const getFuzzyValue = <T,>(obj: T, path: string | string[]): readonly string[] | string => {
-  const value = Fuse.config.getFn(obj, path)
-  return Array.isArray(value)
-    ? value.map(item => removeAccents(String(item)))
-    : removeAccents(value)
-}
-
-const fuzzyOptions: IFuseOptions<RelationTargetResult> = {
-  keys: [
-    { name: 'title', weight: 0.7 },
-    { name: 'description', weight: 0.3 },
-  ],
-  threshold: 0.22,
-  ignoreLocation: true,
-  ignoreFieldNorm: true,
-  includeMatches: true,
-  minMatchCharLength: 3,
-  getFn: getFuzzyValue,
-}
-
-const normalizeSearchText = (value: string) => removeAccents(value).toLowerCase()
-const normalizeDisplayedText = (value: string) => removeBreakLines(value)
-
-const findExactNormalizedRange = (value: string | undefined, keyword: string): MatchRange[] => {
-  if (!value) return []
-
-  const normalizedValue = normalizeSearchText(value)
-  const normalizedKeyword = normalizeSearchText(keyword.trim())
-  if (normalizedKeyword.length < 3) return []
-
-  const start = normalizedValue.indexOf(normalizedKeyword)
-  if (start === -1) return []
-
-  return [[start, start + normalizedKeyword.length - 1]]
-}
-
-const getExactMatches = (
-  target: RelationTargetResult,
-  keyword: string
-): readonly FuseResultMatch[] => {
-  const titleRanges = findExactNormalizedRange(target.title, keyword)
-  const descriptionRanges = findExactNormalizedRange(target.description, keyword)
-  const matches: FuseResultMatch[] = []
-
-  if (titleRanges.length) {
-    matches.push({ key: 'title', value: target.title, indices: titleRanges })
-  }
-  if (target.description && descriptionRanges.length) {
-    matches.push({ key: 'description', value: target.description, indices: descriptionRanges })
-  }
-
-  return matches
-}
-
 const searchWithMatches = (
   targets: RelationTargetResult[],
   keyword: string
-): MatchedRelationTargetResult[] => {
-  const trimmed = keyword.trim()
-  if (!trimmed) return targets
-
-  return new Fuse(targets, fuzzyOptions)
-    .search(removeAccents(trimmed))
-    .map(result => ({
-      ...result.item,
-      matches: getExactMatches(result.item, trimmed),
-    }))
-    .filter(result => result.matches?.length)
-}
-
-const mergeRanges = (ranges: readonly MatchRange[]) =>
-  ranges
-    .slice()
-    .sort((a, b) => a[0] - b[0])
-    .reduce<MatchRange[]>((merged, range) => {
-      const previous = merged[merged.length - 1]
-      if (previous && range[0] <= previous[1] + 1) {
-        merged[merged.length - 1] = [previous[0], Math.max(previous[1], range[1])]
-      } else {
-        merged.push([range[0], range[1]])
-      }
-      return merged
-    }, [])
-
-const filterUsefulRanges = (ranges: readonly MatchRange[]) =>
-  mergeRanges(ranges).filter(([start, end]) => end - start + 1 >= 3)
-
-const getExcerpt = (value: string, ranges: readonly MatchRange[], context = 26) => {
-  const firstRange = ranges[0]
-  const sourceText = normalizeDisplayedText(value)
-  const normalizedSourceText = normalizeSearchText(sourceText)
-  const matchedText = firstRange ? value.slice(firstRange[0], firstRange[1] + 1) : ''
-  const normalizedMatchedText = normalizeSearchText(matchedText)
-  const displayedMatchStart = normalizedMatchedText
-    ? normalizedSourceText.indexOf(normalizedMatchedText)
-    : -1
-
-  if (displayedMatchStart === -1) {
-    return {
-      text: sourceText,
-      ranges: [],
-    }
-  }
-
-  const displayedRange: MatchRange = [
-    displayedMatchStart,
-    displayedMatchStart + normalizedMatchedText.length - 1,
-  ]
-
-  if (!firstRange || value.length <= 90) {
-    return {
-      text: sourceText,
-      ranges: [displayedRange],
-    }
-  }
-
-  const start = Math.max(0, displayedRange[0] - context)
-  const end = Math.min(sourceText.length, displayedRange[1] + context)
-  const prefix = start > 0 ? '...' : ''
-  const suffix = end < sourceText.length ? '...' : ''
-  const text = `${prefix}${sourceText.slice(start, end)}${suffix}`
-  const offset = start - prefix.length
-
-  return {
-    text,
-    ranges: [
-      [
-        Math.max(0, displayedRange[0] - offset),
-        Math.min(text.length - 1, displayedRange[1] - offset),
-      ],
-    ],
-  }
-}
-
-const HighlightedText = ({
-  value,
-  ranges,
-  bold,
-  color = 'tertiary',
-}: {
-  value: string
-  ranges?: readonly MatchRange[]
-  bold?: boolean
-  color?: string
-}) => {
-  const mergedRanges = ranges ? filterUsefulRanges(ranges) : []
-
-  if (!mergedRanges.length) {
-    return (
-      <Text
-        bold={bold}
-        fontSize={bold ? 16 : 13}
-        color={bold ? undefined : color}
-        numberOfLines={1}
-      >
-        {normalizeDisplayedText(value)}
-      </Text>
-    )
-  }
-
-  const { text, ranges: excerptRanges } = getExcerpt(value, mergedRanges)
-  const chunks: { text: string; highlighted: boolean }[] = []
-  let cursor = 0
-
-  excerptRanges.forEach(([start, end]) => {
-    if (start > cursor) {
-      chunks.push({ text: text.slice(cursor, start), highlighted: false })
-    }
-    chunks.push({ text: text.slice(start, end + 1), highlighted: true })
-    cursor = end + 1
-  })
-
-  if (cursor < text.length) {
-    chunks.push({ text: text.slice(cursor), highlighted: false })
-  }
-
-  return (
-    <Text bold={bold} fontSize={bold ? 16 : 13} color={bold ? undefined : color} numberOfLines={1}>
-      {chunks.map((chunk, index) => (
-        <Text
-          key={`${chunk.text}-${index}`}
-          bold
-          fontSize={bold ? 16 : 13}
-          color={chunk.highlighted ? 'primary' : bold ? undefined : color}
-          bg={chunk.highlighted ? 'lightPrimary' : undefined}
-        >
-          {chunk.text}
-        </Text>
-      ))}
-    </Text>
+): MatchedRelationTargetResult[] =>
+  searchRelationTargetsWithMatches(targets, keyword).filter(
+    (item): item is MatchedRelationTargetResult => Boolean(item.endpoint)
   )
-}
-
-const getMatchForKey = (item: MatchedRelationTargetResult, key: string) =>
-  item.matches?.find(match => match.key === key)
 
 const getVerseIds = (endpoint: RelationEndpoint) =>
   endpoint.type === 'verse'
@@ -375,37 +200,6 @@ const getVerseIds = (endpoint: RelationEndpoint) =>
         return { Livre, Chapitre, Verset }
       })
     : []
-
-const TargetIcon = ({ type }: { type: RelationEndpoint['type'] }) => {
-  const config = targetIconConfig[type]
-  const size = 18
-
-  const icon = (() => {
-    switch (type) {
-      case 'strong':
-        return <LexiqueIcon color={config.color} size={size} />
-      case 'nave':
-        return <NaveIcon color={config.color} size={size} />
-      case 'dictionary':
-        return <DictionnaryIcon color={config.color} size={size} />
-      default:
-        return <FeatherIcon name={config.name!} size={size} color={config.color} />
-    }
-  })()
-
-  return (
-    <Box
-      width={36}
-      height={36}
-      borderRadius={10}
-      bg="lightGrey"
-      alignItems="center"
-      justifyContent="center"
-    >
-      {icon}
-    </Box>
-  )
-}
 
 const VerseTargetDescription = ({
   endpoint,
@@ -430,71 +224,18 @@ const RelationTargetRow = ({
 }: {
   item: MatchedRelationTargetResult
   onPress: () => void
-}) => {
-  const description = item.description || item.subtitle
-  const titleMatch = getMatchForKey(item, 'title')
-  const descriptionMatch = getMatchForKey(item, 'description')
-  const subtitleMatch = getMatchForKey(item, 'subtitle')
-  const descriptionRanges = descriptionMatch?.indices || subtitleMatch?.indices
-
-  return (
-    <TouchableBox
-      px={20}
-      py={14}
-      borderBottomWidth={1}
-      borderColor="border"
-      onPress={onPress}
-      row
-      alignItems="center"
-      gap={12}
-    >
-      <TargetIcon type={item.type} />
-      <VStack flex={1} gap={3}>
-        <HighlightedText value={item.title} ranges={titleMatch?.indices} bold />
-        {item.endpoint.type === 'verse' ? (
-          <VerseTargetDescription endpoint={item.endpoint} />
-        ) : description ? (
-          <HighlightedText value={description} ranges={descriptionRanges} />
-        ) : null}
-      </VStack>
-      <FeatherIcon name="arrow-right" size={20} color="grey" />
-    </TouchableBox>
-  )
-}
-
-const StrongTargetRow = ({ item, onPress }: { item: LexiqueRow; onPress: () => void }) => (
-  <TouchableBox
-    px={20}
-    py={14}
-    borderBottomWidth={1}
-    borderColor="border"
+}) => (
+  <SharedSearchEntityResultRow
+    item={item}
     onPress={onPress}
-    row
-    alignItems="center"
-    gap={12}
-  >
-    <TargetIcon type="strong" />
-    <VStack flex={1} gap={3}>
-      <Text bold numberOfLines={1}>
-        {item.Mot}
-      </Text>
-      <Text fontSize={13} color="tertiary" numberOfLines={1}>
-        {getStrongSubtitle(item)}
-      </Text>
-    </VStack>
-    <Text fontSize={16} color="tertiary">
-      {getStrongOriginalWord(item)}
-    </Text>
-    <FeatherIcon name="arrow-right" size={20} color="grey" />
-  </TouchableBox>
-)
-
-const NaveTargetRow = ({ item, onPress }: { item: NaveRow; onPress: () => void }) => (
-  <RelationTargetRow item={getNaveTargetResult(item)} onPress={onPress} />
-)
-
-const DictionaryTargetRow = ({ item, onPress }: { item: DictionaryRow; onPress: () => void }) => (
-  <RelationTargetRow item={getDictionaryTargetResult(item)} onPress={onPress} />
+    showArrow
+    description={
+      item.endpoint.type === 'verse' ? (
+        <VerseTargetDescription endpoint={item.endpoint} />
+      ) : undefined
+    }
+    descriptionColor="tertiary"
+  />
 )
 
 const LoadingIndicator = () => {
@@ -515,14 +256,20 @@ const CreateEntityRelationModal = ({
 }: Props) => {
   const { t } = useTranslation()
   const dispatch = useDispatch<AppDispatch>()
+  const allowedTypesKey = allowedTypes?.join('|') || ''
   const [searchValue, setSearchValue] = useState('')
-  const [browseMode, setBrowseMode] = useState<BrowseMode | null>(null)
+  const [itemFilters, setItemFilters] = useState<SearchItemFilters>(() =>
+    getSearchItemFiltersForTypes(getAllowedSearchItemTypesFromKey(allowedTypesKey))
+  )
   const [strongLetter, setStrongLetter] = useState('a')
   const [naveLetter, setNaveLetter] = useState('a')
   const [dictionaryLetter, setDictionaryLetter] = useState('a')
   const [strongResults, setStrongResults] = useState<LexiqueRow[]>([])
   const [naveResults, setNaveResults] = useState<NaveRow[]>([])
   const [dictionaryResults, setDictionaryResults] = useState<DictionaryRow[]>([])
+  const [visibleCounts, setVisibleCounts] = useState<
+    Partial<Record<RelationTargetSectionId, number>>
+  >({})
   const [isStrongLoading, setIsStrongLoading] = useState(false)
   const [isNaveLoading, setIsNaveLoading] = useState(false)
   const [isDictionaryLoading, setIsDictionaryLoading] = useState(false)
@@ -534,6 +281,12 @@ const CreateEntityRelationModal = ({
   const deferredSearchValue = useDeferredValue(searchValue)
   const deferredStrongSearchValue = useDeferredValue(debouncedStrongSearchValue)
   const deferredResourceSearchValue = useDeferredValue(debouncedResourceSearchValue)
+  const enabledItemTypes = getAllowedSearchItemTypes(allowedTypes)
+  const activeItemTypes = searchItemFilterOrder.filter(
+    type => enabledItemTypes.includes(type) && itemFilters[type]
+  )
+  const browseMode =
+    activeItemTypes.length === 1 ? searchItemTypeToBrowseMode[activeItemTypes[0]] : null
   const deferredBrowseMode = useDeferredValue(browseMode)
   const immediateSearchHasValue = Boolean(searchValue.trim())
   const deferredSearchHasValue = Boolean(deferredSearchValue.trim())
@@ -555,9 +308,11 @@ const CreateEntityRelationModal = ({
   const notes = useSelector((state: RootState) => state.user.bible.notes)
   const studies = useSelector((state: RootState) => state.user.bible.studies)
   const shouldBuildNoteTargets =
-    deferredBrowseMode === 'note' || (!deferredBrowseMode && deferredSearchHasValue)
+    itemFilters.notes &&
+    (deferredBrowseMode === 'note' || (!deferredBrowseMode && deferredSearchHasValue))
   const shouldBuildStudyTargets =
-    deferredBrowseMode === 'study' || (!deferredBrowseMode && deferredSearchHasValue)
+    itemFilters.studies &&
+    (deferredBrowseMode === 'study' || (!deferredBrowseMode && deferredSearchHasValue))
   const noteTargets = shouldBuildNoteTargets
     ? getNoteTargetItems(notes).sort((a, b) => {
         const left = notes[(a.endpoint as Extract<RelationEndpoint, { type: 'note' }>).noteId]
@@ -574,11 +329,24 @@ const CreateEntityRelationModal = ({
     : []
   const fuzzyNoteTargets = searchWithMatches(noteTargets, deferredSearchValue)
   const fuzzyStudyTargets = searchWithMatches(studyTargets, deferredSearchValue)
-  const isAllowed = (type: RelationEndpoint['type']) =>
-    allowedTypes ? allowedTypes.includes(type) : true
+  const isAllowed = (type: RelationEndpoint['type']) => {
+    const itemType = relationTypeToSearchItemType[type]
+    return enabledItemTypes.includes(itemType) && itemFilters[itemType]
+  }
 
   useEffect(() => {
-    if (deferredBrowseMode !== 'strong') return
+    setItemFilters(getSearchItemFiltersForTypes(getAllowedSearchItemTypesFromKey(allowedTypesKey)))
+  }, [allowedTypesKey])
+
+  const shouldLoadStrongTargets =
+    isAllowed('strong') &&
+    (deferredBrowseMode === 'strong' || (!deferredBrowseMode && deferredSearchHasValue))
+
+  useEffect(() => {
+    if (!shouldLoadStrongTargets) {
+      setStrongResults([])
+      return
+    }
 
     let isMounted = true
     setIsStrongLoading(true)
@@ -602,7 +370,7 @@ const CreateEntityRelationModal = ({
     return () => {
       isMounted = false
     }
-  }, [deferredBrowseMode, deferredStrongSearchValue, strongLetter])
+  }, [deferredStrongSearchValue, shouldLoadStrongTargets, strongLetter])
 
   const shouldLoadNaveTargets =
     isAllowed('nave') &&
@@ -675,14 +443,23 @@ const CreateEntityRelationModal = ({
     setSearchValue(value)
   }
 
-  const enterBrowseMode = (mode: BrowseMode) => {
-    setBrowseMode(mode)
-    handleSearch('')
+  const toggleItemFilter = (type: SearchItemType) => {
+    setItemFilters(filters => getNextSearchItemFilters(filters, type, enabledItemTypes))
+    setVisibleCounts({})
   }
 
   const exitBrowseMode = () => {
-    setBrowseMode(null)
+    setItemFilters(getSearchItemFiltersForTypes(enabledItemTypes))
+    setVisibleCounts({})
     handleSearch('')
+  }
+
+  const increaseVisibleCount = (sectionId: RelationTargetSectionId) => {
+    setVisibleCounts(prev => ({
+      ...prev,
+      [sectionId]:
+        (prev[sectionId] || SEARCH_SECTION_PREVIEW_LIMIT) + SEARCH_SECTION_LOAD_MORE_COUNT,
+    }))
   }
 
   const selectTarget = (endpoint: RelationEndpoint) => {
@@ -695,30 +472,91 @@ const CreateEntityRelationModal = ({
       })
     )
     handleSearch('')
-    setBrowseMode(null)
+    setItemFilters(getSearchItemFiltersForTypes(enabledItemTypes))
+    setVisibleCounts({})
     onCreated?.()
   }
 
   const immediateReferenceResults = searchReferenceAndStrongTargets(searchValue)
-  const unifiedResults = [
-    ...immediateReferenceResults,
-    ...(deferredSearchHasValue ? fuzzyNoteTargets.slice(0, 12) : []),
-    ...(deferredSearchHasValue ? fuzzyStudyTargets.slice(0, 12) : []),
-    ...(deferredSearchHasValue ? naveResults.slice(0, 12).map(getNaveTargetResult) : []),
-    ...(deferredSearchHasValue
-      ? dictionaryResults.slice(0, 12).map((dictionary, index) => ({
-          ...getDictionaryTargetResult(dictionary),
-          id: getDictionaryTargetKey(dictionary, index),
-        }))
+  const referenceItems = immediateReferenceResults.filter(
+    result => result.endpoint.type === 'verse' && isAllowed('verse')
+  )
+  const noteItems = itemFilters.notes ? fuzzyNoteTargets : []
+  const studyItems = itemFilters.studies ? fuzzyStudyTargets : []
+  const directStrongItems = immediateReferenceResults.filter(
+    result => result.endpoint.type === 'strong' && isAllowed('strong')
+  )
+  const strongItems = itemFilters.strong
+    ? [
+        ...directStrongItems,
+        ...(deferredSearchHasValue || deferredBrowseMode === 'strong'
+          ? getStrongSearchItems(strongResults, t)
+          : []),
+      ]
+    : []
+  const dictionaryItems = itemFilters.dictionary
+    ? dictionaryResults.map((dictionary, index) => ({
+        ...getDictionaryTargetResult(dictionary),
+        id: getDictionaryTargetKey(dictionary, index),
+      }))
+    : []
+  const naveItems = itemFilters.nave ? naveResults.map(getNaveTargetResult) : []
+  const searchSections: RelationTargetSection[] = [
+    ...(referenceItems.length
+      ? [
+          {
+            id: 'passages' as const,
+            title: t('Passages'),
+            count: referenceItems.length,
+            items: referenceItems,
+          },
+        ]
       : []),
-  ].filter(result => isAllowed(result.type))
-
-  const browseResults =
-    deferredBrowseMode === 'note'
-      ? fuzzyNoteTargets
-      : deferredBrowseMode === 'study'
-        ? fuzzyStudyTargets
-        : []
+    ...(noteItems.length
+      ? [{ id: 'notes' as const, title: t('Notes'), count: noteItems.length, items: noteItems }]
+      : []),
+    ...(studyItems.length
+      ? [
+          {
+            id: 'studies' as const,
+            title: t('Études'),
+            count: studyItems.length,
+            items: studyItems,
+          },
+        ]
+      : []),
+    ...(strongItems.length
+      ? [
+          {
+            id: 'strong' as const,
+            title: t('Strong'),
+            count: strongItems.length,
+            items: strongItems,
+          },
+        ]
+      : []),
+    ...(dictionaryItems.length
+      ? [
+          {
+            id: 'dictionary' as const,
+            title: t('Dictionnaire'),
+            count: dictionaryItems.length,
+            items: dictionaryItems,
+          },
+        ]
+      : []),
+    ...(naveItems.length
+      ? [{ id: 'nave' as const, title: t('Nave'), count: naveItems.length, items: naveItems }]
+      : []),
+  ]
+  const isListLoading =
+    isLocalSearchPending ||
+    isStrongPending ||
+    isNavePending ||
+    isDictionaryPending ||
+    isStrongLoading ||
+    isNaveLoading ||
+    isDictionaryLoading
 
   const placeholder = browseMode
     ? {
@@ -735,21 +573,18 @@ const CreateEntityRelationModal = ({
     : title || t('Ajouter une relation')
   const modalSubtitle = getSourceEndpointSubtitle(sourceEndpoint, t)
 
-  const renderTargetItem = ({ item }: { item: RelationTargetResult }) => (
-    <RelationTargetRow item={item} onPress={() => selectTarget(item.endpoint)} />
-  )
+  const renderTargetSearchItem = (item: SearchEntityResult) => {
+    const endpoint = item.endpoint
+    if (!endpoint) return null
 
-  const renderStrongItem = ({ item }: { item: LexiqueRow }) => (
-    <StrongTargetRow item={item} onPress={() => selectTarget(getStrongEndpoint(item))} />
-  )
-
-  const renderNaveItem = ({ item }: { item: NaveRow }) => (
-    <NaveTargetRow item={item} onPress={() => selectTarget(getNaveEndpoint(item))} />
-  )
-
-  const renderDictionaryItem = ({ item }: { item: DictionaryRow }) => (
-    <DictionaryTargetRow item={item} onPress={() => selectTarget(getDictionaryEndpoint(item))} />
-  )
+    return (
+      <RelationTargetRow
+        key={item.id}
+        item={item as RelationTargetResult}
+        onPress={() => selectTarget(endpoint)}
+      />
+    )
+  }
 
   const emptyMessage = browseMode
     ? t('Aucun élément trouvé dans {{target}}', {
@@ -786,65 +621,14 @@ const CreateEntityRelationModal = ({
         autoFocus
       />
 
-      {!browseMode && (
-        <HStack mt={10} gap={8}>
-          {isAllowed('note') && (
-            <TouchableBox
-              onPress={() => enterBrowseMode('note')}
-              px={10}
-              py={8}
-              bg="lightGrey"
-              borderRadius={8}
-            >
-              <Text fontSize={13}>{t('Notes')}</Text>
-            </TouchableBox>
-          )}
-          {isAllowed('study') && (
-            <TouchableBox
-              onPress={() => enterBrowseMode('study')}
-              px={10}
-              py={8}
-              bg="lightGrey"
-              borderRadius={8}
-            >
-              <Text fontSize={13}>{t('Études')}</Text>
-            </TouchableBox>
-          )}
-          {isAllowed('strong') && (
-            <TouchableBox
-              onPress={() => enterBrowseMode('strong')}
-              px={10}
-              py={8}
-              bg="lightGrey"
-              borderRadius={8}
-            >
-              <Text fontSize={13}>{t('Strong')}</Text>
-            </TouchableBox>
-          )}
-          {isAllowed('nave') && (
-            <TouchableBox
-              onPress={() => enterBrowseMode('nave')}
-              px={10}
-              py={8}
-              bg="lightGrey"
-              borderRadius={8}
-            >
-              <Text fontSize={13}>{t('Nave')}</Text>
-            </TouchableBox>
-          )}
-          {isAllowed('dictionary') && (
-            <TouchableBox
-              onPress={() => enterBrowseMode('dictionary')}
-              px={10}
-              py={8}
-              bg="lightGrey"
-              borderRadius={8}
-            >
-              <Text fontSize={13}>{t('Dictionnaire')}</Text>
-            </TouchableBox>
-          )}
-        </HStack>
-      )}
+      <SearchItemFilterBar
+        itemFilters={itemFilters}
+        onToggle={toggleItemFilter}
+        enabledTypes={enabledItemTypes}
+        px={0}
+        mt={10}
+        mb={0}
+      />
     </Box>
   )
 
@@ -865,86 +649,55 @@ const CreateEntityRelationModal = ({
       }
       enableContentWrapper={false}
     >
-      {browseMode === 'strong' ? (
-        <VStack flex={1}>
-          {strongError ? (
-            <Box px={20} py={24}>
-              <Text color="grey">{t('Impossible de charger le lexique Strong.')}</Text>
-            </Box>
-          ) : (
-            <BottomSheetFlashList
-              data={strongResults}
-              renderItem={renderStrongItem}
-              keyExtractor={(item: LexiqueRow) => `${item.lexiqueType}-${item.Code}-${item.Mot}`}
-              estimatedItemSize={72}
-              ListEmptyComponent={
-                isStrongLoading || isStrongPending ? renderLoadingState() : renderEmptyState()
-              }
-            />
-          )}
-          {!deferredSearchHasValue && (
-            <AlphabetList letter={strongLetter} setLetter={setStrongLetter} />
-          )}
-        </VStack>
-      ) : browseMode === 'nave' ? (
-        <VStack flex={1}>
-          {naveError ? (
-            <Box px={20} py={24}>
-              <Text color="grey">{t('Impossible de charger la nave...')}</Text>
-            </Box>
-          ) : (
-            <BottomSheetFlashList
-              data={naveResults}
-              renderItem={renderNaveItem}
-              keyExtractor={(item: NaveRow) => item.name_lower}
-              estimatedItemSize={72}
-              ListEmptyComponent={
-                isNaveLoading || isNavePending ? renderLoadingState() : renderEmptyState()
-              }
-            />
-          )}
-          {!deferredSearchHasValue && (
-            <AlphabetList color="quint" letter={naveLetter} setLetter={setNaveLetter} />
-          )}
-        </VStack>
-      ) : browseMode === 'dictionary' ? (
-        <VStack flex={1}>
-          {dictionaryError ? (
-            <Box px={20} py={24}>
-              <Text color="grey">{t('Impossible de charger le dictionnaire...')}</Text>
-            </Box>
-          ) : (
-            <BottomSheetFlashList
-              data={dictionaryResults}
-              renderItem={renderDictionaryItem}
-              keyExtractor={(item: DictionaryRow, index: number) =>
-                getDictionaryTargetKey(item, index)
-              }
-              estimatedItemSize={72}
-              ListEmptyComponent={
-                isDictionaryLoading || isDictionaryPending
-                  ? renderLoadingState()
-                  : renderEmptyState()
-              }
-            />
-          )}
-          {!deferredSearchHasValue && (
-            <AlphabetList
-              color="secondary"
-              letter={dictionaryLetter}
-              setLetter={setDictionaryLetter}
-            />
-          )}
-        </VStack>
-      ) : (
-        <BottomSheetFlashList
-          data={browseMode ? browseResults : unifiedResults}
-          renderItem={renderTargetItem}
-          keyExtractor={(item: RelationTargetResult) => item.id}
-          estimatedItemSize={72}
-          ListEmptyComponent={isLocalSearchPending ? renderLoadingState() : renderEmptyState()}
-        />
-      )}
+      <VStack flex={1}>
+        {strongError && browseMode === 'strong' ? (
+          <Box px={20} py={24}>
+            <Text color="grey">{t('Impossible de charger le lexique Strong.')}</Text>
+          </Box>
+        ) : naveError && browseMode === 'nave' ? (
+          <Box px={20} py={24}>
+            <Text color="grey">{t('Impossible de charger la nave...')}</Text>
+          </Box>
+        ) : dictionaryError && browseMode === 'dictionary' ? (
+          <Box px={20} py={24}>
+            <Text color="grey">{t('Impossible de charger le dictionnaire...')}</Text>
+          </Box>
+        ) : (
+          <BottomSheetFlashList
+            data={searchSections}
+            renderItem={({ item: section }: { item: RelationTargetSection }) => (
+              <SearchSectionBlock
+                section={section}
+                visibleCount={visibleCounts[section.id] || SEARCH_SECTION_PREVIEW_LIMIT}
+                onLoadMore={() => increaseVisibleCount(section.id)}
+                onPressItem={() => undefined}
+                renderItem={renderTargetSearchItem}
+                isLoading={
+                  (section.id === 'strong' && (isStrongLoading || isStrongPending)) ||
+                  (section.id === 'dictionary' && (isDictionaryLoading || isDictionaryPending)) ||
+                  (section.id === 'nave' && (isNaveLoading || isNavePending))
+                }
+              />
+            )}
+            keyExtractor={(section: RelationTargetSection) => section.id}
+            estimatedItemSize={260}
+            ListEmptyComponent={isListLoading ? renderLoadingState() : renderEmptyState()}
+          />
+        )}
+        {!deferredSearchHasValue && browseMode === 'strong' && (
+          <AlphabetList letter={strongLetter} setLetter={setStrongLetter} />
+        )}
+        {!deferredSearchHasValue && browseMode === 'nave' && (
+          <AlphabetList color="quint" letter={naveLetter} setLetter={setNaveLetter} />
+        )}
+        {!deferredSearchHasValue && browseMode === 'dictionary' && (
+          <AlphabetList
+            color="secondary"
+            letter={dictionaryLetter}
+            setLetter={setDictionaryLetter}
+          />
+        )}
+      </VStack>
     </Modal.Body>
   )
 }
