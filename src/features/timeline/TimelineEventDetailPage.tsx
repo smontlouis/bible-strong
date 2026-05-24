@@ -14,32 +14,40 @@ import { TimelineEvent } from './types'
 interface Props {
   event?: TimelineEvent | (EventDetailsProps & { sectionIndex?: number })
   onOpenEvent: (event: TimelineEvent) => void
+  canGoBack?: boolean
+  onBack?: () => void
 }
 
-const TimelineEventDetailPage = waitForTimeline(({ event, onOpenEvent }: Props) => {
-  const { t } = useTranslation()
-  const lang = useLanguage()
+const TimelineEventDetailPage = waitForTimeline(
+  ({ event, onOpenEvent, canGoBack, onBack }: Props) => {
+    const { t } = useTranslation()
+    const lang = useLanguage()
 
-  if (!event) {
+    if (!event) {
+      return (
+        <Container>
+          <Header title={t('Chronologie de la Bible')} />
+          <Empty
+            icon={require('~assets/images/empty-state-icons/search.svg')}
+            message={t("Cet événement n'est plus disponible.")}
+          />
+        </Container>
+      )
+    }
+
     return (
       <Container>
-        <Header title={t('Chronologie de la Bible')} />
-        <Empty
-          icon={require('~assets/images/empty-state-icons/search.svg')}
-          message={t("Cet événement n'est plus disponible.")}
+        <Header
+          title={getLegacyLocalizedField(lang, { fr: event.title, en: event.titleEn })}
+          hasBackButton={canGoBack}
+          onCustomBackPress={onBack}
         />
+        <ScrollView>
+          <EventDetailsContent {...event} onOpenEvent={onOpenEvent} />
+        </ScrollView>
       </Container>
     )
   }
-
-  return (
-    <Container>
-      <Header title={getLegacyLocalizedField(lang, { fr: event.title, en: event.titleEn })} />
-      <ScrollView>
-        <EventDetailsContent {...event} onOpenEvent={onOpenEvent} />
-      </ScrollView>
-    </Container>
-  )
-})
+)
 
 export default TimelineEventDetailPage

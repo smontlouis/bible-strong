@@ -6,6 +6,7 @@ import BottomSheet, {
 } from '@gorhom/bottom-sheet'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import PopOverMenu from '~common/PopOverMenu'
+import ModalHeader from '~common/ModalHeader'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
@@ -16,6 +17,7 @@ import generateUUID from '~helpers/generateUUID'
 import EventDetails from './EventDetails'
 import { TimelineEvent as TimelineEventProps } from './types'
 import { useTranslation } from 'react-i18next'
+import { useEventDetailsModal } from './EventDetailsModalContext'
 
 interface Props {
   modalRef: React.RefObject<BottomSheet | null>
@@ -37,6 +39,7 @@ const EventDetailsModal = ({ modalRef, scrollViewRef, event }: Props) => {
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
   const { t } = useTranslation()
   const openInNewTab = useOpenInNewTab()
+  const { canGoBack, goBack } = useEventDetailsModal()
   const canOpenEvent = hasEventDetails(event)
 
   const openEventInNewTab = () => {
@@ -76,18 +79,23 @@ const EventDetailsModal = ({ modalRef, scrollViewRef, event }: Props) => {
       {...bottomSheetStyles}
     >
       {canOpenEvent && (
-        <Box row justifyContent="flex-end" alignItems="center" height={54}>
-          <PopOverMenu
-            popover={
-              <MenuOption onSelect={openEventInNewTab}>
-                <Box row alignItems="center">
-                  <FeatherIcon name="external-link" size={15} />
-                  <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
-                </Box>
-              </MenuOption>
-            }
-          />
-        </Box>
+        <ModalHeader
+          title={event.title}
+          hasBackButton={canGoBack}
+          onBackPress={goBack}
+          rightComponent={
+            <PopOverMenu
+              popover={
+                <MenuOption onSelect={openEventInNewTab}>
+                  <Box row alignItems="center">
+                    <FeatherIcon name="external-link" size={15} />
+                    <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
+                  </Box>
+                </MenuOption>
+              }
+            />
+          }
+        />
       )}
       <BottomSheetScrollView ref={scrollViewRef}>
         {canOpenEvent && (

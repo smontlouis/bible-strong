@@ -26,7 +26,10 @@ const ModalHeader = ({
     <Box bg="reverse" borderColor="border" borderBottomWidth={1}>
       <Box minH={54} row>
         {hasBackButton && (
-          <Back onCustomPress={onBackPress} padding>
+          <Back
+            onCustomPress={onBackPress}
+            style={{ width: 54, minHeight: 54, alignItems: 'center', justifyContent: 'center' }}
+          >
             <FeatherIcon name="arrow-left" size={20} />
           </Back>
         )}

@@ -1,10 +1,8 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 import useLanguage from '~helpers/useLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
 
-import Link from '~common/Link'
 import Box from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import waitForTimeline from '~common/waitForTimeline'
 import bibleMemoize from '~helpers/bibleStupidMemoize'
@@ -42,19 +40,13 @@ export const EventDetailsContent = ({
   titleEn,
   start,
   end,
-  canGoBack = false,
-  onBack,
   onOpenEvent,
 }: EventDetailsProps & {
-  canGoBack?: boolean
-  onBack?: () => void
   onOpenEvent?: (event: TimelineEventProps) => void
 }) => {
   const lang = useLanguage()
   const date = calculateLabel(start, end)
-  const event = useMemo(() => {
-    return (bibleMemoize.timeline as TimelineEventDetail[]).find(e => e.slug === slug)
-  }, [slug])
+  const event = (bibleMemoize.timeline as TimelineEventDetail[]).find(e => e.slug === slug)
 
   if (!event) {
     return null
@@ -62,14 +54,6 @@ export const EventDetailsContent = ({
 
   return (
     <Box py={10}>
-      {canGoBack && (
-        <Link onPress={onBack}>
-          <Box row alignItems="center" px={20} py={10}>
-            <FeatherIcon name="arrow-left" size={20} />
-            <Paragraph ml={10}>Retour</Paragraph>
-          </Box>
-        </Link>
-      )}
       {image && (
         <Box center my={30}>
           <Image
@@ -95,11 +79,9 @@ export const EventDetailsContent = ({
 }
 
 const EventDetails = waitForTimeline((props: EventDetailsProps) => {
-  const { goBack, canGoBack, openEvent } = useEventDetailsModal()
+  const { openEvent } = useEventDetailsModal()
 
-  return (
-    <EventDetailsContent {...props} canGoBack={canGoBack} onBack={goBack} onOpenEvent={openEvent} />
-  )
+  return <EventDetailsContent {...props} onOpenEvent={openEvent} />
 })
 
 export default EventDetails
