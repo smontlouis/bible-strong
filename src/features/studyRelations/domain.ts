@@ -398,9 +398,11 @@ export const normalizeRelation = (relation: LegacyRelation | Relation): Relation
   const pairKey = getRelationPairKey(endpoints)
   const duplicateKey = getRelationDuplicateKey(endpoints, relation.type)
 
-  return {
-    ...relation,
+  const normalized: Relation = {
+    id: relation.id,
     kind: relation.kind || 'manual',
+    type: relation.type,
+    direction: validateRelationDirection(relation.type, relation.direction),
     endpoints,
     endpointKeys: projections.endpointKeys,
     endpointTypes: projections.endpointTypes,
@@ -408,9 +410,16 @@ export const normalizeRelation = (relation: LegacyRelation | Relation): Relation
     duplicateKey,
     verseStartKeys: projections.verseStartKeys,
     verseEndpointKeys: projections.verseEndpointKeys,
-    direction: validateRelationDirection(relation.type, relation.direction),
+    createdAt: relation.createdAt,
+    updatedAt: relation.updatedAt,
     label: relation.label?.trim() || undefined,
   }
+
+  if (relation.createdBy) normalized.createdBy = relation.createdBy
+  if (relation.updatedBy) normalized.updatedBy = relation.updatedBy
+  if (relation.deletedAt) normalized.deletedAt = relation.deletedAt
+
+  return normalized
 }
 
 export const normalizeStudyRelation = normalizeRelation
@@ -429,6 +438,44 @@ export const hasDuplicateRelation = (
   })
 
 export const hasDuplicateStudyRelation = hasDuplicateRelation
+
+const relationDedupeScore = (relation: Relation): [number, number, number, string] => [
+  relation.deletedAt ? 0 : 1,
+  relation.kind === 'system' && relation.id.startsWith('system:') ? 1 : 0,
+  relation.updatedAt || relation.createdAt || 0,
+  relation.id,
+]
+
+const shouldReplaceDuplicateRelation = (current: Relation, candidate: Relation): boolean => {
+  const currentScore = relationDedupeScore(current)
+  const candidateScore = relationDedupeScore(candidate)
+
+  for (let index = 0; index < candidateScore.length; index += 1) {
+    if (candidateScore[index] === currentScore[index]) continue
+    return candidateScore[index] > currentScore[index]
+  }
+
+  return false
+}
+
+export const dedupeRelationsByDuplicateKey = (relations: RelationsObj = {}): RelationsObj => {
+  const byDuplicateKey = Object.values(relations).reduce(
+    (result, relation) => {
+      const normalized = normalizeRelation(relation)
+      const current = result[normalized.duplicateKey]
+      if (!current || shouldReplaceDuplicateRelation(current, normalized)) {
+        result[normalized.duplicateKey] = normalized
+      }
+      return result
+    },
+    {} as Record<string, Relation>
+  )
+
+  return Object.values(byDuplicateKey).reduce((result, relation) => {
+    result[relation.id] = relation
+    return result
+  }, {} as RelationsObj)
+}
 
 export const endpointsMatch = (left: RelationEndpoint, right: RelationEndpoint): boolean =>
   endpointIdentity(left) === endpointIdentity(right)
@@ -480,7 +527,7 @@ export const getSystemRelationId = (
   type: Extract<RelationType, 'annotates' | 'externalLink'>,
   entityId: string,
   verseEndpoint: RelationEndpoint
-): string => `system:${type}:${entityId}:${endpointIdentity(verseEndpoint)}`
+): string => `system:${type}:${getRelationPairId(`${entityId}:${endpointIdentity(verseEndpoint)}`)}`
 
 const getVerseKeysForNote = (noteId: string, wordAnnotations: WordAnnotationsObj = {}) => {
   if (noteId.startsWith('annotation:')) {
@@ -574,11 +621,11 @@ export const mergeRelationsWithSystemBackfill = ({
     return result
   }, {} as RelationsObj)
 
-  return {
+  return dedupeRelationsByDuplicateKey({
     ...preservedRelations,
     ...buildSystemRelationsForNotes(notes, wordAnnotations),
     ...buildSystemRelationsForLinks(links),
-  }
+  })
 }
 
 export const rebuildRelationIndexes = (relations: RelationsObj): RelationIndexObj => {

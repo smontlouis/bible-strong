@@ -27,6 +27,7 @@ import {
 import {
   mergeRelationsWithSystemBackfill,
   normalizeRelation,
+  dedupeRelationsByDuplicateKey,
   rebuildRelationIndexes,
   rebuildRelationPairs,
   type LegacyRelation,
@@ -63,14 +64,16 @@ const normalizeRelationsData = (bible: EmbeddedBibleData | ImportedBibleData): R
     {} as RelationsObj
   )
 
-  return mergeRelationsWithSystemBackfill({
-    relations: normalizedRelations,
-    notes: bible.notes as RootState['user']['bible']['notes'] | undefined,
-    links: bible.links as RootState['user']['bible']['links'] | undefined,
-    wordAnnotations: bible.wordAnnotations as
-      | RootState['user']['bible']['wordAnnotations']
-      | undefined,
-  })
+  return dedupeRelationsByDuplicateKey(
+    mergeRelationsWithSystemBackfill({
+      relations: normalizedRelations,
+      notes: bible.notes as RootState['user']['bible']['notes'] | undefined,
+      links: bible.links as RootState['user']['bible']['links'] | undefined,
+      wordAnnotations: bible.wordAnnotations as
+        | RootState['user']['bible']['wordAnnotations']
+        | undefined,
+    })
+  )
 }
 
 const getCollectionDataForMigration = (
@@ -196,6 +199,63 @@ async function markRelationsAsMigrated(userId: string): Promise<void> {
   })
 }
 
+const hasDuplicateRelationKeys = (relations: RelationsObj): boolean => {
+  const duplicateKeys = new Set<string>()
+  for (const relation of Object.values(relations)) {
+    const duplicateKey = normalizeRelation(relation).duplicateKey
+    if (duplicateKeys.has(duplicateKey)) return true
+    duplicateKeys.add(duplicateKey)
+  }
+  return false
+}
+
+const haveSameKeys = (
+  left: Record<string, unknown> = {},
+  right: Record<string, unknown> = {}
+): boolean => {
+  const leftKeys = Object.keys(left)
+  const rightKeys = Object.keys(right)
+  if (leftKeys.length !== rightKeys.length) return false
+
+  return leftKeys.every(key => Object.prototype.hasOwnProperty.call(right, key))
+}
+
+async function cleanupDuplicateRelations(userId: string): Promise<void> {
+  const [relations, relationIndex, relationPairs, notes, links, wordAnnotations] =
+    await Promise.all([
+      fetchSubcollection(userId, 'relations'),
+      fetchSubcollection(userId, 'relationIndex'),
+      fetchSubcollection(userId, 'relationPairs'),
+      fetchSubcollection(userId, 'notes'),
+      fetchSubcollection(userId, 'links'),
+      fetchSubcollection(userId, 'wordAnnotations'),
+    ])
+  const normalizedRelations = normalizeRelationsData({
+    relations: relations as Record<string, LegacyRelation>,
+    notes,
+    links,
+    wordAnnotations,
+  })
+  const rebuiltRelationIndex = rebuildRelationIndexes(normalizedRelations)
+  const rebuiltRelationPairs = rebuildRelationPairs(normalizedRelations)
+
+  if (
+    !hasDuplicateRelationKeys(relations as RelationsObj) &&
+    haveSameKeys(relations, normalizedRelations) &&
+    haveSameKeys(relationIndex, rebuiltRelationIndex) &&
+    haveSameKeys(relationPairs, rebuiltRelationPairs)
+  ) {
+    return
+  }
+
+  await clearSubcollection(userId, 'relations')
+  await clearSubcollection(userId, 'relationIndex')
+  await clearSubcollection(userId, 'relationPairs')
+  await writeAllToSubcollection(userId, 'relations', normalizedRelations)
+  await writeAllToSubcollection(userId, 'relationIndex', rebuiltRelationIndex)
+  await writeAllToSubcollection(userId, 'relationPairs', rebuiltRelationPairs)
+}
+
 export async function migrateUserRelationsArchitecture(
   userId: string,
   state: RootState,
@@ -209,7 +269,10 @@ export async function migrateUserRelationsArchitecture(
   try {
     reportProgress('Vérification des relations...', 0)
     const alreadyMigrated = await isUserRelationsMigrated(userId)
-    if (alreadyMigrated) return { success: true }
+    if (alreadyMigrated) {
+      await cleanupDuplicateRelations(userId)
+      return { success: true }
+    }
 
     reportProgress('Création du backup de sécurité...', 0.1)
     await autoBackupManager.createBackupNow(state, 'pre_migration')

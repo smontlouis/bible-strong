@@ -1,5 +1,6 @@
 import {
   endpointIdentity,
+  dedupeRelationsByDuplicateKey,
   getRelationDisplayModel,
   getRelationDuplicateKey,
   getSystemRelationId,
@@ -290,5 +291,32 @@ describe('study relation domain', () => {
       'note:note-uuid',
       'verse:1-1-1',
     ])
+  })
+
+  it('deduplicates system relations by duplicateKey and keeps the canonical system id', () => {
+    const canonical = normalizeStudyRelation({
+      id: 'system:annotates:note-1:verse:1-1-1',
+      kind: 'system',
+      type: 'annotates',
+      endpoints: [
+        { type: 'note', noteId: 'note-1' },
+        { type: 'verse', verseKeys: ['1-1-1'] },
+      ],
+      direction: 'none',
+      createdAt: 1,
+      updatedAt: 1,
+    })
+    const duplicate = normalizeStudyRelation({
+      ...canonical,
+      id: 'random-duplicate-id',
+      createdAt: 2,
+      updatedAt: 2,
+    })
+
+    expect(
+      Object.keys(
+        dedupeRelationsByDuplicateKey({ [duplicate.id]: duplicate, [canonical.id]: canonical })
+      )
+    ).toEqual([canonical.id])
   })
 })

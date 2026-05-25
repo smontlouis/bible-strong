@@ -108,8 +108,8 @@ function validateDocumentId(docId: string): ValidationResult {
   if (!docId || docId.length === 0) return { valid: false, reason: 'empty' }
   if (docId === '.' || docId === '..') return { valid: false, reason: 'reserved_name' }
   // Slashs autorisés - ils seront encodés en __SLASH__ avant écriture
-  // Check for reasonable length (Firestore limit is 1500 bytes)
-  if (docId.length > 1500) return { valid: false, reason: 'too_long' }
+  // Check encoded length because Firestore validates the stored document ID.
+  if (encodeDocumentId(docId).length > 1500) return { valid: false, reason: 'too_long' }
   return { valid: true }
 }
 
@@ -196,10 +196,11 @@ export async function batchWriteSubcollection(
   for (const [docId, data] of Object.entries(changes.set)) {
     const validation = validateDocumentId(docId)
     if (validation.valid) {
+      const cleanedData = removeUndefinedDeep(data) as SubcollectionDocument
       operations.push({
         type: 'set',
         docId: encodeDocumentId(docId),
-        data: removeUndefinedDeep(data) as SubcollectionDocument,
+        data: cleanedData,
       })
     } else {
       skippedItems.push({ docId: docId || '(empty)', reason: validation.reason! })

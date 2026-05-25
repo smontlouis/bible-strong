@@ -9,6 +9,7 @@ import SearchTypeIcon from './SearchTypeIcon'
 export const searchItemFilterOrder: SearchItemType[] = [
   'passages',
   'notes',
+  'links',
   'studies',
   'strong',
   'dictionary',
@@ -32,6 +33,7 @@ export const searchItemFilterConfig: Record<
 > = {
   passages: { labelKey: 'Passages', color: 'color1' },
   notes: { labelKey: 'Notes', color: 'color2' },
+  links: { labelKey: 'Liens', color: 'secondary' },
   studies: { labelKey: 'Études', color: 'tertiary' },
   strong: { labelKey: 'Strong', color: 'primary' },
   dictionary: { labelKey: 'Dictionnaire', color: 'secondary' },

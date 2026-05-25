@@ -45,6 +45,8 @@ import {
   makeTaggedVersesInChapterSelector,
   makeWordAnnotationsByChapterSelector,
   makeWordAnnotationsInOtherVersionsSelector,
+  selectLinks,
+  selectNotes,
 } from '~redux/selectors/bible'
 import { makeSelectBookmarksInChapter } from '~redux/selectors/bookmarks'
 import { historyAtom, unifiedTagsModalAtom, bibleDataRefreshSignalAtom } from '../../state/app'
@@ -62,7 +64,11 @@ import { getBibleDOMDestination } from './SharedBibleDOM'
 import SnapshotPlaceholder from './SnapshotPlaceholder'
 import AnnotationNoteModal from './AnnotationNoteModal'
 import AnnotationToolbar from './AnnotationToolbar'
-import { BibleDOMWrapper, ParallelVerse } from './BibleDOM/BibleDOMWrapper'
+import {
+  BibleDOMWrapper,
+  ParallelVerse,
+  type StudyRelationsModalTarget,
+} from './BibleDOM/BibleDOMWrapper'
 import {
   loadBibleReadingComments,
   loadBibleReadingMain,
@@ -91,6 +97,7 @@ import VerseNotesModal from './VerseNotesModal'
 import VerseTagsModal from './VerseTagsModal'
 import CreateEntityRelationModal from '~features/studyRelations/CreateEntityRelationModal'
 import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
+import { useOpenRelationEndpoint } from '~features/studyRelations/useOpenRelationEndpoint'
 
 const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: number) => {
   if (pericope && pericope[book] && pericope[book][chapter]) {
@@ -128,6 +135,7 @@ const BibleViewer = ({
   withNavigation,
 }: BibleViewerProps) => {
   const { t } = useTranslation()
+  const openRelationEndpoint = useOpenRelationEndpoint()
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
   const bibleDataRefreshSignal = useAtomValue(bibleDataRefreshSignalAtom)
 
@@ -180,9 +188,8 @@ const BibleViewer = ({
   const verseNotesModal = useBottomSheetModal()
   const [verseNotesModalKey, setVerseNotesModalKey] = useState<string | null>(null)
   const verseStudyRelationsModal = useBottomSheetModal()
-  const [verseStudyRelationsModalKey, setVerseStudyRelationsModalKey] = useState<string | null>(
-    null
-  )
+  const [verseStudyRelationsModalEndpoint, setVerseStudyRelationsModalEndpoint] =
+    useState<RelationEndpoint | null>(null)
   const [createRelationSourceEndpoint, setCreateRelationSourceEndpoint] =
     useState<RelationEndpoint | null>(null)
 
@@ -343,10 +350,12 @@ const BibleViewer = ({
   const notesByChapter = useSelector((state: RootState) =>
     selectNotesByChapter(state, displayedBook, displayedChapter)
   )
+  const allNotes = useSelector(selectNotes)
 
   const linksByChapter = useSelector((state: RootState) =>
     selectLinksByChapter(state, displayedBook, displayedChapter)
   )
+  const allLinks = useSelector(selectLinks)
 
   const studyRelationsByChapter = useSelector((state: RootState) =>
     selectStudyRelationsByChapter(state, displayedBook, displayedChapter)
@@ -538,8 +547,19 @@ const BibleViewer = ({
     actions.clearSelectedVerses()
   }
 
-  const openVerseStudyRelationsModal = (verseKey: string) => {
-    setVerseStudyRelationsModalKey(verseKey)
+  const openVerseStudyRelationsModal = (target: StudyRelationsModalTarget) => {
+    const verseIds =
+      typeof target === 'string'
+        ? [target]
+        : target.verseIds?.length
+          ? target.verseIds
+          : target.verseKey
+            ? [target.verseKey]
+            : []
+
+    if (!verseIds.length) return
+
+    setVerseStudyRelationsModalEndpoint(createVerseEndpoint(verseIds))
     verseStudyRelationsModal.open()
   }
 
@@ -560,6 +580,20 @@ const BibleViewer = ({
         : undefined
     )
     noteModal.open()
+  }
+
+  const openBibleRelationEndpoint = (endpoint: RelationEndpoint) => {
+    switch (endpoint.type) {
+      case 'note':
+        openNoteModal(endpoint.noteId)
+        break
+      case 'externalLink':
+        openLinkModal(endpoint.linkId)
+        break
+      default:
+        openRelationEndpoint(endpoint)
+        break
+    }
   }
 
   const onChangeResourceTypeSelectVerse = (res: BibleResource, ver: string) => {
@@ -739,8 +773,10 @@ const BibleViewer = ({
     selectedVerses,
     highlightedVerses: highlightedVersesByChapter,
     notedVerses: notesByChapter,
+    allNotes,
     bookmarkedVerses,
     linkedVerses: linksByChapter,
+    allLinks,
     studyRelations: studyRelationsByChapter,
     wordAnnotations: wordAnnotationsByChapter,
     settings,
@@ -936,9 +972,8 @@ const BibleViewer = ({
       />
       <EntityRelationsModal
         ref={verseStudyRelationsModal.getRef()}
-        endpoint={
-          verseStudyRelationsModalKey ? createVerseEndpoint([verseStudyRelationsModalKey]) : null
-        }
+        endpoint={verseStudyRelationsModalEndpoint}
+        onOpenEndpoint={openBibleRelationEndpoint}
       />
       <StrongModal
         ref={strongModal.getRef()}

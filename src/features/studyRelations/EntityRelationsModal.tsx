@@ -14,11 +14,13 @@ import { useOpenRelationEndpoint } from './useOpenRelationEndpoint'
 type Props = {
   ref?: Ref<BottomSheetModal | null>
   endpoint: RelationEndpoint | null
+  onOpenEndpoint?: (endpoint: RelationEndpoint) => void
 }
 
-const EntityRelationsModal = ({ ref, endpoint }: Props) => {
+const EntityRelationsModal = ({ ref, endpoint, onOpenEndpoint }: Props) => {
   const { t } = useTranslation()
-  const openEndpoint = useOpenRelationEndpoint()
+  const defaultOpenEndpoint = useOpenRelationEndpoint()
+  const openEndpoint = onOpenEndpoint || defaultOpenEndpoint
   const createRelationModal = useBottomSheetModal()
   const isSingleVerseEndpoint = endpoint?.type === 'verse' && endpoint.verseKeys.length === 1
   const endpointLabel = endpoint ? getEndpointFallbackLabel(endpoint) : ''

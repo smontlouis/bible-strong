@@ -4,12 +4,11 @@ import { styled } from 'goober'
 import { Bookmark, Verse as TVerse } from '~common/types'
 import { HighlightsObj } from '~redux/modules/user'
 import {
-  LinkedVerse,
-  NotedVerse,
   ParallelVerse,
   PericopeChapter,
   RootStyles,
   TaggedVerse,
+  VerseRelationItem,
   WebViewProps,
 } from './BibleDOMWrapper'
 import { ParallelDisplayMode } from 'src/state/tabs'
@@ -142,11 +141,9 @@ export interface UnifiedVersesRendererProps {
   wordAnnotationsInOtherVersions?: Record<string, CrossVersionAnnotation[]>
   taggedVerses: TaggedVerse[] | null
   bookmarkedVerses?: Record<number, Bookmark>
-  notedVersesCount: { [key: string]: number }
-  notedVersesText: { [key: string]: NotedVerse[] }
-  linkedVersesCount: { [key: string]: number }
-  linkedVersesText: { [key: string]: LinkedVerse[] }
-  studyRelationsCount: { [key: string]: number }
+  annotationNotesCountByVerse: { [key: string]: number }
+  relationItemsCount: { [key: string]: number }
+  relationItemsText: { [key: string]: VerseRelationItem[] }
   versesWithAnnotationNotes?: Record<string, boolean>
   navigateToPericope: () => void
   // Annotation mode props
@@ -249,11 +246,9 @@ export function UnifiedVersesRenderer({
   wordAnnotationsInOtherVersions,
   taggedVerses,
   bookmarkedVerses,
-  notedVersesCount,
-  notedVersesText,
-  linkedVersesCount,
-  linkedVersesText,
-  studyRelationsCount,
+  annotationNotesCountByVerse,
+  relationItemsCount,
+  relationItemsText,
   versesWithAnnotationNotes,
   navigateToPericope,
   annotationMode,
@@ -307,11 +302,9 @@ export function UnifiedVersesRenderer({
         const pericope = getPericopeVerse(pericopeChapter, verseNumber)
         const tag = taggedVersesByLastVerse.get(verseKey)
         const bookmark = bookmarkedVerses?.[verseNumber]
-        const notesCount = notedVersesCount[Verset]
-        const notesText = notedVersesText[Verset]
-        const linksCount = linkedVersesCount[Verset]
-        const linksText = linkedVersesText[Verset]
-        const relationsCount = studyRelationsCount[Verset]
+        const annotationNotesCount = annotationNotesCountByVerse[Verset]
+        const relationCount = relationItemsCount[Verset]
+        const relationItems = relationItemsText[Verset]
         const otherVersionAnnotations = wordAnnotationsInOtherVersions?.[verseKey]
         const isTouched = touchedVerseKey === verseKey
 
@@ -334,11 +327,9 @@ export function UnifiedVersesRenderer({
                 isSelectedMode={false}
                 isSelectionMode={undefined}
                 highlightedColor={undefined}
-                notesCount={notesCount}
-                notesText={notesText}
-                linksCount={linksCount}
-                linksText={linksText}
-                relationsCount={relationsCount}
+                annotationNotesCount={annotationNotesCount}
+                relationCount={relationCount}
+                relationItems={relationItems}
                 isVerseToScroll={false}
                 selectedCode={null}
                 tag={tag}
@@ -402,11 +393,9 @@ export function UnifiedVersesRenderer({
               isSelectedMode={hasSelectedVerses}
               isSelectionMode={isSelectionMode}
               highlightedColor={highlightedColor}
-              notesCount={notesCount}
-              notesText={notesText}
-              linksCount={linksCount}
-              linksText={linksText}
-              relationsCount={relationsCount}
+              annotationNotesCount={annotationNotesCount}
+              relationCount={relationCount}
+              relationItems={relationItems}
               isVerseToScroll={isVerseToScroll}
               selectedCode={selectedCode}
               isFocused={isFocused}

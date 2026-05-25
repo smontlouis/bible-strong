@@ -16,11 +16,7 @@ import BibleDOMComponent from './BibleDOMComponent'
 import {
   sortVersesToTags,
   getAnnotationNotesInfo,
-  getNotedVersesCount,
-  getNotedVersesText,
-  getLinkedVersesCount,
-  getLinkedVersesText,
-  getStudyRelationsCount,
+  getVerseRelationsMetadata,
   transformComments,
 } from './computeVerseMetadata'
 import booksJson from '~assets/bible_versions/books.json'
@@ -50,6 +46,8 @@ import {
   WordAnnotationsObj,
 } from '~redux/modules/user'
 import type { CrossVersionAnnotation } from '~redux/selectors/bible'
+import type { RelationEndpoint, RelationKind, RelationType } from '~features/studyRelations/domain'
+import { useOpenRelationEndpoint } from '~features/studyRelations/useOpenRelationEndpoint'
 import { useBookAndVersionSelector } from '../BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 import type { AnnotationType, SelectionRange, WordPosition } from '../hooks/useAnnotationMode'
 import { BibleDOMTranslations } from './TranslationsContext'
@@ -67,6 +65,7 @@ import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_BIBLE_VIEW,
   NAVIGATE_TO_PERICOPE,
+  NAVIGATE_TO_RELATION_ENDPOINT,
   NAVIGATE_TO_STRONG,
   NAVIGATE_TO_TAG,
   NAVIGATE_TO_VERSE_LINKS,
@@ -79,6 +78,7 @@ import {
   OPEN_VERSE_TAGS_MODAL,
   REMOVE_PARALLEL_VERSION,
   SELECTION_CHANGED,
+  SHOW_TOAST,
   SWIPE_DOWN,
   SWIPE_LEFT,
   SWIPE_RIGHT,
@@ -113,6 +113,14 @@ type HighlightTagsModalPayload = {
   ids: Record<string, true>
 }
 
+export type StudyRelationsModalTarget =
+  | string
+  | {
+      verseKey?: string
+      verseIds?: string[]
+      relationId?: string
+    }
+
 type DispatchAction = {
   type: string
   payload?: unknown
@@ -138,9 +146,34 @@ const getStringPayload = (payload: unknown): string | undefined =>
 const getNumberPayload = (payload: unknown): number | undefined =>
   typeof payload === 'number' ? payload : undefined
 
+const getToastPayload = (payload: unknown): { message?: string; type?: string } => {
+  if (!isRecord(payload)) return {}
+  return {
+    message: getStringPayload(payload.message),
+    type: getStringPayload(payload.type),
+  }
+}
+
 const getVerseIdsPayload = (payload: unknown): string[] => {
   if (!isRecord(payload) || !Array.isArray(payload.verseIds)) return []
   return payload.verseIds.filter((verseId): verseId is string => typeof verseId === 'string')
+}
+
+const getStudyRelationsModalTarget = (payload: unknown): StudyRelationsModalTarget | undefined => {
+  if (typeof payload === 'string') return payload
+  if (!isRecord(payload)) return undefined
+
+  const verseKey = getStringPayload(payload.verseKey)
+  const relationId = getStringPayload(payload.relationId)
+  const verseIds = getVerseIdsPayload(payload)
+
+  if (!verseKey && !verseIds.length) return undefined
+
+  return {
+    verseKey,
+    relationId,
+    verseIds,
+  }
 }
 
 const getNoteModalPayload = (payload: unknown): { noteId?: string; verseIds: string[] } => {
@@ -194,15 +227,17 @@ export type WebViewProps = {
   selectedVerses: VerseIds
   highlightedVerses: HighlightsObj
   notedVerses: NotesObj
+  allNotes: NotesObj
   bookmarkedVerses: Record<number, Bookmark>
   linkedVerses: LinksObj
+  allLinks: LinksObj
   studyRelations: StudyRelationsObj
   wordAnnotations: WordAnnotationsObj
   settings: RootState['user']['bible']['settings']
   verseToScroll: number | undefined
   pericopeChapter: PericopeChapter
   openNoteModal?: (noteId: string, verseIds?: string[]) => void
-  openLinkModal?: (verseKey: string) => void
+  openLinkModal?: (linkId: string) => void
   setSelectedCode: (selectedCode: SelectedCode) => void
   selectedCode: SelectedCode | null
   comments: { [key: string]: string } | null
@@ -242,7 +277,7 @@ export type WebViewProps = {
   onOpenVerseTagsModal?: (verseKey: string) => void
   // Verse notes modal
   onOpenVerseNotesModal?: (verseKey: string) => void
-  onOpenStudyRelationsModal?: (verseKey: string) => void
+  onOpenStudyRelationsModal?: (target: StudyRelationsModalTarget) => void
   // Enter annotation mode from double-tap
   onEnterAnnotationMode?: () => void
   // Red words data
@@ -275,6 +310,20 @@ export type LinkedVerse = {
   verses: string
 }
 
+export type VerseRelationItem = {
+  key: string
+  relationId: string
+  relationType: RelationType
+  relationKind: RelationKind
+  targetEndpoint: RelationEndpoint
+  targetType: RelationEndpoint['type']
+  label: string
+  targetIsAvailable: boolean
+  targetEntityExists: boolean
+  verseIds: string[]
+  updatedAt: number
+}
+
 export const BibleDOMWrapper = ({
   verses,
   parallelVerses,
@@ -285,8 +334,10 @@ export const BibleDOMWrapper = ({
   selectedVerses,
   highlightedVerses,
   notedVerses,
+  allNotes,
   bookmarkedVerses,
   linkedVerses,
+  allLinks,
   studyRelations,
   wordAnnotations,
   settings,
@@ -338,6 +389,7 @@ export const BibleDOMWrapper = ({
   onMountTimeout,
 }: WebViewProps) => {
   const { openVersionSelector } = useBookAndVersionSelector()
+  const openRelationEndpoint = useOpenRelationEndpoint()
   const [isINTComplete, setIsINTComplete] = useAtom(isINTCompleteAtom)
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
   const setTagDetailModal = useSetAtom(tagDetailModalAtom)
@@ -423,8 +475,8 @@ export const BibleDOMWrapper = ({
         break
       }
       case NAVIGATE_TO_VERSE_STUDY_RELATIONS: {
-        const verseKey = getStringPayload(action.payload)
-        if (verseKey) onOpenStudyRelationsModal?.(verseKey)
+        const target = getStudyRelationsModalTarget(action.payload)
+        if (target) onOpenStudyRelationsModal?.(target)
         break
       }
       case NAVIGATE_TO_PERICOPE: {
@@ -499,8 +551,26 @@ export const BibleDOMWrapper = ({
         break
       }
       case NAVIGATE_TO_BIBLE_LINK: {
-        const verseKey = getStringPayload(action.payload)
-        if (verseKey) openLinkModal?.(verseKey)
+        const linkId = getStringPayload(action.payload)
+        if (linkId) openLinkModal?.(linkId)
+        break
+      }
+      case NAVIGATE_TO_RELATION_ENDPOINT: {
+        if (isRecord(action.payload)) {
+          openRelationEndpoint(action.payload as RelationEndpoint)
+        }
+        break
+      }
+      case SHOW_TOAST: {
+        const { message, type } = getToastPayload(action.payload)
+        if (!message) break
+        if (type === 'warning') {
+          toast.warning(t(message))
+        } else if (type === 'error') {
+          toast.error(t(message))
+        } else {
+          toast.info(t(message))
+        }
         break
       }
       case NAVIGATE_TO_BIBLE_VIEW: {
@@ -679,16 +749,18 @@ export const BibleDOMWrapper = ({
     wordAnnotations,
     version
   )
-  const notedVersesCount = getNotedVersesCount(
+  const relationsDisplay =
+    settings.relationsDisplay ||
+    (settings.notesDisplay === 'block' || settings.linksDisplay === 'block' ? 'block' : 'inline')
+  const relationMetadata = getVerseRelationsMetadata(
     versesToSend,
-    notedVerses,
-    annotationNotesCountByVerse,
-    settings.notesDisplay
+    studyRelations,
+    relationsDisplay,
+    {
+      notes: allNotes,
+      links: allLinks,
+    }
   )
-  const notedVersesText = getNotedVersesText(versesToSend, notedVerses)
-  const linkedVersesCount = getLinkedVersesCount(versesToSend, linkedVerses, settings.linksDisplay)
-  const linkedVersesText = getLinkedVersesText(versesToSend, linkedVerses)
-  const studyRelationsCount = getStudyRelationsCount(versesToSend, studyRelations)
 
   return (
     <Box
@@ -746,11 +818,9 @@ export const BibleDOMWrapper = ({
         isINTComplete={isINTComplete}
         taggedVerses={taggedVerses}
         versesWithAnnotationNotes={versesWithAnnotationNotes}
-        notedVersesCount={notedVersesCount}
-        notedVersesText={notedVersesText}
-        linkedVersesCount={linkedVersesCount}
-        linkedVersesText={linkedVersesText}
-        studyRelationsCount={studyRelationsCount}
+        annotationNotesCountByVerse={annotationNotesCountByVerse}
+        relationItemsCount={relationMetadata.counts}
+        relationItemsText={relationMetadata.items}
       />
       {Platform.OS === 'android' && Platform.Version < 30 && (
         <HelpTip

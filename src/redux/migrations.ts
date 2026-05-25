@@ -10,6 +10,7 @@ import { RootState } from './modules/reducer'
 import {
   normalizeRelation,
   mergeRelationsWithSystemBackfill,
+  dedupeRelationsByDuplicateKey,
   rebuildRelationIndexes,
   rebuildRelationPairs,
   type LegacyRelation,
@@ -37,12 +38,14 @@ const migrateRelations = (state: LegacyRootState): RootState => {
     },
     {} as RelationsObj
   )
-  const relations = mergeRelationsWithSystemBackfill({
-    relations: normalizedRelations,
-    notes: state.user.bible.notes,
-    links: state.user.bible.links,
-    wordAnnotations: state.user.bible.wordAnnotations,
-  })
+  const relations = dedupeRelationsByDuplicateKey(
+    mergeRelationsWithSystemBackfill({
+      relations: normalizedRelations,
+      notes: state.user.bible.notes,
+      links: state.user.bible.links,
+      wordAnnotations: state.user.bible.wordAnnotations,
+    })
+  )
 
   const { studyRelations: _studyRelations, ...bible } = state.user.bible
 
@@ -521,4 +524,37 @@ export default {
     }
   },
   33: (state: RootState) => migrateRelations(state as LegacyRootState),
+  34: (state: RootState) => {
+    const notesDisplay = state.user.bible.settings.notesDisplay
+    const linksDisplay = state.user.bible.settings.linksDisplay
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        bible: {
+          ...state.user.bible,
+          settings: {
+            ...state.user.bible.settings,
+            relationsDisplay:
+              notesDisplay === 'block' || linksDisplay === 'block' ? 'block' : 'inline',
+          },
+        },
+      },
+    }
+  },
+  35: (state: RootState) => {
+    const relations = dedupeRelationsByDuplicateKey(state.user.bible.relations ?? {})
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        bible: {
+          ...state.user.bible,
+          relations,
+          relationIndex: rebuildRelationIndexes(relations),
+          relationPairs: rebuildRelationPairs(relations),
+        },
+      },
+    }
+  },
 }

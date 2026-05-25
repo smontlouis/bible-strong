@@ -1,9 +1,15 @@
+jest.mock('~i18n', () => ({
+  t: (key: string) => key,
+}))
+
 import {
   getLinkedVersesCount,
   getLinkedVersesText,
   getNotedVersesCount,
   getNotedVersesText,
+  getVerseRelationsMetadata,
 } from '../computeVerseMetadata'
+import type { StudyRelationsObj } from '~redux/modules/user'
 
 const verses = [
   { Livre: 1, Chapitre: 1, Verset: 1, Texte: 'Verse 1' },
@@ -80,5 +86,109 @@ describe('compute verse metadata', () => {
     }
 
     expect(getLinkedVersesCount(verses, links, 'block')).toEqual({ '1': 2 })
+  })
+
+  it('anchors inline multi-verse relations on the ending verse', () => {
+    const relations: StudyRelationsObj = {
+      relation1: {
+        id: 'relation1',
+        kind: 'system',
+        type: 'annotates',
+        direction: 'none',
+        endpoints: [
+          { type: 'note', key: 'note:note1', noteId: 'note1', labelFallback: 'Note 1' },
+          {
+            type: 'verse',
+            key: 'verse:1-1-1/1-1-2',
+            verseKeys: ['1-1-1', '1-1-2'],
+            labelFallback: '1-1-1/1-1-2',
+          },
+        ],
+        endpointKeys: ['note:note1', 'verse:1-1-1/1-1-2'],
+        endpointTypes: ['note', 'verse'],
+        pairKey: 'note:note1|verse:1-1-1/1-1-2',
+        duplicateKey: 'annotates:note:note1|verse:1-1-1/1-1-2',
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    }
+
+    expect(getVerseRelationsMetadata(verses, relations, 'inline')).toMatchObject({
+      counts: { '2': 1 },
+      items: { '2': [{ relationId: 'relation1', label: 'Note 1', verseIds: ['1-1-1', '1-1-2'] }] },
+    })
+  })
+
+  it('anchors icon multi-verse relations on the starting verse', () => {
+    const relations: StudyRelationsObj = {
+      relation1: {
+        id: 'relation1',
+        kind: 'system',
+        type: 'annotates',
+        direction: 'none',
+        endpoints: [
+          { type: 'note', key: 'note:note1', noteId: 'note1', labelFallback: 'Note 1' },
+          {
+            type: 'verse',
+            key: 'verse:1-1-1/1-1-2',
+            verseKeys: ['1-1-1', '1-1-2'],
+            labelFallback: '1-1-1/1-1-2',
+          },
+        ],
+        endpointKeys: ['note:note1', 'verse:1-1-1/1-1-2'],
+        endpointTypes: ['note', 'verse'],
+        pairKey: 'note:note1|verse:1-1-1/1-1-2',
+        duplicateKey: 'annotates:note:note1|verse:1-1-1/1-1-2',
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    }
+
+    expect(getVerseRelationsMetadata(verses, relations, 'block')).toMatchObject({
+      counts: { '1': 1 },
+      items: { '1': [{ relationId: 'relation1', label: 'Note 1', verseIds: ['1-1-1', '1-1-2'] }] },
+    })
+  })
+
+  it('resolves existing note relations from chapter-scoped note keys', () => {
+    const relations: StudyRelationsObj = {
+      relation1: {
+        id: 'relation1',
+        kind: 'system',
+        type: 'annotates',
+        direction: 'none',
+        endpoints: [
+          { type: 'note', key: 'note:note1', noteId: 'note1', labelFallback: 'Old title' },
+          {
+            type: 'verse',
+            key: 'verse:1-1-1',
+            verseKeys: ['1-1-1'],
+            labelFallback: '1-1-1',
+          },
+        ],
+        endpointKeys: ['note:note1', 'verse:1-1-1'],
+        endpointTypes: ['note', 'verse'],
+        pairKey: 'note:note1|verse:1-1-1',
+        duplicateKey: 'annotates:note:note1|verse:1-1-1',
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    }
+
+    expect(
+      getVerseRelationsMetadata(verses, relations, 'inline', {
+        notes: {
+          '1-1-1#note1': {
+            id: 'note1',
+            title: 'Live title',
+            description: 'Live description',
+            date: 1,
+          },
+        },
+      }).items['1'][0]
+    ).toMatchObject({
+      label: 'Live title',
+      targetEntityExists: true,
+    })
   })
 })

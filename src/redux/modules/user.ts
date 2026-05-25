@@ -49,6 +49,7 @@ import {
   createSystemRelation,
   createVerseEndpoint,
   getSystemRelationId,
+  dedupeRelationsByDuplicateKey,
   hasDuplicateRelation,
   mergeRelationsWithSystemBackfill,
   normalizeRelation,
@@ -87,6 +88,7 @@ import {
   setSettingsPreferredLightTheme,
   setSettingsPress,
   setSettingsRedWordsDisplay,
+  setSettingsRelationsDisplay,
   setSettingsTagsDisplay,
   setSettingsTextDisplay,
   toggleSettingsShareAppName,
@@ -213,6 +215,7 @@ const applySubcollectionChanges = <T extends Record<string, unknown>>(
 
 const syncRelationProjections = (draft: UserState) => {
   draft.bible.relations = draft.bible.relations || {}
+  draft.bible.relations = dedupeRelationsByDuplicateKey(draft.bible.relations)
   draft.bible.relationIndex = rebuildRelationIndexes(draft.bible.relations)
   draft.bible.relationPairs = rebuildRelationPairs(draft.bible.relations)
 }
@@ -482,6 +485,7 @@ export interface UserState {
       press: 'shortPress' | 'longPress'
       notesDisplay: 'inline' | 'block'
       linksDisplay: 'inline' | 'block'
+      relationsDisplay?: 'inline' | 'block'
       tagsDisplay: 'inline' | 'block'
       commentsDisplay: boolean
       redWordsDisplay: boolean
@@ -576,6 +580,7 @@ const getInitialState = (): UserState => ({
       press: 'longPress',
       notesDisplay: 'inline',
       linksDisplay: 'inline',
+      relationsDisplay: 'inline',
       tagsDisplay: 'inline',
       commentsDisplay: false,
       redWordsDisplay: true,
@@ -1171,6 +1176,9 @@ const userSlice = createSlice({
     })
     builder.addCase(setSettingsLinksDisplay, (state, action) => {
       state.bible.settings.linksDisplay = action.payload
+    })
+    builder.addCase(setSettingsRelationsDisplay, (state, action) => {
+      state.bible.settings.relationsDisplay = action.payload
     })
     builder.addCase(setSettingsTagsDisplay, (state, action) => {
       state.bible.settings.tagsDisplay = action.payload

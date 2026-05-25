@@ -43,17 +43,25 @@ import type { AppDispatch } from '~redux/store'
 import type { SearchItemFilters, SearchItemType } from '~state/searchFilters'
 import { endpointsMatch, getEndpointFallbackLabel, type RelationEndpoint } from './domain'
 import {
+  getLinkTargetItems,
   getNoteTargetItems,
   getStudyTargetItems,
   searchReferenceAndStrongTargets,
   type RelationTargetResult,
 } from './targetSearch'
 
-type BrowseMode = 'note' | 'study' | 'strong' | 'nave' | 'dictionary'
+type BrowseMode = 'note' | 'link' | 'study' | 'strong' | 'nave' | 'dictionary'
 type NaveRow = NaveLetterRow | NaveSearchRow
 type DictionaryRow = DictionnaireLetterRow | DictionnaireSearchRow
 type MatchedRelationTargetResult = RelationTargetResult
-type RelationTargetSectionId = 'passages' | 'notes' | 'studies' | 'strong' | 'dictionary' | 'nave'
+type RelationTargetSectionId =
+  | 'passages'
+  | 'notes'
+  | 'links'
+  | 'studies'
+  | 'strong'
+  | 'dictionary'
+  | 'nave'
 type RelationTargetSection = SearchResultSection<RelationTargetSectionId>
 
 type Props = {
@@ -66,6 +74,7 @@ type Props = {
 
 const browseModeLabelKeys: Record<BrowseMode, string> = {
   note: 'Notes',
+  link: 'Liens',
   study: 'Études',
   strong: 'Strong',
   nave: 'Nave',
@@ -75,17 +84,18 @@ const browseModeLabelKeys: Record<BrowseMode, string> = {
 const relationTypeToSearchItemType: Record<RelationEndpoint['type'], SearchItemType> = {
   verse: 'passages',
   note: 'notes',
+  externalLink: 'links',
   study: 'studies',
   strong: 'strong',
   nave: 'nave',
   dictionary: 'dictionary',
-  externalLink: 'passages',
   word: 'dictionary',
 }
 
 const searchItemTypeToBrowseMode: Record<SearchItemType, BrowseMode | null> = {
   passages: null,
   notes: 'note',
+  links: 'link',
   studies: 'study',
   strong: 'strong',
   dictionary: 'dictionary',
@@ -327,6 +337,7 @@ const CreateEntityRelationModal = ({
     debouncedResourceSearchValue !== deferredResourceSearchValue
 
   const notes = useSelector((state: RootState) => state.user.bible.notes)
+  const links = useSelector((state: RootState) => state.user.bible.links)
   const studies = useSelector((state: RootState) => state.user.bible.studies)
   const shouldBuildNoteTargets =
     itemFilters.notes &&
@@ -334,6 +345,9 @@ const CreateEntityRelationModal = ({
   const shouldBuildStudyTargets =
     itemFilters.studies &&
     (deferredBrowseMode === 'study' || (!deferredBrowseMode && deferredSearchHasValue))
+  const shouldBuildLinkTargets =
+    itemFilters.links &&
+    (deferredBrowseMode === 'link' || (!deferredBrowseMode && deferredSearchHasValue))
   const noteTargets = shouldBuildNoteTargets
     ? getNoteTargetItems(notes).sort((a, b) => {
         const left = notes[(a.endpoint as Extract<RelationEndpoint, { type: 'note' }>).noteId]
@@ -348,7 +362,17 @@ const CreateEntityRelationModal = ({
         return Number(right?.modified_at || 0) - Number(left?.modified_at || 0)
       })
     : []
+  const linkTargets = shouldBuildLinkTargets
+    ? getLinkTargetItems(links).sort((a, b) => {
+        const left =
+          links[(a.endpoint as Extract<RelationEndpoint, { type: 'externalLink' }>).linkId]
+        const right =
+          links[(b.endpoint as Extract<RelationEndpoint, { type: 'externalLink' }>).linkId]
+        return Number(right?.date || 0) - Number(left?.date || 0)
+      })
+    : []
   const fuzzyNoteTargets = searchWithMatches(noteTargets, deferredSearchValue)
+  const fuzzyLinkTargets = searchWithMatches(linkTargets, deferredSearchValue)
   const fuzzyStudyTargets = searchWithMatches(studyTargets, deferredSearchValue)
   const isAllowed = (type: RelationEndpoint['type']) => {
     const itemType = relationTypeToSearchItemType[type]
@@ -509,6 +533,7 @@ const CreateEntityRelationModal = ({
     result => result.endpoint.type === 'verse' && isAllowed('verse')
   )
   const noteItems = itemFilters.notes ? fuzzyNoteTargets : []
+  const linkItems = itemFilters.links ? fuzzyLinkTargets : []
   const studyItems = itemFilters.studies ? fuzzyStudyTargets : []
   const directStrongItems = immediateReferenceResults.filter(
     result => result.endpoint.type === 'strong' && isAllowed('strong')
@@ -541,6 +566,9 @@ const CreateEntityRelationModal = ({
       : []),
     ...(noteItems.length
       ? [{ id: 'notes' as const, title: t('Notes'), count: noteItems.length, items: noteItems }]
+      : []),
+    ...(linkItems.length
+      ? [{ id: 'links' as const, title: t('Liens'), count: linkItems.length, items: linkItems }]
       : []),
     ...(studyItems.length
       ? [
@@ -588,12 +616,13 @@ const CreateEntityRelationModal = ({
   const placeholder = browseMode
     ? {
         note: t('Rechercher dans les notes'),
+        link: t('Rechercher dans les liens'),
         study: t('Rechercher dans les études'),
         strong: t('Rechercher un code Strong'),
         nave: t('Rechercher dans Nave'),
         dictionary: t('Rechercher dans le dictionnaire'),
       }[browseMode]
-    : t('Passage, Strong, note, étude...')
+    : t('Passage, Strong, note, lien, étude...')
 
   const modalTitle: string = browseMode
     ? t(browseModeLabelKeys[browseMode])
@@ -624,6 +653,7 @@ const CreateEntityRelationModal = ({
   const emptyIcon = browseMode
     ? {
         note: require('~assets/images/empty-state-icons/note.svg'),
+        link: require('~assets/images/empty-state-icons/link.svg'),
         study: require('~assets/images/empty-state-icons/study.svg'),
         strong: require('~assets/images/empty-state-icons/word.svg'),
         nave: require('~assets/images/empty-state-icons/word.svg'),

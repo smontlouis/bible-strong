@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import styled from '@emotion/native'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
+import { toast } from '~helpers/toast'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import Empty from '~common/Empty'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -103,6 +104,22 @@ const TargetIcon = ({ type }: { type: RelationEndpoint['type'] }) => {
       return <FeatherIcon name={config.name!} size={15} color={config.color} />
   }
 }
+
+const MissingTargetWarningIcon = () => (
+  <Box
+    alignItems="center"
+    justifyContent="center"
+    mr={6}
+    position="absolute"
+    top={20}
+    left={35}
+    bg="reverse"
+    borderRadius={100}
+    p={4}
+  >
+    <FeatherIcon name="alert-triangle" size={12} color="secondary" />
+  </Box>
+)
 
 const getRelationTitleParts = (
   model: RelationDisplayModel,
@@ -296,6 +313,15 @@ const StudyRelationList = ({
       t
     ).target
 
+  const openRelationTarget = (model: RelationDisplayModel) => {
+    if (!model.isTargetAvailable) {
+      toast.warning(t("Cette cible n'existe plus. Vous pouvez supprimer la relation."))
+      return
+    }
+
+    onOpenEndpoint(model.targetEndpoint)
+  }
+
   const renderRelation = (model: RelationDisplayModel, index: number, sectionLength: number) => {
     const relationTitle = getRelationTitleParts(model, relationTitlePrefixes, t)
     const relationSubtitle = getRelationSubtitle(model)
@@ -325,6 +351,8 @@ const StudyRelationList = ({
             borderColor="border"
           />
         )}
+        {!model.isTargetAvailable ? <MissingTargetWarningIcon /> : null}
+
         <TouchableBox
           flex
           row
@@ -334,7 +362,8 @@ const StudyRelationList = ({
           pl={0}
           borderBottomWidth={1}
           borderColor="border"
-          onPress={() => onOpenEndpoint(model.targetEndpoint)}
+          onPress={() => openRelationTarget(model)}
+          opacity={!model.isTargetAvailable ? 0.5 : 1}
         >
           <Box flex>
             <HStack alignItems="center">

@@ -864,77 +864,22 @@ export type TaggedItem =
   | TaggedItemNote
   | TaggedItemLink
 
-// Selector factory for getting all tagged items for a specific verse
+// Selector factory for getting direct verse/highlight tags for a specific verse.
+// Tags owned by related notes/links/annotations are exposed through their relation/entity surfaces.
 export const makeTaggedItemsForVerseSelector = () =>
   createSelector(
     [
       selectHighlights,
-      selectWordAnnotations,
-      selectNotes,
-      selectLinks,
-      selectRelations,
-      (_: RootState, verseKey: string, currentVersion?: string) => ({
-        verseKey,
-        currentVersion,
-      }),
+      (_: RootState, verseKey: string, _currentVersion?: string) => verseKey,
     ],
-    (
-      highlights,
-      wordAnnotations,
-      notes,
-      links,
-      relations,
-      { verseKey, currentVersion }
-    ): TaggedItem[] => {
+    (highlights, verseKey): TaggedItem[] => {
       const items: TaggedItem[] = []
-      const [bookStr, chapterStr, verseStr] = verseKey.split('-')
-      const book = parseInt(bookStr)
-      const chapter = parseInt(chapterStr)
-      const verse = parseInt(verseStr)
 
       // Highlight for this verse
       const highlight = highlights[verseKey]
       if (highlight?.tags && Object.keys(highlight.tags).length > 0) {
         items.push({ type: 'highlight', data: highlight, verseKey })
       }
-
-      // Word annotations on this verse (filtered by version if provided)
-      Object.entries(wordAnnotations).forEach(([id, annotation]) => {
-        // Filter by version if specified
-        if (currentVersion && annotation.version !== currentVersion) return
-        if (annotation.tags && Object.keys(annotation.tags).length > 0) {
-          // Check if the annotation is on this verse
-          const matchesVerse = annotation.ranges.some(r => {
-            const [rBook, rChapter, rVerse] = r.verseKey.split('-').map(Number)
-            return rBook === book && rChapter === chapter && rVerse === verse
-          })
-          if (matchesVerse) {
-            items.push({ type: 'annotation', data: { ...annotation, id } })
-          }
-        }
-      })
-
-      Object.values(relations).forEach(relation => {
-        if (relation.kind !== 'system' || relation.type !== 'annotates') return
-        if (!relationIncludesVerseKey(relation, verseKey)) return
-        const noteEndpoint = getRelationEntityEndpoint(relation, 'note')
-        if (noteEndpoint?.type !== 'note' || noteEndpoint.noteId.startsWith('annotation:')) return
-        const note = notes[noteEndpoint.noteId]
-        if (note?.tags && Object.keys(note.tags).length > 0) {
-          items.push({ type: 'note', data: { ...note, id: noteEndpoint.noteId }, verseKey })
-        }
-      })
-
-      Object.values(relations).forEach(relation => {
-        if (relation.kind !== 'system' || relation.type !== 'externalLink') return
-        if (!relationIncludesVerseKey(relation, verseKey)) return
-        const linkEndpoint = getRelationEntityEndpoint(relation, 'externalLink')
-        if (linkEndpoint?.type !== 'externalLink') return
-        const link = links[linkEndpoint.linkId]
-        if (link?.tags && Object.keys(link.tags).length > 0) {
-          items.push({ type: 'link', data: { ...link, id: linkEndpoint.linkId }, verseKey })
-        }
-      })
 
       return items
     }
@@ -958,24 +903,13 @@ export const makeTaggedVersesInChapterSelector = () =>
   createSelector(
     [
       selectHighlights,
-      selectWordAnnotations,
-      selectNotes,
-      selectLinks,
-      selectRelations,
       (_: RootState, bookNumber: number, chapter: number, currentVersion: string) => ({
         bookNumber,
         chapter,
         currentVersion,
       }),
     ],
-    (
-      highlights,
-      wordAnnotations,
-      notes,
-      links,
-      relations,
-      { bookNumber, chapter, currentVersion }
-    ): TaggedVersesInChapterResult => {
+    (highlights, { bookNumber, chapter }): TaggedVersesInChapterResult => {
       const counts: Record<number, number> = {}
       const hasNonHighlightTags: Record<number, boolean> = {}
       const prefix = `${bookNumber}-${chapter}-`
@@ -990,57 +924,6 @@ export const makeTaggedVersesInChapterSelector = () =>
           }
         }
       }
-
-      // Check word annotations (COUNTS for hasNonHighlightTags)
-      // Filter by version - annotations from other versions are shown in VersionAnnotationIndicator
-      for (const id in wordAnnotations) {
-        const annotation = wordAnnotations[id]
-        if (annotation.version !== currentVersion) continue
-        if (annotation.tags && Object.keys(annotation.tags).length > 0) {
-          for (const range of annotation.ranges) {
-            if (range.verseKey.startsWith(prefix)) {
-              const verseNum = parseInt(range.verseKey.split('-')[2])
-              counts[verseNum] = (counts[verseNum] || 0) + 1
-              hasNonHighlightTags[verseNum] = true
-            }
-          }
-        }
-      }
-
-      Object.values(relations).forEach(relation => {
-        if (relation.kind !== 'system' || relation.type !== 'annotates') return
-        const noteEndpoint = getRelationEntityEndpoint(relation, 'note')
-        const verseEndpoint = getRelationVerseEndpoint(relation)
-        if (noteEndpoint?.type !== 'note' || noteEndpoint.noteId.startsWith('annotation:')) return
-        if (verseEndpoint?.type !== 'verse') return
-        const note = notes[noteEndpoint.noteId]
-        if (note?.tags && Object.keys(note.tags).length > 0) {
-          for (const vk of verseEndpoint.verseKeys) {
-            if (vk.startsWith(prefix)) {
-              const verseNum = parseInt(vk.split('-')[2])
-              counts[verseNum] = (counts[verseNum] || 0) + 1
-              hasNonHighlightTags[verseNum] = true
-            }
-          }
-        }
-      })
-
-      Object.values(relations).forEach(relation => {
-        if (relation.kind !== 'system' || relation.type !== 'externalLink') return
-        const linkEndpoint = getRelationEntityEndpoint(relation, 'externalLink')
-        const verseEndpoint = getRelationVerseEndpoint(relation)
-        if (linkEndpoint?.type !== 'externalLink' || verseEndpoint?.type !== 'verse') return
-        const link = links[linkEndpoint.linkId]
-        if (link?.tags && Object.keys(link.tags).length > 0) {
-          for (const vk of verseEndpoint.verseKeys) {
-            if (vk.startsWith(prefix)) {
-              const verseNum = parseInt(vk.split('-')[2])
-              counts[verseNum] = (counts[verseNum] || 0) + 1
-              hasNonHighlightTags[verseNum] = true
-            }
-          }
-        }
-      })
 
       return { counts, hasNonHighlightTags }
     }

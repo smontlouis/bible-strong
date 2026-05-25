@@ -6,11 +6,10 @@ import React, { useEffect, useState, useRef } from 'react'
 import { Verse as TVerse } from '~common/types'
 import {
   Dispatch,
-  LinkedVerse,
-  NotedVerse,
   ParallelVerse,
   RootStyles,
   TaggedVerse,
+  VerseRelationItem,
   WebViewProps,
 } from './BibleDOMWrapper'
 import ChevronDownIcon from './ChevronDownIcon'
@@ -129,11 +128,9 @@ type Props = Pick<
   comments: { [key: string]: string } | null
   taggedVerses: TaggedVerse[] | null
   versesWithAnnotationNotes: Record<string, boolean>
-  notedVersesCount: { [key: string]: number }
-  notedVersesText: { [key: string]: NotedVerse[] }
-  linkedVersesCount: { [key: string]: number }
-  linkedVersesText: { [key: string]: LinkedVerse[] }
-  studyRelationsCount: { [key: string]: number }
+  annotationNotesCountByVerse: { [key: string]: number }
+  relationItemsCount: { [key: string]: number }
+  relationItemsText: { [key: string]: VerseRelationItem[] }
   // Annotation mode props (uncontrolled - DOM manages local annotation state)
   annotationMode?: boolean
   clearSelectionTrigger?: number
@@ -433,11 +430,9 @@ const LoadedBibleContent = ({
   // Pre-computed metadata from native side
   taggedVerses,
   versesWithAnnotationNotes,
-  notedVersesCount,
-  notedVersesText,
-  linkedVersesCount,
-  linkedVersesText,
-  studyRelationsCount,
+  annotationNotesCountByVerse,
+  relationItemsCount,
+  relationItemsText,
 }: Props) => {
   // Ref for highlight layer
   const containerRef = useRef<HTMLDivElement>(null)
@@ -1043,11 +1038,9 @@ const LoadedBibleContent = ({
               wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
               taggedVerses={taggedVerses}
               bookmarkedVerses={bookmarkedVerses}
-              notedVersesCount={notedVersesCount}
-              notedVersesText={notedVersesText}
-              linkedVersesCount={linkedVersesCount}
-              linkedVersesText={linkedVersesText}
-              studyRelationsCount={studyRelationsCount}
+              annotationNotesCountByVerse={annotationNotesCountByVerse}
+              relationItemsCount={relationItemsCount}
+              relationItemsText={relationItemsText}
               versesWithAnnotationNotes={versesWithAnnotationNotes}
               navigateToPericope={navigateToPericope}
               annotationMode={annotationMode}

@@ -3,30 +3,27 @@ import { styled } from 'goober'
 
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
-  NAVIGATE_TO_VERSE_LINKS,
   NAVIGATE_TO_VERSE_STUDY_RELATIONS,
   NAVIGATE_TO_BIBLE_NOTE,
   OPEN_BOOKMARK_MODAL,
   NAVIGATE_TO_BIBLE_LINK,
+  NAVIGATE_TO_RELATION_ENDPOINT,
   OPEN_CROSS_VERSION_MODAL,
   OPEN_VERSE_TAGS_MODAL,
-  OPEN_VERSE_NOTES_MODAL,
+  SHOW_TOAST,
 } from './dispatch'
 import VersionAnnotationIndicator, { CrossVersionAnnotation } from './VersionAnnotationIndicator'
 
 import { scaleFontSize } from './scaleFontSize'
 import { scaleLineHeight } from './scaleLineHeight'
-import LinksCount from './LinksCount'
-import LinksText from './LinksText'
-import NotesCount from './NotesCount'
-import NotesText from './NotesText'
 import BookmarkIcon from './BookmarkIcon'
-import StudyRelationsCount from './StudyRelationsCount'
+import RelationsCount from './RelationsCount'
+import RelationsText from './RelationsText'
 import TagsIndicator from './TagsIndicator'
 import { RootState } from '~redux/modules/reducer'
 import { useDispatch } from './DispatchProvider'
 import { Bookmark, SelectedCode, StudyNavigateBibleType, Verse as TVerse } from '~common/types'
-import { LinkedVerse, NotedVerse, RootStyles, TaggedVerse } from './BibleDOMWrapper'
+import { RootStyles, TaggedVerse, VerseRelationItem } from './BibleDOMWrapper'
 import { ParallelDisplayMode } from 'src/state/tabs'
 import verseToStrong from './verseToStrong'
 import { verseToRedWords } from './verseToRedWords'
@@ -254,12 +251,10 @@ interface Props {
   secondaryVerse?: TVerse | null
   isSelected: boolean
   highlightedColor?: keyof RootStyles['settings']['colors'][keyof RootStyles['settings']['colors']]
-  notesCount?: number
+  annotationNotesCount?: number
   isVerseToScroll: boolean
-  notesText?: NotedVerse[]
-  linksCount?: number
-  linksText?: LinkedVerse[]
-  relationsCount?: number
+  relationCount?: number
+  relationItems?: VerseRelationItem[]
   version: string
   isHebreu: boolean
   selectedCode: SelectedCode | null
@@ -298,13 +293,11 @@ const Verse = ({
   secondaryVerse,
   isSelected,
   highlightedColor,
-  notesCount,
+  annotationNotesCount,
   settings,
   isVerseToScroll,
-  notesText,
-  linksCount,
-  linksText,
-  relationsCount,
+  relationCount,
+  relationItems,
   isSelectionMode,
   version,
   isHebreu,
@@ -319,7 +312,6 @@ const Verse = ({
   fadePosition,
   isLastFocusVerse,
   hasWordAnnotations,
-  hasAnnotationNotes,
   otherVersionAnnotations,
   isTouched = false,
   annotationMode = false,
@@ -332,14 +324,6 @@ const Verse = ({
 }: Props) => {
   const dispatch = useDispatch()
   const translations = useTranslations()
-
-  const openVerseNotesModal = () => {
-    const { Livre, Chapitre, Verset } = verse
-    dispatch({
-      type: OPEN_VERSE_NOTES_MODAL,
-      payload: `${Livre}-${Chapitre}-${Verset}`,
-    })
-  }
 
   const navigateToVerseTags = () => {
     const { Livre, Chapitre, Verset } = verse
@@ -359,16 +343,6 @@ const Verse = ({
     })
   }
 
-  const navigateToNote = (note: NotedVerse) => {
-    dispatch({
-      type: NAVIGATE_TO_BIBLE_NOTE,
-      payload: {
-        noteId: note.id || note.key,
-        verseIds: note.verseIds,
-      },
-    })
-  }
-
   const openBookmarkModal = () => {
     if (bookmark) {
       dispatch({
@@ -377,19 +351,19 @@ const Verse = ({
       })
     }
   }
-  const navigateToVerseLinks = () => {
-    const { Livre, Chapitre, Verset } = verse
-    dispatch({
-      type: NAVIGATE_TO_VERSE_LINKS,
-      payload: `${Livre}-${Chapitre}-${Verset}`,
-    })
-  }
 
-  const navigateToVerseStudyRelations = () => {
+  const navigateToVerseStudyRelations = (relationItem?: VerseRelationItem) => {
     const { Livre, Chapitre, Verset } = verse
+    const verseKey = `${Livre}-${Chapitre}-${Verset}`
     dispatch({
       type: NAVIGATE_TO_VERSE_STUDY_RELATIONS,
-      payload: `${Livre}-${Chapitre}-${Verset}`,
+      payload: relationItem
+        ? {
+            verseKey,
+            verseIds: relationItem.verseIds,
+            relationId: relationItem.relationId,
+          }
+        : verseKey,
     })
   }
 
@@ -398,6 +372,50 @@ const Verse = ({
       type: NAVIGATE_TO_BIBLE_LINK,
       payload: id,
     })
+  }
+
+  const navigateToRelationItem = (item: VerseRelationItem) => {
+    switch (item.targetEndpoint.type) {
+      case 'note':
+        if (!item.targetEntityExists) {
+          dispatch({
+            type: SHOW_TOAST,
+            payload: {
+              type: 'warning',
+              message: "Cette note n'existe plus. Vous pouvez supprimer la relation.",
+            },
+          })
+          navigateToVerseStudyRelations(item)
+          break
+        }
+        dispatch({
+          type: NAVIGATE_TO_BIBLE_NOTE,
+          payload: {
+            noteId: item.targetEndpoint.noteId,
+            verseIds: item.verseIds,
+          },
+        })
+        break
+      case 'externalLink':
+        if (item.targetEntityExists && item.targetEndpoint.linkId) {
+          navigateToLink(item.targetEndpoint.linkId)
+        } else if (item.targetIsAvailable) {
+          dispatch({ type: NAVIGATE_TO_RELATION_ENDPOINT, payload: item.targetEndpoint })
+        } else {
+          navigateToVerseStudyRelations(item)
+        }
+        break
+      default:
+        if (!item.targetIsAvailable) {
+          navigateToVerseStudyRelations(item)
+          break
+        }
+        dispatch({
+          type: NAVIGATE_TO_RELATION_ENDPOINT,
+          payload: item.targetEndpoint,
+        })
+        break
+    }
   }
 
   const openCrossVersionModal = () => {
@@ -478,10 +496,9 @@ const Verse = ({
                     isSelectedMode={isSelectedMode}
                     isSelectionMode={isSelectionMode}
                     highlightedColor={isMainVersion ? highlightedColor : undefined}
-                    notesCount={isMainVersion ? notesCount : undefined}
-                    notesText={isMainVersion ? notesText : undefined}
-                    linksCount={isMainVersion ? linksCount : undefined}
-                    linksText={isMainVersion ? linksText : undefined}
+                    annotationNotesCount={isMainVersion ? annotationNotesCount : undefined}
+                    relationCount={isMainVersion ? relationCount : undefined}
+                    relationItems={isMainVersion ? relationItems : undefined}
                     isVerseToScroll={isMainVersion ? isVerseToScroll : false}
                     selectedCode={selectedCode}
                     isFocused={isFocused}
@@ -548,10 +565,9 @@ const Verse = ({
                 isSelectedMode={isSelectedMode}
                 isSelectionMode={isSelectionMode}
                 highlightedColor={isMainVersion ? highlightedColor : undefined}
-                notesCount={isMainVersion ? notesCount : undefined}
-                notesText={isMainVersion ? notesText : undefined}
-                linksCount={isMainVersion ? linksCount : undefined}
-                linksText={isMainVersion ? linksText : undefined}
+                annotationNotesCount={isMainVersion ? annotationNotesCount : undefined}
+                relationCount={isMainVersion ? relationCount : undefined}
+                relationItems={isMainVersion ? relationItems : undefined}
                 isVerseToScroll={isMainVersion ? isVerseToScroll : false}
                 selectedCode={selectedCode}
                 isFocused={isFocused}
@@ -621,33 +637,16 @@ const Verse = ({
             isDisabled={annotationMode}
           />
         )}
-        {notesCount &&
-          (settings.notesDisplay !== 'inline' || hasAnnotationNotes) &&
+        {relationCount &&
+          (settings.relationsDisplay || 'inline') !== 'inline' &&
           !isSelectionMode && (
-            <NotesCount
+            <RelationsCount
               settings={settings}
-              onClick={openVerseNotesModal}
-              count={notesCount}
+              onClick={navigateToVerseStudyRelations}
+              count={relationCount}
               isDisabled={annotationMode}
             />
           )}
-        {linksCount && (settings.linksDisplay || 'inline') !== 'inline' && !isSelectionMode && (
-          <LinksCount
-            settings={settings}
-            onClick={navigateToVerseLinks}
-            count={linksCount}
-            linkType={linksText?.[0]?.linkType}
-            isDisabled={annotationMode}
-          />
-        )}
-        {relationsCount && !isSelectionMode && (
-          <StudyRelationsCount
-            settings={settings}
-            onClick={navigateToVerseStudyRelations}
-            count={relationsCount}
-            isDisabled={annotationMode}
-          />
-        )}
         {taggedItemsCount > 0 &&
           (settings.tagsDisplay !== 'inline' || hasNonHighlightTags) &&
           !isSelectionMode && (
@@ -680,24 +679,17 @@ const Verse = ({
         <VerseTags settings={settings} tag={tag} isDisabled={annotationMode} />
       )}
       {isLastFocusVerse && <CloseContextTag settings={settings} isDisabled={annotationMode} />}
-      {notesText && settings.notesDisplay === 'inline' && !isSelectionMode && (
-        <NotesText
-          isParallel={isParallel}
-          settings={settings}
-          onClick={navigateToNote}
-          notesText={notesText}
-          isDisabled={annotationMode}
-        />
-      )}
-      {linksText && (settings.linksDisplay || 'inline') === 'inline' && !isSelectionMode && (
-        <LinksText
-          isParallel={isParallel}
-          settings={settings}
-          onClick={navigateToLink}
-          linksText={linksText}
-          isDisabled={annotationMode}
-        />
-      )}
+      {relationItems &&
+        (settings.relationsDisplay || 'inline') === 'inline' &&
+        !isSelectionMode && (
+          <RelationsText
+            isParallel={isParallel}
+            settings={settings}
+            onClick={navigateToRelationItem}
+            relationItems={relationItems}
+            isDisabled={annotationMode}
+          />
+        )}
     </Wrapper>
   )
 }

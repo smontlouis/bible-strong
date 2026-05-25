@@ -1,6 +1,17 @@
 import { TagsObj, Verse } from '~common/types'
 import { HighlightsObj, NotesObj, LinksObj, StudyRelationsObj } from '~redux/modules/user'
-import type { TaggedVerse, NotedVerse, LinkedVerse, WebViewProps } from './BibleDOMWrapper'
+import {
+  endpointIdentity,
+  getEndpointFallbackLabel,
+  type RelationEndpoint,
+} from '~features/studyRelations/domain'
+import type {
+  TaggedVerse,
+  NotedVerse,
+  LinkedVerse,
+  VerseRelationItem,
+  WebViewProps,
+} from './BibleDOMWrapper'
 
 export interface AnnotationNotesInfo {
   versesWithAnnotationNotes: Record<string, boolean>
@@ -13,6 +24,137 @@ const getVerseRefsFromMetadataKey = (key: string): string[] => key.split('#')[0]
 
 const getAnchorVerseRef = (verseRefs: string[], displayMode: VerseItemDisplayMode): string =>
   displayMode === 'inline' ? verseRefs[verseRefs.length - 1] : verseRefs[0]
+
+const relationTargetOrder: Record<string, number> = {
+  note: 0,
+  externalLink: 1,
+  study: 2,
+  verse: 3,
+  strong: 4,
+  nave: 5,
+  dictionary: 6,
+  word: 7,
+}
+
+const getRelationAnchorVerse = (
+  endpoint: Extract<RelationEndpoint, { type: 'verse' }>,
+  displayMode: VerseItemDisplayMode
+) => getAnchorVerseRef(endpoint.verseKeys, displayMode)
+
+const getRelationTargetEndpoint = (
+  relation: StudyRelationsObj[string],
+  activeEndpoint: RelationEndpoint
+) => {
+  const activeKey = endpointIdentity(activeEndpoint)
+  return relation.endpoints.find(endpoint => endpointIdentity(endpoint) !== activeKey)
+}
+
+const getTargetEntityExists = (
+  endpoint: RelationEndpoint,
+  data: { notes?: NotesObj; links?: LinksObj }
+) => {
+  switch (endpoint.type) {
+    case 'note':
+      return Boolean(
+        data.notes?.[endpoint.noteId] ||
+        Object.values(data.notes || {}).some(note => note.id === endpoint.noteId)
+      )
+    case 'externalLink':
+      return Boolean(
+        data.links?.[endpoint.linkId] ||
+        Object.values(data.links || {}).some(link => link.id === endpoint.linkId)
+      )
+    default:
+      return true
+  }
+}
+
+const getRelationTargetLabel = (
+  endpoint: RelationEndpoint,
+  data: { notes?: NotesObj; links?: LinksObj }
+) => {
+  switch (endpoint.type) {
+    case 'note': {
+      const note =
+        data.notes?.[endpoint.noteId] ||
+        Object.values(data.notes || {}).find(note => note.id === endpoint.noteId)
+      return note?.title || note?.description || getEndpointFallbackLabel(endpoint)
+    }
+    case 'externalLink': {
+      const link =
+        data.links?.[endpoint.linkId] ||
+        Object.values(data.links || {}).find(link => link.id === endpoint.linkId)
+      return (
+        link?.customTitle || link?.ogData?.title || link?.url || getEndpointFallbackLabel(endpoint)
+      )
+    }
+    default:
+      return getEndpointFallbackLabel(endpoint)
+  }
+}
+
+const sortRelationItems = (items: VerseRelationItem[]) =>
+  items.sort((a, b) => {
+    const orderDiff =
+      (relationTargetOrder[a.targetEndpoint.type] ?? 99) -
+      (relationTargetOrder[b.targetEndpoint.type] ?? 99)
+    if (orderDiff) return orderDiff
+    return b.updatedAt - a.updatedAt
+  })
+
+export function getVerseRelationsMetadata(
+  verses: Verse[],
+  relations: StudyRelationsObj | undefined,
+  displayMode: VerseItemDisplayMode = 'inline',
+  data: { notes?: NotesObj; links?: LinksObj } = {}
+): {
+  counts: { [key: string]: number }
+  items: { [key: string]: VerseRelationItem[] }
+} {
+  const counts: { [key: string]: number } = {}
+  const items: { [key: string]: VerseRelationItem[] } = {}
+  if (!verses?.length || !relations) return { counts, items }
+
+  const { Livre, Chapitre } = verses[0]
+
+  for (const relation of Object.values(relations)) {
+    for (const endpoint of relation.endpoints) {
+      if (endpoint.type !== 'verse') continue
+      const anchorVerseRef = getRelationAnchorVerse(endpoint, displayMode)
+      const [bookStr, chapterStr, verseStr] = anchorVerseRef.split('-')
+      if (Number(bookStr) !== Livre || Number(chapterStr) !== Chapitre) continue
+
+      const targetEndpoint = getRelationTargetEndpoint(relation, endpoint)
+      if (!targetEndpoint) continue
+      const targetEntityExists = getTargetEntityExists(targetEndpoint, data)
+
+      counts[verseStr] = (counts[verseStr] || 0) + 1
+      const item: VerseRelationItem = {
+        key: `${relation.id}:${endpointIdentity(endpoint)}`,
+        relationId: relation.id,
+        relationType: relation.type,
+        relationKind: relation.kind,
+        targetEndpoint,
+        targetType: targetEndpoint.type,
+        label: getRelationTargetLabel(targetEndpoint, data),
+        targetIsAvailable: targetEntityExists || targetEndpoint.type !== 'note',
+        targetEntityExists,
+        verseIds: endpoint.verseKeys,
+        updatedAt: relation.updatedAt,
+      }
+
+      if (items[verseStr]) {
+        items[verseStr].push(item)
+      } else {
+        items[verseStr] = [item]
+      }
+    }
+  }
+
+  Object.values(items).forEach(sortRelationItems)
+
+  return { counts, items }
+}
 
 export function sortVersesToTags(highlightedVerses: HighlightsObj): TaggedVerse[] | null {
   if (!highlightedVerses) return null
