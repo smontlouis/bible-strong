@@ -1,5 +1,8 @@
 import { useRouter } from 'expo-router'
+import { Linking } from 'react-native'
 import books from '~assets/bible_versions/books-desc'
+import { toast } from '~helpers/toast'
+import i18n from '~i18n'
 import type { RelationEndpoint } from './domain'
 
 export const useOpenRelationEndpoint = () => {
@@ -47,7 +50,7 @@ export const useOpenRelationEndpoint = () => {
           pathname: '/nave-detail',
           params: {
             name_lower: endpoint.nameLower,
-            name: endpoint.label || endpoint.nameLower,
+            name: endpoint.labelFallback || endpoint.nameLower,
           },
         })
         break
@@ -56,6 +59,18 @@ export const useOpenRelationEndpoint = () => {
           pathname: '/dictionnary-detail',
           params: { word: endpoint.word },
         })
+        break
+      case 'externalLink': {
+        if (!endpoint.url) {
+          toast.error(i18n.t('Lien introuvable'))
+          break
+        }
+        Linking.openURL(endpoint.url).catch(() => {
+          toast.error(i18n.t("Impossible d'ouvrir ce lien"))
+        })
+        break
+      }
+      case 'word':
         break
     }
   }

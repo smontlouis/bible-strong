@@ -9,7 +9,7 @@ import { InlineItemContainer, InlineItemIconWrapper, InlineItemText } from './In
 interface Props {
   notesText: NotedVerse[]
   settings: RootState['user']['bible']['settings']
-  onClick: (x: string) => void
+  onClick: (note: NotedVerse) => void
   isParallel?: boolean
   isDisabled?: boolean
 }
@@ -22,7 +22,7 @@ const NotesText = ({ notesText, settings, onClick, isParallel, isDisabled }: Pro
           key={note.key}
           settings={settings}
           isParallel={isParallel}
-          onClick={() => onClick(note.key)}
+          onClick={() => onClick(note)}
           isButton
           isDisabled={isDisabled}
         >

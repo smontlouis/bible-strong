@@ -23,9 +23,10 @@ import { GroupedWordAnnotation } from '~redux/selectors/bible'
 import type { TagStrongItemData } from './TagStrongItem'
 import type { TagNaveItemData } from './TagNaveItem'
 import type { TagDictionaryItemData } from './TagDictionaryItem'
-
-// Types
-export type LinkItemType = LinkModel & { id: string }
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
+import type { RelationEndpoint } from '~features/studyRelations/domain'
+import { useRelationCount } from '~features/studyRelations/useRelationCount'
 
 export type HighlightData = {
   date: number
@@ -34,9 +35,17 @@ export type HighlightData = {
   tags: TagsObj
 }
 
-export type NoteItemType = Note & { id: string; reference?: string }
+export type LinkItemType = LinkModel & { id: string; reference?: string; verseKeys?: string[] }
+
+export type NoteItemType = Note & { id: string; reference?: string; verseKeys?: string[] }
 
 type Translate = (key: string, options?: Record<string, unknown>) => string
+
+const getFirstVerseLocation = (verseKeys?: string[]) => {
+  const [Livre, Chapitre, Verset] = verseKeys?.[0]?.split('-').map(Number) || []
+  if (!Livre || !Chapitre || !Verset) return null
+  return { Livre, Chapitre, Verset }
+}
 
 export type UnifiedTagItem =
   | { type: 'highlight'; data: HighlightData }
@@ -89,40 +98,57 @@ export const NoteItem = ({
   t: Translate
   lang: ActiveLanguage
 }) => {
-  const [Livre, Chapitre, Verset] = item.id.split('-').map(Number)
-  const { title } = formatVerseContent([{ Livre, Chapitre, Verset }])
+  const location = getFirstVerseLocation(item.verseKeys)
+  const { title } = location
+    ? formatVerseContent([location])
+    : { title: item.reference || t('Note') }
   const formattedDate = distanceInWords(Number(item.date), Date.now(), {
     locale: getDateLocale(lang),
   })
+  const relativeDate = t('Il y a {{formattedDate}}', { formattedDate })
+  const metadataLabel = title ? `${title} - ${relativeDate}` : relativeDate
+
+  const content = (
+    <Box padding={20}>
+      <Box row justifyContent="space-between">
+        <Text color="darkGrey" bold fontSize={11}>
+          {metadataLabel}
+        </Text>
+      </Box>
+      {!!item.title && (
+        <Text title fontSize={16}>
+          {item.title}
+        </Text>
+      )}
+      {!!item.description && (
+        <Paragraph scale={-3} scaleLineHeight={-1}>
+          {truncate(item.description, 100)}
+        </Paragraph>
+      )}
+      <EntityChipList tags={item.tags} />
+    </Box>
+  )
+
+  if (!location) {
+    return (
+      <>
+        {content}
+        <Border />
+      </>
+    )
+  }
 
   return (
     <Link
       route="BibleView"
       params={{
         isReadOnly: true,
-        book: books[Livre - 1],
-        chapter: Number(Chapitre),
-        verse: Number(Verset),
+        book: books[location.Livre - 1],
+        chapter: Number(location.Chapitre),
+        verse: Number(location.Verset),
       }}
     >
-      <Box padding={20}>
-        <Box row justifyContent="space-between">
-          <Text color="darkGrey" bold fontSize={11}>
-            {title} - {t('Il y a {{formattedDate}}', { formattedDate })}
-          </Text>
-        </Box>
-        {!!item.title && (
-          <Text title fontSize={16}>
-            {item.title}
-          </Text>
-        )}
-        {!!item.description && (
-          <Paragraph scale={-3} scaleLineHeight={-1}>
-            {truncate(item.description, 100)}
-          </Paragraph>
-        )}
-        <EntityChipList tags={item.tags} />
-      </Box>
+      {content}
       <Border />
     </Link>
   )
@@ -137,25 +163,30 @@ export const LinkItem = ({
   t: Translate
   lang: ActiveLanguage
 }) => {
-  const [Livre, Chapitre, Verset] = item.id.split('-').map(Number)
-  const { title } = formatVerseContent([{ Livre, Chapitre, Verset }])
+  const location = getFirstVerseLocation(item.verseKeys)
+  const { title } = location
+    ? formatVerseContent([location])
+    : { title: item.reference || t('Lien') }
   const formattedDate = distanceInWords(Number(item.date), Date.now(), {
     locale: getDateLocale(lang),
   })
   const config = linkTypeConfig[item.linkType as LinkType] || linkTypeConfig.website
   const iconName = config.icon as React.ComponentProps<typeof FeatherIcon>['name']
   const displayTitle = item.customTitle || item.ogData?.title || item.url
+  const relativeDate = t('Il y a {{formattedDate}}', { formattedDate })
+  const metadataLabel = title ? `${title} - ${relativeDate}` : relativeDate
+  const relationEndpoint: Extract<RelationEndpoint, { type: 'externalLink' }> = {
+    type: 'externalLink',
+    linkId: item.id,
+    sourceKey: '',
+    url: item.url,
+    label: displayTitle,
+  }
+  const relationCount = useRelationCount(relationEndpoint)
+  const relationModal = useBottomSheetModal()
 
-  return (
-    <Link
-      route="BibleView"
-      params={{
-        isReadOnly: true,
-        book: books[Livre - 1],
-        chapter: Chapitre,
-        verse: Verset,
-      }}
-    >
+  const content = (
+    <>
       <Box padding={20} row>
         <LinkTypeIcon bgColor={config.color}>
           {config.textIcon ? (
@@ -168,7 +199,7 @@ export const LinkItem = ({
         </LinkTypeIcon>
         <Box flex>
           <Text color="darkGrey" bold fontSize={11}>
-            {title} - {t('Il y a {{formattedDate}}', { formattedDate })}
+            {metadataLabel}
           </Text>
           <Text title fontSize={16}>
             {truncate(displayTitle, 50)}
@@ -176,9 +207,37 @@ export const LinkItem = ({
           <Paragraph scale={-3} scaleLineHeight={-1} color="tertiary" numberOfLines={1}>
             {item.url}
           </Paragraph>
-          {item.tags && Object.keys(item.tags).length > 0 && <EntityChipList tags={item.tags} />}
+          <EntityChipList
+            tags={item.tags}
+            relationCount={relationCount}
+            onRelationPress={() => relationModal.open()}
+          />
         </Box>
       </Box>
+      <EntityRelationsModal ref={relationModal.getRef()} endpoint={relationEndpoint} />
+    </>
+  )
+
+  if (!location) {
+    return (
+      <>
+        {content}
+        <Border />
+      </>
+    )
+  }
+
+  return (
+    <Link
+      route="BibleView"
+      params={{
+        isReadOnly: true,
+        book: books[location.Livre - 1],
+        chapter: location.Chapitre,
+        verse: location.Verset,
+      }}
+    >
+      {content}
       <Border />
     </Link>
   )

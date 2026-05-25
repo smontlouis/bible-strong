@@ -16,9 +16,15 @@ import TagsHeader from '~common/TagsHeader'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { unifiedTagsModalAtom } from '~state/app'
 import verseToReference from '~helpers/verseToReference'
-import { Tag, VerseIds } from '~common/types'
+import { Tag } from '~common/types'
 import { Link } from '~redux/modules/user'
-import { selectLinks } from '~redux/selectors/bible'
+import {
+  selectLinks,
+  selectRelationCountsByEndpointIdentity,
+  selectRelations,
+} from '~redux/selectors/bible'
+import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
+import { endpointIdentity, type RelationEndpoint } from '~features/studyRelations/domain'
 
 type TLink = {
   linkId: string
@@ -34,13 +40,17 @@ const BibleVerseLinks = () => {
 
   const [title, setTitle] = useState('')
   const [links, setLinks] = useState<TLink[]>([])
-  const [linkVerses, setLinkVerses] = useState<VerseIds | undefined>(undefined)
+  const [currentLinkId, setCurrentLinkId] = useState<string | null>(null)
   const [selectedChip, setSelectedChip] = useState<Tag | null>(null)
   const [linkSettingsId, setLinkSettingsId] = useState<string | null>(null)
+  const [relationEndpoint, setRelationEndpoint] = useState<RelationEndpoint | null>(null)
   const _links = useSelector(selectLinks)
+  const relations = useSelector(selectRelations)
+  const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
   const linkModal = useBottomSheetModal()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const linkSettingsModal = useBottomSheetModal()
+  const relationModal = useBottomSheetModal()
 
   const openTagsModal = useCallback(() => {
     setUnifiedTagsModal({
@@ -55,6 +65,28 @@ const BibleVerseLinks = () => {
     linkSettingsModal.open()
   }
 
+  const getLinkEndpoint = (
+    linkId: string
+  ): Extract<RelationEndpoint, { type: 'externalLink' }> | null => {
+    const link = _links[linkId]
+    if (!link) return null
+
+    return {
+      type: 'externalLink',
+      linkId,
+      sourceKey: '',
+      url: link.url,
+      label: link.customTitle || link.ogData?.title || link.url,
+    }
+  }
+
+  const openLinkRelations = (linkId: string) => {
+    const endpoint = getLinkEndpoint(linkId)
+    if (!endpoint) return
+    setRelationEndpoint(endpoint)
+    relationModal.open()
+  }
+
   const loadPage = async () => {
     let title
     const filtered_links: TLink[] = []
@@ -66,25 +98,40 @@ const BibleVerseLinks = () => {
       title = t('Liens')
     }
 
-    await Promise.all(
-      Object.entries(_links)
-        .filter(link => {
-          if (verse) {
-            const firstVerseRef = link[0].split('/')[0]
-            return firstVerseRef === verse
-          }
-          return true
+    if (!verse) {
+      Object.entries(_links).forEach(([linkId, link]) => {
+        const verseKeys = new Set<string>()
+        Object.values(relations).forEach(relation => {
+          if (relation.kind !== 'system' || relation.type !== 'externalLink') return
+          const linkEndpoint = relation.endpoints.find(endpoint => endpoint.type === 'externalLink')
+          const verseEndpoint = relation.endpoints.find(endpoint => endpoint.type === 'verse')
+          if (linkEndpoint?.type !== 'externalLink' || linkEndpoint.linkId !== linkId) return
+          if (verseEndpoint?.type !== 'verse') return
+          verseEndpoint.verseKeys.forEach(key => verseKeys.add(key))
         })
-        .map(link => {
-          const verseNumbers: VerseIds = {}
-          link[0].split('/').map(ref => {
-            verseNumbers[ref] = true
-          })
+        const reference = verseKeys.size
+          ? verseToReference(Object.fromEntries(Array.from(verseKeys).map(key => [key, true])))
+          : ''
+        filtered_links.push({ linkId, reference, link })
+      })
+      filtered_links.sort((a, b) => Number(b.link.date) - Number(a.link.date))
+      setTitle(title)
+      setLinks(filtered_links)
+      return
+    }
 
-          const reference = verseToReference(verseNumbers)
-          filtered_links.push({ linkId: link[0], reference, link: link[1] })
-        })
-    )
+    Object.values(relations).forEach(relation => {
+      if (relation.kind !== 'system' || relation.type !== 'externalLink') return
+      const linkEndpoint = relation.endpoints.find(endpoint => endpoint.type === 'externalLink')
+      const verseEndpoint = relation.endpoints.find(endpoint => endpoint.type === 'verse')
+      if (linkEndpoint?.type !== 'externalLink' || verseEndpoint?.type !== 'verse') return
+      if (verse && !verseEndpoint.verseKeys.includes(verse)) return
+      const link = _links[linkEndpoint.linkId]
+      if (!link) return
+      const verseNumbers = Object.fromEntries(verseEndpoint.verseKeys.map(key => [key, true]))
+      const reference = verseToReference(verseNumbers)
+      filtered_links.push({ linkId: linkEndpoint.linkId, reference, link })
+    })
 
     setTitle(title)
     setLinks(filtered_links)
@@ -93,25 +140,26 @@ const BibleVerseLinks = () => {
   useEffect(() => {
     loadPage()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [verse, _links])
+  }, [verse, _links, relations])
 
   const openLinkModal = (linkId: string) => {
-    const linkVerses = linkId.split('/').reduce((accuRefs, key) => {
-      accuRefs[key] = true
-      return accuRefs
-    }, {} as VerseIds)
-
-    setLinkVerses(linkVerses)
+    setCurrentLinkId(linkId)
     linkModal.open()
   }
 
   const renderLink = ({ item, index }: { item: TLink; index: number }) => {
+    const endpoint = getLinkEndpoint(item.linkId)
+
     return (
       <BibleLinkItem
         key={index}
         item={item}
         onPress={openLinkModal}
         onMenuPress={openLinkSettings}
+        relationCount={endpoint ? relationCountsByEndpoint[endpointIdentity(endpoint)] || 0 : 0}
+        onRelationPress={() => {
+          openLinkRelations(item.linkId)
+        }}
       />
     )
   }
@@ -148,7 +196,12 @@ const BibleVerseLinks = () => {
           message={t("Vous n'avez pas encore de liens...")}
         />
       )}
-      <BibleLinkModal ref={linkModal.getRef()} linkVerses={linkVerses} />
+      <BibleLinkModal
+        ref={linkModal.getRef()}
+        linkVerses={undefined}
+        linkId={currentLinkId}
+        onLinkIdChange={setCurrentLinkId}
+      />
       <BibleLinksSettingsModal
         ref={linkSettingsModal.getRef()}
         title={
@@ -159,7 +212,9 @@ const BibleVerseLinks = () => {
         }
         linkId={linkSettingsId}
         onClosed={() => setLinkSettingsId(null)}
+        onEditRelations={openLinkRelations}
       />
+      <EntityRelationsModal ref={relationModal.getRef()} endpoint={relationEndpoint} />
     </Container>
   )
 }

@@ -359,10 +359,13 @@ const Verse = ({
     })
   }
 
-  const navigateToNote = (id: string) => {
+  const navigateToNote = (note: NotedVerse) => {
     dispatch({
       type: NAVIGATE_TO_BIBLE_NOTE,
-      payload: id,
+      payload: {
+        noteId: note.id || note.key,
+        verseIds: note.verseIds,
+      },
     })
   }
 

@@ -53,7 +53,7 @@ const useVerseActiveStates = ({
   const hasLink = useSelector((state: RootState) => {
     if (!firstVerseKey || !book || !chapter) return false
     const links = selectLinksByChapter(state, book, chapter)
-    return !!links[firstVerseKey]
+    return Object.keys(links).some(key => key.split('#')[0].split('/').includes(firstVerseKey))
   })
 
   const hasStudyRelation = useSelector((state: RootState) => {

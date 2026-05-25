@@ -26,7 +26,12 @@ import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addNote, deleteNote } from '~redux/modules/user'
-import { makeNoteByKeySelector, makeWordAnnotationByIdSelector } from '~redux/selectors/bible'
+import {
+  makeNoteByKeySelector,
+  makeVerseGroupsForNoteSelector,
+  makeVerseKeysForNoteSelector,
+  makeWordAnnotationByIdSelector,
+} from '~redux/selectors/bible'
 import { isFullScreenBibleAtom, unifiedTagsModalAtom } from '~state/app'
 import { NotesTab, useIsCurrentTab } from '~state/tabs'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
@@ -37,6 +42,12 @@ import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import type { RelationEndpoint } from '~redux/modules/user'
 
 const FOOTER_HEIGHT = 54
+
+const verseKeysToVerseIds = (verseKeys: string[]): VerseIds =>
+  verseKeys.reduce((acc, key) => {
+    acc[key] = true
+    return acc
+  }, {} as VerseIds)
 
 interface NoteDetailTabScreenProps {
   notesAtom: PrimitiveAtom<NotesTab>
@@ -84,6 +95,12 @@ const NoteDetailTabScreen = ({ notesAtom, noteId, onBackPress }: NoteDetailTabSc
   const selectAnnotationById = makeWordAnnotationByIdSelector()
   const annotation = useSelector((state: RootState) => selectAnnotationById(state, annotationId))
   const isMissingAnnotation = isAnnotationNote && !annotation
+  const selectVerseKeysForNote = makeVerseKeysForNoteSelector()
+  const relatedVerseKeys = useSelector((state: RootState) => selectVerseKeysForNote(state, noteId))
+  const selectVerseGroupsForNote = makeVerseGroupsForNoteSelector()
+  const relatedVerseGroups = useSelector((state: RootState) =>
+    selectVerseGroupsForNote(state, noteId)
+  )
 
   // Parse noteId to get verse references for display
   const noteVerses = useMemo(() => {
@@ -95,12 +112,12 @@ const NoteDetailTabScreen = ({ notesAtom, noteId, onBackPress }: NoteDetailTabSc
       const verseKey = annotation.ranges[0]?.verseKey
       return verseKey ? { [verseKey]: true as const } : ({} as VerseIds)
     }
-    // For regular notes, parse the noteId
-    return noteId.split('/').reduce((acc, key) => {
+    return relatedVerseKeys.reduce((acc, key) => {
       acc[key] = true as const
       return acc
     }, {} as VerseIds)
-  }, [noteId, isAnnotationNote, annotation])
+  }, [isAnnotationNote, annotation, relatedVerseKeys])
+  const hasNoteVerses = Object.keys(noteVerses).length > 0
 
   const reference = useMemo(() => {
     if (isMissingAnnotation) {
@@ -223,8 +240,7 @@ ${currentNote.description}
       verseKey = annotation.ranges[0]?.verseKey
       version = annotation.version
     } else {
-      // For regular notes, use the first verse from noteId
-      verseKey = noteId.split('/')[0]
+      verseKey = relatedVerseKeys[0]
     }
 
     if (!verseKey) {
@@ -371,9 +387,18 @@ ${currentNote.description}
                   {annotation.ranges.map(r => r.text).join(' ')}
                 </Text>
               </Box>
-            ) : (
-              <VerseAccordion noteVerses={noteVerses} />
-            )}
+            ) : hasNoteVerses ? (
+              relatedVerseGroups.length ? (
+                relatedVerseGroups.map((verseKeys, index) => (
+                  <VerseAccordion
+                    key={`${verseKeys.join('/')}-${index}`}
+                    noteVerses={verseKeysToVerseIds(verseKeys)}
+                  />
+                ))
+              ) : (
+                <VerseAccordion noteVerses={noteVerses} />
+              )
+            ) : null}
             <NoteEditorDOMComponent
               defaultTitle={currentNote?.title || ''}
               defaultDescription={currentNote?.description || ''}

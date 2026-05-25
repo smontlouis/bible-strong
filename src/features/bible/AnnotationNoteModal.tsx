@@ -102,7 +102,7 @@ const AnnotationNoteModal = ({
     if (!annotationId) return
 
     const action = addNote(
-      { ...currentNote, title, description, date: Date.now() },
+      { ...currentNote, id: noteKey, title, description, date: Date.now() },
       { [noteKey]: true }
     )
     if (action) {

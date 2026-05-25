@@ -28,30 +28,37 @@ import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import generateUUID from '~helpers/generateUUID'
 import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
-import orderVerses from '~helpers/orderVerses'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addNote, deleteNote } from '~redux/modules/user'
-import { makeNoteByKeySelector } from '~redux/selectors/bible'
+import { makeNoteByIdSelector, makeVerseGroupsForNoteSelector } from '~redux/selectors/bible'
 import { unifiedTagsModalAtom } from '../../state/app'
 import NoteEditorBottomSheet from './NoteEditorDOM/NoteEditorBottomSheet'
 
 interface BibleNoteModalProps {
   noteVerses: VerseIds | undefined
+  noteId?: string | null
+  onNoteIdChange?: (noteId: string) => void
   ref?: React.RefObject<BottomSheetModal | null>
 }
 
-const useCurrentNote = ({ noteVerses }: { noteVerses: VerseIds | undefined }) => {
-  const selectNoteByKey = makeNoteByKeySelector()
-  const orderedVerses = orderVerses(noteVerses || {})
-  const noteKey = Object.keys(orderedVerses).join('/')
-
-  const note = useSelector((state: RootState) => selectNoteByKey(state, noteKey))
+const useCurrentNote = ({ noteId }: { noteId?: string | null }) => {
+  const selectNoteById = makeNoteByIdSelector()
+  const note = useSelector((state: RootState) => selectNoteById(state, noteId || ''))
 
   return note
 }
 
-const BibleNoteModal = ({ noteVerses, ref }: BibleNoteModalProps) => {
+const verseKeysToVerseIds = (verseKeys: string[]): VerseIds =>
+  verseKeys.reduce((acc, key) => {
+    acc[key] = true
+    return acc
+  }, {} as VerseIds)
+
+const hasVerses = (verses: VerseIds | undefined): verses is VerseIds =>
+  Boolean(verses && Object.keys(verses).length)
+
+const BibleNoteModal = ({ noteVerses, noteId, onNoteIdChange, ref }: BibleNoteModalProps) => {
   const insets = useSafeAreaInsets()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -60,8 +67,20 @@ const BibleNoteModal = ({ noteVerses, ref }: BibleNoteModalProps) => {
   const dispatch = useDispatch()
   const { t } = useTranslation()
 
-  const currentNote = useCurrentNote({ noteVerses })
-  const reference = verseToReference(noteVerses)
+  const currentNote = useCurrentNote({ noteId })
+  const selectVerseGroupsForNote = makeVerseGroupsForNoteSelector()
+  const relatedVerseGroups = useSelector((state: RootState) =>
+    selectVerseGroupsForNote(state, currentNote?.id || noteId || '')
+  )
+  const allRelatedNoteVerses = relatedVerseGroups.length
+    ? verseKeysToVerseIds(relatedVerseGroups.flat())
+    : undefined
+  const displayedNoteVerses = noteVerses ?? allRelatedNoteVerses
+  const displayedVerseGroups = hasVerses(noteVerses)
+    ? [noteVerses]
+    : relatedVerseGroups.map(verseKeysToVerseIds)
+  const hasDisplayedNoteVerses = displayedVerseGroups.length > 0
+  const reference = verseToReference(displayedNoteVerses)
   const noteEndpoint = currentNote?.id
     ? {
         type: 'note' as const,
@@ -93,7 +112,7 @@ const BibleNoteModal = ({ noteVerses, ref }: BibleNoteModalProps) => {
   }
 
   useEffect(() => {
-    if (noteVerses) {
+    if (noteVerses || noteId) {
       if (currentNote) {
         setIsEditing(false)
       } else {
@@ -104,13 +123,17 @@ const BibleNoteModal = ({ noteVerses, ref }: BibleNoteModalProps) => {
       setDescription('')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [noteVerses])
+  }, [noteVerses, noteId])
 
   const onSaveNoteFunc = () => {
-    if (!noteVerses) return
-    const action = addNote({ ...currentNote, title, description, date: Date.now() }, noteVerses)
+    const targetVerses = noteVerses ?? displayedNoteVerses ?? {}
+    const action = addNote({ ...currentNote, title, description, date: Date.now() }, targetVerses)
     if (action) {
       dispatch(action)
+      const savedNoteId = Object.keys(action.payload)[0]
+      if (savedNoteId) {
+        onNoteIdChange?.(savedNoteId)
+      }
     }
     setIsEditing(false)
   }
@@ -265,25 +288,29 @@ ${currentNote.description}
         }
       >
         <Box paddingHorizontal={20} gap={20} py={20}>
-          {noteVerses && (
-            <>
-              <VerseAccordion noteVerses={noteVerses} />
-              <NoteEditorBottomSheet
-                defaultTitle={currentNote?.title || ''}
-                defaultDescription={currentNote?.description || ''}
-                isEditing={isEditing}
-                placeholderTitle={t('Titre')}
-                placeholderDescription={t('Description')}
-                onTitleChange={setTitle}
-                onDescriptionChange={setDescription}
-              />
-              <EntityChipList
-                tags={currentNote?.tags}
-                relationCount={relationCount}
-                onRelationPress={() => relationModal.open()}
-              />
-            </>
-          )}
+          <>
+            {hasDisplayedNoteVerses &&
+              displayedVerseGroups.map((verseGroup, index) => (
+                <VerseAccordion
+                  key={`${Object.keys(verseGroup).join('/')}-${index}`}
+                  noteVerses={verseGroup}
+                />
+              ))}
+            <NoteEditorBottomSheet
+              defaultTitle={currentNote?.title || ''}
+              defaultDescription={currentNote?.description || ''}
+              isEditing={isEditing}
+              placeholderTitle={t('Titre')}
+              placeholderDescription={t('Description')}
+              onTitleChange={setTitle}
+              onDescriptionChange={setDescription}
+            />
+            <EntityChipList
+              tags={currentNote?.tags}
+              relationCount={relationCount}
+              onRelationPress={() => relationModal.open()}
+            />
+          </>
         </Box>
       </Modal.Body>
       <EntityRelationsModal ref={relationModal.getRef()} endpoint={noteEndpoint} />

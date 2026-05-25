@@ -7,9 +7,57 @@ import nightColors from '~themes/nightColors'
 import sepiaColors from '~themes/sepiaColors'
 import sunsetColors from '~themes/sunsetColors'
 import { RootState } from './modules/reducer'
+import {
+  normalizeRelation,
+  mergeRelationsWithSystemBackfill,
+  rebuildRelationIndexes,
+  rebuildRelationPairs,
+  type LegacyRelation,
+  type RelationsObj,
+} from '~features/studyRelations/domain'
 
 type LegacyRootState = RootState & {
   bible?: Record<string, unknown>
+  user: RootState['user'] & {
+    bible: RootState['user']['bible'] & {
+      studyRelations?: Record<string, LegacyRelation>
+      relations?: RelationsObj
+    }
+  }
+}
+
+const migrateRelations = (state: LegacyRootState): RootState => {
+  const legacyRelations = state.user.bible.studyRelations ?? {}
+  const existingRelations = state.user.bible.relations ?? {}
+  const normalizedRelations = Object.values({ ...legacyRelations, ...existingRelations }).reduce(
+    (result, relation) => {
+      const normalized = normalizeRelation(relation)
+      result[normalized.id] = normalized
+      return result
+    },
+    {} as RelationsObj
+  )
+  const relations = mergeRelationsWithSystemBackfill({
+    relations: normalizedRelations,
+    notes: state.user.bible.notes,
+    links: state.user.bible.links,
+    wordAnnotations: state.user.bible.wordAnnotations,
+  })
+
+  const { studyRelations: _studyRelations, ...bible } = state.user.bible
+
+  return {
+    ...state,
+    user: {
+      ...state.user,
+      bible: {
+        ...bible,
+        relations,
+        relationIndex: rebuildRelationIndexes(relations),
+        relationPairs: rebuildRelationPairs(relations),
+      },
+    },
+  } as RootState
 }
 
 export default {
@@ -472,4 +520,5 @@ export default {
       },
     }
   },
+  33: (state: RootState) => migrateRelations(state as LegacyRootState),
 }

@@ -43,6 +43,7 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
 
   const _notes = useSelector((state: RootState) => state.user.bible.notes)
   const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
+  const relations = useSelector((state: RootState) => state.user.bible.relations)
   const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const noteSettingsModal = useBottomSheetModal()
@@ -78,11 +79,19 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
           return
         }
 
-        // Handle regular verse notes
-        const verseNumbers: Record<string, boolean> = {}
-        noteKey.split('/').forEach(ref => {
-          verseNumbers[ref] = true
-        })
+        const relation = Object.values(relations).find(
+          candidate =>
+            candidate.kind === 'system' &&
+            candidate.type === 'annotates' &&
+            candidate.endpoints.some(
+              endpoint => endpoint.type === 'note' && endpoint.noteId === noteKey
+            )
+        )
+        const verseEndpoint = relation?.endpoints.find(endpoint => endpoint.type === 'verse')
+        const verseNumbers =
+          verseEndpoint?.type === 'verse'
+            ? Object.fromEntries(verseEndpoint.verseKeys.map(key => [key, true]))
+            : {}
 
         const reference = verseToReference(verseNumbers)
         formattedNotes.push({ noteId: noteKey, reference, notes: note })
@@ -98,7 +107,7 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
   useEffect(() => {
     loadNotes()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [_notes, wordAnnotations])
+  }, [_notes, wordAnnotations, relations])
 
   const openNoteDetail = (noteId: string) => {
     setNotesTab(

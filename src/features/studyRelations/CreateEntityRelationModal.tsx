@@ -38,7 +38,7 @@ import { getStrongSearchItems } from '~features/search/shared/searchItems'
 import type { SearchEntityResult } from '~features/search/shared/searchResultTypes'
 import { removeBreakLines } from '~helpers/utils'
 import { RootState } from '~redux/modules/reducer'
-import { createStudyRelation } from '~redux/modules/user'
+import { attachNoteToVerseAction, createStudyRelation } from '~redux/modules/user'
 import type { AppDispatch } from '~redux/store'
 import type { SearchItemFilters, SearchItemType } from '~state/searchFilters'
 import { endpointsMatch, getEndpointFallbackLabel, type RelationEndpoint } from './domain'
@@ -79,6 +79,8 @@ const relationTypeToSearchItemType: Record<RelationEndpoint['type'], SearchItemT
   strong: 'strong',
   nave: 'nave',
   dictionary: 'dictionary',
+  externalLink: 'passages',
+  word: 'dictionary',
 }
 
 const searchItemTypeToBrowseMode: Record<SearchItemType, BrowseMode | null> = {
@@ -174,11 +176,13 @@ const getSourceEndpointSubtitle = (
     case 'study':
       return t('Étude')
     case 'strong':
-      return endpoint.originalWord || endpoint.label || getEndpointFallbackLabel(endpoint)
+      return endpoint.originalWord || endpoint.labelFallback || getEndpointFallbackLabel(endpoint)
     case 'nave':
-      return endpoint.label || getEndpointFallbackLabel(endpoint)
+      return endpoint.labelFallback || getEndpointFallbackLabel(endpoint)
     case 'dictionary':
-      return endpoint.label || getEndpointFallbackLabel(endpoint)
+    case 'externalLink':
+    case 'word':
+      return endpoint.labelFallback || getEndpointFallbackLabel(endpoint)
   }
 }
 
@@ -200,6 +204,23 @@ const getVerseIds = (endpoint: RelationEndpoint) =>
         return { Livre, Chapitre, Verset }
       })
     : []
+
+const getNoteVerseAttachmentEndpoints = (
+  sourceEndpoint: RelationEndpoint,
+  targetEndpoint: RelationEndpoint
+) => {
+  const endpoints = [sourceEndpoint, targetEndpoint]
+  const noteEndpoint = endpoints.find(
+    (endpoint): endpoint is Extract<RelationEndpoint, { type: 'note' }> => endpoint.type === 'note'
+  )
+  const verseEndpoint = endpoints.find(
+    (endpoint): endpoint is Extract<RelationEndpoint, { type: 'verse' }> =>
+      endpoint.type === 'verse'
+  )
+
+  if (!noteEndpoint || !verseEndpoint) return undefined
+  return { noteEndpoint, verseEndpoint }
+}
 
 const VerseTargetDescription = ({
   endpoint,
@@ -466,11 +487,17 @@ const CreateEntityRelationModal = ({
     if (!sourceEndpoint) return
     if (endpointsMatch(sourceEndpoint, endpoint)) return
 
-    dispatch(
-      createStudyRelation({
-        endpoints: [sourceEndpoint, endpoint],
-      })
-    )
+    const noteVerseAttachment = getNoteVerseAttachmentEndpoints(sourceEndpoint, endpoint)
+
+    if (noteVerseAttachment) {
+      dispatch(attachNoteToVerseAction(noteVerseAttachment))
+    } else {
+      dispatch(
+        createStudyRelation({
+          endpoints: [sourceEndpoint, endpoint],
+        })
+      )
+    }
     handleSearch('')
     setItemFilters(getSearchItemFiltersForTypes(enabledItemTypes))
     setVisibleCounts({})

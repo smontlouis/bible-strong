@@ -141,6 +141,8 @@ const BibleViewer = ({
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
   const [linkVerses, setLinkVerses] = useState<VerseIds | undefined>(undefined)
+  const [currentNoteId, setCurrentNoteId] = useState<string | null>(null)
+  const [currentLinkId, setCurrentLinkId] = useState<string | null>(null)
   const strongModal = useBottomSheet()
   const [selectedCode, setSelectedCodeState] = useState<SelectedCode | null>(null)
   const bookmarkModalRef = useRef<BottomSheetModal>(null)
@@ -513,11 +515,13 @@ const BibleViewer = ({
   }
 
   const toggleCreateNote = () => {
+    setCurrentNoteId(null)
     setNoteVerses(selectedVerses)
     noteModal.open()
   }
 
   const toggleCreateLink = () => {
+    setCurrentLinkId(null)
     setLinkVerses(selectedVerses)
     linkModal.open()
   }
@@ -540,39 +544,22 @@ const BibleViewer = ({
   }
 
   const openLinkModal = (linkId: string) => {
-    try {
-      const linkVersesToLoad = linkId.split('/').reduce((accuRefs, key) => {
-        accuRefs[key] = true
-        return accuRefs
-      }, {} as VerseIds)
-      setLinkVerses(linkVersesToLoad)
-      linkModal.open()
-    } catch (e) {
-      const errorMessage = e instanceof Error ? e.toString() : String(e)
-      Sentry.withScope(scope => {
-        scope.setExtra('Error', errorMessage)
-        scope.setExtra('Link', linkId)
-        Sentry.captureMessage('Link corrupted')
-      })
-    }
+    setCurrentLinkId(linkId)
+    setLinkVerses(undefined)
+    linkModal.open()
   }
 
-  const openNoteModal = (noteId: string) => {
-    try {
-      const noteVersesToLoad = noteId.split('/').reduce((accuRefs, key) => {
-        accuRefs[key] = true
-        return accuRefs
-      }, {} as VerseIds)
-      setNoteVerses(noteVersesToLoad)
-      noteModal.open()
-    } catch (e) {
-      const errorMessage = e instanceof Error ? e.toString() : String(e)
-      Sentry.withScope(scope => {
-        scope.setExtra('Error', errorMessage)
-        scope.setExtra('Note', noteId)
-        Sentry.captureMessage('Note corrumpted')
-      })
-    }
+  const openNoteModal = (noteId: string, verseIds?: string[]) => {
+    setCurrentNoteId(noteId)
+    setNoteVerses(
+      verseIds?.length
+        ? verseIds.reduce((acc, verseId) => {
+            acc[verseId] = true
+            return acc
+          }, {} as VerseIds)
+        : undefined
+    )
+    noteModal.open()
   }
 
   const onChangeResourceTypeSelectVerse = (res: BibleResource, ver: string) => {
@@ -930,8 +917,18 @@ const BibleViewer = ({
         onEnterAnnotationMode={parallelVersions.length > 0 ? undefined : handleEnterAnnotationMode}
         focusVerses={focusVerses}
       />
-      <BibleNoteModal ref={noteModal.getRef()} noteVerses={noteVerses} />
-      <BibleLinkModal ref={linkModal.getRef()} linkVerses={linkVerses} />
+      <BibleNoteModal
+        ref={noteModal.getRef()}
+        noteVerses={noteVerses}
+        noteId={currentNoteId}
+        onNoteIdChange={setCurrentNoteId}
+      />
+      <BibleLinkModal
+        ref={linkModal.getRef()}
+        linkVerses={linkVerses}
+        linkId={currentLinkId}
+        onLinkIdChange={setCurrentLinkId}
+      />
       <CreateEntityRelationModal
         ref={createRelationModal.getRef()}
         sourceEndpoint={createRelationSourceEndpoint}

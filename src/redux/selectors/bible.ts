@@ -8,18 +8,21 @@ import {
   Highlight,
   Link,
   WordAnnotationsObj,
-  StudyRelationsObj,
+  RelationsObj,
   RelationEndpoint,
-  StudyRelation,
+  Relation,
 } from '~redux/modules/user'
 import { WordAnnotation } from '~redux/modules/user/wordAnnotations'
 import { Tag, CurrentTheme, TagsObj } from '~common/types'
 import { VersionCode } from '~state/tabs'
+import verseToReference from '~helpers/verseToReference'
 import {
   getRelationDisplayModel,
   getEndpointFallbackLabel,
   endpointIdentity,
   relationIncludesEndpoint,
+  relationIncludesVerseKey,
+  createVerseEndpoint,
 } from '~features/studyRelations/domain'
 
 type TaggedEntity = { id: string | number; title: string; tags?: TagsObj }
@@ -40,12 +43,68 @@ const isTaggedEntity = (entity: unknown): entity is TaggedEntity =>
     typeof (entity as { id: unknown }).id === 'number') &&
   typeof (entity as { title: unknown }).title === 'string'
 
+const getRelationEntityEndpoint = (
+  relation: Relation,
+  type: 'note' | 'externalLink'
+): RelationEndpoint | undefined => relation.endpoints.find(endpoint => endpoint.type === type)
+
+const getRelationVerseEndpoint = (relation: Relation): RelationEndpoint | undefined =>
+  relation.endpoints.find(endpoint => endpoint.type === 'verse')
+
+const getRelationVerseKeysForEntity = (
+  relations: RelationsObj,
+  entityType: 'note' | 'externalLink',
+  entityId: string,
+  relationType?: 'annotates' | 'externalLink'
+): string[] => {
+  const verseKeys = new Set<string>()
+
+  Object.values(relations).forEach(relation => {
+    if (relationType && relation.type !== relationType) return
+    const entityEndpoint = getRelationEntityEndpoint(relation, entityType)
+    const verseEndpoint = getRelationVerseEndpoint(relation)
+    if (!entityEndpoint || !verseEndpoint || verseEndpoint.type !== 'verse') return
+
+    const matches =
+      entityEndpoint.type === 'note'
+        ? entityEndpoint.noteId === entityId
+        : entityEndpoint.type === 'externalLink'
+          ? entityEndpoint.linkId === entityId
+          : false
+
+    if (matches) {
+      verseEndpoint.verseKeys.forEach(key => verseKeys.add(key))
+    }
+  })
+
+  return Array.from(verseKeys)
+}
+
+const getReferenceFromEntityRelations = (
+  relations: RelationsObj,
+  entityType: 'note' | 'externalLink',
+  entityId: string,
+  fallback = ''
+): string => {
+  const verseKeys = getRelationVerseKeysForEntity(
+    relations,
+    entityType,
+    entityId,
+    entityType === 'note' ? 'annotates' : 'externalLink'
+  )
+  return verseKeys.length
+    ? verseToReference(Object.fromEntries(verseKeys.map(key => [key, true])))
+    : fallback
+}
+
 // Base selectors - private
 // All selectors use nullish coalescing to prevent crashes when state is undefined
 // (e.g., during Redux rehydration or state corruption)
 const selectHighlights = (state: RootState) => state.user.bible.highlights ?? {}
 export const selectLinks = (state: RootState) => state.user.bible.links ?? {}
-export const selectStudyRelations = (state: RootState) => state.user.bible.studyRelations ?? {}
+export const selectRelations = (state: RootState) => state.user.bible.relations ?? {}
+export const selectRelationIndex = (state: RootState) => state.user.bible.relationIndex ?? {}
+export const selectStudyRelations = selectRelations
 const selectStudies = (state: RootState) => state.user.bible.studies ?? {}
 const selectNaves = (state: RootState) => state.user.bible.naves ?? {}
 const selectWords = (state: RootState) => state.user.bible.words ?? {}
@@ -58,19 +117,15 @@ export const selectNotes = (state: RootState) => state.user.bible.notes ?? {}
 export const selectWordAnnotations = (state: RootState) => state.user.bible.wordAnnotations ?? {}
 
 export const selectRelationCountsByEndpointIdentity = createSelector(
-  [selectStudyRelations],
-  (studyRelations): Record<string, number> => {
-    const counts: Record<string, number> = {}
-
-    for (const relation of Object.values(studyRelations)) {
-      for (const endpoint of relation.endpoints) {
-        const identity = endpointIdentity(endpoint)
-        counts[identity] = (counts[identity] || 0) + 1
-      }
-    }
-
-    return counts
-  }
+  [selectRelationIndex],
+  (relationIndex): Record<string, number> =>
+    Object.entries(relationIndex).reduce(
+      (counts, [entityKey, entry]) => ({
+        ...counts,
+        [entityKey]: entry.totalCount,
+      }),
+      {} as Record<string, number>
+    )
 )
 
 // Selector factory for highlights by chapter
@@ -97,15 +152,26 @@ export const makeNotesByChapterSelector = () =>
   createSelector(
     [
       selectNotes,
+      selectRelations,
       (_: RootState, bookNumber: number, chapter: number) => `${bookNumber}-${chapter}-`,
     ],
-    (notes, prefix): NotesObj => {
+    (notes, relations, prefix): NotesObj => {
       const result: NotesObj = {}
-      for (const key in notes) {
-        if (key.startsWith(prefix)) {
-          result[key] = notes[key]
+      Object.values(relations).forEach(relation => {
+        if (relation.kind !== 'system' || relation.type !== 'annotates') return
+        const noteEndpoint = getRelationEntityEndpoint(relation, 'note')
+        const verseEndpoint = getRelationVerseEndpoint(relation)
+        if (noteEndpoint?.type !== 'note' || verseEndpoint?.type !== 'verse') return
+        if (!verseEndpoint.verseKeys.some(key => key.startsWith(prefix))) return
+        const note = notes[noteEndpoint.noteId]
+        if (!note) return
+
+        const verseKey = verseEndpoint.verseKeys.join('/')
+        result[`${verseKey}#${noteEndpoint.noteId}`] = {
+          ...note,
+          id: noteEndpoint.noteId,
         }
-      }
+      })
       return result
     }
   )
@@ -115,15 +181,26 @@ export const makeLinksByChapterSelector = () =>
   createSelector(
     [
       selectLinks,
+      selectRelations,
       (_: RootState, bookNumber: number, chapter: number) => `${bookNumber}-${chapter}-`,
     ],
-    (links, prefix): LinksObj => {
+    (links, relations, prefix): LinksObj => {
       const result: LinksObj = {}
-      for (const key in links) {
-        if (key.startsWith(prefix)) {
-          result[key] = links[key]
+      Object.values(relations).forEach(relation => {
+        if (relation.kind !== 'system' || relation.type !== 'externalLink') return
+        const linkEndpoint = getRelationEntityEndpoint(relation, 'externalLink')
+        const verseEndpoint = getRelationVerseEndpoint(relation)
+        if (linkEndpoint?.type !== 'externalLink' || verseEndpoint?.type !== 'verse') return
+        if (!verseEndpoint.verseKeys.some(key => key.startsWith(prefix))) return
+        const link = links[linkEndpoint.linkId]
+        if (!link) return
+
+        const verseKey = verseEndpoint.verseKeys.join('/')
+        result[`${verseKey}#${linkEndpoint.linkId}`] = {
+          ...link,
+          id: linkEndpoint.linkId,
         }
-      }
+      })
       return result
     }
   )
@@ -131,12 +208,12 @@ export const makeLinksByChapterSelector = () =>
 export const makeStudyRelationsByChapterSelector = () =>
   createSelector(
     [
-      selectStudyRelations,
+      selectRelations,
       (_: RootState, bookNumber: number, chapter: number) => `${bookNumber}-${chapter}-`,
     ],
-    (studyRelations, prefix): StudyRelationsObj => {
-      const result: StudyRelationsObj = {}
-      for (const [id, relation] of Object.entries(studyRelations)) {
+    (relations, prefix): RelationsObj => {
+      const result: RelationsObj = {}
+      for (const [id, relation] of Object.entries(relations)) {
         if (
           relation.endpoints.some(
             endpoint =>
@@ -152,9 +229,9 @@ export const makeStudyRelationsByChapterSelector = () =>
 
 export const makeStudyRelationsForEndpointSelector = () =>
   createSelector(
-    [selectStudyRelations, (_: RootState, endpoint: RelationEndpoint) => endpoint],
-    (studyRelations, endpoint): StudyRelation[] =>
-      Object.values(studyRelations)
+    [selectRelations, (_: RootState, endpoint: RelationEndpoint) => endpoint],
+    (relations, endpoint): Relation[] =>
+      Object.values(relations)
         .filter(relation => relationIncludesEndpoint(relation, endpoint))
         .sort((a, b) => b.updatedAt - a.updatedAt)
   )
@@ -162,22 +239,24 @@ export const makeStudyRelationsForEndpointSelector = () =>
 export const makeStudyRelationDisplayModelsSelector = () =>
   createSelector(
     [
-      selectStudyRelations,
+      selectRelations,
       selectNotes,
       selectStudies,
       selectStrongsGrec,
       selectStrongsHebreu,
       selectNaves,
       selectWords,
+      selectLinks,
       (_: RootState, endpoint: RelationEndpoint) => endpoint,
     ],
-    (studyRelations, notes, studies, strongsGrec, strongsHebreu, naves, words, endpoint) =>
-      Object.values(studyRelations)
+    (relations, notes, studies, strongsGrec, strongsHebreu, naves, words, links, endpoint) =>
+      Object.values(relations)
         .filter(relation => relationIncludesEndpoint(relation, endpoint))
         .map(relation =>
           getRelationDisplayModel(relation, endpoint, {
             notes,
             studies,
+            links,
             strongsGrec,
             strongsHebreu,
             naves,
@@ -191,16 +270,17 @@ export const makeStudyRelationDisplayModelsSelector = () =>
 export const makeStudyRelationDisplaySectionsForStartingVerseKeySelector = () =>
   createSelector(
     [
-      selectStudyRelations,
+      selectRelations,
       selectNotes,
       selectStudies,
       selectStrongsGrec,
       selectStrongsHebreu,
       selectNaves,
       selectWords,
+      selectLinks,
       (_: RootState, verseKey: string) => verseKey,
     ],
-    (studyRelations, notes, studies, strongsGrec, strongsHebreu, naves, words, verseKey) => {
+    (relations, notes, studies, strongsGrec, strongsHebreu, naves, words, links, verseKey) => {
       const sections = new Map<
         string,
         {
@@ -210,7 +290,7 @@ export const makeStudyRelationDisplaySectionsForStartingVerseKeySelector = () =>
         }
       >()
 
-      for (const relation of Object.values(studyRelations)) {
+      for (const relation of Object.values(relations)) {
         const endpoint = relation.endpoints.find(
           relationEndpoint =>
             relationEndpoint.type === 'verse' && relationEndpoint.verseKeys[0] === verseKey
@@ -220,6 +300,7 @@ export const makeStudyRelationDisplaySectionsForStartingVerseKeySelector = () =>
         const model = getRelationDisplayModel(relation, endpoint, {
           notes,
           studies,
+          links,
           strongsGrec,
           strongsHebreu,
           naves,
@@ -249,19 +330,21 @@ export const makeStudyRelationDisplaySectionsForStartingVerseKeySelector = () =>
 export const makeStudyRelationIndicatorsByChapterSelector = () =>
   createSelector(
     [
-      selectStudyRelations,
+      selectRelationIndex,
       (_: RootState, bookNumber: number, chapter: number) => `${bookNumber}-${chapter}-`,
     ],
-    (studyRelations, prefix): Record<string, number> => {
+    (relationIndex, prefix): Record<string, number> => {
       const result: Record<string, number> = {}
-      for (const relation of Object.values(studyRelations)) {
-        for (const endpoint of relation.endpoints) {
-          if (endpoint.type !== 'verse') continue
-          const verseKey = endpoint.verseKeys[0]
-          if (verseKey?.startsWith(prefix)) {
-            const verse = verseKey.split('-')[2]
-            result[verse] = (result[verse] || 0) + 1
-          }
+      for (const verseKey of Object.keys(relationIndex)) {
+        if (!verseKey.startsWith(`verse:${prefix}`)) continue
+        const endpoint = createVerseEndpoint([verseKey.replace('verse:', '')])
+        const exactKey = endpointIdentity(endpoint)
+        if (verseKey !== exactKey) continue
+
+        const verse = verseKey.replace('verse:', '').split('-')[2]
+        const count = relationIndex[verseKey]?.totalCount || 0
+        if (verse && count) {
+          result[verse] = count
         }
       }
       return result
@@ -442,6 +525,7 @@ export const makeTagDataSelector = () =>
       selectStrongsGrec,
       selectStrongsHebreu,
       selectWordAnnotations,
+      selectRelations,
       (_: RootState, tag: Tag) => tag,
     ],
     (
@@ -454,6 +538,7 @@ export const makeTagDataSelector = () =>
       strongsGrec,
       strongsHebreu,
       wordAnnotations,
+      relations,
       tag
     ) => {
       return {
@@ -470,15 +555,37 @@ export const makeTagDataSelector = () =>
           : [],
         notes: tag.notes
           ? Object.keys(tag.notes)
-              .map(
-                id =>
-                  ({ id, reference: '', ...notes[id] }) as Note & { id: string; reference: string }
-              )
+              .map(id => {
+                const verseKeys = getRelationVerseKeysForEntity(relations, 'note', id, 'annotates')
+                return {
+                  id,
+                  reference: verseKeys.length
+                    ? verseToReference(Object.fromEntries(verseKeys.map(key => [key, true])))
+                    : '',
+                  verseKeys,
+                  ...notes[id],
+                } as Note & { id: string; reference: string; verseKeys: string[] }
+              })
               .filter(c => c && c.date)
           : [],
         links: tag.links
           ? Object.keys(tag.links)
-              .map(id => ({ id, ...links[id] }) as Link & { id: string })
+              .map(id => {
+                const verseKeys = getRelationVerseKeysForEntity(
+                  relations,
+                  'externalLink',
+                  id,
+                  'externalLink'
+                )
+                return {
+                  id,
+                  reference: verseKeys.length
+                    ? verseToReference(Object.fromEntries(verseKeys.map(key => [key, true])))
+                    : '',
+                  verseKeys,
+                  ...links[id],
+                } as Link & { id: string; reference: string; verseKeys: string[] }
+              })
               .filter(c => c && c.date)
           : [],
         studies: tag.studies
@@ -590,6 +697,63 @@ export const makeLinkByIdSelector = () =>
         }
       }
       return null
+    }
+  )
+
+export const makeVerseKeysForNoteSelector = () =>
+  createSelector(
+    [selectRelations, (_: RootState, noteId: string | null | undefined) => noteId],
+    (relations, noteId): string[] => {
+      if (!noteId) return []
+      return getRelationVerseKeysForEntity(relations, 'note', noteId, 'annotates')
+    }
+  )
+
+export const makeVerseGroupsForNoteSelector = () =>
+  createSelector(
+    [selectRelations, (_: RootState, noteId: string | null | undefined) => noteId],
+    (relations, noteId): string[][] => {
+      if (!noteId) return []
+
+      return Object.values(relations)
+        .filter(relation => {
+          if (relation.kind !== 'system' || relation.type !== 'annotates') return false
+          const noteEndpoint = getRelationEntityEndpoint(relation, 'note')
+          return noteEndpoint?.type === 'note' && noteEndpoint.noteId === noteId
+        })
+        .map(relation => {
+          const verseEndpoint = getRelationVerseEndpoint(relation)
+          return verseEndpoint?.type === 'verse' ? verseEndpoint.verseKeys : []
+        })
+        .filter(verseKeys => verseKeys.length > 0)
+        .sort((a, b) => a[0].localeCompare(b[0]) || a.length - b.length)
+    }
+  )
+
+export const makeVerseKeysForLinkSelector = () =>
+  createSelector(
+    [selectRelations, (_: RootState, linkId: string | null | undefined) => linkId],
+    (relations, linkId): string[] => {
+      if (!linkId) return []
+      return getRelationVerseKeysForEntity(relations, 'externalLink', linkId, 'externalLink')
+    }
+  )
+
+export const makeReferenceForNoteSelector = () =>
+  createSelector(
+    [selectRelations, (_: RootState, noteId: string | null | undefined) => noteId],
+    (relations, noteId): string => {
+      if (!noteId) return ''
+      return getReferenceFromEntityRelations(relations, 'note', noteId)
+    }
+  )
+
+export const makeReferenceForLinkSelector = () =>
+  createSelector(
+    [selectRelations, (_: RootState, linkId: string | null | undefined) => linkId],
+    (relations, linkId): string => {
+      if (!linkId) return ''
+      return getReferenceFromEntityRelations(relations, 'externalLink', linkId)
     }
   )
 
@@ -708,12 +872,20 @@ export const makeTaggedItemsForVerseSelector = () =>
       selectWordAnnotations,
       selectNotes,
       selectLinks,
+      selectRelations,
       (_: RootState, verseKey: string, currentVersion?: string) => ({
         verseKey,
         currentVersion,
       }),
     ],
-    (highlights, wordAnnotations, notes, links, { verseKey, currentVersion }): TaggedItem[] => {
+    (
+      highlights,
+      wordAnnotations,
+      notes,
+      links,
+      relations,
+      { verseKey, currentVersion }
+    ): TaggedItem[] => {
       const items: TaggedItem[] = []
       const [bookStr, chapterStr, verseStr] = verseKey.split('-')
       const book = parseInt(bookStr)
@@ -742,30 +914,25 @@ export const makeTaggedItemsForVerseSelector = () =>
         }
       })
 
-      // Notes for this verse (check all note keys that include this verse)
-      Object.entries(notes).forEach(([noteKey, note]) => {
-        // Skip annotation notes
-        if (noteKey.startsWith('annotation:')) return
-
+      Object.values(relations).forEach(relation => {
+        if (relation.kind !== 'system' || relation.type !== 'annotates') return
+        if (!relationIncludesVerseKey(relation, verseKey)) return
+        const noteEndpoint = getRelationEntityEndpoint(relation, 'note')
+        if (noteEndpoint?.type !== 'note' || noteEndpoint.noteId.startsWith('annotation:')) return
+        const note = notes[noteEndpoint.noteId]
         if (note?.tags && Object.keys(note.tags).length > 0) {
-          // Note keys can be "1-1-1" or "1-1-1/1-1-2" for verse ranges
-          const versesInKey = noteKey.split('/')
-          const matchesVerse = versesInKey.some(vk => vk === verseKey)
-          if (matchesVerse) {
-            items.push({ type: 'note', data: { ...note, id: noteKey }, verseKey: noteKey })
-          }
+          items.push({ type: 'note', data: { ...note, id: noteEndpoint.noteId }, verseKey })
         }
       })
 
-      // Links for this verse
-      Object.entries(links).forEach(([linkKey, link]) => {
+      Object.values(relations).forEach(relation => {
+        if (relation.kind !== 'system' || relation.type !== 'externalLink') return
+        if (!relationIncludesVerseKey(relation, verseKey)) return
+        const linkEndpoint = getRelationEntityEndpoint(relation, 'externalLink')
+        if (linkEndpoint?.type !== 'externalLink') return
+        const link = links[linkEndpoint.linkId]
         if (link?.tags && Object.keys(link.tags).length > 0) {
-          // Link keys can be "1-1-1" or "1-1-1/1-1-2" for verse ranges
-          const versesInKey = linkKey.split('/')
-          const matchesVerse = versesInKey.some(vk => vk === verseKey)
-          if (matchesVerse) {
-            items.push({ type: 'link', data: { ...link, id: linkKey }, verseKey: linkKey })
-          }
+          items.push({ type: 'link', data: { ...link, id: linkEndpoint.linkId }, verseKey })
         }
       })
 
@@ -794,6 +961,7 @@ export const makeTaggedVersesInChapterSelector = () =>
       selectWordAnnotations,
       selectNotes,
       selectLinks,
+      selectRelations,
       (_: RootState, bookNumber: number, chapter: number, currentVersion: string) => ({
         bookNumber,
         chapter,
@@ -805,6 +973,7 @@ export const makeTaggedVersesInChapterSelector = () =>
       wordAnnotations,
       notes,
       links,
+      relations,
       { bookNumber, chapter, currentVersion }
     ): TaggedVersesInChapterResult => {
       const counts: Record<number, number> = {}
@@ -838,13 +1007,15 @@ export const makeTaggedVersesInChapterSelector = () =>
         }
       }
 
-      // Check notes (COUNTS for hasNonHighlightTags)
-      for (const noteKey in notes) {
-        if (noteKey.startsWith('annotation:')) continue
-        const note = notes[noteKey]
+      Object.values(relations).forEach(relation => {
+        if (relation.kind !== 'system' || relation.type !== 'annotates') return
+        const noteEndpoint = getRelationEntityEndpoint(relation, 'note')
+        const verseEndpoint = getRelationVerseEndpoint(relation)
+        if (noteEndpoint?.type !== 'note' || noteEndpoint.noteId.startsWith('annotation:')) return
+        if (verseEndpoint?.type !== 'verse') return
+        const note = notes[noteEndpoint.noteId]
         if (note?.tags && Object.keys(note.tags).length > 0) {
-          const versesInKey = noteKey.split('/')
-          for (const vk of versesInKey) {
+          for (const vk of verseEndpoint.verseKeys) {
             if (vk.startsWith(prefix)) {
               const verseNum = parseInt(vk.split('-')[2])
               counts[verseNum] = (counts[verseNum] || 0) + 1
@@ -852,14 +1023,16 @@ export const makeTaggedVersesInChapterSelector = () =>
             }
           }
         }
-      }
+      })
 
-      // Check links (COUNTS for hasNonHighlightTags)
-      for (const linkKey in links) {
-        const link = links[linkKey]
+      Object.values(relations).forEach(relation => {
+        if (relation.kind !== 'system' || relation.type !== 'externalLink') return
+        const linkEndpoint = getRelationEntityEndpoint(relation, 'externalLink')
+        const verseEndpoint = getRelationVerseEndpoint(relation)
+        if (linkEndpoint?.type !== 'externalLink' || verseEndpoint?.type !== 'verse') return
+        const link = links[linkEndpoint.linkId]
         if (link?.tags && Object.keys(link.tags).length > 0) {
-          const versesInKey = linkKey.split('/')
-          for (const vk of versesInKey) {
+          for (const vk of verseEndpoint.verseKeys) {
             if (vk.startsWith(prefix)) {
               const verseNum = parseInt(vk.split('-')[2])
               counts[verseNum] = (counts[verseNum] || 0) + 1
@@ -867,7 +1040,7 @@ export const makeTaggedVersesInChapterSelector = () =>
             }
           }
         }
-      }
+      })
 
       return { counts, hasNonHighlightTags }
     }
@@ -881,6 +1054,7 @@ export type NoteItem = {
   date: number
   tags?: TagsObj
   isAnnotationNote: boolean
+  verseKeys?: string[]
   // For annotation notes
   annotationId?: string
   annotationText?: string
@@ -891,25 +1065,32 @@ export type NoteItem = {
 // Selector factory for getting all notes on a specific verse
 export const makeNotesForVerseSelector = () =>
   createSelector(
-    [selectNotes, selectWordAnnotations, (_: RootState, verseKey: string) => verseKey],
-    (notes, wordAnnotations, verseKey): NoteItem[] => {
+    [
+      selectNotes,
+      selectWordAnnotations,
+      selectRelations,
+      (_: RootState, verseKey: string) => verseKey,
+    ],
+    (notes, wordAnnotations, relations, verseKey): NoteItem[] => {
       const items: NoteItem[] = []
 
-      // 1. Regular notes that include this verse
-      Object.entries(notes).forEach(([noteKey, note]) => {
-        // Skip annotation notes
-        if (noteKey.startsWith('annotation:')) return
-
-        // Note keys can be "1-1-1" or "1-1-1/1-1-2" for verse ranges
-        const versesInKey = noteKey.split('/')
-        if (versesInKey.includes(verseKey)) {
+      Object.values(relations).forEach(relation => {
+        if (relation.kind !== 'system' || relation.type !== 'annotates') return
+        if (!relationIncludesVerseKey(relation, verseKey)) return
+        const noteEndpoint = getRelationEntityEndpoint(relation, 'note')
+        const verseEndpoint = getRelationVerseEndpoint(relation)
+        if (noteEndpoint?.type !== 'note' || noteEndpoint.noteId.startsWith('annotation:')) return
+        if (verseEndpoint?.type !== 'verse') return
+        const note = notes[noteEndpoint.noteId]
+        if (note) {
           items.push({
-            id: noteKey,
+            id: noteEndpoint.noteId,
             title: note.title,
             description: note.description,
             date: note.date,
             tags: note.tags,
             isAnnotationNote: false,
+            verseKeys: verseEndpoint.verseKeys,
           })
         }
       })

@@ -143,6 +143,19 @@ const getVerseIdsPayload = (payload: unknown): string[] => {
   return payload.verseIds.filter((verseId): verseId is string => typeof verseId === 'string')
 }
 
+const getNoteModalPayload = (payload: unknown): { noteId?: string; verseIds: string[] } => {
+  if (typeof payload === 'string') {
+    return { noteId: payload, verseIds: [] }
+  }
+  if (!isRecord(payload)) {
+    return { verseIds: [] }
+  }
+  return {
+    noteId: getStringPayload(payload.noteId),
+    verseIds: getVerseIdsPayload(payload),
+  }
+}
+
 /**
  * Prevents rapid empty→loaded prop updates on the Expo DOM bridge.
  * Skips updates when loading with no verses, so the DOM component
@@ -188,7 +201,7 @@ export type WebViewProps = {
   settings: RootState['user']['bible']['settings']
   verseToScroll: number | undefined
   pericopeChapter: PericopeChapter
-  openNoteModal?: (verseKey: string) => void
+  openNoteModal?: (noteId: string, verseIds?: string[]) => void
   openLinkModal?: (verseKey: string) => void
   setSelectedCode: (selectedCode: SelectedCode) => void
   selectedCode: SelectedCode | null
@@ -246,6 +259,7 @@ export type NotedVerse = {
   }
   key: string
   verses: string
+  verseIds: string[]
 }
 
 export type LinkedVerse = {
@@ -480,8 +494,8 @@ export const BibleDOMWrapper = ({
       }
 
       case NAVIGATE_TO_BIBLE_NOTE: {
-        const verseKey = getStringPayload(action.payload)
-        if (verseKey) openNoteModal?.(verseKey)
+        const payload = getNoteModalPayload(action.payload)
+        if (payload.noteId) openNoteModal?.(payload.noteId, payload.verseIds)
         break
       }
       case NAVIGATE_TO_BIBLE_LINK: {
@@ -668,10 +682,11 @@ export const BibleDOMWrapper = ({
   const notedVersesCount = getNotedVersesCount(
     versesToSend,
     notedVerses,
-    annotationNotesCountByVerse
+    annotationNotesCountByVerse,
+    settings.notesDisplay
   )
   const notedVersesText = getNotedVersesText(versesToSend, notedVerses)
-  const linkedVersesCount = getLinkedVersesCount(versesToSend, linkedVerses)
+  const linkedVersesCount = getLinkedVersesCount(versesToSend, linkedVerses, settings.linksDisplay)
   const linkedVersesText = getLinkedVersesText(versesToSend, linkedVerses)
   const studyRelationsCount = getStudyRelationsCount(versesToSend, studyRelations)
 

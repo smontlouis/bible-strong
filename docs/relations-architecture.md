@@ -56,7 +56,7 @@ a unified relation graph.
 
 An entity is an object that can participate in the relation graph.
 
-Initial supported entity types:
+Target schema entity types:
 
 ```ts
 type RelationEntityType =
@@ -69,6 +69,11 @@ type RelationEntityType =
   | 'externalLink'
   | 'word'
 ```
+
+Version 1 should distinguish implemented endpoint types from reserved schema types:
+
+- implemented immediately: `verse`, `note`, `study`, `strong`, and `externalLink`;
+- reserved by the schema until a feature needs them: `nave`, `dictionary`, and `word`.
 
 Tags should not be relation endpoints in the target model. They are organization metadata applied to
 entities and they move in one direction: a user classifies an entity with a tag. That is different
@@ -267,8 +272,10 @@ const RELATION_CAPABILITIES: Record<string, RelationCapabilities> = {
 }
 ```
 
-The lookup key should be order-insensitive unless the product intentionally needs ordered endpoint
-types. For example, `verse:study` and `study:verse` should resolve to the same capability definition.
+The capability lookup key should be order-insensitive unless the product intentionally needs ordered
+endpoint types. For example, `verse:study` and `study:verse` should resolve to the same capability
+definition. Directional relations still need a separate source rule; the capability matrix only says
+which type pairs are allowed.
 
 ## Direction
 
@@ -282,6 +289,9 @@ Rules:
 - `references`, `explains`, and `mentions` may be directional.
 - Direction is interpreted relative to the stored endpoint order.
 - A relation is visible from both endpoints even when directional.
+- For directional relations, creation must either store an explicit source endpoint or normalize the
+  endpoint order so that endpoint `0` is the source. Without that rule, creating `study explains
+  verse` from the verse screen could accidentally store `verse explains study`.
 
 Example:
 
@@ -472,7 +482,7 @@ The canonical relation collection can use `duplicateKey`, but a dedicated pair i
 idempotent creation safer when offline sync and concurrent writes become important.
 
 ```txt
-/users/{uid}/relationPairs/{encodedDuplicateKey}
+/users/{uid}/relationPairs/{stablePairId}
 ```
 
 ```ts
@@ -483,8 +493,18 @@ idempotent creation safer when offline sync and concurrent writes become importa
 }
 ```
 
-This index can be written in the same batch as the relation. It lets the app detect an existing edge
-without scanning all relations.
+`stablePairId` is a Firestore-safe deterministic id derived from `duplicateKey`; the full
+`duplicateKey` stays in the document for lookup and reconciliation. This index can be written in the
+same batch as the relation. It lets the app detect an existing edge without scanning all relations.
+
+`relationPairs` is not a full uniqueness guarantee by itself when clients create relations offline
+with random relation ids. Two devices can still create two canonical `relations/{relationId}`
+documents with the same `duplicateKey`, while the pair index only points at the last writer. If
+strict uniqueness is required, use one of these strategies:
+
+- make `duplicateKey` the canonical relation document id;
+- create relations through a Firestore transaction when online;
+- reconcile duplicate canonical relations with a backend job or Cloud Function.
 
 ## Query Strategy
 
@@ -519,8 +539,13 @@ relationIndex/{entityKeyC}
 ```
 
 For BibleViewer, compute the needed entity keys for the visible chapter or current rendered chapter
-and read the corresponding local Redux index. Firestore should sync the index into Redux like other
-user data; the render path should not issue remote reads.
+and read the corresponding local Redux index. The render path should not issue remote reads.
+
+Locally, `relations` should remain the canonical source. `relationIndex` may be stored in Firestore
+as a remote projection, but Redux should rebuild the local index from canonical relations during
+hydration and live updates, or the backend must own projection updates atomically. Syncing
+`relations` and `relationIndex` as independent live subcollections can otherwise make counters
+temporarily or permanently diverge when snapshots arrive in different orders or one write fails.
 
 ### BibleViewer Chapter Indicators
 
@@ -617,26 +642,34 @@ duplicateKey = `${type}:${directionalSourceKey}->${directionalTargetKey}`
 
 ### Search Relations by Target Type
 
-For filters such as "show only relations from this entity to notes":
+Firestore only permits one `array-contains` filter per disjunction, so do not combine
+`endpointKeys array-contains` with `endpointTypes array-contains`.
+
+For filters such as "show only relations from this entity to notes", prefer a lookup projection:
+
+```ts
+relations
+  .where('lookupKeys', 'array-contains', `endpointTargetType:${entityKey}:note`)
+  .orderBy('updatedAt', 'desc')
+```
+
+For small relation counts, it is also acceptable to fetch all relations for the entity and filter
+locally:
 
 ```ts
 relations
   .where('endpointKeys', 'array-contains', entityKey)
-  .where('endpointTypes', 'array-contains', 'note')
+  .orderBy('updatedAt', 'desc')
 ```
-
-If Firestore index limitations or query combinations become awkward, prefer one of:
-
-- fetch the entity relations and filter locally when the relation count is small;
-- add a dedicated projection field such as `lookupKeys`.
 
 Example lookup keys:
 
 ```ts
 lookupKeys: [
-  'entity:verse:1-1-2',
-  'entity:note:16-2-1',
-  'entityType:verse:note',
+  'endpoint:verse:1-1-2',
+  'endpoint:note:16-2-1',
+  'endpointTargetType:verse:1-1-2:note',
+  'endpointRelationType:verse:1-1-2:linked',
   'type:linked'
 ]
 ```
@@ -667,6 +700,7 @@ These fields duplicate endpoint data for query performance:
 - `duplicateKey`
 - `verseStartKeys`
 - `verseEndpointKeys`
+- `lookupKeys` when target-type or relation-type filtered queries are needed
 
 ### Required Denormalized Index
 
@@ -700,13 +734,13 @@ collection. For counts, use compact index documents.
 5. Validate duplicate rule.
 6. Write relation document.
 7. Update `relationIndex` for both endpoint keys.
-8. Optionally write `relationPairs/{duplicateKey}`.
+8. Optionally write `relationPairs/{stablePairId}`.
 
 Firestore batch write:
 
 ```txt
 set users/{uid}/relations/{relationId}
-set users/{uid}/relationPairs/{duplicateKey}
+set users/{uid}/relationPairs/{stablePairId}
 set or update users/{uid}/relationIndex/{endpointAKey}
 set or update users/{uid}/relationIndex/{endpointBKey}
 ```
@@ -736,16 +770,16 @@ delete is simpler.
 Hard delete:
 
 1. Delete `relations/{relationId}`.
-2. Delete `relationPairs/{duplicateKey}`.
+2. Delete `relationPairs/{stablePairId}`.
 3. Decrement `relationIndex` for both endpoint keys.
 4. Remove index docs when count reaches zero.
 
 ### Delete Endpoint
 
 When a note, study, external link, or other endpoint is deleted, do not automatically delete every
-relation in the first version of this architecture.
+manual relation in the first version of this architecture.
 
-Recommended behavior:
+Recommended behavior for `manual` relations:
 
 - keep relation documents;
 - mark resolved target as unavailable in the UI;
@@ -754,6 +788,16 @@ Recommended behavior:
 
 This avoids destructive cascade bugs and preserves study context after sync conflicts or resource
 unavailability.
+
+Recommended behavior for `system` relations:
+
+- delete `annotates` relations when the source note is deleted;
+- delete `externalLink` relations when the source external link is deleted;
+- update or recreate the system relation if the source feature object changes its durable key.
+
+System relations are projections of feature-owned objects. Keeping them after their source object is
+deleted creates stale counters and unavailable rows for objects the user did not intentionally keep
+as study history.
 
 ## Local Redux Shape
 
@@ -801,7 +845,7 @@ Current sync uses per-user subcollections. The target model should fit the same 
 ```txt
 /users/{uid}/relations/{relationId}
 /users/{uid}/relationIndex/{encodedEntityKey}
-/users/{uid}/relationPairs/{encodedDuplicateKey}
+/users/{uid}/relationPairs/{stablePairId}
 ```
 
 Potential `SUBCOLLECTION_NAMES` additions:

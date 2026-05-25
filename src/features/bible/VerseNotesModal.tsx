@@ -6,7 +6,7 @@ import { TouchableOpacity } from 'react-native'
 import { useSelector } from 'react-redux'
 import Modal from '~common/Modal'
 import EntityChipList from '~common/EntityChipList'
-import { VerseIds } from '~common/types'
+import type { VerseIds } from '~common/types'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -102,7 +102,8 @@ const VerseNotesModal = forwardRef<BottomSheetModal, VerseNotesModalProps>(({ ve
   const { t } = useTranslation()
 
   // State for sub-modals
-  const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>()
+  const [currentNoteId, setCurrentNoteId] = useState<string | null>(null)
+  const [currentNoteVerses, setCurrentNoteVerses] = useState<VerseIds | undefined>(undefined)
   const [selectedAnnotationNote, setSelectedAnnotationNote] = useState<{
     annotationId: string
     text: string
@@ -139,12 +140,16 @@ const VerseNotesModal = forwardRef<BottomSheetModal, VerseNotesModalProps>(({ ve
       })
       annotationNoteModal.open()
     } else {
-      // Open BibleNoteModal
-      const verseIds = item.id.split('/').reduce((acc, key) => {
-        acc[key] = true
-        return acc
-      }, {} as VerseIds)
-      setNoteVerses(verseIds)
+      setCurrentNoteId(item.id)
+      setCurrentNoteVerses(() => {
+        if (item.verseKeys?.length) {
+          return item.verseKeys.reduce((acc, key) => {
+            acc[key] = true
+            return acc
+          }, {} as VerseIds)
+        }
+        return verseKey ? { [verseKey]: true } : undefined
+      })
       noteModal.open()
     }
   }
@@ -185,7 +190,12 @@ const VerseNotesModal = forwardRef<BottomSheetModal, VerseNotesModalProps>(({ ve
           )}
         </Box>
       </Modal.Body>
-      <BibleNoteModal ref={noteModal.getRef()} noteVerses={noteVerses} />
+      <BibleNoteModal
+        ref={noteModal.getRef()}
+        noteVerses={currentNoteVerses}
+        noteId={currentNoteId}
+        onNoteIdChange={setCurrentNoteId}
+      />
       <AnnotationNoteModal
         ref={annotationNoteModal.getRef()}
         annotationId={selectedAnnotationNote?.annotationId ?? null}

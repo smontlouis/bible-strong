@@ -18,7 +18,7 @@ import { registerCleanup } from './cleanupRegistry'
 import useLogin from './useLogin'
 import { usePrevious } from './usePrevious'
 import { subscribeToSubcollection, SUBCOLLECTION_NAMES } from './firestoreSubcollections'
-import { checkForEmbeddedData } from './firestoreMigration'
+import { checkForEmbeddedData, migrateUserRelationsArchitecture } from './firestoreMigration'
 import { useFirestoreMigration } from './useFirestoreMigration'
 import { store } from '~redux/store'
 import { isMigrationInProgress } from 'src/state/migration'
@@ -94,6 +94,11 @@ const useLiveUpdates = () => {
               // Continue anyway - the user can use the app with local data
             }
           }
+
+          const relationsResult = await migrateUserRelationsArchitecture(user.id, store.getState())
+          if (!relationsResult.success) {
+            console.error('[LiveUpdates] Relations architecture migration failed')
+          }
         } catch (error) {
           console.error('[LiveUpdates] Migration check failed:', error)
           const errorMessage = error instanceof Error ? error.message : String(error)
@@ -164,6 +169,7 @@ const useLiveUpdates = () => {
             receiveSubcollectionUpdates({
               collection: collection as Exclude<typeof collection, 'tabGroups'>,
               data,
+              changes,
               isInitialLoad: Object.keys(changes.added).length === Object.keys(data).length,
             })
           )

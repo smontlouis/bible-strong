@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
 
-import { createSelector } from '@reduxjs/toolkit'
 import { ActivityIndicator, Alert, Dimensions, Image, Linking } from 'react-native'
 import YoutubePlayer from 'react-native-youtube-iframe'
 import { useDispatch, useSelector } from 'react-redux'
@@ -32,16 +31,21 @@ import {
   getLinkIcon,
   isValidUrl,
 } from '~helpers/fetchOpenGraphData'
-import orderVerses from '~helpers/orderVerses'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addLink, deleteLink, Link } from '~redux/modules/user'
-import { selectLinks } from '~redux/selectors/bible'
+import { makeLinkByIdSelector, makeVerseKeysForLinkSelector } from '~redux/selectors/bible'
 import { unifiedTagsModalAtom } from '../../state/app'
 import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
+import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
+import type { RelationEndpoint } from '~features/studyRelations/domain'
+import { useRelationCount } from '~features/studyRelations/useRelationCount'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
 
 interface BibleLinkModalProps {
   linkVerses: VerseIds | undefined
+  linkId?: string | null
+  onLinkIdChange?: (linkId: string) => void
   ref?: React.RefObject<BottomSheetModal | null>
 }
 
@@ -56,29 +60,9 @@ const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
   fontSize: 16,
 }))
 
-// Create a memoized selector factory for current link
-const makeCurrentLinkSelector = () =>
-  createSelector(
-    [selectLinks, (_: RootState, linkKey: string) => linkKey],
-    (links, linkKey): (Link & { id: string }) | null => {
-      if (linkKey && links[linkKey]) {
-        return {
-          id: linkKey,
-          ...links[linkKey],
-        }
-      }
-      return null
-    }
-  )
-
-const useCurrentLink = ({ linkVerses }: { linkVerses: VerseIds | undefined }) => {
-  const selectCurrentLink = makeCurrentLinkSelector()
-  const orderedVerses = orderVerses(linkVerses || {})
-  const linkKey = Object.keys(orderedVerses).join('/')
-
-  const link = useSelector((state: RootState) => selectCurrentLink(state, linkKey))
-
-  return link
+const useCurrentLink = ({ linkId }: { linkId?: string | null }) => {
+  const selectLinkById = makeLinkByIdSelector()
+  return useSelector((state: RootState) => selectLinkById(state, linkId || ''))
 }
 
 const getHostname = (url: string) => {
@@ -89,7 +73,7 @@ const getHostname = (url: string) => {
   }
 }
 
-const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
+const BibleLinkModal = ({ linkVerses, linkId, onLinkIdChange, ref }: BibleLinkModalProps) => {
   const [url, setUrl] = useState('')
   const [customTitle, setCustomTitle] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -99,8 +83,30 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
   const dispatch = useDispatch()
   const { t } = useTranslation()
 
-  const currentLink = useCurrentLink({ linkVerses })
-  const reference = verseToReference(linkVerses)
+  const currentLink = useCurrentLink({ linkId })
+  const selectVerseKeysForLink = makeVerseKeysForLinkSelector()
+  const relatedVerseKeys = useSelector((state: RootState) =>
+    selectVerseKeysForLink(state, currentLink?.id || linkId || '')
+  )
+  const displayedLinkVerses =
+    currentLink && relatedVerseKeys.length
+      ? relatedVerseKeys.reduce((acc, key) => {
+          acc[key] = true
+          return acc
+        }, {} as VerseIds)
+      : linkVerses
+  const reference = verseToReference(displayedLinkVerses)
+  const linkEndpoint: RelationEndpoint | null = currentLink?.id
+    ? {
+        type: 'externalLink',
+        linkId: currentLink.id,
+        sourceKey: '',
+        url: currentLink.url,
+        label: currentLink.customTitle || currentLink.ogData?.title || currentLink.url,
+      }
+    : null
+  const relationCount = useRelationCount(linkEndpoint)
+  const relationModal = useBottomSheetModal()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const insets = useSafeAreaInsets()
   const theme = useTheme()
@@ -110,7 +116,7 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
   }, [ref])
 
   useEffect(() => {
-    if (linkVerses) {
+    if (linkVerses || linkId) {
       if (currentLink) {
         setIsEditing(false)
       } else {
@@ -122,7 +128,7 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
       setUrl('')
       setCustomTitle('')
     }
-  }, [linkVerses, currentLink])
+  }, [linkVerses, linkId, currentLink])
 
   const onSaveLinkFunc = async () => {
     if (!url) return
@@ -162,14 +168,15 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
       date: Date.now(),
     }
 
-    if (!linkVerses) {
-      setIsSaving(false)
-      return
-    }
+    const targetVerses = linkVerses || displayedLinkVerses || {}
 
-    const action = addLink(linkData, linkVerses)
+    const action = addLink(linkData, targetVerses)
     if (action) {
       dispatch(action)
+      const savedLinkId = Object.keys(action.payload)[0]
+      if (savedLinkId) {
+        onLinkIdChange?.(savedLinkId)
+      }
     }
     setIsEditing(false)
     setIsSaving(false)
@@ -233,185 +240,198 @@ const BibleLinkModal = ({ linkVerses, ref }: BibleLinkModalProps) => {
   const playerHeight = (playerWidth * 9) / 16
 
   return (
-    <Modal.Body
-      ref={ref}
-      topInset={useSafeAreaInsets().top}
-      enableDynamicSizing
-      headerComponent={
-        <ModalHeader
-          title={t('Lien')}
-          subTitle={reference}
-          rightComponent={
-            currentLink ? (
-              <PopOverMenu
-                width={54}
-                height={54}
-                popover={
-                  <>
-                    <MenuOption onSelect={onEditLink}>
-                      <Box row alignItems="center">
-                        <FeatherIcon name="edit-2" size={15} />
-                        <Text marginLeft={10}>{t('Éditer')}</Text>
-                      </Box>
-                    </MenuOption>
-                    <MenuOption
-                      onSelect={() =>
-                        setUnifiedTagsModal({
-                          mode: 'select',
-                          id: currentLink.id!,
-                          entity: 'links',
-                          title:
-                            currentLink.ogData?.title ||
-                            currentLink.customTitle ||
-                            currentLink.url ||
-                            '',
-                        })
-                      }
-                    >
-                      <Box row alignItems="center">
-                        <FeatherIcon name="tag" size={15} />
-                        <Text marginLeft={10}>{t('Éditer les tags')}</Text>
-                      </Box>
-                    </MenuOption>
-                    <MenuOption onSelect={() => deleteLinkFunc(currentLink?.id!)}>
-                      <Box row alignItems="center">
-                        <FeatherIcon name="trash-2" size={15} />
-                        <Text marginLeft={10}>{t('Supprimer')}</Text>
-                      </Box>
-                    </MenuOption>
-                  </>
-                }
-              />
-            ) : undefined
-          }
-        />
-      }
-      footerComponent={props =>
-        isEditing ? (
-          <BottomSheetFooter bottomInset={insets.bottom} {...props}>
-            <HStack py={10} px={20} justifyContent="flex-end" bg="reverse">
-              {currentLink && (
+    <>
+      <Modal.Body
+        ref={ref}
+        topInset={useSafeAreaInsets().top}
+        enableDynamicSizing
+        headerComponent={
+          <ModalHeader
+            title={t('Lien')}
+            subTitle={reference}
+            rightComponent={
+              currentLink ? (
+                <PopOverMenu
+                  width={54}
+                  height={54}
+                  popover={
+                    <>
+                      <MenuOption onSelect={onEditLink}>
+                        <Box row alignItems="center">
+                          <FeatherIcon name="edit-2" size={15} />
+                          <Text marginLeft={10}>{t('Éditer')}</Text>
+                        </Box>
+                      </MenuOption>
+                      <MenuOption
+                        onSelect={() =>
+                          setUnifiedTagsModal({
+                            mode: 'select',
+                            id: currentLink.id!,
+                            entity: 'links',
+                            title:
+                              currentLink.ogData?.title ||
+                              currentLink.customTitle ||
+                              currentLink.url ||
+                              '',
+                          })
+                        }
+                      >
+                        <Box row alignItems="center">
+                          <FeatherIcon name="tag" size={15} />
+                          <Text marginLeft={10}>{t('Éditer les tags')}</Text>
+                        </Box>
+                      </MenuOption>
+                      <MenuOption onSelect={() => relationModal.open()}>
+                        <Box row alignItems="center">
+                          <FeatherIcon name="git-branch" size={15} />
+                          <Text marginLeft={10}>{t('Éditer les relations')}</Text>
+                        </Box>
+                      </MenuOption>
+                      <MenuOption onSelect={() => deleteLinkFunc(currentLink?.id!)}>
+                        <Box row alignItems="center">
+                          <FeatherIcon name="trash-2" size={15} />
+                          <Text marginLeft={10}>{t('Supprimer')}</Text>
+                        </Box>
+                      </MenuOption>
+                    </>
+                  }
+                />
+              ) : undefined
+            }
+          />
+        }
+        footerComponent={props =>
+          isEditing ? (
+            <BottomSheetFooter bottomInset={insets.bottom} {...props}>
+              <HStack py={10} px={20} justifyContent="flex-end" bg="reverse">
+                {currentLink && (
+                  <Box>
+                    <Button reverse onPress={cancelEditing}>
+                      {t('Annuler')}
+                    </Button>
+                  </Box>
+                )}
                 <Box>
-                  <Button reverse onPress={cancelEditing}>
-                    {t('Annuler')}
+                  <Button disabled={submitIsDisabled} onPress={onSaveLinkFunc}>
+                    {isSaving ? <ActivityIndicator size="small" color="white" /> : t('Sauvegarder')}
                   </Button>
                 </Box>
-              )}
-              <Box>
-                <Button disabled={submitIsDisabled} onPress={onSaveLinkFunc}>
-                  {isSaving ? <ActivityIndicator size="small" color="white" /> : t('Sauvegarder')}
-                </Button>
-              </Box>
-            </HStack>
-          </BottomSheetFooter>
-        ) : (
-          <BottomSheetFooter bottomInset={insets.bottom} {...props}>
-            <HStack py={5} px={20} justifyContent="flex-end" bg="reverse">
-              <Box h={MODAL_FOOTER_HEIGHT} center>
-                <Fab icon="edit-2" onPress={onEditLink} />
-              </Box>
-            </HStack>
-          </BottomSheetFooter>
-        )
-      }
-    >
-      <VStack gap={10} paddingHorizontal={20}>
-        {isEditing && (
-          <VStack py={20} gap={20}>
-            <VStack gap={5}>
-              <Text>{t('URL du lien')}</Text>
-              <StyledTextInput
-                placeholder={t('URL du lien')}
-                onChangeText={setUrl}
-                value={url}
-                autoCapitalize="none"
-                autoCorrect={false}
-                keyboardType="url"
-              />
-            </VStack>
-            <VStack gap={5}>
-              <Text>{t('Titre personnalisé (optionnel)')}</Text>
-
-              <StyledTextInput
-                placeholder={t('Titre personnalisé (optionnel)')}
-                onChangeText={setCustomTitle}
-                value={customTitle}
-              />
-            </VStack>
-          </VStack>
-        )}
-
-        {!isEditing && currentLink && (
-          <Box py={20}>
-            {/* YouTube Player */}
-            {isYoutubeLink && currentLink.videoId && (
-              <Box mb={20} borderRadius={10} overflow="hidden" bg="lightGrey">
-                <YoutubePlayer
-                  height={playerHeight}
-                  width={playerWidth}
-                  videoId={currentLink.videoId}
-                  onReady={() => console.log('[BibleLinkModal] YouTube ready')}
-                  onError={(e: string) => console.log('[BibleLinkModal] YouTube error:', e)}
-                  viewContainerStyle={{ borderRadius: 10, overflow: 'hidden' }}
-                  webviewStyle={{ borderRadius: 10, overflow: 'hidden' }}
+              </HStack>
+            </BottomSheetFooter>
+          ) : (
+            <BottomSheetFooter bottomInset={insets.bottom} {...props}>
+              <HStack py={5} px={20} justifyContent="flex-end" bg="reverse">
+                <Box h={MODAL_FOOTER_HEIGHT} center>
+                  <Fab icon="edit-2" onPress={onEditLink} />
+                </Box>
+              </HStack>
+            </BottomSheetFooter>
+          )
+        }
+      >
+        <VStack gap={10} paddingHorizontal={20}>
+          {isEditing && (
+            <VStack py={20} gap={20}>
+              <VStack gap={5}>
+                <Text>{t('URL du lien')}</Text>
+                <StyledTextInput
+                  placeholder={t('URL du lien')}
+                  onChangeText={setUrl}
+                  value={url}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  keyboardType="url"
                 />
-              </Box>
-            )}
+              </VStack>
+              <VStack gap={5}>
+                <Text>{t('Titre personnalisé (optionnel)')}</Text>
 
-            {/* Link preview image */}
-            {!isYoutubeLink && currentLink.ogData?.image && (
-              <Image
-                source={{ uri: currentLink.ogData.image }}
-                style={{
-                  width: '100%',
-                  height: 180,
-                  borderRadius: 10,
-                  marginBottom: 15,
-                  backgroundColor: theme.colors.lightGrey,
-                }}
-                resizeMode="cover"
-              />
-            )}
+                <StyledTextInput
+                  placeholder={t('Titre personnalisé (optionnel)')}
+                  onChangeText={setCustomTitle}
+                  value={customTitle}
+                />
+              </VStack>
+            </VStack>
+          )}
 
-            <HStack alignItems="center" mb={10}>
-              {linkIcon.textIcon ? (
-                <Text bold fontSize={16} color="default">
-                  {linkIcon.textIcon}
-                </Text>
-              ) : (
-                <FeatherIcon name={linkIconName} size={18} color={linkIcon.color} />
+          {!isEditing && currentLink && (
+            <Box py={20}>
+              {/* YouTube Player */}
+              {isYoutubeLink && currentLink.videoId && (
+                <Box mb={20} borderRadius={10} overflow="hidden" bg="lightGrey">
+                  <YoutubePlayer
+                    height={playerHeight}
+                    width={playerWidth}
+                    videoId={currentLink.videoId}
+                    onReady={() => console.log('[BibleLinkModal] YouTube ready')}
+                    onError={(e: string) => console.log('[BibleLinkModal] YouTube error:', e)}
+                    viewContainerStyle={{ borderRadius: 10, overflow: 'hidden' }}
+                    webviewStyle={{ borderRadius: 10, overflow: 'hidden' }}
+                  />
+                </Box>
               )}
-              <Text marginLeft={8} color="grey" fontSize={13}>
-                {currentLink.ogData?.siteName || getHostname(currentLink.url)}
+
+              {/* Link preview image */}
+              {!isYoutubeLink && currentLink.ogData?.image && (
+                <Image
+                  source={{ uri: currentLink.ogData.image }}
+                  style={{
+                    width: '100%',
+                    height: 180,
+                    borderRadius: 10,
+                    marginBottom: 15,
+                    backgroundColor: theme.colors.lightGrey,
+                  }}
+                  resizeMode="cover"
+                />
+              )}
+
+              <HStack alignItems="center" mb={10}>
+                {linkIcon.textIcon ? (
+                  <Text bold fontSize={16} color="default">
+                    {linkIcon.textIcon}
+                  </Text>
+                ) : (
+                  <FeatherIcon name={linkIconName} size={18} color={linkIcon.color} />
+                )}
+                <Text marginLeft={8} color="grey" fontSize={13}>
+                  {currentLink.ogData?.siteName || getHostname(currentLink.url)}
+                </Text>
+              </HStack>
+
+              <Text title fontSize={20} marginBottom={10}>
+                {displayTitle}
               </Text>
-            </HStack>
 
-            <Text title fontSize={20} marginBottom={10}>
-              {displayTitle}
-            </Text>
+              {currentLink.ogData?.description && (
+                <Paragraph small marginBottom={15}>
+                  {currentLink.ogData.description}
+                </Paragraph>
+              )}
 
-            {currentLink.ogData?.description && (
-              <Paragraph small marginBottom={15}>
-                {currentLink.ogData.description}
-              </Paragraph>
-            )}
+              {/* Open in browser button */}
+              {!isYoutubeLink && (
+                <Button reverse onPress={openInBrowser}>
+                  <HStack alignItems="center">
+                    <FeatherIcon name="external-link" size={16} />
+                    <Text marginLeft={8}>{t('Ouvrir dans le navigateur')}</Text>
+                  </HStack>
+                </Button>
+              )}
 
-            {/* Open in browser button */}
-            {!isYoutubeLink && (
-              <Button reverse onPress={openInBrowser}>
-                <HStack alignItems="center">
-                  <FeatherIcon name="external-link" size={16} />
-                  <Text marginLeft={8}>{t('Ouvrir dans le navigateur')}</Text>
-                </HStack>
-              </Button>
-            )}
-
-            {/* Tags */}
-            <EntityChipList tags={currentLink?.tags} />
-          </Box>
-        )}
-      </VStack>
-    </Modal.Body>
+              {/* Tags */}
+              <EntityChipList
+                tags={currentLink?.tags}
+                relationCount={relationCount}
+                onRelationPress={() => relationModal.open()}
+              />
+            </Box>
+          )}
+        </VStack>
+      </Modal.Body>
+      <EntityRelationsModal ref={relationModal.getRef()} endpoint={linkEndpoint} />
+    </>
   )
 }
 

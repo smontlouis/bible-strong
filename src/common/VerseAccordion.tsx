@@ -21,6 +21,7 @@ interface VerseAccordionProps {
 }
 
 const VerseAccordion = ({ noteVerses, version }: VerseAccordionProps) => {
+  const hasVerses = Object.keys(noteVerses).length > 0
   const theme = useTheme()
   const defaultVersion = useDefaultBibleVersion()
   const [isExpanded, setIsExpanded] = useState(false)
@@ -36,6 +37,12 @@ const VerseAccordion = ({ noteVerses, version }: VerseAccordionProps) => {
 
   // Fetch verse content on mount or when verses change
   useEffect(() => {
+    if (!hasVerses) {
+      setVerseContent(null)
+      setIsLoading(false)
+      return
+    }
+
     const loadVerseContent = async () => {
       setIsLoading(true)
       const _version = version || defaultVersion
@@ -53,9 +60,11 @@ const VerseAccordion = ({ noteVerses, version }: VerseAccordionProps) => {
       }
     }
     loadVerseContent()
-  }, [noteVerses, version, defaultVersion])
+  }, [noteVerses, version, defaultVersion, hasVerses])
 
   const reference = verseToReference(noteVerses)
+
+  if (!hasVerses) return null
 
   const toggleExpand = () => {
     setIsExpanded(prev => !prev)

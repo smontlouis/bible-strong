@@ -36,11 +36,26 @@ import { addLinkAction, deleteLink, updateLink } from './user/links'
 import { addNoteAction, deleteNote } from './user/notes'
 import {
   addStudyRelationAction,
+  attachNoteToVerseAction,
   deleteStudyRelation,
-  StudyRelationsObj,
+  RelationIndexObj,
+  RelationPairsObj,
+  RelationsObj,
   updateStudyRelation,
 } from './user/studyRelations'
-import { hasDuplicateStudyRelation, normalizeStudyRelation } from '~features/studyRelations/domain'
+import {
+  createExternalLinkEndpoint,
+  createNoteEndpoint,
+  createSystemRelation,
+  createVerseEndpoint,
+  getSystemRelationId,
+  hasDuplicateRelation,
+  mergeRelationsWithSystemBackfill,
+  normalizeRelation,
+  rebuildRelationIndexes,
+  rebuildRelationPairs,
+  type RelationEndpoint,
+} from '~features/studyRelations/domain'
 import {
   addWordAnnotationAction,
   changeWordAnnotationColorAction,
@@ -111,6 +126,11 @@ type CleanedFirestoreData =
   | null
   | CleanedFirestoreData[]
   | { [key: string]: CleanedFirestoreData }
+type SubcollectionUpdateChanges = {
+  added: Record<string, unknown>
+  modified: Record<string, unknown>
+  removed: string[]
+}
 
 const isObjectRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -172,6 +192,136 @@ const removeEntityInTags = (
       delete draft.bible.tags[tag][entity][key]
     }
   }
+}
+
+const applySubcollectionChanges = <T extends Record<string, unknown>>(
+  currentData: T,
+  remoteData: Record<string, unknown>,
+  isInitialLoad: boolean,
+  changes?: SubcollectionUpdateChanges
+): T => {
+  if (isInitialLoad || !changes) return remoteData as T
+
+  const nextData = { ...currentData } as Record<string, unknown>
+  for (const id of changes.removed) {
+    delete nextData[id]
+  }
+  Object.assign(nextData, changes.added, changes.modified)
+
+  return nextData as T
+}
+
+const syncRelationProjections = (draft: UserState) => {
+  draft.bible.relations = draft.bible.relations || {}
+  draft.bible.relationIndex = rebuildRelationIndexes(draft.bible.relations)
+  draft.bible.relationPairs = rebuildRelationPairs(draft.bible.relations)
+}
+
+const backfillSystemRelations = (draft: UserState) => {
+  draft.bible.relations = mergeRelationsWithSystemBackfill({
+    relations: draft.bible.relations,
+    notes: draft.bible.notes,
+    links: draft.bible.links,
+    wordAnnotations: draft.bible.wordAnnotations,
+    preserveExistingSystemRelations: true,
+  })
+  syncRelationProjections(draft)
+}
+
+const getLegacyVerseKeysFromEntityId = (entityId: string): string[] =>
+  entityId.split('/').filter(key => {
+    const [book, chapter, verse] = key.split('-').map(Number)
+    return Boolean(book && chapter && verse)
+  })
+
+const getSelectedVerseKeysFromAction = (
+  action: { meta?: { selectedVerseKeys?: string[] } },
+  fallbackEntityId: string
+): string[] => {
+  const selectedVerseKeys = action.meta?.selectedVerseKeys?.filter(Boolean)
+  if (selectedVerseKeys?.length) return selectedVerseKeys
+  return getLegacyVerseKeysFromEntityId(fallbackEntityId)
+}
+
+const removeSystemRelationsForEndpoint = (draft: UserState, endpointKey: string) => {
+  draft.bible.relations = draft.bible.relations || {}
+  for (const [relationId, relation] of Object.entries(draft.bible.relations)) {
+    if (relation.kind === 'system' && relation.endpointKeys.includes(endpointKey)) {
+      delete draft.bible.relations[relationId]
+    }
+  }
+}
+
+const removeSystemRelationsForEntity = (
+  draft: UserState,
+  entityType: 'note' | 'externalLink',
+  entityId: string
+) => {
+  draft.bible.relations = draft.bible.relations || {}
+  for (const [relationId, relation] of Object.entries(draft.bible.relations)) {
+    if (relation.kind !== 'system') continue
+    const matches = relation.endpoints.some(endpoint => {
+      if (entityType === 'note') return endpoint.type === 'note' && endpoint.noteId === entityId
+      return endpoint.type === 'externalLink' && endpoint.linkId === entityId
+    })
+    if (matches) {
+      delete draft.bible.relations[relationId]
+    }
+  }
+}
+
+const removeWordAnnotationWithLinkedNote = (draft: UserState, annotationId: string) => {
+  const annotation = draft.bible.wordAnnotations[annotationId]
+  const noteIds = [annotation?.noteId, `annotation:${annotationId}`].filter(Boolean) as string[]
+
+  noteIds.forEach(noteId => {
+    if (draft.bible.notes[noteId]) {
+      delete draft.bible.notes[noteId]
+      removeEntityInTags(draft, 'notes', noteId)
+      removeSystemRelationsForEndpoint(draft, `note:${noteId}`)
+    }
+  })
+
+  delete draft.bible.wordAnnotations[annotationId]
+  removeEntityInTags(draft, 'wordAnnotations', annotationId)
+}
+
+const upsertSystemRelation = (
+  draft: UserState,
+  relation: ReturnType<typeof createSystemRelation>
+) => {
+  draft.bible.relations = draft.bible.relations || {}
+  draft.bible.relations[relation.id] = relation
+}
+
+const attachNoteToVerse = (
+  draft: UserState,
+  noteEndpoint: Extract<RelationEndpoint, { type: 'note' }>,
+  verseEndpoint: Extract<RelationEndpoint, { type: 'verse' }>
+) => {
+  const note = draft.bible.notes[noteEndpoint.noteId]
+  if (!note) return
+
+  const normalizedVerseEndpoint = createVerseEndpoint(
+    verseEndpoint.verseKeys,
+    verseEndpoint.verseKeys.join('/')
+  )
+  const relationId = getSystemRelationId('annotates', noteEndpoint.noteId, normalizedVerseEndpoint)
+  const existingRelation = draft.bible.relations?.[relationId]
+
+  upsertSystemRelation(
+    draft,
+    createSystemRelation({
+      id: relationId,
+      type: 'annotates',
+      endpoints: [
+        createNoteEndpoint(noteEndpoint.noteId, note.title || note.description),
+        normalizedVerseEndpoint,
+      ],
+      createdAt: existingRelation?.createdAt || note.date,
+      updatedAt: Date.now(),
+    })
+  )
 }
 
 export interface Study {
@@ -310,7 +460,9 @@ export interface UserState {
     highlights: HighlightsObj
     notes: NotesObj
     links: LinksObj
-    studyRelations: StudyRelationsObj
+    relations: RelationsObj
+    relationIndex: RelationIndexObj
+    relationPairs: RelationPairsObj
     studies: StudiesObj
     tags: TagsObj
     strongsHebreu: Record<string, unknown>
@@ -402,7 +554,9 @@ const getInitialState = (): UserState => ({
     highlights: {},
     notes: {},
     links: {},
-    studyRelations: {},
+    relations: {},
+    relationIndex: {},
+    relationPairs: {},
     studies: {},
     tags: {},
     strongsHebreu: {},
@@ -520,7 +674,9 @@ const userSlice = createSlice({
       const currentHighlights = state.bible.highlights
       const currentNotes = state.bible.notes
       const currentLinks = state.bible.links
-      const currentStudyRelations = state.bible.studyRelations
+      const currentRelations = state.bible.relations
+      const currentRelationIndex = state.bible.relationIndex
+      const currentRelationPairs = state.bible.relationPairs
       const currentTags = state.bible.tags
       const currentStrongsHebreu = state.bible.strongsHebreu
       const currentStrongsGrec = state.bible.strongsGrec
@@ -540,7 +696,9 @@ const userSlice = createSlice({
       state.bible.highlights = currentHighlights
       state.bible.notes = currentNotes
       state.bible.links = currentLinks
-      state.bible.studyRelations = currentStudyRelations
+      state.bible.relations = currentRelations
+      state.bible.relationIndex = currentRelationIndex
+      state.bible.relationPairs = currentRelationPairs
       state.bible.tags = currentTags
       state.bible.strongsHebreu = currentStrongsHebreu
       state.bible.strongsGrec = currentStrongsGrec
@@ -558,7 +716,9 @@ const userSlice = createSlice({
           | 'highlights'
           | 'notes'
           | 'links'
-          | 'studyRelations'
+          | 'relations'
+          | 'relationIndex'
+          | 'relationPairs'
           | 'tags'
           | 'strongsHebreu'
           | 'strongsGrec'
@@ -567,44 +727,109 @@ const userSlice = createSlice({
           | 'wordAnnotations'
         data: Record<string, unknown>
         isInitialLoad: boolean
+        changes?: SubcollectionUpdateChanges
       }>
     ) {
-      const { collection, data } = action.payload
+      const { collection, data, isInitialLoad, changes } = action.payload
 
       // Update the specific subcollection
       switch (collection) {
         case 'bookmarks':
-          state.bible.bookmarks = data as BookmarksObj
+          state.bible.bookmarks = applySubcollectionChanges(
+            state.bible.bookmarks,
+            data,
+            isInitialLoad,
+            changes
+          ) as BookmarksObj
           break
         case 'highlights':
-          state.bible.highlights = data as HighlightsObj
+          state.bible.highlights = applySubcollectionChanges(
+            state.bible.highlights,
+            data,
+            isInitialLoad,
+            changes
+          ) as HighlightsObj
           break
         case 'notes':
-          state.bible.notes = data as NotesObj
+          state.bible.notes = applySubcollectionChanges(
+            state.bible.notes,
+            data,
+            isInitialLoad,
+            changes
+          ) as NotesObj
+          backfillSystemRelations(state)
           break
         case 'links':
-          state.bible.links = data as LinksObj
+          state.bible.links = applySubcollectionChanges(
+            state.bible.links,
+            data,
+            isInitialLoad,
+            changes
+          ) as LinksObj
+          backfillSystemRelations(state)
           break
-        case 'studyRelations':
-          state.bible.studyRelations = data as StudyRelationsObj
+        case 'relations':
+          state.bible.relations = applySubcollectionChanges(
+            state.bible.relations,
+            data,
+            isInitialLoad,
+            changes
+          ) as RelationsObj
+          backfillSystemRelations(state)
+          break
+        case 'relationIndex':
+          state.bible.relationIndex = rebuildRelationIndexes(state.bible.relations)
+          break
+        case 'relationPairs':
+          state.bible.relationPairs = rebuildRelationPairs(state.bible.relations)
           break
         case 'tags':
-          state.bible.tags = data as TagsObj
+          state.bible.tags = applySubcollectionChanges(
+            state.bible.tags,
+            data,
+            isInitialLoad,
+            changes
+          ) as TagsObj
           break
         case 'strongsHebreu':
-          state.bible.strongsHebreu = data
+          state.bible.strongsHebreu = applySubcollectionChanges(
+            state.bible.strongsHebreu as Record<string, unknown>,
+            data,
+            isInitialLoad,
+            changes
+          )
           break
         case 'strongsGrec':
-          state.bible.strongsGrec = data
+          state.bible.strongsGrec = applySubcollectionChanges(
+            state.bible.strongsGrec as Record<string, unknown>,
+            data,
+            isInitialLoad,
+            changes
+          )
           break
         case 'words':
-          state.bible.words = data
+          state.bible.words = applySubcollectionChanges(
+            state.bible.words as Record<string, unknown>,
+            data,
+            isInitialLoad,
+            changes
+          )
           break
         case 'naves':
-          state.bible.naves = data
+          state.bible.naves = applySubcollectionChanges(
+            state.bible.naves as Record<string, unknown>,
+            data,
+            isInitialLoad,
+            changes
+          )
           break
         case 'wordAnnotations':
-          state.bible.wordAnnotations = data as WordAnnotationsObj
+          state.bible.wordAnnotations = applySubcollectionChanges(
+            state.bible.wordAnnotations,
+            data,
+            isInitialLoad,
+            changes
+          ) as WordAnnotationsObj
           break
       }
     },
@@ -744,14 +969,12 @@ const userSlice = createSlice({
           selection
         )
 
-        idsToRemove.forEach(id => {
-          delete state.bible.wordAnnotations[id]
-          removeEntityInTags(state, 'wordAnnotations', id)
-        })
+        idsToRemove.forEach(id => removeWordAnnotationWithLinkedNote(state, id))
       }
 
       // Add the new annotation
       state.bible.wordAnnotations[annotation.id] = annotation
+      backfillSystemRelations(state)
     })
     builder.addCase(updateWordAnnotationAction, (state, action) => {
       const { id, changes } = action.payload
@@ -760,20 +983,13 @@ const userSlice = createSlice({
           ...state.bible.wordAnnotations[id],
           ...changes,
         }
+        backfillSystemRelations(state)
       }
     })
     builder.addCase(removeWordAnnotationAction, (state, action) => {
       const id = action.payload.id
-      const annotation = state.bible.wordAnnotations[id]
-
-      // Cascade delete: remove associated note if it exists
-      if (annotation?.noteId && state.bible.notes[annotation.noteId]) {
-        delete state.bible.notes[annotation.noteId]
-        removeEntityInTags(state, 'notes', annotation.noteId)
-      }
-
-      delete state.bible.wordAnnotations[id]
-      removeEntityInTags(state, 'wordAnnotations', id)
+      removeWordAnnotationWithLinkedNote(state, id)
+      syncRelationProjections(state)
     })
     builder.addCase(changeWordAnnotationColorAction, (state, action) => {
       const { id, color } = action.payload
@@ -796,11 +1012,8 @@ const userSlice = createSlice({
         selection
       )
 
-      // Remove the overlapping annotations
-      idsToRemove.forEach(id => {
-        delete state.bible.wordAnnotations[id]
-        removeEntityInTags(state, 'wordAnnotations', id)
-      })
+      idsToRemove.forEach(id => removeWordAnnotationWithLinkedNote(state, id))
+      backfillSystemRelations(state)
     })
 
     // Links
@@ -809,6 +1022,23 @@ const userSlice = createSlice({
         ...state.bible.links,
         ...action.payload,
       }
+      for (const [linkKey, link] of Object.entries(action.payload)) {
+        const verseKeys = getSelectedVerseKeysFromAction(action, linkKey)
+        if (!verseKeys.length) continue
+        const verseEndpoint = createVerseEndpoint(verseKeys, verseKeys.join('/'))
+        const externalLinkEndpoint = createExternalLinkEndpoint(verseEndpoint, linkKey, link)
+        upsertSystemRelation(
+          state,
+          createSystemRelation({
+            id: getSystemRelationId('externalLink', linkKey, verseEndpoint),
+            type: 'externalLink',
+            endpoints: [externalLinkEndpoint, verseEndpoint],
+            createdAt: link.date,
+            updatedAt: link.date,
+          })
+        )
+      }
+      syncRelationProjections(state)
     })
     builder.addCase(updateLink, (state, action) => {
       const { key, data } = action.payload
@@ -817,34 +1047,71 @@ const userSlice = createSlice({
           ...state.bible.links[key],
           ...data,
         }
+        const link = state.bible.links[key]
+        state.bible.relations = state.bible.relations || {}
+        Object.values(state.bible.relations).forEach(existingRelation => {
+          if (existingRelation.kind !== 'system' || existingRelation.type !== 'externalLink') return
+          const linkEndpoint = existingRelation.endpoints.find(
+            endpoint => endpoint.type === 'externalLink' && endpoint.linkId === key
+          )
+          const verseEndpoint = existingRelation.endpoints.find(
+            endpoint => endpoint.type === 'verse'
+          )
+          if (linkEndpoint?.type !== 'externalLink' || verseEndpoint?.type !== 'verse') return
+
+          const externalLinkEndpoint = createExternalLinkEndpoint(verseEndpoint, key, link)
+          upsertSystemRelation(
+            state,
+            createSystemRelation({
+              id: existingRelation.id,
+              type: 'externalLink',
+              endpoints: [externalLinkEndpoint, verseEndpoint],
+              createdAt: existingRelation.createdAt || link.date,
+              updatedAt: Date.now(),
+            })
+          )
+        })
+        syncRelationProjections(state)
       }
     })
     builder.addCase(deleteLink, (state, action) => {
       delete state.bible.links[action.payload]
       removeEntityInTags(state, 'links', action.payload)
+      removeSystemRelationsForEntity(state, 'externalLink', action.payload)
+      syncRelationProjections(state)
     })
 
-    // Study Relations
+    // Relations
     builder.addCase(addStudyRelationAction, (state, action) => {
-      const relation = normalizeStudyRelation(action.payload)
-      if (hasDuplicateStudyRelation(state.bible.studyRelations, relation)) return
-      state.bible.studyRelations[relation.id] = relation
+      const relation = normalizeRelation(action.payload)
+      if (hasDuplicateRelation(state.bible.relations, relation)) return
+      state.bible.relations[relation.id] = relation
+      state.bible.relationIndex = rebuildRelationIndexes(state.bible.relations)
+      state.bible.relationPairs = rebuildRelationPairs(state.bible.relations)
+    })
+    builder.addCase(attachNoteToVerseAction, (state, action) => {
+      attachNoteToVerse(state, action.payload.noteEndpoint, action.payload.verseEndpoint)
+      syncRelationProjections(state)
     })
     builder.addCase(updateStudyRelation, (state, action) => {
-      const currentRelation = state.bible.studyRelations[action.payload.id]
+      const currentRelation = state.bible.relations[action.payload.id]
       if (!currentRelation) return
 
-      const relation = normalizeStudyRelation({
+      const relation = normalizeRelation({
         ...currentRelation,
         ...action.payload.changes,
         updatedAt: Date.now(),
       })
 
-      if (hasDuplicateStudyRelation(state.bible.studyRelations, relation, relation.id)) return
-      state.bible.studyRelations[relation.id] = relation
+      if (hasDuplicateRelation(state.bible.relations, relation, relation.id)) return
+      state.bible.relations[relation.id] = relation
+      state.bible.relationIndex = rebuildRelationIndexes(state.bible.relations)
+      state.bible.relationPairs = rebuildRelationPairs(state.bible.relations)
     })
     builder.addCase(deleteStudyRelation, (state, action) => {
-      delete state.bible.studyRelations[action.payload]
+      delete state.bible.relations[action.payload]
+      state.bible.relationIndex = rebuildRelationIndexes(state.bible.relations)
+      state.bible.relationPairs = rebuildRelationPairs(state.bible.relations)
     })
 
     // Notes
@@ -853,10 +1120,31 @@ const userSlice = createSlice({
         ...state.bible.notes,
         ...action.payload,
       }
+      for (const [noteId, note] of Object.entries(action.payload)) {
+        if (!noteId.startsWith('annotation:')) {
+          const verseKeys = getSelectedVerseKeysFromAction(action, noteId)
+          if (!verseKeys.length) continue
+          const noteEndpoint = createNoteEndpoint(noteId, note.title || note.description)
+          const verseEndpoint = createVerseEndpoint(verseKeys, verseKeys.join('/'))
+          upsertSystemRelation(
+            state,
+            createSystemRelation({
+              id: getSystemRelationId('annotates', noteId, verseEndpoint),
+              type: 'annotates',
+              endpoints: [noteEndpoint, verseEndpoint],
+              createdAt: note.date,
+              updatedAt: note.date,
+            })
+          )
+        }
+      }
+      backfillSystemRelations(state)
     })
     builder.addCase(deleteNote, (state, action) => {
       delete state.bible.notes[action.payload]
       removeEntityInTags(state, 'notes', action.payload)
+      removeSystemRelationsForEndpoint(state, `note:${action.payload}`)
+      syncRelationProjections(state)
     })
 
     // Settings

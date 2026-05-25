@@ -11,7 +11,7 @@ import BibleNoteItem from './BibleNoteItem'
 import BibleNoteModal from './BibleNoteModal'
 
 import TagsHeader from '~common/TagsHeader'
-import { Tag, VerseIds } from '~common/types'
+import { Tag } from '~common/types'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { unifiedTagsModalAtom } from '~state/app'
 import verseToReference from '~helpers/verseToReference'
@@ -32,7 +32,7 @@ export type TNote = {
 const BibleVerseNotes = () => {
   const { t } = useTranslation()
 
-  const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
+  const [currentNoteId, setCurrentNoteId] = useState<string | null>(null)
   const [selectedChip, setSelectedChip] = useState<Tag | null>(null)
   const [noteSettingsId, setNoteSettingsId] = useState<string | null>(null)
   const [selectedAnnotationNote, setSelectedAnnotationNote] = useState<{
@@ -46,6 +46,7 @@ const BibleVerseNotes = () => {
 
   const notesObj = useSelector((state: RootState) => state.user.bible.notes)
   const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
+  const relations = useSelector((state: RootState) => state.user.bible.relations)
   const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
 
   const noteModal = useBottomSheetModal()
@@ -82,14 +83,21 @@ const BibleVerseNotes = () => {
       return
     }
 
-    // Handle regular verse notes
-    const verseNumbers: Record<string, boolean> = {}
-    noteKey.split('/').forEach(ref => {
-      verseNumbers[ref] = true
-    })
+    const relation = Object.values(relations).find(
+      candidate =>
+        candidate.kind === 'system' &&
+        candidate.type === 'annotates' &&
+        candidate.endpoints.some(
+          endpoint => endpoint.type === 'note' && endpoint.noteId === noteKey
+        )
+    )
+    const verseEndpoint = relation?.endpoints.find(endpoint => endpoint.type === 'verse')
+    const verseNumbers =
+      verseEndpoint?.type === 'verse'
+        ? Object.fromEntries(verseEndpoint.verseKeys.map(key => [key, true]))
+        : {}
 
-    const reference = verseToReference(verseNumbers)
-    notes.push({ noteId: noteKey, reference, notes: note })
+    notes.push({ noteId: noteKey, reference: verseToReference(verseNumbers), notes: note })
   })
 
   // Sort by date, newest first
@@ -123,13 +131,7 @@ const BibleVerseNotes = () => {
       return
     }
 
-    // Handle regular verse notes with BibleNoteModal
-    const verses = noteId.split('/').reduce((acc, key) => {
-      acc[key] = true
-      return acc
-    }, {} as VerseIds)
-
-    setNoteVerses(verses)
+    setCurrentNoteId(noteId)
     noteModal.open()
   }
 
@@ -176,7 +178,12 @@ const BibleVerseNotes = () => {
           message={t("Vous n'avez pas encore de notes...")}
         />
       )}
-      <BibleNoteModal ref={noteModal.getRef()} noteVerses={noteVerses} />
+      <BibleNoteModal
+        ref={noteModal.getRef()}
+        noteVerses={undefined}
+        noteId={currentNoteId}
+        onNoteIdChange={setCurrentNoteId}
+      />
       <AnnotationNoteModal
         ref={annotationNoteModal.getRef()}
         annotationId={selectedAnnotationNote?.annotationId ?? null}

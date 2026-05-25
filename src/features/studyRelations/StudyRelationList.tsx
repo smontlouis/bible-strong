@@ -48,13 +48,14 @@ const selectDisplayModels = makeStudyRelationDisplayModelsSelector()
 const selectDisplaySectionsForStartingVerseKey =
   makeStudyRelationDisplaySectionsForStartingVerseKeySelector()
 
-const directionalTypes: RelationType[] = ['references', 'explains']
+const directionalTypes: RelationType[] = ['references', 'explains', 'mentions']
 
 const relationTypeChoices: { value: RelationType }[] = [
   { value: 'linked' },
   { value: 'references' },
   { value: 'explains' },
   { value: 'contrasts' },
+  { value: 'mentions' },
 ]
 
 const relationTypeCycle = relationTypeChoices.map(choice => choice.value)
@@ -72,6 +73,8 @@ const targetIconConfig: Record<
   strong: { name: 'hash', color: 'primary' },
   nave: { name: 'layers', color: 'quint' },
   dictionary: { name: 'book', color: 'secondary' },
+  externalLink: { name: 'link', color: 'secondary' },
+  word: { name: 'type', color: 'tertiary' },
 }
 
 const LabelInput = styled(BottomSheetTextInput)(({ theme }) => ({
@@ -94,6 +97,8 @@ const TargetIcon = ({ type }: { type: RelationEndpoint['type'] }) => {
       return <NaveIcon color={config.color} size={15} />
     case 'dictionary':
       return <DictionnaryIcon color={config.color} size={15} />
+    case 'externalLink':
+    case 'word':
     default:
       return <FeatherIcon name={config.name!} size={15} color={config.color} />
   }
@@ -104,6 +109,13 @@ const getRelationTitleParts = (
   relationTitlePrefixes: Record<string, string>,
   t: (key: string) => string
 ) => {
+  if (model.relation.type === 'annotates') {
+    return {
+      prefix: model.targetEndpoint.type === 'verse' ? t('Sur') : t('Note'),
+      target: model.targetLabel,
+    }
+  }
+
   const prefix = relationTitlePrefixes[model.relationText] || model.relationText
   const target = (() => {
     switch (model.targetEndpoint.type) {
@@ -114,6 +126,8 @@ const getRelationTitleParts = (
       case 'strong':
       case 'nave':
       case 'dictionary':
+      case 'externalLink':
+      case 'word':
         return model.targetLabel
       default:
         return model.targetLabel
@@ -132,6 +146,8 @@ const getRelationSubtitle = (model: RelationDisplayModel) => {
     case 'strong':
     case 'nave':
     case 'dictionary':
+    case 'externalLink':
+    case 'word':
       return ''
     default:
       return model.subtitle
@@ -182,8 +198,12 @@ const StudyRelationList = ({
     [t('studyRelations.type.references')]: t('studyRelations.title.references'),
     [t('studyRelations.type.explains')]: t('studyRelations.title.explains'),
     [t('studyRelations.type.contrasts')]: t('studyRelations.title.contrasts'),
+    [t('studyRelations.type.mentions')]: t('studyRelations.title.mentions'),
+    [t('studyRelations.type.annotates')]: t('studyRelations.title.annotates'),
+    [t('studyRelations.type.externalLink')]: t('studyRelations.title.externalLink'),
     [t('studyRelations.type.referencedBy')]: t('studyRelations.title.referencedBy'),
     [t('studyRelations.type.explainedBy')]: t('studyRelations.title.explainedBy'),
+    [t('studyRelations.type.mentionedBy')]: t('studyRelations.title.mentionedBy'),
   }
 
   if (relations.length === 0 && !showEmptyState) return null
@@ -279,6 +299,7 @@ const StudyRelationList = ({
   const renderRelation = (model: RelationDisplayModel, index: number, sectionLength: number) => {
     const relationTitle = getRelationTitleParts(model, relationTitlePrefixes, t)
     const relationSubtitle = getRelationSubtitle(model)
+    const isSystemRelation = model.relation.kind === 'system'
 
     return (
       <Box key={model.relation.id}>
@@ -343,12 +364,14 @@ const StudyRelationList = ({
             height={42}
             popover={
               <>
-                <MenuOption onSelect={() => openEditModal(model)} closeBeforeSelect>
-                  <HStack alignItems="center">
-                    <FeatherIcon name="edit-3" size={15} />
-                    <Text ml={10}>{t('Modifier')}</Text>
-                  </HStack>
-                </MenuOption>
+                {!isSystemRelation ? (
+                  <MenuOption onSelect={() => openEditModal(model)} closeBeforeSelect>
+                    <HStack alignItems="center">
+                      <FeatherIcon name="edit-3" size={15} />
+                      <Text ml={10}>{t('Modifier')}</Text>
+                    </HStack>
+                  </MenuOption>
+                ) : null}
                 <MenuOption onSelect={() => confirmDelete(model)}>
                   <HStack alignItems="center">
                     <FeatherIcon name="trash-2" size={15} color="quart" />

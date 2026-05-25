@@ -23,6 +23,7 @@ const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
   const router = useRouter()
   const openInNewTab = useOpenInNewTab()
   const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
+  const relations = useSelector((state: RootState) => state.user.bible.relations)
 
   const close = useCallback(() => {
     ref?.current?.dismiss()
@@ -71,8 +72,17 @@ const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
       verseKey = annotation.ranges[0]?.verseKey
       version = annotation.version
     } else {
-      // Handle regular verse notes
-      verseKey = noteId.split('/')[0]
+      const relation = Object.values(relations).find(
+        candidate =>
+          candidate.kind === 'system' &&
+          candidate.type === 'annotates' &&
+          candidate.endpoints.some(
+            endpoint => endpoint.type === 'note' && endpoint.noteId === noteId
+          )
+      )
+      const verseEndpoint = relation?.endpoints.find(endpoint => endpoint.type === 'verse')
+      if (verseEndpoint?.type !== 'verse') return
+      verseKey = verseEndpoint.verseKeys[0]
     }
 
     const [Livre, Chapitre, Verset] = verseKey.split('-')

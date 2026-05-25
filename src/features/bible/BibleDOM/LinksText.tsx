@@ -66,7 +66,7 @@ const LinksText = ({ linksText, settings, onClick, isParallel, isDisabled }: Pro
             key={link.key}
             settings={settings}
             isParallel={isParallel}
-            onClick={() => onClick(link.key)}
+            onClick={() => onClick(link.id || link.key)}
             isButton
             isDisabled={isDisabled}
           >

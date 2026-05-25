@@ -1,10 +1,14 @@
-import userReducer, { Link, UserState } from '../user'
+import userReducer, { Link, receiveSubcollectionUpdates, UserState } from '../user'
 import {
   addStudyRelationAction,
+  attachNoteToVerseAction,
   deleteStudyRelation,
   updateStudyRelation,
   type StudyRelation,
 } from '../user/studyRelations'
+import { addNoteAction } from '../user/notes'
+import { addWordAnnotationAction } from '../user/wordAnnotations'
+import { normalizeRelation } from '~features/studyRelations/domain'
 
 jest.mock('react-native', () => ({
   Appearance: {
@@ -53,24 +57,25 @@ jest.mock('~themes/nightColors', () => ({ primary: '#777' }))
 
 const initialState = userReducer(undefined, { type: '@@INIT' }) as UserState
 
-const createRelation = (overrides: Partial<StudyRelation> = {}): StudyRelation => ({
-  id: 'relation-1',
-  endpoints: [
-    { type: 'verse', verseKeys: ['1-1-1'] },
-    { type: 'verse', verseKeys: ['1-1-2'] },
-  ],
-  type: 'linked',
-  direction: 'none',
-  createdAt: 1,
-  updatedAt: 1,
-  ...overrides,
-})
+const createRelation = (overrides: Partial<StudyRelation> = {}): StudyRelation =>
+  normalizeRelation({
+    id: 'relation-1',
+    endpoints: [
+      { type: 'verse', verseKeys: ['1-1-1'] },
+      { type: 'verse', verseKeys: ['1-1-2'] },
+    ],
+    type: 'linked',
+    direction: 'none',
+    createdAt: 1,
+    updatedAt: 1,
+    ...overrides,
+  })
 
 describe('study relation reducer', () => {
   it('adds a normalized study relation', () => {
     const state = userReducer(initialState, addStudyRelationAction(createRelation()))
 
-    expect(state.bible.studyRelations['relation-1'].endpoints[0]).toEqual({
+    expect(state.bible.relations['relation-1'].endpoints[0]).toMatchObject({
       type: 'verse',
       verseKeys: ['1-1-1'],
     })
@@ -84,7 +89,7 @@ describe('study relation reducer', () => {
     })
     const nextState = userReducer(state, addStudyRelationAction(duplicate))
 
-    expect(Object.keys(nextState.bible.studyRelations)).toEqual(['relation-1'])
+    expect(Object.keys(nextState.bible.relations)).toEqual(['relation-1'])
   })
 
   it('updates type and valid direction together', () => {
@@ -97,7 +102,7 @@ describe('study relation reducer', () => {
       })
     )
 
-    expect(nextState.bible.studyRelations['relation-1']).toMatchObject({
+    expect(nextState.bible.relations['relation-1']).toMatchObject({
       type: 'references',
       direction: 'forward',
       label: 'Allusion',
@@ -108,7 +113,7 @@ describe('study relation reducer', () => {
     const state = userReducer(initialState, addStudyRelationAction(createRelation()))
     const nextState = userReducer(state, deleteStudyRelation('relation-1'))
 
-    expect(nextState.bible.studyRelations).toEqual({})
+    expect(nextState.bible.relations).toEqual({})
   })
 
   it('keeps external links and tags separate from study relations', () => {
@@ -141,5 +146,131 @@ describe('study relation reducer', () => {
     expect(withoutRelation.bible.links).toEqual(state.bible.links)
     expect(withoutRelation.bible.notes).toEqual(state.bible.notes)
     expect(withoutRelation.bible.tags).toEqual(state.bible.tags)
+  })
+
+  it('creates annotation note system relations from the annotation verse range', () => {
+    const withAnnotation = userReducer(
+      initialState,
+      addWordAnnotationAction({
+        id: 'annotation-1',
+        version: 'LSG',
+        ranges: [{ verseKey: '1-1-2', startWordIndex: 0, endWordIndex: 1, text: 'terre' }],
+        color: 'color1',
+        type: 'underline',
+        date: 1,
+      })
+    )
+    const withNote = userReducer(
+      withAnnotation,
+      addNoteAction({
+        'annotation:annotation-1': {
+          title: 'Annotation',
+          description: 'Note',
+          date: 2,
+        },
+      })
+    )
+
+    expect(Object.values(withNote.bible.relations)[0]).toMatchObject({
+      endpointKeys: ['note:annotation:annotation-1', 'verse:1-1-2'],
+      type: 'annotates',
+      kind: 'system',
+    })
+  })
+
+  it('attaches an existing note to a verse with the same annotates relation model', () => {
+    const state: UserState = {
+      ...initialState,
+      bible: {
+        ...initialState.bible,
+        notes: { note1: { title: 'Je suis une note', description: '', date: 1 } },
+      },
+    }
+
+    const nextState = userReducer(
+      state,
+      attachNoteToVerseAction({
+        noteEndpoint: { type: 'note', noteId: 'note1', label: 'Je suis une note' },
+        verseEndpoint: { type: 'verse', verseKeys: ['1-1-2'] },
+      })
+    )
+
+    expect(Object.values(nextState.bible.relations)[0]).toMatchObject({
+      kind: 'system',
+      type: 'annotates',
+      endpointKeys: ['note:note1', 'verse:1-1-2'],
+    })
+  })
+
+  it('keeps separate note attachments instead of merging unrelated verses', () => {
+    const state: UserState = {
+      ...initialState,
+      bible: {
+        ...initialState.bible,
+        notes: { note1: { title: 'Je suis une note', description: '', date: 1 } },
+      },
+    }
+
+    const withFirstVerse = userReducer(
+      state,
+      attachNoteToVerseAction({
+        noteEndpoint: { type: 'note', noteId: 'note1', label: 'Je suis une note' },
+        verseEndpoint: { type: 'verse', verseKeys: ['1-1-1'] },
+      })
+    )
+    const withSecondVerse = userReducer(
+      withFirstVerse,
+      attachNoteToVerseAction({
+        noteEndpoint: { type: 'note', noteId: 'note1', label: 'Je suis une note' },
+        verseEndpoint: { type: 'verse', verseKeys: ['1-1-3'] },
+      })
+    )
+
+    expect(Object.values(withSecondVerse.bible.relations)).toHaveLength(2)
+    expect(
+      Object.values(withSecondVerse.bible.relations).map(relation => relation.endpointKeys)
+    ).toEqual(
+      expect.arrayContaining([
+        ['note:note1', 'verse:1-1-1'],
+        ['note:note1', 'verse:1-1-3'],
+      ])
+    )
+  })
+
+  it('applies non-initial relation live updates incrementally to avoid stale resurrection', () => {
+    const removedRelation = createRelation({ id: 'removed-relation' })
+    const currentRelation = createRelation({
+      id: 'current-relation',
+      endpoints: [
+        { type: 'verse', verseKeys: ['1-1-2'] },
+        { type: 'verse', verseKeys: ['1-1-3'] },
+      ],
+    })
+    const state: UserState = {
+      ...initialState,
+      bible: {
+        ...initialState.bible,
+        relations: { [currentRelation.id]: currentRelation },
+      },
+    }
+
+    const nextState = userReducer(
+      state,
+      receiveSubcollectionUpdates({
+        collection: 'relations',
+        data: {
+          [removedRelation.id]: removedRelation,
+          [currentRelation.id]: currentRelation,
+        },
+        changes: {
+          added: {},
+          modified: {},
+          removed: [currentRelation.id],
+        },
+        isInitialLoad: false,
+      })
+    )
+
+    expect(nextState.bible.relations).toEqual({})
   })
 })

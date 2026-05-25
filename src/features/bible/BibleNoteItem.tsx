@@ -41,6 +41,8 @@ const BibleNoteItem = ({ item, onPress, onMenuPress, relationCount, onRelationPr
   const formattedDate = distanceInWords(Number(item.notes.date), Date.now(), {
     locale: getDateLocale(lang),
   })
+  const relativeDate = t('Il y a {{formattedDate}}', { formattedDate })
+  const metadataLabel = item.reference ? `${item.reference} - ${relativeDate}` : relativeDate
 
   return (
     <Box>
@@ -48,7 +50,7 @@ const BibleNoteItem = ({ item, onPress, onMenuPress, relationCount, onRelationPr
         <Box flex>
           <Box row justifyContent="space-between">
             <Text color="darkGrey" bold fontSize={11}>
-              {item.reference} - {t('Il y a {{formattedDate}}', { formattedDate })}
+              {metadataLabel}
             </Text>
           </Box>
           {!!item.notes.title && (

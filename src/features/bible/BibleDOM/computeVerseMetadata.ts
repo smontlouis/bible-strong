@@ -7,6 +7,13 @@ export interface AnnotationNotesInfo {
   annotationNotesCountByVerse: { [key: string]: number }
 }
 
+type VerseItemDisplayMode = 'inline' | 'block'
+
+const getVerseRefsFromMetadataKey = (key: string): string[] => key.split('#')[0].split('/')
+
+const getAnchorVerseRef = (verseRefs: string[], displayMode: VerseItemDisplayMode): string =>
+  displayMode === 'inline' ? verseRefs[verseRefs.length - 1] : verseRefs[0]
+
 export function sortVersesToTags(highlightedVerses: HighlightsObj): TaggedVerse[] | null {
   if (!highlightedVerses) return null
 
@@ -90,7 +97,8 @@ export function getAnnotationNotesInfo(
 export function getNotedVersesCount(
   verses: Verse[],
   notedVerses: NotesObj,
-  annotationNotesCountByVerse: { [key: string]: number }
+  annotationNotesCountByVerse: { [key: string]: number },
+  displayMode: VerseItemDisplayMode = 'inline'
 ): { [key: string]: number } {
   const newNotedVerses: { [key: string]: number } = {}
   if (!verses?.length) return newNotedVerses
@@ -102,8 +110,8 @@ export function getNotedVersesCount(
     // Ignore annotation notes (counted separately)
     if (key.startsWith('annotation:')) return
 
-    const firstVerseRef = key.split('/')[0]
-    const [bookStr, chapterStr, verseStr] = firstVerseRef.split('-')
+    const verseRef = getAnchorVerseRef(getVerseRefsFromMetadataKey(key), displayMode)
+    const [bookStr, chapterStr, verseStr] = verseRef.split('-')
     const bookNumber = parseInt(bookStr)
     const chapterNumber = parseInt(chapterStr)
 
@@ -130,29 +138,32 @@ export function getNotedVersesText(
 
   const { Livre, Chapitre } = verses[0]
   Object.entries(notedVerses).forEach(([key, value]) => {
-    const versesInArray = key.split('/')
+    const versesInArray = getVerseRefsFromMetadataKey(key)
+    const anchorVerseRef = getAnchorVerseRef(versesInArray, 'inline')
 
-    const lastVerseRef = versesInArray[versesInArray.length - 1]
-    const bookNumber = parseInt(lastVerseRef.split('-')[0])
-    const chapterNumber = parseInt(lastVerseRef.split('-')[1])
-    const verseNumber = lastVerseRef.split('-')[2]
+    const verseToPush = {
+      key,
+      id: value.id,
+      verses:
+        versesInArray.length > 1
+          ? `${versesInArray[0].split('-')[2]}-${
+              versesInArray[versesInArray.length - 1].split('-')[2]
+            }`
+          : versesInArray[0].split('-')[2],
+      verseIds: versesInArray,
+      ...value,
+    }
 
-    if (bookNumber === Livre && chapterNumber === Chapitre) {
-      const verseToPush = {
-        key,
-        verses:
-          versesInArray.length > 1
-            ? `${versesInArray[0].split('-')[2]}-${
-                versesInArray[versesInArray.length - 1].split('-')[2]
-              }`
-            : versesInArray[0].split('-')[2],
-        ...value,
-      }
-      if (newNotedVerses[verseNumber]) {
-        newNotedVerses[verseNumber].push(verseToPush)
-      } else {
-        newNotedVerses[verseNumber] = [verseToPush]
-      }
+    const bookNumber = parseInt(anchorVerseRef.split('-')[0])
+    const chapterNumber = parseInt(anchorVerseRef.split('-')[1])
+    const verseNumber = anchorVerseRef.split('-')[2]
+
+    if (bookNumber !== Livre || chapterNumber !== Chapitre) return
+
+    if (newNotedVerses[verseNumber]) {
+      newNotedVerses[verseNumber].push(verseToPush)
+    } else {
+      newNotedVerses[verseNumber] = [verseToPush]
     }
   })
 
@@ -161,17 +172,18 @@ export function getNotedVersesText(
 
 export function getLinkedVersesCount(
   verses: Verse[],
-  linkedVerses: LinksObj | undefined
+  linkedVerses: LinksObj | undefined,
+  displayMode: VerseItemDisplayMode = 'inline'
 ): { [key: string]: number } {
   const newLinkedVerses: { [key: string]: number } = {}
   if (!verses?.length || !linkedVerses) return newLinkedVerses
 
   const { Livre, Chapitre } = verses[0]
   Object.keys(linkedVerses).forEach(key => {
-    const firstVerseRef = key.split('/')[0]
-    const bookNumber = parseInt(firstVerseRef.split('-')[0])
-    const chapterNumber = parseInt(firstVerseRef.split('-')[1])
-    const verseNumber = firstVerseRef.split('-')[2]
+    const verseRef = getAnchorVerseRef(getVerseRefsFromMetadataKey(key), displayMode)
+    const bookNumber = parseInt(verseRef.split('-')[0])
+    const chapterNumber = parseInt(verseRef.split('-')[1])
+    const verseNumber = verseRef.split('-')[2]
     if (bookNumber === Livre && chapterNumber === Chapitre) {
       newLinkedVerses[verseNumber] = (newLinkedVerses[verseNumber] || 0) + 1
     }
@@ -190,35 +202,37 @@ export function getLinkedVersesText(
 
   const { Livre, Chapitre } = verses[0]
   Object.entries(linkedVerses).forEach(([key, value]) => {
-    const versesInArray = key.split('/')
+    const versesInArray = getVerseRefsFromMetadataKey(key)
+    const anchorVerseRef = getAnchorVerseRef(versesInArray, 'inline')
 
-    const lastVerseRef = versesInArray[versesInArray.length - 1]
-    const bookNumber = parseInt(lastVerseRef.split('-')[0])
-    const chapterNumber = parseInt(lastVerseRef.split('-')[1])
-    const verseNumber = lastVerseRef.split('-')[2]
+    const formattedUrl = value.url?.replace(/^https?:\/\//, '')
+    const title = value.customTitle || value.ogData?.title || formattedUrl
+    const verseToPush: LinkedVerse = {
+      key,
+      id: value.id,
+      verses:
+        versesInArray.length > 1
+          ? `${versesInArray[0].split('-')[2]}-${
+              versesInArray[versesInArray.length - 1].split('-')[2]
+            }`
+          : versesInArray[0].split('-')[2],
+      url: value.url,
+      title,
+      linkType: value.linkType || 'website',
+      date: value.date,
+      tags: value.tags,
+    }
 
-    if (bookNumber === Livre && chapterNumber === Chapitre) {
-      const formattedUrl = value.url?.replace(/^https?:\/\//, '')
-      const title = value.customTitle || value.ogData?.title || formattedUrl
-      const verseToPush: LinkedVerse = {
-        key,
-        verses:
-          versesInArray.length > 1
-            ? `${versesInArray[0].split('-')[2]}-${
-                versesInArray[versesInArray.length - 1].split('-')[2]
-              }`
-            : versesInArray[0].split('-')[2],
-        url: value.url,
-        title,
-        linkType: value.linkType || 'website',
-        date: value.date,
-        tags: value.tags,
-      }
-      if (newLinkedVerses[verseNumber]) {
-        newLinkedVerses[verseNumber].push(verseToPush)
-      } else {
-        newLinkedVerses[verseNumber] = [verseToPush]
-      }
+    const bookNumber = parseInt(anchorVerseRef.split('-')[0])
+    const chapterNumber = parseInt(anchorVerseRef.split('-')[1])
+    const verseNumber = anchorVerseRef.split('-')[2]
+
+    if (bookNumber !== Livre || chapterNumber !== Chapitre) return
+
+    if (newLinkedVerses[verseNumber]) {
+      newLinkedVerses[verseNumber].push(verseToPush)
+    } else {
+      newLinkedVerses[verseNumber] = [verseToPush]
     }
   })
 

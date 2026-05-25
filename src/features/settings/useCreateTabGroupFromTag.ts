@@ -6,7 +6,6 @@ import books from '~assets/bible_versions/books-desc'
 import { Tag } from '~common/types'
 import generateUUID from '~helpers/generateUUID'
 import formatVerseContent from '~helpers/formatVerseContent'
-import verseToReference from '~helpers/verseToReference'
 import { useCreateGroup, useSwitchGroup, useGroupsCount } from '~state/tabGroups'
 import {
   tabGroupsAtom,
@@ -37,10 +36,10 @@ interface HighlightData {
 }
 
 // Type pour les notes retournées par le sélecteur
-type NoteWithId = Note & { id: string; reference: string }
+type NoteWithId = Note & { id: string; reference: string; verseKeys?: string[] }
 
 // Type pour les links retournés par le sélecteur
-type LinkWithId = Link & { id: string }
+type LinkWithId = Link & { id: string; reference?: string; verseKeys?: string[] }
 
 // Types pour les entités avec id et title (naves, words, strongs)
 interface TaggedEntity {
@@ -123,15 +122,7 @@ export const useCreateTabGroupFromTag = () => {
 
     // Notes → NotesTab
     tagData.notes.forEach(n => {
-      // Use note title if available, otherwise use verse reference
-      const noteVerses = n.id.split('/').reduce(
-        (acc, key) => {
-          acc[key] = true
-          return acc
-        },
-        {} as Record<string, boolean>
-      )
-      const noteTitle = n.title || verseToReference(noteVerses)
+      const noteTitle = n.title || n.reference || t('Note')
 
       tabs.push({
         id: `notes-${generateUUID()}`,
@@ -199,7 +190,9 @@ export const useCreateTabGroupFromTag = () => {
 
     // Links → BibleTab (ouvre le verset associé)
     tagData.links.forEach(l => {
-      const [livre, chapitre, verset] = l.id.split('-').map(Number)
+      const firstVerseKey = l.verseKeys?.[0]
+      if (!firstVerseKey) return
+      const [livre, chapitre, verset] = firstVerseKey.split('-').map(Number)
       // Generate title from verse reference
       const { title: linkTitle } = formatVerseContent([
         { Livre: livre, Chapitre: chapitre, Verset: verset },
