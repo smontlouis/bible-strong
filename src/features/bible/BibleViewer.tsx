@@ -15,7 +15,7 @@ import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import type { Bookmark } from '~common/types'
-import { BibleResource, Pericope, SelectedCode, Verse, VerseIds } from '~common/types'
+import { BibleResource, Pericope, SelectedCode, Verse } from '~common/types'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import BookmarkModal from '~features/bookmarks/BookmarkModal'
 import { useOpenNote } from '~features/notes/useOpenNote'
@@ -83,7 +83,6 @@ import {
   selectAllChapterVerses,
   selectedVersesIncludeFocus,
 } from './selectedVersesActions'
-import BibleLinkModal from './BibleLinkModal'
 import BibleParamsModal from './BibleParamsModal'
 import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
 import BibleFooter from './footer/BibleFooter'
@@ -123,6 +122,7 @@ interface BibleViewerProps {
   onMountTimeout?: () => void
   isBibleViewReloadingAtom: PrimitiveAtom<boolean>
   withNavigation?: boolean
+  isFormSheet?: boolean
 }
 
 const BibleViewer = ({
@@ -131,6 +131,7 @@ const BibleViewer = ({
   onMountTimeout,
   isBibleViewReloadingAtom,
   withNavigation,
+  isFormSheet,
 }: BibleViewerProps) => {
   const { t } = useTranslation()
   const router = useRouter()
@@ -147,8 +148,6 @@ const BibleViewer = ({
   const [comments, setComments] = useState<{ [key: string]: string } | null>(null)
   const [redWords, setRedWords] = useState<RedWordsByVerse | null>(null)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
-  const [linkVerses, setLinkVerses] = useState<VerseIds | undefined>(undefined)
-  const [currentLinkId, setCurrentLinkId] = useState<string | null>(null)
   const [selectedCode, setSelectedCodeState] = useState<SelectedCode | null>(null)
   const bookmarkModalRef = useRef<BottomSheetModal>(null)
   const [selectedVerseForBookmark, setSelectedVerseForBookmark] = useState<{
@@ -160,7 +159,6 @@ const BibleViewer = ({
   const bibleParamsModal = useBottomSheetModal()
   const resourceModal = useBottomSheet()
   const versesModal = useBottomSheet()
-  const linkModal = useBottomSheetModal()
   const createRelationModal = useBottomSheetModal()
 
   // Annotation mode
@@ -520,9 +518,10 @@ const BibleViewer = ({
   }
 
   const toggleCreateLink = () => {
-    setCurrentLinkId(null)
-    setLinkVerses(selectedVerses)
-    linkModal.open()
+    router.push({
+      pathname: '/link',
+      params: { verseKeys: Object.keys(selectedVerses).join(',') },
+    })
   }
 
   const toggleCreateStudyRelation = () => {
@@ -553,9 +552,7 @@ const BibleViewer = ({
   }
 
   const openLinkModal = (linkId: string) => {
-    setCurrentLinkId(linkId)
-    setLinkVerses(undefined)
-    linkModal.open()
+    router.push({ pathname: '/link', params: { linkId } })
   }
 
   const openBibleNote = (noteId: string, verseIds?: string[]) => {
@@ -855,7 +852,7 @@ const BibleViewer = ({
         bibleAtom={bibleAtom}
         onBibleParamsClick={bibleParamsModal.open}
         commentsDisplay={settings.commentsDisplay}
-        hasBackButton={withNavigation}
+        hasBackButton={withNavigation && !isFormSheet}
         onExitAnnotationMode={handleExitAnnotationMode}
         annotationModeEnabled={annotationMode.enabled}
       />
@@ -894,7 +891,7 @@ const BibleViewer = ({
           version={version}
         />
       )}
-      {withNavigation && !error && <OpenInNewTabButton bibleTab={bible} />}
+      {withNavigation && !isFormSheet && !error && <OpenInNewTabButton bibleTab={bible} />}
       <SelectedVersesModal
         ref={versesModal.getRef()}
         isSelectionMode={isSelectionMode}
@@ -920,12 +917,6 @@ const BibleViewer = ({
         onPinVerses={handlePinVerses}
         onEnterAnnotationMode={parallelVersions.length > 0 ? undefined : handleEnterAnnotationMode}
         focusVerses={focusVerses}
-      />
-      <BibleLinkModal
-        ref={linkModal.getRef()}
-        linkVerses={linkVerses}
-        linkId={currentLinkId}
-        onLinkIdChange={setCurrentLinkId}
       />
       <CreateEntityRelationModal
         ref={createRelationModal.getRef()}

@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { isFullScreenBibleAtom, tagDetailModalAtom } from 'src/state/app'
+import { isFullScreenBibleAtom } from 'src/state/app'
 import { BibleTab, ParallelColumnWidth, ParallelDisplayMode, VersionCode } from 'src/state/tabs'
 import { isINTCompleteAtom } from '../footer/atom'
 import BibleDOMComponent from './BibleDOMComponent'
@@ -392,7 +392,6 @@ export const BibleDOMWrapper = ({
   const openRelationEndpoint = useOpenRelationEndpoint()
   const [isINTComplete, setIsINTComplete] = useAtom(isINTCompleteAtom)
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
-  const setTagDetailModal = useSetAtom(tagDetailModalAtom)
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
@@ -645,7 +644,7 @@ export const BibleDOMWrapper = ({
       case NAVIGATE_TO_TAG: {
         if (!isRecord(action.payload) || typeof action.payload.tagId !== 'string') break
         const { tagId } = action.payload
-        setTagDetailModal({ tagId })
+        router.push({ pathname: '/tag', params: { tagId } })
         break
       }
 

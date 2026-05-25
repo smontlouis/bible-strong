@@ -1,11 +1,10 @@
 import styled from '@emotion/native'
-import { useSetAtom } from 'jotai/react'
+import { useRouter } from 'expo-router'
 import React, { useState } from 'react'
 
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { tagDetailModalAtom } from '~state/app'
 import { Tag } from './types'
 
 const StyledChip = styled(Box)(({ theme }) => ({
@@ -47,7 +46,7 @@ const EntityChipList = ({
   onRelationPress?: () => void
   limit?: number
 }) => {
-  const setTagDetailModal = useSetAtom(tagDetailModalAtom)
+  const router = useRouter()
   const [isExpanded, setIsExpanded] = useState(false)
 
   const allTags = Object.values(tags || {})
@@ -58,7 +57,9 @@ const EntityChipList = ({
       type: 'tag' as const,
       id: tag.id,
       label: tag.name,
-      onPress: () => setTagDetailModal({ tagId: tag.id }),
+      onPress: () => {
+        router.push({ pathname: '/tag', params: { tagId: tag.id } })
+      },
     })),
     ...(relationCount > 0 && onRelationPress
       ? [

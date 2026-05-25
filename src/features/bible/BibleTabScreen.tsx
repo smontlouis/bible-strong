@@ -26,9 +26,10 @@ const deepmerge = require('@fastify/deepmerge')()
 interface BibleTabScreenProps {
   bibleAtom: PrimitiveAtom<BibleTab>
   withNavigation?: boolean
+  isFormSheet?: boolean
 }
 
-const BibleTabScreen = ({ bibleAtom, withNavigation }: BibleTabScreenProps) => {
+const BibleTabScreen = ({ bibleAtom, withNavigation, isFormSheet }: BibleTabScreenProps) => {
   const dispatch = useDispatch()
   const [reloadKey, setReloadKey] = useState(0)
   const isBibleViewReloadingAtom = useMemo(() => atom(false), [])
@@ -109,6 +110,7 @@ const BibleTabScreen = ({ bibleAtom, withNavigation }: BibleTabScreenProps) => {
       onMountTimeout={handleBibleViewerReload}
       isBibleViewReloadingAtom={isBibleViewReloadingAtom}
       withNavigation={withNavigation}
+      isFormSheet={isFormSheet}
     />
   )
 }

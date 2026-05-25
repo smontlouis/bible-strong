@@ -685,7 +685,7 @@ export const makeNoteByIdSelector = () =>
     }
   )
 
-// Selector for link by id (for BibleLinkModal)
+// Selector for link by id
 export const makeLinkByIdSelector = () =>
   createSelector(
     [selectLinks, (_: RootState, linkId: string) => linkId],

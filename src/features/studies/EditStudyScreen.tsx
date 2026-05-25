@@ -11,8 +11,8 @@ import RenameModal from '~common/RenameModal'
 import EntityChipList from '~common/EntityChipList'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
-import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Text from '~common/ui/Text'
 import { RootState } from '~redux/modules/reducer'
 import { updateStudy, Study, type RelationEndpoint } from '~redux/modules/user'
@@ -30,6 +30,7 @@ type EditStudyScreenProps = {
   studyId?: string
   hasBackButton?: boolean
   openedFromTab?: boolean
+  isFormSheet?: boolean
   onGoBack?: () => void
 }
 
@@ -61,6 +62,7 @@ const EditStudyScreen = ({
   studyId: propStudyId,
   hasBackButton = true,
   openedFromTab = false,
+  isFormSheet = false,
   onGoBack,
 }: EditStudyScreenProps) => {
   const { t } = useTranslation()
@@ -127,7 +129,7 @@ const EditStudyScreen = ({
   // Show message if study doesn't exist
   if (studyId === '' || !currentStudy) {
     return (
-      <Container>
+      <FormSheetScreen isFormSheet={isFormSheet}>
         <Box flex center px={20}>
           <Text fontSize={18} color="grey" textAlign="center" mb={20}>
             {t("Cette étude n'existe plus")}
@@ -136,16 +138,16 @@ const EditStudyScreen = ({
             {t('Retour aux études')}
           </Button>
         </Box>
-      </Container>
+      </FormSheetScreen>
     )
   }
 
   return (
-    <Container>
+    <FormSheetScreen isFormSheet={isFormSheet}>
       {studyAtom && <TabTitleUpdater studyAtom={studyAtom} title={currentStudy.title} />}
       <EditStudyHeader
         isReadOnly={isReadOnly}
-        hasBackButton={hasBackButton}
+        hasBackButton={isFormSheet ? false : hasBackButton}
         openRenameModal={() => renameModalRef.current?.present()}
         openRelationsModal={() => openEntityRelations(studyEndpoint)}
         setReadOnly={() => {
@@ -182,7 +184,7 @@ const EditStudyScreen = ({
         }}
       />
       {isReadOnly && <FabButton icon="edit-2" onPress={() => setIsReadOnly(false)} />}
-    </Container>
+    </FormSheetScreen>
   )
 }
 

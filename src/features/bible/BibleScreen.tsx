@@ -11,7 +11,7 @@ import { StudyNavigateBibleType } from '~common/types'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 import BibleTabScreen from './BibleTabScreen'
 
-const BibleScreen = () => {
+const BibleScreen = ({ isFormSheet = false }: { isFormSheet?: boolean }) => {
   const params = useLocalSearchParams<{
     focusVerses?: string
     isSelectionMode?: string
@@ -54,7 +54,7 @@ const BibleScreen = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const bibleAtom = useMemo(() => atom<BibleTab>(initialValues), [])
 
-  return <BibleTabScreen bibleAtom={bibleAtom} withNavigation />
+  return <BibleTabScreen bibleAtom={bibleAtom} withNavigation isFormSheet={isFormSheet} />
 }
 
 export default BibleScreen

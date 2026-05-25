@@ -1,1 +1,5 @@
-export { default } from '~features/studies/EditStudyScreen'
+import EditStudyScreen from '~features/studies/EditStudyScreen'
+
+const EditStudyRoute = () => <EditStudyScreen isFormSheet />
+
+export default EditStudyRoute

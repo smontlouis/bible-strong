@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next'
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
 import RenameModal from '~common/RenameModal'
-import Container from '~common/ui/Container'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import SectionList from '~common/ui/SectionList'
@@ -153,20 +153,19 @@ const TagScreen = () => {
 
   if (!tag) {
     return (
-      <Container>
-        <Header hasBackButton title="" />
+      <FormSheetScreen isFormSheet>
+        <Header title="" />
         <Empty
           source={require('~assets/images/empty.json')}
           message={t("Cette étiquette n'existe pas...")}
         />
-      </Container>
+      </FormSheetScreen>
     )
   }
 
   return (
-    <Container>
+    <FormSheetScreen isFormSheet>
       <Header
-        hasBackButton
         title={tag.name}
         rightComponent={
           <PopOverMenu
@@ -240,7 +239,7 @@ const TagScreen = () => {
           }
         }}
       />
-    </Container>
+    </FormSheetScreen>
   )
 }
 

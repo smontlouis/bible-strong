@@ -28,7 +28,6 @@ import ColorChangeModal from '~common/ColorChangeModal'
 import ColorPickerModal from '~common/ColorPickerModal'
 import ErrorBoundary from '~common/ErrorBoundary'
 import InitHooks from '~common/InitHooks'
-import TagDetailModal from '~common/TagDetailModal'
 import ThemedToaster from '~common/ThemedToaster'
 import { CurrentTheme } from '~common/types'
 import UnifiedTagsModal from '~common/UnifiedTagsModal'
@@ -212,7 +211,6 @@ function DeferredModals() {
       <UnifiedTagsModal />
       <ColorPickerModal />
       <ColorChangeModal />
-      <TagDetailModal />
       <FeatureOnboardingModal />
       <AppRatingModal />
     </>
@@ -284,7 +282,16 @@ function InnerApp() {
                               name="entity-relations"
                               options={createFormSheetOptions(theme)}
                             />
+                            <Stack.Screen
+                              name="edit-study"
+                              options={createFormSheetOptions(theme)}
+                            />
+                            <Stack.Screen
+                              name="bible-view"
+                              options={createFormSheetOptions(theme)}
+                            />
                             <Stack.Screen name="note" options={createFormSheetOptions(theme)} />
+                            <Stack.Screen name="link" options={createFormSheetOptions(theme)} />
                             <Stack.Screen name="strong" options={createFormSheetOptions(theme)} />
                             <Stack.Screen
                               name="dictionnary-detail"
@@ -294,6 +301,7 @@ function InnerApp() {
                               name="nave-detail"
                               options={createFormSheetOptions(theme)}
                             />
+                            <Stack.Screen name="tag" options={createFormSheetOptions(theme)} />
                           </Stack>
                           <ThemedToaster />
                           <DeferredModals />

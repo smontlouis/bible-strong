@@ -1,22 +1,20 @@
-import React, { useCallback, useEffect, useState } from 'react'
-
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
-import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet/'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
-import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, Alert, Dimensions, Image, Linking } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import React, { useEffect, useState } from 'react'
+import { ActivityIndicator, Alert, Dimensions, Image, Linking, ScrollView } from 'react-native'
 import YoutubePlayer from 'react-native-youtube-iframe'
 import { useDispatch, useSelector } from 'react-redux'
+
 import EntityChipList from '~common/EntityChipList'
-import Modal from '~common/Modal'
-import ModalHeader from '~common/ModalHeader'
+import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
 import { VerseIds } from '~common/types'
 import Box, { VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Fab from '~common/ui/Fab'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import Paragraph from '~common/ui/Paragraph'
@@ -25,7 +23,6 @@ import Text from '~common/ui/Text'
 import type { RelationEndpoint } from '~features/studyRelations/domain'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
-import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
 import {
   detectLinkType,
   extractVideoId,
@@ -39,20 +36,13 @@ import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addLink, deleteLink, Link } from '~redux/modules/user'
 import { makeLinkByIdSelector, makeVerseKeysForLinkSelector } from '~redux/selectors/bible'
-import { unifiedTagsModalAtom } from '../../state/app'
+import { unifiedTagsModalAtom } from '~state/app'
+import { useTranslation } from 'react-i18next'
 
-interface BibleLinkModalProps {
-  linkVerses: VerseIds | undefined
-  linkId?: string | null
-  onLinkIdChange?: (linkId: string) => void
-  ref?: React.RefObject<BottomSheetModal | null>
-}
-
-const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
+const StyledTextInput = styled.TextInput(({ theme }) => ({
   color: theme.colors.default,
   height: 48,
   borderColor: theme.colors.border,
-  placeholderTextColor: theme.colors.border,
   borderWidth: 2,
   borderRadius: 10,
   paddingHorizontal: 15,
@@ -72,16 +62,31 @@ const getHostname = (url: string) => {
   }
 }
 
-const BibleLinkModal = ({ linkVerses, linkId, onLinkIdChange, ref }: BibleLinkModalProps) => {
+const parseVerseKeys = (verseKeys?: string): VerseIds | undefined => {
+  if (!verseKeys) return undefined
+  const keys = verseKeys
+    .split(',')
+    .map(key => key.trim())
+    .filter(Boolean)
+  if (!keys.length) return undefined
+  return Object.fromEntries(keys.map(key => [key, true])) as VerseIds
+}
+
+const BibleLinkScreen = () => {
+  const params = useLocalSearchParams<{ linkId?: string; verseKeys?: string }>()
+  const [savedLinkId, setSavedLinkId] = useState<string | null>(null)
+  const linkId = savedLinkId || params.linkId || null
+  const linkVerses = parseVerseKeys(params.verseKeys)
+
   const [url, setUrl] = useState('')
   const [customTitle, setCustomTitle] = useState('')
   const [isSaving, setIsSaving] = useState(false)
-
   const [isEditing, setIsEditing] = useState(false)
 
   const dispatch = useDispatch()
   const { t } = useTranslation()
-
+  const router = useRouter()
+  const theme = useTheme()
   const currentLink = useCurrentLink({ linkId })
   const selectVerseKeysForLink = makeVerseKeysForLinkSelector()
   const relatedVerseKeys = useSelector((state: RootState) =>
@@ -107,32 +112,21 @@ const BibleLinkModal = ({ linkVerses, linkId, onLinkIdChange, ref }: BibleLinkMo
   const relationCount = useRelationCount(linkEndpoint)
   const openEntityRelations = useOpenEntityRelations()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
-  const insets = useSafeAreaInsets()
-  const theme = useTheme()
-
-  const close = useCallback(() => {
-    ref?.current?.dismiss()
-  }, [ref])
 
   useEffect(() => {
-    if (linkVerses || linkId) {
-      if (currentLink) {
-        setIsEditing(false)
-      } else {
-        setIsEditing(true)
-        setUrl('')
-        setCustomTitle('')
-      }
-    } else {
-      setUrl('')
-      setCustomTitle('')
+    if (currentLink) {
+      setIsEditing(false)
+      return
     }
-  }, [linkVerses, linkId, currentLink])
 
-  const onSaveLinkFunc = async () => {
+    setIsEditing(true)
+    setUrl('')
+    setCustomTitle('')
+  }, [currentLink, linkId])
+
+  const saveLink = async () => {
     if (!url) return
 
-    // Valider l'URL
     if (!isValidUrl(url)) {
       toast.error(t('URL invalide'))
       return
@@ -142,15 +136,10 @@ const BibleLinkModal = ({ linkVerses, linkId, onLinkIdChange, ref }: BibleLinkMo
 
     const linkType = detectLinkType(url)
     const videoId = extractVideoId(url, linkType)
-
-    // Déterminer si on doit fetch les OG data
-    const shouldFetchOG =
-      !currentLink?.ogData?.title || // Nouveau lien ou pas de titre
-      currentLink?.url !== url // URL changée
+    const shouldFetchOG = !currentLink?.ogData?.title || currentLink?.url !== url
 
     let ogData = currentLink?.ogData
     if (shouldFetchOG) {
-      // Tenter le fetch (retourne null si offline)
       const fetchedData = await fetchOpenGraphData(url)
       if (fetchedData) {
         ogData = fetchedData
@@ -167,28 +156,29 @@ const BibleLinkModal = ({ linkVerses, linkId, onLinkIdChange, ref }: BibleLinkMo
       date: Date.now(),
     }
 
-    const targetVerses = linkVerses || displayedLinkVerses || {}
-
-    const action = addLink(linkData, targetVerses)
+    const action = addLink(linkData, linkVerses || displayedLinkVerses || {})
     if (action) {
       dispatch(action)
-      const savedLinkId = Object.keys(action.payload)[0]
-      if (savedLinkId) {
-        onLinkIdChange?.(savedLinkId)
+      const newLinkId = Object.keys(action.payload)[0]
+      if (newLinkId) {
+        setSavedLinkId(newLinkId)
       }
     }
+
     setIsEditing(false)
     setIsSaving(false)
   }
 
-  const deleteLinkFunc = (linkId: string) => {
+  const deleteCurrentLink = () => {
+    if (!currentLink?.id) return
+
     Alert.alert(t('Attention'), t('Voulez-vous vraiment supprimer ce lien?'), [
       { text: t('Non'), onPress: () => null, style: 'cancel' },
       {
         text: t('Oui'),
         onPress: () => {
-          dispatch(deleteLink(linkId))
-          close()
+          dispatch(deleteLink(currentLink.id!))
+          router.back()
         },
         style: 'destructive',
       },
@@ -201,7 +191,7 @@ const BibleLinkModal = ({ linkVerses, linkId, onLinkIdChange, ref }: BibleLinkMo
     setCustomTitle('')
   }
 
-  const onEditLink = () => {
+  const editLink = () => {
     setUrl(currentLink?.url || '')
     setCustomTitle(currentLink?.customTitle || '')
     setIsEditing(true)
@@ -219,117 +209,79 @@ const BibleLinkModal = ({ linkVerses, linkId, onLinkIdChange, ref }: BibleLinkMo
         toast.error(t("Impossible d'ouvrir ce lien"))
       }
     } catch (error) {
-      console.error('[BibleLinkModal] Error opening URL:', error)
+      console.error('[BibleLinkScreen] Error opening URL:', error)
       toast.error(t("Erreur lors de l'ouverture du lien"))
     }
   }
 
   const submitIsDisabled = !url || isSaving
-
   const displayTitle = currentLink ? getLinkDisplayTitle(currentLink) : ''
   const isYoutubeLink = currentLink?.linkType === 'youtube'
   const linkIcon = currentLink
     ? getLinkIcon(currentLink)
     : { icon: 'link', color: theme.colors.grey, textIcon: undefined }
   const linkIconName = linkIcon.icon as React.ComponentProps<typeof FeatherIcon>['name']
-
-  // YouTube player dimensions
   const screenWidth = Dimensions.get('window').width
-  const playerWidth = Math.min(screenWidth - 40, 600) // 40 = padding
+  const playerWidth = Math.min(screenWidth - 40, 600)
   const playerHeight = (playerWidth * 9) / 16
 
   return (
-    <>
-      <Modal.Body
-        ref={ref}
-        topInset={useSafeAreaInsets().top}
-        enableDynamicSizing
-        headerComponent={
-          <ModalHeader
-            title={t('Lien')}
-            subTitle={reference}
-            rightComponent={
-              currentLink ? (
-                <PopOverMenu
-                  width={54}
-                  height={54}
-                  popover={
-                    <>
-                      <MenuOption onSelect={onEditLink}>
-                        <Box row alignItems="center">
-                          <FeatherIcon name="edit-2" size={15} />
-                          <Text marginLeft={10}>{t('Éditer')}</Text>
-                        </Box>
-                      </MenuOption>
-                      <MenuOption
-                        onSelect={() =>
-                          setUnifiedTagsModal({
-                            mode: 'select',
-                            id: currentLink.id!,
-                            entity: 'links',
-                            title:
-                              currentLink.ogData?.title ||
-                              currentLink.customTitle ||
-                              currentLink.url ||
-                              '',
-                          })
-                        }
-                      >
-                        <Box row alignItems="center">
-                          <FeatherIcon name="tag" size={15} />
-                          <Text marginLeft={10}>{t('Éditer les tags')}</Text>
-                        </Box>
-                      </MenuOption>
-                      <MenuOption
-                        onSelect={() => linkEndpoint && openEntityRelations(linkEndpoint)}
-                      >
-                        <Box row alignItems="center">
-                          <FeatherIcon name="git-branch" size={15} />
-                          <Text marginLeft={10}>{t('Éditer les relations')}</Text>
-                        </Box>
-                      </MenuOption>
-                      <MenuOption onSelect={() => deleteLinkFunc(currentLink?.id!)}>
-                        <Box row alignItems="center">
-                          <FeatherIcon name="trash-2" size={15} />
-                          <Text marginLeft={10}>{t('Supprimer')}</Text>
-                        </Box>
-                      </MenuOption>
-                    </>
-                  }
-                />
-              ) : undefined
-            }
-          />
+    <FormSheetScreen isFormSheet>
+      <Header
+        title={t('Lien')}
+        subTitle={reference}
+        rightComponent={
+          currentLink ? (
+            <PopOverMenu
+              width={54}
+              height={54}
+              popover={
+                <>
+                  <MenuOption onSelect={editLink}>
+                    <Box row alignItems="center">
+                      <FeatherIcon name="edit-2" size={15} />
+                      <Text marginLeft={10}>{t('Éditer')}</Text>
+                    </Box>
+                  </MenuOption>
+                  <MenuOption
+                    onSelect={() =>
+                      setUnifiedTagsModal({
+                        mode: 'select',
+                        id: currentLink.id!,
+                        entity: 'links',
+                        title:
+                          currentLink.ogData?.title ||
+                          currentLink.customTitle ||
+                          currentLink.url ||
+                          '',
+                      })
+                    }
+                  >
+                    <Box row alignItems="center">
+                      <FeatherIcon name="tag" size={15} />
+                      <Text marginLeft={10}>{t('Éditer les tags')}</Text>
+                    </Box>
+                  </MenuOption>
+                  <MenuOption onSelect={() => linkEndpoint && openEntityRelations(linkEndpoint)}>
+                    <Box row alignItems="center">
+                      <FeatherIcon name="git-branch" size={15} />
+                      <Text marginLeft={10}>{t('Éditer les relations')}</Text>
+                    </Box>
+                  </MenuOption>
+                  <MenuOption onSelect={deleteCurrentLink}>
+                    <Box row alignItems="center">
+                      <FeatherIcon name="trash-2" size={15} />
+                      <Text marginLeft={10}>{t('Supprimer')}</Text>
+                    </Box>
+                  </MenuOption>
+                </>
+              }
+            />
+          ) : undefined
         }
-        footerComponent={props =>
-          isEditing ? (
-            <BottomSheetFooter bottomInset={insets.bottom} {...props}>
-              <HStack py={10} px={20} justifyContent="flex-end" bg="reverse">
-                {currentLink && (
-                  <Box>
-                    <Button reverse onPress={cancelEditing}>
-                      {t('Annuler')}
-                    </Button>
-                  </Box>
-                )}
-                <Box>
-                  <Button disabled={submitIsDisabled} onPress={onSaveLinkFunc}>
-                    {isSaving ? <ActivityIndicator size="small" color="white" /> : t('Sauvegarder')}
-                  </Button>
-                </Box>
-              </HStack>
-            </BottomSheetFooter>
-          ) : (
-            <BottomSheetFooter bottomInset={insets.bottom} {...props}>
-              <HStack py={5} px={20} justifyContent="flex-end" bg="reverse">
-                <Box h={MODAL_FOOTER_HEIGHT} center>
-                  <Fab icon="edit-2" onPress={onEditLink} />
-                </Box>
-              </HStack>
-            </BottomSheetFooter>
-          )
-        }
-      >
+      />
+
+      <ScrollView keyboardShouldPersistTaps="handled">
         <VStack gap={10} paddingHorizontal={20}>
           {isEditing && (
             <VStack py={20} gap={20}>
@@ -337,6 +289,7 @@ const BibleLinkModal = ({ linkVerses, linkId, onLinkIdChange, ref }: BibleLinkMo
                 <Text>{t('URL du lien')}</Text>
                 <StyledTextInput
                   placeholder={t('URL du lien')}
+                  placeholderTextColor={theme.colors.border}
                   onChangeText={setUrl}
                   value={url}
                   autoCapitalize="none"
@@ -346,9 +299,9 @@ const BibleLinkModal = ({ linkVerses, linkId, onLinkIdChange, ref }: BibleLinkMo
               </VStack>
               <VStack gap={5}>
                 <Text>{t('Titre personnalisé (optionnel)')}</Text>
-
                 <StyledTextInput
                   placeholder={t('Titre personnalisé (optionnel)')}
+                  placeholderTextColor={theme.colors.border}
                   onChangeText={setCustomTitle}
                   value={customTitle}
                 />
@@ -358,22 +311,20 @@ const BibleLinkModal = ({ linkVerses, linkId, onLinkIdChange, ref }: BibleLinkMo
 
           {!isEditing && currentLink && (
             <Box py={20}>
-              {/* YouTube Player */}
               {isYoutubeLink && currentLink.videoId && (
                 <Box mb={20} borderRadius={10} overflow="hidden" bg="lightGrey">
                   <YoutubePlayer
                     height={playerHeight}
                     width={playerWidth}
                     videoId={currentLink.videoId}
-                    onReady={() => console.log('[BibleLinkModal] YouTube ready')}
-                    onError={(e: string) => console.log('[BibleLinkModal] YouTube error:', e)}
+                    onReady={() => console.log('[BibleLinkScreen] YouTube ready')}
+                    onError={(e: string) => console.log('[BibleLinkScreen] YouTube error:', e)}
                     viewContainerStyle={{ borderRadius: 10, overflow: 'hidden' }}
                     webviewStyle={{ borderRadius: 10, overflow: 'hidden' }}
                   />
                 </Box>
               )}
 
-              {/* Link preview image */}
               {!isYoutubeLink && currentLink.ogData?.image && (
                 <Image
                   source={{ uri: currentLink.ogData.image }}
@@ -411,7 +362,6 @@ const BibleLinkModal = ({ linkVerses, linkId, onLinkIdChange, ref }: BibleLinkMo
                 </Paragraph>
               )}
 
-              {/* Open in browser button */}
               {!isYoutubeLink && (
                 <Button reverse onPress={openInBrowser}>
                   <HStack alignItems="center">
@@ -421,7 +371,6 @@ const BibleLinkModal = ({ linkVerses, linkId, onLinkIdChange, ref }: BibleLinkMo
                 </Button>
               )}
 
-              {/* Tags */}
               <EntityChipList
                 tags={currentLink?.tags}
                 relationCount={relationCount}
@@ -430,9 +379,32 @@ const BibleLinkModal = ({ linkVerses, linkId, onLinkIdChange, ref }: BibleLinkMo
             </Box>
           )}
         </VStack>
-      </Modal.Body>
-    </>
+      </ScrollView>
+
+      {isEditing ? (
+        <HStack py={10} px={20} justifyContent="flex-end" bg="reverse">
+          {currentLink && (
+            <Box>
+              <Button reverse onPress={cancelEditing}>
+                {t('Annuler')}
+              </Button>
+            </Box>
+          )}
+          <Box>
+            <Button disabled={submitIsDisabled} onPress={saveLink}>
+              {isSaving ? <ActivityIndicator size="small" color="white" /> : t('Sauvegarder')}
+            </Button>
+          </Box>
+        </HStack>
+      ) : (
+        <HStack py={5} px={20} justifyContent="flex-end" bg="reverse">
+          <Box h={50} center>
+            <Fab icon="edit-2" onPress={editLink} />
+          </Box>
+        </HStack>
+      )}
+    </FormSheetScreen>
   )
 }
 
-export default BibleLinkModal
+export default BibleLinkScreen

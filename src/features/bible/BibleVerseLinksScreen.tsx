@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { useLocalSearchParams } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
 
-import BibleLinkModal from './BibleLinkModal'
 import BibleLinkItem from './BibleLinkItem'
 import BibleLinksSettingsModal from './BibleLinksSettingsModal'
 import Container from '~common/ui/Container'
@@ -37,16 +36,15 @@ const BibleVerseLinks = () => {
   const withBack = params.withBack === 'true'
   const verse = params.verse || ''
   const { t } = useTranslation()
+  const router = useRouter()
 
   const [title, setTitle] = useState('')
   const [links, setLinks] = useState<TLink[]>([])
-  const [currentLinkId, setCurrentLinkId] = useState<string | null>(null)
   const [selectedChip, setSelectedChip] = useState<Tag | null>(null)
   const [linkSettingsId, setLinkSettingsId] = useState<string | null>(null)
   const _links = useSelector(selectLinks)
   const relations = useSelector(selectRelations)
   const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
-  const linkModal = useBottomSheetModal()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const linkSettingsModal = useBottomSheetModal()
   const openEntityRelations = useOpenEntityRelations()
@@ -141,8 +139,7 @@ const BibleVerseLinks = () => {
   }, [verse, _links, relations])
 
   const openLinkModal = (linkId: string) => {
-    setCurrentLinkId(linkId)
-    linkModal.open()
+    router.push({ pathname: '/link', params: { linkId } })
   }
 
   const renderLink = ({ item, index }: { item: TLink; index: number }) => {
@@ -194,12 +191,6 @@ const BibleVerseLinks = () => {
           message={t("Vous n'avez pas encore de liens...")}
         />
       )}
-      <BibleLinkModal
-        ref={linkModal.getRef()}
-        linkVerses={undefined}
-        linkId={currentLinkId}
-        onLinkIdChange={setCurrentLinkId}
-      />
       <BibleLinksSettingsModal
         ref={linkSettingsModal.getRef()}
         title={
