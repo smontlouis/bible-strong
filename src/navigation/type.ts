@@ -49,6 +49,11 @@ type BibleVerseDetailScreenProps = {
 
 type BibleVerseNotesScreenProps = undefined
 
+type NoteScreenProps = {
+  noteId?: string
+  verseKeys?: string
+}
+
 type BibleVerseLinksScreenProps = {
   verse?: string
   withBack?: boolean
@@ -146,6 +151,7 @@ export type MainStackProps = {
   VersionSelector: VersionSelectorProps
   BibleVerseDetail: BibleVerseDetailScreenProps
   BibleVerseNotes: BibleVerseNotesScreenProps
+  Note: NoteScreenProps
   BibleVerseLinks: BibleVerseLinksScreenProps
   Highlights: undefined
   Strong: StrongScreenProps

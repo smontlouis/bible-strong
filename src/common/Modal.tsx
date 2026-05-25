@@ -81,7 +81,7 @@ const Body = ({
   )
 
   const renderContainerComponent = React.useCallback(
-    ({ children }: { children: React.ReactNode }) => (
+    ({ children }: { children?: React.ReactNode }) => (
       <FullWindowOverlay>{children}</FullWindowOverlay>
     ),
     []

@@ -11,6 +11,7 @@ interface Props {
   hasBackButton?: boolean
   isModal?: boolean
   title?: string
+  subTitle?: string
   fontSize?: number
   onTitlePress?: () => void
   rightComponent?: JSX.Element
@@ -23,6 +24,7 @@ const Header = ({
   hasBackButton,
   isModal,
   title,
+  subTitle,
   fontSize = 20,
   onTitlePress,
   rightComponent,
@@ -43,9 +45,26 @@ const Header = ({
           )}
         </Box>
         <Box flex center>
-          <Text numberOfLines={1} title fontSize={smallSize ? 16 : fontSize} onPress={onTitlePress}>
-            {title}
-          </Text>
+          {subTitle ? (
+            <Box row alignItems="center" maxWidth="100%">
+              <Text numberOfLines={1} title fontSize={smallSize ? 14 : 16} onPress={onTitlePress}>
+                {title}
+              </Text>
+              <Box mx={8} size={4} borderRadius={2} bg="tertiary" />
+              <Text numberOfLines={1} title fontSize={smallSize ? 14 : 16} color="grey" shrink={1}>
+                {subTitle}
+              </Text>
+            </Box>
+          ) : (
+            <Text
+              numberOfLines={1}
+              title
+              fontSize={smallSize ? 16 : fontSize}
+              onPress={onTitlePress}
+            >
+              {title}
+            </Text>
+          )}
         </Box>
         {rightComponent ? (
           <Box justifyContent="center" alignItems="flex-end" overflow="visible">

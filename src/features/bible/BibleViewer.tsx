@@ -17,6 +17,7 @@ import type { Bookmark } from '~common/types'
 import { BibleResource, Pericope, SelectedCode, Verse, VerseIds } from '~common/types'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import BookmarkModal from '~features/bookmarks/BookmarkModal'
+import { useOpenNote } from '~features/notes/useOpenNote'
 import AddToStudyModal from '~features/studies/AddToStudyModal'
 import { useAddVerseToStudy } from '~features/studies/hooks/useAddVerseToStudy'
 import VerseFormatBottomSheet from '~features/studies/VerseFormatBottomSheet'
@@ -62,7 +63,6 @@ import {
 import { PortalHost } from 'react-native-teleport'
 import { getBibleDOMDestination } from './SharedBibleDOM'
 import SnapshotPlaceholder from './SnapshotPlaceholder'
-import AnnotationNoteModal from './AnnotationNoteModal'
 import AnnotationToolbar from './AnnotationToolbar'
 import {
   BibleDOMWrapper,
@@ -83,7 +83,6 @@ import {
   selectedVersesIncludeFocus,
 } from './selectedVersesActions'
 import BibleLinkModal from './BibleLinkModal'
-import BibleNoteModal from './BibleNoteModal'
 import BibleParamsModal from './BibleParamsModal'
 import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
 import BibleFooter from './footer/BibleFooter'
@@ -135,6 +134,7 @@ const BibleViewer = ({
 }: BibleViewerProps) => {
   const { t } = useTranslation()
   const openEntityRelations = useOpenEntityRelations()
+  const openNote = useOpenNote()
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
   const bibleDataRefreshSignal = useAtomValue(bibleDataRefreshSignalAtom)
 
@@ -146,9 +146,7 @@ const BibleViewer = ({
   const [comments, setComments] = useState<{ [key: string]: string } | null>(null)
   const [redWords, setRedWords] = useState<RedWordsByVerse | null>(null)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
-  const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
   const [linkVerses, setLinkVerses] = useState<VerseIds | undefined>(undefined)
-  const [currentNoteId, setCurrentNoteId] = useState<string | null>(null)
   const [currentLinkId, setCurrentLinkId] = useState<string | null>(null)
   const strongModal = useBottomSheet()
   const [selectedCode, setSelectedCodeState] = useState<SelectedCode | null>(null)
@@ -163,13 +161,11 @@ const BibleViewer = ({
   const resourceModal = useBottomSheet()
   const versesModal = useBottomSheet()
   const linkModal = useBottomSheetModal()
-  const noteModal = useBottomSheetModal()
   const createRelationModal = useBottomSheetModal()
 
   // Annotation mode
   const annotationMode = useAnnotationMode()
   const annotationToolbar = useBottomSheet()
-  const annotationNoteModal = useBottomSheetModal()
 
   // Cross-version annotations modal
   const crossVersionModal = useBottomSheetModal()
@@ -272,8 +268,8 @@ const BibleViewer = ({
   // Handler for opening annotation note modal
   const handleAnnotationNotePress = useCallback(() => {
     if (!annotationMode.selectedAnnotation) return
-    annotationNoteModal.open()
-  }, [annotationMode.selectedAnnotation, annotationNoteModal])
+    openNote({ noteId: `annotation:${annotationMode.selectedAnnotation.id}` })
+  }, [annotationMode.selectedAnnotation, openNote])
 
   // Handler for opening annotation tags modal
   const handleAnnotationTagsPress = useCallback(() => {
@@ -520,9 +516,7 @@ const BibleViewer = ({
   }
 
   const toggleCreateNote = () => {
-    setCurrentNoteId(null)
-    setNoteVerses(selectedVerses)
-    noteModal.open()
+    openNote({ verseKeys: Object.keys(selectedVerses) })
   }
 
   const toggleCreateLink = () => {
@@ -564,17 +558,8 @@ const BibleViewer = ({
     linkModal.open()
   }
 
-  const openNoteModal = (noteId: string, verseIds?: string[]) => {
-    setCurrentNoteId(noteId)
-    setNoteVerses(
-      verseIds?.length
-        ? verseIds.reduce((acc, verseId) => {
-            acc[verseId] = true
-            return acc
-          }, {} as VerseIds)
-        : undefined
-    )
-    noteModal.open()
+  const openBibleNote = (noteId: string, verseIds?: string[]) => {
+    openNote({ noteId, verseKeys: verseIds })
   }
 
   const onChangeResourceTypeSelectVerse = (res: BibleResource, ver: string) => {
@@ -763,7 +748,7 @@ const BibleViewer = ({
     settings,
     verseToScroll: verse,
     pericopeChapter: getPericopeChapter(pericope, displayedBook, displayedChapter),
-    openNoteModal,
+    openNote: openBibleNote,
     openLinkModal,
     setSelectedCode,
     selectedCode,
@@ -934,12 +919,6 @@ const BibleViewer = ({
         onEnterAnnotationMode={parallelVersions.length > 0 ? undefined : handleEnterAnnotationMode}
         focusVerses={focusVerses}
       />
-      <BibleNoteModal
-        ref={noteModal.getRef()}
-        noteVerses={noteVerses}
-        noteId={currentNoteId}
-        onNoteIdChange={setCurrentNoteId}
-      />
       <BibleLinkModal
         ref={linkModal.getRef()}
         linkVerses={linkVerses}
@@ -1006,14 +985,6 @@ const BibleViewer = ({
         onTagsPress={handleAnnotationTagsPress}
         tagsCount={Object.keys(annotationMode.selectedAnnotation?.tags || {}).length}
         isEnabled={annotationMode.enabled}
-      />
-      <AnnotationNoteModal
-        ref={annotationNoteModal.getRef()}
-        annotationId={annotationMode.selectedAnnotation?.id ?? null}
-        annotationText={annotationMode.selectedAnnotation?.text ?? ''}
-        annotationVerseKey={annotationMode.selectedAnnotation?.verseKey ?? ''}
-        existingNoteId={annotationMode.selectedAnnotation?.noteId}
-        version={version}
       />
       <CrossVersionAnnotationsModal
         bottomSheetRef={crossVersionModal.getRef()}

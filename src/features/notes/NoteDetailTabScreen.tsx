@@ -4,7 +4,7 @@ import { produce } from 'immer'
 import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, Share } from 'react-native'
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, Share } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import books from '~assets/bible_versions/books-desc'
@@ -14,8 +14,8 @@ import PopOverMenu from '~common/PopOverMenu'
 import { VerseIds } from '~common/types'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
-import Container from '~common/ui/Container'
 import Fab from '~common/ui/Fab'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import { HStack } from '~common/ui/Stack'
@@ -31,6 +31,7 @@ import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import type { RelationEndpoint } from '~redux/modules/user'
 import { addNote, deleteNote } from '~redux/modules/user'
+import { updateWordAnnotation } from '~redux/modules/user/wordAnnotations'
 import {
   makeNoteByKeySelector,
   makeVerseGroupsForNoteSelector,
@@ -50,11 +51,19 @@ const verseKeysToVerseIds = (verseKeys: string[]): VerseIds =>
 
 interface NoteDetailTabScreenProps {
   notesAtom: PrimitiveAtom<NotesTab>
-  noteId: string
+  noteId?: string
+  initialVerseKeys?: string[]
   onBackPress?: () => void
+  isFormSheet?: boolean
 }
 
-const NoteDetailTabScreen = ({ notesAtom, noteId, onBackPress }: NoteDetailTabScreenProps) => {
+const NoteDetailTabScreen = ({
+  notesAtom,
+  noteId,
+  initialVerseKeys = [],
+  onBackPress,
+  isFormSheet = false,
+}: NoteDetailTabScreenProps) => {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
@@ -68,8 +77,10 @@ const NoteDetailTabScreen = ({ notesAtom, noteId, onBackPress }: NoteDetailTabSc
   const [description, setDescription] = useState('')
   const [isEditing, setIsEditing] = useState(false)
   const [webViewHeight, setWebViewHeight] = useState(100)
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
   const { bottomBarHeight } = useBottomBarHeightInTab()
   const { colorScheme } = useCurrentThemeSelector()
+  const isCreating = !noteId
 
   const handleSizeChange = (_width: number, height: number) => {
     setWebViewHeight(height)
@@ -85,21 +96,41 @@ const NoteDetailTabScreen = ({ notesAtom, noteId, onBackPress }: NoteDetailTabSc
     }
   }, [isCurrentTab, setIsFullScreenBible])
 
+  useEffect(() => {
+    if (!isFormSheet) return
+
+    const showSubscription = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      event => setKeyboardHeight(event.endCoordinates.height)
+    )
+    const hideSubscription = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setKeyboardHeight(0)
+    )
+
+    return () => {
+      showSubscription.remove()
+      hideSubscription.remove()
+    }
+  }, [isFormSheet])
+
   const selectNoteByKey = makeNoteByKeySelector()
-  const currentNote = useSelector((state: RootState) => selectNoteByKey(state, noteId))
+  const currentNote = useSelector((state: RootState) => selectNoteByKey(state, noteId || ''))
 
   // Get annotation data if this is an annotation note
-  const isAnnotationNote = noteId.startsWith('annotation:')
-  const annotationId = isAnnotationNote ? noteId.replace('annotation:', '') : ''
+  const isAnnotationNote = Boolean(noteId?.startsWith('annotation:'))
+  const annotationId = isAnnotationNote && noteId ? noteId.replace('annotation:', '') : ''
   const selectAnnotationById = makeWordAnnotationByIdSelector()
   const annotation = useSelector((state: RootState) => selectAnnotationById(state, annotationId))
   const isMissingAnnotation = isAnnotationNote && !annotation
+  const isCreatingAnnotationNote = Boolean(isAnnotationNote && annotation && !currentNote)
   const selectVerseKeysForNote = makeVerseKeysForNoteSelector()
   const relatedVerseKeys = useSelector((state: RootState) => selectVerseKeysForNote(state, noteId))
   const selectVerseGroupsForNote = makeVerseGroupsForNoteSelector()
   const relatedVerseGroups = useSelector((state: RootState) =>
     selectVerseGroupsForNote(state, noteId)
   )
+  const hasInitialVerseKeys = initialVerseKeys.length > 0
 
   // Parse noteId to get verse references for display
   const noteVerses = useMemo(() => {
@@ -111,11 +142,12 @@ const NoteDetailTabScreen = ({ notesAtom, noteId, onBackPress }: NoteDetailTabSc
       const verseKey = annotation.ranges[0]?.verseKey
       return verseKey ? { [verseKey]: true as const } : ({} as VerseIds)
     }
-    return relatedVerseKeys.reduce((acc, key) => {
+    const verseKeys = hasInitialVerseKeys ? initialVerseKeys : relatedVerseKeys
+    return verseKeys.reduce((acc, key) => {
       acc[key] = true as const
       return acc
     }, {} as VerseIds)
-  }, [isAnnotationNote, annotation, relatedVerseKeys])
+  }, [isAnnotationNote, annotation, hasInitialVerseKeys, initialVerseKeys, relatedVerseKeys])
   const hasNoteVerses = Object.keys(noteVerses).length > 0
 
   const reference = useMemo(() => {
@@ -130,11 +162,13 @@ const NoteDetailTabScreen = ({ notesAtom, noteId, onBackPress }: NoteDetailTabSc
     return baseRef
   }, [noteVerses, isAnnotationNote, annotation, isMissingAnnotation, t])
 
-  const noteEndpoint: Extract<RelationEndpoint, { type: 'note' }> = {
-    type: 'note',
-    noteId,
-    label: currentNote?.title || currentNote?.description || reference,
-  }
+  const noteEndpoint: Extract<RelationEndpoint, { type: 'note' }> | null = noteId
+    ? {
+        type: 'note',
+        noteId,
+        label: currentNote?.title || currentNote?.description || reference,
+      }
+    : null
   const relationCount = useRelationCount(noteEndpoint)
 
   // Go back to notes list
@@ -158,9 +192,13 @@ const NoteDetailTabScreen = ({ notesAtom, noteId, onBackPress }: NoteDetailTabSc
       setTitle(currentNote.title || '')
       setDescription(currentNote.description || '')
       setIsEditing(false)
+    } else if (isCreating || isCreatingAnnotationNote) {
+      setTitle('')
+      setDescription('')
+      setIsEditing(true)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [noteId])
+  }, [noteId, isCreating, isCreatingAnnotationNote])
 
   // Update tab title when note title changes
   useEffect(() => {
@@ -174,20 +212,40 @@ const NoteDetailTabScreen = ({ notesAtom, noteId, onBackPress }: NoteDetailTabSc
   }, [currentNote?.title, setNotesTab])
 
   const onSaveNote = () => {
-    const action = addNote({ ...currentNote, title, description, date: Date.now() }, noteVerses)
+    const noteKey = isAnnotationNote && noteId ? noteId : currentNote?.id
+    const targetVerses =
+      isAnnotationNote && noteKey ? ({ [noteKey]: true } as VerseIds) : noteVerses
+    const action = addNote(
+      { ...currentNote, ...(noteKey ? { id: noteKey } : {}), title, description, date: Date.now() },
+      targetVerses
+    )
     if (action) {
       dispatch(action)
+      const savedNoteId = Object.keys(action.payload)[0]
+      if (savedNoteId) {
+        if (isAnnotationNote && annotationId) {
+          dispatch(updateWordAnnotation(annotationId, { noteId: savedNoteId }))
+        }
+        if (isCreating) {
+          router.setParams({ noteId: savedNoteId })
+        }
+      }
     }
     setIsEditing(false)
   }
 
   const deleteNoteFunc = () => {
+    if (!noteId) return
+
     Alert.alert(t('Attention'), t('Voulez-vous vraiment supprimer cette note?'), [
       { text: t('Non'), onPress: () => null, style: 'cancel' },
       {
         text: t('Oui'),
         onPress: () => {
           dispatch(deleteNote(noteId))
+          if (isAnnotationNote && annotationId) {
+            dispatch(updateWordAnnotation(annotationId, { noteId: undefined }))
+          }
           goBack()
         },
         style: 'destructive',
@@ -196,6 +254,11 @@ const NoteDetailTabScreen = ({ notesAtom, noteId, onBackPress }: NoteDetailTabSc
   }
 
   const cancelEditing = () => {
+    if (!currentNote) {
+      goBack()
+      return
+    }
+
     setTitle(currentNote?.title || '')
     setDescription(currentNote?.description || '')
     setIsEditing(false)
@@ -239,7 +302,7 @@ ${currentNote.description}
       verseKey = annotation.ranges[0]?.verseKey
       version = annotation.version
     } else {
-      verseKey = relatedVerseKeys[0]
+      verseKey = initialVerseKeys[0] || relatedVerseKeys[0]
     }
 
     if (!verseKey) {
@@ -269,25 +332,27 @@ ${currentNote.description}
   const submitIsDisabled = !title || !description
 
   // Show message if note doesn't exist
-  if (!currentNote) {
-    return (
-      <Container>
+  if (noteId && !currentNote && !isCreatingAnnotationNote) {
+    const content = (
+      <>
         <Box flex center px={20}>
           <Text fontSize={18} color="grey" textAlign="center" mb={20}>
             {t("Cette note n'existe plus")}
           </Text>
           <Button onPress={goBack}>{t('Retour aux notes')}</Button>
         </Box>
-      </Container>
+      </>
     )
+
+    return <FormSheetScreen isFormSheet={isFormSheet}>{content}</FormSheetScreen>
   }
 
   if (isMissingAnnotation) {
-    return (
-      <Container>
+    const content = (
+      <>
         <Header
           title={t('Annotation introuvable')}
-          hasBackButton={Boolean(onBackPress)}
+          hasBackButton={!isFormSheet && Boolean(onBackPress)}
           onCustomBackPress={goBack}
         />
         <Box flex center px={20}>
@@ -296,80 +361,89 @@ ${currentNote.description}
           </Text>
           <Button onPress={goBack}>{t('Retour aux notes')}</Button>
         </Box>
-      </Container>
+      </>
     )
+
+    return <FormSheetScreen isFormSheet={isFormSheet}>{content}</FormSheetScreen>
   }
 
-  return (
-    <Container>
+  const content = (
+    <>
       <Header
-        title={reference}
-        hasBackButton={Boolean(onBackPress)}
+        title={isAnnotationNote ? t("Note d'annotation") : t('Note')}
+        subTitle={reference}
+        hasBackButton={!isFormSheet && Boolean(onBackPress)}
         onCustomBackPress={goBack}
         rightComponent={
-          <PopOverMenu
-            width={54}
-            height={54}
-            popover={
-              <>
-                <MenuOption onSelect={shareNote} closeBeforeSelect>
-                  <Box row alignItems="center">
-                    <FeatherIcon name="share" size={15} />
-                    <Text marginLeft={10}>{t('Partager')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption onSelect={onEditNote}>
-                  <Box row alignItems="center">
-                    <FeatherIcon name="edit-2" size={15} />
-                    <Text marginLeft={10}>{t('Éditer')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption
-                  onSelect={() =>
-                    setUnifiedTagsModal({
-                      mode: 'select',
-                      id: currentNote.id!,
-                      entity: 'notes',
-                    })
-                  }
-                >
-                  <Box row alignItems="center">
-                    <FeatherIcon name="tag" size={15} />
-                    <Text marginLeft={10}>{t('Éditer les tags')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption onSelect={() => openEntityRelations(noteEndpoint)}>
-                  <Box row alignItems="center">
-                    <FeatherIcon name="git-merge" size={15} />
-                    <Text marginLeft={10}>{t('Éditer les relations')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption onSelect={navigateToBible}>
-                  <Box row alignItems="center">
-                    <FeatherIcon name="book-open" size={15} />
-                    <Text marginLeft={10}>{t('Voir dans la Bible')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption onSelect={deleteNoteFunc}>
-                  <Box row alignItems="center">
-                    <FeatherIcon name="trash-2" size={15} />
-                    <Text marginLeft={10}>{t('Supprimer')}</Text>
-                  </Box>
-                </MenuOption>
-              </>
-            }
-          />
+          currentNote ? (
+            <PopOverMenu
+              width={54}
+              height={54}
+              popover={
+                <>
+                  <MenuOption onSelect={shareNote} closeBeforeSelect>
+                    <Box row alignItems="center">
+                      <FeatherIcon name="share" size={15} />
+                      <Text marginLeft={10}>{t('Partager')}</Text>
+                    </Box>
+                  </MenuOption>
+                  <MenuOption onSelect={onEditNote}>
+                    <Box row alignItems="center">
+                      <FeatherIcon name="edit-2" size={15} />
+                      <Text marginLeft={10}>{t('Éditer')}</Text>
+                    </Box>
+                  </MenuOption>
+                  <MenuOption
+                    onSelect={() =>
+                      setUnifiedTagsModal({
+                        mode: 'select',
+                        id: currentNote.id!,
+                        entity: 'notes',
+                      })
+                    }
+                  >
+                    <Box row alignItems="center">
+                      <FeatherIcon name="tag" size={15} />
+                      <Text marginLeft={10}>{t('Éditer les tags')}</Text>
+                    </Box>
+                  </MenuOption>
+                  {noteEndpoint ? (
+                    <MenuOption onSelect={() => openEntityRelations(noteEndpoint)}>
+                      <Box row alignItems="center">
+                        <FeatherIcon name="git-merge" size={15} />
+                        <Text marginLeft={10}>{t('Éditer les relations')}</Text>
+                      </Box>
+                    </MenuOption>
+                  ) : null}
+                  <MenuOption onSelect={navigateToBible}>
+                    <Box row alignItems="center">
+                      <FeatherIcon name="book-open" size={15} />
+                      <Text marginLeft={10}>{t('Voir dans la Bible')}</Text>
+                    </Box>
+                  </MenuOption>
+                  <MenuOption onSelect={deleteNoteFunc}>
+                    <Box row alignItems="center">
+                      <FeatherIcon name="trash-2" size={15} />
+                      <Text marginLeft={10}>{t('Supprimer')}</Text>
+                    </Box>
+                  </MenuOption>
+                </>
+              }
+            />
+          ) : undefined
         }
       />
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={!isFormSheet && Platform.OS === 'ios' ? 'padding' : undefined}
         style={{ flex: 1 }}
       >
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
             padding: 20,
-            paddingBottom: isEditing ? FOOTER_HEIGHT + bottomBarHeight + 20 : insets.bottom + 100,
+            paddingBottom: isEditing
+              ? FOOTER_HEIGHT + (isFormSheet ? keyboardHeight : bottomBarHeight) + 20
+              : insets.bottom + 100,
           }}
         >
           <Box gap={20}>
@@ -383,7 +457,7 @@ ${currentNote.description}
                 </Text>
               </Box>
             ) : hasNoteVerses ? (
-              relatedVerseGroups.length ? (
+              !hasInitialVerseKeys && relatedVerseGroups.length ? (
                 relatedVerseGroups.map((verseKeys, index) => (
                   <VerseAccordion
                     key={`${verseKeys.join('/')}-${index}`}
@@ -414,12 +488,16 @@ ${currentNote.description}
             <EntityChipList
               tags={currentNote?.tags}
               relationCount={relationCount}
-              onRelationPress={() => openEntityRelations(noteEndpoint)}
+              onRelationPress={() => noteEndpoint && openEntityRelations(noteEndpoint)}
             />
           </Box>
         </ScrollView>
         {isEditing && (
           <HStack
+            position={isFormSheet ? 'absolute' : undefined}
+            left={isFormSheet ? 0 : undefined}
+            right={isFormSheet ? 0 : undefined}
+            bottom={isFormSheet ? keyboardHeight : undefined}
             py={10}
             px={20}
             justifyContent="flex-end"
@@ -438,12 +516,18 @@ ${currentNote.description}
         )}
       </KeyboardAvoidingView>
       {!isEditing && (
-        <Box position="absolute" bottom={bottomBarHeight + 20} right={20}>
+        <Box
+          position="absolute"
+          bottom={(isFormSheet ? insets.bottom : bottomBarHeight) + 20}
+          right={20}
+        >
           <Fab icon="edit-2" onPress={onEditNote} />
         </Box>
       )}
-    </Container>
+    </>
   )
+
+  return <FormSheetScreen isFormSheet={isFormSheet}>{content}</FormSheetScreen>
 }
 
 export default NoteDetailTabScreen

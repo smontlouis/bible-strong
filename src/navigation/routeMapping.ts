@@ -17,6 +17,7 @@ export const routeMapping: Record<keyof MainStackProps, string> = {
   VersionSelector: '/version-selector',
   BibleVerseDetail: '/bible-verse-detail',
   BibleVerseNotes: '/bible-verse-notes',
+  Note: '/note',
   BibleVerseLinks: '/bible-verse-links',
   Highlights: '/highlights',
   Strong: '/strong',

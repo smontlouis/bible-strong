@@ -670,7 +670,7 @@ export const selectAvailableAnnotationVersions = createSelector(
   }
 )
 
-// Selector for note by id (for BibleNoteModal)
+// Selector for note by id
 export const makeNoteByIdSelector = () =>
   createSelector(
     [selectNotes, (_: RootState, noteId: string) => noteId],

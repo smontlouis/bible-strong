@@ -1,10 +1,9 @@
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { atom } from 'jotai'
 import { useRef } from 'react'
-import Container from '~common/ui/Container'
-import Text from '~common/ui/Text'
 import type { NotesTab } from '~state/tabs'
 import NoteDetailTabScreen from './NoteDetailTabScreen'
+import { parseNoteVerseKeysParam } from './routeParams'
 
 const createNoteRouteAtom = (noteId?: string) =>
   atom<NotesTab>({
@@ -17,22 +16,17 @@ const createNoteRouteAtom = (noteId?: string) =>
 
 const NoteScreen = () => {
   const router = useRouter()
-  const { noteId } = useLocalSearchParams<{ noteId?: string }>()
+  const { noteId, verseKeys } = useLocalSearchParams<{ noteId?: string; verseKeys?: string }>()
   const notesAtomRef = useRef(createNoteRouteAtom(noteId))
-
-  if (!noteId) {
-    return (
-      <Container center px={20}>
-        <Text color="grey">Note introuvable</Text>
-      </Container>
-    )
-  }
+  const initialVerseKeys = parseNoteVerseKeysParam(verseKeys)
 
   return (
     <NoteDetailTabScreen
       notesAtom={notesAtomRef.current}
       noteId={noteId}
+      initialVerseKeys={initialVerseKeys}
       onBackPress={router.back}
+      isFormSheet
     />
   )
 }

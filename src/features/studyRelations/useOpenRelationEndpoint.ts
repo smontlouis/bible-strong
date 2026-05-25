@@ -1,12 +1,14 @@
 import { useRouter } from 'expo-router'
 import { Linking } from 'react-native'
 import books from '~assets/bible_versions/books-desc'
+import { useOpenNote } from '~features/notes/useOpenNote'
 import { toast } from '~helpers/toast'
 import i18n from '~i18n'
 import type { RelationEndpoint } from './domain'
 
 export const useOpenRelationEndpoint = () => {
   const router = useRouter()
+  const openNote = useOpenNote()
 
   return (endpoint: RelationEndpoint) => {
     switch (endpoint.type) {
@@ -25,10 +27,7 @@ export const useOpenRelationEndpoint = () => {
         break
       }
       case 'note':
-        router.push({
-          pathname: '/note',
-          params: { noteId: endpoint.noteId },
-        })
+        openNote({ noteId: endpoint.noteId })
         break
       case 'study':
         router.push({

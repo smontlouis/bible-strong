@@ -1,16 +1,14 @@
 import styled from '@emotion/native'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import React, { forwardRef, useState } from 'react'
+import React, { forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 import { useSelector } from 'react-redux'
 import Modal from '~common/Modal'
 import EntityChipList from '~common/EntityChipList'
-import type { VerseIds } from '~common/types'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { EMPTY_ARRAY } from '~helpers/emptyReferences'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
@@ -19,13 +17,11 @@ import {
   NoteItem,
   selectRelationCountsByEndpointIdentity,
 } from '~redux/selectors/bible'
-import { VersionCode } from '~state/tabs'
-import AnnotationNoteModal from './AnnotationNoteModal'
-import BibleNoteModal from './BibleNoteModal'
 import { Chip } from '~common/ui/NewChip'
 import ModalHeader from '~common/ModalHeader'
 import { endpointIdentity, type RelationEndpoint } from '~features/studyRelations/domain'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
+import { useOpenNote } from '~features/notes/useOpenNote'
 
 const ItemRow = styled.View(({ theme }) => ({
   flexDirection: 'row',
@@ -100,21 +96,8 @@ const NoteItemRow = ({
 
 const VerseNotesModal = forwardRef<BottomSheetModal, VerseNotesModalProps>(({ verseKey }, ref) => {
   const { t } = useTranslation()
-
-  // State for sub-modals
-  const [currentNoteId, setCurrentNoteId] = useState<string | null>(null)
-  const [currentNoteVerses, setCurrentNoteVerses] = useState<VerseIds | undefined>(undefined)
-  const [selectedAnnotationNote, setSelectedAnnotationNote] = useState<{
-    annotationId: string
-    text: string
-    verseKey: string
-    noteId: string
-    version: VersionCode
-  } | null>(null)
   const openEntityRelations = useOpenEntityRelations()
-
-  const noteModal = useBottomSheetModal()
-  const annotationNoteModal = useBottomSheetModal()
+  const openNote = useOpenNote()
 
   // Create selector for this verse
   const selectNotesForVerse = makeNotesForVerseSelector()
@@ -129,27 +112,18 @@ const VerseNotesModal = forwardRef<BottomSheetModal, VerseNotesModalProps>(({ ve
 
   const handleOpenNote = (item: NoteItem) => {
     if (item.isAnnotationNote) {
-      // Open AnnotationNoteModal
-      setSelectedAnnotationNote({
-        annotationId: item.annotationId!,
-        text: item.annotationText!,
-        verseKey: item.annotationVerseKey!,
-        noteId: item.id,
-        version: item.version!,
-      })
-      annotationNoteModal.open()
+      if (ref && typeof ref !== 'function') {
+        ref.current?.dismiss()
+      }
+      openNote({ noteId: item.id })
     } else {
-      setCurrentNoteId(item.id)
-      setCurrentNoteVerses(() => {
-        if (item.verseKeys?.length) {
-          return item.verseKeys.reduce((acc, key) => {
-            acc[key] = true
-            return acc
-          }, {} as VerseIds)
-        }
-        return verseKey ? { [verseKey]: true } : undefined
+      if (ref && typeof ref !== 'function') {
+        ref.current?.dismiss()
+      }
+      openNote({
+        noteId: item.id,
+        verseKeys: item.verseKeys?.length ? item.verseKeys : verseKey ? [verseKey] : [],
       })
-      noteModal.open()
     }
   }
 
@@ -186,20 +160,6 @@ const VerseNotesModal = forwardRef<BottomSheetModal, VerseNotesModalProps>(({ ve
           )}
         </Box>
       </Modal.Body>
-      <BibleNoteModal
-        ref={noteModal.getRef()}
-        noteVerses={currentNoteVerses}
-        noteId={currentNoteId}
-        onNoteIdChange={setCurrentNoteId}
-      />
-      <AnnotationNoteModal
-        ref={annotationNoteModal.getRef()}
-        annotationId={selectedAnnotationNote?.annotationId ?? null}
-        annotationText={selectedAnnotationNote?.text ?? ''}
-        annotationVerseKey={selectedAnnotationNote?.verseKey ?? ''}
-        existingNoteId={selectedAnnotationNote?.noteId}
-        version={selectedAnnotationNote?.version as VersionCode}
-      />
     </>
   )
 })

@@ -176,7 +176,7 @@ const getStudyRelationsModalTarget = (payload: unknown): StudyRelationsModalTarg
   }
 }
 
-const getNoteModalPayload = (payload: unknown): { noteId?: string; verseIds: string[] } => {
+const getNoteNavigationPayload = (payload: unknown): { noteId?: string; verseIds: string[] } => {
   if (typeof payload === 'string') {
     return { noteId: payload, verseIds: [] }
   }
@@ -236,7 +236,7 @@ export type WebViewProps = {
   settings: RootState['user']['bible']['settings']
   verseToScroll: number | undefined
   pericopeChapter: PericopeChapter
-  openNoteModal?: (noteId: string, verseIds?: string[]) => void
+  openNote?: (noteId: string, verseIds?: string[]) => void
   openLinkModal?: (linkId: string) => void
   setSelectedCode: (selectedCode: SelectedCode) => void
   selectedCode: SelectedCode | null
@@ -362,7 +362,7 @@ export const BibleDOMWrapper = ({
   onChangeResourceTypeSelectVerse,
   onOpenVerseNotesModal,
   onOpenStudyRelationsModal,
-  openNoteModal,
+  openNote,
   openLinkModal,
   removeParallelVersion,
   addParallelVersion,
@@ -546,8 +546,8 @@ export const BibleDOMWrapper = ({
       }
 
       case NAVIGATE_TO_BIBLE_NOTE: {
-        const payload = getNoteModalPayload(action.payload)
-        if (payload.noteId) openNoteModal?.(payload.noteId, payload.verseIds)
+        const payload = getNoteNavigationPayload(action.payload)
+        if (payload.noteId) openNote?.(payload.noteId, payload.verseIds)
         break
       }
       case NAVIGATE_TO_BIBLE_LINK: {

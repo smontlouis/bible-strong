@@ -284,6 +284,7 @@ function InnerApp() {
                               name="entity-relations"
                               options={createFormSheetOptions(theme)}
                             />
+                            <Stack.Screen name="note" options={createFormSheetOptions(theme)} />
                           </Stack>
                           <ThemedToaster />
                           <DeferredModals />
