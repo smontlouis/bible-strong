@@ -868,10 +868,7 @@ export type TaggedItem =
 // Tags owned by related notes/links/annotations are exposed through their relation/entity surfaces.
 export const makeTaggedItemsForVerseSelector = () =>
   createSelector(
-    [
-      selectHighlights,
-      (_: RootState, verseKey: string, _currentVersion?: string) => verseKey,
-    ],
+    [selectHighlights, (_: RootState, verseKey: string, _currentVersion?: string) => verseKey],
     (highlights, verseKey): TaggedItem[] => {
       const items: TaggedItem[] = []
 

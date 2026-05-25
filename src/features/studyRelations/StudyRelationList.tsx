@@ -1,11 +1,10 @@
+import styled from '@emotion/native'
 import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet'
 import { type ComponentProps, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import styled from '@emotion/native'
 import { useDispatch, useSelector } from 'react-redux'
-import { useTranslation } from 'react-i18next'
-import { toast } from '~helpers/toast'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import Empty from '~common/Empty'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -18,6 +17,7 @@ import Button from '~common/ui/Button'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
+import { toast } from '~helpers/toast'
 import type { RootState } from '~redux/modules/reducer'
 import {
   deleteStudyRelation,
@@ -420,7 +420,7 @@ const StudyRelationList = ({
   const hasDirectionalType = isDirectionalType(draft.type)
 
   return (
-    <VStack>
+    <VStack flex={1}>
       {relations.length === 0 ? (
         <Box minHeight={220}>
           <Empty

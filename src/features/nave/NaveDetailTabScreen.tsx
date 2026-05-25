@@ -30,9 +30,8 @@ import { RootState } from '~redux/modules/reducer'
 import { makeNaveTagsSelector } from '~redux/selectors/bible'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
 import { NaveTab } from '../../state/tabs'
-import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import type { RelationEndpoint } from '~redux/modules/user'
 
 interface NaveDetailScreenProps {
@@ -70,7 +69,7 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
   const selectNaveTags = makeNaveTagsSelector()
   const tags = useSelector((state: RootState) => selectNaveTags(state, name_lower ?? ''))
   const openInNewTab = useOpenInNewTab()
-  const relationListModal = useBottomSheetModal()
+  const openEntityRelations = useOpenEntityRelations()
   const naveEndpoint: Extract<RelationEndpoint, { type: 'nave' }> | null =
     name_lower && naveItem
       ? {
@@ -217,7 +216,7 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
                     <Text marginLeft={10}>{t('Partager')}</Text>
                   </Box>
                 </MenuOption>
-                <MenuOption onSelect={() => relationListModal.open()}>
+                <MenuOption onSelect={() => naveEndpoint && openEntityRelations(naveEndpoint)}>
                   <Box row alignItems="center">
                     <FeatherIcon name="git-merge" size={15} />
                     <Text marginLeft={10}>{t('Éditer les relations')}</Text>
@@ -252,7 +251,7 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
           <EntityChipList
             tags={tags}
             relationCount={relationCount}
-            onRelationPress={() => relationListModal.open()}
+            onRelationPress={() => naveEndpoint && openEntityRelations(naveEndpoint)}
           />
         </Box>
       )}
@@ -267,7 +266,6 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
       >
         {naveItem?.description && <WebView {...webviewProps(naveItem.description)} />}
       </Box>
-      <EntityRelationsModal ref={relationListModal.getRef()} endpoint={naveEndpoint} />
     </Container>
   )
 }

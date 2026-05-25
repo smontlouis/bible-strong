@@ -24,8 +24,8 @@ import AnnotationNoteModal from './AnnotationNoteModal'
 import BibleNoteModal from './BibleNoteModal'
 import { Chip } from '~common/ui/NewChip'
 import ModalHeader from '~common/ModalHeader'
-import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
 import { endpointIdentity, type RelationEndpoint } from '~features/studyRelations/domain'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 
 const ItemRow = styled.View(({ theme }) => ({
   flexDirection: 'row',
@@ -111,11 +111,10 @@ const VerseNotesModal = forwardRef<BottomSheetModal, VerseNotesModalProps>(({ ve
     noteId: string
     version: VersionCode
   } | null>(null)
-  const [relationEndpoint, setRelationEndpoint] = useState<RelationEndpoint | null>(null)
+  const openEntityRelations = useOpenEntityRelations()
 
   const noteModal = useBottomSheetModal()
   const annotationNoteModal = useBottomSheetModal()
-  const relationModal = useBottomSheetModal()
 
   // Create selector for this verse
   const selectNotesForVerse = makeNotesForVerseSelector()
@@ -180,10 +179,7 @@ const VerseNotesModal = forwardRef<BottomSheetModal, VerseNotesModalProps>(({ ve
                   item={item}
                   onPress={() => handleOpenNote(item)}
                   relationCount={relationCountsByEndpoint[endpointIdentity(endpoint)] || 0}
-                  onRelationPress={() => {
-                    setRelationEndpoint(endpoint)
-                    relationModal.open()
-                  }}
+                  onRelationPress={() => openEntityRelations(endpoint)}
                 />
               )
             })
@@ -204,7 +200,6 @@ const VerseNotesModal = forwardRef<BottomSheetModal, VerseNotesModalProps>(({ ve
         existingNoteId={selectedAnnotationNote?.noteId}
         version={selectedAnnotationNote?.version as VersionCode}
       />
-      <EntityRelationsModal ref={relationModal.getRef()} endpoint={relationEndpoint} />
     </>
   )
 })

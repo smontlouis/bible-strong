@@ -16,6 +16,7 @@ import {
   useBottomSheetStyles,
 } from '~helpers/bottomSheetHelpers'
 import { BOTTOM_INSET, MODAL_FOOTER_HEIGHT_BOTTOM_INSET } from '~helpers/constants'
+import { FullWindowOverlay } from './ui/FullWindowOverlay'
 
 const Touchy = styled.TouchableOpacity(({ theme }) => ({
   alignItems: 'center',
@@ -79,6 +80,13 @@ const Body = ({
     []
   )
 
+  const renderContainerComponent = React.useCallback(
+    ({ children }: { children: React.ReactNode }) => (
+      <FullWindowOverlay>{children}</FullWindowOverlay>
+    ),
+    []
+  )
+
   return (
     <BottomSheetModal
       ref={ref}
@@ -86,6 +94,7 @@ const Body = ({
       enablePanDownToClose
       enableDynamicSizing={false}
       backdropComponent={renderBackdrop}
+      containerComponent={renderContainerComponent}
       activeOffsetY={[-20, 20]}
       onAnimate={onAnimateModalClose(props.onModalClose)}
       handleComponent={headerComponent ? renderHandle : undefined}

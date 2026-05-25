@@ -16,8 +16,8 @@ import { Note } from '~redux/modules/user'
 import { selectRelationCountsByEndpointIdentity } from '~redux/selectors/bible'
 import { NotesTab } from '~state/tabs'
 import { unifiedTagsModalAtom } from '~state/app'
-import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
 import { endpointIdentity, type RelationEndpoint } from '~features/studyRelations/domain'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import BibleNoteItem from '../bible/BibleNoteItem'
 import NotesSettingsModal from './NotesSettingsModal'
 
@@ -39,7 +39,6 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
   const [notes, setNotes] = useState<TNote[]>([])
   const [selectedChip, setSelectedChip] = useState<Tag | null>(null)
   const [noteSettingsId, setNoteSettingsId] = useState<string | null>(null)
-  const [relationEndpoint, setRelationEndpoint] = useState<RelationEndpoint | null>(null)
 
   const _notes = useSelector((state: RootState) => state.user.bible.notes)
   const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
@@ -47,7 +46,7 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
   const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const noteSettingsModal = useBottomSheetModal()
-  const relationModal = useBottomSheetModal()
+  const openEntityRelations = useOpenEntityRelations()
 
   const openTagsModal = () => {
     setUnifiedTagsModal({
@@ -132,8 +131,7 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
         onMenuPress={openNoteSettings}
         relationCount={relationCountsByEndpoint[endpointIdentity(endpoint)] || 0}
         onRelationPress={() => {
-          setRelationEndpoint(endpoint)
-          relationModal.open()
+          openEntityRelations(endpoint)
         }}
       />
     )
@@ -171,7 +169,6 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
         onClosed={() => setNoteSettingsId(null)}
         notesAtom={notesAtom}
       />
-      <EntityRelationsModal ref={relationModal.getRef()} endpoint={relationEndpoint} />
     </Container>
   )
 }

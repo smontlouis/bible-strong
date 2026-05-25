@@ -42,9 +42,8 @@ import { RootState } from '~redux/modules/reducer'
 import { makeStrongTagsSelector } from '~redux/selectors/bible'
 import { StrongTab } from '../../state/tabs'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
-import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import type { RelationEndpoint } from '~redux/modules/user'
 
 const LinkBox = Box.withComponent(Link)
@@ -87,7 +86,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
   const [count, setCount] = useState<number>(0)
   const [concordanceLoading, setConcordanceLoading] = useState(true)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
-  const relationListModal = useBottomSheetModal()
+  const openEntityRelations = useOpenEntityRelations()
 
   const addHistory = useSetAtom(historyAtom)
 
@@ -288,7 +287,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
                     <Text marginLeft={10}>{t('Partager')}</Text>
                   </Box>
                 </MenuOption>
-                <MenuOption onSelect={() => relationListModal.open()}>
+                <MenuOption onSelect={() => strongEndpoint && openEntityRelations(strongEndpoint)}>
                   <Box row alignItems="center">
                     <FeatherIcon name="git-merge" size={15} />
                     <Text marginLeft={10}>{t('Éditer les relations')}</Text>
@@ -325,7 +324,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
               <EntityChipList
                 tags={tags}
                 relationCount={relationCount}
-                onRelationPress={() => relationListModal.open()}
+                onRelationPress={() => strongEndpoint && openEntityRelations(strongEndpoint)}
               />
             </Box>
           )}
@@ -333,7 +332,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
             <Box marginBottom={10}>
               <EntityChipList
                 relationCount={relationCount}
-                onRelationPress={() => relationListModal.open()}
+                onRelationPress={() => strongEndpoint && openEntityRelations(strongEndpoint)}
               />
             </Box>
           )}
@@ -448,7 +447,6 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
           </Box>
         </Box>
       </ScrollView>
-      <EntityRelationsModal ref={relationListModal.getRef()} endpoint={strongEndpoint} />
     </Container>
   )
 }

@@ -23,8 +23,8 @@ import generateUUID from '~helpers/generateUUID'
 import { RootState } from '~redux/modules/reducer'
 import { selectRelationCountsByEndpointIdentity } from '~redux/selectors/bible'
 import { unifiedTagsModalAtom } from '~state/app'
-import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
-import { endpointIdentity, type RelationEndpoint } from '~features/studyRelations/domain'
+import { endpointIdentity } from '~features/studyRelations/domain'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import StudyItem from './StudyItem'
 import StudySettingsModal from './StudySettingsModal'
 
@@ -43,9 +43,8 @@ const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => 
 
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const [studySettingsId, setStudySettingsId] = useState<string | false>(false)
-  const [relationEndpoint, setRelationEndpoint] = useState<RelationEndpoint | null>(null)
   const studySettingsModal = useBottomSheetModal()
-  const relationModal = useBottomSheetModal()
+  const openEntityRelations = useOpenEntityRelations()
   const renameModalRef = useRef<BottomSheetModal>(null)
   const [studyToRename, setStudyToRename] = useState<{ id: string; title: string } | null>(null)
   const [pendingStudyId, setPendingStudyId] = useState<string | null>(null)
@@ -144,12 +143,11 @@ const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => 
                 ] || 0
               }
               onRelationPress={() => {
-                setRelationEndpoint({
+                openEntityRelations({
                   type: 'study',
                   studyId: item.id,
                   label: item.title,
                 })
-                relationModal.open()
               }}
             />
           )}
@@ -204,7 +202,6 @@ const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => 
           }
         }}
       />
-      <EntityRelationsModal ref={relationModal.getRef()} endpoint={relationEndpoint} />
     </Container>
   )
 }

@@ -1,18 +1,17 @@
 import * as Sentry from '@sentry/react-native'
+import { useRouter } from 'expo-router'
 import { produce } from 'immer'
 import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
-import React, { useCallback, useEffect, useState, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, Share } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
-import { toast } from '~helpers/toast'
-import { useRouter } from 'expo-router'
+import books from '~assets/bible_versions/books-desc'
+import EntityChipList from '~common/EntityChipList'
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
-import EntityChipList from '~common/EntityChipList'
 import { VerseIds } from '~common/types'
-import VerseAccordion from '~common/VerseAccordion'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Container from '~common/ui/Container'
@@ -21,10 +20,16 @@ import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
-import books from '~assets/bible_versions/books-desc'
+import VerseAccordion from '~common/VerseAccordion'
+import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
+import NoteEditorDOMComponent from '~features/bible/NoteEditorDOM/NoteEditorDOMComponent'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
+import { useRelationCount } from '~features/studyRelations/useRelationCount'
+import { toast } from '~helpers/toast'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
+import type { RelationEndpoint } from '~redux/modules/user'
 import { addNote, deleteNote } from '~redux/modules/user'
 import {
   makeNoteByKeySelector,
@@ -34,12 +39,6 @@ import {
 } from '~redux/selectors/bible'
 import { isFullScreenBibleAtom, unifiedTagsModalAtom } from '~state/app'
 import { NotesTab, useIsCurrentTab } from '~state/tabs'
-import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
-import NoteEditorDOMComponent from '~features/bible/NoteEditorDOM/NoteEditorDOMComponent'
-import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
-import { useRelationCount } from '~features/studyRelations/useRelationCount'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
-import type { RelationEndpoint } from '~redux/modules/user'
 
 const FOOTER_HEIGHT = 54
 
@@ -63,7 +62,7 @@ const NoteDetailTabScreen = ({ notesAtom, noteId, onBackPress }: NoteDetailTabSc
   const [, setNotesTab] = useAtom(notesAtom)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
-  const relationListModal = useBottomSheetModal()
+  const openEntityRelations = useOpenEntityRelations()
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -339,11 +338,7 @@ ${currentNote.description}
                     <Text marginLeft={10}>{t('Éditer les tags')}</Text>
                   </Box>
                 </MenuOption>
-                <MenuOption
-                  onSelect={() => {
-                    relationListModal.open()
-                  }}
-                >
+                <MenuOption onSelect={() => openEntityRelations(noteEndpoint)}>
                   <Box row alignItems="center">
                     <FeatherIcon name="git-merge" size={15} />
                     <Text marginLeft={10}>{t('Éditer les relations')}</Text>
@@ -419,7 +414,7 @@ ${currentNote.description}
             <EntityChipList
               tags={currentNote?.tags}
               relationCount={relationCount}
-              onRelationPress={() => relationListModal.open()}
+              onRelationPress={() => openEntityRelations(noteEndpoint)}
             />
           </Box>
         </ScrollView>
@@ -447,7 +442,6 @@ ${currentNote.description}
           <Fab icon="edit-2" onPress={onEditNote} />
         </Box>
       )}
-      <EntityRelationsModal ref={relationListModal.getRef()} endpoint={noteEndpoint} />
     </Container>
   )
 }

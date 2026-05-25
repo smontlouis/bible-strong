@@ -63,6 +63,7 @@ export const routeMapping: Record<keyof MainStackProps, string> = {
   BibleDefaults: '/bible-defaults',
   Theme: '/theme',
   WordAnnotations: '/word-annotations',
+  EntityRelations: '/entity-relations',
 }
 
 /**

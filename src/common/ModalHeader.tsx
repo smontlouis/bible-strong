@@ -24,7 +24,7 @@ const ModalHeader = ({
 }: Props) => {
   return (
     <Box bg="reverse" borderColor="border" borderBottomWidth={1}>
-      <Box minH={54} row>
+      <Box minH={54} row alignItems="center">
         {hasBackButton && (
           <Back
             onCustomPress={onBackPress}

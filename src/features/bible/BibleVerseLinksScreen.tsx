@@ -23,8 +23,8 @@ import {
   selectRelationCountsByEndpointIdentity,
   selectRelations,
 } from '~redux/selectors/bible'
-import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
 import { endpointIdentity, type RelationEndpoint } from '~features/studyRelations/domain'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 
 type TLink = {
   linkId: string
@@ -43,14 +43,13 @@ const BibleVerseLinks = () => {
   const [currentLinkId, setCurrentLinkId] = useState<string | null>(null)
   const [selectedChip, setSelectedChip] = useState<Tag | null>(null)
   const [linkSettingsId, setLinkSettingsId] = useState<string | null>(null)
-  const [relationEndpoint, setRelationEndpoint] = useState<RelationEndpoint | null>(null)
   const _links = useSelector(selectLinks)
   const relations = useSelector(selectRelations)
   const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
   const linkModal = useBottomSheetModal()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const linkSettingsModal = useBottomSheetModal()
-  const relationModal = useBottomSheetModal()
+  const openEntityRelations = useOpenEntityRelations()
 
   const openTagsModal = useCallback(() => {
     setUnifiedTagsModal({
@@ -83,8 +82,7 @@ const BibleVerseLinks = () => {
   const openLinkRelations = (linkId: string) => {
     const endpoint = getLinkEndpoint(linkId)
     if (!endpoint) return
-    setRelationEndpoint(endpoint)
-    relationModal.open()
+    openEntityRelations(endpoint)
   }
 
   const loadPage = async () => {
@@ -214,7 +212,6 @@ const BibleVerseLinks = () => {
         onClosed={() => setLinkSettingsId(null)}
         onEditRelations={openLinkRelations}
       />
-      <EntityRelationsModal ref={relationModal.getRef()} endpoint={relationEndpoint} />
     </Container>
   )
 }

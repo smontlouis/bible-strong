@@ -26,18 +26,19 @@ import { PersistGate } from 'redux-persist/integration/react'
 import ChangelogModal from '~common/Changelog'
 import ColorChangeModal from '~common/ColorChangeModal'
 import ColorPickerModal from '~common/ColorPickerModal'
-import TagDetailModal from '~common/TagDetailModal'
 import ErrorBoundary from '~common/ErrorBoundary'
-import UnifiedTagsModal from '~common/UnifiedTagsModal'
-import OnBoardingModal from '~features/onboarding/OnBoarding'
-import { FeatureOnboardingModal } from '~features/feature-onboarding'
 import InitHooks from '~common/InitHooks'
+import TagDetailModal from '~common/TagDetailModal'
 import ThemedToaster from '~common/ThemedToaster'
 import { CurrentTheme } from '~common/types'
+import UnifiedTagsModal from '~common/UnifiedTagsModal'
+import { AppRatingModal } from '~features/app-rating'
 import { AppSwitcherProvider } from '~features/app-switcher/AppSwitcherProvider'
 import { BookSelectorBottomSheetProvider } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
-import { DBStateProvider } from '~helpers/databaseState'
+import { FeatureOnboardingModal } from '~features/feature-onboarding'
+import OnBoardingModal from '~features/onboarding/OnBoarding'
 import { appLogger } from '~helpers/agentObservability'
+import { DBStateProvider } from '~helpers/databaseState'
 import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
 import { QueryClient, QueryClientProvider } from '~helpers/react-query-lite'
 import {
@@ -47,12 +48,12 @@ import {
 } from '~helpers/storage'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { useRemoteConfig } from '~helpers/useRemoteConfig'
+import { createFormSheetOptions } from '~navigation/formSheetOptions'
 import { RootState } from '~redux/modules/reducer'
 import { persistor, store } from '~redux/store'
-import getTheme, { Theme, baseTheme } from '~themes/index'
+import getTheme, { baseTheme, Theme } from '~themes/index'
 import { setI18n } from '../i18n'
 import { PlaybackService } from '../playbackService'
-import { AppRatingModal } from '~features/app-rating'
 
 // Register background event handler for Notifee
 // This prevents ANR when notifications fire while app is in background
@@ -279,6 +280,10 @@ function InnerApp() {
                           <InitHooks />
                           <Stack screenOptions={{ headerShown: false }}>
                             <Stack.Screen name="index" />
+                            <Stack.Screen
+                              name="entity-relations"
+                              options={createFormSheetOptions(theme)}
+                            />
                           </Stack>
                           <ThemedToaster />
                           <DeferredModals />

@@ -8,11 +8,10 @@ import { BottomSheetFooter, BottomSheetModal } from '@gorhom/bottom-sheet/'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { toast } from '~helpers/toast'
+import EntityChipList from '~common/EntityChipList'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import PopOverMenu from '~common/PopOverMenu'
-import EntityChipList from '~common/EntityChipList'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Fab from '~common/ui/Fab'
@@ -20,18 +19,18 @@ import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
+import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { toast } from '~helpers/toast'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addNote, deleteNote } from '~redux/modules/user'
-import { makeNoteByKeySelector } from '~redux/selectors/bible'
 import { updateWordAnnotation } from '~redux/modules/user/wordAnnotations'
+import { makeNoteByKeySelector } from '~redux/selectors/bible'
 import { unifiedTagsModalAtom } from '../../state/app'
 import { VersionCode } from '../../state/tabs'
 import NoteEditorBottomSheet from './NoteEditorDOM/NoteEditorBottomSheet'
-import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
-import { useRelationCount } from '~features/studyRelations/useRelationCount'
 
 interface AnnotationNoteModalProps {
   ref?: React.RefObject<BottomSheetModal | null>
@@ -77,7 +76,7 @@ const AnnotationNoteModal = ({
       }
     : null
   const relationCount = useRelationCount(noteEndpoint)
-  const relationModal = useBottomSheetModal()
+  const openEntityRelations = useOpenEntityRelations()
 
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
 
@@ -212,7 +211,9 @@ ${currentNote.description}
                           <Text marginLeft={10}>{t('Editer les tags')}</Text>
                         </Box>
                       </MenuOption>
-                      <MenuOption onSelect={() => relationModal.open()}>
+                      <MenuOption
+                        onSelect={() => noteEndpoint && openEntityRelations(noteEndpoint)}
+                      >
                         <Box row alignItems="center">
                           <FeatherIcon name="git-merge" size={15} />
                           <Text marginLeft={10}>{t('Éditer les relations')}</Text>
@@ -290,13 +291,12 @@ ${currentNote.description}
               <EntityChipList
                 tags={currentNote?.tags}
                 relationCount={relationCount}
-                onRelationPress={() => relationModal.open()}
+                onRelationPress={() => noteEndpoint && openEntityRelations(noteEndpoint)}
               />
             </>
           )}
         </Box>
       </Modal.Body>
-      <EntityRelationsModal ref={relationModal.getRef()} endpoint={noteEndpoint} />
     </>
   )
 }

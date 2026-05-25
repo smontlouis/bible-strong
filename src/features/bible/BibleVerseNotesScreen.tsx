@@ -20,8 +20,8 @@ import { Note } from '~redux/modules/user'
 import { selectRelationCountsByEndpointIdentity } from '~redux/selectors/bible'
 import BibleNotesSettingsModal from './BibleNotesSettingsModal'
 import type { VersionCode } from '~state/tabs'
-import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
 import { endpointIdentity, type RelationEndpoint } from '~features/studyRelations/domain'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 
 export type TNote = {
   noteId: string
@@ -42,7 +42,7 @@ const BibleVerseNotes = () => {
     noteId: string
     version: VersionCode
   } | null>(null)
-  const [relationEndpoint, setRelationEndpoint] = useState<RelationEndpoint | null>(null)
+  const openEntityRelations = useOpenEntityRelations()
 
   const notesObj = useSelector((state: RootState) => state.user.bible.notes)
   const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
@@ -53,7 +53,6 @@ const BibleVerseNotes = () => {
   const annotationNoteModal = useBottomSheetModal()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const noteSettingsModal = useBottomSheetModal()
-  const relationModal = useBottomSheetModal()
 
   const openTagsModal = useCallback(() => {
     setUnifiedTagsModal({
@@ -148,10 +147,7 @@ const BibleVerseNotes = () => {
         onPress={openNoteEditor}
         onMenuPress={openNoteSettings}
         relationCount={relationCountsByEndpoint[endpointIdentity(endpoint)] || 0}
-        onRelationPress={() => {
-          setRelationEndpoint(endpoint)
-          relationModal.open()
-        }}
+        onRelationPress={() => openEntityRelations(endpoint)}
       />
     )
   }
@@ -197,7 +193,6 @@ const BibleVerseNotes = () => {
         noteId={noteSettingsId}
         onClosed={() => setNoteSettingsId(null)}
       />
-      <EntityRelationsModal ref={relationModal.getRef()} endpoint={relationEndpoint} />
     </Container>
   )
 }

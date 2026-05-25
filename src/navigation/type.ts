@@ -192,6 +192,7 @@ export type MainStackProps = {
   BibleDefaults: undefined
   Theme: undefined
   WordAnnotations: undefined
+  EntityRelations: { endpoint: string }
 }
 
 declare global {

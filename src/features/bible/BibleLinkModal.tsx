@@ -1,19 +1,18 @@
 import React, { useCallback, useEffect, useState } from 'react'
 
-import { ActivityIndicator, Alert, Dimensions, Image, Linking } from 'react-native'
-import YoutubePlayer from 'react-native-youtube-iframe'
-import { useDispatch, useSelector } from 'react-redux'
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet/'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
+import { ActivityIndicator, Alert, Dimensions, Image, Linking } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import YoutubePlayer from 'react-native-youtube-iframe'
+import { useDispatch, useSelector } from 'react-redux'
+import EntityChipList from '~common/EntityChipList'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import PopOverMenu from '~common/PopOverMenu'
-import { toast } from '~helpers/toast'
-import EntityChipList from '~common/EntityChipList'
 import { VerseIds } from '~common/types'
 import Box, { VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -23,6 +22,10 @@ import MenuOption from '~common/ui/MenuOption'
 import Paragraph from '~common/ui/Paragraph'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
+import type { RelationEndpoint } from '~features/studyRelations/domain'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
+import { useRelationCount } from '~features/studyRelations/useRelationCount'
+import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
 import {
   detectLinkType,
   extractVideoId,
@@ -31,16 +34,12 @@ import {
   getLinkIcon,
   isValidUrl,
 } from '~helpers/fetchOpenGraphData'
+import { toast } from '~helpers/toast'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addLink, deleteLink, Link } from '~redux/modules/user'
 import { makeLinkByIdSelector, makeVerseKeysForLinkSelector } from '~redux/selectors/bible'
 import { unifiedTagsModalAtom } from '../../state/app'
-import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
-import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
-import type { RelationEndpoint } from '~features/studyRelations/domain'
-import { useRelationCount } from '~features/studyRelations/useRelationCount'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
 
 interface BibleLinkModalProps {
   linkVerses: VerseIds | undefined
@@ -106,7 +105,7 @@ const BibleLinkModal = ({ linkVerses, linkId, onLinkIdChange, ref }: BibleLinkMo
       }
     : null
   const relationCount = useRelationCount(linkEndpoint)
-  const relationModal = useBottomSheetModal()
+  const openEntityRelations = useOpenEntityRelations()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const insets = useSafeAreaInsets()
   const theme = useTheme()
@@ -281,7 +280,9 @@ const BibleLinkModal = ({ linkVerses, linkId, onLinkIdChange, ref }: BibleLinkMo
                           <Text marginLeft={10}>{t('Éditer les tags')}</Text>
                         </Box>
                       </MenuOption>
-                      <MenuOption onSelect={() => relationModal.open()}>
+                      <MenuOption
+                        onSelect={() => linkEndpoint && openEntityRelations(linkEndpoint)}
+                      >
                         <Box row alignItems="center">
                           <FeatherIcon name="git-branch" size={15} />
                           <Text marginLeft={10}>{t('Éditer les relations')}</Text>
@@ -424,13 +425,12 @@ const BibleLinkModal = ({ linkVerses, linkId, onLinkIdChange, ref }: BibleLinkMo
               <EntityChipList
                 tags={currentLink?.tags}
                 relationCount={relationCount}
-                onRelationPress={() => relationModal.open()}
+                onRelationPress={() => linkEndpoint && openEntityRelations(linkEndpoint)}
               />
             </Box>
           )}
         </VStack>
       </Modal.Body>
-      <EntityRelationsModal ref={relationModal.getRef()} endpoint={linkEndpoint} />
     </>
   )
 }

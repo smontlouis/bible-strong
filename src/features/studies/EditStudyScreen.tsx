@@ -21,9 +21,8 @@ import StudiesDomWrapper from './StudiesDOM/StudiesDomWrapper'
 import { openedFromTabAtom } from './atom'
 import { StudyTab } from 'src/state/tabs'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 
 type EditStudyScreenProps = {
   studyAtom?: PrimitiveAtom<StudyTab>
@@ -81,7 +80,7 @@ const EditStudyScreen = ({
   const dispatch = useDispatch()
   const [isReadOnly, setIsReadOnly] = useState(true)
   const renameModalRef = useRef<BottomSheetModal>(null)
-  const relationListModal = useBottomSheetModal()
+  const openEntityRelations = useOpenEntityRelations()
   const setOpenedFromTab = useSetAtom(openedFromTabAtom)
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
 
@@ -148,7 +147,7 @@ const EditStudyScreen = ({
         isReadOnly={isReadOnly}
         hasBackButton={hasBackButton}
         openRenameModal={() => renameModalRef.current?.present()}
-        openRelationsModal={() => relationListModal.open()}
+        openRelationsModal={() => openEntityRelations(studyEndpoint)}
         setReadOnly={() => {
           setIsReadOnly(true)
         }}
@@ -169,7 +168,7 @@ const EditStudyScreen = ({
           <EntityChipList
             tags={currentStudy.tags}
             relationCount={relationCount}
-            onRelationPress={() => relationListModal.open()}
+            onRelationPress={() => openEntityRelations(studyEndpoint)}
           />
         </Box>
       )}
@@ -182,7 +181,6 @@ const EditStudyScreen = ({
           dispatch(updateStudy({ id: currentStudy.id, title: value, modified_at: Date.now() }))
         }}
       />
-      <EntityRelationsModal ref={relationListModal.getRef()} endpoint={studyEndpoint} />
       {isReadOnly && <FabButton icon="edit-2" onPress={() => setIsReadOnly(false)} />}
     </Container>
   )

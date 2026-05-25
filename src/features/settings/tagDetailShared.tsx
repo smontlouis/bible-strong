@@ -23,10 +23,9 @@ import { GroupedWordAnnotation } from '~redux/selectors/bible'
 import type { TagStrongItemData } from './TagStrongItem'
 import type { TagNaveItemData } from './TagNaveItem'
 import type { TagDictionaryItemData } from './TagDictionaryItem'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
-import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
 import type { RelationEndpoint } from '~features/studyRelations/domain'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 
 export type HighlightData = {
   date: number
@@ -183,7 +182,7 @@ export const LinkItem = ({
     label: displayTitle,
   }
   const relationCount = useRelationCount(relationEndpoint)
-  const relationModal = useBottomSheetModal()
+  const openEntityRelations = useOpenEntityRelations()
 
   const content = (
     <>
@@ -210,11 +209,10 @@ export const LinkItem = ({
           <EntityChipList
             tags={item.tags}
             relationCount={relationCount}
-            onRelationPress={() => relationModal.open()}
+            onRelationPress={() => openEntityRelations(relationEndpoint)}
           />
         </Box>
       </Box>
-      <EntityRelationsModal ref={relationModal.getRef()} endpoint={relationEndpoint} />
     </>
   )
 

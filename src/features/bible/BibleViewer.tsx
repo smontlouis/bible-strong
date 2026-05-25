@@ -96,8 +96,7 @@ import StrongModal from './StrongModal'
 import VerseNotesModal from './VerseNotesModal'
 import VerseTagsModal from './VerseTagsModal'
 import CreateEntityRelationModal from '~features/studyRelations/CreateEntityRelationModal'
-import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
-import { useOpenRelationEndpoint } from '~features/studyRelations/useOpenRelationEndpoint'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 
 const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: number) => {
   if (pericope && pericope[book] && pericope[book][chapter]) {
@@ -135,7 +134,7 @@ const BibleViewer = ({
   withNavigation,
 }: BibleViewerProps) => {
   const { t } = useTranslation()
-  const openRelationEndpoint = useOpenRelationEndpoint()
+  const openEntityRelations = useOpenEntityRelations()
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
   const bibleDataRefreshSignal = useAtomValue(bibleDataRefreshSignalAtom)
 
@@ -187,9 +186,6 @@ const BibleViewer = ({
   // Verse notes modal
   const verseNotesModal = useBottomSheetModal()
   const [verseNotesModalKey, setVerseNotesModalKey] = useState<string | null>(null)
-  const verseStudyRelationsModal = useBottomSheetModal()
-  const [verseStudyRelationsModalEndpoint, setVerseStudyRelationsModalEndpoint] =
-    useState<RelationEndpoint | null>(null)
   const [createRelationSourceEndpoint, setCreateRelationSourceEndpoint] =
     useState<RelationEndpoint | null>(null)
 
@@ -559,8 +555,7 @@ const BibleViewer = ({
 
     if (!verseIds.length) return
 
-    setVerseStudyRelationsModalEndpoint(createVerseEndpoint(verseIds))
-    verseStudyRelationsModal.open()
+    openEntityRelations(createVerseEndpoint(verseIds))
   }
 
   const openLinkModal = (linkId: string) => {
@@ -580,20 +575,6 @@ const BibleViewer = ({
         : undefined
     )
     noteModal.open()
-  }
-
-  const openBibleRelationEndpoint = (endpoint: RelationEndpoint) => {
-    switch (endpoint.type) {
-      case 'note':
-        openNoteModal(endpoint.noteId)
-        break
-      case 'externalLink':
-        openLinkModal(endpoint.linkId)
-        break
-      default:
-        openRelationEndpoint(endpoint)
-        break
-    }
   }
 
   const onChangeResourceTypeSelectVerse = (res: BibleResource, ver: string) => {
@@ -969,11 +950,6 @@ const BibleViewer = ({
         ref={createRelationModal.getRef()}
         sourceEndpoint={createRelationSourceEndpoint}
         onCreated={handleRelationCreatedFromSelection}
-      />
-      <EntityRelationsModal
-        ref={verseStudyRelationsModal.getRef()}
-        endpoint={verseStudyRelationsModalEndpoint}
-        onOpenEndpoint={openBibleRelationEndpoint}
       />
       <StrongModal
         ref={strongModal.getRef()}
