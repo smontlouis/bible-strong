@@ -1,5 +1,6 @@
 import { useTheme } from '@emotion/react'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
+import { StyleProp, ViewStyle } from 'react-native'
 import literata from '~assets/fonts/literata'
 import { Theme } from '~themes'
 import * as Sentry from '@sentry/react-native'
@@ -24,6 +25,10 @@ type HTMLViewMessage =
       payload: HTMLViewLinkPayload
     }
   | {
+      type: 'height'
+      payload?: unknown
+    }
+  | {
       type: string
       payload?: unknown
     }
@@ -40,17 +45,29 @@ const isHTMLViewLinkPayload = (payload: unknown): payload is HTMLViewLinkPayload
 
 const useHTMLView = ({
   onLinkClicked,
+  autoHeight = false,
+  minHeight = 200,
 }: {
   onLinkClicked: (payload: HTMLViewLinkPayload) => void
+  autoHeight?: boolean
+  minHeight?: number
 }) => {
   const theme: Theme = useTheme()
   const ref = useRef<WebView>(null)
+  const [height, setHeight] = useState(minHeight)
 
   const onMessage = (event: WebViewMessageEvent) => {
     const action = JSON.parse(event.nativeEvent.data) as HTMLViewMessage
 
     if (action.type === 'link' && isHTMLViewLinkPayload(action.payload)) {
       onLinkClicked(action.payload)
+    }
+
+    if (action.type === 'height' && typeof action.payload === 'number') {
+      setHeight(currentHeight => {
+        const nextHeight = Math.max(minHeight, Math.ceil(action.payload as number))
+        return Math.abs(currentHeight - nextHeight) > 4 ? nextHeight : currentHeight
+      })
     }
   }
 
@@ -66,7 +83,7 @@ const useHTMLView = ({
         ${fontRule}
 
         @keyframes fade { from { opacity: 0; } to { opacity: 1; }  }
-  
+
         body {
           font-family: Literata Book;
           background-color: ${theme.colors.reverse};
@@ -85,7 +102,7 @@ const useHTMLView = ({
         strong, bold {
           color: ${theme.colors.quart};
         }
-  
+
         ul {
           margin: 0; padding: 0;
           list-style: none;
@@ -93,6 +110,19 @@ const useHTMLView = ({
       </style>
       <script type="text/javascript">
         (function () {
+          const postHeight = () => {
+            const body = document.body;
+            const html = document.documentElement;
+            const height = Math.max(
+              body ? body.scrollHeight : 0,
+              body ? body.offsetHeight : 0,
+              html ? html.clientHeight : 0,
+              html ? html.scrollHeight : 0,
+              html ? html.offsetHeight : 0
+            );
+            window.ReactNativeWebView.postMessage(JSON.stringify({ type: "height", payload: height }));
+          };
+
           setTimeout(() => {
             document.querySelectorAll('a').forEach(link => {
               link.addEventListener('click', e => {
@@ -103,7 +133,18 @@ const useHTMLView = ({
                 window.ReactNativeWebView.postMessage(JSON.stringify({ type: "link", payload: { href: href, content: content, type: className } }))
               })
             });
+            postHeight();
           }, 0)
+
+          window.addEventListener('load', postHeight);
+          setTimeout(postHeight, 100);
+          setTimeout(postHeight, 500);
+
+          if (typeof ResizeObserver !== 'undefined') {
+            const observer = new ResizeObserver(postHeight);
+            observer.observe(document.body);
+            observer.observe(document.documentElement);
+          }
         })()
       </script>
       <body>
@@ -114,9 +155,15 @@ const useHTMLView = ({
 
   return {
     webviewProps(html: string) {
+      const style: StyleProp<ViewStyle> = [
+        { backgroundColor: 'transparent' },
+        autoHeight ? { height } : undefined,
+      ]
+
       return {
         ref,
-        style: { backgroundColor: 'transparent' },
+        style,
+        ...(autoHeight ? { scrollEnabled: false } : {}),
         originWhitelist: ['*'],
         source: { html: wrapHTML(html) },
         onMessage,

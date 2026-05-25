@@ -36,6 +36,7 @@ import { DictionaryTab } from '../../state/tabs'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import type { RelationEndpoint } from '~redux/modules/user'
+import AppScrollView from '~common/ui/ScrollView'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -156,7 +157,7 @@ const DictionnaryDetailScreen = ({
     }
   }
 
-  const { webviewProps } = useHTMLView({ onLinkClicked: openLink })
+  const { webviewProps } = useHTMLView({ onLinkClicked: openLink, autoHeight: true })
 
   const shareDefinition = async () => {
     if (!dictionnaireItem) return
@@ -255,28 +256,20 @@ const DictionnaryDetailScreen = ({
           />
         }
       />
-      {(tags || relationCount > 0) && (
-        <Box mt={10} px={20}>
-          <EntityChipList
-            tags={tags}
-            relationCount={relationCount}
-            onRelationPress={() => dictionaryEndpoint && openEntityRelations(dictionaryEndpoint)}
-          />
-        </Box>
-      )}
-      <Box
-        mt={10}
-        style={{
-          overflow: 'hidden',
-          flex: 1,
-          borderTopLeftRadius: 30,
-          borderTopRightRadius: 30,
-        }}
-      >
+      <AppScrollView>
+        {(tags || relationCount > 0) && (
+          <Box px={20}>
+            <EntityChipList
+              tags={tags}
+              relationCount={relationCount}
+              onRelationPress={() => dictionaryEndpoint && openEntityRelations(dictionaryEndpoint)}
+            />
+          </Box>
+        )}
         {dictionnaireItem?.definition && (
           <WebView {...webviewProps(dictionnaireItem.definition.replace(/\n/gi, ''))} />
         )}
-      </Box>
+      </AppScrollView>
     </FormSheetScreen>
   )
 }

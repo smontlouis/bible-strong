@@ -33,6 +33,7 @@ import { NaveTab } from '../../state/tabs'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import type { RelationEndpoint } from '~redux/modules/user'
+import ScrollView from '~common/ui/ScrollView'
 
 interface NaveDetailScreenProps {
   naveAtom: PrimitiveAtom<NaveTab>
@@ -152,7 +153,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     }
   }
 
-  const { webviewProps } = useHTMLView({ onLinkClicked: openLink })
+  const { webviewProps } = useHTMLView({ onLinkClicked: openLink, autoHeight: true })
 
   const shareDefinition = async () => {
     if (!naveItem) return
@@ -251,26 +252,18 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
           />
         }
       />
-      {(tags || relationCount > 0) && (
-        <Box mt={10} px={20}>
-          <EntityChipList
-            tags={tags}
-            relationCount={relationCount}
-            onRelationPress={() => naveEndpoint && openEntityRelations(naveEndpoint)}
-          />
-        </Box>
-      )}
-      <Box
-        mt={10}
-        style={{
-          overflow: 'hidden',
-          flex: 1,
-          borderTopLeftRadius: 30,
-          borderTopRightRadius: 30,
-        }}
-      >
+      <ScrollView>
+        {(tags || relationCount > 0) && (
+          <Box mt={0} px={20}>
+            <EntityChipList
+              tags={tags}
+              relationCount={relationCount}
+              onRelationPress={() => naveEndpoint && openEntityRelations(naveEndpoint)}
+            />
+          </Box>
+        )}
         {naveItem?.description && <WebView {...webviewProps(naveItem.description)} />}
-      </Box>
+      </ScrollView>
     </FormSheetScreen>
   )
 }

@@ -9,11 +9,7 @@ type Props = BoxProps & {
 
 const FormSheetScreen = ({ isFormSheet = false, children, ...props }: Props) => {
   if (isFormSheet) {
-    return (
-      <Box flex bg="reverse" {...props}>
-        {children}
-      </Box>
-    )
+    return <>{children}</>
   }
 
   return <Container {...props}>{children}</Container>
