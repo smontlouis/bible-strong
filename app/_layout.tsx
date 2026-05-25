@@ -285,6 +285,15 @@ function InnerApp() {
                               options={createFormSheetOptions(theme)}
                             />
                             <Stack.Screen name="note" options={createFormSheetOptions(theme)} />
+                            <Stack.Screen name="strong" options={createFormSheetOptions(theme)} />
+                            <Stack.Screen
+                              name="dictionnary-detail"
+                              options={createFormSheetOptions(theme)}
+                            />
+                            <Stack.Screen
+                              name="nave-detail"
+                              options={createFormSheetOptions(theme)}
+                            />
                           </Stack>
                           <ThemedToaster />
                           <DeferredModals />

@@ -10,6 +10,7 @@ import { usePrevious } from '~helpers/usePrevious'
 import BibleHeader from './BibleHeader'
 
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { useRouter } from 'expo-router'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
@@ -91,7 +92,6 @@ import { LoadingView } from './LoadingView'
 import { OpenInNewTabButton } from './OpenInNewTabButton'
 import ResourcesModal from './resources/ResourceModal'
 import SelectedVersesModal from './SelectedVersesModal'
-import StrongModal from './StrongModal'
 import VerseNotesModal from './VerseNotesModal'
 import VerseTagsModal from './VerseTagsModal'
 import CreateEntityRelationModal from '~features/studyRelations/CreateEntityRelationModal'
@@ -133,6 +133,7 @@ const BibleViewer = ({
   withNavigation,
 }: BibleViewerProps) => {
   const { t } = useTranslation()
+  const router = useRouter()
   const openEntityRelations = useOpenEntityRelations()
   const openNote = useOpenNote()
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
@@ -148,7 +149,6 @@ const BibleViewer = ({
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const [linkVerses, setLinkVerses] = useState<VerseIds | undefined>(undefined)
   const [currentLinkId, setCurrentLinkId] = useState<string | null>(null)
-  const strongModal = useBottomSheet()
   const [selectedCode, setSelectedCodeState] = useState<SelectedCode | null>(null)
   const bookmarkModalRef = useRef<BottomSheetModal>(null)
   const [selectedVerseForBookmark, setSelectedVerseForBookmark] = useState<{
@@ -646,15 +646,17 @@ const BibleViewer = ({
     (code: SelectedCode | null) => {
       setSelectedCodeState(code)
       if (code) {
-        strongModal.open()
+        router.push({
+          pathname: '/strong',
+          params: {
+            book: String(code.book),
+            reference: code.reference,
+          },
+        })
       }
     },
-    [strongModal]
+    [router]
   )
-
-  const clearSelectedCode = useCallback(() => {
-    setSelectedCodeState(null)
-  }, [])
 
   // Cross-version annotations modal handlers
   const handleOpenCrossVersionModal = useCallback(
@@ -930,13 +932,6 @@ const BibleViewer = ({
         sourceEndpoint={createRelationSourceEndpoint}
         onCreated={handleRelationCreatedFromSelection}
       />
-      <StrongModal
-        ref={strongModal.getRef()}
-        version={version}
-        selectedCode={selectedCode}
-        onClosed={clearSelectedCode}
-      />
-
       <ResourcesModal
         resourceModalRef={resourceModal.getRef()}
         bibleAtom={bibleAtom}

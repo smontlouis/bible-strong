@@ -8,7 +8,7 @@ import truncHTML from 'trunc-html'
 import { WebView } from 'react-native-webview'
 import books from '~assets/bible_versions/books-desc'
 import Box from '~common/ui/Box'
-import Container from '~common/ui/Container'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import Text from '~common/ui/Text'
@@ -43,9 +43,13 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
 
 interface DictionaryDetailScreenProps {
   dictionaryAtom: PrimitiveAtom<DictionaryTab>
+  isFormSheet?: boolean
 }
 
-const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps) => {
+const DictionnaryDetailScreen = ({
+  dictionaryAtom,
+  isFormSheet = false,
+}: DictionaryDetailScreenProps) => {
   const router = useRouter()
   const [dictionaryTab, setDictionaryTab] = useAtom(dictionaryAtom)
   const { isInTab } = useTabContext()
@@ -178,17 +182,21 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
 
   if (!dictionnaireItem) {
     return (
-      <Container>
-        <Header hasBackButton={!isInTab} onCustomBackPress={goBack} title={t('Dictionnaire')} />
+      <FormSheetScreen isFormSheet={isFormSheet}>
+        <Header
+          hasBackButton={!isFormSheet && !isInTab}
+          onCustomBackPress={goBack}
+          title={t('Dictionnaire')}
+        />
         <Loading message={t('Chargement...')} />
-      </Container>
+      </FormSheetScreen>
     )
   }
 
   return (
-    <Container>
+    <FormSheetScreen isFormSheet={isFormSheet}>
       <DetailedHeader
-        hasBackButton={!isInTab}
+        hasBackButton={!isFormSheet && !isInTab}
         title={word}
         borderColor="secondary"
         rightComponent={
@@ -269,7 +277,7 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
           <WebView {...webviewProps(dictionnaireItem.definition.replace(/\n/gi, ''))} />
         )}
       </Box>
-    </Container>
+    </FormSheetScreen>
   )
 }
 

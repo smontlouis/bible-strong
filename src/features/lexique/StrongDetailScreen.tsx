@@ -11,7 +11,7 @@ import Loading from '~common/Loading'
 import EntityChipList from '~common/EntityChipList'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
-import Container from '~common/ui/Container'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Paragraph from '~common/ui/Paragraph'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
@@ -69,9 +69,10 @@ const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
 
 interface StrongDetailScreenProps {
   strongAtom: PrimitiveAtom<StrongTab>
+  isFormSheet?: boolean
 }
 
-const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
+const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScreenProps) => {
   const router = useRouter()
   const [strongTab, setStrongTab] = useAtom(strongAtom)
   const { isInTab } = useTabContext()
@@ -230,8 +231,12 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
 
   if (error) {
     return (
-      <Container>
-        <Header hasBackButton={!isInTab} onCustomBackPress={goBack} title="Désolé..." />
+      <FormSheetScreen isFormSheet={isFormSheet}>
+        <Header
+          hasBackButton={!isFormSheet && !isInTab}
+          onCustomBackPress={goBack}
+          title="Désolé..."
+        />
         <Empty
           source={require('~assets/images/empty.json')}
           message={`Impossible de charger la strong pour ce verset...${
@@ -240,25 +245,29 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
               : ''
           }`}
         />
-      </Container>
+      </FormSheetScreen>
     )
   }
 
   if (!strongReference) {
     return (
-      <Container>
-        <Header hasBackButton={!isInTab} onCustomBackPress={goBack} title={t('Lexique')} />
+      <FormSheetScreen isFormSheet={isFormSheet}>
+        <Header
+          hasBackButton={!isFormSheet && !isInTab}
+          onCustomBackPress={goBack}
+          title={t('Lexique')}
+        />
         <Loading message={t('Chargement...')} />
-      </Container>
+      </FormSheetScreen>
     )
   }
 
   const { Code, Hebreu, Grec, Mot, Phonetique, Definition, Origine, Type, LSG } = strongReference
 
   return (
-    <Container>
+    <FormSheetScreen isFormSheet={isFormSheet}>
       <DetailedHeader
-        hasBackButton={!isInTab}
+        hasBackButton={!isFormSheet && !isInTab}
         title={capitalize(Mot)}
         detail={Phonetique}
         subtitle={Type}
@@ -447,7 +456,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
           </Box>
         </Box>
       </ScrollView>
-    </Container>
+    </FormSheetScreen>
   )
 }
 

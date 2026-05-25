@@ -25,9 +25,9 @@ const DictionaryDetailScreen = () => {
         },
       } as DictionaryTab),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [word]
   )
 
-  return <DictionaryDetailTabScreen dictionaryAtom={onTheFlyAtom} />
+  return <DictionaryDetailTabScreen dictionaryAtom={onTheFlyAtom} isFormSheet />
 }
 export default DictionaryDetailScreen

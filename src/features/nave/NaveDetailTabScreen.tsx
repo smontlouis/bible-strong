@@ -16,7 +16,7 @@ import PopOverMenu from '~common/PopOverMenu'
 import { toast } from '~helpers/toast'
 import EntityChipList from '~common/EntityChipList'
 import Box from '~common/ui/Box'
-import Container from '~common/ui/Container'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
@@ -36,9 +36,10 @@ import type { RelationEndpoint } from '~redux/modules/user'
 
 interface NaveDetailScreenProps {
   naveAtom: PrimitiveAtom<NaveTab>
+  isFormSheet?: boolean
 }
 
-const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
+const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenProps) => {
   const router = useRouter()
   const [naveTab, setNaveTab] = useAtom(naveAtom)
   const { isInTab } = useTabContext()
@@ -177,17 +178,21 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
 
   if (!naveItem) {
     return (
-      <Container>
-        <Header hasBackButton={!isInTab} onCustomBackPress={goBack} title="Thèmes Nave" />
+      <FormSheetScreen isFormSheet={isFormSheet}>
+        <Header
+          hasBackButton={!isFormSheet && !isInTab}
+          onCustomBackPress={goBack}
+          title="Thèmes Nave"
+        />
         <Loading message={t('Chargement...')} />
-      </Container>
+      </FormSheetScreen>
     )
   }
 
   return (
-    <Container>
+    <FormSheetScreen isFormSheet={isFormSheet}>
       <DetailedHeader
-        hasBackButton={!isInTab}
+        hasBackButton={!isFormSheet && !isInTab}
         title={naveItem.name || name || ''}
         subtitle={naveItem?.name_lower}
         borderColor="quint"
@@ -266,7 +271,7 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
       >
         {naveItem?.description && <WebView {...webviewProps(naveItem.description)} />}
       </Box>
-    </Container>
+    </FormSheetScreen>
   )
 }
 
