@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
-import BottomSheet from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -38,7 +38,7 @@ interface Props {
   onPress: () => void
   onBackPress?: () => void
   onOpenInNewTab: () => void
-  searchModalRef: React.RefObject<BottomSheet | null>
+  searchModalRef: React.RefObject<BottomSheetModal | null>
 }
 
 const TimelineHeader = ({
@@ -58,7 +58,7 @@ const TimelineHeader = ({
   const topInset = isFormSheet ? 0 : insets.top
 
   const openSearch = () => {
-    searchModalRef.current?.expand()
+    searchModalRef.current?.present()
   }
 
   return (

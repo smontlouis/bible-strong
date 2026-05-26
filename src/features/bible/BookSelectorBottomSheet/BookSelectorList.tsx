@@ -16,6 +16,8 @@ interface BookSelectorListProps {
   bookSelectorData?: BibleTab['data']
   flatListRef: React.RefObject<FlatList | null>
   chaptersByBook?: Record<number, number[]>
+  renderedChapterBookNumbers: number[]
+  onBookSelect: (book: Book) => void
 }
 export const BookSelectorList = ({
   data,
@@ -24,21 +26,20 @@ export const BookSelectorList = ({
   bookSelectorData,
   flatListRef,
   chaptersByBook,
+  renderedChapterBookNumbers,
+  onBookSelect,
 }: BookSelectorListProps) => {
   const insets = useSafeAreaInsets()
   const selectionMode = useAtomValue(bookSelectorSelectionModeAtom)
-
-  const handleBookSelect = (book: Book) => {
-    expandedBook.set(expandedBook.get() === book.Numero ? null : book.Numero)
-  }
 
   const renderItem = ({ item: book }: { item: Book }) => (
     <BookItem
       book={book}
       chapters={chaptersByBook?.[book.Numero]}
       isSelected={book.Numero === bookSelectorData?.selectedBook.Numero}
-      onBookSelect={handleBookSelect}
+      onBookSelect={onBookSelect}
       expandedBook={expandedBook}
+      shouldRenderChapters={renderedChapterBookNumbers.includes(book.Numero)}
     />
   )
 
