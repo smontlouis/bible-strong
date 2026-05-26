@@ -53,6 +53,10 @@ interface ItemProps {
   onPress: () => void
 }
 
+export const ContainerComponent = ({ children }: { children?: React.ReactNode }) => (
+  <FullWindowOverlay>{children}</FullWindowOverlay>
+)
+
 const Body = ({
   withPortal,
   children,
@@ -80,13 +84,6 @@ const Body = ({
     []
   )
 
-  const renderContainerComponent = React.useCallback(
-    ({ children }: { children?: React.ReactNode }) => (
-      <FullWindowOverlay>{children}</FullWindowOverlay>
-    ),
-    []
-  )
-
   return (
     <BottomSheetModal
       ref={ref}
@@ -94,7 +91,7 @@ const Body = ({
       enablePanDownToClose
       enableDynamicSizing={false}
       backdropComponent={renderBackdrop}
-      containerComponent={renderContainerComponent}
+      containerComponent={ContainerComponent}
       activeOffsetY={[-20, 20]}
       onAnimate={onAnimateModalClose(props.onModalClose)}
       handleComponent={headerComponent ? renderHandle : undefined}

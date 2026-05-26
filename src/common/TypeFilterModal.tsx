@@ -10,6 +10,7 @@ import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
+import { ContainerComponent } from './Modal'
 
 const TypeRow = styled(TouchableOpacity)(({ theme }) => ({
   flexDirection: 'row',
@@ -57,6 +58,7 @@ const TypeFilterModal = forwardRef<BottomSheetModal, Props>(
         enablePanDownToClose
         snapPoints={['50%']}
         backdropComponent={renderBackdrop}
+        containerComponent={ContainerComponent}
         activeOffsetY={[-20, 20]}
         key={key}
         {...bottomSheetStyles}

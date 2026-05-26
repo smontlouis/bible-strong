@@ -138,7 +138,7 @@ const BibleVerseLinks = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [verse, _links, relations])
 
-  const openLinkModal = (linkId: string) => {
+  const openLink = (linkId: string) => {
     router.push({ pathname: '/link', params: { linkId } })
   }
 
@@ -149,7 +149,7 @@ const BibleVerseLinks = () => {
       <BibleLinkItem
         key={index}
         item={item}
-        onPress={openLinkModal}
+        onPress={openLink}
         onMenuPress={openLinkSettings}
         relationCount={endpoint ? relationCountsByEndpoint[endpointIdentity(endpoint)] || 0 : 0}
         onRelationPress={() => {

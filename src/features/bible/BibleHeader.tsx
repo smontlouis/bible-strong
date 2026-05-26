@@ -45,15 +45,17 @@ import { VerseSelectorPopup } from './VerseSelectorPopup'
 
 interface BibleHeaderProps {
   bibleAtom: PrimitiveAtom<BibleTab>
-  hasBackButton?: boolean
+  isFormSheet?: boolean
   onBibleParamsClick: () => void
   commentsDisplay?: boolean
   onExitAnnotationMode?: () => void
   annotationModeEnabled?: boolean
 }
 
+const DISABLE_BACK_BUTTON = false
+
 const Header = ({
-  hasBackButton,
+  isFormSheet,
   bibleAtom,
   onBibleParamsClick,
   commentsDisplay,
@@ -119,6 +121,7 @@ const Header = ({
 
   const fullScreenOpacity = isFullScreenBible ? 0 : 1
   const fullScreenTranslateY = isFullScreenBible ? -4 : 0
+  const TOP_INSET = isFormSheet ? 0 : insets.top
 
   const opacityTransitionStyle = {
     opacity: fullScreenOpacity,
@@ -150,8 +153,8 @@ const Header = ({
         width="100%"
         bg="primary"
         px={15}
-        paddingTop={insets.top}
-        height={HEADER_HEIGHT + insets.top}
+        paddingTop={TOP_INSET}
+        height={HEADER_HEIGHT + TOP_INSET}
         borderBottomWidth={1}
         borderColor="border"
         position="absolute"
@@ -163,7 +166,7 @@ const Header = ({
         key="annotation-mode-header"
       >
         <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
-          {hasBackButton && (
+          {isFormSheet && DISABLE_BACK_BUTTON && (
             <Box position="absolute" left={0} top={5} zIndex={2}>
               <Back
                 onGoBack={() => {
@@ -206,8 +209,8 @@ const Header = ({
         width="100%"
         bg="reverse"
         px={15}
-        paddingTop={insets.top}
-        height={HEADER_HEIGHT + insets.top}
+        paddingTop={TOP_INSET}
+        height={HEADER_HEIGHT + TOP_INSET}
         borderBottomWidth={1}
         borderColor="border"
         position="absolute"
@@ -219,7 +222,7 @@ const Header = ({
         key="selected-verses-header"
       >
         <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
-          {hasBackButton && (
+          {isFormSheet && DISABLE_BACK_BUTTON && (
             <Back
               onGoBack={() => {
                 setIsFullScreenBible(false)
@@ -246,7 +249,7 @@ const Header = ({
       width="100%"
       bg="reverse"
       px={15}
-      paddingTop={insets.top}
+      paddingTop={TOP_INSET}
       borderBottomWidth={1}
       borderColor="border"
       position="absolute"
@@ -254,7 +257,7 @@ const Header = ({
       left={0}
       overflow="visible"
       style={{
-        height: isFullScreenBible ? 20 + insets.top : HEADER_HEIGHT + insets.top,
+        height: isFullScreenBible ? 20 + TOP_INSET : HEADER_HEIGHT + TOP_INSET,
         transitionProperty: 'height',
         transitionDuration: 300,
       }}
@@ -263,7 +266,7 @@ const Header = ({
       exiting={FadeOut}
     >
       <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
-        {hasBackButton ? (
+        {isFormSheet && DISABLE_BACK_BUTTON ? (
           <Back
             onGoBack={() => {
               setIsFullScreenBible(false)

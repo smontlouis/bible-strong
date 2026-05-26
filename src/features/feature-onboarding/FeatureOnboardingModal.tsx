@@ -18,6 +18,7 @@ import OnboardingFooter from './components/OnboardingFooter'
 import OnboardingStep from './components/OnboardingStep'
 import { getOnboardingConfig, type OnboardingId } from './onboardingConfig'
 import { useTheme } from '@emotion/react'
+import { ContainerComponent } from '~common/Modal'
 
 const FeatureOnboardingModal = () => {
   const { t } = useTranslation()
@@ -88,6 +89,7 @@ const FeatureOnboardingModal = () => {
       enablePanDownToClose={false}
       enableDynamicSizing
       backdropComponent={props => renderBackdrop({ ...props, pressBehavior: 'none' })}
+      containerComponent={ContainerComponent}
       onDismiss={handleClose}
       detached={true}
       key={key}

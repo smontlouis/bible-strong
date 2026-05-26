@@ -141,19 +141,10 @@ const DictionnaryDetailScreen = ({
         toast.error('Impossible de charger ce mot.')
       }
     } else {
-      if (isInTab) {
-        // In tab context, update the tab data instead of navigating
-        setDictionaryTab(
-          produce(draft => {
-            draft.data.word = href
-          })
-        )
-      } else {
-        router.push({
-          pathname: '/dictionnary-detail',
-          params: { word: href },
-        })
-      }
+      router.push({
+        pathname: '/dictionnary-detail',
+        params: { word: href },
+      })
     }
   }
 

@@ -1,11 +1,10 @@
 import React from 'react'
 import distanceInWords from 'date-fns/formatDistance'
 import styled from '@emotion/native'
+import { useRouter } from 'expo-router'
 
-import books from '~assets/bible_versions/books-desc'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import LexiqueIcon from '~common/LexiqueIcon'
-import Link from '~common/Link'
 import NaveIcon from '~common/NaveIcon'
 import EntityChipList from '~common/EntityChipList'
 import Border from '~common/ui/Border'
@@ -97,6 +96,7 @@ export const NoteItem = ({
   t: Translate
   lang: ActiveLanguage
 }) => {
+  const router = useRouter()
   const location = getFirstVerseLocation(item.verseKeys)
   const { title } = location
     ? formatVerseContent([location])
@@ -128,28 +128,21 @@ export const NoteItem = ({
     </Box>
   )
 
-  if (!location) {
-    return (
-      <>
-        {content}
-        <Border />
-      </>
-    )
+  const openNote = () => {
+    router.push({
+      pathname: '/note',
+      params: {
+        noteId: item.id,
+        ...(item.verseKeys?.length ? { verseKeys: JSON.stringify(item.verseKeys) } : {}),
+      },
+    })
   }
 
   return (
-    <Link
-      route="BibleView"
-      params={{
-        isReadOnly: true,
-        book: books[location.Livre - 1],
-        chapter: Number(location.Chapitre),
-        verse: Number(location.Verset),
-      }}
-    >
+    <TouchableBox onPress={openNote}>
       {content}
       <Border />
-    </Link>
+    </TouchableBox>
   )
 }
 
@@ -162,6 +155,7 @@ export const LinkItem = ({
   t: Translate
   lang: ActiveLanguage
 }) => {
+  const router = useRouter()
   const location = getFirstVerseLocation(item.verseKeys)
   const { title } = location
     ? formatVerseContent([location])
@@ -216,28 +210,21 @@ export const LinkItem = ({
     </>
   )
 
-  if (!location) {
-    return (
-      <>
-        {content}
-        <Border />
-      </>
-    )
+  const openLink = () => {
+    router.push({
+      pathname: '/link',
+      params: {
+        linkId: item.id,
+        ...(item.verseKeys?.length ? { verseKeys: item.verseKeys.join(',') } : {}),
+      },
+    })
   }
 
   return (
-    <Link
-      route="BibleView"
-      params={{
-        isReadOnly: true,
-        book: books[location.Livre - 1],
-        chapter: location.Chapitre,
-        verse: location.Verset,
-      }}
-    >
+    <TouchableBox onPress={openLink}>
       {content}
       <Border />
-    </Link>
+    </TouchableBox>
   )
 }
 

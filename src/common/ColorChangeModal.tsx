@@ -8,6 +8,7 @@ import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import { useColorItems } from '~helpers/useHighlightColors'
 import { colorChangeModalAtom, colorPickerModalAtom } from '~state/app'
+import { ContainerComponent } from './Modal'
 
 const ColorChangeModal = () => {
   const item = useAtomValue(colorChangeModalAtom)
@@ -56,6 +57,7 @@ const ColorChangeModal = () => {
       enablePanDownToClose
       enableDynamicSizing
       backdropComponent={renderBackdrop}
+      containerComponent={ContainerComponent}
       activeOffsetY={[-20, 20]}
       onDismiss={handleModalClose}
       key={key}

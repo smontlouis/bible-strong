@@ -9,6 +9,7 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
+import { ContainerComponent } from './Modal'
 
 const Header = styled.View(({ theme }) => ({
   flexDirection: 'row',
@@ -80,6 +81,7 @@ const FilterModal = forwardRef<BottomSheetModal, Props>(
         enablePanDownToClose
         enableDynamicSizing
         backdropComponent={renderBackdrop}
+        containerComponent={ContainerComponent}
         activeOffsetY={[-20, 20]}
         key={key}
         {...bottomSheetStyles}

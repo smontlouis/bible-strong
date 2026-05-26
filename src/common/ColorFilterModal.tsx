@@ -11,6 +11,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import { useAllColors } from '~helpers/useColorName'
+import { ContainerComponent } from './Modal'
 
 const ColorCircle = styled.View<{ color: string }>(({ color }) => ({
   width: 24,
@@ -57,6 +58,7 @@ const ColorFilterModal = forwardRef<BottomSheetModal, Props>(
         enablePanDownToClose
         snapPoints={['50%']}
         backdropComponent={renderBackdrop}
+        containerComponent={ContainerComponent}
         activeOffsetY={[-20, 20]}
         key={key}
         {...bottomSheetStyles}

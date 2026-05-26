@@ -237,7 +237,7 @@ export type WebViewProps = {
   verseToScroll: number | undefined
   pericopeChapter: PericopeChapter
   openNote?: (noteId: string, verseIds?: string[]) => void
-  openLinkModal?: (linkId: string) => void
+  openLink?: (linkId: string) => void
   setSelectedCode: (selectedCode: SelectedCode) => void
   selectedCode: SelectedCode | null
   comments: { [key: string]: string } | null
@@ -278,6 +278,7 @@ export type WebViewProps = {
   // Verse notes modal
   onOpenVerseNotesModal?: (verseKey: string) => void
   onOpenStudyRelationsModal?: (target: StudyRelationsModalTarget) => void
+  isFormSheet?: boolean
   // Enter annotation mode from double-tap
   onEnterAnnotationMode?: () => void
   // Red words data
@@ -363,7 +364,7 @@ export const BibleDOMWrapper = ({
   onOpenVerseNotesModal,
   onOpenStudyRelationsModal,
   openNote,
-  openLinkModal,
+  openLink,
   removeParallelVersion,
   addParallelVersion,
   setSelectedCode,
@@ -384,6 +385,7 @@ export const BibleDOMWrapper = ({
   goToPrevChapter,
   goToNextChapter,
   onEnterAnnotationMode,
+  isFormSheet,
   redWords,
   isLoading,
   onMountTimeout,
@@ -551,7 +553,7 @@ export const BibleDOMWrapper = ({
       }
       case NAVIGATE_TO_BIBLE_LINK: {
         const linkId = getStringPayload(action.payload)
-        if (linkId) openLinkModal?.(linkId)
+        if (linkId) openLink?.(linkId)
         break
       }
       case NAVIGATE_TO_RELATION_ENDPOINT: {
@@ -760,6 +762,7 @@ export const BibleDOMWrapper = ({
       links: allLinks,
     }
   )
+  const TOP_INSET = isFormSheet ? 0 : insets.top
 
   return (
     <Box
@@ -772,11 +775,15 @@ export const BibleDOMWrapper = ({
       <BibleDOMComponent
         dom={{
           webviewDebuggingEnabled: __DEV__,
+          style: {
+            flex: 1,
+            backgroundColor: theme.colors.reverse,
+          },
           containerStyle: {
             flex: 1,
             backgroundColor: theme.colors.reverse,
             ...(Platform.OS === 'android' && {
-              marginTop: insets.top,
+              marginTop: TOP_INSET,
             }),
           },
           injectedJavaScriptBeforeContentLoaded: `document.documentElement.style.backgroundColor='${theme.colors.reverse}';document.body.style.backgroundColor='${theme.colors.reverse}';document.body.style.margin='0';true;`,
@@ -809,7 +816,7 @@ export const BibleDOMWrapper = ({
         eraseSelectionTrigger={eraseSelectionTrigger}
         clearAnnotationSelectionTrigger={clearAnnotationSelectionTrigger}
         selectedAnnotationId={selectedAnnotationId}
-        safeAreaTop={Platform.OS === 'ios' ? insets.top : 0}
+        safeAreaTop={Platform.OS === 'ios' ? TOP_INSET : 0}
         wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
         taggedVersesInChapter={taggedVersesInChapter}
         versesWithNonHighlightTags={versesWithNonHighlightTags}
@@ -829,7 +836,7 @@ export const BibleDOMWrapper = ({
           position="absolute"
           left={0}
           right={0}
-          top={HEADER_HEIGHT + insets.top}
+          top={HEADER_HEIGHT + TOP_INSET}
         />
       )}
     </Box>

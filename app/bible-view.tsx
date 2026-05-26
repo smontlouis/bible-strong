@@ -1,5 +1,1 @@
-import BibleScreen from '~features/bible/BibleScreen'
-
-const BibleViewRoute = () => <BibleScreen isFormSheet />
-
-export default BibleViewRoute
+export { default } from '~features/bible/BibleScreen'

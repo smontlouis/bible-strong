@@ -56,11 +56,11 @@ BibleScreen/
 │   ├── ChapterSelector
 │   └── VerseSelector
 ├── Modals/                # Interfaces modales
-│   ├── BibleNoteModal
 │   ├── BibleParamsModal
-│   ├── StrongModal
 │   └── SelectedVersesModal
 └── Screens/               # Écrans spécialisés
+    ├── BibleLinkScreen
+    ├── NoteDetailTabScreen
     ├── StrongScreen
     ├── CompareVersesScreen
     ├── HistoryScreen

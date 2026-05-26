@@ -39,6 +39,7 @@ import {
 import { colorPickerModalAtom } from '~state/app'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
+import { ContainerComponent } from '~common/Modal'
 
 export const HalfContainer = styled.View<{ border?: boolean }>(({ border, theme }) => ({
   paddingHorizontal: 20,
@@ -185,6 +186,7 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
       ref={modalRef}
       enablePanDownToClose
       backdropComponent={props => renderBackdrop({ ...props, opacity: 0.1 })}
+      containerComponent={ContainerComponent}
       enableDynamicSizing={false}
       snapPoints={['40%']}
       activeOffsetY={[-20, 20]}

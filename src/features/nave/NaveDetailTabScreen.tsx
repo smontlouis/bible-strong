@@ -133,23 +133,13 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     }
 
     if (type === 'w') {
-      if (isInTab) {
-        // In tab context, update the tab data instead of navigating
-        setNaveTab(
-          produce(draft => {
-            draft.data.name_lower = item
-            draft.data.name = item
-          })
-        )
-      } else {
-        router.push({
-          pathname: '/nave-detail',
-          params: {
-            name_lower: item,
-            name: item,
-          },
-        })
-      }
+      router.push({
+        pathname: '/nave-detail',
+        params: {
+          name_lower: item,
+          name: item,
+        },
+      })
     }
   }
 

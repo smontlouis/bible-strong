@@ -284,13 +284,28 @@ function InnerApp() {
                             />
                             <Stack.Screen
                               name="edit-study"
-                              options={createFormSheetOptions(theme)}
+                              options={createFormSheetOptions(theme, {
+                                contentStyle: {
+                                  bottom: 0,
+                                },
+                              })}
                             />
                             <Stack.Screen
                               name="bible-view"
-                              options={createFormSheetOptions(theme)}
+                              options={createFormSheetOptions(theme, {
+                                contentStyle: {
+                                  bottom: 0,
+                                },
+                              })}
                             />
-                            <Stack.Screen name="note" options={createFormSheetOptions(theme)} />
+                            <Stack.Screen
+                              name="note"
+                              options={createFormSheetOptions(theme, {
+                                contentStyle: {
+                                  bottom: 0,
+                                },
+                              })}
+                            />
                             <Stack.Screen name="link" options={createFormSheetOptions(theme)} />
                             <Stack.Screen name="strong" options={createFormSheetOptions(theme)} />
                             <Stack.Screen

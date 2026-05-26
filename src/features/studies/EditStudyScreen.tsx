@@ -164,6 +164,7 @@ const EditStudyScreen = ({
         params={{ studyId }}
         studyAtom={studyAtom}
         studyId={studyId}
+        isFormSheet={isFormSheet}
       />
       {isReadOnly && hasTagOrRelationChips && (
         <Box px={20} py={12} borderTopWidth={1} borderColor="border" bg="reverse">

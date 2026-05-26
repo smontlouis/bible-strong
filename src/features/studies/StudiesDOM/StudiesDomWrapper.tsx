@@ -3,6 +3,7 @@ import type { JSONValue } from 'expo/build/dom/dom.types'
 import { useEffect, useRef, useState } from 'react'
 import { Keyboard, KeyboardAvoidingView, Platform } from 'react-native'
 import { WebViewMessageEvent } from 'react-native-webview'
+import { useTheme } from '@emotion/react'
 
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { StudyTab, TabItem, useIsCurrentTab } from 'src/state/tabs'
@@ -29,6 +30,7 @@ type Props = {
   fontFamily: string
   studyAtom?: PrimitiveAtom<StudyTab>
   studyId: string
+  isFormSheet?: boolean
 }
 
 type StudyDomMessage = {
@@ -53,9 +55,11 @@ export default function StudiesDomWrapper({
   fontFamily,
   studyAtom,
   studyId,
+  isFormSheet = false,
 }: Props) {
   const ref = useRef<StudyDOMRef>(null)
   const router = useRouter()
+  const theme = useTheme()
   const [isKeyboardOpened, setIsKeyboardOpened] = useState(false)
   const [activeFormats, setActiveFormats] = useState({})
   const { colorScheme } = useCurrentThemeSelector()
@@ -194,16 +198,8 @@ export default function StudiesDomWrapper({
     }
   }
 
-  return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{
-        overflow: 'hidden',
-        flex: 1,
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
-      }}
-    >
+  const content = (
+    <>
       <StudiesDOMComponent
         ref={ref}
         fontFamily={fontFamily}
@@ -215,8 +211,12 @@ export default function StudiesDomWrapper({
           onMessage: handleMessage,
           keyboardDisplayRequiresUserAction: false,
           bounces: false,
-          scrollEnabled: false,
+          scrollEnabled: true,
           hideKeyboardAccessoryView: true,
+          containerStyle: {
+            flex: 1,
+            backgroundColor: theme.colors.reverse,
+          },
         }}
       />
       {isKeyboardOpened && (
@@ -226,6 +226,22 @@ export default function StudiesDomWrapper({
           activeFormats={activeFormats}
         />
       )}
+    </>
+  )
+
+  if (isFormSheet && isReadOnly) {
+    return content
+  }
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{
+        flex: 1,
+        backgroundColor: theme.colors.reverse,
+      }}
+    >
+      {content}
     </KeyboardAvoidingView>
   )
 }

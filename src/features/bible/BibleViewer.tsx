@@ -121,7 +121,6 @@ interface BibleViewerProps {
   settings: RootState['user']['bible']['settings']
   onMountTimeout?: () => void
   isBibleViewReloadingAtom: PrimitiveAtom<boolean>
-  withNavigation?: boolean
   isFormSheet?: boolean
 }
 
@@ -130,7 +129,6 @@ const BibleViewer = ({
   settings,
   onMountTimeout,
   isBibleViewReloadingAtom,
-  withNavigation,
   isFormSheet,
 }: BibleViewerProps) => {
   const { t } = useTranslation()
@@ -232,8 +230,8 @@ const BibleViewer = ({
   // Shared Bible DOM: detect if this tab is the active Bible tab
   const activeBibleTabId = useAtomValue(activeBibleTabIdAtom)
   const setSharedProps = useSetAtom(sharedBibleDOMPropsAtom)
-  const isActiveBibleTab = !withNavigation && activeBibleTabId === bible.id
-  const useSharedDOM = !withNavigation
+  const isActiveBibleTab = !isFormSheet && activeBibleTabId === bible.id
+  const useSharedDOM = !isFormSheet
 
   // Displayed values - updated only when verses are loaded to keep annotations in sync
   const [displayedBook, setDisplayedBook] = useState(book.Numero)
@@ -551,7 +549,7 @@ const BibleViewer = ({
     openEntityRelations(createVerseEndpoint(verseIds))
   }
 
-  const openLinkModal = (linkId: string) => {
+  const openLink = (linkId: string) => {
     router.push({ pathname: '/link', params: { linkId } })
   }
 
@@ -748,7 +746,7 @@ const BibleViewer = ({
     verseToScroll: verse,
     pericopeChapter: getPericopeChapter(pericope, displayedBook, displayedChapter),
     openNote: openBibleNote,
-    openLinkModal,
+    openLink,
     setSelectedCode,
     selectedCode,
     comments,
@@ -788,6 +786,7 @@ const BibleViewer = ({
     onEnterAnnotationMode: handleEnterAnnotationModeFromDoubleTap,
     // Red words
     redWords: settings.redWordsDisplay ? redWords : null,
+    isFormSheet,
   } satisfies Parameters<typeof BibleDOMWrapper>[0]
 
   // Push props to shared atom when this is the active Bible tab.
@@ -852,7 +851,7 @@ const BibleViewer = ({
         bibleAtom={bibleAtom}
         onBibleParamsClick={bibleParamsModal.open}
         commentsDisplay={settings.commentsDisplay}
-        hasBackButton={withNavigation && !isFormSheet}
+        isFormSheet={isFormSheet}
         onExitAnnotationMode={handleExitAnnotationMode}
         annotationModeEnabled={annotationMode.enabled}
       />
@@ -878,7 +877,7 @@ const BibleViewer = ({
           </Box>
         )}
       </Box>
-      {!(withNavigation || isReadOnly) && (
+      {!isFormSheet && !isReadOnly && (
         <BibleFooter
           bibleAtom={bibleAtom}
           disabled={isLoading}
@@ -891,7 +890,7 @@ const BibleViewer = ({
           version={version}
         />
       )}
-      {withNavigation && !isFormSheet && !error && <OpenInNewTabButton bibleTab={bible} />}
+      {isFormSheet && !error && <OpenInNewTabButton bibleTab={bible} />}
       <SelectedVersesModal
         ref={versesModal.getRef()}
         isSelectionMode={isSelectionMode}

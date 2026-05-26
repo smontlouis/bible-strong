@@ -209,24 +209,13 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
       reference = str1
     }
 
-    if (isInTab) {
-      // In tab context, update the tab data instead of navigating
-      setStrongTab(
-        produce(draft => {
-          draft.data.book = Number(bookNum)
-          draft.data.reference = reference
-          draft.data.strongReference = undefined
-        })
-      )
-    } else {
-      router.push({
-        pathname: '/strong',
-        params: {
-          book: String(bookNum),
-          reference: reference,
-        },
-      })
-    }
+    router.push({
+      pathname: '/strong',
+      params: {
+        book: String(bookNum),
+        reference: reference,
+      },
+    })
   }
 
   if (error) {
