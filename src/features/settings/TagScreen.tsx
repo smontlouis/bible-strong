@@ -5,15 +5,13 @@ import { useDispatch } from 'react-redux'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 
+import { ActionMenuOption } from '~common/ActionMenu'
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
 import RenameModal from '~common/RenameModal'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
-import { FeatherIcon } from '~common/ui/Icon'
-import MenuOption from '~common/ui/MenuOption'
 import SectionList from '~common/ui/SectionList'
 import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
 import Empty from '~common/Empty'
 import HighlightItem from '~features/settings/Verse'
 import StudyItem from '~features/studies/StudyItem'
@@ -174,31 +172,25 @@ const TagScreen = () => {
           <PopOverMenu
             popover={
               <>
-                <MenuOption
+                <ActionMenuOption
+                  icon="edit-3"
+                  label={t('Éditer')}
                   onSelect={() => {
                     setTagToRename({ id: tag.id, name: tag.name })
                     renameModalRef.current?.present()
                   }}
-                >
-                  <Box row alignItems="center">
-                    <FeatherIcon name="edit-3" size={15} />
-                    <Text marginLeft={10}>{t('Éditer')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption onSelect={handleOpenInTabGroup}>
-                  <Box row alignItems="center">
-                    <FeatherIcon name="layers" size={15} />
-                    <Text marginLeft={10}>{t('tabs.createGroupFromTag')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption onSelect={handleDelete}>
-                  <Box row alignItems="center">
-                    <FeatherIcon name="trash-2" size={15} color="quart" />
-                    <Text marginLeft={10} color="quart">
-                      {t('Supprimer')}
-                    </Text>
-                  </Box>
-                </MenuOption>
+                />
+                <ActionMenuOption
+                  icon="layers"
+                  label={t('tabs.createGroupFromTag')}
+                  onSelect={handleOpenInTabGroup}
+                />
+                <ActionMenuOption
+                  icon="trash-2"
+                  label={t('Supprimer')}
+                  color="quart"
+                  onSelect={handleDelete}
+                />
               </>
             }
           />

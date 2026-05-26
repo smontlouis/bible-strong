@@ -1,9 +1,9 @@
 import styled from '@emotion/native'
-import * as Icon from '@expo/vector-icons'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Share } from 'react-native'
 import { useSelector } from 'react-redux'
 
+import { ActionMenuOption } from '~common/ActionMenu'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Link from '~common/Link'
@@ -33,7 +33,6 @@ import { useTranslation } from 'react-i18next'
 import { useRouter } from 'expo-router'
 import PopOverMenu from '~common/PopOverMenu'
 import { StrongReference, Verse } from '~common/types'
-import MenuOption from '~common/ui/MenuOption'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
@@ -60,10 +59,6 @@ const SubTitle = styled(Text)({
 const Word = styled(Text)(({ theme }) => ({
   fontSize: 18,
   fontWeight: 'bold',
-  color: theme.colors.default,
-}))
-
-const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
@@ -223,11 +218,7 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
   if (error) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
-        <Header
-          hasBackButton={hasBackButton}
-          onCustomBackPress={goBack}
-          title="Désolé..."
-        />
+        <Header hasBackButton={hasBackButton} onCustomBackPress={goBack} title="Désolé..." />
         <Empty
           source={require('~assets/images/empty.json')}
           message={`Impossible de charger la strong pour ce verset...${
@@ -243,11 +234,7 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
   if (!strongReference) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
-        <Header
-          hasBackButton={hasBackButton}
-          onCustomBackPress={goBack}
-          title={t('Lexique')}
-        />
+        <Header hasBackButton={hasBackButton} onCustomBackPress={goBack} title={t('Lexique')} />
         <Loading message={t('Chargement...')} />
       </FormSheetScreen>
     )
@@ -266,7 +253,9 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
           <PopOverMenu
             popover={
               <>
-                <MenuOption
+                <ActionMenuOption
+                  icon="tag"
+                  label={t('Étiquettes')}
                   onSelect={() =>
                     setUnifiedTagsModal({
                       mode: 'select',
@@ -275,25 +264,21 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
                       entity: Grec ? 'strongsGrec' : 'strongsHebreu',
                     })
                   }
-                >
-                  <Box row alignItems="center">
-                    <FeatherIcon name="tag" size={15} />
-                    <Text marginLeft={10}>{t('Étiquettes')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption onSelect={shareContent} closeBeforeSelect>
-                  <Box row alignItems="center">
-                    <FeatherIcon name="share-2" size={15} />
-                    <Text marginLeft={10}>{t('Partager')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption onSelect={() => strongEndpoint && openEntityRelations(strongEndpoint)}>
-                  <Box row alignItems="center">
-                    <FeatherIcon name="git-merge" size={15} />
-                    <Text marginLeft={10}>{t('Éditer les relations')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption
+                />
+                <ActionMenuOption
+                  icon="share-2"
+                  label={t('Partager')}
+                  onSelect={shareContent}
+                  closeBeforeSelect
+                />
+                <ActionMenuOption
+                  icon="git-merge"
+                  label={t('Éditer les relations')}
+                  onSelect={() => strongEndpoint && openEntityRelations(strongEndpoint)}
+                />
+                <ActionMenuOption
+                  icon="external-link"
+                  label={t('tab.openInNewTab')}
                   onSelect={() => {
                     openInNewTab({
                       id: `strong-${generateUUID()}`,
@@ -306,12 +291,7 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
                       },
                     })
                   }}
-                >
-                  <Box row alignItems="center">
-                    <FeatherIcon name="external-link" size={15} />
-                    <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
-                  </Box>
-                </MenuOption>
+                />
               </>
             }
           />

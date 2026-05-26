@@ -1,5 +1,3 @@
-import styled from '@emotion/native'
-import * as Icon from '@expo/vector-icons'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Share } from 'react-native'
 import { useSelector } from 'react-redux'
@@ -7,11 +5,11 @@ import truncHTML from 'trunc-html'
 
 import { WebView } from 'react-native-webview'
 import books from '~assets/bible_versions/books-desc'
+import { ActionMenuOption } from '~common/ActionMenu'
 import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
-import Text from '~common/ui/Text'
 import useHTMLView, { type HTMLViewLinkPayload } from '~helpers/useHTMLView'
 
 import { useRouter } from 'expo-router'
@@ -22,7 +20,6 @@ import { useTranslation } from 'react-i18next'
 import PopOverMenu from '~common/PopOverMenu'
 import { toast } from '~helpers/toast'
 import EntityChipList from '~common/EntityChipList'
-import MenuOption from '~common/ui/MenuOption'
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
@@ -37,10 +34,6 @@ import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRe
 import type { RelationEndpoint } from '~redux/modules/user'
 import AppScrollView from '~common/ui/ScrollView'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
-
-const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default,
-}))
 
 interface DictionaryDetailScreenProps {
   dictionaryAtom: PrimitiveAtom<DictionaryTab>
@@ -196,7 +189,9 @@ const DictionnaryDetailScreen = ({
           <PopOverMenu
             popover={
               <>
-                <MenuOption
+                <ActionMenuOption
+                  icon="tag"
+                  label={t('Étiquettes')}
                   onSelect={() =>
                     setUnifiedTagsModal({
                       mode: 'select',
@@ -205,27 +200,21 @@ const DictionnaryDetailScreen = ({
                       entity: 'words',
                     })
                   }
-                >
-                  <Box row alignItems="center">
-                    <FeatherIcon name="tag" size={15} />
-                    <Text marginLeft={10}>{t('Étiquettes')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption onSelect={shareDefinition} closeBeforeSelect>
-                  <Box row alignItems="center">
-                    <FeatherIcon name="share-2" size={15} />
-                    <Text marginLeft={10}>{t('Partager')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption
+                />
+                <ActionMenuOption
+                  icon="share-2"
+                  label={t('Partager')}
+                  onSelect={shareDefinition}
+                  closeBeforeSelect
+                />
+                <ActionMenuOption
+                  icon="git-merge"
+                  label={t('Éditer les relations')}
                   onSelect={() => dictionaryEndpoint && openEntityRelations(dictionaryEndpoint)}
-                >
-                  <Box row alignItems="center">
-                    <FeatherIcon name="git-merge" size={15} />
-                    <Text marginLeft={10}>{t('Éditer les relations')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption
+                />
+                <ActionMenuOption
+                  icon="external-link"
+                  label={t('tab.openInNewTab')}
                   onSelect={() => {
                     openInNewTab({
                       id: `dictionary-${generateUUID()}`,
@@ -237,12 +226,7 @@ const DictionnaryDetailScreen = ({
                       },
                     })
                   }}
-                >
-                  <Box row alignItems="center">
-                    <FeatherIcon name="external-link" size={15} />
-                    <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
-                  </Box>
-                </MenuOption>
+                />
               </>
             }
           />

@@ -4,6 +4,7 @@ import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
+import { ActionSheetItem } from '~common/ActionMenu'
 import Modal from '~common/Modal'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
@@ -104,11 +105,18 @@ const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
 
   return (
     <Modal.Body ref={ref} onModalClose={onClosed} enableDynamicSizing>
-      <Modal.Item onPress={navigateToBible}>{t('Voir dans la Bible')}</Modal.Item>
-      <Modal.Item onPress={openNoteInNewTab}>{t('tab.openInNewTab')}</Modal.Item>
-      <Modal.Item color="quart" onPress={deleteNoteConfirmation}>
-        {t('Supprimer')}
-      </Modal.Item>
+      <ActionSheetItem icon="book-open" label={t('Voir dans la Bible')} onPress={navigateToBible} />
+      <ActionSheetItem
+        icon="external-link"
+        label={t('tab.openInNewTab')}
+        onPress={openNoteInNewTab}
+      />
+      <ActionSheetItem
+        icon="trash-2"
+        label={t('Supprimer')}
+        color="quart"
+        onPress={deleteNoteConfirmation}
+      />
     </Modal.Body>
   )
 }

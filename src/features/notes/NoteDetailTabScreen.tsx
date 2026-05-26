@@ -8,6 +8,7 @@ import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, Share } fr
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import books from '~assets/bible_versions/books-desc'
+import { ActionMenuOption } from '~common/ActionMenu'
 import EntityChipList from '~common/EntityChipList'
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
@@ -16,8 +17,6 @@ import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Fab from '~common/ui/Fab'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
-import { FeatherIcon } from '~common/ui/Icon'
-import MenuOption from '~common/ui/MenuOption'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import VerseAccordion from '~common/VerseAccordion'
@@ -384,19 +383,16 @@ ${currentNote.description}
               height={54}
               popover={
                 <>
-                  <MenuOption onSelect={shareNote} closeBeforeSelect>
-                    <Box row alignItems="center">
-                      <FeatherIcon name="share" size={15} />
-                      <Text marginLeft={10}>{t('Partager')}</Text>
-                    </Box>
-                  </MenuOption>
-                  <MenuOption onSelect={onEditNote}>
-                    <Box row alignItems="center">
-                      <FeatherIcon name="edit-2" size={15} />
-                      <Text marginLeft={10}>{t('Éditer')}</Text>
-                    </Box>
-                  </MenuOption>
-                  <MenuOption
+                  <ActionMenuOption
+                    icon="share"
+                    label={t('Partager')}
+                    onSelect={shareNote}
+                    closeBeforeSelect
+                  />
+                  <ActionMenuOption icon="edit-2" label={t('Éditer')} onSelect={onEditNote} />
+                  <ActionMenuOption
+                    icon="tag"
+                    label={t('Éditer les tags')}
                     onSelect={() =>
                       setUnifiedTagsModal({
                         mode: 'select',
@@ -404,32 +400,25 @@ ${currentNote.description}
                         entity: 'notes',
                       })
                     }
-                  >
-                    <Box row alignItems="center">
-                      <FeatherIcon name="tag" size={15} />
-                      <Text marginLeft={10}>{t('Éditer les tags')}</Text>
-                    </Box>
-                  </MenuOption>
+                  />
                   {noteEndpoint ? (
-                    <MenuOption onSelect={() => openEntityRelations(noteEndpoint)}>
-                      <Box row alignItems="center">
-                        <FeatherIcon name="git-merge" size={15} />
-                        <Text marginLeft={10}>{t('Éditer les relations')}</Text>
-                      </Box>
-                    </MenuOption>
+                    <ActionMenuOption
+                      icon="git-merge"
+                      label={t('Éditer les relations')}
+                      onSelect={() => openEntityRelations(noteEndpoint)}
+                    />
                   ) : null}
-                  <MenuOption onSelect={navigateToBible}>
-                    <Box row alignItems="center">
-                      <FeatherIcon name="book-open" size={15} />
-                      <Text marginLeft={10}>{t('Voir dans la Bible')}</Text>
-                    </Box>
-                  </MenuOption>
-                  <MenuOption onSelect={deleteNoteFunc}>
-                    <Box row alignItems="center">
-                      <FeatherIcon name="trash-2" size={15} />
-                      <Text marginLeft={10}>{t('Supprimer')}</Text>
-                    </Box>
-                  </MenuOption>
+                  <ActionMenuOption
+                    icon="book-open"
+                    label={t('Voir dans la Bible')}
+                    onSelect={navigateToBible}
+                  />
+                  <ActionMenuOption
+                    icon="trash-2"
+                    label={t('Supprimer')}
+                    color="quart"
+                    onSelect={deleteNoteFunc}
+                  />
                 </>
               }
             />

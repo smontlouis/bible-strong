@@ -7,6 +7,7 @@ import { ActivityIndicator, Alert, Dimensions, Image, Linking, ScrollView } from
 import YoutubePlayer from 'react-native-youtube-iframe'
 import { useDispatch, useSelector } from 'react-redux'
 
+import { ActionMenuOption } from '~common/ActionMenu'
 import EntityChipList from '~common/EntityChipList'
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
@@ -16,7 +17,6 @@ import Button from '~common/ui/Button'
 import Fab from '~common/ui/Fab'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
-import MenuOption from '~common/ui/MenuOption'
 import Paragraph from '~common/ui/Paragraph'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
@@ -240,13 +240,10 @@ const BibleLinkScreen = () => {
               height={54}
               popover={
                 <>
-                  <MenuOption onSelect={editLink}>
-                    <Box row alignItems="center">
-                      <FeatherIcon name="edit-2" size={15} />
-                      <Text marginLeft={10}>{t('Éditer')}</Text>
-                    </Box>
-                  </MenuOption>
-                  <MenuOption
+                  <ActionMenuOption icon="edit-2" label={t('Éditer')} onSelect={editLink} />
+                  <ActionMenuOption
+                    icon="tag"
+                    label={t('Éditer les tags')}
                     onSelect={() =>
                       setUnifiedTagsModal({
                         mode: 'select',
@@ -259,24 +256,18 @@ const BibleLinkScreen = () => {
                           '',
                       })
                     }
-                  >
-                    <Box row alignItems="center">
-                      <FeatherIcon name="tag" size={15} />
-                      <Text marginLeft={10}>{t('Éditer les tags')}</Text>
-                    </Box>
-                  </MenuOption>
-                  <MenuOption onSelect={() => linkEndpoint && openEntityRelations(linkEndpoint)}>
-                    <Box row alignItems="center">
-                      <FeatherIcon name="git-branch" size={15} />
-                      <Text marginLeft={10}>{t('Éditer les relations')}</Text>
-                    </Box>
-                  </MenuOption>
-                  <MenuOption onSelect={deleteCurrentLink}>
-                    <Box row alignItems="center">
-                      <FeatherIcon name="trash-2" size={15} />
-                      <Text marginLeft={10}>{t('Supprimer')}</Text>
-                    </Box>
-                  </MenuOption>
+                  />
+                  <ActionMenuOption
+                    icon="git-branch"
+                    label={t('Éditer les relations')}
+                    onSelect={() => linkEndpoint && openEntityRelations(linkEndpoint)}
+                  />
+                  <ActionMenuOption
+                    icon="trash-2"
+                    label={t('Supprimer')}
+                    color="quart"
+                    onSelect={deleteCurrentLink}
+                  />
                 </>
               }
             />

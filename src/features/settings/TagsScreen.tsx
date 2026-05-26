@@ -5,6 +5,7 @@ import { Alert } from 'react-native'
 import { shallowEqual, useDispatch, useSelector, useStore } from 'react-redux'
 
 import { useTranslation } from 'react-i18next'
+import { ActionSheetItem } from '~common/ActionMenu'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Link from '~common/Link'
@@ -208,7 +209,9 @@ const TagsScreen = () => {
       )}
 
       <Modal.Body ref={ref} onModalClose={() => setOpen(undefined)} enableDynamicSizing>
-        <Modal.Item
+        <ActionSheetItem
+          icon="edit-3"
+          label={t('Éditer')}
           onPress={() => {
             if (!isOpen) return
 
@@ -216,13 +219,18 @@ const TagsScreen = () => {
             setTagToEdit({ id: isOpen.id, name: isOpen.name })
             renameModalRef.current?.present()
           }}
-        >
-          {t('Éditer')}
-        </Modal.Item>
-        <Modal.Item onPress={handleOpenInTabGroup}>{t('tabs.createGroupFromTag')}</Modal.Item>
-        <Modal.Item color="quart" onPress={promptLogout}>
-          {t('Supprimer')}
-        </Modal.Item>
+        />
+        <ActionSheetItem
+          icon="layers"
+          label={t('tabs.createGroupFromTag')}
+          onPress={handleOpenInTabGroup}
+        />
+        <ActionSheetItem
+          icon="trash-2"
+          label={t('Supprimer')}
+          color="quart"
+          onPress={promptLogout}
+        />
       </Modal.Body>
       <RenameModal
         bottomSheetRef={renameModalRef}

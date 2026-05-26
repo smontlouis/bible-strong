@@ -7,6 +7,7 @@ import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { useDispatch } from 'react-redux'
+import { ActionSheetItem } from '~common/ActionMenu'
 import Header from '~common/Header'
 import Link from '~common/Link'
 import Modal from '~common/Modal'
@@ -86,7 +87,9 @@ const EditHeader = ({
         />
         <Modal.Body ref={ref} enableDynamicSizing withPortal>
           <PublishStudyMenuItem study={study} onClosed={close} />
-          <Modal.Item
+          <ActionSheetItem
+            icon="external-link"
+            label={t('tab.openInNewTab')}
             onPress={() => {
               close()
               openInNewTab(
@@ -102,36 +105,37 @@ const EditHeader = ({
                 { autoRedirect: true }
               )
             }}
-          >
-            {t('tab.openInNewTab')}
-          </Modal.Item>
-          <Modal.Item
+          />
+          <ActionSheetItem
+            icon="tag"
+            label={t('Éditer les tags')}
             onPress={() => {
               close()
               setUnifiedTagsModal({ mode: 'select', id: study.id, entity: 'studies' })
             }}
-          >
-            {t('Éditer les tags')}
-          </Modal.Item>
-          <Modal.Item
+          />
+          <ActionSheetItem
+            icon="git-merge"
+            label={t('Éditer les relations')}
             onPress={() => {
               close()
               openRelationsModal()
             }}
-          >
-            {t('Éditer les relations')}
-          </Modal.Item>
-          <Modal.Item
+          />
+          <ActionSheetItem
+            icon="edit-3"
+            label={t('Renommer')}
             onPress={() => {
               close()
               openRenameModal()
             }}
-          >
-            {t('Renommer')}
-          </Modal.Item>
-          <Modal.Item color="quart" onPress={deleteStudyConfirmation}>
-            {t('Supprimer')}
-          </Modal.Item>
+          />
+          <ActionSheetItem
+            icon="trash-2"
+            label={t('Supprimer')}
+            color="quart"
+            onPress={deleteStudyConfirmation}
+          />
         </Modal.Body>
       </>
     )

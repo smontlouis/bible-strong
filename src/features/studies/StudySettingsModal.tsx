@@ -3,6 +3,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { ActionSheetItem } from '~common/ActionMenu'
 import Modal from '~common/Modal'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
@@ -50,7 +51,9 @@ const StudySettingsModal = ({ ref, studyId, onClosed, openRenameModal }: Props) 
   return (
     <Modal.Body ref={ref} onModalClose={onClosed} enableDynamicSizing withPortal>
       {study && <PublishStudyMenuItem study={study} onClosed={close} />}
-      <Modal.Item
+      <ActionSheetItem
+        icon="external-link"
+        label={t('tab.openInNewTab')}
         onPress={() => {
           if (!study) return
 
@@ -68,39 +71,37 @@ const StudySettingsModal = ({ ref, studyId, onClosed, openRenameModal }: Props) 
             { autoRedirect: true }
           )
         }}
-      >
-        {t('tab.openInNewTab')}
-      </Modal.Item>
-      <Modal.Item
+      />
+      <ActionSheetItem
+        icon="tag"
+        label={t('Éditer les tags')}
         onPress={() => {
           if (!study) return
 
           close()
           setUnifiedTagsModal({ mode: 'select', id: study.id, entity: 'studies' })
         }}
-      >
-        {t('Éditer les tags')}
-      </Modal.Item>
-      <Modal.Item
+      />
+      <ActionSheetItem
+        icon="edit-3"
+        label={t('Renommer')}
         onPress={() => {
           if (!study) return
 
           close()
           openRenameModal({ id: study.id, title: study.title })
         }}
-      >
-        {t('Renommer')}
-      </Modal.Item>
-      <Modal.Item
+      />
+      <ActionSheetItem
+        icon="trash-2"
+        label={t('Supprimer')}
         color="quart"
         onPress={() => {
           if (!study || !studyId) return
 
           deleteStudyConfirmation(studyId)
         }}
-      >
-        {t('Supprimer')}
-      </Modal.Item>
+      />
     </Modal.Body>
   )
 }

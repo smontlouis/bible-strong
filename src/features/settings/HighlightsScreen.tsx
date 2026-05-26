@@ -4,6 +4,7 @@ import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { Alert, ScrollView } from 'react-native'
 
+import { ActionSheetItem } from '~common/ActionMenu'
 import Empty from '~common/Empty'
 import FiltersHeader from '~common/FiltersHeader'
 import ColorFilterModal from '~common/ColorFilterModal'
@@ -326,7 +327,9 @@ const HighlightsScreen = () => {
 
       {/* Settings modal */}
       <Modal.Body ref={settingsRef} enableDynamicSizing>
-        <Modal.Item
+        <ActionSheetItem
+          icon="droplet"
+          label={t('Changer la couleur')}
           onPress={() => {
             if (settingsData?.stringIds) {
               const verseIds = settingsData.stringIds
@@ -337,10 +340,10 @@ const HighlightsScreen = () => {
               })
             }
           }}
-        >
-          {t('Changer la couleur')}
-        </Modal.Item>
-        <Modal.Item
+        />
+        <ActionSheetItem
+          icon="tag"
+          label={t('Éditer les tags')}
           onPress={() => {
             if (settingsData?.stringIds) {
               setUnifiedTagsModal({
@@ -350,12 +353,13 @@ const HighlightsScreen = () => {
               })
             }
           }}
-        >
-          {t('Éditer les tags')}
-        </Modal.Item>
-        <Modal.Item color="quart" onPress={handleDelete}>
-          {t('Supprimer')}
-        </Modal.Item>
+        />
+        <ActionSheetItem
+          icon="trash-2"
+          label={t('Supprimer')}
+          color="quart"
+          onPress={handleDelete}
+        />
       </Modal.Body>
 
       {/* Annotation settings modal */}
@@ -364,7 +368,9 @@ const HighlightsScreen = () => {
         onModalClose={() => setAnnotationSettingsData(null)}
         enableDynamicSizing
       >
-        <Modal.Item
+        <ActionSheetItem
+          icon="droplet"
+          label={t('Changer la couleur')}
           onPress={() => {
             if (annotationSettingsData) {
               const annotationId = annotationSettingsData.id
@@ -377,10 +383,10 @@ const HighlightsScreen = () => {
               })
             }
           }}
-        >
-          {t('Changer la couleur')}
-        </Modal.Item>
-        <Modal.Item
+        />
+        <ActionSheetItem
+          icon="tag"
+          label={t('Éditer les tags')}
           onPress={() => {
             if (annotationSettingsData) {
               setUnifiedTagsModal({
@@ -390,12 +396,13 @@ const HighlightsScreen = () => {
               })
             }
           }}
-        >
-          {t('Éditer les tags')}
-        </Modal.Item>
-        <Modal.Item color="quart" onPress={handleDeleteAnnotation}>
-          {t('Supprimer')}
-        </Modal.Item>
+        />
+        <ActionSheetItem
+          icon="trash-2"
+          label={t('Supprimer')}
+          color="quart"
+          onPress={handleDeleteAnnotation}
+        />
       </Modal.Body>
     </Container>
   )
