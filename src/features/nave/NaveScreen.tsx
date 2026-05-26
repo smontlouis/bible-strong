@@ -8,9 +8,15 @@ import NaveListScreen from './NaveListScreen'
 
 type NaveScreenProps = {
   isFormSheet?: boolean
+  isNewTabSelection?: boolean
+  newTabId?: string
 }
 
-const NaveScreen = ({ isFormSheet = false }: NaveScreenProps) => {
+const NaveScreen = ({
+  isFormSheet = false,
+  isNewTabSelection = false,
+  newTabId,
+}: NaveScreenProps) => {
   const { t } = useTranslation()
   const onTheFlyAtom = useMemo(
     () =>
@@ -26,6 +32,14 @@ const NaveScreen = ({ isFormSheet = false }: NaveScreenProps) => {
     []
   )
 
-  return <NaveListScreen naveAtom={onTheFlyAtom} hasBackButton isFormSheet={isFormSheet} />
+  return (
+    <NaveListScreen
+      naveAtom={onTheFlyAtom}
+      hasBackButton
+      isFormSheet={isFormSheet}
+      isNewTabSelection={isNewTabSelection}
+      newTabId={newTabId}
+    />
+  )
 }
 export default NaveScreen

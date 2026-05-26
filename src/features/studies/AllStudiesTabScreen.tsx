@@ -26,6 +26,7 @@ import { selectRelationCountsByEndpointIdentity } from '~redux/selectors/bible'
 import { unifiedTagsModalAtom } from '~state/app'
 import { endpointIdentity } from '~features/studyRelations/domain'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
+import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import StudyItem from './StudyItem'
 import StudySettingsModal from './StudySettingsModal'
@@ -33,16 +34,21 @@ import StudySettingsModal from './StudySettingsModal'
 type StudiesScreenProps = {
   hasBackButton?: boolean
   isFormSheet?: boolean
+  isNewTabSelection?: boolean
+  newTabId?: string
   onStudySelect?: (studyId: string) => void
 }
 
 const StudiesScreen = ({
   hasBackButton,
   isFormSheet = false,
+  isNewTabSelection = false,
+  newTabId,
   onStudySelect,
 }: StudiesScreenProps) => {
   const router = useRouter()
   const { t } = useTranslation()
+  const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
   const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
   const { isLogged } = useLogin()
@@ -70,6 +76,21 @@ const StudiesScreen = ({
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onStudyPress = (studyId: string) => {
+    if (isNewTabSelection) {
+      const study = studies.find(candidate => candidate.id === studyId)
+
+      resolveNewTabSelection({
+        id: newTabId || 'new',
+        title: study?.title || t('Études'),
+        isRemovable: true,
+        type: 'study',
+        data: {
+          studyId,
+        },
+      })
+      return
+    }
+
     if (isInTab && onStudySelect) {
       onStudySelect(studyId)
     } else {

@@ -22,6 +22,7 @@ import { endpointIdentity, type RelationEndpoint } from '~features/studyRelation
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { useOpenNote } from '~features/notes/useOpenNote'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
 
 export type TNote = {
   noteId: string
@@ -31,10 +32,17 @@ export type TNote = {
 
 type BibleVerseNotesProps = {
   isFormSheet?: boolean
+  isNewTabSelection?: boolean
+  newTabId?: string
 }
 
-const BibleVerseNotes = ({ isFormSheet = false }: BibleVerseNotesProps) => {
+const BibleVerseNotes = ({
+  isFormSheet = false,
+  isNewTabSelection = false,
+  newTabId,
+}: BibleVerseNotesProps) => {
   const { t } = useTranslation()
+  const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : true
 
@@ -110,6 +118,21 @@ const BibleVerseNotes = ({ isFormSheet = false }: BibleVerseNotesProps) => {
   }
 
   const openNoteEditor = (noteId: string) => {
+    if (isNewTabSelection) {
+      const note = notes.find(candidate => candidate.noteId === noteId)
+
+      resolveNewTabSelection({
+        id: newTabId || 'new',
+        title: note?.notes.title || t('Notes'),
+        isRemovable: true,
+        type: 'notes',
+        data: {
+          noteId,
+        },
+      })
+      return
+    }
+
     openNote({ noteId })
   }
 

@@ -1,5 +1,6 @@
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
+import { useRouter } from 'expo-router'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableBox } from '~common/ui/Box'
@@ -17,6 +18,7 @@ interface NewTabItemProps {
 
 const useOpenTabByType = ({ type, newAtom, onPlanPress }: NewTabItemProps) => {
   const [tab, setTab] = useAtom(newAtom)
+  const router = useRouter()
   const { openBibleReferenceModal } = useSelectBibleReference()
   const defaultVersion = useDefaultBibleVersion()
 
@@ -45,6 +47,31 @@ const useOpenTabByType = ({ type, newAtom, onPlanPress }: NewTabItemProps) => {
   }
 
   const onPress = () => {
+    if (type === 'strong') {
+      router.push({ pathname: '/lexique', params: { mode: 'newTab', tabId: tab.id } })
+      return
+    }
+
+    if (type === 'dictionary') {
+      router.push({ pathname: '/dictionnaire', params: { mode: 'newTab', tabId: tab.id } })
+      return
+    }
+
+    if (type === 'nave') {
+      router.push({ pathname: '/nave', params: { mode: 'newTab', tabId: tab.id } })
+      return
+    }
+
+    if (type === 'study') {
+      router.push({ pathname: '/studies', params: { mode: 'newTab', tabId: tab.id } })
+      return
+    }
+
+    if (type === 'notes') {
+      router.push({ pathname: '/bible-verse-notes', params: { mode: 'newTab', tabId: tab.id } })
+      return
+    }
+
     if (type === 'plan') {
       onPlanPress?.()
       return

@@ -8,9 +8,15 @@ import StudiesTabScreen from './StudiesTabScreen'
 
 type StudiesScreenProps = {
   isFormSheet?: boolean
+  isNewTabSelection?: boolean
+  newTabId?: string
 }
 
-const StudiesScreen = ({ isFormSheet = false }: StudiesScreenProps) => {
+const StudiesScreen = ({
+  isFormSheet = false,
+  isNewTabSelection = false,
+  newTabId,
+}: StudiesScreenProps) => {
   const params = useLocalSearchParams<{ studyId?: string }>()
   const studyId = params.studyId
 
@@ -29,6 +35,13 @@ const StudiesScreen = ({ isFormSheet = false }: StudiesScreenProps) => {
     [studyId]
   )
 
-  return <StudiesTabScreen studyAtom={onTheFlyAtom} isFormSheet={isFormSheet} />
+  return (
+    <StudiesTabScreen
+      studyAtom={onTheFlyAtom}
+      isFormSheet={isFormSheet}
+      isNewTabSelection={isNewTabSelection}
+      newTabId={newTabId}
+    />
+  )
 }
 export default StudiesScreen

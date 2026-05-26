@@ -1,5 +1,12 @@
+import { useLocalSearchParams } from 'expo-router'
 import NaveScreen from '~features/nave/NaveScreen'
 
-const NaveRoute = () => <NaveScreen isFormSheet />
+const NaveRoute = () => {
+  const params = useLocalSearchParams<{ mode?: string; tabId?: string }>()
+
+  return (
+    <NaveScreen isFormSheet isNewTabSelection={params.mode === 'newTab'} newTabId={params.tabId} />
+  )
+}
 
 export default NaveRoute

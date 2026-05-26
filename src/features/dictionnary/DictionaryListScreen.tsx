@@ -26,6 +26,7 @@ import { DictionaryTab } from '../../state/tabs'
 import { useResultsByLetterOrSearch, useSearchValue } from '../lexique/useUtilities'
 import DictionnaireItem from './DictionnaireItem'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
 
 type DictionaryRow = DictionnaireLetterRow | DictionnaireSearchRow
 
@@ -77,15 +78,20 @@ interface DictionaryListScreenProps {
   dictionaryAtom: PrimitiveAtom<DictionaryTab>
   hasBackButton?: boolean
   isFormSheet?: boolean
+  isNewTabSelection?: boolean
+  newTabId?: string
   onWordSelect?: (word: string) => void
 }
 
 const DictionaryListScreen = ({
   hasBackButton,
   isFormSheet = false,
+  isNewTabSelection = false,
+  newTabId,
   onWordSelect,
 }: DictionaryListScreenProps) => {
   const { t } = useTranslation()
+  const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
   const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
   const [error, setError] = useState<DatabaseError['error'] | null>(null)
@@ -105,6 +111,21 @@ const DictionaryListScreen = ({
       setError(results.error)
     }
   }, [results])
+
+  const selectWord = (word: string) => {
+    if (isNewTabSelection) {
+      resolveNewTabSelection({
+        id: newTabId || 'new',
+        title: word,
+        isRemovable: true,
+        type: 'dictionary',
+        data: { word },
+      })
+      return
+    }
+
+    onWordSelect?.(word)
+  }
 
   if (error) {
     return (
@@ -145,7 +166,11 @@ const DictionaryListScreen = ({
           ) : sectionResults.length ? (
             <SectionList<DictionaryRow, DictionarySection>
               renderItem={({ item: { rowid, word } }) => (
-                <DictionnaireItem key={rowid} word={word} onSelect={onWordSelect} />
+                <DictionnaireItem
+                  key={rowid}
+                  word={word}
+                  onSelect={isNewTabSelection || onWordSelect ? selectWord : undefined}
+                />
               )}
               removeClippedSubviews
               maxToRenderPerBatch={100}

@@ -8,9 +8,15 @@ import DictionaryListScreen from './DictionaryListScreen'
 
 type DictionaryScreenProps = {
   isFormSheet?: boolean
+  isNewTabSelection?: boolean
+  newTabId?: string
 }
 
-const DictionaryScreen = ({ isFormSheet = false }: DictionaryScreenProps) => {
+const DictionaryScreen = ({
+  isFormSheet = false,
+  isNewTabSelection = false,
+  newTabId,
+}: DictionaryScreenProps) => {
   const { t } = useTranslation()
   const onTheFlyAtom = useMemo(
     () =>
@@ -27,7 +33,13 @@ const DictionaryScreen = ({ isFormSheet = false }: DictionaryScreenProps) => {
   )
 
   return (
-    <DictionaryListScreen dictionaryAtom={onTheFlyAtom} hasBackButton isFormSheet={isFormSheet} />
+    <DictionaryListScreen
+      dictionaryAtom={onTheFlyAtom}
+      hasBackButton
+      isFormSheet={isFormSheet}
+      isNewTabSelection={isNewTabSelection}
+      newTabId={newTabId}
+    />
   )
 }
 export default DictionaryScreen

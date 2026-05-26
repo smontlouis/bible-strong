@@ -8,9 +8,15 @@ import LexiqueListScreen from './LexiqueListScreen'
 
 type LexiqueScreenProps = {
   isFormSheet?: boolean
+  isNewTabSelection?: boolean
+  newTabId?: string
 }
 
-const LexiqueScreen = ({ isFormSheet = false }: LexiqueScreenProps) => {
+const LexiqueScreen = ({
+  isFormSheet = false,
+  isNewTabSelection = false,
+  newTabId,
+}: LexiqueScreenProps) => {
   const { t } = useTranslation()
   const onTheFlyAtom = useMemo(
     () =>
@@ -26,6 +32,14 @@ const LexiqueScreen = ({ isFormSheet = false }: LexiqueScreenProps) => {
     []
   )
 
-  return <LexiqueListScreen strongAtom={onTheFlyAtom} hasBackButton isFormSheet={isFormSheet} />
+  return (
+    <LexiqueListScreen
+      strongAtom={onTheFlyAtom}
+      hasBackButton
+      isFormSheet={isFormSheet}
+      isNewTabSelection={isNewTabSelection}
+      newTabId={newTabId}
+    />
+  )
 }
 export default LexiqueScreen

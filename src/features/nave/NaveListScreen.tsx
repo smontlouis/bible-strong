@@ -27,6 +27,7 @@ import PopOverMenu from '~common/PopOverMenu'
 import LanguageMenuOption from '~common/LanguageMenuOption'
 import type { DatabaseError } from '~helpers/catchDatabaseError'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
 
 type NaveRow = NaveLetterRow | NaveSearchRow
 type NaveSection = {
@@ -72,15 +73,20 @@ interface NaveListScreenProps {
   naveAtom: PrimitiveAtom<NaveTab>
   hasBackButton?: boolean
   isFormSheet?: boolean
+  isNewTabSelection?: boolean
+  newTabId?: string
   onNaveSelect?: (name_lower: string, name: string) => void
 }
 
 const NaveListScreen = ({
   hasBackButton,
   isFormSheet = false,
+  isNewTabSelection = false,
+  newTabId,
   onNaveSelect,
 }: NaveListScreenProps) => {
   const { t } = useTranslation()
+  const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
   const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
   const lang = useLanguage()
@@ -100,6 +106,24 @@ const NaveListScreen = ({
       setError(results.error)
     }
   }, [results])
+
+  const selectNave = (nameLower: string, name: string) => {
+    if (isNewTabSelection) {
+      resolveNewTabSelection({
+        id: newTabId || 'new',
+        title: name,
+        isRemovable: true,
+        type: 'nave',
+        data: {
+          name_lower: nameLower,
+          name,
+        },
+      })
+      return
+    }
+
+    onNaveSelect?.(nameLower, name)
+  }
 
   if (error) {
     return (
@@ -163,7 +187,7 @@ const NaveListScreen = ({
                   key={name_lower}
                   name_lower={name_lower}
                   name={name}
-                  onSelect={onNaveSelect}
+                  onSelect={isNewTabSelection || onNaveSelect ? selectNave : undefined}
                 />
               )}
               removeClippedSubviews

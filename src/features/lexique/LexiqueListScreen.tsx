@@ -26,6 +26,7 @@ import LexiqueItem from './LexiqueItem'
 import PopOverMenu from '~common/PopOverMenu'
 import LanguageMenuOption from '~common/LanguageMenuOption'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
 
 interface LexiqueSection {
   title: string
@@ -72,6 +73,8 @@ interface LexiqueListScreenProps {
   strongAtom: PrimitiveAtom<StrongTab>
   hasBackButton?: boolean
   isFormSheet?: boolean
+  isNewTabSelection?: boolean
+  newTabId?: string
   onStrongSelect?: (book: number, reference: string) => void
 }
 
@@ -79,9 +82,12 @@ const LexiqueListScreen = ({
   strongAtom,
   hasBackButton,
   isFormSheet = false,
+  isNewTabSelection = false,
+  newTabId,
   onStrongSelect,
 }: LexiqueListScreenProps) => {
   const { t } = useTranslation()
+  const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
   const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
   const [error, setError] = useState<DatabaseError['error'] | null>(null)
@@ -101,6 +107,24 @@ const LexiqueListScreen = ({
       setError(results.error)
     }
   }, [results])
+
+  const selectStrong = (book: number, reference: string, title?: string) => {
+    if (isNewTabSelection) {
+      resolveNewTabSelection({
+        id: newTabId || 'new',
+        title: title ? `${title} (${reference})` : t('Lexique'),
+        isRemovable: true,
+        type: 'strong',
+        data: {
+          book,
+          reference,
+        },
+      })
+      return
+    }
+
+    onStrongSelect?.(book, reference)
+  }
 
   if (error) {
     return (
@@ -154,7 +178,11 @@ const LexiqueListScreen = ({
           ) : sectionResults.length ? (
             <SectionList<LexiqueRow, LexiqueSection>
               renderItem={({ item, index }) => (
-                <LexiqueItem key={index} {...item} onSelect={onStrongSelect} />
+                <LexiqueItem
+                  key={index}
+                  {...item}
+                  onSelect={isNewTabSelection || onStrongSelect ? selectStrong : undefined}
+                />
               )}
               removeClippedSubviews
               maxToRenderPerBatch={100}

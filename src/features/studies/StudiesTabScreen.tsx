@@ -13,9 +13,16 @@ import EditStudyScreen from './EditStudyScreen'
 interface StudiesTabScreenProps {
   studyAtom: PrimitiveAtom<StudyTab>
   isFormSheet?: boolean
+  isNewTabSelection?: boolean
+  newTabId?: string
 }
 
-const StudiesTabScreen = ({ studyAtom, isFormSheet = false }: StudiesTabScreenProps) => {
+const StudiesTabScreen = ({
+  studyAtom,
+  isFormSheet = false,
+  isNewTabSelection = false,
+  newTabId,
+}: StudiesTabScreenProps) => {
   const router = useRouter()
   const [studyTab, setStudyTab] = useAtom(studyAtom)
 
@@ -54,6 +61,8 @@ const StudiesTabScreen = ({ studyAtom, isFormSheet = false }: StudiesTabScreenPr
       <AllStudiesTabScreen
         hasBackButton={hasBackButton}
         isFormSheet={isFormSheet}
+        isNewTabSelection={isNewTabSelection}
+        newTabId={newTabId}
         onStudySelect={onStudySelect}
       />
     )
