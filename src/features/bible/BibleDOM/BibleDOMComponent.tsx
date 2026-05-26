@@ -16,8 +16,6 @@ import ChevronDownIcon from './ChevronDownIcon'
 import Comment from './Comment'
 import {
   ENTER_ANNOTATION_MODE,
-  ENTER_READONLY_MODE,
-  EXIT_READONLY_MODE,
   NAVIGATE_TO_PERICOPE,
   NAVIGATE_TO_VERSION,
   SWIPE_LEFT,
@@ -115,7 +113,7 @@ type Props = Pick<
   | 'versesWithNonHighlightTags'
   | 'settings'
   | 'verseToScroll'
-  | 'isReadOnly'
+  | 'contextDisplayMode'
   | 'version'
   | 'pericopeChapter'
   | 'book'
@@ -304,29 +302,6 @@ const VersionTitleColumn = styled('div')<{ columnCount: number; columnWidth: num
   })
 )
 
-const ReadWholeChapterButtonContainer = styled('div')({
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  marginTop: '20px',
-  marginBottom: '20px',
-})
-
-const ReadWholeChapterButton = styled('button')<RootStyles>(({ settings: { theme, colors } }) => ({
-  backgroundColor: colors[theme].opacity5,
-  color: colors[theme].primary,
-  border: 'none',
-  borderRadius: '100px',
-  padding: '12px 18px',
-  fontSize: '14px',
-  fontWeight: 'bold',
-  cursor: 'pointer',
-  transition: 'all 0.2s',
-  '&:hover': {
-    opacity: 0.6,
-  },
-}))
-
 /** Build a verseKey ("Livre-Chapitre-Verset") for a verse */
 function verseKey(v: TVerse): string {
   return `${v.Livre}-${v.Chapitre}-${v.Verset}`
@@ -416,7 +391,7 @@ const LoadedBibleContent = ({
   versesWithNonHighlightTags,
   settings,
   verseToScroll,
-  isReadOnly,
+  contextDisplayMode,
   version,
   pericopeChapter,
   book,
@@ -931,6 +906,7 @@ const LoadedBibleContent = ({
     ? extractParallelVersionTitles(parallelVerses, version)
     : []
   const headerHeight = isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT
+  const isContextFocused = contextDisplayMode === 'focused'
 
   return (
     <TranslationsProvider translations={translations}>
@@ -1035,7 +1011,7 @@ const LoadedBibleContent = ({
               highlightedVerses={highlightedVerses}
               settings={settings}
               verseToScroll={verseToScroll}
-              isReadOnly={isReadOnly}
+              contextDisplayMode={contextDisplayMode}
               version={version}
               pericopeChapter={pericopeChapter}
               isSelectionMode={isSelectionMode}
@@ -1063,46 +1039,6 @@ const LoadedBibleContent = ({
               redWords={redWords}
             />
           </HorizontalScrollWrapper>
-          {isReadOnly && focusVerses && focusVerses.length > 0 && (
-            <ReadWholeChapterButtonContainer>
-              <ReadWholeChapterButton
-                settings={settings}
-                onClick={() => {
-                  const verseToScrollTo = focusVerses[0]
-                  dispatch({ type: EXIT_READONLY_MODE })
-                  setTimeout(() => {
-                    const element = document.querySelector(`#verset-${verseToScrollTo}`)
-                    if (element) {
-                      const elementPosition = element.getBoundingClientRect().top
-                      window.scrollTo({
-                        top: window.scrollY + elementPosition - 100,
-                      })
-                    }
-                    // Trigger highlight recalculation after layout change
-                    window.dispatchEvent(new CustomEvent('layoutChanged'))
-                  }, 400)
-                }}
-              >
-                {translations.readWholeChapter}
-              </ReadWholeChapterButton>
-            </ReadWholeChapterButtonContainer>
-          )}
-          {!isReadOnly && focusVerses && focusVerses.length > 0 && (
-            <ReadWholeChapterButtonContainer>
-              <ReadWholeChapterButton
-                settings={settings}
-                onClick={() => {
-                  dispatch({ type: ENTER_READONLY_MODE })
-                  // Trigger highlight recalculation after layout change
-                  setTimeout(() => {
-                    window.dispatchEvent(new CustomEvent('layoutChanged'))
-                  }, 100)
-                }}
-              >
-                {translations.closeContext}
-              </ReadWholeChapterButton>
-            </ReadWholeChapterButtonContainer>
-          )}
         </Container>
         <svg
           style={{

@@ -165,7 +165,7 @@ const VerseOfTheDay = ({ addDay }: Props) => {
       <Link
         route="BibleView"
         params={{
-          isReadOnly: true,
+          contextDisplayMode: 'focused',
           book,
           chapter,
           verse,

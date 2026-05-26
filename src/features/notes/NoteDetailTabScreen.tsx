@@ -322,7 +322,7 @@ ${currentNote.description}
     router.push({
       pathname: '/bible-view',
       params: {
-        isReadOnly: 'true',
+        contextDisplayMode: 'focused',
         book: JSON.stringify(books[Number(Livre) - 1]),
         chapter: String(Number(Chapitre)),
         verse: String(Number(Verset)),

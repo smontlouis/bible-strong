@@ -1137,7 +1137,7 @@ const ReferenceSearchResultRow = ({ item }: { item: SearchEntityResult }) => {
         router.push({
           pathname: '/bible-view',
           params: {
-            isReadOnly: 'true',
+            contextDisplayMode: 'focused',
             book: JSON.stringify(booksDesc[segment.book - 1]),
             chapter: String(segment.chapter),
             verse: String(segment.startVerse),

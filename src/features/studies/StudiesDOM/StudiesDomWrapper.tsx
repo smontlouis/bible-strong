@@ -155,7 +155,7 @@ export default function StudiesDomWrapper({
           router.push({
             pathname: '/bible-view',
             params: {
-              isReadOnly: 'true',
+              contextDisplayMode: 'focused',
               book: arrayVerses[0].split('-')[0],
               chapter: arrayVerses[0].split('-')[1],
               focusVerses: JSON.stringify(arrayVerses.map(verse => Number(verse.split('-')[2]))),

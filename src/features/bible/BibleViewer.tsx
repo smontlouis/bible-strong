@@ -54,6 +54,7 @@ import { makeSelectBookmarksInChapter } from '~redux/selectors/bookmarks'
 import { historyAtom, unifiedTagsModalAtom, bibleDataRefreshSignalAtom } from '../../state/app'
 import {
   BibleTab,
+  getBibleContextDisplayMode,
   useBibleTabActions,
   VersionCode,
   parallelColumnWidthAtom,
@@ -88,7 +89,6 @@ import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
 import BibleFooter from './footer/BibleFooter'
 import { useAnnotationMode } from './hooks'
 import { LoadingView } from './LoadingView'
-import { OpenInNewTabButton } from './OpenInNewTabButton'
 import ResourcesModal from './resources/ResourceModal'
 import SelectedVersesModal from './SelectedVersesModal'
 import VerseNotesModal from './VerseNotesModal'
@@ -211,13 +211,14 @@ const BibleViewer = ({
       selectedBook: book,
       selectedChapter: chapter,
       selectedVerse: verse,
-      isReadOnly,
       isSelectionMode,
       focusVerses,
       parallelVersions,
       selectedVerses,
     },
   } = bible
+  const contextDisplayMode = getBibleContextDisplayMode(bible.data)
+  const isContextFocused = contextDisplayMode === 'focused'
   const selectedVersesReference = verseToReference(selectedVerses)
   const { data: coverageData } = useQuery({
     queryKey: ['bible-version-coverage', version],
@@ -699,7 +700,7 @@ const BibleViewer = ({
           data: {
             ...bible.data,
             selectedVersion: newVersion,
-            isReadOnly: false,
+            contextDisplayMode: 'fullChapter',
           },
         },
         {
@@ -725,7 +726,7 @@ const BibleViewer = ({
     removeSelectedVerse: actions.removeSelectedVerse,
     setSelectedVerse: actions.setSelectedVerse,
     version,
-    isReadOnly,
+    contextDisplayMode,
     isSelectionMode,
     verses,
     parallelVerses,
@@ -758,8 +759,8 @@ const BibleViewer = ({
     onChangeResourceTypeSelectVerse,
     onMountTimeout,
     onOpenBookmarkModal: handleOpenBookmarkModal,
-    exitReadOnlyMode: actions.exitReadOnlyMode,
-    enterReadOnlyMode: actions.enterReadOnlyMode,
+    expandContext: actions.expandContext,
+    collapseContext: actions.collapseContext,
     clearFocusVerses: actions.clearFocusVerses,
     // Annotation mode props
     annotationMode: annotationMode.enabled,
@@ -877,7 +878,7 @@ const BibleViewer = ({
           </Box>
         )}
       </Box>
-      {!isFormSheet && !isReadOnly && (
+      {!isFormSheet && !isContextFocused && (
         <BibleFooter
           bibleAtom={bibleAtom}
           disabled={isLoading}
@@ -890,7 +891,6 @@ const BibleViewer = ({
           version={version}
         />
       )}
-      {isFormSheet && !error && <OpenInNewTabButton bibleTab={bible} />}
       <SelectedVersesModal
         ref={versesModal.getRef()}
         isSelectionMode={isSelectionMode}

@@ -10,7 +10,13 @@ import { useTranslation } from 'react-i18next'
 import { Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isFullScreenBibleAtom } from 'src/state/app'
-import { BibleTab, ParallelColumnWidth, ParallelDisplayMode, VersionCode } from 'src/state/tabs'
+import {
+  BibleContextDisplayMode,
+  BibleTab,
+  ParallelColumnWidth,
+  ParallelDisplayMode,
+  VersionCode,
+} from 'src/state/tabs'
 import { isINTCompleteAtom } from '../footer/atom'
 import BibleDOMComponent from './BibleDOMComponent'
 import {
@@ -60,9 +66,9 @@ import {
   CLEAR_FOCUS_VERSES,
   CREATE_ANNOTATION,
   ENTER_ANNOTATION_MODE,
-  ENTER_READONLY_MODE,
+  COLLAPSE_CONTEXT,
   ERASE_SELECTION,
-  EXIT_READONLY_MODE,
+  EXPAND_CONTEXT,
   NAVIGATE_TO_BIBLE_LINK,
   NAVIGATE_TO_BIBLE_NOTE,
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
@@ -218,7 +224,7 @@ export type WebViewProps = {
   removeSelectedVerse: (id: string) => void
   setSelectedVerse: (selectedVerse: number) => void
   version: VersionCode
-  isReadOnly: boolean
+  contextDisplayMode: BibleContextDisplayMode
   isSelectionMode: StudyNavigateBibleType | undefined
   verses: Verse[]
   parallelVerses: ParallelVerse[]
@@ -252,8 +258,8 @@ export type WebViewProps = {
   onChangeResourceTypeSelectVerse?: (resourceType: BibleResource, verseKey: string) => void
   onMountTimeout?: () => void
   onOpenBookmarkModal?: (bookmark: Bookmark) => void
-  exitReadOnlyMode?: () => void
-  enterReadOnlyMode?: () => void
+  expandContext?: () => void
+  collapseContext?: () => void
   clearFocusVerses?: () => void
   // Annotation mode props
   annotationMode?: boolean
@@ -346,7 +352,7 @@ export const BibleDOMWrapper = ({
   wordAnnotations,
   settings,
   verseToScroll,
-  isReadOnly,
+  contextDisplayMode,
   version,
   pericopeChapter,
   book,
@@ -373,8 +379,8 @@ export const BibleDOMWrapper = ({
   setSelectedCode,
   removeSelectedVerse,
   addSelectedVerse,
-  exitReadOnlyMode,
-  enterReadOnlyMode,
+  expandContext,
+  collapseContext,
   clearFocusVerses,
   onSelectionChanged,
   onCreateAnnotation,
@@ -395,6 +401,7 @@ export const BibleDOMWrapper = ({
 }: WebViewProps) => {
   const { openVersionSelector } = useBookAndVersionSelector()
   const openRelationEndpoint = useOpenRelationEndpoint()
+  const isContextFocused = contextDisplayMode === 'focused'
   const [isINTComplete, setIsINTComplete] = useAtom(isINTCompleteAtom)
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
   const theme = useTheme()
@@ -443,8 +450,6 @@ export const BibleDOMWrapper = ({
     parallelVersionNotFound: t('bible.error.parallelVersionNotFound'),
     parallelChapterNotFound: t('bible.error.parallelChapterNotFound'),
     parallelLoadError: t('bible.error.parallelLoadError'),
-    readWholeChapter: t('tab.readWholeChapter'),
-    closeContext: t('tab.closeContext'),
     exitFocus: t('tab.exitFocus'),
     interlinearDetailed: t('bible.interlinear.detailed'),
     interlinearCompact: t('bible.interlinear.compact'),
@@ -591,7 +596,7 @@ export const BibleDOMWrapper = ({
         router.push({
           pathname: '/bible-view',
           params: {
-            isReadOnly: 'true',
+            contextDisplayMode: 'focused',
             book: targetBook,
             chapter: String(action.chapter),
             verse: String(action.verse),
@@ -601,8 +606,8 @@ export const BibleDOMWrapper = ({
         break
       }
       case SWIPE_LEFT: {
-        // Disable chapter navigation in readonly or annotation mode
-        if (isReadOnly || annotationMode) break
+        // Disable chapter navigation in focused context or annotation mode
+        if (isContextFocused || annotationMode) break
 
         const hasNextChapter = !(book.Numero === 66 && chapter === 22)
 
@@ -612,8 +617,8 @@ export const BibleDOMWrapper = ({
         break
       }
       case SWIPE_RIGHT: {
-        // Disable chapter navigation in readonly or annotation mode
-        if (isReadOnly || annotationMode) break
+        // Disable chapter navigation in focused context or annotation mode
+        if (isContextFocused || annotationMode) break
 
         const hasPreviousChapter = !(book.Numero === 1 && chapter === 1)
 
@@ -655,13 +660,13 @@ export const BibleDOMWrapper = ({
         break
       }
 
-      case EXIT_READONLY_MODE: {
-        exitReadOnlyMode?.()
+      case EXPAND_CONTEXT: {
+        expandContext?.()
         break
       }
 
-      case ENTER_READONLY_MODE: {
-        enterReadOnlyMode?.()
+      case COLLAPSE_CONTEXT: {
+        collapseContext?.()
         break
       }
 
@@ -806,7 +811,7 @@ export const BibleDOMWrapper = ({
         wordAnnotations={wordAnnotations}
         settings={trimmedSettings}
         verseToScroll={verseToScroll}
-        isReadOnly={isReadOnly}
+        contextDisplayMode={contextDisplayMode}
         version={version}
         pericopeChapter={pericopeChapter}
         book={book}

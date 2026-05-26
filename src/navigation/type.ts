@@ -1,6 +1,6 @@
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { EdgeInsets } from 'react-native-safe-area-context'
-import { BibleTab, SelectedVerses, VersionCode } from 'src/state/tabs'
+import { BibleContextDisplayMode, BibleTab, SelectedVerses, VersionCode } from 'src/state/tabs'
 import { Book } from '~assets/bible_versions/books-desc'
 import {
   ComputedPlanItem,
@@ -80,6 +80,7 @@ type ConcordanceByBookScreenProps = {
 
 type BibleScreenProps = {
   focusVerses?: number[]
+  contextDisplayMode?: BibleContextDisplayMode
   isSelectionMode?: StudyNavigateBibleType
   isReadOnly?: boolean
   hasBackButton?: boolean

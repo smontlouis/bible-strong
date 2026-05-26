@@ -79,7 +79,7 @@ const BookmarksScreen = () => {
     router.push({
       pathname: '/bible-view',
       params: {
-        isReadOnly: 'true',
+        contextDisplayMode: 'focused',
         book: String(bookmark.book),
         chapter: String(bookmark.chapter),
         verse: bookmark.verse !== undefined ? String(bookmark.verse) : undefined,

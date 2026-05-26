@@ -114,7 +114,7 @@ export const useCreateTabGroupFromTag = () => {
             selectedChapter: chapitre,
             selectedVerse: verset,
             focusVerses: h.verseIds.map(v => Number(v.Verset)),
-            isReadOnly: true,
+            contextDisplayMode: 'focused',
           },
         })
       }
@@ -209,7 +209,7 @@ export const useCreateTabGroupFromTag = () => {
           selectedChapter: chapitre,
           selectedVerse: verset,
           focusVerses: [verset],
-          isReadOnly: true,
+          contextDisplayMode: 'focused',
         },
       })
     })
@@ -234,7 +234,7 @@ export const useCreateTabGroupFromTag = () => {
           selectedVerse: verset,
           selectedVersion: a.version as VersionCode,
           focusVerses: [verset],
-          isReadOnly: true,
+          contextDisplayMode: 'focused',
         },
       })
     })

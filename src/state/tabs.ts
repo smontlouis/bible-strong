@@ -40,6 +40,14 @@ export type TabBase = {
 export type VersionCode = keyof typeof versions
 export type BookName = (typeof books)[number]['Nom']
 export type SelectedVerses = VerseIds
+export type BibleContextDisplayMode = 'focused' | 'fullChapter'
+
+export const getBibleContextDisplayMode = (data: {
+  contextDisplayMode?: BibleContextDisplayMode
+  isReadOnly?: boolean
+}): BibleContextDisplayMode =>
+  data.contextDisplayMode ?? (data.isReadOnly ? 'focused' : 'fullChapter')
+
 export interface BibleTab extends TabBase {
   type: 'bible'
   data: {
@@ -57,7 +65,8 @@ export interface BibleTab extends TabBase {
     selectionMode: 'grid' | 'list'
     focusVerses?: (string | number)[]
     isSelectionMode: StudyNavigateBibleType | undefined
-    isReadOnly: boolean
+    contextDisplayMode?: BibleContextDisplayMode
+    isReadOnly?: boolean
   }
 }
 
@@ -234,6 +243,7 @@ export const getDefaultBibleTab = (version?: VersionCode): BibleTab => ({
     selectionMode: 'grid',
     focusVerses: undefined,
     isSelectionMode: undefined,
+    contextDisplayMode: 'fullChapter',
     isReadOnly: false,
   },
 })
@@ -887,18 +897,18 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     )
   }
 
-  const exitReadOnlyMode = () => {
+  const expandContext = () => {
     setBibleTab(
       produce(draft => {
-        draft.data.isReadOnly = false
+        draft.data.contextDisplayMode = 'fullChapter'
       })
     )
   }
 
-  const enterReadOnlyMode = () => {
+  const collapseContext = () => {
     setBibleTab(
       produce(draft => {
-        draft.data.isReadOnly = true
+        draft.data.contextDisplayMode = 'focused'
       })
     )
   }
@@ -912,7 +922,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
         // Extract verse numbers from keys (format: "book-chapter-verse")
         const verseNumbers = selectedKeys.map(key => key.split('-')[2]).map(Number)
         draft.data.focusVerses = verseNumbers
-        draft.data.isReadOnly = true
+        draft.data.contextDisplayMode = 'focused'
         draft.data.selectedVerses = {}
       })
     )
@@ -922,7 +932,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     setBibleTab(
       produce(draft => {
         draft.data.focusVerses = undefined
-        draft.data.isReadOnly = false
+        draft.data.contextDisplayMode = 'fullChapter'
         draft.data.selectedVerses = {}
       })
     )
@@ -1040,8 +1050,8 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     removeSelectedVerse,
     clearSelectedVerses,
     selectSelectedVerse,
-    exitReadOnlyMode,
-    enterReadOnlyMode,
+    expandContext,
+    collapseContext,
     pinSelectedVerses,
     clearFocusVerses,
 

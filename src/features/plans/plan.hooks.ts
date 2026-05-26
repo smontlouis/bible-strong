@@ -46,7 +46,7 @@ interface ChapterForPlanContent {
   viewMore: {
     route: 'BibleView'
     params: {
-      isReadOnly: true
+      contextDisplayMode: 'focused'
       book: number
       chapter: number
       verse: number
@@ -65,7 +65,7 @@ interface VerseForPlan {
   viewMore?: {
     route: 'BibleView'
     params: {
-      isReadOnly: true
+      contextDisplayMode: 'focused'
       book: number
       chapter: number
       verse: number
@@ -324,7 +324,7 @@ export const getChaptersForPlan = async (
         viewMore: {
           route: 'BibleView',
           params: {
-            isReadOnly: true,
+            contextDisplayMode: 'focused',
             book,
             chapter,
             verse: 1,
@@ -401,7 +401,7 @@ export const getVersesForPlan = async (
     viewMore: {
       route: 'BibleView',
       params: {
-        isReadOnly: true,
+        contextDisplayMode: 'focused',
         book: Number(book),
         chapter: Number(chapter),
         verse: startVerse,

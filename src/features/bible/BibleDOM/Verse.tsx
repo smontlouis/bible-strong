@@ -34,7 +34,6 @@ import { isDarkTheme } from './utils'
 const InterlinearVerseComplete = React.lazy(() => import('./InterlinearVerseComplete'))
 const InterlinearVerse = React.lazy(() => import('./InterlinearVerse'))
 import VerseTags from './VerseTags'
-import CloseContextTag from './CloseContextTag'
 import { BibleError } from '~helpers/bibleErrors'
 import { useTranslations } from './TranslationsContext'
 
@@ -265,7 +264,6 @@ interface Props {
   tag: TaggedVerse | undefined
   bookmark?: Bookmark
   fadePosition?: 'top' | 'bottom'
-  isLastFocusVerse?: boolean
   hasWordAnnotations?: boolean
   hasAnnotationNotes?: boolean
   otherVersionAnnotations?: CrossVersionAnnotation[]
@@ -310,7 +308,6 @@ const Verse = ({
   tag,
   bookmark,
   fadePosition,
-  isLastFocusVerse,
   hasWordAnnotations,
   otherVersionAnnotations,
   isTouched = false,
@@ -678,7 +675,6 @@ const Verse = ({
       {tag && settings.tagsDisplay === 'inline' && (
         <VerseTags settings={settings} tag={tag} isDisabled={annotationMode} />
       )}
-      {isLastFocusVerse && <CloseContextTag settings={settings} isDisabled={annotationMode} />}
       {relationItems &&
         (settings.relationsDisplay || 'inline') === 'inline' &&
         !isSelectionMode && (

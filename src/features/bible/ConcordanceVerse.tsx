@@ -69,7 +69,7 @@ class ConcordanceVerse extends React.Component<Props, ConcordanceVerseState> {
           router.push({
             pathname: '/bible-view',
             params: {
-              isReadOnly: 'true',
+              contextDisplayMode: 'focused',
               book: JSON.stringify(books[bookNumber - 1]),
               chapter: String(chapterNumber),
               verse: String(verseNumber),

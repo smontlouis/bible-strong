@@ -16,7 +16,7 @@ export const useOpenRelationEndpoint = () => {
         router.push({
           pathname: '/bible-view',
           params: {
-            isReadOnly: 'true',
+            contextDisplayMode: 'focused',
             book: JSON.stringify(books[bookNumber - 1]),
             chapter: String(chapter),
             verse: String(verse),

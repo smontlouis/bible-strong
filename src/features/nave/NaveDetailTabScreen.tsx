@@ -121,7 +121,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
         router.push({
           pathname: '/bible-view',
           params: {
-            isReadOnly: 'true',
+            contextDisplayMode: 'focused',
             book: String(book),
             chapter: String(chapter),
             verse: String(verse),

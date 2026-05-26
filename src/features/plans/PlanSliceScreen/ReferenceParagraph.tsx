@@ -14,7 +14,7 @@ interface ReferenceParagraphProps extends Omit<ParagraphProps, 'children'> {
 }
 
 const getBibleViewParams = (target: BibleReferenceTarget) => ({
-  isReadOnly: 'true',
+  contextDisplayMode: 'focused',
   book: JSON.stringify(booksDesc[target.book - 1]),
   chapter: String(target.chapter),
   verse: String(target.verse),

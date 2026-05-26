@@ -77,7 +77,7 @@ class CompareVerseItem extends React.Component<CompareVerseItemProps, CompareVer
       <Link
         route="BibleView"
         params={{
-          isReadOnly: true,
+          contextDisplayMode: 'focused',
           book: books[book - 1],
           chapter,
           verse,

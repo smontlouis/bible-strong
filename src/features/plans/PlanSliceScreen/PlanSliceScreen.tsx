@@ -185,7 +185,7 @@ const PlanSliceScreen = ({
     selectedVerses: EMPTY_OBJECT,
     selectionMode: 'grid',
     isSelectionMode: undefined,
-    isReadOnly: true,
+    contextDisplayMode: 'focused',
   }
 
   const onMarkAsReadSelect = () => {

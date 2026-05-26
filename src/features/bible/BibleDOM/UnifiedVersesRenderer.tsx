@@ -72,15 +72,15 @@ const getPericopeVerse = (pericopeChapter: PericopeChapter, verse: number) => {
 }
 
 /**
- * Determines the fade position for a verse in readonly mode.
+ * Determines the fade position for a verse in focused context mode.
  * Returns 'top' for the verse before the focus range, 'bottom' for the verse after.
  */
 const getFadePosition = (
   verset: number,
-  isReadOnly: boolean | undefined,
+  isContextFocused: boolean,
   adjacentVerses: { prev: number; next: number } | null
 ): 'top' | 'bottom' | undefined => {
-  if (!isReadOnly || !adjacentVerses) return undefined
+  if (!isContextFocused || !adjacentVerses) return undefined
   if (verset === adjacentVerses.prev) return 'top'
   if (verset === adjacentVerses.next) return 'bottom'
   return undefined
@@ -128,7 +128,7 @@ export interface UnifiedVersesRendererProps {
   highlightedVerses: HighlightsObj
   settings: RootStyles['settings']
   verseToScroll: number | undefined
-  isReadOnly: WebViewProps['isReadOnly']
+  contextDisplayMode: WebViewProps['contextDisplayMode']
   version: string
   pericopeChapter: PericopeChapter
   isSelectionMode: WebViewProps['isSelectionMode']
@@ -233,7 +233,7 @@ export function UnifiedVersesRenderer({
   highlightedVerses,
   settings,
   verseToScroll,
-  isReadOnly,
+  contextDisplayMode,
   version,
   pericopeChapter,
   isSelectionMode,
@@ -262,17 +262,15 @@ export function UnifiedVersesRenderer({
 }: UnifiedVersesRendererProps) {
   // Pre-compute numeric focus verses once to avoid repeated .map(Number) calls
   const focusVersesNumeric = focusVerses ? focusVerses.map(Number) : null
+  const isContextFocused = contextDisplayMode === 'focused'
 
-  // Calculate adjacent verses for fade effect in readonly mode
+  // Calculate adjacent verses for fade effect in focused context mode
   const adjacentVerses = focusVersesNumeric
     ? {
         prev: Math.min(...focusVersesNumeric) - 1,
         next: Math.max(...focusVersesNumeric) + 1,
       }
     : null
-
-  // Calculate last focus verse for close context button
-  const lastFocusVerse = focusVersesNumeric ? Math.max(...focusVersesNumeric) : null
 
   // Pre-compute whether verses are selected (avoids Object.keys() per iteration)
   const hasSelectedVerses = Object.keys(selectedVerses).length > 0
@@ -348,10 +346,10 @@ export function UnifiedVersesRenderer({
 
         // Normal mode rendering
 
-        // In readonly mode, only show focused verses and adjacent fading verses
+        // In focused context mode, only show focused verses and adjacent fading verses
         const isFocused = focusVersesNumeric ? focusVersesNumeric.includes(verseNumber) : undefined
-        const fadePosition = getFadePosition(verseNumber, isReadOnly, adjacentVerses)
-        if (isReadOnly && focusVerses && !isFocused && !fadePosition) return null
+        const fadePosition = getFadePosition(verseNumber, isContextFocused, adjacentVerses)
+        if (isContextFocused && focusVerses && !isFocused && !fadePosition) return null
 
         const isSelected = Boolean(selectedVerses[verseKey])
         const isHighlighted = Boolean(highlightedVerses[verseKey])
@@ -361,15 +359,11 @@ export function UnifiedVersesRenderer({
           : undefined
 
         const comment = comments?.[Verset]
-        const isVerseToScroll = !isReadOnly && verseToScroll == Verset
+        const isVerseToScroll = !isContextFocused && verseToScroll == Verset
         const secondaryVerse = secondaryVerses && secondaryVerses[i]
         const parallelVerse = isParallelVerse
           ? extractParallelVerse(i, parallelVerses, verse, version)
           : []
-
-        // Show close context button on last focus verse when not in readonly mode
-        const isLastFocusVerse =
-          !isReadOnly && lastFocusVerse !== null && verseNumber === lastFocusVerse
 
         const hasWordAnnotations = versesWithWordAnnotationsByKey.has(verseKey)
 
@@ -403,7 +397,6 @@ export function UnifiedVersesRenderer({
               tag={tag}
               bookmark={bookmark}
               fadePosition={fadePosition}
-              isLastFocusVerse={isLastFocusVerse}
               hasWordAnnotations={hasWordAnnotations}
               hasAnnotationNotes={versesWithAnnotationNotes?.[String(Verset)]}
               otherVersionAnnotations={otherVersionAnnotations}
