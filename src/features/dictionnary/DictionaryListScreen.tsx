@@ -165,9 +165,8 @@ const DictionaryListScreen = ({
             <Loading message={t('Chargement...')} />
           ) : sectionResults.length ? (
             <SectionList<DictionaryRow, DictionarySection>
-              renderItem={({ item: { rowid, word } }) => (
+              renderItem={({ item: { word } }) => (
                 <DictionnaireItem
-                  key={rowid}
                   word={word}
                   onSelect={isNewTabSelection || onWordSelect ? selectWord : undefined}
                 />
@@ -186,7 +185,9 @@ const DictionaryListScreen = ({
               )}
               stickySectionHeadersEnabled
               sections={sectionResults}
-              keyExtractor={item => String(item.rowid)}
+              keyExtractor={(item, index) =>
+                item.rowid ? String(item.rowid) : `${item.sanitized_word}-${item.word}-${index}`
+              }
             />
           ) : (
             <Empty

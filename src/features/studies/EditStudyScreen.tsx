@@ -157,16 +157,18 @@ const EditStudyScreen = ({
         }}
         title={currentStudy.title}
         study={currentStudy}
-      />
-      {isReadOnly && hasTagOrRelationChips && (
-        <Box px={20} py={12} borderBottomWidth={1} borderColor="border" bg="reverse">
-          <EntityChipList
-            tags={currentStudy.tags}
-            relationCount={relationCount}
-            onRelationPress={() => openEntityRelations(studyEndpoint)}
-          />
-        </Box>
-      )}
+      >
+        {isReadOnly && hasTagOrRelationChips && (
+          <Box px={20} mt={-10} pb={10}>
+            <EntityChipList
+              tags={currentStudy.tags}
+              relationCount={relationCount}
+              onRelationPress={() => openEntityRelations(studyEndpoint)}
+            />
+          </Box>
+        )}
+      </EditStudyHeader>
+
       <StudiesDomWrapper
         isReadOnly={isReadOnly}
         onDeltaChangeCallback={onDeltaChangeCallback}

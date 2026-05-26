@@ -266,7 +266,7 @@ export const TagSectionHeader = ({
     row
     onPress={() => toggle(sectionId)}
     alignItems="center"
-    py={30}
+    py={20}
     px={20}
     backgroundColor="reverse"
     borderBottomWidth={1}

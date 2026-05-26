@@ -41,6 +41,7 @@ type EditHeaderProps = {
   openRelationsModal: () => void
   hasBackButton?: boolean
   study: Study
+  children?: React.ReactNode
 }
 
 const EditHeader = ({
@@ -51,6 +52,7 @@ const EditHeader = ({
   openRelationsModal,
   hasBackButton = true,
   study,
+  children,
 }: EditHeaderProps) => {
   const router = useRouter()
   const openInNewTab = useOpenInNewTab()
@@ -86,7 +88,9 @@ const EditHeader = ({
               <FeatherIcon name="more-vertical" size={20} />
             </Link>
           }
-        />
+        >
+          {children}
+        </Header>
         <Modal.Body ref={ref} enableDynamicSizing withPortal>
           <PublishStudyMenuItem study={study} onClosed={close} />
           <ActionSheetItem

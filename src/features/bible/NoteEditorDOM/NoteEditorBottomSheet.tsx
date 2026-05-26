@@ -6,6 +6,7 @@ import NoteEditorDOMComponent from './NoteEditorDOMComponent'
 interface Props {
   defaultTitle: string
   defaultDescription: string
+  resetKey?: number
   isEditing: boolean
   placeholderTitle: string
   placeholderDescription: string
@@ -20,6 +21,7 @@ interface Props {
 export default function NoteEditorBottomSheet({
   defaultTitle,
   defaultDescription,
+  resetKey,
   isEditing,
   placeholderTitle,
   placeholderDescription,
@@ -55,6 +57,7 @@ export default function NoteEditorBottomSheet({
     <NoteEditorDOMComponent
       defaultTitle={defaultTitle}
       defaultDescription={defaultDescription}
+      resetKey={resetKey}
       isEditing={isEditing}
       colorScheme={colorScheme}
       placeholderTitle={placeholderTitle}

@@ -1,10 +1,13 @@
 import Feather from '@expo/vector-icons/Feather'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useState } from 'react'
+import { styled } from 'goober'
 import { RootState } from '~redux/modules/reducer'
 import { RootStyles, VerseRelationItem } from './BibleDOMWrapper'
-import { InlineItemContainer, InlineItemIconWrapper, InlineItemText } from './InlineItem'
+import { InlineItemContainer } from './InlineItem'
 import truncate from './truncate'
+import { scaleFontSize } from './scaleFontSize'
+import { noSelect } from './utils'
 
 type SvgAsset = string | { uri?: string; default?: string }
 
@@ -24,6 +27,81 @@ interface Props {
   isParallel?: boolean
   isDisabled?: boolean
 }
+
+const RelationTag = styled('span')<RootStyles & { isParallel?: boolean }>(
+  ({ isParallel, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
+    fontFamily,
+    padding: '0px 4px',
+    borderRadius: '4px',
+    color: colors[theme].default,
+    backgroundColor: colors[theme].lightGrey,
+    fontSize: scaleFontSize(isParallel ? 10 : 16, fontSizeScale),
+    marginRight: '5px',
+    cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
+    maxWidth: isParallel ? '110px' : '190px',
+    ...noSelect,
+
+    '&:active': {
+      opacity: 0.5,
+    },
+  })
+)
+
+const RelationIconWrapper = styled('span')<RootStyles>(({ settings: { fontFamily } }) => ({
+  fontFamily,
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginRight: '5px',
+  flexShrink: 0,
+}))
+
+const RelationLabel = styled('span')<RootStyles>(({ settings: { fontFamily } }) => ({
+  fontFamily,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  pointerEvents: 'none',
+  ...noSelect,
+}))
+
+const ExpandButton = styled('div')<RootStyles>(
+  ({ settings: { theme, colors, fontSizeScale, fontFamily } }) => ({
+    fontFamily,
+    padding: '0px 4px',
+    borderRadius: '4px',
+    color: colors[theme].default,
+    backgroundColor: colors[theme].lightGrey,
+    fontSize: scaleFontSize(12, fontSizeScale),
+    marginLeft: '5px',
+    opacity: 0.5,
+    cursor: 'pointer',
+    display: 'inline-flex',
+    ...noSelect,
+    '&:active': {
+      opacity: 0.4,
+    },
+  })
+)
+
+const IconButton = styled('div')<RootStyles>(
+  ({ settings: { theme, colors, fontSizeScale, fontFamily } }) => ({
+    fontFamily,
+    padding: '2px 4px',
+    borderRadius: '4px',
+    color: colors[theme].default,
+    backgroundColor: colors[theme].lightGrey,
+    fontSize: scaleFontSize(12, fontSizeScale),
+    opacity: 0.5,
+    cursor: 'pointer',
+    display: 'inline-flex',
+    '&:active': {
+      opacity: 0.4,
+    },
+  })
+)
 
 const getIconColor = (
   targetType: VerseRelationItem['targetType'],
@@ -118,36 +196,57 @@ const RelationsText = ({ relationItems, settings, onClick, isParallel, isDisable
   const [isExpanded, setIsExpanded] = useState(false)
   const visibleItems = isExpanded ? relationItems : relationItems.slice(0, 3)
   const hiddenCount = relationItems.length - visibleItems.length
+  const hasMoreItems = relationItems.length > 3
+
+  const handleExpandClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsExpanded(true)
+    requestAnimationFrame(() => {
+      window.dispatchEvent(new CustomEvent('layoutChanged'))
+    })
+  }
+
+  const handleCollapseClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsExpanded(false)
+    requestAnimationFrame(() => {
+      window.dispatchEvent(new CustomEvent('layoutChanged'))
+    })
+  }
 
   return (
-    <span>
+    <InlineItemContainer settings={settings} isDisabled={isDisabled}>
       {visibleItems.map(item => (
-        <InlineItemContainer
+        <RelationTag
           key={item.key}
           settings={settings}
           isParallel={isParallel}
-          onClick={() => onClick(item)}
-          isButton
-          isDisabled={isDisabled}
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation()
+            onClick(item)
+          }}
         >
-          <InlineItemIconWrapper settings={settings}>
+          <RelationIconWrapper settings={settings}>
             <RelationIcon item={item} settings={settings} />
-          </InlineItemIconWrapper>
-          <InlineItemText settings={settings}>{truncate(item.label, 40)}</InlineItemText>
-        </InlineItemContainer>
+          </RelationIconWrapper>
+          <RelationLabel settings={settings}>{truncate(item.label, 40)}</RelationLabel>
+        </RelationTag>
       ))}
       {hiddenCount > 0 && (
-        <InlineItemContainer
-          settings={settings}
-          isParallel={isParallel}
-          onClick={() => setIsExpanded(true)}
-          isButton
-          isDisabled={isDisabled}
-        >
-          <InlineItemText settings={settings}>+{hiddenCount}</InlineItemText>
-        </InlineItemContainer>
+        <ExpandButton settings={settings} onClick={handleExpandClick}>
+          +{hiddenCount}
+        </ExpandButton>
       )}
-    </span>
+      {isExpanded && hasMoreItems && (
+        <IconButton settings={settings} onClick={handleCollapseClick}>
+          <Feather
+            name="chevron-left"
+            size={Number(scaleFontSize(14, settings.fontSizeScale).replace('px', ''))}
+            color={settings.colors[settings.theme].default}
+          />
+        </IconButton>
+      )}
+    </InlineItemContainer>
   )
 }
 

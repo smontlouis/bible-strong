@@ -13,9 +13,11 @@ import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import i18n from '~i18n'
 import { EditStudyScreenProps } from '~navigation/type'
 import { Study } from '~redux/modules/user'
+import Box from '~common/ui/Box'
 import { currentStudyIdAtom } from '../atom'
 import StudyFooter from '../StudyFooter'
 import StudiesDOMComponent, { StudyDOMRef } from './StudiesDOMComponent'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 type Props = {
   params: Readonly<EditStudyScreenProps>
@@ -61,6 +63,7 @@ export default function StudiesDomWrapper({
   const router = useRouter()
   const theme = useTheme()
   const [isKeyboardOpened, setIsKeyboardOpened] = useState(false)
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
   const [activeFormats, setActiveFormats] = useState({})
   const { colorScheme } = useCurrentThemeSelector()
 
@@ -68,12 +71,14 @@ export default function StudiesDomWrapper({
     const updateListener = Platform.OS === 'android' ? 'keyboardDidShow' : 'keyboardWillShow'
     const resetListener = Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide'
 
-    const keyboardShowListener = Keyboard.addListener(updateListener, () =>
+    const keyboardShowListener = Keyboard.addListener(updateListener, event => {
       setIsKeyboardOpened(true)
-    )
-    const keyboardHideListener = Keyboard.addListener(resetListener, () =>
+      setKeyboardHeight(event.endCoordinates.height)
+    })
+    const keyboardHideListener = Keyboard.addListener(resetListener, () => {
       setIsKeyboardOpened(false)
-    )
+      setKeyboardHeight(0)
+    })
 
     return () => {
       keyboardShowListener.remove()
@@ -198,39 +203,48 @@ export default function StudiesDomWrapper({
     }
   }
 
-  const content = (
-    <>
-      <StudiesDOMComponent
-        ref={ref}
-        fontFamily={fontFamily}
-        language={i18n.language}
-        contentToDisplay={contentToDisplay ?? { ops: [] }}
-        isReadOnly={isReadOnly}
-        colorScheme={colorScheme}
-        dom={{
-          onMessage: handleMessage,
-          keyboardDisplayRequiresUserAction: false,
-          bounces: false,
-          scrollEnabled: true,
-          hideKeyboardAccessoryView: true,
-          containerStyle: {
-            flex: 1,
-            backgroundColor: theme.colors.reverse,
-          },
-        }}
-      />
-      {isKeyboardOpened && (
-        <StudyFooter
-          navigateBibleView={navigateToSelectionMode}
-          dispatchToWebView={dispatchToWebView}
-          activeFormats={activeFormats}
-        />
-      )}
-    </>
+  const footer = isKeyboardOpened ? (
+    <StudyFooter
+      navigateBibleView={navigateToSelectionMode}
+      dispatchToWebView={dispatchToWebView}
+      activeFormats={activeFormats}
+      keyboardHeight={keyboardHeight - 20}
+    />
+  ) : null
+
+  const editor = (
+    <StudiesDOMComponent
+      ref={ref}
+      fontFamily={fontFamily}
+      language={i18n.language}
+      contentToDisplay={contentToDisplay ?? { ops: [] }}
+      isReadOnly={isReadOnly}
+      colorScheme={colorScheme}
+      dom={{
+        onMessage: handleMessage,
+        keyboardDisplayRequiresUserAction: false,
+        bounces: false,
+        scrollEnabled: true,
+        hideKeyboardAccessoryView: true,
+        containerStyle: {
+          flex: 1,
+          backgroundColor: theme.colors.reverse,
+        },
+      }}
+    />
   )
 
-  if (isFormSheet && isReadOnly) {
-    return content
+  if (isFormSheet) {
+    return (
+      <Box flex bg="reverse" pb={isKeyboardOpened ? 50 : 0}>
+        {editor}
+        {footer && (
+          <Box position="absolute" left={0} right={0} bottom={keyboardHeight}>
+            {footer}
+          </Box>
+        )}
+      </Box>
+    )
   }
 
   return (
@@ -241,7 +255,10 @@ export default function StudiesDomWrapper({
         backgroundColor: theme.colors.reverse,
       }}
     >
-      {content}
+      <>
+        {editor}
+        {footer}
+      </>
     </KeyboardAvoidingView>
   )
 }

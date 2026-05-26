@@ -81,14 +81,14 @@ const TagItem = ({ item, setOpen }: TagItemProps) => {
               {!!strongsNumber && (
                 <Chip>
                   <Text fontSize={10} color="default">
-                    {strongsNumber} {t('nave', { count: strongsNumber })}
+                    {strongsNumber} {t('strong', { count: strongsNumber })}
                   </Text>
                 </Chip>
               )}
               {!!wordsNumber && (
                 <Chip>
                   <Text fontSize={10} color="default">
-                    {wordsNumber} {t('nave', { count: wordsNumber })}
+                    {wordsNumber} {t('dictionnaire', { count: wordsNumber })}
                   </Text>
                 </Chip>
               )}

@@ -78,6 +78,7 @@ const NoteDetailTabScreen = ({
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [isEditing, setIsEditing] = useState(false)
+  const [editorResetKey, setEditorResetKey] = useState(0)
   const [webViewHeight, setWebViewHeight] = useState(100)
   const [keyboardHeight, setKeyboardHeight] = useState(0)
   const { bottomBarHeight } = useBottomBarHeightInTab()
@@ -194,10 +195,12 @@ const NoteDetailTabScreen = ({
       setTitle(currentNote.title || '')
       setDescription(currentNote.description || '')
       setIsEditing(false)
+      setEditorResetKey(key => key + 1)
     } else if (isCreating || isCreatingAnnotationNote) {
       setTitle('')
       setDescription('')
       setIsEditing(true)
+      setEditorResetKey(key => key + 1)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [noteId, isCreating, isCreatingAnnotationNote])
@@ -264,6 +267,7 @@ const NoteDetailTabScreen = ({
     setTitle(currentNote?.title || '')
     setDescription(currentNote?.description || '')
     setIsEditing(false)
+    setEditorResetKey(key => key + 1)
   }
 
   const shareNote = async () => {
@@ -287,6 +291,7 @@ ${currentNote.description}
   const onEditNote = () => {
     setTitle(currentNote?.title || '')
     setDescription(currentNote?.description || '')
+    setEditorResetKey(key => key + 1)
     setIsEditing(true)
   }
 
@@ -468,6 +473,7 @@ ${currentNote.description}
             <NoteEditorDOMComponent
               defaultTitle={currentNote?.title || ''}
               defaultDescription={currentNote?.description || ''}
+              resetKey={editorResetKey}
               isEditing={isEditing}
               colorScheme={colorScheme}
               placeholderTitle={t('Titre')}

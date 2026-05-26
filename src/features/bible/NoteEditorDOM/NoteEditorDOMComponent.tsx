@@ -6,6 +6,7 @@ interface Props {
   dom?: import('expo/dom').DOMProps
   defaultTitle: string
   defaultDescription: string
+  resetKey?: number
   isEditing: boolean
   colorScheme: 'light' | 'dark'
   placeholderTitle: string
@@ -21,6 +22,7 @@ interface Props {
 export default function NoteEditorDOMComponent({
   defaultTitle,
   defaultDescription,
+  resetKey,
   isEditing,
   colorScheme,
   placeholderTitle,
@@ -56,7 +58,8 @@ export default function NoteEditorDOMComponent({
     return () => observer.disconnect()
   }, [onSizeChange])
 
-  // Set initial content only on mount (uncontrolled)
+  // Keep the uncontrolled contenteditable nodes in sync when the native side
+  // explicitly resets the editor, for example after canceling an edit.
   useEffect(() => {
     if (titleRef.current) {
       titleRef.current.innerText = defaultTitle
@@ -64,8 +67,7 @@ export default function NoteEditorDOMComponent({
     if (descriptionRef.current) {
       descriptionRef.current.innerText = defaultDescription
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Empty deps = only on mount
+  }, [defaultTitle, defaultDescription, resetKey])
 
   // Focus title when entering edit mode
   useEffect(() => {

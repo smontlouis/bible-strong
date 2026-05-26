@@ -16,7 +16,7 @@ interface Props {
   onTitlePress?: () => void
   rightComponent?: React.ReactNode
   onCustomBackPress?: () => void
-  children?: JSX.Element
+  children?: React.ReactNode
 }
 
 const Header = ({
