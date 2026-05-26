@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -63,16 +63,18 @@ const ColorChangeModal = () => {
       key={key}
       {...bottomSheetStyles}
     >
-      <ColorCircleGrid
-        colors={colorItems}
-        selectedColor={item ? item.selectedColor : undefined}
-        onSelect={handleColorSelect}
-        showAddButton
-        onAddPress={handleOpenColorPicker}
-        layout="scroll"
-        scrollPadding={{ vertical: 10 }}
-        itemHeight={60 + insets.bottom}
-      />
+      <BottomSheetView>
+        <ColorCircleGrid
+          colors={colorItems}
+          selectedColor={item ? item.selectedColor : undefined}
+          onSelect={handleColorSelect}
+          showAddButton
+          onAddPress={handleOpenColorPicker}
+          layout="scroll"
+          scrollPadding={{ vertical: 10 }}
+          itemHeight={60 + insets.bottom}
+        />
+      </BottomSheetView>
     </BottomSheetModal>
   )
 }

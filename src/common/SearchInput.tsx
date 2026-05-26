@@ -55,7 +55,7 @@ const SearchInput = ({
             {...props}
           />
         </Box>
-        <FeatherIcon name="x" size={20} onPress={onDelete} />
+        {!!value && <FeatherIcon name="x" size={20} onPress={onDelete} />}
       </Box>
     </Box>
   )

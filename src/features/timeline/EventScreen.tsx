@@ -1,6 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-import { FeatherIcon } from '~common/ui/Icon'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useQuery } from '~helpers/react-query-lite'
@@ -62,7 +61,7 @@ const EventScreen = () => {
       menuItems={[
         {
           label: t('tab.openInNewTab'),
-          icon: <FeatherIcon name="external-link" size={15} />,
+          icon: 'external-link',
           onSelect: openEventInNewTab,
         },
       ]}

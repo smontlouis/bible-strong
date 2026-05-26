@@ -3,8 +3,8 @@ import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
 import * as Icon from '@expo/vector-icons'
 import SectionList from '~common/ui/SectionList'
-import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Text from '~common/ui/Text'
 import Header from '~common/Header'
 import Link from '~common/Link'
@@ -26,6 +26,7 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import PopOverMenu from '~common/PopOverMenu'
 import LanguageMenuOption from '~common/LanguageMenuOption'
 import type { DatabaseError } from '~helpers/catchDatabaseError'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 type NaveRow = NaveLetterRow | NaveSearchRow
 type NaveSection = {
@@ -70,11 +71,18 @@ const useSectionResults = (results: NaveRow[]) => {
 interface NaveListScreenProps {
   naveAtom: PrimitiveAtom<NaveTab>
   hasBackButton?: boolean
+  isFormSheet?: boolean
   onNaveSelect?: (name_lower: string, name: string) => void
 }
 
-const NaveListScreen = ({ hasBackButton, onNaveSelect }: NaveListScreenProps) => {
+const NaveListScreen = ({
+  hasBackButton,
+  isFormSheet = false,
+  onNaveSelect,
+}: NaveListScreenProps) => {
   const { t } = useTranslation()
+  const canGoBackInStack = useCanGoBackInStack()
+  const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
   const lang = useLanguage()
   const [error, setError] = useState<DatabaseError['error'] | null>(null)
   const [letter, setLetter] = useState('a')
@@ -95,88 +103,95 @@ const NaveListScreen = ({ hasBackButton, onNaveSelect }: NaveListScreenProps) =>
 
   if (error) {
     return (
-      <Container>
-        <Header hasBackButton={hasBackButton} title={t('Désolé...')} />
-        <Empty
-          icon={require('~assets/images/empty-state-icons/inbox.svg')}
-          message={`${t('Impossible de charger la nave...')}${
-            error === 'CORRUPTED_DATABASE'
-              ? t(
-                  '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
-                )
-              : ''
-          }`}
-        />
-      </Container>
+      <FormSheetScreen isFormSheet={isFormSheet}>
+        <Box flex bg="reverse">
+          <Header hasBackButton={showBackButton} title={t('Désolé...')} />
+          <Empty
+            icon={require('~assets/images/empty-state-icons/inbox.svg')}
+            message={`${t('Impossible de charger la nave...')}${
+              error === 'CORRUPTED_DATABASE'
+                ? t(
+                    '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
+                  )
+                : ''
+            }`}
+          />
+        </Box>
+      </FormSheetScreen>
     )
   }
 
   return (
-    <Container>
-      <Header
-        hasBackButton={hasBackButton}
-        title={t('Thématique Nave')}
-        rightComponent={
-          <Box row alignItems="center">
-            {lang === 'fr' && (
-              <Link route="NaveWarning" padding>
-                <Icon.Feather size={20} name="alert-triangle" color="rgb(255,188,0)" />
-              </Link>
-            )}
-            <PopOverMenu
-              popover={
-                <>
-                  <LanguageMenuOption resourceId="NAVE" />
-                </>
-              }
+    <FormSheetScreen isFormSheet={isFormSheet}>
+      <Box flex bg="reverse">
+        <Header
+          hasBackButton={showBackButton}
+          title={t('Thématique Nave')}
+          rightComponent={
+            <Box row alignItems="center">
+              {lang === 'fr' && (
+                <Link route="NaveWarning" padding>
+                  <Icon.Feather size={20} name="alert-triangle" color="rgb(255,188,0)" />
+                </Link>
+              )}
+              <PopOverMenu
+                popover={
+                  <>
+                    <LanguageMenuOption resourceId="NAVE" />
+                  </>
+                }
+              />
+            </Box>
+          }
+        >
+          <Box pb={10} px={20}>
+            <SearchInput
+              placeholder={t('Recherche par mot')}
+              onChangeText={setSearchValue}
+              value={searchValue}
+              onDelete={() => setSearchValue('')}
             />
           </Box>
-        }
-      />
-      <Box px={20}>
-        <SearchInput
-          placeholder={t('Recherche par mot')}
-          onChangeText={setSearchValue}
-          value={searchValue}
-          onDelete={() => setSearchValue('')}
-        />
+        </Header>
+        <Box flex paddingTop={20}>
+          {isLoading ? (
+            <Loading message={t('Chargement...')} />
+          ) : sectionResults.length ? (
+            <SectionList<NaveRow, NaveSection>
+              renderItem={({ item: { name_lower, name } }) => (
+                <NaveItem
+                  key={name_lower}
+                  name_lower={name_lower}
+                  name={name}
+                  onSelect={onNaveSelect}
+                />
+              )}
+              removeClippedSubviews
+              maxToRenderPerBatch={100}
+              getItemLayout={(data, index) =>
+                getNaveItemLayout((data || []) as NaveSection[], index)
+              }
+              renderSectionHeader={({ section: { title } }) => (
+                <SectionTitle color="quint">
+                  <Text title fontWeight="bold" fontSize={16} style={{ color: 'white' }}>
+                    {title.toUpperCase()}
+                  </Text>
+                </SectionTitle>
+              )}
+              stickySectionHeadersEnabled
+              sections={sectionResults}
+              keyExtractor={(item: NaveRow) => item.name_lower}
+            />
+          ) : (
+            <Empty
+              icon={require('~assets/images/empty-state-icons/word.svg')}
+              message={t('Aucun mot trouvé...')}
+            />
+          )}
+        </Box>
+        {!searchValue && <AlphabetList color="quint" letter={letter} setLetter={setLetter} />}
       </Box>
-      <Box flex paddingTop={20}>
-        {isLoading ? (
-          <Loading message={t('Chargement...')} />
-        ) : sectionResults.length ? (
-          <SectionList<NaveRow, NaveSection>
-            renderItem={({ item: { name_lower, name } }) => (
-              <NaveItem
-                key={name_lower}
-                name_lower={name_lower}
-                name={name}
-                onSelect={onNaveSelect}
-              />
-            )}
-            removeClippedSubviews
-            maxToRenderPerBatch={100}
-            getItemLayout={(data, index) => getNaveItemLayout((data || []) as NaveSection[], index)}
-            renderSectionHeader={({ section: { title } }) => (
-              <SectionTitle color="quint">
-                <Text title fontWeight="bold" fontSize={16} style={{ color: 'white' }}>
-                  {title.toUpperCase()}
-                </Text>
-              </SectionTitle>
-            )}
-            stickySectionHeadersEnabled
-            sections={sectionResults}
-            keyExtractor={(item: NaveRow) => item.name_lower}
-          />
-        ) : (
-          <Empty
-            icon={require('~assets/images/empty-state-icons/word.svg')}
-            message={t('Aucun mot trouvé...')}
-          />
-        )}
-      </Box>
-      {!searchValue && <AlphabetList color="quint" letter={letter} setLetter={setLetter} />}
-    </Container>
+    </FormSheetScreen>
   )
 }
 

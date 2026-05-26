@@ -6,7 +6,11 @@ import generateUUID from '~helpers/generateUUID'
 import { StudyTab } from '../../state/tabs'
 import StudiesTabScreen from './StudiesTabScreen'
 
-const StudiesScreen = () => {
+type StudiesScreenProps = {
+  isFormSheet?: boolean
+}
+
+const StudiesScreen = ({ isFormSheet = false }: StudiesScreenProps) => {
   const params = useLocalSearchParams<{ studyId?: string }>()
   const studyId = params.studyId
 
@@ -25,6 +29,6 @@ const StudiesScreen = () => {
     [studyId]
   )
 
-  return <StudiesTabScreen studyAtom={onTheFlyAtom} />
+  return <StudiesTabScreen studyAtom={onTheFlyAtom} isFormSheet={isFormSheet} />
 }
 export default StudiesScreen

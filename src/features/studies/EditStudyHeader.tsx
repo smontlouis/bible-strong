@@ -21,11 +21,13 @@ import type { AppDispatch } from '~redux/store'
 import { unifiedTagsModalAtom } from '../../state/app'
 import PublishStudyMenuItem from './PublishStudyMenuItem'
 
-const HeaderBox = styled(Box)({
+const HeaderBox = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   paddingLeft: 15,
   paddingRight: 15,
-})
+  borderBottomWidth: 1,
+  borderBottomColor: theme.colors.border,
+}))
 
 const ValidateIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.success,
@@ -143,7 +145,7 @@ const EditHeader = ({
 
   return (
     <HeaderBox>
-      <Box row height={50} center>
+      <Box row height={54} center>
         <Box flex justifyContent="center">
           <Link onPress={setReadOnly} style={{ marginRight: 15 }}>
             <ValidateIcon name="check" size={25} />

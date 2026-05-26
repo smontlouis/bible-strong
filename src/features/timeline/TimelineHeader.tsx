@@ -5,21 +5,21 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { ActionMenuOption } from '~common/ActionMenu'
 import Back from '~common/Back'
 import PopOverMenu from '~common/PopOverMenu'
 import Box from '~common/ui/Box'
-import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
 
-const HeaderBox = styled(Box)(({ theme }) => ({
+const HeaderBox = styled(Box)<{ topInset: number }>(({ theme, topInset }) => ({
   position: 'absolute',
   top: 0,
   left: 0,
   right: 0,
   height: 60,
-  marginTop: useSafeAreaInsets().top,
+  marginTop: topInset,
   borderBottomColor: theme.colors.border,
   alignItems: 'stretch',
   zIndex: 1,
@@ -34,6 +34,7 @@ interface Props {
   titleEn: string
   fontSize?: number
   hasBackButton?: boolean
+  isFormSheet?: boolean
   onPress: () => void
   onBackPress?: () => void
   onOpenInNewTab: () => void
@@ -45,6 +46,7 @@ const TimelineHeader = ({
   titleEn,
   fontSize = 20,
   hasBackButton,
+  isFormSheet = false,
   onPress,
   onBackPress,
   onOpenInNewTab,
@@ -52,17 +54,19 @@ const TimelineHeader = ({
 }: Props) => {
   const lang = useLanguage()
   const { t } = useTranslation()
+  const insets = useSafeAreaInsets()
+  const topInset = isFormSheet ? 0 : insets.top
 
   const openSearch = () => {
     searchModalRef.current?.expand()
   }
 
   return (
-    <HeaderBox row>
+    <HeaderBox row topInset={topInset}>
       <Box center>
         {hasBackButton && (
           <Back padding onCustomPress={onBackPress}>
-            <FeatherIcon name={'grid'} size={20} />
+            <FeatherIcon name="arrow-left" size={20} />
           </Back>
         )}
       </Box>
@@ -75,24 +79,13 @@ const TimelineHeader = ({
         <PopOverMenu
           popover={
             <>
-              <MenuOption onSelect={openSearch}>
-                <Box row alignItems="center">
-                  <FeatherIcon name="search" size={15} />
-                  <Text marginLeft={10}>{t('Recherche')}</Text>
-                </Box>
-              </MenuOption>
-              <MenuOption onSelect={onPress}>
-                <Box row alignItems="center">
-                  <FeatherIcon name="info" size={15} />
-                  <Text marginLeft={10}>{t('Détails')}</Text>
-                </Box>
-              </MenuOption>
-              <MenuOption onSelect={onOpenInNewTab}>
-                <Box row alignItems="center">
-                  <FeatherIcon name="external-link" size={15} />
-                  <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
-                </Box>
-              </MenuOption>
+              <ActionMenuOption icon="search" label={t('Recherche')} onSelect={openSearch} />
+              <ActionMenuOption icon="info" label={t('Détails')} onSelect={onPress} />
+              <ActionMenuOption
+                icon="external-link"
+                label={t('tab.openInNewTab')}
+                onSelect={onOpenInNewTab}
+              />
             </>
           }
         />

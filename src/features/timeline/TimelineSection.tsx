@@ -28,6 +28,8 @@ interface Props extends TimelineSectionProps {
   onPrev: () => void
   onNext: () => void
   onBackPress?: () => void
+  hasBackButton?: boolean
+  isFormSheet?: boolean
   isCurrent: boolean
   isFirst?: boolean
   isLast?: boolean
@@ -56,6 +58,8 @@ const Timeline = ({
   onPrev,
   onNext,
   onBackPress,
+  hasBackButton,
+  isFormSheet = false,
   isCurrent,
   isFirst,
   isLast,
@@ -101,108 +105,107 @@ const Timeline = ({
 
   return (
     <Box flex pos="absolute" left={0} bottom={0} right={0} top={0}>
-        <TimelineHeader
-          hasBackButton
-          title={title}
-          titleEn={titleEn}
-          onPress={onTimelineDetailsOpen}
-          onBackPress={onBackPress}
-          onOpenInNewTab={openSectionInNewTab}
-          searchModalRef={searchModalRef}
-        />
+      <TimelineHeader
+        hasBackButton={hasBackButton}
+        isFormSheet={isFormSheet}
+        title={title}
+        titleEn={titleEn}
+        onPress={onTimelineDetailsOpen}
+        onBackPress={onBackPress}
+        onOpenInNewTab={openSectionInNewTab}
+        searchModalRef={searchModalRef}
+      />
 
-        {!isFirst && <PrevSectionImage x={x} prevEvent={prevEvent} />}
-        {!isLast && <NextSectionImage x={x} width={width} nextEvent={nextEvent} />}
-        <CurrentSectionImage
-          isReady={isReady}
-          currentEvent={{
-            id,
-            image,
-            color,
-            description,
-            descriptionEn,
-            title,
-            titleEn,
-            sectionTitle,
-            sectionTitleEn,
-            subTitle,
-            subTitleEn,
-            startYear,
-            endYear,
-            interval,
-          }}
-        />
-        <ScrollView
-          x={x}
-          y={y}
-          width={width}
-          height={height}
-          onPrev={onPrev}
-          onNext={onNext}
-          isFirst={isFirst}
-          isLast={isLast}
-          isReady={isReady}
-          entrance={entrance}
-        >
-          <Box width={width} height={height} lightShadow>
-            <Box pos="relative" width={width} height={height} bg="lightGrey">
-              {events.map((event, i) => (
-                <TimelineEvent
-                  x={x}
-                  key={i}
-                  yearsToPx={yearsToPx}
-                  calculateEventWidth={calculateEventWidth}
-                  hasDetails={eventDetailSlugs ? eventDetailSlugs.has(event.slug) : true}
-                  sectionIndex={sectionIndex}
-                  {...event}
-                />
-              ))}
-            </Box>
+      {!isFirst && <PrevSectionImage x={x} prevEvent={prevEvent} />}
+      {!isLast && <NextSectionImage x={x} width={width} nextEvent={nextEvent} />}
+      <CurrentSectionImage
+        isReady={isReady}
+        currentEvent={{
+          id,
+          image,
+          color,
+          description,
+          descriptionEn,
+          title,
+          titleEn,
+          sectionTitle,
+          sectionTitleEn,
+          subTitle,
+          subTitleEn,
+          startYear,
+          endYear,
+          interval,
+        }}
+      />
+      <ScrollView
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        onPrev={onPrev}
+        onNext={onNext}
+        isFirst={isFirst}
+        isLast={isLast}
+        isReady={isReady}
+        entrance={entrance}
+      >
+        <Box width={width} height={height} lightShadow>
+          <Box pos="relative" width={width} height={height} bg="lightGrey">
+            {events.map((event, i) => (
+              <TimelineEvent
+                x={x}
+                key={i}
+                yearsToPx={yearsToPx}
+                calculateEventWidth={calculateEventWidth}
+                hasDetails={eventDetailSlugs ? eventDetailSlugs.has(event.slug) : true}
+                sectionIndex={sectionIndex}
+                {...event}
+              />
+            ))}
           </Box>
-        </ScrollView>
-        <Datebar
-          x={x}
-          width={width}
-          startYear={startYear}
-          endYear={endYear}
-          interval={interval}
-          color={color}
-        />
-        <Line lineX={lineX} color={color} />
-        <CurrentYear
-          year={year}
-          x={x}
-          width={width}
-          lineX={lineX}
-          color={color}
-          onPrev={onPrev}
-          onNext={onNext}
-          prevColor={prevEvent?.color}
-          nextColor={nextEvent?.color}
-        />
-        <SectionDetailsModal
-          modalRef={modalRef}
-          {...{
-            id,
-            image,
-            color,
-            description,
-            descriptionEn,
-            title,
-            titleEn,
-            sectionTitle,
-            sectionTitleEn,
-            subTitle,
-            subTitleEn,
-            startYear,
-            endYear,
-            interval,
-          }}
-        />
-        <SearchInTimelineModal
-          modalRef={searchModalRef}
-        />
-      </Box>
+        </Box>
+      </ScrollView>
+      <Datebar
+        x={x}
+        width={width}
+        startYear={startYear}
+        endYear={endYear}
+        interval={interval}
+        color={color}
+      />
+      <Line lineX={lineX} color={color} />
+      <CurrentYear
+        year={year}
+        x={x}
+        width={width}
+        lineX={lineX}
+        color={color}
+        onPrev={onPrev}
+        onNext={onNext}
+        prevColor={prevEvent?.color}
+        nextColor={nextEvent?.color}
+      />
+      <SectionDetailsModal
+        modalRef={modalRef}
+        {...{
+          id,
+          image,
+          color,
+          description,
+          descriptionEn,
+          title,
+          titleEn,
+          sectionTitle,
+          sectionTitleEn,
+          subTitle,
+          subTitleEn,
+          startYear,
+          endYear,
+          interval,
+        }}
+      />
+      <SearchInTimelineModal modalRef={searchModalRef} />
+    </Box>
   )
 }
 export default Timeline

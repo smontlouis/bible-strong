@@ -6,8 +6,9 @@ import { useSetAtom } from 'jotai/react'
 
 import BibleLinkItem from './BibleLinkItem'
 import BibleLinksSettingsModal from './BibleLinksSettingsModal'
-import Container from '~common/ui/Container'
+import Box from '~common/ui/Box'
 import FlatList from '~common/ui/FlatList'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Header from '~common/Header'
 import Empty from '~common/Empty'
 
@@ -24,6 +25,7 @@ import {
 } from '~redux/selectors/bible'
 import { endpointIdentity, type RelationEndpoint } from '~features/studyRelations/domain'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 type TLink = {
   linkId: string
@@ -31,12 +33,19 @@ type TLink = {
   link: Link
 }
 
-const BibleVerseLinks = () => {
+type BibleVerseLinksProps = {
+  isFormSheet?: boolean
+}
+
+const BibleVerseLinks = ({ isFormSheet = false }: BibleVerseLinksProps) => {
   const params = useLocalSearchParams<{ withBack?: string; verse?: string }>()
   const withBack = params.withBack === 'true'
   const verse = params.verse || ''
   const { t } = useTranslation()
   const router = useRouter()
+  const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = isFormSheet ? canGoBackInStack : withBack
+  const hasListBackButton = isFormSheet ? canGoBackInStack : true
 
   const [title, setTitle] = useState('')
   const [links, setLinks] = useState<TLink[]>([])
@@ -166,53 +175,55 @@ const BibleVerseLinks = () => {
   const selectedLink = links.find(link => link.linkId === linkSettingsId)
 
   return (
-    <Container>
-      {verse ? (
-        <Header hasBackButton={withBack} title={title || t('Chargement...')} />
-      ) : (
-        <FiltersHeader
-          title={t('Liens')}
-          filterLabel={selectedChip?.name}
-          hasBackButton
-          hasActiveFilters={Boolean(selectedChip)}
-          onReset={() => setSelectedChip(null)}
-          filters={[
-            {
-              key: 'tags',
-              icon: 'tag',
-              label: t('Tags'),
-              value: selectedChip?.name || t('Tous'),
-              onPress: openTagsModal,
-            },
-          ]}
+    <FormSheetScreen isFormSheet={isFormSheet}>
+      <Box flex bg="reverse">
+        {verse ? (
+          <Header hasBackButton={hasBackButton} title={title || t('Chargement...')} />
+        ) : (
+          <FiltersHeader
+            title={t('Liens')}
+            filterLabel={selectedChip?.name}
+            hasBackButton={hasListBackButton}
+            hasActiveFilters={Boolean(selectedChip)}
+            onReset={() => setSelectedChip(null)}
+            filters={[
+              {
+                key: 'tags',
+                icon: 'tag',
+                label: t('Tags'),
+                value: selectedChip?.name || t('Tous'),
+                onPress: openTagsModal,
+              },
+            ]}
+          />
+        )}
+        {filteredLinks.length ? (
+          <FlatList
+            data={filteredLinks}
+            renderItem={renderLink}
+            keyExtractor={(item: TLink, index: number) => index.toString()}
+            style={{ paddingBottom: 30 }}
+          />
+        ) : (
+          <Empty
+            icon={require('~assets/images/empty-state-icons/link.svg')}
+            message={t("Vous n'avez pas encore de liens...")}
+          />
+        )}
+        <BibleLinksSettingsModal
+          ref={linkSettingsModal.getRef()}
+          title={
+            selectedLink?.link.ogData?.title ||
+            selectedLink?.link.customTitle ||
+            selectedLink?.link.url ||
+            ''
+          }
+          linkId={linkSettingsId}
+          onClosed={() => setLinkSettingsId(null)}
+          onEditRelations={openLinkRelations}
         />
-      )}
-      {filteredLinks.length ? (
-        <FlatList
-          data={filteredLinks}
-          renderItem={renderLink}
-          keyExtractor={(item: TLink, index: number) => index.toString()}
-          style={{ paddingBottom: 30 }}
-        />
-      ) : (
-        <Empty
-          icon={require('~assets/images/empty-state-icons/link.svg')}
-          message={t("Vous n'avez pas encore de liens...")}
-        />
-      )}
-      <BibleLinksSettingsModal
-        ref={linkSettingsModal.getRef()}
-        title={
-          selectedLink?.link.ogData?.title ||
-          selectedLink?.link.customTitle ||
-          selectedLink?.link.url ||
-          ''
-        }
-        linkId={linkSettingsId}
-        onClosed={() => setLinkSettingsId(null)}
-        onEditRelations={openLinkRelations}
-      />
-    </Container>
+      </Box>
+    </FormSheetScreen>
   )
 }
 

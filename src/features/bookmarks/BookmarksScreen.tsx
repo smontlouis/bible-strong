@@ -9,14 +9,15 @@ import Header from '~common/Header'
 import Link from '~common/Link'
 import Border from '~common/ui/Border'
 import Box, { VStack } from '~common/ui/Box'
-import Container from '~common/ui/Container'
 import FlatList from '~common/ui/FlatList'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon, IonIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { selectSortedBookmarks } from '~redux/selectors/bookmarks'
 import type { Bookmark } from '~common/types'
 import BookmarkModal from './BookmarkModal'
 import books from '~assets/bible_versions/books-desc'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 const getBookName = (bookNumber: number): string => {
   const bookData = books.find(b => b.Numero === bookNumber)
@@ -63,9 +64,15 @@ const BookmarkItem = ({ item, onEdit, onNavigate }: BookmarkItemProps) => {
   )
 }
 
-const BookmarksScreen = () => {
+type BookmarksScreenProps = {
+  isFormSheet?: boolean
+}
+
+const BookmarksScreen = ({ isFormSheet = false }: BookmarksScreenProps) => {
   const { t } = useTranslation()
   const router = useRouter()
+  const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = isFormSheet ? canGoBackInStack : true
   const bookmarks = useSelector(selectSortedBookmarks)
   const [selectedBookmark, setSelectedBookmark] = useState<Bookmark | null>(null)
   const bookmarkModalRef = useRef<BottomSheetModal>(null)
@@ -92,29 +99,31 @@ const BookmarksScreen = () => {
   }
 
   return (
-    <Container>
-      <Header hasBackButton title={t('Marque-pages')} />
-      {bookmarks.length > 0 ? (
-        <FlatList
-          data={bookmarks}
-          renderItem={({ item }: { item: Bookmark }) => (
-            <BookmarkItem item={item} onEdit={handleEdit} onNavigate={handleNavigate} />
-          )}
-          keyExtractor={(item: Bookmark) => item.id}
-          contentContainerStyle={{ paddingBottom: 70 }}
+    <FormSheetScreen isFormSheet={isFormSheet}>
+      <Box flex bg="reverse">
+        <Header hasBackButton={hasBackButton} title={t('Marque-pages')} />
+        {bookmarks.length > 0 ? (
+          <FlatList
+            data={bookmarks}
+            renderItem={({ item }: { item: Bookmark }) => (
+              <BookmarkItem item={item} onEdit={handleEdit} onNavigate={handleNavigate} />
+            )}
+            keyExtractor={(item: Bookmark) => item.id}
+            contentContainerStyle={{ paddingBottom: 70 }}
+          />
+        ) : (
+          <Empty
+            icon={require('~assets/images/empty-state-icons/bookmark.svg')}
+            message={t('Aucun marque-page...')}
+          />
+        )}
+        <BookmarkModal
+          bottomSheetRef={bookmarkModalRef}
+          onClose={handleCloseModal}
+          existingBookmark={selectedBookmark || undefined}
         />
-      ) : (
-        <Empty
-          icon={require('~assets/images/empty-state-icons/bookmark.svg')}
-          message={t('Aucun marque-page...')}
-        />
-      )}
-      <BookmarkModal
-        bottomSheetRef={bookmarkModalRef}
-        onClose={handleCloseModal}
-        existingBookmark={selectedBookmark || undefined}
-      />
-    </Container>
+      </Box>
+    </FormSheetScreen>
   )
 }
 

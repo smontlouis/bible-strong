@@ -286,7 +286,14 @@ function InnerApp() {
                                 },
                               })}
                             />
-                            <Stack.Screen name="event" options={createFormSheetOptions(theme)} />
+                            <Stack.Screen
+                              name="(timeline)"
+                              options={createFormSheetOptions(theme, {
+                                contentStyle: {
+                                  bottom: 0,
+                                },
+                              })}
+                            />
                           </Stack>
                           <ThemedToaster />
                           <DeferredModals />

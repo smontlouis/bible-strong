@@ -1,17 +1,17 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { ActionMenuContent } from '~common/ActionMenu'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
-import Box from '~common/ui/Box'
 import MenuOption from '~common/ui/MenuOption'
 import ScrollView from '~common/ui/ScrollView'
-import Text from '~common/ui/Text'
 import waitForTimeline from '~common/waitForTimeline'
 import useLanguage from '~helpers/useLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { EventDetailsContent, EventDetailsProps } from './EventDetails'
 import { TimelineEvent } from './types'
 
@@ -23,7 +23,7 @@ interface Props {
   isFormSheet?: boolean
   menuItems?: {
     label: string
-    icon: React.ReactNode
+    icon: React.ComponentProps<typeof ActionMenuContent>['icon']
     onSelect: () => void
   }[]
 }
@@ -32,11 +32,13 @@ const TimelineEventDetailView = waitForTimeline(
   ({ event, onOpenEvent, canGoBack, onBack, isFormSheet = false, menuItems }: Props) => {
     const { t } = useTranslation()
     const lang = useLanguage()
+    const canGoBackInStack = useCanGoBackInStack()
+    const hasBackButton = isFormSheet ? canGoBackInStack : canGoBack
 
     if (!event) {
       return (
         <FormSheetScreen isFormSheet={isFormSheet}>
-          <Header title={t('Chronologie de la Bible')} />
+          <Header title={t('Chronologie de la Bible')} hasBackButton={hasBackButton} />
           <Empty
             icon={require('~assets/images/empty-state-icons/search.svg')}
             message={t("Cet événement n'est plus disponible.")}
@@ -49,7 +51,7 @@ const TimelineEventDetailView = waitForTimeline(
       <FormSheetScreen isFormSheet={isFormSheet}>
         <Header
           title={getLegacyLocalizedField(lang, { fr: event.title, en: event.titleEn })}
-          hasBackButton={!isFormSheet && canGoBack}
+          hasBackButton={hasBackButton}
           onCustomBackPress={onBack}
           rightComponent={
             menuItems?.length ? (
@@ -58,10 +60,7 @@ const TimelineEventDetailView = waitForTimeline(
                   <>
                     {menuItems.map(item => (
                       <MenuOption key={item.label} onSelect={item.onSelect}>
-                        <Box row alignItems="center">
-                          {item.icon}
-                          <Text marginLeft={10}>{item.label}</Text>
-                        </Box>
+                        <ActionMenuContent icon={item.icon} label={item.label} />
                       </MenuOption>
                     ))}
                   </>

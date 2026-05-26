@@ -5,8 +5,9 @@ import { useSetAtom } from 'jotai/react'
 
 import Empty from '~common/Empty'
 import FiltersHeader from '~common/FiltersHeader'
-import Container from '~common/ui/Container'
+import Box from '~common/ui/Box'
 import FlatList from '~common/ui/FlatList'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import BibleNoteItem from './BibleNoteItem'
 
 import { Tag } from '~common/types'
@@ -20,6 +21,7 @@ import BibleNotesSettingsModal from './BibleNotesSettingsModal'
 import { endpointIdentity, type RelationEndpoint } from '~features/studyRelations/domain'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { useOpenNote } from '~features/notes/useOpenNote'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 export type TNote = {
   noteId: string
@@ -27,8 +29,14 @@ export type TNote = {
   notes: Note
 }
 
-const BibleVerseNotes = () => {
+type BibleVerseNotesProps = {
+  isFormSheet?: boolean
+}
+
+const BibleVerseNotes = ({ isFormSheet = false }: BibleVerseNotesProps) => {
   const { t } = useTranslation()
+  const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = isFormSheet ? canGoBackInStack : true
 
   const [selectedChip, setSelectedChip] = useState<Tag | null>(null)
   const [noteSettingsId, setNoteSettingsId] = useState<string | null>(null)
@@ -124,42 +132,44 @@ const BibleVerseNotes = () => {
   }
 
   return (
-    <Container>
-      <FiltersHeader
-        title="Notes"
-        filterLabel={selectedChip?.name}
-        hasBackButton
-        hasActiveFilters={Boolean(selectedChip)}
-        onReset={() => setSelectedChip(null)}
-        filters={[
-          {
-            key: 'tags',
-            icon: 'tag',
-            label: t('Tags'),
-            value: selectedChip?.name || t('Tous'),
-            onPress: openTagsModal,
-          },
-        ]}
-      />
-      {filteredNotes.length ? (
-        <FlatList
-          data={filteredNotes}
-          renderItem={renderNote}
-          keyExtractor={(item: TNote) => item.noteId}
-          style={{ paddingBottom: 30 }}
+    <FormSheetScreen isFormSheet={isFormSheet}>
+      <Box flex bg="reverse">
+        <FiltersHeader
+          title="Notes"
+          filterLabel={selectedChip?.name}
+          hasBackButton={hasBackButton}
+          hasActiveFilters={Boolean(selectedChip)}
+          onReset={() => setSelectedChip(null)}
+          filters={[
+            {
+              key: 'tags',
+              icon: 'tag',
+              label: t('Tags'),
+              value: selectedChip?.name || t('Tous'),
+              onPress: openTagsModal,
+            },
+          ]}
         />
-      ) : (
-        <Empty
-          icon={require('~assets/images/empty-state-icons/note.svg')}
-          message={t("Vous n'avez pas encore de notes...")}
+        {filteredNotes.length ? (
+          <FlatList
+            data={filteredNotes}
+            renderItem={renderNote}
+            keyExtractor={(item: TNote) => item.noteId}
+            style={{ paddingBottom: 30 }}
+          />
+        ) : (
+          <Empty
+            icon={require('~assets/images/empty-state-icons/note.svg')}
+            message={t("Vous n'avez pas encore de notes...")}
+          />
+        )}
+        <BibleNotesSettingsModal
+          ref={noteSettingsModal.getRef()}
+          noteId={noteSettingsId}
+          onClosed={() => setNoteSettingsId(null)}
         />
-      )}
-      <BibleNotesSettingsModal
-        ref={noteSettingsModal.getRef()}
-        noteId={noteSettingsId}
-        onClosed={() => setNoteSettingsId(null)}
-      />
-    </Container>
+      </Box>
+    </FormSheetScreen>
   )
 }
 

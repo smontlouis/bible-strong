@@ -8,7 +8,7 @@ import Loading from '~common/Loading'
 import SearchInput from '~common/SearchInput'
 import SectionTitle from '~common/SectionTitle'
 import Box from '~common/ui/Box'
-import Container from '~common/ui/Container'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import SectionList from '~common/ui/SectionList'
 import Text from '~common/ui/Text'
 import { getFirstLetterFrom } from '~helpers/alphabet'
@@ -25,6 +25,7 @@ import { StrongTab } from '../../state/tabs'
 import LexiqueItem from './LexiqueItem'
 import PopOverMenu from '~common/PopOverMenu'
 import LanguageMenuOption from '~common/LanguageMenuOption'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 interface LexiqueSection {
   title: string
@@ -70,15 +71,19 @@ const useSectionResults = (results: LexiqueRow[]) => {
 interface LexiqueListScreenProps {
   strongAtom: PrimitiveAtom<StrongTab>
   hasBackButton?: boolean
+  isFormSheet?: boolean
   onStrongSelect?: (book: number, reference: string) => void
 }
 
 const LexiqueListScreen = ({
   strongAtom,
   hasBackButton,
+  isFormSheet = false,
   onStrongSelect,
 }: LexiqueListScreenProps) => {
   const { t } = useTranslation()
+  const canGoBackInStack = useCanGoBackInStack()
+  const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
   const [error, setError] = useState<DatabaseError['error'] | null>(null)
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
@@ -99,11 +104,12 @@ const LexiqueListScreen = ({
 
   if (error) {
     return (
-      <Container>
-        <Header hasBackButton={hasBackButton} title={t('Désolé...')} />
-        <Empty
-          icon={require('~assets/images/empty-state-icons/inbox.svg')}
-          message={`${t('Impossible de charger la strong pour ce verset...')}
+      <FormSheetScreen isFormSheet={isFormSheet}>
+        <Box flex bg="reverse">
+          <Header hasBackButton={showBackButton} title={t('Désolé...')} />
+          <Empty
+            icon={require('~assets/images/empty-state-icons/inbox.svg')}
+            message={`${t('Impossible de charger la strong pour ce verset...')}
             ${
               error === 'CORRUPTED_DATABASE'
                 ? t(
@@ -111,67 +117,71 @@ const LexiqueListScreen = ({
                   )
                 : ''
             }`}
-        />
-      </Container>
+          />
+        </Box>
+      </FormSheetScreen>
     )
   }
 
   return (
-    <Container>
-      <Header
-        hasBackButton={hasBackButton}
-        title={t('Lexique')}
-        rightComponent={
-          <PopOverMenu
-            popover={
-              <>
-                <LanguageMenuOption resourceId="STRONG" />
-              </>
-            }
-          />
-        }
-      />
-      <Box px={20}>
-        <SearchInput
-          placeholder={t('Recherche par code ou par mot')}
-          onChangeText={setSearchValue}
-          value={searchValue}
-          onDelete={() => setSearchValue('')}
-        />
+    <FormSheetScreen isFormSheet={isFormSheet}>
+      <Box flex bg="reverse">
+        <Header
+          hasBackButton={showBackButton}
+          title={t('Lexique')}
+          rightComponent={
+            <PopOverMenu
+              popover={
+                <>
+                  <LanguageMenuOption resourceId="STRONG" />
+                </>
+              }
+            />
+          }
+        >
+          <Box pb={10} px={20}>
+            <SearchInput
+              placeholder={t('Recherche par code ou par mot')}
+              onChangeText={setSearchValue}
+              value={searchValue}
+              onDelete={() => setSearchValue('')}
+            />
+          </Box>
+        </Header>
+        <Box flex paddingTop={20}>
+          {isLoading ? (
+            <Loading message={t('Chargement...')} />
+          ) : sectionResults.length ? (
+            <SectionList<LexiqueRow, LexiqueSection>
+              renderItem={({ item, index }) => (
+                <LexiqueItem key={index} {...item} onSelect={onStrongSelect} />
+              )}
+              removeClippedSubviews
+              maxToRenderPerBatch={100}
+              getItemLayout={(data, index) =>
+                getLexiqueItemLayout((data || []) as LexiqueSection[], index)
+              }
+              renderSectionHeader={({ section: { title } }) => (
+                <SectionTitle color="primary">
+                  <Text title fontWeight="bold" fontSize={16} color="reverse">
+                    {title}
+                  </Text>
+                </SectionTitle>
+              )}
+              stickySectionHeadersEnabled
+              sections={sectionResults}
+              keyExtractor={item => item.Mot + item.Code}
+            />
+          ) : (
+            <Empty
+              icon={require('~assets/images/empty-state-icons/word.svg')}
+              message={t('Aucune strong trouvée...')}
+            />
+          )}
+        </Box>
+        {!searchValue && <AlphabetList letter={letter} setLetter={setLetter} />}
       </Box>
-      <Box flex paddingTop={20}>
-        {isLoading ? (
-          <Loading message={t('Chargement...')} />
-        ) : sectionResults.length ? (
-          <SectionList<LexiqueRow, LexiqueSection>
-            renderItem={({ item, index }) => (
-              <LexiqueItem key={index} {...item} onSelect={onStrongSelect} />
-            )}
-            removeClippedSubviews
-            maxToRenderPerBatch={100}
-            getItemLayout={(data, index) =>
-              getLexiqueItemLayout((data || []) as LexiqueSection[], index)
-            }
-            renderSectionHeader={({ section: { title } }) => (
-              <SectionTitle color="primary">
-                <Text title fontWeight="bold" fontSize={16} color="reverse">
-                  {title}
-                </Text>
-              </SectionTitle>
-            )}
-            stickySectionHeadersEnabled
-            sections={sectionResults}
-            keyExtractor={item => item.Mot + item.Code}
-          />
-        ) : (
-          <Empty
-            icon={require('~assets/images/empty-state-icons/word.svg')}
-            message={t('Aucune strong trouvée...')}
-          />
-        )}
-      </Box>
-      {!searchValue && <AlphabetList letter={letter} setLetter={setLetter} />}
-    </Container>
+    </FormSheetScreen>
   )
 }
 

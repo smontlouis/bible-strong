@@ -6,7 +6,11 @@ import generateUUID from '~helpers/generateUUID'
 import { NaveTab } from '../../state/tabs'
 import NaveListScreen from './NaveListScreen'
 
-const NaveScreen = () => {
+type NaveScreenProps = {
+  isFormSheet?: boolean
+}
+
+const NaveScreen = ({ isFormSheet = false }: NaveScreenProps) => {
   const { t } = useTranslation()
   const onTheFlyAtom = useMemo(
     () =>
@@ -22,6 +26,6 @@ const NaveScreen = () => {
     []
   )
 
-  return <NaveListScreen naveAtom={onTheFlyAtom} hasBackButton />
+  return <NaveListScreen naveAtom={onTheFlyAtom} hasBackButton isFormSheet={isFormSheet} />
 }
 export default NaveScreen

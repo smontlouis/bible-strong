@@ -28,6 +28,8 @@ const StyledText = styled(Text)({
 
 const HeaderBox = styled(Box)(({ theme }) => ({
   alignItems: 'center',
+  minHeight: 54,
+  borderBottomWidth: 1,
   borderBottomColor: theme.colors.border,
 }))
 
