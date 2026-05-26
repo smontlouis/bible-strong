@@ -91,7 +91,6 @@ import { useAnnotationMode } from './hooks'
 import { LoadingView } from './LoadingView'
 import ResourcesModal from './resources/ResourceModal'
 import SelectedVersesModal from './SelectedVersesModal'
-import VerseNotesModal from './VerseNotesModal'
 import VerseTagsModal from './VerseTagsModal'
 import CreateEntityRelationModal from '~features/studyRelations/CreateEntityRelationModal'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
@@ -175,9 +174,6 @@ const BibleViewer = ({
   const verseTagsModal = useBottomSheetModal()
   const [verseTagsModalKey, setVerseTagsModalKey] = useState<string | null>(null)
 
-  // Verse notes modal
-  const verseNotesModal = useBottomSheetModal()
-  const [verseNotesModalKey, setVerseNotesModalKey] = useState<string | null>(null)
   const [createRelationSourceEndpoint, setCreateRelationSourceEndpoint] =
     useState<RelationEndpoint | null>(null)
 
@@ -672,15 +668,6 @@ const BibleViewer = ({
     [verseTagsModal]
   )
 
-  // Verse notes modal handler
-  const handleOpenVerseNotesModal = useCallback(
-    (verseKey: string) => {
-      setVerseNotesModalKey(verseKey)
-      verseNotesModal.open()
-    },
-    [verseNotesModal]
-  )
-
   const handleCrossVersionSwitchVersion = useCallback(
     (newVersion: VersionCode, verse: number) => {
       actions.setSelectedVersion(newVersion)
@@ -780,8 +767,6 @@ const BibleViewer = ({
     taggedVersesInChapter,
     versesWithNonHighlightTags,
     onOpenVerseTagsModal: handleOpenVerseTagsModal,
-    // Verse notes modal
-    onOpenVerseNotesModal: handleOpenVerseNotesModal,
     onOpenStudyRelationsModal: openVerseStudyRelationsModal,
     // Double-tap to enter annotation mode
     onEnterAnnotationMode: handleEnterAnnotationModeFromDoubleTap,
@@ -984,7 +969,6 @@ const BibleViewer = ({
         verseKey={verseTagsModalKey}
         version={displayedVersion}
       />
-      <VerseNotesModal ref={verseNotesModal.getRef()} verseKey={verseNotesModalKey} />
     </Box>
   )
 }

@@ -83,7 +83,6 @@ import {
   OPEN_BOOKMARK_MODAL,
   OPEN_CROSS_VERSION_MODAL,
   OPEN_HIGHLIGHT_TAGS,
-  OPEN_VERSE_NOTES_MODAL,
   OPEN_VERSE_TAGS_MODAL,
   REMOVE_PARALLEL_VERSION,
   SELECTION_CHANGED,
@@ -284,8 +283,6 @@ export type WebViewProps = {
   taggedVersesInChapter?: Record<number, number>
   versesWithNonHighlightTags?: Record<number, boolean>
   onOpenVerseTagsModal?: (verseKey: string) => void
-  // Verse notes modal
-  onOpenVerseNotesModal?: (verseKey: string) => void
   onOpenStudyRelationsModal?: (target: StudyRelationsModalTarget) => void
   isFormSheet?: boolean
   // Enter annotation mode from double-tap
@@ -370,7 +367,6 @@ export const BibleDOMWrapper = ({
   taggedVersesInChapter,
   versesWithNonHighlightTags,
   onChangeResourceTypeSelectVerse,
-  onOpenVerseNotesModal,
   onOpenStudyRelationsModal,
   openNote,
   openLink,
@@ -464,11 +460,6 @@ export const BibleDOMWrapper = ({
         if (__DEV__) console.log(`[Bible] ${Livre}-${Chapitre}-${Verset}`)
         onChangeResourceTypeSelectVerse?.('strong', `${Livre}-${Chapitre}-${Verset}`)
 
-        break
-      }
-      case OPEN_VERSE_NOTES_MODAL: {
-        const verseKey = getStringPayload(action.payload)
-        if (verseKey) onOpenVerseNotesModal?.(verseKey)
         break
       }
       case NAVIGATE_TO_VERSE_LINKS: {
