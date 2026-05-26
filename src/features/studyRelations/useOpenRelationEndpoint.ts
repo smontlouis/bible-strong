@@ -1,5 +1,4 @@
 import { useRouter } from 'expo-router'
-import { Linking } from 'react-native'
 import books from '~assets/bible_versions/books-desc'
 import { useOpenNote } from '~features/notes/useOpenNote'
 import { toast } from '~helpers/toast'
@@ -60,12 +59,13 @@ export const useOpenRelationEndpoint = () => {
         })
         break
       case 'externalLink': {
-        if (!endpoint.url) {
+        if (!endpoint.linkId) {
           toast.error(i18n.t('Lien introuvable'))
           break
         }
-        Linking.openURL(endpoint.url).catch(() => {
-          toast.error(i18n.t("Impossible d'ouvrir ce lien"))
+        router.push({
+          pathname: '/link',
+          params: { linkId: endpoint.linkId },
         })
         break
       }

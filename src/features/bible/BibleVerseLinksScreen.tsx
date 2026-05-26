@@ -11,7 +11,7 @@ import FlatList from '~common/ui/FlatList'
 import Header from '~common/Header'
 import Empty from '~common/Empty'
 
-import TagsHeader from '~common/TagsHeader'
+import FiltersHeader from '~common/FiltersHeader'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { unifiedTagsModalAtom } from '~state/app'
 import verseToReference from '~helpers/verseToReference'
@@ -170,12 +170,21 @@ const BibleVerseLinks = () => {
       {verse ? (
         <Header hasBackButton={withBack} title={title || t('Chargement...')} />
       ) : (
-        <TagsHeader
+        <FiltersHeader
           title={t('Liens')}
-          setIsOpen={openTagsModal}
-          isOpen={false}
-          selectedChip={selectedChip}
+          filterLabel={selectedChip?.name}
           hasBackButton
+          hasActiveFilters={Boolean(selectedChip)}
+          onReset={() => setSelectedChip(null)}
+          filters={[
+            {
+              key: 'tags',
+              icon: 'tag',
+              label: t('Tags'),
+              value: selectedChip?.name || t('Tous'),
+              onPress: openTagsModal,
+            },
+          ]}
         />
       )}
       {filteredLinks.length ? (

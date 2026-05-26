@@ -5,8 +5,8 @@ import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import { useSetAtom } from 'jotai/react'
 
 import Empty from '~common/Empty'
+import FiltersHeader from '~common/FiltersHeader'
 import RenameModal from '~common/RenameModal'
-import TagsHeader from '~common/TagsHeader'
 import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
 import withLoginModal from '~common/withLoginModal'
@@ -115,12 +115,21 @@ const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => 
           key={r(['xs', 'sm', 'md', 'lg'])}
           stickyHeaderIndices={[0]}
           ListHeaderComponent={
-            <TagsHeader
+            <FiltersHeader
               title={t('Études')}
-              setIsOpen={openTagsModal}
-              isOpen={false}
-              selectedChip={selectedChip}
+              filterLabel={selectedChip?.name}
               hasBackButton={hasBackButton}
+              hasActiveFilters={Boolean(selectedChip)}
+              onReset={() => setSelectedChip(null)}
+              filters={[
+                {
+                  key: 'tags',
+                  icon: 'tag',
+                  label: t('Tags'),
+                  value: selectedChip?.name || t('Tous'),
+                  onPress: openTagsModal,
+                },
+              ]}
             />
           }
           numColumns={r([2, 2, 3, 3])}
@@ -154,12 +163,21 @@ const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => 
         />
       ) : (
         <>
-          <TagsHeader
+          <FiltersHeader
             title={t('Études')}
-            setIsOpen={openTagsModal}
-            isOpen={false}
-            selectedChip={selectedChip}
+            filterLabel={selectedChip?.name}
             hasBackButton={hasBackButton}
+            hasActiveFilters={Boolean(selectedChip)}
+            onReset={() => setSelectedChip(null)}
+            filters={[
+              {
+                key: 'tags',
+                icon: 'tag',
+                label: t('Tags'),
+                value: selectedChip?.name || t('Tous'),
+                onPress: openTagsModal,
+              },
+            ]}
           />
           <Empty
             icon={require('~assets/images/empty-state-icons/study.svg')}

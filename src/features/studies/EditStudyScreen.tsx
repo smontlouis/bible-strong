@@ -23,6 +23,7 @@ import { StudyTab } from 'src/state/tabs'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 type EditStudyScreenProps = {
   studyAtom?: PrimitiveAtom<StudyTab>
@@ -94,6 +95,7 @@ const EditStudyScreen = ({
     label: currentStudy?.title || t('Études'),
   }
   const relationCount = useRelationCount(studyEndpoint)
+  const canGoBackInStack = useCanGoBackInStack()
   const hasTagOrRelationChips =
     Boolean(currentStudy?.tags && Object.keys(currentStudy.tags).length > 0) || relationCount > 0
 
@@ -147,7 +149,7 @@ const EditStudyScreen = ({
       {studyAtom && <TabTitleUpdater studyAtom={studyAtom} title={currentStudy.title} />}
       <EditStudyHeader
         isReadOnly={isReadOnly}
-        hasBackButton={isFormSheet ? false : hasBackButton}
+        hasBackButton={isFormSheet ? canGoBackInStack : hasBackButton}
         openRenameModal={() => renameModalRef.current?.present()}
         openRelationsModal={() => openEntityRelations(studyEndpoint)}
         setReadOnly={() => {

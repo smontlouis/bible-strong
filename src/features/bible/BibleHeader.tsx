@@ -36,6 +36,7 @@ import truncate from '~helpers/truncate'
 import useDimensions from '~helpers/useDimensions'
 import useLanguage from '~helpers/useLanguage'
 import verseToReference from '~helpers/verseToReference'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { makeSelectBookmarkForChapter } from '~redux/selectors/bookmarks'
@@ -51,8 +52,6 @@ interface BibleHeaderProps {
   onExitAnnotationMode?: () => void
   annotationModeEnabled?: boolean
 }
-
-const DISABLE_BACK_BUTTON = false
 
 const Header = ({
   isFormSheet,
@@ -77,6 +76,8 @@ const Header = ({
   const setColumnWidth = useSetAtom(parallelColumnWidthAtom)
   const displayMode = useAtomValue(parallelDisplayModeAtom)
   const setDisplayMode = useSetAtom(parallelDisplayModeAtom)
+  const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = Boolean(isFormSheet && canGoBackInStack)
 
   // Bookmark ref
   const bookmarkModalRef = useRef<BottomSheetModal>(null)
@@ -166,7 +167,7 @@ const Header = ({
         key="annotation-mode-header"
       >
         <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
-          {isFormSheet && DISABLE_BACK_BUTTON && (
+          {hasBackButton && (
             <Box position="absolute" left={0} top={5} zIndex={2}>
               <Back
                 onGoBack={() => {
@@ -222,7 +223,7 @@ const Header = ({
         key="selected-verses-header"
       >
         <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
-          {isFormSheet && DISABLE_BACK_BUTTON && (
+          {hasBackButton && (
             <Back
               onGoBack={() => {
                 setIsFullScreenBible(false)
@@ -266,7 +267,7 @@ const Header = ({
       exiting={FadeOut}
     >
       <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
-        {isFormSheet && DISABLE_BACK_BUTTON ? (
+        {hasBackButton ? (
           <Back
             onGoBack={() => {
               setIsFullScreenBible(false)

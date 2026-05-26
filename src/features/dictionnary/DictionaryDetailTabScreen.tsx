@@ -19,7 +19,6 @@ import { produce } from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import DetailedHeader from '~common/DetailedHeader'
 import PopOverMenu from '~common/PopOverMenu'
 import { toast } from '~helpers/toast'
 import EntityChipList from '~common/EntityChipList'
@@ -37,6 +36,7 @@ import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import type { RelationEndpoint } from '~redux/modules/user'
 import AppScrollView from '~common/ui/ScrollView'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
@@ -54,6 +54,8 @@ const DictionnaryDetailScreen = ({
   const router = useRouter()
   const [dictionaryTab, setDictionaryTab] = useAtom(dictionaryAtom)
   const { isInTab } = useTabContext()
+  const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = isFormSheet ? canGoBackInStack : !isInTab
 
   const {
     data: { word },
@@ -176,7 +178,7 @@ const DictionnaryDetailScreen = ({
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
         <Header
-          hasBackButton={!isFormSheet && !isInTab}
+          hasBackButton={hasBackButton}
           onCustomBackPress={goBack}
           title={t('Dictionnaire')}
         />
@@ -187,10 +189,9 @@ const DictionnaryDetailScreen = ({
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
-      <DetailedHeader
-        hasBackButton={!isFormSheet && !isInTab}
+      <Header
+        hasBackButton={hasBackButton}
         title={word}
-        borderColor="secondary"
         rightComponent={
           <PopOverMenu
             popover={

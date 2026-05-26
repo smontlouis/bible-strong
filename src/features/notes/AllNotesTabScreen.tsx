@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 
 import Empty from '~common/Empty'
-import TagsHeader from '~common/TagsHeader'
+import FiltersHeader from '~common/FiltersHeader'
 import { Tag } from '~common/types'
 import Container from '~common/ui/Container'
 import FlatList from '~common/ui/FlatList'
@@ -143,12 +143,21 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
 
   return (
     <Container>
-      <TagsHeader
+      <FiltersHeader
         title={t('Notes')}
-        setIsOpen={openTagsModal}
-        isOpen={false}
-        selectedChip={selectedChip}
+        filterLabel={selectedChip?.name}
         hasBackButton={hasBackButton}
+        hasActiveFilters={Boolean(selectedChip)}
+        onReset={() => setSelectedChip(null)}
+        filters={[
+          {
+            key: 'tags',
+            icon: 'tag',
+            label: t('Tags'),
+            value: selectedChip?.name || t('Tous'),
+            onPress: openTagsModal,
+          },
+        ]}
       />
       {filteredNotes.length ? (
         <FlatList

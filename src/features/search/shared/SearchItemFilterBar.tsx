@@ -97,8 +97,6 @@ const SearchItemFilterBar = ({
   onToggle,
   enabledTypes = searchItemFilterOrder,
   px = 20,
-  mt = 10,
-  mb = 4,
   maxHeight = 40,
 }: Props) => {
   const { t } = useTranslation()
@@ -116,7 +114,7 @@ const SearchItemFilterBar = ({
       horizontal
       keyboardShouldPersistTaps="handled"
       showsHorizontalScrollIndicator={false}
-      style={{ maxHeight, marginBottom: mb, marginTop: mt }}
+      style={{ maxHeight, marginTop: 5 }}
       contentContainerStyle={{ paddingHorizontal: px }}
     >
       <HStack>

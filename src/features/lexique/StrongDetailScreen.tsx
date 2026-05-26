@@ -31,7 +31,6 @@ import { useAtom, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'expo-router'
-import DetailedHeader from '~common/DetailedHeader'
 import PopOverMenu from '~common/PopOverMenu'
 import { StrongReference, Verse } from '~common/types'
 import MenuOption from '~common/ui/MenuOption'
@@ -45,6 +44,7 @@ import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import type { RelationEndpoint } from '~redux/modules/user'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -76,6 +76,8 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
   const router = useRouter()
   const [strongTab, setStrongTab] = useAtom(strongAtom)
   const { isInTab } = useTabContext()
+  const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = isFormSheet ? canGoBackInStack : !isInTab
 
   const {
     data: { book, reference, strongReference: strongReferenceParam },
@@ -222,7 +224,7 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
         <Header
-          hasBackButton={!isFormSheet && !isInTab}
+          hasBackButton={hasBackButton}
           onCustomBackPress={goBack}
           title="Désolé..."
         />
@@ -242,7 +244,7 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
         <Header
-          hasBackButton={!isFormSheet && !isInTab}
+          hasBackButton={hasBackButton}
           onCustomBackPress={goBack}
           title={t('Lexique')}
         />
@@ -255,11 +257,11 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
-      <DetailedHeader
-        hasBackButton={!isFormSheet && !isInTab}
+      <Header
+        hasBackButton={hasBackButton}
         title={capitalize(Mot)}
         detail={Phonetique}
-        subtitle={Type}
+        subTitle={Type}
         rightComponent={
           <PopOverMenu
             popover={

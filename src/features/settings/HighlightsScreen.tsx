@@ -6,7 +6,6 @@ import { Alert, ScrollView } from 'react-native'
 
 import Empty from '~common/Empty'
 import FiltersHeader from '~common/FiltersHeader'
-import FilterModal from '~common/FilterModal'
 import ColorFilterModal from '~common/ColorFilterModal'
 import TypeFilterModal from '~common/TypeFilterModal'
 import Container from '~common/ui/Container'
@@ -106,10 +105,8 @@ const HighlightsScreen = () => {
     selectedTag,
     typeFilterLabel,
     activeFiltersCount,
-    mainModalRef,
     colorModalRef,
     typeModalRef,
-    openMainModal,
     openColorFromMain,
     openTagsFromMain,
     openTypeFromMain,
@@ -245,23 +242,33 @@ const HighlightsScreen = () => {
       <FiltersHeader
         title={t('Surbrillances')}
         filterLabel={filterLabel}
-        onFilterPress={openMainModal}
         hasBackButton
-      />
-
-      {/* Filter modals */}
-      <FilterModal
-        ref={mainModalRef}
-        selectedColorId={filters.colorId}
-        selectedColorName={colorInfo?.name}
-        selectedColorHex={colorInfo?.hex}
-        onColorPress={openColorFromMain}
-        selectedTagName={selectedTag?.name}
-        onTagPress={openTagsFromMain}
-        selectedTypeLabel={typeFilterLabel}
-        onTypePress={openTypeFromMain}
-        onReset={resetFilters}
         hasActiveFilters={activeFiltersCount > 0}
+        onReset={resetFilters}
+        filters={[
+          {
+            key: 'type',
+            icon: 'layers',
+            label: t('Type'),
+            value: typeFilterLabel || t('Tout'),
+            onPress: openTypeFromMain,
+          },
+          {
+            key: 'color',
+            icon: 'droplet',
+            label: t('Couleur'),
+            value: colorInfo?.name || t('Toutes'),
+            color: filters.colorId ? colorInfo?.hex : undefined,
+            onPress: openColorFromMain,
+          },
+          {
+            key: 'tags',
+            icon: 'tag',
+            label: t('Tags'),
+            value: selectedTag?.name || t('Tous'),
+            onPress: openTagsFromMain,
+          },
+        ]}
       />
 
       <ColorFilterModal

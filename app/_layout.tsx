@@ -279,53 +279,14 @@ function InnerApp() {
                           <Stack screenOptions={{ headerShown: false }}>
                             <Stack.Screen name="index" />
                             <Stack.Screen
-                              name="entity-relations"
-                              options={createFormSheetOptions(theme)}
-                            />
-                            <Stack.Screen
-                              name="edit-study"
+                              name="(explore)"
                               options={createFormSheetOptions(theme, {
                                 contentStyle: {
                                   bottom: 0,
                                 },
                               })}
-                            />
-                            <Stack.Screen
-                              name="bible-view"
-                              options={createFormSheetOptions(theme, {
-                                contentStyle: {
-                                  bottom: 0,
-                                },
-                              })}
-                            />
-                            <Stack.Screen
-                              name="note"
-                              options={createFormSheetOptions(theme, {
-                                contentStyle: {
-                                  bottom: 0,
-                                },
-                              })}
-                            />
-                            <Stack.Screen name="link" options={createFormSheetOptions(theme)} />
-                            <Stack.Screen name="strong" options={createFormSheetOptions(theme)} />
-                            <Stack.Screen
-                              name="dictionnary-detail"
-                              options={createFormSheetOptions(theme)}
-                            />
-                            <Stack.Screen
-                              name="nave-detail"
-                              options={createFormSheetOptions(theme)}
                             />
                             <Stack.Screen name="event" options={createFormSheetOptions(theme)} />
-                            <Stack.Screen
-                              name="concordance"
-                              options={createFormSheetOptions(theme)}
-                            />
-                            <Stack.Screen
-                              name="concordance-by-book"
-                              options={createFormSheetOptions(theme)}
-                            />
-                            <Stack.Screen name="tag" options={createFormSheetOptions(theme)} />
                           </Stack>
                           <ThemedToaster />
                           <DeferredModals />

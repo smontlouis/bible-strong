@@ -14,6 +14,7 @@ import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import Box from './ui/Box'
 import Progress from './ui/Progress'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 const STRONG_FILE_SIZE = 34941952
 
@@ -163,14 +164,18 @@ const waitForDatabase =
     hasBackButton,
     hasHeader,
     size,
+    useStackBackButton,
   }: {
     hasBackButton?: boolean
     size?: 'small' | 'large'
     hasHeader?: boolean
+    useStackBackButton?: boolean
   } = {}) =>
   <T extends object>(WrappedComponent: React.ComponentType<T>): React.ComponentType<T> =>
   (props: T) => {
     const { t } = useTranslation()
+    const canGoBackInStack = useCanGoBackInStack()
+    const effectiveHasBackButton = useStackBackButton ? canGoBackInStack : hasBackButton
     const { isLoading, progress, proposeDownload, startDownload, setStartDownload, resourceLang } =
       useWaitForDatabase()
 
@@ -187,7 +192,7 @@ const waitForDatabase =
     if (isLoading && proposeDownload) {
       return (
         <DownloadRequired
-          hasBackButton={hasBackButton}
+          hasBackButton={effectiveHasBackButton}
           size={size}
           hasHeader={hasHeader}
           title={t('La base de données strong est requise pour accéder à cette page.')}

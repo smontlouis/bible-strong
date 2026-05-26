@@ -44,7 +44,6 @@ const SearchTabScreen = ({ searchAtom }: SearchScreenProps) => {
 
   return (
     <Container>
-      <Header title={t('Rechercher')} />
       <SQLiteSearchScreen searchValue={searchValue} setSearchValue={setSearchValue} />
     </Container>
   )

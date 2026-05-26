@@ -13,6 +13,7 @@ import Text from '~common/ui/Text'
 import { DatabaseError } from '~helpers/catchDatabaseError'
 import loadStrongVersesCountByBook from '~helpers/loadStrongVersesCountByBook'
 import useAsync from '~helpers/useAsync'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 const OccurencesNumber = styled.View(({ theme }) => ({
   marginLeft: 10,
@@ -39,6 +40,7 @@ const hasDatabaseError = (value: unknown): value is DatabaseError =>
 const ConcordanceScreen = () => {
   const router = useRouter()
   const params = useLocalSearchParams<{ strongReference?: string; book?: string }>()
+  const canGoBackInStack = useCanGoBackInStack()
 
   // Parse params from URL strings
   const strongReference = params.strongReference ? JSON.parse(params.strongReference) : {}
@@ -51,7 +53,7 @@ const ConcordanceScreen = () => {
 
   return (
     <FormSheetScreen isFormSheet>
-      <Header title={`Concordance ${strongReference.Code}`} />
+      <Header hasBackButton={canGoBackInStack} title={`Concordance ${strongReference.Code}`} />
       {status === 'Pending' && <Loading />}
       {status === 'Resolved' && (
         <FlatList

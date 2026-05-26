@@ -33,6 +33,7 @@ import {
 } from '~helpers/fetchOpenGraphData'
 import { toast } from '~helpers/toast'
 import verseToReference from '~helpers/verseToReference'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { RootState } from '~redux/modules/reducer'
 import { addLink, deleteLink, Link } from '~redux/modules/user'
 import { makeLinkByIdSelector, makeVerseKeysForLinkSelector } from '~redux/selectors/bible'
@@ -88,6 +89,7 @@ const BibleLinkScreen = () => {
   const router = useRouter()
   const theme = useTheme()
   const currentLink = useCurrentLink({ linkId })
+  const canGoBackInStack = useCanGoBackInStack()
   const selectVerseKeysForLink = makeVerseKeysForLinkSelector()
   const relatedVerseKeys = useSelector((state: RootState) =>
     selectVerseKeysForLink(state, currentLink?.id || linkId || '')
@@ -228,6 +230,7 @@ const BibleLinkScreen = () => {
   return (
     <FormSheetScreen isFormSheet>
       <Header
+        hasBackButton={canGoBackInStack}
         title={t('Lien')}
         subTitle={reference}
         rightComponent={

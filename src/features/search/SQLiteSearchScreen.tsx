@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Keyboard, Platform, TouchableOpacity } from 'react-native'
+import { Keyboard, Platform, ScrollView, TouchableOpacity } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { useTheme } from '@emotion/react'
@@ -76,6 +76,7 @@ import {
   type NaveSearchItemRow,
 } from './shared/searchItems'
 import type { SearchEntityResult } from './shared/searchResultTypes'
+import Header from '~common/Header'
 
 type Props = {
   searchValue: string
@@ -1015,60 +1016,65 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
 
   return (
     <Box flex={1}>
-      <Box px={20}>
-        <SearchInput
-          placeholder={t('search.placeholder')}
-          onChangeText={setSearchValue}
-          value={searchValue}
-          onDelete={() => setSearchValue('')}
-        />
-      </Box>
-      <Box>
-        <VStack>
-          <SearchItemFilterBar
-            itemFilters={itemFilters}
-            onToggle={toggleItemFilter}
-            px={20}
-            mt={10}
-            mb={0}
-            maxHeight={40}
-          />
-          {hasInstalledVersions && !hasReference && (
-            <HStack
-              px={20}
-              opacity={itemFilters.passages ? 1 : 0.3}
-              pointerEvents={itemFilters.passages ? 'auto' : 'none'}
-            >
-              <DropdownMenu
-                title={t('Section')}
-                currentValue={section}
-                setValue={(v: string) => setSection(v as SearchSection)}
-                choices={sectionValues}
+      <Header title={t('Rechercher')}>
+        <>
+          <Box px={20}>
+            <SearchInput
+              placeholder={t('search.placeholder')}
+              onChangeText={setSearchValue}
+              value={searchValue}
+              onDelete={() => setSearchValue('')}
+            />
+          </Box>
+          <Box>
+            <VStack>
+              <SearchItemFilterBar
+                itemFilters={itemFilters}
+                onToggle={toggleItemFilter}
+                px={20}
+                mb={0}
+                maxHeight={40}
               />
-              <DropdownMenu
-                title={t('Livre')}
-                currentValue={book}
-                setValue={setBook}
-                choices={books}
-              />
-              {installedVersions.length > 1 && (
-                <DropdownMenu
-                  title={t('Version')}
-                  currentValue={selectedVersion}
-                  setValue={setSelectedVersion}
-                  choices={versionValues}
-                />
+              {hasInstalledVersions && !hasReference && (
+                <ScrollView horizontal>
+                  <HStack
+                    px={20}
+                    opacity={itemFilters.passages ? 1 : 0.3}
+                    pointerEvents={itemFilters.passages ? 'auto' : 'none'}
+                  >
+                    <DropdownMenu
+                      title={t('Section')}
+                      currentValue={section}
+                      setValue={(v: string) => setSection(v as SearchSection)}
+                      choices={sectionValues}
+                    />
+                    <DropdownMenu
+                      title={t('Livre')}
+                      currentValue={book}
+                      setValue={setBook}
+                      choices={books}
+                    />
+                    {installedVersions.length > 1 && (
+                      <DropdownMenu
+                        title={t('Version')}
+                        currentValue={selectedVersion}
+                        setValue={setSelectedVersion}
+                        choices={versionValues}
+                      />
+                    )}
+                    <DropdownMenu
+                      title={t('Ordre')}
+                      currentValue={sortOrder}
+                      setValue={(v: string) => setSortOrder(v as SearchSortOrder)}
+                      choices={sortOrderValues}
+                    />
+                  </HStack>
+                </ScrollView>
               )}
-              <DropdownMenu
-                title={t('Ordre')}
-                currentValue={sortOrder}
-                setValue={(v: string) => setSortOrder(v as SearchSortOrder)}
-                choices={sortOrderValues}
-              />
-            </HStack>
-          )}
-        </VStack>
-      </Box>
+            </VStack>
+          </Box>
+        </>
+      </Header>
 
       {renderContent()}
       {browseAlphabet ? (

@@ -15,12 +15,14 @@ import ConcordanceVerse from './ConcordanceVerse'
 import books from '~assets/bible_versions/books-desc'
 import loadFoundVersesByBook, { FoundVerseRow } from '~helpers/loadFoundVersesByBook'
 import truncate from '~helpers/truncate'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 const ConcordanceByBook = () => {
   const router = useRouter()
   const params = useLocalSearchParams<{ book: string; strongReference: string }>()
   const { t } = useTranslation()
   const [verses, setVerses] = useState<FoundVerseRow[]>([])
+  const canGoBackInStack = useCanGoBackInStack()
 
   const book = params.book ? Number(params.book) : 0
   const strongReference = params.strongReference
@@ -41,6 +43,7 @@ const ConcordanceByBook = () => {
   return (
     <FormSheetScreen isFormSheet>
       <Header
+        hasBackButton={canGoBackInStack}
         title={`${truncate(Mot, 7)} dans ${books[book - 1].Nom}`}
         rightComponent={
           <PopOverMenu
@@ -81,4 +84,5 @@ const ConcordanceByBook = () => {
 export default waitForStrongDB({
   hasBackButton: true,
   hasHeader: true,
+  useStackBackButton: true,
 })(ConcordanceByBook)

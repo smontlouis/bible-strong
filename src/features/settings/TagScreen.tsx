@@ -19,6 +19,7 @@ import HighlightItem from '~features/settings/Verse'
 import StudyItem from '~features/studies/StudyItem'
 import { removeTag, updateTag } from '~redux/modules/user'
 import useLanguage from '~helpers/useLanguage'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 import { useTagData } from './useTagData'
 import { TagData, useCreateTabGroupFromTag } from './useCreateTabGroupFromTag'
@@ -42,6 +43,7 @@ const TagScreen = () => {
   const dispatch = useDispatch()
   const { t } = useTranslation()
   const lang = useLanguage()
+  const canGoBackInStack = useCanGoBackInStack()
 
   const {
     tag,
@@ -154,7 +156,7 @@ const TagScreen = () => {
   if (!tag) {
     return (
       <FormSheetScreen isFormSheet>
-        <Header title="" />
+        <Header hasBackButton={canGoBackInStack} title="" />
         <Empty
           source={require('~assets/images/empty.json')}
           message={t("Cette étiquette n'existe pas...")}
@@ -166,6 +168,7 @@ const TagScreen = () => {
   return (
     <FormSheetScreen isFormSheet>
       <Header
+        hasBackButton={canGoBackInStack}
         title={tag.name}
         rightComponent={
           <PopOverMenu

@@ -28,6 +28,7 @@ import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { toast } from '~helpers/toast'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import verseToReference from '~helpers/verseToReference'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { RootState } from '~redux/modules/reducer'
 import type { RelationEndpoint } from '~redux/modules/user'
 import { addNote, deleteNote } from '~redux/modules/user'
@@ -72,6 +73,8 @@ const NoteDetailTabScreen = ({
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
   const openEntityRelations = useOpenEntityRelations()
+  const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = isFormSheet ? canGoBackInStack : Boolean(onBackPress)
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -352,7 +355,7 @@ ${currentNote.description}
       <>
         <Header
           title={t('Annotation introuvable')}
-          hasBackButton={!isFormSheet && Boolean(onBackPress)}
+          hasBackButton={hasBackButton}
           onCustomBackPress={goBack}
         />
         <Box flex center px={20}>
@@ -372,7 +375,7 @@ ${currentNote.description}
       <Header
         title={isAnnotationNote ? t("Note d'annotation") : t('Note')}
         subTitle={reference}
-        hasBackButton={!isFormSheet && Boolean(onBackPress)}
+        hasBackButton={hasBackButton}
         onCustomBackPress={goBack}
         rightComponent={
           currentNote ? (

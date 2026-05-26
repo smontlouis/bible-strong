@@ -4,11 +4,11 @@ import { useSelector } from 'react-redux'
 import { useSetAtom } from 'jotai/react'
 
 import Empty from '~common/Empty'
+import FiltersHeader from '~common/FiltersHeader'
 import Container from '~common/ui/Container'
 import FlatList from '~common/ui/FlatList'
 import BibleNoteItem from './BibleNoteItem'
 
-import TagsHeader from '~common/TagsHeader'
 import { Tag } from '~common/types'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { unifiedTagsModalAtom } from '~state/app'
@@ -125,12 +125,21 @@ const BibleVerseNotes = () => {
 
   return (
     <Container>
-      <TagsHeader
+      <FiltersHeader
         title="Notes"
-        setIsOpen={openTagsModal}
-        isOpen={false}
-        selectedChip={selectedChip}
+        filterLabel={selectedChip?.name}
         hasBackButton
+        hasActiveFilters={Boolean(selectedChip)}
+        onReset={() => setSelectedChip(null)}
+        filters={[
+          {
+            key: 'tags',
+            icon: 'tag',
+            label: t('Tags'),
+            value: selectedChip?.name || t('Tous'),
+            onPress: openTagsModal,
+          },
+        ]}
       />
       {filteredNotes.length ? (
         <FlatList

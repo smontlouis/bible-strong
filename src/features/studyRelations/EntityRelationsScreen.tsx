@@ -2,15 +2,17 @@ import { useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { ScrollView } from 'react-native'
 import Empty from '~common/Empty'
-import ModalHeader from '~common/ModalHeader'
+import Header from '~common/Header'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import CreateEntityRelationModal from './CreateEntityRelationModal'
 import StudyRelationList from './StudyRelationList'
 import { getEndpointFallbackLabel } from './domain'
 import { parseRelationEndpointParam } from './routeParams'
 import { useOpenRelationEndpoint } from './useOpenRelationEndpoint'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 
 const EntityRelationsScreen = () => {
   const { t } = useTranslation()
@@ -18,12 +20,14 @@ const EntityRelationsScreen = () => {
   const endpoint = parseRelationEndpointParam(params.endpoint)
   const openEndpoint = useOpenRelationEndpoint()
   const createRelationModal = useBottomSheetModal()
+  const canGoBackInStack = useCanGoBackInStack()
   const isSingleVerseEndpoint = endpoint?.type === 'verse' && endpoint.verseKeys.length === 1
   const endpointLabel = endpoint ? getEndpointFallbackLabel(endpoint) : ''
 
   return (
-    <Box bg="reverse">
-      <ModalHeader
+    <FormSheetScreen isFormSheet>
+      <Header
+        hasBackButton={canGoBackInStack}
         title={t('Relations')}
         subTitle={endpointLabel}
         rightComponent={
@@ -43,7 +47,7 @@ const EntityRelationsScreen = () => {
           ) : undefined
         }
       />
-      <ScrollView contentContainerStyle={{ flex: 1 }}>
+      <ScrollView>
         {endpoint ? (
           <StudyRelationList
             endpoint={endpoint}
@@ -65,7 +69,7 @@ const EntityRelationsScreen = () => {
         sourceEndpoint={endpoint}
         onCreated={() => createRelationModal.close()}
       />
-    </Box>
+    </FormSheetScreen>
   )
 }
 

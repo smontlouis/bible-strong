@@ -9,7 +9,6 @@ import { produce } from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import DetailedHeader from '~common/DetailedHeader'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import PopOverMenu from '~common/PopOverMenu'
@@ -34,6 +33,7 @@ import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import type { RelationEndpoint } from '~redux/modules/user'
 import ScrollView from '~common/ui/ScrollView'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 interface NaveDetailScreenProps {
   naveAtom: PrimitiveAtom<NaveTab>
@@ -44,6 +44,8 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
   const router = useRouter()
   const [naveTab, setNaveTab] = useAtom(naveAtom)
   const { isInTab } = useTabContext()
+  const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = isFormSheet ? canGoBackInStack : !isInTab
 
   const {
     data: { name_lower, name },
@@ -171,7 +173,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
         <Header
-          hasBackButton={!isFormSheet && !isInTab}
+          hasBackButton={hasBackButton}
           onCustomBackPress={goBack}
           title="Thèmes Nave"
         />
@@ -182,11 +184,10 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
-      <DetailedHeader
-        hasBackButton={!isFormSheet && !isInTab}
+      <Header
+        hasBackButton={hasBackButton}
         title={naveItem.name || name || ''}
-        subtitle={naveItem?.name_lower}
-        borderColor="quint"
+        subTitle={naveItem?.name_lower}
         rightComponent={
           <PopOverMenu
             popover={
