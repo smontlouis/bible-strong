@@ -1,9 +1,13 @@
 import { useRouter } from 'expo-router'
 import books from '~assets/bible_versions/books-desc'
+import { useOpenNote } from '~features/notes/useOpenNote'
+import { toast } from '~helpers/toast'
+import i18n from '~i18n'
 import type { RelationEndpoint } from './domain'
 
 export const useOpenRelationEndpoint = () => {
   const router = useRouter()
+  const openNote = useOpenNote()
 
   return (endpoint: RelationEndpoint) => {
     switch (endpoint.type) {
@@ -12,7 +16,7 @@ export const useOpenRelationEndpoint = () => {
         router.push({
           pathname: '/bible-view',
           params: {
-            isReadOnly: 'true',
+            contextDisplayMode: 'focused',
             book: JSON.stringify(books[bookNumber - 1]),
             chapter: String(chapter),
             verse: String(verse),
@@ -22,10 +26,7 @@ export const useOpenRelationEndpoint = () => {
         break
       }
       case 'note':
-        router.push({
-          pathname: '/note',
-          params: { noteId: endpoint.noteId },
-        })
+        openNote({ noteId: endpoint.noteId })
         break
       case 'study':
         router.push({
@@ -47,7 +48,7 @@ export const useOpenRelationEndpoint = () => {
           pathname: '/nave-detail',
           params: {
             name_lower: endpoint.nameLower,
-            name: endpoint.label || endpoint.nameLower,
+            name: endpoint.labelFallback || endpoint.nameLower,
           },
         })
         break
@@ -56,6 +57,19 @@ export const useOpenRelationEndpoint = () => {
           pathname: '/dictionnary-detail',
           params: { word: endpoint.word },
         })
+        break
+      case 'externalLink': {
+        if (!endpoint.linkId) {
+          toast.error(i18n.t('Lien introuvable'))
+          break
+        }
+        router.push({
+          pathname: '/link',
+          params: { linkId: endpoint.linkId },
+        })
+        break
+      }
+      case 'word':
         break
     }
   }

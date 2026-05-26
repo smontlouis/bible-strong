@@ -12,7 +12,7 @@ const loadDictionnaireBySearch = (
 ): Promise<DictionnaireSearchRow[] | DatabaseError> =>
   catchDatabaseError(async () => {
     const result = await SQLDictionnaireTransaction<DictionnaireSearchRow>(
-      `SELECT rowid, word, sanitized_word
+      `SELECT id AS rowid, word, sanitized_word
       FROM dictionnaire
       WHERE word LIKE (?) OR sanitized_word LIKE (?)
       ORDER BY sanitized_word ASC

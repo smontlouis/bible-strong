@@ -6,7 +6,17 @@ import generateUUID from '~helpers/generateUUID'
 import { DictionaryTab } from '../../state/tabs'
 import DictionaryListScreen from './DictionaryListScreen'
 
-const DictionaryScreen = () => {
+type DictionaryScreenProps = {
+  isFormSheet?: boolean
+  isNewTabSelection?: boolean
+  newTabId?: string
+}
+
+const DictionaryScreen = ({
+  isFormSheet = false,
+  isNewTabSelection = false,
+  newTabId,
+}: DictionaryScreenProps) => {
   const { t } = useTranslation()
   const onTheFlyAtom = useMemo(
     () =>
@@ -22,6 +32,14 @@ const DictionaryScreen = () => {
     []
   )
 
-  return <DictionaryListScreen dictionaryAtom={onTheFlyAtom} hasBackButton />
+  return (
+    <DictionaryListScreen
+      dictionaryAtom={onTheFlyAtom}
+      hasBackButton
+      isFormSheet={isFormSheet}
+      isNewTabSelection={isNewTabSelection}
+      newTabId={newTabId}
+    />
+  )
 }
 export default DictionaryScreen

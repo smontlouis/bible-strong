@@ -9,7 +9,7 @@ import type { LexiqueRow } from '~helpers/loadLexiqueByLetter'
 import type { NaveLetterRow } from '~helpers/loadNaveByLetter'
 import type { NaveSearchRow } from '~helpers/loadNaveBySearch'
 import i18n from '~i18n'
-import type { Note, Study } from '~redux/modules/user'
+import type { Link, Note, Study } from '~redux/modules/user'
 import type { SearchEntityResult, SearchReferenceMode } from './searchResultTypes'
 
 export type DictionarySearchRow = DictionnaireSearchRow | DictionnaireLetterRow
@@ -94,6 +94,32 @@ export const getNoteSearchItems = (notes: Record<string, Note> = {}, t: Translat
         type: 'note',
         noteId,
         label: title,
+      },
+    }
+  })
+
+const getLinkTitle = (link: Link, t: Translate = translate) =>
+  link.customTitle || link.ogData?.title || link.url || t('Lien sans titre')
+
+export const getLinkSearchItems = (links: Record<string, Link> = {}, t: Translate = translate) =>
+  Object.entries(links).map<SearchEntityResult>(([linkId, link]) => {
+    const title = getLinkTitle(link, t)
+    const description = link.ogData?.description || link.url
+
+    return {
+      id: `link:${linkId}`,
+      type: 'links',
+      iconType: 'links',
+      title,
+      subtitle: t('Lien'),
+      description,
+      endpoint: {
+        type: 'externalLink',
+        linkId,
+        sourceKey: '',
+        url: link.url,
+        label: title,
+        labelFallback: title,
       },
     }
   })

@@ -11,8 +11,8 @@ import RenameModal from '~common/RenameModal'
 import EntityChipList from '~common/EntityChipList'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
-import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Text from '~common/ui/Text'
 import { RootState } from '~redux/modules/reducer'
 import { updateStudy, Study, type RelationEndpoint } from '~redux/modules/user'
@@ -21,9 +21,9 @@ import StudiesDomWrapper from './StudiesDOM/StudiesDomWrapper'
 import { openedFromTabAtom } from './atom'
 import { StudyTab } from 'src/state/tabs'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 type EditStudyScreenProps = {
   studyAtom?: PrimitiveAtom<StudyTab>
@@ -31,6 +31,7 @@ type EditStudyScreenProps = {
   studyId?: string
   hasBackButton?: boolean
   openedFromTab?: boolean
+  isFormSheet?: boolean
   onGoBack?: () => void
 }
 
@@ -62,6 +63,7 @@ const EditStudyScreen = ({
   studyId: propStudyId,
   hasBackButton = true,
   openedFromTab = false,
+  isFormSheet = false,
   onGoBack,
 }: EditStudyScreenProps) => {
   const { t } = useTranslation()
@@ -81,7 +83,7 @@ const EditStudyScreen = ({
   const dispatch = useDispatch()
   const [isReadOnly, setIsReadOnly] = useState(true)
   const renameModalRef = useRef<BottomSheetModal>(null)
-  const relationListModal = useBottomSheetModal()
+  const openEntityRelations = useOpenEntityRelations()
   const setOpenedFromTab = useSetAtom(openedFromTabAtom)
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
 
@@ -93,6 +95,7 @@ const EditStudyScreen = ({
     label: currentStudy?.title || t('Études'),
   }
   const relationCount = useRelationCount(studyEndpoint)
+  const canGoBackInStack = useCanGoBackInStack()
   const hasTagOrRelationChips =
     Boolean(currentStudy?.tags && Object.keys(currentStudy.tags).length > 0) || relationCount > 0
 
@@ -128,7 +131,7 @@ const EditStudyScreen = ({
   // Show message if study doesn't exist
   if (studyId === '' || !currentStudy) {
     return (
-      <Container>
+      <FormSheetScreen isFormSheet={isFormSheet}>
         <Box flex center px={20}>
           <Text fontSize={18} color="grey" textAlign="center" mb={20}>
             {t("Cette étude n'existe plus")}
@@ -137,42 +140,45 @@ const EditStudyScreen = ({
             {t('Retour aux études')}
           </Button>
         </Box>
-      </Container>
+      </FormSheetScreen>
     )
   }
 
   return (
-    <Container>
+    <FormSheetScreen isFormSheet={isFormSheet}>
       {studyAtom && <TabTitleUpdater studyAtom={studyAtom} title={currentStudy.title} />}
       <EditStudyHeader
         isReadOnly={isReadOnly}
-        hasBackButton={hasBackButton}
+        hasBackButton={isFormSheet ? canGoBackInStack : hasBackButton}
         openRenameModal={() => renameModalRef.current?.present()}
-        openRelationsModal={() => relationListModal.open()}
+        openRelationsModal={() => openEntityRelations(studyEndpoint)}
         setReadOnly={() => {
           setIsReadOnly(true)
         }}
         title={currentStudy.title}
         study={currentStudy}
-      />
+      >
+        {isReadOnly && hasTagOrRelationChips && (
+          <Box px={20} mt={-10} pb={10}>
+            <EntityChipList
+              tags={currentStudy.tags}
+              relationCount={relationCount}
+              onRelationPress={() => openEntityRelations(studyEndpoint)}
+            />
+          </Box>
+        )}
+      </EditStudyHeader>
+
       <StudiesDomWrapper
         isReadOnly={isReadOnly}
         onDeltaChangeCallback={onDeltaChangeCallback}
         contentToDisplay={currentStudy.content}
         fontFamily={fontFamily}
-        params={{ studyId }}
+        params={{ ...params, studyId }}
         studyAtom={studyAtom}
         studyId={studyId}
+        isFormSheet={isFormSheet}
       />
-      {isReadOnly && hasTagOrRelationChips && (
-        <Box px={20} py={12} borderTopWidth={1} borderColor="border" bg="reverse">
-          <EntityChipList
-            tags={currentStudy.tags}
-            relationCount={relationCount}
-            onRelationPress={() => relationListModal.open()}
-          />
-        </Box>
-      )}
       <RenameModal
         bottomSheetRef={renameModalRef}
         title={t("Renommer l'étude")}
@@ -182,9 +188,8 @@ const EditStudyScreen = ({
           dispatch(updateStudy({ id: currentStudy.id, title: value, modified_at: Date.now() }))
         }}
       />
-      <EntityRelationsModal ref={relationListModal.getRef()} endpoint={studyEndpoint} />
       {isReadOnly && <FabButton icon="edit-2" onPress={() => setIsReadOnly(false)} />}
-    </Container>
+    </FormSheetScreen>
   )
 }
 

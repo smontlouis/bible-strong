@@ -13,6 +13,7 @@ import {
   parallelColumnWidthAtom,
   parallelDisplayModeAtom,
   BibleTab,
+  getBibleContextDisplayMode,
   useBibleTabActions,
 } from 'src/state/tabs'
 import Back from '~common/Back'
@@ -28,14 +29,20 @@ import Box, {
 import { FeatherIcon, IonIcon, MaterialIcon, TextIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import Text, { AnimatedText } from '~common/ui/Text'
-import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
+import {
+  BIBLE_FORM_SHEET_HEADER_HEIGHT,
+  HEADER_HEIGHT,
+} from '~features/app-switcher/utils/constants'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import BookmarkModal from '~features/bookmarks/BookmarkModal'
 import { getIfDatabaseNeedsDownload } from '~helpers/databases'
+import generateUUID from '~helpers/generateUUID'
 import { toast } from '~helpers/toast'
 import truncate from '~helpers/truncate'
 import useDimensions from '~helpers/useDimensions'
 import useLanguage from '~helpers/useLanguage'
 import verseToReference from '~helpers/verseToReference'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { makeSelectBookmarkForChapter } from '~redux/selectors/bookmarks'
@@ -45,7 +52,7 @@ import { VerseSelectorPopup } from './VerseSelectorPopup'
 
 interface BibleHeaderProps {
   bibleAtom: PrimitiveAtom<BibleTab>
-  hasBackButton?: boolean
+  isFormSheet?: boolean
   onBibleParamsClick: () => void
   commentsDisplay?: boolean
   onExitAnnotationMode?: () => void
@@ -53,7 +60,7 @@ interface BibleHeaderProps {
 }
 
 const Header = ({
-  hasBackButton,
+  isFormSheet,
   bibleAtom,
   onBibleParamsClick,
   commentsDisplay,
@@ -75,10 +82,15 @@ const Header = ({
   const setColumnWidth = useSetAtom(parallelColumnWidthAtom)
   const displayMode = useAtomValue(parallelDisplayModeAtom)
   const setDisplayMode = useSetAtom(parallelDisplayModeAtom)
+  const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = Boolean(isFormSheet && canGoBackInStack)
+  const openInNewTab = useOpenInNewTab()
 
   // Bookmark ref
   const bookmarkModalRef = useRef<BottomSheetModal>(null)
   const bible = useAtomValue(bibleAtom)
+  const contextDisplayMode = getBibleContextDisplayMode(bible.data)
+  const isContextFocused = contextDisplayMode === 'focused'
   const {
     selectedBook: book,
     selectedChapter: chapter,
@@ -117,8 +129,11 @@ const Header = ({
 
   const { addParallelVersion, removeParallelVersion, removeAllParallelVersions } = actions
 
-  const fullScreenOpacity = isFullScreenBible ? 0 : 1
-  const fullScreenTranslateY = isFullScreenBible ? -4 : 0
+  const isHeaderCollapsed = !isFormSheet && isFullScreenBible
+  const headerHeight = isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT
+  const fullScreenOpacity = isHeaderCollapsed ? 0 : 1
+  const fullScreenTranslateY = isHeaderCollapsed ? -4 : 0
+  const TOP_INSET = isFormSheet ? 0 : insets.top
 
   const opacityTransitionStyle = {
     opacity: fullScreenOpacity,
@@ -144,14 +159,24 @@ const Header = ({
     dispatch(setSettingsCommentaires(true))
   }
 
+  const openInBibleTab = () => {
+    openInNewTab({
+      ...bible,
+      id: `bible-${generateUUID()}`,
+      data: {
+        ...bible.data,
+      },
+    })
+  }
+
   if (annotationModeEnabled) {
     return (
       <AnimatedHStack
         width="100%"
         bg="primary"
         px={15}
-        paddingTop={insets.top}
-        height={HEADER_HEIGHT + insets.top}
+        paddingTop={TOP_INSET}
+        height={headerHeight + TOP_INSET}
         borderBottomWidth={1}
         borderColor="border"
         position="absolute"
@@ -206,8 +231,8 @@ const Header = ({
         width="100%"
         bg="reverse"
         px={15}
-        paddingTop={insets.top}
-        height={HEADER_HEIGHT + insets.top}
+        paddingTop={TOP_INSET}
+        height={headerHeight + TOP_INSET}
         borderBottomWidth={1}
         borderColor="border"
         position="absolute"
@@ -245,8 +270,7 @@ const Header = ({
     <AnimatedHStack
       width="100%"
       bg="reverse"
-      px={15}
-      paddingTop={insets.top}
+      paddingTop={TOP_INSET}
       borderBottomWidth={1}
       borderColor="border"
       position="absolute"
@@ -254,7 +278,7 @@ const Header = ({
       left={0}
       overflow="visible"
       style={{
-        height: isFullScreenBible ? 20 + insets.top : HEADER_HEIGHT + insets.top,
+        height: isHeaderCollapsed ? 20 + TOP_INSET : headerHeight + TOP_INSET,
         transitionProperty: 'height',
         transitionDuration: 300,
       }}
@@ -280,37 +304,65 @@ const Header = ({
               <FeatherIcon name="arrow-left" size={20} />
             </AnimatedBox>
           </Back>
-        ) : hasFocusVerses ? (
-          <Box width={50} />
         ) : null}
         {hasFocusVerses ? (
           <>
-            <AnimatedBox flex={1} center style={translateYTransitionStyle}>
-              <Text fontWeight="bold" fontSize={14}>
-                {`${verseToReference({ bookNum: bookNumber, chapterNum: chapter, verses: displayVerses })} - ${version}`}
-              </Text>
+            <AnimatedBox flex={1} style={translateYTransitionStyle}>
+              <HStack px={15} alignItems="center" justifyContent="space-between" gap={8}>
+                <Text fontWeight="bold" fontSize={14}>
+                  {`${verseToReference({ bookNum: bookNumber, chapterNum: chapter, verses: displayVerses })} - ${version}`}
+                </Text>
+                <PopOverMenu
+                  element={
+                    <AnimatedBox style={opacityTransitionStyle}>
+                      <Box bg="lightPrimary" px={8} py={3} borderRadius={12}>
+                        <HStack alignItems="center" gap={3}>
+                          <Text color="primary" fontSize={11} fontWeight="bold">
+                            Focus
+                          </Text>
+                          <FeatherIcon name="chevron-down" size={12} color="primary" />
+                        </HStack>
+                      </Box>
+                    </AnimatedBox>
+                  }
+                  popover={
+                    <>
+                      <MenuOption
+                        onSelect={
+                          isContextFocused ? actions.expandContext : actions.collapseContext
+                        }
+                      >
+                        <Box row alignItems="center">
+                          <FeatherIcon
+                            name={isContextFocused ? 'maximize-2' : 'minimize-2'}
+                            size={15}
+                          />
+                          <Text marginLeft={10}>
+                            {isContextFocused ? t('tab.readWholeChapter') : t('tab.closeContext')}
+                          </Text>
+                        </Box>
+                      </MenuOption>
+                      <MenuOption onSelect={openInBibleTab}>
+                        <Box row alignItems="center">
+                          <FeatherIcon name="external-link" size={15} />
+                          <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
+                        </Box>
+                      </MenuOption>
+                      <MenuOption onSelect={() => actions.clearFocusVerses()}>
+                        <Box row alignItems="center">
+                          <FeatherIcon name="x" size={15} />
+                          <Text marginLeft={10}>{t('Quitter le mode focus')}</Text>
+                        </Box>
+                      </MenuOption>
+                    </>
+                  }
+                />
+              </HStack>
             </AnimatedBox>
-            {focusVerses && focusVerses.length > 0 ? (
-              <AnimatedTouchableBox
-                onPress={() => actions.clearFocusVerses()}
-                center
-                width={40}
-                height={40}
-                alignItems="center"
-                justifyContent="center"
-                style={opacityTransitionStyle}
-              >
-                <Box width={24} height={24} bg="lightGrey" borderRadius={10} center>
-                  <FeatherIcon name="x" size={16} />
-                </Box>
-              </AnimatedTouchableBox>
-            ) : (
-              <Box width={50} />
-            )}
           </>
         ) : (
           <>
-            <HStack alignItems="center" gap={3}>
+            <HStack alignItems="center" gap={3} pl={10}>
               <HStack>
                 <TouchableBox
                   onPress={() => {

@@ -9,18 +9,20 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { isFullScreenBibleAtom, tagDetailModalAtom } from 'src/state/app'
-import { BibleTab, ParallelColumnWidth, ParallelDisplayMode, VersionCode } from 'src/state/tabs'
+import { isFullScreenBibleAtom } from 'src/state/app'
+import {
+  BibleContextDisplayMode,
+  BibleTab,
+  ParallelColumnWidth,
+  ParallelDisplayMode,
+  VersionCode,
+} from 'src/state/tabs'
 import { isINTCompleteAtom } from '../footer/atom'
 import BibleDOMComponent from './BibleDOMComponent'
 import {
   sortVersesToTags,
   getAnnotationNotesInfo,
-  getNotedVersesCount,
-  getNotedVersesText,
-  getLinkedVersesCount,
-  getLinkedVersesText,
-  getStudyRelationsCount,
+  getVerseRelationsMetadata,
   transformComments,
 } from './computeVerseMetadata'
 import booksJson from '~assets/bible_versions/books.json'
@@ -36,7 +38,10 @@ import {
   VerseIds,
 } from '~common/types'
 import Box from '~common/ui/Box'
-import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
+import {
+  BIBLE_FORM_SHEET_HEADER_HEIGHT,
+  HEADER_HEIGHT,
+} from '~features/app-switcher/utils/constants'
 import { HelpTip } from '~features/tips/HelpTip'
 import { appLogger } from '~helpers/agentObservability'
 import { BibleError } from '~helpers/bibleErrors'
@@ -50,6 +55,8 @@ import {
   WordAnnotationsObj,
 } from '~redux/modules/user'
 import type { CrossVersionAnnotation } from '~redux/selectors/bible'
+import type { RelationEndpoint, RelationKind, RelationType } from '~features/studyRelations/domain'
+import { useOpenRelationEndpoint } from '~features/studyRelations/useOpenRelationEndpoint'
 import { useBookAndVersionSelector } from '../BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 import type { AnnotationType, SelectionRange, WordPosition } from '../hooks/useAnnotationMode'
 import { BibleDOMTranslations } from './TranslationsContext'
@@ -59,14 +66,15 @@ import {
   CLEAR_FOCUS_VERSES,
   CREATE_ANNOTATION,
   ENTER_ANNOTATION_MODE,
-  ENTER_READONLY_MODE,
+  COLLAPSE_CONTEXT,
   ERASE_SELECTION,
-  EXIT_READONLY_MODE,
+  EXPAND_CONTEXT,
   NAVIGATE_TO_BIBLE_LINK,
   NAVIGATE_TO_BIBLE_NOTE,
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_BIBLE_VIEW,
   NAVIGATE_TO_PERICOPE,
+  NAVIGATE_TO_RELATION_ENDPOINT,
   NAVIGATE_TO_STRONG,
   NAVIGATE_TO_TAG,
   NAVIGATE_TO_VERSE_LINKS,
@@ -75,10 +83,10 @@ import {
   OPEN_BOOKMARK_MODAL,
   OPEN_CROSS_VERSION_MODAL,
   OPEN_HIGHLIGHT_TAGS,
-  OPEN_VERSE_NOTES_MODAL,
   OPEN_VERSE_TAGS_MODAL,
   REMOVE_PARALLEL_VERSION,
   SELECTION_CHANGED,
+  SHOW_TOAST,
   SWIPE_DOWN,
   SWIPE_LEFT,
   SWIPE_RIGHT,
@@ -113,6 +121,14 @@ type HighlightTagsModalPayload = {
   ids: Record<string, true>
 }
 
+export type StudyRelationsModalTarget =
+  | string
+  | {
+      verseKey?: string
+      verseIds?: string[]
+      relationId?: string
+    }
+
 type DispatchAction = {
   type: string
   payload?: unknown
@@ -138,9 +154,47 @@ const getStringPayload = (payload: unknown): string | undefined =>
 const getNumberPayload = (payload: unknown): number | undefined =>
   typeof payload === 'number' ? payload : undefined
 
+const getToastPayload = (payload: unknown): { message?: string; type?: string } => {
+  if (!isRecord(payload)) return {}
+  return {
+    message: getStringPayload(payload.message),
+    type: getStringPayload(payload.type),
+  }
+}
+
 const getVerseIdsPayload = (payload: unknown): string[] => {
   if (!isRecord(payload) || !Array.isArray(payload.verseIds)) return []
   return payload.verseIds.filter((verseId): verseId is string => typeof verseId === 'string')
+}
+
+const getStudyRelationsModalTarget = (payload: unknown): StudyRelationsModalTarget | undefined => {
+  if (typeof payload === 'string') return payload
+  if (!isRecord(payload)) return undefined
+
+  const verseKey = getStringPayload(payload.verseKey)
+  const relationId = getStringPayload(payload.relationId)
+  const verseIds = getVerseIdsPayload(payload)
+
+  if (!verseKey && !verseIds.length) return undefined
+
+  return {
+    verseKey,
+    relationId,
+    verseIds,
+  }
+}
+
+const getNoteNavigationPayload = (payload: unknown): { noteId?: string; verseIds: string[] } => {
+  if (typeof payload === 'string') {
+    return { noteId: payload, verseIds: [] }
+  }
+  if (!isRecord(payload)) {
+    return { verseIds: [] }
+  }
+  return {
+    noteId: getStringPayload(payload.noteId),
+    verseIds: getVerseIdsPayload(payload),
+  }
 }
 
 /**
@@ -169,7 +223,7 @@ export type WebViewProps = {
   removeSelectedVerse: (id: string) => void
   setSelectedVerse: (selectedVerse: number) => void
   version: VersionCode
-  isReadOnly: boolean
+  contextDisplayMode: BibleContextDisplayMode
   isSelectionMode: StudyNavigateBibleType | undefined
   verses: Verse[]
   parallelVerses: ParallelVerse[]
@@ -181,15 +235,17 @@ export type WebViewProps = {
   selectedVerses: VerseIds
   highlightedVerses: HighlightsObj
   notedVerses: NotesObj
+  allNotes: NotesObj
   bookmarkedVerses: Record<number, Bookmark>
   linkedVerses: LinksObj
+  allLinks: LinksObj
   studyRelations: StudyRelationsObj
   wordAnnotations: WordAnnotationsObj
   settings: RootState['user']['bible']['settings']
   verseToScroll: number | undefined
   pericopeChapter: PericopeChapter
-  openNoteModal?: (verseKey: string) => void
-  openLinkModal?: (verseKey: string) => void
+  openNote?: (noteId: string, verseIds?: string[]) => void
+  openLink?: (linkId: string) => void
   setSelectedCode: (selectedCode: SelectedCode) => void
   selectedCode: SelectedCode | null
   comments: { [key: string]: string } | null
@@ -201,8 +257,8 @@ export type WebViewProps = {
   onChangeResourceTypeSelectVerse?: (resourceType: BibleResource, verseKey: string) => void
   onMountTimeout?: () => void
   onOpenBookmarkModal?: (bookmark: Bookmark) => void
-  exitReadOnlyMode?: () => void
-  enterReadOnlyMode?: () => void
+  expandContext?: () => void
+  collapseContext?: () => void
   clearFocusVerses?: () => void
   // Annotation mode props
   annotationMode?: boolean
@@ -227,9 +283,8 @@ export type WebViewProps = {
   taggedVersesInChapter?: Record<number, number>
   versesWithNonHighlightTags?: Record<number, boolean>
   onOpenVerseTagsModal?: (verseKey: string) => void
-  // Verse notes modal
-  onOpenVerseNotesModal?: (verseKey: string) => void
-  onOpenStudyRelationsModal?: (verseKey: string) => void
+  onOpenStudyRelationsModal?: (target: StudyRelationsModalTarget) => void
+  isFormSheet?: boolean
   // Enter annotation mode from double-tap
   onEnterAnnotationMode?: () => void
   // Red words data
@@ -246,6 +301,7 @@ export type NotedVerse = {
   }
   key: string
   verses: string
+  verseIds: string[]
 }
 
 export type LinkedVerse = {
@@ -261,6 +317,20 @@ export type LinkedVerse = {
   verses: string
 }
 
+export type VerseRelationItem = {
+  key: string
+  relationId: string
+  relationType: RelationType
+  relationKind: RelationKind
+  targetEndpoint: RelationEndpoint
+  targetType: RelationEndpoint['type']
+  label: string
+  targetIsAvailable: boolean
+  targetEntityExists: boolean
+  verseIds: string[]
+  updatedAt: number
+}
+
 export const BibleDOMWrapper = ({
   verses,
   parallelVerses,
@@ -271,13 +341,15 @@ export const BibleDOMWrapper = ({
   selectedVerses,
   highlightedVerses,
   notedVerses,
+  allNotes,
   bookmarkedVerses,
   linkedVerses,
+  allLinks,
   studyRelations,
   wordAnnotations,
   settings,
   verseToScroll,
-  isReadOnly,
+  contextDisplayMode,
   version,
   pericopeChapter,
   book,
@@ -295,17 +367,16 @@ export const BibleDOMWrapper = ({
   taggedVersesInChapter,
   versesWithNonHighlightTags,
   onChangeResourceTypeSelectVerse,
-  onOpenVerseNotesModal,
   onOpenStudyRelationsModal,
-  openNoteModal,
-  openLinkModal,
+  openNote,
+  openLink,
   removeParallelVersion,
   addParallelVersion,
   setSelectedCode,
   removeSelectedVerse,
   addSelectedVerse,
-  exitReadOnlyMode,
-  enterReadOnlyMode,
+  expandContext,
+  collapseContext,
   clearFocusVerses,
   onSelectionChanged,
   onCreateAnnotation,
@@ -319,14 +390,16 @@ export const BibleDOMWrapper = ({
   goToPrevChapter,
   goToNextChapter,
   onEnterAnnotationMode,
+  isFormSheet,
   redWords,
   isLoading,
   onMountTimeout,
 }: WebViewProps) => {
   const { openVersionSelector } = useBookAndVersionSelector()
+  const openRelationEndpoint = useOpenRelationEndpoint()
+  const isContextFocused = contextDisplayMode === 'focused'
   const [isINTComplete, setIsINTComplete] = useAtom(isINTCompleteAtom)
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
-  const setTagDetailModal = useSetAtom(tagDetailModalAtom)
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
@@ -373,8 +446,6 @@ export const BibleDOMWrapper = ({
     parallelVersionNotFound: t('bible.error.parallelVersionNotFound'),
     parallelChapterNotFound: t('bible.error.parallelChapterNotFound'),
     parallelLoadError: t('bible.error.parallelLoadError'),
-    readWholeChapter: t('tab.readWholeChapter'),
-    closeContext: t('tab.closeContext'),
     exitFocus: t('tab.exitFocus'),
     interlinearDetailed: t('bible.interlinear.detailed'),
     interlinearCompact: t('bible.interlinear.compact'),
@@ -391,11 +462,6 @@ export const BibleDOMWrapper = ({
 
         break
       }
-      case OPEN_VERSE_NOTES_MODAL: {
-        const verseKey = getStringPayload(action.payload)
-        if (verseKey) onOpenVerseNotesModal?.(verseKey)
-        break
-      }
       case NAVIGATE_TO_VERSE_LINKS: {
         const verseKey = getStringPayload(action.payload)
         if (!verseKey) break
@@ -409,8 +475,8 @@ export const BibleDOMWrapper = ({
         break
       }
       case NAVIGATE_TO_VERSE_STUDY_RELATIONS: {
-        const verseKey = getStringPayload(action.payload)
-        if (verseKey) onOpenStudyRelationsModal?.(verseKey)
+        const target = getStudyRelationsModalTarget(action.payload)
+        if (target) onOpenStudyRelationsModal?.(target)
         break
       }
       case NAVIGATE_TO_PERICOPE: {
@@ -480,13 +546,31 @@ export const BibleDOMWrapper = ({
       }
 
       case NAVIGATE_TO_BIBLE_NOTE: {
-        const verseKey = getStringPayload(action.payload)
-        if (verseKey) openNoteModal?.(verseKey)
+        const payload = getNoteNavigationPayload(action.payload)
+        if (payload.noteId) openNote?.(payload.noteId, payload.verseIds)
         break
       }
       case NAVIGATE_TO_BIBLE_LINK: {
-        const verseKey = getStringPayload(action.payload)
-        if (verseKey) openLinkModal?.(verseKey)
+        const linkId = getStringPayload(action.payload)
+        if (linkId) openLink?.(linkId)
+        break
+      }
+      case NAVIGATE_TO_RELATION_ENDPOINT: {
+        if (isRecord(action.payload)) {
+          openRelationEndpoint(action.payload as RelationEndpoint)
+        }
+        break
+      }
+      case SHOW_TOAST: {
+        const { message, type } = getToastPayload(action.payload)
+        if (!message) break
+        if (type === 'warning') {
+          toast.warning(t(message))
+        } else if (type === 'error') {
+          toast.error(t(message))
+        } else {
+          toast.info(t(message))
+        }
         break
       }
       case NAVIGATE_TO_BIBLE_VIEW: {
@@ -503,7 +587,7 @@ export const BibleDOMWrapper = ({
         router.push({
           pathname: '/bible-view',
           params: {
-            isReadOnly: 'true',
+            contextDisplayMode: 'focused',
             book: targetBook,
             chapter: String(action.chapter),
             verse: String(action.verse),
@@ -513,8 +597,8 @@ export const BibleDOMWrapper = ({
         break
       }
       case SWIPE_LEFT: {
-        // Disable chapter navigation in readonly or annotation mode
-        if (isReadOnly || annotationMode) break
+        // Disable chapter navigation in focused context or annotation mode
+        if (isContextFocused || annotationMode) break
 
         const hasNextChapter = !(book.Numero === 66 && chapter === 22)
 
@@ -524,8 +608,8 @@ export const BibleDOMWrapper = ({
         break
       }
       case SWIPE_RIGHT: {
-        // Disable chapter navigation in readonly or annotation mode
-        if (isReadOnly || annotationMode) break
+        // Disable chapter navigation in focused context or annotation mode
+        if (isContextFocused || annotationMode) break
 
         const hasPreviousChapter = !(book.Numero === 1 && chapter === 1)
 
@@ -535,10 +619,12 @@ export const BibleDOMWrapper = ({
         break
       }
       case SWIPE_DOWN: {
+        if (isFormSheet) break
         setIsFullScreenBible(true)
         break
       }
       case SWIPE_UP: {
+        if (isFormSheet) break
         setIsFullScreenBible(false)
         break
       }
@@ -561,17 +647,17 @@ export const BibleDOMWrapper = ({
       case NAVIGATE_TO_TAG: {
         if (!isRecord(action.payload) || typeof action.payload.tagId !== 'string') break
         const { tagId } = action.payload
-        setTagDetailModal({ tagId })
+        router.push({ pathname: '/tag', params: { tagId } })
         break
       }
 
-      case EXIT_READONLY_MODE: {
-        exitReadOnlyMode?.()
+      case EXPAND_CONTEXT: {
+        expandContext?.()
         break
       }
 
-      case ENTER_READONLY_MODE: {
-        enterReadOnlyMode?.()
+      case COLLAPSE_CONTEXT: {
+        collapseContext?.()
         break
       }
 
@@ -665,15 +751,20 @@ export const BibleDOMWrapper = ({
     wordAnnotations,
     version
   )
-  const notedVersesCount = getNotedVersesCount(
+  const relationsDisplay =
+    settings.relationsDisplay ||
+    (settings.notesDisplay === 'block' || settings.linksDisplay === 'block' ? 'block' : 'inline')
+  const relationMetadata = getVerseRelationsMetadata(
     versesToSend,
-    notedVerses,
-    annotationNotesCountByVerse
+    studyRelations,
+    relationsDisplay,
+    {
+      notes: allNotes,
+      links: allLinks,
+    }
   )
-  const notedVersesText = getNotedVersesText(versesToSend, notedVerses)
-  const linkedVersesCount = getLinkedVersesCount(versesToSend, linkedVerses)
-  const linkedVersesText = getLinkedVersesText(versesToSend, linkedVerses)
-  const studyRelationsCount = getStudyRelationsCount(versesToSend, studyRelations)
+  const TOP_INSET = isFormSheet ? 0 : insets.top
+  const headerHeight = isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT
 
   return (
     <Box
@@ -686,11 +777,15 @@ export const BibleDOMWrapper = ({
       <BibleDOMComponent
         dom={{
           webviewDebuggingEnabled: __DEV__,
+          style: {
+            flex: 1,
+            backgroundColor: theme.colors.reverse,
+          },
           containerStyle: {
             flex: 1,
             backgroundColor: theme.colors.reverse,
             ...(Platform.OS === 'android' && {
-              marginTop: insets.top,
+              marginTop: TOP_INSET,
             }),
           },
           injectedJavaScriptBeforeContentLoaded: `document.documentElement.style.backgroundColor='${theme.colors.reverse}';document.body.style.backgroundColor='${theme.colors.reverse}';document.body.style.margin='0';true;`,
@@ -707,7 +802,7 @@ export const BibleDOMWrapper = ({
         wordAnnotations={wordAnnotations}
         settings={trimmedSettings}
         verseToScroll={verseToScroll}
-        isReadOnly={isReadOnly}
+        contextDisplayMode={contextDisplayMode}
         version={version}
         pericopeChapter={pericopeChapter}
         book={book}
@@ -723,7 +818,7 @@ export const BibleDOMWrapper = ({
         eraseSelectionTrigger={eraseSelectionTrigger}
         clearAnnotationSelectionTrigger={clearAnnotationSelectionTrigger}
         selectedAnnotationId={selectedAnnotationId}
-        safeAreaTop={Platform.OS === 'ios' ? insets.top : 0}
+        safeAreaTop={Platform.OS === 'ios' ? TOP_INSET : 0}
         wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
         taggedVersesInChapter={taggedVersesInChapter}
         versesWithNonHighlightTags={versesWithNonHighlightTags}
@@ -731,11 +826,10 @@ export const BibleDOMWrapper = ({
         isINTComplete={isINTComplete}
         taggedVerses={taggedVerses}
         versesWithAnnotationNotes={versesWithAnnotationNotes}
-        notedVersesCount={notedVersesCount}
-        notedVersesText={notedVersesText}
-        linkedVersesCount={linkedVersesCount}
-        linkedVersesText={linkedVersesText}
-        studyRelationsCount={studyRelationsCount}
+        annotationNotesCountByVerse={annotationNotesCountByVerse}
+        relationItemsCount={relationMetadata.counts}
+        relationItemsText={relationMetadata.items}
+        isFormSheet={isFormSheet}
       />
       {Platform.OS === 'android' && Platform.Version < 30 && (
         <HelpTip
@@ -745,7 +839,7 @@ export const BibleDOMWrapper = ({
           position="absolute"
           left={0}
           right={0}
-          top={HEADER_HEIGHT + insets.top}
+          top={headerHeight + TOP_INSET}
         />
       )}
     </Box>

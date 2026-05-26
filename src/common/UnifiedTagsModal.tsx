@@ -21,6 +21,7 @@ import { sortedTagsSelector } from '~redux/selectors/tags'
 import { unifiedTagsModalAtom } from '~state/app'
 import BottomSheetSearchInput from './BottomSheetSearchInput'
 import { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated'
+import { ContainerComponent } from './Modal'
 
 const RemovableChip = ({ label, onRemove }: { label: string; onRemove: () => void }) => (
   <AnimatedBox
@@ -175,6 +176,7 @@ const UnifiedTagsModal = () => {
       enablePanDownToClose
       snapPoints={['70%']}
       backdropComponent={renderBackdrop}
+      containerComponent={ContainerComponent}
       activeOffsetY={[-20, 20]}
       onDismiss={() => setItem(false)}
       key={key}

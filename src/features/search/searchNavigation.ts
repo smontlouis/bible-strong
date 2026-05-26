@@ -8,7 +8,7 @@ type BibleViewSearchResult = {
 }
 
 export const getBibleViewParamsForSearchResult = (result: BibleViewSearchResult) => ({
-  isReadOnly: 'true',
+  contextDisplayMode: 'focused',
   book: JSON.stringify(booksDesc[result.book - 1]),
   chapter: String(result.chapter),
   verse: String(result.verse),

@@ -6,7 +6,17 @@ import generateUUID from '~helpers/generateUUID'
 import { StrongTab } from '../../state/tabs'
 import LexiqueListScreen from './LexiqueListScreen'
 
-const LexiqueScreen = () => {
+type LexiqueScreenProps = {
+  isFormSheet?: boolean
+  isNewTabSelection?: boolean
+  newTabId?: string
+}
+
+const LexiqueScreen = ({
+  isFormSheet = false,
+  isNewTabSelection = false,
+  newTabId,
+}: LexiqueScreenProps) => {
   const { t } = useTranslation()
   const onTheFlyAtom = useMemo(
     () =>
@@ -22,6 +32,14 @@ const LexiqueScreen = () => {
     []
   )
 
-  return <LexiqueListScreen strongAtom={onTheFlyAtom} hasBackButton />
+  return (
+    <LexiqueListScreen
+      strongAtom={onTheFlyAtom}
+      hasBackButton
+      isFormSheet={isFormSheet}
+      isNewTabSelection={isNewTabSelection}
+      newTabId={newTabId}
+    />
+  )
 }
 export default LexiqueScreen

@@ -13,6 +13,7 @@ import {
   setSettingsPress,
   setSettingsNotesDisplay,
   setSettingsLinksDisplay,
+  setSettingsRelationsDisplay,
   setSettingsCommentaires,
   toggleSettingsShareVerseNumbers,
   toggleSettingsShareLineBreaks,
@@ -324,6 +325,18 @@ describe('Settings Reducer', () => {
     it('should set links display to block', () => {
       const newState = userReducer(initialState, setSettingsLinksDisplay('block'))
       expect(newState.bible.settings.linksDisplay).toBe('block')
+    })
+  })
+
+  describe('setSettingsRelationsDisplay', () => {
+    it('should set relations display to inline', () => {
+      const newState = userReducer(initialState, setSettingsRelationsDisplay('inline'))
+      expect(newState.bible.settings.relationsDisplay).toBe('inline')
+    })
+
+    it('should set relations display to block', () => {
+      const newState = userReducer(initialState, setSettingsRelationsDisplay('block'))
+      expect(newState.bible.settings.relationsDisplay).toBe('block')
     })
   })
 

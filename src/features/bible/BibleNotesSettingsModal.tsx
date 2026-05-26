@@ -4,6 +4,7 @@ import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
+import { ActionSheetItem } from '~common/ActionMenu'
 import Modal from '~common/Modal'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
@@ -23,6 +24,7 @@ const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
   const router = useRouter()
   const openInNewTab = useOpenInNewTab()
   const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
+  const relations = useSelector((state: RootState) => state.user.bible.relations)
 
   const close = useCallback(() => {
     ref?.current?.dismiss()
@@ -71,8 +73,17 @@ const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
       verseKey = annotation.ranges[0]?.verseKey
       version = annotation.version
     } else {
-      // Handle regular verse notes
-      verseKey = noteId.split('/')[0]
+      const relation = Object.values(relations).find(
+        candidate =>
+          candidate.kind === 'system' &&
+          candidate.type === 'annotates' &&
+          candidate.endpoints.some(
+            endpoint => endpoint.type === 'note' && endpoint.noteId === noteId
+          )
+      )
+      const verseEndpoint = relation?.endpoints.find(endpoint => endpoint.type === 'verse')
+      if (verseEndpoint?.type !== 'verse') return
+      verseKey = verseEndpoint.verseKeys[0]
     }
 
     const [Livre, Chapitre, Verset] = verseKey.split('-')
@@ -81,7 +92,7 @@ const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
       router.push({
         pathname: '/bible-view',
         params: {
-          isReadOnly: 'true',
+          contextDisplayMode: 'focused',
           book: JSON.stringify(books[Number(Livre) - 1]),
           chapter: String(Chapitre),
           verse: String(Verset),
@@ -94,11 +105,18 @@ const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
 
   return (
     <Modal.Body ref={ref} onModalClose={onClosed} enableDynamicSizing>
-      <Modal.Item onPress={navigateToBible}>{t('Voir dans la Bible')}</Modal.Item>
-      <Modal.Item onPress={openNoteInNewTab}>{t('tab.openInNewTab')}</Modal.Item>
-      <Modal.Item color="quart" onPress={deleteNoteConfirmation}>
-        {t('Supprimer')}
-      </Modal.Item>
+      <ActionSheetItem icon="book-open" label={t('Voir dans la Bible')} onPress={navigateToBible} />
+      <ActionSheetItem
+        icon="external-link"
+        label={t('tab.openInNewTab')}
+        onPress={openNoteInNewTab}
+      />
+      <ActionSheetItem
+        icon="trash-2"
+        label={t('Supprimer')}
+        color="quart"
+        onPress={deleteNoteConfirmation}
+      />
     </Modal.Body>
   )
 }

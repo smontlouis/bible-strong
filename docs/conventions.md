@@ -65,6 +65,19 @@ Use component state for truly local ephemeral state.
 - User-facing strings should go through `react-i18next`.
 - Translation files live in `i18n/locales/fr/translation.json` and `i18n/locales/en/translation.json`.
 - Run `yarn i18n` when adding/extracting translatable strings.
+- In French UI copy, use "étiquette(s)" rather than "tag(s)". Keep `tag` for code identifiers and technical docs.
+
+## Menus
+
+Use a stable order for contextual menu actions:
+
+1. Primary local actions: view, details, open, edit content.
+2. Organization actions: labels, relations, bookmarks.
+3. Share/export actions: share, copy.
+4. Open in a new tab.
+5. Destructive actions: delete, stop, reset.
+
+If a menu only contains navigation actions, keep the most direct in-context action first and "Open in a new tab" after it.
 
 ## Tests And Validation
 
@@ -94,4 +107,3 @@ Use domain terms from `CONTEXT.md`:
 - tab group
 
 Avoid introducing synonyms for these concepts in new code or issues.
-

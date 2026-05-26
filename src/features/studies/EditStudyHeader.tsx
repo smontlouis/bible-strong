@@ -7,6 +7,7 @@ import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { useDispatch } from 'react-redux'
+import { ActionSheetItem } from '~common/ActionMenu'
 import Header from '~common/Header'
 import Link from '~common/Link'
 import Modal from '~common/Modal'
@@ -20,11 +21,13 @@ import type { AppDispatch } from '~redux/store'
 import { unifiedTagsModalAtom } from '../../state/app'
 import PublishStudyMenuItem from './PublishStudyMenuItem'
 
-const HeaderBox = styled(Box)({
+const HeaderBox = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   paddingLeft: 15,
   paddingRight: 15,
-})
+  borderBottomWidth: 1,
+  borderBottomColor: theme.colors.border,
+}))
 
 const ValidateIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.success,
@@ -38,6 +41,7 @@ type EditHeaderProps = {
   openRelationsModal: () => void
   hasBackButton?: boolean
   study: Study
+  children?: React.ReactNode
 }
 
 const EditHeader = ({
@@ -48,6 +52,7 @@ const EditHeader = ({
   openRelationsModal,
   hasBackButton = true,
   study,
+  children,
 }: EditHeaderProps) => {
   const router = useRouter()
   const openInNewTab = useOpenInNewTab()
@@ -83,10 +88,38 @@ const EditHeader = ({
               <FeatherIcon name="more-vertical" size={20} />
             </Link>
           }
-        />
+        >
+          {children}
+        </Header>
         <Modal.Body ref={ref} enableDynamicSizing withPortal>
           <PublishStudyMenuItem study={study} onClosed={close} />
-          <Modal.Item
+          <ActionSheetItem
+            icon="tag"
+            label={t('Éditer les tags')}
+            onPress={() => {
+              close()
+              setUnifiedTagsModal({ mode: 'select', id: study.id, entity: 'studies' })
+            }}
+          />
+          <ActionSheetItem
+            icon="git-merge"
+            label={t('Éditer les relations')}
+            onPress={() => {
+              close()
+              openRelationsModal()
+            }}
+          />
+          <ActionSheetItem
+            icon="edit-3"
+            label={t('Renommer')}
+            onPress={() => {
+              close()
+              openRenameModal()
+            }}
+          />
+          <ActionSheetItem
+            icon="external-link"
+            label={t('tab.openInNewTab')}
             onPress={() => {
               close()
               openInNewTab(
@@ -102,36 +135,13 @@ const EditHeader = ({
                 { autoRedirect: true }
               )
             }}
-          >
-            {t('tab.openInNewTab')}
-          </Modal.Item>
-          <Modal.Item
-            onPress={() => {
-              close()
-              setUnifiedTagsModal({ mode: 'select', id: study.id, entity: 'studies' })
-            }}
-          >
-            {t('Éditer les tags')}
-          </Modal.Item>
-          <Modal.Item
-            onPress={() => {
-              close()
-              openRelationsModal()
-            }}
-          >
-            {t('Éditer les relations')}
-          </Modal.Item>
-          <Modal.Item
-            onPress={() => {
-              close()
-              openRenameModal()
-            }}
-          >
-            {t('Renommer')}
-          </Modal.Item>
-          <Modal.Item color="quart" onPress={deleteStudyConfirmation}>
-            {t('Supprimer')}
-          </Modal.Item>
+          />
+          <ActionSheetItem
+            icon="trash-2"
+            label={t('Supprimer')}
+            color="quart"
+            onPress={deleteStudyConfirmation}
+          />
         </Modal.Body>
       </>
     )
@@ -139,7 +149,7 @@ const EditHeader = ({
 
   return (
     <HeaderBox>
-      <Box row height={50} center>
+      <Box row height={54} center>
         <Box flex justifyContent="center">
           <Link onPress={setReadOnly} style={{ marginRight: 15 }}>
             <ValidateIcon name="check" size={25} />

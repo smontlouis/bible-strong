@@ -3,6 +3,7 @@ import React, { useCallback } from 'react'
 import withLoginModal from '~common/withLoginModal'
 
 import { produce } from 'immer'
+import { useRouter } from 'expo-router'
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { StudyTab } from '../../state/tabs'
@@ -11,9 +12,18 @@ import EditStudyScreen from './EditStudyScreen'
 
 interface StudiesTabScreenProps {
   studyAtom: PrimitiveAtom<StudyTab>
+  isFormSheet?: boolean
+  isNewTabSelection?: boolean
+  newTabId?: string
 }
 
-const StudiesTabScreen = ({ studyAtom }: StudiesTabScreenProps) => {
+const StudiesTabScreen = ({
+  studyAtom,
+  isFormSheet = false,
+  isNewTabSelection = false,
+  newTabId,
+}: StudiesTabScreenProps) => {
+  const router = useRouter()
   const [studyTab, setStudyTab] = useAtom(studyAtom)
 
   const {
@@ -23,13 +33,18 @@ const StudiesTabScreen = ({ studyAtom }: StudiesTabScreenProps) => {
 
   const onStudySelect = useCallback(
     (id: string) => {
+      if (isFormSheet) {
+        router.push({ pathname: '/edit-study', params: { studyId: id } })
+        return
+      }
+
       setStudyTab(
         produce(draft => {
           draft.data.studyId = id
         })
       )
     },
-    [setStudyTab]
+    [isFormSheet, router, setStudyTab]
   )
 
   const onGoBack = useCallback(() => {
@@ -42,16 +57,25 @@ const StudiesTabScreen = ({ studyAtom }: StudiesTabScreenProps) => {
   }, [setStudyTab])
 
   if (!studyId) {
-    return <AllStudiesTabScreen hasBackButton={hasBackButton} onStudySelect={onStudySelect} />
+    return (
+      <AllStudiesTabScreen
+        hasBackButton={hasBackButton}
+        isFormSheet={isFormSheet}
+        isNewTabSelection={isNewTabSelection}
+        newTabId={newTabId}
+        onStudySelect={onStudySelect}
+      />
+    )
   }
 
   return (
     <EditStudyScreen
       studyAtom={studyAtom}
       studyId={studyId}
-      hasBackButton={false}
-      openedFromTab={true}
-      onGoBack={onGoBack}
+      hasBackButton={isFormSheet}
+      openedFromTab={!isFormSheet}
+      isFormSheet={isFormSheet}
+      onGoBack={isFormSheet ? undefined : onGoBack}
     />
   )
 }

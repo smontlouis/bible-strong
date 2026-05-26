@@ -1,6 +1,6 @@
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { EdgeInsets } from 'react-native-safe-area-context'
-import { BibleTab, SelectedVerses, VersionCode } from 'src/state/tabs'
+import { BibleContextDisplayMode, BibleTab, SelectedVerses, VersionCode } from 'src/state/tabs'
 import { Book } from '~assets/bible_versions/books-desc'
 import {
   ComputedPlanItem,
@@ -49,6 +49,11 @@ type BibleVerseDetailScreenProps = {
 
 type BibleVerseNotesScreenProps = undefined
 
+type NoteScreenProps = {
+  noteId?: string
+  verseKeys?: string
+}
+
 type BibleVerseLinksScreenProps = {
   verse?: string
   withBack?: boolean
@@ -75,6 +80,7 @@ type ConcordanceByBookScreenProps = {
 
 type BibleScreenProps = {
   focusVerses?: number[]
+  contextDisplayMode?: BibleContextDisplayMode
   isSelectionMode?: StudyNavigateBibleType
   isReadOnly?: boolean
   hasBackButton?: boolean
@@ -128,6 +134,10 @@ type TimelineScreenProps = {
   goTo: number
 }
 
+type EventScreenProps = {
+  slug: string
+}
+
 type ConcordanceScreenProps = {
   strongReference: StrongReference
   book: number
@@ -146,6 +156,7 @@ export type MainStackProps = {
   VersionSelector: VersionSelectorProps
   BibleVerseDetail: BibleVerseDetailScreenProps
   BibleVerseNotes: BibleVerseNotesScreenProps
+  Note: NoteScreenProps
   BibleVerseLinks: BibleVerseLinksScreenProps
   Highlights: undefined
   Strong: StrongScreenProps
@@ -185,6 +196,7 @@ export type MainStackProps = {
   PlanSlice: PlanSliceScreenProps
   Timeline: TimelineScreenProps
   TimelineHome: undefined
+  Event: EventScreenProps
   Concordance: ConcordanceScreenProps
   Commentaries: CommentariesScreenProps
   BibleShareOptions: undefined
@@ -192,6 +204,7 @@ export type MainStackProps = {
   BibleDefaults: undefined
   Theme: undefined
   WordAnnotations: undefined
+  EntityRelations: { endpoint: string }
 }
 
 declare global {

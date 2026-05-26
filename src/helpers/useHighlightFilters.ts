@@ -24,12 +24,10 @@ interface UseHighlightFiltersReturn {
   typeFilterLabel: string
 
   // Modal refs (imperative API)
-  mainModalRef: React.RefObject<BottomSheetModal | null>
   colorModalRef: React.RefObject<BottomSheetModal | null>
   typeModalRef: React.RefObject<BottomSheetModal | null>
 
   // Modal actions
-  openMainModal: () => void
   openColorFromMain: () => void
   openTagsFromMain: () => void
   openTypeFromMain: () => void
@@ -43,7 +41,6 @@ export function useHighlightFilters(): UseHighlightFiltersReturn {
   const [selectedTag, setSelectedTag] = useState<Tag>()
 
   // Modal refs (imperative API - no booleans)
-  const mainModalRef = useRef<BottomSheetModal>(null)
   const colorModalRef = useRef<BottomSheetModal>(null)
   const typeModalRef = useRef<BottomSheetModal>(null)
 
@@ -106,10 +103,6 @@ export function useHighlightFilters(): UseHighlightFiltersReturn {
   }
 
   // Modal navigation (imperative API)
-  const openMainModal = () => {
-    mainModalRef.current?.present()
-  }
-
   const openColorFromMain = () => {
     colorModalRef.current?.present()
   }
@@ -137,10 +130,8 @@ export function useHighlightFilters(): UseHighlightFiltersReturn {
     colorInfo,
     selectedTag,
     typeFilterLabel,
-    mainModalRef,
     colorModalRef,
     typeModalRef,
-    openMainModal,
     openColorFromMain,
     openTagsFromMain,
     openTypeFromMain,

@@ -7,7 +7,6 @@ import Paragraph from '~common/ui/Paragraph'
 import waitForTimeline from '~common/waitForTimeline'
 import bibleMemoize from '~helpers/bibleStupidMemoize'
 import { calculateLabel } from './constants'
-import { useEventDetailsModal } from './EventDetailsModalContext'
 import { TimelineEventDetail, TimelineEvent as TimelineEventProps } from './types'
 import { Image } from 'expo-image'
 import Media from './EventDetailsMedia'
@@ -79,9 +78,7 @@ export const EventDetailsContent = ({
 }
 
 const EventDetails = waitForTimeline((props: EventDetailsProps) => {
-  const { openEvent } = useEventDetailsModal()
-
-  return <EventDetailsContent {...props} onOpenEvent={openEvent} />
+  return <EventDetailsContent {...props} />
 })
 
 export default EventDetails

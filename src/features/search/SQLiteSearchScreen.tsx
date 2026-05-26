@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Keyboard, Platform, TouchableOpacity } from 'react-native'
+import { Keyboard, Platform, ScrollView, TouchableOpacity } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { useTheme } from '@emotion/react'
@@ -65,6 +65,7 @@ import SearchSectionBlock, {
 import { searchWithMatches } from './shared/searchFuzzy'
 import {
   getDictionarySearchItems,
+  getLinkSearchItems,
   getNaveSearchItems,
   getNoteSearchItems,
   getPassageSearchItems,
@@ -75,6 +76,7 @@ import {
   type NaveSearchItemRow,
 } from './shared/searchItems'
 import type { SearchEntityResult } from './shared/searchResultTypes'
+import Header from '~common/Header'
 
 type Props = {
   searchValue: string
@@ -90,6 +92,7 @@ type NaveRow = NaveSearchItemRow
 type SearchSectionId =
   | 'reference'
   | 'notes'
+  | 'links'
   | 'studies'
   | 'strong'
   | 'dictionary'
@@ -136,6 +139,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const keyboardFooterBottom = useKeyboardFooterBottom(SEARCH_ALPHABET_FOOTER_HEIGHT)
   const openRelationEndpoint = useOpenRelationEndpoint()
   const notes = useSelector((state: RootState) => state.user.bible.notes)
+  const links = useSelector((state: RootState) => state.user.bible.links)
   const studies = useSelector((state: RootState) => state.user.bible.studies)
   const strongDb = useWaitForStrongDatabase()
   const dictionaryDb = useWaitForDictionaryDatabase()
@@ -148,6 +152,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const debouncedSearchValue = useDebounce(searchValue, 300)
   const [results, setResults] = useState<SearchResult[] | null>(null)
   const [noteResults, setNoteResults] = useState<SearchEntityResult[]>([])
+  const [linkResults, setLinkResults] = useState<SearchEntityResult[]>([])
   const [studyResults, setStudyResults] = useState<SearchEntityResult[]>([])
   const [strongResults, setStrongResults] = useState<LexiqueRow[]>([])
   const [dictionaryResults, setDictionaryResults] = useState<DictionaryRow[]>([])
@@ -155,6 +160,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const [totalCount, setTotalCount] = useState(0)
   const [isSearching, setIsSearching] = useState(false)
   const [isNoteSearching, setIsNoteSearching] = useState(false)
+  const [isLinkSearching, setIsLinkSearching] = useState(false)
   const [isStudySearching, setIsStudySearching] = useState(false)
   const [isStrongSearching, setIsStrongSearching] = useState(false)
   const [isDictionarySearching, setIsDictionarySearching] = useState(false)
@@ -328,6 +334,49 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       setIsStudySearching(false)
     }
   }, [browseItemType, debouncedSearchValue, itemFilters.studies, searchValue, studies, t])
+
+  useEffect(() => {
+    const trimmed = debouncedSearchValue.trim()
+    const shouldSearch =
+      itemFilters.links && browseItemType === 'links'
+        ? searchValue.trim() === trimmed
+        : itemFilters.links &&
+          browseItemType !== 'links' &&
+          searchValue.trim().length >= MIN_SEARCH_LENGTH &&
+          trimmed.length >= MIN_SEARCH_LENGTH
+
+    if (!shouldSearch) {
+      if (browseItemType === 'links' && searchValue.trim() !== trimmed) return
+      setLinkResults([])
+      setIsLinkSearching(false)
+      return
+    }
+
+    let cancelled = false
+    setIsLinkSearching(true)
+    const timeout = setTimeout(() => {
+      if (cancelled) return
+      const sortedItems = getLinkSearchItems(links, t).sort((a, b) => {
+        const left =
+          links[(a.endpoint as Extract<RelationEndpoint, { type: 'externalLink' }>).linkId]
+        const right =
+          links[(b.endpoint as Extract<RelationEndpoint, { type: 'externalLink' }>).linkId]
+        return Number(right?.date || 0) - Number(left?.date || 0)
+      })
+      setLinkResults(
+        browseItemType === 'links' && trimmed.length < MIN_SEARCH_LENGTH
+          ? sortedItems
+          : searchWithMatches(sortedItems, trimmed)
+      )
+      setIsLinkSearching(false)
+    }, 0)
+
+    return () => {
+      cancelled = true
+      clearTimeout(timeout)
+      setIsLinkSearching(false)
+    }
+  }, [browseItemType, debouncedSearchValue, itemFilters.links, links, searchValue, t])
 
   // Run search
   useEffect(() => {
@@ -592,6 +641,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       debouncedSearchValue.trim().length >= MIN_SEARCH_LENGTH)
   const referenceItems = itemFilters.passages ? getReferenceSearchItems(debouncedSearchValue) : []
   const noteItems = itemFilters.notes ? noteResults : []
+  const linkItems = itemFilters.links ? linkResults : []
   const studyItems = itemFilters.studies ? studyResults : []
   const strongItems = itemFilters.strong ? getStrongSearchItems(strongResults, t) : []
   const dictionaryItems = itemFilters.dictionary ? getDictionarySearchItems(dictionaryResults) : []
@@ -617,6 +667,17 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
             count: noteItems.length,
             items: noteItems,
             itemFilterType: 'notes' as const,
+          },
+        ]
+      : []),
+    ...(linkItems.length
+      ? [
+          {
+            id: 'links' as const,
+            title: t('Liens'),
+            count: linkItems.length,
+            items: linkItems,
+            itemFilterType: 'links' as const,
           },
         ]
       : []),
@@ -678,6 +739,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   ]
   const isBrowseLoading =
     (browseItemType === 'notes' && isNoteSearching) ||
+    (browseItemType === 'links' && isLinkSearching) ||
     (browseItemType === 'studies' && isStudySearching) ||
     (browseItemType === 'strong' && isStrongSearching) ||
     (browseItemType === 'dictionary' && isDictionarySearching) ||
@@ -839,6 +901,13 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
             message={hasSearch ? t('Aucune note trouvée') : t('Aucune note')}
           />
         )
+      case 'links':
+        return (
+          <Empty
+            icon={require('~assets/images/empty-state-icons/link.svg')}
+            message={hasSearch ? t('Aucun lien trouvé') : t('Aucun lien')}
+          />
+        )
       case 'studies':
         return (
           <Empty
@@ -931,6 +1000,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
               statusMessage={section.id === 'passages' ? renderPassageError() : null}
               isLoading={
                 (section.id === 'passages' && isSearching) ||
+                (section.id === 'links' && isLinkSearching) ||
                 (section.id === 'strong' && isStrongSearching) ||
                 (section.id === 'dictionary' && isDictionarySearching) ||
                 (section.id === 'nave' && isNaveSearching)
@@ -946,60 +1016,65 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
 
   return (
     <Box flex={1}>
-      <Box px={20}>
-        <SearchInput
-          placeholder={t('search.placeholder')}
-          onChangeText={setSearchValue}
-          value={searchValue}
-          onDelete={() => setSearchValue('')}
-        />
-      </Box>
-      <Box>
-        <VStack>
-          <SearchItemFilterBar
-            itemFilters={itemFilters}
-            onToggle={toggleItemFilter}
-            px={20}
-            mt={10}
-            mb={0}
-            maxHeight={40}
-          />
-          {hasInstalledVersions && !hasReference && (
-            <HStack
-              px={20}
-              opacity={itemFilters.passages ? 1 : 0.3}
-              pointerEvents={itemFilters.passages ? 'auto' : 'none'}
-            >
-              <DropdownMenu
-                title={t('Section')}
-                currentValue={section}
-                setValue={(v: string) => setSection(v as SearchSection)}
-                choices={sectionValues}
+      <Header title={t('Rechercher')}>
+        <>
+          <Box px={20}>
+            <SearchInput
+              placeholder={t('search.placeholder')}
+              onChangeText={setSearchValue}
+              value={searchValue}
+              onDelete={() => setSearchValue('')}
+            />
+          </Box>
+          <Box>
+            <VStack>
+              <SearchItemFilterBar
+                itemFilters={itemFilters}
+                onToggle={toggleItemFilter}
+                px={20}
+                mb={0}
+                maxHeight={40}
               />
-              <DropdownMenu
-                title={t('Livre')}
-                currentValue={book}
-                setValue={setBook}
-                choices={books}
-              />
-              {installedVersions.length > 1 && (
-                <DropdownMenu
-                  title={t('Version')}
-                  currentValue={selectedVersion}
-                  setValue={setSelectedVersion}
-                  choices={versionValues}
-                />
+              {hasInstalledVersions && !hasReference && (
+                <ScrollView horizontal>
+                  <HStack
+                    px={20}
+                    opacity={itemFilters.passages ? 1 : 0.3}
+                    pointerEvents={itemFilters.passages ? 'auto' : 'none'}
+                  >
+                    <DropdownMenu
+                      title={t('Section')}
+                      currentValue={section}
+                      setValue={(v: string) => setSection(v as SearchSection)}
+                      choices={sectionValues}
+                    />
+                    <DropdownMenu
+                      title={t('Livre')}
+                      currentValue={book}
+                      setValue={setBook}
+                      choices={books}
+                    />
+                    {installedVersions.length > 1 && (
+                      <DropdownMenu
+                        title={t('Version')}
+                        currentValue={selectedVersion}
+                        setValue={setSelectedVersion}
+                        choices={versionValues}
+                      />
+                    )}
+                    <DropdownMenu
+                      title={t('Ordre')}
+                      currentValue={sortOrder}
+                      setValue={(v: string) => setSortOrder(v as SearchSortOrder)}
+                      choices={sortOrderValues}
+                    />
+                  </HStack>
+                </ScrollView>
               )}
-              <DropdownMenu
-                title={t('Ordre')}
-                currentValue={sortOrder}
-                setValue={(v: string) => setSortOrder(v as SearchSortOrder)}
-                choices={sortOrderValues}
-              />
-            </HStack>
-          )}
-        </VStack>
-      </Box>
+            </VStack>
+          </Box>
+        </>
+      </Header>
 
       {renderContent()}
       {browseAlphabet ? (
@@ -1062,7 +1137,7 @@ const ReferenceSearchResultRow = ({ item }: { item: SearchEntityResult }) => {
         router.push({
           pathname: '/bible-view',
           params: {
-            isReadOnly: 'true',
+            contextDisplayMode: 'focused',
             book: JSON.stringify(booksDesc[segment.book - 1]),
             chapter: String(segment.chapter),
             verse: String(segment.startVerse),

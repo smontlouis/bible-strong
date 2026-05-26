@@ -1,10 +1,10 @@
+import styled from '@emotion/native'
 import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet'
 import { type ComponentProps, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import styled from '@emotion/native'
 import { useDispatch, useSelector } from 'react-redux'
-import { useTranslation } from 'react-i18next'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import Empty from '~common/Empty'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -12,11 +12,12 @@ import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import NaveIcon from '~common/NaveIcon'
 import PopOverMenu from '~common/PopOverMenu'
+import { ActionMenuOption, ActionSheetItem } from '~common/ActionMenu'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
-import MenuOption from '~common/ui/MenuOption'
 import Text from '~common/ui/Text'
+import { toast } from '~helpers/toast'
 import type { RootState } from '~redux/modules/reducer'
 import {
   deleteStudyRelation,
@@ -48,13 +49,14 @@ const selectDisplayModels = makeStudyRelationDisplayModelsSelector()
 const selectDisplaySectionsForStartingVerseKey =
   makeStudyRelationDisplaySectionsForStartingVerseKeySelector()
 
-const directionalTypes: RelationType[] = ['references', 'explains']
+const directionalTypes: RelationType[] = ['references', 'explains', 'mentions']
 
 const relationTypeChoices: { value: RelationType }[] = [
   { value: 'linked' },
   { value: 'references' },
   { value: 'explains' },
   { value: 'contrasts' },
+  { value: 'mentions' },
 ]
 
 const relationTypeCycle = relationTypeChoices.map(choice => choice.value)
@@ -72,6 +74,8 @@ const targetIconConfig: Record<
   strong: { name: 'hash', color: 'primary' },
   nave: { name: 'layers', color: 'quint' },
   dictionary: { name: 'book', color: 'secondary' },
+  externalLink: { name: 'link', color: 'secondary' },
+  word: { name: 'type', color: 'tertiary' },
 }
 
 const LabelInput = styled(BottomSheetTextInput)(({ theme }) => ({
@@ -94,16 +98,41 @@ const TargetIcon = ({ type }: { type: RelationEndpoint['type'] }) => {
       return <NaveIcon color={config.color} size={15} />
     case 'dictionary':
       return <DictionnaryIcon color={config.color} size={15} />
+    case 'externalLink':
+    case 'word':
     default:
       return <FeatherIcon name={config.name!} size={15} color={config.color} />
   }
 }
+
+const MissingTargetWarningIcon = () => (
+  <Box
+    alignItems="center"
+    justifyContent="center"
+    mr={6}
+    position="absolute"
+    top={20}
+    left={35}
+    bg="reverse"
+    borderRadius={100}
+    p={4}
+  >
+    <FeatherIcon name="alert-triangle" size={12} color="secondary" />
+  </Box>
+)
 
 const getRelationTitleParts = (
   model: RelationDisplayModel,
   relationTitlePrefixes: Record<string, string>,
   t: (key: string) => string
 ) => {
+  if (model.relation.type === 'annotates') {
+    return {
+      prefix: model.targetEndpoint.type === 'verse' ? t('Sur') : t('Note'),
+      target: model.targetLabel,
+    }
+  }
+
   const prefix = relationTitlePrefixes[model.relationText] || model.relationText
   const target = (() => {
     switch (model.targetEndpoint.type) {
@@ -114,6 +143,8 @@ const getRelationTitleParts = (
       case 'strong':
       case 'nave':
       case 'dictionary':
+      case 'externalLink':
+      case 'word':
         return model.targetLabel
       default:
         return model.targetLabel
@@ -132,6 +163,8 @@ const getRelationSubtitle = (model: RelationDisplayModel) => {
     case 'strong':
     case 'nave':
     case 'dictionary':
+    case 'externalLink':
+    case 'word':
       return ''
     default:
       return model.subtitle
@@ -160,7 +193,9 @@ const StudyRelationList = ({
   const dispatch = useDispatch()
   const insets = useSafeAreaInsets()
   const editModalRef = useRef<BottomSheetModal>(null)
+  const actionModalRef = useRef<BottomSheetModal>(null)
   const [editingModel, setEditingModel] = useState<RelationDisplayModel | null>(null)
+  const [actionModel, setActionModel] = useState<RelationDisplayModel | null>(null)
   const [draft, setDraft] = useState<RelationDraft>({
     label: '',
     type: 'linked',
@@ -182,8 +217,12 @@ const StudyRelationList = ({
     [t('studyRelations.type.references')]: t('studyRelations.title.references'),
     [t('studyRelations.type.explains')]: t('studyRelations.title.explains'),
     [t('studyRelations.type.contrasts')]: t('studyRelations.title.contrasts'),
+    [t('studyRelations.type.mentions')]: t('studyRelations.title.mentions'),
+    [t('studyRelations.type.annotates')]: t('studyRelations.title.annotates'),
+    [t('studyRelations.type.externalLink')]: t('studyRelations.title.externalLink'),
     [t('studyRelations.type.referencedBy')]: t('studyRelations.title.referencedBy'),
     [t('studyRelations.type.explainedBy')]: t('studyRelations.title.explainedBy'),
+    [t('studyRelations.type.mentionedBy')]: t('studyRelations.title.mentionedBy'),
   }
 
   if (relations.length === 0 && !showEmptyState) return null
@@ -197,6 +236,24 @@ const StudyRelationList = ({
     })
     setIsLabelExpanded(Boolean(model.relation.label))
     editModalRef.current?.present()
+  }
+
+  const openActionModal = (model: RelationDisplayModel) => {
+    setActionModel(model)
+    actionModalRef.current?.present()
+  }
+
+  const closeActionModal = () => {
+    actionModalRef.current?.dismiss()
+    setActionModel(null)
+  }
+
+  const openEditFromActionModal = () => {
+    if (!actionModel) return
+
+    const model = actionModel
+    closeActionModal()
+    setTimeout(() => openEditModal(model), 300)
   }
 
   const cycleDraftType = () => {
@@ -242,6 +299,7 @@ const StudyRelationList = ({
 
   const confirmDelete = (model = editingModel) => {
     if (!model) return
+    closeActionModal()
 
     Alert.alert(t('Supprimer la relation'), t('Voulez-vous supprimer cette relation?'), [
       { text: t('Annuler'), style: 'cancel' },
@@ -276,6 +334,15 @@ const StudyRelationList = ({
       t
     ).target
 
+  const openRelationTarget = (model: RelationDisplayModel) => {
+    if (!model.isTargetAvailable) {
+      toast.warning(t("Cette cible n'existe plus. Vous pouvez supprimer la relation."))
+      return
+    }
+
+    onOpenEndpoint(model.targetEndpoint)
+  }
+
   const renderRelation = (model: RelationDisplayModel, index: number, sectionLength: number) => {
     const relationTitle = getRelationTitleParts(model, relationTitlePrefixes, t)
     const relationSubtitle = getRelationSubtitle(model)
@@ -304,6 +371,8 @@ const StudyRelationList = ({
             borderColor="border"
           />
         )}
+        {!model.isTargetAvailable ? <MissingTargetWarningIcon /> : null}
+
         <TouchableBox
           flex
           row
@@ -313,7 +382,8 @@ const StudyRelationList = ({
           pl={0}
           borderBottomWidth={1}
           borderColor="border"
-          onPress={() => onOpenEndpoint(model.targetEndpoint)}
+          onPress={() => openRelationTarget(model)}
+          opacity={!model.isTargetAvailable ? 0.5 : 1}
         >
           <Box flex>
             <HStack alignItems="center">
@@ -338,28 +408,17 @@ const StudyRelationList = ({
               </Text>
             ) : null}
           </Box>
-          <PopOverMenu
+          <TouchableBox
             width={42}
             height={42}
-            popover={
-              <>
-                <MenuOption onSelect={() => openEditModal(model)} closeBeforeSelect>
-                  <HStack alignItems="center">
-                    <FeatherIcon name="edit-3" size={15} />
-                    <Text ml={10}>{t('Modifier')}</Text>
-                  </HStack>
-                </MenuOption>
-                <MenuOption onSelect={() => confirmDelete(model)}>
-                  <HStack alignItems="center">
-                    <FeatherIcon name="trash-2" size={15} color="quart" />
-                    <Text ml={10} color="quart">
-                      {t('Supprimer')}
-                    </Text>
-                  </HStack>
-                </MenuOption>
-              </>
-            }
-          />
+            center
+            onPress={event => {
+              event.stopPropagation()
+              openActionModal(model)
+            }}
+          >
+            <FeatherIcon name="more-vertical" size={18} />
+          </TouchableBox>
         </TouchableBox>
       </Box>
     )
@@ -368,7 +427,7 @@ const StudyRelationList = ({
   const hasDirectionalType = isDirectionalType(draft.type)
 
   return (
-    <VStack>
+    <VStack flex={1}>
       {relations.length === 0 ? (
         <Box minHeight={220}>
           <Empty
@@ -405,14 +464,12 @@ const StudyRelationList = ({
                   width={54}
                   height={54}
                   popover={
-                    <MenuOption onSelect={() => confirmDelete()}>
-                      <HStack alignItems="center">
-                        <FeatherIcon name="trash-2" size={15} color="quart" />
-                        <Text ml={10} color="quart">
-                          {t('Supprimer')}
-                        </Text>
-                      </HStack>
-                    </MenuOption>
+                    <ActionMenuOption
+                      icon="trash-2"
+                      label={t('Supprimer')}
+                      color="quart"
+                      onSelect={() => confirmDelete()}
+                    />
                   }
                 />
               ) : undefined
@@ -536,6 +593,21 @@ const StudyRelationList = ({
             </VStack>
           </VStack>
         ) : null}
+      </Modal.Body>
+      <Modal.Body
+        ref={actionModalRef}
+        onModalClose={() => setActionModel(null)}
+        enableDynamicSizing
+      >
+        {actionModel?.relation.kind !== 'system' ? (
+          <ActionSheetItem icon="edit-3" label={t('Modifier')} onPress={openEditFromActionModal} />
+        ) : null}
+        <ActionSheetItem
+          icon="trash-2"
+          label={t('Supprimer')}
+          color="quart"
+          onPress={() => confirmDelete(actionModel)}
+        />
       </Modal.Body>
     </VStack>
   )

@@ -41,7 +41,7 @@ const ReferenceItem = ({ reference, version }: { reference: string; version: Ver
     <Link
       route="BibleView"
       params={{
-        isReadOnly: true,
+        contextDisplayMode: 'focused',
         book,
         chapter,
         verse,

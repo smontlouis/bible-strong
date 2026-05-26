@@ -1,10 +1,14 @@
 import {
   endpointIdentity,
+  dedupeRelationsByDuplicateKey,
   getRelationDisplayModel,
   getRelationDuplicateKey,
+  getSystemRelationId,
+  getRelationPairId,
+  mergeRelationsWithSystemBackfill,
   normalizeStudyRelation,
   normalizeVerseKeys,
-  type StudyRelation,
+  rebuildRelationPairs,
 } from '../domain'
 
 jest.mock('~assets/bible_versions/books-desc', () => [
@@ -53,7 +57,7 @@ describe('study relation domain', () => {
     })
 
     expect(relation.direction).toBe('none')
-    expect(relation.endpoints[0]).toEqual({
+    expect(relation.endpoints[0]).toMatchObject({
       type: 'verse',
       verseKeys: ['1-1-1', '1-1-2'],
     })
@@ -69,8 +73,32 @@ describe('study relation domain', () => {
     expect(endpointIdentity(left)).toBe('verse:1-1-1')
   })
 
+  it('stores relation pair projections under Firestore-safe ids', () => {
+    const relation = normalizeStudyRelation({
+      id: 'r1',
+      endpoints: [
+        { type: 'note', noteId: 'note/with/slash' },
+        { type: 'verse', verseKeys: ['1-1-1', '1-1-2'] },
+      ],
+      type: 'linked',
+      direction: 'none',
+      createdAt: 1,
+      updatedAt: 1,
+    })
+
+    const pairs = rebuildRelationPairs({ [relation.id]: relation })
+    const pairId = getRelationPairId(relation.duplicateKey)
+
+    expect(Object.keys(pairs)).toEqual([pairId])
+    expect(pairId).toMatch(/^pair_[a-z0-9]+_[a-z0-9]+$/)
+    expect(pairs[pairId]).toMatchObject({
+      duplicateKey: relation.duplicateKey,
+      relationId: relation.id,
+    })
+  })
+
   it('uses active and passive wording for directional relations', () => {
-    const relation: StudyRelation = {
+    const relation = normalizeStudyRelation({
       id: 'r1',
       endpoints: [
         { type: 'verse', verseKeys: ['1-1-1'], label: 'Genèse 1:1' },
@@ -80,7 +108,7 @@ describe('study relation domain', () => {
       direction: 'forward',
       createdAt: 1,
       updatedAt: 1,
-    }
+    })
 
     expect(getRelationDisplayModel(relation, relation.endpoints[0])?.relationText).toBe(
       'renvoie vers'
@@ -91,7 +119,7 @@ describe('study relation domain', () => {
   })
 
   it('keeps missing note and study endpoints visible with fallback labels', () => {
-    const relation: StudyRelation = {
+    const relation = normalizeStudyRelation({
       id: 'r1',
       endpoints: [
         { type: 'note', noteId: 'missing-note', label: 'Ancienne note' },
@@ -101,7 +129,7 @@ describe('study relation domain', () => {
       direction: 'none',
       createdAt: 1,
       updatedAt: 1,
-    }
+    })
 
     const model = getRelationDisplayModel(relation, relation.endpoints[0], {
       notes: {},
@@ -116,7 +144,7 @@ describe('study relation domain', () => {
   })
 
   it('resolves available endpoint labels from current user data', () => {
-    const relation: StudyRelation = {
+    const relation = normalizeStudyRelation({
       id: 'r1',
       endpoints: [
         { type: 'note', noteId: 'note-1', label: 'Fallback note' },
@@ -126,7 +154,7 @@ describe('study relation domain', () => {
       direction: 'none',
       createdAt: 1,
       updatedAt: 1,
-    }
+    })
 
     const model = getRelationDisplayModel(relation, relation.endpoints[0], {
       notes: { 'note-1': { title: 'Note actuelle', description: '', date: 1 } },
@@ -147,7 +175,7 @@ describe('study relation domain', () => {
   })
 
   it('supports Nave and dictionary endpoints as relation targets', () => {
-    const relation: StudyRelation = {
+    const relation = normalizeStudyRelation({
       id: 'r1',
       endpoints: [
         { type: 'nave', nameLower: 'amour', label: 'Amour' },
@@ -157,16 +185,138 @@ describe('study relation domain', () => {
       direction: 'none',
       createdAt: 1,
       updatedAt: 1,
-    }
+    })
 
     const model = getRelationDisplayModel(relation, relation.endpoints[0], {
       naves: { amour: { title: 'Amour' } },
       words: { Alliance: { title: 'Alliance biblique' } },
     })
 
-    expect(endpointIdentity(relation.endpoints[0])).toBe('nave:amour')
-    expect(endpointIdentity(relation.endpoints[1])).toBe('dictionary:Alliance')
+    expect(endpointIdentity(relation.endpoints[0])).toBe('nave:fr:amour')
+    expect(endpointIdentity(relation.endpoints[1])).toBe('dictionary:fr:alliance')
     expect(model?.targetLabel).toBe('Alliance biblique')
     expect(model?.subtitle).toBe('Dictionnaire')
+  })
+
+  it('builds annotation note system relations from word annotation ranges', () => {
+    const relations = mergeRelationsWithSystemBackfill({
+      notes: {
+        'annotation:annotation-1': {
+          title: 'Note annotation',
+          description: 'Description',
+          date: 1,
+        },
+      },
+      wordAnnotations: {
+        'annotation-1': {
+          id: 'annotation-1',
+          version: 'LSG',
+          ranges: [{ verseKey: '1-1-2', startWordIndex: 0, endWordIndex: 1, text: 'terre' }],
+          color: 'color1',
+          type: 'underline',
+          date: 1,
+          noteId: 'annotation:annotation-1',
+        },
+      },
+    })
+
+    const relationId = getSystemRelationId('annotates', 'annotation:annotation-1', {
+      type: 'verse',
+      verseKeys: ['1-1-2'],
+    })
+
+    expect(relations[relationId]).toMatchObject({
+      kind: 'system',
+      type: 'annotates',
+      endpointKeys: ['note:annotation:annotation-1', 'verse:1-1-2'],
+    })
+  })
+
+  it('removes stale system relations before rebuilding current projections', () => {
+    const staleRelation = normalizeStudyRelation({
+      id: 'system:annotates:annotation:missing',
+      kind: 'system',
+      endpoints: [
+        { type: 'note', noteId: 'annotation:missing' },
+        { type: 'verse', verseKeys: ['1-1-3'] },
+      ],
+      type: 'annotates',
+      direction: 'none',
+      createdAt: 1,
+      updatedAt: 1,
+    })
+
+    const relations = mergeRelationsWithSystemBackfill({
+      relations: { [staleRelation.id]: staleRelation },
+      notes: {
+        '1-1-1': {
+          title: 'Note',
+          description: 'Description',
+          date: 1,
+        },
+      },
+    })
+
+    expect(relations['system:annotates:annotation:missing']).toBeUndefined()
+    expect(Object.values(relations)[0]?.endpointKeys).toEqual(['note:1-1-1', 'verse:1-1-1'])
+  })
+
+  it('preserves valid system relations for autonomous note ids during backfill', () => {
+    const relation = normalizeStudyRelation({
+      id: 'system:annotates:note-uuid',
+      kind: 'system',
+      endpoints: [
+        { type: 'note', noteId: 'note-uuid' },
+        { type: 'verse', verseKeys: ['1-1-1'] },
+      ],
+      type: 'annotates',
+      direction: 'none',
+      createdAt: 1,
+      updatedAt: 1,
+    })
+
+    const relations = mergeRelationsWithSystemBackfill({
+      relations: { [relation.id]: relation },
+      notes: {
+        'note-uuid': {
+          id: 'note-uuid',
+          title: 'Note autonome',
+          description: 'Description',
+          date: 1,
+        },
+      },
+    })
+
+    expect(relations['system:annotates:note-uuid']?.endpointKeys).toEqual([
+      'note:note-uuid',
+      'verse:1-1-1',
+    ])
+  })
+
+  it('deduplicates system relations by duplicateKey and keeps the canonical system id', () => {
+    const canonical = normalizeStudyRelation({
+      id: 'system:annotates:note-1:verse:1-1-1',
+      kind: 'system',
+      type: 'annotates',
+      endpoints: [
+        { type: 'note', noteId: 'note-1' },
+        { type: 'verse', verseKeys: ['1-1-1'] },
+      ],
+      direction: 'none',
+      createdAt: 1,
+      updatedAt: 1,
+    })
+    const duplicate = normalizeStudyRelation({
+      ...canonical,
+      id: 'random-duplicate-id',
+      createdAt: 2,
+      updatedAt: 2,
+    })
+
+    expect(
+      Object.keys(
+        dedupeRelationsByDuplicateKey({ [duplicate.id]: duplicate, [canonical.id]: canonical })
+      )
+    ).toEqual([canonical.id])
   })
 })

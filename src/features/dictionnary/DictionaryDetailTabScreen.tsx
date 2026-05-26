@@ -1,5 +1,3 @@
-import styled from '@emotion/native'
-import * as Icon from '@expo/vector-icons'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Share } from 'react-native'
 import { useSelector } from 'react-redux'
@@ -7,11 +5,11 @@ import truncHTML from 'trunc-html'
 
 import { WebView } from 'react-native-webview'
 import books from '~assets/bible_versions/books-desc'
+import { ActionMenuOption } from '~common/ActionMenu'
 import Box from '~common/ui/Box'
-import Container from '~common/ui/Container'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
-import Text from '~common/ui/Text'
 import useHTMLView, { type HTMLViewLinkPayload } from '~helpers/useHTMLView'
 
 import { useRouter } from 'expo-router'
@@ -19,11 +17,9 @@ import { produce } from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import DetailedHeader from '~common/DetailedHeader'
 import PopOverMenu from '~common/PopOverMenu'
 import { toast } from '~helpers/toast'
 import EntityChipList from '~common/EntityChipList'
-import MenuOption from '~common/ui/MenuOption'
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
@@ -33,23 +29,26 @@ import { RootState } from '~redux/modules/reducer'
 import { makeWordTagsSelector } from '~redux/selectors/bible'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
 import { DictionaryTab } from '../../state/tabs'
-import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import type { RelationEndpoint } from '~redux/modules/user'
-
-const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default,
-}))
+import AppScrollView from '~common/ui/ScrollView'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 interface DictionaryDetailScreenProps {
   dictionaryAtom: PrimitiveAtom<DictionaryTab>
+  isFormSheet?: boolean
 }
 
-const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps) => {
+const DictionnaryDetailScreen = ({
+  dictionaryAtom,
+  isFormSheet = false,
+}: DictionaryDetailScreenProps) => {
   const router = useRouter()
   const [dictionaryTab, setDictionaryTab] = useAtom(dictionaryAtom)
   const { isInTab } = useTabContext()
+  const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = isFormSheet ? canGoBackInStack : !isInTab
 
   const {
     data: { word },
@@ -77,7 +76,7 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
 
   const selectWordTags = makeWordTagsSelector()
   const tags = useSelector((state: RootState) => selectWordTags(state, word ?? ''))
-  const relationListModal = useBottomSheetModal()
+  const openEntityRelations = useOpenEntityRelations()
   const dictionaryEndpoint: Extract<RelationEndpoint, { type: 'dictionary' }> | null = word
     ? {
         type: 'dictionary',
@@ -127,7 +126,7 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
         router.push({
           pathname: '/bible-view',
           params: {
-            isReadOnly: 'true',
+            contextDisplayMode: 'focused',
             book: JSON.stringify(book),
             chapter: String(parseInt(chapter, 10)),
             verse: String(parseInt(verse, 10)),
@@ -137,23 +136,14 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
         toast.error('Impossible de charger ce mot.')
       }
     } else {
-      if (isInTab) {
-        // In tab context, update the tab data instead of navigating
-        setDictionaryTab(
-          produce(draft => {
-            draft.data.word = href
-          })
-        )
-      } else {
-        router.push({
-          pathname: '/dictionnary-detail',
-          params: { word: href },
-        })
-      }
+      router.push({
+        pathname: '/dictionnary-detail',
+        params: { word: href },
+      })
     }
   }
 
-  const { webviewProps } = useHTMLView({ onLinkClicked: openLink })
+  const { webviewProps } = useHTMLView({ onLinkClicked: openLink, autoHeight: true })
 
   const shareDefinition = async () => {
     if (!dictionnaireItem) return
@@ -179,24 +169,29 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
 
   if (!dictionnaireItem) {
     return (
-      <Container>
-        <Header hasBackButton={!isInTab} onCustomBackPress={goBack} title={t('Dictionnaire')} />
+      <FormSheetScreen isFormSheet={isFormSheet}>
+        <Header
+          hasBackButton={hasBackButton}
+          onCustomBackPress={goBack}
+          title={t('Dictionnaire')}
+        />
         <Loading message={t('Chargement...')} />
-      </Container>
+      </FormSheetScreen>
     )
   }
 
   return (
-    <Container>
-      <DetailedHeader
-        hasBackButton={!isInTab}
+    <FormSheetScreen isFormSheet={isFormSheet}>
+      <Header
+        hasBackButton={hasBackButton}
         title={word}
-        borderColor="secondary"
         rightComponent={
           <PopOverMenu
             popover={
               <>
-                <MenuOption
+                <ActionMenuOption
+                  icon="tag"
+                  label={t('Étiquettes')}
                   onSelect={() =>
                     setUnifiedTagsModal({
                       mode: 'select',
@@ -205,25 +200,21 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
                       entity: 'words',
                     })
                   }
-                >
-                  <Box row alignItems="center">
-                    <FeatherIcon name="tag" size={15} />
-                    <Text marginLeft={10}>{t('Étiquettes')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption onSelect={shareDefinition} closeBeforeSelect>
-                  <Box row alignItems="center">
-                    <FeatherIcon name="share-2" size={15} />
-                    <Text marginLeft={10}>{t('Partager')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption onSelect={() => relationListModal.open()}>
-                  <Box row alignItems="center">
-                    <FeatherIcon name="git-merge" size={15} />
-                    <Text marginLeft={10}>{t('Éditer les relations')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption
+                />
+                <ActionMenuOption
+                  icon="share-2"
+                  label={t('Partager')}
+                  onSelect={shareDefinition}
+                  closeBeforeSelect
+                />
+                <ActionMenuOption
+                  icon="git-merge"
+                  label={t('Éditer les relations')}
+                  onSelect={() => dictionaryEndpoint && openEntityRelations(dictionaryEndpoint)}
+                />
+                <ActionMenuOption
+                  icon="external-link"
+                  label={t('tab.openInNewTab')}
                   onSelect={() => {
                     openInNewTab({
                       id: `dictionary-${generateUUID()}`,
@@ -235,41 +226,27 @@ const DictionnaryDetailScreen = ({ dictionaryAtom }: DictionaryDetailScreenProps
                       },
                     })
                   }}
-                >
-                  <Box row alignItems="center">
-                    <FeatherIcon name="external-link" size={15} />
-                    <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
-                  </Box>
-                </MenuOption>
+                />
               </>
             }
           />
         }
       />
-      {(tags || relationCount > 0) && (
-        <Box mt={10} px={20}>
-          <EntityChipList
-            tags={tags}
-            relationCount={relationCount}
-            onRelationPress={() => relationListModal.open()}
-          />
-        </Box>
-      )}
-      <Box
-        mt={10}
-        style={{
-          overflow: 'hidden',
-          flex: 1,
-          borderTopLeftRadius: 30,
-          borderTopRightRadius: 30,
-        }}
-      >
+      <AppScrollView>
+        {(tags || relationCount > 0) && (
+          <Box px={20}>
+            <EntityChipList
+              tags={tags}
+              relationCount={relationCount}
+              onRelationPress={() => dictionaryEndpoint && openEntityRelations(dictionaryEndpoint)}
+            />
+          </Box>
+        )}
         {dictionnaireItem?.definition && (
           <WebView {...webviewProps(dictionnaireItem.definition.replace(/\n/gi, ''))} />
         )}
-      </Box>
-      <EntityRelationsModal ref={relationListModal.getRef()} endpoint={dictionaryEndpoint} />
-    </Container>
+      </AppScrollView>
+    </FormSheetScreen>
   )
 }
 

@@ -142,7 +142,7 @@ const Comment = ({ comment }: Props) => {
       router.push({
         pathname: '/bible-view',
         params: {
-          isReadOnly: 'true',
+          contextDisplayMode: 'focused',
           book: String(book),
           chapter: String(chapter),
           verse: String(verse),

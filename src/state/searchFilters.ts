@@ -2,7 +2,14 @@ import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
 import type { SearchSortOrder } from '~helpers/biblesDb'
 
 export type SearchSection = '' | 'at' | 'nt'
-export type SearchItemType = 'passages' | 'notes' | 'studies' | 'strong' | 'dictionary' | 'nave'
+export type SearchItemType =
+  | 'passages'
+  | 'notes'
+  | 'links'
+  | 'studies'
+  | 'strong'
+  | 'dictionary'
+  | 'nave'
 
 export type SearchItemFilters = Record<SearchItemType, boolean>
 
@@ -22,6 +29,7 @@ const defaultSearchFilters: SearchFilters = {
   itemFilters: {
     passages: true,
     notes: true,
+    links: true,
     studies: true,
     strong: true,
     dictionary: true,

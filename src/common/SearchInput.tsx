@@ -25,7 +25,7 @@ const SearchInput = ({
       <Box
         row
         center
-        paddingHorizontal={20}
+        paddingHorizontal={14}
         borderRadius={14}
         backgroundColor="rgba(0,0,0,0.1)"
         marginTop={0}
@@ -37,7 +37,7 @@ const SearchInput = ({
           color={theme.colors.default}
           name="search"
           size={20}
-          style={{ marginRight: 10 }}
+          style={{ marginRight: 8 }}
         />
         <Box flex>
           <TextInput
@@ -55,7 +55,7 @@ const SearchInput = ({
             {...props}
           />
         </Box>
-        <FeatherIcon name="x" size={20} onPress={onDelete} />
+        {!!value && <FeatherIcon name="x" size={20} onPress={onDelete} />}
       </Box>
     </Box>
   )

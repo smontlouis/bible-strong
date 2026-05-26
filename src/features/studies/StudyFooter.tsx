@@ -3,40 +3,24 @@ import { useAtom } from 'jotai/react'
 import type { JSONValue } from 'expo/build/dom/dom.types'
 import React, { memo, useState } from 'react'
 import { TouchableOpacity, type TouchableOpacityProps } from 'react-native'
-import {
-  MenuOption as BaseMenuOption,
-  Menu,
-  MenuOptionProps,
-  MenuOptions,
-  MenuTrigger,
-  renderers,
-  withMenuContext,
-  type MenuContextProps,
-} from 'react-native-popup-menu'
 
-import { useTheme } from '@emotion/react'
 import { useTranslation } from 'react-i18next'
 import type { ColorFormatsObject } from 'reanimated-color-picker'
 import BackgroundIcon from '~assets/images/BackgroundIcon'
 import ColorIcon from '~assets/images/ColorIcon'
 import QuoteIcon from '~assets/images/QuoteIcon'
+import { ActionSheetItem } from '~common/ActionMenu'
 import ColorPicker from '~common/ColorPicker'
 import Link from '~common/Link'
 import Border from '~common/ui/Border'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
+import Modal from '~common/Modal'
 import Text from '~common/ui/Text'
-import useMediaQueries from '~helpers/useMediaQueries'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import type { StudyNavigateBibleType } from '~common/types'
 import { recentColorsAtom } from './atom'
-
-const { Popover } = renderers
-
-const TouchableIcon = styled(TouchableOpacity)(() => ({
-  borderRadius: 2,
-  marginHorizontal: 10,
-}))
 
 type DispatchToWebView = (type: string, payload?: JSONValue) => void
 
@@ -51,55 +35,17 @@ type ActiveFormats = {
   underline?: boolean
 }
 
-type PopOverMenuProps = Omit<React.ComponentProps<typeof Menu>, 'children'> & {
-  element: React.ReactNode
-  popover: React.ReactNode
-}
-
-const PopOverMenu = ({ element, popover, ...props }: PopOverMenuProps) => {
-  const theme = useTheme()
-  return (
-    <Menu renderer={Popover} rendererProps={{ placement: 'top' }} {...props}>
-      <MenuTrigger>{element}</MenuTrigger>
-      <MenuOptions
-        optionsContainerStyle={{
-          backgroundColor: theme.colors.reverse,
-          shadowColor: 'rgb(89,131,240)',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 7,
-          elevation: 1,
-          borderRadius: 8,
-        }}
-      >
-        <Box padding={10}>{popover}</Box>
-      </MenuOptions>
-    </Menu>
-  )
-}
-
-// For whatever reason, we cannot use react-native-popover-view here, so we use react-native-popup-menu instead
-const MenuOption = (props: MenuOptionProps) => {
-  return (
-    <BaseMenuOption
-      {...props}
-      customStyles={{
-        optionWrapper: {
-          paddingHorizontal: 10,
-        },
-      }}
-    />
-  )
-}
-
 const SelectHeading = ({
   dispatchToWebView,
   activeFormats,
+  keyboardHeight,
 }: {
   dispatchToWebView: DispatchToWebView
   activeFormats: ActiveFormats
+  keyboardHeight: number
 }) => {
   const { t } = useTranslation()
+  const { ref, open, close } = useBottomSheetModal()
   const headings = [
     { label: 'Normal', value: 0 },
     { label: 'Titre', value: 1 },
@@ -120,8 +66,8 @@ const SelectHeading = ({
   }
 
   return (
-    <PopOverMenu
-      element={
+    <>
+      <TouchableBox onPress={open}>
         <Box
           row
           center
@@ -137,20 +83,27 @@ const SelectHeading = ({
             <FeatherIcon name="chevron-up" color="reverse" size={18} />
           </Box>
         </Box>
-      }
-      popover={headings.map(h => (
-        <MenuOption
-          key={h.label}
-          onSelect={() => {
-            dispatchToWebView('TOGGLE_FORMAT', {
-              type: 'HEADER',
-              value: h.value,
-            })
-          }}
-        >
-          <Text
-            fontSize={14}
-            bold
+      </TouchableBox>
+      <Modal.Body
+        ref={ref}
+        enableDynamicSizing
+        enableScrollView={false}
+        stackBehavior="push"
+        keyboardBehavior="interactive"
+        keyboardBlurBehavior="restore"
+        android_keyboardInputMode="adjustResize"
+        bottomInset={keyboardHeight}
+        headerComponent={
+          <Box px={20} py={15} center borderColor="border" borderBottomWidth={1}>
+            <Text bold>{t('Style')}</Text>
+          </Box>
+        }
+      >
+        {headings.map(h => (
+          <ActionSheetItem
+            key={h.label}
+            icon="type"
+            label={t(h.label)}
             color={
               activeFormats.header
                 ? activeFormats.header === h.value
@@ -160,26 +113,32 @@ const SelectHeading = ({
                   ? 'primary'
                   : 'grey'
             }
-          >
-            {t(h.label)}
-          </Text>
-        </MenuOption>
-      ))}
-    />
+            onPress={() => {
+              dispatchToWebView('TOGGLE_FORMAT', {
+                type: 'HEADER',
+                value: h.value,
+              })
+              close()
+            }}
+          />
+        ))}
+      </Modal.Body>
+    </>
   )
 }
 
 const SelectMore = ({
   dispatchToWebView,
   activeFormats,
-  ctx,
+  keyboardHeight,
 }: {
   dispatchToWebView: DispatchToWebView
   activeFormats: ActiveFormats
-  ctx: MenuContextProps['ctx']
+  keyboardHeight: number
 }) => {
   const [colorModal, setOpenColorModal] = useState<'background' | 'color' | undefined>()
   const { t } = useTranslation()
+  const { ref, open, close } = useBottomSheetModal()
   const [recentColors, setRecentColors] = useAtom(recentColorsAtom)
   const defaultColor = colorModal === 'background' ? '#ffffff' : '#000000'
   const currentColor = colorModal === 'background' ? activeFormats.background : activeFormats.color
@@ -210,7 +169,7 @@ const SelectMore = ({
       value: selectedColor,
     })
     addToRecentColors(selectedColor)
-    ctx.menuActions.closeMenu()
+    close()
   }
 
   const handleResetColor = () => {
@@ -218,16 +177,38 @@ const SelectMore = ({
       type: colorModal === 'background' ? 'BACKGROUND' : 'COLOR',
       value: null,
     })
-    ctx.menuActions.closeMenu()
+    close()
+  }
+
+  const toggleFormat = (type: string, value?: JSONValue) => {
+    dispatchToWebView('TOGGLE_FORMAT', { type, value })
   }
 
   return (
-    <PopOverMenu
-      onClose={() => setOpenColorModal(undefined)}
-      element={<FeatherIcon name="more-horizontal" size={18} color="primary" />}
-      popover={
-        colorModal ? (
-          <Box width={250}>
+    <>
+      <TouchableBox onPress={open}>
+        <Box center width={44} height={50}>
+          <FeatherIcon name="more-horizontal" size={18} color="primary" />
+        </Box>
+      </TouchableBox>
+      <Modal.Body
+        ref={ref}
+        enableDynamicSizing
+        enableScrollView={false}
+        stackBehavior="push"
+        keyboardBehavior="interactive"
+        keyboardBlurBehavior="restore"
+        android_keyboardInputMode="adjustResize"
+        bottomInset={keyboardHeight}
+        onModalClose={() => setOpenColorModal(undefined)}
+        headerComponent={
+          <Box px={20} py={15} center borderColor="border" borderBottomWidth={1}>
+            <Text bold>{t('Format')}</Text>
+          </Box>
+        }
+      >
+        {colorModal ? (
+          <Box p={20}>
             <TouchableBox onPress={handleResetColor} bg="lightGrey" px={10} py={5} rounded>
               <Text textAlign="center" fontSize={12}>
                 {t('reset')}
@@ -245,8 +226,8 @@ const SelectMore = ({
             </Button>
           </Box>
         ) : (
-          <Box>
-            <Box row>
+          <Box p={20}>
+            <Box row center>
               <FormatIcon
                 isSelected={Boolean(activeFormats.background)}
                 style={{ marginHorizontal: 10 }}
@@ -264,26 +245,18 @@ const SelectMore = ({
               <FormatIcon
                 isSelected={activeFormats.blockquote}
                 style={{ marginHorizontal: 10 }}
-                onPress={() =>
-                  dispatchToWebView('TOGGLE_FORMAT', {
-                    type: 'BLOCKQUOTE',
-                    value: !activeFormats.blockquote,
-                  })
-                }
+                onPress={() => toggleFormat('BLOCKQUOTE', !activeFormats.blockquote)}
               >
                 <QuoteIcon color="primary" />
               </FormatIcon>
             </Box>
-            <Border marginTop={10} />
-            <Box row marginTop={10}>
+            <Border marginTop={16} />
+            <Box row center marginTop={16}>
               <FormatIcon
                 isSelected={activeFormats.list === 'bullet'}
                 style={{ marginHorizontal: 10 }}
                 onPress={() =>
-                  dispatchToWebView('TOGGLE_FORMAT', {
-                    type: 'LIST',
-                    value: activeFormats.list === 'bullet' ? false : 'bullet',
-                  })
+                  toggleFormat('LIST', activeFormats.list === 'bullet' ? false : 'bullet')
                 }
               >
                 <FeatherIcon color="primary" name="list" size={20} />
@@ -292,84 +265,99 @@ const SelectMore = ({
                 isSelected={activeFormats.list === 'ordered'}
                 style={{ marginHorizontal: 10 }}
                 onPress={() =>
-                  dispatchToWebView('TOGGLE_FORMAT', {
-                    type: 'LIST',
-                    value: activeFormats.list === 'ordered' ? false : 'ordered',
-                  })
+                  toggleFormat('LIST', activeFormats.list === 'ordered' ? false : 'ordered')
                 }
               >
                 <MaterialIcon color="primary" name="format-list-numbered" size={20} />
               </FormatIcon>
               <FormatIcon
                 style={{ marginHorizontal: 10 }}
-                onPress={() => {
-                  dispatchToWebView('BLOCK_DIVIDER')
-                }}
+                onPress={() => dispatchToWebView('BLOCK_DIVIDER')}
               >
                 <FeatherIcon size={20} name="minus" color="primary" />
               </FormatIcon>
             </Box>
-            <Border marginTop={10} />
-            <Box row marginTop={10}>
-              <TouchableIcon onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'UNDO' })}>
+            <Border marginTop={16} />
+            <Box row center marginTop={16}>
+              <TouchableBox
+                px={10}
+                py={5}
+                onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'UNDO' })}
+              >
                 <MaterialIcon name="undo" size={20} color="primary" />
-              </TouchableIcon>
-              <TouchableIcon onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'REDO' })}>
+              </TouchableBox>
+              <TouchableBox
+                px={10}
+                py={5}
+                onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'REDO' })}
+              >
                 <MaterialIcon name="redo" size={20} color="primary" />
-              </TouchableIcon>
+              </TouchableBox>
             </Box>
           </Box>
-        )
-      }
-    />
+        )}
+      </Modal.Body>
+    </>
   )
 }
 
 const SelectBlock = ({
   navigateBibleView,
+  keyboardHeight,
 }: {
   navigateBibleView: (type: StudyNavigateBibleType) => void
+  keyboardHeight: number
 }) => {
   const { t } = useTranslation()
+  const { ref, open, close } = useBottomSheetModal()
+
+  const handleNavigate = (type: StudyNavigateBibleType) => {
+    close()
+    navigateBibleView(type)
+  }
+
   return (
-    <PopOverMenu
-      element={
+    <>
+      <TouchableBox onPress={open}>
         <MaterialIcon name="add-box" size={22} color="primary" style={{ marginLeft: 'auto' }} />
-      }
-      popover={
-        <>
-          <MenuOption onSelect={() => navigateBibleView('verse')}>
-            <Box row alignItems="center">
-              <FeatherIcon color="quint" size={20} name="link-2" style={{ marginRight: 15 }} />
-              <Text>{t('Insérer un lien de verset')}</Text>
-            </Box>
-          </MenuOption>
-          <MenuOption onSelect={() => navigateBibleView('verse-block')}>
-            <Box row alignItems="center">
-              <MaterialIcon color="quint" size={24} name="short-text" style={{ marginRight: 15 }} />
-              <Text>{t('Insérer un texte de verset')}</Text>
-            </Box>
-          </MenuOption>
-          <MenuOption onSelect={() => navigateBibleView('strong')}>
-            <Box row alignItems="center">
-              <FeatherIcon color="primary" size={20} name="link-2" style={{ marginRight: 15 }} />
-              <Text>{t('Insérer un lien de strong')}</Text>
-            </Box>
-          </MenuOption>
-          <MenuOption onSelect={() => navigateBibleView('strong-block')}>
-            <Box row alignItems="center">
-              <MaterialIcon
-                color="primary"
-                size={24}
-                name="short-text"
-                style={{ marginRight: 15 }}
-              />
-              <Text>{t('Insérer un texte de strong')}</Text>
-            </Box>
-          </MenuOption>
-        </>
-      }
-    />
+      </TouchableBox>
+      <Modal.Body
+        ref={ref}
+        enableDynamicSizing
+        enableScrollView={false}
+        stackBehavior="push"
+        keyboardBehavior="interactive"
+        keyboardBlurBehavior="restore"
+        android_keyboardInputMode="adjustResize"
+        bottomInset={keyboardHeight}
+        headerComponent={
+          <Box px={20} py={15} center borderColor="border" borderBottomWidth={1}>
+            <Text bold>{t('Insérer')}</Text>
+          </Box>
+        }
+      >
+        <ActionSheetItem
+          icon="link-2"
+          label={t('Insérer un lien de verset')}
+          onPress={() => handleNavigate('verse')}
+        />
+        <ActionSheetItem
+          icon="file-text"
+          label={t('Insérer un texte de verset')}
+          onPress={() => handleNavigate('verse-block')}
+        />
+        <ActionSheetItem
+          icon="link-2"
+          label={t('Insérer un lien de strong')}
+          onPress={() => handleNavigate('strong')}
+        />
+        <ActionSheetItem
+          icon="file-text"
+          label={t('Insérer un texte de strong')}
+          onPress={() => handleNavigate('strong-block')}
+        />
+      </Modal.Body>
+    </>
   )
 }
 
@@ -383,90 +371,27 @@ const FormatIcon = styled(TouchableOpacity)<TouchableOpacityProps & { isSelected
   })
 )
 
-const FormatIconForPopover = FormatIcon.withComponent(Box)
-
-const ColorPopover = ({
-  type,
-  setColor,
-  ctx,
-  currentColor,
-}: {
-  type: 'background' | 'color'
-  setColor: (type: string, color: string | false) => void
-  ctx: MenuContextProps['ctx']
-  currentColor?: string
-}) => {
-  const { t } = useTranslation()
-  const [recentColors, setRecentColors] = useAtom(recentColorsAtom)
-  const defaultColor = type === 'background' ? '#ffffff' : '#000000'
-  const [selectedColor, setSelectedColor] = useState(currentColor || defaultColor)
-
-  const handleColorChange = (color: ColorFormatsObject) => {
-    setSelectedColor(color.hex)
-  }
-
-  const addToRecentColors = (color: string) => {
-    const newColors = [color, ...recentColors.filter(c => c !== color)].slice(0, 5)
-    setRecentColors(newColors)
-  }
-
-  const handleConfirm = () => {
-    setColor(type, selectedColor)
-    addToRecentColors(selectedColor)
-    ctx.menuActions.closeMenu()
-  }
-
-  const handleReset = () => {
-    setColor(type, false)
-    ctx.menuActions.closeMenu()
-  }
-
-  return (
-    <Box width={250}>
-      <TouchableBox onPress={handleReset} bg="lightGrey" px={10} py={5} rounded mb={10}>
-        <Text textAlign="center" fontSize={12}>
-          {t('reset')}
-        </Text>
-      </TouchableBox>
-      <Box height={280}>
-        <ColorPicker
-          value={selectedColor}
-          onChangeJS={handleColorChange}
-          swatchColors={recentColors}
-        />
-      </Box>
-      <Button small onPress={handleConfirm}>
-        {t('Valider')}
-      </Button>
-    </Box>
-  )
-}
-
 type StudyFooterProps = {
   dispatchToWebView: DispatchToWebView
   navigateBibleView: (type: StudyNavigateBibleType) => void
   activeFormats: ActiveFormats
+  keyboardHeight: number
 }
 
 const StudyFooterComponent = ({
   dispatchToWebView,
   navigateBibleView,
   activeFormats,
-  ctx,
-}: StudyFooterProps & MenuContextProps) => {
-  const deviceSize = useMediaQueries()
-
-  const setColor = (colorModal: string, color: string | false) => {
-    dispatchToWebView('TOGGLE_FORMAT', {
-      type: colorModal === 'background' ? 'BACKGROUND' : 'COLOR',
-      value: color,
-    })
-  }
-
+  keyboardHeight,
+}: StudyFooterProps) => {
   return (
     <Box row height={50} backgroundColor="reverse" alignItems="center">
       <Box row flex center paddingLeft={10}>
-        <SelectHeading dispatchToWebView={dispatchToWebView} activeFormats={activeFormats} />
+        <SelectHeading
+          dispatchToWebView={dispatchToWebView}
+          activeFormats={activeFormats}
+          keyboardHeight={keyboardHeight}
+        />
         <FormatIcon
           isSelected={activeFormats.bold}
           onPress={() =>
@@ -503,104 +428,13 @@ const StudyFooterComponent = ({
         >
           <FeatherIcon color="primary" name="underline" size={16} />
         </FormatIcon>
-        {deviceSize === 'xs' || deviceSize === 'sm' ? (
-          <SelectMore
-            dispatchToWebView={dispatchToWebView}
-            activeFormats={activeFormats}
-            ctx={ctx}
-          />
-        ) : (
-          <>
-            <PopOverMenu
-              element={
-                <FormatIconForPopover
-                  isSelected={Boolean(activeFormats.background)}
-                  style={{ marginHorizontal: 10 }}
-                >
-                  <BackgroundIcon color={activeFormats.background} />
-                </FormatIconForPopover>
-              }
-              popover={
-                <ColorPopover
-                  type="background"
-                  ctx={ctx}
-                  setColor={setColor}
-                  currentColor={activeFormats.background}
-                />
-              }
-            />
-            <PopOverMenu
-              element={
-                <FormatIconForPopover
-                  isSelected={Boolean(activeFormats.color)}
-                  style={{ marginHorizontal: 10 }}
-                >
-                  <ColorIcon color={activeFormats.color} />
-                </FormatIconForPopover>
-              }
-              popover={
-                <ColorPopover
-                  type="color"
-                  ctx={ctx}
-                  setColor={setColor}
-                  currentColor={activeFormats.color}
-                />
-              }
-            />
-            <FormatIcon
-              isSelected={activeFormats.blockquote}
-              style={{ marginHorizontal: 10 }}
-              onPress={() =>
-                dispatchToWebView('TOGGLE_FORMAT', {
-                  type: 'BLOCKQUOTE',
-                  value: !activeFormats.blockquote,
-                })
-              }
-            >
-              <QuoteIcon color="primary" />
-            </FormatIcon>
-            <FormatIcon
-              isSelected={activeFormats.list === 'bullet'}
-              style={{ marginHorizontal: 10 }}
-              onPress={() =>
-                dispatchToWebView('TOGGLE_FORMAT', {
-                  type: 'LIST',
-                  value: activeFormats.list === 'bullet' ? false : 'bullet',
-                })
-              }
-            >
-              <FeatherIcon color="primary" name="list" size={20} />
-            </FormatIcon>
-            <FormatIcon
-              isSelected={activeFormats.list === 'ordered'}
-              style={{ marginHorizontal: 10 }}
-              onPress={() =>
-                dispatchToWebView('TOGGLE_FORMAT', {
-                  type: 'LIST',
-                  value: activeFormats.list === 'ordered' ? false : 'ordered',
-                })
-              }
-            >
-              <MaterialIcon color="primary" name="format-list-numbered" size={20} />
-            </FormatIcon>
-            <FormatIcon
-              style={{ marginHorizontal: 10 }}
-              onPress={() => {
-                dispatchToWebView('BLOCK_DIVIDER')
-              }}
-            >
-              <FeatherIcon size={20} name="minus" color="primary" />
-            </FormatIcon>
-            <TouchableIcon onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'UNDO' })}>
-              <MaterialIcon name="undo" size={20} color="primary" />
-            </TouchableIcon>
-            <TouchableIcon onPress={() => dispatchToWebView('TOGGLE_FORMAT', { type: 'REDO' })}>
-              <MaterialIcon name="redo" size={20} color="primary" />
-            </TouchableIcon>
-          </>
-        )}
+        <SelectMore
+          dispatchToWebView={dispatchToWebView}
+          activeFormats={activeFormats}
+          keyboardHeight={keyboardHeight}
+        />
         <Box marginLeft="auto" />
-        <SelectBlock navigateBibleView={navigateBibleView} />
+        <SelectBlock navigateBibleView={navigateBibleView} keyboardHeight={keyboardHeight} />
       </Box>
       <Link paddingSmall onPress={() => dispatchToWebView('BLUR_EDITOR')}>
         <MaterialIcon name="keyboard-hide" size={20} color="primary" />
@@ -613,6 +447,4 @@ const StudyFooter = memo(StudyFooterComponent, (prevProps, nextProps) => {
   return JSON.stringify(prevProps.activeFormats) === JSON.stringify(nextProps.activeFormats)
 })
 
-export default withMenuContext(
-  StudyFooter as React.ComponentType<StudyFooterProps & MenuContextProps>
-)
+export default StudyFooter

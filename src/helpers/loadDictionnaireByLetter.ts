@@ -11,7 +11,7 @@ export interface DictionnaireLetterRow {
 const loadDictionnaireByLetter = memoizeWithLang('DICTIONNAIRE', (letter: string) =>
   catchDatabaseError(async (): Promise<DictionnaireLetterRow[]> => {
     const result = await SQLDictionnaireTransaction<DictionnaireLetterRow>(
-      `SELECT rowid, word, sanitized_word
+      `SELECT id AS rowid, word, sanitized_word
       FROM dictionnaire
       WHERE sanitized_word LIKE (?)
       ORDER BY sanitized_word ASC

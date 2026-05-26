@@ -1,14 +1,16 @@
 import { useAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import PopOverMenu from '~common/PopOverMenu'
-import Box from '~common/ui/Box'
-import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
-import MenuOption from '~common/ui/MenuOption'
+import { ActionSheetItem } from '~common/ActionMenu'
+import Modal from '~common/Modal'
+import Box, { TouchableBox } from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
+import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { bookSelectorSelectionModeAtom, bookSelectorSortAtom, bookSelectorVersesAtom } from './atom'
 
 export const BookSelectorParams = () => {
   const { t } = useTranslation()
+  const { ref, open, close } = useBottomSheetModal()
 
   const [sort, setSort] = useAtom(bookSelectorSortAtom)
   const isAlphabetical = sort === 'alphabetical'
@@ -18,61 +20,59 @@ export const BookSelectorParams = () => {
 
   const handleSortToggle = () => {
     setSort(prev => (prev === 'alphabetical' ? 'classical' : 'alphabetical'))
+    close()
+  }
+
+  const handleVersesToggle = () => {
+    setVerses(v => (v === 'with-verses' ? 'without-verses' : 'with-verses'))
+    close()
+  }
+
+  const handleSelectionModeToggle = () => {
+    setSelectionMode(s => (s === 'grid' ? 'list' : 'grid'))
+    close()
   }
 
   return (
-    <PopOverMenu
-      popover={
-        <>
-          <MenuOption onSelect={handleSortToggle} closeOnSelect={false}>
-            <Box row alignItems="center" width={180}>
-              <MaterialIcon
-                name="sort-by-alpha"
-                size={22}
-                color={isAlphabetical ? 'primary' : 'grey'}
-              />
-              <Text marginLeft={10} numberOfLines={1}>
-                {isAlphabetical
-                  ? t('bookSelector.sort.alphabetical')
-                  : t('bookSelector.sort.classical')}
-              </Text>
-            </Box>
-          </MenuOption>
-
-          <MenuOption
-            onSelect={() => {
-              setVerses(v => (v === 'with-verses' ? 'without-verses' : 'with-verses'))
-            }}
-            closeOnSelect={false}
-          >
-            <Box row alignItems="center">
-              <MaterialIcon
-                name="format-list-numbered"
-                size={20}
-                color={hasVerses ? 'primary' : 'grey'}
-              />
-              <Text marginLeft={10}>
-                {hasVerses ? t('bookSelector.withVerses') : t('bookSelector.withoutVerses')}
-              </Text>
-            </Box>
-          </MenuOption>
-          <MenuOption
-            onSelect={() => {
-              setSelectionMode(s => (s === 'grid' ? 'list' : 'grid'))
-            }}
-            closeOnSelect={false}
-          >
-            <Box row alignItems="center">
-              <FeatherIcon name={selectionMode === 'grid' ? 'grid' : 'menu'} size={20} />
-              <Text marginLeft={10}>
-                {selectionMode === 'grid'
-                  ? t('bookSelector.selectionMode.grid')
-                  : t('bookSelector.selectionMode.list')}
-              </Text>
-            </Box>
-          </MenuOption>
-        </>
-      }
-    />
+    <>
+      <TouchableBox onPress={open}>
+        <Box row center height={54} width={60}>
+          <FeatherIcon name="more-vertical" size={18} />
+        </Box>
+      </TouchableBox>
+      <Modal.Body
+        ref={ref}
+        enableDynamicSizing
+        enableScrollView={false}
+        stackBehavior="push"
+        headerComponent={
+          <Box px={20} py={15} center borderColor="border" borderBottomWidth={1}>
+            <Text bold>{t('Paramètres')}</Text>
+          </Box>
+        }
+      >
+        <ActionSheetItem
+          icon="list"
+          label={
+            isAlphabetical ? t('bookSelector.sort.alphabetical') : t('bookSelector.sort.classical')
+          }
+          onPress={handleSortToggle}
+        />
+        <ActionSheetItem
+          icon="hash"
+          label={hasVerses ? t('bookSelector.withVerses') : t('bookSelector.withoutVerses')}
+          onPress={handleVersesToggle}
+        />
+        <ActionSheetItem
+          icon={selectionMode === 'grid' ? 'grid' : 'menu'}
+          label={
+            selectionMode === 'grid'
+              ? t('bookSelector.selectionMode.grid')
+              : t('bookSelector.selectionMode.list')
+          }
+          onPress={handleSelectionModeToggle}
+        />
+      </Modal.Body>
+    </>
   )
 }

@@ -8,11 +8,12 @@ import books from '~assets/bible_versions/books-desc'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
-import Container from '~common/ui/Container'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Text from '~common/ui/Text'
 import { DatabaseError } from '~helpers/catchDatabaseError'
 import loadStrongVersesCountByBook from '~helpers/loadStrongVersesCountByBook'
 import useAsync from '~helpers/useAsync'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 const OccurencesNumber = styled.View(({ theme }) => ({
   marginLeft: 10,
@@ -39,6 +40,7 @@ const hasDatabaseError = (value: unknown): value is DatabaseError =>
 const ConcordanceScreen = () => {
   const router = useRouter()
   const params = useLocalSearchParams<{ strongReference?: string; book?: string }>()
+  const canGoBackInStack = useCanGoBackInStack()
 
   // Parse params from URL strings
   const strongReference = params.strongReference ? JSON.parse(params.strongReference) : {}
@@ -50,8 +52,8 @@ const ConcordanceScreen = () => {
   const data = hasDatabaseError(versesCountByBook) ? [] : versesCountByBook
 
   return (
-    <Container>
-      <Header title={`Concordance ${strongReference.Code}`} hasBackButton />
+    <FormSheetScreen isFormSheet>
+      <Header hasBackButton={canGoBackInStack} title={`Concordance ${strongReference.Code}`} />
       {status === 'Pending' && <Loading />}
       {status === 'Resolved' && (
         <FlatList
@@ -83,7 +85,7 @@ const ConcordanceScreen = () => {
           )}
         />
       )}
-    </Container>
+    </FormSheetScreen>
   )
 }
 
