@@ -8,7 +8,7 @@ import books from '~assets/bible_versions/books-desc'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
-import Container from '~common/ui/Container'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Text from '~common/ui/Text'
 import { DatabaseError } from '~helpers/catchDatabaseError'
 import loadStrongVersesCountByBook from '~helpers/loadStrongVersesCountByBook'
@@ -50,8 +50,8 @@ const ConcordanceScreen = () => {
   const data = hasDatabaseError(versesCountByBook) ? [] : versesCountByBook
 
   return (
-    <Container>
-      <Header title={`Concordance ${strongReference.Code}`} hasBackButton />
+    <FormSheetScreen isFormSheet>
+      <Header title={`Concordance ${strongReference.Code}`} />
       {status === 'Pending' && <Loading />}
       {status === 'Resolved' && (
         <FlatList
@@ -83,7 +83,7 @@ const ConcordanceScreen = () => {
           )}
         />
       )}
-    </Container>
+    </FormSheetScreen>
   )
 }
 

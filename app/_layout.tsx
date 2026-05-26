@@ -316,6 +316,15 @@ function InnerApp() {
                               name="nave-detail"
                               options={createFormSheetOptions(theme)}
                             />
+                            <Stack.Screen name="event" options={createFormSheetOptions(theme)} />
+                            <Stack.Screen
+                              name="concordance"
+                              options={createFormSheetOptions(theme)}
+                            />
+                            <Stack.Screen
+                              name="concordance-by-book"
+                              options={createFormSheetOptions(theme)}
+                            />
                             <Stack.Screen name="tag" options={createFormSheetOptions(theme)} />
                           </Stack>
                           <ThemedToaster />

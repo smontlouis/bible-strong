@@ -3,6 +3,7 @@ import { Keyboard } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet'
+import { useRouter } from 'expo-router'
 import { Image } from 'expo-image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Empty from '~common/Empty'
@@ -14,25 +15,18 @@ import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import bibleMemoize from '~helpers/bibleStupidMemoize'
 import { useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
-import { TimelineEventDetail, TimelineEvent as TimelineEventProps } from './types'
-import { useQuery } from '~helpers/react-query-lite'
-import { getEvents } from './events'
+import { TimelineEventDetail } from './types'
 
 interface Props {
   modalRef: React.RefObject<BottomSheet | null>
-  eventModalRef: React.RefObject<BottomSheet | null>
-  setEvent: (event: Partial<TimelineEventProps>) => void
 }
 
-const SearchInTimelineModal = ({ modalRef, setEvent, eventModalRef }: Props) => {
+const SearchInTimelineModal = ({ modalRef }: Props) => {
+  const router = useRouter()
   const { t } = useTranslation()
   const [searchValue, setSearchValue] = useState('')
   const [results, setResults] = useState<TimelineEventDetail[]>([])
   const [hasSearched, setHasSearched] = useState(false)
-  const { data: sections } = useQuery({
-    queryKey: 'timeline',
-    queryFn: getEvents,
-  })
 
   const doSearch = (query: string) => {
     if (!query.trim()) {
@@ -76,12 +70,11 @@ const SearchInTimelineModal = ({ modalRef, setEvent, eventModalRef }: Props) => 
   }
 
   const onOpenEvent = (event: TimelineEventDetail) => {
-    const visualEvent = sections
-      ?.flatMap((section, sectionIndex) => section.events.map(e => ({ ...e, sectionIndex })))
-      .find(e => e.slug === event.slug)
-
-    eventModalRef.current?.expand()
-    setEvent((visualEvent || event) as unknown as Partial<TimelineEventProps>)
+    modalRef.current?.close()
+    router.push({
+      pathname: '/event',
+      params: { slug: event.slug },
+    })
   }
 
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()

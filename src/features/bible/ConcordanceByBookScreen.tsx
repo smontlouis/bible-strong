@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 
-import Container from '~common/ui/Container'
 import Box from '~common/ui/Box'
 import FlatList from '~common/ui/FlatList'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import PopOverMenu from '~common/PopOverMenu'
@@ -39,9 +39,8 @@ const ConcordanceByBook = () => {
   }, [book, Code])
 
   return (
-    <Container>
+    <FormSheetScreen isFormSheet>
       <Header
-        hasBackButton
         title={`${truncate(Mot, 7)} dans ${books[book - 1].Nom}`}
         rightComponent={
           <PopOverMenu
@@ -59,25 +58,23 @@ const ConcordanceByBook = () => {
         </Box>
       )}
       {!!verses.length && (
-        <Box flex>
-          <FlatList
-            contentContainerStyle={{ padding: 20 }}
-            removeClippedSubviews
-            data={verses}
-            keyExtractor={(item: FoundVerseRow) => `${item.Livre}-${item.Chapitre}-${item.Verset}`}
-            renderItem={({ item }: { item: FoundVerseRow }) => {
-              const props = {
-                router,
-                concordanceFor: Code,
-                verse: item,
-                t,
-              }
-              return <ConcordanceVerse {...props} />
-            }}
-          />
-        </Box>
+        <FlatList
+          contentContainerStyle={{ padding: 20 }}
+          removeClippedSubviews
+          data={verses}
+          keyExtractor={(item: FoundVerseRow) => `${item.Livre}-${item.Chapitre}-${item.Verset}`}
+          renderItem={({ item }: { item: FoundVerseRow }) => {
+            const props = {
+              router,
+              concordanceFor: Code,
+              verse: item,
+              t,
+            }
+            return <ConcordanceVerse {...props} />
+          }}
+        />
       )}
-    </Container>
+    </FormSheetScreen>
   )
 }
 

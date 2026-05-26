@@ -57,6 +57,7 @@ export const routeMapping: Record<keyof MainStackProps, string> = {
   PlanSlice: '/plan-slice',
   Timeline: '/timeline',
   TimelineHome: '/timeline-home',
+  Event: '/event',
   Concordance: '/concordance',
   Commentaries: '/commentaries',
   BibleShareOptions: '/bible-share-options',

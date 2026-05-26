@@ -1,4 +1,4 @@
-import BottomSheet, { BottomSheetScrollViewMethods } from '@gorhom/bottom-sheet'
+import BottomSheet from '@gorhom/bottom-sheet'
 import React from 'react'
 import { useSharedValue } from 'react-native-reanimated'
 import bibleMemoize from '~helpers/bibleStupidMemoize'
@@ -10,8 +10,6 @@ import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import CurrentSectionImage from './CurrentSectionImage'
 import CurrentYear from './CurrentYear'
 import Datebar from './Datebar'
-import EventDetailsModal from './EventDetailsModal'
-import { EventDetailsModalProvider } from './EventDetailsModalContext'
 import Line from './Line'
 import NextSectionImage from './NextSectionImage'
 import PrevSectionImage from './PrevSectionImage'
@@ -23,7 +21,6 @@ import TimelineHeader from './TimelineHeader'
 import { useTimeline } from './timeline.hooks'
 import {
   ShallowTimelineSection,
-  TimelineEvent as TimelineEventProps,
   TimelineEventDetail,
   TimelineSection as TimelineSectionProps,
 } from './types'
@@ -69,13 +66,10 @@ const Timeline = ({
 }: Props) => {
   const isReady = useSharedValue(0)
   const modalRef = React.useRef<BottomSheet>(null)
-  const eventModalRef = React.useRef<BottomSheet>(null)
-  const eventScrollViewRef = React.useRef<BottomSheetScrollViewMethods>(null)
   const searchModalRef = React.useRef<BottomSheet>(null)
   const openInNewTab = useOpenInNewTab()
   const lang = useLanguage()
 
-  const [event, setEvent] = React.useState<Partial<TimelineEventProps> | null>(null)
   const timeline = bibleMemoize.timeline as TimelineEventDetail[] | undefined
   const eventDetailSlugs = timeline ? new Set(timeline.map(e => e.slug)) : undefined
 
@@ -106,13 +100,7 @@ const Timeline = ({
   }
 
   return (
-    <EventDetailsModalProvider
-      modalRef={eventModalRef}
-      scrollViewRef={eventScrollViewRef}
-      currentEvent={event}
-      setEvent={setEvent}
-    >
-      <Box flex pos="absolute" left={0} bottom={0} right={0} top={0}>
+    <Box flex pos="absolute" left={0} bottom={0} right={0} top={0}>
         <TimelineHeader
           hasBackButton
           title={title}
@@ -164,8 +152,6 @@ const Timeline = ({
                   key={i}
                   yearsToPx={yearsToPx}
                   calculateEventWidth={calculateEventWidth}
-                  eventModalRef={eventModalRef}
-                  setEvent={setEvent}
                   hasDetails={eventDetailSlugs ? eventDetailSlugs.has(event.slug) : true}
                   sectionIndex={sectionIndex}
                   {...event}
@@ -215,16 +201,8 @@ const Timeline = ({
         />
         <SearchInTimelineModal
           modalRef={searchModalRef}
-          eventModalRef={eventModalRef}
-          setEvent={setEvent}
-        />
-        <EventDetailsModal
-          modalRef={eventModalRef}
-          scrollViewRef={eventScrollViewRef}
-          event={event}
         />
       </Box>
-    </EventDetailsModalProvider>
   )
 }
 export default Timeline

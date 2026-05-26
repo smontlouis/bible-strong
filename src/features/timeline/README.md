@@ -37,8 +37,8 @@ timeline/
 │   ├── CurrentYear         # Indicateur année courante
 │   ├── TimelineEvent       # Événement individuel
 │   └── ScrollView          # Container scrollable
+├── EventScreen             # Détails d'un événement en route formSheet
 ├── Modals/
-│   ├── EventDetailsModal   # Détails d'un événement
 │   └── SectionDetailsModal # Détails d'une section
 └── types.ts                # Types TypeScript
 ```
@@ -153,8 +153,7 @@ navigation.navigate('Timeline')
 ### Affichage d'un événement
 ```typescript
 const handleEventPress = (event: Event) => {
-  setSelectedEvent(event)
-  eventModalRef.current?.present()
+  router.push({ pathname: '/event', params: { slug: event.slug } })
 }
 ```
 

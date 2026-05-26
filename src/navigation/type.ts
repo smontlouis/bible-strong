@@ -133,6 +133,10 @@ type TimelineScreenProps = {
   goTo: number
 }
 
+type EventScreenProps = {
+  slug: string
+}
+
 type ConcordanceScreenProps = {
   strongReference: StrongReference
   book: number
@@ -191,6 +195,7 @@ export type MainStackProps = {
   PlanSlice: PlanSliceScreenProps
   Timeline: TimelineScreenProps
   TimelineHome: undefined
+  Event: EventScreenProps
   Concordance: ConcordanceScreenProps
   Commentaries: CommentariesScreenProps
   BibleShareOptions: undefined
