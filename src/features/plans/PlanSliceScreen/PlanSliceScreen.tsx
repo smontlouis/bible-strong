@@ -96,16 +96,16 @@ const PlanSliceMenuContent = ({
           <Text marginLeft={10}>{t('Mise en forme')}</Text>
         </Box>
       </MenuOption>
-      <MenuOption onSelect={onOpenInNewTab}>
-        <Box row alignItems="center">
-          <FeatherIcon name="external-link" size={17} style={{ marginRight: 10 }} />
-          <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
-        </Box>
-      </MenuOption>
       <MenuOption onSelect={onShare} closeBeforeSelect>
         <Box row alignItems="center">
           <FeatherIcon name="share-2" size={17} style={{ marginRight: 10 }} />
           <Text marginLeft={10}>{t('Partager')}</Text>
+        </Box>
+      </MenuOption>
+      <MenuOption onSelect={onOpenInNewTab}>
+        <Box row alignItems="center">
+          <FeatherIcon name="external-link" size={17} style={{ marginRight: 10 }} />
+          <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
         </Box>
       </MenuOption>
     </>

@@ -342,16 +342,16 @@ const Header = ({
                           </Text>
                         </Box>
                       </MenuOption>
-                      <MenuOption onSelect={() => actions.clearFocusVerses()}>
-                        <Box row alignItems="center">
-                          <FeatherIcon name="x" size={15} />
-                          <Text marginLeft={10}>{t('Quitter le mode focus')}</Text>
-                        </Box>
-                      </MenuOption>
                       <MenuOption onSelect={openInBibleTab}>
                         <Box row alignItems="center">
                           <FeatherIcon name="external-link" size={15} />
                           <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
+                        </Box>
+                      </MenuOption>
+                      <MenuOption onSelect={() => actions.clearFocusVerses()}>
+                        <Box row alignItems="center">
+                          <FeatherIcon name="x" size={15} />
+                          <Text marginLeft={10}>{t('Quitter le mode focus')}</Text>
                         </Box>
                       </MenuOption>
                     </>

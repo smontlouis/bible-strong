@@ -88,25 +88,6 @@ const EditHeader = ({
         <Modal.Body ref={ref} enableDynamicSizing withPortal>
           <PublishStudyMenuItem study={study} onClosed={close} />
           <ActionSheetItem
-            icon="external-link"
-            label={t('tab.openInNewTab')}
-            onPress={() => {
-              close()
-              openInNewTab(
-                {
-                  id: `study-${generateUUID()}`,
-                  title: study.title,
-                  isRemovable: true,
-                  type: 'study',
-                  data: {
-                    studyId: study.id,
-                  },
-                },
-                { autoRedirect: true }
-              )
-            }}
-          />
-          <ActionSheetItem
             icon="tag"
             label={t('Éditer les tags')}
             onPress={() => {
@@ -128,6 +109,25 @@ const EditHeader = ({
             onPress={() => {
               close()
               openRenameModal()
+            }}
+          />
+          <ActionSheetItem
+            icon="external-link"
+            label={t('tab.openInNewTab')}
+            onPress={() => {
+              close()
+              openInNewTab(
+                {
+                  id: `study-${generateUUID()}`,
+                  title: study.title,
+                  isRemovable: true,
+                  type: 'study',
+                  data: {
+                    studyId: study.id,
+                  },
+                },
+                { autoRedirect: true }
+              )
             }}
           />
           <ActionSheetItem

@@ -52,6 +52,26 @@ const StudySettingsModal = ({ ref, studyId, onClosed, openRenameModal }: Props) 
     <Modal.Body ref={ref} onModalClose={onClosed} enableDynamicSizing withPortal>
       {study && <PublishStudyMenuItem study={study} onClosed={close} />}
       <ActionSheetItem
+        icon="tag"
+        label={t('Éditer les tags')}
+        onPress={() => {
+          if (!study) return
+
+          close()
+          setUnifiedTagsModal({ mode: 'select', id: study.id, entity: 'studies' })
+        }}
+      />
+      <ActionSheetItem
+        icon="edit-3"
+        label={t('Renommer')}
+        onPress={() => {
+          if (!study) return
+
+          close()
+          openRenameModal({ id: study.id, title: study.title })
+        }}
+      />
+      <ActionSheetItem
         icon="external-link"
         label={t('tab.openInNewTab')}
         onPress={() => {
@@ -70,26 +90,6 @@ const StudySettingsModal = ({ ref, studyId, onClosed, openRenameModal }: Props) 
             },
             { autoRedirect: true }
           )
-        }}
-      />
-      <ActionSheetItem
-        icon="tag"
-        label={t('Éditer les tags')}
-        onPress={() => {
-          if (!study) return
-
-          close()
-          setUnifiedTagsModal({ mode: 'select', id: study.id, entity: 'studies' })
-        }}
-      />
-      <ActionSheetItem
-        icon="edit-3"
-        label={t('Renommer')}
-        onPress={() => {
-          if (!study) return
-
-          close()
-          openRenameModal({ id: study.id, title: study.title })
         }}
       />
       <ActionSheetItem
