@@ -158,6 +158,15 @@ const EditStudyScreen = ({
         title={currentStudy.title}
         study={currentStudy}
       />
+      {isReadOnly && hasTagOrRelationChips && (
+        <Box px={20} py={12} borderBottomWidth={1} borderColor="border" bg="reverse">
+          <EntityChipList
+            tags={currentStudy.tags}
+            relationCount={relationCount}
+            onRelationPress={() => openEntityRelations(studyEndpoint)}
+          />
+        </Box>
+      )}
       <StudiesDomWrapper
         isReadOnly={isReadOnly}
         onDeltaChangeCallback={onDeltaChangeCallback}
@@ -168,15 +177,6 @@ const EditStudyScreen = ({
         studyId={studyId}
         isFormSheet={isFormSheet}
       />
-      {isReadOnly && hasTagOrRelationChips && (
-        <Box px={20} py={12} borderTopWidth={1} borderColor="border" bg="reverse">
-          <EntityChipList
-            tags={currentStudy.tags}
-            relationCount={relationCount}
-            onRelationPress={() => openEntityRelations(studyEndpoint)}
-          />
-        </Box>
-      )}
       <RenameModal
         bottomSheetRef={renameModalRef}
         title={t("Renommer l'étude")}

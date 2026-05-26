@@ -35,6 +35,7 @@ import getTheme from '~themes/index'
 import defaultColors from '~themes/colors'
 import { EMPTY_OBJECT } from '~helpers/emptyReferences'
 import { MAX_CUSTOM_COLORS } from '~helpers/constants'
+import { ContainerComponent } from './Modal'
 
 type ColorKey = keyof typeof defaultColors
 
@@ -278,6 +279,7 @@ const ColorPickerModal = () => {
         activeOffsetY={[-20, 20]}
         onDismiss={handleModalClose}
         handleComponent={renderHandle}
+        containerComponent={ContainerComponent}
         key={key}
         {...bottomSheetStyles}
       >

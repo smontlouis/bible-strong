@@ -32,7 +32,10 @@ import {
   VerseIds,
 } from '~common/types'
 import Box from '~common/ui/Box'
-import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
+import {
+  BIBLE_FORM_SHEET_HEADER_HEIGHT,
+  HEADER_HEIGHT,
+} from '~features/app-switcher/utils/constants'
 import { HelpTip } from '~features/tips/HelpTip'
 import { appLogger } from '~helpers/agentObservability'
 import { BibleError } from '~helpers/bibleErrors'
@@ -620,10 +623,12 @@ export const BibleDOMWrapper = ({
         break
       }
       case SWIPE_DOWN: {
+        if (isFormSheet) break
         setIsFullScreenBible(true)
         break
       }
       case SWIPE_UP: {
+        if (isFormSheet) break
         setIsFullScreenBible(false)
         break
       }
@@ -763,6 +768,7 @@ export const BibleDOMWrapper = ({
     }
   )
   const TOP_INSET = isFormSheet ? 0 : insets.top
+  const headerHeight = isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT
 
   return (
     <Box
@@ -827,6 +833,7 @@ export const BibleDOMWrapper = ({
         annotationNotesCountByVerse={annotationNotesCountByVerse}
         relationItemsCount={relationMetadata.counts}
         relationItemsText={relationMetadata.items}
+        isFormSheet={isFormSheet}
       />
       {Platform.OS === 'android' && Platform.Version < 30 && (
         <HelpTip
@@ -836,7 +843,7 @@ export const BibleDOMWrapper = ({
           position="absolute"
           left={0}
           right={0}
-          top={HEADER_HEIGHT + TOP_INSET}
+          top={headerHeight + TOP_INSET}
         />
       )}
     </Box>

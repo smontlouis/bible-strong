@@ -28,7 +28,10 @@ import Box, {
 import { FeatherIcon, IonIcon, MaterialIcon, TextIcon } from '~common/ui/Icon'
 import MenuOption from '~common/ui/MenuOption'
 import Text, { AnimatedText } from '~common/ui/Text'
-import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
+import {
+  BIBLE_FORM_SHEET_HEADER_HEIGHT,
+  HEADER_HEIGHT,
+} from '~features/app-switcher/utils/constants'
 import BookmarkModal from '~features/bookmarks/BookmarkModal'
 import { getIfDatabaseNeedsDownload } from '~helpers/databases'
 import { toast } from '~helpers/toast'
@@ -120,8 +123,10 @@ const Header = ({
 
   const { addParallelVersion, removeParallelVersion, removeAllParallelVersions } = actions
 
-  const fullScreenOpacity = isFullScreenBible ? 0 : 1
-  const fullScreenTranslateY = isFullScreenBible ? -4 : 0
+  const isHeaderCollapsed = !isFormSheet && isFullScreenBible
+  const headerHeight = isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT
+  const fullScreenOpacity = isHeaderCollapsed ? 0 : 1
+  const fullScreenTranslateY = isHeaderCollapsed ? -4 : 0
   const TOP_INSET = isFormSheet ? 0 : insets.top
 
   const opacityTransitionStyle = {
@@ -155,7 +160,7 @@ const Header = ({
         bg="primary"
         px={15}
         paddingTop={TOP_INSET}
-        height={HEADER_HEIGHT + TOP_INSET}
+        height={headerHeight + TOP_INSET}
         borderBottomWidth={1}
         borderColor="border"
         position="absolute"
@@ -211,7 +216,7 @@ const Header = ({
         bg="reverse"
         px={15}
         paddingTop={TOP_INSET}
-        height={HEADER_HEIGHT + TOP_INSET}
+        height={headerHeight + TOP_INSET}
         borderBottomWidth={1}
         borderColor="border"
         position="absolute"
@@ -249,7 +254,6 @@ const Header = ({
     <AnimatedHStack
       width="100%"
       bg="reverse"
-      px={15}
       paddingTop={TOP_INSET}
       borderBottomWidth={1}
       borderColor="border"
@@ -258,7 +262,7 @@ const Header = ({
       left={0}
       overflow="visible"
       style={{
-        height: isFullScreenBible ? 20 + TOP_INSET : HEADER_HEIGHT + TOP_INSET,
+        height: isHeaderCollapsed ? 20 + TOP_INSET : headerHeight + TOP_INSET,
         transitionProperty: 'height',
         transitionDuration: 300,
       }}
@@ -314,7 +318,7 @@ const Header = ({
           </>
         ) : (
           <>
-            <HStack alignItems="center" gap={3}>
+            <HStack alignItems="center" gap={3} pl={10}>
               <HStack>
                 <TouchableBox
                   onPress={() => {

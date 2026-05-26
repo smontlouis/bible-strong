@@ -32,7 +32,11 @@ import { DispatchProvider } from './DispatchProvider'
 import { TranslationsProvider, BibleDOMTranslations } from './TranslationsContext'
 import { scaleFontSize } from './scaleFontSize'
 import { useFonts } from 'expo-font'
-import { HEADER_HEIGHT, HEADER_HEIGHT_MIN } from '~features/app-switcher/utils/constants'
+import {
+  BIBLE_FORM_SHEET_HEADER_HEIGHT,
+  HEADER_HEIGHT,
+  HEADER_HEIGHT_MIN,
+} from '~features/app-switcher/utils/constants'
 // Annotation mode imports
 import { AnnotationType } from './AnnotationMode'
 import {
@@ -140,6 +144,7 @@ type Props = Pick<
   selectedAnnotationId?: string | null
   // Safe area inset from native side (CSS env vars don't work in Expo DOM WebView)
   safeAreaTop?: number
+  isFormSheet?: boolean
 }
 
 const extractParallelVersionTitles = (parallelVerses: ParallelVerse[], currentVersion: string) => {
@@ -156,8 +161,9 @@ const fadeIn = keyframes`
   to { opacity: 1; }
 `
 
-const Container = styled('div')<RootStyles & { rtl: boolean; isParallelVerse: boolean }>(
-  ({ settings: { alignContent, theme, colors }, rtl, isParallelVerse }) => ({
+const Container = styled('div')<
+  RootStyles & { rtl: boolean; isParallelVerse: boolean; headerHeight: number }
+>(({ settings: { alignContent, theme, colors }, rtl, isParallelVerse, headerHeight }) => ({
     position: 'relative', // For highlight layer positioning
     maxWidth: isParallelVerse ? 'none' : '800px',
     margin: '0 auto',
@@ -167,11 +173,10 @@ const Container = styled('div')<RootStyles & { rtl: boolean; isParallelVerse: bo
     background: colors[theme].reverse,
     color: colors[theme].default,
     direction: rtl ? 'rtl' : 'ltr',
-    paddingTop: `${HEADER_HEIGHT + 10}px`,
+    paddingTop: `${headerHeight + 10}px`,
     animation: `${fadeIn} 300ms ease-out`,
     ...(rtl ? { textAlign: 'right' } : {}),
-  })
-)
+  }))
 
 const RightDirection = styled('div')<RootStyles>(({ settings: { theme, colors } }) => ({
   textAlign: 'right',
@@ -433,6 +438,7 @@ const LoadedBibleContent = ({
   annotationNotesCountByVerse,
   relationItemsCount,
   relationItemsText,
+  isFormSheet,
 }: Props) => {
   // Ref for highlight layer
   const containerRef = useRef<HTMLDivElement>(null)
@@ -812,6 +818,8 @@ const LoadedBibleContent = ({
   }, [parallelVerses?.length, parallelColumnWidth])
 
   useEffect(() => {
+    if (isFormSheet) return
+
     let lastScrollTop = 0
     let lastScrollTime = Date.now()
     const VELOCITY_THRESHOLD = 400
@@ -871,7 +879,7 @@ const LoadedBibleContent = ({
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  }, [dispatch, isFormSheet])
 
   const hasVerses = verses.length > 0
   useEffect(() => {
@@ -922,6 +930,7 @@ const LoadedBibleContent = ({
   const parallelVersionTitles = isParallelVerse
     ? extractParallelVersionTitles(parallelVerses, version)
     : []
+  const headerHeight = isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT
 
   return (
     <TranslationsProvider translations={translations}>
@@ -932,6 +941,7 @@ const LoadedBibleContent = ({
           rtl={isHebreu}
           settings={settings}
           isParallelVerse={isParallelVerse}
+          headerHeight={headerHeight}
         >
           {/* Highlight layer for word annotations and selection (disabled in parallel mode) */}
           {!isParallelVerse && (highlightRects.length > 0 || (annotationMode && selection)) && (
@@ -1131,13 +1141,15 @@ const VersesRenderer = ({ settings, dispatch, translations, verses, ...rest }: P
     'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
   })
 
+  const headerHeight = rest.isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT
+
   useEffect(() => {
     dispatch({
       type: 'DOM_COMPONENT_MOUNTED',
     }).catch(console.error)
-    document.documentElement.style.setProperty('--header-height', `${HEADER_HEIGHT}px`)
+    document.documentElement.style.setProperty('--header-height', `${headerHeight}px`)
     document.body.style.backgroundColor = settings.colors[settings.theme].reverse
-  }, [])
+  }, [dispatch, headerHeight, settings.colors, settings.theme])
 
   // Sync body background when theme changes
   useEffect(() => {
@@ -1151,7 +1163,12 @@ const VersesRenderer = ({ settings, dispatch, translations, verses, ...rest }: P
       <TranslationsProvider translations={translations}>
         <GlobalStyles />
         <DispatchProvider dispatch={dispatch}>
-          <Container settings={settings} rtl={false} isParallelVerse={false} />
+          <Container
+            settings={settings}
+            rtl={false}
+            isParallelVerse={false}
+            headerHeight={headerHeight}
+          />
         </DispatchProvider>
       </TranslationsProvider>
     )

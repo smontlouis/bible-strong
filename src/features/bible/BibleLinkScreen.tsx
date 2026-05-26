@@ -314,6 +314,12 @@ const BibleLinkScreen = () => {
 
           {!isEditing && currentLink && (
             <Box py={20}>
+              <EntityChipList
+                tags={currentLink?.tags}
+                relationCount={relationCount}
+                onRelationPress={() => linkEndpoint && openEntityRelations(linkEndpoint)}
+              />
+
               {isYoutubeLink && currentLink.videoId && (
                 <Box mb={20} borderRadius={10} overflow="hidden" bg="lightGrey">
                   <YoutubePlayer
@@ -373,12 +379,6 @@ const BibleLinkScreen = () => {
                   </HStack>
                 </Button>
               )}
-
-              <EntityChipList
-                tags={currentLink?.tags}
-                relationCount={relationCount}
-                onRelationPress={() => linkEndpoint && openEntityRelations(linkEndpoint)}
-              />
             </Box>
           )}
         </VStack>

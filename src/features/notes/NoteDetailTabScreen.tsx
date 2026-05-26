@@ -450,6 +450,11 @@ ${currentNote.description}
           }}
         >
           <Box gap={20}>
+            <EntityChipList
+              tags={currentNote?.tags}
+              relationCount={relationCount}
+              onRelationPress={() => noteEndpoint && openEntityRelations(noteEndpoint)}
+            />
             {isAnnotationNote && annotation ? (
               <Box bg="opacity5" borderRadius={8} py={12} px={16}>
                 <Text fontSize={14} color="grey" mb={4}>
@@ -487,11 +492,6 @@ ${currentNote.description}
                 scrollEnabled: false,
                 hideKeyboardAccessoryView: true,
               }}
-            />
-            <EntityChipList
-              tags={currentNote?.tags}
-              relationCount={relationCount}
-              onRelationPress={() => noteEndpoint && openEntityRelations(noteEndpoint)}
             />
           </Box>
         </ScrollView>
