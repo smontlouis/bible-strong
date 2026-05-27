@@ -272,11 +272,20 @@ export default function StudiesDOMComponent({
   )
 
   return (
-    <div
-      id="editor"
-      style={{
-        filter: colorScheme === 'dark' ? 'invert(1) hue-rotate(180deg)' : 'none',
-      }}
-    />
+    <>
+      <style>{`
+        @keyframes fade {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+      `}</style>
+      <div
+        id="editor"
+        style={{
+          filter: colorScheme === 'dark' ? 'invert(1) hue-rotate(180deg)' : 'none',
+          animation: 'fade 300ms ease-out',
+        }}
+      />
+    </>
   )
 }

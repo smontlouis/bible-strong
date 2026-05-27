@@ -42,6 +42,7 @@ import { isFullScreenBibleAtom, unifiedTagsModalAtom } from '~state/app'
 import { NotesTab, useIsCurrentTab } from '~state/tabs'
 
 const FOOTER_HEIGHT = 54
+const NOTE_EDITOR_MIN_HEIGHT = 240
 
 const verseKeysToVerseIds = (verseKeys: string[]): VerseIds =>
   verseKeys.reduce((acc, key) => {
@@ -79,14 +80,14 @@ const NoteDetailTabScreen = ({
   const [description, setDescription] = useState('')
   const [isEditing, setIsEditing] = useState(false)
   const [editorResetKey, setEditorResetKey] = useState(0)
-  const [webViewHeight, setWebViewHeight] = useState(100)
+  const [webViewHeight, setWebViewHeight] = useState(NOTE_EDITOR_MIN_HEIGHT)
   const [keyboardHeight, setKeyboardHeight] = useState(0)
   const { bottomBarHeight } = useBottomBarHeightInTab()
   const { colorScheme } = useCurrentThemeSelector()
   const isCreating = !noteId
 
   const handleSizeChange = (_width: number, height: number) => {
-    setWebViewHeight(height)
+    setWebViewHeight(Math.max(NOTE_EDITOR_MIN_HEIGHT, Math.ceil(height)))
   }
 
   // Force full screen bible mode off when this tab becomes active
@@ -375,7 +376,7 @@ ${currentNote.description}
   }
 
   const content = (
-    <>
+    <Box flex>
       <Header
         title={isAnnotationNote ? t("Note d'annotation") : t('Note')}
         subTitle={reference}
@@ -531,7 +532,7 @@ ${currentNote.description}
           <Fab icon="edit-2" onPress={onEditNote} />
         </Box>
       )}
-    </>
+    </Box>
   )
 
   return <FormSheetScreen isFormSheet={isFormSheet}>{content}</FormSheetScreen>

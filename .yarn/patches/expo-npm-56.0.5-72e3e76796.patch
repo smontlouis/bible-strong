@@ -1,0 +1,34 @@
+diff --git a/src/dom/webview-wrapper.tsx b/src/dom/webview-wrapper.tsx
+index 1695ebcf983f50949f4b7dce2845669f6b159383..44ddadf4b2965e49000b1c48a528984a5d894368 100644
+--- a/src/dom/webview-wrapper.tsx
++++ b/src/dom/webview-wrapper.tsx
+@@ -106,6 +106,15 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+   // Keep `initialProps` stable to prevent webview reloads when
+   // `injectedJavaScriptObject` changes.
+   const initialPropsRef = React.useRef(smartActions);
++  const initialDomGlobalsScript = React.useMemo(() => {
++    const hostOS = JSON.stringify(process.env.EXPO_OS);
++    const initialProps = JSON.stringify(initialPropsRef.current);
++    return `;(function() {
++      window.$$EXPO_DOM_HOST_OS = ${hostOS};
++      window.$$EXPO_INITIAL_PROPS = ${initialProps};
++    })();
++    true;`;
++  }, []);
+ 
+   // When the `marshalProps` change, emit them to the webview.
+   React.useEffect(() => {
+@@ -150,6 +159,13 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+       // Inject the initial props
+       initialProps: initialPropsRef.current,
+     },
++    injectedJavaScriptBeforeContentLoaded: [
++      initialDomGlobalsScript,
++      dom?.injectedJavaScriptBeforeContentLoaded,
++      'true;',
++    ]
++      .filter(Boolean)
++      .join('\n'),
+     injectedJavaScript: [
+       dom?.matchContents ? getInjectBodySizeObserverScript() : null,
+       dom?.injectedJavaScript,

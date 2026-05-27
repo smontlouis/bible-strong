@@ -77,6 +77,7 @@ const forwardProps = [
   'columnCount',
   'columnWidth',
   'rtl',
+  'headerHeight',
 ]
 setup(React.createElement, undefined, undefined, (props: object) => {
   const forwardedProps = props as Record<string, unknown>
@@ -162,19 +163,19 @@ const fadeIn = keyframes`
 const Container = styled('div')<
   RootStyles & { rtl: boolean; isParallelVerse: boolean; headerHeight: number }
 >(({ settings: { alignContent, theme, colors }, rtl, isParallelVerse, headerHeight }) => ({
-    position: 'relative', // For highlight layer positioning
-    maxWidth: isParallelVerse ? 'none' : '800px',
-    margin: '0 auto',
-    padding: '10px 15px',
-    paddingBottom: '300px',
-    textAlign: alignContent,
-    background: colors[theme].reverse,
-    color: colors[theme].default,
-    direction: rtl ? 'rtl' : 'ltr',
-    paddingTop: `${headerHeight + 10}px`,
-    animation: `${fadeIn} 300ms ease-out`,
-    ...(rtl ? { textAlign: 'right' } : {}),
-  }))
+  position: 'relative', // For highlight layer positioning
+  maxWidth: isParallelVerse ? 'none' : '800px',
+  margin: '0 auto',
+  padding: '10px 15px',
+  paddingBottom: '300px',
+  textAlign: alignContent,
+  background: colors[theme].reverse,
+  color: colors[theme].default,
+  direction: rtl ? 'rtl' : 'ltr',
+  paddingTop: `${headerHeight + 10}px`,
+  animation: `${fadeIn} 300ms ease-out`,
+  ...(rtl ? { textAlign: 'right' } : {}),
+}))
 
 const RightDirection = styled('div')<RootStyles>(({ settings: { theme, colors } }) => ({
   textAlign: 'right',
@@ -736,11 +737,6 @@ const LoadedBibleContent = ({
     },
   })
 
-  useEffect(() => {
-    dispatch({
-      type: 'DOM_COMPONENT_MOUNTED',
-    }).catch(console.error)
-  }, [])
   // Sync horizontal scroll between header and content for parallel versions
   // Also calculate translateX for each title to make them "sticky" at the left edge
   useEffect(() => {

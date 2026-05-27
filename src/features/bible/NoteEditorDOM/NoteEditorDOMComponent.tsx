@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from 'react'
 
+const MIN_EDITOR_HEIGHT = 240
+
 interface Props {
   dom?: import('expo/dom').DOMProps
   defaultTitle: string
@@ -42,18 +44,27 @@ export default function NoteEditorDOMComponent({
     const container = containerRef.current
     if (!container) return
 
+    const reportSize = () => {
+      const width = container.offsetWidth || container.scrollWidth
+      const height = Math.max(container.offsetHeight, container.scrollHeight, MIN_EDITOR_HEIGHT)
+      onSizeChange(width, height)
+    }
+
+    if (typeof ResizeObserver === 'undefined') {
+      reportSize()
+      return
+    }
+
     const observer = new ResizeObserver(entries => {
       for (const entry of entries) {
         const { width, height } = entry.contentRect
-        onSizeChange(width, height)
+        onSizeChange(width, Math.max(height, container.scrollHeight, MIN_EDITOR_HEIGHT))
       }
     })
 
     observer.observe(container)
 
-    // Report initial size
-    const { offsetWidth, offsetHeight } = container
-    onSizeChange(offsetWidth, offsetHeight)
+    requestAnimationFrame(reportSize)
 
     return () => observer.disconnect()
   }, [onSizeChange])
@@ -67,6 +78,13 @@ export default function NoteEditorDOMComponent({
     if (descriptionRef.current) {
       descriptionRef.current.innerText = defaultDescription
     }
+    requestAnimationFrame(() => {
+      const container = containerRef.current
+      if (!container) return
+      const width = container.offsetWidth || container.scrollWidth
+      const height = Math.max(container.offsetHeight, container.scrollHeight, MIN_EDITOR_HEIGHT)
+      onSizeChange(width, height)
+    })
   }, [defaultTitle, defaultDescription, resetKey])
 
   // Focus title when entering edit mode
@@ -100,7 +118,14 @@ export default function NoteEditorDOMComponent({
   return (
     <div
       ref={containerRef}
-      style={{ fontFamily: 'system-ui', color: textColor, overflow: 'hidden', width: '100%' }}
+      style={{
+        fontFamily: 'system-ui',
+        color: textColor,
+        overflow: 'hidden',
+        width: '100%',
+        minHeight: MIN_EDITOR_HEIGHT,
+        animation: 'fade 300ms ease-out',
+      }}
     >
       {/* Title */}
       <div
@@ -140,6 +165,10 @@ export default function NoteEditorDOMComponent({
         }}
       />
       <style>{`
+        @keyframes fade {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
         html, body {
           margin: 0;
           padding: 0;
