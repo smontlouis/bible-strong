@@ -24,7 +24,6 @@ La recommandation est de garder `BibleViewer.tsx` comme orchestrateur React Nati
 - Expo SDK 56 SwiftUI: https://docs.expo.dev/versions/v56.0.0/sdk/ui/swift-ui/
 - Expo SDK 56 Jetpack Compose: https://docs.expo.dev/versions/v56.0.0/sdk/ui/jetpack-compose/
 - Les deux pages indiquent `@expo/ui` bundle `~56.0.8`, installation `npx expo install @expo/ui`, inclusion dans Expo Go, et l'obligation de wrapper les composants natifs dans `Host`.
-- Context7 a confirmé les APIs utiles pour SDK 56: `Host`, `matchContents`, `onLayoutContent`, `useViewportSizeMeasurement`, `colorScheme`, `layoutDirection`, `ignoreSafeArea`, `LazyColumn`, modifiers et extension via modules Expo custom.
 
 ## État du projet
 

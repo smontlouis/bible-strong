@@ -408,12 +408,6 @@ const animatedStyle = useAnimatedStyle(() => ({
 4. **Use `interpolate` with `Extrapolation.CLAMP`** to limit values
 5. **Prefer non-layout properties** (`transform`, `opacity`) over layout properties (`top`, `width`)
 
-### Documentation
-
-Always use context7 when I need code generation, setup or configuration steps, or
-library/API documentation. This means you should automatically use the Context7 MCP
-tools to resolve library id and get library docs without me having to explicitly ask.
-
 ## Agent skills
 
 ### Issue tracker

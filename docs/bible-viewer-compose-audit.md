@@ -22,7 +22,6 @@ Le choix pragmatique est:
 - Chaque arbre Compose doit etre rendu dans `Host`.
 - `LazyColumn` est disponible pour les listes scrollables.
 - Les modifiers de `@expo/ui/jetpack-compose/modifiers` existent pour styliser les composants Expo UI.
-- Context7 confirme `Host`, `LazyColumn`, les modifiers, et l'extension par composants Jetpack Compose custom via modules Expo.
 - Le depot est actuellement en Expo SDK 54: `package.json` depend de `expo@54.0.29`, `react-native@0.81.5`, `expo-sqlite@16.0.10`, et ne contient pas encore `@expo/ui`.
 
 ## Etat actuel du lecteur
