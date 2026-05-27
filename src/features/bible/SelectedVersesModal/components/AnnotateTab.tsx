@@ -31,7 +31,7 @@ const AnnotateTab = ({
   activeStates,
 }: AnnotateTabProps) => {
   const { t } = useTranslation()
-  const { hasNote, hasTags, hasLink, hasStudyRelation, hasBookmark, hasFocus } = activeStates
+  const { hasBookmark, hasFocus } = activeStates
 
   return (
     <ScrollView
@@ -40,20 +40,10 @@ const AnnotateTab = ({
       contentContainerStyle={{ paddingHorizontal: 16 }}
       style={{ width: screenWidth }}
     >
-      <ActionItem
-        name={hasNote ? 'file-text' : 'file-plus'}
-        label={t('Note')}
-        onPress={onCreateNoteClick}
-        isActive={hasNote}
-      />
-      <ActionItem name="tag" label={t('Tag')} onPress={addTag} isActive={hasTags} />
-      <ActionItem name="link" label={t('Lien')} onPress={onCreateLinkClick} isActive={hasLink} />
-      <ActionItem
-        name="git-merge"
-        label={t('Relation')}
-        onPress={onCreateStudyRelationClick}
-        isActive={hasStudyRelation}
-      />
+      <ActionItem name="file-plus" label={t('Note')} onPress={onCreateNoteClick} />
+      <ActionItem name="tag" label={t('Tag')} onPress={addTag} />
+      <ActionItem name="link" label={t('Lien')} onPress={onCreateLinkClick} />
+      <ActionItem name="git-merge" label={t('Relation')} onPress={onCreateStudyRelationClick} />
       <ActionItem
         name="bookmark"
         label={t('Marque-page')}

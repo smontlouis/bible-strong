@@ -1,14 +1,13 @@
 import type { ReactNode } from 'react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Keyboard, Platform, ScrollView, TouchableOpacity } from 'react-native'
+import { FlatList, ScrollView, TouchableOpacity } from 'react-native'
+import { KeyboardAwareScrollView, useKeyboardState } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { useTheme } from '@emotion/react'
 import { Image } from 'expo-image'
 import { useAtomValue, useSetAtom } from 'jotai/react'
-import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view'
-
 import booksDesc from '~assets/bible_versions/books-desc'
 import DropdownMenu from '~common/DropdownMenu'
 import DownloadRequired from '~common/DownloadRequired'
@@ -108,26 +107,9 @@ const isDatabaseError = (value: unknown): value is DatabaseError =>
 
 const useKeyboardFooterBottom = (footerHeight: number) => {
   const insets = useSafeAreaInsets()
-  const [bottom, setBottom] = useState(0)
-
-  useEffect(() => {
-    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow'
-    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide'
-
-    const showSubscription = Keyboard.addListener(showEvent, event => {
-      Keyboard.scheduleLayoutAnimation(event)
-      setBottom(Math.max(0, event.endCoordinates.height - insets.bottom - footerHeight))
-    })
-    const hideSubscription = Keyboard.addListener(hideEvent, event => {
-      Keyboard.scheduleLayoutAnimation(event)
-      setBottom(0)
-    })
-
-    return () => {
-      showSubscription.remove()
-      hideSubscription.remove()
-    }
-  }, [footerHeight, insets.bottom])
+  const keyboardHeight = useKeyboardState(state => state.height)
+  const isKeyboardVisible = useKeyboardState(state => state.isVisible)
+  const bottom = isKeyboardVisible ? Math.max(0, keyboardHeight - insets.bottom - footerHeight) : 0
 
   return bottom
 }
@@ -950,10 +932,15 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
 
     if (shouldRenderSearchList) {
       return (
-        <KeyboardAwareFlatList
-          enableOnAndroid
+        <FlatList
           keyboardShouldPersistTaps="handled"
-          enableResetScrollToCoords={false}
+          renderScrollComponent={props => (
+            <KeyboardAwareScrollView
+              {...props}
+              bottomOffset={listBottomInset}
+              disableScrollOnKeyboardHide
+            />
+          )}
           style={{
             paddingBottom: listBottomInset || 40,
             flex: 1,

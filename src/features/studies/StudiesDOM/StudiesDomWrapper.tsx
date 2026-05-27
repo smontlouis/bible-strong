@@ -1,7 +1,11 @@
 import { useRouter } from 'expo-router'
 import type { JSONValue } from 'expo/build/dom/dom.types'
 import { useEffect, useRef, useState } from 'react'
-import { Keyboard, KeyboardAvoidingView, Platform } from 'react-native'
+import {
+  KeyboardAvoidingView,
+  KeyboardStickyView,
+  useKeyboardState,
+} from 'react-native-keyboard-controller'
 import { WebViewMessageEvent } from 'react-native-webview'
 import { useTheme } from '@emotion/react'
 
@@ -62,29 +66,10 @@ export default function StudiesDomWrapper({
   const ref = useRef<StudyDOMRef>(null)
   const router = useRouter()
   const theme = useTheme()
-  const [isKeyboardOpened, setIsKeyboardOpened] = useState(false)
-  const [keyboardHeight, setKeyboardHeight] = useState(0)
+  const isKeyboardOpened = useKeyboardState(state => state.isVisible)
+  const keyboardHeight = useKeyboardState(state => state.height)
   const [activeFormats, setActiveFormats] = useState({})
   const { colorScheme } = useCurrentThemeSelector()
-
-  useEffect(() => {
-    const updateListener = Platform.OS === 'android' ? 'keyboardDidShow' : 'keyboardWillShow'
-    const resetListener = Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide'
-
-    const keyboardShowListener = Keyboard.addListener(updateListener, event => {
-      setIsKeyboardOpened(true)
-      setKeyboardHeight(event.endCoordinates.height)
-    })
-    const keyboardHideListener = Keyboard.addListener(resetListener, () => {
-      setIsKeyboardOpened(false)
-      setKeyboardHeight(0)
-    })
-
-    return () => {
-      keyboardShowListener.remove()
-      keyboardHideListener.remove()
-    }
-  }, [])
 
   const getIsCurrentTab = useIsCurrentTab()
   const isCurrentTab = studyAtom ? getIsCurrentTab(studyAtom as PrimitiveAtom<TabItem>) : false
@@ -156,14 +141,22 @@ export default function StudiesDomWrapper({
               ? JSON.parse(msgData.payload.arrayVerses)
               : msgData.payload?.arrayVerses
           ) as string[]
+          const [book, chapter, verse] = arrayVerses[0].split('-')
+          const focusVerses = arrayVerses
+            .filter(verseKey => {
+              const [keyBook, keyChapter] = verseKey.split('-')
+              return keyBook === book && keyChapter === chapter
+            })
+            .map(verseKey => Number(verseKey.split('-')[2]))
 
           router.push({
             pathname: '/bible-view',
             params: {
               contextDisplayMode: 'focused',
-              book: arrayVerses[0].split('-')[0],
-              chapter: arrayVerses[0].split('-')[1],
-              focusVerses: JSON.stringify(arrayVerses.map(verse => Number(verse.split('-')[2]))),
+              book,
+              chapter,
+              verse,
+              focusVerses: JSON.stringify(focusVerses),
             },
           })
           return
@@ -221,6 +214,7 @@ export default function StudiesDomWrapper({
       isReadOnly={isReadOnly}
       colorScheme={colorScheme}
       dom={{
+        useExpoDOMWebView: false,
         onMessage: handleMessage,
         keyboardDisplayRequiresUserAction: false,
         bounces: false,
@@ -239,9 +233,9 @@ export default function StudiesDomWrapper({
       <Box flex bg="reverse" pb={isKeyboardOpened ? 50 : 0}>
         {editor}
         {footer && (
-          <Box position="absolute" left={0} right={0} bottom={keyboardHeight}>
+          <KeyboardStickyView style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
             {footer}
-          </Box>
+          </KeyboardStickyView>
         )}
       </Box>
     )
@@ -249,7 +243,8 @@ export default function StudiesDomWrapper({
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      automaticOffset
+      behavior="padding"
       style={{
         flex: 1,
         backgroundColor: theme.colors.reverse,

@@ -246,6 +246,21 @@ const getSelectedVerseKeysFromAction = (
   return getLegacyVerseKeysFromEntityId(fallbackEntityId)
 }
 
+const groupVerseKeysByChapter = (verseKeys: string[]): string[][] => {
+  const groups = verseKeys.reduce(
+    (result, verseKey) => {
+      const [book, chapter] = verseKey.split('-')
+      const groupKey = `${book}-${chapter}`
+      result[groupKey] = result[groupKey] || []
+      result[groupKey].push(verseKey)
+      return result
+    },
+    {} as Record<string, string[]>
+  )
+
+  return Object.values(groups)
+}
+
 const removeSystemRelationsForEndpoint = (draft: UserState, endpointKey: string) => {
   draft.bible.relations = draft.bible.relations || {}
   for (const [relationId, relation] of Object.entries(draft.bible.relations)) {
@@ -1030,18 +1045,20 @@ const userSlice = createSlice({
       for (const [linkKey, link] of Object.entries(action.payload)) {
         const verseKeys = getSelectedVerseKeysFromAction(action, linkKey)
         if (!verseKeys.length) continue
-        const verseEndpoint = createVerseEndpoint(verseKeys, verseKeys.join('/'))
-        const externalLinkEndpoint = createExternalLinkEndpoint(verseEndpoint, linkKey, link)
-        upsertSystemRelation(
-          state,
-          createSystemRelation({
-            id: getSystemRelationId('externalLink', linkKey, verseEndpoint),
-            type: 'externalLink',
-            endpoints: [externalLinkEndpoint, verseEndpoint],
-            createdAt: link.date,
-            updatedAt: link.date,
-          })
-        )
+        groupVerseKeysByChapter(verseKeys).forEach(verseKeyGroup => {
+          const verseEndpoint = createVerseEndpoint(verseKeyGroup, verseKeyGroup.join('/'))
+          const externalLinkEndpoint = createExternalLinkEndpoint(verseEndpoint, linkKey, link)
+          upsertSystemRelation(
+            state,
+            createSystemRelation({
+              id: getSystemRelationId('externalLink', linkKey, verseEndpoint),
+              type: 'externalLink',
+              endpoints: [externalLinkEndpoint, verseEndpoint],
+              createdAt: link.date,
+              updatedAt: link.date,
+            })
+          )
+        })
       }
       syncRelationProjections(state)
     })
@@ -1130,17 +1147,19 @@ const userSlice = createSlice({
           const verseKeys = getSelectedVerseKeysFromAction(action, noteId)
           if (!verseKeys.length) continue
           const noteEndpoint = createNoteEndpoint(noteId, note.title || note.description)
-          const verseEndpoint = createVerseEndpoint(verseKeys, verseKeys.join('/'))
-          upsertSystemRelation(
-            state,
-            createSystemRelation({
-              id: getSystemRelationId('annotates', noteId, verseEndpoint),
-              type: 'annotates',
-              endpoints: [noteEndpoint, verseEndpoint],
-              createdAt: note.date,
-              updatedAt: note.date,
-            })
-          )
+          groupVerseKeysByChapter(verseKeys).forEach(verseKeyGroup => {
+            const verseEndpoint = createVerseEndpoint(verseKeyGroup, verseKeyGroup.join('/'))
+            upsertSystemRelation(
+              state,
+              createSystemRelation({
+                id: getSystemRelationId('annotates', noteId, verseEndpoint),
+                type: 'annotates',
+                endpoints: [noteEndpoint, verseEndpoint],
+                createdAt: note.date,
+                updatedAt: note.date,
+              })
+            )
+          })
         }
       }
       backfillSystemRelations(state)

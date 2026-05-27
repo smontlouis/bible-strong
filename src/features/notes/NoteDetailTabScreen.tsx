@@ -5,7 +5,12 @@ import { produce } from 'immer'
 import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, Share } from 'react-native'
+import { Alert, ScrollView, Share } from 'react-native'
+import {
+  KeyboardAvoidingView,
+  KeyboardStickyView,
+  useKeyboardState,
+} from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import books from '~assets/bible_versions/books-desc'
@@ -81,7 +86,7 @@ const NoteDetailTabScreen = ({
   const [isEditing, setIsEditing] = useState(false)
   const [editorResetKey, setEditorResetKey] = useState(0)
   const [webViewHeight, setWebViewHeight] = useState(NOTE_EDITOR_MIN_HEIGHT)
-  const [keyboardHeight, setKeyboardHeight] = useState(0)
+  const keyboardHeight = useKeyboardState(state => state.height)
   const { bottomBarHeight } = useBottomBarHeightInTab()
   const { colorScheme } = useCurrentThemeSelector()
   const isCreating = !noteId
@@ -99,24 +104,6 @@ const NoteDetailTabScreen = ({
       setIsFullScreenBible(false)
     }
   }, [isCurrentTab, setIsFullScreenBible])
-
-  useEffect(() => {
-    if (!isFormSheet) return
-
-    const showSubscription = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-      event => setKeyboardHeight(event.endCoordinates.height)
-    )
-    const hideSubscription = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-      () => setKeyboardHeight(0)
-    )
-
-    return () => {
-      showSubscription.remove()
-      hideSubscription.remove()
-    }
-  }, [isFormSheet])
 
   const selectNoteByKey = makeNoteByKeySelector()
   const currentNote = useSelector((state: RootState) => selectNoteByKey(state, noteId || ''))
@@ -219,8 +206,13 @@ const NoteDetailTabScreen = ({
 
   const onSaveNote = () => {
     const noteKey = isAnnotationNote && noteId ? noteId : currentNote?.id
+    const shouldAttachVerses = isCreating || isCreatingAnnotationNote || hasInitialVerseKeys
     const targetVerses =
-      isAnnotationNote && noteKey ? ({ [noteKey]: true } as VerseIds) : noteVerses
+      isAnnotationNote && noteKey
+        ? ({ [noteKey]: true } as VerseIds)
+        : shouldAttachVerses
+          ? noteVerses
+          : ({} as VerseIds)
     const action = addNote(
       { ...currentNote, ...(noteKey ? { id: noteKey } : {}), title, description, date: Date.now() },
       targetVerses
@@ -441,7 +433,8 @@ ${currentNote.description}
         }
       />
       <KeyboardAvoidingView
-        behavior={!isFormSheet && Platform.OS === 'ios' ? 'padding' : undefined}
+        automaticOffset
+        behavior={!isFormSheet ? 'padding' : undefined}
         style={{ flex: 1 }}
       >
         <ScrollView
@@ -492,6 +485,7 @@ ${currentNote.description}
               onDescriptionChange={setDescription}
               onSizeChange={handleSizeChange}
               dom={{
+                useExpoDOMWebView: false,
                 containerStyle: { height: webViewHeight, overflow: 'hidden' },
                 style: { overflow: 'hidden' },
                 scrollEnabled: false,
@@ -501,26 +495,27 @@ ${currentNote.description}
           </Box>
         </ScrollView>
         {isEditing && (
-          <HStack
-            position={isFormSheet ? 'absolute' : undefined}
-            left={isFormSheet ? 0 : undefined}
-            right={isFormSheet ? 0 : undefined}
-            bottom={isFormSheet ? keyboardHeight : undefined}
-            py={10}
-            px={20}
-            justifyContent="flex-end"
-            bg="reverse"
-            borderTopWidth={1}
-            borderColor="border"
-            gap={10}
+          <KeyboardStickyView
+            enabled={isFormSheet}
+            style={isFormSheet ? { position: 'absolute', left: 0, right: 0, bottom: 0 } : undefined}
           >
-            <Button reverse onPress={cancelEditing}>
-              {t('Annuler')}
-            </Button>
-            <Button disabled={submitIsDisabled} onPress={onSaveNote}>
-              {t('Sauvegarder')}
-            </Button>
-          </HStack>
+            <HStack
+              py={10}
+              px={20}
+              justifyContent="flex-end"
+              bg="reverse"
+              borderTopWidth={1}
+              borderColor="border"
+              gap={10}
+            >
+              <Button reverse onPress={cancelEditing}>
+                {t('Annuler')}
+              </Button>
+              <Button disabled={submitIsDisabled} onPress={onSaveNote}>
+                {t('Sauvegarder')}
+              </Button>
+            </HStack>
+          </KeyboardStickyView>
         )}
       </KeyboardAvoidingView>
       {!isEditing && (

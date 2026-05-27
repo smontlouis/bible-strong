@@ -164,6 +164,24 @@ describe('Notes Reducer', () => {
       expect(newState.bible.notes['1-1-1/1-1-2/1-1-3']).toBeDefined()
     })
 
+    it('should split system note relations by chapter', () => {
+      const note = createNote({ id: 'note-1' })
+      const newState = userReducer(
+        initialState,
+        addNoteAction({ 'note-1': note }, ['1-4-1', '65-1-24'])
+      )
+
+      const verseGroups = Object.values(newState.bible.relations)
+        .filter(relation => relation.kind === 'system' && relation.type === 'annotates')
+        .map(relation => relation.endpoints.find(endpoint => endpoint.type === 'verse'))
+        .filter((endpoint): endpoint is Extract<typeof endpoint, { type: 'verse' }> =>
+          Boolean(endpoint)
+        )
+        .map(endpoint => endpoint.verseKeys)
+
+      expect(verseGroups).toEqual([['1-4-1'], ['65-1-24']])
+    })
+
     it('should merge with existing notes', () => {
       const state = {
         ...initialState,

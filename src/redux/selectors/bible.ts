@@ -51,7 +51,7 @@ const getRelationEntityEndpoint = (
 const getRelationVerseEndpoint = (relation: Relation): RelationEndpoint | undefined =>
   relation.endpoints.find(endpoint => endpoint.type === 'verse')
 
-const getRelationVerseKeysForEntity = (
+export const getRelationVerseKeysForEntity = (
   relations: RelationsObj,
   entityType: 'note' | 'externalLink',
   entityId: string,

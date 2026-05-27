@@ -13,7 +13,10 @@ import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { Note } from '~redux/modules/user'
-import { selectRelationCountsByEndpointIdentity } from '~redux/selectors/bible'
+import {
+  getRelationVerseKeysForEntity,
+  selectRelationCountsByEndpointIdentity,
+} from '~redux/selectors/bible'
 import { NotesTab } from '~state/tabs'
 import { unifiedTagsModalAtom } from '~state/app'
 import { endpointIdentity, type RelationEndpoint } from '~features/studyRelations/domain'
@@ -78,19 +81,8 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
           return
         }
 
-        const relation = Object.values(relations).find(
-          candidate =>
-            candidate.kind === 'system' &&
-            candidate.type === 'annotates' &&
-            candidate.endpoints.some(
-              endpoint => endpoint.type === 'note' && endpoint.noteId === noteKey
-            )
-        )
-        const verseEndpoint = relation?.endpoints.find(endpoint => endpoint.type === 'verse')
-        const verseNumbers =
-          verseEndpoint?.type === 'verse'
-            ? Object.fromEntries(verseEndpoint.verseKeys.map(key => [key, true]))
-            : {}
+        const verseKeys = getRelationVerseKeysForEntity(relations, 'note', noteKey, 'annotates')
+        const verseNumbers = Object.fromEntries(verseKeys.map(key => [key, true]))
 
         const reference = verseToReference(verseNumbers)
         formattedNotes.push({ noteId: noteKey, reference, notes: note })

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Verse } from '~common/types'
-import { getChapterVerses } from '~helpers/biblesDb'
+import { getMultipleVerses } from '~helpers/biblesDb'
 import { useDefaultBibleVersion } from '../state/useDefaultBibleVersion'
 
 export const verseStringToObject = (arrayString: string[]): Omit<Verse, 'Texte'>[] => {
@@ -17,14 +17,24 @@ const useBibleVerses = (verseIds: Omit<Verse, 'Texte'>[]) => {
 
   React.useEffect(() => {
     const loadVerses = async () => {
-      const { Livre, Chapitre } = verseIds[0]
-      const bookNum = Number(Livre)
-      const chapterNum = Number(Chapitre)
+      if (!verseIds.length) {
+        setVerses([])
+        return
+      }
 
-      const allVerses = await getChapterVerses(version, bookNum, chapterNum)
-      const versesWithText = allVerses.filter(v =>
-        verseIds.find(vI => Number(vI.Verset) === Number(v.Verset))
+      const verseKeys = verseIds.map(
+        ({ Livre, Chapitre, Verset }) => `${Livre}-${Chapitre}-${Verset}`
       )
+      const versesMap = await getMultipleVerses(version, verseKeys)
+
+      const versesWithText = verseIds
+        .map(verse => {
+          const key = `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`
+          const text = versesMap[key]
+          if (!text) return undefined
+          return { ...verse, Texte: text } as Verse
+        })
+        .filter((verse): verse is Verse => Boolean(verse))
 
       setVerses(versesWithText)
     }

@@ -13,6 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, InteractionManager, LogBox, View } from 'react-native'
 import { SystemBars } from 'react-native-edge-to-edge'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { configureReanimatedLogger } from 'react-native-reanimated'
 import { RootSiblingParent } from 'react-native-root-siblings'
 import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-context'
@@ -325,11 +326,13 @@ function RootLayout() {
       <SystemBars style="light" />
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-          <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-            <ReduxProvider store={store}>
-              <InnerApp />
-            </ReduxProvider>
-          </View>
+          <KeyboardProvider>
+            <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+              <ReduxProvider store={store}>
+                <InnerApp />
+              </ReduxProvider>
+            </View>
+          </KeyboardProvider>
         </SafeAreaProvider>
       </GestureHandlerRootView>
     </>

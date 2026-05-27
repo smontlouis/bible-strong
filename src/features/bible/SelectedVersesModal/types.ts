@@ -25,10 +25,6 @@ export interface ActionItemProps {
 }
 
 export interface VerseActiveStates {
-  hasNote: boolean
-  hasTags: boolean
-  hasLink: boolean
-  hasStudyRelation: boolean
   hasBookmark: boolean
   hasFocus: boolean
 }

@@ -157,7 +157,8 @@ const BibleLinkScreen = () => {
       date: Date.now(),
     }
 
-    const action = addLink(linkData, linkVerses || displayedLinkVerses || {})
+    const targetVerses = currentLink && !linkVerses ? {} : linkVerses || displayedLinkVerses || {}
+    const action = addLink(linkData, targetVerses)
     if (action) {
       dispatch(action)
       const newLinkId = Object.keys(action.payload)[0]

@@ -68,6 +68,7 @@ export default function NoteEditorBottomSheet({
       onFocus={handleFocus}
       onBlur={handleBlur}
       dom={{
+        useExpoDOMWebView: false,
         containerStyle: { height: webViewHeight, overflow: 'hidden' },
         style: { overflow: 'hidden' },
         scrollEnabled: false,

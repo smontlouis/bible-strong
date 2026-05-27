@@ -6,16 +6,9 @@ import * as Sentry from '@sentry/react-native'
 
 const orderVerses = (verses: VerseIds) => {
   const orderedVersesList = Object.keys(verses).sort((key1, key2) => {
-    const verse1 = Number(key1.split('-')[2])
-    const verse2 = Number(key2.split('-')[2])
-
-    if (verse1 < verse2) {
-      return -1
-    }
-    if (verse1 > verse2) {
-      return 1
-    }
-    return 0
+    const [book1, chapter1, verse1] = key1.split('-').map(Number)
+    const [book2, chapter2, verse2] = key2.split('-').map(Number)
+    return book1 - book2 || chapter1 - chapter2 || verse1 - verse2
   })
 
   return orderedVersesList

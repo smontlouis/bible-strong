@@ -37,13 +37,36 @@ const isBookChapterInput = (v: VerseInput): v is BookChapterInput => {
   return typeof v === 'object' && !Array.isArray(v) && 'bookNum' in v && 'chapterNum' in v
 }
 
+const parseVerseId = (verseId: VerseId): ParsedVerse => {
+  const [book, chapter, verse] = verseId.split('-').map(Number)
+  return { book, chapter, verse }
+}
+
 const orderVerses = (arrayVerses: VerseId[]): VerseId[] => {
   return arrayVerses.sort((key1, key2) => {
-    const verse1 = Number(key1.split('-')[2])
-    const verse2 = Number(key2.split('-')[2])
-    return verse1 - verse2
+    const verse1 = parseVerseId(key1)
+    const verse2 = parseVerseId(key2)
+    return (
+      verse1.book - verse2.book ||
+      verse1.chapter - verse2.chapter ||
+      verse1.verse - verse2.verse
+    )
   })
 }
+
+const compactVerseNumbers = (verses: number[]): string =>
+  verses.reduce((acc: string, verse: number, i: number, array: number[]) => {
+    if (verse === array[i - 1] + 1 && verse === array[i + 1] - 1) {
+      return acc
+    }
+    if (verse === array[i - 1] + 1 && verse !== array[i + 1] - 1) {
+      return `${acc}-${verse}`
+    }
+    if (array[i - 1] && verse - 1 !== array[i - 1]) {
+      return `${acc},${verse}`
+    }
+    return acc + verse
+  }, '')
 
 const range = (start: number, end: number): number[] => {
   return Array(end - start + 1)
@@ -98,33 +121,30 @@ const verseToReference = (v: VerseInput, options: VerseToReferenceOptions = {}):
 
   verses = orderVerses(verses)
 
-  const parsedVerses: ParsedVerse[] = verses.map(verseId => {
-    const [book, chapter, verse] = verseId.split('-').map(Number)
-    return { book, chapter, verse }
-  })
+  const parsedVerses: ParsedVerse[] = verses.map(parseVerseId)
+  const groupedByChapter = parsedVerses.reduce(
+    (groups, verse) => {
+      const key = `${verse.book}-${verse.chapter}`
+      groups[key] = groups[key] || {
+        book: verse.book,
+        chapter: verse.chapter,
+        verses: [],
+      }
+      groups[key].verses.push(verse.verse)
+      return groups
+    },
+    {} as Record<string, { book: number; chapter: number; verses: number[] }>
+  )
 
-  const title: string = parsedVerses
-    .map(v => v.verse)
-    .reduce(
-      (acc: string, verse: number, i: number, array: number[]) => {
-        if (verse === array[i - 1] + 1 && verse === array[i + 1] - 1) {
-          // if suite > 2
-          return acc
-        }
-        if (verse === array[i - 1] + 1 && verse !== array[i + 1] - 1) {
-          // if endSuite
-          return `${acc}-${verse}`
-        }
-        if (array[i - 1] && verse - 1 !== array[i - 1]) {
-          // if not preceded by - 1
-          return `${acc},${verse}`
-        }
-        return acc + verse
-      },
-      `${i18n.t(books[parsedVerses[0].book - 1].Nom)} ${parsedVerses[0].chapter}:`
-    )
-
-  return title
+  return Object.values(groupedByChapter)
+    .map(group => {
+      const bookName = books[group.book - 1]?.Nom
+      const translatedBookName = bookName
+        ? i18n.t(bookName)
+        : i18n.t('Livre {{bookNumber}}', { bookNumber: group.book })
+      return `${translatedBookName} ${group.chapter}:${compactVerseNumbers(group.verses)}`
+    })
+    .join('; ')
 }
 
 export default verseToReference

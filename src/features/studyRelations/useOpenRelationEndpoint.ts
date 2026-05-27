@@ -13,6 +13,12 @@ export const useOpenRelationEndpoint = () => {
     switch (endpoint.type) {
       case 'verse': {
         const [bookNumber, chapter, verse] = endpoint.verseKeys[0].split('-').map(Number)
+        const focusVerses = endpoint.verseKeys
+          .filter(key => {
+            const [keyBook, keyChapter] = key.split('-').map(Number)
+            return keyBook === bookNumber && keyChapter === chapter
+          })
+          .map(key => Number(key.split('-')[2]))
         router.push({
           pathname: '/bible-view',
           params: {
@@ -20,7 +26,7 @@ export const useOpenRelationEndpoint = () => {
             book: JSON.stringify(books[bookNumber - 1]),
             chapter: String(chapter),
             verse: String(verse),
-            focusVerses: JSON.stringify(endpoint.verseKeys.map(key => Number(key.split('-')[2]))),
+            focusVerses: JSON.stringify(focusVerses),
           },
         })
         break

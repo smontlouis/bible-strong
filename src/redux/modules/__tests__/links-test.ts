@@ -197,6 +197,24 @@ describe('Links Reducer', () => {
       expect(newState.bible.links['1-1-1/1-1-2/1-1-3']).toBeDefined()
     })
 
+    it('should split system link relations by chapter', () => {
+      const link = createLink({ id: 'link-1' })
+      const newState = userReducer(
+        initialState,
+        addLinkAction({ 'link-1': link }, ['1-4-1', '65-1-24'])
+      )
+
+      const verseGroups = Object.values(newState.bible.relations)
+        .filter(relation => relation.kind === 'system' && relation.type === 'externalLink')
+        .map(relation => relation.endpoints.find(endpoint => endpoint.type === 'verse'))
+        .filter((endpoint): endpoint is Extract<typeof endpoint, { type: 'verse' }> =>
+          Boolean(endpoint)
+        )
+        .map(endpoint => endpoint.verseKeys)
+
+      expect(verseGroups).toEqual([['1-4-1'], ['65-1-24']])
+    })
+
     it('should merge with existing links', () => {
       const state = {
         ...initialState,

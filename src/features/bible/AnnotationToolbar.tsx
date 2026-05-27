@@ -38,16 +38,22 @@ interface SelectedAnnotation {
 }
 
 const formatSelectionRange = (selection: SelectionRange): string => {
-  const [book, chapter, verse1] = selection.start.verseKey.split('-').map(Number)
-  const verse2 = Number(selection.end.verseKey.split('-')[2])
+  const [startBook, startChapter, startVerseNumber] = selection.start.verseKey
+    .split('-')
+    .map(Number)
+  const [endBook, endChapter, endVerseNumber] = selection.end.verseKey.split('-').map(Number)
+
+  if (startBook !== endBook || startChapter !== endChapter) {
+    return verseToReference([selection.start.verseKey, selection.end.verseKey])
+  }
 
   // Normalize: ensure startVerse <= endVerse (handles right-to-left selection)
-  const startVerse = Math.min(verse1, verse2)
-  const endVerse = Math.max(verse1, verse2)
+  const startVerse = Math.min(startVerseNumber, endVerseNumber)
+  const endVerse = Math.max(startVerseNumber, endVerseNumber)
 
   const verses = Array.from(
     { length: endVerse - startVerse + 1 },
-    (_, i) => `${book}-${chapter}-${startVerse + i}`
+    (_, i) => `${startBook}-${startChapter}-${startVerse + i}`
   )
 
   return verseToReference(verses)

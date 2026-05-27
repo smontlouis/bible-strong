@@ -1,6 +1,7 @@
 import { useTheme } from '@emotion/react'
 import React, { memo, useRef, useState } from 'react'
-import { Keyboard, TextInput, useWindowDimensions, ScrollView } from 'react-native'
+import { TextInput, useWindowDimensions, ScrollView } from 'react-native'
+import { KeyboardController } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { toast } from '~helpers/toast'
 import {
@@ -100,7 +101,7 @@ const CreateGroupPage = memo(
       }
       setName('')
       setSelectedColor(GROUP_COLORS[0])
-      Keyboard.dismiss()
+      void KeyboardController.dismiss()
     }
 
     // Reset les flags quand on arrive sur la page
@@ -125,7 +126,7 @@ const CreateGroupPage = memo(
     const handleCancel = () => {
       setName('')
       setSelectedColor(GROUP_COLORS[0])
-      Keyboard.dismiss()
+      void KeyboardController.dismiss()
       onCancel()
     }
 
@@ -144,7 +145,7 @@ const CreateGroupPage = memo(
 
         setName('')
         setSelectedColor(GROUP_COLORS[0])
-        Keyboard.dismiss()
+        void KeyboardController.dismiss()
         onGroupCreated(newGroupId)
       } else {
         // Si la création a échoué (limite atteinte), afficher le toast
