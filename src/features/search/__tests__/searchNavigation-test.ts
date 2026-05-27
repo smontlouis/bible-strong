@@ -10,7 +10,7 @@ describe('getBibleViewParamsForSearchResult', () => {
         version: 'DBY',
       })
     ).toEqual({
-      isReadOnly: 'true',
+      contextDisplayMode: 'focused',
       book: JSON.stringify({ Numero: 51, Nom: 'Colossiens', Chapitres: 4 }),
       chapter: '2',
       verse: '19',

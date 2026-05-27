@@ -58,10 +58,6 @@ export type ColorChangeModalProps =
 
 export const colorChangeModalAtom = atom<ColorChangeModalProps>(false)
 
-export type TagDetailModalProps = { tagId: string } | false
-
-export const tagDetailModalAtom = atom<TagDetailModalProps>(false)
-
 // Atom to trigger animation state reset in AppSwitcherProvider
 export const resetTabAnimationTriggerAtom = atom(0)
 

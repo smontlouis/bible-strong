@@ -13,6 +13,7 @@ import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import Box from './ui/Box'
 import Progress from './ui/Progress'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 const FILE_SIZE = 7448576
 
@@ -122,14 +123,18 @@ const waitForDatabase =
     hasBackButton,
     hasHeader,
     size,
+    useStackBackButton,
   }: {
     hasBackButton?: boolean
     size?: 'small' | 'large'
     hasHeader?: boolean
+    useStackBackButton?: boolean
   } = {}) =>
   <T extends object>(WrappedComponent: React.ComponentType<T>): React.ComponentType<T> =>
   (props: T) => {
     const { t } = useTranslation()
+    const canGoBackInStack = useCanGoBackInStack()
+    const effectiveHasBackButton = useStackBackButton ? canGoBackInStack : hasBackButton
     const { isLoading, progress, proposeDownload, startDownload, setStartDownload, resourceLang } =
       useWaitForDatabase()
 
@@ -146,7 +151,7 @@ const waitForDatabase =
     if (isLoading && proposeDownload) {
       return (
         <DownloadRequired
-          hasBackButton={hasBackButton}
+          hasBackButton={effectiveHasBackButton}
           hasHeader={hasHeader}
           size={size}
           title={t(

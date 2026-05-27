@@ -21,7 +21,9 @@ export type SubcollectionName =
   | 'highlights'
   | 'notes'
   | 'links'
-  | 'studyRelations'
+  | 'relations'
+  | 'relationIndex'
+  | 'relationPairs'
   | 'tags'
   | 'strongsHebreu'
   | 'strongsGrec'
@@ -35,7 +37,9 @@ export const SUBCOLLECTION_NAMES: SubcollectionName[] = [
   'highlights',
   'notes',
   'links',
-  'studyRelations',
+  'relations',
+  'relationIndex',
+  'relationPairs',
   'tags',
   'strongsHebreu',
   'strongsGrec',
@@ -55,6 +59,23 @@ export type SubcollectionData = Record<string, SubcollectionDocument>
 type BatchOperation =
   | { type: 'set'; docId: string; data: SubcollectionDocument }
   | { type: 'delete'; docId: string }
+
+const removeUndefinedDeep = (value: unknown): unknown => {
+  if (value === undefined) return undefined
+  if (value === null || typeof value !== 'object') return value
+  if (Array.isArray(value)) {
+    return value.map(removeUndefinedDeep).filter(item => item !== undefined)
+  }
+
+  const cleaned: Record<string, unknown> = {}
+  for (const [key, childValue] of Object.entries(value as Record<string, unknown>)) {
+    const cleanedValue = removeUndefinedDeep(childValue)
+    if (cleanedValue !== undefined) {
+      cleaned[key] = cleanedValue
+    }
+  }
+  return cleaned
+}
 
 /**
  * Résultat de la validation d'un ID de document
@@ -87,8 +108,8 @@ function validateDocumentId(docId: string): ValidationResult {
   if (!docId || docId.length === 0) return { valid: false, reason: 'empty' }
   if (docId === '.' || docId === '..') return { valid: false, reason: 'reserved_name' }
   // Slashs autorisés - ils seront encodés en __SLASH__ avant écriture
-  // Check for reasonable length (Firestore limit is 1500 bytes)
-  if (docId.length > 1500) return { valid: false, reason: 'too_long' }
+  // Check encoded length because Firestore validates the stored document ID.
+  if (encodeDocumentId(docId).length > 1500) return { valid: false, reason: 'too_long' }
   return { valid: true }
 }
 
@@ -175,7 +196,12 @@ export async function batchWriteSubcollection(
   for (const [docId, data] of Object.entries(changes.set)) {
     const validation = validateDocumentId(docId)
     if (validation.valid) {
-      operations.push({ type: 'set', docId: encodeDocumentId(docId), data })
+      const cleanedData = removeUndefinedDeep(data) as SubcollectionDocument
+      operations.push({
+        type: 'set',
+        docId: encodeDocumentId(docId),
+        data: cleanedData,
+      })
     } else {
       skippedItems.push({ docId: docId || '(empty)', reason: validation.reason! })
     }

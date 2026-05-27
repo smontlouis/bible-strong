@@ -9,17 +9,14 @@ import { produce } from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import DetailedHeader from '~common/DetailedHeader'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import PopOverMenu from '~common/PopOverMenu'
 import { toast } from '~helpers/toast'
+import { ActionMenuOption } from '~common/ActionMenu'
 import EntityChipList from '~common/EntityChipList'
 import Box from '~common/ui/Box'
-import Container from '~common/ui/Container'
-import { FeatherIcon } from '~common/ui/Icon'
-import MenuOption from '~common/ui/MenuOption'
-import Text from '~common/ui/Text'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import waitForNaveDB from '~common/waitForNaveDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
@@ -30,19 +27,23 @@ import { RootState } from '~redux/modules/reducer'
 import { makeNaveTagsSelector } from '~redux/selectors/bible'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
 import { NaveTab } from '../../state/tabs'
-import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import type { RelationEndpoint } from '~redux/modules/user'
+import ScrollView from '~common/ui/ScrollView'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 interface NaveDetailScreenProps {
   naveAtom: PrimitiveAtom<NaveTab>
+  isFormSheet?: boolean
 }
 
-const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
+const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenProps) => {
   const router = useRouter()
   const [naveTab, setNaveTab] = useAtom(naveAtom)
   const { isInTab } = useTabContext()
+  const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = isFormSheet ? canGoBackInStack : !isInTab
 
   const {
     data: { name_lower, name },
@@ -70,7 +71,7 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
   const selectNaveTags = makeNaveTagsSelector()
   const tags = useSelector((state: RootState) => selectNaveTags(state, name_lower ?? ''))
   const openInNewTab = useOpenInNewTab()
-  const relationListModal = useBottomSheetModal()
+  const openEntityRelations = useOpenEntityRelations()
   const naveEndpoint: Extract<RelationEndpoint, { type: 'nave' }> | null =
     name_lower && naveItem
       ? {
@@ -118,7 +119,7 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
         router.push({
           pathname: '/bible-view',
           params: {
-            isReadOnly: 'true',
+            contextDisplayMode: 'focused',
             book: String(book),
             chapter: String(chapter),
             verse: String(verse),
@@ -132,27 +133,17 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
     }
 
     if (type === 'w') {
-      if (isInTab) {
-        // In tab context, update the tab data instead of navigating
-        setNaveTab(
-          produce(draft => {
-            draft.data.name_lower = item
-            draft.data.name = item
-          })
-        )
-      } else {
-        router.push({
-          pathname: '/nave-detail',
-          params: {
-            name_lower: item,
-            name: item,
-          },
-        })
-      }
+      router.push({
+        pathname: '/nave-detail',
+        params: {
+          name_lower: item,
+          name: item,
+        },
+      })
     }
   }
 
-  const { webviewProps } = useHTMLView({ onLinkClicked: openLink })
+  const { webviewProps } = useHTMLView({ onLinkClicked: openLink, autoHeight: true })
 
   const shareDefinition = async () => {
     if (!naveItem) return
@@ -178,25 +169,26 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
 
   if (!naveItem) {
     return (
-      <Container>
-        <Header hasBackButton={!isInTab} onCustomBackPress={goBack} title="Thèmes Nave" />
+      <FormSheetScreen isFormSheet={isFormSheet}>
+        <Header hasBackButton={hasBackButton} onCustomBackPress={goBack} title="Thèmes Nave" />
         <Loading message={t('Chargement...')} />
-      </Container>
+      </FormSheetScreen>
     )
   }
 
   return (
-    <Container>
-      <DetailedHeader
-        hasBackButton={!isInTab}
+    <FormSheetScreen isFormSheet={isFormSheet}>
+      <Header
+        hasBackButton={hasBackButton}
         title={naveItem.name || name || ''}
-        subtitle={naveItem?.name_lower}
-        borderColor="quint"
+        subTitle={naveItem?.name_lower}
         rightComponent={
           <PopOverMenu
             popover={
               <>
-                <MenuOption
+                <ActionMenuOption
+                  icon="tag"
+                  label={t('Étiquettes')}
                   onSelect={() =>
                     setUnifiedTagsModal({
                       mode: 'select',
@@ -205,25 +197,21 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
                       entity: 'naves',
                     })
                   }
-                >
-                  <Box row alignItems="center">
-                    <FeatherIcon name="tag" size={15} />
-                    <Text marginLeft={10}>{t('Étiquettes')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption onSelect={shareDefinition} closeBeforeSelect>
-                  <Box row alignItems="center">
-                    <FeatherIcon name="share-2" size={15} />
-                    <Text marginLeft={10}>{t('Partager')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption onSelect={() => relationListModal.open()}>
-                  <Box row alignItems="center">
-                    <FeatherIcon name="git-merge" size={15} />
-                    <Text marginLeft={10}>{t('Éditer les relations')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption
+                />
+                <ActionMenuOption
+                  icon="share-2"
+                  label={t('Partager')}
+                  onSelect={shareDefinition}
+                  closeBeforeSelect
+                />
+                <ActionMenuOption
+                  icon="git-merge"
+                  label={t('Éditer les relations')}
+                  onSelect={() => naveEndpoint && openEntityRelations(naveEndpoint)}
+                />
+                <ActionMenuOption
+                  icon="external-link"
+                  label={t('tab.openInNewTab')}
                   onSelect={() => {
                     openInNewTab({
                       id: `nave-${generateUUID()}`,
@@ -236,39 +224,25 @@ const NaveDetailScreen = ({ naveAtom }: NaveDetailScreenProps) => {
                       },
                     })
                   }}
-                >
-                  <Box row alignItems="center">
-                    <FeatherIcon name="external-link" size={15} />
-                    <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
-                  </Box>
-                </MenuOption>
+                />
               </>
             }
           />
         }
       />
-      {(tags || relationCount > 0) && (
-        <Box mt={10} px={20}>
-          <EntityChipList
-            tags={tags}
-            relationCount={relationCount}
-            onRelationPress={() => relationListModal.open()}
-          />
-        </Box>
-      )}
-      <Box
-        mt={10}
-        style={{
-          overflow: 'hidden',
-          flex: 1,
-          borderTopLeftRadius: 30,
-          borderTopRightRadius: 30,
-        }}
-      >
+      <ScrollView>
+        {(tags || relationCount > 0) && (
+          <Box mt={0} px={20}>
+            <EntityChipList
+              tags={tags}
+              relationCount={relationCount}
+              onRelationPress={() => naveEndpoint && openEntityRelations(naveEndpoint)}
+            />
+          </Box>
+        )}
         {naveItem?.description && <WebView {...webviewProps(naveItem.description)} />}
-      </Box>
-      <EntityRelationsModal ref={relationListModal.getRef()} endpoint={naveEndpoint} />
-    </Container>
+      </ScrollView>
+    </FormSheetScreen>
   )
 }
 

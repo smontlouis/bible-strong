@@ -2,7 +2,7 @@ import React from 'react'
 import { ScrollView, TouchableOpacity } from 'react-native'
 import { useTheme } from '@emotion/react'
 import { useTranslation } from 'react-i18next'
-import Animated from 'react-native-reanimated'
+import { EaseView } from 'react-native-ease'
 
 import Text from '~common/ui/Text'
 
@@ -73,16 +73,21 @@ const FilterChipRow = ({
     >
       {chips.map(chip => (
         <TouchableOpacity key={chip.key} onPress={chip.onPress} activeOpacity={0.7}>
-          <Animated.View
+          <EaseView
+            animate={{
+              backgroundColor: chip.isActive ? theme.colors.primary : theme.colors.border,
+            }}
+            transition={{
+              type: 'timing',
+              duration: 200,
+              easing: [0.455, 0.03, 0.515, 0.955],
+            }}
             style={{
               height: 32,
               paddingHorizontal: 12,
               borderRadius: 16,
               justifyContent: 'center',
               alignItems: 'center',
-              backgroundColor: chip.isActive ? theme.colors.primary : theme.colors.border,
-              transitionProperty: 'backgroundColor',
-              transitionDuration: 200,
             }}
           >
             <Text
@@ -94,7 +99,7 @@ const FilterChipRow = ({
             >
               {chip.label}
             </Text>
-          </Animated.View>
+          </EaseView>
         </TouchableOpacity>
       ))}
     </ScrollView>

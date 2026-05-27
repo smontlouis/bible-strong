@@ -6,7 +6,12 @@ import generateUUID from '~helpers/generateUUID'
 
 import { useLocalSearchParams } from 'expo-router'
 import { atom } from 'jotai/vanilla'
-import { BibleTab, getDefaultBibleTab, VersionCode } from '../../state/tabs'
+import {
+  BibleContextDisplayMode,
+  BibleTab,
+  getDefaultBibleTab,
+  VersionCode,
+} from '../../state/tabs'
 import { StudyNavigateBibleType } from '~common/types'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 import BibleTabScreen from './BibleTabScreen'
@@ -14,6 +19,7 @@ import BibleTabScreen from './BibleTabScreen'
 const BibleScreen = () => {
   const params = useLocalSearchParams<{
     focusVerses?: string
+    contextDisplayMode?: BibleContextDisplayMode
     isSelectionMode?: string
     isReadOnly?: string
     book?: string
@@ -25,7 +31,8 @@ const BibleScreen = () => {
   // Parse params from URL strings
   const focusVerses = params.focusVerses ? JSON.parse(params.focusVerses) : undefined
   const isSelectionMode = params.isSelectionMode || undefined
-  const isReadOnly = params.isReadOnly === 'true'
+  const contextDisplayMode =
+    params.contextDisplayMode || (params.isReadOnly === 'true' ? 'focused' : undefined)
   const book = params.book ? JSON.parse(params.book) : undefined
   const chapter = params.chapter ? Number(params.chapter) : undefined
   const verse = params.verse ? Number(params.verse) : undefined
@@ -46,7 +53,9 @@ const BibleScreen = () => {
       if (verse) draft.data.selectedVerse = verse
       if (focusVerses) draft.data.focusVerses = focusVerses
       if (isSelectionMode) draft.data.isSelectionMode = isSelectionMode as StudyNavigateBibleType
-      if (isReadOnly) draft.data.isReadOnly = isReadOnly
+      if (contextDisplayMode) {
+        draft.data.contextDisplayMode = contextDisplayMode
+      }
     }
   )
 
@@ -54,7 +63,7 @@ const BibleScreen = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const bibleAtom = useMemo(() => atom<BibleTab>(initialValues), [])
 
-  return <BibleTabScreen bibleAtom={bibleAtom} withNavigation />
+  return <BibleTabScreen bibleAtom={bibleAtom} isFormSheet />
 }
 
 export default BibleScreen

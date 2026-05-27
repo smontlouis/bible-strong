@@ -5,20 +5,19 @@ import { useDispatch } from 'react-redux'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 
+import { ActionMenuOption } from '~common/ActionMenu'
 import Header from '~common/Header'
 import PopOverMenu from '~common/PopOverMenu'
 import RenameModal from '~common/RenameModal'
-import Container from '~common/ui/Container'
-import { FeatherIcon } from '~common/ui/Icon'
-import MenuOption from '~common/ui/MenuOption'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import SectionList from '~common/ui/SectionList'
 import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
 import Empty from '~common/Empty'
 import HighlightItem from '~features/settings/Verse'
 import StudyItem from '~features/studies/StudyItem'
 import { removeTag, updateTag } from '~redux/modules/user'
 import useLanguage from '~helpers/useLanguage'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 import { useTagData } from './useTagData'
 import { TagData, useCreateTabGroupFromTag } from './useCreateTabGroupFromTag'
@@ -42,6 +41,7 @@ const TagScreen = () => {
   const dispatch = useDispatch()
   const { t } = useTranslation()
   const lang = useLanguage()
+  const canGoBackInStack = useCanGoBackInStack()
 
   const {
     tag,
@@ -153,50 +153,44 @@ const TagScreen = () => {
 
   if (!tag) {
     return (
-      <Container>
-        <Header hasBackButton title="" />
+      <FormSheetScreen isFormSheet>
+        <Header hasBackButton={canGoBackInStack} title="" />
         <Empty
           source={require('~assets/images/empty.json')}
           message={t("Cette étiquette n'existe pas...")}
         />
-      </Container>
+      </FormSheetScreen>
     )
   }
 
   return (
-    <Container>
+    <FormSheetScreen isFormSheet>
       <Header
-        hasBackButton
+        hasBackButton={canGoBackInStack}
         title={tag.name}
         rightComponent={
           <PopOverMenu
             popover={
               <>
-                <MenuOption
+                <ActionMenuOption
+                  icon="edit-3"
+                  label={t('Éditer')}
                   onSelect={() => {
                     setTagToRename({ id: tag.id, name: tag.name })
                     renameModalRef.current?.present()
                   }}
-                >
-                  <Box row alignItems="center">
-                    <FeatherIcon name="edit-3" size={15} />
-                    <Text marginLeft={10}>{t('Éditer')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption onSelect={handleOpenInTabGroup}>
-                  <Box row alignItems="center">
-                    <FeatherIcon name="layers" size={15} />
-                    <Text marginLeft={10}>{t('tabs.createGroupFromTag')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption onSelect={handleDelete}>
-                  <Box row alignItems="center">
-                    <FeatherIcon name="trash-2" size={15} color="quart" />
-                    <Text marginLeft={10} color="quart">
-                      {t('Supprimer')}
-                    </Text>
-                  </Box>
-                </MenuOption>
+                />
+                <ActionMenuOption
+                  icon="layers"
+                  label={t('tabs.createGroupFromTag')}
+                  onSelect={handleOpenInTabGroup}
+                />
+                <ActionMenuOption
+                  icon="trash-2"
+                  label={t('Supprimer')}
+                  color="quart"
+                  onSelect={handleDelete}
+                />
               </>
             }
           />
@@ -240,7 +234,7 @@ const TagScreen = () => {
           }
         }}
       />
-    </Container>
+    </FormSheetScreen>
   )
 }
 

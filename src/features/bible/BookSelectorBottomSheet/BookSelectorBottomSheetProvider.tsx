@@ -1,4 +1,4 @@
-import BottomSheet from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import React, { createContext, useContext, useRef } from 'react'
 import type { BibleTab, BibleTabActions } from '../../../state/tabs'
 import BookSelectorBottomSheet, { bookSelectorDataAtom } from './BookSelectorBottomSheet'
@@ -37,8 +37,8 @@ export const useBookAndVersionSelector = () => {
 }
 
 export const BookSelectorBottomSheetProvider = ({ children }: { children: React.ReactNode }) => {
-  const bookBottomSheetRef = useRef<BottomSheet>(null)
-  const versionBottomSheetRef = useRef<BottomSheet>(null)
+  const bookBottomSheetRef = useRef<BottomSheetModal>(null)
+  const versionBottomSheetRef = useRef<BottomSheetModal>(null)
   const setBookSelectorData = useSetAtom(bookSelectorDataAtom)
   const setVersionSelectorData = useSetAtom(versionSelectorDataAtom)
 
@@ -50,7 +50,7 @@ export const BookSelectorBottomSheetProvider = ({ children }: { children: React.
     data: BibleTab['data']
   }) => {
     setBookSelectorData({ actions, data })
-    bookBottomSheetRef.current?.expand()
+    bookBottomSheetRef.current?.present()
   }
 
   const openVersionSelector = ({
@@ -63,7 +63,7 @@ export const BookSelectorBottomSheetProvider = ({ children }: { children: React.
     parallelVersionIndex?: number
   }) => {
     setVersionSelectorData({ actions, data, parallelVersionIndex })
-    versionBottomSheetRef.current?.expand()
+    versionBottomSheetRef.current?.present()
   }
 
   return (

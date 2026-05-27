@@ -1,9 +1,11 @@
 import * as Sentry from '@sentry/react-native'
-import { firebaseDb, doc, getDoc, updateDoc, deleteField } from './firebase'
+import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
+import { firebaseDb, doc, getDoc, updateDoc, deleteField, collection, getDocs } from './firebase'
 import { autoBackupManager } from './AutoBackupManager'
 import {
   SUBCOLLECTION_NAMES,
   SubcollectionName,
+  fetchSubcollection,
   writeAllToSubcollection,
   clearSubcollection,
   type ChunkProgressCallback,
@@ -22,11 +24,24 @@ import {
   setMigrationProgressFromOutsideReact,
   resetMigrationProgressFromOutsideReact,
 } from 'src/state/migration'
+import {
+  mergeRelationsWithSystemBackfill,
+  normalizeRelation,
+  dedupeRelationsByDuplicateKey,
+  rebuildRelationIndexes,
+  rebuildRelationPairs,
+  type LegacyRelation,
+  type RelationsObj,
+} from '~features/studyRelations/domain'
 
 // Batch chunk size (must match firestoreSubcollections.ts)
 const BATCH_CHUNK_SIZE = 400
-type EmbeddedBibleData = Partial<Record<SubcollectionName, SubcollectionData>>
-type ImportedBibleData = Partial<Record<SubcollectionName, Record<string, unknown>>>
+type EmbeddedBibleData = Partial<Record<SubcollectionName, SubcollectionData>> & {
+  studyRelations?: Record<string, LegacyRelation>
+}
+type ImportedBibleData = Partial<Record<SubcollectionName, Record<string, unknown>>> & {
+  studyRelations?: Record<string, LegacyRelation>
+}
 
 const getErrorMessage = (error: unknown, fallback = 'Unknown error'): string => {
   if (error instanceof Error) return error.message
@@ -34,6 +49,52 @@ const getErrorMessage = (error: unknown, fallback = 'Unknown error'): string => 
     return String((error as { message?: unknown }).message ?? fallback)
   }
   return fallback
+}
+
+const normalizeRelationsData = (bible: EmbeddedBibleData | ImportedBibleData): RelationsObj => {
+  const legacyRelations = bible.studyRelations ?? {}
+  const existingRelations = (bible.relations ?? {}) as Record<string, LegacyRelation>
+
+  const normalizedRelations = Object.values({ ...legacyRelations, ...existingRelations }).reduce(
+    (relations, relation) => {
+      const normalized = normalizeRelation(relation)
+      relations[normalized.id] = normalized
+      return relations
+    },
+    {} as RelationsObj
+  )
+
+  return dedupeRelationsByDuplicateKey(
+    mergeRelationsWithSystemBackfill({
+      relations: normalizedRelations,
+      notes: bible.notes as RootState['user']['bible']['notes'] | undefined,
+      links: bible.links as RootState['user']['bible']['links'] | undefined,
+      wordAnnotations: bible.wordAnnotations as
+        | RootState['user']['bible']['wordAnnotations']
+        | undefined,
+    })
+  )
+}
+
+const getCollectionDataForMigration = (
+  bible: EmbeddedBibleData | ImportedBibleData,
+  collection: SubcollectionName
+): SubcollectionData => {
+  if (collection === 'relations') return normalizeRelationsData(bible)
+  if (collection === 'relationIndex') return rebuildRelationIndexes(normalizeRelationsData(bible))
+  if (collection === 'relationPairs') return rebuildRelationPairs(normalizeRelationsData(bible))
+  return (bible[collection] ?? {}) as SubcollectionData
+}
+
+async function fetchLegacyStudyRelationsSubcollection(
+  userId: string
+): Promise<Record<string, LegacyRelation>> {
+  const snapshot = await getDocs(collection(firebaseDb, 'users', userId, 'studyRelations'))
+  const relations: Record<string, LegacyRelation> = {}
+  snapshot.forEach((docSnap: FirebaseFirestoreTypes.QueryDocumentSnapshot) => {
+    relations[docSnap.id] = docSnap.data() as LegacyRelation
+  })
+  return relations
 }
 
 /**
@@ -44,7 +105,9 @@ const COLLECTION_LABELS: Record<SubcollectionName, string> = {
   highlights: 'surlignages',
   notes: 'notes',
   links: 'liens',
-  studyRelations: 'relations d’étude',
+  relations: 'relations',
+  relationIndex: 'index des relations',
+  relationPairs: 'paires de relations',
   tags: 'tags',
   strongsHebreu: 'Strong hébreu',
   strongsGrec: 'Strong grec',
@@ -107,6 +170,159 @@ export async function isUserMigrated(userId: string): Promise<boolean> {
   }
 }
 
+export async function isUserRelationsMigrated(userId: string): Promise<boolean> {
+  try {
+    const userDocRef = doc(firebaseDb, 'users', userId)
+    const userDocSnap = await getDoc(userDocRef)
+    const userData = userDocSnap.data()
+    return userData?._relationsMigrated === true
+  } catch (error) {
+    console.error('[FirestoreMigration] Failed to check relations migration status:', error)
+    Sentry.captureException(error, {
+      tags: {
+        feature: 'firestore_migration',
+        action: 'check_relations_migration_status',
+      },
+      extra: {
+        userId,
+        errorMessage: getErrorMessage(error),
+      },
+    })
+    return false
+  }
+}
+
+async function markRelationsAsMigrated(userId: string): Promise<void> {
+  const userDocRef = doc(firebaseDb, 'users', userId)
+  await updateDoc(userDocRef, {
+    _relationsMigrated: true,
+  })
+}
+
+const hasDuplicateRelationKeys = (relations: RelationsObj): boolean => {
+  const duplicateKeys = new Set<string>()
+  for (const relation of Object.values(relations)) {
+    const duplicateKey = normalizeRelation(relation).duplicateKey
+    if (duplicateKeys.has(duplicateKey)) return true
+    duplicateKeys.add(duplicateKey)
+  }
+  return false
+}
+
+const haveSameKeys = (
+  left: Record<string, unknown> = {},
+  right: Record<string, unknown> = {}
+): boolean => {
+  const leftKeys = Object.keys(left)
+  const rightKeys = Object.keys(right)
+  if (leftKeys.length !== rightKeys.length) return false
+
+  return leftKeys.every(key => Object.prototype.hasOwnProperty.call(right, key))
+}
+
+async function cleanupDuplicateRelations(userId: string): Promise<void> {
+  const [relations, relationIndex, relationPairs, notes, links, wordAnnotations] =
+    await Promise.all([
+      fetchSubcollection(userId, 'relations'),
+      fetchSubcollection(userId, 'relationIndex'),
+      fetchSubcollection(userId, 'relationPairs'),
+      fetchSubcollection(userId, 'notes'),
+      fetchSubcollection(userId, 'links'),
+      fetchSubcollection(userId, 'wordAnnotations'),
+    ])
+  const normalizedRelations = normalizeRelationsData({
+    relations: relations as Record<string, LegacyRelation>,
+    notes,
+    links,
+    wordAnnotations,
+  })
+  const rebuiltRelationIndex = rebuildRelationIndexes(normalizedRelations)
+  const rebuiltRelationPairs = rebuildRelationPairs(normalizedRelations)
+
+  if (
+    !hasDuplicateRelationKeys(relations as RelationsObj) &&
+    haveSameKeys(relations, normalizedRelations) &&
+    haveSameKeys(relationIndex, rebuiltRelationIndex) &&
+    haveSameKeys(relationPairs, rebuiltRelationPairs)
+  ) {
+    return
+  }
+
+  await clearSubcollection(userId, 'relations')
+  await clearSubcollection(userId, 'relationIndex')
+  await clearSubcollection(userId, 'relationPairs')
+  await writeAllToSubcollection(userId, 'relations', normalizedRelations)
+  await writeAllToSubcollection(userId, 'relationIndex', rebuiltRelationIndex)
+  await writeAllToSubcollection(userId, 'relationPairs', rebuiltRelationPairs)
+}
+
+export async function migrateUserRelationsArchitecture(
+  userId: string,
+  state: RootState,
+  onProgress?: (message: string, progress: number) => void
+): Promise<{ success: boolean; error?: string }> {
+  const reportProgress = (message: string, progress: number) => {
+    console.log(`[RelationsMigration] ${message} (${Math.round(progress * 100)}%)`)
+    onProgress?.(message, progress)
+  }
+
+  try {
+    reportProgress('Vérification des relations...', 0)
+    const alreadyMigrated = await isUserRelationsMigrated(userId)
+    if (alreadyMigrated) {
+      await cleanupDuplicateRelations(userId)
+      return { success: true }
+    }
+
+    reportProgress('Création du backup de sécurité...', 0.1)
+    await autoBackupManager.createBackupNow(state, 'pre_migration')
+
+    reportProgress('Lecture des notes et liens...', 0.3)
+    const [notes, links, wordAnnotations, existingRelations, legacyStudyRelations] =
+      await Promise.all([
+        fetchSubcollection(userId, 'notes'),
+        fetchSubcollection(userId, 'links'),
+        fetchSubcollection(userId, 'wordAnnotations'),
+        fetchSubcollection(userId, 'relations'),
+        fetchLegacyStudyRelationsSubcollection(userId),
+      ])
+
+    const relations = normalizeRelationsData({
+      notes,
+      links,
+      wordAnnotations,
+      relations: existingRelations,
+      studyRelations: legacyStudyRelations,
+    })
+    const relationIndex = rebuildRelationIndexes(relations)
+    const relationPairs = rebuildRelationPairs(relations)
+
+    reportProgress('Écriture des relations...', 0.6)
+    await clearSubcollection(userId, 'relations')
+    await clearSubcollection(userId, 'relationIndex')
+    await clearSubcollection(userId, 'relationPairs')
+    await writeAllToSubcollection(userId, 'relations', relations)
+    await writeAllToSubcollection(userId, 'relationIndex', relationIndex)
+    await writeAllToSubcollection(userId, 'relationPairs', relationPairs)
+
+    reportProgress('Finalisation des relations...', 0.9)
+    await markRelationsAsMigrated(userId)
+
+    reportProgress('Migration des relations terminée!', 1)
+    return { success: true }
+  } catch (error) {
+    console.error('[RelationsMigration] Migration failed:', error)
+    Sentry.captureException(error, {
+      tags: { feature: 'firestore_migration', action: 'relations_architecture_migration' },
+      extra: { userId, errorMessage: getErrorMessage(error) },
+    })
+    return {
+      success: false,
+      error: getErrorMessage(error, 'Unknown error during relations migration'),
+    }
+  }
+}
+
 /**
  * Vérifie si l'utilisateur a des données embedded dans bible.* qui doivent être migrées
  * Ceci est important pour la migration incrémentale: même si _migrated est true,
@@ -130,7 +346,7 @@ export async function checkForEmbeddedData(userId: string): Promise<{
     const collectionsWithData: SubcollectionName[] = []
 
     for (const collection of SUBCOLLECTION_NAMES) {
-      if (bible[collection] && Object.keys(bible[collection]).length > 0) {
+      if (Object.keys(getCollectionDataForMigration(bible, collection)).length > 0) {
         collectionsWithData.push(collection)
       }
     }
@@ -190,6 +406,7 @@ async function removeEmbeddedData(userId: string): Promise<void> {
     for (const collectionName of SUBCOLLECTION_NAMES) {
       updates[`bible.${collectionName}`] = deleteField()
     }
+    updates['bible.studyRelations'] = deleteField()
 
     const userDocRef = doc(firebaseDb, 'users', userId)
     await updateDoc(userDocRef, updates)
@@ -267,7 +484,7 @@ export async function migrateUserDataToSubcollections(
 
     // 4. Migrer chaque collection
     const collectionsToMigrate = SUBCOLLECTION_NAMES.filter(
-      name => bible[name] && Object.keys(bible[name]).length > 0
+      name => Object.keys(getCollectionDataForMigration(bible, name)).length > 0
     )
 
     if (collectionsToMigrate.length === 0) {
@@ -283,7 +500,7 @@ export async function migrateUserDataToSubcollections(
 
     for (let i = 0; i < collectionsToMigrate.length; i++) {
       const collection = collectionsToMigrate[i]
-      const data = bible[collection]
+      const data = getCollectionDataForMigration(bible, collection)
       const itemCount = Object.keys(data).length
 
       const baseProgress = 0.1 + (0.7 * i) / collectionsToMigrate.length
@@ -344,13 +561,13 @@ export async function migrateImportedDataToSubcollections(
   // Log data counts for debugging
   console.log('[FirestoreMigration] Data counts to import:')
   for (const collection of SUBCOLLECTION_NAMES) {
-    const count = data[collection] ? Object.keys(data[collection]).length : 0
+    const count = Object.keys(getCollectionDataForMigration(data, collection)).length
     console.log(`[FirestoreMigration]   - ${collection}: ${count} items`)
   }
 
   // Determine which collections have data to migrate
   const collectionsToMigrate = SUBCOLLECTION_NAMES.filter(
-    name => data[name] && Object.keys(data[name]).length > 0
+    name => Object.keys(getCollectionDataForMigration(data, name)).length > 0
   )
 
   if (collectionsToMigrate.length === 0) {
@@ -382,7 +599,7 @@ export async function migrateImportedDataToSubcollections(
     // Process each collection: clear existing data, then write new data
     for (let i = 0; i < totalCollections; i++) {
       const collection = collectionsToMigrate[i]
-      const collectionData = data[collection]! as SubcollectionData
+      const collectionData = getCollectionDataForMigration(data, collection)
       const itemCount = Object.keys(collectionData).length
 
       // Base progress for this collection (0 to 1 range for each collection)
@@ -475,9 +692,7 @@ export async function migrateImportedDataToSubcollections(
 export function countItemsToMigrate(bible: EmbeddedBibleData): number {
   let count = 0
   for (const collection of SUBCOLLECTION_NAMES) {
-    if (bible[collection]) {
-      count += Object.keys(bible[collection]).length
-    }
+    count += Object.keys(getCollectionDataForMigration(bible, collection)).length
   }
   return count
 }
@@ -579,16 +794,16 @@ export async function resumableMigrateUserData(
       return { success: true, partialFailure: false, failedCollections: [] }
     }
 
-    const bible = userData.bible
+    const bible = userData.bible as EmbeddedBibleData
 
     // 5. Déterminer les collections à migrer
     const collectionsToMigrate = getCollectionsToMigrate(migrationState).filter(
-      name => bible[name] && Object.keys(bible[name]).length > 0
+      name => Object.keys(getCollectionDataForMigration(bible, name)).length > 0
     )
 
     // Ajouter les collections vides comme complétées
     const emptyCollections = SUBCOLLECTION_NAMES.filter(
-      name => !bible[name] || Object.keys(bible[name]).length === 0
+      name => Object.keys(getCollectionDataForMigration(bible, name)).length === 0
     )
     for (const emptyCollection of emptyCollections) {
       if (migrationState.collections[emptyCollection].status !== 'completed') {
@@ -615,7 +830,7 @@ export async function resumableMigrateUserData(
     let totalChunks = 0
 
     for (const collection of collectionsToMigrate) {
-      const data = bible[collection]
+      const data = getCollectionDataForMigration(bible, collection)
       const itemCount = Object.keys(data).length
       const chunkCount = Math.ceil(itemCount / BATCH_CHUNK_SIZE)
       collectionChunks.push({ collection, itemCount, chunkCount })
@@ -628,7 +843,7 @@ export async function resumableMigrateUserData(
 
     // 7. Migrer chaque collection individuellement
     for (const { collection, itemCount, chunkCount } of collectionChunks) {
-      const data = bible[collection]
+      const data = getCollectionDataForMigration(bible, collection)
       const label = getCollectionLabel(collection)
 
       // Calculer la progression basée sur les chunks

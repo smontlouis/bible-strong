@@ -6,19 +6,16 @@ import React, { useEffect, useState, useRef } from 'react'
 import { Verse as TVerse } from '~common/types'
 import {
   Dispatch,
-  LinkedVerse,
-  NotedVerse,
   ParallelVerse,
   RootStyles,
   TaggedVerse,
+  VerseRelationItem,
   WebViewProps,
 } from './BibleDOMWrapper'
 import ChevronDownIcon from './ChevronDownIcon'
 import Comment from './Comment'
 import {
   ENTER_ANNOTATION_MODE,
-  ENTER_READONLY_MODE,
-  EXIT_READONLY_MODE,
   NAVIGATE_TO_PERICOPE,
   NAVIGATE_TO_VERSION,
   SWIPE_LEFT,
@@ -33,7 +30,11 @@ import { DispatchProvider } from './DispatchProvider'
 import { TranslationsProvider, BibleDOMTranslations } from './TranslationsContext'
 import { scaleFontSize } from './scaleFontSize'
 import { useFonts } from 'expo-font'
-import { HEADER_HEIGHT, HEADER_HEIGHT_MIN } from '~features/app-switcher/utils/constants'
+import {
+  BIBLE_FORM_SHEET_HEADER_HEIGHT,
+  HEADER_HEIGHT,
+  HEADER_HEIGHT_MIN,
+} from '~features/app-switcher/utils/constants'
 // Annotation mode imports
 import { AnnotationType } from './AnnotationMode'
 import {
@@ -112,7 +113,7 @@ type Props = Pick<
   | 'versesWithNonHighlightTags'
   | 'settings'
   | 'verseToScroll'
-  | 'isReadOnly'
+  | 'contextDisplayMode'
   | 'version'
   | 'pericopeChapter'
   | 'book'
@@ -129,11 +130,9 @@ type Props = Pick<
   comments: { [key: string]: string } | null
   taggedVerses: TaggedVerse[] | null
   versesWithAnnotationNotes: Record<string, boolean>
-  notedVersesCount: { [key: string]: number }
-  notedVersesText: { [key: string]: NotedVerse[] }
-  linkedVersesCount: { [key: string]: number }
-  linkedVersesText: { [key: string]: LinkedVerse[] }
-  studyRelationsCount: { [key: string]: number }
+  annotationNotesCountByVerse: { [key: string]: number }
+  relationItemsCount: { [key: string]: number }
+  relationItemsText: { [key: string]: VerseRelationItem[] }
   // Annotation mode props (uncontrolled - DOM manages local annotation state)
   annotationMode?: boolean
   clearSelectionTrigger?: number
@@ -143,6 +142,7 @@ type Props = Pick<
   selectedAnnotationId?: string | null
   // Safe area inset from native side (CSS env vars don't work in Expo DOM WebView)
   safeAreaTop?: number
+  isFormSheet?: boolean
 }
 
 const extractParallelVersionTitles = (parallelVerses: ParallelVerse[], currentVersion: string) => {
@@ -159,8 +159,9 @@ const fadeIn = keyframes`
   to { opacity: 1; }
 `
 
-const Container = styled('div')<RootStyles & { rtl: boolean; isParallelVerse: boolean }>(
-  ({ settings: { alignContent, theme, colors }, rtl, isParallelVerse }) => ({
+const Container = styled('div')<
+  RootStyles & { rtl: boolean; isParallelVerse: boolean; headerHeight: number }
+>(({ settings: { alignContent, theme, colors }, rtl, isParallelVerse, headerHeight }) => ({
     position: 'relative', // For highlight layer positioning
     maxWidth: isParallelVerse ? 'none' : '800px',
     margin: '0 auto',
@@ -170,11 +171,10 @@ const Container = styled('div')<RootStyles & { rtl: boolean; isParallelVerse: bo
     background: colors[theme].reverse,
     color: colors[theme].default,
     direction: rtl ? 'rtl' : 'ltr',
-    paddingTop: `${HEADER_HEIGHT + 10}px`,
+    paddingTop: `${headerHeight + 10}px`,
     animation: `${fadeIn} 300ms ease-out`,
     ...(rtl ? { textAlign: 'right' } : {}),
-  })
-)
+  }))
 
 const RightDirection = styled('div')<RootStyles>(({ settings: { theme, colors } }) => ({
   textAlign: 'right',
@@ -302,29 +302,6 @@ const VersionTitleColumn = styled('div')<{ columnCount: number; columnWidth: num
   })
 )
 
-const ReadWholeChapterButtonContainer = styled('div')({
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  marginTop: '20px',
-  marginBottom: '20px',
-})
-
-const ReadWholeChapterButton = styled('button')<RootStyles>(({ settings: { theme, colors } }) => ({
-  backgroundColor: colors[theme].opacity5,
-  color: colors[theme].primary,
-  border: 'none',
-  borderRadius: '100px',
-  padding: '12px 18px',
-  fontSize: '14px',
-  fontWeight: 'bold',
-  cursor: 'pointer',
-  transition: 'all 0.2s',
-  '&:hover': {
-    opacity: 0.6,
-  },
-}))
-
 /** Build a verseKey ("Livre-Chapitre-Verset") for a verse */
 function verseKey(v: TVerse): string {
   return `${v.Livre}-${v.Chapitre}-${v.Verset}`
@@ -414,7 +391,7 @@ const LoadedBibleContent = ({
   versesWithNonHighlightTags,
   settings,
   verseToScroll,
-  isReadOnly,
+  contextDisplayMode,
   version,
   pericopeChapter,
   book,
@@ -433,11 +410,10 @@ const LoadedBibleContent = ({
   // Pre-computed metadata from native side
   taggedVerses,
   versesWithAnnotationNotes,
-  notedVersesCount,
-  notedVersesText,
-  linkedVersesCount,
-  linkedVersesText,
-  studyRelationsCount,
+  annotationNotesCountByVerse,
+  relationItemsCount,
+  relationItemsText,
+  isFormSheet,
 }: Props) => {
   // Ref for highlight layer
   const containerRef = useRef<HTMLDivElement>(null)
@@ -817,6 +793,8 @@ const LoadedBibleContent = ({
   }, [parallelVerses?.length, parallelColumnWidth])
 
   useEffect(() => {
+    if (isFormSheet) return
+
     let lastScrollTop = 0
     let lastScrollTime = Date.now()
     const VELOCITY_THRESHOLD = 400
@@ -876,7 +854,7 @@ const LoadedBibleContent = ({
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  }, [dispatch, isFormSheet])
 
   const hasVerses = verses.length > 0
   useEffect(() => {
@@ -927,6 +905,8 @@ const LoadedBibleContent = ({
   const parallelVersionTitles = isParallelVerse
     ? extractParallelVersionTitles(parallelVerses, version)
     : []
+  const headerHeight = isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT
+  const isContextFocused = contextDisplayMode === 'focused'
 
   return (
     <TranslationsProvider translations={translations}>
@@ -937,6 +917,7 @@ const LoadedBibleContent = ({
           rtl={isHebreu}
           settings={settings}
           isParallelVerse={isParallelVerse}
+          headerHeight={headerHeight}
         >
           {/* Highlight layer for word annotations and selection (disabled in parallel mode) */}
           {!isParallelVerse && (highlightRects.length > 0 || (annotationMode && selection)) && (
@@ -1030,7 +1011,7 @@ const LoadedBibleContent = ({
               highlightedVerses={highlightedVerses}
               settings={settings}
               verseToScroll={verseToScroll}
-              isReadOnly={isReadOnly}
+              contextDisplayMode={contextDisplayMode}
               version={version}
               pericopeChapter={pericopeChapter}
               isSelectionMode={isSelectionMode}
@@ -1043,11 +1024,9 @@ const LoadedBibleContent = ({
               wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
               taggedVerses={taggedVerses}
               bookmarkedVerses={bookmarkedVerses}
-              notedVersesCount={notedVersesCount}
-              notedVersesText={notedVersesText}
-              linkedVersesCount={linkedVersesCount}
-              linkedVersesText={linkedVersesText}
-              studyRelationsCount={studyRelationsCount}
+              annotationNotesCountByVerse={annotationNotesCountByVerse}
+              relationItemsCount={relationItemsCount}
+              relationItemsText={relationItemsText}
               versesWithAnnotationNotes={versesWithAnnotationNotes}
               navigateToPericope={navigateToPericope}
               annotationMode={annotationMode}
@@ -1060,46 +1039,6 @@ const LoadedBibleContent = ({
               redWords={redWords}
             />
           </HorizontalScrollWrapper>
-          {isReadOnly && focusVerses && focusVerses.length > 0 && (
-            <ReadWholeChapterButtonContainer>
-              <ReadWholeChapterButton
-                settings={settings}
-                onClick={() => {
-                  const verseToScrollTo = focusVerses[0]
-                  dispatch({ type: EXIT_READONLY_MODE })
-                  setTimeout(() => {
-                    const element = document.querySelector(`#verset-${verseToScrollTo}`)
-                    if (element) {
-                      const elementPosition = element.getBoundingClientRect().top
-                      window.scrollTo({
-                        top: window.scrollY + elementPosition - 100,
-                      })
-                    }
-                    // Trigger highlight recalculation after layout change
-                    window.dispatchEvent(new CustomEvent('layoutChanged'))
-                  }, 400)
-                }}
-              >
-                {translations.readWholeChapter}
-              </ReadWholeChapterButton>
-            </ReadWholeChapterButtonContainer>
-          )}
-          {!isReadOnly && focusVerses && focusVerses.length > 0 && (
-            <ReadWholeChapterButtonContainer>
-              <ReadWholeChapterButton
-                settings={settings}
-                onClick={() => {
-                  dispatch({ type: ENTER_READONLY_MODE })
-                  // Trigger highlight recalculation after layout change
-                  setTimeout(() => {
-                    window.dispatchEvent(new CustomEvent('layoutChanged'))
-                  }, 100)
-                }}
-              >
-                {translations.closeContext}
-              </ReadWholeChapterButton>
-            </ReadWholeChapterButtonContainer>
-          )}
         </Container>
         <svg
           style={{
@@ -1138,13 +1077,15 @@ const VersesRenderer = ({ settings, dispatch, translations, verses, ...rest }: P
     'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
   })
 
+  const headerHeight = rest.isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT
+
   useEffect(() => {
     dispatch({
       type: 'DOM_COMPONENT_MOUNTED',
     }).catch(console.error)
-    document.documentElement.style.setProperty('--header-height', `${HEADER_HEIGHT}px`)
+    document.documentElement.style.setProperty('--header-height', `${headerHeight}px`)
     document.body.style.backgroundColor = settings.colors[settings.theme].reverse
-  }, [])
+  }, [dispatch, headerHeight, settings.colors, settings.theme])
 
   // Sync body background when theme changes
   useEffect(() => {
@@ -1158,7 +1099,12 @@ const VersesRenderer = ({ settings, dispatch, translations, verses, ...rest }: P
       <TranslationsProvider translations={translations}>
         <GlobalStyles />
         <DispatchProvider dispatch={dispatch}>
-          <Container settings={settings} rtl={false} isParallelVerse={false} />
+          <Container
+            settings={settings}
+            rtl={false}
+            isParallelVerse={false}
+            headerHeight={headerHeight}
+          />
         </DispatchProvider>
       </TranslationsProvider>
     )

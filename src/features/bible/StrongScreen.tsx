@@ -34,7 +34,7 @@ const StrongScreen = () => {
     [book, reference, strongReference]
   )
 
-  return <StrongDetailScreen strongAtom={onTheFlyAtom} />
+  return <StrongDetailScreen strongAtom={onTheFlyAtom} isFormSheet />
 }
 
 export default StrongScreen

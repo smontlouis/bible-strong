@@ -27,9 +27,9 @@ const NaveDetailScreen = () => {
         },
       } as NaveTab),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [name, name_lower]
   )
 
-  return <NaveDetailTabScreen naveAtom={onTheFlyAtom} />
+  return <NaveDetailTabScreen naveAtom={onTheFlyAtom} isFormSheet />
 }
 export default NaveDetailScreen

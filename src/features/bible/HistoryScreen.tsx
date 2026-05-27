@@ -87,7 +87,7 @@ const HistoryItem = ({ item }: { item: HistoryItemType }) => {
       <Link
         route="BibleView"
         params={{
-          isReadOnly: true,
+          contextDisplayMode: 'focused',
           book: books[bookNumber - 1],
           chapter: chapterNumber,
           verse: verseNumber,

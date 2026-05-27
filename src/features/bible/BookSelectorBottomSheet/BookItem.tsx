@@ -17,6 +17,7 @@ interface BookItemProps {
   isSelected: boolean
   onBookSelect: (book: Book) => void
   expandedBook: SharedValue<number | null>
+  shouldRenderChapters: boolean
 }
 
 export const itemHeight = 46
@@ -28,6 +29,7 @@ const BookItem = memo(
     isSelected,
     onBookSelect,
     expandedBook,
+    shouldRenderChapters,
   }: BookItemProps) => {
     const { t } = useTranslation()
     const { width: windowWidth } = useWindowDimensions()
@@ -90,52 +92,57 @@ const BookItem = memo(
             </MotiView>
           </HStack>
         </TouchableOpacity>
-        <AccordionItem isExpanded={isExpanded} viewKey={book.Nom}>
-          <HStack
-            gap={ITEM_GAP}
-            style={{
-              flexWrap: 'wrap',
-              paddingVertical: 10,
-              paddingHorizontal: horizontalMargin,
-              maxWidth: MAX_WIDTH,
-              alignSelf: 'center',
-            }}
-          >
-            {chapters.map(chapter => (
-              <TouchableOpacity
-                key={chapter}
-                onPress={() => handleChapterSelect(chapter)}
-                onLongPress={() => handleLongPressChapterSelect(chapter)}
-              >
-                <Box
-                  backgroundColor="opacity5"
-                  borderRadius={6}
-                  width={ITEM_WIDTH}
-                  height={60}
-                  alignItems="center"
-                  justifyContent="center"
+        {shouldRenderChapters && (
+          <AccordionItem isExpanded={isExpanded} viewKey={book.Nom}>
+            <HStack
+              gap={ITEM_GAP}
+              style={{
+                flexWrap: 'wrap',
+                paddingVertical: 10,
+                paddingHorizontal: horizontalMargin,
+                maxWidth: MAX_WIDTH,
+                alignSelf: 'center',
+              }}
+            >
+              {chapters.map(chapter => (
+                <TouchableOpacity
+                  key={chapter}
+                  onPress={() => handleChapterSelect(chapter)}
+                  onLongPress={() => handleLongPressChapterSelect(chapter)}
                 >
                   <Box
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      justifyContent: 'center',
-                      display: 'flex',
-                      alignItems: 'center',
-                    }}
+                    backgroundColor="opacity5"
+                    borderRadius={6}
+                    width={ITEM_WIDTH}
+                    height={60}
+                    alignItems="center"
+                    justifyContent="center"
                   >
-                    <Text textAlign="center">{chapter}</Text>
+                    <Box
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        justifyContent: 'center',
+                        display: 'flex',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Text textAlign="center">{chapter}</Text>
+                    </Box>
                   </Box>
-                </Box>
-              </TouchableOpacity>
-            ))}
-          </HStack>
-        </AccordionItem>
+                </TouchableOpacity>
+              ))}
+            </HStack>
+          </AccordionItem>
+        )}
       </Box>
     )
   },
   (prevProps, nextProps) => {
-    return prevProps.isSelected === nextProps.isSelected
+    return (
+      prevProps.isSelected === nextProps.isSelected &&
+      prevProps.shouldRenderChapters === nextProps.shouldRenderChapters
+    )
   }
 )
 

@@ -1,4 +1,4 @@
-import BottomSheet from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { atom } from 'jotai/vanilla'
 import React from 'react'
@@ -11,12 +11,13 @@ import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { getVersionsBySections } from '~helpers/bibleVersions'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
+import { ContainerComponent } from '~common/Modal'
 import { BibleTab, BibleTabActions, VersionCode } from '../../../state/tabs'
 import VersionSelectorItem from '../VersionSelectorItem'
 import { bookSelectorDataAtom } from '../BookSelectorBottomSheet/BookSelectorBottomSheet'
 
 interface VersionSelectorBottomSheetProps {
-  bottomSheetRef: React.RefObject<BottomSheet | null>
+  bottomSheetRef: React.RefObject<BottomSheetModal | null>
 }
 
 export const versionSelectorDataAtom = atom<{
@@ -50,19 +51,20 @@ const VersionSelectorBottomSheet = ({ bottomSheetRef }: VersionSelectorBottomShe
     } else {
       actions.setParallelVersion(vers, parallelVersionIndex)
     }
-    bottomSheetRef.current?.close()
+    bottomSheetRef.current?.dismiss()
   }
 
   return (
-    <BottomSheet
+    <BottomSheetModal
       ref={bottomSheetRef}
       snapPoints={['100%']}
-      index={-1}
       topInset={insets.top + 64}
       enablePanDownToClose
       enableDynamicSizing={false}
       enableContentPanningGesture={false}
       backdropComponent={renderBackdrop}
+      containerComponent={ContainerComponent}
+      activeOffsetY={[-20, 20]}
       key={key}
       {...bottomSheetStyles}
     >
@@ -106,7 +108,7 @@ const VersionSelectorBottomSheet = ({ bottomSheetRef }: VersionSelectorBottomShe
           />
         )}
       />
-    </BottomSheet>
+    </BottomSheetModal>
   )
 }
 

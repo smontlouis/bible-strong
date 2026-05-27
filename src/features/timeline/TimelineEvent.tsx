@@ -7,8 +7,8 @@ import Animated, {
   useDerivedValue,
 } from 'react-native-reanimated'
 
-import BottomSheet from '@gorhom/bottom-sheet'
 import { Image } from 'expo-image'
+import { useRouter } from 'expo-router'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -23,8 +23,6 @@ const LinkBox = Box.withComponent(Link)
 interface Props extends TimelineEventProps {
   x: SharedValue<number>
   yearsToPx: (years: number) => number
-  eventModalRef: React.RefObject<BottomSheet | null>
-  setEvent: (event: Partial<TimelineEventProps>) => void
   calculateEventWidth: (yearStart: number, yearEnd: number, isFixed?: boolean) => number
   hasDetails?: boolean
   sectionIndex?: number
@@ -46,11 +44,9 @@ const TimelineEvent = ({
   x,
   yearsToPx,
   calculateEventWidth,
-  eventModalRef,
-  setEvent,
   hasDetails = true,
-  sectionIndex,
 }: Props) => {
+  const router = useRouter()
   const lang = useLanguage()
   const { current: top } = React.useRef(rowToPx(row))
   const { current: left } = React.useRef(yearsToPx(start))
@@ -61,8 +57,10 @@ const TimelineEvent = ({
   const onOpenEvent = () => {
     if (!hasDetails) return
 
-    eventModalRef.current?.expand()
-    setEvent({ slug, title, titleEn, image, start, end, sectionIndex })
+    router.push({
+      pathname: '/event',
+      params: { slug },
+    })
   }
 
   const posX = useDerivedValue(() => {

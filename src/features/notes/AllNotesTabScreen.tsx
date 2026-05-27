@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 
 import Empty from '~common/Empty'
-import TagsHeader from '~common/TagsHeader'
+import FiltersHeader from '~common/FiltersHeader'
 import { Tag } from '~common/types'
 import Container from '~common/ui/Container'
 import FlatList from '~common/ui/FlatList'
@@ -16,8 +16,8 @@ import { Note } from '~redux/modules/user'
 import { selectRelationCountsByEndpointIdentity } from '~redux/selectors/bible'
 import { NotesTab } from '~state/tabs'
 import { unifiedTagsModalAtom } from '~state/app'
-import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
 import { endpointIdentity, type RelationEndpoint } from '~features/studyRelations/domain'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import BibleNoteItem from '../bible/BibleNoteItem'
 import NotesSettingsModal from './NotesSettingsModal'
 
@@ -39,14 +39,14 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
   const [notes, setNotes] = useState<TNote[]>([])
   const [selectedChip, setSelectedChip] = useState<Tag | null>(null)
   const [noteSettingsId, setNoteSettingsId] = useState<string | null>(null)
-  const [relationEndpoint, setRelationEndpoint] = useState<RelationEndpoint | null>(null)
 
   const _notes = useSelector((state: RootState) => state.user.bible.notes)
   const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
+  const relations = useSelector((state: RootState) => state.user.bible.relations)
   const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const noteSettingsModal = useBottomSheetModal()
-  const relationModal = useBottomSheetModal()
+  const openEntityRelations = useOpenEntityRelations()
 
   const openTagsModal = () => {
     setUnifiedTagsModal({
@@ -78,11 +78,19 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
           return
         }
 
-        // Handle regular verse notes
-        const verseNumbers: Record<string, boolean> = {}
-        noteKey.split('/').forEach(ref => {
-          verseNumbers[ref] = true
-        })
+        const relation = Object.values(relations).find(
+          candidate =>
+            candidate.kind === 'system' &&
+            candidate.type === 'annotates' &&
+            candidate.endpoints.some(
+              endpoint => endpoint.type === 'note' && endpoint.noteId === noteKey
+            )
+        )
+        const verseEndpoint = relation?.endpoints.find(endpoint => endpoint.type === 'verse')
+        const verseNumbers =
+          verseEndpoint?.type === 'verse'
+            ? Object.fromEntries(verseEndpoint.verseKeys.map(key => [key, true]))
+            : {}
 
         const reference = verseToReference(verseNumbers)
         formattedNotes.push({ noteId: noteKey, reference, notes: note })
@@ -98,7 +106,7 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
   useEffect(() => {
     loadNotes()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [_notes, wordAnnotations])
+  }, [_notes, wordAnnotations, relations])
 
   const openNoteDetail = (noteId: string) => {
     setNotesTab(
@@ -123,8 +131,7 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
         onMenuPress={openNoteSettings}
         relationCount={relationCountsByEndpoint[endpointIdentity(endpoint)] || 0}
         onRelationPress={() => {
-          setRelationEndpoint(endpoint)
-          relationModal.open()
+          openEntityRelations(endpoint)
         }}
       />
     )
@@ -136,12 +143,21 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
 
   return (
     <Container>
-      <TagsHeader
+      <FiltersHeader
         title={t('Notes')}
-        setIsOpen={openTagsModal}
-        isOpen={false}
-        selectedChip={selectedChip}
+        filterLabel={selectedChip?.name}
         hasBackButton={hasBackButton}
+        hasActiveFilters={Boolean(selectedChip)}
+        onReset={() => setSelectedChip(null)}
+        filters={[
+          {
+            key: 'tags',
+            icon: 'tag',
+            label: t('Tags'),
+            value: selectedChip?.name || t('Tous'),
+            onPress: openTagsModal,
+          },
+        ]}
       />
       {filteredNotes.length ? (
         <FlatList
@@ -162,7 +178,6 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
         onClosed={() => setNoteSettingsId(null)}
         notesAtom={notesAtom}
       />
-      <EntityRelationsModal ref={relationModal.getRef()} endpoint={relationEndpoint} />
     </Container>
   )
 }

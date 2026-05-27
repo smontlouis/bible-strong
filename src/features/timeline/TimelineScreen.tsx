@@ -6,19 +6,28 @@ import { TimelineSection as TimelineSectionProps, ShallowTimelineSection } from 
 
 import { useLocalSearchParams } from 'expo-router'
 import { useQuery } from '~helpers/react-query-lite'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { getEvents } from './events'
 
 const omitEvents = ({ events, ...rest }: TimelineSectionProps): ShallowTimelineSection => rest
 
 interface Props {
   initialSectionIndex?: number
+  isFormSheet?: boolean
   onBackPress?: () => void
   onSectionChange?: (sectionIndex: number) => void
 }
 
-const Timeline = ({ initialSectionIndex, onBackPress, onSectionChange }: Props) => {
+const Timeline = ({
+  initialSectionIndex,
+  isFormSheet = false,
+  onBackPress,
+  onSectionChange,
+}: Props) => {
   const params = useLocalSearchParams<{ goTo?: string }>()
   const goTo = initialSectionIndex ?? (params.goTo ? Number(params.goTo) : 0)
+  const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = isFormSheet ? canGoBackInStack : Boolean(onBackPress)
 
   const [current, setCurrent] = React.useState(goTo)
   const [entrance, setEntrance] = React.useState<0 | 1>(1)
@@ -69,6 +78,8 @@ const Timeline = ({ initialSectionIndex, onBackPress, onSectionChange }: Props) 
               onPrev={onPrev}
               onNext={onNext}
               onBackPress={onBackPress}
+              hasBackButton={hasBackButton}
+              isFormSheet={isFormSheet}
               prevEvent={prevEvent}
               nextEvent={nextEvent}
               sectionIndex={i}

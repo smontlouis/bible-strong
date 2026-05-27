@@ -3,6 +3,7 @@ import type { JSONValue } from 'expo/build/dom/dom.types'
 import { useEffect, useRef, useState } from 'react'
 import { Keyboard, KeyboardAvoidingView, Platform } from 'react-native'
 import { WebViewMessageEvent } from 'react-native-webview'
+import { useTheme } from '@emotion/react'
 
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { StudyTab, TabItem, useIsCurrentTab } from 'src/state/tabs'
@@ -12,9 +13,11 @@ import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import i18n from '~i18n'
 import { EditStudyScreenProps } from '~navigation/type'
 import { Study } from '~redux/modules/user'
+import Box from '~common/ui/Box'
 import { currentStudyIdAtom } from '../atom'
 import StudyFooter from '../StudyFooter'
 import StudiesDOMComponent, { StudyDOMRef } from './StudiesDOMComponent'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 type Props = {
   params: Readonly<EditStudyScreenProps>
@@ -29,6 +32,7 @@ type Props = {
   fontFamily: string
   studyAtom?: PrimitiveAtom<StudyTab>
   studyId: string
+  isFormSheet?: boolean
 }
 
 type StudyDomMessage = {
@@ -53,10 +57,13 @@ export default function StudiesDomWrapper({
   fontFamily,
   studyAtom,
   studyId,
+  isFormSheet = false,
 }: Props) {
   const ref = useRef<StudyDOMRef>(null)
   const router = useRouter()
+  const theme = useTheme()
   const [isKeyboardOpened, setIsKeyboardOpened] = useState(false)
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
   const [activeFormats, setActiveFormats] = useState({})
   const { colorScheme } = useCurrentThemeSelector()
 
@@ -64,12 +71,14 @@ export default function StudiesDomWrapper({
     const updateListener = Platform.OS === 'android' ? 'keyboardDidShow' : 'keyboardWillShow'
     const resetListener = Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide'
 
-    const keyboardShowListener = Keyboard.addListener(updateListener, () =>
+    const keyboardShowListener = Keyboard.addListener(updateListener, event => {
       setIsKeyboardOpened(true)
-    )
-    const keyboardHideListener = Keyboard.addListener(resetListener, () =>
+      setKeyboardHeight(event.endCoordinates.height)
+    })
+    const keyboardHideListener = Keyboard.addListener(resetListener, () => {
       setIsKeyboardOpened(false)
-    )
+      setKeyboardHeight(0)
+    })
 
     return () => {
       keyboardShowListener.remove()
@@ -151,7 +160,7 @@ export default function StudiesDomWrapper({
           router.push({
             pathname: '/bible-view',
             params: {
-              isReadOnly: 'true',
+              contextDisplayMode: 'focused',
               book: arrayVerses[0].split('-')[0],
               chapter: arrayVerses[0].split('-')[1],
               focusVerses: JSON.stringify(arrayVerses.map(verse => Number(verse.split('-')[2]))),
@@ -194,38 +203,62 @@ export default function StudiesDomWrapper({
     }
   }
 
+  const footer = isKeyboardOpened ? (
+    <StudyFooter
+      navigateBibleView={navigateToSelectionMode}
+      dispatchToWebView={dispatchToWebView}
+      activeFormats={activeFormats}
+      keyboardHeight={keyboardHeight - 20}
+    />
+  ) : null
+
+  const editor = (
+    <StudiesDOMComponent
+      ref={ref}
+      fontFamily={fontFamily}
+      language={i18n.language}
+      contentToDisplay={contentToDisplay ?? { ops: [] }}
+      isReadOnly={isReadOnly}
+      colorScheme={colorScheme}
+      dom={{
+        onMessage: handleMessage,
+        keyboardDisplayRequiresUserAction: false,
+        bounces: false,
+        scrollEnabled: true,
+        hideKeyboardAccessoryView: true,
+        containerStyle: {
+          flex: 1,
+          backgroundColor: theme.colors.reverse,
+        },
+      }}
+    />
+  )
+
+  if (isFormSheet) {
+    return (
+      <Box flex bg="reverse" pb={isKeyboardOpened ? 50 : 0}>
+        {editor}
+        {footer && (
+          <Box position="absolute" left={0} right={0} bottom={keyboardHeight}>
+            {footer}
+          </Box>
+        )}
+      </Box>
+    )
+  }
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{
-        overflow: 'hidden',
         flex: 1,
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
+        backgroundColor: theme.colors.reverse,
       }}
     >
-      <StudiesDOMComponent
-        ref={ref}
-        fontFamily={fontFamily}
-        language={i18n.language}
-        contentToDisplay={contentToDisplay ?? { ops: [] }}
-        isReadOnly={isReadOnly}
-        colorScheme={colorScheme}
-        dom={{
-          onMessage: handleMessage,
-          keyboardDisplayRequiresUserAction: false,
-          bounces: false,
-          scrollEnabled: false,
-          hideKeyboardAccessoryView: true,
-        }}
-      />
-      {isKeyboardOpened && (
-        <StudyFooter
-          navigateBibleView={navigateToSelectionMode}
-          dispatchToWebView={dispatchToWebView}
-          activeFormats={activeFormats}
-        />
-      )}
+      <>
+        {editor}
+        {footer}
+      </>
     </KeyboardAvoidingView>
   )
 }

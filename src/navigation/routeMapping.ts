@@ -17,6 +17,7 @@ export const routeMapping: Record<keyof MainStackProps, string> = {
   VersionSelector: '/version-selector',
   BibleVerseDetail: '/bible-verse-detail',
   BibleVerseNotes: '/bible-verse-notes',
+  Note: '/note',
   BibleVerseLinks: '/bible-verse-links',
   Highlights: '/highlights',
   Strong: '/strong',
@@ -56,6 +57,7 @@ export const routeMapping: Record<keyof MainStackProps, string> = {
   PlanSlice: '/plan-slice',
   Timeline: '/timeline',
   TimelineHome: '/timeline-home',
+  Event: '/event',
   Concordance: '/concordance',
   Commentaries: '/commentaries',
   BibleShareOptions: '/bible-share-options',
@@ -63,6 +65,7 @@ export const routeMapping: Record<keyof MainStackProps, string> = {
   BibleDefaults: '/bible-defaults',
   Theme: '/theme',
   WordAnnotations: '/word-annotations',
+  EntityRelations: '/entity-relations',
 }
 
 /**

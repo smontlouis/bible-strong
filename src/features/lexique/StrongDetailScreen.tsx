@@ -1,9 +1,9 @@
 import styled from '@emotion/native'
-import * as Icon from '@expo/vector-icons'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Share } from 'react-native'
 import { useSelector } from 'react-redux'
 
+import { ActionMenuOption } from '~common/ActionMenu'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Link from '~common/Link'
@@ -11,7 +11,7 @@ import Loading from '~common/Loading'
 import EntityChipList from '~common/EntityChipList'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
-import Container from '~common/ui/Container'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Paragraph from '~common/ui/Paragraph'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
@@ -31,10 +31,8 @@ import { useAtom, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'expo-router'
-import DetailedHeader from '~common/DetailedHeader'
 import PopOverMenu from '~common/PopOverMenu'
 import { StrongReference, Verse } from '~common/types'
-import MenuOption from '~common/ui/MenuOption'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
@@ -42,10 +40,10 @@ import { RootState } from '~redux/modules/reducer'
 import { makeStrongTagsSelector } from '~redux/selectors/bible'
 import { StrongTab } from '../../state/tabs'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
-import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import type { RelationEndpoint } from '~redux/modules/user'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -64,18 +62,17 @@ const Word = styled(Text)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
-const FeatherIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default,
-}))
-
 interface StrongDetailScreenProps {
   strongAtom: PrimitiveAtom<StrongTab>
+  isFormSheet?: boolean
 }
 
-const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
+const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScreenProps) => {
   const router = useRouter()
   const [strongTab, setStrongTab] = useAtom(strongAtom)
   const { isInTab } = useTabContext()
+  const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = isFormSheet ? canGoBackInStack : !isInTab
 
   const {
     data: { book, reference, strongReference: strongReferenceParam },
@@ -87,7 +84,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
   const [count, setCount] = useState<number>(0)
   const [concordanceLoading, setConcordanceLoading] = useState(true)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
-  const relationListModal = useBottomSheetModal()
+  const openEntityRelations = useOpenEntityRelations()
 
   const addHistory = useSetAtom(historyAtom)
 
@@ -209,30 +206,19 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
       reference = str1
     }
 
-    if (isInTab) {
-      // In tab context, update the tab data instead of navigating
-      setStrongTab(
-        produce(draft => {
-          draft.data.book = Number(bookNum)
-          draft.data.reference = reference
-          draft.data.strongReference = undefined
-        })
-      )
-    } else {
-      router.push({
-        pathname: '/strong',
-        params: {
-          book: String(bookNum),
-          reference: reference,
-        },
-      })
-    }
+    router.push({
+      pathname: '/strong',
+      params: {
+        book: String(bookNum),
+        reference: reference,
+      },
+    })
   }
 
   if (error) {
     return (
-      <Container>
-        <Header hasBackButton={!isInTab} onCustomBackPress={goBack} title="Désolé..." />
+      <FormSheetScreen isFormSheet={isFormSheet}>
+        <Header hasBackButton={hasBackButton} onCustomBackPress={goBack} title="Désolé..." />
         <Empty
           source={require('~assets/images/empty.json')}
           message={`Impossible de charger la strong pour ce verset...${
@@ -241,33 +227,35 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
               : ''
           }`}
         />
-      </Container>
+      </FormSheetScreen>
     )
   }
 
   if (!strongReference) {
     return (
-      <Container>
-        <Header hasBackButton={!isInTab} onCustomBackPress={goBack} title={t('Lexique')} />
+      <FormSheetScreen isFormSheet={isFormSheet}>
+        <Header hasBackButton={hasBackButton} onCustomBackPress={goBack} title={t('Lexique')} />
         <Loading message={t('Chargement...')} />
-      </Container>
+      </FormSheetScreen>
     )
   }
 
   const { Code, Hebreu, Grec, Mot, Phonetique, Definition, Origine, Type, LSG } = strongReference
 
   return (
-    <Container>
-      <DetailedHeader
-        hasBackButton={!isInTab}
+    <FormSheetScreen isFormSheet={isFormSheet}>
+      <Header
+        hasBackButton={hasBackButton}
         title={capitalize(Mot)}
         detail={Phonetique}
-        subtitle={Type}
+        subTitle={Type}
         rightComponent={
           <PopOverMenu
             popover={
               <>
-                <MenuOption
+                <ActionMenuOption
+                  icon="tag"
+                  label={t('Étiquettes')}
                   onSelect={() =>
                     setUnifiedTagsModal({
                       mode: 'select',
@@ -276,25 +264,21 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
                       entity: Grec ? 'strongsGrec' : 'strongsHebreu',
                     })
                   }
-                >
-                  <Box row alignItems="center">
-                    <FeatherIcon name="tag" size={15} />
-                    <Text marginLeft={10}>{t('Étiquettes')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption onSelect={shareContent} closeBeforeSelect>
-                  <Box row alignItems="center">
-                    <FeatherIcon name="share-2" size={15} />
-                    <Text marginLeft={10}>{t('Partager')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption onSelect={() => relationListModal.open()}>
-                  <Box row alignItems="center">
-                    <FeatherIcon name="git-merge" size={15} />
-                    <Text marginLeft={10}>{t('Éditer les relations')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption
+                />
+                <ActionMenuOption
+                  icon="share-2"
+                  label={t('Partager')}
+                  onSelect={shareContent}
+                  closeBeforeSelect
+                />
+                <ActionMenuOption
+                  icon="git-merge"
+                  label={t('Éditer les relations')}
+                  onSelect={() => strongEndpoint && openEntityRelations(strongEndpoint)}
+                />
+                <ActionMenuOption
+                  icon="external-link"
+                  label={t('tab.openInNewTab')}
                   onSelect={() => {
                     openInNewTab({
                       id: `strong-${generateUUID()}`,
@@ -307,12 +291,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
                       },
                     })
                   }}
-                >
-                  <Box row alignItems="center">
-                    <FeatherIcon name="external-link" size={15} />
-                    <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
-                  </Box>
-                </MenuOption>
+                />
               </>
             }
           />
@@ -325,7 +304,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
               <EntityChipList
                 tags={tags}
                 relationCount={relationCount}
-                onRelationPress={() => relationListModal.open()}
+                onRelationPress={() => strongEndpoint && openEntityRelations(strongEndpoint)}
               />
             </Box>
           )}
@@ -333,7 +312,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
             <Box marginBottom={10}>
               <EntityChipList
                 relationCount={relationCount}
-                onRelationPress={() => relationListModal.open()}
+                onRelationPress={() => strongEndpoint && openEntityRelations(strongEndpoint)}
               />
             </Box>
           )}
@@ -448,8 +427,7 @@ const StrongDetailScreen = ({ strongAtom }: StrongDetailScreenProps) => {
           </Box>
         </Box>
       </ScrollView>
-      <EntityRelationsModal ref={relationListModal.getRef()} endpoint={strongEndpoint} />
-    </Container>
+    </FormSheetScreen>
   )
 }
 

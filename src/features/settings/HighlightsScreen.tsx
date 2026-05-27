@@ -4,12 +4,13 @@ import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { Alert, ScrollView } from 'react-native'
 
+import { ActionSheetItem } from '~common/ActionMenu'
 import Empty from '~common/Empty'
 import FiltersHeader from '~common/FiltersHeader'
-import FilterModal from '~common/FilterModal'
 import ColorFilterModal from '~common/ColorFilterModal'
 import TypeFilterModal from '~common/TypeFilterModal'
-import Container from '~common/ui/Container'
+import Box from '~common/ui/Box'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Modal from '~common/Modal'
 import { useHighlightFilters } from '~helpers/useHighlightFilters'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
@@ -34,6 +35,7 @@ import { unifiedTagsModalAtom, colorChangeModalAtom } from '../../state/app'
 import VerseComponent from './Verse'
 import AnnotationItem from './AnnotationItem'
 import type { TagsObj, Verse, VerseIds } from '~common/types'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 export type GroupedHighlightData = {
   date: number
@@ -81,9 +83,15 @@ const groupHighlightsByDate = (arr: GroupedHighlights, highlightTuple: [string, 
   return arr
 }
 
-const HighlightsScreen = () => {
+type HighlightsScreenProps = {
+  isFormSheet?: boolean
+}
+
+const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
+  const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = isFormSheet ? canGoBackInStack : true
   const highlightsObj = useSelector(selectHighlightsObj)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const setColorChangeModal = useSetAtom(colorChangeModalAtom)
@@ -106,10 +114,8 @@ const HighlightsScreen = () => {
     selectedTag,
     typeFilterLabel,
     activeFiltersCount,
-    mainModalRef,
     colorModalRef,
     typeModalRef,
-    openMainModal,
     openColorFromMain,
     openTagsFromMain,
     openTypeFromMain,
@@ -240,157 +246,175 @@ const HighlightsScreen = () => {
   }
 
   return (
-    <Container>
-      {/* Header with filter button */}
-      <FiltersHeader
-        title={t('Surbrillances')}
-        filterLabel={filterLabel}
-        onFilterPress={openMainModal}
-        hasBackButton
-      />
+    <FormSheetScreen isFormSheet={isFormSheet}>
+      <Box flex bg="reverse">
+        {/* Header with filter button */}
+        <FiltersHeader
+          title={t('Surbrillances')}
+          filterLabel={filterLabel}
+          hasBackButton={hasBackButton}
+          hasActiveFilters={activeFiltersCount > 0}
+          onReset={resetFilters}
+          filters={[
+            {
+              key: 'type',
+              icon: 'layers',
+              label: t('Type'),
+              value: typeFilterLabel || t('Tout'),
+              onPress: openTypeFromMain,
+            },
+            {
+              key: 'color',
+              icon: 'droplet',
+              label: t('Couleur'),
+              value: colorInfo?.name || t('Toutes'),
+              color: filters.colorId ? colorInfo?.hex : undefined,
+              onPress: openColorFromMain,
+            },
+            {
+              key: 'tags',
+              icon: 'tag',
+              label: t('Tags'),
+              value: selectedTag?.name || t('Tous'),
+              onPress: openTagsFromMain,
+            },
+          ]}
+        />
 
-      {/* Filter modals */}
-      <FilterModal
-        ref={mainModalRef}
-        selectedColorId={filters.colorId}
-        selectedColorName={colorInfo?.name}
-        selectedColorHex={colorInfo?.hex}
-        onColorPress={openColorFromMain}
-        selectedTagName={selectedTag?.name}
-        onTagPress={openTagsFromMain}
-        selectedTypeLabel={typeFilterLabel}
-        onTypePress={openTypeFromMain}
-        onReset={resetFilters}
-        hasActiveFilters={activeFiltersCount > 0}
-      />
+        <ColorFilterModal
+          ref={colorModalRef}
+          selectedColorId={filters.colorId}
+          onSelect={colorId => {
+            setColorFilter(colorId)
+            colorModalRef.current?.dismiss()
+          }}
+        />
 
-      <ColorFilterModal
-        ref={colorModalRef}
-        selectedColorId={filters.colorId}
-        onSelect={colorId => {
-          setColorFilter(colorId)
-          colorModalRef.current?.dismiss()
-        }}
-      />
+        <TypeFilterModal
+          ref={typeModalRef}
+          selectedType={filters.typeFilter}
+          availableVersions={availableAnnotationVersions}
+          onSelect={type => {
+            setTypeFilter(type)
+            typeModalRef.current?.dismiss()
+          }}
+        />
 
-      <TypeFilterModal
-        ref={typeModalRef}
-        selectedType={filters.typeFilter}
-        availableVersions={availableAnnotationVersions}
-        onSelect={type => {
-          setTypeFilter(type)
-          typeModalRef.current?.dismiss()
-        }}
-      />
+        {/* Content */}
+        {unifiedItems.length ? (
+          <ScrollView>
+            {unifiedItems.map(item => {
+              if (item.type === 'highlight') {
+                return (
+                  <VerseComponent
+                    key={`highlight-${item.data.date}`}
+                    color={item.data.color}
+                    date={item.data.date}
+                    verseIds={item.data.highlightsObj}
+                    stringIds={item.data.stringIds}
+                    tags={item.data.tags}
+                    setSettings={setSettingsData}
+                  />
+                )
+              }
 
-      {/* Content */}
-      {unifiedItems.length ? (
-        <ScrollView>
-          {unifiedItems.map(item => {
-            if (item.type === 'highlight') {
               return (
-                <VerseComponent
-                  key={`highlight-${item.data.date}`}
-                  color={item.data.color}
-                  date={item.data.date}
-                  verseIds={item.data.highlightsObj}
-                  stringIds={item.data.stringIds}
-                  tags={item.data.tags}
-                  setSettings={setSettingsData}
+                <AnnotationItem
+                  key={`annotation-${item.data.id}`}
+                  item={item.data}
+                  onSettingsPress={setAnnotationSettingsData}
                 />
               )
-            }
+            })}
+          </ScrollView>
+        ) : (
+          <Empty
+            icon={require('~assets/images/empty-state-icons/highlight.svg')}
+            message={t("Vous n'avez pas encore rien surligné...")}
+          />
+        )}
 
-            return (
-              <AnnotationItem
-                key={`annotation-${item.data.id}`}
-                item={item.data}
-                onSettingsPress={setAnnotationSettingsData}
-              />
-            )
-          })}
-        </ScrollView>
-      ) : (
-        <Empty
-          icon={require('~assets/images/empty-state-icons/highlight.svg')}
-          message={t("Vous n'avez pas encore rien surligné...")}
-        />
-      )}
+        {/* Settings modal */}
+        <Modal.Body ref={settingsRef} enableDynamicSizing>
+          <ActionSheetItem
+            icon="droplet"
+            label={t('Changer la couleur')}
+            onPress={() => {
+              if (settingsData?.stringIds) {
+                const verseIds = settingsData.stringIds
+                setColorChangeModal({
+                  onSelectColor: (colorId: string) => {
+                    dispatch(changeHighlightColor(verseIds, colorId))
+                  },
+                })
+              }
+            }}
+          />
+          <ActionSheetItem
+            icon="tag"
+            label={t('Éditer les tags')}
+            onPress={() => {
+              if (settingsData?.stringIds) {
+                setUnifiedTagsModal({
+                  mode: 'select',
+                  entity: 'highlights',
+                  ids: settingsData.stringIds,
+                })
+              }
+            }}
+          />
+          <ActionSheetItem
+            icon="trash-2"
+            label={t('Supprimer')}
+            color="quart"
+            onPress={handleDelete}
+          />
+        </Modal.Body>
 
-      {/* Settings modal */}
-      <Modal.Body ref={settingsRef} enableDynamicSizing>
-        <Modal.Item
-          onPress={() => {
-            if (settingsData?.stringIds) {
-              const verseIds = settingsData.stringIds
-              setColorChangeModal({
-                onSelectColor: (colorId: string) => {
-                  dispatch(changeHighlightColor(verseIds, colorId))
-                },
-              })
-            }
-          }}
+        {/* Annotation settings modal */}
+        <Modal.Body
+          ref={annotationSettingsRef}
+          onModalClose={() => setAnnotationSettingsData(null)}
+          enableDynamicSizing
         >
-          {t('Changer la couleur')}
-        </Modal.Item>
-        <Modal.Item
-          onPress={() => {
-            if (settingsData?.stringIds) {
-              setUnifiedTagsModal({
-                mode: 'select',
-                entity: 'highlights',
-                ids: settingsData.stringIds,
-              })
-            }
-          }}
-        >
-          {t('Éditer les tags')}
-        </Modal.Item>
-        <Modal.Item color="quart" onPress={handleDelete}>
-          {t('Supprimer')}
-        </Modal.Item>
-      </Modal.Body>
-
-      {/* Annotation settings modal */}
-      <Modal.Body
-        ref={annotationSettingsRef}
-        onModalClose={() => setAnnotationSettingsData(null)}
-        enableDynamicSizing
-      >
-        <Modal.Item
-          onPress={() => {
-            if (annotationSettingsData) {
-              const annotationId = annotationSettingsData.id
-              const annotationColor = annotationSettingsData.color
-              setColorChangeModal({
-                selectedColor: annotationColor,
-                onSelectColor: (colorId: string) => {
-                  dispatch(changeWordAnnotationColor(annotationId, colorId))
-                },
-              })
-            }
-          }}
-        >
-          {t('Changer la couleur')}
-        </Modal.Item>
-        <Modal.Item
-          onPress={() => {
-            if (annotationSettingsData) {
-              setUnifiedTagsModal({
-                mode: 'select',
-                entity: 'wordAnnotations',
-                id: annotationSettingsData.id,
-              })
-            }
-          }}
-        >
-          {t('Éditer les tags')}
-        </Modal.Item>
-        <Modal.Item color="quart" onPress={handleDeleteAnnotation}>
-          {t('Supprimer')}
-        </Modal.Item>
-      </Modal.Body>
-    </Container>
+          <ActionSheetItem
+            icon="droplet"
+            label={t('Changer la couleur')}
+            onPress={() => {
+              if (annotationSettingsData) {
+                const annotationId = annotationSettingsData.id
+                const annotationColor = annotationSettingsData.color
+                setColorChangeModal({
+                  selectedColor: annotationColor,
+                  onSelectColor: (colorId: string) => {
+                    dispatch(changeWordAnnotationColor(annotationId, colorId))
+                  },
+                })
+              }
+            }}
+          />
+          <ActionSheetItem
+            icon="tag"
+            label={t('Éditer les tags')}
+            onPress={() => {
+              if (annotationSettingsData) {
+                setUnifiedTagsModal({
+                  mode: 'select',
+                  entity: 'wordAnnotations',
+                  id: annotationSettingsData.id,
+                })
+              }
+            }}
+          />
+          <ActionSheetItem
+            icon="trash-2"
+            label={t('Supprimer')}
+            color="quart"
+            onPress={handleDeleteAnnotation}
+          />
+        </Modal.Body>
+      </Box>
+    </FormSheetScreen>
   )
 }
 

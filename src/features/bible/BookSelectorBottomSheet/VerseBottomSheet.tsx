@@ -1,4 +1,4 @@
-import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { useAtomValue } from 'jotai/react'
 import { atom } from 'jotai/vanilla'
 import React from 'react'
@@ -12,13 +12,14 @@ import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
+import { ContainerComponent } from '~common/Modal'
 import generateUUID from '~helpers/generateUUID'
 import loadBibleChapter from '~helpers/loadBibleChapter'
 import { useQuery } from '~helpers/react-query-lite'
 
 interface VerseBottomSheetProps {
-  bottomSheetRef: React.RefObject<BottomSheet | null>
-  bookSelectorRef: React.RefObject<BottomSheet | null>
+  bottomSheetRef: React.RefObject<BottomSheetModal | null>
+  bookSelectorRef: React.RefObject<BottomSheetModal | null>
   actions?: BibleTabActions
   data?: BibleTab['data']
 }
@@ -66,13 +67,13 @@ const VerseBottomSheet = ({
   const handleSelect = (verse: Verse) => {
     setTempSelectedVerse?.(Number(verse.Verset))
     validateTempSelected?.()
-    bottomSheetRef.current?.close()
-    bookSelectorRef.current?.close()
+    bottomSheetRef.current?.dismiss()
+    bookSelectorRef.current?.dismiss()
   }
 
   const handleLongPress = (verse: Verse) => {
-    bottomSheetRef.current?.close()
-    bookSelectorRef.current?.close()
+    bottomSheetRef.current?.dismiss()
+    bookSelectorRef.current?.dismiss()
 
     if (!tempSelectedBook || !tempSelectedChapter || !data) {
       return
@@ -105,15 +106,17 @@ const VerseBottomSheet = ({
   const horizontalMargin = (MAX_WIDTH - totalItemsWidth) / 2
 
   return (
-    <BottomSheet
+    <BottomSheetModal
       key={key}
       ref={bottomSheetRef}
-      index={-1}
       topInset={insets.top}
       snapPoints={['50%']}
       enablePanDownToClose
       enableDynamicSizing={false}
       backdropComponent={renderBackdrop}
+      containerComponent={ContainerComponent}
+      activeOffsetY={[-20, 20]}
+      stackBehavior="push"
       {...bottomSheetStyles}
     >
       <Box px={10} py={10} borderBottomWidth={1} borderColor="border">
@@ -160,7 +163,7 @@ const VerseBottomSheet = ({
           </TouchableBox>
         ))}
       </BottomSheetScrollView>
-    </BottomSheet>
+    </BottomSheetModal>
   )
 }
 

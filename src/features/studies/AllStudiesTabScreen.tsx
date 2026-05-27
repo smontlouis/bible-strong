@@ -5,10 +5,11 @@ import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import { useSetAtom } from 'jotai/react'
 
 import Empty from '~common/Empty'
+import FiltersHeader from '~common/FiltersHeader'
 import RenameModal from '~common/RenameModal'
-import TagsHeader from '~common/TagsHeader'
-import Container from '~common/ui/Container'
+import Box from '~common/ui/Box'
 import FabButton from '~common/ui/FabButton'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import withLoginModal from '~common/withLoginModal'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import useLogin from '~helpers/useLogin'
@@ -23,19 +24,33 @@ import generateUUID from '~helpers/generateUUID'
 import { RootState } from '~redux/modules/reducer'
 import { selectRelationCountsByEndpointIdentity } from '~redux/selectors/bible'
 import { unifiedTagsModalAtom } from '~state/app'
-import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
-import { endpointIdentity, type RelationEndpoint } from '~features/studyRelations/domain'
+import { endpointIdentity } from '~features/studyRelations/domain'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
+import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import StudyItem from './StudyItem'
 import StudySettingsModal from './StudySettingsModal'
 
 type StudiesScreenProps = {
   hasBackButton?: boolean
+  isFormSheet?: boolean
+  isNewTabSelection?: boolean
+  newTabId?: string
   onStudySelect?: (studyId: string) => void
 }
 
-const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => {
+const StudiesScreen = ({
+  hasBackButton,
+  isFormSheet = false,
+  isNewTabSelection = false,
+  newTabId,
+  onStudySelect,
+}: StudiesScreenProps) => {
   const router = useRouter()
   const { t } = useTranslation()
+  const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
+  const canGoBackInStack = useCanGoBackInStack()
+  const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
   const { isLogged } = useLogin()
   const { isInTab } = useTabContext()
   const dispatch = useDispatch()
@@ -43,9 +58,8 @@ const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => 
 
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const [studySettingsId, setStudySettingsId] = useState<string | false>(false)
-  const [relationEndpoint, setRelationEndpoint] = useState<RelationEndpoint | null>(null)
   const studySettingsModal = useBottomSheetModal()
-  const relationModal = useBottomSheetModal()
+  const openEntityRelations = useOpenEntityRelations()
   const renameModalRef = useRef<BottomSheetModal>(null)
   const [studyToRename, setStudyToRename] = useState<{ id: string; title: string } | null>(null)
   const [pendingStudyId, setPendingStudyId] = useState<string | null>(null)
@@ -62,6 +76,21 @@ const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => 
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onStudyPress = (studyId: string) => {
+    if (isNewTabSelection) {
+      const study = studies.find(candidate => candidate.id === studyId)
+
+      resolveNewTabSelection({
+        id: newTabId || 'new',
+        title: study?.title || t('Études'),
+        isRemovable: true,
+        type: 'study',
+        data: {
+          studyId,
+        },
+      })
+      return
+    }
+
     if (isInTab && onStudySelect) {
       onStudySelect(studyId)
     } else {
@@ -110,102 +139,120 @@ const StudiesScreen = ({ hasBackButton, onStudySelect }: StudiesScreenProps) => 
   filteredStudies.sort((a, b) => Number(b.modified_at) - Number(a.modified_at))
 
   return (
-    <Container>
-      {filteredStudies.length ? (
-        <FlatList
-          key={r(['xs', 'sm', 'md', 'lg'])}
-          stickyHeaderIndices={[0]}
-          ListHeaderComponent={
-            <TagsHeader
-              title={t('Études')}
-              setIsOpen={openTagsModal}
-              isOpen={false}
-              selectedChip={selectedChip}
-              hasBackButton={hasBackButton}
-            />
-          }
-          numColumns={r([2, 2, 3, 3])}
-          data={filteredStudies}
-          contentContainerStyle={{ paddingBottom: 100 }}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => (
-            <StudyItem
-              key={item.id}
-              study={item}
-              setStudySettings={openStudySettings}
-              onPress={onStudyPress}
-              relationCount={
-                relationCountsByEndpoint[
-                  endpointIdentity({
+    <FormSheetScreen isFormSheet={isFormSheet}>
+      <Box flex bg="reverse">
+        {filteredStudies.length ? (
+          <FlatList
+            key={r(['xs', 'sm', 'md', 'lg'])}
+            stickyHeaderIndices={[0]}
+            ListHeaderComponent={
+              <FiltersHeader
+                title={t('Études')}
+                filterLabel={selectedChip?.name}
+                hasBackButton={showBackButton}
+                hasActiveFilters={Boolean(selectedChip)}
+                onReset={() => setSelectedChip(null)}
+                filters={[
+                  {
+                    key: 'tags',
+                    icon: 'tag',
+                    label: t('Tags'),
+                    value: selectedChip?.name || t('Tous'),
+                    onPress: openTagsModal,
+                  },
+                ]}
+              />
+            }
+            numColumns={r([2, 2, 3, 3])}
+            data={filteredStudies}
+            contentContainerStyle={{ paddingBottom: 100 }}
+            keyExtractor={item => item.id}
+            renderItem={({ item }) => (
+              <StudyItem
+                key={item.id}
+                study={item}
+                setStudySettings={openStudySettings}
+                onPress={onStudyPress}
+                relationCount={
+                  relationCountsByEndpoint[
+                    endpointIdentity({
+                      type: 'study',
+                      studyId: item.id,
+                      label: item.title,
+                    })
+                  ] || 0
+                }
+                onRelationPress={() => {
+                  openEntityRelations({
                     type: 'study',
                     studyId: item.id,
                     label: item.title,
                   })
-                ] || 0
-              }
-              onRelationPress={() => {
-                setRelationEndpoint({
-                  type: 'study',
-                  studyId: item.id,
-                  label: item.title,
-                })
-                relationModal.open()
-              }}
+                }}
+              />
+            )}
+          />
+        ) : (
+          <>
+            <FiltersHeader
+              title={t('Études')}
+              filterLabel={selectedChip?.name}
+              hasBackButton={showBackButton}
+              hasActiveFilters={Boolean(selectedChip)}
+              onReset={() => setSelectedChip(null)}
+              filters={[
+                {
+                  key: 'tags',
+                  icon: 'tag',
+                  label: t('Tags'),
+                  value: selectedChip?.name || t('Tous'),
+                  onPress: openTagsModal,
+                },
+              ]}
             />
-          )}
+            <Empty
+              icon={require('~assets/images/empty-state-icons/study.svg')}
+              message={t('Aucune étude...')}
+            />
+          </>
+        )}
+        {isLogged && (
+          <FabButton
+            icon="plus"
+            onPress={() => {
+              const studyUuid = generateUUID()
+              setPendingStudyId(studyUuid)
+              dispatch(
+                updateStudy({
+                  id: studyUuid,
+                  title: t('Document sans titre'),
+                  content: null,
+                  created_at: Date.now(),
+                  modified_at: Date.now(),
+                })
+              )
+            }}
+          />
+        )}
+        <StudySettingsModal
+          ref={studySettingsModal.ref}
+          studyId={studySettingsId}
+          onClosed={() => setStudySettingsId(false)}
+          openRenameModal={openRenameModal}
         />
-      ) : (
-        <>
-          <TagsHeader
-            title={t('Études')}
-            setIsOpen={openTagsModal}
-            isOpen={false}
-            selectedChip={selectedChip}
-            hasBackButton={hasBackButton}
-          />
-          <Empty
-            icon={require('~assets/images/empty-state-icons/study.svg')}
-            message={t('Aucune étude...')}
-          />
-        </>
-      )}
-      {isLogged && (
-        <FabButton
-          icon="plus"
-          onPress={() => {
-            const studyUuid = generateUUID()
-            setPendingStudyId(studyUuid)
-            dispatch(
-              updateStudy({
-                id: studyUuid,
-                title: t('Document sans titre'),
-                content: null,
-                created_at: Date.now(),
-                modified_at: Date.now(),
-              })
-            )
+        <RenameModal
+          bottomSheetRef={renameModalRef}
+          title={t("Renommer l'étude")}
+          placeholder={t("Nom de l'étude")}
+          initialValue={studyToRename?.title}
+          onSave={value => {
+            if (studyToRename) {
+              dispatch(updateStudy({ id: studyToRename.id, title: value, modified_at: Date.now() }))
+            }
           }}
         />
-      )}
-      <StudySettingsModal
-        ref={studySettingsModal.ref}
-        studyId={studySettingsId}
-        onClosed={() => setStudySettingsId(false)}
-        openRenameModal={openRenameModal}
-      />
-      <RenameModal
-        bottomSheetRef={renameModalRef}
-        title={t("Renommer l'étude")}
-        placeholder={t("Nom de l'étude")}
-        initialValue={studyToRename?.title}
-        onSave={value => {
-          if (studyToRename) {
-            dispatch(updateStudy({ id: studyToRename.id, title: value, modified_at: Date.now() }))
-          }
-        }}
-      />
-      <EntityRelationsModal ref={relationModal.getRef()} endpoint={relationEndpoint} />
-    </Container>
+      </Box>
+    </FormSheetScreen>
   )
 }
 

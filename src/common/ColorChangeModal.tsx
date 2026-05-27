@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -8,6 +8,7 @@ import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import { useColorItems } from '~helpers/useHighlightColors'
 import { colorChangeModalAtom, colorPickerModalAtom } from '~state/app'
+import { ContainerComponent } from './Modal'
 
 const ColorChangeModal = () => {
   const item = useAtomValue(colorChangeModalAtom)
@@ -56,21 +57,24 @@ const ColorChangeModal = () => {
       enablePanDownToClose
       enableDynamicSizing
       backdropComponent={renderBackdrop}
+      containerComponent={ContainerComponent}
       activeOffsetY={[-20, 20]}
       onDismiss={handleModalClose}
       key={key}
       {...bottomSheetStyles}
     >
-      <ColorCircleGrid
-        colors={colorItems}
-        selectedColor={item ? item.selectedColor : undefined}
-        onSelect={handleColorSelect}
-        showAddButton
-        onAddPress={handleOpenColorPicker}
-        layout="scroll"
-        scrollPadding={{ vertical: 10 }}
-        itemHeight={60 + insets.bottom}
-      />
+      <BottomSheetView>
+        <ColorCircleGrid
+          colors={colorItems}
+          selectedColor={item ? item.selectedColor : undefined}
+          onSelect={handleColorSelect}
+          showAddButton
+          onAddPress={handleOpenColorPicker}
+          layout="scroll"
+          scrollPadding={{ vertical: 10 }}
+          itemHeight={60 + insets.bottom}
+        />
+      </BottomSheetView>
     </BottomSheetModal>
   )
 }

@@ -101,7 +101,7 @@ const PericopeScreen = () => {
                         router.push({
                           pathname: '/bible-view',
                           params: {
-                            isReadOnly: 'true',
+                            contextDisplayMode: 'focused',
                             book: JSON.stringify(book),
                             chapter: String(chapterKey),
                             version: defaultVersion,

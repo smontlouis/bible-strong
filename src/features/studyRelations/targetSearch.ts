@@ -1,8 +1,9 @@
-import type { NotesObj, StudiesObj } from '~redux/modules/user'
+import type { LinksObj, NotesObj, StudiesObj } from '~redux/modules/user'
 import { normalizeStrongCode } from './domain'
 import i18n from '~i18n'
 import {
   getNoteSearchItems,
+  getLinkSearchItems,
   getReferenceSearchItems,
   getStudySearchItems,
 } from '~features/search/shared/searchItems'
@@ -12,6 +13,7 @@ export type RelationTargetResult = SearchEntityResultWithEndpoint
 
 type SearchData = {
   notes?: NotesObj
+  links?: LinksObj
   studies?: StudiesObj
 }
 
@@ -60,6 +62,9 @@ const normalizeText = (text: string) => text.toLowerCase().trim()
 export const getNoteTargetItems = (notes: NotesObj = {}): RelationTargetResult[] =>
   getNoteSearchItems(notes).filter((item): item is RelationTargetResult => Boolean(item.endpoint))
 
+export const getLinkTargetItems = (links: LinksObj = {}): RelationTargetResult[] =>
+  getLinkSearchItems(links).filter((item): item is RelationTargetResult => Boolean(item.endpoint))
+
 export const getStudyTargetItems = (studies: StudiesObj = {}): RelationTargetResult[] =>
   getStudySearchItems(studies).filter((item): item is RelationTargetResult =>
     Boolean(item.endpoint)
@@ -71,6 +76,17 @@ const searchNoteTargets = (query: string, notes: NotesObj = {}): RelationTargetR
 
   return getNoteTargetItems(notes)
     .filter(note => normalizeText(`${note.title} ${note.subtitle || ''}`).includes(normalizedQuery))
+    .slice(0, 12)
+}
+
+const searchLinkTargets = (query: string, links: LinksObj = {}): RelationTargetResult[] => {
+  const normalizedQuery = normalizeText(query)
+  if (!normalizedQuery) return []
+
+  return getLinkTargetItems(links)
+    .filter(link =>
+      normalizeText(`${link.title} ${link.description || ''}`).includes(normalizedQuery)
+    )
     .slice(0, 12)
 }
 
@@ -94,6 +110,7 @@ export const searchRelationTargets = (
     ...searchVerseTargets(trimmed),
     ...searchStrongTargets(trimmed),
     ...searchNoteTargets(trimmed, data.notes),
+    ...searchLinkTargets(trimmed, data.links),
     ...searchStudyTargets(trimmed, data.studies),
   ]
 }

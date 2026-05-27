@@ -1,5 +1,5 @@
-import BottomSheet from '@gorhom/bottom-sheet'
-import React, { useEffect, useMemo, useRef } from 'react'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { atom } from 'jotai/vanilla'
@@ -8,13 +8,14 @@ import { DeviceEventEmitter, FlatList } from 'react-native'
 import { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BibleTab, BibleTabActions } from 'src/state/tabs'
-import books from '~assets/bible_versions/books-desc'
+import books, { Book } from '~assets/bible_versions/books-desc'
 import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { HelpTip } from '~features/tips/HelpTip'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
+import { ContainerComponent } from '~common/Modal'
 import { bookSelectorSortAtom, bookSelectorVersesAtom } from './atom'
 import { itemHeight } from './BookItem'
 import { BookSelectorList } from './BookSelectorList'
@@ -25,7 +26,7 @@ import { useQuery } from '~helpers/react-query-lite'
 import { getBibleVersionCoverage } from '~helpers/biblesDb'
 interface BookSelectorBottomSheetProps {
   selectedBookNum?: number
-  bottomSheetRef: React.RefObject<BottomSheet | null>
+  bottomSheetRef: React.RefObject<BottomSheetModal | null>
 }
 
 export const bookSelectorDataAtom = atom<{
@@ -36,6 +37,9 @@ export const bookSelectorDataAtom = atom<{
 const BookSelectorBottomSheet = ({ bottomSheetRef }: BookSelectorBottomSheetProps) => {
   const insets = useSafeAreaInsets()
   const expandedBook = useSharedValue<number | null>(null)
+  const [expandedBookNumber, setExpandedBookNumber] = useState<number | null>(null)
+  const [renderedChapterBookNumbers, setRenderedChapterBookNumbers] = useState<number[]>([])
+  const collapseTimeouts = useRef<Record<number, ReturnType<typeof setTimeout>>>({})
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
   const flatListRef = useRef<FlatList>(null)
   const { t } = useTranslation()
@@ -48,7 +52,7 @@ const BookSelectorBottomSheet = ({ bottomSheetRef }: BookSelectorBottomSheetProp
   const { actions: bookSelectorActions, data: bookSelectorData } =
     useAtomValue(bookSelectorDataAtom)
   const openInNewTab = useOpenInNewTab()
-  const verseBottomSheetRef = useRef<BottomSheet>(null)
+  const verseBottomSheetRef = useRef<BottomSheetModal>(null)
   const selectedVersion = bookSelectorData?.selectedVersion
 
   const { data: coverageData } = useQuery({
@@ -71,19 +75,19 @@ const BookSelectorBottomSheet = ({ bottomSheetRef }: BookSelectorBottomSheetProp
           setTempSelectedChapter(chapter)
           bookSelectorActions.setTempSelectedBook(book)
           bookSelectorActions.setTempSelectedChapter(chapter)
-          verseBottomSheetRef.current?.expand()
+          verseBottomSheetRef.current?.present()
           return
         }
         bookSelectorActions.setTempSelectedBook(book)
         bookSelectorActions.setTempSelectedChapter(chapter)
         bookSelectorActions.setTempSelectedVerse(1)
         bookSelectorActions.validateTempSelected()
-        bottomSheetRef.current?.close()
+        bottomSheetRef.current?.dismiss()
       } else if (type === 'longPress') {
         if (bookSelectorHasVerses) {
           return
         }
-        bottomSheetRef.current?.close()
+        bottomSheetRef.current?.dismiss()
         setTimeout(() => {
           openInNewTab(
             {
@@ -129,18 +133,57 @@ const BookSelectorBottomSheet = ({ bottomSheetRef }: BookSelectorBottomSheetProp
   )
   const safeInitialScrollIndex = Math.max(initialScrollIndex, 0)
 
+  useEffect(
+    () => () => {
+      Object.values(collapseTimeouts.current).forEach(clearTimeout)
+    },
+    []
+  )
+
+  const scheduleChapterUnmount = (bookNumber: number) => {
+    clearTimeout(collapseTimeouts.current[bookNumber])
+    collapseTimeouts.current[bookNumber] = setTimeout(() => {
+      setRenderedChapterBookNumbers(current => current.filter(value => value !== bookNumber))
+      delete collapseTimeouts.current[bookNumber]
+    }, 300)
+  }
+
+  const handleBookSelect = (book: Book) => {
+    const currentExpandedBookNumber = expandedBookNumber
+
+    if (currentExpandedBookNumber === book.Numero) {
+      expandedBook.set(null)
+      setExpandedBookNumber(null)
+      scheduleChapterUnmount(book.Numero)
+      return
+    }
+
+    if (currentExpandedBookNumber !== null) {
+      scheduleChapterUnmount(currentExpandedBookNumber)
+    }
+
+    clearTimeout(collapseTimeouts.current[book.Numero])
+    delete collapseTimeouts.current[book.Numero]
+    setRenderedChapterBookNumbers(current =>
+      current.includes(book.Numero) ? current : [...current, book.Numero]
+    )
+    expandedBook.set(book.Numero)
+    setExpandedBookNumber(book.Numero)
+  }
+
   return (
     <>
-      <BottomSheet
+      <BottomSheetModal
         key={key}
         ref={bottomSheetRef}
         snapPoints={['100%']}
-        index={-1}
         topInset={insets.top + 64}
         enablePanDownToClose
         enableDynamicSizing={false}
         enableContentPanningGesture={false}
         backdropComponent={renderBackdrop}
+        containerComponent={ContainerComponent}
+        activeOffsetY={[-20, 20]}
         onAnimate={(fromIndex, toIndex) => {
           // Opening the bottom sheet
           if (fromIndex === -1 && toIndex === 0 && data.length > 0) {
@@ -153,6 +196,10 @@ const BookSelectorBottomSheet = ({ bottomSheetRef }: BookSelectorBottomSheetProp
           // Closing the bottom sheet
           if (fromIndex === 0 && toIndex === -1) {
             expandedBook.set(null)
+            setExpandedBookNumber(null)
+            Object.values(collapseTimeouts.current).forEach(clearTimeout)
+            collapseTimeouts.current = {}
+            setRenderedChapterBookNumbers([])
           }
         }}
         {...bottomSheetStyles}
@@ -179,8 +226,10 @@ const BookSelectorBottomSheet = ({ bottomSheetRef }: BookSelectorBottomSheetProp
           bookSelectorData={bookSelectorData}
           flatListRef={flatListRef}
           chaptersByBook={coverageData?.chaptersByBook}
+          renderedChapterBookNumbers={renderedChapterBookNumbers}
+          onBookSelect={handleBookSelect}
         />
-      </BottomSheet>
+      </BottomSheetModal>
       <VerseBottomSheet
         bottomSheetRef={verseBottomSheetRef}
         bookSelectorRef={bottomSheetRef}

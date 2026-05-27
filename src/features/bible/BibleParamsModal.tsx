@@ -27,8 +27,7 @@ import {
   setFontFamily,
   setSettingsAlignContent,
   setSettingsLineHeight,
-  setSettingsLinksDisplay,
-  setSettingsNotesDisplay,
+  setSettingsRelationsDisplay,
   setSettingsPreferredColorScheme,
   setSettingsPreferredDarkTheme,
   setSettingsPreferredLightTheme,
@@ -40,6 +39,7 @@ import {
 import { colorPickerModalAtom } from '~state/app'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
+import { ContainerComponent } from '~common/Modal'
 
 export const HalfContainer = styled.View<{ border?: boolean }>(({ border, theme }) => ({
   paddingHorizontal: 20,
@@ -102,12 +102,7 @@ export const useParamsModalLabels = () => {
     longPress: t('Appui long'),
   }
 
-  const notesDisplayToString = {
-    inline: t('À la ligne'),
-    block: t('En icone'),
-  }
-
-  const linksDisplayToString = {
+  const relationsDisplayToString = {
     inline: t('À la ligne'),
     block: t('En icone'),
   }
@@ -125,8 +120,7 @@ export const useParamsModalLabels = () => {
     preferredLightThemeToString,
     preferredDarkThemeToString,
     pressToString,
-    notesDisplayToString,
-    linksDisplayToString,
+    relationsDisplayToString,
     tagsDisplayToString,
   }
 }
@@ -148,8 +142,7 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
     preferredLightThemeToString,
     preferredDarkThemeToString,
     pressToString,
-    notesDisplayToString,
-    linksDisplayToString,
+    relationsDisplayToString,
     tagsDisplayToString,
   } = useParamsModalLabels()
 
@@ -169,8 +162,14 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
   const alignContent = useSelector((state: RootState) => state.user.bible.settings.alignContent)
   const lineHeight = useSelector((state: RootState) => state.user.bible.settings.lineHeight)
   const textDisplay = useSelector((state: RootState) => state.user.bible.settings.textDisplay)
-  const notesDisplay = useSelector((state: RootState) => state.user.bible.settings.notesDisplay)
-  const linksDisplay = useSelector((state: RootState) => state.user.bible.settings.linksDisplay)
+  const relationsDisplay = useSelector(
+    (state: RootState) =>
+      state.user.bible.settings.relationsDisplay ||
+      (state.user.bible.settings.notesDisplay === 'block' ||
+      state.user.bible.settings.linksDisplay === 'block'
+        ? 'block'
+        : 'inline')
+  )
   const tagsDisplay = useSelector((state: RootState) => state.user.bible.settings.tagsDisplay)
   const press = useSelector((state: RootState) => state.user.bible.settings.press)
   const redWordsDisplay = useSelector(
@@ -187,6 +186,7 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
       ref={modalRef}
       enablePanDownToClose
       backdropComponent={props => renderBackdrop({ ...props, opacity: 0.1 })}
+      containerComponent={ContainerComponent}
       enableDynamicSizing={false}
       snapPoints={['40%']}
       activeOffsetY={[-20, 20]}
@@ -328,30 +328,16 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
         </HalfContainer>
 
         <HalfContainer border>
-          <Text flex={5}>{t('Affichage des notes')}</Text>
+          <Text flex={5}>{t('Affichage des relations')}</Text>
           <Text marginLeft={5} fontSize={12} bold>
-            {notesDisplayToString[notesDisplay]}
+            {relationsDisplayToString[relationsDisplay]}
           </Text>
           <TouchableIcon
             isSelected
-            name={notesDisplay === 'inline' ? 'align-left' : 'file-text'}
+            name={relationsDisplay === 'inline' ? 'align-left' : 'git-merge'}
             onPress={() => {
-              const nextDisplay = notesDisplay === 'inline' ? 'block' : 'inline'
-              dispatch(setSettingsNotesDisplay(nextDisplay))
-            }}
-          />
-        </HalfContainer>
-        <HalfContainer border>
-          <Text flex={5}>{t('Affichage des liens')}</Text>
-          <Text marginLeft={5} fontSize={12} bold>
-            {linksDisplayToString[linksDisplay]}
-          </Text>
-          <TouchableIcon
-            isSelected
-            name={linksDisplay === 'inline' ? 'align-left' : 'link'}
-            onPress={() => {
-              const nextDisplay = linksDisplay === 'inline' ? 'block' : 'inline'
-              dispatch(setSettingsLinksDisplay(nextDisplay))
+              const nextDisplay = relationsDisplay === 'inline' ? 'block' : 'inline'
+              dispatch(setSettingsRelationsDisplay(nextDisplay))
             }}
           />
         </HalfContainer>

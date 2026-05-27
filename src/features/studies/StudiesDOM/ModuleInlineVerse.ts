@@ -24,54 +24,62 @@ class ModuleInlineVerse extends Module {
 
     this.quill.on(Quill.events.EDITOR_CHANGE, (type, range) => {
       if (type === Quill.events.SELECTION_CHANGE) {
-        this.range = range as QuillRange | null
+        const nextRange = range as QuillRange | null
+        if (nextRange) {
+          this.range = nextRange
+        }
       }
     })
   }
 
-  receiveVerseLink = ({ title, verses }: InlineVersePayload) => {
-    this.quill.focus()
-    this.quill.setSelection(this.range, Quill.sources.SILENT)
+  getInsertionRange = () => {
+    return (
+      this.range ??
+      this.quill.selection.savedRange ?? { index: this.quill.getLength() - 1, length: 0 }
+    )
+  }
 
-    if (this.range) {
-      if (this.range.length) {
-        this.quill.format('inline-strong', false) // Disable inline-strong in case
-        this.quill.format('inline-verse', {
-          title,
-          verses,
-        })
-        this.quill.setSelection(this.range.index + this.range.length + 1, Quill.sources.SILENT)
-      } else {
-        this.quill.insertText(this.range.index, title, 'inline-verse', {
-          title,
-          verses,
-        })
-        this.quill.insertText(this.range.index, ' ', 'inline-verse', false)
-      }
+  receiveVerseLink = ({ title, verses }: InlineVersePayload) => {
+    const range = this.getInsertionRange()
+    this.quill.focus()
+    this.quill.setSelection(range, Quill.sources.SILENT)
+
+    if (range.length) {
+      this.quill.format('inline-strong', false) // Disable inline-strong in case
+      this.quill.format('inline-verse', {
+        title,
+        verses,
+      })
+      this.quill.setSelection(range.index + range.length + 1, Quill.sources.SILENT)
+    } else {
+      this.quill.insertText(range.index, title, 'inline-verse', {
+        title,
+        verses,
+      })
+      this.quill.insertText(range.index, ' ', 'inline-verse', false)
     }
   }
 
   receiveStrongLink = ({ title, codeStrong, book }: InlineStrongPayload) => {
+    const range = this.getInsertionRange()
     this.quill.focus()
-    this.quill.setSelection(this.range, Quill.sources.SILENT)
+    this.quill.setSelection(range, Quill.sources.SILENT)
 
-    if (this.range) {
-      if (this.range.length) {
-        this.quill.format('inline-verse', false) // Disable inline-verse in case
-        this.quill.format('inline-strong', {
-          title,
-          codeStrong,
-          book,
-        })
-        this.quill.setSelection(this.range.index + this.range.length + 1, Quill.sources.SILENT)
-      } else {
-        this.quill.insertText(this.range.index, title, 'inline-strong', {
-          title,
-          codeStrong,
-          book,
-        })
-        this.quill.insertText(this.range.index, ' ', 'inline-strong', false)
-      }
+    if (range.length) {
+      this.quill.format('inline-verse', false) // Disable inline-verse in case
+      this.quill.format('inline-strong', {
+        title,
+        codeStrong,
+        book,
+      })
+      this.quill.setSelection(range.index + range.length + 1, Quill.sources.SILENT)
+    } else {
+      this.quill.insertText(range.index, title, 'inline-strong', {
+        title,
+        codeStrong,
+        book,
+      })
+      this.quill.insertText(range.index, ' ', 'inline-strong', false)
     }
   }
 }

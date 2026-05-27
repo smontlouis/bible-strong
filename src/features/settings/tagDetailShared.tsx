@@ -1,11 +1,10 @@
 import React from 'react'
 import distanceInWords from 'date-fns/formatDistance'
 import styled from '@emotion/native'
+import { useRouter } from 'expo-router'
 
-import books from '~assets/bible_versions/books-desc'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import LexiqueIcon from '~common/LexiqueIcon'
-import Link from '~common/Link'
 import NaveIcon from '~common/NaveIcon'
 import EntityChipList from '~common/EntityChipList'
 import Border from '~common/ui/Border'
@@ -23,9 +22,9 @@ import { GroupedWordAnnotation } from '~redux/selectors/bible'
 import type { TagStrongItemData } from './TagStrongItem'
 import type { TagNaveItemData } from './TagNaveItem'
 import type { TagDictionaryItemData } from './TagDictionaryItem'
-
-// Types
-export type LinkItemType = LinkModel & { id: string }
+import type { RelationEndpoint } from '~features/studyRelations/domain'
+import { useRelationCount } from '~features/studyRelations/useRelationCount'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 
 export type HighlightData = {
   date: number
@@ -34,9 +33,17 @@ export type HighlightData = {
   tags: TagsObj
 }
 
-export type NoteItemType = Note & { id: string; reference?: string }
+export type LinkItemType = LinkModel & { id: string; reference?: string; verseKeys?: string[] }
+
+export type NoteItemType = Note & { id: string; reference?: string; verseKeys?: string[] }
 
 type Translate = (key: string, options?: Record<string, unknown>) => string
+
+const getFirstVerseLocation = (verseKeys?: string[]) => {
+  const [Livre, Chapitre, Verset] = verseKeys?.[0]?.split('-').map(Number) || []
+  if (!Livre || !Chapitre || !Verset) return null
+  return { Livre, Chapitre, Verset }
+}
 
 export type UnifiedTagItem =
   | { type: 'highlight'; data: HighlightData }
@@ -89,42 +96,53 @@ export const NoteItem = ({
   t: Translate
   lang: ActiveLanguage
 }) => {
-  const [Livre, Chapitre, Verset] = item.id.split('-').map(Number)
-  const { title } = formatVerseContent([{ Livre, Chapitre, Verset }])
+  const router = useRouter()
+  const location = getFirstVerseLocation(item.verseKeys)
+  const { title } = location
+    ? formatVerseContent([location])
+    : { title: item.reference || t('Note') }
   const formattedDate = distanceInWords(Number(item.date), Date.now(), {
     locale: getDateLocale(lang),
   })
+  const relativeDate = t('Il y a {{formattedDate}}', { formattedDate })
+  const metadataLabel = title ? `${title} - ${relativeDate}` : relativeDate
+
+  const content = (
+    <Box padding={20}>
+      <Box row justifyContent="space-between">
+        <Text color="darkGrey" bold fontSize={11}>
+          {metadataLabel}
+        </Text>
+      </Box>
+      {!!item.title && (
+        <Text title fontSize={16}>
+          {item.title}
+        </Text>
+      )}
+      {!!item.description && (
+        <Paragraph scale={-3} scaleLineHeight={-1}>
+          {truncate(item.description, 100)}
+        </Paragraph>
+      )}
+      <EntityChipList tags={item.tags} />
+    </Box>
+  )
+
+  const openNote = () => {
+    router.push({
+      pathname: '/note',
+      params: {
+        noteId: item.id,
+        ...(item.verseKeys?.length ? { verseKeys: JSON.stringify(item.verseKeys) } : {}),
+      },
+    })
+  }
 
   return (
-    <Link
-      route="BibleView"
-      params={{
-        isReadOnly: true,
-        book: books[Livre - 1],
-        chapter: Number(Chapitre),
-        verse: Number(Verset),
-      }}
-    >
-      <Box padding={20}>
-        <Box row justifyContent="space-between">
-          <Text color="darkGrey" bold fontSize={11}>
-            {title} - {t('Il y a {{formattedDate}}', { formattedDate })}
-          </Text>
-        </Box>
-        {!!item.title && (
-          <Text title fontSize={16}>
-            {item.title}
-          </Text>
-        )}
-        {!!item.description && (
-          <Paragraph scale={-3} scaleLineHeight={-1}>
-            {truncate(item.description, 100)}
-          </Paragraph>
-        )}
-        <EntityChipList tags={item.tags} />
-      </Box>
+    <TouchableBox onPress={openNote}>
+      {content}
       <Border />
-    </Link>
+    </TouchableBox>
   )
 }
 
@@ -137,25 +155,31 @@ export const LinkItem = ({
   t: Translate
   lang: ActiveLanguage
 }) => {
-  const [Livre, Chapitre, Verset] = item.id.split('-').map(Number)
-  const { title } = formatVerseContent([{ Livre, Chapitre, Verset }])
+  const router = useRouter()
+  const location = getFirstVerseLocation(item.verseKeys)
+  const { title } = location
+    ? formatVerseContent([location])
+    : { title: item.reference || t('Lien') }
   const formattedDate = distanceInWords(Number(item.date), Date.now(), {
     locale: getDateLocale(lang),
   })
   const config = linkTypeConfig[item.linkType as LinkType] || linkTypeConfig.website
   const iconName = config.icon as React.ComponentProps<typeof FeatherIcon>['name']
   const displayTitle = item.customTitle || item.ogData?.title || item.url
+  const relativeDate = t('Il y a {{formattedDate}}', { formattedDate })
+  const metadataLabel = title ? `${title} - ${relativeDate}` : relativeDate
+  const relationEndpoint: Extract<RelationEndpoint, { type: 'externalLink' }> = {
+    type: 'externalLink',
+    linkId: item.id,
+    sourceKey: '',
+    url: item.url,
+    label: displayTitle,
+  }
+  const relationCount = useRelationCount(relationEndpoint)
+  const openEntityRelations = useOpenEntityRelations()
 
-  return (
-    <Link
-      route="BibleView"
-      params={{
-        isReadOnly: true,
-        book: books[Livre - 1],
-        chapter: Chapitre,
-        verse: Verset,
-      }}
-    >
+  const content = (
+    <>
       <Box padding={20} row>
         <LinkTypeIcon bgColor={config.color}>
           {config.textIcon ? (
@@ -168,7 +192,7 @@ export const LinkItem = ({
         </LinkTypeIcon>
         <Box flex>
           <Text color="darkGrey" bold fontSize={11}>
-            {title} - {t('Il y a {{formattedDate}}', { formattedDate })}
+            {metadataLabel}
           </Text>
           <Text title fontSize={16}>
             {truncate(displayTitle, 50)}
@@ -176,11 +200,31 @@ export const LinkItem = ({
           <Paragraph scale={-3} scaleLineHeight={-1} color="tertiary" numberOfLines={1}>
             {item.url}
           </Paragraph>
-          {item.tags && Object.keys(item.tags).length > 0 && <EntityChipList tags={item.tags} />}
+          <EntityChipList
+            tags={item.tags}
+            relationCount={relationCount}
+            onRelationPress={() => openEntityRelations(relationEndpoint)}
+          />
         </Box>
       </Box>
+    </>
+  )
+
+  const openLink = () => {
+    router.push({
+      pathname: '/link',
+      params: {
+        linkId: item.id,
+        ...(item.verseKeys?.length ? { verseKeys: item.verseKeys.join(',') } : {}),
+      },
+    })
+  }
+
+  return (
+    <TouchableBox onPress={openLink}>
+      {content}
       <Border />
-    </Link>
+    </TouchableBox>
   )
 }
 
@@ -222,7 +266,7 @@ export const TagSectionHeader = ({
     row
     onPress={() => toggle(sectionId)}
     alignItems="center"
-    py={30}
+    py={20}
     px={20}
     backgroundColor="reverse"
     borderBottomWidth={1}

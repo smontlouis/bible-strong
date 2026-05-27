@@ -4,14 +4,13 @@ import { useSelector } from 'react-redux'
 import { useSetAtom } from 'jotai/react'
 
 import Empty from '~common/Empty'
-import Container from '~common/ui/Container'
+import FiltersHeader from '~common/FiltersHeader'
+import Box from '~common/ui/Box'
 import FlatList from '~common/ui/FlatList'
-import AnnotationNoteModal from './AnnotationNoteModal'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import BibleNoteItem from './BibleNoteItem'
-import BibleNoteModal from './BibleNoteModal'
 
-import TagsHeader from '~common/TagsHeader'
-import { Tag, VerseIds } from '~common/types'
+import { Tag } from '~common/types'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import { unifiedTagsModalAtom } from '~state/app'
 import verseToReference from '~helpers/verseToReference'
@@ -19,9 +18,11 @@ import { RootState } from '~redux/modules/reducer'
 import { Note } from '~redux/modules/user'
 import { selectRelationCountsByEndpointIdentity } from '~redux/selectors/bible'
 import BibleNotesSettingsModal from './BibleNotesSettingsModal'
-import type { VersionCode } from '~state/tabs'
-import EntityRelationsModal from '~features/studyRelations/EntityRelationsModal'
 import { endpointIdentity, type RelationEndpoint } from '~features/studyRelations/domain'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
+import { useOpenNote } from '~features/notes/useOpenNote'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
 
 export type TNote = {
   noteId: string
@@ -29,30 +30,34 @@ export type TNote = {
   notes: Note
 }
 
-const BibleVerseNotes = () => {
-  const { t } = useTranslation()
+type BibleVerseNotesProps = {
+  isFormSheet?: boolean
+  isNewTabSelection?: boolean
+  newTabId?: string
+}
 
-  const [noteVerses, setNoteVerses] = useState<VerseIds | undefined>(undefined)
+const BibleVerseNotes = ({
+  isFormSheet = false,
+  isNewTabSelection = false,
+  newTabId,
+}: BibleVerseNotesProps) => {
+  const { t } = useTranslation()
+  const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
+  const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = isFormSheet ? canGoBackInStack : true
+
   const [selectedChip, setSelectedChip] = useState<Tag | null>(null)
   const [noteSettingsId, setNoteSettingsId] = useState<string | null>(null)
-  const [selectedAnnotationNote, setSelectedAnnotationNote] = useState<{
-    annotationId: string
-    text: string
-    verseKey: string
-    noteId: string
-    version: VersionCode
-  } | null>(null)
-  const [relationEndpoint, setRelationEndpoint] = useState<RelationEndpoint | null>(null)
+  const openEntityRelations = useOpenEntityRelations()
+  const openNote = useOpenNote()
 
   const notesObj = useSelector((state: RootState) => state.user.bible.notes)
   const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
+  const relations = useSelector((state: RootState) => state.user.bible.relations)
   const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
 
-  const noteModal = useBottomSheetModal()
-  const annotationNoteModal = useBottomSheetModal()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const noteSettingsModal = useBottomSheetModal()
-  const relationModal = useBottomSheetModal()
 
   const openTagsModal = useCallback(() => {
     setUnifiedTagsModal({
@@ -82,14 +87,21 @@ const BibleVerseNotes = () => {
       return
     }
 
-    // Handle regular verse notes
-    const verseNumbers: Record<string, boolean> = {}
-    noteKey.split('/').forEach(ref => {
-      verseNumbers[ref] = true
-    })
+    const relation = Object.values(relations).find(
+      candidate =>
+        candidate.kind === 'system' &&
+        candidate.type === 'annotates' &&
+        candidate.endpoints.some(
+          endpoint => endpoint.type === 'note' && endpoint.noteId === noteKey
+        )
+    )
+    const verseEndpoint = relation?.endpoints.find(endpoint => endpoint.type === 'verse')
+    const verseNumbers =
+      verseEndpoint?.type === 'verse'
+        ? Object.fromEntries(verseEndpoint.verseKeys.map(key => [key, true]))
+        : {}
 
-    const reference = verseToReference(verseNumbers)
-    notes.push({ noteId: noteKey, reference, notes: note })
+    notes.push({ noteId: noteKey, reference: verseToReference(verseNumbers), notes: note })
   })
 
   // Sort by date, newest first
@@ -106,31 +118,22 @@ const BibleVerseNotes = () => {
   }
 
   const openNoteEditor = (noteId: string) => {
-    // Handle annotation notes with AnnotationNoteModal
-    if (noteId.startsWith('annotation:')) {
-      const annotationId = noteId.replace('annotation:', '')
-      const annotation = wordAnnotations[annotationId]
-      if (annotation) {
-        setSelectedAnnotationNote({
-          annotationId,
-          text: annotation.ranges.map(r => r.text).join(' '),
-          verseKey: annotation.ranges[0]?.verseKey || '',
+    if (isNewTabSelection) {
+      const note = notes.find(candidate => candidate.noteId === noteId)
+
+      resolveNewTabSelection({
+        id: newTabId || 'new',
+        title: note?.notes.title || t('Notes'),
+        isRemovable: true,
+        type: 'notes',
+        data: {
           noteId,
-          version: annotation.version,
-        })
-        annotationNoteModal.open()
-      }
+        },
+      })
       return
     }
 
-    // Handle regular verse notes with BibleNoteModal
-    const verses = noteId.split('/').reduce((acc, key) => {
-      acc[key] = true
-      return acc
-    }, {} as VerseIds)
-
-    setNoteVerses(verses)
-    noteModal.open()
+    openNote({ noteId })
   }
 
   const renderNote = ({ item }: { item: TNote }) => {
@@ -146,52 +149,50 @@ const BibleVerseNotes = () => {
         onPress={openNoteEditor}
         onMenuPress={openNoteSettings}
         relationCount={relationCountsByEndpoint[endpointIdentity(endpoint)] || 0}
-        onRelationPress={() => {
-          setRelationEndpoint(endpoint)
-          relationModal.open()
-        }}
+        onRelationPress={() => openEntityRelations(endpoint)}
       />
     )
   }
 
   return (
-    <Container>
-      <TagsHeader
-        title="Notes"
-        setIsOpen={openTagsModal}
-        isOpen={false}
-        selectedChip={selectedChip}
-        hasBackButton
-      />
-      {filteredNotes.length ? (
-        <FlatList
-          data={filteredNotes}
-          renderItem={renderNote}
-          keyExtractor={(item: TNote) => item.noteId}
-          style={{ paddingBottom: 30 }}
+    <FormSheetScreen isFormSheet={isFormSheet}>
+      <Box flex bg="reverse">
+        <FiltersHeader
+          title="Notes"
+          filterLabel={selectedChip?.name}
+          hasBackButton={hasBackButton}
+          hasActiveFilters={Boolean(selectedChip)}
+          onReset={() => setSelectedChip(null)}
+          filters={[
+            {
+              key: 'tags',
+              icon: 'tag',
+              label: t('Tags'),
+              value: selectedChip?.name || t('Tous'),
+              onPress: openTagsModal,
+            },
+          ]}
         />
-      ) : (
-        <Empty
-          icon={require('~assets/images/empty-state-icons/note.svg')}
-          message={t("Vous n'avez pas encore de notes...")}
+        {filteredNotes.length ? (
+          <FlatList
+            data={filteredNotes}
+            renderItem={renderNote}
+            keyExtractor={(item: TNote) => item.noteId}
+            style={{ paddingBottom: 30 }}
+          />
+        ) : (
+          <Empty
+            icon={require('~assets/images/empty-state-icons/note.svg')}
+            message={t("Vous n'avez pas encore de notes...")}
+          />
+        )}
+        <BibleNotesSettingsModal
+          ref={noteSettingsModal.getRef()}
+          noteId={noteSettingsId}
+          onClosed={() => setNoteSettingsId(null)}
         />
-      )}
-      <BibleNoteModal ref={noteModal.getRef()} noteVerses={noteVerses} />
-      <AnnotationNoteModal
-        ref={annotationNoteModal.getRef()}
-        annotationId={selectedAnnotationNote?.annotationId ?? null}
-        annotationText={selectedAnnotationNote?.text ?? ''}
-        annotationVerseKey={selectedAnnotationNote?.verseKey ?? ''}
-        existingNoteId={selectedAnnotationNote?.noteId}
-        version={selectedAnnotationNote?.version ?? 'LSG'}
-      />
-      <BibleNotesSettingsModal
-        ref={noteSettingsModal.getRef()}
-        noteId={noteSettingsId}
-        onClosed={() => setNoteSettingsId(null)}
-      />
-      <EntityRelationsModal ref={relationModal.getRef()} endpoint={relationEndpoint} />
-    </Container>
+      </Box>
+    </FormSheetScreen>
   )
 }
 

@@ -2,6 +2,7 @@ import { Image } from 'expo-image'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import Carousel from 'react-native-reanimated-carousel'
+import { useRouter } from 'expo-router'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -9,7 +10,6 @@ import Paragraph from '~common/ui/Paragraph'
 import { useQuery } from '~helpers/react-query-lite'
 import { wp } from '~helpers/utils'
 import EventDetailVerse from './EventDetailVerse'
-import { useOptionalEventDetailsModal } from './EventDetailsModalContext'
 import { getEvents } from './events'
 import { TimelineEvent, TimelineEventDetail } from './types'
 
@@ -25,8 +25,8 @@ const Media = ({
 }: Pick<TimelineEventDetail, 'images' | 'scriptures' | 'videos' | 'related'> & {
   onOpenEvent?: (event: TimelineEvent) => void
 }) => {
+  const router = useRouter()
   const { t } = useTranslation()
-  const eventDetailsModal = useOptionalEventDetailsModal()
 
   const { data: events } = useQuery({
     queryKey: 'timeline',
@@ -101,9 +101,13 @@ const Media = ({
               key={r.slug}
               onPress={() => {
                 const foundEvent = flattenedEvents?.find(ev => ev.slug === r.slug)
-                const openEvent = onOpenEvent || eventDetailsModal?.openEvent
-                if (foundEvent && openEvent) {
-                  openEvent(foundEvent)
+                if (foundEvent && onOpenEvent) {
+                  onOpenEvent(foundEvent)
+                } else if (foundEvent) {
+                  router.push({
+                    pathname: '/event',
+                    params: { slug: foundEvent.slug },
+                  })
                 } else {
                   console.log("[Timeline] Can't open this event.")
                 }

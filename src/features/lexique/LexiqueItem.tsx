@@ -39,7 +39,7 @@ interface LexiqueItemProps {
   Hebreu?: string
   Code: string
   lexiqueType: string
-  onSelect?: (book: number, reference: string) => void
+  onSelect?: (book: number, reference: string, title?: string) => void
 }
 
 const LexiqueItem = memo(({ Mot, Grec, Hebreu, Code, lexiqueType, onSelect }: LexiqueItemProps) => {
@@ -49,14 +49,14 @@ const LexiqueItem = memo(({ Mot, Grec, Hebreu, Code, lexiqueType, onSelect }: Le
 
   const handlePress = useCallback(() => {
     if (onSelect) {
-      onSelect(book, Code)
+      onSelect(book, Code, Mot)
     } else {
       router.push({
         pathname: '/strong',
         params: { book: String(book), reference: Code },
       })
     }
-  }, [onSelect, book, Code, router])
+  }, [onSelect, book, Code, Mot, router])
 
   const content = (
     <SectionItem>

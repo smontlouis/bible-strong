@@ -31,6 +31,7 @@ import { addLinkAction, deleteLink, updateLink } from './modules/user/links'
 import { addNoteAction, deleteNote } from './modules/user/notes'
 import {
   addStudyRelationAction,
+  attachNoteToVerseAction,
   deleteStudyRelation,
   updateStudyRelation,
 } from './modules/user/studyRelations'
@@ -57,6 +58,7 @@ import {
   setSettingsPreferredDarkTheme,
   setSettingsPreferredLightTheme,
   setSettingsPress,
+  setSettingsRelationsDisplay,
   setSettingsTagsDisplay,
   setSettingsTextDisplay,
   toggleSettingsShareAppName,
@@ -205,6 +207,35 @@ async function syncSubcollectionChanges(
   await batchWriteSubcollection(userId, collection, changes)
 }
 
+async function syncRelationCollections(
+  userId: string,
+  diffBible: BibleSyncData,
+  bible: RootState['user']['bible'],
+  deleteMarker: unknown
+): Promise<void> {
+  await syncSubcollectionChanges(
+    userId,
+    'relations',
+    diffBible.relations,
+    bible.relations,
+    deleteMarker
+  )
+  await syncSubcollectionChanges(
+    userId,
+    'relationIndex',
+    diffBible.relationIndex,
+    bible.relationIndex,
+    deleteMarker
+  )
+  await syncSubcollectionChanges(
+    userId,
+    'relationPairs',
+    diffBible.relationPairs,
+    bible.relationPairs,
+    deleteMarker
+  )
+}
+
 /**
  * Gère les erreurs de sync avec retry sur permission-denied
  */
@@ -272,6 +303,7 @@ const isSettingsAction = isAnyOf(
   setSettingsPress,
   setSettingsNotesDisplay,
   setSettingsLinksDisplay,
+  setSettingsRelationsDisplay,
   setSettingsTagsDisplay,
   setSettingsCommentaires,
   changeColor,
@@ -296,6 +328,7 @@ const isLinkAction = isAnyOf(addLinkAction, updateLink, deleteLink)
 
 const isStudyRelationAction = isAnyOf(
   addStudyRelationAction,
+  attachNoteToVerseAction,
   updateStudyRelation,
   deleteStudyRelation
 )
@@ -443,6 +476,7 @@ const firestoreMiddleware: Middleware = store => next => async action => {
           user.bible.notes,
           deleteMarker
         )
+        await syncRelationCollections(userId, diffState.user.bible, user.bible, deleteMarker)
       },
       userId,
       'notes_sync',
@@ -464,6 +498,7 @@ const firestoreMiddleware: Middleware = store => next => async action => {
           user.bible.links,
           deleteMarker
         )
+        await syncRelationCollections(userId, diffState.user.bible, user.bible, deleteMarker)
       },
       userId,
       'links_sync',
@@ -490,22 +525,16 @@ const firestoreMiddleware: Middleware = store => next => async action => {
     return result
   }
 
-  // ========== STUDY RELATIONS SYNC (sous-collection) ==========
+  // ========== RELATIONS SYNC (sous-collections) ==========
   if (isStudyRelationAction(action)) {
-    if (!diffState?.user?.bible?.studyRelations) return result
+    if (!diffState?.user?.bible?.relations) return result
 
     await handleSyncWithRetry(
       async () => {
-        await syncSubcollectionChanges(
-          userId,
-          'studyRelations',
-          diffState.user.bible.studyRelations,
-          user.bible.studyRelations,
-          deleteMarker
-        )
+        await syncRelationCollections(userId, diffState.user.bible, user.bible, deleteMarker)
       },
       userId,
-      'study_relations_sync',
+      'relations_sync',
       state
     )
     return result
@@ -601,6 +630,17 @@ const firestoreMiddleware: Middleware = store => next => async action => {
         },
         userId,
         'notes_sync_from_word_annotation',
+        state
+      )
+    }
+
+    if (diffState?.user?.bible?.relations) {
+      await handleSyncWithRetry(
+        async () => {
+          await syncRelationCollections(userId, diffState.user.bible, user.bible, deleteMarker)
+        },
+        userId,
+        'relations_sync_from_word_annotation',
         state
       )
     }
@@ -773,7 +813,9 @@ const firestoreMiddleware: Middleware = store => next => async action => {
           strongsGrec: bible?.strongsGrec,
           words: bible?.words,
           naves: bible?.naves,
-          studyRelations: bible?.studyRelations,
+          relations: bible?.relations,
+          relationIndex: bible?.relationIndex,
+          relationPairs: bible?.relationPairs,
         })
 
         // 2. Sync settings dans le document user

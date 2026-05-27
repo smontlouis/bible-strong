@@ -30,8 +30,8 @@ const Back: FC<PropsWithChildren<BackProps>> = ({
       style={{
         ...StyleSheet.flatten(style),
         ...(padding && {
-          width: 60,
-          height: 60,
+          width: 54,
+          height: 54,
           alignItems: 'center',
           justifyContent: 'center',
         }),

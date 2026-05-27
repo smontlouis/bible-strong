@@ -5,9 +5,6 @@ export interface BibleDOMTranslations {
   parallelVersionNotFound: string
   parallelChapterNotFound: string
   parallelLoadError: string
-  // Readonly mode
-  readWholeChapter: string
-  closeContext: string
   exitFocus: string
   // Interlinear mode
   interlinearDetailed: string

@@ -37,15 +37,19 @@ Core user activities:
 | Selected verses | The current verse selection in Bible view, used to create highlights, notes, tags, links, bookmarks, study entries, or shares. | `src/features/bible/SelectedVersesModal/` |
 | Highlight | Verse-level visual mark stored in Redux/Firestore under `user.bible.highlights`. | `src/redux/modules/user.ts`, `src/features/bible/ColorCirclesBar.tsx` |
 | Word annotation | Word/range-level mark created in Mode libre and stored under `user.bible.wordAnnotations`. | `src/features/bible/hooks/useAnnotationMode.ts`, `src/features/bible/BibleDOM/AnnotationMode/` |
-| Note | User text attached to verses or annotations. | `src/features/bible/BibleNoteModal.tsx`, `src/features/notes/` |
+| Note | User text that can exist independently and can be connected to verses or other entities through relations. | `src/features/bible/BibleNoteModal.tsx`, `src/features/notes/` |
+| Annotation note | Note that belongs to one word annotation and follows that annotation's lifecycle. | `src/features/bible/AnnotationNoteModal.tsx` |
 | Tag | Shared organization object that can reference highlights, annotations, notes, links, and studies. | `src/common/UnifiedTagsModal.tsx`, `src/redux/modules/user/tags.ts` |
 | Entity chip list | Compact chip row showing study associations attached to one object, such as tags and a relation count. | `src/common/EntityChipList.tsx` |
 | Bookmark | Named marker for one Bible location. | `src/features/bookmarks/`, `src/features/bookmarks/BookmarkModal.tsx` |
-| Link | User URL attached to a verse selection. | `src/features/bible/BibleLinkModal.tsx` |
-| Study relation | User-created relationship between two relation endpoints that can be opened inside Bible Strong. | Planned |
-| Relation endpoint | Openable study object that can participate in a study relation; initially a verse, note, study, or Strong entry. | Planned |
+| Link | User URL that can exist independently and can be connected to verses or other entities through relations. | `src/features/bible/BibleLinkModal.tsx` |
+| Relation | Binary edge between two relation endpoints that can be opened inside Bible Strong. | `src/features/studyRelations/` |
+| System relation | Relation implied by a feature action, such as connecting a note or link to a verse. | `src/features/studyRelations/` |
+| Manual relation | Relation intentionally created by the user to express a study connection between two endpoints. | `src/features/studyRelations/` |
+| Relation endpoint | Openable study object that can participate in a relation, such as a verse, note, study, Strong entry, Nave topic, dictionary word, word, or external link. | `src/features/studyRelations/` |
 | Relation target picker | Surface for choosing the target endpoint of a study relation through unified search or by browsing a specific endpoint type. | Planned |
-| Relation type | Meaning assigned to a study relation; initially linked, references, explains, or contrasts. | Planned |
+| Relation type | Meaning assigned to a relation, such as linked, references, explains, contrasts, mentions, annotates, or external link. | `src/features/studyRelations/` |
+| Relation display | Bible reading setting that controls whether verse relations appear as a grouped icon at the start of their range or as short inline chips at the end of their range. | `src/features/bible/BibleDOM/` |
 | Study | Rich text document authored by the user; can be tagged and can receive verse references. | `src/features/studies/`, `src/redux/modules/user.ts` |
 | Reading plan | Structured sequence of Bible readings, meditations, media, or teaching slices followed by the user. | `src/features/plans/`, `src/redux/modules/plan.ts` |
 | Plan slice | One reading unit inside a reading plan; it can contain Bible text, meditation text, image, video, or a chapter/verse reference. | `src/features/plans/PlanSliceScreen/` |
@@ -64,31 +68,37 @@ Core user activities:
 - Any **Plan slice** can be the active content of a **Plan tab**, regardless of whether it contains Bible text, meditation text, image, video, chapter, or verse content.
 - If the followed **Reading plan** no longer exists, its **Plan tab** has no reading content to recover.
 - A **Tag** groups user study objects by theme or category.
-- A **Study relation** connects exactly two **Relation endpoints** as an explicit user-created relationship.
-- A **Link** opens an external URL, while a **Study relation** opens another object inside Bible Strong.
+- A **Relation** connects exactly two **Relation endpoints**.
+- A **Link** opens an external URL, while a **Relation** opens another object inside Bible Strong.
+- An **Annotation note** belongs to its **Word annotation** and is not surfaced as a passage-level **Relation** by default.
 - A **Bookmark**, **Highlight**, and **Tag** are not **Relation endpoints**.
-- A **Study relation** is binary; it never groups more than two **Relation endpoints**.
-- A **Study relation** is non-directional by default and only becomes directional when its relation type needs a direction.
+- A **Relation** is binary; it never groups more than two **Relation endpoints**.
+- A **Relation** is non-directional by default and only becomes directional when its relation type needs a direction.
 - **Same theme** is not a **Relation type**; use **Tags** for thematic grouping.
-- Every **Study relation** has a **Relation type**; the default type is linked.
+- Every **Relation** has a **Relation type**; the default type is linked.
 - A **Relation endpoint** is identified by its durable object identity and may keep a display label snapshot as fallback.
-- Deleting or losing access to a **Relation endpoint** does not automatically delete its **Study relations**.
-- A **Study relation** can exist even when one of its **Relation endpoints** is not currently openable on the device.
-- **Study relations** are private user-owned study data and are not published with **Studies**.
-- A **Study relation** may have a short user label but does not contain long-form note text.
-- A user can have at most one **Study relation** for the same unordered endpoint pair and **Relation type**.
+- Deleting or losing access to a **Relation endpoint** does not automatically delete its **Manual relations**.
+- A **Manual relation** can exist even when one of its **Relation endpoints** is not currently openable on the device.
+- **Relations** are private user-owned study data and are not published with **Studies**.
+- A **Manual relation** may have a short user label but does not contain long-form note text.
+- A user can have at most one **Relation** for the same unordered endpoint pair and **Relation type**.
 - A **Verse** relation endpoint can represent one or more selected verses in canonical order.
 - A **Strong** relation endpoint is identified by original-language family and numeric Strong code, with the Strong word as its display label fallback.
-- Opening a **Study relation** navigates to the target endpoint; opening that target in a new tab remains an action of the target screen.
-- A **Study relation** is discoverable from both of its **Relation endpoints**.
+- Opening a **Relation** navigates to the target endpoint; opening that target in a new tab remains an action of the target screen.
+- A **Relation** is discoverable from both of its **Relation endpoints**.
 - **Verse** relations are surfaced in the Bible reading surface; **Note**, **Study**, and **Strong** relations are surfaced near tags in their detail surfaces.
-- A **Study relation** can be created from selected verses, note details, study items, and Strong details.
+- A **Manual relation** can be created from selected verses, note details, study items, and Strong details.
 - Relation target selection follows the app search language for Bible references and Strong codes, then adds Notes and Studies as searchable target types.
 - A **Verse** relation target is a global Bible reference, not a specific Bible version rendering.
 - **Verse** relation endpoints identify Bible locations, not Bible version-specific text.
-- A directional **Study relation** is visible from both endpoints, with active wording from the source and passive wording from the target.
+- A directional **Relation** is visible from both endpoints, with active wording from the source and passive wording from the target.
 - The linked and contrasts **Relation types** are non-directional; references and explains are directional.
-- **Study relations** live in their own user-data collection, separate from Notes, Studies, Links, Tags, and Highlights.
+- **Relations** live in their own user-data collection, separate from Notes, Studies, Links, Tags, and Highlights.
+- **Relation display** replaces separate note and link display settings in the Bible reading surface.
+- In grouped icon mode, **Relation display** surfaces verse relations at the start of their verse range.
+- In inline mode, **Relation display** surfaces verse relations at the end of their verse range.
+- Inline **Relation display** shows the related endpoint label by default; relation type wording is optional and disabled unless explicitly enabled.
+- Grouped **Relation display** uses one stable relation icon and counts relations rather than unique target endpoints.
 
 ## Invariants
 

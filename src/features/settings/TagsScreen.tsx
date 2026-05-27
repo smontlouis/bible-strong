@@ -5,6 +5,7 @@ import { Alert } from 'react-native'
 import { shallowEqual, useDispatch, useSelector, useStore } from 'react-redux'
 
 import { useTranslation } from 'react-i18next'
+import { ActionSheetItem } from '~common/ActionMenu'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Link from '~common/Link'
@@ -13,8 +14,8 @@ import RenameModal from '~common/RenameModal'
 import SearchInput from '~common/SearchInput'
 import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
-import Container from '~common/ui/Container'
 import FabButton from '~common/ui/FabButton'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { LegendList } from '@legendapp/list'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -30,6 +31,7 @@ import {
 import { Tag } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import { useCreateTabGroupFromTag } from './useCreateTabGroupFromTag'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 const Chip = styled(Box)(({ theme }) => ({
   borderRadius: 20,
@@ -79,14 +81,14 @@ const TagItem = ({ item, setOpen }: TagItemProps) => {
               {!!strongsNumber && (
                 <Chip>
                   <Text fontSize={10} color="default">
-                    {strongsNumber} {t('nave', { count: strongsNumber })}
+                    {strongsNumber} {t('strong', { count: strongsNumber })}
                   </Text>
                 </Chip>
               )}
               {!!wordsNumber && (
                 <Chip>
                   <Text fontSize={10} color="default">
-                    {wordsNumber} {t('nave', { count: wordsNumber })}
+                    {wordsNumber} {t('dictionnaire', { count: wordsNumber })}
                   </Text>
                 </Chip>
               )}
@@ -138,8 +140,14 @@ const TagItem = ({ item, setOpen }: TagItemProps) => {
   )
 }
 
-const TagsScreen = () => {
+type TagsScreenProps = {
+  isFormSheet?: boolean
+}
+
+const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
   const { t } = useTranslation()
+  const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = isFormSheet ? canGoBackInStack : true
   const tags = useSelector(sortedTagsSelector, shallowEqual)
   const [isOpen, setOpen] = useState<Tag | undefined>(undefined)
   const renameModalRef = useRef<BottomSheetModal>(null)
@@ -181,70 +189,79 @@ const TagsScreen = () => {
   }
 
   return (
-    <Container>
-      <Header hasBackButton title={t('Étiquettes')}>
-        <Box pb={10} px={20}>
-          <SearchInput
-            placeholder={t('Chercher une étiquette')}
-            onChangeText={search}
-            onDelete={resetSearch}
-            value={keyword}
-            returnKeyType="done"
+    <FormSheetScreen isFormSheet={isFormSheet}>
+      <Box flex bg="reverse">
+        <Header hasBackButton={hasBackButton} title={t('Étiquettes')}>
+          <Box pb={10} px={20}>
+            <SearchInput
+              placeholder={t('Chercher une étiquette')}
+              onChangeText={search}
+              onDelete={resetSearch}
+              value={keyword}
+              returnKeyType="done"
+            />
+          </Box>
+        </Header>
+        {result.length ? (
+          <LegendList
+            data={result}
+            renderItem={({ item }: { item: Tag }) => <TagItem setOpen={setOpen} item={item} />}
+            keyExtractor={(item: Tag) => item.id}
+            contentContainerStyle={{ paddingBottom: 70 }}
           />
-        </Box>
-      </Header>
-      {result.length ? (
-        <LegendList
-          data={result}
-          renderItem={({ item }: { item: Tag }) => <TagItem setOpen={setOpen} item={item} />}
-          keyExtractor={(item: Tag) => item.id}
-          contentContainerStyle={{ paddingBottom: 70 }}
-        />
-      ) : (
-        <Empty
-          icon={require('~assets/images/empty-state-icons/tag.svg')}
-          message={t('Aucune étiquette...')}
-        />
-      )}
+        ) : (
+          <Empty
+            icon={require('~assets/images/empty-state-icons/tag.svg')}
+            message={t('Aucune étiquette...')}
+          />
+        )}
 
-      <Modal.Body ref={ref} onModalClose={() => setOpen(undefined)} enableDynamicSizing>
-        <Modal.Item
+        <Modal.Body ref={ref} onModalClose={() => setOpen(undefined)} enableDynamicSizing>
+          <ActionSheetItem
+            icon="edit-3"
+            label={t('Éditer')}
+            onPress={() => {
+              if (!isOpen) return
+
+              close()
+              setTagToEdit({ id: isOpen.id, name: isOpen.name })
+              renameModalRef.current?.present()
+            }}
+          />
+          <ActionSheetItem
+            icon="layers"
+            label={t('tabs.createGroupFromTag')}
+            onPress={handleOpenInTabGroup}
+          />
+          <ActionSheetItem
+            icon="trash-2"
+            label={t('Supprimer')}
+            color="quart"
+            onPress={promptLogout}
+          />
+        </Modal.Body>
+        <RenameModal
+          bottomSheetRef={renameModalRef}
+          title={tagToEdit?.id ? t("Renommer l'étiquette") : t('Nouvelle étiquette')}
+          placeholder={t("Nom de l'étiquette")}
+          initialValue={tagToEdit?.name}
+          onSave={value => {
+            if (tagToEdit?.id) {
+              dispatch(updateTag(tagToEdit.id, value))
+            } else {
+              dispatch(addTag(value))
+            }
+          }}
+        />
+        <FabButton
+          icon="plus"
           onPress={() => {
-            if (!isOpen) return
-
-            close()
-            setTagToEdit({ id: isOpen.id, name: isOpen.name })
+            setTagToEdit({ id: '', name: '' })
             renameModalRef.current?.present()
           }}
-        >
-          {t('Éditer')}
-        </Modal.Item>
-        <Modal.Item onPress={handleOpenInTabGroup}>{t('tabs.createGroupFromTag')}</Modal.Item>
-        <Modal.Item color="quart" onPress={promptLogout}>
-          {t('Supprimer')}
-        </Modal.Item>
-      </Modal.Body>
-      <RenameModal
-        bottomSheetRef={renameModalRef}
-        title={tagToEdit?.id ? t("Renommer l'étiquette") : t('Nouvelle étiquette')}
-        placeholder={t("Nom de l'étiquette")}
-        initialValue={tagToEdit?.name}
-        onSave={value => {
-          if (tagToEdit?.id) {
-            dispatch(updateTag(tagToEdit.id, value))
-          } else {
-            dispatch(addTag(value))
-          }
-        }}
-      />
-      <FabButton
-        icon="plus"
-        onPress={() => {
-          setTagToEdit({ id: '', name: '' })
-          renameModalRef.current?.present()
-        }}
-      />
-    </Container>
+        />
+      </Box>
+    </FormSheetScreen>
   )
 }
 

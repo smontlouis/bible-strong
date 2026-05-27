@@ -47,9 +47,11 @@ type Props = {
   item: TLink
   onPress: (linkId: string) => void
   onMenuPress: (linkId: string) => void
+  relationCount?: number
+  onRelationPress?: () => void
 }
 
-const BibleLinkItem = ({ item, onPress, onMenuPress }: Props) => {
+const BibleLinkItem = ({ item, onPress, onMenuPress, relationCount, onRelationPress }: Props) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const lang = useLanguage()
@@ -61,6 +63,8 @@ const BibleLinkItem = ({ item, onPress, onMenuPress }: Props) => {
   const config = linkTypeConfig[item.link.linkType] || linkTypeConfig.website
   const iconName = config.icon as React.ComponentProps<typeof FeatherIcon>['name']
   const displayTitle = item.link.customTitle || item.link.ogData?.title || item.link.url
+  const relativeDate = t('Il y a {{formattedDate}}', { formattedDate })
+  const metadataLabel = item.reference ? `${item.reference} - ${relativeDate}` : relativeDate
 
   return (
     <Box>
@@ -77,7 +81,7 @@ const BibleLinkItem = ({ item, onPress, onMenuPress }: Props) => {
         <Box flex>
           <Box row justifyContent="space-between">
             <Text color="darkGrey" bold fontSize={11}>
-              {item.reference} - {t('Il y a {{formattedDate}}', { formattedDate })}
+              {metadataLabel}
             </Text>
           </Box>
           <Text title fontSize={16}>
@@ -86,9 +90,11 @@ const BibleLinkItem = ({ item, onPress, onMenuPress }: Props) => {
           <Paragraph scale={-3} scaleLineHeight={-1} color="tertiary" numberOfLines={1}>
             {item.link.url}
           </Paragraph>
-          {item.link.tags && Object.keys(item.link.tags).length > 0 && (
-            <EntityChipList tags={item.link.tags} />
-          )}
+          <EntityChipList
+            tags={item.link.tags}
+            relationCount={relationCount}
+            onRelationPress={onRelationPress}
+          />
         </Box>
         <Link padding onPress={() => onMenuPress(item.linkId)}>
           <Icon.Feather name="more-vertical" size={20} color={theme.colors.tertiary} />

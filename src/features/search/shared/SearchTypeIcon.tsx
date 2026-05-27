@@ -13,6 +13,7 @@ export const searchTypeIconConfig: Record<
 > = {
   passages: { name: 'book-open', color: 'color1' },
   notes: { name: 'file-text', color: 'color2' },
+  links: { name: 'link', color: 'secondary' },
   studies: { name: 'feather', color: 'tertiary' },
   strong: { color: 'primary' },
   dictionary: { color: 'secondary' },
@@ -33,6 +34,7 @@ const SearchTypeIcon = ({
   switch (type) {
     case 'passages':
     case 'notes':
+    case 'links':
     case 'studies':
       return <FeatherIcon name={searchTypeIconConfig[type].name!} size={size} color={iconColor} />
     case 'strong':
