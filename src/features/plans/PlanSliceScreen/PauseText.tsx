@@ -19,7 +19,7 @@ const PauseText = ({ children }: Props) => {
   return (
     <Box center marginTop={60} marginBottom={120}>
       <Box height={100} width={100} marginBottom={10}>
-        <Box style={StyleSheet.absoluteFillObject} center>
+        <Box style={StyleSheet.absoluteFill} center>
           <Animated.View
             style={{
               width: 30,
@@ -37,7 +37,7 @@ const PauseText = ({ children }: Props) => {
             }}
           />
         </Box>
-        <Box style={StyleSheet.absoluteFillObject} center>
+        <Box style={StyleSheet.absoluteFill} center>
           <Animated.View
             style={{
               width: 30,

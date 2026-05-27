@@ -108,7 +108,7 @@ const PlanHome = () => {
               thickness={2}
               animationDuration={300}
             >
-              <Box style={StyleSheet.absoluteFillObject} center>
+              <Box style={StyleSheet.absoluteFill} center>
                 <CircleImage size={35} center>
                   {cacheImage && (
                     <Image

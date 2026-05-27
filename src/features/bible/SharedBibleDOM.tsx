@@ -115,8 +115,8 @@ const SharedBibleDOM = () => {
   }
 
   return (
-    <View style={[StyleSheet.absoluteFillObject, { zIndex: -9999, pointerEvents: 'none' }]}>
-      <PortalHost name={SHARED_BIBLE_DOM_PARK_HOST} style={StyleSheet.absoluteFillObject} />
+    <View style={[StyleSheet.absoluteFill, { zIndex: -9999, pointerEvents: 'none' }]}>
+      <PortalHost name={SHARED_BIBLE_DOM_PARK_HOST} style={StyleSheet.absoluteFill} />
       <Portal hostName={destination}>
         <BibleDOMWrapper key={reloadKey} {...props} onMountTimeout={handleMountTimeout} />
       </Portal>

@@ -138,6 +138,7 @@
     "react-native-edge-to-edge": "^1.4.3",
     "react-native-gesture-handler": "~2.31.1",
     "react-native-keyboard-aware-scroll-view": "^0.9.4",
+    "react-native-keyboard-controller": "1.21.6",
     "react-native-localize": "^1.4.0",
     "react-native-mmkv": "4.1.0",
     "react-native-modal-datetime-picker": "^17.1.0",
@@ -156,7 +157,7 @@
     "react-native-teleport": "^1.1.0",
     "react-native-track-player": "patch:react-native-track-player@https%3A//github.com/weights-ai/react-native-track-player.git%23commit=17a3ac866b642405a6a21dddbec38ddf3f217cd0#~/.yarn/patches/react-native-track-player-https-0ed4312346.patch",
     "react-native-url-polyfill": "^2.0.0",
-    "react-native-view-shot": "~4.0.3",
+    "react-native-view-shot": "5.1.0",
     "react-native-web": "^0.21.0",
     "react-native-webview": "13.16.1",
     "react-native-worklets": "0.8.3",
@@ -216,6 +217,9 @@
     "react-native-svg": "15.15.4"
   },
   "expo": {
+    "install": {
+      "exclude": ["react-native-view-shot"]
+    },
     "doctor": {
       "reactNativeDirectoryCheck": {
         "exclude": [

@@ -195,7 +195,7 @@ const YoutubeIframe = (
 
   return (
     <Box height={height} width={width} backgroundColor="border">
-      <Box style={StyleSheet.absoluteFillObject} center>
+      <Box style={StyleSheet.absoluteFill} center>
         <Text fontSize={20} color="grey">
           {placeholder}
         </Text>
