@@ -1,19 +1,17 @@
 import React from 'react'
+import { MenuView } from '@expo/ui/community/menu'
 import { useDispatch, useSelector } from 'react-redux'
-import MenuOption from '~common/ui/MenuOption'
 
 import { useTranslation } from 'react-i18next'
 import { Share } from 'react-native'
 import Header from '~common/Header'
-import PopOverMenu from '~common/PopOverMenu'
 import { toast } from '~helpers/toast'
 import { ComputedReadingSlice, EntitySlice, Plan } from '~common/types'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
-import { FeatherIcon, MaterialIcon, TextIcon } from '~common/ui/Icon'
+import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import ScrollView from '~common/ui/ScrollView'
-import Text from '~common/ui/Text'
 import { chapterToReference } from '~helpers/chapterToReference'
 import verseToReference from '~helpers/verseToReference'
 import { markAsRead } from '~redux/modules/plan'
@@ -49,68 +47,6 @@ const extractTitle = (slice: EntitySlice) => {
 const DEFAULT_BOOK = { Numero: 1, Nom: 'Genèse', Chapitres: 50 }
 const EMPTY_ARRAY: never[] = []
 const EMPTY_OBJECT = {}
-
-interface PlanSliceMenuContentProps {
-  isRead: boolean
-  onMarkAsRead: () => void
-  onOpenVersionSelector: () => void
-  onOpenParams: () => void
-  onOpenInNewTab: () => void
-  onShare: () => void
-  version: string
-}
-
-const PlanSliceMenuContent = ({
-  isRead,
-  onMarkAsRead,
-  onOpenVersionSelector,
-  onOpenParams,
-  onOpenInNewTab,
-  onShare,
-  version,
-}: PlanSliceMenuContentProps) => {
-  const { t } = useTranslation()
-
-  return (
-    <>
-      <MenuOption onSelect={onMarkAsRead}>
-        <Box row alignItems="center">
-          <MaterialIcon
-            name="check"
-            size={20}
-            color="success"
-            style={{ opacity: isRead ? 0.3 : 1 }}
-          />
-          <Text marginLeft={10}>{isRead ? t('Marquer comme non lu') : t('Marquer comme lu')}</Text>
-        </Box>
-      </MenuOption>
-      <MenuOption onSelect={onOpenVersionSelector}>
-        <Box row alignItems="center">
-          <TextIcon style={{ fontSize: 12 }}>{version}</TextIcon>
-          <Text marginLeft={10}>{t('Changer de version')}</Text>
-        </Box>
-      </MenuOption>
-      <MenuOption onSelect={onOpenParams}>
-        <Box row alignItems="center">
-          <TextIcon>Aa</TextIcon>
-          <Text marginLeft={10}>{t('Mise en forme')}</Text>
-        </Box>
-      </MenuOption>
-      <MenuOption onSelect={onShare} closeBeforeSelect>
-        <Box row alignItems="center">
-          <FeatherIcon name="share-2" size={17} style={{ marginRight: 10 }} />
-          <Text marginLeft={10}>{t('Partager')}</Text>
-        </Box>
-      </MenuOption>
-      <MenuOption onSelect={onOpenInNewTab}>
-        <Box row alignItems="center">
-          <FeatherIcon name="external-link" size={17} style={{ marginRight: 10 }} />
-          <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
-        </Box>
-      </MenuOption>
-    </>
-  )
-}
 
 interface Props {
   readingSlice?: ComputedReadingSlice & {
@@ -264,21 +200,50 @@ const PlanSliceScreen = ({
         hasBackButton
         onCustomBackPress={handleBack}
         rightComponent={
-          <PopOverMenu
-            popover={
-              <PlanSliceMenuContent
-                isRead={isRead}
-                onMarkAsRead={onMarkAsReadSelect}
-                onOpenVersionSelector={() =>
+          <MenuView
+            actions={[
+              {
+                id: 'mark-read',
+                title: isRead ? t('Marquer comme non lu') : t('Marquer comme lu'),
+                image: 'checkmark',
+              },
+              {
+                id: 'version',
+                title: `${t('Changer de version')} (${version})`,
+                image: 'book',
+              },
+              { id: 'format', title: t('Mise en forme'), image: 'textformat' },
+              { id: 'share', title: t('Partager'), image: 'square.and.arrow.up' },
+              {
+                id: 'open-tab',
+                title: t('tab.openInNewTab'),
+                image: 'arrow.up.forward.square',
+              },
+            ]}
+            onPressAction={({ nativeEvent }) => {
+              switch (nativeEvent.event) {
+                case 'mark-read':
+                  onMarkAsReadSelect()
+                  break
+                case 'version':
                   openVersionSelector({ actions: versionActions, data: versionData })
-                }
-                onOpenParams={() => paramsModalRef.current?.present()}
-                onOpenInNewTab={openSliceInNewTab}
-                onShare={share}
-                version={version}
-              />
-            }
-          />
+                  break
+                case 'format':
+                  paramsModalRef.current?.present()
+                  break
+                case 'share':
+                  share()
+                  break
+                case 'open-tab':
+                  openSliceInNewTab()
+                  break
+              }
+            }}
+          >
+            <Box row center height={60} width={60}>
+              <FeatherIcon name="more-vertical" size={18} />
+            </Box>
+          </MenuView>
         }
       />
       <ScrollView>

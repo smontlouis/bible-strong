@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { MenuView } from '@expo/ui/community/menu'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
 import AlphabetList from '~common/AlphabetList'
@@ -23,10 +24,11 @@ import { useTranslation } from 'react-i18next'
 import waitForStrongDB from '~common/waitForStrongDB'
 import { StrongTab } from '../../state/tabs'
 import LexiqueItem from './LexiqueItem'
-import PopOverMenu from '~common/PopOverMenu'
-import LanguageMenuOption from '~common/LanguageMenuOption'
+import { FeatherIcon } from '~common/ui/Icon'
+import { toast } from '~helpers/toast'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
+import { useResourceLanguage } from 'src/state/resourcesLanguage'
 
 interface LexiqueSection {
   title: string
@@ -90,6 +92,7 @@ const LexiqueListScreen = ({
   const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
   const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
+  const [strongResourceLanguage, setStrongResourceLanguage] = useResourceLanguage('STRONG')
   const [error, setError] = useState<DatabaseError['error'] | null>(null)
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
@@ -126,6 +129,12 @@ const LexiqueListScreen = ({
     onStrongSelect?.(book, reference)
   }
 
+  const toggleStrongLanguage = () => {
+    const nextLanguage = strongResourceLanguage === 'fr' ? 'en' : 'fr'
+    setStrongResourceLanguage(nextLanguage)
+    toast(t('menu.languageChanged', { language: nextLanguage === 'fr' ? 'Français' : 'English' }))
+  }
+
   if (error) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
@@ -154,13 +163,24 @@ const LexiqueListScreen = ({
           hasBackButton={showBackButton}
           title={t('Lexique')}
           rightComponent={
-            <PopOverMenu
-              popover={
-                <>
-                  <LanguageMenuOption resourceId="STRONG" />
-                </>
-              }
-            />
+            <MenuView
+              actions={[
+                {
+                  id: 'language',
+                  title: `${t('menu.language')}: ${
+                    strongResourceLanguage === 'fr' ? 'Français' : 'English'
+                  }`,
+                  image: 'globe',
+                },
+              ]}
+              onPressAction={({ nativeEvent }) => {
+                if (nativeEvent.event === 'language') toggleStrongLanguage()
+              }}
+            >
+              <Box row center height={60} width={60}>
+                <FeatherIcon name="more-vertical" size={18} />
+              </Box>
+            </MenuView>
           }
         >
           <Box pb={10} px={20}>

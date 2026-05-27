@@ -144,8 +144,6 @@
     "react-native-modal-datetime-picker": "^17.1.0",
     "react-native-modalbox": "^2.0.0",
     "react-native-nitro-modules": "^0.31.10",
-    "react-native-popover-view": "^6.1.0",
-    "react-native-popup-menu": "^0.18.0",
     "react-native-reanimated": "4.3.1",
     "react-native-reanimated-carousel": "^5.0.0-beta.3",
     "react-native-root-siblings": "5.0.1",

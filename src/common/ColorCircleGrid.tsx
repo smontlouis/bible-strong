@@ -24,7 +24,7 @@ interface ColorCircleGridProps {
   /**
    * Layout mode:
    * - 'scroll': Horizontal ScrollView with dynamic width (like ColorCirclesBar)
-   * - 'grid': Flex wrap grid (like AnnotationColorSelector)
+   * - 'grid': Flex wrap grid
    */
   layout?: 'scroll' | 'grid'
   /**

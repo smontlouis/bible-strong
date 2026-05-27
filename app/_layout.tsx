@@ -13,7 +13,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, InteractionManager, LogBox, View } from 'react-native'
 import { SystemBars } from 'react-native-edge-to-edge'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
-import { MenuProvider } from 'react-native-popup-menu'
 import { configureReanimatedLogger } from 'react-native-reanimated'
 import { RootSiblingParent } from 'react-native-root-siblings'
 import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-context'
@@ -250,63 +249,53 @@ function InnerApp() {
 
   return (
     <ThemeProvider theme={theme}>
-      <MenuProvider
-        backHandler
-        customStyles={{
-          backdrop: {
-            backgroundColor: 'black',
-            opacity: 0.2,
-          },
-        }}
-      >
-        <QueryClientProvider client={queryClient}>
-          <PersistGate
-            loading={
-              <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                <ActivityIndicator />
-              </View>
-            }
-            persistor={persistor}
-          >
-            <DBStateProvider>
-              <ErrorBoundary>
-                <AppSwitcherProvider>
-                  <RootSiblingParent>
-                    <PortalProvider>
-                      <BottomSheetModalProvider>
-                        <BookSelectorBottomSheetProvider>
-                          <InitHooks />
-                          <Stack screenOptions={{ headerShown: false }}>
-                            <Stack.Screen name="index" />
-                            <Stack.Screen
-                              name="(explore)"
-                              options={createFormSheetOptions(theme, {
-                                contentStyle: {
-                                  bottom: 0,
-                                },
-                              })}
-                            />
-                            <Stack.Screen
-                              name="(timeline)"
-                              options={createFormSheetOptions(theme, {
-                                contentStyle: {
-                                  bottom: 0,
-                                },
-                              })}
-                            />
-                          </Stack>
-                          <ThemedToaster />
-                          <DeferredModals />
-                        </BookSelectorBottomSheetProvider>
-                      </BottomSheetModalProvider>
-                    </PortalProvider>
-                  </RootSiblingParent>
-                </AppSwitcherProvider>
-              </ErrorBoundary>
-            </DBStateProvider>
-          </PersistGate>
-        </QueryClientProvider>
-      </MenuProvider>
+      <QueryClientProvider client={queryClient}>
+        <PersistGate
+          loading={
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+              <ActivityIndicator />
+            </View>
+          }
+          persistor={persistor}
+        >
+          <DBStateProvider>
+            <ErrorBoundary>
+              <AppSwitcherProvider>
+                <RootSiblingParent>
+                  <PortalProvider>
+                    <BottomSheetModalProvider>
+                      <BookSelectorBottomSheetProvider>
+                        <InitHooks />
+                        <Stack screenOptions={{ headerShown: false }}>
+                          <Stack.Screen name="index" />
+                          <Stack.Screen
+                            name="(explore)"
+                            options={createFormSheetOptions(theme, {
+                              contentStyle: {
+                                bottom: 0,
+                              },
+                            })}
+                          />
+                          <Stack.Screen
+                            name="(timeline)"
+                            options={createFormSheetOptions(theme, {
+                              contentStyle: {
+                                bottom: 0,
+                              },
+                            })}
+                          />
+                        </Stack>
+                        <ThemedToaster />
+                        <DeferredModals />
+                      </BookSelectorBottomSheetProvider>
+                    </BottomSheetModalProvider>
+                  </PortalProvider>
+                </RootSiblingParent>
+              </AppSwitcherProvider>
+            </ErrorBoundary>
+          </DBStateProvider>
+        </PersistGate>
+      </QueryClientProvider>
     </ThemeProvider>
   )
 }

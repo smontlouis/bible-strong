@@ -1,4 +1,5 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { MenuView, type MenuAction } from '@expo/ui/community/menu'
 import { useRouter } from 'expo-router'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -7,9 +8,7 @@ import { useDispatch } from 'react-redux'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import Box from '~common/ui/Box'
-import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
-import MenuOption from '~common/ui/MenuOption'
-import Text from '~common/ui/Text'
+import { FeatherIcon } from '~common/ui/Icon'
 import { removePlan, resetPlan } from '~redux/modules/plan'
 
 interface Props {
@@ -62,43 +61,60 @@ const Menu = ({ modalRefDetails, planId, title, onRemove }: Props) => {
     ])
   }
 
+  const actions: MenuAction[] = [
+    {
+      id: 'details',
+      title: t('Détails'),
+      image: 'info.circle',
+    },
+    {
+      id: 'open-in-new-tab',
+      title: t('tab.openInNewTab'),
+      image: 'arrow.up.forward.square',
+    },
+    {
+      id: 'reset',
+      title: t('Remise à zéro'),
+      image: 'clock.arrow.circlepath',
+    },
+    {
+      id: 'remove',
+      title: t('Arrêter le plan'),
+      image: 'trash',
+      attributes: { destructive: true },
+    },
+  ]
+
   return (
-    <>
-      <MenuOption onSelect={() => modalRefDetails.current?.present()}>
-        <Box row alignItems="center">
-          <FeatherIcon name="eye" size={15} />
-          <Text marginLeft={10}>{t('Détails')}</Text>
-        </Box>
-      </MenuOption>
-      <MenuOption
-        onSelect={() =>
-          openInNewTab({
-            id: `plan-${generateUUID()}`,
-            title,
-            isRemovable: true,
-            type: 'plan',
-            data: { planId },
-          })
+    <MenuView
+      actions={actions}
+      onPressAction={({ nativeEvent }) => {
+        switch (nativeEvent.event) {
+          case 'details':
+            modalRefDetails.current?.present()
+            break
+          case 'open-in-new-tab':
+            openInNewTab({
+              id: `plan-${generateUUID()}`,
+              title,
+              isRemovable: true,
+              type: 'plan',
+              data: { planId },
+            })
+            break
+          case 'reset':
+            onResetPress()
+            break
+          case 'remove':
+            onRemovePress()
+            break
         }
-      >
-        <Box row alignItems="center">
-          <FeatherIcon name="external-link" size={15} />
-          <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
-        </Box>
-      </MenuOption>
-      <MenuOption onSelect={onResetPress}>
-        <Box row alignItems="center">
-          <MaterialIcon name="grid-off" size={15} />
-          <Text marginLeft={10}>{t('Remise à zéro')}</Text>
-        </Box>
-      </MenuOption>
-      <MenuOption onSelect={onRemovePress}>
-        <Box row alignItems="center">
-          <MaterialIcon name="cancel" size={17} color="quart" />
-          <Text marginLeft={10}>{t('Arrêter le plan')}</Text>
-        </Box>
-      </MenuOption>
-    </>
+      }}
+    >
+      <Box row center height={60} width={60}>
+        <FeatherIcon name="more-vertical" size={18} />
+      </Box>
+    </MenuView>
   )
 }
 

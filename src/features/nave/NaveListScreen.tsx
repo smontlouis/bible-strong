@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { MenuView } from '@expo/ui/community/menu'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
 import * as Icon from '@expo/vector-icons'
@@ -23,11 +24,11 @@ import { useSearchValue, useResultsByLetterOrSearch } from '../lexique/useUtilit
 import { useTranslation } from 'react-i18next'
 import { NaveTab } from '../../state/tabs'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import PopOverMenu from '~common/PopOverMenu'
-import LanguageMenuOption from '~common/LanguageMenuOption'
 import type { DatabaseError } from '~helpers/catchDatabaseError'
+import { toast } from '~helpers/toast'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
+import { useResourceLanguage } from 'src/state/resourcesLanguage'
 
 type NaveRow = NaveLetterRow | NaveSearchRow
 type NaveSection = {
@@ -90,6 +91,7 @@ const NaveListScreen = ({
   const canGoBackInStack = useCanGoBackInStack()
   const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
   const lang = useLanguage()
+  const [naveResourceLanguage, setNaveResourceLanguage] = useResourceLanguage('NAVE')
   const [error, setError] = useState<DatabaseError['error'] | null>(null)
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
@@ -125,6 +127,12 @@ const NaveListScreen = ({
     onNaveSelect?.(nameLower, name)
   }
 
+  const toggleNaveLanguage = () => {
+    const nextLanguage = naveResourceLanguage === 'fr' ? 'en' : 'fr'
+    setNaveResourceLanguage(nextLanguage)
+    toast(t('menu.languageChanged', { language: nextLanguage === 'fr' ? 'Français' : 'English' }))
+  }
+
   if (error) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
@@ -158,13 +166,24 @@ const NaveListScreen = ({
                   <Icon.Feather size={20} name="alert-triangle" color="rgb(255,188,0)" />
                 </Link>
               )}
-              <PopOverMenu
-                popover={
-                  <>
-                    <LanguageMenuOption resourceId="NAVE" />
-                  </>
-                }
-              />
+              <MenuView
+                actions={[
+                  {
+                    id: 'language',
+                    title: `${t('menu.language')}: ${
+                      naveResourceLanguage === 'fr' ? 'Français' : 'English'
+                    }`,
+                    image: 'globe',
+                  },
+                ]}
+                onPressAction={({ nativeEvent }) => {
+                  if (nativeEvent.event === 'language') toggleNaveLanguage()
+                }}
+              >
+                <Box row center height={60} width={60}>
+                  <Icon.Feather name="more-vertical" size={18} />
+                </Box>
+              </MenuView>
             </Box>
           }
         >

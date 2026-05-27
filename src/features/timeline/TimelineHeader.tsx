@@ -1,13 +1,12 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
+import { MenuView } from '@expo/ui/community/menu'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { ActionMenuOption } from '~common/ActionMenu'
 import Back from '~common/Back'
-import PopOverMenu from '~common/PopOverMenu'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
@@ -76,19 +75,34 @@ const TimelineHeader = ({
         </Text>
       </Box>
       <Box center row>
-        <PopOverMenu
-          popover={
-            <>
-              <ActionMenuOption icon="search" label={t('Recherche')} onSelect={openSearch} />
-              <ActionMenuOption icon="info" label={t('Détails')} onSelect={onPress} />
-              <ActionMenuOption
-                icon="external-link"
-                label={t('tab.openInNewTab')}
-                onSelect={onOpenInNewTab}
-              />
-            </>
-          }
-        />
+        <MenuView
+          actions={[
+            { id: 'search', title: t('Recherche'), image: 'magnifyingglass' },
+            { id: 'details', title: t('Détails'), image: 'info.circle' },
+            {
+              id: 'open-tab',
+              title: t('tab.openInNewTab'),
+              image: 'arrow.up.forward.square',
+            },
+          ]}
+          onPressAction={({ nativeEvent }) => {
+            switch (nativeEvent.event) {
+              case 'search':
+                openSearch()
+                break
+              case 'details':
+                onPress()
+                break
+              case 'open-tab':
+                onOpenInNewTab()
+                break
+            }
+          }}
+        >
+          <Box row center height={60} width={60}>
+            <Icon.Feather name="more-vertical" size={18} />
+          </Box>
+        </MenuView>
       </Box>
     </HeaderBox>
   )

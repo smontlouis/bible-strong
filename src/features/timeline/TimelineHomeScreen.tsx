@@ -1,18 +1,19 @@
 import React from 'react'
+import { MenuView } from '@expo/ui/community/menu'
 
 import BottomSheet from '@gorhom/bottom-sheet'
 import { useTranslation } from 'react-i18next'
-import { ActionMenuOption } from '~common/ActionMenu'
 import Header from '~common/Header'
-import LanguageMenuOption from '~common/LanguageMenuOption'
-import PopOverMenu from '~common/PopOverMenu'
 import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
+import { FeatherIcon } from '~common/ui/Icon'
 import ScrollView from '~common/ui/ScrollView'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useQuery } from '~helpers/react-query-lite'
+import { toast } from '~helpers/toast'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { useResourceLanguage } from 'src/state/resourcesLanguage'
 import TimelineHomeDetailModal from './TimelineHomeDetailModal'
 import TimelineItem from './TimelineItem'
 import { getEvents } from './events'
@@ -29,6 +30,7 @@ const TimelineHomeScreen = ({ hasBackButton, isFormSheet = false, onSectionPress
   const openInNewTab = useOpenInNewTab()
   const canGoBackInStack = useCanGoBackInStack()
   const showBackButton = hasBackButton ?? (isFormSheet ? canGoBackInStack : true)
+  const [timelineResourceLanguage, setTimelineResourceLanguage] = useResourceLanguage('TIMELINE')
 
   const { data: events } = useQuery({
     queryKey: 'timeline',
@@ -45,6 +47,12 @@ const TimelineHomeScreen = ({ hasBackButton, isFormSheet = false, onSectionPress
     })
   }
 
+  const toggleTimelineLanguage = () => {
+    const nextLanguage = timelineResourceLanguage === 'fr' ? 'en' : 'fr'
+    setTimelineResourceLanguage(nextLanguage)
+    toast(t('menu.languageChanged', { language: nextLanguage === 'fr' ? 'Français' : 'English' }))
+  }
+
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
       <Box flex bg="reverse">
@@ -52,23 +60,40 @@ const TimelineHomeScreen = ({ hasBackButton, isFormSheet = false, onSectionPress
           hasBackButton={showBackButton}
           title={t('La Chronologie biblique')}
           rightComponent={
-            <PopOverMenu
-              popover={
-                <>
-                  <LanguageMenuOption resourceId="TIMELINE" />
-                  <ActionMenuOption
-                    icon="info"
-                    label={t('Détails')}
-                    onSelect={() => modalRef.current?.expand()}
-                  />
-                  <ActionMenuOption
-                    icon="external-link"
-                    label={t('tab.openInNewTab')}
-                    onSelect={openTimelineInNewTab}
-                  />
-                </>
-              }
-            />
+            <MenuView
+              actions={[
+                {
+                  id: 'language',
+                  title: `${t('menu.language')}: ${
+                    timelineResourceLanguage === 'fr' ? 'Français' : 'English'
+                  }`,
+                  image: 'globe',
+                },
+                { id: 'details', title: t('Détails'), image: 'info.circle' },
+                {
+                  id: 'open-tab',
+                  title: t('tab.openInNewTab'),
+                  image: 'arrow.up.forward.square',
+                },
+              ]}
+              onPressAction={({ nativeEvent }) => {
+                switch (nativeEvent.event) {
+                  case 'language':
+                    toggleTimelineLanguage()
+                    break
+                  case 'details':
+                    modalRef.current?.expand()
+                    break
+                  case 'open-tab':
+                    openTimelineInNewTab()
+                    break
+                }
+              }}
+            >
+              <Box row center height={60} width={60}>
+                <FeatherIcon name="more-vertical" size={18} />
+              </Box>
+            </MenuView>
           }
         />
         <ScrollView backgroundColor="lightGrey">

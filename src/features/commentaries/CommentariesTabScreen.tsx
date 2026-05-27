@@ -1,4 +1,5 @@
 import styled from '@emotion/native'
+import { MenuView } from '@expo/ui/community/menu'
 import { to } from 'await-to-js'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -25,9 +26,7 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import AdventistIcon from '~common/AdventistIcon'
-import PopOverMenu from '~common/PopOverMenu'
 import { FeatherIcon } from '~common/ui/Icon'
-import MenuOption from '~common/ui/MenuOption'
 import { HStack } from '~common/ui/Stack'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
@@ -234,30 +233,32 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
             hasBackButton={hasBackButton}
             title={headerTitle}
             rightComponent={
-              <PopOverMenu
-                popover={
-                  <>
-                    <MenuOption
-                      onSelect={() => {
-                        openInNewTab({
-                          id: `commentary-${generateUUID()}`,
-                          title: t('tabs.new'),
-                          isRemovable: true,
-                          type: 'commentary',
-                          data: {
-                            verse,
-                          },
-                        })
-                      }}
-                    >
-                      <Box row alignItems="center">
-                        <FeatherIcon name="external-link" size={15} />
-                        <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
-                      </Box>
-                    </MenuOption>
-                  </>
-                }
-              />
+              <MenuView
+                actions={[
+                  {
+                    id: 'open-tab',
+                    title: t('tab.openInNewTab'),
+                    image: 'arrow.up.forward.square',
+                  },
+                ]}
+                onPressAction={({ nativeEvent }) => {
+                  if (nativeEvent.event === 'open-tab') {
+                    openInNewTab({
+                      id: `commentary-${generateUUID()}`,
+                      title: t('tabs.new'),
+                      isRemovable: true,
+                      type: 'commentary',
+                      data: {
+                        verse,
+                      },
+                    })
+                  }
+                }}
+              >
+                <Box row center height={60} width={60}>
+                  <FeatherIcon name="more-vertical" size={18} />
+                </Box>
+              </MenuView>
             }
           />
         </>

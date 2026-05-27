@@ -1,12 +1,12 @@
 import React from 'react'
+import { MenuView, type MenuAction } from '@expo/ui/community/menu'
 import { useTranslation } from 'react-i18next'
 
-import { ActionMenuContent } from '~common/ActionMenu'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
-import PopOverMenu from '~common/PopOverMenu'
+import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
-import MenuOption from '~common/ui/MenuOption'
+import { FeatherIcon } from '~common/ui/Icon'
 import ScrollView from '~common/ui/ScrollView'
 import waitForTimeline from '~common/waitForTimeline'
 import useLanguage from '~helpers/useLanguage'
@@ -23,9 +23,18 @@ interface Props {
   isFormSheet?: boolean
   menuItems?: {
     label: string
-    icon: React.ComponentProps<typeof ActionMenuContent>['icon']
+    icon: string
     onSelect: () => void
   }[]
+}
+
+const getMenuItemImage = (icon: string): MenuAction['image'] => {
+  switch (icon) {
+    case 'external-link':
+      return 'arrow.up.forward.square'
+    default:
+      return undefined
+  }
 }
 
 const TimelineEventDetailView = waitForTimeline(
@@ -55,17 +64,20 @@ const TimelineEventDetailView = waitForTimeline(
           onCustomBackPress={onBack}
           rightComponent={
             menuItems?.length ? (
-              <PopOverMenu
-                popover={
-                  <>
-                    {menuItems.map(item => (
-                      <MenuOption key={item.label} onSelect={item.onSelect}>
-                        <ActionMenuContent icon={item.icon} label={item.label} />
-                      </MenuOption>
-                    ))}
-                  </>
-                }
-              />
+              <MenuView
+                actions={menuItems.map(item => ({
+                  id: item.label,
+                  title: item.label,
+                  image: getMenuItemImage(item.icon),
+                }))}
+                onPressAction={({ nativeEvent }) => {
+                  menuItems.find(item => item.label === nativeEvent.event)?.onSelect()
+                }}
+              >
+                <Box row center height={60} width={60}>
+                  <FeatherIcon name="more-vertical" size={18} />
+                </Box>
+              </MenuView>
             ) : undefined
           }
         />

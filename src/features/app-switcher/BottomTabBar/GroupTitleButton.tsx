@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import Box, { AnimatedBox, FadingText } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
-import PopOverMenu from '~common/PopOverMenu'
 import { useActiveGroup, useUpdateGroup, getTabGroups } from '../../../state/tabGroups'
 import { tabsCountAtom } from '../../../state/tabs'
 import { useAtomValue } from 'jotai/react'
@@ -55,53 +54,48 @@ const GroupTitleButton = () => {
 
   return (
     <Box flex={1}>
-      <PopOverMenu
-        element={
-          <Box row center>
-            <AnimatedBox
-              row
-              py={6}
-              px={12}
-              borderRadius={20}
-              layout={LinearTransition}
-              alignItems="center"
-              justifyContent="center"
+      <GroupActionsPopover
+        group={activeGroup}
+        onCreateGroup={handleOpenCreateGroup}
+        onEditGroup={handleOpenEdit}
+        onViewGroups={handleOpenViewGroups}
+      >
+        <Box row center>
+          <AnimatedBox
+            row
+            py={6}
+            px={12}
+            borderRadius={20}
+            layout={LinearTransition}
+            alignItems="center"
+            justifyContent="center"
+            style={{
+              backgroundColor: activeGroup.color || 'transparent',
+              transitionProperty: 'backgroundColor',
+              transitionDuration: 300,
+            }}
+          >
+            <FadingText
+              color={textColor || 'default'}
+              fontSize={14}
+              numberOfLines={1}
               style={{
-                backgroundColor: activeGroup.color || 'transparent',
-                transitionProperty: 'backgroundColor',
-                transitionDuration: 300,
+                maxWidth: wp(50),
               }}
             >
-              <FadingText
+              {displayName}
+            </FadingText>
+            <AnimatedBox layout={LinearTransition} center>
+              <FeatherIcon
+                name="chevron-down"
+                size={16}
                 color={textColor || 'default'}
-                fontSize={14}
-                numberOfLines={1}
-                style={{
-                  maxWidth: wp(50),
-                }}
-              >
-                {displayName}
-              </FadingText>
-              <AnimatedBox layout={LinearTransition} center>
-                <FeatherIcon
-                  name="chevron-down"
-                  size={16}
-                  color={textColor || 'default'}
-                  style={{ marginLeft: 4 }}
-                />
-              </AnimatedBox>
+                style={{ marginLeft: 4 }}
+              />
             </AnimatedBox>
-          </Box>
-        }
-        popover={
-          <GroupActionsPopover
-            group={activeGroup}
-            onCreateGroup={handleOpenCreateGroup}
-            onEditGroup={handleOpenEdit}
-            onViewGroups={handleOpenViewGroups}
-          />
-        }
-      />
+          </AnimatedBox>
+        </Box>
+      </GroupActionsPopover>
       {!activeGroup.isDefault && (
         <EditGroupModal
           bottomSheetRef={editSheetRef}

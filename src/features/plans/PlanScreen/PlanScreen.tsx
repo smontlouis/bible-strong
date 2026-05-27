@@ -3,7 +3,6 @@ import { useLocalSearchParams } from 'expo-router'
 import React from 'react'
 import { ComputedReadingSlice, ComputedPlanItem, Plan } from 'src/common/types'
 import Header from '~common/Header'
-import PopOverMenu from '~common/PopOverMenu'
 import Container from '~common/ui/Container'
 import { usePrevious } from '~helpers/usePrevious'
 import { useComputedPlan, useFireStorage } from '../plan.hooks'
@@ -61,15 +60,11 @@ const PlanScreen = ({
         title={title}
         hasBackButton={hasBackButton}
         rightComponent={
-          <PopOverMenu
-            popover={
-              <Menu
-                modalRefDetails={modalRefDetails}
-                planId={id}
-                title={title || ''}
-                onRemove={onRemove}
-              />
-            }
+          <Menu
+            modalRefDetails={modalRefDetails}
+            planId={id}
+            title={title || ''}
+            onRemove={onRemove}
           />
         }
       />

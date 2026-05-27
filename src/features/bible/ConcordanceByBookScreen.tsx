@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { MenuView } from '@expo/ui/community/menu'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 
@@ -7,15 +8,16 @@ import FlatList from '~common/ui/FlatList'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
-import PopOverMenu from '~common/PopOverMenu'
-import LanguageMenuOption from '~common/LanguageMenuOption'
 import waitForStrongDB from '~common/waitForStrongDB'
 import ConcordanceVerse from './ConcordanceVerse'
+import { FeatherIcon } from '~common/ui/Icon'
 
 import books from '~assets/bible_versions/books-desc'
 import loadFoundVersesByBook, { FoundVerseRow } from '~helpers/loadFoundVersesByBook'
 import truncate from '~helpers/truncate'
+import { toast } from '~helpers/toast'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { useResourceLanguage } from 'src/state/resourcesLanguage'
 
 const ConcordanceByBook = () => {
   const router = useRouter()
@@ -23,6 +25,7 @@ const ConcordanceByBook = () => {
   const { t } = useTranslation()
   const [verses, setVerses] = useState<FoundVerseRow[]>([])
   const canGoBackInStack = useCanGoBackInStack()
+  const [strongResourceLanguage, setStrongResourceLanguage] = useResourceLanguage('STRONG')
 
   const book = params.book ? Number(params.book) : 0
   const strongReference = params.strongReference
@@ -40,19 +43,36 @@ const ConcordanceByBook = () => {
     loadVerses()
   }, [book, Code])
 
+  const toggleStrongLanguage = () => {
+    const nextLanguage = strongResourceLanguage === 'fr' ? 'en' : 'fr'
+    setStrongResourceLanguage(nextLanguage)
+    toast(t('menu.languageChanged', { language: nextLanguage === 'fr' ? 'Français' : 'English' }))
+  }
+
   return (
     <FormSheetScreen isFormSheet>
       <Header
         hasBackButton={canGoBackInStack}
         title={`${truncate(Mot, 7)} dans ${books[book - 1].Nom}`}
         rightComponent={
-          <PopOverMenu
-            popover={
-              <>
-                <LanguageMenuOption resourceId="STRONG" />
-              </>
-            }
-          />
+          <MenuView
+            actions={[
+              {
+                id: 'language',
+                title: `${t('menu.language')}: ${
+                  strongResourceLanguage === 'fr' ? 'Français' : 'English'
+                }`,
+                image: 'globe',
+              },
+            ]}
+            onPressAction={({ nativeEvent }) => {
+              if (nativeEvent.event === 'language') toggleStrongLanguage()
+            }}
+          >
+            <Box row center height={60} width={60}>
+              <FeatherIcon name="more-vertical" size={18} />
+            </Box>
+          </MenuView>
         }
       />
       {!verses.length && (

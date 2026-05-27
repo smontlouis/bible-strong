@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/react-native'
+import { MenuView, type MenuAction } from '@expo/ui/community/menu'
 import { useRouter } from 'expo-router'
 import { produce } from 'immer'
 import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
@@ -8,15 +9,14 @@ import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, Share } fr
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import books from '~assets/bible_versions/books-desc'
-import { ActionMenuOption } from '~common/ActionMenu'
 import EntityChipList from '~common/EntityChipList'
 import Header from '~common/Header'
-import PopOverMenu from '~common/PopOverMenu'
 import { VerseIds } from '~common/types'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Fab from '~common/ui/Fab'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
+import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import VerseAccordion from '~common/VerseAccordion'
@@ -383,50 +383,59 @@ ${currentNote.description}
         onCustomBackPress={goBack}
         rightComponent={
           currentNote ? (
-            <PopOverMenu
-              width={54}
-              height={54}
-              popover={
-                <>
-                  <ActionMenuOption
-                    icon="share"
-                    label={t('Partager')}
-                    onSelect={shareNote}
-                    closeBeforeSelect
-                  />
-                  <ActionMenuOption icon="edit-2" label={t('Éditer')} onSelect={onEditNote} />
-                  <ActionMenuOption
-                    icon="tag"
-                    label={t('Éditer les tags')}
-                    onSelect={() =>
-                      setUnifiedTagsModal({
-                        mode: 'select',
-                        id: currentNote.id!,
-                        entity: 'notes',
-                      })
-                    }
-                  />
-                  {noteEndpoint ? (
-                    <ActionMenuOption
-                      icon="git-merge"
-                      label={t('Éditer les relations')}
-                      onSelect={() => openEntityRelations(noteEndpoint)}
-                    />
-                  ) : null}
-                  <ActionMenuOption
-                    icon="book-open"
-                    label={t('Voir dans la Bible')}
-                    onSelect={navigateToBible}
-                  />
-                  <ActionMenuOption
-                    icon="trash-2"
-                    label={t('Supprimer')}
-                    color="quart"
-                    onSelect={deleteNoteFunc}
-                  />
-                </>
+            <MenuView
+              actions={
+                [
+                  { id: 'share', title: t('Partager'), image: 'square.and.arrow.up' },
+                  { id: 'edit', title: t('Éditer'), image: 'pencil' },
+                  { id: 'tags', title: t('Éditer les tags'), image: 'tag' },
+                  noteEndpoint
+                    ? {
+                        id: 'relations',
+                        title: t('Éditer les relations'),
+                        image: 'arrow.triangle.merge',
+                      }
+                    : null,
+                  { id: 'bible', title: t('Voir dans la Bible'), image: 'book' },
+                  {
+                    id: 'delete',
+                    title: t('Supprimer'),
+                    image: 'trash',
+                    attributes: { destructive: true },
+                  },
+                ].filter(Boolean) as MenuAction[]
               }
-            />
+              onPressAction={({ nativeEvent }) => {
+                switch (nativeEvent.event) {
+                  case 'share':
+                    shareNote()
+                    break
+                  case 'edit':
+                    onEditNote()
+                    break
+                  case 'tags':
+                    setUnifiedTagsModal({
+                      mode: 'select',
+                      id: currentNote.id!,
+                      entity: 'notes',
+                    })
+                    break
+                  case 'relations':
+                    if (noteEndpoint) openEntityRelations(noteEndpoint)
+                    break
+                  case 'bible':
+                    navigateToBible()
+                    break
+                  case 'delete':
+                    deleteNoteFunc()
+                    break
+                }
+              }}
+            >
+              <Box row center height={54} width={54}>
+                <FeatherIcon name="more-vertical" size={18} />
+              </Box>
+            </MenuView>
           ) : undefined
         }
       />

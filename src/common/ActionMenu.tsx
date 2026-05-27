@@ -1,5 +1,4 @@
 import type { ComponentProps } from 'react'
-import MenuOption from '~common/ui/MenuOption'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -10,12 +9,6 @@ type ActionMenuContentProps = {
   icon: FeatherIconName
   label: string
   color?: string
-}
-
-type ActionMenuOptionProps = ActionMenuContentProps & {
-  onSelect?: (value?: unknown) => void
-  closeOnSelect?: boolean
-  closeBeforeSelect?: boolean
 }
 
 type ActionSheetItemProps = ActionMenuContentProps & {
@@ -31,23 +24,6 @@ export const ActionMenuContent = ({ icon, label, color = 'default' }: ActionMenu
       {label}
     </Text>
   </Box>
-)
-
-export const ActionMenuOption = ({
-  icon,
-  label,
-  color,
-  onSelect,
-  closeOnSelect,
-  closeBeforeSelect,
-}: ActionMenuOptionProps) => (
-  <MenuOption
-    onSelect={onSelect}
-    closeOnSelect={closeOnSelect}
-    closeBeforeSelect={closeBeforeSelect}
-  >
-    <ActionMenuContent icon={icon} label={label} color={color} />
-  </MenuOption>
 )
 
 export const ActionSheetItem = ({ icon, label, color, onPress }: ActionSheetItemProps) => (

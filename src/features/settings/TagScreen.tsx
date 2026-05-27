@@ -1,18 +1,18 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet/'
+import { MenuView } from '@expo/ui/community/menu'
 import React, { useRef, useState } from 'react'
 import { Alert } from 'react-native'
 import { useDispatch } from 'react-redux'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 
-import { ActionMenuOption } from '~common/ActionMenu'
 import Header from '~common/Header'
-import PopOverMenu from '~common/PopOverMenu'
 import RenameModal from '~common/RenameModal'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import SectionList from '~common/ui/SectionList'
 import Box from '~common/ui/Box'
 import Empty from '~common/Empty'
+import { FeatherIcon } from '~common/ui/Icon'
 import HighlightItem from '~features/settings/Verse'
 import StudyItem from '~features/studies/StudyItem'
 import { removeTag, updateTag } from '~redux/modules/user'
@@ -169,31 +169,40 @@ const TagScreen = () => {
         hasBackButton={canGoBackInStack}
         title={tag.name}
         rightComponent={
-          <PopOverMenu
-            popover={
-              <>
-                <ActionMenuOption
-                  icon="edit-3"
-                  label={t('Éditer')}
-                  onSelect={() => {
-                    setTagToRename({ id: tag.id, name: tag.name })
-                    renameModalRef.current?.present()
-                  }}
-                />
-                <ActionMenuOption
-                  icon="layers"
-                  label={t('tabs.createGroupFromTag')}
-                  onSelect={handleOpenInTabGroup}
-                />
-                <ActionMenuOption
-                  icon="trash-2"
-                  label={t('Supprimer')}
-                  color="quart"
-                  onSelect={handleDelete}
-                />
-              </>
-            }
-          />
+          <MenuView
+            actions={[
+              { id: 'edit', title: t('Éditer'), image: 'pencil' },
+              {
+                id: 'create-group',
+                title: t('tabs.createGroupFromTag'),
+                image: 'square.stack.3d.up',
+              },
+              {
+                id: 'delete',
+                title: t('Supprimer'),
+                image: 'trash',
+                attributes: { destructive: true },
+              },
+            ]}
+            onPressAction={({ nativeEvent }) => {
+              switch (nativeEvent.event) {
+                case 'edit':
+                  setTagToRename({ id: tag.id, name: tag.name })
+                  renameModalRef.current?.present()
+                  break
+                case 'create-group':
+                  handleOpenInTabGroup()
+                  break
+                case 'delete':
+                  handleDelete()
+                  break
+              }
+            }}
+          >
+            <Box row center height={60} width={60}>
+              <FeatherIcon name="more-vertical" size={18} />
+            </Box>
+          </MenuView>
         }
       />
       {isEmpty ? (

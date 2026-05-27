@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import { MenuView } from '@expo/ui/community/menu'
 import { shallowEqual, useSelector } from 'react-redux'
 
 import verseToReference from '~helpers/verseToReference'
@@ -16,10 +17,7 @@ import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
-import PopOverMenu from '~common/PopOverMenu'
 import { FeatherIcon } from '~common/ui/Icon'
-import MenuOption from '~common/ui/MenuOption'
-import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { versions } from '~helpers/bibleVersions'
@@ -106,36 +104,42 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
         fontSize={16}
         title={title}
         rightComponent={
-          <PopOverMenu
-            popover={
-              <>
-                <MenuOption onSelect={() => compareVersionSelectorRef.current?.expand()}>
-                  <Box row alignItems="center">
-                    <FeatherIcon name="check-square" size={15} />
-                    <Text marginLeft={10}>{t('common.chooseCompareVersions')}</Text>
-                  </Box>
-                </MenuOption>
-                <MenuOption
-                  onSelect={() => {
-                    openInNewTab({
-                      id: `compare-${generateUUID()}`,
-                      title: t('tabs.new'),
-                      isRemovable: true,
-                      type: 'compare',
-                      data: {
-                        selectedVerses,
-                      },
-                    })
-                  }}
-                >
-                  <Box row alignItems="center">
-                    <FeatherIcon name="external-link" size={15} />
-                    <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
-                  </Box>
-                </MenuOption>
-              </>
-            }
-          />
+          <MenuView
+            actions={[
+              {
+                id: 'choose-versions',
+                title: t('common.chooseCompareVersions'),
+                image: 'checkmark.square',
+              },
+              {
+                id: 'open-tab',
+                title: t('tab.openInNewTab'),
+                image: 'arrow.up.forward.square',
+              },
+            ]}
+            onPressAction={({ nativeEvent }) => {
+              switch (nativeEvent.event) {
+                case 'choose-versions':
+                  compareVersionSelectorRef.current?.expand()
+                  break
+                case 'open-tab':
+                  openInNewTab({
+                    id: `compare-${generateUUID()}`,
+                    title: t('tabs.new'),
+                    isRemovable: true,
+                    type: 'compare',
+                    data: {
+                      selectedVerses,
+                    },
+                  })
+                  break
+              }
+            }}
+          >
+            <Box row center height={60} width={60}>
+              <FeatherIcon name="more-vertical" size={18} />
+            </Box>
+          </MenuView>
         }
       />
       <ScrollView>

@@ -1,13 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react'
+import { MenuView, type MenuAction } from '@expo/ui/community/menu'
 import { Share } from 'react-native'
 import { useSelector } from 'react-redux'
 import truncHTML from 'trunc-html'
 
 import { WebView } from 'react-native-webview'
 import books from '~assets/bible_versions/books-desc'
-import { ActionMenuOption } from '~common/ActionMenu'
 import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
+import { FeatherIcon } from '~common/ui/Icon'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import useHTMLView, { type HTMLViewLinkPayload } from '~helpers/useHTMLView'
@@ -17,7 +18,6 @@ import { produce } from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import PopOverMenu from '~common/PopOverMenu'
 import { toast } from '~helpers/toast'
 import EntityChipList from '~common/EntityChipList'
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
@@ -186,50 +186,57 @@ const DictionnaryDetailScreen = ({
         hasBackButton={hasBackButton}
         title={word}
         rightComponent={
-          <PopOverMenu
-            popover={
-              <>
-                <ActionMenuOption
-                  icon="tag"
-                  label={t('Étiquettes')}
-                  onSelect={() =>
-                    setUnifiedTagsModal({
-                      mode: 'select',
-                      id: word,
-                      title: word,
-                      entity: 'words',
-                    })
-                  }
-                />
-                <ActionMenuOption
-                  icon="share-2"
-                  label={t('Partager')}
-                  onSelect={shareDefinition}
-                  closeBeforeSelect
-                />
-                <ActionMenuOption
-                  icon="git-merge"
-                  label={t('Éditer les relations')}
-                  onSelect={() => dictionaryEndpoint && openEntityRelations(dictionaryEndpoint)}
-                />
-                <ActionMenuOption
-                  icon="external-link"
-                  label={t('tab.openInNewTab')}
-                  onSelect={() => {
-                    openInNewTab({
-                      id: `dictionary-${generateUUID()}`,
-                      title: t('tabs.new'),
-                      isRemovable: true,
-                      type: 'dictionary',
-                      data: {
-                        word,
-                      },
-                    })
-                  }}
-                />
-              </>
+          <MenuView
+            actions={
+              [
+                { id: 'tags', title: t('Étiquettes'), image: 'tag' },
+                { id: 'share', title: t('Partager'), image: 'square.and.arrow.up' },
+                dictionaryEndpoint
+                  ? {
+                      id: 'relations',
+                      title: t('Éditer les relations'),
+                      image: 'arrow.triangle.merge',
+                    }
+                  : null,
+                {
+                  id: 'open-tab',
+                  title: t('tab.openInNewTab'),
+                  image: 'arrow.up.forward.square',
+                },
+              ].filter(Boolean) as MenuAction[]
             }
-          />
+            onPressAction={({ nativeEvent }) => {
+              switch (nativeEvent.event) {
+                case 'tags':
+                  setUnifiedTagsModal({
+                    mode: 'select',
+                    id: word,
+                    title: word,
+                    entity: 'words',
+                  })
+                  break
+                case 'share':
+                  shareDefinition()
+                  break
+                case 'relations':
+                  if (dictionaryEndpoint) openEntityRelations(dictionaryEndpoint)
+                  break
+                case 'open-tab':
+                  openInNewTab({
+                    id: `dictionary-${generateUUID()}`,
+                    title: t('tabs.new'),
+                    isRemovable: true,
+                    type: 'dictionary',
+                    data: { word },
+                  })
+                  break
+              }
+            }}
+          >
+            <Box row center height={60} width={60}>
+              <FeatherIcon name="more-vertical" size={18} />
+            </Box>
+          </MenuView>
         }
       />
       <AppScrollView>

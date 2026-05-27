@@ -3,21 +3,18 @@ import BottomSheet, {
   BottomSheetFooterProps,
   BottomSheetScrollView,
 } from '@gorhom/bottom-sheet/'
+import { MenuView, type MenuAction } from '@expo/ui/community/menu'
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React, { memo, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BackHandler, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import LanguageMenuOption from '~common/LanguageMenuOption'
 import ModalHeader from '~common/ModalHeader'
-import PopOverMenu from '~common/PopOverMenu'
 import { BibleResource, StudyNavigateBibleType } from '~common/types'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
-import MenuOption from '~common/ui/MenuOption'
 import { Slide, Slides } from '~common/ui/Slider'
-import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import CommentariesCard from '~features/commentaries/CommentariesCard'
@@ -27,11 +24,13 @@ import CompareCard from './CompareCard'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import formatVerseContent from '~helpers/formatVerseContent'
 import generateUUID from '~helpers/generateUUID'
+import { toast } from '~helpers/toast'
 import { BibleTab, useBibleTabActions } from '../../../state/tabs'
 import BibleVerseDetailCard from '../BibleVerseDetailCard'
 import CompareVersionSelectorBottomSheet from '../CompareVersionSelectorBottomSheet'
 import { ReferenceCard } from '../ReferenceCard'
 import ResourcesModalFooter from './ResourcesModalFooter'
+import { useResourceLanguage } from 'src/state/resourcesLanguage'
 
 type ResourceVerse = {
   Livre: number
@@ -81,6 +80,10 @@ const ResourcesModal = memo(
     const [isOpen, setIsOpen] = useState(false)
     const openInNewTab = useOpenInNewTab()
     const bible = useAtomValue(bibleAtom)
+    const [strongLanguage, setStrongLanguage] = useResourceLanguage('STRONG')
+    const [dictionaryLanguage, setDictionaryLanguage] = useResourceLanguage('DICTIONNAIRE')
+    const [naveLanguage, setNaveLanguage] = useResourceLanguage('NAVE')
+    const [commentariesLanguage, setCommentariesLanguage] = useResourceLanguage('COMMENTARIES')
     const { key, ...bottomSheetStyles } = useBottomSheetStyles()
     const insets = useSafeAreaInsets()
     const {
@@ -109,71 +112,91 @@ const ResourcesModal = memo(
       }
     }
 
-    const getMenuOptionsByResourceType = () => {
+    const toggleResourceLanguage = (
+      currentLanguage: 'fr' | 'en',
+      setLanguage: (language: 'fr' | 'en') => void
+    ) => {
+      const nextLanguage = currentLanguage === 'fr' ? 'en' : 'fr'
+      setLanguage(nextLanguage)
+      toast(t('menu.languageChanged', { language: nextLanguage === 'fr' ? 'Français' : 'English' }))
+    }
+
+    const getMenuActionsByResourceType = (): MenuAction[] => {
+      const languageAction = (currentLanguage: 'fr' | 'en'): MenuAction => ({
+        id: 'language',
+        title: `${t('menu.language')}: ${currentLanguage === 'fr' ? 'Français' : 'English'}`,
+        image: 'globe',
+      })
+
       switch (resourceType) {
         case 'strong':
-          return <LanguageMenuOption resourceId="STRONG" />
+          return [languageAction(strongLanguage)]
         case 'dictionary':
-          return <LanguageMenuOption resourceId="DICTIONNAIRE" />
+          return [languageAction(dictionaryLanguage)]
         case 'nave':
-          return <LanguageMenuOption resourceId="NAVE" />
-        case 'commentary': {
-          return (
-            <>
-              <LanguageMenuOption resourceId="COMMENTARIES" />
-              <MenuOption
-                onSelect={() => {
-                  openInNewTab({
-                    id: `commentary-${generateUUID()}`,
-                    title: t('tabs.new'),
-                    isRemovable: true,
-                    type: 'commentary',
-                    data: {
-                      verse: selectedVerse,
-                    },
-                  })
-                }}
-              >
-                <Box row alignItems="center">
-                  <FeatherIcon name="external-link" size={15} />
-                  <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
-                </Box>
-              </MenuOption>
-            </>
-          )
-        }
-        case 'compare': {
-          return (
-            <>
-              <MenuOption onSelect={() => compareVersionSelectorRef.current?.expand()}>
-                <Box row alignItems="center">
-                  <FeatherIcon name="check-square" size={15} />
-                  <Text marginLeft={10}>{t('common.chooseCompareVersions')}</Text>
-                </Box>
-              </MenuOption>
-              <MenuOption
-                onSelect={() => {
-                  openInNewTab({
-                    id: `compare-${generateUUID()}`,
-                    title: t('tabs.new'),
-                    isRemovable: true,
-                    type: 'compare',
-                    data: {
-                      selectedVerses,
-                    },
-                  })
-                }}
-              >
-                <Box row alignItems="center">
-                  <FeatherIcon name="external-link" size={15} />
-                  <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
-                </Box>
-              </MenuOption>
-            </>
-          )
-        }
+          return [languageAction(naveLanguage)]
+        case 'commentary':
+          return [
+            languageAction(commentariesLanguage),
+            {
+              id: 'open-tab',
+              title: t('tab.openInNewTab'),
+              image: 'arrow.up.forward.square',
+            },
+          ]
+        case 'compare':
+          return [
+            {
+              id: 'choose-versions',
+              title: t('common.chooseCompareVersions'),
+              image: 'checkmark.square',
+            },
+            {
+              id: 'open-tab',
+              title: t('tab.openInNewTab'),
+              image: 'arrow.up.forward.square',
+            },
+          ]
         default:
-          return undefined
+          return []
+      }
+    }
+
+    const handleMenuAction = (actionId: string) => {
+      switch (actionId) {
+        case 'language':
+          if (resourceType === 'strong') toggleResourceLanguage(strongLanguage, setStrongLanguage)
+          if (resourceType === 'dictionary') {
+            toggleResourceLanguage(dictionaryLanguage, setDictionaryLanguage)
+          }
+          if (resourceType === 'nave') toggleResourceLanguage(naveLanguage, setNaveLanguage)
+          if (resourceType === 'commentary') {
+            toggleResourceLanguage(commentariesLanguage, setCommentariesLanguage)
+          }
+          break
+        case 'choose-versions':
+          compareVersionSelectorRef.current?.expand()
+          break
+        case 'open-tab':
+          if (resourceType === 'commentary') {
+            openInNewTab({
+              id: `commentary-${generateUUID()}`,
+              title: t('tabs.new'),
+              isRemovable: true,
+              type: 'commentary',
+              data: { verse: selectedVerse },
+            })
+          }
+          if (resourceType === 'compare') {
+            openInNewTab({
+              id: `compare-${generateUUID()}`,
+              title: t('tabs.new'),
+              isRemovable: true,
+              type: 'compare',
+              data: { selectedVerses },
+            })
+          }
+          break
       }
     }
 
@@ -193,11 +216,20 @@ const ResourcesModal = memo(
     }, [isOpen])
 
     const renderRightComponent = () => {
-      const menuOptions = getMenuOptionsByResourceType()
+      const menuActions = getMenuActionsByResourceType()
 
       return (
         <Box row alignItems="center">
-          {menuOptions ? <PopOverMenu width={44} height={54} popover={menuOptions} /> : null}
+          {menuActions.length ? (
+            <MenuView
+              actions={menuActions}
+              onPressAction={({ nativeEvent }) => handleMenuAction(nativeEvent.event)}
+            >
+              <Box row center height={54} width={44}>
+                <FeatherIcon name="more-vertical" size={18} />
+              </Box>
+            </MenuView>
+          ) : null}
         </Box>
       )
     }

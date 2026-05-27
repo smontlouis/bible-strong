@@ -1,5 +1,6 @@
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
+import { MenuView } from '@expo/ui/community/menu'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
 import React, { useEffect, useState } from 'react'
@@ -7,10 +8,8 @@ import { ActivityIndicator, Alert, Dimensions, Image, Linking, ScrollView } from
 import YoutubePlayer from 'react-native-youtube-iframe'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { ActionMenuOption } from '~common/ActionMenu'
 import EntityChipList from '~common/EntityChipList'
 import Header from '~common/Header'
-import PopOverMenu from '~common/PopOverMenu'
 import { VerseIds } from '~common/types'
 import Box, { VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -235,42 +234,53 @@ const BibleLinkScreen = () => {
         subTitle={reference}
         rightComponent={
           currentLink ? (
-            <PopOverMenu
-              width={54}
-              height={54}
-              popover={
-                <>
-                  <ActionMenuOption icon="edit-2" label={t('Éditer')} onSelect={editLink} />
-                  <ActionMenuOption
-                    icon="tag"
-                    label={t('Éditer les tags')}
-                    onSelect={() =>
-                      setUnifiedTagsModal({
-                        mode: 'select',
-                        id: currentLink.id!,
-                        entity: 'links',
-                        title:
-                          currentLink.ogData?.title ||
-                          currentLink.customTitle ||
-                          currentLink.url ||
-                          '',
-                      })
-                    }
-                  />
-                  <ActionMenuOption
-                    icon="git-branch"
-                    label={t('Éditer les relations')}
-                    onSelect={() => linkEndpoint && openEntityRelations(linkEndpoint)}
-                  />
-                  <ActionMenuOption
-                    icon="trash-2"
-                    label={t('Supprimer')}
-                    color="quart"
-                    onSelect={deleteCurrentLink}
-                  />
-                </>
-              }
-            />
+            <MenuView
+              actions={[
+                { id: 'edit', title: t('Éditer'), image: 'pencil' },
+                { id: 'tags', title: t('Éditer les tags'), image: 'tag' },
+                {
+                  id: 'relations',
+                  title: t('Éditer les relations'),
+                  image: 'point.3.connected.trianglepath.dotted',
+                  attributes: linkEndpoint ? undefined : { disabled: true },
+                },
+                {
+                  id: 'delete',
+                  title: t('Supprimer'),
+                  image: 'trash',
+                  attributes: { destructive: true },
+                },
+              ]}
+              onPressAction={({ nativeEvent }) => {
+                switch (nativeEvent.event) {
+                  case 'edit':
+                    editLink()
+                    break
+                  case 'tags':
+                    setUnifiedTagsModal({
+                      mode: 'select',
+                      id: currentLink.id!,
+                      entity: 'links',
+                      title:
+                        currentLink.ogData?.title ||
+                        currentLink.customTitle ||
+                        currentLink.url ||
+                        '',
+                    })
+                    break
+                  case 'relations':
+                    if (linkEndpoint) openEntityRelations(linkEndpoint)
+                    break
+                  case 'delete':
+                    deleteCurrentLink()
+                    break
+                }
+              }}
+            >
+              <Box row center height={54} width={54}>
+                <FeatherIcon name="more-vertical" size={18} />
+              </Box>
+            </MenuView>
           ) : undefined
         }
       />

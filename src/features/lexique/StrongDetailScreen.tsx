@@ -1,9 +1,9 @@
 import styled from '@emotion/native'
 import React, { useCallback, useEffect, useState } from 'react'
+import { MenuView, type MenuAction } from '@expo/ui/community/menu'
 import { Share } from 'react-native'
 import { useSelector } from 'react-redux'
 
-import { ActionMenuOption } from '~common/ActionMenu'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Link from '~common/Link'
@@ -12,6 +12,7 @@ import EntityChipList from '~common/EntityChipList'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
+import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
@@ -31,7 +32,6 @@ import { useAtom, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'expo-router'
-import PopOverMenu from '~common/PopOverMenu'
 import { StrongReference, Verse } from '~common/types'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
@@ -250,51 +250,60 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
         detail={Phonetique}
         subTitle={Type}
         rightComponent={
-          <PopOverMenu
-            popover={
-              <>
-                <ActionMenuOption
-                  icon="tag"
-                  label={t('Étiquettes')}
-                  onSelect={() =>
-                    setUnifiedTagsModal({
-                      mode: 'select',
-                      id: Code!,
-                      title: Mot!,
-                      entity: Grec ? 'strongsGrec' : 'strongsHebreu',
-                    })
-                  }
-                />
-                <ActionMenuOption
-                  icon="share-2"
-                  label={t('Partager')}
-                  onSelect={shareContent}
-                  closeBeforeSelect
-                />
-                <ActionMenuOption
-                  icon="git-merge"
-                  label={t('Éditer les relations')}
-                  onSelect={() => strongEndpoint && openEntityRelations(strongEndpoint)}
-                />
-                <ActionMenuOption
-                  icon="external-link"
-                  label={t('tab.openInNewTab')}
-                  onSelect={() => {
-                    openInNewTab({
-                      id: `strong-${generateUUID()}`,
-                      title: t('tabs.new'),
-                      isRemovable: true,
-                      type: 'strong',
-                      data: {
-                        book,
-                        reference: strongReference.Code,
-                      },
-                    })
-                  }}
-                />
-              </>
+          <MenuView
+            actions={
+              [
+                { id: 'tags', title: t('Étiquettes'), image: 'tag' },
+                { id: 'share', title: t('Partager'), image: 'square.and.arrow.up' },
+                strongEndpoint
+                  ? {
+                      id: 'relations',
+                      title: t('Éditer les relations'),
+                      image: 'arrow.triangle.merge',
+                    }
+                  : null,
+                {
+                  id: 'open-tab',
+                  title: t('tab.openInNewTab'),
+                  image: 'arrow.up.forward.square',
+                },
+              ].filter(Boolean) as MenuAction[]
             }
-          />
+            onPressAction={({ nativeEvent }) => {
+              switch (nativeEvent.event) {
+                case 'tags':
+                  setUnifiedTagsModal({
+                    mode: 'select',
+                    id: Code!,
+                    title: Mot!,
+                    entity: Grec ? 'strongsGrec' : 'strongsHebreu',
+                  })
+                  break
+                case 'share':
+                  shareContent()
+                  break
+                case 'relations':
+                  if (strongEndpoint) openEntityRelations(strongEndpoint)
+                  break
+                case 'open-tab':
+                  openInNewTab({
+                    id: `strong-${generateUUID()}`,
+                    title: t('tabs.new'),
+                    isRemovable: true,
+                    type: 'strong',
+                    data: {
+                      book,
+                      reference: strongReference.Code,
+                    },
+                  })
+                  break
+              }
+            }}
+          >
+            <Box row center height={60} width={60}>
+              <FeatherIcon name="more-vertical" size={18} />
+            </Box>
+          </MenuView>
         }
       />
       <ScrollView style={{ paddingLeft: 20, paddingRight: 20, flex: 1 }}>

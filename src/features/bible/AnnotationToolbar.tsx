@@ -1,9 +1,9 @@
 import { useTheme } from '@emotion/react'
 import BottomSheet, { BottomSheetHandle, BottomSheetView } from '@gorhom/bottom-sheet'
 import { TouchableOpacity, type ViewStyle } from 'react-native'
-import { useAtomValue } from 'jotai/react'
+import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { withMenuContext, type MenuContextProps } from 'react-native-popup-menu'
+import { MenuView, type MenuAction } from '@expo/ui/community/menu'
 
 import BackgroundIcon from '~assets/images/BackgroundIcon'
 import CircleSketchIcon from '~assets/images/CircleSketchIcon'
@@ -21,13 +21,11 @@ import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabConte
 import { useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import { BOTTOM_INSET } from '~helpers/constants'
 import verseToReference from '~helpers/verseToReference'
-import { isFullScreenBibleAtom } from 'src/state/app'
+import { colorPickerModalAtom, isFullScreenBibleAtom } from 'src/state/app'
 import type { AnnotationType, SelectionRange } from './hooks/useAnnotationMode'
 
-import { PopOverMenu } from './components/PopOverMenu'
-import AnnotationColorSelector from './components/AnnotationColorSelector'
 import { LinearTransition } from 'react-native-reanimated'
-import { useResolvedColor } from '~helpers/useHighlightColors'
+import { useColorItems, useResolvedColor } from '~helpers/useHighlightColors'
 
 interface SelectedAnnotation {
   id: string
@@ -63,7 +61,6 @@ type Props = {
   onClearSelection: () => void
   onEraseAnnotations: () => void
   onClose: () => void
-  ctx: MenuContextProps['ctx']
   selectedAnnotation?: SelectedAnnotation | null
   onChangeAnnotationColor?: (color: string) => void
   onChangeAnnotationType?: (type: AnnotationType) => void
@@ -114,6 +111,62 @@ const IconButton = ({
   </Box>
 )
 
+type AnnotationColorMenuProps = {
+  disabled: boolean
+  element: React.ReactNode
+  selectedColor?: string
+  type: AnnotationType
+  onSelectColor: (colorKey: string, type: AnnotationType) => void
+}
+
+const AnnotationColorMenu = ({
+  disabled,
+  element,
+  selectedColor,
+  type,
+  onSelectColor,
+}: AnnotationColorMenuProps) => {
+  const { t } = useTranslation()
+  const colorItems = useColorItems()
+  const setColorPickerModal = useSetAtom(colorPickerModalAtom)
+
+  if (disabled) {
+    return <>{element}</>
+  }
+
+  const actions: MenuAction[] = [
+    ...colorItems.map(color => ({
+      id: color.key,
+      title: color.key,
+      state: selectedColor === color.key ? ('on' as const) : ('off' as const),
+      imageColor: color.hex,
+    })),
+    {
+      id: 'add-color',
+      title: t('Ajouter une couleur'),
+      image: 'plus',
+    },
+  ]
+
+  return (
+    <MenuView
+      actions={actions}
+      onPressAction={({ nativeEvent }) => {
+        if (nativeEvent.event === 'add-color') {
+          setColorPickerModal({
+            selectedColor,
+            onSelectColor: colorKey => onSelectColor(colorKey, type),
+          })
+          return
+        }
+        onSelectColor(nativeEvent.event, type)
+      }}
+    >
+      {element}
+    </MenuView>
+  )
+}
+
 const AnnotationToolbar = ({
   ref,
   hasSelection,
@@ -122,7 +175,6 @@ const AnnotationToolbar = ({
   onClearSelection,
   onEraseAnnotations,
   onClose,
-  ctx,
   selectedAnnotation,
   onChangeAnnotationColor,
   onChangeAnnotationType,
@@ -348,7 +400,7 @@ const AnnotationToolbar = ({
         <AnimatedBox layout={LinearTransition}>
           <HStack center py={20} px={20} gap={30}>
             <HStack>
-              <PopOverMenu
+              <AnnotationColorMenu
                 disabled={disabled}
                 element={
                   <IconButton
@@ -359,20 +411,14 @@ const AnnotationToolbar = ({
                     <BackgroundIcon width={32} height={32} color={getColor('background')} />
                   </IconButton>
                 }
-                popover={
-                  <AnnotationColorSelector
-                    onSelectColor={colorKey => handleApply(colorKey, 'background')}
-                    selectedColor={
-                      selectedAnnotation?.type === 'background'
-                        ? selectedAnnotation.color
-                        : undefined
-                    }
-                    ctx={ctx}
-                  />
+                type="background"
+                selectedColor={
+                  selectedAnnotation?.type === 'background' ? selectedAnnotation.color : undefined
                 }
+                onSelectColor={handleApply}
               />
 
-              <PopOverMenu
+              <AnnotationColorMenu
                 disabled={disabled}
                 element={
                   <IconButton
@@ -382,20 +428,14 @@ const AnnotationToolbar = ({
                     <FeatherIcon name="underline" size={24} color={getColor('underline')} />
                   </IconButton>
                 }
-                popover={
-                  <AnnotationColorSelector
-                    onSelectColor={colorKey => handleApply(colorKey, 'underline')}
-                    selectedColor={
-                      selectedAnnotation?.type === 'underline'
-                        ? selectedAnnotation.color
-                        : undefined
-                    }
-                    ctx={ctx}
-                  />
+                type="underline"
+                selectedColor={
+                  selectedAnnotation?.type === 'underline' ? selectedAnnotation.color : undefined
                 }
+                onSelectColor={handleApply}
               />
 
-              <PopOverMenu
+              <AnnotationColorMenu
                 disabled={disabled}
                 element={
                   <IconButton
@@ -406,15 +446,11 @@ const AnnotationToolbar = ({
                     <CircleSketchIcon width={24} height={24} color={getColor('circle')} />
                   </IconButton>
                 }
-                popover={
-                  <AnnotationColorSelector
-                    onSelectColor={colorKey => handleApply(colorKey, 'circle')}
-                    selectedColor={
-                      selectedAnnotation?.type === 'circle' ? selectedAnnotation.color : undefined
-                    }
-                    ctx={ctx}
-                  />
+                type="circle"
+                selectedColor={
+                  selectedAnnotation?.type === 'circle' ? selectedAnnotation.color : undefined
                 }
+                onSelectColor={handleApply}
               />
             </HStack>
           </HStack>
@@ -424,4 +460,4 @@ const AnnotationToolbar = ({
   )
 }
 
-export default withMenuContext(AnnotationToolbar)
+export default AnnotationToolbar

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 
+import { MenuView, type MenuAction } from '@expo/ui/community/menu'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useRouter } from 'expo-router'
 import { useAtomValue, useSetAtom } from 'jotai/react'
@@ -18,7 +19,6 @@ import {
 } from 'src/state/tabs'
 import Back from '~common/Back'
 import ParallelIcon from '~common/ParallelIcon'
-import PopOverMenu from '~common/PopOverMenu'
 import Box, {
   AnimatedBox,
   AnimatedHStack,
@@ -26,8 +26,7 @@ import Box, {
   HStack,
   TouchableBox,
 } from '~common/ui/Box'
-import { FeatherIcon, IonIcon, MaterialIcon, TextIcon } from '~common/ui/Icon'
-import MenuOption from '~common/ui/MenuOption'
+import { FeatherIcon, IonIcon } from '~common/ui/Icon'
 import Text, { AnimatedText } from '~common/ui/Text'
 import {
   BIBLE_FORM_SHEET_HEADER_HEIGHT,
@@ -47,7 +46,6 @@ import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { makeSelectBookmarkForChapter } from '~redux/selectors/bookmarks'
 import { useBookAndVersionSelector } from './BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
-import ParallelVersionsPopover from './ParallelVersionsPopover'
 import { VerseSelectorPopup } from './VerseSelectorPopup'
 
 interface BibleHeaderProps {
@@ -168,6 +166,108 @@ const Header = ({
       },
     })
   }
+
+  const isVerticalParallelMode = displayMode === 'vertical'
+  const nextColumnWidth = columnWidth === 50 ? 75 : columnWidth === 75 ? 100 : 50
+
+  const focusMenuActions: MenuAction[] = [
+    {
+      id: 'toggle-context',
+      title: isContextFocused ? t('tab.readWholeChapter') : t('tab.closeContext'),
+      image: isContextFocused
+        ? 'arrow.up.left.and.arrow.down.right'
+        : 'arrow.down.right.and.arrow.up.left',
+    },
+    {
+      id: 'open-tab',
+      title: t('tab.openInNewTab'),
+      image: 'arrow.up.forward.square',
+    },
+    {
+      id: 'clear-focus',
+      title: t('Quitter le mode focus'),
+      image: 'xmark',
+    },
+  ]
+
+  const parallelMenuActions: MenuAction[] = [
+    {
+      id: 'main-version',
+      title: `${version} - ${t('Version principale')}`,
+      image: 'book',
+      attributes: { disabled: true },
+    },
+    ...parallelVersions.map((parallelVersion, index) => ({
+      id: `remove-version-${index}`,
+      title: `${parallelVersion} - ${t('Retirer')}`,
+      image: 'xmark.circle' as const,
+      attributes: { destructive: true },
+    })),
+    ...(parallelVersions.length < 3
+      ? [
+          {
+            id: 'add-version',
+            title: t('Ajouter une version'),
+            image: 'plus.circle' as const,
+          },
+        ]
+      : []),
+    {
+      id: 'toggle-display-mode',
+      title: isVerticalParallelMode ? t('Affichage vertical') : t('Affichage horizontal'),
+      image: isVerticalParallelMode ? 'arrow.down' : 'arrow.right',
+    },
+    ...(isVerticalParallelMode
+      ? []
+      : [
+          {
+            id: 'toggle-column-width',
+            title: `${t('Largeur des colonnes')} (${columnWidth}%)`,
+            image: 'gearshape' as const,
+          },
+        ]),
+    {
+      id: 'exit-parallel',
+      title: t('Sortir du mode parallèle'),
+      image: 'rectangle.portrait.and.arrow.right',
+      attributes: { destructive: true },
+    },
+  ]
+
+  const mainMenuActions: MenuAction[] = [
+    { id: 'params', title: t('Police et paramêtres'), image: 'textformat' },
+    ...(!commentsDisplay && lang === 'fr'
+      ? [
+          {
+            id: 'comments-on',
+            title: t('Commentaire désactivé'),
+            image: 'bubble.left.and.bubble.right' as const,
+          },
+        ]
+      : []),
+    ...(commentsDisplay && lang === 'fr'
+      ? [
+          {
+            id: 'comments-off',
+            title: t('Commentaire activé'),
+            image: 'bubble.left.and.bubble.right' as const,
+            state: 'on' as const,
+          },
+        ]
+      : []),
+    {
+      id: 'parallel',
+      title: t('Affichage parallèle'),
+      image: 'rectangle.split.2x1',
+      state: isParallel ? 'on' : 'off',
+    },
+    { id: 'history', title: t('Historique'), image: 'clock.arrow.circlepath' },
+    {
+      id: 'bookmark',
+      title: currentChapterBookmark ? t('Modifier le marque-page') : t('Ajouter un marque-page'),
+      image: 'bookmark',
+    },
+  ]
 
   if (annotationModeEnabled) {
     return (
@@ -312,51 +412,34 @@ const Header = ({
                 <Text fontWeight="bold" fontSize={14}>
                   {`${verseToReference({ bookNum: bookNumber, chapterNum: chapter, verses: displayVerses })} - ${version}`}
                 </Text>
-                <PopOverMenu
-                  element={
-                    <AnimatedBox style={opacityTransitionStyle}>
-                      <Box bg="lightPrimary" px={8} py={3} borderRadius={12}>
-                        <HStack alignItems="center" gap={3}>
-                          <Text color="primary" fontSize={11} fontWeight="bold">
-                            Focus
-                          </Text>
-                          <FeatherIcon name="chevron-down" size={12} color="primary" />
-                        </HStack>
-                      </Box>
-                    </AnimatedBox>
-                  }
-                  popover={
-                    <>
-                      <MenuOption
-                        onSelect={
-                          isContextFocused ? actions.expandContext : actions.collapseContext
-                        }
-                      >
-                        <Box row alignItems="center">
-                          <FeatherIcon
-                            name={isContextFocused ? 'maximize-2' : 'minimize-2'}
-                            size={15}
-                          />
-                          <Text marginLeft={10}>
-                            {isContextFocused ? t('tab.readWholeChapter') : t('tab.closeContext')}
-                          </Text>
-                        </Box>
-                      </MenuOption>
-                      <MenuOption onSelect={openInBibleTab}>
-                        <Box row alignItems="center">
-                          <FeatherIcon name="external-link" size={15} />
-                          <Text marginLeft={10}>{t('tab.openInNewTab')}</Text>
-                        </Box>
-                      </MenuOption>
-                      <MenuOption onSelect={() => actions.clearFocusVerses()}>
-                        <Box row alignItems="center">
-                          <FeatherIcon name="x" size={15} />
-                          <Text marginLeft={10}>{t('Quitter le mode focus')}</Text>
-                        </Box>
-                      </MenuOption>
-                    </>
-                  }
-                />
+                <MenuView
+                  actions={focusMenuActions}
+                  onPressAction={({ nativeEvent }) => {
+                    switch (nativeEvent.event) {
+                      case 'toggle-context':
+                        if (isContextFocused) actions.expandContext()
+                        else actions.collapseContext()
+                        break
+                      case 'open-tab':
+                        openInBibleTab()
+                        break
+                      case 'clear-focus':
+                        actions.clearFocusVerses()
+                        break
+                    }
+                  }}
+                >
+                  <AnimatedBox style={opacityTransitionStyle}>
+                    <Box bg="lightPrimary" px={8} py={3} borderRadius={12}>
+                      <HStack alignItems="center" gap={3}>
+                        <Text color="primary" fontSize={11} fontWeight="bold">
+                          Focus
+                        </Text>
+                        <FeatherIcon name="chevron-down" size={12} color="primary" />
+                      </HStack>
+                    </Box>
+                  </AnimatedBox>
+                </MenuView>
               </HStack>
             </AnimatedBox>
           </>
@@ -423,67 +506,39 @@ const Header = ({
               </TouchableBox>
             </HStack>
 
-            <PopOverMenu
-              element={
-                <AnimatedBox center width={40} height="100%" style={opacityTransitionStyle}>
-                  <FeatherIcon name="chevrons-down" size={20} style={{ opacity: 0.3 }} />
-                </AnimatedBox>
-              }
-              popover={<VerseSelectorPopup bibleAtom={bibleAtom} />}
-            />
+            <VerseSelectorPopup bibleAtom={bibleAtom}>
+              <AnimatedBox center width={40} height="100%" style={opacityTransitionStyle}>
+                <FeatherIcon name="chevrons-down" size={20} style={{ opacity: 0.3 }} />
+              </AnimatedBox>
+            </VerseSelectorPopup>
             {!isSelectionMode && (
               <HStack marginLeft="auto">
                 {isParallel && (
-                  <PopOverMenu
-                    element={
-                      <AnimatedBox
-                        center
-                        width={40}
-                        height="100%"
-                        style={{
-                          opacity: fullScreenOpacity,
-                          transitionProperty: 'opacity',
-                          transitionDuration: 300,
-                        }}
-                      >
-                        <Box position="relative" overflow="visible">
-                          <ParallelIcon color="primary" />
-                          <Box
-                            position="absolute"
-                            bottom={-2}
-                            right={-4}
-                            bg="grey"
-                            borderRadius={99}
-                            width={12}
-                            height={12}
-                            center
-                          >
-                            <Text fontSize={9} color="reverse" fontWeight="bold">
-                              {parallelVersions.length + 1}
-                            </Text>
-                          </Box>
-                        </Box>
-                      </AnimatedBox>
-                    }
-                    popover={
-                      <ParallelVersionsPopover
-                        version={version}
-                        parallelVersions={parallelVersions}
-                        addParallelVersion={addParallelVersion}
-                        removeParallelVersion={removeParallelVersion}
-                        removeAllParallelVersions={removeAllParallelVersions}
-                        columnWidth={columnWidth}
-                        setColumnWidth={setColumnWidth}
-                        displayMode={displayMode}
-                        setDisplayMode={setDisplayMode}
-                      />
-                    }
-                  />
-                )}
+                  <MenuView
+                    actions={parallelMenuActions}
+                    onPressAction={({ nativeEvent }) => {
+                      if (nativeEvent.event.startsWith('remove-version-')) {
+                        const index = Number(nativeEvent.event.replace('remove-version-', ''))
+                        removeParallelVersion(index)
+                        return
+                      }
 
-                {/* Three-dots menu */}
-                <PopOverMenu
-                  element={
+                      switch (nativeEvent.event) {
+                        case 'add-version':
+                          addParallelVersion()
+                          break
+                        case 'toggle-display-mode':
+                          setDisplayMode(isVerticalParallelMode ? 'horizontal' : 'vertical')
+                          break
+                        case 'toggle-column-width':
+                          setColumnWidth(nextColumnWidth)
+                          break
+                        case 'exit-parallel':
+                          removeAllParallelVersions()
+                          break
+                      }
+                    }}
+                  >
                     <AnimatedBox
                       center
                       width={40}
@@ -494,66 +549,67 @@ const Header = ({
                         transitionDuration: 300,
                       }}
                     >
-                      <FeatherIcon name="more-vertical" size={18} />
-                    </AnimatedBox>
-                  }
-                  popover={
-                    <>
-                      <MenuOption onSelect={onBibleParamsClick}>
-                        <Box row alignItems="center">
-                          <TextIcon style={{ marginRight: 0 }}>Aa</TextIcon>
-                          <Text marginLeft={10}>{t('Police et paramêtres')}</Text>
-                        </Box>
-                      </MenuOption>
-                      {!commentsDisplay && lang === 'fr' && (
-                        <MenuOption onSelect={onOpenCommentaire}>
-                          <Box row alignItems="center">
-                            <MaterialIcon name="chat" size={20} />
-                            <Text marginLeft={10}>{t('Commentaire désactivé')}</Text>
-                          </Box>
-                        </MenuOption>
-                      )}
-                      {commentsDisplay && lang === 'fr' && (
-                        <MenuOption onSelect={() => dispatch(setSettingsCommentaires(false))}>
-                          <Box row alignItems="center">
-                            <MaterialIcon name="chat" size={20} color="primary" />
-                            <Text marginLeft={10}>{t('Commentaire activé')}</Text>
-                          </Box>
-                        </MenuOption>
-                      )}
-                      <MenuOption
-                        onSelect={isParallel ? removeAllParallelVersions : addParallelVersion}
-                      >
-                        <Box row alignItems="center">
-                          <ParallelIcon color={isParallel ? 'primary' : 'default'} />
-                          <Text marginLeft={10}>{t('Affichage parallèle')}</Text>
-                        </Box>
-                      </MenuOption>
-                      <MenuOption onSelect={() => router.push('/history')}>
-                        <Box row alignItems="center">
-                          <MaterialIcon name="history" size={20} />
-                          <Text marginLeft={10}>{t('Historique')}</Text>
-                        </Box>
-                      </MenuOption>
-                      <MenuOption onSelect={() => bookmarkModalRef.current?.present()}>
-                        <Box row alignItems="center">
-                          <IonIcon
-                            name="bookmark"
-                            size={20}
-                            color={
-                              currentChapterBookmark ? currentChapterBookmark.color : undefined
-                            }
-                          />
-                          <Text marginLeft={10}>
-                            {currentChapterBookmark
-                              ? t('Modifier le marque-page')
-                              : t('Ajouter un marque-page')}
+                      <Box position="relative" overflow="visible">
+                        <ParallelIcon color="primary" />
+                        <Box
+                          position="absolute"
+                          bottom={-2}
+                          right={-4}
+                          bg="grey"
+                          borderRadius={99}
+                          width={12}
+                          height={12}
+                          center
+                        >
+                          <Text fontSize={9} color="reverse" fontWeight="bold">
+                            {parallelVersions.length + 1}
                           </Text>
                         </Box>
-                      </MenuOption>
-                    </>
-                  }
-                />
+                      </Box>
+                    </AnimatedBox>
+                  </MenuView>
+                )}
+
+                {/* Three-dots menu */}
+                <MenuView
+                  actions={mainMenuActions}
+                  onPressAction={({ nativeEvent }) => {
+                    switch (nativeEvent.event) {
+                      case 'params':
+                        onBibleParamsClick()
+                        break
+                      case 'comments-on':
+                        onOpenCommentaire()
+                        break
+                      case 'comments-off':
+                        dispatch(setSettingsCommentaires(false))
+                        break
+                      case 'parallel':
+                        if (isParallel) removeAllParallelVersions()
+                        else addParallelVersion()
+                        break
+                      case 'history':
+                        router.push('/history')
+                        break
+                      case 'bookmark':
+                        bookmarkModalRef.current?.present()
+                        break
+                    }
+                  }}
+                >
+                  <AnimatedBox
+                    center
+                    width={40}
+                    height="100%"
+                    style={{
+                      opacity: fullScreenOpacity,
+                      transitionProperty: 'opacity',
+                      transitionDuration: 300,
+                    }}
+                  >
+                    <FeatherIcon name="more-vertical" size={18} />
+                  </AnimatedBox>
+                </MenuView>
                 {focusVerses && focusVerses.length > 0 && (
                   <TouchableBox
                     onPress={() => actions.clearFocusVerses()}

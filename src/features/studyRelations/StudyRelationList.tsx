@@ -1,5 +1,6 @@
 import styled from '@emotion/native'
 import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet'
+import { MenuView } from '@expo/ui/community/menu'
 import { type ComponentProps, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
@@ -11,8 +12,7 @@ import LexiqueIcon from '~common/LexiqueIcon'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import NaveIcon from '~common/NaveIcon'
-import PopOverMenu from '~common/PopOverMenu'
-import { ActionMenuOption, ActionSheetItem } from '~common/ActionMenu'
+import { ActionSheetItem } from '~common/ActionMenu'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
@@ -460,18 +460,23 @@ const StudyRelationList = ({
             title={t('Modifier la relation')}
             rightComponent={
               editingModel ? (
-                <PopOverMenu
-                  width={54}
-                  height={54}
-                  popover={
-                    <ActionMenuOption
-                      icon="trash-2"
-                      label={t('Supprimer')}
-                      color="quart"
-                      onSelect={() => confirmDelete()}
-                    />
-                  }
-                />
+                <MenuView
+                  actions={[
+                    {
+                      id: 'delete',
+                      title: t('Supprimer'),
+                      image: 'trash',
+                      attributes: { destructive: true },
+                    },
+                  ]}
+                  onPressAction={({ nativeEvent }) => {
+                    if (nativeEvent.event === 'delete') confirmDelete()
+                  }}
+                >
+                  <Box row center height={54} width={54}>
+                    <FeatherIcon name="more-vertical" size={18} />
+                  </Box>
+                </MenuView>
               ) : undefined
             }
           />

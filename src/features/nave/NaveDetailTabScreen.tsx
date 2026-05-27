@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
+import { MenuView, type MenuAction } from '@expo/ui/community/menu'
 import { Share } from 'react-native'
 import { WebView } from 'react-native-webview'
 import { useSelector } from 'react-redux'
@@ -11,12 +12,11 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
-import PopOverMenu from '~common/PopOverMenu'
 import { toast } from '~helpers/toast'
-import { ActionMenuOption } from '~common/ActionMenu'
 import EntityChipList from '~common/EntityChipList'
 import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
+import { FeatherIcon } from '~common/ui/Icon'
 import waitForNaveDB from '~common/waitForNaveDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
@@ -183,51 +183,60 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
         title={naveItem.name || name || ''}
         subTitle={naveItem?.name_lower}
         rightComponent={
-          <PopOverMenu
-            popover={
-              <>
-                <ActionMenuOption
-                  icon="tag"
-                  label={t('Étiquettes')}
-                  onSelect={() =>
-                    setUnifiedTagsModal({
-                      mode: 'select',
-                      id: naveItem.name_lower,
-                      title: naveItem.name,
-                      entity: 'naves',
-                    })
-                  }
-                />
-                <ActionMenuOption
-                  icon="share-2"
-                  label={t('Partager')}
-                  onSelect={shareDefinition}
-                  closeBeforeSelect
-                />
-                <ActionMenuOption
-                  icon="git-merge"
-                  label={t('Éditer les relations')}
-                  onSelect={() => naveEndpoint && openEntityRelations(naveEndpoint)}
-                />
-                <ActionMenuOption
-                  icon="external-link"
-                  label={t('tab.openInNewTab')}
-                  onSelect={() => {
-                    openInNewTab({
-                      id: `nave-${generateUUID()}`,
-                      title: t('tabs.new'),
-                      isRemovable: true,
-                      type: 'nave',
-                      data: {
-                        name: name || naveItem.name,
-                        name_lower,
-                      },
-                    })
-                  }}
-                />
-              </>
+          <MenuView
+            actions={
+              [
+                { id: 'tags', title: t('Étiquettes'), image: 'tag' },
+                { id: 'share', title: t('Partager'), image: 'square.and.arrow.up' },
+                naveEndpoint
+                  ? {
+                      id: 'relations',
+                      title: t('Éditer les relations'),
+                      image: 'arrow.triangle.merge',
+                    }
+                  : null,
+                {
+                  id: 'open-tab',
+                  title: t('tab.openInNewTab'),
+                  image: 'arrow.up.forward.square',
+                },
+              ].filter(Boolean) as MenuAction[]
             }
-          />
+            onPressAction={({ nativeEvent }) => {
+              switch (nativeEvent.event) {
+                case 'tags':
+                  setUnifiedTagsModal({
+                    mode: 'select',
+                    id: naveItem.name_lower,
+                    title: naveItem.name,
+                    entity: 'naves',
+                  })
+                  break
+                case 'share':
+                  shareDefinition()
+                  break
+                case 'relations':
+                  if (naveEndpoint) openEntityRelations(naveEndpoint)
+                  break
+                case 'open-tab':
+                  openInNewTab({
+                    id: `nave-${generateUUID()}`,
+                    title: t('tabs.new'),
+                    isRemovable: true,
+                    type: 'nave',
+                    data: {
+                      name: name || naveItem.name,
+                      name_lower,
+                    },
+                  })
+                  break
+              }
+            }}
+          >
+            <Box row center height={60} width={60}>
+              <FeatherIcon name="more-vertical" size={18} />
+            </Box>
+          </MenuView>
         }
       />
       <ScrollView>
