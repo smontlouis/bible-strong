@@ -27,7 +27,7 @@ const DownloadItem = ({ name, subTitle, fileSize, isSelected, isDisabled, onPres
           <Text flex fontSize={18} color={isSelected ? 'primary' : 'default'} bold={isSelected}>
             {name}
           </Text>
-          {fileSize && (
+          {fileSize != null && fileSize > 0 && (
             <Text fontSize={14} color="grey">
               {Math.round(fileSize / 1000000)}Mo
             </Text>

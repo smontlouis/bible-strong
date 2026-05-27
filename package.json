@@ -57,7 +57,7 @@
     "@expo/ui": "~56.0.14",
     "@expo/vector-icons": "^15.0.3",
     "@fastify/deepmerge": "^1.3.0",
-    "@gorhom/bottom-sheet": "5.2.6",
+    "@gorhom/bottom-sheet": "^5.2.14",
     "@gorhom/portal": "^1.0.14",
     "@invertase/react-native-apple-authentication": "^2.3.0",
     "@legendapp/list": "^2.0.19",
@@ -218,7 +218,9 @@
   },
   "expo": {
     "install": {
-      "exclude": ["react-native-view-shot"]
+      "exclude": [
+        "react-native-view-shot"
+      ]
     },
     "doctor": {
       "reactNativeDirectoryCheck": {
