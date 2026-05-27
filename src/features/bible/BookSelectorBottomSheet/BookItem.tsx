@@ -47,6 +47,9 @@ const BookItem = memo(
     const itemsPerRow = Math.floor(availableWidth / (ITEM_WIDTH + ITEM_GAP))
     const totalItemsWidth = itemsPerRow * ITEM_WIDTH + (itemsPerRow - 1) * ITEM_GAP
     const horizontalMargin = (MAX_WIDTH - totalItemsWidth) / 2
+    const chevronAnimation = useDerivedValue(() => ({
+      transform: [{ rotate: isExpanded.get() ? '180deg' : '0deg' }],
+    }))
 
     const handleChapterSelect = (chapter: number) => {
       DeviceEventEmitter.emit(BOOK_SELECTION_EVENT, {
@@ -81,9 +84,7 @@ const BookItem = memo(
                 type: 'timing',
                 duration: 300,
               }}
-              animate={useDerivedValue(() => ({
-                transform: [{ rotate: isExpanded.get() ? '180deg' : '0deg' }],
-              }))}
+              animate={chevronAnimation as never}
             >
               <FeatherIcon color="grey" name="chevron-down" size={24} style={{ opacity: 0.5 }} />
             </MotiView>

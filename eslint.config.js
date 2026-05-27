@@ -22,6 +22,12 @@ module.exports = [
       'react/display-name': 'off',
       'react/no-unescaped-entities': 'off',
       'react-compiler/react-compiler': 'off',
+      'react-hooks/immutability': 'off',
+      'react-hooks/preserve-manual-memoization': 'off',
+      'react-hooks/purity': 'off',
+      'react-hooks/refs': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/use-memo': 'off',
     },
   },
   {

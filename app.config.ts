@@ -13,7 +13,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   orientation: 'default',
   icon: './assets/images/icon-2.png',
   userInterfaceStyle: 'automatic',
-  newArchEnabled: true,
 
   android: {
     versionCode: 467,
@@ -80,7 +79,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'expo-build-properties',
       {
         ios: {
-          deploymentTarget: '15.1',
+          deploymentTarget: '16.4',
           useFrameworks: 'static',
           forceStaticLinking: ['RNFBApp', 'RNFBAuth', 'RNFBFirestore', 'RNFBConfig', 'RNFBStorage'],
         },

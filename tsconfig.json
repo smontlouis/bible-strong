@@ -3,6 +3,7 @@
   "compilerOptions": {
     "strict": true,
     "module": "esnext",
+    "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
       "~assets/*": ["src/assets/*"],

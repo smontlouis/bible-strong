@@ -7,8 +7,10 @@ import books from '~assets/bible_versions/books-desc'
 import Loading from '~common/Loading'
 import verseToStrong from '~helpers/verseToStrong'
 import type { TFunction } from 'react-i18next'
-import { Router } from 'expo-router'
+import type { useRouter } from 'expo-router'
 import type { Verse } from '~common/types'
+
+type Router = ReturnType<typeof useRouter>
 
 const VerseText = styled.View(() => ({
   flex: 1,

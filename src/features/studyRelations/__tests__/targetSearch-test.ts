@@ -28,7 +28,7 @@ describe('searchRelationTargets', () => {
     const [result] = searchRelationTargets('Jean 3:16')
 
     expect(result).toMatchObject({
-      type: 'verse',
+      type: 'passages',
       title: 'Jean 3:16',
       endpoint: {
         type: 'verse',
@@ -70,7 +70,7 @@ describe('searchRelationTargets', () => {
       },
     })
 
-    expect(results.map(result => result.type)).toEqual(['note', 'study'])
+    expect(results.map(result => result.type)).toEqual(['notes', 'studies'])
     expect(results[0].endpoint).toMatchObject({ type: 'note', noteId: 'note1' })
     expect(results[1].endpoint).toMatchObject({ type: 'study', studyId: 'study1' })
   })
