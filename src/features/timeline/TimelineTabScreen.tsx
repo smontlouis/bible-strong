@@ -84,20 +84,10 @@ const TimelineTabScreen = ({ timelineAtom }: Props) => {
 
     return () => backHandler.remove()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    isCurrentTab,
-    timelineAtom,
-    timelineTab.data.eventSlug,
-    timelineTab.data.sectionIndex,
-  ])
+  }, [isCurrentTab, timelineAtom, timelineTab.data.eventSlug, timelineTab.data.sectionIndex])
 
   if (timelineTab.data.eventSlug) {
-    return (
-      <TimelineEventDetailView
-        event={activeEvent}
-        onOpenEvent={goToEvent}
-      />
-    )
+    return <TimelineEventDetailView event={activeEvent} onOpenEvent={goToEvent} />
   }
 
   if (timelineTab.data.sectionIndex !== undefined) {

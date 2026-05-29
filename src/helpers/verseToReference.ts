@@ -47,9 +47,7 @@ const orderVerses = (arrayVerses: VerseId[]): VerseId[] => {
     const verse1 = parseVerseId(key1)
     const verse2 = parseVerseId(key2)
     return (
-      verse1.book - verse2.book ||
-      verse1.chapter - verse2.chapter ||
-      verse1.verse - verse2.verse
+      verse1.book - verse2.book || verse1.chapter - verse2.chapter || verse1.verse - verse2.verse
     )
   })
 }
