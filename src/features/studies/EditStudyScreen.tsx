@@ -23,6 +23,7 @@ import { StudyTab } from 'src/state/tabs'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
+import { createStudyEndpoint } from '~features/studyRelations/endpoints'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
 type EditStudyScreenProps = {
@@ -89,11 +90,10 @@ const EditStudyScreen = ({
 
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
   const currentStudy = useSelector((state: RootState) => state.user.bible.studies[studyId])
-  const studyEndpoint: Extract<RelationEndpoint, { type: 'study' }> = {
-    type: 'study',
+  const studyEndpoint: Extract<RelationEndpoint, { type: 'study' }> = createStudyEndpoint(
     studyId,
-    label: currentStudy?.title || t('Études'),
-  }
+    currentStudy?.title || t('Études')
+  )
   const relationCount = useRelationCount(studyEndpoint)
   const canGoBackInStack = useCanGoBackInStack()
   const hasTagOrRelationChips =

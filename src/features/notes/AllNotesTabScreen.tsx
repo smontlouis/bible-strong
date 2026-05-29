@@ -20,6 +20,7 @@ import {
 import { NotesTab } from '~state/tabs'
 import { unifiedTagsModalAtom } from '~state/app'
 import { endpointIdentity, type RelationEndpoint } from '~features/studyRelations/domain'
+import { createNoteEndpoint } from '~features/studyRelations/endpoints'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import BibleNoteItem from '../bible/BibleNoteItem'
 import NotesSettingsModal from './NotesSettingsModal'
@@ -109,11 +110,10 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
   }
 
   const renderNote = ({ item, index }: { item: TNote; index: number }) => {
-    const endpoint: Extract<RelationEndpoint, { type: 'note' }> = {
-      type: 'note',
-      noteId: item.noteId,
-      label: item.notes.title || item.notes.description || item.reference,
-    }
+    const endpoint: Extract<RelationEndpoint, { type: 'note' }> = createNoteEndpoint(
+      item.noteId,
+      item.notes.title || item.notes.description || item.reference
+    )
 
     return (
       <BibleNoteItem

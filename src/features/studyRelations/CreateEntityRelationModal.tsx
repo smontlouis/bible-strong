@@ -42,10 +42,11 @@ import { attachNoteToVerseAction, createStudyRelation } from '~redux/modules/use
 import type { AppDispatch } from '~redux/store'
 import type { SearchItemFilters, SearchItemType } from '~state/searchFilters'
 import { endpointsMatch, getEndpointFallbackLabel, type RelationEndpoint } from './domain'
+import { createDictionaryEndpoint, createNaveEndpoint } from './endpoints'
 import {
-  getLinkTargetItems,
-  getNoteTargetItems,
-  getStudyTargetItems,
+  getSortedLinkTargetItems,
+  getSortedNoteTargetItems,
+  getSortedStudyTargetItems,
   searchReferenceAndStrongTargets,
   type RelationTargetResult,
 } from './targetSearch'
@@ -132,25 +133,13 @@ const getSearchItemFiltersForTypes = (enabledTypes: SearchItemType[]) => {
   )
 }
 
-const getNaveEndpoint = (nave: NaveRow): RelationEndpoint => ({
-  type: 'nave',
-  nameLower: nave.name_lower,
-  label: nave.name,
-})
-
-const getDictionaryEndpoint = (dictionary: DictionaryRow): RelationEndpoint => ({
-  type: 'dictionary',
-  word: dictionary.word,
-  label: dictionary.word,
-})
-
 const getNaveTargetResult = (nave: NaveRow): RelationTargetResult => ({
   id: `nave:${nave.name_lower}`,
   type: 'nave',
   iconType: 'nave',
   title: nave.name,
   subtitle: 'Nave',
-  endpoint: getNaveEndpoint(nave),
+  endpoint: createNaveEndpoint({ nameLower: nave.name_lower, labelFallback: nave.name }),
 })
 
 const getDictionaryTargetResult = (dictionary: DictionaryRow): RelationTargetResult => ({
@@ -159,7 +148,7 @@ const getDictionaryTargetResult = (dictionary: DictionaryRow): RelationTargetRes
   iconType: 'dictionary',
   title: dictionary.word,
   subtitle: 'Dictionnaire',
-  endpoint: getDictionaryEndpoint(dictionary),
+  endpoint: createDictionaryEndpoint({ word: dictionary.word, labelFallback: dictionary.word }),
 })
 
 const getDictionaryTargetKey = (dictionary: DictionaryRow, index?: number) =>
@@ -348,29 +337,9 @@ const CreateEntityRelationModal = ({
   const shouldBuildLinkTargets =
     itemFilters.links &&
     (deferredBrowseMode === 'link' || (!deferredBrowseMode && deferredSearchHasValue))
-  const noteTargets = shouldBuildNoteTargets
-    ? getNoteTargetItems(notes).sort((a, b) => {
-        const left = notes[(a.endpoint as Extract<RelationEndpoint, { type: 'note' }>).noteId]
-        const right = notes[(b.endpoint as Extract<RelationEndpoint, { type: 'note' }>).noteId]
-        return Number(right?.date || 0) - Number(left?.date || 0)
-      })
-    : []
-  const studyTargets = shouldBuildStudyTargets
-    ? getStudyTargetItems(studies).sort((a, b) => {
-        const left = studies[(a.endpoint as Extract<RelationEndpoint, { type: 'study' }>).studyId]
-        const right = studies[(b.endpoint as Extract<RelationEndpoint, { type: 'study' }>).studyId]
-        return Number(right?.modified_at || 0) - Number(left?.modified_at || 0)
-      })
-    : []
-  const linkTargets = shouldBuildLinkTargets
-    ? getLinkTargetItems(links).sort((a, b) => {
-        const left =
-          links[(a.endpoint as Extract<RelationEndpoint, { type: 'externalLink' }>).linkId]
-        const right =
-          links[(b.endpoint as Extract<RelationEndpoint, { type: 'externalLink' }>).linkId]
-        return Number(right?.date || 0) - Number(left?.date || 0)
-      })
-    : []
+  const noteTargets = shouldBuildNoteTargets ? getSortedNoteTargetItems(notes) : []
+  const studyTargets = shouldBuildStudyTargets ? getSortedStudyTargetItems(studies) : []
+  const linkTargets = shouldBuildLinkTargets ? getSortedLinkTargetItems(links) : []
   const fuzzyNoteTargets = searchWithMatches(noteTargets, deferredSearchValue)
   const fuzzyLinkTargets = searchWithMatches(linkTargets, deferredSearchValue)
   const fuzzyStudyTargets = searchWithMatches(studyTargets, deferredSearchValue)

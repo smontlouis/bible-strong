@@ -27,6 +27,7 @@ import Text from '~common/ui/Text'
 import VerseAccordion from '~common/VerseAccordion'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import NoteEditorDOMComponent from '~features/bible/NoteEditorDOM/NoteEditorDOMComponent'
+import { createNoteEndpoint } from '~features/studyRelations/endpoints'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { toast } from '~helpers/toast'
@@ -154,11 +155,7 @@ const NoteDetailTabScreen = ({
   }, [noteVerses, isAnnotationNote, annotation, isMissingAnnotation, t])
 
   const noteEndpoint: Extract<RelationEndpoint, { type: 'note' }> | null = noteId
-    ? {
-        type: 'note',
-        noteId,
-        label: currentNote?.title || currentNote?.description || reference,
-      }
+    ? createNoteEndpoint(noteId, currentNote?.title || currentNote?.description || reference)
     : null
   const relationCount = useRelationCount(noteEndpoint)
 

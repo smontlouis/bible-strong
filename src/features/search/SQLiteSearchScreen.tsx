@@ -46,7 +46,6 @@ import { parseBibleReference } from '~features/search/BibleReferenceWidget'
 import SearchEmptyState from '~features/search/SearchEmptyState'
 import { getBibleViewParamsForSearchResult } from '~features/search/searchNavigation'
 import { useOpenRelationEndpoint } from '~features/studyRelations/useOpenRelationEndpoint'
-import type { RelationEndpoint } from '~features/studyRelations/domain'
 import type { RootState } from '~redux/modules/reducer'
 import { useSelector } from 'react-redux'
 import { searchFiltersAtom, SearchItemType, SearchSection } from '~state/searchFilters'
@@ -64,13 +63,13 @@ import SearchSectionBlock, {
 import { searchWithMatches } from './shared/searchFuzzy'
 import {
   getDictionarySearchItems,
-  getLinkSearchItems,
   getNaveSearchItems,
-  getNoteSearchItems,
   getPassageSearchItems,
   getReferenceSearchItems,
+  getSortedLinkSearchItems,
+  getSortedNoteSearchItems,
+  getSortedStudySearchItems,
   getStrongSearchItems,
-  getStudySearchItems,
   type DictionarySearchRow,
   type NaveSearchItemRow,
 } from './shared/searchItems'
@@ -256,11 +255,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     setIsNoteSearching(true)
     const timeout = setTimeout(() => {
       if (cancelled) return
-      const sortedItems = getNoteSearchItems(notes, t).sort((a, b) => {
-        const left = notes[(a.endpoint as Extract<RelationEndpoint, { type: 'note' }>).noteId]
-        const right = notes[(b.endpoint as Extract<RelationEndpoint, { type: 'note' }>).noteId]
-        return Number(right?.date || 0) - Number(left?.date || 0)
-      })
+      const sortedItems = getSortedNoteSearchItems(notes, t)
       setNoteResults(
         browseItemType === 'notes' && trimmed.length < MIN_SEARCH_LENGTH
           ? sortedItems
@@ -297,11 +292,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     setIsStudySearching(true)
     const timeout = setTimeout(() => {
       if (cancelled) return
-      const sortedItems = getStudySearchItems(studies, t).sort((a, b) => {
-        const left = studies[(a.endpoint as Extract<RelationEndpoint, { type: 'study' }>).studyId]
-        const right = studies[(b.endpoint as Extract<RelationEndpoint, { type: 'study' }>).studyId]
-        return Number(right?.modified_at || 0) - Number(left?.modified_at || 0)
-      })
+      const sortedItems = getSortedStudySearchItems(studies, t)
       setStudyResults(
         browseItemType === 'studies' && trimmed.length < MIN_SEARCH_LENGTH
           ? sortedItems
@@ -338,13 +329,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     setIsLinkSearching(true)
     const timeout = setTimeout(() => {
       if (cancelled) return
-      const sortedItems = getLinkSearchItems(links, t).sort((a, b) => {
-        const left =
-          links[(a.endpoint as Extract<RelationEndpoint, { type: 'externalLink' }>).linkId]
-        const right =
-          links[(b.endpoint as Extract<RelationEndpoint, { type: 'externalLink' }>).linkId]
-        return Number(right?.date || 0) - Number(left?.date || 0)
-      })
+      const sortedItems = getSortedLinkSearchItems(links, t)
       setLinkResults(
         browseItemType === 'links' && trimmed.length < MIN_SEARCH_LENGTH
           ? sortedItems

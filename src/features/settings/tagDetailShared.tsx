@@ -23,6 +23,7 @@ import type { TagStrongItemData } from './TagStrongItem'
 import type { TagNaveItemData } from './TagNaveItem'
 import type { TagDictionaryItemData } from './TagDictionaryItem'
 import type { RelationEndpoint } from '~features/studyRelations/domain'
+import { createExternalLinkEndpointFromLink } from '~features/studyRelations/endpoints'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 
@@ -168,13 +169,11 @@ export const LinkItem = ({
   const displayTitle = item.customTitle || item.ogData?.title || item.url
   const relativeDate = t('Il y a {{formattedDate}}', { formattedDate })
   const metadataLabel = title ? `${title} - ${relativeDate}` : relativeDate
-  const relationEndpoint: Extract<RelationEndpoint, { type: 'externalLink' }> = {
-    type: 'externalLink',
-    linkId: item.id,
-    sourceKey: '',
-    url: item.url,
-    label: displayTitle,
-  }
+  const relationEndpoint: Extract<RelationEndpoint, { type: 'externalLink' }> =
+    createExternalLinkEndpointFromLink(item.id, {
+      url: item.url,
+      customTitle: displayTitle,
+    })
   const relationCount = useRelationCount(relationEndpoint)
   const openEntityRelations = useOpenEntityRelations()
 

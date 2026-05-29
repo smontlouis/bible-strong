@@ -20,6 +20,7 @@ import Paragraph from '~common/ui/Paragraph'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import type { RelationEndpoint } from '~features/studyRelations/domain'
+import { createExternalLinkEndpointFromLink } from '~features/studyRelations/endpoints'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import {
@@ -102,13 +103,7 @@ const BibleLinkScreen = () => {
       : linkVerses
   const reference = verseToReference(displayedLinkVerses)
   const linkEndpoint: RelationEndpoint | null = currentLink?.id
-    ? {
-        type: 'externalLink',
-        linkId: currentLink.id,
-        sourceKey: '',
-        url: currentLink.url,
-        label: currentLink.customTitle || currentLink.ogData?.title || currentLink.url,
-      }
+    ? createExternalLinkEndpointFromLink(currentLink.id, currentLink)
     : null
   const relationCount = useRelationCount(linkEndpoint)
   const openEntityRelations = useOpenEntityRelations()

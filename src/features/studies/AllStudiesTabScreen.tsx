@@ -25,6 +25,7 @@ import { RootState } from '~redux/modules/reducer'
 import { selectRelationCountsByEndpointIdentity } from '~redux/selectors/bible'
 import { unifiedTagsModalAtom } from '~state/app'
 import { endpointIdentity } from '~features/studyRelations/domain'
+import { createStudyEndpoint } from '~features/studyRelations/endpoints'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
@@ -167,30 +168,21 @@ const StudiesScreen = ({
             data={filteredStudies}
             contentContainerStyle={{ paddingBottom: 100 }}
             keyExtractor={item => item.id}
-            renderItem={({ item }) => (
-              <StudyItem
-                key={item.id}
-                study={item}
-                setStudySettings={openStudySettings}
-                onPress={onStudyPress}
-                relationCount={
-                  relationCountsByEndpoint[
-                    endpointIdentity({
-                      type: 'study',
-                      studyId: item.id,
-                      label: item.title,
-                    })
-                  ] || 0
-                }
-                onRelationPress={() => {
-                  openEntityRelations({
-                    type: 'study',
-                    studyId: item.id,
-                    label: item.title,
-                  })
-                }}
-              />
-            )}
+            renderItem={({ item }) => {
+              const endpoint = createStudyEndpoint(item.id, item.title)
+              return (
+                <StudyItem
+                  key={item.id}
+                  study={item}
+                  setStudySettings={openStudySettings}
+                  onPress={onStudyPress}
+                  relationCount={relationCountsByEndpoint[endpointIdentity(endpoint)] || 0}
+                  onRelationPress={() => {
+                    openEntityRelations(endpoint)
+                  }}
+                />
+              )
+            }}
           />
         ) : (
           <>

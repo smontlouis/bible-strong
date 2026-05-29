@@ -29,6 +29,7 @@ import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
 import { NaveTab } from '../../state/tabs'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
+import { createNaveEndpoint } from '~features/studyRelations/endpoints'
 import type { RelationEndpoint } from '~redux/modules/user'
 import ScrollView from '~common/ui/ScrollView'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
@@ -74,11 +75,10 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
   const openEntityRelations = useOpenEntityRelations()
   const naveEndpoint: Extract<RelationEndpoint, { type: 'nave' }> | null =
     name_lower && naveItem
-      ? {
-          type: 'nave',
+      ? createNaveEndpoint({
           nameLower: name_lower,
-          label: naveItem.name || name || name_lower,
-        }
+          labelFallback: naveItem.name || name || name_lower,
+        })
       : null
   const relationCount = useRelationCount(naveEndpoint)
 

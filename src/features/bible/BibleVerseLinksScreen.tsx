@@ -24,6 +24,7 @@ import {
   selectRelations,
 } from '~redux/selectors/bible'
 import { endpointIdentity, type RelationEndpoint } from '~features/studyRelations/domain'
+import { createExternalLinkEndpointFromLink } from '~features/studyRelations/endpoints'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
@@ -77,13 +78,7 @@ const BibleVerseLinks = ({ isFormSheet = false }: BibleVerseLinksProps) => {
     const link = _links[linkId]
     if (!link) return null
 
-    return {
-      type: 'externalLink',
-      linkId,
-      sourceKey: '',
-      url: link.url,
-      label: link.customTitle || link.ogData?.title || link.url,
-    }
+    return createExternalLinkEndpointFromLink(linkId, link)
   }
 
   const openLinkRelations = (linkId: string) => {

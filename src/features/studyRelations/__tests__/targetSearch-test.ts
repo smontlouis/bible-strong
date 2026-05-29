@@ -38,18 +38,18 @@ describe('searchRelationTargets', () => {
   })
 
   it('returns strong endpoints for strong codes', () => {
-    expect(searchRelationTargets('G26')[0].endpoint).toEqual({
+    expect(searchRelationTargets('G26')[0].endpoint).toMatchObject({
       type: 'strong',
       language: 'greek',
       code: '26',
-      label: 'G26',
+      labelFallback: 'G26',
     })
 
-    expect(searchRelationTargets('H7225')[0].endpoint).toEqual({
+    expect(searchRelationTargets('H7225')[0].endpoint).toMatchObject({
       type: 'strong',
       language: 'hebrew',
       code: '7225',
-      label: 'H7225',
+      labelFallback: 'H7225',
     })
   })
 

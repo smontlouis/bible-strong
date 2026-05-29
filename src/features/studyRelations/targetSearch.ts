@@ -1,13 +1,16 @@
 import type { LinksObj, NotesObj, StudiesObj } from '~redux/modules/user'
-import { normalizeStrongCode } from './domain'
 import i18n from '~i18n'
 import {
   getNoteSearchItems,
   getLinkSearchItems,
   getReferenceSearchItems,
+  getSortedLinkSearchItems,
+  getSortedNoteSearchItems,
+  getSortedStudySearchItems,
   getStudySearchItems,
 } from '~features/search/shared/searchItems'
 import type { SearchEntityResultWithEndpoint } from '~features/search/shared/searchResultTypes'
+import { createStrongEndpoint } from './endpoints'
 
 export type RelationTargetResult = SearchEntityResultWithEndpoint
 
@@ -30,7 +33,8 @@ const searchStrongTargets = (query: string): RelationTargetResult[] => {
   if (!match) return []
 
   const language = match[1].toUpperCase() === 'G' ? 'greek' : 'hebrew'
-  const code = normalizeStrongCode(match[2])
+  const endpoint = createStrongEndpoint({ language, code: match[2] })
+  const code = endpoint.code
   const prefix = language === 'greek' ? 'G' : 'H'
 
   return [
@@ -40,12 +44,7 @@ const searchStrongTargets = (query: string): RelationTargetResult[] => {
       iconType: 'strong',
       title: `${prefix}${code}`,
       subtitle: language === 'greek' ? i18n.t('Strong grec') : i18n.t('Strong hébreu'),
-      endpoint: {
-        type: 'strong',
-        language,
-        code,
-        label: `${prefix}${code}`,
-      },
+      endpoint: createStrongEndpoint({ language, code, labelFallback: `${prefix}${code}` }),
     },
   ]
 }
@@ -67,6 +66,21 @@ export const getLinkTargetItems = (links: LinksObj = {}): RelationTargetResult[]
 
 export const getStudyTargetItems = (studies: StudiesObj = {}): RelationTargetResult[] =>
   getStudySearchItems(studies).filter((item): item is RelationTargetResult =>
+    Boolean(item.endpoint)
+  )
+
+export const getSortedNoteTargetItems = (notes: NotesObj = {}): RelationTargetResult[] =>
+  getSortedNoteSearchItems(notes).filter((item): item is RelationTargetResult =>
+    Boolean(item.endpoint)
+  )
+
+export const getSortedLinkTargetItems = (links: LinksObj = {}): RelationTargetResult[] =>
+  getSortedLinkSearchItems(links).filter((item): item is RelationTargetResult =>
+    Boolean(item.endpoint)
+  )
+
+export const getSortedStudyTargetItems = (studies: StudiesObj = {}): RelationTargetResult[] =>
+  getSortedStudySearchItems(studies).filter((item): item is RelationTargetResult =>
     Boolean(item.endpoint)
   )
 

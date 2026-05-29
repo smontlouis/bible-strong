@@ -10,7 +10,17 @@ import type { NaveLetterRow } from '~helpers/loadNaveByLetter'
 import type { NaveSearchRow } from '~helpers/loadNaveBySearch'
 import i18n from '~i18n'
 import type { Link, Note, Study } from '~redux/modules/user'
+import type { RelationEndpoint } from '~features/studyRelations/domain'
 import type { SearchEntityResult, SearchReferenceMode } from './searchResultTypes'
+import {
+  createDictionaryEndpoint,
+  createExternalLinkEndpointFromLink,
+  createNaveEndpoint,
+  createNoteEndpoint,
+  createStrongEndpoint,
+  createStudyEndpoint,
+  createVerseEndpoint,
+} from '~features/studyRelations/endpoints'
 
 export type DictionarySearchRow = DictionnaireSearchRow | DictionnaireLetterRow
 export type NaveSearchItemRow = NaveSearchRow | NaveLetterRow
@@ -45,29 +55,24 @@ export const getStrongEndpoint = (
   strong: LexiqueRow
 ): NonNullable<SearchEntityResult['endpoint']> => {
   const isGreek = isGreekStrong(strong)
-  return {
-    type: 'strong',
+  return createStrongEndpoint({
     language: isGreek ? 'greek' : 'hebrew',
     code: getStrongCode(strong),
-    label: strong.Mot,
+    labelFallback: strong.Mot,
     originalWord: getStrongOriginalWord(strong),
-  }
+  })
 }
 
 export const getNaveEndpoint = (
   nave: NaveSearchItemRow
 ): NonNullable<SearchEntityResult['endpoint']> => ({
-  type: 'nave',
-  nameLower: nave.name_lower,
-  label: nave.name,
+  ...createNaveEndpoint({ nameLower: nave.name_lower, labelFallback: nave.name }),
 })
 
 export const getDictionaryEndpoint = (
   dictionary: DictionarySearchRow
 ): NonNullable<SearchEntityResult['endpoint']> => ({
-  type: 'dictionary',
-  word: dictionary.word,
-  label: dictionary.word,
+  ...createDictionaryEndpoint({ word: dictionary.word, labelFallback: dictionary.word }),
 })
 
 export const getDictionaryResultKey = (dictionary: DictionarySearchRow, index?: number) =>
@@ -90,12 +95,18 @@ export const getNoteSearchItems = (notes: Record<string, Note> = {}, t: Translat
       title,
       subtitle: t('Note'),
       description: note.description,
-      endpoint: {
-        type: 'note',
-        noteId,
-        label: title,
-      },
+      endpoint: createNoteEndpoint(noteId, title),
     }
+  })
+
+export const getSortedNoteSearchItems = (
+  notes: Record<string, Note> = {},
+  t: Translate = translate
+) =>
+  getNoteSearchItems(notes, t).sort((a, b) => {
+    const left = notes[(a.endpoint as Extract<RelationEndpoint, { type: 'note' }>).noteId]
+    const right = notes[(b.endpoint as Extract<RelationEndpoint, { type: 'note' }>).noteId]
+    return Number(right?.date || 0) - Number(left?.date || 0)
   })
 
 const getLinkTitle = (link: Link, t: Translate = translate) =>
@@ -113,15 +124,18 @@ export const getLinkSearchItems = (links: Record<string, Link> = {}, t: Translat
       title,
       subtitle: t('Lien'),
       description,
-      endpoint: {
-        type: 'externalLink',
-        linkId,
-        sourceKey: '',
-        url: link.url,
-        label: title,
-        labelFallback: title,
-      },
+      endpoint: createExternalLinkEndpointFromLink(linkId, link),
     }
+  })
+
+export const getSortedLinkSearchItems = (
+  links: Record<string, Link> = {},
+  t: Translate = translate
+) =>
+  getLinkSearchItems(links, t).sort((a, b) => {
+    const left = links[(a.endpoint as Extract<RelationEndpoint, { type: 'externalLink' }>).linkId]
+    const right = links[(b.endpoint as Extract<RelationEndpoint, { type: 'externalLink' }>).linkId]
+    return Number(right?.date || 0) - Number(left?.date || 0)
   })
 
 export const getStudySearchItems = (
@@ -141,12 +155,18 @@ export const getStudySearchItems = (
       title,
       subtitle: t('Étude'),
       description,
-      endpoint: {
-        type: 'study',
-        studyId: id,
-        label: title,
-      },
+      endpoint: createStudyEndpoint(id, title),
     }
+  })
+
+export const getSortedStudySearchItems = (
+  studies: Record<string, Study> = {},
+  t: Translate = translate
+) =>
+  getStudySearchItems(studies, t).sort((a, b) => {
+    const left = studies[(a.endpoint as Extract<RelationEndpoint, { type: 'study' }>).studyId]
+    const right = studies[(b.endpoint as Extract<RelationEndpoint, { type: 'study' }>).studyId]
+    return Number(right?.modified_at || 0) - Number(left?.modified_at || 0)
   })
 
 export const getReferenceSearchItems = (
@@ -179,10 +199,7 @@ export const getReferenceSearchItems = (
         endVerse,
         isWholeChapter,
       },
-      endpoint: {
-        type: 'verse',
-        verseKeys,
-      },
+      endpoint: createVerseEndpoint(verseKeys),
     }
   })
 

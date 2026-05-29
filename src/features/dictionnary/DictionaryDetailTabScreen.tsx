@@ -31,6 +31,7 @@ import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
 import { DictionaryTab } from '../../state/tabs'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
+import { createDictionaryEndpoint } from '~features/studyRelations/endpoints'
 import type { RelationEndpoint } from '~redux/modules/user'
 import AppScrollView from '~common/ui/ScrollView'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
@@ -78,11 +79,7 @@ const DictionnaryDetailScreen = ({
   const tags = useSelector((state: RootState) => selectWordTags(state, word ?? ''))
   const openEntityRelations = useOpenEntityRelations()
   const dictionaryEndpoint: Extract<RelationEndpoint, { type: 'dictionary' }> | null = word
-    ? {
-        type: 'dictionary',
-        word,
-        label: word,
-      }
+    ? createDictionaryEndpoint({ word, labelFallback: word })
     : null
   const relationCount = useRelationCount(dictionaryEndpoint)
 

@@ -77,6 +77,7 @@ Core user activities:
 - **Same theme** is not a **Relation type**; use **Tags** for thematic grouping.
 - Every **Relation** has a **Relation type**; the default type is linked.
 - A **Relation endpoint** is identified by its durable object identity and may keep a display label snapshot as fallback.
+- **Relation endpoints** are the shared identity language for objects that can be opened inside Bible Strong, including Search results and Relation target selection.
 - Deleting or losing access to a **Relation endpoint** does not automatically delete its **Manual relations**.
 - A **Manual relation** can exist even when one of its **Relation endpoints** is not currently openable on the device.
 - **Relations** are private user-owned study data and are not published with **Studies**.
@@ -94,6 +95,7 @@ Core user activities:
 - A directional **Relation** is visible from both endpoints, with active wording from the source and passive wording from the target.
 - The linked and contrasts **Relation types** are non-directional; references and explains are directional.
 - **Relations** live in their own user-data collection, separate from Notes, Studies, Links, Tags, and Highlights.
+- **System relations** remain derived from their source object lifecycle; a **Note**, **Link**, or **Word annotation** stays the source of truth.
 - **Relation display** replaces separate note and link display settings in the Bible reading surface.
 - In grouped icon mode, **Relation display** surfaces verse relations at the start of their verse range.
 - In inline mode, **Relation display** surfaces verse relations at the end of their verse range.

@@ -42,6 +42,7 @@ import { StrongTab } from '../../state/tabs'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
+import { createStrongEndpoint } from '~features/studyRelations/endpoints'
 import type { RelationEndpoint } from '~redux/modules/user'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 
@@ -96,13 +97,12 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
   const isGreek = (book || 1) > 39
   const tags = useSelector((state: RootState) => selectStrongTags(state, code, isGreek))
   const strongEndpoint: Extract<RelationEndpoint, { type: 'strong' }> | null = strongReference
-    ? {
-        type: 'strong',
+    ? createStrongEndpoint({
         language: strongReference.Grec ? 'greek' : 'hebrew',
-        code: String(strongReference.Code),
-        label: strongReference.Mot,
+        code: strongReference.Code,
+        labelFallback: strongReference.Mot,
         originalWord: strongReference.Grec || strongReference.Hebreu,
-      }
+      })
     : null
   const relationCount = useRelationCount(strongEndpoint)
 

@@ -22,6 +22,7 @@ import {
 } from '~redux/selectors/bible'
 import BibleNotesSettingsModal from './BibleNotesSettingsModal'
 import { endpointIdentity, type RelationEndpoint } from '~features/studyRelations/domain'
+import { createNoteEndpoint } from '~features/studyRelations/endpoints'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { useOpenNote } from '~features/notes/useOpenNote'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
@@ -129,11 +130,10 @@ const BibleVerseNotes = ({
   }
 
   const renderNote = ({ item }: { item: TNote }) => {
-    const endpoint: Extract<RelationEndpoint, { type: 'note' }> = {
-      type: 'note',
-      noteId: item.noteId,
-      label: item.notes.title || item.notes.description || item.reference,
-    }
+    const endpoint: Extract<RelationEndpoint, { type: 'note' }> = createNoteEndpoint(
+      item.noteId,
+      item.notes.title || item.notes.description || item.reference
+    )
 
     return (
       <BibleNoteItem
