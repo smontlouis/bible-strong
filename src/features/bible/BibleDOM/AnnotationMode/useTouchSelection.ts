@@ -5,7 +5,7 @@ import { Verse as TVerse } from '~common/types'
 import { WordToken, getWordIndexFromCharOffset } from '~helpers/wordTokenizer'
 import { SelectionRange, WordPosition } from './selectionUtils'
 import { HighlightRect } from './HighlightComponents'
-import { getCaretInfoFromPoint, findVerseContainer } from './domUtils'
+import { getCaretInfoFromPoint, findVerseContainer, isIgnoredVerseTouchTarget } from './domUtils'
 
 // Drag selection constants
 const DRAG_THRESHOLD = 10 // pixels to detect horizontal drag vs scroll
@@ -316,6 +316,14 @@ export function useTouchSelection({
       touchState.velocitySamples = [{ time: now, x: touch.clientX }]
 
       currentTouchPosRef.current = { x: touch.clientX, y: touch.clientY }
+
+      if (isIgnoredVerseTouchTarget(e.target)) {
+        touchState.hasMoved = true
+        touchState.startWord = null
+        touchState.startVerseKey = null
+        cbs.onTouchedVerseChange?.(null)
+        return
+      }
 
       const wordPos = getWordAtPoint(touch.clientX, touch.clientY)
       touchState.startWord = wordPos

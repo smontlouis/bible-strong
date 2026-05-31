@@ -18,6 +18,7 @@ export const updateTabGroupTabs = (
           ...group,
           tabs,
           activeTabIndex: clampTabIndex(group.activeTabIndex, tabs.length),
+          updatedAt: Date.now(),
         }
       : group
   )

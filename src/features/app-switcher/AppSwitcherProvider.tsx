@@ -82,6 +82,13 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
   const { initialTabId, initialTabIndex } = useOnceAtoms()
   const { HEIGHT } = useTabConstants()
   const { width } = useWindowDimensions()
+  const store = getDefaultStore()
+  const groups = store.get(tabGroupsAtom)
+  const activeGroupId = store.get(activeGroupIdAtom)
+  const initialGroupIndex = Math.max(
+    0,
+    groups.findIndex(group => group.id === activeGroupId)
+  )
 
   const tabPreviewRefs = useRef(new Array(100))
   const visibleIndicesRef = useRef(new Set<number>())
@@ -153,9 +160,9 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
   }
 
   // Tab groups pagination
-  const activeGroupIndex = useSharedValue(0)
-  const pagerTranslateX = useSharedValue(0)
-  const pagerScrollX = useSharedValue(0)
+  const activeGroupIndex = useSharedValue(initialGroupIndex)
+  const pagerTranslateX = useSharedValue(-initialGroupIndex * width)
+  const pagerScrollX = useSharedValue(initialGroupIndex * width)
   const createGroupPageIsFullyVisible = useSharedValue(false)
 
   // Tabs count shared value for UI thread access
@@ -192,12 +199,13 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
 
     // Set activeGroupId (si c'est une page de groupe, pas la page de création)
     if (pageIndex < groups.length) {
-      const newGroupId = groups[pageIndex].id
+      const newGroup = groups[pageIndex]
+      const newGroupId = newGroup.id
       if (newGroupId !== prevGroupId) {
         store.set(activeGroupIdAtom, newGroupId)
 
-        // Reset activeTabPreview.index to 0 when switching groups
-        activeTabPreview.index.set(0)
+        // Keep the device-local active tab for the newly active group.
+        activeTabPreview.index.set(newGroup.activeTabIndex)
 
         // Scroll la FlashList précédente vers le top
         prevFlashListRef?.current?.scrollToOffset({ offset: 0, animated: true })

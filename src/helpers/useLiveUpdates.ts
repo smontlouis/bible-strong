@@ -17,7 +17,7 @@ import { firebaseDb, doc, collection, query, where, onSnapshot } from './firebas
 import { registerCleanup } from './cleanupRegistry'
 import useLogin from './useLogin'
 import { usePrevious } from './usePrevious'
-import { subscribeToSubcollection, SUBCOLLECTION_NAMES } from './firestoreSubcollections'
+import { subscribeToSubcollection, USER_DATA_SUBCOLLECTION_NAMES } from './firestoreSubcollections'
 import { checkForEmbeddedData, migrateUserRelationsArchitecture } from './firestoreMigration'
 import { useFirestoreMigration } from './useFirestoreMigration'
 import { store } from '~redux/store'
@@ -152,7 +152,7 @@ const useLiveUpdates = () => {
       })
 
       // Subscribe to each subcollection
-      for (const collection of SUBCOLLECTION_NAMES) {
+      for (const collection of USER_DATA_SUBCOLLECTION_NAMES) {
         const unsubscribe = subscribeToSubcollection(user.id, collection, (data, changes) => {
           // Skip updates while migration is in progress to prevent race conditions
           // Migration writes in chunks, and between chunks the listener could fire
@@ -167,7 +167,7 @@ const useLiveUpdates = () => {
           // Dispatch l'update pour cette collection spécifique
           dispatch(
             receiveSubcollectionUpdates({
-              collection: collection as Exclude<typeof collection, 'tabGroups'>,
+              collection,
               data,
               changes,
               isInitialLoad: Object.keys(changes.added).length === Object.keys(data).length,

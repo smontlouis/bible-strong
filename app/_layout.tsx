@@ -98,7 +98,6 @@ SplashScreen.setOptions({
 setAutoFreeze(false)
 LogBox.ignoreLogs(['Require cycle', 'EventEmitter.removeListener'])
 
-// Sentry init is deferred to after splash screen via initSentry()
 let sentryInitialized = false
 const initSentry = () => {
   if (sentryInitialized) return
@@ -341,5 +340,7 @@ function RootLayout() {
     </>
   )
 }
+
+initSentry()
 
 export default Sentry.wrap(RootLayout)

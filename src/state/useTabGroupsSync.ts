@@ -163,7 +163,7 @@ export const useTabGroupsSync = () => {
             }
 
             for (const group of localGroups) {
-              changes.set[group.id] = prepareTabGroupForSync(group)
+              changes.set[group.id] = prepareTabGroupForSync(group, { updatedAt: Date.now() })
             }
 
             await batchWriteSubcollection(userId, 'tabGroups', changes)
@@ -187,6 +187,7 @@ export const useTabGroupsSync = () => {
           }
 
           // Reset to view mode (first tab expanded) and trigger animation reset
+          // Keep the device-local active group/tab; the reset only realigns shared values.
           const store = getDefaultStore()
           store.set(appSwitcherModeAtom, 'view')
           store.set(resetTabAnimationTriggerAtom, prev => prev + 1)
@@ -282,7 +283,7 @@ export const useTabGroupsSync = () => {
         const activeGroupId = getDefaultStore().get(activeGroupIdAtom)
         if (removedIds.has(activeGroupId) || !finalGroups.find(g => g.id === activeGroupId)) {
           setActiveGroupId(finalGroups[0]?.id || DEFAULT_GROUP_ID)
-          // Reset to view mode after group deletion
+          // Reset to view mode after group deletion; shared values will align to the new active group.
           const store = getDefaultStore()
           store.set(appSwitcherModeAtom, 'view')
           store.set(resetTabAnimationTriggerAtom, prev => prev + 1)
@@ -376,7 +377,11 @@ export const useTabGroupsSync = () => {
     const isWithinCooldown = timeSinceRemote < REMOTE_UPDATE_COOLDOWN
     const hasAdditionsOrModifications = groups.some(g => {
       const oldGroup = previousGroupsRef.current.find(og => og.id === g.id)
-      return !oldGroup || JSON.stringify(g) !== JSON.stringify(oldGroup)
+      return (
+        !oldGroup ||
+        JSON.stringify(prepareTabGroupForSync(g)) !==
+          JSON.stringify(prepareTabGroupForSync(oldGroup))
+      )
     })
 
     if (previousGroupsRef.current.length > 0 && hasAdditionsOrModifications && !isWithinCooldown) {

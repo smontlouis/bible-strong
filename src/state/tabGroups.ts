@@ -89,7 +89,7 @@ export const renameGroupAtom = atom(
 
     set(
       tabGroupsAtom,
-      groups.map(g => (g.id === groupId ? { ...g, name: newName } : g))
+      groups.map(g => (g.id === groupId ? { ...g, name: newName, updatedAt: Date.now() } : g))
     )
   }
 )
@@ -104,7 +104,9 @@ export const updateGroupAtom = atom(
 
     set(
       tabGroupsAtom,
-      groups.map(g => (g.id === groupId ? { ...g, name, ...(color && { color }) } : g))
+      groups.map(g =>
+        g.id === groupId ? { ...g, name, ...(color && { color }), updatedAt: Date.now() } : g
+      )
     )
   }
 )
@@ -173,6 +175,7 @@ export const addTabToGroupAtom = atom(
               ...g,
               tabs: [...g.tabs, tab],
               activeTabIndex: g.tabs.length, // Activate the new tab
+              updatedAt: Date.now(),
             }
           : g
       )
@@ -217,6 +220,7 @@ export const moveTabToGroupAtom = atom(
             ...g,
             tabs: newTabs,
             activeTabIndex: Math.min(g.activeTabIndex, newTabs.length - 1),
+            updatedAt: Date.now(),
           }
         }
         if (g.id === toGroupId) {
@@ -224,6 +228,7 @@ export const moveTabToGroupAtom = atom(
             ...g,
             tabs: [...g.tabs, tabToMove],
             activeTabIndex: g.tabs.length, // Activate the moved tab
+            updatedAt: Date.now(),
           }
         }
         return g

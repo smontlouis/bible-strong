@@ -1079,6 +1079,9 @@ const VersesRenderer = ({ settings, dispatch, translations, verses, ...rest }: P
     dispatch({
       type: 'DOM_COMPONENT_MOUNTED',
     }).catch(console.error)
+  }, [])
+
+  useEffect(() => {
     document.documentElement.style.setProperty('--header-height', `${headerHeight}px`)
     document.body.style.backgroundColor = settings.colors[settings.theme].reverse
   }, [dispatch, headerHeight, settings.colors, settings.theme])

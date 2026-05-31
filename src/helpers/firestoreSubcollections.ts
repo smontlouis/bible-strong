@@ -49,6 +49,11 @@ export const SUBCOLLECTION_NAMES: SubcollectionName[] = [
   'wordAnnotations',
 ]
 
+export type UserDataSubcollectionName = Exclude<SubcollectionName, 'tabGroups'>
+
+export const USER_DATA_SUBCOLLECTION_NAMES: UserDataSubcollectionName[] =
+  SUBCOLLECTION_NAMES.filter((name): name is UserDataSubcollectionName => name !== 'tabGroups')
+
 /**
  * Taille maximale d'un batch Firestore (on utilise 400 pour avoir de la marge)
  */

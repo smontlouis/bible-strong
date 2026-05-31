@@ -1077,7 +1077,9 @@ export const closeAllTabsAtom = atom(null, (get, set) => {
 
   set(
     tabGroupsAtom,
-    groups.map(g => (g.id === activeId ? { ...g, tabs: [], activeTabIndex: 0 } : g))
+    groups.map(g =>
+      g.id === activeId ? { ...g, tabs: [], activeTabIndex: 0, updatedAt: Date.now() } : g
+    )
   )
   set(cachedTabIdsAtom, [])
 })
