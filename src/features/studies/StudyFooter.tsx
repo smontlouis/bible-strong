@@ -1,8 +1,9 @@
 import styled from '@emotion/native'
+import { useTheme } from '@emotion/react'
 import { useAtom } from 'jotai/react'
 import type { JSONValue } from 'expo/build/dom/dom.types'
 import React, { memo, useState } from 'react'
-import { TouchableOpacity, type TouchableOpacityProps } from 'react-native'
+import { TouchableOpacity, useWindowDimensions, type TouchableOpacityProps } from 'react-native'
 
 import { useTranslation } from 'react-i18next'
 import type { ColorFormatsObject } from 'reanimated-color-picker'
@@ -18,6 +19,7 @@ import Button from '~common/ui/Button'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Modal from '~common/Modal'
 import Text from '~common/ui/Text'
+import { renderBackdrop } from '~helpers/bottomSheetHelpers'
 import { useBottomSheetModal } from '~helpers/useBottomSheet'
 import type { StudyNavigateBibleType } from '~common/types'
 import { recentColorsAtom } from './atom'
@@ -35,6 +37,27 @@ type ActiveFormats = {
   underline?: boolean
 }
 
+const useDetachedStudySheetStyle = () => {
+  const theme = useTheme()
+  const { width: windowWidth } = useWindowDimensions()
+  const sheetWidth = Math.min(250, windowWidth - 40)
+
+  return {
+    backdropComponent: (props: Parameters<typeof renderBackdrop>[0]) =>
+      renderBackdrop({ ...props, opacity: 0.2 }),
+    style: {
+      width: sheetWidth,
+      marginLeft: (windowWidth - sheetWidth) / 2,
+      borderRadius: 16,
+      overflow: 'hidden' as const,
+    },
+    backgroundStyle: {
+      backgroundColor: theme.colors.reverse,
+      borderRadius: 16,
+    },
+  }
+}
+
 const SelectHeading = ({
   dispatchToWebView,
   activeFormats,
@@ -46,6 +69,7 @@ const SelectHeading = ({
 }) => {
   const { t } = useTranslation()
   const { ref, open, close } = useBottomSheetModal()
+  const detachedSheetStyle = useDetachedStudySheetStyle()
   const headings = [
     { label: 'Normal', value: 0 },
     { label: 'Titre', value: 1 },
@@ -92,12 +116,9 @@ const SelectHeading = ({
         keyboardBehavior="interactive"
         keyboardBlurBehavior="restore"
         android_keyboardInputMode="adjustResize"
+        detached
         bottomInset={keyboardHeight}
-        headerComponent={
-          <Box px={20} py={15} center borderColor="border" borderBottomWidth={1}>
-            <Text bold>{t('Style')}</Text>
-          </Box>
-        }
+        {...detachedSheetStyle}
       >
         {headings.map(h => (
           <ActionSheetItem
@@ -139,6 +160,7 @@ const SelectMore = ({
   const [colorModal, setOpenColorModal] = useState<'background' | 'color' | undefined>()
   const { t } = useTranslation()
   const { ref, open, close } = useBottomSheetModal()
+  const detachedSheetStyle = useDetachedStudySheetStyle()
   const [recentColors, setRecentColors] = useAtom(recentColorsAtom)
   const defaultColor = colorModal === 'background' ? '#ffffff' : '#000000'
   const currentColor = colorModal === 'background' ? activeFormats.background : activeFormats.color
@@ -199,13 +221,10 @@ const SelectMore = ({
         keyboardBehavior="interactive"
         keyboardBlurBehavior="restore"
         android_keyboardInputMode="adjustResize"
+        detached
         bottomInset={keyboardHeight}
+        {...detachedSheetStyle}
         onModalClose={() => setOpenColorModal(undefined)}
-        headerComponent={
-          <Box px={20} py={15} center borderColor="border" borderBottomWidth={1}>
-            <Text bold>{t('Format')}</Text>
-          </Box>
-        }
       >
         {colorModal ? (
           <Box p={20}>
@@ -219,6 +238,7 @@ const SelectMore = ({
                 value={selectedColor}
                 onChangeJS={handleColorChange}
                 swatchColors={recentColors}
+                swatchSize={22}
               />
             </Box>
             <Button small onPress={handleConfirm}>
@@ -310,6 +330,7 @@ const SelectBlock = ({
 }) => {
   const { t } = useTranslation()
   const { ref, open, close } = useBottomSheetModal()
+  const detachedSheetStyle = useDetachedStudySheetStyle()
 
   const handleNavigate = (type: StudyNavigateBibleType) => {
     close()
@@ -329,12 +350,9 @@ const SelectBlock = ({
         keyboardBehavior="interactive"
         keyboardBlurBehavior="restore"
         android_keyboardInputMode="adjustResize"
+        detached
         bottomInset={keyboardHeight}
-        headerComponent={
-          <Box px={20} py={15} center borderColor="border" borderBottomWidth={1}>
-            <Text bold>{t('Insérer')}</Text>
-          </Box>
-        }
+        {...detachedSheetStyle}
       >
         <ActionSheetItem
           icon="link-2"

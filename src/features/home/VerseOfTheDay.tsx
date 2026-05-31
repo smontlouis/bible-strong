@@ -1,8 +1,8 @@
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import DateTimePicker from '@expo/ui/community/datetime-picker'
 import React, { useEffect, useState } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'
-import { Share, View } from 'react-native'
-import DateTimePicker from 'react-native-modal-datetime-picker'
+import { Platform, Share, View } from 'react-native'
 import { EaseView } from 'react-native-ease'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
@@ -113,14 +113,17 @@ const VerseOfTheDay = ({ addDay }: Props) => {
   const initialDate = new Date()
   initialDate.setHours(initialHour || 0, initialMinutes || 0, 0, 0)
 
-  const onConfirmTimePicker = (date: Date) => {
-    setTimePicker(false)
+  const onChangeTimePicker = (date: Date) => {
     const dateObject = new Date(date)
     const hours = zeroFill(dateObject.getHours())
     const minutes = zeroFill(dateObject.getMinutes())
 
     dispatch(setNotificationVOD(`${hours}:${minutes}`))
     toast(`Le verset du jour sera envoyé chaque jour à ${hours}:${minutes}.`)
+
+    if (Platform.OS === 'android') {
+      setTimePicker(false)
+    }
   }
 
   const openTimePicker = () => {
@@ -202,14 +205,6 @@ const VerseOfTheDay = ({ addDay }: Props) => {
         imageUrls={imageUrls}
         verseOfTheDay={verseOfTheDay}
       />
-      <DateTimePicker
-        date={initialDate}
-        mode="time"
-        locale="en_GB"
-        isVisible={timerPickerOpen}
-        onConfirm={onConfirmTimePicker}
-        onCancel={() => setTimePicker(false)}
-      />
       <BottomSheetModal
         ref={notificationModalRef}
         enablePanDownToClose
@@ -235,7 +230,20 @@ const VerseOfTheDay = ({ addDay }: Props) => {
                 }}
               />
             </Box>
-            {!!verseOfTheDayTime && (
+            {!!verseOfTheDayTime && Platform.OS === 'ios' && (
+              <Box mt={10}>
+                <DateTimePicker
+                  value={initialDate}
+                  mode="time"
+                  locale="en_GB"
+                  is24Hour
+                  onValueChange={(_, selectedDate) => {
+                    onChangeTimePicker(selectedDate)
+                  }}
+                />
+              </Box>
+            )}
+            {!!verseOfTheDayTime && Platform.OS === 'android' && (
               <LinkBox row alignItems="center" mt={10} onPress={openTimePicker}>
                 <Text>{t("Choisir l'heure")}:</Text>
                 <Text bold> {verseOfTheDayTime}</Text>
@@ -243,6 +251,19 @@ const VerseOfTheDay = ({ addDay }: Props) => {
                   <FeatherIcon name="chevron-down" />
                 </Box>
               </LinkBox>
+            )}
+            {timerPickerOpen && Platform.OS === 'android' && (
+              <DateTimePicker
+                value={initialDate}
+                mode="time"
+                locale="en_GB"
+                is24Hour
+                presentation="dialog"
+                onValueChange={(_, selectedDate) => {
+                  onChangeTimePicker(selectedDate)
+                }}
+                onDismiss={() => setTimePicker(false)}
+              />
             )}
           </Box>
         </BottomSheetScrollView>

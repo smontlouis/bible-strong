@@ -22,6 +22,7 @@ interface ColorPickerProps {
   onChangeJS?: (color: ColorFormatsObject) => void
   onCompleteJS?: (color: ColorFormatsObject) => void
   swatchColors?: string[]
+  swatchSize?: number
 }
 
 const ColorPicker = ({
@@ -29,6 +30,7 @@ const ColorPicker = ({
   onChangeJS,
   onCompleteJS,
   swatchColors,
+  swatchSize = 30,
 }: ColorPickerProps) => {
   const normalizedValue = normalizeColor(value)
 
@@ -41,7 +43,16 @@ const ColorPicker = ({
         style={styles.picker}
       >
         {swatchColors && swatchColors.length > 0 && (
-          <Swatches colors={swatchColors} style={styles.swatches} swatchStyle={styles.swatch} />
+          <Swatches
+            colors={swatchColors}
+            style={styles.swatches}
+            swatchStyle={{
+              ...styles.swatch,
+              width: swatchSize,
+              height: swatchSize,
+              borderRadius: Math.max(6, swatchSize / 3),
+            }}
+          />
         )}
         <Panel2 style={styles.panel} boundedThumb />
         <BrightnessSlider adaptSpectrum style={styles.brightnessSlider} boundedThumb />

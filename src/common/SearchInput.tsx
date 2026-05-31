@@ -26,11 +26,11 @@ const SearchInput = ({
         row
         center
         paddingHorizontal={14}
-        borderRadius={14}
+        borderRadius={10}
         backgroundColor="rgba(0,0,0,0.1)"
         marginTop={0}
         marginBottom={5}
-        height={44}
+        height={36}
         overflow="visible"
       >
         <Icon.Feather

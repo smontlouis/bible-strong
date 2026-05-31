@@ -191,5 +191,5 @@ Pour ajouter une nouvelle fonctionnalité :
 - `quill` : Éditeur de texte riche
 - `expo-dom-components` : Intégration DOM dans React Native
 - `react-native-webview` : Container pour l'éditeur
-- `@react-native-community/datetimepicker` : Sélection de dates
+- `@expo/ui` : Composants natifs Expo UI, dont la sélection de dates
 - Firebase (Firestore, Functions) : Backend et synchronisation

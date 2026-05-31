@@ -275,14 +275,17 @@ function InnerApp() {
                               contentStyle: {
                                 bottom: 0,
                               },
+                              sheetAllowedDetents: [0.4, 1],
+                              sheetLargestUndimmedDetentIndex: 'last',
                             })}
                           />
                           <Stack.Screen
-                            name="(timeline)"
+                            name="(library)"
                             options={createFormSheetOptions(theme, {
                               contentStyle: {
                                 bottom: 0,
                               },
+                              sheetGrabberVisible: false,
                             })}
                           />
                         </Stack>

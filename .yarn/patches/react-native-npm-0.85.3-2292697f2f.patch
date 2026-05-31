@@ -1,0 +1,13 @@
+diff --git a/React/Fabric/Mounting/ComponentViews/View/RCTViewComponentView.mm b/React/Fabric/Mounting/ComponentViews/View/RCTViewComponentView.mm
+index 71dd62f9b10bca5d5c4fcb97283790dc64aee3ba..511c45af269d618277a4daaa687bb7f4bd83e04c 100644
+--- a/React/Fabric/Mounting/ComponentViews/View/RCTViewComponentView.mm
++++ b/React/Fabric/Mounting/ComponentViews/View/RCTViewComponentView.mm
+@@ -1673,7 +1673,7 @@ static NSString *RCTRecursiveAccessibilityLabel(UIView *view)
+ 
+ - (BOOL)canBecomeFirstResponder
+ {
+-  return YES;
++  return ReactNativeFeatureFlags::enableImperativeFocus();
+ }
+ 
+ - (void)handleCommand:(const NSString *)commandName args:(const NSArray *)args
