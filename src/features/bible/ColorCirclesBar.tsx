@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import { useSetAtom } from 'jotai/react'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '~common/bottom-sheet'
 
 import ColorCircleGrid from '~common/ColorCircleGrid'
 import ColorEditModal from '~common/ColorEditModal'

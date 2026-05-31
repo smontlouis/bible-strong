@@ -277,5 +277,5 @@ SENTRY_DSN
 - `@react-native-firebase/*` : Services Firebase
 - `@react-native-google-signin/google-signin` : Auth Google
 - `expo-file-system` : Gestion fichiers
-- `@gorhom/bottom-sheet` : Bottom sheets
+- `~common/bottom-sheet` : Bottom sheets
 - `react-native-color-picker` : Sélection couleurs

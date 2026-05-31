@@ -1,7 +1,7 @@
 import Lottie from 'lottie-react-native'
 import React from 'react'
 
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '~common/bottom-sheet'
 import { useTranslation } from 'react-i18next'
 import Modal from '~common/Modal'
 import Box from '~common/ui/Box'

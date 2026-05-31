@@ -18,7 +18,7 @@ import StrongCard from './StrongCard'
 
 import BibleVerseDetailFooter from './BibleVerseDetailFooter'
 
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { BottomSheetScrollView } from '~common/bottom-sheet'
 import { useTranslation } from 'react-i18next'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { StrongReference, StudyNavigateBibleType } from '~common/types'

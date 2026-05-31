@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetView } from '~common/bottom-sheet'
 import React, { memo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'

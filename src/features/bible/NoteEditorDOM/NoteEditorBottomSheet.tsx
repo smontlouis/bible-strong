@@ -1,4 +1,4 @@
-import { useBottomSheetInternal } from '@gorhom/bottom-sheet'
+import { useBottomSheetInternal } from '~common/bottom-sheet'
 import { useState } from 'react'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import NoteEditorDOMComponent from './NoteEditorDOMComponent'

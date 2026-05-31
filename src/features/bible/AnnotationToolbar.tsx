@@ -1,5 +1,9 @@
 import { useTheme } from '@emotion/react'
-import BottomSheet, { BottomSheetHandle, BottomSheetView } from '@gorhom/bottom-sheet'
+import BottomSheet, {
+  type BottomSheet as BottomSheetRef,
+  BottomSheetHandle,
+  BottomSheetView,
+} from '~common/bottom-sheet'
 import { TouchableOpacity, type ViewStyle } from 'react-native'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
@@ -60,7 +64,7 @@ const formatSelectionRange = (selection: SelectionRange): string => {
 }
 
 type Props = {
-  ref?: React.RefObject<BottomSheet | null>
+  ref?: React.RefObject<BottomSheetRef | null>
   hasSelection: boolean
   selection?: SelectionRange | null
   onApplyAnnotation: (color: string, type: AnnotationType) => void

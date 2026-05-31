@@ -1,6 +1,9 @@
 import React from 'react'
 
-import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import BottomSheet, {
+  type BottomSheet as BottomSheetRef,
+  BottomSheetScrollView,
+} from '~common/bottom-sheet'
 import { Image } from 'expo-image'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -15,7 +18,7 @@ import { wp } from '~helpers/utils'
 import { ShallowTimelineSection } from './types'
 
 interface Props extends ShallowTimelineSection {
-  modalRef: React.RefObject<BottomSheet | null>
+  modalRef: React.RefObject<BottomSheetRef | null>
 }
 
 const width = wp(50, 500)

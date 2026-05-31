@@ -1,8 +1,7 @@
 // installReduxDevToolsPolyfill()
 
 import { ThemeProvider } from '@emotion/react'
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
-import { PortalProvider } from '@gorhom/portal'
+import { BottomSheetModalProvider } from '~common/bottom-sheet'
 import { getAnalytics, logScreenView } from '@react-native-firebase/analytics'
 import * as Sentry from '@sentry/react-native'
 
@@ -262,37 +261,35 @@ function InnerApp() {
             <ErrorBoundary>
               <AppSwitcherProvider>
                 <RootSiblingParent>
-                  <PortalProvider>
-                    <BottomSheetModalProvider>
-                      <BookSelectorBottomSheetProvider>
-                        <InitHooks />
-                        <Stack screenOptions={{ headerShown: false }}>
-                          <Stack.Screen name="index" />
-                          <Stack.Screen
-                            name="(explore)"
-                            options={createFormSheetOptions(theme, {
-                              contentStyle: {
-                                bottom: 0,
-                              },
-                              sheetAllowedDetents: [0.45, 1],
-                              sheetLargestUndimmedDetentIndex: 'last',
-                            })}
-                          />
-                          <Stack.Screen
-                            name="(library)"
-                            options={createFormSheetOptions(theme, {
-                              contentStyle: {
-                                bottom: 0,
-                              },
-                              sheetGrabberVisible: false,
-                            })}
-                          />
-                        </Stack>
-                        <ThemedToaster />
-                        <DeferredModals />
-                      </BookSelectorBottomSheetProvider>
-                    </BottomSheetModalProvider>
-                  </PortalProvider>
+                  <BottomSheetModalProvider>
+                    <BookSelectorBottomSheetProvider>
+                      <InitHooks />
+                      <Stack screenOptions={{ headerShown: false }}>
+                        <Stack.Screen name="index" />
+                        <Stack.Screen
+                          name="(explore)"
+                          options={createFormSheetOptions(theme, {
+                            contentStyle: {
+                              bottom: 0,
+                            },
+                            sheetAllowedDetents: [0.45, 1],
+                            sheetLargestUndimmedDetentIndex: 'last',
+                          })}
+                        />
+                        <Stack.Screen
+                          name="(library)"
+                          options={createFormSheetOptions(theme, {
+                            contentStyle: {
+                              bottom: 0,
+                            },
+                            sheetGrabberVisible: false,
+                          })}
+                        />
+                      </Stack>
+                      <ThemedToaster />
+                      <DeferredModals />
+                    </BookSelectorBottomSheetProvider>
+                  </BottomSheetModalProvider>
                 </RootSiblingParent>
               </AppSwitcherProvider>
             </ErrorBoundary>

@@ -1,4 +1,4 @@
-import BottomSheet from '@gorhom/bottom-sheet'
+import BottomSheet, { type BottomSheet as BottomSheetRef } from '~common/bottom-sheet'
 import React from 'react'
 import { SectionList } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
@@ -18,7 +18,7 @@ import type { Version } from '~helpers/bibleVersions'
 import type { VersionCode } from 'src/state/tabs'
 
 type CompareVersionSelectorBottomSheetProps = {
-  bottomSheetRef: React.RefObject<BottomSheet | null>
+  bottomSheetRef: React.RefObject<BottomSheetRef | null>
 }
 
 const CompareVersionSelectorBottomSheet = ({

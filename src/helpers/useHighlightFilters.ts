@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSetAtom } from 'jotai/react'
-import type { BottomSheetModal } from '@gorhom/bottom-sheet'
+import type { BottomSheetModal } from '~common/bottom-sheet'
 import type { HighlightFilters, Tag } from '~common/types'
 import { useColorInfo } from './useColorName'
 import { unifiedTagsModalAtom } from '~state/app'

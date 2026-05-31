@@ -5,7 +5,7 @@
 import React from 'react'
 import { FlatList } from 'react-native'
 
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '~common/bottom-sheet'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'

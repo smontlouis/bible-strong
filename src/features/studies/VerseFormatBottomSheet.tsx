@@ -1,4 +1,4 @@
-import type { BottomSheetModal } from '@gorhom/bottom-sheet'
+import type { BottomSheetModal } from '~common/bottom-sheet'
 import React, { memo } from 'react'
 import { TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'

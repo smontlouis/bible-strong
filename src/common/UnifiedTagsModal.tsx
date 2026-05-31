@@ -1,4 +1,4 @@
-import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetScrollView } from '~common/bottom-sheet'
 import { useAtom } from 'jotai/react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -18,7 +18,7 @@ import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addTag, toggleTagEntity } from '~redux/modules/user'
 import { sortedTagsSelector } from '~redux/selectors/tags'
-import { unifiedTagsModalAtom } from '~state/app'
+import { unifiedTagsModalAtom, type UnifiedTagsModalProps } from '~state/app'
 import BottomSheetSearchInput from './BottomSheetSearchInput'
 import { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated'
 import { ContainerComponent } from './Modal'
@@ -44,14 +44,18 @@ const RemovableChip = ({ label, onRemove }: { label: string; onRemove: () => voi
   </AnimatedBox>
 )
 
-const UnifiedTagsModal = () => {
+type UnifiedTagsModalInstanceProps = {
+  item: UnifiedTagsModalProps
+  setItem: (item: UnifiedTagsModalProps) => void
+}
+
+export const UnifiedTagsModalInstance = ({ item, setItem }: UnifiedTagsModalInstanceProps) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const insets = useSafeAreaInsets()
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
   const { bottomBarHeight } = useBottomBarHeightInTab()
 
-  const [item, setItem] = useAtom(unifiedTagsModalAtom)
   const { ref, open, close } = useBottomSheetModal()
 
   const tags = useSelector(sortedTagsSelector)
@@ -316,6 +320,12 @@ const UnifiedTagsModal = () => {
       </BottomSheetScrollView>
     </BottomSheetModal>
   )
+}
+
+const UnifiedTagsModal = () => {
+  const [item, setItem] = useAtom(unifiedTagsModalAtom)
+
+  return <UnifiedTagsModalInstance item={item} setItem={setItem} />
 }
 
 export default UnifiedTagsModal

@@ -1,7 +1,7 @@
 import React from 'react'
 import { MenuView } from '@expo/ui/community/menu'
 
-import BottomSheet from '@gorhom/bottom-sheet'
+import BottomSheet, { type BottomSheet as BottomSheetRef } from '~common/bottom-sheet'
 import { useTranslation } from 'react-i18next'
 import Header from '~common/Header'
 import Box from '~common/ui/Box'
@@ -25,7 +25,7 @@ interface Props {
 }
 
 const TimelineHomeScreen = ({ hasBackButton, isFormSheet = false, onSectionPress }: Props) => {
-  const modalRef = React.useRef<BottomSheet>(null)
+  const modalRef = React.useRef<BottomSheetRef>(null)
   const { t } = useTranslation()
   const openInNewTab = useOpenInNewTab()
   const canGoBackInStack = useCanGoBackInStack()

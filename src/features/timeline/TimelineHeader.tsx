@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import { MenuView } from '@expo/ui/community/menu'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '~common/bottom-sheet'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 

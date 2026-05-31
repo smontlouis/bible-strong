@@ -11,7 +11,7 @@ import { RootState } from '~redux/modules/reducer'
 import { deleteStudy } from '~redux/modules/user'
 import { unifiedTagsModalAtom } from '../../state/app'
 import PublishStudyMenuItem from './PublishStudyMenuItem'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '~common/bottom-sheet'
 
 interface Props {
   ref?: React.RefObject<BottomSheetModal | null>

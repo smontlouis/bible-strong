@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import { BottomSheetModal } from '@gorhom/bottom-sheet/'
+import { BottomSheetModal } from '~common/bottom-sheet'
 import React, { useEffect, useRef, useState } from 'react'
 import { Alert } from 'react-native'
 import { shallowEqual, useDispatch, useSelector, useStore } from 'react-redux'

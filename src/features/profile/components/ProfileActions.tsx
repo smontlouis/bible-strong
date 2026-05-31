@@ -1,7 +1,7 @@
 import React, { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '~common/bottom-sheet'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'

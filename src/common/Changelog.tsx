@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react'
-import { BottomSheetFooter, BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { BottomSheetFooter, BottomSheetModal, BottomSheetScrollView } from '~common/bottom-sheet'
 import distanceInWords from 'date-fns/formatDistance'
 
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'

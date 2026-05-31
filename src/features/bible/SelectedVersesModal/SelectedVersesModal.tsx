@@ -1,5 +1,8 @@
-import type { BottomSheetFooterProps } from '@gorhom/bottom-sheet'
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
+import type { BottomSheetFooterProps } from '~common/bottom-sheet'
+import BottomSheet, {
+  type BottomSheet as BottomSheetRef,
+  BottomSheetView,
+} from '~common/bottom-sheet'
 import { useAtom, useAtomValue } from 'jotai/react'
 import Animated from 'react-native-reanimated'
 import { isFullScreenBibleAtom } from 'src/state/app'

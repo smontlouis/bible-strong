@@ -1,4 +1,4 @@
-import { BottomSheetModal } from '@gorhom/bottom-sheet/'
+import { BottomSheetModal } from '~common/bottom-sheet'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 

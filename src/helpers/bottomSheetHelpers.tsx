@@ -1,6 +1,6 @@
 import { useTheme } from '@emotion/react'
-import { BottomSheetBackdrop, BottomSheetProps } from '@gorhom/bottom-sheet'
-import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types'
+import { BottomSheetBackdrop, BottomSheetProps } from '~common/bottom-sheet'
+import { BottomSheetDefaultBackdropProps } from '~common/bottom-sheet'
 import { useId } from 'react'
 import { useWindowDimensions } from 'react-native'
 

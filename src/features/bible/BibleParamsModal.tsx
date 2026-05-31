@@ -2,7 +2,7 @@ import React from 'react'
 import { FlatList } from 'react-native'
 
 import styled from '@emotion/native'
-import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetScrollView } from '~common/bottom-sheet'
 import { useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'

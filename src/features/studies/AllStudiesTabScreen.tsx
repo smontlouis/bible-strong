@@ -1,4 +1,4 @@
-import { BottomSheetModal } from '@gorhom/bottom-sheet/'
+import { BottomSheetModal } from '~common/bottom-sheet'
 import { useEffect, useRef, useState } from 'react'
 import { FlatList } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'

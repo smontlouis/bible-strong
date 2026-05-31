@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Alert, TouchableOpacity } from 'react-native'
 import styled from '@emotion/native'
-import { BottomSheetHandle, BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { BottomSheetHandle, BottomSheetModal, BottomSheetScrollView } from '~common/bottom-sheet'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'

@@ -1,8 +1,11 @@
-import BottomSheet, { BottomSheetModal } from '@gorhom/bottom-sheet'
+import BottomSheet, {
+  type BottomSheet as BottomSheetRef,
+  BottomSheetModal,
+} from '~common/bottom-sheet'
 import { useRef } from 'react'
 
 export const useBottomSheet = () => {
-  const ref = useRef<BottomSheet>(null)
+  const ref = useRef<BottomSheetRef>(null)
 
   const close = () => {
     ref.current?.close()

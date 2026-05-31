@@ -1,6 +1,6 @@
 import { TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetView } from '~common/bottom-sheet'
 import Lottie from 'lottie-react-native'
 import { useTheme } from '@emotion/react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'

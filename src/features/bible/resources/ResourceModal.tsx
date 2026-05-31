@@ -2,7 +2,8 @@ import BottomSheet, {
   BottomSheetFooter,
   BottomSheetFooterProps,
   BottomSheetScrollView,
-} from '@gorhom/bottom-sheet/'
+  type BottomSheet as BottomSheetRef,
+} from '~common/bottom-sheet'
 import { MenuView, type MenuAction } from '@expo/ui/community/menu'
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -40,7 +41,7 @@ type ResourceVerse = {
 }
 
 type Props = {
-  resourceModalRef: React.RefObject<BottomSheet | null>
+  resourceModalRef: React.RefObject<BottomSheetRef | null>
   resourceType: BibleResource | null
   onChangeResourceType: (resourceType: BibleResource) => void
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -76,7 +77,7 @@ type Props = {
 const ResourcesModal = memo(
   ({ resourceModalRef, resourceType, onChangeResourceType, bibleAtom, isSelectionMode }: Props) => {
     const { t } = useTranslation()
-    const compareVersionSelectorRef = React.useRef<BottomSheet>(null)
+    const compareVersionSelectorRef = React.useRef<BottomSheetRef>(null)
     const [isOpen, setIsOpen] = useState(false)
     const openInNewTab = useOpenInNewTab()
     const bible = useAtomValue(bibleAtom)

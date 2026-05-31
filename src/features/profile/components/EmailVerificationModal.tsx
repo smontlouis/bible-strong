@@ -2,7 +2,7 @@ import styled from '@emotion/native'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator } from 'react-native'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '~common/bottom-sheet'
 
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'

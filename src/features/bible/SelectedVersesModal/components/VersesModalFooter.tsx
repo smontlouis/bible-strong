@@ -1,6 +1,6 @@
 import { useTheme } from '@emotion/react'
-import type { BottomSheetFooterProps } from '@gorhom/bottom-sheet'
-import { BottomSheetFooter } from '@gorhom/bottom-sheet'
+import type { BottomSheetFooterProps } from '~common/bottom-sheet'
+import { BottomSheetFooter } from '~common/bottom-sheet'
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import type { GestureType } from 'react-native-gesture-handler'

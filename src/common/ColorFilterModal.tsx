@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetScrollView } from '~common/bottom-sheet'
 import React, { forwardRef } from 'react'
 import { TouchableOpacity } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'

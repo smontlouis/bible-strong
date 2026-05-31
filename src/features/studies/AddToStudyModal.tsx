@@ -1,4 +1,4 @@
-import { BottomSheetModal, BottomSheetFlashList } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetFlashList } from '~common/bottom-sheet'
 import distanceInWords from 'date-fns/formatDistance'
 import React, { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'

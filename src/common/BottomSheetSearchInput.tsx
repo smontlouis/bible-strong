@@ -4,7 +4,7 @@ import React from 'react'
 import { TextInputProps } from 'react-native'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from './ui/Icon'
-import { BottomSheetTextInput } from '@gorhom/bottom-sheet'
+import { BottomSheetTextInput } from '~common/bottom-sheet'
 
 interface Props {
   onChangeText: (text: string) => void

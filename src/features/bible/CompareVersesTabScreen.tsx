@@ -25,7 +25,7 @@ import { getMaxChapterVerseCount } from '~helpers/bibleCoverage'
 import { selectCompareVersions } from '~redux/selectors/user'
 import { CompareTab, SelectedVerses, VersionCode } from '../../state/tabs'
 import CompareVersionSelectorBottomSheet from './CompareVersionSelectorBottomSheet'
-import type BottomSheet from '@gorhom/bottom-sheet'
+import type { BottomSheet as BottomSheetRef } from '~common/bottom-sheet'
 
 interface CompareVersesTabScreenProps {
   compareAtom: PrimitiveAtom<CompareTab>
@@ -37,7 +37,7 @@ type PrevNextItems = {
 }
 
 const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) => {
-  const compareVersionSelectorRef = React.useRef<BottomSheet>(null)
+  const compareVersionSelectorRef = React.useRef<BottomSheetRef>(null)
   const [compareTab, setCompareTab] = useAtom(compareAtom)
   const { t } = useTranslation()
   const setSelectedVerses = (v: SelectedVerses) =>

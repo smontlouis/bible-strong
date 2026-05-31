@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
-import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet/'
+import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '~common/bottom-sheet'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'

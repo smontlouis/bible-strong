@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { BottomSheetFlatList, BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetFlatList, BottomSheetModal } from '~common/bottom-sheet'
 import { useRouter } from 'expo-router'
 import { Image } from 'expo-image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'

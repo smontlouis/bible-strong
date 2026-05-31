@@ -1,4 +1,4 @@
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetView } from '~common/bottom-sheet'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { BottomSheetModal, type BottomSheetFooterProps } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, type BottomSheetFooterProps } from '~common/bottom-sheet'
 import { Image } from 'expo-image'
 import { useTranslation } from 'react-i18next'
 import { Image as RNImage } from 'react-native'

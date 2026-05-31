@@ -5,7 +5,7 @@ import { useTheme } from '@emotion/react'
 import type { ColorFormatsObject } from 'reanimated-color-picker'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
-import { BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetTextInput } from '~common/bottom-sheet'
 
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'

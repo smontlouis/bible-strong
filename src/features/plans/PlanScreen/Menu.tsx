@@ -1,4 +1,4 @@
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '~common/bottom-sheet'
 import { MenuView, type MenuAction } from '@expo/ui/community/menu'
 import { useRouter } from 'expo-router'
 import React from 'react'

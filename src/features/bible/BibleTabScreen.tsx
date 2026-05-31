@@ -20,6 +20,8 @@ import { getDatabases } from '~helpers/databases'
 import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { BibleTab } from '../../state/tabs'
+import { LocalUnifiedTagsModalProvider } from '~common/UnifiedTagsModalProvider'
+import { BookSelectorBottomSheetProvider } from './BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const deepmerge = require('@fastify/deepmerge')()
 
@@ -101,7 +103,7 @@ const BibleTabScreen = ({ bibleAtom, isFormSheet }: BibleTabScreenProps) => {
     getDefaultStore().set(isBibleViewReloadingAtom, true)
   }
 
-  return (
+  const content = (
     <BibleViewer
       key={`bible-viewer-${reloadKey}`}
       settings={settings}
@@ -111,6 +113,16 @@ const BibleTabScreen = ({ bibleAtom, isFormSheet }: BibleTabScreenProps) => {
       isFormSheet={isFormSheet}
     />
   )
+
+  if (isFormSheet) {
+    return (
+      <BookSelectorBottomSheetProvider>
+        <LocalUnifiedTagsModalProvider>{content}</LocalUnifiedTagsModalProvider>
+      </BookSelectorBottomSheetProvider>
+    )
+  }
+
+  return content
 }
 
 export default BibleTabScreen

@@ -1,4 +1,4 @@
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetView } from '~common/bottom-sheet'
 import { useTheme } from '@emotion/react'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import React, { memo, useRef } from 'react'

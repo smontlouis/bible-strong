@@ -1,6 +1,5 @@
 import styled from '@emotion/native'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import { useSetAtom } from 'jotai/react'
+import { BottomSheetModal } from '~common/bottom-sheet'
 import { forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
@@ -8,6 +7,7 @@ import { useSelector } from 'react-redux'
 import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import EntityChipList from '~common/EntityChipList'
+import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { Chip } from '~common/ui/NewChip'
@@ -16,7 +16,6 @@ import { EMPTY_ARRAY } from '~helpers/emptyReferences'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { makeTaggedItemsForVerseSelector, TaggedItem } from '~redux/selectors/bible'
-import { unifiedTagsModalAtom } from '~state/app'
 
 const ItemRow = styled.View(({ theme }) => ({
   flexDirection: 'row',
@@ -115,7 +114,7 @@ const TaggedItemRow = ({ item, onEditTags }: { item: TaggedItem; onEditTags: () 
 const VerseTagsModal = forwardRef<BottomSheetModal, VerseTagsModalProps>(
   ({ verseKey, version }, ref) => {
     const { t } = useTranslation()
-    const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
+    const setUnifiedTagsModal = useUnifiedTagsModal()
 
     // Create selector for this verse
     const selectTaggedItems = makeTaggedItemsForVerseSelector()

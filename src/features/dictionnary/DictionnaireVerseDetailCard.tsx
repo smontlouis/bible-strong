@@ -13,7 +13,7 @@ import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { CarouselProvider } from '~helpers/CarouselContext'
 import { getChapterVerses } from '~helpers/biblesDb'
 
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { BottomSheetScrollView } from '~common/bottom-sheet'
 import { useTranslation } from 'react-i18next'
 import { Verse } from '~common/types'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'

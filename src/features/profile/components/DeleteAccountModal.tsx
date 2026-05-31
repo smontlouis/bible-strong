@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, Alert } from 'react-native'
 import { useTheme } from '@emotion/react'
-import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet'
+import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '~common/bottom-sheet'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { getAuth, deleteUser } from '@react-native-firebase/auth'
 

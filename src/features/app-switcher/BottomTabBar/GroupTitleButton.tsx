@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '~common/bottom-sheet'
 import Box, { AnimatedBox, FadingText } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useActiveGroup, useUpdateGroup, getTabGroups } from '../../../state/tabGroups'

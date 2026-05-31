@@ -4,7 +4,10 @@ import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Login from './Login'
 
-import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import BottomSheet, {
+  type BottomSheet as BottomSheetRef,
+  BottomSheetScrollView,
+} from '~common/bottom-sheet'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Text from '~common/ui/Text'
@@ -16,7 +19,7 @@ import { FeatherIcon } from './ui/Icon'
 
 const LoginModal = ({ isVisible }: { isVisible: boolean }) => {
   const { t } = useTranslation()
-  const ref = useRef<BottomSheet>(null)
+  const ref = useRef<BottomSheetRef>(null)
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   return (

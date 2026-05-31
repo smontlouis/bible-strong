@@ -2,7 +2,7 @@ import {
   BottomSheetFooter,
   BottomSheetModal,
   type BottomSheetFooterProps,
-} from '@gorhom/bottom-sheet'
+} from '~common/bottom-sheet'
 import { useRouter } from 'expo-router'
 import { Image } from 'expo-image'
 import React from 'react'

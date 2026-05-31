@@ -3333,40 +3333,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gorhom/bottom-sheet@npm:^5.2.14":
-  version: 5.2.14
-  resolution: "@gorhom/bottom-sheet@npm:5.2.14"
-  dependencies:
-    "@gorhom/portal": "npm:1.0.14"
-    invariant: "npm:^2.2.4"
-  peerDependencies:
-    "@types/react": "*"
-    "@types/react-native": "*"
-    react: "*"
-    react-native: "*"
-    react-native-gesture-handler: ">=2.16.1"
-    react-native-reanimated: "*"
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-    "@types/react-native":
-      optional: true
-  checksum: 10c0/744c718aaa4e66989043378932ea31d8ff510cff289b5561115530ff49218af080d28dbe409191b33ab7d87b1cfab4e7c16cfb0015cf2b6917b26c61f033bc05
-  languageName: node
-  linkType: hard
-
-"@gorhom/portal@npm:1.0.14, @gorhom/portal@npm:^1.0.14":
-  version: 1.0.14
-  resolution: "@gorhom/portal@npm:1.0.14"
-  dependencies:
-    nanoid: "npm:^3.3.1"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 10c0/86f33afc2ac2656a86a6f3fd1e41565419839576ede2c38333434a93a0a2fe4fb6fc18ab3360579427f2a1fc3b4564b933cc5ae1793a7e2825c93860a00b215f
-  languageName: node
-  linkType: hard
-
 "@grpc/grpc-js@npm:~1.9.0":
   version: 1.9.15
   resolution: "@grpc/grpc-js@npm:1.9.15"
@@ -6864,8 +6830,6 @@ __metadata:
     "@expo/ui": "npm:~56.0.14"
     "@expo/vector-icons": "npm:^15.0.3"
     "@fastify/deepmerge": "npm:^1.3.0"
-    "@gorhom/bottom-sheet": "npm:^5.2.14"
-    "@gorhom/portal": "npm:^1.0.14"
     "@invertase/react-native-apple-authentication": "npm:^2.3.0"
     "@legendapp/list": "npm:^2.0.19"
     "@notifee/react-native": "npm:^7.8.2"
@@ -13185,7 +13149,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nanoid@npm:^3.1.23, nanoid@npm:^3.3.1, nanoid@npm:^3.3.11, nanoid@npm:^3.3.8":
+"nanoid@npm:^3.1.23, nanoid@npm:^3.3.11, nanoid@npm:^3.3.8":
   version: 3.3.11
   resolution: "nanoid@npm:3.3.11"
   bin:

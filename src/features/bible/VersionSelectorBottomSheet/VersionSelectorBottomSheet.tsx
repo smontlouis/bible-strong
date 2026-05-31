@@ -1,4 +1,4 @@
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '~common/bottom-sheet'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { atom } from 'jotai/vanilla'
 import React from 'react'

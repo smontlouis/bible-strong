@@ -1,5 +1,5 @@
 import { useTheme } from '@emotion/react'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '~common/bottom-sheet'
 import distanceInWords from 'date-fns/formatDistance'
 import { useAtomValue } from 'jotai/react'
 import React from 'react'

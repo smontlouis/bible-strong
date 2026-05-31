@@ -1,4 +1,4 @@
-import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetScrollView } from '~common/bottom-sheet'
 import DateTimePicker from '@expo/ui/community/datetime-picker'
 import React, { useEffect, useState } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'

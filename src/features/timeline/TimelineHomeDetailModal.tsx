@@ -1,6 +1,9 @@
 import React from 'react'
 
-import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import BottomSheet, {
+  type BottomSheet as BottomSheetRef,
+  BottomSheetScrollView,
+} from '~common/bottom-sheet'
 import { Trans, useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import InlineLink from '~common/InlineLink'
@@ -11,7 +14,7 @@ import Text from '~common/ui/Text'
 import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 
 interface Props {
-  modalRef: React.RefObject<BottomSheet | null>
+  modalRef: React.RefObject<BottomSheetRef | null>
   HeaderComponent?: React.ReactNode
   FooterComponent?: React.ReactNode
 }

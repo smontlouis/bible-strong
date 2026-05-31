@@ -10,7 +10,7 @@ import loadNaveByVerset from '~helpers/loadNaveByVerset'
 import { useQuery } from '~helpers/react-query-lite'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import NaveForVerse from './NaveModalForVerse'
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { BottomSheetScrollView } from '~common/bottom-sheet'
 
 type Props = {
   selectedVerse: string

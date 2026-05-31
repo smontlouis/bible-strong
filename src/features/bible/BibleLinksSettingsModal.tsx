@@ -1,4 +1,4 @@
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '~common/bottom-sheet'
 import { useRouter } from 'expo-router'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'

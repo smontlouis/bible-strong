@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 
 import { MenuView, type MenuAction } from '@expo/ui/community/menu'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '~common/bottom-sheet'
 import { useRouter } from 'expo-router'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'

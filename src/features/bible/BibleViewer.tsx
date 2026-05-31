@@ -3,13 +3,14 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { ActivityIndicator, Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import Box from '~common/ui/Box'
+import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 import { BibleError } from '~helpers/bibleErrors'
 import BibleErrorView from './BibleErrorView'
 import { usePrevious } from '~helpers/usePrevious'
 import BibleHeader from './BibleHeader'
 
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '~common/bottom-sheet'
 import { useRouter } from 'expo-router'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -51,7 +52,7 @@ import {
   selectNotes,
 } from '~redux/selectors/bible'
 import { makeSelectBookmarksInChapter } from '~redux/selectors/bookmarks'
-import { historyAtom, unifiedTagsModalAtom, bibleDataRefreshSignalAtom } from '../../state/app'
+import { historyAtom, bibleDataRefreshSignalAtom } from '../../state/app'
 import {
   BibleTab,
   getBibleContextDisplayMode,
@@ -144,7 +145,7 @@ const BibleViewer = ({
   const [secondaryVerses, setSecondaryVerses] = useState<Verse[] | null>(null)
   const [comments, setComments] = useState<{ [key: string]: string } | null>(null)
   const [redWords, setRedWords] = useState<RedWordsByVerse | null>(null)
-  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
+  const setUnifiedTagsModal = useUnifiedTagsModal()
   const [selectedCode, setSelectedCodeState] = useState<SelectedCode | null>(null)
   const bookmarkModalRef = useRef<BottomSheetModal>(null)
   const [selectedVerseForBookmark, setSelectedVerseForBookmark] = useState<{

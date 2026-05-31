@@ -1,22 +1,16 @@
 import styled from '@emotion/native'
 import {
-  BottomSheetHandle,
   BottomSheetModal,
-  BottomSheetModalProps,
+  BottomSheetProps,
   BottomSheetScrollView,
   BottomSheetView,
-} from '@gorhom/bottom-sheet'
+  type BottomSheetModal as ExpoBottomSheetModal,
+} from '~common/bottom-sheet'
 import React, { Ref } from 'react'
 import { StyleProp, ViewStyle } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Text, { TextProps } from '~common/ui/Text'
-import {
-  onAnimateModalClose,
-  renderBackdrop,
-  useBottomSheetStyles,
-} from '~helpers/bottomSheetHelpers'
+import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import { BOTTOM_INSET, MODAL_FOOTER_HEIGHT_BOTTOM_INSET } from '~helpers/constants'
-import { FullWindowOverlay } from './ui/FullWindowOverlay'
 
 const Touchy = styled.TouchableOpacity(({ theme }) => ({
   alignItems: 'center',
@@ -35,16 +29,26 @@ const Tag = styled.View(({ theme }) => ({
   borderRadius: 3,
 }))
 
-interface ModalBodyProps extends BottomSheetModalProps {
+interface ModalBodyProps extends Omit<
+  BottomSheetProps,
+  'backdropComponent' | 'footerComponent' | 'ref'
+> {
   headerComponent?: React.ReactNode
   children: React.ReactNode
   withPortal?: boolean
-  modalRef?: React.RefObject<BottomSheetModal | null>
+  modalRef?: React.RefObject<ExpoBottomSheetModal | null>
   style?: StyleProp<ViewStyle>
   onModalClose?: () => void
   enableScrollView?: boolean
   enableContentWrapper?: boolean
-  ref?: Ref<BottomSheetModal | null>
+  ref?: Ref<ExpoBottomSheetModal | null>
+  backdropComponent?: React.ComponentType<any> | ((props: any) => React.ReactNode)
+  footerComponent?: React.ComponentType<any> | ((props: any) => React.ReactNode)
+  topInset?: number
+  stackBehavior?: string
+  bottomInset?: number
+  android_keyboardInputMode?: string
+  detached?: boolean
 }
 
 interface ItemProps {
@@ -53,9 +57,7 @@ interface ItemProps {
   onPress: () => void
 }
 
-export const ContainerComponent = ({ children }: { children?: React.ReactNode }) => (
-  <FullWindowOverlay>{children}</FullWindowOverlay>
-)
+export const ContainerComponent = ({ children }: { children?: React.ReactNode }) => <>{children}</>
 
 const Body = ({
   withPortal,
@@ -66,45 +68,45 @@ const Body = ({
   ref,
   ...props
 }: ModalBodyProps) => {
-  const insets = useSafeAreaInsets()
   const { key, ...bottomSheetStyles } = useBottomSheetStyles()
-
-  // Use ref to avoid recreating renderHandle when headerComponent changes
-  // This prevents the handle from remounting and losing focus in inputs
-  const headerComponentRef = React.useRef(headerComponent)
-  headerComponentRef.current = headerComponent
-
-  const renderHandle = React.useCallback(
-    (handleProps: React.ComponentProps<typeof BottomSheetHandle>) => (
-      <>
-        <BottomSheetHandle {...handleProps} />
-        {headerComponentRef.current}
-      </>
-    ),
-    []
-  )
+  const {
+    onModalClose,
+    onDismiss,
+    backdropComponent,
+    footerComponent,
+    modalRef: _modalRef,
+    stackBehavior: _stackBehavior,
+    topInset: _topInset,
+    bottomInset: _bottomInset,
+    android_keyboardInputMode: _androidKeyboardInputMode,
+    detached: _detached,
+    ...bottomSheetProps
+  } = props
 
   return (
     <BottomSheetModal
       ref={ref}
-      topInset={insets.top}
       enablePanDownToClose
       enableDynamicSizing={false}
-      backdropComponent={renderBackdrop}
-      containerComponent={ContainerComponent}
-      activeOffsetY={[-20, 20]}
-      onAnimate={onAnimateModalClose(props.onModalClose)}
-      handleComponent={headerComponent ? renderHandle : undefined}
+      backdropComponent={
+        (backdropComponent ?? renderBackdrop) as BottomSheetProps['backdropComponent']
+      }
+      footerComponent={footerComponent as BottomSheetProps['footerComponent']}
+      onDismiss={() => {
+        onDismiss?.()
+        onModalClose?.()
+      }}
       key={key}
       {...bottomSheetStyles}
-      {...props}
+      {...bottomSheetProps}
     >
+      {headerComponent}
       {!enableContentWrapper ? (
         children
       ) : enableScrollView ? (
         <BottomSheetScrollView
           contentContainerStyle={{
-            paddingBottom: props.footerComponent ? MODAL_FOOTER_HEIGHT_BOTTOM_INSET : BOTTOM_INSET,
+            paddingBottom: footerComponent ? MODAL_FOOTER_HEIGHT_BOTTOM_INSET : BOTTOM_INSET,
           }}
         >
           {children}
@@ -113,7 +115,7 @@ const Body = ({
         <BottomSheetView
           style={{
             flex: 1,
-            paddingBottom: props.footerComponent ? MODAL_FOOTER_HEIGHT_BOTTOM_INSET : BOTTOM_INSET,
+            paddingBottom: footerComponent ? MODAL_FOOTER_HEIGHT_BOTTOM_INSET : BOTTOM_INSET,
           }}
         >
           {children}

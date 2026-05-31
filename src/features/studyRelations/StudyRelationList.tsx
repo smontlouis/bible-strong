@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet'
+import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '~common/bottom-sheet'
 import { MenuView } from '@expo/ui/community/menu'
 import { type ComponentProps, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'

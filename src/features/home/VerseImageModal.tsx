@@ -1,4 +1,4 @@
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetView } from '~common/bottom-sheet'
 import { useTheme } from '@emotion/react'
 import { Image } from 'expo-image'
 import * as FileSystem from 'expo-file-system/legacy'

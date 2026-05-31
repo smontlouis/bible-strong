@@ -2,7 +2,7 @@ import styled from '@emotion/native'
 import React, { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch } from 'react-redux'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '~common/bottom-sheet'
 
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'

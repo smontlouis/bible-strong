@@ -18,7 +18,7 @@ import { useRouter } from 'expo-router'
 import { currentStudyIdAtom, openedFromTabAtom } from '~features/studies/atom'
 import { StrongReference, StudyNavigateBibleType } from '~common/types'
 import { Theme } from '@emotion/react'
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { BottomSheetScrollView } from '~common/bottom-sheet'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)

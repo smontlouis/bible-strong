@@ -1,4 +1,7 @@
-import BottomSheet, { BottomSheetModal } from '@gorhom/bottom-sheet'
+import BottomSheet, {
+  type BottomSheet as BottomSheetRef,
+  BottomSheetModal,
+} from '~common/bottom-sheet'
 import React from 'react'
 import { useSharedValue } from 'react-native-reanimated'
 import bibleMemoize from '~helpers/bibleStupidMemoize'
@@ -69,7 +72,7 @@ const Timeline = ({
   sectionIndex,
 }: Props) => {
   const isReady = useSharedValue(0)
-  const modalRef = React.useRef<BottomSheet>(null)
+  const modalRef = React.useRef<BottomSheetRef>(null)
   const searchModalRef = React.useRef<BottomSheetModal>(null)
   const openInNewTab = useOpenInNewTab()
   const lang = useLanguage()

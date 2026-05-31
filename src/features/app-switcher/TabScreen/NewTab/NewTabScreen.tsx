@@ -1,5 +1,5 @@
 import { PrimitiveAtom } from 'jotai/vanilla'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '~common/bottom-sheet'
 import { useAtom } from 'jotai/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'

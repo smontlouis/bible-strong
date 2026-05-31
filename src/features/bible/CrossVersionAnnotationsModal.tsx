@@ -1,6 +1,6 @@
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { type BottomSheetModal as ExpoBottomSheetModal } from '~common/bottom-sheet'
 import { MenuView, type MenuAction } from '@expo/ui/community/menu'
 import styled from '@emotion/native'
 import Modal from '~common/Modal'
@@ -32,7 +32,7 @@ const IconContainer = styled.View(({ theme }) => ({
 }))
 
 interface CrossVersionAnnotationsModalProps {
-  bottomSheetRef: React.RefObject<BottomSheetModal | null>
+  bottomSheetRef: React.RefObject<ExpoBottomSheetModal | null>
   verseKey: string | null
   versions: CrossVersionAnnotation[]
   onSwitchVersion: (version: VersionCode, verse: number) => void
@@ -98,48 +98,45 @@ const CrossVersionAnnotationsModal = ({
     <Modal.Body
       ref={bottomSheetRef}
       onModalClose={onClose}
-      withPortal
-      snapPoints={['50%']}
+      enableDynamicSizing
       headerComponent={
         <ModalHeader title={t('bible.crossVersionAnnotations.subtitle')} subTitle={reference} />
       }
     >
-      <Box>
-        {versions.map((versionData, index) => (
-          <ItemRow key={index}>
-            <IconContainer>
-              <FeatherIcon name="edit-3" size={18} color="secondary" />
-            </IconContainer>
-            <Box flex>
-              <HStack gap={10} alignItems="center">
-                <Text fontSize={14} fontWeight="600">
-                  {t('bible.crossVersionAnnotations.annotationCount', {
-                    count: versionData.count,
-                  })}
-                </Text>
-                <Chip>{versionData.version}</Chip>
-              </HStack>
+      {versions.map((versionData, index) => (
+        <ItemRow key={index}>
+          <IconContainer>
+            <FeatherIcon name="edit-3" size={18} color="secondary" />
+          </IconContainer>
+          <Box flex>
+            <HStack gap={10} alignItems="center">
+              <Text fontSize={14} fontWeight="600">
+                {t('bible.crossVersionAnnotations.annotationCount', {
+                  count: versionData.count,
+                })}
+              </Text>
+              <Chip>{versionData.version}</Chip>
+            </HStack>
+          </Box>
+          <MenuView
+            actions={menuActions}
+            onPressAction={({ nativeEvent }) => {
+              switch (nativeEvent.event) {
+                case 'switch-version':
+                  handleSwitchVersion(versionData.version)
+                  break
+                case 'new-tab':
+                  handleOpenInNewTab(versionData.version)
+                  break
+              }
+            }}
+          >
+            <Box center width={40} height={40} marginLeft={8}>
+              <FeatherIcon name="more-vertical" size={18} color="tertiary" />
             </Box>
-            <MenuView
-              actions={menuActions}
-              onPressAction={({ nativeEvent }) => {
-                switch (nativeEvent.event) {
-                  case 'switch-version':
-                    handleSwitchVersion(versionData.version)
-                    break
-                  case 'new-tab':
-                    handleOpenInNewTab(versionData.version)
-                    break
-                }
-              }}
-            >
-              <Box center width={40} height={40} marginLeft={8}>
-                <FeatherIcon name="more-vertical" size={18} color="tertiary" />
-              </Box>
-            </MenuView>
-          </ItemRow>
-        ))}
-      </Box>
+          </MenuView>
+        </ItemRow>
+      ))}
     </Modal.Body>
   )
 }

@@ -1,4 +1,4 @@
-import { BottomSheetFlashList, BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetFlashList, BottomSheetModal } from '~common/bottom-sheet'
 import { useTheme } from '@emotion/react'
 import { Ref, useDeferredValue, useEffect, useState } from 'react'
 import { ActivityIndicator } from 'react-native'

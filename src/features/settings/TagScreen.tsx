@@ -1,4 +1,4 @@
-import { BottomSheetModal } from '@gorhom/bottom-sheet/'
+import { BottomSheetModal } from '~common/bottom-sheet'
 import { MenuView } from '@expo/ui/community/menu'
 import React, { useRef, useState } from 'react'
 import { Alert } from 'react-native'

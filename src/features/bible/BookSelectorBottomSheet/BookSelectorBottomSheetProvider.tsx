@@ -1,4 +1,4 @@
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '~common/bottom-sheet'
 import React, { createContext, useContext, useRef } from 'react'
 import type { BibleTab, BibleTabActions } from '../../../state/tabs'
 import BookSelectorBottomSheet, { bookSelectorDataAtom } from './BookSelectorBottomSheet'

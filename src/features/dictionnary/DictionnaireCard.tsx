@@ -15,7 +15,7 @@ import truncate from '~helpers/truncate'
 import { useRouter } from 'expo-router'
 import { useAtomValue } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { BottomSheetScrollView } from '~common/bottom-sheet'
 import { currentStudyIdAtom, openedFromTabAtom } from '~features/studies/atom'
 import { StudyNavigateBibleType } from '~common/types'
 

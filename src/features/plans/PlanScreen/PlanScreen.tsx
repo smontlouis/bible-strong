@@ -1,4 +1,4 @@
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '~common/bottom-sheet'
 import { useLocalSearchParams } from 'expo-router'
 import React from 'react'
 import { ComputedReadingSlice, ComputedPlanItem, Plan } from 'src/common/types'
