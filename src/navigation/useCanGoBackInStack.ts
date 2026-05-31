@@ -1,5 +1,5 @@
-import type { NavigationState } from '@react-navigation/native'
 import { useNavigation } from 'expo-router'
+import { NavigationState } from 'expo-router/build/react-navigation'
 import { useSyncExternalStore } from 'react'
 
 export const useCanGoBackInStack = () => {
