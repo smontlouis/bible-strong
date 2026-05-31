@@ -1,7 +1,7 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { TouchableOpacity } from 'react-native'
+import { MenuView, type MenuAction } from '@expo/ui/community/menu'
 import styled from '@emotion/native'
 import Modal from '~common/Modal'
 import Box, { HStack } from '~common/ui/Box'
@@ -81,6 +81,18 @@ const CrossVersionAnnotationsModal = ({
   }
 
   const reference = verseKey ? formatVerseReference(verseKey) : ''
+  const menuActions: MenuAction[] = [
+    {
+      id: 'switch-version',
+      title: t('bible.crossVersionAnnotations.switchVersion'),
+      image: 'arrow.triangle.2.circlepath',
+    },
+    {
+      id: 'new-tab',
+      title: t('bible.crossVersionAnnotations.newTab'),
+      image: 'plus.square',
+    },
+  ]
 
   return (
     <Modal.Body
@@ -107,35 +119,24 @@ const CrossVersionAnnotationsModal = ({
                 </Text>
                 <Chip>{versionData.version}</Chip>
               </HStack>
-              <HStack gap={12} marginTop={8}>
-                <TouchableOpacity
-                  onPress={e => {
-                    e.stopPropagation()
-                    handleSwitchVersion(versionData.version)
-                  }}
-                >
-                  <HStack alignItems="center">
-                    <FeatherIcon name="refresh-cw" size={10} color="tertiary" />
-                    <Text fontSize={11} color="tertiary" marginLeft={4}>
-                      {t('bible.crossVersionAnnotations.switchVersion')}
-                    </Text>
-                  </HStack>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={e => {
-                    e.stopPropagation()
-                    handleOpenInNewTab(versionData.version)
-                  }}
-                >
-                  <HStack alignItems="center">
-                    <FeatherIcon name="plus-square" size={10} color="tertiary" />
-                    <Text fontSize={11} color="tertiary" marginLeft={4}>
-                      {t('bible.crossVersionAnnotations.newTab')}
-                    </Text>
-                  </HStack>
-                </TouchableOpacity>
-              </HStack>
             </Box>
+            <MenuView
+              actions={menuActions}
+              onPressAction={({ nativeEvent }) => {
+                switch (nativeEvent.event) {
+                  case 'switch-version':
+                    handleSwitchVersion(versionData.version)
+                    break
+                  case 'new-tab':
+                    handleOpenInNewTab(versionData.version)
+                    break
+                }
+              }}
+            >
+              <Box center width={40} height={40} marginLeft={8}>
+                <FeatherIcon name="more-vertical" size={18} color="tertiary" />
+              </Box>
+            </MenuView>
           </ItemRow>
         ))}
       </Box>

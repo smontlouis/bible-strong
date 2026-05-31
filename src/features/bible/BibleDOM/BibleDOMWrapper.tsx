@@ -214,6 +214,7 @@ function useStabilizedVerses(verses: Verse[], isLoading: boolean) {
 }
 
 export type WebViewProps = {
+  tabId: string
   bibleAtom: PrimitiveAtom<BibleTab>
   isBibleViewReloadingAtom: PrimitiveAtom<boolean>
   book: Book

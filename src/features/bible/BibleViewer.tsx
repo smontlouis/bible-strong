@@ -704,6 +704,7 @@ const BibleViewer = ({
 
   // Build the props object for BibleDOMWrapper (same props as before, just extracted)
   const domProps = {
+    tabId: bible.id,
     bibleAtom,
     isBibleViewReloadingAtom,
     book,

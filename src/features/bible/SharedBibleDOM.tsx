@@ -37,9 +37,12 @@ const SharedBibleDOM = () => {
   const sharedProps = useAtomValue(sharedBibleDOMPropsAtom)
   const settings = useSelector((state: RootState) => state.user.bible.settings)
 
-  const destination = activeBibleTabId
-    ? getBibleDOMDestination(activeBibleTabId)
-    : SHARED_BIBLE_DOM_PARK_HOST
+  const activeProps =
+    activeBibleTabId && sharedProps?.tabId === activeBibleTabId ? sharedProps : null
+  const destination =
+    activeBibleTabId && activeProps
+      ? getBibleDOMDestination(activeBibleTabId)
+      : SHARED_BIBLE_DOM_PARK_HOST
 
   const prevDestination = useRef<string | undefined>(undefined)
   if (prevDestination.current !== destination) {
@@ -64,6 +67,7 @@ const SharedBibleDOM = () => {
 
   // Default props to pre-warm the WebView (empty verses, no-op callbacks)
   const defaultProps: WebViewProps = {
+    tabId: defaultBibleTab.id,
     bibleAtom: defaultBibleAtom,
     isBibleViewReloadingAtom: defaultReloadAtom,
     book: defaultBibleTab.data.selectedBook,
@@ -96,7 +100,7 @@ const SharedBibleDOM = () => {
     comments: null,
   }
 
-  const props = sharedProps ?? defaultProps
+  const props = activeProps ?? defaultProps
 
   const MAX_RETRIES = 2
   const handleMountTimeout = () => {

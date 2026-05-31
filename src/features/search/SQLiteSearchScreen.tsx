@@ -1007,7 +1007,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
                 mb={0}
                 maxHeight={40}
               />
-              {hasInstalledVersions && !hasReference && (
+              {hasInstalledVersions && (
                 <ScrollView horizontal>
                   <HStack
                     px={20}
