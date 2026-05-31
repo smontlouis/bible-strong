@@ -4,9 +4,7 @@ import NaveScreen from '~features/nave/NaveScreen'
 const NaveRoute = () => {
   const params = useLocalSearchParams<{ mode?: string; tabId?: string }>()
 
-  return (
-    <NaveScreen isFormSheet isNewTabSelection={params.mode === 'newTab'} newTabId={params.tabId} />
-  )
+  return <NaveScreen isNewTabSelection={params.mode === 'newTab'} newTabId={params.tabId} />
 }
 
 export default NaveRoute

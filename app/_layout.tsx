@@ -278,12 +278,11 @@ function InnerApp() {
                         />
                         <Stack.Screen
                           name="(library)"
-                          options={createFormSheetOptions(theme, {
+                          options={{
                             contentStyle: {
                               bottom: 0,
                             },
-                            sheetGrabberVisible: false,
-                          })}
+                          }}
                         />
                       </Stack>
                       <ThemedToaster />

@@ -1,5 +1,5 @@
 import TagsScreen from '~features/settings/TagsScreen'
 
-const TagsRoute = () => <TagsScreen isFormSheet />
+const TagsRoute = () => <TagsScreen />
 
 export default TagsRoute

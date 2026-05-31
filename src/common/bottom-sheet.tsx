@@ -15,7 +15,10 @@ import ExpoBottomSheet, {
   type BottomSheetProps as ExpoBottomSheetProps,
 } from '@expo/ui/community/bottom-sheet'
 
-type CompatBottomSheetProps = Omit<ExpoBottomSheetProps, 'backdropComponent' | 'footerComponent'> & {
+type CompatBottomSheetProps = Omit<
+  ExpoBottomSheetProps,
+  'backdropComponent' | 'footerComponent'
+> & {
   activeOffsetY?: unknown
   android_keyboardInputMode?: string
   animateOnMount?: boolean
@@ -60,14 +63,14 @@ const stripUnsupportedProps = ({
   ...props
 }: CompatBottomSheetProps) => props
 
-const BottomSheet = forwardRef<BottomSheetMethods, CompatBottomSheetProps>(
-  (props, ref) => <ExpoBottomSheet ref={ref} {...stripUnsupportedProps(props)} />
-)
+const BottomSheet = forwardRef<BottomSheetMethods, CompatBottomSheetProps>((props, ref) => (
+  <ExpoBottomSheet ref={ref} {...stripUnsupportedProps(props)} />
+))
 BottomSheet.displayName = 'BottomSheet'
 
-const BottomSheetModal = forwardRef<BottomSheetMethods, CompatBottomSheetProps>(
-  (props, ref) => <ExpoBottomSheetModal ref={ref} {...stripUnsupportedProps(props)} />
-)
+const BottomSheetModal = forwardRef<BottomSheetMethods, CompatBottomSheetProps>((props, ref) => (
+  <ExpoBottomSheetModal ref={ref} {...stripUnsupportedProps(props)} />
+))
 BottomSheetModal.displayName = 'BottomSheetModal'
 
 export type BottomSheet = BottomSheetMethods
@@ -75,11 +78,7 @@ export type BottomSheetModal = BottomSheetMethods
 export type BottomSheetProps = CompatBottomSheetProps
 type BottomSheetDefaultBackdropProps = CompatBackdropProps
 
-const BottomSheetFooter = ({
-  children,
-  bottomInset = 0,
-  style,
-}: CompatFooterProps) => (
+const BottomSheetFooter = ({ children, bottomInset = 0, style }: CompatFooterProps) => (
   <View style={[style, bottomInset ? { paddingBottom: bottomInset } : null]}>{children}</View>
 )
 

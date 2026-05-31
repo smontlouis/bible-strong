@@ -61,9 +61,6 @@ const VersionSelectorBottomSheet = ({ bottomSheetRef }: VersionSelectorBottomShe
       topInset={insets.top + 64}
       enablePanDownToClose
       enableDynamicSizing={false}
-      enableContentPanningGesture={false}
-      backdropComponent={renderBackdrop}
-      containerComponent={ContainerComponent}
       activeOffsetY={[-20, 20]}
       key={key}
       {...bottomSheetStyles}

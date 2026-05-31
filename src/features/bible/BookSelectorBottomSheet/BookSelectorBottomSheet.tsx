@@ -179,10 +179,6 @@ const BookSelectorBottomSheet = ({ bottomSheetRef }: BookSelectorBottomSheetProp
         snapPoints={['100%']}
         topInset={insets.top + 64}
         enablePanDownToClose
-        enableDynamicSizing={false}
-        enableContentPanningGesture={false}
-        backdropComponent={renderBackdrop}
-        containerComponent={ContainerComponent}
         activeOffsetY={[-20, 20]}
         onAnimate={(fromIndex, toIndex) => {
           // Opening the bottom sheet
