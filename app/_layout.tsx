@@ -275,7 +275,7 @@ function InnerApp() {
                               contentStyle: {
                                 bottom: 0,
                               },
-                              sheetAllowedDetents: [0.4, 1],
+                              sheetAllowedDetents: [0.45, 1],
                               sheetLargestUndimmedDetentIndex: 'last',
                             })}
                           />
