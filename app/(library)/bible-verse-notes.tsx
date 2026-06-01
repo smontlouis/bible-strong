@@ -5,11 +5,7 @@ const BibleVerseNotesRoute = () => {
   const params = useLocalSearchParams<{ mode?: string; tabId?: string }>()
 
   return (
-    <BibleVerseNotesScreen
-      isFormSheet
-      isNewTabSelection={params.mode === 'newTab'}
-      newTabId={params.tabId}
-    />
+    <BibleVerseNotesScreen isNewTabSelection={params.mode === 'newTab'} newTabId={params.tabId} />
   )
 }
 

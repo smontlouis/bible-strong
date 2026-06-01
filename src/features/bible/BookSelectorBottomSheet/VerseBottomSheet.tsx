@@ -119,7 +119,13 @@ const VerseBottomSheet = ({
       stackBehavior="push"
       {...bottomSheetStyles}
     >
-      <Box px={10} py={10} borderBottomWidth={1} borderColor="border">
+      <Box
+        height={54}
+        justifyContent="center"
+        alignItems="center"
+        borderBottomWidth={1}
+        borderColor="lightGrey"
+      >
         <Text fontWeight="bold" textAlign="center">
           {t('goToVerse')}
         </Text>

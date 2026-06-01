@@ -204,8 +204,7 @@
     "USE_COMMIT_HOOK_ONLY_FOR_REACT_COMMITS": true
   },
   "resolutions": {
-    "react-native-svg": "15.15.4",
-    "@expo/ui@npm:^56.0.14": "patch:@expo/ui@npm%3A56.0.14#~/.yarn/patches/@expo-ui-npm-56.0.14-ce05d5ead5.patch"
+    "react-native-svg": "15.15.4"
   },
   "expo": {
     "install": {
