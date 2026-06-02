@@ -1,12 +1,12 @@
-import { useRouter } from 'expo-router'
 import books from '~assets/bible_versions/books-desc'
 import { useOpenNote } from '~features/notes/useOpenNote'
 import { toast } from '~helpers/toast'
 import i18n from '~i18n'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import type { RelationEndpoint } from './domain'
 
 export const useOpenRelationEndpoint = () => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const openNote = useOpenNote()
 
   return (endpoint: RelationEndpoint) => {
@@ -19,7 +19,7 @@ export const useOpenRelationEndpoint = () => {
             return keyBook === bookNumber && keyChapter === chapter
           })
           .map(key => Number(key.split('-')[2]))
-        router.push({
+        pushRouteOnce({
           pathname: '/bible-view',
           params: {
             contextDisplayMode: 'focused',
@@ -35,13 +35,13 @@ export const useOpenRelationEndpoint = () => {
         openNote({ noteId: endpoint.noteId })
         break
       case 'study':
-        router.push({
+        pushRouteOnce({
           pathname: '/edit-study',
           params: { studyId: endpoint.studyId },
         })
         break
       case 'strong':
-        router.push({
+        pushRouteOnce({
           pathname: '/strong',
           params: {
             book: endpoint.language === 'hebrew' ? '1' : '40',
@@ -50,7 +50,7 @@ export const useOpenRelationEndpoint = () => {
         })
         break
       case 'nave':
-        router.push({
+        pushRouteOnce({
           pathname: '/nave-detail',
           params: {
             name_lower: endpoint.nameLower,
@@ -59,7 +59,7 @@ export const useOpenRelationEndpoint = () => {
         })
         break
       case 'dictionary':
-        router.push({
+        pushRouteOnce({
           pathname: '/dictionnary-detail',
           params: { word: endpoint.word },
         })
@@ -69,7 +69,7 @@ export const useOpenRelationEndpoint = () => {
           toast.error(i18n.t('Lien introuvable'))
           break
         }
-        router.push({
+        pushRouteOnce({
           pathname: '/link',
           params: { linkId: endpoint.linkId },
         })

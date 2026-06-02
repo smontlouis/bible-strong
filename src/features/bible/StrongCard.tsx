@@ -19,6 +19,7 @@ import { currentStudyIdAtom, openedFromTabAtom } from '~features/studies/atom'
 import { StrongReference, StudyNavigateBibleType } from '~common/types'
 import { Theme } from '@emotion/react'
 import { BottomSheetScrollView } from '~common/bottom-sheet'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -91,6 +92,7 @@ type Props = {
 const StrongCard = (props: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const openedFromTab = useAtomValue(openedFromTabAtom)
 
   const linkToStrong = (str1: string, str2: number) => {
@@ -108,7 +110,7 @@ const StrongCard = (props: Props) => {
       reference = str1
     }
 
-    router.push({
+    pushRouteOnce({
       pathname: '/strong',
       params: {
         book: bookNum,
@@ -148,7 +150,7 @@ const StrongCard = (props: Props) => {
         },
       })
     } else {
-      router.push({
+      pushRouteOnce({
         pathname: '/strong',
         params: {
           book: String(Number(book)),

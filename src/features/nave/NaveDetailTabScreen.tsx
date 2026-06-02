@@ -33,6 +33,7 @@ import { createNaveEndpoint } from '~features/studyRelations/endpoints'
 import type { RelationEndpoint } from '~redux/modules/user'
 import ScrollView from '~common/ui/ScrollView'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 interface NaveDetailScreenProps {
   naveAtom: PrimitiveAtom<NaveTab>
@@ -41,6 +42,7 @@ interface NaveDetailScreenProps {
 
 const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenProps) => {
   const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const [naveTab, setNaveTab] = useAtom(naveAtom)
   const { isInTab } = useTabContext()
   const canGoBackInStack = useCanGoBackInStack()
@@ -116,7 +118,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
       try {
         const [book, chapter, verses] = item.split('-')
         const [verse] = verses ? verses.split(',') : []
-        router.push({
+        pushRouteOnce({
           pathname: '/bible-view',
           params: {
             contextDisplayMode: 'focused',
@@ -133,7 +135,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     }
 
     if (type === 'w') {
-      router.push({
+      pushRouteOnce({
         pathname: '/nave-detail',
         params: {
           name_lower: item,

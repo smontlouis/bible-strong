@@ -1,10 +1,10 @@
 import React from 'react'
 import styled from '@emotion/native'
-import { useRouter } from 'expo-router'
 
 import booksDesc from '~assets/bible_versions/books-desc'
 import Paragraph from '~common/ui/Paragraph'
 import { BcvLanguage, BibleReferenceTarget, parseInlineBibleReferences } from '~helpers/bcvParser'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 type ParagraphProps = React.ComponentProps<typeof Paragraph>
 
@@ -27,7 +27,7 @@ const ReferenceText = styled.Text(({ theme }) => ({
 }))
 
 const ReferenceParagraph = ({ children, planLanguage, ...props }: ReferenceParagraphProps) => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const references = parseInlineBibleReferences(children, planLanguage)
 
   if (!references.length) {
@@ -49,7 +49,7 @@ const ReferenceParagraph = ({ children, planLanguage, ...props }: ReferenceParag
               accessibilityLabel={reference.text}
               accessibilityRole="link"
               onPress={() =>
-                router.push({
+                pushRouteOnce({
                   pathname: '/bible-view',
                   params: getBibleViewParams(reference.target),
                 })

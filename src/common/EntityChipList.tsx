@@ -1,10 +1,10 @@
 import styled from '@emotion/native'
-import { useRouter } from 'expo-router'
 import React, { useState } from 'react'
 
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { Tag } from './types'
 
 const StyledChip = styled(Box)(({ theme }) => ({
@@ -46,7 +46,7 @@ const EntityChipList = ({
   onRelationPress?: () => void
   limit?: number
 }) => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const [isExpanded, setIsExpanded] = useState(false)
 
   const allTags = Object.values(tags || {})
@@ -58,7 +58,7 @@ const EntityChipList = ({
       id: tag.id,
       label: tag.name,
       onPress: () => {
-        router.push({ pathname: '/tag', params: { tagId: tag.id } })
+        pushRouteOnce({ pathname: '/tag', params: { tagId: tag.id } })
       },
     })),
     ...(relationCount > 0 && onRelationPress

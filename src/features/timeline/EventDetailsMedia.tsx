@@ -2,7 +2,6 @@ import { Image } from 'expo-image'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import Carousel from 'react-native-reanimated-carousel'
-import { useRouter } from 'expo-router'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -12,6 +11,7 @@ import { wp } from '~helpers/utils'
 import EventDetailVerse from './EventDetailVerse'
 import { getEvents } from './events'
 import { TimelineEvent, TimelineEventDetail } from './types'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 const imageWidth = wp(80, true)
 const sliderWidth = wp(100, true)
@@ -25,7 +25,7 @@ const Media = ({
 }: Pick<TimelineEventDetail, 'images' | 'scriptures' | 'videos' | 'related'> & {
   onOpenEvent?: (event: TimelineEvent) => void
 }) => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
 
   const { data: events } = useQuery({
@@ -104,7 +104,7 @@ const Media = ({
                 if (foundEvent && onOpenEvent) {
                   onOpenEvent(foundEvent)
                 } else if (foundEvent) {
-                  router.push({
+                  pushRouteOnce({
                     pathname: '/event',
                     params: { slug: foundEvent.slug },
                   })

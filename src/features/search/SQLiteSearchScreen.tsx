@@ -75,6 +75,7 @@ import {
 } from './shared/searchItems'
 import type { SearchEntityResult } from './shared/searchResultTypes'
 import Header from '~common/Header'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 type Props = {
   searchValue: string
@@ -119,6 +120,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const router = useRouter()
   const keyboardFooterBottom = useKeyboardFooterBottom(SEARCH_ALPHABET_FOOTER_HEIGHT)
   const openRelationEndpoint = useOpenRelationEndpoint()
+  const pushRouteOnce = usePushRouteOnce()
   const notes = useSelector((state: RootState) => state.user.bible.notes)
   const links = useSelector((state: RootState) => state.user.bible.links)
   const studies = useSelector((state: RootState) => state.user.bible.studies)
@@ -745,7 +747,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
 
   const openSearchItem = (item: SearchEntityResult) => {
     if (item.passage) {
-      router.push({
+      pushRouteOnce({
         pathname: '/bible-view',
         params: getBibleViewParamsForSearchResult(item.passage),
       })
@@ -1089,7 +1091,7 @@ const SearchNoResultsState = ({ query }: { query: string }) => {
 }
 
 const ReferenceSearchResultRow = ({ item }: { item: SearchEntityResult }) => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const version = useDefaultBibleVersion()
   const segment = item.referenceSegment!
 
@@ -1106,7 +1108,7 @@ const ReferenceSearchResultRow = ({ item }: { item: SearchEntityResult }) => {
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={() =>
-        router.push({
+        pushRouteOnce({
           pathname: '/bible-view',
           params: {
             contextDisplayMode: 'focused',

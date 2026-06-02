@@ -2,10 +2,10 @@ import React, { memo, useCallback } from 'react'
 import styled from '@emotion/native'
 import { Pressable } from 'react-native'
 
-import { useRouter } from 'expo-router'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 interface NaveItemProps {
   name_lower: string
@@ -25,18 +25,18 @@ const SectionItem = styled(Box)(({ theme }) => ({
 }))
 
 const NaveItem = memo(({ name_lower, name, onSelect }: NaveItemProps) => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
 
   const handlePress = useCallback(() => {
     if (onSelect) {
       onSelect(name_lower, name)
     } else {
-      router.push({
+      pushRouteOnce({
         pathname: '/nave-detail',
         params: { name_lower, name },
       })
     }
-  }, [onSelect, name_lower, name, router])
+  }, [onSelect, name_lower, name, pushRouteOnce])
 
   const content = (
     <SectionItem>

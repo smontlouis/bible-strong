@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { BottomSheetFlatList, BottomSheetModal } from '~common/bottom-sheet'
-import { useRouter } from 'expo-router'
 import { Image } from 'expo-image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Empty from '~common/Empty'
@@ -17,6 +16,7 @@ import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelper
 import { ContainerComponent } from '~common/Modal'
 import { TimelineEventDetail } from './types'
 import { getTimelineImageUri } from './timelineImage'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 interface Props {
   modalRef: React.RefObject<BottomSheetModal | null>
@@ -103,7 +103,7 @@ const TimelineSearchResultItem = ({
 }
 
 const SearchInTimelineModal = ({ modalRef }: Props) => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const [searchValue, setSearchValue] = useState('')
@@ -128,7 +128,7 @@ const SearchInTimelineModal = ({ modalRef }: Props) => {
 
   const onOpenEvent = (event: TimelineEventDetail) => {
     modalRef.current?.dismiss()
-    router.push({
+    pushRouteOnce({
       pathname: '/event',
       params: { slug: event.slug },
     })

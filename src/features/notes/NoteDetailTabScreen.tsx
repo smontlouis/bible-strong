@@ -35,6 +35,7 @@ import { toast } from '~helpers/toast'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import verseToReference from '~helpers/verseToReference'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { RootState } from '~redux/modules/reducer'
 import type { RelationEndpoint } from '~redux/modules/user'
 import { addNote, deleteNote } from '~redux/modules/user'
@@ -73,6 +74,7 @@ const NoteDetailTabScreen = ({
   isFormSheet = false,
 }: NoteDetailTabScreenProps) => {
   const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
   const dispatch = useDispatch()
@@ -315,7 +317,7 @@ ${currentNote.description}
       return
     }
 
-    router.push({
+    pushRouteOnce({
       pathname: '/bible-view',
       params: {
         contextDisplayMode: 'focused',

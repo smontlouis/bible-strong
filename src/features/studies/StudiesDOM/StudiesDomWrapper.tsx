@@ -1,4 +1,3 @@
-import { useRouter } from 'expo-router'
 import type { JSONValue } from 'expo/build/dom/dom.types'
 import { useEffect, useRef, useState } from 'react'
 import {
@@ -22,6 +21,7 @@ import { currentStudyIdAtom } from '../atom'
 import StudyFooter from '../StudyFooter'
 import StudiesDOMComponent, { StudyDOMRef } from './StudiesDOMComponent'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 type Props = {
   params: Readonly<EditStudyScreenProps>
@@ -67,7 +67,7 @@ export default function StudiesDomWrapper({
   isFormSheet = false,
 }: Props) {
   const ref = useRef<StudyDOMRef>(null)
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const theme = useTheme()
   const isKeyboardOpened = useKeyboardState(state => state.isVisible)
   const keyboardHeight = useKeyboardState(state => state.height)
@@ -98,7 +98,7 @@ export default function StudiesDomWrapper({
     dispatchToWebView('BLUR_EDITOR')
     await timeout(300)
     getDefaultStore().set(currentStudyIdAtom, studyId)
-    router.push({
+    pushRouteOnce({
       pathname: '/bible-view',
       params: { isSelectionMode: selectionMode },
     })
@@ -153,7 +153,7 @@ export default function StudiesDomWrapper({
             })
             .map(verseKey => Number(verseKey.split('-')[2]))
 
-          router.push({
+          pushRouteOnce({
             pathname: '/bible-view',
             params: {
               contextDisplayMode: 'focused',
@@ -167,7 +167,7 @@ export default function StudiesDomWrapper({
         }
 
         case 'VIEW_BIBLE_STRONG': {
-          router.push({
+          pushRouteOnce({
             pathname: '/strong',
             params: msgData.payload as RouterParams | undefined,
           })

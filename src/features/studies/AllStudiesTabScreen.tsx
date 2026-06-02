@@ -16,7 +16,6 @@ import useLogin from '~helpers/useLogin'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { updateStudy } from '~redux/modules/user'
 
-import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { Tag } from '~common/types'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
@@ -29,6 +28,7 @@ import { createStudyEndpoint } from '~features/studyRelations/endpoints'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import StudyItem from './StudyItem'
 import StudySettingsModal from './StudySettingsModal'
 
@@ -47,7 +47,7 @@ const StudiesScreen = ({
   newTabId,
   onStudySelect,
 }: StudiesScreenProps) => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
   const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
@@ -95,7 +95,7 @@ const StudiesScreen = ({
     if (isInTab && onStudySelect) {
       onStudySelect(studyId)
     } else {
-      router.push({
+      pushRouteOnce({
         pathname: '/edit-study',
         params: { studyId },
       })

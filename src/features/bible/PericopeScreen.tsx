@@ -15,8 +15,9 @@ import Empty from '~common/Empty'
 import getBiblePericope from '~helpers/getBiblePericope'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '~helpers/react-query-lite'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 type PericopeVerse = {
   h1?: string
@@ -55,7 +56,7 @@ function clearEmpties<T extends Record<string, unknown>>(o: T): T {
 }
 
 const PericopeScreen = () => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
   const defaultVersion = useDefaultBibleVersion()
   const params = useLocalSearchParams<{ book?: string }>()
@@ -98,7 +99,7 @@ const PericopeScreen = () => {
                     <TouchableOpacity
                       key={verseKey}
                       onPress={() =>
-                        router.push({
+                        pushRouteOnce({
                           pathname: '/bible-view',
                           params: {
                             contextDisplayMode: 'focused',

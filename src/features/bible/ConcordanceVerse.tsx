@@ -7,10 +7,7 @@ import books from '~assets/bible_versions/books-desc'
 import Loading from '~common/Loading'
 import verseToStrong from '~helpers/verseToStrong'
 import type { TFunction } from 'react-i18next'
-import type { useRouter } from 'expo-router'
 import type { Verse } from '~common/types'
-
-type Router = ReturnType<typeof useRouter>
 
 const VerseText = styled.View(() => ({
   flex: 1,
@@ -27,7 +24,7 @@ const Container = styled.TouchableOpacity(({ theme }) => ({
 }))
 
 type Props = {
-  router: Router
+  onOpenVerse: (verse: Verse) => void
   t: TFunction<'translation', undefined>
   verse: Verse
   concordanceFor: string
@@ -56,7 +53,7 @@ class ConcordanceVerse extends React.Component<Props, ConcordanceVerseState> {
   }
 
   render() {
-    const { verse, router } = this.props
+    const { verse, onOpenVerse } = this.props
     const bookNumber = Number(verse.Livre)
     const chapterNumber = Number(verse.Chapitre)
     const verseNumber = Number(verse.Verset)
@@ -67,18 +64,7 @@ class ConcordanceVerse extends React.Component<Props, ConcordanceVerseState> {
 
     return (
       <Container
-        onPress={() =>
-          router.push({
-            pathname: '/bible-view',
-            params: {
-              contextDisplayMode: 'focused',
-              book: JSON.stringify(books[bookNumber - 1]),
-              chapter: String(chapterNumber),
-              verse: String(verseNumber),
-              focusVerses: JSON.stringify([verseNumber]),
-            },
-          })
-        }
+        onPress={() => onOpenVerse(verse)}
       >
         <Text title fontSize={16} marginBottom={5}>
           {this.t(books[bookNumber - 1].Nom)} {chapterNumber}:{verseNumber}

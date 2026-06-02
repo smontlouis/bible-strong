@@ -2,10 +2,10 @@ import React, { memo, useCallback } from 'react'
 import styled from '@emotion/native'
 import { Pressable } from 'react-native'
 
-import { useRouter } from 'expo-router'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 interface DictionnaireItemProps {
   word: string
@@ -24,18 +24,18 @@ const SectionItem = styled(Box)(({ theme }) => ({
 }))
 
 const DictionnaireItem = memo(({ word, onSelect }: DictionnaireItemProps) => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
 
   const handlePress = useCallback(() => {
     if (onSelect) {
       onSelect(word)
     } else {
-      router.push({
+      pushRouteOnce({
         pathname: '/dictionnary-detail',
         params: { word },
       })
     }
-  }, [onSelect, word, router])
+  }, [onSelect, word, pushRouteOnce])
 
   const content = (
     <SectionItem>

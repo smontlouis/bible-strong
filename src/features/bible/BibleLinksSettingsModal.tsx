@@ -1,5 +1,4 @@
 import { BottomSheetModal } from '~common/bottom-sheet'
-import { useRouter } from 'expo-router'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
@@ -11,6 +10,7 @@ import { deleteLink } from '~redux/modules/user'
 import books from '~assets/bible_versions/books-desc'
 import { unifiedTagsModalAtom } from '../../state/app'
 import { RootState } from '~redux/modules/reducer'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 type Props = {
   ref?: React.RefObject<BottomSheetModal | null>
@@ -23,7 +23,7 @@ type Props = {
 const LinksSettingsModal = ({ ref, linkId, onClosed, title, onEditRelations }: Props) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const relations = useSelector((state: RootState) => state.user.bible.relations)
 
@@ -61,7 +61,7 @@ const LinksSettingsModal = ({ ref, linkId, onClosed, title, onEditRelations }: P
     const [Livre, Chapitre, Verset] = verseEndpoint.verseKeys[0].split('-')
     close()
     setTimeout(() => {
-      router.push({
+      pushRouteOnce({
         pathname: '/bible-view',
         params: {
           contextDisplayMode: 'focused',

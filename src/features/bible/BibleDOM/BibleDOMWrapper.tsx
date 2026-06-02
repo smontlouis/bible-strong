@@ -57,6 +57,7 @@ import {
 import type { CrossVersionAnnotation } from '~redux/selectors/bible'
 import type { RelationEndpoint, RelationKind, RelationType } from '~features/studyRelations/domain'
 import { useOpenRelationEndpoint } from '~features/studyRelations/useOpenRelationEndpoint'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { useBookAndVersionSelector } from '../BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
 import type { AnnotationType, SelectionRange, WordPosition } from '../hooks/useAnnotationMode'
 import { BibleDOMTranslations } from './TranslationsContext'
@@ -405,6 +406,7 @@ export const BibleDOMWrapper = ({
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
   const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
 
   const stableVerses = useStabilizedVerses(verses, isLoading)
 
@@ -585,7 +587,7 @@ export const BibleDOMWrapper = ({
           return
         }
 
-        router.push({
+        pushRouteOnce({
           pathname: '/bible-view',
           params: {
             contextDisplayMode: 'focused',
@@ -648,7 +650,7 @@ export const BibleDOMWrapper = ({
       case NAVIGATE_TO_TAG: {
         if (!isRecord(action.payload) || typeof action.payload.tagId !== 'string') break
         const { tagId } = action.payload
-        router.push({ pathname: '/tag', params: { tagId } })
+        pushRouteOnce({ pathname: '/tag', params: { tagId } })
         break
       }
 

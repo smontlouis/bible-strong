@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react'
 import { FlatList } from 'react-native'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { useRouter } from 'expo-router'
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 
@@ -12,6 +11,7 @@ import Text from '~common/ui/Text'
 import { RootState } from '~redux/modules/reducer'
 import { WordAnnotation } from '~redux/modules/user/wordAnnotations'
 import verseToReference from '~helpers/verseToReference'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 const Container = styled.View(({ theme }) => ({
   flex: 1,
@@ -77,7 +77,7 @@ type ViewMode = 'verse' | 'date' | 'flat'
 
 const WordAnnotationsScreen = () => {
   const { t } = useTranslation()
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const theme = useTheme()
   const [viewMode, setViewMode] = useState<ViewMode>('verse')
 
@@ -142,7 +142,7 @@ const WordAnnotationsScreen = () => {
     if (!firstRange) return
 
     const [book, chapter, verse] = firstRange.verseKey.split('-').map(Number)
-    router.push({
+    pushRouteOnce({
       pathname: '/bible-view',
       params: {
         contextDisplayMode: 'focused',

@@ -18,6 +18,7 @@ import { getDefaultStore } from 'jotai/vanilla'
 import { BottomSheetScrollView } from '~common/bottom-sheet'
 import { currentStudyIdAtom, openedFromTabAtom } from '~features/studies/atom'
 import { StudyNavigateBibleType } from '~common/types'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -72,6 +73,7 @@ type Props = {
 const DictionnaireCard = ({ dictionnaireRef, isSelectionMode }: Props) => {
   const theme = useTheme()
   const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const openedFromTab = useAtomValue(openedFromTabAtom)
 
   const { word, definition } = dictionnaireRef || {}
@@ -91,7 +93,7 @@ const DictionnaireCard = ({ dictionnaireRef, isSelectionMode }: Props) => {
         },
       })
     } else {
-      router.push({
+      pushRouteOnce({
         pathname: '/dictionnary-detail',
         params: { word },
       })

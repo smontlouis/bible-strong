@@ -67,6 +67,7 @@ import { PortalHost } from 'react-native-teleport'
 import { getBibleDOMDestination } from './SharedBibleDOM'
 import SnapshotPlaceholder from './SnapshotPlaceholder'
 import AnnotationToolbar from './AnnotationToolbar'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import {
   BibleDOMWrapper,
   ParallelVerse,
@@ -133,6 +134,7 @@ const BibleViewer = ({
 }: BibleViewerProps) => {
   const { t } = useTranslation()
   const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const openEntityRelations = useOpenEntityRelations()
   const openNote = useOpenNote()
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
@@ -514,7 +516,7 @@ const BibleViewer = ({
   }
 
   const toggleCreateLink = () => {
-    router.push({
+    pushRouteOnce({
       pathname: '/link',
       params: { verseKeys: Object.keys(selectedVerses).join(',') },
     })
@@ -548,7 +550,7 @@ const BibleViewer = ({
   }
 
   const openLink = (linkId: string) => {
-    router.push({ pathname: '/link', params: { linkId } })
+    pushRouteOnce({ pathname: '/link', params: { linkId } })
   }
 
   const openBibleNote = (noteId: string, verseIds?: string[]) => {
@@ -639,7 +641,7 @@ const BibleViewer = ({
     (code: SelectedCode | null) => {
       setSelectedCodeState(code)
       if (code) {
-        router.push({
+        pushRouteOnce({
           pathname: '/strong',
           params: {
             book: String(code.book),
@@ -648,7 +650,7 @@ const BibleViewer = ({
         })
       }
     },
-    [router]
+    [pushRouteOnce]
   )
 
   // Cross-version annotations modal handlers

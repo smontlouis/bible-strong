@@ -1,5 +1,4 @@
 import { BottomSheetModal } from '~common/bottom-sheet'
-import { useRouter } from 'expo-router'
 import { produce } from 'immer'
 import { PrimitiveAtom, useAtom } from 'jotai'
 import React, { useCallback } from 'react'
@@ -14,6 +13,7 @@ import generateUUID from '~helpers/generateUUID'
 import { RootState } from '~redux/modules/reducer'
 import { deleteNote } from '~redux/modules/user'
 import { NotesTab } from '~state/tabs'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 type Props = {
   ref?: React.RefObject<BottomSheetModal | null>
@@ -25,7 +25,7 @@ type Props = {
 const NotesSettingsModal = ({ ref, noteId, onClosed, notesAtom }: Props) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const openInNewTab = useOpenInNewTab()
   const [, setNotesTab] = useAtom(notesAtom)
   const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
@@ -80,7 +80,7 @@ const NotesSettingsModal = ({ ref, noteId, onClosed, notesAtom }: Props) => {
     const [Livre, Chapitre, Verset] = verseKey.split('-')
     close()
     setTimeout(() => {
-      router.push({
+      pushRouteOnce({
         pathname: '/bible-view',
         params: {
           contextDisplayMode: 'focused',
