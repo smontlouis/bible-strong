@@ -1,10 +1,9 @@
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
-import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '~common/bottom-sheet'
+import { SheetFooter, Sheet, SheetTextInput, type SheetRef } from '~common/sheet'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -12,7 +11,7 @@ import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import { GROUP_COLORS } from '../../../state/tabs'
 
-const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
+const StyledTextInput = styled(SheetTextInput)(({ theme }) => ({
   color: theme.colors.default,
   height: 48,
   borderColor: theme.colors.border,
@@ -23,7 +22,7 @@ const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
 }))
 
 interface EditGroupModalProps {
-  bottomSheetRef: React.RefObject<BottomSheetModal | null>
+  sheetRef: React.RefObject<SheetRef | null>
   initialName?: string
   initialColor?: string
   onSave: (data: { name: string; color: string }) => void
@@ -31,7 +30,7 @@ interface EditGroupModalProps {
 }
 
 const EditGroupModal = ({
-  bottomSheetRef,
+  sheetRef,
   initialName = '',
   initialColor = GROUP_COLORS[0],
   onSave,
@@ -49,7 +48,7 @@ const EditGroupModal = ({
   }, [initialName, initialColor])
 
   const handleClose = () => {
-    bottomSheetRef.current?.dismiss()
+    sheetRef.current?.dismiss()
     onClose?.()
   }
 
@@ -59,25 +58,21 @@ const EditGroupModal = ({
     handleClose()
   }
 
-  const handleSheetChange = (index: number) => {
-    if (index >= 0) {
-      setName(initialName)
-      setSelectedColor(initialColor || GROUP_COLORS[0])
-    }
+  const handlePresent = () => {
+    setName(initialName)
+    setSelectedColor(initialColor || GROUP_COLORS[0])
   }
 
   const isDisabled = !name.trim()
 
   return (
-    <Modal.Body
-      ref={bottomSheetRef}
-      onModalClose={handleClose}
-      onChange={handleSheetChange}
-      topInset={insets.top}
-      enableDynamicSizing
-      headerComponent={<ModalHeader title={t('tabs.editGroup')} />}
-      footerComponent={props => (
-        <BottomSheetFooter {...props}>
+    <Sheet
+      ref={sheetRef}
+      onDismiss={handleClose}
+      onPresent={handlePresent}
+      header={<ModalHeader title={t('tabs.editGroup')} />}
+      footer={props => (
+        <SheetFooter {...props}>
           <HStack
             py={5}
             px={20}
@@ -91,7 +86,7 @@ const EditGroupModal = ({
               </Button>
             </Box>
           </HStack>
-        </BottomSheetFooter>
+        </SheetFooter>
       )}
     >
       <Box paddingHorizontal={20} py={20} gap={20}>
@@ -134,7 +129,7 @@ const EditGroupModal = ({
           </HStack>
         </Box>
       </Box>
-    </Modal.Body>
+    </Sheet>
   )
 }
 

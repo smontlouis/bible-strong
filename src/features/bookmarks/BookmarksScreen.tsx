@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { BottomSheetModal } from '~common/bottom-sheet'
+import { type SheetRef } from '~common/sheet'
 
 import Empty from '~common/Empty'
 import Header from '~common/Header'
@@ -75,7 +75,7 @@ const BookmarksScreen = ({ isFormSheet = false }: BookmarksScreenProps) => {
   const hasBackButton = isFormSheet ? canGoBackInStack : true
   const bookmarks = useSelector(selectSortedBookmarks)
   const [selectedBookmark, setSelectedBookmark] = useState<Bookmark | null>(null)
-  const bookmarkModalRef = useRef<BottomSheetModal>(null)
+  const bookmarkModalRef = useRef<SheetRef>(null)
 
   const handleEdit = (bookmark: Bookmark) => {
     setSelectedBookmark(bookmark)
@@ -118,7 +118,7 @@ const BookmarksScreen = ({ isFormSheet = false }: BookmarksScreenProps) => {
           />
         )}
         <BookmarkModal
-          bottomSheetRef={bookmarkModalRef}
+          sheetRef={bookmarkModalRef}
           onClose={handleCloseModal}
           existingBookmark={selectedBookmark || undefined}
         />

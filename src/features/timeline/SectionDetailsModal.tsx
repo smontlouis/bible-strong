@@ -1,24 +1,19 @@
 import React from 'react'
 
-import BottomSheet, {
-  type BottomSheet as BottomSheetRef,
-  BottomSheetScrollView,
-} from '~common/bottom-sheet'
+import { Sheet, type SheetRef, SheetScrollView } from '~common/sheet'
 import { Image } from 'expo-image'
 import { useTranslation } from 'react-i18next'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import InlineLink from '~common/InlineLink'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import useLanguage from '~helpers/useLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { wp } from '~helpers/utils'
 import { ShallowTimelineSection } from './types'
 
 interface Props extends ShallowTimelineSection {
-  modalRef: React.RefObject<BottomSheetRef | null>
+  modalRef: React.RefObject<SheetRef | null>
 }
 
 const width = wp(50, 500)
@@ -41,21 +36,10 @@ const SectionDetailsModal = ({
 }: Props) => {
   const lang = useLanguage()
   const { t } = useTranslation()
-  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   return (
-    <BottomSheet
-      ref={modalRef}
-      index={-1}
-      topInset={useSafeAreaInsets().top + 56}
-      snapPoints={['100%']}
-      enableDynamicSizing={false}
-      enablePanDownToClose
-      backdropComponent={renderBackdrop}
-      key={key}
-      {...bottomSheetStyles}
-    >
-      <BottomSheetScrollView>
+    <Sheet ref={modalRef} snapPoints={[1]} dismissible backdrop>
+      <SheetScrollView>
         <Box flex center px={50} py={60}>
           <Text title fontSize={20}>
             {getLegacyLocalizedField(lang, { fr: sectionTitle, en: sectionTitleEn })}
@@ -95,8 +79,8 @@ const SectionDetailsModal = ({
             </InlineLink>
           </Paragraph>
         </Box>
-      </BottomSheetScrollView>
-    </BottomSheet>
+      </SheetScrollView>
+    </Sheet>
   )
 }
 

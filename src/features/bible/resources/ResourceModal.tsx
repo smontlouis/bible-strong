@@ -1,16 +1,16 @@
-import BottomSheet, {
-  BottomSheetFooter,
-  BottomSheetFooterProps,
-  BottomSheetScrollView,
-  type BottomSheet as BottomSheetRef,
-} from '~common/bottom-sheet'
+import {
+  SheetFooter,
+  type SheetFooterProps,
+  Sheet,
+  SheetScrollView,
+  type SheetRef,
+} from '~common/sheet'
 import { MenuView, type MenuAction } from '@expo/ui/community/menu'
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React, { memo, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BackHandler, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import ModalHeader from '~common/ModalHeader'
 import { BibleResource, StudyNavigateBibleType } from '~common/types'
 import Box from '~common/ui/Box'
@@ -22,13 +22,12 @@ import CommentariesCard from '~features/commentaries/CommentariesCard'
 import DictionnaireVerseDetailCard from '~features/dictionnary/DictionnaireVerseDetailCard'
 import NaveModalCard from '~features/nave/NaveModalCard'
 import CompareCard from './CompareCard'
-import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import formatVerseContent from '~helpers/formatVerseContent'
 import generateUUID from '~helpers/generateUUID'
 import { toast } from '~helpers/toast'
 import { BibleTab, useBibleTabActions } from '../../../state/tabs'
 import BibleVerseDetailCard from '../BibleVerseDetailCard'
-import CompareVersionSelectorBottomSheet from '../CompareVersionSelectorBottomSheet'
+import CompareVersionSelectorSheet from '../CompareVersionSelectorSheet'
 import { ReferenceCard } from '../ReferenceCard'
 import ResourcesModalFooter from './ResourcesModalFooter'
 import { useResourceLanguage } from 'src/state/resourcesLanguage'
@@ -41,7 +40,7 @@ type ResourceVerse = {
 }
 
 type Props = {
-  resourceModalRef: React.RefObject<BottomSheetRef | null>
+  resourceModalRef: React.RefObject<SheetRef | null>
   resourceType: BibleResource | null
   onChangeResourceType: (resourceType: BibleResource) => void
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -77,7 +76,7 @@ type Props = {
 const ResourcesModal = memo(
   ({ resourceModalRef, resourceType, onChangeResourceType, bibleAtom, isSelectionMode }: Props) => {
     const { t } = useTranslation()
-    const compareVersionSelectorRef = React.useRef<BottomSheetRef>(null)
+    const compareVersionSelectorRef = React.useRef<SheetRef>(null)
     const [isOpen, setIsOpen] = useState(false)
     const openInNewTab = useOpenInNewTab()
     const bible = useAtomValue(bibleAtom)
@@ -85,8 +84,6 @@ const ResourcesModal = memo(
     const [dictionaryLanguage, setDictionaryLanguage] = useResourceLanguage('DICTIONNAIRE')
     const [naveLanguage, setNaveLanguage] = useResourceLanguage('NAVE')
     const [commentariesLanguage, setCommentariesLanguage] = useResourceLanguage('COMMENTARIES')
-    const { key, ...bottomSheetStyles } = useBottomSheetStyles()
-    const insets = useSafeAreaInsets()
     const {
       data: { selectedVerses },
     } = bible
@@ -176,7 +173,7 @@ const ResourcesModal = memo(
           }
           break
         case 'choose-versions':
-          compareVersionSelectorRef.current?.expand()
+          compareVersionSelectorRef.current?.present()
           break
         case 'open-tab':
           if (resourceType === 'commentary') {
@@ -235,15 +232,15 @@ const ResourcesModal = memo(
       )
     }
 
-    const footerComponent = useCallback(
-      (props: BottomSheetFooterProps) => {
+    const footerRenderer = useCallback(
+      (props: SheetFooterProps) => {
         return (
-          <BottomSheetFooter {...props}>
+          <SheetFooter {...props}>
             <ResourcesModalFooter
               resourceType={resourceType}
               onChangeResourceType={onChangeResourceType}
             />
-          </BottomSheetFooter>
+          </SheetFooter>
         )
       },
       [resourceType, onChangeResourceType]
@@ -251,20 +248,14 @@ const ResourcesModal = memo(
 
     return (
       <>
-        <BottomSheet
-          index={-1}
-          key={key}
+        <Sheet
           ref={resourceModalRef}
-          topInset={insets.top}
-          enablePanDownToClose
-          enableDynamicSizing={false}
-          backdropComponent={renderBackdrop}
-          activeOffsetY={[-20, 20]}
-          snapPoints={['100%']}
-          footerComponent={footerComponent}
-          onChange={index => setIsOpen(index >= 0)}
+          dismissible
+          backdrop
+          snapPoints={[1]}
+          footer={footerRenderer}
+          onOpenChange={setIsOpen}
           onClose={() => setIsOpen(false)}
-          {...bottomSheetStyles}
         >
           <ModalHeader
             hasBackButton
@@ -282,8 +273,8 @@ const ResourcesModal = memo(
               />
             </View>
           )}
-        </BottomSheet>
-        <CompareVersionSelectorBottomSheet bottomSheetRef={compareVersionSelectorRef} />
+        </Sheet>
+        <CompareVersionSelectorSheet sheetRef={compareVersionSelectorRef} />
       </>
     )
   }
@@ -349,34 +340,34 @@ const Resource = ({
         </View>
       </Slide>
       <Slide key="nave">
-        <BottomSheetScrollView
+        <SheetScrollView
           contentContainerStyle={{
             paddingBottom: bottomBarHeight + 54,
           }}
         >
           <NaveModalCard selectedVerse={selectedVerse} />
-        </BottomSheetScrollView>
+        </SheetScrollView>
       </Slide>
       <Slide key="reference">
-        <BottomSheetScrollView
+        <SheetScrollView
           contentContainerStyle={{
             paddingBottom: bottomBarHeight + 54,
           }}
         >
           <ReferenceCard selectedVerse={selectedVerse} version={selectedVersion} />
-        </BottomSheetScrollView>
+        </SheetScrollView>
       </Slide>
       <Slide key="commentary">
-        <BottomSheetScrollView
+        <SheetScrollView
           contentContainerStyle={{
             paddingBottom: bottomBarHeight + 54,
           }}
         >
           <CommentariesCard verse={selectedVerse} onChangeVerse={actions.selectSelectedVerse} />
-        </BottomSheetScrollView>
+        </SheetScrollView>
       </Slide>
       <Slide key="compare">
-        <BottomSheetScrollView
+        <SheetScrollView
           contentContainerStyle={{
             paddingBottom: bottomBarHeight + 54,
           }}
@@ -385,7 +376,7 @@ const Resource = ({
             selectedVerses={selectedVerses}
             onChangeVerse={actions.selectSelectedVerse}
           />
-        </BottomSheetScrollView>
+        </SheetScrollView>
       </Slide>
     </Slides>
   )

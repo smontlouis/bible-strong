@@ -1,4 +1,4 @@
-import { BottomSheetModal } from '~common/bottom-sheet'
+import { Sheet, type SheetRef } from '~common/sheet'
 import { produce } from 'immer'
 import { PrimitiveAtom, useAtom } from 'jotai'
 import React, { useCallback } from 'react'
@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { ActionSheetItem } from '~common/ActionMenu'
-import Modal from '~common/Modal'
 import books from '~assets/bible_versions/books-desc'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
@@ -16,7 +15,7 @@ import { NotesTab } from '~state/tabs'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 type Props = {
-  ref?: React.RefObject<BottomSheetModal | null>
+  ref?: React.RefObject<SheetRef | null>
   noteId: string | null
   onClosed?: () => void
   notesAtom: PrimitiveAtom<NotesTab>
@@ -119,7 +118,7 @@ const NotesSettingsModal = ({ ref, noteId, onClosed, notesAtom }: Props) => {
   }
 
   return (
-    <Modal.Body ref={ref} onModalClose={onClosed} enableDynamicSizing>
+    <Sheet ref={ref} onDismiss={onClosed}>
       <ActionSheetItem icon="file-text" label={t('Voir la note')} onPress={openNoteDetail} />
       <ActionSheetItem icon="book-open" label={t('Voir dans la Bible')} onPress={navigateToBible} />
       <ActionSheetItem
@@ -133,7 +132,7 @@ const NotesSettingsModal = ({ ref, noteId, onClosed, notesAtom }: Props) => {
         color="quart"
         onPress={deleteNoteConfirmation}
       />
-    </Modal.Body>
+    </Sheet>
   )
 }
 

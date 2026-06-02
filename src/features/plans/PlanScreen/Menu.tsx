@@ -1,4 +1,4 @@
-import { BottomSheetModal } from '~common/bottom-sheet'
+import { type SheetRef } from '~common/sheet'
 import { MenuView, type MenuAction } from '@expo/ui/community/menu'
 import { useRouter } from 'expo-router'
 import React from 'react'
@@ -12,7 +12,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { removePlan, resetPlan } from '~redux/modules/plan'
 
 interface Props {
-  modalRefDetails: React.RefObject<BottomSheetModal | null>
+  modalRefDetails: React.RefObject<SheetRef | null>
   planId: string
   title: string
   onRemove?: () => void

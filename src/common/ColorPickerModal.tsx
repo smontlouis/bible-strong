@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Alert, TouchableOpacity } from 'react-native'
 import styled from '@emotion/native'
-import { BottomSheetHandle, BottomSheetModal, BottomSheetScrollView } from '~common/bottom-sheet'
+import { SheetHandle, Sheet, SheetScrollView, type SheetRef } from '~common/sheet'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
@@ -13,8 +13,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
 import ColorEditModal from '~common/ColorEditModal'
 import ModalHeader from '~common/ModalHeader'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
-import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
+import { useSheet } from '~helpers/useSheet'
 import { useHighlightColors } from '~helpers/useHighlightColors'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { colorPickerModalAtom } from '~state/app'
@@ -35,7 +34,6 @@ import getTheme from '~themes/index'
 import defaultColors from '~themes/colors'
 import { EMPTY_OBJECT } from '~helpers/emptyReferences'
 import { MAX_CUSTOM_COLORS } from '~helpers/constants'
-import { ContainerComponent } from './Modal'
 
 type ColorKey = keyof typeof defaultColors
 
@@ -74,12 +72,11 @@ type ModalState = {
 const ColorPickerModal = () => {
   const item = useAtomValue(colorPickerModalAtom)
   const setColorPickerModal = useSetAtom(colorPickerModalAtom)
-  const { ref, open, close } = useBottomSheetModal()
-  const editModalRef = useRef<BottomSheetModal>(null)
+  const { ref, open, close } = useSheet()
+  const editModalRef = useRef<SheetRef>(null)
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const insets = useSafeAreaInsets()
-  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   const { theme: currentTheme } = useCurrentThemeSelector()
   const { colors: themeColors, customHighlightColors, defaultColorTypes } = useHighlightColors()
@@ -258,9 +255,9 @@ const ColorPickerModal = () => {
   }
 
   const renderHandle = useCallback(
-    (handleProps: React.ComponentProps<typeof BottomSheetHandle>) => (
+    (handleProps: React.ComponentProps<typeof SheetHandle>) => (
       <>
-        <BottomSheetHandle {...handleProps} />
+        <SheetHandle {...handleProps} />
         <ModalHeader title={t('Palette de couleurs')} />
       </>
     ),
@@ -270,20 +267,8 @@ const ColorPickerModal = () => {
 
   return (
     <>
-      <BottomSheetModal
-        ref={ref}
-        topInset={insets.top}
-        enablePanDownToClose
-        enableDynamicSizing
-        backdropComponent={renderBackdrop}
-        activeOffsetY={[-20, 20]}
-        onDismiss={handleModalClose}
-        handleComponent={renderHandle}
-        containerComponent={ContainerComponent}
-        key={key}
-        {...bottomSheetStyles}
-      >
-        <BottomSheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}>
+      <Sheet ref={ref} dismissible backdrop onDismiss={handleModalClose} handle={renderHandle({})}>
+        <SheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}>
           <SectionTitle>{t('Couleurs par défaut')}</SectionTitle>
           {([1, 2, 3, 4, 5] as const).map(i => {
             const colorKey = `color${i}` as ColorKey
@@ -417,8 +402,8 @@ const ColorPickerModal = () => {
               </Text>
             </Box>
           )}
-        </BottomSheetScrollView>
-      </BottomSheetModal>
+        </SheetScrollView>
+      </Sheet>
 
       <ColorEditModal
         modalRef={editModalRef}

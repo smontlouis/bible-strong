@@ -1,7 +1,7 @@
 // installReduxDevToolsPolyfill()
 
 import { ThemeProvider } from '@emotion/react'
-import { BottomSheetModalProvider } from '~common/bottom-sheet'
+import { SheetProvider } from '~common/sheet'
 import { getAnalytics, logScreenView } from '@react-native-firebase/analytics'
 import * as Sentry from '@sentry/react-native'
 
@@ -32,7 +32,7 @@ import { CurrentTheme } from '~common/types'
 import UnifiedTagsModal from '~common/UnifiedTagsModal'
 import { AppRatingModal } from '~features/app-rating'
 import { AppSwitcherProvider } from '~features/app-switcher/AppSwitcherProvider'
-import { BookSelectorBottomSheetProvider } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
+import { BookSelectorSheetProvider } from '~features/bible/BookSelectorSheet/BookSelectorSheetProvider'
 import { FeatureOnboardingModal } from '~features/feature-onboarding'
 import OnBoardingModal from '~features/onboarding/OnBoarding'
 import { appLogger } from '~helpers/agentObservability'
@@ -261,8 +261,8 @@ function InnerApp() {
             <ErrorBoundary>
               <AppSwitcherProvider>
                 <RootSiblingParent>
-                  <BottomSheetModalProvider>
-                    <BookSelectorBottomSheetProvider>
+                  <SheetProvider>
+                    <BookSelectorSheetProvider>
                       <InitHooks />
                       <Stack screenOptions={{ headerShown: false }}>
                         <Stack.Screen name="index" />
@@ -287,8 +287,8 @@ function InnerApp() {
                       </Stack>
                       <ThemedToaster />
                       <DeferredModals />
-                    </BookSelectorBottomSheetProvider>
-                  </BottomSheetModalProvider>
+                    </BookSelectorSheetProvider>
+                  </SheetProvider>
                 </RootSiblingParent>
               </AppSwitcherProvider>
             </ErrorBoundary>

@@ -2,9 +2,8 @@ import styled from '@emotion/native'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator } from 'react-native'
-import { BottomSheetModal } from '~common/bottom-sheet'
+import { Sheet, type SheetRef } from '~common/sheet'
 
-import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import Box, { VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -12,7 +11,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import FireAuth from '~helpers/FireAuth'
 
 type EmailVerificationModalProps = {
-  modalRef: React.RefObject<BottomSheetModal | null>
+  modalRef: React.RefObject<SheetRef | null>
 }
 
 const EmailVerificationModal = ({ modalRef }: EmailVerificationModalProps) => {
@@ -35,11 +34,7 @@ const EmailVerificationModal = ({ modalRef }: EmailVerificationModalProps) => {
   }
 
   return (
-    <Modal.Body
-      ref={modalRef}
-      enableDynamicSizing
-      headerComponent={<ModalHeader title={t('profile.emailNotVerified')} />}
-    >
+    <Sheet ref={modalRef} header={<ModalHeader title={t('profile.emailNotVerified')} />}>
       <VStack gap={20} paddingHorizontal={20} paddingVertical={20}>
         <Box row alignItems="center" gap={12}>
           <WarningIcon>
@@ -62,7 +57,7 @@ const EmailVerificationModal = ({ modalRef }: EmailVerificationModalProps) => {
           )}
         </ResendButton>
       </VStack>
-    </Modal.Body>
+    </Sheet>
   )
 }
 

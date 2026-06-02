@@ -1,4 +1,4 @@
-import { BottomSheetModal } from '~common/bottom-sheet'
+import { type SheetRef } from '~common/sheet'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -83,7 +83,7 @@ const EditStudyScreen = ({
 
   const dispatch = useDispatch()
   const [isReadOnly, setIsReadOnly] = useState(true)
-  const renameModalRef = useRef<BottomSheetModal>(null)
+  const renameModalRef = useRef<SheetRef>(null)
   const openEntityRelations = useOpenEntityRelations()
   const setOpenedFromTab = useSetAtom(openedFromTabAtom)
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
@@ -180,7 +180,7 @@ const EditStudyScreen = ({
         isFormSheet={isFormSheet}
       />
       <RenameModal
-        bottomSheetRef={renameModalRef}
+        sheetRef={renameModalRef}
         title={t("Renommer l'étude")}
         placeholder={t("Nom de l'étude")}
         initialValue={currentStudy.title}

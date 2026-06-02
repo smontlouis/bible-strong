@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react'
-import { BottomSheetFooter, BottomSheetModal, BottomSheetScrollView } from '~common/bottom-sheet'
+import { SheetFooter, Sheet, SheetScrollView, type SheetRef } from '~common/sheet'
 import distanceInWords from 'date-fns/formatDistance'
 
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
@@ -16,7 +16,6 @@ import { getDateLocale } from '~helpers/languageUtils'
 import styled from '@emotion/native'
 import { RootState } from '~redux/modules/reducer'
 import { ChangelogItem, LogType } from './types'
-import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 const getTagColor = (type: LogType) => {
@@ -65,8 +64,7 @@ const Changelog = () => {
   const dispatch = useDispatch()
   const { t } = useTranslation()
   const lang = useLanguage()
-  const modalRef = useRef<BottomSheetModal>(null)
-  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
+  const modalRef = useRef<SheetRef>(null)
   const insets = useSafeAreaInsets()
 
   const seenLogs = useSelector(
@@ -99,31 +97,24 @@ const Changelog = () => {
   }
 
   return (
-    <BottomSheetModal
+    <Sheet
       ref={modalRef}
-      topInset={insets.top}
-      snapPoints={['40%']}
-      enablePanDownToClose={true}
-      backdropComponent={props => renderBackdrop({ ...props, pressBehavior: 'none' })}
-      footerComponent={props => (
-        <BottomSheetFooter {...props}>
+      snapPoints={[0.4]}
+      dismissible
+      backdrop
+      footer={props => (
+        <SheetFooter {...props}>
           <Box px={20} pt={5} paddingBottom={insets.bottom + 5} alignItems="flex-end" bg="reverse">
             <Button onPress={handleClose} small>
               {t('Fermer')}
             </Button>
           </Box>
-        </BottomSheetFooter>
+        </SheetFooter>
       )}
-      key={key}
-      {...bottomSheetStyles}
-      style={{
-        ...(bottomSheetStyles.style as object),
-        marginHorizontal: 20,
-        borderRadius: 20,
-      }}
+      cornerRadius={20}
       onDismiss={handleClose}
     >
-      <BottomSheetScrollView>
+      <SheetScrollView>
         <Box padding={20}>
           <Text fontSize={30} bold>
             {t('Quoi de neuf ?')}
@@ -158,8 +149,8 @@ const Changelog = () => {
             })}
           </Box>
         </Box>
-      </BottomSheetScrollView>
-    </BottomSheetModal>
+      </SheetScrollView>
+    </Sheet>
   )
 }
 

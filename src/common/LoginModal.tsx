@@ -1,17 +1,12 @@
-import React, { useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Login from './Login'
 
-import BottomSheet, {
-  type BottomSheet as BottomSheetRef,
-  BottomSheetScrollView,
-} from '~common/bottom-sheet'
+import { Sheet, SheetScrollView, type SheetRef } from '~common/sheet'
 import { useTranslation } from 'react-i18next'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Text from '~common/ui/Text'
-import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import Back from './Back'
 import { FeatherIcon } from './ui/Icon'
 
@@ -19,21 +14,19 @@ import { FeatherIcon } from './ui/Icon'
 
 const LoginModal = ({ isVisible }: { isVisible: boolean }) => {
   const { t } = useTranslation()
-  const ref = useRef<BottomSheetRef>(null)
-  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
+  const ref = useRef<SheetRef>(null)
+
+  useEffect(() => {
+    if (isVisible) {
+      ref.current?.present()
+    } else {
+      ref.current?.dismiss()
+    }
+  }, [isVisible])
 
   return (
-    <BottomSheet
-      ref={ref}
-      index={isVisible ? 0 : -1}
-      snapPoints={['100%']}
-      enableDynamicSizing={false}
-      topInset={useSafeAreaInsets().top}
-      backdropComponent={renderBackdrop}
-      key={key}
-      {...bottomSheetStyles}
-    >
-      <BottomSheetScrollView contentContainerStyle={{ padding: 20 }}>
+    <Sheet ref={ref} snapPoints={[1]} backdrop>
+      <SheetScrollView contentContainerStyle={{ padding: 20 }}>
         <Box row alignItems="center" marginBottom={30}>
           <Back style={{ marginRight: 15 }}>
             <FeatherIcon name="arrow-left" size={25} />
@@ -49,8 +42,8 @@ const LoginModal = ({ isVisible }: { isVisible: boolean }) => {
           {t('Rejoignez la communauté !')}
         </Paragraph>
         <Login />
-      </BottomSheetScrollView>
-    </BottomSheet>
+      </SheetScrollView>
+    </Sheet>
   )
 }
 

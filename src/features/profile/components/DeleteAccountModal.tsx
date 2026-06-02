@@ -3,11 +3,10 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, Alert } from 'react-native'
 import { useTheme } from '@emotion/react'
-import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '~common/bottom-sheet'
+import { SheetFooter, Sheet, SheetTextInput, type SheetRef } from '~common/sheet'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { getAuth, deleteUser } from '@react-native-firebase/auth'
 
-import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import Box, { VStack, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -16,7 +15,7 @@ import FireAuth from '~helpers/FireAuth'
 import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
 
 type DeleteAccountModalProps = {
-  modalRef: React.RefObject<BottomSheetModal | null>
+  modalRef: React.RefObject<SheetRef | null>
 }
 
 const DeleteAccountModal = ({ modalRef }: DeleteAccountModalProps) => {
@@ -63,13 +62,12 @@ const DeleteAccountModal = ({ modalRef }: DeleteAccountModalProps) => {
   }
 
   return (
-    <Modal.Body
+    <Sheet
       ref={modalRef}
-      enableDynamicSizing
-      onModalClose={resetForm}
-      headerComponent={<ModalHeader title={t('app.deleteAccount')} />}
-      footerComponent={props => (
-        <BottomSheetFooter bottomInset={insets.bottom} {...props}>
+      onDismiss={resetForm}
+      header={<ModalHeader title={t('app.deleteAccount')} />}
+      footer={props => (
+        <SheetFooter bottomInset={insets.bottom} {...props}>
           <HStack px={20} gap={10} justifyContent="flex-end" bg="reverse">
             <Box h={MODAL_FOOTER_HEIGHT}>
               <Button reverse onPress={handleClose} disabled={isLoading}>
@@ -90,7 +88,7 @@ const DeleteAccountModal = ({ modalRef }: DeleteAccountModalProps) => {
               </Button>
             </Box>
           </HStack>
-        </BottomSheetFooter>
+        </SheetFooter>
       )}
     >
       <VStack gap={15} paddingHorizontal={20} py={20}>
@@ -107,11 +105,11 @@ const DeleteAccountModal = ({ modalRef }: DeleteAccountModalProps) => {
           autoCorrect={false}
         />
       </VStack>
-    </Modal.Body>
+    </Sheet>
   )
 }
 
-const StyledInput = styled(BottomSheetTextInput)(({ theme }) => ({
+const StyledInput = styled(SheetTextInput)(({ theme }) => ({
   backgroundColor: theme.colors.lightGrey,
   borderRadius: 10,
   paddingHorizontal: 15,

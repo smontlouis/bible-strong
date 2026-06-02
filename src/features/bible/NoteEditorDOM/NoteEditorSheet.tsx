@@ -1,4 +1,4 @@
-import { useBottomSheetInternal } from '~common/bottom-sheet'
+import { useSheetInternal } from '~common/sheet'
 import { useTheme } from '@emotion/react'
 import { useState } from 'react'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
@@ -16,10 +16,10 @@ interface Props {
 }
 
 /**
- * Wrapper for NoteEditorDOMComponent that integrates with BottomSheet keyboard handling.
- * Must be used inside a BottomSheet context.
+ * Wrapper for NoteEditorDOMComponent that integrates with Sheet keyboard handling.
+ * Must be used inside a Sheet context.
  */
-export default function NoteEditorBottomSheet({
+export default function NoteEditorSheet({
   defaultTitle,
   defaultDescription,
   resetKey,
@@ -32,7 +32,7 @@ export default function NoteEditorBottomSheet({
   const theme = useTheme()
   const { colorScheme } = useCurrentThemeSelector()
   const [webViewHeight, setWebViewHeight] = useState(100)
-  const { animatedKeyboardState } = useBottomSheetInternal()
+  const { animatedKeyboardState } = useSheetInternal()
 
   const handleSizeChange = (_width: number, height: number) => {
     setWebViewHeight(height)

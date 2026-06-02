@@ -1,13 +1,9 @@
-import BottomSheet, {
-  type BottomSheet as BottomSheetRef,
-  BottomSheetView,
-} from '~common/bottom-sheet'
+import { Sheet, SheetView } from '~common/sheet'
 import { useAtom } from 'jotai/react'
 import Animated from 'react-native-reanimated'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
 import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { onAnimateModalClose, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import { BOTTOM_INSET } from '~helpers/constants'
 import verseToReference from '../../../helpers/verseToReference'
 import ColorCirclesBar from '../ColorCirclesBar'
@@ -83,28 +79,14 @@ const SelectedVersesModal = ({
   })
 
   const moreThanOneVerseSelected = Object.keys(selectedVerses).length > 1
-  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   const onClose = () => {
     clearSelectedVerses()
   }
 
   return (
-    <BottomSheet
-      ref={ref}
-      onAnimate={onAnimateModalClose(onClose)}
-      index={-1}
-      enableDynamicSizing
-      enablePanDownToClose
-      activeOffsetY={[-20, 20]}
-      key={key}
-      backdropComponent={null}
-      {...bottomSheetStyles}
-      style={{
-        ...(bottomSheetStyles.style as object),
-      }}
-    >
-      <BottomSheetView style={{ flex: 0 }}>
+    <Sheet ref={ref} onDismiss={onClose} dismissible backdrop={false}>
+      <SheetView style={{ flex: 0 }}>
         {typeof isSelectionMode === 'string' && isSelectionMode.includes('verse') ? (
           <HStack
             gap={10}
@@ -182,8 +164,8 @@ const SelectedVersesModal = ({
             />
           </Box>
         )}
-      </BottomSheetView>
-    </BottomSheet>
+      </SheetView>
+    </Sheet>
   )
 }
 

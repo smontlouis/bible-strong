@@ -1,10 +1,9 @@
 import React from 'react'
 
-import { BottomSheetModal, type BottomSheetFooterProps } from '~common/bottom-sheet'
+import { Sheet, type SheetFooterProps, type SheetRef } from '~common/sheet'
 import { Image } from 'expo-image'
 import { useTranslation } from 'react-i18next'
 import { Image as RNImage } from 'react-native'
-import Modal from '~common/Modal'
 import { ComputedPlanItem } from '~common/types'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
@@ -13,9 +12,9 @@ import { wp } from '~helpers/utils'
 const width = wp(100) - 20 > 600 ? 600 : wp(100) - 20
 
 interface Props extends Omit<ComputedPlanItem, 'status' | 'progress' | 'type' | 'lang'> {
-  modalRefDetails: React.RefObject<BottomSheetModal | null>
+  modalRefDetails: React.RefObject<SheetRef | null>
   headerComponent?: React.ReactNode
-  footerComponent?: (props: BottomSheetFooterProps) => React.ReactNode
+  footer?: (props: SheetFooterProps) => React.ReactNode
 }
 
 const DetailsModal = ({
@@ -25,7 +24,7 @@ const DetailsModal = ({
   downloads,
   description,
   author,
-  footerComponent,
+  footer,
   headerComponent,
 }: Props) => {
   const { t } = useTranslation()
@@ -44,12 +43,7 @@ const DetailsModal = ({
   }, [image])
 
   return (
-    <Modal.Body
-      ref={modalRefDetails}
-      snapPoints={['100%']}
-      footerComponent={footerComponent}
-      headerComponent={headerComponent}
-    >
+    <Sheet ref={modalRefDetails} snapPoints={[1]} footer={footer} header={headerComponent}>
       <Box paddingHorizontal={20} paddingTop={20} paddingBottom={50}>
         {!!image && (
           <Box marginBottom={20} rounded>
@@ -92,7 +86,7 @@ const DetailsModal = ({
           </Box>
         )}
       </Box>
-    </Modal.Body>
+    </Sheet>
   )
 }
 

@@ -4,7 +4,7 @@ import React from 'react'
 import { TextInputProps } from 'react-native'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from './ui/Icon'
-import { BottomSheetTextInput } from '~common/bottom-sheet'
+import { SheetTextInput } from '~common/sheet'
 
 interface Props {
   onChangeText: (text: string) => void
@@ -13,7 +13,7 @@ interface Props {
   onDelete: () => void
 }
 
-const BottomSheetSearchInput = ({
+const SheetSearchInput = ({
   onChangeText,
   value,
   placeholder,
@@ -42,7 +42,7 @@ const BottomSheetSearchInput = ({
           style={{ marginRight: 8 }}
         />
         <Box flex>
-          <BottomSheetTextInput
+          <SheetTextInput
             placeholder={placeholder}
             placeholderTextColor={theme.colors.grey}
             onChangeText={onChangeText}
@@ -63,4 +63,4 @@ const BottomSheetSearchInput = ({
   )
 }
 
-export default BottomSheetSearchInput
+export default SheetSearchInput

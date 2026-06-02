@@ -1,41 +1,25 @@
 import React from 'react'
 
-import BottomSheet, {
-  type BottomSheet as BottomSheetRef,
-  BottomSheetScrollView,
-} from '~common/bottom-sheet'
+import { Sheet, type SheetRef, SheetScrollView } from '~common/sheet'
 import { Trans, useTranslation } from 'react-i18next'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import InlineLink from '~common/InlineLink'
 import Accordion from '~common/ui/Accordion'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 
 interface Props {
-  modalRef: React.RefObject<BottomSheetRef | null>
+  modalRef: React.RefObject<SheetRef | null>
   HeaderComponent?: React.ReactNode
   FooterComponent?: React.ReactNode
 }
 
 const TimelineHomeDetailModal = ({ modalRef }: Props) => {
   const { t } = useTranslation()
-  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   return (
-    <BottomSheet
-      ref={modalRef}
-      index={-1}
-      topInset={useSafeAreaInsets().top}
-      snapPoints={['100%']}
-      enableDynamicSizing={false}
-      enablePanDownToClose
-      backdropComponent={renderBackdrop}
-      key={key}
-      {...bottomSheetStyles}
-    >
-      <BottomSheetScrollView>
+    <Sheet ref={modalRef} snapPoints={[1]} dismissible backdrop>
+      <SheetScrollView>
         <Box mt={20} p={20}>
           <Paragraph>
             <Trans>
@@ -172,8 +156,8 @@ Il y a des preuves que c'est ainsi que les Juifs ont compris ce passage. Josèph
             </Paragraph>
           </Accordion>
         </Box>
-      </BottomSheetScrollView>
-    </BottomSheet>
+      </SheetScrollView>
+    </Sheet>
   )
 }
 

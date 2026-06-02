@@ -13,7 +13,7 @@ import Header from '~common/Header'
 import Empty from '~common/Empty'
 
 import FiltersHeader from '~common/FiltersHeader'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useSheet } from '~helpers/useSheet'
 import { unifiedTagsModalAtom } from '~state/app'
 import verseToReference from '~helpers/verseToReference'
 import { Tag } from '~common/types'
@@ -57,7 +57,7 @@ const BibleVerseLinks = ({ isFormSheet = false }: BibleVerseLinksProps) => {
   const relations = useSelector(selectRelations)
   const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
-  const linkSettingsModal = useBottomSheetModal()
+  const linkSettingsModal = useSheet()
   const openEntityRelations = useOpenEntityRelations()
 
   const openTagsModal = useCallback(() => {

@@ -1,9 +1,5 @@
 import { useTheme } from '@emotion/react'
-import BottomSheet, {
-  type BottomSheet as BottomSheetRef,
-  BottomSheetHandle,
-  BottomSheetView,
-} from '~common/bottom-sheet'
+import { type SheetRef, SheetHandle, Sheet, SheetView } from '~common/sheet'
 import { TouchableOpacity, type ViewStyle } from 'react-native'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
@@ -22,7 +18,6 @@ import Box, {
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
-import { useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import { BOTTOM_INSET } from '~helpers/constants'
 import verseToReference from '~helpers/verseToReference'
 import { colorPickerModalAtom, isFullScreenBibleAtom } from 'src/state/app'
@@ -64,7 +59,7 @@ const formatSelectionRange = (selection: SelectionRange): string => {
 }
 
 type Props = {
-  ref?: React.RefObject<BottomSheetRef | null>
+  ref?: React.RefObject<SheetRef | null>
   hasSelection: boolean
   selection?: SelectionRange | null
   onApplyAnnotation: (color: string, type: AnnotationType) => void
@@ -239,7 +234,6 @@ const AnnotationToolbar = ({
 }: Props) => {
   const { t } = useTranslation()
   const theme = useTheme()
-  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
   const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
   const { bottomBarHeight } = useBottomBarHeightInTab()
   const disabled = !selectedAnnotation && !hasSelection
@@ -267,9 +261,9 @@ const AnnotationToolbar = ({
     }
   }
 
-  const renderHandle = (handleProps: React.ComponentProps<typeof BottomSheetHandle>) => (
+  const renderHandle = (handleProps: React.ComponentProps<typeof SheetHandle>) => (
     <>
-      <BottomSheetHandle {...handleProps} />
+      <SheetHandle {...handleProps} />
       <Box
         position="absolute"
         top={isEnabled ? -70 : 0}
@@ -308,18 +302,14 @@ const AnnotationToolbar = ({
   )
 
   return (
-    <BottomSheet
+    <Sheet
       ref={ref}
-      enableDynamicSizing
-      enablePanDownToClose
+      dismissible
       onClose={onClose}
-      key={key}
-      index={-1}
-      {...bottomSheetStyles}
-      backgroundStyle={{ backgroundColor: theme.colors.reverse }}
-      handleComponent={renderHandle}
+      backgroundColor={theme.colors.reverse}
+      handle={renderHandle({})}
     >
-      <BottomSheetView
+      <SheetView
         style={{
           flex: 0,
           paddingBottom: isFullScreenBible ? BOTTOM_INSET : bottomBarHeight,
@@ -501,8 +491,8 @@ const AnnotationToolbar = ({
             onSelectColor={handleApply}
           />
         </AnimatedBox>
-      </BottomSheetView>
-    </BottomSheet>
+      </SheetView>
+    </Sheet>
   )
 }
 

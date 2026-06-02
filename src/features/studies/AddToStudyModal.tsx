@@ -1,12 +1,11 @@
-import { BottomSheetModal, BottomSheetFlashList } from '~common/bottom-sheet'
+import { Sheet, SheetFlashList, type SheetRef } from '~common/sheet'
 import distanceInWords from 'date-fns/formatDistance'
 import React, { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 import { shallowEqual, useSelector } from 'react-redux'
-import BottomSheetSearchInput from '~common/BottomSheetSearchInput'
+import SheetSearchInput from '~common/SheetSearchInput'
 import Empty from '~common/Empty'
-import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -19,18 +18,13 @@ import type { RootState } from '~redux/modules/reducer'
 import type { Study } from '~redux/modules/user'
 
 interface AddToStudyModalProps {
-  bottomSheetRef: React.RefObject<BottomSheetModal | null>
+  sheetRef: React.RefObject<SheetRef | null>
   onSelectStudy: (studyId: string) => void
   reference?: string
   onClose?: () => void
 }
 
-const AddToStudyModal = ({
-  bottomSheetRef,
-  onSelectStudy,
-  reference,
-  onClose,
-}: AddToStudyModalProps) => {
+const AddToStudyModal = ({ sheetRef, onSelectStudy, reference, onClose }: AddToStudyModalProps) => {
   const { t } = useTranslation()
   const lang = useLanguage()
 
@@ -103,16 +97,15 @@ const AddToStudyModal = ({
   }
 
   return (
-    <Modal.Body
-      ref={bottomSheetRef}
-      onModalClose={onClose}
-      withPortal
-      snapPoints={['100%']}
-      headerComponent={
+    <Sheet
+      ref={sheetRef}
+      onDismiss={onClose}
+      snapPoints={[1]}
+      header={
         <Box gap={5}>
           <ModalHeader title={t('study.selectStudy')} subTitle={reference} />
           <Box px={20}>
-            <BottomSheetSearchInput
+            <SheetSearchInput
               placeholder={t('study.searchStudy')}
               onChangeText={search}
               onDelete={resetSearch}
@@ -123,7 +116,7 @@ const AddToStudyModal = ({
         </Box>
       }
     >
-      <BottomSheetFlashList
+      <SheetFlashList
         ListHeaderComponent={renderNewStudyButton}
         data={result.filter(item => item.id)}
         renderItem={renderStudyItem}
@@ -139,7 +132,7 @@ const AddToStudyModal = ({
           </Box>
         }
       />
-    </Modal.Body>
+    </Sheet>
   )
 }
 

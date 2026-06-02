@@ -1,11 +1,10 @@
-import { BottomSheetModal } from '~common/bottom-sheet'
+import { Sheet, type SheetRef } from '~common/sheet'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { useSetAtom } from 'jotai/react'
 import { ActionSheetItem } from '~common/ActionMenu'
-import Modal from '~common/Modal'
 import { deleteLink } from '~redux/modules/user'
 import books from '~assets/bible_versions/books-desc'
 import { unifiedTagsModalAtom } from '../../state/app'
@@ -13,7 +12,7 @@ import { RootState } from '~redux/modules/reducer'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 type Props = {
-  ref?: React.RefObject<BottomSheetModal | null>
+  ref?: React.RefObject<SheetRef | null>
   linkId: string | null
   onClosed: () => void
   title: string
@@ -91,7 +90,7 @@ const LinksSettingsModal = ({ ref, linkId, onClosed, title, onEditRelations }: P
   }
 
   return (
-    <Modal.Body ref={ref} onModalClose={onClosed} enableDynamicSizing>
+    <Sheet ref={ref} onDismiss={onClosed}>
       <ActionSheetItem icon="book-open" label={t('Voir dans la Bible')} onPress={navigateToBible} />
       <ActionSheetItem icon="tag" label={t('Éditer les tags')} onPress={editTags} />
       <ActionSheetItem icon="git-merge" label={t('Éditer les relations')} onPress={editRelations} />
@@ -101,7 +100,7 @@ const LinksSettingsModal = ({ ref, linkId, onClosed, title, onEditRelations }: P
         color="quart"
         onPress={deleteLinkConfirmation}
       />
-    </Modal.Body>
+    </Sheet>
   )
 }
 

@@ -18,7 +18,7 @@ import { useRouter } from 'expo-router'
 import { currentStudyIdAtom, openedFromTabAtom } from '~features/studies/atom'
 import { StrongReference, StudyNavigateBibleType } from '~common/types'
 import { Theme } from '@emotion/react'
-import { BottomSheetScrollView } from '~common/bottom-sheet'
+import { SheetScrollView } from '~common/sheet'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 const slideWidth = wp(60)
@@ -209,7 +209,7 @@ const StrongCard = (props: Props) => {
         </Box>
       </Box>
 
-      <BottomSheetScrollView style={{ marginBottom: 15 }}>
+      <SheetScrollView style={{ marginBottom: 15 }}>
         {!!Definition && (
           <ViewItem>
             <SubTitle color="darkGrey">Définition - {Code}</SubTitle>
@@ -247,7 +247,7 @@ const StrongCard = (props: Props) => {
             />
           </ViewItem>
         )}
-      </BottomSheetScrollView>
+      </SheetScrollView>
     </Container>
   )
 }

@@ -1,11 +1,10 @@
 import { PrimitiveAtom } from 'jotai/vanilla'
-import { BottomSheetModal } from '~common/bottom-sheet'
+import { Sheet, type SheetRef } from '~common/sheet'
 import { useAtom } from 'jotai/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
-import Modal from '~common/Modal'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
@@ -24,7 +23,7 @@ export interface NewTabScreenProps {
 const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
   const { t } = useTranslation()
   const [, setTab] = useAtom(newAtom as unknown as PrimitiveAtom<TabItem>)
-  const planSelectorRef = React.useRef<BottomSheetModal>(null)
+  const planSelectorRef = React.useRef<SheetRef>(null)
   const plans = useComputedPlanItems()
 
   return (
@@ -43,7 +42,7 @@ const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
             ))}
           </Box>
         </ScrollView>
-        <Modal.Body ref={planSelectorRef} snapPoints={['70%']} enableDynamicSizing={false}>
+        <Sheet ref={planSelectorRef} snapPoints={[0.7]}>
           <Box px={20} pt={10} pb={15}>
             <Text title fontSize={18}>
               {t('Plans')}
@@ -75,7 +74,7 @@ const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
               message={t("Vous n'avez aucun plan...")}
             />
           )}
-        </Modal.Body>
+        </Sheet>
       </Container>
     </SelectBibleReferenceModalProvider>
   )

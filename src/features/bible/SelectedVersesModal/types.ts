@@ -30,7 +30,7 @@ export interface VerseActiveStates {
 }
 
 export interface SelectedVersesModalProps {
-  ref?: React.RefObject<import('~common/bottom-sheet').BottomSheet | null>
+  ref?: React.RefObject<import('~common/sheet').SheetRef | null>
   isSelectionMode: StudyNavigateBibleType | undefined
   selectedVerseHighlightColor: string | null
   onChangeResourceType: (type: BibleResource) => void

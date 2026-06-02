@@ -13,7 +13,7 @@ import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { CarouselProvider } from '~helpers/CarouselContext'
 import { getChapterVerses } from '~helpers/biblesDb'
 
-import { BottomSheetScrollView } from '~common/bottom-sheet'
+import { SheetScrollView } from '~common/sheet'
 import { useTranslation } from 'react-i18next'
 import { Verse } from '~common/types'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
@@ -226,7 +226,7 @@ const DictionnaireVerseDetailScreen = ({
   return (
     <Box flex={1} onLayout={e => setBoxHeight(e.nativeEvent.layout.height)}>
       <Box maxHeight={boxHeight / 2} position="relative" zIndex={1}>
-        <BottomSheetScrollView contentContainerStyle={{ paddingTop: 10 }}>
+        <SheetScrollView contentContainerStyle={{ paddingTop: 10 }}>
           <StyledVerse>
             <VersetWrapper>
               <NumberText>{verse.Verset}</NumberText>
@@ -240,7 +240,7 @@ const DictionnaireVerseDetailScreen = ({
               <VerseText>{formattedText}</VerseText>
             </CarouselProvider>
           </StyledVerse>
-        </BottomSheetScrollView>
+        </SheetScrollView>
         <BibleVerseDetailFooter
           verseNumber={Verset}
           versesInCurrentChapter={versesInCurrentChapter}

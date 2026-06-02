@@ -243,7 +243,7 @@ dispatch(updateHighlightColor({
 ### Navigation
 - Intégration avec React Navigation
 - Deep linking pour certains écrans
-- Modales et bottom sheets
+- Modales et sheets
 
 ### Permissions
 - Accès fichiers pour import/export
@@ -277,5 +277,5 @@ SENTRY_DSN
 - `@react-native-firebase/*` : Services Firebase
 - `@react-native-google-signin/google-signin` : Auth Google
 - `expo-file-system` : Gestion fichiers
-- `~common/bottom-sheet` : Bottom sheets
+- `~common/sheet` : Bottom sheets
 - `react-native-color-picker` : Sélection couleurs

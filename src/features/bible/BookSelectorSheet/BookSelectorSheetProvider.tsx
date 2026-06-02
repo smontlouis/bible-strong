@@ -1,10 +1,10 @@
-import { BottomSheetModal } from '~common/bottom-sheet'
+import { type SheetRef } from '~common/sheet'
 import React, { createContext, useContext, useRef } from 'react'
 import type { BibleTab, BibleTabActions } from '../../../state/tabs'
-import BookSelectorBottomSheet, { bookSelectorDataAtom } from './BookSelectorBottomSheet'
-import VersionSelectorBottomSheet, {
+import BookSelectorSheet, { bookSelectorDataAtom } from './BookSelectorSheet'
+import VersionSelectorSheet, {
   versionSelectorDataAtom,
-} from '../VersionSelectorBottomSheet/VersionSelectorBottomSheet'
+} from '../VersionSelectorSheet/VersionSelectorSheet'
 import { useSetAtom } from 'jotai/react'
 
 interface BookSelectorContextType {
@@ -36,9 +36,9 @@ export const useBookAndVersionSelector = () => {
   return context
 }
 
-export const BookSelectorBottomSheetProvider = ({ children }: { children: React.ReactNode }) => {
-  const bookBottomSheetRef = useRef<BottomSheetModal>(null)
-  const versionBottomSheetRef = useRef<BottomSheetModal>(null)
+export const BookSelectorSheetProvider = ({ children }: { children: React.ReactNode }) => {
+  const bookSheetRef = useRef<SheetRef>(null)
+  const versionSheetRef = useRef<SheetRef>(null)
   const setBookSelectorData = useSetAtom(bookSelectorDataAtom)
   const setVersionSelectorData = useSetAtom(versionSelectorDataAtom)
 
@@ -50,7 +50,7 @@ export const BookSelectorBottomSheetProvider = ({ children }: { children: React.
     data: BibleTab['data']
   }) => {
     setBookSelectorData({ actions, data })
-    bookBottomSheetRef.current?.present()
+    bookSheetRef.current?.present()
   }
 
   const openVersionSelector = ({
@@ -63,14 +63,14 @@ export const BookSelectorBottomSheetProvider = ({ children }: { children: React.
     parallelVersionIndex?: number
   }) => {
     setVersionSelectorData({ actions, data, parallelVersionIndex })
-    versionBottomSheetRef.current?.present()
+    versionSheetRef.current?.present()
   }
 
   return (
     <BookSelectorContext.Provider value={{ openBookSelector, openVersionSelector }}>
       {children}
-      <BookSelectorBottomSheet bottomSheetRef={bookBottomSheetRef} />
-      <VersionSelectorBottomSheet bottomSheetRef={versionBottomSheetRef} />
+      <BookSelectorSheet sheetRef={bookSheetRef} />
+      <VersionSelectorSheet sheetRef={versionSheetRef} />
     </BookSelectorContext.Provider>
   )
 }

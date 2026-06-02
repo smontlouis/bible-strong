@@ -1,35 +1,33 @@
-import type { BottomSheetModal } from '~common/bottom-sheet'
-import React, { memo } from 'react'
+import React from 'react'
 import { TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import Modal from '~common/Modal'
+import { Sheet, type SheetRef } from '~common/sheet'
 import ModalHeader from '~common/ModalHeader'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 
-interface VerseFormatBottomSheetProps {
-  bottomSheetRef: React.RefObject<BottomSheetModal | null>
+interface VerseFormatSheetProps {
+  sheetRef: React.RefObject<SheetRef | null>
   onSelectFormat: (format: 'inline' | 'block') => void
   reference?: string
   onClose?: () => void
 }
 
-const VerseFormatBottomSheet = ({
-  bottomSheetRef,
+const VerseFormatSheet = ({
+  sheetRef,
   onSelectFormat,
   reference,
   onClose,
-}: VerseFormatBottomSheetProps) => {
+}: VerseFormatSheetProps) => {
   const { t } = useTranslation()
 
   return (
-    <Modal.Body
-      ref={bottomSheetRef}
-      onModalClose={onClose}
-      withPortal
+    <Sheet
+      ref={sheetRef}
+      onDismiss={onClose}
       snapPoints={[280]}
-      headerComponent={<ModalHeader title={t('study.formatChoice')} subTitle={reference} />}
+      header={<ModalHeader title={t('study.formatChoice')} subTitle={reference} />}
     >
       <Box paddingHorizontal={20} paddingBottom={20}>
         {/* Inline format option */}
@@ -77,8 +75,8 @@ const VerseFormatBottomSheet = ({
           </HStack>
         </TouchableOpacity>
       </Box>
-    </Modal.Body>
+    </Sheet>
   )
 }
 
-export default memo(VerseFormatBottomSheet)
+export default VerseFormatSheet

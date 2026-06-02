@@ -1,9 +1,8 @@
-import { BottomSheetModal, BottomSheetScrollView } from '~common/bottom-sheet'
+import { Sheet, SheetScrollView } from '~common/sheet'
 import { useAtom } from 'jotai/react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { Tag } from '~common/types'
@@ -11,17 +10,15 @@ import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
-import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useSheet } from '~helpers/useSheet'
 import useFuzzy from '~helpers/useFuzzy'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addTag, toggleTagEntity } from '~redux/modules/user'
 import { sortedTagsSelector } from '~redux/selectors/tags'
 import { unifiedTagsModalAtom, type UnifiedTagsModalProps } from '~state/app'
-import BottomSheetSearchInput from './BottomSheetSearchInput'
+import SheetSearchInput from './SheetSearchInput'
 import { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated'
-import { ContainerComponent } from './Modal'
 
 const RemovableChip = ({ label, onRemove }: { label: string; onRemove: () => void }) => (
   <AnimatedBox
@@ -52,11 +49,9 @@ type UnifiedTagsModalInstanceProps = {
 export const UnifiedTagsModalInstance = ({ item, setItem }: UnifiedTagsModalInstanceProps) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const insets = useSafeAreaInsets()
-  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
   const { bottomBarHeight } = useBottomBarHeightInTab()
 
-  const { ref, open, close } = useBottomSheetModal()
+  const { ref, open, close } = useSheet()
 
   const tags = useSelector(sortedTagsSelector)
   const { keyword, result, search, resetSearch } = useFuzzy(tags, {
@@ -174,25 +169,14 @@ export const UnifiedTagsModalInstance = ({ item, setItem }: UnifiedTagsModalInst
   const filterModeSelectedTag = isFilterMode ? item.selectedTag : undefined
 
   return (
-    <BottomSheetModal
-      ref={ref}
-      topInset={insets.top}
-      enablePanDownToClose
-      snapPoints={['70%']}
-      backdropComponent={renderBackdrop}
-      containerComponent={ContainerComponent}
-      activeOffsetY={[-20, 20]}
-      onDismiss={() => setItem(false)}
-      key={key}
-      {...bottomSheetStyles}
-    >
+    <Sheet ref={ref} dismissible snapPoints={[0.7]} backdrop onDismiss={() => setItem(false)}>
       {/* Header */}
       <Box pt={20} pb={10} px={20} borderBottomWidth={1} borderColor="border">
         <Text bold fontSize={16}>
           {getTitle()}
         </Text>
         <Box height={8} />
-        <BottomSheetSearchInput
+        <SheetSearchInput
           placeholder={t('Chercher ou creer une etiquette')}
           onChangeText={search}
           onDelete={resetSearch}
@@ -226,7 +210,7 @@ export const UnifiedTagsModalInstance = ({ item, setItem }: UnifiedTagsModalInst
         </AnimatedBox>
       )}
 
-      <BottomSheetScrollView
+      <SheetScrollView
         contentContainerStyle={{
           paddingBottom: bottomBarHeight,
         }}
@@ -317,8 +301,8 @@ export const UnifiedTagsModalInstance = ({ item, setItem }: UnifiedTagsModalInst
             </Text>
           </TouchableBox>
         )}
-      </BottomSheetScrollView>
-    </BottomSheetModal>
+      </SheetScrollView>
+    </Sheet>
   )
 }
 

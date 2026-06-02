@@ -1,9 +1,9 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { type BottomSheetModal as ExpoBottomSheetModal } from '~common/bottom-sheet'
+import { type SheetRef } from '~common/sheet'
 import { MenuView, type MenuAction } from '@expo/ui/community/menu'
 import styled from '@emotion/native'
-import Modal from '~common/Modal'
+import { Sheet } from '~common/sheet'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -32,7 +32,7 @@ const IconContainer = styled.View(({ theme }) => ({
 }))
 
 interface CrossVersionAnnotationsModalProps {
-  bottomSheetRef: React.RefObject<ExpoBottomSheetModal | null>
+  sheetRef: React.RefObject<SheetRef | null>
   verseKey: string | null
   versions: CrossVersionAnnotation[]
   onSwitchVersion: (version: VersionCode, verse: number) => void
@@ -59,7 +59,7 @@ const formatVerseReference = (verseKey: string): string => {
 }
 
 const CrossVersionAnnotationsModal = ({
-  bottomSheetRef,
+  sheetRef,
   verseKey,
   versions,
   onSwitchVersion,
@@ -72,12 +72,12 @@ const CrossVersionAnnotationsModal = ({
     // Extract verse number from verseKey (format: "book-chapter-verse")
     const verse = verseKey ? parseInt(verseKey.split('-')[2], 10) : 1
     onSwitchVersion(version, verse)
-    bottomSheetRef.current?.dismiss()
+    sheetRef.current?.dismiss()
   }
 
   const handleOpenInNewTab = (version: VersionCode) => {
     onOpenInNewTab(version)
-    bottomSheetRef.current?.dismiss()
+    sheetRef.current?.dismiss()
   }
 
   const reference = verseKey ? formatVerseReference(verseKey) : ''
@@ -95,11 +95,10 @@ const CrossVersionAnnotationsModal = ({
   ]
 
   return (
-    <Modal.Body
-      ref={bottomSheetRef}
-      onModalClose={onClose}
-      enableDynamicSizing
-      headerComponent={
+    <Sheet
+      ref={sheetRef}
+      onDismiss={onClose}
+      header={
         <ModalHeader title={t('bible.crossVersionAnnotations.subtitle')} subTitle={reference} />
       }
     >
@@ -137,7 +136,7 @@ const CrossVersionAnnotationsModal = ({
           </MenuView>
         </ItemRow>
       ))}
-    </Modal.Body>
+    </Sheet>
   )
 }
 

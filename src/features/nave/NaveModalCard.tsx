@@ -10,7 +10,7 @@ import loadNaveByVerset from '~helpers/loadNaveByVerset'
 import { useQuery } from '~helpers/react-query-lite'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import NaveForVerse from './NaveModalForVerse'
-import { BottomSheetScrollView } from '~common/bottom-sheet'
+import { SheetScrollView } from '~common/sheet'
 
 type Props = {
   selectedVerse: string
@@ -53,7 +53,7 @@ const NaveModalCard = waitForNaveDB()(({ selectedVerse }: Props) => {
   const [naveItemsForVerse, naveItemsForChapter] = data || []
 
   return (
-    <BottomSheetScrollView>
+    <SheetScrollView>
       <Box padding={20}>
         {(!!naveItemsForChapter || !!naveItemsForVerse) && (
           <>
@@ -62,7 +62,7 @@ const NaveModalCard = waitForNaveDB()(({ selectedVerse }: Props) => {
           </>
         )}
       </Box>
-    </BottomSheetScrollView>
+    </SheetScrollView>
   )
 })
 

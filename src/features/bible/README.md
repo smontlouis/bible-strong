@@ -142,7 +142,7 @@ dispatch(updateHighlight({
 ## Dépendances clés
 
 - `jotai` : Gestion d'état atomique
-- `~common/bottom-sheet` : Bottom sheets natifs
+- `~common/sheet` : Bottom sheets natifs
 - `expo-haptics` : Retour haptique
 - `react-native-webview` : Rendu du contenu biblique
 

@@ -1,8 +1,4 @@
-import {
-  BottomSheetFooter,
-  BottomSheetModal,
-  type BottomSheetFooterProps,
-} from '~common/bottom-sheet'
+import { SheetFooter, type SheetFooterProps, type SheetRef } from '~common/sheet'
 import { useRouter } from 'expo-router'
 import { Image } from 'expo-image'
 import React from 'react'
@@ -38,7 +34,7 @@ const ExplorePlanItem = ({
 }: ExplorePlanItemProps) => {
   const router = useRouter()
   const { t } = useTranslation()
-  const modalRef = React.useRef<BottomSheetModal>(null)
+  const modalRef = React.useRef<SheetRef>(null)
   const planImage = useFireStorage(image)
   const dispatch = useDispatch<AppDispatch>()
   const hasAlreadyStarted = useSelector(
@@ -104,8 +100,8 @@ const ExplorePlanItem = ({
         author={author}
         downloads={downloads}
         description={description}
-        footerComponent={(props: BottomSheetFooterProps) => (
-          <BottomSheetFooter {...props}>
+        footer={(props: SheetFooterProps) => (
+          <SheetFooter {...props}>
             <Box paddingBottom={10 + insets.bottom} paddingHorizontal={20} paddingTop={10}>
               <Button
                 success
@@ -138,7 +134,7 @@ const ExplorePlanItem = ({
                     : t('Démarrer ce plan')}
               </Button>
             </Box>
-          </BottomSheetFooter>
+          </SheetFooter>
         )}
       />
     </Box>

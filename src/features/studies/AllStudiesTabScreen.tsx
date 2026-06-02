@@ -1,4 +1,4 @@
-import { BottomSheetModal } from '~common/bottom-sheet'
+import { type SheetRef } from '~common/sheet'
 import { useEffect, useRef, useState } from 'react'
 import { FlatList } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
@@ -11,7 +11,7 @@ import Box from '~common/ui/Box'
 import FabButton from '~common/ui/FabButton'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import withLoginModal from '~common/withLoginModal'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useSheet } from '~helpers/useSheet'
 import useLogin from '~helpers/useLogin'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { updateStudy } from '~redux/modules/user'
@@ -59,9 +59,9 @@ const StudiesScreen = ({
 
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const [studySettingsId, setStudySettingsId] = useState<string | false>(false)
-  const studySettingsModal = useBottomSheetModal()
+  const studySettingsModal = useSheet()
   const openEntityRelations = useOpenEntityRelations()
-  const renameModalRef = useRef<BottomSheetModal>(null)
+  const renameModalRef = useRef<SheetRef>(null)
   const [studyToRename, setStudyToRename] = useState<{ id: string; title: string } | null>(null)
   const [pendingStudyId, setPendingStudyId] = useState<string | null>(null)
 
@@ -233,7 +233,7 @@ const StudiesScreen = ({
           openRenameModal={openRenameModal}
         />
         <RenameModal
-          bottomSheetRef={renameModalRef}
+          sheetRef={renameModalRef}
           title={t("Renommer l'étude")}
           placeholder={t("Nom de l'étude")}
           initialValue={studyToRename?.title}

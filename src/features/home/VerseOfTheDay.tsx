@@ -1,4 +1,4 @@
-import { BottomSheetModal, BottomSheetScrollView } from '~common/bottom-sheet'
+import { Sheet, SheetScrollView, type SheetRef } from '~common/sheet'
 import DateTimePicker from '@expo/ui/community/datetime-picker'
 import React, { useEffect, useState } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'
@@ -13,7 +13,6 @@ import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Switch from '~common/ui/Switch'
 import Text from '~common/ui/Text'
-import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import { removeBreakLines } from '~helpers/utils'
 import { zeroFill } from '~helpers/zeroFill'
 import { RootState } from '~redux/modules/reducer'
@@ -100,13 +99,13 @@ const VerseOfTheDay = ({ addDay }: Props) => {
   const verseOfTheDay = useVerseOfTheDay(addDay)
   const imageUrls = useImageUrls(verseOfTheDay)
   const dispatch = useDispatch()
-  const imageModalRef = React.useRef<BottomSheetModal>(null)
+  const imageModalRef = React.useRef<SheetRef>(null)
   const verseOfTheDayTime = useSelector(
     (state: RootState) => state.user.notifications.verseOfTheDay
   )
   const insets = useSafeAreaInsets()
   const ago = dayToAgo(addDay, t)
-  const notificationModalRef = React.useRef<BottomSheetModal>(null)
+  const notificationModalRef = React.useRef<SheetRef>(null)
 
   const [initialHour, initialMinutes] = verseOfTheDayTime.split(':').map(n => Number(n))
 
@@ -129,8 +128,6 @@ const VerseOfTheDay = ({ addDay }: Props) => {
   const openTimePicker = () => {
     setTimePicker(true)
   }
-
-  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   if (!verseOfTheDay) {
     return (
@@ -205,15 +202,8 @@ const VerseOfTheDay = ({ addDay }: Props) => {
         imageUrls={imageUrls}
         verseOfTheDay={verseOfTheDay}
       />
-      <BottomSheetModal
-        ref={notificationModalRef}
-        enablePanDownToClose
-        enableDynamicSizing
-        backdropComponent={renderBackdrop}
-        key={key}
-        {...bottomSheetStyles}
-      >
-        <BottomSheetScrollView scrollEnabled={false}>
+      <Sheet ref={notificationModalRef} dismissible backdrop>
+        <SheetScrollView scrollEnabled={false}>
           <Box py={30} px={20} pb={30 + insets.bottom}>
             <Box row alignItems="center">
               <Text bold flex>
@@ -266,8 +256,8 @@ const VerseOfTheDay = ({ addDay }: Props) => {
               />
             )}
           </Box>
-        </BottomSheetScrollView>
-      </BottomSheetModal>
+        </SheetScrollView>
+      </Sheet>
     </Box>
   )
 }

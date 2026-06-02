@@ -1,4 +1,4 @@
-import { BottomSheetModal } from '~common/bottom-sheet'
+import { type SheetRef } from '~common/sheet'
 import { MenuView } from '@expo/ui/community/menu'
 import React, { useRef, useState } from 'react'
 import { Alert } from 'react-native'
@@ -56,7 +56,7 @@ const TagScreen = () => {
     wordAnnotations,
   } = useTagData(tagId)
 
-  const renameModalRef = useRef<BottomSheetModal>(null)
+  const renameModalRef = useRef<SheetRef>(null)
   const [tagToRename, setTagToRename] = useState<{ id: string; name: string } | null>(null)
   const createTabGroupFromTag = useCreateTabGroupFromTag()
 
@@ -233,7 +233,7 @@ const TagScreen = () => {
         />
       )}
       <RenameModal
-        bottomSheetRef={renameModalRef}
+        sheetRef={renameModalRef}
         title={t("Renommer l'étiquette")}
         placeholder={t("Nom de l'étiquette")}
         initialValue={tagToRename?.name}

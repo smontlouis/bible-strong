@@ -58,7 +58,7 @@ import type { CrossVersionAnnotation } from '~redux/selectors/bible'
 import type { RelationEndpoint, RelationKind, RelationType } from '~features/studyRelations/domain'
 import { useOpenRelationEndpoint } from '~features/studyRelations/useOpenRelationEndpoint'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import { useBookAndVersionSelector } from '../BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
+import { useBookAndVersionSelector } from '../BookSelectorSheet/BookSelectorSheetProvider'
 import type { AnnotationType, SelectionRange, WordPosition } from '../hooks/useAnnotationMode'
 import { BibleDOMTranslations } from './TranslationsContext'
 import {

@@ -1,4 +1,4 @@
-import { BottomSheetModal, BottomSheetScrollView } from '~common/bottom-sheet'
+import { Sheet, SheetScrollView, type SheetRef } from '~common/sheet'
 import { useAtomValue } from 'jotai/react'
 import { atom } from 'jotai/vanilla'
 import React from 'react'
@@ -11,15 +11,13 @@ import { Verse } from '~common/types'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
-import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
-import { ContainerComponent } from '~common/Modal'
 import generateUUID from '~helpers/generateUUID'
 import loadBibleChapter from '~helpers/loadBibleChapter'
 import { useQuery } from '~helpers/react-query-lite'
 
-interface VerseBottomSheetProps {
-  bottomSheetRef: React.RefObject<BottomSheetModal | null>
-  bookSelectorRef: React.RefObject<BottomSheetModal | null>
+interface VerseSheetProps {
+  sheetRef: React.RefObject<SheetRef | null>
+  bookSelectorRef: React.RefObject<SheetRef | null>
   actions?: BibleTabActions
   data?: BibleTab['data']
 }
@@ -27,20 +25,13 @@ interface VerseBottomSheetProps {
 export const tempSelectedBookAtom = atom<Book | null>(null)
 export const tempSelectedChapterAtom = atom<number | null>(null)
 
-const VerseBottomSheet = ({
-  bottomSheetRef,
-  bookSelectorRef,
-  actions,
-  data,
-}: VerseBottomSheetProps) => {
+const VerseSheet = ({ sheetRef, bookSelectorRef, actions, data }: VerseSheetProps) => {
   const { width: windowWidth } = useWindowDimensions()
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const openInNewTab = useOpenInNewTab()
   const tempSelectedBook = useAtomValue(tempSelectedBookAtom)
   const tempSelectedChapter = useAtomValue(tempSelectedChapterAtom)
-
-  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   const ITEM_WIDTH = 40
   const ITEM_GAP = 10
@@ -67,12 +58,12 @@ const VerseBottomSheet = ({
   const handleSelect = (verse: Verse) => {
     setTempSelectedVerse?.(Number(verse.Verset))
     validateTempSelected?.()
-    bottomSheetRef.current?.dismiss()
+    sheetRef.current?.dismiss()
     bookSelectorRef.current?.dismiss()
   }
 
   const handleLongPress = (verse: Verse) => {
-    bottomSheetRef.current?.dismiss()
+    sheetRef.current?.dismiss()
     bookSelectorRef.current?.dismiss()
 
     if (!tempSelectedBook || !tempSelectedChapter || !data) {
@@ -106,19 +97,7 @@ const VerseBottomSheet = ({
   const horizontalMargin = (MAX_WIDTH - totalItemsWidth) / 2
 
   return (
-    <BottomSheetModal
-      key={key}
-      ref={bottomSheetRef}
-      topInset={insets.top}
-      snapPoints={['50%']}
-      enablePanDownToClose
-      enableDynamicSizing={false}
-      backdropComponent={renderBackdrop}
-      containerComponent={ContainerComponent}
-      activeOffsetY={[-20, 20]}
-      stackBehavior="push"
-      {...bottomSheetStyles}
-    >
+    <Sheet ref={sheetRef} snapPoints={[0.5]} dismissible backdrop stackBehavior="push">
       <Box
         height={54}
         justifyContent="center"
@@ -130,7 +109,7 @@ const VerseBottomSheet = ({
           {t('goToVerse')}
         </Text>
       </Box>
-      <BottomSheetScrollView
+      <SheetScrollView
         contentContainerStyle={{
           paddingTop: 10,
           paddingBottom: insets.bottom,
@@ -168,9 +147,9 @@ const VerseBottomSheet = ({
             </Box>
           </TouchableBox>
         ))}
-      </BottomSheetScrollView>
-    </BottomSheetModal>
+      </SheetScrollView>
+    </Sheet>
   )
 }
 
-export default VerseBottomSheet
+export default VerseSheet

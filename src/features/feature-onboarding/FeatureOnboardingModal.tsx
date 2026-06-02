@@ -1,12 +1,11 @@
-import { BottomSheetModal, BottomSheetView } from '~common/bottom-sheet'
+import { Sheet, SheetView } from '~common/sheet'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
-import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useSheet } from '~helpers/useSheet'
 import {
   completeOnboardingAtom,
   featureOnboardingModalAtom,
@@ -18,17 +17,15 @@ import OnboardingFooter from './components/OnboardingFooter'
 import OnboardingStep from './components/OnboardingStep'
 import { getOnboardingConfig, type OnboardingId } from './onboardingConfig'
 import { useTheme } from '@emotion/react'
-import { ContainerComponent } from '~common/Modal'
 
 const FeatureOnboardingModal = () => {
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
-  const { key } = useBottomSheetStyles()
   const theme = useTheme()
 
   const [modalState, setModalState] = useAtom(featureOnboardingModalAtom)
   const completeOnboarding = useSetAtom(completeOnboardingAtom)
-  const { ref, open, close } = useBottomSheetModal()
+  const { ref, open, close } = useSheet()
 
   // Atoms for footer state
   const [currentStep, setCurrentStep] = useAtom(onboardingCurrentStepAtom)
@@ -82,29 +79,18 @@ const FeatureOnboardingModal = () => {
   if (!config) return null
 
   return (
-    <BottomSheetModal
+    <Sheet
       ref={ref}
-      topInset={insets.top}
-      bottomInset={insets.bottom + 50}
-      enablePanDownToClose={false}
-      enableDynamicSizing
-      backdropComponent={props => renderBackdrop({ ...props, pressBehavior: 'none' })}
-      containerComponent={ContainerComponent}
+      detachedOffset={insets.bottom + 50}
+      dismissible={false}
+      backdrop
       onDismiss={handleClose}
       detached={true}
-      key={key}
-      handleComponent={() => null}
-      style={{
-        paddingTop: 10,
-        marginHorizontal: 20,
-        borderRadius: 30,
-        overflow: 'hidden',
-      }}
-      backgroundStyle={{
-        backgroundColor: theme.colors.reverse,
-      }}
+      grabber={false}
+      cornerRadius={30}
+      backgroundColor={theme.colors.reverse}
     >
-      <BottomSheetView>
+      <SheetView>
         <TouchableBox
           onPress={() => {
             ref?.current?.close()
@@ -125,8 +111,8 @@ const FeatureOnboardingModal = () => {
         </TouchableBox>
         {step && <OnboardingStep step={step} />}
         <OnboardingFooter />
-      </BottomSheetView>
-    </BottomSheetModal>
+      </SheetView>
+    </Sheet>
   )
 }
 

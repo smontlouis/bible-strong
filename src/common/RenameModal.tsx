@@ -1,16 +1,15 @@
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
-import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '~common/bottom-sheet'
+import { Sheet, SheetFooter, SheetTextInput, type SheetRef } from '~common/sheet'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { HStack } from '~common/ui/Stack'
 
-const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
+const StyledTextInput = styled(SheetTextInput)(({ theme }) => ({
   color: theme.colors.default,
   height: 48,
   borderColor: theme.colors.border,
@@ -21,7 +20,7 @@ const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
 }))
 
 interface RenameModalProps {
-  bottomSheetRef: React.RefObject<BottomSheetModal | null>
+  sheetRef: React.RefObject<SheetRef | null>
   title: string
   placeholder: string
   initialValue?: string
@@ -30,7 +29,7 @@ interface RenameModalProps {
 }
 
 const RenameModal = ({
-  bottomSheetRef,
+  sheetRef,
   title,
   placeholder,
   initialValue = '',
@@ -47,7 +46,7 @@ const RenameModal = ({
   }, [initialValue])
 
   const handleClose = () => {
-    bottomSheetRef.current?.dismiss()
+    sheetRef.current?.dismiss()
     onClose?.()
   }
 
@@ -57,25 +56,18 @@ const RenameModal = ({
     handleClose()
   }
 
-  const handleSheetChange = (index: number) => {
-    if (index >= 0) {
-      setValue(initialValue)
-    }
-  }
+  const handlePresent = () => setValue(initialValue)
 
   const isDisabled = !value.trim()
 
   return (
-    <Modal.Body
-      ref={bottomSheetRef}
-      onModalClose={handleClose}
-      onChange={handleSheetChange}
-      topInset={insets.top}
-      enableDynamicSizing
-      enableScrollView={false}
-      headerComponent={<ModalHeader title={title} />}
-      footerComponent={props => (
-        <BottomSheetFooter bottomInset={insets.bottom} {...props}>
+    <Sheet
+      ref={sheetRef}
+      onDismiss={handleClose}
+      onPresent={handlePresent}
+      header={<ModalHeader title={title} />}
+      footer={props => (
+        <SheetFooter bottomInset={insets.bottom} {...props}>
           <HStack py={5} px={20} justifyContent="flex-end" bg="reverse">
             <Box>
               <Button disabled={isDisabled} onPress={handleSave}>
@@ -83,7 +75,7 @@ const RenameModal = ({
               </Button>
             </Box>
           </HStack>
-        </BottomSheetFooter>
+        </SheetFooter>
       )}
     >
       <Box paddingHorizontal={20} py={20}>
@@ -98,7 +90,7 @@ const RenameModal = ({
           selectTextOnFocus
         />
       </Box>
-    </Modal.Body>
+    </Sheet>
   )
 }
 

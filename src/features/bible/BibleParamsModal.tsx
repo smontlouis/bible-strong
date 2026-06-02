@@ -2,7 +2,7 @@ import React from 'react'
 import { FlatList } from 'react-native'
 
 import styled from '@emotion/native'
-import { BottomSheetModal, BottomSheetScrollView } from '~common/bottom-sheet'
+import { Sheet, SheetScrollView, type SheetRef } from '~common/sheet'
 import { useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
@@ -18,7 +18,6 @@ import Circle from '~common/ui/Circle'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import fonts from '~helpers/fonts'
 import { RootState } from '~redux/modules/reducer'
 import {
@@ -39,7 +38,6 @@ import {
 import { colorPickerModalAtom } from '~state/app'
 import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
-import { ContainerComponent } from '~common/Modal'
 
 export const HalfContainer = styled.View<{ border?: boolean }>(({ border, theme }) => ({
   paddingHorizontal: 20,
@@ -126,7 +124,7 @@ export const useParamsModalLabels = () => {
 }
 
 interface BibleParamsModalprops {
-  modalRef: React.RefObject<BottomSheetModal | null>
+  modalRef: React.RefObject<SheetRef | null>
 }
 
 const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
@@ -177,23 +175,12 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
   )
 
   const fontsViewRef = React.useRef(null)
-  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   const initialScrollIndex = fonts.findIndex(f => f === fontFamily)
   const insets = useSafeAreaInsets()
   return (
-    <BottomSheetModal
-      ref={modalRef}
-      enablePanDownToClose
-      backdropComponent={props => renderBackdrop({ ...props, opacity: 0.1 })}
-      containerComponent={ContainerComponent}
-      enableDynamicSizing={false}
-      snapPoints={['40%']}
-      activeOffsetY={[-20, 20]}
-      key={key}
-      {...bottomSheetStyles}
-    >
-      <BottomSheetScrollView
+    <Sheet ref={modalRef} dismissible backdrop snapPoints={[0.4]}>
+      <SheetScrollView
         contentContainerStyle={{
           alignItems: 'stretch',
           justifyContent: 'space-between',
@@ -439,8 +426,8 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
           <Text flex>{t('bible.settings.shareOptions')}</Text>
           <FeatherIcon name="chevron-right" size={20} color="grey" />
         </TouchableBox>
-      </BottomSheetScrollView>
-    </BottomSheetModal>
+      </SheetScrollView>
+    </Sheet>
   )
 }
 

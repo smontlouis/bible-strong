@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 
 import { MenuView, type MenuAction } from '@expo/ui/community/menu'
-import { BottomSheetModal } from '~common/bottom-sheet'
+import { type SheetRef } from '~common/sheet'
 import { useRouter } from 'expo-router'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
@@ -45,7 +45,7 @@ import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { makeSelectBookmarkForChapter } from '~redux/selectors/bookmarks'
-import { useBookAndVersionSelector } from './BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
+import { useBookAndVersionSelector } from './BookSelectorSheet/BookSelectorSheetProvider'
 import { VerseSelectorPopup } from './VerseSelectorPopup'
 
 interface BibleHeaderProps {
@@ -85,7 +85,7 @@ const Header = ({
   const openInNewTab = useOpenInNewTab()
 
   // Bookmark ref
-  const bookmarkModalRef = useRef<BottomSheetModal>(null)
+  const bookmarkModalRef = useRef<SheetRef>(null)
   const bible = useAtomValue(bibleAtom)
   const contextDisplayMode = getBibleContextDisplayMode(bible.data)
   const isContextFocused = contextDisplayMode === 'focused'
@@ -626,7 +626,7 @@ const Header = ({
         )}
       </HStack>
       <BookmarkModal
-        bottomSheetRef={bookmarkModalRef}
+        sheetRef={bookmarkModalRef}
         book={bookNumber}
         chapter={chapter}
         version={version}

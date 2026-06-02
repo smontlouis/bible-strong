@@ -17,10 +17,9 @@ import Border from '~common/ui/Border'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
-import Modal from '~common/Modal'
+import { Sheet } from '~common/sheet'
 import Text from '~common/ui/Text'
-import { renderBackdrop } from '~helpers/bottomSheetHelpers'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useSheet } from '~helpers/useSheet'
 import type { StudyNavigateBibleType } from '~common/types'
 import { recentColorsAtom } from './atom'
 
@@ -43,18 +42,10 @@ const useDetachedStudySheetStyle = () => {
   const sheetWidth = Math.min(250, windowWidth - 40)
 
   return {
-    backdropComponent: (props: Parameters<typeof renderBackdrop>[0]) =>
-      renderBackdrop({ ...props, opacity: 0.2 }),
-    style: {
-      width: sheetWidth,
-      marginLeft: (windowWidth - sheetWidth) / 2,
-      borderRadius: 16,
-      overflow: 'hidden' as const,
-    },
-    backgroundStyle: {
-      backgroundColor: theme.colors.reverse,
-      borderRadius: 16,
-    },
+    backdrop: true,
+    maxWidth: sheetWidth,
+    cornerRadius: 16,
+    backgroundColor: theme.colors.reverse,
   }
 }
 
@@ -68,7 +59,7 @@ const SelectHeading = ({
   keyboardHeight: number
 }) => {
   const { t } = useTranslation()
-  const { ref, open, close } = useBottomSheetModal()
+  const { ref, open, close } = useSheet()
   const detachedSheetStyle = useDetachedStudySheetStyle()
   const headings = [
     { label: 'Normal', value: 0 },
@@ -108,16 +99,11 @@ const SelectHeading = ({
           </Box>
         </Box>
       </TouchableBox>
-      <Modal.Body
+      <Sheet
         ref={ref}
-        enableDynamicSizing
-        enableScrollView={false}
         stackBehavior="push"
-        keyboardBehavior="interactive"
-        keyboardBlurBehavior="restore"
-        android_keyboardInputMode="adjustResize"
         detached
-        bottomInset={keyboardHeight}
+        detachedOffset={keyboardHeight}
         {...detachedSheetStyle}
       >
         {headings.map(h => (
@@ -143,7 +129,7 @@ const SelectHeading = ({
             }}
           />
         ))}
-      </Modal.Body>
+      </Sheet>
     </>
   )
 }
@@ -159,7 +145,7 @@ const SelectMore = ({
 }) => {
   const [colorModal, setOpenColorModal] = useState<'background' | 'color' | undefined>()
   const { t } = useTranslation()
-  const { ref, open, close } = useBottomSheetModal()
+  const { ref, open, close } = useSheet()
   const detachedSheetStyle = useDetachedStudySheetStyle()
   const [recentColors, setRecentColors] = useAtom(recentColorsAtom)
   const defaultColor = colorModal === 'background' ? '#ffffff' : '#000000'
@@ -213,18 +199,13 @@ const SelectMore = ({
           <FeatherIcon name="more-horizontal" size={18} color="primary" />
         </Box>
       </TouchableBox>
-      <Modal.Body
+      <Sheet
         ref={ref}
-        enableDynamicSizing
-        enableScrollView={false}
         stackBehavior="push"
-        keyboardBehavior="interactive"
-        keyboardBlurBehavior="restore"
-        android_keyboardInputMode="adjustResize"
         detached
-        bottomInset={keyboardHeight}
+        detachedOffset={keyboardHeight}
         {...detachedSheetStyle}
-        onModalClose={() => setOpenColorModal(undefined)}
+        onDismiss={() => setOpenColorModal(undefined)}
       >
         {colorModal ? (
           <Box p={20}>
@@ -316,7 +297,7 @@ const SelectMore = ({
             </Box>
           </Box>
         )}
-      </Modal.Body>
+      </Sheet>
     </>
   )
 }
@@ -329,7 +310,7 @@ const SelectBlock = ({
   keyboardHeight: number
 }) => {
   const { t } = useTranslation()
-  const { ref, open, close } = useBottomSheetModal()
+  const { ref, open, close } = useSheet()
   const detachedSheetStyle = useDetachedStudySheetStyle()
 
   const handleNavigate = (type: StudyNavigateBibleType) => {
@@ -342,16 +323,11 @@ const SelectBlock = ({
       <TouchableBox onPress={open}>
         <MaterialIcon name="add-box" size={22} color="primary" style={{ marginLeft: 'auto' }} />
       </TouchableBox>
-      <Modal.Body
+      <Sheet
         ref={ref}
-        enableDynamicSizing
-        enableScrollView={false}
         stackBehavior="push"
-        keyboardBehavior="interactive"
-        keyboardBlurBehavior="restore"
-        android_keyboardInputMode="adjustResize"
         detached
-        bottomInset={keyboardHeight}
+        detachedOffset={keyboardHeight}
         {...detachedSheetStyle}
       >
         <ActionSheetItem
@@ -374,7 +350,7 @@ const SelectBlock = ({
           label={t('Insérer un texte de strong')}
           onPress={() => handleNavigate('strong-block')}
         />
-      </Modal.Body>
+      </Sheet>
     </>
   )
 }

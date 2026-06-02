@@ -21,7 +21,7 @@ import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { BibleTab } from '../../state/tabs'
 import { LocalUnifiedTagsModalProvider } from '~common/UnifiedTagsModalProvider'
-import { BookSelectorBottomSheetProvider } from './BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
+import { BookSelectorSheetProvider } from './BookSelectorSheet/BookSelectorSheetProvider'
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const deepmerge = require('@fastify/deepmerge')()
 
@@ -116,9 +116,9 @@ const BibleTabScreen = ({ bibleAtom, isFormSheet }: BibleTabScreenProps) => {
 
   if (isFormSheet) {
     return (
-      <BookSelectorBottomSheetProvider>
+      <BookSelectorSheetProvider>
         <LocalUnifiedTagsModalProvider>{content}</LocalUnifiedTagsModalProvider>
-      </BookSelectorBottomSheetProvider>
+      </BookSelectorSheetProvider>
     )
   }
 

@@ -1,15 +1,13 @@
-import { BottomSheetModal, BottomSheetView } from '~common/bottom-sheet'
+import { Sheet, SheetView, type SheetRef } from '~common/sheet'
 import { useTheme } from '@emotion/react'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import React, { memo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { ContainerComponent } from '~common/Modal'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { renderBackdrop } from '~helpers/bottomSheetHelpers'
 import { useDeleteGroup } from '../../../state/tabGroups'
 import { TabGroup, closeAllTabsAtom, tabGroupsAtom } from '../../../state/tabs'
 import { TAB_ICON_SIZE } from '../utils/constants'
@@ -56,7 +54,7 @@ const GroupActionsPopover = memo(
     const theme = useTheme()
     const insets = useSafeAreaInsets()
     const { width: windowWidth } = useWindowDimensions()
-    const bottomSheetRef = useRef<BottomSheetModal>(null)
+    const sheetRef = useRef<SheetRef>(null)
     const closeAllTabs = useSetAtom(closeAllTabsAtom)
     const deleteGroup = useDeleteGroup()
     const groups = useAtomValue(tabGroupsAtom)
@@ -65,7 +63,7 @@ const GroupActionsPopover = memo(
     const bottomBarHeight = TAB_ICON_SIZE + insets.bottom
 
     const closeSheet = () => {
-      bottomSheetRef.current?.dismiss()
+      sheetRef.current?.dismiss()
     }
 
     const handleCloseAllTabs = () => {
@@ -118,27 +116,18 @@ const GroupActionsPopover = memo(
 
     return (
       <>
-        <TouchableBox onPress={() => bottomSheetRef.current?.present()}>{children}</TouchableBox>
-        <BottomSheetModal
-          ref={bottomSheetRef}
+        <TouchableBox onPress={() => sheetRef.current?.present()}>{children}</TouchableBox>
+        <Sheet
+          ref={sheetRef}
           detached
-          bottomInset={bottomBarHeight}
-          enableDynamicSizing
-          enablePanDownToClose
-          backdropComponent={props => renderBackdrop({ ...props, opacity: 0.2 })}
-          containerComponent={ContainerComponent}
-          style={{
-            width: sheetWidth,
-            marginLeft: (windowWidth - sheetWidth) / 2,
-            borderRadius: 16,
-            overflow: 'hidden',
-          }}
-          backgroundStyle={{
-            backgroundColor: theme.colors.reverse,
-            borderRadius: 16,
-          }}
+          detachedOffset={bottomBarHeight}
+          dismissible
+          backdrop
+          maxWidth={sheetWidth}
+          cornerRadius={16}
+          backgroundColor={theme.colors.reverse}
         >
-          <BottomSheetView>
+          <SheetView>
             <Box minWidth={200} py={6}>
               <PopoverItem
                 icon="x-circle"
@@ -164,8 +153,8 @@ const GroupActionsPopover = memo(
                 onPress={handleViewGroups}
               />
             </Box>
-          </BottomSheetView>
-        </BottomSheetModal>
+          </SheetView>
+        </Sheet>
       </>
     )
   }

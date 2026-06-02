@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import { MenuView } from '@expo/ui/community/menu'
-import { BottomSheetModal } from '~common/bottom-sheet'
+import { type SheetRef } from '~common/sheet'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -37,7 +37,7 @@ interface Props {
   onPress: () => void
   onBackPress?: () => void
   onOpenInNewTab: () => void
-  searchModalRef: React.RefObject<BottomSheetModal | null>
+  searchModalRef: React.RefObject<SheetRef | null>
 }
 
 const TimelineHeader = ({

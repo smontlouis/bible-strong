@@ -5,7 +5,7 @@ import React, { memo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, Alert, Platform } from 'react-native'
 import { useSelector } from 'react-redux'
-import { BottomSheetModal } from '~common/bottom-sheet'
+import { type SheetRef } from '~common/sheet'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import Header from '~common/Header'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -65,7 +65,7 @@ type MoreProps = {
 export const More = ({ closeMenu }: MoreProps) => {
   const { isLogged, user, logout } = useLogin()
   const theme = useTheme()
-  const deleteAccountModalRef = useRef<BottomSheetModal>(null)
+  const deleteAccountModalRef = useRef<SheetRef>(null)
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false)
 
   const lang = useLanguage()

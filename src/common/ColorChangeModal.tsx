@@ -1,22 +1,19 @@
 import { useEffect } from 'react'
-import { BottomSheetModal, BottomSheetView } from '~common/bottom-sheet'
+import { Sheet, SheetView } from '~common/sheet'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import ColorCircleGrid from '~common/ColorCircleGrid'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
-import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
+import { useSheet } from '~helpers/useSheet'
 import { useColorItems } from '~helpers/useHighlightColors'
 import { colorChangeModalAtom, colorPickerModalAtom } from '~state/app'
-import { ContainerComponent } from './Modal'
 
 const ColorChangeModal = () => {
   const item = useAtomValue(colorChangeModalAtom)
   const setColorChangeModal = useSetAtom(colorChangeModalAtom)
   const setColorPickerModal = useSetAtom(colorPickerModalAtom)
-  const { ref, open, close } = useBottomSheetModal()
+  const { ref, open, close } = useSheet()
   const insets = useSafeAreaInsets()
-  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   const colorItems = useColorItems({ includeTypes: true })
 
@@ -51,19 +48,8 @@ const ColorChangeModal = () => {
   }
 
   return (
-    <BottomSheetModal
-      ref={ref}
-      topInset={insets.top}
-      enablePanDownToClose
-      enableDynamicSizing
-      backdropComponent={renderBackdrop}
-      containerComponent={ContainerComponent}
-      activeOffsetY={[-20, 20]}
-      onDismiss={handleModalClose}
-      key={key}
-      {...bottomSheetStyles}
-    >
-      <BottomSheetView>
+    <Sheet ref={ref} dismissible backdrop onDismiss={handleModalClose}>
+      <SheetView>
         <ColorCircleGrid
           colors={colorItems}
           selectedColor={item ? item.selectedColor : undefined}
@@ -74,8 +60,8 @@ const ColorChangeModal = () => {
           scrollPadding={{ vertical: 10 }}
           itemHeight={60 + insets.bottom}
         />
-      </BottomSheetView>
-    </BottomSheetModal>
+      </SheetView>
+    </Sheet>
   )
 }
 

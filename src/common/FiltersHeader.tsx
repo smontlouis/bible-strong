@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import { BottomSheetModal, BottomSheetView } from '~common/bottom-sheet'
+import { Sheet, SheetView, type SheetRef } from '~common/sheet'
 import React, { memo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
@@ -9,8 +9,6 @@ import Back from '~common/Back'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
-import { ContainerComponent } from './Modal'
 
 const TouchableBox = styled.TouchableOpacity({
   flex: 1,
@@ -91,8 +89,7 @@ const FiltersHeader = ({
 }: Props) => {
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
-  const filtersRef = useRef<BottomSheetModal>(null)
-  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
+  const filtersRef = useRef<SheetRef>(null)
 
   const openFilters = () => {
     filtersRef.current?.present()
@@ -118,18 +115,8 @@ const FiltersHeader = ({
           <FeatherIcon name="chevron-down" size={15} />
         </TouchableBox>
       </HeaderBox>
-      <BottomSheetModal
-        ref={filtersRef}
-        topInset={insets.top}
-        enablePanDownToClose
-        enableDynamicSizing
-        backdropComponent={renderBackdrop}
-        containerComponent={ContainerComponent}
-        activeOffsetY={[-20, 20]}
-        key={key}
-        {...bottomSheetStyles}
-      >
-        <BottomSheetView>
+      <Sheet ref={filtersRef} dismissible backdrop>
+        <SheetView>
           <SheetHeader>
             <Text bold fontSize={18}>
               {t('Filtres')}
@@ -166,8 +153,8 @@ const FiltersHeader = ({
             </FilterRow>
           ))}
           <Box height={insets.bottom + 16} />
-        </BottomSheetView>
-      </BottomSheetModal>
+        </SheetView>
+      </Sheet>
     </>
   )
 }

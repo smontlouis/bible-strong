@@ -1,11 +1,9 @@
 import { useTheme } from '@emotion/react'
-import { BottomSheetModal } from '~common/bottom-sheet'
+import { Sheet, type SheetRef } from '~common/sheet'
 import distanceInWords from 'date-fns/formatDistance'
 import { useAtomValue } from 'jotai/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import Modal from '~common/Modal'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { getDateLocale } from '~helpers/languageUtils'
@@ -159,18 +157,17 @@ const GroupCard = ({ group, isActive, onPress }: GroupCardProps) => {
 }
 
 interface ViewGroupsModalProps {
-  bottomSheetRef: React.RefObject<BottomSheetModal | null>
+  sheetRef: React.RefObject<SheetRef | null>
   onClose?: () => void
 }
 
-const ViewGroupsModal = ({ bottomSheetRef, onClose }: ViewGroupsModalProps) => {
-  const insets = useSafeAreaInsets()
+const ViewGroupsModal = ({ sheetRef, onClose }: ViewGroupsModalProps) => {
   const groups = useAtomValue(tabGroupsAtom)
   const activeGroupId = useAtomValue(activeGroupIdAtom)
   const { groupPager } = useAppSwitcherContext()
 
   const handleClose = () => {
-    bottomSheetRef.current?.dismiss()
+    sheetRef.current?.dismiss()
     onClose?.()
   }
 
@@ -183,12 +180,10 @@ const ViewGroupsModal = ({ bottomSheetRef, onClose }: ViewGroupsModalProps) => {
   }
 
   return (
-    <Modal.Body
-      ref={bottomSheetRef}
-      onModalClose={handleClose}
-      topInset={insets.top}
-      enableDynamicSizing
-      // headerComponent={<ModalHeader title={t('tabs.viewMyGroups')} />}
+    <Sheet
+      ref={sheetRef}
+      onDismiss={handleClose}
+      // header={<ModalHeader title={t('tabs.viewMyGroups')} />}
     >
       <Box paddingHorizontal={20} paddingTop={16}>
         {groups.map(group => (
@@ -200,7 +195,7 @@ const ViewGroupsModal = ({ bottomSheetRef, onClose }: ViewGroupsModalProps) => {
           />
         ))}
       </Box>
-    </Modal.Body>
+    </Sheet>
   )
 }
 

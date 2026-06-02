@@ -1,6 +1,6 @@
 import { useTheme } from '@emotion/react'
-import type { BottomSheetFooterProps } from '~common/bottom-sheet'
-import { BottomSheetFooter } from '~common/bottom-sheet'
+import type { SheetFooterProps } from '~common/sheet'
+import { SheetFooter } from '~common/sheet'
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import type { GestureType } from 'react-native-gesture-handler'
@@ -15,7 +15,7 @@ import { TAB_CONTAINER_PADDING } from '../constants'
 import TabButton from './TabButton'
 
 interface VersesModalFooterProps {
-  bottomSheetFooterProps?: BottomSheetFooterProps
+  sheetFooterProps?: SheetFooterProps
   panGesture: GestureType
   indicatorAnimatedStyle: AnimatedStyle<StyleProps>
   tabWidth: number
@@ -24,7 +24,7 @@ interface VersesModalFooterProps {
 }
 
 const VersesModalFooter = ({
-  bottomSheetFooterProps,
+  sheetFooterProps,
   panGesture,
   indicatorAnimatedStyle,
   tabWidth,
@@ -37,7 +37,7 @@ const VersesModalFooter = ({
   const { bottomBarHeight } = useBottomBarHeightInTab()
 
   return (
-    <BottomSheetFooter {...bottomSheetFooterProps}>
+    <SheetFooter {...sheetFooterProps}>
       <AnimatedBox
         bg="lightGrey"
         borderRadius={18}
@@ -84,7 +84,7 @@ const VersesModalFooter = ({
           </Animated.View>
         </GestureDetector>
       </AnimatedBox>
-    </BottomSheetFooter>
+    </SheetFooter>
   )
 }
 

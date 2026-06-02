@@ -3,22 +3,21 @@ import { TouchableOpacity } from 'react-native'
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import type { ColorFormatsObject } from 'reanimated-color-picker'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
-import { BottomSheetModal, BottomSheetTextInput } from '~common/bottom-sheet'
+import { SheetTextInput, type SheetRef } from '~common/sheet'
 
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Button from '~common/ui/Button'
 import ColorPicker from '~common/ColorPicker'
-import Modal from '~common/Modal'
+import { Sheet } from '~common/sheet'
 import ModalHeader from '~common/ModalHeader'
 import type { HighlightType } from '~redux/modules/user'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { HIGHLIGHT_BACKGROUND_OPACITY_HEX, getContrastTextColor } from '~helpers/highlightUtils'
 import { FeatherIcon } from './ui/Icon'
 
-const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
+const StyledTextInput = styled(SheetTextInput)(({ theme }) => ({
   flex: 1,
   fontSize: 16,
   paddingVertical: 10,
@@ -52,7 +51,7 @@ const PreviewContainer = styled.View(({ theme }) => ({
 }))
 
 export type ColorEditModalProps = {
-  modalRef: React.RefObject<BottomSheetModal | null>
+  modalRef: React.RefObject<SheetRef | null>
   mode: 'add' | 'edit'
   initialHex?: string
   initialName?: string
@@ -73,7 +72,6 @@ const ColorEditModal = ({
   onDelete,
 }: ColorEditModalProps) => {
   const { t } = useTranslation()
-  const insets = useSafeAreaInsets()
   const theme = useTheme()
   const { colorScheme } = useCurrentThemeSelector()
 
@@ -110,12 +108,10 @@ const ColorEditModal = ({
   }
 
   return (
-    <Modal.Body
+    <Sheet
       ref={modalRef}
-      topInset={insets.top}
-      enableDynamicSizing
-      onModalClose={handleClose}
-      headerComponent={
+      onDismiss={handleClose}
+      header={
         <ModalHeader
           title={getModalTitle()}
           rightComponent={
@@ -212,7 +208,7 @@ const ColorEditModal = ({
         </Box>
         <Button onPress={handleSave}>{t('Valider')}</Button>
       </Box>
-    </Modal.Body>
+    </Sheet>
   )
 }
 

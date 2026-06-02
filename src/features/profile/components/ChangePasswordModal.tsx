@@ -3,10 +3,9 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator } from 'react-native'
 import { useTheme } from '@emotion/react'
-import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '~common/bottom-sheet'
+import { SheetFooter, Sheet, SheetTextInput, type SheetRef } from '~common/sheet'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import Box, { VStack, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -16,7 +15,7 @@ import FireAuth from '~helpers/FireAuth'
 import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
 
 type ChangePasswordModalProps = {
-  modalRef: React.RefObject<BottomSheetModal | null>
+  modalRef: React.RefObject<SheetRef | null>
 }
 
 const ChangePasswordModal = ({ modalRef }: ChangePasswordModalProps) => {
@@ -70,13 +69,12 @@ const ChangePasswordModal = ({ modalRef }: ChangePasswordModalProps) => {
     currentPassword.length > 0 && newPassword.length >= 6 && newPassword === confirmPassword
 
   return (
-    <Modal.Body
+    <Sheet
       ref={modalRef}
-      enableDynamicSizing
-      onModalClose={resetForm}
-      headerComponent={<ModalHeader title={t('profile.changePassword')} />}
-      footerComponent={props => (
-        <BottomSheetFooter bottomInset={insets.bottom} {...props}>
+      onDismiss={resetForm}
+      header={<ModalHeader title={t('profile.changePassword')} />}
+      footer={props => (
+        <SheetFooter bottomInset={insets.bottom} {...props}>
           <HStack px={20} gap={10} justifyContent="flex-end" bg="reverse">
             <Box h={MODAL_FOOTER_HEIGHT}>
               <Button reverse onPress={handleClose} disabled={isLoading}>
@@ -89,7 +87,7 @@ const ChangePasswordModal = ({ modalRef }: ChangePasswordModalProps) => {
               </Button>
             </Box>
           </HStack>
-        </BottomSheetFooter>
+        </SheetFooter>
       )}
     >
       <VStack gap={15} paddingHorizontal={20} py={20}>
@@ -142,11 +140,11 @@ const ChangePasswordModal = ({ modalRef }: ChangePasswordModalProps) => {
           </Text>
         )}
       </VStack>
-    </Modal.Body>
+    </Sheet>
   )
 }
 
-const StyledInput = styled(BottomSheetTextInput)(({ theme }) => ({
+const StyledInput = styled(SheetTextInput)(({ theme }) => ({
   backgroundColor: theme.colors.lightGrey,
   borderRadius: 10,
   paddingHorizontal: 15,

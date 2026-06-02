@@ -4,17 +4,16 @@ import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import { ActionSheetItem } from '~common/ActionMenu'
-import Modal from '~common/Modal'
+import { Sheet, type SheetRef } from '~common/sheet'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { RootState } from '~redux/modules/reducer'
 import { deleteStudy } from '~redux/modules/user'
 import { unifiedTagsModalAtom } from '../../state/app'
 import PublishStudyMenuItem from './PublishStudyMenuItem'
-import { BottomSheetModal } from '~common/bottom-sheet'
 
 interface Props {
-  ref?: React.RefObject<BottomSheetModal | null>
+  ref?: React.RefObject<SheetRef | null>
   studyId: string | false
   onClosed: () => void
   openRenameModal: (data: { id: string; title: string }) => void
@@ -49,7 +48,7 @@ const StudySettingsModal = ({ ref, studyId, onClosed, openRenameModal }: Props) 
   }
 
   return (
-    <Modal.Body ref={ref} onModalClose={onClosed} enableDynamicSizing withPortal>
+    <Sheet ref={ref} onDismiss={onClosed}>
       {study && <PublishStudyMenuItem study={study} onClosed={close} />}
       <ActionSheetItem
         icon="tag"
@@ -102,7 +101,7 @@ const StudySettingsModal = ({ ref, studyId, onClosed, openRenameModal }: Props) 
           deleteStudyConfirmation(studyId)
         }}
       />
-    </Modal.Body>
+    </Sheet>
   )
 }
 

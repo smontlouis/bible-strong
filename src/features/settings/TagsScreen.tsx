@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import { BottomSheetModal } from '~common/bottom-sheet'
+import { Sheet, type SheetRef } from '~common/sheet'
 import React, { useEffect, useRef, useState } from 'react'
 import { Alert } from 'react-native'
 import { shallowEqual, useDispatch, useSelector, useStore } from 'react-redux'
@@ -9,7 +9,6 @@ import { ActionSheetItem } from '~common/ActionMenu'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Link from '~common/Link'
-import Modal from '~common/Modal'
 import RenameModal from '~common/RenameModal'
 import SearchInput from '~common/SearchInput'
 import Border from '~common/ui/Border'
@@ -20,7 +19,7 @@ import { LegendList } from '@legendapp/list'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import useFuzzy from '~helpers/useFuzzy'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useSheet } from '~helpers/useSheet'
 import { addTag, removeTag, updateTag } from '~redux/modules/user'
 import { sortedTagsSelector } from '~redux/selectors/tags'
 import {
@@ -150,13 +149,13 @@ const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
   const hasBackButton = isFormSheet ? canGoBackInStack : true
   const tags = useSelector(sortedTagsSelector, shallowEqual)
   const [isOpen, setOpen] = useState<Tag | undefined>(undefined)
-  const renameModalRef = useRef<BottomSheetModal>(null)
+  const renameModalRef = useRef<SheetRef>(null)
   const [tagToEdit, setTagToEdit] = useState<{ id: string; name: string } | null>(null)
   const { keyword, result, search, resetSearch } = useFuzzy(tags, {
     keys: ['name'],
   })
   const dispatch = useDispatch()
-  const { ref, open, close } = useBottomSheetModal()
+  const { ref, open, close } = useSheet()
   const store = useStore<RootState>()
   const selectTagData = makeTagDataSelector()
   const createTabGroupFromTag = useCreateTabGroupFromTag()
@@ -216,7 +215,7 @@ const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
           />
         )}
 
-        <Modal.Body ref={ref} onModalClose={() => setOpen(undefined)} enableDynamicSizing>
+        <Sheet ref={ref} onDismiss={() => setOpen(undefined)}>
           <ActionSheetItem
             icon="edit-3"
             label={t('Éditer')}
@@ -239,9 +238,9 @@ const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
             color="quart"
             onPress={promptLogout}
           />
-        </Modal.Body>
+        </Sheet>
         <RenameModal
-          bottomSheetRef={renameModalRef}
+          sheetRef={renameModalRef}
           title={tagToEdit?.id ? t("Renommer l'étiquette") : t('Nouvelle étiquette')}
           placeholder={t("Nom de l'étiquette")}
           initialValue={tagToEdit?.name}

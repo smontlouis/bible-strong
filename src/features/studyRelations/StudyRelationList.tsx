@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '~common/bottom-sheet'
+import { SheetFooter, Sheet, SheetTextInput, type SheetRef } from '~common/sheet'
 import { MenuView } from '@expo/ui/community/menu'
 import { type ComponentProps, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import Empty from '~common/Empty'
 import LexiqueIcon from '~common/LexiqueIcon'
-import Modal from '~common/Modal'
 import ModalHeader from '~common/ModalHeader'
 import NaveIcon from '~common/NaveIcon'
 import { ActionSheetItem } from '~common/ActionMenu'
@@ -78,7 +77,7 @@ const targetIconConfig: Record<
   word: { name: 'type', color: 'tertiary' },
 }
 
-const LabelInput = styled(BottomSheetTextInput)(({ theme }) => ({
+const LabelInput = styled(SheetTextInput)(({ theme }) => ({
   minHeight: 44,
   borderWidth: 1,
   borderColor: theme.colors.border,
@@ -192,8 +191,8 @@ const StudyRelationList = ({
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const insets = useSafeAreaInsets()
-  const editModalRef = useRef<BottomSheetModal>(null)
-  const actionModalRef = useRef<BottomSheetModal>(null)
+  const editModalRef = useRef<SheetRef>(null)
+  const actionModalRef = useRef<SheetRef>(null)
   const [editingModel, setEditingModel] = useState<RelationDisplayModel | null>(null)
   const [actionModel, setActionModel] = useState<RelationDisplayModel | null>(null)
   const [draft, setDraft] = useState<RelationDraft>({
@@ -451,11 +450,9 @@ const StudyRelationList = ({
         ))
       )}
 
-      <Modal.Body
+      <Sheet
         ref={editModalRef}
-        enableDynamicSizing
-        enableScrollView={false}
-        headerComponent={
+        header={
           <ModalHeader
             title={t('Modifier la relation')}
             rightComponent={
@@ -481,8 +478,8 @@ const StudyRelationList = ({
             }
           />
         }
-        footerComponent={props => (
-          <BottomSheetFooter bottomInset={insets.bottom} {...props}>
+        footer={props => (
+          <SheetFooter bottomInset={insets.bottom} {...props}>
             <HStack px={20} gap={10} justifyContent="flex-end" bg="reverse">
               <Box h={54}>
                 <Button reverse onPress={closeEditModal}>
@@ -493,7 +490,7 @@ const StudyRelationList = ({
                 <Button onPress={saveEdit}>{t('Enregistrer')}</Button>
               </Box>
             </HStack>
-          </BottomSheetFooter>
+          </SheetFooter>
         )}
       >
         {editingModel ? (
@@ -598,12 +595,8 @@ const StudyRelationList = ({
             </VStack>
           </VStack>
         ) : null}
-      </Modal.Body>
-      <Modal.Body
-        ref={actionModalRef}
-        onModalClose={() => setActionModel(null)}
-        enableDynamicSizing
-      >
+      </Sheet>
+      <Sheet ref={actionModalRef} onDismiss={() => setActionModel(null)}>
         {actionModel?.relation.kind !== 'system' ? (
           <ActionSheetItem icon="edit-3" label={t('Modifier')} onPress={openEditFromActionModal} />
         ) : null}
@@ -613,7 +606,7 @@ const StudyRelationList = ({
           color="quart"
           onPress={() => confirmDelete(actionModel)}
         />
-      </Modal.Body>
+      </Sheet>
     </VStack>
   )
 }

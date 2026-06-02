@@ -1,22 +1,10 @@
-import * as Icon from '@expo/vector-icons'
 import React from 'react'
 
-import styled from '@emotion/native'
-
-import Modal from '~common/Modal'
+import { Sheet, SheetItem } from '~common/sheet'
 import Box, { TouchableBox } from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
-
-const StyledText = styled(Text)({
-  fontSize: 12,
-  fontWeight: 'bold',
-  marginRight: 3,
-})
-
-const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.default,
-}))
+import { useSheet } from '~helpers/useSheet'
 
 interface DropdownMenuProps<T extends string | number = string> {
   currentValue?: T
@@ -34,7 +22,7 @@ const DropdownMenu = <T extends string | number = string>({
   customRender,
 }: DropdownMenuProps<T>) => {
   const choice = choices.find(l => l.value === currentValue)
-  const { ref, open, close } = useBottomSheetModal()
+  const { ref, open, close } = useSheet()
 
   const onItemPress = (value: T) => {
     setValue(value)
@@ -49,27 +37,28 @@ const DropdownMenu = <T extends string | number = string>({
               {title}
             </Text>
             <Box row pr={5} alignItems="center">
-              <StyledText>{choice?.label}</StyledText>
-              <StyledIcon name="chevron-down" size={15} />
+              <Text bold fontSize={12} mr={3}>
+                {choice?.label}
+              </Text>
+              <FeatherIcon name="chevron-down" size={15} color="default" />
             </Box>
           </Box>
         )}
       </TouchableBox>
-      <Modal.Body
+      <Sheet
         ref={ref}
-        enableDynamicSizing
-        headerComponent={
+        header={
           <Box px={20} py={15} center borderColor="border" borderBottomWidth={1}>
             <Text bold>{title}</Text>
           </Box>
         }
       >
         {choices.map(({ value, label, subLabel }) => (
-          <Modal.Item key={String(value)} tag={subLabel} onPress={() => onItemPress(value)}>
+          <SheetItem key={String(value)} tag={subLabel} onPress={() => onItemPress(value)}>
             {label}
-          </Modal.Item>
+          </SheetItem>
         ))}
-      </Modal.Body>
+      </Sheet>
     </>
   )
 }

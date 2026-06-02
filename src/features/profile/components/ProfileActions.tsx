@@ -1,7 +1,7 @@
 import React, { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
-import { BottomSheetModal } from '~common/bottom-sheet'
+import { type SheetRef } from '~common/sheet'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -16,8 +16,8 @@ import DeleteAccountModal from './DeleteAccountModal'
 const ProfileActions = () => {
   const { t } = useTranslation()
   const { user, logout } = useLogin()
-  const passwordModalRef = useRef<BottomSheetModal>(null)
-  const deleteAccountModalRef = useRef<BottomSheetModal>(null)
+  const passwordModalRef = useRef<SheetRef>(null)
+  const deleteAccountModalRef = useRef<SheetRef>(null)
 
   const isEmailProvider = user.provider === 'password'
 
