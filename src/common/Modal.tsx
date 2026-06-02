@@ -104,18 +104,11 @@ const Body = ({
       {!enableContentWrapper ? (
         children
       ) : enableScrollView ? (
-        <BottomSheetScrollView
-          contentContainerStyle={{
-            paddingBottom: footerComponent ? MODAL_FOOTER_HEIGHT_BOTTOM_INSET : BOTTOM_INSET,
-          }}
-        >
-          {children}
-        </BottomSheetScrollView>
+        <BottomSheetScrollView>{children}</BottomSheetScrollView>
       ) : (
         <BottomSheetView
           style={{
             flex: 1,
-            paddingBottom: footerComponent ? MODAL_FOOTER_HEIGHT_BOTTOM_INSET : BOTTOM_INSET,
           }}
         >
           {children}
