@@ -33,7 +33,8 @@ interface Props {
   dom: import('expo/dom').DOMProps
   fontFamily: string
   language: string
-  contentToDisplay: DeltaStatic
+  contentToDisplay?: DeltaStatic
+  encodedContentToDisplay?: string
   isReadOnly: boolean
   colorScheme: 'light' | 'dark'
   ref?: Ref<StudyDOMRef>
@@ -88,10 +89,31 @@ function focusEditor(quill: QuillInstance): void {
   }, 0)
 }
 
+function decodeDeltaContent(encodedContent?: string, fallback?: DeltaStatic): DeltaStatic {
+  if (!encodedContent) return fallback ?? { ops: [] }
+
+  try {
+    const decoded = JSON.parse(decodeURIComponent(encodedContent))
+    return isDeltaStatic(decoded) ? decoded : (fallback ?? { ops: [] })
+  } catch (err) {
+    console.log(`[Studies] Failed to decode editor content: ${err}`)
+    return fallback ?? { ops: [] }
+  }
+}
+
+function normalizeReloadContent(content: JSONValue): DeltaStatic | null {
+  if (typeof content === 'string') {
+    return decodeDeltaContent(content)
+  }
+
+  return isDeltaStatic(content) ? content : null
+}
+
 export default function StudiesDOMComponent({
   fontFamily,
   language,
   contentToDisplay,
+  encodedContentToDisplay,
   isReadOnly,
   colorScheme,
   ref,
@@ -101,6 +123,7 @@ export default function StudiesDOMComponent({
   })
 
   const quillRef = useRef<QuillInstance | null>(null)
+  const initialContent = decodeDeltaContent(encodedContentToDisplay, contentToDisplay)
 
   function onChangeText(delta: unknown, oldDelta: unknown, source: unknown): void {
     dispatch('TEXT_CHANGED', {
@@ -160,7 +183,7 @@ export default function StudiesDOMComponent({
     console.log('[Studies] Editor initialized')
 
     quill.focus()
-    quill.setContents(contentToDisplay, Quill.sources.SILENT)
+    quill.setContents(initialContent, Quill.sources.SILENT)
 
     addTextChangeEventToEditor()
   }
@@ -263,8 +286,9 @@ export default function StudiesDOMComponent({
         }
       },
       reloadEditor: (content: JSONValue) => {
-        if (quillRef.current && isDeltaStatic(content)) {
-          quillRef.current.setContents(content, Quill.sources.SILENT)
+        const nextContent = normalizeReloadContent(content)
+        if (quillRef.current && nextContent) {
+          quillRef.current.setContents(nextContent, Quill.sources.SILENT)
         }
       },
     }),

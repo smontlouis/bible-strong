@@ -1,4 +1,5 @@
 import { useBottomSheetInternal } from '~common/bottom-sheet'
+import { useTheme } from '@emotion/react'
 import { useState } from 'react'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import NoteEditorDOMComponent from './NoteEditorDOMComponent'
@@ -28,6 +29,7 @@ export default function NoteEditorBottomSheet({
   onTitleChange,
   onDescriptionChange,
 }: Props) {
+  const theme = useTheme()
   const { colorScheme } = useCurrentThemeSelector()
   const [webViewHeight, setWebViewHeight] = useState(100)
   const { animatedKeyboardState } = useBottomSheetInternal()
@@ -55,11 +57,14 @@ export default function NoteEditorBottomSheet({
 
   return (
     <NoteEditorDOMComponent
-      defaultTitle={defaultTitle}
-      defaultDescription={defaultDescription}
+      encodedDefaultTitle={encodeURIComponent(defaultTitle)}
+      encodedDefaultDescription={encodeURIComponent(defaultDescription)}
       resetKey={resetKey}
       isEditing={isEditing}
       colorScheme={colorScheme}
+      textColor={theme.colors.default}
+      editorBackgroundColor={theme.colors.opacity5}
+      placeholderColor={theme.colors.grey}
       placeholderTitle={placeholderTitle}
       placeholderDescription={placeholderDescription}
       onTitleChange={onTitleChange}

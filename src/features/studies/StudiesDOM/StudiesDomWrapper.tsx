@@ -53,6 +53,9 @@ const SELECTION_MODE_MAP: Record<string, StudyNavigateBibleType> = {
   SELECT_BIBLE_STRONG_BLOCK: 'strong-block',
 }
 
+const encodeDeltaContent = (content: Study['content'] | undefined) =>
+  encodeURIComponent(JSON.stringify(content ?? { ops: [] }))
+
 export default function StudiesDomWrapper({
   params,
   isReadOnly,
@@ -70,6 +73,7 @@ export default function StudiesDomWrapper({
   const keyboardHeight = useKeyboardState(state => state.height)
   const [activeFormats, setActiveFormats] = useState({})
   const { colorScheme } = useCurrentThemeSelector()
+  const encodedContentToDisplay = encodeDeltaContent(contentToDisplay)
 
   const getIsCurrentTab = useIsCurrentTab()
   const isCurrentTab = studyAtom ? getIsCurrentTab(studyAtom as PrimitiveAtom<TabItem>) : false
@@ -79,9 +83,9 @@ export default function StudiesDomWrapper({
 
     if (ref.current?.reloadEditor && isCurrentTab) {
       console.log('[Studies] Reloading editor')
-      ref.current.reloadEditor(contentToDisplay ?? { ops: [] })
+      ref.current.reloadEditor(encodedContentToDisplay)
     }
-  }, [isCurrentTab])
+  }, [isCurrentTab, encodedContentToDisplay])
 
   function dispatchToWebView(type: string, payload?: JSONValue): void {
     if (ref.current) {
@@ -210,7 +214,7 @@ export default function StudiesDomWrapper({
       ref={ref}
       fontFamily={fontFamily}
       language={i18n.language}
-      contentToDisplay={contentToDisplay ?? { ops: [] }}
+      encodedContentToDisplay={encodedContentToDisplay}
       isReadOnly={isReadOnly}
       colorScheme={colorScheme}
       dom={{
