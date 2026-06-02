@@ -75,7 +75,6 @@ export const VerseSelectorPopup = ({ bibleAtom, children }: VerseSelectorPopupPr
         <BottomSheetScrollView
           contentContainerStyle={{
             paddingTop: 10,
-            paddingBottom: insets.bottom,
             paddingHorizontal: horizontalMargin,
             flexDirection: 'row',
             flexWrap: 'wrap',

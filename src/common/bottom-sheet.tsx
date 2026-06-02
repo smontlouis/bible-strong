@@ -2,7 +2,7 @@ import React, { forwardRef } from 'react'
 import { StyleSheet, TextInput, View, useWindowDimensions, type ViewProps } from 'react-native'
 import { FlashList, type FlashListProps } from '@shopify/flash-list'
 import { TrueSheet, TrueSheetProvider, type TrueSheetProps } from '@lodev09/react-native-true-sheet'
-import ExpoBottomSheet, {
+import {
   BottomSheetModal as ExpoBottomSheetModal,
   BottomSheetView,
   BottomSheetScrollView,
@@ -26,7 +26,7 @@ type CompatBottomSheetProps = Omit<
   animateOnMount?: boolean
   bottomInset?: number
   containerComponent?: React.ComponentType<{ children?: React.ReactNode }>
-  backdropComponent?: React.ComponentType<any> | ((props: any) => React.ReactNode)
+  backdropComponent?: React.ComponentType<any> | ((props: any) => React.ReactNode) | null
   detached?: boolean
   footerComponent?: React.ComponentType<any> | ((props: any) => React.ReactNode)
   handleComponent?: React.ComponentType<any> | null
@@ -50,26 +50,6 @@ type CompatFooterProps = BottomSheetFooterProps & {
   children?: React.ReactNode
   style?: ViewProps['style']
 }
-
-const stripUnsupportedProps = ({
-  activeOffsetY: _activeOffsetY,
-  android_keyboardInputMode: _androidKeyboardInputMode,
-  animateOnMount: _animateOnMount,
-  bottomInset: _bottomInset,
-  containerComponent: _containerComponent,
-  detached: _detached,
-  keyboardBehavior: _keyboardBehavior,
-  keyboardBlurBehavior: _keyboardBlurBehavior,
-  onAnimate: _onAnimate,
-  stackBehavior: _stackBehavior,
-  topInset: _topInset,
-  ...props
-}: CompatBottomSheetProps) => props
-
-const BottomSheet = forwardRef<BottomSheetMethods, CompatBottomSheetProps>((props, ref) => (
-  <ExpoBottomSheet ref={ref} {...stripUnsupportedProps(props)} />
-))
-BottomSheet.displayName = 'BottomSheet'
 
 const snapPointToDetent = (snapPoint: string | number, screenHeight: number): SheetDetent => {
   if (typeof snapPoint === 'string' && snapPoint.endsWith('%')) {
@@ -118,15 +98,16 @@ const findNearestDetentIndex = (detents: SheetDetent[], position: string | numbe
   return nearestIndex
 }
 
-const BottomSheetModal = forwardRef<BottomSheetMethods, CompatBottomSheetProps>((props, ref) => {
+const TrueSheetCompat = forwardRef<BottomSheetMethods, CompatBottomSheetProps>((props, ref) => {
   const {
+    backdropComponent,
     backgroundStyle,
     children,
     enableDynamicSizing,
     enablePanDownToClose,
     footerComponent,
     handleComponent,
-    index = 0,
+    index = -1,
     onAnimate,
     onChange,
     onClose,
@@ -138,6 +119,7 @@ const BottomSheetModal = forwardRef<BottomSheetMethods, CompatBottomSheetProps>(
   const { height } = useWindowDimensions()
   const sheetRef = React.useRef<TrueSheet>(null)
   const currentIndexRef = React.useRef(-1)
+  const hasMountedRef = React.useRef(false)
   const detents = React.useMemo(
     () => getDetents(snapPoints, enableDynamicSizing, height),
     [enableDynamicSizing, height, snapPoints]
@@ -145,6 +127,8 @@ const BottomSheetModal = forwardRef<BottomSheetMethods, CompatBottomSheetProps>(
   const presentIndex = Math.min(Math.max(index, 0), detents.length - 1)
   const maxContentHeight = topInset ? height - topInset : undefined
   const resolvedBackgroundStyle = StyleSheet.flatten(backgroundStyle)
+  const resolvedSheetStyle = StyleSheet.flatten(style)
+  const dimmed = Boolean(backdropComponent)
 
   React.useImperativeHandle(
     ref,
@@ -192,11 +176,27 @@ const BottomSheetModal = forwardRef<BottomSheetMethods, CompatBottomSheetProps>(
     [detents, presentIndex]
   )
 
+  React.useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true
+      return
+    }
+
+    if (index < 0) {
+      sheetRef.current?.dismiss()
+    } else if (currentIndexRef.current === -1) {
+      sheetRef.current?.present(presentIndex)
+    } else {
+      sheetRef.current?.resize(presentIndex)
+    }
+  }, [index, presentIndex])
+
   return (
     <TrueSheet
       ref={sheetRef}
       detents={detents}
       dismissible={enablePanDownToClose ?? false}
+      dimmed={dimmed}
       draggable
       footer={
         footerComponent
@@ -204,7 +204,15 @@ const BottomSheetModal = forwardRef<BottomSheetMethods, CompatBottomSheetProps>(
           : undefined
       }
       grabber={handleComponent !== null}
+      cornerRadius={
+        typeof resolvedSheetStyle?.borderTopLeftRadius === 'number'
+          ? resolvedSheetStyle.borderTopLeftRadius
+          : undefined
+      }
       maxContentHeight={maxContentHeight}
+      maxContentWidth={
+        typeof resolvedSheetStyle?.maxWidth === 'number' ? resolvedSheetStyle.maxWidth : undefined
+      }
       scrollable={!enableDynamicSizing}
       backgroundColor={resolvedBackgroundStyle?.backgroundColor}
       onWillPresent={event => {
@@ -232,6 +240,12 @@ const BottomSheetModal = forwardRef<BottomSheetMethods, CompatBottomSheetProps>(
     </TrueSheet>
   )
 })
+TrueSheetCompat.displayName = 'TrueSheetCompat'
+
+const BottomSheet = TrueSheetCompat
+BottomSheet.displayName = 'BottomSheet'
+
+const BottomSheetModal = TrueSheetCompat
 BottomSheetModal.displayName = 'BottomSheetModal'
 
 export type BottomSheet = BottomSheetMethods

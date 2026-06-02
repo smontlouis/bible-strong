@@ -1,15 +1,12 @@
-import type { BottomSheetFooterProps } from '~common/bottom-sheet'
 import BottomSheet, {
   type BottomSheet as BottomSheetRef,
   BottomSheetView,
 } from '~common/bottom-sheet'
-import { useAtom, useAtomValue } from 'jotai/react'
+import { useAtom } from 'jotai/react'
 import Animated from 'react-native-reanimated'
-import { isFullScreenBibleAtom } from 'src/state/app'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
 import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { onAnimateModalClose, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import { BOTTOM_INSET } from '~helpers/constants'
 import verseToReference from '../../../helpers/verseToReference'
@@ -19,7 +16,7 @@ import AnnotateTab from './components/AnnotateTab'
 import ShareTab from './components/ShareTab'
 import StudyTab from './components/StudyTab'
 import VersesModalFooter from './components/VersesModalFooter'
-import { TABS, TAB_FOOTER_HEIGHT } from './constants'
+import { TABS } from './constants'
 import useTabSwipeGesture from './hooks/useTabSwipeGesture'
 import useVerseActions from './hooks/useVerseActions'
 import useVerseActiveStates from './hooks/useVerseActiveStates'
@@ -51,8 +48,6 @@ const SelectedVersesModal = ({
 }: SelectedVersesModalProps) => {
   const selectedVersesTitle = verseToReference(selectedVerses)
   const [activeTabIndex, setActiveTabIndex] = useAtom(selectedVersesTabIndexAtom)
-  const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
-  const { bottomBarHeight } = useBottomBarHeightInTab()
 
   const close = () => {
     ref?.current?.close()
@@ -94,20 +89,6 @@ const SelectedVersesModal = ({
     clearSelectedVerses()
   }
 
-  const renderFooter =
-    typeof isSelectionMode === 'string' && isSelectionMode.includes('verse')
-      ? undefined
-      : (props: BottomSheetFooterProps) => (
-          <VersesModalFooter
-            bottomSheetFooterProps={props}
-            panGesture={panGesture}
-            indicatorAnimatedStyle={indicatorAnimatedStyle}
-            tabWidth={tabWidth}
-            activeTabIndex={activeTabIndex}
-            goToTab={goToTab}
-          />
-        )
-
   return (
     <BottomSheet
       ref={ref}
@@ -117,7 +98,7 @@ const SelectedVersesModal = ({
       enablePanDownToClose
       activeOffsetY={[-20, 20]}
       key={key}
-      footerComponent={renderFooter}
+      backdropComponent={null}
       {...bottomSheetStyles}
       style={{
         ...(bottomSheetStyles.style as object),
@@ -144,8 +125,6 @@ const SelectedVersesModal = ({
           <Box
             style={{
               overflow: 'hidden',
-              paddingBottom:
-                TAB_FOOTER_HEIGHT + (isFullScreenBible ? BOTTOM_INSET : bottomBarHeight),
             }}
           >
             <ColorCirclesBar
@@ -194,6 +173,13 @@ const SelectedVersesModal = ({
                 selectAllVerses={selectAllVerses}
               />
             </Animated.View>
+            <VersesModalFooter
+              panGesture={panGesture}
+              indicatorAnimatedStyle={indicatorAnimatedStyle}
+              tabWidth={tabWidth}
+              activeTabIndex={activeTabIndex}
+              goToTab={goToTab}
+            />
           </Box>
         )}
       </BottomSheetView>

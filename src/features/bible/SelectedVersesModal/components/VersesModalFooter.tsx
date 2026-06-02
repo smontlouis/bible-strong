@@ -15,7 +15,7 @@ import { TAB_CONTAINER_PADDING } from '../constants'
 import TabButton from './TabButton'
 
 interface VersesModalFooterProps {
-  bottomSheetFooterProps: BottomSheetFooterProps
+  bottomSheetFooterProps?: BottomSheetFooterProps
   panGesture: GestureType
   indicatorAnimatedStyle: AnimatedStyle<StyleProps>
   tabWidth: number
