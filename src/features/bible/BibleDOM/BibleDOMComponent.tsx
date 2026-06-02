@@ -1082,16 +1082,20 @@ const VersesRenderer = ({ settings, dispatch, translations, verses, ...rest }: P
   }, [])
 
   useEffect(() => {
+    const reverseColor = settings.colors[settings.theme].reverse
     document.documentElement.style.setProperty('--header-height', `${headerHeight}px`)
-    document.body.style.backgroundColor = settings.colors[settings.theme].reverse
+    document.documentElement.style.backgroundColor = reverseColor
+    document.body.style.backgroundColor = reverseColor
   }, [dispatch, headerHeight, settings.colors, settings.theme])
 
-  // Sync body background when theme changes
+  // Keep the WebView document background in sync when Expo DOM reuses the same page.
   useEffect(() => {
     if (settings?.theme) {
-      document.body.style.backgroundColor = settings.colors[settings.theme].reverse
+      const reverseColor = settings.colors[settings.theme].reverse
+      document.documentElement.style.backgroundColor = reverseColor
+      document.body.style.backgroundColor = reverseColor
     }
-  }, [settings?.theme])
+  }, [settings.colors, settings?.theme])
 
   if (!verses.length) {
     return (

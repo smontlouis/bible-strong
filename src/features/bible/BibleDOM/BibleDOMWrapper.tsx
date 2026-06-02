@@ -214,6 +214,10 @@ function useStabilizedVerses(verses: Verse[], isLoading: boolean) {
   return stable
 }
 
+const DOM_WEBVIEW_BACKGROUND_COLOR = 'transparent'
+const DOM_WEBVIEW_INITIAL_SCRIPT =
+  "document.documentElement.style.backgroundColor='transparent';document.body.style.backgroundColor='transparent';document.body.style.margin='0';true;"
+
 export type WebViewProps = {
   tabId: string
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -782,16 +786,16 @@ export const BibleDOMWrapper = ({
           webviewDebuggingEnabled: __DEV__,
           style: {
             flex: 1,
-            backgroundColor: theme.colors.reverse,
+            backgroundColor: DOM_WEBVIEW_BACKGROUND_COLOR,
           },
           containerStyle: {
             flex: 1,
-            backgroundColor: theme.colors.reverse,
+            backgroundColor: DOM_WEBVIEW_BACKGROUND_COLOR,
             ...(Platform.OS === 'android' && {
               marginTop: TOP_INSET,
             }),
           },
-          injectedJavaScriptBeforeContentLoaded: `document.documentElement.style.backgroundColor='${theme.colors.reverse}';document.body.style.backgroundColor='${theme.colors.reverse}';document.body.style.margin='0';true;`,
+          injectedJavaScriptBeforeContentLoaded: DOM_WEBVIEW_INITIAL_SCRIPT,
         }}
         verses={versesToSend}
         parallelVerses={parallelVerses}
