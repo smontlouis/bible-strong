@@ -32,10 +32,10 @@ import {
   BibleResource,
   Pericope,
   SelectedCode,
-  StudyNavigateBibleType,
   Tag,
   Verse,
   VerseIds,
+  StudyNavigateBibleType,
 } from '~common/types'
 import Box from '~common/ui/Box'
 import {
@@ -95,6 +95,20 @@ import {
   TOGGLE_INT_COMPLETE,
   TOGGLE_SELECTED_VERSE,
 } from './dispatch'
+import {
+  getBookmarkPayload,
+  getNoteNavigationPayload,
+  getNumberPayload,
+  getStringPayload,
+  getStudyRelationsModalTarget,
+  getToastPayload,
+  getVerseIdsPayload,
+  isRecord,
+  type BibleDOMBridgeAction,
+  type StudyRelationsModalTarget,
+} from './bibleDomBridgeCommands'
+
+export type { StudyRelationsModalTarget } from './bibleDomBridgeCommands'
 
 export type ParallelVerse = {
   id: VersionCode
@@ -122,81 +136,9 @@ type HighlightTagsModalPayload = {
   ids: Record<string, true>
 }
 
-export type StudyRelationsModalTarget =
-  | string
-  | {
-      verseKey?: string
-      verseIds?: string[]
-      relationId?: string
-    }
-
-type DispatchAction = {
-  type: string
-  payload?: unknown
-  params?: {
-    verse: Verse
-    isSelectionMode?: StudyNavigateBibleType
-  }
-  bookCode?: string
-  chapter?: string | number
-  verse?: string | number
-}
-
-export type Dispatch = (props: DispatchAction) => Promise<void>
+export type Dispatch = (props: BibleDOMBridgeAction) => Promise<void>
 
 const books = booksJson as Record<string, string[]>
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null
-
-const getStringPayload = (payload: unknown): string | undefined =>
-  typeof payload === 'string' ? payload : undefined
-
-const getNumberPayload = (payload: unknown): number | undefined =>
-  typeof payload === 'number' ? payload : undefined
-
-const getToastPayload = (payload: unknown): { message?: string; type?: string } => {
-  if (!isRecord(payload)) return {}
-  return {
-    message: getStringPayload(payload.message),
-    type: getStringPayload(payload.type),
-  }
-}
-
-const getVerseIdsPayload = (payload: unknown): string[] => {
-  if (!isRecord(payload) || !Array.isArray(payload.verseIds)) return []
-  return payload.verseIds.filter((verseId): verseId is string => typeof verseId === 'string')
-}
-
-const getStudyRelationsModalTarget = (payload: unknown): StudyRelationsModalTarget | undefined => {
-  if (typeof payload === 'string') return payload
-  if (!isRecord(payload)) return undefined
-
-  const verseKey = getStringPayload(payload.verseKey)
-  const relationId = getStringPayload(payload.relationId)
-  const verseIds = getVerseIdsPayload(payload)
-
-  if (!verseKey && !verseIds.length) return undefined
-
-  return {
-    verseKey,
-    relationId,
-    verseIds,
-  }
-}
-
-const getNoteNavigationPayload = (payload: unknown): { noteId?: string; verseIds: string[] } => {
-  if (typeof payload === 'string') {
-    return { noteId: payload, verseIds: [] }
-  }
-  if (!isRecord(payload)) {
-    return { verseIds: [] }
-  }
-  return {
-    noteId: getStringPayload(payload.noteId),
-    verseIds: getVerseIdsPayload(payload),
-  }
-}
 
 /**
  * Prevents rapid empty→loaded prop updates on the Expo DOM bridge.
@@ -647,7 +589,8 @@ export const BibleDOMWrapper = ({
       }
 
       case OPEN_BOOKMARK_MODAL: {
-        if (isRecord(action.payload)) onOpenBookmarkModal?.(action.payload as unknown as Bookmark)
+        const bookmark = getBookmarkPayload(action.payload)
+        if (bookmark) onOpenBookmarkModal?.(bookmark)
         break
       }
 

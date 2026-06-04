@@ -8,13 +8,16 @@ import Button from '~common/ui/Button'
 import Container from '~common/ui/Container'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import { getVersions, getVersionsBySections } from '~helpers/bibleVersions'
+import { getVersionsBySections } from '~helpers/bibleVersions'
 import { getDatabases } from '~helpers/databases'
-import { biblesRef, getDatabaseUrl, getDatabasesRef } from '~helpers/firebase'
-import { requireBiblePath } from '~helpers/requireBiblePath'
 import useLanguage from '~helpers/useLanguage'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
-import { ResourceToDownload, selectedResourcesAtom } from './atom'
+import { selectedResourcesAtom } from './atom'
+import {
+  getDefaultOnboardingResourceSelection,
+  getOnboardingResourceSelectionId,
+  type OnboardingResourceSelection,
+} from './onboardingResources'
 import ResourceItem from './ResourceItem'
 
 const DownloadFiles = ({ setStep }: { setStep: React.Dispatch<React.SetStateAction<number>> }) => {
@@ -25,40 +28,25 @@ const DownloadFiles = ({ setStep }: { setStep: React.Dispatch<React.SetStateActi
   )
   const [selectedResources, setSelectedResources] = useAtom(selectedResourcesAtom)
 
-  const getDefaultVersionResource = (): ResourceToDownload => {
-    const defaultVersionCode = getDefaultBibleVersion(lang)
-    const defaultVersion = getVersions()[defaultVersionCode]
-    const path = requireBiblePath(defaultVersion.id)
-    const uri =
-      defaultVersion.id === 'INT'
-        ? getDatabaseUrl('INTERLINEAIRE', 'fr')
-        : defaultVersion.id === 'INT_EN'
-          ? getDatabaseUrl('INTERLINEAIRE', 'en')
-          : biblesRef[defaultVersion.id]
-
-    return {
-      id: defaultVersion.id,
-      name: defaultVersion.name,
-      path,
-      uri,
-      fileSize: 2500000,
-      type: 'bible',
-    }
-  }
-
   // Set default version
   useEffect(() => {
-    setSelectedResources([getDefaultVersionResource()])
+    setSelectedResources([getDefaultOnboardingResourceSelection(lang)])
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const onPressItem = (resource: ResourceToDownload) => {
+  const onPressItem = (resource: OnboardingResourceSelection) => {
+    const resourceId = getOnboardingResourceSelectionId(resource)
     setSelectedResources(res => {
-      if (res.find(r => r.id === resource.id)) {
-        return res.filter(r => r.id !== resource.id)
+      if (res.find(r => getOnboardingResourceSelectionId(r) === resourceId)) {
+        return res.filter(r => getOnboardingResourceSelectionId(r) !== resourceId)
       }
       return [...res, resource]
     })
+  }
+
+  const isSelected = (resource: OnboardingResourceSelection) => {
+    const resourceId = getOnboardingResourceSelectionId(resource)
+    return selectedResources.some(r => getOnboardingResourceSelectionId(r) === resourceId)
   }
 
   return (
@@ -89,15 +77,15 @@ const DownloadFiles = ({ setStep }: { setStep: React.Dispatch<React.SetStateActi
                 name={db.name}
                 subTitle={db.desc}
                 fileSize={db.fileSize}
-                isSelected={Boolean(selectedResources.find(r => r.id === db.id))}
+                isSelected={isSelected({
+                  kind: 'database',
+                  databaseId: db.id,
+                  lang,
+                })}
                 onPress={() =>
                   onPressItem({
-                    id: db.id,
-                    name: db.name,
-                    path: db.path,
-                    uri: getDatabasesRef()[db.id],
-                    fileSize: db.fileSize,
-                    type: 'database',
+                    kind: 'database',
+                    databaseId: db.id,
                     lang,
                   })
                 }
@@ -124,24 +112,12 @@ const DownloadFiles = ({ setStep }: { setStep: React.Dispatch<React.SetStateActi
           version.id === 'LSGS' || version.id === 'KJVS' ? null : (
             <ResourceItem
               name={version.name}
-              isSelected={Boolean(selectedResources.find(r => r.id === version.id))}
+              isSelected={isSelected({ kind: 'bible', versionId: version.id })}
               isDisabled={version.id === getDefaultBibleVersion(lang)}
               onPress={() => {
-                const path = requireBiblePath(version.id)
-                const uri =
-                  version.id === 'INT'
-                    ? getDatabaseUrl('INTERLINEAIRE', 'fr')
-                    : version.id === 'INT_EN'
-                      ? getDatabaseUrl('INTERLINEAIRE', 'en')
-                      : biblesRef[version.id]
-
                 onPressItem({
-                  id: version.id,
-                  name: version.name,
-                  path,
-                  uri,
-                  fileSize: 2500000,
-                  type: 'bible',
+                  kind: 'bible',
+                  versionId: version.id,
                 })
               }}
             />

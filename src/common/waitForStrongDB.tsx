@@ -1,20 +1,16 @@
-import * as FileSystem from 'expo-file-system/legacy'
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 import { useAtomValue } from 'jotai'
 
 import { useTranslation } from 'react-i18next'
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
-import { toast } from '~helpers/toast'
-import { dbManager, initSQLiteDirForLang } from '~helpers/sqlite'
 import { DBAction, useDBStateValue } from '~helpers/databaseState'
-import { getDatabaseUrl } from '~helpers/firebase'
-import { getDbPath } from '~helpers/databases'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import Box from './ui/Box'
 import Progress from './ui/Progress'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { useResourceDatabaseAccess } from './resourceDatabaseAccess'
 
 const STRONG_FILE_SIZE = 34941952
 
@@ -23,109 +19,20 @@ const useStrong = (
   startDownload: boolean,
   lang: ResourceLanguage
 ) => {
-  const { t } = useTranslation()
-  const prevLangRef = useRef<ResourceLanguage>(lang)
-
-  useEffect(() => {
-    // Detect if this is a language change
-    const isLangChange = prevLangRef.current !== lang
-
-    // Reset state when language changes
-    if (isLangChange) {
-      prevLangRef.current = lang
-      dispatch({ type: 'strong.setLoading', payload: true })
-      dispatch({ type: 'strong.setProposeDownload', payload: false })
-      dispatch({ type: 'strong.setStartDownload', payload: false })
-      dispatch({ type: 'strong.setProgress', payload: 0 })
-    }
-
-    const db = dbManager.getDB('STRONG', lang)
-
-    if (db.get()) {
-      dispatch({
-        type: 'strong.setLoading',
-        payload: false,
-      })
-    } else {
-      const loadDBAsync = async () => {
-        const dbPath = getDbPath('STRONG', lang)
-        const dbFile = await FileSystem.getInfoAsync(dbPath)
-
-        if (!dbFile.exists) {
-          await initSQLiteDirForLang(lang)
-
-          // Waiting for user to accept to download
-          // Also prevent auto-download when language changes
-          if (!startDownload || isLangChange) {
-            dispatch({
-              type: 'strong.setProposeDownload',
-              payload: true,
-            })
-            return
-          }
-
-          try {
-            const downloadKey = `strongDownloadHasStarted_${lang}`
-            const downloadFlags = window as unknown as Window & Record<string, boolean>
-            if (!downloadFlags[downloadKey]) {
-              downloadFlags[downloadKey] = true
-
-              const sqliteDbUri = getDatabaseUrl('STRONG', lang)
-
-              console.log(`[Strong] Downloading ${sqliteDbUri} to ${dbPath}`)
-
-              await initSQLiteDirForLang(lang)
-
-              await FileSystem.createDownloadResumable(
-                sqliteDbUri,
-                dbPath,
-                undefined,
-                ({ totalBytesWritten }) => {
-                  const idxProgress = Math.floor((totalBytesWritten / STRONG_FILE_SIZE) * 100) / 100
-                  dispatch({
-                    type: 'strong.setProgress',
-                    payload: idxProgress,
-                  })
-                }
-              ).downloadAsync()
-
-              await db.init()
-
-              dispatch({
-                type: 'strong.setLoading',
-                payload: false,
-              })
-              downloadFlags[downloadKey] = false
-            }
-          } catch (e) {
-            console.log('[Strong] Download error:', e)
-            toast.error(
-              t(
-                "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
-              )
-            )
-            dispatch({
-              type: 'strong.setProposeDownload',
-              payload: true,
-            })
-            dispatch({
-              type: 'strong.setStartDownload',
-              payload: false,
-            })
-          }
-        } else {
-          await db.init()
-
-          dispatch({
-            type: 'strong.setLoading',
-            payload: false,
-          })
-        }
-      }
-
-      loadDBAsync()
-    }
-  }, [dispatch, startDownload, lang, t])
+  useResourceDatabaseAccess({
+    dbId: 'STRONG',
+    fileSize: STRONG_FILE_SIZE,
+    downloadKeyPrefix: 'strongDownloadHasStarted',
+    logName: 'Strong',
+    ensureDirBeforePrompt: true,
+    state: { startDownload, lang },
+    actions: {
+      setLoading: value => dispatch({ type: 'strong.setLoading', payload: value }),
+      setProposeDownload: value => dispatch({ type: 'strong.setProposeDownload', payload: value }),
+      setStartDownload: value => dispatch({ type: 'strong.setStartDownload', payload: value }),
+      setProgress: value => dispatch({ type: 'strong.setProgress', payload: value }),
+    },
+  })
 }
 
 export const useWaitForDatabase = () => {

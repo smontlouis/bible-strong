@@ -1,25 +1,19 @@
-import * as FileSystem from 'expo-file-system/legacy'
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 import { useAtomValue } from 'jotai'
 
 import { useTranslation } from 'react-i18next'
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
-import { toast } from '~helpers/toast'
-import { dbManager, initSQLiteDirForLang } from '~helpers/sqlite'
 import { useDBStateValue } from '~helpers/databaseState'
-import { getDatabaseUrl } from '~helpers/firebase'
-import { getDbPath } from '~helpers/databases'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
-import type { ResourceLanguage } from '~helpers/databaseTypes'
 import Box from './ui/Box'
 import Progress from './ui/Progress'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { useResourceDatabaseAccess } from './resourceDatabaseAccess'
 
 const DICTIONNAIRE_FILE_SIZE = 22532096
 
 export const useWaitForDatabase = () => {
-  const { t } = useTranslation()
   const [
     {
       dictionnaire: { isLoading, proposeDownload, startDownload, progress },
@@ -31,108 +25,22 @@ export const useWaitForDatabase = () => {
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const resourceLang = resourcesLanguage.DICTIONNAIRE
 
-  const prevLangRef = useRef<ResourceLanguage>(resourceLang)
-
-  useEffect(() => {
-    // Detect if this is a language change
-    const isLangChange = prevLangRef.current !== resourceLang
-
-    // Reset state when language changes
-    if (isLangChange) {
-      prevLangRef.current = resourceLang
-      dispatch({ type: 'dictionnaire.setLoading', payload: true })
-      dispatch({ type: 'dictionnaire.setProposeDownload', payload: false })
-      dispatch({ type: 'dictionnaire.setStartDownload', payload: false })
-      dispatch({ type: 'dictionnaire.setProgress', payload: 0 })
-    }
-
-    const db = dbManager.getDB('DICTIONNAIRE', resourceLang)
-
-    if (db.get()) {
-      dispatch({
-        type: 'dictionnaire.setLoading',
-        payload: false,
-      })
-    } else {
-      const loadDBAsync = async () => {
-        const dbPath = getDbPath('DICTIONNAIRE', resourceLang)
-        const dbFile = await FileSystem.getInfoAsync(dbPath)
-
-        if (!dbFile.exists) {
-          await initSQLiteDirForLang(resourceLang)
-
-          // Waiting for user to accept to download
-          // Also prevent auto-download when language changes
-          if (!startDownload || isLangChange) {
-            dispatch({
-              type: 'dictionnaire.setProposeDownload',
-              payload: true,
-            })
-            return
-          }
-
-          try {
-            const downloadKey = `dictionnaireDownloadHasStarted_${resourceLang}`
-            const downloadFlags = window as unknown as Window & Record<string, boolean>
-            if (!downloadFlags[downloadKey]) {
-              downloadFlags[downloadKey] = true
-
-              const sqliteDbUri = getDatabaseUrl('DICTIONNAIRE', resourceLang)
-
-              console.log(`[Dictionnaire] Downloading ${sqliteDbUri} to ${dbPath}`)
-
-              await initSQLiteDirForLang(resourceLang)
-
-              await FileSystem.createDownloadResumable(
-                sqliteDbUri,
-                dbPath,
-                undefined,
-                ({ totalBytesWritten }) => {
-                  const idxProgress =
-                    Math.floor((totalBytesWritten / DICTIONNAIRE_FILE_SIZE) * 100) / 100
-                  dispatch({
-                    type: 'dictionnaire.setProgress',
-                    payload: idxProgress,
-                  })
-                }
-              ).downloadAsync()
-
-              await db.init()
-
-              dispatch({
-                type: 'dictionnaire.setLoading',
-                payload: false,
-              })
-              downloadFlags[downloadKey] = false
-            }
-          } catch {
-            toast.error(
-              t(
-                "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
-              )
-            )
-            dispatch({
-              type: 'dictionnaire.setProposeDownload',
-              payload: true,
-            })
-            dispatch({
-              type: 'dictionnaire.setStartDownload',
-              payload: false,
-            })
-          }
-        } else {
-          await db.init()
-
-          dispatch({
-            type: 'dictionnaire.setLoading',
-            payload: false,
-          })
-        }
-      }
-
-      loadDBAsync()
-    }
-  }, [dispatch, startDownload, resourceLang, t])
+  useResourceDatabaseAccess({
+    dbId: 'DICTIONNAIRE',
+    fileSize: DICTIONNAIRE_FILE_SIZE,
+    downloadKeyPrefix: 'dictionnaireDownloadHasStarted',
+    logName: 'Dictionnaire',
+    ensureDirBeforePrompt: true,
+    state: { startDownload, lang: resourceLang },
+    actions: {
+      setLoading: value => dispatch({ type: 'dictionnaire.setLoading', payload: value }),
+      setProposeDownload: value =>
+        dispatch({ type: 'dictionnaire.setProposeDownload', payload: value }),
+      setStartDownload: value =>
+        dispatch({ type: 'dictionnaire.setStartDownload', payload: value }),
+      setProgress: value => dispatch({ type: 'dictionnaire.setProgress', payload: value }),
+    },
+  })
 
   const setStartDownload = (value: boolean) =>
     dispatch({

@@ -84,6 +84,18 @@ import i18n from '~i18n'
 import { RootState } from '~redux/modules/reducer'
 import { deleteDoc, deleteField, doc, firebaseDb, getDoc, setDoc } from '../helpers/firebase'
 import { fetchPlan, markAsRead, removePlan, resetPlan } from './modules/plan'
+import {
+  groupUserBibleSyncOperations,
+  planBookmarkSync,
+  planHighlightSync,
+  planLinkSync,
+  planNoteSync,
+  planStudyRelationSync,
+  planTagSync,
+  planToggleTagEntitySync,
+  planWordAnnotationSync,
+  type UserBibleSyncOperation,
+} from './userBibleSyncPlan'
 
 type SyncRecord = Record<string, unknown>
 type BibleSyncCollection = Exclude<SubcollectionName, 'tabGroups'>
@@ -94,6 +106,68 @@ type SyncDiffState = {
       studies?: SyncRecord
       settings?: unknown
     }
+  }
+}
+
+const executeUserBibleSyncOperation = async ({
+  operation,
+  userId,
+  diffBible,
+  bible,
+  deleteMarker,
+}: {
+  operation: UserBibleSyncOperation
+  userId: string
+  diffBible: BibleSyncData
+  bible: RootState['user']['bible']
+  deleteMarker: unknown
+}) => {
+  if (operation.type === 'relations') {
+    await syncRelationCollections(userId, diffBible, bible, deleteMarker)
+    return
+  }
+
+  await syncSubcollectionChanges(
+    userId,
+    operation.collection,
+    diffBible[operation.collection],
+    bible[operation.collection] as SubcollectionData | undefined,
+    deleteMarker
+  )
+}
+
+const executeUserBibleSyncOperationGroups = async ({
+  operations,
+  userId,
+  diffBible,
+  bible,
+  deleteMarker,
+  state,
+}: {
+  operations: UserBibleSyncOperation[]
+  userId: string
+  diffBible: BibleSyncData
+  bible: RootState['user']['bible']
+  deleteMarker: unknown
+  state: RootState
+}) => {
+  for (const group of groupUserBibleSyncOperations(operations)) {
+    await handleSyncWithRetry(
+      async () => {
+        for (const operation of group.operations) {
+          await executeUserBibleSyncOperation({
+            operation,
+            userId,
+            diffBible,
+            bible,
+            deleteMarker,
+          })
+        }
+      },
+      userId,
+      group.actionName,
+      state
+    )
   }
 }
 
@@ -444,227 +518,113 @@ const firestoreMiddleware: Middleware = store => next => async action => {
 
   // ========== BOOKMARKS SYNC (sous-collection) ==========
   if (isBookmarkAction(action)) {
-    if (!diffState?.user?.bible?.bookmarks) return result
+    const operations = planBookmarkSync(diffState?.user?.bible ?? {})
+    if (!operations.length) return result
 
-    await handleSyncWithRetry(
-      async () => {
-        await syncSubcollectionChanges(
-          userId,
-          'bookmarks',
-          diffState.user.bible.bookmarks,
-          user.bible.bookmarks,
-          deleteMarker
-        )
-      },
+    await executeUserBibleSyncOperationGroups({
+      operations,
       userId,
-      'bookmarks_sync',
-      state
-    )
+      diffBible: diffState.user.bible,
+      bible: user.bible,
+      deleteMarker,
+      state,
+    })
     return result
   }
 
   // ========== NOTES SYNC (sous-collection) ==========
   if (isNoteAction(action)) {
-    if (!diffState?.user?.bible?.notes) return result
+    const operations = planNoteSync(diffState?.user?.bible ?? {})
+    if (!operations.length) return result
 
-    await handleSyncWithRetry(
-      async () => {
-        await syncSubcollectionChanges(
-          userId,
-          'notes',
-          diffState.user.bible.notes,
-          user.bible.notes,
-          deleteMarker
-        )
-        await syncRelationCollections(userId, diffState.user.bible, user.bible, deleteMarker)
-      },
+    await executeUserBibleSyncOperationGroups({
+      operations,
       userId,
-      'notes_sync',
-      state
-    )
+      diffBible: diffState.user.bible,
+      bible: user.bible,
+      deleteMarker,
+      state,
+    })
     return result
   }
 
   // ========== LINKS SYNC (sous-collection) ==========
   if (isLinkAction(action)) {
-    if (!diffState?.user?.bible?.links) return result
+    const operations = planLinkSync(diffState?.user?.bible ?? {})
+    if (!operations.length) return result
 
-    await handleSyncWithRetry(
-      async () => {
-        await syncSubcollectionChanges(
-          userId,
-          'links',
-          diffState.user.bible.links,
-          user.bible.links,
-          deleteMarker
-        )
-        await syncRelationCollections(userId, diffState.user.bible, user.bible, deleteMarker)
-      },
+    await executeUserBibleSyncOperationGroups({
+      operations,
       userId,
-      'links_sync',
-      state
-    )
-
-    // Si des tags ont aussi changé (via removeEntityInTags), sync les tags
-    if (diffState?.user?.bible?.tags) {
-      await handleSyncWithRetry(
-        async () => {
-          await syncSubcollectionChanges(
-            userId,
-            'tags',
-            diffState.user.bible.tags,
-            user.bible.tags,
-            deleteMarker
-          )
-        },
-        userId,
-        'tags_sync_from_link',
-        state
-      )
-    }
+      diffBible: diffState.user.bible,
+      bible: user.bible,
+      deleteMarker,
+      state,
+    })
     return result
   }
 
   // ========== RELATIONS SYNC (sous-collections) ==========
   if (isStudyRelationAction(action)) {
-    if (!diffState?.user?.bible?.relations) return result
+    const operations = planStudyRelationSync(diffState?.user?.bible ?? {})
+    if (!operations.length) return result
 
-    await handleSyncWithRetry(
-      async () => {
-        await syncRelationCollections(userId, diffState.user.bible, user.bible, deleteMarker)
-      },
+    await executeUserBibleSyncOperationGroups({
+      operations,
       userId,
-      'relations_sync',
-      state
-    )
+      diffBible: diffState.user.bible,
+      bible: user.bible,
+      deleteMarker,
+      state,
+    })
     return result
   }
 
   // ========== HIGHLIGHTS SYNC (sous-collection) ==========
   if (isHighlightAction(action)) {
-    if (!diffState?.user?.bible?.highlights) return result
+    const operations = planHighlightSync(diffState?.user?.bible ?? {})
+    if (!operations.length) return result
 
-    await handleSyncWithRetry(
-      async () => {
-        await syncSubcollectionChanges(
-          userId,
-          'highlights',
-          diffState.user.bible.highlights,
-          user.bible.highlights,
-          deleteMarker
-        )
-      },
+    await executeUserBibleSyncOperationGroups({
+      operations,
       userId,
-      'highlights_sync',
-      state
-    )
-
-    // Si des tags ont aussi changé (via removeEntityInTags), sync les tags
-    if (diffState?.user?.bible?.tags) {
-      await handleSyncWithRetry(
-        async () => {
-          await syncSubcollectionChanges(
-            userId,
-            'tags',
-            diffState.user.bible.tags,
-            user.bible.tags,
-            deleteMarker
-          )
-        },
-        userId,
-        'tags_sync_from_highlight',
-        state
-      )
-    }
+      diffBible: diffState.user.bible,
+      bible: user.bible,
+      deleteMarker,
+      state,
+    })
     return result
   }
 
   // ========== WORD ANNOTATIONS SYNC (sous-collection) ==========
   if (isWordAnnotationAction(action)) {
-    if (!diffState?.user?.bible?.wordAnnotations) return result
+    const operations = planWordAnnotationSync(diffState?.user?.bible ?? {})
+    if (!operations.length) return result
 
-    await handleSyncWithRetry(
-      async () => {
-        await syncSubcollectionChanges(
-          userId,
-          'wordAnnotations',
-          diffState.user.bible.wordAnnotations,
-          user.bible.wordAnnotations,
-          deleteMarker
-        )
-      },
+    await executeUserBibleSyncOperationGroups({
+      operations,
       userId,
-      'word_annotations_sync',
-      state
-    )
-
-    // Si des tags ont aussi changé (via removeEntityInTags), sync les tags
-    if (diffState?.user?.bible?.tags) {
-      await handleSyncWithRetry(
-        async () => {
-          await syncSubcollectionChanges(
-            userId,
-            'tags',
-            diffState.user.bible.tags,
-            user.bible.tags,
-            deleteMarker
-          )
-        },
-        userId,
-        'tags_sync_from_word_annotation',
-        state
-      )
-    }
-
-    // Si des notes ont aussi changé (cascade delete from annotation), sync les notes
-    if (diffState?.user?.bible?.notes) {
-      await handleSyncWithRetry(
-        async () => {
-          await syncSubcollectionChanges(
-            userId,
-            'notes',
-            diffState.user.bible.notes,
-            user.bible.notes,
-            deleteMarker
-          )
-        },
-        userId,
-        'notes_sync_from_word_annotation',
-        state
-      )
-    }
-
-    if (diffState?.user?.bible?.relations) {
-      await handleSyncWithRetry(
-        async () => {
-          await syncRelationCollections(userId, diffState.user.bible, user.bible, deleteMarker)
-        },
-        userId,
-        'relations_sync_from_word_annotation',
-        state
-      )
-    }
+      diffBible: diffState.user.bible,
+      bible: user.bible,
+      deleteMarker,
+      state,
+    })
     return result
   }
 
   // ========== TAGS SYNC (sous-collection) ==========
   if (isTagAction(action)) {
-    if (!diffState?.user?.bible?.tags) return result
+    const operations = planTagSync(diffState?.user?.bible ?? {})
+    if (!operations.length) return result
 
-    await handleSyncWithRetry(
-      async () => {
-        await syncSubcollectionChanges(
-          userId,
-          'tags',
-          diffState.user.bible.tags,
-          user.bible.tags,
-          deleteMarker
-        )
-      },
+    await executeUserBibleSyncOperationGroups({
+      operations,
       userId,
-      'tags_sync',
-      state
-    )
+      diffBible: diffState.user.bible,
+      bible: user.bible,
+      deleteMarker,
+      state,
+    })
     return result
   }
 
@@ -672,48 +632,21 @@ const firestoreMiddleware: Middleware = store => next => async action => {
   if (toggleTagEntity.match(action)) {
     if (!diffState?.user?.bible) return result
 
-    // Sync les tags modifiés
-    if (diffState.user.bible.tags) {
+    for (const operation of planToggleTagEntitySync(diffState.user.bible, SUBCOLLECTION_NAMES)) {
       await handleSyncWithRetry(
         async () => {
-          await syncSubcollectionChanges(
+          await executeUserBibleSyncOperation({
+            operation,
             userId,
-            'tags',
-            diffState.user.bible.tags,
-            user.bible.tags,
-            deleteMarker
-          )
+            diffBible: diffState.user.bible,
+            bible: user.bible,
+            deleteMarker,
+          })
         },
         userId,
-        'tags_sync_toggle',
+        operation.actionName,
         state
       )
-    }
-
-    // Sync les entités modifiées (highlights, notes, etc.)
-    for (const collection of SUBCOLLECTION_NAMES) {
-      if (collection === 'tags' || collection === 'tabGroups') continue
-
-      const bibleCollection = collection as BibleSyncCollection
-      const collectionDiff = diffState.user.bible[bibleCollection]
-      const collectionData = user.bible[bibleCollection] as SubcollectionData | undefined
-
-      if (collectionDiff) {
-        await handleSyncWithRetry(
-          async () => {
-            await syncSubcollectionChanges(
-              userId,
-              bibleCollection,
-              collectionDiff,
-              collectionData,
-              deleteMarker
-            )
-          },
-          userId,
-          `${collection}_sync_toggle`,
-          state
-        )
-      }
     }
     return result
   }

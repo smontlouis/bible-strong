@@ -102,7 +102,13 @@ import {
   toggleSettingsShareVerseNumbers,
 } from './user/settings'
 import { addStudies, deleteStudy, publishStudyAction, updateStudy } from './user/studies'
-import { addTag, entitiesArray, removeTag, toggleTagEntity, updateTag } from './user/tags'
+import { addTag, removeTag, toggleTagEntity, updateTag } from './user/tags'
+import {
+  removeEntityFromTagAssignments,
+  removeTagAssignments,
+  renameTagAssignment,
+  toggleTagAssignment,
+} from './user/tagAssignments'
 import { getDatabaseUpdate, getVersionUpdate, setVersionUpdated } from './user/versionUpdate'
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -110,21 +116,6 @@ const deepmerge = require('@fastify/deepmerge')()
 
 // Type for color keys (used for dynamic theme color access)
 type ColorKeys = keyof typeof defaultColors
-
-// Type for entity tag references (simplified Tag without all properties)
-type EntityTagRef = {
-  id: string
-  name: string
-}
-
-// Type for entities that can have tags
-type EntityWithTags = {
-  tags?: Record<string, EntityTagRef>
-  [key: string]: unknown
-}
-
-// Type for bible entity collections (used in toggleTagEntity)
-type BibleEntityCollection = Record<string, EntityWithTags>
 
 type CleanedFirestoreData =
   | string
@@ -194,11 +185,7 @@ const removeEntityInTags = (
   entity: 'notes' | 'links' | 'highlights' | 'studies' | 'wordAnnotations',
   key: string
 ) => {
-  for (const tag in draft.bible.tags) {
-    if (draft.bible.tags[tag][entity]) {
-      delete draft.bible.tags[tag][entity][key]
-    }
-  }
+  removeEntityFromTagAssignments(draft.bible, entity, key)
 }
 
 const applySubcollectionChanges = <T extends Record<string, unknown>>(
@@ -1315,128 +1302,14 @@ const userSlice = createSlice({
     })
     builder.addCase(updateTag, (state, action) => {
       const { id, value } = action.payload
-      state.bible.tags[id].name = value
-
-      entitiesArray.forEach(ent => {
-        const entities = (state.bible[ent] ?? {}) as BibleEntityCollection
-        Object.values(entities).forEach(entity => {
-          const entityTags = entity.tags
-          if (entityTags && entityTags[id]) {
-            entityTags[id].name = value
-          }
-        })
-      })
+      renameTagAssignment(state.bible, id, value)
     })
     builder.addCase(removeTag, (state, action) => {
-      delete state.bible.tags[action.payload]
-
-      entitiesArray.forEach(ent => {
-        const entities = (state.bible[ent] ?? {}) as BibleEntityCollection
-        Object.values(entities).forEach(entity => {
-          const entityTags = entity.tags
-          if (entityTags && entityTags[action.payload]) {
-            delete entityTags[action.payload]
-          }
-        })
-      })
+      removeTagAssignments(state.bible, action.payload)
     })
     builder.addCase(toggleTagEntity, (state, action) => {
       const { item, tagId } = action.payload
-      // Use type assertion for dynamic entity access
-      const entityCollection = state.bible[item.entity] as unknown as BibleEntityCollection
-
-      if (item.ids) {
-        const firstId = Object.keys(item.ids)[0]
-        const hasTag = entityCollection[firstId]?.tags?.[tagId]
-
-        Object.keys(item.ids).forEach(id => {
-          // DELETE OPERATION - In order to have a true toggle, check only for first item with Object.keys(item.ids)[0]
-          if (hasTag) {
-            try {
-              delete state.bible.tags[tagId][item.entity]?.[id]
-              delete entityCollection[id].tags?.[tagId]
-
-              // Delete highlight if it has no color and no remaining tags
-              if (item.entity === 'highlights') {
-                const highlight = state.bible.highlights[id]
-                if (
-                  highlight &&
-                  highlight.color === '' &&
-                  Object.keys(highlight.tags || {}).length === 0
-                ) {
-                  delete state.bible.highlights[id]
-                }
-              }
-            } catch {}
-
-            // ADD OPERATION
-          } else {
-            if (!state.bible.tags[tagId][item.entity]) {
-              state.bible.tags[tagId][item.entity] = {}
-            }
-            state.bible.tags[tagId][item.entity]![id] = true
-
-            // Create highlight if it doesn't exist (for highlights entity only)
-            if (item.entity === 'highlights' && !state.bible.highlights[id]) {
-              state.bible.highlights[id] = {
-                color: '',
-                date: Date.now(),
-                tags: {},
-              }
-            }
-
-            if (!entityCollection[id]) {
-              entityCollection[id] = { tags: {} }
-            }
-            if (!entityCollection[id].tags) {
-              entityCollection[id].tags = {}
-            }
-            entityCollection[id].tags![tagId] = {
-              id: tagId,
-              name: state.bible.tags[tagId].name,
-            }
-          }
-        })
-      } else {
-        const entityId = item.id!
-        if (!entityCollection[entityId]) {
-          entityCollection[entityId] = {
-            id: item.id,
-            title: item.title,
-            tags: {},
-          }
-        }
-
-        // DELETE OPERATION
-        if (entityCollection[entityId]?.tags?.[tagId]) {
-          delete state.bible.tags[tagId][item.entity]?.[entityId]
-          delete entityCollection[entityId].tags?.[tagId]
-
-          // If words / strongs / nave, delete unused entity
-          if (['naves', 'strongsHebreu', 'strongsGrec', 'words'].includes(item.entity)) {
-            const hasTags = Object.keys(entityCollection[entityId].tags || {}).length
-
-            if (!hasTags) {
-              delete entityCollection[entityId]
-            }
-          }
-
-          // ADD OPERATION
-        } else {
-          if (!state.bible.tags[tagId][item.entity]) {
-            state.bible.tags[tagId][item.entity] = {}
-          }
-          state.bible.tags[tagId][item.entity]![entityId] = true
-
-          if (!entityCollection[entityId].tags) {
-            entityCollection[entityId].tags = {}
-          }
-          entityCollection[entityId].tags![tagId] = {
-            id: tagId,
-            name: state.bible.tags[tagId].name,
-          }
-        }
-      }
+      toggleTagAssignment(state.bible, item, tagId)
     })
 
     // Version Update

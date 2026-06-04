@@ -1,24 +1,18 @@
-import * as FileSystem from 'expo-file-system/legacy'
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useState } from 'react'
 import { useAtomValue } from 'jotai'
-import { toast } from '~helpers/toast'
 
 import { useTranslation } from 'react-i18next'
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
-import { dbManager, initSQLiteDirForLang } from '~helpers/sqlite'
-import { getDatabaseUrl } from '~helpers/firebase'
-import { getDbPath } from '~helpers/databases'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
-import type { ResourceLanguage } from '~helpers/databaseTypes'
 import Box from './ui/Box'
 import Progress from './ui/Progress'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { useResourceDatabaseAccess } from './resourceDatabaseAccess'
 
 const FILE_SIZE = 7448576
 
 export const useWaitForDatabase = () => {
-  const { t } = useTranslation()
   const [isLoading, setLoading] = useState(true)
   const [proposeDownload, setProposeDownload] = useState(false)
   const [startDownload, setStartDownload] = useState(false)
@@ -28,85 +22,19 @@ export const useWaitForDatabase = () => {
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const resourceLang = resourcesLanguage.NAVE
 
-  const prevLangRef = useRef<ResourceLanguage>(resourceLang)
-
-  useEffect(() => {
-    // Detect if this is a language change
-    const isLangChange = prevLangRef.current !== resourceLang
-
-    // Reset state when language changes
-    if (isLangChange) {
-      prevLangRef.current = resourceLang
-      setLoading(true)
-      setProposeDownload(false)
-      setStartDownload(false)
-      setProgress(0)
-    }
-
-    const db = dbManager.getDB('NAVE', resourceLang)
-
-    if (db.get()) {
-      setLoading(false)
-    } else {
-      const loadDBAsync = async () => {
-        const dbPath = getDbPath('NAVE', resourceLang)
-        const dbFile = await FileSystem.getInfoAsync(dbPath)
-
-        if (!dbFile.exists) {
-          // Waiting for user to accept to download
-          // Also prevent auto-download when language changes
-          if (!startDownload || isLangChange) {
-            setProposeDownload(true)
-            return
-          }
-
-          try {
-            const downloadKey = `naveDownloadHasStarted_${resourceLang}`
-            const downloadFlags = window as unknown as Window & Record<string, boolean>
-            if (!downloadFlags[downloadKey]) {
-              downloadFlags[downloadKey] = true
-
-              const sqliteDbUri = getDatabaseUrl('NAVE', resourceLang)
-
-              console.log(`[Nave] Downloading ${sqliteDbUri} to ${dbPath}`)
-
-              await initSQLiteDirForLang(resourceLang)
-
-              await FileSystem.createDownloadResumable(
-                sqliteDbUri,
-                dbPath,
-                undefined,
-                ({ totalBytesWritten }) => {
-                  const idxProgress = Math.floor((totalBytesWritten / FILE_SIZE) * 100) / 100
-                  setProgress(idxProgress)
-                }
-              ).downloadAsync()
-
-              await db.init()
-
-              setLoading(false)
-              downloadFlags[downloadKey] = false
-            }
-          } catch (e) {
-            toast.error(
-              t(
-                "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
-              )
-            )
-            console.log('[Nave] Download error:', e)
-            setProposeDownload(true)
-            setStartDownload(false)
-          }
-        } else {
-          await db.init()
-
-          setLoading(false)
-        }
-      }
-
-      loadDBAsync()
-    }
-  }, [startDownload, resourceLang, t])
+  useResourceDatabaseAccess({
+    dbId: 'NAVE',
+    fileSize: FILE_SIZE,
+    downloadKeyPrefix: 'naveDownloadHasStarted',
+    logName: 'Nave',
+    state: { startDownload, lang: resourceLang },
+    actions: {
+      setLoading,
+      setProposeDownload,
+      setStartDownload,
+      setProgress,
+    },
+  })
 
   return {
     isLoading,
