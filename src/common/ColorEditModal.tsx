@@ -4,14 +4,13 @@ import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import type { ColorFormatsObject } from 'reanimated-color-picker'
 import { useTranslation } from 'react-i18next'
-import { SheetTextInput, type SheetRef } from '~common/sheet'
+import { SheetHeader, SheetTextInput, type SheetRef } from '~common/sheet'
 
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Button from '~common/ui/Button'
 import ColorPicker from '~common/ColorPicker'
 import { Sheet } from '~common/sheet'
-import ModalHeader from '~common/ModalHeader'
 import type { HighlightType } from '~redux/modules/user'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { HIGHLIGHT_BACKGROUND_OPACITY_HEX, getContrastTextColor } from '~helpers/highlightUtils'
@@ -98,7 +97,6 @@ const ColorEditModal = ({
 
   const handleClose = () => {
     modalRef.current?.dismiss()
-    onClose?.()
   }
 
   const getModalTitle = () => {
@@ -110,9 +108,9 @@ const ColorEditModal = ({
   return (
     <Sheet
       ref={modalRef}
-      onDismiss={handleClose}
+      onDismiss={onClose}
       header={
-        <ModalHeader
+        <SheetHeader
           title={getModalTitle()}
           rightComponent={
             onDelete ? (

@@ -168,7 +168,6 @@ const ViewGroupsModal = ({ sheetRef, onClose }: ViewGroupsModalProps) => {
 
   const handleClose = () => {
     sheetRef.current?.dismiss()
-    onClose?.()
   }
 
   const handleSelectGroup = (groupId: string) => {
@@ -182,8 +181,8 @@ const ViewGroupsModal = ({ sheetRef, onClose }: ViewGroupsModalProps) => {
   return (
     <Sheet
       ref={sheetRef}
-      onDismiss={handleClose}
-      // header={<ModalHeader title={t('tabs.viewMyGroups')} />}
+      onDismiss={onClose}
+      // header={<SheetHeader title={t('tabs.viewMyGroups')} />}
     >
       <Box paddingHorizontal={20} paddingTop={16}>
         {groups.map(group => (

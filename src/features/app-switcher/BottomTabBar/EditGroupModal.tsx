@@ -1,10 +1,9 @@
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
-import { SheetFooter, Sheet, SheetTextInput, type SheetRef } from '~common/sheet'
+import { SheetFooter, Sheet, SheetHeader, SheetTextInput, type SheetRef } from '~common/sheet'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import ModalHeader from '~common/ModalHeader'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { HStack } from '~common/ui/Stack'
@@ -49,7 +48,6 @@ const EditGroupModal = ({
 
   const handleClose = () => {
     sheetRef.current?.dismiss()
-    onClose?.()
   }
 
   const handleSave = () => {
@@ -68,9 +66,9 @@ const EditGroupModal = ({
   return (
     <Sheet
       ref={sheetRef}
-      onDismiss={handleClose}
+      onDismiss={onClose}
       onPresent={handlePresent}
-      header={<ModalHeader title={t('tabs.editGroup')} />}
+      header={<SheetHeader title={t('tabs.editGroup')} />}
       footer={props => (
         <SheetFooter {...props}>
           <HStack

@@ -179,7 +179,7 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
   const initialScrollIndex = fonts.findIndex(f => f === fontFamily)
   const insets = useSafeAreaInsets()
   return (
-    <Sheet ref={modalRef} dismissible backdrop snapPoints={[0.4]}>
+    <Sheet ref={modalRef} backdrop={false} snapPoints={[0.4]}>
       <SheetScrollView
         contentContainerStyle={{
           alignItems: 'stretch',

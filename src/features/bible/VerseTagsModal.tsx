@@ -1,10 +1,9 @@
 import styled from '@emotion/native'
-import { Sheet, type SheetRef } from '~common/sheet'
+import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 import { forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 import { useSelector } from 'react-redux'
-import ModalHeader from '~common/ModalHeader'
 import EntityChipList from '~common/EntityChipList'
 import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
 import Box, { HStack } from '~common/ui/Box'
@@ -165,7 +164,7 @@ const VerseTagsModal = forwardRef<SheetRef, VerseTagsModalProps>(({ verseKey, ve
     <Sheet
       ref={ref}
       snapPoints={[0.5]}
-      header={<ModalHeader title={t('Étiquettes')} subTitle={reference} />}
+      header={<SheetHeader title={t('Étiquettes')} subTitle={reference} />}
     >
       <Box>
         {taggedItems.length === 0 ? (

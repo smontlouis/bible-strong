@@ -2,6 +2,7 @@ import {
   SheetFooter,
   type SheetFooterProps,
   Sheet,
+  SheetHeader,
   SheetScrollView,
   type SheetRef,
 } from '~common/sheet'
@@ -11,7 +12,6 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import React, { memo, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BackHandler, View } from 'react-native'
-import ModalHeader from '~common/ModalHeader'
 import { BibleResource, StudyNavigateBibleType } from '~common/types'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -31,6 +31,7 @@ import CompareVersionSelectorSheet from '../CompareVersionSelectorSheet'
 import { ReferenceCard } from '../ReferenceCard'
 import ResourcesModalFooter from './ResourcesModalFooter'
 import { useResourceLanguage } from 'src/state/resourcesLanguage'
+import { useTheme } from '@emotion/react'
 
 type ResourceVerse = {
   Livre: number
@@ -246,24 +247,27 @@ const ResourcesModal = memo(
       [resourceType, onChangeResourceType]
     )
 
+    const theme = useTheme()
+
     return (
       <>
         <Sheet
           ref={resourceModalRef}
-          dismissible
-          backdrop
           snapPoints={[1]}
           footer={footerRenderer}
           onOpenChange={setIsOpen}
           onClose={() => setIsOpen(false)}
+          backgroundColor={theme.colors.reverse}
+          header={
+            <SheetHeader
+              hasBackButton
+              onBackPress={closeModal}
+              title={title}
+              subTitle={getSubtitleByResourceType()}
+              rightComponent={renderRightComponent()}
+            />
+          }
         >
-          <ModalHeader
-            hasBackButton
-            onBackPress={closeModal}
-            title={title}
-            subTitle={getSubtitleByResourceType()}
-            rightComponent={renderRightComponent()}
-          />
           {resourceType && (
             <View style={{ flex: 1 }}>
               <Resource

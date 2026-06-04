@@ -1,10 +1,9 @@
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
-import { Sheet, SheetFooter, SheetTextInput, type SheetRef } from '~common/sheet'
+import { Sheet, SheetFooter, SheetHeader, SheetTextInput, type SheetRef } from '~common/sheet'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import ModalHeader from '~common/ModalHeader'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { HStack } from '~common/ui/Stack'
@@ -47,7 +46,6 @@ const RenameModal = ({
 
   const handleClose = () => {
     sheetRef.current?.dismiss()
-    onClose?.()
   }
 
   const handleSave = () => {
@@ -63,9 +61,9 @@ const RenameModal = ({
   return (
     <Sheet
       ref={sheetRef}
-      onDismiss={handleClose}
+      onDismiss={onClose}
       onPresent={handlePresent}
-      header={<ModalHeader title={title} />}
+      header={<SheetHeader title={title} />}
       footer={props => (
         <SheetFooter bottomInset={insets.bottom} {...props}>
           <HStack py={5} px={20} justifyContent="flex-end" bg="reverse">

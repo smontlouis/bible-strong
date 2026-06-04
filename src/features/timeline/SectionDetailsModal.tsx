@@ -38,7 +38,7 @@ const SectionDetailsModal = ({
   const { t } = useTranslation()
 
   return (
-    <Sheet ref={modalRef} snapPoints={[1]} dismissible backdrop>
+    <Sheet ref={modalRef} snapPoints={[1]}>
       <SheetScrollView>
         <Box flex center px={50} py={60}>
           <Text title fontSize={20}>

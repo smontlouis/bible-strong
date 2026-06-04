@@ -42,7 +42,7 @@ const useDetachedStudySheetStyle = () => {
   const sheetWidth = Math.min(250, windowWidth - 40)
 
   return {
-    backdrop: true,
+    backdrop: false,
     maxWidth: sheetWidth,
     cornerRadius: 16,
     backgroundColor: theme.colors.reverse,

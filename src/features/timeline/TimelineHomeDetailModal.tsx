@@ -18,7 +18,7 @@ const TimelineHomeDetailModal = ({ modalRef }: Props) => {
   const { t } = useTranslation()
 
   return (
-    <Sheet ref={modalRef} snapPoints={[1]} dismissible backdrop>
+    <Sheet ref={modalRef} snapPoints={[1]}>
       <SheetScrollView>
         <Box mt={20} p={20}>
           <Paragraph>

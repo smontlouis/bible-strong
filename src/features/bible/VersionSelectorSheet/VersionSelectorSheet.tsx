@@ -1,4 +1,4 @@
-import { Sheet, type SheetRef } from '~common/sheet'
+import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { atom } from 'jotai/vanilla'
 import React from 'react'
@@ -7,12 +7,13 @@ import { SectionList } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import Border from '~common/ui/Border'
-import Box, { HStack } from '~common/ui/Box'
+import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { getVersionsBySections } from '~helpers/bibleVersions'
 import { BibleTab, BibleTabActions, VersionCode } from '../../../state/tabs'
 import VersionSelectorItem from '../VersionSelectorItem'
 import { bookSelectorDataAtom } from '../BookSelectorSheet/BookSelectorSheet'
+import { useTheme } from '@emotion/react'
 
 interface VersionSelectorSheetProps {
   sheetRef: React.RefObject<SheetRef | null>
@@ -27,6 +28,7 @@ export const versionSelectorDataAtom = atom<{
 const VersionSelectorSheet = ({ sheetRef }: VersionSelectorSheetProps) => {
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
+  const theme = useTheme()
 
   const { actions, data, parallelVersionIndex } = useAtomValue(versionSelectorDataAtom)
   const setBookSelectorData = useSetAtom(bookSelectorDataAtom)
@@ -52,18 +54,12 @@ const VersionSelectorSheet = ({ sheetRef }: VersionSelectorSheetProps) => {
   }
 
   return (
-    <Sheet ref={sheetRef} snapPoints={[1]} dismissible>
-      <HStack
-        height={54}
-        justifyContent="center"
-        alignItems="center"
-        borderBottomWidth={1}
-        borderColor="lightGrey"
-      >
-        <Text flex textAlign="center" fontSize={16} bold>
-          {t('Version')}
-        </Text>
-      </HStack>
+    <Sheet
+      ref={sheetRef}
+      snapPoints={[1]}
+      backgroundColor={theme.colors.reverse}
+      header={<SheetHeader title={t('Version')} centerTitle />}
+    >
       <SectionList
         contentContainerStyle={{
           paddingTop: 0,

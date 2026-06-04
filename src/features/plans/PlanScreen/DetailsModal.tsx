@@ -13,7 +13,7 @@ const width = wp(100) - 20 > 600 ? 600 : wp(100) - 20
 
 interface Props extends Omit<ComputedPlanItem, 'status' | 'progress' | 'type' | 'lang'> {
   modalRefDetails: React.RefObject<SheetRef | null>
-  headerComponent?: React.ReactNode
+  header?: React.ReactElement
   footer?: (props: SheetFooterProps) => React.ReactNode
 }
 
@@ -25,7 +25,7 @@ const DetailsModal = ({
   description,
   author,
   footer,
-  headerComponent,
+  header,
 }: Props) => {
   const { t } = useTranslation()
   const [height, setHeight] = React.useState<number>()
@@ -43,7 +43,7 @@ const DetailsModal = ({
   }, [image])
 
   return (
-    <Sheet ref={modalRefDetails} snapPoints={[1]} footer={footer} header={headerComponent}>
+    <Sheet ref={modalRefDetails} snapPoints={[1]} footer={footer} header={header}>
       <Box paddingHorizontal={20} paddingTop={20} paddingBottom={50}>
         {!!image && (
           <Box marginBottom={20} rounded>

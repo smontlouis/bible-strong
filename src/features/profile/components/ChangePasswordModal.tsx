@@ -3,10 +3,9 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator } from 'react-native'
 import { useTheme } from '@emotion/react'
-import { SheetFooter, Sheet, SheetTextInput, type SheetRef } from '~common/sheet'
+import { SheetFooter, Sheet, SheetHeader, SheetTextInput, type SheetRef } from '~common/sheet'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import ModalHeader from '~common/ModalHeader'
 import Box, { VStack, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Button from '~common/ui/Button'
@@ -72,7 +71,7 @@ const ChangePasswordModal = ({ modalRef }: ChangePasswordModalProps) => {
     <Sheet
       ref={modalRef}
       onDismiss={resetForm}
-      header={<ModalHeader title={t('profile.changePassword')} />}
+      header={<SheetHeader title={t('profile.changePassword')} />}
       footer={props => (
         <SheetFooter bottomInset={insets.bottom} {...props}>
           <HStack px={20} gap={10} justifyContent="flex-end" bg="reverse">

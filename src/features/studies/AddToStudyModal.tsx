@@ -1,4 +1,4 @@
-import { Sheet, SheetFlashList, type SheetRef } from '~common/sheet'
+import { Sheet, SheetFlashList, SheetHeader, type SheetRef } from '~common/sheet'
 import distanceInWords from 'date-fns/formatDistance'
 import React, { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -6,7 +6,6 @@ import { TouchableOpacity } from 'react-native'
 import { shallowEqual, useSelector } from 'react-redux'
 import SheetSearchInput from '~common/SheetSearchInput'
 import Empty from '~common/Empty'
-import ModalHeader from '~common/ModalHeader'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -102,9 +101,8 @@ const AddToStudyModal = ({ sheetRef, onSelectStudy, reference, onClose }: AddToS
       onDismiss={onClose}
       snapPoints={[1]}
       header={
-        <Box gap={5}>
-          <ModalHeader title={t('study.selectStudy')} subTitle={reference} />
-          <Box px={20}>
+        <SheetHeader title={t('study.selectStudy')} subTitle={reference}>
+          <Box px={20} pb={10}>
             <SheetSearchInput
               placeholder={t('study.searchStudy')}
               onChangeText={search}
@@ -113,7 +111,7 @@ const AddToStudyModal = ({ sheetRef, onSelectStudy, reference, onClose }: AddToS
               returnKeyType="done"
             />
           </Box>
-        </Box>
+        </SheetHeader>
       }
     >
       <SheetFlashList

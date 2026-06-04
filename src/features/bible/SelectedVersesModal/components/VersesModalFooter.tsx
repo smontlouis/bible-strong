@@ -33,8 +33,6 @@ const VersesModalFooter = ({
 }: VersesModalFooterProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
-  const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
-  const { bottomBarHeight } = useBottomBarHeightInTab()
 
   return (
     <SheetFooter {...sheetFooterProps}>
@@ -43,7 +41,7 @@ const VersesModalFooter = ({
         borderRadius={18}
         p={3}
         mx={16}
-        mb={(isFullScreenBible ? BOTTOM_INSET : bottomBarHeight) + 5}
+        mb={5}
         position="relative"
         style={{
           transitionProperty: 'margin',

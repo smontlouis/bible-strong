@@ -1,11 +1,11 @@
 import React, { forwardRef } from 'react'
 import {
   FlatList,
+  Platform,
   ScrollView,
   SectionList,
   TextInput,
   View,
-  useColorScheme,
   useWindowDimensions,
   type FlatListProps,
   type ScrollViewProps,
@@ -15,13 +15,13 @@ import {
 } from 'react-native'
 import { TrueSheet, TrueSheetProvider, type TrueSheetProps } from '@lodev09/react-native-true-sheet'
 import { FlashList, type FlashListProps } from '@shopify/flash-list'
+import Back from '~common/Back'
 import Box, { TouchableBox } from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
 import Text, { type TextProps } from '~common/ui/Text'
-import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { useTheme } from '@emotion/react'
 
 export type SheetSnapPoint = NonNullable<TrueSheetProps['detents']>[number]
-export type SheetGrabberOptions = NonNullable<TrueSheetProps['grabberOptions']>
 export type SheetScrollableOptions = NonNullable<TrueSheetProps['scrollableOptions']>
 export type SheetStackBehavior = NonNullable<TrueSheetProps['stackBehavior']>
 
@@ -40,9 +40,15 @@ export type SheetFooterProps = {
   style?: ViewProps['style']
 }
 
-export type SheetHandleProps = {
+export type SheetHeaderProps = {
+  title?: string
+  subTitle?: string
   children?: React.ReactNode
-  style?: ViewProps['style']
+  centerTitle?: boolean
+  hasBackButton?: boolean
+  leftComponent?: React.ReactNode
+  onBackPress?: () => void
+  rightComponent?: React.ReactNode
 }
 
 export type SheetItemProps = TextProps & {
@@ -62,10 +68,7 @@ export type SheetProps = {
   backgroundColor?: string
   cornerRadius?: number
   maxWidth?: number
-  grabber?: boolean
-  grabberOptions?: SheetGrabberOptions
-  handle?: React.ReactNode
-  header?: React.ReactNode
+  header?: React.ReactElement | React.ComponentType<unknown>
   footer?: React.ComponentType<SheetFooterProps> | ((props: SheetFooterProps) => React.ReactNode)
   dismissible?: boolean
   stackBehavior?: SheetStackBehavior
@@ -122,17 +125,14 @@ const SheetItem = ({ children, tag, onPress, ...props }: SheetItemProps) => (
 
 const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
   const {
-    backdrop = false,
+    backdrop = true,
     backgroundColor,
     children,
     cornerRadius,
     detached,
     detachedOffset,
-    dismissible = false,
+    dismissible = true,
     footer,
-    grabber = true,
-    grabberOptions,
-    handle,
     header,
     initialSnapPoint,
     maxWidth,
@@ -174,18 +174,19 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
       footer={
         footer ? React.createElement(footer as React.ComponentType<SheetFooterProps>) : undefined
       }
-      grabber={grabber && !handle}
-      grabberOptions={
-        grabberOptions || {
-          color: theme.colors.tertiary,
-        }
-      }
+      header={header}
+      grabber
       cornerRadius={cornerRadius}
       maxContentHeight={height}
       maxContentWidth={maxWidth}
       scrollable={scrollable}
       scrollableOptions={scrollableOptions}
-      backgroundColor={backgroundColor || theme.colors.reverse}
+      blurOptions={{
+        intensity: 90,
+      }}
+      backgroundColor={
+        backgroundColor || Platform.OS === 'android' ? theme.colors.reverse : undefined
+      }
       detached={detached}
       detachedOffset={detachedOffset}
       stackBehavior={stackBehavior}
@@ -199,8 +200,6 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
         onDismiss?.()
       }}
     >
-      {handle}
-      {header}
       {children}
     </TrueSheet>
   )
@@ -211,7 +210,53 @@ const SheetFooter = ({ children, bottomInset = 0, style }: SheetFooterProps) => 
   <View style={[style, bottomInset ? { paddingBottom: bottomInset } : null]}>{children}</View>
 )
 
-const SheetHandle = ({ children, style }: SheetHandleProps) => <View style={style}>{children}</View>
+const SheetHeader = ({
+  title,
+  subTitle,
+  children,
+  centerTitle,
+  hasBackButton,
+  leftComponent,
+  onBackPress,
+  rightComponent,
+}: SheetHeaderProps) => (
+  <Box borderColor="border" borderBottomWidth={1}>
+    {(title || subTitle || hasBackButton || leftComponent || rightComponent) && (
+      <Box minH={54} row alignItems="center">
+        {hasBackButton ? (
+          <Back
+            onCustomPress={onBackPress}
+            style={{ width: 54, minHeight: 54, alignItems: 'center', justifyContent: 'center' }}
+          >
+            <FeatherIcon name="arrow-left" size={20} />
+          </Back>
+        ) : (
+          leftComponent
+        )}
+        <Box
+          flex
+          paddingLeft={hasBackButton || leftComponent ? 0 : 20}
+          paddingRight={rightComponent ? 0 : 20}
+          justifyContent="center"
+          alignItems={centerTitle ? 'center' : undefined}
+        >
+          {!!title && (
+            <Text numberOfLines={1} bold fontSize={16} textAlign={centerTitle ? 'center' : 'left'}>
+              {title}
+            </Text>
+          )}
+          {!!subTitle && (
+            <Text fontSize={13} color="grey" textAlign={centerTitle ? 'center' : 'left'}>
+              {subTitle}
+            </Text>
+          )}
+        </Box>
+        {rightComponent}
+      </Box>
+    )}
+    {children}
+  </Box>
+)
 
 const SheetView = View
 const SheetScrollView = ScrollView
@@ -245,7 +290,7 @@ export {
   SheetSectionList,
   SheetTextInput,
   SheetFooter,
-  SheetHandle,
+  SheetHeader,
   SheetItem,
   useSheetInternal,
 }

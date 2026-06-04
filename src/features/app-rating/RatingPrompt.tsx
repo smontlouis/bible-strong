@@ -43,11 +43,8 @@ const RatingPrompt = ({ modalRef, onClose }: Props) => {
       ref={modalRef}
       detachedOffset={insets.bottom + 50}
       dismissible={false}
-      backdrop
       detached={true}
-      grabber={false}
       cornerRadius={30}
-      backgroundColor={theme.colors.reverse}
     >
       <SheetView>
         <Box padding={20} paddingTop={30} paddingBottom={30}>

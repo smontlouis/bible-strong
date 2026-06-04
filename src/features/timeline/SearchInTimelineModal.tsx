@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { SheetFlatList, Sheet, type SheetRef } from '~common/sheet'
+import { SheetFlatList, Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 import { Image } from 'expo-image'
 import Empty from '~common/Empty'
 import { LinkBox } from '~common/Link'
@@ -131,18 +131,23 @@ const SearchInTimelineModal = ({ modalRef }: Props) => {
   }
 
   return (
-    <Sheet ref={modalRef} snapPoints={[1]} dismissible backdrop>
-      <Box pt={12}>
-        <Box px={16}>
-          <SearchInput
-            value={searchValue}
-            onChangeText={setSearchValue}
-            placeholder={t('Rechercher un événement dans la Bible')}
-            onDelete={onClear}
-            returnKeyType="search"
-          />
-        </Box>
-      </Box>
+    <Sheet
+      ref={modalRef}
+      snapPoints={[1]}
+      header={
+        <SheetHeader>
+          <Box px={16} py={12}>
+            <SearchInput
+              value={searchValue}
+              onChangeText={setSearchValue}
+              placeholder={t('Rechercher un événement dans la Bible')}
+              onDelete={onClear}
+              returnKeyType="search"
+            />
+          </Box>
+        </SheetHeader>
+      }
+    >
       <SheetFlatList
         ItemSeparatorComponent={() => <Border />}
         data={results}

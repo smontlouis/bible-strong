@@ -1,6 +1,7 @@
 import React, { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, TouchableOpacity } from 'react-native'
+import { useSafeAreaFrame, useSafeAreaInsets } from 'react-native-safe-area-context'
 import CommentIcon from '~common/CommentIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -22,7 +23,7 @@ type Props = {
 
 const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props) => {
   const { t } = useTranslation()
-  const { bottomBarHeight } = useBottomBarHeightInTab()
+  const insets = useSafeAreaInsets()
 
   const onPress = (newResourceType: BibleResource) => {
     onChangeResourceType(newResourceType)
@@ -31,13 +32,7 @@ const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props
   const iconWidth = wp(18)
 
   return (
-    <Box
-      borderTopWidth={1}
-      borderColor="border"
-      bg="reverse"
-      h={54 + bottomBarHeight}
-      paddingBottom={bottomBarHeight}
-    >
+    <Box borderTopWidth={1} borderColor="border" bg="reverse" h={54 + insets.bottom}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}

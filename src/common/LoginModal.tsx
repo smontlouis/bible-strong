@@ -25,7 +25,7 @@ const LoginModal = ({ isVisible }: { isVisible: boolean }) => {
   }, [isVisible])
 
   return (
-    <Sheet ref={ref} snapPoints={[1]} backdrop>
+    <Sheet ref={ref} snapPoints={[1]} dismissible={false}>
       <SheetScrollView contentContainerStyle={{ padding: 20 }}>
         <Box row alignItems="center" marginBottom={30}>
           <Back style={{ marginRight: 15 }}>

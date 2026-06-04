@@ -1,4 +1,4 @@
-import { Sheet, SheetScrollView } from '~common/sheet'
+import { Sheet, SheetHeader, SheetScrollView } from '~common/sheet'
 import { useAtom } from 'jotai/react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -169,47 +169,49 @@ export const UnifiedTagsModalInstance = ({ item, setItem }: UnifiedTagsModalInst
   const filterModeSelectedTag = isFilterMode ? item.selectedTag : undefined
 
   return (
-    <Sheet ref={ref} dismissible snapPoints={[0.7]} backdrop onDismiss={() => setItem(false)}>
-      {/* Header */}
-      <Box pt={20} pb={10} px={20} borderBottomWidth={1} borderColor="border">
-        <Text bold fontSize={16}>
-          {getTitle()}
-        </Text>
-        <Box height={8} />
-        <SheetSearchInput
-          placeholder={t('Chercher ou creer une etiquette')}
-          onChangeText={search}
-          onDelete={resetSearch}
-          value={keyword}
-          returnKeyType="done"
-          onSubmitEditing={() => (!result.length ? saveTag() : undefined)}
-        />
-      </Box>
-
-      {/* Selected tags chips (select mode only) */}
-      {hasSelectedTags && (
-        <AnimatedBox
-          layout={LinearTransition}
-          px={16}
-          py={8}
-          borderBottomWidth={1}
-          borderColor="border"
-        >
-          <Text fontSize={12} color="grey" mb={6}>
-            {t('tagsSelected', { count: selectedTagsList.length })}
-          </Text>
-          <Box row wrap style={{ gap: 8 }}>
-            {selectedTagsList.map(tag => (
-              <RemovableChip
-                key={tag.id}
-                label={tag.name}
-                onRemove={() => handleRemoveTag(tag.id)}
+    <Sheet
+      ref={ref}
+      snapPoints={[0.7]}
+      onDismiss={() => setItem(false)}
+      header={
+        <>
+          <SheetHeader title={getTitle()}>
+            <Box px={20} pb={10}>
+              <SheetSearchInput
+                placeholder={t('Chercher ou creer une etiquette')}
+                onChangeText={search}
+                onDelete={resetSearch}
+                value={keyword}
+                returnKeyType="done"
+                onSubmitEditing={() => (!result.length ? saveTag() : undefined)}
               />
-            ))}
-          </Box>
-        </AnimatedBox>
-      )}
-
+            </Box>
+          </SheetHeader>
+          {hasSelectedTags && (
+            <AnimatedBox
+              layout={LinearTransition}
+              px={16}
+              py={8}
+              borderBottomWidth={1}
+              borderColor="border"
+            >
+              <Text fontSize={12} color="grey" mb={6}>
+                {t('tagsSelected', { count: selectedTagsList.length })}
+              </Text>
+              <Box row wrap style={{ gap: 8 }}>
+                {selectedTagsList.map(tag => (
+                  <RemovableChip
+                    key={tag.id}
+                    label={tag.name}
+                    onRemove={() => handleRemoveTag(tag.id)}
+                  />
+                ))}
+              </Box>
+            </AnimatedBox>
+          )}
+        </>
+      }
+    >
       <SheetScrollView
         contentContainerStyle={{
           paddingBottom: bottomBarHeight,

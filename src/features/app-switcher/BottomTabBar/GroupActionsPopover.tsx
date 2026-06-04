@@ -121,11 +121,9 @@ const GroupActionsPopover = memo(
           ref={sheetRef}
           detached
           detachedOffset={bottomBarHeight}
-          dismissible
-          backdrop
+          backdrop={false}
           maxWidth={sheetWidth}
           cornerRadius={16}
-          backgroundColor={theme.colors.reverse}
         >
           <SheetView>
             <Box minWidth={200} py={6}>

@@ -1,6 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { type SheetRef } from '~common/sheet'
+import { SheetHeader, type SheetRef } from '~common/sheet'
 import { MenuView, type MenuAction } from '@expo/ui/community/menu'
 import styled from '@emotion/native'
 import { Sheet } from '~common/sheet'
@@ -10,7 +10,6 @@ import Text from '~common/ui/Text'
 import books from '~assets/bible_versions/books-desc'
 import type { CrossVersionAnnotation } from '~redux/selectors/bible'
 import { VersionCode } from '~state/tabs'
-import ModalHeader from '~common/ModalHeader'
 import { Chip } from '~common/ui/NewChip'
 
 const ItemRow = styled.View(({ theme }) => ({
@@ -99,7 +98,7 @@ const CrossVersionAnnotationsModal = ({
       ref={sheetRef}
       onDismiss={onClose}
       header={
-        <ModalHeader title={t('bible.crossVersionAnnotations.subtitle')} subTitle={reference} />
+        <SheetHeader title={t('bible.crossVersionAnnotations.subtitle')} subTitle={reference} />
       }
     >
       {versions.map((versionData, index) => (

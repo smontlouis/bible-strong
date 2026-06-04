@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Alert, TouchableOpacity } from 'react-native'
 import styled from '@emotion/native'
-import { SheetHandle, Sheet, SheetScrollView, type SheetRef } from '~common/sheet'
+import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
@@ -12,7 +12,6 @@ import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
 import ColorEditModal from '~common/ColorEditModal'
-import ModalHeader from '~common/ModalHeader'
 import { useSheet } from '~helpers/useSheet'
 import { useHighlightColors } from '~helpers/useHighlightColors'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
@@ -254,20 +253,13 @@ const ColorPickerModal = () => {
     setColorPickerModal(false)
   }
 
-  const renderHandle = useCallback(
-    (handleProps: React.ComponentProps<typeof SheetHandle>) => (
-      <>
-        <SheetHandle {...handleProps} />
-        <ModalHeader title={t('Palette de couleurs')} />
-      </>
-    ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  )
-
   return (
     <>
-      <Sheet ref={ref} dismissible backdrop onDismiss={handleModalClose} handle={renderHandle({})}>
+      <Sheet
+        ref={ref}
+        onDismiss={handleModalClose}
+        header={<SheetHeader title={t('Palette de couleurs')} />}
+      >
         <SheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}>
           <SectionTitle>{t('Couleurs par défaut')}</SectionTitle>
           {([1, 2, 3, 4, 5] as const).map(i => {

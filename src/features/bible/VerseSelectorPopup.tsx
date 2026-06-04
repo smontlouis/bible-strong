@@ -1,4 +1,4 @@
-import { Sheet, SheetScrollView, type SheetRef } from '~common/sheet'
+import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useRef } from 'react'
@@ -50,12 +50,11 @@ export const VerseSelectorPopup = ({ bibleAtom, children }: VerseSelectorPopupPr
       <TouchableBox center height="100%" onPress={() => sheetRef.current?.present()}>
         {children}
       </TouchableBox>
-      <Sheet ref={sheetRef} dismissible backdrop stackBehavior="push">
-        <Box px={10} py={10} borderBottomWidth={1} borderColor="border">
-          <Text fontWeight="bold" textAlign="center">
-            {t('goToVerse')}
-          </Text>
-        </Box>
+      <Sheet
+        ref={sheetRef}
+        stackBehavior="push"
+        header={<SheetHeader title={t('goToVerse')} centerTitle />}
+      >
         <SheetScrollView
           contentContainerStyle={{
             paddingTop: 10,

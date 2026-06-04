@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import { SheetFooter, Sheet, SheetTextInput, type SheetRef } from '~common/sheet'
+import { SheetFooter, Sheet, SheetHeader, SheetTextInput, type SheetRef } from '~common/sheet'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
@@ -10,7 +10,6 @@ import generateUUID from '~helpers/generateUUID'
 
 import books from '~assets/bible_versions/books-desc'
 import ColorPicker from '~common/ColorPicker'
-import ModalHeader from '~common/ModalHeader'
 import { toast } from '~helpers/toast'
 import type { Bookmark } from '~common/types'
 import Box from '~common/ui/Box'
@@ -243,7 +242,7 @@ const BookmarkModal = ({
         onClose?.()
       }}
       onPresent={handlePresent}
-      header={<ModalHeader title={t('Marque-page')} subTitle={reference} />}
+      header={<SheetHeader title={t('Marque-page')} subTitle={reference} />}
       footer={props =>
         mode === 'select' ? null : (
           <SheetFooter bottomInset={insets.bottom} {...props}>

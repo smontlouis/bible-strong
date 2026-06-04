@@ -1,4 +1,4 @@
-import { Sheet, type SheetRef } from '~common/sheet'
+import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { useAtomValue, useSetAtom } from 'jotai/react'
@@ -8,8 +8,7 @@ import { DeviceEventEmitter, FlatList } from 'react-native'
 import { useSharedValue } from 'react-native-reanimated'
 import { BibleTab, BibleTabActions } from 'src/state/tabs'
 import books, { Book } from '~assets/bible_versions/books-desc'
-import Box, { HStack } from '~common/ui/Box'
-import Text from '~common/ui/Text'
+import Box from '~common/ui/Box'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { HelpTip } from '~features/tips/HelpTip'
@@ -21,6 +20,7 @@ import { BOOK_SELECTION_EVENT, SelectionEvent } from './constants'
 import VerseSheet, { tempSelectedBookAtom, tempSelectedChapterAtom } from './VerseSheet'
 import { useQuery } from '~helpers/react-query-lite'
 import { getBibleVersionCoverage } from '~helpers/biblesDb'
+import { useTheme } from '@emotion/react'
 interface BookSelectorSheetProps {
   selectedBookNum?: number
   sheetRef: React.RefObject<SheetRef | null>
@@ -49,6 +49,7 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
   const openInNewTab = useOpenInNewTab()
   const verseSheetRef = useRef<SheetRef>(null)
   const selectedVersion = bookSelectorData?.selectedVersion
+  const theme = useTheme()
 
   const { data: coverageData } = useQuery({
     queryKey: ['bible-version-coverage', selectedVersion || ''],
@@ -170,8 +171,8 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
     <>
       <Sheet
         ref={sheetRef}
+        backgroundColor={theme.colors.reverse}
         snapPoints={[1]}
-        dismissible
         onPresent={() => {
           if (data.length > 0) {
             flatListRef.current?.scrollToIndex({
@@ -188,21 +189,18 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
           collapseTimeouts.current = {}
           setRenderedChapterBookNumbers([])
         }}
+        header={
+          <>
+            <SheetHeader
+              title={t('Livres')}
+              centerTitle
+              leftComponent={<Box width={60} />}
+              rightComponent={<BookSelectorParams />}
+            />
+            <HelpTip id="chapter-selector" description={t('tips.chapterSelector')} />
+          </>
+        }
       >
-        <HStack
-          height={54}
-          justifyContent="center"
-          alignItems="center"
-          borderBottomWidth={1}
-          borderColor="lightGrey"
-        >
-          <Box px={20} width={60}></Box>
-          <Text flex textAlign="center" fontSize={16} bold>
-            {t('Livres')}
-          </Text>
-          <BookSelectorParams />
-        </HStack>
-        <HelpTip id="chapter-selector" description={t('tips.chapterSelector')} />
         <BookSelectorList
           key={selectedVersion}
           data={data}

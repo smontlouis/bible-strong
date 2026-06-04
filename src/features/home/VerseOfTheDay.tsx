@@ -202,7 +202,7 @@ const VerseOfTheDay = ({ addDay }: Props) => {
         imageUrls={imageUrls}
         verseOfTheDay={verseOfTheDay}
       />
-      <Sheet ref={notificationModalRef} dismissible backdrop>
+      <Sheet ref={notificationModalRef}>
         <SheetScrollView scrollEnabled={false}>
           <Box py={30} px={20} pb={30 + insets.bottom}>
             <Box row alignItems="center">

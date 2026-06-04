@@ -1,4 +1,4 @@
-import { Sheet, type SheetRef } from '~common/sheet'
+import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 import React from 'react'
 import { SectionList } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import Border from '~common/ui/Border'
-import Box, { HStack } from '~common/ui/Box'
+import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import VersionSelectorItem from '~features/bible/VersionSelectorItem'
 import { getVersionsBySections } from '~helpers/bibleVersions'
@@ -43,21 +43,9 @@ const CompareVersionSelectorSheet = ({ sheetRef }: CompareVersionSelectorSheetPr
     <Sheet
       ref={sheetRef}
       snapPoints={[1]}
-      dismissible
       scrollableOptions={{ scrollingExpandsSheet: false }}
-      backdrop
+      header={<SheetHeader title={t('Sélectionner les versions')} centerTitle />}
     >
-      <HStack
-        height={54}
-        justifyContent="center"
-        alignItems="center"
-        borderBottomWidth={1}
-        borderColor="lightGrey"
-      >
-        <Text flex textAlign="center" fontSize={16} bold>
-          {t('Sélectionner les versions')}
-        </Text>
-      </HStack>
       <SectionList<Version, { title: string; data: Version[] }>
         contentContainerStyle={{
           paddingTop: 0,

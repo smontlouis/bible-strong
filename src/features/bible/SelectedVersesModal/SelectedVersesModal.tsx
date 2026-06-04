@@ -85,7 +85,7 @@ const SelectedVersesModal = ({
   }
 
   return (
-    <Sheet ref={ref} onDismiss={onClose} dismissible backdrop={false}>
+    <Sheet ref={ref} onDismiss={onClose} backdrop={false}>
       <SheetView style={{ flex: 0 }}>
         {typeof isSelectionMode === 'string' && isSelectionMode.includes('verse') ? (
           <HStack

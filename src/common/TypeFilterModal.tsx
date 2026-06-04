@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import { Sheet, SheetScrollView, type SheetRef } from '~common/sheet'
+import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
 import React, { forwardRef } from 'react'
 import { TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -12,15 +12,6 @@ import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabConte
 const TypeRow = styled(TouchableOpacity)(({ theme }) => ({
   flexDirection: 'row',
   alignItems: 'center',
-  padding: 16,
-  borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border,
-}))
-
-const Header = styled.View(({ theme }) => ({
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
   padding: 16,
   borderBottomWidth: 1,
   borderBottomColor: theme.colors.border,
@@ -47,12 +38,7 @@ const TypeFilterModal = forwardRef<SheetRef, Props>(
     const isAnnotationsSelected = selectedType === 'annotations'
 
     return (
-      <Sheet ref={ref} dismissible snapPoints={[0.5]} backdrop>
-        <Header>
-          <Text bold fontSize={18}>
-            {t('Filtrer par type')}
-          </Text>
-        </Header>
+      <Sheet ref={ref} snapPoints={[0.5]} header={<SheetHeader title={t('Filtrer par type')} />}>
         <SheetScrollView
           contentContainerStyle={{
             paddingBottom: bottomBarHeight,

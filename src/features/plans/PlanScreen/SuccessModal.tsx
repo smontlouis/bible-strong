@@ -22,15 +22,7 @@ const SuccessModal = ({ modalRef, isPlanCompleted, onClose }: Props) => {
   }
 
   return (
-    <Sheet
-      ref={modalRef}
-      onDismiss={onClose}
-      grabberOptions={{
-        color: 'transparent',
-        adaptive: false,
-      }}
-      backgroundColor="transparent"
-    >
+    <Sheet ref={modalRef} onDismiss={onClose} dismissible={false} backgroundColor="transparent">
       <Box flex={1} justifyContent="flex-end" paddingVertical={40} paddingHorizontal={20}>
         <Box center>
           <Lottie

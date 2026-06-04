@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import { SheetFooter, Sheet, SheetTextInput, type SheetRef } from '~common/sheet'
+import { SheetFooter, Sheet, SheetHeader, SheetTextInput, type SheetRef } from '~common/sheet'
 import { MenuView } from '@expo/ui/community/menu'
 import { type ComponentProps, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import Empty from '~common/Empty'
 import LexiqueIcon from '~common/LexiqueIcon'
-import ModalHeader from '~common/ModalHeader'
 import NaveIcon from '~common/NaveIcon'
 import { ActionSheetItem } from '~common/ActionMenu'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
@@ -453,7 +452,7 @@ const StudyRelationList = ({
       <Sheet
         ref={editModalRef}
         header={
-          <ModalHeader
+          <SheetHeader
             title={t('Modifier la relation')}
             rightComponent={
               editingModel ? (

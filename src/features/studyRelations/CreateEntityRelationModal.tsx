@@ -1,4 +1,4 @@
-import { SheetFlashList, Sheet, type SheetRef } from '~common/sheet'
+import { SheetFlashList, Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 import { useTheme } from '@emotion/react'
 import { Ref, useDeferredValue, useEffect, useState } from 'react'
 import { ActivityIndicator } from 'react-native'
@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next'
 import AlphabetList from '~common/AlphabetList'
 import SheetSearchInput from '~common/SheetSearchInput'
 import Empty from '~common/Empty'
-import ModalHeader from '~common/ModalHeader'
 import Box, { VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import useBibleVerses from '~helpers/useBibleVerses'
@@ -636,7 +635,7 @@ const CreateEntityRelationModal = ({
   )
   const renderLoadingState = () => <LoadingIndicator />
 
-  const headerComponent = (
+  const searchHeader = (
     <Box px={20} pt={8} pb={12}>
       <SheetSearchInput
         value={searchValue}
@@ -662,15 +661,14 @@ const CreateEntityRelationModal = ({
       ref={ref}
       snapPoints={[0.75]}
       header={
-        <>
-          <ModalHeader
-            title={modalTitle}
-            subTitle={modalSubtitle}
-            hasBackButton={Boolean(browseMode)}
-            onBackPress={exitBrowseMode}
-          />
-          {headerComponent}
-        </>
+        <SheetHeader
+          title={modalTitle}
+          subTitle={modalSubtitle}
+          hasBackButton={Boolean(browseMode)}
+          onBackPress={exitBrowseMode}
+        >
+          {searchHeader}
+        </SheetHeader>
       }
     >
       <VStack flex={1}>

@@ -1,8 +1,7 @@
 import React from 'react'
 import { TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { Sheet, type SheetRef } from '~common/sheet'
-import ModalHeader from '~common/ModalHeader'
+import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -27,7 +26,7 @@ const VerseFormatSheet = ({
       ref={sheetRef}
       onDismiss={onClose}
       snapPoints={[280]}
-      header={<ModalHeader title={t('study.formatChoice')} subTitle={reference} />}
+      header={<SheetHeader title={t('study.formatChoice')} subTitle={reference} />}
     >
       <Box paddingHorizontal={20} paddingBottom={20}>
         {/* Inline format option */}

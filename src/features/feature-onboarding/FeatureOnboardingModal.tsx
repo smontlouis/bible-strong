@@ -83,12 +83,9 @@ const FeatureOnboardingModal = () => {
       ref={ref}
       detachedOffset={insets.bottom + 50}
       dismissible={false}
-      backdrop
       onDismiss={handleClose}
       detached={true}
-      grabber={false}
       cornerRadius={30}
-      backgroundColor={theme.colors.reverse}
     >
       <SheetView>
         <TouchableBox

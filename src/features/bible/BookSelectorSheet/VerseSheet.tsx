@@ -1,4 +1,4 @@
-import { Sheet, SheetScrollView, type SheetRef } from '~common/sheet'
+import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
 import { useAtomValue } from 'jotai/react'
 import { atom } from 'jotai/vanilla'
 import React from 'react'
@@ -97,18 +97,12 @@ const VerseSheet = ({ sheetRef, bookSelectorRef, actions, data }: VerseSheetProp
   const horizontalMargin = (MAX_WIDTH - totalItemsWidth) / 2
 
   return (
-    <Sheet ref={sheetRef} snapPoints={[0.5]} dismissible backdrop stackBehavior="push">
-      <Box
-        height={54}
-        justifyContent="center"
-        alignItems="center"
-        borderBottomWidth={1}
-        borderColor="lightGrey"
-      >
-        <Text fontWeight="bold" textAlign="center">
-          {t('goToVerse')}
-        </Text>
-      </Box>
+    <Sheet
+      ref={sheetRef}
+      snapPoints={[0.5]}
+      stackBehavior="push"
+      header={<SheetHeader title={t('goToVerse')} centerTitle />}
+    >
       <SheetScrollView
         contentContainerStyle={{
           paddingTop: 10,

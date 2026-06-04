@@ -1,5 +1,5 @@
 import { useTheme } from '@emotion/react'
-import { type SheetRef, SheetHandle, Sheet, SheetView } from '~common/sheet'
+import { type SheetRef, Sheet, SheetView } from '~common/sheet'
 import { TouchableOpacity, type ViewStyle } from 'react-native'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
@@ -261,54 +261,45 @@ const AnnotationToolbar = ({
     }
   }
 
-  const renderHandle = (handleProps: React.ComponentProps<typeof SheetHandle>) => (
-    <>
-      <SheetHandle {...handleProps} />
-      <Box
-        position="absolute"
-        top={isEnabled ? -70 : 0}
-        left={0}
-        right={0}
-        bottom={0}
-        zIndex={1000}
+  const header = (
+    <Box
+      position="absolute"
+      top={isEnabled ? -70 : 0}
+      left={0}
+      right={0}
+      bottom={0}
+      zIndex={1000}
+      alignItems="center"
+      justifyContent="center"
+      style={
+        {
+          transitionProperty: ['top'],
+          transitionDuration: 300,
+        } as unknown as ViewStyle
+      }
+    >
+      <TouchableBox
+        bg="primary"
+        borderRadius={14}
+        py={10}
+        px={14}
+        row
+        gap={10}
         alignItems="center"
-        justifyContent="center"
-        style={
-          {
-            transitionProperty: ['top'],
-            transitionDuration: 300,
-          } as unknown as ViewStyle
-        }
+        onPress={onClose}
       >
-        <TouchableBox
-          bg="primary"
-          borderRadius={14}
-          py={10}
-          px={14}
-          row
-          gap={10}
-          alignItems="center"
-          onPress={onClose}
-        >
-          <Text fontSize={14} bold color="reverse">
-            {t('Mode libre')}
-          </Text>
-          <Box bg="reverse" borderRadius={20} size={16} center lightShadow opacity={0.5}>
-            <FeatherIcon name="x" size={12} color="primary" />
-          </Box>
-        </TouchableBox>
-      </Box>
-    </>
+        <Text fontSize={14} bold color="reverse">
+          {t('Mode libre')}
+        </Text>
+        <Box bg="reverse" borderRadius={20} size={16} center lightShadow opacity={0.5}>
+          <FeatherIcon name="x" size={12} color="primary" />
+        </Box>
+      </TouchableBox>
+    </Box>
   )
 
   return (
-    <Sheet
-      ref={ref}
-      dismissible
-      onClose={onClose}
-      backgroundColor={theme.colors.reverse}
-      handle={renderHandle({})}
-    >
+    <Sheet ref={ref} backdrop={false} onClose={onClose} header={header}>
       <SheetView
         style={{
           flex: 0,

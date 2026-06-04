@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import { Sheet, SheetView, type SheetRef } from '~common/sheet'
+import { Sheet, SheetHeader, SheetView, type SheetRef } from '~common/sheet'
 import React, { memo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
@@ -27,15 +27,6 @@ const StyledText = styled(Text)({
 const HeaderBox = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   minHeight: 54,
-  borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border,
-}))
-
-const SheetHeader = styled.View(({ theme }) => ({
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  padding: 16,
   borderBottomWidth: 1,
   borderBottomColor: theme.colors.border,
 }))
@@ -115,20 +106,24 @@ const FiltersHeader = ({
           <FeatherIcon name="chevron-down" size={15} />
         </TouchableBox>
       </HeaderBox>
-      <Sheet ref={filtersRef} dismissible backdrop>
+      <Sheet
+        ref={filtersRef}
+        header={
+          <SheetHeader
+            title={t('Filtres')}
+            rightComponent={
+              hasActiveFilters && onReset ? (
+                <ResetButton onPress={onReset}>
+                  <Text color="primary" fontSize={14}>
+                    {t('Réinitialiser')}
+                  </Text>
+                </ResetButton>
+              ) : undefined
+            }
+          />
+        }
+      >
         <SheetView>
-          <SheetHeader>
-            <Text bold fontSize={18}>
-              {t('Filtres')}
-            </Text>
-            {hasActiveFilters && onReset && (
-              <ResetButton onPress={onReset}>
-                <Text color="primary" fontSize={14}>
-                  {t('Réinitialiser')}
-                </Text>
-              </ResetButton>
-            )}
-          </SheetHeader>
           {filters.map(filter => (
             <FilterRow key={filter.key} onPress={filter.onPress}>
               <Box row flex={1}>

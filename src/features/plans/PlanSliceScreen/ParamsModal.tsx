@@ -52,8 +52,8 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
   const initialScrollIndex = fonts.findIndex(f => f === fontFamily)
 
   return (
-    <Sheet ref={paramsModalRef}>
-      <Box padding={20} paddingBottom={20 + insets.bottom}>
+    <Sheet ref={paramsModalRef} backdrop={false}>
+      <Box padding={20}>
         <HalfContainer border>
           <Text flex={5}>{t('Taille du texte')}</Text>
           <Text marginLeft={5} fontSize={12} bold>{`${100 + fontSizeScale * 10}%`}</Text>

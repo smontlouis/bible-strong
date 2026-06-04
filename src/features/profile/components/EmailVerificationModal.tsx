@@ -2,9 +2,8 @@ import styled from '@emotion/native'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator } from 'react-native'
-import { Sheet, type SheetRef } from '~common/sheet'
+import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 
-import ModalHeader from '~common/ModalHeader'
 import Box, { VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -34,7 +33,7 @@ const EmailVerificationModal = ({ modalRef }: EmailVerificationModalProps) => {
   }
 
   return (
-    <Sheet ref={modalRef} header={<ModalHeader title={t('profile.emailNotVerified')} />}>
+    <Sheet ref={modalRef} header={<SheetHeader title={t('profile.emailNotVerified')} />}>
       <VStack gap={20} paddingHorizontal={20} paddingVertical={20}>
         <Box row alignItems="center" gap={12}>
           <WarningIcon>

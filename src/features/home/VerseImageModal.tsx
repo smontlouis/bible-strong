@@ -130,8 +130,6 @@ const VerseImageModal = ({ modalRef, imageUrls, verseOfTheDay }: Props) => {
       ref={modalRef}
       detached
       detachedOffset={insets.bottom + 46}
-      dismissible
-      backdrop
       cornerRadius={20}
       backgroundColor={theme.colors.lightGrey}
     >

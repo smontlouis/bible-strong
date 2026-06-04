@@ -48,7 +48,7 @@ const ColorChangeModal = () => {
   }
 
   return (
-    <Sheet ref={ref} dismissible backdrop onDismiss={handleModalClose}>
+    <Sheet ref={ref} onDismiss={handleModalClose}>
       <SheetView>
         <ColorCircleGrid
           colors={colorItems}

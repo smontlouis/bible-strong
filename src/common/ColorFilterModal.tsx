@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import { Sheet, SheetScrollView, type SheetRef } from '~common/sheet'
+import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
 import React, { forwardRef } from 'react'
 import { TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -26,15 +26,6 @@ const ColorRow = styled(TouchableOpacity)(({ theme }) => ({
   borderBottomColor: theme.colors.border,
 }))
 
-const Header = styled.View(({ theme }) => ({
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  padding: 16,
-  borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border,
-}))
-
 type Props = {
   selectedColorId?: string
   onSelect: (colorId: string | undefined) => void
@@ -46,12 +37,7 @@ const ColorFilterModal = forwardRef<SheetRef, Props>(({ selectedColorId, onSelec
   const allColors = useAllColors()
 
   return (
-    <Sheet ref={ref} dismissible snapPoints={[0.5]} backdrop>
-      <Header>
-        <Text bold fontSize={18}>
-          {t('Filtrer par couleur')}
-        </Text>
-      </Header>
+    <Sheet ref={ref} snapPoints={[0.5]} header={<SheetHeader title={t('Filtrer par couleur')} />}>
       <SheetScrollView
         contentContainerStyle={{
           paddingBottom: bottomBarHeight,

@@ -3,11 +3,10 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, Alert } from 'react-native'
 import { useTheme } from '@emotion/react'
-import { SheetFooter, Sheet, SheetTextInput, type SheetRef } from '~common/sheet'
+import { SheetFooter, Sheet, SheetHeader, SheetTextInput, type SheetRef } from '~common/sheet'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { getAuth, deleteUser } from '@react-native-firebase/auth'
 
-import ModalHeader from '~common/ModalHeader'
 import Box, { VStack, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Button from '~common/ui/Button'
@@ -65,7 +64,7 @@ const DeleteAccountModal = ({ modalRef }: DeleteAccountModalProps) => {
     <Sheet
       ref={modalRef}
       onDismiss={resetForm}
-      header={<ModalHeader title={t('app.deleteAccount')} />}
+      header={<SheetHeader title={t('app.deleteAccount')} />}
       footer={props => (
         <SheetFooter bottomInset={insets.bottom} {...props}>
           <HStack px={20} gap={10} justifyContent="flex-end" bg="reverse">

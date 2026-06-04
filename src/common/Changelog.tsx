@@ -91,8 +91,12 @@ const Changelog = () => {
     return log[`${attr}_en` as keyof ChangelogItem] || log[attr]
   }
 
-  const handleClose = () => {
+  const markLogsAsSeen = () => {
     dispatch(saveAllLogsAsSeen(changelog))
+  }
+
+  const handleClose = () => {
+    markLogsAsSeen()
     modalRef.current?.dismiss()
   }
 
@@ -100,8 +104,6 @@ const Changelog = () => {
     <Sheet
       ref={modalRef}
       snapPoints={[0.4]}
-      dismissible
-      backdrop
       footer={props => (
         <SheetFooter {...props}>
           <Box px={20} pt={5} paddingBottom={insets.bottom + 5} alignItems="flex-end" bg="reverse">
@@ -112,7 +114,7 @@ const Changelog = () => {
         </SheetFooter>
       )}
       cornerRadius={20}
-      onDismiss={handleClose}
+      onDismiss={markLogsAsSeen}
     >
       <SheetScrollView>
         <Box padding={20}>
