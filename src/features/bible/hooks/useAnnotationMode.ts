@@ -14,18 +14,25 @@ import {
 import { VersionCode } from '~state/tabs'
 import { RootState } from '~redux/modules/reducer'
 import generateUUID from '~helpers/generateUUID'
+import {
+  INITIAL_ANNOTATION_SESSION_STATE,
+  clearSelectedAnnotation,
+  enterAnnotationSession,
+  exitAnnotationSession,
+  markAnnotationCreated,
+  markAnnotationSelectionErased,
+  requestApplyAnnotation,
+  requestClearAnnotationSelectionRange,
+  requestEraseAnnotationSelection,
+  selectAnnotation,
+  updateAnnotationSelection,
+  type AnnotationSessionState,
+  type AnnotationType,
+  type SelectionRange,
+  type WordPosition,
+} from './annotationSession'
 
-export type AnnotationType = 'background' | 'underline' | 'circle'
-
-export interface WordPosition {
-  verseKey: string
-  wordIndex: number
-}
-
-export interface SelectionRange {
-  start: WordPosition
-  end: WordPosition
-}
+export type { AnnotationType, SelectionRange, WordPosition } from './annotationSession'
 
 export interface SelectedAnnotation {
   id: string
@@ -35,22 +42,6 @@ export interface SelectedAnnotation {
   type: AnnotationType
   noteId?: string
   tags?: { [id: string]: { id: string; name: string } }
-}
-
-interface AnnotationModeInternalState {
-  enabled: boolean
-  version?: VersionCode
-  hasSelection: boolean
-  selection: SelectionRange | null
-  clearSelectionTrigger: number
-  applyAnnotationTrigger: {
-    count: number
-    color: string
-    type: AnnotationType
-  }
-  eraseSelectionTrigger: number
-  selectedAnnotationId: string | null
-  clearAnnotationSelectionTrigger: number
 }
 
 export interface AnnotationModeState {
@@ -95,19 +86,8 @@ export interface UseAnnotationModeReturn extends AnnotationModeState {
   clearAnnotationSelection: () => void
 }
 
-const INITIAL_STATE: AnnotationModeInternalState = {
-  enabled: false,
-  hasSelection: false,
-  selection: null,
-  clearSelectionTrigger: 0,
-  applyAnnotationTrigger: { count: 0, color: '', type: 'background' },
-  eraseSelectionTrigger: 0,
-  selectedAnnotationId: null,
-  clearAnnotationSelectionTrigger: 0,
-}
-
 export function useAnnotationMode(): UseAnnotationModeReturn {
-  const [state, setState] = useState<AnnotationModeInternalState>(INITIAL_STATE)
+  const [state, setState] = useState<AnnotationSessionState>(INITIAL_ANNOTATION_SESSION_STATE)
   const reduxDispatch = useDispatch()
   const versesRef = useRef<Verse[]>([])
   const webViewRef = useRef<WebViewRef | null>(null)
@@ -147,56 +127,28 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
   }
 
   const enterMode = (version: VersionCode) => {
-    setState({
-      ...INITIAL_STATE,
-      enabled: true,
-      version,
-    })
+    setState(enterAnnotationSession(version))
     featureOnboarding.triggerIfNeeded(ONBOARDING_IDS.ANNOTATION_MODE)
   }
 
   const exitMode = () => {
-    setState(INITIAL_STATE)
+    setState(exitAnnotationSession())
   }
 
   const handleSelectionChanged = (hasSelection: boolean, selection: SelectionRange | null) => {
-    const isValid = hasSelection && selection?.start && selection?.end
-    setState(prev => ({
-      ...prev,
-      hasSelection: !!isValid,
-      selection: isValid ? selection : null,
-    }))
+    setState(prev => updateAnnotationSelection(prev, hasSelection, selection))
   }
 
   const applyAnnotation = (color: string, type: AnnotationType) => {
-    if (!state.hasSelection) return
-
-    setState(prev => ({
-      ...prev,
-      applyAnnotationTrigger: {
-        count: (prev.applyAnnotationTrigger?.count ?? 0) + 1,
-        color,
-        type,
-      },
-    }))
+    setState(prev => requestApplyAnnotation(prev, color, type))
   }
 
   const clearSelection = () => {
-    setState(prev => ({
-      ...prev,
-      hasSelection: false,
-      selection: null,
-      clearSelectionTrigger: (prev.clearSelectionTrigger ?? 0) + 1,
-    }))
+    setState(requestClearAnnotationSelectionRange)
   }
 
   const eraseSelection = () => {
-    if (!state.hasSelection) return
-
-    setState(prev => ({
-      ...prev,
-      eraseSelectionTrigger: (prev.eraseSelectionTrigger ?? 0) + 1,
-    }))
+    setState(requestEraseAnnotationSelection)
   }
 
   const handleCreateAnnotation = (payload: {
@@ -226,13 +178,7 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
       })
     )
 
-    // Auto-select the newly created annotation
-    setState(prev => ({
-      ...prev,
-      hasSelection: false,
-      selection: null,
-      selectedAnnotationId: annotationId,
-    }))
+    setState(prev => markAnnotationCreated(prev, annotationId))
   }
 
   const handleEraseSelection = (payload: { start: WordPosition; end: WordPosition }) => {
@@ -240,20 +186,11 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
 
     reduxDispatch(removeWordAnnotationsInRangeAction(state.version, payload.start, payload.end))
 
-    setState(prev => ({
-      ...prev,
-      hasSelection: false,
-      selection: null,
-    }))
+    setState(markAnnotationSelectionErased)
   }
 
   const handleAnnotationSelected = (annotationId: string | null) => {
-    setState(prev => ({
-      ...prev,
-      selectedAnnotationId: annotationId,
-      hasSelection: false,
-      selection: null,
-    }))
+    setState(prev => selectAnnotation(prev, annotationId))
   }
 
   const changeAnnotationColor = (color: string) => {
@@ -269,15 +206,11 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
   const deleteSelectedAnnotation = () => {
     if (!state.selectedAnnotationId) return
     reduxDispatch(removeWordAnnotationAction(state.selectedAnnotationId))
-    setState(prev => ({ ...prev, selectedAnnotationId: null }))
+    setState(prev => selectAnnotation(prev, null))
   }
 
   const clearAnnotationSelection = () => {
-    setState(prev => ({
-      ...prev,
-      selectedAnnotationId: null,
-      clearAnnotationSelectionTrigger: (prev.clearAnnotationSelectionTrigger ?? 0) + 1,
-    }))
+    setState(clearSelectedAnnotation)
   }
 
   useEffect(() => {

@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { OngoingPlan, OnlinePlan, Plan, ReadingSlice, Section, Status } from '~common/types'
+import { OngoingPlan, OnlinePlan, Plan, Section, Status } from '~common/types'
 import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
 import {
   firebaseDb,
@@ -13,6 +13,7 @@ import {
 // import { getLangIsFr } from '~i18n'
 import { RootState } from './reducer'
 import { importData, receiveLiveUpdates, USER_LOGOUT } from './user'
+import { markReadingSliceAsRead } from '~features/plans/planProgress'
 
 // const bibleProjectPlan: Plan = require('~assets/plans/bible-project-plan')
 // const bibleProjectPlanEn: Plan = require('~assets/plans/bible-project-plan-en')
@@ -137,72 +138,13 @@ const planSlice = createSlice({
     },
     markAsRead(state, action: PayloadAction<{ readingSliceId: string; planId: string }>) {
       const { readingSliceId, planId } = action.payload
-
-      let ongoingPlan = state.ongoingPlans.find(oP => oP.id === planId)
       const plan = state.myPlans.find(p => p.id === planId)
-      const flattenedReadingSlices =
-        plan?.sections.reduce((acc: ReadingSlice[], curr) => [...acc, ...curr.readingSlices], []) ||
-        []
-      const readingSliceIndex = flattenedReadingSlices.findIndex(c => c.id === readingSliceId)
-
-      // Create ongoingPlan if don't exists
-      if (!ongoingPlan) {
-        ongoingPlan = {
-          id: planId,
-          status: 'Progress',
-          readingSlices: {},
-        }
-        state.ongoingPlans.push(ongoingPlan)
-      }
-
-      // Remove plans in progress and put this one in Progress
-      state.ongoingPlans.forEach(oP => {
-        if (oP.status === 'Progress') {
-          oP.status = 'Idle'
-        }
+      state.ongoingPlans = markReadingSliceAsRead({
+        ongoingPlans: state.ongoingPlans,
+        plan,
+        planId,
+        readingSliceId,
       })
-      ongoingPlan.status = 'Progress'
-
-      // Toggle reading slice by either removing it or complete it
-      const ongoingReadingSlice = ongoingPlan.readingSlices[readingSliceId]
-
-      if (ongoingReadingSlice && ongoingReadingSlice === 'Completed') {
-        delete ongoingPlan.readingSlices[readingSliceId]
-
-        // Put next on previous
-        Object.keys(ongoingPlan.readingSlices).forEach(key => {
-          if (ongoingPlan?.readingSlices[key] === 'Next') delete ongoingPlan?.readingSlices[key]
-        })
-        const prevReadingSliceId = flattenedReadingSlices[readingSliceIndex]?.id
-        if (prevReadingSliceId) {
-          ongoingPlan.readingSlices[prevReadingSliceId] = 'Next'
-        }
-      } else {
-        ongoingPlan.readingSlices[readingSliceId] = 'Completed'
-
-        //Put next on next
-        Object.keys(ongoingPlan.readingSlices).forEach(key => {
-          if (ongoingPlan?.readingSlices[key] === 'Next') delete ongoingPlan?.readingSlices[key]
-        })
-        const nextReadingSliceId = flattenedReadingSlices[readingSliceIndex + 1]?.id
-        if (nextReadingSliceId && ongoingPlan.readingSlices[nextReadingSliceId] !== 'Completed') {
-          ongoingPlan.readingSlices[nextReadingSliceId] = 'Next'
-        }
-      }
-
-      // Check if plan is complete
-      const readingSlicesLength =
-        plan?.sections.reduce((acc: ReadingSlice[], curr) => [...acc, ...curr.readingSlices], [])
-          .length || 0
-      const ongoingReadingSlicesLength = Object.values(ongoingPlan.readingSlices).filter(
-        status => status === 'Completed'
-      ).length
-
-      if (readingSlicesLength === ongoingReadingSlicesLength) {
-        ongoingPlan.status = 'Completed'
-      } else {
-        ongoingPlan.status = 'Progress'
-      }
     },
   },
   extraReducers: builder => {

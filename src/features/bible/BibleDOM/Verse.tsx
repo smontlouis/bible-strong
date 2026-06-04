@@ -4,13 +4,9 @@ import { styled } from 'goober'
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_VERSE_STUDY_RELATIONS,
-  NAVIGATE_TO_BIBLE_NOTE,
   OPEN_BOOKMARK_MODAL,
-  NAVIGATE_TO_BIBLE_LINK,
-  NAVIGATE_TO_RELATION_ENDPOINT,
   OPEN_CROSS_VERSION_MODAL,
   OPEN_VERSE_TAGS_MODAL,
-  SHOW_TOAST,
 } from './dispatch'
 import VersionAnnotationIndicator, { CrossVersionAnnotation } from './VersionAnnotationIndicator'
 
@@ -36,6 +32,10 @@ const InterlinearVerse = React.lazy(() => import('./InterlinearVerse'))
 import VerseTags from './VerseTags'
 import { BibleError } from '~helpers/bibleErrors'
 import { useTranslations } from './TranslationsContext'
+import {
+  getRelationItemNavigationActions,
+  getVerseStudyRelationsPayload,
+} from './relationDisplayActions'
 
 const VerseText = styled('span')<RootStyles & { isParallel?: boolean }>(
   ({ isParallel, settings: { fontSizeScale, lineHeight } }) => ({
@@ -354,65 +354,16 @@ const Verse = ({
     const verseKey = `${Livre}-${Chapitre}-${Verset}`
     dispatch({
       type: NAVIGATE_TO_VERSE_STUDY_RELATIONS,
-      payload: relationItem
-        ? {
-            verseKey,
-            verseIds: relationItem.verseIds,
-            relationId: relationItem.relationId,
-          }
-        : verseKey,
-    })
-  }
-
-  const navigateToLink = (id: string) => {
-    dispatch({
-      type: NAVIGATE_TO_BIBLE_LINK,
-      payload: id,
+      payload: getVerseStudyRelationsPayload(verseKey, relationItem),
     })
   }
 
   const navigateToRelationItem = (item: VerseRelationItem) => {
-    switch (item.targetEndpoint.type) {
-      case 'note':
-        if (!item.targetEntityExists) {
-          dispatch({
-            type: SHOW_TOAST,
-            payload: {
-              type: 'warning',
-              message: "Cette note n'existe plus. Vous pouvez supprimer la relation.",
-            },
-          })
-          navigateToVerseStudyRelations(item)
-          break
-        }
-        dispatch({
-          type: NAVIGATE_TO_BIBLE_NOTE,
-          payload: {
-            noteId: item.targetEndpoint.noteId,
-            verseIds: item.verseIds,
-          },
-        })
-        break
-      case 'externalLink':
-        if (item.targetEntityExists && item.targetEndpoint.linkId) {
-          navigateToLink(item.targetEndpoint.linkId)
-        } else if (item.targetIsAvailable) {
-          dispatch({ type: NAVIGATE_TO_RELATION_ENDPOINT, payload: item.targetEndpoint })
-        } else {
-          navigateToVerseStudyRelations(item)
-        }
-        break
-      default:
-        if (!item.targetIsAvailable) {
-          navigateToVerseStudyRelations(item)
-          break
-        }
-        dispatch({
-          type: NAVIGATE_TO_RELATION_ENDPOINT,
-          payload: item.targetEndpoint,
-        })
-        break
-    }
+    const { Livre, Chapitre, Verset } = verse
+    const verseKey = `${Livre}-${Chapitre}-${Verset}`
+    getRelationItemNavigationActions(verseKey, item).forEach(action => {
+      dispatch(action)
+    })
   }
 
   const openCrossVersionModal = () => {

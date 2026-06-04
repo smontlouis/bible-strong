@@ -44,7 +44,6 @@ import {
   updateStudyRelation,
 } from './user/studyRelations'
 import {
-  createExternalLinkEndpoint,
   createNoteEndpoint,
   createSystemRelation,
   createVerseEndpoint,
@@ -57,6 +56,12 @@ import {
   rebuildRelationPairs,
   type RelationEndpoint,
 } from '~features/studyRelations/domain'
+import {
+  addExternalLinkSystemRelations,
+  groupVerseKeysByChapter,
+  refreshExternalLinkSystemRelations,
+  removeExternalLinkSystemRelations,
+} from '~features/studyRelations/systemRelationLifecycle'
 import {
   addWordAnnotationAction,
   changeWordAnnotationColorAction,
@@ -246,43 +251,10 @@ const getSelectedVerseKeysFromAction = (
   return getLegacyVerseKeysFromEntityId(fallbackEntityId)
 }
 
-const groupVerseKeysByChapter = (verseKeys: string[]): string[][] => {
-  const groups = verseKeys.reduce(
-    (result, verseKey) => {
-      const [book, chapter] = verseKey.split('-')
-      const groupKey = `${book}-${chapter}`
-      result[groupKey] = result[groupKey] || []
-      result[groupKey].push(verseKey)
-      return result
-    },
-    {} as Record<string, string[]>
-  )
-
-  return Object.values(groups)
-}
-
 const removeSystemRelationsForEndpoint = (draft: UserState, endpointKey: string) => {
   draft.bible.relations = draft.bible.relations || {}
   for (const [relationId, relation] of Object.entries(draft.bible.relations)) {
     if (relation.kind === 'system' && relation.endpointKeys.includes(endpointKey)) {
-      delete draft.bible.relations[relationId]
-    }
-  }
-}
-
-const removeSystemRelationsForEntity = (
-  draft: UserState,
-  entityType: 'note' | 'externalLink',
-  entityId: string
-) => {
-  draft.bible.relations = draft.bible.relations || {}
-  for (const [relationId, relation] of Object.entries(draft.bible.relations)) {
-    if (relation.kind !== 'system') continue
-    const matches = relation.endpoints.some(endpoint => {
-      if (entityType === 'note') return endpoint.type === 'note' && endpoint.noteId === entityId
-      return endpoint.type === 'externalLink' && endpoint.linkId === entityId
-    })
-    if (matches) {
       delete draft.bible.relations[relationId]
     }
   }
@@ -1045,19 +1017,11 @@ const userSlice = createSlice({
       for (const [linkKey, link] of Object.entries(action.payload)) {
         const verseKeys = getSelectedVerseKeysFromAction(action, linkKey)
         if (!verseKeys.length) continue
-        groupVerseKeysByChapter(verseKeys).forEach(verseKeyGroup => {
-          const verseEndpoint = createVerseEndpoint(verseKeyGroup, verseKeyGroup.join('/'))
-          const externalLinkEndpoint = createExternalLinkEndpoint(verseEndpoint, linkKey, link)
-          upsertSystemRelation(
-            state,
-            createSystemRelation({
-              id: getSystemRelationId('externalLink', linkKey, verseEndpoint),
-              type: 'externalLink',
-              endpoints: [externalLinkEndpoint, verseEndpoint],
-              createdAt: link.date,
-              updatedAt: link.date,
-            })
-          )
+        state.bible.relations = addExternalLinkSystemRelations({
+          relations: state.bible.relations,
+          linkKey,
+          link,
+          verseKeys,
         })
       }
       syncRelationProjections(state)
@@ -1070,28 +1034,10 @@ const userSlice = createSlice({
           ...data,
         }
         const link = state.bible.links[key]
-        state.bible.relations = state.bible.relations || {}
-        Object.values(state.bible.relations).forEach(existingRelation => {
-          if (existingRelation.kind !== 'system' || existingRelation.type !== 'externalLink') return
-          const linkEndpoint = existingRelation.endpoints.find(
-            endpoint => endpoint.type === 'externalLink' && endpoint.linkId === key
-          )
-          const verseEndpoint = existingRelation.endpoints.find(
-            endpoint => endpoint.type === 'verse'
-          )
-          if (linkEndpoint?.type !== 'externalLink' || verseEndpoint?.type !== 'verse') return
-
-          const externalLinkEndpoint = createExternalLinkEndpoint(verseEndpoint, key, link)
-          upsertSystemRelation(
-            state,
-            createSystemRelation({
-              id: existingRelation.id,
-              type: 'externalLink',
-              endpoints: [externalLinkEndpoint, verseEndpoint],
-              createdAt: existingRelation.createdAt || link.date,
-              updatedAt: Date.now(),
-            })
-          )
+        state.bible.relations = refreshExternalLinkSystemRelations({
+          relations: state.bible.relations,
+          linkKey: key,
+          link,
         })
         syncRelationProjections(state)
       }
@@ -1099,7 +1045,10 @@ const userSlice = createSlice({
     builder.addCase(deleteLink, (state, action) => {
       delete state.bible.links[action.payload]
       removeEntityInTags(state, 'links', action.payload)
-      removeSystemRelationsForEntity(state, 'externalLink', action.payload)
+      state.bible.relations = removeExternalLinkSystemRelations(
+        state.bible.relations,
+        action.payload
+      )
       syncRelationProjections(state)
     })
 

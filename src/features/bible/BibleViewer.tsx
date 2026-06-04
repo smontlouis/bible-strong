@@ -82,9 +82,14 @@ import {
   RedWordsByVerse,
 } from './bibleReadingChapter'
 import {
-  getFirstSelectedVerseLocation,
+  getSelectedVerseKeys,
+  getSelectedVersesBookmarkLocation,
+  getSelectedVersesFocusAction,
+  getSelectedVersesLinkParams,
+  getSelectedVersesRelationEndpoint,
+  getSelectedVersesStudyPayload,
+  hasSelectedVerses,
   selectAllChapterVerses,
-  selectedVersesIncludeFocus,
 } from './selectedVersesActions'
 import BibleParamsModal from './BibleParamsModal'
 import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
@@ -323,7 +328,7 @@ const BibleViewer = ({
 
   // Open/close verses modal based on selected verses
   useEffect(() => {
-    if (Object.keys(selectedVerses).length > 0) {
+    if (hasSelectedVerses(selectedVerses)) {
       versesModal.open()
     } else {
       versesModal.close()
@@ -512,20 +517,20 @@ const BibleViewer = ({
   }
 
   const toggleCreateNote = () => {
-    openNote({ verseKeys: Object.keys(selectedVerses) })
+    openNote({ verseKeys: getSelectedVerseKeys(selectedVerses) })
   }
 
   const toggleCreateLink = () => {
     pushRouteOnce({
       pathname: '/link',
-      params: { verseKeys: Object.keys(selectedVerses).join(',') },
+      params: getSelectedVersesLinkParams(selectedVerses),
     })
   }
 
   const toggleCreateStudyRelation = () => {
-    const verseKeys = Object.keys(selectedVerses)
-    if (!verseKeys.length) return
-    setCreateRelationSourceEndpoint(createVerseEndpoint(verseKeys))
+    const endpoint = getSelectedVersesRelationEndpoint(selectedVerses)
+    if (!endpoint) return
+    setCreateRelationSourceEndpoint(endpoint)
     createRelationModal.open()
   }
 
@@ -580,7 +585,7 @@ const BibleViewer = ({
         title,
         content,
         version,
-        verses: Object.keys(selectedVerses),
+        verses: getSelectedVersesStudyPayload(selectedVerses),
       }
 
       setPendingVerseData({ studyId, verseData })
@@ -606,7 +611,7 @@ const BibleViewer = ({
 
   // Pin verses handler - toggles focus on/off
   const handlePinVerses = () => {
-    if (selectedVersesIncludeFocus(selectedVerses, focusVerses)) {
+    if (getSelectedVersesFocusAction(selectedVerses, focusVerses) === 'clear-focus') {
       actions.clearFocusVerses()
     } else {
       actions.pinSelectedVerses()
@@ -615,7 +620,7 @@ const BibleViewer = ({
 
   // Bookmark handler
   const handleAddBookmark = useCallback(() => {
-    const location = getFirstSelectedVerseLocation(selectedVerses)
+    const location = getSelectedVersesBookmarkLocation(selectedVerses)
     if (location) {
       setSelectedVerseForBookmark({
         book: location.book,

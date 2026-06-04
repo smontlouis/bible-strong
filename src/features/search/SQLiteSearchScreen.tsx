@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { FlatList, ScrollView, TouchableOpacity } from 'react-native'
 import { KeyboardAwareScrollView, useKeyboardState } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useRouter } from 'expo-router'
 import { useTheme } from '@emotion/react'
 import { Image } from 'expo-image'
 import { useAtomValue, useSetAtom } from 'jotai/react'
@@ -42,10 +41,8 @@ import { removeBreakLines } from '~helpers/utils'
 import { useWaitForDatabase as useWaitForDictionaryDatabase } from '~common/waitForDictionnaireDB'
 import { useWaitForDatabase as useWaitForNaveDatabase } from '~common/waitForNaveDB'
 import { useWaitForDatabase as useWaitForStrongDatabase } from '~common/waitForStrongDB'
-import { parseBibleReference } from '~features/search/BibleReferenceWidget'
 import SearchEmptyState from '~features/search/SearchEmptyState'
-import { getBibleViewParamsForSearchResult } from '~features/search/searchNavigation'
-import { useOpenRelationEndpoint } from '~features/studyRelations/useOpenRelationEndpoint'
+import { useOpenStudyObject } from '~features/studyRelations/useOpenStudyObject'
 import type { RootState } from '~redux/modules/reducer'
 import { useSelector } from 'react-redux'
 import { searchFiltersAtom, SearchItemType, SearchSection } from '~state/searchFilters'
@@ -117,10 +114,8 @@ const useKeyboardFooterBottom = (footerHeight: number) => {
 const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const { t } = useTranslation()
   const theme = useTheme()
-  const router = useRouter()
   const keyboardFooterBottom = useKeyboardFooterBottom(SEARCH_ALPHABET_FOOTER_HEIGHT)
-  const openRelationEndpoint = useOpenRelationEndpoint()
-  const pushRouteOnce = usePushRouteOnce()
+  const openStudyObject = useOpenStudyObject()
   const notes = useSelector((state: RootState) => state.user.bible.notes)
   const links = useSelector((state: RootState) => state.user.bible.links)
   const studies = useSelector((state: RootState) => state.user.bible.studies)
@@ -595,13 +590,6 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     searchValue,
   ])
 
-  const hasReference = Boolean(
-    itemFilters.passages &&
-    searchValue.trim().length >= MIN_SEARCH_LENGTH &&
-    debouncedSearchValue &&
-    parseBibleReference(debouncedSearchValue).length > 0
-  )
-
   const hasSearchQuery = Boolean(debouncedSearchValue)
   const showResultsList =
     Boolean(browseItemType) ||
@@ -746,17 +734,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   }
 
   const openSearchItem = (item: SearchEntityResult) => {
-    if (item.passage) {
-      pushRouteOnce({
-        pathname: '/bible-view',
-        params: getBibleViewParamsForSearchResult(item.passage),
-      })
-      return
-    }
-
-    if (item.endpoint) {
-      openRelationEndpoint(item.endpoint)
-    }
+    openStudyObject(item)
   }
 
   const renderBrowseAlphabet = () => {
