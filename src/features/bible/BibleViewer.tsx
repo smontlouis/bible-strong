@@ -516,6 +516,18 @@ const BibleViewer = ({
     })
   }
 
+  const editFocusTags = () => {
+    if (!focusVerses?.length) return
+
+    setUnifiedTagsModal({
+      mode: 'select',
+      entity: 'highlights',
+      ids: Object.fromEntries(
+        focusVerses.map(focusVerse => [`${book.Numero}-${chapter}-${focusVerse}`, true])
+      ),
+    })
+  }
+
   const toggleCreateNote = () => {
     openNote({ verseKeys: getSelectedVerseKeys(selectedVerses) })
   }
@@ -849,6 +861,7 @@ const BibleViewer = ({
         isFormSheet={isFormSheet}
         onExitAnnotationMode={handleExitAnnotationMode}
         annotationModeEnabled={annotationMode.enabled}
+        onEditFocusTags={editFocusTags}
       />
       <Box flex={1} zIndex={-1}>
         {useSharedDOM ? (
