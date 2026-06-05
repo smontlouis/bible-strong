@@ -431,7 +431,7 @@ export const BibleDOMWrapper = ({
       case NAVIGATE_TO_PERICOPE: {
         router.push({
           pathname: '/pericope',
-          params: { book: String(book.Numero) },
+          params: { book: String(book.Numero), version },
         })
         break
       }

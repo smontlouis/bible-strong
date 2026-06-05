@@ -18,6 +18,7 @@ import { useQuery } from '~helpers/react-query-lite'
 import { useLocalSearchParams } from 'expo-router'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import type { VersionCode } from '~state/tabs'
 
 type PericopeVerse = {
   h1?: string
@@ -59,14 +60,15 @@ const PericopeScreen = () => {
   const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
   const defaultVersion = useDefaultBibleVersion()
-  const params = useLocalSearchParams<{ book?: string }>()
+  const params = useLocalSearchParams<{ book?: string; version?: string }>()
+  const version = (params.version || defaultVersion) as VersionCode
 
   const initialBookIndex = params.book ? Number(params.book) - 1 : 0
   const [book, setBook] = useState(books[initialBookIndex] || books[0])
 
   const { data: pericope } = useQuery({
-    queryKey: ['bible-pericope', defaultVersion],
-    queryFn: () => getBiblePericope(defaultVersion),
+    queryKey: ['bible-pericope', version],
+    queryFn: () => getBiblePericope(version),
   })
   const pericopeBook: PericopeBook = pericope
     ? clearEmpties((pericope[String(book.Numero)] || {}) as PericopeBook)
@@ -74,7 +76,7 @@ const PericopeScreen = () => {
 
   return (
     <Container>
-      <PericopeHeader hasBackButton title={`${t('Péricopes')} ${defaultVersion}`} />
+      <PericopeHeader hasBackButton title={`${t('Péricopes')} ${version}`} />
       <ScrollView>
         <Box padding={20}>
           <Text fontSize={30} fontWeight="bold" marginBottom={40}>
@@ -105,7 +107,7 @@ const PericopeScreen = () => {
                             contextDisplayMode: 'focused',
                             book: JSON.stringify(book),
                             chapter: String(chapterKey),
-                            version: defaultVersion,
+                            version,
                             verse: '1',
                           },
                         })
