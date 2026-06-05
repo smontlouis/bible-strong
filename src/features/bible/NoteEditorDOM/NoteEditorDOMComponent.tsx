@@ -89,10 +89,10 @@ export default function NoteEditorDOMComponent({
   // explicitly resets the editor, for example after canceling an edit.
   useEffect(() => {
     if (titleRef.current) {
-      titleRef.current.textContent = defaultTitle
+      titleRef.current.innerText = defaultTitle
     }
     if (descriptionRef.current) {
-      descriptionRef.current.textContent = defaultDescription
+      descriptionRef.current.innerText = defaultDescription
     }
     requestAnimationFrame(() => {
       const container = containerRef.current
@@ -111,11 +111,11 @@ export default function NoteEditorDOMComponent({
   }, [isEditing])
 
   const handleTitleInput = () => {
-    onTitleChange(titleRef.current?.textContent || '')
+    onTitleChange(titleRef.current?.innerText || '')
   }
 
   const handleDescriptionInput = () => {
-    onDescriptionChange(descriptionRef.current?.textContent || '')
+    onDescriptionChange(descriptionRef.current?.innerText || '')
   }
 
   const handleFocus = () => {
@@ -128,8 +128,7 @@ export default function NoteEditorDOMComponent({
 
   const isDark = colorScheme === 'dark'
   const textColor = textColorProp || (isDark ? '#fff' : '#000')
-  const bgColor =
-    editorBackgroundColor || (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)')
+  const bgColor = editorBackgroundColor || (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)')
   const placeholderColor =
     placeholderColorProp || (isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)')
 

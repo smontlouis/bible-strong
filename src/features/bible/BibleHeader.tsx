@@ -267,6 +267,11 @@ const Header = ({
       title: currentChapterBookmark ? t('Modifier le marque-page') : t('Ajouter un marque-page'),
       image: 'bookmark',
     },
+    {
+      id: 'open-tab',
+      title: t('tab.openInNewTab'),
+      image: 'arrow.up.forward.square',
+    },
   ]
 
   if (annotationModeEnabled) {
@@ -593,6 +598,9 @@ const Header = ({
                         break
                       case 'bookmark':
                         bookmarkModalRef.current?.present()
+                        break
+                      case 'open-tab':
+                        openInBibleTab()
                         break
                     }
                   }}

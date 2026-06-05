@@ -165,46 +165,59 @@ const TagScreen = () => {
 
   return (
     <FormSheetScreen isFormSheet>
-      <Header
-        hasBackButton={canGoBackInStack}
-        title={tag.name}
-        rightComponent={
-          <MenuView
-            actions={[
-              { id: 'edit', title: t('Éditer'), image: 'pencil' },
-              {
-                id: 'create-group',
-                title: t('tabs.createGroupFromTag'),
-                image: 'square.stack.3d.up',
-              },
-              {
-                id: 'delete',
-                title: t('Supprimer'),
-                image: 'trash',
-                attributes: { destructive: true },
-              },
-            ]}
-            onPressAction={({ nativeEvent }) => {
-              switch (nativeEvent.event) {
-                case 'edit':
-                  setTagToRename({ id: tag.id, name: tag.name })
-                  renameModalRef.current?.present()
-                  break
-                case 'create-group':
-                  handleOpenInTabGroup()
-                  break
-                case 'delete':
-                  handleDelete()
-                  break
-              }
-            }}
-          >
-            <Box row center height={60} width={60}>
-              <FeatherIcon name="more-vertical" size={18} />
-            </Box>
-          </MenuView>
-        }
-      />
+      <Box>
+        <Header
+          hasBackButton={canGoBackInStack}
+          title={tag.name}
+          rightComponent={
+            <MenuView
+              actions={[
+                { id: 'edit', title: t('Éditer'), image: 'pencil' },
+                {
+                  id: 'create-group',
+                  title: t('tabs.createGroupFromTag'),
+                  image: 'square.stack.3d.up',
+                },
+                {
+                  id: 'delete',
+                  title: t('Supprimer'),
+                  image: 'trash',
+                  attributes: { destructive: true },
+                },
+              ]}
+              onPressAction={({ nativeEvent }) => {
+                switch (nativeEvent.event) {
+                  case 'edit':
+                    setTagToRename({ id: tag.id, name: tag.name })
+                    renameModalRef.current?.present()
+                    break
+                  case 'create-group':
+                    handleOpenInTabGroup()
+                    break
+                  case 'delete':
+                    handleDelete()
+                    break
+                }
+              }}
+            >
+              <Box row center height={60} width={60}>
+                <FeatherIcon name="more-vertical" size={18} />
+              </Box>
+            </MenuView>
+          }
+        />
+        <RenameModal
+          sheetRef={renameModalRef}
+          title={t("Renommer l'étiquette")}
+          placeholder={t("Nom de l'étiquette")}
+          initialValue={tagToRename?.name}
+          onSave={value => {
+            if (tagToRename) {
+              dispatch(updateTag(tagToRename.id, value))
+            }
+          }}
+        />
+      </Box>
       {isEmpty ? (
         <Box flex pt={40} px={20}>
           <Empty
@@ -232,17 +245,6 @@ const TagScreen = () => {
           stickySectionHeadersEnabled={false}
         />
       )}
-      <RenameModal
-        sheetRef={renameModalRef}
-        title={t("Renommer l'étiquette")}
-        placeholder={t("Nom de l'étiquette")}
-        initialValue={tagToRename?.name}
-        onSave={value => {
-          if (tagToRename) {
-            dispatch(updateTag(tagToRename.id, value))
-          }
-        }}
-      />
     </FormSheetScreen>
   )
 }

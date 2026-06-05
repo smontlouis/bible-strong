@@ -63,12 +63,12 @@ const EntityRelationsScreen = () => {
             />
           </Box>
         )}
+        <CreateEntityRelationModal
+          ref={createRelationModal.getRef()}
+          sourceEndpoint={endpoint}
+          onCreated={() => createRelationModal.close()}
+        />
       </ScrollView>
-      <CreateEntityRelationModal
-        ref={createRelationModal.getRef()}
-        sourceEndpoint={endpoint}
-        onCreated={() => createRelationModal.close()}
-      />
     </FormSheetScreen>
   )
 }

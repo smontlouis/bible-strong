@@ -5,6 +5,12 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Alert, Dimensions, Image, Linking, ScrollView } from 'react-native'
+import {
+  KeyboardAvoidingView,
+  KeyboardStickyView,
+  useKeyboardState,
+} from 'react-native-keyboard-controller'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import YoutubePlayer from 'react-native-youtube-iframe'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -39,6 +45,8 @@ import { addLink, deleteLink, Link } from '~redux/modules/user'
 import { makeLinkByIdSelector, makeVerseKeysForLinkSelector } from '~redux/selectors/bible'
 import { unifiedTagsModalAtom } from '~state/app'
 import { useTranslation } from 'react-i18next'
+
+const FOOTER_HEIGHT = 64
 
 const StyledTextInput = styled.TextInput(({ theme }) => ({
   color: theme.colors.default,
@@ -88,6 +96,7 @@ const BibleLinkScreen = () => {
   const { t } = useTranslation()
   const router = useRouter()
   const theme = useTheme()
+  const insets = useSafeAreaInsets()
   const currentLink = useCurrentLink({ linkId })
   const canGoBackInStack = useCanGoBackInStack()
   const selectVerseKeysForLink = makeVerseKeysForLinkSelector()
@@ -108,6 +117,7 @@ const BibleLinkScreen = () => {
   const relationCount = useRelationCount(linkEndpoint)
   const openEntityRelations = useOpenEntityRelations()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
+  const keyboardHeight = useKeyboardState(state => state.height)
 
   useEffect(() => {
     if (currentLink) {
@@ -224,185 +234,203 @@ const BibleLinkScreen = () => {
 
   return (
     <FormSheetScreen isFormSheet>
-      <Header
-        hasBackButton={canGoBackInStack}
-        title={t('Lien')}
-        subTitle={reference}
-        rightComponent={
-          currentLink ? (
-            <MenuView
-              actions={[
-                { id: 'edit', title: t('Éditer'), image: 'pencil' },
-                { id: 'tags', title: t('Éditer les tags'), image: 'tag' },
-                {
-                  id: 'relations',
-                  title: t('Éditer les relations'),
-                  image: 'point.3.connected.trianglepath.dotted',
-                  attributes: linkEndpoint ? undefined : { disabled: true },
-                },
-                {
-                  id: 'delete',
-                  title: t('Supprimer'),
-                  image: 'trash',
-                  attributes: { destructive: true },
-                },
-              ]}
-              onPressAction={({ nativeEvent }) => {
-                switch (nativeEvent.event) {
-                  case 'edit':
-                    editLink()
-                    break
-                  case 'tags':
-                    setUnifiedTagsModal({
-                      mode: 'select',
-                      id: currentLink.id!,
-                      entity: 'links',
-                      title:
-                        currentLink.ogData?.title ||
-                        currentLink.customTitle ||
-                        currentLink.url ||
-                        '',
-                    })
-                    break
-                  case 'relations':
-                    if (linkEndpoint) openEntityRelations(linkEndpoint)
-                    break
-                  case 'delete':
-                    deleteCurrentLink()
-                    break
-                }
-              }}
-            >
-              <Box row center height={54} width={54}>
-                <FeatherIcon name="more-vertical" size={18} />
-              </Box>
-            </MenuView>
-          ) : undefined
-        }
-      />
+      <Box flex>
+        <Header
+          hasBackButton={canGoBackInStack}
+          title={t('Lien')}
+          subTitle={reference}
+          rightComponent={
+            currentLink ? (
+              <MenuView
+                actions={[
+                  { id: 'edit', title: t('Éditer'), image: 'pencil' },
+                  { id: 'tags', title: t('Éditer les tags'), image: 'tag' },
+                  {
+                    id: 'relations',
+                    title: t('Éditer les relations'),
+                    image: 'point.3.connected.trianglepath.dotted',
+                    attributes: linkEndpoint ? undefined : { disabled: true },
+                  },
+                  {
+                    id: 'delete',
+                    title: t('Supprimer'),
+                    image: 'trash',
+                    attributes: { destructive: true },
+                  },
+                ]}
+                onPressAction={({ nativeEvent }) => {
+                  switch (nativeEvent.event) {
+                    case 'edit':
+                      editLink()
+                      break
+                    case 'tags':
+                      setUnifiedTagsModal({
+                        mode: 'select',
+                        id: currentLink.id!,
+                        entity: 'links',
+                        title:
+                          currentLink.ogData?.title ||
+                          currentLink.customTitle ||
+                          currentLink.url ||
+                          '',
+                      })
+                      break
+                    case 'relations':
+                      if (linkEndpoint) openEntityRelations(linkEndpoint)
+                      break
+                    case 'delete':
+                      deleteCurrentLink()
+                      break
+                  }
+                }}
+              >
+                <Box row center height={54} width={54}>
+                  <FeatherIcon name="more-vertical" size={18} />
+                </Box>
+              </MenuView>
+            ) : undefined
+          }
+        />
 
-      <ScrollView keyboardShouldPersistTaps="handled">
-        <VStack gap={10} paddingHorizontal={20}>
-          {isEditing && (
-            <VStack py={20} gap={20}>
-              <VStack gap={5}>
-                <Text>{t('URL du lien')}</Text>
-                <StyledTextInput
-                  placeholder={t('URL du lien')}
-                  placeholderTextColor={theme.colors.border}
-                  onChangeText={setUrl}
-                  value={url}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  keyboardType="url"
-                />
-              </VStack>
-              <VStack gap={5}>
-                <Text>{t('Titre personnalisé (optionnel)')}</Text>
-                <StyledTextInput
-                  placeholder={t('Titre personnalisé (optionnel)')}
-                  placeholderTextColor={theme.colors.border}
-                  onChangeText={setCustomTitle}
-                  value={customTitle}
-                />
-              </VStack>
-            </VStack>
-          )}
+        <KeyboardAvoidingView automaticOffset style={{ flex: 1 }}>
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            style={{ flex: 1 }}
+            contentContainerStyle={{
+              paddingBottom: isEditing ? FOOTER_HEIGHT + keyboardHeight + 20 : 0,
+            }}
+          >
+            <VStack gap={10} paddingHorizontal={20}>
+              {isEditing && (
+                <VStack py={20} gap={20}>
+                  <VStack gap={5}>
+                    <Text>{t('URL du lien')}</Text>
+                    <StyledTextInput
+                      placeholder={t('URL du lien')}
+                      placeholderTextColor={theme.colors.border}
+                      onChangeText={setUrl}
+                      value={url}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      keyboardType="url"
+                    />
+                  </VStack>
+                  <VStack gap={5}>
+                    <Text>{t('Titre personnalisé (optionnel)')}</Text>
+                    <StyledTextInput
+                      placeholder={t('Titre personnalisé (optionnel)')}
+                      placeholderTextColor={theme.colors.border}
+                      onChangeText={setCustomTitle}
+                      value={customTitle}
+                    />
+                  </VStack>
+                </VStack>
+              )}
 
-          {!isEditing && currentLink && (
-            <Box py={20}>
-              <EntityChipList
-                tags={currentLink?.tags}
-                relationCount={relationCount}
-                onRelationPress={() => linkEndpoint && openEntityRelations(linkEndpoint)}
-              />
-
-              {isYoutubeLink && currentLink.videoId && (
-                <Box mb={20} borderRadius={10} overflow="hidden" bg="lightGrey">
-                  <YoutubePlayer
-                    height={playerHeight}
-                    width={playerWidth}
-                    videoId={currentLink.videoId}
-                    onReady={() => console.log('[BibleLinkScreen] YouTube ready')}
-                    onError={(e: string) => console.log('[BibleLinkScreen] YouTube error:', e)}
-                    viewContainerStyle={{ borderRadius: 10, overflow: 'hidden' }}
-                    webviewStyle={{ borderRadius: 10, overflow: 'hidden' }}
+              {!isEditing && currentLink && (
+                <Box py={20}>
+                  <EntityChipList
+                    tags={currentLink?.tags}
+                    relationCount={relationCount}
+                    onRelationPress={() => linkEndpoint && openEntityRelations(linkEndpoint)}
                   />
+
+                  {isYoutubeLink && currentLink.videoId && (
+                    <Box mb={20} borderRadius={10} overflow="hidden" bg="lightGrey">
+                      <YoutubePlayer
+                        height={playerHeight}
+                        width={playerWidth}
+                        videoId={currentLink.videoId}
+                        onReady={() => console.log('[BibleLinkScreen] YouTube ready')}
+                        onError={(e: string) => console.log('[BibleLinkScreen] YouTube error:', e)}
+                        viewContainerStyle={{ borderRadius: 10, overflow: 'hidden' }}
+                        webviewStyle={{ borderRadius: 10, overflow: 'hidden' }}
+                      />
+                    </Box>
+                  )}
+
+                  {!isYoutubeLink && currentLink.ogData?.image && (
+                    <Image
+                      source={{ uri: currentLink.ogData.image }}
+                      style={{
+                        width: '100%',
+                        height: 180,
+                        borderRadius: 10,
+                        marginBottom: 15,
+                        backgroundColor: theme.colors.lightGrey,
+                      }}
+                      resizeMode="cover"
+                    />
+                  )}
+
+                  <HStack alignItems="center" mb={10}>
+                    {linkIcon.textIcon ? (
+                      <Text bold fontSize={16} color="default">
+                        {linkIcon.textIcon}
+                      </Text>
+                    ) : (
+                      <FeatherIcon name={linkIconName} size={18} color={linkIcon.color} />
+                    )}
+                    <Text marginLeft={8} color="grey" fontSize={13}>
+                      {currentLink.ogData?.siteName || getHostname(currentLink.url)}
+                    </Text>
+                  </HStack>
+
+                  <Text title fontSize={20} marginBottom={10}>
+                    {displayTitle}
+                  </Text>
+
+                  {currentLink.ogData?.description && (
+                    <Paragraph small marginBottom={15}>
+                      {currentLink.ogData.description}
+                    </Paragraph>
+                  )}
+
+                  {!isYoutubeLink && (
+                    <Button reverse onPress={openInBrowser}>
+                      <HStack alignItems="center">
+                        <FeatherIcon name="external-link" size={16} />
+                        <Text marginLeft={8}>{t('Ouvrir dans le navigateur')}</Text>
+                      </HStack>
+                    </Button>
+                  )}
                 </Box>
               )}
+            </VStack>
+          </ScrollView>
 
-              {!isYoutubeLink && currentLink.ogData?.image && (
-                <Image
-                  source={{ uri: currentLink.ogData.image }}
-                  style={{
-                    width: '100%',
-                    height: 180,
-                    borderRadius: 10,
-                    marginBottom: 15,
-                    backgroundColor: theme.colors.lightGrey,
-                  }}
-                  resizeMode="cover"
-                />
-              )}
-
-              <HStack alignItems="center" mb={10}>
-                {linkIcon.textIcon ? (
-                  <Text bold fontSize={16} color="default">
-                    {linkIcon.textIcon}
-                  </Text>
-                ) : (
-                  <FeatherIcon name={linkIconName} size={18} color={linkIcon.color} />
+          {isEditing && (
+            <KeyboardStickyView style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
+              <HStack
+                py={10}
+                px={20}
+                justifyContent="flex-end"
+                bg="reverse"
+                borderTopWidth={1}
+                borderColor="border"
+              >
+                {currentLink && (
+                  <Box>
+                    <Button reverse onPress={cancelEditing}>
+                      {t('Annuler')}
+                    </Button>
+                  </Box>
                 )}
-                <Text marginLeft={8} color="grey" fontSize={13}>
-                  {currentLink.ogData?.siteName || getHostname(currentLink.url)}
-                </Text>
+                <Box>
+                  <Button disabled={submitIsDisabled} onPress={saveLink}>
+                    {isSaving ? <ActivityIndicator size="small" color="white" /> : t('Sauvegarder')}
+                  </Button>
+                </Box>
               </HStack>
-
-              <Text title fontSize={20} marginBottom={10}>
-                {displayTitle}
-              </Text>
-
-              {currentLink.ogData?.description && (
-                <Paragraph small marginBottom={15}>
-                  {currentLink.ogData.description}
-                </Paragraph>
-              )}
-
-              {!isYoutubeLink && (
-                <Button reverse onPress={openInBrowser}>
-                  <HStack alignItems="center">
-                    <FeatherIcon name="external-link" size={16} />
-                    <Text marginLeft={8}>{t('Ouvrir dans le navigateur')}</Text>
-                  </HStack>
-                </Button>
-              )}
-            </Box>
+            </KeyboardStickyView>
           )}
-        </VStack>
-      </ScrollView>
-
-      {isEditing ? (
-        <HStack py={10} px={20} justifyContent="flex-end" bg="reverse">
-          {currentLink && (
-            <Box>
-              <Button reverse onPress={cancelEditing}>
-                {t('Annuler')}
-              </Button>
-            </Box>
-          )}
-          <Box>
-            <Button disabled={submitIsDisabled} onPress={saveLink}>
-              {isSaving ? <ActivityIndicator size="small" color="white" /> : t('Sauvegarder')}
-            </Button>
-          </Box>
-        </HStack>
-      ) : (
-        <HStack py={5} px={20} justifyContent="flex-end" bg="reverse">
-          <Box h={50} center>
+        </KeyboardAvoidingView>
+        {!isEditing && (
+          <Box position="absolute" bottom={insets.bottom + 20} right={20}>
             <Fab icon="edit-2" onPress={editLink} />
           </Box>
-        </HStack>
-      )}
+        )}
+      </Box>
     </FormSheetScreen>
   )
 }

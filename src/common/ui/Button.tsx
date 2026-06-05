@@ -127,7 +127,7 @@ const Button = ({
   }
 
   return (
-    <Box flex={fullWidth ? true : undefined}>
+    <Box>
       {onPress ? (
         <WrapperButton {...sharedProps}>
           {isLoading ? (
