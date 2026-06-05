@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import Animated from 'react-native-reanimated'
 
 import Box from '~common/ui/Box'
+import Checkbox from '~common/ui/Checkbox'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
@@ -121,11 +122,7 @@ const DownloadableItem = ({
                 transitionDuration: 200,
               }}
             >
-              <FeatherIcon
-                name={isSelected ? 'check-square' : 'square'}
-                size={20}
-                color={isSelected ? 'primary' : 'tertiary'}
-              />
+              <Checkbox checked={Boolean(isSelected)} variant="icon" size={20} />
             </Animated.View>
           )}
 

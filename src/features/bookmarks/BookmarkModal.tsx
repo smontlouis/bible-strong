@@ -1,9 +1,15 @@
 import styled from '@emotion/native'
-import { SheetFooter, Sheet, SheetHeader, SheetTextInput, type SheetRef } from '~common/sheet'
+import {
+  SheetFooter,
+  Sheet,
+  SheetHeader,
+  SheetTextInput,
+  type SheetRef,
+  SheetView,
+} from '~common/sheet'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import type { ColorFormatsObject } from 'reanimated-color-picker'
 import generateUUID from '~helpers/generateUUID'
@@ -88,7 +94,6 @@ const BookmarkModal = ({
 }: BookmarkModalProps) => {
   const dispatch = useDispatch()
   const { t } = useTranslation()
-  const insets = useSafeAreaInsets()
 
   const bookmarksCount = useSelector(selectBookmarksCount)
   const existingBookmarks = useSelector(selectSortedBookmarks)
@@ -245,24 +250,22 @@ const BookmarkModal = ({
       header={<SheetHeader title={t('Marque-page')} subTitle={reference} />}
       footer={props =>
         mode === 'select' ? null : (
-          <SheetFooter bottomInset={insets.bottom} {...props}>
-            <HStack py={5} px={20} justifyContent="flex-end" bg="reverse">
-              {isEditing && (
-                <Box>
-                  <Button reverse onPress={handleDelete}>
-                    {t('Supprimer')}
-                  </Button>
-                </Box>
-              )}
+          <SheetFooter justifyContent="flex-end" row gap={10} {...props}>
+            {isEditing && (
               <Box>
-                <Button onPress={handleSave}>{t('Sauvegarder')}</Button>
+                <Button reverse onPress={handleDelete}>
+                  {t('Supprimer')}
+                </Button>
               </Box>
-            </HStack>
+            )}
+            <Box>
+              <Button onPress={handleSave}>{t('Sauvegarder')}</Button>
+            </Box>
           </SheetFooter>
         )
       }
     >
-      <Box paddingHorizontal={20} paddingTop={20}>
+      <SheetView paddingHorizontal={20} paddingTop={20}>
         {mode === 'select' ? (
           // Selection mode - show list of existing bookmarks
           <Box>
@@ -313,11 +316,12 @@ const BookmarkModal = ({
                 style={{ flex: 1 }}
               />
             </HStack>
-
-            <ColorPicker
-              value={selectedColor}
-              onChangeJS={(color: ColorFormatsObject) => setSelectedColor(color.hex)}
-            />
+            <Box h={200}>
+              <ColorPicker
+                value={selectedColor}
+                onChangeJS={(color: ColorFormatsObject) => setSelectedColor(color.hex)}
+              />
+            </Box>
 
             {!isEditing && (
               <Box marginTop={20}>
@@ -328,7 +332,7 @@ const BookmarkModal = ({
             )}
           </Box>
         )}
-      </Box>
+      </SheetView>
     </Sheet>
   )
 }

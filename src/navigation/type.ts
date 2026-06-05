@@ -170,7 +170,6 @@ export type MainStackProps = {
   DictionnaryDetail: DictionaryDetailScreenProps
   Login: undefined
   Support: undefined
-  Changelog: undefined
   ImportExport: undefined
   Backup: undefined
   AutomaticBackups: undefined

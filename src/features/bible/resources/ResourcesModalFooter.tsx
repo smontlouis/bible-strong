@@ -1,7 +1,6 @@
-import React, { memo } from 'react'
+import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, TouchableOpacity } from 'react-native'
-import { useSafeAreaFrame, useSafeAreaInsets } from 'react-native-safe-area-context'
 import CommentIcon from '~common/CommentIcon'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -12,7 +11,6 @@ import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
-import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import TouchableSvgIcon from '~features/bible/TouchableSvgIcon'
 import { wp } from '~helpers/utils'
 
@@ -23,7 +21,6 @@ type Props = {
 
 const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props) => {
   const { t } = useTranslation()
-  const insets = useSafeAreaInsets()
 
   const onPress = (newResourceType: BibleResource) => {
     onChangeResourceType(newResourceType)
@@ -32,7 +29,7 @@ const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props
   const iconWidth = wp(18)
 
   return (
-    <Box borderTopWidth={1} borderColor="border" bg="reverse" h={54 + insets.bottom}>
+    <Box mx={20} bg="reverse" py={10} borderRadius={20} borderWidth={1} borderColor="border">
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}

@@ -6949,7 +6949,7 @@ __metadata:
     react-native-reanimated-carousel: "npm:^5.0.0-beta.3"
     react-native-root-siblings: "npm:5.0.1"
     react-native-safe-area-context: "npm:~5.7.0"
-    react-native-screens: "npm:4.25.2"
+    react-native-screens: "patch:react-native-screens@npm%3A4.25.2#~/.yarn/patches/react-native-screens-npm-4.25.2-0de6719d95.patch"
     react-native-section-list-get-item-layout: "npm:^2.2.3"
     react-native-svg: "npm:15.15.4"
     react-native-tab-view: "npm:^2.14.0"
@@ -14390,7 +14390,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-screens@npm:4.25.2, react-native-screens@npm:^4.25.2":
+"react-native-screens@npm:4.25.2":
   version: 4.25.2
   resolution: "react-native-screens@npm:4.25.2"
   dependencies:
@@ -14400,6 +14400,19 @@ __metadata:
     react: "*"
     react-native: ">=0.82.0"
   checksum: 10c0/b1f155830e57c36e8ca60831f4b22079cd311f0e36f7c4465ff4094f9dec18e66cef2321a4ff8944aac51ead437720585080f1f4b2956106099a9ea7d9745d00
+  languageName: node
+  linkType: hard
+
+"react-native-screens@patch:react-native-screens@npm%3A4.25.2#~/.yarn/patches/react-native-screens-npm-4.25.2-0de6719d95.patch":
+  version: 4.25.2
+  resolution: "react-native-screens@patch:react-native-screens@npm%3A4.25.2#~/.yarn/patches/react-native-screens-npm-4.25.2-0de6719d95.patch::version=4.25.2&hash=08d8a4"
+  dependencies:
+    react-freeze: "npm:^1.0.0"
+    warn-once: "npm:^0.1.0"
+  peerDependencies:
+    react: "*"
+    react-native: ">=0.82.0"
+  checksum: 10c0/02b9fc83fca9833186f4764b087a1560dfbe02102f9ed9b243d7e80d5e8509ce3ccaa9a389b095dd72f0a1db6fc7cb6d8c0dc1e5099c8f30cd9d247eb104acc1
   languageName: node
   linkType: hard
 

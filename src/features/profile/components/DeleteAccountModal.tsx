@@ -3,8 +3,14 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, Alert } from 'react-native'
 import { useTheme } from '@emotion/react'
-import { SheetFooter, Sheet, SheetHeader, SheetTextInput, type SheetRef } from '~common/sheet'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import {
+  SheetFooter,
+  Sheet,
+  SheetHeader,
+  SheetTextInput,
+  type SheetRef,
+  SheetView,
+} from '~common/sheet'
 import { getAuth, deleteUser } from '@react-native-firebase/auth'
 
 import Box, { VStack, HStack } from '~common/ui/Box'
@@ -20,7 +26,6 @@ type DeleteAccountModalProps = {
 const DeleteAccountModal = ({ modalRef }: DeleteAccountModalProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
-  const insets = useSafeAreaInsets()
 
   const confirmationText = t('app.deleteAccountConfirmationText')
   const [confirmText, setConfirmText] = useState('')
@@ -66,44 +71,44 @@ const DeleteAccountModal = ({ modalRef }: DeleteAccountModalProps) => {
       onDismiss={resetForm}
       header={<SheetHeader title={t('app.deleteAccount')} />}
       footer={props => (
-        <SheetFooter bottomInset={insets.bottom} {...props}>
-          <HStack px={20} gap={10} justifyContent="flex-end" bg="reverse">
-            <Box h={MODAL_FOOTER_HEIGHT}>
-              <Button reverse onPress={handleClose} disabled={isLoading}>
-                {t('Annuler')}
-              </Button>
-            </Box>
-            <Box h={MODAL_FOOTER_HEIGHT}>
-              <Button
-                color={theme.colors.quart}
-                onPress={handleDelete}
-                disabled={!isValid || isLoading}
-              >
-                {isLoading ? (
-                  <ActivityIndicator color="white" size="small" />
-                ) : (
-                  t('app.deleteAccountConfirmButton')
-                )}
-              </Button>
-            </Box>
-          </HStack>
+        <SheetFooter gap={10} justifyContent="flex-end" row {...props}>
+          <Box h={MODAL_FOOTER_HEIGHT}>
+            <Button reverse onPress={handleClose} disabled={isLoading}>
+              {t('Annuler')}
+            </Button>
+          </Box>
+          <Box h={MODAL_FOOTER_HEIGHT}>
+            <Button
+              color={theme.colors.quart}
+              onPress={handleDelete}
+              disabled={!isValid || isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="white" size="small" />
+              ) : (
+                t('app.deleteAccountConfirmButton')
+              )}
+            </Button>
+          </Box>
         </SheetFooter>
       )}
     >
-      <VStack gap={15} paddingHorizontal={20} py={20}>
-        <Text fontSize={15}>{t('app.deleteAccountBody')}</Text>
-        <Text fontSize={14} color="grey">
-          {t('app.deleteAccountTypeConfirm', { text: confirmationText })}
-        </Text>
-        <StyledInput
-          placeholder={confirmationText}
-          placeholderTextColor={theme.colors.grey}
-          value={confirmText}
-          onChangeText={setConfirmText}
-          autoCapitalize="characters"
-          autoCorrect={false}
-        />
-      </VStack>
+      <SheetView>
+        <VStack gap={15} paddingHorizontal={20} py={20}>
+          <Text fontSize={15}>{t('app.deleteAccountBody')}</Text>
+          <Text fontSize={14} color="grey">
+            {t('app.deleteAccountTypeConfirm', { text: confirmationText })}
+          </Text>
+          <StyledInput
+            placeholder={confirmationText}
+            placeholderTextColor={theme.colors.grey}
+            value={confirmText}
+            onChangeText={setConfirmText}
+            autoCapitalize="characters"
+            autoCorrect={false}
+          />
+        </VStack>
+      </SheetView>
     </Sheet>
   )
 }

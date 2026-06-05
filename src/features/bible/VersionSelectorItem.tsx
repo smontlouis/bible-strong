@@ -12,6 +12,7 @@ import { getDefaultStore } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import Animated from 'react-native-reanimated'
 import Box from '~common/ui/Box'
+import Checkbox from '~common/ui/Checkbox'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
@@ -265,11 +266,7 @@ const VersionSelectorItem = ({
         ml={12}
         opacity={disabled ? 0.45 : 1}
       >
-        <FeatherIcon
-          name={isSelected ? 'check-square' : 'square'}
-          size={22}
-          color={isSelected ? 'primary' : 'tertiary'}
-        />
+        <Checkbox checked={Boolean(isSelected)} variant="icon" size={22} />
       </Box>
     )
   }

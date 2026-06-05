@@ -1,8 +1,7 @@
-import { Sheet, SheetView } from '~common/sheet'
 import { useAtom, useSetAtom } from 'jotai/react'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Sheet, SheetView } from '~common/sheet'
 import { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useSheet } from '~helpers/useSheet'
@@ -16,12 +15,9 @@ import {
 import OnboardingFooter from './components/OnboardingFooter'
 import OnboardingStep from './components/OnboardingStep'
 import { getOnboardingConfig, type OnboardingId } from './onboardingConfig'
-import { useTheme } from '@emotion/react'
 
 const FeatureOnboardingModal = () => {
   const { t } = useTranslation()
-  const insets = useSafeAreaInsets()
-  const theme = useTheme()
 
   const [modalState, setModalState] = useAtom(featureOnboardingModalAtom)
   const completeOnboarding = useSetAtom(completeOnboardingAtom)
@@ -79,14 +75,7 @@ const FeatureOnboardingModal = () => {
   if (!config) return null
 
   return (
-    <Sheet
-      ref={ref}
-      detachedOffset={insets.bottom + 50}
-      dismissible={false}
-      onDismiss={handleClose}
-      detached={true}
-      cornerRadius={30}
-    >
+    <Sheet ref={ref} dismissible={false} onDismiss={handleClose}>
       <SheetView>
         <TouchableBox
           onPress={() => {
@@ -100,7 +89,7 @@ const FeatureOnboardingModal = () => {
           borderWidth={1}
           borderColor="border"
           position="absolute"
-          top={0}
+          top={10}
           right={10}
           zIndex={1000}
         >

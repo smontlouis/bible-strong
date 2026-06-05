@@ -140,7 +140,7 @@
     "react-native-reanimated-carousel": "^5.0.0-beta.3",
     "react-native-root-siblings": "5.0.1",
     "react-native-safe-area-context": "~5.7.0",
-    "react-native-screens": "4.25.2",
+    "react-native-screens": "patch:react-native-screens@npm%3A4.25.2#~/.yarn/patches/react-native-screens-npm-4.25.2-0de6719d95.patch",
     "react-native-section-list-get-item-layout": "^2.2.3",
     "react-native-svg": "15.15.4",
     "react-native-tab-view": "^2.14.0",
@@ -204,7 +204,8 @@
     "USE_COMMIT_HOOK_ONLY_FOR_REACT_COMMITS": true
   },
   "resolutions": {
-    "react-native-svg": "15.15.4"
+    "react-native-svg": "15.15.4",
+    "react-native-screens@npm:^4.25.2": "patch:react-native-screens@npm%3A4.25.2#~/.yarn/patches/react-native-screens-npm-4.25.2-0de6719d95.patch"
   },
   "expo": {
     "install": {

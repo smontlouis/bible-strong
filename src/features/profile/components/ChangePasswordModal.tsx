@@ -3,8 +3,14 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator } from 'react-native'
 import { useTheme } from '@emotion/react'
-import { SheetFooter, Sheet, SheetHeader, SheetTextInput, type SheetRef } from '~common/sheet'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import {
+  SheetFooter,
+  Sheet,
+  SheetHeader,
+  SheetTextInput,
+  type SheetRef,
+  SheetView,
+} from '~common/sheet'
 
 import Box, { VStack, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -20,7 +26,6 @@ type ChangePasswordModalProps = {
 const ChangePasswordModal = ({ modalRef }: ChangePasswordModalProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
-  const insets = useSafeAreaInsets()
 
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -73,23 +78,21 @@ const ChangePasswordModal = ({ modalRef }: ChangePasswordModalProps) => {
       onDismiss={resetForm}
       header={<SheetHeader title={t('profile.changePassword')} />}
       footer={props => (
-        <SheetFooter bottomInset={insets.bottom} {...props}>
-          <HStack px={20} gap={10} justifyContent="flex-end" bg="reverse">
-            <Box h={MODAL_FOOTER_HEIGHT}>
-              <Button reverse onPress={handleClose} disabled={isLoading}>
-                {t('Annuler')}
-              </Button>
-            </Box>
-            <Box h={MODAL_FOOTER_HEIGHT}>
-              <Button onPress={handleSubmit} disabled={!isValid || isLoading}>
-                {isLoading ? <ActivityIndicator color="white" size="small" /> : t('Enregistrer')}
-              </Button>
-            </Box>
-          </HStack>
+        <SheetFooter row gap={10} justifyContent="flex-end" {...props}>
+          <Box h={MODAL_FOOTER_HEIGHT}>
+            <Button reverse onPress={handleClose} disabled={isLoading}>
+              {t('Annuler')}
+            </Button>
+          </Box>
+          <Box h={MODAL_FOOTER_HEIGHT}>
+            <Button onPress={handleSubmit} disabled={!isValid || isLoading}>
+              {isLoading ? <ActivityIndicator color="white" size="small" /> : t('Enregistrer')}
+            </Button>
+          </Box>
         </SheetFooter>
       )}
     >
-      <VStack gap={15} paddingHorizontal={20} py={20}>
+      <SheetView gap={15} paddingHorizontal={20} py={20}>
         <Box>
           <StyledInput
             placeholder={t('profile.currentPassword')}
@@ -138,7 +141,7 @@ const ChangePasswordModal = ({ modalRef }: ChangePasswordModalProps) => {
             {t('profile.passwordMismatch')}
           </Text>
         )}
-      </VStack>
+      </SheetView>
     </Sheet>
   )
 }

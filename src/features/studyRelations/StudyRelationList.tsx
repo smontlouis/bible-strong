@@ -1,10 +1,16 @@
 import styled from '@emotion/native'
-import { SheetFooter, Sheet, SheetHeader, SheetTextInput, type SheetRef } from '~common/sheet'
+import {
+  SheetFooter,
+  Sheet,
+  SheetHeader,
+  SheetTextInput,
+  type SheetRef,
+  SheetView,
+} from '~common/sheet'
 import { MenuView } from '@expo/ui/community/menu'
 import { type ComponentProps, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import Empty from '~common/Empty'
@@ -189,7 +195,6 @@ const StudyRelationList = ({
 }: Props) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const insets = useSafeAreaInsets()
   const editModalRef = useRef<SheetRef>(null)
   const actionModalRef = useRef<SheetRef>(null)
   const [editingModel, setEditingModel] = useState<RelationDisplayModel | null>(null)
@@ -478,22 +483,20 @@ const StudyRelationList = ({
           />
         }
         footer={props => (
-          <SheetFooter bottomInset={insets.bottom} {...props}>
-            <HStack px={20} gap={10} justifyContent="flex-end" bg="reverse">
-              <Box h={54}>
-                <Button reverse onPress={closeEditModal}>
-                  {t('Annuler')}
-                </Button>
-              </Box>
-              <Box h={54}>
-                <Button onPress={saveEdit}>{t('Enregistrer')}</Button>
-              </Box>
-            </HStack>
+          <SheetFooter row gap={10} justifyContent="flex-end" {...props}>
+            <Box h={54}>
+              <Button reverse onPress={closeEditModal}>
+                {t('Annuler')}
+              </Button>
+            </Box>
+            <Box h={54}>
+              <Button onPress={saveEdit}>{t('Enregistrer')}</Button>
+            </Box>
           </SheetFooter>
         )}
       >
         {editingModel ? (
-          <VStack p={20} gap={22}>
+          <SheetView p={20} gap={22}>
             <VStack gap={10}>
               <HStack alignItems="center" wrap>
                 <Text bold numberOfLines={1} shrink={1} fontSize={14}>
@@ -592,7 +595,7 @@ const StudyRelationList = ({
                 </TouchableBox>
               )}
             </VStack>
-          </VStack>
+          </SheetView>
         ) : null}
       </Sheet>
       <Sheet ref={actionModalRef} onDismiss={() => setActionModel(null)}>

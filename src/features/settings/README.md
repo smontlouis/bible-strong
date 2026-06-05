@@ -53,7 +53,6 @@ settings/
 │   ├── LoginScreen             # Connexion
 │   ├── RegisterScreen          # Inscription
 │   ├── BibleShareOptionsScreen # Options de partage
-│   ├── ChangelogScreen         # Journal des modifications
 │   ├── FAQScreen               # Questions fréquentes
 │   └── SupportScreen           # Page de support
 ├── Components/

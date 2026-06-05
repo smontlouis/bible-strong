@@ -5,18 +5,19 @@ import {
   ScrollView,
   SectionList,
   TextInput,
-  View,
   useWindowDimensions,
   type FlatListProps,
   type ScrollViewProps,
   type SectionListProps,
   type TextInputProps,
+  type View,
   type ViewProps,
 } from 'react-native'
 import { TrueSheet, TrueSheetProvider, type TrueSheetProps } from '@lodev09/react-native-true-sheet'
 import { FlashList, type FlashListProps } from '@shopify/flash-list'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Back from '~common/Back'
-import Box, { TouchableBox } from '~common/ui/Box'
+import Box, { type BoxProps, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text, { type TextProps } from '~common/ui/Text'
 import { useTheme } from '@emotion/react'
@@ -24,6 +25,18 @@ import { useTheme } from '@emotion/react'
 export type SheetSnapPoint = NonNullable<TrueSheetProps['detents']>[number]
 export type SheetScrollableOptions = NonNullable<TrueSheetProps['scrollableOptions']>
 export type SheetStackBehavior = NonNullable<TrueSheetProps['stackBehavior']>
+
+type SheetContextValue = {
+  footerHeight: number
+  hasFooter: boolean
+  setFooterHeight: React.Dispatch<React.SetStateAction<number>>
+}
+
+const SheetContext = React.createContext<SheetContextValue>({
+  footerHeight: 0,
+  hasFooter: false,
+  setFooterHeight: () => {},
+})
 
 export type SheetRef = {
   present: () => void
@@ -34,9 +47,12 @@ export type SheetRef = {
   forceClose: () => void
 }
 
-export type SheetFooterProps = {
-  bottomInset?: number
-  children?: React.ReactNode
+export type SheetFooterProps = BoxProps & {
+  onLayout?: ViewProps['onLayout']
+  style?: ViewProps['style']
+}
+
+export type SheetViewProps = BoxProps & {
   style?: ViewProps['style']
 }
 
@@ -101,6 +117,14 @@ const findSnapPointIndex = (snapPoints: SheetSnapPoint[], snapPoint: SheetSnapPo
   return nearestIndex
 }
 
+const withFooterMargin = (style: ViewProps['style'], footerHeight: number) => [
+  style,
+  footerHeight ? { marginBottom: footerHeight } : null,
+]
+
+const getFooterMarginStyle = (footerHeight: number) =>
+  footerHeight ? { marginBottom: footerHeight } : undefined
+
 const SheetItem = ({ children, tag, onPress, ...props }: SheetItemProps) => (
   <TouchableBox
     onPress={onPress}
@@ -150,6 +174,18 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
   const initialDetentIndex = initialSnapPoint ? findSnapPointIndex(detents, initialSnapPoint) : 0
   const scrollable = !detents.includes('auto')
   const theme = useTheme()
+  const [footerHeight, setFooterHeight] = React.useState(0)
+  const hasFooter = Boolean(footer)
+
+  const renderedFooter = footer
+    ? React.createElement(footer as React.ComponentType<SheetFooterProps>)
+    : undefined
+
+  React.useEffect(() => {
+    if (!hasFooter) {
+      setFooterHeight(0)
+    }
+  }, [hasFooter])
 
   React.useImperativeHandle(
     ref,
@@ -165,50 +201,65 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
   )
 
   return (
-    <TrueSheet
-      ref={sheetRef}
-      detents={detents}
-      dismissible={dismissible}
-      dimmed={backdrop}
-      draggable
-      footer={
-        footer ? React.createElement(footer as React.ComponentType<SheetFooterProps>) : undefined
-      }
-      header={header}
-      grabber
-      cornerRadius={cornerRadius}
-      maxContentHeight={height}
-      maxContentWidth={maxWidth}
-      scrollable={scrollable}
-      scrollableOptions={scrollableOptions}
-      blurOptions={{
-        intensity: 90,
-      }}
-      backgroundColor={
-        backgroundColor || Platform.OS === 'android' ? theme.colors.reverse : undefined
-      }
-      detached={detached}
-      detachedOffset={detachedOffset}
-      stackBehavior={stackBehavior}
-      onDidPresent={() => {
-        onOpenChange?.(true)
-        onPresent?.()
-      }}
-      onDidDismiss={() => {
-        onOpenChange?.(false)
-        onClose?.()
-        onDismiss?.()
-      }}
-    >
-      {children}
-    </TrueSheet>
+    <SheetContext.Provider value={{ footerHeight, hasFooter, setFooterHeight }}>
+      <TrueSheet
+        ref={sheetRef}
+        detents={detents}
+        dismissible={dismissible}
+        dimmed={backdrop}
+        draggable
+        footer={renderedFooter}
+        header={header}
+        grabber
+        cornerRadius={cornerRadius}
+        maxContentHeight={height}
+        maxContentWidth={maxWidth}
+        scrollable={scrollable}
+        scrollableOptions={scrollableOptions}
+        blurOptions={{
+          intensity: 90,
+        }}
+        backgroundColor={
+          backgroundColor || Platform.OS === 'android' ? theme.colors.reverse : undefined
+        }
+        detached={detached}
+        detachedOffset={detachedOffset}
+        stackBehavior={stackBehavior}
+        onDidPresent={() => {
+          onOpenChange?.(true)
+          onPresent?.()
+        }}
+        onDidDismiss={() => {
+          onOpenChange?.(false)
+          onClose?.()
+          onDismiss?.()
+        }}
+      >
+        {children}
+      </TrueSheet>
+    </SheetContext.Provider>
   )
 })
 Sheet.displayName = 'Sheet'
 
-const SheetFooter = ({ children, bottomInset = 0, style }: SheetFooterProps) => (
-  <View style={[style, bottomInset ? { paddingBottom: bottomInset } : null]}>{children}</View>
-)
+const SheetFooter = ({ children, onLayout, style, ...props }: SheetFooterProps) => {
+  const insets = useSafeAreaInsets()
+  const { hasFooter, setFooterHeight } = React.useContext(SheetContext)
+
+  const handleLayout: NonNullable<ViewProps['onLayout']> = event => {
+    if (hasFooter) {
+      const nextHeight = Math.ceil(event.nativeEvent.layout.height)
+      setFooterHeight(currentHeight => (currentHeight === nextHeight ? currentHeight : nextHeight))
+    }
+    onLayout?.(event)
+  }
+
+  return (
+    <Box px={20} pt={8} pb={8} mb={insets.bottom} onLayout={handleLayout} style={style} {...props}>
+      {children}
+    </Box>
+  )
+}
 
 const SheetHeader = ({
   title,
@@ -258,16 +309,63 @@ const SheetHeader = ({
   </Box>
 )
 
-const SheetView = View
-const SheetScrollView = ScrollView
-const SheetFlatList = FlatList
-const SheetSectionList = SectionList
+const SheetView = forwardRef<View, SheetViewProps>(({ style, ...props }, ref) => {
+  const { footerHeight } = React.useContext(SheetContext)
+
+  return <Box ref={ref} style={withFooterMargin(style, footerHeight)} {...props} />
+})
+SheetView.displayName = 'SheetView'
+
+const SheetScrollView = forwardRef<ScrollView, ScrollViewProps>(
+  ({ contentContainerStyle, ...props }, ref) => {
+    const { footerHeight } = React.useContext(SheetContext)
+
+    return (
+      <ScrollView
+        ref={ref}
+        contentContainerStyle={withFooterMargin(contentContainerStyle, footerHeight)}
+        {...props}
+      />
+    )
+  }
+)
+SheetScrollView.displayName = 'SheetScrollView'
+
+const SheetFlatList = <T,>({ contentContainerStyle, ...props }: FlatListProps<T>) => {
+  const { footerHeight } = React.useContext(SheetContext)
+
+  return (
+    <FlatList
+      contentContainerStyle={withFooterMargin(contentContainerStyle, footerHeight)}
+      {...props}
+    />
+  )
+}
+
+const SheetSectionList = <ItemT, SectionT>({
+  contentContainerStyle,
+  ...props
+}: SectionListProps<ItemT, SectionT>) => {
+  const { footerHeight } = React.useContext(SheetContext)
+
+  return (
+    <SectionList
+      contentContainerStyle={withFooterMargin(contentContainerStyle, footerHeight)}
+      {...props}
+    />
+  )
+}
 const SheetTextInput = TextInput
 
 const SheetFlashList = <T,>({
   estimatedItemSize: _estimatedItemSize,
+  contentContainerStyle,
   ...props
-}: FlashListProps<T> & { estimatedItemSize?: number }) => <FlashList {...props} />
+}: FlashListProps<T> & { estimatedItemSize?: number }) => {
+  const { footerHeight } = React.useContext(SheetContext)
+
+  return <FlashList contentContainerStyle={getFooterMarginStyle(footerHeight)} {...props} />
+}
 
 type KeyboardState = { target?: number }
 

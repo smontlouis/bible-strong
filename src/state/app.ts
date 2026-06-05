@@ -40,6 +40,8 @@ export type UnifiedTagsModalProps =
 
 export const unifiedTagsModalAtom = atom<UnifiedTagsModalProps>(false)
 
+export const changelogModalAtom = atom(false)
+
 export type ColorPickerModalProps =
   | {
       selectedColor?: string

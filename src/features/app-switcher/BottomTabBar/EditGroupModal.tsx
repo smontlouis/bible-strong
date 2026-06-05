@@ -1,9 +1,16 @@
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
-import { SheetFooter, Sheet, SheetHeader, SheetTextInput, type SheetRef } from '~common/sheet'
+import {
+  SheetFooter,
+  Sheet,
+  SheetHeader,
+  SheetTextInput,
+  type SheetRef,
+  SheetView,
+} from '~common/sheet'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import type { TextInput as RNTextInput } from 'react-native'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { HStack } from '~common/ui/Stack'
@@ -37,14 +44,18 @@ const EditGroupModal = ({
 }: EditGroupModalProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
-  const insets = useSafeAreaInsets()
   const [name, setName] = useState(initialName)
   const [selectedColor, setSelectedColor] = useState(initialColor)
+  const inputRef = React.useRef<RNTextInput>(null)
 
   useEffect(() => {
     setName(initialName)
     setSelectedColor(initialColor || GROUP_COLORS[0])
   }, [initialName, initialColor])
+
+  const scheduleInputFocus = () => {
+    inputRef.current?.focus()
+  }
 
   const handleClose = () => {
     sheetRef.current?.dismiss()
@@ -59,6 +70,11 @@ const EditGroupModal = ({
   const handlePresent = () => {
     setName(initialName)
     setSelectedColor(initialColor || GROUP_COLORS[0])
+    scheduleInputFocus()
+  }
+
+  const handleDismiss = () => {
+    onClose?.()
   }
 
   const isDisabled = !name.trim()
@@ -66,18 +82,12 @@ const EditGroupModal = ({
   return (
     <Sheet
       ref={sheetRef}
-      onDismiss={onClose}
+      onDismiss={handleDismiss}
       onPresent={handlePresent}
       header={<SheetHeader title={t('tabs.editGroup')} />}
       footer={props => (
         <SheetFooter {...props}>
-          <HStack
-            py={5}
-            px={20}
-            justifyContent="flex-end"
-            paddingBottom={insets.bottom + 5}
-            bg="reverse"
-          >
+          <HStack justifyContent="flex-end">
             <Box>
               <Button disabled={isDisabled} onPress={handleSave}>
                 {t('Sauvegarder')}
@@ -87,19 +97,19 @@ const EditGroupModal = ({
         </SheetFooter>
       )}
     >
-      <Box paddingHorizontal={20} py={20} gap={20}>
+      <SheetView paddingHorizontal={20} py={20} gap={20}>
         <Box gap={8}>
           <Text color="tertiary" fontSize={13}>
             {t('Nom')}
           </Text>
           <StyledTextInput
+            ref={inputRef}
             placeholder={t('tabs.groupNamePlaceholder')}
             placeholderTextColor={theme.colors.grey}
             onChangeText={setName}
             onSubmitEditing={handleSave}
             returnKeyType="send"
             value={name}
-            autoFocus
             selectTextOnFocus
           />
         </Box>
@@ -126,7 +136,7 @@ const EditGroupModal = ({
             ))}
           </HStack>
         </Box>
-      </Box>
+      </SheetView>
     </Sheet>
   )
 }

@@ -1,5 +1,5 @@
 import { PrimitiveAtom } from 'jotai/vanilla'
-import { Sheet, type SheetRef } from '~common/sheet'
+import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
 import { useAtom } from 'jotai/react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -42,38 +42,35 @@ const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
             ))}
           </Box>
         </ScrollView>
-        <Sheet ref={planSelectorRef} snapPoints={[0.7]}>
-          <Box px={20} pt={10} pb={15}>
-            <Text title fontSize={18}>
-              {t('Plans')}
-            </Text>
-          </Box>
-          {plans.length ? (
-            <Box px={20} pb={20} gap={10}>
-              {plans.map((plan, index) => (
-                <React.Fragment key={plan.id}>
-                  <PlanItem
-                    {...plan}
-                    onPress={() => {
-                      planSelectorRef.current?.dismiss()
-                      setTab(tab => ({
-                        ...tab,
-                        title: plan.title,
-                        type: 'plan',
-                        data: { planId: plan.id },
-                      }))
-                    }}
-                  />
-                  {index < plans.length - 1 && <Spacer />}
-                </React.Fragment>
-              ))}
-            </Box>
-          ) : (
-            <Empty
-              icon={require('~assets/images/empty-state-icons/plan.svg')}
-              message={t("Vous n'avez aucun plan...")}
-            />
-          )}
+        <Sheet ref={planSelectorRef} snapPoints={[1]} header={<SheetHeader title={t('Plans')} />}>
+          <SheetScrollView>
+            {plans.length ? (
+              <Box px={20} py={20}>
+                {plans.map((plan, index) => (
+                  <React.Fragment key={plan.id}>
+                    <PlanItem
+                      {...plan}
+                      onPress={() => {
+                        planSelectorRef.current?.dismiss()
+                        setTab(tab => ({
+                          ...tab,
+                          title: plan.title,
+                          type: 'plan',
+                          data: { planId: plan.id },
+                        }))
+                      }}
+                    />
+                    {index < plans.length - 1 && <Spacer />}
+                  </React.Fragment>
+                ))}
+              </Box>
+            ) : (
+              <Empty
+                icon={require('~assets/images/empty-state-icons/plan.svg')}
+                message={t("Vous n'avez aucun plan...")}
+              />
+            )}
+          </SheetScrollView>
         </Sheet>
       </Container>
     </SelectBibleReferenceModalProvider>

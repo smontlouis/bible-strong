@@ -43,7 +43,7 @@ const buttonStyles = ({
 }: WrapperButtonProps): ViewStyle => ({
   backgroundColor: reverse ? theme.colors.reverse : theme.colors.primary,
   borderWidth: reverse ? 1 : 0,
-  borderColor: theme.colors.darkGrey,
+  borderColor: theme.colors.border,
   borderRadius: 24,
   height: 48,
   alignItems: 'center',
@@ -52,7 +52,7 @@ const buttonStyles = ({
   paddingRight: 15,
   flexDirection: 'row',
 
-  ...(fullWidth && { flex: 1 }),
+  ...(fullWidth && {}),
 
   ...(color && { backgroundColor: color }),
 

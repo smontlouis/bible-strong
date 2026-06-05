@@ -10,7 +10,6 @@ import RenameModal from '~common/RenameModal'
 import Box from '~common/ui/Box'
 import FabButton from '~common/ui/FabButton'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
-import withLoginModal from '~common/withLoginModal'
 import { useSheet } from '~helpers/useSheet'
 import useLogin from '~helpers/useLogin'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
@@ -248,4 +247,4 @@ const StudiesScreen = ({
   )
 }
 
-export default withLoginModal(StudiesScreen)
+export default StudiesScreen

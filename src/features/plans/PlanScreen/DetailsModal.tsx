@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Sheet, type SheetFooterProps, type SheetRef } from '~common/sheet'
+import { Sheet, SheetScrollView, type SheetFooterProps, type SheetRef } from '~common/sheet'
 import { Image } from 'expo-image'
 import { useTranslation } from 'react-i18next'
 import { Image as RNImage } from 'react-native'
@@ -44,48 +44,51 @@ const DetailsModal = ({
 
   return (
     <Sheet ref={modalRefDetails} snapPoints={[1]} footer={footer} header={header}>
-      <Box paddingHorizontal={20} paddingTop={20} paddingBottom={50}>
-        {!!image && (
-          <Box marginBottom={20} rounded>
-            <Image
-              style={{ width: '100%', height: height || 200 }}
-              source={{
-                uri: image,
-              }}
-            />
-          </Box>
-        )}
-        <Paragraph fontFamily="title" scale={2}>
-          {title}
-        </Paragraph>
-        {!!downloads && (
-          <Paragraph fontFamily="text" scale={-2} color="grey">
-            {t('Téléchargé {{downloads}} fois', { downloads })}
+      <SheetScrollView>
+        {/** TODO: fix */}
+        <Box paddingHorizontal={20} paddingTop={20} paddingBottom={200}>
+          {!!image && (
+            <Box marginBottom={20} rounded>
+              <Image
+                style={{ width: '100%', height: height || 200 }}
+                source={{
+                  uri: image,
+                }}
+              />
+            </Box>
+          )}
+          <Paragraph fontFamily="title" scale={2}>
+            {title}
           </Paragraph>
-        )}
-        <Paragraph marginTop={20} fontFamily="text" scale={-2}>
-          {description}
-        </Paragraph>
-        {!!author.displayName && (
-          <Box marginTop={40} row center>
-            {author.photoUrl && (
-              <Box borderRadius={10}>
-                <Image
-                  style={{ width: 50, height: 50 }}
-                  source={{
-                    uri: author.photoUrl,
-                  }}
-                />
-              </Box>
-            )}
-            <Paragraph marginLeft={10} flex={1} fontFamily="text" scale={-3}>
-              {t('Créé par {{displayName}}', {
-                displayName: author.displayName,
-              })}
+          {!!downloads && (
+            <Paragraph fontFamily="text" scale={-2} color="grey">
+              {t('Téléchargé {{downloads}} fois', { downloads })}
             </Paragraph>
-          </Box>
-        )}
-      </Box>
+          )}
+          <Paragraph marginTop={20} fontFamily="text" scale={-2}>
+            {description}
+          </Paragraph>
+          {!!author.displayName && (
+            <Box marginTop={40} row center>
+              {author.photoUrl && (
+                <Box borderRadius={10}>
+                  <Image
+                    style={{ width: 50, height: 50 }}
+                    source={{
+                      uri: author.photoUrl,
+                    }}
+                  />
+                </Box>
+              )}
+              <Paragraph marginLeft={10} flex={1} fontFamily="text" scale={-3}>
+                {t('Créé par {{displayName}}', {
+                  displayName: author.displayName,
+                })}
+              </Paragraph>
+            </Box>
+          )}
+        </Box>
+      </SheetScrollView>
     </Sheet>
   )
 }

@@ -136,7 +136,7 @@ const SearchInTimelineModal = ({ modalRef }: Props) => {
       snapPoints={[1]}
       header={
         <SheetHeader>
-          <Box px={16} py={12}>
+          <Box px={16} pt={30} pb={12}>
             <SearchInput
               value={searchValue}
               onChangeText={setSearchValue}

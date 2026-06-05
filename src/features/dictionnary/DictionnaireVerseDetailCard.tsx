@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
+import { useAtomValue } from 'jotai'
 import React, { useEffect, useRef, useState } from 'react'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
-import { useAtomValue } from 'jotai'
 
 import Empty from '~common/Empty'
 import Loading from '~common/Loading'
@@ -13,21 +13,21 @@ import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { CarouselProvider } from '~helpers/CarouselContext'
 import { getChapterVerses } from '~helpers/biblesDb'
 
-import { SheetScrollView } from '~common/sheet'
 import { useTranslation } from 'react-i18next'
+import { ScrollView } from 'react-native'
+import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import { Verse } from '~common/types'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
 import captureError from '~helpers/captureError'
+import { getDefaultBibleVersion } from '~helpers/languageUtils'
+import type { DictionaryItem } from '~helpers/loadDictionnaireItem'
 import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
 import loadDictionnaireWords from '~helpers/loadDictionnaireWords'
 import { QueryStatus, useQuery } from '~helpers/react-query-lite'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
-import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
-import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import DictionnaireCard from './DictionnaireCard'
 import DictionnaireVerseReference from './DictionnaireVerseReference'
-import type { DictionaryItem } from '~helpers/loadDictionnaireItem'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -226,7 +226,7 @@ const DictionnaireVerseDetailScreen = ({
   return (
     <Box flex={1} onLayout={e => setBoxHeight(e.nativeEvent.layout.height)}>
       <Box maxHeight={boxHeight / 2} position="relative" zIndex={1}>
-        <SheetScrollView contentContainerStyle={{ paddingTop: 10 }}>
+        <ScrollView contentContainerStyle={{ paddingTop: 10 }}>
           <StyledVerse>
             <VersetWrapper>
               <NumberText>{verse.Verset}</NumberText>
@@ -240,7 +240,7 @@ const DictionnaireVerseDetailScreen = ({
               <VerseText>{formattedText}</VerseText>
             </CarouselProvider>
           </StyledVerse>
-        </SheetScrollView>
+        </ScrollView>
         <BibleVerseDetailFooter
           verseNumber={Verset}
           versesInCurrentChapter={versesInCurrentChapter}

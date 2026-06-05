@@ -1,12 +1,17 @@
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
-import { Sheet, SheetFooter, SheetHeader, SheetTextInput, type SheetRef } from '~common/sheet'
+import {
+  Sheet,
+  SheetFooter,
+  SheetHeader,
+  SheetTextInput,
+  SheetView,
+  type SheetRef,
+} from '~common/sheet'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import Box from '~common/ui/Box'
+import type { TextInput as RNTextInput } from 'react-native'
 import Button from '~common/ui/Button'
-import { HStack } from '~common/ui/Stack'
 
 const StyledTextInput = styled(SheetTextInput)(({ theme }) => ({
   color: theme.colors.default,
@@ -37,12 +42,16 @@ const RenameModal = ({
 }: RenameModalProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
-  const insets = useSafeAreaInsets()
   const [value, setValue] = useState(initialValue)
+  const inputRef = React.useRef<RNTextInput>(null)
 
   useEffect(() => {
     setValue(initialValue)
   }, [initialValue])
+
+  const scheduleInputFocus = () => {
+    inputRef.current?.focus()
+  }
 
   const handleClose = () => {
     sheetRef.current?.dismiss()
@@ -54,40 +63,43 @@ const RenameModal = ({
     handleClose()
   }
 
-  const handlePresent = () => setValue(initialValue)
+  const handlePresent = () => {
+    setValue(initialValue)
+    scheduleInputFocus()
+  }
+
+  const handleDismiss = () => {
+    onClose?.()
+  }
 
   const isDisabled = !value.trim()
 
   return (
     <Sheet
       ref={sheetRef}
-      onDismiss={onClose}
+      onDismiss={handleDismiss}
       onPresent={handlePresent}
       header={<SheetHeader title={title} />}
       footer={props => (
-        <SheetFooter bottomInset={insets.bottom} {...props}>
-          <HStack py={5} px={20} justifyContent="flex-end" bg="reverse">
-            <Box>
-              <Button disabled={isDisabled} onPress={handleSave}>
-                {t('Sauvegarder')}
-              </Button>
-            </Box>
-          </HStack>
+        <SheetFooter {...props}>
+          <Button disabled={isDisabled} onPress={handleSave}>
+            {t('Sauvegarder')}
+          </Button>
         </SheetFooter>
       )}
     >
-      <Box paddingHorizontal={20} py={20}>
+      <SheetView px={20} py={20}>
         <StyledTextInput
+          ref={inputRef}
           placeholder={placeholder}
           placeholderTextColor={theme.colors.grey}
           onChangeText={setValue}
           onSubmitEditing={handleSave}
           returnKeyType="send"
           value={value}
-          autoFocus
           selectTextOnFocus
         />
-      </Box>
+      </SheetView>
     </Sheet>
   )
 }

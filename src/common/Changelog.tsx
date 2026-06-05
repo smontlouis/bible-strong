@@ -1,8 +1,16 @@
 import React, { useRef, useEffect } from 'react'
-import { SheetFooter, Sheet, SheetScrollView, type SheetRef } from '~common/sheet'
+import {
+  SheetFooter,
+  Sheet,
+  SheetScrollView,
+  type SheetRef,
+  SheetProvider,
+  SheetHeader,
+} from '~common/sheet'
 import distanceInWords from 'date-fns/formatDistance'
 
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
+import { useAtom } from 'jotai/react'
 
 import Button from '~common/ui/Button'
 import Box from '~common/ui/Box'
@@ -16,7 +24,7 @@ import { getDateLocale } from '~helpers/languageUtils'
 import styled from '@emotion/native'
 import { RootState } from '~redux/modules/reducer'
 import { ChangelogItem, LogType } from './types'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { changelogModalAtom } from '~state/app'
 
 const getTagColor = (type: LogType) => {
   switch (type) {
@@ -65,7 +73,7 @@ const Changelog = () => {
   const { t } = useTranslation()
   const lang = useLanguage()
   const modalRef = useRef<SheetRef>(null)
-  const insets = useSafeAreaInsets()
+  const [manualOpen, setManualOpen] = useAtom(changelogModalAtom)
 
   const seenLogs = useSelector(
     (state: RootState) => Object.keys(state.user.bible.changelog),
@@ -74,8 +82,12 @@ const Changelog = () => {
   const changelog = useSelector((state: RootState) => state.user.changelog.data, shallowEqual)
   const changelogIsLoading = useSelector((state: RootState) => state.user.changelog.isLoading)
 
-  const showModal = !changelogIsLoading && hasNewLogs(seenLogs, changelog)
-  const newLogs = showModal ? findNewLogs(seenLogs, changelog) : []
+  const hasAutomaticLogs = !changelogIsLoading && hasNewLogs(seenLogs, changelog)
+  const showModal = hasAutomaticLogs || manualOpen
+  const newLogs = hasAutomaticLogs ? findNewLogs(seenLogs, changelog) : []
+  const visibleLogs = hasAutomaticLogs
+    ? newLogs
+    : [...changelog].sort((a, b) => Number(b.date) - Number(a.date))
 
   useEffect(() => {
     if (showModal) {
@@ -97,59 +109,58 @@ const Changelog = () => {
 
   const handleClose = () => {
     markLogsAsSeen()
+    setManualOpen(false)
     modalRef.current?.dismiss()
+  }
+
+  const handleDismiss = () => {
+    markLogsAsSeen()
+    setManualOpen(false)
   }
 
   return (
     <Sheet
       ref={modalRef}
-      snapPoints={[0.4]}
+      snapPoints={[0.4, 1]}
+      dismissible={false}
+      header={
+        <SheetHeader
+          title={t('Quoi de neuf ?')}
+          subTitle={t('Les changements depuis votre dernière visite')}
+        />
+      }
       footer={props => (
-        <SheetFooter {...props}>
-          <Box px={20} pt={5} paddingBottom={insets.bottom + 5} alignItems="flex-end" bg="reverse">
-            <Button onPress={handleClose} small>
-              {t('Fermer')}
-            </Button>
-          </Box>
+        <SheetFooter alignItems="center" {...props}>
+          <Button onPress={handleClose}>{t('Fermer')}</Button>
         </SheetFooter>
       )}
-      cornerRadius={20}
-      onDismiss={markLogsAsSeen}
+      onDismiss={handleDismiss}
     >
       <SheetScrollView>
-        <Box padding={20}>
-          <Text fontSize={30} bold>
-            {t('Quoi de neuf ?')}
-          </Text>
-          <Text marginTop={5} fontSize={12} color="grey">
-            {t('Les changements depuis votre dernière visite')}
-          </Text>
-          <Border marginTop={15} />
-          <Box marginTop={10}>
-            {newLogs.map(log => {
-              const formattedDate = distanceInWords(Number(log.date), Date.now(), {
-                locale: getDateLocale(lang),
-              })
-              return (
-                <Box key={log.date} marginTop={10} marginBottom={10}>
-                  <Box row alignItems="flex-start">
-                    <Text fontSize={16} bold flex>
-                      {getAttribute(log, 'title')}
-                    </Text>
-                    <ChangelogTag type={log.type}>
-                      <Text fontSize={11} bold color="reverse">
-                        {log.type}
-                      </Text>
-                    </ChangelogTag>
-                  </Box>
-                  <Text fontSize={10} color="grey">
-                    {t('Il y a {{formattedDate}}', { formattedDate })}
+        <Box px={20}>
+          {visibleLogs.map(log => {
+            const formattedDate = distanceInWords(Number(log.date), Date.now(), {
+              locale: getDateLocale(lang),
+            })
+            return (
+              <Box key={log.date} marginTop={10} marginBottom={10}>
+                <Box row alignItems="flex-start">
+                  <Text fontSize={16} bold flex>
+                    {getAttribute(log, 'title')}
                   </Text>
-                  <Text marginTop={10}>{getAttribute(log, 'description')}</Text>
+                  <ChangelogTag type={log.type}>
+                    <Text fontSize={11} bold color="reverse">
+                      {log.type}
+                    </Text>
+                  </ChangelogTag>
                 </Box>
-              )
-            })}
-          </Box>
+                <Text fontSize={10} color="grey">
+                  {t('Il y a {{formattedDate}}', { formattedDate })}
+                </Text>
+                <Text marginTop={10}>{getAttribute(log, 'description')}</Text>
+              </Box>
+            )
+          })}
         </Box>
       </SheetScrollView>
     </Sheet>

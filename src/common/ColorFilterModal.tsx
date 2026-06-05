@@ -4,7 +4,7 @@ import React, { forwardRef } from 'react'
 import { TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
-import Box from '~common/ui/Box'
+import Checkbox from '~common/ui/Checkbox'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
@@ -45,17 +45,7 @@ const ColorFilterModal = forwardRef<SheetRef, Props>(({ selectedColorId, onSelec
       >
         {/* Option "Toutes les couleurs" */}
         <ColorRow onPress={() => onSelect(undefined)}>
-          <Box
-            width={24}
-            height={24}
-            borderRadius={6}
-            marginRight={12}
-            borderWidth={2}
-            borderColor="border"
-            center
-          >
-            {!selectedColorId && <FeatherIcon name="check" size={14} color="primary" />}
-          </Box>
+          <Checkbox checked={!selectedColorId} marginRight={12} />
           <Text flex={1} fontSize={16}>
             {t('Toutes les couleurs')}
           </Text>

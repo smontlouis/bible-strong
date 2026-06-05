@@ -27,7 +27,7 @@ const Timeline = ({
   const params = useLocalSearchParams<{ goTo?: string }>()
   const goTo = initialSectionIndex ?? (params.goTo ? Number(params.goTo) : 0)
   const canGoBackInStack = useCanGoBackInStack()
-  const hasBackButton = isFormSheet ? canGoBackInStack : Boolean(onBackPress)
+  const hasBackButton = true || isFormSheet ? canGoBackInStack : Boolean(onBackPress)
 
   const [current, setCurrent] = React.useState(goTo)
   const [entrance, setEntrance] = React.useState<0 | 1>(1)

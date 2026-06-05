@@ -3,6 +3,7 @@ import { TouchableOpacity } from 'react-native'
 import { EaseView } from 'react-native-ease'
 
 import Box from '~common/ui/Box'
+import Checkbox from '~common/ui/Checkbox'
 import Text from '~common/ui/Text'
 import Border from '~common/ui/Border'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -38,11 +39,7 @@ const DownloadSectionHeader = ({
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               style={{ marginRight: 8 }}
             >
-              <FeatherIcon
-                name={allSelected ? 'check-square' : 'square'}
-                size={18}
-                color={allSelected ? 'primary' : 'tertiary'}
-              />
+              <Checkbox checked={Boolean(allSelected)} variant="icon" size={18} />
             </TouchableOpacity>
           )}
           <EaseView

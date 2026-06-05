@@ -126,13 +126,7 @@ const VerseImageModal = ({ modalRef, imageUrls, verseOfTheDay }: Props) => {
   }
 
   return (
-    <Sheet
-      ref={modalRef}
-      detached
-      detachedOffset={insets.bottom + 46}
-      cornerRadius={20}
-      backgroundColor={theme.colors.lightGrey}
-    >
+    <Sheet ref={modalRef}>
       <SheetView>
         <Box center p={20}>
           {renderContent()}

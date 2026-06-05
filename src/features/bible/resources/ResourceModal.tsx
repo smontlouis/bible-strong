@@ -1,27 +1,27 @@
-import {
-  SheetFooter,
-  type SheetFooterProps,
-  Sheet,
-  SheetHeader,
-  SheetScrollView,
-  type SheetRef,
-} from '~common/sheet'
+import { useTheme } from '@emotion/react'
 import { MenuView, type MenuAction } from '@expo/ui/community/menu'
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React, { memo, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BackHandler, View } from 'react-native'
+import { useResourceLanguage } from 'src/state/resourcesLanguage'
+import {
+  Sheet,
+  SheetFooter,
+  SheetHeader,
+  SheetScrollView,
+  type SheetFooterProps,
+  type SheetRef,
+} from '~common/sheet'
 import { BibleResource, StudyNavigateBibleType } from '~common/types'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { Slide, Slides } from '~common/ui/Slider'
-import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import CommentariesCard from '~features/commentaries/CommentariesCard'
 import DictionnaireVerseDetailCard from '~features/dictionnary/DictionnaireVerseDetailCard'
 import NaveModalCard from '~features/nave/NaveModalCard'
-import CompareCard from './CompareCard'
 import formatVerseContent from '~helpers/formatVerseContent'
 import generateUUID from '~helpers/generateUUID'
 import { toast } from '~helpers/toast'
@@ -29,9 +29,8 @@ import { BibleTab, useBibleTabActions } from '../../../state/tabs'
 import BibleVerseDetailCard from '../BibleVerseDetailCard'
 import CompareVersionSelectorSheet from '../CompareVersionSelectorSheet'
 import { ReferenceCard } from '../ReferenceCard'
+import CompareCard from './CompareCard'
 import ResourcesModalFooter from './ResourcesModalFooter'
-import { useResourceLanguage } from 'src/state/resourcesLanguage'
-import { useTheme } from '@emotion/react'
 
 type ResourceVerse = {
   Livre: number
@@ -236,7 +235,7 @@ const ResourcesModal = memo(
     const footerRenderer = useCallback(
       (props: SheetFooterProps) => {
         return (
-          <SheetFooter {...props}>
+          <SheetFooter px={0} py={0} {...props}>
             <ResourcesModalFooter
               resourceType={resourceType}
               onChangeResourceType={onChangeResourceType}
@@ -297,7 +296,6 @@ const Resource = ({
 }) => {
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
-  const { bottomBarHeight } = useBottomBarHeightInTab()
   const {
     data: { selectedVersion, selectedVerses },
   } = bible
@@ -323,7 +321,6 @@ const Resource = ({
         <View
           style={{
             flex: 1,
-            paddingBottom: bottomBarHeight + 54,
           }}
         >
           <BibleVerseDetailCard
@@ -337,45 +334,26 @@ const Resource = ({
         <View
           style={{
             flex: 1,
-            paddingBottom: bottomBarHeight + 54,
           }}
         >
           <DictionnaireVerseDetailCard verse={verseObj} updateVerse={updateVerse} />
         </View>
       </Slide>
       <Slide key="nave">
-        <SheetScrollView
-          contentContainerStyle={{
-            paddingBottom: bottomBarHeight + 54,
-          }}
-        >
+        <SheetScrollView contentContainerStyle={{}}>
           <NaveModalCard selectedVerse={selectedVerse} />
         </SheetScrollView>
       </Slide>
       <Slide key="reference">
-        <SheetScrollView
-          contentContainerStyle={{
-            paddingBottom: bottomBarHeight + 54,
-          }}
-        >
+        <SheetScrollView contentContainerStyle={{}}>
           <ReferenceCard selectedVerse={selectedVerse} version={selectedVersion} />
         </SheetScrollView>
       </Slide>
       <Slide key="commentary">
-        <SheetScrollView
-          contentContainerStyle={{
-            paddingBottom: bottomBarHeight + 54,
-          }}
-        >
-          <CommentariesCard verse={selectedVerse} onChangeVerse={actions.selectSelectedVerse} />
-        </SheetScrollView>
+        <CommentariesCard verse={selectedVerse} onChangeVerse={actions.selectSelectedVerse} />
       </Slide>
       <Slide key="compare">
-        <SheetScrollView
-          contentContainerStyle={{
-            paddingBottom: bottomBarHeight + 54,
-          }}
-        >
+        <SheetScrollView contentContainerStyle={{}}>
           <CompareCard
             selectedVerses={selectedVerses}
             onChangeVerse={actions.selectSelectedVerse}

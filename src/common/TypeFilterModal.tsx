@@ -4,7 +4,7 @@ import React, { forwardRef } from 'react'
 import { TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
-import Box from '~common/ui/Box'
+import Checkbox from '~common/ui/Checkbox'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
@@ -46,17 +46,7 @@ const TypeFilterModal = forwardRef<SheetRef, Props>(
         >
           {/* Option "Tout" */}
           <TypeRow onPress={() => onSelect(undefined)}>
-            <Box
-              width={24}
-              height={24}
-              borderRadius={6}
-              marginRight={12}
-              borderWidth={2}
-              borderColor="border"
-              center
-            >
-              {isAllSelected && <FeatherIcon name="check" size={14} color="primary" />}
-            </Box>
+            <Checkbox checked={isAllSelected} marginRight={12} />
             <Text flex={1} fontSize={16}>
               {t('Tout')}
             </Text>
@@ -65,17 +55,7 @@ const TypeFilterModal = forwardRef<SheetRef, Props>(
 
           {/* Option "Annotations" (toutes) */}
           <TypeRow onPress={() => onSelect('annotations')}>
-            <Box
-              width={24}
-              height={24}
-              borderRadius={6}
-              marginRight={12}
-              borderWidth={2}
-              borderColor="border"
-              center
-            >
-              {isAnnotationsSelected && <FeatherIcon name="check" size={14} color="primary" />}
-            </Box>
+            <Checkbox checked={isAnnotationsSelected} marginRight={12} />
             <Text flex={1} fontSize={16}>
               {t('Annotations')}
             </Text>
@@ -95,17 +75,7 @@ const TypeFilterModal = forwardRef<SheetRef, Props>(
                 const isSelected = selectedType === version
                 return (
                   <TypeRow key={version} onPress={() => onSelect(version)}>
-                    <Box
-                      width={24}
-                      height={24}
-                      borderRadius={6}
-                      marginRight={12}
-                      borderWidth={2}
-                      borderColor="border"
-                      center
-                    >
-                      {isSelected && <FeatherIcon name="check" size={14} color="primary" />}
-                    </Box>
+                    <Checkbox checked={isSelected} marginRight={12} />
                     <Text flex={1} fontSize={16}>
                       {version}
                     </Text>

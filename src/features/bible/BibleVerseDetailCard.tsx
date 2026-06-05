@@ -18,8 +18,8 @@ import StrongCard from './StrongCard'
 
 import BibleVerseDetailFooter from './BibleVerseDetailFooter'
 
-import { SheetScrollView } from '~common/sheet'
 import { useTranslation } from 'react-i18next'
+import { ScrollView } from 'react-native'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { StrongReference, StudyNavigateBibleType } from '~common/types'
 import { CarouselProvider } from '~helpers/CarouselContext'
@@ -224,7 +224,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
   return (
     <Box flex={1} onLayout={e => setBoxHeight(e.nativeEvent.layout.height)}>
       <Box maxHeight={boxHeight / 2} position="relative" zIndex={1}>
-        <SheetScrollView contentContainerStyle={{ paddingTop: 10 }}>
+        <ScrollView contentContainerStyle={{ paddingTop: 10 }}>
           <StyledVerse>
             <VersetWrapper>
               <NumberText>{verse.Verset}</NumberText>
@@ -238,7 +238,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
               <VerseText>{formattedTexte}</VerseText>
             </CarouselProvider>
           </StyledVerse>
-        </SheetScrollView>
+        </ScrollView>
         <BibleVerseDetailFooter
           verseNumber={verse.Verset}
           goToNextVerse={() => {

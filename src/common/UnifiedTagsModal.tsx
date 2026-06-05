@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { Tag } from '~common/types'
 import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
+import Checkbox from '~common/ui/Checkbox'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
@@ -229,17 +230,7 @@ export const UnifiedTagsModalInstance = ({ item, setItem }: UnifiedTagsModalInst
                 borderColor="border"
                 onPress={handleAllPress}
               >
-                <Box
-                  width={24}
-                  height={24}
-                  borderRadius={6}
-                  mr={12}
-                  borderWidth={2}
-                  borderColor="border"
-                  center
-                >
-                  {!filterModeSelectedTag && <FeatherIcon name="check" size={14} color="primary" />}
-                </Box>
+                <Checkbox checked={!filterModeSelectedTag} mr={12} />
                 <Text flex={1} fontSize={16}>
                   {t('Tout')}
                 </Text>
@@ -260,18 +251,7 @@ export const UnifiedTagsModalInstance = ({ item, setItem }: UnifiedTagsModalInst
                   borderColor="border"
                   onPress={() => handleTagPress(tag)}
                 >
-                  <Box
-                    width={24}
-                    height={24}
-                    borderRadius={6}
-                    mr={12}
-                    borderWidth={2}
-                    borderColor={isSelected ? 'primary' : 'border'}
-                    bg={isSelected ? 'primary' : undefined}
-                    center
-                  >
-                    {isSelected && <FeatherIcon name="check" size={14} color="white" />}
-                  </Box>
+                  <Checkbox checked={isSelected} fillChecked checkColor="white" mr={12} />
                   <Text flex={1} fontSize={16}>
                     {tag.name}
                   </Text>

@@ -3,7 +3,6 @@ import { useRouter } from 'expo-router'
 import { Image } from 'expo-image'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import Link from '~common/Link'
 import { toast } from '~helpers/toast'
@@ -41,7 +40,6 @@ const ExplorePlanItem = ({
     (state: RootState) => !!state.plan.myPlans.find(p => id === p.id)
   )
   const [isLoading, setIsLoading] = React.useState(false)
-  const insets = useSafeAreaInsets()
   const r = useMediaQueriesArray()
   const height = r([70, 70, 150, 200])
   const featuredHeight = r([150, 150, 250, 250])
@@ -102,38 +100,36 @@ const ExplorePlanItem = ({
         description={description}
         footer={(props: SheetFooterProps) => (
           <SheetFooter {...props}>
-            <Box paddingBottom={10 + insets.bottom} paddingHorizontal={20} paddingTop={10}>
-              <Button
-                success
-                disabled={hasAlreadyStarted || isLoading}
-                onPress={() => {
-                  setIsLoading(true)
-                  dispatch(fetchPlan({ id, update: true }))
-                    .unwrap()
-                    .then(() => {
-                      setIsLoading(false)
-                      router.back()
-                      modalRef?.current?.dismiss()
-                      toast.success(t('Plan ajouté avec succès'))
-                    })
-                    .catch((e: unknown) => {
-                      console.log('[Plans] Error adding plan:', e)
-                      setIsLoading(false)
-                      toast.error(
-                        t(
-                          "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
-                        )
+            <Button
+              success
+              disabled={hasAlreadyStarted || isLoading}
+              onPress={() => {
+                setIsLoading(true)
+                dispatch(fetchPlan({ id, update: true }))
+                  .unwrap()
+                  .then(() => {
+                    setIsLoading(false)
+                    router.back()
+                    modalRef?.current?.dismiss()
+                    toast.success(t('Plan ajouté avec succès'))
+                  })
+                  .catch((e: unknown) => {
+                    console.log('[Plans] Error adding plan:', e)
+                    setIsLoading(false)
+                    toast.error(
+                      t(
+                        "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
                       )
-                    })
-                }}
-              >
-                {hasAlreadyStarted
-                  ? t('Plan démarré')
-                  : isLoading
-                    ? t('Chargement...')
-                    : t('Démarrer ce plan')}
-              </Button>
-            </Box>
+                    )
+                  })
+              }}
+            >
+              {hasAlreadyStarted
+                ? t('Plan démarré')
+                : isLoading
+                  ? t('Chargement...')
+                  : t('Démarrer ce plan')}
+            </Button>
           </SheetFooter>
         )}
       />

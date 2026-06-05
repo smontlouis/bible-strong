@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   },
   picker: {
     flex: 1,
-    gap: 15,
+    gap: 0,
   },
   swatches: {
     justifyContent: 'center',

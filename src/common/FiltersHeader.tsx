@@ -147,7 +147,6 @@ const FiltersHeader = ({
               </Box>
             </FilterRow>
           ))}
-          <Box height={insets.bottom + 16} />
         </SheetView>
       </Sheet>
     </>

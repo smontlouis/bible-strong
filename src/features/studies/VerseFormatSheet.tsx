@@ -1,7 +1,7 @@
 import React from 'react'
 import { TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
+import { Sheet, SheetHeader, SheetView, type SheetRef } from '~common/sheet'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -25,10 +25,9 @@ const VerseFormatSheet = ({
     <Sheet
       ref={sheetRef}
       onDismiss={onClose}
-      snapPoints={[280]}
       header={<SheetHeader title={t('study.formatChoice')} subTitle={reference} />}
     >
-      <Box paddingHorizontal={20} paddingBottom={20}>
+      <SheetView p={20}>
         {/* Inline format option */}
         <TouchableOpacity onPress={() => onSelectFormat('inline')}>
           <HStack
@@ -73,7 +72,7 @@ const VerseFormatSheet = ({
             <FeatherIcon name="arrow-right" size={20} color="grey" />
           </HStack>
         </TouchableOpacity>
-      </Box>
+      </SheetView>
     </Sheet>
   )
 }

@@ -1,7 +1,7 @@
 import Lottie from 'lottie-react-native'
 import React from 'react'
 
-import { Sheet, type SheetRef } from '~common/sheet'
+import { Sheet, SheetView, type SheetRef } from '~common/sheet'
 import { useTranslation } from 'react-i18next'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -22,8 +22,8 @@ const SuccessModal = ({ modalRef, isPlanCompleted, onClose }: Props) => {
   }
 
   return (
-    <Sheet ref={modalRef} onDismiss={onClose} dismissible={false} backgroundColor="transparent">
-      <Box flex={1} justifyContent="flex-end" paddingVertical={40} paddingHorizontal={20}>
+    <Sheet ref={modalRef} onDismiss={onClose} dismissible={false}>
+      <SheetView pt={40} pb={10} paddingHorizontal={20}>
         <Box center>
           <Lottie
             autoPlay
@@ -59,10 +59,8 @@ const SuccessModal = ({ modalRef, isPlanCompleted, onClose }: Props) => {
             </>
           )}
         </Box>
-        <Button fullWidth onPress={handleClose}>
-          {t('Continuer')}
-        </Button>
-      </Box>
+        <Button onPress={handleClose}>{t('Continuer')}</Button>
+      </SheetView>
     </Sheet>
   )
 }

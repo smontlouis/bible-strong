@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Sheet, SheetHeader, SheetItem } from '~common/sheet'
+import { Sheet, SheetHeader, SheetItem, SheetScrollView } from '~common/sheet'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -45,12 +45,18 @@ const DropdownMenu = <T extends string | number = string>({
           </Box>
         )}
       </TouchableBox>
-      <Sheet ref={ref} header={<SheetHeader title={title} centerTitle />}>
-        {choices.map(({ value, label, subLabel }) => (
-          <SheetItem key={String(value)} tag={subLabel} onPress={() => onItemPress(value)}>
-            {label}
-          </SheetItem>
-        ))}
+      <Sheet
+        ref={ref}
+        snapPoints={choices.length > 10 ? [1] : ['auto']}
+        header={<SheetHeader title={title} centerTitle />}
+      >
+        <SheetScrollView>
+          {choices.map(({ value, label, subLabel }) => (
+            <SheetItem key={String(value)} tag={subLabel} onPress={() => onItemPress(value)}>
+              {label}
+            </SheetItem>
+          ))}
+        </SheetScrollView>
       </Sheet>
     </>
   )
