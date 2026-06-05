@@ -12,12 +12,13 @@ import QuoteIcon from '~assets/images/QuoteIcon'
 import ColorPicker from '~common/ColorPicker'
 import Link from '~common/Link'
 import Border from '~common/ui/Border'
-import Box, { TouchableBox } from '~common/ui/Box'
+import Box, { AnimatedBox, TouchableBox, fadeSlideBottomAnimations } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import type { StudyNavigateBibleType } from '~common/types'
 import { recentColorsAtom } from './atom'
+import { FadeInDown, FadeInUp, FadeOutDown, FadeOutUp } from 'react-native-reanimated'
 
 type DispatchToWebView = (type: string, payload?: JSONValue) => void
 
@@ -34,6 +35,38 @@ type ActiveFormats = {
 
 type StudyFooterMenu = 'heading' | 'more' | 'block' | null
 type FeatherIconName = React.ComponentProps<typeof FeatherIcon>['name']
+
+const StudyFooterPopover = ({
+  children,
+  bottom,
+  left,
+  right,
+  width,
+}: {
+  children: React.ReactNode
+  bottom: number
+  left?: number
+  right?: number
+  width: number
+}) => (
+  <AnimatedBox
+    position="absolute"
+    bottom={bottom}
+    left={left}
+    right={right}
+    width={width}
+    bg="reverse"
+    borderRadius={12}
+    borderWidth={1}
+    borderColor="border"
+    overflow="hidden"
+    lightShadow
+    entering={FadeInDown}
+    exiting={FadeOutDown}
+  >
+    {children}
+  </AnimatedBox>
+)
 
 const PopoverItem = ({
   icon,
@@ -109,18 +142,7 @@ const SelectHeading = ({
         </Box>
       </TouchableBox>
       {isOpen && (
-        <Box
-          position="absolute"
-          bg="reverse"
-          bottom={40}
-          left={0}
-          width={220}
-          borderRadius={12}
-          borderWidth={1}
-          borderColor="border"
-          overflow="hidden"
-          lightShadow
-        >
+        <StudyFooterPopover bottom={40} left={0} width={220}>
           {headings.map(h => (
             <PopoverItem
               key={h.label}
@@ -144,7 +166,7 @@ const SelectHeading = ({
               }}
             />
           ))}
-        </Box>
+        </StudyFooterPopover>
       )}
     </Box>
   )
@@ -225,18 +247,7 @@ const SelectMore = ({
         </Box>
       </TouchableBox>
       {isOpen && (
-        <Box
-          position="absolute"
-          bottom={40}
-          left={-112}
-          width={250}
-          bg="reverse"
-          borderRadius={12}
-          borderWidth={1}
-          borderColor="border"
-          overflow="hidden"
-          lightShadow
-        >
+        <StudyFooterPopover bottom={40} left={-112} width={250}>
           {colorModal ? (
             <Box p={20}>
               <TouchableBox onPress={handleResetColor} bg="lightGrey" px={10} py={5} rounded>
@@ -327,7 +338,7 @@ const SelectMore = ({
               </Box>
             </Box>
           )}
-        </Box>
+        </StudyFooterPopover>
       )}
     </Box>
   )
@@ -357,18 +368,7 @@ const SelectBlock = ({
         <MaterialIcon name="add-box" size={22} color="primary" style={{ marginLeft: 'auto' }} />
       </TouchableBox>
       {isOpen && (
-        <Box
-          position="absolute"
-          bottom={30}
-          right={0}
-          width={250}
-          bg="reverse"
-          borderRadius={12}
-          borderWidth={1}
-          borderColor="border"
-          overflow="hidden"
-          lightShadow
-        >
+        <StudyFooterPopover bottom={30} right={0} width={250}>
           <PopoverItem
             icon="link-2"
             label={t('Insérer un lien de verset')}
@@ -389,7 +389,7 @@ const SelectBlock = ({
             label={t('Insérer un texte de strong')}
             onPress={() => handleNavigate('strong-block')}
           />
-        </Box>
+        </StudyFooterPopover>
       )}
     </Box>
   )
@@ -424,6 +424,17 @@ const StudyFooterComponent = ({
 
   return (
     <Box row height={50} backgroundColor="reverse" alignItems="center" overflow="visible">
+      {openMenu && (
+        <TouchableBox
+          position="absolute"
+          left={-1000}
+          right={-1000}
+          bottom={0}
+          top={-1000}
+          zIndex={1}
+          onPress={closeMenu}
+        />
+      )}
       <Box row flex center paddingLeft={10} overflow="visible">
         <SelectHeading
           dispatchToWebView={dispatchToWebView}
