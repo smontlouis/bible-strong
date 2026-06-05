@@ -11,6 +11,7 @@ import books from '~assets/bible_versions/books-desc'
 import type { CrossVersionAnnotation } from '~redux/selectors/bible'
 import { VersionCode } from '~state/tabs'
 import { Chip } from '~common/ui/NewChip'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 const ItemRow = styled.View(({ theme }) => ({
   flexDirection: 'row',
@@ -19,6 +20,12 @@ const ItemRow = styled.View(({ theme }) => ({
   borderBottomWidth: 1,
   borderBottomColor: theme.colors.border,
 }))
+
+const ItemButton = styled.TouchableOpacity({
+  flex: 1,
+  flexDirection: 'row',
+  alignItems: 'center',
+})
 
 const IconContainer = styled.View(({ theme }) => ({
   width: 36,
@@ -66,6 +73,7 @@ const CrossVersionAnnotationsModal = ({
   onClose,
 }: CrossVersionAnnotationsModalProps) => {
   const { t } = useTranslation()
+  const pushRouteOnce = usePushRouteOnce()
 
   const handleSwitchVersion = (version: VersionCode) => {
     // Extract verse number from verseKey (format: "book-chapter-verse")
@@ -76,6 +84,26 @@ const CrossVersionAnnotationsModal = ({
 
   const handleOpenInNewTab = (version: VersionCode) => {
     onOpenInNewTab(version)
+    sheetRef.current?.dismiss()
+  }
+
+  const handleOpenBibleView = (version: VersionCode) => {
+    if (!verseKey) return
+
+    const [bookNumber, chapter, verse] = verseKey.split('-').map(Number)
+    if (!bookNumber || !chapter || !verse) return
+
+    pushRouteOnce({
+      pathname: '/bible-view',
+      params: {
+        contextDisplayMode: 'focused',
+        book: JSON.stringify(books[bookNumber - 1]),
+        chapter: String(chapter),
+        verse: String(verse),
+        version,
+        focusVerses: JSON.stringify([verse]),
+      },
+    })
     sheetRef.current?.dismiss()
   }
 
@@ -103,19 +131,21 @@ const CrossVersionAnnotationsModal = ({
     >
       {versions.map((versionData, index) => (
         <ItemRow key={index}>
-          <IconContainer>
-            <FeatherIcon name="edit-3" size={18} color="secondary" />
-          </IconContainer>
-          <Box flex>
-            <HStack gap={10} alignItems="center">
-              <Text fontSize={14} fontWeight="600">
-                {t('bible.crossVersionAnnotations.annotationCount', {
-                  count: versionData.count,
-                })}
-              </Text>
-              <Chip>{versionData.version}</Chip>
-            </HStack>
-          </Box>
+          <ItemButton activeOpacity={0.7} onPress={() => handleOpenBibleView(versionData.version)}>
+            <IconContainer>
+              <FeatherIcon name="edit-3" size={18} color="secondary" />
+            </IconContainer>
+            <Box flex>
+              <HStack gap={10} alignItems="center">
+                <Text fontSize={14} fontWeight="600">
+                  {t('bible.crossVersionAnnotations.annotationCount', {
+                    count: versionData.count,
+                  })}
+                </Text>
+                <Chip>{versionData.version}</Chip>
+              </HStack>
+            </Box>
+          </ItemButton>
           <MenuView
             actions={menuActions}
             onPressAction={({ nativeEvent }) => {
