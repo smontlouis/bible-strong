@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
   swatches: {
     justifyContent: 'center',
     gap: 10,
+    marginBlock: 5,
   },
   swatch: {
     width: 30,

@@ -70,7 +70,6 @@ export default function StudiesDomWrapper({
   const pushRouteOnce = usePushRouteOnce()
   const theme = useTheme()
   const isKeyboardOpened = useKeyboardState(state => state.isVisible)
-  const keyboardHeight = useKeyboardState(state => state.height)
   const [activeFormats, setActiveFormats] = useState({})
   const { colorScheme } = useCurrentThemeSelector()
   const encodedContentToDisplay = encodeDeltaContent(contentToDisplay)
@@ -205,7 +204,6 @@ export default function StudiesDomWrapper({
       navigateBibleView={navigateToSelectionMode}
       dispatchToWebView={dispatchToWebView}
       activeFormats={activeFormats}
-      keyboardHeight={keyboardHeight - 20}
     />
   ) : null
 
@@ -237,7 +235,16 @@ export default function StudiesDomWrapper({
       <Box flex bg="reverse" pb={isKeyboardOpened ? 50 : 0}>
         {editor}
         {footer && (
-          <KeyboardStickyView style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
+          <KeyboardStickyView
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              overflow: 'visible',
+              backgroundColor: 'red',
+            }}
+          >
             {footer}
           </KeyboardStickyView>
         )}
