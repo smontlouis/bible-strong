@@ -49,6 +49,7 @@ import { useRemoteConfig } from '~helpers/useRemoteConfig'
 import { createFormSheetOptions } from '~navigation/formSheetOptions'
 import { RootState } from '~redux/modules/reducer'
 import { persistor, store } from '~redux/store'
+import { applyPreferredColorScheme } from '~redux/themeAppearanceMiddleware'
 import getTheme, { baseTheme, Theme } from '~themes/index'
 import { setI18n } from '../i18n'
 import { PlaybackService } from '../playbackService'
@@ -218,6 +219,9 @@ function DeferredModals() {
 // Inner app with all providers (needs Redux context)
 function InnerApp() {
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
+  const preferredColorScheme = useSelector(
+    (state: RootState) => state.user.bible.settings.preferredColorScheme || 'auto'
+  )
   const { theme: currentTheme } = useCurrentThemeSelector()
 
   useKeepAwake()
@@ -234,6 +238,12 @@ function InnerApp() {
   useEffect(() => {
     changeStatusBarStyle(currentTheme)
   }, [currentTheme])
+
+  useEffect(() => {
+    if (preferredColorScheme === 'auto') return
+
+    applyPreferredColorScheme(preferredColorScheme)
+  }, [preferredColorScheme])
 
   const theme = useMemo(() => {
     const defaultTheme: Theme = getTheme[currentTheme] || baseTheme

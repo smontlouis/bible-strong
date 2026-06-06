@@ -64,7 +64,9 @@ function configureStore() {
 
   const persistor = persistStore(store, undefined, () => {
     const preferredColorScheme = store.getState().user.bible.settings.preferredColorScheme
-    applyPreferredColorScheme(preferredColorScheme)
+    if (preferredColorScheme !== 'auto') {
+      applyPreferredColorScheme(preferredColorScheme)
+    }
   })
   // persistor.purge() // Purge async storage
   // storage.clearAll()

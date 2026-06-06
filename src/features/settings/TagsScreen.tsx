@@ -60,7 +60,7 @@ const TagItem = ({ item, setOpen }: TagItemProps) => {
   return (
     <Box>
       <Link route="Tag" params={{ tagId: item.id }}>
-        <Box padding={20} row paddingRight={0}>
+        <Box padding={20} row pr={0} py={10}>
           <Box flex justifyContent="center">
             <Text bold>{item.name}</Text>
             <Box row>
@@ -120,7 +120,7 @@ const TagItem = ({ item, setOpen }: TagItemProps) => {
           </Link>
         </Box>
       </Link>
-      <Border marginHorizontal={20} />
+      <Border marginHorizontal={10} />
     </Box>
   )
 }
