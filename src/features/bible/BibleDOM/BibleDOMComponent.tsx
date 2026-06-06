@@ -458,6 +458,8 @@ const LoadedBibleContent = ({
     chapter,
     verses,
     settings,
+    contextDisplayMode,
+    focusVerses,
     // Pass selection only when in annotation mode
     selection: annotationMode ? selection : undefined,
     getTokens: annotationMode ? getTokens : undefined,
@@ -928,6 +930,7 @@ const LoadedBibleContent = ({
                   $color={rect.color}
                   $annotationType={rect.annotationType}
                   $isSelected={rect.annotationId === selectedAnnotationId}
+                  $isDimmed={rect.isDimmed}
                   $primaryColor={settings.colors[settings.theme].primary}
                   $backgroundColor={settings.colors[settings.theme].reverse}
                   $animationDelay={rect.type === 'annotation' ? getAnimationDelay(rect.id) : 0}

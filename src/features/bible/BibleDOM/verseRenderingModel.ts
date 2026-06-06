@@ -30,6 +30,21 @@ export const getFadePosition = (
   return undefined
 }
 
+export const isVerseDimmedInFocusedContext = ({
+  verseKey,
+  isContextFocused,
+  focusVerseNumbers,
+}: {
+  verseKey: string
+  isContextFocused: boolean
+  focusVerseNumbers: number[] | null
+}) => {
+  if (!isContextFocused || !focusVerseNumbers?.length) return false
+
+  const verseNumber = Number(verseKey.split('-')[2])
+  return !focusVerseNumbers.includes(verseNumber)
+}
+
 export const shouldRenderVerseInFocusedContext = ({
   verseNumber,
   isContextFocused,

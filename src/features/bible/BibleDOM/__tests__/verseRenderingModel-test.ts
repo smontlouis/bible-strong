@@ -6,6 +6,7 @@ import {
   getParallelVerseRows,
   getTaggedVersesByLastVerse,
   getVersesWithWordAnnotations,
+  isVerseDimmedInFocusedContext,
   shouldRenderVerseInFocusedContext,
 } from '../verseRenderingModel'
 
@@ -55,6 +56,30 @@ describe('verseRenderingModel', () => {
         isContextFocused: true,
         hasFocusVerses: true,
         isFocused: false,
+      })
+    ).toBe(false)
+  })
+
+  it('dims non-focused verse overlays in focused context', () => {
+    expect(
+      isVerseDimmedInFocusedContext({
+        verseKey: '1-16-12',
+        isContextFocused: true,
+        focusVerseNumbers: [11],
+      })
+    ).toBe(true)
+    expect(
+      isVerseDimmedInFocusedContext({
+        verseKey: '1-16-11',
+        isContextFocused: true,
+        focusVerseNumbers: [11],
+      })
+    ).toBe(false)
+    expect(
+      isVerseDimmedInFocusedContext({
+        verseKey: '1-16-12',
+        isContextFocused: false,
+        focusVerseNumbers: [11],
       })
     ).toBe(false)
   })

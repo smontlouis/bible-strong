@@ -284,12 +284,6 @@ function InnerApp() {
                             },
                           }}
                         />
-                        <Stack.Screen
-                          name="pericope"
-                          options={{
-                            headerShown: true,
-                          }}
-                        />
                       </Stack>
                       <ThemedToaster />
                       <DeferredModals />

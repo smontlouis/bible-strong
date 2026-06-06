@@ -7,6 +7,7 @@ import { RootStyles, WebViewProps } from '../BibleDOMWrapper'
 import { AnnotationType, HighlightRect } from './HighlightComponents'
 import { SelectionRange, normalizeRange, getVersesBetween } from './selectionUtils'
 import { usePrevious } from '~helpers/usePrevious'
+import { getFocusVerseNumbers, isVerseDimmedInFocusedContext } from '../verseRenderingModel'
 
 /**
  * Represents a text node and its character offset within the combined verse text.
@@ -141,6 +142,8 @@ interface UseAnnotationHighlightsProps {
   chapter: number
   verses: TVerse[]
   settings: RootStyles['settings']
+  contextDisplayMode?: WebViewProps['contextDisplayMode']
+  focusVerses?: WebViewProps['focusVerses']
   // Optional: Selection support for annotation mode
   selection?: SelectionRange | null
   getTokens?: (verseKey: string, text: string) => WordToken[]
@@ -273,6 +276,8 @@ export function useAnnotationHighlights({
   chapter,
   verses,
   settings,
+  contextDisplayMode,
+  focusVerses,
   selection,
   getTokens,
 }: UseAnnotationHighlightsProps): {
@@ -295,6 +300,9 @@ export function useAnnotationHighlights({
   // Track previous values to detect chapter changes vs annotation/selection changes
   const prevBook = usePrevious(book)
   const prevChapter = usePrevious(chapter)
+  const focusVerseNumbers = getFocusVerseNumbers(focusVerses)
+  const isContextFocused = contextDisplayMode === 'focused'
+  const focusKey = focusVerses?.join(',') ?? ''
 
   useEffect(() => {
     // Only set isPending on chapter/book changes (not annotation or selection changes)
@@ -327,6 +335,11 @@ export function useAnnotationHighlights({
 
         annotation.ranges.forEach((range, rangeIdx) => {
           const { verseKey, startWordIndex, endWordIndex } = range
+          const isDimmed = isVerseDimmedInFocusedContext({
+            verseKey,
+            isContextFocused,
+            focusVerseNumbers,
+          })
 
           let tokens = tokensByVerse.get(verseKey)
           if (!tokens) {
@@ -369,6 +382,7 @@ export function useAnnotationHighlights({
               type: 'annotation',
               annotationType: annotation.type as AnnotationType,
               annotationId,
+              isDimmed,
             })
           })
         })
@@ -418,7 +432,17 @@ export function useAnnotationHighlights({
       window.removeEventListener('resize', handleResize)
       window.removeEventListener('layoutChanged', handleLayoutChanged)
     }
-  }, [version, book, chapter, annotationKey, selection, verses, settings])
+  }, [
+    version,
+    book,
+    chapter,
+    annotationKey,
+    selection,
+    verses,
+    settings,
+    isContextFocused,
+    focusKey,
+  ])
 
   // Calculate selection handle positions synchronously from highlight rects
   const selectionHandlePositions = (() => {

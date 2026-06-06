@@ -25,6 +25,7 @@ const ExploreLayout = () => {
       <Stack.Screen name="entity-relations" />
       <Stack.Screen name="tag" />
       <Stack.Screen name="event" />
+      <Stack.Screen name="pericope" />
     </Stack>
   )
 }
