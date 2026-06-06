@@ -1,4 +1,8 @@
-import { makeNotesForVerseSelector, selectRelationCountsByEndpointIdentity } from '../bible'
+import {
+  makeNotesForVerseSelector,
+  makeTagDataSelector,
+  selectRelationCountsByEndpointIdentity,
+} from '../bible'
 import type { RootState } from '~redux/modules/reducer'
 import {
   normalizeRelation,
@@ -115,5 +119,38 @@ describe('makeNotesForVerseSelector', () => {
     state.user.bible.wordAnnotations = {}
 
     expect(selectNotesForVerse(state, '1-1-1').map(note => note.id)).toEqual(['note-2', 'note-1'])
+  })
+})
+
+describe('makeTagDataSelector', () => {
+  it('ignores orphan note ids from the tag index', () => {
+    const selectTagData = makeTagDataSelector()
+    const state = {
+      user: {
+        bible: {
+          highlights: {},
+          notes: {},
+          links: {},
+          studies: {},
+          naves: {},
+          words: {},
+          strongsGrec: {},
+          strongsHebreu: {},
+          wordAnnotations: {},
+          relations: {},
+        },
+      },
+    } as unknown as RootState
+
+    const tag = {
+      id: 'tag-1',
+      name: 'Tag 1',
+      notes: {
+        'missing-note-1': true as const,
+        'missing-note-2': true as const,
+      },
+    }
+
+    expect(selectTagData(state, tag).notes).toEqual([])
   })
 })

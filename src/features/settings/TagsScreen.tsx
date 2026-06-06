@@ -22,11 +22,7 @@ import useFuzzy from '~helpers/useFuzzy'
 import { useSheet } from '~helpers/useSheet'
 import { addTag, removeTag, updateTag } from '~redux/modules/user'
 import { sortedTagsSelector } from '~redux/selectors/tags'
-import {
-  makeTagDataSelector,
-  makeGroupedHighlightsCountSelector,
-  makeGroupedWordAnnotationsCountSelector,
-} from '~redux/selectors/bible'
+import { makeTagDataSelector } from '~redux/selectors/bible'
 import { Tag } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import { useCreateTabGroupFromTag } from './useCreateTabGroupFromTag'
@@ -51,24 +47,15 @@ type TagItemProps = {
 
 const TagItem = ({ item, setOpen }: TagItemProps) => {
   const { t } = useTranslation()
-  const selectGroupedHighlightsCount = makeGroupedHighlightsCountSelector()
-  const selectGroupedWordAnnotationsCount = makeGroupedWordAnnotationsCountSelector()
-  const highlightsNumber = useSelector((state: RootState) =>
-    selectGroupedHighlightsCount(state, item.highlights)
-  )
-  const annotationsNumber = useSelector((state: RootState) =>
-    selectGroupedWordAnnotationsCount(state, item.wordAnnotations)
-  )
-  const notesNumber = item.notes && Object.keys(item.notes).length
-  const linksNumber = item.links && Object.keys(item.links).length
-  const studiesNumber = item.studies && Object.keys(item.studies).length
-
-  const strongsNumber =
-    item.strongsHebreu &&
-    Object.keys(item.strongsHebreu).length +
-      ((item.strongsGrec && Object.keys(item.strongsGrec).length) || 0)
-  const wordsNumber = item.words && Object.keys(item.words).length
-  const navesNumber = item.naves && Object.keys(item.naves).length
+  const selectTagData = useRef(makeTagDataSelector()).current
+  const tagData = useSelector((state: RootState) => selectTagData(state, item))
+  const highlightsNumber = tagData.highlights.length + tagData.wordAnnotations.length
+  const notesNumber = tagData.notes.length
+  const linksNumber = tagData.links.length
+  const studiesNumber = tagData.studies.length
+  const strongsNumber = tagData.strongsHebreu.length + tagData.strongsGrec.length
+  const wordsNumber = tagData.words.length
+  const navesNumber = tagData.naves.length
 
   return (
     <Box>
@@ -98,11 +85,10 @@ const TagItem = ({ item, setOpen }: TagItemProps) => {
                   </Text>
                 </Chip>
               )}
-              {!!(highlightsNumber + annotationsNumber) && (
+              {!!highlightsNumber && (
                 <Chip>
                   <Text fontSize={10} color="default">
-                    {highlightsNumber + annotationsNumber}{' '}
-                    {t('surbrillance', { count: highlightsNumber + annotationsNumber })}
+                    {highlightsNumber} {t('surbrillance', { count: highlightsNumber })}
                   </Text>
                 </Chip>
               )}
