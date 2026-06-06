@@ -242,7 +242,6 @@ export default function StudiesDomWrapper({
               right: 0,
               bottom: 0,
               overflow: 'visible',
-              backgroundColor: 'red',
             }}
           >
             {footer}
