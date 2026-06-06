@@ -1,15 +1,14 @@
 import Lottie from 'lottie-react-native'
 import React from 'react'
 
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { Sheet, SheetView, type SheetRef } from '~common/sheet'
 import { useTranslation } from 'react-i18next'
-import Modal from '~common/Modal'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Paragraph from '~common/ui/Paragraph'
 
 interface Props {
-  modalRef: React.RefObject<BottomSheetModal | null>
+  modalRef: React.RefObject<SheetRef | null>
   isPlanCompleted: boolean
   onClose?: () => void
 }
@@ -23,19 +22,8 @@ const SuccessModal = ({ modalRef, isPlanCompleted, onClose }: Props) => {
   }
 
   return (
-    <Modal.Body
-      ref={modalRef}
-      enableDynamicSizing
-      enableScrollView={false}
-      onModalClose={onClose}
-      handleIndicatorStyle={{
-        opacity: 0,
-      }}
-      backgroundStyle={{
-        backgroundColor: 'transparent',
-      }}
-    >
-      <Box flex={1} justifyContent="flex-end" paddingVertical={40} paddingHorizontal={20}>
+    <Sheet ref={modalRef} onDismiss={onClose} dismissible={false}>
+      <SheetView pt={40} pb={10} paddingHorizontal={20}>
         <Box center>
           <Lottie
             autoPlay
@@ -71,11 +59,9 @@ const SuccessModal = ({ modalRef, isPlanCompleted, onClose }: Props) => {
             </>
           )}
         </Box>
-        <Button fullWidth onPress={handleClose}>
-          {t('Continuer')}
-        </Button>
-      </Box>
-    </Modal.Body>
+        <Button onPress={handleClose}>{t('Continuer')}</Button>
+      </SheetView>
+    </Sheet>
   )
 }
 

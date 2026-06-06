@@ -8,12 +8,12 @@ import Animated, {
 } from 'react-native-reanimated'
 
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { calculateLabel, offset, rowToPx } from './constants'
 import { TimelineEvent as TimelineEventProps } from './types'
 
@@ -46,7 +46,7 @@ const TimelineEvent = ({
   calculateEventWidth,
   hasDetails = true,
 }: Props) => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const lang = useLanguage()
   const { current: top } = React.useRef(rowToPx(row))
   const { current: left } = React.useRef(yearsToPx(start))
@@ -57,7 +57,7 @@ const TimelineEvent = ({
   const onOpenEvent = () => {
     if (!hasDetails) return
 
-    router.push({
+    pushRouteOnce({
       pathname: '/event',
       params: { slug },
     })

@@ -1,6 +1,6 @@
 import { TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
+import { Sheet, SheetView, type SheetRef } from '~common/sheet'
 import Lottie from 'lottie-react-native'
 import { useTheme } from '@emotion/react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -8,11 +8,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Paragraph from '~common/ui/Paragraph'
-import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import { useAppRating } from './useAppRating'
 
 interface Props {
-  modalRef: React.RefObject<BottomSheetModal | null>
+  modalRef: React.RefObject<SheetRef | null>
   onClose: () => void
 }
 
@@ -20,7 +19,6 @@ const RatingPrompt = ({ modalRef, onClose }: Props) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
-  const { key } = useBottomSheetStyles()
   const { acceptRating, remindLater, declineRating } = useAppRating()
 
   const handleAccept = () => {
@@ -41,28 +39,15 @@ const RatingPrompt = ({ modalRef, onClose }: Props) => {
   }
 
   return (
-    <BottomSheetModal
+    <Sheet
       ref={modalRef}
-      topInset={insets.top}
-      bottomInset={insets.bottom + 50}
-      enablePanDownToClose={false}
-      enableDynamicSizing
-      backdropComponent={props => renderBackdrop({ ...props, pressBehavior: 'none' })}
+      detachedOffset={insets.bottom + 50}
+      dismissible={false}
       detached={true}
-      key={key}
-      handleComponent={() => null}
-      style={{
-        paddingTop: 10,
-        marginHorizontal: 20,
-        borderRadius: 30,
-        overflow: 'hidden',
-      }}
-      backgroundStyle={{
-        backgroundColor: theme.colors.reverse,
-      }}
+      cornerRadius={30}
     >
-      <BottomSheetView>
-        <Box padding={20} paddingBottom={30}>
+      <SheetView>
+        <Box padding={20} paddingTop={30} paddingBottom={30}>
           <Box height={80} alignItems="center" justifyContent="center">
             <Lottie
               autoPlay
@@ -94,8 +79,8 @@ const RatingPrompt = ({ modalRef, onClose }: Props) => {
             </TouchableOpacity>
           </Box>
         </Box>
-      </BottomSheetView>
-    </BottomSheetModal>
+      </SheetView>
+    </Sheet>
   )
 }
 

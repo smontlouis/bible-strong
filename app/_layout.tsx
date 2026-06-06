@@ -1,8 +1,7 @@
 // installReduxDevToolsPolyfill()
 
 import { ThemeProvider } from '@emotion/react'
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
-import { PortalProvider } from '@gorhom/portal'
+import { SheetProvider } from '~common/sheet'
 import { getAnalytics, logScreenView } from '@react-native-firebase/analytics'
 import * as Sentry from '@sentry/react-native'
 
@@ -33,7 +32,7 @@ import { CurrentTheme } from '~common/types'
 import UnifiedTagsModal from '~common/UnifiedTagsModal'
 import { AppRatingModal } from '~features/app-rating'
 import { AppSwitcherProvider } from '~features/app-switcher/AppSwitcherProvider'
-import { BookSelectorBottomSheetProvider } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
+import { BookSelectorSheetProvider } from '~features/bible/BookSelectorSheet/BookSelectorSheetProvider'
 import { FeatureOnboardingModal } from '~features/feature-onboarding'
 import OnBoardingModal from '~features/onboarding/OnBoarding'
 import { appLogger } from '~helpers/agentObservability'
@@ -50,6 +49,7 @@ import { useRemoteConfig } from '~helpers/useRemoteConfig'
 import { createFormSheetOptions } from '~navigation/formSheetOptions'
 import { RootState } from '~redux/modules/reducer'
 import { persistor, store } from '~redux/store'
+import { applyPreferredColorScheme } from '~redux/themeAppearanceMiddleware'
 import getTheme, { baseTheme, Theme } from '~themes/index'
 import { setI18n } from '../i18n'
 import { PlaybackService } from '../playbackService'
@@ -98,7 +98,6 @@ SplashScreen.setOptions({
 setAutoFreeze(false)
 LogBox.ignoreLogs(['Require cycle', 'EventEmitter.removeListener'])
 
-// Sentry init is deferred to after splash screen via initSentry()
 let sentryInitialized = false
 const initSentry = () => {
   if (sentryInitialized) return
@@ -220,6 +219,9 @@ function DeferredModals() {
 // Inner app with all providers (needs Redux context)
 function InnerApp() {
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
+  const preferredColorScheme = useSelector(
+    (state: RootState) => state.user.bible.settings.preferredColorScheme || 'auto'
+  )
   const { theme: currentTheme } = useCurrentThemeSelector()
 
   useKeepAwake()
@@ -236,6 +238,12 @@ function InnerApp() {
   useEffect(() => {
     changeStatusBarStyle(currentTheme)
   }, [currentTheme])
+
+  useEffect(() => {
+    if (preferredColorScheme === 'auto') return
+
+    applyPreferredColorScheme(preferredColorScheme)
+  }, [preferredColorScheme])
 
   const theme = useMemo(() => {
     const defaultTheme: Theme = getTheme[currentTheme] || baseTheme
@@ -263,37 +271,34 @@ function InnerApp() {
             <ErrorBoundary>
               <AppSwitcherProvider>
                 <RootSiblingParent>
-                  <PortalProvider>
-                    <BottomSheetModalProvider>
-                      <BookSelectorBottomSheetProvider>
-                        <InitHooks />
-                        <Stack screenOptions={{ headerShown: false }}>
-                          <Stack.Screen name="index" />
-                          <Stack.Screen
-                            name="(explore)"
-                            options={createFormSheetOptions(theme, {
-                              contentStyle: {
-                                bottom: 0,
-                              },
-                              sheetAllowedDetents: [0.45, 1],
-                              sheetLargestUndimmedDetentIndex: 'last',
-                            })}
-                          />
-                          <Stack.Screen
-                            name="(library)"
-                            options={createFormSheetOptions(theme, {
-                              contentStyle: {
-                                bottom: 0,
-                              },
-                              sheetGrabberVisible: false,
-                            })}
-                          />
-                        </Stack>
-                        <ThemedToaster />
-                        <DeferredModals />
-                      </BookSelectorBottomSheetProvider>
-                    </BottomSheetModalProvider>
-                  </PortalProvider>
+                  <SheetProvider>
+                    <BookSelectorSheetProvider>
+                      <InitHooks />
+                      <Stack screenOptions={{ headerShown: false }}>
+                        <Stack.Screen name="index" />
+                        <Stack.Screen
+                          name="(explore)"
+                          options={createFormSheetOptions(theme, {
+                            contentStyle: {
+                              bottom: 0,
+                            },
+                            sheetAllowedDetents: [0.45, 1],
+                            sheetLargestUndimmedDetentIndex: 'last',
+                          })}
+                        />
+                        <Stack.Screen
+                          name="(library)"
+                          options={{
+                            contentStyle: {
+                              bottom: 0,
+                            },
+                          }}
+                        />
+                      </Stack>
+                      <ThemedToaster />
+                      <DeferredModals />
+                    </BookSelectorSheetProvider>
+                  </SheetProvider>
                 </RootSiblingParent>
               </AppSwitcherProvider>
             </ErrorBoundary>
@@ -341,5 +346,7 @@ function RootLayout() {
     </>
   )
 }
+
+initSentry()
 
 export default Sentry.wrap(RootLayout)

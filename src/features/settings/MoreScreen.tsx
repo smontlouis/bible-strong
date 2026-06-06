@@ -1,11 +1,12 @@
 import styled from '@emotion/native'
 import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
+import { useSetAtom } from 'jotai/react'
 import * as Updates from 'expo-updates'
 import React, { memo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, Alert, Platform } from 'react-native'
 import { useSelector } from 'react-redux'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { type SheetRef } from '~common/sheet'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import Header from '~common/Header'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -27,6 +28,7 @@ import useLanguage from '~helpers/useLanguage'
 import useLogin from '~helpers/useLogin'
 import DeleteAccountModal from '~features/profile/components/DeleteAccountModal'
 import { RootState } from '~redux/modules/reducer'
+import { changelogModalAtom } from '~state/app'
 import app from '../../../package.json'
 
 import { useRouter } from 'expo-router'
@@ -65,8 +67,9 @@ type MoreProps = {
 export const More = ({ closeMenu }: MoreProps) => {
   const { isLogged, user, logout } = useLogin()
   const theme = useTheme()
-  const deleteAccountModalRef = useRef<BottomSheetModal>(null)
+  const deleteAccountModalRef = useRef<SheetRef>(null)
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false)
+  const openChangelogModal = useSetAtom(changelogModalAtom)
 
   const lang = useLanguage()
   const hasUpdate = useSelector((state: RootState) =>
@@ -281,7 +284,7 @@ export const More = ({ closeMenu }: MoreProps) => {
               {t('settings.help')}
             </Text>
           </SectionCardHeader>
-          <CardLinkItem route="Changelog">
+          <CardLinkItem onPress={() => openChangelogModal(true)}>
             <IconCircle bg="rgba(147, 51, 234, 0.1)">
               <FeatherIcon name="terminal" size={20} color="quint" />
             </IconCircle>

@@ -1,15 +1,12 @@
-import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useWindowDimensions } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BibleTab, useBibleTabActions } from 'src/state/tabs'
-import { ContainerComponent } from '~common/Modal'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import loadBibleChapter from '~helpers/loadBibleChapter'
 import { useQuery } from '~helpers/react-query-lite'
 
@@ -21,11 +18,9 @@ type VerseSelectorPopupProps = {
 export const VerseSelectorPopup = ({ bibleAtom, children }: VerseSelectorPopupProps) => {
   const { t } = useTranslation()
   const { width: windowWidth } = useWindowDimensions()
-  const insets = useSafeAreaInsets()
-  const bottomSheetRef = useRef<BottomSheetModal>(null)
+  const sheetRef = useRef<SheetRef>(null)
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
-  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   const {
     data: { selectedVersion: version, selectedBook: book, selectedChapter: chapter },
@@ -47,35 +42,22 @@ export const VerseSelectorPopup = ({ bibleAtom, children }: VerseSelectorPopupPr
 
   const handleSelect = (verse: number) => {
     actions.setSelectedVerse(verse)
-    bottomSheetRef.current?.dismiss()
+    sheetRef.current?.dismiss()
   }
 
   return (
     <>
-      <TouchableBox center height="100%" onPress={() => bottomSheetRef.current?.present()}>
+      <TouchableBox center height="100%" onPress={() => sheetRef.current?.present()}>
         {children}
       </TouchableBox>
-      <BottomSheetModal
-        key={key}
-        ref={bottomSheetRef}
-        topInset={insets.top}
-        enablePanDownToClose
-        enableDynamicSizing
-        backdropComponent={renderBackdrop}
-        containerComponent={ContainerComponent}
-        activeOffsetY={[-20, 20]}
+      <Sheet
+        ref={sheetRef}
         stackBehavior="push"
-        {...bottomSheetStyles}
+        header={<SheetHeader title={t('goToVerse')} centerTitle />}
       >
-        <Box px={10} py={10} borderBottomWidth={1} borderColor="border">
-          <Text fontWeight="bold" textAlign="center">
-            {t('goToVerse')}
-          </Text>
-        </Box>
-        <BottomSheetScrollView
+        <SheetScrollView
           contentContainerStyle={{
             paddingTop: 10,
-            paddingBottom: insets.bottom,
             paddingHorizontal: horizontalMargin,
             flexDirection: 'row',
             flexWrap: 'wrap',
@@ -115,8 +97,8 @@ export const VerseSelectorPopup = ({ bibleAtom, children }: VerseSelectorPopupPr
               <Text color="grey">{t('Chargement...')}</Text>
             </Box>
           )}
-        </BottomSheetScrollView>
-      </BottomSheetModal>
+        </SheetScrollView>
+      </Sheet>
     </>
   )
 }

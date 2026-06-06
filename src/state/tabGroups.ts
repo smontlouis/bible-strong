@@ -3,6 +3,16 @@ import { atom, getDefaultStore } from 'jotai/vanilla'
 
 import generateUUID from '~helpers/generateUUID'
 import {
+  addTabToGroup,
+  createTabGroup,
+  deleteTabGroup,
+  moveTabToGroup,
+  renameTabGroup,
+  reorderTabGroups,
+  switchTabGroup,
+  updateTabGroup,
+} from './tabWorkspace'
+import {
   tabGroupsAtom,
   activeGroupIdAtom,
   activeGroupAtom,
@@ -52,8 +62,11 @@ export const createGroupAtom = atom(
       updatedAt: now,
     }
 
-    set(tabGroupsAtom, [...groups, newGroup])
-    return newGroup.id
+    const result = createTabGroup(groups, newGroup, MAX_TAB_GROUPS)
+    if (!result.ok) return null
+
+    set(tabGroupsAtom, result.groups)
+    return result.value ?? null
   }
 )
 
@@ -63,18 +76,18 @@ export const createGroupAtom = atom(
  */
 export const switchGroupAtom = atom(null, (get, set, groupId: string) => {
   const groups = get(tabGroupsAtom)
-  const targetGroup = groups.find(g => g.id === groupId)
+  const result = switchTabGroup(groups, groupId)
 
-  if (!targetGroup) {
+  if (!result.ok) {
     console.warn('[TabGroups] Group not found:', groupId)
     return false
   }
 
   // Clear cached tab IDs - this will unload tabs from the previous group
-  set(cachedTabIdsAtom, [])
+  set(cachedTabIdsAtom, result.cacheTabIds ?? [])
 
   // Switch to the new group
-  set(activeGroupIdAtom, groupId)
+  set(activeGroupIdAtom, result.value ?? groupId)
 
   return true
 })
@@ -87,10 +100,7 @@ export const renameGroupAtom = atom(
   (get, set, { groupId, newName }: { groupId: string; newName: string }) => {
     const groups = get(tabGroupsAtom)
 
-    set(
-      tabGroupsAtom,
-      groups.map(g => (g.id === groupId ? { ...g, name: newName } : g))
-    )
+    set(tabGroupsAtom, renameTabGroup(groups, groupId, newName).groups)
   }
 )
 
@@ -102,10 +112,7 @@ export const updateGroupAtom = atom(
   (get, set, { groupId, name, color }: { groupId: string; name: string; color?: string }) => {
     const groups = get(tabGroupsAtom)
 
-    set(
-      tabGroupsAtom,
-      groups.map(g => (g.id === groupId ? { ...g, name, ...(color && { color }) } : g))
-    )
+    set(tabGroupsAtom, updateTabGroup(groups, groupId, { name, color }).groups)
   }
 )
 
@@ -128,22 +135,17 @@ export const deleteGroupAtom = atom(null, (get, set, groupId: string) => {
     return false
   }
 
-  // Remove tab IDs from global cache that belong to this group
   const cachedIds = get(cachedTabIdsAtom)
-  const groupTabIds = targetGroup.tabs.map(t => t.id)
-  set(
-    cachedTabIdsAtom,
-    cachedIds.filter(id => !groupTabIds.includes(id))
-  )
+  const result = deleteTabGroup(groups, groupId, cachedIds)
+  if (!result.ok) return false
+
+  set(cachedTabIdsAtom, result.cacheTabIds ?? cachedIds)
 
   // Clean up per-group atom cache
   cleanupGroupTabsAtomCache(groupId)
 
   // Remove the group
-  set(
-    tabGroupsAtom,
-    groups.filter(g => g.id !== groupId)
-  )
+  set(tabGroupsAtom, result.groups)
 
   // Note: Navigation après suppression est gérée par l'appelant (GroupActionsPopover)
   // via groupPager.navigateToPage() qui set aussi activeGroupIdAtom
@@ -158,25 +160,14 @@ export const addTabToGroupAtom = atom(
   null,
   (get, set, { groupId, tab }: { groupId: string; tab: TabItem }) => {
     const groups = get(tabGroupsAtom)
-    const targetGroup = groups.find(g => g.id === groupId)
+    const result = addTabToGroup(groups, groupId, tab)
 
-    if (!targetGroup) {
+    if (!result.ok) {
       console.warn('[TabGroups] Group not found:', groupId)
       return false
     }
 
-    set(
-      tabGroupsAtom,
-      groups.map(g =>
-        g.id === groupId
-          ? {
-              ...g,
-              tabs: [...g.tabs, tab],
-              activeTabIndex: g.tabs.length, // Activate the new tab
-            }
-          : g
-      )
-    )
+    set(tabGroupsAtom, result.groups)
 
     return true
   }
@@ -193,53 +184,17 @@ export const moveTabToGroupAtom = atom(
     { tabId, fromGroupId, toGroupId }: { tabId: string; fromGroupId: string; toGroupId: string }
   ) => {
     const groups = get(tabGroupsAtom)
-    const fromGroup = groups.find(g => g.id === fromGroupId)
-    const toGroup = groups.find(g => g.id === toGroupId)
-
-    if (!fromGroup || !toGroup) {
-      console.warn('[TabGroups] Source or target group not found')
-      return false
-    }
-
-    const tabToMove = fromGroup.tabs.find(t => t.id === tabId)
-    if (!tabToMove) {
-      console.warn('[TabGroups] Tab not found in source group')
-      return false
-    }
-
-    // Remove from source, add to target
-    set(
-      tabGroupsAtom,
-      groups.map(g => {
-        if (g.id === fromGroupId) {
-          const newTabs = g.tabs.filter(t => t.id !== tabId)
-          return {
-            ...g,
-            tabs: newTabs,
-            activeTabIndex: Math.min(g.activeTabIndex, newTabs.length - 1),
-          }
-        }
-        if (g.id === toGroupId) {
-          return {
-            ...g,
-            tabs: [...g.tabs, tabToMove],
-            activeTabIndex: g.tabs.length, // Activate the moved tab
-          }
-        }
-        return g
-      })
-    )
-
-    // Update cache if needed
     const cachedIds = get(cachedTabIdsAtom)
-    if (cachedIds.includes(tabId)) {
-      // Remove from cache since it's now in a different group
-      set(
-        cachedTabIdsAtom,
-        cachedIds.filter(id => id !== tabId)
-      )
+    const result = moveTabToGroup(groups, { tabId, fromGroupId, toGroupId, cacheTabIds: cachedIds })
+    if (!result.ok) {
+      console.warn('[TabGroups] Source, target group, or tab not found')
+      return false
     }
 
+    set(tabGroupsAtom, result.groups)
+    if (cachedIds.includes(tabId)) {
+      set(cachedTabIdsAtom, result.cacheTabIds ?? cachedIds)
+    }
     return true
   }
 )
@@ -252,15 +207,12 @@ export const reorderGroupsAtom = atom(
   (get, set, { fromIndex, toIndex }: { fromIndex: number; toIndex: number }) => {
     const groups = get(tabGroupsAtom)
 
-    if (fromIndex < 0 || fromIndex >= groups.length || toIndex < 0 || toIndex >= groups.length) {
+    const result = reorderTabGroups(groups, fromIndex, toIndex)
+    if (!result.ok) {
       return false
     }
 
-    const newGroups = [...groups]
-    const [movedGroup] = newGroups.splice(fromIndex, 1)
-    newGroups.splice(toIndex, 0, movedGroup)
-
-    set(tabGroupsAtom, newGroups)
+    set(tabGroupsAtom, result.groups)
     return true
   }
 )
@@ -354,14 +306,13 @@ export const switchGroupFromOutsideReact = (groupId: string): boolean => {
   const store = getDefaultStore()
   const groups = store.get(tabGroupsAtom)
 
-  if (!groups.find(g => g.id === groupId)) {
+  const result = switchTabGroup(groups, groupId)
+  if (!result.ok) {
     return false
   }
 
-  // Clear cache
-  store.set(cachedTabIdsAtom, [])
-  // Switch group
-  store.set(activeGroupIdAtom, groupId)
+  store.set(cachedTabIdsAtom, result.cacheTabIds ?? [])
+  store.set(activeGroupIdAtom, result.value ?? groupId)
 
   return true
 }
@@ -390,6 +341,9 @@ export const createGroupFromOutsideReact = (
     updatedAt: now,
   }
 
-  store.set(tabGroupsAtom, [...groups, newGroup])
-  return newGroup.id
+  const result = createTabGroup(groups, newGroup, MAX_TAB_GROUPS)
+  if (!result.ok) return null
+
+  store.set(tabGroupsAtom, result.groups)
+  return result.value ?? null
 }

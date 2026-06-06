@@ -1,19 +1,18 @@
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import { useRouter } from 'expo-router'
+import { Sheet, type SheetRef } from '~common/sheet'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { ActionSheetItem } from '~common/ActionMenu'
-import Modal from '~common/Modal'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { RootState } from '~redux/modules/reducer'
 import { deleteNote } from '~redux/modules/user'
 import books from '~assets/bible_versions/books-desc'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 type Props = {
-  ref?: React.RefObject<BottomSheetModal | null>
+  ref?: React.RefObject<SheetRef | null>
   noteId: string | null
   onClosed?: () => void
 }
@@ -21,7 +20,7 @@ type Props = {
 const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const openInNewTab = useOpenInNewTab()
   const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
   const relations = useSelector((state: RootState) => state.user.bible.relations)
@@ -89,7 +88,7 @@ const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
     const [Livre, Chapitre, Verset] = verseKey.split('-')
     close()
     setTimeout(() => {
-      router.push({
+      pushRouteOnce({
         pathname: '/bible-view',
         params: {
           contextDisplayMode: 'focused',
@@ -104,7 +103,7 @@ const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
   }
 
   return (
-    <Modal.Body ref={ref} onModalClose={onClosed} enableDynamicSizing>
+    <Sheet ref={ref} onDismiss={onClosed}>
       <ActionSheetItem icon="book-open" label={t('Voir dans la Bible')} onPress={navigateToBible} />
       <ActionSheetItem
         icon="external-link"
@@ -117,7 +116,7 @@ const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
         color="quart"
         onPress={deleteNoteConfirmation}
       />
-    </Modal.Body>
+    </Sheet>
   )
 }
 

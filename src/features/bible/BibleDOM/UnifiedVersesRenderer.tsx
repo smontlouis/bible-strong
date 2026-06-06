@@ -17,7 +17,16 @@ import ExternalIcon from './ExternalIcon'
 import Verse from './Verse'
 import { scaleFontSize } from './scaleFontSize'
 import type { CrossVersionAnnotation } from '~redux/selectors/bible'
-import { BibleError } from '~helpers/bibleErrors'
+import {
+  createVerseKey,
+  getAdjacentFocusVerses,
+  getFadePosition,
+  getFocusVerseNumbers,
+  getParallelVerseRows,
+  getTaggedVersesByLastVerse,
+  getVersesWithWordAnnotations,
+  shouldRenderVerseInFocusedContext,
+} from './verseRenderingModel'
 
 // ============================================================================
 // STYLED COMPONENTS
@@ -69,50 +78,6 @@ const getPericopeVerse = (pericopeChapter: PericopeChapter, verse: number) => {
     return pericopeChapter[verse]
   }
   return {}
-}
-
-/**
- * Determines the fade position for a verse in focused context mode.
- * Returns 'top' for the verse before the focus range, 'bottom' for the verse after.
- */
-const getFadePosition = (
-  verset: number,
-  isContextFocused: boolean,
-  adjacentVerses: { prev: number; next: number } | null
-): 'top' | 'bottom' | undefined => {
-  if (!isContextFocused || !adjacentVerses) return undefined
-  if (verset === adjacentVerses.prev) return 'top'
-  if (verset === adjacentVerses.next) return 'bottom'
-  return undefined
-}
-
-const extractParallelVerse = (
-  i: number,
-  parallelVerses: ParallelVerse[],
-  verse: TVerse,
-  version: string
-): { version: string; verse: TVerse; error?: BibleError }[] => {
-  const result: { version: string; verse: TVerse; error?: BibleError }[] = [{ version, verse }]
-
-  parallelVerses.forEach(({ id, verses, error }) => {
-    const parallelVerse = verses?.[i]
-    if (parallelVerse) {
-      result.push({
-        version: id,
-        verse: parallelVerse,
-        error,
-      })
-    } else {
-      // Push a placeholder for missing verse
-      result.push({
-        version: id,
-        verse: { ...verse, Texte: '' },
-        error,
-      })
-    }
-  })
-
-  return result
 }
 
 // ============================================================================
@@ -261,32 +226,20 @@ export function UnifiedVersesRenderer({
   redWords,
 }: UnifiedVersesRendererProps) {
   // Pre-compute numeric focus verses once to avoid repeated .map(Number) calls
-  const focusVersesNumeric = focusVerses ? focusVerses.map(Number) : null
+  const focusVersesNumeric = getFocusVerseNumbers(focusVerses)
   const isContextFocused = contextDisplayMode === 'focused'
 
   // Calculate adjacent verses for fade effect in focused context mode
-  const adjacentVerses = focusVersesNumeric
-    ? {
-        prev: Math.min(...focusVersesNumeric) - 1,
-        next: Math.max(...focusVersesNumeric) + 1,
-      }
-    : null
+  const adjacentVerses = getAdjacentFocusVerses(focusVersesNumeric)
 
   // Pre-compute whether verses are selected (avoids Object.keys() per iteration)
   const hasSelectedVerses = Object.keys(selectedVerses).length > 0
 
   // Pre-compute tagged verses lookup: O(m) once instead of O(n*m) per verse
-  const taggedVersesByLastVerse = new Map(taggedVerses?.map(v => [v.lastVerse, v] as const) ?? [])
+  const taggedVersesByLastVerse = getTaggedVersesByLastVerse(taggedVerses)
 
   // Pre-compute which verses have word annotations: O(a*r) once instead of O(n*a*r)
-  const versesWithWordAnnotationsByKey = new Set<string>()
-  if (wordAnnotations) {
-    Object.values(wordAnnotations).forEach(ann => {
-      if (ann.version === version) {
-        ann.ranges.forEach(r => versesWithWordAnnotationsByKey.add(r.verseKey))
-      }
-    })
-  }
+  const versesWithWordAnnotationsByKey = getVersesWithWordAnnotations(wordAnnotations, version)
 
   return (
     <>
@@ -295,7 +248,7 @@ export function UnifiedVersesRenderer({
 
         const { Livre, Chapitre, Verset } = verse
         const verseNumber = Number(Verset)
-        const verseKey = `${Livre}-${Chapitre}-${Verset}`
+        const verseKey = createVerseKey(verse)
 
         const pericope = getPericopeVerse(pericopeChapter, verseNumber)
         const tag = taggedVersesByLastVerse.get(verseKey)
@@ -349,7 +302,17 @@ export function UnifiedVersesRenderer({
         // In focused context mode, only show focused verses and adjacent fading verses
         const isFocused = focusVersesNumeric ? focusVersesNumeric.includes(verseNumber) : undefined
         const fadePosition = getFadePosition(verseNumber, isContextFocused, adjacentVerses)
-        if (isContextFocused && focusVerses && !isFocused && !fadePosition) return null
+        if (
+          !shouldRenderVerseInFocusedContext({
+            verseNumber,
+            isContextFocused,
+            hasFocusVerses: Boolean(focusVerses),
+            isFocused,
+            fadePosition,
+          })
+        ) {
+          return null
+        }
 
         const isSelected = Boolean(selectedVerses[verseKey])
         const isHighlighted = Boolean(highlightedVerses[verseKey])
@@ -362,7 +325,7 @@ export function UnifiedVersesRenderer({
         const isVerseToScroll = !isContextFocused && verseToScroll == Verset
         const secondaryVerse = secondaryVerses && secondaryVerses[i]
         const parallelVerse = isParallelVerse
-          ? extractParallelVerse(i, parallelVerses, verse, version)
+          ? getParallelVerseRows(i, parallelVerses, verse, version)
           : []
 
         const hasWordAnnotations = versesWithWordAnnotationsByKey.has(verseKey)

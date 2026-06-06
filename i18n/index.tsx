@@ -28,9 +28,20 @@ const languageDetector = {
   type: 'languageDetector' as const,
   async: false,
   init: () => {},
-  detect: () => storage.getString('lang') || languageTag,
+  detect: () => {
+    try {
+      return storage.getString('lang') || languageTag
+    } catch (error) {
+      console.warn('[i18n] Failed to read cached language from MMKV:', error)
+      return languageTag
+    }
+  },
   cacheUserLanguage: (language: string) => {
-    storage.set('lang', language)
+    try {
+      storage.set('lang', language)
+    } catch (error) {
+      console.warn('[i18n] Failed to cache language in MMKV:', error)
+    }
   },
 }
 

@@ -1,5 +1,5 @@
 import BibleVerseLinksScreen from '~features/bible/BibleVerseLinksScreen'
 
-const BibleVerseLinksRoute = () => <BibleVerseLinksScreen isFormSheet />
+const BibleVerseLinksRoute = () => <BibleVerseLinksScreen />
 
 export default BibleVerseLinksRoute

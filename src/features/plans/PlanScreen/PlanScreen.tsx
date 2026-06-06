@@ -1,4 +1,4 @@
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { type SheetRef } from '~common/sheet'
 import { useLocalSearchParams } from 'expo-router'
 import React from 'react'
 import { ComputedReadingSlice, ComputedPlanItem, Plan } from 'src/common/types'
@@ -31,8 +31,8 @@ const PlanScreen = ({
   // Parse complex object from URL string
   const planParams: ComputedPlanItem | undefined = params.plan ? JSON.parse(params.plan) : undefined
   const id = planIdFromProps || planParams?.id || ''
-  const modalRef = React.useRef<BottomSheetModal | null>(null)
-  const modalRefDetails = React.useRef<BottomSheetModal | null>(null)
+  const modalRef = React.useRef<SheetRef | null>(null)
+  const modalRefDetails = React.useRef<SheetRef | null>(null)
 
   const plan = useComputedPlan(id)
   const {

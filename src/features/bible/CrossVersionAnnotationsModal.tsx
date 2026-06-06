@@ -1,17 +1,17 @@
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { TouchableOpacity } from 'react-native'
+import { SheetHeader, type SheetRef } from '~common/sheet'
+import { MenuView, type MenuAction } from '@expo/ui/community/menu'
 import styled from '@emotion/native'
-import Modal from '~common/Modal'
+import { Sheet } from '~common/sheet'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import books from '~assets/bible_versions/books-desc'
 import type { CrossVersionAnnotation } from '~redux/selectors/bible'
 import { VersionCode } from '~state/tabs'
-import ModalHeader from '~common/ModalHeader'
 import { Chip } from '~common/ui/NewChip'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 const ItemRow = styled.View(({ theme }) => ({
   flexDirection: 'row',
@@ -20,6 +20,12 @@ const ItemRow = styled.View(({ theme }) => ({
   borderBottomWidth: 1,
   borderBottomColor: theme.colors.border,
 }))
+
+const ItemButton = styled.TouchableOpacity({
+  flex: 1,
+  flexDirection: 'row',
+  alignItems: 'center',
+})
 
 const IconContainer = styled.View(({ theme }) => ({
   width: 36,
@@ -32,7 +38,7 @@ const IconContainer = styled.View(({ theme }) => ({
 }))
 
 interface CrossVersionAnnotationsModalProps {
-  bottomSheetRef: React.RefObject<BottomSheetModal | null>
+  sheetRef: React.RefObject<SheetRef | null>
   verseKey: string | null
   versions: CrossVersionAnnotation[]
   onSwitchVersion: (version: VersionCode, verse: number) => void
@@ -59,7 +65,7 @@ const formatVerseReference = (verseKey: string): string => {
 }
 
 const CrossVersionAnnotationsModal = ({
-  bottomSheetRef,
+  sheetRef,
   verseKey,
   versions,
   onSwitchVersion,
@@ -67,34 +73,65 @@ const CrossVersionAnnotationsModal = ({
   onClose,
 }: CrossVersionAnnotationsModalProps) => {
   const { t } = useTranslation()
+  const pushRouteOnce = usePushRouteOnce()
 
   const handleSwitchVersion = (version: VersionCode) => {
     // Extract verse number from verseKey (format: "book-chapter-verse")
     const verse = verseKey ? parseInt(verseKey.split('-')[2], 10) : 1
     onSwitchVersion(version, verse)
-    bottomSheetRef.current?.dismiss()
+    sheetRef.current?.dismiss()
   }
 
   const handleOpenInNewTab = (version: VersionCode) => {
     onOpenInNewTab(version)
-    bottomSheetRef.current?.dismiss()
+    sheetRef.current?.dismiss()
+  }
+
+  const handleOpenBibleView = (version: VersionCode) => {
+    if (!verseKey) return
+
+    const [bookNumber, chapter, verse] = verseKey.split('-').map(Number)
+    if (!bookNumber || !chapter || !verse) return
+
+    pushRouteOnce({
+      pathname: '/bible-view',
+      params: {
+        contextDisplayMode: 'focused',
+        book: JSON.stringify(books[bookNumber - 1]),
+        chapter: String(chapter),
+        verse: String(verse),
+        version,
+        focusVerses: JSON.stringify([verse]),
+      },
+    })
+    sheetRef.current?.dismiss()
   }
 
   const reference = verseKey ? formatVerseReference(verseKey) : ''
+  const menuActions: MenuAction[] = [
+    {
+      id: 'switch-version',
+      title: t('bible.crossVersionAnnotations.switchVersion'),
+      image: 'arrow.triangle.2.circlepath',
+    },
+    {
+      id: 'new-tab',
+      title: t('bible.crossVersionAnnotations.newTab'),
+      image: 'plus.square',
+    },
+  ]
 
   return (
-    <Modal.Body
-      ref={bottomSheetRef}
-      onModalClose={onClose}
-      withPortal
-      snapPoints={['50%']}
-      headerComponent={
-        <ModalHeader title={t('bible.crossVersionAnnotations.subtitle')} subTitle={reference} />
+    <Sheet
+      ref={sheetRef}
+      onDismiss={onClose}
+      header={
+        <SheetHeader title={t('bible.crossVersionAnnotations.subtitle')} subTitle={reference} />
       }
     >
-      <Box>
-        {versions.map((versionData, index) => (
-          <ItemRow key={index}>
+      {versions.map((versionData, index) => (
+        <ItemRow key={index}>
+          <ItemButton activeOpacity={0.7} onPress={() => handleOpenBibleView(versionData.version)}>
             <IconContainer>
               <FeatherIcon name="edit-3" size={18} color="secondary" />
             </IconContainer>
@@ -107,39 +144,28 @@ const CrossVersionAnnotationsModal = ({
                 </Text>
                 <Chip>{versionData.version}</Chip>
               </HStack>
-              <HStack gap={12} marginTop={8}>
-                <TouchableOpacity
-                  onPress={e => {
-                    e.stopPropagation()
-                    handleSwitchVersion(versionData.version)
-                  }}
-                >
-                  <HStack alignItems="center">
-                    <FeatherIcon name="refresh-cw" size={10} color="tertiary" />
-                    <Text fontSize={11} color="tertiary" marginLeft={4}>
-                      {t('bible.crossVersionAnnotations.switchVersion')}
-                    </Text>
-                  </HStack>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={e => {
-                    e.stopPropagation()
-                    handleOpenInNewTab(versionData.version)
-                  }}
-                >
-                  <HStack alignItems="center">
-                    <FeatherIcon name="plus-square" size={10} color="tertiary" />
-                    <Text fontSize={11} color="tertiary" marginLeft={4}>
-                      {t('bible.crossVersionAnnotations.newTab')}
-                    </Text>
-                  </HStack>
-                </TouchableOpacity>
-              </HStack>
             </Box>
-          </ItemRow>
-        ))}
-      </Box>
-    </Modal.Body>
+          </ItemButton>
+          <MenuView
+            actions={menuActions}
+            onPressAction={({ nativeEvent }) => {
+              switch (nativeEvent.event) {
+                case 'switch-version':
+                  handleSwitchVersion(versionData.version)
+                  break
+                case 'new-tab':
+                  handleOpenInNewTab(versionData.version)
+                  break
+              }
+            }}
+          >
+            <Box center width={40} height={40} marginLeft={8}>
+              <FeatherIcon name="more-vertical" size={18} color="tertiary" />
+            </Box>
+          </MenuView>
+        </ItemRow>
+      ))}
+    </Sheet>
   )
 }
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
 
 import BibleLinkItem from './BibleLinkItem'
@@ -13,7 +13,7 @@ import Header from '~common/Header'
 import Empty from '~common/Empty'
 
 import FiltersHeader from '~common/FiltersHeader'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useSheet } from '~helpers/useSheet'
 import { unifiedTagsModalAtom } from '~state/app'
 import verseToReference from '~helpers/verseToReference'
 import { Tag } from '~common/types'
@@ -27,6 +27,7 @@ import { endpointIdentity, type RelationEndpoint } from '~features/studyRelation
 import { createExternalLinkEndpointFromLink } from '~features/studyRelations/endpoints'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 type TLink = {
   linkId: string
@@ -43,7 +44,7 @@ const BibleVerseLinks = ({ isFormSheet = false }: BibleVerseLinksProps) => {
   const withBack = params.withBack === 'true'
   const verse = params.verse || ''
   const { t } = useTranslation()
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : withBack
   const hasListBackButton = isFormSheet ? canGoBackInStack : true
@@ -56,7 +57,7 @@ const BibleVerseLinks = ({ isFormSheet = false }: BibleVerseLinksProps) => {
   const relations = useSelector(selectRelations)
   const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
-  const linkSettingsModal = useBottomSheetModal()
+  const linkSettingsModal = useSheet()
   const openEntityRelations = useOpenEntityRelations()
 
   const openTagsModal = useCallback(() => {
@@ -143,7 +144,7 @@ const BibleVerseLinks = ({ isFormSheet = false }: BibleVerseLinksProps) => {
   }, [verse, _links, relations])
 
   const openLink = (linkId: string) => {
-    router.push({ pathname: '/link', params: { linkId } })
+    pushRouteOnce({ pathname: '/link', params: { linkId } })
   }
 
   const renderLink = ({ item, index }: { item: TLink; index: number }) => {

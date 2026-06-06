@@ -8,11 +8,16 @@ import { BackHandler } from 'react-native'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Container from '~common/ui/Container'
-import { ComputedReadingSlice } from '~common/types'
 import { useComputedPlan } from '~features/plans/plan.hooks'
 import { PlanTab, useIsCurrentTab } from '~state/tabs'
 import PlanScreen from './PlanScreen/PlanScreen'
 import PlanSliceScreen from './PlanSliceScreen/PlanSliceScreen'
+import {
+  getRecoveredPlanTabTitle,
+  leavePlanSliceInTab,
+  openPlanSliceInTab,
+  resolvePlanTabContent,
+} from './planTabState'
 
 interface Props {
   planAtom: PrimitiveAtom<PlanTab>
@@ -23,35 +28,26 @@ const PlanTabScreen = ({ planAtom }: Props) => {
   const [planTab, setPlanTab] = useAtom(planAtom)
   const isCurrentTab = useIsCurrentTab()
   const plan = useComputedPlan(planTab.data.planId)
-
-  const activeSlice = (() => {
-    if (!planTab.data.readingSliceId || !plan) return undefined
-
-    for (const section of plan.sections) {
-      const slice = section.data.find(s => s.id === planTab.data.readingSliceId)
-      if (slice) return slice
-    }
-
-    return undefined
-  })()
+  const content = resolvePlanTabContent(plan, planTab.data.readingSliceId)
 
   const clearActiveSlice = () => {
     setPlanTab(
       produce(draft => {
-        draft.data.readingSliceId = undefined
+        draft.data = leavePlanSliceInTab(draft.data)
       })
     )
   }
 
   React.useEffect(() => {
-    if (!plan?.title || plan.title === planTab.title) return
+    const recoveredTitle = getRecoveredPlanTabTitle(planTab.title, plan)
+    if (!recoveredTitle) return
 
     setPlanTab(
       produce(draft => {
-        draft.title = plan.title
+        draft.title = recoveredTitle
       })
     )
-  }, [plan?.title, planTab.title, setPlanTab])
+  }, [plan, planTab.title, setPlanTab])
 
   React.useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -59,7 +55,7 @@ const PlanTabScreen = ({ planAtom }: Props) => {
 
       setPlanTab(
         produce(draft => {
-          draft.data.readingSliceId = undefined
+          draft.data = leavePlanSliceInTab(draft.data)
         })
       )
       return true
@@ -68,7 +64,7 @@ const PlanTabScreen = ({ planAtom }: Props) => {
     return () => backHandler.remove()
   }, [isCurrentTab, planAtom, planTab.data.readingSliceId, setPlanTab])
 
-  if (!plan) {
+  if (content.type === 'missing-plan') {
     return (
       <Container>
         <Header title={planTab.title} />
@@ -80,37 +76,28 @@ const PlanTabScreen = ({ planAtom }: Props) => {
     )
   }
 
-  if (planTab.data.readingSliceId && activeSlice) {
+  if (content.type === 'reading-slice') {
     return (
       <PlanSliceScreen
-        readingSlice={
-          {
-            ...activeSlice,
-            planId: plan.id,
-            planTitle: plan.title,
-            planLanguage: plan.lang,
-          } as ComputedReadingSlice & {
-            planId: string
-            planTitle: string
-            planLanguage?: typeof plan.lang
-          }
-        }
-        planTitle={plan.title}
+        readingSlice={content.readingSlice}
+        planTitle={content.readingSlice.planTitle}
         onBack={clearActiveSlice}
         onRead={clearActiveSlice}
       />
     )
   }
 
+  const resolvedPlan = plan!
+
   return (
     <PlanScreen
-      planId={plan.id}
+      planId={resolvedPlan.id}
       hasBackButton={false}
       onRemove={clearActiveSlice}
       onReadingSlicePress={slice => {
         setPlanTab(
           produce(draft => {
-            draft.data.readingSliceId = slice.id
+            draft.data = openPlanSliceInTab(draft.data, slice.id)
           })
         )
       }}

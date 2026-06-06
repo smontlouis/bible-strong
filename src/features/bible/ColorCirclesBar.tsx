@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import { useSetAtom } from 'jotai/react'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { type SheetRef } from '~common/sheet'
 
 import ColorCircleGrid from '~common/ColorCircleGrid'
 import ColorEditModal from '~common/ColorEditModal'
@@ -38,7 +38,7 @@ type Props = {
 const ColorCirclesBar = ({ selectedVerseHighlightColor, addHighlight, removeHighlight }: Props) => {
   const dispatch = useDispatch()
   const setColorPickerModal = useSetAtom(colorPickerModalAtom)
-  const modalRef = useRef<BottomSheetModal>(null)
+  const modalRef = useRef<SheetRef>(null)
   const [editingColor, setEditingColor] = useState<EditingColor | null>(null)
 
   const { colors, customHighlightColors, defaultColorTypes } = useHighlightColors()

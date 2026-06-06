@@ -36,6 +36,7 @@ import {
 
 // Batch chunk size (must match firestoreSubcollections.ts)
 const BATCH_CHUNK_SIZE = 400
+const RELATIONS_CLEANUP_VERSION = 1
 type EmbeddedBibleData = Partial<Record<SubcollectionName, SubcollectionData>> & {
   studyRelations?: Record<string, LegacyRelation>
 }
@@ -192,10 +193,40 @@ export async function isUserRelationsMigrated(userId: string): Promise<boolean> 
   }
 }
 
+async function isRelationsCleanupCurrent(userId: string): Promise<boolean> {
+  try {
+    const userDocRef = doc(firebaseDb, 'users', userId)
+    const userDocSnap = await getDoc(userDocRef)
+    const userData = userDocSnap.data()
+    return Number(userData?._relationsCleanupVersion || 0) >= RELATIONS_CLEANUP_VERSION
+  } catch (error) {
+    console.error('[FirestoreMigration] Failed to check relations cleanup status:', error)
+    Sentry.captureException(error, {
+      tags: {
+        feature: 'firestore_migration',
+        action: 'check_relations_cleanup_status',
+      },
+      extra: {
+        userId,
+        errorMessage: getErrorMessage(error),
+      },
+    })
+    return false
+  }
+}
+
 async function markRelationsAsMigrated(userId: string): Promise<void> {
   const userDocRef = doc(firebaseDb, 'users', userId)
   await updateDoc(userDocRef, {
     _relationsMigrated: true,
+    _relationsCleanupVersion: RELATIONS_CLEANUP_VERSION,
+  })
+}
+
+async function markRelationsCleanupComplete(userId: string): Promise<void> {
+  const userDocRef = doc(firebaseDb, 'users', userId)
+  await updateDoc(userDocRef, {
+    _relationsCleanupVersion: RELATIONS_CLEANUP_VERSION,
   })
 }
 
@@ -270,7 +301,11 @@ export async function migrateUserRelationsArchitecture(
     reportProgress('Vérification des relations...', 0)
     const alreadyMigrated = await isUserRelationsMigrated(userId)
     if (alreadyMigrated) {
-      await cleanupDuplicateRelations(userId)
+      const cleanupCurrent = await isRelationsCleanupCurrent(userId)
+      if (!cleanupCurrent) {
+        await cleanupDuplicateRelations(userId)
+        await markRelationsCleanupComplete(userId)
+      }
       return { success: true }
     }
 

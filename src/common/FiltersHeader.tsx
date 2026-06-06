@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
+import { Sheet, SheetHeader, SheetView, type SheetRef } from '~common/sheet'
 import React, { memo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
@@ -9,8 +9,6 @@ import Back from '~common/Back'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
-import { ContainerComponent } from './Modal'
 
 const TouchableBox = styled.TouchableOpacity({
   flex: 1,
@@ -29,15 +27,6 @@ const StyledText = styled(Text)({
 const HeaderBox = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   minHeight: 54,
-  borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border,
-}))
-
-const SheetHeader = styled.View(({ theme }) => ({
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  padding: 16,
   borderBottomWidth: 1,
   borderBottomColor: theme.colors.border,
 }))
@@ -91,8 +80,7 @@ const FiltersHeader = ({
 }: Props) => {
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
-  const filtersRef = useRef<BottomSheetModal>(null)
-  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
+  const filtersRef = useRef<SheetRef>(null)
 
   const openFilters = () => {
     filtersRef.current?.present()
@@ -118,30 +106,24 @@ const FiltersHeader = ({
           <FeatherIcon name="chevron-down" size={15} />
         </TouchableBox>
       </HeaderBox>
-      <BottomSheetModal
+      <Sheet
         ref={filtersRef}
-        topInset={insets.top}
-        enablePanDownToClose
-        enableDynamicSizing
-        backdropComponent={renderBackdrop}
-        containerComponent={ContainerComponent}
-        activeOffsetY={[-20, 20]}
-        key={key}
-        {...bottomSheetStyles}
+        header={
+          <SheetHeader
+            title={t('Filtres')}
+            rightComponent={
+              hasActiveFilters && onReset ? (
+                <ResetButton onPress={onReset}>
+                  <Text color="primary" fontSize={14}>
+                    {t('Réinitialiser')}
+                  </Text>
+                </ResetButton>
+              ) : undefined
+            }
+          />
+        }
       >
-        <BottomSheetView>
-          <SheetHeader>
-            <Text bold fontSize={18}>
-              {t('Filtres')}
-            </Text>
-            {hasActiveFilters && onReset && (
-              <ResetButton onPress={onReset}>
-                <Text color="primary" fontSize={14}>
-                  {t('Réinitialiser')}
-                </Text>
-              </ResetButton>
-            )}
-          </SheetHeader>
+        <SheetView>
           {filters.map(filter => (
             <FilterRow key={filter.key} onPress={filter.onPress}>
               <Box row flex={1}>
@@ -165,9 +147,8 @@ const FiltersHeader = ({
               </Box>
             </FilterRow>
           ))}
-          <Box height={insets.bottom + 16} />
-        </BottomSheetView>
-      </BottomSheetModal>
+        </SheetView>
+      </Sheet>
     </>
   )
 }

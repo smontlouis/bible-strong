@@ -69,6 +69,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     associatedDomains: ['applinks:bible.strong.app'],
   },
   plugins: [
+    'expo-sharing',
     'expo-router',
     'expo-asset',
     'expo-sqlite',

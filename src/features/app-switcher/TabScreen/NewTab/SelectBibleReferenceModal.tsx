@@ -1,9 +1,9 @@
 import { useAtomValue } from 'jotai/react'
 import { atom } from 'jotai/vanilla'
 import React, { useEffect } from 'react'
-import Modal from '~common/Modal'
+import { Sheet } from '~common/sheet'
 import BibleSelect from '~features/bible/BibleSelect'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useSheet } from '~helpers/useSheet'
 import wait from '~helpers/wait'
 import { getDefaultBibleTab, useBibleTabActions } from '../../../../state/tabs'
 import { selectBibleReferenceDataAtom } from './atoms'
@@ -19,7 +19,7 @@ const SelectBibleReferenceModal = ({ isOpen, onClose }: SelectBibleReferenceModa
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
   const [canGetData, setCanGetData] = React.useState(false)
-  const { ref, open, close } = useBottomSheetModal()
+  const { ref, open, close } = useSheet()
   const { onSelect } = useAtomValue(selectBibleReferenceDataAtom)
 
   useEffect(() => {
@@ -46,16 +46,9 @@ const SelectBibleReferenceModal = ({ isOpen, onClose }: SelectBibleReferenceModa
   }, [bible, canGetData, onSelect])
 
   return (
-    <Modal.Body
-      ref={ref}
-      onModalClose={onClose}
-      enableDynamicSizing={false}
-      snapPoints={['90%']}
-      withPortal
-      enableScrollView={false}
-    >
+    <Sheet ref={ref} onDismiss={onClose} snapPoints={[0.9]}>
       <BibleSelect bibleAtom={bibleAtom} onComplete={getBibleData} />
-    </Modal.Body>
+    </Sheet>
   )
 }
 

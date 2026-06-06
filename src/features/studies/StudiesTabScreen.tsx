@@ -3,12 +3,12 @@ import React, { useCallback } from 'react'
 import withLoginModal from '~common/withLoginModal'
 
 import { produce } from 'immer'
-import { useRouter } from 'expo-router'
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { StudyTab } from '../../state/tabs'
 import AllStudiesTabScreen from './AllStudiesTabScreen'
 import EditStudyScreen from './EditStudyScreen'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 interface StudiesTabScreenProps {
   studyAtom: PrimitiveAtom<StudyTab>
@@ -23,7 +23,7 @@ const StudiesTabScreen = ({
   isNewTabSelection = false,
   newTabId,
 }: StudiesTabScreenProps) => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const [studyTab, setStudyTab] = useAtom(studyAtom)
 
   const {
@@ -34,7 +34,7 @@ const StudiesTabScreen = ({
   const onStudySelect = useCallback(
     (id: string) => {
       if (isFormSheet) {
-        router.push({ pathname: '/edit-study', params: { studyId: id } })
+        pushRouteOnce({ pathname: '/edit-study', params: { studyId: id } })
         return
       }
 
@@ -44,7 +44,7 @@ const StudiesTabScreen = ({
         })
       )
     },
-    [isFormSheet, router, setStudyTab]
+    [isFormSheet, pushRouteOnce, setStudyTab]
   )
 
   const onGoBack = useCallback(() => {

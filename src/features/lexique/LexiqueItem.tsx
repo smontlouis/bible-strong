@@ -2,11 +2,11 @@ import React, { memo, useCallback } from 'react'
 import styled from '@emotion/native'
 import { Pressable } from 'react-native'
 
-import { useRouter } from 'expo-router'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useTranslation } from 'react-i18next'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 const SectionItem = styled(Box)(({ theme }) => ({
   height: 80,
@@ -44,19 +44,19 @@ interface LexiqueItemProps {
 
 const LexiqueItem = memo(({ Mot, Grec, Hebreu, Code, lexiqueType, onSelect }: LexiqueItemProps) => {
   const { t } = useTranslation()
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const book = lexiqueType === 'Hébreu' ? 1 : 40
 
   const handlePress = useCallback(() => {
     if (onSelect) {
       onSelect(book, Code, Mot)
     } else {
-      router.push({
+      pushRouteOnce({
         pathname: '/strong',
         params: { book: String(book), reference: Code },
       })
     }
-  }, [onSelect, book, Code, Mot, router])
+  }, [onSelect, book, Code, Mot, pushRouteOnce])
 
   const content = (
     <SectionItem>

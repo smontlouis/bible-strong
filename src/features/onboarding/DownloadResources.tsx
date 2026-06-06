@@ -12,11 +12,13 @@ import useLanguage from '~helpers/useLanguage'
 import { isVersionInstalled } from '~helpers/biblesDb'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { requireBiblePath } from '~helpers/requireBiblePath'
-import { createBibleDownloadItem, createDatabaseDownloadItem } from '~helpers/downloadItemFactory'
-import type { DatabaseId } from '~helpers/databaseTypes'
 import { downloadManager } from '~helpers/downloadManager'
 import { overallProgressAtom, activeQueueAtom, failedItemsAtom } from '~state/downloadQueue'
 import { isOnboardingCompletedAtom, selectedResourcesAtom } from './atom'
+import {
+  createDownloadItemFromOnboardingSelection,
+  getOnboardingResourceSelectionId,
+} from './onboardingResources'
 
 import * as FileSystem from 'expo-file-system/legacy'
 
@@ -36,18 +38,13 @@ const DownloadResources = () => {
   useEffect(() => {
     const items = selectedResources.map(resource => {
       try {
-        if (resource.type === 'bible') {
-          return createBibleDownloadItem(resource.id)
-        } else {
-          // Database: use the language that was stored when resource was selected
-          return createDatabaseDownloadItem(
-            resource.id as DatabaseId,
-            (resource.lang || 'fr') as 'en' | 'fr' // Fallback to 'fr' for safety
-          )
-        }
+        return createDownloadItemFromOnboardingSelection(resource)
       } catch (error) {
         // Log error but don't crash the app
-        console.error(`Failed to create download item for ${resource.id}:`, error)
+        console.error(
+          `Failed to create download item for ${getOnboardingResourceSelectionId(resource)}:`,
+          error
+        )
         throw error // Re-throw to trigger the error UI
       }
     })

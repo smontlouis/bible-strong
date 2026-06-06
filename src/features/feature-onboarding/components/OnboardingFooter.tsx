@@ -29,7 +29,6 @@ const OnboardingFooter = () => {
       justifyContent="space-between"
       px={18}
       py={16}
-      bg="reverse"
       mt="auto"
       layout={LinearTransition}
     >

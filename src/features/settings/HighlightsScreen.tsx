@@ -11,9 +11,9 @@ import ColorFilterModal from '~common/ColorFilterModal'
 import TypeFilterModal from '~common/TypeFilterModal'
 import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
-import Modal from '~common/Modal'
+import { Sheet } from '~common/sheet'
 import { useHighlightFilters } from '~helpers/useHighlightFilters'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useSheet } from '~helpers/useSheet'
 import type { RootState } from '~redux/modules/reducer'
 import { selectHighlightsObj } from '~redux/selectors/user'
 import {
@@ -123,7 +123,7 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
 
   // Settings modal (for highlight actions)
   const [settingsData, setSettingsData] = useState<{ stringIds: VerseIds } | null>(null)
-  const { ref: settingsRef, open: openSettings, close: closeSettings } = useBottomSheetModal()
+  const { ref: settingsRef, open: openSettings, close: closeSettings } = useSheet()
 
   // Annotation settings modal
   const [annotationSettingsData, setAnnotationSettingsData] =
@@ -132,7 +132,7 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
     ref: annotationSettingsRef,
     open: openAnnotationSettings,
     close: closeAnnotationSettings,
-  } = useBottomSheetModal()
+  } = useSheet()
 
   useEffect(() => {
     if (settingsData) openSettings()
@@ -335,7 +335,7 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
         )}
 
         {/* Settings modal */}
-        <Modal.Body ref={settingsRef} enableDynamicSizing>
+        <Sheet ref={settingsRef}>
           <ActionSheetItem
             icon="droplet"
             label={t('Changer la couleur')}
@@ -369,14 +369,10 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
             color="quart"
             onPress={handleDelete}
           />
-        </Modal.Body>
+        </Sheet>
 
         {/* Annotation settings modal */}
-        <Modal.Body
-          ref={annotationSettingsRef}
-          onModalClose={() => setAnnotationSettingsData(null)}
-          enableDynamicSizing
-        >
+        <Sheet ref={annotationSettingsRef} onDismiss={() => setAnnotationSettingsData(null)}>
           <ActionSheetItem
             icon="droplet"
             label={t('Changer la couleur')}
@@ -412,7 +408,7 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
             color="quart"
             onPress={handleDeleteAnnotation}
           />
-        </Modal.Body>
+        </Sheet>
       </Box>
     </FormSheetScreen>
   )

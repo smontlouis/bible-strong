@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 
 import { MenuView, type MenuAction } from '@expo/ui/community/menu'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { type SheetRef } from '~common/sheet'
 import { useRouter } from 'expo-router'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
@@ -28,12 +28,17 @@ import Box, {
 } from '~common/ui/Box'
 import { FeatherIcon, IonIcon } from '~common/ui/Icon'
 import Text, { AnimatedText } from '~common/ui/Text'
+import EntityChipList from '~common/EntityChipList'
+import type { TagsObj } from '~common/types'
 import {
   BIBLE_FORM_SHEET_HEADER_HEIGHT,
   HEADER_HEIGHT,
 } from '~features/app-switcher/utils/constants'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import BookmarkModal from '~features/bookmarks/BookmarkModal'
+import { createVerseEndpoint } from '~features/studyRelations/domain'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
+import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { getIfDatabaseNeedsDownload } from '~helpers/databases'
 import generateUUID from '~helpers/generateUUID'
 import { toast } from '~helpers/toast'
@@ -45,7 +50,7 @@ import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { makeSelectBookmarkForChapter } from '~redux/selectors/bookmarks'
-import { useBookAndVersionSelector } from './BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
+import { useBookAndVersionSelector } from './BookSelectorSheet/BookSelectorSheetProvider'
 import { VerseSelectorPopup } from './VerseSelectorPopup'
 
 interface BibleHeaderProps {
@@ -55,6 +60,7 @@ interface BibleHeaderProps {
   commentsDisplay?: boolean
   onExitAnnotationMode?: () => void
   annotationModeEnabled?: boolean
+  onEditFocusTags?: () => void
 }
 
 const Header = ({
@@ -64,6 +70,7 @@ const Header = ({
   commentsDisplay,
   onExitAnnotationMode,
   annotationModeEnabled,
+  onEditFocusTags,
 }: BibleHeaderProps) => {
   const router = useRouter()
   const { t } = useTranslation()
@@ -83,9 +90,10 @@ const Header = ({
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = Boolean(isFormSheet && canGoBackInStack)
   const openInNewTab = useOpenInNewTab()
+  const openEntityRelations = useOpenEntityRelations()
 
   // Bookmark ref
-  const bookmarkModalRef = useRef<BottomSheetModal>(null)
+  const bookmarkModalRef = useRef<SheetRef>(null)
   const bible = useAtomValue(bibleAtom)
   const contextDisplayMode = getBibleContextDisplayMode(bible.data)
   const isContextFocused = contextDisplayMode === 'focused'
@@ -114,6 +122,27 @@ const Header = ({
   )
 
   const hasFocusVerses = focusVerses && focusVerses.length > 0
+  const focusedReference = hasFocusVerses
+    ? verseToReference({ bookNum: bookNumber, chapterNum: chapter, verses: displayVerses })
+    : ''
+  const focusedVerseEndpoint = hasFocusVerses
+    ? createVerseEndpoint(
+        focusVerses.map(focusVerse => `${bookNumber}-${chapter}-${focusVerse}`),
+        focusedReference
+      )
+    : null
+  const focusedVerseRelationCount = useRelationCount(focusedVerseEndpoint)
+  const highlights = useSelector((state: RootState) => state.user.bible.highlights)
+  const focusedVerseTags = (hasFocusVerses ? focusVerses : []).reduce<TagsObj>(
+    (acc, focusVerse) => {
+      const verseKey = `${bookNumber}-${chapter}-${focusVerse}`
+      const tags = highlights[verseKey]?.tags
+      return tags ? { ...acc, ...tags } : acc
+    },
+    {}
+  )
+  const hasFocusedVerseTags = Object.keys(focusedVerseTags).length > 0
+  const hasFocusEntityChips = hasFocusedVerseTags || focusedVerseRelationCount > 0
 
   useEffect(() => {
     const { selectedBook, selectedChapter, selectedVersion, focusVerses } = bible.data
@@ -129,6 +158,7 @@ const Header = ({
 
   const isHeaderCollapsed = !isFormSheet && isFullScreenBible
   const headerHeight = isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT
+  const focusedHeaderMinHeight = headerHeight + (hasFocusVerses && hasFocusEntityChips ? 10 : 0)
   const fullScreenOpacity = isHeaderCollapsed ? 0 : 1
   const fullScreenTranslateY = isHeaderCollapsed ? -4 : 0
   const TOP_INSET = isFormSheet ? 0 : insets.top
@@ -167,6 +197,11 @@ const Header = ({
     })
   }
 
+  const openFocusedVerseRelations = () => {
+    if (!focusedVerseEndpoint) return
+    openEntityRelations(focusedVerseEndpoint)
+  }
+
   const isVerticalParallelMode = displayMode === 'vertical'
   const nextColumnWidth = columnWidth === 50 ? 75 : columnWidth === 75 ? 100 : 50
 
@@ -183,6 +218,24 @@ const Header = ({
       title: t('tab.openInNewTab'),
       image: 'arrow.up.forward.square',
     },
+    ...(hasFocusVerses && onEditFocusTags
+      ? [
+          {
+            id: 'tags',
+            title: t('Éditer les tags'),
+            image: 'tag' as const,
+          },
+        ]
+      : []),
+    ...(focusedVerseEndpoint
+      ? [
+          {
+            id: 'relations',
+            title: t('Éditer les relations'),
+            image: 'arrow.triangle.merge' as const,
+          },
+        ]
+      : []),
     {
       id: 'clear-focus',
       title: t('Quitter le mode focus'),
@@ -266,6 +319,11 @@ const Header = ({
       id: 'bookmark',
       title: currentChapterBookmark ? t('Modifier le marque-page') : t('Ajouter un marque-page'),
       image: 'bookmark',
+    },
+    {
+      id: 'open-tab',
+      title: t('tab.openInNewTab'),
+      image: 'arrow.up.forward.square',
     },
   ]
 
@@ -378,7 +436,8 @@ const Header = ({
       left={0}
       overflow="visible"
       style={{
-        height: isHeaderCollapsed ? 20 + TOP_INSET : headerHeight + TOP_INSET,
+        height: isHeaderCollapsed ? 20 + TOP_INSET : undefined,
+        minHeight: isHeaderCollapsed ? 20 + TOP_INSET : focusedHeaderMinHeight + TOP_INSET,
         transitionProperty: 'height',
         transitionDuration: 300,
       }}
@@ -409,9 +468,17 @@ const Header = ({
           <>
             <AnimatedBox flex={1} style={translateYTransitionStyle}>
               <HStack px={15} alignItems="center" justifyContent="space-between" gap={8}>
-                <Text fontWeight="bold" fontSize={14}>
-                  {`${verseToReference({ bookNum: bookNumber, chapterNum: chapter, verses: displayVerses })} - ${version}`}
-                </Text>
+                <Box flex={1}>
+                  <Text fontWeight="bold" fontSize={14} numberOfLines={1} shrink={1}>
+                    {`${focusedReference} - ${version}`}
+                  </Text>
+                  <EntityChipList
+                    tags={focusedVerseTags}
+                    relationCount={focusedVerseRelationCount}
+                    onRelationPress={openFocusedVerseRelations}
+                    limit={2}
+                  />
+                </Box>
                 <MenuView
                   actions={focusMenuActions}
                   onPressAction={({ nativeEvent }) => {
@@ -422,6 +489,12 @@ const Header = ({
                         break
                       case 'open-tab':
                         openInBibleTab()
+                        break
+                      case 'tags':
+                        onEditFocusTags?.()
+                        break
+                      case 'relations':
+                        openFocusedVerseRelations()
                         break
                       case 'clear-focus':
                         actions.clearFocusVerses()
@@ -594,6 +667,9 @@ const Header = ({
                       case 'bookmark':
                         bookmarkModalRef.current?.present()
                         break
+                      case 'open-tab':
+                        openInBibleTab()
+                        break
                     }
                   }}
                 >
@@ -626,7 +702,7 @@ const Header = ({
         )}
       </HStack>
       <BookmarkModal
-        bottomSheetRef={bookmarkModalRef}
+        sheetRef={bookmarkModalRef}
         book={bookNumber}
         chapter={chapter}
         version={version}

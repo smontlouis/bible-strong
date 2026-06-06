@@ -1,19 +1,18 @@
-import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import DateTimePicker from '@expo/ui/community/datetime-picker'
 import React, { useEffect, useState } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'
 import { Platform, Share, View } from 'react-native'
 import { EaseView } from 'react-native-ease'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import Empty from '~common/Empty'
 import Link, { LinkBox } from '~common/Link'
-import { toast } from '~helpers/toast'
+import { Sheet, SheetView, type SheetRef } from '~common/sheet'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import Paragraph from '~common/ui/Paragraph'
 import Switch from '~common/ui/Switch'
 import Text from '~common/ui/Text'
-import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
+import { toast } from '~helpers/toast'
 import { removeBreakLines } from '~helpers/utils'
 import { zeroFill } from '~helpers/zeroFill'
 import { RootState } from '~redux/modules/reducer'
@@ -21,7 +20,6 @@ import { setNotificationVOD } from '~redux/modules/user'
 import VerseImageModal from './VerseImageModal'
 import { useImageUrls } from './useImageUrls'
 import { useVerseOfTheDay } from './useVerseOfTheDay'
-import Paragraph from '~common/ui/Paragraph'
 
 export const VERSE_CARD_HEIGHT = 240
 
@@ -100,13 +98,12 @@ const VerseOfTheDay = ({ addDay }: Props) => {
   const verseOfTheDay = useVerseOfTheDay(addDay)
   const imageUrls = useImageUrls(verseOfTheDay)
   const dispatch = useDispatch()
-  const imageModalRef = React.useRef<BottomSheetModal>(null)
+  const imageModalRef = React.useRef<SheetRef>(null)
   const verseOfTheDayTime = useSelector(
     (state: RootState) => state.user.notifications.verseOfTheDay
   )
-  const insets = useSafeAreaInsets()
   const ago = dayToAgo(addDay, t)
-  const notificationModalRef = React.useRef<BottomSheetModal>(null)
+  const notificationModalRef = React.useRef<SheetRef>(null)
 
   const [initialHour, initialMinutes] = verseOfTheDayTime.split(':').map(n => Number(n))
 
@@ -129,8 +126,6 @@ const VerseOfTheDay = ({ addDay }: Props) => {
   const openTimePicker = () => {
     setTimePicker(true)
   }
-
-  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
 
   if (!verseOfTheDay) {
     return (
@@ -205,69 +200,60 @@ const VerseOfTheDay = ({ addDay }: Props) => {
         imageUrls={imageUrls}
         verseOfTheDay={verseOfTheDay}
       />
-      <BottomSheetModal
-        ref={notificationModalRef}
-        enablePanDownToClose
-        enableDynamicSizing
-        backdropComponent={renderBackdrop}
-        key={key}
-        {...bottomSheetStyles}
-      >
-        <BottomSheetScrollView scrollEnabled={false}>
-          <Box py={30} px={20} pb={30 + insets.bottom}>
-            <Box row alignItems="center">
-              <Text bold flex>
-                {t('Recevoir une notification quotidienne')}
-              </Text>
-              <Switch
-                value={!!verseOfTheDayTime}
-                onValueChange={() => {
-                  if (verseOfTheDayTime) {
-                    dispatch(setNotificationVOD(''))
-                  } else {
-                    dispatch(setNotificationVOD('07:00'))
-                  }
-                }}
-              />
-            </Box>
-            {!!verseOfTheDayTime && Platform.OS === 'ios' && (
-              <Box mt={10}>
-                <DateTimePicker
-                  value={initialDate}
-                  mode="time"
-                  locale="en_GB"
-                  is24Hour
-                  onValueChange={(_, selectedDate) => {
-                    onChangeTimePicker(selectedDate)
-                  }}
-                />
-              </Box>
-            )}
-            {!!verseOfTheDayTime && Platform.OS === 'android' && (
-              <LinkBox row alignItems="center" mt={10} onPress={openTimePicker}>
-                <Text>{t("Choisir l'heure")}:</Text>
-                <Text bold> {verseOfTheDayTime}</Text>
-                <Box ml={5}>
-                  <FeatherIcon name="chevron-down" />
-                </Box>
-              </LinkBox>
-            )}
-            {timerPickerOpen && Platform.OS === 'android' && (
+      <Sheet ref={notificationModalRef} snapPoints={[0.3]}>
+        <SheetView py={30} px={20}>
+          <Box row alignItems="center">
+            <Text bold flex>
+              {t('Recevoir une notification quotidienne')}
+            </Text>
+            <Switch
+              value={!!verseOfTheDayTime}
+              onValueChange={() => {
+                if (verseOfTheDayTime) {
+                  dispatch(setNotificationVOD(''))
+                } else {
+                  dispatch(setNotificationVOD('07:00'))
+                }
+              }}
+            />
+          </Box>
+          {!!verseOfTheDayTime && Platform.OS === 'ios' && (
+            <Box mt={10}>
               <DateTimePicker
                 value={initialDate}
                 mode="time"
                 locale="en_GB"
                 is24Hour
-                presentation="dialog"
                 onValueChange={(_, selectedDate) => {
                   onChangeTimePicker(selectedDate)
                 }}
-                onDismiss={() => setTimePicker(false)}
               />
-            )}
-          </Box>
-        </BottomSheetScrollView>
-      </BottomSheetModal>
+            </Box>
+          )}
+          {!!verseOfTheDayTime && Platform.OS === 'android' && (
+            <LinkBox row alignItems="center" mt={10} onPress={openTimePicker}>
+              <Text>{t("Choisir l'heure")}:</Text>
+              <Text bold> {verseOfTheDayTime}</Text>
+              <Box ml={5}>
+                <FeatherIcon name="chevron-down" />
+              </Box>
+            </LinkBox>
+          )}
+          {timerPickerOpen && Platform.OS === 'android' && (
+            <DateTimePicker
+              value={initialDate}
+              mode="time"
+              locale="en_GB"
+              is24Hour
+              presentation="dialog"
+              onValueChange={(_, selectedDate) => {
+                onChangeTimePicker(selectedDate)
+              }}
+              onDismiss={() => setTimePicker(false)}
+            />
+          )}
+        </SheetView>
+      </Sheet>
     </Box>
   )
 }

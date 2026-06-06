@@ -1,4 +1,4 @@
-import BottomSheet, { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { type SheetRef } from '~common/sheet'
 import React from 'react'
 import { useSharedValue } from 'react-native-reanimated'
 import bibleMemoize from '~helpers/bibleStupidMemoize'
@@ -69,8 +69,8 @@ const Timeline = ({
   sectionIndex,
 }: Props) => {
   const isReady = useSharedValue(0)
-  const modalRef = React.useRef<BottomSheet>(null)
-  const searchModalRef = React.useRef<BottomSheetModal>(null)
+  const modalRef = React.useRef<SheetRef>(null)
+  const searchModalRef = React.useRef<SheetRef>(null)
   const openInNewTab = useOpenInNewTab()
   const lang = useLanguage()
 
@@ -78,7 +78,7 @@ const Timeline = ({
   const eventDetailSlugs = timeline ? new Set(timeline.map(e => e.slug)) : undefined
 
   const onTimelineDetailsOpen = () => {
-    modalRef.current?.expand()
+    modalRef.current?.present()
   }
 
   const openSectionInNewTab = () => {

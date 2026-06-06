@@ -1,5 +1,4 @@
 import { TouchableOpacity } from 'react-native'
-import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import distanceInWords from 'date-fns/formatDistance'
 import styled from '@emotion/native'
@@ -14,6 +13,7 @@ import useLanguage from '~helpers/useLanguage'
 import { getDateLocale } from '~helpers/languageUtils'
 import formatVerseContent from '~helpers/formatVerseContent'
 import { useResolvedColor } from '~helpers/useHighlightColors'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import books from '~assets/bible_versions/books-desc'
 import type { GroupedWordAnnotation } from '~redux/selectors/bible'
 import type { TagsObj } from '~common/types'
@@ -37,7 +37,7 @@ export type AnnotationItemProps = {
 }
 
 const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
   const lang = useLanguage()
 
@@ -48,24 +48,23 @@ const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
   const formattedDate = distanceInWords(Number(item.date), Date.now(), {
     locale: getDateLocale(lang),
   })
+  const bibleViewParams = {
+    contextDisplayMode: 'focused',
+    book: JSON.stringify(books[Livre - 1]),
+    chapter: String(Chapitre),
+    verse: String(Verset),
+    version: item.version,
+    focusVerses: JSON.stringify([Verset]),
+  }
+  const openBibleView = () => {
+    pushRouteOnce({
+      pathname: '/bible-view',
+      params: bibleViewParams,
+    })
+  }
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.7}
-      onPress={() =>
-        router.push({
-          pathname: '/bible-view',
-          params: {
-            contextDisplayMode: 'focused',
-            book: JSON.stringify(books[Livre - 1]),
-            chapter: String(Chapitre),
-            verse: String(Verset),
-            version: item.version,
-            focusVerses: JSON.stringify([Verset]),
-          },
-        })
-      }
-    >
+    <TouchableOpacity activeOpacity={0.7} onPress={openBibleView}>
       <AnnotationContainer>
         <Box row style={{ marginBottom: 10 }} alignItems="center">
           <HStack flex row alignItems="center" gap={10}>

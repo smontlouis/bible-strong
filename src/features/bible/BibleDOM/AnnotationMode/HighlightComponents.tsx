@@ -44,6 +44,7 @@ export interface HighlightRect {
   type: 'selection' | 'annotation'
   annotationType?: AnnotationType
   annotationId?: string
+  isDimmed?: boolean
 }
 
 // Create marker/highlighter gradient effect
@@ -154,6 +155,7 @@ export const HighlightRectDiv = styled('div')<{
   $color: string
   $annotationType?: AnnotationType
   $isSelected?: boolean
+  $isDimmed?: boolean
   $primaryColor?: string
   $backgroundColor?: string
   $animationDelay?: number
@@ -165,6 +167,7 @@ export const HighlightRectDiv = styled('div')<{
   $color,
   $annotationType,
   $isSelected,
+  $isDimmed,
   $primaryColor,
   $backgroundColor,
   $animationDelay = 0,
@@ -191,7 +194,9 @@ export const HighlightRectDiv = styled('div')<{
     borderRadius: '2px',
     boxSizing: 'border-box',
     pointerEvents: 'none',
-    transition: 'background 0.1s ease, box-shadow 0.1s ease',
+    opacity: $isDimmed ? 0.18 : 1,
+    filter: $isDimmed ? 'blur(4px)' : 'none',
+    transition: 'background 0.1s ease, box-shadow 0.1s ease, opacity 0.3s ease',
 
     boxShadow: $isSelected
       ? `${$backgroundColor} 0px 0px 0px 2px, ${$primaryColor} 0px 0px 0px 4px`

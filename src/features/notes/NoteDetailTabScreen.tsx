@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/react-native'
+import { useTheme } from '@emotion/react'
 import { MenuView, type MenuAction } from '@expo/ui/community/menu'
 import { useRouter } from 'expo-router'
 import { produce } from 'immer'
@@ -34,6 +35,7 @@ import { toast } from '~helpers/toast'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import verseToReference from '~helpers/verseToReference'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { RootState } from '~redux/modules/reducer'
 import type { RelationEndpoint } from '~redux/modules/user'
 import { addNote, deleteNote } from '~redux/modules/user'
@@ -72,9 +74,11 @@ const NoteDetailTabScreen = ({
   isFormSheet = false,
 }: NoteDetailTabScreenProps) => {
   const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
   const dispatch = useDispatch()
+  const theme = useTheme()
   const [, setNotesTab] = useAtom(notesAtom)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
@@ -313,7 +317,7 @@ ${currentNote.description}
       return
     }
 
-    router.push({
+    pushRouteOnce({
       pathname: '/bible-view',
       params: {
         contextDisplayMode: 'focused',
@@ -471,11 +475,15 @@ ${currentNote.description}
               )
             ) : null}
             <NoteEditorDOMComponent
-              defaultTitle={currentNote?.title || ''}
-              defaultDescription={currentNote?.description || ''}
+              key={`${noteId || 'new'}-${editorResetKey}`}
+              encodedDefaultTitle={encodeURIComponent(currentNote?.title || '')}
+              encodedDefaultDescription={encodeURIComponent(currentNote?.description || '')}
               resetKey={editorResetKey}
               isEditing={isEditing}
               colorScheme={colorScheme}
+              textColor={theme.colors.default}
+              editorBackgroundColor={theme.colors.opacity5}
+              placeholderColor={theme.colors.grey}
               placeholderTitle={t('Titre')}
               placeholderDescription={t('Description')}
               onTitleChange={setTitle}

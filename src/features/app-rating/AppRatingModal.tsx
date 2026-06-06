@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useSheet } from '~helpers/useSheet'
 import RatingPrompt from './RatingPrompt'
 import { useAppRating } from './useAppRating'
 
@@ -10,7 +10,7 @@ import { useAppRating } from './useAppRating'
  * It checks after a delay whether conditions are met and shows the prompt.
  */
 const AppRatingModal = () => {
-  const { ref, open, close } = useBottomSheetModal()
+  const { ref, open, close } = useSheet()
   const { shouldShowRatingPrompt } = useAppRating()
 
   useEffect(() => {

@@ -1,7 +1,6 @@
 import React from 'react'
 import distanceInWords from 'date-fns/formatDistance'
 import styled from '@emotion/native'
-import { useRouter } from 'expo-router'
 
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -26,6 +25,7 @@ import type { RelationEndpoint } from '~features/studyRelations/domain'
 import { createExternalLinkEndpointFromLink } from '~features/studyRelations/endpoints'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 export type HighlightData = {
   date: number
@@ -97,7 +97,7 @@ export const NoteItem = ({
   t: Translate
   lang: ActiveLanguage
 }) => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const location = getFirstVerseLocation(item.verseKeys)
   const { title } = location
     ? formatVerseContent([location])
@@ -130,7 +130,7 @@ export const NoteItem = ({
   )
 
   const openNote = () => {
-    router.push({
+    pushRouteOnce({
       pathname: '/note',
       params: {
         noteId: item.id,
@@ -156,7 +156,7 @@ export const LinkItem = ({
   t: Translate
   lang: ActiveLanguage
 }) => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const location = getFirstVerseLocation(item.verseKeys)
   const { title } = location
     ? formatVerseContent([location])
@@ -210,7 +210,7 @@ export const LinkItem = ({
   )
 
   const openLink = () => {
-    router.push({
+    pushRouteOnce({
       pathname: '/link',
       params: {
         linkId: item.id,

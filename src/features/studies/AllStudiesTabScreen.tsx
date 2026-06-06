@@ -1,4 +1,4 @@
-import { BottomSheetModal } from '@gorhom/bottom-sheet/'
+import { type SheetRef } from '~common/sheet'
 import { useEffect, useRef, useState } from 'react'
 import { FlatList } from 'react-native'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
@@ -10,13 +10,11 @@ import RenameModal from '~common/RenameModal'
 import Box from '~common/ui/Box'
 import FabButton from '~common/ui/FabButton'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
-import withLoginModal from '~common/withLoginModal'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useSheet } from '~helpers/useSheet'
 import useLogin from '~helpers/useLogin'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { updateStudy } from '~redux/modules/user'
 
-import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { Tag } from '~common/types'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
@@ -29,6 +27,7 @@ import { createStudyEndpoint } from '~features/studyRelations/endpoints'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import StudyItem from './StudyItem'
 import StudySettingsModal from './StudySettingsModal'
 
@@ -47,7 +46,7 @@ const StudiesScreen = ({
   newTabId,
   onStudySelect,
 }: StudiesScreenProps) => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
   const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
@@ -59,9 +58,9 @@ const StudiesScreen = ({
 
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const [studySettingsId, setStudySettingsId] = useState<string | false>(false)
-  const studySettingsModal = useBottomSheetModal()
+  const studySettingsModal = useSheet()
   const openEntityRelations = useOpenEntityRelations()
-  const renameModalRef = useRef<BottomSheetModal>(null)
+  const renameModalRef = useRef<SheetRef>(null)
   const [studyToRename, setStudyToRename] = useState<{ id: string; title: string } | null>(null)
   const [pendingStudyId, setPendingStudyId] = useState<string | null>(null)
 
@@ -95,7 +94,7 @@ const StudiesScreen = ({
     if (isInTab && onStudySelect) {
       onStudySelect(studyId)
     } else {
-      router.push({
+      pushRouteOnce({
         pathname: '/edit-study',
         params: { studyId },
       })
@@ -233,7 +232,7 @@ const StudiesScreen = ({
           openRenameModal={openRenameModal}
         />
         <RenameModal
-          bottomSheetRef={renameModalRef}
+          sheetRef={renameModalRef}
           title={t("Renommer l'étude")}
           placeholder={t("Nom de l'étude")}
           initialValue={studyToRename?.title}
@@ -248,4 +247,4 @@ const StudiesScreen = ({
   )
 }
 
-export default withLoginModal(StudiesScreen)
+export default StudiesScreen

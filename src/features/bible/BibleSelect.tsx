@@ -28,7 +28,7 @@ const BibleSelect = ({ bibleAtom, onComplete, onLongPressComplete }: BibleSelect
   })
 
   return (
-    <Box flex>
+    <Box flex pt={20}>
       <BibleSelectTabBar index={index} onChange={setIndex} />
       <Slides index={index}>
         <Slide key="book" flex>

@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSetAtom } from 'jotai/react'
-import type { BottomSheetModal } from '@gorhom/bottom-sheet'
+import type { SheetRef } from '~common/sheet'
 import type { HighlightFilters, Tag } from '~common/types'
 import { useColorInfo } from './useColorName'
 import { unifiedTagsModalAtom } from '~state/app'
@@ -24,8 +24,8 @@ interface UseHighlightFiltersReturn {
   typeFilterLabel: string
 
   // Modal refs (imperative API)
-  colorModalRef: React.RefObject<BottomSheetModal | null>
-  typeModalRef: React.RefObject<BottomSheetModal | null>
+  colorModalRef: React.RefObject<SheetRef | null>
+  typeModalRef: React.RefObject<SheetRef | null>
 
   // Modal actions
   openColorFromMain: () => void
@@ -41,8 +41,8 @@ export function useHighlightFilters(): UseHighlightFiltersReturn {
   const [selectedTag, setSelectedTag] = useState<Tag>()
 
   // Modal refs (imperative API - no booleans)
-  const colorModalRef = useRef<BottomSheetModal>(null)
-  const typeModalRef = useRef<BottomSheetModal>(null)
+  const colorModalRef = useRef<SheetRef>(null)
+  const typeModalRef = useRef<SheetRef>(null)
 
   // Atom-based modal for tags
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)

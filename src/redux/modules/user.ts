@@ -44,7 +44,6 @@ import {
   updateStudyRelation,
 } from './user/studyRelations'
 import {
-  createExternalLinkEndpoint,
   createNoteEndpoint,
   createSystemRelation,
   createVerseEndpoint,
@@ -57,6 +56,12 @@ import {
   rebuildRelationPairs,
   type RelationEndpoint,
 } from '~features/studyRelations/domain'
+import {
+  addExternalLinkSystemRelations,
+  groupVerseKeysByChapter,
+  refreshExternalLinkSystemRelations,
+  removeExternalLinkSystemRelations,
+} from '~features/studyRelations/systemRelationLifecycle'
 import {
   addWordAnnotationAction,
   changeWordAnnotationColorAction,
@@ -97,7 +102,13 @@ import {
   toggleSettingsShareVerseNumbers,
 } from './user/settings'
 import { addStudies, deleteStudy, publishStudyAction, updateStudy } from './user/studies'
-import { addTag, entitiesArray, removeTag, toggleTagEntity, updateTag } from './user/tags'
+import { addTag, removeTag, toggleTagEntity, updateTag } from './user/tags'
+import {
+  removeEntityFromTagAssignments,
+  removeTagAssignments,
+  renameTagAssignment,
+  toggleTagAssignment,
+} from './user/tagAssignments'
 import { getDatabaseUpdate, getVersionUpdate, setVersionUpdated } from './user/versionUpdate'
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -105,21 +116,6 @@ const deepmerge = require('@fastify/deepmerge')()
 
 // Type for color keys (used for dynamic theme color access)
 type ColorKeys = keyof typeof defaultColors
-
-// Type for entity tag references (simplified Tag without all properties)
-type EntityTagRef = {
-  id: string
-  name: string
-}
-
-// Type for entities that can have tags
-type EntityWithTags = {
-  tags?: Record<string, EntityTagRef>
-  [key: string]: unknown
-}
-
-// Type for bible entity collections (used in toggleTagEntity)
-type BibleEntityCollection = Record<string, EntityWithTags>
 
 type CleanedFirestoreData =
   | string
@@ -189,11 +185,7 @@ const removeEntityInTags = (
   entity: 'notes' | 'links' | 'highlights' | 'studies' | 'wordAnnotations',
   key: string
 ) => {
-  for (const tag in draft.bible.tags) {
-    if (draft.bible.tags[tag][entity]) {
-      delete draft.bible.tags[tag][entity][key]
-    }
-  }
+  removeEntityFromTagAssignments(draft.bible, entity, key)
 }
 
 const applySubcollectionChanges = <T extends Record<string, unknown>>(
@@ -246,43 +238,10 @@ const getSelectedVerseKeysFromAction = (
   return getLegacyVerseKeysFromEntityId(fallbackEntityId)
 }
 
-const groupVerseKeysByChapter = (verseKeys: string[]): string[][] => {
-  const groups = verseKeys.reduce(
-    (result, verseKey) => {
-      const [book, chapter] = verseKey.split('-')
-      const groupKey = `${book}-${chapter}`
-      result[groupKey] = result[groupKey] || []
-      result[groupKey].push(verseKey)
-      return result
-    },
-    {} as Record<string, string[]>
-  )
-
-  return Object.values(groups)
-}
-
 const removeSystemRelationsForEndpoint = (draft: UserState, endpointKey: string) => {
   draft.bible.relations = draft.bible.relations || {}
   for (const [relationId, relation] of Object.entries(draft.bible.relations)) {
     if (relation.kind === 'system' && relation.endpointKeys.includes(endpointKey)) {
-      delete draft.bible.relations[relationId]
-    }
-  }
-}
-
-const removeSystemRelationsForEntity = (
-  draft: UserState,
-  entityType: 'note' | 'externalLink',
-  entityId: string
-) => {
-  draft.bible.relations = draft.bible.relations || {}
-  for (const [relationId, relation] of Object.entries(draft.bible.relations)) {
-    if (relation.kind !== 'system') continue
-    const matches = relation.endpoints.some(endpoint => {
-      if (entityType === 'note') return endpoint.type === 'note' && endpoint.noteId === entityId
-      return endpoint.type === 'externalLink' && endpoint.linkId === entityId
-    })
-    if (matches) {
       delete draft.bible.relations[relationId]
     }
   }
@@ -1045,19 +1004,11 @@ const userSlice = createSlice({
       for (const [linkKey, link] of Object.entries(action.payload)) {
         const verseKeys = getSelectedVerseKeysFromAction(action, linkKey)
         if (!verseKeys.length) continue
-        groupVerseKeysByChapter(verseKeys).forEach(verseKeyGroup => {
-          const verseEndpoint = createVerseEndpoint(verseKeyGroup, verseKeyGroup.join('/'))
-          const externalLinkEndpoint = createExternalLinkEndpoint(verseEndpoint, linkKey, link)
-          upsertSystemRelation(
-            state,
-            createSystemRelation({
-              id: getSystemRelationId('externalLink', linkKey, verseEndpoint),
-              type: 'externalLink',
-              endpoints: [externalLinkEndpoint, verseEndpoint],
-              createdAt: link.date,
-              updatedAt: link.date,
-            })
-          )
+        state.bible.relations = addExternalLinkSystemRelations({
+          relations: state.bible.relations,
+          linkKey,
+          link,
+          verseKeys,
         })
       }
       syncRelationProjections(state)
@@ -1070,28 +1021,10 @@ const userSlice = createSlice({
           ...data,
         }
         const link = state.bible.links[key]
-        state.bible.relations = state.bible.relations || {}
-        Object.values(state.bible.relations).forEach(existingRelation => {
-          if (existingRelation.kind !== 'system' || existingRelation.type !== 'externalLink') return
-          const linkEndpoint = existingRelation.endpoints.find(
-            endpoint => endpoint.type === 'externalLink' && endpoint.linkId === key
-          )
-          const verseEndpoint = existingRelation.endpoints.find(
-            endpoint => endpoint.type === 'verse'
-          )
-          if (linkEndpoint?.type !== 'externalLink' || verseEndpoint?.type !== 'verse') return
-
-          const externalLinkEndpoint = createExternalLinkEndpoint(verseEndpoint, key, link)
-          upsertSystemRelation(
-            state,
-            createSystemRelation({
-              id: existingRelation.id,
-              type: 'externalLink',
-              endpoints: [externalLinkEndpoint, verseEndpoint],
-              createdAt: existingRelation.createdAt || link.date,
-              updatedAt: Date.now(),
-            })
-          )
+        state.bible.relations = refreshExternalLinkSystemRelations({
+          relations: state.bible.relations,
+          linkKey: key,
+          link,
         })
         syncRelationProjections(state)
       }
@@ -1099,7 +1032,10 @@ const userSlice = createSlice({
     builder.addCase(deleteLink, (state, action) => {
       delete state.bible.links[action.payload]
       removeEntityInTags(state, 'links', action.payload)
-      removeSystemRelationsForEntity(state, 'externalLink', action.payload)
+      state.bible.relations = removeExternalLinkSystemRelations(
+        state.bible.relations,
+        action.payload
+      )
       syncRelationProjections(state)
     })
 
@@ -1366,128 +1302,14 @@ const userSlice = createSlice({
     })
     builder.addCase(updateTag, (state, action) => {
       const { id, value } = action.payload
-      state.bible.tags[id].name = value
-
-      entitiesArray.forEach(ent => {
-        const entities = (state.bible[ent] ?? {}) as BibleEntityCollection
-        Object.values(entities).forEach(entity => {
-          const entityTags = entity.tags
-          if (entityTags && entityTags[id]) {
-            entityTags[id].name = value
-          }
-        })
-      })
+      renameTagAssignment(state.bible, id, value)
     })
     builder.addCase(removeTag, (state, action) => {
-      delete state.bible.tags[action.payload]
-
-      entitiesArray.forEach(ent => {
-        const entities = (state.bible[ent] ?? {}) as BibleEntityCollection
-        Object.values(entities).forEach(entity => {
-          const entityTags = entity.tags
-          if (entityTags && entityTags[action.payload]) {
-            delete entityTags[action.payload]
-          }
-        })
-      })
+      removeTagAssignments(state.bible, action.payload)
     })
     builder.addCase(toggleTagEntity, (state, action) => {
       const { item, tagId } = action.payload
-      // Use type assertion for dynamic entity access
-      const entityCollection = state.bible[item.entity] as unknown as BibleEntityCollection
-
-      if (item.ids) {
-        const firstId = Object.keys(item.ids)[0]
-        const hasTag = entityCollection[firstId]?.tags?.[tagId]
-
-        Object.keys(item.ids).forEach(id => {
-          // DELETE OPERATION - In order to have a true toggle, check only for first item with Object.keys(item.ids)[0]
-          if (hasTag) {
-            try {
-              delete state.bible.tags[tagId][item.entity]?.[id]
-              delete entityCollection[id].tags?.[tagId]
-
-              // Delete highlight if it has no color and no remaining tags
-              if (item.entity === 'highlights') {
-                const highlight = state.bible.highlights[id]
-                if (
-                  highlight &&
-                  highlight.color === '' &&
-                  Object.keys(highlight.tags || {}).length === 0
-                ) {
-                  delete state.bible.highlights[id]
-                }
-              }
-            } catch {}
-
-            // ADD OPERATION
-          } else {
-            if (!state.bible.tags[tagId][item.entity]) {
-              state.bible.tags[tagId][item.entity] = {}
-            }
-            state.bible.tags[tagId][item.entity]![id] = true
-
-            // Create highlight if it doesn't exist (for highlights entity only)
-            if (item.entity === 'highlights' && !state.bible.highlights[id]) {
-              state.bible.highlights[id] = {
-                color: '',
-                date: Date.now(),
-                tags: {},
-              }
-            }
-
-            if (!entityCollection[id]) {
-              entityCollection[id] = { tags: {} }
-            }
-            if (!entityCollection[id].tags) {
-              entityCollection[id].tags = {}
-            }
-            entityCollection[id].tags![tagId] = {
-              id: tagId,
-              name: state.bible.tags[tagId].name,
-            }
-          }
-        })
-      } else {
-        const entityId = item.id!
-        if (!entityCollection[entityId]) {
-          entityCollection[entityId] = {
-            id: item.id,
-            title: item.title,
-            tags: {},
-          }
-        }
-
-        // DELETE OPERATION
-        if (entityCollection[entityId]?.tags?.[tagId]) {
-          delete state.bible.tags[tagId][item.entity]?.[entityId]
-          delete entityCollection[entityId].tags?.[tagId]
-
-          // If words / strongs / nave, delete unused entity
-          if (['naves', 'strongsHebreu', 'strongsGrec', 'words'].includes(item.entity)) {
-            const hasTags = Object.keys(entityCollection[entityId].tags || {}).length
-
-            if (!hasTags) {
-              delete entityCollection[entityId]
-            }
-          }
-
-          // ADD OPERATION
-        } else {
-          if (!state.bible.tags[tagId][item.entity]) {
-            state.bible.tags[tagId][item.entity] = {}
-          }
-          state.bible.tags[tagId][item.entity]![entityId] = true
-
-          if (!entityCollection[entityId].tags) {
-            entityCollection[entityId].tags = {}
-          }
-          entityCollection[entityId].tags![tagId] = {
-            id: tagId,
-            name: state.bible.tags[tagId].name,
-          }
-        }
-      }
+      toggleTagAssignment(state.bible, item, tagId)
     })
 
     // Version Update

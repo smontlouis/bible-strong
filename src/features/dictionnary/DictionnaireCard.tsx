@@ -15,9 +15,10 @@ import truncate from '~helpers/truncate'
 import { useRouter } from 'expo-router'
 import { useAtomValue } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { SheetScrollView } from '~common/sheet'
 import { currentStudyIdAtom, openedFromTabAtom } from '~features/studies/atom'
 import { StudyNavigateBibleType } from '~common/types'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -72,6 +73,7 @@ type Props = {
 const DictionnaireCard = ({ dictionnaireRef, isSelectionMode }: Props) => {
   const theme = useTheme()
   const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const openedFromTab = useAtomValue(openedFromTabAtom)
 
   const { word, definition } = dictionnaireRef || {}
@@ -91,7 +93,7 @@ const DictionnaireCard = ({ dictionnaireRef, isSelectionMode }: Props) => {
         },
       })
     } else {
-      router.push({
+      pushRouteOnce({
         pathname: '/dictionnary-detail',
         params: { word },
       })
@@ -127,7 +129,7 @@ const DictionnaireCard = ({ dictionnaireRef, isSelectionMode }: Props) => {
         </Box>
       </Box>
 
-      <BottomSheetScrollView style={{ marginBottom: 15 }}>
+      <SheetScrollView style={{ marginBottom: 15 }}>
         {!!definition && (
           <ViewItem>
             <StylizedHTMLView
@@ -149,7 +151,7 @@ const DictionnaireCard = ({ dictionnaireRef, isSelectionMode }: Props) => {
             />
           </ViewItem>
         )}
-      </BottomSheetScrollView>
+      </SheetScrollView>
     </Container>
   )
 }

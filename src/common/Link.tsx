@@ -12,6 +12,7 @@ import { useRouter } from 'expo-router'
 import Box, { BoxProps } from '~common/ui/Box'
 import { MainStackProps } from '~navigation/type'
 import { routeMapping } from '~navigation/routeMapping'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 export interface LinkProps<R extends keyof MainStackProps> {
   route?: R
@@ -62,6 +63,7 @@ const Link = <R extends keyof MainStackProps>({
   ...props
 }: PropsWithChildren<LinkProps<R>>) => {
   const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
 
   const handlePress = () => {
     if (route) {
@@ -74,7 +76,7 @@ const Link = <R extends keyof MainStackProps>({
           if (replace) {
             router.replace({ pathname, params: serializedParams })
           } else {
-            router.push({ pathname, params: serializedParams })
+            pushRouteOnce({ pathname, params: serializedParams })
           }
         }, 300)
         return
@@ -83,7 +85,7 @@ const Link = <R extends keyof MainStackProps>({
       if (replace) {
         router.replace({ pathname, params: serializedParams })
       } else {
-        router.push({ pathname, params: serializedParams })
+        pushRouteOnce({ pathname, params: serializedParams })
       }
     }
 

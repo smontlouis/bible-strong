@@ -1,14 +1,15 @@
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useQuery } from '~helpers/react-query-lite'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { getEvents } from './events'
 import TimelineEventDetailView from './TimelineEventDetailView'
 import { TimelineEvent } from './types'
 
 const EventScreen = () => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
   const openInNewTab = useOpenInNewTab()
   const params = useLocalSearchParams<{ slug?: string }>()
@@ -23,7 +24,7 @@ const EventScreen = () => {
   const event = eventsWithSection?.find(item => item.slug === params.slug)
 
   const openEvent = (nextEvent: TimelineEvent) => {
-    router.push({
+    pushRouteOnce({
       pathname: '/event',
       params: { slug: nextEvent.slug },
     })

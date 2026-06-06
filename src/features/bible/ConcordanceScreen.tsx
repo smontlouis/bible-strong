@@ -3,7 +3,7 @@ import * as Icon from '@expo/vector-icons'
 import React from 'react'
 import { FlatList, TouchableOpacity } from 'react-native'
 
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
 import books from '~assets/bible_versions/books-desc'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
@@ -14,6 +14,7 @@ import { DatabaseError } from '~helpers/catchDatabaseError'
 import loadStrongVersesCountByBook from '~helpers/loadStrongVersesCountByBook'
 import useAsync from '~helpers/useAsync'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 const OccurencesNumber = styled.View(({ theme }) => ({
   marginLeft: 10,
@@ -38,7 +39,7 @@ const hasDatabaseError = (value: unknown): value is DatabaseError =>
   typeof value === 'object' && value !== null && 'error' in value
 
 const ConcordanceScreen = () => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const params = useLocalSearchParams<{ strongReference?: string; book?: string }>()
   const canGoBackInStack = useCanGoBackInStack()
 
@@ -64,7 +65,7 @@ const ConcordanceScreen = () => {
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => {
-                router.push({
+                pushRouteOnce({
                   pathname: '/concordance-by-book',
                   params: {
                     book: String(item.Livre),

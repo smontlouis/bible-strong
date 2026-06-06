@@ -1,11 +1,12 @@
 import styled from '@emotion/native'
-import { useRouter } from 'expo-router'
 import React, { useState } from 'react'
 
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { Tag } from './types'
+import { getEntityChipListState } from './entityChips'
 
 const StyledChip = styled(Box)(({ theme }) => ({
   borderRadius: 20,
@@ -18,20 +19,6 @@ const StyledChip = styled(Box)(({ theme }) => ({
   marginBottom: 2,
   marginTop: 5,
 }))
-
-type EntityChipListItem =
-  | {
-      type: 'tag'
-      id: string
-      label: string
-      onPress: () => void
-    }
-  | {
-      type: 'relation'
-      id: string
-      label: string
-      onPress: () => void
-    }
 
 const EntityChipList = ({
   tags,
@@ -46,32 +33,24 @@ const EntityChipList = ({
   onRelationPress?: () => void
   limit?: number
 }) => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const [isExpanded, setIsExpanded] = useState(false)
+  const { items, hasMoreTags, hiddenTagCount } = getEntityChipListState({
+    tags,
+    relationCount,
+    canOpenRelations: !!onRelationPress,
+    limit,
+    isExpanded,
+  })
 
-  const allTags = Object.values(tags || {})
-  const hasMoreTags = limit > 0 && allTags.length > limit
-  const visibleTags = limit && !isExpanded ? allTags.slice(0, limit) : allTags
-  const items: EntityChipListItem[] = [
-    ...visibleTags.map(tag => ({
-      type: 'tag' as const,
-      id: tag.id,
-      label: tag.name,
-      onPress: () => {
-        router.push({ pathname: '/tag', params: { tagId: tag.id } })
-      },
-    })),
-    ...(relationCount > 0 && onRelationPress
-      ? [
-          {
-            type: 'relation' as const,
-            id: 'relations',
-            label: String(relationCount),
-            onPress: onRelationPress,
-          },
-        ]
-      : []),
-  ]
+  const handleChipPress = (item: (typeof items)[number]) => {
+    if (item.type === 'relation') {
+      onRelationPress?.()
+      return
+    }
+
+    pushRouteOnce({ pathname: '/tag', params: { tagId: item.id } })
+  }
 
   if (!items.length) {
     return null
@@ -80,7 +59,7 @@ const EntityChipList = ({
   return (
     <Box wrap row>
       {items.map(item => (
-        <TouchableBox key={`${item.type}-${item.id}`} onPress={item.onPress}>
+        <TouchableBox key={`${item.type}-${item.id}`} onPress={() => handleChipPress(item)}>
           <StyledChip>
             <Box row alignItems="center">
               <FeatherIcon
@@ -110,7 +89,7 @@ const EntityChipList = ({
               marginTop: 4,
             }}
           >
-            {isExpanded ? '−' : `+ ${allTags.length - limit}`}
+            {isExpanded ? '−' : `+ ${hiddenTagCount}`}
           </Text>
         </TouchableBox>
       )}

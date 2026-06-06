@@ -1,5 +1,5 @@
 import HighlightsScreen from '~features/settings/HighlightsScreen'
 
-const HighlightsRoute = () => <HighlightsScreen isFormSheet />
+const HighlightsRoute = () => <HighlightsScreen />
 
 export default HighlightsRoute

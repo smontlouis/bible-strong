@@ -10,7 +10,7 @@ type StackScreenOptions = Exclude<
 const defaultFormSheetOptions = {
   presentation: 'formSheet',
   sheetGrabberVisible: true,
-  sheetCornerRadius: 20,
+  sheetExpandsWhenScrolledToEdge: false,
 } satisfies StackScreenOptions
 
 export const createFormSheetOptions = (

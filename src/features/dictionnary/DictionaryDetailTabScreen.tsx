@@ -35,6 +35,7 @@ import { createDictionaryEndpoint } from '~features/studyRelations/endpoints'
 import type { RelationEndpoint } from '~redux/modules/user'
 import AppScrollView from '~common/ui/ScrollView'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 interface DictionaryDetailScreenProps {
   dictionaryAtom: PrimitiveAtom<DictionaryTab>
@@ -46,6 +47,7 @@ const DictionnaryDetailScreen = ({
   isFormSheet = false,
 }: DictionaryDetailScreenProps) => {
   const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const [dictionaryTab, setDictionaryTab] = useAtom(dictionaryAtom)
   const { isInTab } = useTabContext()
   const canGoBackInStack = useCanGoBackInStack()
@@ -120,7 +122,7 @@ const DictionnaryDetailScreen = ({
           .replace(String.fromCharCode(160), ' ')
           .split(/\b\s+(?!$)/)
         const [chapter, verse] = splittedHref[splittedHref.length - 1].split('.')
-        router.push({
+        pushRouteOnce({
           pathname: '/bible-view',
           params: {
             contextDisplayMode: 'focused',
@@ -133,7 +135,7 @@ const DictionnaryDetailScreen = ({
         toast.error('Impossible de charger ce mot.')
       }
     } else {
-      router.push({
+      pushRouteOnce({
         pathname: '/dictionnary-detail',
         params: { word: href },
       })

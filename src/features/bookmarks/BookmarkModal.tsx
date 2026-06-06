@@ -1,17 +1,21 @@
 import styled from '@emotion/native'
-import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet/'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  SheetFooter,
+  Sheet,
+  SheetHeader,
+  SheetTextInput,
+  type SheetRef,
+  SheetView,
+} from '~common/sheet'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import type { ColorFormatsObject } from 'reanimated-color-picker'
 import generateUUID from '~helpers/generateUUID'
 
 import books from '~assets/bible_versions/books-desc'
 import ColorPicker from '~common/ColorPicker'
-import Modal from '~common/Modal'
-import ModalHeader from '~common/ModalHeader'
 import { toast } from '~helpers/toast'
 import type { Bookmark } from '~common/types'
 import Box from '~common/ui/Box'
@@ -43,7 +47,7 @@ const BookmarkListItem = styled.TouchableOpacity<{ isSelected?: boolean }>(
   })
 )
 
-const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
+const StyledTextInput = styled(SheetTextInput)(({ theme }) => ({
   color: theme.colors.default,
   height: 48,
   borderColor: theme.colors.border,
@@ -55,7 +59,7 @@ const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
 }))
 
 interface BookmarkModalProps {
-  bottomSheetRef: React.RefObject<BottomSheetModal | null>
+  sheetRef: React.RefObject<SheetRef | null>
   onClose?: () => void
   // For creating new bookmark
   book?: number
@@ -80,7 +84,7 @@ const formatReference = (book: number, chapter: number, verse?: number): string 
 }
 
 const BookmarkModal = ({
-  bottomSheetRef,
+  sheetRef,
   onClose,
   book,
   chapter,
@@ -90,7 +94,6 @@ const BookmarkModal = ({
 }: BookmarkModalProps) => {
   const dispatch = useDispatch()
   const { t } = useTranslation()
-  const insets = useSafeAreaInsets()
 
   const bookmarksCount = useSelector(selectBookmarksCount)
   const existingBookmarks = useSelector(selectSortedBookmarks)
@@ -133,39 +136,32 @@ const BookmarkModal = ({
     }
   }, [existingBookmark, existingBookmarks.length])
 
-  // Handle sheet index change - reset state only when modal first opens
-  const handleSheetChange = useCallback(
-    (index: number) => {
-      if (index === -1) {
-        // Modal closed - reset the flag for next opening
-        isInitializedRef.current = false
-        return
-      }
+  const handlePresent = () => {
+    if (isInitializedRef.current) return
 
-      // Only reset state on first opening, not on keyboard resize
-      if (!isInitializedRef.current) {
-        isInitializedRef.current = true
+    isInitializedRef.current = true
 
-        if (existingBookmark) {
-          setMode('edit')
-          setName(existingBookmark.name)
-          setSelectedColor(existingBookmark.color)
-        } else if (existingBookmarks.length > 0) {
-          setMode('select')
-          setName('')
-          setSelectedColor(DEFAULT_BOOKMARK_COLOR)
-        } else {
-          setMode('create')
-          setName('')
-          setSelectedColor(DEFAULT_BOOKMARK_COLOR)
-        }
-      }
-    },
-    [existingBookmark, existingBookmarks.length]
-  )
+    if (existingBookmark) {
+      setMode('edit')
+      setName(existingBookmark.name)
+      setSelectedColor(existingBookmark.color)
+    } else if (existingBookmarks.length > 0) {
+      setMode('select')
+      setName('')
+      setSelectedColor(DEFAULT_BOOKMARK_COLOR)
+    } else {
+      setMode('create')
+      setName('')
+      setSelectedColor(DEFAULT_BOOKMARK_COLOR)
+    }
+  }
+
+  const handleDismiss = () => {
+    isInitializedRef.current = false
+  }
 
   const handleClose = () => {
-    bottomSheetRef.current?.dismiss()
+    sheetRef.current?.dismiss()
     onClose?.()
   }
 
@@ -244,33 +240,32 @@ const BookmarkModal = ({
   }
 
   return (
-    <Modal.Body
-      ref={bottomSheetRef}
-      onModalClose={handleClose}
-      onChange={handleSheetChange}
-      topInset={insets.top}
-      enableDynamicSizing
-      headerComponent={<ModalHeader title={t('Marque-page')} subTitle={reference} />}
-      footerComponent={props =>
+    <Sheet
+      ref={sheetRef}
+      onDismiss={() => {
+        handleDismiss()
+        onClose?.()
+      }}
+      onPresent={handlePresent}
+      header={<SheetHeader title={t('Marque-page')} subTitle={reference} />}
+      footer={props =>
         mode === 'select' ? null : (
-          <BottomSheetFooter bottomInset={insets.bottom} {...props}>
-            <HStack py={5} px={20} justifyContent="flex-end" bg="reverse">
-              {isEditing && (
-                <Box>
-                  <Button reverse onPress={handleDelete}>
-                    {t('Supprimer')}
-                  </Button>
-                </Box>
-              )}
+          <SheetFooter justifyContent="flex-end" row gap={10} {...props}>
+            {isEditing && (
               <Box>
-                <Button onPress={handleSave}>{t('Sauvegarder')}</Button>
+                <Button reverse onPress={handleDelete}>
+                  {t('Supprimer')}
+                </Button>
               </Box>
-            </HStack>
-          </BottomSheetFooter>
+            )}
+            <Box>
+              <Button onPress={handleSave}>{t('Sauvegarder')}</Button>
+            </Box>
+          </SheetFooter>
         )
       }
     >
-      <Box paddingHorizontal={20} paddingTop={20}>
+      <SheetView paddingHorizontal={20} paddingTop={20}>
         {mode === 'select' ? (
           // Selection mode - show list of existing bookmarks
           <Box>
@@ -321,11 +316,12 @@ const BookmarkModal = ({
                 style={{ flex: 1 }}
               />
             </HStack>
-
-            <ColorPicker
-              value={selectedColor}
-              onChangeJS={(color: ColorFormatsObject) => setSelectedColor(color.hex)}
-            />
+            <Box h={200}>
+              <ColorPicker
+                value={selectedColor}
+                onChangeJS={(color: ColorFormatsObject) => setSelectedColor(color.hex)}
+              />
+            </Box>
 
             {!isEditing && (
               <Box marginTop={20}>
@@ -336,8 +332,8 @@ const BookmarkModal = ({
             )}
           </Box>
         )}
-      </Box>
-    </Modal.Body>
+      </SheetView>
+    </Sheet>
   )
 }
 

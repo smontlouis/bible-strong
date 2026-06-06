@@ -1,13 +1,11 @@
 import styled from '@emotion/native'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import { useSetAtom } from 'jotai/react'
+import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 import { forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 import { useSelector } from 'react-redux'
-import Modal from '~common/Modal'
-import ModalHeader from '~common/ModalHeader'
 import EntityChipList from '~common/EntityChipList'
+import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { Chip } from '~common/ui/NewChip'
@@ -16,7 +14,6 @@ import { EMPTY_ARRAY } from '~helpers/emptyReferences'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { makeTaggedItemsForVerseSelector, TaggedItem } from '~redux/selectors/bible'
-import { unifiedTagsModalAtom } from '~state/app'
 
 const ItemRow = styled.View(({ theme }) => ({
   flexDirection: 'row',
@@ -112,83 +109,81 @@ const TaggedItemRow = ({ item, onEditTags }: { item: TaggedItem; onEditTags: () 
   )
 }
 
-const VerseTagsModal = forwardRef<BottomSheetModal, VerseTagsModalProps>(
-  ({ verseKey, version }, ref) => {
-    const { t } = useTranslation()
-    const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
+const VerseTagsModal = forwardRef<SheetRef, VerseTagsModalProps>(({ verseKey, version }, ref) => {
+  const { t } = useTranslation()
+  const setUnifiedTagsModal = useUnifiedTagsModal()
 
-    // Create selector for this verse
-    const selectTaggedItems = makeTaggedItemsForVerseSelector()
+  // Create selector for this verse
+  const selectTaggedItems = makeTaggedItemsForVerseSelector()
 
-    const taggedItems = useSelector((state: RootState) =>
-      verseKey ? selectTaggedItems(state, verseKey, version) : EMPTY_ARRAY
-    )
+  const taggedItems = useSelector((state: RootState) =>
+    verseKey ? selectTaggedItems(state, verseKey, version) : EMPTY_ARRAY
+  )
 
-    // Get verse reference for header
-    const reference = verseKey ? verseToReference({ [verseKey]: true }) : ''
+  // Get verse reference for header
+  const reference = verseKey ? verseToReference({ [verseKey]: true }) : ''
 
-    const handleEditTags = (item: TaggedItem) => {
-      // Open UnifiedTagsModal with the appropriate entity
-      switch (item.type) {
-        case 'highlight':
-          setUnifiedTagsModal({
-            mode: 'select',
-            ids: { [item.verseKey]: true as const },
-            entity: 'highlights',
-          })
-          break
-        case 'annotation':
-          setUnifiedTagsModal({
-            mode: 'select',
-            id: item.data.id,
-            entity: 'wordAnnotations',
-            title: item.data.ranges[0]?.text,
-          })
-          break
-        case 'note':
-          setUnifiedTagsModal({
-            mode: 'select',
-            id: item.data.id,
-            entity: 'notes',
-            title: item.data.title,
-          })
-          break
-        case 'link':
-          setUnifiedTagsModal({
-            mode: 'select',
-            id: item.data.id,
-            entity: 'links',
-            title: item.data.customTitle || item.data.ogData?.title || item.data.url,
-          })
-          break
-      }
+  const handleEditTags = (item: TaggedItem) => {
+    // Open UnifiedTagsModal with the appropriate entity
+    switch (item.type) {
+      case 'highlight':
+        setUnifiedTagsModal({
+          mode: 'select',
+          ids: { [item.verseKey]: true as const },
+          entity: 'highlights',
+        })
+        break
+      case 'annotation':
+        setUnifiedTagsModal({
+          mode: 'select',
+          id: item.data.id,
+          entity: 'wordAnnotations',
+          title: item.data.ranges[0]?.text,
+        })
+        break
+      case 'note':
+        setUnifiedTagsModal({
+          mode: 'select',
+          id: item.data.id,
+          entity: 'notes',
+          title: item.data.title,
+        })
+        break
+      case 'link':
+        setUnifiedTagsModal({
+          mode: 'select',
+          id: item.data.id,
+          entity: 'links',
+          title: item.data.customTitle || item.data.ogData?.title || item.data.url,
+        })
+        break
     }
-
-    return (
-      <Modal.Body
-        ref={ref}
-        snapPoints={['50%']}
-        headerComponent={<ModalHeader title={t('Étiquettes')} subTitle={reference} />}
-      >
-        <Box>
-          {taggedItems.length === 0 ? (
-            <Box center py={40}>
-              <Text color="grey">{t('Aucun élément avec des étiquettes')}</Text>
-            </Box>
-          ) : (
-            taggedItems.map((item, index) => (
-              <TaggedItemRow
-                key={`${item.type}-${index}`}
-                item={item}
-                onEditTags={() => handleEditTags(item)}
-              />
-            ))
-          )}
-        </Box>
-      </Modal.Body>
-    )
   }
-)
+
+  return (
+    <Sheet
+      ref={ref}
+      snapPoints={[0.5]}
+      header={<SheetHeader title={t('Étiquettes')} subTitle={reference} />}
+    >
+      <Box>
+        {taggedItems.length === 0 ? (
+          <Box center py={40}>
+            <Text color="grey">{t('Aucun élément avec des étiquettes')}</Text>
+          </Box>
+        ) : (
+          taggedItems.map((item, index) => (
+            <TaggedItemRow
+              key={`${item.type}-${index}`}
+              item={item}
+              onEditTags={() => handleEditTags(item)}
+            />
+          ))
+        )}
+      </Box>
+    </Sheet>
+  )
+})
 
 VerseTagsModal.displayName = 'VerseTagsModal'
 

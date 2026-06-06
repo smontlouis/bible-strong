@@ -1,4 +1,3 @@
-import { useRouter } from 'expo-router'
 import type { JSONValue } from 'expo/build/dom/dom.types'
 import { useEffect, useRef, useState } from 'react'
 import {
@@ -22,6 +21,7 @@ import { currentStudyIdAtom } from '../atom'
 import StudyFooter from '../StudyFooter'
 import StudiesDOMComponent, { StudyDOMRef } from './StudiesDOMComponent'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 type Props = {
   params: Readonly<EditStudyScreenProps>
@@ -53,6 +53,9 @@ const SELECTION_MODE_MAP: Record<string, StudyNavigateBibleType> = {
   SELECT_BIBLE_STRONG_BLOCK: 'strong-block',
 }
 
+const encodeDeltaContent = (content: Study['content'] | undefined) =>
+  encodeURIComponent(JSON.stringify(content ?? { ops: [] }))
+
 export default function StudiesDomWrapper({
   params,
   isReadOnly,
@@ -64,12 +67,12 @@ export default function StudiesDomWrapper({
   isFormSheet = false,
 }: Props) {
   const ref = useRef<StudyDOMRef>(null)
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const theme = useTheme()
   const isKeyboardOpened = useKeyboardState(state => state.isVisible)
-  const keyboardHeight = useKeyboardState(state => state.height)
   const [activeFormats, setActiveFormats] = useState({})
   const { colorScheme } = useCurrentThemeSelector()
+  const encodedContentToDisplay = encodeDeltaContent(contentToDisplay)
 
   const getIsCurrentTab = useIsCurrentTab()
   const isCurrentTab = studyAtom ? getIsCurrentTab(studyAtom as PrimitiveAtom<TabItem>) : false
@@ -79,9 +82,9 @@ export default function StudiesDomWrapper({
 
     if (ref.current?.reloadEditor && isCurrentTab) {
       console.log('[Studies] Reloading editor')
-      ref.current.reloadEditor(contentToDisplay ?? { ops: [] })
+      ref.current.reloadEditor(encodedContentToDisplay)
     }
-  }, [isCurrentTab])
+  }, [isCurrentTab, encodedContentToDisplay])
 
   function dispatchToWebView(type: string, payload?: JSONValue): void {
     if (ref.current) {
@@ -94,7 +97,7 @@ export default function StudiesDomWrapper({
     dispatchToWebView('BLUR_EDITOR')
     await timeout(300)
     getDefaultStore().set(currentStudyIdAtom, studyId)
-    router.push({
+    pushRouteOnce({
       pathname: '/bible-view',
       params: { isSelectionMode: selectionMode },
     })
@@ -149,7 +152,7 @@ export default function StudiesDomWrapper({
             })
             .map(verseKey => Number(verseKey.split('-')[2]))
 
-          router.push({
+          pushRouteOnce({
             pathname: '/bible-view',
             params: {
               contextDisplayMode: 'focused',
@@ -163,7 +166,7 @@ export default function StudiesDomWrapper({
         }
 
         case 'VIEW_BIBLE_STRONG': {
-          router.push({
+          pushRouteOnce({
             pathname: '/strong',
             params: msgData.payload as RouterParams | undefined,
           })
@@ -201,7 +204,6 @@ export default function StudiesDomWrapper({
       navigateBibleView={navigateToSelectionMode}
       dispatchToWebView={dispatchToWebView}
       activeFormats={activeFormats}
-      keyboardHeight={keyboardHeight - 20}
     />
   ) : null
 
@@ -210,7 +212,7 @@ export default function StudiesDomWrapper({
       ref={ref}
       fontFamily={fontFamily}
       language={i18n.language}
-      contentToDisplay={contentToDisplay ?? { ops: [] }}
+      encodedContentToDisplay={encodedContentToDisplay}
       isReadOnly={isReadOnly}
       colorScheme={colorScheme}
       dom={{
@@ -233,7 +235,15 @@ export default function StudiesDomWrapper({
       <Box flex bg="reverse" pb={isKeyboardOpened ? 50 : 0}>
         {editor}
         {footer && (
-          <KeyboardStickyView style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
+          <KeyboardStickyView
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              overflow: 'visible',
+            }}
+          >
             {footer}
           </KeyboardStickyView>
         )}

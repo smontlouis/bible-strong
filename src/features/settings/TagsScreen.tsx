@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import { BottomSheetModal } from '@gorhom/bottom-sheet/'
+import { Sheet, type SheetRef } from '~common/sheet'
 import React, { useEffect, useRef, useState } from 'react'
 import { Alert } from 'react-native'
 import { shallowEqual, useDispatch, useSelector, useStore } from 'react-redux'
@@ -9,7 +9,6 @@ import { ActionSheetItem } from '~common/ActionMenu'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Link from '~common/Link'
-import Modal from '~common/Modal'
 import RenameModal from '~common/RenameModal'
 import SearchInput from '~common/SearchInput'
 import Border from '~common/ui/Border'
@@ -20,14 +19,10 @@ import { LegendList } from '@legendapp/list'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import useFuzzy from '~helpers/useFuzzy'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useSheet } from '~helpers/useSheet'
 import { addTag, removeTag, updateTag } from '~redux/modules/user'
 import { sortedTagsSelector } from '~redux/selectors/tags'
-import {
-  makeTagDataSelector,
-  makeGroupedHighlightsCountSelector,
-  makeGroupedWordAnnotationsCountSelector,
-} from '~redux/selectors/bible'
+import { makeTagDataSelector } from '~redux/selectors/bible'
 import { Tag } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import { useCreateTabGroupFromTag } from './useCreateTabGroupFromTag'
@@ -52,29 +47,20 @@ type TagItemProps = {
 
 const TagItem = ({ item, setOpen }: TagItemProps) => {
   const { t } = useTranslation()
-  const selectGroupedHighlightsCount = makeGroupedHighlightsCountSelector()
-  const selectGroupedWordAnnotationsCount = makeGroupedWordAnnotationsCountSelector()
-  const highlightsNumber = useSelector((state: RootState) =>
-    selectGroupedHighlightsCount(state, item.highlights)
-  )
-  const annotationsNumber = useSelector((state: RootState) =>
-    selectGroupedWordAnnotationsCount(state, item.wordAnnotations)
-  )
-  const notesNumber = item.notes && Object.keys(item.notes).length
-  const linksNumber = item.links && Object.keys(item.links).length
-  const studiesNumber = item.studies && Object.keys(item.studies).length
-
-  const strongsNumber =
-    item.strongsHebreu &&
-    Object.keys(item.strongsHebreu).length +
-      ((item.strongsGrec && Object.keys(item.strongsGrec).length) || 0)
-  const wordsNumber = item.words && Object.keys(item.words).length
-  const navesNumber = item.naves && Object.keys(item.naves).length
+  const selectTagData = useRef(makeTagDataSelector()).current
+  const tagData = useSelector((state: RootState) => selectTagData(state, item))
+  const highlightsNumber = tagData.highlights.length + tagData.wordAnnotations.length
+  const notesNumber = tagData.notes.length
+  const linksNumber = tagData.links.length
+  const studiesNumber = tagData.studies.length
+  const strongsNumber = tagData.strongsHebreu.length + tagData.strongsGrec.length
+  const wordsNumber = tagData.words.length
+  const navesNumber = tagData.naves.length
 
   return (
     <Box>
       <Link route="Tag" params={{ tagId: item.id }}>
-        <Box padding={20} row paddingRight={0}>
+        <Box padding={20} row pr={0} py={10}>
           <Box flex justifyContent="center">
             <Text bold>{item.name}</Text>
             <Box row>
@@ -99,11 +85,10 @@ const TagItem = ({ item, setOpen }: TagItemProps) => {
                   </Text>
                 </Chip>
               )}
-              {!!(highlightsNumber + annotationsNumber) && (
+              {!!highlightsNumber && (
                 <Chip>
                   <Text fontSize={10} color="default">
-                    {highlightsNumber + annotationsNumber}{' '}
-                    {t('surbrillance', { count: highlightsNumber + annotationsNumber })}
+                    {highlightsNumber} {t('surbrillance', { count: highlightsNumber })}
                   </Text>
                 </Chip>
               )}
@@ -135,7 +120,7 @@ const TagItem = ({ item, setOpen }: TagItemProps) => {
           </Link>
         </Box>
       </Link>
-      <Border marginHorizontal={20} />
+      <Border marginHorizontal={10} />
     </Box>
   )
 }
@@ -150,13 +135,13 @@ const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
   const hasBackButton = isFormSheet ? canGoBackInStack : true
   const tags = useSelector(sortedTagsSelector, shallowEqual)
   const [isOpen, setOpen] = useState<Tag | undefined>(undefined)
-  const renameModalRef = useRef<BottomSheetModal>(null)
+  const renameModalRef = useRef<SheetRef>(null)
   const [tagToEdit, setTagToEdit] = useState<{ id: string; name: string } | null>(null)
   const { keyword, result, search, resetSearch } = useFuzzy(tags, {
     keys: ['name'],
   })
   const dispatch = useDispatch()
-  const { ref, open, close } = useBottomSheetModal()
+  const { ref, open, close } = useSheet()
   const store = useStore<RootState>()
   const selectTagData = makeTagDataSelector()
   const createTabGroupFromTag = useCreateTabGroupFromTag()
@@ -216,7 +201,7 @@ const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
           />
         )}
 
-        <Modal.Body ref={ref} onModalClose={() => setOpen(undefined)} enableDynamicSizing>
+        <Sheet ref={ref} onDismiss={() => setOpen(undefined)}>
           <ActionSheetItem
             icon="edit-3"
             label={t('Éditer')}
@@ -239,9 +224,9 @@ const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
             color="quart"
             onPress={promptLogout}
           />
-        </Modal.Body>
+        </Sheet>
         <RenameModal
-          bottomSheetRef={renameModalRef}
+          sheetRef={renameModalRef}
           title={tagToEdit?.id ? t("Renommer l'étiquette") : t('Nouvelle étiquette')}
           placeholder={t("Nom de l'étiquette")}
           initialValue={tagToEdit?.name}

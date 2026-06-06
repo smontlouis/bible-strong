@@ -5,7 +5,7 @@ import { Verse as TVerse } from '~common/types'
 import { WordToken, getWordIndexFromCharOffset } from '~helpers/wordTokenizer'
 import { SelectionRange, WordPosition } from './selectionUtils'
 import { HighlightRect } from './HighlightComponents'
-import { getCaretInfoFromPoint, findVerseContainer } from './domUtils'
+import { getCaretInfoFromPoint, findVerseContainer, isIgnoredVerseTouchTarget } from './domUtils'
 
 // Drag selection constants
 const DRAG_THRESHOLD = 10 // pixels to detect horizontal drag vs scroll
@@ -85,8 +85,6 @@ export interface TouchSelectionCallbacks {
   onLongPressVerse?: (verseKey: string) => void
   /** Called when drag starts */
   onDragStart?: () => void
-  /** Called when horizontal drag detected in normal mode - triggers entry into annotation mode */
-  onEnterAnnotationModeFromDrag?: () => void
   /** Called to notify which verse is currently being touched (for visual feedback) */
   onTouchedVerseChange?: (verseKey: string | null) => void
   /** Called when tapping on empty space (not on a verse) - useful for clearing selection */
@@ -105,8 +103,6 @@ export interface TouchSelectionConfig {
   highlightRects: HighlightRect[]
   /** Whether annotation mode is currently active */
   annotationMode: boolean
-  /** Whether drag-to-annotation is allowed (disabled when verses are selected in normal mode) */
-  canDragToAnnotate?: boolean
   /** Gesture callbacks */
   callbacks?: TouchSelectionCallbacks
 }
@@ -124,7 +120,6 @@ export function useTouchSelection({
   getTokens,
   getSelectionHandlePositions,
   annotationMode,
-  canDragToAnnotate = true,
   callbacks = {},
 }: TouchSelectionConfig): {
   lastDragEndRef: RefObject<number>
@@ -156,9 +151,6 @@ export function useTouchSelection({
 
   const annotationModeRef = useRef(annotationMode)
   annotationModeRef.current = annotationMode
-
-  const canDragToAnnotateRef = useRef(canDragToAnnotate)
-  canDragToAnnotateRef.current = canDragToAnnotate
 
   const setSelectionRef = useRef(setSelection)
   setSelectionRef.current = setSelection
@@ -317,6 +309,14 @@ export function useTouchSelection({
 
       currentTouchPosRef.current = { x: touch.clientX, y: touch.clientY }
 
+      if (isIgnoredVerseTouchTarget(e.target)) {
+        touchState.hasMoved = true
+        touchState.startWord = null
+        touchState.startVerseKey = null
+        cbs.onTouchedVerseChange?.(null)
+        return
+      }
+
       const wordPos = getWordAtPoint(touch.clientX, touch.clientY)
       touchState.startWord = wordPos
       touchState.startVerseKey =
@@ -428,17 +428,8 @@ export function useTouchSelection({
         // Slow movement -> drag (text selection)
         if (touchState.startWord) {
           if (!annotationModeRef.current) {
-            if (!canDragToAnnotateRef.current) {
-              touchState.hasMoved = true
-              return
-            }
-            touchState.isDragging = true
-            e.preventDefault()
-            cbs.onEnterAnnotationModeFromDrag?.()
-            setSelectionRef.current(() => ({
-              start: touchState.startWord!,
-              end: touchState.startWord!,
-            }))
+            touchState.hasMoved = true
+            return
           } else {
             touchState.isDragging = true
             e.preventDefault()

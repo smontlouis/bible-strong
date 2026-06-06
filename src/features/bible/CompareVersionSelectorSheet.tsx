@@ -1,0 +1,79 @@
+import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
+import React from 'react'
+import { SectionList } from 'react-native'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
+import Border from '~common/ui/Border'
+import Box from '~common/ui/Box'
+import Text from '~common/ui/Text'
+import VersionSelectorItem from '~features/bible/VersionSelectorItem'
+import { getVersionsBySections } from '~helpers/bibleVersions'
+import { toggleCompareVersion } from '~redux/modules/user'
+import type { RootState } from '~redux/modules/reducer'
+import type { AppDispatch } from '~redux/store'
+import type { Version } from '~helpers/bibleVersions'
+import type { VersionCode } from 'src/state/tabs'
+
+type CompareVersionSelectorSheetProps = {
+  sheetRef: React.RefObject<SheetRef | null>
+}
+
+const CompareVersionSelectorSheet = ({ sheetRef }: CompareVersionSelectorSheetProps) => {
+  const insets = useSafeAreaInsets()
+  const { t } = useTranslation()
+  const dispatch = useDispatch<AppDispatch>()
+  const versionsToCompare = useSelector(
+    (state: RootState) => Object.keys(state.user.bible.settings.compare),
+    shallowEqual
+  )
+
+  const toggleVersion = (versionId: VersionCode) => {
+    dispatch(toggleCompareVersion(versionId))
+  }
+
+  const addCompletedDownload = (versionId: VersionCode) => {
+    if (!versionsToCompare.includes(versionId)) {
+      dispatch(toggleCompareVersion(versionId))
+    }
+  }
+
+  return (
+    <Sheet
+      ref={sheetRef}
+      snapPoints={[1]}
+      scrollableOptions={{ scrollingExpandsSheet: false }}
+      header={<SheetHeader title={t('Sélectionner les versions')} centerTitle />}
+    >
+      <SectionList<Version, { title: string; data: Version[] }>
+        contentContainerStyle={{
+          paddingTop: 0,
+          paddingBottom: insets.bottom,
+        }}
+        stickySectionHeadersEnabled={false}
+        sections={getVersionsBySections()}
+        keyExtractor={item => item.id}
+        renderSectionHeader={({ section: { title } }) => (
+          <Box paddingHorizontal={20} marginTop={30}>
+            <Text fontSize={16} color="tertiary">
+              {title}
+            </Text>
+            <Border marginTop={10} />
+          </Box>
+        )}
+        renderItem={({ item }) => (
+          <VersionSelectorItem
+            version={item}
+            isSelected={versionsToCompare.includes(item.id)}
+            onChange={toggleVersion}
+            onDownloadComplete={addCompletedDownload}
+            showSelectionCheckbox
+          />
+        )}
+      />
+    </Sheet>
+  )
+}
+
+export default CompareVersionSelectorSheet

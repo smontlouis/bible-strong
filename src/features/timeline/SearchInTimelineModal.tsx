@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { BottomSheetFlatList, BottomSheetModal } from '@gorhom/bottom-sheet'
-import { useRouter } from 'expo-router'
+import { SheetFlatList, Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 import { Image } from 'expo-image'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Empty from '~common/Empty'
 import { LinkBox } from '~common/Link'
 import SearchInput from '~common/SearchInput'
@@ -13,13 +11,12 @@ import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import bibleMemoize from '~helpers/bibleStupidMemoize'
-import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
-import { ContainerComponent } from '~common/Modal'
 import { TimelineEventDetail } from './types'
 import { getTimelineImageUri } from './timelineImage'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 interface Props {
-  modalRef: React.RefObject<BottomSheetModal | null>
+  modalRef: React.RefObject<SheetRef | null>
 }
 
 const normalizeSearchText = (value?: string) =>
@@ -103,9 +100,8 @@ const TimelineSearchResultItem = ({
 }
 
 const SearchInTimelineModal = ({ modalRef }: Props) => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
-  const insets = useSafeAreaInsets()
   const [searchValue, setSearchValue] = useState('')
   const [results, setResults] = useState<TimelineEventDetail[]>([])
   const [hasSearched, setHasSearched] = useState(false)
@@ -128,39 +124,31 @@ const SearchInTimelineModal = ({ modalRef }: Props) => {
 
   const onOpenEvent = (event: TimelineEventDetail) => {
     modalRef.current?.dismiss()
-    router.push({
+    pushRouteOnce({
       pathname: '/event',
       params: { slug: event.slug },
     })
   }
 
-  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
-
   return (
-    <BottomSheetModal
+    <Sheet
       ref={modalRef}
-      snapPoints={['100%']}
-      enableDynamicSizing={false}
-      enablePanDownToClose
-      topInset={insets.top}
-      backdropComponent={renderBackdrop}
-      containerComponent={ContainerComponent}
-      activeOffsetY={[-20, 20]}
-      key={key}
-      {...bottomSheetStyles}
+      snapPoints={[1]}
+      header={
+        <SheetHeader>
+          <Box px={16} pt={30} pb={12}>
+            <SearchInput
+              value={searchValue}
+              onChangeText={setSearchValue}
+              placeholder={t('Rechercher un événement dans la Bible')}
+              onDelete={onClear}
+              returnKeyType="search"
+            />
+          </Box>
+        </SheetHeader>
+      }
     >
-      <Box pt={12}>
-        <Box px={16}>
-          <SearchInput
-            value={searchValue}
-            onChangeText={setSearchValue}
-            placeholder={t('Rechercher un événement dans la Bible')}
-            onDelete={onClear}
-            returnKeyType="search"
-          />
-        </Box>
-      </Box>
-      <BottomSheetFlatList
+      <SheetFlatList
         ItemSeparatorComponent={() => <Border />}
         data={results}
         keyExtractor={(item: TimelineEventDetail) => item.slug}
@@ -186,7 +174,7 @@ const SearchInTimelineModal = ({ modalRef }: Props) => {
           <TimelineSearchResultItem item={item} onPress={onOpenEvent} />
         )}
       />
-    </BottomSheetModal>
+    </Sheet>
   )
 }
 

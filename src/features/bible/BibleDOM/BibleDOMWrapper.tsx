@@ -32,10 +32,10 @@ import {
   BibleResource,
   Pericope,
   SelectedCode,
-  StudyNavigateBibleType,
   Tag,
   Verse,
   VerseIds,
+  StudyNavigateBibleType,
 } from '~common/types'
 import Box from '~common/ui/Box'
 import {
@@ -57,7 +57,8 @@ import {
 import type { CrossVersionAnnotation } from '~redux/selectors/bible'
 import type { RelationEndpoint, RelationKind, RelationType } from '~features/studyRelations/domain'
 import { useOpenRelationEndpoint } from '~features/studyRelations/useOpenRelationEndpoint'
-import { useBookAndVersionSelector } from '../BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { useBookAndVersionSelector } from '../BookSelectorSheet/BookSelectorSheetProvider'
 import type { AnnotationType, SelectionRange, WordPosition } from '../hooks/useAnnotationMode'
 import { BibleDOMTranslations } from './TranslationsContext'
 import {
@@ -94,6 +95,20 @@ import {
   TOGGLE_INT_COMPLETE,
   TOGGLE_SELECTED_VERSE,
 } from './dispatch'
+import {
+  getBookmarkPayload,
+  getNoteNavigationPayload,
+  getNumberPayload,
+  getStringPayload,
+  getStudyRelationsModalTarget,
+  getToastPayload,
+  getVerseIdsPayload,
+  isRecord,
+  type BibleDOMBridgeAction,
+  type StudyRelationsModalTarget,
+} from './bibleDomBridgeCommands'
+
+export type { StudyRelationsModalTarget } from './bibleDomBridgeCommands'
 
 export type ParallelVerse = {
   id: VersionCode
@@ -121,81 +136,9 @@ type HighlightTagsModalPayload = {
   ids: Record<string, true>
 }
 
-export type StudyRelationsModalTarget =
-  | string
-  | {
-      verseKey?: string
-      verseIds?: string[]
-      relationId?: string
-    }
-
-type DispatchAction = {
-  type: string
-  payload?: unknown
-  params?: {
-    verse: Verse
-    isSelectionMode?: StudyNavigateBibleType
-  }
-  bookCode?: string
-  chapter?: string | number
-  verse?: string | number
-}
-
-export type Dispatch = (props: DispatchAction) => Promise<void>
+export type Dispatch = (props: BibleDOMBridgeAction) => Promise<void>
 
 const books = booksJson as Record<string, string[]>
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null
-
-const getStringPayload = (payload: unknown): string | undefined =>
-  typeof payload === 'string' ? payload : undefined
-
-const getNumberPayload = (payload: unknown): number | undefined =>
-  typeof payload === 'number' ? payload : undefined
-
-const getToastPayload = (payload: unknown): { message?: string; type?: string } => {
-  if (!isRecord(payload)) return {}
-  return {
-    message: getStringPayload(payload.message),
-    type: getStringPayload(payload.type),
-  }
-}
-
-const getVerseIdsPayload = (payload: unknown): string[] => {
-  if (!isRecord(payload) || !Array.isArray(payload.verseIds)) return []
-  return payload.verseIds.filter((verseId): verseId is string => typeof verseId === 'string')
-}
-
-const getStudyRelationsModalTarget = (payload: unknown): StudyRelationsModalTarget | undefined => {
-  if (typeof payload === 'string') return payload
-  if (!isRecord(payload)) return undefined
-
-  const verseKey = getStringPayload(payload.verseKey)
-  const relationId = getStringPayload(payload.relationId)
-  const verseIds = getVerseIdsPayload(payload)
-
-  if (!verseKey && !verseIds.length) return undefined
-
-  return {
-    verseKey,
-    relationId,
-    verseIds,
-  }
-}
-
-const getNoteNavigationPayload = (payload: unknown): { noteId?: string; verseIds: string[] } => {
-  if (typeof payload === 'string') {
-    return { noteId: payload, verseIds: [] }
-  }
-  if (!isRecord(payload)) {
-    return { verseIds: [] }
-  }
-  return {
-    noteId: getStringPayload(payload.noteId),
-    verseIds: getVerseIdsPayload(payload),
-  }
-}
 
 /**
  * Prevents rapid empty→loaded prop updates on the Expo DOM bridge.
@@ -213,7 +156,12 @@ function useStabilizedVerses(verses: Verse[], isLoading: boolean) {
   return stable
 }
 
+const DOM_WEBVIEW_BACKGROUND_COLOR = 'transparent'
+const DOM_WEBVIEW_INITIAL_SCRIPT =
+  "document.documentElement.style.backgroundColor='transparent';document.body.style.backgroundColor='transparent';document.body.style.margin='0';true;"
+
 export type WebViewProps = {
+  tabId: string
   bibleAtom: PrimitiveAtom<BibleTab>
   isBibleViewReloadingAtom: PrimitiveAtom<boolean>
   book: Book
@@ -404,6 +352,7 @@ export const BibleDOMWrapper = ({
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
   const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
 
   const stableVerses = useStabilizedVerses(verses, isLoading)
 
@@ -482,7 +431,7 @@ export const BibleDOMWrapper = ({
       case NAVIGATE_TO_PERICOPE: {
         router.push({
           pathname: '/pericope',
-          params: { book: String(book.Numero) },
+          params: { book: String(book.Numero), version },
         })
         break
       }
@@ -584,7 +533,7 @@ export const BibleDOMWrapper = ({
           return
         }
 
-        router.push({
+        pushRouteOnce({
           pathname: '/bible-view',
           params: {
             contextDisplayMode: 'focused',
@@ -640,14 +589,15 @@ export const BibleDOMWrapper = ({
       }
 
       case OPEN_BOOKMARK_MODAL: {
-        if (isRecord(action.payload)) onOpenBookmarkModal?.(action.payload as unknown as Bookmark)
+        const bookmark = getBookmarkPayload(action.payload)
+        if (bookmark) onOpenBookmarkModal?.(bookmark)
         break
       }
 
       case NAVIGATE_TO_TAG: {
         if (!isRecord(action.payload) || typeof action.payload.tagId !== 'string') break
         const { tagId } = action.payload
-        router.push({ pathname: '/tag', params: { tagId } })
+        pushRouteOnce({ pathname: '/tag', params: { tagId } })
         break
       }
 
@@ -779,16 +729,16 @@ export const BibleDOMWrapper = ({
           webviewDebuggingEnabled: __DEV__,
           style: {
             flex: 1,
-            backgroundColor: theme.colors.reverse,
+            backgroundColor: DOM_WEBVIEW_BACKGROUND_COLOR,
           },
           containerStyle: {
             flex: 1,
-            backgroundColor: theme.colors.reverse,
+            backgroundColor: DOM_WEBVIEW_BACKGROUND_COLOR,
             ...(Platform.OS === 'android' && {
               marginTop: TOP_INSET,
             }),
           },
-          injectedJavaScriptBeforeContentLoaded: `document.documentElement.style.backgroundColor='${theme.colors.reverse}';document.body.style.backgroundColor='${theme.colors.reverse}';document.body.style.margin='0';true;`,
+          injectedJavaScriptBeforeContentLoaded: DOM_WEBVIEW_INITIAL_SCRIPT,
         }}
         verses={versesToSend}
         parallelVerses={parallelVerses}

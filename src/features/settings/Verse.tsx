@@ -2,7 +2,6 @@ import { TouchableOpacity } from 'react-native'
 import distanceInWords from 'date-fns/formatDistance'
 
 import styled from '@emotion/native'
-import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 
 import EntityChipList from '~common/EntityChipList'
@@ -20,6 +19,7 @@ import { removeBreakLines } from '~helpers/utils'
 import useLanguage from '~helpers/useLanguage'
 import { getDateLocale } from '~helpers/languageUtils'
 import { useHighlightColors, useResolvedColor } from '~helpers/useHighlightColors'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import type { CustomColor, HighlightType } from '~redux/modules/user'
 import type { TagsObj, Verse, VerseIds } from '~common/types'
 
@@ -56,7 +56,7 @@ const VerseComponent = ({
   tags,
   setSettings,
 }: VerseComponentProps) => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const verses = useBibleVerses(verseIds)
   const { t } = useTranslation()
   const lang = useLanguage()
@@ -86,22 +86,22 @@ const VerseComponent = ({
     locale: getDateLocale(lang),
   })
   const { Livre, Chapitre, Verset } = verses[0]
+  const bibleViewParams = {
+    contextDisplayMode: 'focused',
+    book: JSON.stringify(books[Number(Livre) - 1]),
+    chapter: String(Chapitre),
+    verse: String(Verset),
+    focusVerses: JSON.stringify(verses.map(v => Number(v.Verset))),
+  }
+  const openBibleView = () => {
+    pushRouteOnce({
+      pathname: '/bible-view',
+      params: bibleViewParams,
+    })
+  }
+
   return (
-    <TouchableOpacity
-      activeOpacity={0.7}
-      onPress={() =>
-        router.push({
-          pathname: '/bible-view',
-          params: {
-            contextDisplayMode: 'focused',
-            book: JSON.stringify(books[Number(Livre) - 1]),
-            chapter: String(Chapitre),
-            verse: String(Verset),
-            focusVerses: JSON.stringify(verses.map(v => Number(v.Verset))),
-          },
-        })
-      }
-    >
+    <TouchableOpacity activeOpacity={0.7} onPress={openBibleView}>
       <Container>
         <Box row style={{ marginBottom: 10 }} alignItems="center">
           <Box flex row alignItems="center">

@@ -1,5 +1,5 @@
 import { useTheme } from '@emotion/react'
-import BottomSheet, { BottomSheetHandle, BottomSheetView } from '@gorhom/bottom-sheet'
+import { type SheetRef, Sheet, SheetHeader, SheetView } from '~common/sheet'
 import { TouchableOpacity, type ViewStyle } from 'react-native'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
@@ -18,7 +18,6 @@ import Box, {
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
-import { useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import { BOTTOM_INSET } from '~helpers/constants'
 import verseToReference from '~helpers/verseToReference'
 import { colorPickerModalAtom, isFullScreenBibleAtom } from 'src/state/app'
@@ -60,7 +59,7 @@ const formatSelectionRange = (selection: SelectionRange): string => {
 }
 
 type Props = {
-  ref?: React.RefObject<BottomSheet | null>
+  ref?: React.RefObject<SheetRef | null>
   hasSelection: boolean
   selection?: SelectionRange | null
   onApplyAnnotation: (color: string, type: AnnotationType) => void
@@ -183,7 +182,7 @@ const AnnotationColorPalette = ({
         <TouchableBox
           key={color.key}
           size={30}
-          borderRadius={15}
+          borderRadius={12}
           center
           bg="reverse"
           borderWidth={selectedColor === color.key ? 2 : 0}
@@ -192,7 +191,7 @@ const AnnotationColorPalette = ({
         >
           <Box
             size={selectedColor === color.key ? 20 : 24}
-            borderRadius={12}
+            borderRadius={8}
             style={{ backgroundColor: color.hex }}
           />
         </TouchableBox>
@@ -235,9 +234,6 @@ const AnnotationToolbar = ({
 }: Props) => {
   const { t } = useTranslation()
   const theme = useTheme()
-  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
-  const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
-  const { bottomBarHeight } = useBottomBarHeightInTab()
   const disabled = !selectedAnnotation && !hasSelection
   const [activeAnnotationType, setActiveAnnotationType] = useState<AnnotationType>('background')
 
@@ -263,64 +259,14 @@ const AnnotationToolbar = ({
     }
   }
 
-  const renderHandle = (handleProps: React.ComponentProps<typeof BottomSheetHandle>) => (
-    <>
-      <BottomSheetHandle {...handleProps} />
-      <Box
-        position="absolute"
-        top={isEnabled ? -70 : 0}
-        left={0}
-        right={0}
-        bottom={0}
-        zIndex={1000}
-        alignItems="center"
-        justifyContent="center"
-        style={
-          {
-            transitionProperty: ['top'],
-            transitionDuration: 300,
-          } as unknown as ViewStyle
-        }
-      >
-        <TouchableBox
-          bg="primary"
-          borderRadius={14}
-          py={10}
-          px={14}
-          row
-          gap={10}
-          alignItems="center"
-          onPress={onClose}
-        >
-          <Text fontSize={14} bold color="reverse">
-            {t('Mode libre')}
-          </Text>
-          <Box bg="reverse" borderRadius={20} size={16} center lightShadow opacity={0.5}>
-            <FeatherIcon name="x" size={12} color="primary" />
-          </Box>
-        </TouchableBox>
-      </Box>
-    </>
-  )
-
   return (
-    <BottomSheet
+    <Sheet
       ref={ref}
-      enableDynamicSizing
-      enablePanDownToClose
+      backdrop={false}
       onClose={onClose}
-      key={key}
-      index={-1}
-      {...bottomSheetStyles}
-      backgroundStyle={{ backgroundColor: theme.colors.reverse }}
-      handleComponent={renderHandle}
+      header={<SheetHeader title={t('Mode libre')} centerTitle />}
     >
-      <BottomSheetView
-        style={{
-          flex: 0,
-          paddingBottom: isFullScreenBible ? BOTTOM_INSET : bottomBarHeight,
-        }}
-      >
+      <SheetView pt={20}>
         <FadingBox
           keyProp={
             selectedAnnotation ? 'selectedAnnotation' : hasSelection ? 'hasSelection' : 'empty'
@@ -497,8 +443,8 @@ const AnnotationToolbar = ({
             onSelectColor={handleApply}
           />
         </AnimatedBox>
-      </BottomSheetView>
-    </BottomSheet>
+      </SheetView>
+    </Sheet>
   )
 }
 

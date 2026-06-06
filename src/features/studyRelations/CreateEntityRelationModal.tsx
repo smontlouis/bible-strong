@@ -1,14 +1,12 @@
-import { BottomSheetFlashList, BottomSheetModal } from '@gorhom/bottom-sheet'
+import { SheetFlashList, Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 import { useTheme } from '@emotion/react'
 import { Ref, useDeferredValue, useEffect, useState } from 'react'
 import { ActivityIndicator } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import AlphabetList from '~common/AlphabetList'
-import BottomSheetSearchInput from '~common/BottomSheetSearchInput'
+import SheetSearchInput from '~common/SheetSearchInput'
 import Empty from '~common/Empty'
-import Modal from '~common/Modal'
-import ModalHeader from '~common/ModalHeader'
 import Box, { VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import useBibleVerses from '~helpers/useBibleVerses'
@@ -66,7 +64,7 @@ type RelationTargetSectionId =
 type RelationTargetSection = SearchResultSection<RelationTargetSectionId>
 
 type Props = {
-  ref?: Ref<BottomSheetModal | null>
+  ref?: Ref<SheetRef | null>
   title?: string
   sourceEndpoint: RelationEndpoint | null
   onCreated?: () => void
@@ -637,9 +635,9 @@ const CreateEntityRelationModal = ({
   )
   const renderLoadingState = () => <LoadingIndicator />
 
-  const headerComponent = (
+  const searchHeader = (
     <Box px={20} pt={8} pb={12}>
-      <BottomSheetSearchInput
+      <SheetSearchInput
         value={searchValue}
         onChangeText={handleSearch}
         onDelete={() => handleSearch('')}
@@ -659,21 +657,19 @@ const CreateEntityRelationModal = ({
   )
 
   return (
-    <Modal.Body
+    <Sheet
       ref={ref}
-      snapPoints={['75%']}
-      headerComponent={
-        <>
-          <ModalHeader
-            title={modalTitle}
-            subTitle={modalSubtitle}
-            hasBackButton={Boolean(browseMode)}
-            onBackPress={exitBrowseMode}
-          />
-          {headerComponent}
-        </>
+      snapPoints={[0.75]}
+      header={
+        <SheetHeader
+          title={modalTitle}
+          subTitle={modalSubtitle}
+          hasBackButton={Boolean(browseMode)}
+          onBackPress={exitBrowseMode}
+        >
+          {searchHeader}
+        </SheetHeader>
       }
-      enableContentWrapper={false}
     >
       <VStack flex={1}>
         {strongError && browseMode === 'strong' ? (
@@ -689,7 +685,7 @@ const CreateEntityRelationModal = ({
             <Text color="grey">{t('Impossible de charger le dictionnaire...')}</Text>
           </Box>
         ) : (
-          <BottomSheetFlashList
+          <SheetFlashList
             data={searchSections}
             renderItem={({ item: section }: { item: RelationTargetSection }) => (
               <SearchSectionBlock
@@ -724,7 +720,7 @@ const CreateEntityRelationModal = ({
           />
         )}
       </VStack>
-    </Modal.Body>
+    </Sheet>
   )
 }
 

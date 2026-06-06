@@ -1,18 +1,23 @@
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
-import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet/'
+import {
+  SheetFooter,
+  Sheet,
+  SheetHeader,
+  SheetTextInput,
+  type SheetRef,
+  SheetView,
+} from '~common/sheet'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import Modal from '~common/Modal'
-import ModalHeader from '~common/ModalHeader'
+import type { TextInput as RNTextInput } from 'react-native'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import { GROUP_COLORS } from '../../../state/tabs'
 
-const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
+const StyledTextInput = styled(SheetTextInput)(({ theme }) => ({
   color: theme.colors.default,
   height: 48,
   borderColor: theme.colors.border,
@@ -23,7 +28,7 @@ const StyledTextInput = styled(BottomSheetTextInput)(({ theme }) => ({
 }))
 
 interface EditGroupModalProps {
-  bottomSheetRef: React.RefObject<BottomSheetModal | null>
+  sheetRef: React.RefObject<SheetRef | null>
   initialName?: string
   initialColor?: string
   onSave: (data: { name: string; color: string }) => void
@@ -31,7 +36,7 @@ interface EditGroupModalProps {
 }
 
 const EditGroupModal = ({
-  bottomSheetRef,
+  sheetRef,
   initialName = '',
   initialColor = GROUP_COLORS[0],
   onSave,
@@ -39,18 +44,21 @@ const EditGroupModal = ({
 }: EditGroupModalProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
-  const insets = useSafeAreaInsets()
   const [name, setName] = useState(initialName)
   const [selectedColor, setSelectedColor] = useState(initialColor)
+  const inputRef = React.useRef<RNTextInput>(null)
 
   useEffect(() => {
     setName(initialName)
     setSelectedColor(initialColor || GROUP_COLORS[0])
   }, [initialName, initialColor])
 
+  const scheduleInputFocus = () => {
+    inputRef.current?.focus()
+  }
+
   const handleClose = () => {
-    bottomSheetRef.current?.dismiss()
-    onClose?.()
+    sheetRef.current?.dismiss()
   }
 
   const handleSave = () => {
@@ -59,54 +67,49 @@ const EditGroupModal = ({
     handleClose()
   }
 
-  const handleSheetChange = (index: number) => {
-    if (index >= 0) {
-      setName(initialName)
-      setSelectedColor(initialColor || GROUP_COLORS[0])
-    }
+  const handlePresent = () => {
+    setName(initialName)
+    setSelectedColor(initialColor || GROUP_COLORS[0])
+    scheduleInputFocus()
+  }
+
+  const handleDismiss = () => {
+    onClose?.()
   }
 
   const isDisabled = !name.trim()
 
   return (
-    <Modal.Body
-      ref={bottomSheetRef}
-      onModalClose={handleClose}
-      onChange={handleSheetChange}
-      topInset={insets.top}
-      enableDynamicSizing
-      headerComponent={<ModalHeader title={t('tabs.editGroup')} />}
-      footerComponent={props => (
-        <BottomSheetFooter {...props}>
-          <HStack
-            py={5}
-            px={20}
-            justifyContent="flex-end"
-            paddingBottom={insets.bottom + 5}
-            bg="reverse"
-          >
+    <Sheet
+      ref={sheetRef}
+      onDismiss={handleDismiss}
+      onPresent={handlePresent}
+      header={<SheetHeader title={t('tabs.editGroup')} />}
+      footer={props => (
+        <SheetFooter {...props}>
+          <HStack justifyContent="flex-end">
             <Box>
               <Button disabled={isDisabled} onPress={handleSave}>
                 {t('Sauvegarder')}
               </Button>
             </Box>
           </HStack>
-        </BottomSheetFooter>
+        </SheetFooter>
       )}
     >
-      <Box paddingHorizontal={20} py={20} gap={20}>
+      <SheetView paddingHorizontal={20} py={20} gap={20}>
         <Box gap={8}>
           <Text color="tertiary" fontSize={13}>
             {t('Nom')}
           </Text>
           <StyledTextInput
+            ref={inputRef}
             placeholder={t('tabs.groupNamePlaceholder')}
             placeholderTextColor={theme.colors.grey}
             onChangeText={setName}
             onSubmitEditing={handleSave}
             returnKeyType="send"
             value={name}
-            autoFocus
             selectTextOnFocus
           />
         </Box>
@@ -133,8 +136,8 @@ const EditGroupModal = ({
             ))}
           </HStack>
         </Box>
-      </Box>
-    </Modal.Body>
+      </SheetView>
+    </Sheet>
   )
 }
 

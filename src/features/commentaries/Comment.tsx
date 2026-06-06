@@ -1,7 +1,6 @@
 import * as Sentry from '@sentry/react-native'
 import { to } from 'await-to-js'
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
 import { useAtomValue } from 'jotai'
 import React, { memo, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -19,6 +18,7 @@ import Text from '~common/ui/Text'
 import { useFireStorage } from '~features/plans/plan.hooks'
 import { firebaseDb } from '~helpers/firebase'
 import { Comment as CommentProps, EGWComment } from './types'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 const findBookNumber = (bookName: string) => {
   bookName = bookMappingComments[bookName] || bookName
@@ -117,7 +117,7 @@ const Comment = ({ comment }: Props) => {
   const { resource, content, href, id } = comment
   const [isCollapsed, setCollapsed] = React.useState(true)
   const cacheImage = useFireStorage(resource.logo)
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const fastImageSource = useMemo(
     () => ({
       uri: cacheImage,
@@ -139,7 +139,7 @@ const Comment = ({ comment }: Props) => {
       book = findBookNumber(book.substr(0, 3).toUpperCase())
       const [chapter, verse] = numbers.split('.')
 
-      router.push({
+      pushRouteOnce({
         pathname: '/bible-view',
         params: {
           contextDisplayMode: 'focused',

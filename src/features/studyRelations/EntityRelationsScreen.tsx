@@ -5,7 +5,7 @@ import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useSheet } from '~helpers/useSheet'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import CreateEntityRelationModal from './CreateEntityRelationModal'
 import StudyRelationList from './StudyRelationList'
@@ -19,7 +19,7 @@ const EntityRelationsScreen = () => {
   const params = useLocalSearchParams<{ endpoint?: string }>()
   const endpoint = parseRelationEndpointParam(params.endpoint)
   const openEndpoint = useOpenRelationEndpoint()
-  const createRelationModal = useBottomSheetModal()
+  const createRelationModal = useSheet()
   const canGoBackInStack = useCanGoBackInStack()
   const isSingleVerseEndpoint = endpoint?.type === 'verse' && endpoint.verseKeys.length === 1
   const endpointLabel = endpoint ? getEndpointFallbackLabel(endpoint) : ''
@@ -63,12 +63,12 @@ const EntityRelationsScreen = () => {
             />
           </Box>
         )}
+        <CreateEntityRelationModal
+          ref={createRelationModal.getRef()}
+          sourceEndpoint={endpoint}
+          onCreated={() => createRelationModal.close()}
+        />
       </ScrollView>
-      <CreateEntityRelationModal
-        ref={createRelationModal.getRef()}
-        sourceEndpoint={endpoint}
-        onCreated={() => createRelationModal.close()}
-      />
     </FormSheetScreen>
   )
 }

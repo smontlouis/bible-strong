@@ -1,15 +1,11 @@
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
-import { useTheme } from '@emotion/react'
+import { ActionSheetItem } from '~common/ActionMenu'
+import { Sheet, SheetView, type SheetRef } from '~common/sheet'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import React, { memo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { ContainerComponent } from '~common/Modal'
 import Box, { TouchableBox } from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
-import Text from '~common/ui/Text'
-import { renderBackdrop } from '~helpers/bottomSheetHelpers'
 import { useDeleteGroup } from '../../../state/tabGroups'
 import { TabGroup, closeAllTabsAtom, tabGroupsAtom } from '../../../state/tabs'
 import { TAB_ICON_SIZE } from '../utils/constants'
@@ -23,49 +19,17 @@ interface GroupActionsPopoverProps {
   onViewGroups: () => void
 }
 
-type FeatherIconName = React.ComponentProps<typeof FeatherIcon>['name']
-
-interface PopoverItemProps {
-  icon: FeatherIconName
-  label: string
-  onPress: () => void
-  destructive?: boolean
-}
-
-const PopoverItem = memo(({ icon, label, onPress, destructive }: PopoverItemProps) => {
-  return (
-    <TouchableBox row alignItems="center" py={8} px={16} onPress={onPress}>
-      <FeatherIcon
-        name={icon}
-        size={18}
-        color={destructive ? 'quart' : 'default'}
-        style={{ marginRight: 12 }}
-      />
-      <Text color={destructive ? 'quart' : 'default'} fontSize={15}>
-        {label}
-      </Text>
-    </TouchableBox>
-  )
-})
-
-PopoverItem.displayName = 'PopoverItem'
-
 const GroupActionsPopover = memo(
   ({ children, group, onCreateGroup, onEditGroup, onViewGroups }: GroupActionsPopoverProps) => {
     const { t } = useTranslation()
-    const theme = useTheme()
-    const insets = useSafeAreaInsets()
-    const { width: windowWidth } = useWindowDimensions()
-    const bottomSheetRef = useRef<BottomSheetModal>(null)
+    const sheetRef = useRef<SheetRef>(null)
     const closeAllTabs = useSetAtom(closeAllTabsAtom)
     const deleteGroup = useDeleteGroup()
     const groups = useAtomValue(tabGroupsAtom)
     const { groupPager } = useAppSwitcherContext()
-    const sheetWidth = Math.min(250, windowWidth - 40)
-    const bottomBarHeight = TAB_ICON_SIZE + insets.bottom
 
     const closeSheet = () => {
-      bottomSheetRef.current?.dismiss()
+      sheetRef.current?.dismiss()
     }
 
     const handleCloseAllTabs = () => {
@@ -74,10 +38,7 @@ const GroupActionsPopover = memo(
     }
 
     const handleEdit = () => {
-      closeSheet()
-      setTimeout(() => {
-        onEditGroup()
-      }, 100)
+      onEditGroup()
     }
 
     const handleDelete = () => {
@@ -104,68 +65,46 @@ const GroupActionsPopover = memo(
 
     const handleCreateGroup = () => {
       closeSheet()
-      setTimeout(() => {
-        onCreateGroup()
-      }, 100)
+      onCreateGroup()
     }
 
     const handleViewGroups = () => {
       closeSheet()
-      setTimeout(() => {
-        onViewGroups()
-      }, 100)
+      onViewGroups()
     }
 
     return (
       <>
-        <TouchableBox onPress={() => bottomSheetRef.current?.present()}>{children}</TouchableBox>
-        <BottomSheetModal
-          ref={bottomSheetRef}
-          detached
-          bottomInset={bottomBarHeight}
-          enableDynamicSizing
-          enablePanDownToClose
-          backdropComponent={props => renderBackdrop({ ...props, opacity: 0.2 })}
-          containerComponent={ContainerComponent}
-          style={{
-            width: sheetWidth,
-            marginLeft: (windowWidth - sheetWidth) / 2,
-            borderRadius: 16,
-            overflow: 'hidden',
-          }}
-          backgroundStyle={{
-            backgroundColor: theme.colors.reverse,
-            borderRadius: 16,
-          }}
-        >
-          <BottomSheetView>
-            <Box minWidth={200} py={6}>
-              <PopoverItem
+        <TouchableBox onPress={() => sheetRef.current?.present()}>{children}</TouchableBox>
+        <Sheet ref={sheetRef} detached>
+          <SheetView>
+            <Box minWidth={200}>
+              <ActionSheetItem
                 icon="x-circle"
                 label={t('tabs.closeAll')}
                 onPress={handleCloseAllTabs}
               />
               {!group.isDefault && (
                 <>
-                  <PopoverItem icon="edit-2" label={t('tabs.editGroup')} onPress={handleEdit} />
-                  <PopoverItem
+                  <ActionSheetItem icon="edit-2" label={t('tabs.editGroup')} onPress={handleEdit} />
+                  <ActionSheetItem
                     icon="trash-2"
                     label={t('tabs.deleteGroup')}
                     onPress={handleDelete}
-                    destructive
+                    color="quart"
                   />
                 </>
               )}
-              <Box height={1} bg="border" marginVertical={4} />
-              <PopoverItem icon="plus" label={t('tabs.newGroup')} onPress={handleCreateGroup} />
-              <PopoverItem
+              <Box height={1} bg="border" />
+              <ActionSheetItem icon="plus" label={t('tabs.newGroup')} onPress={handleCreateGroup} />
+              <ActionSheetItem
                 icon="layers"
                 label={t('tabs.viewMyGroups')}
                 onPress={handleViewGroups}
               />
             </Box>
-          </BottomSheetView>
-        </BottomSheetModal>
+          </SheetView>
+        </Sheet>
       </>
     )
   }

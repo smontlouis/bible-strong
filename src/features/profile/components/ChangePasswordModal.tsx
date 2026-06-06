@@ -3,11 +3,15 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator } from 'react-native'
 import { useTheme } from '@emotion/react'
-import { BottomSheetFooter, BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import {
+  SheetFooter,
+  Sheet,
+  SheetHeader,
+  SheetTextInput,
+  type SheetRef,
+  SheetView,
+} from '~common/sheet'
 
-import Modal from '~common/Modal'
-import ModalHeader from '~common/ModalHeader'
 import Box, { VStack, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Button from '~common/ui/Button'
@@ -16,13 +20,12 @@ import FireAuth from '~helpers/FireAuth'
 import { MODAL_FOOTER_HEIGHT } from '~helpers/constants'
 
 type ChangePasswordModalProps = {
-  modalRef: React.RefObject<BottomSheetModal | null>
+  modalRef: React.RefObject<SheetRef | null>
 }
 
 const ChangePasswordModal = ({ modalRef }: ChangePasswordModalProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
-  const insets = useSafeAreaInsets()
 
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -70,29 +73,26 @@ const ChangePasswordModal = ({ modalRef }: ChangePasswordModalProps) => {
     currentPassword.length > 0 && newPassword.length >= 6 && newPassword === confirmPassword
 
   return (
-    <Modal.Body
+    <Sheet
       ref={modalRef}
-      enableDynamicSizing
-      onModalClose={resetForm}
-      headerComponent={<ModalHeader title={t('profile.changePassword')} />}
-      footerComponent={props => (
-        <BottomSheetFooter bottomInset={insets.bottom} {...props}>
-          <HStack px={20} gap={10} justifyContent="flex-end" bg="reverse">
-            <Box h={MODAL_FOOTER_HEIGHT}>
-              <Button reverse onPress={handleClose} disabled={isLoading}>
-                {t('Annuler')}
-              </Button>
-            </Box>
-            <Box h={MODAL_FOOTER_HEIGHT}>
-              <Button onPress={handleSubmit} disabled={!isValid || isLoading}>
-                {isLoading ? <ActivityIndicator color="white" size="small" /> : t('Enregistrer')}
-              </Button>
-            </Box>
-          </HStack>
-        </BottomSheetFooter>
+      onDismiss={resetForm}
+      header={<SheetHeader title={t('profile.changePassword')} />}
+      footer={props => (
+        <SheetFooter row gap={10} justifyContent="flex-end" {...props}>
+          <Box h={MODAL_FOOTER_HEIGHT}>
+            <Button reverse onPress={handleClose} disabled={isLoading}>
+              {t('Annuler')}
+            </Button>
+          </Box>
+          <Box h={MODAL_FOOTER_HEIGHT}>
+            <Button onPress={handleSubmit} disabled={!isValid || isLoading}>
+              {isLoading ? <ActivityIndicator color="white" size="small" /> : t('Enregistrer')}
+            </Button>
+          </Box>
+        </SheetFooter>
       )}
     >
-      <VStack gap={15} paddingHorizontal={20} py={20}>
+      <SheetView gap={15} paddingHorizontal={20} py={20}>
         <Box>
           <StyledInput
             placeholder={t('profile.currentPassword')}
@@ -141,12 +141,12 @@ const ChangePasswordModal = ({ modalRef }: ChangePasswordModalProps) => {
             {t('profile.passwordMismatch')}
           </Text>
         )}
-      </VStack>
-    </Modal.Body>
+      </SheetView>
+    </Sheet>
   )
 }
 
-const StyledInput = styled(BottomSheetTextInput)(({ theme }) => ({
+const StyledInput = styled(SheetTextInput)(({ theme }) => ({
   backgroundColor: theme.colors.lightGrey,
   borderRadius: 10,
   paddingHorizontal: 15,

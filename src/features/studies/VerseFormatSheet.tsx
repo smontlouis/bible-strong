@@ -1,0 +1,80 @@
+import React from 'react'
+import { TouchableOpacity } from 'react-native'
+import { useTranslation } from 'react-i18next'
+import { Sheet, SheetHeader, SheetView, type SheetRef } from '~common/sheet'
+import Box, { HStack } from '~common/ui/Box'
+import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
+import Text from '~common/ui/Text'
+
+interface VerseFormatSheetProps {
+  sheetRef: React.RefObject<SheetRef | null>
+  onSelectFormat: (format: 'inline' | 'block') => void
+  reference?: string
+  onClose?: () => void
+}
+
+const VerseFormatSheet = ({
+  sheetRef,
+  onSelectFormat,
+  reference,
+  onClose,
+}: VerseFormatSheetProps) => {
+  const { t } = useTranslation()
+
+  return (
+    <Sheet
+      ref={sheetRef}
+      onDismiss={onClose}
+      header={<SheetHeader title={t('study.formatChoice')} subTitle={reference} />}
+    >
+      <SheetView p={20}>
+        {/* Inline format option */}
+        <TouchableOpacity onPress={() => onSelectFormat('inline')}>
+          <HStack
+            paddingVertical={16}
+            paddingHorizontal={16}
+            borderRadius={12}
+            bg="lightGrey"
+            marginBottom={12}
+            alignItems="center"
+          >
+            <FeatherIcon name="link-2" size={24} />
+            <Box flex marginLeft={16}>
+              <Text fontSize={16} bold>
+                {t('study.asLink')}
+              </Text>
+              <Text fontSize={13} color="tertiary" marginTop={4}>
+                {t('study.asLinkDescription')}
+              </Text>
+            </Box>
+            <FeatherIcon name="arrow-right" size={20} color="grey" />
+          </HStack>
+        </TouchableOpacity>
+
+        {/* Block format option */}
+        <TouchableOpacity onPress={() => onSelectFormat('block')}>
+          <HStack
+            paddingVertical={16}
+            paddingHorizontal={16}
+            borderRadius={12}
+            bg="lightGrey"
+            alignItems="center"
+          >
+            <MaterialIcon name="short-text" size={24} />
+            <Box flex marginLeft={16}>
+              <Text fontSize={16} bold>
+                {t('study.asBlock')}
+              </Text>
+              <Text fontSize={13} color="tertiary" marginTop={4}>
+                {t('study.asBlockDescription')}
+              </Text>
+            </Box>
+            <FeatherIcon name="arrow-right" size={20} color="grey" />
+          </HStack>
+        </TouchableOpacity>
+      </SheetView>
+    </Sheet>
+  )
+}
+
+export default VerseFormatSheet

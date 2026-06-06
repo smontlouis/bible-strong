@@ -6,11 +6,16 @@ const MIN_EDITOR_HEIGHT = 240
 
 interface Props {
   dom?: import('expo/dom').DOMProps
-  defaultTitle: string
-  defaultDescription: string
+  defaultTitle?: string
+  defaultDescription?: string
+  encodedDefaultTitle?: string
+  encodedDefaultDescription?: string
   resetKey?: number
   isEditing: boolean
   colorScheme: 'light' | 'dark'
+  textColor?: string
+  editorBackgroundColor?: string
+  placeholderColor?: string
   placeholderTitle: string
   placeholderDescription: string
   // Native action callbacks
@@ -22,11 +27,16 @@ interface Props {
 }
 
 export default function NoteEditorDOMComponent({
-  defaultTitle,
-  defaultDescription,
+  defaultTitle: rawDefaultTitle = '',
+  defaultDescription: rawDefaultDescription = '',
+  encodedDefaultTitle,
+  encodedDefaultDescription,
   resetKey,
   isEditing,
   colorScheme,
+  textColor: textColorProp,
+  editorBackgroundColor,
+  placeholderColor: placeholderColorProp,
   placeholderTitle,
   placeholderDescription,
   onTitleChange,
@@ -38,6 +48,12 @@ export default function NoteEditorDOMComponent({
   const titleRef = useRef<HTMLDivElement>(null)
   const descriptionRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const defaultTitle = encodedDefaultTitle
+    ? decodeURIComponent(encodedDefaultTitle)
+    : rawDefaultTitle
+  const defaultDescription = encodedDefaultDescription
+    ? decodeURIComponent(encodedDefaultDescription)
+    : rawDefaultDescription
 
   // ResizeObserver to report size changes to native
   useEffect(() => {
@@ -111,9 +127,10 @@ export default function NoteEditorDOMComponent({
   }
 
   const isDark = colorScheme === 'dark'
-  const textColor = isDark ? '#fff' : '#000'
-  const bgColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'
-  const placeholderColor = isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)'
+  const textColor = textColorProp || (isDark ? '#fff' : '#000')
+  const bgColor = editorBackgroundColor || (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)')
+  const placeholderColor =
+    placeholderColorProp || (isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)')
 
   return (
     <div
@@ -129,8 +146,10 @@ export default function NoteEditorDOMComponent({
     >
       {/* Title */}
       <div
+        key={`title-${resetKey}`}
         ref={titleRef}
         contentEditable={isEditing}
+        suppressContentEditableWarning
         onInput={handleTitleInput}
         onFocus={handleFocus}
         onBlur={handleBlur}
@@ -145,11 +164,15 @@ export default function NoteEditorDOMComponent({
           outline: 'none',
           whiteSpace: 'pre-wrap',
         }}
-      />
+      >
+        {defaultTitle}
+      </div>
       {/* Description */}
       <div
+        key={`description-${resetKey}`}
         ref={descriptionRef}
         contentEditable={isEditing}
+        suppressContentEditableWarning
         onInput={handleDescriptionInput}
         onFocus={handleFocus}
         onBlur={handleBlur}
@@ -163,7 +186,9 @@ export default function NoteEditorDOMComponent({
           whiteSpace: 'pre-wrap',
           minHeight: 200,
         }}
-      />
+      >
+        {defaultDescription}
+      </div>
       <style>{`
         @keyframes fade {
           from { opacity: 0; }

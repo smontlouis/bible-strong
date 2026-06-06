@@ -210,7 +210,7 @@ Pour ajouter de nouveaux événements :
 ## Dépendances clés
 
 - `react-native-reanimated` : Animations performantes
-- `@gorhom/bottom-sheet` : Modales bottom sheet
+- `~common/sheet` : Modales sheet
 - `expo-asset` : Chargement des données
 - `expo-haptics` : Retour haptique
 - `date-fns` : Manipulation des dates

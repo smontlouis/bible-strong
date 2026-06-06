@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { MenuView } from '@expo/ui/community/menu'
-import { useRouter, useLocalSearchParams } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 
 import Box from '~common/ui/Box'
@@ -18,9 +18,10 @@ import truncate from '~helpers/truncate'
 import { toast } from '~helpers/toast'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResourceLanguage } from 'src/state/resourcesLanguage'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 const ConcordanceByBook = () => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const params = useLocalSearchParams<{ book: string; strongReference: string }>()
   const { t } = useTranslation()
   const [verses, setVerses] = useState<FoundVerseRow[]>([])
@@ -87,13 +88,28 @@ const ConcordanceByBook = () => {
           data={verses}
           keyExtractor={(item: FoundVerseRow) => `${item.Livre}-${item.Chapitre}-${item.Verset}`}
           renderItem={({ item }: { item: FoundVerseRow }) => {
-            const props = {
-              router,
-              concordanceFor: Code,
-              verse: item,
-              t,
-            }
-            return <ConcordanceVerse {...props} />
+            return (
+              <ConcordanceVerse
+                concordanceFor={Code}
+                verse={item}
+                t={t}
+                onOpenVerse={verse => {
+                  const bookNumber = Number(verse.Livre)
+                  const verseNumber = Number(verse.Verset)
+
+                  pushRouteOnce({
+                    pathname: '/bible-view',
+                    params: {
+                      contextDisplayMode: 'focused',
+                      book: JSON.stringify(books[bookNumber - 1]),
+                      chapter: String(verse.Chapitre),
+                      verse: String(verseNumber),
+                      focusVerses: JSON.stringify([verseNumber]),
+                    },
+                  })
+                }}
+              />
+            )
           }}
         />
       )}

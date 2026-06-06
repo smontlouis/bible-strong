@@ -1,9 +1,8 @@
 import React, { useState, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { type SheetRef } from '~common/sheet'
 
-import { useRouter } from 'expo-router'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Link from '~common/Link'
@@ -18,6 +17,7 @@ import type { Bookmark } from '~common/types'
 import BookmarkModal from './BookmarkModal'
 import books from '~assets/bible_versions/books-desc'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 const getBookName = (bookNumber: number): string => {
   const bookData = books.find(b => b.Numero === bookNumber)
@@ -70,12 +70,12 @@ type BookmarksScreenProps = {
 
 const BookmarksScreen = ({ isFormSheet = false }: BookmarksScreenProps) => {
   const { t } = useTranslation()
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : true
   const bookmarks = useSelector(selectSortedBookmarks)
   const [selectedBookmark, setSelectedBookmark] = useState<Bookmark | null>(null)
-  const bookmarkModalRef = useRef<BottomSheetModal>(null)
+  const bookmarkModalRef = useRef<SheetRef>(null)
 
   const handleEdit = (bookmark: Bookmark) => {
     setSelectedBookmark(bookmark)
@@ -83,7 +83,7 @@ const BookmarksScreen = ({ isFormSheet = false }: BookmarksScreenProps) => {
   }
 
   const handleNavigate = (bookmark: Bookmark) => {
-    router.push({
+    pushRouteOnce({
       pathname: '/bible-view',
       params: {
         contextDisplayMode: 'focused',
@@ -118,7 +118,7 @@ const BookmarksScreen = ({ isFormSheet = false }: BookmarksScreenProps) => {
           />
         )}
         <BookmarkModal
-          bottomSheetRef={bookmarkModalRef}
+          sheetRef={bookmarkModalRef}
           onClose={handleCloseModal}
           existingBookmark={selectedBookmark || undefined}
         />

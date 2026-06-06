@@ -45,6 +45,8 @@ import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRe
 import { createStrongEndpoint } from '~features/studyRelations/endpoints'
 import type { RelationEndpoint } from '~redux/modules/user'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import booksDesc from '~assets/bible_versions/books-desc'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -70,6 +72,7 @@ interface StrongDetailScreenProps {
 
 const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScreenProps) => {
   const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const [strongTab, setStrongTab] = useAtom(strongAtom)
   const { isInTab } = useTabContext()
   const canGoBackInStack = useCanGoBackInStack()
@@ -206,11 +209,27 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
       reference = str1
     }
 
-    router.push({
+    pushRouteOnce({
       pathname: '/strong',
       params: {
         book: String(bookNum),
         reference: reference,
+      },
+    })
+  }
+
+  const openConcordanceVerse = (verse: Verse) => {
+    const bookNumber = Number(verse.Livre)
+    const verseNumber = Number(verse.Verset)
+
+    pushRouteOnce({
+      pathname: '/bible-view',
+      params: {
+        contextDisplayMode: 'focused',
+        book: JSON.stringify(booksDesc[bookNumber - 1]),
+        chapter: String(verse.Chapitre),
+        verse: String(verseNumber),
+        focusVerses: JSON.stringify([verseNumber]),
       },
     })
   }
@@ -406,7 +425,7 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
                 <Box my={10}>
                   {verses.map((item, i) => (
                     <ConcordanceVerse
-                      router={router}
+                      onOpenVerse={openConcordanceVerse}
                       t={t}
                       concordanceFor={Code}
                       verse={item}
@@ -418,7 +437,7 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
                   <Box>
                     <Button
                       onPress={() =>
-                        router.push({
+                        pushRouteOnce({
                           pathname: '/concordance',
                           params: {
                             strongReference: JSON.stringify(strongReference),

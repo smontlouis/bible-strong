@@ -68,6 +68,7 @@ class DB {
 // New language-aware DB class
 class LanguageAwareDB {
   private db?: SQLite.SQLiteDatabase
+  private initPromise?: Promise<void>
   private dbId: DatabaseId
   private lang: ResourceLanguage
   private path: string
@@ -80,8 +81,9 @@ class LanguageAwareDB {
 
   init = async (): Promise<void> => {
     if (this.db) return
+    if (this.initPromise) return this.initPromise
 
-    try {
+    this.initPromise = (async () => {
       // Ensure the directory exists
       await initLanguageDirs(this.lang)
 
@@ -118,9 +120,15 @@ class LanguageAwareDB {
         }
       )
       console.log(`[DBManager] ${this.dbId} (${this.lang}) loaded from ${this.path}`)
+    })()
+
+    try {
+      await this.initPromise
     } catch (error) {
       console.error(`[DBManager] Error opening ${this.dbId} (${this.lang}):`, error)
       throw error
+    } finally {
+      this.initPromise = undefined
     }
   }
 
@@ -129,6 +137,10 @@ class LanguageAwareDB {
   }
 
   close = async (): Promise<void> => {
+    if (this.initPromise) {
+      await this.initPromise.catch(() => {})
+    }
+
     if (this.db) {
       try {
         await this.db.closeAsync()

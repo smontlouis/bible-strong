@@ -1,4 +1,3 @@
-import { Href, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 import type { ReactNode } from 'react'
@@ -6,6 +5,7 @@ import type { ReactNode } from 'react'
 import type { TagsObj } from '~common/types'
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 export type TagItemData = {
   id: string | number
@@ -21,7 +21,7 @@ type Props = {
   badge?: ReactNode
 }
 
-const getNavigationConfig = (variant: TagItemVariant, item: TagItemData): Href => {
+const getNavigationConfig = (variant: TagItemVariant, item: TagItemData) => {
   switch (variant) {
     case 'strong-grec':
       return {
@@ -47,11 +47,11 @@ const getNavigationConfig = (variant: TagItemVariant, item: TagItemData): Href =
 }
 
 const TagItemCard = ({ item, variant, badge }: Props) => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const navigationConfig = getNavigationConfig(variant, item)
 
   return (
-    <TouchableOpacity activeOpacity={0.7} onPress={() => router.push(navigationConfig)}>
+    <TouchableOpacity activeOpacity={0.7} onPress={() => pushRouteOnce(navigationConfig)}>
       <VStack gap={6} mx={20} paddingVertical={15} borderBottomWidth={1} borderColor="border">
         <HStack gap={10} alignItems="center">
           <Text fontSize={14} bold>

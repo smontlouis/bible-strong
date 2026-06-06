@@ -374,7 +374,13 @@ export const makeWordAnnotationsByChapterSelector = () =>
         const hasRangeInChapter = annotation.ranges.some(range => range.verseKey.startsWith(prefix))
 
         if (hasRangeInChapter) {
-          result[annotationId] = annotation
+          result[annotationId] = {
+            ...annotation,
+            ranges: annotation.ranges.map(range => ({
+              ...range,
+              text: '',
+            })),
+          }
         }
       }
       return result

@@ -17,8 +17,6 @@ interface AnnotationModeCallbacks {
   onDoubleTapVerse?: (verseKey: string, position: { x: number; y: number }) => void
   /** Called on long press */
   onLongPressVerse?: (verseKey: string) => void
-  /** Called when horizontal drag detected in normal mode - triggers entry into annotation mode */
-  onEnterAnnotationModeFromDrag?: () => void
   /** Called to notify which verse is currently being touched (for visual feedback) */
   onTouchedVerseChange?: (verseKey: string | null) => void
   /** Called when tapping on empty space (not on a verse) - useful for clearing selection */
@@ -53,8 +51,6 @@ interface UseAnnotationModeControllerProps {
     end: { x: number; y: number } | null
   }
   selectedAnnotationId: string | null | undefined
-  /** Whether drag-to-annotation is allowed (disabled when verses are selected in normal mode) */
-  canDragToAnnotate?: boolean
   // Triggers from native side
   triggers?: AnnotationModeTriggers
   // Gesture callbacks
@@ -76,7 +72,6 @@ export function useAnnotationModeController({
   highlightRects,
   selectionHandlePositions,
   selectedAnnotationId,
-  canDragToAnnotate = true,
   triggers = {},
   callbacks = {},
 }: UseAnnotationModeControllerProps): UseAnnotationModeControllerReturn {
@@ -85,7 +80,6 @@ export function useAnnotationModeController({
     onTapVerse,
     onDoubleTapVerse,
     onLongPressVerse,
-    onEnterAnnotationModeFromDrag,
     onTouchedVerseChange,
     onTapEmpty,
     onSwipe,
@@ -101,7 +95,6 @@ export function useAnnotationModeController({
     getSelectionHandlePositions: () => selectionHandlePositions,
     highlightRects,
     annotationMode: annotationMode ?? false,
-    canDragToAnnotate,
     callbacks: {
       onTapVerse,
       onDoubleTapVerse,
@@ -114,7 +107,6 @@ export function useAnnotationModeController({
           }).catch(console.error)
         }
       },
-      onEnterAnnotationModeFromDrag,
       onTouchedVerseChange,
       onTapEmpty,
       onSwipe,

@@ -24,8 +24,8 @@ import { versions } from '~helpers/bibleVersions'
 import { getMaxChapterVerseCount } from '~helpers/bibleCoverage'
 import { selectCompareVersions } from '~redux/selectors/user'
 import { CompareTab, SelectedVerses, VersionCode } from '../../state/tabs'
-import CompareVersionSelectorBottomSheet from './CompareVersionSelectorBottomSheet'
-import type BottomSheet from '@gorhom/bottom-sheet'
+import CompareVersionSelectorSheet from './CompareVersionSelectorSheet'
+import type { SheetRef } from '~common/sheet'
 
 interface CompareVersesTabScreenProps {
   compareAtom: PrimitiveAtom<CompareTab>
@@ -37,7 +37,7 @@ type PrevNextItems = {
 }
 
 const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) => {
-  const compareVersionSelectorRef = React.useRef<BottomSheet>(null)
+  const compareVersionSelectorRef = React.useRef<SheetRef>(null)
   const [compareTab, setCompareTab] = useAtom(compareAtom)
   const { t } = useTranslation()
   const setSelectedVerses = (v: SelectedVerses) =>
@@ -120,7 +120,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
             onPressAction={({ nativeEvent }) => {
               switch (nativeEvent.event) {
                 case 'choose-versions':
-                  compareVersionSelectorRef.current?.expand()
+                  compareVersionSelectorRef.current?.present()
                   break
                 case 'open-tab':
                   openInNewTab({
@@ -173,7 +173,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
           />
         </Box>
       )}
-      <CompareVersionSelectorBottomSheet bottomSheetRef={compareVersionSelectorRef} />
+      <CompareVersionSelectorSheet sheetRef={compareVersionSelectorRef} />
     </Container>
   )
 }

@@ -5,12 +5,11 @@
 import React from 'react'
 import { FlatList } from 'react-native'
 
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { Sheet, type SheetRef } from '~common/sheet'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import Link, { LinkBox } from '~common/Link'
-import Modal from '~common/Modal'
 import Box from '~common/ui/Box'
 import Circle from '~common/ui/Circle'
 import Text from '~common/ui/Text'
@@ -31,7 +30,7 @@ import {
 const FONTS_DATA = ['Literata Book', ...fonts]
 
 interface Props {
-  paramsModalRef: React.RefObject<BottomSheetModal | null>
+  paramsModalRef: React.RefObject<SheetRef | null>
 }
 
 const ParamsModal = ({ paramsModalRef }: Props) => {
@@ -53,8 +52,8 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
   const initialScrollIndex = fonts.findIndex(f => f === fontFamily)
 
   return (
-    <Modal.Body ref={paramsModalRef} enableDynamicSizing enableScrollView={false}>
-      <Box padding={20} paddingBottom={20 + insets.bottom}>
+    <Sheet ref={paramsModalRef} backdrop={false}>
+      <Box padding={20}>
         <HalfContainer border>
           <Text flex={5}>{t('Taille du texte')}</Text>
           <Text marginLeft={5} fontSize={12} bold>{`${100 + fontSizeScale * 10}%`}</Text>
@@ -156,7 +155,7 @@ const ParamsModal = ({ paramsModalRef }: Props) => {
           />
         </Box>
       </Box>
-    </Modal.Body>
+    </Sheet>
   )
 }
 

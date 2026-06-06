@@ -13,6 +13,7 @@ import devToolsEnhancer from 'redux-devtools-expo-dev-plugin'
 import firestoreMiddleware from './firestoreMiddleware'
 import { logger, crashReporter } from './logMiddleware'
 import migrations from './migrations'
+import { applyPreferredColorScheme, themeAppearanceMiddleware } from './themeAppearanceMiddleware'
 
 import reducer from '~redux/modules/reducer'
 import { mmkvStorage } from '~helpers/storage'
@@ -55,13 +56,18 @@ function configureStore() {
       getDefaultMiddleware({
         serializableCheck: false,
         immutableCheck: false,
-      }).concat(logger, crashReporter, firestoreMiddleware),
+      }).concat(logger, crashReporter, themeAppearanceMiddleware, firestoreMiddleware),
     devTools: false,
     enhancers: defaultEnhancers =>
       __DEV__ ? [...defaultEnhancers, devToolsEnhancer()] : defaultEnhancers,
   })
 
-  const persistor = persistStore(store)
+  const persistor = persistStore(store, undefined, () => {
+    const preferredColorScheme = store.getState().user.bible.settings.preferredColorScheme
+    if (preferredColorScheme !== 'auto') {
+      applyPreferredColorScheme(preferredColorScheme)
+    }
+  })
   // persistor.purge() // Purge async storage
   // storage.clearAll()
 

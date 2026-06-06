@@ -9,7 +9,7 @@ import FiltersHeader from '~common/FiltersHeader'
 import { Tag } from '~common/types'
 import Container from '~common/ui/Container'
 import FlatList from '~common/ui/FlatList'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useSheet } from '~helpers/useSheet'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { Note } from '~redux/modules/user'
@@ -49,7 +49,7 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
   const relations = useSelector((state: RootState) => state.user.bible.relations)
   const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
-  const noteSettingsModal = useBottomSheetModal()
+  const noteSettingsModal = useSheet()
   const openEntityRelations = useOpenEntityRelations()
 
   const openTagsModal = () => {

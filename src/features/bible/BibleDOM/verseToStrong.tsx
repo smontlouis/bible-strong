@@ -1,3 +1,4 @@
+import type React from 'react'
 import { styled } from 'goober'
 import { NAVIGATE_TO_STRONG } from './dispatch'
 import { RootStyles } from './BibleDOMWrapper'
@@ -60,7 +61,8 @@ const BibleStrongRef = ({
   const dispatch = useDispatch()
   const isSelected = Number(selectedCode?.reference) === Number(reference)
 
-  const navigateToStrong = () => {
+  const navigateToStrong = (event: React.MouseEvent<HTMLSpanElement>) => {
+    event.stopPropagation()
     dispatch({
       type: NAVIGATE_TO_STRONG,
       payload: { reference: `${Number(reference)}`, book },
@@ -70,6 +72,7 @@ const BibleStrongRef = ({
   return (
     <StyledReference
       onClick={navigateToStrong}
+      data-ignore-verse-touch
       isSelected={isSelected}
       isParallel={isParallel}
       isDisabled={isDisabled}

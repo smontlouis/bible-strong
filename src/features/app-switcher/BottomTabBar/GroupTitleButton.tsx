@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { type SheetRef } from '~common/sheet'
 import Box, { AnimatedBox, FadingText } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useActiveGroup, useUpdateGroup, getTabGroups } from '../../../state/tabGroups'
@@ -20,8 +20,8 @@ const GroupTitleButton = () => {
   const activeGroup = useActiveGroup()
   const tabsCount = useAtomValue(tabsCountAtom)
   const updateGroup = useUpdateGroup()
-  const editSheetRef = useRef<BottomSheetModal>(null)
-  const viewGroupsSheetRef = useRef<BottomSheetModal>(null)
+  const editSheetRef = useRef<SheetRef>(null)
+  const viewGroupsSheetRef = useRef<SheetRef>(null)
   const { groupPager } = useAppSwitcherContext()
   const { colorScheme } = useCurrentThemeSelector()
 
@@ -98,13 +98,13 @@ const GroupTitleButton = () => {
       </GroupActionsPopover>
       {!activeGroup.isDefault && (
         <EditGroupModal
-          bottomSheetRef={editSheetRef}
+          sheetRef={editSheetRef}
           initialName={activeGroup.name}
           initialColor={activeGroup.color}
           onSave={handleEdit}
         />
       )}
-      <ViewGroupsModal bottomSheetRef={viewGroupsSheetRef} />
+      <ViewGroupsModal sheetRef={viewGroupsSheetRef} />
     </Box>
   )
 }

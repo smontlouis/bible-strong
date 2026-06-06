@@ -15,7 +15,9 @@ const ProfileStats = () => {
   const { isLogged } = useLogin()
 
   const highlights = useSelector(
-    (state: RootState) => Object.keys(state.user.bible.highlights).length
+    (state: RootState) =>
+      Object.keys(state.user.bible.highlights).length +
+      Object.keys(state.user.bible.wordAnnotations || {}).length
   )
   const notes = useSelector((state: RootState) => Object.keys(state.user.bible.notes).length)
   const studies = useSelector((state: RootState) => Object.keys(state.user.bible.studies).length)

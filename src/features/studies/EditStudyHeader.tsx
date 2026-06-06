@@ -10,12 +10,12 @@ import { useDispatch } from 'react-redux'
 import { ActionSheetItem } from '~common/ActionMenu'
 import Header from '~common/Header'
 import Link from '~common/Link'
-import Modal from '~common/Modal'
+import { Sheet } from '~common/sheet'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useSheet } from '~helpers/useSheet'
 import { deleteStudy, Study } from '~redux/modules/user'
 import type { AppDispatch } from '~redux/store'
 import { unifiedTagsModalAtom } from '../../state/app'
@@ -59,7 +59,7 @@ const EditHeader = ({
   const { t } = useTranslation()
   const dispatch = useDispatch<AppDispatch>()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
-  const { ref, open, close } = useBottomSheetModal()
+  const { ref, open, close } = useSheet()
 
   const deleteStudyConfirmation = useCallback(() => {
     Alert.alert(t('Attention'), t('Voulez-vous vraiment supprimer cette étude?'), [
@@ -91,7 +91,7 @@ const EditHeader = ({
         >
           {children}
         </Header>
-        <Modal.Body ref={ref} enableDynamicSizing withPortal>
+        <Sheet ref={ref}>
           <PublishStudyMenuItem study={study} onClosed={close} />
           <ActionSheetItem
             icon="tag"
@@ -142,7 +142,7 @@ const EditHeader = ({
             color="quart"
             onPress={deleteStudyConfirmation}
           />
-        </Modal.Body>
+        </Sheet>
       </>
     )
   }

@@ -26,9 +26,9 @@ import ReadButton from './ReadButton'
 import ReferenceParagraph from './ReferenceParagraph'
 import Slice from './Slice'
 import { chapterSliceToText, verseSliceToText, videoSliceToText } from './share'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { type SheetRef } from '~common/sheet'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { useBookAndVersionSelector } from '~features/bible/BookSelectorBottomSheet/BookSelectorBottomSheetProvider'
+import { useBookAndVersionSelector } from '~features/bible/BookSelectorSheet/BookSelectorSheetProvider'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 
@@ -92,7 +92,7 @@ const PlanSliceScreen = ({
 
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const paramsModalRef = React.useRef<BottomSheetModal>(null)
+  const paramsModalRef = React.useRef<SheetRef>(null)
 
   const selectIsRead = makeIsReadSelector()
   const isRead = useSelector((state: RootState) => selectIsRead(state, planId ?? '', id ?? ''))

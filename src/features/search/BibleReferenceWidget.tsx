@@ -1,5 +1,4 @@
 import { TouchableOpacity } from 'react-native'
-import { useRouter } from 'expo-router'
 
 import booksDesc from '~assets/bible_versions/books-desc'
 import Box, { HStack } from '~common/ui/Box'
@@ -12,6 +11,7 @@ import useBibleVerses from '~helpers/useBibleVerses'
 import { removeBreakLines } from '~helpers/utils'
 import i18n from '~i18n'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 export interface ParsedSegment {
   book: number
@@ -79,7 +79,7 @@ const BibleReferenceWidget = ({ searchValue }: Props) => {
 }
 
 const ReferenceItem = ({ segment }: { segment: ParsedSegment }) => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const version = useDefaultBibleVersion()
 
   const verseCount = segment.endVerse - segment.startVerse + 1
@@ -100,7 +100,7 @@ const ReferenceItem = ({ segment }: { segment: ParsedSegment }) => {
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={() =>
-        router.push({
+        pushRouteOnce({
           pathname: '/bible-view',
           params: {
             contextDisplayMode: 'focused',

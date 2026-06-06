@@ -11,7 +11,7 @@ import FormSheetScreen from '~common/ui/FormSheetScreen'
 import BibleNoteItem from './BibleNoteItem'
 
 import { Tag } from '~common/types'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useSheet } from '~helpers/useSheet'
 import { unifiedTagsModalAtom } from '~state/app'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
@@ -61,7 +61,7 @@ const BibleVerseNotes = ({
   const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
 
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
-  const noteSettingsModal = useBottomSheetModal()
+  const noteSettingsModal = useSheet()
 
   const openTagsModal = useCallback(() => {
     setUnifiedTagsModal({

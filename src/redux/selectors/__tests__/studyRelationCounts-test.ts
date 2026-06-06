@@ -1,4 +1,9 @@
-import { makeNotesForVerseSelector, selectRelationCountsByEndpointIdentity } from '../bible'
+import {
+  makeWordAnnotationsByChapterSelector,
+  makeNotesForVerseSelector,
+  makeTagDataSelector,
+  selectRelationCountsByEndpointIdentity,
+} from '../bible'
 import type { RootState } from '~redux/modules/reducer'
 import {
   normalizeRelation,
@@ -115,5 +120,92 @@ describe('makeNotesForVerseSelector', () => {
     state.user.bible.wordAnnotations = {}
 
     expect(selectNotesForVerse(state, '1-1-1').map(note => note.id)).toEqual(['note-2', 'note-1'])
+  })
+})
+
+describe('makeWordAnnotationsByChapterSelector', () => {
+  it('keeps annotation ranges addressable without sending range text to the DOM', () => {
+    const selectWordAnnotationsByChapter = makeWordAnnotationsByChapterSelector()
+    const state = {
+      user: {
+        bible: {
+          wordAnnotations: {
+            annotation1: {
+              id: 'annotation1',
+              version: 'NBS',
+              color: 'color2',
+              type: 'background',
+              date: 1,
+              ranges: [
+                {
+                  verseKey: '1-16-12',
+                  startWordIndex: 4,
+                  endWordIndex: 20,
+                  text: 'âne sauvage ;\n sa main sera contre tous',
+                },
+              ],
+            },
+            annotation2: {
+              id: 'annotation2',
+              version: 'LSG',
+              color: 'color3',
+              type: 'background',
+              date: 2,
+              ranges: [
+                {
+                  verseKey: '1-16-12',
+                  startWordIndex: 0,
+                  endWordIndex: 2,
+                  text: 'other version',
+                },
+              ],
+            },
+          },
+        },
+      },
+    } as unknown as RootState
+
+    const result = selectWordAnnotationsByChapter(state, 1, 16, 'NBS')
+
+    expect(result.annotation1?.ranges[0]).toEqual({
+      verseKey: '1-16-12',
+      startWordIndex: 4,
+      endWordIndex: 20,
+      text: '',
+    })
+    expect(result.annotation2).toBeUndefined()
+  })
+})
+
+describe('makeTagDataSelector', () => {
+  it('ignores orphan note ids from the tag index', () => {
+    const selectTagData = makeTagDataSelector()
+    const state = {
+      user: {
+        bible: {
+          highlights: {},
+          notes: {},
+          links: {},
+          studies: {},
+          naves: {},
+          words: {},
+          strongsGrec: {},
+          strongsHebreu: {},
+          wordAnnotations: {},
+          relations: {},
+        },
+      },
+    } as unknown as RootState
+
+    const tag = {
+      id: 'tag-1',
+      name: 'Tag 1',
+      notes: {
+        'missing-note-1': true as const,
+        'missing-note-2': true as const,
+      },
+    }
+
+    expect(selectTagData(state, tag).notes).toEqual([])
   })
 })

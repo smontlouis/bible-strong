@@ -7,17 +7,7 @@ import { cdnUrl } from '~helpers/firebase'
 import { cacheImage, fetchPlan, updatePlans } from '~redux/modules/plan'
 import { getPlanByIdSelector, getOngoingPlanByIdSelector } from '~redux/selectors/plan'
 
-import {
-  ComputedPlan,
-  ComputedPlanItem,
-  ComputedSection,
-  OngoingPlan,
-  OngoingReadingSlice,
-  Plan,
-  ReadingSlice,
-  Section,
-  Status,
-} from 'src/common/types'
+import { ComputedPlan, ComputedPlanItem, Plan, Status } from 'src/common/types'
 import { RootState } from 'src/redux/modules/reducer'
 import books from '~assets/bible_versions/books-desc'
 import { toast } from '~helpers/toast'
@@ -28,6 +18,7 @@ import verseToReference from '~helpers/verseToReference'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 import { VersionCode } from '~state/tabs'
 import type { AppDispatch } from '~redux/store'
+import { areOngoingPlansEqual, buildComputedPlan, buildComputedPlanItem } from './planProgress'
 
 interface VerseContent {
   Pericope: {
@@ -74,51 +65,6 @@ interface VerseForPlan {
 }
 
 /**
- * Calculate Section Progress
- * @param readingSlices
- * @param ongoingReadingSlices
- */
-const calculateProgress = (
-  readingSlices: ReadingSlice[],
-  ongoingReadingSlices?: OngoingReadingSlice[]
-) => {
-  if (!ongoingReadingSlices) {
-    return 0
-  }
-
-  // Use a Set for O(1) lookup instead of nested find
-  const completedIds = new Set(
-    ongoingReadingSlices.filter(s => s.status === 'Completed').map(s => s.id)
-  )
-
-  const completedCount = readingSlices.filter(s => completedIds.has(s.id)).length
-  return completedCount / readingSlices.length
-}
-
-/**
- * Transform sections to computedSections with progress and status
- * @param sections
- * @param ongoingReadingSlices
- */
-const transformSections = (
-  sections: Section[],
-  ongoingReadingSlices?: OngoingReadingSlice[]
-): ComputedSection[] => {
-  // Create a Map for O(1) status lookup instead of find for each slice
-  const statusMap = new Map(ongoingReadingSlices?.map(s => [s.id, s.status]))
-
-  return sections.map(s => ({
-    ...s,
-    progress: calculateProgress(s.readingSlices, ongoingReadingSlices),
-    readingSlices: undefined,
-    data: s.readingSlices.map(rSlice => ({
-      ...rSlice,
-      status: statusMap.get(rSlice.id) ?? 'Idle',
-    })),
-  }))
-}
-
-/**
  * Return computedPlan based on id
  * @param id
  */
@@ -134,27 +80,7 @@ export const useComputedPlan = (id: string): ComputedPlan | undefined => {
     return
   }
 
-  if (ongoingPlan) {
-    // Use flatMap for cleaner flattening
-    const flattenedReadingSlices = plan.sections.flatMap(s => s.readingSlices)
-
-    const onGoingReadingSlicesArray = Object.entries(ongoingPlan.readingSlices).map(
-      ([id, status]) => ({ id, status })
-    )
-
-    return {
-      ...plan,
-      status: ongoingPlan.status,
-      progress: calculateProgress(flattenedReadingSlices, onGoingReadingSlicesArray),
-      sections: transformSections(plan.sections, onGoingReadingSlicesArray),
-    }
-  }
-  return {
-    ...plan,
-    status: 'Idle',
-    progress: 0,
-    sections: transformSections(plan.sections),
-  }
+  return buildComputedPlan(plan, ongoingPlan)
 }
 
 const compareMyPlans = (prev: Plan[], next: Plan[]) => {
@@ -171,22 +97,6 @@ const compareMyPlans = (prev: Plan[], next: Plan[]) => {
   return true
 }
 
-const compareOngoingPlans = (prev: OngoingPlan[], next: OngoingPlan[]) => {
-  if (prev.length !== next.length) {
-    return false
-  }
-  // Loop and compare readingSlices.length field and status field
-  for (let i = 0; i < prev.length; i++) {
-    if (
-      prev[i]?.readingSlices?.length !== next[i]?.readingSlices?.length ||
-      prev[i]?.status !== next[i]?.status
-    ) {
-      return false
-    }
-  }
-  return true
-}
-
 /**
  * Return computed plan items for the plan list
  */
@@ -194,39 +104,15 @@ export const useComputedPlanItems = (): ComputedPlanItem[] => {
   const myPlans = useSelector((state: RootState) => state.plan.myPlans, compareMyPlans)
   const ongoingPlans = useSelector(
     (state: RootState) => state.plan.ongoingPlans,
-    compareOngoingPlans
+    areOngoingPlansEqual
   )
 
-  const computedPlansItems: ComputedPlanItem[] = myPlans.map(({ sections, ...plan }) => {
-    const ongoingPlan = ongoingPlans.find(uP => uP.id === plan.id)
-
-    if (ongoingPlan) {
-      const onGoingReadingSlicesArray = Object.entries(ongoingPlan?.readingSlices).map(
-        ([id, status]) => ({
-          id,
-          status,
-        })
-      )
-
-      // Calculate progress
-      const flattenedReadingSlices: ReadingSlice[] = sections.reduce(
-        (acc: ReadingSlice[], curr) => [...acc, ...curr.readingSlices],
-        []
-      )
-      return {
-        ...plan,
-        status: ongoingPlan.status,
-        progress: calculateProgress(flattenedReadingSlices, onGoingReadingSlicesArray),
-      }
-    }
-    return {
-      ...plan,
-      status: 'Idle',
-      progress: 0,
-    }
-  })
-
-  return computedPlansItems
+  return myPlans.map(plan =>
+    buildComputedPlanItem(
+      plan,
+      ongoingPlans.find(ongoingPlan => ongoingPlan.id === plan.id)
+    )
+  )
 }
 
 /**

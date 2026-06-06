@@ -4,10 +4,10 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { BackHandler } from 'react-native'
-import { useRouter } from 'expo-router'
 
 import { useQuery } from '~helpers/react-query-lite'
 import { TimelineTab, useIsCurrentTab } from '~state/tabs'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { getEvents } from './events'
 import TimelineEventDetailView from './TimelineEventDetailView'
 import TimelineHomeScreen from './TimelineHomeScreen'
@@ -19,7 +19,7 @@ interface Props {
 }
 
 const TimelineTabScreen = ({ timelineAtom }: Props) => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
   const [timelineTab, setTimelineTab] = useAtom(timelineAtom)
   const isCurrentTab = useIsCurrentTab()
@@ -60,7 +60,7 @@ const TimelineTabScreen = ({ timelineAtom }: Props) => {
   }
 
   const goToEvent = (event: TimelineEvent) => {
-    router.push({
+    pushRouteOnce({
       pathname: '/event',
       params: { slug: event.slug },
     })

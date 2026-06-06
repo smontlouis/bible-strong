@@ -3,13 +3,14 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { ActivityIndicator, Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import Box from '~common/ui/Box'
+import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 import { BibleError } from '~helpers/bibleErrors'
 import BibleErrorView from './BibleErrorView'
 import { usePrevious } from '~helpers/usePrevious'
 import BibleHeader from './BibleHeader'
 
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { type SheetRef } from '~common/sheet'
 import { useRouter } from 'expo-router'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -21,12 +22,12 @@ import BookmarkModal from '~features/bookmarks/BookmarkModal'
 import { useOpenNote } from '~features/notes/useOpenNote'
 import AddToStudyModal from '~features/studies/AddToStudyModal'
 import { useAddVerseToStudy } from '~features/studies/hooks/useAddVerseToStudy'
-import VerseFormatBottomSheet from '~features/studies/VerseFormatBottomSheet'
+import VerseFormatSheet from '~features/studies/VerseFormatSheet'
 import { getBibleVersionCoverage } from '~helpers/biblesDb'
 import generateUUID from '~helpers/generateUUID'
 import getVersesContent from '~helpers/getVersesContent'
 import { useQuery } from '~helpers/react-query-lite'
-import { useBottomSheet, useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useSheet } from '~helpers/useSheet'
 import useLanguage from '~helpers/useLanguage'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
@@ -51,7 +52,7 @@ import {
   selectNotes,
 } from '~redux/selectors/bible'
 import { makeSelectBookmarksInChapter } from '~redux/selectors/bookmarks'
-import { historyAtom, unifiedTagsModalAtom, bibleDataRefreshSignalAtom } from '../../state/app'
+import { historyAtom, bibleDataRefreshSignalAtom } from '../../state/app'
 import {
   BibleTab,
   getBibleContextDisplayMode,
@@ -66,6 +67,7 @@ import { PortalHost } from 'react-native-teleport'
 import { getBibleDOMDestination } from './SharedBibleDOM'
 import SnapshotPlaceholder from './SnapshotPlaceholder'
 import AnnotationToolbar from './AnnotationToolbar'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import {
   BibleDOMWrapper,
   ParallelVerse,
@@ -80,9 +82,14 @@ import {
   RedWordsByVerse,
 } from './bibleReadingChapter'
 import {
-  getFirstSelectedVerseLocation,
+  getSelectedVerseKeys,
+  getSelectedVersesBookmarkLocation,
+  getSelectedVersesFocusAction,
+  getSelectedVersesLinkParams,
+  getSelectedVersesRelationEndpoint,
+  getSelectedVersesStudyPayload,
+  hasSelectedVerses,
   selectAllChapterVerses,
-  selectedVersesIncludeFocus,
 } from './selectedVersesActions'
 import BibleParamsModal from './BibleParamsModal'
 import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
@@ -132,6 +139,7 @@ const BibleViewer = ({
 }: BibleViewerProps) => {
   const { t } = useTranslation()
   const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const openEntityRelations = useOpenEntityRelations()
   const openNote = useOpenNote()
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
@@ -144,26 +152,26 @@ const BibleViewer = ({
   const [secondaryVerses, setSecondaryVerses] = useState<Verse[] | null>(null)
   const [comments, setComments] = useState<{ [key: string]: string } | null>(null)
   const [redWords, setRedWords] = useState<RedWordsByVerse | null>(null)
-  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
+  const setUnifiedTagsModal = useUnifiedTagsModal()
   const [selectedCode, setSelectedCodeState] = useState<SelectedCode | null>(null)
-  const bookmarkModalRef = useRef<BottomSheetModal>(null)
+  const bookmarkModalRef = useRef<SheetRef>(null)
   const [selectedVerseForBookmark, setSelectedVerseForBookmark] = useState<{
     book: number
     chapter: number
     verse: number
   } | null>(null)
   const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null)
-  const bibleParamsModal = useBottomSheetModal()
-  const resourceModal = useBottomSheet()
-  const versesModal = useBottomSheet()
-  const createRelationModal = useBottomSheetModal()
+  const bibleParamsModal = useSheet()
+  const resourceModal = useSheet()
+  const versesModal = useSheet()
+  const createRelationModal = useSheet()
 
   // Annotation mode
   const annotationMode = useAnnotationMode()
-  const annotationToolbar = useBottomSheet()
+  const annotationToolbar = useSheet()
 
   // Cross-version annotations modal
-  const crossVersionModal = useBottomSheetModal()
+  const crossVersionModal = useSheet()
   const [crossVersionModalData, setCrossVersionModalData] = useState<{
     verseKey: string
     versions: CrossVersionAnnotation[]
@@ -171,15 +179,15 @@ const BibleViewer = ({
   const openInNewTab = useOpenInNewTab()
 
   // Verse tags modal
-  const verseTagsModal = useBottomSheetModal()
+  const verseTagsModal = useSheet()
   const [verseTagsModalKey, setVerseTagsModalKey] = useState<string | null>(null)
 
   const [createRelationSourceEndpoint, setCreateRelationSourceEndpoint] =
     useState<RelationEndpoint | null>(null)
 
   // Add to study modal states
-  const addToStudyModal = useBottomSheetModal()
-  const verseFormatModal = useBottomSheetModal()
+  const addToStudyModal = useSheet()
+  const verseFormatModal = useSheet()
   const [pendingVerseData, setPendingVerseData] = useState<{
     studyId: string
     verseData: {
@@ -320,7 +328,7 @@ const BibleViewer = ({
 
   // Open/close verses modal based on selected verses
   useEffect(() => {
-    if (Object.keys(selectedVerses).length > 0) {
+    if (hasSelectedVerses(selectedVerses)) {
       versesModal.open()
     } else {
       versesModal.close()
@@ -508,21 +516,33 @@ const BibleViewer = ({
     })
   }
 
+  const editFocusTags = () => {
+    if (!focusVerses?.length) return
+
+    setUnifiedTagsModal({
+      mode: 'select',
+      entity: 'highlights',
+      ids: Object.fromEntries(
+        focusVerses.map(focusVerse => [`${book.Numero}-${chapter}-${focusVerse}`, true])
+      ),
+    })
+  }
+
   const toggleCreateNote = () => {
-    openNote({ verseKeys: Object.keys(selectedVerses) })
+    openNote({ verseKeys: getSelectedVerseKeys(selectedVerses) })
   }
 
   const toggleCreateLink = () => {
-    router.push({
+    pushRouteOnce({
       pathname: '/link',
-      params: { verseKeys: Object.keys(selectedVerses).join(',') },
+      params: getSelectedVersesLinkParams(selectedVerses),
     })
   }
 
   const toggleCreateStudyRelation = () => {
-    const verseKeys = Object.keys(selectedVerses)
-    if (!verseKeys.length) return
-    setCreateRelationSourceEndpoint(createVerseEndpoint(verseKeys))
+    const endpoint = getSelectedVersesRelationEndpoint(selectedVerses)
+    if (!endpoint) return
+    setCreateRelationSourceEndpoint(endpoint)
     createRelationModal.open()
   }
 
@@ -547,7 +567,7 @@ const BibleViewer = ({
   }
 
   const openLink = (linkId: string) => {
-    router.push({ pathname: '/link', params: { linkId } })
+    pushRouteOnce({ pathname: '/link', params: { linkId } })
   }
 
   const openBibleNote = (noteId: string, verseIds?: string[]) => {
@@ -577,7 +597,7 @@ const BibleViewer = ({
         title,
         content,
         version,
-        verses: Object.keys(selectedVerses),
+        verses: getSelectedVersesStudyPayload(selectedVerses),
       }
 
       setPendingVerseData({ studyId, verseData })
@@ -603,7 +623,7 @@ const BibleViewer = ({
 
   // Pin verses handler - toggles focus on/off
   const handlePinVerses = () => {
-    if (selectedVersesIncludeFocus(selectedVerses, focusVerses)) {
+    if (getSelectedVersesFocusAction(selectedVerses, focusVerses) === 'clear-focus') {
       actions.clearFocusVerses()
     } else {
       actions.pinSelectedVerses()
@@ -612,7 +632,7 @@ const BibleViewer = ({
 
   // Bookmark handler
   const handleAddBookmark = useCallback(() => {
-    const location = getFirstSelectedVerseLocation(selectedVerses)
+    const location = getSelectedVersesBookmarkLocation(selectedVerses)
     if (location) {
       setSelectedVerseForBookmark({
         book: location.book,
@@ -638,7 +658,7 @@ const BibleViewer = ({
     (code: SelectedCode | null) => {
       setSelectedCodeState(code)
       if (code) {
-        router.push({
+        pushRouteOnce({
           pathname: '/strong',
           params: {
             book: String(code.book),
@@ -647,7 +667,7 @@ const BibleViewer = ({
         })
       }
     },
-    [router]
+    [pushRouteOnce]
   )
 
   // Cross-version annotations modal handlers
@@ -704,6 +724,7 @@ const BibleViewer = ({
 
   // Build the props object for BibleDOMWrapper (same props as before, just extracted)
   const domProps = {
+    tabId: bible.id,
     bibleAtom,
     isBibleViewReloadingAtom,
     book,
@@ -840,6 +861,7 @@ const BibleViewer = ({
         isFormSheet={isFormSheet}
         onExitAnnotationMode={handleExitAnnotationMode}
         annotationModeEnabled={annotationMode.enabled}
+        onEditFocusTags={editFocusTags}
       />
       <Box flex={1} zIndex={-1}>
         {useSharedDOM ? (
@@ -916,18 +938,18 @@ const BibleViewer = ({
       />
       <BibleParamsModal modalRef={bibleParamsModal.getRef()} />
       <AddToStudyModal
-        bottomSheetRef={addToStudyModal.getRef()}
+        sheetRef={addToStudyModal.getRef()}
         onSelectStudy={handleSelectStudy}
         reference={selectedVersesReference}
       />
-      <VerseFormatBottomSheet
-        bottomSheetRef={verseFormatModal.getRef()}
+      <VerseFormatSheet
+        sheetRef={verseFormatModal.getRef()}
         onSelectFormat={handleSelectFormat}
         reference={pendingVerseData?.verseData.title || selectedVersesReference}
       />
       <LoadingView isBibleViewReloadingAtom={isBibleViewReloadingAtom} />
       <BookmarkModal
-        bottomSheetRef={bookmarkModalRef}
+        sheetRef={bookmarkModalRef}
         onClose={() => {
           setSelectedVerseForBookmark(null)
           setEditingBookmark(null)
@@ -957,7 +979,7 @@ const BibleViewer = ({
         isEnabled={annotationMode.enabled}
       />
       <CrossVersionAnnotationsModal
-        bottomSheetRef={crossVersionModal.getRef()}
+        sheetRef={crossVersionModal.getRef()}
         verseKey={crossVersionModalData?.verseKey ?? null}
         versions={crossVersionModalData?.versions ?? []}
         onSwitchVersion={handleCrossVersionSwitchVersion}

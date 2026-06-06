@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { serializeNoteVerseKeys } from './routeParams'
 
 type OpenNoteParams = {
@@ -7,10 +7,10 @@ type OpenNoteParams = {
 }
 
 export const useOpenNote = () => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
 
   return ({ noteId, verseKeys }: OpenNoteParams = {}) => {
-    router.push({
+    pushRouteOnce({
       pathname: '/note',
       params: {
         ...(noteId ? { noteId } : {}),

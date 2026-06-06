@@ -1,4 +1,4 @@
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
+import { Sheet, SheetView, type SheetRef } from '~common/sheet'
 import { useTheme } from '@emotion/react'
 import { Image } from 'expo-image'
 import * as FileSystem from 'expo-file-system/legacy'
@@ -12,7 +12,6 @@ import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
 import { wp } from '~helpers/utils'
 import { toast } from '~helpers/toast'
 import { useTranslation } from 'react-i18next'
@@ -28,7 +27,7 @@ interface VerseOfTheDayData {
 }
 
 interface Props {
-  modalRef: React.RefObject<BottomSheetModal | null>
+  modalRef: React.RefObject<SheetRef | null>
   imageUrls: ImageUrls | null
   verseOfTheDay: VerseOfTheDayData
 }
@@ -37,7 +36,6 @@ const VerseImageModal = ({ modalRef, imageUrls, verseOfTheDay }: Props) => {
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   const [shareIsLoading, setShareIsLoading] = useState(false)
-  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
   const { t } = useTranslation()
   const imageSize = wp(100, true) - 80
 
@@ -128,34 +126,13 @@ const VerseImageModal = ({ modalRef, imageUrls, verseOfTheDay }: Props) => {
   }
 
   return (
-    <BottomSheetModal
-      ref={modalRef}
-      detached
-      bottomInset={insets.bottom + 46}
-      enableDynamicSizing
-      enablePanDownToClose
-      backdropComponent={renderBackdrop}
-      key={key}
-      {...bottomSheetStyles}
-      style={{
-        marginHorizontal: 20,
-      }}
-      backgroundStyle={{
-        backgroundColor: theme.colors.lightGrey,
-        borderRadius: 20,
-      }}
-      handleIndicatorStyle={{
-        backgroundColor: theme.colors.default,
-        opacity: 0.3,
-        width: 40,
-      }}
-    >
-      <BottomSheetView>
-        <Box center p={20} pb={30}>
+    <Sheet ref={modalRef}>
+      <SheetView>
+        <Box center p={20}>
           {renderContent()}
         </Box>
-      </BottomSheetView>
-    </BottomSheetModal>
+      </SheetView>
+    </Sheet>
   )
 }
 

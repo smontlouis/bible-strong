@@ -1,27 +1,25 @@
-import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { Sheet, SheetHeader, SheetScrollView } from '~common/sheet'
 import { useAtom } from 'jotai/react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { Tag } from '~common/types'
 import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
+import Checkbox from '~common/ui/Checkbox'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
-import { renderBackdrop, useBottomSheetStyles } from '~helpers/bottomSheetHelpers'
-import { useBottomSheetModal } from '~helpers/useBottomSheet'
+import { useSheet } from '~helpers/useSheet'
 import useFuzzy from '~helpers/useFuzzy'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
 import { addTag, toggleTagEntity } from '~redux/modules/user'
 import { sortedTagsSelector } from '~redux/selectors/tags'
-import { unifiedTagsModalAtom } from '~state/app'
-import BottomSheetSearchInput from './BottomSheetSearchInput'
+import { unifiedTagsModalAtom, type UnifiedTagsModalProps } from '~state/app'
+import SheetSearchInput from './SheetSearchInput'
 import { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated'
-import { ContainerComponent } from './Modal'
 
 const RemovableChip = ({ label, onRemove }: { label: string; onRemove: () => void }) => (
   <AnimatedBox
@@ -44,15 +42,17 @@ const RemovableChip = ({ label, onRemove }: { label: string; onRemove: () => voi
   </AnimatedBox>
 )
 
-const UnifiedTagsModal = () => {
+type UnifiedTagsModalInstanceProps = {
+  item: UnifiedTagsModalProps
+  setItem: (item: UnifiedTagsModalProps) => void
+}
+
+export const UnifiedTagsModalInstance = ({ item, setItem }: UnifiedTagsModalInstanceProps) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const insets = useSafeAreaInsets()
-  const { key, ...bottomSheetStyles } = useBottomSheetStyles()
   const { bottomBarHeight } = useBottomBarHeightInTab()
 
-  const [item, setItem] = useAtom(unifiedTagsModalAtom)
-  const { ref, open, close } = useBottomSheetModal()
+  const { ref, open, close } = useSheet()
 
   const tags = useSelector(sortedTagsSelector)
   const { keyword, result, search, resetSearch } = useFuzzy(tags, {
@@ -170,59 +170,50 @@ const UnifiedTagsModal = () => {
   const filterModeSelectedTag = isFilterMode ? item.selectedTag : undefined
 
   return (
-    <BottomSheetModal
+    <Sheet
       ref={ref}
-      topInset={insets.top}
-      enablePanDownToClose
-      snapPoints={['70%']}
-      backdropComponent={renderBackdrop}
-      containerComponent={ContainerComponent}
-      activeOffsetY={[-20, 20]}
+      snapPoints={[0.7]}
       onDismiss={() => setItem(false)}
-      key={key}
-      {...bottomSheetStyles}
-    >
-      {/* Header */}
-      <Box pt={20} pb={10} px={20} borderBottomWidth={1} borderColor="border">
-        <Text bold fontSize={16}>
-          {getTitle()}
-        </Text>
-        <Box height={8} />
-        <BottomSheetSearchInput
-          placeholder={t('Chercher ou creer une etiquette')}
-          onChangeText={search}
-          onDelete={resetSearch}
-          value={keyword}
-          returnKeyType="done"
-          onSubmitEditing={() => (!result.length ? saveTag() : undefined)}
-        />
-      </Box>
-
-      {/* Selected tags chips (select mode only) */}
-      {hasSelectedTags && (
-        <AnimatedBox
-          layout={LinearTransition}
-          px={16}
-          py={8}
-          borderBottomWidth={1}
-          borderColor="border"
-        >
-          <Text fontSize={12} color="grey" mb={6}>
-            {t('tagsSelected', { count: selectedTagsList.length })}
-          </Text>
-          <Box row wrap style={{ gap: 8 }}>
-            {selectedTagsList.map(tag => (
-              <RemovableChip
-                key={tag.id}
-                label={tag.name}
-                onRemove={() => handleRemoveTag(tag.id)}
+      header={
+        <>
+          <SheetHeader title={getTitle()}>
+            <Box px={20} pb={10}>
+              <SheetSearchInput
+                placeholder={t('Chercher ou creer une etiquette')}
+                onChangeText={search}
+                onDelete={resetSearch}
+                value={keyword}
+                returnKeyType="done"
+                onSubmitEditing={() => (!result.length ? saveTag() : undefined)}
               />
-            ))}
-          </Box>
-        </AnimatedBox>
-      )}
-
-      <BottomSheetScrollView
+            </Box>
+          </SheetHeader>
+          {hasSelectedTags && (
+            <AnimatedBox
+              layout={LinearTransition}
+              px={16}
+              py={8}
+              borderBottomWidth={1}
+              borderColor="border"
+            >
+              <Text fontSize={12} color="grey" mb={6}>
+                {t('tagsSelected', { count: selectedTagsList.length })}
+              </Text>
+              <Box row wrap style={{ gap: 8 }}>
+                {selectedTagsList.map(tag => (
+                  <RemovableChip
+                    key={tag.id}
+                    label={tag.name}
+                    onRemove={() => handleRemoveTag(tag.id)}
+                  />
+                ))}
+              </Box>
+            </AnimatedBox>
+          )}
+        </>
+      }
+    >
+      <SheetScrollView
         contentContainerStyle={{
           paddingBottom: bottomBarHeight,
         }}
@@ -239,17 +230,7 @@ const UnifiedTagsModal = () => {
                 borderColor="border"
                 onPress={handleAllPress}
               >
-                <Box
-                  width={24}
-                  height={24}
-                  borderRadius={6}
-                  mr={12}
-                  borderWidth={2}
-                  borderColor="border"
-                  center
-                >
-                  {!filterModeSelectedTag && <FeatherIcon name="check" size={14} color="primary" />}
-                </Box>
+                <Checkbox checked={!filterModeSelectedTag} mr={12} />
                 <Text flex={1} fontSize={16}>
                   {t('Tout')}
                 </Text>
@@ -270,18 +251,7 @@ const UnifiedTagsModal = () => {
                   borderColor="border"
                   onPress={() => handleTagPress(tag)}
                 >
-                  <Box
-                    width={24}
-                    height={24}
-                    borderRadius={6}
-                    mr={12}
-                    borderWidth={2}
-                    borderColor={isSelected ? 'primary' : 'border'}
-                    bg={isSelected ? 'primary' : undefined}
-                    center
-                  >
-                    {isSelected && <FeatherIcon name="check" size={14} color="white" />}
-                  </Box>
+                  <Checkbox checked={isSelected} fillChecked checkColor="white" mr={12} />
                   <Text flex={1} fontSize={16}>
                     {tag.name}
                   </Text>
@@ -313,9 +283,15 @@ const UnifiedTagsModal = () => {
             </Text>
           </TouchableBox>
         )}
-      </BottomSheetScrollView>
-    </BottomSheetModal>
+      </SheetScrollView>
+    </Sheet>
   )
+}
+
+const UnifiedTagsModal = () => {
+  const [item, setItem] = useAtom(unifiedTagsModalAtom)
+
+  return <UnifiedTagsModalInstance item={item} setItem={setItem} />
 }
 
 export default UnifiedTagsModal

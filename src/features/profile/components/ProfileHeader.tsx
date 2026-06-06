@@ -2,7 +2,7 @@ import styled from '@emotion/native'
 import React, { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch } from 'react-redux'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { type SheetRef } from '~common/sheet'
 
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -44,8 +44,8 @@ const ProfileHeader = () => {
   const dispatch = useDispatch()
   const { user } = useLogin()
 
-  const renameModalRef = useRef<BottomSheetModal>(null)
-  const emailVerificationModalRef = useRef<BottomSheetModal>(null)
+  const renameModalRef = useRef<SheetRef>(null)
+  const emailVerificationModalRef = useRef<SheetRef>(null)
 
   const showEmailNotVerified = user.provider === 'password' && !user.emailVerified
   const providerInfo = getProviderIcon(user.provider)
@@ -96,7 +96,7 @@ const ProfileHeader = () => {
       </VStack>
 
       <RenameModal
-        bottomSheetRef={renameModalRef}
+        sheetRef={renameModalRef}
         title={t('profile.editName')}
         placeholder={t('profile.enterName')}
         initialValue={user.displayName}

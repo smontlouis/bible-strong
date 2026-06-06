@@ -1,17 +1,8 @@
 import { atom } from 'jotai/vanilla'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
+import type { OnboardingResourceSelection } from './onboardingResources'
 
-export type ResourceToDownload = {
-  id: string
-  name: string
-  path: string
-  uri: string
-  fileSize: number
-  type: 'bible' | 'database' // Discriminate between resource types
-  lang?: string // Language for database downloads (required for databases)
-}
-
-export const selectedResourcesAtom = atom<ResourceToDownload[]>([])
+export const selectedResourcesAtom = atom<OnboardingResourceSelection[]>([])
 
 // Tracks onboarding completion state: true = completed (Bible downloaded), false = not completed
 // Persisted in MMKV for instant access on app restart

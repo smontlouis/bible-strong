@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { FlatList, ScrollView, TouchableOpacity } from 'react-native'
 import { KeyboardAwareScrollView, useKeyboardState } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useRouter } from 'expo-router'
 import { useTheme } from '@emotion/react'
 import { Image } from 'expo-image'
 import { useAtomValue, useSetAtom } from 'jotai/react'
@@ -42,10 +41,8 @@ import { removeBreakLines } from '~helpers/utils'
 import { useWaitForDatabase as useWaitForDictionaryDatabase } from '~common/waitForDictionnaireDB'
 import { useWaitForDatabase as useWaitForNaveDatabase } from '~common/waitForNaveDB'
 import { useWaitForDatabase as useWaitForStrongDatabase } from '~common/waitForStrongDB'
-import { parseBibleReference } from '~features/search/BibleReferenceWidget'
 import SearchEmptyState from '~features/search/SearchEmptyState'
-import { getBibleViewParamsForSearchResult } from '~features/search/searchNavigation'
-import { useOpenRelationEndpoint } from '~features/studyRelations/useOpenRelationEndpoint'
+import { useOpenStudyObject } from '~features/studyRelations/useOpenStudyObject'
 import type { RootState } from '~redux/modules/reducer'
 import { useSelector } from 'react-redux'
 import { searchFiltersAtom, SearchItemType, SearchSection } from '~state/searchFilters'
@@ -58,48 +55,36 @@ import SearchItemFilterBar, {
 import SearchSectionBlock, {
   SEARCH_SECTION_LOAD_MORE_COUNT,
   SEARCH_SECTION_PREVIEW_LIMIT,
-  type SearchResultSection,
 } from './shared/SearchSectionBlock'
 import { searchWithMatches } from './shared/searchFuzzy'
 import {
-  getDictionarySearchItems,
-  getNaveSearchItems,
-  getPassageSearchItems,
-  getReferenceSearchItems,
   getSortedLinkSearchItems,
   getSortedNoteSearchItems,
   getSortedStudySearchItems,
-  getStrongSearchItems,
   type DictionarySearchRow,
   type NaveSearchItemRow,
 } from './shared/searchItems'
 import type { SearchEntityResult } from './shared/searchResultTypes'
 import Header from '~common/Header'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import {
+  getSearchResultsModel,
+  SEARCH_MIN_QUERY_LENGTH,
+  type SQLiteSearchResultSection,
+  type SearchSectionId,
+} from './searchResultsModel'
 
 type Props = {
   searchValue: string
   setSearchValue: (value: string) => void
 }
 
-const MIN_SEARCH_LENGTH = 2
+const MIN_SEARCH_LENGTH = SEARCH_MIN_QUERY_LENGTH
 const STRONG_CODE_REGEX = /^[HG]\d+$/i
 const SEARCH_ALPHABET_FOOTER_HEIGHT = 70
 
 type DictionaryRow = DictionarySearchRow
 type NaveRow = NaveSearchItemRow
-type SearchSectionId =
-  | 'reference'
-  | 'notes'
-  | 'links'
-  | 'studies'
-  | 'strong'
-  | 'dictionary'
-  | 'nave'
-  | 'passages'
-
-type SQLiteSearchResultSection = SearchResultSection<SearchSectionId> & {
-  itemFilterType: SearchItemType
-}
 
 const isDatabaseError = (value: unknown): value is DatabaseError =>
   typeof value === 'object' && value !== null && 'error' in value
@@ -116,9 +101,8 @@ const useKeyboardFooterBottom = (footerHeight: number) => {
 const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const { t } = useTranslation()
   const theme = useTheme()
-  const router = useRouter()
   const keyboardFooterBottom = useKeyboardFooterBottom(SEARCH_ALPHABET_FOOTER_HEIGHT)
-  const openRelationEndpoint = useOpenRelationEndpoint()
+  const openStudyObject = useOpenStudyObject()
   const notes = useSelector((state: RootState) => state.user.bible.notes)
   const links = useSelector((state: RootState) => state.user.bible.links)
   const studies = useSelector((state: RootState) => state.user.bible.studies)
@@ -593,131 +577,31 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     searchValue,
   ])
 
-  const hasReference = Boolean(
-    itemFilters.passages &&
-    searchValue.trim().length >= MIN_SEARCH_LENGTH &&
-    debouncedSearchValue &&
-    parseBibleReference(debouncedSearchValue).length > 0
-  )
-
-  const hasSearchQuery = Boolean(debouncedSearchValue)
-  const showResultsList =
-    Boolean(browseItemType) ||
-    (hasSearchQuery &&
-      searchValue.trim().length >= MIN_SEARCH_LENGTH &&
-      debouncedSearchValue.trim().length >= MIN_SEARCH_LENGTH)
-  const referenceItems = itemFilters.passages ? getReferenceSearchItems(debouncedSearchValue) : []
-  const noteItems = itemFilters.notes ? noteResults : []
-  const linkItems = itemFilters.links ? linkResults : []
-  const studyItems = itemFilters.studies ? studyResults : []
-  const strongItems = itemFilters.strong ? getStrongSearchItems(strongResults, t) : []
-  const dictionaryItems = itemFilters.dictionary ? getDictionarySearchItems(dictionaryResults) : []
-  const naveItems = itemFilters.nave ? getNaveSearchItems(naveResults) : []
-  const passageItems = itemFilters.passages ? getPassageSearchItems(results ?? []) : []
-  const searchSections: SQLiteSearchResultSection[] = [
-    ...(referenceItems.length
-      ? [
-          {
-            id: 'reference' as const,
-            title: t('Référence biblique'),
-            count: referenceItems.length,
-            items: referenceItems,
-            itemFilterType: 'passages' as const,
-          },
-        ]
-      : []),
-    ...(noteItems.length
-      ? [
-          {
-            id: 'notes' as const,
-            title: t('Notes'),
-            count: noteItems.length,
-            items: noteItems,
-            itemFilterType: 'notes' as const,
-          },
-        ]
-      : []),
-    ...(linkItems.length
-      ? [
-          {
-            id: 'links' as const,
-            title: t('Liens'),
-            count: linkItems.length,
-            items: linkItems,
-            itemFilterType: 'links' as const,
-          },
-        ]
-      : []),
-    ...(studyItems.length
-      ? [
-          {
-            id: 'studies' as const,
-            title: t('Études'),
-            count: studyItems.length,
-            items: studyItems,
-            itemFilterType: 'studies' as const,
-          },
-        ]
-      : []),
-    ...(strongItems.length
-      ? [
-          {
-            id: 'strong' as const,
-            title: t('Strong'),
-            count: strongItems.length,
-            items: strongItems,
-            itemFilterType: 'strong' as const,
-          },
-        ]
-      : []),
-    ...(dictionaryItems.length
-      ? [
-          {
-            id: 'dictionary' as const,
-            title: t('Dictionnaire'),
-            count: dictionaryItems.length,
-            items: dictionaryItems,
-            itemFilterType: 'dictionary' as const,
-          },
-        ]
-      : []),
-    ...(naveItems.length
-      ? [
-          {
-            id: 'nave' as const,
-            title: t('Nave'),
-            count: naveItems.length,
-            items: naveItems,
-            itemFilterType: 'nave' as const,
-          },
-        ]
-      : []),
-    ...(passageItems.length || (itemFilters.passages && (isSearching || searchError))
-      ? [
-          {
-            id: 'passages' as const,
-            title: t('Passages'),
-            count: totalCount || passageItems.length,
-            items: passageItems,
-            itemFilterType: 'passages' as const,
-          },
-        ]
-      : []),
-  ]
-  const isBrowseLoading =
-    (browseItemType === 'notes' && isNoteSearching) ||
-    (browseItemType === 'links' && isLinkSearching) ||
-    (browseItemType === 'studies' && isStudySearching) ||
-    (browseItemType === 'strong' && isStrongSearching) ||
-    (browseItemType === 'dictionary' && isDictionarySearching) ||
-    (browseItemType === 'nave' && isNaveSearching)
-
-  const showNoResults =
-    showResultsList &&
-    !isSearching &&
-    !isBrowseLoading &&
-    searchSections.length === 0 &&
-    !searchError
+  const searchModel = getSearchResultsModel({
+    query: searchValue,
+    debouncedQuery: debouncedSearchValue,
+    browseItemType,
+    itemFilters,
+    noteResults,
+    linkResults,
+    studyResults,
+    strongResults,
+    dictionaryResults,
+    naveResults,
+    passageResults: results,
+    totalPassageCount: totalCount,
+    searchError,
+    loading: {
+      passages: isSearching,
+      notes: isNoteSearching,
+      links: isLinkSearching,
+      studies: isStudySearching,
+      strong: isStrongSearching,
+      dictionary: isDictionarySearching,
+      nave: isNaveSearching,
+    },
+    t,
+  })
 
   function renderPassageError(): ReactNode {
     if (searchError) {
@@ -744,17 +628,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   }
 
   const openSearchItem = (item: SearchEntityResult) => {
-    if (item.passage) {
-      router.push({
-        pathname: '/bible-view',
-        params: getBibleViewParamsForSearchResult(item.passage),
-      })
-      return
-    }
-
-    if (item.endpoint) {
-      openRelationEndpoint(item.endpoint)
-    }
+    openStudyObject(item)
   }
 
   const renderBrowseAlphabet = () => {
@@ -778,7 +652,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     }
   }
   const browseAlphabet = renderBrowseAlphabet()
-  const shouldRenderSearchList = showResultsList || !hasSearchQuery
+  const shouldRenderSearchList = searchModel.shouldRenderSearchList
   const alphabetFooterInset = browseAlphabet ? SEARCH_ALPHABET_FOOTER_HEIGHT : 0
   const listBottomInset = alphabetFooterInset + keyboardFooterBottom
 
@@ -935,14 +809,14 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
             paddingBottom: listBottomInset,
           }}
           removeClippedSubviews
-          data={searchSections}
+          data={searchModel.sections}
           keyExtractor={(section: SQLiteSearchResultSection) => section.id}
           ListEmptyComponent={
-            isBrowseLoading ? (
+            searchModel.isBrowseLoading ? (
               <Box px={20} py={16}>
                 <Text color="grey">{String(t('Chargement...'))}</Text>
               </Box>
-            ) : showNoResults ? (
+            ) : searchModel.showNoResults ? (
               browseItemType ? (
                 renderSoloEmptyState()
               ) : (
@@ -1007,7 +881,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
                 mb={0}
                 maxHeight={40}
               />
-              {hasInstalledVersions && !hasReference && (
+              {hasInstalledVersions && (
                 <ScrollView horizontal>
                   <HStack
                     px={20}
@@ -1089,7 +963,7 @@ const SearchNoResultsState = ({ query }: { query: string }) => {
 }
 
 const ReferenceSearchResultRow = ({ item }: { item: SearchEntityResult }) => {
-  const router = useRouter()
+  const pushRouteOnce = usePushRouteOnce()
   const version = useDefaultBibleVersion()
   const segment = item.referenceSegment!
 
@@ -1106,7 +980,7 @@ const ReferenceSearchResultRow = ({ item }: { item: SearchEntityResult }) => {
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={() =>
-        router.push({
+        pushRouteOnce({
           pathname: '/bible-view',
           params: {
             contextDisplayMode: 'focused',

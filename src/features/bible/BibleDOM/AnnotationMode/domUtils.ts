@@ -348,3 +348,11 @@ export function findVerseContainer(element: Element | null): Element | null {
   }
   return current
 }
+
+/**
+ * Returns true when a touch started on an inline control that should handle
+ * its own action instead of being interpreted as a verse tap.
+ */
+export function isIgnoredVerseTouchTarget(target: EventTarget | null): boolean {
+  return target instanceof Element && Boolean(target.closest('[data-ignore-verse-touch]'))
+}

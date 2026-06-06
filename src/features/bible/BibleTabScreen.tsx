@@ -1,7 +1,6 @@
 import * as FileSystem from 'expo-file-system/legacy'
 import { produce } from 'immer'
 import React, { useEffect, useMemo, useState } from 'react'
-import { Appearance } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
 import blackColors from '~themes/blackColors'
@@ -20,6 +19,9 @@ import { getDatabases } from '~helpers/databases'
 import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { BibleTab } from '../../state/tabs'
+import { LocalUnifiedTagsModalProvider } from '~common/UnifiedTagsModalProvider'
+import { BookSelectorSheetProvider } from './BookSelectorSheet/BookSelectorSheetProvider'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const deepmerge = require('@fastify/deepmerge')()
 
@@ -35,8 +37,7 @@ const BibleTabScreen = ({ bibleAtom, isFormSheet }: BibleTabScreenProps) => {
 
   const rawSettings = useSelector((state: RootState) => state.user.bible.settings)
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
-
-  const systemColorScheme = Appearance.getColorScheme()
+  const { theme: currentTheme } = useCurrentThemeSelector()
 
   const settings = useMemo(
     () =>
@@ -50,26 +51,10 @@ const BibleTabScreen = ({ bibleAtom, isFormSheet }: BibleTabScreenProps) => {
         draftState.colors.night = deepmerge(nightColors, draftState.colors.night || {})
         draftState.colors.sunset = deepmerge(sunsetColors, draftState.colors.sunset || {})
 
-        const preferredColorScheme = draftState.preferredColorScheme || 'auto'
-        const preferredDarkTheme = draftState.preferredDarkTheme || 'dark'
-        const preferredLightTheme = draftState.preferredLightTheme || 'default'
-
-        draftState.theme =
-          (() => {
-            if (preferredColorScheme === 'auto') {
-              if (systemColorScheme === 'dark') {
-                return preferredDarkTheme
-              }
-              return preferredLightTheme
-            }
-
-            if (preferredColorScheme === 'dark') return preferredDarkTheme
-            return preferredLightTheme
-          })() || 'default'
-
+        draftState.theme = currentTheme
         draftState.fontFamily = fontFamily
       }),
-    [rawSettings, fontFamily, systemColorScheme]
+    [rawSettings, fontFamily, currentTheme]
   )
 
   const getIfMhyCommentsNeedsDownload = async () => {
@@ -101,7 +86,7 @@ const BibleTabScreen = ({ bibleAtom, isFormSheet }: BibleTabScreenProps) => {
     getDefaultStore().set(isBibleViewReloadingAtom, true)
   }
 
-  return (
+  const content = (
     <BibleViewer
       key={`bible-viewer-${reloadKey}`}
       settings={settings}
@@ -111,6 +96,16 @@ const BibleTabScreen = ({ bibleAtom, isFormSheet }: BibleTabScreenProps) => {
       isFormSheet={isFormSheet}
     />
   )
+
+  if (isFormSheet) {
+    return (
+      <BookSelectorSheetProvider>
+        <LocalUnifiedTagsModalProvider>{content}</LocalUnifiedTagsModalProvider>
+      </BookSelectorSheetProvider>
+    )
+  }
+
+  return content
 }
 
 export default BibleTabScreen
