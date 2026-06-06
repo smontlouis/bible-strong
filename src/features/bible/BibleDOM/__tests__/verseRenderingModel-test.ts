@@ -4,6 +4,7 @@ import {
   getFadePosition,
   getFocusVerseNumbers,
   getParallelVerseRows,
+  getScrollTargetVerse,
   getTaggedVersesByLastVerse,
   getVersesWithWordAnnotations,
   isVerseDimmedInFocusedContext,
@@ -58,6 +59,23 @@ describe('verseRenderingModel', () => {
         isFocused: false,
       })
     ).toBe(false)
+  })
+
+  it('uses the focused verse as scroll target in focused context', () => {
+    expect(
+      getScrollTargetVerse({
+        verseToScroll: 1,
+        contextDisplayMode: 'focused',
+        focusVerses: ['28'],
+      })
+    ).toBe(28)
+    expect(
+      getScrollTargetVerse({
+        verseToScroll: 12,
+        contextDisplayMode: 'fullChapter',
+        focusVerses: ['28'],
+      })
+    ).toBe(12)
   })
 
   it('dims non-focused verse overlays in focused context', () => {

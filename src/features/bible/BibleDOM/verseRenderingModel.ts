@@ -11,6 +11,25 @@ export const createVerseKey = (verse: Pick<TVerse, 'Livre' | 'Chapitre' | 'Verse
 export const getFocusVerseNumbers = (focusVerses: WebViewProps['focusVerses']) =>
   focusVerses ? focusVerses.map(Number) : null
 
+export const getScrollTargetVerse = ({
+  verseToScroll,
+  contextDisplayMode,
+  focusVerses,
+}: {
+  verseToScroll: number | undefined
+  contextDisplayMode: WebViewProps['contextDisplayMode']
+  focusVerses: WebViewProps['focusVerses']
+}) => {
+  if (contextDisplayMode === 'focused' && focusVerses?.length) {
+    const focusVerseNumbers = focusVerses.map(Number).filter(Number.isFinite)
+    if (focusVerseNumbers.length) {
+      return Math.min(...focusVerseNumbers)
+    }
+  }
+
+  return verseToScroll
+}
+
 export const getAdjacentFocusVerses = (focusVerseNumbers: number[] | null) =>
   focusVerseNumbers
     ? {

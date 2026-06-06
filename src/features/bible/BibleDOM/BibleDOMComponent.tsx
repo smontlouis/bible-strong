@@ -51,6 +51,7 @@ import { getCaretInfoFromPoint } from './AnnotationMode/domUtils'
 // Unified verse renderer
 import { UnifiedVersesRenderer } from './UnifiedVersesRenderer'
 import { isDarkTheme } from './utils'
+import { getScrollTargetVerse } from './verseRenderingModel'
 
 declare global {
   interface Window {
@@ -669,12 +670,6 @@ const LoadedBibleContent = ({
     }
   }
 
-  // Check verses are selected (disables drag-to-annotation in normal mode)
-  const hasSelectedVerses = Object.keys(selectedVerses).length > 0
-
-  // Interlinear versions have different DOM structure, disable annotation mode
-  const isInterlinearVersion = version === 'INT' || version === 'INT_EN'
-
   // Check if parallel verse mode (disables horizontal gestures for scroll)
   const isParallelVerseMode = Boolean(parallelVerses?.length)
   // Only disable swipe/drag in horizontal parallel mode (vertical mode has no horizontal scroll)
@@ -692,24 +687,12 @@ const LoadedBibleContent = ({
     highlightRects,
     selectionHandlePositions,
     selectedAnnotationId,
-    // Disable drag-to-annotation in all parallel modes (annotation not supported)
-    canDragToAnnotate: !hasSelectedVerses && !isInterlinearVersion && !isParallelVerseMode,
     triggers: {
       clearSelectionTrigger,
       applyAnnotationTrigger,
       eraseSelectionTrigger,
     },
     callbacks: {
-      // Disable drag-to-annotation in all parallel modes
-      onEnterAnnotationModeFromDrag: isParallelVerseMode
-        ? undefined
-        : () => {
-            // Note: canDragToAnnotate already prevents this from being called when verses are selected
-            dispatch({
-              type: ENTER_ANNOTATION_MODE,
-              payload: {},
-            }).catch(console.error)
-          },
       onTapVerse: handleTapVerse,
       onDoubleTapVerse: handleDoubleTapVerse,
       onLongPressVerse: handleLongPressVerse,
@@ -855,20 +838,28 @@ const LoadedBibleContent = ({
   }, [dispatch, isFormSheet])
 
   const hasVerses = verses.length > 0
+  const scrollTargetVerse = getScrollTargetVerse({
+    verseToScroll,
+    contextDisplayMode,
+    focusVerses,
+  })
+  const focusKey = focusVerses?.join(',') ?? ''
+  const annotationScrollKey = contextDisplayMode === 'focused' ? annotationMode : false
+
   useEffect(() => {
     if (!hasVerses) return
-    if (verseToScroll === 1) {
+    if (scrollTargetVerse === 1) {
       window.scrollTo(0, 0)
     }
-  }, [chapter, verseToScroll, hasVerses])
+  }, [chapter, scrollTargetVerse, hasVerses])
 
   useEffect(() => {
-    if (!verseToScroll || !hasVerses) return
+    if (!scrollTargetVerse || !hasVerses) return
 
-    if (verseToScroll === 1) return
+    if (scrollTargetVerse === 1) return
 
     requestAnimationFrame(() => {
-      const element = document.querySelector(`#verset-${verseToScroll}`)
+      const element = document.querySelector(`#verset-${scrollTargetVerse}`)
       if (element) {
         window.disableSwipeDownEvent = true
         const elementPosition = element.getBoundingClientRect().top
@@ -880,7 +871,7 @@ const LoadedBibleContent = ({
         }, 400)
       }
     })
-  }, [verseToScroll, hasVerses])
+  }, [scrollTargetVerse, hasVerses, annotationScrollKey, contextDisplayMode, focusKey])
 
   const navigateToPericope = () => {
     dispatch({
