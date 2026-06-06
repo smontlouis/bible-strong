@@ -101,10 +101,7 @@ const VerseComponent = ({
   }
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.7}
-      onPress={openBibleView}
-    >
+    <TouchableOpacity activeOpacity={0.7} onPress={openBibleView}>
       <Container>
         <Box row style={{ marginBottom: 10 }} alignItems="center">
           <Box flex row alignItems="center">

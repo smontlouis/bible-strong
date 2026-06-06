@@ -63,9 +63,7 @@ class ConcordanceVerse extends React.Component<Props, ConcordanceVerseState> {
     }
 
     return (
-      <Container
-        onPress={() => onOpenVerse(verse)}
-      >
+      <Container onPress={() => onOpenVerse(verse)}>
         <Text title fontSize={16} marginBottom={5}>
           {this.t(books[bookNumber - 1].Nom)} {chapterNumber}:{verseNumber}
         </Text>

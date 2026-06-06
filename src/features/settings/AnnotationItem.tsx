@@ -64,10 +64,7 @@ const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
   }
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.7}
-      onPress={openBibleView}
-    >
+    <TouchableOpacity activeOpacity={0.7} onPress={openBibleView}>
       <AnnotationContainer>
         <Box row style={{ marginBottom: 10 }} alignItems="center">
           <HStack flex row alignItems="center" gap={10}>
