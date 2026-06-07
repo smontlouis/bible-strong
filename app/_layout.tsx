@@ -283,7 +283,7 @@ function InnerApp() {
                               bottom: 0,
                             },
                             sheetAllowedDetents: [0.45, 1],
-                            sheetLargestUndimmedDetentIndex: 'last',
+                            sheetLargestUndimmedDetentIndex: 0,
                           })}
                         />
                         <Stack.Screen

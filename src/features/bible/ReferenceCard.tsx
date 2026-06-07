@@ -45,6 +45,7 @@ const ReferenceItem = ({ reference, version }: { reference: string; version: Ver
         book,
         chapter,
         verse,
+        focusVerses: [verse],
       }}
     >
       <Box marginBottom={30}>

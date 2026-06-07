@@ -2,6 +2,7 @@
 
 import { setup, styled, keyframes } from 'goober'
 import { createGlobalStyles } from 'goober/global'
+import Feather from '@expo/vector-icons/Feather'
 import React, { useEffect, useState, useRef } from 'react'
 import { Verse as TVerse } from '~common/types'
 import {
@@ -161,6 +162,8 @@ const fadeIn = keyframes`
   to { opacity: 1; }
 `
 
+const RETURN_TO_SELECTED_VERSE_BOTTOM_OFFSET = 250
+
 const Container = styled('div')<
   RootStyles & { rtl: boolean; isParallelVerse: boolean; headerHeight: number }
 >(({ settings: { alignContent, theme, colors }, rtl, isParallelVerse, headerHeight }) => ({
@@ -213,6 +216,40 @@ const IntMode = styled('div')<RootStyles>(({ settings: { theme, colors, fontFami
     opacity: 0.6,
   },
 }))
+
+const ReturnToSelectedVerseButton = styled('button')<
+  RootStyles & { $position: 'top' | 'bottom' | null }
+>(({ settings: { theme, colors, fontFamily }, $position }) => {
+  const isVisible = Boolean($position)
+
+  return {
+    position: 'fixed',
+    left: '50%',
+    top: $position === 'top' ? `${HEADER_HEIGHT + 12}px` : undefined,
+    bottom: $position === 'bottom' ? `${RETURN_TO_SELECTED_VERSE_BOTTOM_OFFSET + 16}px` : undefined,
+    transform: `translateX(-50%) scale(${isVisible ? 1 : 0.95})`,
+    opacity: isVisible ? 1 : 0,
+    pointerEvents: isVisible ? 'auto' : 'none',
+    zIndex: 40,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '44px',
+    height: '44px',
+    borderRadius: '999px',
+    border: `1px solid ${colors[theme].border}`,
+    background: colors[theme].reverse,
+    color: colors[theme].primary,
+    boxShadow: isDarkTheme(theme)
+      ? '0 8px 24px rgba(0, 0, 0, 0.45)'
+      : '0 8px 24px rgba(0, 0, 0, 0.18)',
+    fontFamily,
+    fontSize: '22px',
+    lineHeight: '22px',
+    cursor: 'pointer',
+    transition: 'opacity 180ms ease, transform 180ms ease',
+  }
+})
 
 const VersionTitle = styled('div')<RootStyles>(
   ({ settings: { fontSizeScale, fontFamily, colors, theme } }) => ({
@@ -439,6 +476,9 @@ const LoadedBibleContent = ({
 
   // State for touched verse (for visual feedback)
   const [touchedVerseKey, setTouchedVerseKey] = useState<string | null>(null)
+  const [returnToSelectedVersePosition, setReturnToSelectedVersePosition] = useState<
+    'top' | 'bottom' | null
+  >(null)
 
   // Tokens getter function with caching
   // Cache key includes text length and first char to detect content mismatch
@@ -838,6 +878,7 @@ const LoadedBibleContent = ({
   }, [dispatch, isFormSheet])
 
   const hasVerses = verses.length > 0
+  const headerHeight = isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT
   const scrollTargetVerse = getScrollTargetVerse({
     verseToScroll,
     contextDisplayMode,
@@ -845,6 +886,49 @@ const LoadedBibleContent = ({
   })
   const focusKey = focusVerses?.join(',') ?? ''
   const annotationScrollKey = contextDisplayMode === 'focused' ? annotationMode : false
+  const selectedVerseKeys = Object.keys(selectedVerses)
+  const selectedVerseKey = selectedVerseKeys[selectedVerseKeys.length - 1]
+  const selectedVerseLocation = selectedVerseKey
+    ? selectedVerseKey.split('-').map(value => Number(value))
+    : []
+  const [selectedBook, selectedChapter, selectedVerseNumber] = selectedVerseLocation
+  const canScrollToSelectedVerse =
+    selectedBook === book.Numero && selectedChapter === chapter && Boolean(selectedVerseNumber)
+  const selectedVerseElementId = canScrollToSelectedVerse
+    ? `verset-${selectedVerseNumber}`
+    : undefined
+
+  const getSelectedVerseElement = () =>
+    selectedVerseElementId ? document.getElementById(selectedVerseElementId) : null
+
+  const getReturnToSelectedVersePosition = (): 'top' | 'bottom' | null => {
+    const element = getSelectedVerseElement()
+    if (!element) return null
+
+    const rect = element.getBoundingClientRect()
+    const viewportBottom = window.innerHeight - RETURN_TO_SELECTED_VERSE_BOTTOM_OFFSET
+
+    if (rect.bottom < headerHeight) return 'top'
+    if (rect.top > viewportBottom) return 'bottom'
+    return null
+  }
+
+  const scrollSelectedVerseToMiddle = (behavior: ScrollBehavior = 'smooth') => {
+    const element = getSelectedVerseElement()
+    if (!element) return
+
+    const rect = element.getBoundingClientRect()
+    window.disableSwipeDownEvent = true
+    window.scrollTo({
+      top: window.scrollY + rect.top - window.innerHeight / 2 + rect.height / 2,
+      behavior,
+    })
+    setReturnToSelectedVersePosition(null)
+    setTimeout(() => {
+      window.disableSwipeDownEvent = false
+      setReturnToSelectedVersePosition(getReturnToSelectedVersePosition())
+    }, 450)
+  }
 
   useEffect(() => {
     if (!hasVerses) return
@@ -873,6 +957,39 @@ const LoadedBibleContent = ({
     })
   }, [scrollTargetVerse, hasVerses, annotationScrollKey, contextDisplayMode, focusKey])
 
+  useEffect(() => {
+    if (!selectedVerseElementId || !hasVerses) {
+      setReturnToSelectedVersePosition(null)
+      return
+    }
+
+    requestAnimationFrame(() => scrollSelectedVerseToMiddle('smooth'))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedVerseElementId, hasVerses])
+
+  useEffect(() => {
+    if (!selectedVerseElementId) return
+
+    let rafId: number | null = null
+    const updateVisibility = () => {
+      if (rafId) cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(() => {
+        setReturnToSelectedVersePosition(getReturnToSelectedVersePosition())
+      })
+    }
+
+    updateVisibility()
+    window.addEventListener('scroll', updateVisibility, { passive: true })
+    window.addEventListener('resize', updateVisibility)
+
+    return () => {
+      window.removeEventListener('scroll', updateVisibility)
+      window.removeEventListener('resize', updateVisibility)
+      if (rafId) cancelAnimationFrame(rafId)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedVerseElementId, headerHeight])
+
   const navigateToPericope = () => {
     dispatch({
       type: NAVIGATE_TO_PERICOPE,
@@ -894,7 +1011,6 @@ const LoadedBibleContent = ({
   const parallelVersionTitles = isParallelVerse
     ? extractParallelVersionTitles(parallelVerses, version)
     : []
-  const headerHeight = isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT
   const isContextFocused = contextDisplayMode === 'focused'
 
   return (
@@ -1029,6 +1145,19 @@ const LoadedBibleContent = ({
               redWords={redWords}
             />
           </HorizontalScrollWrapper>
+          <ReturnToSelectedVerseButton
+            type="button"
+            settings={settings}
+            $position={returnToSelectedVersePosition}
+            onClick={() => scrollSelectedVerseToMiddle()}
+            aria-label="Retourner au verset sélectionné"
+          >
+            <Feather
+              name={returnToSelectedVersePosition === 'top' ? 'chevron-up' : 'chevron-down'}
+              size={24}
+              color={settings.colors[settings.theme].primary}
+            />
+          </ReturnToSelectedVerseButton>
         </Container>
         <svg
           style={{

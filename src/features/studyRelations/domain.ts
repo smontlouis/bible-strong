@@ -2,6 +2,7 @@ import books from '~assets/bible_versions/books-desc'
 import type { Link, Note, Study } from '~redux/modules/user'
 import type { WordAnnotationsObj } from '~redux/modules/user/wordAnnotations'
 import verseToReference from '~helpers/verseToReference'
+import { getNoteTitle } from '~helpers/getNoteTitle'
 import i18n from '~i18n'
 
 export type RelationKind = 'manual' | 'system'
@@ -547,7 +548,7 @@ export const buildSystemRelationsForNotes = (
     const verseKeys = getVerseKeysForNote(noteId, wordAnnotations)
     if (verseKeys.length === 0) return relations
 
-    const noteEndpoint = createNoteEndpoint(noteId, note.title || note.description)
+    const noteEndpoint = createNoteEndpoint(noteId, getNoteTitle(note, ''))
     const verseEndpoint = createVerseEndpoint(verseKeys, verseKeys.join('/'))
     const relation = createSystemRelation({
       id: getSystemRelationId('annotates', noteId, verseEndpoint),
@@ -735,7 +736,7 @@ export const getResolvedEndpointLabel = (
     case 'note': {
       const note = data.notes?.[endpoint.noteId]
       return {
-        label: note?.title || note?.description || getEndpointFallbackLabel(endpoint),
+        label: getNoteTitle(note, getEndpointFallbackLabel(endpoint)),
         isAvailable: Boolean(note),
       }
     }

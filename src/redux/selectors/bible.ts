@@ -16,6 +16,7 @@ import { WordAnnotation } from '~redux/modules/user/wordAnnotations'
 import { Tag, CurrentTheme, TagsObj } from '~common/types'
 import { VersionCode } from '~state/tabs'
 import verseToReference from '~helpers/verseToReference'
+import { getNoteTitle } from '~helpers/getNoteTitle'
 import {
   getRelationDisplayModel,
   getEndpointFallbackLabel,
@@ -971,7 +972,7 @@ export const makeNotesForVerseSelector = () =>
         if (note) {
           items.push({
             id: noteEndpoint.noteId,
-            title: note.title,
+            title: getNoteTitle(note, ''),
             description: note.description,
             date: note.date,
             tags: note.tags,
@@ -989,7 +990,7 @@ export const makeNotesForVerseSelector = () =>
           if (note) {
             items.push({
               id: annotation.noteId,
-              title: note.title,
+              title: getNoteTitle(note, ''),
               description: note.description,
               date: note.date,
               tags: note.tags,

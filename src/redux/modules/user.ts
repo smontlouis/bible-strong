@@ -15,6 +15,7 @@ import {
 } from '~common/types'
 import { FireAuthProfile } from '~helpers/FireAuth'
 import { firebaseDb } from '~helpers/firebase'
+import { getNoteTitle } from '~helpers/getNoteTitle'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { getLanguage } from '~i18n'
 import { TabGroup, tabGroupsAtom } from '~state/tabs'
@@ -292,7 +293,7 @@ const attachNoteToVerse = (
       id: relationId,
       type: 'annotates',
       endpoints: [
-        createNoteEndpoint(noteEndpoint.noteId, note.title || note.description),
+        createNoteEndpoint(noteEndpoint.noteId, getNoteTitle(note, '')),
         normalizedVerseEndpoint,
       ],
       createdAt: existingRelation?.createdAt || note.date,
@@ -1082,7 +1083,7 @@ const userSlice = createSlice({
         if (!noteId.startsWith('annotation:')) {
           const verseKeys = getSelectedVerseKeysFromAction(action, noteId)
           if (!verseKeys.length) continue
-          const noteEndpoint = createNoteEndpoint(noteId, note.title || note.description)
+          const noteEndpoint = createNoteEndpoint(noteId, getNoteTitle(note, ''))
           groupVerseKeysByChapter(verseKeys).forEach(verseKeyGroup => {
             const verseEndpoint = createVerseEndpoint(verseKeyGroup, verseKeyGroup.join('/'))
             upsertSystemRelation(

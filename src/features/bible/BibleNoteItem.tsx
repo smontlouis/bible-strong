@@ -16,6 +16,7 @@ import Paragraph from '~common/ui/Paragraph'
 import truncate from '~helpers/truncate'
 import useLanguage from '~helpers/useLanguage'
 import { getDateLocale } from '~helpers/languageUtils'
+import { getNoteTitle } from '~helpers/getNoteTitle'
 import type { TNote } from './BibleVerseNotesScreen'
 
 const NoteLink = styled(Link)(({ theme }: { theme: Theme }) => ({
@@ -43,6 +44,7 @@ const BibleNoteItem = ({ item, onPress, onMenuPress, relationCount, onRelationPr
   })
   const relativeDate = t('Il y a {{formattedDate}}', { formattedDate })
   const metadataLabel = item.reference ? `${item.reference} - ${relativeDate}` : relativeDate
+  const noteTitle = getNoteTitle(item.notes, '')
 
   return (
     <Box>
@@ -53,12 +55,12 @@ const BibleNoteItem = ({ item, onPress, onMenuPress, relationCount, onRelationPr
               {metadataLabel}
             </Text>
           </Box>
-          {!!item.notes.title && (
+          {!!noteTitle && (
             <Text title fontSize={16}>
-              {item.notes.title}
+              {noteTitle}
             </Text>
           )}
-          {!!item.notes.description && (
+          {!!item.notes.description && item.notes.description !== noteTitle && (
             <Paragraph scale={-3} scaleLineHeight={-1}>
               {truncate(item.notes.description, 100)}
             </Paragraph>
@@ -69,7 +71,13 @@ const BibleNoteItem = ({ item, onPress, onMenuPress, relationCount, onRelationPr
             onRelationPress={onRelationPress}
           />
         </Box>
-        <Link padding onPress={() => onMenuPress(item.noteId)}>
+        <Link
+          padding
+          onPress={event => {
+            event?.stopPropagation()
+            onMenuPress(item.noteId)
+          }}
+        >
           <Icon.Feather name="more-vertical" size={20} color={theme.colors.tertiary} />
         </Link>
       </NoteLink>

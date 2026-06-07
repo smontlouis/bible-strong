@@ -2,6 +2,7 @@ import React, { PropsWithChildren } from 'react'
 import {
   Linking,
   Share,
+  GestureResponderEvent,
   StyleProp,
   TouchableOpacity,
   TouchableOpacityProps,
@@ -20,7 +21,7 @@ export interface LinkProps<R extends keyof MainStackProps> {
   share?: string
   params?: MainStackProps[R]
   replace?: boolean
-  onPress?: () => void
+  onPress?: (event?: GestureResponderEvent) => void
   padding?: boolean
   paddingSmall?: boolean
   style?: StyleProp<ViewStyle>
@@ -65,13 +66,13 @@ const Link = <R extends keyof MainStackProps>({
   const router = useRouter()
   const pushRouteOnce = usePushRouteOnce()
 
-  const handlePress = () => {
+  const handlePress = (event: GestureResponderEvent) => {
     if (route) {
       const pathname = routeMapping[route]
       const serializedParams = serializeParams(params as Record<string, unknown>)
 
       if (onPress) {
-        onPress()
+        onPress(event)
         setTimeout(() => {
           if (replace) {
             router.replace({ pathname, params: serializedParams })
@@ -98,7 +99,7 @@ const Link = <R extends keyof MainStackProps>({
     }
 
     if (onPress) {
-      onPress()
+      onPress(event)
     }
   }
 

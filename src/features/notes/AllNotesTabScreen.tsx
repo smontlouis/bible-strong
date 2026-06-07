@@ -11,6 +11,7 @@ import Container from '~common/ui/Container'
 import FlatList from '~common/ui/FlatList'
 import { useSheet } from '~helpers/useSheet'
 import verseToReference from '~helpers/verseToReference'
+import { getNoteTitle } from '~helpers/getNoteTitle'
 import { RootState } from '~redux/modules/reducer'
 import { Note } from '~redux/modules/user'
 import {
@@ -112,7 +113,7 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
   const renderNote = ({ item, index }: { item: TNote; index: number }) => {
     const endpoint: Extract<RelationEndpoint, { type: 'note' }> = createNoteEndpoint(
       item.noteId,
-      item.notes.title || item.notes.description || item.reference
+      getNoteTitle(item.notes, item.reference)
     )
 
     return (

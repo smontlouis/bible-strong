@@ -14,6 +14,7 @@ import { Tag } from '~common/types'
 import { useSheet } from '~helpers/useSheet'
 import { unifiedTagsModalAtom } from '~state/app'
 import verseToReference from '~helpers/verseToReference'
+import { getNoteTitle } from '~helpers/getNoteTitle'
 import { RootState } from '~redux/modules/reducer'
 import { Note } from '~redux/modules/user'
 import {
@@ -116,7 +117,7 @@ const BibleVerseNotes = ({
 
       resolveNewTabSelection({
         id: newTabId || 'new',
-        title: note?.notes.title || t('Notes'),
+        title: getNoteTitle(note?.notes, t('Notes')),
         isRemovable: true,
         type: 'notes',
         data: {
@@ -132,7 +133,7 @@ const BibleVerseNotes = ({
   const renderNote = ({ item }: { item: TNote }) => {
     const endpoint: Extract<RelationEndpoint, { type: 'note' }> = createNoteEndpoint(
       item.noteId,
-      item.notes.title || item.notes.description || item.reference
+      getNoteTitle(item.notes, item.reference)
     )
 
     return (

@@ -10,6 +10,7 @@ import type { NaveLetterRow } from '~helpers/loadNaveByLetter'
 import type { NaveSearchRow } from '~helpers/loadNaveBySearch'
 import i18n from '~i18n'
 import type { Link, Note, Study } from '~redux/modules/user'
+import { getNoteTitle } from '~helpers/getNoteTitle'
 import type { RelationEndpoint } from '~features/studyRelations/domain'
 import type { SearchEntityResult, SearchReferenceMode } from './searchResultTypes'
 import {
@@ -87,7 +88,7 @@ export const getDictionaryResultKey = (dictionary: DictionarySearchRow, index?: 
 
 export const getNoteSearchItems = (notes: Record<string, Note> = {}, t: Translate = translate) =>
   Object.entries(notes).map<SearchEntityResult>(([noteId, note]) => {
-    const title = note.title || note.description || t('Note sans titre')
+    const title = getNoteTitle(note, t('Note sans titre'))
     return {
       id: `note:${noteId}`,
       type: 'notes',

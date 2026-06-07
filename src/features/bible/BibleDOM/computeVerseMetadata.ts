@@ -12,6 +12,7 @@ import type {
   VerseRelationItem,
   WebViewProps,
 } from './BibleDOMWrapper'
+import { getNoteTitle } from '~helpers/getNoteTitle'
 
 export interface AnnotationNotesInfo {
   versesWithAnnotationNotes: Record<string, boolean>
@@ -78,7 +79,7 @@ const getRelationTargetLabel = (
       const note =
         data.notes?.[endpoint.noteId] ||
         Object.values(data.notes || {}).find(note => note.id === endpoint.noteId)
-      return note?.title || note?.description || getEndpointFallbackLabel(endpoint)
+      return getNoteTitle(note, getEndpointFallbackLabel(endpoint))
     }
     case 'externalLink': {
       const link =

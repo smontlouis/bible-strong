@@ -7,7 +7,7 @@ import {
   type SheetRef,
   SheetView,
 } from '~common/sheet'
-import { MenuView } from '@expo/ui/community/menu'
+import { MenuView, type MenuAction } from '@expo/ui/community/menu'
 import { type ComponentProps, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
@@ -16,7 +16,6 @@ import DictionnaryIcon from '~common/DictionnaryIcon'
 import Empty from '~common/Empty'
 import LexiqueIcon from '~common/LexiqueIcon'
 import NaveIcon from '~common/NaveIcon'
-import { ActionSheetItem } from '~common/ActionMenu'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
@@ -196,9 +195,7 @@ const StudyRelationList = ({
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const editModalRef = useRef<SheetRef>(null)
-  const actionModalRef = useRef<SheetRef>(null)
   const [editingModel, setEditingModel] = useState<RelationDisplayModel | null>(null)
-  const [actionModel, setActionModel] = useState<RelationDisplayModel | null>(null)
   const [draft, setDraft] = useState<RelationDraft>({
     label: '',
     type: 'linked',
@@ -239,24 +236,6 @@ const StudyRelationList = ({
     })
     setIsLabelExpanded(Boolean(model.relation.label))
     editModalRef.current?.present()
-  }
-
-  const openActionModal = (model: RelationDisplayModel) => {
-    setActionModel(model)
-    actionModalRef.current?.present()
-  }
-
-  const closeActionModal = () => {
-    actionModalRef.current?.dismiss()
-    setActionModel(null)
-  }
-
-  const openEditFromActionModal = () => {
-    if (!actionModel) return
-
-    const model = actionModel
-    closeActionModal()
-    setTimeout(() => openEditModal(model), 300)
   }
 
   const cycleDraftType = () => {
@@ -302,7 +281,6 @@ const StudyRelationList = ({
 
   const confirmDelete = (model = editingModel) => {
     if (!model) return
-    closeActionModal()
 
     Alert.alert(t('Supprimer la relation'), t('Voulez-vous supprimer cette relation?'), [
       { text: t('Annuler'), style: 'cancel' },
@@ -349,6 +327,23 @@ const StudyRelationList = ({
   const renderRelation = (model: RelationDisplayModel, index: number, sectionLength: number) => {
     const relationTitle = getRelationTitleParts(model, relationTitlePrefixes, t)
     const relationSubtitle = getRelationSubtitle(model)
+    const menuActions: MenuAction[] = [
+      ...(model.relation.kind !== 'system'
+        ? [
+            {
+              id: 'edit',
+              title: t('Modifier'),
+              image: 'pencil',
+            } as MenuAction,
+          ]
+        : []),
+      {
+        id: 'delete',
+        title: t('Supprimer'),
+        image: 'trash',
+        attributes: { destructive: true },
+      },
+    ]
 
     return (
       <Box key={model.relation.id}>
@@ -376,53 +371,59 @@ const StudyRelationList = ({
         )}
         {!model.isTargetAvailable ? <MissingTargetWarningIcon /> : null}
 
-        <TouchableBox
+        <Box
           flex
           row
           alignItems="center"
-          paddingVertical={10}
           ml={60}
           pl={0}
           borderBottomWidth={1}
           borderColor="border"
-          onPress={() => openRelationTarget(model)}
           opacity={!model.isTargetAvailable ? 0.5 : 1}
         >
-          <Box flex>
-            <HStack alignItems="center">
-              <Text bold numberOfLines={1} fontSize={14}>
-                {relationTitle.prefix}
-              </Text>
-              <Box mx={6}>
-                <TargetIcon type={model.targetEndpoint.type} />
-              </Box>
-              <Text bold numberOfLines={1} shrink={1} fontSize={14}>
-                {relationTitle.target}
-              </Text>
-            </HStack>
-            {relationSubtitle ? (
-              <Text fontSize={12} color="tertiary" numberOfLines={1}>
-                {relationSubtitle}
-              </Text>
-            ) : null}
-            {model.relation.label ? (
-              <Text fontSize={12} color="tertiary" numberOfLines={1}>
-                {model.relation.label}
-              </Text>
-            ) : null}
-          </Box>
           <TouchableBox
-            width={42}
-            height={42}
-            center
-            onPress={event => {
-              event.stopPropagation()
-              openActionModal(model)
+            flex
+            row
+            alignItems="center"
+            paddingVertical={10}
+            onPress={() => openRelationTarget(model)}
+          >
+            <Box flex>
+              <HStack alignItems="center">
+                <Text bold numberOfLines={1} fontSize={14}>
+                  {relationTitle.prefix}
+                </Text>
+                <Box mx={6}>
+                  <TargetIcon type={model.targetEndpoint.type} />
+                </Box>
+                <Text bold numberOfLines={1} shrink={1} fontSize={14}>
+                  {relationTitle.target}
+                </Text>
+              </HStack>
+              {relationSubtitle ? (
+                <Text fontSize={12} color="tertiary" numberOfLines={1}>
+                  {relationSubtitle}
+                </Text>
+              ) : null}
+              {model.relation.label ? (
+                <Text fontSize={12} color="tertiary" numberOfLines={1}>
+                  {model.relation.label}
+                </Text>
+              ) : null}
+            </Box>
+          </TouchableBox>
+          <MenuView
+            actions={menuActions}
+            onPressAction={({ nativeEvent }) => {
+              if (nativeEvent.event === 'edit') openEditModal(model)
+              if (nativeEvent.event === 'delete') confirmDelete(model)
             }}
           >
-            <FeatherIcon name="more-vertical" size={18} />
-          </TouchableBox>
-        </TouchableBox>
+            <Box width={42} height={42} center>
+              <FeatherIcon name="more-vertical" size={18} />
+            </Box>
+          </MenuView>
+        </Box>
       </Box>
     )
   }
@@ -597,17 +598,6 @@ const StudyRelationList = ({
             </VStack>
           </SheetView>
         ) : null}
-      </Sheet>
-      <Sheet ref={actionModalRef} onDismiss={() => setActionModel(null)}>
-        {actionModel?.relation.kind !== 'system' ? (
-          <ActionSheetItem icon="edit-3" label={t('Modifier')} onPress={openEditFromActionModal} />
-        ) : null}
-        <ActionSheetItem
-          icon="trash-2"
-          label={t('Supprimer')}
-          color="quart"
-          onPress={() => confirmDelete(actionModel)}
-        />
       </Sheet>
     </VStack>
   )

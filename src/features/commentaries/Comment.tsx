@@ -196,7 +196,14 @@ https://bible-strong.app
             </AnimatedBox>
           )}
         </Box>
-        <LinkBox width={30} center onPress={shareDefinition}>
+        <LinkBox
+          width={30}
+          center
+          onPress={event => {
+            event?.stopPropagation()
+            shareDefinition()
+          }}
+        >
           <FeatherIcon color="grey" name="share-2" size={17} />
         </LinkBox>
       </LinkBox>

@@ -34,6 +34,7 @@ import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { toast } from '~helpers/toast'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import verseToReference from '~helpers/verseToReference'
+import { getNoteTitle } from '~helpers/getNoteTitle'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { RootState } from '~redux/modules/reducer'
@@ -159,7 +160,7 @@ const NoteDetailTabScreen = ({
   }, [noteVerses, isAnnotationNote, annotation, isMissingAnnotation, t])
 
   const noteEndpoint: Extract<RelationEndpoint, { type: 'note' }> | null = noteId
-    ? createNoteEndpoint(noteId, currentNote?.title || currentNote?.description || reference)
+    ? createNoteEndpoint(noteId, getNoteTitle(currentNote, reference))
     : null
   const relationCount = useRelationCount(noteEndpoint)
 
@@ -196,14 +197,15 @@ const NoteDetailTabScreen = ({
 
   // Update tab title when note title changes
   useEffect(() => {
-    if (currentNote?.title) {
+    const currentTitle = getNoteTitle(currentNote, '')
+    if (currentTitle) {
       setNotesTab(
         produce(draft => {
-          draft.title = currentNote.title
+          draft.title = currentTitle
         })
       )
     }
-  }, [currentNote?.title, setNotesTab])
+  }, [currentNote, setNotesTab])
 
   const onSaveNote = () => {
     const noteKey = isAnnotationNote && noteId ? noteId : currentNote?.id
@@ -270,7 +272,7 @@ const NoteDetailTabScreen = ({
       const message = `
 Note pour ${reference}
 
-${currentNote.title}
+${getNoteTitle(currentNote, '')}
 
 ${currentNote.description}
       `
@@ -330,7 +332,7 @@ ${currentNote.description}
     })
   }
 
-  const submitIsDisabled = !title || !description
+  const submitIsDisabled = !description
 
   // Show message if note doesn't exist
   if (noteId && !currentNote && !isCreatingAnnotationNote) {

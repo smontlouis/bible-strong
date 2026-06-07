@@ -15,6 +15,7 @@ import formatVerseContent from '~helpers/formatVerseContent'
 import { linkTypeConfig } from '~helpers/fetchOpenGraphData'
 import { getDateLocale, type ActiveLanguage } from '~helpers/languageUtils'
 import truncate from '~helpers/truncate'
+import { getNoteTitle } from '~helpers/getNoteTitle'
 import type { TagsObj } from '~common/types'
 import { LinkType, Link as LinkModel, Note, Study } from '~redux/modules/user'
 import { GroupedWordAnnotation } from '~redux/selectors/bible'
@@ -107,6 +108,7 @@ export const NoteItem = ({
   })
   const relativeDate = t('Il y a {{formattedDate}}', { formattedDate })
   const metadataLabel = title ? `${title} - ${relativeDate}` : relativeDate
+  const noteTitle = getNoteTitle(item, '')
 
   const content = (
     <Box padding={20}>
@@ -115,12 +117,12 @@ export const NoteItem = ({
           {metadataLabel}
         </Text>
       </Box>
-      {!!item.title && (
+      {!!noteTitle && (
         <Text title fontSize={16}>
-          {item.title}
+          {noteTitle}
         </Text>
       )}
-      {!!item.description && (
+      {!!item.description && item.description !== noteTitle && (
         <Paragraph scale={-3} scaleLineHeight={-1}>
           {truncate(item.description, 100)}
         </Paragraph>
