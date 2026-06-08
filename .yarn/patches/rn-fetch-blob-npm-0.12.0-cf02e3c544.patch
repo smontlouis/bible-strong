@@ -1,0 +1,19 @@
+diff --git a/android/build.gradle b/android/build.gradle
+index a4ca7a421bff66bcc378c1092474bac6b7a82738..4ef0e418c5d70abedfd40649a5563468c7f68ea9 100644
+--- a/android/build.gradle
++++ b/android/build.gradle
+@@ -6,13 +6,12 @@ def safeExtGet(prop, fallback) {
+ 
+ repositories {
+     mavenCentral()
+-    jcenter()
+     google()
+ }
+ 
+ buildscript {
+     repositories {
+-        jcenter()
++        mavenCentral()
+         google()
+     }
+     dependencies {

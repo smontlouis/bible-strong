@@ -6942,7 +6942,6 @@ __metadata:
     react-native-edge-to-edge: "npm:^1.4.3"
     react-native-gesture-handler: "npm:~2.31.1"
     react-native-keyboard-controller: "npm:1.21.6"
-    react-native-localize: "npm:^1.4.0"
     react-native-mmkv: "npm:4.1.0"
     react-native-nitro-modules: "npm:^0.31.10"
     react-native-reanimated: "npm:4.3.1"
@@ -6969,7 +6968,7 @@ __metadata:
     redux-persist: "npm:^6.0.0"
     redux-persist-filesystem-storage: "npm:^2.1.0"
     redux-thunk: "npm:^2.3.0"
-    rn-fetch-blob: "npm:^0.12.0"
+    rn-fetch-blob: "patch:rn-fetch-blob@npm%3A0.12.0#~/.yarn/patches/rn-fetch-blob-npm-0.12.0-cf02e3c544.patch"
     serve-sim: "npm:^0.1.28"
     slugify: "npm:^1.4.0"
     sonner-native: "npm:^0.22.2"
@@ -14316,15 +14315,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-localize@npm:^1.4.0":
-  version: 1.4.3
-  resolution: "react-native-localize@npm:1.4.3"
-  peerDependencies:
-    react-native: ">=0.56.0"
-  checksum: 10c0/3a0dbf0ec33487c7821ab9b30ba2720c62e463c30722e4df79aee2edc7d247f276df78d7e6c27061355c723f832c023d357a8ed9b69e3e19a9a18cb7ed4a119b
-  languageName: node
-  linkType: hard
-
 "react-native-mmkv@npm:4.1.0":
   version: 4.1.0
   resolution: "react-native-mmkv@npm:4.1.0"
@@ -15178,13 +15168,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rn-fetch-blob@npm:^0.12.0":
+"rn-fetch-blob@npm:0.12.0":
   version: 0.12.0
   resolution: "rn-fetch-blob@npm:0.12.0"
   dependencies:
     base-64: "npm:0.1.0"
     glob: "npm:7.0.6"
   checksum: 10c0/af81bb4279c8635319124472f9d00acddf150782f2e152c61f10a389e8e043b1f96fb85b19a1eccb7f1d22041b996fee214087998793ecebf910e06af8911a24
+  languageName: node
+  linkType: hard
+
+"rn-fetch-blob@patch:rn-fetch-blob@npm%3A0.12.0#~/.yarn/patches/rn-fetch-blob-npm-0.12.0-cf02e3c544.patch":
+  version: 0.12.0
+  resolution: "rn-fetch-blob@patch:rn-fetch-blob@npm%3A0.12.0#~/.yarn/patches/rn-fetch-blob-npm-0.12.0-cf02e3c544.patch::version=0.12.0&hash=9ac8ae"
+  dependencies:
+    base-64: "npm:0.1.0"
+    glob: "npm:7.0.6"
+  checksum: 10c0/778e98a7fd79fa259b9815408a808b928bda0c1240b6e8986d465fa177abd4a57612bf1e4a78535f4ccab86adfc093305c13dc3d083d5765c4012e55300e2fc7
   languageName: node
   linkType: hard
 

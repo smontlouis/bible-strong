@@ -1,5 +1,6 @@
 import styled from '@emotion/native'
 import React, { useState } from 'react'
+import type { GestureResponderEvent } from 'react-native'
 
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -43,7 +44,9 @@ const EntityChipList = ({
     isExpanded,
   })
 
-  const handleChipPress = (item: (typeof items)[number]) => {
+  const handleChipPress = (item: (typeof items)[number], event?: GestureResponderEvent) => {
+    event?.stopPropagation()
+
     if (item.type === 'relation') {
       onRelationPress?.()
       return
@@ -59,7 +62,10 @@ const EntityChipList = ({
   return (
     <Box wrap row>
       {items.map(item => (
-        <TouchableBox key={`${item.type}-${item.id}`} onPress={() => handleChipPress(item)}>
+        <TouchableBox
+          key={`${item.type}-${item.id}`}
+          onPress={event => handleChipPress(item, event)}
+        >
           <StyledChip>
             <Box row alignItems="center">
               <FeatherIcon
@@ -75,7 +81,12 @@ const EntityChipList = ({
         </TouchableBox>
       ))}
       {hasMoreTags && (
-        <TouchableBox onPress={() => setIsExpanded(!isExpanded)}>
+        <TouchableBox
+          onPress={event => {
+            event.stopPropagation()
+            setIsExpanded(!isExpanded)
+          }}
+        >
           <Text
             fontSize={10}
             color="primary"

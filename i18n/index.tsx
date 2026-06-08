@@ -1,5 +1,4 @@
 import i18n from 'i18next'
-import * as RNLocalize from 'react-native-localize'
 import { initReactI18next } from 'react-i18next'
 import 'react-native-url-polyfill/auto'
 
@@ -21,8 +20,14 @@ const resources = {
   },
 }
 
-const fallback = { languageTag: 'fr', isRTL: false }
-const { languageTag } = RNLocalize.findBestAvailableLanguage(['en', 'fr']) || fallback
+const getDeviceLanguage = (): ActiveLanguage => {
+  const locale = Intl.DateTimeFormat().resolvedOptions().locale
+  const language = locale.split('-')[0]
+
+  return isActiveLanguage(language) ? language : DEFAULT_LANGUAGE
+}
+
+const languageTag = getDeviceLanguage()
 
 const languageDetector = {
   type: 'languageDetector' as const,
