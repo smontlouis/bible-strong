@@ -3,8 +3,8 @@ import { useEffect, useRef, useState } from 'react'
 import {
   KeyboardAvoidingView,
   KeyboardStickyView,
-  useKeyboardState,
 } from 'react-native-keyboard-controller'
+import { Platform } from 'react-native'
 import { WebViewMessageEvent } from 'react-native-webview'
 import { useTheme } from '@emotion/react'
 
@@ -53,6 +53,9 @@ const SELECTION_MODE_MAP: Record<string, StudyNavigateBibleType> = {
   SELECT_BIBLE_STRONG_BLOCK: 'strong-block',
 }
 
+const STUDY_FOOTER_HEIGHT = 50
+const STUDY_FOOTER_KEYBOARD_OFFSET = Platform.OS === 'android' ? -STUDY_FOOTER_HEIGHT : 0
+
 const encodeDeltaContent = (content: Study['content'] | undefined) =>
   encodeURIComponent(JSON.stringify(content ?? { ops: [] }))
 
@@ -69,7 +72,6 @@ export default function StudiesDomWrapper({
   const ref = useRef<StudyDOMRef>(null)
   const pushRouteOnce = usePushRouteOnce()
   const theme = useTheme()
-  const isKeyboardOpened = useKeyboardState(state => state.isVisible)
   const [activeFormats, setActiveFormats] = useState({})
   const { colorScheme } = useCurrentThemeSelector()
   const encodedContentToDisplay = encodeDeltaContent(contentToDisplay)
@@ -199,7 +201,7 @@ export default function StudiesDomWrapper({
     }
   }
 
-  const footer = isKeyboardOpened ? (
+  const footer = !isReadOnly ? (
     <StudyFooter
       navigateBibleView={navigateToSelectionMode}
       dispatchToWebView={dispatchToWebView}
@@ -216,6 +218,7 @@ export default function StudiesDomWrapper({
       isReadOnly={isReadOnly}
       colorScheme={colorScheme}
       dom={{
+        ...(Platform.OS === 'ios' ? { useExpoDOMWebView: false } : {}),
         onMessage: handleMessage,
         keyboardDisplayRequiresUserAction: false,
         bounces: false,
@@ -231,10 +234,11 @@ export default function StudiesDomWrapper({
 
   if (isFormSheet) {
     return (
-      <Box flex bg="reverse" pb={isKeyboardOpened ? 50 : 0}>
+      <Box flex bg="reverse" pb={footer ? STUDY_FOOTER_HEIGHT : 0}>
         {editor}
         {footer && (
           <KeyboardStickyView
+            offset={{ opened: STUDY_FOOTER_KEYBOARD_OFFSET }}
             style={{
               position: 'absolute',
               left: 0,
@@ -259,10 +263,23 @@ export default function StudiesDomWrapper({
         backgroundColor: theme.colors.reverse,
       }}
     >
-      <>
+      <Box flex bg="reverse" pb={footer ? STUDY_FOOTER_HEIGHT : 0}>
         {editor}
-        {footer}
-      </>
+        {footer && (
+          <KeyboardStickyView
+            offset={{ opened: STUDY_FOOTER_KEYBOARD_OFFSET }}
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              overflow: 'visible',
+            }}
+          >
+            {footer}
+          </KeyboardStickyView>
+        )}
+      </Box>
     </KeyboardAvoidingView>
   )
 }

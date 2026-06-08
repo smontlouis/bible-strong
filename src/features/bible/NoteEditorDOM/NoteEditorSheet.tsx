@@ -1,6 +1,7 @@
 import { useSheetInternal } from '~common/sheet'
 import { useTheme } from '@emotion/react'
 import { useState } from 'react'
+import { Platform } from 'react-native'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import NoteEditorDOMComponent from './NoteEditorDOMComponent'
 
@@ -73,6 +74,7 @@ export default function NoteEditorSheet({
       onFocus={handleFocus}
       onBlur={handleBlur}
       dom={{
+        ...(Platform.OS === 'ios' ? { useExpoDOMWebView: false } : {}),
         containerStyle: { height: webViewHeight, overflow: 'hidden' },
         style: { overflow: 'hidden' },
         scrollEnabled: false,

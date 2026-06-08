@@ -6,7 +6,7 @@ import { produce } from 'immer'
 import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, ScrollView, Share } from 'react-native'
+import { Alert, Platform, ScrollView, Share } from 'react-native'
 import {
   KeyboardAvoidingView,
   KeyboardStickyView,
@@ -492,6 +492,7 @@ ${currentNote.description}
               onDescriptionChange={setDescription}
               onSizeChange={handleSizeChange}
               dom={{
+                ...(Platform.OS === 'ios' ? { useExpoDOMWebView: false } : {}),
                 containerStyle: { height: webViewHeight, overflow: 'hidden' },
                 style: { overflow: 'hidden' },
                 scrollEnabled: false,
