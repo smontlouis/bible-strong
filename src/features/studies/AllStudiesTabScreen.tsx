@@ -141,28 +141,25 @@ const StudiesScreen = ({
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
       <Box flex bg="reverse">
+        <FiltersHeader
+          title={t('Études')}
+          filterLabel={selectedChip?.name}
+          hasBackButton={showBackButton}
+          hasActiveFilters={Boolean(selectedChip)}
+          onReset={() => setSelectedChip(null)}
+          filters={[
+            {
+              key: 'tags',
+              icon: 'tag',
+              label: t('Tags'),
+              value: selectedChip?.name || t('Tous'),
+              onPress: openTagsModal,
+            },
+          ]}
+        />
         {filteredStudies.length ? (
           <FlatList
             key={r(['xs', 'sm', 'md', 'lg'])}
-            stickyHeaderIndices={[0]}
-            ListHeaderComponent={
-              <FiltersHeader
-                title={t('Études')}
-                filterLabel={selectedChip?.name}
-                hasBackButton={showBackButton}
-                hasActiveFilters={Boolean(selectedChip)}
-                onReset={() => setSelectedChip(null)}
-                filters={[
-                  {
-                    key: 'tags',
-                    icon: 'tag',
-                    label: t('Tags'),
-                    value: selectedChip?.name || t('Tous'),
-                    onPress: openTagsModal,
-                  },
-                ]}
-              />
-            }
             numColumns={r([2, 2, 3, 3])}
             data={filteredStudies}
             contentContainerStyle={{ paddingBottom: 100 }}
