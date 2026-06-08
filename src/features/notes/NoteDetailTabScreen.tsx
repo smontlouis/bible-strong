@@ -492,7 +492,6 @@ ${currentNote.description}
               onDescriptionChange={setDescription}
               onSizeChange={handleSizeChange}
               dom={{
-                useExpoDOMWebView: false,
                 containerStyle: { height: webViewHeight, overflow: 'hidden' },
                 style: { overflow: 'hidden' },
                 scrollEnabled: false,

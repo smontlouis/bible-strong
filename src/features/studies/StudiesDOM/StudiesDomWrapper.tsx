@@ -216,7 +216,6 @@ export default function StudiesDomWrapper({
       isReadOnly={isReadOnly}
       colorScheme={colorScheme}
       dom={{
-        useExpoDOMWebView: false,
         onMessage: handleMessage,
         keyboardDisplayRequiresUserAction: false,
         bounces: false,
