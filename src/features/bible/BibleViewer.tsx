@@ -6,15 +6,16 @@ import Box from '~common/ui/Box'
 import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 import { BibleError } from '~helpers/bibleErrors'
-import BibleErrorView from './BibleErrorView'
 import { usePrevious } from '~helpers/usePrevious'
+import BibleErrorView from './BibleErrorView'
 import BibleHeader from './BibleHeader'
 
-import { type SheetRef } from '~common/sheet'
 import { useRouter } from 'expo-router'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
+import { PortalHost } from 'react-native-teleport'
+import { type SheetRef } from '~common/sheet'
 import type { Bookmark } from '~common/types'
 import { BibleResource, Pericope, SelectedCode, Verse } from '~common/types'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
@@ -23,13 +24,16 @@ import { useOpenNote } from '~features/notes/useOpenNote'
 import AddToStudyModal from '~features/studies/AddToStudyModal'
 import { useAddVerseToStudy } from '~features/studies/hooks/useAddVerseToStudy'
 import VerseFormatSheet from '~features/studies/VerseFormatSheet'
+import CreateEntityRelationModal from '~features/studyRelations/CreateEntityRelationModal'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { getBibleVersionCoverage } from '~helpers/biblesDb'
 import generateUUID from '~helpers/generateUUID'
 import getVersesContent from '~helpers/getVersesContent'
 import { useQuery } from '~helpers/react-query-lite'
-import { useSheet } from '~helpers/useSheet'
 import useLanguage from '~helpers/useLanguage'
+import { useSheet } from '~helpers/useSheet'
 import verseToReference from '~helpers/verseToReference'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { RootState } from '~redux/modules/reducer'
 import {
   addHighlight,
@@ -37,7 +41,6 @@ import {
   removeHighlight,
   type RelationEndpoint,
 } from '~redux/modules/user'
-import type { AppDispatch } from '~redux/store'
 import {
   CrossVersionAnnotation,
   makeHighlightsByChapterSelector,
@@ -52,27 +55,25 @@ import {
   selectNotes,
 } from '~redux/selectors/bible'
 import { makeSelectBookmarksInChapter } from '~redux/selectors/bookmarks'
-import { historyAtom, bibleDataRefreshSignalAtom } from '../../state/app'
+import type { AppDispatch } from '~redux/store'
+import { bibleDataRefreshSignalAtom, historyAtom } from '../../state/app'
 import {
+  activeBibleTabIdAtom,
   BibleTab,
   getBibleContextDisplayMode,
-  useBibleTabActions,
-  VersionCode,
   parallelColumnWidthAtom,
   parallelDisplayModeAtom,
-  activeBibleTabIdAtom,
   sharedBibleDOMPropsAtom,
+  useBibleTabActions,
+  VersionCode,
 } from '../../state/tabs'
-import { PortalHost } from 'react-native-teleport'
-import { getBibleDOMDestination } from './SharedBibleDOM'
-import SnapshotPlaceholder from './SnapshotPlaceholder'
 import AnnotationToolbar from './AnnotationToolbar'
-import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import {
   BibleDOMWrapper,
   ParallelVerse,
   type StudyRelationsModalTarget,
 } from './BibleDOM/BibleDOMWrapper'
+import BibleParamsModal from './BibleParamsModal'
 import {
   loadBibleReadingComments,
   loadBibleReadingMain,
@@ -81,6 +82,11 @@ import {
   loadBibleReadingSecondaryVerses,
   RedWordsByVerse,
 } from './bibleReadingChapter'
+import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
+import BibleFooter from './footer/BibleFooter'
+import { useAnnotationMode } from './hooks'
+import { LoadingView } from './LoadingView'
+import ResourcesModal from './resources/ResourceModal'
 import {
   getSelectedVerseKeys,
   getSelectedVersesBookmarkLocation,
@@ -91,16 +97,10 @@ import {
   hasSelectedVerses,
   selectAllChapterVerses,
 } from './selectedVersesActions'
-import BibleParamsModal from './BibleParamsModal'
-import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
-import BibleFooter from './footer/BibleFooter'
-import { useAnnotationMode } from './hooks'
-import { LoadingView } from './LoadingView'
-import ResourcesModal from './resources/ResourceModal'
 import SelectedVersesModal from './SelectedVersesModal'
+import { getBibleDOMDestination } from './SharedBibleDOM'
+import SnapshotPlaceholder from './SnapshotPlaceholder'
 import VerseTagsModal from './VerseTagsModal'
-import CreateEntityRelationModal from '~features/studyRelations/CreateEntityRelationModal'
-import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 
 const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: number) => {
   if (pericope && pericope[book] && pericope[book][chapter]) {

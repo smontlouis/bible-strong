@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
 
 import { MenuView, type MenuAction } from '@expo/ui/community/menu'
-import { type SheetRef } from '~common/sheet'
 import { useRouter } from 'expo-router'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
@@ -11,25 +10,27 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import { isFullScreenBibleAtom } from 'src/state/app'
 import {
-  parallelColumnWidthAtom,
-  parallelDisplayModeAtom,
   BibleTab,
   getBibleContextDisplayMode,
+  parallelColumnWidthAtom,
+  parallelDisplayModeAtom,
   useBibleTabActions,
 } from 'src/state/tabs'
 import Back from '~common/Back'
+import EntityChipList from '~common/EntityChipList'
 import ParallelIcon from '~common/ParallelIcon'
+import { type SheetRef } from '~common/sheet'
+import type { TagsObj } from '~common/types'
 import Box, {
   AnimatedBox,
-  AnimatedHStack,
   AnimatedTouchableBox,
+  AnimatedVStack,
   HStack,
   TouchableBox,
 } from '~common/ui/Box'
+import { FormSheetHandle } from '~common/ui/FormSheetScreen'
 import { FeatherIcon, IonIcon } from '~common/ui/Icon'
 import Text, { AnimatedText } from '~common/ui/Text'
-import EntityChipList from '~common/EntityChipList'
-import type { TagsObj } from '~common/types'
 import {
   BIBLE_FORM_SHEET_HEADER_HEIGHT,
   HEADER_HEIGHT,
@@ -329,7 +330,8 @@ const Header = ({
 
   if (annotationModeEnabled) {
     return (
-      <AnimatedHStack
+      <AnimatedVStack
+        justifyContent="center"
         width="100%"
         bg="primary"
         px={15}
@@ -345,6 +347,8 @@ const Header = ({
         exiting={FadeOut}
         key="annotation-mode-header"
       >
+        {isFormSheet && <FormSheetHandle />}
+
         <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
           {hasBackButton && (
             <Box position="absolute" left={0} top={5} zIndex={2}>
@@ -379,15 +383,16 @@ const Header = ({
             </Box>
           </AnimatedTouchableBox>
         </HStack>
-      </AnimatedHStack>
+      </AnimatedVStack>
     )
   }
 
   if (hasSelectedVerses) {
     return (
-      <AnimatedHStack
+      <AnimatedVStack
         width="100%"
         bg="reverse"
+        justifyContent="center"
         px={15}
         paddingTop={TOP_INSET}
         height={headerHeight + TOP_INSET}
@@ -401,6 +406,8 @@ const Header = ({
         exiting={FadeOut}
         key="selected-verses-header"
       >
+        {isFormSheet && <FormSheetHandle />}
+
         <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
           {hasBackButton && (
             <Back
@@ -420,12 +427,13 @@ const Header = ({
             </Text>
           </Box>
         </HStack>
-      </AnimatedHStack>
+      </AnimatedVStack>
     )
   }
 
   return (
-    <AnimatedHStack
+    <AnimatedVStack
+      justifyContent="center"
       width="100%"
       bg="reverse"
       paddingTop={TOP_INSET}
@@ -445,6 +453,8 @@ const Header = ({
       entering={FadeIn}
       exiting={FadeOut}
     >
+      {isFormSheet && <FormSheetHandle />}
+
       <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
         {hasBackButton ? (
           <Back
@@ -715,7 +725,7 @@ const Header = ({
           </TouchableBox>
         </Box>
       )}
-    </AnimatedHStack>
+    </AnimatedVStack>
   )
 }
 

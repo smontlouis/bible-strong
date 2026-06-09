@@ -1,5 +1,6 @@
 import { Stack } from 'expo-router'
 import type { ComponentProps } from 'react'
+import { Platform } from 'react-native'
 import type { Theme } from '~themes'
 
 type StackScreenOptions = Exclude<
@@ -11,6 +12,9 @@ const defaultFormSheetOptions = {
   presentation: 'formSheet',
   sheetGrabberVisible: true,
   sheetExpandsWhenScrolledToEdge: false,
+  ...(Platform.OS === 'android' && {
+    sheetCornerRadius: 24,
+  }),
 } satisfies StackScreenOptions
 
 export const createFormSheetOptions = (

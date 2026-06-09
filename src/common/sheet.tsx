@@ -211,6 +211,15 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
         footer={renderedFooter}
         header={header}
         grabber
+        {...(Platform.OS === 'android'
+          ? {
+              grabberOptions: {
+                width: 38,
+                height: 5,
+                topMargin: 5,
+              },
+            }
+          : undefined)}
         cornerRadius={cornerRadius}
         maxContentHeight={height}
         maxContentWidth={maxWidth}
