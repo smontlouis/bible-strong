@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react-native'
 import { useTheme } from '@emotion/react'
-import { MenuView, type MenuAction } from '@expo/ui/community/menu'
+import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { useRouter } from 'expo-router'
 import { produce } from 'immer'
 import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'

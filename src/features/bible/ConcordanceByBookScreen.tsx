@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { MenuView } from '@expo/ui/community/menu'
+import { MenuView } from '~common/ui/MenuView'
 import { useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 

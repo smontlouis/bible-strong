@@ -18,7 +18,7 @@ import {
   prepareTabGroupForSync,
   type FirestoreTabGroup,
 } from '../tabGroupsFirestoreSync'
-import type { TabGroup, TabItem } from '~state/tabs'
+import type { BibleTab, TabGroup, TabItem } from '~state/tabs'
 
 const makeTab = (id: string, base64Preview?: string): TabItem => ({
   id,
@@ -27,6 +27,34 @@ const makeTab = (id: string, base64Preview?: string): TabItem => ({
   type: 'new',
   data: {},
   base64Preview,
+})
+
+const makeBibleTab = (): BibleTab => ({
+  id: 'bible-1',
+  title: 'Genèse 1',
+  isRemovable: true,
+  type: 'bible',
+  data: {
+    selectedVersion: 'LSG',
+    selectedBook: { Numero: 1, Nom: 'Genèse', Chapitres: 50 },
+    selectedChapter: 1,
+    selectedVerse: 1,
+    parallelVersions: [],
+    temp: {
+      selectedBook: { Numero: 1, Nom: 'Genèse', Chapitres: 50 },
+      selectedChapter: 1,
+      selectedVerse: 1,
+    },
+    selectedVerses: {
+      '1-1-1': true,
+      '1-1-2': true,
+    },
+    selectionMode: 'grid',
+    focusVerses: [1, 2],
+    isSelectionMode: undefined,
+    contextDisplayMode: 'focused',
+    isReadOnly: false,
+  },
 })
 
 const makeGroup = (tabs: TabItem[], activeTabIndex = 0): TabGroup => ({
@@ -48,6 +76,16 @@ describe('tabGroupsFirestoreSync', () => {
     expect(synced.updatedAt).toBe(123)
     expect('activeTabIndex' in synced).toBe(false)
     expect('base64Preview' in synced.tabs[0]).toBe(false)
+  })
+
+  it('omits selected verses from Bible tabs while preserving focus verses', () => {
+    const group = makeGroup([makeBibleTab()])
+
+    const synced = prepareTabGroupForSync(group)
+    const syncedTab = synced.tabs[0] as BibleTab
+
+    expect(syncedTab.data.selectedVerses).toEqual({})
+    expect(syncedTab.data.focusVerses).toEqual([1, 2])
   })
 
   it('keeps the local active tab by tab id when hydrating reordered remote tabs', () => {

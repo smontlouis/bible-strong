@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-import { MenuView, type MenuAction } from '@expo/ui/community/menu'
+import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { useRouter } from 'expo-router'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'

@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import React, { useCallback, useEffect, useState } from 'react'
-import { MenuView, type MenuAction } from '@expo/ui/community/menu'
+import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { Share } from 'react-native'
 import { useSelector } from 'react-redux'
 

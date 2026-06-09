@@ -76,6 +76,7 @@ const TabPreview = ({ index, tabAtom, groupId, ...props }: TabPreviewProps & Box
         width={TAB_PREVIEW_WIDTH}
         height={TAB_PREVIEW_HEIGHT}
         onPress={onOpen}
+        activeOpacity={1}
         {...props}
       >
         <AnimatedBox
@@ -117,7 +118,7 @@ const TabPreview = ({ index, tabAtom, groupId, ...props }: TabPreviewProps & Box
             />
           </>
 
-          <AnimatedTouchableBox
+          <AnimatedBox
             style={textStyles}
             row
             alignItems="center"
@@ -132,7 +133,7 @@ const TabPreview = ({ index, tabAtom, groupId, ...props }: TabPreviewProps & Box
           >
             <TabIcon type={type} size={16} />
             <Title tabAtom={tabAtom} />
-          </AnimatedTouchableBox>
+          </AnimatedBox>
 
           {isRemovable && (
             <AnimatedTouchableBox

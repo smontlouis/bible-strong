@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { MenuView } from '@expo/ui/community/menu'
+import { MenuView } from '~common/ui/MenuView'
 import { shallowEqual, useSelector } from 'react-redux'
 
 import verseToReference from '~helpers/verseToReference'

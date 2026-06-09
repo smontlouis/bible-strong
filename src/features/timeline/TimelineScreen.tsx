@@ -8,6 +8,7 @@ import { useLocalSearchParams } from 'expo-router'
 import { useQuery } from '~helpers/react-query-lite'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { getEvents } from './events'
+import Box from '~common/ui/Box'
 
 const omitEvents = ({ events, ...rest }: TimelineSectionProps): ShallowTimelineSection => rest
 
@@ -62,7 +63,7 @@ const Timeline = ({
   }, [events?.length])
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#f5f6fa' }}>
+    <Box flex bg="reverse">
       <View style={{ flex: 1, position: 'relative' }}>
         {events?.map((ev, i) => {
           const prevEvent = events[i - 1] && omitEvents(events[i - 1])
@@ -87,7 +88,7 @@ const Timeline = ({
           )
         })}
       </View>
-    </View>
+    </Box>
   )
 }
 export default Timeline

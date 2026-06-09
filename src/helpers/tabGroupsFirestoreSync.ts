@@ -76,6 +76,17 @@ export function prepareTabGroupForSync(
     updatedAt: options?.updatedAt ?? group.updatedAt,
     tabs: group.tabs.map(tab => {
       const { base64Preview, ...tabWithoutPreview } = tab
+
+      if (tabWithoutPreview.type === 'bible') {
+        return {
+          ...tabWithoutPreview,
+          data: {
+            ...tabWithoutPreview.data,
+            selectedVerses: {},
+          },
+        } as FirestoreTabItem
+      }
+
       return tabWithoutPreview as FirestoreTabItem
     }),
   }

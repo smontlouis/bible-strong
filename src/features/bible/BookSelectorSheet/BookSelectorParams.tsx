@@ -1,4 +1,4 @@
-import { MenuView } from '@expo/ui/community/menu'
+import { MenuView } from '~common/ui/MenuView'
 import { useAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import Box from '~common/ui/Box'

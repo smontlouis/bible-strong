@@ -1,8 +1,13 @@
 import React, { MutableRefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { viewportWidth, wp, wpUI } from '~helpers/utils'
-import { mapRange, scrollViewHeight } from './constants'
-import { interpolate, useDerivedValue, useSharedValue } from 'react-native-reanimated'
+import { mapRange, offset, scrollViewHeight } from './constants'
+import {
+  Extrapolation,
+  interpolate,
+  useDerivedValue,
+  useSharedValue,
+} from 'react-native-reanimated'
 
 export const useTimeline = ({
   startYear,
@@ -26,24 +31,31 @@ export const useTimeline = ({
   const avJCString = t('avJC')
   const futurString = t('futur')
 
-  const year = useDerivedValue(() => {
-    const currentYearNb = Math.round(
-      interpolate(x.get() * -1, [0, scrollViewWidth], [startYear, endYear], 'extend')
-    )
-    if (currentYearNb >= yearNow) {
-      return futurString
-    } else {
-      const yearSuffix = currentYearNb >= 0 ? '' : avJCString
-      return `${Math.abs(currentYearNb)} ${yearSuffix}`
-    }
-  })
-
   const lineX = useDerivedValue(() => {
     return interpolate(
       x.get(),
       [-width, -width + wpUI(100), 0, wpUI(100)],
       [-wpUI(100), 0, 0, wpUI(100)]
     )
+  })
+
+  const year = useDerivedValue(() => {
+    const currentTimelineX = offset + lineX.get() - x.get()
+    const currentYearNb = Math.round(
+      interpolate(
+        currentTimelineX,
+        [0, scrollViewWidth],
+        [startYear, endYear],
+        Extrapolation.CLAMP
+      )
+    )
+
+    if (currentYearNb >= yearNow) {
+      return futurString
+    } else {
+      const yearSuffix = currentYearNb >= 0 ? '' : avJCString
+      return `${Math.abs(currentYearNb)} ${yearSuffix}`
+    }
   })
 
   const { current: yearRange }: MutableRefObject<[number, number]> = React.useRef([

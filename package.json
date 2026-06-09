@@ -53,6 +53,7 @@
     "@convective/react-native-reanimated-progress": "^1.0.8",
     "@emotion/native": "^11.10.0",
     "@emotion/react": "^11.10.5",
+    "@expo/material-symbols": "^0.1.1",
     "@expo/metro-runtime": "~56.0.13",
     "@expo/ui": "~56.0.15",
     "@expo/vector-icons": "^15.0.3",

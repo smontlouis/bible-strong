@@ -112,7 +112,6 @@ const CurrentYear = ({
         center
         borderTopLeftRadius={5}
         borderTopRightRadius={5}
-        paddingTop={Platform.OS === 'android' ? 8 : 0}
       >
         <AnimatedTextInput
           underlineColorAndroid="transparent"
@@ -130,7 +129,9 @@ const CurrentYear = ({
             fontWeight: 'bold',
             padding: 0,
             ...(Platform.OS === 'android' && {
-              lineHeight: 1,
+              height: 30,
+              lineHeight: 14,
+              includeFontPadding: false,
               textAlignVertical: 'center',
             }),
           }}

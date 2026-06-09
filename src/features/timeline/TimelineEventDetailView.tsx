@@ -1,5 +1,5 @@
 import React from 'react'
-import { MenuView, type MenuAction } from '@expo/ui/community/menu'
+import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { useTranslation } from 'react-i18next'
 
 import Empty from '~common/Empty'

@@ -1,5 +1,5 @@
 import styled from '@emotion/native'
-import { MenuView } from '@expo/ui/community/menu'
+import { MenuView } from '~common/ui/MenuView'
 import { to } from 'await-to-js'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'

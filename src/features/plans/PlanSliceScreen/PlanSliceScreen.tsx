@@ -1,5 +1,5 @@
 import React from 'react'
-import { MenuView } from '@expo/ui/community/menu'
+import { MenuView } from '~common/ui/MenuView'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { useTranslation } from 'react-i18next'

@@ -2444,6 +2444,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@expo/material-symbols@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "@expo/material-symbols@npm:0.1.1"
+  bin:
+    add-material-symbols: bin/add-material-symbols.mjs
+  checksum: 10c0/17f0b16637d5e1a9b0217b225cd1eb338079cdf30a5228b9fd8454b2af9344adf019e8118d1174932211fc7dc0839443248c7c443c3548ade8c2c0043973de3b
+  languageName: node
+  linkType: hard
+
 "@expo/metro-config@npm:~56.0.13":
   version: 56.0.13
   resolution: "@expo/metro-config@npm:56.0.13"
@@ -6841,6 +6850,7 @@ __metadata:
     "@dagrejs/dagre": "npm:^3.0.0"
     "@emotion/native": "npm:^11.10.0"
     "@emotion/react": "npm:^11.10.5"
+    "@expo/material-symbols": "npm:^0.1.1"
     "@expo/metro-runtime": "npm:~56.0.13"
     "@expo/ui": "npm:~56.0.15"
     "@expo/vector-icons": "npm:^15.0.3"

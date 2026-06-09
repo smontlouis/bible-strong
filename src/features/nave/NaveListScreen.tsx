@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { MenuView } from '@expo/ui/community/menu'
+import { MenuView } from '~common/ui/MenuView'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
 import * as Icon from '@expo/vector-icons'

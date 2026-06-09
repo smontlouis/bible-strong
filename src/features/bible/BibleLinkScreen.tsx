@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
-import { MenuView } from '@expo/ui/community/menu'
+import { MenuView } from '~common/ui/MenuView'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
 import React, { useEffect, useState } from 'react'

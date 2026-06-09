@@ -1,5 +1,5 @@
 import { type SheetRef } from '~common/sheet'
-import { MenuView } from '@expo/ui/community/menu'
+import { MenuView } from '~common/ui/MenuView'
 import React, { useRef, useState } from 'react'
 import { Alert } from 'react-native'
 import { useDispatch } from 'react-redux'

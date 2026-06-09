@@ -1,5 +1,5 @@
 import React from 'react'
-import { MenuView } from '@expo/ui/community/menu'
+import { MenuView } from '~common/ui/MenuView'
 
 import { type SheetRef } from '~common/sheet'
 import { useTranslation } from 'react-i18next'

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { MenuView, type MenuAction } from '@expo/ui/community/menu'
+import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { Share } from 'react-native'
 import { WebView } from 'react-native-webview'
 import { useSelector } from 'react-redux'

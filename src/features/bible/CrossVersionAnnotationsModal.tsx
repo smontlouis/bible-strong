@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { SheetHeader, type SheetRef } from '~common/sheet'
-import { MenuView, type MenuAction } from '@expo/ui/community/menu'
+import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import styled from '@emotion/native'
 import { Sheet } from '~common/sheet'
 import Box, { HStack } from '~common/ui/Box'
