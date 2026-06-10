@@ -23,7 +23,9 @@ export function renderTaggedText(result: AlignmentResult): string {
       2
     )}" data-source="${escapeHtml(assignment.source)}" data-method="${
       assignment.method
-    }">${escapeHtml(segment.text)}</w>`;
+    }" data-original="${assignment.originalConfirmed ? "true" : "false"}">${escapeHtml(
+      segment.text
+    )}</w>`;
   }
 
   return output;

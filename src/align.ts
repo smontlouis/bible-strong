@@ -17,11 +17,17 @@ export interface StrongLexicon {
   stem: Map<string, StrongLexiconEntry>;
 }
 
+export interface OriginalConstraint {
+  strongSet: Set<string>;
+  source: string;
+}
+
 export interface AssignedStrong {
   strong: string[];
   confidence: number;
   source: string;
-  method: "exact" | "stem" | "window" | "lexicon";
+  method: "exact" | "stem" | "window" | "lexicon" | "source-lexicon";
+  originalConfirmed: boolean;
 }
 
 export interface AlignmentResult {
@@ -44,7 +50,8 @@ const LOW_CONFIDENCE_THRESHOLD = 0.55;
 export function alignVerse(
   targetText: string,
   references: ReferenceSource[],
-  lexicon?: StrongLexicon
+  lexicon?: StrongLexicon,
+  original?: OriginalConstraint
 ): AlignmentResult {
   const segments = tokenizeText(targetText);
   const assignments = new Map<number, AssignedStrong>();
@@ -73,23 +80,35 @@ export function alignVerse(
     const chosen = chooseCandidate(candidates);
 
     if (chosen) {
+      const originalConfirmed = isConfirmedByOriginal(chosen.strong, original);
       assignments.set(wordIndex, {
         strong: chosen.strong,
-        confidence: chosen.score,
-        source: chosen.source,
-        method: chosen.method
+        confidence: scoreWithOriginal(chosen.score, chosen.strong, original),
+        source: sourceWithOriginal(chosen.source, chosen.strong, original),
+        method: chosen.method,
+        originalConfirmed
       });
       continue;
     }
 
-    const lexiconCandidate = findLexiconCandidate(segment.normalized, lexicon);
+    const lexiconCandidate = findLexiconCandidate(
+      segment.normalized,
+      lexicon,
+      original
+    );
 
     if (lexiconCandidate) {
       assignments.set(wordIndex, {
         strong: lexiconCandidate.strong,
         confidence: lexiconCandidate.confidence,
         source: lexiconCandidate.source,
-        method: "lexicon"
+        method: lexiconCandidate.source.includes("original")
+          ? "source-lexicon"
+          : "lexicon",
+        originalConfirmed: isConfirmedByOriginal(
+          lexiconCandidate.strong,
+          original
+        )
       });
     }
   }
@@ -171,23 +190,82 @@ function findCandidate(
 
 function findLexiconCandidate(
   normalizedWord: string,
-  lexicon?: StrongLexicon
+  lexicon?: StrongLexicon,
+  original?: OriginalConstraint
 ): StrongLexiconEntry | undefined {
   if (!lexicon) {
     return undefined;
   }
 
   const exact = lexicon.exact.get(normalizedWord);
-  if (exact) {
+  if (exact && isConfirmedByOriginal(exact.strong, original)) {
+    return {
+      ...exact,
+      confidence: Math.min(0.86, exact.confidence + 0.18),
+      source: `${exact.source}+${original?.source ?? "original"}`
+    };
+  }
+
+  if (exact && !original) {
     return exact;
   }
 
   const stem = stemWord(normalizedWord);
   if (stem.length >= 5) {
-    return lexicon.stem.get(stem);
+    const stemEntry = lexicon.stem.get(stem);
+    if (stemEntry && isConfirmedByOriginal(stemEntry.strong, original)) {
+      return {
+        ...stemEntry,
+        confidence: Math.min(0.78, stemEntry.confidence + 0.14),
+        source: `${stemEntry.source}+${original?.source ?? "original"}`
+      };
+    }
+
+    if (stemEntry && !original) {
+      return stemEntry;
+    }
   }
 
   return undefined;
+}
+
+function isConfirmedByOriginal(
+  strong: string[],
+  original?: OriginalConstraint
+): boolean {
+  if (!original) {
+    return false;
+  }
+
+  return strong.some((strongCode) => original.strongSet.has(strongCode));
+}
+
+function scoreWithOriginal(
+  score: number,
+  strong: string[],
+  original?: OriginalConstraint
+): number {
+  if (!original) {
+    return score;
+  }
+
+  if (isConfirmedByOriginal(strong, original)) {
+    return Math.min(0.995, score + 0.04);
+  }
+
+  return Math.min(score, 0.58);
+}
+
+function sourceWithOriginal(
+  source: string,
+  strong: string[],
+  original?: OriginalConstraint
+): string {
+  if (!original || !isConfirmedByOriginal(strong, original)) {
+    return source;
+  }
+
+  return `${source}+${original.source}`;
 }
 
 function chooseCandidate(candidates: Candidate[]): Candidate | undefined {

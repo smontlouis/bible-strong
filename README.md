@@ -13,6 +13,7 @@ npm install
 ```sh
 npm run dev
 npm run generate:strong -- --bible bds
+npm run generate:strong:v2 -- --bible bds
 npm run build
 npm run typecheck
 npm run lint
