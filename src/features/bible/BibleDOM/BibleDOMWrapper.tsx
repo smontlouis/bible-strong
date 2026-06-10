@@ -107,6 +107,7 @@ import {
   type BibleDOMBridgeAction,
   type StudyRelationsModalTarget,
 } from './bibleDomBridgeCommands'
+import AndroidWebViewWarningModal from '../AndroidWebViewWarningModal'
 
 export type { StudyRelationsModalTarget } from './bibleDomBridgeCommands'
 
@@ -781,16 +782,8 @@ export const BibleDOMWrapper = ({
         relationItemsText={relationMetadata.items}
         isFormSheet={isFormSheet}
       />
-      {Platform.OS === 'android' && Platform.Version < 30 && (
-        <HelpTip
-          id="bible-dom-wrapper-android"
-          description={t('tips.bible-dom-wrapper-android')}
-          type="warning"
-          position="absolute"
-          left={0}
-          right={0}
-          top={headerHeight + TOP_INSET}
-        />
+      {Platform.OS === 'android' && Number(Platform.Version) < 30 && (
+        <AndroidWebViewWarningModal top={headerHeight + TOP_INSET} />
       )}
     </Box>
   )

@@ -70,7 +70,7 @@ const BibleErrorView = ({ error }: { error: BibleError }) => {
   }
 
   return (
-    <Box flex={1} zIndex={-1}>
+    <Box flex={1}>
       <Empty source={require('~assets/images/empty.json')} message={getErrorMessage(error, t)}>
         {showActions && (
           <Box mt={20} gap={10} alignItems="center">

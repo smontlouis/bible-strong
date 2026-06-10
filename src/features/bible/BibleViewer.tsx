@@ -880,7 +880,16 @@ const BibleViewer = ({
           !error && <BibleDOMWrapper {...domProps} />
         )}
         {error && (
-          <Box position="absolute" top={0} left={0} right={0} bottom={0} bg="reverse" zIndex={10}>
+          <Box
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            bottom={0}
+            bg="reverse"
+            zIndex={10}
+            pointerEvents="auto"
+          >
             <BibleErrorView error={error} />
           </Box>
         )}

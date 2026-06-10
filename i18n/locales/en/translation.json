@@ -786,6 +786,8 @@
   "event": "Event",
   "tips.chapterSelector": "You can open a new tab by long pressing on the chapter number.",
   "tips.manual-backup": "To prevent any data loss, you can manually export your data in the Import/Export tab",
+  "tips.androidWebView.title": "Android WebView update",
+  "tips.androidWebView.understand": "I understand",
   "tips.bible-dom-wrapper-android": "You are on Android 10 or lower. If you have a white screen, please update your Android WebView in the play store.",
   "goToVerse": "Go to verse",
   "Normal": "Normal",
