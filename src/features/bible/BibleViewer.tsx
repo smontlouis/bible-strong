@@ -1,10 +1,9 @@
 import * as Sentry from '@sentry/react-native'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Alert, Platform } from 'react-native'
+import { Alert, Platform } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import Box from '~common/ui/Box'
 import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
-import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 import { BibleError } from '~helpers/bibleErrors'
 import { usePrevious } from '~helpers/usePrevious'
 import BibleHeader from './BibleHeader'
@@ -139,7 +138,6 @@ const BibleViewer = ({
   const pushRouteOnce = usePushRouteOnce()
   const openEntityRelations = useOpenEntityRelations()
   const openNote = useOpenNote()
-  const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
   const bibleDataRefreshSignal = useAtomValue(bibleDataRefreshSignalAtom)
 
   const [error, setError] = useState<BibleError | null>(null)
@@ -492,10 +490,6 @@ const BibleViewer = ({
   const parallelVersionsKey = parallelVersions.join(',')
 
   useEffect(() => {
-    // Don't load verses if onboarding is not completed
-    if (!isOnboardingCompleted) {
-      return
-    }
     loadVerses().catch(e => {
       console.log('[Bible] Error loading verses:', e)
       // Set a generic error if something unexpected happens
@@ -519,7 +513,6 @@ const BibleViewer = ({
     chapter,
     version,
     parallelVersionsKey,
-    isOnboardingCompleted,
     settings.commentsDisplay,
     bibleDataRefreshSignal,
   ])
@@ -878,16 +871,6 @@ const BibleViewer = ({
       level: 'info',
     })
   }, [useSharedDOM, isActiveBibleTab, bible.id])
-
-  // Wait for onboarding to complete before rendering Bible content
-  // This prevents FileNotFoundException when Bible files don't exist yet
-  if (!isOnboardingCompleted) {
-    return (
-      <Box flex={1} bg="reverse" center>
-        <ActivityIndicator />
-      </Box>
-    )
-  }
 
   return (
     <Box flex={1} bg="reverse">
