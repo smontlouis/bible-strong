@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react-native'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Alert } from 'react-native'
+import { ActivityIndicator, Alert, Platform } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import Box from '~common/ui/Box'
 import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
@@ -10,7 +10,6 @@ import { usePrevious } from '~helpers/usePrevious'
 import BibleErrorView from './BibleErrorView'
 import BibleHeader from './BibleHeader'
 
-import { useRouter } from 'expo-router'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
@@ -138,7 +137,6 @@ const BibleViewer = ({
   isFormSheet,
 }: BibleViewerProps) => {
   const { t } = useTranslation()
-  const router = useRouter()
   const pushRouteOnce = usePushRouteOnce()
   const openEntityRelations = useOpenEntityRelations()
   const openNote = useOpenNote()
@@ -224,6 +222,26 @@ const BibleViewer = ({
   const contextDisplayMode = getBibleContextDisplayMode(bible.data)
   const isContextFocused = contextDisplayMode === 'focused'
   const selectedVersesReference = verseToReference(selectedVerses)
+  const resetAndroidSelectionBeforeFormSheet = useCallback(() => {
+    if (Platform.OS !== 'android') {
+      return
+    }
+
+    versesModal.close()
+    actions.clearSelectedVerses()
+  }, [actions, versesModal])
+  const runAfterAndroidSelectionReset = useCallback(
+    (callback: () => void) => {
+      if (Platform.OS !== 'android') {
+        callback()
+        return
+      }
+
+      resetAndroidSelectionBeforeFormSheet()
+      setTimeout(callback, 120)
+    },
+    [resetAndroidSelectionBeforeFormSheet]
+  )
   const { data: coverageData } = useQuery({
     queryKey: ['bible-version-coverage', version],
     queryFn: () => getBibleVersionCoverage(version),
@@ -269,8 +287,11 @@ const BibleViewer = ({
   // Handler for opening annotation note modal
   const handleAnnotationNotePress = useCallback(() => {
     if (!annotationMode.selectedAnnotation) return
-    openNote({ noteId: `annotation:${annotationMode.selectedAnnotation.id}` })
-  }, [annotationMode.selectedAnnotation, openNote])
+    const noteId = `annotation:${annotationMode.selectedAnnotation.id}`
+    runAfterAndroidSelectionReset(() => {
+      openNote({ noteId })
+    })
+  }, [annotationMode.selectedAnnotation, openNote, runAfterAndroidSelectionReset])
 
   // Handler for opening annotation tags modal
   const handleAnnotationTagsPress = useCallback(() => {
@@ -529,13 +550,19 @@ const BibleViewer = ({
   }
 
   const toggleCreateNote = () => {
-    openNote({ verseKeys: getSelectedVerseKeys(selectedVerses) })
+    const verseKeys = getSelectedVerseKeys(selectedVerses)
+    runAfterAndroidSelectionReset(() => {
+      openNote({ verseKeys })
+    })
   }
 
   const toggleCreateLink = () => {
-    pushRouteOnce({
-      pathname: '/link',
-      params: getSelectedVersesLinkParams(selectedVerses),
+    const params = getSelectedVersesLinkParams(selectedVerses)
+    runAfterAndroidSelectionReset(() => {
+      pushRouteOnce({
+        pathname: '/link',
+        params,
+      })
     })
   }
 
@@ -543,7 +570,9 @@ const BibleViewer = ({
     const endpoint = getSelectedVersesRelationEndpoint(selectedVerses)
     if (!endpoint) return
     setCreateRelationSourceEndpoint(endpoint)
-    createRelationModal.open()
+    runAfterAndroidSelectionReset(() => {
+      createRelationModal.open()
+    })
   }
 
   const handleRelationCreatedFromSelection = () => {
@@ -563,15 +592,21 @@ const BibleViewer = ({
 
     if (!verseIds.length) return
 
-    openEntityRelations(createVerseEndpoint(verseIds))
+    runAfterAndroidSelectionReset(() => {
+      openEntityRelations(createVerseEndpoint(verseIds))
+    })
   }
 
   const openLink = (linkId: string) => {
-    pushRouteOnce({ pathname: '/link', params: { linkId } })
+    runAfterAndroidSelectionReset(() => {
+      pushRouteOnce({ pathname: '/link', params: { linkId } })
+    })
   }
 
   const openBibleNote = (noteId: string, verseIds?: string[]) => {
-    openNote({ noteId, verseKeys: verseIds })
+    runAfterAndroidSelectionReset(() => {
+      openNote({ noteId, verseKeys: verseIds })
+    })
   }
 
   const onChangeResourceTypeSelectVerse = (res: BibleResource, ver: string) => {
@@ -658,16 +693,18 @@ const BibleViewer = ({
     (code: SelectedCode | null) => {
       setSelectedCodeState(code)
       if (code) {
-        pushRouteOnce({
-          pathname: '/strong',
-          params: {
-            book: String(code.book),
-            reference: code.reference,
-          },
+        runAfterAndroidSelectionReset(() => {
+          pushRouteOnce({
+            pathname: '/strong',
+            params: {
+              book: String(code.book),
+              reference: code.reference,
+            },
+          })
         })
       }
     },
-    [pushRouteOnce]
+    [pushRouteOnce, runAfterAndroidSelectionReset]
   )
 
   // Cross-version annotations modal handlers
