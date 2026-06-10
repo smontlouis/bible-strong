@@ -35,18 +35,12 @@ yarn test --watchman=false
 
 ## Simulator Preview
 
-```bash
-yarn serve-sim
-```
+Use Argent to inspect and control a booted iOS Simulator or Android emulator. Common workflow:
 
-Use `serve-sim` to stream and control a booted iOS Simulator from the browser or CLI. Common commands:
-
-```bash
-yarn serve-sim --detach --quiet
-yarn serve-sim --list
-yarn serve-sim tap <x> <y>
-yarn serve-sim --kill
-```
+1. Connect to the target simulator/emulator with Argent.
+2. Inspect the screen before interacting.
+3. Use Argent interactions to tap, type, swipe, and capture screenshots.
+4. Stop Argent simulator servers when finished.
 
 ## Development Server
 
@@ -100,6 +94,6 @@ yarn build:ios:prod
 
 ## UI Validation Notes
 
-`serve-sim` is installed and has been verified against a booted iPhone 17 simulator. The existing `builds/biblestrong.dev.app` was installed and launched with bundle id `com.smontlouis.biblestrong.dev`.
+Argent is the preferred simulator tooling and should be verified against the target booted simulator before runtime validation. The existing `builds/biblestrong.dev.app` was installed and launched with bundle id `com.smontlouis.biblestrong.dev`.
 
 No root `ios/` or `android/` project is checked in, so lower-level native simulator tools cannot be assumed to work without Expo prebuild/dev-client setup.

@@ -31,7 +31,7 @@ Detected in `package.json`:
 | Start dev client Metro | `yarn start` |
 | iOS simulator/device run | `yarn ios` |
 | Android emulator/device run | `yarn android` |
-| Simulator control | `yarn serve-sim` |
+| Simulator control | Argent |
 | Unit tests | `yarn test` |
 | Lint | `yarn lint` |
 | Typecheck | `yarn typecheck` |
@@ -74,9 +74,9 @@ Selected `1C` validation path:
 
 - Local static checks: `yarn typecheck`, `yarn lint`, `yarn test`, `yarn format:check`.
 - Harness checks: `yarn agents:quality:check`, `yarn agents:architecture:check`.
-- Mobile UI validation: `serve-sim` with an Expo custom development client.
+- Mobile UI validation: Argent with an Expo custom development client.
 
-Reason for selected path: this is a UI-driven mobile app, `serve-sim` is already installed as a dev dependency, and existing smoke evidence was captured against an iOS Simulator.
+Reason for selected path: this is a UI-driven mobile app, Argent is the preferred simulator tooling, and existing smoke evidence was captured against an iOS Simulator.
 
 ### Inferred Architecture
 
@@ -217,7 +217,7 @@ Level 1 makes the repo readable, runnable, testable, and safer for one human plu
 |---|---|---|---|---|---|
 | 1A | Local commands | Commands detected in `package.json` and documented in `docs/agents/validation.md` | Agents know canonical install, run, check, and build commands | Verified locally | Done |
 | 1B | Local setup and environment | `.env.example` exists; environment files and Node 20 Expo workaround documented | Agents know required env variables, secrets boundaries, and local setup caveats | Documented for agents | Done |
-| 1C | Validation tooling | Static checks, harness checks, and `serve-sim` path documented; prior smoke validation used iOS Simulator | Agents have a practical validation path for mobile changes | Verified locally | Done |
+| 1C | Validation tooling | Static checks, harness checks, and Argent path documented; prior smoke validation used iOS Simulator | Agents have a practical validation path for mobile changes | Verified locally | Done |
 | 1D | Product smoke paths | Must-run mobile smoke paths documented; recent iOS Simulator evidence recorded | Critical ordinary flows are documented and executable | Verified locally | Done |
 | 1E | Sensitive areas | Risk policy documented for auth, sync, storage, backup, native config, release, and external services | Agents know approval boundaries | Documented for agents | Done |
 | 1F | Local observability | Sentry, ErrorBoundary, `[AgentLog]`, startup prefixes, and log query scripts documented | Agents know where to find startup/errors/debugging evidence | Verified locally | Done |

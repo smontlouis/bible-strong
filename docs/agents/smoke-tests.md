@@ -58,12 +58,12 @@ This is a UI-driven mobile app. Level 1 Ready requires app launch plus represent
 
 ## Execution Status
 
-Executed on iOS Simulator with `serve-sim`.
+Executed on iOS Simulator with Argent.
 
 Executed:
 
 - Installed `builds/biblestrong.dev.app` on the booted iPhone 17 simulator.
-- Started `serve-sim` and confirmed the simulator stream at `http://127.0.0.1:3101`.
+- Started Argent and confirmed the simulator session was available.
 - Started Metro under Node 20 on port `8081`.
 - Confirmed app launch and Bible reading surface rendered at `Jean 11` / `LSG`.
 - Confirmed Bible WebView interaction by selecting verse text and opening contextual search result flow.

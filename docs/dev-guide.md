@@ -36,16 +36,11 @@ Use `docs/agents/validation.md` for the current canonical validation matrix.
 
 ## Simulator Smoke
 
-`serve-sim` is installed as a dev dependency.
+Argent is the preferred simulator control path for agent-driven mobile validation.
 
-```bash
-yarn serve-sim --detach --quiet
-yarn serve-sim --list
-yarn serve-sim tap <x> <y>
-yarn serve-sim --kill
-```
+Use the Argent MCP tools to connect to the target simulator, inspect the screen, perform interactions, capture screenshots, and stop simulator servers when finished.
 
-The last Level 1 smoke used the existing `builds/biblestrong.dev.app` dev client on an iPhone 17 simulator, launched bundle id `com.smontlouis.biblestrong.dev`, and streamed at `http://127.0.0.1:3101`.
+The last Level 1 smoke used the existing `builds/biblestrong.dev.app` dev client on an iPhone 17 simulator and launched bundle id `com.smontlouis.biblestrong.dev`.
 
 In this environment, `yarn start` under Node 22 failed before Metro bound a port with a `freeport-async` bad-port error. The working command was:
 
@@ -104,4 +99,3 @@ Prefer aliases over long relative paths.
 Current automated test coverage is concentrated in Redux modules. UI flows are mostly validated manually through simulator smoke tests.
 
 The current lint command passes but emits ESLint flat-config warnings for `/* eslint-env */` comments in Redux test files. These warnings are known and non-blocking until ESLint v10 makes them errors.
-

@@ -190,7 +190,6 @@
     "jest-expo": "~56.0.4",
     "prettier": "^3.8.1",
     "react-test-renderer": "19.2.3",
-    "serve-sim": "^0.1.28",
     "typescript": "~6.0.3",
     "vite": "^8.0.13"
   },

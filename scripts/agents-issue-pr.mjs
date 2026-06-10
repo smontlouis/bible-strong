@@ -221,7 +221,7 @@ const extractStatus = text => {
   if (explicit) return explicit[1].toLowerCase()
   const markdown = text.match(/\b(?:status|verdict)\s*:\s*`?(passed|blocked|not-needed|pass)\b/i)
   if (markdown) return markdown[1].toLowerCase() === 'pass' ? 'passed' : markdown[1].toLowerCase()
-  if (/serve-sim result:[\s\S]*started successfully/i.test(text)) return 'passed'
+  if (/Argent result:[\s\S]*started successfully/i.test(text)) return 'passed'
   if (/mobile validation:[\s\S]*(blocked|cannot|failed|unable)/i.test(text)) return 'blocked'
   if (/not-needed|not needed|non-runtime|non-user-facing/i.test(text)) return 'not-needed'
   return 'blocked'
@@ -334,7 +334,7 @@ ${filesList}
 ## Mobile Validation
 
 - ${checkbox(mobileStatus === 'not-needed')} Not needed: non-runtime or non-user-facing change
-- ${checkbox(mobileStatus === 'passed')} Passed via \`serve-sim\` or equivalent simulator/device flow
+- ${checkbox(mobileStatus === 'passed')} Passed via Argent or equivalent simulator/device flow
 
 Smoke paths:
 

@@ -113,7 +113,7 @@ Use this orchestration shape for mobile user-facing or runtime issue work:
    - Run the smallest relevant static checks, then broaden when touching shared state, navigation, storage, startup, sync, or sensitive areas.
 3. Mobile verification loop.
    - Start the required local runtime and execute the selected smoke paths in `docs/agents/smoke-tests.md`.
-   - Use `serve-sim` or equivalent simulator/device tooling for user-facing changes.
+   - Use Argent or equivalent simulator/device tooling for user-facing changes.
    - Record screenshots, logs, or a concise evidence note before PR readiness.
 4. Fix loop.
    - If mobile smoke fails, fix on the same branch and rerun the relevant checks.

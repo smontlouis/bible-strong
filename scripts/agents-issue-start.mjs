@@ -222,7 +222,7 @@ ${
 
 Mobile runtime validation is host-only and sequential by default.
 
-If this issue changes runtime or user-facing behavior, run the required smoke paths from \`docs/agents/smoke-tests.md\` with \`serve-sim\` or equivalent simulator/device tooling before PR readiness.
+If this issue changes runtime or user-facing behavior, run the required smoke paths from \`docs/agents/smoke-tests.md\` with Argent or equivalent simulator/device tooling before PR readiness.
 
 For UI or runtime changes, produce stable evidence for the future PR step:
 
@@ -231,8 +231,8 @@ For UI or runtime changes, produce stable evidence for the future PR step:
 - prefer descriptive names such as \`after-home.png\`, \`after-settings.png\`, or \`runtime-smoke.png\`;
 - do not create duplicate screenshots just to simulate a before/after pair;
 - write a concise mobile validation report to \`${path.relative(repoRoot, mobileValidationPath)}\`;
-- include the simulator/emulator/device used, the \`serve-sim\` URL when applicable, smoke path covered, relevant app logs, and whether runtime validation is \`passed\`, \`blocked\`, or \`not-needed\`;
-- stop \`serve-sim\`, Metro, or other helper processes you started unless the operator explicitly asks to keep them running.
+- include the simulator/emulator/device used, the Argent session details when applicable, smoke path covered, relevant app logs, and whether runtime validation is \`passed\`, \`blocked\`, or \`not-needed\`;
+- stop Argent simulator servers, Metro, or other helper processes you started unless the operator explicitly asks to keep them running.
 
 ## PR Handoff Artifacts
 

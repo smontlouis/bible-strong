@@ -86,7 +86,7 @@ Use risk-based validation:
 - Docs-only: `yarn format:check` if docs are in Prettier scope; otherwise review manually.
 - TypeScript/shared logic: `yarn typecheck`.
 - Redux/helper logic: `yarn test`.
-- UI or Bible behavior: simulator smoke with `serve-sim`.
+- UI or Bible behavior: simulator smoke with Argent.
 - Sensitive flows: include before/after notes and avoid production environments.
 
 ## Naming
