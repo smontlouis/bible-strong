@@ -1,0 +1,15 @@
+.DS_Store
+node_modules/
+dist/
+coverage/
+bibles/
+strongs/
+data/bibles/
+data/strongs/
+.env
+.env.*
+!.env.example
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
