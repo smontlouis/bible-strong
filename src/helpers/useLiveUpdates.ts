@@ -6,8 +6,10 @@ import {
   addStudies,
   deleteStudy,
   type FireStoreUserData,
+  markUserDataSyncCollectionLoaded,
   receiveLiveUpdates,
   receiveSubcollectionUpdates,
+  startUserDataSync,
   type Study,
   type StudyMutation,
   updateStudy,
@@ -74,6 +76,8 @@ const useLiveUpdates = () => {
       if (!isLogged || isLoading !== false || !user.id) {
         return
       }
+
+      dispatch(startUserDataSync())
 
       // Vérifier et effectuer la migration si nécessaire
       // IMPORTANT: On vérifie les données embedded, pas juste le flag _migrated
@@ -223,6 +227,7 @@ const useLiveUpdates = () => {
           }
 
           isFirstSnapshotListener = false
+          dispatch(markUserDataSyncCollectionLoaded({ collection: 'studies' }))
         }
       )
     }

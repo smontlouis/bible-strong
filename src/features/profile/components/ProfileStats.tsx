@@ -1,7 +1,9 @@
 import styled from '@emotion/native'
+import { useTheme } from '@emotion/react'
 import * as Icon from '@expo/vector-icons'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { ActivityIndicator } from 'react-native'
 import { useSelector } from 'react-redux'
 
 import Link from '~common/Link'
@@ -12,6 +14,7 @@ import { RootState } from '~redux/modules/reducer'
 
 const ProfileStats = () => {
   const { t } = useTranslation()
+  const theme = useTheme()
   const { isLogged } = useLogin()
 
   const highlights = useSelector(
@@ -26,6 +29,9 @@ const ProfileStats = () => {
     (state: RootState) => Object.keys(state.user.bible.bookmarks || {}).length
   )
   const links = useSelector((state: RootState) => Object.keys(state.user.bible.links || {}).length)
+  const sync = useSelector((state: RootState) => state.user.sync)
+  const isSyncing = (collections: (keyof RootState['user']['sync']['loaded'])[]) =>
+    Boolean(sync?.isLoading) && collections.some(collection => !sync?.loaded?.[collection])
 
   if (!isLogged) {
     return null
@@ -34,83 +40,103 @@ const ProfileStats = () => {
   return (
     <Box bg="lightGrey" borderRadius={30} paddingVertical={20} marginHorizontal={20}>
       <VStack gap={10} paddingHorizontal={20}>
+        {sync?.isLoading && (
+          <HStack alignItems="center" gap={8}>
+            <ActivityIndicator size="small" color={theme.colors.primary} />
+            <Text fontSize={12} color="grey">
+              {t('profileStats.syncingData')}
+            </Text>
+          </HStack>
+        )}
         <HStack gap={10}>
           <StatCard route="Highlights">
-            <HStack alignItems="center" gap={8}>
-              <ChipIcon name="edit-3" size={18} />
-              <Text bold fontSize={18}>
-                {highlights}
-              </Text>
-            </HStack>
+            <StatValue
+              icon="edit-3"
+              count={highlights}
+              isLoading={isSyncing(['highlights', 'wordAnnotations'])}
+            />
             <Text fontSize={11} color="grey" numberOfLines={1}>
-              {t('surbrillance', { count: highlights })}
+              {isSyncing(['highlights', 'wordAnnotations']) && highlights === 0
+                ? t('profileStats.syncing')
+                : t('surbrillance', { count: highlights })}
             </Text>
           </StatCard>
 
           <StatCard route="Bookmarks">
-            <HStack alignItems="center" gap={8}>
-              <ChipIcon name="bookmark" size={18} />
-              <Text bold fontSize={18}>
-                {bookmarks}
-              </Text>
-            </HStack>
+            <StatValue icon="bookmark" count={bookmarks} isLoading={isSyncing(['bookmarks'])} />
             <Text fontSize={11} color="grey" numberOfLines={1}>
-              {t('marque-page', { count: bookmarks })}
+              {isSyncing(['bookmarks']) && bookmarks === 0
+                ? t('profileStats.syncing')
+                : t('marque-page', { count: bookmarks })}
             </Text>
           </StatCard>
 
           <StatCard route="BibleVerseNotes">
-            <HStack alignItems="center" gap={8}>
-              <ChipIcon name="file-text" size={18} />
-              <Text bold fontSize={18}>
-                {notes}
-              </Text>
-            </HStack>
+            <StatValue icon="file-text" count={notes} isLoading={isSyncing(['notes'])} />
             <Text fontSize={11} color="grey" numberOfLines={1}>
-              {t('note', { count: notes })}
+              {isSyncing(['notes']) && notes === 0
+                ? t('profileStats.syncing')
+                : t('note', { count: notes })}
             </Text>
           </StatCard>
         </HStack>
 
         <HStack gap={10}>
           <StatCard route="Studies">
-            <HStack alignItems="center" gap={8}>
-              <ChipIcon name="feather" size={18} />
-              <Text bold fontSize={18}>
-                {studies}
-              </Text>
-            </HStack>
+            <StatValue icon="feather" count={studies} isLoading={isSyncing(['studies'])} />
             <Text fontSize={11} color="grey" numberOfLines={1}>
-              {t('étude', { count: studies })}
+              {isSyncing(['studies']) && studies === 0
+                ? t('profileStats.syncing')
+                : t('étude', { count: studies })}
             </Text>
           </StatCard>
 
           <StatCard route="BibleVerseLinks">
-            <HStack alignItems="center" gap={8}>
-              <ChipIcon name="link" size={18} />
-              <Text bold fontSize={18}>
-                {links}
-              </Text>
-            </HStack>
+            <StatValue icon="link" count={links} isLoading={isSyncing(['links'])} />
             <Text fontSize={11} color="grey" numberOfLines={1}>
-              {t('lien', { count: links })}
+              {isSyncing(['links']) && links === 0
+                ? t('profileStats.syncing')
+                : t('lien', { count: links })}
             </Text>
           </StatCard>
 
           <StatCard route="Tags">
-            <HStack alignItems="center" gap={8}>
-              <ChipIcon name="tag" size={18} />
-              <Text bold fontSize={18}>
-                {tags}
-              </Text>
-            </HStack>
+            <StatValue icon="tag" count={tags} isLoading={isSyncing(['tags'])} />
             <Text fontSize={11} color="grey" numberOfLines={1}>
-              {t('étiquette', { count: tags })}
+              {isSyncing(['tags']) && tags === 0
+                ? t('profileStats.syncing')
+                : t('étiquette', { count: tags })}
             </Text>
           </StatCard>
         </HStack>
       </VStack>
     </Box>
+  )
+}
+
+const StatValue = ({
+  icon,
+  count,
+  isLoading,
+}: {
+  icon: React.ComponentProps<typeof Icon.Feather>['name']
+  count: number
+  isLoading: boolean
+}) => {
+  const theme = useTheme()
+  const showLoader = isLoading && count === 0
+
+  return (
+    <HStack alignItems="center" gap={8}>
+      <ChipIcon name={icon} size={18} />
+      {showLoader ? (
+        <ActivityIndicator size="small" color={theme.colors.primary} />
+      ) : (
+        <Text bold fontSize={18}>
+          {count}
+        </Text>
+      )}
+    </HStack>
   )
 }
 

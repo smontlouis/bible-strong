@@ -130,9 +130,53 @@ type SubcollectionUpdateChanges = {
   modified: Record<string, unknown>
   removed: string[]
 }
+type UserDataSyncCollection =
+  | 'bookmarks'
+  | 'highlights'
+  | 'notes'
+  | 'links'
+  | 'tags'
+  | 'wordAnnotations'
+  | 'studies'
+
+type UserDataSyncState = {
+  isLoading: boolean
+  loaded: Record<UserDataSyncCollection, boolean>
+  startedAt?: number
+  completedAt?: number
+}
 
 const isObjectRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
+
+const getInitialUserDataSyncState = (): UserDataSyncState => ({
+  isLoading: false,
+  loaded: {
+    bookmarks: false,
+    highlights: false,
+    notes: false,
+    links: false,
+    tags: false,
+    wordAnnotations: false,
+    studies: false,
+  },
+})
+
+const markSyncCollectionLoaded = (sync: UserDataSyncState, collection: UserDataSyncCollection) => {
+  sync.loaded[collection] = true
+
+  if (Object.values(sync.loaded).every(Boolean)) {
+    sync.isLoading = false
+    sync.completedAt = Date.now()
+  }
+}
+
+const ensureUserDataSyncState = (state: UserState): UserDataSyncState => {
+  if (!state.sync) {
+    state.sync = getInitialUserDataSyncState()
+  }
+  return state.sync
+}
 
 // Re-export everything from sub-modules for backward compatibility
 export * from './user/bookmarks'
@@ -419,6 +463,7 @@ export interface UserState {
   emailVerified: boolean
   createdAt: string | null
   isLoading: boolean
+  sync: UserDataSyncState
   notifications: {
     verseOfTheDay: string
     notificationId: string
@@ -516,6 +561,7 @@ const getInitialState = (): UserState => ({
   emailVerified: false,
   createdAt: null,
   isLoading: true,
+  sync: getInitialUserDataSyncState(),
   notifications: {
     verseOfTheDay: '07:00',
     notificationId: '',
@@ -688,6 +734,19 @@ const userSlice = createSlice({
       state.bible.changelog = currentChangelog
       state.bible.wordAnnotations = currentWordAnnotations
     },
+    startUserDataSync(state) {
+      state.sync = {
+        ...getInitialUserDataSyncState(),
+        isLoading: true,
+        startedAt: Date.now(),
+      }
+    },
+    markUserDataSyncCollectionLoaded(
+      state,
+      action: PayloadAction<{ collection: UserDataSyncCollection }>
+    ) {
+      markSyncCollectionLoaded(ensureUserDataSyncState(state), action.payload.collection)
+    },
     receiveSubcollectionUpdates(
       state,
       action: PayloadAction<{
@@ -811,6 +870,17 @@ const userSlice = createSlice({
             changes
           ) as WordAnnotationsObj
           break
+      }
+
+      if (
+        collection === 'bookmarks' ||
+        collection === 'highlights' ||
+        collection === 'notes' ||
+        collection === 'links' ||
+        collection === 'tags' ||
+        collection === 'wordAnnotations'
+      ) {
+        markSyncCollectionLoaded(ensureUserDataSyncState(state), collection)
       }
     },
     importData(state, action: PayloadAction<ImportDataPayload>) {
@@ -1335,6 +1405,8 @@ export const {
   onUserLogout,
   onUserUpdateProfile,
   receiveLiveUpdates,
+  startUserDataSync,
+  markUserDataSyncCollectionLoaded,
   receiveSubcollectionUpdates,
   importData,
   setNotificationVOD,

@@ -789,6 +789,8 @@
   "tips.androidWebView.title": "Android WebView update",
   "tips.androidWebView.understand": "I understand",
   "tips.bible-dom-wrapper-android": "You are on Android 10 or lower. If you have a white screen, please update your Android WebView in the play store.",
+  "profileStats.syncingData": "Syncing your data...",
+  "profileStats.syncing": "Syncing...",
   "goToVerse": "Go to verse",
   "Normal": "Normal",
   "Petit": "Small",
