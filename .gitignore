@@ -2,10 +2,15 @@
 node_modules/
 dist/
 coverage/
+artifacts/
+cache/
+output/
+outputs/
 bibles/
 strongs/
 data/bibles/
 data/strongs/
+data/external/
 .env
 .env.*
 !.env.example

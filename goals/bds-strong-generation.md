@@ -45,6 +45,24 @@ Prefer a robust working pipeline over a perfect but unfinished research implemen
 - Keep the pipeline runnable through an npm script.
 - Report errors and low-confidence verses instead of failing the entire run.
 
+## External Research And Downloads
+
+You are allowed to use the internet to inspect documentation, repositories, datasets, papers, and implementation examples related to this goal.
+
+You are allowed to download open datasets, source files, and tooling needed for the pipeline, including but not limited to resources mentioned in `data/discovery.md`:
+
+- Clear.Bible datasets and alignment tools.
+- Macula Greek / Macula Hebrew.
+- SIL NLP / machine.py resources.
+- Open Bible alignment corpora.
+- Tokenizer, alignment, and NLP libraries.
+
+Before relying on downloaded data, verify license compatibility and document the source URL, license, and exact local path used.
+
+Do not commit large downloaded datasets unless they are small, clearly licensed for redistribution, and useful as test fixtures. Prefer storing downloaded or generated corpora under ignored local directories such as `artifacts/`, `cache/`, `output/`, `outputs/`, or `data/external/`.
+
+If a required dataset is too large, slow, unavailable, or legally unsuitable, document that as a stop condition or choose a smaller validated sample.
+
 ## Expected Work Plan
 
 1. Inspect the exact formats of the Bible JSON files and Strong CSV files.
@@ -126,4 +144,3 @@ When stopping early, provide:
 - estimated cost or compute needed to finish,
 - exact commands to resume,
 - next recommended approach.
-
