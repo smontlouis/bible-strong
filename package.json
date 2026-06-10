@@ -6,8 +6,10 @@
   "description": "Tools for building Bible lexicon data from Bible and Strong source files.",
   "scripts": {
     "dev": "tsx src/index.ts",
+    "generate:strong": "tsx src/generateStrong.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
+    "test": "node --import tsx --test tests/**/*.test.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",

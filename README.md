@@ -12,9 +12,11 @@ npm install
 
 ```sh
 npm run dev
+npm run generate:strong -- --bible bds
 npm run build
 npm run typecheck
 npm run lint
+npm test
 npm run format
 ```
 
@@ -22,3 +24,5 @@ npm run format
 
 - `data/bibles/`: Bible translations in JSON format.
 - `data/strongs/`: Strong source files in CSV format.
+
+Generated Bible outputs are written to `outputs/` by default. This directory is ignored by Git because generated Strong-tagged BDS text is a local artifact.
