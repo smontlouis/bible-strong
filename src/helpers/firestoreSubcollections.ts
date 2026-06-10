@@ -431,6 +431,7 @@ export type SubcollectionChangeCallback = (
     removed: string[]
   }
 ) => void
+export type SubcollectionErrorCallback = (error: Error) => void
 
 /**
  * S'abonne aux changements d'une sous-collection
@@ -439,7 +440,8 @@ export type SubcollectionChangeCallback = (
 export function subscribeToSubcollection(
   userId: string,
   collectionName: SubcollectionName,
-  onChange: SubcollectionChangeCallback
+  onChange: SubcollectionChangeCallback,
+  onError?: SubcollectionErrorCallback
 ): () => void {
   let currentUnsubscribe: (() => void) | null = null
   let isDisposed = false
@@ -530,6 +532,7 @@ export function subscribeToSubcollection(
           tags: { feature: 'subcollections', action: 'subscribe', collection: collectionName },
           extra: { userId },
         })
+        onError?.(error as Error)
       }
     )
 

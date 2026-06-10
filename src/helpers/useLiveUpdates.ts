@@ -5,6 +5,7 @@ import type { RootState } from '~redux/modules/reducer'
 import {
   addStudies,
   deleteStudy,
+  finishUserDataSync,
   type FireStoreUserData,
   markUserDataSyncCollectionLoaded,
   receiveLiveUpdates,
@@ -12,6 +13,7 @@ import {
   startUserDataSync,
   type Study,
   type StudyMutation,
+  type UserDataSyncCollection,
   updateStudy,
 } from '~redux/modules/user'
 import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
@@ -31,6 +33,20 @@ let isFirstSnapshotListener = true
 let currentUnsubscribeUsers: (() => void) | undefined
 let currentUnsubscribeStudies: (() => void) | undefined
 let currentSubcollectionUnsubscribes: (() => void)[] = []
+
+const SYNC_FALLBACK_TIMEOUT_MS = 15000
+const TRACKED_SYNC_COLLECTIONS: UserDataSyncCollection[] = [
+  'bookmarks',
+  'highlights',
+  'notes',
+  'links',
+  'tags',
+  'wordAnnotations',
+  'studies',
+]
+
+const isTrackedSyncCollection = (collection: string): collection is UserDataSyncCollection =>
+  TRACKED_SYNC_COLLECTIONS.includes(collection as UserDataSyncCollection)
 
 /**
  * Cleanup all Firestore subscriptions.
@@ -71,6 +87,7 @@ const useLiveUpdates = () => {
     currentUnsubscribeUsers = undefined
     currentUnsubscribeStudies = undefined
     currentSubcollectionUnsubscribes = []
+    let syncFallbackTimeout: ReturnType<typeof setTimeout> | undefined
 
     const setupListeners = async () => {
       if (!isLogged || isLoading !== false || !user.id) {
@@ -78,6 +95,15 @@ const useLiveUpdates = () => {
       }
 
       dispatch(startUserDataSync())
+      syncFallbackTimeout = setTimeout(() => {
+        const sync = store.getState().user.sync
+        if (!sync?.isLoading) {
+          return
+        }
+
+        console.warn('[LiveUpdates] User data sync timed out, keeping local data visible')
+        dispatch(finishUserDataSync())
+      }, SYNC_FALLBACK_TIMEOUT_MS)
 
       // Vérifier et effectuer la migration si nécessaire
       // IMPORTANT: On vérifie les données embedded, pas juste le flag _migrated
@@ -157,27 +183,37 @@ const useLiveUpdates = () => {
 
       // Subscribe to each subcollection
       for (const collection of USER_DATA_SUBCOLLECTION_NAMES) {
-        const unsubscribe = subscribeToSubcollection(user.id, collection, (data, changes) => {
-          // Skip updates while migration is in progress to prevent race conditions
-          // Migration writes in chunks, and between chunks the listener could fire
-          // with incomplete/stale data, overwriting the correctly-imported Redux state
-          if (isMigrationInProgress()) {
-            console.log(`[LiveUpdates] Skipping ${collection} update - migration in progress`)
-            return
+        const unsubscribe = subscribeToSubcollection(
+          user.id,
+          collection,
+          (data, changes) => {
+            // Skip updates while migration is in progress to prevent race conditions
+            // Migration writes in chunks, and between chunks the listener could fire
+            // with incomplete/stale data, overwriting the correctly-imported Redux state
+            if (isMigrationInProgress()) {
+              console.log(`[LiveUpdates] Skipping ${collection} update - migration in progress`)
+              return
+            }
+
+            console.log(`[LiveUpdates] ${collection} updated:`, Object.keys(data).length, 'items')
+
+            // Dispatch l'update pour cette collection spécifique
+            dispatch(
+              receiveSubcollectionUpdates({
+                collection,
+                data,
+                changes,
+                isInitialLoad: Object.keys(changes.added).length === Object.keys(data).length,
+              })
+            )
+          },
+          error => {
+            console.warn(`[LiveUpdates] ${collection} sync unavailable, using local data`, error)
+            if (isTrackedSyncCollection(collection)) {
+              dispatch(markUserDataSyncCollectionLoaded({ collection }))
+            }
           }
-
-          console.log(`[LiveUpdates] ${collection} updated:`, Object.keys(data).length, 'items')
-
-          // Dispatch l'update pour cette collection spécifique
-          dispatch(
-            receiveSubcollectionUpdates({
-              collection,
-              data,
-              changes,
-              isInitialLoad: Object.keys(changes.added).length === Object.keys(data).length,
-            })
-          )
-        })
+        )
         currentSubcollectionUnsubscribes.push(unsubscribe)
       }
 
@@ -228,6 +264,19 @@ const useLiveUpdates = () => {
 
           isFirstSnapshotListener = false
           dispatch(markUserDataSyncCollectionLoaded({ collection: 'studies' }))
+        },
+        error => {
+          console.warn('[LiveUpdates] Studies sync unavailable, using local data', error)
+          Sentry.captureException(error, {
+            tags: {
+              feature: 'firestore_live_updates',
+              action: 'subscribe_studies',
+            },
+            extra: {
+              userId: user.id,
+            },
+          })
+          dispatch(markUserDataSyncCollectionLoaded({ collection: 'studies' }))
         }
       )
     }
@@ -240,6 +289,9 @@ const useLiveUpdates = () => {
     }
 
     return () => {
+      if (syncFallbackTimeout) {
+        clearTimeout(syncFallbackTimeout)
+      }
       // Cleanup on unmount
       cleanupFirestoreSubscriptions()
     }

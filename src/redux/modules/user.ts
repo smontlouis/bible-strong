@@ -130,7 +130,7 @@ type SubcollectionUpdateChanges = {
   modified: Record<string, unknown>
   removed: string[]
 }
-type UserDataSyncCollection =
+export type UserDataSyncCollection =
   | 'bookmarks'
   | 'highlights'
   | 'notes'
@@ -740,6 +740,18 @@ const userSlice = createSlice({
         isLoading: true,
         startedAt: Date.now(),
       }
+    },
+    finishUserDataSync(state) {
+      const sync = ensureUserDataSyncState(state)
+      if (!sync.isLoading) {
+        return
+      }
+
+      Object.keys(sync.loaded).forEach(collection => {
+        sync.loaded[collection as UserDataSyncCollection] = true
+      })
+      sync.isLoading = false
+      sync.completedAt = Date.now()
     },
     markUserDataSyncCollectionLoaded(
       state,
@@ -1406,6 +1418,7 @@ export const {
   onUserUpdateProfile,
   receiveLiveUpdates,
   startUserDataSync,
+  finishUserDataSync,
   markUserDataSyncCollectionLoaded,
   receiveSubcollectionUpdates,
   importData,
