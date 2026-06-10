@@ -7,6 +7,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { Verse as TVerse } from '~common/types'
 import {
   Dispatch,
+  BibleDOMDownloadState,
   ParallelVerse,
   RootStyles,
   TaggedVerse,
@@ -17,6 +18,7 @@ import ChevronDownIcon from './ChevronDownIcon'
 import Comment from './Comment'
 import {
   ENTER_ANNOTATION_MODE,
+  DOWNLOAD_BIBLE_VERSION,
   NAVIGATE_TO_PERICOPE,
   NAVIGATE_TO_VERSION,
   SWIPE_LEFT,
@@ -26,7 +28,10 @@ import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   TOGGLE_INT_COMPLETE,
   TOGGLE_SELECTED_VERSE,
+  OPEN_DOWNLOADS,
+  RESET_BIBLE_DATABASE,
 } from './dispatch'
+import { BibleError } from '~helpers/bibleErrors'
 import { DispatchProvider } from './DispatchProvider'
 import { TranslationsProvider, BibleDOMTranslations } from './TranslationsContext'
 import { scaleFontSize } from './scaleFontSize'
@@ -80,6 +85,8 @@ const forwardProps = [
   'columnWidth',
   'rtl',
   'headerHeight',
+  '$secondary',
+  '$progress',
 ]
 setup(React.createElement, undefined, undefined, (props: object) => {
   const forwardedProps = props as Record<string, unknown>
@@ -146,6 +153,9 @@ type Props = Pick<
   // Safe area inset from native side (CSS env vars don't work in Expo DOM WebView)
   safeAreaTop?: number
   isFormSheet?: boolean
+  error?: BibleError | null
+  errorDownloadState?: BibleDOMDownloadState
+  isResettingDatabase?: boolean
 }
 
 const extractParallelVersionTitles = (parallelVerses: ParallelVerse[], currentVersion: string) => {
@@ -250,6 +260,87 @@ const ReturnToSelectedVerseButton = styled('button')<
     transition: 'opacity 180ms ease, transform 180ms ease',
   }
 })
+
+const ErrorContainer = styled('div')<RootStyles & { headerHeight: number }>(
+  ({ settings: { theme, colors, fontFamily }, headerHeight }) => ({
+    position: 'fixed',
+    inset: 0,
+    height: '100vh',
+    width: '100vw',
+    boxSizing: 'border-box',
+    overflow: 'hidden',
+    padding: `${headerHeight + 200}px 24px 24px`,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    background: colors[theme].reverse,
+    color: colors[theme].default,
+    fontFamily,
+    textAlign: 'center',
+  })
+)
+
+const ErrorContent = styled('div')({
+  width: 'calc(100vw - 48px)',
+  maxWidth: '360px',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '16px',
+})
+
+const ErrorIcon = styled('div')<RootStyles>(({ settings: { theme, colors } }) => ({
+  width: '56px',
+  height: '56px',
+  borderRadius: '999px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  background: colors[theme].lightGrey,
+  color: colors[theme].primary,
+}))
+
+const ErrorMessage = styled('p')<RootStyles>(
+  ({ settings: { fontSizeScale, fontFamily, colors, theme } }) => ({
+    margin: 0,
+    fontFamily,
+    fontSize: scaleFontSize(16, fontSizeScale),
+    lineHeight: 1.35,
+    color: colors[theme].default,
+  })
+)
+
+const ErrorButton = styled('button')<RootStyles & { $secondary?: boolean }>(
+  ({ settings: { theme, colors, fontFamily }, $secondary }) => ({
+    minHeight: '44px',
+    padding: '0 18px',
+    borderRadius: '8px',
+    border: `1px solid ${$secondary ? colors[theme].border : colors[theme].primary}`,
+    background: $secondary ? colors[theme].reverse : colors[theme].primary,
+    color: $secondary ? colors[theme].default : colors[theme].reverse,
+    fontFamily,
+    fontWeight: 700,
+    fontSize: '15px',
+    cursor: 'pointer',
+  })
+)
+
+const ProgressTrack = styled('div')<RootStyles>(({ settings: { theme, colors } }) => ({
+  width: '180px',
+  height: '6px',
+  borderRadius: '999px',
+  overflow: 'hidden',
+  background: colors[theme].lightGrey,
+}))
+
+const ProgressBar = styled('div')<RootStyles & { $progress: number }>(
+  ({ settings: { theme, colors }, $progress }) => ({
+    width: `${Math.max(0, Math.min(1, $progress)) * 100}%`,
+    height: '100%',
+    background: colors[theme].primary,
+    transition: 'width 180ms ease',
+  })
+)
 
 const VersionTitle = styled('div')<RootStyles>(
   ({ settings: { fontSizeScale, fontFamily, colors, theme } }) => ({
@@ -1191,6 +1282,104 @@ const LoadedBibleContent = ({
 // MAIN VERSES RENDERER (lightweight shell)
 // ============================================================================
 
+const getErrorMessage = (error: BibleError, translations: BibleDOMTranslations) => {
+  switch (error.type) {
+    case 'BIBLE_NOT_FOUND':
+      return translations.versionNotFound
+    case 'CHAPTER_NOT_FOUND':
+      return translations.chapterNotFound
+    case 'DATABASE_CORRUPTED':
+      return translations.databaseCorrupted
+    default:
+      return translations.unknownError
+  }
+}
+
+const BibleDOMErrorContent = ({
+  settings,
+  dispatch,
+  translations,
+  error,
+  errorDownloadState,
+  isResettingDatabase,
+  headerHeight,
+}: Pick<Props, 'settings' | 'dispatch' | 'translations' | 'error' | 'errorDownloadState'> & {
+  error: BibleError
+  isResettingDatabase?: boolean
+  headerHeight: number
+}) => {
+  const isDownloading =
+    errorDownloadState?.status === 'queued' ||
+    errorDownloadState?.status === 'downloading' ||
+    errorDownloadState?.status === 'inserting'
+  const progressLabel =
+    errorDownloadState?.status === 'inserting' ? translations.inserting : translations.downloading
+
+  return (
+    <TranslationsProvider translations={translations}>
+      <GlobalStyles />
+      <DispatchProvider dispatch={dispatch}>
+        <ErrorContainer settings={settings} headerHeight={headerHeight}>
+          <ErrorContent>
+            <ErrorIcon settings={settings}>
+              <Feather
+                name="download-cloud"
+                size={26}
+                color={settings.colors[settings.theme].primary}
+              />
+            </ErrorIcon>
+            <ErrorMessage settings={settings}>{getErrorMessage(error, translations)}</ErrorMessage>
+            {error.type === 'BIBLE_NOT_FOUND' &&
+              (isDownloading ? (
+                <>
+                  <ProgressTrack settings={settings}>
+                    <ProgressBar
+                      settings={settings}
+                      $progress={errorDownloadState?.progress ?? 0}
+                    />
+                  </ProgressTrack>
+                  <ErrorMessage settings={settings}>{progressLabel}</ErrorMessage>
+                </>
+              ) : (
+                <ErrorButton
+                  settings={settings}
+                  type="button"
+                  onClick={() =>
+                    dispatch({ type: DOWNLOAD_BIBLE_VERSION, payload: error.version }).catch(
+                      console.error
+                    )
+                  }
+                >
+                  {translations.downloadVersion}
+                </ErrorButton>
+              ))}
+            {error.type === 'DATABASE_CORRUPTED' && (
+              <>
+                <ErrorButton
+                  settings={settings}
+                  type="button"
+                  onClick={() => dispatch({ type: OPEN_DOWNLOADS }).catch(console.error)}
+                >
+                  {translations.goToDownloads}
+                </ErrorButton>
+                <ErrorButton
+                  settings={settings}
+                  $secondary
+                  type="button"
+                  disabled={isResettingDatabase}
+                  onClick={() => dispatch({ type: RESET_BIBLE_DATABASE }).catch(console.error)}
+                >
+                  {translations.resetDatabase}
+                </ErrorButton>
+              </>
+            )}
+          </ErrorContent>
+        </ErrorContainer>
+      </DispatchProvider>
+    </TranslationsProvider>
+  )
+}
+
 const VersesRenderer = ({ settings, dispatch, translations, verses, ...rest }: Props) => {
   useFonts({
     'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
@@ -1219,6 +1408,20 @@ const VersesRenderer = ({ settings, dispatch, translations, verses, ...rest }: P
       document.body.style.backgroundColor = reverseColor
     }
   }, [settings.colors, settings?.theme])
+
+  if (rest.error) {
+    return (
+      <BibleDOMErrorContent
+        settings={settings}
+        dispatch={dispatch}
+        translations={translations}
+        error={rest.error}
+        errorDownloadState={rest.errorDownloadState}
+        isResettingDatabase={rest.isResettingDatabase}
+        headerHeight={headerHeight}
+      />
+    )
+  }
 
   if (!verses.length) {
     return (

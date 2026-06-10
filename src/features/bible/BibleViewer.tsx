@@ -7,7 +7,6 @@ import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 import { BibleError } from '~helpers/bibleErrors'
 import { usePrevious } from '~helpers/usePrevious'
-import BibleErrorView from './BibleErrorView'
 import BibleHeader from './BibleHeader'
 
 import { useAtomValue, useSetAtom } from 'jotai/react'
@@ -831,6 +830,7 @@ const BibleViewer = ({
     // Red words
     redWords: settings.redWordsDisplay ? redWords : null,
     isFormSheet,
+    error,
   } satisfies Parameters<typeof BibleDOMWrapper>[0]
 
   // Push props to shared atom when this is the active Bible tab.
@@ -914,21 +914,7 @@ const BibleViewer = ({
           </Box>
         ) : (
           // Stack navigation mode: render own BibleDOMWrapper inline
-          !error && <BibleDOMWrapper {...domProps} />
-        )}
-        {error && (
-          <Box
-            position="absolute"
-            top={0}
-            left={0}
-            right={0}
-            bottom={0}
-            bg="reverse"
-            zIndex={10}
-            pointerEvents="auto"
-          >
-            <BibleErrorView error={error} />
-          </Box>
+          <BibleDOMWrapper {...domProps} />
         )}
       </Box>
       {!isFormSheet && !isContextFocused && (

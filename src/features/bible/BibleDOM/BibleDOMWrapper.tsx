@@ -68,6 +68,7 @@ import {
   CREATE_ANNOTATION,
   ENTER_ANNOTATION_MODE,
   COLLAPSE_CONTEXT,
+  DOWNLOAD_BIBLE_VERSION,
   ERASE_SELECTION,
   EXPAND_CONTEXT,
   NAVIGATE_TO_BIBLE_LINK,
@@ -85,7 +86,9 @@ import {
   OPEN_CROSS_VERSION_MODAL,
   OPEN_HIGHLIGHT_TAGS,
   OPEN_VERSE_TAGS_MODAL,
+  OPEN_DOWNLOADS,
   REMOVE_PARALLEL_VERSION,
+  RESET_BIBLE_DATABASE,
   SELECTION_CHANGED,
   SHOW_TOAST,
   SWIPE_DOWN,
@@ -108,6 +111,10 @@ import {
   type StudyRelationsModalTarget,
 } from './bibleDomBridgeCommands'
 import AndroidWebViewWarningModal from '../AndroidWebViewWarningModal'
+import { downloadManager } from '~helpers/downloadManager'
+import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
+import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
+import { resetBiblesDb } from '~helpers/biblesDb'
 
 export type { StudyRelationsModalTarget } from './bibleDomBridgeCommands'
 
@@ -238,6 +245,13 @@ export type WebViewProps = {
   onEnterAnnotationMode?: () => void
   // Red words data
   redWords?: Record<string, { start: number; end: number }[]> | null
+  error?: BibleError | null
+}
+
+export type BibleDOMDownloadState = {
+  status?: 'queued' | 'downloading' | 'inserting' | 'completed' | 'failed' | 'cancelled'
+  progress: number
+  error?: string
 }
 
 export type NotedVerse = {
@@ -343,6 +357,7 @@ export const BibleDOMWrapper = ({
   redWords,
   isLoading,
   onMountTimeout,
+  error,
 }: WebViewProps) => {
   const { openVersionSelector } = useBookAndVersionSelector()
   const openRelationEndpoint = useOpenRelationEndpoint()
@@ -354,6 +369,19 @@ export const BibleDOMWrapper = ({
   const { t } = useTranslation()
   const router = useRouter()
   const pushRouteOnce = usePushRouteOnce()
+  const [isResettingDatabase, setIsResettingDatabase] = useState(false)
+  const errorDownloadItemId = error ? `bible:${error.version}` : `bible:${version}`
+  const queueState = useDownloadItemStatus(errorDownloadItemId)
+  const errorDownloadState: BibleDOMDownloadState | undefined = error
+    ? {
+        status: queueState?.status,
+        progress:
+          queueState?.status === 'inserting'
+            ? (queueState.insertProgress ?? 0)
+            : (queueState?.downloadProgress ?? 0),
+        error: queueState?.error,
+      }
+    : undefined
 
   const stableVerses = useStabilizedVerses(verses, isLoading)
 
@@ -399,6 +427,15 @@ export const BibleDOMWrapper = ({
     exitFocus: t('tab.exitFocus'),
     interlinearDetailed: t('bible.interlinear.detailed'),
     interlinearCompact: t('bible.interlinear.compact'),
+    versionNotFound: t('bible.error.versionNotFound'),
+    chapterNotFound: t('bible.error.chapterNotFound'),
+    databaseCorrupted: t('bible.error.databaseCorrupted'),
+    unknownError: t('bible.error.unknown'),
+    goToDownloads: t('bible.error.goToDownloads'),
+    downloadVersion: t('bible.error.downloadVersion'),
+    downloading: t('bible.error.downloading'),
+    inserting: t('bible.error.inserting'),
+    resetDatabase: t('bible.error.resetDatabase'),
   }
   const dispatch: Dispatch = async action => {
     appLogger.debug('webview', 'bible_dom.dispatch', { actionType: action.type })
@@ -678,6 +715,36 @@ export const BibleDOMWrapper = ({
         break
       }
 
+      case DOWNLOAD_BIBLE_VERSION: {
+        const requestedVersion = getStringPayload(action.payload)
+        if (!requestedVersion) break
+        try {
+          downloadManager.enqueue([createBibleDownloadItem(requestedVersion)])
+        } catch (e) {
+          console.error('[BibleDOMWrapper] Failed to enqueue download:', e)
+          toast.error(t('bible.error.unknown'))
+        }
+        break
+      }
+
+      case OPEN_DOWNLOADS: {
+        router.push('/downloads')
+        break
+      }
+
+      case RESET_BIBLE_DATABASE: {
+        setIsResettingDatabase(true)
+        try {
+          await resetBiblesDb()
+          toast.success(t('bible.error.databaseRecovered'))
+        } catch {
+          toast.error(t('bible.error.databaseOpenFailed'))
+        } finally {
+          setIsResettingDatabase(false)
+        }
+        break
+      }
+
       case 'DOM_COMPONENT_MOUNTED': {
         appLogger.info('webview', 'bible_dom.mounted', {
           version,
@@ -774,6 +841,9 @@ export const BibleDOMWrapper = ({
         taggedVersesInChapter={taggedVersesInChapter}
         versesWithNonHighlightTags={versesWithNonHighlightTags}
         redWords={redWords}
+        error={error}
+        errorDownloadState={errorDownloadState}
+        isResettingDatabase={isResettingDatabase}
         isINTComplete={isINTComplete}
         taggedVerses={taggedVerses}
         versesWithAnnotationNotes={versesWithAnnotationNotes}

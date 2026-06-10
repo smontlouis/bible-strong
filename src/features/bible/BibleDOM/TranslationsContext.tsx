@@ -9,6 +9,16 @@ export interface BibleDOMTranslations {
   // Interlinear mode
   interlinearDetailed: string
   interlinearCompact: string
+  // Error/download state
+  versionNotFound: string
+  chapterNotFound: string
+  databaseCorrupted: string
+  unknownError: string
+  goToDownloads: string
+  downloadVersion: string
+  downloading: string
+  inserting: string
+  resetDatabase: string
 }
 
 const TranslationsContext = createContext<BibleDOMTranslations | null>(null)

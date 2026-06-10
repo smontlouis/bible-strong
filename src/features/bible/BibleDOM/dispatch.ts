@@ -40,3 +40,8 @@ export const OPEN_VERSE_TAGS_MODAL = 'OPEN_VERSE_TAGS_MODAL'
 
 // Interlinear mode toggle
 export const TOGGLE_INT_COMPLETE = 'TOGGLE_INT_COMPLETE'
+
+// Error/download actions
+export const DOWNLOAD_BIBLE_VERSION = 'DOWNLOAD_BIBLE_VERSION'
+export const OPEN_DOWNLOADS = 'OPEN_DOWNLOADS'
+export const RESET_BIBLE_DATABASE = 'RESET_BIBLE_DATABASE'
