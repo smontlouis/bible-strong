@@ -7,6 +7,7 @@ import { Portal, PortalHost } from 'react-native-teleport'
 import { useSelector } from 'react-redux'
 
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
+import { bibleDomRemountSignalAtom } from '~state/app'
 import { activeBibleTabIdAtom, sharedBibleDOMPropsAtom, getDefaultBibleTab } from '~state/tabs'
 import type { WebViewProps } from './BibleDOM/BibleDOMWrapper'
 import { BibleDOMWrapper } from './BibleDOM/BibleDOMWrapper'
@@ -35,6 +36,7 @@ const SharedBibleDOM = () => {
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
   const activeBibleTabId = useAtomValue(activeBibleTabIdAtom)
   const sharedProps = useAtomValue(sharedBibleDOMPropsAtom)
+  const bibleDomRemountSignal = useAtomValue(bibleDomRemountSignalAtom)
   const settings = useSelector((state: RootState) => state.user.bible.settings)
 
   const activeProps =
@@ -124,7 +126,11 @@ const SharedBibleDOM = () => {
     <View style={[StyleSheet.absoluteFill, { zIndex: -9999, pointerEvents: 'none' }]}>
       <PortalHost name={SHARED_BIBLE_DOM_PARK_HOST} style={StyleSheet.absoluteFill} />
       <Portal hostName={destination}>
-        <BibleDOMWrapper key={reloadKey} {...props} onMountTimeout={handleMountTimeout} />
+        <BibleDOMWrapper
+          key={`${reloadKey}-${bibleDomRemountSignal}`}
+          {...props}
+          onMountTimeout={handleMountTimeout}
+        />
       </Portal>
     </View>
   )

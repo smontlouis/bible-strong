@@ -71,6 +71,10 @@ export const installedVersionsSignalAtom = atom(0)
 // so that all mounted BibleViewer instances reload verses from SQLite.
 export const bibleDataRefreshSignalAtom = atom(0)
 
+// Signal atom — incremented to force the shared Android WebView to remount
+// after first-run resource installation.
+export const bibleDomRemountSignalAtom = atom(0)
+
 export const resetUserAtomsAtom = atom(null, (get, set) => {
   // Reset to a single default group with one Bible tab
   set(tabGroupsAtom, [createDefaultGroup()])

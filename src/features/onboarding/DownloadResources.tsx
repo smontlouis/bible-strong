@@ -2,6 +2,7 @@ import { useTheme } from '@emotion/react'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAtom, useSetAtom, useAtomValue } from 'jotai/react'
+import { Platform } from 'react-native'
 import { EaseView } from 'react-native-ease'
 
 import Box from '~common/ui/Box'
@@ -13,6 +14,7 @@ import { isVersionInstalled } from '~helpers/biblesDb'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { requireBiblePath } from '~helpers/requireBiblePath'
 import { downloadManager } from '~helpers/downloadManager'
+import { bibleDomRemountSignalAtom } from '~state/app'
 import { overallProgressAtom, activeQueueAtom, failedItemsAtom } from '~state/downloadQueue'
 import { isOnboardingCompletedAtom, selectedResourcesAtom } from './atom'
 import {
@@ -25,6 +27,7 @@ import * as FileSystem from 'expo-file-system/legacy'
 const DownloadResources = () => {
   const [selectedResources] = useAtom(selectedResourcesAtom)
   const setIsOnboardingCompleted = useSetAtom(isOnboardingCompletedAtom)
+  const bumpBibleDomRemountSignal = useSetAtom(bibleDomRemountSignalAtom)
   const [error, setError] = React.useState<Error | null>(null)
   const { t } = useTranslation()
   const theme = useTheme()
@@ -86,6 +89,9 @@ const DownloadResources = () => {
     }
 
     downloadManager.clearCompleted()
+    if (Platform.OS === 'android') {
+      bumpBibleDomRemountSignal(signal => signal + 1)
+    }
     setIsOnboardingCompleted(true)
   }
 
