@@ -1,6 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy'
 
 import { downloadAndInsertBible } from '~helpers/downloadBibleToSqlite'
+import { downloadWithCdnFallback } from '~helpers/downloadWithCdnFallback'
 import { dbManager } from '~helpers/sqlite'
 import { downloadRedWordsFile, versionHasRedWords } from '~helpers/redWords'
 import { downloadPericopeFile, versionHasPericope } from '~helpers/pericopes'
@@ -25,18 +26,16 @@ const downloadSidecarBibleFiles = (item: DownloadItem, versionId: string) => {
 }
 
 const downloadFile = async (item: DownloadItem, callbacks: ResourceInstallationCallbacks) => {
-  const resumable = FileSystem.createDownloadResumable(
-    item.url,
-    item.destinationPath!,
-    undefined,
-    ({ totalBytesWritten }) => {
+  await downloadWithCdnFallback({
+    url: item.url,
+    destinationPath: item.destinationPath!,
+    onDownloadProgress: ({ totalBytesWritten }) => {
       callbacks.onDownloadProgress(Math.min(totalBytesWritten / item.estimatedSize, 1))
-    }
-  )
-
-  callbacks.onResumable(resumable)
-  await resumable.downloadAsync()
-  callbacks.onResumable(null)
+    },
+    onResumable: callbacks.onResumable,
+    isCancelled: callbacks.isCancelled,
+    logTag: 'ResourceInstallation',
+  })
 
   if (callbacks.isCancelled()) throw new Error('CANCELLED')
 }

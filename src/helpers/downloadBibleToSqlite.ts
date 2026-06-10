@@ -2,11 +2,12 @@ import * as FileSystem from 'expo-file-system/legacy'
 
 import { insertBibleVersion, openBiblesDb } from '~helpers/biblesDb'
 import type { InsertBibleOptions } from '~helpers/biblesDb'
+import { downloadWithCdnFallback } from '~helpers/downloadWithCdnFallback'
 
 export interface DownloadAndInsertOptions extends InsertBibleOptions {
   onDownloadProgress?: FileSystem.DownloadProgressCallback
   /** Return the DownloadResumable so the caller can pause/cancel it */
-  onResumable?: (resumable: FileSystem.DownloadResumable) => void
+  onResumable?: (resumable: FileSystem.DownloadResumable | null) => void
 }
 
 /**
@@ -37,16 +38,14 @@ export async function downloadAndInsertBible(
   try {
     // 1. Download to temp file
     console.log(`[DownloadBible] Downloading ${versionId} from ${downloadUrl}`)
-    const resumable = FileSystem.createDownloadResumable(
-      downloadUrl,
-      tempPath,
-      undefined,
-      opts.onDownloadProgress
-    )
-
-    opts.onResumable?.(resumable)
-
-    await resumable.downloadAsync()
+    await downloadWithCdnFallback({
+      url: downloadUrl,
+      destinationPath: tempPath,
+      onDownloadProgress: opts.onDownloadProgress,
+      onResumable: opts.onResumable,
+      isCancelled: opts.isCancelled,
+      logTag: 'DownloadBible',
+    })
 
     // Check cancellation after download
     if (opts.isCancelled?.()) {

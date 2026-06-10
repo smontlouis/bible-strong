@@ -41,7 +41,10 @@ export {
 }
 
 export const CDN_URL = 'https://assets.bible-strong.app/'
+export const CDN_FALLBACK_URL = 'https://storage.googleapis.com/bible-strong-app.appspot.com/'
 export const cdnUrl = (path: string) => `${CDN_URL}${path}`
+export const getCdnFallbackUrl = (url: string) =>
+  url.startsWith(CDN_URL) ? `${CDN_FALLBACK_URL}${url.slice(CDN_URL.length)}` : null
 
 // French database URLs
 export const databasesRef = {

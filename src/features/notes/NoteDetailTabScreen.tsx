@@ -486,7 +486,7 @@ ${currentNote.description}
               textColor={theme.colors.default}
               editorBackgroundColor={theme.colors.opacity5}
               placeholderColor={theme.colors.grey}
-              placeholderTitle={t('Titre')}
+              placeholderTitle={t('notes.titlePlaceholder')}
               placeholderDescription={t('Description')}
               onTitleChange={setTitle}
               onDescriptionChange={setDescription}

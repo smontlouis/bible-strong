@@ -167,6 +167,7 @@
   "Note d'annotation": "Annotation note",
   "Texte annoté": "Annotated text",
   "Titre": "Title",
+  "notes.titlePlaceholder": "Title (optional)",
   "Description": "Description",
   "Annuler": "Cancel",
   "Sauvegarder": "Save",
