@@ -24,6 +24,7 @@ import {
   type StrongRow,
   type StrongVerseMap
 } from "./strongCsv.js";
+import { buildStrongTranslationLexicon } from "./translationLexicon.js";
 
 interface AlignOptions {
   bible: string;
@@ -92,6 +93,7 @@ interface AlignMetrics {
   sourceTextMismatchCount: number;
   fallbackStrongOccurrenceCount: number;
   originalDirectStrongOccurrenceCount: number;
+  learnedTranslationStrongOccurrenceCount: number;
   strongCoverage: number;
   emptyStrongRate: number;
   realWordStrongRate: number;
@@ -136,6 +138,7 @@ export async function generateStrongAlign(
   const originals = await loadOriginalSources();
   const originalByRef = mergeOriginalSources(originals);
   const lexicon = buildStrongLexicon(references);
+  const translationLexicon = buildStrongTranslationLexicon(references);
   await mkdir(options.outputDir, { recursive: true });
 
   const outputPath = path.join(
@@ -194,6 +197,7 @@ export async function generateStrongAlign(
         verse: reference.map.get(key)
       })),
       lexicon,
+      translationLexicon,
       original
     });
 
@@ -335,6 +339,7 @@ function createEmptyMetrics(
     sourceTextMismatchCount: 0,
     fallbackStrongOccurrenceCount: 0,
     originalDirectStrongOccurrenceCount: 0,
+    learnedTranslationStrongOccurrenceCount: 0,
     strongCoverage: 0,
     emptyStrongRate: 0,
     realWordStrongRate: 0,
@@ -372,6 +377,8 @@ function addResultMetrics(
   metrics.fallbackStrongOccurrenceCount += result.fallbackStrongOccurrenceCount;
   metrics.originalDirectStrongOccurrenceCount +=
     result.originalDirectStrongOccurrenceCount;
+  metrics.learnedTranslationStrongOccurrenceCount +=
+    result.learnedTranslationStrongOccurrenceCount;
 }
 
 function finalizeMetrics(metrics: AlignMetrics): void {

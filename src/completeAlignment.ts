@@ -5,6 +5,10 @@ import {
 } from "./align.js";
 import { type OriginalToken, type OriginalVerse } from "./originalSource.js";
 import { escapeHtml, tokenizeText, type TextSegment } from "./tokenize.js";
+import {
+  findTranslationCandidate,
+  type StrongTranslationLexicon
+} from "./translationLexicon.js";
 
 export interface OriginalStrongOccurrence {
   occurrenceId: string;
@@ -52,12 +56,14 @@ export interface CompleteAlignmentResult {
   multiStrongWordCount: number;
   fallbackStrongOccurrenceCount: number;
   originalDirectStrongOccurrenceCount: number;
+  learnedTranslationStrongOccurrenceCount: number;
 }
 
 export function alignCompleteVerse(options: {
   targetText: string;
   references: ReferenceSource[];
   lexicon?: StrongLexicon;
+  translationLexicon?: StrongTranslationLexicon;
   original?: OriginalVerse;
 }): CompleteAlignmentResult {
   const base = alignVerse(
@@ -110,6 +116,16 @@ export function alignCompleteVerse(options: {
     });
   }
 
+  if (options.translationLexicon) {
+    assignByTranslationLexicon({
+      segments: base.segments,
+      originalOccurrences,
+      usedOccurrences,
+      wordAssignments,
+      translationLexicon: options.translationLexicon
+    });
+  }
+
   const emptyAssignments = originalOccurrences
     .filter((occurrence) => !usedOccurrences.has(occurrence.occurrenceId))
     .map((occurrence) => ({
@@ -156,8 +172,105 @@ export function alignCompleteVerse(options: {
         sum + (assignment.fallback ? assignment.strong.length : 0),
       0
     ),
-    originalDirectStrongOccurrenceCount: realWordStrongOccurrenceCount
+    originalDirectStrongOccurrenceCount: realWordStrongOccurrenceCount,
+    learnedTranslationStrongOccurrenceCount: [
+      ...wordAssignments.values()
+    ].reduce(
+      (sum, assignment) =>
+        sum +
+        (assignment.method.includes("learned-translation")
+          ? assignment.strong.length
+          : 0),
+      0
+    )
   };
+}
+
+function assignByTranslationLexicon(options: {
+  segments: TextSegment[];
+  originalOccurrences: OriginalStrongOccurrence[];
+  usedOccurrences: Set<string>;
+  wordAssignments: Map<number, CompleteWordAssignment>;
+  translationLexicon: StrongTranslationLexicon;
+}): void {
+  const words = getWordSegments(options.segments);
+  const maxStrongPerWord = 3;
+
+  for (const occurrence of options.originalOccurrences) {
+    if (options.usedOccurrences.has(occurrence.occurrenceId)) {
+      continue;
+    }
+
+    const candidate = words
+      .map((word) => {
+        const translation = findTranslationCandidate(
+          options.translationLexicon,
+          occurrence.strong,
+          word.normalized
+        );
+
+        if (!translation) {
+          return undefined;
+        }
+
+        const existing = options.wordAssignments.get(word.wordIndex);
+        if ((existing?.strong.length ?? 0) >= maxStrongPerWord) {
+          return undefined;
+        }
+        if (existing?.strong.includes(occurrence.strong)) {
+          return undefined;
+        }
+
+        const positionScore = scorePosition(
+          occurrence.tokenIndex,
+          options.originalOccurrences.length,
+          word.wordIndex,
+          words.length
+        );
+
+        return {
+          wordIndex: word.wordIndex,
+          translation,
+          score: translation.score * 0.72 + positionScore * 0.28
+        };
+      })
+      .filter((value): value is NonNullable<typeof value> => Boolean(value))
+      .sort((a, b) => b.score - a.score)[0];
+
+    if (!candidate || candidate.score < 0.28) {
+      continue;
+    }
+
+    const existing = options.wordAssignments.get(candidate.wordIndex);
+    const confidence = Math.min(0.88, 0.48 + candidate.score * 0.35);
+
+    if (existing) {
+      existing.strong.push(occurrence.strong);
+      existing.originalTokenIds.push(occurrence.tokenId);
+      existing.originalOccurrenceIds.push(occurrence.occurrenceId);
+      existing.confidence = Math.max(existing.confidence, confidence);
+      existing.method = mergeLabel(
+        existing.method,
+        candidate.translation.method
+      );
+      existing.source = mergeLabel(
+        existing.source,
+        candidate.translation.source
+      );
+    } else {
+      options.wordAssignments.set(candidate.wordIndex, {
+        strong: [occurrence.strong],
+        originalTokenIds: [occurrence.tokenId],
+        originalOccurrenceIds: [occurrence.occurrenceId],
+        confidence,
+        method: candidate.translation.method,
+        source: candidate.translation.source,
+        fallback: false
+      });
+    }
+
+    options.usedOccurrences.add(occurrence.occurrenceId);
+  }
 }
 
 export function renderCompleteTaggedText(
@@ -259,6 +372,44 @@ function findPreviousAssignedWordIndex(
   }
 
   return previousWordIndex;
+}
+
+function getWordSegments(
+  segments: TextSegment[]
+): Array<{ wordIndex: number; normalized: string }> {
+  const words: Array<{ wordIndex: number; normalized: string }> = [];
+  let wordIndex = -1;
+
+  for (const segment of segments) {
+    if (segment.kind !== "word") {
+      continue;
+    }
+
+    wordIndex += 1;
+    words.push({ wordIndex, normalized: segment.normalized });
+  }
+
+  return words;
+}
+
+function scorePosition(
+  originalIndex: number,
+  originalCount: number,
+  wordIndex: number,
+  wordCount: number
+): number {
+  if (originalCount <= 1 || wordCount <= 1) {
+    return 1;
+  }
+
+  const originalRatio = originalIndex / (originalCount - 1);
+  const wordRatio = wordIndex / (wordCount - 1);
+  return Math.max(0, 1 - Math.abs(originalRatio - wordRatio));
+}
+
+function mergeLabel(current: string, next: string): string {
+  const labels = new Set([...current.split("+"), ...next.split("+")]);
+  return [...labels].filter(Boolean).join("+");
 }
 
 function renderEmptyAssignments(

@@ -35,8 +35,9 @@ For each compatible verse, the generator now:
 1. Reads original WLC/SBLGNT source tokens with Strong numbers.
 2. Builds original Strong occurrences, preserving duplicates.
 3. Uses French-reference and lexicon evidence to attach some occurrences to real French words.
-4. Emits empty `<w>` tags for original Strong occurrences that are not aligned to a real French word.
-5. Reports real-word vs empty-tag rates separately.
+4. Uses a learned Strong-to-French translation lexicon from the local Strong references to attach additional original occurrences to real French words.
+5. Emits empty `<w>` tags for original Strong occurrences that are not aligned to a real French word.
+6. Reports real-word vs empty-tag rates separately.
 
 This means `strongCoverage` is now an occurrence-based source coverage metric, not a French token coverage metric.
 
@@ -93,23 +94,24 @@ Multiple Strong occurrences on one French word are supported:
 
 From `outputs/bible-nbs-strong-align.metrics.json`:
 
-| Metric                         |   Value |
-| ------------------------------ | ------: |
-| Verse count                    |  31,169 |
-| Processed verses               |  31,152 |
-| Skipped/source mismatch verses |      17 |
-| French token count             | 733,829 |
-| Tagged French token count      | 311,048 |
-| Tagged French token rate       |  42.39% |
-| Original Strong occurrences    | 612,753 |
-| Represented Strong occurrences | 612,753 |
-| Missing Strong occurrences     |       0 |
-| Strong coverage                | 100.00% |
-| Real-word Strong occurrences   | 315,231 |
-| Empty Strong occurrences       | 297,522 |
-| Real-word Strong rate          |  51.45% |
-| Empty Strong rate              |  48.55% |
-| Multi-Strong French words      |   3,737 |
+| Metric                                 |   Value |
+| -------------------------------------- | ------: |
+| Verse count                            |  31,169 |
+| Processed verses                       |  31,152 |
+| Skipped/source mismatch verses         |      17 |
+| French token count                     | 733,829 |
+| Tagged French token count              | 345,574 |
+| Tagged French token rate               |  47.09% |
+| Original Strong occurrences            | 612,753 |
+| Represented Strong occurrences         | 612,753 |
+| Missing Strong occurrences             |       0 |
+| Strong coverage                        | 100.00% |
+| Real-word Strong occurrences           | 357,659 |
+| Empty Strong occurrences               | 255,094 |
+| Real-word Strong rate                  |  58.37% |
+| Empty Strong rate                      |  41.63% |
+| Learned-translation Strong occurrences |  49,618 |
+| Multi-Strong French words              |  11,493 |
 
 Evaluation against `Sg1910` occurrence sets:
 
@@ -129,23 +131,24 @@ Evaluation against `Sg1910` occurrence sets:
 
 From `outputs/bible-bds-strong-align.metrics.json`:
 
-| Metric                         |   Value |
-| ------------------------------ | ------: |
-| Verse count                    |  31,112 |
-| Processed verses               |  31,101 |
-| Skipped/source mismatch verses |      11 |
-| French token count             | 783,143 |
-| Tagged French token count      | 266,153 |
-| Tagged French token rate       |  33.99% |
-| Original Strong occurrences    | 611,887 |
-| Represented Strong occurrences | 611,887 |
-| Missing Strong occurrences     |       0 |
-| Strong coverage                | 100.00% |
-| Real-word Strong occurrences   | 269,890 |
-| Empty Strong occurrences       | 341,997 |
-| Real-word Strong rate          |  44.11% |
-| Empty Strong rate              |  55.89% |
-| Multi-Strong French words      |   3,258 |
+| Metric                                 |   Value |
+| -------------------------------------- | ------: |
+| Verse count                            |  31,112 |
+| Processed verses                       |  31,101 |
+| Skipped/source mismatch verses         |      11 |
+| French token count                     | 783,143 |
+| Tagged French token count              | 305,687 |
+| Tagged French token rate               |  39.03% |
+| Original Strong occurrences            | 611,887 |
+| Represented Strong occurrences         | 611,887 |
+| Missing Strong occurrences             |       0 |
+| Strong coverage                        | 100.00% |
+| Real-word Strong occurrences           | 318,102 |
+| Empty Strong occurrences               | 293,785 |
+| Real-word Strong rate                  |  51.99% |
+| Empty Strong rate                      |  48.01% |
+| Learned-translation Strong occurrences |  55,867 |
+| Multi-Strong French words              |  11,747 |
 
 Evaluation against `Sg1910` occurrence sets:
 
@@ -171,12 +174,13 @@ npm run generate:strong:align -- --bible fmar
 
 Result:
 
-| Metric                |           Value |
-| --------------------- | --------------: |
-| Processed verses      | 30,924 / 31,057 |
-| Strong coverage       |         100.00% |
-| Real-word Strong rate |          53.18% |
-| Empty Strong rate     |          46.82% |
+| Metric                                 |           Value |
+| -------------------------------------- | --------------: |
+| Processed verses                       | 30,924 / 31,057 |
+| Strong coverage                        |         100.00% |
+| Real-word Strong rate                  |          60.52% |
+| Empty Strong rate                      |          39.48% |
+| Learned-translation Strong occurrences |          50,804 |
 
 ## Interpretation
 
@@ -187,10 +191,18 @@ The generator now satisfies the complete Strong representation requirement for c
 
 The key tradeoff is visible in the empty-tag rate:
 
-- NBS: 48.55% of original Strong occurrences are represented as empty tags.
-- BDS: 55.89% of original Strong occurrences are represented as empty tags.
+- NBS: 41.63% of original Strong occurrences are represented as empty tags.
+- BDS: 48.01% of original Strong occurrences are represented as empty tags.
 
-This is expected because the current real-word alignment still uses conservative French-reference and lexicon evidence. When it cannot confidently attach an original Strong occurrence to a French word, it preserves the occurrence as an empty tag rather than dropping it.
+The learned translation backend improved real-word placement while preserving `missingStrongOccurrenceCount = 0`:
+
+| Bible | Previous real-word rate | Current real-word rate | Improvement |
+| ----- | ----------------------: | ---------------------: | ----------: |
+| NBS   |                  51.45% |                 58.37% |    +6.92 pp |
+| BDS   |                  44.11% |                 51.99% |    +7.88 pp |
+| FMAR  |                  53.18% |                 60.52% |    +7.34 pp |
+
+The remaining empty tags are expected because the current real-word alignment is still conservative. When it cannot confidently attach an original Strong occurrence to a French word, it preserves the occurrence as an empty tag rather than dropping it.
 
 ## Diagnostics
 
@@ -209,8 +221,8 @@ Observed counts:
 
 | Bible | sourceTextMismatch | mostlyEmptyStrongOccurrences | missingStrongOccurrences |
 | ----- | -----------------: | ---------------------------: | -----------------------: |
-| NBS   |                 17 |                       14,083 |                        0 |
-| BDS   |                 11 |                       19,090 |                        0 |
+| NBS   |                 17 |                        8,882 |                        0 |
+| BDS   |                 11 |                       13,763 |                        0 |
 
 ## Known Limits
 
@@ -226,7 +238,7 @@ What is strong:
 
 What still needs improvement:
 
-- Many occurrences become empty tags because real-word alignment is conservative.
+- Many occurrences still become empty tags because real-word alignment is conservative.
 - Precision against Sg1910 is lowered by generating all WLC/SBLGNT source occurrences, including occurrences that Sg1910 may not expose the same way.
 - NT source text differences are counted as source mismatch only when the whole verse is unavailable; fine-grained Textus Receptus vs SBLGNT token differences are not fully classified yet.
 - No neural aligner is currently used; a SimAlign/eflomal backend remains the next major quality step.

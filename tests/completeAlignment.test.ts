@@ -7,6 +7,7 @@ import {
 } from "../src/completeAlignment.js";
 import { type OriginalVerse } from "../src/originalSource.js";
 import { parseStrongTokens } from "../src/strongCsv.js";
+import { type StrongTranslationLexicon } from "../src/translationLexicon.js";
 
 test("represents unaligned original Strong occurrences as empty tags", () => {
   const original: OriginalVerse = {
@@ -70,6 +71,50 @@ test("supports multiple original Strong occurrences on one French word", () => {
 
   assert.equal(result.multiStrongWordCount, 1);
   assert.match(renderCompleteTaggedText(result), /strong="H7970 H3967"/);
+});
+
+test("uses learned translation lexicon to move an empty occurrence onto a word", () => {
+  const original: OriginalVerse = {
+    bookId: "Gen",
+    chapter: 1,
+    verse: 1,
+    tokens: [token("o1", "house", ["H1004"])],
+    strongSet: new Set(["H1004"])
+  };
+  const translationLexicon: StrongTranslationLexicon = {
+    exact: new Map([
+      [
+        "H1004",
+        new Map([
+          [
+            "maison",
+            {
+              strong: "H1004",
+              normalized: "maison",
+              score: 1,
+              source: "fixture",
+              method: "learned-translation"
+            }
+          ]
+        ])
+      ]
+    ]),
+    stem: new Map()
+  };
+
+  const result = alignCompleteVerse({
+    targetText: "maison",
+    original,
+    references: [],
+    translationLexicon
+  });
+
+  assert.equal(result.realWordStrongOccurrenceCount, 1);
+  assert.equal(result.emptyStrongOccurrenceCount, 0);
+  assert.match(
+    renderCompleteTaggedText(result),
+    /data-method="learned-translation"/
+  );
 });
 
 function token(
