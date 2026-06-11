@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bible To Strong"
+  short_description: "Generate Strong-tagged local Bibles."
+  default_prompt: "Generate a Strong-tagged Bible for the local version I specify, validate the metrics, and use LLM transfer only when useful."

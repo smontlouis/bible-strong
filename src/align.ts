@@ -26,7 +26,17 @@ export interface AssignedStrong {
   strong: string[];
   confidence: number;
   source: string;
-  method: "exact" | "stem" | "window" | "lexicon" | "source-lexicon";
+  method:
+    | "exact"
+    | "stem"
+    | "window"
+    | "lexicon"
+    | "source-lexicon"
+    | "learned-translation"
+    | "learned-translation-stem"
+    | "reader-strong-rule"
+    | "llm-arbiter"
+    | "curated-llm-transfer";
   originalConfirmed: boolean;
 }
 

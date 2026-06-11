@@ -55,17 +55,33 @@ export function findTranslationCandidate(
   strong: string,
   normalized: string
 ): StrongTranslationCandidate | undefined {
-  const exact = lexicon.exact.get(strong)?.get(normalized);
-  if (exact) {
-    return exact;
+  for (const form of equivalentForms(normalized)) {
+    const exact = lexicon.exact.get(strong)?.get(form);
+    if (exact) {
+      return exact;
+    }
   }
 
-  const stem = stemWord(normalized);
-  if (stem.length >= 4) {
-    return lexicon.stem.get(strong)?.get(stem);
+  for (const form of equivalentForms(normalized)) {
+    const stem = stemWord(form);
+    if (stem.length >= 4) {
+      const candidate = lexicon.stem.get(strong)?.get(stem);
+      if (candidate) return candidate;
+    }
   }
 
   return undefined;
+}
+
+function equivalentForms(normalized: string): string[] {
+  const forms = new Set([normalized]);
+
+  if (normalized === "ciel") forms.add("cieux");
+  if (normalized === "cieux") forms.add("ciel");
+  if (normalized === "oeil") forms.add("yeux");
+  if (normalized === "yeux") forms.add("oeil");
+
+  return [...forms];
 }
 
 function increment(

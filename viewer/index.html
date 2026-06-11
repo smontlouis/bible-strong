@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Strong File Viewer</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">S</div>
+          <div>
+            <h1>Strong File Viewer</h1>
+            <p>
+              Charge un TSV généré ou un CSV Strong pour inspecter les tags.
+            </p>
+          </div>
+        </div>
+
+        <label class="drop-zone" id="dropZone">
+          <input
+            id="fileInput"
+            type="file"
+            accept=".tsv,.csv,text/tab-separated-values,text/csv,text/plain"
+          />
+          <span class="drop-title">Charger un TSV ou CSV</span>
+          <span class="drop-copy"
+            >Glisse un fichier ici ou clique pour choisir.</span
+          >
+        </label>
+
+        <section class="panel">
+          <h2>Navigation</h2>
+          <label>
+            Livre
+            <select id="bookSelect" disabled></select>
+          </label>
+          <label>
+            Chapitre
+            <select id="chapterSelect" disabled></select>
+          </label>
+          <label>
+            Recherche
+            <input
+              id="searchInput"
+              type="search"
+              placeholder="Strong, mot, référence..."
+              disabled
+            />
+          </label>
+        </section>
+
+        <section class="panel stats-panel">
+          <h2>Résumé</h2>
+          <dl id="stats">
+            <div>
+              <dt>Versets</dt>
+              <dd>-</dd>
+            </div>
+            <div>
+              <dt>Tags</dt>
+              <dd>-</dd>
+            </div>
+            <div>
+              <dt>Vides</dt>
+              <dd>-</dd>
+            </div>
+            <div>
+              <dt>Mots taggés</dt>
+              <dd>-</dd>
+            </div>
+          </dl>
+        </section>
+      </aside>
+
+      <section class="reader">
+        <header class="reader-toolbar">
+          <div>
+            <p id="fileName" class="file-name">Aucun fichier chargé</p>
+            <h2 id="chapterTitle">Aperçu Strong</h2>
+          </div>
+          <div class="toolbar-actions">
+            <button id="prevChapter" type="button" disabled>Précédent</button>
+            <button id="nextChapter" type="button" disabled>Suivant</button>
+          </div>
+        </header>
+
+        <div class="legend">
+          <span><i class="legend-chip"></i> mot taggé</span>
+          <span><i class="legend-empty"></i> Strong vide</span>
+          <span><sup>430</sup> numéro Strong</span>
+        </div>
+
+        <article id="chapterView" class="chapter-view empty-state">
+          <p>
+            Charge un TSV ou CSV contenant les colonnes <code>book_id</code>,
+            <code>num_chapter</code>, <code>num_verse</code>, <code>text</code>.
+          </p>
+        </article>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
