@@ -92,6 +92,18 @@ export function parseStrongTokens(text: string): StrongToken[] {
   return tokens;
 }
 
+export function parseStrongOccurrences(text: string): string[] {
+  const occurrences: string[] = [];
+  const wordTagPattern = /<w\b([^>]*)>([\s\S]*?)<\/w>/giu;
+
+  for (const match of text.matchAll(wordTagPattern)) {
+    const attributes = match[1] ?? "";
+    occurrences.push(...parseStrongAttribute(attributes));
+  }
+
+  return occurrences;
+}
+
 export function buildStrongVerseMap(rows: StrongRow[]): StrongVerseMap {
   const map: StrongVerseMap = new Map();
 

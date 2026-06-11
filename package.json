@@ -8,6 +8,7 @@
     "dev": "tsx src/index.ts",
     "generate:strong": "tsx src/generateStrong.ts",
     "generate:strong:v2": "tsx src/generateStrongV2.ts",
+    "generate:strong:align": "tsx src/generateStrongAlign.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "test": "node --import tsx --test tests/**/*.test.ts",
