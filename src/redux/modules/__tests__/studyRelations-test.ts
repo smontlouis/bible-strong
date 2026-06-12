@@ -1,4 +1,4 @@
-import userReducer, { Link, receiveSubcollectionUpdates, UserState } from '../user'
+import userReducer, { importData, Link, receiveSubcollectionUpdates, UserState } from '../user'
 import {
   addStudyRelationAction,
   attachNoteToVerseAction,
@@ -272,5 +272,43 @@ describe('study relation reducer', () => {
     )
 
     expect(nextState.bible.relations).toEqual({})
+  })
+
+  it('backfills relations from pre-migration note data when importing a backup', () => {
+    const nextState = userReducer(
+      initialState,
+      importData({
+        bible: {
+          notes: {
+            '1-1-1': { title: 'Imported note', description: 'Body', date: 1 },
+          },
+          wordAnnotations: {
+            'annotation-1': {
+              id: 'annotation-1',
+              version: 'LSG',
+              ranges: [{ verseKey: '1-1-2', startWordIndex: 0, endWordIndex: 1, text: 'terre' }],
+              color: 'color1',
+              type: 'underline',
+              date: 1,
+              noteId: 'annotation:annotation-1',
+            },
+          },
+        } as never,
+        studies: {},
+      })
+    )
+
+    expect(Object.values(nextState.bible.relations)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: 'system',
+          type: 'annotates',
+          endpointKeys: ['note:1-1-1', 'verse:1-1-1'],
+        }),
+      ])
+    )
+    expect(Object.keys(nextState.bible.relationIndex)).toEqual(
+      expect.arrayContaining(['verse:1-1-1', 'note:1-1-1'])
+    )
   })
 })

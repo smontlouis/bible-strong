@@ -13,7 +13,6 @@ import {
   dedupeRelationsByDuplicateKey,
   rebuildRelationIndexes,
   rebuildRelationPairs,
-  type LegacyRelation,
   type RelationsObj,
 } from '~features/studyRelations/domain'
 
@@ -21,23 +20,25 @@ type LegacyRootState = RootState & {
   bible?: Record<string, unknown>
   user: RootState['user'] & {
     bible: RootState['user']['bible'] & {
-      studyRelations?: Record<string, LegacyRelation>
       relations?: RelationsObj
     }
   }
 }
 
 const migrateRelations = (state: LegacyRootState): RootState => {
-  const legacyRelations = state.user.bible.studyRelations ?? {}
   const existingRelations = state.user.bible.relations ?? {}
-  const normalizedRelations = Object.values({ ...legacyRelations, ...existingRelations }).reduce(
-    (result, relation) => {
+  const normalizedRelations = Object.values(existingRelations).reduce((result, relation) => {
+    try {
       const normalized = normalizeRelation(relation)
       result[normalized.id] = normalized
-      return result
-    },
-    {} as RelationsObj
-  )
+    } catch (error) {
+      console.warn('[ReduxMigration] Skipping invalid relation during migration', {
+        relationId: relation?.id,
+        error,
+      })
+    }
+    return result
+  }, {} as RelationsObj)
   const relations = dedupeRelationsByDuplicateKey(
     mergeRelationsWithSystemBackfill({
       relations: normalizedRelations,
@@ -47,14 +48,12 @@ const migrateRelations = (state: LegacyRootState): RootState => {
     })
   )
 
-  const { studyRelations: _studyRelations, ...bible } = state.user.bible
-
   return {
     ...state,
     user: {
       ...state.user,
       bible: {
-        ...bible,
+        ...state.user.bible,
         relations,
         relationIndex: rebuildRelationIndexes(relations),
         relationPairs: rebuildRelationPairs(relations),

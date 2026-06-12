@@ -1,6 +1,5 @@
 import * as Sentry from '@sentry/react-native'
-import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
-import { firebaseDb, doc, getDoc, updateDoc, deleteField, collection, getDocs } from './firebase'
+import { firebaseDb, doc, getDoc, updateDoc, deleteField } from './firebase'
 import { autoBackupManager } from './AutoBackupManager'
 import {
   SUBCOLLECTION_NAMES,
@@ -8,6 +7,7 @@ import {
   fetchSubcollection,
   writeAllToSubcollection,
   clearSubcollection,
+  getInvalidSubcollectionDocumentIds,
   type ChunkProgressCallback,
   type SubcollectionData,
 } from './firestoreSubcollections'
@@ -37,12 +37,8 @@ import {
 // Batch chunk size (must match firestoreSubcollections.ts)
 const BATCH_CHUNK_SIZE = 400
 const RELATIONS_CLEANUP_VERSION = 1
-type EmbeddedBibleData = Partial<Record<SubcollectionName, SubcollectionData>> & {
-  studyRelations?: Record<string, LegacyRelation>
-}
-type ImportedBibleData = Partial<Record<SubcollectionName, Record<string, unknown>>> & {
-  studyRelations?: Record<string, LegacyRelation>
-}
+type EmbeddedBibleData = Partial<Record<SubcollectionName, SubcollectionData>>
+type ImportedBibleData = Partial<Record<SubcollectionName, Record<string, unknown>>>
 
 const getErrorMessage = (error: unknown, fallback = 'Unknown error'): string => {
   if (error instanceof Error) return error.message
@@ -53,17 +49,20 @@ const getErrorMessage = (error: unknown, fallback = 'Unknown error'): string => 
 }
 
 const normalizeRelationsData = (bible: EmbeddedBibleData | ImportedBibleData): RelationsObj => {
-  const legacyRelations = bible.studyRelations ?? {}
   const existingRelations = (bible.relations ?? {}) as Record<string, LegacyRelation>
 
-  const normalizedRelations = Object.values({ ...legacyRelations, ...existingRelations }).reduce(
-    (relations, relation) => {
+  const normalizedRelations = Object.values(existingRelations).reduce((relations, relation) => {
+    try {
       const normalized = normalizeRelation(relation)
       relations[normalized.id] = normalized
-      return relations
-    },
-    {} as RelationsObj
-  )
+    } catch (error) {
+      console.warn('[FirestoreMigration] Skipping invalid relation during normalization', {
+        relationId: relation?.id,
+        error,
+      })
+    }
+    return relations
+  }, {} as RelationsObj)
 
   return dedupeRelationsByDuplicateKey(
     mergeRelationsWithSystemBackfill({
@@ -85,17 +84,6 @@ const getCollectionDataForMigration = (
   if (collection === 'relationIndex') return rebuildRelationIndexes(normalizeRelationsData(bible))
   if (collection === 'relationPairs') return rebuildRelationPairs(normalizeRelationsData(bible))
   return (bible[collection] ?? {}) as SubcollectionData
-}
-
-async function fetchLegacyStudyRelationsSubcollection(
-  userId: string
-): Promise<Record<string, LegacyRelation>> {
-  const snapshot = await getDocs(collection(firebaseDb, 'users', userId, 'studyRelations'))
-  const relations: Record<string, LegacyRelation> = {}
-  snapshot.forEach((docSnap: FirebaseFirestoreTypes.QueryDocumentSnapshot) => {
-    relations[docSnap.id] = docSnap.data() as LegacyRelation
-  })
-  return relations
 }
 
 /**
@@ -313,21 +301,18 @@ export async function migrateUserRelationsArchitecture(
     await autoBackupManager.createBackupNow(state, 'pre_migration')
 
     reportProgress('Lecture des notes et liens...', 0.3)
-    const [notes, links, wordAnnotations, existingRelations, legacyStudyRelations] =
-      await Promise.all([
-        fetchSubcollection(userId, 'notes'),
-        fetchSubcollection(userId, 'links'),
-        fetchSubcollection(userId, 'wordAnnotations'),
-        fetchSubcollection(userId, 'relations'),
-        fetchLegacyStudyRelationsSubcollection(userId),
-      ])
+    const [notes, links, wordAnnotations, existingRelations] = await Promise.all([
+      fetchSubcollection(userId, 'notes'),
+      fetchSubcollection(userId, 'links'),
+      fetchSubcollection(userId, 'wordAnnotations'),
+      fetchSubcollection(userId, 'relations'),
+    ])
 
     const relations = normalizeRelationsData({
       notes,
       links,
       wordAnnotations,
       relations: existingRelations,
-      studyRelations: legacyStudyRelations,
     })
     const relationIndex = rebuildRelationIndexes(relations)
     const relationPairs = rebuildRelationPairs(relations)
@@ -441,7 +426,6 @@ async function removeEmbeddedData(userId: string): Promise<void> {
     for (const collectionName of SUBCOLLECTION_NAMES) {
       updates[`bible.${collectionName}`] = deleteField()
     }
-    updates['bible.studyRelations'] = deleteField()
 
     const userDocRef = doc(firebaseDb, 'users', userId)
     await updateDoc(userDocRef, updates)
@@ -459,117 +443,6 @@ async function removeEmbeddedData(userId: string): Promise<void> {
       },
     })
     throw error // Re-throw to let caller handle it
-  }
-}
-
-/**
- * Migre les données d'un utilisateur vers les sous-collections Firestore
- *
- * Cette fonction:
- * 1. Crée un backup avant migration (sécurité)
- * 2. Lit les données embedded du document user
- * 3. Écrit chaque collection dans sa sous-collection
- * 4. Marque l'utilisateur comme migré
- * 5. Supprime les données embedded du document principal
- *
- * @param userId - L'ID Firebase de l'utilisateur
- * @param state - L'état Redux actuel (pour le backup)
- * @param onProgress - Callback optionnel pour le suivi de progression
- */
-export async function migrateUserDataToSubcollections(
-  userId: string,
-  state: RootState,
-  onProgress?: (message: string, progress: number) => void
-): Promise<{ success: boolean; error?: string }> {
-  const reportProgress = (message: string, progress: number) => {
-    console.log(`[FirestoreMigration] ${message} (${Math.round(progress * 100)}%)`)
-    onProgress?.(message, progress)
-  }
-
-  try {
-    // 1. Vérifier si déjà migré
-    reportProgress('Vérification du statut de migration...', 0)
-    const alreadyMigrated = await isUserMigrated(userId)
-    if (alreadyMigrated) {
-      console.log('[FirestoreMigration] User already migrated, skipping')
-      return { success: true }
-    }
-
-    // 2. Créer un backup avant migration
-    reportProgress('Création du backup de sécurité...', 0.05)
-    const backupCreated = await autoBackupManager.createBackupNow(state, 'pre_migration')
-    if (!backupCreated) {
-      console.warn('[FirestoreMigration] Backup creation failed, but continuing with migration')
-      // On continue quand même car le backup peut échouer pour diverses raisons non critiques
-    }
-
-    // 3. Lire les données embedded du document user
-    reportProgress('Lecture des données existantes...', 0.1)
-    const userDocRef = doc(firebaseDb, 'users', userId)
-    const userDocSnap = await getDoc(userDocRef)
-    const userData = userDocSnap.data()
-
-    if (!userData?.bible) {
-      console.log('[FirestoreMigration] No bible data found, marking as migrated')
-      await markAsMigrated(userId)
-      return { success: true }
-    }
-
-    const bible = userData.bible
-
-    // 4. Migrer chaque collection
-    const collectionsToMigrate = SUBCOLLECTION_NAMES.filter(
-      name => Object.keys(getCollectionDataForMigration(bible, name)).length > 0
-    )
-
-    if (collectionsToMigrate.length === 0) {
-      console.log('[FirestoreMigration] No data to migrate, marking as migrated')
-      await markAsMigrated(userId)
-      return { success: true }
-    }
-
-    console.log(
-      `[FirestoreMigration] Migrating ${collectionsToMigrate.length} collections:`,
-      collectionsToMigrate
-    )
-
-    for (let i = 0; i < collectionsToMigrate.length; i++) {
-      const collection = collectionsToMigrate[i]
-      const data = getCollectionDataForMigration(bible, collection)
-      const itemCount = Object.keys(data).length
-
-      const baseProgress = 0.1 + (0.7 * i) / collectionsToMigrate.length
-      const label = getCollectionLabel(collection)
-      reportProgress(`Migration des ${label} (${itemCount} éléments)...`, baseProgress)
-
-      await writeAllToSubcollection(userId, collection, data)
-
-      const endProgress = 0.1 + (0.7 * (i + 1)) / collectionsToMigrate.length
-      reportProgress(`${label} migrés avec succès`, endProgress)
-    }
-
-    // 5. Marquer comme migré
-    reportProgress('Finalisation de la migration...', 0.85)
-    await markAsMigrated(userId)
-
-    // 6. Supprimer les données embedded
-    reportProgress('Nettoyage des anciennes données...', 0.9)
-    await removeEmbeddedData(userId)
-
-    reportProgress('Migration terminée avec succès!', 1)
-    console.log('[FirestoreMigration] Migration completed successfully')
-
-    return { success: true }
-  } catch (error) {
-    console.error('[FirestoreMigration] Migration failed:', error)
-    Sentry.captureException(error, {
-      tags: { feature: 'migration', action: 'migrate_to_subcollections' },
-      extra: { userId },
-    })
-    return {
-      success: false,
-      error: getErrorMessage(error, 'Unknown error during migration'),
-    }
   }
 }
 
@@ -601,17 +474,42 @@ export async function migrateImportedDataToSubcollections(
   }
 
   // Determine which collections have data to migrate
-  const collectionsToMigrate = SUBCOLLECTION_NAMES.filter(
-    name => Object.keys(getCollectionDataForMigration(data, name)).length > 0
+  const collectionDataByName = SUBCOLLECTION_NAMES.reduce(
+    (result, collection) => {
+      result[collection] = getCollectionDataForMigration(data, collection)
+      return result
+    },
+    {} as Record<SubcollectionName, SubcollectionData>
   )
+  const collectionsToWrite = SUBCOLLECTION_NAMES.filter(
+    name => Object.keys(collectionDataByName[name]).length > 0
+  )
+  const invalidDocumentIds = SUBCOLLECTION_NAMES.flatMap(collection => {
+    const invalidIds = getInvalidSubcollectionDocumentIds(
+      Object.keys(collectionDataByName[collection])
+    )
+    return invalidIds.map(invalid => ({ collection, ...invalid }))
+  })
 
-  if (collectionsToMigrate.length === 0) {
-    console.log('[FirestoreMigration] WARNING: No data to migrate - all collections empty!')
-    await markAsMigrated(userId)
-    return
+  if (invalidDocumentIds.length > 0) {
+    console.warn(
+      '[FirestoreMigration] Imported data contains invalid document IDs:',
+      invalidDocumentIds
+    )
+    throw new Error(
+      `Invalid document IDs in imported data: ${invalidDocumentIds
+        .map(item => `${item.collection}/${item.docId}`)
+        .join(', ')}`
+    )
   }
 
-  console.log('[FirestoreMigration] Collections to migrate:', collectionsToMigrate.join(', '))
+  if (collectionsToWrite.length === 0) {
+    console.log(
+      '[FirestoreMigration] WARNING: No subcollection data to write - clearing existing data'
+    )
+  }
+
+  console.log('[FirestoreMigration] Collections to write:', collectionsToWrite.join(', '))
 
   // Show migration modal and set isMigrating flag to prevent listener race conditions
   setMigrationProgressFromOutsideReact({
@@ -620,7 +518,7 @@ export async function migrateImportedDataToSubcollections(
     isMigrating: true,
     currentCollection: null,
     collectionsCompleted: 0,
-    totalCollections: collectionsToMigrate.length,
+    totalCollections: SUBCOLLECTION_NAMES.length,
     overallProgress: 0,
     message: 'Démarrage de la restauration...',
     error: null,
@@ -629,12 +527,12 @@ export async function migrateImportedDataToSubcollections(
   })
 
   try {
-    const totalCollections = collectionsToMigrate.length
+    const totalCollections = SUBCOLLECTION_NAMES.length
 
-    // Process each collection: clear existing data, then write new data
+    // Process each collection: clear existing data, then write imported data if present.
     for (let i = 0; i < totalCollections; i++) {
-      const collection = collectionsToMigrate[i]
-      const collectionData = getCollectionDataForMigration(data, collection)
+      const collection = SUBCOLLECTION_NAMES[i]
+      const collectionData = collectionDataByName[collection]
       const itemCount = Object.keys(collectionData).length
 
       // Base progress for this collection (0 to 1 range for each collection)
@@ -663,29 +561,39 @@ export async function migrateImportedDataToSubcollections(
       // STEP 2: Write new data (second half of collection progress)
       const writeBaseProgress = baseProgress + collectionProgress / 2
 
-      setMigrationProgressFromOutsideReact({
-        currentCollection: collection,
-        collectionsCompleted: i,
-        overallProgress: writeBaseProgress,
-        message: `Remplacement de ${collection} (${itemCount} éléments)...`,
-      })
+      if (itemCount > 0) {
+        setMigrationProgressFromOutsideReact({
+          currentCollection: collection,
+          collectionsCompleted: i,
+          overallProgress: writeBaseProgress,
+          message: `Remplacement de ${collection} (${itemCount} éléments)...`,
+        })
 
-      console.log(`[FirestoreMigration] STEP 2: Writing ${itemCount} items to ${collection}...`)
-      await writeAllToSubcollection(
-        userId,
-        collection,
-        collectionData,
-        (chunkIndex, totalChunks) => {
-          // Progress during write: writeBaseProgress + (chunk progress * half of collection progress)
-          const writeProgress =
-            writeBaseProgress + (chunkIndex / totalChunks) * (collectionProgress / 2)
-          setMigrationProgressFromOutsideReact({
-            overallProgress: writeProgress,
-            message: `Remplacement de ${collection} (${itemCount} éléments)...`,
-          })
-        }
-      )
-      console.log(`[FirestoreMigration] ${collection} written successfully`)
+        console.log(`[FirestoreMigration] STEP 2: Writing ${itemCount} items to ${collection}...`)
+        await writeAllToSubcollection(
+          userId,
+          collection,
+          collectionData,
+          (chunkIndex, totalChunks) => {
+            // Progress during write: writeBaseProgress + (chunk progress * half of collection progress)
+            const writeProgress =
+              writeBaseProgress + (chunkIndex / totalChunks) * (collectionProgress / 2)
+            setMigrationProgressFromOutsideReact({
+              overallProgress: writeProgress,
+              message: `Remplacement de ${collection} (${itemCount} éléments)...`,
+            })
+          }
+        )
+        console.log(`[FirestoreMigration] ${collection} written successfully`)
+      } else {
+        setMigrationProgressFromOutsideReact({
+          currentCollection: collection,
+          collectionsCompleted: i,
+          overallProgress: writeBaseProgress + collectionProgress / 2,
+          message: `${collection} remplacé`,
+        })
+        console.log(`[FirestoreMigration] STEP 2: No data to write to ${collection}`)
+      }
     }
 
     // Mark user as migrated
@@ -694,7 +602,7 @@ export async function migrateImportedDataToSubcollections(
 
     // Show success and allow listener updates again
     setMigrationProgressFromOutsideReact({
-      collectionsCompleted: collectionsToMigrate.length,
+      collectionsCompleted: SUBCOLLECTION_NAMES.length,
       overallProgress: 1,
       message: 'Restauration terminée avec succès!',
       isMigrating: false,

@@ -89,6 +89,7 @@ interface ValidationResult {
   valid: boolean
   reason?: 'empty' | 'reserved_name' | 'too_long'
 }
+export type InvalidSubcollectionDocumentId = { docId: string; reason: string }
 
 /**
  * Encode un ID de document pour Firestore (remplace / par __SLASH__)
@@ -116,6 +117,18 @@ function validateDocumentId(docId: string): ValidationResult {
   // Check encoded length because Firestore validates the stored document ID.
   if (encodeDocumentId(docId).length > 1500) return { valid: false, reason: 'too_long' }
   return { valid: true }
+}
+
+export function getInvalidSubcollectionDocumentIds(
+  docIds: string[]
+): InvalidSubcollectionDocumentId[] {
+  return docIds.reduce((invalidIds, docId) => {
+    const validation = validateDocumentId(docId)
+    if (!validation.valid) {
+      invalidIds.push({ docId: docId || '(empty)', reason: validation.reason! })
+    }
+    return invalidIds
+  }, [] as InvalidSubcollectionDocumentId[])
 }
 
 /**
@@ -195,7 +208,7 @@ export async function batchWriteSubcollection(
 
   // Préparer toutes les opérations
   const operations: BatchOperation[] = []
-  const skippedItems: { docId: string; reason: string }[] = []
+  const skippedItems: InvalidSubcollectionDocumentId[] = []
 
   // Ajouter les opérations set (avec validation et encodage des IDs)
   for (const [docId, data] of Object.entries(changes.set)) {
@@ -246,6 +259,19 @@ export async function batchWriteSubcollection(
         )
       }
     }
+
+    const error = new Error(
+      `[Subcollections] Refusing to write ${collectionName}: ${skippedItems.length} invalid document ID(s)`
+    )
+    Sentry.captureException(error, {
+      tags: { feature: 'subcollections', action: 'validate_ids', collection: collectionName },
+      extra: {
+        userId,
+        skippedCount: skippedItems.length,
+        reasons: [...new Set(skippedItems.map(item => item.reason))].join(', '),
+      },
+    })
+    throw error
   }
 
   if (operations.length === 0) {

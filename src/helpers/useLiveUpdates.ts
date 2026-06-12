@@ -122,6 +122,7 @@ const useLiveUpdates = () => {
             if (!result) {
               console.error('[LiveUpdates] Migration failed or incomplete')
               // Continue anyway - the user can use the app with local data
+              return
             }
           }
 

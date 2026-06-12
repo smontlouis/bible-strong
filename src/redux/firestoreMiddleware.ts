@@ -746,6 +746,7 @@ const firestoreMiddleware: Middleware = store => next => async action => {
           strongsGrec: bible?.strongsGrec,
           words: bible?.words,
           naves: bible?.naves,
+          wordAnnotations: bible?.wordAnnotations,
           relations: bible?.relations,
           relationIndex: bible?.relationIndex,
           relationPairs: bible?.relationPairs,

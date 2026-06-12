@@ -268,6 +268,34 @@ const backfillSystemRelations = (draft: UserState) => {
   syncRelationProjections(draft)
 }
 
+const normalizeImportedRelations = (
+  bible: Partial<UserState['bible']>,
+  fallbackRelations: RelationsObj = {}
+): RelationsObj => {
+  const existingRelations = bible.relations ?? fallbackRelations
+  const normalizedRelations = Object.values(existingRelations).reduce((result, relation) => {
+    try {
+      const normalized = normalizeRelation(relation)
+      result[normalized.id] = normalized
+    } catch (error) {
+      console.warn('[ImportData] Skipping invalid relation during import', {
+        relationId: relation?.id,
+        error,
+      })
+    }
+    return result
+  }, {} as RelationsObj)
+
+  return dedupeRelationsByDuplicateKey(
+    mergeRelationsWithSystemBackfill({
+      relations: normalizedRelations,
+      notes: bible.notes,
+      links: bible.links,
+      wordAnnotations: bible.wordAnnotations,
+    })
+  )
+}
+
 const getLegacyVerseKeysFromEntityId = (entityId: string): string[] =>
   entityId.split('/').filter(key => {
     const [book, chapter, verse] = key.split('-').map(Number)
@@ -901,7 +929,11 @@ const userSlice = createSlice({
 
       // Merge bible (clean corrupted data before merging)
       const cleanedBible = cleanCorruptedFirestoreData(bible || {})
+      const importedBible = cleanedBible as Partial<UserState['bible']>
       state.bible = deepmerge(getInitialState().bible, cleanedBible)
+      state.bible.relations = normalizeImportedRelations(importedBible, state.bible.relations)
+      state.bible.relationIndex = rebuildRelationIndexes(state.bible.relations)
+      state.bible.relationPairs = rebuildRelationPairs(state.bible.relations)
 
       // Restore studies and changelog
       state.bible.studies = studies
