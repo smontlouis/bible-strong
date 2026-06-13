@@ -1,4 +1,5 @@
 import React, { forwardRef } from 'react'
+import * as Sentry from '@sentry/react-native'
 import {
   FlatList,
   Platform,
@@ -125,6 +126,45 @@ const withFooterMargin = (style: ViewProps['style'], footerHeight: number) => [
 const getFooterMarginStyle = (footerHeight: number) =>
   footerHeight ? { marginBottom: footerHeight } : undefined
 
+type SheetCommand = 'present' | 'presentAt' | 'resizeTo' | 'dismiss' | 'close' | 'forceClose'
+
+const isExpectedNativeSheetLifecycleError = (error: unknown) => {
+  if (!(error instanceof Error)) return false
+
+  return (
+    /No sheet found with tag \d+/.test(error.message) ||
+    /TrueSheetView with tag \d+ not found/.test(error.message) ||
+    error.message === 'No presenting view controller found'
+  )
+}
+
+const runSheetCommand = (command: SheetCommand, action: () => Promise<void> | undefined) => {
+  try {
+    const result = action()
+    if (!result) return
+
+    void result.catch(error => {
+      if (isExpectedNativeSheetLifecycleError(error)) return
+
+      Sentry.captureException(error, {
+        tags: {
+          component: 'Sheet',
+          sheetCommand: command,
+        },
+      })
+    })
+  } catch (error) {
+    if (isExpectedNativeSheetLifecycleError(error)) return
+
+    Sentry.captureException(error, {
+      tags: {
+        component: 'Sheet',
+        sheetCommand: command,
+      },
+    })
+  }
+}
+
 const SheetItem = ({ children, tag, onPress, ...props }: SheetItemProps) => (
   <TouchableBox
     onPress={onPress}
@@ -190,12 +230,19 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
   React.useImperativeHandle(
     ref,
     () => ({
-      present: () => sheetRef.current?.present(initialDetentIndex),
-      presentAt: snapPoint => sheetRef.current?.present(findSnapPointIndex(detents, snapPoint)),
-      resizeTo: snapPoint => sheetRef.current?.resize(findSnapPointIndex(detents, snapPoint)),
-      dismiss: () => sheetRef.current?.dismiss(),
-      close: () => sheetRef.current?.dismiss(),
-      forceClose: () => sheetRef.current?.dismiss(),
+      present: () =>
+        runSheetCommand('present', () => sheetRef.current?.present(initialDetentIndex)),
+      presentAt: snapPoint =>
+        runSheetCommand('presentAt', () =>
+          sheetRef.current?.present(findSnapPointIndex(detents, snapPoint))
+        ),
+      resizeTo: snapPoint =>
+        runSheetCommand('resizeTo', () =>
+          sheetRef.current?.resize(findSnapPointIndex(detents, snapPoint))
+        ),
+      dismiss: () => runSheetCommand('dismiss', () => sheetRef.current?.dismiss()),
+      close: () => runSheetCommand('close', () => sheetRef.current?.dismiss()),
+      forceClose: () => runSheetCommand('forceClose', () => sheetRef.current?.dismiss()),
     }),
     [detents, initialDetentIndex]
   )

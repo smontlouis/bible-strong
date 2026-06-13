@@ -2,7 +2,7 @@ import * as Sentry from '@sentry/react-native'
 import { useAtomValue } from 'jotai/react'
 import { atom } from 'jotai'
 import { useRef, useState } from 'react'
-import { View, StyleSheet } from 'react-native'
+import { AppState, View, StyleSheet } from 'react-native'
 import { Portal, PortalHost } from 'react-native-teleport'
 import { useSelector } from 'react-redux'
 
@@ -45,6 +45,7 @@ const SharedBibleDOM = () => {
       : SHARED_BIBLE_DOM_PARK_HOST
 
   const prevDestination = useRef<string | undefined>(undefined)
+  const maxRetriesReportedRef = useRef(false)
   if (prevDestination.current !== destination) {
     Sentry.addBreadcrumb({
       category: 'bible-dom',
@@ -53,6 +54,7 @@ const SharedBibleDOM = () => {
       level: 'info',
     })
     prevDestination.current = destination
+    maxRetriesReportedRef.current = false
   }
 
   // Self-healing: if the BibleDOMWrapper never mounts (white screen bug),
@@ -98,20 +100,38 @@ const SharedBibleDOM = () => {
 
   const MAX_RETRIES = 2
   const handleMountTimeout = () => {
-    // Still call the upstream onMountTimeout (e.g. BibleTabScreen's reload)
-    props.onMountTimeout?.()
+    if (AppState.currentState !== 'active') {
+      Sentry.addBreadcrumb({
+        category: 'bible-dom',
+        message: 'Mount timeout ignored while app is not active',
+        data: { appState: AppState.currentState, reloadKey },
+        level: 'info',
+      })
+      return
+    }
+
     if (reloadKey < MAX_RETRIES) {
+      // Still call the upstream onMountTimeout (e.g. BibleTabScreen's reload)
+      props.onMountTimeout?.()
       Sentry.captureMessage('SharedBibleDOM remounting WebView after mount timeout', {
         level: 'warning',
         tags: { reloadKey: String(reloadKey) },
       })
       setReloadKey(k => k + 1)
-    } else {
-      Sentry.captureMessage('SharedBibleDOM: max retries exhausted, WebView still not mounted', {
-        level: 'error',
-        tags: { reloadKey: String(reloadKey) },
-      })
+      return
     }
+
+    if (maxRetriesReportedRef.current) return
+
+    maxRetriesReportedRef.current = true
+    Sentry.captureMessage('SharedBibleDOM: max retries exhausted, WebView still not mounted', {
+      level: 'error',
+      tags: { reloadKey: String(reloadKey) },
+    })
+  }
+
+  const handleDOMMounted = () => {
+    maxRetriesReportedRef.current = false
   }
 
   return (
@@ -122,6 +142,7 @@ const SharedBibleDOM = () => {
           key={`${reloadKey}-${bibleDomRemountSignal}`}
           {...props}
           onMountTimeout={handleMountTimeout}
+          onDOMMounted={handleDOMMounted}
         />
       </Portal>
     </View>
