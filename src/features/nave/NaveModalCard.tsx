@@ -6,7 +6,7 @@ import { useAtomValue } from 'jotai'
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
 import waitForNaveDB from '~common/waitForNaveDB'
-import loadNaveByVerset from '~helpers/loadNaveByVerset'
+import { localNaveAccess } from '~features/resources/naveAccess'
 import { useQuery } from '~helpers/react-query-lite'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import NaveForVerse from './NaveModalForVerse'
@@ -26,7 +26,7 @@ const NaveModalCard = waitForNaveDB()(({ selectedVerse }: Props) => {
 
   const { isLoading, error, data } = useQuery({
     queryKey: ['nave', selectedVerse, resourceLang],
-    queryFn: () => loadNaveByVerset(selectedVerse),
+    queryFn: () => localNaveAccess.loadByVerse(selectedVerse),
   })
 
   if (error) {

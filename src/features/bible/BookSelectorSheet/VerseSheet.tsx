@@ -11,8 +11,8 @@ import { Verse } from '~common/types'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import { localBibleContentAccess } from '~features/resources/bibleContentAccess'
 import generateUUID from '~helpers/generateUUID'
-import loadBibleChapter from '~helpers/loadBibleChapter'
 import { useQuery } from '~helpers/react-query-lite'
 
 interface VerseSheetProps {
@@ -49,7 +49,11 @@ const VerseSheet = ({ sheetRef, bookSelectorRef, actions, data }: VerseSheetProp
       tempSelectedChapter?.toString() || '',
     ],
     queryFn: () =>
-      loadBibleChapter(tempSelectedBook?.Numero || 1, tempSelectedChapter || 1, version || 'LSG'),
+      localBibleContentAccess.loadChapter({
+        book: tempSelectedBook?.Numero || 1,
+        chapter: tempSelectedChapter || 1,
+        version: version || 'LSG',
+      }),
     enabled: !!tempSelectedBook && !!tempSelectedChapter && !!version,
   })
 

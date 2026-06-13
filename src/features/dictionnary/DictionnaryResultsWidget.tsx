@@ -4,9 +4,10 @@ import { LinearGradient } from 'expo-linear-gradient'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import loadDictionnaireBySearch, {
+import {
+  localDictionaryAccess,
   type DictionnaireSearchRow,
-} from '~helpers/loadDictionnaireBySearch'
+} from '~features/resources/dictionaryAccess'
 import { useWaitForDatabase } from '~common/waitForDictionnaireDB'
 import { DatabaseError } from '~helpers/catchDatabaseError'
 
@@ -41,7 +42,7 @@ const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
   const [limit, setLimit] = useState(LIMIT)
 
   const { results } = useResultsByLetterOrSearch({
-    query: loadDictionnaireBySearch,
+    query: localDictionaryAccess.search,
     value: searchValue,
   })
 

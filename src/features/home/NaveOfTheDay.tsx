@@ -8,7 +8,7 @@ import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import loadNaveByRandom from '~helpers/loadNaveByRandom'
+import { localNaveAccess } from '~features/resources/naveAccess'
 import RandomButton from './RandomButton'
 import waitForNaveWidget from './waitForNaveWidget'
 import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
@@ -22,7 +22,7 @@ const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)'
     const loadNave = async () => {
       if (!startRandom) return
 
-      const naveReference = await loadNaveByRandom()
+      const naveReference = await localNaveAccess.loadRandom()
       if (!naveReference || 'error' in naveReference) {
         setError(true)
         return

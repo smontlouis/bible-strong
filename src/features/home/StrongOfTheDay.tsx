@@ -8,12 +8,12 @@ import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import loadRandomStrongReference from '~helpers/loadRandomStrongReference'
 import truncate from '~helpers/truncate'
 import RandomButton from './RandomButton'
 import waitForStrongWidget from './waitForStrongWidget'
 import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
 import { StrongReference } from '~common/types'
+import { localStrongAccess } from '~features/resources/strongAccess'
 
 type StrongOfTheDayProps = {
   type: 'grec' | 'hebreu'
@@ -36,7 +36,7 @@ const StrongOfTheDay = ({
     const loadStrong = async () => {
       if (!startRandom) return
 
-      const strongReference = await loadRandomStrongReference(type === 'grec' ? 40 : 1)
+      const strongReference = await localStrongAccess.loadRandomReference(type === 'grec' ? 40 : 1)
 
       if (!strongReference) {
         setError('NOT_FOUND')

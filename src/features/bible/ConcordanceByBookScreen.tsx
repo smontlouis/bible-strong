@@ -13,12 +13,12 @@ import ConcordanceVerse from './ConcordanceVerse'
 import { FeatherIcon } from '~common/ui/Icon'
 
 import books from '~assets/bible_versions/books-desc'
-import loadFoundVersesByBook, { FoundVerseRow } from '~helpers/loadFoundVersesByBook'
 import truncate from '~helpers/truncate'
 import { toast } from '~helpers/toast'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResourceLanguage } from 'src/state/resourcesLanguage'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { localStrongAccess, type FoundVerseRow } from '~features/resources/strongAccess'
 
 const ConcordanceByBook = () => {
   const pushRouteOnce = usePushRouteOnce()
@@ -37,7 +37,7 @@ const ConcordanceByBook = () => {
   useEffect(() => {
     const loadVerses = async () => {
       if (!book || !Code) return
-      const foundVerses = await loadFoundVersesByBook(book, Code)
+      const foundVerses = await localStrongAccess.loadFoundVersesByBook(book, Code)
       if ('error' in foundVerses) return
       setVerses(foundVerses)
     }

@@ -9,12 +9,12 @@ import Container from '~common/ui/Container'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import { getVersionsBySections } from '~helpers/bibleVersions'
-import { getDatabases } from '~helpers/databases'
 import useLanguage from '~helpers/useLanguage'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { selectedResourcesAtom } from './atom'
 import {
   getDefaultOnboardingResourceSelection,
+  getOnboardingDatabaseResourceOptions,
   getOnboardingResourceSelectionId,
   type OnboardingResourceSelection,
 } from './onboardingResources'
@@ -23,9 +23,7 @@ import ResourceItem from './ResourceItem'
 const DownloadFiles = ({ setStep }: { setStep: React.Dispatch<React.SetStateAction<number>> }) => {
   const { t } = useTranslation()
   const lang = useLanguage()
-  const databases = Object.values(getDatabases()).filter(db =>
-    lang !== 'fr' ? db.id !== 'MHY' : true
-  )
+  const databases = getOnboardingDatabaseResourceOptions(lang)
   const [selectedResources, setSelectedResources] = useAtom(selectedResourcesAtom)
 
   // Set default version

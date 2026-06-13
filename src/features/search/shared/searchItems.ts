@@ -3,11 +3,12 @@ import { parseBibleReference } from '~features/search/BibleReferenceWidget'
 import type { SearchResult } from '~helpers/biblesDb'
 import { deltaToPlainText } from '~helpers/deltaToPlainText'
 import formatVerseContent from '~helpers/formatVerseContent'
-import type { DictionnaireSearchRow } from '~helpers/loadDictionnaireBySearch'
-import type { DictionnaireLetterRow } from '~helpers/loadDictionnaireByLetter'
-import type { LexiqueRow } from '~helpers/loadLexiqueByLetter'
-import type { NaveLetterRow } from '~helpers/loadNaveByLetter'
-import type { NaveSearchRow } from '~helpers/loadNaveBySearch'
+import type {
+  DictionnaireLetterRow,
+  DictionnaireSearchRow,
+} from '~features/resources/dictionaryAccess'
+import type { LexiqueRow } from '~features/resources/strongAccess'
+import type { NaveLetterRow, NaveSearchRow } from '~features/resources/naveAccess'
 import i18n from '~i18n'
 import type { Link, Note, Study } from '~redux/modules/user'
 import { getNoteTitle } from '~helpers/getNoteTitle'

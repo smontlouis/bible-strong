@@ -1,11 +1,7 @@
-import * as FileSystem from 'expo-file-system/legacy'
-
 import { getLanguage } from '~i18n'
-import { isVersionInstalled } from '~helpers/biblesDb'
+import { getIfLocalResourceNeedsDownload } from '~features/resources/resourceAvailability'
 import { audioDefault, audioV2 } from './topBibleAudio'
 import { zeroFill } from './zeroFill'
-import { getDatabases, getDbPath } from './databases'
-import { initSQLiteDir } from './sqlite'
 
 export const getIfVersionNeedsUpdate = async (versionId: string) => {
   // Find a way to update the version
@@ -13,48 +9,7 @@ export const getIfVersionNeedsUpdate = async (versionId: string) => {
 }
 
 export const getIfVersionNeedsDownload = async (versionId: string) => {
-  if (versionId === 'INT') {
-    await initSQLiteDir()
-    const dbPath = getDbPath('INTERLINEAIRE', 'fr')
-    const file = await FileSystem.getInfoAsync(dbPath)
-    return !file.exists
-  }
-
-  if (versionId === 'INT_EN') {
-    await initSQLiteDir()
-    const dbPath = getDbPath('INTERLINEAIRE', 'en')
-    const file = await FileSystem.getInfoAsync(dbPath)
-    return !file.exists
-  }
-
-  if (versionId === 'LSGS' || versionId === 'KJVS') {
-    await initSQLiteDir()
-
-    const dbPath = getDatabases().STRONG.path
-    const file = await FileSystem.getInfoAsync(dbPath)
-
-    if (!file.exists) {
-      return true
-    }
-
-    return false
-  }
-
-  // Check bibles.sqlite first
-  const installed = await isVersionInstalled(versionId)
-  if (installed) {
-    return false
-  }
-
-  // Fallback: check legacy JSON file (for versions not yet migrated)
-  const path = `${FileSystem.documentDirectory}bible-${versionId}.json`
-  const file = await FileSystem.getInfoAsync(path)
-
-  if (!file.exists) {
-    return true
-  }
-
-  return false
+  return getIfLocalResourceNeedsDownload({ kind: 'bible', versionId })
 }
 
 const bibleStudyToolsBookMapping = [

@@ -1,7 +1,12 @@
 import type { DownloadItem } from '~state/downloadQueue'
 import { createBibleDownloadItem, createDatabaseDownloadItem } from '~helpers/downloadItemFactory'
+import { databases } from '~helpers/databases'
 import { getDefaultBibleVersion, type ActiveLanguage } from '~helpers/languageUtils'
 import type { DatabaseId, ResourceLanguage } from '~helpers/databaseTypes'
+
+type DownloadableDatabaseResources = ReturnType<typeof databases>
+export type OnboardingDatabaseResourceOption =
+  DownloadableDatabaseResources[keyof DownloadableDatabaseResources]
 
 export type OnboardingResourceSelection =
   | {
@@ -28,6 +33,11 @@ export const getDefaultOnboardingResourceSelection = (
   kind: 'bible',
   versionId: getDefaultBibleVersion(lang),
 })
+
+export const getOnboardingDatabaseResourceOptions = (
+  lang: ResourceLanguage
+): OnboardingDatabaseResourceOption[] =>
+  Object.values(databases(lang)).filter(db => (lang !== 'fr' ? db.id !== 'MHY' : true))
 
 export const createDownloadItemFromOnboardingSelection = (
   resource: OnboardingResourceSelection

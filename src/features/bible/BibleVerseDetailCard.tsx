@@ -4,8 +4,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 
 import waitForStrongDB from '~common/waitForStrongDB'
-import loadStrongReferences from '~helpers/loadStrongReferences'
-import loadStrongVerse from '~helpers/loadStrongVerse'
 import verseToStrong from '~helpers/verseToStrong'
 
 import Empty from '~common/Empty'
@@ -27,6 +25,7 @@ import { getChapterVerseCountSafe } from '~helpers/bibleCoverage'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
+import { localStrongAccess } from '~features/resources/strongAccess'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -104,7 +103,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
   })
 
   const loadPage = async () => {
-    const strongVerse = await loadStrongVerse(verse)
+    const strongVerse = await localStrongAccess.loadVerse(verse)
 
     if (!strongVerse || 'error' in strongVerse || !strongVerse.Texte) {
       setState(prev => ({
@@ -130,7 +129,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
 
     setState(prev => ({ ...prev, formattedTexte }))
 
-    const strongReferencesResult = await loadStrongReferences(references, verse.Livre)
+    const strongReferencesResult = await localStrongAccess.loadReferences(references, verse.Livre)
     if (!strongReferencesResult || 'error' in strongReferencesResult) {
       setState(prev => ({
         ...prev,

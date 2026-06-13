@@ -7,7 +7,7 @@ import { useWindowDimensions } from 'react-native'
 import { BibleTab, useBibleTabActions } from 'src/state/tabs'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import loadBibleChapter from '~helpers/loadBibleChapter'
+import { localBibleContentAccess } from '~features/resources/bibleContentAccess'
 import { useQuery } from '~helpers/react-query-lite'
 
 type VerseSelectorPopupProps = {
@@ -28,7 +28,7 @@ export const VerseSelectorPopup = ({ bibleAtom, children }: VerseSelectorPopupPr
 
   const { data: verses } = useQuery({
     queryKey: ['bible', version, book.Numero.toString(), chapter.toString()],
-    queryFn: () => loadBibleChapter(book.Numero, chapter, version),
+    queryFn: () => localBibleContentAccess.loadChapter({ book: book.Numero, chapter, version }),
   })
 
   const ITEM_WIDTH = 40

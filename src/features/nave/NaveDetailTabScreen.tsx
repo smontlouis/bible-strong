@@ -21,7 +21,7 @@ import waitForNaveDB from '~common/waitForNaveDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
-import loadNaveItem, { type NaveItemRow } from '~helpers/loadNaveItem'
+import { localNaveAccess, type NaveItemRow } from '~features/resources/naveAccess'
 import useHTMLView, { type HTMLViewLinkPayload } from '~helpers/useHTMLView'
 import { RootState } from '~redux/modules/reducer'
 import { makeNaveTagsSelector } from '~redux/selectors/bible'
@@ -98,7 +98,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
 
   useEffect(() => {
     if (!name_lower) return
-    loadNaveItem(name_lower).then(result => {
+    localNaveAccess.loadItem(name_lower).then(result => {
       if (!result || 'error' in result) return
       setNaveItem(result)
       addHistory({

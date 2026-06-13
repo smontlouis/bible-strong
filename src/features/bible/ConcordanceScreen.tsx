@@ -11,8 +11,8 @@ import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Text from '~common/ui/Text'
 import { DatabaseError } from '~helpers/catchDatabaseError'
-import loadStrongVersesCountByBook from '~helpers/loadStrongVersesCountByBook'
 import useAsync from '~helpers/useAsync'
+import { localStrongAccess } from '~features/resources/strongAccess'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
@@ -48,7 +48,7 @@ const ConcordanceScreen = () => {
   const book = params.book ? Number(params.book) : 0
 
   const { data: versesCountByBook, status } = useAsync(
-    async () => await loadStrongVersesCountByBook(book, strongReference.Code)
+    async () => await localStrongAccess.loadVersesCountByBook(book, strongReference.Code)
   )
   const data = hasDatabaseError(versesCountByBook) ? [] : versesCountByBook
 

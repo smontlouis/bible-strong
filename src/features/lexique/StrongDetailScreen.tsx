@@ -23,9 +23,6 @@ import StylizedHTMLView from '~common/StylizedHTMLView'
 import waitForStrongDB from '~common/waitForStrongDB'
 
 import capitalize from '~helpers/capitalize'
-import loadFirstFoundVerses from '~helpers/loadFirstFoundVerses'
-import loadStrongReference from '~helpers/loadStrongReference'
-import loadStrongVersesCount from '~helpers/loadStrongVersesCount'
 
 import { produce } from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
@@ -47,6 +44,7 @@ import type { RelationEndpoint } from '~redux/modules/user'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import booksDesc from '~assets/bible_versions/books-desc'
+import { localStrongAccess } from '~features/resources/strongAccess'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -113,7 +111,7 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
     let loadedStrongReference = strongReferenceParam
 
     if (reference) {
-      const result = await loadStrongReference(reference, book || 1)
+      const result = await localStrongAccess.loadReference(reference, book || 1)
       if (!result || 'error' in result) {
         setError(result && 'error' in result ? result.error : undefined)
         return
@@ -132,8 +130,11 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
       type: 'strong',
     })
     setStrongReference(loadedStrongReference)
-    const firstFoundVersesResult = await loadFirstFoundVerses(book || 1, loadedStrongReference.Code)
-    const strongVersesCountResult = await loadStrongVersesCount(
+    const firstFoundVersesResult = await localStrongAccess.loadFirstFoundVerses(
+      book || 1,
+      loadedStrongReference.Code
+    )
+    const strongVersesCountResult = await localStrongAccess.loadVersesCount(
       book || 1,
       loadedStrongReference.Code
     )

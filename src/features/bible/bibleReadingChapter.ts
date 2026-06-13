@@ -1,16 +1,16 @@
 import type { Pericope, Verse } from '~common/types'
 import { BibleError, BibleChapterResult } from '~helpers/bibleErrors'
-import getBiblePericope from '~helpers/getBiblePericope'
-import loadBibleChapter from '~helpers/loadBibleChapter'
-import { loadRedWords } from '~helpers/loadRedWords'
-import loadMhyComments from '~helpers/loadMhyComments'
+import { localBibleContentAccess } from '~features/resources/bibleContentAccess'
+import {
+  localBibleReadingResourceAccess,
+  type RedWordsByVerse,
+} from '~features/resources/bibleReadingResourceAccess'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import type { VersionCode } from '~state/tabs'
 import type { ParallelVerse } from './BibleDOM/BibleDOMWrapper'
 
-type RedWordsRange = { start: number; end: number }
-export type RedWordsByVerse = Record<string, RedWordsRange[]>
 export type CommentsByVerse = Record<string, string>
+export type { RedWordsByVerse }
 
 export interface BibleReadingChapterRequest {
   book: number
@@ -35,8 +35,8 @@ export const loadBibleReadingMain = async ({
   version,
 }: BibleReadingChapterRequest): Promise<BibleReadingMainResult> => {
   const [pericope, mainResult] = await Promise.all([
-    getBiblePericope(version),
-    loadBibleChapter(book, chapter, version),
+    localBibleReadingResourceAccess.loadPericope(version),
+    localBibleContentAccess.loadChapter({ book, chapter, version }),
   ])
 
   return {
@@ -53,7 +53,9 @@ export const loadBibleReadingParallelVerses = async ({
   if (!parallelVersions.length) return []
 
   const parallelResults = await Promise.all(
-    parallelVersions.map(parallelVersion => loadBibleChapter(book, chapter, parallelVersion))
+    parallelVersions.map(parallelVersion =>
+      localBibleContentAccess.loadChapter({ book, chapter, version: parallelVersion })
+    )
   )
 
   return parallelResults.map((result, index) => {
@@ -81,7 +83,11 @@ export const loadBibleReadingSecondaryVerses = async ({
 }: BibleReadingExtrasRequest): Promise<Verse[] | null> => {
   if (version !== 'INT' && version !== 'INT_EN') return null
 
-  const secondaryResult = await loadBibleChapter(book, chapter, getDefaultBibleVersion(lang))
+  const secondaryResult = await localBibleContentAccess.loadChapter({
+    book,
+    chapter,
+    version: getDefaultBibleVersion(lang),
+  })
   if (secondaryResult.success && secondaryResult.data) {
     return secondaryResult.data as Verse[]
   }
@@ -96,7 +102,7 @@ export const loadBibleReadingComments = async ({
 }: BibleReadingExtrasRequest): Promise<CommentsByVerse | null> => {
   if (!commentsDisplay) return null
 
-  const comments = await loadMhyComments(book, chapter)
+  const comments = await localBibleReadingResourceAccess.loadMhyComments(book, chapter)
   if (!comments || 'error' in comments) return null
 
   return JSON.parse(comments.commentaires) as CommentsByVerse
@@ -106,7 +112,7 @@ export const loadBibleReadingRedWords = async ({
   version,
 }: BibleReadingChapterRequest): Promise<RedWordsByVerse | null> => {
   try {
-    return await loadRedWords(version)
+    return await localBibleReadingResourceAccess.loadRedWords(version)
   } catch {
     return null
   }

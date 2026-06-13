@@ -8,7 +8,7 @@ import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import loadDictionnaireItemByRowId from '~helpers/loadDictionnaireItemByRowId'
+import { localDictionaryAccess } from '~features/resources/dictionaryAccess'
 import useLanguage from '~helpers/useLanguage'
 import RandomButton from './RandomButton'
 import waitForDictionnaireWidget from './waitForDictionnaireWidget'
@@ -30,7 +30,7 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
       if (!startRandom) return
 
       // UGLY HACK
-      const strongReference = await loadDictionnaireItemByRowId(
+      const strongReference = await localDictionaryAccess.loadItemByRowId(
         lang === 'fr' ? randomIntFromInterval(5437, 10872) : randomIntFromInterval(1, 8620)
       )
       if (!strongReference || 'error' in strongReference) {

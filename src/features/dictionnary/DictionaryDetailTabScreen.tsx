@@ -24,7 +24,7 @@ import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
-import loadDictionnaireItem, { type DictionaryItem } from '~helpers/loadDictionnaireItem'
+import { localDictionaryAccess, type DictionaryItem } from '~features/resources/dictionaryAccess'
 import { RootState } from '~redux/modules/reducer'
 import { makeWordTagsSelector } from '~redux/selectors/bible'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
@@ -101,8 +101,8 @@ const DictionnaryDetailScreen = ({
 
   useEffect(() => {
     if (!word) return
-    loadDictionnaireItem(word).then(result => {
-      setDictionnaireItem(result)
+    localDictionaryAccess.loadItem(word).then(result => {
+      setDictionnaireItem(result ?? null)
 
       addHistory({
         word,

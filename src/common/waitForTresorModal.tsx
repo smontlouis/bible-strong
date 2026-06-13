@@ -1,89 +1,33 @@
-import * as FileSystem from 'expo-file-system/legacy'
-import React, { useEffect, useState } from 'react'
-
-import { toast } from '~helpers/toast'
+import React, { useState } from 'react'
 
 import { useTranslation } from 'react-i18next'
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
-import { getDbPath } from '~helpers/databases'
-import { getDatabaseUrl } from '~helpers/firebase'
-import { dbManager, initSharedSQLiteDir } from '~helpers/sqlite'
+import { useResourceDatabaseAccess } from './resourceDatabaseAccess'
 import Box from './ui/Box'
 import Progress from './ui/Progress'
 
 const TRESOR_FILE_SIZE = 5434368
-const downloadState = window as Window & { tresorDownloadHasStarted?: boolean }
 
 export const useWaitForDatabase = () => {
-  const { t } = useTranslation()
   const [isLoading, setLoading] = useState(true)
   const [proposeDownload, setProposeDownload] = useState(false)
   const [startDownload, setStartDownload] = useState(false)
   const [progress, setProgress] = useState(0)
 
-  useEffect(() => {
-    // TRESOR is a shared database, use 'fr' as default (doesn't matter for shared DBs)
-    const db = dbManager.getDB('TRESOR', 'fr')
-
-    if (db.get()) {
-      setLoading(false)
-    } else {
-      const loadDBAsync = async () => {
-        const dbPath = getDbPath('TRESOR', 'fr')
-        const dbFile = await FileSystem.getInfoAsync(dbPath)
-
-        if (!dbFile.exists) {
-          // Waiting for user to accept to download
-          if (!startDownload) {
-            setProposeDownload(true)
-            return
-          }
-
-          try {
-            if (!downloadState.tresorDownloadHasStarted) {
-              downloadState.tresorDownloadHasStarted = true
-
-              const sqliteDbUri = getDatabaseUrl('TRESOR', 'fr')
-
-              console.log(`[Tresor] Downloading ${sqliteDbUri} to ${dbPath}`)
-
-              await initSharedSQLiteDir()
-
-              await FileSystem.createDownloadResumable(
-                sqliteDbUri,
-                dbPath,
-                undefined,
-                ({ totalBytesWritten }) => {
-                  const idxProgress = Math.floor((totalBytesWritten / TRESOR_FILE_SIZE) * 100) / 100
-                  setProgress(idxProgress)
-                }
-              ).downloadAsync()
-
-              await db.init()
-
-              setLoading(false)
-              downloadState.tresorDownloadHasStarted = false
-            }
-          } catch (e) {
-            console.log('[Tresor] Download error:', e)
-            toast.error(
-              t(
-                "Impossible de commencer le téléchargement. Assurez-vous d'être connecté à internet."
-              )
-            )
-            setProposeDownload(true)
-            setStartDownload(false)
-          }
-        } else {
-          await db.init()
-          setLoading(false)
-        }
-      }
-
-      loadDBAsync()
-    }
-  }, [startDownload, t])
+  useResourceDatabaseAccess({
+    dbId: 'TRESOR',
+    fileSize: TRESOR_FILE_SIZE,
+    downloadKeyPrefix: 'tresorDownloadHasStarted',
+    logName: 'Tresor',
+    state: { startDownload, lang: 'fr' },
+    actions: {
+      setLoading,
+      setProposeDownload,
+      setStartDownload,
+      setProgress,
+    },
+  })
 
   return {
     isLoading,

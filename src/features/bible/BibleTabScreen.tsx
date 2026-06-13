@@ -1,4 +1,3 @@
-import * as FileSystem from 'expo-file-system/legacy'
 import { produce } from 'immer'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -15,7 +14,7 @@ import sunsetColors from '~themes/sunsetColors'
 import BibleViewer from './BibleViewer'
 
 import { atom, getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
-import { getDatabases } from '~helpers/databases'
+import { getIfLocalResourceNeedsDownload } from '~features/resources/resourceAvailability'
 import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { BibleTab } from '../../state/tabs'
@@ -58,14 +57,7 @@ const BibleTabScreen = ({ bibleAtom, isFormSheet }: BibleTabScreenProps) => {
   )
 
   const getIfMhyCommentsNeedsDownload = async () => {
-    const path = getDatabases().MHY.path
-    const file = await FileSystem.getInfoAsync(path)
-
-    if (!file.exists) {
-      return true
-    }
-
-    return false
+    return getIfLocalResourceNeedsDownload({ kind: 'database', databaseId: 'MHY' })
   }
 
   useEffect(() => {

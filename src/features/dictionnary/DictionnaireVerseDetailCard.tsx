@@ -11,18 +11,16 @@ import Paragraph from '~common/ui/Paragraph'
 import RoundedCorner from '~common/ui/RoundedCorner'
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { CarouselProvider } from '~helpers/CarouselContext'
-import { getChapterVerses } from '~helpers/biblesDb'
 
 import { useTranslation } from 'react-i18next'
 import { ScrollView } from 'react-native'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import { Verse } from '~common/types'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
+import { localBibleContentAccess } from '~features/resources/bibleContentAccess'
 import captureError from '~helpers/captureError'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
-import type { DictionaryItem } from '~helpers/loadDictionnaireItem'
-import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
-import loadDictionnaireWords from '~helpers/loadDictionnaireWords'
+import { localDictionaryAccess, type DictionaryItem } from '~features/resources/dictionaryAccess'
 import { QueryStatus, useQuery } from '~helpers/react-query-lite'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
@@ -129,7 +127,11 @@ const useFormattedText = ({
       setCurrentWord(wordsInVerse[0])
 
       const defaultVersion = getDefaultBibleVersion(resourceLang)
-      const chapterVerses = await getChapterVerses(defaultVersion, Number(Livre), Number(Chapitre))
+      const chapterVerses = await localBibleContentAccess.loadChapterVerses(
+        defaultVersion,
+        Number(Livre),
+        Number(Chapitre)
+      )
       const bible = {
         [Livre]: {
           [Chapitre]: Object.fromEntries(chapterVerses.map(v => [v.Verset, v.Texte])),
@@ -148,7 +150,7 @@ const useFormattedText = ({
     queryFn: () =>
       Promise.all(
         (wordsInVerse ?? []).map(async w => {
-          const word = await loadDictionnaireItem(w)
+          const word = await localDictionaryAccess.loadItem(w)
           return word
         })
       ),
@@ -191,7 +193,7 @@ const DictionnaireVerseDetailScreen = ({
     data: wordsInVerse,
   } = useQuery<string[]>({
     queryKey: ['dictionaryWords', `${Livre}-${Chapitre}-${Verset}`, resourceLang],
-    queryFn: () => loadDictionnaireWords(`${Livre}-${Chapitre}-${Verset}`),
+    queryFn: () => localDictionaryAccess.loadWordsForVerse(`${Livre}-${Chapitre}-${Verset}`),
   })
 
   const { wordsError, formattedText, words, currentWord, setCurrentWord, versesInCurrentChapter } =

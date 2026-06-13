@@ -14,8 +14,6 @@ import SectionList from '~common/ui/SectionList'
 import Text from '~common/ui/Text'
 import { getFirstLetterFrom } from '~helpers/alphabet'
 import { DatabaseError } from '~helpers/catchDatabaseError'
-import loadLexiqueByLetter, { type LexiqueRow } from '~helpers/loadLexiqueByLetter'
-import loadLexiqueBySearch from '~helpers/loadLexiqueBySearch'
 
 import { useResultsByLetterOrSearch, useSearchValue } from './useUtilities'
 
@@ -29,6 +27,7 @@ import { toast } from '~helpers/toast'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
 import { useResourceLanguage } from 'src/state/resourcesLanguage'
+import { localStrongAccess, type LexiqueRow } from '~features/resources/strongAccess'
 
 interface LexiqueSection {
   title: string
@@ -98,8 +97,8 @@ const LexiqueListScreen = ({
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
 
   const { results, isLoading } = useResultsByLetterOrSearch(
-    { query: loadLexiqueBySearch, value: debouncedSearchValue },
-    { query: loadLexiqueByLetter, value: letter }
+    { query: localStrongAccess.searchLexicon, value: debouncedSearchValue },
+    { query: localStrongAccess.listLexiconByLetter, value: letter }
   )
 
   const lexiqueResults = Array.isArray(results) ? results : []

@@ -13,12 +13,11 @@ import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import waitForTresorModal from '~common/waitForTresorModal'
 import getVersesContent from '~helpers/getVersesContent'
-import loadTresorReferences from '~helpers/loadTresorReferences'
+import {
+  localBibleReadingResourceAccess,
+  type TresorReferences,
+} from '~features/resources/bibleReadingResourceAccess'
 import { VersionCode } from '../../state/tabs'
-
-type TresorReferences = {
-  commentaires?: string
-}
 
 const ReferenceItem = ({ reference, version }: { reference: string; version: VersionCode }) => {
   const [Verse, setVerse] = useState<VerseRefContent | null>(null)
@@ -66,7 +65,7 @@ export const ReferenceCard = waitForTresorModal(
 
     const { isLoading, error, data } = useQuery({
       queryKey: ['references', selectedVerse],
-      queryFn: () => loadTresorReferences(selectedVerse),
+      queryFn: () => localBibleReadingResourceAccess.loadTresorReferences(selectedVerse),
     })
 
     if (error) {

@@ -11,8 +11,11 @@ import Header from '~common/Header'
 import Link from '~common/Link'
 import SearchInput from '~common/SearchInput'
 import Loading from '~common/Loading'
-import loadNaveByLetter, { type NaveLetterRow } from '~helpers/loadNaveByLetter'
-import loadNaveBySearch, { type NaveSearchRow } from '~helpers/loadNaveBySearch'
+import {
+  localNaveAccess,
+  type NaveLetterRow,
+  type NaveSearchRow,
+} from '~features/resources/naveAccess'
 import Empty from '~common/Empty'
 import AlphabetList from '~common/AlphabetList'
 import SectionTitle from '~common/SectionTitle'
@@ -97,8 +100,8 @@ const NaveListScreen = ({
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
 
   const { results, isLoading } = useResultsByLetterOrSearch(
-    { query: loadNaveBySearch, value: debouncedSearchValue },
-    { query: loadNaveByLetter, value: letter }
+    { query: localNaveAccess.search, value: debouncedSearchValue },
+    { query: localNaveAccess.listByLetter, value: letter }
   )
   const naveResults = Array.isArray(results) ? (results as NaveRow[]) : []
   const sectionResults = useSectionResults(naveResults)

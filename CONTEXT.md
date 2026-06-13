@@ -58,6 +58,7 @@ Core user activities:
 | Interlinear | Original-language verse display with lexical/translation alignment. | `src/helpers/loadInterlineaireChapter.ts`, `src/features/bible/BibleDOM/InterlinearVerse*` |
 | Nave | Nave's topical Bible resource. | `src/features/nave/`, `src/helpers/loadNaveItem.ts` |
 | Resource database | Downloaded SQLite/JSON file used by study features. | `src/helpers/databases.ts`, `src/helpers/databaseTypes.ts` |
+| Resource access | Domain interface used by app surfaces to read Bible/resource content without knowing whether the data comes from local storage, partial cache, or a future remote adapter. | `src/features/resources/` |
 | Tab group | A group of app tabs persisted through Jotai/MMKV and optionally synced. | `src/state/tabs.ts`, `src/state/tabGroups.ts` |
 
 ## Domain Relationships
@@ -105,6 +106,7 @@ Core user activities:
 ## Invariants
 
 - The app is expected to work offline for already downloaded Bible/resource data.
+- Resource access modules should preserve the offline behavior of downloaded Bible/resource data while creating seams for future remote adapters.
 - User-owned Bible data lives primarily in Redux state and is persisted locally through MMKV/redux-persist.
 - Authenticated user data can sync with Firestore; changes to sync semantics are sensitive.
 - Bible/resource database files are language-aware: many resources are language-specific, while some are shared.

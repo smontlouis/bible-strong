@@ -1,5 +1,5 @@
 import type { SearchResult } from '~helpers/biblesDb'
-import type { LexiqueRow } from '~helpers/loadLexiqueByLetter'
+import type { LexiqueRow } from '~features/resources/strongAccess'
 import type { SearchItemType } from '~state/searchFilters'
 import type { SearchResultSection } from './shared/SearchSectionBlock'
 import {

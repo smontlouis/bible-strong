@@ -11,16 +11,16 @@ import Box, { VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import useBibleVerses from '~helpers/useBibleVerses'
 import useDebounce from '~helpers/useDebounce'
-import loadLexiqueByLetter, { type LexiqueRow } from '~helpers/loadLexiqueByLetter'
-import loadLexiqueBySearch from '~helpers/loadLexiqueBySearch'
-import loadDictionnaireByLetter, {
+import {
+  localDictionaryAccess,
   type DictionnaireLetterRow,
-} from '~helpers/loadDictionnaireByLetter'
-import loadDictionnaireBySearch, {
   type DictionnaireSearchRow,
-} from '~helpers/loadDictionnaireBySearch'
-import loadNaveByLetter, { type NaveLetterRow } from '~helpers/loadNaveByLetter'
-import loadNaveBySearch, { type NaveSearchRow } from '~helpers/loadNaveBySearch'
+} from '~features/resources/dictionaryAccess'
+import {
+  localNaveAccess,
+  type NaveLetterRow,
+  type NaveSearchRow,
+} from '~features/resources/naveAccess'
 import SharedSearchEntityResultRow from '~features/search/shared/SearchEntityResultRow'
 import SearchItemFilterBar, {
   getNextSearchItemFilters,
@@ -48,6 +48,7 @@ import {
   searchReferenceAndStrongTargets,
   type RelationTargetResult,
 } from './targetSearch'
+import { localStrongAccess, type LexiqueRow } from '~features/resources/strongAccess'
 
 type BrowseMode = 'note' | 'link' | 'study' | 'strong' | 'nave' | 'dictionary'
 type NaveRow = NaveLetterRow | NaveSearchRow
@@ -365,8 +366,8 @@ const CreateEntityRelationModal = ({
     setStrongError(null)
 
     const loader = deferredStrongSearchValue.trim()
-      ? loadLexiqueBySearch(deferredStrongSearchValue)
-      : loadLexiqueByLetter(strongLetter)
+      ? localStrongAccess.searchLexicon(deferredStrongSearchValue)
+      : localStrongAccess.listLexiconByLetter(strongLetter)
 
     loader.then(results => {
       if (!isMounted) return
@@ -402,8 +403,8 @@ const CreateEntityRelationModal = ({
     setNaveError(null)
 
     const loader = deferredResourceSearchValue.trim()
-      ? loadNaveBySearch(deferredResourceSearchValue)
-      : loadNaveByLetter(naveLetter)
+      ? localNaveAccess.search(deferredResourceSearchValue)
+      : localNaveAccess.listByLetter(naveLetter)
 
     loader.then(results => {
       if (!isMounted) return
@@ -432,8 +433,8 @@ const CreateEntityRelationModal = ({
     setDictionaryError(null)
 
     const loader = deferredResourceSearchValue.trim()
-      ? loadDictionnaireBySearch(deferredResourceSearchValue)
-      : loadDictionnaireByLetter(dictionaryLetter)
+      ? localDictionaryAccess.search(deferredResourceSearchValue)
+      : localDictionaryAccess.listByLetter(dictionaryLetter)
 
     loader.then(results => {
       if (!isMounted) return

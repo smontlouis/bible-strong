@@ -20,21 +20,16 @@ import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import Progress from '~common/ui/Progress'
 import {
-  getInstalledVersions,
-  searchVerses,
-  searchVersesCount,
-  SearchOptions,
-  SearchSortOrder,
-} from '~helpers/biblesDb'
-import type { SearchResult } from '~helpers/biblesDb'
+  localBibleSearchAccess,
+  type SearchOptions,
+  type SearchResult,
+  type SearchSortOrder,
+} from '~features/resources/bibleSearchAccess'
 import { appLogger } from '~helpers/agentObservability'
 import { DatabaseError } from '~helpers/catchDatabaseError'
-import loadDictionnaireBySearch from '~helpers/loadDictionnaireBySearch'
-import loadLexiqueBySearch from '~helpers/loadLexiqueBySearch'
-import loadLexiqueByLetter, { type LexiqueRow } from '~helpers/loadLexiqueByLetter'
-import loadNaveBySearch from '~helpers/loadNaveBySearch'
-import loadNaveByLetter from '~helpers/loadNaveByLetter'
-import loadDictionnaireByLetter from '~helpers/loadDictionnaireByLetter'
+import { localDictionaryAccess } from '~features/resources/dictionaryAccess'
+import { localNaveAccess } from '~features/resources/naveAccess'
+import { localStrongAccess, type LexiqueRow } from '~features/resources/strongAccess'
 import useDebounce from '~helpers/useDebounce'
 import useBibleVerses from '~helpers/useBibleVerses'
 import { removeBreakLines } from '~helpers/utils'
@@ -180,7 +175,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   // Load installed versions on mount
   useEffect(() => {
     ;(async () => {
-      const versions = await getInstalledVersions()
+      const versions = await localBibleSearchAccess.getInstalledVersions()
       setInstalledVersions(versions)
       setHasInstalledVersions(versions.length > 0)
     })()
@@ -374,8 +369,8 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           'search.sqlite',
           () =>
             Promise.all([
-              searchVerses(debouncedSearchValue, options),
-              searchVersesCount(debouncedSearchValue, options),
+              localBibleSearchAccess.searchVerses(debouncedSearchValue, options),
+              localBibleSearchAccess.searchVersesCount(debouncedSearchValue, options),
             ]),
           {
             queryLength: debouncedSearchValue.length,
@@ -443,8 +438,8 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     setIsStrongSearching(true)
     const loader =
       browseItemType === 'strong' && !trimmed
-        ? loadLexiqueByLetter(strongLetter)
-        : loadLexiqueBySearch(trimmed)
+        ? localStrongAccess.listLexiconByLetter(strongLetter)
+        : localStrongAccess.searchLexicon(trimmed)
 
     loader
       .then(results => {
@@ -495,8 +490,8 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     setIsDictionarySearching(true)
     const loader =
       browseItemType === 'dictionary' && !trimmed
-        ? loadDictionnaireByLetter(dictionaryLetter)
-        : loadDictionnaireBySearch(trimmed)
+        ? localDictionaryAccess.listByLetter(dictionaryLetter)
+        : localDictionaryAccess.search(trimmed)
 
     loader
       .then(results => {
@@ -547,8 +542,8 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     setIsNaveSearching(true)
     const loader =
       browseItemType === 'nave' && !trimmed
-        ? loadNaveByLetter(naveLetter)
-        : loadNaveBySearch(trimmed)
+        ? localNaveAccess.listByLetter(naveLetter)
+        : localNaveAccess.search(trimmed)
 
     loader
       .then(results => {

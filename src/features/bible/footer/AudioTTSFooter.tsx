@@ -13,12 +13,12 @@ import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import * as Sentry from '@sentry/react-native'
 import { Version, getVersions } from '~helpers/bibleVersions'
-import { getChapterVerses } from '~helpers/biblesDb'
 import {
   getNextAvailableChapterLocation,
   getPreviousAvailableChapterLocation,
 } from '~helpers/bibleCoverage'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
+import { localBibleContentAccess } from '~features/resources/bibleContentAccess'
 import AudioContainer from './AudioContainer'
 import BasicFooter from './BasicFooter'
 import ChapterButton from './ChapterButton'
@@ -200,7 +200,7 @@ const useLoadSound = ({
     versesData.current = {}
     ;(async () => {
       try {
-        const rows = await getChapterVerses(version, book.Numero, chapter)
+        const rows = await localBibleContentAccess.loadChapterVerses(version, book.Numero, chapter)
         if (cancelled) return
 
         const obj: Record<number, string> = {}

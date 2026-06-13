@@ -18,18 +18,8 @@ import DownloadSectionHeader from './components/DownloadSectionHeader'
 import GlobalDownloadBar from './components/GlobalDownloadBar'
 import BatchActionBar from './components/BatchActionBar'
 
-import {
-  versions,
-  getIfVersionNeedsDownload,
-  isStrongVersion,
-  type Version,
-} from '~helpers/bibleVersions'
-import {
-  databases,
-  getIfDatabaseNeedsDownloadForLang,
-  getIfDatabaseNeedsDownload,
-  type IdDatabase,
-} from '~helpers/databases'
+import { versions, isStrongVersion, type Version } from '~helpers/bibleVersions'
+import { databases } from '~helpers/databases'
 import {
   LANGUAGE_SPECIFIC_DBS,
   SHARED_DBS,
@@ -37,6 +27,7 @@ import {
   type DatabaseId,
   type ResourceLanguage,
 } from '~helpers/databaseTypes'
+import { isLocalResourceAvailable } from '~features/resources/resourceAvailability'
 import { createBibleDownloadItem, createDatabaseDownloadItem } from '~helpers/downloadItemFactory'
 import { useDownloadQueue } from '~helpers/useDownloadQueue'
 import { isVersionInstalled, removeBibleVersion } from '~helpers/biblesDb'
@@ -239,8 +230,8 @@ function useDownloadedItems() {
     // Check all Bible versions
     for (const vId of Object.keys(versions)) {
       if (vId === 'LSGS' || vId === 'KJVS') continue
-      const needs = await getIfVersionNeedsDownload(vId)
-      if (!needs) set.add(`bible:${vId}`)
+      const available = await isLocalResourceAvailable({ kind: 'bible', versionId: vId })
+      if (available) set.add(`bible:${vId}`)
     }
 
     // Check databases for both languages
@@ -250,15 +241,23 @@ function useDownloadedItems() {
       ).filter(dbId => (lang === 'en' ? !FRENCH_ONLY_DBS.includes(dbId) : true))
 
       for (const dbId of dbIds) {
-        const needs = await getIfDatabaseNeedsDownloadForLang(dbId as IdDatabase, lang)
-        if (!needs) set.add(`database:${dbId}:${lang}`)
+        const available = await isLocalResourceAvailable({
+          kind: 'database',
+          databaseId: dbId,
+          lang,
+        })
+        if (available) set.add(`database:${dbId}:${lang}`)
       }
     }
 
     // Check shared databases
     for (const dbId of SHARED_DBS.filter(d => d !== 'BIBLES')) {
-      const needs = await getIfDatabaseNeedsDownload(dbId as IdDatabase)
-      if (!needs) set.add(`database:${dbId}:fr`)
+      const available = await isLocalResourceAvailable({
+        kind: 'database',
+        databaseId: dbId,
+        lang: 'fr',
+      })
+      if (available) set.add(`database:${dbId}:fr`)
     }
 
     setDownloadedSet(set)

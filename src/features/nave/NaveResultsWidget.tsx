@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import loadNaveBySearch, { type NaveSearchRow } from '~helpers/loadNaveBySearch'
+import { localNaveAccess, type NaveSearchRow } from '~features/resources/naveAccess'
 import { useWaitForDatabase } from '~common/waitForNaveDB'
 import { DatabaseError } from '~helpers/catchDatabaseError'
 
@@ -39,7 +39,7 @@ const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
   const [limit, setLimit] = useState(LIMIT)
 
   const { results } = useResultsByLetterOrSearch({
-    query: loadNaveBySearch,
+    query: localNaveAccess.search,
     value: searchValue,
   })
 

@@ -2,6 +2,7 @@ import type { DownloadItem } from '~state/downloadQueue'
 import {
   createDownloadItemFromOnboardingSelection,
   getDefaultOnboardingResourceSelection,
+  getOnboardingDatabaseResourceOptions,
   getOnboardingResourceSelectionId,
 } from '../onboardingResources'
 
@@ -31,6 +32,14 @@ jest.mock('~helpers/downloadItemFactory', () => ({
   ),
 }))
 
+jest.mock('~helpers/databases', () => ({
+  databases: jest.fn(() => ({
+    STRONG: { id: 'STRONG', name: 'Strong', desc: '', fileSize: 1, path: '' },
+    MHY: { id: 'MHY', name: 'Matthew Henry', desc: '', fileSize: 1, path: '' },
+    NAVE: { id: 'NAVE', name: 'Nave', desc: '', fileSize: 1, path: '' },
+  })),
+}))
+
 describe('onboardingResources', () => {
   it('stores Bible selections as durable identifiers', () => {
     expect(getOnboardingResourceSelectionId({ kind: 'bible', versionId: 'LSG' })).toBe('bible:LSG')
@@ -55,6 +64,11 @@ describe('onboardingResources', () => {
       kind: 'bible',
       versionId: 'LSG',
     })
+  })
+
+  it('hides Matthew Henry comments from non-French onboarding resources', () => {
+    expect(getOnboardingDatabaseResourceOptions('fr').map(db => db.id)).toContain('MHY')
+    expect(getOnboardingDatabaseResourceOptions('en').map(db => db.id)).not.toContain('MHY')
   })
 
   it('converts Bible selections through the download item Adapter', () => {

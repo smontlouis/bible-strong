@@ -16,12 +16,11 @@ import Text from '~common/ui/Text'
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { DatabaseError } from '~helpers/catchDatabaseError'
 import { getFirstLetterFrom } from '~helpers/alphabet'
-import loadDictionnaireByLetter, {
+import {
+  localDictionaryAccess,
   type DictionnaireLetterRow,
-} from '~helpers/loadDictionnaireByLetter'
-import loadDictionnaireBySearch, {
   type DictionnaireSearchRow,
-} from '~helpers/loadDictionnaireBySearch'
+} from '~features/resources/dictionaryAccess'
 import { DictionaryTab } from '../../state/tabs'
 import { useResultsByLetterOrSearch, useSearchValue } from '../lexique/useUtilities'
 import DictionnaireItem from './DictionnaireItem'
@@ -99,8 +98,8 @@ const DictionaryListScreen = ({
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
 
   const { results, isLoading } = useResultsByLetterOrSearch(
-    { query: loadDictionnaireBySearch, value: debouncedSearchValue },
-    { query: loadDictionnaireByLetter, value: letter }
+    { query: localDictionaryAccess.search, value: debouncedSearchValue },
+    { query: localDictionaryAccess.listByLetter, value: letter }
   )
 
   const dictionaryResults = Array.isArray(results) ? results : []
