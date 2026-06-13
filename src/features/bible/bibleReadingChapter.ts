@@ -1,10 +1,10 @@
 import type { Pericope, Verse } from '~common/types'
 import { BibleError, BibleChapterResult } from '~helpers/bibleErrors'
-import { localBibleContentAccess } from '~features/resources/bibleContentAccess'
+import type { RedWordsByVerse } from '~features/resources/bibleReadingResourceAccess'
 import {
-  localBibleReadingResourceAccess,
-  type RedWordsByVerse,
-} from '~features/resources/bibleReadingResourceAccess'
+  defaultResourceAccess,
+  type ResourceAccessRegistry,
+} from '~features/resources/resourceAccess'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import type { VersionCode } from '~state/tabs'
 import type { ParallelVerse } from './BibleDOM/BibleDOMWrapper'
@@ -29,14 +29,13 @@ export interface BibleReadingMainResult {
   mainResult: BibleChapterResult<Verse[] | null>
 }
 
-export const loadBibleReadingMain = async ({
-  book,
-  chapter,
-  version,
-}: BibleReadingChapterRequest): Promise<BibleReadingMainResult> => {
+export const loadBibleReadingMain = async (
+  { book, chapter, version }: BibleReadingChapterRequest,
+  resourceAccess: ResourceAccessRegistry = defaultResourceAccess
+): Promise<BibleReadingMainResult> => {
   const [pericope, mainResult] = await Promise.all([
-    localBibleReadingResourceAccess.loadPericope(version),
-    localBibleContentAccess.loadChapter({ book, chapter, version }),
+    resourceAccess.bibleReading.loadPericope(version),
+    resourceAccess.bibleContent.loadChapter({ book, chapter, version }),
   ])
 
   return {
@@ -45,16 +44,15 @@ export const loadBibleReadingMain = async ({
   }
 }
 
-export const loadBibleReadingParallelVerses = async ({
-  book,
-  chapter,
-  parallelVersions,
-}: BibleReadingExtrasRequest): Promise<ParallelVerse[]> => {
+export const loadBibleReadingParallelVerses = async (
+  { book, chapter, parallelVersions }: BibleReadingExtrasRequest,
+  resourceAccess: ResourceAccessRegistry = defaultResourceAccess
+): Promise<ParallelVerse[]> => {
   if (!parallelVersions.length) return []
 
   const parallelResults = await Promise.all(
     parallelVersions.map(parallelVersion =>
-      localBibleContentAccess.loadChapter({ book, chapter, version: parallelVersion })
+      resourceAccess.bibleContent.loadChapter({ book, chapter, version: parallelVersion })
     )
   )
 
@@ -75,15 +73,13 @@ export const loadBibleReadingParallelVerses = async ({
   })
 }
 
-export const loadBibleReadingSecondaryVerses = async ({
-  book,
-  chapter,
-  version,
-  lang,
-}: BibleReadingExtrasRequest): Promise<Verse[] | null> => {
+export const loadBibleReadingSecondaryVerses = async (
+  { book, chapter, version, lang }: BibleReadingExtrasRequest,
+  resourceAccess: ResourceAccessRegistry = defaultResourceAccess
+): Promise<Verse[] | null> => {
   if (version !== 'INT' && version !== 'INT_EN') return null
 
-  const secondaryResult = await localBibleContentAccess.loadChapter({
+  const secondaryResult = await resourceAccess.bibleContent.loadChapter({
     book,
     chapter,
     version: getDefaultBibleVersion(lang),
@@ -95,24 +91,24 @@ export const loadBibleReadingSecondaryVerses = async ({
   return null
 }
 
-export const loadBibleReadingComments = async ({
-  book,
-  chapter,
-  commentsDisplay,
-}: BibleReadingExtrasRequest): Promise<CommentsByVerse | null> => {
+export const loadBibleReadingComments = async (
+  { book, chapter, commentsDisplay }: BibleReadingExtrasRequest,
+  resourceAccess: ResourceAccessRegistry = defaultResourceAccess
+): Promise<CommentsByVerse | null> => {
   if (!commentsDisplay) return null
 
-  const comments = await localBibleReadingResourceAccess.loadMhyComments(book, chapter)
+  const comments = await resourceAccess.bibleReading.loadMhyComments(book, chapter)
   if (!comments || 'error' in comments) return null
 
   return JSON.parse(comments.commentaires) as CommentsByVerse
 }
 
-export const loadBibleReadingRedWords = async ({
-  version,
-}: BibleReadingChapterRequest): Promise<RedWordsByVerse | null> => {
+export const loadBibleReadingRedWords = async (
+  { version }: BibleReadingChapterRequest,
+  resourceAccess: ResourceAccessRegistry = defaultResourceAccess
+): Promise<RedWordsByVerse | null> => {
   try {
-    return await localBibleReadingResourceAccess.loadRedWords(version)
+    return await resourceAccess.bibleReading.loadRedWords(version)
   } catch {
     return null
   }

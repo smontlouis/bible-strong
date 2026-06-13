@@ -16,11 +16,11 @@ import Text from '~common/ui/Text'
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { DatabaseError } from '~helpers/catchDatabaseError'
 import { getFirstLetterFrom } from '~helpers/alphabet'
-import {
-  localDictionaryAccess,
-  type DictionnaireLetterRow,
-  type DictionnaireSearchRow,
+import type {
+  DictionnaireLetterRow,
+  DictionnaireSearchRow,
 } from '~features/resources/dictionaryAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 import { DictionaryTab } from '../../state/tabs'
 import { useResultsByLetterOrSearch, useSearchValue } from '../lexique/useUtilities'
 import DictionnaireItem from './DictionnaireItem'
@@ -90,6 +90,7 @@ const DictionaryListScreen = ({
   onWordSelect,
 }: DictionaryListScreenProps) => {
   const { t } = useTranslation()
+  const resources = useResourceAccess()
   const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
   const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
@@ -98,8 +99,8 @@ const DictionaryListScreen = ({
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
 
   const { results, isLoading } = useResultsByLetterOrSearch(
-    { query: localDictionaryAccess.search, value: debouncedSearchValue },
-    { query: localDictionaryAccess.listByLetter, value: letter }
+    { query: resources.dictionary.search, value: debouncedSearchValue },
+    { query: resources.dictionary.listByLetter, value: letter }
   )
 
   const dictionaryResults = Array.isArray(results) ? results : []

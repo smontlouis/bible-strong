@@ -25,7 +25,7 @@ import { getChapterVerseCountSafe } from '~helpers/bibleCoverage'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
-import { localStrongAccess } from '~features/resources/strongAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -86,6 +86,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
   const theme = useTheme()
   const { t } = useTranslation()
   const defaultVersion = useDefaultBibleVersion()
+  const resources = useResourceAccess()
   const carouselRef = useRef<ICarouselInstance>(null)
   const [boxHeight, setBoxHeight] = useState(0)
   const {
@@ -103,7 +104,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
   })
 
   const loadPage = async () => {
-    const strongVerse = await localStrongAccess.loadVerse(verse)
+    const strongVerse = await resources.strong.loadVerse(verse)
 
     if (!strongVerse || 'error' in strongVerse || !strongVerse.Texte) {
       setState(prev => ({
@@ -129,7 +130,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
 
     setState(prev => ({ ...prev, formattedTexte }))
 
-    const strongReferencesResult = await localStrongAccess.loadReferences(references, verse.Livre)
+    const strongReferencesResult = await resources.strong.loadReferences(references, verse.Livre)
     if (!strongReferencesResult || 'error' in strongReferencesResult) {
       setState(prev => ({
         ...prev,

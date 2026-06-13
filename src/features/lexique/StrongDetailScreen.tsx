@@ -44,7 +44,7 @@ import type { RelationEndpoint } from '~redux/modules/user'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import booksDesc from '~assets/bible_versions/books-desc'
-import { localStrongAccess } from '~features/resources/strongAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -72,6 +72,7 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
   const router = useRouter()
   const pushRouteOnce = usePushRouteOnce()
   const [strongTab, setStrongTab] = useAtom(strongAtom)
+  const resources = useResourceAccess()
   const { isInTab } = useTabContext()
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : !isInTab
@@ -111,7 +112,7 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
     let loadedStrongReference = strongReferenceParam
 
     if (reference) {
-      const result = await localStrongAccess.loadReference(reference, book || 1)
+      const result = await resources.strong.loadReference(reference, book || 1)
       if (!result || 'error' in result) {
         setError(result && 'error' in result ? result.error : undefined)
         return
@@ -130,11 +131,11 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
       type: 'strong',
     })
     setStrongReference(loadedStrongReference)
-    const firstFoundVersesResult = await localStrongAccess.loadFirstFoundVerses(
+    const firstFoundVersesResult = await resources.strong.loadFirstFoundVerses(
       book || 1,
       loadedStrongReference.Code
     )
-    const strongVersesCountResult = await localStrongAccess.loadVersesCount(
+    const strongVersesCountResult = await resources.strong.loadVersesCount(
       book || 1,
       loadedStrongReference.Code
     )

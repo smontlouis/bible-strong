@@ -19,17 +19,15 @@ import { Chip } from '~common/ui/NewChip'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import Progress from '~common/ui/Progress'
-import {
-  localBibleSearchAccess,
-  type SearchOptions,
-  type SearchResult,
-  type SearchSortOrder,
+import type {
+  SearchOptions,
+  SearchResult,
+  SearchSortOrder,
 } from '~features/resources/bibleSearchAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 import { appLogger } from '~helpers/agentObservability'
 import { DatabaseError } from '~helpers/catchDatabaseError'
-import { localDictionaryAccess } from '~features/resources/dictionaryAccess'
-import { localNaveAccess } from '~features/resources/naveAccess'
-import { localStrongAccess, type LexiqueRow } from '~features/resources/strongAccess'
+import type { LexiqueRow } from '~features/resources/strongAccess'
 import useDebounce from '~helpers/useDebounce'
 import useBibleVerses from '~helpers/useBibleVerses'
 import { removeBreakLines } from '~helpers/utils'
@@ -98,6 +96,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const theme = useTheme()
   const keyboardFooterBottom = useKeyboardFooterBottom(SEARCH_ALPHABET_FOOTER_HEIGHT)
   const openStudyObject = useOpenStudyObject()
+  const resources = useResourceAccess()
   const notes = useSelector((state: RootState) => state.user.bible.notes)
   const links = useSelector((state: RootState) => state.user.bible.links)
   const studies = useSelector((state: RootState) => state.user.bible.studies)
@@ -175,11 +174,11 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   // Load installed versions on mount
   useEffect(() => {
     ;(async () => {
-      const versions = await localBibleSearchAccess.getInstalledVersions()
+      const versions = await resources.bibleSearch.getInstalledVersions()
       setInstalledVersions(versions)
       setHasInstalledVersions(versions.length > 0)
     })()
-  }, [])
+  }, [resources.bibleSearch])
 
   const books = [
     {
@@ -369,8 +368,8 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           'search.sqlite',
           () =>
             Promise.all([
-              localBibleSearchAccess.searchVerses(debouncedSearchValue, options),
-              localBibleSearchAccess.searchVersesCount(debouncedSearchValue, options),
+              resources.bibleSearch.searchVerses(debouncedSearchValue, options),
+              resources.bibleSearch.searchVersesCount(debouncedSearchValue, options),
             ]),
           {
             queryLength: debouncedSearchValue.length,
@@ -438,8 +437,8 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     setIsStrongSearching(true)
     const loader =
       browseItemType === 'strong' && !trimmed
-        ? localStrongAccess.listLexiconByLetter(strongLetter)
-        : localStrongAccess.searchLexicon(trimmed)
+        ? resources.strong.listLexiconByLetter(strongLetter)
+        : resources.strong.searchLexicon(trimmed)
 
     loader
       .then(results => {
@@ -466,6 +465,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     strongDb.isLoading,
     strongDb.proposeDownload,
     strongLetter,
+    resources.strong,
   ])
 
   useEffect(() => {
@@ -490,8 +490,8 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     setIsDictionarySearching(true)
     const loader =
       browseItemType === 'dictionary' && !trimmed
-        ? localDictionaryAccess.listByLetter(dictionaryLetter)
-        : localDictionaryAccess.search(trimmed)
+        ? resources.dictionary.listByLetter(dictionaryLetter)
+        : resources.dictionary.search(trimmed)
 
     loader
       .then(results => {
@@ -518,6 +518,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     searchValue,
     dictionaryDb.isLoading,
     dictionaryDb.proposeDownload,
+    resources.dictionary,
   ])
 
   useEffect(() => {
@@ -542,8 +543,8 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     setIsNaveSearching(true)
     const loader =
       browseItemType === 'nave' && !trimmed
-        ? localNaveAccess.listByLetter(naveLetter)
-        : localNaveAccess.search(trimmed)
+        ? resources.nave.listByLetter(naveLetter)
+        : resources.nave.search(trimmed)
 
     loader
       .then(results => {
@@ -570,6 +571,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     naveDb.isLoading,
     naveDb.proposeDownload,
     searchValue,
+    resources.nave,
   ])
 
   const searchModel = getSearchResultsModel({

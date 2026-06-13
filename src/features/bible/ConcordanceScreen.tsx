@@ -12,7 +12,7 @@ import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Text from '~common/ui/Text'
 import { DatabaseError } from '~helpers/catchDatabaseError'
 import useAsync from '~helpers/useAsync'
-import { localStrongAccess } from '~features/resources/strongAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
@@ -40,6 +40,7 @@ const hasDatabaseError = (value: unknown): value is DatabaseError =>
 
 const ConcordanceScreen = () => {
   const pushRouteOnce = usePushRouteOnce()
+  const resources = useResourceAccess()
   const params = useLocalSearchParams<{ strongReference?: string; book?: string }>()
   const canGoBackInStack = useCanGoBackInStack()
 
@@ -48,7 +49,7 @@ const ConcordanceScreen = () => {
   const book = params.book ? Number(params.book) : 0
 
   const { data: versesCountByBook, status } = useAsync(
-    async () => await localStrongAccess.loadVersesCountByBook(book, strongReference.Code)
+    async () => await resources.strong.loadVersesCountByBook(book, strongReference.Code)
   )
   const data = hasDatabaseError(versesCountByBook) ? [] : versesCountByBook
 

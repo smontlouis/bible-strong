@@ -4,10 +4,8 @@ import { LinearGradient } from 'expo-linear-gradient'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import {
-  localDictionaryAccess,
-  type DictionnaireSearchRow,
-} from '~features/resources/dictionaryAccess'
+import type { DictionnaireSearchRow } from '~features/resources/dictionaryAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 import { useWaitForDatabase } from '~common/waitForDictionnaireDB'
 import { DatabaseError } from '~helpers/catchDatabaseError'
 
@@ -38,11 +36,12 @@ const isDatabaseError = (value: unknown): value is DatabaseError =>
   typeof value === 'object' && value !== null && 'error' in value
 
 const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
+  const resources = useResourceAccess()
   const [error, setError] = useState<DatabaseError['error'] | null>(null)
   const [limit, setLimit] = useState(LIMIT)
 
   const { results } = useResultsByLetterOrSearch({
-    query: localDictionaryAccess.search,
+    query: resources.dictionary.search,
     value: searchValue,
   })
 

@@ -11,16 +11,12 @@ import Box, { VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import useBibleVerses from '~helpers/useBibleVerses'
 import useDebounce from '~helpers/useDebounce'
-import {
-  localDictionaryAccess,
-  type DictionnaireLetterRow,
-  type DictionnaireSearchRow,
+import type {
+  DictionnaireLetterRow,
+  DictionnaireSearchRow,
 } from '~features/resources/dictionaryAccess'
-import {
-  localNaveAccess,
-  type NaveLetterRow,
-  type NaveSearchRow,
-} from '~features/resources/naveAccess'
+import type { NaveLetterRow, NaveSearchRow } from '~features/resources/naveAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 import SharedSearchEntityResultRow from '~features/search/shared/SearchEntityResultRow'
 import SearchItemFilterBar, {
   getNextSearchItemFilters,
@@ -48,7 +44,7 @@ import {
   searchReferenceAndStrongTargets,
   type RelationTargetResult,
 } from './targetSearch'
-import { localStrongAccess, type LexiqueRow } from '~features/resources/strongAccess'
+import type { LexiqueRow } from '~features/resources/strongAccess'
 
 type BrowseMode = 'note' | 'link' | 'study' | 'strong' | 'nave' | 'dictionary'
 type NaveRow = NaveLetterRow | NaveSearchRow
@@ -274,6 +270,7 @@ const CreateEntityRelationModal = ({
   allowedTypes,
 }: Props) => {
   const { t } = useTranslation()
+  const resources = useResourceAccess()
   const dispatch = useDispatch<AppDispatch>()
   const allowedTypesKey = allowedTypes?.join('|') || ''
   const [searchValue, setSearchValue] = useState('')
@@ -366,8 +363,8 @@ const CreateEntityRelationModal = ({
     setStrongError(null)
 
     const loader = deferredStrongSearchValue.trim()
-      ? localStrongAccess.searchLexicon(deferredStrongSearchValue)
-      : localStrongAccess.listLexiconByLetter(strongLetter)
+      ? resources.strong.searchLexicon(deferredStrongSearchValue)
+      : resources.strong.listLexiconByLetter(strongLetter)
 
     loader.then(results => {
       if (!isMounted) return
@@ -383,7 +380,7 @@ const CreateEntityRelationModal = ({
     return () => {
       isMounted = false
     }
-  }, [deferredStrongSearchValue, shouldLoadStrongTargets, strongLetter])
+  }, [deferredStrongSearchValue, resources.strong, shouldLoadStrongTargets, strongLetter])
 
   const shouldLoadNaveTargets =
     isAllowed('nave') &&
@@ -403,8 +400,8 @@ const CreateEntityRelationModal = ({
     setNaveError(null)
 
     const loader = deferredResourceSearchValue.trim()
-      ? localNaveAccess.search(deferredResourceSearchValue)
-      : localNaveAccess.listByLetter(naveLetter)
+      ? resources.nave.search(deferredResourceSearchValue)
+      : resources.nave.listByLetter(naveLetter)
 
     loader.then(results => {
       if (!isMounted) return
@@ -420,7 +417,7 @@ const CreateEntityRelationModal = ({
     return () => {
       isMounted = false
     }
-  }, [deferredResourceSearchValue, naveLetter, shouldLoadNaveTargets])
+  }, [deferredResourceSearchValue, naveLetter, resources.nave, shouldLoadNaveTargets])
 
   useEffect(() => {
     if (!shouldLoadDictionaryTargets) {
@@ -433,8 +430,8 @@ const CreateEntityRelationModal = ({
     setDictionaryError(null)
 
     const loader = deferredResourceSearchValue.trim()
-      ? localDictionaryAccess.search(deferredResourceSearchValue)
-      : localDictionaryAccess.listByLetter(dictionaryLetter)
+      ? resources.dictionary.search(deferredResourceSearchValue)
+      : resources.dictionary.listByLetter(dictionaryLetter)
 
     loader.then(results => {
       if (!isMounted) return
@@ -450,7 +447,12 @@ const CreateEntityRelationModal = ({
     return () => {
       isMounted = false
     }
-  }, [deferredResourceSearchValue, dictionaryLetter, shouldLoadDictionaryTargets])
+  }, [
+    deferredResourceSearchValue,
+    dictionaryLetter,
+    resources.dictionary,
+    shouldLoadDictionaryTargets,
+  ])
 
   const handleSearch = (value: string) => {
     setSearchValue(value)

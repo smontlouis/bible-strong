@@ -11,8 +11,10 @@ import { ComputedPlan, ComputedPlanItem, Plan, Status } from 'src/common/types'
 import { RootState } from 'src/redux/modules/reducer'
 import books from '~assets/bible_versions/books-desc'
 import { toast } from '~helpers/toast'
-import { localBibleContentAccess } from '~features/resources/bibleContentAccess'
-import { localBibleReadingResourceAccess } from '~features/resources/bibleReadingResourceAccess'
+import {
+  defaultResourceAccess,
+  type ResourceAccessRegistry,
+} from '~features/resources/resourceAccess'
 import { range } from '~helpers/range'
 import verseToReference from '~helpers/verseToReference'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
@@ -185,19 +187,20 @@ const chapterStringToArray = (chapters: string) => {
  */
 export const getChaptersForPlan = async (
   chapters: string,
-  version: VersionCode
+  version: VersionCode,
+  resourceAccess: ResourceAccessRegistry = defaultResourceAccess
 ): Promise<ChapterForPlan> => {
   const book = chapters.split('|').map(Number)[0]
   const bookName = i18n.t(books[book - 1].Nom)
   const chaptersRange = chapterStringToArray(chapters)
 
-  const pericope = await localBibleReadingResourceAccess.loadPericope(version)
+  const pericope = await resourceAccess.bibleReading.loadPericope(version)
 
   const content: ChapterForPlanContent[] = await Promise.all(
     chaptersRange.map(async (cRange: string[]) => {
       const [, chapter] = cRange.map(Number)
 
-      const verses = await localBibleContentAccess.loadChapterVerses(version, book, chapter)
+      const verses = await resourceAccess.bibleContent.loadChapterVerses(version, book, chapter)
       const chapterContent: VerseContent[] = verses.map(v => ({
         Pericope: pericope?.[book]?.[chapter]?.[v.Verset] || {},
         Verset: `${v.Verset}`,
@@ -252,7 +255,8 @@ export const useChapterToContent = (chapters: string) => {
  */
 export const getVersesForPlan = async (
   verses: string,
-  version: VersionCode
+  version: VersionCode,
+  resourceAccess: ResourceAccessRegistry = defaultResourceAccess
 ): Promise<VerseForPlan> => {
   const [book, rest] = verses.split('|')
   const bookName = verseToReference(verses, { isPlan: true })
@@ -265,14 +269,14 @@ export const getVersesForPlan = async (
       : [`${book}-${chapter}-${startVerse}`]
   ).map(c => c.split('-').map(Number))
 
-  const pericope = await localBibleReadingResourceAccess.loadPericope(version)
+  const pericope = await resourceAccess.bibleReading.loadPericope(version)
 
   const content: VerseContent[] = await Promise.all(
     versesRange.map(async (vRange: number[]) => {
       const [bookNum, chapterNum, verse] = vRange
 
       const text =
-        (await localBibleContentAccess.loadVerseText(version, bookNum, chapterNum, verse)) ?? ''
+        (await resourceAccess.bibleContent.loadVerseText(version, bookNum, chapterNum, verse)) ?? ''
 
       return {
         Pericope: pericope?.[book]?.[chapter]?.[verse] || {},

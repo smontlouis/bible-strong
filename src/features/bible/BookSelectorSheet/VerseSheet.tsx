@@ -11,7 +11,7 @@ import { Verse } from '~common/types'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
-import { localBibleContentAccess } from '~features/resources/bibleContentAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 import generateUUID from '~helpers/generateUUID'
 import { useQuery } from '~helpers/react-query-lite'
 
@@ -28,6 +28,7 @@ export const tempSelectedChapterAtom = atom<number | null>(null)
 const VerseSheet = ({ sheetRef, bookSelectorRef, actions, data }: VerseSheetProps) => {
   const { width: windowWidth } = useWindowDimensions()
   const { t } = useTranslation()
+  const resources = useResourceAccess()
   const insets = useSafeAreaInsets()
   const openInNewTab = useOpenInNewTab()
   const tempSelectedBook = useAtomValue(tempSelectedBookAtom)
@@ -49,7 +50,7 @@ const VerseSheet = ({ sheetRef, bookSelectorRef, actions, data }: VerseSheetProp
       tempSelectedChapter?.toString() || '',
     ],
     queryFn: () =>
-      localBibleContentAccess.loadChapter({
+      resources.bibleContent.loadChapter({
         book: tempSelectedBook?.Numero || 1,
         chapter: tempSelectedChapter || 1,
         version: version || 'LSG',

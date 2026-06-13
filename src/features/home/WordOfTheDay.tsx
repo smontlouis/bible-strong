@@ -8,7 +8,7 @@ import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import { localDictionaryAccess } from '~features/resources/dictionaryAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 import useLanguage from '~helpers/useLanguage'
 import RandomButton from './RandomButton'
 import waitForDictionnaireWidget from './waitForDictionnaireWidget'
@@ -21,6 +21,7 @@ function randomIntFromInterval(min: number, max: number) {
 
 const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47,128,237,1)' }) => {
   const { t } = useTranslation()
+  const resources = useResourceAccess()
   const lang = useLanguage()
   const [error, setError] = useState(false)
   const [startRandom, setStartRandom] = useState(true)
@@ -30,7 +31,7 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
       if (!startRandom) return
 
       // UGLY HACK
-      const strongReference = await localDictionaryAccess.loadItemByRowId(
+      const strongReference = await resources.dictionary.loadItemByRowId(
         lang === 'fr' ? randomIntFromInterval(5437, 10872) : randomIntFromInterval(1, 8620)
       )
       if (!strongReference || 'error' in strongReference) {
@@ -42,7 +43,7 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
       setStartRandom(false)
     }
     loadStrong()
-  }, [startRandom, lang])
+  }, [resources.dictionary, startRandom, lang])
 
   if (error) {
     return (

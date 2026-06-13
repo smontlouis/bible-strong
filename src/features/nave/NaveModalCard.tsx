@@ -6,7 +6,7 @@ import { useAtomValue } from 'jotai'
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
 import waitForNaveDB from '~common/waitForNaveDB'
-import { localNaveAccess } from '~features/resources/naveAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 import { useQuery } from '~helpers/react-query-lite'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import NaveForVerse from './NaveModalForVerse'
@@ -19,6 +19,7 @@ type Props = {
 const NaveModalCard = waitForNaveDB()(({ selectedVerse }: Props) => {
   const { t } = useTranslation()
   const theme = useTheme()
+  const resources = useResourceAccess()
 
   // Get resource language from Jotai for cache key invalidation
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
@@ -26,7 +27,7 @@ const NaveModalCard = waitForNaveDB()(({ selectedVerse }: Props) => {
 
   const { isLoading, error, data } = useQuery({
     queryKey: ['nave', selectedVerse, resourceLang],
-    queryFn: () => localNaveAccess.loadByVerse(selectedVerse),
+    queryFn: () => resources.nave.loadByVerse(selectedVerse),
   })
 
   if (error) {

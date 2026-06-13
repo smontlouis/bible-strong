@@ -17,10 +17,10 @@ import { ScrollView } from 'react-native'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import { Verse } from '~common/types'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
-import { localBibleContentAccess } from '~features/resources/bibleContentAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 import captureError from '~helpers/captureError'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
-import { localDictionaryAccess, type DictionaryItem } from '~features/resources/dictionaryAccess'
+import type { DictionaryItem } from '~features/resources/dictionaryAccess'
 import { QueryStatus, useQuery } from '~helpers/react-query-lite'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
@@ -113,6 +113,7 @@ const useFormattedText = ({
   status: QueryStatus
   resourceLang: string
 }) => {
+  const resources = useResourceAccess()
   const [currentWord, setCurrentWord] = useState<string>()
   const [versesInCurrentChapter, setVersesInCurrentChapter] = useState(0)
   const [formattedText, setFormattedText] = useState<JSX.Element | JSX.Element[] | undefined>()
@@ -127,7 +128,7 @@ const useFormattedText = ({
       setCurrentWord(wordsInVerse[0])
 
       const defaultVersion = getDefaultBibleVersion(resourceLang)
-      const chapterVerses = await localBibleContentAccess.loadChapterVerses(
+      const chapterVerses = await resources.bibleContent.loadChapterVerses(
         defaultVersion,
         Number(Livre),
         Number(Chapitre)
@@ -142,7 +143,7 @@ const useFormattedText = ({
       setFormattedText(verseToDictionnaryText)
       setVersesInCurrentChapter(Object.keys(bible[Livre][Chapitre]).length)
     })()
-  }, [wordsInVerse, verse, resourceLang, Chapitre, Livre])
+  }, [wordsInVerse, verse, resourceLang, Chapitre, Livre, resources.bibleContent])
 
   const { error: wordsError, data: words } = useQuery<(DictionaryItem | undefined)[]>({
     enabled: Boolean(wordsInVerse),
@@ -150,7 +151,7 @@ const useFormattedText = ({
     queryFn: () =>
       Promise.all(
         (wordsInVerse ?? []).map(async w => {
-          const word = await localDictionaryAccess.loadItem(w)
+          const word = await resources.dictionary.loadItem(w)
           return word
         })
       ),
@@ -174,6 +175,7 @@ const DictionnaireVerseDetailScreen = ({
   updateVerse: (value: number) => void
 }) => {
   const { t } = useTranslation()
+  const resources = useResourceAccess()
   const carousel = useRef<ICarouselInstance>(null)
   const { Livre, Chapitre, Verset } = verse
   const [boxHeight, setBoxHeight] = useState(0)
@@ -193,7 +195,7 @@ const DictionnaireVerseDetailScreen = ({
     data: wordsInVerse,
   } = useQuery<string[]>({
     queryKey: ['dictionaryWords', `${Livre}-${Chapitre}-${Verset}`, resourceLang],
-    queryFn: () => localDictionaryAccess.loadWordsForVerse(`${Livre}-${Chapitre}-${Verset}`),
+    queryFn: () => resources.dictionary.loadWordsForVerse(`${Livre}-${Chapitre}-${Verset}`),
   })
 
   const { wordsError, formattedText, words, currentWord, setCurrentWord, versesInCurrentChapter } =

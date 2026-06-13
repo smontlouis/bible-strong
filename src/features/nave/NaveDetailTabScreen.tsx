@@ -21,7 +21,8 @@ import waitForNaveDB from '~common/waitForNaveDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
-import { localNaveAccess, type NaveItemRow } from '~features/resources/naveAccess'
+import type { NaveItemRow } from '~features/resources/naveAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 import useHTMLView, { type HTMLViewLinkPayload } from '~helpers/useHTMLView'
 import { RootState } from '~redux/modules/reducer'
 import { makeNaveTagsSelector } from '~redux/selectors/bible'
@@ -44,6 +45,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
   const router = useRouter()
   const pushRouteOnce = usePushRouteOnce()
   const [naveTab, setNaveTab] = useAtom(naveAtom)
+  const resources = useResourceAccess()
   const { isInTab } = useTabContext()
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : !isInTab
@@ -98,7 +100,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
 
   useEffect(() => {
     if (!name_lower) return
-    localNaveAccess.loadItem(name_lower).then(result => {
+    resources.nave.loadItem(name_lower).then(result => {
       if (!result || 'error' in result) return
       setNaveItem(result)
       addHistory({
@@ -109,7 +111,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
       })
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name, name_lower])
+  }, [name, name_lower, resources.nave])
 
   const openLink = ({ href }: HTMLViewLinkPayload) => {
     const [type, item] = href.split('=')

@@ -11,11 +11,8 @@ import Header from '~common/Header'
 import Link from '~common/Link'
 import SearchInput from '~common/SearchInput'
 import Loading from '~common/Loading'
-import {
-  localNaveAccess,
-  type NaveLetterRow,
-  type NaveSearchRow,
-} from '~features/resources/naveAccess'
+import type { NaveLetterRow, NaveSearchRow } from '~features/resources/naveAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 import Empty from '~common/Empty'
 import AlphabetList from '~common/AlphabetList'
 import SectionTitle from '~common/SectionTitle'
@@ -90,6 +87,7 @@ const NaveListScreen = ({
   onNaveSelect,
 }: NaveListScreenProps) => {
   const { t } = useTranslation()
+  const resources = useResourceAccess()
   const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
   const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
@@ -100,8 +98,8 @@ const NaveListScreen = ({
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
 
   const { results, isLoading } = useResultsByLetterOrSearch(
-    { query: localNaveAccess.search, value: debouncedSearchValue },
-    { query: localNaveAccess.listByLetter, value: letter }
+    { query: resources.nave.search, value: debouncedSearchValue },
+    { query: resources.nave.listByLetter, value: letter }
   )
   const naveResults = Array.isArray(results) ? (results as NaveRow[]) : []
   const sectionResults = useSectionResults(naveResults)

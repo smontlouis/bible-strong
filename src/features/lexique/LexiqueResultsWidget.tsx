@@ -6,7 +6,8 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { DatabaseError } from '~helpers/catchDatabaseError'
 import { useWaitForDatabase } from '~common/waitForStrongDB'
-import { localStrongAccess, type LexiqueRow } from '~features/resources/strongAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import type { LexiqueRow } from '~features/resources/strongAccess'
 
 import { useResultsByLetterOrSearch } from './useUtilities'
 import LexiqueResultItem from './LexiqueResultItem'
@@ -33,11 +34,12 @@ const isDatabaseError = (value: unknown): value is DatabaseError =>
   typeof value === 'object' && value !== null && 'error' in value
 
 const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
+  const resources = useResourceAccess()
   const [error, setError] = useState<DatabaseError['error'] | null>(null)
   const [limit, setLimit] = useState(LIMIT)
 
   const { results } = useResultsByLetterOrSearch({
-    query: localStrongAccess.searchLexicon,
+    query: resources.strong.searchLexicon,
     value: searchValue,
   })
 

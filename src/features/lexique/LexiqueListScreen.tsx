@@ -27,7 +27,8 @@ import { toast } from '~helpers/toast'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
 import { useResourceLanguage } from 'src/state/resourcesLanguage'
-import { localStrongAccess, type LexiqueRow } from '~features/resources/strongAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import type { LexiqueRow } from '~features/resources/strongAccess'
 
 interface LexiqueSection {
   title: string
@@ -88,6 +89,7 @@ const LexiqueListScreen = ({
   onStrongSelect,
 }: LexiqueListScreenProps) => {
   const { t } = useTranslation()
+  const resources = useResourceAccess()
   const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
   const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
@@ -97,8 +99,8 @@ const LexiqueListScreen = ({
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
 
   const { results, isLoading } = useResultsByLetterOrSearch(
-    { query: localStrongAccess.searchLexicon, value: debouncedSearchValue },
-    { query: localStrongAccess.listLexiconByLetter, value: letter }
+    { query: resources.strong.searchLexicon, value: debouncedSearchValue },
+    { query: resources.strong.listLexiconByLetter, value: letter }
   )
 
   const lexiqueResults = Array.isArray(results) ? results : []

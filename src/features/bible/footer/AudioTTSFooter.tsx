@@ -18,7 +18,7 @@ import {
   getPreviousAvailableChapterLocation,
 } from '~helpers/bibleCoverage'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
-import { localBibleContentAccess } from '~features/resources/bibleContentAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 import AudioContainer from './AudioContainer'
 import BasicFooter from './BasicFooter'
 import ChapterButton from './ChapterButton'
@@ -57,6 +57,7 @@ const useLoadSound = ({
   bibleAtom,
 }: UseLoadSoundProps) => {
   const bibleTab = useAtomValue(bibleAtom)
+  const resources = useResourceAccess()
   const setPlayingBibleTabId = useSetAtom(playingBibleTabIdAtom)
   const currentVerseIndex = useRef(0)
   const verseKeys = useRef<number[]>([])
@@ -200,7 +201,7 @@ const useLoadSound = ({
     versesData.current = {}
     ;(async () => {
       try {
-        const rows = await localBibleContentAccess.loadChapterVerses(version, book.Numero, chapter)
+        const rows = await resources.bibleContent.loadChapterVerses(version, book.Numero, chapter)
         if (cancelled) return
 
         const obj: Record<number, string> = {}
@@ -235,7 +236,7 @@ const useLoadSound = ({
       cancelled = true
       Speech.stop()
     }
-  }, [book.Numero, chapter, version])
+  }, [book.Numero, chapter, version, resources.bibleContent])
 
   // Effect 2: Start/stop playback when user presses play/stop
   useEffect(() => {

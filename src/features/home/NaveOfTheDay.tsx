@@ -8,13 +8,14 @@ import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import { localNaveAccess } from '~features/resources/naveAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 import RandomButton from './RandomButton'
 import waitForNaveWidget from './waitForNaveWidget'
 import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
 
 const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)' }) => {
   const { t } = useTranslation()
+  const resources = useResourceAccess()
   const [error, setError] = useState(false)
   const [startRandom, setStartRandom] = useState(true)
   const [naveReference, setNaveRef] = useState<{ name: string; name_lower: string } | null>(null)
@@ -22,7 +23,7 @@ const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)'
     const loadNave = async () => {
       if (!startRandom) return
 
-      const naveReference = await localNaveAccess.loadRandom()
+      const naveReference = await resources.nave.loadRandom()
       if (!naveReference || 'error' in naveReference) {
         setError(true)
         return
@@ -32,7 +33,7 @@ const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)'
       setStartRandom(false)
     }
     loadNave()
-  }, [startRandom])
+  }, [resources.nave, startRandom])
 
   if (error) {
     return (

@@ -12,7 +12,7 @@ import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
 import Link from '~common/Link'
 import Empty from '~common/Empty'
-import { localBibleReadingResourceAccess } from '~features/resources/bibleReadingResourceAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '~helpers/react-query-lite'
 import { useLocalSearchParams } from 'expo-router'
@@ -65,6 +65,7 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
   const pushRouteOnce = usePushRouteOnce()
   const canGoBackInStack = useCanGoBackInStack()
   const { t } = useTranslation()
+  const resources = useResourceAccess()
   const defaultVersion = useDefaultBibleVersion()
   const params = useLocalSearchParams<{ book?: string; version?: string }>()
   const version = (params.version || defaultVersion) as VersionCode
@@ -75,7 +76,7 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
 
   const { data: pericope } = useQuery({
     queryKey: ['bible-pericope', version],
-    queryFn: () => localBibleReadingResourceAccess.loadPericope(version),
+    queryFn: () => resources.bibleReading.loadPericope(version),
   })
   const pericopeBook: PericopeBook = pericope
     ? clearEmpties((pericope[String(book.Numero)] || {}) as PericopeBook)

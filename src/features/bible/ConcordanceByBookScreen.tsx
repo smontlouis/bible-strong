@@ -18,10 +18,12 @@ import { toast } from '~helpers/toast'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResourceLanguage } from 'src/state/resourcesLanguage'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import { localStrongAccess, type FoundVerseRow } from '~features/resources/strongAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import type { FoundVerseRow } from '~features/resources/strongAccess'
 
 const ConcordanceByBook = () => {
   const pushRouteOnce = usePushRouteOnce()
+  const resources = useResourceAccess()
   const params = useLocalSearchParams<{ book: string; strongReference: string }>()
   const { t } = useTranslation()
   const [verses, setVerses] = useState<FoundVerseRow[]>([])
@@ -37,12 +39,12 @@ const ConcordanceByBook = () => {
   useEffect(() => {
     const loadVerses = async () => {
       if (!book || !Code) return
-      const foundVerses = await localStrongAccess.loadFoundVersesByBook(book, Code)
+      const foundVerses = await resources.strong.loadFoundVersesByBook(book, Code)
       if ('error' in foundVerses) return
       setVerses(foundVerses)
     }
     loadVerses()
-  }, [book, Code])
+  }, [book, Code, resources.strong])
 
   const toggleStrongLanguage = () => {
     const nextLanguage = strongResourceLanguage === 'fr' ? 'en' : 'fr'

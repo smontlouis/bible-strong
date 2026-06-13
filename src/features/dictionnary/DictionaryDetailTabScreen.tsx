@@ -24,7 +24,8 @@ import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
-import { localDictionaryAccess, type DictionaryItem } from '~features/resources/dictionaryAccess'
+import type { DictionaryItem } from '~features/resources/dictionaryAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 import { RootState } from '~redux/modules/reducer'
 import { makeWordTagsSelector } from '~redux/selectors/bible'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
@@ -49,6 +50,7 @@ const DictionnaryDetailScreen = ({
   const router = useRouter()
   const pushRouteOnce = usePushRouteOnce()
   const [dictionaryTab, setDictionaryTab] = useAtom(dictionaryAtom)
+  const resources = useResourceAccess()
   const { isInTab } = useTabContext()
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : !isInTab
@@ -101,7 +103,7 @@ const DictionnaryDetailScreen = ({
 
   useEffect(() => {
     if (!word) return
-    localDictionaryAccess.loadItem(word).then(result => {
+    resources.dictionary.loadItem(word).then(result => {
       setDictionnaireItem(result ?? null)
 
       addHistory({
@@ -111,7 +113,7 @@ const DictionnaryDetailScreen = ({
       })
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [word])
+  }, [resources.dictionary, word])
 
   const openLink = ({ href, type }: HTMLViewLinkPayload) => {
     if (type === 'verse') {

@@ -35,6 +35,7 @@ import { AppSwitcherProvider } from '~features/app-switcher/AppSwitcherProvider'
 import { BookSelectorSheetProvider } from '~features/bible/BookSelectorSheet/BookSelectorSheetProvider'
 import { FeatureOnboardingModal } from '~features/feature-onboarding'
 import OnBoardingModal from '~features/onboarding/OnBoarding'
+import { ResourceAccessProvider } from '~features/resources/resourceAccess'
 import { appLogger } from '~helpers/agentObservability'
 import { DBStateProvider } from '~helpers/databaseState'
 import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
@@ -270,36 +271,38 @@ function InnerApp() {
           <DBStateProvider>
             <ErrorBoundary>
               <AppSwitcherProvider>
-                <RootSiblingParent>
-                  <SheetProvider>
-                    <BookSelectorSheetProvider>
-                      <InitHooks />
-                      <Stack screenOptions={{ headerShown: false }}>
-                        <Stack.Screen name="index" />
-                        <Stack.Screen
-                          name="(explore)"
-                          options={createFormSheetOptions(theme, {
-                            contentStyle: {
-                              bottom: 0,
-                            },
-                            sheetAllowedDetents: [0.45, 1],
-                            sheetLargestUndimmedDetentIndex: 0,
-                          })}
-                        />
-                        <Stack.Screen
-                          name="(library)"
-                          options={{
-                            contentStyle: {
-                              bottom: 0,
-                            },
-                          }}
-                        />
-                      </Stack>
-                      <ThemedToaster />
-                      <DeferredModals />
-                    </BookSelectorSheetProvider>
-                  </SheetProvider>
-                </RootSiblingParent>
+                <ResourceAccessProvider>
+                  <RootSiblingParent>
+                    <SheetProvider>
+                      <BookSelectorSheetProvider>
+                        <InitHooks />
+                        <Stack screenOptions={{ headerShown: false }}>
+                          <Stack.Screen name="index" />
+                          <Stack.Screen
+                            name="(explore)"
+                            options={createFormSheetOptions(theme, {
+                              contentStyle: {
+                                bottom: 0,
+                              },
+                              sheetAllowedDetents: [0.45, 1],
+                              sheetLargestUndimmedDetentIndex: 0,
+                            })}
+                          />
+                          <Stack.Screen
+                            name="(library)"
+                            options={{
+                              contentStyle: {
+                                bottom: 0,
+                              },
+                            }}
+                          />
+                        </Stack>
+                        <ThemedToaster />
+                        <DeferredModals />
+                      </BookSelectorSheetProvider>
+                    </SheetProvider>
+                  </RootSiblingParent>
+                </ResourceAccessProvider>
               </AppSwitcherProvider>
             </ErrorBoundary>
           </DBStateProvider>
