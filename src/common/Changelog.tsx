@@ -1,20 +1,12 @@
 import React, { useRef, useEffect } from 'react'
-import {
-  SheetFooter,
-  Sheet,
-  SheetScrollView,
-  type SheetRef,
-  SheetProvider,
-  SheetHeader,
-} from '~common/sheet'
+import { SheetFooter, Sheet, SheetScrollView, type SheetRef, SheetHeader } from '~common/sheet'
 import distanceInWords from 'date-fns/formatDistance'
 
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
-import { useAtom } from 'jotai/react'
+import { useAtom, useAtomValue } from 'jotai/react'
 
 import Button from '~common/ui/Button'
 import Box from '~common/ui/Box'
-import Border from '~common/ui/Border'
 import Text from '~common/ui/Text'
 import { logTypes } from '~helpers/changelog'
 import { saveAllLogsAsSeen } from '~redux/modules/user'
@@ -25,6 +17,7 @@ import styled from '@emotion/native'
 import { RootState } from '~redux/modules/reducer'
 import { ChangelogItem, LogType } from './types'
 import { changelogModalAtom } from '~state/app'
+import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 
 const getTagColor = (type: LogType) => {
   switch (type) {
@@ -74,6 +67,7 @@ const Changelog = () => {
   const lang = useLanguage()
   const modalRef = useRef<SheetRef>(null)
   const [manualOpen, setManualOpen] = useAtom(changelogModalAtom)
+  const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
 
   const seenLogs = useSelector(
     (state: RootState) => Object.keys(state.user.bible.changelog),
@@ -83,7 +77,7 @@ const Changelog = () => {
   const changelogIsLoading = useSelector((state: RootState) => state.user.changelog.isLoading)
 
   const hasAutomaticLogs = !changelogIsLoading && hasNewLogs(seenLogs, changelog)
-  const showModal = hasAutomaticLogs || manualOpen
+  const showModal = isOnboardingCompleted && (hasAutomaticLogs || manualOpen)
   const newLogs = hasAutomaticLogs ? findNewLogs(seenLogs, changelog) : []
   const visibleLogs = hasAutomaticLogs
     ? newLogs

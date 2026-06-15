@@ -2,7 +2,6 @@ import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { useWindowDimensions } from 'react-native'
 import Carousel from 'react-native-reanimated-carousel'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -25,7 +24,7 @@ const Container = styled.View(({ theme }) => ({
 const UserWidget = () => {
   const { isLogged } = useLogin()
   const { t } = useTranslation()
-  const { width } = useWindowDimensions()
+  const [carouselWidth, setCarouselWidth] = React.useState(0)
 
   if (!isLogged) {
     return (
@@ -54,33 +53,46 @@ const UserWidget = () => {
     <Container>
       <OfflineNotice />
       <PreloadBible>
-        <Box alignItems="center" justifyContent="center" overflow="visible">
-          <Carousel
-            mode="vertical-stack"
-            data={vodNb}
-            loop={false}
-            style={{
-              width: width,
-              height: VERSE_CARD_HEIGHT,
-              overflow: 'visible',
-            }}
-            contentContainerStyle={{
-              alignItems: 'center',
-              justifyContent: 'center',
-              overflow: 'visible',
-            }}
-            itemWidth={width - 65}
-            itemHeight={VERSE_CARD_HEIGHT}
-            modeConfig={{
-              snapDirection: 'right',
-              stackInterval: -10,
-              scaleInterval: 0.04,
-              rotateZDeg: 0,
-              opacityInterval: 0.4,
-            }}
-            renderItem={({ item: i }) => <VerseOfTheDay addDay={-(vodNb.length - 1 - i)} />}
-            defaultIndex={vodNb.length - 1}
-          />
+        <Box
+          alignItems="center"
+          justifyContent="center"
+          overflow="visible"
+          width="100%"
+          onLayout={({ nativeEvent }) => {
+            const nextWidth = Math.round(nativeEvent.layout.width)
+            setCarouselWidth(currentWidth =>
+              currentWidth === nextWidth ? currentWidth : nextWidth
+            )
+          }}
+        >
+          {carouselWidth > 0 && (
+            <Carousel
+              mode="vertical-stack"
+              data={vodNb}
+              loop={false}
+              style={{
+                width: carouselWidth,
+                height: VERSE_CARD_HEIGHT,
+                overflow: 'visible',
+              }}
+              contentContainerStyle={{
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'visible',
+              }}
+              itemWidth={Math.max(carouselWidth - 65, 0)}
+              itemHeight={VERSE_CARD_HEIGHT}
+              modeConfig={{
+                snapDirection: 'right',
+                stackInterval: -10,
+                scaleInterval: 0.04,
+                rotateZDeg: 0,
+                opacityInterval: 0.4,
+              }}
+              renderItem={({ item: i }) => <VerseOfTheDay addDay={-(vodNb.length - 1 - i)} />}
+              defaultIndex={vodNb.length - 1}
+            />
+          )}
         </Box>
       </PreloadBible>
     </Container>
