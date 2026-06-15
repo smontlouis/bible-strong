@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
+import { Platform } from 'react-native'
 import { FadeIn, FadeOut } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
@@ -169,6 +170,7 @@ const Header = ({
     transitionProperty: 'opacity',
     transitionDuration: 300,
   } as const
+  const nativeHeaderZIndex = Platform.OS === 'ios' ? 20 : undefined
 
   const translateYTransitionStyle = {
     transform: [{ translateY: fullScreenTranslateY }],
@@ -342,6 +344,7 @@ const Header = ({
         position="absolute"
         top={0}
         left={0}
+        zIndex={nativeHeaderZIndex}
         overflow="visible"
         entering={FadeIn}
         exiting={FadeOut}
@@ -401,6 +404,7 @@ const Header = ({
         position="absolute"
         top={0}
         left={0}
+        zIndex={nativeHeaderZIndex}
         overflow="visible"
         entering={FadeIn}
         exiting={FadeOut}
@@ -442,6 +446,7 @@ const Header = ({
       position="absolute"
       top={0}
       left={0}
+      zIndex={nativeHeaderZIndex}
       overflow="visible"
       style={{
         height: isHeaderCollapsed ? 20 + TOP_INSET : undefined,

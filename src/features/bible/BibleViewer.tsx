@@ -252,6 +252,7 @@ const BibleViewer = ({
   const setSharedProps = useSetAtom(sharedBibleDOMPropsAtom)
   const isActiveBibleTab = !isFormSheet && activeBibleTabId === bible.id
   const useSharedDOM = !isFormSheet
+  const domLayerZIndex = Platform.OS === 'ios' ? 0 : -1
 
   // Displayed values - updated only when verses are loaded to keep annotations in sync
   const [displayedBook, setDisplayedBook] = useState(book.Numero)
@@ -883,12 +884,15 @@ const BibleViewer = ({
         annotationModeEnabled={annotationMode.enabled}
         onEditFocusTags={editFocusTags}
       />
-      <Box flex={1} zIndex={-1}>
+      <Box flex={1} zIndex={domLayerZIndex}>
         {useSharedDOM ? (
           // Keep every host mounted so Android only retargets between
           // stable native parents instead of unmounting/remounting hosts.
           <Box flex={1}>
-            <PortalHost name={getBibleDOMDestination(bible.id)} style={{ flex: 1, zIndex: -1 }} />
+            <PortalHost
+              name={getBibleDOMDestination(bible.id)}
+              style={{ flex: 1, zIndex: domLayerZIndex }}
+            />
             {!isActiveBibleTab && (
               <Box position="absolute" top={0} left={0} right={0} bottom={0}>
                 <SnapshotPlaceholder base64={bible.base64Preview} />
