@@ -11,12 +11,7 @@ type Props = BoxProps & {
 
 const FormSheetScreen = ({ isFormSheet = false, children, ...props }: Props) => {
   if (isFormSheet) {
-    return (
-      <>
-        <FormSheetHandle />
-        {children}
-      </>
-    )
+    return <>{children}</>
   }
 
   return <Container {...props}>{children}</Container>

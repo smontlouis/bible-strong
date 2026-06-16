@@ -26,6 +26,8 @@ const ExploreLayout = () => {
     detentIndex: 0,
     detents: [0.45, 1],
     grabber: true,
+    scrollable: true,
+    dimmed: false,
   } satisfies TrueSheetNavigationOptions
 
   return (
@@ -36,7 +38,7 @@ const ExploreLayout = () => {
       }}
     >
       <Sheet.Screen name="index" />
-      <Sheet.Screen name="bible-view" options={{ detents: [1] }} />
+      <Sheet.Screen name="bible-view" />
       <Sheet.Screen name="strong" />
       <Sheet.Screen name="concordance" />
       <Sheet.Screen name="concordance-by-book" />

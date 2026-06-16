@@ -327,7 +327,7 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
           </MenuView>
         }
       />
-      <ScrollView style={{ paddingLeft: 20, paddingRight: 20, flex: 1 }}>
+      <ScrollView style={{ paddingLeft: 20, paddingRight: 20 }}>
         <Box>
           {tags && (
             <Box marginBottom={10}>

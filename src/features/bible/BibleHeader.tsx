@@ -350,8 +350,6 @@ const Header = ({
         exiting={FadeOut}
         key="annotation-mode-header"
       >
-        {isFormSheet && <FormSheetHandle />}
-
         <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
           {hasBackButton && (
             <Box position="absolute" left={0} top={5} zIndex={2}>
@@ -410,8 +408,6 @@ const Header = ({
         exiting={FadeOut}
         key="selected-verses-header"
       >
-        {isFormSheet && <FormSheetHandle />}
-
         <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
           {hasBackButton && (
             <Back
@@ -458,8 +454,6 @@ const Header = ({
       entering={FadeIn}
       exiting={FadeOut}
     >
-      {isFormSheet && <FormSheetHandle />}
-
       <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
         {hasBackButton ? (
           <Back
