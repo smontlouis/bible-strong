@@ -1,9 +1,6 @@
 import type { JSONValue } from 'expo/build/dom/dom.types'
 import { useEffect, useRef, useState } from 'react'
-import {
-  KeyboardAvoidingView,
-  KeyboardStickyView,
-} from 'react-native-keyboard-controller'
+import { KeyboardAvoidingView, KeyboardStickyView } from 'react-native-keyboard-controller'
 import { Platform } from 'react-native'
 import { WebViewMessageEvent } from 'react-native-webview'
 import { useTheme } from '@emotion/react'
@@ -263,22 +260,9 @@ export default function StudiesDomWrapper({
         backgroundColor: theme.colors.reverse,
       }}
     >
-      <Box flex bg="reverse" pb={footer ? STUDY_FOOTER_HEIGHT : 0}>
+      <Box flex bg="reverse" pb={0}>
         {editor}
-        {footer && (
-          <KeyboardStickyView
-            offset={{ opened: STUDY_FOOTER_KEYBOARD_OFFSET }}
-            style={{
-              position: 'absolute',
-              left: 0,
-              right: 0,
-              bottom: 0,
-              overflow: 'visible',
-            }}
-          >
-            {footer}
-          </KeyboardStickyView>
-        )}
+        {footer}
       </Box>
     </KeyboardAvoidingView>
   )
