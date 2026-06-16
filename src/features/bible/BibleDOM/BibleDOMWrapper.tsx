@@ -820,6 +820,7 @@ export const BibleDOMWrapper = ({
     >
       <BibleDOMComponent
         dom={{
+          ...(Platform.OS === 'ios' ? { useExpoDOMWebView: false } : {}),
           webviewDebuggingEnabled: __DEV__,
           style: {
             flex: 1,
