@@ -110,6 +110,14 @@ const getLsgAudioUrl = (bookNum: number, chapterNum: number) => {
   return `${audioBaseUrl}${zeroFill(bookNum, 2)}_${zeroFill(chapterNum, 2)}.mp3`
 }
 
+const getBibleStudyToolsAudioUrl = (version: string, bookNum: number, chapterNum: number) => {
+  return `https://content.swncdn.com/biblestudytools/audio/${version}-mp3/${bookNum
+    .toString()
+    .padStart(2, '0')}_${
+    bibleStudyToolsBookMapping[bookNum - 1]
+  }_${chapterNum.toString().padStart(3, '0')}.mp3`
+}
+
 export const versions: Record<string, Version> = {
   LSG: {
     id: 'LSG',
@@ -262,7 +270,7 @@ export const versions: Record<string, Version> = {
     hasPericope: true,
     hasAudio: true,
     getAudioUrl: (bookNum: number, chapterNum: number) => {
-      return `https://www.wordpocket.org/bibles/app/audio/1/${bookNum}/${chapterNum}.mp3`
+      return getBibleStudyToolsAudioUrl('kjv', bookNum, chapterNum)
     },
   },
   KJVS: {
@@ -272,7 +280,7 @@ export const versions: Record<string, Version> = {
     type: 'en',
     hasAudio: true,
     getAudioUrl: (bookNum: number, chapterNum: number) => {
-      return `https://www.wordpocket.org/bibles/app/audio/1/${bookNum}/${chapterNum}.mp3`
+      return getBibleStudyToolsAudioUrl('kjv', bookNum, chapterNum)
     },
   },
   INT_EN: {
@@ -299,11 +307,7 @@ export const versions: Record<string, Version> = {
     hasPericope: true,
     hasAudio: true,
     getAudioUrl: (bookNum: number, chapterNum: number) => {
-      return `https://content.swncdn.com/biblestudytools/audio/esv-mp3/${bookNum
-        .toString()
-        .padStart(2, '0')}_${
-        bibleStudyToolsBookMapping[bookNum - 1]
-      }_${chapterNum.toString().padStart(3, '0')}.mp3`
+      return getBibleStudyToolsAudioUrl('esv', bookNum, chapterNum)
     },
   },
   NIV: {
@@ -410,11 +414,7 @@ export const versions: Record<string, Version> = {
     hasPericope: true,
     hasAudio: true,
     getAudioUrl: (bookNum: number, chapterNum: number) => {
-      return `https://content.swncdn.com/biblestudytools/audio/nlt-mp3/${bookNum
-        .toString()
-        .padStart(2, '0')}_${
-        bibleStudyToolsBookMapping[bookNum - 1]
-      }_${chapterNum.toString().padStart(3, '0')}.mp3`
+      return getBibleStudyToolsAudioUrl('nlt', bookNum, chapterNum)
     },
   },
   AMP: {
