@@ -5,6 +5,7 @@ import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 
 import Empty from '~common/Empty'
 import Loading from '~common/Loading'
+import Button from '~common/ui/Button'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import Paragraph from '~common/ui/Paragraph'
@@ -15,6 +16,7 @@ import { CarouselProvider } from '~helpers/CarouselContext'
 import { useTranslation } from 'react-i18next'
 import { ScrollView } from 'react-native'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
+import { installedVersionsSignalAtom } from '~state/app'
 import { Verse } from '~common/types'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
 import { useResourceAccess } from '~features/resources/resourceAccess'
@@ -24,6 +26,9 @@ import type { DictionaryItem } from '~features/resources/dictionaryAccess'
 import { QueryStatus, useQuery } from '~helpers/react-query-lite'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
+import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
+import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
+import { useDownloadQueue, useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import DictionnaireCard from './DictionnaireCard'
 import DictionnaireVerseReference from './DictionnaireVerseReference'
 
@@ -118,9 +123,11 @@ const useFormattedText = ({
   resourceLang: string
 }) => {
   const resources = useResourceAccess()
+  const installedVersionsSignal = useAtomValue(installedVersionsSignalAtom)
   const [currentWord, setCurrentWord] = useState<string>()
   const [versesInCurrentChapter, setVersesInCurrentChapter] = useState(0)
   const [formattedText, setFormattedText] = useState<JSX.Element | JSX.Element[] | undefined>()
+  const [requiredBibleVersion, setRequiredBibleVersion] = useState<string | null>(null)
 
   const { Livre, Chapitre, Verset } = verse
 
@@ -129,6 +136,7 @@ const useFormattedText = ({
       if (!wordsInVerse) {
         return
       }
+      setRequiredBibleVersion(null)
       setCurrentWord(wordsInVerse[0])
 
       const defaultVersion = getDefaultBibleVersion(resourceLang)
@@ -142,12 +150,28 @@ const useFormattedText = ({
           [Chapitre]: Object.fromEntries(chapterVerses.map(v => [v.Verset, v.Texte])),
         },
       }
+      const verseText = bible[Livre]?.[Chapitre]?.[Verset]
+      if (!verseText && (await getIfVersionNeedsDownload(defaultVersion))) {
+        setRequiredBibleVersion(defaultVersion)
+        setFormattedText(undefined)
+        setVersesInCurrentChapter(0)
+        return
+      }
 
       const verseToDictionnaryText = await verseToDictionnary(verse, wordsInVerse, bible)
       setFormattedText(verseToDictionnaryText)
       setVersesInCurrentChapter(Object.keys(bible[Livre][Chapitre]).length)
     })()
-  }, [wordsInVerse, verse, resourceLang, Chapitre, Livre, resources.bibleContent])
+  }, [
+    wordsInVerse,
+    verse,
+    resourceLang,
+    Chapitre,
+    Livre,
+    Verset,
+    resources.bibleContent,
+    installedVersionsSignal,
+  ])
 
   const { error: wordsError, data: words } = useQuery<(DictionaryItem | undefined)[]>({
     enabled: Boolean(wordsInVerse),
@@ -168,6 +192,7 @@ const useFormattedText = ({
     currentWord,
     setCurrentWord,
     versesInCurrentChapter,
+    requiredBibleVersion,
   }
 }
 
@@ -192,6 +217,7 @@ const DictionnaireVerseDetailScreen = ({
   // Get resource language from Jotai for cache key invalidation
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const resourceLang = resourcesLanguage.DICTIONNAIRE
+  const { enqueue } = useDownloadQueue()
 
   const {
     status,
@@ -202,8 +228,18 @@ const DictionnaireVerseDetailScreen = ({
     queryFn: () => resources.dictionary.loadWordsForVerse(`${Livre}-${Chapitre}-${Verset}`),
   })
 
-  const { wordsError, formattedText, words, currentWord, setCurrentWord, versesInCurrentChapter } =
-    useFormattedText({ verse, wordsInVerse, status, resourceLang })
+  const {
+    wordsError,
+    formattedText,
+    words,
+    currentWord,
+    setCurrentWord,
+    versesInCurrentChapter,
+    requiredBibleVersion,
+  } = useFormattedText({ verse, wordsInVerse, status, resourceLang })
+  const requiredBibleDownloadStatus = useDownloadItemStatus(
+    requiredBibleVersion ? `bible:${requiredBibleVersion}` : ''
+  )
 
   const goToWord = (word: string) => {
     if (!wordsInVerse) return
@@ -221,6 +257,32 @@ const DictionnaireVerseDetailScreen = ({
           source={require('~assets/images/empty.json')}
           message={t('Impossible de charger le dictionnaire pour ce verset...')}
         />
+      </Container>
+    )
+  }
+
+  if (requiredBibleVersion) {
+    const isDownloading =
+      requiredBibleDownloadStatus?.status === 'queued' ||
+      requiredBibleDownloadStatus?.status === 'downloading' ||
+      requiredBibleDownloadStatus?.status === 'inserting'
+
+    return (
+      <Container>
+        <Box flex center px={30}>
+          <Empty
+            source={require('~assets/images/empty.json')}
+            message={t('resourceLanguage.requiredBibleMissing', {
+              version: requiredBibleVersion,
+            })}
+          />
+          <Button
+            onPress={() => enqueue([createBibleDownloadItem(requiredBibleVersion)])}
+            isLoading={isDownloading}
+          >
+            {t('resourceLanguage.downloadRequiredBible', { version: requiredBibleVersion })}
+          </Button>
+        </Box>
       </Container>
     )
   }

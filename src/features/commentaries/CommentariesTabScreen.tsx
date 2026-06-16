@@ -10,6 +10,7 @@ import { LinkBox } from '~common/Link'
 import Loading from '~common/Loading'
 import { Status } from '~common/types'
 import Box from '~common/ui/Box'
+import Button from '~common/ui/Button'
 import Paragraph from '~common/ui/Paragraph'
 import RoundedCorner from '~common/ui/RoundedCorner'
 import Text from '~common/ui/Text'
@@ -37,6 +38,9 @@ import { CommentaryTab } from '../../state/tabs'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { getChapterVerseCountSafe } from '~helpers/bibleCoverage'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
+import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
+import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
+import { useDownloadItemStatus, useDownloadQueue } from '~helpers/useDownloadQueue'
 
 const VersetWrapper = styled.View(() => ({
   width: 25,
@@ -209,8 +213,27 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
     ? formatVerseContent([verse])
     : { title: t('Chargement') }
 
+  const defaultVersion = useDefaultBibleVersion()
   const [verseText] = useBibleVerses(verseFormatted)
   const { versesInCurrentChapter } = useVerseInCurrentChapter(verseText?.Livre, verseText?.Chapitre)
+  const { enqueue } = useDownloadQueue()
+  const [requiredBibleVersion, setRequiredBibleVersion] = useState<string | null>(null)
+  const requiredBibleDownloadStatus = useDownloadItemStatus(
+    requiredBibleVersion ? `bible:${requiredBibleVersion}` : ''
+  )
+
+  useEffect(() => {
+    ;(async () => {
+      if (verseText || !verse) {
+        setRequiredBibleVersion(null)
+        return
+      }
+
+      const needsDownload = await getIfVersionNeedsDownload(defaultVersion)
+      setRequiredBibleVersion(needsDownload ? defaultVersion : null)
+    })()
+  }, [defaultVersion, verse, verseText])
+
   const updateVerse = (value: -1 | 1) => {
     const [b, c, v] = verse.split('-').map(Number)
     setVerse(`${b}-${c}-${v + value}`)
@@ -276,7 +299,30 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
                 <NumberText>{verseText?.Verset}</NumberText>
               </VersetWrapper>
               <Box flex>
-                <Paragraph>{verseText?.Texte.replace(/\n/gi, '')}</Paragraph>
+                {requiredBibleVersion ? (
+                  <Box>
+                    <Text fontSize={13} color="grey" mb={10}>
+                      {t('resourceLanguage.requiredBibleMissing', {
+                        version: requiredBibleVersion,
+                      })}
+                    </Text>
+                    <Button
+                      small
+                      onPress={() => enqueue([createBibleDownloadItem(requiredBibleVersion)])}
+                      isLoading={
+                        requiredBibleDownloadStatus?.status === 'queued' ||
+                        requiredBibleDownloadStatus?.status === 'downloading' ||
+                        requiredBibleDownloadStatus?.status === 'inserting'
+                      }
+                    >
+                      {t('resourceLanguage.downloadRequiredBible', {
+                        version: requiredBibleVersion,
+                      })}
+                    </Button>
+                  </Box>
+                ) : (
+                  <Paragraph>{verseText?.Texte.replace(/\n/gi, '')}</Paragraph>
+                )}
               </Box>
             </StyledVerse>
             <BibleVerseDetailFooter

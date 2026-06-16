@@ -1,7 +1,9 @@
 import React from 'react'
+import { useAtomValue } from 'jotai/react'
 import { Verse } from '~common/types'
 import { getMultipleVerses } from '~helpers/biblesDb'
 import { useDefaultBibleVersion } from '../state/useDefaultBibleVersion'
+import { bibleDataRefreshSignalAtom } from '~state/app'
 
 export const verseStringToObject = (arrayString: string[]): Omit<Verse, 'Texte'>[] => {
   return arrayString.map(string => {
@@ -14,6 +16,7 @@ const useBibleVerses = (verseIds: Omit<Verse, 'Texte'>[]) => {
   const [verses, setVerses] = React.useState<Verse[]>([])
 
   const version = useDefaultBibleVersion()
+  const bibleDataRefreshSignal = useAtomValue(bibleDataRefreshSignalAtom)
 
   React.useEffect(() => {
     const loadVerses = async () => {
@@ -39,7 +42,7 @@ const useBibleVerses = (verseIds: Omit<Verse, 'Texte'>[]) => {
       setVerses(versesWithText)
     }
     loadVerses()
-  }, [verseIds, version])
+  }, [verseIds, version, bibleDataRefreshSignal])
 
   return verses
 }
