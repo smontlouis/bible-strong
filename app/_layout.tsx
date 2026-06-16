@@ -48,7 +48,6 @@ import {
 } from '~helpers/storage'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { useRemoteConfig } from '~helpers/useRemoteConfig'
-import { createFormSheetOptions } from '~navigation/formSheetOptions'
 import { RootState } from '~redux/modules/reducer'
 import { persistor, store } from '~redux/store'
 import { applyPreferredColorScheme } from '~redux/themeAppearanceMiddleware'
@@ -282,13 +281,13 @@ function InnerApp() {
                             <Stack.Screen name="index" />
                             <Stack.Screen
                               name="(explore)"
-                              options={createFormSheetOptions(theme, {
+                              options={{
+                                animation: 'none',
                                 contentStyle: {
-                                  bottom: 0,
+                                  backgroundColor: 'transparent',
                                 },
-                                sheetAllowedDetents: [0.45, 1],
-                                sheetLargestUndimmedDetentIndex: 0,
-                              })}
+                                presentation: 'transparentModal',
+                              }}
                             />
                             <Stack.Screen
                               name="(library)"

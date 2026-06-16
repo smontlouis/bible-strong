@@ -51,11 +51,7 @@ export const VerseSelectorPopup = ({ bibleAtom, children }: VerseSelectorPopupPr
       <TouchableBox center height="100%" onPress={() => sheetRef.current?.present()}>
         {children}
       </TouchableBox>
-      <Sheet
-        ref={sheetRef}
-        stackBehavior="push"
-        header={<SheetHeader title={t('goToVerse')} centerTitle />}
-      >
+      <Sheet ref={sheetRef} header={<SheetHeader title={t('goToVerse')} centerTitle />}>
         <SheetScrollView
           contentContainerStyle={{
             paddingTop: 10,

@@ -25,7 +25,6 @@ import { useTheme } from '@emotion/react'
 
 export type SheetSnapPoint = NonNullable<TrueSheetProps['detents']>[number]
 export type SheetScrollableOptions = NonNullable<TrueSheetProps['scrollableOptions']>
-export type SheetStackBehavior = NonNullable<TrueSheetProps['stackBehavior']>
 
 type SheetContextValue = {
   footerHeight: number
@@ -88,7 +87,6 @@ export type SheetProps = {
   header?: React.ReactElement | React.ComponentType<unknown>
   footer?: React.ComponentType<SheetFooterProps> | ((props: SheetFooterProps) => React.ReactNode)
   dismissible?: boolean
-  stackBehavior?: SheetStackBehavior
   onClose?: () => void
   onDismiss?: () => void
   onOpenChange?: (isOpen: boolean) => void
@@ -206,7 +204,6 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
     onPresent,
     scrollableOptions,
     snapPoints,
-    stackBehavior,
   } = props
   const { height } = useWindowDimensions()
   const sheetRef = React.useRef<TrueSheet>(null)
@@ -280,7 +277,6 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
         }
         detached={detached}
         detachedOffset={detachedOffset}
-        stackBehavior={stackBehavior}
         onDidPresent={() => {
           onOpenChange?.(true)
           onPresent?.()

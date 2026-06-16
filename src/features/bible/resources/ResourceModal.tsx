@@ -47,32 +47,6 @@ type Props = {
   isSelectionMode?: StudyNavigateBibleType
 }
 
-// const useCloseOnRouteChange = () => {
-//  const navigation = useNavigation()
-
-//   useEffect(() => {
-//     const beforeRemoveUnsubscribe = navigation.addListener(
-//       'beforeRemove',
-//       () => {
-//         if (resourceModalRef.current) {
-//           resourceModalRef.current.close()
-//         }
-//       }
-//     )
-
-//     const blurUnsubscribe = navigation.addListener('blur', () => {
-//       if (resourceModalRef.current) {
-//         resourceModalRef.current.close()
-//       }
-//     })
-
-//     return () => {
-//       beforeRemoveUnsubscribe()
-//       blurUnsubscribe()
-//     }
-//   }, [navigation, resourceModalRef])
-// }
-
 const ResourcesModal = memo(
   ({ resourceModalRef, resourceType, onChangeResourceType, bibleAtom, isSelectionMode }: Props) => {
     const { t } = useTranslation()
