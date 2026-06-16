@@ -503,8 +503,13 @@ ${currentNote.description}
         </ScrollView>
         {isEditing && (
           <KeyboardStickyView
-            enabled={isFormSheet}
-            style={isFormSheet ? { position: 'absolute', left: 0, right: 0, bottom: 0 } : undefined}
+            // TODO: temp fix
+            enabled={isFormSheet || Platform.OS === 'android'}
+            style={
+              isFormSheet || Platform.OS === 'android'
+                ? { position: 'absolute', left: 0, right: 0, bottom: 0 }
+                : undefined
+            }
           >
             <HStack
               py={10}
