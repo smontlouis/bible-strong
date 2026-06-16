@@ -33,6 +33,7 @@ import TagStrongItem from './TagStrongItem'
 import TagNaveItem from './TagNaveItem'
 import TagDictionaryItem from './TagDictionaryItem'
 import AnnotationItem from './AnnotationItem'
+import { IS_FORM_SHEET } from '~helpers/constants'
 
 const TagScreen = () => {
   const router = useRouter()
@@ -41,7 +42,9 @@ const TagScreen = () => {
   const dispatch = useDispatch()
   const { t } = useTranslation()
   const lang = useLanguage()
+  const isFormSheet = IS_FORM_SHEET
   const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = isFormSheet ? canGoBackInStack : true
 
   const {
     tag,
@@ -153,8 +156,8 @@ const TagScreen = () => {
 
   if (!tag) {
     return (
-      <FormSheetScreen isFormSheet>
-        <Header hasBackButton={canGoBackInStack} title="" />
+      <FormSheetScreen isFormSheet={IS_FORM_SHEET}>
+        <Header hasBackButton={hasBackButton} title="" />
         <Empty
           source={require('~assets/images/empty.json')}
           message={t("Cette étiquette n'existe pas...")}
@@ -164,10 +167,10 @@ const TagScreen = () => {
   }
 
   return (
-    <FormSheetScreen isFormSheet>
+    <FormSheetScreen isFormSheet={IS_FORM_SHEET}>
       <Box>
         <Header
-          hasBackButton={canGoBackInStack}
+          hasBackButton={hasBackButton}
           title={tag.name}
           rightComponent={
             <MenuView

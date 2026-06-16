@@ -13,6 +13,7 @@ import { getEndpointFallbackLabel } from './domain'
 import { parseRelationEndpointParam } from './routeParams'
 import { useOpenRelationEndpoint } from './useOpenRelationEndpoint'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
+import { IS_FORM_SHEET } from '~helpers/constants'
 
 const EntityRelationsScreen = () => {
   const { t } = useTranslation()
@@ -20,14 +21,16 @@ const EntityRelationsScreen = () => {
   const endpoint = parseRelationEndpointParam(params.endpoint)
   const openEndpoint = useOpenRelationEndpoint()
   const createRelationModal = useSheet()
+  const isFormSheet = IS_FORM_SHEET
   const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = isFormSheet ? canGoBackInStack : true
   const isSingleVerseEndpoint = endpoint?.type === 'verse' && endpoint.verseKeys.length === 1
   const endpointLabel = endpoint ? getEndpointFallbackLabel(endpoint) : ''
 
   return (
-    <FormSheetScreen isFormSheet>
+    <FormSheetScreen isFormSheet={isFormSheet}>
       <Header
-        hasBackButton={canGoBackInStack}
+        hasBackButton={hasBackButton}
         title={t('Relations')}
         subTitle={endpointLabel}
         rightComponent={

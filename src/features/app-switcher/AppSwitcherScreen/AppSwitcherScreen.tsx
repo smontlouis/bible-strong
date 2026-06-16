@@ -28,17 +28,15 @@ const MAX_DRAWER_WIDTH = 450
 
 const AppSwitcherScreen = ({ openHome, openMenu }: AppSwitcherScreenFuncs) => {
   return (
-    <PortalProvider>
-      <TabContextProvider>
-        <Box flex={1} bg="lightGrey">
-          <TabGroupPager />
-          <CachedTabScreens />
-          <SharedBibleDOM />
-          <TabPreviewCarousel />
-          <BottomTabBar openMenu={openMenu} openHome={openHome} />
-        </Box>
-      </TabContextProvider>
-    </PortalProvider>
+    <TabContextProvider>
+      <Box flex={1} bg="lightGrey">
+        <TabGroupPager />
+        <CachedTabScreens />
+        <SharedBibleDOM />
+        <TabPreviewCarousel />
+        <BottomTabBar openMenu={openMenu} openHome={openHome} />
+      </Box>
+    </TabContextProvider>
   )
 }
 

@@ -45,6 +45,7 @@ import { addLink, deleteLink, Link } from '~redux/modules/user'
 import { makeLinkByIdSelector, makeVerseKeysForLinkSelector } from '~redux/selectors/bible'
 import { unifiedTagsModalAtom } from '~state/app'
 import { useTranslation } from 'react-i18next'
+import { IS_FORM_SHEET } from '~helpers/constants'
 
 const FOOTER_HEIGHT = 64
 
@@ -98,7 +99,9 @@ const BibleLinkScreen = () => {
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   const currentLink = useCurrentLink({ linkId })
+  const isFormSheet = IS_FORM_SHEET
   const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = isFormSheet ? canGoBackInStack : true
   const selectVerseKeysForLink = makeVerseKeysForLinkSelector()
   const relatedVerseKeys = useSelector((state: RootState) =>
     selectVerseKeysForLink(state, currentLink?.id || linkId || '')
@@ -233,10 +236,10 @@ const BibleLinkScreen = () => {
   const playerHeight = (playerWidth * 9) / 16
 
   return (
-    <FormSheetScreen isFormSheet>
+    <FormSheetScreen isFormSheet={isFormSheet}>
       <Box flex>
         <Header
-          hasBackButton={canGoBackInStack}
+          hasBackButton={hasBackButton}
           title={t('Lien')}
           subTitle={reference}
           rightComponent={

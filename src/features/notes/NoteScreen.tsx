@@ -4,6 +4,7 @@ import { useRef } from 'react'
 import type { NotesTab } from '~state/tabs'
 import NoteDetailTabScreen from './NoteDetailTabScreen'
 import { parseNoteVerseKeysParam } from './routeParams'
+import { IS_FORM_SHEET } from '~helpers/constants'
 
 const createNoteRouteAtom = (noteId?: string) =>
   atom<NotesTab>({
@@ -26,7 +27,7 @@ const NoteScreen = () => {
       noteId={noteId}
       initialVerseKeys={initialVerseKeys}
       onBackPress={router.back}
-      isFormSheet
+      isFormSheet={IS_FORM_SHEET}
     />
   )
 }

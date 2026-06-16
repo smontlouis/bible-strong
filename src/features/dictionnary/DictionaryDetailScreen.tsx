@@ -5,6 +5,7 @@ import { useLocalSearchParams } from 'expo-router'
 import generateUUID from '~helpers/generateUUID'
 import { DictionaryTab } from '../../state/tabs'
 import DictionaryDetailTabScreen from './DictionaryDetailTabScreen'
+import { IS_FORM_SHEET } from '~helpers/constants'
 
 const DictionaryDetailScreen = () => {
   const params = useLocalSearchParams<{ word?: string }>()
@@ -28,6 +29,6 @@ const DictionaryDetailScreen = () => {
     [word]
   )
 
-  return <DictionaryDetailTabScreen dictionaryAtom={onTheFlyAtom} isFormSheet />
+  return <DictionaryDetailTabScreen dictionaryAtom={onTheFlyAtom} isFormSheet={IS_FORM_SHEET} />
 }
 export default DictionaryDetailScreen

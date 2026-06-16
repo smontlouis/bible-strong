@@ -15,6 +15,7 @@ import useAsync from '~helpers/useAsync'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { IS_FORM_SHEET } from '~helpers/constants'
 
 const OccurencesNumber = styled.View(({ theme }) => ({
   marginLeft: 10,
@@ -42,7 +43,9 @@ const ConcordanceScreen = () => {
   const pushRouteOnce = usePushRouteOnce()
   const resources = useResourceAccess()
   const params = useLocalSearchParams<{ strongReference?: string; book?: string }>()
+  const isFormSheet = IS_FORM_SHEET
   const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = isFormSheet ? canGoBackInStack : true
 
   // Parse params from URL strings
   const strongReference = params.strongReference ? JSON.parse(params.strongReference) : {}
@@ -54,8 +57,8 @@ const ConcordanceScreen = () => {
   const data = hasDatabaseError(versesCountByBook) ? [] : versesCountByBook
 
   return (
-    <FormSheetScreen isFormSheet>
-      <Header hasBackButton={canGoBackInStack} title={`Concordance ${strongReference.Code}`} />
+    <FormSheetScreen isFormSheet={isFormSheet}>
+      <Header hasBackButton={hasBackButton} title={`Concordance ${strongReference.Code}`} />
       {status === 'Pending' && <Loading />}
       {status === 'Resolved' && (
         <FlatList

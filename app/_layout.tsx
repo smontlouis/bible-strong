@@ -55,6 +55,7 @@ import { applyPreferredColorScheme } from '~redux/themeAppearanceMiddleware'
 import getTheme, { baseTheme, Theme } from '~themes/index'
 import { setI18n } from '../i18n'
 import { PlaybackService } from '../playbackService'
+import { PortalProvider } from 'react-native-teleport'
 
 // Register background event handler for Notifee
 // This prevents ANR when notifications fire while app is in background
@@ -272,40 +273,42 @@ function InnerApp() {
           <DBStateProvider>
             <ErrorBoundary>
               <AppSwitcherProvider>
-                <ResourceAccessProvider>
-                  <RootSiblingParent>
-                    <SheetProvider>
-                      <BookSelectorSheetProvider>
-                        <StrongAudioProvider>
-                          <InitHooks />
-                          <Stack screenOptions={{ headerShown: false }}>
-                            <Stack.Screen name="index" />
-                            <Stack.Screen
-                              name="(explore)"
-                              options={createFormSheetOptions(theme, {
-                                contentStyle: {
-                                  bottom: 0,
-                                },
-                                sheetAllowedDetents: [0.45, 1],
-                                sheetLargestUndimmedDetentIndex: 0,
-                              })}
-                            />
-                            <Stack.Screen
-                              name="(library)"
-                              options={{
-                                contentStyle: {
-                                  bottom: 0,
-                                },
-                              }}
-                            />
-                          </Stack>
-                          <ThemedToaster />
-                          <DeferredModals />
-                        </StrongAudioProvider>
-                      </BookSelectorSheetProvider>
-                    </SheetProvider>
-                  </RootSiblingParent>
-                </ResourceAccessProvider>
+                <PortalProvider>
+                  <ResourceAccessProvider>
+                    <RootSiblingParent>
+                      <SheetProvider>
+                        <BookSelectorSheetProvider>
+                          <StrongAudioProvider>
+                            <InitHooks />
+                            <Stack screenOptions={{ headerShown: false }}>
+                              <Stack.Screen name="index" />
+                              <Stack.Screen
+                                name="(explore)"
+                                options={createFormSheetOptions(theme, {
+                                  contentStyle: {
+                                    bottom: 0,
+                                  },
+                                  sheetAllowedDetents: [0.45, 1],
+                                  sheetLargestUndimmedDetentIndex: 0,
+                                })}
+                              />
+                              <Stack.Screen
+                                name="(library)"
+                                options={{
+                                  contentStyle: {
+                                    bottom: 0,
+                                  },
+                                }}
+                              />
+                            </Stack>
+                            <ThemedToaster />
+                            <DeferredModals />
+                          </StrongAudioProvider>
+                        </BookSelectorSheetProvider>
+                      </SheetProvider>
+                    </RootSiblingParent>
+                  </ResourceAccessProvider>
+                </PortalProvider>
               </AppSwitcherProvider>
             </ErrorBoundary>
           </DBStateProvider>

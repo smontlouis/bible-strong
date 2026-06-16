@@ -105,7 +105,6 @@ const VerseSheet = ({ sheetRef, bookSelectorRef, actions, data }: VerseSheetProp
     <Sheet
       ref={sheetRef}
       snapPoints={[0.5]}
-      stackBehavior="push"
       header={<SheetHeader title={t('goToVerse')} centerTitle />}
     >
       <SheetScrollView

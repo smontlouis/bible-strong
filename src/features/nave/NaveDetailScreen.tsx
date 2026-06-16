@@ -5,6 +5,7 @@ import { useLocalSearchParams } from 'expo-router'
 import generateUUID from '~helpers/generateUUID'
 import { NaveTab } from '../../state/tabs'
 import NaveDetailTabScreen from './NaveDetailTabScreen'
+import { IS_FORM_SHEET } from '~helpers/constants'
 
 const NaveDetailScreen = () => {
   const params = useLocalSearchParams<{ name_lower?: string; name?: string }>()
@@ -30,6 +31,6 @@ const NaveDetailScreen = () => {
     [name, name_lower]
   )
 
-  return <NaveDetailTabScreen naveAtom={onTheFlyAtom} isFormSheet />
+  return <NaveDetailTabScreen naveAtom={onTheFlyAtom} isFormSheet={IS_FORM_SHEET} />
 }
 export default NaveDetailScreen

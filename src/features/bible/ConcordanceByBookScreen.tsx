@@ -20,6 +20,7 @@ import { useResourceLanguage } from 'src/state/resourcesLanguage'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { FoundVerseRow } from '~features/resources/strongAccess'
+import { IS_FORM_SHEET } from '~helpers/constants'
 
 const ConcordanceByBook = () => {
   const pushRouteOnce = usePushRouteOnce()
@@ -27,7 +28,9 @@ const ConcordanceByBook = () => {
   const params = useLocalSearchParams<{ book: string; strongReference: string }>()
   const { t } = useTranslation()
   const [verses, setVerses] = useState<FoundVerseRow[]>([])
+  const isFormSheet = IS_FORM_SHEET
   const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = isFormSheet ? canGoBackInStack : true
   const [strongResourceLanguage, setStrongResourceLanguage] = useResourceLanguage('STRONG')
 
   const book = params.book ? Number(params.book) : 0
@@ -53,9 +56,9 @@ const ConcordanceByBook = () => {
   }
 
   return (
-    <FormSheetScreen isFormSheet>
+    <FormSheetScreen isFormSheet={isFormSheet}>
       <Header
-        hasBackButton={canGoBackInStack}
+        hasBackButton={hasBackButton}
         title={`${truncate(Mot, 7)} dans ${books[book - 1].Nom}`}
         rightComponent={
           <MenuView

@@ -126,6 +126,7 @@ interface BibleViewerProps {
   onMountTimeout?: () => void
   isBibleViewReloadingAtom: PrimitiveAtom<boolean>
   isFormSheet?: boolean
+  isInTab?: boolean
 }
 
 const BibleViewer = ({
@@ -134,6 +135,7 @@ const BibleViewer = ({
   onMountTimeout,
   isBibleViewReloadingAtom,
   isFormSheet,
+  isInTab,
 }: BibleViewerProps) => {
   const { t } = useTranslation()
   const pushRouteOnce = usePushRouteOnce()
@@ -220,26 +222,6 @@ const BibleViewer = ({
   const contextDisplayMode = getBibleContextDisplayMode(bible.data)
   const isContextFocused = contextDisplayMode === 'focused'
   const selectedVersesReference = verseToReference(selectedVerses)
-  const resetAndroidSelectionBeforeFormSheet = useCallback(() => {
-    if (Platform.OS !== 'android') {
-      return
-    }
-
-    versesModal.close()
-    actions.clearSelectedVerses()
-  }, [actions, versesModal])
-  const runAfterAndroidSelectionReset = useCallback(
-    (callback: () => void) => {
-      if (Platform.OS !== 'android') {
-        callback()
-        return
-      }
-
-      resetAndroidSelectionBeforeFormSheet()
-      setTimeout(callback, 120)
-    },
-    [resetAndroidSelectionBeforeFormSheet]
-  )
   const { data: coverageData } = useQuery({
     queryKey: ['bible-version-coverage', version],
     queryFn: () => getBibleVersionCoverage(version),
@@ -253,7 +235,7 @@ const BibleViewer = ({
   const setSharedProps = useSetAtom(sharedBibleDOMPropsAtom)
   const setBibleDOMHostLayouts = useSetAtom(bibleDOMHostLayoutsAtom)
   const isActiveBibleTab = !isFormSheet && activeBibleTabId === bible.id
-  const useSharedDOM = !isFormSheet
+  const useSharedDOM = isInTab
   const domLayerZIndex = Platform.OS === 'ios' ? 0 : -1
 
   // Displayed values - updated only when verses are loaded to keep annotations in sync
@@ -288,10 +270,8 @@ const BibleViewer = ({
   const handleAnnotationNotePress = useCallback(() => {
     if (!annotationMode.selectedAnnotation) return
     const noteId = `annotation:${annotationMode.selectedAnnotation.id}`
-    runAfterAndroidSelectionReset(() => {
-      openNote({ noteId })
-    })
-  }, [annotationMode.selectedAnnotation, openNote, runAfterAndroidSelectionReset])
+    openNote({ noteId })
+  }, [annotationMode.selectedAnnotation, openNote])
 
   // Handler for opening annotation tags modal
   const handleAnnotationTagsPress = useCallback(() => {
@@ -546,18 +526,14 @@ const BibleViewer = ({
 
   const toggleCreateNote = () => {
     const verseKeys = getSelectedVerseKeys(selectedVerses)
-    runAfterAndroidSelectionReset(() => {
-      openNote({ verseKeys })
-    })
+    openNote({ verseKeys })
   }
 
   const toggleCreateLink = () => {
     const params = getSelectedVersesLinkParams(selectedVerses)
-    runAfterAndroidSelectionReset(() => {
-      pushRouteOnce({
-        pathname: '/link',
-        params,
-      })
+    pushRouteOnce({
+      pathname: '/link',
+      params,
     })
   }
 
@@ -565,9 +541,7 @@ const BibleViewer = ({
     const endpoint = getSelectedVersesRelationEndpoint(selectedVerses)
     if (!endpoint) return
     setCreateRelationSourceEndpoint(endpoint)
-    runAfterAndroidSelectionReset(() => {
-      createRelationModal.open()
-    })
+    createRelationModal.open()
   }
 
   const handleRelationCreatedFromSelection = () => {
@@ -587,21 +561,15 @@ const BibleViewer = ({
 
     if (!verseIds.length) return
 
-    runAfterAndroidSelectionReset(() => {
-      openEntityRelations(createVerseEndpoint(verseIds))
-    })
+    openEntityRelations(createVerseEndpoint(verseIds))
   }
 
   const openLink = (linkId: string) => {
-    runAfterAndroidSelectionReset(() => {
-      pushRouteOnce({ pathname: '/link', params: { linkId } })
-    })
+    pushRouteOnce({ pathname: '/link', params: { linkId } })
   }
 
   const openBibleNote = (noteId: string, verseIds?: string[]) => {
-    runAfterAndroidSelectionReset(() => {
-      openNote({ noteId, verseKeys: verseIds })
-    })
+    openNote({ noteId, verseKeys: verseIds })
   }
 
   const onChangeResourceTypeSelectVerse = (res: BibleResource, ver: string) => {
@@ -688,18 +656,16 @@ const BibleViewer = ({
     (code: SelectedCode | null) => {
       setSelectedCodeState(code)
       if (code) {
-        runAfterAndroidSelectionReset(() => {
-          pushRouteOnce({
-            pathname: '/strong',
-            params: {
-              book: String(code.book),
-              reference: code.reference,
-            },
-          })
+        pushRouteOnce({
+          pathname: '/strong',
+          params: {
+            book: String(code.book),
+            reference: code.reference,
+          },
         })
       }
     },
-    [pushRouteOnce, runAfterAndroidSelectionReset]
+    [pushRouteOnce]
   )
 
   // Cross-version annotations modal handlers
@@ -910,6 +876,7 @@ const BibleViewer = ({
         onBibleParamsClick={bibleParamsModal.open}
         commentsDisplay={settings.commentsDisplay}
         isFormSheet={isFormSheet}
+        isInTab={isInTab}
         onExitAnnotationMode={handleExitAnnotationMode}
         annotationModeEnabled={annotationMode.enabled}
         onEditFocusTags={editFocusTags}

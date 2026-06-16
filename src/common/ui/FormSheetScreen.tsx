@@ -23,6 +23,9 @@ const FormSheetScreen = ({ isFormSheet = false, children, ...props }: Props) => 
 }
 
 export const FormSheetHandle = () => {
+  // Disable handle for now
+  return null
+
   if (Platform.OS === 'ios') {
     return null
   }

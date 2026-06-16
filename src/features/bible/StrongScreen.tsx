@@ -4,6 +4,7 @@ import { useLocalSearchParams } from 'expo-router'
 import generateUUID from '~helpers/generateUUID'
 import { StrongTab } from '../../state/tabs'
 import StrongDetailScreen from '~features/lexique/StrongDetailScreen'
+import { IS_FORM_SHEET } from '~helpers/constants'
 
 const StrongScreen = () => {
   const params = useLocalSearchParams<{
@@ -34,7 +35,7 @@ const StrongScreen = () => {
     [book, reference, strongReference]
   )
 
-  return <StrongDetailScreen strongAtom={onTheFlyAtom} isFormSheet />
+  return <StrongDetailScreen strongAtom={onTheFlyAtom} isFormSheet={IS_FORM_SHEET} />
 }
 
 export default StrongScreen

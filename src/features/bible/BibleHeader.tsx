@@ -63,6 +63,7 @@ interface BibleHeaderProps {
   onExitAnnotationMode?: () => void
   annotationModeEnabled?: boolean
   onEditFocusTags?: () => void
+  isInTab?: boolean
 }
 
 const Header = ({
@@ -73,6 +74,7 @@ const Header = ({
   onExitAnnotationMode,
   annotationModeEnabled,
   onEditFocusTags,
+  isInTab,
 }: BibleHeaderProps) => {
   const router = useRouter()
   const { t } = useTranslation()
@@ -90,7 +92,7 @@ const Header = ({
   const displayMode = useAtomValue(parallelDisplayModeAtom)
   const setDisplayMode = useSetAtom(parallelDisplayModeAtom)
   const canGoBackInStack = useCanGoBackInStack()
-  const hasBackButton = Boolean(isFormSheet && canGoBackInStack)
+  const hasBackButton = !isInTab || Boolean(isFormSheet && canGoBackInStack)
   const openInNewTab = useOpenInNewTab()
   const openEntityRelations = useOpenEntityRelations()
 

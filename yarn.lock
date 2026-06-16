@@ -3806,26 +3806,55 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lodev09/react-native-true-sheet@npm:^3.10.1":
-  version: 3.10.1
-  resolution: "@lodev09/react-native-true-sheet@npm:3.10.1"
+"@lodev09/react-native-true-sheet@npm:3.11.0-beta.15":
+  version: 3.11.0-beta.15
+  resolution: "@lodev09/react-native-true-sheet@npm:3.11.0-beta.15"
   peerDependencies:
-    "@gorhom/bottom-sheet": ">=5"
-    "@react-navigation/native": ">=7"
+    "@radix-ui/react-dialog": ">=1"
+    "@radix-ui/react-presence": ">=1"
+    "@react-navigation/core": ">=7"
     react: "*"
     react-native: "*"
     react-native-reanimated: ">=4"
     react-native-worklets: "*"
   peerDependenciesMeta:
-    "@gorhom/bottom-sheet":
+    "@radix-ui/react-dialog":
       optional: true
-    "@react-navigation/native":
+    "@radix-ui/react-presence":
+      optional: true
+    "@react-navigation/core":
       optional: true
     react-native-reanimated:
       optional: true
     react-native-worklets:
       optional: true
-  checksum: 10c0/73716d01b0b7a703f30ef2aaf751dc7fa703cf918026e814c24f85e03ea09e6fdf9eafd57f5373a322772dbb3517194eebf058ff1f8f82a5506f3d048ed4520c
+  checksum: 10c0/fdc4dde65020f00ad5d29b9cac13257b8e3c7ba8ccde645dffc88103a71a4ec27078ce6b46720f76798bac13f80cd2095004900d2b2d938a5e7780896d976877
+  languageName: node
+  linkType: hard
+
+"@lodev09/react-native-true-sheet@patch:@lodev09/react-native-true-sheet@npm%3A3.11.0-beta.15#~/.yarn/patches/@lodev09-react-native-true-sheet-npm-3.11.0-beta.15-0c37133009.patch":
+  version: 3.11.0-beta.15
+  resolution: "@lodev09/react-native-true-sheet@patch:@lodev09/react-native-true-sheet@npm%3A3.11.0-beta.15#~/.yarn/patches/@lodev09-react-native-true-sheet-npm-3.11.0-beta.15-0c37133009.patch::version=3.11.0-beta.15&hash=d4900d"
+  peerDependencies:
+    "@radix-ui/react-dialog": ">=1"
+    "@radix-ui/react-presence": ">=1"
+    "@react-navigation/core": ">=7"
+    react: "*"
+    react-native: "*"
+    react-native-reanimated: ">=4"
+    react-native-worklets: "*"
+  peerDependenciesMeta:
+    "@radix-ui/react-dialog":
+      optional: true
+    "@radix-ui/react-presence":
+      optional: true
+    "@react-navigation/core":
+      optional: true
+    react-native-reanimated:
+      optional: true
+    react-native-worklets:
+      optional: true
+  checksum: 10c0/8d526d07e42a4ff5b449b224b06c4eb2a69f6aefe245655ebe6270bf834d3e22ec12a1892cff4ac9850be1457858e9721101fc3fbc83cc07dab8f1839d699fa3
   languageName: node
   linkType: hard
 
@@ -6844,7 +6873,7 @@ __metadata:
     "@fastify/deepmerge": "npm:^1.3.0"
     "@invertase/react-native-apple-authentication": "npm:^2.3.0"
     "@legendapp/list": "npm:^2.0.19"
-    "@lodev09/react-native-true-sheet": "npm:^3.10.1"
+    "@lodev09/react-native-true-sheet": "patch:@lodev09/react-native-true-sheet@npm%3A3.11.0-beta.15#~/.yarn/patches/@lodev09-react-native-true-sheet-npm-3.11.0-beta.15-0c37133009.patch"
     "@notifee/react-native": "npm:^7.8.2"
     "@react-native-async-storage/async-storage": "npm:2.2.0"
     "@react-native-clipboard/clipboard": "npm:^1.14.0"

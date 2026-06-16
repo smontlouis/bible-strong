@@ -7,6 +7,7 @@ import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { getEvents } from './events'
 import TimelineEventDetailView from './TimelineEventDetailView'
 import { TimelineEvent } from './types'
+import { IS_FORM_SHEET } from '~helpers/constants'
 
 const EventScreen = () => {
   const pushRouteOnce = usePushRouteOnce()
@@ -58,7 +59,7 @@ const EventScreen = () => {
     <TimelineEventDetailView
       event={event}
       onOpenEvent={openEvent}
-      isFormSheet
+      isFormSheet={IS_FORM_SHEET}
       menuItems={[
         {
           label: t('tab.openInNewTab'),

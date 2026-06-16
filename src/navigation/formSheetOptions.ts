@@ -26,6 +26,10 @@ export const createFormSheetOptions = (
     backgroundColor: theme.colors.reverse,
   } satisfies NonNullable<StackScreenOptions['contentStyle']>
 
+  if (Platform.OS === 'android') {
+    return {}
+  }
+
   return {
     ...defaultFormSheetOptions,
     ...restOverrides,
