@@ -33,6 +33,7 @@ import UnifiedTagsModal from '~common/UnifiedTagsModal'
 import { AppRatingModal } from '~features/app-rating'
 import { AppSwitcherProvider } from '~features/app-switcher/AppSwitcherProvider'
 import { BookSelectorSheetProvider } from '~features/bible/BookSelectorSheet/BookSelectorSheetProvider'
+import { StrongAudioProvider } from '~features/bible/StrongAudioProvider'
 import { FeatureOnboardingModal } from '~features/feature-onboarding'
 import OnBoardingModal from '~features/onboarding/OnBoarding'
 import { ResourceAccessProvider } from '~features/resources/resourceAccess'
@@ -275,30 +276,32 @@ function InnerApp() {
                   <RootSiblingParent>
                     <SheetProvider>
                       <BookSelectorSheetProvider>
-                        <InitHooks />
-                        <Stack screenOptions={{ headerShown: false }}>
-                          <Stack.Screen name="index" />
-                          <Stack.Screen
-                            name="(explore)"
-                            options={createFormSheetOptions(theme, {
-                              contentStyle: {
-                                bottom: 0,
-                              },
-                              sheetAllowedDetents: [0.45, 1],
-                              sheetLargestUndimmedDetentIndex: 0,
-                            })}
-                          />
-                          <Stack.Screen
-                            name="(library)"
-                            options={{
-                              contentStyle: {
-                                bottom: 0,
-                              },
-                            }}
-                          />
-                        </Stack>
-                        <ThemedToaster />
-                        <DeferredModals />
+                        <StrongAudioProvider>
+                          <InitHooks />
+                          <Stack screenOptions={{ headerShown: false }}>
+                            <Stack.Screen name="index" />
+                            <Stack.Screen
+                              name="(explore)"
+                              options={createFormSheetOptions(theme, {
+                                contentStyle: {
+                                  bottom: 0,
+                                },
+                                sheetAllowedDetents: [0.45, 1],
+                                sheetLargestUndimmedDetentIndex: 0,
+                              })}
+                            />
+                            <Stack.Screen
+                              name="(library)"
+                              options={{
+                                contentStyle: {
+                                  bottom: 0,
+                                },
+                              }}
+                            />
+                          </Stack>
+                          <ThemedToaster />
+                          <DeferredModals />
+                        </StrongAudioProvider>
                       </BookSelectorSheetProvider>
                     </SheetProvider>
                   </RootSiblingParent>

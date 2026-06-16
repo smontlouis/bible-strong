@@ -72,6 +72,10 @@ const verseToDictionnary = async (
 ): Promise<JSX.Element | JSX.Element[] | undefined> => {
   try {
     const verseText = bible[Livre]?.[Chapitre]?.[Verset]
+    if (!verseText) {
+      return <Paragraph />
+    }
+
     if (!dictionnaryWordsInVerse.length) {
       return <Paragraph>{verseText}</Paragraph>
     }
@@ -225,7 +229,10 @@ const DictionnaireVerseDetailScreen = ({
     return <Loading />
   }
 
-  const currentWordIndex = wordsInVerse.findIndex(w => w === currentWord)
+  const loadedWords = words
+    .map((word, index) => (word ? { wordKey: wordsInVerse[index], item: word } : null))
+    .filter((word): word is { wordKey: string; item: DictionaryItem } => Boolean(word))
+  const currentLoadedWordIndex = loadedWords.findIndex(word => word.wordKey === currentWord)
 
   return (
     <Box flex={1} onLayout={e => setBoxHeight(e.nativeEvent.layout.height)}>
@@ -256,7 +263,7 @@ const DictionnaireVerseDetailScreen = ({
         <RoundedCorner />
       </Box>
       <Box ref={carouselContainerRef} flex bg="lightGrey" onLayout={onCarouselContainerLayout}>
-        {wordsInVerse.length ? (
+        {loadedWords.length ? (
           <Carousel
             ref={carousel}
             mode="horizontal-stack"
@@ -278,10 +285,10 @@ const DictionnaireVerseDetailScreen = ({
               flex: 1,
               width: '100%',
             }}
-            defaultIndex={currentWordIndex === -1 ? 0 : currentWordIndex}
-            data={words.filter((word): word is DictionaryItem => Boolean(word))}
-            renderItem={({ item }) => <DictionnaireCard dictionnaireRef={item} />}
-            onSnapToItem={(index: number) => setCurrentWord(wordsInVerse[index])}
+            defaultIndex={currentLoadedWordIndex === -1 ? 0 : currentLoadedWordIndex}
+            data={loadedWords}
+            renderItem={({ item }) => <DictionnaireCard dictionnaireRef={item.item} />}
+            onSnapToItem={(index: number) => setCurrentWord(loadedWords[index]?.wordKey)}
           />
         ) : (
           <Empty
