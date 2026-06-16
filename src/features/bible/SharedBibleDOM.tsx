@@ -7,7 +7,12 @@ import { Portal, PortalHost } from 'react-native-teleport'
 import { useSelector } from 'react-redux'
 
 import { bibleDomRemountSignalAtom } from '~state/app'
-import { activeBibleTabIdAtom, sharedBibleDOMPropsAtom, getDefaultBibleTab } from '~state/tabs'
+import {
+  activeBibleTabIdAtom,
+  bibleDOMHostLayoutsAtom,
+  getDefaultBibleTab,
+  sharedBibleDOMPropsAtom,
+} from '~state/tabs'
 import type { WebViewProps } from './BibleDOM/BibleDOMWrapper'
 import { BibleDOMWrapper } from './BibleDOM/BibleDOMWrapper'
 import type { RootState } from '~redux/modules/reducer'
@@ -33,16 +38,21 @@ const noop = () => {}
  */
 const SharedBibleDOM = () => {
   const activeBibleTabId = useAtomValue(activeBibleTabIdAtom)
+  const bibleDOMHostLayouts = useAtomValue(bibleDOMHostLayoutsAtom)
   const sharedProps = useAtomValue(sharedBibleDOMPropsAtom)
   const bibleDomRemountSignal = useAtomValue(bibleDomRemountSignalAtom)
   const settings = useSelector((state: RootState) => state.user.bible.settings)
 
   const activeProps =
     activeBibleTabId && sharedProps?.tabId === activeBibleTabId ? sharedProps : null
+  const activeHostLayout = activeBibleTabId ? bibleDOMHostLayouts[activeBibleTabId] : undefined
   const destination =
     activeBibleTabId && activeProps
       ? getBibleDOMDestination(activeBibleTabId)
       : SHARED_BIBLE_DOM_PARK_HOST
+  const portalLayoutKey = activeHostLayout
+    ? `${activeHostLayout.width}x${activeHostLayout.height}`
+    : '0x0'
 
   const prevDestination = useRef<string | undefined>(undefined)
   const maxRetriesReportedRef = useRef(false)
@@ -137,9 +147,9 @@ const SharedBibleDOM = () => {
   return (
     <View style={[StyleSheet.absoluteFill, { zIndex: -9999, pointerEvents: 'none' }]}>
       <PortalHost name={SHARED_BIBLE_DOM_PARK_HOST} style={StyleSheet.absoluteFill} />
-      <Portal hostName={destination}>
+      <Portal key={`${destination}-${portalLayoutKey}`} hostName={destination}>
         <BibleDOMWrapper
-          key={`${reloadKey}-${bibleDomRemountSignal}`}
+          key={`${reloadKey}-${bibleDomRemountSignal}-${destination}-${portalLayoutKey}`}
           {...props}
           onMountTimeout={handleMountTimeout}
           onDOMMounted={handleDOMMounted}

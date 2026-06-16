@@ -1108,6 +1108,13 @@ export const activeBibleTabIdAtom = atom<string | null>(get => {
   return activeTab.type === 'bible' ? activeId : null
 })
 
+export type BibleDOMHostLayout = {
+  width: number
+  height: number
+}
+
+export const bibleDOMHostLayoutsAtom = atom<Record<string, BibleDOMHostLayout>>({})
+
 /**
  * Props for the shared BibleDOMWrapper instance.
  * Updated by the active BibleViewer via useLayoutEffect.

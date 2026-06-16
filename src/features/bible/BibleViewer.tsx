@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react-native'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Alert, Platform } from 'react-native'
+import { Alert, Platform, type LayoutChangeEvent } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import Box from '~common/ui/Box'
 import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
@@ -56,6 +56,7 @@ import type { AppDispatch } from '~redux/store'
 import { bibleDataRefreshSignalAtom, historyAtom } from '../../state/app'
 import {
   activeBibleTabIdAtom,
+  bibleDOMHostLayoutsAtom,
   BibleTab,
   getBibleContextDisplayMode,
   parallelColumnWidthAtom,
@@ -250,6 +251,7 @@ const BibleViewer = ({
   // Shared Bible DOM: detect if this tab is the active Bible tab
   const activeBibleTabId = useAtomValue(activeBibleTabIdAtom)
   const setSharedProps = useSetAtom(sharedBibleDOMPropsAtom)
+  const setBibleDOMHostLayouts = useSetAtom(bibleDOMHostLayoutsAtom)
   const isActiveBibleTab = !isFormSheet && activeBibleTabId === bible.id
   const useSharedDOM = !isFormSheet
   const domLayerZIndex = Platform.OS === 'ios' ? 0 : -1
@@ -859,8 +861,14 @@ const BibleViewer = ({
         data: { tabId: bible.id },
         level: 'info',
       })
+      setBibleDOMHostLayouts(current => {
+        if (!current[bible.id]) return current
+        const next = { ...current }
+        delete next[bible.id]
+        return next
+      })
     }
-  }, [useSharedDOM, bible.id])
+  }, [useSharedDOM, bible.id, setBibleDOMHostLayouts])
 
   // Track tab activation changes for Sentry
   useEffect(() => {
@@ -872,6 +880,28 @@ const BibleViewer = ({
       level: 'info',
     })
   }, [useSharedDOM, isActiveBibleTab, bible.id])
+
+  const handleBibleDOMHostLayout = ({ nativeEvent: { layout } }: LayoutChangeEvent) => {
+    if (!useSharedDOM) return
+
+    const width = Math.round(layout.width)
+    const height = Math.round(layout.height)
+    if (width <= 0 || height <= 0) return
+
+    setBibleDOMHostLayouts(current => {
+      const previous = current[bible.id]
+      if (previous?.width === width && previous?.height === height) return current
+
+      Sentry.addBreadcrumb({
+        category: 'bible-host',
+        message: 'PortalHost layout changed',
+        data: { tabId: bible.id, width, height },
+        level: 'info',
+      })
+
+      return { ...current, [bible.id]: { width, height } }
+    })
+  }
 
   return (
     <Box flex={1} bg="reverse">
@@ -888,7 +918,7 @@ const BibleViewer = ({
         {useSharedDOM ? (
           // Keep every host mounted so Android only retargets between
           // stable native parents instead of unmounting/remounting hosts.
-          <Box flex={1}>
+          <Box flex={1} onLayout={handleBibleDOMHostLayout}>
             <PortalHost
               name={getBibleDOMDestination(bible.id)}
               style={{ flex: 1, zIndex: domLayerZIndex }}
