@@ -210,7 +210,7 @@ export type WebViewProps = {
   goToPrevChapter?: () => void
   goToNextChapter?: () => void
   setUnifiedTagsModal?: (payload: HighlightTagsModalPayload) => void
-  onChangeResourceTypeSelectVerse?: (resourceType: BibleResource, verseKey: string) => void
+  onOpenResourceForVerse?: (resourceType: BibleResource, verseKey: string) => void
   onMountTimeout?: () => void
   onDOMMounted?: () => void
   onOpenBookmarkModal?: (bookmark: Bookmark) => void
@@ -330,7 +330,7 @@ export const BibleDOMWrapper = ({
   wordAnnotationsInOtherVersions,
   taggedVersesInChapter,
   versesWithNonHighlightTags,
-  onChangeResourceTypeSelectVerse,
+  onOpenResourceForVerse,
   onOpenStudyRelationsModal,
   openNote,
   openLink,
@@ -468,7 +468,7 @@ export const BibleDOMWrapper = ({
         if (!action.params) break
         const { Livre, Chapitre, Verset } = action.params.verse
         if (__DEV__) console.log(`[Bible] ${Livre}-${Chapitre}-${Verset}`)
-        onChangeResourceTypeSelectVerse?.('strong', `${Livre}-${Chapitre}-${Verset}`)
+        onOpenResourceForVerse?.('strong', `${Livre}-${Chapitre}-${Verset}`)
 
         break
       }

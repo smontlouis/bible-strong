@@ -14,7 +14,7 @@ import {
   type SheetFooterProps,
   type SheetRef,
 } from '~common/sheet'
-import { BibleResource, StudyNavigateBibleType } from '~common/types'
+import { BibleResource, StudyNavigateBibleType, VerseIds } from '~common/types'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { Slide, Slides } from '~common/ui/Slider'
@@ -25,7 +25,7 @@ import NaveModalCard from '~features/nave/NaveModalCard'
 import formatVerseContent from '~helpers/formatVerseContent'
 import generateUUID from '~helpers/generateUUID'
 import { toast } from '~helpers/toast'
-import { BibleTab, useBibleTabActions } from '../../../state/tabs'
+import { BibleTab, useBibleTabActions, VersionCode } from '../../../state/tabs'
 import BibleVerseDetailCard from '../BibleVerseDetailCard'
 import CompareVersionSelectorSheet from '../CompareVersionSelectorSheet'
 import { ReferenceCard } from '../ReferenceCard'
@@ -45,6 +45,9 @@ type Props = {
   onChangeResourceType: (resourceType: BibleResource) => void
   bibleAtom: PrimitiveAtom<BibleTab>
   isSelectionMode?: StudyNavigateBibleType
+  selectedVersion?: VersionCode
+  selectedVerses?: VerseIds
+  onChangeVerse?: (verseKey: string) => void
 }
 
 // const useCloseOnRouteChange = () => {
@@ -74,7 +77,16 @@ type Props = {
 // }
 
 const ResourcesModal = memo(
-  ({ resourceModalRef, resourceType, onChangeResourceType, bibleAtom, isSelectionMode }: Props) => {
+  ({
+    resourceModalRef,
+    resourceType,
+    onChangeResourceType,
+    bibleAtom,
+    isSelectionMode,
+    selectedVersion,
+    selectedVerses: selectedVersesProp,
+    onChangeVerse,
+  }: Props) => {
     const { t } = useTranslation()
     const compareVersionSelectorRef = React.useRef<SheetRef>(null)
     const [isOpen, setIsOpen] = useState(false)
@@ -85,8 +97,10 @@ const ResourcesModal = memo(
     const [naveLanguage, setNaveLanguage] = useResourceLanguage('NAVE')
     const [commentariesLanguage, setCommentariesLanguage] = useResourceLanguage('COMMENTARIES')
     const {
-      data: { selectedVerses },
+      data: { selectedVersion: bibleSelectedVersion, selectedVerses: bibleSelectedVerses },
     } = bible
+    const selectedVerses = selectedVersesProp ?? bibleSelectedVerses
+    const effectiveSelectedVersion = selectedVersion ?? bibleSelectedVersion
     const selectedVerse = Object.keys(selectedVerses)[0]
 
     const { title } = formatVerseContent([selectedVerse])
@@ -273,6 +287,9 @@ const ResourcesModal = memo(
                 resourceType={resourceType}
                 bibleAtom={bibleAtom}
                 isSelectionMode={isSelectionMode}
+                selectedVersion={effectiveSelectedVersion}
+                selectedVerses={selectedVerses}
+                onChangeVerse={onChangeVerse}
               />
             </View>
           )}
@@ -289,16 +306,18 @@ const Resource = ({
   bibleAtom,
   resourceType,
   isSelectionMode,
+  selectedVersion,
+  selectedVerses,
+  onChangeVerse,
 }: {
   bibleAtom: PrimitiveAtom<BibleTab>
   resourceType: BibleResource | null
   isSelectionMode?: StudyNavigateBibleType
+  selectedVersion: VersionCode
+  selectedVerses: VerseIds
+  onChangeVerse?: (verseKey: string) => void
 }) => {
-  const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
-  const {
-    data: { selectedVersion, selectedVerses },
-  } = bible
   const selectedVerse = Object.keys(selectedVerses)[0]
   const [Livre, Chapitre, Verset] = selectedVerse ? selectedVerse?.split('-') : []
 
@@ -310,7 +329,13 @@ const Resource = ({
   }
 
   const updateVerse = (incr: number) => {
-    actions.selectSelectedVerse(`${Livre}-${Chapitre}-${Number(Verset) + incr}`)
+    const nextVerse = `${Livre}-${Chapitre}-${Number(Verset) + incr}`
+    if (onChangeVerse) {
+      onChangeVerse(nextVerse)
+      return
+    }
+
+    actions.selectSelectedVerse(nextVerse)
   }
 
   if (!selectedVerse) return null
@@ -350,13 +375,16 @@ const Resource = ({
         </SheetScrollView>
       </Slide>
       <Slide key="commentary">
-        <CommentariesCard verse={selectedVerse} onChangeVerse={actions.selectSelectedVerse} />
+        <CommentariesCard
+          verse={selectedVerse}
+          onChangeVerse={onChangeVerse ?? actions.selectSelectedVerse}
+        />
       </Slide>
       <Slide key="compare">
         <SheetScrollView contentContainerStyle={{}}>
           <CompareCard
             selectedVerses={selectedVerses}
-            onChangeVerse={actions.selectSelectedVerse}
+            onChangeVerse={onChangeVerse ?? actions.selectSelectedVerse}
           />
         </SheetScrollView>
       </Slide>

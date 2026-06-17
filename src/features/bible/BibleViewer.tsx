@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { PortalHost } from 'react-native-teleport'
 import { type SheetRef } from '~common/sheet'
 import type { Bookmark } from '~common/types'
-import { BibleResource, Pericope, SelectedCode, Verse } from '~common/types'
+import { BibleResource, Pericope, SelectedCode, Verse, VerseIds } from '~common/types'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import BookmarkModal from '~features/bookmarks/BookmarkModal'
 import { useOpenNote } from '~features/notes/useOpenNote'
@@ -201,6 +201,10 @@ const BibleViewer = ({
   const dispatch = useDispatch<AppDispatch>()
   const [pericope, setPericope] = useState<Pericope | null>(null)
   const [resourceType, onChangeResourceType] = useState<BibleResource>('strong')
+  const [resourceModalSelection, setResourceModalSelection] = useState<{
+    selectedVersion: VersionCode
+    selectedVerses: VerseIds
+  } | null>(null)
   const addHistory = useSetAtom(historyAtom)
   const bible = useAtomValue(bibleAtom)
   const parallelColumnWidth = useAtomValue(parallelColumnWidthAtom)
@@ -572,10 +576,24 @@ const BibleViewer = ({
     openNote({ noteId, verseKeys: verseIds })
   }
 
-  const onChangeResourceTypeSelectVerse = (res: BibleResource, ver: string) => {
-    actions.selectSelectedVerse(ver)
+  const openResourceForVerse = (res: BibleResource, ver: string) => {
+    setResourceModalSelection({
+      selectedVersion: version,
+      selectedVerses: { [ver]: true },
+    })
     onChangeResourceType(res)
     resourceModal.open()
+  }
+
+  const changeResourceModalVerse = (ver: string) => {
+    if (resourceModalSelection) {
+      setResourceModalSelection(current =>
+        current ? { ...current, selectedVerses: { [ver]: true } } : current
+      )
+      return
+    }
+
+    actions.selectSelectedVerse(ver)
   }
 
   // Add to study handlers
@@ -762,7 +780,7 @@ const BibleViewer = ({
     goToPrevChapter: goToPrevAvailableChapter,
     goToNextChapter: goToNextAvailableChapter,
     setUnifiedTagsModal,
-    onChangeResourceTypeSelectVerse,
+    onOpenResourceForVerse: openResourceForVerse,
     onMountTimeout,
     onOpenBookmarkModal: handleOpenBookmarkModal,
     expandContext: actions.expandContext,
@@ -919,6 +937,7 @@ const BibleViewer = ({
         isSelectionMode={isSelectionMode}
         selectedVerseHighlightColor={selectedVerseHighlightColor}
         onChangeResourceType={val => {
+          setResourceModalSelection(null)
           onChangeResourceType(val)
           resourceModal.open()
         }}
@@ -951,6 +970,9 @@ const BibleViewer = ({
         resourceType={resourceType}
         onChangeResourceType={onChangeResourceType}
         isSelectionMode={isSelectionMode}
+        selectedVersion={resourceModalSelection?.selectedVersion}
+        selectedVerses={resourceModalSelection?.selectedVerses}
+        onChangeVerse={changeResourceModalVerse}
       />
       <BibleParamsModal modalRef={bibleParamsModal.getRef()} />
       <AddToStudyModal
