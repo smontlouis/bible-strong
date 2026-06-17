@@ -84,6 +84,7 @@ export type SheetProps = {
   backgroundColor?: string
   cornerRadius?: number
   maxWidth?: number
+  draggable?: boolean
   header?: React.ReactElement | React.ComponentType<unknown>
   footer?: React.ComponentType<SheetFooterProps> | ((props: SheetFooterProps) => React.ReactNode)
   dismissible?: boolean
@@ -194,6 +195,7 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
     detached,
     detachedOffset,
     dismissible = true,
+    draggable = true,
     footer,
     header,
     initialSnapPoint,
@@ -251,7 +253,7 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
         detents={detents}
         dismissible={dismissible}
         dimmed={backdrop}
-        draggable
+        draggable={draggable}
         footer={renderedFooter}
         header={header}
         grabber
