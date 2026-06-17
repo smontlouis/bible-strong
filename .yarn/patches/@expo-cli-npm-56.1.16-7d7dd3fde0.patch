@@ -1,0 +1,32 @@
+diff --git a/build/src/start/server/middleware/DomComponentsMiddleware.js b/build/src/start/server/middleware/DomComponentsMiddleware.js
+index 9354bedfc84d53efd54e089ad3e9e23c4d026123..55d8eb166ff1cfa17aa2a34623b01ca9e97dd583 100644
+--- a/build/src/start/server/middleware/DomComponentsMiddleware.js
++++ b/build/src/start/server/middleware/DomComponentsMiddleware.js
+@@ -132,13 +132,22 @@ function getDomComponentHtml(src, { title } = {}) {
+         <script>${_domPolyfills.DOM_POLYFILLS_SCRIPT}</script>
+         <script>
+           var injectedObject = {};
+-          try {
++          if (window.ReactNativeWebView && typeof window.ReactNativeWebView.injectedObjectJson === 'function') {
++            try {
+             injectedObject = JSON.parse(window.ReactNativeWebView.injectedObjectJson());
+-          } catch (e) {
+-            throw new Error('Failed to parse injectedObjectJson: ' + e.message);
++            } catch (e) {
++              console.error('Failed to parse injectedObjectJson: ' + e.message);
++            }
+           }
+-          window.$$EXPO_DOM_HOST_OS = injectedObject.EXPO_DOM_HOST_OS;
+-          window.$$EXPO_INITIAL_PROPS = injectedObject.initialProps;
++          var fallbackHostOS = /Android/i.test(navigator.userAgent)
++            ? 'android'
++            : /iPhone|iPad|iPod/i.test(navigator.userAgent)
++              ? 'ios'
++              : 'web';
++          var hasInitialProps = !!injectedObject.initialProps || typeof window.$$EXPO_INITIAL_PROPS !== 'undefined';
++          window.$$EXPO_DOM_HOST_OS = injectedObject.EXPO_DOM_HOST_OS || window.$$EXPO_DOM_HOST_OS || fallbackHostOS;
++          window.$$EXPO_INITIAL_PROPS = injectedObject.initialProps || window.$$EXPO_INITIAL_PROPS || { names: [], props: {} };
++          window.$$EXPO_INITIAL_PROPS_PENDING = !hasInitialProps;
+         </script>
+         ${src ? `<script crossorigin src="${src.replace(/^https?:/, '')}"></script>` : ''}
+     </body>

@@ -1,8 +1,57 @@
+diff --git a/src/dom/dom-entry.tsx b/src/dom/dom-entry.tsx
+index 46f25f77f998a67a3b560afad7eca2dfc35c8185..2ff61462cf984b3b50a4d8548f7d15cfc5f695ea 100644
+--- a/src/dom/dom-entry.tsx
++++ b/src/dom/dom-entry.tsx
+@@ -67,18 +67,22 @@ export function registerDOMComponent(AppModule: any) {
+ 
+   function DOMComponentRoot(props: Record<string, unknown>) {
+     // Props listeners
+-    const [marshalledProps, setProps] = React.useState(() => {
++    const [marshalledProps, setProps] = React.useState<MarshalledProps | null>(() => {
+       if (typeof window.$$EXPO_INITIAL_PROPS === 'undefined') {
+         throw new Error(
+           'Initial props are not defined. This is a bug in the DOM Component runtime.'
+         );
+       }
++      if ((window as any).$$EXPO_INITIAL_PROPS_PENDING) {
++        return null;
++      }
+       return window.$$EXPO_INITIAL_PROPS;
+     });
+ 
+     React.useEffect(() => {
+       const remove = addEventListener!((msg) => {
+         if (msg.type === '$$props') {
++          (window as any).$$EXPO_INITIAL_PROPS_PENDING = false;
+           setProps(msg.data as MarshalledProps);
+         }
+       });
+@@ -88,14 +92,18 @@ export function registerDOMComponent(AppModule: any) {
+     }, [setProps]);
+ 
+     const proxyActions = React.useMemo(() => {
+-      if (!marshalledProps.names) return {};
++      if (!marshalledProps?.names) return {};
+       // Create a named map { [name: string]: ProxyFunction }
+       // TODO(@kitten): Unclear how this is typed or shaped
+       return marshalledProps.names.reduce((acc: Record<string, any>, key: string) => {
+         acc[key] = ACTIONS[key];
+         return acc;
+       }, {});
+-    }, [marshalledProps.names]);
++    }, [marshalledProps?.names]);
++
++    if (!marshalledProps) {
++      return null;
++    }
+ 
+     return <AppModule {...props} {...(marshalledProps.props || {})} {...proxyActions} />;
+   }
 diff --git a/src/dom/webview-wrapper.tsx b/src/dom/webview-wrapper.tsx
-index 1695ebcf983f50949f4b7dce2845669f6b159383..44ddadf4b2965e49000b1c48a528984a5d894368 100644
+index 1695ebcf983f50949f4b7dce2845669f6b159383..a61d707f29a22ccf049182db4431f8f29bf1bf3c 100644
 --- a/src/dom/webview-wrapper.tsx
 +++ b/src/dom/webview-wrapper.tsx
-@@ -106,6 +106,15 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+@@ -106,6 +106,16 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
    // Keep `initialProps` stable to prevent webview reloads when
    // `injectedJavaScriptObject` changes.
    const initialPropsRef = React.useRef(smartActions);
@@ -12,13 +61,24 @@ index 1695ebcf983f50949f4b7dce2845669f6b159383..44ddadf4b2965e49000b1c48a528984a
 +    return `;(function() {
 +      window.$$EXPO_DOM_HOST_OS = ${hostOS};
 +      window.$$EXPO_INITIAL_PROPS = ${initialProps};
++      window.$$EXPO_INITIAL_PROPS_PENDING = false;
 +    })();
 +    true;`;
 +  }, []);
  
    // When the `marshalProps` change, emit them to the webview.
    React.useEffect(() => {
-@@ -150,6 +159,13 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+@@ -144,12 +154,23 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+     ...(useExpoDOMWebView ? { useExpoModulesBridge } : null),
+     containerStyle: [containerStyle, debugZeroHeightStyle, dom?.containerStyle],
+     onLayout: (__DEV__ ? debugOnLayout : dom?.onLayout) as RawWebViewProps['onLayout'],
++    onLoad: (event: any) => {
++      dom?.onLoad?.(event);
++      emit({ type: '$$props', data: smartActions });
++    },
+     injectedJavaScriptObject: {
+       // Inject the top-most OS for the DOM component to read.
+       EXPO_DOM_HOST_OS: process.env.EXPO_OS,
        // Inject the initial props
        initialProps: initialPropsRef.current,
      },

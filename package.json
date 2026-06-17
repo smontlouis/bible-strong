@@ -205,7 +205,8 @@
   "resolutions": {
     "react-native-svg": "15.15.4",
     "react-native-screens@npm:^4.25.2": "patch:react-native-screens@npm%3A4.25.2#~/.yarn/patches/react-native-screens-npm-4.25.2-0de6719d95.patch",
-    "rn-fetch-blob@npm:^0.12.0": "patch:rn-fetch-blob@npm%3A0.12.0#~/.yarn/patches/rn-fetch-blob-npm-0.12.0-cf02e3c544.patch"
+    "rn-fetch-blob@npm:^0.12.0": "patch:rn-fetch-blob@npm%3A0.12.0#~/.yarn/patches/rn-fetch-blob-npm-0.12.0-cf02e3c544.patch",
+    "@expo/cli@npm:^56.1.16": "patch:@expo/cli@npm%3A56.1.16#~/.yarn/patches/@expo-cli-npm-56.1.16-7d7dd3fde0.patch"
   },
   "expo": {
     "install": {
