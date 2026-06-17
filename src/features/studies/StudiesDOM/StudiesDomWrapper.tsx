@@ -215,7 +215,7 @@ export default function StudiesDomWrapper({
       isReadOnly={isReadOnly}
       colorScheme={colorScheme}
       dom={{
-        ...(Platform.OS === 'ios' ? { useExpoDOMWebView: false } : {}),
+        useExpoDOMWebView: false,
         onMessage: handleMessage,
         keyboardDisplayRequiresUserAction: false,
         bounces: false,

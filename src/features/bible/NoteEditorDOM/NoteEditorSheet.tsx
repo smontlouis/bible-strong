@@ -74,7 +74,7 @@ export default function NoteEditorSheet({
       onFocus={handleFocus}
       onBlur={handleBlur}
       dom={{
-        ...(Platform.OS === 'ios' ? { useExpoDOMWebView: false } : {}),
+        useExpoDOMWebView: false,
         containerStyle: { height: webViewHeight, overflow: 'hidden' },
         style: { overflow: 'hidden' },
         scrollEnabled: false,

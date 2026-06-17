@@ -820,15 +820,15 @@ export const BibleDOMWrapper = ({
     >
       <BibleDOMComponent
         dom={{
-          ...(Platform.OS === 'ios' ? { useExpoDOMWebView: false } : {}),
+          useExpoDOMWebView: false,
           webviewDebuggingEnabled: __DEV__,
           style: {
             flex: 1,
-            backgroundColor: DOM_WEBVIEW_BACKGROUND_COLOR,
+            backgroundColor: theme.colors.reverse,
           },
           containerStyle: {
             flex: 1,
-            backgroundColor: DOM_WEBVIEW_BACKGROUND_COLOR,
+            backgroundColor: theme.colors.reverse,
             ...(Platform.OS === 'android' && {
               marginTop: TOP_INSET,
             }),

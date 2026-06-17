@@ -60,7 +60,7 @@
     "@fastify/deepmerge": "^1.3.0",
     "@invertase/react-native-apple-authentication": "^2.3.0",
     "@legendapp/list": "^2.0.19",
-    "@lodev09/react-native-true-sheet": "patch:@lodev09/react-native-true-sheet@npm%3A3.11.0-beta.15#~/.yarn/patches/@lodev09-react-native-true-sheet-npm-3.11.0-beta.15-0c37133009.patch",
+    "@lodev09/react-native-true-sheet": "^3.10.1",
     "@notifee/react-native": "^7.8.2",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-clipboard/clipboard": "^1.14.0",
