@@ -30,18 +30,30 @@ export const useTabAnimations = () => {
   const { activeTabPreview, activeTabScreen, tabPreviewCarousel } = useAppSwitcherContext()
 
   /**
-   * Batched expand completion: set active tab index, resolve tabId,
-   * and start fade-in — all in a single JS hop from the UI thread
-   * animation callback.
+   * Prepare the real tab screen before the preview reaches full screen.
+   * This gives React Native/iOS a frame budget to lay out the destination
+   * screen while it is still transparent.
    */
-  const onExpandComplete = (index: number) => {
+  const prepareExpandTarget = (index: number) => {
     setActiveTabIndex(index)
     resolveAndSetTabId(activeTabScreen.tabId, index)
+  }
+
+  const sendPreviewBehindActiveScreen = () => {
+    activeTabPreview.zIndex.set(1)
+  }
+
+  /**
+   * Expand completion: fade in the already-mounted tab screen, then move
+   * the enlarged preview behind it so stale preview pixels cannot leak.
+   */
+  const onExpandComplete = () => {
     fadeInTabScreen(
       activeTabScreen.opacity,
       activeTabPreview.index,
       activeTabScreen.tabId,
-      takeActiveTabSnapshot
+      takeActiveTabSnapshot,
+      sendPreviewBehindActiveScreen
     )
   }
 
@@ -91,6 +103,7 @@ export const useTabAnimations = () => {
    */
   const minimizeTab = () => {
     'worklet'
+    activeTabPreview.zIndex.set(3)
     activeTabScreen.opacity.set(withTiming(0))
     activeTabPreview.animationProgress.set(
       withTiming(0, tabTimingConfig, () => {
@@ -120,14 +133,16 @@ export const useTabAnimations = () => {
     'worklet'
 
     runOnJS(switchToViewMode)()
+    activeTabScreen.opacity.set(0)
     activeTabPreview.zIndex.set(3)
     activeTabPreview.left.set(left)
     activeTabPreview.top.set(top)
     activeTabPreview.index.set(index)
+    runOnJS(prepareExpandTarget)(index)
 
     activeTabPreview.animationProgress.set(
       withTiming(1, tabTimingConfig, () => {
-        runOnJS(onExpandComplete)(index)
+        runOnJS(onExpandComplete)()
       })
     )
   }
@@ -143,14 +158,16 @@ export const useTabAnimations = () => {
     if (!m) return
 
     runOnJS(switchToViewMode)()
+    activeTabScreen.opacity.set(0)
     activeTabPreview.zIndex.set(3)
     activeTabPreview.left.set(m.pageX)
     activeTabPreview.top.set(m.pageY)
     activeTabPreview.index.set(index)
+    runOnJS(prepareExpandTarget)(index)
 
     activeTabPreview.animationProgress.set(
       withTiming(1, tabTimingConfig, () => {
-        runOnJS(onExpandComplete)(index)
+        runOnJS(onExpandComplete)()
       })
     )
   }

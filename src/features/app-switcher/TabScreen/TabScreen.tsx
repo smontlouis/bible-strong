@@ -76,7 +76,7 @@ export type TabScreenProps = {
 
 const TabScreen = ({ tabAtom, ref }: TabScreenProps) => {
   const tab = useAtomValue(tabAtom)
-  const { height: HEIGHT, width: WIDTH } = useSafeAreaFrame()
+  const { height: HEIGHT } = useSafeAreaFrame()
   const { activeTabScreen } = useAppSwitcherContext()
   const scrollToActiveTab = useScrollToActiveTab()
 
@@ -99,7 +99,7 @@ const TabScreen = ({ tabAtom, ref }: TabScreenProps) => {
       position: 'absolute',
       top: 0,
       left: 0,
-      width: WIDTH,
+      right: 0,
       bottom: 0,
       opacity: activeTabScreen.opacity.get(),
       transform: [

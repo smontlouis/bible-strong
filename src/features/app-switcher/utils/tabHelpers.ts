@@ -24,13 +24,17 @@ export const fadeInTabScreen = (
   opacitySV: SharedValue<number>,
   indexSV: SharedValue<number>,
   tabIdSV: SharedValue<string | null>,
-  snapshotFn: (index: number, tabId: string) => void
+  snapshotFn: (index: number, tabId: string) => void,
+  onComplete?: () => void
 ) => {
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       opacitySV.set(
         withTiming(1, undefined, () => {
           runOnJS(snapshotFn)(indexSV.get(), tabIdSV.get() || '')
+          if (onComplete) {
+            runOnJS(onComplete)()
+          }
         })
       )
     })
