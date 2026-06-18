@@ -172,7 +172,7 @@ const Header = ({
     transitionProperty: 'opacity',
     transitionDuration: 300,
   } as const
-  const nativeHeaderZIndex = Platform.OS === 'ios' ? 20 : undefined
+  const nativeHeaderZIndex = undefined
 
   const translateYTransitionStyle = {
     transform: [{ translateY: fullScreenTranslateY }],

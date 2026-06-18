@@ -240,7 +240,7 @@ const BibleViewer = ({
   const setBibleDOMHostLayouts = useSetAtom(bibleDOMHostLayoutsAtom)
   const isActiveBibleTab = !isFormSheet && activeBibleTabId === bible.id
   const useSharedDOM = Platform.OS === 'ios' ? false : isInTab
-  const domLayerZIndex = Platform.OS === 'ios' ? 0 : -1
+  const domLayerZIndex = -1
 
   // Displayed values - updated only when verses are loaded to keep annotations in sync
   const [displayedBook, setDisplayedBook] = useState(book.Numero)

@@ -808,7 +808,7 @@ export const BibleDOMWrapper = ({
   )
   const TOP_INSET = isFormSheet ? 0 : insets.top
   const headerHeight = isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT
-  const nativeLayerZIndex = Platform.OS === 'ios' ? 0 : -1
+  const nativeLayerZIndex = -1
 
   return (
     <Box
