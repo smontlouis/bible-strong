@@ -5,7 +5,6 @@ import { useRouter } from 'expo-router'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { Platform } from 'react-native'
 import { FadeIn, FadeOut } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
@@ -519,15 +518,20 @@ const Header = ({
                     }
                   }}
                 >
-                  <AnimatedBox style={opacityTransitionStyle}>
-                    <Box bg="lightPrimary" px={8} py={3} borderRadius={12}>
-                      <HStack alignItems="center" gap={3}>
-                        <Text color="primary" fontSize={11} fontWeight="bold">
-                          Focus
-                        </Text>
-                        <FeatherIcon name="chevron-down" size={12} color="primary" />
-                      </HStack>
-                    </Box>
+                  <AnimatedBox
+                    row
+                    center
+                    width={76}
+                    height={28}
+                    bg="lightPrimary"
+                    borderRadius={12}
+                    gap={3}
+                    style={opacityTransitionStyle}
+                  >
+                    <Text color="primary" fontSize={11} fontWeight="bold">
+                      Focus
+                    </Text>
+                    <FeatherIcon name="chevron-down" size={12} color="primary" />
                   </AnimatedBox>
                 </MenuView>
               </HStack>
@@ -602,7 +606,7 @@ const Header = ({
               </AnimatedBox>
             </VerseSelectorPopup>
             {!isSelectionMode && (
-              <HStack marginLeft="auto">
+              <HStack marginLeft="auto" alignItems="center">
                 {isParallel && (
                   <MenuView
                     actions={parallelMenuActions}
@@ -632,7 +636,7 @@ const Header = ({
                     <AnimatedBox
                       center
                       width={40}
-                      height="100%"
+                      height={40}
                       style={{
                         opacity: fullScreenOpacity,
                         transitionProperty: 'opacity',
@@ -693,7 +697,7 @@ const Header = ({
                   <AnimatedBox
                     center
                     width={40}
-                    height="100%"
+                    height={40}
                     style={{
                       opacity: fullScreenOpacity,
                       transitionProperty: 'opacity',
