@@ -1,6 +1,6 @@
 # Strong Generation BDS
 
-Generated: 2026-06-20T10:39:22.688Z
+Generated: 2026-06-20T10:40:23.962Z
 
 ## Inputs
 
@@ -30,7 +30,10 @@ Generated: 2026-06-20T10:39:22.688Z
 - missing books: none
 - failed books: none
 - LLM attempted verses: 65
+- LLM prompt tokens: 201338
+- LLM completion tokens: 278355
 - LLM total token count: 479693
+- estimated uncached LLM cost: $0.1061 using DeepSeek V4 Flash at $0.14/1M input and $0.28/1M output tokens
 - review items: 248
 - auto accepted items: 176
 - pending items in manifest: 72
@@ -38,4 +41,10 @@ Generated: 2026-06-20T10:39:22.688Z
 ## Decision Counts
 
 - accept-word: 176
+- accept-empty: 0
+- reject-wrong: 0
+- reject-duplicate: 0
 - pending-human: 72
+- accept: 0
+- reject: 0
+- pending: 0

@@ -1,6 +1,6 @@
 # Strong Generation NFC
 
-Generated: 2026-06-20T10:39:22.689Z
+Generated: 2026-06-20T10:40:23.995Z
 
 ## Inputs
 
@@ -30,7 +30,10 @@ Generated: 2026-06-20T10:39:22.689Z
 - missing books: none
 - failed books: none
 - LLM attempted verses: 65
+- LLM prompt tokens: 180373
+- LLM completion tokens: 253602
 - LLM total token count: 433975
+- estimated uncached LLM cost: $0.0963 using DeepSeek V4 Flash at $0.14/1M input and $0.28/1M output tokens
 - review items: 196
 - auto accepted items: 157
 - pending items in manifest: 39
@@ -38,4 +41,10 @@ Generated: 2026-06-20T10:39:22.689Z
 ## Decision Counts
 
 - accept-word: 157
+- accept-empty: 0
+- reject-wrong: 0
+- reject-duplicate: 0
 - pending-human: 39
+- accept: 0
+- reject: 0
+- pending: 0

@@ -1,6 +1,6 @@
 # Strong Generation FMAR
 
-Generated: 2026-06-20T10:39:22.689Z
+Generated: 2026-06-20T10:40:23.979Z
 
 ## Inputs
 
@@ -30,7 +30,10 @@ Generated: 2026-06-20T10:39:22.689Z
 - missing books: none
 - failed books: none
 - LLM attempted verses: 64
+- LLM prompt tokens: 194233
+- LLM completion tokens: 212814
 - LLM total token count: 407047
+- estimated uncached LLM cost: $0.0868 using DeepSeek V4 Flash at $0.14/1M input and $0.28/1M output tokens
 - review items: 121
 - auto accepted items: 101
 - pending items in manifest: 20
@@ -38,4 +41,10 @@ Generated: 2026-06-20T10:39:22.689Z
 ## Decision Counts
 
 - accept-word: 101
+- accept-empty: 0
+- reject-wrong: 0
+- reject-duplicate: 0
 - pending-human: 20
+- accept: 0
+- reject: 0
+- pending: 0

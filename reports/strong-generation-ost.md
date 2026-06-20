@@ -1,6 +1,6 @@
 # Strong Generation OST
 
-Generated: 2026-06-20T10:39:22.690Z
+Generated: 2026-06-20T10:40:24.003Z
 
 ## Inputs
 
@@ -30,7 +30,10 @@ Generated: 2026-06-20T10:39:22.690Z
 - missing books: none
 - failed books: none
 - LLM attempted verses: 62
+- LLM prompt tokens: 168552
+- LLM completion tokens: 205193
 - LLM total token count: 373745
+- estimated uncached LLM cost: $0.0811 using DeepSeek V4 Flash at $0.14/1M input and $0.28/1M output tokens
 - review items: 78
 - auto accepted items: 59
 - pending items in manifest: 19
@@ -38,4 +41,10 @@ Generated: 2026-06-20T10:39:22.690Z
 ## Decision Counts
 
 - accept-word: 59
+- accept-empty: 0
+- reject-wrong: 0
+- reject-duplicate: 0
 - pending-human: 19
+- accept: 0
+- reject: 0
+- pending: 0

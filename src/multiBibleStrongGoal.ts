@@ -35,12 +35,19 @@ interface BookReviewResult {
   book: string;
   status: "completed" | "skipped" | "failed";
   reviewPath: string;
+  metricsPath: string;
   itemCount: number;
   autoAcceptedCount: number;
   pendingCount: number;
   llmAttemptedVerseCount: number;
   llmTotalTokenCount: number;
   error?: string;
+}
+
+interface BookMetrics {
+  llmPromptTokenCount?: number;
+  llmCompletionTokenCount?: number;
+  llmTotalTokenCount?: number;
 }
 
 interface BatchManifest {
@@ -108,6 +115,24 @@ interface DecisionFile {
   }>;
   items: ReviewItem[];
 }
+
+const DECISION_ORDER: ReviewDecision[] = [
+  "accept-word",
+  "accept-empty",
+  "reject-wrong",
+  "reject-duplicate",
+  "pending-human",
+  "accept",
+  "reject",
+  "pending"
+];
+
+const DEEPSEEK_V4_FLASH_PRICING = {
+  inputUsdPerMillion: 0.14,
+  outputUsdPerMillion: 0.28,
+  source:
+    "https://api-docs.deepseek.com/quick_start/pricing and https://vercel.com/ai-gateway/models/deepseek-v4-flash"
+};
 
 async function main(): Promise<void> {
   const command = process.argv[2] ?? "status";
@@ -281,7 +306,22 @@ function renderGlobalReport(statuses: BibleStatus[]): string {
     );
   }
 
+  const totalUsage = statuses.reduce(
+    (total, status) => addUsage(total, getLlmUsage(status)),
+    emptyUsage()
+  );
+
   lines.push(
+    "",
+    "## LLM Cost Estimate",
+    "",
+    `- model: \`deepseek/deepseek-v4-flash\``,
+    `- uncached input price: $${DEEPSEEK_V4_FLASH_PRICING.inputUsdPerMillion}/1M tokens`,
+    `- output price: $${DEEPSEEK_V4_FLASH_PRICING.outputUsdPerMillion}/1M tokens`,
+    `- prompt tokens: ${totalUsage.promptTokens}`,
+    `- completion tokens: ${totalUsage.completionTokens}`,
+    `- estimated uncached cost: $${estimateCost(totalUsage).toFixed(4)}`,
+    `- pricing source checked 2026-06-20: ${DEEPSEEK_V4_FLASH_PRICING.source}`,
     "",
     "## Notes",
     "",
@@ -333,12 +373,9 @@ function renderBibleReport(status: BibleStatus): string {
 
   lines.push("", "## LLM Review", "");
   if (manifest) {
+    const usage = getLlmUsage(status);
     const attempted = manifest.reviews.reduce(
       (total, review) => total + review.llmAttemptedVerseCount,
-      0
-    );
-    const tokens = manifest.reviews.reduce(
-      (total, review) => total + review.llmTotalTokenCount,
       0
     );
     lines.push(
@@ -346,7 +383,10 @@ function renderBibleReport(status: BibleStatus): string {
       `- missing books: ${status.missingBooks.join(", ") || "none"}`,
       `- failed books: ${status.failedBooks.map((book) => `${book.book}: ${book.error ?? "failed"}`).join("; ") || "none"}`,
       `- LLM attempted verses: ${attempted}`,
-      `- LLM total token count: ${tokens}`,
+      `- LLM prompt tokens: ${usage.promptTokens}`,
+      `- LLM completion tokens: ${usage.completionTokens}`,
+      `- LLM total token count: ${usage.totalTokens}`,
+      `- estimated uncached LLM cost: $${estimateCost(usage).toFixed(4)} using DeepSeek V4 Flash at $${DEEPSEEK_V4_FLASH_PRICING.inputUsdPerMillion}/1M input and $${DEEPSEEK_V4_FLASH_PRICING.outputUsdPerMillion}/1M output tokens`,
       `- review items: ${manifest.itemCount}`,
       `- auto accepted items: ${manifest.autoAcceptedCount}`,
       `- pending items in manifest: ${manifest.pendingCount}`
@@ -358,11 +398,13 @@ function renderBibleReport(status: BibleStatus): string {
   }
 
   lines.push("", "## Decision Counts", "");
-  for (const [decision, count] of Object.entries(status.decisionCounts).sort()) {
-    lines.push(`- ${decision}: ${count}`);
+  for (const decision of DECISION_ORDER) {
+    lines.push(`- ${decision}: ${status.decisionCounts[decision] ?? 0}`);
   }
-  if (Object.keys(status.decisionCounts).length === 0) {
-    lines.push("- no merged decisions yet");
+  for (const [decision, count] of Object.entries(status.decisionCounts).sort()) {
+    if (!DECISION_ORDER.includes(decision as ReviewDecision)) {
+      lines.push(`- ${decision}: ${count}`);
+    }
   }
 
   return `${lines.join("\n")}\n`;
@@ -393,6 +435,49 @@ function countDecisions(items: ReviewItem[]): Record<string, number> {
     counts[item.decision] = (counts[item.decision] ?? 0) + 1;
   }
   return counts;
+}
+
+function getLlmUsage(status: BibleStatus): {
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+} {
+  const usage = emptyUsage();
+  for (const review of status.manifest?.reviews ?? []) {
+    const metrics = readJsonIfExists<BookMetrics>(review.metricsPath);
+    usage.promptTokens += metrics?.llmPromptTokenCount ?? 0;
+    usage.completionTokens += metrics?.llmCompletionTokenCount ?? 0;
+    usage.totalTokens += metrics?.llmTotalTokenCount ?? review.llmTotalTokenCount;
+  }
+  return usage;
+}
+
+function emptyUsage(): {
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+} {
+  return { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
+}
+
+function addUsage(
+  left: ReturnType<typeof emptyUsage>,
+  right: ReturnType<typeof emptyUsage>
+): ReturnType<typeof emptyUsage> {
+  return {
+    promptTokens: left.promptTokens + right.promptTokens,
+    completionTokens: left.completionTokens + right.completionTokens,
+    totalTokens: left.totalTokens + right.totalTokens
+  };
+}
+
+function estimateCost(usage: ReturnType<typeof emptyUsage>): number {
+  return (
+    (usage.promptTokens / 1_000_000) *
+      DEEPSEEK_V4_FLASH_PRICING.inputUsdPerMillion +
+    (usage.completionTokens / 1_000_000) *
+      DEEPSEEK_V4_FLASH_PRICING.outputUsdPerMillion
+  );
 }
 
 function appendNote(current: string | undefined, note: string): string {
