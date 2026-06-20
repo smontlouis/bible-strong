@@ -11,6 +11,10 @@ import {
   type OriginalStrongOccurrence
 } from "./completeAlignment.js";
 import { type OriginalVerse } from "./originalSource.js";
+import {
+  findPhraseCandidate,
+  type StrongPhraseLexicon
+} from "./phraseTranslationLexicon.js";
 import { renderTaggedText } from "./render.js";
 import { parseStrongOccurrences } from "./strongCsv.js";
 import {
@@ -24,11 +28,12 @@ import {
   type StrongTranslationCandidate,
   type StrongTranslationLexicon
 } from "./translationLexicon.js";
+import { type ReaderAlignmentPolicy } from "./translationProfiles.js";
 
 export interface ReaderEmptyAssignment {
   strong: string;
   confidence: number;
-  method: "editorial-empty";
+  method: "editorial-empty" | "curated-empty";
   source: string;
   insertAfterWordIndex: number;
 }
@@ -50,6 +55,13 @@ interface EmptyOccurrence {
 
 const MIN_EMPTY_SOURCES = 2;
 
+const DEFAULT_READER_POLICY: ReaderAlignmentPolicy = {
+  maxStrongPerWord: 3,
+  minEmptySourceAgreement: MIN_EMPTY_SOURCES,
+  learnedTranslationMinScore: 0.36,
+  learnedFunctionWordMode: "restricted"
+};
+
 export function alignReaderVerse(options: {
   targetText: string;
   references: ReferenceSource[];
@@ -57,7 +69,10 @@ export function alignReaderVerse(options: {
   original?: OriginalConstraint;
   originalVerse?: OriginalVerse;
   translationLexicon?: StrongTranslationLexicon;
+  phraseLexicon?: StrongPhraseLexicon;
+  readerPolicy?: ReaderAlignmentPolicy;
 }): ReaderAlignmentResult {
+  const readerPolicy = options.readerPolicy ?? DEFAULT_READER_POLICY;
   const base = alignVerse(
     options.targetText,
     options.references,
@@ -68,11 +83,14 @@ export function alignReaderVerse(options: {
     result: base,
     original: options.original,
     originalVerse: options.originalVerse,
-    translationLexicon: options.translationLexicon
+    translationLexicon: options.translationLexicon,
+    phraseLexicon: options.phraseLexicon,
+    readerPolicy
   });
   const emptyAssignments = buildEditorialEmptyAssignments(
     base,
-    options.references
+    options.references,
+    readerPolicy
   );
   const taggedWordCount = base.assignments.size;
   const lowConfidenceWordCount = [...base.assignments.values()].filter(
@@ -104,6 +122,8 @@ function enrichAssignmentsFromOriginal(options: {
   original?: OriginalConstraint;
   originalVerse?: OriginalVerse;
   translationLexicon?: StrongTranslationLexicon;
+  phraseLexicon?: StrongPhraseLexicon;
+  readerPolicy: ReaderAlignmentPolicy;
 }): void {
   if (!options.originalVerse || !options.translationLexicon) {
     return;
@@ -126,7 +146,9 @@ function enrichAssignmentsFromOriginal(options: {
       occurrences,
       words,
       assignments: options.result.assignments,
-      translationLexicon: options.translationLexicon
+      translationLexicon: options.translationLexicon,
+      phraseLexicon: options.phraseLexicon,
+      readerPolicy: options.readerPolicy
     });
 
     if (!candidate) {
@@ -185,6 +207,8 @@ function findReaderEnrichmentCandidate(options: {
   words: Array<{ wordIndex: number; normalized: string }>;
   assignments: Map<number, AssignedStrong>;
   translationLexicon: StrongTranslationLexicon;
+  phraseLexicon?: StrongPhraseLexicon;
+  readerPolicy: ReaderAlignmentPolicy;
 }):
   | {
       wordIndex: number;
@@ -193,7 +217,35 @@ function findReaderEnrichmentCandidate(options: {
       source: string;
     }
   | undefined {
-  const maxStrongPerWord = 3;
+  const maxStrongPerWord = options.readerPolicy.maxStrongPerWord;
+  const phrase = options.phraseLexicon
+    ? findPhraseCandidate({
+        lexicon: options.phraseLexicon,
+        strong: options.occurrence.strong,
+        words: options.words,
+        existingStrongByWord: new Map(
+          [...options.assignments].map(([wordIndex, assignment]) => [
+            wordIndex,
+            assignment.strong
+          ])
+        ),
+        originalRatio:
+          options.occurrences.length <= 1
+            ? 1
+            : options.occurrence.tokenIndex / (options.occurrences.length - 1)
+      })
+    : undefined;
+  const phraseExisting =
+    phrase && options.assignments.get(phrase.wordIndex)?.strong.length;
+  if (phrase && (phraseExisting ?? 0) < maxStrongPerWord) {
+    return {
+      wordIndex: phrase.wordIndex,
+      confidence: Math.min(0.88, 0.5 + phrase.score * 0.34),
+      method: phrase.method,
+      source: `${phrase.source}:phrase:${phrase.phrase.join("_")}`
+    };
+  }
+
   const hasRuleCandidate = options.words.some((word) =>
     findReaderStrongRule(options.occurrence.strong, word.normalized)
   );
@@ -221,7 +273,8 @@ function findReaderEnrichmentCandidate(options: {
         : chooseReaderMatch(
             isAllowedLearnedTranslation(
               options.occurrence.strong,
-              word.normalized
+              word.normalized,
+              options.readerPolicy
             )
               ? learned
               : undefined,
@@ -251,7 +304,7 @@ function findReaderEnrichmentCandidate(options: {
     .sort((a, b) => b.score - a.score);
 
   const best = candidates[0];
-  if (!best || best.score < 0.36) {
+  if (!best || best.score < options.readerPolicy.learnedTranslationMinScore) {
     return undefined;
   }
 
@@ -338,9 +391,17 @@ function findReaderStrongRule(
 
 function isAllowedLearnedTranslation(
   strong: string,
-  normalized: string
+  normalized: string,
+  policy: ReaderAlignmentPolicy
 ): boolean {
   if (strong === "H0853") {
+    return false;
+  }
+
+  if (
+    policy.learnedFunctionWordMode === "reference-only" &&
+    FRENCH_FUNCTION_WORDS.has(normalized)
+  ) {
     return false;
   }
 
@@ -360,6 +421,7 @@ const FRENCH_FUNCTION_WORDS = new Set([
   "a",
   "au",
   "aux",
+  "avec",
   "ce",
   "ces",
   "cet",
@@ -421,7 +483,8 @@ export function renderReaderTaggedText(result: ReaderAlignmentResult): string {
 
 function buildEditorialEmptyAssignments(
   result: AlignmentResult,
-  references: ReferenceSource[]
+  references: ReferenceSource[],
+  policy: ReaderAlignmentPolicy
 ): ReaderEmptyAssignment[] {
   const occurrencesByStrong = new Map<string, EmptyOccurrence[]>();
   const totalCountsByStrong = new Map<string, number[]>();
@@ -458,7 +521,7 @@ function buildEditorialEmptyAssignments(
 
   for (const [strong, occurrences] of occurrencesByStrong) {
     const bySource = groupBySource(occurrences);
-    if (bySource.size < MIN_EMPTY_SOURCES) continue;
+    if (bySource.size < policy.minEmptySourceAgreement) continue;
 
     const sourceEmptyCounts = [...bySource.values()].map(
       (sourceOccurrences) => sourceOccurrences.length

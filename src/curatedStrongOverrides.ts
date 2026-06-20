@@ -1,9 +1,12 @@
+import { existsSync, readFileSync } from "node:fs";
+
 import { type AssignedStrong } from "./align.js";
 import { type ReaderAlignmentResult } from "./readerAlignment.js";
 
 export interface CuratedStrongOverride {
   bible: string;
   ref: string;
+  target?: "word" | "empty";
   wordIndex: number;
   normalized: string;
   strong: string[];
@@ -124,6 +127,17 @@ export const CURATED_STRONG_OVERRIDES: CuratedStrongOverride[] = [
     source: "llm-transfer:Darby+concordance.bible",
     reason:
       "Matches SG21 concordance.bible handling for the separation preposition."
+  },
+  {
+    bible: "fixture-empty",
+    ref: "Gen.1.4",
+    target: "empty",
+    wordIndex: 1,
+    normalized: "",
+    strong: ["H0996"],
+    confidence: 0.8,
+    source: "test:curated-empty",
+    reason: "Fixture override used to verify curated empty Strong handling."
   }
 ];
 
@@ -132,7 +146,7 @@ export function applyCuratedStrongOverrides(options: {
   ref: string;
   result: ReaderAlignmentResult;
 }): number {
-  const overrides = CURATED_STRONG_OVERRIDES.filter(
+  const overrides = getCuratedStrongOverrides().filter(
     (override) =>
       override.bible === options.bible.toLowerCase() &&
       override.ref === options.ref
@@ -140,6 +154,38 @@ export function applyCuratedStrongOverrides(options: {
   let appliedStrongCount = 0;
 
   for (const override of overrides) {
+    if ((override.target ?? "word") === "empty") {
+      const missingStrong = override.strong.filter(
+        (strong) =>
+          !options.result.emptyAssignments.some(
+            (assignment) =>
+              assignment.strong === strong &&
+              assignment.insertAfterWordIndex === override.wordIndex &&
+              assignment.source === override.source
+          )
+      );
+      if (missingStrong.length === 0) {
+        continue;
+      }
+
+      for (const strong of missingStrong) {
+        options.result.emptyAssignments.push({
+          strong,
+          confidence: override.confidence,
+          method: "curated-empty",
+          source: override.source,
+          insertAfterWordIndex: override.wordIndex
+        });
+      }
+      options.result.emptyAssignments.sort(
+        (left, right) =>
+          left.insertAfterWordIndex - right.insertAfterWordIndex ||
+          left.strong.localeCompare(right.strong)
+      );
+      appliedStrongCount += missingStrong.length;
+      continue;
+    }
+
     const word = getWord(options.result, override.wordIndex);
     if (!word || word.normalized !== override.normalized) {
       continue;
@@ -176,6 +222,44 @@ export function applyCuratedStrongOverrides(options: {
   return appliedStrongCount;
 }
 
+export function getCuratedStrongOverrides(): CuratedStrongOverride[] {
+  return [
+    ...CURATED_STRONG_OVERRIDES,
+    ...readJsonCuratedStrongOverrides("data/curated-strong-overrides.json")
+  ];
+}
+
+function readJsonCuratedStrongOverrides(path: string): CuratedStrongOverride[] {
+  if (!existsSync(path)) return [];
+
+  const raw = JSON.parse(readFileSync(path, "utf8")) as unknown;
+  if (!Array.isArray(raw)) return [];
+
+  return raw.filter(isCuratedStrongOverride);
+}
+
+function isCuratedStrongOverride(
+  value: unknown
+): value is CuratedStrongOverride {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Partial<CuratedStrongOverride>;
+
+  return (
+    typeof candidate.bible === "string" &&
+    typeof candidate.ref === "string" &&
+    (candidate.target === undefined ||
+      candidate.target === "word" ||
+      candidate.target === "empty") &&
+    Number.isInteger(candidate.wordIndex) &&
+    typeof candidate.normalized === "string" &&
+    Array.isArray(candidate.strong) &&
+    candidate.strong.every((strong) => typeof strong === "string") &&
+    typeof candidate.confidence === "number" &&
+    typeof candidate.source === "string" &&
+    typeof candidate.reason === "string"
+  );
+}
+
 function getWord(
   result: ReaderAlignmentResult,
   wantedWordIndex: number
@@ -202,6 +286,7 @@ function refreshResultCounts(result: ReaderAlignmentResult): void {
     (sum, assignment) => sum + assignment.strong.length,
     0
   );
+  result.emptyStrongOccurrenceCount = result.emptyAssignments.length;
   result.totalStrongOccurrenceCount =
     result.strongWordOccurrenceCount + result.emptyStrongOccurrenceCount;
   result.multiStrongWordCount = [...result.assignments.values()].filter(

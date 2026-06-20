@@ -14,6 +14,7 @@ import {
   type OriginalVerse,
   type OriginalVerseMap
 } from "./originalSource.js";
+import { buildStrongPhraseLexicon } from "./phraseTranslationLexicon.js";
 import {
   alignReaderVerse,
   renderReaderTaggedText,
@@ -30,6 +31,10 @@ import {
 } from "./strongCsv.js";
 import { tokenizeText } from "./tokenize.js";
 import { buildStrongTranslationLexicon } from "./translationLexicon.js";
+import {
+  getTranslationProfile,
+  type TranslationProfile
+} from "./translationProfiles.js";
 
 interface HybridOptions {
   bible: string;
@@ -76,6 +81,7 @@ interface HardVerseDiagnostic {
   llmAcceptedAssignments: number;
   llmRejectedAssignments: number;
   llmSuggestions?: LlmAssignment[];
+  llmUsage?: LlmUsage;
   llmError?: string;
 }
 
@@ -92,6 +98,9 @@ interface HybridMetrics {
   llmAttemptedVerseCount: number;
   llmAcceptedAssignmentCount: number;
   llmRejectedAssignmentCount: number;
+  llmPromptTokenCount: number;
+  llmCompletionTokenCount: number;
+  llmTotalTokenCount: number;
   curatedOverrideStrongOccurrenceCount: number;
   verseCount: number;
   generatedVerseCount: number;
@@ -100,11 +109,23 @@ interface HybridMetrics {
   strongWordOccurrenceCount: number;
   emptyStrongOccurrenceCount: number;
   totalStrongOccurrenceCount: number;
+  multiStrongWordCount: number;
   taggedTokenCoverage: number;
+  visibleStrongRate: number;
   emptyStrongRate: number;
+  multiStrongWordRate: number;
   originalConfirmationRate: number;
+  originalActionableStrongOccurrenceCount: number;
+  originalRepresentedStrongOccurrenceCount: number;
+  originalUnrepresentedStrongOccurrenceCount: number;
+  originalRepresentationRate: number;
+  profileTokenCoverageStatus:
+    | "below-expected"
+    | "within-expected"
+    | "above-expected";
   references: Array<{ name: string; path: string; verses: number }>;
   originalSources: OriginalSourceSummary[];
+  translationProfile: TranslationProfile;
   method: string;
 }
 
@@ -124,7 +145,14 @@ interface LlmApplyResult {
   accepted: number;
   rejected: number;
   suggestions?: LlmAssignment[];
+  usage?: LlmUsage;
   error?: string;
+}
+
+interface LlmUsage {
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
 }
 
 const REFERENCES = [
@@ -161,6 +189,8 @@ export async function generateStrongHybrid(
   const originalByRef = mergeOriginalSources(originals);
   const lexicon = buildStrongLexicon(references);
   const translationLexicon = buildStrongTranslationLexicon(references);
+  const phraseLexicon = buildStrongPhraseLexicon(references);
+  const translationProfile = getTranslationProfile(options.bible);
   await mkdir(options.outputDir, { recursive: true });
 
   const outputPath = path.join(
@@ -181,12 +211,18 @@ export async function generateStrongHybrid(
   let llmAttemptedVerseCount = 0;
   let llmAcceptedAssignmentCount = 0;
   let llmRejectedAssignmentCount = 0;
+  let llmPromptTokenCount = 0;
+  let llmCompletionTokenCount = 0;
+  let llmTotalTokenCount = 0;
   let curatedOverrideStrongOccurrenceCount = 0;
   let wordCount = 0;
   let taggedWordCount = 0;
   let strongWordOccurrenceCount = 0;
   let emptyStrongOccurrenceCount = 0;
+  let multiStrongWordCount = 0;
   let originalConfirmedTaggedWordCount = 0;
+  let originalActionableStrongOccurrenceCount = 0;
+  let originalRepresentedStrongOccurrenceCount = 0;
 
   for (const verse of verses) {
     const key = referenceKey(verse.bookId, verse.chapter, verse.verse);
@@ -202,19 +238,26 @@ export async function generateStrongHybrid(
       lexicon,
       originalVerse: original?.verse,
       translationLexicon,
+      phraseLexicon,
       original: original
         ? {
             strongSet: original.verse.strongSet,
             source: original.sourceNames.join("+")
           }
-        : undefined
+        : undefined,
+      readerPolicy: translationProfile.readerAlignment
     });
     curatedOverrideStrongOccurrenceCount += applyCuratedStrongOverrides({
       bible: options.bible,
       ref: formatRef(verse),
       result
     });
-    const hard = diagnoseHardVerse(result, original?.verse, verseReferences);
+    const hard = diagnoseHardVerse(
+      result,
+      original?.verse,
+      verseReferences,
+      translationProfile
+    );
     let llm: LlmApplyResult = { attempted: false, accepted: 0, rejected: 0 };
     const llmEligible = isLlmEligibleHardVerse(hard.reasons);
 
@@ -237,6 +280,9 @@ export async function generateStrongHybrid(
         llmAttemptedVerseCount += 1;
         llmAcceptedAssignmentCount += llm.accepted;
         llmRejectedAssignmentCount += llm.rejected;
+        llmPromptTokenCount += llm.usage?.promptTokens ?? 0;
+        llmCompletionTokenCount += llm.usage?.completionTokens ?? 0;
+        llmTotalTokenCount += llm.usage?.totalTokens ?? 0;
       }
     }
 
@@ -249,6 +295,7 @@ export async function generateStrongHybrid(
         llmAcceptedAssignments: llm.accepted,
         llmRejectedAssignments: llm.rejected,
         llmSuggestions: llm.suggestions,
+        llmUsage: llm.usage,
         llmError: llm.error
       });
     }
@@ -257,9 +304,18 @@ export async function generateStrongHybrid(
     taggedWordCount += result.assignments.size;
     strongWordOccurrenceCount += countAssignedStrong(result);
     emptyStrongOccurrenceCount += result.emptyAssignments.length;
+    multiStrongWordCount += result.multiStrongWordCount;
     originalConfirmedTaggedWordCount += [...result.assignments.values()].filter(
       (assignment) => assignment.originalConfirmed
     ).length;
+    if (original) {
+      const representation = summarizeOriginalRepresentation(
+        result,
+        original.verse
+      );
+      originalActionableStrongOccurrenceCount += representation.actionable;
+      originalRepresentedStrongOccurrenceCount += representation.represented;
+    }
 
     lines.push(
       `${verse.bookId}\t${verse.chapter}\t${verse.verse}\t${tsvEscape(
@@ -270,6 +326,14 @@ export async function generateStrongHybrid(
 
   const totalStrongOccurrenceCount =
     strongWordOccurrenceCount + emptyStrongOccurrenceCount;
+  const taggedTokenCoverage = roundRatio(
+    taggedWordCount / Math.max(1, wordCount)
+  );
+  const originalUnrepresentedStrongOccurrenceCount = Math.max(
+    0,
+    originalActionableStrongOccurrenceCount -
+      originalRepresentedStrongOccurrenceCount
+  );
   const metrics: HybridMetrics = {
     bible: options.bible,
     generatedAt: new Date().toISOString(),
@@ -283,6 +347,9 @@ export async function generateStrongHybrid(
     llmAttemptedVerseCount,
     llmAcceptedAssignmentCount,
     llmRejectedAssignmentCount,
+    llmPromptTokenCount,
+    llmCompletionTokenCount,
+    llmTotalTokenCount,
     curatedOverrideStrongOccurrenceCount,
     verseCount: verses.length,
     generatedVerseCount: verses.length,
@@ -291,12 +358,30 @@ export async function generateStrongHybrid(
     strongWordOccurrenceCount,
     emptyStrongOccurrenceCount,
     totalStrongOccurrenceCount,
-    taggedTokenCoverage: roundRatio(taggedWordCount / Math.max(1, wordCount)),
+    multiStrongWordCount,
+    taggedTokenCoverage,
+    visibleStrongRate: roundRatio(
+      strongWordOccurrenceCount / Math.max(1, totalStrongOccurrenceCount)
+    ),
     emptyStrongRate: roundRatio(
       emptyStrongOccurrenceCount / Math.max(1, totalStrongOccurrenceCount)
     ),
+    multiStrongWordRate: roundRatio(
+      multiStrongWordCount / Math.max(1, taggedWordCount)
+    ),
     originalConfirmationRate: roundRatio(
       originalConfirmedTaggedWordCount / Math.max(1, taggedWordCount)
+    ),
+    originalActionableStrongOccurrenceCount,
+    originalRepresentedStrongOccurrenceCount,
+    originalUnrepresentedStrongOccurrenceCount,
+    originalRepresentationRate: roundRatio(
+      originalRepresentedStrongOccurrenceCount /
+        Math.max(1, originalActionableStrongOccurrenceCount)
+    ),
+    profileTokenCoverageStatus: classifyTokenCoverage(
+      taggedTokenCoverage,
+      translationProfile
     ),
     references: references.map((reference) => ({
       name: reference.name,
@@ -304,8 +389,9 @@ export async function generateStrongHybrid(
       verses: reference.map.size
     })),
     originalSources: originals.map((original) => original.summary),
+    translationProfile,
     method:
-      "Hybrid Strong generation. Starts from reader alignment, applies reviewed deterministic overrides promoted from LLM reference-transfer, diagnoses hard verses using coverage/original/reference disagreement, and can call Vercel AI Gateway as a bounded arbiter. LLM suggestions are accepted only when they reference existing target word indexes and Strong codes present in the original verse inventory."
+      "Style 4 calibrated hybrid Strong generation. Starts from reader alignment, applies the Bible translation profile to density, learned enrichment, empty-word consensus, diagnostics, and LLM escalation, then applies reviewed deterministic overrides promoted from LLM reference-transfer. LLM suggestions are accepted only when they reference existing target word indexes and Strong codes present in the original verse inventory."
   };
 
   await writeFile(outputPath, `${lines.join("\n")}\n`, "utf8");
@@ -322,7 +408,8 @@ export async function generateStrongHybrid(
 function diagnoseHardVerse(
   result: ReaderAlignmentResult,
   original: OriginalVerse | undefined,
-  references: ReferenceSource[]
+  references: ReferenceSource[],
+  profile: TranslationProfile
 ): Omit<
   HardVerseDiagnostic,
   | "ref"
@@ -356,16 +443,28 @@ function diagnoseHardVerse(
 
   if (result.assignments.size === 0 && result.wordCount > 0)
     reasons.push("no-tags");
-  if (taggedTokenCoverage < 0.28) reasons.push("low-token-coverage");
-  if (original && originalConfirmationRate < 0.72) {
+  if (taggedTokenCoverage < profile.hardVerseThresholds.lowTokenCoverage) {
+    reasons.push("low-token-coverage");
+  }
+  if (
+    original &&
+    originalConfirmationRate <
+      profile.hardVerseThresholds.lowOriginalConfirmation
+  ) {
     reasons.push("low-original-confirmation");
   }
-  if (original && missingOriginalStrongCount >= 5) {
+  if (
+    original &&
+    missingOriginalStrongCount >=
+      profile.hardVerseThresholds.manyOriginalStrongUnplaced
+  ) {
     reasons.push("many-original-strong-unplaced");
   }
   if (
     referenceMedianStrongOccurrenceCount > 0 &&
-    readerStrongOccurrenceCount < referenceMedianStrongOccurrenceCount * 0.72
+    readerStrongOccurrenceCount <
+      referenceMedianStrongOccurrenceCount *
+        profile.hardVerseThresholds.referenceDensityRatio
   ) {
     reasons.push("below-reference-strong-density");
   }
@@ -418,10 +517,16 @@ async function arbitrateWithLlm(options: {
 
   try {
     const payload = buildLlmPayload({ ...options, original });
+    const controller = new AbortController();
+    const timeout = setTimeout(
+      () => controller.abort(),
+      Number.parseInt(process.env.AI_GATEWAY_TIMEOUT_MS ?? "120000", 10)
+    );
     const response = await fetch(
       "https://ai-gateway.vercel.sh/v1/chat/completions",
       {
         method: "POST",
+        signal: controller.signal,
         headers: {
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json"
@@ -442,7 +547,7 @@ async function arbitrateWithLlm(options: {
           ]
         })
       }
-    );
+    ).finally(() => clearTimeout(timeout));
 
     if (!response.ok) {
       const errorBody = await response.text();
@@ -456,12 +561,21 @@ async function arbitrateWithLlm(options: {
 
     const json = (await response.json()) as {
       choices?: Array<{ message?: { content?: string } }>;
+      usage?: {
+        prompt_tokens?: number;
+        completion_tokens?: number;
+        total_tokens?: number;
+        promptTokens?: number;
+        completionTokens?: number;
+        totalTokens?: number;
+      };
     };
     const content = json.choices?.[0]?.message?.content ?? "{}";
     const parsed = JSON.parse(extractJson(content)) as LlmResponse;
     return {
       attempted: true,
-      ...applyLlmAssignments(options.result, original, parsed, options.apply)
+      ...applyLlmAssignments(options.result, original, parsed, options.apply),
+      usage: normalizeUsage(json.usage)
     };
   } catch (error) {
     return {
@@ -471,6 +585,33 @@ async function arbitrateWithLlm(options: {
       error: error instanceof Error ? error.message : "unknown-llm-error"
     };
   }
+}
+
+function normalizeUsage(
+  usage:
+    | {
+        prompt_tokens?: number;
+        completion_tokens?: number;
+        total_tokens?: number;
+        promptTokens?: number;
+        completionTokens?: number;
+        totalTokens?: number;
+      }
+    | undefined
+): LlmUsage | undefined {
+  if (!usage) return undefined;
+
+  const promptTokens = usage.prompt_tokens ?? usage.promptTokens ?? 0;
+  const completionTokens =
+    usage.completion_tokens ?? usage.completionTokens ?? 0;
+  const totalTokens =
+    usage.total_tokens ?? usage.totalTokens ?? promptTokens + completionTokens;
+
+  return {
+    promptTokens,
+    completionTokens,
+    totalTokens
+  };
 }
 
 function buildLlmPayload(options: {
@@ -724,6 +865,45 @@ function countMissingOriginalStrong(
   }
 
   return missing;
+}
+
+function summarizeOriginalRepresentation(
+  result: ReaderAlignmentResult,
+  original: OriginalVerse
+): { actionable: number; represented: number } {
+  const originalCounts = countStrongValues(
+    getOriginalStrongOccurrences(original)
+      .map((occurrence) => occurrence.strong)
+      .filter(isActionableOriginalStrong)
+  );
+  const representedCounts = countStrongValues([
+    ...[...result.assignments.values()].flatMap(
+      (assignment) => assignment.strong
+    ),
+    ...result.emptyAssignments.map((assignment) => assignment.strong)
+  ]);
+  let actionable = 0;
+  let represented = 0;
+
+  for (const [strong, count] of originalCounts) {
+    actionable += count;
+    represented += Math.min(count, representedCounts.get(strong) ?? 0);
+  }
+
+  return { actionable, represented };
+}
+
+function classifyTokenCoverage(
+  taggedTokenCoverage: number,
+  profile: TranslationProfile
+): HybridMetrics["profileTokenCoverageStatus"] {
+  if (taggedTokenCoverage < profile.expectedTokenCoverage.low) {
+    return "below-expected";
+  }
+  if (taggedTokenCoverage > profile.expectedTokenCoverage.high) {
+    return "above-expected";
+  }
+  return "within-expected";
 }
 
 function isActionableOriginalStrong(strong: string): boolean {

@@ -73,6 +73,6 @@ The reader mode is therefore much closer to Darby/Sg1910/DarbyR editorial behavi
 
 ## Acceptance Notes
 
-- The complete original mode remains available via `npm run generate:strong:align`.
+- The previous complete-original prototype has been retired from the runnable scripts. Use `npm run generate:strong:hybrid` for production-local generation and `npm run evaluate:strong:hybrid` for masked gold evaluation.
 - Reader mode should be the default candidate for user-facing Bibles.
 - Empty tags are now editorial consensus tags, not a fallback for every unaligned original token.

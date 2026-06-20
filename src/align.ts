@@ -34,6 +34,7 @@ export interface AssignedStrong {
     | "source-lexicon"
     | "learned-translation"
     | "learned-translation-stem"
+    | "learned-phrase"
     | "reader-strong-rule"
     | "llm-arbiter"
     | "curated-llm-transfer";

@@ -4,7 +4,7 @@
 
 Build a safer backend for difficult verses without continuing to add one-off lexical patches.
 
-The hybrid backend starts from the fluent reader output, diagnoses hard verses, and can ask Vercel AI Gateway for bounded alignment suggestions. LLM output is not trusted blindly: suggestions are mechanically validated and are not applied to the TSV unless `--llm-apply` is explicitly passed.
+The hybrid backend starts from the fluent reader output, adds original-confirmed word and phrase enrichments, diagnoses hard verses, and can ask Vercel AI Gateway for bounded alignment suggestions. LLM output is not trusted blindly: suggestions are mechanically validated and are not applied to the TSV unless `--llm-apply` is explicitly passed.
 
 ## Commands
 
@@ -33,6 +33,14 @@ npm run generate:strong:hybrid -- --bible s21 --only Gen.1 --llm --llm-limit 2
 npm run generate:strong:hybrid -- --bible s21 --only Gen.2.4 --llm --llm-limit 1
 ```
 
+Masked gold evaluation:
+
+```sh
+npm run evaluate:strong:hybrid -- --gold Sg1910 --limit 1000
+npm run evaluate:strong:hybrid -- --gold Darby --limit 1000
+npm run evaluate:strong:hybrid -- --gold DarbyR --limit 1000
+```
+
 ## Outputs
 
 - `outputs/bible-s21-strong-hybrid.tsv`
@@ -52,11 +60,42 @@ The hard-verses JSON is the useful review artifact. It includes:
 Deterministic hybrid generation, no LLM application:
 
 - verses: `31,168`
-- total Strong occurrences: `396,492`
-- hard diagnostic verses: `8,485`
-- LLM-eligible verses: `3,231`
+- total Strong occurrences: `398,569`
+- hard diagnostic verses: `5,977`
+- LLM-eligible verses: `2,484`
 - curated LLM-transfer overrides applied: `2`
-- output tags otherwise unchanged from enriched reader mode unless `--llm-apply` is passed
+- output uses profile-aware enriched reader alignment; LLM suggestions are still not applied unless `--llm-apply` is passed
+
+## Style 4 Calibrated Hybrid Profiles
+
+The backend now applies a translation profile during generation and diagnostics instead of comparing every Bible as if it were Darby.
+
+Current profiles:
+
+| Bible | Family          | Density policy | Generation policy                                                            |
+| ----- | --------------- | -------------- | ---------------------------------------------------------------------------- |
+| BDS   | dynamic         | semantic       | Fewer learned function-word tags, 3-source empty consensus, max 2 tags/word. |
+| NBS   | formal-readable | medium         | Balanced density, 2-source empty consensus, max 3 tags/word.                 |
+| S21   | formal-readable | medium         | Balanced density, 2-source empty consensus, max 3 tags/word.                 |
+| FMAR  | formal          | high           | Higher density accepted, 2-source empty consensus, max 4 tags/word.          |
+
+Profile settings affect:
+
+- learned enrichment strictness;
+- maximum Strong codes per visible word;
+- minimum reference consensus before adding an empty word;
+- hard-verse thresholds for token coverage, reference density, and unrepresented original Strong occurrences.
+
+## Multi-Word Phrase Transfer
+
+The backend now learns repeated 2-4 word phrase contexts from `Sg1910`, `Darby`, and `DarbyR`. During original-aware enrichment, a missing original Strong can be attached through a learned phrase only when:
+
+- the Strong exists in the WLC/SBLGNT inventory for that verse;
+- the phrase appears in the target verse;
+- the target word does not already carry that Strong;
+- the candidate passes a position-aware score threshold.
+
+This is deterministic and does not call the LLM. It improves cases where a single Strong decision depends on a phrase rather than one isolated word.
 
 ## What Counts As Hard
 
@@ -171,12 +210,59 @@ The overrides live in `src/curatedStrongOverrides.ts` and are guarded by Bible i
 
 Current regenerated override counts:
 
-| Bible | Curated Strong additions | Total Strong occurrences |
-| ----- | -----------------------: | -----------------------: |
-| NBS   |                      `2` |                `392,329` |
-| BDS   |                      `2` |                `344,699` |
-| FMAR  |                      `4` |                `407,333` |
-| S21   |                      `2` |                `396,492` |
+| Bible | Curated Strong additions | Total Strong occurrences | Token coverage | Hard verses |
+| ----- | -----------------------: | -----------------------: | -------------: | ----------: |
+| NBS   |                      `2` |                `394,933` |       `50.98%` |     `8,197` |
+| BDS   |                      `2` |                `347,523` |       `41.85%` |    `14,654` |
+| FMAR  |                      `4` |                `410,208` |       `49.32%` |     `7,055` |
+| S21   |                      `2` |                `398,899` |       `50.83%` |     `7,561` |
+
+Compared with the pre-profile diagnostics, BDS is no longer penalized as aggressively for lower density. After style 4 activation, profiles are generation inputs: they change learned enrichment strictness, empty-word consensus, max Strong-per-word, and hard-verse thresholds.
+
+Current regenerated style 4 metrics:
+
+| Bible | Density policy | Total Strong | Token coverage | Profile status  | Visible rate | Empty rate | Multi-word rate | Original representation | Unrepresented original |
+| ----- | -------------- | -----------: | -------------: | --------------- | -----------: | ---------: | --------------: | ----------------------: | ---------------------: |
+| NBS   | medium         |    `394,586` |       `50.95%` | within-expected |     `98.98%` |    `1.02%` |         `4.14%` |                `80.41%` |               `82,455` |
+| BDS   | semantic       |    `341,512` |       `41.60%` | within-expected |     `99.64%` |    `0.36%` |         `4.20%` |                `68.94%` |              `130,559` |
+| FMAR  | high           |    `410,295` |       `49.32%` | within-expected |     `99.39%` |    `0.61%` |         `3.89%` |                `83.32%` |               `69,771` |
+| S21   | medium         |    `398,569` |       `50.80%` | within-expected |     `99.01%` |    `0.99%` |         `3.81%` |                `81.30%` |               `78,687` |
+
+## Masked Gold Evaluation
+
+`evaluate:strong:hybrid` strips tags from a known Strong Bible, runs the hybrid backend without using that same Bible as a reference, and scores predicted Strong occurrences against the original gold occurrences.
+
+Full gold evaluation results:
+
+| Gold   | Precision |   Recall |       F1 |
+| ------ | --------: | -------: | -------: |
+| Sg1910 |  `0.9172` | `0.8179` | `0.8647` |
+| Darby  |  `0.8736` | `0.9674` | `0.9182` |
+| DarbyR |  `0.8725` | `0.9544` | `0.9116` |
+
+Observed failure modes:
+
+- Sg1910 loses recall on verses where the reader-style policy intentionally avoids some morphology-heavy or weak function-word tags.
+- Darby and DarbyR sometimes show false positives around expansions or notes because the backend is denser than their local editorial choice.
+
+Detailed report: `reports/hybrid-gold-evaluation-report.md`.
+
+## Bounded LLM Hard-Verse Review
+
+A bounded LLM suggestion run was performed on 3 profile-aware hard verses per target Bible, using `outputs/llm-hard-review` to avoid overwriting production TSVs.
+
+Summary:
+
+| Bible | Attempted verses | Accepted suggestions | Rejected suggestions | Total tokens |
+| ----- | ---------------: | -------------------: | -------------------: | -----------: |
+| NBS   |              `3` |                  `7` |                  `3` |     `11,866` |
+| BDS   |              `3` |                  `8` |                  `0` |      `9,489` |
+| FMAR  |              `3` |                  `4` |                  `7` |     `12,766` |
+| S21   |              `3` |                  `9` |                  `3` |     `11,495` |
+
+No LLM suggestions were promoted automatically. The sample proves usefulness, but also shows enough editorial ambiguity that promotions should happen only after recurring patterns are validated.
+
+Detailed report: `reports/llm-hard-verse-review.md`.
 
 ## Better LLM Strategy: Reference Transfer
 

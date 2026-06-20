@@ -97,42 +97,21 @@ els.fileInput.addEventListener("change", () => {
   if (file) loadFile(file);
 });
 
-for (const eventName of ["dragenter", "dragover"]) {
-  els.dropZone.addEventListener(eventName, (event) => {
-    event.preventDefault();
-    els.dropZone.classList.add("is-dragging");
-  });
-}
-
-for (const eventName of ["dragleave", "drop"]) {
-  els.dropZone.addEventListener(eventName, (event) => {
-    event.preventDefault();
-    els.dropZone.classList.remove("is-dragging");
-  });
-}
-
-els.dropZone.addEventListener("drop", (event) => {
-  const file = event.dataTransfer?.files?.[0];
-  if (file) loadFile(file);
-});
-
+wireDropZone(els.dropZone, loadFile);
 els.bookSelect.addEventListener("change", () => {
   state.currentBook = els.bookSelect.value;
   state.currentChapter = firstChapter(state.currentBook);
   syncControls();
   render();
 });
-
 els.chapterSelect.addEventListener("change", () => {
   state.currentChapter = els.chapterSelect.value;
   render();
 });
-
 els.searchInput.addEventListener("input", () => {
   state.search = els.searchInput.value.trim().toLocaleLowerCase("fr-FR");
   render();
 });
-
 els.prevChapter.addEventListener("click", () => moveChapter(-1));
 els.nextChapter.addEventListener("click", () => moveChapter(1));
 
@@ -187,8 +166,7 @@ function parseStrongFile(text) {
 }
 
 function detectDelimiter(headerLine) {
-  const candidates = ["\t", ";", ","];
-  return candidates
+  return ["\t", ";", ","]
     .map((delimiter) => ({
       delimiter,
       columns: parseDelimitedLine(headerLine, delimiter).length
@@ -204,24 +182,20 @@ function parseDelimitedLine(line, delimiter) {
   for (let index = 0; index < line.length; index += 1) {
     const char = line[index];
     const next = line[index + 1];
-
     if (char === '"' && inQuotes && next === '"') {
       current += '"';
       index += 1;
       continue;
     }
-
     if (char === '"') {
       inQuotes = !inQuotes;
       continue;
     }
-
     if (char === delimiter && !inQuotes) {
       columns.push(current);
       current = "";
       continue;
     }
-
     current += char;
   }
 
@@ -258,7 +232,6 @@ function syncControls() {
 function render() {
   renderStats();
   syncControls();
-
   if (state.rows.length === 0) return;
 
   const rows = state.rows.filter(
@@ -292,29 +265,19 @@ function render() {
 }
 
 function renderTaggedHtml(rawText) {
-  const html = unescapeTsvText(rawText);
   const template = document.createElement("template");
-  template.innerHTML = html;
-  const nodes = [];
-
-  for (const node of template.content.childNodes) {
-    nodes.push(...renderNode(node));
-  }
-
-  return nodes;
+  template.innerHTML = rawText.replace(/\\n/g, "\n");
+  return [...template.content.childNodes].flatMap(renderNode);
 }
 
 function renderNode(node) {
   if (node.nodeType === Node.TEXT_NODE) {
     return [document.createTextNode(node.textContent ?? "")];
   }
-
   if (!(node instanceof HTMLElement)) return [];
-
   if (node.tagName.toLowerCase() === "w") {
     return [renderStrongToken(node)];
   }
-
   return [...node.childNodes].flatMap(renderNode);
 }
 
@@ -339,8 +302,9 @@ function renderStrongToken(node) {
   }
 
   token.className = "token";
-  if (matchesTokenSearch(node.textContent ?? "", strong))
+  if (matchesTokenSearch(node.textContent ?? "", strong)) {
     token.classList.add("highlight");
+  }
   token.append(
     document.createTextNode(node.textContent ?? ""),
     renderSup(strong)
@@ -355,24 +319,35 @@ function renderSup(strong) {
 }
 
 function renderStats() {
-  const rows = state.rows;
-  const tagCount = rows.reduce(
+  const tagCount = state.rows.reduce(
     (sum, row) => sum + countMatches(row.text, /<w\b/gi),
     0
   );
-  const emptyCount = rows.reduce(
+  const emptyCount = state.rows.reduce(
     (sum, row) =>
       sum + countMatches(row.text, /data-empty="true"|<w\b[^>]*><\/w>/gi),
     0
   );
-  const taggedWords = Math.max(0, tagCount - emptyCount);
-  const values = [rows.length, tagCount, emptyCount, taggedWords].map(
-    formatNumber
-  );
+  setStats([
+    ["Versets", state.rows.length],
+    ["Tags", tagCount],
+    ["Vides", emptyCount],
+    ["Mots taggés", Math.max(0, tagCount - emptyCount)]
+  ]);
+}
 
-  els.stats.querySelectorAll("dd").forEach((dd, index) => {
-    dd.textContent = values[index] ?? "-";
-  });
+function setStats(values) {
+  els.stats.replaceChildren(
+    ...values.map(([label, value]) => {
+      const row = document.createElement("div");
+      const dt = document.createElement("dt");
+      const dd = document.createElement("dd");
+      dt.textContent = label;
+      dd.textContent = formatNumber(value);
+      row.append(dt, dd);
+      return row;
+    })
+  );
 }
 
 function matchesSearch(row) {
@@ -443,18 +418,33 @@ function option(value, label) {
   return optionElement;
 }
 
-function unescapeTsvText(text) {
-  return text.replace(/\\n/g, "\n");
+function countMatches(text, pattern) {
+  return [...text.matchAll(pattern)].length;
 }
 
 function formatStrong(strong) {
   return strong.replace(/^[HG]0*/i, "");
 }
 
-function countMatches(text, pattern) {
-  return [...text.matchAll(pattern)].length;
-}
-
 function formatNumber(value) {
   return new Intl.NumberFormat("fr-FR").format(value);
+}
+
+function wireDropZone(element, callback) {
+  for (const eventName of ["dragenter", "dragover"]) {
+    element.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      element.classList.add("is-dragging");
+    });
+  }
+  for (const eventName of ["dragleave", "drop"]) {
+    element.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      element.classList.remove("is-dragging");
+    });
+  }
+  element.addEventListener("drop", (event) => {
+    const file = event.dataTransfer?.files?.[0];
+    if (file) callback(file);
+  });
 }

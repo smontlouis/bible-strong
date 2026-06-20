@@ -99,6 +99,32 @@ dt {
   line-height: 1.4;
 }
 
+.page-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.page-nav a {
+  border: 1px solid #3b4b53;
+  border-radius: 7px;
+  background: #101619;
+  color: var(--muted);
+  padding: 8px 10px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.page-nav a:hover,
+.page-nav a.is-active {
+  border-color: var(--focus);
+  color: var(--text);
+  background: rgba(49, 91, 103, 0.28);
+}
+
 .drop-zone {
   display: grid;
   gap: 6px;
@@ -113,6 +139,10 @@ dt {
 .drop-zone.is-dragging {
   border-color: var(--focus);
   background: rgba(49, 91, 103, 0.32);
+}
+
+.review-drop-zone {
+  margin-top: 12px;
 }
 
 .drop-zone input {
@@ -138,11 +168,79 @@ dt {
 }
 
 .panel h2 {
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #bfd0d7;
+}
+
+.filter-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.filter-tabs button {
+  min-height: 36px;
+  padding: 7px 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.filter-tabs button.is-active {
+  border-color: var(--focus);
+  background: rgba(49, 91, 103, 0.36);
+  color: var(--text);
+}
+
+.filter-tabs [data-filter="pending"].is-active {
+  border-color: #d0b253;
+  background: rgba(113, 93, 24, 0.78);
+  color: #fff7ce;
+}
+
+.filter-tabs [data-filter="accept"].is-active {
+  border-color: #57c781;
+  background: rgba(29, 109, 65, 0.78);
+  color: #ecfff3;
+}
+
+.filter-tabs [data-filter="reject"].is-active {
+  border-color: #df7777;
+  background: rgba(127, 41, 41, 0.78);
+  color: #fff0f0;
+}
+
+.search-label {
+  margin: 12px 0 0;
+}
+
+.filter-summary {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.review-actions button {
+  width: 100%;
+}
+
+.save-status {
+  min-height: 18px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.save-status.success {
+  color: #7ee0a3;
+}
+
+.save-status.error {
+  color: #ff9b9b;
 }
 
 label {
@@ -358,6 +456,226 @@ button:disabled {
   outline-offset: 1px;
 }
 
+.review-view {
+  display: grid;
+  gap: 9px;
+  max-width: 1120px;
+  font-size: 14px;
+  line-height: 1.36;
+}
+
+.review-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #11171a;
+  padding: 10px 12px;
+}
+
+.review-card.is-accept {
+  border-color: #4aa875;
+  background: linear-gradient(90deg, rgba(54, 135, 90, 0.2), #11171a 42%);
+}
+
+.review-card.is-reject {
+  border-color: #a85858;
+  background: linear-gradient(90deg, rgba(142, 64, 64, 0.22), #11171a 42%);
+}
+
+.review-card.is-pending {
+  border-color: #9d8848;
+  background: linear-gradient(90deg, rgba(142, 119, 54, 0.18), #11171a 42%);
+}
+
+.review-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 7px;
+}
+
+.review-card-header strong {
+  display: block;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.review-card-header span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.review-status {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 7px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.review-card.is-accept .review-status {
+  border-color: #4aa875;
+  background: rgba(54, 135, 90, 0.25);
+  color: #9cf0b8;
+}
+
+.review-card.is-reject .review-status {
+  border-color: #a85858;
+  background: rgba(142, 64, 64, 0.25);
+  color: #ffb1b1;
+}
+
+.review-card.is-pending .review-status {
+  border-color: #9d8848;
+  background: rgba(142, 119, 54, 0.24);
+  color: #f1d983;
+}
+
+.review-context {
+  margin-bottom: 8px;
+  color: #dce8ed;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.review-context span {
+  display: inline;
+  margin: 0;
+}
+
+.review-word {
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+
+.review-card.is-editable .review-word {
+  display: inline-block;
+  padding: 0 2px;
+  cursor: pointer;
+}
+
+.review-card.is-editable .review-word:hover {
+  border-color: var(--focus);
+  background: rgba(142, 230, 255, 0.12);
+}
+
+.review-target {
+  display: inline-block;
+  background: var(--chip);
+  color: var(--chip-text);
+  font-weight: 800;
+  padding: 0 4px;
+}
+
+.review-meta {
+  display: grid;
+  grid-template-columns: minmax(78px, 102px) minmax(0, 1fr);
+  gap: 4px 9px;
+  margin: 0 0 8px;
+}
+
+.review-meta div {
+  display: contents;
+}
+
+.review-meta dd {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.review-correction {
+  display: grid;
+  grid-template-columns: minmax(90px, 120px) minmax(120px, 1fr) minmax(
+      140px,
+      1fr
+    );
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 8px;
+  border: 1px solid rgba(84, 113, 124, 0.58);
+  border-radius: 8px;
+  background: rgba(12, 17, 19, 0.55);
+}
+
+.review-correction legend {
+  grid-column: 1 / -1;
+  padding: 0 4px;
+  color: #bfd0d7;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.review-correction label {
+  margin: 0;
+}
+
+.review-correction input {
+  width: 100%;
+  border: 1px solid #3b4b53;
+  border-radius: 7px;
+  background: #0c1113;
+  color: var(--text);
+  padding: 7px 8px;
+}
+
+.review-note {
+  width: 100%;
+  margin-bottom: 8px;
+  border: 1px solid #3b4b53;
+  border-radius: 7px;
+  background: #0c1113;
+  color: var(--text);
+  padding: 7px 9px;
+  font-size: 13px;
+}
+
+.review-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.review-action {
+  min-width: 94px;
+  padding: 7px 10px;
+  font-weight: 800;
+}
+
+.review-action-accept {
+  border-color: rgba(87, 199, 129, 0.55);
+  color: #9cf0b8;
+}
+
+.review-action-reject {
+  border-color: rgba(223, 119, 119, 0.55);
+  color: #ffb1b1;
+}
+
+.review-action-pending {
+  border-color: rgba(208, 178, 83, 0.58);
+  color: #f1d983;
+}
+
+.review-action-accept.is-active {
+  border-color: #57c781;
+  background: #1d6d41;
+  color: #ecfff3;
+}
+
+.review-action-reject.is-active {
+  border-color: #df7777;
+  background: #7f2929;
+  color: #fff0f0;
+}
+
+.review-action-pending.is-active {
+  border-color: #d0b253;
+  background: #715d18;
+  color: #fff7ce;
+}
+
 @media (max-width: 780px) {
   .app-shell {
     grid-template-columns: 1fr;
@@ -377,5 +695,9 @@ button:disabled {
 
   .chapter-view {
     font-size: 16px;
+  }
+
+  .review-correction {
+    grid-template-columns: 1fr;
   }
 }

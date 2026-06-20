@@ -6,6 +6,7 @@ import {
   renderReaderTaggedText
 } from "../src/readerAlignment.js";
 import { applyCuratedStrongOverrides } from "../src/curatedStrongOverrides.js";
+import { buildStrongPhraseLexicon } from "../src/phraseTranslationLexicon.js";
 import { parseStrongTokens } from "../src/strongCsv.js";
 
 test("does not add empty tags only because the original has extra Strong occurrences", () => {
@@ -47,6 +48,30 @@ test("adds editorial empty tags when at least two references agree", () => {
   assert.match(renderReaderTaggedText(result), /data-method="editorial-empty"/);
 });
 
+test("requires stronger empty consensus when the reader profile asks for it", () => {
+  const result = alignReaderVerse({
+    targetText: "Dieu sépara la lumière avec les ténèbres.",
+    readerPolicy: {
+      maxStrongPerWord: 3,
+      minEmptySourceAgreement: 3,
+      learnedTranslationMinScore: 0.36,
+      learnedFunctionWordMode: "restricted"
+    },
+    references: [
+      reference(
+        "Sg1910",
+        '<w strong="H0430">Dieu</w> <w strong="H0914">sépara</w><w strong="H0996"></w> la <w strong="H0216">lumière</w>.'
+      ),
+      reference(
+        "Darby",
+        '<w strong="H0430">Dieu</w> <w strong="H0914">sépara</w><w strong="H0996"></w> la <w strong="H0216">lumière</w>.'
+      )
+    ]
+  });
+
+  assert.equal(result.emptyStrongOccurrenceCount, 0);
+});
+
 test("does not add editorial empty tags when target already has enough occurrences", () => {
   const result = alignReaderVerse({
     targetText: "Dieu sépara avec la lumière et avec les ténèbres.",
@@ -63,6 +88,52 @@ test("does not add editorial empty tags when target already has enough occurrenc
   });
 
   assert.equal(result.emptyStrongOccurrenceCount, 0);
+});
+
+test("can block learned function-word enrichment for semantic profiles", () => {
+  const result = alignReaderVerse({
+    targetText: "avec",
+    references: [],
+    readerPolicy: {
+      maxStrongPerWord: 2,
+      minEmptySourceAgreement: 3,
+      learnedTranslationMinScore: 0.36,
+      learnedFunctionWordMode: "reference-only"
+    },
+    translationLexicon: {
+      exact: new Map([
+        [
+          "H0996",
+          new Map([
+            [
+              "avec",
+              {
+                strong: "H0996",
+                normalized: "avec",
+                score: 1,
+                source: "test",
+                method: "learned-translation"
+              }
+            ]
+          ])
+        ]
+      ]),
+      stem: new Map()
+    },
+    original: {
+      strongSet: new Set(["H0996"]),
+      source: "original"
+    },
+    originalVerse: {
+      bookId: "Gen",
+      chapter: 1,
+      verse: 1,
+      strongSet: new Set(["H0996"]),
+      tokens: [originalToken("o1", ["H0996"])]
+    }
+  });
+
+  assert.equal(result.assignments.size, 0);
 });
 
 test("enriches reader tags from original and learned translation variants", () => {
@@ -144,6 +215,73 @@ test("enriches reader tags with curated original Strong rules", () => {
   assert.equal(result.emptyStrongOccurrenceCount, 0);
 });
 
+test("enriches reader tags with learned multi-word phrase context", () => {
+  const result = alignReaderVerse({
+    targetText: "Il prit femme.",
+    references: [],
+    translationLexicon: { exact: new Map(), stem: new Map() },
+    phraseLexicon: {
+      byStrong: new Map([
+        [
+          "H0802",
+          [
+            {
+              strong: "H0802",
+              phrase: ["prit", "femme"],
+              offset: 1,
+              score: 1,
+              source: "test",
+              method: "learned-phrase"
+            }
+          ]
+        ]
+      ])
+    },
+    original: {
+      strongSet: new Set(["H0802"]),
+      source: "original"
+    },
+    originalVerse: {
+      bookId: "Gen",
+      chapter: 1,
+      verse: 1,
+      strongSet: new Set(["H0802"]),
+      tokens: [originalToken("o1", ["H0802"])]
+    }
+  });
+
+  assert.deepEqual(result.assignments.get(2)?.strong, ["H0802"]);
+  assert.equal(result.assignments.get(2)?.method, "learned-phrase");
+});
+
+test("learns repeated phrase candidates from Strong references", () => {
+  const map = new Map([
+    [
+      "Gen.1.1",
+      {
+        row: {
+          bookId: "Gen",
+          chapter: 1,
+          verse: 1,
+          text: '<w strong="H3947">prit</w> <w strong="H0802">femme</w>'
+        },
+        tokens: parseStrongTokens(
+          '<w strong="H3947">prit</w> <w strong="H0802">femme</w>'
+        )
+      }
+    ]
+  ]);
+  const lexicon = buildStrongPhraseLexicon([
+    { name: "one", map },
+    { name: "two", map }
+  ]);
+
+  assert.equal(
+    lexicon.byStrong.get("H0802")?.[0]?.phrase.join(" "),
+    "prit femme"
+  );
+});
+
 test("applies reviewed LLM transfer overrides only when the target word still matches", () => {
   const result = alignReaderVerse({
     targetText:
@@ -178,6 +316,25 @@ test("skips reviewed LLM transfer overrides when token indexes drift", () => {
 
   assert.equal(applied, 0);
   assert.equal(result.assignments.size, 0);
+});
+
+test("applies curated empty Strong overrides without a target word", () => {
+  const result = alignReaderVerse({
+    targetText: "Dieu vit.",
+    references: []
+  });
+
+  const applied = applyCuratedStrongOverrides({
+    bible: "fixture-empty",
+    ref: "Gen.1.4",
+    result
+  });
+
+  assert.equal(applied, 1);
+  assert.equal(result.emptyStrongOccurrenceCount, 1);
+  assert.equal(result.totalStrongOccurrenceCount, 1);
+  assert.match(renderReaderTaggedText(result), /data-method="curated-empty"/);
+  assert.match(renderReaderTaggedText(result), /strong="H0996"/);
 });
 
 function reference(name: string, text: string) {
