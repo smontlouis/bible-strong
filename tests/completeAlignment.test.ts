@@ -117,6 +117,35 @@ test("uses learned translation lexicon to move an empty occurrence onto a word",
   );
 });
 
+test("matches extended original Strong subcodes to classical reference Strong codes", () => {
+  const original: OriginalVerse = {
+    bookId: "Gen",
+    chapter: 1,
+    verse: 10,
+    tokens: [token("o1", "place", ["H4723a"])],
+    strongSet: new Set(["H4723a"])
+  };
+
+  const result = alignCompleteVerse({
+    targetText: "la masse des eaux",
+    original,
+    references: [
+      {
+        name: "fixture",
+        verse: {
+          row: { bookId: "Gen", chapter: 1, verse: 10, text: "" },
+          tokens: parseStrongTokens('<w strong="H4723">masse</w> des eaux')
+        }
+      }
+    ]
+  });
+
+  assert.equal(result.realWordStrongOccurrenceCount, 1);
+  assert.equal(result.emptyStrongOccurrenceCount, 0);
+  assert.match(renderCompleteTaggedText(result), /strong="H4723"/);
+  assert.doesNotMatch(renderCompleteTaggedText(result), /H4723a/);
+});
+
 function token(
   id: string,
   text: string,

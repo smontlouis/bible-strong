@@ -12,7 +12,10 @@ import {
 } from "./completeAlignment.js";
 import { type OriginalVerse } from "./originalSource.js";
 import {
+  buildPhraseMatchIndex,
+  findBestPhraseMatch,
   findPhraseCandidate,
+  type StrongPhraseMatch,
   type StrongPhraseLexicon
 } from "./phraseTranslationLexicon.js";
 import { renderTaggedText } from "./render.js";
@@ -38,8 +41,19 @@ export interface ReaderEmptyAssignment {
   insertAfterWordIndex: number;
 }
 
+export interface ReaderPhraseAssignment {
+  strong: string[];
+  confidence: number;
+  method: "curated-phrase" | "learned-phrase";
+  source: string;
+  startWordIndex: number;
+  endWordIndex: number;
+  originalConfirmed: boolean;
+}
+
 export interface ReaderAlignmentResult extends AlignmentResult {
   emptyAssignments: ReaderEmptyAssignment[];
+  phraseAssignments: ReaderPhraseAssignment[];
   strongWordOccurrenceCount: number;
   emptyStrongOccurrenceCount: number;
   totalStrongOccurrenceCount: number;
@@ -79,8 +93,10 @@ export function alignReaderVerse(options: {
     options.lexicon,
     options.original
   );
+  const phraseAssignments: ReaderPhraseAssignment[] = [];
   enrichAssignmentsFromOriginal({
     result: base,
+    phraseAssignments,
     original: options.original,
     originalVerse: options.originalVerse,
     translationLexicon: options.translationLexicon,
@@ -89,17 +105,30 @@ export function alignReaderVerse(options: {
   });
   const emptyAssignments = buildEditorialEmptyAssignments(
     base,
+    phraseAssignments,
     options.references,
     readerPolicy
   );
-  const taggedWordCount = base.assignments.size;
-  const lowConfidenceWordCount = [...base.assignments.values()].filter(
-    (assignment) => assignment.confidence < 0.55
-  ).length;
-  const strongWordOccurrenceCount = [...base.assignments.values()].reduce(
-    (sum, assignment) => sum + assignment.strong.length,
-    0
-  );
+  const phraseWordIndexes = getPhraseWordIndexes(phraseAssignments);
+  const taggedWordCount = new Set([
+    ...base.assignments.keys(),
+    ...phraseWordIndexes
+  ]).size;
+  const lowConfidenceWordCount =
+    [...base.assignments.values()].filter(
+      (assignment) => assignment.confidence < 0.55
+    ).length +
+    phraseAssignments.filter((assignment) => assignment.confidence < 0.55)
+      .length;
+  const strongWordOccurrenceCount =
+    [...base.assignments.values()].reduce(
+      (sum, assignment) => sum + assignment.strong.length,
+      0
+    ) +
+    phraseAssignments.reduce(
+      (sum, assignment) => sum + assignment.strong.length,
+      0
+    );
   const emptyStrongOccurrenceCount = emptyAssignments.length;
 
   return {
@@ -107,6 +136,7 @@ export function alignReaderVerse(options: {
     taggedWordCount,
     lowConfidenceWordCount,
     emptyAssignments,
+    phraseAssignments,
     strongWordOccurrenceCount,
     emptyStrongOccurrenceCount,
     totalStrongOccurrenceCount:
@@ -119,6 +149,7 @@ export function alignReaderVerse(options: {
 
 function enrichAssignmentsFromOriginal(options: {
   result: AlignmentResult;
+  phraseAssignments: ReaderPhraseAssignment[];
   original?: OriginalConstraint;
   originalVerse?: OriginalVerse;
   translationLexicon?: StrongTranslationLexicon;
@@ -130,11 +161,31 @@ function enrichAssignmentsFromOriginal(options: {
   }
 
   const occurrences = getOriginalStrongOccurrences(options.originalVerse);
+  const words = getWordSegments(options.result.segments);
+  relocateSemanticAssignments({
+    occurrences,
+    words,
+    assignments: options.result.assignments,
+    translationLexicon: options.translationLexicon,
+    readerPolicy: options.readerPolicy
+  });
   const usedOccurrences = consumeBaseOccurrences(
     occurrences,
     options.result.assignments
   );
-  const words = getWordSegments(options.result.segments);
+  const phraseMatchIndex = options.phraseLexicon
+    ? buildPhraseMatchIndex({
+        lexicon: options.phraseLexicon,
+        words,
+        existingStrongByWord: mergeExistingStrongByWord(
+          options.result.assignments,
+          options.phraseAssignments
+        ),
+        allowedStrong: new Set(
+          occurrences.map((occurrence) => occurrence.strong)
+        )
+      })
+    : undefined;
 
   for (const occurrence of occurrences) {
     if (usedOccurrences.has(occurrence.occurrenceId)) {
@@ -146,6 +197,8 @@ function enrichAssignmentsFromOriginal(options: {
       occurrences,
       words,
       assignments: options.result.assignments,
+      phraseAssignments: options.phraseAssignments,
+      phraseMatchIndex,
       translationLexicon: options.translationLexicon,
       phraseLexicon: options.phraseLexicon,
       readerPolicy: options.readerPolicy
@@ -155,8 +208,29 @@ function enrichAssignmentsFromOriginal(options: {
       continue;
     }
 
-    const existing = options.result.assignments.get(candidate.wordIndex);
     const source = `${candidate.source}+${options.original?.source ?? "original"}`;
+
+    if (candidate.target === "phrase") {
+      removeStrongFromCoveredWords(
+        options.result.assignments,
+        candidate.startWordIndex,
+        candidate.endWordIndex,
+        [occurrence.strong]
+      );
+      options.phraseAssignments.push({
+        strong: [occurrence.strong],
+        confidence: candidate.confidence,
+        source,
+        method: candidate.method,
+        startWordIndex: candidate.startWordIndex,
+        endWordIndex: candidate.endWordIndex,
+        originalConfirmed: true
+      });
+      usedOccurrences.add(occurrence.occurrenceId);
+      continue;
+    }
+
+    const existing = options.result.assignments.get(candidate.wordIndex);
 
     if (existing) {
       existing.strong.push(occurrence.strong);
@@ -176,6 +250,148 @@ function enrichAssignmentsFromOriginal(options: {
 
     usedOccurrences.add(occurrence.occurrenceId);
   }
+}
+
+function relocateSemanticAssignments(options: {
+  occurrences: OriginalStrongOccurrence[];
+  words: Array<{ wordIndex: number; normalized: string }>;
+  assignments: Map<number, AssignedStrong>;
+  translationLexicon: StrongTranslationLexicon;
+  readerPolicy: ReaderAlignmentPolicy;
+}): void {
+  for (const occurrence of options.occurrences) {
+    if (!isRelocatableOriginalOccurrence(occurrence)) {
+      continue;
+    }
+
+    const current = [...options.assignments.entries()].filter(
+      ([, assignment]) => assignment.strong.includes(occurrence.strong)
+    );
+    if (current.length === 0) {
+      continue;
+    }
+
+    const currentScores = current.map(([wordIndex]) => ({
+      wordIndex,
+      score: scoreSemanticWordForOccurrence({
+        strong: occurrence.strong,
+        originalTokenIndex: occurrence.tokenIndex,
+        originalCount: options.occurrences.length,
+        word: options.words[wordIndex],
+        wordCount: options.words.length,
+        translationLexicon: options.translationLexicon
+      })
+    }));
+    const weakestCurrent = currentScores.sort((a, b) => a.score - b.score)[0];
+    if (!weakestCurrent) {
+      continue;
+    }
+
+    const best = options.words
+      .map((word) => {
+        const existing = options.assignments.get(word.wordIndex);
+        if (existing?.strong.includes(occurrence.strong)) {
+          return undefined;
+        }
+        if (
+          (existing?.strong.length ?? 0) >=
+          options.readerPolicy.maxStrongPerWord
+        ) {
+          return undefined;
+        }
+
+        const score = scoreSemanticWordForOccurrence({
+          strong: occurrence.strong,
+          originalTokenIndex: occurrence.tokenIndex,
+          originalCount: options.occurrences.length,
+          word,
+          wordCount: options.words.length,
+          translationLexicon: options.translationLexicon
+        });
+
+        return { word, score };
+      })
+      .filter((value): value is NonNullable<typeof value> => Boolean(value))
+      .sort((left, right) => right.score - left.score)[0];
+
+    if (
+      !best ||
+      best.score < 0.62 ||
+      best.score < weakestCurrent.score + 0.16
+    ) {
+      continue;
+    }
+
+    removeStrongFromCoveredWords(
+      options.assignments,
+      weakestCurrent.wordIndex,
+      weakestCurrent.wordIndex,
+      [occurrence.strong]
+    );
+
+    const existing = options.assignments.get(best.word.wordIndex);
+    const source = `semantic-relocation:${occurrence.strong}`;
+    const confidence = Math.min(0.86, 0.52 + best.score * 0.34);
+
+    if (existing) {
+      existing.strong.push(occurrence.strong);
+      existing.confidence = Math.max(existing.confidence, confidence);
+      existing.source = mergeLabel(existing.source, source);
+      existing.method = "learned-translation";
+      existing.originalConfirmed = true;
+    } else {
+      options.assignments.set(best.word.wordIndex, {
+        strong: [occurrence.strong],
+        confidence,
+        source,
+        method: "learned-translation",
+        originalConfirmed: true
+      });
+    }
+  }
+}
+
+function scoreSemanticWordForOccurrence(options: {
+  strong: string;
+  originalTokenIndex: number;
+  originalCount: number;
+  word: { wordIndex: number; normalized: string } | undefined;
+  wordCount: number;
+  translationLexicon: StrongTranslationLexicon;
+}): number {
+  if (!options.word || FRENCH_FUNCTION_WORDS.has(options.word.normalized)) {
+    return 0;
+  }
+
+  const translation = findTranslationCandidate(
+    options.translationLexicon,
+    options.strong,
+    options.word.normalized
+  );
+  if (!translation) {
+    return 0;
+  }
+
+  const position = scorePosition(
+    options.originalTokenIndex,
+    options.originalCount,
+    options.word.wordIndex,
+    options.wordCount
+  );
+
+  return translation.score * 0.68 + position * 0.32;
+}
+
+function isRelocatableOriginalOccurrence(
+  occurrence: OriginalStrongOccurrence
+): boolean {
+  return (
+    occurrence.pos === "Name" ||
+    occurrence.pos === "noun" ||
+    occurrence.pos === "verb" ||
+    occurrence.pos === "adj" ||
+    occurrence.pos === "adv"
+  );
 }
 
 function consumeBaseOccurrences(
@@ -206,40 +422,78 @@ function findReaderEnrichmentCandidate(options: {
   occurrences: OriginalStrongOccurrence[];
   words: Array<{ wordIndex: number; normalized: string }>;
   assignments: Map<number, AssignedStrong>;
+  phraseAssignments: ReaderPhraseAssignment[];
+  phraseMatchIndex?: Map<string, StrongPhraseMatch[]>;
   translationLexicon: StrongTranslationLexicon;
   phraseLexicon?: StrongPhraseLexicon;
   readerPolicy: ReaderAlignmentPolicy;
 }):
   | {
+      target: "word";
       wordIndex: number;
       confidence: number;
       method: AssignedStrong["method"];
       source: string;
     }
+  | {
+      target: "phrase";
+      wordIndex: number;
+      startWordIndex: number;
+      endWordIndex: number;
+      confidence: number;
+      method: "learned-phrase";
+      source: string;
+    }
   | undefined {
   const maxStrongPerWord = options.readerPolicy.maxStrongPerWord;
-  const phrase = options.phraseLexicon
-    ? findPhraseCandidate({
-        lexicon: options.phraseLexicon,
+  const originalRatio =
+    options.occurrences.length <= 1
+      ? 1
+      : options.occurrence.tokenIndex / (options.occurrences.length - 1);
+  const phrase = options.phraseMatchIndex
+    ? findBestPhraseMatch({
+        matches: options.phraseMatchIndex,
         strong: options.occurrence.strong,
-        words: options.words,
-        existingStrongByWord: new Map(
-          [...options.assignments].map(([wordIndex, assignment]) => [
-            wordIndex,
-            assignment.strong
-          ])
-        ),
-        originalRatio:
-          options.occurrences.length <= 1
-            ? 1
-            : options.occurrence.tokenIndex / (options.occurrences.length - 1)
+        originalRatio
       })
-    : undefined;
+    : options.phraseLexicon
+      ? findPhraseCandidate({
+          lexicon: options.phraseLexicon,
+          strong: options.occurrence.strong,
+          words: options.words,
+          existingStrongByWord: new Map(
+            mergeExistingStrongByWord(
+              options.assignments,
+              options.phraseAssignments
+            )
+          ),
+          originalRatio
+        })
+      : undefined;
   const phraseExisting =
-    phrase && options.assignments.get(phrase.wordIndex)?.strong.length;
-  if (phrase && (phraseExisting ?? 0) < maxStrongPerWord) {
+    phrase &&
+    (options.assignments.get(phrase.wordIndex)?.strong.length ?? 0) +
+      options.phraseAssignments
+        .filter(
+          (assignment) =>
+            assignment.startWordIndex === phrase.startWordIndex &&
+            assignment.endWordIndex === phrase.endWordIndex
+        )
+        .reduce((sum, assignment) => sum + assignment.strong.length, 0);
+  const phraseHasStrong =
+    phrase &&
+    options.phraseAssignments.some(
+      (assignment) =>
+        assignment.startWordIndex === phrase.startWordIndex &&
+        assignment.endWordIndex === phrase.endWordIndex &&
+        assignment.strong.includes(options.occurrence.strong)
+    );
+  if (phrase && !phraseHasStrong && (phraseExisting ?? 0) < maxStrongPerWord) {
     return {
+      target: "phrase",
       wordIndex: phrase.wordIndex,
+      startWordIndex: phrase.startWordIndex,
+      endWordIndex: phrase.endWordIndex,
       confidence: Math.min(0.88, 0.5 + phrase.score * 0.34),
       method: phrase.method,
       source: `${phrase.source}:phrase:${phrase.phrase.join("_")}`
@@ -309,6 +563,7 @@ function findReaderEnrichmentCandidate(options: {
   }
 
   return {
+    target: "word",
     wordIndex: best.wordIndex,
     confidence: Math.min(0.86, 0.46 + best.score * 0.36),
     method: best.method,
@@ -460,6 +715,8 @@ const FRENCH_FUNCTION_WORDS = new Set([
 export function renderReaderTaggedText(result: ReaderAlignmentResult): string {
   let wordIndex = -1;
   let output = renderEmptyAssignments(result.emptyAssignments, -1);
+  let activePhrase: ReaderPhraseAssignment | undefined;
+  const phraseStarts = buildPhraseStartMap(result.phraseAssignments);
 
   for (const segment of result.segments) {
     if (segment.kind === "text") {
@@ -468,21 +725,66 @@ export function renderReaderTaggedText(result: ReaderAlignmentResult): string {
     }
 
     wordIndex += 1;
-    const wordHtml = renderTaggedText({
+    const startingPhrase = phraseStarts.get(wordIndex);
+    if (startingPhrase) {
+      activePhrase = startingPhrase;
+      output += `<w strong="${escapeHtml(startingPhrase.strong.join(" "))}" data-confidence="${startingPhrase.confidence.toFixed(
+        2
+      )}" data-source="${escapeHtml(startingPhrase.source)}" data-method="${
+        startingPhrase.method
+      }" data-original="${
+        startingPhrase.originalConfirmed ? "true" : "false"
+      }" data-target="phrase">`;
+    }
+
+    if (activePhrase) {
+      output += escapeHtml(segment.text);
+      if (activePhrase.endWordIndex === wordIndex) {
+        output += "</w>";
+        activePhrase = undefined;
+        output += renderEmptyAssignments(result.emptyAssignments, wordIndex);
+      }
+      continue;
+    }
+
+    output += renderTaggedText({
       ...result,
       segments: [segment],
       assignments: shiftAssignment(result, wordIndex)
     });
-
-    output += wordHtml;
     output += renderEmptyAssignments(result.emptyAssignments, wordIndex);
+  }
+
+  if (activePhrase) {
+    output += "</w>";
   }
 
   return output;
 }
 
+function buildPhraseStartMap(
+  phraseAssignments: ReaderPhraseAssignment[]
+): Map<number, ReaderPhraseAssignment> {
+  const byStart = new Map<number, ReaderPhraseAssignment>();
+  let coveredUntil = -1;
+
+  for (const phrase of [...phraseAssignments].sort(
+    (left, right) =>
+      left.startWordIndex - right.startWordIndex ||
+      right.endWordIndex - left.endWordIndex
+  )) {
+    if (phrase.startWordIndex <= coveredUntil) continue;
+    if (phrase.endWordIndex < phrase.startWordIndex) continue;
+    byStart.set(phrase.startWordIndex, phrase);
+    coveredUntil = phrase.endWordIndex;
+  }
+
+  return byStart;
+}
+
 function buildEditorialEmptyAssignments(
   result: AlignmentResult,
+  phraseAssignments: ReaderPhraseAssignment[],
   references: ReferenceSource[],
   policy: ReaderAlignmentPolicy
 ): ReaderEmptyAssignment[] {
@@ -514,9 +816,12 @@ function buildEditorialEmptyAssignments(
   }
 
   const targetWordCount = result.wordCount;
-  const assignedCounts = countOccurrencesByStrong(
-    [...result.assignments.values()].flatMap((assignment) => assignment.strong)
-  );
+  const assignedCounts = countOccurrencesByStrong([
+    ...[...result.assignments.values()].flatMap(
+      (assignment) => assignment.strong
+    ),
+    ...phraseAssignments.flatMap((assignment) => assignment.strong)
+  ]);
   const assignments: ReaderEmptyAssignment[] = [];
 
   for (const [strong, occurrences] of occurrencesByStrong) {
@@ -645,6 +950,74 @@ function shiftAssignment(
 ): Map<number, AssignedStrong> {
   const assignment = result.assignments.get(wordIndex);
   return assignment ? new Map([[0, assignment]]) : new Map();
+}
+
+function getPhraseWordIndexes(
+  phraseAssignments: ReaderPhraseAssignment[]
+): Set<number> {
+  const indexes = new Set<number>();
+
+  for (const phrase of phraseAssignments) {
+    for (
+      let wordIndex = phrase.startWordIndex;
+      wordIndex <= phrase.endWordIndex;
+      wordIndex += 1
+    ) {
+      indexes.add(wordIndex);
+    }
+  }
+
+  return indexes;
+}
+
+function mergeExistingStrongByWord(
+  assignments: Map<number, AssignedStrong>,
+  phraseAssignments: ReaderPhraseAssignment[]
+): Map<number, string[]> {
+  const existing = new Map(
+    [...assignments].map(([wordIndex, assignment]) => [
+      wordIndex,
+      [...assignment.strong]
+    ])
+  );
+
+  for (const phrase of phraseAssignments) {
+    for (
+      let wordIndex = phrase.startWordIndex;
+      wordIndex <= phrase.endWordIndex;
+      wordIndex += 1
+    ) {
+      const current = existing.get(wordIndex) ?? [];
+      existing.set(wordIndex, [...current, ...phrase.strong]);
+    }
+  }
+
+  return existing;
+}
+
+function removeStrongFromCoveredWords(
+  assignments: Map<number, AssignedStrong>,
+  startWordIndex: number,
+  endWordIndex: number,
+  strong: string[]
+): void {
+  const strongSet = new Set(strong);
+
+  for (
+    let wordIndex = startWordIndex;
+    wordIndex <= endWordIndex;
+    wordIndex += 1
+  ) {
+    const assignment = assignments.get(wordIndex);
+    if (!assignment) continue;
+
+    assignment.strong = assignment.strong.filter(
+      (code) => !strongSet.has(code)
+    );
+    if (assignment.strong.length === 0) {
+      assignments.delete(wordIndex);
+    }
+  }
 }
 
 function getWordSegments(

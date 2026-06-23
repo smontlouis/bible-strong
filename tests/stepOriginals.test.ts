@@ -1,0 +1,86 @@
+import { mkdtemp, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import { readStepOriginalTokens } from "../src/stepOriginals.js";
+
+test("uses TAGNT dStrong as the STEP candidate instead of simple Strong", async () => {
+  const filePath = await writeTempStepFile("TAGNT Mat-Jhn.txt", [
+    [
+      "Mat.1.1#03=NKO",
+      "Ἰησοῦ (Iēsou)",
+      "of Jesus",
+      "G2424G=N-GSM-P",
+      "Ἰησοῦς=Jesus/Joshua",
+      "NA28+TR",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "G2424",
+      ""
+    ].join("\t")
+  ]);
+
+  const [token] = await readStepOriginalTokens(filePath);
+  assert.deepEqual([...(token?.strongByBase.get("G2424") ?? [])], ["G2424G"]);
+});
+
+test("uses simple TAGNT alternates as aliases to the dStrong", async () => {
+  const filePath = await writeTempStepFile("TAGNT Mat-Jhn.txt", [
+    [
+      "Mat.7.12#12=NKO",
+      "ὑμᾶς (hymas)",
+      "you",
+      "G4771=P-2AP",
+      "σύ=you",
+      "NA28+TR",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "G5213",
+      ""
+    ].join("\t")
+  ]);
+
+  const [token] = await readStepOriginalTokens(filePath);
+  assert.deepEqual([...(token?.strongByBase.get("G5213") ?? [])], ["G4771"]);
+});
+
+test("filters TAHOT technical H90xx markers before alias mapping", async () => {
+  const filePath = await writeTempStepFile("TAHOT Gen-Deu.txt", [
+    [
+      "Gen.1.10#12=L",
+      "טֽוֹב\\׃",
+      "Tov",
+      "[it was] good",
+      "{H2895}\\H9016",
+      "HVqp3ms",
+      "",
+      "",
+      "H2895",
+      "H2896A",
+      "",
+      "{H2895=טוֹב=be pleasing}\\H9016=׃=verseEnd"
+    ].join("\t")
+  ]);
+
+  const [token] = await readStepOriginalTokens(filePath);
+  assert.deepEqual([...(token?.strongByBase.get("H2896") ?? [])], ["H2895"]);
+  assert.equal(token?.strongByBase.has("H9016"), false);
+});
+
+async function writeTempStepFile(
+  fileName: string,
+  lines: string[]
+): Promise<string> {
+  const dir = await mkdtemp(path.join(tmpdir(), "step-originals-test-"));
+  const filePath = path.join(dir, fileName);
+  await writeFile(filePath, `${lines.join("\n")}\n`, "utf8");
+  return filePath;
+}

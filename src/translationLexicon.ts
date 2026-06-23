@@ -55,14 +55,14 @@ export function findTranslationCandidate(
   strong: string,
   normalized: string
 ): StrongTranslationCandidate | undefined {
-  for (const form of equivalentForms(normalized)) {
+  for (const form of getEquivalentTranslationForms(strong, normalized)) {
     const exact = lexicon.exact.get(strong)?.get(form);
     if (exact) {
       return exact;
     }
   }
 
-  for (const form of equivalentForms(normalized)) {
+  for (const form of getEquivalentTranslationForms(strong, normalized)) {
     const stem = stemWord(form);
     if (stem.length >= 4) {
       const candidate = lexicon.stem.get(strong)?.get(stem);
@@ -73,7 +73,10 @@ export function findTranslationCandidate(
   return undefined;
 }
 
-function equivalentForms(normalized: string): string[] {
+export function getEquivalentTranslationForms(
+  strong: string,
+  normalized: string
+): string[] {
   const forms = new Set([normalized]);
 
   if (normalized === "ciel") forms.add("cieux");
@@ -81,8 +84,81 @@ function equivalentForms(normalized: string): string[] {
   if (normalized === "oeil") forms.add("yeux");
   if (normalized === "yeux") forms.add("oeil");
 
+  for (const family of CONTROLLED_SEMANTIC_EQUIVALENCES) {
+    if (!family.strong.has(strong) || !family.forms.has(normalized)) continue;
+    for (const form of family.forms) {
+      forms.add(form);
+    }
+  }
+
   return [...forms];
 }
+
+const CONTROLLED_SEMANTIC_EQUIVALENCES: Array<{
+  strong: Set<string>;
+  forms: Set<string>;
+}> = [
+  {
+    strong: new Set(["H0120"]),
+    forms: new Set([
+      "homme",
+      "hommes",
+      "humain",
+      "humains",
+      "personne",
+      "personnes"
+    ])
+  },
+  {
+    strong: new Set(["H5162"]),
+    forms: new Set([
+      "repens",
+      "repent",
+      "repentit",
+      "repentir",
+      "regrette",
+      "regretta"
+    ])
+  },
+  {
+    strong: new Set(["H7843"]),
+    forms: new Set([
+      "corrompu",
+      "corrompue",
+      "corrompus",
+      "corrompues",
+      "perverti",
+      "pervertie",
+      "pervertis",
+      "perverties",
+      "detruire",
+      "detruit",
+      "detruis",
+      "detruirai",
+      "aneantir",
+      "aneantis",
+      "aneantirai"
+    ])
+  },
+  {
+    strong: new Set(["H5303"]),
+    forms: new Set(["geant", "geants", "nephilim"])
+  },
+  {
+    strong: new Set(["H8435"]),
+    forms: new Set([
+      "generation",
+      "generations",
+      "genealogie",
+      "posterite",
+      "descendance"
+    ])
+  },
+  {
+    strong: new Set(["H3068"]),
+    forms: new Set(["eternel", "seigneur", "yahweh"])
+  }
+];
 
 function increment(
   counts: Map<string, Map<string, number>>,

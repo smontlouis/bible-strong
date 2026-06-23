@@ -45,6 +45,13 @@ select {
   min-height: 100vh;
 }
 
+.app-shell.has-lexicon-drawer {
+  grid-template-columns: minmax(270px, 320px) minmax(0, 1fr) minmax(
+      320px,
+      390px
+    );
+}
+
 .sidebar {
   position: sticky;
   top: 0;
@@ -101,7 +108,7 @@ dt {
 
 .page-nav {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   margin-bottom: 20px;
 }
@@ -412,10 +419,18 @@ button:disabled {
   color: var(--chip-text);
   padding: 0 3px;
   line-height: 1.34;
+  cursor: pointer;
 }
 
-.token:hover {
+.token:hover,
+.token.is-selected {
   background: var(--chip-hover);
+}
+
+.token.is-selected,
+.empty-token.is-selected {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
 }
 
 .token sup {
@@ -432,6 +447,7 @@ button:disabled {
   gap: 1px;
   margin: 0 2px;
   vertical-align: baseline;
+  cursor: pointer;
 }
 
 .empty-token::before {
@@ -454,6 +470,166 @@ button:disabled {
 .highlight {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
+}
+
+.lexicon-drawer {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: auto;
+  border-left: 1px solid var(--line);
+  background: #12181c;
+  padding: 18px;
+}
+
+.lexicon-drawer-empty,
+.drawer-header,
+.drawer-section {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0f1518;
+}
+
+.lexicon-drawer-empty {
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  min-height: 240px;
+  padding: 18px;
+  color: var(--muted);
+}
+
+.lexicon-drawer-empty h2 {
+  color: var(--text);
+  font-size: 20px;
+}
+
+.drawer-header {
+  padding: 16px;
+}
+
+.drawer-kicker {
+  margin-bottom: 6px;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.drawer-header h2 {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.drawer-token {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.drawer-strong-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.drawer-strong-switcher button {
+  padding: 5px 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.drawer-strong-switcher button.is-active {
+  border-color: var(--focus);
+  background: rgba(49, 91, 103, 0.5);
+  color: var(--text);
+}
+
+.drawer-meta {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+}
+
+.drawer-meta div {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+}
+
+.drawer-meta dt {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.drawer-meta dd {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+
+.drawer-section {
+  margin-top: 10px;
+  padding: 14px 16px;
+}
+
+.drawer-section h3 {
+  margin: 0 0 9px;
+  color: #bfd0d7;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.drawer-section p,
+.drawer-rich-text {
+  color: #d8e5ea;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.drawer-rich-text p,
+.drawer-rich-text ul,
+.drawer-rich-text ol {
+  margin: 0 0 10px;
+}
+
+.drawer-rich-text :last-child {
+  margin-bottom: 0;
+}
+
+.drawer-rich-text a {
+  color: var(--focus);
+}
+
+.drawer-resource-list {
+  display: grid;
+  gap: 10px;
+}
+
+.drawer-resource {
+  display: grid;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(49, 64, 71, 0.72);
+}
+
+.drawer-resource:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.drawer-resource > strong {
+  color: var(--text);
+  font-size: 13px;
 }
 
 .review-view {
@@ -676,8 +852,24 @@ button:disabled {
   color: #fff7ce;
 }
 
+@media (max-width: 1180px) {
+  .app-shell.has-lexicon-drawer {
+    grid-template-columns: minmax(260px, 310px) minmax(0, 1fr);
+  }
+
+  .has-lexicon-drawer .lexicon-drawer {
+    position: static;
+    grid-column: 1 / -1;
+    height: auto;
+    max-height: none;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+}
+
 @media (max-width: 780px) {
-  .app-shell {
+  .app-shell,
+  .app-shell.has-lexicon-drawer {
     grid-template-columns: 1fr;
   }
 

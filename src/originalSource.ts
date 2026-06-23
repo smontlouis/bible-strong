@@ -139,6 +139,15 @@ function parseOriginalTokenId(
 function parseStrongList(value: string): string[] {
   return value
     .split(/[ ,]+/u)
-    .map((strong) => strong.trim())
-    .filter(Boolean);
+    .map(normalizeOriginalStrong)
+    .filter((strong): strong is string => Boolean(strong));
+}
+
+export function normalizeOriginalStrong(strong: string): string | undefined {
+  const match = strong
+    .trim()
+    .toUpperCase()
+    .match(/^([HG])0*(\d{1,5})(?:[A-Z])?(?:_[A-Z])?$/u);
+  if (!match) return undefined;
+  return `${match[1]}${match[2].padStart(4, "0")}`;
 }

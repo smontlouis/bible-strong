@@ -187,6 +187,206 @@ test("enriches reader tags from original and learned translation variants", () =
   assert.equal(result.emptyStrongOccurrenceCount, 0);
 });
 
+test("does not window-match with too-short stems", () => {
+  const result = alignReaderVerse({
+    targetText: "Le Seigneur parla.",
+    references: [reference("bad-window", '<w strong="H1961">seront</w>.')],
+    original: {
+      strongSet: new Set(["H1961"]),
+      source: "original"
+    }
+  });
+
+  assert.equal(result.assignments.size, 0);
+});
+
+test("uses controlled semantic equivalents only for the matching Strong", () => {
+  const result = alignReaderVerse({
+    targetText: "Les humains arrivèrent.",
+    references: [],
+    translationLexicon: {
+      exact: new Map([
+        [
+          "H0120",
+          new Map([
+            [
+              "hommes",
+              {
+                strong: "H0120",
+                normalized: "hommes",
+                score: 1,
+                source: "test",
+                method: "learned-translation"
+              }
+            ]
+          ])
+        ],
+        [
+          "H0376",
+          new Map([
+            [
+              "hommes",
+              {
+                strong: "H0376",
+                normalized: "hommes",
+                score: 1,
+                source: "test",
+                method: "learned-translation"
+              }
+            ]
+          ])
+        ]
+      ]),
+      stem: new Map()
+    },
+    original: {
+      strongSet: new Set(["H0120", "H0376"]),
+      source: "original"
+    },
+    originalVerse: {
+      bookId: "Gen",
+      chapter: 1,
+      verse: 1,
+      strongSet: new Set(["H0120", "H0376"]),
+      tokens: [
+        originalToken("o1", ["H0120"], "noun"),
+        originalToken("o2", ["H0376"], "noun")
+      ]
+    }
+  });
+
+  assert.deepEqual(result.assignments.get(1)?.strong, ["H0120"]);
+  assert.equal(result.assignments.get(1)?.strong.includes("H0376"), false);
+});
+
+test("relocates a semantic Strong to a better target without moving unrelated Strong", () => {
+  const result = alignReaderVerse({
+    targetText:
+      "Voici la généalogie de Noé parmi les générations de son temps.",
+    references: [
+      reference(
+        "Darby",
+        'Voici les <w strong="H8435">générations</w> de Noé dans son <w strong="H1755">temps</w>.'
+      )
+    ],
+    translationLexicon: {
+      exact: new Map([
+        [
+          "H8435",
+          new Map([
+            [
+              "generations",
+              {
+                strong: "H8435",
+                normalized: "generations",
+                score: 1,
+                source: "test",
+                method: "learned-translation"
+              }
+            ]
+          ])
+        ],
+        [
+          "H1755",
+          new Map([
+            [
+              "temps",
+              {
+                strong: "H1755",
+                normalized: "temps",
+                score: 1,
+                source: "test",
+                method: "learned-translation"
+              }
+            ]
+          ])
+        ]
+      ]),
+      stem: new Map()
+    },
+    original: {
+      strongSet: new Set(["H8435", "H1755"]),
+      source: "original"
+    },
+    originalVerse: {
+      bookId: "Gen",
+      chapter: 6,
+      verse: 9,
+      strongSet: new Set(["H8435", "H1755"]),
+      tokens: [
+        originalToken("o1", ["H8435"], "noun"),
+        originalToken("o2", ["H1755"], "noun")
+      ]
+    }
+  });
+
+  const rendered = renderReaderTaggedText(result);
+  assert.match(rendered, /strong="H8435"[^>]*>généalogie<\/w>/);
+  assert.match(rendered, /strong="H1755"[^>]*>temps<\/w>/);
+  assert.doesNotMatch(rendered, /strong="H8435 H1755"[^>]*>généalogie<\/w>/);
+});
+
+test("covers the NBS Genesis 6 semantic regression carriers", () => {
+  const repentance = alignReaderVerse({
+    targetText: "Le Seigneur regretta les humains.",
+    references: [],
+    translationLexicon: semanticLexicon([
+      ["H3068", "eternel"],
+      ["H5162", "repentit"],
+      ["H0120", "hommes"]
+    ]),
+    original: {
+      strongSet: new Set(["H3068", "H5162", "H0120"]),
+      source: "original"
+    },
+    originalVerse: {
+      bookId: "Gen",
+      chapter: 6,
+      verse: 6,
+      strongSet: new Set(["H3068", "H5162", "H0120"]),
+      tokens: [
+        originalToken("o1", ["H3068"], "noun"),
+        originalToken("o2", ["H5162"], "verb"),
+        originalToken("o3", ["H0120"], "noun")
+      ]
+    }
+  });
+
+  const repentanceRendered = renderReaderTaggedText(repentance);
+  assert.match(repentanceRendered, /strong="H3068"[^>]*>Seigneur<\/w>/);
+  assert.match(repentanceRendered, /strong="H5162"[^>]*>regretta<\/w>/);
+  assert.match(repentanceRendered, /strong="H0120"[^>]*>humains<\/w>/);
+
+  const corruption = alignReaderVerse({
+    targetText: "Les Nephilim étaient pervertis ; je vais les anéantir.",
+    references: [],
+    translationLexicon: semanticLexicon([
+      ["H5303", "geants"],
+      ["H7843", "corrompus"]
+    ]),
+    original: {
+      strongSet: new Set(["H5303", "H7843"]),
+      source: "original"
+    },
+    originalVerse: {
+      bookId: "Gen",
+      chapter: 6,
+      verse: 13,
+      strongSet: new Set(["H5303", "H7843"]),
+      tokens: [
+        originalToken("o1", ["H5303"], "noun"),
+        originalToken("o2", ["H7843"], "verb"),
+        originalToken("o3", ["H7843"], "verb")
+      ]
+    }
+  });
+
+  const corruptionRendered = renderReaderTaggedText(corruption);
+  assert.match(corruptionRendered, /strong="H5303"[^>]*>Nephilim<\/w>/);
+  assert.match(corruptionRendered, /strong="H7843"[^>]*>pervertis<\/w>/);
+  assert.match(corruptionRendered, /strong="H7843"[^>]*>anéantir<\/w>/);
+});
+
 test("enriches reader tags with curated original Strong rules", () => {
   const result = alignReaderVerse({
     targetText: "Qu’il y ait de la lumière, et il y eut de la lumière.",
@@ -250,8 +450,55 @@ test("enriches reader tags with learned multi-word phrase context", () => {
     }
   });
 
+  assert.equal(result.assignments.has(2), false);
+  assert.deepEqual(result.phraseAssignments[0]?.strong, ["H0802"]);
+  assert.equal(result.phraseAssignments[0]?.method, "learned-phrase");
+  assert.equal(result.phraseAssignments[0]?.startWordIndex, 1);
+  assert.equal(result.phraseAssignments[0]?.endWordIndex, 2);
+  assert.match(
+    renderReaderTaggedText(result),
+    /<w strong="H0802"[^>]*data-target="phrase">prit femme<\/w>/
+  );
+});
+
+test("learned phrase assignment does not duplicate existing Strong on covered words", () => {
+  const result = alignReaderVerse({
+    targetText: "Il prit femme.",
+    references: [reference("existing", 'Il prit <w strong="H0802">femme</w>.')],
+    translationLexicon: { exact: new Map(), stem: new Map() },
+    phraseLexicon: {
+      byStrong: new Map([
+        [
+          "H0802",
+          [
+            {
+              strong: "H0802",
+              phrase: ["prit", "femme"],
+              offset: 1,
+              score: 1,
+              source: "test",
+              method: "learned-phrase"
+            }
+          ]
+        ]
+      ])
+    },
+    original: {
+      strongSet: new Set(["H0802"]),
+      source: "original"
+    },
+    originalVerse: {
+      bookId: "Gen",
+      chapter: 1,
+      verse: 1,
+      strongSet: new Set(["H0802"]),
+      tokens: [originalToken("o1", ["H0802"])]
+    }
+  });
+
+  assert.equal(result.phraseAssignments.length, 0);
   assert.deepEqual(result.assignments.get(2)?.strong, ["H0802"]);
-  assert.equal(result.assignments.get(2)?.method, "learned-phrase");
+  assert.equal(result.totalStrongOccurrenceCount, 1);
 });
 
 test("learns repeated phrase candidates from Strong references", () => {
@@ -337,6 +584,53 @@ test("applies curated empty Strong overrides without a target word", () => {
   assert.match(renderReaderTaggedText(result), /strong="H0996"/);
 });
 
+test("applies curated phrase Strong overrides across multiple target words", () => {
+  const result = alignReaderVerse({
+    targetText: "Il agit dans la mesure où il parle.",
+    references: []
+  });
+
+  const applied = applyCuratedStrongOverrides({
+    bible: "fixture-phrase",
+    ref: "Heb.1.4",
+    result
+  });
+
+  assert.equal(applied, 1);
+  assert.equal(result.phraseAssignments.length, 1);
+  assert.equal(result.taggedWordCount, 4);
+  assert.equal(result.totalStrongOccurrenceCount, 1);
+  assert.match(
+    renderReaderTaggedText(result),
+    /<w strong="G3745"[^>]*data-target="phrase">dans la mesure où<\/w>/
+  );
+});
+
+test("applies curated relocation overrides without deleting unrelated Strong", () => {
+  const result = alignReaderVerse({
+    targetText:
+      "Dieu créa les humains à son image : il les créa à l’image de Dieu ; homme et femme il les créa.",
+    references: []
+  });
+  result.assignments.set(14, {
+    strong: ["H0120", "H2145"],
+    confidence: 0.9,
+    source: "test",
+    method: "test",
+    originalConfirmed: true
+  });
+
+  const applied = applyCuratedStrongOverrides({
+    bible: "fixture-move",
+    ref: "Gen.1.27",
+    result
+  });
+
+  assert.equal(applied, 1);
+  assert.deepEqual(result.assignments.get(3)?.strong, ["H0120"]);
+  assert.deepEqual(result.assignments.get(14)?.strong, ["H2145"]);
+});
+
 function reference(name: string, text: string) {
   return {
     name,
@@ -347,14 +641,37 @@ function reference(name: string, text: string) {
   };
 }
 
-function originalToken(id: string, strong: string[]) {
+function semanticLexicon(entries: Array<[string, string]>) {
+  return {
+    exact: new Map(
+      entries.map(([strong, normalized]) => [
+        strong,
+        new Map([
+          [
+            normalized,
+            {
+              strong,
+              normalized,
+              score: 1,
+              source: "test",
+              method: "learned-translation"
+            }
+          ]
+        ])
+      ])
+    ),
+    stem: new Map()
+  };
+}
+
+function originalToken(id: string, strong: string[], pos = "") {
   return {
     id,
     text: "",
     strong,
     gloss: "",
     lemma: "",
-    pos: "",
+    pos,
     morph: ""
   };
 }

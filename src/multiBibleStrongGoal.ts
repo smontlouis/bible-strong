@@ -193,7 +193,8 @@ async function mergeDecisions(statuses: BibleStatus[]): Promise<void> {
 
     const items: ReviewItem[] = [];
     for (const review of status.manifest.reviews) {
-      if (review.status === "failed" || !existsSync(review.reviewPath)) continue;
+      if (review.status === "failed" || !existsSync(review.reviewPath))
+        continue;
       const reviewFile = readJsonIfExists<ReviewFile>(review.reviewPath);
       if (!reviewFile) continue;
       items.push(...reviewFile.items.map(normalizeDecisionItem));
@@ -368,7 +369,9 @@ function renderBibleReport(status: BibleStatus): string {
       `- curated override Strong occurrences: ${metrics.curatedOverrideStrongOccurrenceCount}`
     );
   } else {
-    lines.push("- missing metrics; run `npm run generate:strong:hybrid -- --bible <id>`.");
+    lines.push(
+      "- missing metrics; run `npm run generate:strong:hybrid -- --bible <id>`."
+    );
   }
 
   lines.push("", "## LLM Review", "");
@@ -401,7 +404,9 @@ function renderBibleReport(status: BibleStatus): string {
   for (const decision of DECISION_ORDER) {
     lines.push(`- ${decision}: ${status.decisionCounts[decision] ?? 0}`);
   }
-  for (const [decision, count] of Object.entries(status.decisionCounts).sort()) {
+  for (const [decision, count] of Object.entries(
+    status.decisionCounts
+  ).sort()) {
     if (!DECISION_ORDER.includes(decision as ReviewDecision)) {
       lines.push(`- ${decision}: ${count}`);
     }
@@ -447,7 +452,8 @@ function getLlmUsage(status: BibleStatus): {
     const metrics = readJsonIfExists<BookMetrics>(review.metricsPath);
     usage.promptTokens += metrics?.llmPromptTokenCount ?? 0;
     usage.completionTokens += metrics?.llmCompletionTokenCount ?? 0;
-    usage.totalTokens += metrics?.llmTotalTokenCount ?? review.llmTotalTokenCount;
+    usage.totalTokens +=
+      metrics?.llmTotalTokenCount ?? review.llmTotalTokenCount;
   }
   return usage;
 }

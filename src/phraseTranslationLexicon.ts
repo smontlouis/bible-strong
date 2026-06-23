@@ -11,6 +11,14 @@ export interface StrongPhraseCandidate {
 
 export interface StrongPhraseLexicon {
   byStrong: Map<string, StrongPhraseCandidate[]>;
+  byStrongFirst?: Map<string, Map<string, StrongPhraseCandidate[]>>;
+}
+
+export interface StrongPhraseMatch extends StrongPhraseCandidate {
+  wordIndex: number;
+  startWordIndex: number;
+  endWordIndex: number;
+  targetRatio: number;
 }
 
 interface PhraseCount {
@@ -64,7 +72,95 @@ export function buildStrongPhraseLexicon(
     }
   }
 
-  return { byStrong: normalizePhraseCounts(counts, source) };
+  const byStrong = normalizePhraseCounts(counts, source);
+  return {
+    byStrong,
+    byStrongFirst: indexByStrongFirst(byStrong)
+  };
+}
+
+export function buildPhraseMatchIndex(options: {
+  lexicon: StrongPhraseLexicon;
+  words: Array<{ wordIndex: number; normalized: string }>;
+  existingStrongByWord: Map<number, string[]>;
+  allowedStrong?: Set<string>;
+}): Map<string, StrongPhraseMatch[]> {
+  const matches = new Map<string, StrongPhraseMatch[]>();
+  const strongValues =
+    options.allowedStrong && options.allowedStrong.size > 0
+      ? [...options.allowedStrong]
+      : [...options.lexicon.byStrong.keys()];
+
+  for (const strong of strongValues) {
+    const byFirst = options.lexicon.byStrongFirst?.get(strong);
+    const fallbackCandidates = options.lexicon.byStrong.get(strong) ?? [];
+    if (!byFirst && fallbackCandidates.length === 0) continue;
+
+    for (let start = 0; start < options.words.length; start += 1) {
+      const firstWord = options.words[start]?.normalized;
+      if (!firstWord) continue;
+      const candidates = byFirst?.get(firstWord) ?? fallbackCandidates;
+
+      for (const candidate of candidates) {
+        if (candidate.strong !== strong) continue;
+        if (candidate.phrase[0] !== firstWord) continue;
+        if (start + candidate.phrase.length > options.words.length) continue;
+        const slice = options.words.slice(
+          start,
+          start + candidate.phrase.length
+        );
+        if (!phraseEquals(slice, candidate.phrase)) continue;
+        if (
+          slice.some((word) =>
+            options.existingStrongByWord
+              .get(word.wordIndex)
+              ?.includes(candidate.strong)
+          )
+        ) {
+          continue;
+        }
+
+        const target = slice[candidate.offset];
+        if (!target) continue;
+        const entries = matches.get(candidate.strong) ?? [];
+        entries.push({
+          ...candidate,
+          wordIndex: target.wordIndex,
+          startWordIndex: slice[0]?.wordIndex ?? target.wordIndex,
+          endWordIndex: slice[slice.length - 1]?.wordIndex ?? target.wordIndex,
+          targetRatio:
+            options.words.length <= 1
+              ? 1
+              : target.wordIndex / (options.words.length - 1)
+        });
+        matches.set(candidate.strong, entries);
+      }
+    }
+  }
+
+  return matches;
+}
+
+export function findBestPhraseMatch(options: {
+  matches: Map<string, StrongPhraseMatch[]>;
+  strong: string;
+  originalRatio: number;
+}): (StrongPhraseMatch & { rankedScore: number }) | undefined {
+  let best: (StrongPhraseMatch & { rankedScore: number }) | undefined;
+
+  for (const match of options.matches.get(options.strong) ?? []) {
+    const positionScore = Math.max(
+      0,
+      1 - Math.abs(options.originalRatio - match.targetRatio)
+    );
+    const rankedScore = match.score * 0.72 + positionScore * 0.28;
+    if (!best || rankedScore > best.rankedScore) {
+      best = { ...match, rankedScore };
+    }
+  }
+
+  if (!best || best.rankedScore < 0.42) return undefined;
+  return best;
 }
 
 export function findPhraseCandidate(options: {
@@ -73,30 +169,43 @@ export function findPhraseCandidate(options: {
   words: Array<{ wordIndex: number; normalized: string }>;
   existingStrongByWord: Map<number, string[]>;
   originalRatio: number;
-}): (StrongPhraseCandidate & { wordIndex: number }) | undefined {
-  const candidates = options.lexicon.byStrong.get(options.strong) ?? [];
+}):
+  | (StrongPhraseCandidate & {
+      wordIndex: number;
+      startWordIndex: number;
+      endWordIndex: number;
+    })
+  | undefined {
+  const byFirst = options.lexicon.byStrongFirst?.get(options.strong);
+  const fallbackCandidates = options.lexicon.byStrong.get(options.strong) ?? [];
   let best:
     | (StrongPhraseCandidate & {
         wordIndex: number;
+        startWordIndex: number;
+        endWordIndex: number;
         rankedScore: number;
       })
     | undefined;
 
-  for (const candidate of candidates) {
-    for (
-      let start = 0;
-      start + candidate.phrase.length <= options.words.length;
-      start += 1
-    ) {
+  for (let start = 0; start < options.words.length; start += 1) {
+    const firstWord = options.words[start]?.normalized;
+    if (!firstWord) continue;
+    const candidates = byFirst?.get(firstWord) ?? fallbackCandidates;
+
+    for (const candidate of candidates) {
+      if (candidate.phrase[0] !== firstWord) continue;
+      if (start + candidate.phrase.length > options.words.length) continue;
       const slice = options.words.slice(start, start + candidate.phrase.length);
       if (!phraseEquals(slice, candidate.phrase)) continue;
 
       const target = slice[candidate.offset];
       if (!target) continue;
       if (
-        options.existingStrongByWord
-          .get(target.wordIndex)
-          ?.includes(options.strong)
+        slice.some((word) =>
+          options.existingStrongByWord
+            .get(word.wordIndex)
+            ?.includes(options.strong)
+        )
       ) {
         continue;
       }
@@ -115,6 +224,8 @@ export function findPhraseCandidate(options: {
         best = {
           ...candidate,
           wordIndex: target.wordIndex,
+          startWordIndex: slice[0]?.wordIndex ?? target.wordIndex,
+          endWordIndex: slice[slice.length - 1]?.wordIndex ?? target.wordIndex,
           rankedScore
         };
       }
@@ -126,6 +237,26 @@ export function findPhraseCandidate(options: {
   }
 
   return best;
+}
+
+function indexByStrongFirst(
+  byStrong: Map<string, StrongPhraseCandidate[]>
+): Map<string, Map<string, StrongPhraseCandidate[]>> {
+  const indexed = new Map<string, Map<string, StrongPhraseCandidate[]>>();
+
+  for (const [strong, candidates] of byStrong) {
+    const byFirst = new Map<string, StrongPhraseCandidate[]>();
+    for (const candidate of candidates) {
+      const first = candidate.phrase[0];
+      if (!first) continue;
+      const entries = byFirst.get(first) ?? [];
+      entries.push(candidate);
+      byFirst.set(first, entries);
+    }
+    indexed.set(strong, byFirst);
+  }
+
+  return indexed;
 }
 
 function increment(

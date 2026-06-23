@@ -96,11 +96,92 @@ npm run llm:transfer -- --source Darby --gold Sg1910 --only Gen.1 --limit 5
 npm run llm:transfer -- --source Darby --gold DarbyR --only Gen.1 --limit 5
 ```
 
+Internal-agent semantic-refill packet:
+
+```sh
+npm run generate:strong:enriched -- --bible <id>
+npm run strong:semantic-refill -- \
+  --bible <id> \
+  --only <BookOrScope> \
+  --audit \
+  --output-dir outputs/semantic-refill/<id>/<scope>
+npm run strong:semantic-refill:agent-packet -- \
+  --bible <id> \
+  --only <BookOrScope> \
+  --candidates outputs/semantic-refill/<id>/<scope>/semantic-refill-candidates.json \
+  --output outputs/semantic-refill/<id>/agent-packets/agent-packet-<id>-<scope>.json
+```
+
+Validate an agent or arbiter review:
+
+```sh
+npm run strong:semantic-refill:agent-review -- \
+  --bible <id> \
+  --input outputs/semantic-refill/<id>/agent-review/<review>.json \
+  --output-dir outputs/semantic-refill/<id>/agent-review/<review>-validated \
+  --candidates outputs/semantic-refill/<id>/<scope>/semantic-refill-candidates.json
+```
+
+Apply only the final validated arbiter decisions:
+
+```sh
+npm run strong:semantic-refill:agent-review -- \
+  --bible <id> \
+  --input outputs/semantic-refill/<id>/agent-review/<arbiter>.json \
+  --output-dir outputs/semantic-refill/<id>/agent-review/<arbiter>-applied \
+  --candidates outputs/semantic-refill/<id>/<scope>/semantic-refill-candidates.json \
+  --apply
+npm run generate:strong:enriched -- --bible <id>
+```
+
 S21 concordance comparison:
 
 ```sh
 npm run compare:s21:concordance
 ```
+
+## Reference-Style Agent Model Matrix
+
+When the task is to copy the visible Strong style of `Darby`, `DarbyR`, and
+`Sg1910` for a target Bible, use this benchmarked default matrix:
+
+- proposer A: `gpt-5.4-mini`, reasoning `medium`;
+- proposer B: `gpt-5.5`, reasoning `low`;
+- arbiter: `gpt-5.5`, reasoning `medium`.
+
+Do not upgrade proposer A to `xhigh` unless the user explicitly asks for that
+experiment. The normal workflow is meant to test whether the ordinary proposer
+pair can solve the chapter. If a stronger proposer is used during an experiment,
+record that fact in the output folder/report and do not treat the result as the
+default production evidence.
+
+This default was selected by the Gen.1 benchmark documented in
+`reports/semantic-refill-model-benchmark-gen1.md`. It is combo A:
+
+- same proposers as the high-quality baseline;
+- arbiter downgraded from `gpt-5.5 high` to `gpt-5.5 medium`;
+- 0 final differences from the baseline on Gen.1;
+- all applicable spot checks passed;
+- wall time improved from 719s to 623s.
+
+Keep `gpt-5.5 high` as the quality-reference baseline, an escalation path for
+hard chapters, or an explicit experiment. Do not use `gpt-5.4-mini low` as
+proposer A for this workflow: the Gen.1 benchmark showed that it collapsed to
+all-empty proposals and caused downstream quality loss.
+
+For this workflow, build packets chapter by chapter. Filter candidates to Strong
+codes present in at least one reference Strong Bible when the goal is
+reader-style parity. Original-only candidates may be reported separately, but
+they must not force the visible reader style.
+
+The semantic-refill candidate set is not limited to missing Strong codes. It
+also emits `auditKind="relocation"` items for visible reader tags that look
+misplaced. A relocation candidate carries `currentTarget` plus alternative
+`deterministicCandidates`; the proposer should return `duplicate` only when the
+existing target is correct. Otherwise it should return `word`, `phrase`, or
+`empty`. This is required for cases like NBS `Gen.1.27`, where `H0120` was
+already visible on `homme` but should move to `humains`, leaving `homme` for
+`H2145`.
 
 ## Choosing The Backend
 
@@ -241,6 +322,101 @@ Each override must be guarded by:
 - reason.
 
 The viewer writes accepted decisions to `data/curated-strong-overrides.json`. The CLI `review:llm:apply` remains available for scripted/offline decision files. This makes LLM work reproducible and auditable: later agents do not need to re-ask the model for decisions already reviewed.
+
+## Internal-Agent Semantic Refill
+
+Use this workflow when the enriched Bible already contains the Strong in
+`advanced` or `debug`, but the reader mode still has semantic holes. This is the
+right path for cases like a missing visible content Strong, not for rebuilding
+the whole Bible from scratch.
+
+The production shape is:
+
+1. Generate or refresh the canonical enriched Bible.
+2. Run `strong:semantic-refill --audit` to create candidate and pending files.
+3. Build a procedural packet with `strong:semantic-refill:agent-packet`.
+4. Send one chapter packet to two independent proposer agents.
+5. Validate each proposer with `strong:semantic-refill:agent-review`.
+6. Send packet + proposals + validations to an arbiter.
+7. Validate the arbiter output.
+8. Apply only validated arbiter decisions.
+9. Regenerate the enriched Bible.
+10. Inspect the result in the viewer.
+
+Prefer chapter-sized packets. They preserve enough narrative context while
+keeping the decision surface small. Use book-sized packets only for short books
+or low candidate counts.
+
+The packet deliberately reduces LLM freedom. Each candidate includes:
+
+- `sourcePlacement`: where the advanced/empty Strong currently sits;
+- `nearbyOpenTargets`: unoccupied content words near that source placement;
+- `blockedTargets`: words already carrying reader Strong tags;
+- `openContentTargets`: non-weak unoccupied target words;
+- `occupiedTargets`: all occupied word/phrase carriers;
+- `availableTargets`: every token with occupancy metadata;
+- `placementWarnings`: mechanical risks the agent must account for.
+
+The key rule is: do not stack a missing Strong onto a `blockedTarget` just
+because the surface word looks lexically attractive. If a plausible
+`nearbyOpenTarget` exists, prefer it.
+
+For reference-style candidates, no valid Strong should disappear just because no
+French carrier is found. There is no final `pending` bucket in this workflow.
+Every valid candidate must become a placed decision with a confidence score. The
+decision order is:
+
+1. `word` when a visible French token clearly carries the Strong;
+2. `phrase` when a contiguous French expression carries the Strong;
+3. `empty` when the Strong is legitimate for the verse/reference style but no
+   reliable French carrier exists.
+
+Use `sourcePlacement.insertAfterWordIndex` to position the empty tag in the
+original/reference order. Example: if an unplaced Strong belongs before the
+concept currently carried by `abime`, place the empty tag before that segment
+rather than reporting it as merely "not placed". The output reason should say
+that no reliable French carrier was found.
+
+Reserve `reject` for invalid candidate ids, Strong codes absent from the
+allowed inventories, duplicated drift, impossible token indexes, or bad
+proposals. Do not reject a valid reference-style Strong only because it is not
+rendered by a visible French word.
+
+Confidence replaces pending/review state:
+
+- `confidence >= 0.84`: high-confidence placement, rendered normally;
+- `confidence < 0.84`: low-confidence placement, rendered in yellow;
+- low-confidence can apply to `word`, `phrase`, or `empty`;
+- keep warnings such as suspicious stacking, weak carrier, or no reliable
+  French carrier in the reason/evidence, but still place the Strong.
+
+If local validation produces `pending-human` for a structurally valid
+reference-style candidate, the final adapter must convert it before preview or
+application: keep the proposed target with low confidence when mechanically
+safe, or fall back to `empty` at `sourcePlacement.insertAfterWordIndex` when the
+target is unsafe.
+
+This rule came from the NBS Gen.3.6 regression test. The weak prompt caused both
+proposers to choose `H8378 -> desirable`, even though `desirable` already had
+`H2530`. Adding only `blockedTargets` made the agents safer but sometimes too
+conservative. Adding `sourcePlacement` and `nearbyOpenTargets` fixed the
+upstream behavior: both proposers selected `H8378 -> plaisant`, while keeping
+`H7919 -> discernement`.
+
+Local validation remains a safety net, but it is not the product state. If an
+agent proposes a word target that already carries a different reader Strong
+while an open content target exists, validation may flag it as
+`pending-human/suspicious-stacking-on-occupied-word`; the arbiter/final adapter
+must then choose a safer open target or emit a low-confidence `empty` fallback.
+
+Preview/report requirements for this workflow:
+
+- show visible existing tags;
+- show agent/arbitrated visible additions;
+- show `empty` additions inline as small empty Strong tags;
+- color low-confidence placements yellow;
+- report true technical rejects separately from valid low-confidence or empty
+  placements.
 
 ## Quality Gates
 

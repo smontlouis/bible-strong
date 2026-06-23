@@ -31,7 +31,11 @@ interface HardVerseDiagnostic {
   llmAcceptedAssignments?: number;
   llmRejectedAssignments?: number;
   llmSuggestions?: Array<{
+    target?: "word" | "phrase" | "empty";
     wordIndex: number;
+    startWordIndex?: number;
+    endWordIndex?: number;
+    normalizedPhrase?: string[];
     strong: string[];
     confidence: number;
     reason: string;
@@ -65,9 +69,13 @@ interface ReviewItem {
   bible: string;
   ref: string;
   reasons: string[];
+  target?: "word" | "empty" | "phrase";
   wordIndex: number;
   word: string;
   normalized: string;
+  startWordIndex?: number;
+  endWordIndex?: number;
+  normalizedPhrase?: string[];
   strong: string[];
   confidence: number;
   llmReason: string;
@@ -121,21 +129,58 @@ export async function prepareReview(
     const words = getWords(verse);
 
     for (const suggestion of diagnostic.llmSuggestions) {
-      const word = words[suggestion.wordIndex];
-      if (!word) continue;
+      const target = normalizeReviewTarget(suggestion.target);
+      const startWordIndex = suggestion.startWordIndex ?? suggestion.wordIndex;
+      const endWordIndex = suggestion.endWordIndex ?? suggestion.wordIndex;
+      const word =
+        target === "empty"
+          ? (words[Math.max(0, suggestion.wordIndex)] ?? words[0])
+          : words[suggestion.wordIndex];
+      const phraseWords =
+        target === "phrase"
+          ? words.filter(
+              (candidate) =>
+                candidate.wordIndex >= startWordIndex &&
+                candidate.wordIndex <= endWordIndex
+            )
+          : [];
+      if (target !== "empty" && !word) continue;
+      if (
+        target === "phrase" &&
+        phraseWords.length !== endWordIndex - startWordIndex + 1
+      ) {
+        continue;
+      }
       const item: ReviewItem = {
         id: [
           options.bible,
           diagnostic.ref,
-          suggestion.wordIndex,
+          target,
+          target === "phrase"
+            ? `${startWordIndex}-${endWordIndex}`
+            : suggestion.wordIndex,
           suggestion.strong.join("+")
         ].join(":"),
         bible: options.bible,
         ref: diagnostic.ref,
         reasons: diagnostic.reasons ?? [],
+        target,
         wordIndex: suggestion.wordIndex,
-        word: word.text,
-        normalized: word.normalized,
+        word:
+          target === "phrase"
+            ? phraseWords.map((phraseWord) => phraseWord.text).join(" ")
+            : (word?.text ?? ""),
+        normalized:
+          target === "phrase"
+            ? phraseWords.map((phraseWord) => phraseWord.normalized).join(" ")
+            : (word?.normalized ?? ""),
+        startWordIndex: target === "phrase" ? startWordIndex : undefined,
+        endWordIndex: target === "phrase" ? endWordIndex : undefined,
+        normalizedPhrase:
+          target === "phrase"
+            ? (suggestion.normalizedPhrase ??
+              phraseWords.map((phraseWord) => phraseWord.normalized))
+            : undefined,
         strong: suggestion.strong.map((strong) => strong.toUpperCase()),
         confidence: suggestion.confidence,
         llmReason: suggestion.reason,
@@ -157,7 +202,8 @@ export async function prepareReview(
     instructions: [
       "Open this JSON in the local viewer LLM Review mode.",
       "High-confidence mechanically safe suggestions may already be marked accept; review them and reject if needed.",
-      "Accept only suggestions that clearly attach a Strong code to the intended French word.",
+      "Accept only suggestions that clearly attach a Strong code to the intended French word, phrase, or justified empty target.",
+      "Use phrase targets for real French locutions instead of forcing the Strong onto a single head word.",
       "Reject token-index drift, weak function-word tags, duplicate over-tagging, and unrendered original particles.",
       "Click Save decisions in the viewer to write accepted suggestions into data/curated-strong-overrides.json."
     ],
@@ -203,14 +249,8 @@ export async function applyReviewDecisionPayload(options: {
 }> {
   const overridesPath =
     options.overridesPath ?? "data/curated-strong-overrides.json";
-  const bible = await readBibleJson(`data/bibles/bible-${options.bible}.json`);
-  const verses = new Map(
-    bible.map((verse) => [
-      referenceKey(verse.bookId, verse.chapter, verse.verse),
-      verse
-    ])
-  );
   const accepted = extractAcceptedOverrides(options.decisions);
+  const versesByBible = new Map<string, Map<string, BibleVerse>>();
   const existing = getCuratedStrongOverrides();
   const currentJson = existsSync(overridesPath)
     ? readJsonFile<CuratedStrongOverride[]>(overridesPath)
@@ -220,8 +260,16 @@ export async function applyReviewDecisionPayload(options: {
   let skipped = 0;
 
   for (const override of accepted) {
+    if (options.bible !== "multi" && override.bible !== options.bible) {
+      skipped += 1;
+      continue;
+    }
+
+    const verses = await getVersesForBible(override.bible, versesByBible);
     const verse = verses.get(override.ref);
-    const isEmptyOverride = (override.target ?? "word") === "empty";
+    const target = override.target ?? "word";
+    const isEmptyOverride = target === "empty";
+    const isPhraseOverride = target === "phrase";
     const words = verse ? getWords(verse) : [];
     const word = words[override.wordIndex];
     const validEmptyIndex =
@@ -229,12 +277,13 @@ export async function applyReviewDecisionPayload(options: {
       verse &&
       override.wordIndex >= -1 &&
       override.wordIndex < words.length;
+    const validPhraseTarget =
+      isPhraseOverride && verse && isValidPhraseTarget(override, words);
     const validWordTarget =
-      !isEmptyOverride && word && word.normalized === override.normalized;
+      target === "word" && word && word.normalized === override.normalized;
 
     if (
-      override.bible !== options.bible ||
-      (!validWordTarget && !validEmptyIndex) ||
+      (!validWordTarget && !validEmptyIndex && !validPhraseTarget) ||
       existing.some((candidate) => sameOverride(candidate, override)) ||
       next.some((candidate) => sameOverride(candidate, override))
     ) {
@@ -276,6 +325,7 @@ function extractAcceptedOverrides(
 
 function autoAcceptReviewItem(item: ReviewItem, options: ReviewOptions): void {
   if (!options.autoAccept) return;
+  if ((item.target ?? "word") !== "word") return;
   if (item.confidence < options.autoAcceptThreshold) return;
   if (item.strong.some((strong) => WEAK_AUTO_ACCEPT_STRONG.has(strong))) return;
   if (WEAK_AUTO_ACCEPT_WORDS.has(item.normalized)) return;
@@ -346,7 +396,26 @@ const WEAK_AUTO_ACCEPT_WORDS = new Set([
 ]);
 
 function itemToOverride(item: ReviewItem): CuratedStrongOverride {
-  if (item.decision === "accept-empty") {
+  if (item.target === "phrase") {
+    const startWordIndex = item.startWordIndex ?? item.wordIndex;
+    const endWordIndex = item.endWordIndex ?? item.wordIndex;
+    return {
+      bible: item.bible,
+      ref: item.ref,
+      target: "phrase",
+      wordIndex: startWordIndex,
+      normalized: (item.normalizedPhrase ?? [item.normalized]).join(" "),
+      startWordIndex,
+      endWordIndex,
+      normalizedPhrase: item.normalizedPhrase ?? [item.normalized],
+      strong: item.strong,
+      confidence: Math.min(0.92, Math.max(0.72, item.confidence)),
+      source: "llm-review:human-approved-phrase",
+      reason: [item.llmReason, item.reviewerNote].filter(Boolean).join(" | ")
+    };
+  }
+
+  if (item.target === "empty" || item.decision === "accept-empty") {
     return {
       bible: item.bible,
       ref: item.ref,
@@ -373,6 +442,13 @@ function itemToOverride(item: ReviewItem): CuratedStrongOverride {
   };
 }
 
+function normalizeReviewTarget(
+  target: "word" | "phrase" | "empty" | undefined
+): "word" | "phrase" | "empty" {
+  if (target === "phrase" || target === "empty") return target;
+  return "word";
+}
+
 function renderReviewMarkdown(review: ReviewFile): string {
   const lines = [
     `# LLM Review ${review.bible.toUpperCase()}`,
@@ -396,7 +472,14 @@ function renderReviewMarkdown(review: ReviewFile): string {
       `### ${item.ref} -> ${item.word}/${item.strong.join(" ")}`,
       "",
       `- decision: \`${item.decision}\``,
+      `- target: \`${item.target ?? "word"}\``,
       `- word index: \`${item.wordIndex}\``,
+      ...(item.target === "phrase"
+        ? [
+            `- phrase range: \`${item.startWordIndex}-${item.endWordIndex}\``,
+            `- normalized phrase: \`${item.normalizedPhrase?.join(" ") ?? ""}\``
+          ]
+        : []),
       `- confidence: \`${item.confidence}\``,
       `- reasons: \`${item.reasons.join(", ") || "none"}\``,
       `- LLM reason: ${item.llmReason}`,
@@ -430,10 +513,21 @@ function sameOverride(
   left: CuratedStrongOverride,
   right: CuratedStrongOverride
 ): boolean {
+  if ((left.target ?? "word") !== (right.target ?? "word")) return false;
+  if ((left.target ?? "word") === "phrase") {
+    return (
+      left.bible === right.bible &&
+      left.ref === right.ref &&
+      left.startWordIndex === right.startWordIndex &&
+      left.endWordIndex === right.endWordIndex &&
+      left.normalizedPhrase?.join(" ") === right.normalizedPhrase?.join(" ") &&
+      left.strong.join(" ") === right.strong.join(" ")
+    );
+  }
+
   return (
     left.bible === right.bible &&
     left.ref === right.ref &&
-    (left.target ?? "word") === (right.target ?? "word") &&
     left.wordIndex === right.wordIndex &&
     left.normalized === right.normalized &&
     left.strong.join(" ") === right.strong.join(" ")
@@ -458,8 +552,52 @@ function sortOverrides(
       a.bible.localeCompare(b.bible) ||
       a.ref.localeCompare(b.ref, undefined, { numeric: true }) ||
       (a.target ?? "word").localeCompare(b.target ?? "word") ||
+      (a.startWordIndex ?? a.wordIndex) - (b.startWordIndex ?? b.wordIndex) ||
+      (a.endWordIndex ?? a.wordIndex) - (b.endWordIndex ?? b.wordIndex) ||
       a.wordIndex - b.wordIndex ||
       a.strong.join(" ").localeCompare(b.strong.join(" "))
+  );
+}
+
+async function getVersesForBible(
+  bible: string,
+  cache: Map<string, Map<string, BibleVerse>>
+): Promise<Map<string, BibleVerse>> {
+  const normalizedBible = bible.toLowerCase();
+  const cached = cache.get(normalizedBible);
+  if (cached) return cached;
+
+  const bibleRows = await readBibleJson(
+    `data/bibles/bible-${normalizedBible}.json`
+  );
+  const verses = new Map(
+    bibleRows.map((verse) => [
+      referenceKey(verse.bookId, verse.chapter, verse.verse),
+      verse
+    ])
+  );
+  cache.set(normalizedBible, verses);
+  return verses;
+}
+
+function isValidPhraseTarget(
+  override: CuratedStrongOverride,
+  words: ReviewWord[]
+): boolean {
+  const startWordIndex = override.startWordIndex ?? override.wordIndex;
+  const endWordIndex = override.endWordIndex ?? override.wordIndex;
+  const expected = override.normalizedPhrase ?? [];
+  if (
+    startWordIndex < 0 ||
+    endWordIndex < startWordIndex ||
+    expected.length !== endWordIndex - startWordIndex + 1
+  ) {
+    return false;
+  }
+
+  return expected.every(
+    (normalized, offset) =>
+      words[startWordIndex + offset]?.normalized === normalized
   );
 }
 

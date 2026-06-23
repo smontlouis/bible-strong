@@ -1,5 +1,6 @@
 import { tokenizeText, type TextSegment } from "./tokenize.js";
 import { type StrongToken, type StrongVerse } from "./strongCsv.js";
+import { normalizeOriginalStrong } from "./originalSource.js";
 
 export interface ReferenceSource {
   name: string;
@@ -178,14 +179,19 @@ function findCandidate(
     }
   }
 
-  const windowMatch = tokens.find(
-    (token) =>
+  const windowMatch = tokens.find((token) => {
+    const tokenStem = stemWord(token.normalized);
+
+    return (
       token.strong.length > 0 &&
       token.normalized.length >= 5 &&
       normalizedWord.length >= 5 &&
+      stem.length >= 4 &&
+      tokenStem.length >= 4 &&
       (token.normalized.startsWith(stem) ||
-        normalizedWord.startsWith(stemWord(token.normalized)))
-  );
+        normalizedWord.startsWith(tokenStem))
+    );
+  });
 
   if (windowMatch) {
     return {
@@ -248,7 +254,16 @@ function isConfirmedByOriginal(
     return false;
   }
 
-  return strong.some((strongCode) => original.strongSet.has(strongCode));
+  const originalStrong = new Set(
+    [...original.strongSet]
+      .map((strongCode) => normalizeOriginalStrong(strongCode))
+      .filter((strongCode): strongCode is string => Boolean(strongCode))
+  );
+
+  return strong.some((strongCode) => {
+    const normalizedStrong = normalizeOriginalStrong(strongCode);
+    return !!normalizedStrong && originalStrong.has(normalizedStrong);
+  });
 }
 
 function scoreWithOriginal(

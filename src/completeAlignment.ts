@@ -3,7 +3,11 @@ import {
   type ReferenceSource,
   type StrongLexicon
 } from "./align.js";
-import { type OriginalToken, type OriginalVerse } from "./originalSource.js";
+import {
+  normalizeOriginalStrong,
+  type OriginalToken,
+  type OriginalVerse
+} from "./originalSource.js";
 import { escapeHtml, tokenizeText, type TextSegment } from "./tokenize.js";
 import {
   findTranslationCandidate,
@@ -317,7 +321,11 @@ export function getOriginalStrongOccurrences(
 
   original.tokens.forEach((token, tokenIndex) => {
     token.strong.forEach((strong, strongIndex) => {
-      occurrences.push(toOccurrence(token, tokenIndex, strong, strongIndex));
+      const normalizedStrong = normalizeOriginalStrong(strong);
+      if (!normalizedStrong) return;
+      occurrences.push(
+        toOccurrence(token, tokenIndex, normalizedStrong, strongIndex)
+      );
     });
   });
 

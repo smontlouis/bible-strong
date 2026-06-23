@@ -106,7 +106,47 @@ npm run llm:transfer -- --source Darby --gold Sg1910 --only Gen.1 --limit 5
 npm run llm:transfer -- --source Darby --gold DarbyR --only Gen.1 --limit 5
 ```
 
-10. Run full checks before finalizing:
+10. When deterministic generation leaves meaningful semantic holes or suspicious visible placements, use the internal-agent semantic-refill workflow instead of ad hoc token patches:
+
+```sh
+npm run generate:strong:enriched -- --bible <id>
+npm run strong:semantic-refill -- --bible <id> --only <BookOrScope> --audit --output-dir outputs/semantic-refill/<id>/<scope>
+npm run strong:semantic-refill:agent-packet -- \
+  --bible <id> \
+  --only <BookOrScope> \
+  --candidates outputs/semantic-refill/<id>/<scope>/semantic-refill-candidates.json \
+  --output outputs/semantic-refill/<id>/agent-packets/agent-packet-<id>-<scope>.json
+```
+
+Give that packet to two independent proposer agents. Prefer chapter-sized packets for normal books; use book-sized packets only when the book is short or the candidate count is low. For the benchmarked reference-style workflow, use `gpt-5.4-mini` with reasoning `medium` as proposer A, `gpt-5.5` with reasoning `low` as proposer B, and `gpt-5.5` with reasoning `medium` as arbiter. This Gen.1 benchmarked combo is called combo A in `reports/semantic-refill-model-benchmark-gen1.md`. Do not silently upgrade proposer A to `xhigh`: the point is to test whether the ordinary proposer pair can solve the chapter without a hand-written rule. Each proposer must write a JSON review file, then validate it:
+
+```sh
+npm run strong:semantic-refill:agent-review -- \
+  --bible <id> \
+  --input outputs/semantic-refill/<id>/agent-review/<proposer>.json \
+  --output-dir outputs/semantic-refill/<id>/agent-review/<proposer>-validated \
+  --candidates outputs/semantic-refill/<id>/<scope>/semantic-refill-candidates.json
+```
+
+Use an arbiter only after both proposer outputs are validated. For the reference-style workflow, default to `gpt-5.5` with reasoning `medium` as the arbiter. Use `gpt-5.5 high` as a quality-reference baseline, escalation path, or explicit experiment, not as the default production choice. The arbiter should choose between defensible proposals and inspect local validation results; it should not invent a third unvalidated path when both proposers are weak. Validate the arbiter output the same way. Apply only the final decisions after converting every valid unresolved reference-style Strong to a placed decision (`word`, `phrase`, or `empty`) with a confidence score:
+
+```sh
+npm run strong:semantic-refill:agent-review -- \
+  --bible <id> \
+  --input outputs/semantic-refill/<id>/agent-review/<arbiter>.json \
+  --output-dir outputs/semantic-refill/<id>/agent-review/<arbiter>-applied \
+  --candidates outputs/semantic-refill/<id>/<scope>/semantic-refill-candidates.json \
+  --apply
+npm run generate:strong:enriched -- --bible <id>
+```
+
+The agent packet is procedural. It includes `auditKind`, `currentTarget`, `sourcePlacement`, `nearbyOpenTargets`, `blockedTargets`, `openContentTargets`, `occupiedTargets`, `availableTargets`, and `placementWarnings`. `auditKind="missing"` means the Strong is not visible yet. `auditKind="relocation"` means the Strong is already visible but may be attached to the wrong French carrier. Agents must treat `blockedTargets` as forbidden for `decision="word"` when a semantically plausible open target exists. This prevents errors such as stacking a missing Strong onto a word that already carries a different Strong when a nearby unoccupied carrier exists.
+
+For relocation candidates, agents must compare `currentTarget` with `deterministicCandidates`. Use `duplicate` only when the current placement is correct. If a better visible carrier exists, output `word` or `phrase`; if no reliable carrier exists, output `empty`. A canonical regression case is NBS `Gen.1.27`: `H0120` should move from `homme` to `humains`, leaving `homme` for `H2145`.
+
+For reference-style candidates, do not use `pending-human` as a final state and do not use `reject` for a legitimate Strong simply because no French carrier is found. The objective is to copy the reader style of `Darby`, `DarbyR`, and `Sg1910`: first try `word`, then `phrase`; if no reliable visible carrier exists, output `empty` at the candidate's `sourcePlacement.insertAfterWordIndex` so the Strong remains visible as a small empty tag in original/reference order. Every final decision gets a confidence score. The product vocabulary is high confidence vs low confidence, not accepted vs pending. Use low confidence for uncertain word/phrase placements, suspicious stacking, or empty fallbacks. Reserve `reject` only for invalid candidates, duplicate drift, bad ids, or mechanically impossible decisions. The review/preview must show low-confidence decisions in yellow and empty decisions inline, with a reason such as "no reliable French carrier found".
+
+11. Run full checks before finalizing:
 
 ```sh
 npm run format:check
@@ -129,7 +169,10 @@ npm run build
 - Do not use `--llm-apply` until suggestions have been reviewed on a small sample.
 - Promote good LLM suggestions through `review:llm` + `review:llm:apply` into `data/curated-strong-overrides.json` rather than repeatedly paying for the same decision.
 - Prefer LLM batches by book (`--only Gen`, `--only Exod`, etc.) instead of whole-Bible LLM runs.
-- Reject suggestions that are just token-index drift, broad function-word tagging, duplicate over-tagging, or questionable attachment of unrendered original particles.
+- Prefer internal-agent semantic-refill batches by chapter when the target is to place Strong codes already present as advanced empty/technical annotations. Chapter packets preserve local context while keeping the decision surface small. Use the benchmarked combo A by default: `gpt-5.4-mini medium` + `gpt-5.5 low` as proposers and `gpt-5.5 medium` as arbiter. Keep `gpt-5.5 high` for quality-reference runs, escalation, or explicit experiments.
+- Do not send agents a free-form "find the best word" task. Use `strong:semantic-refill:agent-packet` so they see blocked/occupied/open/nearby targets and can avoid false multi-Strong stacking.
+- Treat suspicious stacking as low-confidence unless it is mechanically invalid. If a proposed word target already carries a different reader Strong and another open content target exists, the arbiter should either choose the open target or output a low-confidence `empty`/`word` decision with the warning preserved.
+- For reference-style candidates, prefer `empty` over `reject` when the Strong is valid but unrendered in the target French. Place the empty tag according to `sourcePlacement.insertAfterWordIndex` and keep the reason auditable. Do not leave valid reference-style candidates as final pending. Reject only token-index drift, invalid Strong ids, duplicate over-tagging, or candidates that are not actually supported by the verse/reference inventories.
 - Keep generated copyrighted/full Bible outputs in `outputs/`; do not commit them.
 
 ## When More Detail Is Needed

@@ -4,7 +4,10 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import { readOriginalSourceTsv } from "../src/originalSource.js";
+import {
+  normalizeOriginalStrong,
+  readOriginalSourceTsv
+} from "../src/originalSource.js";
 import { referenceKey } from "../src/strongCsv.js";
 
 test("parses original-language source TSV by encoded token id", async () => {
@@ -24,7 +27,7 @@ test("parses original-language source TSV by encoded token id", async () => {
   const map = await readOriginalSourceTsv(file);
 
   assert.equal(
-    map.get(referenceKey("Gen", 1, 1))?.strongSet.has("H0871a"),
+    map.get(referenceKey("Gen", 1, 1))?.strongSet.has("H0871"),
     true
   );
   assert.equal(
@@ -33,4 +36,10 @@ test("parses original-language source TSV by encoded token id", async () => {
   );
 
   await rm(directory, { recursive: true, force: true });
+});
+
+test("normalizes extended original Strong subcodes to classical reference codes", () => {
+  assert.equal(normalizeOriginalStrong("H4723a"), "H4723");
+  assert.equal(normalizeOriginalStrong("H0776_G"), "H0776");
+  assert.equal(normalizeOriginalStrong("G0976"), "G0976");
 });

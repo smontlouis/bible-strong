@@ -75,6 +75,9 @@ interface HardVerseDiagnostic {
   originalConfirmationRate: number;
   missingOriginalStrongCount: number;
   readerStrongOccurrenceCount: number;
+  phraseStrongAssignmentCount: number;
+  learnedPhraseStrongAssignmentCount: number;
+  curatedPhraseStrongAssignmentCount: number;
   referenceMedianStrongOccurrenceCount: number;
   llmAttempted: boolean;
   llmEligible: boolean;
@@ -102,6 +105,9 @@ interface HybridMetrics {
   llmCompletionTokenCount: number;
   llmTotalTokenCount: number;
   curatedOverrideStrongOccurrenceCount: number;
+  phraseStrongAssignmentCount: number;
+  learnedPhraseStrongAssignmentCount: number;
+  curatedPhraseStrongAssignmentCount: number;
   verseCount: number;
   generatedVerseCount: number;
   wordCount: number;
@@ -130,7 +136,11 @@ interface HybridMetrics {
 }
 
 interface LlmAssignment {
+  target?: "word" | "phrase" | "empty";
   wordIndex: number;
+  startWordIndex?: number;
+  endWordIndex?: number;
+  normalizedPhrase?: string[];
   strong: string[];
   confidence: number;
   reason: string;
@@ -215,6 +225,9 @@ export async function generateStrongHybrid(
   let llmCompletionTokenCount = 0;
   let llmTotalTokenCount = 0;
   let curatedOverrideStrongOccurrenceCount = 0;
+  let phraseStrongAssignmentCount = 0;
+  let learnedPhraseStrongAssignmentCount = 0;
+  let curatedPhraseStrongAssignmentCount = 0;
   let wordCount = 0;
   let taggedWordCount = 0;
   let strongWordOccurrenceCount = 0;
@@ -301,13 +314,19 @@ export async function generateStrongHybrid(
     }
 
     wordCount += result.wordCount;
-    taggedWordCount += result.assignments.size;
+    taggedWordCount += result.taggedWordCount;
     strongWordOccurrenceCount += countAssignedStrong(result);
     emptyStrongOccurrenceCount += result.emptyAssignments.length;
-    multiStrongWordCount += result.multiStrongWordCount;
-    originalConfirmedTaggedWordCount += [...result.assignments.values()].filter(
-      (assignment) => assignment.originalConfirmed
+    phraseStrongAssignmentCount += result.phraseAssignments.length;
+    learnedPhraseStrongAssignmentCount += result.phraseAssignments.filter(
+      (assignment) => assignment.method === "learned-phrase"
     ).length;
+    curatedPhraseStrongAssignmentCount += result.phraseAssignments.filter(
+      (assignment) => assignment.method === "curated-phrase"
+    ).length;
+    multiStrongWordCount += result.multiStrongWordCount;
+    originalConfirmedTaggedWordCount +=
+      countOriginalConfirmedTaggedWords(result);
     if (original) {
       const representation = summarizeOriginalRepresentation(
         result,
@@ -351,6 +370,9 @@ export async function generateStrongHybrid(
     llmCompletionTokenCount,
     llmTotalTokenCount,
     curatedOverrideStrongOccurrenceCount,
+    phraseStrongAssignmentCount,
+    learnedPhraseStrongAssignmentCount,
+    curatedPhraseStrongAssignmentCount,
     verseCount: verses.length,
     generatedVerseCount: verses.length,
     wordCount,
@@ -391,7 +413,7 @@ export async function generateStrongHybrid(
     originalSources: originals.map((original) => original.summary),
     translationProfile,
     method:
-      "Style 4 calibrated hybrid Strong generation. Starts from reader alignment, applies the Bible translation profile to density, learned enrichment, empty-word consensus, diagnostics, and LLM escalation, then applies reviewed deterministic overrides promoted from LLM reference-transfer. LLM suggestions are accepted only when they reference existing target word indexes and Strong codes present in the original verse inventory."
+      "Style 4 calibrated hybrid Strong generation. Starts from reader alignment, applies the Bible translation profile to density, learned enrichment, learned phrase wrappers, empty-word consensus, diagnostics, and LLM escalation, then applies reviewed deterministic overrides promoted from LLM reference-transfer. LLM review suggestions support word, phrase, and empty targets but are persisted only through reviewed overrides."
   };
 
   await writeFile(outputPath, `${lines.join("\n")}\n`, "utf8");
@@ -422,11 +444,10 @@ function diagnoseHardVerse(
 > {
   const reasons: string[] = [];
   const taggedTokenCoverage =
-    result.assignments.size / Math.max(1, result.wordCount);
+    result.taggedWordCount / Math.max(1, result.wordCount);
   const originalConfirmationRate =
-    [...result.assignments.values()].filter(
-      (assignment) => assignment.originalConfirmed
-    ).length / Math.max(1, result.assignments.size);
+    countOriginalConfirmedTaggedWords(result) /
+    Math.max(1, result.taggedWordCount);
   const missingOriginalStrongCount = original
     ? countMissingOriginalStrong(result, original)
     : 0;
@@ -441,7 +462,7 @@ function diagnoseHardVerse(
       .filter((count) => count > 0)
   );
 
-  if (result.assignments.size === 0 && result.wordCount > 0)
+  if (result.taggedWordCount === 0 && result.wordCount > 0)
     reasons.push("no-tags");
   if (taggedTokenCoverage < profile.hardVerseThresholds.lowTokenCoverage) {
     reasons.push("low-token-coverage");
@@ -472,11 +493,18 @@ function diagnoseHardVerse(
   return {
     reasons,
     wordCount: result.wordCount,
-    taggedWordCount: result.assignments.size,
+    taggedWordCount: result.taggedWordCount,
     taggedTokenCoverage: roundRatio(taggedTokenCoverage),
     originalConfirmationRate: roundRatio(originalConfirmationRate),
     missingOriginalStrongCount,
     readerStrongOccurrenceCount,
+    phraseStrongAssignmentCount: result.phraseAssignments.length,
+    learnedPhraseStrongAssignmentCount: result.phraseAssignments.filter(
+      (assignment) => assignment.method === "learned-phrase"
+    ).length,
+    curatedPhraseStrongAssignmentCount: result.phraseAssignments.filter(
+      (assignment) => assignment.method === "curated-phrase"
+    ).length,
     referenceMedianStrongOccurrenceCount
   };
 }
@@ -622,7 +650,7 @@ function buildLlmPayload(options: {
   reasons: string[];
 }): Record<string, unknown> {
   return {
-    task: 'Propose uniquement les Strong manquants qui devraient être attachés à des mots français existants de contenu. Ne tague pas les articles/pronoms/conjonctions sauf préposition clairement traduite. Ignore les Strong non canoniques avec suffixe et le marqueur objet H0853. Ne propose pas de mot vide. Retourne {"assignments":[{"wordIndex":number,"strong":["H0000"],"confidence":0.0,"reason":"..."}]}',
+    task: 'Propose uniquement des Strong manquants réellement représentés dans le français. Retourne {"assignments":[{"target":"word|phrase|empty","wordIndex":number,"startWordIndex":number,"endWordIndex":number,"normalizedPhrase":["..."],"strong":["H0000"],"confidence":0.0,"reason":"..."}]}. Utilise target="word" pour un équivalent lexical simple, target="phrase" quand l’équivalent français est une locution ou expression syntaxique, target="empty" seulement quand le mot original n’est pas naturellement rendu par un mot français visible. Pour phrase, startWordIndex/endWordIndex doivent couvrir une plage contiguë et normalizedPhrase doit correspondre aux mots normalisés. Ne tague pas les articles/pronoms/conjonctions sauf préposition clairement traduite. Ignore les Strong non canoniques avec suffixe et le marqueur objet H0853. Explique pourquoi la cible choisie est meilleure qu’un mot tête quand target="phrase".',
     ref: formatRef(options.verse),
     hardReasons: options.reasons,
     targetWords: tokenizeText(options.verse.text)
@@ -631,7 +659,16 @@ function buildLlmPayload(options: {
         wordIndex: index,
         text: segment.text,
         normalized: segment.normalized,
-        currentStrong: options.result.assignments.get(index)?.strong ?? []
+        currentStrong: [
+          ...(options.result.assignments.get(index)?.strong ?? []),
+          ...options.result.phraseAssignments
+            .filter(
+              (assignment) =>
+                index >= assignment.startWordIndex &&
+                index <= assignment.endWordIndex
+            )
+            .flatMap((assignment) => assignment.strong)
+        ]
       })),
     originalOccurrences: getOriginalStrongOccurrences(options.original).map(
       (occurrence, index) => ({
@@ -674,6 +711,7 @@ function applyLlmAssignments(
     ...[...result.assignments.values()].flatMap(
       (assignment) => assignment.strong
     ),
+    ...result.phraseAssignments.flatMap((assignment) => assignment.strong),
     ...result.emptyAssignments.map((assignment) => assignment.strong)
   ]);
   let accepted = 0;
@@ -681,9 +719,12 @@ function applyLlmAssignments(
   const suggestions: LlmAssignment[] = [];
 
   for (const assignment of response.assignments ?? []) {
+    const target = normalizeLlmTarget(assignment.target);
+    const startWordIndex = assignment.startWordIndex ?? assignment.wordIndex;
+    const endWordIndex = assignment.endWordIndex ?? assignment.wordIndex;
     if (
       !Number.isInteger(assignment.wordIndex) ||
-      assignment.wordIndex < 0 ||
+      (target !== "empty" && assignment.wordIndex < 0) ||
       assignment.wordIndex >= result.wordCount ||
       assignment.confidence < 0.64 ||
       assignment.strong.length === 0
@@ -693,13 +734,41 @@ function applyLlmAssignments(
     }
 
     const targetWord = words[assignment.wordIndex];
-    if (!targetWord) {
+    const phraseWords = words.filter(
+      (word) =>
+        word.wordIndex >= startWordIndex && word.wordIndex <= endWordIndex
+    );
+    if (
+      (target === "word" && !targetWord) ||
+      (target === "phrase" &&
+        (!Number.isInteger(startWordIndex) ||
+          !Number.isInteger(endWordIndex) ||
+          startWordIndex < 0 ||
+          endWordIndex < startWordIndex ||
+          endWordIndex >= result.wordCount ||
+          phraseWords.length !== endWordIndex - startWordIndex + 1 ||
+          !isAllowedLlmPhraseTarget(
+            phraseWords.map((word) => word.normalized)
+          )))
+    ) {
       rejected += 1;
       continue;
     }
 
-    const existing = result.assignments.get(assignment.wordIndex);
-    const currentStrongCount = existing?.strong.length ?? 0;
+    const existing =
+      target === "word"
+        ? result.assignments.get(assignment.wordIndex)
+        : undefined;
+    const currentStrongCount =
+      target === "word"
+        ? (existing?.strong.length ?? 0)
+        : result.phraseAssignments
+            .filter(
+              (phrase) =>
+                phrase.startWordIndex === startWordIndex &&
+                phrase.endWordIndex === endWordIndex
+            )
+            .reduce((sum, phrase) => sum + phrase.strong.length, 0);
     if (currentStrongCount >= 3) {
       rejected += 1;
       continue;
@@ -708,7 +777,13 @@ function applyLlmAssignments(
     const acceptedStrong: string[] = [];
     for (const strong of assignment.strong.map((code) => code.toUpperCase())) {
       if (!/^[HG]\d{4}$/u.test(strong)) continue;
-      if (!isAllowedLlmTarget(targetWord.normalized, strong)) continue;
+      if (
+        target === "word" &&
+        targetWord &&
+        !isAllowedLlmTarget(targetWord.normalized, strong)
+      ) {
+        continue;
+      }
       if (!originalCounts.has(strong)) continue;
       if ((usedCounts.get(strong) ?? 0) >= (originalCounts.get(strong) ?? 0)) {
         continue;
@@ -732,7 +807,14 @@ function applyLlmAssignments(
 
     const confidence = Math.min(0.84, assignment.confidence);
     suggestions.push({
+      target,
       wordIndex: assignment.wordIndex,
+      startWordIndex: target === "phrase" ? startWordIndex : undefined,
+      endWordIndex: target === "phrase" ? endWordIndex : undefined,
+      normalizedPhrase:
+        target === "phrase"
+          ? phraseWords.map((word) => word.normalized)
+          : undefined,
       strong: acceptedStrong,
       confidence,
       reason: assignment.reason
@@ -742,7 +824,7 @@ function applyLlmAssignments(
       usedCounts.set(strong, (usedCounts.get(strong) ?? 0) + 1);
     }
 
-    if (!apply) {
+    if (!apply || target !== "word") {
       accepted += acceptedStrong.length;
       continue;
     }
@@ -767,6 +849,18 @@ function applyLlmAssignments(
   }
 
   return { accepted, rejected, suggestions };
+}
+
+function normalizeLlmTarget(
+  target: LlmAssignment["target"] | undefined
+): "word" | "phrase" | "empty" {
+  if (target === "phrase" || target === "empty") return target;
+  return "word";
+}
+
+function isAllowedLlmPhraseTarget(normalizedPhrase: string[]): boolean {
+  if (normalizedPhrase.length < 2) return false;
+  return normalizedPhrase.some((word) => !LLM_FUNCTION_WORDS.has(word));
 }
 
 function getResultWords(
@@ -856,6 +950,7 @@ function countMissingOriginalStrong(
     ...[...result.assignments.values()].flatMap(
       (assignment) => assignment.strong
     ),
+    ...result.phraseAssignments.flatMap((assignment) => assignment.strong),
     ...result.emptyAssignments.map((assignment) => assignment.strong)
   ]);
   let missing = 0;
@@ -880,6 +975,7 @@ function summarizeOriginalRepresentation(
     ...[...result.assignments.values()].flatMap(
       (assignment) => assignment.strong
     ),
+    ...result.phraseAssignments.flatMap((assignment) => assignment.strong),
     ...result.emptyAssignments.map((assignment) => assignment.strong)
   ]);
   let actionable = 0;
@@ -913,10 +1009,36 @@ function isActionableOriginalStrong(strong: string): boolean {
 const IGNORED_ORIGINAL_STRONG = new Set(["H0853"]);
 
 function countAssignedStrong(result: ReaderAlignmentResult): number {
-  return [...result.assignments.values()].reduce(
-    (sum, assignment) => sum + assignment.strong.length,
-    0
+  return (
+    [...result.assignments.values()].reduce(
+      (sum, assignment) => sum + assignment.strong.length,
+      0
+    ) +
+    result.phraseAssignments.reduce(
+      (sum, assignment) => sum + assignment.strong.length,
+      0
+    )
   );
+}
+
+function countOriginalConfirmedTaggedWords(
+  result: ReaderAlignmentResult
+): number {
+  const confirmedWordIndexes = new Set<number>();
+  for (const [wordIndex, assignment] of result.assignments) {
+    if (assignment.originalConfirmed) confirmedWordIndexes.add(wordIndex);
+  }
+  for (const phrase of result.phraseAssignments) {
+    if (!phrase.originalConfirmed) continue;
+    for (
+      let wordIndex = phrase.startWordIndex;
+      wordIndex <= phrase.endWordIndex;
+      wordIndex += 1
+    ) {
+      confirmedWordIndexes.add(wordIndex);
+    }
+  }
+  return confirmedWordIndexes.size;
 }
 
 async function loadReferences(): Promise<ReferenceMap[]> {

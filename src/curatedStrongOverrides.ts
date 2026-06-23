@@ -6,9 +6,18 @@ import { type ReaderAlignmentResult } from "./readerAlignment.js";
 export interface CuratedStrongOverride {
   bible: string;
   ref: string;
-  target?: "word" | "empty";
+  target?: "word" | "empty" | "phrase";
+  replace?: {
+    target: "word" | "empty" | "phrase";
+    wordIndex?: number;
+    startWordIndex?: number;
+    endWordIndex?: number;
+  };
   wordIndex: number;
   normalized: string;
+  startWordIndex?: number;
+  endWordIndex?: number;
+  normalizedPhrase?: string[];
   strong: string[];
   confidence: number;
   source: string;
@@ -138,6 +147,35 @@ export const CURATED_STRONG_OVERRIDES: CuratedStrongOverride[] = [
     confidence: 0.8,
     source: "test:curated-empty",
     reason: "Fixture override used to verify curated empty Strong handling."
+  },
+  {
+    bible: "fixture-phrase",
+    ref: "Heb.1.4",
+    target: "phrase",
+    wordIndex: 2,
+    normalized: "dans la mesure ou",
+    startWordIndex: 2,
+    endWordIndex: 5,
+    normalizedPhrase: ["dans", "la", "mesure", "ou"],
+    strong: ["G3745"],
+    confidence: 0.86,
+    source: "test:curated-phrase",
+    reason: "Fixture override used to verify curated phrase Strong handling."
+  },
+  {
+    bible: "fixture-move",
+    ref: "Gen.1.27",
+    target: "word",
+    replace: {
+      target: "word",
+      wordIndex: 14
+    },
+    wordIndex: 3,
+    normalized: "humains",
+    strong: ["H0120"],
+    confidence: 0.95,
+    source: "test:curated-relocation",
+    reason: "Fixture override used to verify curated Strong relocation."
   }
 ];
 
@@ -154,6 +192,54 @@ export function applyCuratedStrongOverrides(options: {
   let appliedStrongCount = 0;
 
   for (const override of overrides) {
+    applyReplacement(options.result, override);
+
+    if (override.target === "phrase") {
+      if (!isValidPhraseOverride(options.result, override)) {
+        continue;
+      }
+
+      const startWordIndex = override.startWordIndex ?? override.wordIndex;
+      const endWordIndex = override.endWordIndex ?? override.wordIndex;
+      const missingStrong = override.strong.filter(
+        (strong) =>
+          !options.result.phraseAssignments.some(
+            (assignment) =>
+              assignment.startWordIndex === startWordIndex &&
+              assignment.endWordIndex === endWordIndex &&
+              assignment.strong.includes(strong)
+          )
+      );
+
+      if (missingStrong.length === 0) {
+        continue;
+      }
+
+      removeStrongFromCoveredWords(
+        options.result,
+        startWordIndex,
+        endWordIndex,
+        missingStrong
+      );
+      options.result.phraseAssignments.push({
+        strong: missingStrong,
+        confidence: override.confidence,
+        method: "curated-phrase",
+        source: override.source,
+        startWordIndex,
+        endWordIndex,
+        originalConfirmed: true
+      });
+      options.result.phraseAssignments.sort(
+        (left, right) =>
+          left.startWordIndex - right.startWordIndex ||
+          left.endWordIndex - right.endWordIndex ||
+          left.strong.join(" ").localeCompare(right.strong.join(" "))
+      );
+      appliedStrongCount += missingStrong.length;
+      continue;
+    }
+
     if ((override.target ?? "word") === "empty") {
       const missingStrong = override.strong.filter(
         (strong) =>
@@ -222,6 +308,54 @@ export function applyCuratedStrongOverrides(options: {
   return appliedStrongCount;
 }
 
+function applyReplacement(
+  result: ReaderAlignmentResult,
+  override: CuratedStrongOverride
+): void {
+  if (!override.replace) return;
+  const strong = new Set(override.strong.map((code) => code.toUpperCase()));
+  const replacement = override.replace;
+
+  if (replacement.target === "word" && replacement.wordIndex !== undefined) {
+    const assignment = result.assignments.get(replacement.wordIndex);
+    if (assignment) {
+      assignment.strong = assignment.strong.filter(
+        (code) => !strong.has(code.toUpperCase())
+      );
+      if (assignment.strong.length === 0) {
+        result.assignments.delete(replacement.wordIndex);
+      }
+    }
+  }
+
+  if (replacement.target === "phrase") {
+    result.phraseAssignments = result.phraseAssignments
+      .map((assignment) => {
+        if (
+          assignment.startWordIndex !== replacement.startWordIndex ||
+          assignment.endWordIndex !== replacement.endWordIndex
+        ) {
+          return assignment;
+        }
+        return {
+          ...assignment,
+          strong: assignment.strong.filter(
+            (code) => !strong.has(code.toUpperCase())
+          )
+        };
+      })
+      .filter((assignment) => assignment.strong.length > 0);
+  }
+
+  if (replacement.target === "empty" && replacement.wordIndex !== undefined) {
+    result.emptyAssignments = result.emptyAssignments.filter(
+      (assignment) =>
+        assignment.insertAfterWordIndex !== replacement.wordIndex ||
+        !strong.has(assignment.strong.toUpperCase())
+    );
+  }
+}
+
 export function getCuratedStrongOverrides(): CuratedStrongOverride[] {
   return [
     ...CURATED_STRONG_OVERRIDES,
@@ -249,9 +383,23 @@ function isCuratedStrongOverride(
     typeof candidate.ref === "string" &&
     (candidate.target === undefined ||
       candidate.target === "word" ||
-      candidate.target === "empty") &&
+      candidate.target === "empty" ||
+      candidate.target === "phrase") &&
     Number.isInteger(candidate.wordIndex) &&
     typeof candidate.normalized === "string" &&
+    (candidate.target !== "phrase" ||
+      (Number.isInteger(candidate.startWordIndex) &&
+        Number.isInteger(candidate.endWordIndex) &&
+        Array.isArray(candidate.normalizedPhrase) &&
+        candidate.normalizedPhrase.every(
+          (normalized) => typeof normalized === "string"
+        ))) &&
+    (candidate.replace === undefined ||
+      (typeof candidate.replace === "object" &&
+        candidate.replace !== null &&
+        (candidate.replace.target === "word" ||
+          candidate.replace.target === "empty" ||
+          candidate.replace.target === "phrase"))) &&
     Array.isArray(candidate.strong) &&
     candidate.strong.every((strong) => typeof strong === "string") &&
     typeof candidate.confidence === "number" &&
@@ -277,21 +425,100 @@ function getWord(
   return undefined;
 }
 
+function isValidPhraseOverride(
+  result: ReaderAlignmentResult,
+  override: CuratedStrongOverride
+): boolean {
+  const startWordIndex = override.startWordIndex ?? override.wordIndex;
+  const endWordIndex = override.endWordIndex ?? override.wordIndex;
+
+  if (
+    !Number.isInteger(startWordIndex) ||
+    !Number.isInteger(endWordIndex) ||
+    startWordIndex < 0 ||
+    endWordIndex < startWordIndex
+  ) {
+    return false;
+  }
+
+  const expected = override.normalizedPhrase ?? [];
+  if (expected.length !== endWordIndex - startWordIndex + 1) {
+    return false;
+  }
+
+  for (let index = startWordIndex; index <= endWordIndex; index += 1) {
+    const word = getWord(result, index);
+    if (!word || word.normalized !== expected[index - startWordIndex]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function removeStrongFromCoveredWords(
+  result: ReaderAlignmentResult,
+  startWordIndex: number,
+  endWordIndex: number,
+  strong: string[]
+): void {
+  const strongSet = new Set(strong);
+
+  for (let index = startWordIndex; index <= endWordIndex; index += 1) {
+    const assignment = result.assignments.get(index);
+    if (!assignment) continue;
+
+    assignment.strong = assignment.strong.filter(
+      (code) => !strongSet.has(code)
+    );
+    if (assignment.strong.length === 0) {
+      result.assignments.delete(index);
+    }
+  }
+}
+
 function refreshResultCounts(result: ReaderAlignmentResult): void {
-  result.taggedWordCount = result.assignments.size;
-  result.lowConfidenceWordCount = [...result.assignments.values()].filter(
-    (assignment) => assignment.confidence < 0.55
-  ).length;
-  result.strongWordOccurrenceCount = [...result.assignments.values()].reduce(
-    (sum, assignment) => sum + assignment.strong.length,
-    0
-  );
+  const phraseWordIndexes = new Set<number>();
+  for (const phrase of result.phraseAssignments) {
+    for (
+      let index = phrase.startWordIndex;
+      index <= phrase.endWordIndex;
+      index += 1
+    ) {
+      phraseWordIndexes.add(index);
+    }
+  }
+
+  result.taggedWordCount = new Set([
+    ...result.assignments.keys(),
+    ...phraseWordIndexes
+  ]).size;
+  result.lowConfidenceWordCount =
+    [...result.assignments.values()].filter(
+      (assignment) => assignment.confidence < 0.55
+    ).length +
+    result.phraseAssignments.filter(
+      (assignment) => assignment.confidence < 0.55
+    ).length;
+  result.strongWordOccurrenceCount =
+    [...result.assignments.values()].reduce(
+      (sum, assignment) => sum + assignment.strong.length,
+      0
+    ) +
+    result.phraseAssignments.reduce(
+      (sum, assignment) => sum + assignment.strong.length,
+      0
+    );
   result.emptyStrongOccurrenceCount = result.emptyAssignments.length;
   result.totalStrongOccurrenceCount =
     result.strongWordOccurrenceCount + result.emptyStrongOccurrenceCount;
-  result.multiStrongWordCount = [...result.assignments.values()].filter(
-    (assignment) => assignment.strong.length > 1
-  ).length;
+  result.multiStrongWordCount =
+    [...result.assignments.values()].filter(
+      (assignment) => assignment.strong.length > 1
+    ).length +
+    result.phraseAssignments.filter(
+      (assignment) => assignment.strong.length > 1
+    ).length;
 }
 
 function mergeLabel(left: string, right: string): string {

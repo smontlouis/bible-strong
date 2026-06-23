@@ -8,9 +8,11 @@ output/
 outputs/
 bibles/
 strongs/
+data/
 data/bibles/
 data/strongs/
 data/external/
+reports/
 .env
 .env.*
 !.env.example

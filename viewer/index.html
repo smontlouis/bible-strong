@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <main class="app-shell">
+    <main class="app-shell has-lexicon-drawer">
       <aside class="sidebar">
         <div class="brand">
           <div class="brand-mark">S</div>
@@ -21,6 +21,7 @@
 
         <nav class="page-nav">
           <a class="is-active" href="./">Viewer</a>
+          <a href="./lexicon.html">Lexique</a>
           <a href="./review.html">Revue LLM</a>
         </nav>
 
@@ -28,7 +29,7 @@
           <input
             id="fileInput"
             type="file"
-            accept=".tsv,.csv,text/tab-separated-values,text/csv,text/plain"
+            accept=".tsv,.csv,.json,application/json,text/tab-separated-values,text/csv,text/plain"
           />
           <span class="drop-title">Charger un TSV ou CSV</span>
           <span class="drop-copy"
@@ -54,6 +55,14 @@
               placeholder="Strong, mot, référence..."
               disabled
             />
+          </label>
+          <label>
+            Mode
+            <select id="viewModeSelect" disabled>
+              <option value="reader">Reader</option>
+              <option value="advanced">Advanced</option>
+              <option value="debug">Debug</option>
+            </select>
           </label>
         </section>
 
@@ -100,11 +109,24 @@
 
         <article id="chapterView" class="chapter-view empty-state">
           <p>
-            Charge un TSV ou CSV contenant les colonnes <code>book_id</code>,
-            <code>num_chapter</code>, <code>num_verse</code>, <code>text</code>.
+            Charge un JSON enrichi, TSV ou CSV contenant les colonnes
+            <code>book_id</code>, <code>num_chapter</code>,
+            <code>num_verse</code>, <code>text</code>.
           </p>
         </article>
       </section>
+
+      <aside
+        class="lexicon-drawer"
+        id="lexiconDrawer"
+        aria-label="Détail lexique Strong"
+      >
+        <div class="lexicon-drawer-empty">
+          <p class="drawer-kicker">Lexique FR</p>
+          <h2>Sélectionne un Strong</h2>
+          <p>Clique sur un mot taggé ou un Strong vide pour ouvrir sa fiche.</p>
+        </div>
+      </aside>
     </main>
 
     <script type="module" src="./strong-viewer.js"></script>

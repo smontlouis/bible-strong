@@ -79,6 +79,16 @@ els.reviewView.addEventListener("input", (event) => {
     );
   }
 });
+els.reviewView.addEventListener("change", (event) => {
+  const edit = event.target.closest("[data-review-edit]");
+  if (edit) {
+    updateReviewEdit(
+      edit.dataset.reviewId,
+      edit.dataset.reviewEdit,
+      edit.value
+    );
+  }
+});
 
 wireDropZone(els.reviewDropZone, loadReviewFiles);
 wireDropZone(els.reviewFolderZone, loadReviewFiles);
@@ -261,7 +271,7 @@ function renderReviewCard(item) {
       token.dataset.reviewId = item.id;
       token.dataset.reviewWord = String(word.wordIndex);
     }
-    if (word.wordIndex === item.wordIndex) {
+    if (isTargetWord(item, word.wordIndex)) {
       token.classList.add("review-target");
     }
     context.append(token, document.createTextNode(" "));
@@ -315,6 +325,23 @@ function renderCorrectionControls(item) {
     ? "Correction manuelle"
     : "Correction verrouillée";
 
+  const targetLabel = editLabel("Type de cible");
+  const target = document.createElement("select");
+  target.dataset.reviewId = item.id;
+  target.dataset.reviewEdit = "target";
+  for (const [value, label] of [
+    ["word", "Mot"],
+    ["phrase", "Phrase"],
+    ["empty", "Vide"]
+  ]) {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+    option.selected = getItemTarget(item) === value;
+    target.append(option);
+  }
+  targetLabel.append(target);
+
   const indexLabel = editLabel("Index cible");
   const index = document.createElement("input");
   index.type = "number";
@@ -342,7 +369,47 @@ function renderCorrectionControls(item) {
   strong.dataset.reviewEdit = "strong";
   strongLabel.append(strong);
 
-  fieldset.append(legend, indexLabel, wordLabel, strongLabel);
+  const startLabel = editLabel("Début phrase");
+  const start = document.createElement("input");
+  start.type = "number";
+  start.min = "0";
+  start.step = "1";
+  start.value = String(item.startWordIndex ?? item.wordIndex);
+  start.dataset.reviewId = item.id;
+  start.dataset.reviewEdit = "startWordIndex";
+  start.disabled = getItemTarget(item) !== "phrase";
+  startLabel.append(start);
+
+  const endLabel = editLabel("Fin phrase");
+  const end = document.createElement("input");
+  end.type = "number";
+  end.min = "0";
+  end.step = "1";
+  end.value = String(item.endWordIndex ?? item.wordIndex);
+  end.dataset.reviewId = item.id;
+  end.dataset.reviewEdit = "endWordIndex";
+  end.disabled = getItemTarget(item) !== "phrase";
+  endLabel.append(end);
+
+  const phraseLabel = editLabel("Phrase normalisée");
+  const phrase = document.createElement("input");
+  phrase.type = "text";
+  phrase.value = getNormalizedPhrase(item).join(" ");
+  phrase.dataset.reviewId = item.id;
+  phrase.dataset.reviewEdit = "normalizedPhrase";
+  phrase.disabled = getItemTarget(item) !== "phrase";
+  phraseLabel.append(phrase);
+
+  fieldset.append(
+    legend,
+    targetLabel,
+    indexLabel,
+    wordLabel,
+    startLabel,
+    endLabel,
+    phraseLabel,
+    strongLabel
+  );
   return fieldset;
 }
 
@@ -534,6 +601,13 @@ function setReviewWordTarget(id, wordIndex) {
   );
   if (!word) return;
 
+  if (getItemTarget(item) === "phrase") {
+    setPhraseRangeFromClick(item, wordIndex);
+    setSaveStatus("");
+    renderReview();
+    return;
+  }
+
   item.wordIndex = word.wordIndex;
   item.word = word.text;
   item.normalized = word.normalized;
@@ -556,7 +630,14 @@ function updateReviewEdit(id, field, value) {
   const item = state.review.items.find((candidate) => candidate.id === id);
   if (!item || !isEditableReviewItem(item)) return;
 
-  if (field === "wordIndex") {
+  if (field === "target") {
+    item.target = value === "phrase" || value === "empty" ? value : "word";
+    if (item.target === "phrase") {
+      item.startWordIndex = item.startWordIndex ?? item.wordIndex;
+      item.endWordIndex = item.endWordIndex ?? item.wordIndex;
+      updateNormalizedPhrase(item);
+    }
+  } else if (field === "wordIndex") {
     const wordIndex = Number.parseInt(value, 10);
     if (!Number.isInteger(wordIndex)) return;
     const word = item.targetWords?.find(
@@ -570,11 +651,100 @@ function updateReviewEdit(id, field, value) {
   } else if (field === "normalized") {
     item.normalized = normalizeEditableWord(value);
     item.word = value;
+  } else if (field === "startWordIndex" || field === "endWordIndex") {
+    const wordIndex = Number.parseInt(value, 10);
+    if (!Number.isInteger(wordIndex)) return;
+    item.target = "phrase";
+    item[field] = wordIndex;
+    normalizePhraseRange(item);
+    updateNormalizedPhrase(item);
+  } else if (field === "normalizedPhrase") {
+    item.target = "phrase";
+    item.normalizedPhrase = String(value)
+      .split(/\s+/u)
+      .map(normalizeEditableWord)
+      .filter(Boolean);
   } else if (field === "strong") {
     item.strong = parseStrongList(value);
   }
 
   setSaveStatus("");
+  renderReview();
+}
+
+function getItemTarget(item) {
+  if (item.target === "phrase" || item.target === "empty") return item.target;
+  if (item.decision === "accept-empty") return "empty";
+  return "word";
+}
+
+function isTargetWord(item, wordIndex) {
+  if (getItemTarget(item) === "phrase") {
+    const startWordIndex = item.startWordIndex ?? item.wordIndex;
+    const endWordIndex = item.endWordIndex ?? item.wordIndex;
+    return wordIndex >= startWordIndex && wordIndex <= endWordIndex;
+  }
+
+  return wordIndex === item.wordIndex;
+}
+
+function setPhraseRangeFromClick(item, wordIndex) {
+  item.target = "phrase";
+  const startWordIndex = item.startWordIndex ?? item.wordIndex;
+  if ((item.endWordIndex ?? startWordIndex) === startWordIndex) {
+    item.startWordIndex = Math.min(startWordIndex, wordIndex);
+    item.endWordIndex = Math.max(startWordIndex, wordIndex);
+  } else {
+    item.startWordIndex = Math.min(startWordIndex, wordIndex);
+    item.endWordIndex = Math.max(startWordIndex, wordIndex);
+  }
+  normalizePhraseRange(item);
+  updateNormalizedPhrase(item);
+  item.reviewerNote = replaceCorrectionNote(
+    item.reviewerNote,
+    `Correction manuelle: cible déplacée vers la phrase "${getPhraseText(item)}" (index ${item.startWordIndex}-${item.endWordIndex}).`
+  );
+}
+
+function normalizePhraseRange(item) {
+  const words = item.targetWords ?? [];
+  const maxIndex = Math.max(0, words.length - 1);
+  const start = Math.max(
+    0,
+    Math.min(maxIndex, item.startWordIndex ?? item.wordIndex)
+  );
+  const end = Math.max(
+    0,
+    Math.min(maxIndex, item.endWordIndex ?? item.wordIndex)
+  );
+  item.startWordIndex = Math.min(start, end);
+  item.endWordIndex = Math.max(start, end);
+}
+
+function updateNormalizedPhrase(item) {
+  item.normalizedPhrase = getPhraseWords(item).map((word) => word.normalized);
+  item.wordIndex = item.startWordIndex ?? item.wordIndex;
+  item.normalized = item.normalizedPhrase.join(" ");
+  item.word = getPhraseText(item);
+}
+
+function getNormalizedPhrase(item) {
+  if (item.normalizedPhrase?.length) return item.normalizedPhrase;
+  return getPhraseWords(item).map((word) => word.normalized);
+}
+
+function getPhraseWords(item) {
+  const startWordIndex = item.startWordIndex ?? item.wordIndex;
+  const endWordIndex = item.endWordIndex ?? item.wordIndex;
+  return (item.targetWords ?? []).filter(
+    (word) => word.wordIndex >= startWordIndex && word.wordIndex <= endWordIndex
+  );
+}
+
+function getPhraseText(item) {
+  return getPhraseWords(item)
+    .map((word) => word.text)
+    .join(" ");
 }
 
 async function saveReviewDecisions() {
@@ -614,19 +784,32 @@ function buildReviewDecisionPayload() {
       .map((item) => ({
         bible: item.bible,
         ref: item.ref,
+        target: getItemTarget(item),
         wordIndex: item.wordIndex,
         normalized: item.normalized,
+        startWordIndex: item.startWordIndex,
+        endWordIndex: item.endWordIndex,
+        normalizedPhrase: item.normalizedPhrase,
         strong: item.strong,
         confidence: Math.min(0.92, Math.max(0.72, item.confidence)),
-        source: "llm-review:human-approved",
+        source:
+          getItemTarget(item) === "phrase"
+            ? "llm-review:human-approved-phrase"
+            : getItemTarget(item) === "empty"
+              ? "llm-review:human-approved-empty"
+              : "llm-review:human-approved",
         reason: [item.llmReason, item.reviewerNote].filter(Boolean).join(" | ")
       })),
     items: state.review.items.map((item) => ({
       id: item.id,
       bible: item.bible,
       ref: item.ref,
+      target: getItemTarget(item),
       wordIndex: item.wordIndex,
       normalized: item.normalized,
+      startWordIndex: item.startWordIndex,
+      endWordIndex: item.endWordIndex,
+      normalizedPhrase: item.normalizedPhrase,
       word: item.word,
       strong: item.strong,
       confidence: item.confidence,
