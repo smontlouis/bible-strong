@@ -1,10 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import {
-  type EnrichedStrongBible,
-  type EnrichedVerse
-} from "./enrichedStrongBible.js";
+import { type StrongLedger, type StrongLedgerVerse } from "./strongLedger.js";
 import {
   buildSemanticRefillLlmBatch,
   SEMANTIC_REFILL_LLM_SYSTEM_PROMPT
@@ -20,7 +17,7 @@ interface AgentPacketFile {
   verses: Array<{
     ref: string;
     text: string;
-    tokens: EnrichedVerse["tokens"];
+    tokens: StrongLedgerVerse["tokens"];
   }>;
   summary: {
     verses: number;
@@ -40,7 +37,7 @@ async function buildAgentPacket(options: {
   bible: string;
   scope: string;
   candidatesPath: string;
-  enrichedDir: string;
+  ledgerDir: string;
   outputPath: string;
   limit?: number;
 }): Promise<AgentPacketFile> {
@@ -49,7 +46,7 @@ async function buildAgentPacket(options: {
       await readFile(options.candidatesPath, "utf8")
     ) as SemanticRefillAuditItem[]
   ).filter((candidate) => refInScope(candidate.ref, options.scope));
-  const verses = (await readVerses(options.enrichedDir, options.bible)).filter(
+  const verses = (await readVerses(options.ledgerDir, options.bible)).filter(
     (verse) => refInScope(verse.ref, options.scope)
   );
   const batch = buildSemanticRefillLlmBatch({
@@ -95,7 +92,9 @@ async function buildAgentPacket(options: {
       withPlacementWarnings: batch.candidates.filter(
         (candidate) => candidate.placementWarnings.length > 0
       ).length,
-      topStrong: topStrong(batch.candidates.map((candidate) => candidate.strong))
+      topStrong: topStrong(
+        batch.candidates.map((candidate) => candidate.strong)
+      )
     },
     candidates: batch.candidates
   };
@@ -110,16 +109,16 @@ async function buildAgentPacket(options: {
 }
 
 async function readVerses(
-  enrichedDir: string,
+  ledgerDir: string,
   bible: string
-): Promise<EnrichedVerse[]> {
+): Promise<StrongLedgerVerse[]> {
   const canonicalPath = path.join(
-    enrichedDir,
-    `bible-${bible}-strong-enriched.json`
+    ledgerDir,
+    `bible-${bible}-strong-ledger.json`
   );
   const canonical = JSON.parse(
     await readFile(canonicalPath, "utf8")
-  ) as EnrichedStrongBible;
+  ) as StrongLedger;
 
   if (!canonical.split) return canonical.verses;
 
@@ -127,7 +126,7 @@ async function readVerses(
     await Promise.all(
       (canonical.verseFiles ?? []).map(async (file) => {
         const content = await readFile(file.path, "utf8");
-        return JSON.parse(content) as EnrichedVerse[];
+        return JSON.parse(content) as StrongLedgerVerse[];
       })
     )
   ).flat();
@@ -145,7 +144,9 @@ function topStrong(strong: string[]): Array<[string, number]> {
     counts.set(code, (counts.get(code) ?? 0) + 1);
   }
   return [...counts.entries()]
-    .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+    .sort(
+      (left, right) => right[1] - left[1] || left[0].localeCompare(right[0])
+    )
     .slice(0, 30);
 }
 
@@ -187,7 +188,7 @@ function readOptionalNumberArg(
 
 function defaultOutputPath(bible: string, scope: string): string {
   const safeScope = scope.replace(/[^0-9A-Za-z]+/gu, "-");
-  return `outputs/semantic-refill/${bible}/agent-packets/agent-packet-${bible}-${safeScope}.json`;
+  return `outputs/gap-review/${bible}/agent-packets/agent-packet-${bible}-${safeScope}.json`;
 }
 
 async function main(): Promise<void> {
@@ -205,9 +206,9 @@ async function main(): Promise<void> {
     candidatesPath: readStringArg(
       args,
       "candidates",
-      `outputs/semantic-refill/${bible}/${scope}/semantic-refill-candidates.json`
+      `outputs/gap-review/${bible}/${scope}/gap-review-candidates.json`
     ),
-    enrichedDir: readStringArg(args, "enriched-dir", `outputs/enriched/${bible}`),
+    ledgerDir: readStringArg(args, "ledger-dir", `outputs/strong/${bible}`),
     outputPath,
     limit: readOptionalNumberArg(args, "limit")
   });

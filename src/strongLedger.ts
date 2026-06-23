@@ -65,7 +65,7 @@ export type StrongSource =
   | "llm-review"
   | "curated-override";
 
-export interface EnrichedStrongAnnotation {
+export interface StrongLedgerAnnotation {
   id: string;
   strong: string;
   visibility: StrongVisibility;
@@ -89,14 +89,14 @@ export interface EnrichedStrongAnnotation {
   profile?: string;
 }
 
-export interface EnrichedVerse {
+export interface StrongLedgerVerse {
   ref: string;
   bookId: string;
   chapter: number;
   verse: number;
   text: string;
-  tokens: EnrichedToken[];
-  annotations: EnrichedStrongAnnotation[];
+  tokens: StrongLedgerToken[];
+  annotations: StrongLedgerAnnotation[];
   views: {
     readerHtml: string;
     advancedHtml: string;
@@ -108,16 +108,16 @@ export interface EnrichedVerse {
     reader: string[];
     advanced: string[];
   };
-  metrics: EnrichedVerseMetrics;
+  metrics: StrongLedgerVerseMetrics;
 }
 
-export interface EnrichedToken {
+export interface StrongLedgerToken {
   wordIndex: number;
   text: string;
   normalized: string;
 }
 
-export interface EnrichedStrongBible {
+export interface StrongLedger {
   bible: string;
   generatedAt: string;
   inputPath: string;
@@ -137,11 +137,11 @@ export interface EnrichedStrongBible {
     ledgerManifest: string;
     verseDir: string;
   };
-  metrics: EnrichedMetrics;
-  verses: EnrichedVerse[];
+  metrics: StrongLedgerMetrics;
+  verses: StrongLedgerVerse[];
 }
 
-export interface EnrichedMetrics {
+export interface StrongLedgerMetrics {
   bible: string;
   generatedAt: string;
   scope: string;
@@ -165,17 +165,17 @@ export interface EnrichedMetrics {
   advancedTaggedTokenCount: number;
   readerTokenCoverage: number;
   advancedTokenCoverage: number;
-  books: Record<string, EnrichedBookMetrics>;
+  books: Record<string, StrongLedgerBookMetrics>;
 }
 
-export interface EnrichedBookMetrics extends Omit<
-  EnrichedMetrics,
+export interface StrongLedgerBookMetrics extends Omit<
+  StrongLedgerMetrics,
   "bible" | "generatedAt" | "scope" | "books"
 > {
   bookId: string;
 }
 
-export interface EnrichedVerseMetrics {
+export interface StrongLedgerVerseMetrics {
   wordCount: number;
   readerVisibleStrongCount: number;
   advancedStrongCount: number;
@@ -197,7 +197,7 @@ export interface EnrichedVerseMetrics {
   advancedTokenCoverage: number;
 }
 
-interface EnrichedOptions {
+interface StrongLedgerOptions {
   bible: string;
   biblePath: string;
   outputDir: string;
@@ -259,9 +259,9 @@ const TECHNICAL_STRONG = new Set([
   "G1519"
 ]);
 
-export async function generateEnrichedStrongBible(
-  options: EnrichedOptions
-): Promise<EnrichedStrongBible> {
+export async function generateStrongLedger(
+  options: StrongLedgerOptions
+): Promise<StrongLedger> {
   const verses = filterVerses(await readBibleJson(options.biblePath), options);
   const references = await loadReferences();
   const originals = await loadOriginalSources();
@@ -273,8 +273,8 @@ export async function generateEnrichedStrongBible(
   await mkdir(options.outputDir, { recursive: true });
 
   const paths = outputPaths(options);
-  const enrichedVerses: EnrichedVerse[] = [];
-  const ledgerByBook = new Map<string, EnrichedVerse[]>();
+  const ledgerVerses: StrongLedgerVerse[] = [];
+  const ledgerByBook = new Map<string, StrongLedgerVerse[]>();
 
   for (const verse of verses) {
     const key = referenceKey(verse.bookId, verse.chapter, verse.verse);
@@ -313,7 +313,7 @@ export async function generateEnrichedStrongBible(
       original: original?.verse
     });
 
-    const enriched = buildEnrichedVerse({
+    const ledgerVerse = buildStrongLedgerVerse({
       bible: options.bible,
       verse,
       reader,
@@ -323,24 +323,24 @@ export async function generateEnrichedStrongBible(
       profile: translationProfile
     });
 
-    enrichedVerses.push(enriched);
+    ledgerVerses.push(ledgerVerse);
     const bookVerses = ledgerByBook.get(verse.bookId) ?? [];
-    bookVerses.push(enriched);
+    bookVerses.push(ledgerVerse);
     ledgerByBook.set(verse.bookId, bookVerses);
   }
 
   const metrics = aggregateMetrics(
     options.bible,
     options.onlyRef,
-    enrichedVerses
+    ledgerVerses
   );
-  const bible: EnrichedStrongBible = {
+  const bible: StrongLedger = {
     bible: options.bible,
     generatedAt: metrics.generatedAt,
     inputPath: options.biblePath,
     scope: options.onlyRef ?? "all",
     method:
-      "Canonical enriched Strong Bible. Reader annotations come from the calibrated hybrid reader pipeline. Advanced annotations add original-complete WLC/SBLGNT coverage as technical, empty, duplicate, or extra visible annotations. Macula/original inventory verifies and explains density but does not force reader visibility.",
+      "Canonical Strong ledger. Reader annotations come from the calibrated reader pipeline. Advanced annotations add original-complete WLC/SBLGNT coverage as technical, empty, duplicate, or extra visible annotations. Macula/original inventory verifies and explains density but does not force reader visibility.",
     translationProfile,
     references: references.map((reference) => ({
       name: reference.name,
@@ -350,14 +350,14 @@ export async function generateEnrichedStrongBible(
     originalSources: originals.map((original) => original.summary),
     outputPaths: paths,
     metrics,
-    verses: enrichedVerses
+    verses: ledgerVerses
   };
 
-  await writeEnrichedOutputs(bible, ledgerByBook, paths);
+  await writeStrongLedgerOutputs(bible, ledgerByBook, paths);
   return bible;
 }
 
-export async function exportEnrichedStrongBible(options: {
+export async function exportStrongLedger(options: {
   bible: string;
   outputDir: string;
   mode: "reader" | "advanced";
@@ -366,23 +366,23 @@ export async function exportEnrichedStrongBible(options: {
     bible: options.bible,
     outputDir: options.outputDir
   });
-  const canonical = await readEnrichedStrongBible(paths.canonical);
+  const canonical = await readStrongLedger(paths.canonical);
   const outputPath =
     options.mode === "reader" ? paths.readerTsv : paths.advancedTsv;
   await writeTsv(outputPath, canonical.verses, options.mode);
   return outputPath;
 }
 
-export function validateEnrichedAnnotation(options: {
-  annotation: Pick<EnrichedStrongAnnotation, "strong">;
+export function validateStrongLedgerAnnotation(options: {
+  annotation: Pick<StrongLedgerAnnotation, "strong">;
   allowedStrong: Set<string>;
 }): boolean {
   return options.allowedStrong.has(options.annotation.strong.toUpperCase());
 }
 
-export function renderEnrichedTaggedText(
+export function renderStrongTaggedText(
   segments: TextSegment[],
-  annotations: EnrichedStrongAnnotation[],
+  annotations: StrongLedgerAnnotation[],
   mode: "reader" | "advanced" | "debug"
 ): string {
   const visible = annotations.filter((annotation) =>
@@ -411,7 +411,7 @@ export function renderEnrichedTaggedText(
   let activePhrase:
     | {
         endWordIndex: number;
-        annotations: EnrichedStrongAnnotation[];
+        annotations: StrongLedgerAnnotation[];
       }
     | undefined;
 
@@ -459,7 +459,7 @@ export function renderEnrichedTaggedText(
   return output;
 }
 
-function buildEnrichedVerse(options: {
+function buildStrongLedgerVerse(options: {
   bible: string;
   verse: BibleVerse;
   reader: ReaderAlignmentResult;
@@ -467,7 +467,7 @@ function buildEnrichedVerse(options: {
   original?: OriginalVerse;
   references: ReferenceSource[];
   profile: TranslationProfile;
-}): EnrichedVerse {
+}): StrongLedgerVerse {
   const tokens = getWordTokens(options.reader.segments);
   const referenceInventories = buildReferenceInventories(options.references);
   const originalOccurrences = options.original
@@ -514,24 +514,24 @@ function buildEnrichedVerse(options: {
 
   const normalizedAnnotations = annotations
     .filter((annotation) =>
-      validateEnrichedAnnotation({ annotation, allowedStrong })
+      validateStrongLedgerAnnotation({ annotation, allowedStrong })
     )
     .map((annotation, index) => ({
       ...annotation,
       id: `${options.verse.bookId}.${options.verse.chapter}.${options.verse.verse}:${index}:${annotation.strong}`
     }));
 
-  const readerHtml = renderEnrichedTaggedText(
+  const readerHtml = renderStrongTaggedText(
     options.reader.segments,
     normalizedAnnotations,
     "reader"
   );
-  const advancedHtml = renderEnrichedTaggedText(
+  const advancedHtml = renderStrongTaggedText(
     options.reader.segments,
     normalizedAnnotations,
     "advanced"
   );
-  const debugHtml = renderEnrichedTaggedText(
+  const debugHtml = renderStrongTaggedText(
     options.reader.segments,
     normalizedAnnotations,
     "debug"
@@ -572,11 +572,11 @@ function buildEnrichedVerse(options: {
 
 function readerPhraseAnnotations(options: {
   assignments: ReaderPhraseAssignment[];
-  tokens: EnrichedToken[];
+  tokens: StrongLedgerToken[];
   profile: TranslationProfile;
   referenceSupport: Map<string, ReferenceName[]>;
   allowedStrong: Set<string>;
-}): EnrichedStrongAnnotation[] {
+}): StrongLedgerAnnotation[] {
   return options.assignments.flatMap((assignment) =>
     assignment.strong.map((strong) => ({
       id: "",
@@ -586,7 +586,7 @@ function readerPhraseAnnotations(options: {
       source: "phrase-transfer" as const,
       confidence: assignment.confidence,
       reason:
-        "Visible in reader mode because the calibrated hybrid pipeline found a defensible French phrase carrier.",
+        "Visible in reader mode because the calibrated reader pipeline found a defensible French phrase carrier.",
       diagnostics: [assignment.method, assignment.source],
       startWordIndex: assignment.startWordIndex,
       endWordIndex: assignment.endWordIndex,
@@ -604,12 +604,12 @@ function readerPhraseAnnotations(options: {
 
 function readerWordAnnotations(options: {
   assignments: Map<number, AssignedStrong>;
-  tokens: EnrichedToken[];
+  tokens: StrongLedgerToken[];
   profile: TranslationProfile;
   referenceSupport: Map<string, ReferenceName[]>;
   allowedStrong: Set<string>;
-}): EnrichedStrongAnnotation[] {
-  const annotations: EnrichedStrongAnnotation[] = [];
+}): StrongLedgerAnnotation[] {
+  const annotations: StrongLedgerAnnotation[] = [];
 
   for (const [wordIndex, assignment] of options.assignments) {
     for (const strong of assignment.strong) {
@@ -627,7 +627,7 @@ function readerWordAnnotations(options: {
         source,
         confidence: assignment.confidence,
         reason:
-          "Visible in reader mode because the calibrated hybrid pipeline attached it to an existing French word.",
+          "Visible in reader mode because the calibrated reader pipeline attached it to an existing French word.",
         diagnostics: [assignment.method, assignment.source],
         wordIndex,
         normalizedWord: options.tokens[wordIndex]?.normalized,
@@ -645,7 +645,7 @@ function readerEmptyAnnotations(options: {
   profile: TranslationProfile;
   referenceSupport: Map<string, ReferenceName[]>;
   allowedStrong: Set<string>;
-}): EnrichedStrongAnnotation[] {
+}): StrongLedgerAnnotation[] {
   return options.assignments.map((assignment) => ({
     id: "",
     strong: assignment.strong.toUpperCase(),
@@ -665,13 +665,13 @@ function readerEmptyAnnotations(options: {
 
 function advancedAnnotations(options: {
   complete: CompleteAlignmentResult;
-  tokens: EnrichedToken[];
+  tokens: StrongLedgerToken[];
   profile: TranslationProfile;
   referenceSupport: Map<string, ReferenceName[]>;
   allowedStrong: Set<string>;
   readerCounts: Map<string, number>;
-}): EnrichedStrongAnnotation[] {
-  const annotations: EnrichedStrongAnnotation[] = [];
+}): StrongLedgerAnnotation[] {
+  const annotations: StrongLedgerAnnotation[] = [];
 
   for (const [wordIndex, assignment] of options.complete.wordAssignments) {
     annotations.push(
@@ -703,11 +703,11 @@ function advancedAnnotations(options: {
 function completeWordAnnotations(options: {
   wordIndex: number;
   assignment: CompleteWordAssignment;
-  tokens: EnrichedToken[];
+  tokens: StrongLedgerToken[];
   profile: TranslationProfile;
   referenceSupport: Map<string, ReferenceName[]>;
   readerCounts: Map<string, number>;
-}): EnrichedStrongAnnotation[] {
+}): StrongLedgerAnnotation[] {
   return options.assignment.strong.map((strong, index) => {
     const normalizedStrong = strong.toUpperCase();
     const originalOccurrenceId =
@@ -745,7 +745,7 @@ function completeEmptyAnnotation(options: {
   profile: TranslationProfile;
   referenceSupport: Map<string, ReferenceName[]>;
   readerCounts: Map<string, number>;
-}): EnrichedStrongAnnotation {
+}): StrongLedgerAnnotation {
   const strong = options.assignment.strong.toUpperCase();
   const duplicate = consumeReaderStrong(options.readerCounts, strong);
   const technical = TECHNICAL_STRONG.has(strong);
@@ -771,10 +771,10 @@ function completeEmptyAnnotation(options: {
   };
 }
 
-async function writeEnrichedOutputs(
-  bible: EnrichedStrongBible,
-  ledgerByBook: Map<string, EnrichedVerse[]>,
-  paths: EnrichedStrongBible["outputPaths"]
+async function writeStrongLedgerOutputs(
+  bible: StrongLedger,
+  ledgerByBook: Map<string, StrongLedgerVerse[]>,
+  paths: StrongLedger["outputPaths"]
 ): Promise<void> {
   const split = bible.verses.length > 2000;
   const verseFiles = split
@@ -798,8 +798,8 @@ async function writeEnrichedOutputs(
 }
 
 async function writeCanonicalJson(
-  bible: EnrichedStrongBible,
-  paths: EnrichedStrongBible["outputPaths"],
+  bible: StrongLedger,
+  paths: StrongLedger["outputPaths"],
   verseFiles?: Array<{ bookId: string; path: string; verses: number }>
 ): Promise<void> {
   if (!verseFiles) {
@@ -811,7 +811,7 @@ async function writeCanonicalJson(
     return;
   }
 
-  const manifest: EnrichedStrongBible = {
+  const manifest: StrongLedger = {
     ...bible,
     split: true,
     verseFiles,
@@ -825,8 +825,8 @@ async function writeCanonicalJson(
 }
 
 async function writeDebugJson(
-  bible: EnrichedStrongBible,
-  paths: EnrichedStrongBible["outputPaths"],
+  bible: StrongLedger,
+  paths: StrongLedger["outputPaths"],
   verseFiles?: Array<{ bookId: string; path: string; verses: number }>
 ): Promise<void> {
   if (!verseFiles) {
@@ -838,7 +838,7 @@ async function writeDebugJson(
     return;
   }
 
-  const debug: EnrichedStrongBible = {
+  const debug: StrongLedger = {
     ...bible,
     split: true,
     verseFiles,
@@ -852,7 +852,7 @@ async function writeDebugJson(
 }
 
 async function writeVerseFiles(
-  ledgerByBook: Map<string, EnrichedVerse[]>,
+  ledgerByBook: Map<string, StrongLedgerVerse[]>,
   verseDir: string
 ): Promise<Array<{ bookId: string; path: string; verses: number }>> {
   await mkdir(verseDir, { recursive: true });
@@ -868,7 +868,7 @@ async function writeVerseFiles(
 }
 
 async function writeLedgerFiles(
-  ledgerByBook: Map<string, EnrichedVerse[]>,
+  ledgerByBook: Map<string, StrongLedgerVerse[]>,
   manifestPath: string
 ): Promise<void> {
   const ledgerDir = path.dirname(manifestPath);
@@ -916,7 +916,7 @@ async function writeLedgerManifestFromFiles(
 
 async function writeTsv(
   outputPath: string,
-  verses: EnrichedVerse[],
+  verses: StrongLedgerVerse[],
   mode: "reader" | "advanced"
 ): Promise<void> {
   const lines = ["book_id\tnum_chapter\tnum_verse\ttext"];
@@ -933,13 +933,13 @@ async function writeTsv(
 }
 
 function outputPaths(
-  options: Pick<EnrichedOptions, "bible" | "outputDir">
-): EnrichedStrongBible["outputPaths"] {
+  options: Pick<StrongLedgerOptions, "bible" | "outputDir">
+): StrongLedger["outputPaths"] {
   const outputDir = options.outputDir;
   return {
     canonical: path.join(
       outputDir,
-      `bible-${options.bible}-strong-enriched.json`
+      `bible-${options.bible}-strong-ledger.json`
     ),
     readerTsv: path.join(outputDir, `bible-${options.bible}-strong-reader.tsv`),
     advancedTsv: path.join(
@@ -953,12 +953,10 @@ function outputPaths(
   };
 }
 
-async function readEnrichedStrongBible(
-  canonicalPath: string
-): Promise<EnrichedStrongBible> {
+async function readStrongLedger(canonicalPath: string): Promise<StrongLedger> {
   const canonical = JSON.parse(
     await readFile(canonicalPath, "utf8")
-  ) as EnrichedStrongBible;
+  ) as StrongLedger;
 
   if (!canonical.split) {
     return canonical;
@@ -968,7 +966,7 @@ async function readEnrichedStrongBible(
     await Promise.all(
       (canonical.verseFiles ?? []).map(async (file) => {
         const content = await readFile(file.path, "utf8");
-        return JSON.parse(content) as EnrichedVerse[];
+        return JSON.parse(content) as StrongLedgerVerse[];
       })
     )
   ).flat();
@@ -981,13 +979,13 @@ async function readEnrichedStrongBible(
 
 function calculateVerseMetrics(
   wordCount: number,
-  annotations: EnrichedStrongAnnotation[],
+  annotations: StrongLedgerAnnotation[],
   expected: {
     references: string[];
     originalCount: number;
     originalRepresentedCount: number;
   }
-): EnrichedVerseMetrics {
+): StrongLedgerVerseMetrics {
   const readerAnnotations = annotations.filter(
     (annotation) => annotation.visibility === "reader"
   );
@@ -1050,10 +1048,10 @@ function calculateVerseMetrics(
 function aggregateMetrics(
   bible: string,
   onlyRef: string | undefined,
-  verses: EnrichedVerse[]
-): EnrichedMetrics {
+  verses: StrongLedgerVerse[]
+): StrongLedgerMetrics {
   const generatedAt = new Date().toISOString();
-  const books: Record<string, EnrichedBookMetrics> = {};
+  const books: Record<string, StrongLedgerBookMetrics> = {};
 
   for (const verse of verses) {
     const existing = books[verse.bookId] ?? emptyBookMetrics(verse.bookId);
@@ -1065,7 +1063,7 @@ function aggregateMetrics(
     finalizeCoverage(book);
   }
 
-  const metrics: EnrichedMetrics = {
+  const metrics: StrongLedgerMetrics = {
     bible,
     generatedAt,
     scope: onlyRef ?? "all",
@@ -1081,7 +1079,7 @@ function aggregateMetrics(
   return metrics;
 }
 
-function emptyBookMetrics(bookId: string): EnrichedBookMetrics {
+function emptyBookMetrics(bookId: string): StrongLedgerBookMetrics {
   return {
     bookId,
     ...emptyMetricCounts(),
@@ -1090,7 +1088,7 @@ function emptyBookMetrics(bookId: string): EnrichedBookMetrics {
 }
 
 function emptyMetricCounts(): Omit<
-  EnrichedMetrics,
+  StrongLedgerMetrics,
   "bible" | "generatedAt" | "scope" | "books"
 > {
   return {
@@ -1118,8 +1116,11 @@ function emptyMetricCounts(): Omit<
 }
 
 function addMetrics(
-  target: Omit<EnrichedMetrics, "bible" | "generatedAt" | "scope" | "books">,
-  source: EnrichedVerseMetrics
+  target: Omit<
+    StrongLedgerMetrics,
+    "bible" | "generatedAt" | "scope" | "books"
+  >,
+  source: StrongLedgerVerseMetrics
 ): void {
   target.verseCount += 1;
   target.wordCount += source.wordCount;
@@ -1143,7 +1144,7 @@ function addMetrics(
 }
 
 function finalizeCoverage(
-  target: Omit<EnrichedMetrics, "bible" | "generatedAt" | "scope" | "books">
+  target: Omit<StrongLedgerMetrics, "bible" | "generatedAt" | "scope" | "books">
 ): void {
   target.referenceStrongCoverage = roundRatio(
     target.referenceStrongRepresentedCount /
@@ -1220,7 +1221,7 @@ function collapseReferenceInventories(
 }
 
 function countVisibleReaderStrong(
-  annotations: EnrichedStrongAnnotation[]
+  annotations: StrongLedgerAnnotation[]
 ): Map<string, number> {
   return countByStrong(
     annotations
@@ -1264,7 +1265,7 @@ function countRepresentedOccurrences(
   return represented;
 }
 
-function countTaggedTokens(annotations: EnrichedStrongAnnotation[]): number {
+function countTaggedTokens(annotations: StrongLedgerAnnotation[]): number {
   const indexes = new Set<number>();
 
   for (const annotation of annotations) {
@@ -1291,7 +1292,7 @@ function countTaggedTokens(annotations: EnrichedStrongAnnotation[]): number {
 }
 
 function isVisibleInMode(
-  annotation: EnrichedStrongAnnotation,
+  annotation: StrongLedgerAnnotation,
   mode: "reader" | "advanced" | "debug"
 ): boolean {
   if (mode === "reader") return annotation.visibility === "reader";
@@ -1301,11 +1302,11 @@ function isVisibleInMode(
   );
 }
 
-function buildPhraseStartMap(annotations: EnrichedStrongAnnotation[]): Map<
+function buildPhraseStartMap(annotations: StrongLedgerAnnotation[]): Map<
   number,
   {
     endWordIndex: number;
-    annotations: EnrichedStrongAnnotation[];
+    annotations: StrongLedgerAnnotation[];
   }
 > {
   const phrases = groupAnnotations(
@@ -1321,7 +1322,7 @@ function buildPhraseStartMap(annotations: EnrichedStrongAnnotation[]): Map<
     number,
     {
       endWordIndex: number;
-      annotations: EnrichedStrongAnnotation[];
+      annotations: StrongLedgerAnnotation[];
     }
   >();
   let coveredUntil = -1;
@@ -1342,9 +1343,7 @@ function buildPhraseStartMap(annotations: EnrichedStrongAnnotation[]): Map<
   return byStart;
 }
 
-function renderEmptyAnnotations(
-  annotations: EnrichedStrongAnnotation[]
-): string {
+function renderEmptyAnnotations(annotations: StrongLedgerAnnotation[]): string {
   return annotations
     .map(
       (annotation) => `${openStrongTag([annotation], annotation.placement)}</w>`
@@ -1353,7 +1352,7 @@ function renderEmptyAnnotations(
 }
 
 function openStrongTag(
-  annotations: EnrichedStrongAnnotation[],
+  annotations: StrongLedgerAnnotation[],
   target: string
 ): string {
   const strong = annotations.map((annotation) => annotation.strong).join(" ");
@@ -1383,7 +1382,7 @@ function openStrongTag(
   )}">`;
 }
 
-function groupAnnotations<T extends EnrichedStrongAnnotation>(
+function groupAnnotations<T extends StrongLedgerAnnotation>(
   annotations: T[],
   key: (annotation: T) => string
 ): Map<string, T[]> {
@@ -1398,8 +1397,8 @@ function groupAnnotations<T extends EnrichedStrongAnnotation>(
   return grouped;
 }
 
-function getWordTokens(segments: TextSegment[]): EnrichedToken[] {
-  const tokens: EnrichedToken[] = [];
+function getWordTokens(segments: TextSegment[]): StrongLedgerToken[] {
+  const tokens: StrongLedgerToken[] = [];
   let wordIndex = -1;
 
   for (const segment of segments) {
@@ -1416,7 +1415,7 @@ function getWordTokens(segments: TextSegment[]): EnrichedToken[] {
 }
 
 function normalizedPhrase(
-  tokens: EnrichedToken[],
+  tokens: StrongLedgerToken[],
   startWordIndex: number,
   endWordIndex: number
 ): string {
@@ -1496,7 +1495,7 @@ function mergeOriginalSources(
 
 function filterVerses(
   verses: BibleVerse[],
-  options: EnrichedOptions
+  options: StrongLedgerOptions
 ): BibleVerse[] {
   if (!options.onlyRef) {
     return verses;
@@ -1545,14 +1544,14 @@ function parseArgs(argv: string[]): {
   }
 
   const bible = args.get("bible") ?? "nbs";
-  const mode = args.get("mode") === "advanced" ? "advanced" : "reader";
+  const requestedView = args.get("view") ?? args.get("mode");
+  const mode = requestedView === "advanced" ? "advanced" : "reader";
 
   return {
     command,
     bible,
     onlyRef: args.get("only"),
-    outputDir:
-      args.get("output-dir") ?? path.join("outputs", "enriched", bible),
+    outputDir: args.get("output-dir") ?? path.join("outputs", "strong", bible),
     mode
   };
 }
@@ -1561,7 +1560,7 @@ async function main(): Promise<void> {
   const args = parseArgs(process.argv);
 
   if (args.command === "export") {
-    const outputPath = await exportEnrichedStrongBible({
+    const outputPath = await exportStrongLedger({
       bible: args.bible,
       outputDir: args.outputDir,
       mode: args.mode
@@ -1571,7 +1570,7 @@ async function main(): Promise<void> {
   }
 
   const biblePath = path.join("data", "bibles", `bible-${args.bible}.json`);
-  const result = await generateEnrichedStrongBible({
+  const result = await generateStrongLedger({
     bible: args.bible,
     biblePath,
     outputDir: args.outputDir,
@@ -1579,7 +1578,7 @@ async function main(): Promise<void> {
   });
 
   console.log(
-    `Generated canonical enriched Bible: ${result.outputPaths.canonical}`
+    `Generated canonical Strong ledger: ${result.outputPaths.canonical}`
   );
   console.log(`Reader TSV: ${result.outputPaths.readerTsv}`);
   console.log(`Advanced TSV: ${result.outputPaths.advancedTsv}`);
@@ -1590,7 +1589,7 @@ async function main(): Promise<void> {
 
 if (
   process.argv.some((arg) =>
-    arg.replaceAll("\\", "/").endsWith("src/enrichedStrongBible.ts")
+    arg.replaceAll("\\", "/").endsWith("src/strongLedger.ts")
   )
 ) {
   main().catch((error) => {

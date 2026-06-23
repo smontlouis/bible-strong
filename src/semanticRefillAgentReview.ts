@@ -3,10 +3,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { type CuratedStrongOverride } from "./curatedStrongOverrides.js";
-import {
-  type EnrichedStrongBible,
-  type EnrichedVerse
-} from "./enrichedStrongBible.js";
+import { type StrongLedger, type StrongLedgerVerse } from "./strongLedger.js";
 import {
   buildSemanticRefillLlmBatch,
   evaluateSemanticRefillLlmDecisions,
@@ -38,7 +35,7 @@ async function validateAgentReview(options: {
   outputDir: string;
   bible: string;
   candidatesPath: string;
-  enrichedDir: string;
+  ledgerDir: string;
   overridesPath: string;
   apply: boolean;
 }): Promise<AgentReviewResult> {
@@ -57,7 +54,7 @@ async function validateAgentReview(options: {
     candidates,
     rawDecisions
   });
-  const verses = await readBookVerses(options.enrichedDir, books);
+  const verses = await readBookVerses(options.ledgerDir, options.bible, books);
   const batch = buildSemanticRefillLlmBatch({
     bible: options.bible,
     scope: books.join(","),
@@ -194,16 +191,17 @@ function patchUnknownIds(options: {
 }
 
 async function readBookVerses(
-  enrichedDir: string,
+  ledgerDir: string,
+  bible: string,
   books: string[]
-): Promise<EnrichedVerse[]> {
+): Promise<StrongLedgerVerse[]> {
   const canonicalPath = path.join(
-    enrichedDir,
-    "bible-nbs-strong-enriched.json"
+    ledgerDir,
+    `bible-${bible}-strong-ledger.json`
   );
   const canonical = JSON.parse(
     await readFile(canonicalPath, "utf8")
-  ) as EnrichedStrongBible;
+  ) as StrongLedger;
 
   if (!canonical.split) {
     return canonical.verses.filter((verse) => books.includes(verse.bookId));
@@ -216,7 +214,7 @@ async function readBookVerses(
     await Promise.all(
       files.map(async (file) => {
         const content = await readFile(file.path, "utf8");
-        return JSON.parse(content) as EnrichedVerse[];
+        return JSON.parse(content) as StrongLedgerVerse[];
       })
     )
   ).flat();
@@ -300,7 +298,7 @@ async function main(): Promise<void> {
   const inputPath = readStringArg(
     args,
     "input",
-    "outputs/semantic-refill/nbs/agent-review/agent-review.json"
+    "outputs/gap-review/nbs/agent-review/agent-review.json"
   );
   const outputDir = readStringArg(
     args,
@@ -314,9 +312,9 @@ async function main(): Promise<void> {
     candidatesPath: readStringArg(
       args,
       "candidates",
-      "outputs/semantic-refill/nbs/post-lexicon-v2-final/semantic-refill-candidates.json"
+      "outputs/gap-review/nbs/post-lexicon-v2-final/gap-review-candidates.json"
     ),
-    enrichedDir: readStringArg(args, "enriched-dir", "outputs/enriched/nbs"),
+    ledgerDir: readStringArg(args, "ledger-dir", "outputs/strong/nbs"),
     overridesPath: readStringArg(
       args,
       "overrides",

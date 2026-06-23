@@ -1,6 +1,7 @@
 # Bible Lexicon Maker
 
-Utilities for building Bible lexicon data from Bible JSON files and Strong CSV files.
+Utilities for building Bible lexicon data from Bible JSON files and Strong CSV
+files.
 
 ## Setup
 
@@ -8,20 +9,49 @@ Utilities for building Bible lexicon data from Bible JSON files and Strong CSV f
 npm install
 ```
 
-## Recommended Scripts
+## Recommended Workflow
+
+Generate the canonical Strong ledger first. This is the production source of
+truth and includes both `reader` and `advanced` views:
 
 ```sh
-npm run dev
-npm run generate:strong:hybrid -- --bible nbs
-npm run generate:strong:enriched -- --bible nbs
-npm run strong:semantic-refill -- --bible nbs --only Gen.3 --audit --output-dir outputs/semantic-refill/nbs/Gen.3
-npm run strong:semantic-refill:agent-packet -- --bible nbs --only Gen.3 --candidates outputs/semantic-refill/nbs/Gen.3/semantic-refill-candidates.json
-npm run strong:semantic-refill:agent-review -- --bible nbs --input outputs/semantic-refill/nbs/agent-review/review.json --candidates outputs/semantic-refill/nbs/Gen.3/semantic-refill-candidates.json
-npm run generate:strong:hybrid -- --bible nbs --only Gen --llm --llm-limit 250 --output-dir outputs/llm-books/nbs/Gen
-npm run review:llm -- --bible nbs --diagnostics outputs/llm-books/nbs/Gen/bible-nbs-strong-hybrid.hard-verses.json --review outputs/llm-books/nbs/Gen/llm-review-nbs-Gen.json --only Gen
-npm run evaluate:strong:hybrid -- --gold Sg1910 --limit 1000
-npm run evaluate:strong:hybrid -- --gold Sg1910
-npm run llm:transfer -- --source Darby --target nbs --only Gen.1 --limit 5
+npm run strong:generate -- --bible nbs
+```
+
+Export either view from the canonical ledger:
+
+```sh
+npm run strong:export -- --bible nbs --view reader
+npm run strong:export -- --bible nbs --view advanced
+```
+
+Evaluate reader-style output against masked gold Strong Bibles:
+
+```sh
+npm run strong:evaluate -- --gold Sg1910 --limit 1000
+npm run strong:evaluate -- --gold Darby --limit 1000
+npm run strong:evaluate -- --gold DarbyR --limit 1000
+```
+
+For semantic gaps that remain in the ledger, build a constrained review packet
+before using any LLM:
+
+```sh
+npm run strong:review:gaps -- --bible nbs --only Gen.3 --audit --output-dir outputs/gap-review/nbs/Gen.3
+npm run strong:review:gaps:packet -- --bible nbs --only Gen.3 --candidates outputs/gap-review/nbs/Gen.3/gap-review-candidates.json
+npm run strong:review:gaps:apply -- --bible nbs --input outputs/gap-review/nbs/agent-review/review.json --candidates outputs/gap-review/nbs/Gen.3/gap-review-candidates.json
+```
+
+For residual hard verses, use LLM review as a bounded suggestion workflow:
+
+```sh
+npm run strong:review:llm -- --bible nbs --diagnostics outputs/llm-books/nbs/Gen/bible-nbs-strong-diagnostic.hard-verses.json --review outputs/llm-books/nbs/Gen/llm-review-nbs-Gen.json --only Gen
+npm run strong:llm:transfer -- --source Darby --target nbs --only Gen.1 --limit 5
+```
+
+Useful development commands:
+
+```sh
 npm run viewer
 npm run build
 npm run typecheck
@@ -30,26 +60,49 @@ npm test
 npm run format
 ```
 
-`npm run generate:strong:hybrid` is the recommended production-local pipeline. It implements the style 4 calibrated hybrid policy: one common backend, but generation and diagnostics are adapted to the translation family. It combines reader alignment, original WLC/SBLGNT confirmation, learned multi-word phrase transfer, curated LLM-transfer overrides, active translation profiles, and metrics for visible, empty, multi-word, and original-representation coverage.
+## Concepts
 
-`npm run generate:strong:reader` remains available as a simple baseline calibrated against `Sg1910`, `Darby`, and `DarbyR`.
+There is one intended production artifact:
 
-`npm run viewer` starts the local UI server. Use `/viewer/` for TSV/CSV Strong inspection, `/viewer/lexicon.html` for the FR/EN Strong lexicon, and `/viewer/review.html` for LLM review.
+```text
+outputs/strong/<bible>/bible-<bible>-strong-ledger.json
+```
 
-For LLM review, work book by book. Run `generate:strong:hybrid -- --only <Book> --llm`, then `npm run review:llm` against that diagnostics file. High-confidence mechanically safe suggestions are pre-accepted; weak function-word/particle cases stay pending. Load the review JSON in `/viewer/review.html`, reject bad auto-accepted suggestions, decide pending suggestions, then click `Enregistrer décisions`. The reviewer writes accepted suggestions directly to `data/curated-strong-overrides.json`.
+That canonical ledger records each Strong annotation with placement, visibility,
+source, confidence, diagnostics, and reason.
 
-For semantic holes that remain as advanced/empty Strong annotations, use the internal-agent semantic-refill workflow. Generate an enriched Bible, run `strong:semantic-refill --audit`, build a procedural packet with `strong:semantic-refill:agent-packet`, ask two agents to propose decisions, validate each JSON with `strong:semantic-refill:agent-review`, arbitrate, apply only the validated final review, then regenerate. Agent packets include blocked occupied targets and nearby open targets so agents do not stack a missing Strong onto a word that already carries another Strong when a better carrier exists.
+Two views are derived from it:
+
+- `reader`: readable Strong tagging for normal use;
+- `advanced`: fuller study view with empty, technical, duplicate, and
+  original-complete annotations.
+
+Legacy command aliases were removed. Use the `strong:*` command surface.
+
+## Review
+
+LLM review should not generate a Bible directly. Work from deterministic
+evidence: a hard-verse file, a gap-review packet, or a masked-gold transfer
+experiment. Accepted decisions must be validated and saved as curated overrides.
+
+`npm run viewer` starts the local UI server. Use `/viewer/` for TSV/CSV Strong
+inspection, `/viewer/lexicon.html` for the FR/EN Strong lexicon, and
+`/viewer/review.html` for LLM review.
 
 ## Reports
 
-- `reports/hybrid-strong-report.md`: current pipeline status and final metrics.
-- `reports/hybrid-gold-evaluation-report.md`: full masked-gold evaluation on `Sg1910`, `Darby`, and `DarbyR`.
+- `reports/strong-diagnostic-report.md`: diagnostic pipeline status and metrics.
+- `reports/strong-gold-evaluation-report.md`: masked-gold evaluation on
+  `Sg1910`, `Darby`, and `DarbyR`.
 - `reports/llm-hard-verse-review.md`: bounded LLM review on true hard verses.
-- `reports/strong-bible-project-history.md`: historical record of the pipeline, including the semantic-refill agent workflow.
+- `reports/strong-bible-project-history.md`: historical record of the pipeline,
+  including gap-review agent workflows.
 
 ## Data
 
 - `data/bibles/`: Bible translations in JSON format.
 - `data/strongs/`: Strong source files in CSV format.
+- `data/dictionaries/`: local Strong/STEP dictionaries.
 
-Generated Bible outputs are written to `outputs/` by default. This directory is ignored by Git because generated Strong-tagged Bible text is a local artifact.
+Generated Bible outputs are written to `outputs/` by default. This directory is
+ignored by Git because generated Strong-tagged Bible text is a local artifact.

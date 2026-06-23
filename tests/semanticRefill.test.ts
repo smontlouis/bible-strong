@@ -7,9 +7,9 @@ import {
   type SemanticRefillDecision
 } from "../src/semanticRefill.js";
 import {
-  type EnrichedStrongAnnotation,
-  type EnrichedVerse
-} from "../src/enrichedStrongBible.js";
+  type StrongLedgerAnnotation,
+  type StrongLedgerVerse
+} from "../src/strongLedger.js";
 
 test("semantic refill resolves required NBS Genesis phrase and word cases", () => {
   const result = buildSemanticRefill({
@@ -164,7 +164,7 @@ function assertDecision(
   );
 }
 
-function genesisOneSix(): EnrichedVerse {
+function genesisOneSix(): StrongLedgerVerse {
   return verse({
     ref: "Gen.1.6",
     text: "Dieu dit : Qu’il y ait une voûte au milieu des eaux pour séparer les eaux des eaux !",
@@ -219,7 +219,7 @@ function genesisOneSix(): EnrichedVerse {
   });
 }
 
-function genesisOneTwenty(): EnrichedVerse {
+function genesisOneTwenty(): StrongLedgerVerse {
   return verse({
     ref: "Gen.1.20",
     text: "Dieu dit : Que les eaux grouillent de petites bêtes, d’êtres vivants, et que des oiseaux volent au-dessus de la terre, face à la voûte céleste !",
@@ -282,7 +282,7 @@ function genesisOneTwenty(): EnrichedVerse {
   });
 }
 
-function genesisOneTwentySeven(): EnrichedVerse {
+function genesisOneTwentySeven(): StrongLedgerVerse {
   return verse({
     ref: "Gen.1.27",
     text: "Dieu créa les humains à son image : il les créa à l’image de Dieu ; homme et femme il les créa.",
@@ -340,10 +340,10 @@ function verse(options: {
   ref: string;
   text: string;
   tokens: string[];
-  annotations: EnrichedStrongAnnotation[];
+  annotations: StrongLedgerAnnotation[];
   original: string[];
   references: string[];
-}): EnrichedVerse {
+}): StrongLedgerVerse {
   const [bookId, chapterVerse] = options.ref.split(".");
   const [chapter, verseNumber] = chapterVerse.split(":");
   return {
@@ -400,9 +400,9 @@ function verse(options: {
 }
 
 function annotation(
-  partial: Partial<EnrichedStrongAnnotation> &
-    Pick<EnrichedStrongAnnotation, "strong" | "visibility" | "placement">
-): EnrichedStrongAnnotation {
+  partial: Partial<StrongLedgerAnnotation> &
+    Pick<StrongLedgerAnnotation, "strong" | "visibility" | "placement">
+): StrongLedgerAnnotation {
   return {
     id: "",
     source: "original-complete",

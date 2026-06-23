@@ -2,54 +2,61 @@
 
 ## Commands
 
-Optional reader baseline:
+Canonical no-LLM Strong ledger with reader and advanced views:
 
 ```sh
-npm run generate:strong:reader -- --bible <id>
+npm run strong:generate -- --bible <id>
 ```
 
-Deterministic hybrid output with hard-verse diagnostics:
+Export an existing canonical output again if needed:
 
 ```sh
-npm run generate:strong:hybrid -- --bible <id>
+npm run strong:export -- --bible <id> --view reader
+npm run strong:export -- --bible <id> --view advanced
 ```
 
-Masked gold evaluation of the deterministic hybrid backend:
+Diagnostic output with hard-verse reports:
 
 ```sh
-npm run evaluate:strong:hybrid -- --gold Sg1910 --limit 1000
-npm run evaluate:strong:hybrid -- --gold Darby --limit 1000
-npm run evaluate:strong:hybrid -- --gold DarbyR --limit 1000
+npm run strong:diagnose -- --bible <id>
+```
+
+Masked gold evaluation of the diagnostic backend:
+
+```sh
+npm run strong:evaluate -- --gold Sg1910 --limit 1000
+npm run strong:evaluate -- --gold Darby --limit 1000
+npm run strong:evaluate -- --gold DarbyR --limit 1000
 ```
 
 Full gold evaluation for production-maturity reports:
 
 ```sh
-npm run evaluate:strong:hybrid -- --gold Sg1910
-npm run evaluate:strong:hybrid -- --gold Darby
-npm run evaluate:strong:hybrid -- --gold DarbyR
+npm run strong:evaluate -- --gold Sg1910
+npm run strong:evaluate -- --gold Darby
+npm run strong:evaluate -- --gold DarbyR
 ```
 
-Hybrid plus LLM suggestions only:
+Diagnostic plus LLM suggestions only:
 
 ```sh
-npm run generate:strong:hybrid -- --bible <id> --llm --llm-limit 25
+npm run strong:diagnose -- --bible <id> --llm --llm-limit 25
 ```
 
 Book-by-book LLM batch:
 
 ```sh
-npm run generate:strong:hybrid -- --bible <id> --only Gen --llm --llm-limit 250 --output-dir outputs/llm-books/<id>/Gen
-npm run review:llm -- --bible <id> --diagnostics outputs/llm-books/<id>/Gen/bible-<id>-strong-hybrid.hard-verses.json --review outputs/llm-books/<id>/Gen/llm-review-<id>-Gen.json --only Gen
+npm run strong:diagnose -- --bible <id> --only Gen --llm --llm-limit 250 --output-dir outputs/llm-books/<id>/Gen
+npm run strong:review:llm -- --bible <id> --diagnostics outputs/llm-books/<id>/Gen/bible-<id>-strong-diagnostic.hard-verses.json --review outputs/llm-books/<id>/Gen/llm-review-<id>-Gen.json --only Gen
 ```
 
 Concurrent all-books LLM batch:
 
 ```sh
 set -a; . ./.env; set +a
-AI_GATEWAY_TIMEOUT_MS=120000 npm run review:llm:books -- --bible <id> --books all --concurrency 3 --llm-limit 25 --model deepseek/deepseek-v4-flash --skip-existing
-AI_GATEWAY_TIMEOUT_MS=120000 npm run review:llm:books -- --bible <id> --books Gen,Exod,Lev --concurrency 2 --llm-limit 100 --model deepseek/deepseek-v4-flash --skip-existing
-npm run review:llm:books -- --bible <id> --books all --skip-existing
+AI_GATEWAY_TIMEOUT_MS=120000 npm run strong:review:llm:books -- --bible <id> --books all --concurrency 3 --llm-limit 25 --model deepseek/deepseek-v4-flash --skip-existing
+AI_GATEWAY_TIMEOUT_MS=120000 npm run strong:review:llm:books -- --bible <id> --books Gen,Exod,Lev --concurrency 2 --llm-limit 100 --model deepseek/deepseek-v4-flash --skip-existing
+npm run strong:review:llm:books -- --bible <id> --books all --skip-existing
 ```
 
 Use the small complete pass first. A higher `--llm-limit` should be a targeted second pass on selected books, not the default for every book of every Bible.
@@ -72,7 +79,7 @@ The reviewer can also load a local folder of `llm-review-*.json` files. It defau
 Prepare a human review queue from LLM suggestions:
 
 ```sh
-npm run review:llm -- --bible <id>
+npm run strong:review:llm -- --bible <id>
 npm run viewer
 ```
 
@@ -80,58 +87,58 @@ Save accepted decisions in the viewer, then regenerate:
 
 ```sh
 npm run viewer
-npm run generate:strong:hybrid -- --bible <id>
+npm run strong:generate -- --bible <id>
 ```
 
 Reference-transfer LLM to target:
 
 ```sh
-npm run llm:transfer -- --source Darby --target <id> --only Gen.1 --limit 5
+npm run strong:llm:transfer -- --source Darby --target <id> --only Gen.1 --limit 5
 ```
 
 Reference-transfer gold evaluation:
 
 ```sh
-npm run llm:transfer -- --source Darby --gold Sg1910 --only Gen.1 --limit 5
-npm run llm:transfer -- --source Darby --gold DarbyR --only Gen.1 --limit 5
+npm run strong:llm:transfer -- --source Darby --gold Sg1910 --only Gen.1 --limit 5
+npm run strong:llm:transfer -- --source Darby --gold DarbyR --only Gen.1 --limit 5
 ```
 
-Internal-agent semantic-refill packet:
+Internal-agent gap-review packet:
 
 ```sh
-npm run generate:strong:enriched -- --bible <id>
-npm run strong:semantic-refill -- \
+npm run strong:generate -- --bible <id>
+npm run strong:review:gaps -- \
   --bible <id> \
   --only <BookOrScope> \
   --audit \
-  --output-dir outputs/semantic-refill/<id>/<scope>
-npm run strong:semantic-refill:agent-packet -- \
+  --output-dir outputs/gap-review/<id>/<scope>
+npm run strong:review:gaps:packet -- \
   --bible <id> \
   --only <BookOrScope> \
-  --candidates outputs/semantic-refill/<id>/<scope>/semantic-refill-candidates.json \
-  --output outputs/semantic-refill/<id>/agent-packets/agent-packet-<id>-<scope>.json
+  --candidates outputs/gap-review/<id>/<scope>/gap-review-candidates.json \
+  --output outputs/gap-review/<id>/agent-packets/agent-packet-<id>-<scope>.json
 ```
 
 Validate an agent or arbiter review:
 
 ```sh
-npm run strong:semantic-refill:agent-review -- \
+npm run strong:review:gaps:apply -- \
   --bible <id> \
-  --input outputs/semantic-refill/<id>/agent-review/<review>.json \
-  --output-dir outputs/semantic-refill/<id>/agent-review/<review>-validated \
-  --candidates outputs/semantic-refill/<id>/<scope>/semantic-refill-candidates.json
+  --input outputs/gap-review/<id>/agent-review/<review>.json \
+  --output-dir outputs/gap-review/<id>/agent-review/<review>-validated \
+  --candidates outputs/gap-review/<id>/<scope>/gap-review-candidates.json
 ```
 
 Apply only the final validated arbiter decisions:
 
 ```sh
-npm run strong:semantic-refill:agent-review -- \
+npm run strong:review:gaps:apply -- \
   --bible <id> \
-  --input outputs/semantic-refill/<id>/agent-review/<arbiter>.json \
-  --output-dir outputs/semantic-refill/<id>/agent-review/<arbiter>-applied \
-  --candidates outputs/semantic-refill/<id>/<scope>/semantic-refill-candidates.json \
+  --input outputs/gap-review/<id>/agent-review/<arbiter>.json \
+  --output-dir outputs/gap-review/<id>/agent-review/<arbiter>-applied \
+  --candidates outputs/gap-review/<id>/<scope>/gap-review-candidates.json \
   --apply
-npm run generate:strong:enriched -- --bible <id>
+npm run strong:generate -- --bible <id>
 ```
 
 S21 concordance comparison:
@@ -156,7 +163,7 @@ record that fact in the output folder/report and do not treat the result as the
 default production evidence.
 
 This default was selected by the Gen.1 benchmark documented in
-`reports/semantic-refill-model-benchmark-gen1.md`. It is combo A:
+`reports/gap-review-model-benchmark-gen1.md`. It is combo A:
 
 - same proposers as the high-quality baseline;
 - arbiter downgraded from `gpt-5.5 high` to `gpt-5.5 medium`;
@@ -174,7 +181,7 @@ codes present in at least one reference Strong Bible when the goal is
 reader-style parity. Original-only candidates may be reported separately, but
 they must not force the visible reader style.
 
-The semantic-refill candidate set is not limited to missing Strong codes. It
+The gap-review candidate set is not limited to missing Strong codes. It
 also emits `auditKind="relocation"` items for visible reader tags that look
 misplaced. A relocation candidate carries `currentTarget` plus alternative
 `deterministicCandidates`; the proposer should return `duplicate` only when the
@@ -183,23 +190,40 @@ existing target is correct. Otherwise it should return `word`, `phrase`, or
 already visible on `homme` but should move to `humains`, leaving `homme` for
 `H2145`.
 
-## Choosing The Backend
+## Choosing The Command
 
-Use `reader` when:
+Use `strong:generate` when:
 
-- you need the simplest fluent Strong Bible;
-- you want low empty-tag rate;
-- the target is close to `Sg1910`, `Darby`, or `DarbyR`.
+- the user asks for the best production-quality workflow;
+- you need the canonical Strong ledger;
+- you need one artifact that can produce both `reader` and `advanced` views;
+- you need auditable placement, visibility, source, confidence, and diagnostics.
 
-Use `hybrid` when:
+Use `strong:export` when:
 
-- you want hard-verse diagnostics;
-- you want original-aware metrics;
-- you want deterministic multi-word phrase transfer;
-- you want translation-profile-aware interpretation;
-- you may later run LLM review on difficult verses.
+- a TSV is needed for the viewer, distribution, or downstream tools;
+- the canonical ledger already exists;
+- the caller needs either `--view reader` or `--view advanced`.
 
-Use `llm:transfer` when:
+Use `strong:diagnose` when:
+
+- you need hard-verse diagnostics;
+- you need current diagnostic metrics;
+- you are preparing bounded LLM review inputs.
+
+Use `strong:evaluate` when:
+
+- alignment logic changed;
+- you need masked-gold precision, recall, and F1 against `Sg1910`, `Darby`, or
+  `DarbyR`.
+
+Use `strong:review:gaps` and `strong:review:gaps:*` when:
+
+- the ledger already contains an advanced/technical/empty Strong that needs a
+  reader placement decision;
+- you want a constrained packet for agents instead of a free-form LLM task.
+
+Use `strong:llm:transfer` when:
 
 - the target translation differs from the references enough that deterministic transfer misses obvious semantic matches;
 - you need a measurable LLM path;
@@ -224,7 +248,7 @@ Always report at least:
 - LLM attempted count if any;
 - LLM accepted/suggested count if any.
 
-## Style 4: Calibrated Hybrid Profiles
+## Translation Profiles
 
 Do not compare every French Bible as if it were Darby.
 
@@ -235,7 +259,7 @@ Current profiles:
 - `s21`: formal-readable modern Segond-family translation, medium density and readable tags.
 - `bds`: dynamic-equivalence translation, semantic density, fewer learned function-word tags, stricter empty-word consensus.
 
-The hybrid metrics include `translationProfile`. Its settings affect generation and diagnostics:
+The diagnostic metrics include `translationProfile`. Its settings affect generation and diagnostics:
 
 - learned enrichment threshold;
 - maximum Strong codes per visible word;
@@ -261,7 +285,7 @@ For gold evaluation, report:
 - evaluated verse count;
 - obvious failure modes.
 
-`evaluate:strong:hybrid` masks a known Strong Bible by stripping its tags, runs the hybrid backend without using that Bible as a reference, and compares predicted Strong occurrences to the original gold Strong occurrences.
+`strong:evaluate` masks a known Strong Bible by stripping its tags, runs the current diagnostic backend without using that Bible as a reference, and compares predicted Strong occurrences to the original gold Strong occurrences.
 
 ## LLM Policy
 
@@ -269,13 +293,16 @@ LLM should not be the primary generator.
 
 Recommended LLM strategy:
 
-1. Run deterministic generation.
-2. Run bounded hybrid LLM suggestions by book with `--only <Book> --llm --llm-limit <n> --output-dir outputs/llm-books/<id>/<Book>`.
-3. Run `npm run review:llm` against that book diagnostics file.
-4. High-confidence mechanically safe suggestions are pre-marked `accept`; weak function-word/particle cases remain `pending`.
-5. Open the viewer, load the review JSON, reject any bad auto-accepted suggestions, decide pending suggestions, and click `Enregistrer décisions`.
-6. Regenerate the full Bible with `npm run generate:strong:hybrid -- --bible <id>`.
-7. Optionally run `llm:transfer --gold` before large batches to evaluate prompt quality.
+1. Run deterministic ledger generation.
+2. Inspect metrics, hard verses, and the canonical ledger.
+3. Prefer gap review when the Strong already exists in advanced/debug but
+   lacks a good reader placement.
+4. Run bounded diagnostic LLM suggestions by book with `--only <Book> --llm --llm-limit <n> --output-dir outputs/llm-books/<id>/<Book>` only for residual hard cases.
+5. Run `npm run strong:review:llm` against that book diagnostics file.
+6. High-confidence mechanically safe suggestions are pre-marked `accept`; weak function-word/particle cases remain `pending`.
+7. Open the viewer, load the review JSON, reject any bad auto-accepted suggestions, decide pending suggestions, and click `Enregistrer décisions`.
+8. Regenerate the full Bible with `npm run strong:generate -- --bible <id>`.
+9. Optionally run `strong:llm:transfer --gold` before large batches to evaluate prompt quality.
 
 Manual correction is supported in the review UI only while an item is `À revoir`. If the LLM has the right Strong code but attached it to the wrong French token, set the item to `À revoir`, click the intended word in the verse context or edit `Index cible`, `Mot normalisé`, and `Strong`, then set the item to `Accepter`. Example: if `H8033` should be attached to `Là`, switch the item to `À revoir`, click `Là` in the context, verify that `Strong` is `H8033`, accept the item, and save decisions. The saved override is guarded by the final word index and normalized word, so it will only reapply if the target Bible verse still matches.
 
@@ -288,8 +315,8 @@ Default review pre-acceptance is conservative:
 Override the threshold if needed:
 
 ```sh
-npm run review:llm -- --bible <id> --auto-accept-threshold 0.88
-npm run review:llm -- --bible <id> --auto-accept false
+npm run strong:review:llm -- --bible <id> --auto-accept-threshold 0.88
+npm run strong:review:llm -- --bible <id> --auto-accept false
 ```
 
 Do not let the LLM invent Strong codes. Valid suggestions must use Strong codes present in either:
@@ -301,14 +328,14 @@ Do not let the LLM invent Strong codes. Valid suggestions must use Strong codes 
 
 The production path is not "LLM says yes, TSV changes." The production path is:
 
-1. Generate the current hybrid TSV.
-2. Run `npm run generate:strong:hybrid -- --bible <id> --only <Book> --llm --llm-limit <n> --output-dir outputs/llm-books/<id>/<Book>`.
-3. Run `npm run review:llm -- --bible <id> --diagnostics outputs/llm-books/<id>/<Book>/bible-<id>-strong-hybrid.hard-verses.json --review outputs/llm-books/<id>/<Book>/llm-review-<id>-<Book>.json --only <Book>`.
+1. Generate the current diagnostic hard-verse report.
+2. Run `npm run strong:diagnose -- --bible <id> --only <Book> --llm --llm-limit <n> --output-dir outputs/llm-books/<id>/<Book>`.
+3. Run `npm run strong:review:llm -- --bible <id> --diagnostics outputs/llm-books/<id>/<Book>/bible-<id>-strong-diagnostic.hard-verses.json --review outputs/llm-books/<id>/<Book>/llm-review-<id>-<Book>.json --only <Book>`.
 4. Open `http://localhost:4173/viewer/review.html` with `npm run viewer`.
 5. Load `outputs/llm-review-<id>.json` in the "Charger une revue LLM" drop zone.
 6. Accept only defensible suggestions; reject token-index drift, weak function-word tags, duplicate over-tagging, and unrendered original particles that should stay empty or absent.
 7. Click `Enregistrer décisions` in the viewer.
-8. Regenerate with `npm run generate:strong:hybrid -- --bible <id>`.
+8. Regenerate with `npm run strong:generate -- --bible <id>`.
 
 Each override must be guarded by:
 
@@ -321,26 +348,26 @@ Each override must be guarded by:
 - source;
 - reason.
 
-The viewer writes accepted decisions to `data/curated-strong-overrides.json`. The CLI `review:llm:apply` remains available for scripted/offline decision files. This makes LLM work reproducible and auditable: later agents do not need to re-ask the model for decisions already reviewed.
+The viewer writes accepted decisions to `data/curated-strong-overrides.json`. The CLI `strong:review:llm:apply` remains available for scripted/offline decision files. This makes LLM work reproducible and auditable: later agents do not need to re-ask the model for decisions already reviewed.
 
 ## Internal-Agent Semantic Refill
 
-Use this workflow when the enriched Bible already contains the Strong in
+Use this workflow when the canonical ledger already contains the Strong in
 `advanced` or `debug`, but the reader mode still has semantic holes. This is the
 right path for cases like a missing visible content Strong, not for rebuilding
 the whole Bible from scratch.
 
 The production shape is:
 
-1. Generate or refresh the canonical enriched Bible.
-2. Run `strong:semantic-refill --audit` to create candidate and pending files.
-3. Build a procedural packet with `strong:semantic-refill:agent-packet`.
+1. Generate or refresh the canonical Strong ledger.
+2. Run `strong:review:gaps --audit` to create candidate and pending files.
+3. Build a procedural packet with `strong:review:gaps:packet`.
 4. Send one chapter packet to two independent proposer agents.
-5. Validate each proposer with `strong:semantic-refill:agent-review`.
+5. Validate each proposer with `strong:review:gaps:apply`.
 6. Send packet + proposals + validations to an arbiter.
 7. Validate the arbiter output.
 8. Apply only validated arbiter decisions.
-9. Regenerate the enriched Bible.
+9. Regenerate the canonical Strong ledger.
 10. Inspect the result in the viewer.
 
 Prefer chapter-sized packets. They preserve enough narrative context while
@@ -444,8 +471,8 @@ Useful existing reports:
 
 - `reports/reader-strong-report.md`
 - `reports/s21-concordance-comparison.md`
-- `reports/hybrid-strong-report.md`
-- `reports/hybrid-gold-evaluation-report.md`
+- `reports/strong-diagnostic-report.md`
+- `reports/strong-gold-evaluation-report.md`
 - `reports/llm-hard-verse-review.md`
 
 When adding a new Bible or strategy, update or create a report under `reports/` with:
@@ -457,7 +484,7 @@ When adding a new Bible or strategy, update or create a report under `reports/` 
 - known failure modes;
 - whether generated full outputs remain ignored by Git.
 
-To resume a production-maturity audit, read `reports/hybrid-gold-evaluation-report.md` and `reports/llm-hard-verse-review.md`, then continue from the highest-impact documented failure class rather than adding isolated overrides.
+To resume a production-maturity audit, read `reports/strong-gold-evaluation-report.md` and `reports/llm-hard-verse-review.md`, then continue from the highest-impact documented failure class rather than adding isolated overrides.
 
 ## Final Response Checklist
 

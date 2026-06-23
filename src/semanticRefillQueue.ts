@@ -111,9 +111,9 @@ interface ParsedRef {
 }
 
 const DEFAULT_INPUT =
-  "outputs/semantic-refill/nbs/final-audit/semantic-refill-pending.json";
+  "outputs/gap-review/nbs/final-audit/gap-review-pending.json";
 const DEFAULT_OUTPUT =
-  "outputs/semantic-refill/nbs/final-audit/semantic-refill-llm-queue-manifest.json";
+  "outputs/gap-review/nbs/final-audit/gap-review-llm-queue-manifest.json";
 const DEFAULT_MAX_ITEMS_PER_TASK = 80;
 
 const PRIORITY_ORDER: SemanticRefillQueuePriority[] = [

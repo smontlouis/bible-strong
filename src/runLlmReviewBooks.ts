@@ -96,11 +96,11 @@ async function runBookReview(
   const outputDir = path.join(options.outputRoot, options.bible, book);
   const diagnosticsPath = path.join(
     outputDir,
-    `bible-${options.bible}-strong-hybrid.hard-verses.json`
+    `bible-${options.bible}-strong-diagnostic.hard-verses.json`
   );
   const metricsPath = path.join(
     outputDir,
-    `bible-${options.bible}-strong-hybrid.metrics.json`
+    `bible-${options.bible}-strong-diagnostic.metrics.json`
   );
   const reviewPath = path.join(
     outputDir,
@@ -113,7 +113,7 @@ async function runBookReview(
       console.log(`[${book}] generate LLM review inputs`);
       await runCommand("npm", [
         "run",
-        "generate:strong:hybrid",
+        "strong:diagnose",
         "--",
         "--bible",
         options.bible,
@@ -131,7 +131,7 @@ async function runBookReview(
       console.log(`[${book}] prepare review`);
       await runCommand("npm", [
         "run",
-        "review:llm",
+        "strong:review:llm",
         "--",
         "--bible",
         options.bible,

@@ -130,7 +130,7 @@ const ORIGINAL_SOURCES = [
   }
 ];
 
-export async function evaluateStrongHybrid(
+export async function evaluateStrongGold(
   options: EvaluationOptions
 ): Promise<EvaluationReport> {
   const goldRows = await readStrongCsv(`data/strongs/${options.gold}.csv`);
@@ -198,7 +198,7 @@ export async function evaluateStrongHybrid(
       : (2 * precision * recall) / (precision + recall);
   const outputPath = path.join(
     options.outputDir,
-    `hybrid-gold-eval-${options.gold}.json`
+    `strong-gold-eval-${options.gold}.json`
   );
   const report: EvaluationReport = {
     generatedAt: new Date().toISOString(),
@@ -514,7 +514,7 @@ function roundRatio(value: number): number {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const report = await evaluateStrongHybrid(
+  const report = await evaluateStrongGold(
     parseCliOptions(process.argv.slice(2))
   );
   console.log(`Evaluated ${report.gold}: ${report.verseCount} verses`);

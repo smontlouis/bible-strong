@@ -20,7 +20,7 @@ export interface TranslationProfile {
   bible: string;
   family: TranslationFamily;
   label: string;
-  style: "hybrid-calibrated";
+  style: "calibrated";
   strongDensityPolicy: StrongDensityPolicy;
   expectedTokenCoverage: {
     low: number;
@@ -40,7 +40,7 @@ const DEFAULT_PROFILE: TranslationProfile = {
   bible: "default",
   family: "unknown",
   label: "Unknown translation profile",
-  style: "hybrid-calibrated",
+  style: "calibrated",
   strongDensityPolicy: "medium",
   expectedTokenCoverage: { low: 0.4, high: 0.54 },
   readerAlignment: {
@@ -66,7 +66,7 @@ const PROFILES = new Map<string, TranslationProfile>([
       bible: "bfc",
       family: "dynamic",
       label: "Bible en francais courant",
-      style: "hybrid-calibrated",
+      style: "calibrated",
       strongDensityPolicy: "semantic",
       expectedTokenCoverage: { low: 0.38, high: 0.5 },
       readerAlignment: {
@@ -91,7 +91,7 @@ const PROFILES = new Map<string, TranslationProfile>([
       bible: "bds",
       family: "dynamic",
       label: "Bible du Semeur",
-      style: "hybrid-calibrated",
+      style: "calibrated",
       strongDensityPolicy: "semantic",
       expectedTokenCoverage: { low: 0.38, high: 0.48 },
       readerAlignment: {
@@ -116,7 +116,7 @@ const PROFILES = new Map<string, TranslationProfile>([
       bible: "frc97",
       family: "dynamic",
       label: "Francais courant 1997",
-      style: "hybrid-calibrated",
+      style: "calibrated",
       strongDensityPolicy: "semantic",
       expectedTokenCoverage: { low: 0.38, high: 0.5 },
       readerAlignment: {
@@ -141,7 +141,7 @@ const PROFILES = new Map<string, TranslationProfile>([
       bible: "nbs",
       family: "formal-readable",
       label: "Nouvelle Bible Segond",
-      style: "hybrid-calibrated",
+      style: "calibrated",
       strongDensityPolicy: "medium",
       expectedTokenCoverage: { low: 0.46, high: 0.56 },
       readerAlignment: {
@@ -166,7 +166,7 @@ const PROFILES = new Map<string, TranslationProfile>([
       bible: "nfc",
       family: "dynamic",
       label: "Nouvelle francais courant",
-      style: "hybrid-calibrated",
+      style: "calibrated",
       strongDensityPolicy: "semantic",
       expectedTokenCoverage: { low: 0.38, high: 0.5 },
       readerAlignment: {
@@ -191,7 +191,7 @@ const PROFILES = new Map<string, TranslationProfile>([
       bible: "nvs78p",
       family: "formal-readable",
       label: "Nouvelle Version Segond revisee 1978",
-      style: "hybrid-calibrated",
+      style: "calibrated",
       strongDensityPolicy: "medium",
       expectedTokenCoverage: { low: 0.46, high: 0.56 },
       readerAlignment: {
@@ -216,7 +216,7 @@ const PROFILES = new Map<string, TranslationProfile>([
       bible: "ost",
       family: "formal",
       label: "Ostervald",
-      style: "hybrid-calibrated",
+      style: "calibrated",
       strongDensityPolicy: "high",
       expectedTokenCoverage: { low: 0.48, high: 0.58 },
       readerAlignment: {
@@ -241,7 +241,7 @@ const PROFILES = new Map<string, TranslationProfile>([
       bible: "s21",
       family: "formal-readable",
       label: "Segond 21",
-      style: "hybrid-calibrated",
+      style: "calibrated",
       strongDensityPolicy: "medium",
       expectedTokenCoverage: { low: 0.47, high: 0.57 },
       readerAlignment: {
@@ -266,7 +266,7 @@ const PROFILES = new Map<string, TranslationProfile>([
       bible: "fmar",
       family: "formal",
       label: "Martin",
-      style: "hybrid-calibrated",
+      style: "calibrated",
       strongDensityPolicy: "high",
       expectedTokenCoverage: { low: 0.48, high: 0.58 },
       readerAlignment: {

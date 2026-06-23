@@ -198,14 +198,14 @@ async function enrichBible(options: {
     counters.verseCount += 1;
     const ref = referenceKey(bookId, chapter, verse);
     const verseIndex = options.stepIndex.get(ref);
-    const enrichedText = enrichTaggedText({
+    const strongText = enrichTaggedText({
       text,
       verseIndex,
       stepSurfaceLexicon: options.stepSurfaceLexicon,
       counters
     });
     outputLines.push(
-      [bookId, chapter, verse, tsvEscape(enrichedText)].join("\t")
+      [bookId, chapter, verse, tsvEscape(strongText)].join("\t")
     );
   }
 
@@ -573,8 +573,11 @@ function resolveBibleInput(id: string, outputDir: string): BibleInput {
     outputDir,
     `bible-${id}-strong-reference.tsv`
   );
-  const hybridPath = path.join(outputDir, `bible-${id}-strong-hybrid.tsv`);
-  const inputPath = existsSync(referencePath) ? referencePath : hybridPath;
+  const diagnosticPath = path.join(
+    outputDir,
+    `bible-${id}-strong-diagnostic.tsv`
+  );
+  const inputPath = existsSync(referencePath) ? referencePath : diagnosticPath;
   return {
     id,
     inputPath,

@@ -61,7 +61,7 @@ interface BatchManifest {
   reviews: BookReviewResult[];
 }
 
-interface HybridMetrics {
+interface DiagnosticMetrics {
   bible: string;
   generatedAt: string;
   outputPath: string;
@@ -94,7 +94,7 @@ interface BibleStatus {
   biblePath: string;
   bibleExists: boolean;
   metricsPath: string;
-  metrics?: HybridMetrics;
+  metrics?: DiagnosticMetrics;
   manifestPath: string;
   manifest?: BatchManifest;
   completedBookCount: number;
@@ -154,7 +154,7 @@ async function main(): Promise<void> {
 function collectStatuses(): BibleStatus[] {
   return TARGET_BIBLES.map((bible) => {
     const biblePath = `data/bibles/bible-${bible}.json`;
-    const metricsPath = `outputs/bible-${bible}-strong-hybrid.metrics.json`;
+    const metricsPath = `outputs/bible-${bible}-strong-diagnostic.metrics.json`;
     const manifestPath = `outputs/llm-books/${bible}/llm-review-${bible}-manifest.json`;
     const decisionPath = `outputs/llm-books/${bible}/llm-review-${bible}-merged-decisions.json`;
     const manifest = readJsonIfExists<BatchManifest>(manifestPath);
@@ -170,7 +170,7 @@ function collectStatuses(): BibleStatus[] {
       biblePath,
       bibleExists: existsSync(biblePath),
       metricsPath,
-      metrics: readJsonIfExists<HybridMetrics>(metricsPath),
+      metrics: readJsonIfExists<DiagnosticMetrics>(metricsPath),
       manifestPath,
       manifest,
       completedBookCount: completedBooks.size,
@@ -370,7 +370,7 @@ function renderBibleReport(status: BibleStatus): string {
     );
   } else {
     lines.push(
-      "- missing metrics; run `npm run generate:strong:hybrid -- --bible <id>`."
+      "- missing metrics; run `npm run strong:diagnose -- --bible <id>`."
     );
   }
 

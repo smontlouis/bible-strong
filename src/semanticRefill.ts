@@ -7,11 +7,11 @@ import {
   getCuratedStrongOverrides
 } from "./curatedStrongOverrides.js";
 import {
-  type EnrichedStrongAnnotation,
-  type EnrichedStrongBible,
-  type EnrichedToken,
-  type EnrichedVerse
-} from "./enrichedStrongBible.js";
+  type StrongLedgerAnnotation,
+  type StrongLedger,
+  type StrongLedgerToken,
+  type StrongLedgerVerse
+} from "./strongLedger.js";
 import { normalizeWord } from "./tokenize.js";
 
 export type CandidateTarget =
@@ -53,10 +53,10 @@ export interface SemanticRefillAuditItem {
   bible: string;
   ref: string;
   text: string;
-  tokens: EnrichedToken[];
+  tokens: StrongLedgerToken[];
   auditKind?: "missing" | "relocation";
   annotation: Pick<
-    EnrichedStrongAnnotation,
+    StrongLedgerAnnotation,
     | "id"
     | "strong"
     | "visibility"
@@ -270,7 +270,7 @@ export const WEAK_WORDS = new Set([
 export async function runSemanticRefill(
   options: RunOptions
 ): Promise<SemanticRefillRunResult> {
-  const bible = await readEnrichedBible(options.inputDir, options.bible);
+  const bible = await readStrongLedgerInput(options.inputDir, options.bible);
   const verses = filterScope(bible.verses, options.scope);
   const lexicon = await readOrCreateLexicon(options.lexiconPath);
   const result = buildSemanticRefill({
@@ -282,7 +282,7 @@ export async function runSemanticRefill(
 
   await writeRunOutputs(options.outputDir, result);
   await writeFile(
-    path.join(options.outputDir, "semantic-refill-metrics.json"),
+    path.join(options.outputDir, "gap-review-metrics.json"),
     `${JSON.stringify(result.metrics, null, 2)}\n`,
     "utf8"
   );
@@ -297,7 +297,7 @@ export async function runSemanticRefill(
 export function buildSemanticRefill(options: {
   bible: string;
   scope: string;
-  verses: EnrichedVerse[];
+  verses: StrongLedgerVerse[];
   lexicon?: SemanticRefillLexiconEntry[];
 }): SemanticRefillRunResult {
   const lexicon = options.lexicon ?? DEFAULT_LEXICON;
@@ -415,7 +415,7 @@ export function buildSemanticRefill(options: {
 }
 
 export function validateSemanticRefillDecision(options: {
-  verse: EnrichedVerse;
+  verse: StrongLedgerVerse;
   decision: SemanticRefillDecision;
 }): { status: "validated" } | { status: "rejected"; reason: string } {
   const strong = options.decision.strong.map((item) => item.toUpperCase());
@@ -477,17 +477,17 @@ export function validateSemanticRefillDecision(options: {
   return { status: "validated" };
 }
 
-async function readEnrichedBible(
+async function readStrongLedgerInput(
   inputDir: string,
   bible: string
-): Promise<EnrichedStrongBible> {
+): Promise<StrongLedger> {
   const canonicalPath = path.join(
     inputDir,
-    `bible-${bible}-strong-enriched.json`
+    `bible-${bible}-strong-ledger.json`
   );
   const canonical = JSON.parse(
     await readFile(canonicalPath, "utf8")
-  ) as EnrichedStrongBible;
+  ) as StrongLedger;
 
   if (!canonical.split) return canonical;
 
@@ -495,7 +495,7 @@ async function readEnrichedBible(
     await Promise.all(
       (canonical.verseFiles ?? []).map(async (file) => {
         const content = await readFile(file.path, "utf8");
-        return JSON.parse(content) as EnrichedVerse[];
+        return JSON.parse(content) as StrongLedgerVerse[];
       })
     )
   ).flat();
@@ -503,7 +503,10 @@ async function readEnrichedBible(
   return { ...canonical, verses };
 }
 
-function filterScope(verses: EnrichedVerse[], scope: string): EnrichedVerse[] {
+function filterScope(
+  verses: StrongLedgerVerse[],
+  scope: string
+): StrongLedgerVerse[] {
   if (scope === "all") return verses;
   if (/^[1-3]?[A-Za-z]+$/u.test(scope)) {
     return verses.filter((verse) => verse.bookId === scope);
@@ -598,8 +601,8 @@ function uniqueForms(forms: string[][]): string[][] {
 
 function buildAuditItem(options: {
   bible: string;
-  verse: EnrichedVerse;
-  annotation: EnrichedStrongAnnotation;
+  verse: StrongLedgerVerse;
+  annotation: StrongLedgerAnnotation;
   lexiconEntry?: SemanticRefillLexiconEntry;
 }): SemanticRefillAuditItem {
   const strong = options.annotation.strong.toUpperCase();
@@ -654,7 +657,7 @@ function buildAuditItem(options: {
 
 function buildRelocationAuditItems(options: {
   bible: string;
-  verse: EnrichedVerse;
+  verse: StrongLedgerVerse;
   lexiconByStrong: Map<string, SemanticRefillLexiconEntry>;
 }): SemanticRefillAuditItem[] {
   const items: SemanticRefillAuditItem[] = [];
@@ -723,7 +726,7 @@ function buildRelocationAuditItems(options: {
 }
 
 function annotationTarget(
-  annotation: EnrichedStrongAnnotation
+  annotation: StrongLedgerAnnotation
 ): SemanticRefillAuditItem["currentTarget"] {
   if (annotation.placement === "phrase") {
     return {
@@ -745,14 +748,13 @@ function annotationTarget(
     };
   }
   return {
-    target:
-      annotation.placement === "technical" ? "technical" : "empty",
+    target: annotation.placement === "technical" ? "technical" : "empty",
     wordIndex: annotation.insertAfterWordIndex
   };
 }
 
 function classifyAnnotation(
-  annotation: EnrichedStrongAnnotation,
+  annotation: StrongLedgerAnnotation,
   lexiconEntry?: SemanticRefillLexiconEntry
 ): RefillPriority {
   const strong = annotation.strong.toUpperCase();
@@ -763,7 +765,7 @@ function classifyAnnotation(
 }
 
 function ineligibleReason(
-  annotation: EnrichedStrongAnnotation,
+  annotation: StrongLedgerAnnotation,
   priority: RefillPriority
 ): string {
   if (priority === "technical-skip") {
@@ -773,8 +775,8 @@ function ineligibleReason(
 }
 
 function buildCandidates(options: {
-  verse: EnrichedVerse;
-  annotation: EnrichedStrongAnnotation;
+  verse: StrongLedgerVerse;
+  annotation: StrongLedgerAnnotation;
   lexiconEntry?: SemanticRefillLexiconEntry;
 }): SemanticRefillCandidate[] {
   const entry = options.lexiconEntry;
@@ -820,8 +822,8 @@ function buildCandidates(options: {
 }
 
 function buildRelocationCandidates(options: {
-  verse: EnrichedVerse;
-  annotation: EnrichedStrongAnnotation;
+  verse: StrongLedgerVerse;
+  annotation: StrongLedgerAnnotation;
   lexiconEntry: SemanticRefillLexiconEntry;
 }): SemanticRefillCandidate[] {
   const candidates: SemanticRefillCandidate[] = [];
@@ -865,11 +867,13 @@ function buildRelocationCandidates(options: {
 }
 
 function matchContainsCurrentAnnotation(
-  annotation: EnrichedStrongAnnotation,
+  annotation: StrongLedgerAnnotation,
   match: { start: number; end: number }
 ): boolean {
   if (annotation.placement === "word" && annotation.wordIndex !== undefined) {
-    return annotation.wordIndex >= match.start && annotation.wordIndex <= match.end;
+    return (
+      annotation.wordIndex >= match.start && annotation.wordIndex <= match.end
+    );
   }
   if (
     annotation.placement === "phrase" &&
@@ -877,16 +881,17 @@ function matchContainsCurrentAnnotation(
     annotation.endWordIndex !== undefined
   ) {
     return (
-      annotation.startWordIndex === match.start && annotation.endWordIndex === match.end
+      annotation.startWordIndex === match.start &&
+      annotation.endWordIndex === match.end
     );
   }
   return false;
 }
 
 function currentTargetScore(options: {
-  annotation: EnrichedStrongAnnotation;
+  annotation: StrongLedgerAnnotation;
   lexiconEntry: SemanticRefillLexiconEntry;
-  verse: EnrichedVerse;
+  verse: StrongLedgerVerse;
 }): number {
   const target =
     options.annotation.placement === "phrase"
@@ -915,8 +920,8 @@ function currentTargetScore(options: {
 }
 
 function currentTargetHasOtherReaderStrong(
-  verse: EnrichedVerse,
-  annotation: EnrichedStrongAnnotation
+  verse: StrongLedgerVerse,
+  annotation: StrongLedgerAnnotation
 ): boolean {
   const currentStrong = annotation.strong.toUpperCase();
   const start =
@@ -945,7 +950,7 @@ function currentTargetHasOtherReaderStrong(
 }
 
 function normalizedPhraseFromAnnotation(
-  annotation: EnrichedStrongAnnotation
+  annotation: StrongLedgerAnnotation
 ): string[] {
   if (Array.isArray(annotation.normalizedPhrase)) {
     return annotation.normalizedPhrase;
@@ -956,7 +961,7 @@ function normalizedPhraseFromAnnotation(
   return [];
 }
 
-function describeAnnotationTarget(annotation: EnrichedStrongAnnotation): string {
+function describeAnnotationTarget(annotation: StrongLedgerAnnotation): string {
   if (annotation.placement === "phrase") {
     return `phrase:${normalizedPhraseFromAnnotation(annotation).join(" ")}`;
   }
@@ -967,7 +972,7 @@ function describeAnnotationTarget(annotation: EnrichedStrongAnnotation): string 
 }
 
 function targetOccupancyRank(
-  verse: EnrichedVerse,
+  verse: StrongLedgerVerse,
   candidate: SemanticRefillCandidate
 ): number {
   const match =
@@ -993,7 +998,7 @@ function candidateSpanLength(candidate: SemanticRefillCandidate): number {
 }
 
 function findPhraseMatches(
-  tokens: EnrichedToken[],
+  tokens: StrongLedgerToken[],
   form: string[]
 ): Array<{ start: number; end: number }> {
   const normalized = form.map(normalizeWord).filter(Boolean);
@@ -1017,8 +1022,8 @@ function scoreMatch(options: {
   form: string[];
   match: { start: number; end: number };
   entry: SemanticRefillLexiconEntry;
-  annotation: EnrichedStrongAnnotation;
-  verse: EnrichedVerse;
+  annotation: StrongLedgerAnnotation;
+  verse: StrongLedgerVerse;
 }): SemanticRefillCandidate {
   const referenceCount = options.annotation.referenceSupport?.length ?? 0;
   const originalPresent = options.verse.inventories.original.includes(
@@ -1078,7 +1083,7 @@ function entryConfidence(entry: SemanticRefillLexiconEntry): number {
 }
 
 function tokenStrongSet(
-  verse: EnrichedVerse,
+  verse: StrongLedgerVerse,
   match: { start: number; end: number }
 ): Set<string> {
   const strong = new Set<string>();
@@ -1243,7 +1248,7 @@ function candidateToOverride(
 
 function buildReaderPhraseExpansions(options: {
   bible: string;
-  verse: EnrichedVerse;
+  verse: StrongLedgerVerse;
   lexicon: SemanticRefillLexiconEntry[];
 }): SemanticRefillDecision[] {
   const decisions: SemanticRefillDecision[] = [];
@@ -1348,21 +1353,15 @@ async function writeRunOutputs(
   await mkdir(outputDir, { recursive: true });
   await Promise.all([
     writeJson(
-      path.join(outputDir, "semantic-refill-candidates.json"),
+      path.join(outputDir, "gap-review-candidates.json"),
       result.candidates
     ),
     writeJson(
-      path.join(outputDir, "semantic-refill-decisions.json"),
+      path.join(outputDir, "gap-review-decisions.json"),
       result.decisions
     ),
-    writeJson(
-      path.join(outputDir, "semantic-refill-pending.json"),
-      result.pending
-    ),
-    writeJson(
-      path.join(outputDir, "semantic-refill-rejected.json"),
-      result.rejected
-    )
+    writeJson(path.join(outputDir, "gap-review-pending.json"), result.pending),
+    writeJson(path.join(outputDir, "gap-review-rejected.json"), result.rejected)
   ]);
 }
 
@@ -1455,15 +1454,11 @@ async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
   const bible = readStringArg(args, "bible", "nbs").toLowerCase();
   const scope = readStringArg(args, "only", "Gen");
-  const inputDir = readStringArg(
-    args,
-    "input-dir",
-    `outputs/enriched/${bible}`
-  );
+  const inputDir = readStringArg(args, "input-dir", `outputs/strong/${bible}`);
   const outputDir = readStringArg(
     args,
     "output-dir",
-    `outputs/semantic-refill/${bible}/${scope}`
+    `outputs/gap-review/${bible}/${scope}`
   );
   const result = await runSemanticRefill({
     bible,

@@ -5,7 +5,7 @@ import {
   type SemanticRefillAuditItem,
   type SemanticRefillDecision
 } from "./semanticRefill.js";
-import { type EnrichedVerse } from "./enrichedStrongBible.js";
+import { type StrongLedgerVerse } from "./strongLedger.js";
 
 export const SEMANTIC_REFILL_LLM_DECISION_TYPES = [
   "word",
@@ -170,7 +170,7 @@ export interface SemanticRefillLlmRunResult {
 export interface RunSemanticRefillLlmOptions {
   bible: string;
   scope: string;
-  verses: EnrichedVerse[];
+  verses: StrongLedgerVerse[];
   candidates: SemanticRefillAuditItem[];
   mode: SemanticRefillLlmMode;
   model?: string;
@@ -314,7 +314,7 @@ export function buildSemanticRefillLlmBatch(options: {
   bible: string;
   scope: string;
   candidates: SemanticRefillAuditItem[];
-  verses?: EnrichedVerse[];
+  verses?: StrongLedgerVerse[];
   limit?: number;
 }): SemanticRefillLlmBatch {
   const versesByRef = new Map(
@@ -365,7 +365,7 @@ export function buildSemanticRefillLlmRequest(options: {
 
 export function evaluateSemanticRefillLlmDecisions(options: {
   bible: string;
-  verses: EnrichedVerse[];
+  verses: StrongLedgerVerse[];
   batch: SemanticRefillLlmBatch;
   rawDecisions: SemanticRefillLlmRawDecision[];
   autoAcceptThreshold?: number;
@@ -454,7 +454,7 @@ function auditItemToPacket(
   bible: string,
   item: SemanticRefillAuditItem,
   index: number,
-  verse?: EnrichedVerse
+  verse?: StrongLedgerVerse
 ): SemanticRefillLlmCandidatePacket {
   return {
     id: [
@@ -525,23 +525,19 @@ function auditItemToPacket(
 }
 
 function buildOccupiedTargets(
-  verse?: EnrichedVerse
+  verse?: StrongLedgerVerse
 ): SemanticRefillLlmCandidatePacket["occupiedTargets"] {
   if (!verse) return [];
   const wordTargets = new Map<
     number,
     SemanticRefillLlmCandidatePacket["occupiedTargets"][number]
   >();
-  const phraseTargets: SemanticRefillLlmCandidatePacket["occupiedTargets"] =
-    [];
+  const phraseTargets: SemanticRefillLlmCandidatePacket["occupiedTargets"] = [];
 
   for (const annotation of verse.annotations) {
     if (annotation.visibility !== "reader") continue;
     const strong = annotation.strong.toUpperCase();
-    if (
-      annotation.placement === "word" &&
-      annotation.wordIndex !== undefined
-    ) {
+    if (annotation.placement === "word" && annotation.wordIndex !== undefined) {
       const current = wordTargets.get(annotation.wordIndex) ?? {
         placement: "word" as const,
         strong: [],
@@ -573,7 +569,7 @@ function buildOccupiedTargets(
 
 function buildAvailableTargets(
   tokens: SemanticRefillAuditItem["tokens"],
-  verse?: EnrichedVerse
+  verse?: StrongLedgerVerse
 ): SemanticRefillLlmCandidatePacket["availableTargets"] {
   const occupiedByWord = new Map<number, string[]>();
   for (const annotation of verse?.annotations ?? []) {
@@ -612,7 +608,7 @@ function buildAvailableTargets(
 
 function buildBlockedTargets(
   tokens: SemanticRefillAuditItem["tokens"],
-  verse?: EnrichedVerse
+  verse?: StrongLedgerVerse
 ): SemanticRefillLlmCandidatePacket["blockedTargets"] {
   return buildAvailableTargets(tokens, verse)
     .filter((target) => target.occupiedStrong.length > 0)
@@ -627,7 +623,7 @@ function buildBlockedTargets(
 
 function buildOpenContentTargets(
   tokens: SemanticRefillAuditItem["tokens"],
-  verse?: EnrichedVerse
+  verse?: StrongLedgerVerse
 ): SemanticRefillLlmCandidatePacket["openContentTargets"] {
   return buildAvailableTargets(tokens, verse)
     .filter((target) => !target.weak && target.occupiedStrong.length === 0)
@@ -640,7 +636,7 @@ function buildOpenContentTargets(
 
 function buildNearbyOpenTargets(
   item: SemanticRefillAuditItem,
-  verse?: EnrichedVerse
+  verse?: StrongLedgerVerse
 ): SemanticRefillLlmCandidatePacket["nearbyOpenTargets"] {
   const sourceIndex = item.annotation.insertAfterWordIndex;
   if (sourceIndex === undefined) return [];
@@ -659,7 +655,7 @@ function buildNearbyOpenTargets(
 
 function buildPlacementWarnings(
   item: SemanticRefillAuditItem,
-  verse?: EnrichedVerse
+  verse?: StrongLedgerVerse
 ): string[] {
   if (!verse) return [];
   const availableTargets = buildAvailableTargets(item.tokens, verse);
@@ -875,7 +871,7 @@ function rawDecisionToOverride(options: {
 }
 
 function findDuplicateReaderStrong(
-  verse: EnrichedVerse,
+  verse: StrongLedgerVerse,
   decision: SemanticRefillDecision
 ): string | undefined {
   const target = decision.target ?? "word";
@@ -902,7 +898,7 @@ function findDuplicateReaderStrong(
 }
 
 function findSuspiciousStacking(
-  verse: EnrichedVerse,
+  verse: StrongLedgerVerse,
   decision: SemanticRefillDecision
 ): string | undefined {
   if ((decision.target ?? "word") !== "word") return undefined;

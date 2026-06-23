@@ -331,7 +331,7 @@ function autoAcceptReviewItem(item: ReviewItem, options: ReviewOptions): void {
   if (WEAK_AUTO_ACCEPT_WORDS.has(item.normalized)) return;
 
   item.decision = "accept";
-  item.reviewerNote = `Auto-accepted by review:llm because confidence >= ${options.autoAcceptThreshold}, target word is not a weak function word, and Strong is not in the weak auto-accept denylist.`;
+  item.reviewerNote = `Auto-accepted by strong:review:llm because confidence >= ${options.autoAcceptThreshold}, target word is not a weak function word, and Strong is not in the weak auto-accept denylist.`;
 }
 
 const WEAK_AUTO_ACCEPT_STRONG = new Set([
@@ -461,7 +461,7 @@ function renderReviewMarkdown(review: ReviewFile): string {
     "1. Open the JSON review file in the local viewer.",
     "2. Accept only suggestions that are clearly correct.",
     "3. Click Save decisions in the viewer.",
-    "4. Regenerate the Bible with `npm run generate:strong:hybrid -- --bible <id>`.",
+    "4. Regenerate the Bible with `npm run strong:generate -- --bible <id>`.",
     "",
     "## Pending Suggestions",
     ""
@@ -627,7 +627,7 @@ function parseCliOptions(argv: string[]): ReviewOptions {
     outputDir,
     diagnosticsPath:
       args.get("diagnostics") ??
-      path.join(outputDir, `bible-${bible}-strong-hybrid.hard-verses.json`),
+      path.join(outputDir, `bible-${bible}-strong-diagnostic.hard-verses.json`),
     reviewPath:
       args.get("review") ?? path.join(outputDir, `llm-review-${bible}.json`),
     decisionsPath:

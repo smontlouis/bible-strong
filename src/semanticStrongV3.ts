@@ -358,7 +358,7 @@ export async function buildSemanticMissingOutput(
     generatedAt: new Date().toISOString(),
     scope: scopeLabel(options),
     source:
-      "semantic-v3 inventory-first missing Strong audit using original WLC/SBLGNT inventory, local Strong references, current hybrid alignment, curated overrides, and controlled French semantic equivalences.",
+      "semantic-v3 inventory-first missing Strong audit using original WLC/SBLGNT inventory, local Strong references, current diagnostic alignment, curated overrides, and controlled French semantic equivalences.",
     summary: {
       verseCount: context.verses.length,
       missingItemCount: items.length,
@@ -556,7 +556,9 @@ export async function validateDecisions(
   options: CliOptions
 ): Promise<ValidationOutput> {
   if (!options.inputPath) {
-    throw new Error("strong:v3:validate requires --input <file-or-directory>");
+    throw new Error(
+      "semanticStrongV3 validate requires --input <file-or-directory>"
+    );
   }
 
   const context = await loadContext({ ...options, onlyRef: undefined });
@@ -749,7 +751,7 @@ function analyzeVerseForMissing(options: {
       },
       references: referenceEvidence,
       alreadyPlacedStrong: [...representedCounts.keys()].sort(),
-      reason: `Original occurrence ${occurrence.occurrenceId} (${strong}) is not represented by the current hybrid output.`,
+      reason: `Original occurrence ${occurrence.occurrenceId} (${strong}) is not represented by the current Strong output.`,
       priority,
       deterministicProposal: proposal
     });

@@ -11,9 +11,9 @@ import {
 } from "../src/semanticRefillLlm.js";
 import { buildSemanticRefill } from "../src/semanticRefill.js";
 import {
-  type EnrichedStrongAnnotation,
-  type EnrichedVerse
-} from "../src/enrichedStrongBible.js";
+  type StrongLedgerAnnotation,
+  type StrongLedgerVerse
+} from "../src/strongLedger.js";
 
 test("semantic refill LLM dry-run builds prompt and strict schema without calling a client", async () => {
   const verses = [genesisOneTwenty()];
@@ -286,8 +286,9 @@ test("semantic refill LLM keeps suspicious stacking pending", async () => {
   });
 
   assert.equal(
-    candidate.availableTargets.find((target) => target.normalized === "plaisant")
-      ?.occupiedStrong.length,
+    candidate.availableTargets.find(
+      (target) => target.normalized === "plaisant"
+    )?.occupiedStrong.length,
     0
   );
   assert.deepEqual(
@@ -313,10 +314,13 @@ test("semantic refill LLM keeps suspicious stacking pending", async () => {
   assert.equal(candidate.sourcePlacement.insertAfterWordIndex, 1);
   assert.equal(candidate.nearbyOpenTargets[0]?.normalized, "plaisant");
   assert.equal(result.validated.length, 0);
-  assert.equal(result.pending[0]?.reason, "suspicious-stacking-on-occupied-word");
+  assert.equal(
+    result.pending[0]?.reason,
+    "suspicious-stacking-on-occupied-word"
+  );
 });
 
-function genesisOneTwentyWithReaderDuplicate(): EnrichedVerse {
+function genesisOneTwentyWithReaderDuplicate(): StrongLedgerVerse {
   const base = genesisOneTwenty();
   return {
     ...base,
@@ -337,7 +341,7 @@ function genesisOneTwentyWithReaderDuplicate(): EnrichedVerse {
   };
 }
 
-function genesisThreeSixWithOccupiedDesirable(): EnrichedVerse {
+function genesisThreeSixWithOccupiedDesirable(): StrongLedgerVerse {
   return verse({
     ref: "Gen.3.6",
     text: "bon plaisant desirable discernement",
@@ -362,7 +366,7 @@ function genesisThreeSixWithOccupiedDesirable(): EnrichedVerse {
   });
 }
 
-function genesisOneTwenty(): EnrichedVerse {
+function genesisOneTwenty(): StrongLedgerVerse {
   return verse({
     ref: "Gen.1.20",
     text: "Dieu dit : Que les eaux grouillent de petites bêtes, d’êtres vivants, et que des oiseaux volent au-dessus de la terre, face à la voûte céleste !",
@@ -429,10 +433,10 @@ function verse(options: {
   ref: string;
   text: string;
   tokens: string[];
-  annotations: EnrichedStrongAnnotation[];
+  annotations: StrongLedgerAnnotation[];
   original: string[];
   references: string[];
-}): EnrichedVerse {
+}): StrongLedgerVerse {
   const [bookId, chapterVerse] = options.ref.split(".");
   const [chapter, verseNumber] = chapterVerse.split(":");
   return {
@@ -489,9 +493,9 @@ function verse(options: {
 }
 
 function annotation(
-  partial: Partial<EnrichedStrongAnnotation> &
-    Pick<EnrichedStrongAnnotation, "strong" | "visibility" | "placement">
-): EnrichedStrongAnnotation {
+  partial: Partial<StrongLedgerAnnotation> &
+    Pick<StrongLedgerAnnotation, "strong" | "visibility" | "placement">
+): StrongLedgerAnnotation {
   return {
     id: "",
     source: "original-complete",

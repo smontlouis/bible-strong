@@ -2,15 +2,15 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
-  renderEnrichedTaggedText,
-  validateEnrichedAnnotation,
-  type EnrichedStrongAnnotation
-} from "../src/enrichedStrongBible.js";
+  renderStrongTaggedText,
+  validateStrongLedgerAnnotation,
+  type StrongLedgerAnnotation
+} from "../src/strongLedger.js";
 import { tokenizeText } from "../src/tokenize.js";
 
 test("renders reader and advanced modes from one canonical annotation set", () => {
   const segments = tokenizeText("Dieu créa.");
-  const annotations: EnrichedStrongAnnotation[] = [
+  const annotations: StrongLedgerAnnotation[] = [
     annotation({
       strong: "H0430",
       visibility: "reader",
@@ -25,8 +25,8 @@ test("renders reader and advanced modes from one canonical annotation set", () =
     })
   ];
 
-  const reader = renderEnrichedTaggedText(segments, annotations, "reader");
-  const advanced = renderEnrichedTaggedText(segments, annotations, "advanced");
+  const reader = renderStrongTaggedText(segments, annotations, "reader");
+  const advanced = renderStrongTaggedText(segments, annotations, "advanced");
 
   assert.match(reader, /strong="H0430"/);
   assert.doesNotMatch(reader, /H0853/);
@@ -37,7 +37,7 @@ test("renders reader and advanced modes from one canonical annotation set", () =
 
 test("renders a multi-word phrase as one Strong wrapper", () => {
   const segments = tokenizeText("Dans la mesure où il vint.");
-  const annotations: EnrichedStrongAnnotation[] = [
+  const annotations: StrongLedgerAnnotation[] = [
     annotation({
       strong: "G3745",
       visibility: "reader",
@@ -48,21 +48,21 @@ test("renders a multi-word phrase as one Strong wrapper", () => {
     })
   ];
 
-  const html = renderEnrichedTaggedText(segments, annotations, "reader");
+  const html = renderStrongTaggedText(segments, annotations, "reader");
 
   assert.match(html, /<w strong="G3745"[^>]*>Dans la mesure où<\/w>/);
 });
 
 test("rejects annotations whose Strong is absent from the verse inventory", () => {
   assert.equal(
-    validateEnrichedAnnotation({
+    validateStrongLedgerAnnotation({
       annotation: { strong: "H0430" },
       allowedStrong: new Set(["H0430"])
     }),
     true
   );
   assert.equal(
-    validateEnrichedAnnotation({
+    validateStrongLedgerAnnotation({
       annotation: { strong: "H9999" },
       allowedStrong: new Set(["H0430"])
     }),
@@ -71,9 +71,9 @@ test("rejects annotations whose Strong is absent from the verse inventory", () =
 });
 
 function annotation(
-  partial: Partial<EnrichedStrongAnnotation> &
-    Pick<EnrichedStrongAnnotation, "strong" | "visibility" | "placement">
-): EnrichedStrongAnnotation {
+  partial: Partial<StrongLedgerAnnotation> &
+    Pick<StrongLedgerAnnotation, "strong" | "visibility" | "placement">
+): StrongLedgerAnnotation {
   return {
     id: "",
     source: "original-complete",

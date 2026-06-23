@@ -36,7 +36,7 @@ import {
   type TranslationProfile
 } from "./translationProfiles.js";
 
-interface HybridOptions {
+interface DiagnosticOptions {
   bible: string;
   biblePath: string;
   outputDir: string;
@@ -88,7 +88,7 @@ interface HardVerseDiagnostic {
   llmError?: string;
 }
 
-interface HybridMetrics {
+interface DiagnosticMetrics {
   bible: string;
   generatedAt: string;
   inputPath: string;
@@ -188,9 +188,9 @@ const ORIGINAL_SOURCES = [
   }
 ];
 
-export async function generateStrongHybrid(
-  options: HybridOptions
-): Promise<HybridMetrics> {
+export async function diagnoseStrong(
+  options: DiagnosticOptions
+): Promise<DiagnosticMetrics> {
   loadDotEnv();
 
   const verses = filterVerses(await readBibleJson(options.biblePath), options);
@@ -205,15 +205,15 @@ export async function generateStrongHybrid(
 
   const outputPath = path.join(
     options.outputDir,
-    `bible-${options.bible}-strong-hybrid.tsv`
+    `bible-${options.bible}-strong-diagnostic.tsv`
   );
   const metricsPath = path.join(
     options.outputDir,
-    `bible-${options.bible}-strong-hybrid.metrics.json`
+    `bible-${options.bible}-strong-diagnostic.metrics.json`
   );
   const diagnosticsPath = path.join(
     options.outputDir,
-    `bible-${options.bible}-strong-hybrid.hard-verses.json`
+    `bible-${options.bible}-strong-diagnostic.hard-verses.json`
   );
   const lines = ["book_id\tnum_chapter\tnum_verse\ttext"];
   const diagnostics: HardVerseDiagnostic[] = [];
@@ -353,7 +353,7 @@ export async function generateStrongHybrid(
     originalActionableStrongOccurrenceCount -
       originalRepresentedStrongOccurrenceCount
   );
-  const metrics: HybridMetrics = {
+  const metrics: DiagnosticMetrics = {
     bible: options.bible,
     generatedAt: new Date().toISOString(),
     inputPath: options.biblePath,
@@ -413,7 +413,7 @@ export async function generateStrongHybrid(
     originalSources: originals.map((original) => original.summary),
     translationProfile,
     method:
-      "Style 4 calibrated hybrid Strong generation. Starts from reader alignment, applies the Bible translation profile to density, learned enrichment, learned phrase wrappers, empty-word consensus, diagnostics, and LLM escalation, then applies reviewed deterministic overrides promoted from LLM reference-transfer. LLM review suggestions support word, phrase, and empty targets but are persisted only through reviewed overrides."
+      "Diagnostic Strong generation. Starts from reader alignment, applies the Bible translation profile to density, learned enrichment, learned phrase wrappers, empty-word consensus, diagnostics, and LLM escalation, then applies reviewed deterministic overrides promoted from LLM reference-transfer. LLM review suggestions support word, phrase, and empty targets but are persisted only through reviewed overrides."
   };
 
   await writeFile(outputPath, `${lines.join("\n")}\n`, "utf8");
@@ -992,7 +992,7 @@ function summarizeOriginalRepresentation(
 function classifyTokenCoverage(
   taggedTokenCoverage: number,
   profile: TranslationProfile
-): HybridMetrics["profileTokenCoverageStatus"] {
+): DiagnosticMetrics["profileTokenCoverageStatus"] {
   if (taggedTokenCoverage < profile.expectedTokenCoverage.low) {
     return "below-expected";
   }
@@ -1101,7 +1101,7 @@ function mergeOriginalSources(
 
 function filterVerses(
   verses: BibleVerse[],
-  options: HybridOptions
+  options: DiagnosticOptions
 ): BibleVerse[] {
   if (!options.onlyRef) return verses;
   const [bookId, chapter, verse] = options.onlyRef.split(".");
@@ -1113,7 +1113,7 @@ function filterVerses(
   );
 }
 
-function parseCliOptions(argv: string[]): HybridOptions {
+function parseCliOptions(argv: string[]): DiagnosticOptions {
   const args = new Map<string, string>();
   const flags = new Set<string>();
 
@@ -1209,7 +1209,7 @@ function roundRatio(value: number): number {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const options = parseCliOptions(process.argv.slice(2));
-  const metrics = await generateStrongHybrid(options);
+  const metrics = await diagnoseStrong(options);
 
   console.log(`Generated ${metrics.outputPath}`);
   console.log(
