@@ -11,6 +11,8 @@
     "strong:diagnose": "tsx src/diagnoseStrong.ts",
     "strong:evaluate": "tsx src/evaluateStrongGold.ts",
     "strong:report:references": "tsx src/referenceCoverageReport.ts",
+    "strong:lexical-candidates": "tsx src/lexicalCandidateReport.ts",
+    "strong:lexical-candidates:apply": "tsx src/lexicalCandidateExperiment.ts",
     "strong:review:gaps": "tsx src/semanticRefill.ts",
     "strong:review:gaps:queue": "tsx src/semanticRefillQueue.ts",
     "strong:review:gaps:packet": "tsx src/semanticRefillAgentPacket.ts",

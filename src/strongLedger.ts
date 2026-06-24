@@ -15,7 +15,6 @@ import {
 import { applyCuratedStrongOverrides } from "./curatedStrongOverrides.js";
 import { buildStrongLexicon } from "./lexicon.js";
 import {
-  readOriginalSourceTsv,
   summarizeOriginalSource,
   type OriginalSourceSummary,
   type OriginalVerse,
@@ -39,6 +38,7 @@ import {
 import { readStrongDictionaryTranslationCandidates } from "./strongDictionaryLexicon.js";
 import {
   readStepOriginalEvidenceIndex,
+  readStepOriginalVerseMap,
   type StepOriginalEvidenceIndex,
   type StepStrongEvidence as SourceStepStrongEvidence
 } from "./stepOriginals.js";
@@ -67,6 +67,9 @@ export type StrongSource =
   | "reference-transfer"
   | "phrase-transfer"
   | "semantic-lexicon"
+  | "reference-learned"
+  | "reference-backed-original"
+  | "dictionary-fr"
   | "original-complete"
   | "manual-review"
   | "llm-review"
@@ -272,23 +275,6 @@ const REFERENCES: Array<{ name: ReferenceName; path: string }> = [
   { name: "DarbyR", path: "data/strongs/DarbyR.csv" }
 ];
 
-const ORIGINAL_SOURCES = [
-  {
-    name: "WLC",
-    path: "data/external/Alignments/data/sources/WLC.tsv",
-    license:
-      "CC BY 4.0 via Clear-Bible/Alignments; WLC text may be viewed or copied without restriction per repository license notes.",
-    url: "https://github.com/Clear-Bible/Alignments"
-  },
-  {
-    name: "SBLGNT",
-    path: "data/external/Alignments/data/sources/SBLGNT.tsv",
-    license:
-      "CC BY 4.0 via Clear-Bible/Alignments, derived from Clear Bible data and SBLGNT source notes.",
-    url: "https://github.com/Clear-Bible/Alignments"
-  }
-];
-
 const STEP_ORIGINAL_SOURCES = [
   "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt",
   "data/external/stepbible/amalgamated/TAHOT Jos-Est.txt",
@@ -401,7 +387,7 @@ export async function generateStrongLedger(
     inputPath: options.biblePath,
     scope: options.onlyRef ?? "all",
     method:
-      "Canonical Strong ledger. Reader annotations come from the calibrated reader pipeline. Advanced annotations add original-complete WLC/SBLGNT coverage as technical, empty, duplicate, or extra visible annotations. Macula/original inventory verifies and explains density but does not force reader visibility.",
+      "Canonical Strong ledger. Reader annotations come from the calibrated reader pipeline. Advanced annotations add original-complete STEP TAHOT/TAGNT coverage as empty, duplicate, or extra visible annotations. STEP dStrong/eStrong evidence is preserved for lexical disambiguation; WLC/SBLGNT suffixes are not used as production lookup keys.",
     translationProfile,
     references: references.map((reference) => ({
       name: reference.name,
@@ -678,12 +664,7 @@ function readerWordAnnotations(options: {
   for (const [wordIndex, assignment] of options.assignments) {
     for (const strong of assignment.strong) {
       const normalizedStrong = strong.toUpperCase();
-      const source = assignment.method.includes("curated")
-        ? "curated-override"
-        : assignment.method.includes("learned") ||
-            assignment.method.includes("dictionary")
-          ? "semantic-lexicon"
-          : "reference-transfer";
+      const source = readerAssignmentSource(assignment.method);
       annotations.push({
         id: "",
         strong: normalizedStrong,
@@ -765,6 +746,15 @@ function advancedAnnotations(options: {
   return annotations;
 }
 
+function readerAssignmentSource(
+  method: AssignedStrong["method"]
+): StrongSource {
+  if (method.includes("curated")) return "curated-override";
+  if (method.includes("dictionary")) return "dictionary-fr";
+  if (method.includes("learned")) return "reference-learned";
+  return "reference-transfer";
+}
+
 function completeWordAnnotations(options: {
   wordIndex: number;
   assignment: CompleteWordAssignment;
@@ -781,25 +771,36 @@ function completeWordAnnotations(options: {
       options.readerCounts,
       normalizedStrong
     );
+    const referenceSupport =
+      options.referenceSupport.get(normalizedStrong) ?? [];
+    const referenceBacked = referenceSupport.length > 0;
 
     return {
       id: "",
       strong: normalizedStrong,
-      visibility: duplicate ? "hidden" : "advanced",
+      visibility: duplicate
+        ? "hidden"
+        : referenceBacked
+          ? "reader"
+          : "advanced",
       placement: duplicate ? "duplicate" : "word",
-      source: "original-complete",
+      source: referenceBacked
+        ? "reference-backed-original"
+        : "original-complete",
       confidence: duplicate
         ? Math.max(options.assignment.confidence, 0.9)
         : options.assignment.confidence,
       reason: duplicate
         ? "Already represented in reader mode; kept in debug ledger to explain the original occurrence."
-        : "Visible only in advanced mode because the original-complete alignment found a defensible extra carrier beyond reader density.",
+        : referenceBacked
+          ? "Visible in normal mode because Strong witnesses expect this code and the original-complete alignment found a defensible French carrier."
+          : "Visible only in advanced mode because STEP has an original Strong beyond the witness-backed normal view.",
       diagnostics: [options.assignment.method, options.assignment.source],
       wordIndex: options.wordIndex,
       normalizedWord: options.tokens[options.wordIndex]?.normalized,
       originalTokenId: options.assignment.originalTokenIds[index],
       originalOccurrenceId,
-      referenceSupport: options.referenceSupport.get(normalizedStrong) ?? [],
+      referenceSupport,
       profile: options.profile.bible
     };
   });
@@ -814,26 +815,30 @@ function completeEmptyAnnotation(options: {
   const strong = options.assignment.strong.toUpperCase();
   const duplicate = consumeReaderStrong(options.readerCounts, strong);
   const technical = TECHNICAL_STRONG.has(strong);
+  const referenceSupport = options.referenceSupport.get(strong) ?? [];
+  const referenceBacked = referenceSupport.length > 0;
 
   return {
     id: "",
     strong,
-    visibility: duplicate ? "hidden" : "advanced",
+    visibility: duplicate ? "hidden" : referenceBacked ? "reader" : "advanced",
     placement: duplicate ? "duplicate" : technical ? "technical" : "empty",
-    source: "original-complete",
+    source: referenceBacked ? "reference-backed-original" : "original-complete",
     confidence: options.assignment.confidence,
     reason: duplicate
       ? "Already represented in reader mode; kept in debug ledger to explain the original occurrence."
-      : technical
-        ? "Original Strong is technical or weakly rendered; hidden in reader mode and exposed only in advanced/debug mode."
-        : "Original Strong has no reliable French word carrier; exposed as an empty Strong only in advanced/debug mode.",
+      : referenceBacked
+        ? "Strong witnesses expect this code, but no reliable French carrier was found; exposed as an empty Strong in normal mode."
+        : technical
+          ? "STEP original Strong is technical or weakly rendered; exposed only in advanced/debug mode."
+          : "STEP original Strong has no reliable French word carrier; exposed as an empty Strong only in advanced/debug mode.",
     diagnostics: [options.assignment.method],
     insertAfterWordIndex: options.assignment.insertAfterWordIndex,
     originalTokenId: options.assignment.originalTokenId,
     originalOccurrenceId: options.assignment.originalOccurrenceId,
     sourceStrong: options.assignment.sourceStrong,
     lexiconLookup: !(technical && options.assignment.sourceStrong),
-    referenceSupport: options.referenceSupport.get(strong) ?? [],
+    referenceSupport,
     profile: options.profile.bible
   };
 }
@@ -1521,9 +1526,15 @@ function openStrongTag(
   annotations: StrongLedgerAnnotation[],
   target: string
 ): string {
-  const strong = annotations
-    .map((annotation) => annotation.sourceStrong ?? annotation.strong)
-    .join(" ");
+  const strong = annotations.map((annotation) => annotation.strong).join(" ");
+  const sourceStrong = uniqueStrings(
+    annotations.flatMap((annotation) => annotation.sourceStrong ?? [])
+  ).join(" ");
+  const stepStrong = uniqueStrings(
+    annotations.flatMap(
+      (annotation) => annotation.step?.map((evidence) => evidence.dStrong) ?? []
+    )
+  ).join(" ");
   const lexicalStrong = annotations
     .map((annotation) => annotation.strong)
     .join(" ");
@@ -1547,7 +1558,7 @@ function openStrongTag(
 
   return `<w strong="${escapeHtml(strong)}" data-lexical-strong="${escapeHtml(
     lexicalStrong
-  )}" data-lexicon="${lexiconLookup ? "true" : "false"}" data-confidence="${confidence.toFixed(
+  )}"${sourceStrong ? ` data-source-strong="${escapeHtml(sourceStrong)}"` : ""}${stepStrong ? ` data-step-strong="${escapeHtml(stepStrong)}"` : ""} data-lexicon="${lexiconLookup ? "true" : "false"}" data-confidence="${confidence.toFixed(
     2
   )}" data-source="${escapeHtml(source)}" data-method="${escapeHtml(
     source
@@ -1571,6 +1582,10 @@ function groupAnnotations<T extends StrongLedgerAnnotation>(
   }
 
   return grouped;
+}
+
+function uniqueStrings(values: string[]): string[] {
+  return [...new Set(values.filter(Boolean))];
 }
 
 function getWordTokens(segments: TextSegment[]): StrongLedgerToken[] {
@@ -1653,20 +1668,30 @@ async function loadReferences(): Promise<ReferenceMap[]> {
 async function loadOriginalSources(): Promise<OriginalBundle[]> {
   const bundles: OriginalBundle[] = [];
 
-  for (const source of ORIGINAL_SOURCES) {
-    if (!existsSync(source.path)) {
-      continue;
-    }
-    const map = await readOriginalSourceTsv(source.path);
+  for (const sourcePath of STEP_ORIGINAL_SOURCES) {
+    if (!existsSync(sourcePath)) continue;
+
+    const map = await readStepOriginalVerseMap([sourcePath]);
+    const source = stepOriginalSourceMetadata(sourcePath);
     bundles.push({
       name: source.name,
-      path: source.path,
+      path: sourcePath,
       map,
-      summary: summarizeOriginalSource(source.name, source.path, map, source)
+      summary: summarizeOriginalSource(source.name, sourcePath, map, source)
     });
   }
 
   return bundles;
+}
+
+function stepOriginalSourceMetadata(
+  sourcePath: string
+): Pick<OriginalSourceSummary, "name" | "license" | "url"> {
+  return {
+    name: `STEP ${path.basename(sourcePath, ".txt")}`,
+    license: "CC BY 4.0 via Tyndale House Cambridge / STEPBible-Data.",
+    url: "https://github.com/STEPBible/STEPBible-Data"
+  };
 }
 
 function mergeOriginalSources(

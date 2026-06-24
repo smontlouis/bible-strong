@@ -62,7 +62,9 @@ The repository already has the core pieces:
 
 - local French Strong references: `data/strongs/Sg1910.csv`,
   `data/strongs/Darby.csv`, `data/strongs/DarbyR.csv`;
-- original inventories from Clear-Bible alignment sources:
+- production original inventories from STEP TAHOT/TAGNT:
+  `data/external/stepbible/amalgamated/TAHOT *.txt` and `TAGNT *.txt`;
+- optional audit/provenance inventories from Clear-Bible alignment sources:
   `data/external/Alignments/data/sources/WLC.tsv` and `SBLGNT.tsv`;
 - local dictionaries: `data/dictionaries/strong_fr.sqlite` and
   `data/dictionaries/strong_lexicon.full.production.sqlite`;
@@ -73,10 +75,11 @@ The repository already has the core pieces:
 - masked gold evaluation through `strong:evaluate`;
 - bounded LLM review and internal-agent gap review.
 
-The main gap: the generation path learns its lexical placement evidence mostly
-from the local Strong-tagged references. The French Strong dictionaries and STEP
-lexicon are available locally, but they are not yet a first-class deterministic
-placement signal in the reader alignment scorer.
+The main gap: the generation path now uses STEP as the original inventory, but
+reader placement still learns most lexical carrier choices from the local
+Strong-tagged references. The French Strong dictionaries and STEP lexicon are
+available locally; broad synonym placement should remain an auditable review
+layer until it is evaluated against gold references.
 
 ## Recommended Production Workflow
 
@@ -194,10 +197,10 @@ auditable external sources as candidate evidence. See
 `docs/french-lexical-sources-for-strong-placement.md` for the first-pass
 evaluation of RezoJDM, Kaikki/Wiktextract, WOLF, OpenOffice synonyms, and ReSyf.
 
-### B. Import STEP Tagged Originals
+### B. Use STEP Tagged Originals
 
-The current plan in `goals/step-tagged-originals-plan.md` is still the right
-direction. Importing `TAHOT`/`TAGNT` would let the ledger carry:
+`strong:generate` uses `TAHOT`/`TAGNT` as the production original inventory.
+The ledger can carry:
 
 - classical Strong;
 - `eStrong`;

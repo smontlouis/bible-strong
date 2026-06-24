@@ -13,7 +13,8 @@ Expected input:
 
 - Bible JSON: `data/bibles/bible-<id>.json`
 - Strong references: `data/strongs/Sg1910.csv`, `data/strongs/Darby.csv`, `data/strongs/DarbyR.csv`
-- Original sources: `data/external/Alignments/data/sources/WLC.tsv` and `SBLGNT.tsv`
+- STEP original sources: `data/external/stepbible/amalgamated/TAHOT *.txt` and `TAGNT *.txt`
+- Optional audit/provenance sources: `data/external/Alignments/data/sources/WLC.tsv` and `SBLGNT.tsv`
 - Local lexicons for review and future deterministic evidence: `data/dictionaries/strong_fr.sqlite` and `data/dictionaries/strong_lexicon.full.production.sqlite`
 
 Generated full Bible outputs under `outputs/` are ignored by Git and must not be committed.
@@ -134,6 +135,7 @@ npm run strong:llm:transfer -- --source Darby --gold DarbyR --only Gen.1 --limit
 
 ```sh
 npm run strong:generate -- --bible <id>
+npm run strong:lexical-candidates -- --bible <id> --only <BookOrScope>
 npm run strong:review:gaps -- --bible <id> --only <BookOrScope> --audit --output-dir outputs/gap-review/<id>/<scope>
 npm run strong:review:gaps:packet -- \
   --bible <id> \
@@ -185,6 +187,7 @@ npm run build
 - Prefer `strong:generate` for the production artifact because it keeps a canonical reader/advanced ledger and explains every Strong placement.
 - Prefer `strong:export -- --view reader` or `strong:export -- --view advanced` for TSV views.
 - The diagnostic backend includes learned multi-word phrase transfer from the local Strong references. Keep this deterministic and original-confirmed.
+- Use STEP TAHOT/TAGNT as the production original inventory. Treat WLC/SBLGNT suffixed Strong values (`H6960a`, etc.) as audit provenance only, not lexicon lookup keys. Render and compare the canonical Strong (`H6960`), prefer STEP `dStrong`/`eStrong` for lexical disambiguation, and keep any non-STEP source suffix only as metadata.
 - Treat local French Strong dictionaries as deterministic evidence for review and future scoring, not as a license to place tags without original/reference inventory support.
 - Do not add hand-written synonym entries to generation because a hard verse was discussed. For broad semantic candidates, use external lexical resources as auditable evidence only; see `docs/french-lexical-sources-for-strong-placement.md`.
 - Use calibrated translation profiles: one common backend, but profile-aware generation and diagnostics by translation family.

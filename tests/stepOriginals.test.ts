@@ -6,7 +6,8 @@ import test from "node:test";
 
 import {
   readStepOriginalEvidenceIndex,
-  readStepOriginalTokens
+  readStepOriginalTokens,
+  readStepOriginalVerseMap
 } from "../src/stepOriginals.js";
 
 test("uses TAGNT dStrong as the STEP candidate instead of simple Strong", async () => {
@@ -106,6 +107,33 @@ test("builds STEP evidence by verse and classical Strong", async () => {
   assert.equal(evidence?.tokenIndex, 3);
   assert.equal(evidence?.gloss, "of Jesus");
   assert.equal(evidence?.morphology, "N-GSM-P");
+});
+
+test("builds original inventory from STEP dStrong without WLC suffix normalization", async () => {
+  const filePath = await writeTempStepFile("TAHOT Gen-Deu.txt", [
+    [
+      "Gen.1.1#01=N",
+      "בְּרֵאשִׁ֖ית",
+      "be.re.Shit",
+      "in beginning",
+      "H7225A",
+      "HNcfsa",
+      "",
+      "",
+      "H7225",
+      "",
+      "",
+      "{H7225=רֵאשִׁית=beginning}"
+    ].join("\t")
+  ]);
+
+  const map = await readStepOriginalVerseMap([filePath]);
+  const verse = map.get("Gen.1.1");
+  const token = verse?.tokens[0];
+
+  assert.deepEqual(token?.strong, ["H7225"]);
+  assert.deepEqual(token?.sourceStrong, ["H7225A"]);
+  assert.equal(verse?.strongSet.has("H1886"), false);
 });
 
 async function writeTempStepFile(

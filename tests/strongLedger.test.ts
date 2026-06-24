@@ -33,8 +33,43 @@ test("renders reader and advanced modes from one canonical annotation set", () =
   assert.match(reader, /strong="H0430"/);
   assert.doesNotMatch(reader, /H0853/);
   assert.match(advanced, /strong="H0430"/);
-  assert.match(advanced, /strong="H0853a"/);
+  assert.match(advanced, /strong="H0853"/);
+  assert.match(advanced, /data-source-strong="H0853a"/);
   assert.match(advanced, /data-lexicon="false"/);
+});
+
+test("renders STEP disambiguation separately from WLC source suffixes", () => {
+  const segments = tokenizeText("Les eaux s’amassent.");
+  const annotations: StrongLedgerAnnotation[] = [
+    annotation({
+      strong: "H6960",
+      visibility: "reader",
+      placement: "word",
+      wordIndex: 2,
+      sourceStrong: "H6960a",
+      step: [
+        {
+          source: "TAHOT",
+          classicalStrong: "H6960",
+          dStrong: "H6960B",
+          tokenIndex: 3,
+          type: "L",
+          surface: "יִקָּו֨וּ",
+          transliteration: "yi.ka.Vu",
+          gloss: "let them gather",
+          morphology: "HVNi3mp",
+          editions: ""
+        }
+      ]
+    })
+  ];
+
+  const html = renderStrongTaggedText(segments, annotations, "reader");
+
+  assert.match(html, /strong="H6960"/);
+  assert.doesNotMatch(html, /<w strong="H6960a"/);
+  assert.match(html, /data-source-strong="H6960a"/);
+  assert.match(html, /data-step-strong="H6960B"/);
 });
 
 test("renders a multi-word phrase as one Strong wrapper", () => {

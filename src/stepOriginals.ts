@@ -1,5 +1,10 @@
 import { readFile } from "node:fs/promises";
 
+import {
+  type OriginalToken,
+  type OriginalVerse,
+  type OriginalVerseMap
+} from "./originalSource.js";
 import { referenceKey } from "./strongCsv.js";
 
 export interface StepOriginalToken {
@@ -162,6 +167,24 @@ export async function readStepOriginalEvidenceIndex(
   return index;
 }
 
+export async function readStepOriginalVerseMap(
+  filePaths: string[]
+): Promise<OriginalVerseMap> {
+  const map: OriginalVerseMap = new Map();
+
+  for (const filePath of filePaths) {
+    const tokens = await readStepOriginalTokens(filePath);
+    for (const token of tokens) {
+      addTokenToOriginalVerseMap(map, token, token.ref);
+      for (const alternateRef of token.alternateRefs) {
+        addTokenToOriginalVerseMap(map, token, alternateRef);
+      }
+    }
+  }
+
+  return map;
+}
+
 export async function readStepOriginalTokens(
   filePath: string
 ): Promise<StepOriginalToken[]> {
@@ -184,6 +207,84 @@ export async function readStepOriginalTokens(
   }
 
   return tokens;
+}
+
+function addTokenToOriginalVerseMap(
+  map: OriginalVerseMap,
+  token: StepOriginalToken,
+  key: string
+): void {
+  const ref = parseReferenceKey(key);
+  if (!ref) return;
+
+  const pairs = stepStrongPairs(token);
+  if (pairs.length === 0) return;
+
+  const existing =
+    map.get(key) ??
+    ({
+      bookId: ref.bookId,
+      chapter: ref.chapter,
+      verse: ref.verse,
+      tokens: [],
+      strongSet: new Set<string>()
+    } satisfies OriginalVerse);
+
+  const suffix = key === token.ref ? "main" : "alt";
+  const originalToken: OriginalToken = {
+    id: `${token.source}.${key}.${token.tokenIndex}.${token.type}.${suffix}`,
+    text: token.surface,
+    strong: pairs.map((pair) => pair.baseStrong),
+    sourceStrong: pairs.map((pair) => pair.stepStrong),
+    gloss: token.gloss,
+    lemma: token.transliteration,
+    pos: token.type,
+    morph: token.morphology
+  };
+
+  existing.tokens.push(originalToken);
+  for (const pair of pairs) {
+    existing.strongSet.add(pair.baseStrong);
+  }
+  map.set(key, existing);
+}
+
+function stepStrongPairs(
+  token: StepOriginalToken
+): Array<{ baseStrong: string; stepStrong: string }> {
+  const pairs: Array<{ baseStrong: string; stepStrong: string }> = [];
+  const seen = new Set<string>();
+
+  for (const [baseStrong, stepStrongSet] of token.strongByBase) {
+    const stepStrongValues = preferDisambiguatedStepStrong([...stepStrongSet]);
+    for (const stepStrong of stepStrongValues) {
+      const key = `${baseStrong}:${stepStrong}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      pairs.push({ baseStrong, stepStrong });
+    }
+  }
+
+  return pairs;
+}
+
+function preferDisambiguatedStepStrong(values: string[]): string[] {
+  const disambiguated = values.filter((value) =>
+    /^[HG]\d{4,5}[A-Z]$/u.test(value)
+  );
+  return disambiguated.length > 0 ? disambiguated : values;
+}
+
+function parseReferenceKey(
+  key: string
+): { bookId: string; chapter: number; verse: number } | undefined {
+  const [bookId, chapter, verse] = key.split(".");
+  if (!bookId || !chapter || !verse) return undefined;
+  return {
+    bookId,
+    chapter: Number.parseInt(chapter, 10),
+    verse: Number.parseInt(verse, 10)
+  };
 }
 
 export function normalizeClassicalStrong(strong: string): string | undefined {

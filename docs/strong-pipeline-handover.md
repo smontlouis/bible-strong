@@ -18,8 +18,8 @@ exportees et des revues ciblees.
 - LLM seulement en review ciblee: `npm run strong:review:llm` ou packets agent.
 
 La strategie produit reste: produire une Bible Strong lisible, proche du style
-visible de `Sg1910`, `Darby` et `DarbyR`, sans forcer toute l'inventaire
-WLC/SBLGNT dans la vue lecteur.
+visible de `Sg1910`, `Darby` et `DarbyR`, avec STEP TAHOT/TAGNT comme
+inventaire original de production.
 
 ## Workflow Recommande
 
@@ -61,6 +61,16 @@ npm run strong:evaluate -- --gold DarbyR
 ```
 
 ### 4. Auditer Les Trous
+
+Avant une revue LLM/humaine, on peut produire des candidats lexicaux externes
+sans modifier le ledger:
+
+```sh
+npm run strong:lexical-candidates -- --bible <id> --only Gen.1-Gen.6
+```
+
+La sortie sert d'aide au tri: elle propose des mots candidats avec sources et
+scores, mais ne place aucun Strong automatiquement.
 
 ```sh
 npm run strong:review:gaps -- \
@@ -136,8 +146,12 @@ npm run strong:generate -- --bible <id>
 - Le LLM intervient seulement en review ciblee, avec validation locale.
 - Les Strong legitimes deviennent `word`, `phrase` ou `empty`.
 - `pending` doit rester un etat transitoire, pas une sortie finale souhaitee.
-- Les donnees originales WLC/SBLGNT servent de garde-fou et d'inventaire, pas
-  de contrainte de visibilite lecteur exhaustive.
+- STEP TAHOT/TAGNT est l'inventaire original de production. Les Strong
+  classiques servent a comparer les references, tandis que les `dStrong` STEP
+  gardent la precision lexicale.
+- Les donnees WLC/SBLGNT peuvent servir d'audit/provenance, mais elles ne
+  doivent pas creer de clefs de dictionnaire produit. Les suffixes WLC/SBLGNT
+  (`H6960a`, etc.) ne sont pas normalises en Strong cliquables.
 
 ## Checks
 

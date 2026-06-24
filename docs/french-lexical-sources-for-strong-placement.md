@@ -191,7 +191,31 @@ Assessment:
 
 Do not add hand-written synonym entries to the generation path.
 
-Instead, if we want a stronger deterministic-assisted layer:
+The prototype command is:
+
+```sh
+npm run strong:lexical-candidates -- --bible nbs --only Gen.1-Gen.6
+```
+
+Optional external source flags:
+
+```sh
+--kaikki /path/to/kaikki.org-dictionary-French.jsonl.gz
+--jdm-cache /path/to/rezojdm-cache
+--fetch-jdm
+--openoffice /path/to/openoffice-synonyms.txt-or-dictionary.go
+--wolf /path/to/wolf.xml-or-wolf.xml.bz2
+```
+
+It writes JSON and Markdown under:
+
+```text
+outputs/lexical-candidates/<bible>/
+```
+
+This command only produces candidates. It does not change the canonical ledger.
+
+If we want a stronger deterministic-assisted layer:
 
 1. Build an external lexical index from Kaikki + RezoJDM + WOLF/OpenOffice.
 2. Use Kaikki to lemmatize French target tokens.

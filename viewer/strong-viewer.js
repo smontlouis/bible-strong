@@ -77,7 +77,7 @@ const state = {
   currentBook: "",
   currentChapter: "",
   search: "",
-  viewMode: "reader",
+  viewMode: "normal",
   selectedStrong: "",
   selectedToken: null,
   lexiconCache: new Map()
@@ -219,7 +219,7 @@ function rowsFromEnriched(payload, mode) {
     chapter: verse.chapter,
     verse: verse.verse,
     text:
-      mode === "reader"
+      mode === "normal"
         ? verse.views.readerHtml
         : mode === "debug"
           ? (verse.views.debugHtml ?? verse.views.advancedHtml)
@@ -387,6 +387,8 @@ function renderStrongToken(node) {
   const lexiconEnabled = node.getAttribute("data-lexicon") !== "false";
   const stepStrong = node.getAttribute("data-step-strong") ?? "";
   const stepStatus = node.getAttribute("data-step-status") ?? "";
+  const sourceStrong = node.getAttribute("data-source-strong") ?? "";
+  const experiment = node.getAttribute("data-experiment") ?? "";
   const isEmpty =
     node.getAttribute("data-empty") === "true" ||
     (node.textContent ?? "").trim().length === 0;
@@ -394,9 +396,13 @@ function renderStrongToken(node) {
   token.dataset.strong = strong;
   token.dataset.lexicon = lexiconEnabled ? "true" : "false";
   token.dataset.stepStrong = stepStrong;
+  token.dataset.sourceStrong = sourceStrong;
   token.dataset.method = node.getAttribute("data-method") ?? "";
   token.dataset.source = node.getAttribute("data-source") ?? "";
+  token.dataset.placement = node.getAttribute("data-placement") ?? "";
+  token.dataset.target = node.getAttribute("data-target") ?? "";
   token.dataset.confidence = node.getAttribute("data-confidence") ?? "";
+  token.dataset.experiment = experiment;
   if (lexiconEnabled) {
     token.tabIndex = 0;
     token.role = "button";
@@ -404,7 +410,10 @@ function renderStrongToken(node) {
   token.title = [
     strong,
     stepStrong ? `STEP ${stepStrong}` : "",
+    sourceStrong ? `Source ${sourceStrong}` : "",
+    token.dataset.source ? `Origine ${sourceLabel(token.dataset.source)}` : "",
     stepStatus ? `STEP status: ${stepStatus}` : "",
+    experiment ? `Expérience ${experiment}` : "",
     node.getAttribute("data-method"),
     node.getAttribute("data-step-method"),
     node.getAttribute("data-original-token")
@@ -414,6 +423,8 @@ function renderStrongToken(node) {
 
   if (isEmpty) {
     token.className = "empty-token";
+    applyTokenStateClasses(token);
+    if (experiment) token.classList.add("is-experiment");
     if (!lexiconEnabled) token.classList.add("is-static");
     if (isSelectedStrong(strong)) token.classList.add("is-selected");
     token.append(renderSup(strong));
@@ -421,6 +432,8 @@ function renderStrongToken(node) {
   }
 
   token.className = "token";
+  applyTokenStateClasses(token);
+  if (experiment) token.classList.add("is-experiment");
   if (!lexiconEnabled) token.classList.add("is-static");
   if (isSelectedStrong(strong)) token.classList.add("is-selected");
   if (matchesTokenSearch(node.textContent ?? "", strong)) {
@@ -431,6 +444,21 @@ function renderStrongToken(node) {
     renderSup(strong)
   );
   return token;
+}
+
+function applyTokenStateClasses(token) {
+  for (const source of (token.dataset.source ?? "").split("+")) {
+    if (source) token.classList.add(`source-${safeClassSuffix(source)}`);
+  }
+  for (const placement of (token.dataset.placement ?? "").split("+")) {
+    if (placement) {
+      token.classList.add(`placement-${safeClassSuffix(placement)}`);
+    }
+  }
+}
+
+function safeClassSuffix(value) {
+  return value.toLowerCase().replace(/[^a-z0-9_-]+/g, "-");
 }
 
 function getStrongTokenFromEventTarget(target) {
@@ -458,7 +486,9 @@ async function openLexiconDrawer(token) {
   token.classList.add("is-selected");
   renderLexiconLoading(selectedStrong, strongCodes, token);
 
-  const payload = await loadLexiconEntry(selectedStrong);
+  const payload = await loadLexiconEntry(
+    lookupStrongForToken(token, selectedStrong)
+  );
   renderLexiconEntry({
     selectedStrong,
     strongCodes,
@@ -516,6 +546,24 @@ function normalizeStrongCode(value) {
     .trim()
     .toUpperCase()
     .replace(/^([GH])0+(\d)/, "$1$2");
+}
+
+function lookupStrongForToken(token, selectedStrong) {
+  const stepCodes = (token.dataset.stepStrong ?? "")
+    .split(/\s+/)
+    .filter(Boolean);
+  if (stepCodes.length === 1) return stepCodes[0];
+
+  const normalizedSelected = normalizeStrongCode(selectedStrong).replace(
+    /[A-Z]+$/u,
+    ""
+  );
+  return (
+    stepCodes.find(
+      (code) =>
+        normalizeStrongCode(code).replace(/[A-Z]+$/u, "") === normalizedSelected
+    ) ?? selectedStrong
+  );
 }
 
 function renderLexiconLoading(strong, strongCodes, token) {
@@ -593,7 +641,19 @@ function drawerHeader(strong, strongCodes, token, entry = {}) {
       entry.transliteration
         ? metaItem("Translittération", entry.transliteration)
         : null,
+      token.dataset.stepStrong
+        ? metaItem("STEP", token.dataset.stepStrong)
+        : null,
+      token.dataset.sourceStrong
+        ? metaItem("Source originale", token.dataset.sourceStrong)
+        : null,
+      token.dataset.source
+        ? metaItem("Origine placement", sourceLabel(token.dataset.source))
+        : null,
       token.dataset.method ? metaItem("Méthode", token.dataset.method) : null,
+      token.dataset.experiment
+        ? metaItem("Expérience", token.dataset.experiment)
+        : null,
       token.dataset.confidence
         ? metaItem("Confiance", token.dataset.confidence)
         : null
@@ -611,7 +671,7 @@ function drawerHeader(strong, strongCodes, token, entry = {}) {
       button.addEventListener("click", () => {
         state.selectedStrong = code;
         renderLexiconLoading(code, strongCodes, token);
-        loadLexiconEntry(code).then((payload) =>
+        loadLexiconEntry(lookupStrongForToken(token, code)).then((payload) =>
           renderLexiconEntry({
             selectedStrong: code,
             strongCodes,
@@ -644,6 +704,22 @@ function drawerHtmlSection(title, html) {
   content.className = "drawer-rich-text";
   content.innerHTML = html;
   return drawerSection(title, content);
+}
+
+function sourceLabel(source) {
+  const labels = {
+    "reference-transfer": "Témoin direct",
+    "reference-learned": "Témoin appris",
+    "reference-backed-original": "Témoin via original",
+    "dictionary-fr": "Dictionnaire FR",
+    "phrase-transfer": "Expression témoin",
+    "semantic-lexicon": "Lexique sémantique",
+    "original-complete": "Original STEP",
+    "curated-override": "Correction validée",
+    "manual-review": "Revue humaine",
+    "llm-review": "Revue LLM"
+  };
+  return labels[source] ?? source;
 }
 
 function drawerResourcesSection(title, resources) {
@@ -736,45 +812,89 @@ function renderStats() {
 }
 
 function renderEnrichedStats(metrics) {
+  const lexicalPlaced = metrics.lexicalExperimentPlacedCount ?? 0;
+  const lexicalRemaining = metrics.emptyStrongCount ?? 0;
+  const hasLexicalExperiment = lexicalPlaced > 0;
+  const referenceUncarriedCount = Math.max(
+    0,
+    metrics.referenceStrongOccurrenceCount - metrics.referenceStrongCarrierCount
+  );
+  const originalUncarriedCount = Math.max(
+    0,
+    metrics.originalStrongOccurrenceCount - metrics.originalStrongCarrierCount
+  );
+  const unplacedNonTechnicalCount = Math.max(
+    0,
+    metrics.emptyStrongCount - metrics.technicalStrongCount
+  );
+  const reviewCount = unplacedNonTechnicalCount + metrics.placementRiskCount;
+
   els.stats.className = "stats-dashboard";
   els.stats.replaceChildren(
     coverageMeter({
-      label: "Réf. placées",
+      label: "Témoins retrouvés",
+      value: metrics.referenceStrongCoverage,
+      count: `${formatRatio(
+        metrics.referenceStrongRepresentedCount,
+        metrics.referenceStrongOccurrenceCount
+      )} présents dans Advanced`
+    }),
+    coverageMeter({
+      label: "Témoins sur texte",
       value: metrics.referenceStrongCarrierCoverage,
       count: `${formatRatio(
         metrics.referenceStrongCarrierCount,
         metrics.referenceStrongOccurrenceCount
-      )} · audit ${formatPercent(metrics.referenceStrongCoverage)}`
+      )} sur mot/expression · ${formatNumber(referenceUncarriedCount)} vides`
     }),
     coverageMeter({
-      label: "Original placé",
+      label: "STEP sur texte",
       value: metrics.originalStrongCarrierRate,
       count: `${formatRatio(
         metrics.originalStrongCarrierCount,
         metrics.originalStrongOccurrenceCount
-      )} · audit ${formatPercent(metrics.originalRepresentationRate)}`
+      )} sur mot/expression · ${formatNumber(originalUncarriedCount)} à expliquer`
     }),
     coverageMeter({
-      label: "Placement",
-      value: metrics.placementQuality,
-      count: `${formatNumber(metrics.placementRiskCount)} risque${metrics.placementRiskCount > 1 ? "s" : ""}`
+      label: "À traiter",
+      value:
+        reviewCount === 0
+          ? 1
+          : 1 - reviewCount / Math.max(1, metrics.advancedStrongCount),
+      displayValue: formatNumber(reviewCount),
+      count: `${formatNumber(unplacedNonTechnicalCount)} sans mot · ${formatNumber(
+        metrics.placementRiskCount
+      )} risques · ${formatNumber(metrics.technicalStrongCount)} techniques`,
+      status:
+        reviewCount === 0 ? "good" : reviewCount <= 10 ? "warning" : "risk"
     }),
+    ...(hasLexicalExperiment
+      ? [
+          coverageMeter({
+            label: "Exp. lexicale",
+            value: ratio(lexicalPlaced, lexicalPlaced + lexicalRemaining),
+            count: `${formatNumber(lexicalPlaced)} ajoutés · ${formatNumber(
+              lexicalRemaining
+            )} vides restants`
+          })
+        ]
+      : []),
     statBars([
       {
-        label: "Reader",
+        label: "Normal",
         value: metrics.readerVisibleStrongCount,
         max: Math.max(1, metrics.advancedStrongCount),
-        detail: "Strong visibles"
+        detail: "sans STEP-only"
       },
       {
         label: "Advanced",
         value: metrics.advancedStrongCount,
         max: Math.max(1, metrics.advancedStrongCount),
-        detail: "Strong complets"
+        detail: "avec STEP-only"
       },
       {
         label: "Vides",
-        value: metrics.emptyStrongCount,
+        value: unplacedNonTechnicalCount,
         max: Math.max(1, metrics.advancedStrongCount),
         detail: "sans mot français"
       },
@@ -783,20 +903,59 @@ function renderEnrichedStats(metrics) {
         value: metrics.technicalStrongCount,
         max: Math.max(1, metrics.advancedStrongCount),
         detail: "source uniquement"
-      }
+      },
+      {
+        label: "Risques",
+        value: metrics.placementRiskCount,
+        max: Math.max(1, metrics.advancedStrongCount),
+        detail: "multi-Strong à vérifier"
+      },
+      ...(hasLexicalExperiment
+        ? [
+            {
+              label: "Exp. high",
+              value: metrics.lexicalExperimentHighCount ?? 0,
+              max: Math.max(1, lexicalPlaced),
+              detail: "candidats forts"
+            },
+            {
+              label: "Exp. medium",
+              value: metrics.lexicalExperimentMediumCount ?? 0,
+              max: Math.max(1, lexicalPlaced),
+              detail: "candidats moyens"
+            },
+            {
+              label: "Exp. empilés",
+              value: metrics.lexicalExperimentOccupiedCount ?? 0,
+              max: Math.max(1, lexicalPlaced),
+              detail: "ajoutés sur mot déjà taggé"
+            }
+          ]
+        : [])
     ]),
     miniStats([
       ["Versets", metrics.verseCount],
-      ["Mots", metrics.wordCount],
-      ["Mots reader", formatPercent(metrics.readerTokenCoverage)],
-      ["Mots advanced", formatPercent(metrics.advancedTokenCoverage)]
+      ["Strong témoins", metrics.referenceStrongOccurrenceCount],
+      ["Strong STEP", metrics.originalStrongOccurrenceCount],
+      ["Normal", metrics.readerVisibleStrongCount],
+      ...(hasLexicalExperiment
+        ? [
+            [
+              "Exp. vides",
+              formatPercent(
+                ratio(lexicalPlaced, lexicalPlaced + lexicalRemaining)
+              )
+            ],
+            ["Exp. ajoutés", lexicalPlaced]
+          ]
+        : [])
     ])
   );
 }
 
-function coverageMeter({ label, value, count }) {
+function coverageMeter({ label, value, count, displayValue, status }) {
   const card = document.createElement("section");
-  card.className = `coverage-meter ${coverageClass(value)}`;
+  card.className = `coverage-meter ${status ? `is-${status}` : coverageClass(value)}`;
 
   const header = document.createElement("div");
   header.className = "coverage-meter-header";
@@ -806,7 +965,7 @@ function coverageMeter({ label, value, count }) {
   title.textContent = label;
 
   const score = document.createElement("strong");
-  score.textContent = formatPercent(value);
+  score.textContent = displayValue ?? formatPercent(value);
 
   header.append(title, score);
 
@@ -818,7 +977,7 @@ function coverageMeter({ label, value, count }) {
 
   const detail = document.createElement("span");
   detail.className = "stat-detail";
-  detail.textContent = `${count} · ${coverageLabel(value)}`;
+  detail.textContent = count;
 
   card.append(header, track, detail);
   return card;
@@ -906,12 +1065,6 @@ function coverageClass(value) {
   return "is-risk";
 }
 
-function coverageLabel(value) {
-  if (value >= 0.98) return "OK";
-  if (value >= 0.9) return "À surveiller";
-  return "À corriger";
-}
-
 function currentScopeRows() {
   if (!state.currentBook || !state.currentChapter) return state.rows;
   return state.rows.filter(
@@ -950,7 +1103,11 @@ function aggregateEnrichedMetrics(rows) {
     readerTaggedTokenCount: 0,
     advancedTaggedTokenCount: 0,
     readerTokenCoverage: 0,
-    advancedTokenCoverage: 0
+    advancedTokenCoverage: 0,
+    lexicalExperimentPlacedCount: 0,
+    lexicalExperimentHighCount: 0,
+    lexicalExperimentMediumCount: 0,
+    lexicalExperimentOccupiedCount: 0
   };
 
   for (const row of rows) {
@@ -987,6 +1144,14 @@ function aggregateEnrichedMetrics(rows) {
     metrics.readerTaggedTokenCount += rowMetrics.readerTaggedTokenCount ?? 0;
     metrics.advancedTaggedTokenCount +=
       rowMetrics.advancedTaggedTokenCount ?? 0;
+    metrics.lexicalExperimentPlacedCount +=
+      rowMetrics.lexicalExperimentPlacedCount ?? 0;
+    metrics.lexicalExperimentHighCount +=
+      rowMetrics.lexicalExperimentHighCount ?? 0;
+    metrics.lexicalExperimentMediumCount +=
+      rowMetrics.lexicalExperimentMediumCount ?? 0;
+    metrics.lexicalExperimentOccupiedCount +=
+      rowMetrics.lexicalExperimentOccupiedCount ?? 0;
   }
 
   metrics.referenceStrongCoverage = ratio(
