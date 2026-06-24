@@ -234,6 +234,149 @@ test("allows numeric Strong components on occupied compound numbers", async () =
   assert.equal(report.metrics.autoSafeItems, 1);
 });
 
+test("decomposes French teen and quatre-vingt compound numbers", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-"));
+  const ledgerPath = path.join(dir, "ledger.json");
+
+  writeFileSync(
+    ledgerPath,
+    JSON.stringify(
+      {
+        bible: "nbs",
+        generatedAt: "2026-06-24T00:00:00.000Z",
+        split: false,
+        metrics: {},
+        verses: [
+          verse(
+            "Gen.5.17",
+            "Il vécut quatre-vingt-quinze ans, puis douze ans.",
+            [
+              token(0, "Il"),
+              token(1, "vécut"),
+              token(2, "quatre-vingt-quinze"),
+              token(3, "ans"),
+              token(4, "puis"),
+              token(5, "douze"),
+              token(6, "ans")
+            ],
+            [
+              word(
+                "Gen.5.17:0:H8084",
+                "H8084",
+                "eighty",
+                2,
+                "HAcbsa",
+                "quatre-vingt-quinze"
+              ),
+              empty("Gen.5.17:1:H2568", "H2568", "five", 1, "HAcbsa"),
+              empty("Gen.5.17:2:H6240", "H6240", "ten", 4, "HAcbsa"),
+              empty("Gen.5.17:3:H8147", "H8147", "two", 4, "HAcbsa")
+            ]
+          )
+        ]
+      },
+      null,
+      2
+    )
+  );
+
+  const report = await buildLexicalCandidateReport({
+    bible: "nbs",
+    onlyRef: "Gen.5.17",
+    inputDir: dir,
+    outputDir: dir,
+    ledgerPath,
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    maxCandidatesPerEmpty: 5,
+    dictionaryCandidates: [
+      candidate("H3382", "jared", 0.5),
+      candidate("H4968", "mathusala", 0.5)
+    ]
+  });
+
+  assert.equal(
+    topCandidateFor(report, "Gen.5.17", "H2568")?.normalized,
+    "quatre-vingt-quinze"
+  );
+  assert.equal(
+    topCandidateFor(report, "Gen.5.17", "H6240")?.normalized,
+    "douze"
+  );
+  assert.equal(
+    topCandidateFor(report, "Gen.5.17", "H8147")?.normalized,
+    "douze"
+  );
+});
+
+test("matches STEP proper names across French transliteration drift", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-"));
+  const ledgerPath = path.join(dir, "ledger.json");
+
+  writeFileSync(
+    ledgerPath,
+    JSON.stringify(
+      {
+        bible: "nbs",
+        generatedAt: "2026-06-24T00:00:00.000Z",
+        split: false,
+        metrics: {},
+        verses: [
+          verse(
+            "Gen.5.21",
+            "Il engendra Yéred et Mathusalem.",
+            [
+              token(0, "Il"),
+              token(1, "engendra"),
+              token(2, "Yéred"),
+              token(3, "et"),
+              token(4, "Mathusalem")
+            ],
+            [
+              empty("Gen.5.21:0:H3382", "H3382", "Jared", 1, "HNpm", "Ya.red"),
+              empty(
+                "Gen.5.21:1:H4968",
+                "H4968",
+                "Methuselah",
+                3,
+                "HNpm",
+                "me.tu.Sha.lach"
+              )
+            ]
+          )
+        ]
+      },
+      null,
+      2
+    )
+  );
+
+  const report = await buildLexicalCandidateReport({
+    bible: "nbs",
+    onlyRef: "Gen.5.21",
+    inputDir: dir,
+    outputDir: dir,
+    ledgerPath,
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    maxCandidatesPerEmpty: 5,
+    dictionaryCandidates: [
+      candidate("H3382", "jared", 0.5),
+      candidate("H4968", "mathusala", 0.5)
+    ]
+  });
+
+  assert.equal(
+    topCandidateFor(report, "Gen.5.21", "H3382")?.normalized,
+    "yered"
+  );
+  assert.equal(
+    topCandidateFor(report, "Gen.5.21", "H4968")?.normalized,
+    "mathusalem"
+  );
+  assert.equal(report.metrics.autoSafeItems, 2);
+});
+
 test("resolves repeated lexical empty Strong codes across repeated French carriers", async () => {
   const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-"));
   const ledgerPath = path.join(dir, "ledger.json");
@@ -403,6 +546,71 @@ test("relocates numeric components from a simple number to a later compound numb
   assert.equal(placement?.kind, "auto-safe");
 });
 
+test("places duplicate numeric empties on the richer compound carrier", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-"));
+  const ledgerPath = path.join(dir, "ledger.json");
+
+  writeFileSync(
+    ledgerPath,
+    JSON.stringify(
+      {
+        bible: "nbs",
+        generatedAt: "2026-06-24T00:00:00.000Z",
+        split: false,
+        metrics: {},
+        verses: [
+          verse(
+            "Gen.5.27",
+            "Mathusalem fut de neuf cent soixante-neuf ans.",
+            [
+              token(0, "Mathusalem"),
+              token(1, "fut"),
+              token(2, "de"),
+              token(3, "neuf"),
+              token(4, "cent"),
+              token(5, "soixante-neuf"),
+              token(6, "ans")
+            ],
+            [
+              word("Gen.5.27:0:H8672", "H8672", "nine", 3, "HAcbsa", "neuf"),
+              word("Gen.5.27:1:H3967", "H3967", "hundred", 4, "HAcbsa"),
+              word(
+                "Gen.5.27:2:H8346",
+                "H8346",
+                "sixty",
+                5,
+                "HAcbsa",
+                "soixante-neuf"
+              ),
+              empty("Gen.5.27:3:H8672", "H8672", "nine", 5, "HAcbsa")
+            ]
+          )
+        ]
+      },
+      null,
+      2
+    )
+  );
+
+  const report = await buildLexicalCandidateReport({
+    bible: "nbs",
+    onlyRef: "Gen.5.27",
+    inputDir: dir,
+    outputDir: dir,
+    ledgerPath,
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    maxCandidatesPerEmpty: 5,
+    dictionaryCandidates: [candidate("H8672", "neuf", 0.5)]
+  });
+
+  const placement = lexicalAutoSafePlacements(report).find(
+    (candidate) => candidate.item.annotationId === "Gen.5.27:3:H8672"
+  );
+  assert.equal(placement?.candidate.normalized, "soixante-neuf");
+  assert.equal(placement?.kind, "auto-safe");
+});
+
 test("keeps numeric components on richer compound numbers after relocation", async () => {
   const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-"));
   const ledgerPath = path.join(dir, "ledger.json");
@@ -491,10 +699,18 @@ function assertTopCandidate(
   strong: string,
   normalized: string
 ): void {
+  assert.equal(topCandidateFor(report, ref, strong)?.normalized, normalized);
+}
+
+function topCandidateFor(
+  report: Awaited<ReturnType<typeof buildLexicalCandidateReport>>,
+  ref: string,
+  strong: string
+) {
   const item = report.items.find(
     (candidate) => candidate.ref === ref && candidate.strong === strong
   );
-  assert.equal(item?.candidates[0]?.normalized, normalized);
+  return item?.candidates[0];
 }
 
 function dictionaryCandidates(): StrongTranslationCandidate[] {
@@ -643,7 +859,8 @@ function empty(
   strong: string,
   gloss: string,
   insertAfterWordIndex: number,
-  morphology = ""
+  morphology = "",
+  transliteration = ""
 ) {
   return {
     id,
@@ -664,7 +881,7 @@ function empty(
         tokenIndex: 1,
         type: "L",
         surface: "",
-        transliteration: "",
+        transliteration,
         gloss,
         morphology,
         editions: ""

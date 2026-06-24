@@ -298,7 +298,17 @@ Interpretation:
   even when the French token is already occupied by another numeric Strong.
   For relocation audits, a numeric Strong may also move from a simple occupied
   number to a later occupied compound number when the compound exposes a richer
-  numeric decomposition.
+  numeric decomposition. Empty duplicate numeric occurrences may likewise move
+  to the single richer compound carrier when competing simple and compound
+  candidates are both occupied. French compound parsing includes teen
+  decomposition (`douze` -> `ten` + `two`) and productive forms such as
+  `quatre-vingt-*` / `soixante-dix-*`.
+- `proper-name-step` evidence normalizes common transliteration drift for STEP
+  names. It prefers exact key matches first, then bounded edit-distance matches
+  for longer names, with a consonant-skeleton guard so near names in the same
+  genealogy do not cross-match. Cases such as `Jared` -> `Yéred` and
+  `Methuselah` -> `Mathusalem` can be auto-safe when the local Strong
+  dictionary also supports the name.
 - `french-auxiliary-phrase` evidence means a STEP verb gloss includes an
   auxiliary such as `had`/`have` or `was`/`be`, and the French text renders it
   as an adjacent auxiliary plus participle. In those cases the phrase can be
@@ -352,6 +362,10 @@ Observed benchmark cases:
   the same French token already carries `H8346` (`sixty`). This is a
   STEP-bounded numeric component match, not a general license to stack Strong
   codes on occupied words.
+- `Gen.5.27`, `Gen.5.30`, and `Gen.5.31`: duplicate numeric components in
+  `neuf cent soixante-neuf`, `cinq cent quatre-vingt-quinze`, and `sept cent
+soixante-dix-sept` are placed on the richer compound token instead of being
+  left empty beside the earlier simple number.
 
 Current deterministic-assisted layer:
 
@@ -369,7 +383,8 @@ Current deterministic-assisted layer:
    synonym evidence for those candidates. Name keys normalize common
    transliteration drift such as hyphenation, `j/y`, `th/t`, `ou/u`,
    `ch/h/kh/c/k`, and consonant skeletons only when STEP and the Strong
-   dictionary agree.
+   dictionary agree. Approximate matches also require a close consonant skeleton
+   so names such as `Mehouyaël` and `Metoushaël` do not become interchangeable.
 6. Score candidates with conservative features:
    - same verse Strong inventory already permits this Strong;
    - source is not technical/function-only;

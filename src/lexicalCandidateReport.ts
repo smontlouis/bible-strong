@@ -720,15 +720,23 @@ function numericValuesForTarget(normalized: string): Set<number> {
       allPartsAreNumeric = false;
       continue;
     }
-    values.add(value);
+    for (const decomposed of decomposeIntegerNumber(value)) {
+      values.add(decomposed);
+    }
     sum += value;
   }
+  addFrenchCompoundNumberValues(parts, values);
   if (allPartsAreNumeric && sum > 0) values.add(sum);
   return values;
 }
 
 function decomposeIntegerNumber(value: number): Set<number> {
   const values = new Set([value]);
+  const teenUnit = TEEN_UNIT_VALUES.get(value);
+  if (teenUnit !== undefined) {
+    values.add(10);
+    values.add(teenUnit);
+  }
   if (value >= 100) {
     const hundreds = Math.floor(value / 100);
     if (hundreds > 0) {
@@ -747,6 +755,83 @@ function decomposeIntegerNumber(value: number): Set<number> {
     values.add(lastTwoDigits);
   }
   return values;
+}
+
+function addFrenchCompoundNumberValues(
+  parts: string[],
+  values: Set<number>
+): void {
+  const compoundValue = frenchCompoundNumberValue(parts);
+  if (compoundValue !== undefined) {
+    for (const value of decomposeIntegerNumber(compoundValue)) {
+      values.add(value);
+    }
+  }
+
+  const quatreVingtIndex = parts.findIndex(
+    (part, index) =>
+      part === "quatre" && ["vingt", "vingts"].includes(parts[index + 1] ?? "")
+  );
+  if (quatreVingtIndex !== -1) {
+    values.add(80);
+    const rest = parts.slice(quatreVingtIndex + 2);
+    const restValue = frenchCompoundNumberValue(rest);
+    if (restValue !== undefined) {
+      for (const value of decomposeIntegerNumber(restValue)) values.add(value);
+      for (const value of decomposeIntegerNumber(80 + restValue)) {
+        values.add(value);
+      }
+    }
+  }
+
+  const soixanteDixIndex = parts.findIndex(
+    (part, index) => part === "soixante" && parts[index + 1] === "dix"
+  );
+  if (soixanteDixIndex !== -1) {
+    values.add(70);
+    const rest = parts.slice(soixanteDixIndex + 2);
+    const restValue = frenchCompoundNumberValue(rest);
+    if (restValue !== undefined) {
+      for (const value of decomposeIntegerNumber(restValue)) values.add(value);
+      for (const value of decomposeIntegerNumber(70 + restValue)) {
+        values.add(value);
+      }
+    }
+  }
+
+  const soixanteIndex = parts.findIndex((part) => part === "soixante");
+  const teenAfterSixty =
+    soixanteIndex !== -1
+      ? NUMERIC_WORD_VALUES.get(parts[soixanteIndex + 1] ?? "")
+      : undefined;
+  if (teenAfterSixty !== undefined && teenAfterSixty >= 11) {
+    values.add(70);
+    for (const value of decomposeIntegerNumber(60 + teenAfterSixty)) {
+      values.add(value);
+    }
+  }
+}
+
+function frenchCompoundNumberValue(parts: string[]): number | undefined {
+  if (parts.length === 0) return undefined;
+  if (
+    parts.length >= 2 &&
+    parts[0] === "quatre" &&
+    ["vingt", "vingts"].includes(parts[1] ?? "")
+  ) {
+    return 80 + (frenchCompoundNumberValue(parts.slice(2)) ?? 0);
+  }
+  if (parts.length >= 2 && parts[0] === "soixante" && parts[1] === "dix") {
+    return 70 + (frenchCompoundNumberValue(parts.slice(2)) ?? 0);
+  }
+
+  let total = 0;
+  for (const part of parts) {
+    const value = NUMERIC_WORD_VALUES.get(part);
+    if (value === undefined) return undefined;
+    total += value;
+  }
+  return total > 0 ? total : undefined;
 }
 
 function isStackSafeLexicalCandidateEvidence(
@@ -805,6 +890,18 @@ const NUMERIC_WORD_VALUES = new Map<string, number>([
   ["thousand", 1000],
   ["thousands", 1000],
   ["mille", 1000]
+]);
+
+const TEEN_UNIT_VALUES = new Map<number, number>([
+  [11, 1],
+  [12, 2],
+  [13, 3],
+  [14, 4],
+  [15, 5],
+  [16, 6],
+  [17, 7],
+  [18, 8],
+  [19, 9]
 ]);
 
 function bestSeedStemMatch(
@@ -906,7 +1003,7 @@ function properNameEvidence(options: {
 }): CandidateEvidence[] {
   const targetKeys = nameKeyVariantsFromText(options.targetText);
   const stepKeys = properNameStepKeys(options.annotation);
-  const matchingStepKey = firstIntersection(targetKeys, stepKeys);
+  const matchingStepKey = firstNameKeyMatch(targetKeys, stepKeys);
   if (!matchingStepKey) return [];
 
   const evidence: CandidateEvidence[] = [
@@ -918,7 +1015,7 @@ function properNameEvidence(options: {
   ];
 
   const dictionaryKeys = properNameDictionaryKeys(options.seedTerms, stepKeys);
-  const matchingDictionaryKey = firstIntersection(targetKeys, dictionaryKeys);
+  const matchingDictionaryKey = firstNameKeyMatch(targetKeys, dictionaryKeys);
   if (matchingDictionaryKey) {
     evidence.push({
       source: "proper-name-dictionary",
@@ -971,10 +1068,78 @@ function properNameDictionaryKeys(
   const keys = new Set<string>();
   for (const seed of seedTerms.keys()) {
     const seedKeys = nameKeyVariantsFromText(seed);
-    if (!firstIntersection(seedKeys, stepKeys)) continue;
+    if (!firstNameKeyMatch(seedKeys, stepKeys)) continue;
     addAll(keys, seedKeys);
   }
   return keys;
+}
+
+function firstNameKeyMatch(
+  left: Set<string>,
+  right: Set<string>
+): string | undefined {
+  const exact = firstIntersection(left, right);
+  if (exact) return exact;
+
+  for (const leftKey of left) {
+    for (const rightKey of right) {
+      if (isApproximateNameKeyMatch(leftKey, rightKey)) return rightKey;
+    }
+  }
+  return undefined;
+}
+
+function isApproximateNameKeyMatch(left: string, right: string): boolean {
+  if (left.length < 5 || right.length < 5) return false;
+  if (isNameSkeleton(left) || isNameSkeleton(right)) return false;
+  const leftSkeleton = nameConsonantSkeleton(left);
+  const rightSkeleton = nameConsonantSkeleton(right);
+  if (
+    leftSkeleton.length >= 3 &&
+    rightSkeleton.length >= 3 &&
+    levenshteinDistance(leftSkeleton, rightSkeleton, 1) > 1
+  ) {
+    return false;
+  }
+  const maxLength = Math.max(left.length, right.length);
+  const maxDistance = maxLength >= 9 ? 4 : 2;
+  return levenshteinDistance(left, right, maxDistance) <= maxDistance;
+}
+
+function isNameSkeleton(value: string): boolean {
+  return !/[aeiouy]/u.test(value);
+}
+
+function nameConsonantSkeleton(value: string): string {
+  return value.replace(/[aeiouy]/gu, "");
+}
+
+function levenshteinDistance(
+  left: string,
+  right: string,
+  limit: number
+): number {
+  if (Math.abs(left.length - right.length) > limit) return limit + 1;
+
+  let previous = Array.from({ length: right.length + 1 }, (_, index) => index);
+  for (let leftIndex = 0; leftIndex < left.length; leftIndex += 1) {
+    const current = [leftIndex + 1];
+    let rowMin = current[0] ?? 0;
+    for (let rightIndex = 0; rightIndex < right.length; rightIndex += 1) {
+      const cost = left[leftIndex] === right[rightIndex] ? 0 : 1;
+      const value = Math.min(
+        (previous[rightIndex + 1] ?? 0) + 1,
+        (current[rightIndex] ?? 0) + 1,
+        (previous[rightIndex] ?? 0) + cost
+      );
+      current[rightIndex + 1] = value;
+      rowMin = Math.min(rowMin, value);
+    }
+    if (rowMin > limit) return limit + 1;
+    previous = current;
+  }
+
+  return previous[right.length] ?? limit + 1;
 }
 
 function nameKeyVariantsFromText(text: string): Set<string> {
@@ -994,6 +1159,7 @@ function nameKeyVariantsFromParts(parts: string[]): Set<string> {
   const variants = new Set([base]);
   const replacements: Array<[RegExp, string]> = [
     [/th/gu, "t"],
+    [/sh/gu, "s"],
     [/kh/gu, "k"],
     [/ch/gu, "h"],
     [/ch/gu, "k"],
@@ -1013,10 +1179,10 @@ function nameKeyVariantsFromParts(parts: string[]): Set<string> {
 
   for (const variant of [...variants]) {
     const skeleton = variant.replace(/[aeiouy]/gu, "");
-    if (skeleton.length >= 3) variants.add(skeleton);
+    if (skeleton.length >= 2) variants.add(skeleton);
   }
 
-  return new Set([...variants].filter((variant) => variant.length >= 3));
+  return new Set([...variants].filter((variant) => variant.length >= 2));
 }
 
 function nameParts(text: string): string[] {
@@ -2361,12 +2527,37 @@ export function isAutoSafeCandidate(
     return candidate.score >= currentTargetScore(item) + 0.12;
   }
   if (isDominantPhraseAutoSafeCandidate(item, candidate)) return true;
+  if (isNumericCompoundEmptyDuplicateCandidate(item, candidate)) return true;
   const highSafeCount = item.candidates.filter(
     (other) =>
       other.confidence === "high" &&
       (!other.occupied || isStackSafeLexicalCandidateEvidence(other.evidence))
   ).length;
   return highSafeCount === 1;
+}
+
+function isNumericCompoundEmptyDuplicateCandidate(
+  item: LexicalCandidateItem,
+  candidate: LexicalCandidate
+): boolean {
+  if (item.auditKind !== "empty") return false;
+  if (candidate.target !== "word" || !candidate.occupied) return false;
+  if (!isStackSafeLexicalCandidateEvidence(candidate.evidence)) return false;
+
+  const candidateValueCount = numericValuesForTarget(candidate.normalized).size;
+  if (candidateValueCount < 2) return false;
+
+  const stackSafeCandidates = item.candidates.filter(
+    (other) =>
+      other.confidence === "high" &&
+      other.target === "word" &&
+      isStackSafeLexicalCandidateEvidence(other.evidence)
+  );
+  const richerCandidates = stackSafeCandidates.filter(
+    (other) => numericValuesForTarget(other.normalized).size >= 2
+  );
+  if (richerCandidates.length !== 1) return false;
+  return richerCandidates[0]?.wordIndex === candidate.wordIndex;
 }
 
 function isDominantPhraseAutoSafeCandidate(
