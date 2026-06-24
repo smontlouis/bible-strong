@@ -445,10 +445,11 @@ button:disabled {
 .legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 8px 14px;
   align-items: center;
   margin-bottom: 16px;
   font-size: 12px;
+  line-height: 1.25;
 }
 
 .legend span {
@@ -457,26 +458,54 @@ button:disabled {
   align-items: center;
 }
 
-.legend-chip {
+.legend i {
   width: 18px;
   height: 12px;
   border-radius: 3px;
+  flex: 0 0 auto;
+}
+
+.legend-chip {
   background: var(--chip);
 }
 
-.legend-original {
-  width: 18px;
-  height: 12px;
-  border-radius: 3px;
+.legend-reference-learned {
+  background: #385264;
+}
+
+.legend-dictionary {
+  background: #335242;
+}
+
+.legend-reference-original {
+  background: #564b35;
+  box-shadow: inset 0 -2px 0 #d0b253;
+}
+
+.legend-step-only {
   background: #5b4d2e;
   box-shadow: inset 0 -2px 0 #d9bd63;
+}
+
+.legend-curated {
+  background: #5d4d72;
+  box-shadow: inset 0 -2px 0 #b99ee8;
 }
 
 .legend-empty {
   width: 13px;
   height: 13px;
-  border: 2px solid var(--empty);
+  border: 2px solid #d87979;
   border-radius: 50%;
+  background: rgba(122, 50, 50, 0.28);
+}
+
+.legend-technical {
+  width: 13px;
+  height: 13px;
+  border: 2px solid #8da1aa;
+  border-radius: 50%;
+  background: rgba(94, 108, 116, 0.26);
 }
 
 .chapter-view {
@@ -555,6 +584,12 @@ button:disabled {
   background: #564b35;
   color: #f6ebce;
   box-shadow: inset 0 -2px 0 #d0b253;
+}
+
+.token.source-curated-override {
+  background: #5d4d72;
+  color: #efe5ff;
+  box-shadow: inset 0 -2px 0 #b99ee8;
 }
 
 .token.is-experiment {
