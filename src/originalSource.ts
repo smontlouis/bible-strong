@@ -7,6 +7,7 @@ export interface OriginalToken {
   id: string;
   text: string;
   strong: string[];
+  sourceStrong?: string[];
   gloss: string;
   lemma: string;
   pos: string;
@@ -50,7 +51,10 @@ export async function readOriginalSourceTsv(
       continue;
     }
 
-    const strong = parseStrongList(columns[indexes.strongs] ?? "");
+    const sourceStrong = parseSourceStrongList(columns[indexes.strongs] ?? "");
+    const strong = sourceStrong
+      .map(normalizeOriginalStrong)
+      .filter((strong): strong is string => Boolean(strong));
     const key = referenceKey(ref.bookId, ref.chapter, ref.verse);
     const existing =
       verses.get(key) ??
@@ -66,6 +70,7 @@ export async function readOriginalSourceTsv(
       id,
       text: columns[indexes.text] ?? "",
       strong,
+      sourceStrong,
       gloss: columns[indexes.gloss] ?? "",
       lemma: columns[indexes.lemma] ?? "",
       pos: columns[indexes.pos] ?? "",
@@ -136,11 +141,12 @@ function parseOriginalTokenId(
   };
 }
 
-function parseStrongList(value: string): string[] {
-  return value
-    .split(/[ ,]+/u)
-    .map(normalizeOriginalStrong)
-    .filter((strong): strong is string => Boolean(strong));
+function parseSourceStrongList(value: string): string[] {
+  return value.split(/[ ,]+/u).map(normalizeSourceStrong).filter(Boolean);
+}
+
+function normalizeSourceStrong(strong: string): string {
+  return strong.trim().replace(/^([hg])/u, (prefix) => prefix.toUpperCase());
 }
 
 export function normalizeOriginalStrong(strong: string): string | undefined {

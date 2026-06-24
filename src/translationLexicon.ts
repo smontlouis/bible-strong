@@ -6,7 +6,11 @@ export interface StrongTranslationCandidate {
   normalized: string;
   score: number;
   source: string;
-  method: "learned-translation" | "learned-translation-stem";
+  method:
+    | "learned-translation"
+    | "learned-translation-stem"
+    | "dictionary-fr-exact"
+    | "dictionary-fr-stem";
 }
 
 export interface StrongTranslationLexicon {
@@ -19,7 +23,8 @@ const MIN_STEM_COUNT = 4;
 const MIN_SCORE = 0.18;
 
 export function buildStrongTranslationLexicon(
-  references: Array<{ name: string; map: StrongVerseMap }>
+  references: Array<{ name: string; map: StrongVerseMap }>,
+  options: { dictionaryCandidates?: StrongTranslationCandidate[] } = {}
 ): StrongTranslationLexicon {
   const exactCounts = new Map<string, Map<string, number>>();
   const stemCounts = new Map<string, Map<string, number>>();
@@ -44,10 +49,16 @@ export function buildStrongTranslationLexicon(
     }
   }
 
-  return {
+  const lexicon = {
     exact: normalizeCounts(exactCounts, MIN_EXACT_COUNT, sourceNames),
     stem: normalizeCounts(stemCounts, MIN_STEM_COUNT, sourceNames)
   };
+
+  for (const candidate of options.dictionaryCandidates ?? []) {
+    addDictionaryCandidate(lexicon, candidate);
+  }
+
+  return lexicon;
 }
 
 export function findTranslationCandidate(
@@ -209,4 +220,21 @@ function normalizeCounts(
   }
 
   return lexicon;
+}
+
+function addDictionaryCandidate(
+  lexicon: StrongTranslationLexicon,
+  candidate: StrongTranslationCandidate
+): void {
+  const target =
+    candidate.method === "dictionary-fr-stem" ||
+    candidate.method === "learned-translation-stem"
+      ? lexicon.stem
+      : lexicon.exact;
+  const forms = target.get(candidate.strong) ?? new Map();
+  const existing = forms.get(candidate.normalized);
+  if (!existing || candidate.score > existing.score) {
+    forms.set(candidate.normalized, candidate);
+  }
+  target.set(candidate.strong, forms);
 }

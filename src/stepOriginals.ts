@@ -23,6 +23,24 @@ export interface StepStrongCandidates {
 
 export type StepOriginalIndex = Map<string, Map<string, StepStrongCandidates>>;
 
+export interface StepStrongEvidence {
+  baseStrong: string;
+  stepStrong: string;
+  source: "TAHOT" | "TAGNT";
+  tokenIndex: number;
+  type: string;
+  surface: string;
+  transliteration: string;
+  gloss: string;
+  morphology: string;
+  editions: string;
+}
+
+export type StepOriginalEvidenceIndex = Map<
+  string,
+  Map<string, StepStrongEvidence[]>
+>;
+
 const STEP_TO_OSIS_BOOK = new Map<string, string>([
   ["Gen", "Gen"],
   ["Exo", "Exod"],
@@ -110,6 +128,30 @@ export async function readStepOriginalIndex(
       addTokenStrongSets(verse, token);
       for (const alternateRef of token.alternateRefs) {
         addTokenStrongSets(
+          getOrInsert(index, alternateRef, () => new Map()),
+          token
+        );
+      }
+    }
+  }
+
+  return index;
+}
+
+export async function readStepOriginalEvidenceIndex(
+  filePaths: string[]
+): Promise<StepOriginalEvidenceIndex> {
+  const index: StepOriginalEvidenceIndex = new Map();
+
+  for (const filePath of filePaths) {
+    const tokens = await readStepOriginalTokens(filePath);
+    for (const token of tokens) {
+      addTokenEvidence(
+        getOrInsert(index, token.ref, () => new Map()),
+        token
+      );
+      for (const alternateRef of token.alternateRefs) {
+        addTokenEvidence(
           getOrInsert(index, alternateRef, () => new Map()),
           token
         );
@@ -240,6 +282,29 @@ function addTokenStrongSets(
     for (const stepStrong of stepStrongSet) {
       target.unique.add(stepStrong);
       target.occurrences.push(stepStrong);
+    }
+  }
+}
+
+function addTokenEvidence(
+  verse: Map<string, StepStrongEvidence[]>,
+  token: StepOriginalToken
+): void {
+  for (const [baseStrong, stepStrongSet] of token.strongByBase) {
+    const target = getOrInsert(verse, baseStrong, () => []);
+    for (const stepStrong of stepStrongSet) {
+      target.push({
+        baseStrong,
+        stepStrong,
+        source: token.source,
+        tokenIndex: token.tokenIndex,
+        type: token.type,
+        surface: token.surface,
+        transliteration: token.transliteration,
+        gloss: token.gloss,
+        morphology: token.morphology,
+        editions: token.editions
+      });
     }
   }
 }

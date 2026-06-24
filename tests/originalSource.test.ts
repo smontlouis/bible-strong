@@ -34,6 +34,10 @@ test("parses original-language source TSV by encoded token id", async () => {
     map.get(referenceKey("Matt", 1, 1))?.strongSet.has("G0976"),
     true
   );
+  assert.deepEqual(
+    map.get(referenceKey("Gen", 1, 1))?.tokens[0]?.sourceStrong,
+    ["H0871a"]
+  );
 
   await rm(directory, { recursive: true, force: true });
 });

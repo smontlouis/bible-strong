@@ -19,6 +19,7 @@ export interface OriginalStrongOccurrence {
   tokenId: string;
   tokenIndex: number;
   strong: string;
+  sourceStrong: string;
   text: string;
   gloss: string;
   lemma: string;
@@ -40,6 +41,7 @@ export interface EmptyStrongAssignment {
   strong: string;
   originalTokenId: string;
   originalOccurrenceId: string;
+  sourceStrong?: string;
   confidence: number;
   method: "empty-original";
   insertAfterWordIndex: number;
@@ -136,6 +138,7 @@ export function alignCompleteVerse(options: {
       strong: occurrence.strong,
       originalTokenId: occurrence.tokenId,
       originalOccurrenceId: occurrence.occurrenceId,
+      sourceStrong: occurrence.sourceStrong,
       confidence: 0.35,
       method: "empty-original" as const,
       insertAfterWordIndex: findPreviousAssignedWordIndex(
@@ -182,7 +185,8 @@ export function alignCompleteVerse(options: {
     ].reduce(
       (sum, assignment) =>
         sum +
-        (assignment.method.includes("learned-translation")
+        (assignment.method.includes("learned-translation") ||
+        assignment.method.includes("dictionary")
           ? assignment.strong.length
           : 0),
       0
@@ -347,6 +351,7 @@ function toOccurrence(
     tokenId: token.id,
     tokenIndex,
     strong,
+    sourceStrong: token.sourceStrong?.[strongIndex] ?? strong,
     text: token.text,
     gloss: token.gloss,
     lemma: token.lemma,

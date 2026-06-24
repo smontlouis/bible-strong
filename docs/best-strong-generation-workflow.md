@@ -188,6 +188,12 @@ This should feed `translationLexicon`/`readerAlignment` as an additional
 candidate source such as `dictionary-fr-exact`, `dictionary-fr-stem`, or
 `dictionary-fr-phrase`.
 
+Do not add hand-written synonym entries to the production generation path just
+because a hard verse was discussed. If a broad synonym layer is needed, use
+auditable external sources as candidate evidence. See
+`docs/french-lexical-sources-for-strong-placement.md` for the first-pass
+evaluation of RezoJDM, Kaikki/Wiktextract, WOLF, OpenOffice synonyms, and ReSyf.
+
 ### B. Import STEP Tagged Originals
 
 The current plan in `goals/step-tagged-originals-plan.md` is still the right

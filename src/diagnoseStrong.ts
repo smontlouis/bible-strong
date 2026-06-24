@@ -29,6 +29,7 @@ import {
   type StrongRow,
   type StrongVerseMap
 } from "./strongCsv.js";
+import { readStrongDictionaryTranslationCandidates } from "./strongDictionaryLexicon.js";
 import { tokenizeText } from "./tokenize.js";
 import { buildStrongTranslationLexicon } from "./translationLexicon.js";
 import {
@@ -198,7 +199,10 @@ export async function diagnoseStrong(
   const originals = await loadOriginalSources();
   const originalByRef = mergeOriginalSources(originals);
   const lexicon = buildStrongLexicon(references);
-  const translationLexicon = buildStrongTranslationLexicon(references);
+  const dictionaryCandidates = readStrongDictionaryTranslationCandidates();
+  const translationLexicon = buildStrongTranslationLexicon(references, {
+    dictionaryCandidates
+  });
   const phraseLexicon = buildStrongPhraseLexicon(references);
   const translationProfile = getTranslationProfile(options.bible);
   await mkdir(options.outputDir, { recursive: true });

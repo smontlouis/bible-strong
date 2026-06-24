@@ -21,6 +21,7 @@ import {
   type StrongRow,
   type StrongVerseMap
 } from "./strongCsv.js";
+import { readStrongDictionaryTranslationCandidates } from "./strongDictionaryLexicon.js";
 import { stripTags } from "./tokenize.js";
 import { buildStrongTranslationLexicon } from "./translationLexicon.js";
 
@@ -142,7 +143,10 @@ export async function evaluateStrongGold(
   const originals = await loadOriginalSources();
   const originalByRef = mergeOriginalSources(originals);
   const lexicon = buildStrongLexicon(references);
-  const translationLexicon = buildStrongTranslationLexicon(references);
+  const dictionaryCandidates = readStrongDictionaryTranslationCandidates();
+  const translationLexicon = buildStrongTranslationLexicon(references, {
+    dictionaryCandidates
+  });
   const phraseLexicon = buildStrongPhraseLexicon(references);
   const verseEvaluations: VerseEvaluation[] = [];
   const refs = [...goldMap.keys()].filter((ref) =>
@@ -452,6 +456,7 @@ function mergeOriginalSources(
         id: occurrence.occurrenceId,
         text: occurrence.text,
         strong: [occurrence.strong],
+        sourceStrong: [occurrence.sourceStrong],
         gloss: occurrence.gloss,
         lemma: occurrence.lemma,
         pos: occurrence.pos,

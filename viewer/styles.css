@@ -276,24 +276,115 @@ button:focus-visible {
   box-shadow: 0 0 0 3px rgba(142, 230, 255, 0.12);
 }
 
-.stats-panel dl {
+.stats-dashboard {
+  display: grid;
+  gap: 10px;
+}
+
+.stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin: 0;
 }
 
-.stats-panel div {
+.stats-grid > div,
+.coverage-meter,
+.stat-bars {
   padding: 10px;
   border-radius: 8px;
   background: #101619;
 }
 
-dt {
-  font-size: 11px;
+.coverage-meter {
+  border: 1px solid rgba(142, 230, 255, 0.14);
 }
 
+.coverage-meter-header,
+.stat-bar-header {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.coverage-meter-header strong {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.stat-label,
+.stat-bar-header span,
+dt {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.meter-track {
+  height: 9px;
+  margin-top: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #263239;
+}
+
+.meter-track.thin {
+  height: 6px;
+  margin-top: 6px;
+}
+
+.meter-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--focus);
+}
+
+.coverage-meter.is-good .meter-track span {
+  background: #57c781;
+}
+
+.coverage-meter.is-warning .meter-track span {
+  background: #d0b253;
+}
+
+.coverage-meter.is-risk .meter-track span {
+  background: #df7777;
+}
+
+.stat-bars {
+  display: grid;
+  gap: 10px;
+}
+
+.stat-bar:nth-child(1) .meter-track span {
+  background: #8ee6ff;
+}
+
+.stat-bar:nth-child(2) .meter-track span {
+  background: #57c781;
+}
+
+.stat-bar:nth-child(3) .meter-track span {
+  background: #d0b253;
+}
+
+.stat-bar:nth-child(4) .meter-track span {
+  background: #94a7b0;
+}
+
+.stat-detail {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.stats-grid strong,
 dd {
+  display: block;
   margin: 3px 0 0;
   font-size: 18px;
   font-weight: 800;
@@ -425,6 +516,16 @@ button:disabled {
 .token:hover,
 .token.is-selected {
   background: var(--chip-hover);
+}
+
+.token.is-static,
+.empty-token.is-static {
+  cursor: default;
+  opacity: 0.82;
+}
+
+.token.is-static:hover {
+  background: var(--chip);
 }
 
 .token.is-selected,

@@ -99,6 +99,7 @@ export function alignReaderVerse(options: {
     phraseAssignments,
     original: options.original,
     originalVerse: options.originalVerse,
+    references: options.references,
     translationLexicon: options.translationLexicon,
     phraseLexicon: options.phraseLexicon,
     readerPolicy
@@ -152,6 +153,7 @@ function enrichAssignmentsFromOriginal(options: {
   phraseAssignments: ReaderPhraseAssignment[];
   original?: OriginalConstraint;
   originalVerse?: OriginalVerse;
+  references: ReferenceSource[];
   translationLexicon?: StrongTranslationLexicon;
   phraseLexicon?: StrongPhraseLexicon;
   readerPolicy: ReaderAlignmentPolicy;
@@ -250,6 +252,14 @@ function enrichAssignmentsFromOriginal(options: {
 
     usedOccurrences.add(occurrence.occurrenceId);
   }
+
+  pruneOverBudgetAssignments({
+    assignments: options.result.assignments,
+    phraseAssignments: options.phraseAssignments,
+    occurrences,
+    words,
+    budget: buildPlacementBudget(options.references, occurrences)
+  });
 }
 
 function relocateSemanticAssignments(options: {
@@ -271,16 +281,19 @@ function relocateSemanticAssignments(options: {
       continue;
     }
 
-    const currentScores = current.map(([wordIndex]) => ({
+    const currentScores = current.map(([wordIndex, assignment]) => ({
       wordIndex,
-      score: scoreSemanticWordForOccurrence({
-        strong: occurrence.strong,
-        originalTokenIndex: occurrence.tokenIndex,
-        originalCount: options.occurrences.length,
-        word: options.words[wordIndex],
-        wordCount: options.words.length,
-        translationLexicon: options.translationLexicon
-      })
+      score: Math.max(
+        scoreSemanticWordForOccurrence({
+          strong: occurrence.strong,
+          originalTokenIndex: occurrence.tokenIndex,
+          originalCount: options.occurrences.length,
+          word: options.words[wordIndex],
+          wordCount: options.words.length,
+          translationLexicon: options.translationLexicon
+        }),
+        scoreExistingReferenceAnchor(assignment)
+      )
     }));
     const weakestCurrent = currentScores.sort((a, b) => a.score - b.score)[0];
     if (!weakestCurrent) {
@@ -317,7 +330,9 @@ function relocateSemanticAssignments(options: {
     if (
       !best ||
       best.score < 0.62 ||
-      best.score < weakestCurrent.score + 0.16
+      best.score <
+        weakestCurrent.score +
+          relocationMargin(options.assignments, best.word.wordIndex)
     ) {
       continue;
     }
@@ -349,6 +364,25 @@ function relocateSemanticAssignments(options: {
       });
     }
   }
+}
+
+function relocationMargin(
+  assignments: Map<number, AssignedStrong>,
+  targetWordIndex: number
+): number {
+  return assignments.has(targetWordIndex) ? 0.16 : 0.08;
+}
+
+function scoreExistingReferenceAnchor(assignment: AssignedStrong): number {
+  if (
+    assignment.method !== "exact" &&
+    assignment.method !== "stem" &&
+    assignment.method !== "window"
+  ) {
+    return 0;
+  }
+
+  return Math.min(0.82, assignment.confidence * 0.82);
 }
 
 function scoreSemanticWordForOccurrence(options: {
@@ -545,7 +579,10 @@ function findReaderEnrichmentCandidate(options: {
         word.wordIndex,
         options.words.length
       );
-      const score = match.score * 0.68 + positionScore * 0.32;
+      const occupiedPenalty = existing
+        ? 0.18 + existing.strong.length * 0.06
+        : 0;
+      const score = match.score * 0.68 + positionScore * 0.32 - occupiedPenalty;
 
       return {
         wordIndex: word.wordIndex,
@@ -558,17 +595,136 @@ function findReaderEnrichmentCandidate(options: {
     .sort((a, b) => b.score - a.score);
 
   const best = candidates[0];
-  if (!best || best.score < options.readerPolicy.learnedTranslationMinScore) {
-    return undefined;
+  if (best && best.score >= options.readerPolicy.learnedTranslationMinScore) {
+    return {
+      target: "word",
+      wordIndex: best.wordIndex,
+      confidence: Math.min(0.86, 0.46 + best.score * 0.36),
+      method: best.method,
+      source: best.source
+    };
   }
 
-  return {
-    target: "word",
-    wordIndex: best.wordIndex,
-    confidence: Math.min(0.86, 0.46 + best.score * 0.36),
-    method: best.method,
-    source: best.source
-  };
+  return undefined;
+}
+
+function buildPlacementBudget(
+  references: ReferenceSource[],
+  occurrences: OriginalStrongOccurrence[]
+): Map<string, number> {
+  const budget = new Map<string, number>();
+
+  for (const reference of references) {
+    const counts = new Map<string, number>();
+    for (const token of reference.verse?.tokens ?? []) {
+      for (const strong of token.strong) {
+        counts.set(strong, (counts.get(strong) ?? 0) + 1);
+      }
+    }
+
+    for (const [strong, count] of counts) {
+      budget.set(strong, Math.max(budget.get(strong) ?? 0, count));
+    }
+  }
+
+  const originalCounts = new Map<string, number>();
+  for (const occurrence of occurrences) {
+    originalCounts.set(
+      occurrence.strong,
+      (originalCounts.get(occurrence.strong) ?? 0) + 1
+    );
+  }
+
+  for (const [strong, count] of originalCounts) {
+    budget.set(strong, Math.max(budget.get(strong) ?? 0, count));
+  }
+
+  return budget;
+}
+
+function pruneOverBudgetAssignments(options: {
+  assignments: Map<number, AssignedStrong>;
+  phraseAssignments: ReaderPhraseAssignment[];
+  occurrences: OriginalStrongOccurrence[];
+  words: Array<{ wordIndex: number; normalized: string }>;
+  budget: Map<string, number>;
+}): void {
+  const placementsByStrong = new Map<
+    string,
+    Array<{
+      strong: string;
+      wordIndex: number;
+      assignment: AssignedStrong;
+      score: number;
+    }>
+  >();
+
+  for (const [wordIndex, assignment] of options.assignments) {
+    for (const strong of assignment.strong) {
+      const placements = placementsByStrong.get(strong) ?? [];
+      placements.push({
+        strong,
+        wordIndex,
+        assignment,
+        score: scoreBudgetPlacement({
+          strong,
+          wordIndex,
+          assignment,
+          occurrences: options.occurrences,
+          words: options.words
+        })
+      });
+      placementsByStrong.set(strong, placements);
+    }
+  }
+
+  for (const [strong, placements] of placementsByStrong) {
+    const allowed = options.budget.get(strong) ?? placements.length;
+    const excess = placements.length - allowed;
+    if (excess <= 0) continue;
+
+    const toRemove = placements
+      .sort((left, right) => left.score - right.score)
+      .slice(0, excess);
+
+    for (const placement of toRemove) {
+      removeStrongFromCoveredWords(
+        options.assignments,
+        placement.wordIndex,
+        placement.wordIndex,
+        [placement.strong]
+      );
+    }
+  }
+}
+
+function scoreBudgetPlacement(options: {
+  strong: string;
+  wordIndex: number;
+  assignment: AssignedStrong;
+  occurrences: OriginalStrongOccurrence[];
+  words: Array<{ wordIndex: number; normalized: string }>;
+}): number {
+  const sameStrongOccurrences = options.occurrences.filter(
+    (occurrence) => occurrence.strong === options.strong
+  );
+  const bestPosition =
+    sameStrongOccurrences.length === 0
+      ? 0.5
+      : Math.max(
+          ...sameStrongOccurrences.map((occurrence) =>
+            scorePosition(
+              occurrence.tokenIndex,
+              options.occurrences.length,
+              options.wordIndex,
+              options.words.length
+            )
+          )
+        );
+  const unstackedBonus = options.assignment.strong.length === 1 ? 0.16 : 0;
+  const confidenceScore = Math.min(1, options.assignment.confidence);
+
+  return bestPosition * 0.54 + confidenceScore * 0.3 + unstackedBonus;
 }
 
 function chooseReaderMatch(

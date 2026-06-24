@@ -46,7 +46,15 @@ npm run strong:evaluate -- --gold DarbyR --limit 1000
 
 The evaluator still uses the diagnostic backend internally. Until it evaluates the canonical ledger directly, use `strong:evaluate` as the public command.
 
-5. For current hard-verse diagnostics or legacy TSV compatibility, run the diagnostic path explicitly:
+5. Report reference coverage against the known Strong Bibles when the user wants to know how many reference Strong occurrences were reproduced:
+
+```sh
+npm run strong:report:references -- --bible <id>
+```
+
+This reads the canonical ledger and writes JSON/Markdown coverage for `Sg1910`, `Darby`, `DarbyR`, plus consensus buckets `1/3`, `2/3`, and `3/3`.
+
+6. For current hard-verse diagnostics or legacy TSV compatibility, run the diagnostic path explicitly:
 
 ```sh
 npm run strong:diagnose -- --bible <id>
@@ -54,26 +62,26 @@ npm run strong:diagnose -- --bible <id>
 
 For a production-maturity audit, run the same commands without `--limit` and update `reports/strong-gold-evaluation-report.md`.
 
-6. Inspect metrics:
+7. Inspect metrics:
 
 ```sh
 cat outputs/strong/<id>/bible-<id>-strong-metrics.json
 cat outputs/bible-<id>-strong-diagnostic.metrics.json
 ```
 
-7. If quality is unclear, inspect hard verses:
+8. If quality is unclear, inspect hard verses:
 
 ```sh
 cat outputs/bible-<id>-strong-diagnostic.hard-verses.json
 ```
 
-8. Use LLM only as a bounded suggestion generator, not as blind production:
+9. Use LLM only as a bounded suggestion generator, not as blind production:
 
 ```sh
 npm run strong:diagnose -- --bible <id> --only Gen --llm --llm-limit 250 --output-dir outputs/llm-books/<id>/Gen
 ```
 
-9. Prepare a human review queue for LLM suggestions:
+10. Prepare a human review queue for LLM suggestions:
 
 ```sh
 npm run strong:review:llm -- --bible <id> --diagnostics outputs/llm-books/<id>/Gen/bible-<id>-strong-diagnostic.hard-verses.json --review outputs/llm-books/<id>/Gen/llm-review-<id>-Gen.json --only Gen
@@ -105,7 +113,7 @@ Manual review supports three cases:
 - wrong suggestion: set `Rejeter`;
 - right Strong but wrong French token: set the item to `À revoir`, click the intended word in the verse context or edit `Index cible` / `Mot normalisé` / `Strong`, then set `Accepter`.
 
-10. Regenerate after saving accepted decisions:
+11. Regenerate after saving accepted decisions:
 
 ```sh
 npm run strong:generate -- --bible <id>
@@ -115,14 +123,14 @@ The viewer stores accepted decisions in `data/curated-strong-overrides.json`. Th
 
 `strong:review:llm` pre-accepts only high-confidence mechanically safe suggestions. Weak function-word/particle cases stay pending. Use `--auto-accept false` or `--auto-accept-threshold <n>` when a stricter review is needed.
 
-11. Before trusting the LLM prompt on a new book/style, evaluate it against known Strong Bibles:
+12. Before trusting the LLM prompt on a new book/style, evaluate it against known Strong Bibles:
 
 ```sh
 npm run strong:llm:transfer -- --source Darby --gold Sg1910 --only Gen.1 --limit 5
 npm run strong:llm:transfer -- --source Darby --gold DarbyR --only Gen.1 --limit 5
 ```
 
-12. When deterministic generation leaves meaningful semantic holes or suspicious visible placements, use the internal-agent gap-review workflow instead of ad hoc token patches:
+13. When deterministic generation leaves meaningful semantic holes or suspicious visible placements, use the internal-agent gap-review workflow instead of ad hoc token patches:
 
 ```sh
 npm run strong:generate -- --bible <id>
@@ -162,7 +170,7 @@ For relocation candidates, agents must compare `currentTarget` with `determinist
 
 For reference-style candidates, do not use `pending-human` as a final state and do not use `reject` for a legitimate Strong simply because no French carrier is found. The objective is to copy the reader style of `Darby`, `DarbyR`, and `Sg1910`: first try `word`, then `phrase`; if no reliable visible carrier exists, output `empty` at the candidate's `sourcePlacement.insertAfterWordIndex` so the Strong remains visible as a small empty tag in original/reference order. Every final decision gets a confidence score. The product vocabulary is high confidence vs low confidence, not accepted vs pending. Use low confidence for uncertain word/phrase placements, suspicious stacking, or empty fallbacks. Reserve `reject` only for invalid candidates, duplicate drift, bad ids, or mechanically impossible decisions. The review/preview must show low-confidence decisions in yellow and empty decisions inline, with a reason such as "no reliable French carrier found".
 
-13. Run full checks before finalizing:
+14. Run full checks before finalizing:
 
 ```sh
 npm run format:check
@@ -178,6 +186,7 @@ npm run build
 - Prefer `strong:export -- --view reader` or `strong:export -- --view advanced` for TSV views.
 - The diagnostic backend includes learned multi-word phrase transfer from the local Strong references. Keep this deterministic and original-confirmed.
 - Treat local French Strong dictionaries as deterministic evidence for review and future scoring, not as a license to place tags without original/reference inventory support.
+- Do not add hand-written synonym entries to generation because a hard verse was discussed. For broad semantic candidates, use external lexical resources as auditable evidence only; see `docs/french-lexical-sources-for-strong-placement.md`.
 - Use calibrated translation profiles: one common backend, but profile-aware generation and diagnostics by translation family.
 - Interpret metrics through the Bible's translation profile. Dynamic translations such as BDS are expected to have lower token coverage than formal translations such as Martin.
 - Profiles are active generation inputs, not just labels: they control learned enrichment strictness, maximum Strong codes per word, empty-word consensus, and hard-verse thresholds.

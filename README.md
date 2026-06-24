@@ -33,6 +33,13 @@ npm run strong:evaluate -- --gold Darby --limit 1000
 npm run strong:evaluate -- --gold DarbyR --limit 1000
 ```
 
+Report how much of `Sg1910`, `Darby`, and `DarbyR` is represented by the
+canonical ledger:
+
+```sh
+npm run strong:report:references -- --bible nbs
+```
+
 For semantic gaps that remain in the ledger, build a constrained review packet
 before using any LLM:
 

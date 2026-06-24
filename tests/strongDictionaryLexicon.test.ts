@@ -1,0 +1,79 @@
+import { execFileSync } from "node:child_process";
+import { mkdtemp } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import { readStrongDictionaryTranslationCandidates } from "../src/strongDictionaryLexicon.js";
+
+test("reads conservative French dictionary candidates from the production schema", async () => {
+  const dbPath = await writeTempLexiconDb();
+
+  const candidates = readStrongDictionaryTranslationCandidates(dbPath);
+
+  assert.ok(
+    candidates.some(
+      (candidate) =>
+        candidate.strong === "H0120" &&
+        candidate.normalized === "humain" &&
+        candidate.method === "dictionary-fr-exact" &&
+        candidate.score >= 0.5
+    )
+  );
+  assert.ok(
+    candidates.some(
+      (candidate) =>
+        candidate.strong === "G0014" &&
+        candidate.normalized === "bien" &&
+        candidate.source === "strong-lexicon-sqlite:fr-gloss-token"
+    )
+  );
+  assert.equal(
+    candidates.some((candidate) => candidate.normalized === "le"),
+    false
+  );
+});
+
+async function writeTempLexiconDb(): Promise<string> {
+  const dir = await mkdtemp(path.join(tmpdir(), "strong-lexicon-test-"));
+  const dbPath = path.join(dir, "strong_lexicon.full.production.sqlite");
+  execFileSync("sqlite3", [
+    dbPath,
+    `
+      create table StepEntries (
+        id integer primary key,
+        language text not null,
+        baseCode integer not null,
+        eStrong text not null,
+        dStrong text not null,
+        uStrong text not null,
+        original text not null,
+        transliteration text not null,
+        morph text not null,
+        gloss text not null,
+        meaning text not null,
+        classicTransliteration text not null default '',
+        pronunciation text not null default ''
+      );
+      create table LexiconTranslations (
+        stepEntryId integer not null,
+        language text not null,
+        gloss text not null,
+        meaning text not null,
+        meaningHtml text not null
+      );
+      insert into StepEntries
+        (id, language, baseCode, eStrong, dStrong, uStrong, original, transliteration, morph, gloss, meaning)
+      values
+        (1, 'Hebrew', 120, 'H0120', 'H0120 =', 'H0120', 'אָדָם', 'adam', 'N', 'human', 'human'),
+        (2, 'Greek', 14, 'G0014', 'G0014 =', 'G0014', 'ἀγαθοεργέω', 'agathoergeo', 'V', 'do good', 'do good');
+      insert into LexiconTranslations
+        (stepEntryId, language, gloss, meaning, meaningHtml)
+      values
+        (1, 'fr', 'humain', 'être humain, personne', ''),
+        (2, 'fr', 'faire le bien', 'faire du bien à quelqu’un', '');
+    `
+  ]);
+  return dbPath;
+}

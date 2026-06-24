@@ -326,6 +326,89 @@ test("relocates a semantic Strong to a better target without moving unrelated St
   assert.doesNotMatch(rendered, /strong="H8435 H1755"[^>]*>généalogie<\/w>/);
 });
 
+test("uses original order to split human and male Strong codes across open targets", () => {
+  const result = alignReaderVerse({
+    targetText:
+      "Dieu créa les humains à son image ; homme et femme il les créa.",
+    references: [
+      reference(
+        "Sg1910",
+        'Dieu créa <w strong="H0120">homme</w> ; <w strong="H2145">homme</w> et <w strong="H5347">femme</w>.'
+      ),
+      reference(
+        "Darby",
+        'Dieu créa <w strong="H0120">homme</w> ; <w strong="H2145">mâle</w> et <w strong="H5347">femelle</w>.'
+      )
+    ],
+    translationLexicon: semanticLexicon([
+      ["H0120", "homme"],
+      ["H2145", "homme"],
+      ["H5347", "femme"]
+    ]),
+    original: {
+      strongSet: new Set(["H0120", "H2145", "H5347"]),
+      source: "original"
+    },
+    originalVerse: {
+      bookId: "Gen",
+      chapter: 1,
+      verse: 27,
+      strongSet: new Set(["H0120", "H2145", "H5347"]),
+      tokens: [
+        originalToken("o1", ["H0120"], "noun"),
+        originalToken("o2", ["H2145"], "noun"),
+        originalToken("o3", ["H5347"], "noun")
+      ]
+    }
+  });
+
+  const rendered = renderReaderTaggedText(result);
+  assert.match(rendered, /strong="H0120"[^>]*>humains<\/w>/);
+  assert.match(rendered, /strong="H2145"[^>]*>homme<\/w>/);
+  assert.doesNotMatch(rendered, /strong="H0120 H2145"[^>]*>homme<\/w>/);
+});
+
+test("prunes duplicate reader placements beyond the verse Strong budget", () => {
+  const result = alignReaderVerse({
+    targetText: "La terre produisit de la verdure, de l’herbe porteuse.",
+    references: [
+      reference(
+        "Sg1910",
+        'La terre produisit de la <w strong="H1877">verdure</w>, de l’<w strong="H6212">herbe</w>.'
+      ),
+      reference(
+        "Darby",
+        'La terre produisit de l’<w strong="H1877">herbe</w>, une <w strong="H6212">plante</w>.'
+      )
+    ],
+    translationLexicon: semanticLexicon([
+      ["H1877", "herbe"],
+      ["H6212", "herbe"]
+    ]),
+    original: {
+      strongSet: new Set(["H1877", "H6212"]),
+      source: "original"
+    },
+    originalVerse: {
+      bookId: "Gen",
+      chapter: 1,
+      verse: 12,
+      strongSet: new Set(["H1877", "H6212"]),
+      tokens: [
+        originalToken("o1", ["H1877"], "noun"),
+        originalToken("o2", ["H6212"], "noun")
+      ]
+    }
+  });
+
+  const strongCodes = [...result.assignments.values()].flatMap(
+    (assignment) => assignment.strong
+  );
+  assert.equal(strongCodes.filter((strong) => strong === "H1877").length, 1);
+  assert.deepEqual(result.assignments.get(5)?.strong, ["H1877"]);
+  assert.deepEqual(result.assignments.get(7)?.strong, ["H6212"]);
+});
+
 test("covers the NBS Genesis 6 semantic regression carriers", () => {
   const repentance = alignReaderVerse({
     targetText: "Le Seigneur regretta les humains.",
@@ -543,9 +626,9 @@ test("applies reviewed LLM transfer overrides only when the target word still ma
   });
 
   assert.equal(applied, 2);
-  assert.deepEqual(result.assignments.get(19)?.strong, ["H7307"]);
-  assert.deepEqual(result.assignments.get(22)?.strong, ["H7363"]);
-  assert.equal(result.assignments.get(19)?.method, "curated-llm-transfer");
+  assert.deepEqual(result.assignments.get(18)?.strong, ["H7307"]);
+  assert.deepEqual(result.assignments.get(21)?.strong, ["H7363"]);
+  assert.equal(result.assignments.get(18)?.method, "curated-llm-transfer");
 });
 
 test("skips reviewed LLM transfer overrides when token indexes drift", () => {

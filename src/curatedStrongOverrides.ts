@@ -28,7 +28,7 @@ export const CURATED_STRONG_OVERRIDES: CuratedStrongOverride[] = [
   {
     bible: "nbs",
     ref: "Gen.1.2",
-    wordIndex: 19,
+    wordIndex: 18,
     normalized: "souffle",
     strong: ["H7307"],
     confidence: 0.9,
@@ -38,7 +38,7 @@ export const CURATED_STRONG_OVERRIDES: CuratedStrongOverride[] = [
   {
     bible: "nbs",
     ref: "Gen.1.2",
-    wordIndex: 22,
+    wordIndex: 21,
     normalized: "tournoyait",
     strong: ["H7363"],
     confidence: 0.9,

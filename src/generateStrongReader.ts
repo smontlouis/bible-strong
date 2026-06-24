@@ -24,6 +24,7 @@ import {
   type StrongRow,
   type StrongVerseMap
 } from "./strongCsv.js";
+import { readStrongDictionaryTranslationCandidates } from "./strongDictionaryLexicon.js";
 import { buildStrongTranslationLexicon } from "./translationLexicon.js";
 
 interface ReaderOptions {
@@ -132,7 +133,10 @@ export async function generateStrongReader(
   const originals = await loadOriginalSources();
   const originalByRef = mergeOriginalSources(originals);
   const lexicon = buildStrongLexicon(references);
-  const translationLexicon = buildStrongTranslationLexicon(references);
+  const dictionaryCandidates = readStrongDictionaryTranslationCandidates();
+  const translationLexicon = buildStrongTranslationLexicon(references, {
+    dictionaryCandidates
+  });
   await mkdir(options.outputDir, { recursive: true });
 
   const outputPath = path.join(

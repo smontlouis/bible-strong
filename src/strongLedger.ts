@@ -4,6 +4,7 @@ import path from "node:path";
 
 import { type AssignedStrong, type ReferenceSource } from "./align.js";
 import { readBibleJson, type BibleVerse } from "./bibleJson.js";
+import { BOOK_IDS } from "./books.js";
 import {
   alignCompleteVerse,
   type CompleteAlignmentResult,
@@ -35,6 +36,12 @@ import {
   type StrongRow,
   type StrongVerseMap
 } from "./strongCsv.js";
+import { readStrongDictionaryTranslationCandidates } from "./strongDictionaryLexicon.js";
+import {
+  readStepOriginalEvidenceIndex,
+  type StepOriginalEvidenceIndex,
+  type StepStrongEvidence as SourceStepStrongEvidence
+} from "./stepOriginals.js";
 import { escapeHtml, type TextSegment } from "./tokenize.js";
 import { buildStrongPhraseLexicon } from "./phraseTranslationLexicon.js";
 import { buildStrongTranslationLexicon } from "./translationLexicon.js";
@@ -65,6 +72,21 @@ export type StrongSource =
   | "llm-review"
   | "curated-override";
 
+export interface StrongStepEvidence {
+  source: "TAHOT" | "TAGNT";
+  classicalStrong: string;
+  eStrong?: string;
+  dStrong: string;
+  uStrong?: string;
+  tokenIndex: number;
+  type: string;
+  surface: string;
+  transliteration: string;
+  gloss: string;
+  morphology: string;
+  editions: string;
+}
+
 export interface StrongLedgerAnnotation {
   id: string;
   strong: string;
@@ -85,6 +107,9 @@ export interface StrongLedgerAnnotation {
   originalOccurrenceIndex?: number;
   originalTokenId?: string;
   originalOccurrenceId?: string;
+  sourceStrong?: string;
+  lexiconLookup?: boolean;
+  step?: StrongStepEvidence[];
   referenceSupport?: ReferenceName[];
   profile?: string;
 }
@@ -157,10 +182,18 @@ export interface StrongLedgerMetrics {
   referenceStrongOccurrenceCount: number;
   referenceStrongRepresentedCount: number;
   referenceStrongCoverage: number;
+  referenceStrongCarrierCount: number;
+  referenceStrongCarrierCoverage: number;
   originalStrongOccurrenceCount: number;
   originalRepresentedStrongOccurrenceCount: number;
   originalRepresentationRate: number;
+  originalStrongCarrierCount: number;
+  originalStrongCarrierRate: number;
   semanticMissingCount: number;
+  readerMultiStrongWordCount: number;
+  readerOverBudgetStrongCount: number;
+  placementRiskCount: number;
+  placementQuality: number;
   readerTaggedTokenCount: number;
   advancedTaggedTokenCount: number;
   readerTokenCoverage: number;
@@ -187,10 +220,18 @@ export interface StrongLedgerVerseMetrics {
   referenceStrongOccurrenceCount: number;
   referenceStrongRepresentedCount: number;
   referenceStrongCoverage: number;
+  referenceStrongCarrierCount: number;
+  referenceStrongCarrierCoverage: number;
   originalStrongOccurrenceCount: number;
   originalRepresentedStrongOccurrenceCount: number;
   originalRepresentationRate: number;
+  originalStrongCarrierCount: number;
+  originalStrongCarrierRate: number;
   semanticMissingCount: number;
+  readerMultiStrongWordCount: number;
+  readerOverBudgetStrongCount: number;
+  placementRiskCount: number;
+  placementQuality: number;
   readerTaggedTokenCount: number;
   advancedTaggedTokenCount: number;
   readerTokenCoverage: number;
@@ -248,12 +289,26 @@ const ORIGINAL_SOURCES = [
   }
 ];
 
+const STEP_ORIGINAL_SOURCES = [
+  "data/external/stepbible/amalgamated/TAHOT Gen-Deu.txt",
+  "data/external/stepbible/amalgamated/TAHOT Jos-Est.txt",
+  "data/external/stepbible/amalgamated/TAHOT Job-Sng.txt",
+  "data/external/stepbible/amalgamated/TAHOT Isa-Mal.txt",
+  "data/external/stepbible/amalgamated/TAGNT Mat-Jhn.txt",
+  "data/external/stepbible/amalgamated/TAGNT Act-Rev.txt"
+];
+
 const TECHNICAL_STRONG = new Set([
   "H0853",
   "H0834",
+  "H0871",
   "H0996",
+  "H3807",
   "H5921",
   "H0413",
+  "H1886",
+  "H2050",
+  "H3963",
   "G3588",
   "G1722",
   "G1519"
@@ -266,8 +321,12 @@ export async function generateStrongLedger(
   const references = await loadReferences();
   const originals = await loadOriginalSources();
   const originalByRef = mergeOriginalSources(originals);
+  const stepEvidenceByRef = await loadStepEvidence();
   const lexicon = buildStrongLexicon(references);
-  const translationLexicon = buildStrongTranslationLexicon(references);
+  const dictionaryCandidates = readStrongDictionaryTranslationCandidates();
+  const translationLexicon = buildStrongTranslationLexicon(references, {
+    dictionaryCandidates
+  });
   const phraseLexicon = buildStrongPhraseLexicon(references);
   const translationProfile = getTranslationProfile(options.bible);
   await mkdir(options.outputDir, { recursive: true });
@@ -279,6 +338,7 @@ export async function generateStrongLedger(
   for (const verse of verses) {
     const key = referenceKey(verse.bookId, verse.chapter, verse.verse);
     const original = originalByRef.get(key);
+    const stepEvidence = stepEvidenceByRef.get(key);
     const verseReferences = references.map((reference) => ({
       name: reference.name,
       verse: reference.map.get(key)
@@ -319,6 +379,7 @@ export async function generateStrongLedger(
       reader,
       complete,
       original: original?.verse,
+      stepEvidence,
       references: verseReferences,
       profile: translationProfile
     });
@@ -465,6 +526,7 @@ function buildStrongLedgerVerse(options: {
   reader: ReaderAlignmentResult;
   complete: CompleteAlignmentResult;
   original?: OriginalVerse;
+  stepEvidence?: Map<string, SourceStepStrongEvidence[]>;
   references: ReferenceSource[];
   profile: TranslationProfile;
 }): StrongLedgerVerse {
@@ -518,6 +580,7 @@ function buildStrongLedgerVerse(options: {
     )
     .map((annotation, index) => ({
       ...annotation,
+      step: stepEvidenceForStrong(options.stepEvidence, annotation.strong),
       id: `${options.verse.bookId}.${options.verse.chapter}.${options.verse.verse}:${index}:${annotation.strong}`
     }));
 
@@ -561,6 +624,7 @@ function buildStrongLedgerVerse(options: {
     inventories,
     metrics: calculateVerseMetrics(tokens.length, normalizedAnnotations, {
       references: collapseReferenceInventories(referenceInventories),
+      original: originalOccurrences.map((occurrence) => occurrence.strong),
       originalCount: originalOccurrences.length,
       originalRepresentedCount: Math.min(
         originalOccurrences.length,
@@ -616,7 +680,8 @@ function readerWordAnnotations(options: {
       const normalizedStrong = strong.toUpperCase();
       const source = assignment.method.includes("curated")
         ? "curated-override"
-        : assignment.method.includes("learned")
+        : assignment.method.includes("learned") ||
+            assignment.method.includes("dictionary")
           ? "semantic-lexicon"
           : "reference-transfer";
       annotations.push({
@@ -766,6 +831,8 @@ function completeEmptyAnnotation(options: {
     insertAfterWordIndex: options.assignment.insertAfterWordIndex,
     originalTokenId: options.assignment.originalTokenId,
     originalOccurrenceId: options.assignment.originalOccurrenceId,
+    sourceStrong: options.assignment.sourceStrong,
+    lexiconLookup: !(technical && options.assignment.sourceStrong),
     referenceSupport: options.referenceSupport.get(strong) ?? [],
     profile: options.profile.bible
   };
@@ -982,6 +1049,7 @@ function calculateVerseMetrics(
   annotations: StrongLedgerAnnotation[],
   expected: {
     references: string[];
+    original: string[];
     originalCount: number;
     originalRepresentedCount: number;
   }
@@ -992,13 +1060,32 @@ function calculateVerseMetrics(
   const advancedVisible = annotations.filter((annotation) =>
     ["reader", "advanced"].includes(annotation.visibility)
   );
+  const advancedCarriers = advancedVisible.filter((annotation) =>
+    ["word", "phrase"].includes(annotation.placement)
+  );
   const referenceStrongOccurrenceCount = expected.references.length;
   const referenceStrongRepresentedCount = countRepresentedOccurrences(
     expected.references,
     advancedVisible.map((annotation) => annotation.strong)
   );
+  const referenceStrongCarrierCount = countRepresentedOccurrences(
+    expected.references,
+    advancedCarriers.map((annotation) => annotation.strong)
+  );
+  const originalStrongCarrierCount = countRepresentedOccurrences(
+    expected.original,
+    advancedCarriers.map((annotation) => annotation.strong)
+  );
   const readerTaggedTokenCount = countTaggedTokens(readerAnnotations);
   const advancedTaggedTokenCount = countTaggedTokens(advancedVisible);
+  const readerMultiStrongWordCount =
+    countMultiStrongReaderWords(readerAnnotations);
+  const readerOverBudgetStrongCount = countOverBudgetStrong(readerAnnotations, [
+    ...expected.references,
+    ...expected.original
+  ]);
+  const placementRiskCount =
+    readerMultiStrongWordCount + readerOverBudgetStrongCount;
 
   return {
     wordCount,
@@ -1025,14 +1112,28 @@ function calculateVerseMetrics(
       referenceStrongRepresentedCount /
         Math.max(1, referenceStrongOccurrenceCount)
     ),
+    referenceStrongCarrierCount,
+    referenceStrongCarrierCoverage: roundRatio(
+      referenceStrongCarrierCount / Math.max(1, referenceStrongOccurrenceCount)
+    ),
     originalStrongOccurrenceCount: expected.originalCount,
     originalRepresentedStrongOccurrenceCount: expected.originalRepresentedCount,
     originalRepresentationRate: roundRatio(
       expected.originalRepresentedCount / Math.max(1, expected.originalCount)
     ),
+    originalStrongCarrierCount,
+    originalStrongCarrierRate: roundRatio(
+      originalStrongCarrierCount / Math.max(1, expected.originalCount)
+    ),
     semanticMissingCount: Math.max(
       0,
       referenceStrongOccurrenceCount - referenceStrongRepresentedCount
+    ),
+    readerMultiStrongWordCount,
+    readerOverBudgetStrongCount,
+    placementRiskCount,
+    placementQuality: roundRatio(
+      1 - placementRiskCount / Math.max(1, readerTaggedTokenCount)
     ),
     readerTaggedTokenCount,
     advancedTaggedTokenCount,
@@ -1104,10 +1205,18 @@ function emptyMetricCounts(): Omit<
     referenceStrongOccurrenceCount: 0,
     referenceStrongRepresentedCount: 0,
     referenceStrongCoverage: 0,
+    referenceStrongCarrierCount: 0,
+    referenceStrongCarrierCoverage: 0,
     originalStrongOccurrenceCount: 0,
     originalRepresentedStrongOccurrenceCount: 0,
     originalRepresentationRate: 0,
+    originalStrongCarrierCount: 0,
+    originalStrongCarrierRate: 0,
     semanticMissingCount: 0,
+    readerMultiStrongWordCount: 0,
+    readerOverBudgetStrongCount: 0,
+    placementRiskCount: 0,
+    placementQuality: 0,
     readerTaggedTokenCount: 0,
     advancedTaggedTokenCount: 0,
     readerTokenCoverage: 0,
@@ -1135,10 +1244,15 @@ function addMetrics(
     source.referenceStrongOccurrenceCount;
   target.referenceStrongRepresentedCount +=
     source.referenceStrongRepresentedCount;
+  target.referenceStrongCarrierCount += source.referenceStrongCarrierCount;
   target.originalStrongOccurrenceCount += source.originalStrongOccurrenceCount;
   target.originalRepresentedStrongOccurrenceCount +=
     source.originalRepresentedStrongOccurrenceCount;
+  target.originalStrongCarrierCount += source.originalStrongCarrierCount;
   target.semanticMissingCount += source.semanticMissingCount;
+  target.readerMultiStrongWordCount += source.readerMultiStrongWordCount;
+  target.readerOverBudgetStrongCount += source.readerOverBudgetStrongCount;
+  target.placementRiskCount += source.placementRiskCount;
   target.readerTaggedTokenCount += source.readerTaggedTokenCount;
   target.advancedTaggedTokenCount += source.advancedTaggedTokenCount;
 }
@@ -1150,8 +1264,16 @@ function finalizeCoverage(
     target.referenceStrongRepresentedCount /
       Math.max(1, target.referenceStrongOccurrenceCount)
   );
+  target.referenceStrongCarrierCoverage = roundRatio(
+    target.referenceStrongCarrierCount /
+      Math.max(1, target.referenceStrongOccurrenceCount)
+  );
   target.originalRepresentationRate = roundRatio(
     target.originalRepresentedStrongOccurrenceCount /
+      Math.max(1, target.originalStrongOccurrenceCount)
+  );
+  target.originalStrongCarrierRate = roundRatio(
+    target.originalStrongCarrierCount /
       Math.max(1, target.originalStrongOccurrenceCount)
   );
   target.readerTokenCoverage = roundRatio(
@@ -1159,6 +1281,9 @@ function finalizeCoverage(
   );
   target.advancedTokenCoverage = roundRatio(
     target.advancedTaggedTokenCount / Math.max(1, target.wordCount)
+  );
+  target.placementQuality = roundRatio(
+    1 - target.placementRiskCount / Math.max(1, target.readerTaggedTokenCount)
   );
 }
 
@@ -1265,6 +1390,47 @@ function countRepresentedOccurrences(
   return represented;
 }
 
+function countOverBudgetStrong(
+  annotations: StrongLedgerAnnotation[],
+  expected: string[]
+): number {
+  const actualCounts = countByStrong(
+    annotations
+      .filter((annotation) => annotation.visibility === "reader")
+      .map((annotation) => annotation.strong)
+  );
+  const expectedCounts = countByStrong(expected);
+  let overBudget = 0;
+
+  for (const [strong, actualCount] of actualCounts) {
+    overBudget += Math.max(0, actualCount - (expectedCounts.get(strong) ?? 0));
+  }
+
+  return overBudget;
+}
+
+function countMultiStrongReaderWords(
+  annotations: StrongLedgerAnnotation[]
+): number {
+  const countsByWord = new Map<number, number>();
+
+  for (const annotation of annotations) {
+    if (
+      annotation.visibility !== "reader" ||
+      annotation.placement !== "word" ||
+      annotation.wordIndex === undefined
+    ) {
+      continue;
+    }
+    countsByWord.set(
+      annotation.wordIndex,
+      (countsByWord.get(annotation.wordIndex) ?? 0) + 1
+    );
+  }
+
+  return [...countsByWord.values()].filter((count) => count > 1).length;
+}
+
 function countTaggedTokens(annotations: StrongLedgerAnnotation[]): number {
   const indexes = new Set<number>();
 
@@ -1355,7 +1521,15 @@ function openStrongTag(
   annotations: StrongLedgerAnnotation[],
   target: string
 ): string {
-  const strong = annotations.map((annotation) => annotation.strong).join(" ");
+  const strong = annotations
+    .map((annotation) => annotation.sourceStrong ?? annotation.strong)
+    .join(" ");
+  const lexicalStrong = annotations
+    .map((annotation) => annotation.strong)
+    .join(" ");
+  const lexiconLookup = annotations.every(
+    (annotation) => annotation.lexiconLookup !== false
+  );
   const confidence = Math.max(
     ...annotations.map((annotation) => annotation.confidence)
   );
@@ -1371,7 +1545,9 @@ function openStrongTag(
     .join("+");
   const reason = annotations[0]?.reason ?? "";
 
-  return `<w strong="${escapeHtml(strong)}" data-confidence="${confidence.toFixed(
+  return `<w strong="${escapeHtml(strong)}" data-lexical-strong="${escapeHtml(
+    lexicalStrong
+  )}" data-lexicon="${lexiconLookup ? "true" : "false"}" data-confidence="${confidence.toFixed(
     2
   )}" data-source="${escapeHtml(source)}" data-method="${escapeHtml(
     source
@@ -1426,6 +1602,37 @@ function normalizedPhrase(
     )
     .map((token) => token.normalized)
     .join(" ");
+}
+
+function stepEvidenceForStrong(
+  evidenceByStrong: Map<string, SourceStepStrongEvidence[]> | undefined,
+  strong: string
+): StrongStepEvidence[] | undefined {
+  const evidence = evidenceByStrong?.get(strong.toUpperCase());
+  if (!evidence || evidence.length === 0) return undefined;
+
+  return evidence.slice(0, 4).map((item) => ({
+    source: item.source,
+    classicalStrong: item.baseStrong,
+    dStrong: item.stepStrong,
+    tokenIndex: item.tokenIndex,
+    type: item.type,
+    surface: item.surface,
+    transliteration: item.transliteration,
+    gloss: item.gloss,
+    morphology: item.morphology,
+    editions: item.editions
+  }));
+}
+
+async function loadStepEvidence(): Promise<StepOriginalEvidenceIndex> {
+  const paths = STEP_ORIGINAL_SOURCES.filter((sourcePath) =>
+    existsSync(sourcePath)
+  );
+  if (paths.length === 0) {
+    return new Map();
+  }
+  return readStepOriginalEvidenceIndex(paths);
 }
 
 async function loadReferences(): Promise<ReferenceMap[]> {
@@ -1501,6 +1708,17 @@ function filterVerses(
     return verses;
   }
 
+  if (options.onlyRef.includes("-")) {
+    const range = parseScopeRange(options.onlyRef);
+    if (range) {
+      return verses.filter(
+        (candidate) =>
+          compareVerseRef(candidate, range.start) >= 0 &&
+          compareVerseRef(candidate, range.end) <= 0
+      );
+    }
+  }
+
   const [book, chapter, verse] = options.onlyRef.split(".");
   return verses.filter((candidate) => {
     if (book && candidate.bookId !== book) return false;
@@ -1509,6 +1727,67 @@ function filterVerses(
     if (verse && candidate.verse !== Number.parseInt(verse, 10)) return false;
     return true;
   });
+}
+
+function parseScopeRange(scope: string):
+  | {
+      start: { bookId: string; chapter: number; verse: number };
+      end: { bookId: string; chapter: number; verse: number };
+    }
+  | undefined {
+  const [rawStart, rawEnd] = scope.split("-");
+  if (!rawStart || !rawEnd) return undefined;
+
+  const start = parseScopeBound(rawStart);
+  const end = parseScopeBound(rawEnd, start?.bookId);
+  if (!start || !end) return undefined;
+
+  return {
+    start: {
+      bookId: start.bookId,
+      chapter: start.chapter ?? 1,
+      verse: start.verse ?? 1
+    },
+    end: {
+      bookId: end.bookId,
+      chapter: end.chapter ?? Number.MAX_SAFE_INTEGER,
+      verse: end.verse ?? Number.MAX_SAFE_INTEGER
+    }
+  };
+}
+
+function parseScopeBound(
+  value: string,
+  defaultBookId?: string
+): { bookId: string; chapter?: number; verse?: number } | undefined {
+  const parts = value.split(".");
+  const bookId = parts[0]?.match(/^\d+$/u) ? defaultBookId : parts.shift();
+  if (!bookId) return undefined;
+
+  const [chapter, verse] = parts;
+  return {
+    bookId,
+    chapter: chapter ? Number.parseInt(chapter, 10) : undefined,
+    verse: verse ? Number.parseInt(verse, 10) : undefined
+  };
+}
+
+function compareVerseRef(
+  verse: BibleVerse,
+  ref: { bookId: string; chapter: number; verse: number }
+): number {
+  const verseBookIndex = bookOrderIndex(verse.bookId);
+  const refBookIndex = bookOrderIndex(ref.bookId);
+  return (
+    verseBookIndex - refBookIndex ||
+    verse.chapter - ref.chapter ||
+    verse.verse - ref.verse
+  );
+}
+
+function bookOrderIndex(bookId: string): number {
+  const index = BOOK_IDS.indexOf(bookId as (typeof BOOK_IDS)[number]);
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index;
 }
 
 function formatRef(verse: BibleVerse): string {

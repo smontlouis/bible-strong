@@ -4,7 +4,10 @@ import path from "node:path";
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { readStepOriginalTokens } from "../src/stepOriginals.js";
+import {
+  readStepOriginalEvidenceIndex,
+  readStepOriginalTokens
+} from "../src/stepOriginals.js";
 
 test("uses TAGNT dStrong as the STEP candidate instead of simple Strong", async () => {
   const filePath = await writeTempStepFile("TAGNT Mat-Jhn.txt", [
@@ -73,6 +76,36 @@ test("filters TAHOT technical H90xx markers before alias mapping", async () => {
   const [token] = await readStepOriginalTokens(filePath);
   assert.deepEqual([...(token?.strongByBase.get("H2896") ?? [])], ["H2895"]);
   assert.equal(token?.strongByBase.has("H9016"), false);
+});
+
+test("builds STEP evidence by verse and classical Strong", async () => {
+  const filePath = await writeTempStepFile("TAGNT Mat-Jhn.txt", [
+    [
+      "Mat.1.1#03=NKO",
+      "Ἰησοῦ (Iēsou)",
+      "of Jesus",
+      "G2424G=N-GSM-P",
+      "Ἰησοῦς=Jesus/Joshua",
+      "NA28+TR",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "G2424",
+      ""
+    ].join("\t")
+  ]);
+
+  const index = await readStepOriginalEvidenceIndex([filePath]);
+  const evidence = index.get("Matt.1.1")?.get("G2424")?.[0];
+
+  assert.equal(evidence?.baseStrong, "G2424");
+  assert.equal(evidence?.stepStrong, "G2424G");
+  assert.equal(evidence?.source, "TAGNT");
+  assert.equal(evidence?.tokenIndex, 3);
+  assert.equal(evidence?.gloss, "of Jesus");
+  assert.equal(evidence?.morphology, "N-GSM-P");
 });
 
 async function writeTempStepFile(

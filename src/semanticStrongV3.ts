@@ -29,6 +29,7 @@ import {
   type StrongRow,
   type StrongVerseMap
 } from "./strongCsv.js";
+import { readStrongDictionaryTranslationCandidates } from "./strongDictionaryLexicon.js";
 import { tokenizeText } from "./tokenize.js";
 import {
   buildStrongTranslationLexicon,
@@ -1316,6 +1317,7 @@ async function loadContext(options: CliOptions): Promise<V3Context> {
   const references = await loadReferences();
   const originals = mergeOriginalSources(await loadOriginalSources());
   const verses = filterVerses(await readBibleJson(options.biblePath), options);
+  const dictionaryCandidates = readStrongDictionaryTranslationCandidates();
 
   return {
     bible: options.bible,
@@ -1323,7 +1325,9 @@ async function loadContext(options: CliOptions): Promise<V3Context> {
     references,
     originals,
     lexicon: buildStrongLexicon(references),
-    translationLexicon: buildStrongTranslationLexicon(references),
+    translationLexicon: buildStrongTranslationLexicon(references, {
+      dictionaryCandidates
+    }),
     phraseLexicon: buildStrongPhraseLexicon(references),
     profile: getTranslationProfile(options.bible)
   };

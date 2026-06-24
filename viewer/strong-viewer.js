@@ -384,6 +384,7 @@ function renderNode(node) {
 
 function renderStrongToken(node) {
   const strong = node.getAttribute("strong") ?? "";
+  const lexiconEnabled = node.getAttribute("data-lexicon") !== "false";
   const stepStrong = node.getAttribute("data-step-strong") ?? "";
   const stepStatus = node.getAttribute("data-step-status") ?? "";
   const isEmpty =
@@ -391,12 +392,15 @@ function renderStrongToken(node) {
     (node.textContent ?? "").trim().length === 0;
   const token = document.createElement("span");
   token.dataset.strong = strong;
+  token.dataset.lexicon = lexiconEnabled ? "true" : "false";
   token.dataset.stepStrong = stepStrong;
   token.dataset.method = node.getAttribute("data-method") ?? "";
   token.dataset.source = node.getAttribute("data-source") ?? "";
   token.dataset.confidence = node.getAttribute("data-confidence") ?? "";
-  token.tabIndex = 0;
-  token.role = "button";
+  if (lexiconEnabled) {
+    token.tabIndex = 0;
+    token.role = "button";
+  }
   token.title = [
     strong,
     stepStrong ? `STEP ${stepStrong}` : "",
@@ -410,12 +414,14 @@ function renderStrongToken(node) {
 
   if (isEmpty) {
     token.className = "empty-token";
+    if (!lexiconEnabled) token.classList.add("is-static");
     if (isSelectedStrong(strong)) token.classList.add("is-selected");
     token.append(renderSup(strong));
     return token;
   }
 
   token.className = "token";
+  if (!lexiconEnabled) token.classList.add("is-static");
   if (isSelectedStrong(strong)) token.classList.add("is-selected");
   if (matchesTokenSearch(node.textContent ?? "", strong)) {
     token.classList.add("highlight");
@@ -430,7 +436,8 @@ function renderStrongToken(node) {
 function getStrongTokenFromEventTarget(target) {
   if (!(target instanceof HTMLElement)) return null;
   const token = target.closest("[data-strong]");
-  return token instanceof HTMLElement ? token : null;
+  if (!(token instanceof HTMLElement)) return null;
+  return token.dataset.lexicon === "false" ? null : token;
 }
 
 function isSelectedStrong(strong) {
@@ -704,55 +711,314 @@ function renderSup(strong) {
 
 function renderStats() {
   if (state.enriched?.metrics) {
-    const metrics = state.enriched.metrics;
-    setStats([
-      ["Versets", state.rows.length],
-      [
-        state.viewMode === "reader" ? "Tags reader" : "Tags advanced",
-        state.viewMode === "reader"
-          ? metrics.readerVisibleStrongCount
-          : metrics.advancedStrongCount
-      ],
-      ["Vides", metrics.emptyStrongCount],
-      [
-        "Mots taggés",
-        state.viewMode === "reader"
-          ? metrics.readerTaggedTokenCount
-          : metrics.advancedTaggedTokenCount
-      ]
-    ]);
+    const rows = currentScopeRows();
+    const metrics = aggregateEnrichedMetrics(rows);
+    renderEnrichedStats(metrics);
     return;
   }
 
-  const tagCount = state.rows.reduce(
+  const rows = currentScopeRows();
+  const tagCount = rows.reduce(
     (sum, row) => sum + countMatches(row.text, /<w\b/gi),
     0
   );
-  const emptyCount = state.rows.reduce(
+  const emptyCount = rows.reduce(
     (sum, row) =>
       sum + countMatches(row.text, /data-empty="true"|<w\b[^>]*><\/w>/gi),
     0
   );
   setStats([
-    ["Versets", state.rows.length],
+    ["Versets", rows.length],
     ["Tags", tagCount],
     ["Vides", emptyCount],
     ["Mots taggés", Math.max(0, tagCount - emptyCount)]
   ]);
 }
 
-function setStats(values) {
+function renderEnrichedStats(metrics) {
+  els.stats.className = "stats-dashboard";
   els.stats.replaceChildren(
+    coverageMeter({
+      label: "Réf. placées",
+      value: metrics.referenceStrongCarrierCoverage,
+      count: `${formatRatio(
+        metrics.referenceStrongCarrierCount,
+        metrics.referenceStrongOccurrenceCount
+      )} · audit ${formatPercent(metrics.referenceStrongCoverage)}`
+    }),
+    coverageMeter({
+      label: "Original placé",
+      value: metrics.originalStrongCarrierRate,
+      count: `${formatRatio(
+        metrics.originalStrongCarrierCount,
+        metrics.originalStrongOccurrenceCount
+      )} · audit ${formatPercent(metrics.originalRepresentationRate)}`
+    }),
+    coverageMeter({
+      label: "Placement",
+      value: metrics.placementQuality,
+      count: `${formatNumber(metrics.placementRiskCount)} risque${metrics.placementRiskCount > 1 ? "s" : ""}`
+    }),
+    statBars([
+      {
+        label: "Reader",
+        value: metrics.readerVisibleStrongCount,
+        max: Math.max(1, metrics.advancedStrongCount),
+        detail: "Strong visibles"
+      },
+      {
+        label: "Advanced",
+        value: metrics.advancedStrongCount,
+        max: Math.max(1, metrics.advancedStrongCount),
+        detail: "Strong complets"
+      },
+      {
+        label: "Vides",
+        value: metrics.emptyStrongCount,
+        max: Math.max(1, metrics.advancedStrongCount),
+        detail: "sans mot français"
+      },
+      {
+        label: "Techniques",
+        value: metrics.technicalStrongCount,
+        max: Math.max(1, metrics.advancedStrongCount),
+        detail: "source uniquement"
+      }
+    ]),
+    miniStats([
+      ["Versets", metrics.verseCount],
+      ["Mots", metrics.wordCount],
+      ["Mots reader", formatPercent(metrics.readerTokenCoverage)],
+      ["Mots advanced", formatPercent(metrics.advancedTokenCoverage)]
+    ])
+  );
+}
+
+function coverageMeter({ label, value, count }) {
+  const card = document.createElement("section");
+  card.className = `coverage-meter ${coverageClass(value)}`;
+
+  const header = document.createElement("div");
+  header.className = "coverage-meter-header";
+
+  const title = document.createElement("span");
+  title.className = "stat-label";
+  title.textContent = label;
+
+  const score = document.createElement("strong");
+  score.textContent = formatPercent(value);
+
+  header.append(title, score);
+
+  const track = document.createElement("div");
+  track.className = "meter-track";
+  const fill = document.createElement("span");
+  fill.style.width = `${Math.max(0, Math.min(100, value * 100))}%`;
+  track.append(fill);
+
+  const detail = document.createElement("span");
+  detail.className = "stat-detail";
+  detail.textContent = `${count} · ${coverageLabel(value)}`;
+
+  card.append(header, track, detail);
+  return card;
+}
+
+function statBars(items) {
+  const group = document.createElement("div");
+  group.className = "stat-bars";
+  group.replaceChildren(...items.map(statBar));
+  return group;
+}
+
+function statBar(item) {
+  const row = document.createElement("div");
+  row.className = "stat-bar";
+
+  const header = document.createElement("div");
+  header.className = "stat-bar-header";
+
+  const label = document.createElement("span");
+  label.textContent = item.label;
+
+  const value = document.createElement("strong");
+  value.textContent = formatNumber(item.value);
+
+  header.append(label, value);
+
+  const track = document.createElement("div");
+  track.className = "meter-track thin";
+  const fill = document.createElement("span");
+  fill.style.width = `${Math.max(0, Math.min(100, (item.value / item.max) * 100))}%`;
+  track.append(fill);
+
+  const detail = document.createElement("span");
+  detail.className = "stat-detail";
+  detail.textContent = item.detail;
+
+  row.append(header, track, detail);
+  return row;
+}
+
+function miniStats(values) {
+  const grid = document.createElement("div");
+  grid.className = "stats-grid";
+  grid.replaceChildren(
     ...values.map(([label, value]) => {
+      const item = document.createElement("div");
+      const labelElement = document.createElement("span");
+      labelElement.className = "stat-label";
+      labelElement.textContent = label;
+      const valueElement = document.createElement("strong");
+      valueElement.textContent = formatStatValue(value);
+      item.append(labelElement, valueElement);
+      return item;
+    })
+  );
+  return grid;
+}
+
+function setStats(values) {
+  els.stats.className = "stats-grid";
+  els.stats.replaceChildren(
+    ...values.map(([label, value, detail]) => {
       const row = document.createElement("div");
-      const dt = document.createElement("dt");
-      const dd = document.createElement("dd");
-      dt.textContent = label;
-      dd.textContent = formatNumber(value);
-      row.append(dt, dd);
+      const labelElement = document.createElement("span");
+      const valueElement = document.createElement("strong");
+      labelElement.className = "stat-label";
+      labelElement.textContent = label;
+      valueElement.textContent = formatStatValue(value);
+      row.append(labelElement, valueElement);
+      if (detail) {
+        const small = document.createElement("span");
+        small.className = "stat-detail";
+        small.textContent = detail;
+        row.append(small);
+      }
       return row;
     })
   );
+}
+
+function coverageClass(value) {
+  if (value >= 0.98) return "is-good";
+  if (value >= 0.9) return "is-warning";
+  return "is-risk";
+}
+
+function coverageLabel(value) {
+  if (value >= 0.98) return "OK";
+  if (value >= 0.9) return "À surveiller";
+  return "À corriger";
+}
+
+function currentScopeRows() {
+  if (!state.currentBook || !state.currentChapter) return state.rows;
+  return state.rows.filter(
+    (row) =>
+      row.bookId === state.currentBook &&
+      String(row.chapter) === String(state.currentChapter)
+  );
+}
+
+function aggregateEnrichedMetrics(rows) {
+  const metrics = {
+    verseCount: 0,
+    wordCount: 0,
+    readerVisibleStrongCount: 0,
+    advancedStrongCount: 0,
+    emptyStrongCount: 0,
+    phraseStrongCount: 0,
+    technicalStrongCount: 0,
+    pendingHumanCount: 0,
+    rejectedCount: 0,
+    referenceStrongOccurrenceCount: 0,
+    referenceStrongRepresentedCount: 0,
+    referenceStrongCoverage: 0,
+    referenceStrongCarrierCount: 0,
+    referenceStrongCarrierCoverage: 0,
+    originalStrongOccurrenceCount: 0,
+    originalRepresentedStrongOccurrenceCount: 0,
+    originalRepresentationRate: 0,
+    originalStrongCarrierCount: 0,
+    originalStrongCarrierRate: 0,
+    semanticMissingCount: 0,
+    readerMultiStrongWordCount: 0,
+    readerOverBudgetStrongCount: 0,
+    placementRiskCount: 0,
+    placementQuality: 0,
+    readerTaggedTokenCount: 0,
+    advancedTaggedTokenCount: 0,
+    readerTokenCoverage: 0,
+    advancedTokenCoverage: 0
+  };
+
+  for (const row of rows) {
+    const rowMetrics = row.enrichedMetrics;
+    if (!rowMetrics) continue;
+    metrics.verseCount += 1;
+    metrics.wordCount += rowMetrics.wordCount ?? 0;
+    metrics.readerVisibleStrongCount +=
+      rowMetrics.readerVisibleStrongCount ?? 0;
+    metrics.advancedStrongCount += rowMetrics.advancedStrongCount ?? 0;
+    metrics.emptyStrongCount += rowMetrics.emptyStrongCount ?? 0;
+    metrics.phraseStrongCount += rowMetrics.phraseStrongCount ?? 0;
+    metrics.technicalStrongCount += rowMetrics.technicalStrongCount ?? 0;
+    metrics.pendingHumanCount += rowMetrics.pendingHumanCount ?? 0;
+    metrics.rejectedCount += rowMetrics.rejectedCount ?? 0;
+    metrics.referenceStrongOccurrenceCount +=
+      rowMetrics.referenceStrongOccurrenceCount ?? 0;
+    metrics.referenceStrongRepresentedCount +=
+      rowMetrics.referenceStrongRepresentedCount ?? 0;
+    metrics.referenceStrongCarrierCount +=
+      rowMetrics.referenceStrongCarrierCount ?? 0;
+    metrics.originalStrongOccurrenceCount +=
+      rowMetrics.originalStrongOccurrenceCount ?? 0;
+    metrics.originalRepresentedStrongOccurrenceCount +=
+      rowMetrics.originalRepresentedStrongOccurrenceCount ?? 0;
+    metrics.originalStrongCarrierCount +=
+      rowMetrics.originalStrongCarrierCount ?? 0;
+    metrics.semanticMissingCount += rowMetrics.semanticMissingCount ?? 0;
+    metrics.readerMultiStrongWordCount +=
+      rowMetrics.readerMultiStrongWordCount ?? 0;
+    metrics.readerOverBudgetStrongCount +=
+      rowMetrics.readerOverBudgetStrongCount ?? 0;
+    metrics.placementRiskCount += rowMetrics.placementRiskCount ?? 0;
+    metrics.readerTaggedTokenCount += rowMetrics.readerTaggedTokenCount ?? 0;
+    metrics.advancedTaggedTokenCount +=
+      rowMetrics.advancedTaggedTokenCount ?? 0;
+  }
+
+  metrics.referenceStrongCoverage = ratio(
+    metrics.referenceStrongRepresentedCount,
+    metrics.referenceStrongOccurrenceCount
+  );
+  metrics.referenceStrongCarrierCoverage = ratio(
+    metrics.referenceStrongCarrierCount,
+    metrics.referenceStrongOccurrenceCount
+  );
+  metrics.originalRepresentationRate = ratio(
+    metrics.originalRepresentedStrongOccurrenceCount,
+    metrics.originalStrongOccurrenceCount
+  );
+  metrics.originalStrongCarrierRate = ratio(
+    metrics.originalStrongCarrierCount,
+    metrics.originalStrongOccurrenceCount
+  );
+  metrics.readerTokenCoverage = ratio(
+    metrics.readerTaggedTokenCount,
+    metrics.wordCount
+  );
+  metrics.advancedTokenCoverage = ratio(
+    metrics.advancedTaggedTokenCount,
+    metrics.wordCount
+  );
+  metrics.placementQuality = ratio(
+    metrics.readerTaggedTokenCount - metrics.placementRiskCount,
+    metrics.readerTaggedTokenCount
+  );
+
+  return metrics;
 }
 
 function matchesSearch(row) {
@@ -835,8 +1101,26 @@ function displayStrongCode(strong) {
   return String(strong ?? "").toUpperCase();
 }
 
+function formatStatValue(value) {
+  return typeof value === "number" ? formatNumber(value) : String(value);
+}
+
 function formatNumber(value) {
   return new Intl.NumberFormat("fr-FR").format(value);
+}
+
+function formatRatio(value, total) {
+  return `${formatNumber(value)} / ${formatNumber(total)}`;
+}
+
+function formatPercent(value) {
+  return `${new Intl.NumberFormat("fr-FR", {
+    maximumFractionDigits: 1
+  }).format(value * 100)} %`;
+}
+
+function ratio(value, total) {
+  return total > 0 ? value / total : 0;
 }
 
 function wireDropZone(element, callback) {

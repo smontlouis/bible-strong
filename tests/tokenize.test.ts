@@ -17,3 +17,11 @@ test("tokenizes words while preserving text segments", () => {
     ["word", "text", "word", "text", "word", "text", "word", "text"]
   );
 });
+
+test("keeps hyphenated French compounds as one word", () => {
+  const words = tokenizeText("au-dessus et au-dessous")
+    .filter((segment) => segment.kind === "word")
+    .map((segment) => segment.normalized);
+
+  assert.deepEqual(words, ["au-dessus", "et", "au-dessous"]);
+});

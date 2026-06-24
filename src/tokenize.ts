@@ -9,7 +9,8 @@ export type TextSegment =
       text: string;
     };
 
-const WORD_PATTERN = /[\p{L}\p{M}\p{N}]+(?:[’'][\p{L}\p{M}\p{N}]+)*/gu;
+const WORD_PATTERN =
+  /[\p{L}\p{M}\p{N}]+(?:(?:[’']|[‐‑‒–—-])[\p{L}\p{M}\p{N}]+)*/gu;
 
 const FRENCH_ELISIONS = new Set(["c", "d", "j", "l", "m", "n", "qu", "s", "t"]);
 

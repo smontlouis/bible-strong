@@ -21,7 +21,9 @@ test("renders reader and advanced modes from one canonical annotation set", () =
       strong: "H0853",
       visibility: "advanced",
       placement: "technical",
-      insertAfterWordIndex: 0
+      insertAfterWordIndex: 0,
+      sourceStrong: "H0853a",
+      lexiconLookup: false
     })
   ];
 
@@ -31,8 +33,8 @@ test("renders reader and advanced modes from one canonical annotation set", () =
   assert.match(reader, /strong="H0430"/);
   assert.doesNotMatch(reader, /H0853/);
   assert.match(advanced, /strong="H0430"/);
-  assert.match(advanced, /strong="H0853"/);
-  assert.match(advanced, /data-empty="true"/);
+  assert.match(advanced, /strong="H0853a"/);
+  assert.match(advanced, /data-lexicon="false"/);
 });
 
 test("renders a multi-word phrase as one Strong wrapper", () => {
