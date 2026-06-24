@@ -15,10 +15,12 @@ Use a deterministic, evidence-led pipeline first:
 1. build the verse inventory from original-language sources;
 2. transfer obvious Strong tags from local French Strong references;
 3. use learned word and phrase lexicons from those references;
-4. use translation profiles to control density;
-5. write a canonical ledger explaining every Strong occurrence;
-6. run evaluation against masked gold Strong Bibles;
-7. use LLM only on the residual review queue, with allowed Strong inventories
+4. apply validated lexical auto-safe placements from local Strong dictionaries,
+   STEP evidence, and audited external French lexical sources;
+5. use translation profiles to control density;
+6. write a canonical ledger explaining every Strong occurrence;
+7. run evaluation against masked gold Strong Bibles;
+8. use LLM only on the residual review queue, with allowed Strong inventories
    and mechanical validation.
 
 The LLM should not invent Strong numbers, should not freely retag a whole Bible,
@@ -69,17 +71,18 @@ The repository already has the core pieces:
 - local dictionaries: `data/dictionaries/strong_fr.sqlite` and
   `data/dictionaries/strong_lexicon.full.production.sqlite`;
 - diagnostic TSV/hard-verse generation: `strong:diagnose`;
-- canonical ledger generation: `strong:generate`;
+- canonical ledger generation with lexical auto-safe placement:
+  `strong:generate`;
 - reader/advanced exports from the canonical ledger;
 - phrase transfer, translation profiles, gap review, curated overrides;
 - masked gold evaluation through `strong:evaluate`;
 - bounded LLM review and internal-agent gap review.
 
-The main gap: the generation path now uses STEP as the original inventory, but
-reader placement still learns most lexical carrier choices from the local
-Strong-tagged references. The French Strong dictionaries and STEP lexicon are
-available locally; broad synonym placement should remain an auditable review
-layer until it is evaluated against gold references.
+The current production path uses STEP as the original inventory and applies a
+validated lexical auto-safe layer. Broad synonym evidence remains bounded: it
+can boost candidates, but automatic placement requires direct evidence such as a
+local Strong dictionary term, conservative stem match, STEP proper-name match,
+Kaikki gloss overlap, or STEP numeric component.
 
 ## Recommended Production Workflow
 
@@ -102,6 +105,10 @@ It gives two product views from the same ledger:
 - `reader`: visible tags only where the French carrier is defensible;
 - `advanced`: complete original-aware study view, including empty, technical,
   duplicate, and original-complete annotations.
+
+`strong:generate` also writes the residual lexical candidate report under
+`outputs/lexical-candidates/<id>/`. Auto-safe items are already applied to the
+ledger and should not appear as residual auto-safe candidates.
 
 ### 2. Export Views Or Generate Diagnostics
 
@@ -192,10 +199,11 @@ candidate source such as `dictionary-fr-exact`, `dictionary-fr-stem`, or
 `dictionary-fr-phrase`.
 
 Do not add hand-written synonym entries to the production generation path just
-because a hard verse was discussed. If a broad synonym layer is needed, use
-auditable external sources as candidate evidence. See
-`docs/french-lexical-sources-for-strong-placement.md` for the first-pass
-evaluation of RezoJDM, Kaikki/Wiktextract, WOLF, OpenOffice synonyms, and ReSyf.
+because a hard verse was discussed. The validated lexical auto-safe layer uses
+auditable external sources as candidate evidence, but synonym-only candidates
+stay in the residual review report. See
+`docs/french-lexical-sources-for-strong-placement.md` for the current production
+rules and source evaluation.
 
 ### B. Use STEP Tagged Originals
 
@@ -259,4 +267,5 @@ outputs/bible-<id>-strong-diagnostic.hard-verses.json
 ```
 
 Only after this, run semantic refill or LLM review on the specific residual
-cases.
+cases. Auto-safe lexical placements have already been inserted by
+`strong:generate`.

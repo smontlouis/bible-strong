@@ -73,6 +73,8 @@ const bookOrder = Object.keys(bookNames);
 const state = {
   rows: [],
   enriched: null,
+  lexicalReport: null,
+  lexicalByRef: new Map(),
   books: [],
   currentBook: "",
   currentChapter: "",
@@ -158,11 +160,20 @@ async function loadInitialFileFromQuery() {
     throw new Error(`Impossible de charger ${filePath}: ${response.status}`);
   }
 
-  await loadText(await response.text(), filePath.split("/").pop() || filePath);
+  await loadText(await response.text(), filePath.split("/").pop() || filePath, {
+    filePath,
+    lexicalPath: url.searchParams.get("lexical")
+  });
 }
 
-async function loadText(text, fileName) {
+async function loadText(text, fileName, options = {}) {
   state.enriched = await parseEnrichedFile(text);
+  state.lexicalReport = state.enriched
+    ? await loadLexicalReport(
+        options.lexicalPath ?? inferLexicalReportPath(state.enriched)
+      )
+    : null;
+  state.lexicalByRef = groupLexicalItemsByRef(state.lexicalReport);
   state.rows = state.enriched
     ? rowsFromEnriched(state.enriched, state.viewMode)
     : parseStrongFile(text);
@@ -177,6 +188,30 @@ async function loadText(text, fileName) {
   els.viewModeSelect.value = state.viewMode;
   syncControls();
   render();
+}
+
+async function loadLexicalReport(filePath) {
+  if (!filePath) return null;
+  const response = await fetch(asServedPath(filePath));
+  if (!response.ok) return null;
+  const payload = await response.json();
+  return Array.isArray(payload.items) ? payload : null;
+}
+
+function inferLexicalReportPath(payload) {
+  if (!payload?.bible || !payload?.scope) return null;
+  const scopeSlug = String(payload.scope).replace(/[^\p{L}\p{N}.-]+/gu, "_");
+  return `/outputs/lexical-candidates/${payload.bible}/bible-${payload.bible}-lexical-candidates-${scopeSlug}.json`;
+}
+
+function groupLexicalItemsByRef(report) {
+  const byRef = new Map();
+  for (const item of report?.items ?? []) {
+    const entries = byRef.get(item.ref) ?? [];
+    entries.push(item);
+    byRef.set(item.ref, entries);
+  }
+  return byRef;
 }
 
 async function parseEnrichedFile(text) {
@@ -215,6 +250,7 @@ function asServedPath(filePath) {
 
 function rowsFromEnriched(payload, mode) {
   return payload.verses.map((verse) => ({
+    ref: verse.ref,
     bookId: verse.bookId,
     chapter: verse.chapter,
     verse: verse.verse,
@@ -224,7 +260,9 @@ function rowsFromEnriched(payload, mode) {
         : mode === "debug"
           ? (verse.views.debugHtml ?? verse.views.advancedHtml)
           : verse.views.advancedHtml,
+    tokens: verse.tokens ?? [],
     enrichedMetrics: verse.metrics,
+    lexicalItems: state.lexicalByRef.get(verse.ref) ?? [],
     annotations: verse.annotations ?? []
   }));
 }
@@ -351,8 +389,11 @@ function render() {
     const number = document.createElement("span");
     number.className = "verse-number";
     number.textContent = row.verse;
-    verse.append(number, ...renderTaggedHtml(row.text));
+    verse.append(number, ...renderTaggedHtml(row));
     fragment.append(verse);
+    if (row.lexicalItems?.length) {
+      fragment.append(renderLexicalCandidates(row));
+    }
   }
 
   els.chapterView.className = "chapter-view";
@@ -365,24 +406,316 @@ function render() {
   }
 }
 
-function renderTaggedHtml(rawText) {
-  const template = document.createElement("template");
-  template.innerHTML = rawText.replace(/\\n/g, "\n");
-  return [...template.content.childNodes].flatMap(renderNode);
+function renderLexicalCandidates(row) {
+  const panel = document.createElement("div");
+  panel.className = "lexical-candidate-panel";
+
+  const toolbar = document.createElement("div");
+  toolbar.className = "lexical-candidate-toolbar";
+
+  const title = document.createElement("span");
+  title.className = "lexical-candidate-title";
+  const highOpenCount = row.lexicalItems.reduce(
+    (sum, item) =>
+      sum +
+      item.candidates.filter((candidate) =>
+        isDefaultVisibleLexicalCandidate(item, candidate)
+      ).length,
+    0
+  );
+  const autoSafeCount = row.lexicalItems.filter(isLexicalAutoSafeItem).length;
+  const groupAutoSafeCount = row.lexicalItems.filter(
+    (item) => item.groupAutoSafe
+  ).length;
+  const hiddenCandidateCount = row.lexicalItems.reduce(
+    (sum, item) =>
+      sum +
+      item.candidates.filter(
+        (candidate) => !isDefaultVisibleLexicalCandidate(item, candidate)
+      ).length,
+    0
+  );
+  title.textContent = `Candidats lexicaux · ${highOpenCount} visibles · ${autoSafeCount} auto-safe${
+    groupAutoSafeCount > 0 ? ` · ${groupAutoSafeCount} groupés` : ""
+  }`;
+
+  const toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.className = "lexical-candidate-toggle";
+  toggle.textContent = "+";
+  toggle.title = `Afficher ${hiddenCandidateCount} candidats occupés ou moins sûrs`;
+  toggle.setAttribute("aria-label", toggle.title);
+  toggle.hidden = hiddenCandidateCount === 0;
+
+  const list = document.createElement("div");
+  list.className = "lexical-candidate-list";
+
+  let expanded = false;
+  const renderList = () => {
+    const items = row.lexicalItems
+      .map((item) => renderLexicalCandidateItem(item, expanded))
+      .filter(Boolean);
+    list.replaceChildren(
+      ...(items.length > 0
+        ? items
+        : [lexicalCandidateEmptyState("Aucun candidat high ouvert")])
+    );
+    panel.classList.toggle("is-expanded", expanded);
+    toggle.textContent = expanded ? "-" : "+";
+    toggle.title = expanded
+      ? "Masquer les candidats occupés ou moins sûrs"
+      : `Afficher ${hiddenCandidateCount} candidats occupés ou moins sûrs`;
+    toggle.setAttribute("aria-label", toggle.title);
+  };
+
+  toggle.addEventListener("click", () => {
+    expanded = !expanded;
+    renderList();
+  });
+
+  toolbar.append(title, toggle);
+  panel.append(toolbar, list);
+  renderList();
+  return panel;
 }
 
-function renderNode(node) {
+function renderLexicalCandidateItem(item, expanded) {
+  const visibleCandidates = expanded
+    ? item.candidates.slice(0, 5)
+    : item.candidates.filter((candidate) =>
+        isDefaultVisibleLexicalCandidate(item, candidate)
+      );
+  if (visibleCandidates.length === 0) return null;
+
+  const section = document.createElement("section");
+  section.className = `lexical-candidate-item is-${item.auditKind}`;
+  if (item.groupAutoSafe) section.classList.add("is-group-auto-safe");
+
+  const header = document.createElement("div");
+  header.className = "lexical-candidate-header";
+
+  const title = document.createElement("strong");
+  title.textContent = `${item.strong} · ${
+    item.auditKind === "empty" ? "Strong vide" : "relocation"
+  }${item.groupAutoSafe ? " · groupe sûr" : ""}`;
+
+  const meta = document.createElement("span");
+  meta.textContent = item.groupAutoSafe
+    ? `assigné: ${item.groupAutoSafe.assignedWordIndex} ${item.groupAutoSafe.assignedText}`
+    : item.currentTarget
+      ? `actuel: ${item.currentTarget.wordIndex} ${item.currentTarget.text}`
+      : item.insertAfterWordIndex !== undefined
+        ? `après mot ${item.insertAfterWordIndex}`
+        : "";
+
+  header.append(title, meta);
+
+  const candidates = document.createElement("div");
+  candidates.className = "lexical-candidate-chips";
+  candidates.replaceChildren(
+    ...visibleCandidates.map((candidate) =>
+      renderLexicalCandidateChip(item, candidate)
+    )
+  );
+
+  section.append(header, candidates);
+  return section;
+}
+
+function renderLexicalCandidateChip(item, candidate) {
+  const chip = document.createElement("span");
+  chip.className = `lexical-candidate-chip is-${candidate.confidence}`;
+  if (candidate.occupied) chip.classList.add("is-occupied");
+  if (isLexicalAutoSafeCandidate(item, candidate)) {
+    chip.classList.add("is-auto-safe");
+  }
+  if (isLexicalGroupAutoSafeCandidate(item, candidate)) {
+    chip.classList.add("is-group-auto-safe");
+  }
+  chip.title = candidate.evidence
+    .map((evidence) => `${evidence.source}: ${evidence.detail}`)
+    .join("\n");
+  chip.textContent = `${lexicalCandidateTargetLabel(candidate)} ${candidate.text} · ${Math.round(
+    candidate.score * 100
+  )}%${candidate.occupied ? " · occupé" : ""}`;
+  return chip;
+}
+
+function lexicalCandidateTargetLabel(candidate) {
+  if (
+    candidate.target === "phrase" &&
+    candidate.startWordIndex !== undefined &&
+    candidate.endWordIndex !== undefined
+  ) {
+    return `${candidate.startWordIndex}-${candidate.endWordIndex}`;
+  }
+  return String(candidate.wordIndex);
+}
+
+function lexicalCandidateEmptyState(text) {
+  const empty = document.createElement("div");
+  empty.className = "lexical-candidate-empty";
+  empty.textContent = text;
+  return empty;
+}
+
+function isUsefulLexicalCandidate(candidate) {
+  return (
+    candidate.confidence === "high" &&
+    (!candidate.occupied || isStackSafeLexicalCandidate(candidate))
+  );
+}
+
+function isDefaultVisibleLexicalCandidate(item, candidate) {
+  if (item.groupAutoSafe) {
+    return isLexicalGroupAutoSafeCandidate(item, candidate);
+  }
+  return isUsefulLexicalCandidate(candidate);
+}
+
+function lexicalWordHighlights(row) {
+  const highlights = new Map();
+  for (const item of row.lexicalItems ?? []) {
+    if (item.groupAutoSafe) {
+      addLexicalWordHighlight(highlights, {
+        start: item.groupAutoSafe.assignedWordIndex,
+        end: item.groupAutoSafe.assignedWordIndex,
+        kind: "group",
+        label: `${item.strong} groupe sûr`
+      });
+      continue;
+    }
+
+    for (const candidate of item.candidates ?? []) {
+      if (!isDefaultVisibleLexicalCandidate(item, candidate)) continue;
+      addLexicalWordHighlight(highlights, {
+        start:
+          candidate.target === "phrase" &&
+          candidate.startWordIndex !== undefined
+            ? candidate.startWordIndex
+            : candidate.wordIndex,
+        end:
+          candidate.target === "phrase" && candidate.endWordIndex !== undefined
+            ? candidate.endWordIndex
+            : candidate.wordIndex,
+        kind: isLexicalAutoSafeCandidate(item, candidate)
+          ? "auto"
+          : "candidate",
+        label: `${item.strong} ${Math.round(candidate.score * 100)}%`
+      });
+    }
+  }
+  return highlights;
+}
+
+function addLexicalWordHighlight(highlights, highlight) {
+  for (let index = highlight.start; index <= highlight.end; index += 1) {
+    const entry = highlights.get(index) ?? { kinds: new Set(), labels: [] };
+    entry.kinds.add(highlight.kind);
+    entry.labels.push(highlight.label);
+    highlights.set(index, entry);
+  }
+}
+
+function consumeRenderedWordRange(context, text) {
+  const count = [...text.matchAll(WORD_PATTERN)].length;
+  if (count === 0) return null;
+  const start = consumeRenderedWordIndex(context);
+  let end = start;
+  for (let index = 1; index < count; index += 1) {
+    end = consumeRenderedWordIndex(context);
+  }
+  return { start, end };
+}
+
+function consumeRenderedWordIndex(context) {
+  const fallback = context.nextWordIndex;
+  const token = context.tokens[context.nextWordIndex];
+  context.nextWordIndex += 1;
+  return token?.wordIndex ?? fallback;
+}
+
+function applyLexicalWordHighlight(
+  element,
+  highlights,
+  startWordIndex,
+  endWordIndex
+) {
+  const entries = [];
+  for (let index = startWordIndex; index <= endWordIndex; index += 1) {
+    const entry = highlights.get(index);
+    if (entry) entries.push(entry);
+  }
+  if (entries.length === 0) return;
+
+  element.classList.add("lexical-word-marker");
+  const kindPriority = ["group", "auto", "candidate"];
+  const kind =
+    kindPriority.find((candidate) =>
+      entries.some((entry) => entry.kinds.has(candidate))
+    ) ?? "candidate";
+  element.classList.add(`is-lexical-${kind}`);
+  const labels = [...new Set(entries.flatMap((entry) => entry.labels))];
+  element.title = [element.title, `Candidat lexical: ${labels.join(", ")}`]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function renderTaggedHtml(row) {
+  const template = document.createElement("template");
+  template.innerHTML = row.text.replace(/\\n/g, "\n");
+  const context = {
+    tokens: row.tokens ?? [],
+    nextWordIndex: 0,
+    highlights: lexicalWordHighlights(row)
+  };
+  return [...template.content.childNodes].flatMap((node) =>
+    renderNode(node, context)
+  );
+}
+
+function renderNode(node, context) {
   if (node.nodeType === Node.TEXT_NODE) {
-    return [document.createTextNode(node.textContent ?? "")];
+    return renderTextNodeWords(node.textContent ?? "", context);
   }
   if (!(node instanceof HTMLElement)) return [];
   if (node.tagName.toLowerCase() === "w") {
-    return [renderStrongToken(node)];
+    return [renderStrongToken(node, context)];
   }
-  return [...node.childNodes].flatMap(renderNode);
+  return [...node.childNodes].flatMap((child) => renderNode(child, context));
 }
 
-function renderStrongToken(node) {
+const WORD_PATTERN =
+  /[\p{L}\p{M}\p{N}]+(?:(?:[’']|[‐‑‒–—-])[\p{L}\p{M}\p{N}]+)*/gu;
+
+function renderTextNodeWords(text, context) {
+  const nodes = [];
+  let cursor = 0;
+
+  for (const match of text.matchAll(WORD_PATTERN)) {
+    const index = match.index ?? 0;
+    if (index > cursor) {
+      nodes.push(document.createTextNode(text.slice(cursor, index)));
+    }
+
+    const word = match[0];
+    const wordIndex = consumeRenderedWordIndex(context);
+    const span = document.createElement("span");
+    span.textContent = word;
+    span.dataset.wordIndex = String(wordIndex);
+    applyLexicalWordHighlight(span, context.highlights, wordIndex, wordIndex);
+    nodes.push(span);
+    cursor = index + word.length;
+  }
+
+  if (cursor < text.length) {
+    nodes.push(document.createTextNode(text.slice(cursor)));
+  }
+
+  return nodes;
+}
+
+function renderStrongToken(node, context) {
   const strong = node.getAttribute("strong") ?? "";
   const lexiconEnabled = node.getAttribute("data-lexicon") !== "false";
   const stepStrong = node.getAttribute("data-step-strong") ?? "";
@@ -393,6 +726,10 @@ function renderStrongToken(node) {
     node.getAttribute("data-empty") === "true" ||
     (node.textContent ?? "").trim().length === 0;
   const token = document.createElement("span");
+  const renderedWordRange = consumeRenderedWordRange(
+    context,
+    node.textContent ?? ""
+  );
   token.dataset.strong = strong;
   token.dataset.lexicon = lexiconEnabled ? "true" : "false";
   token.dataset.stepStrong = stepStrong;
@@ -403,6 +740,10 @@ function renderStrongToken(node) {
   token.dataset.target = node.getAttribute("data-target") ?? "";
   token.dataset.confidence = node.getAttribute("data-confidence") ?? "";
   token.dataset.experiment = experiment;
+  if (renderedWordRange) {
+    token.dataset.wordIndex = String(renderedWordRange.start);
+    token.dataset.endWordIndex = String(renderedWordRange.end);
+  }
   if (lexiconEnabled) {
     token.tabIndex = 0;
     token.role = "button";
@@ -427,6 +768,14 @@ function renderStrongToken(node) {
     if (experiment) token.classList.add("is-experiment");
     if (!lexiconEnabled) token.classList.add("is-static");
     if (isSelectedStrong(strong)) token.classList.add("is-selected");
+    if (renderedWordRange) {
+      applyLexicalWordHighlight(
+        token,
+        context.highlights,
+        renderedWordRange.start,
+        renderedWordRange.end
+      );
+    }
     token.append(renderSup(strong));
     return token;
   }
@@ -438,6 +787,14 @@ function renderStrongToken(node) {
   if (isSelectedStrong(strong)) token.classList.add("is-selected");
   if (matchesTokenSearch(node.textContent ?? "", strong)) {
     token.classList.add("highlight");
+  }
+  if (renderedWordRange) {
+    applyLexicalWordHighlight(
+      token,
+      context.highlights,
+      renderedWordRange.start,
+      renderedWordRange.end
+    );
   }
   token.append(
     document.createTextNode(node.textContent ?? ""),
@@ -828,6 +1185,7 @@ function renderEnrichedStats(metrics) {
     metrics.emptyStrongCount - metrics.technicalStrongCount
   );
   const reviewCount = unplacedNonTechnicalCount + metrics.placementRiskCount;
+  const hasLexicalCandidates = metrics.lexicalAuditItems > 0;
 
   els.stats.className = "stats-dashboard";
   els.stats.replaceChildren(
@@ -876,6 +1234,23 @@ function renderEnrichedStats(metrics) {
             count: `${formatNumber(lexicalPlaced)} ajoutés · ${formatNumber(
               lexicalRemaining
             )} vides restants`
+          })
+        ]
+      : []),
+    ...(hasLexicalCandidates
+      ? [
+          coverageMeter({
+            label: "Candidats lexicaux",
+            value: ratio(
+              metrics.lexicalItemsWithCandidates,
+              metrics.lexicalAuditItems
+            ),
+            count: `${formatNumber(metrics.lexicalItemsWithCandidates)} / ${formatNumber(
+              metrics.lexicalAuditItems
+            )} audits · ${formatNumber(metrics.lexicalAutoSafeItems)} auto-safe · ${formatNumber(
+              metrics.lexicalGroupAutoSafeItems
+            )} groupés`,
+            status: metrics.lexicalAmbiguousHighItems > 0 ? "warning" : "good"
           })
         ]
       : []),
@@ -931,6 +1306,28 @@ function renderEnrichedStats(metrics) {
               detail: "ajoutés sur mot déjà taggé"
             }
           ]
+        : []),
+      ...(hasLexicalCandidates
+        ? [
+            {
+              label: "Cand. high",
+              value: metrics.lexicalHighCandidates,
+              max: Math.max(1, metrics.lexicalCandidateCount),
+              detail: "signal fort"
+            },
+            {
+              label: "Cand. ouverts",
+              value: metrics.lexicalOpenCandidates,
+              max: Math.max(1, metrics.lexicalCandidateCount),
+              detail: "mot non occupé"
+            },
+            {
+              label: "Cand. ambigus",
+              value: metrics.lexicalAmbiguousHighItems,
+              max: Math.max(1, metrics.lexicalAuditItems),
+              detail: "plusieurs high"
+            }
+          ]
         : [])
     ]),
     miniStats([
@@ -947,6 +1344,12 @@ function renderEnrichedStats(metrics) {
               )
             ],
             ["Exp. ajoutés", lexicalPlaced]
+          ]
+        : []),
+      ...(hasLexicalCandidates
+        ? [
+            ["Audits lex.", metrics.lexicalAuditItems],
+            ["Auto-safe", metrics.lexicalAutoSafeItems]
           ]
         : [])
     ])
@@ -1107,7 +1510,18 @@ function aggregateEnrichedMetrics(rows) {
     lexicalExperimentPlacedCount: 0,
     lexicalExperimentHighCount: 0,
     lexicalExperimentMediumCount: 0,
-    lexicalExperimentOccupiedCount: 0
+    lexicalExperimentOccupiedCount: 0,
+    lexicalAuditItems: 0,
+    lexicalItemsWithCandidates: 0,
+    lexicalCandidateCount: 0,
+    lexicalHighCandidates: 0,
+    lexicalMediumCandidates: 0,
+    lexicalLowCandidates: 0,
+    lexicalOpenCandidates: 0,
+    lexicalOccupiedCandidates: 0,
+    lexicalAutoSafeItems: 0,
+    lexicalGroupAutoSafeItems: 0,
+    lexicalAmbiguousHighItems: 0
   };
 
   for (const row of rows) {
@@ -1152,6 +1566,36 @@ function aggregateEnrichedMetrics(rows) {
       rowMetrics.lexicalExperimentMediumCount ?? 0;
     metrics.lexicalExperimentOccupiedCount +=
       rowMetrics.lexicalExperimentOccupiedCount ?? 0;
+
+    const lexicalItems = row.lexicalItems ?? [];
+    metrics.lexicalAuditItems += lexicalItems.length;
+    metrics.lexicalItemsWithCandidates += lexicalItems.filter(
+      (item) => item.candidates.length > 0
+    ).length;
+    metrics.lexicalAutoSafeItems += lexicalItems.filter(
+      isLexicalAutoSafeItem
+    ).length;
+    metrics.lexicalGroupAutoSafeItems += lexicalItems.filter(
+      (item) => item.groupAutoSafe
+    ).length;
+    metrics.lexicalAmbiguousHighItems += lexicalItems.filter(
+      (item) =>
+        !item.groupAutoSafe &&
+        item.candidates.filter((candidate) => candidate.confidence === "high")
+          .length > 1
+    ).length;
+    for (const item of lexicalItems) {
+      metrics.lexicalCandidateCount += item.candidates.length;
+      metrics.lexicalHighCandidates += countCandidates(item, "high");
+      metrics.lexicalMediumCandidates += countCandidates(item, "medium");
+      metrics.lexicalLowCandidates += countCandidates(item, "low");
+      metrics.lexicalOpenCandidates += item.candidates.filter(
+        (candidate) => !candidate.occupied
+      ).length;
+      metrics.lexicalOccupiedCandidates += item.candidates.filter(
+        (candidate) => candidate.occupied
+      ).length;
+    }
   }
 
   metrics.referenceStrongCoverage = ratio(
@@ -1185,6 +1629,263 @@ function aggregateEnrichedMetrics(rows) {
 
   return metrics;
 }
+
+function countCandidates(item, confidence) {
+  return item.candidates.filter(
+    (candidate) => candidate.confidence === confidence
+  ).length;
+}
+
+function isLexicalAutoSafeItem(item) {
+  return (
+    Boolean(item.groupAutoSafe) ||
+    item.candidates.filter((candidate) =>
+      isLexicalAutoSafeCandidate(item, candidate)
+    ).length === 1
+  );
+}
+
+function isLexicalGroupAutoSafeCandidate(item, candidate) {
+  return (
+    item.groupAutoSafe &&
+    candidate.wordIndex === item.groupAutoSafe.assignedWordIndex
+  );
+}
+
+function isLexicalAutoSafeCandidate(item, candidate) {
+  if (candidate.confidence !== "high") return false;
+  const stackSafe = isStackSafeLexicalCandidate(candidate);
+  if (candidate.occupied && !stackSafe) return false;
+  if (!hasDirectLexicalEvidence(candidate)) return false;
+  if (
+    !stackSafe &&
+    new Set(candidate.evidence.map((evidence) => evidence.source)).size < 2
+  ) {
+    return false;
+  }
+  if (item.auditKind === "relocation") {
+    if (isNumericCompoundRelocationCandidate(item, candidate)) return true;
+    if (isNumericCompoundBacktrackCandidate(item, candidate)) return false;
+    return candidate.score >= lexicalCurrentScore(item) + 0.12;
+  }
+  if (isDominantPhraseAutoSafeCandidate(item, candidate)) return true;
+  return (
+    item.candidates.filter(
+      (other) =>
+        other.confidence === "high" &&
+        (!other.occupied || isStackSafeLexicalCandidate(other))
+    ).length === 1
+  );
+}
+
+function isDominantPhraseAutoSafeCandidate(item, candidate) {
+  if (item.auditKind !== "empty" || candidate.target !== "phrase") {
+    return false;
+  }
+  if (
+    candidate.startWordIndex === undefined ||
+    candidate.endWordIndex === undefined
+  ) {
+    return false;
+  }
+  if (
+    !candidate.evidence?.some(
+      (evidence) => evidence.source === "french-auxiliary-phrase"
+    )
+  ) {
+    return false;
+  }
+
+  const highOpenCandidates = item.candidates.filter(
+    (other) =>
+      other.confidence === "high" &&
+      !other.occupied &&
+      other.wordIndex >= candidate.startWordIndex &&
+      other.wordIndex <= candidate.endWordIndex
+  );
+  const highOpenOutsidePhrase = item.candidates.filter(
+    (other) =>
+      other.confidence === "high" &&
+      !other.occupied &&
+      (other.wordIndex < candidate.startWordIndex ||
+        other.wordIndex > candidate.endWordIndex)
+  );
+
+  return highOpenCandidates.length >= 2 && highOpenOutsidePhrase.length === 0;
+}
+
+function isStackSafeLexicalCandidate(candidate) {
+  return candidate.evidence?.some(
+    (evidence) => evidence.source === "number-component"
+  );
+}
+
+function hasDirectLexicalEvidence(candidate) {
+  return candidate.evidence?.some((evidence) =>
+    DIRECT_LEXICAL_EVIDENCE_SOURCES.has(evidence.source)
+  );
+}
+
+const DIRECT_LEXICAL_EVIDENCE_SOURCES = new Set([
+  "seed-term",
+  "seed-stem",
+  "number-component",
+  "kaikki-gloss",
+  "proper-name-step",
+  "proper-name-dictionary"
+]);
+
+function lexicalCurrentScore(item) {
+  if (!item.currentTarget) return 0;
+  return (
+    item.candidates.find(
+      (candidate) => candidate.wordIndex === item.currentTarget.wordIndex
+    )?.score ?? 0
+  );
+}
+
+function isNumericCompoundRelocationCandidate(item, candidate) {
+  if (item.auditKind !== "relocation" || !item.currentTarget) return false;
+  if (candidate.wordIndex === item.currentTarget.wordIndex) return false;
+  if (candidate.wordIndex < item.currentTarget.wordIndex) return false;
+  if (!candidate.occupied) return false;
+  if (!item.currentTarget.otherStrong?.length) return false;
+  if (!isStackSafeLexicalCandidate(candidate)) return false;
+
+  const currentCandidate = item.candidates.find(
+    (current) => current.wordIndex === item.currentTarget.wordIndex
+  );
+  if (!currentCandidate || !isStackSafeLexicalCandidate(currentCandidate)) {
+    return false;
+  }
+
+  return (
+    numericValuesForTarget(candidate.normalized).size >
+    numericValuesForTarget(item.currentTarget.normalized).size
+  );
+}
+
+function isNumericCompoundBacktrackCandidate(item, candidate) {
+  if (item.auditKind !== "relocation" || !item.currentTarget) return false;
+  if (candidate.wordIndex >= item.currentTarget.wordIndex) return false;
+  if (!isStackSafeLexicalCandidate(candidate)) return false;
+
+  const currentCandidate = item.candidates.find(
+    (current) => current.wordIndex === item.currentTarget.wordIndex
+  );
+  if (!currentCandidate || !isStackSafeLexicalCandidate(currentCandidate)) {
+    return false;
+  }
+
+  return (
+    numericValuesForTarget(item.currentTarget.normalized).size >
+    numericValuesForTarget(candidate.normalized).size
+  );
+}
+
+function numericValuesForTarget(normalized) {
+  const values = new Set();
+  const numericValue = Number(normalized);
+  if (Number.isInteger(numericValue) && numericValue > 0) {
+    for (const value of decomposeIntegerNumber(numericValue)) values.add(value);
+    return values;
+  }
+
+  const parts = normalized
+    .split(/[-\s'’]+/u)
+    .map((part) => part.replace(/[^\p{L}\p{N}]+/gu, ""))
+    .filter(Boolean);
+  let sum = 0;
+  let allPartsAreNumeric = parts.length > 0;
+  for (const part of parts) {
+    const value = NUMERIC_WORD_VALUES.get(part);
+    if (value === undefined) {
+      allPartsAreNumeric = false;
+      continue;
+    }
+    values.add(value);
+    sum += value;
+  }
+  if (allPartsAreNumeric && sum > 0) values.add(sum);
+  return values;
+}
+
+function decomposeIntegerNumber(value) {
+  const values = new Set([value]);
+  if (value >= 100) {
+    const hundreds = Math.floor(value / 100);
+    if (hundreds > 0) {
+      values.add(hundreds);
+      values.add(100);
+      values.add(hundreds * 100);
+    }
+  }
+  const lastTwoDigits = value % 100;
+  if (lastTwoDigits >= 20) {
+    const tens = Math.floor(lastTwoDigits / 10) * 10;
+    const units = lastTwoDigits % 10;
+    if (tens > 0) values.add(tens);
+    if (units > 0) values.add(units);
+  } else if (lastTwoDigits > 0 && lastTwoDigits !== value) {
+    values.add(lastTwoDigits);
+  }
+  return values;
+}
+
+const NUMERIC_WORD_VALUES = new Map([
+  ["one", 1],
+  ["un", 1],
+  ["une", 1],
+  ["two", 2],
+  ["deux", 2],
+  ["three", 3],
+  ["trois", 3],
+  ["four", 4],
+  ["quatre", 4],
+  ["five", 5],
+  ["cinq", 5],
+  ["six", 6],
+  ["seven", 7],
+  ["sept", 7],
+  ["eight", 8],
+  ["huit", 8],
+  ["nine", 9],
+  ["neuf", 9],
+  ["ten", 10],
+  ["dix", 10],
+  ["eleven", 11],
+  ["onze", 11],
+  ["twelve", 12],
+  ["douze", 12],
+  ["thirteen", 13],
+  ["treize", 13],
+  ["fourteen", 14],
+  ["quatorze", 14],
+  ["fifteen", 15],
+  ["quinze", 15],
+  ["sixteen", 16],
+  ["seize", 16],
+  ["twenty", 20],
+  ["vingt", 20],
+  ["thirty", 30],
+  ["trente", 30],
+  ["forty", 40],
+  ["quarante", 40],
+  ["fifty", 50],
+  ["cinquante", 50],
+  ["sixty", 60],
+  ["soixante", 60],
+  ["seventy", 70],
+  ["seventyfold", 70],
+  ["eighty", 80],
+  ["quatre-vingt", 80],
+  ["quatrevingt", 80],
+  ["ninety", 90],
+  ["hundred", 100],
+  ["cent", 100],
+  ["thousand", 1000],
+  ["mille", 1000]
+]);
 
 function matchesSearch(row) {
   const ref = `${row.bookId}.${row.chapter}.${row.verse}`.toLocaleLowerCase(

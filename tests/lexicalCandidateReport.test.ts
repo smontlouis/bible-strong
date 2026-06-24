@@ -5,7 +5,10 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { buildLexicalCandidateReport } from "../src/lexicalCandidateReport.js";
+import {
+  buildLexicalCandidateReport,
+  lexicalAutoSafePlacements
+} from "../src/lexicalCandidateReport.js";
 import { type StrongTranslationCandidate } from "../src/translationLexicon.js";
 
 test("builds lexical candidates for advanced empty Strong annotations", async () => {
@@ -59,6 +62,427 @@ test("builds lexical candidates for advanced empty Strong annotations", async ()
   assertTopCandidate(report, "Gen.1.9", "H6960", "amassent");
   assertTopCandidate(report, "Gen.1.11", "H1876", "donne");
   assertTopCandidate(report, "Gen.1.12", "H6213", "portent");
+});
+
+test("uses conservative Strong dictionary stems as direct lexical evidence", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-"));
+  const ledgerPath = path.join(dir, "ledger.json");
+
+  writeFileSync(
+    ledgerPath,
+    JSON.stringify(
+      {
+        bible: "nbs",
+        generatedAt: "2026-06-24T00:00:00.000Z",
+        split: false,
+        metrics: {},
+        verses: [
+          verse(
+            "Gen.5.1",
+            "Voici le livre de la généalogie d’Adam.",
+            [
+              token(0, "Voici"),
+              token(1, "le"),
+              token(2, "livre"),
+              token(3, "de"),
+              token(4, "la"),
+              token(5, "généalogie"),
+              token(6, "d’Adam")
+            ],
+            empty("Gen.5.1:0:H8435", "H8435", "descendants", 2)
+          )
+        ]
+      },
+      null,
+      2
+    )
+  );
+
+  const report = await buildLexicalCandidateReport({
+    bible: "nbs",
+    onlyRef: "Gen.5.1",
+    inputDir: dir,
+    outputDir: dir,
+    ledgerPath,
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    maxCandidatesPerEmpty: 5,
+    dictionaryCandidates: [candidate("H8435", "genealog", 0.5)]
+  });
+
+  const item = report.items.find(
+    (candidate) => candidate.ref === "Gen.5.1" && candidate.strong === "H8435"
+  );
+  const topCandidate = item?.candidates[0];
+  assert.equal(topCandidate?.normalized, "genealogie");
+  assert.equal(topCandidate?.evidence[0]?.source, "seed-stem");
+});
+
+test("promotes French auxiliary plus participle as an auto-safe verb phrase", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-"));
+  const ledgerPath = path.join(dir, "ledger.json");
+
+  writeFileSync(
+    ledgerPath,
+    JSON.stringify(
+      {
+        bible: "nbs",
+        generatedAt: "2026-06-24T00:00:00.000Z",
+        split: false,
+        metrics: {},
+        verses: [
+          verse(
+            "Gen.2.8",
+            "Il y mit l’homme qu’il avait façonné.",
+            [
+              token(0, "Il"),
+              token(1, "y"),
+              token(2, "mit"),
+              token(3, "l’homme"),
+              token(4, "qu’il"),
+              token(5, "avait"),
+              token(6, "façonné")
+            ],
+            empty("Gen.2.8:0:H3335", "H3335", "he had formed", 3, "HVqp3ms")
+          )
+        ]
+      },
+      null,
+      2
+    )
+  );
+
+  const report = await buildLexicalCandidateReport({
+    bible: "nbs",
+    onlyRef: "Gen.2.8",
+    inputDir: dir,
+    outputDir: dir,
+    ledgerPath,
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    maxCandidatesPerEmpty: 5,
+    dictionaryCandidates: [candidate("H3335", "faconne", 1)]
+  });
+
+  const placement = lexicalAutoSafePlacements(report).find(
+    (candidate) => candidate.item.annotationId === "Gen.2.8:0:H3335"
+  );
+  assert.equal(placement?.candidate.target, "phrase");
+  assert.equal(placement?.candidate.normalized, "avait faconne");
+  assert.equal(
+    placement?.candidate.evidence.some(
+      (evidence) => evidence.source === "french-auxiliary-phrase"
+    ),
+    true
+  );
+});
+
+test("allows numeric Strong components on occupied compound numbers", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-"));
+  const ledgerPath = path.join(dir, "ledger.json");
+
+  writeFileSync(
+    ledgerPath,
+    JSON.stringify(
+      {
+        bible: "nbs",
+        generatedAt: "2026-06-24T00:00:00.000Z",
+        split: false,
+        metrics: {},
+        verses: [
+          verse(
+            "Gen.5.15",
+            "Mahalaléel vécut soixante-cinq ans.",
+            [
+              token(0, "Mahalaléel"),
+              token(1, "vécut"),
+              token(2, "soixante-cinq"),
+              token(3, "ans")
+            ],
+            [
+              word("Gen.5.15:0:H8346", "H8346", "sixty", 2),
+              empty("Gen.5.15:1:H2568", "H2568", "five", 1, "HAcbsa")
+            ]
+          )
+        ]
+      },
+      null,
+      2
+    )
+  );
+
+  const report = await buildLexicalCandidateReport({
+    bible: "nbs",
+    onlyRef: "Gen.5.15",
+    inputDir: dir,
+    outputDir: dir,
+    ledgerPath,
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    maxCandidatesPerEmpty: 5,
+    dictionaryCandidates: [candidate("H2568", "cinq", 0.5)]
+  });
+
+  const item = report.items.find(
+    (candidate) => candidate.ref === "Gen.5.15" && candidate.strong === "H2568"
+  );
+  const topCandidate = item?.candidates[0];
+  assert.equal(topCandidate?.normalized, "soixante-cinq");
+  assert.equal(topCandidate?.occupied, true);
+  assert.equal(topCandidate?.confidence, "high");
+  assert.equal(topCandidate?.evidence[0]?.source, "number-component");
+  assert.equal(report.metrics.autoSafeItems, 1);
+});
+
+test("resolves repeated lexical empty Strong codes across repeated French carriers", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-"));
+  const ledgerPath = path.join(dir, "ledger.json");
+  const kaikkipath = path.join(dir, "kaikki.jsonl");
+
+  writeFileSync(
+    ledgerPath,
+    JSON.stringify(
+      {
+        bible: "nbs",
+        generatedAt: "2026-06-24T00:00:00.000Z",
+        split: false,
+        metrics: {},
+        verses: [
+          verse(
+            "Gen.2.4",
+            "Voilà la généalogie du ciel et de la terre, quand ils furent créés. Au jour où le Seigneur Dieu fit la terre et le ciel.",
+            [
+              token(0, "Voilà"),
+              token(1, "la"),
+              token(2, "généalogie"),
+              token(3, "du"),
+              token(4, "ciel"),
+              token(5, "et"),
+              token(6, "de"),
+              token(7, "la"),
+              token(8, "terre"),
+              token(9, "quand"),
+              token(10, "ils"),
+              token(11, "furent"),
+              token(12, "créés"),
+              token(13, "Au"),
+              token(14, "jour"),
+              token(15, "où"),
+              token(16, "le"),
+              token(17, "Seigneur"),
+              token(18, "Dieu"),
+              token(19, "fit"),
+              token(20, "la"),
+              token(21, "terre"),
+              token(22, "et"),
+              token(23, "le"),
+              token(24, "ciel")
+            ],
+            [
+              empty("Gen.2.4:0:H8064", "H8064", "the heavens", 1),
+              empty("Gen.2.4:1:H8064", "H8064", "and heaven", 21)
+            ]
+          )
+        ]
+      },
+      null,
+      2
+    )
+  );
+  writeFileSync(kaikkipath, kaikkiEntry("ciel", "noun", [], ["heaven", "sky"]));
+
+  const report = await buildLexicalCandidateReport({
+    bible: "nbs",
+    onlyRef: "Gen.2.4",
+    inputDir: dir,
+    outputDir: dir,
+    ledgerPath,
+    kaikkiPath: kaikkipath,
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    maxCandidatesPerEmpty: 5,
+    dictionaryCandidates: [candidate("H8064", "ciel", 0.5)]
+  });
+
+  const placements = lexicalAutoSafePlacements(report).filter(
+    (candidate) => candidate.item.strong === "H8064"
+  );
+  assert.deepEqual(
+    placements.map((placement) => placement.candidate.wordIndex),
+    [4, 24]
+  );
+  assert.equal(report.metrics.groupAutoSafeItems, 2);
+});
+
+test("relocates numeric components from a simple number to a later compound number", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-"));
+  const ledgerPath = path.join(dir, "ledger.json");
+
+  writeFileSync(
+    ledgerPath,
+    JSON.stringify(
+      {
+        bible: "nbs",
+        generatedAt: "2026-06-24T00:00:00.000Z",
+        split: false,
+        metrics: {},
+        verses: [
+          verse(
+            "Gen.4.24",
+            "Si Caïn doit être vengé sept fois, Lémek le sera soixante-dix-sept fois !",
+            [
+              token(0, "Si"),
+              token(1, "Caïn"),
+              token(2, "doit"),
+              token(3, "être"),
+              token(4, "vengé"),
+              token(5, "sept"),
+              token(6, "fois"),
+              token(7, "Lémek"),
+              token(8, "le"),
+              token(9, "sera"),
+              token(10, "soixante-dix-sept"),
+              token(11, "fois")
+            ],
+            [
+              word(
+                "Gen.4.24:0:H7659",
+                "H7659",
+                "sevenfold",
+                5,
+                "HAcfda",
+                "sept"
+              ),
+              word(
+                "Gen.4.24:1:H7651",
+                "H7651",
+                "and/ seven",
+                5,
+                "HC/Acbsa",
+                "sept"
+              ),
+              word(
+                "Gen.4.24:2:H7657",
+                "H7657",
+                "seventy",
+                10,
+                "HAcmpa",
+                "soixante-dix-sept"
+              )
+            ]
+          )
+        ]
+      },
+      null,
+      2
+    )
+  );
+
+  const report = await buildLexicalCandidateReport({
+    bible: "nbs",
+    onlyRef: "Gen.4.24",
+    inputDir: dir,
+    outputDir: dir,
+    ledgerPath,
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    maxCandidatesPerEmpty: 5,
+    dictionaryCandidates: [candidate("H7651", "sept", 0.5)]
+  });
+
+  const item = report.items.find(
+    (candidate) => candidate.ref === "Gen.4.24" && candidate.strong === "H7651"
+  );
+  assert.equal(item?.currentTarget?.normalized, "sept");
+  assert.equal(item?.candidates[0]?.normalized, "sept");
+
+  const placement = lexicalAutoSafePlacements(report).find(
+    (candidate) => candidate.item.annotationId === "Gen.4.24:1:H7651"
+  );
+  assert.equal(placement?.candidate.normalized, "soixante-dix-sept");
+  assert.equal(placement?.kind, "auto-safe");
+});
+
+test("keeps numeric components on richer compound numbers after relocation", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-"));
+  const ledgerPath = path.join(dir, "ledger.json");
+
+  writeFileSync(
+    ledgerPath,
+    JSON.stringify(
+      {
+        bible: "nbs",
+        generatedAt: "2026-06-24T00:00:00.000Z",
+        split: false,
+        metrics: {},
+        verses: [
+          verse(
+            "Gen.4.24",
+            "Si Caïn doit être vengé sept fois, Lémek le sera soixante-dix-sept fois !",
+            [
+              token(0, "Si"),
+              token(1, "Caïn"),
+              token(2, "doit"),
+              token(3, "être"),
+              token(4, "vengé"),
+              token(5, "sept"),
+              token(6, "fois"),
+              token(7, "Lémek"),
+              token(8, "le"),
+              token(9, "sera"),
+              token(10, "soixante-dix-sept"),
+              token(11, "fois")
+            ],
+            [
+              word(
+                "Gen.4.24:0:H7659",
+                "H7659",
+                "sevenfold",
+                5,
+                "HAcfda",
+                "sept"
+              ),
+              word(
+                "Gen.4.24:1:H7651",
+                "H7651",
+                "and/ seven",
+                10,
+                "HC/Acbsa",
+                "soixante-dix-sept"
+              ),
+              word(
+                "Gen.4.24:2:H7657",
+                "H7657",
+                "seventy",
+                10,
+                "HAcmpa",
+                "soixante-dix-sept"
+              )
+            ]
+          )
+        ]
+      },
+      null,
+      2
+    )
+  );
+
+  const report = await buildLexicalCandidateReport({
+    bible: "nbs",
+    onlyRef: "Gen.4.24",
+    inputDir: dir,
+    outputDir: dir,
+    ledgerPath,
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    maxCandidatesPerEmpty: 5,
+    dictionaryCandidates: [candidate("H7651", "sept", 0.5)]
+  });
+
+  const placement = lexicalAutoSafePlacements(report).find(
+    (candidate) => candidate.item.annotationId === "Gen.4.24:1:H7651"
+  );
+  assert.equal(placement, undefined);
 });
 
 function assertTopCandidate(
@@ -148,7 +572,7 @@ function verse(
   ref: string,
   text: string,
   tokens: Array<{ wordIndex: number; text: string; normalized: string }>,
-  annotation: unknown
+  annotation: unknown | unknown[]
 ) {
   const [bookId, chapter, verseNumber] = ref.split(".");
   return {
@@ -158,7 +582,7 @@ function verse(
     verse: Number(verseNumber),
     text,
     tokens,
-    annotations: [annotation],
+    annotations: Array.isArray(annotation) ? annotation : [annotation],
     inventories: { references: {}, original: [] },
     metrics: {},
     views: {}
@@ -177,11 +601,49 @@ function token(wordIndex: number, text: string) {
   };
 }
 
+function word(
+  id: string,
+  strong: string,
+  gloss: string,
+  wordIndex: number,
+  morphology = "",
+  normalizedWord = ""
+) {
+  return {
+    id,
+    strong,
+    visibility: "reader",
+    placement: "word",
+    source: "reference-transfer",
+    confidence: 0.8,
+    reason: "test",
+    diagnostics: [],
+    wordIndex,
+    normalizedWord,
+    lexiconLookup: true,
+    step: [
+      {
+        source: "TAHOT",
+        classicalStrong: strong,
+        dStrong: strong,
+        tokenIndex: 1,
+        type: "L",
+        surface: "",
+        transliteration: "",
+        gloss,
+        morphology,
+        editions: ""
+      }
+    ]
+  };
+}
+
 function empty(
   id: string,
   strong: string,
   gloss: string,
-  insertAfterWordIndex: number
+  insertAfterWordIndex: number,
+  morphology = ""
 ) {
   return {
     id,
@@ -204,7 +666,7 @@ function empty(
         surface: "",
         transliteration: "",
         gloss,
-        morphology: "",
+        morphology,
         editions: ""
       }
     ]

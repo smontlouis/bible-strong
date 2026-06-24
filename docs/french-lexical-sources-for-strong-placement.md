@@ -1,6 +1,6 @@
 # French Lexical Sources For Strong Placement
 
-Date: 2026-06-23
+Date: 2026-06-24
 
 This note records a first pass over external French lexical resources that could
 help place Strong codes when the deterministic pipeline already knows that a
@@ -187,17 +187,32 @@ Assessment:
 - not yet tested as data because no direct dump was found;
 - worth revisiting before building a large in-house synonym layer.
 
-## Practical Recommendation
+## Production Recommendation
 
 Do not add hand-written synonym entries to the generation path.
 
-The prototype command is:
+The validated lexical auto-safe layer is now part of the canonical generation
+path:
+
+```sh
+npm run strong:generate -- --bible <id>
+```
+
+During generation, the ledger is built first, then the lexical scorer applies
+only auto-safe placements. A residual lexical report is written for the viewer
+under:
+
+```text
+outputs/lexical-candidates/<bible>/
+```
+
+Manual candidate inspection is still available:
 
 ```sh
 npm run strong:lexical-candidates -- --bible nbs --only Gen.1-Gen.6
 ```
 
-Optional external source flags:
+Optional external source flags remain:
 
 ```sh
 --kaikki /path/to/kaikki.org-dictionary-French.jsonl.gz
@@ -207,31 +222,172 @@ Optional external source flags:
 --wolf /path/to/wolf.xml-or-wolf.xml.bz2
 ```
 
-It writes JSON and Markdown under:
+`strong:lexical-candidates` only produces a report. `strong:generate` is the
+production command that applies validated auto-safe placements.
 
-```text
-outputs/lexical-candidates/<bible>/
+Current local command used for the STEP-first NBS Genesis 1-6 run:
+
+```sh
+npm run strong:lexical-candidates -- \
+  --bible nbs \
+  --only Gen.1-Gen.6 \
+  --ledger outputs/strong-step-first/nbs/bible-nbs-strong-ledger.json \
+  --kaikki data/external/french-lexical/kaikki/kaikki.org-dictionary-French.jsonl \
+  --jdm-cache data/external/french-lexical/rezojdm-cache \
+  --openoffice data/external/french-lexical/openoffice/synonymes/handler/dictionary.go \
+  --wolf data/external/french-lexical/wolf/wolf-1.0b4.xml.bz2 \
+  --output-dir outputs/lexical-candidates/nbs
 ```
 
-This command only produces candidates. It does not change the canonical ledger.
+The viewer auto-loads the matching report when the ledger scope and Bible id
+match:
 
-If we want a stronger deterministic-assisted layer:
+```text
+/outputs/lexical-candidates/<bible>/bible-<bible>-lexical-candidates-<scope>.json
+```
+
+For `outputs/strong-step-first/nbs/bible-nbs-strong-ledger.json`, it loads:
+
+```text
+/outputs/lexical-candidates/nbs/bible-nbs-lexical-candidates-Gen.1-Gen.6.json
+```
+
+As of the STEP-first production run with lexical auto-safe enabled, NBS Genesis
+1-6 applied 61 lexical auto-safe placements into the canonical ledger. The
+residual lexical audit metrics were:
+
+```text
+audit items: 242
+empty annotations: 170
+reader empty annotations: 159
+advanced empty annotations: 11
+relocation annotations: 72
+items with candidates: 209
+candidate count: 722
+high / medium / low candidates: 201 / 181 / 340
+open / occupied candidates: 195 / 527
+reviewable candidates: 412
+auto-safe items: 0
+group auto-safe items: 0
+ambiguous high-confidence items: 53
+relocation items with better open candidate: 7
+```
+
+Interpretation:
+
+- `auto-safe` is deliberately strict and is applied by `strong:generate`.
+- residual reports should show `auto-safe items: 0`; remaining candidates are
+  review material, not automatic production changes.
+- `group auto-safe` means an individually ambiguous proper-name candidate was
+  resolved by source order across repeated French carriers. The same mechanism
+  also resolves repeated ordinary lexical carriers when the same Strong has the
+  same high-confidence direct lexical evidence on each open repeated French
+  token.
+- `ambiguous high-confidence` means several high candidates compete; these
+  should go to review.
+- `occupied` means the candidate is on a word already carrying a reader Strong;
+  this is a relocation/stacking risk.
+- `relocation-guard` evidence means a weak open synonym candidate was capped
+  because the current visible carrier already has direct lexical evidence.
+- `seed-stem` evidence means the target word shares a conservative morphological
+  stem with a local Strong dictionary term. This is limited to long stems and
+  expected suffix drift, so concatenated dictionary phrases do not become direct
+  lexical evidence.
+- `number-component` evidence means a STEP numeric/cardinal occurrence matches
+  one component of a French compound number. These candidates may be auto-safe
+  even when the French token is already occupied by another numeric Strong.
+  For relocation audits, a numeric Strong may also move from a simple occupied
+  number to a later occupied compound number when the compound exposes a richer
+  numeric decomposition.
+- `french-auxiliary-phrase` evidence means a STEP verb gloss includes an
+  auxiliary such as `had`/`have` or `was`/`be`, and the French text renders it
+  as an adjacent auxiliary plus participle. In those cases the phrase can be
+  auto-safe when the participle has direct lexical evidence.
+- synonym-only candidates are never auto-safe. Synonyms can boost a candidate,
+  but production insertion requires direct evidence such as `seed-term`,
+  `seed-stem`, `kaikki-gloss`, `proper-name-*`, or `number-component`.
+
+Observed benchmark cases:
+
+- `Gen.1.9 H6960`: `s’amassent` is a high-confidence candidate, but remains
+  residual review material unless direct evidence also supports it.
+- `Gen.1.11 H1876`: `donne` is medium confidence, review needed.
+- `Gen.1.11 H6213`: `portent` and `donne` are both high confidence, ambiguous.
+- `Gen.1.12 H6213`: `portent` is high confidence, but `produisit` is also a
+  strong occupied candidate; review needed before moving.
+- `Gen.1.10 H2896/H2895`: `bon` remains the correct direct carrier. The open
+  candidate `ferme` is capped low by the relocation guard because it only has
+  indirect synonym evidence (`fort -> ferme`) while the current target has a
+  direct lexical match.
+- `Gen.1.27 H0120/H2145`: `humains` is high confidence for both candidates, so
+  the system correctly refuses auto-safe relocation.
+- `Gen.4.25 H3205`: `mit au monde` is detected as a phrase candidate from WOLF
+  (`mettre au monde -> accoucher`) and scores high, while `mit` alone remains
+  medium. This is deterministic phrase evidence, not a hand-written exception.
+- `Gen.4.22 H8423`: `Toubal-Caïn` is placed by the lexical auto-safe layer as a
+  high-confidence proper-name candidate from STEP (`Tubal` + `Cain`) confirmed
+  by the local Strong
+  dictionary (`tubal-cain`). This is transliteration evidence, not synonym
+  evidence. The same pass flags the visible placement on `Tsilla` as a
+  relocation candidate, then resolves the four `H8423` audit items as a group:
+  two source tokens map to the first French `Toubal-Caïn`, and two map to the
+  second. Related dictionary terms are not treated as valid semantic matches.
+- `Gen.4.18 H4232/H4967`: `Mehouyaël` and `Metoushaël` are placed as
+  high-confidence proper-name candidates from STEP plus the Strong dictionary.
+  This comes from generic biblical name transliteration rules (`j/y`, `th/t`,
+  `ch/h`, `ou/u`, and consonant skeletons), not from verse-specific aliases.
+  The repeated source tokens are then resolved as groups onto the repeated
+  French carriers.
+- `Gen.4.18`, `Gen.4.19`, `Gen.4.23`, and `Gen.4.24 H3929`: `Lémek` is
+  detected from STEP/dictionary name evidence despite transliteration drift
+  (`Lamech`, `Le.mekh`, `lemec`). Composite morphology such as `HC/Npm` is
+  treated as a proper-name signal, and the two misplaced visible `H3929`
+  placements in `Gen.4.23` are resolved as a group onto the two French `Lémek`
+  carriers.
+- `Gen.5.1 H8435`: `généalogie` is placed from a conservative
+  dictionary-stem match (`genealogie` vs `genealogies`) plus external synonym
+  evidence (`généalogie -> descendance`). This lifts a real lexical match
+  without adding a hand-written `H8435 = généalogie` alias.
+- `Gen.5.15 H2568`: `soixante-cinq` is placed for `five` even though
+  the same French token already carries `H8346` (`sixty`). This is a
+  STEP-bounded numeric component match, not a general license to stack Strong
+  codes on occupied words.
+
+Current deterministic-assisted layer:
 
 1. Build an external lexical index from Kaikki + RezoJDM + WOLF/OpenOffice.
 2. Use Kaikki to lemmatize French target tokens.
 3. Use local Strong dictionary and STEP glosses to produce expected semantic
    hints for each Strong occurrence.
-4. Use external sources to produce candidate target words only.
-5. Score candidates with conservative features:
+4. Use external sources to produce candidate target words and short phrase
+   carriers. Phrase candidates are matched with lemma/original token variants
+   so a bad lemma on one internal token does not break known locutions such as
+   `mit au monde`.
+5. Treat proper names separately from ordinary lexical synonyms. For STEP proper
+   nouns, compare target words against STEP gloss/transliteration keys and only
+   let the Strong dictionary confirm names that agree with STEP. Do not use
+   synonym evidence for those candidates. Name keys normalize common
+   transliteration drift such as hyphenation, `j/y`, `th/t`, `ou/u`,
+   `ch/h/kh/c/k`, and consonant skeletons only when STEP and the Strong
+   dictionary agree.
+6. Score candidates with conservative features:
    - same verse Strong inventory already permits this Strong;
    - source is not technical/function-only;
+   - local Strong dictionary terms match directly or through a conservative
+     long-stem variant;
+   - STEP numeric/cardinal occurrences can match one component of a compound
+     French number;
    - target token is open or low-risk;
    - lemma/synonym relation exists in at least two independent sources;
    - English/French gloss overlap agrees with STEP/local dictionary;
    - position is plausible in original/target order.
-6. Auto-place only when the score is very high and no competing candidate
-   exists.
-7. Otherwise emit a gap-review candidate for LLM/human review.
+7. For relocation audits, cap synonym-only open candidates when the current
+   visible target already has direct lexical evidence. This prevents false
+   positives such as `Gen.1.10 H2896 -> ferme` when `bon` is already directly
+   supported.
+8. Auto-place only when the score is very high, no competing safe candidate
+   exists, and direct lexical evidence is present.
+9. Otherwise emit a residual lexical candidate for LLM/human review.
 
 ## Boundary With LLM Review
 

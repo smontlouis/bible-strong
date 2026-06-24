@@ -15,6 +15,13 @@ import {
 import { applyCuratedStrongOverrides } from "./curatedStrongOverrides.js";
 import { buildStrongLexicon } from "./lexicon.js";
 import {
+  buildLexicalCandidateReport,
+  lexicalAutoSafePlacements,
+  writeLexicalCandidateReport,
+  type LexicalAutoSafePlacement,
+  type LexicalCandidate
+} from "./lexicalCandidateReport.js";
+import {
   summarizeOriginalSource,
   type OriginalSourceSummary,
   type OriginalVerse,
@@ -42,7 +49,7 @@ import {
   type StepOriginalEvidenceIndex,
   type StepStrongEvidence as SourceStepStrongEvidence
 } from "./stepOriginals.js";
-import { escapeHtml, type TextSegment } from "./tokenize.js";
+import { escapeHtml, tokenizeText, type TextSegment } from "./tokenize.js";
 import { buildStrongPhraseLexicon } from "./phraseTranslationLexicon.js";
 import { buildStrongTranslationLexicon } from "./translationLexicon.js";
 import {
@@ -284,6 +291,15 @@ const STEP_ORIGINAL_SOURCES = [
   "data/external/stepbible/amalgamated/TAGNT Act-Rev.txt"
 ];
 
+const FRENCH_LEXICAL_SOURCES = {
+  kaikki:
+    "data/external/french-lexical/kaikki/kaikki.org-dictionary-French.jsonl",
+  rezoJdmCache: "data/external/french-lexical/rezojdm-cache",
+  openOffice:
+    "data/external/french-lexical/openoffice/synonymes/handler/dictionary.go",
+  wolf: "data/external/french-lexical/wolf/wolf-1.0b4.xml.bz2"
+};
+
 const TECHNICAL_STRONG = new Set([
   "H0853",
   "H0834",
@@ -376,6 +392,41 @@ export async function generateStrongLedger(
     ledgerByBook.set(verse.bookId, bookVerses);
   }
 
+  const lexicalReportOptions = {
+    bible: options.bible,
+    onlyRef: options.onlyRef,
+    inputDir: options.outputDir,
+    outputDir: lexicalCandidateOutputDir(options.bible),
+    dictionaryCandidates,
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    maxCandidatesPerEmpty: 8,
+    ...availableFrenchLexicalSources()
+  };
+  let lexicalAutoSafeCount = 0;
+  for (let pass = 0; pass < 4; pass += 1) {
+    const lexicalReport = await buildLexicalCandidateReport({
+      ...lexicalReportOptions,
+      ledger: { verses: ledgerVerses }
+    });
+    const applied = applyLexicalAutoSafePlacementsToLedger({
+      verses: ledgerVerses,
+      report: lexicalReport
+    });
+    if (applied === 0) break;
+    lexicalAutoSafeCount += applied;
+    rebuildLedgerVerses(ledgerVerses);
+    rebuildLedgerByBook(ledgerByBook, ledgerVerses);
+  }
+  const residualLexicalReport = await buildLexicalCandidateReport({
+    ...lexicalReportOptions,
+    ledger: { verses: ledgerVerses }
+  });
+  await writeLexicalCandidateReport(
+    residualLexicalReport,
+    lexicalCandidateOutputDir(options.bible)
+  );
+
   const metrics = aggregateMetrics(
     options.bible,
     options.onlyRef,
@@ -386,8 +437,7 @@ export async function generateStrongLedger(
     generatedAt: metrics.generatedAt,
     inputPath: options.biblePath,
     scope: options.onlyRef ?? "all",
-    method:
-      "Canonical Strong ledger. Reader annotations come from the calibrated reader pipeline. Advanced annotations add original-complete STEP TAHOT/TAGNT coverage as empty, duplicate, or extra visible annotations. STEP dStrong/eStrong evidence is preserved for lexical disambiguation; WLC/SBLGNT suffixes are not used as production lookup keys.",
+    method: `Canonical Strong ledger. Reader annotations come from the calibrated reader pipeline plus validated deterministic lexical auto-safe placement (${lexicalAutoSafeCount} placements). Advanced annotations add original-complete STEP TAHOT/TAGNT coverage as empty, duplicate, or extra visible annotations. STEP dStrong/eStrong evidence is preserved for lexical disambiguation; WLC/SBLGNT suffixes are not used as production lookup keys.`,
     translationProfile,
     references: references.map((reference) => ({
       name: reference.name,
@@ -841,6 +891,226 @@ function completeEmptyAnnotation(options: {
     referenceSupport,
     profile: options.profile.bible
   };
+}
+
+function applyLexicalAutoSafePlacementsToLedger(options: {
+  verses: StrongLedgerVerse[];
+  report: Parameters<typeof lexicalAutoSafePlacements>[0];
+}): number {
+  const verseByRef = new Map(options.verses.map((verse) => [verse.ref, verse]));
+  const occupiedTargetsByRef = new Map(
+    options.verses.map((verse) => [verse.ref, occupiedReaderTargets(verse)])
+  );
+  let applied = 0;
+
+  for (const placement of lexicalAutoSafePlacements(options.report)) {
+    const verse = verseByRef.get(placement.item.ref);
+    const annotation = verse?.annotations.find(
+      (annotation) => annotation.id === placement.item.annotationId
+    );
+    if (!verse || !annotation || !canApplyLexicalAutoSafe(annotation)) {
+      continue;
+    }
+    const occupiedTargets =
+      occupiedTargetsByRef.get(placement.item.ref) ?? new Set<string>();
+    const targetKey = lexicalCandidateTargetKey(placement.candidate);
+    if (
+      targetKey &&
+      occupiedTargets.has(targetKey) &&
+      !canStackLexicalAutoSafe(placement)
+    ) {
+      continue;
+    }
+
+    applyLexicalAutoSafePlacement(annotation, placement);
+    if (targetKey) occupiedTargets.add(targetKey);
+    occupiedTargetsByRef.set(placement.item.ref, occupiedTargets);
+    applied += 1;
+  }
+
+  return applied;
+}
+
+function canApplyLexicalAutoSafe(annotation: StrongLedgerAnnotation): boolean {
+  if (annotation.lexiconLookup === false) return false;
+  if (
+    annotation.visibility === "reader" &&
+    ["word", "phrase"].includes(annotation.placement)
+  ) {
+    return true;
+  }
+  return (
+    (annotation.visibility === "reader" ||
+      annotation.visibility === "advanced") &&
+    annotation.placement === "empty"
+  );
+}
+
+function applyLexicalAutoSafePlacement(
+  annotation: StrongLedgerAnnotation,
+  placement: LexicalAutoSafePlacement
+): void {
+  const { candidate, kind } = placement;
+  const evidenceSources = candidate.evidence.map((evidence) => evidence.source);
+
+  annotation.visibility = "reader";
+  annotation.placement = candidate.target;
+  annotation.source = "semantic-lexicon";
+  annotation.confidence = Math.max(
+    annotation.confidence,
+    Math.min(0.9, candidate.score)
+  );
+  annotation.reason =
+    "Visible in reader mode because deterministic lexical sources produced a validated auto-safe French carrier.";
+  annotation.diagnostics = [
+    ...new Set([
+      ...annotation.diagnostics,
+      "lexical-auto-safe",
+      kind,
+      ...evidenceSources
+    ])
+  ];
+  annotation.insertAfterWordIndex = undefined;
+
+  if (
+    candidate.target === "phrase" &&
+    candidate.startWordIndex !== undefined &&
+    candidate.endWordIndex !== undefined
+  ) {
+    annotation.wordIndex = undefined;
+    annotation.normalizedWord = undefined;
+    annotation.startWordIndex = candidate.startWordIndex;
+    annotation.endWordIndex = candidate.endWordIndex;
+    annotation.normalizedPhrase = candidate.normalized;
+    return;
+  }
+
+  annotation.wordIndex = candidate.wordIndex;
+  annotation.normalizedWord = candidate.normalized;
+  annotation.startWordIndex = undefined;
+  annotation.endWordIndex = undefined;
+  annotation.normalizedPhrase = undefined;
+}
+
+function occupiedReaderTargets(verse: StrongLedgerVerse): Set<string> {
+  const targets = new Set<string>();
+  for (const annotation of verse.annotations) {
+    if (annotation.visibility !== "reader") continue;
+    if (annotation.placement === "word" && annotation.wordIndex !== undefined) {
+      targets.add(`word:${annotation.wordIndex}`);
+      continue;
+    }
+    if (
+      annotation.placement === "phrase" &&
+      annotation.startWordIndex !== undefined &&
+      annotation.endWordIndex !== undefined
+    ) {
+      targets.add(
+        `phrase:${annotation.startWordIndex}:${annotation.endWordIndex}`
+      );
+    }
+  }
+  return targets;
+}
+
+function lexicalCandidateTargetKey(
+  candidate: LexicalCandidate
+): string | undefined {
+  if (
+    candidate.target === "phrase" &&
+    candidate.startWordIndex !== undefined &&
+    candidate.endWordIndex !== undefined
+  ) {
+    return `phrase:${candidate.startWordIndex}:${candidate.endWordIndex}`;
+  }
+  return `word:${candidate.wordIndex}`;
+}
+
+function canStackLexicalAutoSafe(placement: LexicalAutoSafePlacement): boolean {
+  return (
+    placement.kind === "group-auto-safe" ||
+    placement.candidate.evidence.some(
+      (evidence) => evidence.source === "number-component"
+    )
+  );
+}
+
+function rebuildLedgerVerses(verses: StrongLedgerVerse[]): void {
+  for (const verse of verses) {
+    verse.inventories = {
+      ...verse.inventories,
+      reader: verse.annotations
+        .filter((annotation) => annotation.visibility === "reader")
+        .map((annotation) => annotation.strong),
+      advanced: verse.annotations
+        .filter((annotation) =>
+          ["reader", "advanced"].includes(annotation.visibility)
+        )
+        .map((annotation) => annotation.strong)
+    };
+    verse.metrics = calculateVerseMetrics(
+      verse.tokens.length,
+      verse.annotations,
+      {
+        references: collapseReferenceInventories(verse.inventories.references),
+        original: verse.inventories.original,
+        originalCount: verse.metrics.originalStrongOccurrenceCount,
+        originalRepresentedCount:
+          verse.metrics.originalRepresentedStrongOccurrenceCount
+      }
+    );
+    verse.views = {
+      readerHtml: renderStrongTaggedText(
+        tokenizeText(verse.text),
+        verse.annotations,
+        "reader"
+      ),
+      advancedHtml: renderStrongTaggedText(
+        tokenizeText(verse.text),
+        verse.annotations,
+        "advanced"
+      ),
+      debugHtml: renderStrongTaggedText(
+        tokenizeText(verse.text),
+        verse.annotations,
+        "debug"
+      )
+    };
+  }
+}
+
+function rebuildLedgerByBook(
+  ledgerByBook: Map<string, StrongLedgerVerse[]>,
+  verses: StrongLedgerVerse[]
+): void {
+  ledgerByBook.clear();
+  for (const verse of verses) {
+    const bookVerses = ledgerByBook.get(verse.bookId) ?? [];
+    bookVerses.push(verse);
+    ledgerByBook.set(verse.bookId, bookVerses);
+  }
+}
+
+function lexicalCandidateOutputDir(bible: string): string {
+  return path.join("outputs", "lexical-candidates", bible);
+}
+
+function availableFrenchLexicalSources(): {
+  kaikkiPath?: string;
+  jdmCacheDir?: string;
+  openOfficePath?: string;
+  wolfPath?: string;
+} {
+  return {
+    kaikkiPath: existingPath(FRENCH_LEXICAL_SOURCES.kaikki),
+    jdmCacheDir: existingPath(FRENCH_LEXICAL_SOURCES.rezoJdmCache),
+    openOfficePath: existingPath(FRENCH_LEXICAL_SOURCES.openOffice),
+    wolfPath: existingPath(FRENCH_LEXICAL_SOURCES.wolf)
+  };
+}
+
+function existingPath(filePath: string): string | undefined {
+  return existsSync(filePath) ? filePath : undefined;
 }
 
 async function writeStrongLedgerOutputs(
@@ -1417,7 +1687,7 @@ function countOverBudgetStrong(
 function countMultiStrongReaderWords(
   annotations: StrongLedgerAnnotation[]
 ): number {
-  const countsByWord = new Map<number, number>();
+  const annotationsByWord = new Map<number, StrongLedgerAnnotation[]>();
 
   for (const annotation of annotations) {
     if (
@@ -1427,13 +1697,22 @@ function countMultiStrongReaderWords(
     ) {
       continue;
     }
-    countsByWord.set(
-      annotation.wordIndex,
-      (countsByWord.get(annotation.wordIndex) ?? 0) + 1
-    );
+    const items = annotationsByWord.get(annotation.wordIndex) ?? [];
+    items.push(annotation);
+    annotationsByWord.set(annotation.wordIndex, items);
   }
 
-  return [...countsByWord.values()].filter((count) => count > 1).length;
+  return [...annotationsByWord.values()].filter(
+    (items) => items.length > 1 && !isSafeNumericStack(items)
+  ).length;
+}
+
+function isSafeNumericStack(annotations: StrongLedgerAnnotation[]): boolean {
+  return annotations.every((annotation) =>
+    annotation.step?.some((step) =>
+      /(?:^|[/=;+ ])H?Ac[A-Za-z]*/u.test(step.morphology)
+    )
+  );
 }
 
 function countTaggedTokens(annotations: StrongLedgerAnnotation[]): number {

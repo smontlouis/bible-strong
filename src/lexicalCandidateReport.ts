@@ -6,6 +6,7 @@ import { createGunzip } from "node:zlib";
 import { createReadStream } from "node:fs";
 import readline from "node:readline";
 
+import { stemWord } from "./align.js";
 import { BOOK_IDS } from "./books.js";
 import { readStrongDictionaryTranslationCandidates } from "./strongDictionaryLexicon.js";
 import { normalizeWord, tokenizeText } from "./tokenize.js";
@@ -44,28 +45,69 @@ export interface LexicalCandidateReport {
   sources: SourceConfig;
   metrics: {
     verses: number;
+    auditItems: number;
     emptyAnnotations: number;
+    readerEmptyAnnotations: number;
+    advancedEmptyAnnotations: number;
+    relocationAnnotations: number;
+    itemsWithCandidates: number;
     emptyWithCandidates: number;
+    relocationWithCandidates: number;
     candidateCount: number;
     highConfidenceCandidates: number;
+    mediumConfidenceCandidates: number;
+    lowConfidenceCandidates: number;
+    occupiedCandidates: number;
+    openCandidates: number;
+    reviewableCandidates: number;
+    autoSafeCandidates: number;
+    autoSafeItems: number;
+    groupAutoSafeItems: number;
+    ambiguousHighItems: number;
+    openHighItems: number;
+    relocationBetterOpenItems: number;
+    evidenceSourceCounts: Record<string, number>;
   };
   items: LexicalCandidateItem[];
 }
 
 export interface LexicalCandidateItem {
+  auditKind: "empty" | "relocation";
+  annotationId: string;
   ref: string;
   text: string;
   strong: string;
   sourceStrong?: string;
   insertAfterWordIndex?: number;
+  currentTarget?: {
+    wordIndex: number;
+    text: string;
+    normalized: string;
+    otherStrong: string[];
+  };
   stepGlosses: string[];
   dictionaryTerms: string[];
   inferredTerms: string[];
+  groupAutoSafe?: LexicalGroupAutoSafe;
   candidates: LexicalCandidate[];
 }
 
+interface LexicalGroupAutoSafe {
+  groupId: string;
+  assignedWordIndex: number;
+  assignedText: string;
+  sourceRank: number;
+  groupSize: number;
+  targetCount: number;
+  capacityPerTarget: number;
+  reason: string;
+}
+
 export interface LexicalCandidate {
+  target: "word" | "phrase";
   wordIndex: number;
+  startWordIndex?: number;
+  endWordIndex?: number;
   text: string;
   normalized: string;
   lemma: string;
@@ -73,6 +115,12 @@ export interface LexicalCandidate {
   confidence: "high" | "medium" | "low";
   occupied: boolean;
   evidence: CandidateEvidence[];
+}
+
+export interface LexicalAutoSafePlacement {
+  item: LexicalCandidateItem;
+  candidate: LexicalCandidate;
+  kind: "auto-safe" | "group-auto-safe";
 }
 
 interface CandidateEvidence {
@@ -102,10 +150,17 @@ interface KaikkiSense {
 interface SynonymSource {
   name: string;
   synonymsByLemma: Map<string, Map<string, number>>;
+  phraseSynonymsByLemma: Map<string, Map<string, PhraseSynonym>>;
+}
+
+interface PhraseSynonym {
+  phrase: string[];
+  weight: number;
 }
 
 interface BuildOptions extends CliOptions {
   dictionaryCandidates?: StrongTranslationCandidate[];
+  ledger?: Pick<StrongLedger, "verses">;
 }
 
 const FUNCTION_WORDS = new Set([
@@ -155,18 +210,28 @@ export async function buildLexicalCandidateReport(
   const inputPath =
     options.ledgerPath ??
     path.join(options.inputDir, `bible-${options.bible}-strong-ledger.json`);
-  const ledger = await readStrongLedger(inputPath);
+  const ledger = options.ledger ?? (await readStrongLedger(inputPath));
   const verses = ledger.verses.filter((verse) =>
     options.onlyRef ? verseMatchesScope(verse, options.onlyRef) : true
   );
   const dictionaryCandidates =
     options.dictionaryCandidates ?? readStrongDictionaryTranslationCandidates();
   const dictionaryByStrong = groupDictionaryTerms(dictionaryCandidates);
-  const emptyAnnotations = verses.flatMap((verse) =>
-    verse.annotations
-      .filter(isCandidateEmptyAnnotation)
-      .map((annotation) => ({ verse, annotation }))
+  const emptyItems = verses.flatMap((verse) =>
+    verse.annotations.filter(isCandidateEmptyAnnotation).map((annotation) => ({
+      kind: "empty" as const,
+      verse,
+      annotation
+    }))
   );
+  const relocationItems = verses.flatMap((verse) =>
+    relocationCandidateAnnotations(verse).map((annotation) => ({
+      kind: "relocation" as const,
+      verse,
+      annotation
+    }))
+  );
+  const auditItems = [...emptyItems, ...relocationItems];
   const targetWords = new Set(
     verses.flatMap((verse) =>
       verse.tokens
@@ -175,7 +240,7 @@ export async function buildLexicalCandidateReport(
     )
   );
   const englishHints = new Set(
-    emptyAnnotations.flatMap(({ annotation }) =>
+    auditItems.flatMap(({ annotation }) =>
       stepGlossTokens(annotation.step?.map((step) => step.gloss) ?? [])
     )
   );
@@ -192,8 +257,9 @@ export async function buildLexicalCandidateReport(
     )
   });
 
-  const items = emptyAnnotations.map(({ verse, annotation }) =>
+  const items = auditItems.map(({ kind, verse, annotation }) =>
     buildCandidateItem({
+      auditKind: kind,
       verse,
       annotation,
       dictionaryTerms: dictionaryByStrong.get(annotation.strong) ?? new Map(),
@@ -202,6 +268,8 @@ export async function buildLexicalCandidateReport(
       maxCandidates: options.maxCandidatesPerEmpty
     })
   );
+  applyProperNameGroupAutoSafe(items);
+  applyLexicalDuplicateGroupAutoSafe(items);
 
   const candidateCount = items.reduce(
     (sum, item) => sum + item.candidates.length,
@@ -214,6 +282,68 @@ export async function buildLexicalCandidateReport(
         .length,
     0
   );
+  const mediumConfidenceCandidates = items.reduce(
+    (sum, item) =>
+      sum +
+      item.candidates.filter((candidate) => candidate.confidence === "medium")
+        .length,
+    0
+  );
+  const lowConfidenceCandidates = items.reduce(
+    (sum, item) =>
+      sum +
+      item.candidates.filter((candidate) => candidate.confidence === "low")
+        .length,
+    0
+  );
+  const occupiedCandidates = items.reduce(
+    (sum, item) =>
+      sum + item.candidates.filter((candidate) => candidate.occupied).length,
+    0
+  );
+  const openCandidates = candidateCount - occupiedCandidates;
+  const reviewableCandidates = items.reduce(
+    (sum, item) =>
+      sum +
+      item.candidates.filter(
+        (candidate) =>
+          candidate.confidence !== "low" ||
+          candidate.evidence.some((evidence) => evidence.source === "seed-term")
+      ).length,
+    0
+  );
+  const autoSafeItems = items.filter(isAutoSafeItem).length;
+  const groupAutoSafeItems = items.filter((item) => item.groupAutoSafe).length;
+  const autoSafeCandidates = items.reduce((sum, item) => {
+    if (item.groupAutoSafe) return sum + 1;
+    if (!isAutoSafeItem(item)) return sum;
+    return (
+      sum +
+      item.candidates.filter((candidate) =>
+        isAutoSafeCandidate(item, candidate)
+      ).length
+    );
+  }, 0);
+  const ambiguousHighItems = items.filter(
+    (item) =>
+      !item.groupAutoSafe &&
+      item.candidates.filter((candidate) => candidate.confidence === "high")
+        .length > 1
+  ).length;
+  const openHighItems = items.filter((item) =>
+    item.candidates.some(
+      (candidate) => candidate.confidence === "high" && !candidate.occupied
+    )
+  ).length;
+  const relocationBetterOpenItems = items.filter(
+    (item) =>
+      item.auditKind === "relocation" &&
+      bestOpenCandidate(item) &&
+      bestOpenCandidate(item)!.score >= currentTargetScore(item) + 0.12
+  ).length;
+  const evidenceSourceCounts = countEvidenceSources(items);
+  const emptyAnnotations = emptyItems.length;
+  const relocationAnnotations = relocationItems.length;
 
   return {
     bible: options.bible,
@@ -230,11 +360,37 @@ export async function buildLexicalCandidateReport(
     },
     metrics: {
       verses: verses.length,
-      emptyAnnotations: emptyAnnotations.length,
-      emptyWithCandidates: items.filter((item) => item.candidates.length > 0)
+      auditItems: auditItems.length,
+      emptyAnnotations,
+      readerEmptyAnnotations: emptyItems.filter(
+        (item) => item.annotation.visibility === "reader"
+      ).length,
+      advancedEmptyAnnotations: emptyItems.filter(
+        (item) => item.annotation.visibility === "advanced"
+      ).length,
+      relocationAnnotations,
+      itemsWithCandidates: items.filter((item) => item.candidates.length > 0)
         .length,
+      emptyWithCandidates: items.filter(
+        (item) => item.auditKind === "empty" && item.candidates.length > 0
+      ).length,
+      relocationWithCandidates: items.filter(
+        (item) => item.auditKind === "relocation" && item.candidates.length > 0
+      ).length,
       candidateCount,
-      highConfidenceCandidates
+      highConfidenceCandidates,
+      mediumConfidenceCandidates,
+      lowConfidenceCandidates,
+      occupiedCandidates,
+      openCandidates,
+      reviewableCandidates,
+      autoSafeCandidates,
+      autoSafeItems,
+      groupAutoSafeItems,
+      ambiguousHighItems,
+      openHighItems,
+      relocationBetterOpenItems,
+      evidenceSourceCounts
     },
     items
   };
@@ -264,6 +420,7 @@ export async function writeLexicalCandidateReport(
 }
 
 function buildCandidateItem(options: {
+  auditKind: LexicalCandidateItem["auditKind"];
   verse: StrongLedger["verses"][number];
   annotation: StrongLedger["verses"][number]["annotations"][number];
   dictionaryTerms: Map<string, number>;
@@ -283,8 +440,8 @@ function buildCandidateItem(options: {
     seedTerms.set(term, Math.max(seedTerms.get(term) ?? 0, 0.42));
   }
 
-  const candidates = options.verse.tokens
-    .filter((token) => isContentWord(token.normalized))
+  const scoredCandidates = options.verse.tokens
+    .filter((token) => shouldScoreToken(token, options.annotation))
     .map((token) =>
       scoreTargetToken({
         token,
@@ -297,6 +454,21 @@ function buildCandidateItem(options: {
       })
     )
     .filter((candidate): candidate is LexicalCandidate => Boolean(candidate))
+    .concat(
+      scorePhraseCandidates({
+        verse: options.verse,
+        seedTerms,
+        annotation: options.annotation,
+        kaikki: options.kaikki,
+        synonymSources: options.synonymSources
+      })
+    );
+
+  const candidates = applyRelocationDirectTargetGuard({
+    auditKind: options.auditKind,
+    annotation: options.annotation,
+    candidates: scoredCandidates
+  })
     .sort(
       (left, right) =>
         right.score - left.score ||
@@ -306,11 +478,17 @@ function buildCandidateItem(options: {
     .slice(0, options.maxCandidates);
 
   return {
+    annotationId: options.annotation.id,
+    auditKind: options.auditKind,
     ref: options.verse.ref,
     text: options.verse.text,
     strong: options.annotation.strong,
     sourceStrong: options.annotation.sourceStrong,
     insertAfterWordIndex: options.annotation.insertAfterWordIndex,
+    currentTarget: currentTargetForAnnotation(
+      options.verse,
+      options.annotation
+    ),
     stepGlosses,
     dictionaryTerms: [...options.dictionaryTerms.keys()].slice(0, 20),
     inferredTerms: [...inferredTerms].slice(0, 30),
@@ -329,39 +507,66 @@ function scoreTargetToken(options: {
 }): LexicalCandidate | undefined {
   const lemma = lemmaForToken(options.token.normalized, options.kaikki);
   const evidence: CandidateEvidence[] = [];
+  const properName = isProperNameAnnotation(options.annotation);
 
-  const exactSeedScore =
-    Math.max(
-      options.seedTerms.get(options.token.normalized) ?? 0,
-      options.seedTerms.get(lemma) ?? 0
-    ) || 0;
-  if (exactSeedScore > 0) {
-    evidence.push({
-      source: "seed-term",
-      detail: `${lemma} matches Strong lexical hint`,
-      weight: Math.min(0.5, 0.26 + exactSeedScore * 0.4)
-    });
-  }
-
-  const glossOverlap = overlapCount(
-    options.kaikki.lemmaGlossTokens.get(lemma) ?? new Set(),
-    new Set(options.englishHints)
-  );
-  if (glossOverlap > 0) {
-    evidence.push({
-      source: "kaikki-gloss",
-      detail: `${lemma} gloss overlaps ${options.englishHints.join(", ")}`,
-      weight: Math.min(0.32, 0.16 + glossOverlap * 0.08)
-    });
-  }
-
-  for (const source of options.synonymSources) {
-    const synonymEvidence = synonymSourceEvidence(
-      source,
-      lemma,
-      options.seedTerms
+  if (properName) {
+    evidence.push(
+      ...properNameEvidence({
+        targetText: options.token.text,
+        annotation: options.annotation,
+        seedTerms: options.seedTerms
+      })
     );
-    if (synonymEvidence) evidence.push(synonymEvidence);
+  } else {
+    const numberEvidence = numberComponentEvidence({
+      targetText: options.token.text,
+      normalized: options.token.normalized,
+      annotation: options.annotation
+    });
+    if (numberEvidence) evidence.push(numberEvidence);
+
+    const exactSeedScore =
+      Math.max(
+        options.seedTerms.get(options.token.normalized) ?? 0,
+        options.seedTerms.get(lemma) ?? 0
+      ) || 0;
+    if (exactSeedScore > 0) {
+      evidence.push({
+        source: "seed-term",
+        detail: `${lemma} matches Strong lexical hint`,
+        weight: Math.min(0.5, 0.26 + exactSeedScore * 0.4)
+      });
+    } else {
+      const stemMatch = bestSeedStemMatch(lemma, options.seedTerms);
+      if (stemMatch) {
+        evidence.push({
+          source: "seed-stem",
+          detail: `${lemma} shares Strong lexical stem ${stemMatch.seed}`,
+          weight: Math.min(0.42, 0.24 + stemMatch.score * 0.42)
+        });
+      }
+    }
+
+    const glossOverlap = overlapCount(
+      options.kaikki.lemmaGlossTokens.get(lemma) ?? new Set(),
+      new Set(options.englishHints)
+    );
+    if (glossOverlap > 0) {
+      evidence.push({
+        source: "kaikki-gloss",
+        detail: `${lemma} gloss overlaps ${options.englishHints.join(", ")}`,
+        weight: Math.min(0.32, 0.16 + glossOverlap * 0.08)
+      });
+    }
+
+    for (const source of options.synonymSources) {
+      const synonymEvidence = synonymSourceEvidence(
+        source,
+        lemma,
+        options.seedTerms
+      );
+      if (synonymEvidence) evidence.push(synonymEvidence);
+    }
   }
 
   if (evidence.length === 0) return undefined;
@@ -373,14 +578,17 @@ function scoreTargetToken(options: {
     options.verse.tokens.length
   );
   const sourceDiversity = new Set(evidence.map((item) => item.source)).size;
+  const safeOccupiedStack =
+    occupied && isStackSafeLexicalCandidateEvidence(evidence);
   const rawScore =
     evidence.reduce((sum, item) => sum + item.weight, 0) +
     position * 0.12 +
     Math.min(0.14, (sourceDiversity - 1) * 0.07) -
-    (occupied ? 0.34 : 0);
+    (occupied && !safeOccupiedStack ? 0.34 : 0);
   const score = roundRatio(Math.max(0, Math.min(1, rawScore)));
 
   return {
+    target: "word",
     wordIndex: options.token.wordIndex,
     text: options.token.text,
     normalized: options.token.normalized,
@@ -395,6 +603,737 @@ function scoreTargetToken(options: {
     occupied,
     evidence
   };
+}
+
+function applyRelocationDirectTargetGuard(options: {
+  auditKind: LexicalCandidateItem["auditKind"];
+  annotation: StrongLedger["verses"][number]["annotations"][number];
+  candidates: LexicalCandidate[];
+}): LexicalCandidate[] {
+  if (
+    options.auditKind !== "relocation" ||
+    options.annotation.wordIndex === undefined
+  ) {
+    return options.candidates;
+  }
+
+  const currentCandidate = options.candidates.find(
+    (candidate) => candidate.wordIndex === options.annotation.wordIndex
+  );
+  if (
+    !currentCandidate ||
+    currentCandidate.score < HIGH_CONFIDENCE_THRESHOLD ||
+    !hasDirectLexicalEvidence(currentCandidate)
+  ) {
+    return options.candidates;
+  }
+
+  return options.candidates.map((candidate) => {
+    if (candidate.wordIndex === options.annotation.wordIndex) return candidate;
+    if (hasDirectLexicalEvidence(candidate)) return candidate;
+    if (candidate.occupied) return candidate;
+    return capCandidateScore(candidate, MEDIUM_CONFIDENCE_THRESHOLD - 0.02, {
+      source: "relocation-guard",
+      detail: `current target ${currentCandidate.text} has direct lexical evidence`,
+      weight: 0
+    });
+  });
+}
+
+function hasDirectLexicalEvidence(candidate: LexicalCandidate): boolean {
+  return candidate.evidence.some((evidence) =>
+    DIRECT_LEXICAL_EVIDENCE_SOURCES.has(evidence.source)
+  );
+}
+
+const DIRECT_LEXICAL_EVIDENCE_SOURCES = new Set([
+  "seed-term",
+  "seed-stem",
+  "number-component",
+  "kaikki-gloss",
+  "proper-name-step",
+  "proper-name-dictionary"
+]);
+
+function numberComponentEvidence(options: {
+  targetText: string;
+  normalized: string;
+  annotation: StrongLedger["verses"][number]["annotations"][number];
+}): CandidateEvidence | undefined {
+  const expectedValues = numericValuesForAnnotation(options.annotation);
+  if (expectedValues.size === 0) return undefined;
+
+  const targetValues = numericValuesForTarget(options.normalized);
+  const matchingValue = firstIntersection(expectedValues, targetValues);
+  if (matchingValue === undefined) return undefined;
+
+  return {
+    source: "number-component",
+    detail: `${options.targetText} contains numeric component ${matchingValue}`,
+    weight: 0.78
+  };
+}
+
+function numericValuesForAnnotation(
+  annotation: StrongLedger["verses"][number]["annotations"][number]
+): Set<number> {
+  const values = new Set<number>();
+  if (!hasNumericStepMorphology(annotation)) return values;
+  for (const token of stepGlossTokens(
+    annotation.step?.map((step) => step.gloss) ?? []
+  )) {
+    const value = NUMERIC_WORD_VALUES.get(token);
+    if (value !== undefined) values.add(value);
+  }
+  return values;
+}
+
+function hasNumericStepMorphology(
+  annotation: StrongLedger["verses"][number]["annotations"][number]
+): boolean {
+  return (
+    annotation.step?.some((step) =>
+      /(?:^|[/=;+ ])H?Ac[A-Za-z]*/u.test(step.morphology)
+    ) ?? false
+  );
+}
+
+function numericValuesForTarget(normalized: string): Set<number> {
+  const values = new Set<number>();
+  const numericValue = Number(normalized);
+  if (Number.isInteger(numericValue) && numericValue > 0) {
+    for (const value of decomposeIntegerNumber(numericValue)) {
+      values.add(value);
+    }
+    return values;
+  }
+
+  const parts = normalized
+    .split(/[-\s'’]+/u)
+    .map((part) => part.replace(/[^\p{L}\p{N}]+/gu, ""))
+    .filter(Boolean);
+  let sum = 0;
+  let allPartsAreNumeric = parts.length > 0;
+  for (const part of parts) {
+    const value = NUMERIC_WORD_VALUES.get(part);
+    if (value === undefined) {
+      allPartsAreNumeric = false;
+      continue;
+    }
+    values.add(value);
+    sum += value;
+  }
+  if (allPartsAreNumeric && sum > 0) values.add(sum);
+  return values;
+}
+
+function decomposeIntegerNumber(value: number): Set<number> {
+  const values = new Set([value]);
+  if (value >= 100) {
+    const hundreds = Math.floor(value / 100);
+    if (hundreds > 0) {
+      values.add(hundreds);
+      values.add(100);
+      values.add(hundreds * 100);
+    }
+  }
+  const lastTwoDigits = value % 100;
+  if (lastTwoDigits >= 20) {
+    const tens = Math.floor(lastTwoDigits / 10) * 10;
+    const units = lastTwoDigits % 10;
+    if (tens > 0) values.add(tens);
+    if (units > 0) values.add(units);
+  } else if (lastTwoDigits > 0 && lastTwoDigits !== value) {
+    values.add(lastTwoDigits);
+  }
+  return values;
+}
+
+function isStackSafeLexicalCandidateEvidence(
+  evidence: CandidateEvidence[]
+): boolean {
+  return evidence.some((item) => item.source === "number-component");
+}
+
+const NUMERIC_WORD_VALUES = new Map<string, number>([
+  ["one", 1],
+  ["un", 1],
+  ["une", 1],
+  ["two", 2],
+  ["deux", 2],
+  ["three", 3],
+  ["trois", 3],
+  ["four", 4],
+  ["quatre", 4],
+  ["five", 5],
+  ["cinq", 5],
+  ["six", 6],
+  ["seven", 7],
+  ["sept", 7],
+  ["eight", 8],
+  ["huit", 8],
+  ["nine", 9],
+  ["neuf", 9],
+  ["ten", 10],
+  ["dix", 10],
+  ["eleven", 11],
+  ["onze", 11],
+  ["twelve", 12],
+  ["douze", 12],
+  ["thirteen", 13],
+  ["treize", 13],
+  ["fourteen", 14],
+  ["quatorze", 14],
+  ["fifteen", 15],
+  ["quinze", 15],
+  ["sixteen", 16],
+  ["seize", 16],
+  ["twenty", 20],
+  ["vingt", 20],
+  ["thirty", 30],
+  ["trente", 30],
+  ["forty", 40],
+  ["quarante", 40],
+  ["fifty", 50],
+  ["cinquante", 50],
+  ["sixty", 60],
+  ["soixante", 60],
+  ["hundred", 100],
+  ["hundreds", 100],
+  ["cent", 100],
+  ["cents", 100],
+  ["thousand", 1000],
+  ["thousands", 1000],
+  ["mille", 1000]
+]);
+
+function bestSeedStemMatch(
+  lemma: string,
+  seedTerms: Map<string, number>
+): { seed: string; score: number } | undefined {
+  const targetVariants = lexicalStemVariants(lemma);
+  const matches: Array<{ seed: string; score: number }> = [];
+
+  for (const [seed, score] of seedTerms) {
+    const seedVariants = lexicalStemVariants(seed);
+    if (
+      [...targetVariants].some((targetVariant) =>
+        [...seedVariants].some((seedVariant) =>
+          isSafeLexicalStemMatch(targetVariant, seedVariant)
+        )
+      )
+    ) {
+      matches.push({ seed, score });
+    }
+  }
+
+  return matches.sort((left, right) => right.score - left.score)[0];
+}
+
+function lexicalStemVariants(term: string): Set<string> {
+  const variants = new Set([term]);
+  const stem = stemWord(term);
+  if (stem.length >= 5) variants.add(stem);
+  return variants;
+}
+
+function isSafeLexicalStemMatch(left: string, right: string): boolean {
+  if (left.length < 7 || right.length < 7) return false;
+  if (left === right) return true;
+  const shorter = left.length <= right.length ? left : right;
+  const longer = left.length > right.length ? left : right;
+  if (!longer.startsWith(shorter)) return false;
+  return SAFE_LEXICAL_STEM_SUFFIXES.has(longer.slice(shorter.length));
+}
+
+const SAFE_LEXICAL_STEM_SUFFIXES = new Set([
+  "s",
+  "e",
+  "es",
+  "r",
+  "er",
+  "ir",
+  "ie",
+  "ies",
+  "ique",
+  "iques",
+  "ant",
+  "ante",
+  "ants",
+  "antes"
+]);
+
+function capCandidateScore(
+  candidate: LexicalCandidate,
+  maxScore: number,
+  evidence: CandidateEvidence
+): LexicalCandidate {
+  if (candidate.score <= maxScore) return candidate;
+  const score = roundRatio(maxScore);
+  return {
+    ...candidate,
+    score,
+    confidence:
+      score >= HIGH_CONFIDENCE_THRESHOLD
+        ? "high"
+        : score >= MEDIUM_CONFIDENCE_THRESHOLD
+          ? "medium"
+          : "low",
+    evidence: [...candidate.evidence, evidence]
+  };
+}
+
+function isProperNameAnnotation(
+  annotation: StrongLedger["verses"][number]["annotations"][number]
+): boolean {
+  return (
+    annotation.step?.some((step) => {
+      const morphology = step.morphology.trim();
+      return (
+        /^[HG]?N[Pp]/u.test(morphology) ||
+        /(?:^|[/=;+ ])(?:[HG]?N[Pp])/u.test(morphology) ||
+        /N-?PRI/iu.test(morphology) ||
+        /proper/iu.test(morphology)
+      );
+    }) ?? false
+  );
+}
+
+function properNameEvidence(options: {
+  targetText: string;
+  annotation: StrongLedger["verses"][number]["annotations"][number];
+  seedTerms: Map<string, number>;
+}): CandidateEvidence[] {
+  const targetKeys = nameKeyVariantsFromText(options.targetText);
+  const stepKeys = properNameStepKeys(options.annotation);
+  const matchingStepKey = firstIntersection(targetKeys, stepKeys);
+  if (!matchingStepKey) return [];
+
+  const evidence: CandidateEvidence[] = [
+    {
+      source: "proper-name-step",
+      detail: `${options.targetText} matches STEP name key ${matchingStepKey}`,
+      weight: 0.62
+    }
+  ];
+
+  const dictionaryKeys = properNameDictionaryKeys(options.seedTerms, stepKeys);
+  const matchingDictionaryKey = firstIntersection(targetKeys, dictionaryKeys);
+  if (matchingDictionaryKey) {
+    evidence.push({
+      source: "proper-name-dictionary",
+      detail: `${options.targetText} matches Strong dictionary name key ${matchingDictionaryKey}`,
+      weight: 0.22
+    });
+  }
+
+  return evidence;
+}
+
+function properNameStepKeys(
+  annotation: StrongLedger["verses"][number]["annotations"][number]
+): Set<string> {
+  const keys = new Set<string>();
+  const primaryParts: string[][] = [];
+
+  for (const step of annotation.step ?? []) {
+    const texts = [step.gloss, step.transliteration].filter(hasLatinLetter);
+    for (const text of texts) {
+      addAll(keys, nameKeyVariantsFromText(text));
+    }
+
+    const primaryText = [step.gloss, step.transliteration].find(hasLatinLetter);
+    const parts = primaryText ? nameParts(primaryText) : [];
+    if (parts.length > 0) primaryParts.push(parts);
+  }
+
+  for (let index = 0; index < primaryParts.length; index += 1) {
+    const combined: string[] = [];
+    for (
+      let end = index;
+      end < primaryParts.length && end < index + 4;
+      end += 1
+    ) {
+      combined.push(...(primaryParts[end] ?? []));
+      if (combined.length >= 2) {
+        addAll(keys, nameKeyVariantsFromParts(combined));
+      }
+    }
+  }
+
+  return keys;
+}
+
+function properNameDictionaryKeys(
+  seedTerms: Map<string, number>,
+  stepKeys: Set<string>
+): Set<string> {
+  const keys = new Set<string>();
+  for (const seed of seedTerms.keys()) {
+    const seedKeys = nameKeyVariantsFromText(seed);
+    if (!firstIntersection(seedKeys, stepKeys)) continue;
+    addAll(keys, seedKeys);
+  }
+  return keys;
+}
+
+function nameKeyVariantsFromText(text: string): Set<string> {
+  const parts = nameParts(text);
+  const variants = nameKeyVariantsFromParts(parts);
+
+  for (let index = 1; index < parts.length; index += 1) {
+    addAll(variants, nameKeyVariantsFromParts(parts.slice(index)));
+  }
+
+  return variants;
+}
+
+function nameKeyVariantsFromParts(parts: string[]): Set<string> {
+  const base = parts.join("");
+  if (!base) return new Set();
+  const variants = new Set([base]);
+  const replacements: Array<[RegExp, string]> = [
+    [/th/gu, "t"],
+    [/kh/gu, "k"],
+    [/ch/gu, "h"],
+    [/ch/gu, "k"],
+    [/j/gu, "y"],
+    [/ou/gu, "u"],
+    [/v/gu, "b"],
+    [/k/gu, "c"],
+    [/c/gu, "k"],
+    [/y/gu, "i"]
+  ];
+
+  for (const [pattern, replacement] of replacements) {
+    for (const variant of [...variants]) {
+      variants.add(variant.replace(pattern, replacement));
+    }
+  }
+
+  for (const variant of [...variants]) {
+    const skeleton = variant.replace(/[aeiouy]/gu, "");
+    if (skeleton.length >= 3) variants.add(skeleton);
+  }
+
+  return new Set([...variants].filter((variant) => variant.length >= 3));
+}
+
+function nameParts(text: string): string[] {
+  return tokenizeText(text)
+    .filter((segment) => segment.kind === "word")
+    .flatMap((segment) => segment.normalized.split(/[-'’]+/u))
+    .map((part) => part.replace(/[^\p{L}\p{N}]+/gu, ""))
+    .filter((part) => part.length > 0);
+}
+
+function hasLatinLetter(value: string | undefined): value is string {
+  return typeof value === "string" && /[A-Za-z]/u.test(value);
+}
+
+function firstIntersection<T>(left: Set<T>, right: Set<T>): T | undefined {
+  for (const value of left) {
+    if (right.has(value)) return value;
+  }
+  return undefined;
+}
+
+function addAll<T>(target: Set<T>, values: Iterable<T>): void {
+  for (const value of values) target.add(value);
+}
+
+function scorePhraseCandidates(options: {
+  verse: StrongLedger["verses"][number];
+  seedTerms: Map<string, number>;
+  annotation: StrongLedger["verses"][number]["annotations"][number];
+  kaikki: KaikkiIndex;
+  synonymSources: SynonymSource[];
+}): LexicalCandidate[] {
+  if (isProperNameAnnotation(options.annotation)) return [];
+
+  const phraseHints = phraseHintsFromSynonyms(
+    options.seedTerms,
+    options.synonymSources
+  );
+  const candidates: LexicalCandidate[] = [];
+  const maxLength = 5;
+
+  if (phraseHints.size > 0) {
+    for (let start = 0; start < options.verse.tokens.length; start += 1) {
+      for (
+        let end = start + 1;
+        end < options.verse.tokens.length && end < start + maxLength;
+        end += 1
+      ) {
+        const span = options.verse.tokens.slice(start, end + 1);
+        const normalizedPhrase = span.map((token) => token.normalized);
+        if (!isUsefulPhrase(normalizedPhrase)) continue;
+
+        const matchingKey = phraseKeysForSpan(span, options.kaikki).find(
+          (key) => phraseHints.has(key)
+        );
+        if (!matchingKey) continue;
+        const hint = phraseHints.get(matchingKey);
+        if (!hint) continue;
+
+        const startWordIndex = span[0]?.wordIndex ?? start;
+        const endWordIndex = span[span.length - 1]?.wordIndex ?? end;
+        const occupied = isPhraseOccupied(
+          options.verse,
+          startWordIndex,
+          endWordIndex
+        );
+        const position = positionScore(
+          options.annotation.insertAfterWordIndex,
+          startWordIndex,
+          options.verse.tokens.length
+        );
+        const sourceDiversity = new Set(
+          hint.evidence.map((item) => item.source)
+        ).size;
+        const rawScore =
+          hint.evidence.reduce((sum, item) => sum + item.weight, 0) +
+          position * 0.12 +
+          Math.min(0.14, (sourceDiversity - 1) * 0.07) +
+          0.22 -
+          (occupied ? 0.34 : 0);
+        const score = roundRatio(Math.max(0, Math.min(1, rawScore)));
+
+        candidates.push({
+          target: "phrase",
+          wordIndex: startWordIndex,
+          startWordIndex,
+          endWordIndex,
+          text: span.map((token) => token.text).join(" "),
+          normalized: normalizedPhrase.join(" "),
+          lemma: matchingKey,
+          score,
+          confidence:
+            score >= HIGH_CONFIDENCE_THRESHOLD
+              ? "high"
+              : score >= MEDIUM_CONFIDENCE_THRESHOLD
+                ? "medium"
+                : "low",
+          occupied,
+          evidence: hint.evidence
+        });
+      }
+    }
+  }
+
+  candidates.push(...scoreAuxiliaryVerbPhraseCandidates(options));
+
+  return dedupePhraseCandidates(candidates);
+}
+
+function scoreAuxiliaryVerbPhraseCandidates(options: {
+  verse: StrongLedger["verses"][number];
+  seedTerms: Map<string, number>;
+  annotation: StrongLedger["verses"][number]["annotations"][number];
+  kaikki: KaikkiIndex;
+  synonymSources: SynonymSource[];
+}): LexicalCandidate[] {
+  if (!hasVerbStepMorphology(options.annotation)) return [];
+  const expectedAuxiliaries = auxiliaryFamiliesForAnnotation(
+    options.annotation
+  );
+  if (expectedAuxiliaries.size === 0) return [];
+
+  const candidates: LexicalCandidate[] = [];
+  for (let index = 0; index < options.verse.tokens.length - 1; index += 1) {
+    const auxiliary = options.verse.tokens[index];
+    const participle = options.verse.tokens[index + 1];
+    if (!auxiliary || !participle) continue;
+
+    const auxiliaryFamily = FRENCH_AUXILIARY_FORMS.get(auxiliary.normalized);
+    if (!auxiliaryFamily || !expectedAuxiliaries.has(auxiliaryFamily)) {
+      continue;
+    }
+
+    const participleCandidate = scoreTargetToken({
+      token: participle,
+      verse: options.verse,
+      seedTerms: options.seedTerms,
+      englishHints: stepGlossTokens(
+        options.annotation.step?.map((step) => step.gloss) ?? []
+      ),
+      annotation: options.annotation,
+      kaikki: options.kaikki,
+      synonymSources: options.synonymSources
+    });
+    if (
+      !participleCandidate ||
+      !hasDirectLexicalEvidence(participleCandidate)
+    ) {
+      continue;
+    }
+
+    const startWordIndex = auxiliary.wordIndex;
+    const endWordIndex = participle.wordIndex;
+    const occupied = isPhraseOccupied(
+      options.verse,
+      startWordIndex,
+      endWordIndex
+    );
+    const position = positionScore(
+      options.annotation.insertAfterWordIndex,
+      startWordIndex,
+      options.verse.tokens.length
+    );
+    const evidence: CandidateEvidence[] = [
+      {
+        source: "french-auxiliary-phrase",
+        detail: `${auxiliary.text} carries STEP auxiliary ${auxiliaryFamily}`,
+        weight: 0.28
+      },
+      ...participleCandidate.evidence
+    ];
+    const sourceDiversity = new Set(evidence.map((item) => item.source)).size;
+    const rawScore =
+      participleCandidate.score +
+      0.28 +
+      position * 0.12 +
+      Math.min(0.14, (sourceDiversity - 1) * 0.07) -
+      (occupied ? 0.34 : 0);
+    const score = roundRatio(Math.max(0, Math.min(1, rawScore)));
+
+    candidates.push({
+      target: "phrase",
+      wordIndex: startWordIndex,
+      startWordIndex,
+      endWordIndex,
+      text: `${auxiliary.text} ${participle.text}`,
+      normalized: `${auxiliary.normalized} ${participle.normalized}`,
+      lemma: `${auxiliaryFamily} ${participleCandidate.lemma}`,
+      score,
+      confidence:
+        score >= HIGH_CONFIDENCE_THRESHOLD
+          ? "high"
+          : score >= MEDIUM_CONFIDENCE_THRESHOLD
+            ? "medium"
+            : "low",
+      occupied,
+      evidence
+    });
+  }
+
+  return candidates;
+}
+
+function hasVerbStepMorphology(
+  annotation: StrongLedger["verses"][number]["annotations"][number]
+): boolean {
+  return (
+    annotation.step?.some((step) =>
+      /(?:^|[/=;+ ])[HG]?V[A-Za-z]*/u.test(step.morphology)
+    ) ?? false
+  );
+}
+
+function auxiliaryFamiliesForAnnotation(
+  annotation: StrongLedger["verses"][number]["annotations"][number]
+): Set<string> {
+  const tokens = new Set(
+    stepGlossTokens(annotation.step?.map((step) => step.gloss) ?? [])
+  );
+  const families = new Set<string>();
+  if (["had", "has", "have", "having"].some((token) => tokens.has(token))) {
+    families.add("avoir");
+  }
+  if (
+    ["am", "are", "be", "been", "being", "is", "was", "were"].some((token) =>
+      tokens.has(token)
+    )
+  ) {
+    families.add("etre");
+  }
+  return families;
+}
+
+const FRENCH_AUXILIARY_FORMS = new Map<string, string>([
+  ["ai", "avoir"],
+  ["as", "avoir"],
+  ["a", "avoir"],
+  ["avons", "avoir"],
+  ["avez", "avoir"],
+  ["ont", "avoir"],
+  ["avais", "avoir"],
+  ["avait", "avoir"],
+  ["avions", "avoir"],
+  ["aviez", "avoir"],
+  ["avaient", "avoir"],
+  ["eus", "avoir"],
+  ["eut", "avoir"],
+  ["eumes", "avoir"],
+  ["eutes", "avoir"],
+  ["eurent", "avoir"],
+  ["aurai", "avoir"],
+  ["auras", "avoir"],
+  ["aura", "avoir"],
+  ["aurons", "avoir"],
+  ["aurez", "avoir"],
+  ["auront", "avoir"],
+  ["suis", "etre"],
+  ["es", "etre"],
+  ["est", "etre"],
+  ["sommes", "etre"],
+  ["etes", "etre"],
+  ["sont", "etre"],
+  ["etais", "etre"],
+  ["etait", "etre"],
+  ["etions", "etre"],
+  ["etiez", "etre"],
+  ["etaient", "etre"],
+  ["fus", "etre"],
+  ["fut", "etre"],
+  ["fumes", "etre"],
+  ["futes", "etre"],
+  ["furent", "etre"],
+  ["serai", "etre"],
+  ["seras", "etre"],
+  ["sera", "etre"],
+  ["serons", "etre"],
+  ["serez", "etre"],
+  ["seront", "etre"]
+]);
+
+function phraseHintsFromSynonyms(
+  seedTerms: Map<string, number>,
+  synonymSources: SynonymSource[]
+): Map<string, { evidence: CandidateEvidence[] }> {
+  const hints = new Map<string, { evidence: CandidateEvidence[] }>();
+
+  for (const seed of seedTerms.keys()) {
+    for (const source of synonymSources) {
+      for (const phrase of source.phraseSynonymsByLemma.get(seed)?.values() ??
+        []) {
+        const key = phraseKey(phrase.phrase);
+        const existing = hints.get(key) ?? { evidence: [] };
+        existing.evidence.push({
+          source: `${source.name}-phrase`,
+          detail: `${phrase.phrase.join(" ")} links to seed ${seed}`,
+          weight: weightedSynonymScore(phrase.weight, source.name) + 0.08
+        });
+        hints.set(key, existing);
+      }
+    }
+  }
+
+  return hints;
+}
+
+function dedupePhraseCandidates(
+  candidates: LexicalCandidate[]
+): LexicalCandidate[] {
+  const bestBySpan = new Map<string, LexicalCandidate>();
+  for (const candidate of candidates) {
+    const key = `${candidate.startWordIndex}:${candidate.endWordIndex}:${candidate.lemma}`;
+    const existing = bestBySpan.get(key);
+    if (!existing || candidate.score > existing.score) {
+      bestBySpan.set(key, candidate);
+    }
+  }
+  return [...bestBySpan.values()];
 }
 
 function synonymSourceEvidence(
@@ -472,24 +1411,29 @@ async function readSynonymSources(
         cacheDir: options.jdmCacheDir,
         fetchMissing: options.fetchJdm,
         fetchLimit: options.fetchJdmLimit
-      })
+      }),
+      phraseSynonymsByLemma: new Map()
     });
   }
 
   if (options.openOfficePath) {
+    const openOffice = readOpenOfficeSynonymData(
+      options.openOfficePath,
+      sourceTerms
+    );
     sources.push({
       name: "openoffice-synonyms",
-      synonymsByLemma: readOpenOfficeSynonyms(
-        options.openOfficePath,
-        sourceTerms
-      )
+      synonymsByLemma: openOffice.synonymsByLemma,
+      phraseSynonymsByLemma: openOffice.phraseSynonymsByLemma
     });
   }
 
   if (options.wolfPath) {
+    const wolf = readWolfSynonymData(options.wolfPath, sourceTerms);
     sources.push({
       name: "wolf",
-      synonymsByLemma: readWolfSynonyms(options.wolfPath, sourceTerms)
+      synonymsByLemma: wolf.synonymsByLemma,
+      phraseSynonymsByLemma: wolf.phraseSynonymsByLemma
     });
   }
 
@@ -591,16 +1535,20 @@ function parseRezoJdmFile(filePath: string, term: string): Map<string, number> {
   }
 }
 
-function readOpenOfficeSynonyms(
+function readOpenOfficeSynonymData(
   filePath: string,
   terms: Set<string>
-): Map<string, Map<string, number>> {
+): {
+  synonymsByLemma: Map<string, Map<string, number>>;
+  phraseSynonymsByLemma: Map<string, Map<string, PhraseSynonym>>;
+} {
   const text = readFileSync(filePath, "utf8");
   const body = text.includes("return []byte(`")
     ? text.slice(text.indexOf("`") + 1, text.lastIndexOf("`"))
     : text;
   const lines = body.split(/\r?\n/u);
   const synonyms = new Map<string, Map<string, number>>();
+  const phraseSynonyms = new Map<string, Map<string, PhraseSynonym>>();
 
   for (let index = 1; index < lines.length; ) {
     const [word, countRaw] = (lines[index++] ?? "").split("|");
@@ -611,7 +1559,12 @@ function readOpenOfficeSynonyms(
     for (let offset = 0; offset < count; offset += 1, index += 1) {
       const parts = (lines[index] ?? "").split("|").slice(1);
       for (const synonym of parts) {
-        const normalized = normalizeWord(synonym);
+        const phrase = normalizedPhraseWords(synonym);
+        if (phrase.length > 1) {
+          addPhraseSynonym(phraseSynonyms, normalizedWord, phrase, 1);
+          continue;
+        }
+        const normalized = phrase[0] ?? normalizeWord(synonym);
         if (isContentWord(normalized)) forms.set(normalized, 1);
       }
     }
@@ -621,36 +1574,48 @@ function readOpenOfficeSynonyms(
     }
   }
 
-  return synonyms;
+  return { synonymsByLemma: synonyms, phraseSynonymsByLemma: phraseSynonyms };
 }
 
-function readWolfSynonyms(
+function readWolfSynonymData(
   filePath: string,
   terms: Set<string>
-): Map<string, Map<string, number>> {
+): {
+  synonymsByLemma: Map<string, Map<string, number>>;
+  phraseSynonymsByLemma: Map<string, Map<string, PhraseSynonym>>;
+} {
   const text = readTextPossiblyCompressed(filePath);
   const synonyms = new Map<string, Map<string, number>>();
+  const phraseSynonyms = new Map<string, Map<string, PhraseSynonym>>();
   const synsets = text.match(/<SYNSET>.*?<\/SYNSET>/gsu) ?? [];
 
   for (const synset of synsets) {
     const literals = [
       ...synset.matchAll(/<LITERAL(?: [^>]*)?>(.*?)<\/LITERAL>/gsu)
-    ]
-      .map((match) => normalizeWord(stripXml(match[1] ?? "")))
+    ].map((match) => normalizedPhraseWords(stripXml(match[1] ?? "")));
+    const singleLiterals = literals
+      .filter((phrase) => phrase.length === 1)
+      .map((phrase) => phrase[0] ?? "")
       .filter(isContentWord);
-    const relevant = literals.filter((literal) => terms.has(literal));
+    const phraseLiterals = literals.filter(
+      (phrase) => phrase.length > 1 && isUsefulPhrase(phrase)
+    );
+    const relevant = singleLiterals.filter((literal) => terms.has(literal));
     if (relevant.length === 0) continue;
 
     for (const literal of relevant) {
       const forms = synonyms.get(literal) ?? new Map();
-      for (const other of literals) {
+      for (const other of singleLiterals) {
         if (other !== literal) forms.set(other, 1);
       }
       synonyms.set(literal, forms);
+      for (const phrase of phraseLiterals) {
+        addPhraseSynonym(phraseSynonyms, literal, phrase, 1);
+      }
     }
   }
 
-  return synonyms;
+  return { synonymsByLemma: synonyms, phraseSynonymsByLemma: phraseSynonyms };
 }
 
 function readTextPossiblyCompressed(filePath: string): string {
@@ -804,22 +1769,104 @@ function isCandidateEmptyAnnotation(
   annotation: StrongLedger["verses"][number]["annotations"][number]
 ): boolean {
   return (
-    annotation.visibility === "advanced" &&
+    (annotation.visibility === "reader" ||
+      annotation.visibility === "advanced") &&
     annotation.placement === "empty" &&
     annotation.lexiconLookup !== false
   );
+}
+
+function relocationCandidateAnnotations(
+  verse: StrongLedger["verses"][number]
+): Array<StrongLedger["verses"][number]["annotations"][number]> {
+  const visibleWordAnnotations = verse.annotations.filter(
+    (annotation) =>
+      annotation.visibility === "reader" &&
+      annotation.placement === "word" &&
+      annotation.wordIndex !== undefined &&
+      annotation.lexiconLookup !== false
+  );
+  const strongByWord = new Map<number, Set<string>>();
+
+  for (const annotation of visibleWordAnnotations) {
+    const wordIndex = annotation.wordIndex;
+    if (wordIndex === undefined) continue;
+    const strong = strongByWord.get(wordIndex) ?? new Set<string>();
+    strong.add(annotation.strong);
+    strongByWord.set(wordIndex, strong);
+  }
+
+  return visibleWordAnnotations.filter((annotation) => {
+    const wordIndex = annotation.wordIndex;
+    return (
+      wordIndex !== undefined &&
+      (strongByWord.get(wordIndex)?.size ?? 0) > 1 &&
+      isContentWord(annotation.normalizedWord ?? "")
+    );
+  });
+}
+
+function currentTargetForAnnotation(
+  verse: StrongLedger["verses"][number],
+  annotation: StrongLedger["verses"][number]["annotations"][number]
+): LexicalCandidateItem["currentTarget"] {
+  if (annotation.placement !== "word" || annotation.wordIndex === undefined) {
+    return undefined;
+  }
+  const token = verse.tokens.find(
+    (candidate) => candidate.wordIndex === annotation.wordIndex
+  );
+  if (!token) return undefined;
+  const otherStrong = verse.annotations
+    .filter(
+      (candidate) =>
+        candidate.visibility === "reader" &&
+        candidate.placement === "word" &&
+        candidate.wordIndex === annotation.wordIndex &&
+        candidate.strong !== annotation.strong
+    )
+    .map((candidate) => candidate.strong);
+
+  return {
+    wordIndex: token.wordIndex,
+    text: token.text,
+    normalized: token.normalized,
+    otherStrong
+  };
 }
 
 function isWordOccupied(
   verse: StrongLedger["verses"][number],
   wordIndex: number
 ): boolean {
-  return verse.annotations.some(
-    (annotation) =>
-      annotation.visibility === "reader" &&
-      annotation.placement === "word" &&
-      annotation.wordIndex === wordIndex
-  );
+  return verse.annotations.some((annotation) => {
+    if (annotation.visibility !== "reader") return false;
+    if (annotation.placement === "word") {
+      return annotation.wordIndex === wordIndex;
+    }
+    if (annotation.placement !== "phrase") return false;
+    return (
+      annotation.startWordIndex !== undefined &&
+      annotation.endWordIndex !== undefined &&
+      wordIndex >= annotation.startWordIndex &&
+      wordIndex <= annotation.endWordIndex
+    );
+  });
+}
+
+function isPhraseOccupied(
+  verse: StrongLedger["verses"][number],
+  startWordIndex: number,
+  endWordIndex: number
+): boolean {
+  for (
+    let wordIndex = startWordIndex;
+    wordIndex <= endWordIndex;
+    wordIndex += 1
+  ) {
+    if (isWordOccupied(verse, wordIndex)) return true;
+  }
+  return false;
 }
 
 function stepGlossTokens(glosses: string[]): string[] {
@@ -861,6 +1908,78 @@ const ENGLISH_STOP_WORDS = new Set([
 
 function isContentWord(word: string): boolean {
   return word.length >= 3 && !FUNCTION_WORDS.has(word) && !/^\d+$/u.test(word);
+}
+
+function shouldScoreToken(
+  token: StrongLedger["verses"][number]["tokens"][number],
+  annotation: StrongLedger["verses"][number]["annotations"][number]
+): boolean {
+  if (isContentWord(token.normalized)) return true;
+  if (numericValuesForAnnotation(annotation).size === 0) {
+    return false;
+  }
+  return numericValuesForTarget(token.normalized).size > 0;
+}
+
+function isUsefulPhrase(words: string[]): boolean {
+  return (
+    words.length >= 2 &&
+    words.length <= 5 &&
+    words.some((word) => isContentWord(word))
+  );
+}
+
+function normalizedPhraseWords(text: string): string[] {
+  return tokenizeText(text)
+    .filter((segment) => segment.kind === "word")
+    .map((segment) => segment.normalized)
+    .filter((word) => word.length > 0);
+}
+
+function phraseKeysForSpan(
+  span: StrongLedger["verses"][number]["tokens"],
+  kaikki: KaikkiIndex
+): string[] {
+  const variants = span.map((token) => {
+    const lemma = lemmaForToken(token.normalized, kaikki);
+    return lemma === token.normalized
+      ? [token.normalized]
+      : [lemma, token.normalized];
+  });
+  const keys: string[] = [];
+
+  const visit = (index: number, words: string[]) => {
+    if (index >= variants.length) {
+      keys.push(phraseKey(words));
+      return;
+    }
+    for (const variant of variants[index] ?? []) {
+      visit(index + 1, [...words, variant]);
+    }
+  };
+
+  visit(0, []);
+  return [...new Set(keys)];
+}
+
+function phraseKey(words: string[]): string {
+  return words.join(" ");
+}
+
+function addPhraseSynonym(
+  phraseSynonyms: Map<string, Map<string, PhraseSynonym>>,
+  lemma: string,
+  phrase: string[],
+  weight: number
+): void {
+  if (!isContentWord(lemma) || !isUsefulPhrase(phrase)) return;
+  const key = phraseKey(phrase);
+  const entries = phraseSynonyms.get(lemma) ?? new Map<string, PhraseSynonym>();
+  const existing = entries.get(key);
+  if (!existing || weight > existing.weight) {
+    entries.set(key, { phrase, weight });
+  }
+  phraseSynonyms.set(lemma, entries);
 }
 
 function isTechnicalLexicalNode(name: string): boolean {
@@ -974,6 +2093,386 @@ function roundRatio(value: number): number {
   return Math.round(value * 10000) / 10000;
 }
 
+function countEvidenceSources(
+  items: LexicalCandidateItem[]
+): Record<string, number> {
+  const counts = new Map<string, number>();
+  for (const item of items) {
+    for (const candidate of item.candidates) {
+      for (const evidence of candidate.evidence) {
+        counts.set(evidence.source, (counts.get(evidence.source) ?? 0) + 1);
+      }
+    }
+  }
+  return Object.fromEntries(
+    [...counts].sort((left, right) => left[0].localeCompare(right[0]))
+  );
+}
+
+function applyProperNameGroupAutoSafe(items: LexicalCandidateItem[]): void {
+  const groups = new Map<string, LexicalCandidateItem[]>();
+  for (const item of items) {
+    if (!item.candidates.some(isProperNameCandidate)) continue;
+    const key = `${item.ref}:${item.strong}`;
+    const group = groups.get(key) ?? [];
+    group.push(item);
+    groups.set(key, group);
+  }
+
+  for (const [groupId, group] of groups) {
+    const targetCandidates = new Map<number, LexicalCandidate>();
+    for (const item of group) {
+      for (const candidate of item.candidates.filter(
+        isOpenHighProperNameCandidate
+      )) {
+        const existing = targetCandidates.get(candidate.wordIndex);
+        if (!existing || candidate.score > existing.score) {
+          targetCandidates.set(candidate.wordIndex, candidate);
+        }
+      }
+    }
+
+    const targets = [...targetCandidates.values()].sort(
+      (left, right) => left.wordIndex - right.wordIndex
+    );
+    if (targets.length < 2) continue;
+    if (group.length < targets.length || group.length % targets.length !== 0) {
+      continue;
+    }
+
+    const capacityPerTarget = group.length / targets.length;
+    const slots = targets.flatMap((target) =>
+      Array.from({ length: capacityPerTarget }, () => target)
+    );
+    const orderedItems = [...group].sort(
+      (left, right) =>
+        lexicalItemSourceAnchor(left) - lexicalItemSourceAnchor(right) ||
+        lexicalItemCurrentAnchor(left) - lexicalItemCurrentAnchor(right) ||
+        left.auditKind.localeCompare(right.auditKind)
+    );
+
+    const assignments = orderedItems.map((item, index) => {
+      const slot = slots[index];
+      if (!slot) return undefined;
+      const candidate = item.candidates.find(
+        (candidate) =>
+          candidate.wordIndex === slot.wordIndex &&
+          isOpenHighProperNameCandidate(candidate)
+      );
+      return candidate;
+    });
+
+    if (assignments.some((candidate) => !candidate)) continue;
+
+    assignments.forEach((candidate, index) => {
+      const item = orderedItems[index];
+      if (!item || !candidate) return;
+      item.groupAutoSafe = {
+        groupId,
+        assignedWordIndex: candidate.wordIndex,
+        assignedText: candidate.text,
+        sourceRank: index + 1,
+        groupSize: orderedItems.length,
+        targetCount: targets.length,
+        capacityPerTarget,
+        reason: `proper-name group resolved by source order across ${targets.length} French carriers`
+      };
+    });
+  }
+}
+
+function applyLexicalDuplicateGroupAutoSafe(
+  items: LexicalCandidateItem[]
+): void {
+  const groups = new Map<string, LexicalCandidateItem[]>();
+  for (const item of items) {
+    if (item.groupAutoSafe || item.auditKind !== "empty") continue;
+    if (!item.candidates.some(isOpenHighLexicalDuplicateCandidate)) continue;
+    const key = `${item.ref}:${item.strong}`;
+    const group = groups.get(key) ?? [];
+    group.push(item);
+    groups.set(key, group);
+  }
+
+  for (const [groupId, group] of groups) {
+    if (group.length < 2) continue;
+    const candidatesByLexeme = new Map<string, Map<number, LexicalCandidate>>();
+
+    for (const item of group) {
+      for (const candidate of item.candidates.filter(
+        isOpenHighLexicalDuplicateCandidate
+      )) {
+        const lexemeKey = lexicalDuplicateCandidateKey(candidate);
+        const candidates =
+          candidatesByLexeme.get(lexemeKey) ??
+          new Map<number, LexicalCandidate>();
+        const existing = candidates.get(candidate.wordIndex);
+        if (!existing || candidate.score > existing.score) {
+          candidates.set(candidate.wordIndex, candidate);
+        }
+        candidatesByLexeme.set(lexemeKey, candidates);
+      }
+    }
+
+    for (const [lexemeKey, candidatesByWordIndex] of candidatesByLexeme) {
+      const targets = [...candidatesByWordIndex.values()].sort(
+        (left, right) => left.wordIndex - right.wordIndex
+      );
+      if (targets.length !== group.length) continue;
+
+      const orderedItems = [...group].sort(
+        (left, right) =>
+          lexicalItemSourceAnchor(left) - lexicalItemSourceAnchor(right) ||
+          lexicalItemCurrentAnchor(left) - lexicalItemCurrentAnchor(right) ||
+          left.auditKind.localeCompare(right.auditKind)
+      );
+
+      const assignments = orderedItems.map((item, index) => {
+        const slot = targets[index];
+        if (!slot || slot.wordIndex < lexicalItemSourceAnchor(item)) {
+          return undefined;
+        }
+        return item.candidates.find(
+          (candidate) =>
+            candidate.wordIndex === slot.wordIndex &&
+            lexicalDuplicateCandidateKey(candidate) === lexemeKey &&
+            isOpenHighLexicalDuplicateCandidate(candidate)
+        );
+      });
+
+      if (assignments.some((candidate) => !candidate)) continue;
+
+      assignments.forEach((candidate, index) => {
+        const item = orderedItems[index];
+        if (!item || !candidate) return;
+        item.groupAutoSafe = {
+          groupId,
+          assignedWordIndex: candidate.wordIndex,
+          assignedText: candidate.text,
+          sourceRank: index + 1,
+          groupSize: orderedItems.length,
+          targetCount: targets.length,
+          capacityPerTarget: 1,
+          reason: `duplicate lexical group resolved by source order across ${targets.length} matching French carriers`
+        };
+      });
+      return;
+    }
+  }
+}
+
+function isProperNameCandidate(candidate: LexicalCandidate): boolean {
+  return candidate.evidence.some(
+    (evidence) => evidence.source === "proper-name-step"
+  );
+}
+
+function isOpenHighProperNameCandidate(candidate: LexicalCandidate): boolean {
+  return (
+    candidate.confidence === "high" &&
+    !candidate.occupied &&
+    isProperNameCandidate(candidate)
+  );
+}
+
+function isOpenHighLexicalDuplicateCandidate(
+  candidate: LexicalCandidate
+): boolean {
+  return (
+    candidate.target === "word" &&
+    candidate.confidence === "high" &&
+    !candidate.occupied &&
+    !isProperNameCandidate(candidate) &&
+    !isStackSafeLexicalCandidateEvidence(candidate.evidence) &&
+    hasDirectLexicalEvidence(candidate) &&
+    new Set(candidate.evidence.map((evidence) => evidence.source)).size >= 2
+  );
+}
+
+function lexicalDuplicateCandidateKey(candidate: LexicalCandidate): string {
+  return candidate.lemma || candidate.normalized;
+}
+
+function lexicalItemSourceAnchor(item: LexicalCandidateItem): number {
+  return item.insertAfterWordIndex ?? item.currentTarget?.wordIndex ?? 0;
+}
+
+function lexicalItemCurrentAnchor(item: LexicalCandidateItem): number {
+  return item.currentTarget?.wordIndex ?? Number.MAX_SAFE_INTEGER;
+}
+
+function isAutoSafeItem(item: LexicalCandidateItem): boolean {
+  return (
+    Boolean(item.groupAutoSafe) ||
+    item.candidates.filter((candidate) => isAutoSafeCandidate(item, candidate))
+      .length === 1
+  );
+}
+
+export function lexicalAutoSafePlacements(
+  report: LexicalCandidateReport
+): LexicalAutoSafePlacement[] {
+  const placements: LexicalAutoSafePlacement[] = [];
+
+  for (const item of report.items) {
+    if (item.groupAutoSafe) {
+      const candidate = item.candidates.find(
+        (candidate) =>
+          candidate.wordIndex === item.groupAutoSafe?.assignedWordIndex
+      );
+      if (candidate) {
+        placements.push({ item, candidate, kind: "group-auto-safe" });
+      }
+      continue;
+    }
+
+    const candidates = item.candidates.filter((candidate) =>
+      isAutoSafeCandidate(item, candidate)
+    );
+    if (candidates.length === 1 && candidates[0]) {
+      placements.push({
+        item,
+        candidate: candidates[0],
+        kind: "auto-safe"
+      });
+    }
+  }
+
+  return placements;
+}
+
+export function isAutoSafeCandidate(
+  item: LexicalCandidateItem,
+  candidate: LexicalCandidate
+): boolean {
+  if (candidate.confidence !== "high") return false;
+  const stackSafe = isStackSafeLexicalCandidateEvidence(candidate.evidence);
+  if (candidate.occupied && !stackSafe) return false;
+  if (!hasDirectLexicalEvidence(candidate)) return false;
+  if (
+    !stackSafe &&
+    new Set(candidate.evidence.map((evidence) => evidence.source)).size < 2
+  ) {
+    return false;
+  }
+  if (item.auditKind === "relocation") {
+    if (isNumericCompoundRelocationCandidate(item, candidate)) return true;
+    if (isNumericCompoundBacktrackCandidate(item, candidate)) return false;
+    return candidate.score >= currentTargetScore(item) + 0.12;
+  }
+  if (isDominantPhraseAutoSafeCandidate(item, candidate)) return true;
+  const highSafeCount = item.candidates.filter(
+    (other) =>
+      other.confidence === "high" &&
+      (!other.occupied || isStackSafeLexicalCandidateEvidence(other.evidence))
+  ).length;
+  return highSafeCount === 1;
+}
+
+function isDominantPhraseAutoSafeCandidate(
+  item: LexicalCandidateItem,
+  candidate: LexicalCandidate
+): boolean {
+  if (item.auditKind !== "empty" || candidate.target !== "phrase") {
+    return false;
+  }
+  if (
+    candidate.startWordIndex === undefined ||
+    candidate.endWordIndex === undefined
+  ) {
+    return false;
+  }
+  if (
+    !candidate.evidence.some(
+      (evidence) => evidence.source === "french-auxiliary-phrase"
+    )
+  ) {
+    return false;
+  }
+
+  const highOpenCandidates = item.candidates.filter(
+    (other) =>
+      other.confidence === "high" &&
+      !other.occupied &&
+      other.wordIndex >= candidate.startWordIndex! &&
+      other.wordIndex <= candidate.endWordIndex!
+  );
+  const highOpenOutsidePhrase = item.candidates.filter(
+    (other) =>
+      other.confidence === "high" &&
+      !other.occupied &&
+      (other.wordIndex < candidate.startWordIndex! ||
+        other.wordIndex > candidate.endWordIndex!)
+  );
+
+  return highOpenCandidates.length >= 2 && highOpenOutsidePhrase.length === 0;
+}
+
+function currentTargetScore(item: LexicalCandidateItem): number {
+  if (!item.currentTarget) return 0;
+  return (
+    item.candidates.find(
+      (candidate) => candidate.wordIndex === item.currentTarget?.wordIndex
+    )?.score ?? 0
+  );
+}
+
+function isNumericCompoundRelocationCandidate(
+  item: LexicalCandidateItem,
+  candidate: LexicalCandidate
+): boolean {
+  if (item.auditKind !== "relocation" || !item.currentTarget) return false;
+  if (candidate.wordIndex === item.currentTarget.wordIndex) return false;
+  if (candidate.wordIndex < item.currentTarget.wordIndex) return false;
+  if (!candidate.occupied) return false;
+  if (item.currentTarget.otherStrong.length === 0) return false;
+  if (!isStackSafeLexicalCandidateEvidence(candidate.evidence)) return false;
+
+  const currentCandidate = item.candidates.find(
+    (current) => current.wordIndex === item.currentTarget?.wordIndex
+  );
+  if (
+    !currentCandidate ||
+    !isStackSafeLexicalCandidateEvidence(currentCandidate.evidence)
+  ) {
+    return false;
+  }
+
+  const currentValues = numericValuesForTarget(item.currentTarget.normalized);
+  const targetValues = numericValuesForTarget(candidate.normalized);
+  return targetValues.size > currentValues.size;
+}
+
+function isNumericCompoundBacktrackCandidate(
+  item: LexicalCandidateItem,
+  candidate: LexicalCandidate
+): boolean {
+  if (item.auditKind !== "relocation" || !item.currentTarget) return false;
+  if (candidate.wordIndex >= item.currentTarget.wordIndex) return false;
+  if (!isStackSafeLexicalCandidateEvidence(candidate.evidence)) return false;
+
+  const currentCandidate = item.candidates.find(
+    (current) => current.wordIndex === item.currentTarget?.wordIndex
+  );
+  if (
+    !currentCandidate ||
+    !isStackSafeLexicalCandidateEvidence(currentCandidate.evidence)
+  ) {
+    return false;
+  }
+
+  return (
+    numericValuesForTarget(item.currentTarget.normalized).size >
+    numericValuesForTarget(candidate.normalized).size
+  );
+}
+
+function bestOpenCandidate(
+  item: LexicalCandidateItem
+): LexicalCandidate | undefined {
+  return item.candidates.find((candidate) => !candidate.occupied);
+}
+
 function renderMarkdownReport(report: LexicalCandidateReport): string {
   const lines = [
     `# Lexical Candidate Report`,
@@ -985,10 +2484,32 @@ function renderMarkdownReport(report: LexicalCandidateReport): string {
     "## Metrics",
     "",
     `- Verses: ${report.metrics.verses}`,
+    `- Audit items: ${report.metrics.auditItems}`,
     `- Advanced empty annotations: ${report.metrics.emptyAnnotations}`,
+    `- Reader empty annotations: ${report.metrics.readerEmptyAnnotations}`,
+    `- STEP/advanced empty annotations: ${report.metrics.advancedEmptyAnnotations}`,
+    `- Relocation annotations: ${report.metrics.relocationAnnotations}`,
+    `- Items with candidates: ${report.metrics.itemsWithCandidates}`,
     `- Empty annotations with candidates: ${report.metrics.emptyWithCandidates}`,
+    `- Relocation annotations with candidates: ${report.metrics.relocationWithCandidates}`,
     `- Candidate count: ${report.metrics.candidateCount}`,
     `- High-confidence candidates: ${report.metrics.highConfidenceCandidates}`,
+    `- Medium-confidence candidates: ${report.metrics.mediumConfidenceCandidates}`,
+    `- Low-confidence candidates: ${report.metrics.lowConfidenceCandidates}`,
+    `- Open candidates: ${report.metrics.openCandidates}`,
+    `- Occupied candidates: ${report.metrics.occupiedCandidates}`,
+    `- Reviewable candidates: ${report.metrics.reviewableCandidates}`,
+    `- Auto-safe candidates: ${report.metrics.autoSafeCandidates}`,
+    `- Auto-safe items: ${report.metrics.autoSafeItems}`,
+    `- Group auto-safe items: ${report.metrics.groupAutoSafeItems}`,
+    `- High-confidence ambiguous items: ${report.metrics.ambiguousHighItems}`,
+    `- Items with open high candidate: ${report.metrics.openHighItems}`,
+    `- Relocation items with better open candidate: ${report.metrics.relocationBetterOpenItems}`,
+    `- Evidence sources: ${
+      Object.entries(report.metrics.evidenceSourceCounts)
+        .map(([source, count]) => `${source}=${count}`)
+        .join(", ") || "none"
+    }`,
     "",
     "## Sources",
     "",
@@ -1004,7 +2525,16 @@ function renderMarkdownReport(report: LexicalCandidateReport): string {
   ];
 
   for (const item of report.items.filter((row) => row.candidates.length > 0)) {
-    lines.push(`### ${item.ref} ${item.strong}`, "");
+    lines.push(`### ${item.ref} ${item.strong} (${item.auditKind})`, "");
+    if (item.currentTarget) {
+      lines.push(
+        `Current target: ${item.currentTarget.wordIndex}: \`${item.currentTarget.text}\`${
+          item.currentTarget.otherStrong.length > 0
+            ? ` with ${item.currentTarget.otherStrong.map((strong) => `\`${strong}\``).join(", ")}`
+            : ""
+        }`
+      );
+    }
     if (item.sourceStrong)
       lines.push(`Source Strong: \`${item.sourceStrong}\``);
     if (item.stepGlosses.length > 0) {
@@ -1028,6 +2558,11 @@ function renderMarkdownReport(report: LexicalCandidateReport): string {
           .join(", ")}`
       );
     }
+    if (item.groupAutoSafe) {
+      lines.push(
+        `Group auto-safe: ${item.groupAutoSafe.assignedWordIndex}: \`${item.groupAutoSafe.assignedText}\` (${item.groupAutoSafe.sourceRank}/${item.groupAutoSafe.groupSize}, capacity ${item.groupAutoSafe.capacityPerTarget})`
+      );
+    }
     lines.push(
       "",
       "| Word | Score | Confidence | Evidence |",
@@ -1035,7 +2570,7 @@ function renderMarkdownReport(report: LexicalCandidateReport): string {
     );
     for (const candidate of item.candidates) {
       lines.push(
-        `| ${candidate.wordIndex}: ${candidate.text} | ${candidate.score.toFixed(
+        `| ${candidateLabel(candidate)}: ${candidate.text} | ${candidate.score.toFixed(
           2
         )} | ${candidate.confidence}${candidate.occupied ? " / occupied" : ""} | ${candidate.evidence
           .map((evidence) => `${evidence.source}: ${evidence.detail}`)
@@ -1046,6 +2581,17 @@ function renderMarkdownReport(report: LexicalCandidateReport): string {
   }
 
   return `${lines.join("\n")}\n`;
+}
+
+function candidateLabel(candidate: LexicalCandidate): string {
+  if (
+    candidate.target === "phrase" &&
+    candidate.startWordIndex !== undefined &&
+    candidate.endWordIndex !== undefined
+  ) {
+    return `${candidate.startWordIndex}-${candidate.endWordIndex}`;
+  }
+  return String(candidate.wordIndex);
 }
 
 function parseCliOptions(argv: string[]): CliOptions {

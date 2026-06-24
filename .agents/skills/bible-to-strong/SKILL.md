@@ -22,13 +22,13 @@ Generated full Bible outputs under `outputs/` are ignored by Git and must not be
 ## Default Workflow
 
 1. Confirm the requested Bible id and input file.
-2. Generate the canonical Strong ledger. This is the no-LLM production path with reader and advanced views:
+2. Generate the canonical Strong ledger. This is the no-LLM production path with reader and advanced views. It also applies the validated deterministic lexical auto-safe layer, then writes the residual lexical candidate report for review:
 
 ```sh
 npm run strong:generate -- --bible <id>
 ```
 
-Use this output as the authoritative production artifact when the user asks for the best workflow. It preserves a complete Strong ledger while keeping reader-visible tags profile-aware.
+Use this output as the authoritative production artifact when the user asks for the best workflow. It preserves a complete Strong ledger while keeping reader-visible tags profile-aware. Auto-safe lexical placements are already inserted with `source="semantic-lexicon"`; they should not remain as residual auto-safe candidates.
 
 3. Export reader or advanced views from the canonical ledger when a TSV is needed:
 
@@ -184,12 +184,13 @@ npm run build
 
 ## Decision Rules
 
-- Prefer `strong:generate` for the production artifact because it keeps a canonical reader/advanced ledger and explains every Strong placement.
+- Prefer `strong:generate` for the production artifact because it keeps a canonical reader/advanced ledger, applies validated lexical auto-safe placements, writes the residual lexical candidate report, and explains every Strong placement.
 - Prefer `strong:export -- --view reader` or `strong:export -- --view advanced` for TSV views.
 - The diagnostic backend includes learned multi-word phrase transfer from the local Strong references. Keep this deterministic and original-confirmed.
 - Use STEP TAHOT/TAGNT as the production original inventory. Treat WLC/SBLGNT suffixed Strong values (`H6960a`, etc.) as audit provenance only, not lexicon lookup keys. Render and compare the canonical Strong (`H6960`), prefer STEP `dStrong`/`eStrong` for lexical disambiguation, and keep any non-STEP source suffix only as metadata.
 - Treat local French Strong dictionaries as deterministic evidence for review and future scoring, not as a license to place tags without original/reference inventory support.
-- Do not add hand-written synonym or semantic-equivalence entries to generation because a hard verse was discussed. Production placement may use exact learned reference evidence, dictionary evidence, algorithmic stemming, STEP inventory, external lexical resources as auditable evidence, or bounded LLM review; see `docs/french-lexical-sources-for-strong-placement.md`.
+- Do not add hand-written synonym or semantic-equivalence entries to generation because a hard verse was discussed. Production placement may use exact learned reference evidence, dictionary evidence, algorithmic stemming, STEP inventory, validated lexical auto-safe evidence from external French sources, or bounded LLM review; see `docs/french-lexical-sources-for-strong-placement.md`.
+- Treat synonym-only candidates as review material. Auto-safe production insertion requires direct evidence such as `seed-term`, `seed-stem`, `kaikki-gloss`, STEP proper-name evidence, STEP numeric component evidence, or a French auxiliary-plus-participle phrase whose participle has direct lexical evidence. Numeric component evidence may stack on occupied compound-number carriers, including relocation from a simple occupied number to a later richer compound number. Repeated empty occurrences of the same Strong may be group-auto-safe when the same open French lexeme appears the same number of times with high-confidence direct evidence and source order maps cleanly to text order.
 - Use calibrated translation profiles: one common backend, but profile-aware generation and diagnostics by translation family.
 - Interpret metrics through the Bible's translation profile. Dynamic translations such as BDS are expected to have lower token coverage than formal translations such as Martin.
 - Profiles are active generation inputs, not just labels: they control learned enrichment strictness, maximum Strong codes per word, empty-word consensus, and hard-verse thresholds.
