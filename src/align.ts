@@ -38,7 +38,6 @@ export interface AssignedStrong {
     | "dictionary-fr-exact"
     | "dictionary-fr-stem"
     | "learned-phrase"
-    | "reader-strong-rule"
     | "llm-arbiter"
     | "curated-llm-transfer";
   originalConfirmed: boolean;

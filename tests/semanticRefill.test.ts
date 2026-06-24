@@ -4,7 +4,8 @@ import assert from "node:assert/strict";
 import {
   buildSemanticRefill,
   validateSemanticRefillDecision,
-  type SemanticRefillDecision
+  type SemanticRefillDecision,
+  type SemanticRefillLexiconEntry
 } from "../src/semanticRefill.js";
 import {
   type StrongLedgerAnnotation,
@@ -15,7 +16,8 @@ test("semantic refill resolves required NBS Genesis phrase and word cases", () =
   const result = buildSemanticRefill({
     bible: "nbs",
     scope: "Gen",
-    verses: [genesisOneSix(), genesisOneTwenty()]
+    verses: [genesisOneSix(), genesisOneTwenty()],
+    lexicon: externalLexiconFixture()
   });
 
   assertDecision(result.decisions, {
@@ -76,7 +78,8 @@ test("semantic refill audits misplaced visible reader Strong codes", () => {
   const result = buildSemanticRefill({
     bible: "nbs",
     scope: "Gen.1.27",
-    verses: [genesisOneTwentySeven()]
+    verses: [genesisOneTwentySeven()],
+    lexicon: externalLexiconFixture()
   });
 
   const relocation = result.candidates.find(
@@ -92,6 +95,24 @@ test("semantic refill audits misplaced visible reader Strong codes", () => {
   assert.equal(relocation.candidates[0]?.target, "word");
   assert.equal(relocation.candidates[0]?.wordIndex, 3);
   assert.equal(relocation.candidates[0]?.normalizedWord, "humains");
+});
+
+test("semantic refill does not propose synonym relocation without lexical evidence", () => {
+  const result = buildSemanticRefill({
+    bible: "nbs",
+    scope: "Gen.1.27",
+    verses: [genesisOneTwentySeven()]
+  });
+
+  assert.equal(
+    result.candidates.some(
+      (candidate) =>
+        candidate.auditKind === "relocation" &&
+        candidate.ref === "Gen.1.27" &&
+        candidate.strong === "H0120"
+    ),
+    false
+  );
 });
 
 test("semantic refill validates Strong inventory and phrase indexes", () => {
@@ -162,6 +183,33 @@ function assertDecision(
     true,
     `Expected ${expected.ref} ${expected.strong.join("+")} on ${expected.normalized}`
   );
+}
+
+function externalLexiconFixture(): SemanticRefillLexiconEntry[] {
+  return [
+    lexiconEntry("H7549", [["voute"], ["voute", "celeste"]], 0.94),
+    lexiconEntry("H8064", [["voute", "celeste"]], 0.92),
+    lexiconEntry("H8317", [["grouillent"]], 0.9),
+    lexiconEntry("H8318", [["petites", "betes"]], 0.88),
+    lexiconEntry("H1961", [["il", "y", "ait"]], 0.86),
+    lexiconEntry("H0120", [["humains"]], 0.88)
+  ];
+}
+
+function lexiconEntry(
+  strong: string,
+  forms: string[][],
+  confidence: number
+): SemanticRefillLexiconEntry {
+  return {
+    strong,
+    forms,
+    priority: "semantic-high",
+    source: "test:external-lexicon",
+    evidence: ["fixture lexical evidence"],
+    confidence,
+    autoAccept: true
+  };
 }
 
 function genesisOneSix(): StrongLedgerVerse {

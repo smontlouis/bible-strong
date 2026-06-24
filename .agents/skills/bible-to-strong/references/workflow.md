@@ -186,9 +186,10 @@ also emits `auditKind="relocation"` items for visible reader tags that look
 misplaced. A relocation candidate carries `currentTarget` plus alternative
 `deterministicCandidates`; the proposer should return `duplicate` only when the
 existing target is correct. Otherwise it should return `word`, `phrase`, or
-`empty`. This is required for cases like NBS `Gen.1.27`, where `H0120` was
-already visible on `homme` but should move to `humains`, leaving `homme` for
-`H2145`.
+`empty`. For cases like NBS `Gen.1.27` (`H0120` on `homme` vs `humains`),
+do not introduce a hand-written semantic rule. Move the Strong only when
+auditable external lexical evidence or a bounded LLM review supports the
+target carrier.
 
 ## Choosing The Command
 

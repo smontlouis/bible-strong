@@ -28,7 +28,6 @@ import {
 } from "./tokenize.js";
 import {
   findTranslationCandidate,
-  type StrongTranslationCandidate,
   type StrongTranslationLexicon
 } from "./translationLexicon.js";
 import { type ReaderAlignmentPolicy } from "./translationProfiles.js";
@@ -419,12 +418,30 @@ function scoreSemanticWordForOccurrence(options: {
 function isRelocatableOriginalOccurrence(
   occurrence: OriginalStrongOccurrence
 ): boolean {
+  if (isRelocatablePos(occurrence.pos)) return true;
+  return isRelocatableMorphology(occurrence.morph);
+}
+
+function isRelocatablePos(pos: string): boolean {
+  const normalized = pos.toLowerCase();
   return (
-    occurrence.pos === "Name" ||
-    occurrence.pos === "noun" ||
-    occurrence.pos === "verb" ||
-    occurrence.pos === "adj" ||
-    occurrence.pos === "adv"
+    normalized === "name" ||
+    normalized === "noun" ||
+    normalized === "verb" ||
+    normalized === "adj" ||
+    normalized === "adv"
+  );
+}
+
+function isRelocatableMorphology(morphology: string): boolean {
+  const parts = morphology.toUpperCase().split(/[/=;+ ]+/u);
+  return parts.some(
+    (part) =>
+      /^H?[NVA]/u.test(part) ||
+      part.startsWith("ADV") ||
+      part.startsWith("N-") ||
+      part.startsWith("V-") ||
+      part.startsWith("A-")
   );
 }
 
@@ -534,9 +551,6 @@ function findReaderEnrichmentCandidate(options: {
     };
   }
 
-  const hasRuleCandidate = options.words.some((word) =>
-    findReaderStrongRule(options.occurrence.strong, word.normalized)
-  );
   const candidates = options.words
     .map((word) => {
       const existing = options.assignments.get(word.wordIndex);
@@ -552,22 +566,13 @@ function findReaderEnrichmentCandidate(options: {
         options.occurrence.strong,
         word.normalized
       );
-      const rule = findReaderStrongRule(
+      const match = isAllowedLearnedTranslation(
         options.occurrence.strong,
-        word.normalized
-      );
-      const match = hasRuleCandidate
-        ? rule
-        : chooseReaderMatch(
-            isAllowedLearnedTranslation(
-              options.occurrence.strong,
-              word.normalized,
-              options.readerPolicy
-            )
-              ? learned
-              : undefined,
-            rule
-          );
+        word.normalized,
+        options.readerPolicy
+      )
+        ? learned
+        : undefined;
 
       if (!match) {
         return undefined;
@@ -725,79 +730,6 @@ function scoreBudgetPlacement(options: {
   const confidenceScore = Math.min(1, options.assignment.confidence);
 
   return bestPosition * 0.54 + confidenceScore * 0.3 + unstackedBonus;
-}
-
-function chooseReaderMatch(
-  learned: StrongTranslationCandidate | undefined,
-  rule: ReaderRuleMatch | undefined
-):
-  | {
-      score: number;
-      method: AssignedStrong["method"];
-      source: string;
-    }
-  | undefined {
-  if (!learned) return rule;
-  if (!rule) {
-    return {
-      score: learned.score,
-      method: learned.method,
-      source: learned.source
-    };
-  }
-
-  if (rule.score > learned.score) {
-    return rule;
-  }
-
-  return {
-    score: learned.score,
-    method: learned.method,
-    source: learned.source
-  };
-}
-
-interface ReaderRuleMatch {
-  score: number;
-  method: "reader-strong-rule";
-  source: string;
-}
-
-function findReaderStrongRule(
-  strong: string,
-  normalized: string
-): ReaderRuleMatch | undefined {
-  const rules: Record<string, Set<string>> = {
-    H1961: new Set([
-      "ait",
-      "eut",
-      "est",
-      "etait",
-      "etaient",
-      "ete",
-      "fut",
-      "fussent",
-      "passa",
-      "sera",
-      "serait",
-      "seront",
-      "servir",
-      "serviront",
-      "soit"
-    ]),
-    H8414: new Set(["abime", "chaos", "desolation", "informe"]),
-    G1096: new Set(["arriva", "arriver", "devint", "devenir", "fut"])
-  };
-
-  if (!rules[strong]?.has(normalized)) {
-    return undefined;
-  }
-
-  return {
-    score: 0.82,
-    method: "reader-strong-rule",
-    source: `reader-rule:${strong}`
-  };
 }
 
 function isAllowedLearnedTranslation(

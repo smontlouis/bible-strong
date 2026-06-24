@@ -5,7 +5,7 @@ import path from "node:path";
 import { readBibleJson, type BibleVerse } from "./bibleJson.js";
 import { getOriginalStrongOccurrences } from "./completeAlignment.js";
 import { applyCuratedStrongOverrides } from "./curatedStrongOverrides.js";
-import { type StrongLexicon } from "./align.js";
+import { stemWord, type StrongLexicon } from "./align.js";
 import { buildStrongLexicon } from "./lexicon.js";
 import {
   readOriginalSourceTsv,
@@ -34,7 +34,6 @@ import { tokenizeText } from "./tokenize.js";
 import {
   buildStrongTranslationLexicon,
   findTranslationCandidate,
-  getEquivalentTranslationForms,
   type StrongTranslationLexicon
 } from "./translationLexicon.js";
 import {
@@ -359,7 +358,7 @@ export async function buildSemanticMissingOutput(
     generatedAt: new Date().toISOString(),
     scope: scopeLabel(options),
     source:
-      "semantic-v3 inventory-first missing Strong audit using original WLC/SBLGNT inventory, local Strong references, current diagnostic alignment, curated overrides, and controlled French semantic equivalences.",
+      "semantic-v3 inventory-first missing Strong audit using original WLC/SBLGNT inventory, local Strong references, current diagnostic alignment, and curated overrides.",
     summary: {
       verseCount: context.verses.length,
       missingItemCount: items.length,
@@ -832,7 +831,7 @@ function proposeDeterministicDecision(options: {
         word,
         score,
         source: `${translation.source}:semantic-v3`,
-        reason: `${word.normalized} matches learned/controlled semantic forms for ${options.occurrence.strong} (${options.occurrence.gloss || options.occurrence.lemma}).`
+        reason: `${word.normalized} matches learned or dictionary lexical evidence for ${options.occurrence.strong} (${options.occurrence.gloss || options.occurrence.lemma}).`
       };
     })
     .filter((candidate): candidate is NonNullable<typeof candidate> =>
@@ -877,13 +876,17 @@ function isSupportedBySameVerseReference(options: {
   normalized: string;
   referenceEvidence: ReferenceEvidence[];
 }): boolean {
-  const allowedForms = new Set(
-    getEquivalentTranslationForms(options.strong, options.normalized)
-  );
+  const normalizedStem = stemWord(options.normalized);
 
   for (const reference of options.referenceEvidence) {
     for (const token of reference.taggedTokens) {
-      if (allowedForms.has(token.normalized)) {
+      if (token.normalized === options.normalized) {
+        return true;
+      }
+      if (
+        normalizedStem.length >= 4 &&
+        stemWord(token.normalized) === normalizedStem
+      ) {
         return true;
       }
     }

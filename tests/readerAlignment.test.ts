@@ -136,9 +136,9 @@ test("can block learned function-word enrichment for semantic profiles", () => {
   assert.equal(result.assignments.size, 0);
 });
 
-test("enriches reader tags from original and learned translation variants", () => {
+test("enriches reader tags from original and learned exact translations", () => {
   const result = alignReaderVerse({
-    targetText: "Dieu créa le ciel.",
+    targetText: "Dieu créa les cieux.",
     references: [
       reference(
         "Sg1910",
@@ -182,7 +182,7 @@ test("enriches reader tags from original and learned translation variants", () =
     }
   });
 
-  assert.match(renderReaderTaggedText(result), /ciel<\/w>/);
+  assert.match(renderReaderTaggedText(result), /cieux<\/w>/);
   assert.match(renderReaderTaggedText(result), /strong="H8064"/);
   assert.equal(result.emptyStrongOccurrenceCount, 0);
 });
@@ -200,7 +200,7 @@ test("does not window-match with too-short stems", () => {
   assert.equal(result.assignments.size, 0);
 });
 
-test("uses controlled semantic equivalents only for the matching Strong", () => {
+test("does not use hand-coded semantic equivalents", () => {
   const result = alignReaderVerse({
     targetText: "Les humains arrivèrent.",
     references: [],
@@ -255,11 +255,10 @@ test("uses controlled semantic equivalents only for the matching Strong", () => 
     }
   });
 
-  assert.deepEqual(result.assignments.get(1)?.strong, ["H0120"]);
-  assert.equal(result.assignments.get(1)?.strong.includes("H0376"), false);
+  assert.equal(result.assignments.has(1), false);
 });
 
-test("relocates a semantic Strong to a better target without moving unrelated Strong", () => {
+test("does not relocate to a synonym without direct lexical evidence", () => {
   const result = alignReaderVerse({
     targetText:
       "Voici la généalogie de Noé parmi les générations de son temps.",
@@ -321,12 +320,13 @@ test("relocates a semantic Strong to a better target without moving unrelated St
   });
 
   const rendered = renderReaderTaggedText(result);
-  assert.match(rendered, /strong="H8435"[^>]*>généalogie<\/w>/);
+  assert.doesNotMatch(rendered, /strong="H8435"[^>]*>généalogie<\/w>/);
+  assert.match(rendered, /strong="H8435"[^>]*>générations<\/w>/);
   assert.match(rendered, /strong="H1755"[^>]*>temps<\/w>/);
   assert.doesNotMatch(rendered, /strong="H8435 H1755"[^>]*>généalogie<\/w>/);
 });
 
-test("uses original order to split human and male Strong codes across open targets", () => {
+test("uses original order to split human and male Strong codes when lexical evidence exists", () => {
   const result = alignReaderVerse({
     targetText:
       "Dieu créa les humains à son image ; homme et femme il les créa.",
@@ -341,6 +341,7 @@ test("uses original order to split human and male Strong codes across open targe
       )
     ],
     translationLexicon: semanticLexicon([
+      ["H0120", "humains"],
       ["H0120", "homme"],
       ["H2145", "homme"],
       ["H5347", "femme"]
@@ -355,9 +356,9 @@ test("uses original order to split human and male Strong codes across open targe
       verse: 27,
       strongSet: new Set(["H0120", "H2145", "H5347"]),
       tokens: [
-        originalToken("o1", ["H0120"], "noun"),
-        originalToken("o2", ["H2145"], "noun"),
-        originalToken("o3", ["H5347"], "noun")
+        originalToken("o1", ["H0120"], "L", "HTd/Ncmsa"),
+        originalToken("o2", ["H2145"], "L", "HAamsa"),
+        originalToken("o3", ["H5347"], "L", "HNcfsa")
       ]
     }
   });
@@ -409,7 +410,7 @@ test("prunes duplicate reader placements beyond the verse Strong budget", () => 
   assert.deepEqual(result.assignments.get(7)?.strong, ["H6212"]);
 });
 
-test("covers the NBS Genesis 6 semantic regression carriers", () => {
+test("does not cover NBS Genesis 6 semantic carriers without lexical evidence", () => {
   const repentance = alignReaderVerse({
     targetText: "Le Seigneur regretta les humains.",
     references: [],
@@ -436,9 +437,9 @@ test("covers the NBS Genesis 6 semantic regression carriers", () => {
   });
 
   const repentanceRendered = renderReaderTaggedText(repentance);
-  assert.match(repentanceRendered, /strong="H3068"[^>]*>Seigneur<\/w>/);
-  assert.match(repentanceRendered, /strong="H5162"[^>]*>regretta<\/w>/);
-  assert.match(repentanceRendered, /strong="H0120"[^>]*>humains<\/w>/);
+  assert.doesNotMatch(repentanceRendered, /strong="H3068"/);
+  assert.doesNotMatch(repentanceRendered, /strong="H5162"/);
+  assert.doesNotMatch(repentanceRendered, /strong="H0120"/);
 
   const corruption = alignReaderVerse({
     targetText: "Les Nephilim étaient pervertis ; je vais les anéantir.",
@@ -465,12 +466,11 @@ test("covers the NBS Genesis 6 semantic regression carriers", () => {
   });
 
   const corruptionRendered = renderReaderTaggedText(corruption);
-  assert.match(corruptionRendered, /strong="H5303"[^>]*>Nephilim<\/w>/);
-  assert.match(corruptionRendered, /strong="H7843"[^>]*>pervertis<\/w>/);
-  assert.match(corruptionRendered, /strong="H7843"[^>]*>anéantir<\/w>/);
+  assert.doesNotMatch(corruptionRendered, /strong="H5303"/);
+  assert.doesNotMatch(corruptionRendered, /strong="H7843"/);
 });
 
-test("enriches reader tags with curated original Strong rules", () => {
+test("does not enrich reader tags from hand-coded original Strong rules", () => {
   const result = alignReaderVerse({
     targetText: "Qu’il y ait de la lumière, et il y eut de la lumière.",
     references: [],
@@ -493,8 +493,8 @@ test("enriches reader tags with curated original Strong rules", () => {
   });
 
   const rendered = renderReaderTaggedText(result);
-  assert.match(rendered, />ait<\/w>/);
-  assert.match(rendered, />eut<\/w>/);
+  assert.doesNotMatch(rendered, /strong="H1961"/);
+  assert.equal(result.assignments.size, 0);
   assert.equal(result.emptyStrongOccurrenceCount, 0);
 });
 
@@ -725,29 +725,26 @@ function reference(name: string, text: string) {
 }
 
 function semanticLexicon(entries: Array<[string, string]>) {
+  const exact = new Map();
+  for (const [strong, normalized] of entries) {
+    const forms = exact.get(strong) ?? new Map();
+    forms.set(normalized, {
+      strong,
+      normalized,
+      score: 1,
+      source: "test",
+      method: "learned-translation"
+    });
+    exact.set(strong, forms);
+  }
+
   return {
-    exact: new Map(
-      entries.map(([strong, normalized]) => [
-        strong,
-        new Map([
-          [
-            normalized,
-            {
-              strong,
-              normalized,
-              score: 1,
-              source: "test",
-              method: "learned-translation"
-            }
-          ]
-        ])
-      ])
-    ),
+    exact,
     stem: new Map()
   };
 }
 
-function originalToken(id: string, strong: string[], pos = "") {
+function originalToken(id: string, strong: string[], pos = "", morph = "") {
   return {
     id,
     text: "",
@@ -755,6 +752,6 @@ function originalToken(id: string, strong: string[], pos = "") {
     gloss: "",
     lemma: "",
     pos,
-    morph: ""
+    morph
   };
 }
