@@ -2,9 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  mergeStrongLedgerVerseScopes,
   renderStrongTaggedText,
   validateStrongLedgerAnnotation,
-  type StrongLedgerAnnotation
+  type StrongLedgerAnnotation,
+  type StrongLedgerVerse
 } from "../src/strongLedger.js";
 import { tokenizeText } from "../src/tokenize.js";
 
@@ -107,6 +109,30 @@ test("rejects annotations whose Strong is absent from the verse inventory", () =
   );
 });
 
+test("merges refreshed scoped verses without duplicating stale verses", () => {
+  const merged = mergeStrongLedgerVerseScopes(
+    [
+      verse({ ref: "Gen.1.1", bookId: "Gen", text: "old gen" }),
+      verse({ ref: "Joel.1.1", bookId: "Joel", text: "old joel" }),
+      verse({ ref: "Matt.1.1", bookId: "Matt", text: "old matt" })
+    ],
+    [
+      verse({ ref: "Joel.1.1", bookId: "Joel", text: "new joel" }),
+      verse({ ref: "Joel.1.2", bookId: "Joel", verse: 2, text: "new joel 2" })
+    ]
+  );
+
+  assert.deepEqual(
+    merged.map((item) => `${item.ref}:${item.text}`),
+    [
+      "Gen.1.1:old gen",
+      "Joel.1.1:new joel",
+      "Joel.1.2:new joel 2",
+      "Matt.1.1:old matt"
+    ]
+  );
+});
+
 function annotation(
   partial: Partial<StrongLedgerAnnotation> &
     Pick<StrongLedgerAnnotation, "strong" | "visibility" | "placement">
@@ -117,6 +143,35 @@ function annotation(
     confidence: 0.9,
     reason: "test",
     diagnostics: [],
+    ...partial
+  };
+}
+
+function verse(
+  partial: Pick<StrongLedgerVerse, "ref" | "bookId" | "text"> &
+    Partial<StrongLedgerVerse>
+): StrongLedgerVerse {
+  return {
+    chapter: 1,
+    verse: 1,
+    tokens: [],
+    annotations: [],
+    views: {
+      readerHtml: "",
+      advancedHtml: "",
+      debugHtml: ""
+    },
+    inventories: {
+      references: {
+        Sg1910: [],
+        Darby: [],
+        DarbyR: []
+      },
+      original: [],
+      reader: [],
+      advanced: []
+    },
+    metrics: {} as StrongLedgerVerse["metrics"],
     ...partial
   };
 }

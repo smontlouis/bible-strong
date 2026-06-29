@@ -14,7 +14,8 @@
           <div>
             <h1>Strong File Viewer</h1>
             <p>
-              Charge un TSV généré ou un CSV Strong pour inspecter les tags.
+              Inspecte les placements Strong, leur source et les Strong non
+              placés.
             </p>
           </div>
         </div>
@@ -102,15 +103,45 @@
         </header>
 
         <div class="legend" aria-label="Légende des couleurs Strong">
-          <span><i class="legend-chip"></i> témoin direct</span>
-          <span><i class="legend-reference-learned"></i> témoin appris</span>
-          <span><i class="legend-dictionary"></i> dictionnaire FR</span>
-          <span><i class="legend-reference-original"></i> témoin via original</span>
-          <span><i class="legend-step-only"></i> STEP only</span>
-          <span><i class="legend-curated"></i> correction validée</span>
-          <span><i class="legend-empty"></i> Strong vide</span>
-          <span><i class="legend-technical"></i> technique</span>
-          <span><sup>430</sup> numéro Strong</span>
+          <span
+            title="Strong repris directement depuis une Bible témoin locale : Sg1910, Darby ou DarbyR."
+            ><i class="legend-chip"></i> Témoin direct</span
+          >
+          <span
+            title="Strong placé par une correspondance déterministe apprise depuis les Bibles témoins locales."
+            ><i class="legend-reference-learned"></i> Témoin appris</span
+          >
+          <span
+            title="Strong placé sur une expression française multi-mots apprise depuis les Bibles témoins."
+            ><i class="legend-phrase"></i> Expression témoin</span
+          >
+          <span
+            title="Strong placé automatiquement grâce à des sources lexicales françaises déterministes : dictionnaire Strong FR, lemmatisation, synonymes externes, Kaikki, WOLF, OpenOffice ou RezoJDM selon disponibilité."
+            ><i class="legend-dictionary"></i> Lexique FR validé</span
+          >
+          <span
+            title="Strong attendu par les témoins et confirmé par l'inventaire original TAHOT/TAGNT."
+            ><i class="legend-reference-original"></i> Témoin via original</span
+          >
+          <span
+            title="Strong venant de l'inventaire original STEP Bible : TAHOT pour l'hébreu/araméen, TAGNT pour le grec. Ce n'est pas Macula."
+            ><i class="legend-step-only"></i> Original TAHOT/TAGNT</span
+          >
+          <span
+            title="Placement issu d'une décision validée manuellement ou via workflow de revue."
+            ><i class="legend-curated"></i> Correction revue</span
+          >
+          <span
+            title="Strong valide attendu, mais aucun mot ou expression française fiable n'a été trouvé."
+            ><i class="legend-empty"></i> Strong vide</span
+          >
+          <span
+            title="Strong grammatical ou structurel, souvent sans équivalent français direct : particule, article, préposition, marqueur d'objet, etc."
+            ><i class="legend-technical"></i> Technique</span
+          >
+          <span title="Nombre Strong canonique affiché en exposant."
+            ><sup>430</sup> numéro Strong</span
+          >
         </div>
 
         <article id="chapterView" class="chapter-view empty-state">

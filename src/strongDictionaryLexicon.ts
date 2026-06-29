@@ -10,6 +10,7 @@ interface DictionaryRow {
   eStrong: string;
   dStrong: string;
   uStrong: string;
+  morph: string;
   gloss: string;
   meaning: string;
 }
@@ -111,6 +112,7 @@ function readDictionaryRows(dbPath: string): DictionaryRow[] {
       se.eStrong as eStrong,
       se.dStrong as dStrong,
       se.uStrong as uStrong,
+      se.morph as morph,
       lt.gloss as gloss,
       substr(lt.meaning, 1, ${MAX_MEANING_CHARS}) as meaning
     from StepEntries se
@@ -127,9 +129,12 @@ function readDictionaryRows(dbPath: string): DictionaryRow[] {
 
 function candidateStrongCodes(row: DictionaryRow): string[] {
   const codes = new Set<string>();
-  for (const raw of [row.eStrong, row.uStrong]) {
-    const strong = normalizeClassicalStrong(raw);
-    if (strong) codes.add(strong);
+  const eStrong = normalizeClassicalStrong(row.eStrong);
+  if (eStrong) codes.add(eStrong);
+
+  const uStrong = normalizeClassicalStrong(row.uStrong);
+  if (uStrong && (uStrong === eStrong || isPronounRow(row))) {
+    codes.add(uStrong);
   }
   return [...codes];
 }
@@ -171,6 +176,8 @@ function addMeaningForms(
   strong: string,
   row: DictionaryRow
 ): void {
+  if (isProperNameRow(row)) return;
+
   const counts = new Map<string, number>();
   for (const word of normalizedWords(row.meaning).filter(isContentWord)) {
     if (word.length < 5) continue;
@@ -186,6 +193,14 @@ function addMeaningForms(
       method: "dictionary-fr-exact"
     });
   }
+}
+
+function isProperNameRow(row: DictionaryRow): boolean {
+  return /(?:^|[-:])PG?(?:$|[-:])/u.test(row.morph);
+}
+
+function isPronounRow(row: DictionaryRow): boolean {
+  return /(?:^|[-:])P(?:$|[-:])/u.test(row.morph);
 }
 
 function normalizedWords(text: string): string[] {

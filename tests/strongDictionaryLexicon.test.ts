@@ -33,6 +33,48 @@ test("reads conservative French dictionary candidates from the production schema
     candidates.some((candidate) => candidate.normalized === "le"),
     false
   );
+  assert.ok(
+    candidates.some(
+      (candidate) =>
+        candidate.strong === "H3226" &&
+        candidate.normalized === "jamin" &&
+        candidate.source === "strong-lexicon-sqlite:fr-gloss"
+    )
+  );
+  assert.equal(
+    candidates.some(
+      (candidate) =>
+        candidate.strong === "H3226" && candidate.normalized === "simeon"
+    ),
+    false
+  );
+  assert.ok(
+    candidates.some(
+      (candidate) =>
+        candidate.strong === "G2424" &&
+        candidate.normalized === "jesus" &&
+        candidate.source === "strong-lexicon-sqlite:fr-gloss"
+    )
+  );
+  assert.equal(
+    candidates.some(
+      (candidate) =>
+        candidate.strong === "G2424" && candidate.normalized === "disciples"
+    ),
+    false
+  );
+  assert.ok(
+    candidates.some(
+      (candidate) =>
+        candidate.strong === "G5546" && candidate.normalized === "chretien"
+    )
+  );
+  assert.ok(
+    candidates.some(
+      (candidate) =>
+        candidate.strong === "G4771" && candidate.normalized === "toi-meme"
+    )
+  );
 });
 
 async function writeTempLexiconDb(): Promise<string> {
@@ -67,12 +109,22 @@ async function writeTempLexiconDb(): Promise<string> {
         (id, language, baseCode, eStrong, dStrong, uStrong, original, transliteration, morph, gloss, meaning)
       values
         (1, 'Hebrew', 120, 'H0120', 'H0120 =', 'H0120', 'אָדָם', 'adam', 'N', 'human', 'human'),
-        (2, 'Greek', 14, 'G0014', 'G0014 =', 'G0014', 'ἀγαθοεργέω', 'agathoergeo', 'V', 'do good', 'do good');
+        (2, 'Greek', 14, 'G0014', 'G0014 =', 'G0014', 'ἀγαθοεργέω', 'agathoergeo', 'V', 'do good', 'do good'),
+        (3, 'Hebrew', 3226, 'H3226', 'H3226G =', 'H3226G', 'יָמִין', 'jamin', 'N:N-M-P', 'Jamin', 'Jamin = fils de Siméon, fondateur des Jaminites'),
+        (4, 'Hebrew', 3228, 'H3228', 'H3228H = a group of', 'H3226G', 'ימיני', 'jaminite', 'N:N--PG', 'Jaminite', 'Descendant de Jamin, homme de la tribu de Siméon'),
+        (5, 'Greek', 2424, 'G2424', 'G2424G =', 'G2424G', 'Ἰησοῦς', 'Iesous', 'N:N-M-P', 'Jesus', 'Jesus'),
+        (6, 'Greek', 5546, 'G5546', 'G5546 = a Group member of', 'G2424G', 'Χριστιανός', 'christianos', 'N:N--T', 'Christian', 'A group member related to Jesus'),
+        (7, 'Greek', 4572, 'G4572', 'G4572 = the reflexive of', 'G4771', 'σεαυτοῦ', 'seautou', 'G:P', 'yourself', 'yourself');
       insert into LexiconTranslations
         (stepEntryId, language, gloss, meaning, meaningHtml)
       values
         (1, 'fr', 'humain', 'être humain, personne', ''),
-        (2, 'fr', 'faire le bien', 'faire du bien à quelqu’un', '');
+        (2, 'fr', 'faire le bien', 'faire du bien à quelqu’un', ''),
+        (3, 'fr', 'Jamin', 'Jamin = « main droite ». Fils de Siméon, fondateur des Jaminites.', ''),
+        (4, 'fr', 'Jaminite', 'Descendant de Jamin, homme de la tribu de Siméon', ''),
+        (5, 'fr', 'Jésus', 'Jésus', ''),
+        (6, 'fr', 'Chrétien', 'Chrétien, nom donné aux disciples par les païens.', ''),
+        (7, 'fr', 'toi-même', 'toi-même', '');
     `
   ]);
   return dbPath;

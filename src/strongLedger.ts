@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { type AssignedStrong, type ReferenceSource } from "./align.js";
@@ -255,6 +255,10 @@ interface StrongLedgerOptions {
   onlyRef?: string;
 }
 
+interface StrongLedgerRefreshOptions extends StrongLedgerOptions {
+  onlyRef: string;
+}
+
 interface ReferenceMap {
   name: ReferenceName;
   path: string;
@@ -299,6 +303,8 @@ const FRENCH_LEXICAL_SOURCES = {
     "data/external/french-lexical/openoffice/synonymes/handler/dictionary.go",
   wolf: "data/external/french-lexical/wolf/wolf-1.0b4.xml.bz2"
 };
+
+const MAX_LEXICAL_AUTOSAFE_PASSES = 8;
 
 const TECHNICAL_STRONG = new Set([
   "H0853",
@@ -404,7 +410,7 @@ export async function generateStrongLedger(
     ...availableFrenchLexicalSources()
   };
   let lexicalAutoSafeCount = 0;
-  for (let pass = 0; pass < 4; pass += 1) {
+  for (let pass = 0; pass < MAX_LEXICAL_AUTOSAFE_PASSES; pass += 1) {
     const lexicalReport = await buildLexicalCandidateReport({
       ...lexicalReportOptions,
       ledger: { verses: ledgerVerses }
@@ -468,6 +474,76 @@ export async function exportStrongLedger(options: {
     options.mode === "reader" ? paths.readerTsv : paths.advancedTsv;
   await writeTsv(outputPath, canonical.verses, options.mode);
   return outputPath;
+}
+
+export async function refreshStrongLedger(
+  options: StrongLedgerRefreshOptions
+): Promise<StrongLedger> {
+  const scopes = parseRefreshScopes(options.onlyRef);
+  if (scopes.length === 0) {
+    throw new Error("Refresh requires --only with at least one scope.");
+  }
+
+  const paths = outputPaths(options);
+  const existing = await readStrongLedger(paths.canonical);
+  const refreshRoot = path.join(options.outputDir, ".refresh");
+  const refreshedVerses: StrongLedgerVerse[] = [];
+
+  try {
+    for (const scope of scopes) {
+      const scopedOutputDir = path.join(
+        refreshRoot,
+        sanitizeScopeForPath(scope)
+      );
+      const scopedLedger = await generateStrongLedger({
+        ...options,
+        onlyRef: scope,
+        outputDir: scopedOutputDir
+      });
+      refreshedVerses.push(...scopedLedger.verses);
+    }
+  } finally {
+    await rm(refreshRoot, { recursive: true, force: true });
+  }
+
+  const verses = mergeStrongLedgerVerseScopes(existing.verses, refreshedVerses);
+  const ledgerByBook = buildLedgerByBook(verses);
+  const metrics = aggregateMetrics(options.bible, undefined, verses);
+  const refreshed: StrongLedger = {
+    ...existing,
+    generatedAt: metrics.generatedAt,
+    scope: "all",
+    method: `${existing.method} Refreshed scoped output for ${scopes.join(
+      ", "
+    )} without a full-Bible regeneration.`,
+    outputPaths: paths,
+    metrics,
+    verses
+  };
+
+  await writeStrongLedgerOutputs(refreshed, ledgerByBook, paths);
+  return refreshed;
+}
+
+export function mergeStrongLedgerVerseScopes(
+  existingVerses: StrongLedgerVerse[],
+  refreshedVerses: StrongLedgerVerse[]
+): StrongLedgerVerse[] {
+  const refreshedByRef = new Map(
+    refreshedVerses.map((verse) => [verse.ref, verse])
+  );
+  const merged = existingVerses.map(
+    (verse) => refreshedByRef.get(verse.ref) ?? verse
+  );
+  const existingRefs = new Set(existingVerses.map((verse) => verse.ref));
+
+  for (const verse of refreshedVerses) {
+    if (!existingRefs.has(verse.ref)) {
+      merged.push(verse);
+    }
+  }
+
+  return merged.sort(compareStrongLedgerVerseRef);
 }
 
 export function validateStrongLedgerAnnotation(options: {
@@ -1089,6 +1165,25 @@ function rebuildLedgerByBook(
     bookVerses.push(verse);
     ledgerByBook.set(verse.bookId, bookVerses);
   }
+}
+
+function buildLedgerByBook(
+  verses: StrongLedgerVerse[]
+): Map<string, StrongLedgerVerse[]> {
+  const ledgerByBook = new Map<string, StrongLedgerVerse[]>();
+  rebuildLedgerByBook(ledgerByBook, verses);
+  return ledgerByBook;
+}
+
+function parseRefreshScopes(onlyRef: string): string[] {
+  return onlyRef
+    .split(",")
+    .map((scope) => scope.trim())
+    .filter((scope) => scope.length > 0);
+}
+
+function sanitizeScopeForPath(scope: string): string {
+  return scope.replace(/[^A-Za-z0-9_.-]+/gu, "_");
 }
 
 function lexicalCandidateOutputDir(bible: string): string {
@@ -2012,25 +2107,35 @@ function filterVerses(
     return verses;
   }
 
-  if (options.onlyRef.includes("-")) {
-    const range = parseScopeRange(options.onlyRef);
+  const scopes = parseRefreshScopes(options.onlyRef);
+  if (scopes.length > 1) {
+    return verses.filter((candidate) =>
+      scopes.some((scope) => verseMatchesScope(candidate, scope))
+    );
+  }
+
+  return verses.filter((candidate) =>
+    verseMatchesScope(candidate, options.onlyRef ?? "")
+  );
+}
+
+function verseMatchesScope(candidate: BibleVerse, scope: string): boolean {
+  if (scope.includes("-")) {
+    const range = parseScopeRange(scope);
     if (range) {
-      return verses.filter(
-        (candidate) =>
-          compareVerseRef(candidate, range.start) >= 0 &&
-          compareVerseRef(candidate, range.end) <= 0
+      return (
+        compareVerseRef(candidate, range.start) >= 0 &&
+        compareVerseRef(candidate, range.end) <= 0
       );
     }
   }
 
-  const [book, chapter, verse] = options.onlyRef.split(".");
-  return verses.filter((candidate) => {
-    if (book && candidate.bookId !== book) return false;
-    if (chapter && candidate.chapter !== Number.parseInt(chapter, 10))
-      return false;
-    if (verse && candidate.verse !== Number.parseInt(verse, 10)) return false;
-    return true;
-  });
+  const [book, chapter, verse] = scope.split(".");
+  if (book && candidate.bookId !== book) return false;
+  if (chapter && candidate.chapter !== Number.parseInt(chapter, 10))
+    return false;
+  if (verse && candidate.verse !== Number.parseInt(verse, 10)) return false;
+  return true;
 }
 
 function parseScopeRange(scope: string):
@@ -2089,6 +2194,17 @@ function compareVerseRef(
   );
 }
 
+function compareStrongLedgerVerseRef(
+  left: StrongLedgerVerse,
+  right: StrongLedgerVerse
+): number {
+  return (
+    bookOrderIndex(left.bookId) - bookOrderIndex(right.bookId) ||
+    left.chapter - right.chapter ||
+    left.verse - right.verse
+  );
+}
+
 function bookOrderIndex(bookId: string): number {
   const index = BOOK_IDS.indexOf(bookId as (typeof BOOK_IDS)[number]);
   return index === -1 ? Number.MAX_SAFE_INTEGER : index;
@@ -2104,14 +2220,15 @@ function roundRatio(value: number): number {
 }
 
 function parseArgs(argv: string[]): {
-  command: "generate" | "export";
+  command: "generate" | "export" | "refresh";
   bible: string;
   onlyRef?: string;
   outputDir: string;
   mode: "reader" | "advanced";
 } {
   const args = new Map<string, string>();
-  const command = argv[2] === "export" ? "export" : "generate";
+  const command =
+    argv[2] === "export" || argv[2] === "refresh" ? argv[2] : "generate";
 
   for (let index = 3; index < argv.length; index += 1) {
     const arg = argv[index];
@@ -2153,6 +2270,27 @@ async function main(): Promise<void> {
   }
 
   const biblePath = path.join("data", "bibles", `bible-${args.bible}.json`);
+
+  if (args.command === "refresh") {
+    if (!args.onlyRef) {
+      throw new Error("Refresh requires --only <Book|Book.Chapter|range>.");
+    }
+    const result = await refreshStrongLedger({
+      bible: args.bible,
+      biblePath,
+      outputDir: args.outputDir,
+      onlyRef: args.onlyRef
+    });
+    console.log(
+      `Refreshed canonical Strong ledger: ${result.outputPaths.canonical}`
+    );
+    console.log(`Scopes: ${args.onlyRef}`);
+    console.log(
+      `Reader coverage ${result.metrics.readerTokenCoverage}; advanced coverage ${result.metrics.advancedTokenCoverage}; original representation ${result.metrics.originalRepresentationRate}`
+    );
+    return;
+  }
+
   const result = await generateStrongLedger({
     bible: args.bible,
     biblePath,

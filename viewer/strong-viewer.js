@@ -70,6 +70,134 @@ const bookNames = {
 };
 
 const bookOrder = Object.keys(bookNames);
+const sourceInfo = {
+  "reference-transfer": {
+    label: "Témoin direct",
+    tooltip:
+      "Strong repris directement depuis une Bible témoin locale : Sg1910, Darby ou DarbyR."
+  },
+  "reference-learned": {
+    label: "Témoin appris",
+    tooltip:
+      "Strong placé par une correspondance déterministe apprise depuis les Bibles témoins locales."
+  },
+  "reference-backed-original": {
+    label: "Témoin via original",
+    tooltip:
+      "Strong attendu par les témoins et confirmé par l'inventaire original TAHOT/TAGNT."
+  },
+  "dictionary-fr": {
+    label: "Dictionnaire FR",
+    tooltip:
+      "Strong proposé par le dictionnaire Strong français local ou le lexique français de production."
+  },
+  "phrase-transfer": {
+    label: "Expression témoin",
+    tooltip:
+      "Strong placé sur une expression française multi-mots apprise depuis les Bibles témoins."
+  },
+  "semantic-lexicon": {
+    label: "Lexique FR validé",
+    tooltip:
+      "Placement auto-safe validé par des sources lexicales françaises déterministes : dictionnaire, lemmatisation, synonymes externes, Kaikki, WOLF, OpenOffice ou RezoJDM selon disponibilité."
+  },
+  "original-complete": {
+    label: "Original TAHOT/TAGNT",
+    tooltip:
+      "Strong venant de l'inventaire original STEP Bible : TAHOT pour l'hébreu/araméen, TAGNT pour le grec. Ce n'est pas Macula."
+  },
+  "curated-override": {
+    label: "Correction revue",
+    tooltip:
+      "Placement issu d'une décision validée manuellement ou via workflow de revue."
+  },
+  "manual-review": {
+    label: "Revue humaine",
+    tooltip: "Placement validé par une revue humaine explicite."
+  },
+  "llm-review": {
+    label: "LLM revu",
+    tooltip:
+      "Suggestion LLM acceptée après validation. Le LLM n'est pas utilisé comme source brute."
+  }
+};
+
+const metricInfo = {
+  "Témoins présents":
+    "Nombre de Strong attendus par les Bibles témoins locales qui existent dans le ledger, qu'ils soient placés sur texte ou laissés en Strong vide.",
+  "Témoins sur texte":
+    "Parmi les Strong des témoins, nombre placé sur un mot ou une expression française. Les Strong vides ne comptent pas.",
+  "Original TAHOT/TAGNT sur texte":
+    "Parmi les Strong de l'inventaire original STEP Bible, nombre placé sur un mot ou une expression française. TAHOT couvre l'hébreu/araméen, TAGNT le grec. Ce n'est pas Macula.",
+  "À revoir":
+    "Strong valides mais encore à expliquer : Strong sans mot français, risques de placement ou Strong techniques.",
+  "Exp. lexicale":
+    "Ancienne métrique d'expérience lexicale, conservée seulement quand le fichier chargé en contient.",
+  "Candidats restants":
+    "Suggestions déterministes restantes qui n'ont pas été insérées automatiquement, souvent à cause d'une ambiguïté ou d'un conflit.",
+  Normal:
+    "Vue reader : Strong lisibles, principalement alignés avec le style des Bibles témoins.",
+  Advanced:
+    "Vue d'étude : ajoute les Strong de l'inventaire original TAHOT/TAGNT, y compris ceux que les témoins ne portent pas.",
+  Vides:
+    "Strong valide attendu, mais aucun porteur français fiable n'a été trouvé.",
+  Techniques:
+    "Strong grammatical ou structurel, souvent sans équivalent français direct.",
+  Risques:
+    "Placements à surveiller, par exemple plusieurs Strong sur un même mot."
+};
+
+const evidenceSourceInfo = {
+  "seed-term": {
+    label: "Terme lexical direct",
+    tooltip:
+      "Le mot français correspond directement à un terme lexical connu pour ce Strong."
+  },
+  "seed-stem": {
+    label: "Racine lexicale",
+    tooltip:
+      "La racine ou le lemme français correspond à un terme lexical connu pour ce Strong."
+  },
+  "number-component": {
+    label: "Composant numérique",
+    tooltip:
+      "Correspondance mécanique entre un nombre français composé et une valeur numérique de l'original."
+  },
+  "kaikki-gloss": {
+    label: "Kaikki",
+    tooltip: "Signal lexical issu des glosses françaises/lexicales Kaikki."
+  },
+  "proper-name-step": {
+    label: "Nom propre TAHOT/TAGNT",
+    tooltip:
+      "Nom propre détecté depuis les glosses/translittérations de l'original STEP Bible : TAHOT ou TAGNT."
+  },
+  "proper-name-dictionary": {
+    label: "Nom propre dictionnaire",
+    tooltip: "Nom propre confirmé par le dictionnaire/lexique Strong local."
+  },
+  "openoffice-synonyms": {
+    label: "Synonymes OpenOffice",
+    tooltip:
+      "Lien de synonymie issu du thésaurus français OpenOffice. Utilisé comme signal, pas comme preuve suffisante seul."
+  },
+  wolf: {
+    label: "WOLF",
+    tooltip:
+      "Lien lexical issu de WOLF, ressource WordNet-like française. Utilisé comme signal, pas comme preuve suffisante seul."
+  },
+  rezojdm: {
+    label: "RezoJDM",
+    tooltip:
+      "Lien lexical issu du cache RezoJDM. Utilisé comme signal, pas comme preuve suffisante seul."
+  },
+  "french-auxiliary-phrase": {
+    label: "Expression verbale française",
+    tooltip:
+      "Phrase auxiliaire + participe, par exemple « avait façonné », reconnue comme porteur français complet."
+  }
+};
+
 const state = {
   rows: [],
   enriched: null,
@@ -435,9 +563,11 @@ function renderLexicalCandidates(row) {
       ).length,
     0
   );
-  title.textContent = `Candidats lexicaux · ${highOpenCount} visibles · ${autoSafeCount} auto-safe${
+  title.textContent = `Candidats déterministes · ${highOpenCount} visibles · ${autoSafeCount} auto-validés${
     groupAutoSafeCount > 0 ? ` · ${groupAutoSafeCount} groupés` : ""
   }`;
+  title.title =
+    "Suggestions déterministes restantes. Par défaut, seuls les candidats high et non occupés sont affichés ; le bouton + montre aussi les candidats occupés ou moins sûrs.";
 
   const toggle = document.createElement("button");
   toggle.type = "button";
@@ -498,6 +628,10 @@ function renderLexicalCandidateItem(item, expanded) {
   title.textContent = `${item.strong} · ${
     item.auditKind === "empty" ? "Strong vide" : "relocation"
   }${item.groupAutoSafe ? " · groupe sûr" : ""}`;
+  title.title =
+    item.auditKind === "empty"
+      ? "Strong valide attendu, mais pas encore placé sur un porteur français fiable."
+      : "Strong déjà visible, mais le rapport voit peut-être un meilleur porteur français.";
 
   const meta = document.createElement("span");
   meta.textContent = item.groupAutoSafe
@@ -532,13 +666,22 @@ function renderLexicalCandidateChip(item, candidate) {
   if (isLexicalGroupAutoSafeCandidate(item, candidate)) {
     chip.classList.add("is-group-auto-safe");
   }
-  chip.title = candidate.evidence
-    .map((evidence) => `${evidence.source}: ${evidence.detail}`)
-    .join("\n");
+  chip.title = candidate.evidence.map(formatEvidenceTooltip).join("\n");
   chip.textContent = `${lexicalCandidateTargetLabel(candidate)} ${candidate.text} · ${Math.round(
     candidate.score * 100
   )}%${candidate.occupied ? " · occupé" : ""}`;
   return chip;
+}
+
+function formatEvidenceTooltip(evidence) {
+  const info = evidenceSourceInfo[evidence.source];
+  return [
+    info?.label ?? evidence.source,
+    evidence.detail,
+    info?.tooltip ? `Info: ${info.tooltip}` : ""
+  ]
+    .filter(Boolean)
+    .join(" - ");
 }
 
 function lexicalCandidateTargetLabel(candidate) {
@@ -750,10 +893,11 @@ function renderStrongToken(node, context) {
   }
   token.title = [
     strong,
-    stepStrong ? `STEP ${stepStrong}` : "",
+    stepStrong ? `Entrée TAHOT/TAGNT ${stepStrong}` : "",
     sourceStrong ? `Source ${sourceStrong}` : "",
     token.dataset.source ? `Origine ${sourceLabel(token.dataset.source)}` : "",
-    stepStatus ? `STEP status: ${stepStatus}` : "",
+    token.dataset.source ? sourceTooltip(token.dataset.source) : "",
+    stepStatus ? `Statut original TAHOT/TAGNT: ${stepStatus}` : "",
     experiment ? `Expérience ${experiment}` : "",
     node.getAttribute("data-method"),
     node.getAttribute("data-step-method"),
@@ -999,7 +1143,7 @@ function drawerHeader(strong, strongCodes, token, entry = {}) {
         ? metaItem("Translittération", entry.transliteration)
         : null,
       token.dataset.stepStrong
-        ? metaItem("STEP", token.dataset.stepStrong)
+        ? metaItem("TAHOT/TAGNT", token.dataset.stepStrong)
         : null,
       token.dataset.sourceStrong
         ? metaItem("Source originale", token.dataset.sourceStrong)
@@ -1064,19 +1208,20 @@ function drawerHtmlSection(title, html) {
 }
 
 function sourceLabel(source) {
-  const labels = {
-    "reference-transfer": "Témoin direct",
-    "reference-learned": "Témoin appris",
-    "reference-backed-original": "Témoin via original",
-    "dictionary-fr": "Dictionnaire FR",
-    "phrase-transfer": "Expression témoin",
-    "semantic-lexicon": "Lexique sémantique",
-    "original-complete": "Original STEP",
-    "curated-override": "Correction validée",
-    "manual-review": "Revue humaine",
-    "llm-review": "Revue LLM"
-  };
-  return labels[source] ?? source;
+  return source
+    .split("+")
+    .filter(Boolean)
+    .map((item) => sourceInfo[item]?.label ?? item)
+    .join(" + ");
+}
+
+function sourceTooltip(source) {
+  return source
+    .split("+")
+    .filter(Boolean)
+    .map((item) => sourceInfo[item]?.tooltip ?? "")
+    .filter(Boolean)
+    .join("\n");
 }
 
 function drawerResourcesSection(title, resources) {
@@ -1190,7 +1335,7 @@ function renderEnrichedStats(metrics) {
   els.stats.className = "stats-dashboard";
   els.stats.replaceChildren(
     coverageMeter({
-      label: "Témoins retrouvés",
+      label: "Témoins présents",
       value: metrics.referenceStrongCoverage,
       count: `${formatRatio(
         metrics.referenceStrongRepresentedCount,
@@ -1206,7 +1351,7 @@ function renderEnrichedStats(metrics) {
       )} sur mot/expression · ${formatNumber(referenceUncarriedCount)} vides`
     }),
     coverageMeter({
-      label: "STEP sur texte",
+      label: "Original TAHOT/TAGNT sur texte",
       value: metrics.originalStrongCarrierRate,
       count: `${formatRatio(
         metrics.originalStrongCarrierCount,
@@ -1214,7 +1359,7 @@ function renderEnrichedStats(metrics) {
       )} sur mot/expression · ${formatNumber(originalUncarriedCount)} à expliquer`
     }),
     coverageMeter({
-      label: "À traiter",
+      label: "À revoir",
       value:
         reviewCount === 0
           ? 1
@@ -1240,7 +1385,7 @@ function renderEnrichedStats(metrics) {
     ...(hasLexicalCandidates
       ? [
           coverageMeter({
-            label: "Candidats lexicaux",
+            label: "Candidats restants",
             value: ratio(
               metrics.lexicalItemsWithCandidates,
               metrics.lexicalAuditItems
@@ -1259,13 +1404,13 @@ function renderEnrichedStats(metrics) {
         label: "Normal",
         value: metrics.readerVisibleStrongCount,
         max: Math.max(1, metrics.advancedStrongCount),
-        detail: "sans STEP-only"
+        detail: "vue témoin lisible"
       },
       {
         label: "Advanced",
         value: metrics.advancedStrongCount,
         max: Math.max(1, metrics.advancedStrongCount),
-        detail: "avec STEP-only"
+        detail: "avec original TAHOT/TAGNT"
       },
       {
         label: "Vides",
@@ -1277,7 +1422,7 @@ function renderEnrichedStats(metrics) {
         label: "Techniques",
         value: metrics.technicalStrongCount,
         max: Math.max(1, metrics.advancedStrongCount),
-        detail: "source uniquement"
+        detail: "grammaire/source seule"
       },
       {
         label: "Risques",
@@ -1333,7 +1478,7 @@ function renderEnrichedStats(metrics) {
     miniStats([
       ["Versets", metrics.verseCount],
       ["Strong témoins", metrics.referenceStrongOccurrenceCount],
-      ["Strong STEP", metrics.originalStrongOccurrenceCount],
+      ["Strong original", metrics.originalStrongOccurrenceCount],
       ["Normal", metrics.readerVisibleStrongCount],
       ...(hasLexicalExperiment
         ? [
@@ -1359,6 +1504,7 @@ function renderEnrichedStats(metrics) {
 function coverageMeter({ label, value, count, displayValue, status }) {
   const card = document.createElement("section");
   card.className = `coverage-meter ${status ? `is-${status}` : coverageClass(value)}`;
+  card.title = metricInfo[label] ?? "";
 
   const header = document.createElement("div");
   header.className = "coverage-meter-header";
@@ -1366,6 +1512,7 @@ function coverageMeter({ label, value, count, displayValue, status }) {
   const title = document.createElement("span");
   title.className = "stat-label";
   title.textContent = label;
+  appendInfoHint(title, metricInfo[label]);
 
   const score = document.createElement("strong");
   score.textContent = displayValue ?? formatPercent(value);
@@ -1396,12 +1543,14 @@ function statBars(items) {
 function statBar(item) {
   const row = document.createElement("div");
   row.className = "stat-bar";
+  row.title = metricInfo[item.label] ?? "";
 
   const header = document.createElement("div");
   header.className = "stat-bar-header";
 
   const label = document.createElement("span");
   label.textContent = item.label;
+  appendInfoHint(label, metricInfo[item.label]);
 
   const value = document.createElement("strong");
   value.textContent = formatNumber(item.value);
@@ -1431,6 +1580,7 @@ function miniStats(values) {
       const labelElement = document.createElement("span");
       labelElement.className = "stat-label";
       labelElement.textContent = label;
+      appendInfoHint(labelElement, metricInfo[label]);
       const valueElement = document.createElement("strong");
       valueElement.textContent = formatStatValue(value);
       item.append(labelElement, valueElement);
@@ -1449,6 +1599,7 @@ function setStats(values) {
       const valueElement = document.createElement("strong");
       labelElement.className = "stat-label";
       labelElement.textContent = label;
+      appendInfoHint(labelElement, metricInfo[label]);
       valueElement.textContent = formatStatValue(value);
       row.append(labelElement, valueElement);
       if (detail) {
@@ -1460,6 +1611,16 @@ function setStats(values) {
       return row;
     })
   );
+}
+
+function appendInfoHint(element, tooltip) {
+  if (!tooltip) return;
+  element.title = tooltip;
+  const hint = document.createElement("span");
+  hint.className = "info-hint";
+  hint.textContent = "?";
+  hint.setAttribute("aria-hidden", "true");
+  element.append(" ", hint);
 }
 
 function coverageClass(value) {

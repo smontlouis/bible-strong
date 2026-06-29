@@ -30,6 +30,22 @@ npm run strong:generate -- --bible <id>
 
 Use this output as the authoritative production artifact when the user asks for the best workflow. It preserves a complete Strong ledger while keeping reader-visible tags profile-aware. Auto-safe lexical placements are already inserted with `source="semantic-lexicon"`; they should not remain as residual auto-safe candidates.
 
+For localized deterministic fixes, refresh only the affected books, chapters, or
+ranges instead of regenerating the whole Bible:
+
+```sh
+npm run strong:refresh -- --bible <id> --only <Book>
+npm run strong:refresh -- --bible <id> --only <Book.Chapter>
+npm run strong:refresh -- --bible <id> --only <BookA-BookB>
+npm run strong:refresh -- --bible <id> --only <Book1>,<Book2>,<Book3>
+```
+
+`strong:refresh` generates each requested scope in a temporary output directory,
+merges those verses into the existing canonical ledger, then rewrites the split
+verse files, reader/advanced TSV exports, manifest, and global metrics. Use a
+full `strong:generate` only when the entire corpus must be rebuilt or when no
+canonical ledger exists yet.
+
 3. Export reader or advanced views from the canonical ledger when a TSV is needed:
 
 ```sh
@@ -182,6 +198,44 @@ npm test
 npm run build
 ```
 
+15. When changing deterministic lexical placement rules, run or resume the
+    10-book first-5-chapters regression audit:
+
+```sh
+npm run strong:audit:plan
+npm run strong:audit:run
+npm run strong:audit:verify
+npm run strong:audit:residuals
+```
+
+The default audit is intentionally capped at 10 books to keep regeneration
+fast during iterative work. Use `--books <n>` only for explicit broader
+stress tests.
+
+If the audit changed intentionally, inspect `outputs/strong-audit/nbs/manifest.json`,
+then refresh the committed metrics/hash baseline:
+
+```sh
+npm run strong:audit:snapshot -- --snapshot tests/fixtures/strong-audit/nbs-10x5-snapshot.json
+```
+
+Use `strong:audit:residuals` after a successful audit run to write
+`outputs/strong-audit/nbs/residuals.json` and `.md`. The residual report is for
+human inspection only and stays in ignored `outputs/`; it groups remaining
+lexical candidates into actionable categories such as group auto-safe leftovers,
+compound STEP proper-name candidates, clean single open high candidates, blocked
+single open high candidates split by medium-only vs high-candidate blockers,
+high candidates that use inferred seed evidence, high-scoring medium candidates,
+ambiguous high candidates, and relocation better-open candidates. Treat clean
+single-open items as the first deterministic audit queue. Treat compound proper
+names, inferred-seed high items, blocked items, and high-scoring medium items as
+evidence for review, not as automatic insertion candidates.
+
+Lexical auto-safe insertion is iterative. Keep rerunning candidate generation
+until no more placements are applied, within the bounded pass limit. Some
+group-auto-safe placements become visible only after earlier lexical passes
+remove competing residual candidates.
+
 ## Decision Rules
 
 - Prefer `strong:generate` for the production artifact because it keeps a canonical reader/advanced ledger, applies validated lexical auto-safe placements, writes the residual lexical candidate report, and explains every Strong placement.
@@ -189,8 +243,12 @@ npm run build
 - The diagnostic backend includes learned multi-word phrase transfer from the local Strong references. Keep this deterministic and original-confirmed.
 - Use STEP TAHOT/TAGNT as the production original inventory. Treat WLC/SBLGNT suffixed Strong values (`H6960a`, etc.) as audit provenance only, not lexicon lookup keys. Render and compare the canonical Strong (`H6960`), prefer STEP `dStrong`/`eStrong` for lexical disambiguation, and keep any non-STEP source suffix only as metadata.
 - Treat local French Strong dictionaries as deterministic evidence for review and future scoring, not as a license to place tags without original/reference inventory support.
+- When reading `strong_lexicon.full.production.sqlite`, keep proper-name `gloss` evidence but do not use proper-name `meaning` text as French carrier evidence. Do not let a row's `uStrong` feed another classical Strong unless the normalized `uStrong` equals the row's `eStrong`, except for pronominal morphology where cross-`uStrong` forms are grammatical variants. This prevents related-name/group definitions from placing false carriers while preserving pronoun variants.
 - Do not add hand-written synonym or semantic-equivalence entries to generation because a hard verse was discussed. Production placement may use exact learned reference evidence, dictionary evidence, algorithmic stemming, STEP inventory, validated lexical auto-safe evidence from external French sources, or bounded LLM review; see `docs/french-lexical-sources-for-strong-placement.md`.
-- Treat synonym-only candidates as review material. Auto-safe production insertion requires direct evidence such as `seed-term`, `seed-stem`, `kaikki-gloss`, STEP proper-name evidence, STEP numeric component evidence, or a French auxiliary-plus-participle phrase whose participle has direct lexical evidence. Numeric component evidence may stack on occupied compound-number carriers, including relocation from a simple occupied number to a later richer compound number and duplicate empty numeric occurrences that have one richer occupied compound carrier; French compounds such as `douze`, `quatre-vingt-*`, and `soixante-dix-*` are decomposed into STEP-compatible numeric components. Repeated empty occurrences of the same Strong may be group-auto-safe when the same open French lexeme appears the same number of times with high-confidence direct evidence and source order maps cleanly to text order.
+- Treat synonym-only candidates as review material. A candidate can be `high` only when it has direct evidence such as `seed-term`, `seed-stem`, `kaikki-gloss`, STEP proper-name evidence, or STEP numeric component evidence. Synonym-only candidates may keep their numeric score for sorting, but their confidence is capped at `medium` and they still count as ambiguity blockers for generic auto-safe decisions. Auto-safe production insertion requires direct evidence or a French auxiliary-plus-participle phrase whose participle has direct lexical evidence. A synonym-only high-score competitor outside a strong auxiliary-plus-participle phrase does not block that phrase, but a direct-evidence outside competitor does. When both a French auxiliary-plus-participle phrase and its contained participle are independently auto-safe, prefer the phrase because it preserves the visible French verbal construction without adding semantic assumptions. Numeric component evidence may stack on occupied compound-number carriers, including relocation from a simple occupied number to a later richer compound number and duplicate empty numeric occurrences that have one richer occupied compound carrier; French compounds such as `douze`, `quatre-vingt-*`, and `soixante-dix-*` are decomposed into STEP-compatible numeric components. Repeated empty occurrences of the same Strong may be group-auto-safe when the same open French lexeme appears the same number of times with high-confidence direct evidence and source order maps cleanly to text order. The duplicate lexical group rule uses relative order and exact cardinality; it does not require the French carriers to appear after the empty source anchors, because translated clauses can move the visible carrier before the original-complete insertion point. Ambiguous STEP proper-name sequences may also be group-auto-safe when same-verse source order and French token order provide a one-to-one monotonic assignment across open high-confidence proper-name carriers; do not use this to replace simple proper-name auto-safe placements that are already unambiguous.
+- Lexical auto-safe placement is a stabilization loop, not a single pass. Do
+  not lower the pass limit unless the 10x5 audit proves that no validated
+  auto-safe placements remain stranded in the residual report.
 - Use calibrated translation profiles: one common backend, but profile-aware generation and diagnostics by translation family.
 - Interpret metrics through the Bible's translation profile. Dynamic translations such as BDS are expected to have lower token coverage than formal translations such as Martin.
 - Profiles are active generation inputs, not just labels: they control learned enrichment strictness, maximum Strong codes per word, empty-word consensus, and hard-verse thresholds.

@@ -7,6 +7,7 @@ import path from "node:path";
 
 import {
   buildLexicalCandidateReport,
+  isAutoSafeCandidate,
   lexicalAutoSafePlacements
 } from "../src/lexicalCandidateReport.js";
 import { type StrongTranslationCandidate } from "../src/translationLexicon.js";
@@ -118,6 +119,68 @@ test("uses conservative Strong dictionary stems as direct lexical evidence", asy
   assert.equal(topCandidate?.evidence[0]?.source, "seed-stem");
 });
 
+test("caps synonym-only candidates below high confidence", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-"));
+  const ledgerPath = path.join(dir, "ledger.json");
+  const openOfficePath = path.join(dir, "thes.dat");
+  const wolfPath = path.join(dir, "wolf.xml");
+
+  writeFileSync(openOfficePath, "UTF-8\nenfant|1\n|petit\n");
+  writeFileSync(
+    wolfPath,
+    "<WOLF><SYNSET><LITERAL>enfant</LITERAL><LITERAL>petit</LITERAL></SYNSET></WOLF>"
+  );
+  writeFileSync(
+    ledgerPath,
+    JSON.stringify(
+      {
+        bible: "nbs",
+        generatedAt: "2026-06-24T00:00:00.000Z",
+        split: false,
+        metrics: {},
+        verses: [
+          verse(
+            "Test.1.1",
+            "Le petit arrive.",
+            [token(0, "Le"), token(1, "petit"), token(2, "arrive")],
+            empty("Test.1.1:0:H0001", "H0001", "child", 0)
+          )
+        ]
+      },
+      null,
+      2
+    )
+  );
+
+  const report = await buildLexicalCandidateReport({
+    bible: "nbs",
+    onlyRef: "Test.1.1",
+    inputDir: dir,
+    outputDir: dir,
+    ledgerPath,
+    openOfficePath,
+    wolfPath,
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    maxCandidatesPerEmpty: 5,
+    dictionaryCandidates: [candidate("H0001", "enfant", 0.5)]
+  });
+
+  const item = report.items.find(
+    (candidate) => candidate.ref === "Test.1.1" && candidate.strong === "H0001"
+  );
+  const topCandidate = item?.candidates[0];
+  assert.equal(topCandidate?.normalized, "petit");
+  assert.equal(topCandidate?.score, 0.93);
+  assert.equal(topCandidate?.confidence, "medium");
+  assert.deepEqual(
+    topCandidate?.evidence.map((evidence) => evidence.source),
+    ["openoffice-synonyms", "wolf"]
+  );
+  assert.equal(report.metrics.highConfidenceCandidates, 0);
+  assert.equal(report.metrics.mediumConfidenceCandidates, 1);
+});
+
 test("promotes French auxiliary plus participle as an auto-safe verb phrase", async () => {
   const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-"));
   const ledgerPath = path.join(dir, "ledger.json");
@@ -175,6 +238,171 @@ test("promotes French auxiliary plus participle as an auto-safe verb phrase", as
     ),
     true
   );
+});
+
+test("ignores synonym-only outside competitors for strong auxiliary phrases", () => {
+  const item = {
+    auditKind: "empty",
+    annotationId: "Rom.4.14:22:G2758",
+    ref: "Rom.4.14",
+    text: "la foi est vidée de son sens et la promesse est réduite à rien.",
+    strong: "G2758",
+    insertAfterWordIndex: 10,
+    stepGlosses: ["has been made void"],
+    dictionaryTerms: ["vider"],
+    inferredTerms: [],
+    candidates: [
+      lexicalCandidate({
+        target: "phrase",
+        wordIndex: 3,
+        startWordIndex: 3,
+        endWordIndex: 4,
+        text: "est vidée",
+        normalized: "est videe",
+        lemma: "etre vide",
+        score: 1,
+        evidenceSources: ["french-auxiliary-phrase", "seed-term"]
+      }),
+      lexicalCandidate({
+        wordIndex: 4,
+        text: "vidée",
+        normalized: "videe",
+        lemma: "vide",
+        score: 1,
+        evidenceSources: ["seed-term"]
+      }),
+      lexicalCandidate({
+        wordIndex: 11,
+        text: "rien",
+        normalized: "rien",
+        lemma: "rien",
+        score: 0.92,
+        evidenceSources: ["openoffice-synonyms", "wolf"]
+      })
+    ]
+  };
+
+  assert.equal(isAutoSafeCandidate(item, item.candidates[0]!), true);
+});
+
+test("keeps auxiliary phrases in review when a direct outside competitor exists", () => {
+  const item = {
+    auditKind: "empty",
+    annotationId: "Rom.4.14:22:G2758",
+    ref: "Rom.4.14",
+    text: "la foi est vidée de son sens et la promesse est réduite à rien.",
+    strong: "G2758",
+    insertAfterWordIndex: 10,
+    stepGlosses: ["has been made void"],
+    dictionaryTerms: ["vider"],
+    inferredTerms: [],
+    candidates: [
+      lexicalCandidate({
+        target: "phrase",
+        wordIndex: 3,
+        startWordIndex: 3,
+        endWordIndex: 4,
+        text: "est vidée",
+        normalized: "est videe",
+        lemma: "etre vide",
+        score: 1,
+        evidenceSources: ["french-auxiliary-phrase", "seed-term"]
+      }),
+      lexicalCandidate({
+        wordIndex: 11,
+        text: "réduite",
+        normalized: "reduite",
+        lemma: "reduire",
+        score: 1,
+        evidenceSources: ["seed-term"]
+      })
+    ]
+  };
+
+  assert.equal(isAutoSafeCandidate(item, item.candidates[0]!), false);
+});
+
+test("prefers an auxiliary phrase when it contains the only competing auto-safe word", () => {
+  const item = {
+    auditKind: "relocation",
+    annotationId: "John.2.22:0:G1453",
+    ref: "John.2.22",
+    text: "Quand donc il fut réveillé d’entre les morts.",
+    strong: "G1453",
+    currentTarget: {
+      wordIndex: 6,
+      text: "d’entre",
+      normalized: "entre",
+      otherStrong: ["G1537"]
+    },
+    stepGlosses: ["He was raised up"],
+    dictionaryTerms: ["réveiller"],
+    inferredTerms: [],
+    candidates: [
+      lexicalCandidate({
+        target: "phrase",
+        wordIndex: 4,
+        startWordIndex: 4,
+        endWordIndex: 5,
+        text: "fut réveillé",
+        normalized: "fut reveille",
+        lemma: "etre reveiller",
+        score: 1,
+        evidenceSources: ["french-auxiliary-phrase", "seed-term"]
+      }),
+      lexicalCandidate({
+        wordIndex: 5,
+        text: "réveillé",
+        normalized: "reveille",
+        lemma: "reveiller",
+        score: 1,
+        evidenceSources: ["seed-term", "openoffice-synonyms"]
+      })
+    ]
+  };
+
+  const placements = lexicalAutoSafePlacements({
+    items: [item]
+  } as never);
+
+  assert.equal(placements.length, 1);
+  assert.equal(placements[0]?.candidate.target, "phrase");
+  assert.equal(placements[0]?.candidate.text, "fut réveillé");
+});
+
+test("keeps generic direct candidates in review when a high-scoring synonym competitor exists", () => {
+  const item = {
+    auditKind: "empty",
+    annotationId: "Test.1.1:0:H0001",
+    ref: "Test.1.1",
+    text: "Le petit enfant arrive.",
+    strong: "H0001",
+    insertAfterWordIndex: 0,
+    stepGlosses: ["child"],
+    dictionaryTerms: ["enfant"],
+    inferredTerms: [],
+    candidates: [
+      lexicalCandidate({
+        wordIndex: 2,
+        text: "enfant",
+        normalized: "enfant",
+        lemma: "enfant",
+        score: 1,
+        evidenceSources: ["seed-term"]
+      }),
+      lexicalCandidate({
+        wordIndex: 1,
+        text: "petit",
+        normalized: "petit",
+        lemma: "petit",
+        score: 0.93,
+        confidence: "medium",
+        evidenceSources: ["openoffice-synonyms", "wolf"]
+      })
+    ]
+  };
+
+  assert.equal(isAutoSafeCandidate(item, item.candidates[0]!), false);
 });
 
 test("allows numeric Strong components on occupied compound numbers", async () => {
@@ -377,6 +605,287 @@ test("matches STEP proper names across French transliteration drift", async () =
   assert.equal(report.metrics.autoSafeItems, 2);
 });
 
+test("keeps French elision prefixes but rejects arbitrary compound-name suffixes", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-"));
+  const ledgerPath = path.join(dir, "ledger.json");
+
+  writeFileSync(
+    ledgerPath,
+    JSON.stringify(
+      {
+        bible: "nbs",
+        generatedAt: "2026-06-24T00:00:00.000Z",
+        split: false,
+        metrics: {},
+        verses: [
+          verse(
+            "Gen.4.17",
+            "D’Hénoch à Beth-El.",
+            [token(0, "D’Hénoch"), token(1, "à"), token(2, "Beth-El")],
+            [
+              empty("Gen.4.17:0:H2585", "H2585", "Enoch", 0, "HNpm"),
+              empty("Gen.4.17:1:H0410", "H0410", "El", 1, "HNpm")
+            ]
+          )
+        ]
+      },
+      null,
+      2
+    )
+  );
+
+  const report = await buildLexicalCandidateReport({
+    bible: "nbs",
+    onlyRef: "Gen.4.17",
+    inputDir: dir,
+    outputDir: dir,
+    ledgerPath,
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    maxCandidatesPerEmpty: 5,
+    dictionaryCandidates: []
+  });
+
+  assert.equal(
+    topCandidateFor(report, "Gen.4.17", "H2585")?.normalized,
+    "d’henoch"
+  );
+  assert.equal(topCandidateFor(report, "Gen.4.17", "H0410"), undefined);
+});
+
+test("rejects lowercase common words as STEP proper-name carriers", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-"));
+  const ledgerPath = path.join(dir, "ledger.json");
+
+  writeFileSync(
+    ledgerPath,
+    JSON.stringify(
+      {
+        bible: "nbs",
+        generatedAt: "2026-06-24T00:00:00.000Z",
+        split: false,
+        metrics: {},
+        verses: [
+          verse(
+            "2Sam.2.5",
+            "Ils ont enseveli Saül, les gens de Yabesh, et vous.",
+            [
+              token(0, "Ils"),
+              token(1, "ont"),
+              token(2, "enseveli"),
+              token(3, "Saül"),
+              token(4, "les"),
+              token(5, "gens"),
+              token(6, "de"),
+              token(7, "Yabesh"),
+              token(8, "et"),
+              token(9, "vous")
+            ],
+            empty("2Sam.2.5:0:H3003", "H3003", "Jabesh", 4, "HNpl")
+          )
+        ]
+      },
+      null,
+      2
+    )
+  );
+
+  const report = await buildLexicalCandidateReport({
+    bible: "nbs",
+    onlyRef: "2Sam.2.5",
+    inputDir: dir,
+    outputDir: dir,
+    ledgerPath,
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    maxCandidatesPerEmpty: 5,
+    dictionaryCandidates: [candidate("H3003", "jabesh", 0.5)]
+  });
+
+  const candidates =
+    report.items.find(
+      (candidate) =>
+        candidate.ref === "2Sam.2.5" && candidate.strong === "H3003"
+    )?.candidates ?? [];
+
+  assert.equal(
+    candidates.some((candidate) => candidate.normalized === "vous"),
+    false
+  );
+  assert.equal(candidates[0]?.normalized, "yabesh");
+});
+
+test("auto-safes simple STEP-only proper names", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-"));
+  const ledgerPath = path.join(dir, "ledger.json");
+
+  writeFileSync(
+    ledgerPath,
+    JSON.stringify(
+      {
+        bible: "nbs",
+        generatedAt: "2026-06-24T00:00:00.000Z",
+        split: false,
+        metrics: {},
+        verses: [
+          verse(
+            "Josh.1.1",
+            "Josué, fils de Noun.",
+            [
+              token(0, "Josué"),
+              token(1, "fils"),
+              token(2, "de"),
+              token(3, "Noun")
+            ],
+            empty("Josh.1.1:0:H5126", "H5126", "Nun", 3, "HNpm")
+          )
+        ]
+      },
+      null,
+      2
+    )
+  );
+
+  const report = await buildLexicalCandidateReport({
+    bible: "nbs",
+    onlyRef: "Josh.1.1",
+    inputDir: dir,
+    outputDir: dir,
+    ledgerPath,
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    maxCandidatesPerEmpty: 5,
+    dictionaryCandidates: []
+  });
+
+  const placement = lexicalAutoSafePlacements(report).find(
+    (candidate) => candidate.item.annotationId === "Josh.1.1:0:H5126"
+  );
+  assert.equal(placement?.candidate.normalized, "noun");
+  assert.equal(placement?.kind, "auto-safe");
+});
+
+test("keeps compound STEP-only proper names in review", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-"));
+  const ledgerPath = path.join(dir, "ledger.json");
+  const compoundName = empty(
+    "1Chr.3.20:0:H3142",
+    "H3142",
+    "Jushab-",
+    0,
+    "HNpm"
+  );
+  compoundName.step.push({
+    ...compoundName.step[0],
+    gloss: "Hesed"
+  });
+
+  writeFileSync(
+    ledgerPath,
+    JSON.stringify(
+      {
+        bible: "nbs",
+        generatedAt: "2026-06-24T00:00:00.000Z",
+        split: false,
+        metrics: {},
+        verses: [
+          verse(
+            "1Chr.3.20",
+            "Youshab-Hésed.",
+            [token(0, "Youshab-Hésed")],
+            compoundName
+          )
+        ]
+      },
+      null,
+      2
+    )
+  );
+
+  const report = await buildLexicalCandidateReport({
+    bible: "nbs",
+    onlyRef: "1Chr.3.20",
+    inputDir: dir,
+    outputDir: dir,
+    ledgerPath,
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    maxCandidatesPerEmpty: 5,
+    dictionaryCandidates: []
+  });
+
+  assert.equal(
+    topCandidateFor(report, "1Chr.3.20", "H3142")?.normalized,
+    "youshab-hesed"
+  );
+  assert.equal(lexicalAutoSafePlacements(report).length, 0);
+});
+
+test("resolves ambiguous STEP proper-name sequences by source order", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-"));
+  const ledgerPath = path.join(dir, "ledger.json");
+  const jamin = empty("1Chr.4.24:0:H3226", "H3226", "Jamin", 3, "HNpm");
+  const jarib = empty("1Chr.4.24:1:H3402", "H3402", "Jamin", 4, "HNpm");
+  jamin.step.push({ ...jamin.step[0], gloss: "Jarib" });
+  jarib.step.push({ ...jarib.step[0], gloss: "Jarib" });
+
+  writeFileSync(
+    ledgerPath,
+    JSON.stringify(
+      {
+        bible: "nbs",
+        generatedAt: "2026-06-24T00:00:00.000Z",
+        split: false,
+        metrics: {},
+        verses: [
+          verse(
+            "1Chr.4.24",
+            "Fils de Siméon : Nemouel, Yamîn, Yarib, Zérah.",
+            [
+              token(0, "Fils"),
+              token(1, "de"),
+              token(2, "Siméon"),
+              token(3, "Nemouel"),
+              token(4, "Yamîn"),
+              token(5, "Yarib"),
+              token(6, "Zérah")
+            ],
+            [jamin, jarib]
+          )
+        ]
+      },
+      null,
+      2
+    )
+  );
+
+  const report = await buildLexicalCandidateReport({
+    bible: "nbs",
+    onlyRef: "1Chr.4.24",
+    inputDir: dir,
+    outputDir: dir,
+    ledgerPath,
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    maxCandidatesPerEmpty: 5,
+    dictionaryCandidates: []
+  });
+
+  const placements = lexicalAutoSafePlacements(report);
+  assert.deepEqual(
+    placements.map((placement) => [
+      placement.item.strong,
+      placement.candidate.normalized,
+      placement.kind
+    ]),
+    [
+      ["H3226", "yamin", "group-auto-safe"],
+      ["H3402", "yarib", "group-auto-safe"]
+    ]
+  );
+  assert.equal(report.metrics.groupAutoSafeItems, 2);
+});
+
 test("resolves repeated lexical empty Strong codes across repeated French carriers", async () => {
   const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-"));
   const ledgerPath = path.join(dir, "ledger.json");
@@ -453,6 +962,82 @@ test("resolves repeated lexical empty Strong codes across repeated French carrie
   assert.deepEqual(
     placements.map((placement) => placement.candidate.wordIndex),
     [4, 24]
+  );
+  assert.equal(report.metrics.groupAutoSafeItems, 2);
+});
+
+test("resolves repeated lexical carriers that appear before empty source anchors", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-"));
+  const ledgerPath = path.join(dir, "ledger.json");
+  const kaikkipath = path.join(dir, "kaikki.jsonl");
+  const openOfficePath = path.join(dir, "thes.dat");
+  const wolfPath = path.join(dir, "wolf.xml");
+
+  writeFileSync(
+    ledgerPath,
+    JSON.stringify(
+      {
+        bible: "nbs",
+        generatedAt: "2026-06-24T00:00:00.000Z",
+        split: false,
+        metrics: {},
+        verses: [
+          verse(
+            "Heb.5.1",
+            "Tout grand prêtre pris parmi homme est établi pour homme.",
+            [
+              token(0, "Tout"),
+              token(1, "grand"),
+              token(2, "prêtre"),
+              token(3, "pris"),
+              token(4, "parmi"),
+              token(5, "les"),
+              token(6, "homme"),
+              token(7, "est"),
+              token(8, "établi"),
+              token(9, "pour"),
+              token(10, "les"),
+              token(11, "homme")
+            ],
+            [
+              empty("Heb.5.1:0:G0444", "G0444", "men", 11),
+              empty("Heb.5.1:1:G0444", "G0444", "men", 11)
+            ]
+          )
+        ]
+      },
+      null,
+      2
+    )
+  );
+  writeFileSync(kaikkipath, kaikkiEntry("homme", "noun", [], ["man", "human"]));
+  writeFileSync(openOfficePath, "UTF-8\nhomme|1\n|homme\n");
+  writeFileSync(
+    wolfPath,
+    "<WOLF><SYNSET><LITERAL>homme</LITERAL><LITERAL>homme</LITERAL></SYNSET></WOLF>"
+  );
+
+  const report = await buildLexicalCandidateReport({
+    bible: "nbs",
+    onlyRef: "Heb.5.1",
+    inputDir: dir,
+    outputDir: dir,
+    ledgerPath,
+    kaikkiPath: kaikkipath,
+    openOfficePath,
+    wolfPath,
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    maxCandidatesPerEmpty: 5,
+    dictionaryCandidates: [candidate("G0444", "homme", 0.5)]
+  });
+
+  const placements = lexicalAutoSafePlacements(report).filter(
+    (candidate) => candidate.item.strong === "G0444"
+  );
+  assert.deepEqual(
+    placements.map((placement) => placement.candidate.wordIndex),
+    [6, 11]
   );
   assert.equal(report.metrics.groupAutoSafeItems, 2);
 });
@@ -713,6 +1298,38 @@ function topCandidateFor(
   return item?.candidates[0];
 }
 
+function lexicalCandidate(options: {
+  target?: "word" | "phrase";
+  wordIndex: number;
+  startWordIndex?: number;
+  endWordIndex?: number;
+  text: string;
+  normalized: string;
+  lemma: string;
+  score: number;
+  confidence?: "high" | "medium" | "low";
+  occupied?: boolean;
+  evidenceSources: string[];
+}) {
+  return {
+    target: options.target ?? "word",
+    wordIndex: options.wordIndex,
+    startWordIndex: options.startWordIndex,
+    endWordIndex: options.endWordIndex,
+    text: options.text,
+    normalized: options.normalized,
+    lemma: options.lemma,
+    score: options.score,
+    confidence: options.confidence ?? "high",
+    occupied: options.occupied ?? false,
+    evidence: options.evidenceSources.map((source) => ({
+      source,
+      detail: `${source} test evidence`,
+      weight: 0.4
+    }))
+  };
+}
+
 function dictionaryCandidates(): StrongTranslationCandidate[] {
   return [
     candidate("H6960", "rassembler", 0.5),
@@ -860,7 +1477,8 @@ function empty(
   gloss: string,
   insertAfterWordIndex: number,
   morphology = "",
-  transliteration = ""
+  transliteration = "",
+  sourceStrong?: string
 ) {
   return {
     id,
@@ -872,6 +1490,7 @@ function empty(
     reason: "test",
     diagnostics: ["empty-original"],
     insertAfterWordIndex,
+    sourceStrong,
     lexiconLookup: true,
     step: [
       {

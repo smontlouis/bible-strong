@@ -10,6 +10,13 @@
   --chip: #315b67;
   --chip-hover: #3e6e7c;
   --chip-text: #e4f2f5;
+  --source-direct: #315b67;
+  --source-learned: #3f6685;
+  --source-phrase: #2f7a8a;
+  --source-lexical: #2f6847;
+  --source-original: #4c4f95;
+  --source-reference-original: #6d5630;
+  --source-review: #7a4f2a;
   --empty: #8ca4ad;
   --focus: #8ee6ff;
   font-family:
@@ -321,6 +328,20 @@ dt {
   font-weight: 800;
 }
 
+.info-hint {
+  display: inline-grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  margin-left: 4px;
+  border: 1px solid rgba(142, 230, 255, 0.42);
+  border-radius: 50%;
+  color: #bdeefa;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+}
+
 .meter-track {
   height: 9px;
   margin-top: 8px;
@@ -466,30 +487,36 @@ button:disabled {
 }
 
 .legend-chip {
-  background: var(--chip);
+  background: var(--source-direct);
 }
 
 .legend-reference-learned {
-  background: #385264;
+  background: var(--source-learned);
+}
+
+.legend-phrase {
+  background: var(--source-phrase);
+  box-shadow: inset 0 -2px 0 #6be4f0;
 }
 
 .legend-dictionary {
-  background: #335242;
+  background: var(--source-lexical);
+  box-shadow: inset 0 -2px 0 #73d99b;
 }
 
 .legend-reference-original {
-  background: #564b35;
-  box-shadow: inset 0 -2px 0 #d0b253;
+  background: var(--source-reference-original);
+  box-shadow: inset 0 -2px 0 #f0bd5b;
 }
 
 .legend-step-only {
-  background: #314a61;
-  box-shadow: inset 0 -2px 0 #72c7e6;
+  background: var(--source-original);
+  box-shadow: inset 0 -2px 0 #b8a5ff;
 }
 
 .legend-curated {
-  background: #5d4d72;
-  box-shadow: inset 0 -2px 0 #b99ee8;
+  background: var(--source-review);
+  box-shadow: inset 0 -2px 0 #f5b36b;
 }
 
 .legend-empty {
@@ -672,42 +699,57 @@ button:disabled {
   cursor: pointer;
 }
 
+.token.source-reference-transfer {
+  background: var(--source-direct);
+  color: #e4f2f5;
+}
+
 .token:hover,
 .token.is-selected {
   background: var(--chip-hover);
 }
 
 .token.source-original-complete {
-  background: #314a61;
-  color: #d9f2fb;
-  box-shadow: inset 0 -2px 0 #72c7e6;
+  background: var(--source-original);
+  color: #ebe8ff;
+  box-shadow: inset 0 -2px 0 #b8a5ff;
 }
 
 .token.source-original-complete:hover,
 .token.source-original-complete.is-selected {
-  background: #3a5872;
+  background: #5a5daf;
 }
 
-.token.source-dictionary-fr {
-  background: #335242;
+.token.source-dictionary-fr,
+.token.source-semantic-lexicon {
+  background: var(--source-lexical);
   color: #daf2e5;
+  box-shadow: inset 0 -2px 0 #73d99b;
 }
 
 .token.source-reference-learned {
-  background: #385264;
+  background: var(--source-learned);
   color: #d9edf7;
 }
 
-.token.source-reference-backed-original {
-  background: #564b35;
-  color: #f6ebce;
-  box-shadow: inset 0 -2px 0 #d0b253;
+.token.source-phrase-transfer {
+  background: var(--source-phrase);
+  color: #dffaff;
+  box-shadow: inset 0 -2px 0 #6be4f0;
 }
 
-.token.source-curated-override {
-  background: #5d4d72;
-  color: #efe5ff;
-  box-shadow: inset 0 -2px 0 #b99ee8;
+.token.source-reference-backed-original {
+  background: var(--source-reference-original);
+  color: #f6ebce;
+  box-shadow: inset 0 -2px 0 #f0bd5b;
+}
+
+.token.source-curated-override,
+.token.source-manual-review,
+.token.source-llm-review {
+  background: var(--source-review);
+  color: #fff0de;
+  box-shadow: inset 0 -2px 0 #f5b36b;
 }
 
 .token.is-experiment {

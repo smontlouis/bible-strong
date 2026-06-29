@@ -136,6 +136,60 @@ test("builds original inventory from STEP dStrong without WLC suffix normalizati
   assert.equal(verse?.strongSet.has("H1886"), false);
 });
 
+test("maps observed TAHOT book aliases and alternate references", async () => {
+  const filePath = await writeTempStepFile("TAHOT Isa-Mal.txt", [
+    [
+      "Ezk.1.1#01=L",
+      "וַ/יְהִ֣י\\׀",
+      "va/y.Hi",
+      "and/ it was",
+      "H9001/{H1961}\\H9015",
+      "Hc/Vqw3ms",
+      "",
+      "",
+      "H1961",
+      "",
+      "",
+      "H9001=ו=&/{H1961=הָיָה=to be}\\H9015=׀=separate"
+    ].join("\t"),
+    [
+      "Jol.2.28(3.1)#01=L",
+      "וְ/הָיָ֣ה",
+      "ve/ha.Yah",
+      "and/ it shall happen",
+      "H9001/{H1961}",
+      "Hc/Vqq3ms",
+      "",
+      "",
+      "H1961",
+      "",
+      "",
+      "H9001=ו=&/{H1961=הָיָה=to be}"
+    ].join("\t"),
+    [
+      "Nam.1.1#01=N",
+      "מַשָּׂ֖א",
+      "ma.Sa",
+      "burden",
+      "{H4853A}",
+      "HNcmsa",
+      "",
+      "",
+      "H4853",
+      "",
+      "",
+      "{H4853A=מַשָּׂא=burden}"
+    ].join("\t")
+  ]);
+
+  const map = await readStepOriginalVerseMap([filePath]);
+
+  assert.equal(map.get("Ezek.1.1")?.strongSet.has("H1961"), true);
+  assert.equal(map.get("Joel.2.28")?.strongSet.has("H1961"), true);
+  assert.equal(map.get("Joel.3.1")?.strongSet.has("H1961"), true);
+  assert.equal(map.get("Nah.1.1")?.strongSet.has("H4853"), true);
+});
+
 async function writeTempStepFile(
   fileName: string,
   lines: string[]
