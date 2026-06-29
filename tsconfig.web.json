@@ -1,19 +1,18 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "outDir": "dist",
-    "rootDir": "src",
     "baseUrl": ".",
     "paths": {
       "@/*": ["web/src/*"]
     },
-    "resolveJsonModule": true
+    "types": ["vite/client"]
   },
-  "include": ["src/**/*.ts"]
+  "include": ["web/src/**/*.ts", "web/src/**/*.tsx", "vite.config.ts"]
 }

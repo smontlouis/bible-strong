@@ -53,6 +53,17 @@ const server = createServer(async (request, response) => {
       return;
     }
 
+    if (isReactViewerRoute(url.pathname) && reactViewerEntryExists()) {
+      if (url.pathname === "/viewer/review.html") {
+        url.searchParams.set("view", "review");
+      }
+      if (url.pathname === "/viewer/lexicon.html") {
+        url.searchParams.set("view", "lexicon");
+      }
+      serveStatic("/viewer/app/index.html", response, request.method === "HEAD");
+      return;
+    }
+
     if (url.pathname === "/viewer/" && url.searchParams.has("review")) {
       response.writeHead(302, {
         Location: `/viewer/review.html?${url.searchParams.toString()}`
@@ -538,6 +549,16 @@ function serveStatic(
     }
   });
   stream.pipe(response);
+}
+
+function isReactViewerRoute(pathname: string): boolean {
+  return ["/viewer/", "/viewer/index.html", "/viewer/review.html", "/viewer/lexicon.html"].includes(
+    pathname
+  );
+}
+
+function reactViewerEntryExists(): boolean {
+  return existsSync(path.resolve(ROOT, "viewer/app/index.html"));
 }
 
 function isAllowedStaticPath(filePath: string): boolean {
