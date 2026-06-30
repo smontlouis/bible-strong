@@ -2,11 +2,40 @@
 
 ## Commands
 
-Canonical no-LLM Strong ledger with reader and advanced views:
+Canonical no-LLM Strong ledger with reader and advanced views. The canonical
+artifact is `outputs/strong/<id>/bible-<id>-strong.sqlite`; reader/advanced TSV
+files are exports from that SQLite store:
 
 ```sh
 npm run strong:generate -- --bible <id>
 ```
+
+Migrate an existing pre-SQLite split JSON output once:
+
+```sh
+npm run strong:migrate:sqlite -- --bible <id>
+```
+
+Build the Kaikki lexical SQLite index once:
+
+```sh
+npm run strong:kaikki:index
+```
+
+When `data/external/french-lexical/kaikki/kaikki.org-dictionary-French.sqlite`
+exists, lexical candidate generation uses targeted SQLite lookups instead of
+streaming the large JSONL dictionary.
+
+Build the Strong phrase-lexicon SQLite index once:
+
+```sh
+npm run strong:phrase:index
+```
+
+When `data/derived/strong-phrase-lexicon.sqlite` exists and its source
+fingerprint matches `Sg1910`, `Darby`, and `DarbyR`, generation loads learned
+multi-word phrase candidates from SQLite instead of rebuilding the large
+in-memory phrase lexicon on every run.
 
 Export an existing canonical output again if needed:
 
@@ -119,6 +148,142 @@ npm run strong:review:gaps:packet -- \
   --output outputs/gap-review/<id>/agent-packets/agent-packet-<id>-<scope>.json
 ```
 
+For semantic benchmarks, require a semantic-priority queue before calling a
+model:
+
+```sh
+npm run strong:review:gaps:packet -- \
+  --bible <id> \
+  --only <BookOrScope> \
+  --candidates outputs/gap-review/<id>/<scope>/gap-review-candidates.json \
+  --output outputs/gap-review/<id>/agent-packets/agent-packet-<id>-<scope>-semantic.json \
+  --limit 30 \
+  --min-priority semantic-medium
+```
+
+If the packet command exits with
+`no-candidates-at-or-above-priority:semantic-medium`, the current queue is a
+restraint/function-low queue, not a high-yield semantic benchmark queue.
+
+High-yield semantic packet from lexical candidates:
+
+```sh
+npm run strong:review:gaps:lexical-packet -- \
+  --bible <id> \
+  --only <BookOrScope> \
+  --lexical-report outputs/lexical-candidates/<id>/bible-<id>-lexical-candidates-<BookOrScope>.json \
+  --output outputs/gap-review/<id>/agent-packets/agent-packet-<id>-<scope>-lexical.json \
+  --limit 30 \
+  --min-confidence medium
+```
+
+Current production-maturity evidence, dated 2026-06-29:
+
+| scope  | consensus applied | empty delta | reader tagged token delta | risk delta |
+| ------ | ----------------: | ----------: | ------------------------: | ---------: |
+| `Ezek` |                16 |         -16 |                       +18 |         -2 |
+| `1Cor` |                 7 |         -14 |                       +15 |         -1 |
+| `Acts` |                 8 |          -6 |                       +10 |         -4 |
+
+This is enough evidence to run the next controlled batch across several compact
+lexical packets, but the application rule remains consensus-only. Keep per-book
+caps, validate each model review, build exact visible high-confidence consensus,
+apply only that consensus, refresh the affected scope, and write a before/after
+benchmark report.
+
+The first controlled batch, replayed through the automatic post-consensus filter
+on 2026-06-30, initially left 27 safe consensus decisions applied across `Hos`,
+`2Sam`, `Rev`, and `Amos` with global deltas `emptyStrongCount -40`,
+`readerTaggedTokenCount +47`, and `placementRiskCount -6` before the Leviticus
+follow-up. It also exposed two mandatory safety gates before application:
+
+- remove generic carriers such as `vais`, `ferai`, `fera`, `fasse`, `celle`,
+  and `quoi` unless at least two Strong witnesses use the same normalized
+  carrier. The automatic replay also held 2 Samuel `faisait`, `vais`, and
+  `fit`;
+- hold same-target stacking for review instead of applying both Strong codes to
+  the same French word automatically. That review must inspect the witnesses
+  before discarding either side. In `Rev.5.1`, the witness check showed
+  `G1855 -> dehors/revers/extérieur`, so NBS `dos` keeps `G1855`; `G3693`
+  remains advanced empty.
+
+`Lev` produced a clean 21-decision consensus in that batch and the filter marks
+all 21 safe. Follow-up isolation on 2026-06-30 showed the apparent refresh hang
+was a performance issue in scoped refresh, not a bad Leviticus decision:
+`generateStrongLedger` reread heavy lexical sources and rebuilt large reference
+phrase structures during auto-safe stabilization. The SQLite ledger, lexical
+source cache, Kaikki index, and phrase-lexicon index now remove the full-ledger
+JSON parse and the largest repeated source-loading costs. The pre-SQLite
+`strong:refresh -- --bible nbs --only Lev` baseline completed in 132.06s with
+7.46 GB max RSS; the SQLite/indexed path reduces memory materially while the
+remaining time is dominated by bounded lexical auto-safe stabilization. The 21
+filtered `Lev` decisions are now applied and verified. Incremental `Lev` delta:
+`emptyStrongCount -15`,
+`readerTaggedTokenCount +21`, `placementRiskCount -5`. Report:
+`reports/llm-gap-review-nbs-Lev-filtered-applied-20260630.md`.
+
+The second bounded batch on 2026-06-30 applied 17 filtered consensus decisions
+across `2Kgs.1-5`, `1Pet.1-5`, and `Rom.1-5`, with global deltas
+`emptyStrongCount -42`, `readerTaggedTokenCount +48`, and
+`placementRiskCount -6`. The automatic filter held `2Kgs.4.38 H8239 -> fais`,
+`1Pet.2.20 G0015 -> faisant`, and original-only `Rom.4.17 G5607 -> existe`.
+Visible decisions with no token witness and no Strong support in `Sg1910`,
+`Darby`, or `DarbyR` must remain review items.
+
+Visible high-confidence consensus from two validated model reviews, then filter
+before application:
+
+```sh
+npm run strong:review:gaps:consensus -- \
+  --left-review outputs/gap-review/<id>/agent-review/<left>.json \
+  --right-review outputs/gap-review/<id>/agent-review/<right>.json \
+  --left-validation-dir outputs/gap-review/<id>/agent-review/<left>-validated \
+  --right-validation-dir outputs/gap-review/<id>/agent-review/<right>-validated \
+  --output outputs/gap-review/<id>/agent-review/<consensus-visible-high>.json \
+  --min-confidence 0.84
+npm run strong:review:gaps:filter -- \
+  --review outputs/gap-review/<id>/agent-review/<consensus-visible-high>.json \
+  --output outputs/gap-review/<id>/agent-review/<consensus-visible-high>-auto-filtered.json \
+  --report-json reports/llm-gap-review-<id>-<scope>-post-consensus-filter.json \
+  --report-md reports/llm-gap-review-<id>-<scope>-post-consensus-filter.md
+npm run strong:review:gaps:apply -- \
+  --bible <id> \
+  --input outputs/gap-review/<id>/agent-review/<consensus-visible-high>-auto-filtered.json \
+  --output-dir outputs/gap-review/<id>/agent-review/<consensus-visible-high>-auto-filtered-applied \
+  --apply
+```
+
+Benchmark report with before/after metrics:
+
+```sh
+npm run strong:review:gaps:report -- \
+  --packet outputs/gap-review/<id>/agent-packets/agent-packet-<id>-<scope>-lexical.json \
+  --review outputs/gap-review/<id>/agent-review/<consensus-visible-high>.json \
+  --validation-dir outputs/gap-review/<id>/agent-review/<consensus-visible-high>-validated \
+  --applied-dir outputs/gap-review/<id>/agent-review/<consensus-visible-high>-applied \
+  --before-metrics outputs/gap-review/<id>/baseline/bible-<id>-strong-metrics-before-<scope>.json \
+  --after-metrics outputs/strong/<id>/bible-<id>-strong-metrics.json \
+  --metrics-scope <scope> \
+  --output-json reports/llm-gap-review-<id>-<scope>.json \
+  --output-md reports/llm-gap-review-<id>-<scope>.md
+```
+
+Single-model AI Gateway pilot from a packet:
+
+```sh
+set -a; . ./.env; set +a
+AI_GATEWAY_TIMEOUT_MS=120000 npm run strong:review:gaps:llm -- \
+  --input outputs/gap-review/<id>/agent-packets/agent-packet-<id>-<scope>.json \
+  --output outputs/gap-review/<id>/agent-review/llm-review-<id>-<scope>.json \
+  --model deepseek/deepseek-v4-flash
+npm run strong:review:gaps:apply -- \
+  --bible <id> \
+  --input outputs/gap-review/<id>/agent-review/llm-review-<id>-<scope>.json \
+  --output-dir outputs/gap-review/<id>/agent-review/llm-review-<id>-<scope>-validated \
+  --candidates outputs/gap-review/<id>/<scope>/gap-review-candidates.json \
+  --finalize-reference-style
+```
+
 Validate an agent or arbiter review:
 
 ```sh
@@ -137,6 +302,7 @@ npm run strong:review:gaps:apply -- \
   --input outputs/gap-review/<id>/agent-review/<arbiter>.json \
   --output-dir outputs/gap-review/<id>/agent-review/<arbiter>-applied \
   --candidates outputs/gap-review/<id>/<scope>/gap-review-candidates.json \
+  --finalize-reference-style \
   --apply
 npm run strong:generate -- --bible <id>
 ```
@@ -196,14 +362,14 @@ target carrier.
 Use `strong:generate` when:
 
 - the user asks for the best production-quality workflow;
-- you need the canonical Strong ledger;
+- you need the canonical Strong SQLite ledger;
 - you need one artifact that can produce both `reader` and `advanced` views;
 - you need auditable placement, visibility, source, confidence, and diagnostics.
 
 Use `strong:export` when:
 
 - a TSV is needed for the viewer, distribution, or downstream tools;
-- the canonical ledger already exists;
+- the canonical SQLite ledger already exists;
 - the caller needs either `--view reader` or `--view advanced`.
 
 Use `strong:diagnose` when:
@@ -420,9 +586,11 @@ Confidence replaces pending/review state:
 
 If local validation produces `pending-human` for a structurally valid
 reference-style candidate, the final adapter must convert it before preview or
-application: keep the proposed target with low confidence when mechanically
-safe, or fall back to `empty` at `sourcePlacement.insertAfterWordIndex` when the
-target is unsafe.
+application. Pass `--finalize-reference-style` on the final arbiter validation
+or application command. That mode keeps mechanically safe `word`/`phrase`
+decisions, converts unsafe or unresolved targets to low-confidence `empty` at
+`sourcePlacement.insertAfterWordIndex`, and fills any missing candidate decision
+with the same low-confidence `empty` fallback.
 
 This rule came from the NBS Gen.3.6 regression test. The weak prompt caused both
 proposers to choose `H8378 -> desirable`, even though `desirable` already had

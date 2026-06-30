@@ -1,19 +1,22 @@
 import assert from "node:assert/strict";
-import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
 import { buildReferenceCoverageReport } from "../src/referenceCoverageReport.js";
 import { type StrongLedger } from "../src/strongLedger.js";
+import {
+  strongLedgerSqlitePath,
+  writeStrongLedgerSqlite
+} from "../src/strongLedgerStore.js";
 
 test("reports per-reference reader and advanced coverage from a ledger", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "reference-coverage-test-"));
   const ledger = minimalLedger(dir);
-  await writeFile(
-    path.join(dir, "bible-test-reference-strong-ledger.json"),
-    `${JSON.stringify(ledger, null, 2)}\n`,
-    "utf8"
+  await writeStrongLedgerSqlite(
+    ledger,
+    strongLedgerSqlitePath(dir, "test-reference")
   );
 
   const report = await buildReferenceCoverageReport({
@@ -63,6 +66,7 @@ function minimalLedger(inputPath: string): StrongLedger {
     originalSources: [],
     outputPaths: {
       canonical: "",
+      sqlite: "",
       readerTsv: "",
       advancedTsv: "",
       debugJson: "",

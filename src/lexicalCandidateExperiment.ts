@@ -12,6 +12,10 @@ import {
   type StrongLedgerVerse,
   type StrongLedgerVerseMetrics
 } from "./strongLedger.js";
+import {
+  readStrongLedgerSqlite,
+  strongLedgerSqlitePath
+} from "./strongLedgerStore.js";
 import { escapeHtml, tokenizeText } from "./tokenize.js";
 
 interface CliOptions {
@@ -79,9 +83,9 @@ const CONFIDENCE_ORDER = {
 export async function applyLexicalCandidateExperiment(
   options: CliOptions
 ): Promise<ExperimentResult> {
-  const ledger = JSON.parse(
-    await readFile(options.ledgerPath, "utf8")
-  ) as StrongLedger;
+  const ledger = options.ledgerPath.endsWith(".sqlite")
+    ? readStrongLedgerSqlite({ sqlitePath: options.ledgerPath })
+    : (JSON.parse(await readFile(options.ledgerPath, "utf8")) as StrongLedger);
   const report = JSON.parse(
     await readFile(options.candidatesPath, "utf8")
   ) as LexicalCandidateReport;
@@ -786,7 +790,7 @@ function parseCliOptions(argv: string[]): CliOptions {
   const bible = readOption(argv, "--bible") ?? "nbs";
   const ledgerPath =
     readOption(argv, "--ledger") ??
-    path.join("outputs", "strong", bible, `bible-${bible}-strong-ledger.json`);
+    strongLedgerSqlitePath(path.join("outputs", "strong", bible), bible);
   const candidatesPath =
     readOption(argv, "--candidates") ??
     path.join(

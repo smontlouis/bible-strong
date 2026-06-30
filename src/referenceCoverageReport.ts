@@ -5,6 +5,10 @@ import {
   type StrongLedger,
   type StrongLedgerAnnotation
 } from "./strongLedger.js";
+import {
+  readStrongLedgerSqlite,
+  strongLedgerSqlitePath
+} from "./strongLedgerStore.js";
 
 type ReferenceName = "Sg1910" | "Darby" | "DarbyR";
 type ConsensusBucket = "oneOfThree" | "twoOfThree" | "threeOfThree";
@@ -108,11 +112,8 @@ const EMPTY_COVERAGE_METRICS = (): CoverageMetrics => ({
 export async function buildReferenceCoverageReport(
   options: CliOptions
 ): Promise<ReferenceCoverageReport> {
-  const ledgerPath = path.join(
-    options.inputDir,
-    `bible-${options.bible}-strong-ledger.json`
-  );
-  const ledger = await readStrongLedger(ledgerPath);
+  const ledgerPath = strongLedgerSqlitePath(options.inputDir, options.bible);
+  const ledger = await readStrongLedger(ledgerPath, options.onlyRef);
   const verses = ledger.verses.filter((verse) =>
     options.onlyRef ? refMatches(verse.ref, options.onlyRef) : true
   );
@@ -555,7 +556,14 @@ function renderMarkdownReport(report: ReferenceCoverageReport): string {
   return `${lines.join("\n")}\n`;
 }
 
-async function readStrongLedger(ledgerPath: string): Promise<StrongLedger> {
+async function readStrongLedger(
+  ledgerPath: string,
+  onlyRef?: string
+): Promise<StrongLedger> {
+  if (ledgerPath.endsWith(".sqlite")) {
+    return readStrongLedgerSqlite({ sqlitePath: ledgerPath, onlyRef });
+  }
+
   const ledger = JSON.parse(await readFile(ledgerPath, "utf8")) as StrongLedger;
   if (!ledger.split) return ledger;
 

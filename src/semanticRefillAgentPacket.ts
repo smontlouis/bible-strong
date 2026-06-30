@@ -1,12 +1,19 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { type StrongLedger, type StrongLedgerVerse } from "./strongLedger.js";
+import { type StrongLedgerVerse } from "./strongLedger.js";
+import {
+  readStrongLedgerVersesSqlite,
+  strongLedgerSqlitePath
+} from "./strongLedgerStore.js";
 import {
   buildSemanticRefillLlmBatch,
   SEMANTIC_REFILL_LLM_SYSTEM_PROMPT
 } from "./semanticRefillLlm.js";
-import { type SemanticRefillAuditItem } from "./semanticRefill.js";
+import {
+  type RefillPriority,
+  type SemanticRefillAuditItem
+} from "./semanticRefill.js";
 
 interface AgentPacketFile {
   generatedAt: string;
@@ -20,6 +27,8 @@ interface AgentPacketFile {
     tokens: StrongLedgerVerse["tokens"];
   }>;
   summary: {
+    inputCandidates: number;
+    filteredCandidates: number;
     verses: number;
     candidates: number;
     usable: number;
@@ -40,14 +49,26 @@ async function buildAgentPacket(options: {
   ledgerDir: string;
   outputPath: string;
   limit?: number;
+  minPriority?: RefillPriority;
 }): Promise<AgentPacketFile> {
-  const candidates = (
+  const scopedCandidates = (
     JSON.parse(
       await readFile(options.candidatesPath, "utf8")
     ) as SemanticRefillAuditItem[]
   ).filter((candidate) => refInScope(candidate.ref, options.scope));
-  const verses = (await readVerses(options.ledgerDir, options.bible)).filter(
-    (verse) => refInScope(verse.ref, options.scope)
+  const candidates = filterCandidatesByPriority(
+    scopedCandidates,
+    options.minPriority
+  );
+  if (options.minPriority && candidates.length === 0) {
+    throw new Error(
+      `no-candidates-at-or-above-priority:${options.minPriority}`
+    );
+  }
+  const verses = await readVerses(
+    options.ledgerDir,
+    options.bible,
+    options.scope
   );
   const batch = buildSemanticRefillLlmBatch({
     bible: options.bible,
@@ -56,6 +77,10 @@ async function buildAgentPacket(options: {
     verses,
     limit: options.limit
   });
+  const candidateRefs = new Set(
+    batch.candidates.map((candidate) => candidate.ref)
+  );
+  const packetVerses = verses.filter((verse) => candidateRefs.has(verse.ref));
 
   const packet: AgentPacketFile = {
     generatedAt: new Date().toISOString(),
@@ -68,13 +93,15 @@ async function buildAgentPacket(options: {
       "When sourcePlacement.insertAfterWordIndex exists, nearbyOpenTargets are the first visible targets to consider."
     ].join(" "),
     promptPolicy: SEMANTIC_REFILL_LLM_SYSTEM_PROMPT,
-    verses: verses.map((verse) => ({
+    verses: packetVerses.map((verse) => ({
       ref: verse.ref,
       text: verse.text,
       tokens: verse.tokens
     })),
     summary: {
-      verses: verses.length,
+      inputCandidates: scopedCandidates.length,
+      filteredCandidates: candidates.length,
+      verses: packetVerses.length,
       candidates: batch.candidates.length,
       usable: batch.candidates.length,
       occupiedAware: batch.candidates.filter(
@@ -110,26 +137,14 @@ async function buildAgentPacket(options: {
 
 async function readVerses(
   ledgerDir: string,
-  bible: string
+  bible: string,
+  scope: string
 ): Promise<StrongLedgerVerse[]> {
-  const canonicalPath = path.join(
-    ledgerDir,
-    `bible-${bible}-strong-ledger.json`
-  );
-  const canonical = JSON.parse(
-    await readFile(canonicalPath, "utf8")
-  ) as StrongLedger;
-
-  if (!canonical.split) return canonical.verses;
-
-  return (
-    await Promise.all(
-      (canonical.verseFiles ?? []).map(async (file) => {
-        const content = await readFile(file.path, "utf8");
-        return JSON.parse(content) as StrongLedgerVerse[];
-      })
-    )
-  ).flat();
+  return readStrongLedgerVersesSqlite({
+    sqlitePath: strongLedgerSqlitePath(ledgerDir, bible),
+    bible,
+    onlyRef: scope
+  });
 }
 
 function refInScope(ref: string, scope: string): boolean {
@@ -148,6 +163,30 @@ function topStrong(strong: string[]): Array<[string, number]> {
       (left, right) => right[1] - left[1] || left[0].localeCompare(right[0])
     )
     .slice(0, 30);
+}
+
+function filterCandidatesByPriority(
+  candidates: SemanticRefillAuditItem[],
+  minPriority: RefillPriority | undefined
+): SemanticRefillAuditItem[] {
+  if (!minPriority) return candidates;
+  const minimumRank = priorityRank(minPriority);
+  return candidates.filter(
+    (candidate) => priorityRank(candidate.priority) >= minimumRank
+  );
+}
+
+function priorityRank(priority: RefillPriority): number {
+  switch (priority) {
+    case "semantic-high":
+      return 4;
+    case "semantic-medium":
+      return 3;
+    case "function-low":
+      return 2;
+    case "technical-skip":
+      return 1;
+  }
 }
 
 function parseArgs(argv: string[]): Map<string, string | boolean> {
@@ -186,6 +225,23 @@ function readOptionalNumberArg(
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
+function readOptionalPriorityArg(
+  args: Map<string, string | boolean>,
+  name: string
+): RefillPriority | undefined {
+  const value = args.get(name);
+  if (value === undefined) return undefined;
+  if (
+    value === "semantic-high" ||
+    value === "semantic-medium" ||
+    value === "function-low" ||
+    value === "technical-skip"
+  ) {
+    return value;
+  }
+  throw new Error(`invalid-${name}:${String(value)}`);
+}
+
 function defaultOutputPath(bible: string, scope: string): string {
   const safeScope = scope.replace(/[^0-9A-Za-z]+/gu, "-");
   return `outputs/gap-review/${bible}/agent-packets/agent-packet-${bible}-${safeScope}.json`;
@@ -210,7 +266,8 @@ async function main(): Promise<void> {
     ),
     ledgerDir: readStringArg(args, "ledger-dir", `outputs/strong/${bible}`),
     outputPath,
-    limit: readOptionalNumberArg(args, "limit")
+    limit: readOptionalNumberArg(args, "limit"),
+    minPriority: readOptionalPriorityArg(args, "min-priority")
   });
 
   console.log(

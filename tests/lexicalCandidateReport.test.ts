@@ -7,6 +7,7 @@ import path from "node:path";
 
 import {
   buildLexicalCandidateReport,
+  createLexicalCandidateSourceCache,
   isAutoSafeCandidate,
   lexicalAutoSafePlacements
 } from "../src/lexicalCandidateReport.js";
@@ -63,6 +64,46 @@ test("builds lexical candidates for advanced empty Strong annotations", async ()
   assertTopCandidate(report, "Gen.1.9", "H6960", "amassent");
   assertTopCandidate(report, "Gen.1.11", "H1876", "donne");
   assertTopCandidate(report, "Gen.1.12", "H6213", "portent");
+});
+
+test("reuses cached lexical sources across repeated report builds", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-cache-"));
+  const ledgerPath = path.join(dir, "ledger.json");
+  const kaikkipath = path.join(dir, "kaikki.jsonl");
+  const openOfficePath = path.join(dir, "thes.dat");
+
+  writeFileSync(ledgerPath, JSON.stringify(fakeLedger(), null, 2));
+  writeFileSync(
+    kaikkipath,
+    [
+      kaikkiEntry("donne", "verb", [], ["form of donner"], ["donner"]),
+      kaikkiEntry("donner", "verb", ["donne"], ["to give"])
+    ].join("\n")
+  );
+  writeFileSync(openOfficePath, "UTF-8\ndonner|1\n|produire\n");
+
+  const sourceCache = createLexicalCandidateSourceCache(dictionaryCandidates());
+  const options = {
+    bible: "nbs",
+    onlyRef: "Gen.1",
+    inputDir: dir,
+    outputDir: dir,
+    ledgerPath,
+    kaikkiPath: kaikkipath,
+    openOfficePath,
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    maxCandidatesPerEmpty: 5,
+    sourceCache
+  };
+
+  const first = await buildLexicalCandidateReport(options);
+  const second = await buildLexicalCandidateReport(options);
+
+  assert.equal(sourceCache.kaikki.size, 1);
+  assert.equal(sourceCache.synonymSources.size, 1);
+  assert.deepEqual(second.metrics, first.metrics);
+  assert.deepEqual(second.items, first.items);
 });
 
 test("uses conservative Strong dictionary stems as direct lexical evidence", async () => {

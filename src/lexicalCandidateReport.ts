@@ -12,6 +12,15 @@ import { readStrongDictionaryTranslationCandidates } from "./strongDictionaryLex
 import { normalizeWord, tokenizeText } from "./tokenize.js";
 import { type StrongTranslationCandidate } from "./translationLexicon.js";
 import { type StrongLedger } from "./strongLedger.js";
+import {
+  readStrongLedgerSqlite,
+  strongLedgerSqlitePath
+} from "./strongLedgerStore.js";
+import {
+  defaultKaikkiSqlitePath,
+  hasKaikkiSqliteIndex,
+  readKaikkiSqliteIndex
+} from "./kaikkiSqliteIndex.js";
 
 interface CliOptions {
   bible: string;
@@ -161,6 +170,13 @@ interface PhraseSynonym {
 interface BuildOptions extends CliOptions {
   dictionaryCandidates?: StrongTranslationCandidate[];
   ledger?: Pick<StrongLedger, "verses">;
+  sourceCache?: LexicalCandidateSourceCache;
+}
+
+export interface LexicalCandidateSourceCache {
+  dictionaryCandidates?: StrongTranslationCandidate[];
+  kaikki: Map<string, KaikkiIndex>;
+  synonymSources: Map<string, SynonymSource[]>;
 }
 
 const FUNCTION_WORDS = new Set([
@@ -204,18 +220,31 @@ const FUNCTION_WORDS = new Set([
 export const HIGH_CONFIDENCE_THRESHOLD = 0.72;
 const MEDIUM_CONFIDENCE_THRESHOLD = 0.48;
 
+export function createLexicalCandidateSourceCache(
+  dictionaryCandidates?: StrongTranslationCandidate[]
+): LexicalCandidateSourceCache {
+  return {
+    dictionaryCandidates,
+    kaikki: new Map(),
+    synonymSources: new Map()
+  };
+}
+
 export async function buildLexicalCandidateReport(
   options: BuildOptions
 ): Promise<LexicalCandidateReport> {
   const inputPath =
     options.ledgerPath ??
-    path.join(options.inputDir, `bible-${options.bible}-strong-ledger.json`);
-  const ledger = options.ledger ?? (await readStrongLedger(inputPath));
+    strongLedgerSqlitePath(options.inputDir, options.bible);
+  const ledger =
+    options.ledger ?? (await readStrongLedger(inputPath, options.onlyRef));
   const verses = ledger.verses.filter((verse) =>
     options.onlyRef ? verseMatchesScope(verse, options.onlyRef) : true
   );
   const dictionaryCandidates =
-    options.dictionaryCandidates ?? readStrongDictionaryTranslationCandidates();
+    options.dictionaryCandidates ??
+    options.sourceCache?.dictionaryCandidates ??
+    readStrongDictionaryTranslationCandidates();
   const dictionaryByStrong = groupDictionaryTerms(dictionaryCandidates);
   const emptyItems = verses.flatMap((verse) =>
     verse.annotations.filter(isCandidateEmptyAnnotation).map((annotation) => ({
@@ -239,23 +268,44 @@ export async function buildLexicalCandidateReport(
         .map((token) => token.normalized)
     )
   );
+  const sourceAnnotations = options.sourceCache
+    ? verses.flatMap((verse) =>
+        verse.annotations.filter(
+          (annotation) => annotation.lexiconLookup !== false
+        )
+      )
+    : auditItems.map(({ annotation }) => annotation);
   const englishHints = new Set(
-    auditItems.flatMap(({ annotation }) =>
+    sourceAnnotations.flatMap((annotation) =>
       stepGlossTokens(annotation.step?.map((step) => step.gloss) ?? [])
     )
   );
   const kaikki = options.kaikkiPath
-    ? await readKaikkiIndex(options.kaikkiPath, targetWords, englishHints)
+    ? await readCachedKaikkiIndex(
+        options.kaikkiPath,
+        targetWords,
+        englishHints,
+        options.sourceCache
+      )
     : emptyKaikkiIndex();
-  const synonymSources = await readSynonymSources(options, {
-    targetWords: new Set([...targetWords, ...kaikki.formToLemma.values()]),
-    dictionaryTerms: new Set(
-      [...dictionaryByStrong.values()].flatMap((terms) => [...terms.keys()])
-    ),
-    inferredTerms: new Set(
-      [...kaikki.englishGlossToFrench.values()].flatMap((terms) => [...terms])
-    )
-  });
+  const dictionaryStrongSet = new Set(
+    sourceAnnotations.map((annotation) => annotation.strong)
+  );
+  const synonymSources = await readCachedSynonymSources(
+    options,
+    {
+      targetWords: new Set([...targetWords, ...kaikki.formToLemma.values()]),
+      dictionaryTerms: new Set(
+        [...dictionaryStrongSet].flatMap((strong) => [
+          ...(dictionaryByStrong.get(strong)?.keys() ?? [])
+        ])
+      ),
+      inferredTerms: new Set(
+        [...kaikki.englishGlossToFrench.values()].flatMap((terms) => [...terms])
+      )
+    },
+    options.sourceCache
+  );
 
   const items = auditItems.map(({ kind, verse, annotation }) =>
     buildCandidateItem({
@@ -1643,6 +1693,35 @@ async function readSynonymSources(
   return sources;
 }
 
+async function readCachedSynonymSources(
+  options: CliOptions,
+  terms: {
+    targetWords: Set<string>;
+    dictionaryTerms: Set<string>;
+    inferredTerms: Set<string>;
+  },
+  cache?: LexicalCandidateSourceCache
+): Promise<SynonymSource[]> {
+  if (!cache) return readSynonymSources(options, terms);
+
+  const key = lexicalSourceCacheKey([
+    options.jdmCacheDir ?? "",
+    String(options.fetchJdm),
+    String(options.fetchJdmLimit),
+    options.openOfficePath ?? "",
+    options.wolfPath ?? "",
+    lexicalSetKey(terms.targetWords),
+    lexicalSetKey(terms.dictionaryTerms),
+    lexicalSetKey(terms.inferredTerms)
+  ]);
+  const cached = cache.synonymSources.get(key);
+  if (cached) return cached;
+
+  const sources = await readSynonymSources(options, terms);
+  cache.synonymSources.set(key, sources);
+  return sources;
+}
+
 async function readRezoJdmSynonyms(options: {
   terms: Set<string>;
   cacheDir: string;
@@ -1841,6 +1920,11 @@ async function readKaikkiIndex(
   targetWords: Set<string>,
   englishHints: Set<string>
 ): Promise<KaikkiIndex> {
+  const sqlitePath = defaultKaikkiSqlitePath(filePath);
+  if (hasKaikkiSqliteIndex(sqlitePath)) {
+    return readKaikkiSqliteIndex({ sqlitePath, targetWords, englishHints });
+  }
+
   const index = emptyKaikkiIndex();
   const input = filePath.endsWith(".gz")
     ? createReadStream(filePath).pipe(createGunzip())
@@ -1882,6 +1966,35 @@ async function readKaikkiIndex(
   }
 
   return index;
+}
+
+async function readCachedKaikkiIndex(
+  filePath: string,
+  targetWords: Set<string>,
+  englishHints: Set<string>,
+  cache?: LexicalCandidateSourceCache
+): Promise<KaikkiIndex> {
+  if (!cache) return readKaikkiIndex(filePath, targetWords, englishHints);
+
+  const key = lexicalSourceCacheKey([
+    filePath,
+    lexicalSetKey(targetWords),
+    lexicalSetKey(englishHints)
+  ]);
+  const cached = cache.kaikki.get(key);
+  if (cached) return cached;
+
+  const index = await readKaikkiIndex(filePath, targetWords, englishHints);
+  cache.kaikki.set(key, index);
+  return index;
+}
+
+function lexicalSourceCacheKey(parts: string[]): string {
+  return parts.join("\u0000");
+}
+
+function lexicalSetKey(values: Set<string>): string {
+  return [...values].sort().join("\u0001");
 }
 
 function safeJsonParse(line: string): KaikkiEntry | undefined {
@@ -1933,7 +2046,14 @@ function inferredFrenchTerms(
   return terms;
 }
 
-async function readStrongLedger(ledgerPath: string): Promise<StrongLedger> {
+async function readStrongLedger(
+  ledgerPath: string,
+  onlyRef?: string
+): Promise<StrongLedger> {
+  if (ledgerPath.endsWith(".sqlite")) {
+    return readStrongLedgerSqlite({ sqlitePath: ledgerPath, onlyRef });
+  }
+
   const ledger = JSON.parse(await readFile(ledgerPath, "utf8")) as StrongLedger;
   if (!ledger.split) return ledger;
 

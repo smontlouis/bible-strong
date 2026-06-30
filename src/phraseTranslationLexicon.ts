@@ -23,7 +23,7 @@ export interface StrongPhraseMatch extends StrongPhraseCandidate {
 
 interface PhraseCount {
   strong: string;
-  phrase: string[];
+  phraseKey: string;
   offset: number;
   count: number;
 }
@@ -53,16 +53,13 @@ export function buildStrongPhraseLexicon(
               start <= index && start + length <= tokens.length;
               start += 1
             ) {
-              const phraseTokens = tokens.slice(start, start + length);
-              if (
-                !isUsefulPhrase(phraseTokens.map((item) => item.normalized))
-              ) {
+              if (!isUsefulPhraseSpan(tokens, start, length)) {
                 continue;
               }
 
               increment(counts, {
                 strong,
-                phrase: phraseTokens.map((item) => item.normalized),
+                phraseKey: phraseKeyForSpan(tokens, start, length),
                 offset: index - start
               });
             }
@@ -73,6 +70,12 @@ export function buildStrongPhraseLexicon(
   }
 
   const byStrong = normalizePhraseCounts(counts, source);
+  return createStrongPhraseLexicon(byStrong);
+}
+
+export function createStrongPhraseLexicon(
+  byStrong: Map<string, StrongPhraseCandidate[]>
+): StrongPhraseLexicon {
   return {
     byStrong,
     byStrongFirst: indexByStrongFirst(byStrong)
@@ -261,9 +264,9 @@ function indexByStrongFirst(
 
 function increment(
   counts: Map<string, PhraseCount>,
-  value: Pick<PhraseCount, "strong" | "phrase" | "offset">
+  value: Pick<PhraseCount, "strong" | "phraseKey" | "offset">
 ): void {
-  const key = `${value.strong}\t${value.offset}\t${value.phrase.join(" ")}`;
+  const key = `${value.strong}\t${value.offset}\t${value.phraseKey}`;
   const existing = counts.get(key);
 
   if (existing) {
@@ -294,7 +297,7 @@ function normalizePhraseCounts(
     const candidates = entries
       .map((entry) => ({
         strong,
-        phrase: entry.phrase,
+        phrase: entry.phraseKey.split(" "),
         offset: entry.offset,
         score: entry.count / maxCount,
         source,
@@ -322,9 +325,33 @@ function phraseEquals(
   return words.every((word, index) => word.normalized === phrase[index]);
 }
 
-function isUsefulPhrase(phrase: string[]): boolean {
-  if (phrase.some((word) => word.length < 2)) return false;
-  return phrase.some((word) => !FRENCH_FUNCTION_WORDS.has(word));
+function isUsefulPhraseSpan(
+  tokens: Array<{ normalized: string }>,
+  start: number,
+  length: number
+): boolean {
+  let hasContentWord = false;
+  for (let offset = 0; offset < length; offset += 1) {
+    const normalized = tokens[start + offset]?.normalized ?? "";
+    if (normalized.length < 2) return false;
+    if (!FRENCH_FUNCTION_WORDS.has(normalized)) {
+      hasContentWord = true;
+    }
+  }
+  return hasContentWord;
+}
+
+function phraseKeyForSpan(
+  tokens: Array<{ normalized: string }>,
+  start: number,
+  length: number
+): string {
+  let phrase = "";
+  for (let offset = 0; offset < length; offset += 1) {
+    if (offset > 0) phrase += " ";
+    phrase += tokens[start + offset]?.normalized ?? "";
+  }
+  return phrase;
 }
 
 const FRENCH_FUNCTION_WORDS = new Set([

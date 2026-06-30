@@ -46,6 +46,15 @@ export type StepOriginalEvidenceIndex = Map<
   Map<string, StepStrongEvidence[]>
 >;
 
+export interface StepOriginalData {
+  verseMap: OriginalVerseMap;
+  evidenceIndex: StepOriginalEvidenceIndex;
+}
+
+interface StepOriginalReadOptions {
+  bookIds?: Set<string>;
+}
+
 const STEP_TO_OSIS_BOOK = new Map<string, string>([
   ["Gen", "Gen"],
   ["Exo", "Exod"],
@@ -188,8 +197,37 @@ export async function readStepOriginalVerseMap(
   return map;
 }
 
+export async function readStepOriginalData(
+  filePaths: string[],
+  options: StepOriginalReadOptions = {}
+): Promise<StepOriginalData> {
+  const verseMap: OriginalVerseMap = new Map();
+  const evidenceIndex: StepOriginalEvidenceIndex = new Map();
+
+  for (const filePath of filePaths) {
+    const tokens = await readStepOriginalTokens(filePath, options);
+    for (const token of tokens) {
+      addTokenToOriginalVerseMap(verseMap, token, token.ref);
+      addTokenEvidence(
+        getOrInsert(evidenceIndex, token.ref, () => new Map()),
+        token
+      );
+      for (const alternateRef of token.alternateRefs) {
+        addTokenToOriginalVerseMap(verseMap, token, alternateRef);
+        addTokenEvidence(
+          getOrInsert(evidenceIndex, alternateRef, () => new Map()),
+          token
+        );
+      }
+    }
+  }
+
+  return { verseMap, evidenceIndex };
+}
+
 export async function readStepOriginalTokens(
-  filePath: string
+  filePath: string,
+  options: StepOriginalReadOptions = {}
 ): Promise<StepOriginalToken[]> {
   const content = await readFile(filePath, "utf8");
   const source = filePath.includes("TAGNT") ? "TAGNT" : "TAHOT";
@@ -199,6 +237,7 @@ export async function readStepOriginalTokens(
     const parts = line.split("\t");
     const ref = parseStepRef(parts[0] ?? "");
     if (!ref) continue;
+    if (!stepRefMatchesBooks(ref, options.bookIds)) continue;
 
     const token =
       source === "TAGNT"
@@ -210,6 +249,21 @@ export async function readStepOriginalTokens(
   }
 
   return tokens;
+}
+
+function stepRefMatchesBooks(
+  ref: ParsedStepRef,
+  bookIds: Set<string> | undefined
+): boolean {
+  if (!bookIds || bookIds.size === 0) return true;
+  if (bookIds.has(bookIdFromReferenceKey(ref.key))) return true;
+  return ref.alternateKeys.some((key) =>
+    bookIds.has(bookIdFromReferenceKey(key))
+  );
+}
+
+function bookIdFromReferenceKey(key: string): string {
+  return key.split(".")[0] ?? "";
 }
 
 function addTokenToOriginalVerseMap(

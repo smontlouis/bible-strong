@@ -3,11 +3,17 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { type CuratedStrongOverride } from "./curatedStrongOverrides.js";
-import { type StrongLedger, type StrongLedgerVerse } from "./strongLedger.js";
+import { type StrongLedgerVerse } from "./strongLedger.js";
+import {
+  readStrongLedgerVersesSqlite,
+  strongLedgerSqlitePath
+} from "./strongLedgerStore.js";
 import {
   buildSemanticRefillLlmBatch,
   evaluateSemanticRefillLlmDecisions,
   SEMANTIC_REFILL_LLM_DECISION_TYPES,
+  type SemanticRefillLlmBatch,
+  type SemanticRefillLlmCandidatePacket,
   type SemanticRefillLlmDecisionType,
   type SemanticRefillLlmRawDecision
 } from "./semanticRefillLlm.js";
@@ -16,7 +22,14 @@ import { type SemanticRefillAuditItem } from "./semanticRefill.js";
 interface AgentReviewFile {
   bible?: string;
   books?: string[];
+  sourcePacket?: string;
   decisions?: unknown[];
+}
+
+interface AgentPacketFile {
+  bible: string;
+  scope: string;
+  candidates: SemanticRefillLlmCandidatePacket[];
 }
 
 interface AgentReviewResult {
@@ -24,6 +37,7 @@ interface AgentReviewResult {
   outputDir: string;
   bible: string;
   books: string[];
+  referenceStyleFinalization: boolean;
   rawDecisionCount: number;
   validatedCount: number;
   pendingCount: number;
@@ -38,34 +52,50 @@ async function validateAgentReview(options: {
   ledgerDir: string;
   overridesPath: string;
   apply: boolean;
+  referenceStyleFinalization: boolean;
 }): Promise<AgentReviewResult> {
   const review = JSON.parse(
     await readFile(options.inputPath, "utf8")
   ) as AgentReviewFile;
   const rawDecisions = normalizeRawDecisions(review.decisions ?? []);
-  const books = inferBooks(review.books, rawDecisions);
-  const candidates = (
-    JSON.parse(
-      await readFile(options.candidatesPath, "utf8")
-    ) as SemanticRefillAuditItem[]
-  ).filter((candidate) => books.includes(candidate.ref.split(".")[0] ?? ""));
-  const patchedRaw = patchUnknownIds({
-    bible: options.bible,
-    candidates,
-    rawDecisions
-  });
+  const packet = await readOptionalPacket(review.sourcePacket);
+  const books = packet
+    ? inferBooksFromRefs(packet.candidates.map((candidate) => candidate.ref))
+    : inferBooks(review.books, rawDecisions);
+  const candidates = packet
+    ? []
+    : (
+        JSON.parse(
+          await readFile(options.candidatesPath, "utf8")
+        ) as SemanticRefillAuditItem[]
+      ).filter((candidate) =>
+        books.includes(candidate.ref.split(".")[0] ?? "")
+      );
+  const patchedRaw = packet
+    ? patchUnknownPacketIds({
+        candidates: packet.candidates,
+        rawDecisions
+      })
+    : patchUnknownIds({
+        bible: options.bible,
+        candidates,
+        rawDecisions
+      });
   const verses = await readBookVerses(options.ledgerDir, options.bible, books);
-  const batch = buildSemanticRefillLlmBatch({
-    bible: options.bible,
-    scope: books.join(","),
-    candidates,
-    verses
-  });
+  const batch = packet
+    ? packetToBatch(packet)
+    : buildSemanticRefillLlmBatch({
+        bible: options.bible,
+        scope: books.join(","),
+        candidates,
+        verses
+      });
   const evaluated = evaluateSemanticRefillLlmDecisions({
     bible: options.bible,
     verses,
     batch,
-    rawDecisions: patchedRaw
+    rawDecisions: patchedRaw,
+    referenceStyleFinalization: options.referenceStyleFinalization
   });
 
   await mkdir(options.outputDir, { recursive: true });
@@ -87,11 +117,38 @@ async function validateAgentReview(options: {
     outputDir: options.outputDir,
     bible: options.bible,
     books,
+    referenceStyleFinalization: options.referenceStyleFinalization,
     rawDecisionCount: rawDecisions.length,
     validatedCount: evaluated.validated.length,
     pendingCount: evaluated.pending.length,
     rejectedCount: evaluated.rejected.length
   };
+}
+
+async function readOptionalPacket(
+  sourcePacket: string | undefined
+): Promise<AgentPacketFile | undefined> {
+  if (!sourcePacket) return undefined;
+  if (!existsSync(sourcePacket)) return undefined;
+  return JSON.parse(await readFile(sourcePacket, "utf8")) as AgentPacketFile;
+}
+
+function packetToBatch(packet: AgentPacketFile): SemanticRefillLlmBatch {
+  return {
+    bible: packet.bible,
+    scope: packet.scope,
+    candidates: packet.candidates
+  };
+}
+
+function inferBooksFromRefs(refs: string[]): string[] {
+  return [
+    ...new Set(
+      refs
+        .map((ref) => ref.split(".")[0])
+        .filter((book): book is string => !!book)
+    )
+  ];
 }
 
 function inferBooks(
@@ -190,34 +247,34 @@ function patchUnknownIds(options: {
   });
 }
 
+function patchUnknownPacketIds(options: {
+  candidates: SemanticRefillLlmCandidatePacket[];
+  rawDecisions: SemanticRefillLlmRawDecision[];
+}): SemanticRefillLlmRawDecision[] {
+  const byId = new Set(options.candidates.map((candidate) => candidate.id));
+
+  return options.rawDecisions.map((raw) => {
+    if (byId.has(raw.id)) return raw;
+    const matching = options.candidates.filter(
+      (candidate) =>
+        candidate.ref === raw.ref &&
+        raw.strong.some((strong) => strong.toUpperCase() === candidate.strong)
+    );
+    if (matching.length !== 1) return raw;
+    return { ...raw, id: matching[0]?.id ?? raw.id };
+  });
+}
+
 async function readBookVerses(
   ledgerDir: string,
   bible: string,
   books: string[]
 ): Promise<StrongLedgerVerse[]> {
-  const canonicalPath = path.join(
-    ledgerDir,
-    `bible-${bible}-strong-ledger.json`
-  );
-  const canonical = JSON.parse(
-    await readFile(canonicalPath, "utf8")
-  ) as StrongLedger;
-
-  if (!canonical.split) {
-    return canonical.verses.filter((verse) => books.includes(verse.bookId));
-  }
-
-  const files = (canonical.verseFiles ?? []).filter((file) =>
-    books.includes(file.bookId)
-  );
-  return (
-    await Promise.all(
-      files.map(async (file) => {
-        const content = await readFile(file.path, "utf8");
-        return JSON.parse(content) as StrongLedgerVerse[];
-      })
-    )
-  ).flat();
+  return readStrongLedgerVersesSqlite({
+    sqlitePath: strongLedgerSqlitePath(ledgerDir, bible),
+    bible,
+    books
+  });
 }
 
 async function appendOverrides(
@@ -320,7 +377,10 @@ async function main(): Promise<void> {
       "overrides",
       "data/curated-strong-overrides.json"
     ),
-    apply: args.get("apply") === true
+    apply: args.get("apply") === true,
+    referenceStyleFinalization:
+      args.get("reference-style") === true ||
+      args.get("finalize-reference-style") === true
   });
   console.log(JSON.stringify(result, null, 2));
 }

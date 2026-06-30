@@ -8,10 +8,13 @@ import {
 } from "./curatedStrongOverrides.js";
 import {
   type StrongLedgerAnnotation,
-  type StrongLedger,
   type StrongLedgerToken,
   type StrongLedgerVerse
 } from "./strongLedger.js";
+import {
+  readStrongLedgerSqlite,
+  strongLedgerSqlitePath
+} from "./strongLedgerStore.js";
 import { normalizeWord } from "./tokenize.js";
 
 export type CandidateTarget =
@@ -174,8 +177,11 @@ export const WEAK_WORDS = new Set([
 export async function runSemanticRefill(
   options: RunOptions
 ): Promise<SemanticRefillRunResult> {
-  const bible = await readStrongLedgerInput(options.inputDir, options.bible);
-  const verses = filterScope(bible.verses, options.scope);
+  const bible = readStrongLedgerSqlite({
+    sqlitePath: strongLedgerSqlitePath(options.inputDir, options.bible),
+    onlyRef: options.scope
+  });
+  const verses = bible.verses;
   const lexicon = await readOrCreateLexicon(options.lexiconPath);
   const result = buildSemanticRefill({
     bible: options.bible,
@@ -379,51 +385,6 @@ export function validateSemanticRefillDecision(options: {
   }
 
   return { status: "validated" };
-}
-
-async function readStrongLedgerInput(
-  inputDir: string,
-  bible: string
-): Promise<StrongLedger> {
-  const canonicalPath = path.join(
-    inputDir,
-    `bible-${bible}-strong-ledger.json`
-  );
-  const canonical = JSON.parse(
-    await readFile(canonicalPath, "utf8")
-  ) as StrongLedger;
-
-  if (!canonical.split) return canonical;
-
-  const verses = (
-    await Promise.all(
-      (canonical.verseFiles ?? []).map(async (file) => {
-        const content = await readFile(file.path, "utf8");
-        return JSON.parse(content) as StrongLedgerVerse[];
-      })
-    )
-  ).flat();
-
-  return { ...canonical, verses };
-}
-
-function filterScope(
-  verses: StrongLedgerVerse[],
-  scope: string
-): StrongLedgerVerse[] {
-  if (scope === "all") return verses;
-  if (/^[1-3]?[A-Za-z]+$/u.test(scope)) {
-    return verses.filter((verse) => verse.bookId === scope);
-  }
-  const chapterMatch = /^([1-3]?[A-Za-z]+)\.(\d+)$/u.exec(scope);
-  if (chapterMatch) {
-    const [, bookId, rawChapter] = chapterMatch;
-    const chapter = Number(rawChapter);
-    return verses.filter(
-      (verse) => verse.bookId === bookId && verse.chapter === chapter
-    );
-  }
-  return verses.filter((verse) => verse.ref === scope);
 }
 
 async function readOrCreateLexicon(

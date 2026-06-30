@@ -1,6 +1,7 @@
-import { existsSync } from "node:fs";
+import { createWriteStream, existsSync } from "node:fs";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { performance } from "node:perf_hooks";
 
 import { type AssignedStrong, type ReferenceSource } from "./align.js";
 import { readBibleJson, type BibleVerse } from "./bibleJson.js";
@@ -16,6 +17,7 @@ import { applyCuratedStrongOverrides } from "./curatedStrongOverrides.js";
 import { buildStrongLexicon } from "./lexicon.js";
 import {
   buildLexicalCandidateReport,
+  createLexicalCandidateSourceCache,
   lexicalAutoSafePlacements,
   writeLexicalCandidateReport,
   type LexicalAutoSafePlacement,
@@ -44,8 +46,7 @@ import {
 } from "./strongCsv.js";
 import { readStrongDictionaryTranslationCandidates } from "./strongDictionaryLexicon.js";
 import {
-  readStepOriginalEvidenceIndex,
-  readStepOriginalVerseMap,
+  readStepOriginalData,
   type StepOriginalEvidenceIndex,
   type StepStrongEvidence as SourceStepStrongEvidence
 } from "./stepOriginals.js";
@@ -56,6 +57,18 @@ import {
   getTranslationProfile,
   type TranslationProfile
 } from "./translationProfiles.js";
+import {
+  readStrongPhraseLexiconSqlite,
+  strongPhraseLexiconSourceFingerprint,
+  writeStrongPhraseLexiconSqlite
+} from "./strongPhraseLexiconStore.js";
+import {
+  exportStrongLedgerTsvSqlite,
+  readStrongLedgerSqlite,
+  replaceStrongLedgerSqliteVerses,
+  strongLedgerSqlitePath,
+  writeStrongLedgerSqlite
+} from "./strongLedgerStore.js";
 
 export type StrongVisibility =
   | "reader"
@@ -165,6 +178,7 @@ export interface StrongLedger {
   originalSources: OriginalSourceSummary[];
   outputPaths: {
     canonical: string;
+    sqlite: string;
     readerTsv: string;
     advancedTsv: string;
     debugJson: string;
@@ -253,6 +267,8 @@ interface StrongLedgerOptions {
   biblePath: string;
   outputDir: string;
   onlyRef?: string;
+  writeArtifacts?: boolean;
+  writeLexicalReport?: boolean;
 }
 
 interface StrongLedgerRefreshOptions extends StrongLedgerOptions {
@@ -295,6 +311,17 @@ const STEP_ORIGINAL_SOURCES = [
   "data/external/stepbible/amalgamated/TAGNT Act-Rev.txt"
 ];
 
+const STEP_SOURCE_BOOK_RANGES = new Map<string, { start: string; end: string }>(
+  [
+    ["TAHOT Gen-Deu.txt", { start: "Gen", end: "Deut" }],
+    ["TAHOT Jos-Est.txt", { start: "Josh", end: "Esth" }],
+    ["TAHOT Job-Sng.txt", { start: "Job", end: "Song" }],
+    ["TAHOT Isa-Mal.txt", { start: "Isa", end: "Mal" }],
+    ["TAGNT Mat-Jhn.txt", { start: "Matt", end: "John" }],
+    ["TAGNT Act-Rev.txt", { start: "Acts", end: "Rev" }]
+  ]
+);
+
 const FRENCH_LEXICAL_SOURCES = {
   kaikki:
     "data/external/french-lexical/kaikki/kaikki.org-dictionary-French.jsonl",
@@ -305,6 +332,7 @@ const FRENCH_LEXICAL_SOURCES = {
 };
 
 const MAX_LEXICAL_AUTOSAFE_PASSES = 8;
+const STRONG_PERF_ENABLED = process.env.STRONG_PERF === "1";
 
 const TECHNICAL_STRONG = new Set([
   "H0853",
@@ -325,23 +353,48 @@ const TECHNICAL_STRONG = new Set([
 export async function generateStrongLedger(
   options: StrongLedgerOptions
 ): Promise<StrongLedger> {
-  const verses = filterVerses(await readBibleJson(options.biblePath), options);
-  const references = await loadReferences();
-  const originals = await loadOriginalSources();
-  const originalByRef = mergeOriginalSources(originals);
-  const stepEvidenceByRef = await loadStepEvidence();
-  const lexicon = buildStrongLexicon(references);
-  const dictionaryCandidates = readStrongDictionaryTranslationCandidates();
-  const translationLexicon = buildStrongTranslationLexicon(references, {
-    dictionaryCandidates
-  });
-  const phraseLexicon = buildStrongPhraseLexicon(references);
+  const generateStart = perfStart();
+  const verses = await measureAsync("read target bible", async () =>
+    filterVerses(await readBibleJson(options.biblePath), options)
+  );
+  const scopedBooks = new Set(verses.map((verse) => verse.bookId));
+  const references = await measureAsync("load Strong references", () =>
+    loadReferences()
+  );
+  const originalData = await measureAsync("load STEP originals", () =>
+    loadOriginalData(scopedBooks)
+  );
+  const originals = originalData.bundles;
+  const originalByRef = measureSync("merge STEP originals", () =>
+    mergeOriginalSources(originals)
+  );
+  const stepEvidenceByRef = originalData.evidence;
+  const lexicon = measureSync("build Strong lexicon", () =>
+    buildStrongLexicon(references)
+  );
+  const dictionaryCandidates = measureSync(
+    "load dictionary candidates",
+    readStrongDictionaryTranslationCandidates
+  );
+  const translationLexicon = measureSync("build translation lexicon", () =>
+    buildStrongTranslationLexicon(references, {
+      dictionaryCandidates
+    })
+  );
+  const phraseLexicon = await measureAsync("load phrase lexicon", () =>
+    loadStrongPhraseLexicon(references)
+  );
+  const lexicalSourceCache =
+    createLexicalCandidateSourceCache(dictionaryCandidates);
   const translationProfile = getTranslationProfile(options.bible);
   await mkdir(options.outputDir, { recursive: true });
 
   const paths = outputPaths(options);
   const ledgerVerses: StrongLedgerVerse[] = [];
   const ledgerByBook = new Map<string, StrongLedgerVerse[]>();
+  let readerAlignMs = 0;
+  let completeAlignMs = 0;
+  let ledgerBuildMs = 0;
 
   for (const verse of verses) {
     const key = referenceKey(verse.bookId, verse.chapter, verse.verse);
@@ -352,6 +405,7 @@ export async function generateStrongLedger(
       verse: reference.map.get(key)
     }));
 
+    const readerStart = perfStart();
     const reader = alignReaderVerse({
       targetText: verse.text,
       references: verseReferences,
@@ -367,12 +421,14 @@ export async function generateStrongLedger(
         : undefined,
       readerPolicy: translationProfile.readerAlignment
     });
+    readerAlignMs += perfElapsed(readerStart);
     applyCuratedStrongOverrides({
       bible: options.bible,
       ref: formatRef(verse),
       result: reader
     });
 
+    const completeStart = perfStart();
     const complete = alignCompleteVerse({
       targetText: verse.text,
       references: verseReferences,
@@ -380,7 +436,9 @@ export async function generateStrongLedger(
       translationLexicon,
       original: original?.verse
     });
+    completeAlignMs += perfElapsed(completeStart);
 
+    const ledgerBuildStart = perfStart();
     const ledgerVerse = buildStrongLedgerVerse({
       bible: options.bible,
       verse,
@@ -391,12 +449,20 @@ export async function generateStrongLedger(
       references: verseReferences,
       profile: translationProfile
     });
+    ledgerBuildMs += perfElapsed(ledgerBuildStart);
 
     ledgerVerses.push(ledgerVerse);
     const bookVerses = ledgerByBook.get(verse.bookId) ?? [];
     bookVerses.push(ledgerVerse);
     ledgerByBook.set(verse.bookId, bookVerses);
   }
+  perfLog(
+    `align ${verses.length} verses reader=${formatPerfMs(
+      readerAlignMs
+    )} complete=${formatPerfMs(completeAlignMs)} ledger=${formatPerfMs(
+      ledgerBuildMs
+    )}`
+  );
 
   const lexicalReportOptions = {
     bible: options.bible,
@@ -407,31 +473,55 @@ export async function generateStrongLedger(
     fetchJdm: false,
     fetchJdmLimit: 0,
     maxCandidatesPerEmpty: 8,
+    sourceCache: lexicalSourceCache,
     ...availableFrenchLexicalSources()
   };
   let lexicalAutoSafeCount = 0;
+  let residualLexicalReport:
+    | Awaited<ReturnType<typeof buildLexicalCandidateReport>>
+    | undefined;
   for (let pass = 0; pass < MAX_LEXICAL_AUTOSAFE_PASSES; pass += 1) {
+    const passStart = perfStart();
     const lexicalReport = await buildLexicalCandidateReport({
       ...lexicalReportOptions,
       ledger: { verses: ledgerVerses }
     });
-    const applied = applyLexicalAutoSafePlacementsToLedger({
-      verses: ledgerVerses,
-      report: lexicalReport
-    });
-    if (applied === 0) break;
+    const applied = measureSync("apply lexical auto-safe placements", () =>
+      applyLexicalAutoSafePlacementsToLedger({
+        verses: ledgerVerses,
+        report: lexicalReport
+      })
+    );
+    perfLog(
+      `lexical auto-safe pass ${pass + 1}: ${formatPerfMs(
+        perfElapsed(passStart)
+      )}; applied=${applied}`
+    );
+    if (applied === 0) {
+      residualLexicalReport = lexicalReport;
+      break;
+    }
     lexicalAutoSafeCount += applied;
     rebuildLedgerVerses(ledgerVerses);
     rebuildLedgerByBook(ledgerByBook, ledgerVerses);
   }
-  const residualLexicalReport = await buildLexicalCandidateReport({
-    ...lexicalReportOptions,
-    ledger: { verses: ledgerVerses }
-  });
-  await writeLexicalCandidateReport(
-    residualLexicalReport,
-    lexicalCandidateOutputDir(options.bible)
-  );
+  if (options.writeLexicalReport !== false) {
+    residualLexicalReport ??= await measureAsync(
+      "build residual lexical report",
+      () =>
+        buildLexicalCandidateReport({
+          ...lexicalReportOptions,
+          ledger: { verses: ledgerVerses }
+        })
+    );
+    const lexicalReportToWrite = residualLexicalReport;
+    await measureAsync("write lexical candidate report", () =>
+      writeLexicalCandidateReport(
+        lexicalReportToWrite,
+        lexicalCandidateOutputDir(options.bible)
+      )
+    );
+  }
 
   const metrics = aggregateMetrics(
     options.bible,
@@ -456,7 +546,12 @@ export async function generateStrongLedger(
     verses: ledgerVerses
   };
 
-  await writeStrongLedgerOutputs(bible, ledgerByBook, paths);
+  if (options.writeArtifacts !== false) {
+    await measureAsync("write ledger artifacts", () =>
+      writeStrongLedgerOutputs(bible, paths)
+    );
+  }
+  perfEnd("generate total", generateStart);
   return bible;
 }
 
@@ -469,10 +564,14 @@ export async function exportStrongLedger(options: {
     bible: options.bible,
     outputDir: options.outputDir
   });
-  const canonical = await readStrongLedger(paths.canonical);
   const outputPath =
     options.mode === "reader" ? paths.readerTsv : paths.advancedTsv;
-  await writeTsv(outputPath, canonical.verses, options.mode);
+  await exportStrongLedgerTsvSqlite({
+    sqlitePath: paths.sqlite,
+    bible: options.bible,
+    outputPath,
+    mode: options.mode
+  });
   return outputPath;
 }
 
@@ -485,7 +584,10 @@ export async function refreshStrongLedger(
   }
 
   const paths = outputPaths(options);
-  const existing = await readStrongLedger(paths.canonical);
+  const existing = readStrongLedgerSqlite({
+    sqlitePath: paths.sqlite,
+    includeVerses: false
+  });
   const refreshRoot = path.join(options.outputDir, ".refresh");
   const refreshedVerses: StrongLedgerVerse[] = [];
 
@@ -498,7 +600,9 @@ export async function refreshStrongLedger(
       const scopedLedger = await generateStrongLedger({
         ...options,
         onlyRef: scope,
-        outputDir: scopedOutputDir
+        outputDir: scopedOutputDir,
+        writeArtifacts: false,
+        writeLexicalReport: false
       });
       refreshedVerses.push(...scopedLedger.verses);
     }
@@ -506,23 +610,57 @@ export async function refreshStrongLedger(
     await rm(refreshRoot, { recursive: true, force: true });
   }
 
-  const verses = mergeStrongLedgerVerseScopes(existing.verses, refreshedVerses);
-  const ledgerByBook = buildLedgerByBook(verses);
-  const metrics = aggregateMetrics(options.bible, undefined, verses);
-  const refreshed: StrongLedger = {
+  const method = `${existing.method} Refreshed scoped output for ${scopes.join(
+    ", "
+  )} without a full-Bible regeneration.`;
+  const metrics = await replaceStrongLedgerSqliteVerses({
+    sqlitePath: paths.sqlite,
+    bible: options.bible,
+    verses: refreshedVerses,
+    method
+  });
+  await Promise.all([
+    writeFile(paths.metrics, `${JSON.stringify(metrics, null, 2)}\n`, "utf8"),
+    exportStrongLedgerTsvSqlite({
+      sqlitePath: paths.sqlite,
+      bible: options.bible,
+      outputPath: paths.readerTsv,
+      mode: "reader"
+    }),
+    exportStrongLedgerTsvSqlite({
+      sqlitePath: paths.sqlite,
+      bible: options.bible,
+      outputPath: paths.advancedTsv,
+      mode: "advanced"
+    })
+  ]);
+
+  return {
     ...existing,
     generatedAt: metrics.generatedAt,
     scope: "all",
-    method: `${existing.method} Refreshed scoped output for ${scopes.join(
-      ", "
-    )} without a full-Bible regeneration.`,
+    method,
     outputPaths: paths,
     metrics,
-    verses
+    verses: refreshedVerses
   };
+}
 
-  await writeStrongLedgerOutputs(refreshed, ledgerByBook, paths);
-  return refreshed;
+export async function migrateStrongLedgerToSqlite(
+  options: StrongLedgerOptions
+): Promise<StrongLedger> {
+  const paths = outputPaths(options);
+  const legacyPath = path.join(
+    options.outputDir,
+    `bible-${options.bible}-strong-ledger.json`
+  );
+  const ledger = await readLegacyStrongLedgerJson(legacyPath);
+  const migrated: StrongLedger = {
+    ...ledger,
+    outputPaths: paths
+  };
+  await writeStrongLedgerOutputs(migrated, paths);
+  return migrated;
 }
 
 export function mergeStrongLedgerVerseScopes(
@@ -1167,14 +1305,6 @@ function rebuildLedgerByBook(
   }
 }
 
-function buildLedgerByBook(
-  verses: StrongLedgerVerse[]
-): Map<string, StrongLedgerVerse[]> {
-  const ledgerByBook = new Map<string, StrongLedgerVerse[]>();
-  rebuildLedgerByBook(ledgerByBook, verses);
-  return ledgerByBook;
-}
-
 function parseRefreshScopes(onlyRef: string): string[] {
   return onlyRef
     .split(",")
@@ -1208,18 +1338,55 @@ function existingPath(filePath: string): string | undefined {
   return existsSync(filePath) ? filePath : undefined;
 }
 
+function perfStart(): number {
+  return STRONG_PERF_ENABLED ? performance.now() : 0;
+}
+
+function perfElapsed(start: number): number {
+  return STRONG_PERF_ENABLED ? performance.now() - start : 0;
+}
+
+function perfEnd(label: string, start: number): void {
+  if (!STRONG_PERF_ENABLED) return;
+  perfLog(`${label}: ${formatPerfMs(performance.now() - start)}`);
+}
+
+function perfLog(message: string): void {
+  if (!STRONG_PERF_ENABLED) return;
+  const rssMb = Math.round(process.memoryUsage().rss / 1024 / 1024);
+  console.error(`[strong:perf] ${message}; rss=${rssMb}MB`);
+}
+
+function formatPerfMs(ms: number): string {
+  return `${(ms / 1000).toFixed(2)}s`;
+}
+
+async function measureAsync<T>(
+  label: string,
+  action: () => Promise<T>
+): Promise<T> {
+  const start = perfStart();
+  try {
+    return await action();
+  } finally {
+    perfEnd(label, start);
+  }
+}
+
+function measureSync<T>(label: string, action: () => T): T {
+  const start = perfStart();
+  try {
+    return action();
+  } finally {
+    perfEnd(label, start);
+  }
+}
+
 async function writeStrongLedgerOutputs(
   bible: StrongLedger,
-  ledgerByBook: Map<string, StrongLedgerVerse[]>,
   paths: StrongLedger["outputPaths"]
 ): Promise<void> {
-  const split = bible.verses.length > 2000;
-  const verseFiles = split
-    ? await writeVerseFiles(ledgerByBook, paths.verseDir)
-    : undefined;
-
-  await writeCanonicalJson(bible, paths, verseFiles);
-  await writeDebugJson(bible, paths, verseFiles);
+  await writeStrongLedgerSqlite(bible, paths.sqlite);
   await Promise.all([
     writeFile(
       paths.metrics,
@@ -1227,128 +1394,25 @@ async function writeStrongLedgerOutputs(
       "utf8"
     ),
     writeTsv(paths.readerTsv, bible.verses, "reader"),
-    writeTsv(paths.advancedTsv, bible.verses, "advanced"),
-    verseFiles
-      ? writeLedgerManifestFromFiles(verseFiles, paths.ledgerManifest)
-      : writeLedgerFiles(ledgerByBook, paths.ledgerManifest)
+    writeTsv(paths.advancedTsv, bible.verses, "advanced")
   ]);
+  await removeLegacyLedgerArtifacts(bible.bible, paths);
 }
 
-async function writeCanonicalJson(
-  bible: StrongLedger,
-  paths: StrongLedger["outputPaths"],
-  verseFiles?: Array<{ bookId: string; path: string; verses: number }>
+async function removeLegacyLedgerArtifacts(
+  bible: string,
+  paths: StrongLedger["outputPaths"]
 ): Promise<void> {
-  if (!verseFiles) {
-    await writeFile(
-      paths.canonical,
-      `${JSON.stringify(bible, null, 2)}\n`,
-      "utf8"
-    );
-    return;
-  }
-
-  const manifest: StrongLedger = {
-    ...bible,
-    split: true,
-    verseFiles,
-    verses: []
-  };
-  await writeFile(
-    paths.canonical,
-    `${JSON.stringify(manifest, null, 2)}\n`,
-    "utf8"
-  );
-}
-
-async function writeDebugJson(
-  bible: StrongLedger,
-  paths: StrongLedger["outputPaths"],
-  verseFiles?: Array<{ bookId: string; path: string; verses: number }>
-): Promise<void> {
-  if (!verseFiles) {
-    await writeFile(
-      paths.debugJson,
-      `${JSON.stringify(bible, null, 2)}\n`,
-      "utf8"
-    );
-    return;
-  }
-
-  const debug: StrongLedger = {
-    ...bible,
-    split: true,
-    verseFiles,
-    verses: []
-  };
-  await writeFile(
-    paths.debugJson,
-    `${JSON.stringify(debug, null, 2)}\n`,
-    "utf8"
-  );
-}
-
-async function writeVerseFiles(
-  ledgerByBook: Map<string, StrongLedgerVerse[]>,
-  verseDir: string
-): Promise<Array<{ bookId: string; path: string; verses: number }>> {
-  await mkdir(verseDir, { recursive: true });
-  const files: Array<{ bookId: string; path: string; verses: number }> = [];
-
-  for (const [bookId, verses] of ledgerByBook) {
-    const versePath = path.join(verseDir, `${bookId}.json`);
-    await writeFile(versePath, `${JSON.stringify(verses, null, 2)}\n`, "utf8");
-    files.push({ bookId, path: versePath, verses: verses.length });
-  }
-
-  return files;
-}
-
-async function writeLedgerFiles(
-  ledgerByBook: Map<string, StrongLedgerVerse[]>,
-  manifestPath: string
-): Promise<void> {
-  const ledgerDir = path.dirname(manifestPath);
-  await mkdir(ledgerDir, { recursive: true });
-  const books: Array<{ bookId: string; path: string; verses: number }> = [];
-
-  for (const [bookId, verses] of ledgerByBook) {
-    const bookPath = path.join(ledgerDir, `${bookId}.json`);
-    await writeFile(bookPath, `${JSON.stringify(verses, null, 2)}\n`, "utf8");
-    books.push({ bookId, path: bookPath, verses: verses.length });
-  }
-
-  await writeFile(
-    manifestPath,
-    `${JSON.stringify(
-      {
-        generatedAt: new Date().toISOString(),
-        books
-      },
-      null,
-      2
-    )}\n`,
-    "utf8"
-  );
-}
-
-async function writeLedgerManifestFromFiles(
-  verseFiles: Array<{ bookId: string; path: string; verses: number }>,
-  manifestPath: string
-): Promise<void> {
-  await mkdir(path.dirname(manifestPath), { recursive: true });
-  await writeFile(
-    manifestPath,
-    `${JSON.stringify(
-      {
-        generatedAt: new Date().toISOString(),
-        books: verseFiles
-      },
-      null,
-      2
-    )}\n`,
-    "utf8"
-  );
+  const outputDir = path.dirname(paths.sqlite);
+  await Promise.all([
+    rm(path.join(outputDir, `bible-${bible}-strong-ledger.json`), {
+      force: true
+    }),
+    rm(paths.debugJson, { force: true }),
+    rm(paths.ledgerManifest, { force: true }),
+    rm(paths.verseDir, { recursive: true, force: true }),
+    rm(path.dirname(paths.ledgerManifest), { recursive: true, force: true })
+  ]);
 }
 
 async function writeTsv(
@@ -1356,28 +1420,69 @@ async function writeTsv(
   verses: StrongLedgerVerse[],
   mode: "reader" | "advanced"
 ): Promise<void> {
-  const lines = ["book_id\tnum_chapter\tnum_verse\ttext"];
+  await mkdir(path.dirname(outputPath), { recursive: true });
+  const stream = createWriteStream(outputPath, { encoding: "utf8" });
+  stream.write("book_id\tnum_chapter\tnum_verse\ttext\n");
 
   for (const verse of verses) {
-    lines.push(
-      `${verse.bookId}\t${verse.chapter}\t${verse.verse}\t${tsvEscape(
-        mode === "reader" ? verse.views.readerHtml : verse.views.advancedHtml
-      )}`
-    );
+    if (
+      !stream.write(
+        `${verse.bookId}\t${verse.chapter}\t${verse.verse}\t${tsvEscape(
+          mode === "reader" ? verse.views.readerHtml : verse.views.advancedHtml
+        )}\n`
+      )
+    ) {
+      await onceDrain(stream);
+    }
   }
 
-  await writeFile(outputPath, `${lines.join("\n")}\n`, "utf8");
+  await closeStream(stream);
+}
+
+async function onceDrain(stream: NodeJS.WritableStream): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    const cleanup = (): void => {
+      stream.off("drain", onDrain);
+      stream.off("error", onError);
+    };
+    const onDrain = (): void => {
+      cleanup();
+      resolve();
+    };
+    const onError = (error: Error): void => {
+      cleanup();
+      reject(error);
+    };
+    stream.once("drain", onDrain);
+    stream.once("error", onError);
+  });
+}
+
+async function closeStream(stream: NodeJS.WritableStream): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    const cleanup = (): void => {
+      stream.off("error", onError);
+    };
+    const onError = (error: Error): void => {
+      cleanup();
+      reject(error);
+    };
+    stream.once("error", onError);
+    stream.end(() => {
+      cleanup();
+      resolve();
+    });
+  });
 }
 
 function outputPaths(
   options: Pick<StrongLedgerOptions, "bible" | "outputDir">
 ): StrongLedger["outputPaths"] {
   const outputDir = options.outputDir;
+  const sqlite = strongLedgerSqlitePath(outputDir, options.bible);
   return {
-    canonical: path.join(
-      outputDir,
-      `bible-${options.bible}-strong-ledger.json`
-    ),
+    canonical: sqlite,
+    sqlite,
     readerTsv: path.join(outputDir, `bible-${options.bible}-strong-reader.tsv`),
     advancedTsv: path.join(
       outputDir,
@@ -1390,7 +1495,9 @@ function outputPaths(
   };
 }
 
-async function readStrongLedger(canonicalPath: string): Promise<StrongLedger> {
+async function readLegacyStrongLedgerJson(
+  canonicalPath: string
+): Promise<StrongLedger> {
   const canonical = JSON.parse(
     await readFile(canonicalPath, "utf8")
   ) as StrongLedger;
@@ -2014,16 +2121,6 @@ function stepEvidenceForStrong(
   }));
 }
 
-async function loadStepEvidence(): Promise<StepOriginalEvidenceIndex> {
-  const paths = STEP_ORIGINAL_SOURCES.filter((sourcePath) =>
-    existsSync(sourcePath)
-  );
-  if (paths.length === 0) {
-    return new Map();
-  }
-  return readStepOriginalEvidenceIndex(paths);
-}
-
 async function loadReferences(): Promise<ReferenceMap[]> {
   const references: ReferenceMap[] = [];
 
@@ -2039,23 +2136,92 @@ async function loadReferences(): Promise<ReferenceMap[]> {
   return references;
 }
 
-async function loadOriginalSources(): Promise<OriginalBundle[]> {
-  const bundles: OriginalBundle[] = [];
+async function loadStrongPhraseLexicon(
+  references: ReferenceMap[]
+): Promise<ReturnType<typeof buildStrongPhraseLexicon>> {
+  const sourceFingerprint = strongPhraseLexiconSourceFingerprint(references);
+  const cached = measureSync("read phrase lexicon sqlite", () =>
+    readStrongPhraseLexiconSqlite({ sourceFingerprint })
+  );
+  if (cached) return cached;
 
-  for (const sourcePath of STEP_ORIGINAL_SOURCES) {
+  return measureSync("build phrase lexicon", () =>
+    buildStrongPhraseLexicon(references)
+  );
+}
+
+async function buildStrongPhraseLexiconIndex(): Promise<string> {
+  const references = await measureAsync("load Strong references", () =>
+    loadReferences()
+  );
+  const sourceFingerprint = strongPhraseLexiconSourceFingerprint(references);
+  const lexicon = measureSync("build phrase lexicon", () =>
+    buildStrongPhraseLexicon(references)
+  );
+  return measureAsync("write phrase lexicon sqlite", () =>
+    writeStrongPhraseLexiconSqlite({ sourceFingerprint, lexicon })
+  );
+}
+
+async function loadOriginalData(bookIds?: Set<string>): Promise<{
+  bundles: OriginalBundle[];
+  evidence: StepOriginalEvidenceIndex;
+}> {
+  const bundles: OriginalBundle[] = [];
+  const evidence: StepOriginalEvidenceIndex = new Map();
+
+  for (const sourcePath of stepOriginalSourcesForBooks(bookIds)) {
     if (!existsSync(sourcePath)) continue;
 
-    const map = await readStepOriginalVerseMap([sourcePath]);
+    const data = await readStepOriginalData([sourcePath], { bookIds });
     const source = stepOriginalSourceMetadata(sourcePath);
     bundles.push({
       name: source.name,
       path: sourcePath,
-      map,
-      summary: summarizeOriginalSource(source.name, sourcePath, map, source)
+      map: data.verseMap,
+      summary: summarizeOriginalSource(
+        source.name,
+        sourcePath,
+        data.verseMap,
+        source
+      )
     });
+    mergeStepEvidence(evidence, data.evidenceIndex);
   }
 
-  return bundles;
+  return { bundles, evidence };
+}
+
+function mergeStepEvidence(
+  target: StepOriginalEvidenceIndex,
+  source: StepOriginalEvidenceIndex
+): void {
+  for (const [ref, byStrong] of source) {
+    const targetByStrong = target.get(ref) ?? new Map();
+    for (const [strong, evidence] of byStrong) {
+      const items = targetByStrong.get(strong) ?? [];
+      items.push(...evidence);
+      targetByStrong.set(strong, items);
+    }
+    target.set(ref, targetByStrong);
+  }
+}
+
+function stepOriginalSourcesForBooks(bookIds?: Set<string>): string[] {
+  if (!bookIds || bookIds.size === 0 || bookIds.size === BOOK_IDS.length) {
+    return STEP_ORIGINAL_SOURCES;
+  }
+
+  return STEP_ORIGINAL_SOURCES.filter((sourcePath) => {
+    const range = STEP_SOURCE_BOOK_RANGES.get(path.basename(sourcePath));
+    if (!range) return true;
+    const start = bookOrderIndex(range.start);
+    const end = bookOrderIndex(range.end);
+    return [...bookIds].some((bookId) => {
+      const index = bookOrderIndex(bookId);
+      return index >= start && index <= end;
+    });
+  });
 }
 
 function stepOriginalSourceMetadata(
@@ -2220,15 +2386,18 @@ function roundRatio(value: number): number {
 }
 
 function parseArgs(argv: string[]): {
-  command: "generate" | "export" | "refresh";
+  command: "generate" | "export" | "refresh" | "migrate" | "phrase-index";
   bible: string;
   onlyRef?: string;
   outputDir: string;
   mode: "reader" | "advanced";
 } {
   const args = new Map<string, string>();
-  const command =
-    argv[2] === "export" || argv[2] === "refresh" ? argv[2] : "generate";
+  const command = ["export", "refresh", "migrate", "phrase-index"].includes(
+    argv[2] ?? ""
+  )
+    ? (argv[2] as "export" | "refresh" | "migrate" | "phrase-index")
+    : "generate";
 
   for (let index = 3; index < argv.length; index += 1) {
     const arg = argv[index];
@@ -2288,6 +2457,28 @@ async function main(): Promise<void> {
     console.log(
       `Reader coverage ${result.metrics.readerTokenCoverage}; advanced coverage ${result.metrics.advancedTokenCoverage}; original representation ${result.metrics.originalRepresentationRate}`
     );
+    return;
+  }
+
+  if (args.command === "migrate") {
+    const result = await migrateStrongLedgerToSqlite({
+      bible: args.bible,
+      biblePath,
+      outputDir: args.outputDir,
+      onlyRef: args.onlyRef
+    });
+    console.log(
+      `Migrated canonical Strong ledger: ${result.outputPaths.sqlite}`
+    );
+    console.log(
+      `Reader coverage ${result.metrics.readerTokenCoverage}; advanced coverage ${result.metrics.advancedTokenCoverage}; original representation ${result.metrics.originalRepresentationRate}`
+    );
+    return;
+  }
+
+  if (args.command === "phrase-index") {
+    const sqlitePath = await buildStrongPhraseLexiconIndex();
+    console.log(`Built Strong phrase lexicon index: ${sqlitePath}`);
     return;
   }
 

@@ -11,6 +11,10 @@ import {
   type StrongLedgerMetrics
 } from "./strongLedger.js";
 import {
+  readStrongLedgerSqlite,
+  strongLedgerSqlitePath
+} from "./strongLedgerStore.js";
+import {
   HIGH_CONFIDENCE_THRESHOLD,
   type LexicalCandidate,
   type LexicalCandidateItem,
@@ -266,9 +270,9 @@ export async function runStrongAudit(
   for (const [index, bookId] of selectedBooks.entries()) {
     const scope = `${bookId}.1-${bookId}.${options.chaptersPerBook}`;
     const scopeOutputDir = path.join(options.outputDir, "scopes", bookId);
-    const expectedLedgerPath = path.join(
+    const expectedLedgerPath = strongLedgerSqlitePath(
       scopeOutputDir,
-      `bible-${options.bible}-strong-ledger.json`
+      options.bible
     );
     const expectedLexicalReportPath = lexicalReportPathFor(
       options.bible,
@@ -283,7 +287,7 @@ export async function runStrongAudit(
       `[${index + 1}/${selectedBooks.length}] ${scope} ${canResume ? "reuse" : "generate"}`
     );
     const ledger = canResume
-      ? readJsonFile<StrongLedger>(expectedLedgerPath)
+      ? readStrongLedgerSqlite({ sqlitePath: expectedLedgerPath })
       : await generateStrongLedger({
           bible: options.bible,
           biblePath: biblePath(options.bible),

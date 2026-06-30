@@ -176,6 +176,7 @@ export interface RunSemanticRefillLlmOptions {
   model?: string;
   limit?: number;
   autoAcceptThreshold?: number;
+  referenceStyleFinalization?: boolean;
   client?: SemanticRefillLlmClient;
   mockResponse?: SemanticRefillLlmResponse | unknown;
 }
@@ -290,7 +291,8 @@ export async function runSemanticRefillLlm(
     verses: options.verses,
     batch,
     rawDecisions,
-    autoAcceptThreshold: options.autoAcceptThreshold ?? 0.84
+    autoAcceptThreshold: options.autoAcceptThreshold ?? 0.84,
+    referenceStyleFinalization: options.referenceStyleFinalization
   });
 
   return {
@@ -369,6 +371,7 @@ export function evaluateSemanticRefillLlmDecisions(options: {
   batch: SemanticRefillLlmBatch;
   rawDecisions: SemanticRefillLlmRawDecision[];
   autoAcceptThreshold?: number;
+  referenceStyleFinalization?: boolean;
 }): Pick<SemanticRefillLlmRunResult, "validated" | "pending" | "rejected"> {
   const versesByRef = new Map(
     options.verses.map((verse) => [verse.ref, verse])
@@ -379,6 +382,7 @@ export function evaluateSemanticRefillLlmDecisions(options: {
   const validated: SemanticRefillDecision[] = [];
   const pending: SemanticRefillLlmEvaluatedDecision[] = [];
   const rejected: SemanticRefillLlmEvaluatedDecision[] = [];
+  const handledCandidateIds = new Set<string>();
 
   for (const raw of options.rawDecisions) {
     const candidate = candidatesById.get(raw.id);
@@ -391,6 +395,7 @@ export function evaluateSemanticRefillLlmDecisions(options: {
       );
       continue;
     }
+    handledCandidateIds.add(candidate.id);
 
     const structural = validateRawDecision(candidate, normalizedRaw);
     if (structural) {
@@ -399,12 +404,26 @@ export function evaluateSemanticRefillLlmDecisions(options: {
     }
 
     if (isTerminalRejectType(normalizedRaw.decision)) {
-      rejected.push(
-        rejectedEvaluation(
-          normalizedRaw,
-          `llm-classified-${normalizedRaw.decision}`
-        )
-      );
+      if (
+        options.referenceStyleFinalization &&
+        normalizedRaw.decision !== "duplicate"
+      ) {
+        validated.push(
+          referenceStyleEmptyOverride({
+            bible: options.bible,
+            candidate,
+            raw: normalizedRaw,
+            reason: `reference-style-empty-fallback:llm-classified-${normalizedRaw.decision}`
+          })
+        );
+      } else {
+        rejected.push(
+          rejectedEvaluation(
+            normalizedRaw,
+            `llm-classified-${normalizedRaw.decision}`
+          )
+        );
+      }
       continue;
     }
 
@@ -414,12 +433,23 @@ export function evaluateSemanticRefillLlmDecisions(options: {
       raw: normalizedRaw
     });
     if (!override) {
-      pending.push(
-        pendingEvaluation(
-          normalizedRaw,
-          "llm requested human review before a durable override"
-        )
-      );
+      if (options.referenceStyleFinalization) {
+        validated.push(
+          referenceStyleEmptyOverride({
+            bible: options.bible,
+            candidate,
+            raw: normalizedRaw,
+            reason: "reference-style-empty-fallback:no-durable-visible-override"
+          })
+        );
+      } else {
+        pending.push(
+          pendingEvaluation(
+            normalizedRaw,
+            "llm requested human review before a durable override"
+          )
+        );
+      }
       continue;
     }
 
@@ -428,7 +458,18 @@ export function evaluateSemanticRefillLlmDecisions(options: {
       decision: override
     });
     if (validation.status === "rejected") {
-      rejected.push(rejectedEvaluation(normalizedRaw, validation.reason));
+      if (options.referenceStyleFinalization) {
+        validated.push(
+          referenceStyleEmptyOverride({
+            bible: options.bible,
+            candidate,
+            raw: normalizedRaw,
+            reason: `reference-style-empty-fallback:${validation.reason}`
+          })
+        );
+      } else {
+        rejected.push(rejectedEvaluation(normalizedRaw, validation.reason));
+      }
       continue;
     }
 
@@ -440,11 +481,38 @@ export function evaluateSemanticRefillLlmDecisions(options: {
 
     const stackingReason = findSuspiciousStacking(verse, override);
     if (stackingReason) {
-      pending.push(pendingEvaluation(normalizedRaw, stackingReason, override));
+      if (options.referenceStyleFinalization) {
+        validated.push(
+          referenceStyleEmptyOverride({
+            bible: options.bible,
+            candidate,
+            raw: normalizedRaw,
+            reason: `reference-style-empty-fallback:${stackingReason}`
+          })
+        );
+      } else {
+        pending.push(
+          pendingEvaluation(normalizedRaw, stackingReason, override)
+        );
+      }
       continue;
     }
 
     validated.push(override);
+  }
+
+  if (options.referenceStyleFinalization) {
+    for (const candidate of options.batch.candidates) {
+      if (handledCandidateIds.has(candidate.id)) continue;
+      if (!versesByRef.has(candidate.ref)) continue;
+      validated.push(
+        referenceStyleEmptyOverride({
+          bible: options.bible,
+          candidate,
+          reason: "reference-style-empty-fallback:missing-llm-decision"
+        })
+      );
+    }
   }
 
   return { validated, pending, rejected };
@@ -868,6 +936,51 @@ function rawDecisionToOverride(options: {
   }
 
   return undefined;
+}
+
+function referenceStyleEmptyOverride(options: {
+  bible: string;
+  candidate: SemanticRefillLlmCandidatePacket;
+  raw?: SemanticRefillLlmRawDecision;
+  reason: string;
+}): SemanticRefillDecision {
+  const confidence = Math.min(options.raw?.confidence ?? 0.7, 0.83);
+  const evidence = [
+    ...(options.raw?.evidence ?? []),
+    options.raw ? `llm-decision:${options.raw.decision}` : undefined,
+    options.raw?.reason,
+    options.reason
+  ].filter((item): item is string => Boolean(item));
+
+  return {
+    bible: options.bible.toLowerCase(),
+    ref: options.candidate.ref,
+    replace:
+      options.candidate.auditKind === "relocation" &&
+      options.candidate.currentTarget &&
+      options.candidate.currentTarget.target !== "technical"
+        ? {
+            target: options.candidate.currentTarget.target,
+            wordIndex: options.candidate.currentTarget.wordIndex,
+            startWordIndex: options.candidate.currentTarget.startWordIndex,
+            endWordIndex: options.candidate.currentTarget.endWordIndex
+          }
+        : undefined,
+    target: "empty",
+    wordIndex:
+      options.candidate.sourcePlacement.insertAfterWordIndex ??
+      options.candidate.currentTarget?.wordIndex ??
+      0,
+    normalized: "",
+    strong: [options.candidate.strong.toUpperCase()],
+    confidence,
+    source: "semantic-refill:llm-reference-style",
+    reason: evidence.join("; "),
+    status: "accept",
+    score: confidence,
+    priority: options.candidate.priority,
+    evidence
+  };
 }
 
 function findDuplicateReaderStrong(
