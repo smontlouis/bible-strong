@@ -60,7 +60,14 @@ const server = createServer(async (request, response) => {
       if (url.pathname === "/viewer/lexicon.html") {
         url.searchParams.set("view", "lexicon");
       }
-      serveStatic("/viewer/app/index.html", response, request.method === "HEAD");
+      if (url.pathname === "/viewer/workflow.html") {
+        url.searchParams.set("view", "workflow");
+      }
+      serveStatic(
+        "/viewer/app/index.html",
+        response,
+        request.method === "HEAD"
+      );
       return;
     }
 
@@ -552,9 +559,13 @@ function serveStatic(
 }
 
 function isReactViewerRoute(pathname: string): boolean {
-  return ["/viewer/", "/viewer/index.html", "/viewer/review.html", "/viewer/lexicon.html"].includes(
-    pathname
-  );
+  return [
+    "/viewer/",
+    "/viewer/index.html",
+    "/viewer/review.html",
+    "/viewer/lexicon.html",
+    "/viewer/workflow.html"
+  ].includes(pathname);
 }
 
 function reactViewerEntryExists(): boolean {

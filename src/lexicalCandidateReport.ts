@@ -2657,7 +2657,7 @@ function applyLexicalDuplicateGroupAutoSafe(
           reason: `duplicate lexical group resolved by source order across ${targets.length} matching French carriers`
         };
       });
-      return;
+      break;
     }
   }
 }

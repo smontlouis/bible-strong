@@ -331,7 +331,7 @@ const FRENCH_LEXICAL_SOURCES = {
   wolf: "data/external/french-lexical/wolf/wolf-1.0b4.xml.bz2"
 };
 
-const MAX_LEXICAL_AUTOSAFE_PASSES = 8;
+const MAX_LEXICAL_AUTOSAFE_PASSES = 32;
 const STRONG_PERF_ENABLED = process.env.STRONG_PERF === "1";
 
 const TECHNICAL_STRONG = new Set([
@@ -391,7 +391,6 @@ export async function generateStrongLedger(
 
   const paths = outputPaths(options);
   const ledgerVerses: StrongLedgerVerse[] = [];
-  const ledgerByBook = new Map<string, StrongLedgerVerse[]>();
   let readerAlignMs = 0;
   let completeAlignMs = 0;
   let ledgerBuildMs = 0;
@@ -452,9 +451,6 @@ export async function generateStrongLedger(
     ledgerBuildMs += perfElapsed(ledgerBuildStart);
 
     ledgerVerses.push(ledgerVerse);
-    const bookVerses = ledgerByBook.get(verse.bookId) ?? [];
-    bookVerses.push(ledgerVerse);
-    ledgerByBook.set(verse.bookId, bookVerses);
   }
   perfLog(
     `align ${verses.length} verses reader=${formatPerfMs(
@@ -480,30 +476,63 @@ export async function generateStrongLedger(
   let residualLexicalReport:
     | Awaited<ReturnType<typeof buildLexicalCandidateReport>>
     | undefined;
+  let incrementalLexicalPassRefs: Set<string> | undefined;
+  let lexicalAutoSafeReachedPassLimit = false;
+  let lexicalAutoSafeLastApplied = 0;
   for (let pass = 0; pass < MAX_LEXICAL_AUTOSAFE_PASSES; pass += 1) {
+    const fullScopePass = incrementalLexicalPassRefs === undefined;
+    const passVerses = fullScopePass
+      ? ledgerVerses
+      : ledgerVerses.filter((verse) =>
+          incrementalLexicalPassRefs?.has(verse.ref)
+        );
+    if (passVerses.length === 0) break;
     const passStart = perfStart();
     const lexicalReport = await buildLexicalCandidateReport({
       ...lexicalReportOptions,
-      ledger: { verses: ledgerVerses }
+      ledger: { verses: passVerses }
     });
-    const applied = measureSync("apply lexical auto-safe placements", () =>
+    const autoSafePlacements = lexicalAutoSafePlacements(lexicalReport);
+    const autoSafePlacementRefs =
+      lexicalAutoSafePlacementRefs(autoSafePlacements);
+    const result = measureSync("apply lexical auto-safe placements", () =>
       applyLexicalAutoSafePlacementsToLedger({
         verses: ledgerVerses,
-        report: lexicalReport
+        placements: autoSafePlacements
       })
     );
     perfLog(
       `lexical auto-safe pass ${pass + 1}: ${formatPerfMs(
         perfElapsed(passStart)
-      )}; applied=${applied}`
+      )}; verses=${passVerses.length}; applied=${result.applied}; changedRefs=${
+        result.changedRefs.size
+      }${formatChangedRefSample(result.changedRefs)}`
     );
-    if (applied === 0) {
-      residualLexicalReport = lexicalReport;
-      break;
+    if (result.applied === 0) {
+      if (fullScopePass) {
+        residualLexicalReport = lexicalReport;
+        break;
+      }
+      incrementalLexicalPassRefs = undefined;
+      continue;
     }
-    lexicalAutoSafeCount += applied;
-    rebuildLedgerVerses(ledgerVerses);
-    rebuildLedgerByBook(ledgerByBook, ledgerVerses);
+    lexicalAutoSafeLastApplied = result.applied;
+    lexicalAutoSafeCount += result.applied;
+    rebuildLedgerVerses(
+      ledgerVerses.filter((verse) => result.changedRefs.has(verse.ref))
+    );
+    incrementalLexicalPassRefs = new Set([
+      ...result.changedRefs,
+      ...autoSafePlacementRefs
+    ]);
+    if (pass === MAX_LEXICAL_AUTOSAFE_PASSES - 1) {
+      lexicalAutoSafeReachedPassLimit = true;
+    }
+  }
+  if (lexicalAutoSafeReachedPassLimit) {
+    console.warn(
+      `Lexical auto-safe reached pass limit after applying ${lexicalAutoSafeLastApplied} placement(s) in the final pass; inspect the residual lexical report for remaining auto-safe candidates.`
+    );
   }
   if (options.writeLexicalReport !== false) {
     residualLexicalReport ??= await measureAsync(
@@ -1109,15 +1138,16 @@ function completeEmptyAnnotation(options: {
 
 function applyLexicalAutoSafePlacementsToLedger(options: {
   verses: StrongLedgerVerse[];
-  report: Parameters<typeof lexicalAutoSafePlacements>[0];
-}): number {
+  placements: LexicalAutoSafePlacement[];
+}): { applied: number; changedRefs: Set<string> } {
   const verseByRef = new Map(options.verses.map((verse) => [verse.ref, verse]));
   const occupiedTargetsByRef = new Map(
     options.verses.map((verse) => [verse.ref, occupiedReaderTargets(verse)])
   );
   let applied = 0;
+  const changedRefs = new Set<string>();
 
-  for (const placement of lexicalAutoSafePlacements(options.report)) {
+  for (const placement of options.placements) {
     const verse = verseByRef.get(placement.item.ref);
     const annotation = verse?.annotations.find(
       (annotation) => annotation.id === placement.item.annotationId
@@ -1135,14 +1165,51 @@ function applyLexicalAutoSafePlacementsToLedger(options: {
     ) {
       continue;
     }
+    if (!lexicalAutoSafePlacementWouldChange(annotation, placement.candidate)) {
+      continue;
+    }
 
     applyLexicalAutoSafePlacement(annotation, placement);
+    changedRefs.add(verse.ref);
     if (targetKey) occupiedTargets.add(targetKey);
     occupiedTargetsByRef.set(placement.item.ref, occupiedTargets);
     applied += 1;
   }
 
-  return applied;
+  return { applied, changedRefs };
+}
+
+function lexicalAutoSafePlacementRefs(
+  placements: LexicalAutoSafePlacement[]
+): Set<string> {
+  return new Set(placements.map((placement) => placement.item.ref));
+}
+
+function lexicalAutoSafePlacementWouldChange(
+  annotation: StrongLedgerAnnotation,
+  candidate: LexicalCandidate
+): boolean {
+  if (annotation.visibility !== "reader") return true;
+  if (annotation.placement !== candidate.target) return true;
+
+  if (
+    candidate.target === "phrase" &&
+    candidate.startWordIndex !== undefined &&
+    candidate.endWordIndex !== undefined
+  ) {
+    return (
+      annotation.startWordIndex !== candidate.startWordIndex ||
+      annotation.endWordIndex !== candidate.endWordIndex
+    );
+  }
+
+  return annotation.wordIndex !== candidate.wordIndex;
+}
+
+function formatChangedRefSample(refs: Set<string>): string {
+  if (refs.size === 0) return "";
+  const sample = [...refs].slice(0, 5).join(",");
+  return `; refs=${sample}${refs.size > 5 ? ",..." : ""}`;
 }
 
 function canApplyLexicalAutoSafe(annotation: StrongLedgerAnnotation): boolean {
@@ -1290,18 +1357,6 @@ function rebuildLedgerVerses(verses: StrongLedgerVerse[]): void {
         "debug"
       )
     };
-  }
-}
-
-function rebuildLedgerByBook(
-  ledgerByBook: Map<string, StrongLedgerVerse[]>,
-  verses: StrongLedgerVerse[]
-): void {
-  ledgerByBook.clear();
-  for (const verse of verses) {
-    const bookVerses = ledgerByBook.get(verse.bookId) ?? [];
-    bookVerses.push(verse);
-    ledgerByBook.set(verse.bookId, bookVerses);
   }
 }
 

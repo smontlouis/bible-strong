@@ -1,4 +1,4 @@
-export type ViewId = "viewer" | "lexicon" | "review";
+export type ViewId = "viewer" | "workflow" | "lexicon" | "review";
 export type ReaderMode = "normal" | "advanced" | "debug";
 
 export interface StrongLedger {

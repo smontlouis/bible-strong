@@ -1,4 +1,9 @@
-import type { LexicalAuditItem, LexicalCandidateReport, StrongLedger, StrongVerse } from "./types";
+import type {
+  LexicalAuditItem,
+  LexicalCandidateReport,
+  StrongLedger,
+  StrongVerse
+} from "./types";
 
 const verseCache = new Map<string, Promise<StrongVerse[]>>();
 
@@ -19,7 +24,9 @@ export async function loadBookVerses(
     return ledger.verses.filter((verse) => verse.bookId === bookId);
   }
 
-  const file = ledger.verseFiles?.find((candidate) => candidate.bookId === bookId);
+  const file = ledger.verseFiles?.find(
+    (candidate) => candidate.bookId === bookId
+  );
   if (!file) return [];
 
   const cacheKey = `${ledger.generatedAt}:${file.path}`;
@@ -64,10 +71,15 @@ function inferLexicalReportPath(ledger: StrongLedger) {
 export function currentViewFromLocation(): string {
   const params = new URLSearchParams(window.location.search);
   if (params.has("review") || params.has("manifest")) return "review";
+  if (window.location.pathname.endsWith("/workflow.html")) return "workflow";
+  if (window.location.pathname.endsWith("/lexicon.html")) return "lexicon";
+  if (window.location.pathname.endsWith("/review.html")) return "review";
   return params.get("view") ?? "viewer";
 }
 
 export function defaultLedgerPath() {
   const params = new URLSearchParams(window.location.search);
-  return params.get("file") ?? "/outputs/strong/nbs/bible-nbs-strong-ledger.json";
+  return (
+    params.get("file") ?? "/outputs/strong/nbs/bible-nbs-strong-ledger.json"
+  );
 }

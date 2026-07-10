@@ -88,8 +88,13 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family:
-      Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-      "Segoe UI", sans-serif;
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
   }
 }
 
@@ -178,5 +183,61 @@
 
   .prose-strong a {
     @apply text-primary underline underline-offset-4;
+  }
+
+  .workflow-shell {
+    background:
+      linear-gradient(180deg, rgba(15, 23, 31, 0.96), rgba(10, 15, 22, 0.98)),
+      var(--background);
+  }
+
+  .workflow-canvas {
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px), #0b1017;
+    background-size: 44px 44px;
+  }
+
+  .workflow-flow .react-flow__pane {
+    cursor: grab;
+  }
+
+  .workflow-flow .react-flow__pane:active {
+    cursor: grabbing;
+  }
+
+  .workflow-node {
+    backdrop-filter: blur(12px);
+  }
+
+  .workflow-node-active {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.12),
+      0 22px 70px rgba(0, 0, 0, 0.42);
+  }
+
+  .workflow-flow .react-flow__controls,
+  .workflow-flow .react-flow__minimap {
+    border: 1px solid color-mix(in oklab, var(--border) 78%, transparent);
+    border-radius: 8px;
+    overflow: hidden;
+    background: color-mix(in oklab, var(--card) 92%, transparent);
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.28);
+  }
+
+  .workflow-flow .react-flow__controls-button {
+    background: color-mix(in oklab, var(--card) 92%, transparent);
+    color: var(--foreground);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .workflow-flow .react-flow__controls-button:hover {
+    background: var(--muted);
+  }
+
+  @media (max-width: 767px) {
+    .workflow-flow .react-flow__minimap {
+      display: none;
+    }
   }
 }

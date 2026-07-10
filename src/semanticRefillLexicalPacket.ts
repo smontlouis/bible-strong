@@ -405,6 +405,13 @@ async function readVerses(
 }
 
 function refInScope(ref: string, scope: string): boolean {
+  const scopes = scope
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+  if (scopes.length > 1) {
+    return scopes.some((item) => refInScope(ref, item));
+  }
   if (scope === "all") return true;
   if (ref === scope) return true;
   return ref.startsWith(`${scope}.`);

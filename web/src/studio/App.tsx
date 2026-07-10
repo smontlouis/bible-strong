@@ -2,6 +2,8 @@ import {
   BookOpen,
   Braces,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Database,
   FileJson,
   Gauge,
@@ -68,6 +70,7 @@ import type {
   StrongVerse,
   ViewId
 } from "./types";
+import { WorkflowView } from "./WorkflowView";
 
 const navItems: Array<{
   id: ViewId;
@@ -80,6 +83,12 @@ const navItems: Array<{
     label: "Ledger",
     description: "Strong placés, vides et preuves",
     icon: BookOpen
+  },
+  {
+    id: "workflow",
+    label: "Workflow",
+    description: "Carte production et LLM borné",
+    icon: GitCompareArrows
   },
   {
     id: "lexicon",
@@ -113,28 +122,36 @@ const sourceLegend = [
     "lexical"
   ],
   ["Revu", "Strong validé par une décision de revue.", "reviewed"],
-  ["Sans mot", "Strong attendu, mais aucun mot français fiable ne le porte.", "empty"]
+  [
+    "Sans mot",
+    "Strong attendu, mais aucun mot français fiable ne le porte.",
+    "empty"
+  ]
 ] as const;
 
 export function App() {
-  const [view, setView] = useState<ViewId>(
-    currentViewFromLocation() as ViewId
-  );
+  const [view, setView] = useState<ViewId>(currentViewFromLocation() as ViewId);
   const [ledger, setLedger] = useState<StrongLedger | null>(null);
   const [ledgerPath, setLedgerPath] = useState(defaultLedgerPath());
   const [loadingLedger, setLoadingLedger] = useState(false);
 
   useEffect(() => {
+    if (view === "workflow") {
+      setLoadingLedger(false);
+      return;
+    }
     setLoadingLedger(true);
     loadLedger(ledgerPath)
       .then((nextLedger) => {
         setLedger(nextLedger);
       })
       .catch((error) => {
-        toast.error(error instanceof Error ? error.message : "Chargement impossible");
+        toast.error(
+          error instanceof Error ? error.message : "Chargement impossible"
+        );
       })
       .finally(() => setLoadingLedger(false));
-  }, [ledgerPath]);
+  }, [ledgerPath, view]);
 
   function changeView(next: string) {
     setView(next as ViewId);
@@ -162,8 +179,12 @@ export function App() {
               </div>
             </div>
 
-            <Tabs value={view} onValueChange={changeView} className="w-full lg:hidden">
-              <TabsList className="grid w-full grid-cols-3">
+            <Tabs
+              value={view}
+              onValueChange={changeView}
+              className="w-full lg:hidden"
+            >
+              <TabsList className="grid w-full grid-cols-4">
                 {navItems.map((item) => (
                   <TabsTrigger key={item.id} value={item.id}>
                     {item.label}
@@ -204,10 +225,18 @@ export function App() {
             <Separator className="hidden lg:block" />
 
             <div className="hidden lg:block">
-              <LedgerStatus ledger={ledger} loading={loadingLedger} />
+              {view === "workflow" ? <WorkflowStatus /> : null}
+              {view !== "workflow" ? (
+                <LedgerStatus ledger={ledger} loading={loadingLedger} />
+              ) : null}
             </div>
 
-            <div className="mt-auto hidden flex-col gap-2 lg:flex">
+            <div
+              className={cn(
+                "mt-auto hidden flex-col gap-2 lg:flex",
+                view === "workflow" && "lg:hidden"
+              )}
+            >
               <label className="text-muted-foreground text-xs font-medium">
                 Ledger JSON
               </label>
@@ -235,11 +264,31 @@ export function App() {
           {view === "viewer" ? (
             <LedgerView ledger={ledger} loading={loadingLedger} />
           ) : null}
+          {view === "workflow" ? <WorkflowView /> : null}
           {view === "lexicon" ? <LexiconView /> : null}
           {view === "review" ? <ReviewView /> : null}
         </main>
       </div>
     </div>
+  );
+}
+
+function WorkflowStatus() {
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm">Documentation workflow</CardTitle>
+        <CardDescription>
+          Carte React Flow du pipeline Strong, du determinisme au LLM borne.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="text-muted-foreground space-y-3 text-sm leading-6">
+        <p>
+          Le LLM n'est pas dans la generation brute. Il intervient apres le
+          rapport residuel, via packets, consensus et filtre.
+        </p>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -276,7 +325,8 @@ function LedgerStatus({
       <CardHeader className="pb-3">
         <CardTitle className="text-sm">État production</CardTitle>
         <CardDescription>
-          {ledger.bible.toUpperCase()} · {metrics.verseCount.toLocaleString("fr-FR")} versets
+          {ledger.bible.toUpperCase()} ·{" "}
+          {metrics.verseCount.toLocaleString("fr-FR")} versets
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
@@ -347,6 +397,7 @@ function LedgerView({
   const [mode, setMode] = useState<ReaderMode>("normal");
   const [query, setQuery] = useState("");
   const [selectedStrong, setSelectedStrong] = useState("");
+  const [selectedStrongCodes, setSelectedStrongCodes] = useState<string[]>([]);
   const [bookVerses, setBookVerses] = useState<StrongVerse[]>([]);
   const [loadingBook, setLoadingBook] = useState(false);
   const [showLexicalCandidates, setShowLexicalCandidates] = useState(
@@ -369,19 +420,13 @@ function LedgerView({
     if (!ledger || book) return;
     const params = new URLSearchParams(window.location.search);
     const queryBook = resolveBookId(params.get("book"));
-    const firstBook = books.includes(queryBook) ? queryBook : books[0] ?? "";
+    const firstBook = books.includes(queryBook) ? queryBook : (books[0] ?? "");
     setBook(firstBook);
   }, [book, books, ledger]);
 
   const chapters = useMemo(() => {
     if (!book) return [];
-    return [
-      ...new Set(
-        bookVerses
-          .filter((verse) => verse.bookId === book)
-          .map((verse) => verse.chapter)
-      )
-    ].sort((left, right) => left - right);
+    return chaptersForBook(bookVerses, book);
   }, [book, bookVerses]);
 
   useEffect(() => {
@@ -393,7 +438,9 @@ function LedgerView({
     loadBookVerses(ledger, book)
       .then(setBookVerses)
       .catch((error) =>
-        toast.error(error instanceof Error ? error.message : "Livre inaccessible")
+        toast.error(
+          error instanceof Error ? error.message : "Livre inaccessible"
+        )
       )
       .finally(() => setLoadingBook(false));
   }, [book, ledger]);
@@ -409,7 +456,11 @@ function LedgerView({
   useEffect(() => {
     if (!chapter && chapters.length > 0) {
       const params = new URLSearchParams(window.location.search);
-      setChapter(params.get("chapter") ?? String(chapters[0]));
+      const queryChapter = Number(params.get("chapter"));
+      const nextChapter = chapters.includes(queryChapter)
+        ? queryChapter
+        : chapters[0];
+      setChapter(String(nextChapter));
     }
   }, [chapter, chapters]);
 
@@ -417,7 +468,8 @@ function LedgerView({
     if (!book || !chapter) return [];
     const needle = query.trim().toLowerCase();
     return bookVerses.filter((verse) => {
-      if (verse.bookId !== book || String(verse.chapter) !== chapter) return false;
+      if (verse.bookId !== book || String(verse.chapter) !== chapter)
+        return false;
       if (!needle) return true;
       return (
         verse.text.toLowerCase().includes(needle) ||
@@ -429,13 +481,101 @@ function LedgerView({
     });
   }, [book, bookVerses, chapter, query]);
 
-  const chapterMetrics = useMemo(() => summarizeVerses(chapterVerses), [chapterVerses]);
+  const chapterMetrics = useMemo(
+    () => summarizeVerses(chapterVerses),
+    [chapterVerses]
+  );
   const selectedAnnotation = useMemo(() => {
     if (!selectedStrong) return undefined;
     return chapterVerses
       .flatMap((verse) => verse.annotations)
-      .find((annotation) => annotation.strong === selectedStrong);
+      .find((annotation) =>
+        strongListIncludes(annotation.strong, selectedStrong)
+      );
   }, [chapterVerses, selectedStrong]);
+  const chapterNavigation = useMemo(() => {
+    const currentChapter = Number(chapter);
+    const currentChapterIndex = chapters.indexOf(currentChapter);
+    const currentBookIndex = books.indexOf(book);
+    return {
+      currentChapterIndex,
+      currentBookIndex,
+      hasPrevious:
+        currentChapterIndex >= 0 &&
+        (currentChapterIndex > 0 || currentBookIndex > 0),
+      hasNext:
+        currentChapterIndex >= 0 &&
+        (currentChapterIndex < chapters.length - 1 ||
+          currentBookIndex < books.length - 1)
+    };
+  }, [book, books, chapter, chapters]);
+
+  useEffect(() => {
+    if (!book || !chapter) return;
+    const url = new URL(window.location.href);
+    url.searchParams.set("book", book);
+    url.searchParams.set("chapter", chapter);
+    window.history.replaceState(null, "", url);
+  }, [book, chapter]);
+
+  useEffect(() => {
+    setSelectedStrong("");
+    setSelectedStrongCodes([]);
+  }, [book, chapter]);
+
+  function selectStrong(value: string) {
+    const codes = splitStrongCodes(value);
+    setSelectedStrongCodes(codes);
+    setSelectedStrong(codes[0] ?? "");
+  }
+
+  function switchSelectedStrong(value: string) {
+    const code = normalizeStrongCode(value);
+    setSelectedStrong(code);
+    setSelectedStrongCodes((codes) =>
+      codes.some((item) => strongCodesEqual(item, code)) ? codes : [code]
+    );
+  }
+
+  function clearSelectedStrong() {
+    setSelectedStrong("");
+    setSelectedStrongCodes([]);
+  }
+
+  async function navigateChapter(direction: -1 | 1) {
+    if (!ledger || !book || !chapter) return;
+
+    const { currentBookIndex, currentChapterIndex } = chapterNavigation;
+    if (currentChapterIndex < 0 || currentBookIndex < 0) return;
+
+    const nextChapter = chapters[currentChapterIndex + direction];
+    if (nextChapter !== undefined) {
+      setChapter(String(nextChapter));
+      return;
+    }
+
+    const nextBook = books[currentBookIndex + direction];
+    if (!nextBook) return;
+
+    setLoadingBook(true);
+    try {
+      const nextBookVerses = await loadBookVerses(ledger, nextBook);
+      const nextBookChapters = chaptersForBook(nextBookVerses, nextBook);
+      const targetChapter =
+        direction < 0 ? nextBookChapters.at(-1) : nextBookChapters[0];
+      if (targetChapter === undefined) return;
+      setBook(nextBook);
+      setChapter(String(targetChapter));
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Navigation de chapitre impossible"
+      );
+    } finally {
+      setLoadingBook(false);
+    }
+  }
 
   return (
     <section className="flex min-h-screen flex-col lg:h-screen lg:min-h-0">
@@ -451,11 +591,14 @@ function LedgerView({
               {chapter ? ` ${chapter}` : ""}
             </h2>
           </div>
-          <div className="grid grid-cols-2 gap-2 md:grid-cols-[170px_130px_minmax(180px,220px)_190px_auto]">
-            <Select value={book} onValueChange={(value) => {
-              setBook(value);
-              setChapter("");
-            }}>
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-[170px_190px_minmax(180px,220px)_190px_auto]">
+            <Select
+              value={book}
+              onValueChange={(value) => {
+                setBook(value);
+                setChapter("1");
+              }}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Livre" />
               </SelectTrigger>
@@ -469,26 +612,53 @@ function LedgerView({
                 </SelectGroup>
               </SelectContent>
             </Select>
-            <Select value={chapter} onValueChange={setChapter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Chapitre" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {chapters.map((item) => (
-                    <SelectItem key={item} value={String(item)}>
-                      Chapitre {item}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+            <div className="grid grid-cols-[36px_minmax(0,1fr)_36px] gap-1">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label="Chapitre précédent"
+                title="Chapitre précédent"
+                disabled={!chapterNavigation.hasPrevious || loadingBook}
+                onClick={() => void navigateChapter(-1)}
+              >
+                <ChevronLeft />
+              </Button>
+              <Select value={chapter} onValueChange={setChapter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Chapitre" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {chapters.map((item) => (
+                      <SelectItem key={item} value={String(item)}>
+                        Chapitre {item}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label="Chapitre suivant"
+                title="Chapitre suivant"
+                disabled={!chapterNavigation.hasNext || loadingBook}
+                onClick={() => void navigateChapter(1)}
+              >
+                <ChevronRight />
+              </Button>
+            </div>
             <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Strong, mot, référence"
             />
-            <Select value={mode} onValueChange={(value) => setMode(value as ReaderMode)}>
+            <Select
+              value={mode}
+              onValueChange={(value) => setMode(value as ReaderMode)}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -522,9 +692,17 @@ function LedgerView({
             <ChapterScoreboard metrics={chapterMetrics} />
             <Legend />
             {loading || loadingBook ? (
-              <EmptyPanel icon={Loader2} title="Chargement" copy="Lecture des fichiers split du ledger." />
+              <EmptyPanel
+                icon={Loader2}
+                title="Chargement"
+                copy="Lecture des fichiers split du ledger."
+              />
             ) : chapterVerses.length === 0 ? (
-              <EmptyPanel icon={Search} title="Aucun verset" copy="Aucun résultat pour ce livre, chapitre ou filtre." />
+              <EmptyPanel
+                icon={Search}
+                title="Aucun verset"
+                copy="Aucun résultat pour ce livre, chapitre ou filtre."
+              />
             ) : (
               <Card>
                 <CardContent className="p-0">
@@ -536,7 +714,7 @@ function LedgerView({
                         mode={mode}
                         lexicalItems={lexicalByRef.get(verse.ref) ?? []}
                         showLexicalCandidates={showLexicalCandidates}
-                        onSelectStrong={setSelectedStrong}
+                        onSelectStrong={selectStrong}
                       />
                     ))}
                   </div>
@@ -548,8 +726,10 @@ function LedgerView({
         <aside className="border-border/70 bg-card/50 hidden min-h-0 border-t xl:block xl:border-t-0 xl:border-l">
           <StrongInspector
             strong={selectedStrong}
+            strongCodes={selectedStrongCodes}
             annotation={selectedAnnotation}
-            onClear={() => setSelectedStrong("")}
+            onStrongChange={switchSelectedStrong}
+            onClear={clearSelectedStrong}
           />
         </aside>
       </div>
@@ -571,7 +751,21 @@ function changeShowLexicalCandidates(
   window.history.replaceState(null, "", url);
 }
 
-function ChapterScoreboard({ metrics }: { metrics: ReturnType<typeof summarizeVerses> }) {
+function chaptersForBook(verses: StrongVerse[], bookId: string) {
+  return [
+    ...new Set(
+      verses
+        .filter((verse) => verse.bookId === bookId)
+        .map((verse) => verse.chapter)
+    )
+  ].sort((left, right) => left - right);
+}
+
+function ChapterScoreboard({
+  metrics
+}: {
+  metrics: ReturnType<typeof summarizeVerses>;
+}) {
   return (
     <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-4">
       <MetricCard
@@ -637,9 +831,7 @@ function MetricCard({
           <Icon />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-muted-foreground text-xs font-medium">
-            {label}
-          </p>
+          <p className="text-muted-foreground text-xs font-medium">{label}</p>
           <p className="text-xl font-semibold">{value}</p>
           <p className="text-muted-foreground truncate text-xs">{detail}</p>
           {progress !== undefined ? (
@@ -761,7 +953,9 @@ function LexicalCandidatePanel({
           <span className="text-sm font-semibold">Candidats déterministes</span>
           <Badge variant="secondary">{visibleCount} visibles</Badge>
           <Badge variant="outline">{autoSafeCount} auto-safe</Badge>
-          {groupCount > 0 ? <Badge variant="outline">{groupCount} groupés</Badge> : null}
+          {groupCount > 0 ? (
+            <Badge variant="outline">{groupCount} groupés</Badge>
+          ) : null}
         </div>
         {hiddenCount > 0 ? (
           <Button
@@ -829,7 +1023,9 @@ function LexicalCandidateItem({
             {item.groupAutoSafe ? " · groupe sûr" : ""}
           </strong>
         </div>
-        {meta ? <span className="text-muted-foreground text-xs">{meta}</span> : null}
+        {meta ? (
+          <span className="text-muted-foreground text-xs">{meta}</span>
+        ) : null}
       </div>
       <div className="mt-2 flex flex-wrap gap-2">
         {candidates.map((candidate, index) => (
@@ -893,7 +1089,11 @@ function LexicalCandidateChip({
           ) : null}
         </Badge>
       </TooltipTrigger>
-      {title ? <TooltipContent className="max-w-sm whitespace-pre-line">{title}</TooltipContent> : null}
+      {title ? (
+        <TooltipContent className="max-w-sm whitespace-pre-line">
+          {title}
+        </TooltipContent>
+      ) : null}
     </Tooltip>
   );
 }
@@ -936,7 +1136,10 @@ function isDefaultVisibleLexicalCandidate(
   if (item.groupAutoSafe) {
     return isLexicalGroupAutoSafeCandidate(item, candidate);
   }
-  return candidate.confidence === "high" && (!candidate.occupied || isStackSafeLexicalCandidate(candidate));
+  return (
+    candidate.confidence === "high" &&
+    (!candidate.occupied || isStackSafeLexicalCandidate(candidate))
+  );
 }
 
 function isLexicalAutoSafeItem(item: LexicalAuditItem) {
@@ -963,13 +1166,17 @@ function isLexicalAutoSafeCandidate(
   candidate: LexicalCandidate
 ) {
   if (candidate.confidence !== "high") return false;
-  if (candidate.occupied && !isStackSafeLexicalCandidate(candidate)) return false;
-  if (item.groupAutoSafe) return isLexicalGroupAutoSafeCandidate(item, candidate);
+  if (candidate.occupied && !isStackSafeLexicalCandidate(candidate))
+    return false;
+  if (item.groupAutoSafe)
+    return isLexicalGroupAutoSafeCandidate(item, candidate);
   return hasDirectLexicalEvidence(candidate);
 }
 
 function isStackSafeLexicalCandidate(candidate: LexicalCandidate) {
-  return candidate.evidence?.some((evidence) => evidence.source === "number-component");
+  return candidate.evidence?.some(
+    (evidence) => evidence.source === "number-component"
+  );
 }
 
 function hasDirectLexicalEvidence(candidate: LexicalCandidate) {
@@ -995,6 +1202,37 @@ function displaySourceLabel(value: string) {
     .replace(/\bstep\b/g, "TAHOT/TAGNT");
 }
 
+function splitStrongCodes(value: string | null | undefined) {
+  const seen = new Set<string>();
+  return (value ?? "")
+    .split(/\s+/u)
+    .map(normalizeStrongCode)
+    .filter((code) => {
+      if (!code || seen.has(code)) return false;
+      seen.add(code);
+      return true;
+    });
+}
+
+function normalizeStrongCode(value: string) {
+  const code = value.trim().toUpperCase();
+  const match = code.match(/^([HG])0*(\d+)([A-Z]?)$/u);
+  if (!match) return code;
+  return `${match[1]}${match[2].padStart(4, "0")}${match[3] ?? ""}`;
+}
+
+function strongCodesEqual(left: string, right: string) {
+  return normalizeStrongCode(left) === normalizeStrongCode(right);
+}
+
+function strongListIncludes(value: string | null | undefined, strong: string) {
+  return splitStrongCodes(value).some((code) => strongCodesEqual(code, strong));
+}
+
+function inlineStrongLabel(strong: string) {
+  return normalizeStrongCode(strong).replace(/^[HG]/u, "");
+}
+
 function lexicalCandidateTargetLabel(candidate: LexicalCandidate) {
   if (
     candidate.target === "phrase" &&
@@ -1012,9 +1250,10 @@ function decorateStrongHtml(html: string) {
   template.innerHTML = html;
   template.content.querySelectorAll("w[strong]").forEach((node) => {
     if (node.querySelector("sup")) return;
-    const strong = node.getAttribute("strong") ?? "";
-    const compactStrong = strong.replace(/^[HG]/i, "");
-    if (!compactStrong) return;
+    const strongCodes = splitStrongCodes(node.getAttribute("strong"));
+    const compactStrong = strongCodes.map(inlineStrongLabel).join(" ");
+    if (!strongCodes.length || !compactStrong) return;
+    node.setAttribute("title", strongCodes.join(" "));
     const sup = document.createElement("sup");
     sup.textContent = compactStrong;
     node.append(sup);
@@ -1024,19 +1263,32 @@ function decorateStrongHtml(html: string) {
 
 function StrongInspector({
   strong,
+  strongCodes,
   annotation,
+  onStrongChange,
   onClear
 }: {
   strong: string;
+  strongCodes: string[];
   annotation?: StrongAnnotation;
+  onStrongChange: (strong: string) => void;
   onClear: () => void;
 }) {
   const [entry, setEntry] = useState<LexiconEntryPayload | null>(null);
+  const normalizedStrong = normalizeStrongCode(strong);
+  const activeStrongCodes =
+    strongCodes.length > 0
+      ? strongCodes
+      : normalizedStrong
+        ? [normalizedStrong]
+        : [];
 
   useEffect(() => {
     setEntry(null);
-    if (!strong) return;
-    fetch(`/api/lexicon/search?q=${encodeURIComponent(strong)}&limit=1`)
+    if (!normalizedStrong) return;
+    fetch(
+      `/api/lexicon/search?q=${encodeURIComponent(normalizedStrong)}&limit=1`
+    )
       .then((response) => response.json())
       .then(async (payload) => {
         const id = payload.rows?.[0]?.id;
@@ -1045,12 +1297,12 @@ function StrongInspector({
         if (entryResponse.ok) setEntry(await entryResponse.json());
       })
       .catch(() => undefined);
-  }, [strong]);
+  }, [normalizedStrong]);
 
   return (
     <ScrollArea className="h-full">
       <div className="flex flex-col gap-4 p-4">
-        {!strong ? (
+        {!normalizedStrong ? (
           <EmptyPanel
             icon={Sparkles}
             title="Inspecteur Strong"
@@ -1062,7 +1314,7 @@ function StrongInspector({
               <CardHeader>
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <CardTitle>{strong}</CardTitle>
+                    <CardTitle>{normalizedStrong}</CardTitle>
                     <CardDescription>
                       {annotation?.source ?? "Source non trouvée"}
                     </CardDescription>
@@ -1076,14 +1328,40 @@ function StrongInspector({
                 <Badge variant="secondary">
                   {annotation?.placement ?? "placement inconnu"}
                 </Badge>
+                {activeStrongCodes.length > 1 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {activeStrongCodes.map((code) => (
+                      <Button
+                        key={code}
+                        type="button"
+                        variant={
+                          strongCodesEqual(code, normalizedStrong)
+                            ? "secondary"
+                            : "outline"
+                        }
+                        size="sm"
+                        className="h-7 px-2 font-mono text-xs"
+                        onClick={() => onStrongChange(code)}
+                      >
+                        {code}
+                      </Button>
+                    ))}
+                  </div>
+                ) : null}
                 <p className="text-muted-foreground">
-                  {annotation?.reason ?? "Aucun détail pour ce tag dans le chapitre courant."}
+                  {annotation?.reason ??
+                    "Aucun détail pour ce tag dans le chapitre courant."}
                 </p>
                 {annotation?.step?.slice(0, 3).map((step) => (
-                  <div key={`${step.dStrong}-${step.tokenIndex}`} className="rounded-lg border p-3">
+                  <div
+                    key={`${step.dStrong}-${step.tokenIndex}`}
+                    className="rounded-lg border p-3"
+                  >
                     <div className="flex items-center justify-between gap-2">
                       <strong>{step.dStrong}</strong>
-                      <Badge variant="outline">{displaySourceLabel(step.source)}</Badge>
+                      <Badge variant="outline">
+                        {displaySourceLabel(step.source)}
+                      </Badge>
                     </div>
                     <p className="text-muted-foreground mt-1">{step.gloss}</p>
                   </div>
@@ -1114,11 +1392,15 @@ function LexiconView() {
           const first = payload.rows?.[0];
           if (first) return fetch(`/api/lexicon/entry?id=${first.id}`);
         })
-        .then((response) => response?.ok ? response.json() : undefined)
+        .then((response) => (response?.ok ? response.json() : undefined))
         .then((payload) => {
           if (payload) setSelected(payload);
         })
-        .catch((error) => toast.error(error instanceof Error ? error.message : "Recherche impossible"))
+        .catch((error) =>
+          toast.error(
+            error instanceof Error ? error.message : "Recherche impossible"
+          )
+        )
         .finally(() => setLoading(false));
     }, 180);
     return () => window.clearTimeout(handle);
@@ -1146,25 +1428,32 @@ function LexiconView() {
           </div>
           <ScrollArea className="min-h-0 flex-1">
             <div className="flex flex-col gap-2 pr-3">
-              {loading ? <p className="text-muted-foreground text-sm">Recherche...</p> : null}
+              {loading ? (
+                <p className="text-muted-foreground text-sm">Recherche...</p>
+              ) : null}
               {rows.map((row) => (
                 <button
                   key={row.id}
                   type="button"
                   onClick={async () => {
-                    const response = await fetch(`/api/lexicon/entry?id=${row.id}`);
+                    const response = await fetch(
+                      `/api/lexicon/entry?id=${row.id}`
+                    );
                     if (response.ok) setSelected(await response.json());
                   }}
                   className={cn(
                     "hover:bg-muted rounded-lg border p-3 text-left transition",
-                    selected?.entry.id === row.id && "border-primary/40 bg-primary/10"
+                    selected?.entry.id === row.id &&
+                      "border-primary/40 bg-primary/10"
                   )}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <strong>{row.eStrong}</strong>
                     <Badge variant="secondary">{row.language}</Badge>
                   </div>
-                  <p className="mt-1 truncate text-sm">{row.glossFr || row.glossEn}</p>
+                  <p className="mt-1 truncate text-sm">
+                    {row.glossFr || row.glossEn}
+                  </p>
                   <p className="text-muted-foreground truncate text-xs">
                     {row.transliteration || row.original}
                   </p>
@@ -1179,7 +1468,11 @@ function LexiconView() {
           {selected ? (
             <LexiconEntryCard payload={selected} />
           ) : (
-            <EmptyPanel icon={Database} title="Aucune entrée" copy="Lance une recherche pour afficher une fiche lexicale." />
+            <EmptyPanel
+              icon={Database}
+              title="Aucune entrée"
+              copy="Lance une recherche pour afficher une fiche lexicale."
+            />
           )}
         </div>
       </ScrollArea>
@@ -1213,7 +1506,10 @@ function LexiconEntryCard({
       <CardContent className="flex flex-col gap-5">
         <div className="grid gap-3 md:grid-cols-2">
           <InfoBlock label="Original" value={entry.original} />
-          <InfoBlock label="Translittération" value={entry.transliteration || entry.classicTransliteration} />
+          <InfoBlock
+            label="Translittération"
+            value={entry.transliteration || entry.classicTransliteration}
+          />
           <InfoBlock label="Gloss FR" value={entry.glossFr || "—"} />
           <InfoBlock label="Gloss EN" value={entry.glossEn || "—"} />
         </div>
@@ -1234,7 +1530,10 @@ function LexiconEntryCard({
           <div className="flex flex-col gap-3">
             <h3 className="text-sm font-semibold">Ressources</h3>
             {payload.resources.slice(0, 5).map((resource, index) => (
-              <div key={`${resource.source}-${resource.kind}-${index}`} className="rounded-lg border p-4">
+              <div
+                key={`${resource.source}-${resource.kind}-${index}`}
+                className="rounded-lg border p-4"
+              >
                 <div className="mb-2 flex items-center gap-2">
                   <Badge variant="outline">{resource.source}</Badge>
                   <Badge variant="secondary">{resource.kind}</Badge>
@@ -1274,7 +1573,9 @@ function ReviewView() {
     const reviewPath = params.get("review");
     const manifestPath = params.get("manifest");
     if (manifestPath) {
-      loadManifest(manifestPath).then(setReview).catch((error) => toast.error(String(error)));
+      loadManifest(manifestPath)
+        .then(setReview)
+        .catch((error) => toast.error(String(error)));
       return;
     }
     if (reviewPath) {
@@ -1291,7 +1592,13 @@ function ReviewView() {
       const decision = item.decision ?? "pending";
       if (filter !== "all" && decision !== filter) return false;
       if (!needle) return true;
-      return [item.ref, item.strong, item.targetText, item.llmReason, item.reviewSource]
+      return [
+        item.ref,
+        item.strong,
+        item.targetText,
+        item.llmReason,
+        item.reviewSource
+      ]
         .filter(Boolean)
         .join(" ")
         .toLowerCase()
@@ -1305,7 +1612,9 @@ function ReviewView() {
       total: all.length,
       accept: all.filter((item) => item.decision === "accept").length,
       reject: all.filter((item) => item.decision === "reject").length,
-      pending: all.filter((item) => !item.decision || item.decision === "pending").length
+      pending: all.filter(
+        (item) => !item.decision || item.decision === "pending"
+      ).length
     };
   }, [review]);
 
@@ -1331,7 +1640,9 @@ function ReviewView() {
       if (!response.ok) throw new Error("Sauvegarde impossible");
       toast.success("Décisions sauvegardées");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Erreur de sauvegarde");
+      toast.error(
+        error instanceof Error ? error.message : "Erreur de sauvegarde"
+      );
     } finally {
       setSaving(false);
     }
@@ -1385,7 +1696,11 @@ function ReviewView() {
             <MiniStat label="Rejetées" value={stats.reject} />
           </div>
           <Button disabled={!review || saving} onClick={save}>
-            {saving ? <Loader2 data-icon="inline-start" className="animate-spin" /> : <CheckCircle2 data-icon="inline-start" />}
+            {saving ? (
+              <Loader2 data-icon="inline-start" className="animate-spin" />
+            ) : (
+              <CheckCircle2 data-icon="inline-start" />
+            )}
             Enregistrer décisions
           </Button>
         </div>
@@ -1399,7 +1714,11 @@ function ReviewView() {
               copy="Charge une revue LLM ou ouvre cette page avec un paramètre ?review= ou ?manifest=."
             />
           ) : items.length === 0 ? (
-            <EmptyPanel icon={Search} title="Aucun item" copy="Aucun item ne correspond au filtre courant." />
+            <EmptyPanel
+              icon={Search}
+              title="Aucun item"
+              copy="Aucun item ne correspond au filtre courant."
+            />
           ) : (
             items.map((item, index) => (
               <Card key={`${item.ref}-${item.strong}-${index}`}>
@@ -1411,34 +1730,65 @@ function ReviewView() {
                         <Badge>{item.strong}</Badge>
                       </CardTitle>
                       <CardDescription>
-                        {String(item.reviewSource ?? review.diagnosticsPath ?? "")}
+                        {String(
+                          item.reviewSource ?? review.diagnosticsPath ?? ""
+                        )}
                       </CardDescription>
                     </div>
-                    <Badge variant={item.decision === "accept" ? "default" : "secondary"}>
+                    <Badge
+                      variant={
+                        item.decision === "accept" ? "default" : "secondary"
+                      }
+                    >
                       {item.decision ?? "pending"}
                     </Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4">
                   <p className="rounded-lg border p-3 text-sm leading-7">
-                    {item.text ?? item.verseText ?? item.context ?? "Aucun contexte textuel."}
+                    {item.text ??
+                      item.verseText ??
+                      item.context ??
+                      "Aucun contexte textuel."}
                   </p>
                   <div className="grid gap-3 md:grid-cols-3">
-                    <InfoBlock label="Décision LLM" value={String(item.llmDecision ?? "—")} />
-                    <InfoBlock label="Mot cible" value={String(item.targetText ?? item.targetNormalized ?? "—")} />
-                    <InfoBlock label="Index" value={String(item.targetWordIndex ?? "—")} />
+                    <InfoBlock
+                      label="Décision LLM"
+                      value={String(item.llmDecision ?? "—")}
+                    />
+                    <InfoBlock
+                      label="Mot cible"
+                      value={String(
+                        item.targetText ?? item.targetNormalized ?? "—"
+                      )}
+                    />
+                    <InfoBlock
+                      label="Index"
+                      value={String(item.targetWordIndex ?? "—")}
+                    />
                   </div>
                   <p className="text-muted-foreground text-sm">
                     {item.llmReason ?? "Aucune raison LLM fournie."}
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <Button size="sm" onClick={() => updateItem(item, { decision: "accept" })}>
+                    <Button
+                      size="sm"
+                      onClick={() => updateItem(item, { decision: "accept" })}
+                    >
                       Accepter
                     </Button>
-                    <Button size="sm" variant="secondary" onClick={() => updateItem(item, { decision: "pending" })}>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => updateItem(item, { decision: "pending" })}
+                    >
                       À revoir
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => updateItem(item, { decision: "reject" })}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => updateItem(item, { decision: "reject" })}
+                    >
                       Rejeter
                     </Button>
                   </div>
@@ -1456,21 +1806,27 @@ async function loadManifest(path: string): Promise<ReviewFile> {
   const response = await fetch(path);
   if (!response.ok) throw new Error(`Manifest inaccessible: ${path}`);
   const manifest = (await response.json()) as {
-    reviews?: Array<{ status?: string; reviewHref?: string; reviewPath?: string }>;
+    reviews?: Array<{
+      status?: string;
+      reviewHref?: string;
+      reviewPath?: string;
+    }>;
   };
-  const reviews: Array<{ review: ReviewFile; source: string }> = await Promise.all(
-    (manifest.reviews ?? [])
-      .filter((entry: { status?: string }) => entry.status !== "failed")
-      .map(async (entry: { reviewHref?: string; reviewPath?: string }) => {
-        const href = entry.reviewHref ?? `/${entry.reviewPath}`;
-        const reviewResponse = await fetch(href);
-        if (!reviewResponse.ok) throw new Error(`Revue inaccessible: ${href}`);
-        return {
-          review: (await reviewResponse.json()) as ReviewFile,
-          source: href
-        };
-      })
-  );
+  const reviews: Array<{ review: ReviewFile; source: string }> =
+    await Promise.all(
+      (manifest.reviews ?? [])
+        .filter((entry: { status?: string }) => entry.status !== "failed")
+        .map(async (entry: { reviewHref?: string; reviewPath?: string }) => {
+          const href = entry.reviewHref ?? `/${entry.reviewPath}`;
+          const reviewResponse = await fetch(href);
+          if (!reviewResponse.ok)
+            throw new Error(`Revue inaccessible: ${href}`);
+          return {
+            review: (await reviewResponse.json()) as ReviewFile,
+            source: href
+          };
+        })
+    );
   const first = reviews[0]?.review;
   return {
     bible: first?.bible ?? "nbs",

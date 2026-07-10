@@ -30,6 +30,22 @@ npm run strong:generate -- --bible <id>
 
 Use the SQLite output as the authoritative production artifact when the user asks for the best workflow. It preserves a complete Strong ledger while keeping reader-visible tags profile-aware. Auto-safe lexical placements are already inserted with `source="semantic-lexicon"`; they should not remain as residual auto-safe candidates. Do not rely on legacy split `verses/*.json` files; new generation removes them.
 
+Production full-Bible generation is validated with the SQLite/indexed path. On
+2026-06-30, a full NBS regeneration completed in about 14 minutes with
+approximately 5.9 GB max RSS, wrote the canonical SQLite ledger, and left
+`Auto-safe candidates: 0`, `Auto-safe items: 0`, and `Group auto-safe items: 0`
+in `outputs/lexical-candidates/nbs/bible-nbs-lexical-candidates-all.md`.
+The lexical auto-safe loop is intentionally incremental after the first full
+pass, but it must finish with a full-scope confirmation pass that applies zero
+placements before the residual lexical report is trusted. If a run leaves any
+residual auto-safe item, treat generation as incomplete and investigate before
+using the Bible as a production artifact.
+
+The duplicate lexical group auto-safe rule must continue processing all
+eligible groups in a report. A regression where that loop returned after the
+first resolved duplicate group caused slow global cascades; do not reintroduce
+early returns there.
+
 If an existing output folder still has the old split JSON ledger, migrate it once:
 
 ```sh
@@ -117,6 +133,16 @@ cat outputs/strong/<id>/bible-<id>-strong-metrics.json
 sqlite3 outputs/strong/<id>/bible-<id>-strong.sqlite "select count(*) from verses"
 cat outputs/bible-<id>-strong-diagnostic.metrics.json
 ```
+
+After a full production generation, also verify:
+
+```sh
+sqlite3 outputs/strong/<id>/bible-<id>-strong.sqlite "select count(*) from verses; pragma integrity_check;"
+grep -E "Auto-safe candidates: 0|Auto-safe items: 0|Group auto-safe items: 0" outputs/lexical-candidates/<id>/bible-<id>-lexical-candidates-all.md
+```
+
+For a complete Bible, `pragma integrity_check` must return `ok`. The expected
+verse count depends on the input Bible, but NBS should have `31169` verses.
 
 8. If quality is unclear, inspect hard verses:
 
@@ -269,6 +295,84 @@ The filter held three model-consensus decisions: `2Kgs.4.38 H8239 -> fais`,
 The last case added a new automatic rule: a visible decision with no token
 witness and no Strong support in `Sg1910`, `Darby`, or `DarbyR` must be held for
 review, even when both models agree.
+
+The full NBS high-confidence lexical gap-review batch was validated on
+2026-07-01 with the SQLite-first runner:
+
+```sh
+set -a; . ./.env; set +a
+npm run strong:review:gaps:batch -- \
+  --bible <id> \
+  --lexical-report outputs/lexical-candidates/<id>/bible-<id>-lexical-candidates-all.json \
+  --output-root outputs/gap-review/<id>/full-bible-llm-high-open-<date> \
+  --max-items-per-task 30 \
+  --task-batch-size 3 \
+  --min-confidence high \
+  --skip-existing \
+  --timeout-ms 600000 \
+  --llm-attempts 2
+```
+
+For the validated production-style run, use one batch runner process. The runner
+may keep multiple LLM tasks in flight, but SQLite writes, `strong:review:gaps:apply`,
+`strong:refresh`, and reports must remain serialized. Do not launch independent
+writer agents against the same Bible ledger. `--task-batch-size 3`,
+`--max-items-per-task 30`, `--timeout-ms 600000`, `--llm-attempts 2`, and
+`--skip-existing` are the validated defaults for NBS-scale production review.
+
+The batch runner is resumable, but it may reuse only tasks whose status is
+`completed`. Do not treat historical `skipped` tasks as done. A packet with zero
+post-filter safe decisions is a completed no-op, not a skipped task, when both
+model reviews parsed and the consensus/filter/apply validation succeeded. The
+2026-07-01 NBS run had four completed no-op scopes (`Hos.14`, `Acts.27`,
+`Phlm.1`, `3John.1`), which correctly produced no applied report.
+
+The full NBS result:
+
+- `tasks=248`, `completed=248`, `skipped=0`, `failed=0`;
+- `candidates=5475`, `consensus=2665`, `acceptedSafe=2205`,
+  `applied=2205`;
+- `needsWitnessReview=440`, `rejectedRisky=20`;
+- 248 packet files, 248 OpenAI reviews, 248 DeepSeek reviews, 248 consensus
+  files, 248 filtered files;
+- zero LLM `parseError` files.
+
+The required post-batch gates are:
+
+```sh
+node - <<'NODE'
+const m=require('./outputs/gap-review/<id>/<run>/manifest.json');
+console.log(JSON.stringify(m.totals,null,2));
+console.log(m.tasks.reduce((a,t)=>((a[t.status]=(a[t.status]||0)+1),a),{}));
+NODE
+node - <<'NODE'
+const fs=require('fs'), path=require('path');
+const root='outputs/gap-review/<id>/<run>/agent-review';
+const bad=[];
+for (const f of fs.readdirSync(root)) {
+  if (!f.endsWith('.json')) continue;
+  if (!f.includes('-openai-') && !f.includes('-deepseek-')) continue;
+  const j=JSON.parse(fs.readFileSync(path.join(root,f),'utf8'));
+  if (j.parseError) bad.push({file:f, parseError:j.parseError});
+}
+console.log(JSON.stringify(bad,null,2));
+NODE
+npm run strong:generate -- --bible <id>
+npm run strong:export -- --bible <id> --view reader
+npm run strong:export -- --bible <id> --view advanced
+npm run strong:diagnose -- --bible <id>
+sqlite3 outputs/strong/<id>/bible-<id>-strong.sqlite "select count(*) from verses; pragma integrity_check;"
+grep -E "Auto-safe candidates: 0|Auto-safe items: 0|Group auto-safe items: 0" outputs/lexical-candidates/<id>/bible-<id>-lexical-candidates-all.md
+npm run typecheck
+npm run lint
+npm test
+```
+
+For NBS after the full run and final regeneration, the canonical ledger still
+has `31169` verses, `pragma integrity_check` returns `ok`, lexical auto-safe is
+zero, `pendingHumanCount=0`, `rejectedCount=0`, `readerTokenCoverage=0.5325`,
+`advancedTokenCoverage=0.5458`, `originalRepresentationRate=0.9999`, and
+`referenceStrongCoverage=0.9991`.
 
 After validating two model reviews on the same lexical packet, build a strict
 visible high-confidence consensus review, run the post-consensus filter, and
@@ -428,9 +532,10 @@ remove competing residual candidates.
 - Promote good LLM suggestions through `strong:review:llm` + `strong:review:llm:apply` into `data/curated-strong-overrides.json` rather than repeatedly paying for the same decision.
 - Prefer LLM batches by book (`--only Gen`, `--only Exod`, etc.) instead of whole-Bible LLM runs.
 - For semantic improvement batches, prefer compact lexical packets and exact
-  two-model consensus. The current positive threshold is three refreshed NBS
-  pilots (`Ezek`, `1Cor`, `Acts`), which permits a controlled multi-packet
-  consensus-only batch, not broad automatic LLM application.
+  two-model consensus. NBS now has a validated full-Bible high-confidence
+  lexical batch path via `strong:review:gaps:batch`, but it is still bounded
+  suggestion generation: exact consensus plus the post-consensus filter is
+  required before any application.
 - After the first controlled batch, require a post-consensus safety filter
   before application. Generic auxiliary/function carriers, suspicious same-word
   stacking, and any positive per-book `placementRiskCount` delta should be held
