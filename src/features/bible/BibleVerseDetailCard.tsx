@@ -13,11 +13,11 @@ import Container from '~common/ui/Container'
 import Paragraph from '~common/ui/Paragraph'
 import RoundedCorner from '~common/ui/RoundedCorner'
 import StrongCard from './StrongCard'
+import StrongVersePreview from './StrongVersePreview'
 
 import BibleVerseDetailFooter from './BibleVerseDetailFooter'
 
 import { useTranslation } from 'react-i18next'
-import { ScrollView } from 'react-native'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { StrongReference, StudyNavigateBibleType } from '~common/types'
 import { CarouselProvider } from '~helpers/CarouselContext'
@@ -258,35 +258,37 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
 
   return (
     <Box flex={1} onLayout={e => setBoxHeight(e.nativeEvent.layout.height)}>
-      <Box maxHeight={boxHeight / 2} position="relative" zIndex={1}>
-        <ScrollView contentContainerStyle={{ paddingTop: 10 }}>
-          <StyledVerse>
-            <VersetWrapper>
-              <NumberText>{verse.Verset}</NumberText>
-            </VersetWrapper>
-            <CarouselProvider
-              value={{
-                currentStrongReference: state.currentStrongReference,
-                goToCarouselItem,
-              }}
-            >
-              <VerseText>{formattedTexte}</VerseText>
-            </CarouselProvider>
-          </StyledVerse>
-        </ScrollView>
-        <BibleVerseDetailFooter
-          verseNumber={verse.Verset}
-          goToNextVerse={() => {
-            updateVerse(+1)
-            setState(prev => ({ ...prev, isCarouselLoading: true }))
-          }}
-          goToPrevVerse={() => {
-            updateVerse(-1)
-            setState(prev => ({ ...prev, isCarouselLoading: true }))
-          }}
-          versesInCurrentChapter={versesInCurrentChapter}
-        />
-      </Box>
+      <StrongVersePreview
+        height={boxHeight / 2}
+        footer={
+          <BibleVerseDetailFooter
+            verseNumber={verse.Verset}
+            goToNextVerse={() => {
+              updateVerse(+1)
+              setState(prev => ({ ...prev, isCarouselLoading: true }))
+            }}
+            goToPrevVerse={() => {
+              updateVerse(-1)
+              setState(prev => ({ ...prev, isCarouselLoading: true }))
+            }}
+            versesInCurrentChapter={versesInCurrentChapter}
+          />
+        }
+      >
+        <StyledVerse>
+          <VersetWrapper>
+            <NumberText>{verse.Verset}</NumberText>
+          </VersetWrapper>
+          <CarouselProvider
+            value={{
+              currentStrongReference: state.currentStrongReference,
+              goToCarouselItem,
+            }}
+          >
+            <VerseText>{formattedTexte}</VerseText>
+          </CarouselProvider>
+        </StyledVerse>
+      </StrongVersePreview>
       <Box bg="lightGrey" mt={-30} position="relative" zIndex={0}>
         <RoundedCorner />
       </Box>
