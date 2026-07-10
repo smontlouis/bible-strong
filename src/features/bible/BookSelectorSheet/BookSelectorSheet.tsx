@@ -12,7 +12,7 @@ import Box from '~common/ui/Box'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { HelpTip } from '~features/tips/HelpTip'
-import { bookSelectorSortAtom, bookSelectorVersesAtom } from './atom'
+import { bookSelectorSelectionModeAtom, bookSelectorSortAtom, bookSelectorVersesAtom } from './atom'
 import { itemHeight } from './BookItem'
 import { BookSelectorList } from './BookSelectorList'
 import { BookSelectorParams } from './BookSelectorParams'
@@ -21,6 +21,7 @@ import VerseSheet, { tempSelectedBookAtom, tempSelectedChapterAtom } from './Ver
 import { useQuery } from '~helpers/react-query-lite'
 import { getBibleVersionCoverage } from '~helpers/biblesDb'
 import { useTheme } from '@emotion/react'
+import { applyBookChapterSelection } from './bookSelectorSelection'
 interface BookSelectorSheetProps {
   selectedBookNum?: number
   sheetRef: React.RefObject<SheetRef | null>
@@ -35,11 +36,13 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
   const expandedBook = useSharedValue<number | null>(null)
   const [expandedBookNumber, setExpandedBookNumber] = useState<number | null>(null)
   const [renderedChapterBookNumbers, setRenderedChapterBookNumbers] = useState<number[]>([])
+  const [gridBook, setGridBook] = useState<Book | null>(null)
   const collapseTimeouts = useRef<Record<number, ReturnType<typeof setTimeout>>>({})
   const flatListRef = useRef<FlatList>(null)
   const { t } = useTranslation()
   const sort = useAtomValue(bookSelectorSortAtom)
   const isAlphabetical = sort === 'alphabetical'
+  const selectionMode = useAtomValue(bookSelectorSelectionModeAtom)
   const verses = useAtomValue(bookSelectorVersesAtom)
   const bookSelectorHasVerses = verses === 'with-verses'
   const setTempSelectedBook = useSetAtom(tempSelectedBookAtom)
@@ -66,19 +69,17 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
       }
 
       if (type === 'select') {
-        if (bookSelectorHasVerses) {
-          setTempSelectedBook(book)
-          setTempSelectedChapter(chapter)
-          bookSelectorActions.setTempSelectedBook(book)
-          bookSelectorActions.setTempSelectedChapter(chapter)
-          verseSheetRef.current?.present()
-          return
-        }
-        bookSelectorActions.setTempSelectedBook(book)
-        bookSelectorActions.setTempSelectedChapter(chapter)
-        bookSelectorActions.setTempSelectedVerse(1)
-        bookSelectorActions.validateTempSelected()
-        sheetRef.current?.dismiss()
+        applyBookChapterSelection(
+          { book, chapter },
+          {
+            actions: bookSelectorActions,
+            hasVerses: bookSelectorHasVerses,
+            dismissBookSelector: () => sheetRef.current?.dismiss(),
+            presentVerseSelector: () => verseSheetRef.current?.present(),
+            setVerseSelectorBook: setTempSelectedBook,
+            setVerseSelectorChapter: setTempSelectedChapter,
+          }
+        )
       } else if (type === 'longPress') {
         if (bookSelectorHasVerses) {
           return
@@ -128,6 +129,7 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
     book => book.Numero === (bookSelectorData?.selectedBook.Numero || 1)
   )
   const safeInitialScrollIndex = Math.max(initialScrollIndex, 0)
+  const isGridChapterPicker = selectionMode === 'grid' && gridBook !== null
 
   useEffect(
     () => () => {
@@ -185,6 +187,7 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
         onDismiss={() => {
           expandedBook.set(null)
           setExpandedBookNumber(null)
+          setGridBook(null)
           Object.values(collapseTimeouts.current).forEach(clearTimeout)
           collapseTimeouts.current = {}
           setRenderedChapterBookNumbers([])
@@ -192,12 +195,17 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
         header={
           <>
             <SheetHeader
-              title={t('Livres')}
+              title={isGridChapterPicker ? t(gridBook.Nom) : t('Livres')}
+              subTitle={isGridChapterPicker ? t('Chapitres') : undefined}
               centerTitle
-              leftComponent={<Box width={60} />}
-              rightComponent={<BookSelectorParams />}
+              hasBackButton={isGridChapterPicker}
+              leftComponent={isGridChapterPicker ? undefined : <Box width={60} />}
+              onBackPress={isGridChapterPicker ? () => setGridBook(null) : undefined}
+              rightComponent={isGridChapterPicker ? <Box width={54} /> : <BookSelectorParams />}
             />
-            <HelpTip id="chapter-selector" description={t('tips.chapterSelector')} />
+            {!isGridChapterPicker && (
+              <HelpTip id="chapter-selector" description={t('tips.chapterSelector')} />
+            )}
           </>
         }
       >
@@ -211,6 +219,8 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
           chaptersByBook={coverageData?.chaptersByBook}
           renderedChapterBookNumbers={renderedChapterBookNumbers}
           onBookSelect={handleBookSelect}
+          gridBook={gridBook}
+          onGridBookSelect={setGridBook}
         />
       </Sheet>
       <VerseSheet

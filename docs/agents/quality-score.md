@@ -9,9 +9,9 @@ This report is a directional agent-readability score, not a product quality verd
 | Domain | Score | Files | Tests | Smoke | Sensitive | Main Risks |
 |---|---:|---:|---:|---|---|---|
 | `app-rating` | 5/10 | 5 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README; 3 eslint-disable markers |
-| `app-switcher` | 5/10 | 54 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README; 7 eslint-disable markers |
+| `app-switcher` | 5/10 | 55 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README; 8 eslint-disable markers |
 | `audio` | 7/10 | 0 | 0 | no | no | no colocated feature tests; no mapped smoke path |
-| `bible` | 8/10 | 158 | 1 | yes | no | 46 console calls; 19 eslint-disable markers |
+| `bible` | 8/10 | 160 | 9 | yes | no | 48 console calls; 18 eslint-disable markers |
 | `bookmarks` | 6/10 | 2 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README |
 | `commentaries` | 5/10 | 5 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README; 4 eslint-disable markers |
 | `dictionnary` | 7/10 | 11 | 0 | yes | no | no colocated feature tests; 4 eslint-disable markers |
@@ -19,14 +19,16 @@ This report is a directional agent-readability score, not a product quality verd
 | `home` | 5/10 | 23 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README; 4 eslint-disable markers |
 | `lexique` | 6/10 | 8 | 0 | yes | no | no colocated feature tests; no feature README; 4 eslint-disable markers |
 | `nave` | 7/10 | 12 | 0 | yes | no | no colocated feature tests; 4 eslint-disable markers |
-| `notes` | 5/10 | 5 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README; 2 eslint-disable markers |
-| `onboarding` | 6/10 | 7 | 0 | yes | yes | no colocated feature tests; 5 eslint-disable markers; sensitive user/account surface |
-| `plans` | 7/10 | 27 | 0 | yes | no | no colocated feature tests; 2 eslint-disable markers |
+| `notes` | 5/10 | 8 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README; 2 eslint-disable markers |
+| `onboarding` | 8/10 | 8 | 1 | yes | yes | 5 eslint-disable markers; sensitive user/account surface |
+| `plans` | 9/10 | 30 | 2 | yes | no | 2 eslint-disable markers |
 | `profile` | 5/10 | 9 | 0 | no | yes | no colocated feature tests; no mapped smoke path; no feature README; sensitive user/account surface |
-| `search` | 9/10 | 7 | 1 | yes | no | 2 eslint-disable markers |
-| `settings` | 5/10 | 35 | 0 | yes | yes | no colocated feature tests; 12 console calls; 1 eslint-disable markers; sensitive user/account surface |
-| `studies` | 5/10 | 34 | 0 | no | no | no colocated feature tests; no mapped smoke path; 17 console calls; 2 eslint-disable markers |
-| `timeline` | 7/10 | 28 | 0 | yes | no | no colocated feature tests; 2 eslint-disable markers |
+| `resources` | 8/10 | 9 | 3 | no | no | no mapped smoke path; no feature README |
+| `search` | 9/10 | 15 | 2 | yes | no | 2 eslint-disable markers |
+| `settings` | 5/10 | 34 | 0 | yes | yes | no colocated feature tests; 12 console calls; 1 eslint-disable markers; sensitive user/account surface |
+| `studies` | 5/10 | 34 | 0 | no | no | no colocated feature tests; no mapped smoke path; 18 console calls; 2 eslint-disable markers |
+| `studyRelations` | 8/10 | 13 | 5 | no | no | no mapped smoke path; no feature README |
+| `timeline` | 7/10 | 30 | 0 | yes | no | no colocated feature tests; 3 eslint-disable markers |
 | `tips` | 6/10 | 2 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README |
 
 ## Scoring Inputs
