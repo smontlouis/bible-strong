@@ -22,6 +22,7 @@ import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { StrongReference, StudyNavigateBibleType } from '~common/types'
 import { CarouselProvider } from '~helpers/CarouselContext'
 import { getChapterVerseCountSafe } from '~helpers/bibleCoverage'
+import { parseStrongVerse } from '~helpers/strongVerseParser'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
@@ -87,6 +88,9 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
   const { t } = useTranslation()
   const defaultVersion = useDefaultBibleVersion()
   const resources = useResourceAccess()
+  const verseBook = verse.Livre
+  const verseChapter = verse.Chapitre
+  const verseNumber = verse.Verset
   const carouselRef = useRef<ICarouselInstance>(null)
   const [boxHeight, setBoxHeight] = useState(0)
   const {
@@ -103,58 +107,6 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
     formattedTexte: null,
   })
 
-  const loadPage = async () => {
-    const strongVerse = await resources.strong.loadVerse(verse)
-
-    if (!strongVerse || 'error' in strongVerse || !strongVerse.Texte) {
-      setState(prev => ({
-        ...prev,
-        error: strongVerse && 'error' in strongVerse ? strongVerse.error : true,
-      }))
-      return
-    }
-
-    const versesInCurrentChapter =
-      (await getChapterVerseCountSafe(defaultVersion, verse.Livre, verse.Chapitre)) ||
-      countLsgChapters[`${verse.Livre}-${verse.Chapitre}`]
-
-    setState(prev => ({ ...prev, versesInCurrentChapter }))
-    formatVerse(strongVerse)
-  }
-
-  const formatVerse = async (strongVerse: { Texte: string }) => {
-    const { formattedTexte, references } = await verseToStrong({
-      ...strongVerse,
-      Livre: verse.Livre,
-    })
-
-    setState(prev => ({ ...prev, formattedTexte }))
-
-    const strongReferencesResult = await resources.strong.loadReferences(references, verse.Livre)
-    if (!strongReferencesResult || 'error' in strongReferencesResult) {
-      setState(prev => ({
-        ...prev,
-        isCarouselLoading: false,
-        error:
-          strongReferencesResult && 'error' in strongReferencesResult
-            ? strongReferencesResult.error
-            : true,
-      }))
-      return
-    }
-    const strongReferences = strongReferencesResult.filter(
-      (reference): reference is StrongReference => typeof reference !== 'string'
-    )
-    setState(prev => ({
-      ...prev,
-      isCarouselLoading: false,
-      strongReferences,
-      currentStrongReference: strongReferences[0],
-    }))
-
-    carouselRef.current?.scrollTo({ index: 0, animated: false })
-  }
-
   const findRefIndex = (ref: string | number) =>
     state.strongReferences.findIndex(r => Number(r.Code) === Number(ref))
 
@@ -166,14 +118,14 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
     setState(prev => ({
       ...prev,
       currentStrongReference:
-        state.strongReferences.find(r => Number(r.Code) === Number(ref)) || null,
+        prev.strongReferences.find(r => Number(r.Code) === Number(ref)) || null,
     }))
   }
 
   const onSnapToItem = (index: number) => {
     setState(prev => ({
       ...prev,
-      currentStrongReference: state.strongReferences[index],
+      currentStrongReference: prev.strongReferences[index] || null,
     }))
   }
 
@@ -190,9 +142,92 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
   }
 
   useEffect(() => {
+    let isCurrent = true
+
+    const loadPage = async () => {
+      setState(prev => ({
+        ...prev,
+        error: false,
+        isCarouselLoading: true,
+        strongReferences: [],
+        currentStrongReference: null,
+        versesInCurrentChapter: null,
+        formattedTexte: null,
+      }))
+
+      try {
+        const strongVerse = await resources.strong.loadVerse({
+          Livre: verseBook,
+          Chapitre: verseChapter,
+          Verset: verseNumber,
+        })
+        if (!isCurrent) return
+
+        if (!strongVerse || 'error' in strongVerse || !strongVerse.Texte) {
+          setState(prev => ({
+            ...prev,
+            isCarouselLoading: false,
+            error: strongVerse && 'error' in strongVerse ? strongVerse.error : true,
+          }))
+          return
+        }
+
+        const parsedVerse = parseStrongVerse(strongVerse.Texte, verseBook)
+        const [versesInCurrentChapterResult, strongReferencesResult] = await Promise.all([
+          getChapterVerseCountSafe(defaultVersion, verseBook, verseChapter),
+          resources.strong.loadReferences(parsedVerse.references, verseBook),
+        ])
+        if (!isCurrent) return
+
+        if (!strongReferencesResult || 'error' in strongReferencesResult) {
+          setState(prev => ({
+            ...prev,
+            isCarouselLoading: false,
+            error:
+              strongReferencesResult && 'error' in strongReferencesResult
+                ? strongReferencesResult.error
+                : true,
+          }))
+          return
+        }
+
+        const strongReferences = strongReferencesResult.filter(
+          (reference): reference is StrongReference => typeof reference !== 'string'
+        )
+        const { formattedTexte } = await verseToStrong(
+          { ...strongVerse, Livre: verseBook },
+          undefined,
+          undefined,
+          strongReferences
+        )
+        if (!isCurrent) return
+
+        setState(prev => ({
+          ...prev,
+          error: false,
+          isCarouselLoading: false,
+          formattedTexte,
+          strongReferences,
+          currentStrongReference: strongReferences[0] || null,
+          versesInCurrentChapter:
+            versesInCurrentChapterResult || countLsgChapters[`${verseBook}-${verseChapter}`],
+        }))
+        carouselRef.current?.scrollTo({ index: 0, animated: false })
+      } catch {
+        if (!isCurrent) return
+        setState(prev => ({
+          ...prev,
+          isCarouselLoading: false,
+          error: 'UNKNOWN_ERROR',
+        }))
+      }
+    }
+
     loadPage()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [verse.Verset, defaultVersion])
+    return () => {
+      isCurrent = false
+    }
+  }, [defaultVersion, resources.strong, verseBook, verseChapter, verseNumber])
 
   const { isCarouselLoading, versesInCurrentChapter, error, formattedTexte } = state
 
