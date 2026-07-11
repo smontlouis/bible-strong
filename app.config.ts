@@ -158,5 +158,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   experiments: {
     reactCompiler: true,
   },
-  runtimeVersion: '2.0.5',
+  runtimeVersion: {
+    policy: 'fingerprint',
+  },
 })
