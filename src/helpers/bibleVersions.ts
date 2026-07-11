@@ -118,6 +118,10 @@ const getBibleStudyToolsAudioUrl = (version: string, bookNum: number, chapterNum
   }_${chapterNum.toString().padStart(3, '0')}.mp3`
 }
 
+const getWordPocketKjvAudioUrl = (bookNum: number, chapterNum: number) => {
+  return `https://www.wordpocket.org/bibles/app/audio/1/${bookNum}/${chapterNum}.mp3`
+}
+
 export const versions: Record<string, Version> = {
   LSG: {
     id: 'LSG',
@@ -269,9 +273,7 @@ export const versions: Record<string, Version> = {
     hasRedWords: true,
     hasPericope: true,
     hasAudio: true,
-    getAudioUrl: (bookNum: number, chapterNum: number) => {
-      return getBibleStudyToolsAudioUrl('kjv', bookNum, chapterNum)
-    },
+    getAudioUrl: getWordPocketKjvAudioUrl,
   },
   KJVS: {
     id: 'KJVS',
@@ -279,9 +281,7 @@ export const versions: Record<string, Version> = {
     c: '1611 Libre de droit',
     type: 'en',
     hasAudio: true,
-    getAudioUrl: (bookNum: number, chapterNum: number) => {
-      return getBibleStudyToolsAudioUrl('kjv', bookNum, chapterNum)
-    },
+    getAudioUrl: getWordPocketKjvAudioUrl,
   },
   INT_EN: {
     id: 'INT_EN',
