@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SharedValue } from 'react-native-reanimated'
 import { BibleTab } from 'src/state/tabs'
 import { BookShortItem } from './BookShortItem'
+import ChapterGrid from './ChapterGrid'
 
 interface BookSelectorListProps {
   initialScrollIndex: number
@@ -18,6 +19,8 @@ interface BookSelectorListProps {
   chaptersByBook?: Record<number, number[]>
   renderedChapterBookNumbers: number[]
   onBookSelect: (book: Book) => void
+  gridBook: Book | null
+  onGridBookSelect: (book: Book) => void
 }
 export const BookSelectorList = ({
   data,
@@ -28,6 +31,8 @@ export const BookSelectorList = ({
   chaptersByBook,
   renderedChapterBookNumbers,
   onBookSelect,
+  gridBook,
+  onGridBookSelect,
 }: BookSelectorListProps) => {
   const insets = useSafeAreaInsets()
   const selectionMode = useAtomValue(bookSelectorSelectionModeAtom)
@@ -55,6 +60,20 @@ export const BookSelectorList = ({
   }, [data.length, initialScrollIndex])
 
   if (selectionMode === 'grid') {
+    if (gridBook) {
+      return (
+        <ChapterGrid
+          book={gridBook}
+          chapters={chaptersByBook?.[gridBook.Numero]}
+          selectedChapter={
+            gridBook.Numero === bookSelectorData?.selectedBook.Numero
+              ? bookSelectorData.selectedChapter
+              : undefined
+          }
+        />
+      )
+    }
+
     return (
       <ScrollView
         contentContainerStyle={{
@@ -70,9 +89,8 @@ export const BookSelectorList = ({
           <BookShortItem
             isNT={book.Numero >= 40}
             key={book.Numero}
-            onChange={() => {}}
+            onChange={onGridBookSelect}
             book={book}
-            chapters={chaptersByBook?.[book.Numero]}
             isSelected={book.Numero === bookSelectorData?.selectedBook.Numero}
           />
         ))}

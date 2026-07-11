@@ -42,12 +42,7 @@ export const useTimeline = ({
   const year = useDerivedValue(() => {
     const currentTimelineX = offset + lineX.get() - x.get()
     const currentYearNb = Math.round(
-      interpolate(
-        currentTimelineX,
-        [0, scrollViewWidth],
-        [startYear, endYear],
-        Extrapolation.CLAMP
-      )
+      interpolate(currentTimelineX, [0, scrollViewWidth], [startYear, endYear], Extrapolation.CLAMP)
     )
 
     if (currentYearNb >= yearNow) {
