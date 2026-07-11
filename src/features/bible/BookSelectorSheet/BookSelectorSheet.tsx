@@ -175,9 +175,8 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
         snapPoints={[1]}
         onPresent={() => {
           if (data.length > 0) {
-            flatListRef.current?.scrollToIndex({
-              index: safeInitialScrollIndex,
-              viewOffset: itemHeight * 2,
+            flatListRef.current?.scrollToOffset({
+              offset: Math.max(0, itemHeight * (safeInitialScrollIndex - 2)),
               animated: false,
             })
           }

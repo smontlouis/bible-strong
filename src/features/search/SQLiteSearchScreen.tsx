@@ -177,7 +177,12 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       const versions = await resources.bibleSearch.getInstalledVersions()
       setInstalledVersions(versions)
       setHasInstalledVersions(versions.length > 0)
+      if (selectedVersion && !versions.includes(selectedVersion)) {
+        setSelectedVersion('')
+      }
     })()
+    // Reconcile the persisted filter when the installed-version inventory changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resources.bibleSearch])
 
   const books = [
@@ -885,6 +890,14 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
                     opacity={itemFilters.passages ? 1 : 0.3}
                     pointerEvents={itemFilters.passages ? 'auto' : 'none'}
                   >
+                    {installedVersions.length > 1 && (
+                      <DropdownMenu
+                        title={t('Version')}
+                        currentValue={selectedVersion}
+                        setValue={setSelectedVersion}
+                        choices={versionValues}
+                      />
+                    )}
                     <DropdownMenu
                       title={t('Section')}
                       currentValue={section}
@@ -897,14 +910,6 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
                       setValue={setBook}
                       choices={books}
                     />
-                    {installedVersions.length > 1 && (
-                      <DropdownMenu
-                        title={t('Version')}
-                        currentValue={selectedVersion}
-                        setValue={setSelectedVersion}
-                        choices={versionValues}
-                      />
-                    )}
                     <DropdownMenu
                       title={t('Ordre')}
                       currentValue={sortOrder}

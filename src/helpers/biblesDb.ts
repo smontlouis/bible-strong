@@ -3,6 +3,7 @@ import * as Sentry from '@sentry/react-native'
 import * as SQLite from 'expo-sqlite'
 import { getSharedSqliteDirPath } from '~helpers/databaseTypes'
 import { databaseBiblesName } from '~helpers/databases'
+import { buildNearFtsQuery, sanitizeFtsQuery } from '~helpers/bibleSearchQuery'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -658,22 +659,6 @@ function buildSearchFilter(ftsQuery: string, options?: SearchOptions) {
  * Build a NEAR query from raw user input for proximity-boosted ranking.
  * Returns null for single-word queries or inputs with explicit operators.
  */
-function buildNearQuery(raw: string, distance: number = 5): string | null {
-  const trimmed = raw.trim()
-
-  // Skip if user typed explicit FTS5 operators or quoted phrases
-  if (/\b(AND|OR|NOT)\b/.test(trimmed) || trimmed.includes('"')) return null
-
-  const tokens = trimmed
-    .replace(/[^\p{L}\p{N}\s]/gu, '')
-    .split(/\s+/)
-    .filter(Boolean)
-
-  if (tokens.length < 2) return null
-
-  return `NEAR(${tokens.join(' ')}, ${distance})`
-}
-
 /**
  * Search verses using FTS5 full-text search.
  *
@@ -698,7 +683,7 @@ export function searchVerses(query: string, options?: SearchOptions): Promise<Se
     const offset = options?.offset ?? 0
     const orderBy = options?.sortOrder === 'book' ? 'v.book, v.chapter, v.verse' : 'rank'
 
-    const nearQuery = buildNearQuery(query)
+    const nearQuery = buildNearFtsQuery(query)
 
     // Two-tier proximity search for multi-word + relevance sort
     if (nearQuery && options?.sortOrder !== 'book') {
@@ -815,33 +800,4 @@ export function searchVersesCount(query: string, options?: SearchOptions): Promi
     const row = await d.getFirstAsync<{ cnt: number }>(sql, params)
     return row?.cnt ?? 0
   })
-}
-
-/**
- * Sanitize and prepare a user query for FTS5.
- * - Wraps bare words with implicit AND
- * - Preserves quoted phrases
- * - Preserves prefix operator (*)
- * - Strips dangerous chars
- */
-function sanitizeFtsQuery(raw: string): string {
-  const trimmed = raw.trim()
-  if (!trimmed) return ''
-
-  // If user typed explicit operators, pass through after basic sanitation
-  if (/\b(AND|OR|NOT)\b/.test(trimmed) || trimmed.includes('"')) {
-    // Remove chars that could break FTS5 syntax (keep alphanumeric, spaces, quotes, *, -)
-    return trimmed.replace(/[^\p{L}\p{N}\s"*\-]/gu, '')
-  }
-
-  // Simple query: split into tokens and add prefix matching (*)
-  const tokens = trimmed
-    .replace(/[^\p{L}\p{N}\s*]/gu, '')
-    .split(/\s+/)
-    .filter(Boolean)
-
-  if (tokens.length === 0) return ''
-
-  // Add * to each token for prefix matching (e.g. "amour" -> "amour*")
-  return tokens.map(t => (t.endsWith('*') ? t : t + '*')).join(' ')
 }

@@ -46,9 +46,8 @@ export const BookSelectorList = ({
   useEffect(() => {
     if (data.length === 0) return
     setTimeout(() => {
-      flatListRef.current?.scrollToIndex({
-        index: initialScrollIndex,
-        viewOffset: itemHeight * 2,
+      flatListRef.current?.scrollToOffset({
+        offset: Math.max(0, itemHeight * (initialScrollIndex - 2)),
         animated: false,
       })
     }, 100)
@@ -86,12 +85,6 @@ export const BookSelectorList = ({
       ref={flatListRef}
       data={data}
       renderItem={renderItem}
-      getItemLayout={(_, index) => ({
-        length: itemHeight,
-        offset: itemHeight * index,
-        index,
-      })}
-      onScrollToIndexFailed={error => console.log('[Bible] Scroll failed:', error)}
       keyExtractor={item => item.Numero.toString()}
       maintainVisibleContentPosition={{
         minIndexForVisible: 0,
