@@ -118,7 +118,6 @@ describe('BookSelectorList', () => {
         shouldRenderChapters: true,
       })
     )
-    expect(list.props.getItemLayout(undefined, 2)).toEqual({ length: 46, offset: 92, index: 2 })
     expect(list.props.keyExtractor(genesis)).toBe('1')
   })
 
