@@ -31,7 +31,10 @@ export const queryEntityList = <T extends EntityListRow>(
       case 'title-asc':
         return titleCompare(left, right)
       case 'title-desc':
-        return -titleCompare(left, right) || left.id.localeCompare(right.id)
+        return (
+          -left.title.localeCompare(right.title, undefined, { sensitivity: 'base' }) ||
+          left.id.localeCompare(right.id)
+        )
       case 'created-newest':
         return (
           Number(right.createdAt || 0) - Number(left.createdAt || 0) ||

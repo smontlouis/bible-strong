@@ -98,7 +98,7 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
   const highlightsObj = useSelector(selectHighlightsObj)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const setColorChangeModal = useSetAtom(colorChangeModalAtom)
-  const [, setPersistedFilters] = useAtom(highlightsListQueryAtom)
+  const [persistedFilters, setPersistedFilters] = useAtom(highlightsListQueryAtom)
   const testamentModalRef = useRef<SheetRef>(null)
   const bookModalRef = useRef<SheetRef>(null)
   const sortModalRef = useRef<SheetRef>(null)
@@ -110,6 +110,17 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
 
   // Available annotation versions for type filter
   const availableAnnotationVersions = useSelector(selectAvailableAnnotationVersions)
+
+  useEffect(() => {
+    const typeFilter = persistedFilters.typeFilter
+    if (
+      typeFilter &&
+      !['all', 'highlights', 'annotations'].includes(typeFilter) &&
+      !availableAnnotationVersions.includes(typeFilter)
+    ) {
+      setPersistedFilters(state => ({ ...state, typeFilter: undefined }))
+    }
+  }, [availableAnnotationVersions, persistedFilters.typeFilter, setPersistedFilters])
 
   // Filters hook - encapsulates all filter logic
   const {
@@ -464,7 +475,11 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
         ) : (
           <Empty
             icon={require('~assets/images/empty-state-icons/highlight.svg')}
-            message={t("Vous n'avez pas encore rien surligné...")}
+            message={
+              Object.keys(highlightsObj).length || wordAnnotations.length
+                ? t('entityList.noFilterMatch')
+                : t("Vous n'avez pas encore rien surligné...")
+            }
           />
         )}
 

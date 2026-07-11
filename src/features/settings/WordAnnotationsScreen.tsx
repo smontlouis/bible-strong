@@ -173,11 +173,27 @@ const WordAnnotationsScreen = () => {
       groups.get(verseKey)!.push(annotation)
     })
 
-    return Array.from(groups.entries()).map(([verseKey, annotations]) => ({
-      verseKey,
-      reference: verseToReference({ [verseKey]: true }),
-      annotations,
-    }))
+    const compareVerseKeys = (left: string, right: string) => {
+      const leftParts = left.split('-').map(Number)
+      const rightParts = right.split('-').map(Number)
+      return (
+        leftParts[0] - rightParts[0] || leftParts[1] - rightParts[1] || leftParts[2] - rightParts[2]
+      )
+    }
+    const compareDates = (
+      left: (typeof annotationsList)[number],
+      right: (typeof annotationsList)[number]
+    ) =>
+      (queryState.sort === 'oldest' ? left.date - right.date : right.date - left.date) ||
+      left.id.localeCompare(right.id)
+
+    return Array.from(groups.entries())
+      .sort(([left], [right]) => compareVerseKeys(left, right))
+      .map(([verseKey, groupedAnnotations]) => ({
+        verseKey,
+        reference: verseToReference({ [verseKey]: true }),
+        annotations: groupedAnnotations.sort(compareDates),
+      }))
   })()
 
   // Group by date
@@ -194,11 +210,17 @@ const WordAnnotationsScreen = () => {
       groups.get(dateKey)!.push(annotation)
     })
 
-    return Array.from(groups.entries()).map(([date, annotations]) => ({
-      date,
-      label: new Date(`${date}T12:00:00`).toLocaleDateString(),
-      annotations,
-    }))
+    return Array.from(groups.entries())
+      .sort(([left], [right]) =>
+        queryState.sort === 'oldest' ? left.localeCompare(right) : right.localeCompare(left)
+      )
+      .map(([date, groupedAnnotations]) => ({
+        date,
+        label: new Date(`${date}T12:00:00`).toLocaleDateString(),
+        annotations: groupedAnnotations.sort(
+          (left, right) => left.date - right.date || left.id.localeCompare(right.id)
+        ),
+      }))
   })()
 
   // Handle annotation tap - navigate to Bible verse
@@ -242,7 +264,11 @@ const WordAnnotationsScreen = () => {
     if (annotationsList.length === 0) {
       return (
         <EmptyState>
-          <EmptyText>{t("Vous n'avez pas encore annoté de mots...")}</EmptyText>
+          <EmptyText>
+            {Object.keys(annotations).length
+              ? t('entityList.noFilterMatch')
+              : t("Vous n'avez pas encore annoté de mots...")}
+          </EmptyText>
         </EmptyState>
       )
     }

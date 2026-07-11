@@ -21,4 +21,15 @@ describe('queryEntityList', () => {
       ['a', 'b']
     )
   })
+
+  it('uses ascending IDs as the tie-breaker for descending titles', () => {
+    const equalTitles = [
+      { id: 'b', title: 'Même titre' },
+      { id: 'a', title: 'Même titre' },
+    ]
+
+    expect(
+      queryEntityList(equalTitles, { query: '', sort: 'title-desc' }).map(row => row.id)
+    ).toEqual(['a', 'b'])
+  })
 })

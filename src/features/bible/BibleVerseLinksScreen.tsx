@@ -69,7 +69,10 @@ const BibleVerseLinks = ({ isFormSheet = false }: BibleVerseLinksProps) => {
     if (queryState.tagId && !tags[queryState.tagId]) {
       setQueryState(state => ({ ...state, tagId: null }))
     }
-  }, [queryState.tagId, setQueryState, tags])
+    if (queryState.linkType && !Object.hasOwn(linkTypeConfig, queryState.linkType)) {
+      setQueryState(state => ({ ...state, linkType: null }))
+    }
+  }, [queryState.linkType, queryState.tagId, setQueryState, tags])
   const relations = useSelector(selectRelations)
   const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
@@ -286,7 +289,9 @@ const BibleVerseLinks = ({ isFormSheet = false }: BibleVerseLinksProps) => {
             icon={require('~assets/images/empty-state-icons/link.svg')}
             message={
               links.length
-                ? t('Aucun résultat trouvé pour "{{query}}"', { query: queryState.query })
+                ? queryState.query.trim()
+                  ? t('Aucun résultat trouvé pour "{{query}}"', { query: queryState.query })
+                  : t('entityList.noFilterMatch')
                 : t("Vous n'avez pas encore de liens...")
             }
           />

@@ -626,6 +626,7 @@
   "entityList.sort.titleDesc": "Titre Z–A",
   "entityList.sort.createdNewest": "Création la plus récente",
   "entityList.sort.createdOldest": "Création la plus ancienne",
+  "entityList.noFilterMatch": "Aucun élément ne correspond à ces filtres.",
   "Pertinence": "Pertinence",
   "Ordre biblique": "Ordre biblique",
   "Section": "Section",

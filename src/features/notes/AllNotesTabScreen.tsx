@@ -203,7 +203,9 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
           icon={require('~assets/images/empty-state-icons/note.svg')}
           message={
             notes.length
-              ? t('Aucun résultat trouvé pour "{{query}}"', { query: queryState.query })
+              ? queryState.query.trim()
+                ? t('Aucun résultat trouvé pour "{{query}}"', { query: queryState.query })
+                : t('entityList.noFilterMatch')
               : t("Vous n'avez pas encore de notes...")
           }
         />

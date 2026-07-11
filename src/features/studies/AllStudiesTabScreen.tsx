@@ -265,7 +265,9 @@ const StudiesScreen = ({
             icon={require('~assets/images/empty-state-icons/study.svg')}
             message={
               studies.length
-                ? t('Aucun résultat trouvé pour "{{query}}"', { query: queryState.query })
+                ? queryState.query.trim()
+                  ? t('Aucun résultat trouvé pour "{{query}}"', { query: queryState.query })
+                  : t('entityList.noFilterMatch')
                 : t('Aucune étude...')
             }
           />
