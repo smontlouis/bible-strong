@@ -1,4 +1,7 @@
-import { buildGroupedWordAnnotations } from '~features/entityListQuery/wordAnnotationsQuery'
+import {
+  buildGroupedWordAnnotations,
+  getAnnotationGroupVerseKey,
+} from '~features/entityListQuery/wordAnnotationsQuery'
 import type { WordAnnotationsObj } from '~redux/modules/user/wordAnnotations'
 
 describe('buildGroupedWordAnnotations', () => {
@@ -24,5 +27,17 @@ describe('buildGroupedWordAnnotations', () => {
 
     expect(result).toHaveLength(125)
     expect(result[0].verseKeys).toEqual(['1-1-1', '40-1-1'])
+  })
+
+  it('groups a multi-range annotation under the range matching the active Bible scope', () => {
+    const annotation = {
+      ranges: [
+        { verseKey: '1-1-1', startWordIndex: 0, endWordIndex: 0, text: 'Début' },
+        { verseKey: '40-1-1', startWordIndex: 0, endWordIndex: 0, text: 'Suite' },
+      ],
+    }
+
+    expect(getAnnotationGroupVerseKey(annotation, { book: 40, testament: 'new' })).toBe('40-1-1')
+    expect(getAnnotationGroupVerseKey(annotation, { book: null, testament: 'old' })).toBe('1-1-1')
   })
 })

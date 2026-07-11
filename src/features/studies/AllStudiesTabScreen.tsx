@@ -1,7 +1,7 @@
 import { type SheetRef } from '~common/sheet'
 import { useEffect, useRef, useState } from 'react'
 import { FlatList } from 'react-native'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useAtom, useSetAtom } from 'jotai/react'
 
 import Empty from '~common/Empty'
@@ -33,12 +33,12 @@ import StudySettingsModal from './StudySettingsModal'
 import ChoiceFilterModal from '~common/ChoiceFilterModal'
 import { useEntityListQueryFilters } from '~common/EntityListQueryFilters'
 import { queryEntityList, type EntityListSort } from '~features/entityListQuery/entityListQuery'
-import { deltaToPlainText } from '~helpers/deltaToPlainText'
 import {
   defaultStudiesListQueryState,
   studiesListQueryAtom,
   type StudiesListQueryState,
 } from '~state/entityListFilters'
+import { selectStudyListRows } from '~redux/selectors/studies'
 
 type StudiesScreenProps = {
   hasBackButton?: boolean
@@ -129,14 +129,7 @@ const StudiesScreen = ({
     })
   }
 
-  const studies = useSelector(
-    (state: RootState) =>
-      Object.entries(state.user.bible.studies).map(([studyId, study]) => ({
-        ...study,
-        id: study.id || studyId,
-      })),
-    shallowEqual
-  )
+  const studies = useSelector(selectStudyListRows)
   const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
 
   const pendingStudy = useSelector((state: RootState) =>
@@ -181,9 +174,7 @@ const StudiesScreen = ({
     matchingStudies.map(study => ({
       ...study,
       title: study.title || t('Étude sans titre'),
-      description: study.content?.ops
-        ? deltaToPlainText(study.content.ops as Parameters<typeof deltaToPlainText>[0])
-        : undefined,
+      description: study.searchDescription,
       date: Number(study.modified_at || 0),
       createdAt: Number(study.created_at || 0),
     })),

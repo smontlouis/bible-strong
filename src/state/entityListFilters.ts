@@ -114,17 +114,24 @@ export const linksListQueryAtom = atomWithAsyncStorage<LinksListQueryState>(
 export const migrateHighlightsListQueryState = (value: unknown): HighlightFilters => {
   if (!value || typeof value !== 'object') return {}
   const candidate = value as HighlightFilters
+  const testament = ['all', 'old', 'new'].includes(String(candidate.testament))
+    ? candidate.testament
+    : 'all'
+  const validBook =
+    typeof candidate.book === 'number' && candidate.book >= 1 && candidate.book <= 66
+      ? candidate.book
+      : undefined
+  const book =
+    validBook &&
+    ((testament === 'old' && validBook > 39) || (testament === 'new' && validBook < 40))
+      ? undefined
+      : validBook
   return {
     colorId: typeof candidate.colorId === 'string' ? candidate.colorId : undefined,
     tagId: typeof candidate.tagId === 'string' ? candidate.tagId : undefined,
     typeFilter: typeof candidate.typeFilter === 'string' ? candidate.typeFilter : undefined,
-    testament: ['all', 'old', 'new'].includes(String(candidate.testament))
-      ? candidate.testament
-      : 'all',
-    book:
-      typeof candidate.book === 'number' && candidate.book >= 1 && candidate.book <= 66
-        ? candidate.book
-        : undefined,
+    testament,
+    book,
     sort: ['newest', 'oldest', 'bible'].includes(String(candidate.sort))
       ? candidate.sort
       : 'newest',
@@ -164,6 +171,18 @@ export const migrateWordAnnotationsListQueryState = (
 ): WordAnnotationsListQueryState => {
   if (!value || typeof value !== 'object') return defaultWordAnnotationsListQueryState
   const candidate = value as Partial<WordAnnotationsListQueryState>
+  const testament = ['all', 'old', 'new'].includes(String(candidate.testament))
+    ? (candidate.testament as WordAnnotationsListQueryState['testament'])
+    : 'all'
+  const validBook =
+    typeof candidate.book === 'number' && candidate.book >= 1 && candidate.book <= 66
+      ? candidate.book
+      : null
+  const book =
+    validBook &&
+    ((testament === 'old' && validBook > 39) || (testament === 'new' && validBook < 40))
+      ? null
+      : validBook
   return {
     colorId: typeof candidate.colorId === 'string' ? candidate.colorId : null,
     tagId: typeof candidate.tagId === 'string' ? candidate.tagId : null,
@@ -171,13 +190,8 @@ export const migrateWordAnnotationsListQueryState = (
       ? (candidate.annotationType as WordAnnotationsListQueryState['annotationType'])
       : null,
     version: typeof candidate.version === 'string' ? candidate.version : null,
-    testament: ['all', 'old', 'new'].includes(String(candidate.testament))
-      ? (candidate.testament as WordAnnotationsListQueryState['testament'])
-      : 'all',
-    book:
-      typeof candidate.book === 'number' && candidate.book >= 1 && candidate.book <= 66
-        ? candidate.book
-        : null,
+    testament,
+    book,
     view: ['verse', 'date', 'flat'].includes(String(candidate.view))
       ? (candidate.view as WordAnnotationsListQueryState['view'])
       : 'verse',

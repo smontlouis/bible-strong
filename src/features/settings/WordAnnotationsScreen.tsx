@@ -25,6 +25,7 @@ import { selectAvailableAnnotationVersions } from '~redux/selectors/bible'
 import { sections } from '~assets/bible_versions/books-desc'
 import { useColorInfo } from '~helpers/useColorName'
 import Container from '~common/ui/Container'
+import { getAnnotationGroupVerseKey } from '~features/entityListQuery/wordAnnotationsQuery'
 
 const TabContainer = styled.View(({ theme }) => ({
   flexDirection: 'row',
@@ -163,8 +164,10 @@ const WordAnnotationsScreen = () => {
     const groups = new Map<string, typeof annotationsList>()
 
     annotationsList.forEach(annotation => {
-      // Use first range's verseKey as primary key
-      const verseKey = annotation.ranges[0]?.verseKey
+      const verseKey = getAnnotationGroupVerseKey(annotation, {
+        book: queryState.book,
+        testament: queryState.testament,
+      })
       if (!verseKey) return
 
       if (!groups.has(verseKey)) {

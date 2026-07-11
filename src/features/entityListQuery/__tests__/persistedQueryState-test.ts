@@ -38,5 +38,14 @@ describe('persisted entity list query state', () => {
         sort: 'oldest',
       })
     ).toMatchObject({ version: 'LSG', testament: 'new', book: null, view: 'date', sort: 'oldest' })
+
+    expect(migrateHighlightsListQueryState({ testament: 'old', book: 50 })).toMatchObject({
+      testament: 'old',
+      book: undefined,
+    })
+    expect(migrateWordAnnotationsListQueryState({ testament: 'new', book: 20 })).toMatchObject({
+      testament: 'new',
+      book: null,
+    })
   })
 })
