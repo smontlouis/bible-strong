@@ -1,8 +1,12 @@
 import Fuse, { type FuseResultMatch, type IFuseOptions } from 'fuse.js'
-import { removeBreakLines } from '~helpers/utils'
 import type { MatchRange, SearchEntityResult } from './searchResultTypes'
 
-export const normalizeDisplayedText = (value: string = '') => removeBreakLines(value)
+export type SearchableTextItem = {
+  title: string
+  description?: string
+}
+
+export const normalizeDisplayedText = (value: string = '') => value.replace(/\n/g, '')
 
 export const removeAccents = (value: string) =>
   value.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -16,7 +20,7 @@ const getFuzzyValue = <T>(obj: T, path: string | string[]): readonly string[] | 
     : removeAccents(String(value || ''))
 }
 
-export const defaultSearchFuzzyOptions: IFuseOptions<SearchEntityResult> = {
+export const defaultSearchFuzzyOptions: IFuseOptions<SearchableTextItem> = {
   keys: ['title', 'description'],
   includeMatches: true,
   threshold: 0.15,
@@ -81,11 +85,11 @@ const getExactMatches = (
   return matches
 }
 
-export const searchWithMatches = (
-  targets: SearchEntityResult[],
+export const searchWithMatches = <T extends SearchableTextItem>(
+  targets: T[],
   keyword: string,
-  options: IFuseOptions<SearchEntityResult> = defaultSearchFuzzyOptions
-): SearchEntityResult[] => {
+  options: IFuseOptions<T> = defaultSearchFuzzyOptions as IFuseOptions<T>
+): (T & { matches?: readonly FuseResultMatch[] })[] => {
   const trimmed = keyword.trim()
   if (trimmed.length < 2) return []
 

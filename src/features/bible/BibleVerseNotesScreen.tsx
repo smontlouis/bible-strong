@@ -1,7 +1,7 @@
-import React, { useCallback, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
-import { useSetAtom } from 'jotai/react'
+import { useAtom, useSetAtom } from 'jotai/react'
 
 import Empty from '~common/Empty'
 import FiltersHeader from '~common/FiltersHeader'
@@ -28,6 +28,9 @@ import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRe
 import { useOpenNote } from '~features/notes/useOpenNote'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
+import { useEntityListQueryFilters } from '~common/EntityListQueryFilters'
+import { queryEntityList, type EntityListSort } from '~features/entityListQuery/entityListQuery'
+import { defaultNotesListQueryState, notesListQueryAtom } from '~state/entityListFilters'
 
 export type TNote = {
   noteId: string
@@ -51,7 +54,7 @@ const BibleVerseNotes = ({
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : true
 
-  const [selectedChip, setSelectedChip] = useState<Tag | null>(null)
+  const [queryState, setQueryState] = useAtom(notesListQueryAtom)
   const [noteSettingsId, setNoteSettingsId] = useState<string | null>(null)
   const openEntityRelations = useOpenEntityRelations()
   const openNote = useOpenNote()
@@ -59,18 +62,26 @@ const BibleVerseNotes = ({
   const notesObj = useSelector((state: RootState) => state.user.bible.notes)
   const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
   const relations = useSelector((state: RootState) => state.user.bible.relations)
+  const tags = useSelector((state: RootState) => state.user.bible.tags)
+  const selectedChip = queryState.tagId ? tags[queryState.tagId] || null : null
+
+  useEffect(() => {
+    if (queryState.tagId && !tags[queryState.tagId]) {
+      setQueryState(state => ({ ...state, tagId: null }))
+    }
+  }, [queryState.tagId, setQueryState, tags])
   const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
 
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const noteSettingsModal = useSheet()
 
-  const openTagsModal = useCallback(() => {
+  const openTagsModal = () => {
     setUnifiedTagsModal({
       mode: 'filter',
       selectedTag: selectedChip ?? undefined,
-      onSelect: (tag?: Tag) => setSelectedChip(tag ?? null),
+      onSelect: (tag?: Tag) => setQueryState(state => ({ ...state, tagId: tag?.id || null })),
     })
-  }, [selectedChip, setUnifiedTagsModal])
+  }
 
   // Compute notes directly (React Compiler handles memoization)
   const notes: TNote[] = []
@@ -98,13 +109,39 @@ const BibleVerseNotes = ({
     notes.push({ noteId: noteKey, reference: verseToReference(verseNumbers), notes: note })
   })
 
-  // Sort by date, newest first
-  notes.sort((a, b) => Number(b.notes.date) - Number(a.notes.date))
-
-  // Filter by selected tag
-  const filteredNotes = selectedChip
-    ? notes.filter(s => s.notes.tags && s.notes.tags[selectedChip.id])
-    : notes
+  const sortOptions = [
+    { value: 'newest', label: t('entityList.sort.newest') },
+    { value: 'oldest', label: t('entityList.sort.oldest') },
+    { value: 'title-asc', label: t('entityList.sort.titleAsc') },
+    { value: 'title-desc', label: t('entityList.sort.titleDesc') },
+  ] satisfies readonly { value: EntityListSort; label: string }[]
+  const queryFilters = useEntityListQueryFilters({
+    query: queryState.query,
+    sort: queryState.sort,
+    sortOptions,
+    onQueryChange: query => setQueryState(state => ({ ...state, query })),
+    onSortChange: sort => setQueryState(state => ({ ...state, sort })),
+  })
+  const filteredNotes = queryEntityList(
+    notes.reduce<(TNote & { id: string; title: string; description: string; date: number })[]>(
+      (result, item) => {
+        if (selectedChip && !item.notes.tags?.[selectedChip.id]) return result
+        result.push({
+          ...item,
+          id: item.noteId,
+          title: getNoteTitle(item.notes, item.reference),
+          description: item.notes.description,
+          date: Number(item.notes.date || 0),
+        })
+        return result
+      },
+      []
+    ),
+    queryState
+  )
+  const activeFilters = Boolean(
+    queryState.query.trim() || queryState.tagId || queryState.sort !== 'newest'
+  )
 
   const openNoteSettings = (noteId: string) => {
     setNoteSettingsId(noteId)
@@ -151,12 +188,13 @@ const BibleVerseNotes = ({
     <FormSheetScreen isFormSheet={isFormSheet}>
       <Box flex bg="reverse">
         <FiltersHeader
-          title="Notes"
+          title={t('Notes')}
           filterLabel={selectedChip?.name}
           hasBackButton={hasBackButton}
-          hasActiveFilters={Boolean(selectedChip)}
-          onReset={() => setSelectedChip(null)}
+          hasActiveFilters={activeFilters}
+          onReset={() => setQueryState(defaultNotesListQueryState)}
           filters={[
+            ...queryFilters.filters,
             {
               key: 'tags',
               icon: 'tag',
@@ -166,6 +204,7 @@ const BibleVerseNotes = ({
             },
           ]}
         />
+        {queryFilters.modals}
         {filteredNotes.length ? (
           <FlatList
             data={filteredNotes}
@@ -176,7 +215,11 @@ const BibleVerseNotes = ({
         ) : (
           <Empty
             icon={require('~assets/images/empty-state-icons/note.svg')}
-            message={t("Vous n'avez pas encore de notes...")}
+            message={
+              notes.length
+                ? t('Aucun résultat trouvé pour "{{query}}"', { query: queryState.query })
+                : t("Vous n'avez pas encore de notes...")
+            }
           />
         )}
         <BibleNotesSettingsModal

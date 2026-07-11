@@ -36,6 +36,7 @@ const TypeFilterModal = forwardRef<SheetRef, Props>(
 
     const isAllSelected = !selectedType || selectedType === 'all'
     const isAnnotationsSelected = selectedType === 'annotations'
+    const isHighlightsSelected = selectedType === 'highlights'
 
     return (
       <Sheet ref={ref} snapPoints={[0.5]} header={<SheetHeader title={t('Filtrer par type')} />}>
@@ -51,6 +52,14 @@ const TypeFilterModal = forwardRef<SheetRef, Props>(
               {t('Tout')}
             </Text>
             {isAllSelected && <FeatherIcon name="check" size={20} color="primary" />}
+          </TypeRow>
+
+          <TypeRow onPress={() => onSelect('highlights')}>
+            <Checkbox checked={isHighlightsSelected} marginRight={12} />
+            <Text flex={1} fontSize={16}>
+              {t('Surbrillances')}
+            </Text>
+            {isHighlightsSelected && <FeatherIcon name="check" size={20} color="primary" />}
           </TypeRow>
 
           {/* Option "Annotations" (toutes) */}

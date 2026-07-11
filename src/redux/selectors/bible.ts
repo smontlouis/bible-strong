@@ -25,6 +25,10 @@ import {
   relationIncludesVerseKey,
   createVerseEndpoint,
 } from '~features/studyRelations/domain'
+import {
+  buildGroupedWordAnnotations,
+  type GroupedWordAnnotationRow,
+} from '~features/entityListQuery/wordAnnotationsQuery'
 
 type TaggedEntity = { id: string | number; title: string; tags?: TagsObj }
 type HighlightVerseGroup = {
@@ -515,6 +519,7 @@ const sortWordAnnotationsByDate = (annotations: Record<string, WordAnnotation>) 
       version: annotation.version,
       text: annotation.ranges[0]?.text || '',
       verseKey: annotation.ranges[0]?.verseKey || '',
+      verseKeys: annotation.ranges.map(range => range.verseKey),
       tags: annotation.tags,
     }))
     .sort((a, b) => b.date - a.date)
@@ -636,34 +641,10 @@ export const makeTagDataSelector = () =>
   )
 
 // Type for grouped word annotations (for HighlightsScreen)
-export type GroupedWordAnnotation = {
-  id: string
-  date: number
-  color: string
-  type: 'background' | 'underline' | 'circle'
-  version: string
-  text: string
-  verseKey: string
-  tags?: Record<string, { id: string; name: string }>
-}
+export type GroupedWordAnnotation = GroupedWordAnnotationRow
 
-// Selector for all word annotations sorted by date (for HighlightsScreen)
 export const makeAllWordAnnotationsSelector = () =>
-  createSelector([selectWordAnnotations], (wordAnnotations): GroupedWordAnnotation[] => {
-    return Object.entries(wordAnnotations)
-      .map(([id, annotation]) => ({
-        id,
-        date: annotation.date,
-        color: annotation.color,
-        type: annotation.type,
-        version: annotation.version,
-        text: annotation.ranges[0]?.text || '',
-        verseKey: annotation.ranges[0]?.verseKey || '',
-        tags: annotation.tags,
-      }))
-      .sort((a, b) => b.date - a.date)
-      .slice(0, 100) // Limit to 100 items like highlights
-  })
+  createSelector([selectWordAnnotations], buildGroupedWordAnnotations)
 
 // Selector for available annotation versions (for type filter in HighlightsScreen)
 export const selectAvailableAnnotationVersions = createSelector(

@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useSetAtom } from 'jotai/react'
+import { useAtom, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { Alert, ScrollView } from 'react-native'
+import { Alert, FlatList } from 'react-native'
 
 import { ActionSheetItem } from '~common/ActionMenu'
 import Empty from '~common/Empty'
@@ -11,7 +11,7 @@ import ColorFilterModal from '~common/ColorFilterModal'
 import TypeFilterModal from '~common/TypeFilterModal'
 import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
-import { Sheet } from '~common/sheet'
+import { Sheet, type SheetRef } from '~common/sheet'
 import { useHighlightFilters } from '~helpers/useHighlightFilters'
 import { useSheet } from '~helpers/useSheet'
 import type { RootState } from '~redux/modules/reducer'
@@ -36,6 +36,9 @@ import VerseComponent from './Verse'
 import AnnotationItem from './AnnotationItem'
 import type { TagsObj, Verse, VerseIds } from '~common/types'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import ChoiceFilterModal from '~common/ChoiceFilterModal'
+import { highlightsListQueryAtom } from '~state/entityListFilters'
+import { sections } from '~assets/bible_versions/books-desc'
 
 export type GroupedHighlightData = {
   date: number
@@ -95,6 +98,11 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
   const highlightsObj = useSelector(selectHighlightsObj)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const setColorChangeModal = useSetAtom(colorChangeModalAtom)
+  const [, setPersistedFilters] = useAtom(highlightsListQueryAtom)
+  const testamentModalRef = useRef<SheetRef>(null)
+  const bookModalRef = useRef<SheetRef>(null)
+  const sortModalRef = useRef<SheetRef>(null)
+  const books = sections.flatMap(section => section.data)
 
   // Word annotations selector
   const selectAllWordAnnotations = makeAllWordAnnotationsSelector()
@@ -152,10 +160,16 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
     if (filters.tagId) {
       highlights = highlights.filter(filterByTag(filters.tagId, highlightsObj))
     }
+    if (filters.book) {
+      highlights = highlights.filter(([id]) => Number(id.split('-')[0]) === filters.book)
+    } else if (filters.testament === 'old') {
+      highlights = highlights.filter(([id]) => Number(id.split('-')[0]) <= 39)
+    } else if (filters.testament === 'new') {
+      highlights = highlights.filter(([id]) => Number(id.split('-')[0]) >= 40)
+    }
 
     return highlights
       .sort((a, b) => Number(b[1].date) - Number(a[1].date))
-      .slice(0, 100)
       .reduce(groupHighlightsByDate, [])
   })()
 
@@ -170,45 +184,72 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
     if (tagIdFilter) {
       filteredAnnotations = filteredAnnotations.filter(a => a.tags?.[tagIdFilter])
     }
+    if (filters.book) {
+      filteredAnnotations = filteredAnnotations.filter(a =>
+        a.verseKeys.some(verseKey => Number(verseKey.split('-')[0]) === filters.book)
+      )
+    } else if (filters.testament === 'old') {
+      filteredAnnotations = filteredAnnotations.filter(a =>
+        a.verseKeys.some(verseKey => Number(verseKey.split('-')[0]) <= 39)
+      )
+    } else if (filters.testament === 'new') {
+      filteredAnnotations = filteredAnnotations.filter(a =>
+        a.verseKeys.some(verseKey => Number(verseKey.split('-')[0]) >= 40)
+      )
+    }
 
     // Type filter logic
     const typeFilter = filters.typeFilter
 
-    // If type is 'annotations' - only show annotations (no highlights)
-    if (typeFilter === 'annotations') {
-      const annotationItems: UnifiedHighlightItem[] = filteredAnnotations.map(a => ({
-        type: 'annotation' as const,
-        data: a,
-      }))
-      return annotationItems.sort((a, b) => Number(b.data.date) - Number(a.data.date))
-    }
-
-    // If type is a version code - only show annotations for that version
-    if (typeFilter && typeFilter !== 'all') {
-      const versionAnnotations = filteredAnnotations.filter(a => a.version === typeFilter)
-      const annotationItems: UnifiedHighlightItem[] = versionAnnotations.map(a => ({
-        type: 'annotation' as const,
-        data: a,
-      }))
-      return annotationItems.sort((a, b) => Number(b.data.date) - Number(a.data.date))
-    }
-
-    // Default ('all' or undefined): show everything
-    // Transform highlights to unified format
     const highlightItems: UnifiedHighlightItem[] = groupedHighlights.map(h => ({
       type: 'highlight' as const,
       data: h,
     }))
-
     const annotationItems: UnifiedHighlightItem[] = filteredAnnotations.map(a => ({
       type: 'annotation' as const,
       data: a,
     }))
+    const items =
+      typeFilter === 'highlights'
+        ? highlightItems
+        : typeFilter === 'annotations'
+          ? annotationItems
+          : typeFilter && typeFilter !== 'all'
+            ? annotationItems.filter(
+                item => item.type === 'annotation' && item.data.version === typeFilter
+              )
+            : [...highlightItems, ...annotationItems]
+    const identity = (item: UnifiedHighlightItem) =>
+      item.type === 'annotation'
+        ? `annotation-${item.data.id}`
+        : `highlight-${Object.keys(item.data.stringIds).sort().join('/')}`
 
     // Combine and sort by date descending
-    return [...highlightItems, ...annotationItems].sort(
-      (a, b) => Number(b.data.date) - Number(a.data.date)
-    )
+    return items.sort((a, b) => {
+      if (filters.sort === 'oldest') {
+        return Number(a.data.date) - Number(b.data.date) || identity(a).localeCompare(identity(b))
+      }
+      if (filters.sort === 'bible') {
+        const key = (item: UnifiedHighlightItem) => {
+          const verseKeys =
+            item.type === 'highlight' ? Object.keys(item.data.stringIds) : item.data.verseKeys
+          return verseKeys
+            .map(value => value.split('-').map(Number))
+            .sort(
+              (left, right) => left[0] - right[0] || left[1] - right[1] || left[2] - right[2]
+            )[0]
+        }
+        const left = key(a)
+        const right = key(b)
+        return (
+          (left?.[0] || 0) - (right?.[0] || 0) ||
+          (left?.[1] || 0) - (right?.[1] || 0) ||
+          (left?.[2] || 0) - (right?.[2] || 0) ||
+          identity(a).localeCompare(identity(b))
+        )
+      }
+      return Number(b.data.date) - Number(a.data.date) || identity(a).localeCompare(identity(b))
+    })
   })()
 
   const handleDelete = () => {
@@ -278,7 +319,101 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
               value: selectedTag?.name || t('Tous'),
               onPress: openTagsFromMain,
             },
+            {
+              key: 'testament',
+              icon: 'book',
+              label: t('Testament'),
+              value:
+                filters.testament === 'old'
+                  ? t('Ancien Testament')
+                  : filters.testament === 'new'
+                    ? t('Nouveau Testament')
+                    : t('Toute la Bible'),
+              onPress: () => testamentModalRef.current?.present(),
+            },
+            {
+              key: 'book',
+              icon: 'bookmark',
+              label: t('Livre'),
+              value: books.find(book => book.Numero === filters.book)?.Nom || t('Tous'),
+              onPress: () => bookModalRef.current?.present(),
+            },
+            {
+              key: 'sort',
+              icon: 'list',
+              label: t('Ordre'),
+              value:
+                filters.sort === 'oldest'
+                  ? t('entityList.sort.oldest')
+                  : filters.sort === 'bible'
+                    ? t('Ordre biblique')
+                    : t('entityList.sort.newest'),
+              onPress: () => sortModalRef.current?.present(),
+            },
           ]}
+        />
+
+        <ChoiceFilterModal
+          ref={testamentModalRef}
+          title={t('Testament')}
+          selectedValue={filters.testament || 'all'}
+          options={[
+            { value: 'all', label: t('Toute la Bible') },
+            { value: 'old', label: t('Ancien Testament') },
+            { value: 'new', label: t('Nouveau Testament') },
+          ]}
+          onSelect={testament => {
+            setPersistedFilters(state => ({
+              ...state,
+              testament,
+              book:
+                state.book &&
+                ((testament === 'old' && state.book > 39) ||
+                  (testament === 'new' && state.book < 40))
+                  ? undefined
+                  : state.book,
+            }))
+            testamentModalRef.current?.dismiss()
+          }}
+        />
+        <ChoiceFilterModal
+          ref={bookModalRef}
+          title={t('Livre')}
+          selectedValue={String(filters.book || 0)}
+          options={[
+            { value: '0', label: t('Tous') },
+            ...books
+              .filter(
+                book =>
+                  !filters.testament ||
+                  filters.testament === 'all' ||
+                  (filters.testament === 'old' ? book.Numero <= 39 : book.Numero >= 40)
+              )
+              .map(book => ({ value: String(book.Numero), label: book.Nom })),
+          ]}
+          onSelect={book => {
+            const number = Number(book) || undefined
+            setPersistedFilters(state => ({
+              ...state,
+              book: number,
+              testament: number ? (number <= 39 ? 'old' : 'new') : state.testament,
+            }))
+            bookModalRef.current?.dismiss()
+          }}
+        />
+        <ChoiceFilterModal
+          ref={sortModalRef}
+          title={t('Ordre')}
+          selectedValue={filters.sort || 'newest'}
+          options={[
+            { value: 'newest', label: t('entityList.sort.newest') },
+            { value: 'oldest', label: t('entityList.sort.oldest') },
+            { value: 'bible', label: t('Ordre biblique') },
+          ]}
+          onSelect={sort => {
+            setPersistedFilters(state => ({ ...state, sort }))
+            sortModalRef.current?.dismiss()
+          }}
         />
 
         <ColorFilterModal
@@ -302,12 +437,17 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
 
         {/* Content */}
         {unifiedItems.length ? (
-          <ScrollView>
-            {unifiedItems.map(item => {
+          <FlatList
+            data={unifiedItems}
+            keyExtractor={item =>
+              item.type === 'highlight'
+                ? `highlight-${Object.keys(item.data.stringIds).sort().join('/')}`
+                : `annotation-${item.data.id}`
+            }
+            renderItem={({ item }) => {
               if (item.type === 'highlight') {
                 return (
                   <VerseComponent
-                    key={`highlight-${item.data.date}`}
                     color={item.data.color}
                     date={item.data.date}
                     verseIds={item.data.highlightsObj}
@@ -318,15 +458,9 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
                 )
               }
 
-              return (
-                <AnnotationItem
-                  key={`annotation-${item.data.id}`}
-                  item={item.data}
-                  onSettingsPress={setAnnotationSettingsData}
-                />
-              )
-            })}
-          </ScrollView>
+              return <AnnotationItem item={item.data} onSettingsPress={setAnnotationSettingsData} />
+            }}
+          />
         ) : (
           <Empty
             icon={require('~assets/images/empty-state-icons/highlight.svg')}
