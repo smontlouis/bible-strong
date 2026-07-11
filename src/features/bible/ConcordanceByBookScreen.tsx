@@ -21,6 +21,7 @@ import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { FoundVerseRow } from '~features/resources/strongAccess'
 import { IS_FORM_SHEET } from '~helpers/constants'
+import type { StrongLexiconEntry } from '~helpers/strongVerseParser'
 
 const ConcordanceByBook = () => {
   const pushRouteOnce = usePushRouteOnce()
@@ -38,16 +39,32 @@ const ConcordanceByBook = () => {
     ? JSON.parse(params.strongReference)
     : { Code: 0, Mot: '' }
   const { Code, Mot } = strongReference
+  const routeLexiconLsg = strongReference.LSG || ''
+  const [lexiconEntry, setLexiconEntry] = useState<StrongLexiconEntry>({
+    Code,
+    LSG: routeLexiconLsg,
+  })
 
   useEffect(() => {
+    let isCurrent = true
     const loadVerses = async () => {
       if (!book || !Code) return
-      const foundVerses = await resources.strong.loadFoundVersesByBook(book, Code)
-      if ('error' in foundVerses) return
+      setLexiconEntry({ Code, LSG: routeLexiconLsg })
+      const [foundVerses, currentLexiconEntry] = await Promise.all([
+        resources.strong.loadFoundVersesByBook(book, Code),
+        resources.strong.loadReference(String(Code), book),
+      ])
+      if (!isCurrent || 'error' in foundVerses) return
       setVerses(foundVerses)
+      if (currentLexiconEntry && !('error' in currentLexiconEntry)) {
+        setLexiconEntry(currentLexiconEntry)
+      }
     }
     loadVerses()
-  }, [book, Code, resources.strong])
+    return () => {
+      isCurrent = false
+    }
+  }, [book, Code, resources.strong, routeLexiconLsg, strongResourceLanguage])
 
   const toggleStrongLanguage = () => {
     const nextLanguage = strongResourceLanguage === 'fr' ? 'en' : 'fr'
@@ -96,6 +113,7 @@ const ConcordanceByBook = () => {
             return (
               <ConcordanceVerse
                 concordanceFor={Code}
+                lexiconEntry={lexiconEntry}
                 verse={item}
                 t={t}
                 onOpenVerse={verse => {

@@ -1,8 +1,14 @@
-import React, { Fragment } from 'react'
-import BibleStrongReference from '~features/bible/BibleStrongReference'
-import Paragraph from '~common/ui/Paragraph'
-import memoize from './memoize'
 import * as Sentry from '@sentry/react-native'
+import React from 'react'
+
+import Paragraph from '~common/ui/Paragraph'
+import BibleStrongReference from '~features/bible/BibleStrongReference'
+
+import {
+  parseStrongVerse,
+  type StrongLexiconEntry,
+  type StrongVerseModel,
+} from './strongVerseParser'
 
 interface VerseData {
   Texte: string
@@ -10,85 +16,68 @@ interface VerseData {
 }
 
 interface VerseToStrongResult {
-  formattedTexte: (React.JSX.Element | null)[]
+  formattedTexte: React.JSX.Element[]
   references: string[]
+  model: StrongVerseModel
 }
 
-const verseToStrong = memoize(
-  ({ Texte, Livre }: VerseData, concordanceFor?: string, isSmall?: boolean) =>
-    new Promise<VerseToStrongResult>((resolve, reject) => {
-      try {
-        let formattedTexte: (React.JSX.Element | null)[]
-        const references: string[] = []
+const splitTextRun = (text: string): string[] => text.match(/\S+\s*|\s+/gu) || []
 
-        // STRONG -- We don't want what is in parentheses
-        const splittedTexte = Texte.split(/\s*(\(?\d+[^{.|\s}]?\d+(?!\.?\d)\)?)/g)
-        if (!splittedTexte[splittedTexte.length - 1].trim()) {
-          splittedTexte.pop()
-        }
-        formattedTexte = splittedTexte.map((item, i) => {
-          // IF YOU WANT RADICALdb
-          // if (item.match(/\(\d+\)/)) {
-          //   item = item.substring(1, item.length - 1)
-          // }
-
-          // For every number, replace it with last word of previous item
-          if (Number.isInteger(Number(item)) && item) {
-            references.push(item)
-            const prevItem = splittedTexte[i - 1].split(' ')
-            return (
-              <Fragment key={i}>
-                {(i - 1 !== 0 || prevItem.length > 1) && (
-                  <Paragraph small={isSmall}>&nbsp;</Paragraph>
-                )}
-                <BibleStrongReference
-                  small={isSmall}
-                  concordanceFor={concordanceFor}
-                  book={Livre}
-                  word={prevItem[prevItem.length - 1]}
-                  reference={item}
-                />
-              </Fragment>
-            )
-          }
-
-          // Remove number with parentheses
-          if (item.match(/\(\d+\)/)) {
-            return null
-          }
-
-          // Don't delete last word if last item
-          if (i === splittedTexte.length - 1) {
-            return (
-              <Paragraph small={isSmall} key={i}>
-                {item}
-              </Paragraph>
-            )
-          }
-
-          const words = item.split(' ').slice(0, -1)
-          // Delete last word
+const verseToStrong = async (
+  { Texte, Livre }: VerseData,
+  concordanceFor?: string,
+  isSmall?: boolean,
+  lexiconEntries: StrongLexiconEntry[] = []
+): Promise<VerseToStrongResult> => {
+  try {
+    const model = parseStrongVerse(Texte, Livre, lexiconEntries)
+    const formattedTexte = model.runs.flatMap(run => {
+      if (run.type === 'text') {
+        let offset = 0
+        return splitTextRun(run.text).map(text => {
+          const key = `${run.id}-${offset}`
+          offset += text.length
           return (
-            <Fragment key={i}>
-              {words.map((w, j) => (
-                <Paragraph small={isSmall} key={j}>
-                  {w}
-                  {!(j === words.length - 1) && ' '}
-                </Paragraph>
-              ))}
-            </Fragment>
+            <Paragraph small={isSmall} key={key}>
+              {text}
+            </Paragraph>
           )
         })
-        return resolve({ formattedTexte, references })
-      } catch (e) {
-        Sentry.withScope(scope => {
-          scope.setExtra('Reference', `${Texte}-${Livre}`)
-          Sentry.captureException('verseToStrong error')
-        })
-
-        return reject(e)
       }
+
+      if (run.type === 'standalone') {
+        return (
+          <BibleStrongReference
+            small={isSmall}
+            concordanceFor={concordanceFor}
+            book={Livre}
+            reference={run.reference}
+            key={run.id}
+          />
+        )
+      }
+
+      return (
+        <BibleStrongReference
+          small={isSmall}
+          concordanceFor={concordanceFor}
+          book={Livre}
+          word={run.text}
+          reference={run.reference}
+          key={run.id}
+        />
+      )
     })
-)
+
+    return { formattedTexte, references: model.references, model }
+  } catch (error) {
+    Sentry.withScope(scope => {
+      scope.setExtra('Reference', `${Texte}-${Livre}`)
+      Sentry.captureException(error)
+    })
+
+    throw error
+  }
+}
 
 export default verseToStrong

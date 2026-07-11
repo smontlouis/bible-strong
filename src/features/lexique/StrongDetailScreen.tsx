@@ -425,13 +425,14 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
                   )}
                 </Box>
                 <Box my={10}>
-                  {verses.map((item, i) => (
+                  {verses.map(item => (
                     <ConcordanceVerse
                       onOpenVerse={openConcordanceVerse}
                       t={t}
                       concordanceFor={Code}
+                      lexiconEntry={strongReference}
                       verse={item}
-                      key={i}
+                      key={`${item.Livre}-${item.Chapitre}-${item.Verset}`}
                     />
                   ))}
                 </Box>
