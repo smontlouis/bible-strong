@@ -61,6 +61,7 @@ jobs:
               "IOS_GOOGLE_SERVICES_FILE",
             ]
             const values = keys.map(key => `${key}=${process.env[key] ?? ""}`)
+            values.push("EXPO_NO_BUNDLE_SPLITTING=true")
             fs.appendFileSync(process.env.GITHUB_ENV, `${values.join("\n")}\n`)
           '
 
