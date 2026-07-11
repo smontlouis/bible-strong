@@ -49,7 +49,22 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      - name: Load development environment
+        run: |
+          yarn dotenv -c development -- node -e '
+            const fs = require("node:fs")
+            const keys = [
+              "ANDROID_GOOGLE_SERVICES_FILE",
+              "APP_NAME",
+              "BUNDLE_IDENTIFIER",
+              "EXPO_PUBLIC_SENTRY_DSN",
+              "IOS_GOOGLE_SERVICES_FILE",
+            ]
+            const values = keys.map(key => `${key}=${process.env[key] ?? ""}`)
+            fs.appendFileSync(process.env.GITHUB_ENV, `${values.join("\n")}\n`)
+          '
+
       - name: Publish preview update
         uses: expo/expo-github-action/preview@v8
         with:
-          command: yarn dotenv -c development -- eas update --auto
+          command: eas update --auto
