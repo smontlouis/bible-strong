@@ -706,6 +706,7 @@
   "study.verseAdded": "Verset ajouté à l'étude",
   "study.openStudy": "Ouvrir",
   "study.noStudies": "Aucune étude trouvée",
+  "study.loginRequired": "Connectez-vous pour créer une étude",
   "common.goTo": "Aller à l'onglet",
   "common.chooseCompareVersions": "Choisir les versions à comparer",
   "premium.earlyAccess": "Accès anticipé",

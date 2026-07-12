@@ -29,6 +29,7 @@ import getVersesContent from '~helpers/getVersesContent'
 import { useQuery } from '~helpers/react-query-lite'
 import useLanguage from '~helpers/useLanguage'
 import { useSheet } from '~helpers/useSheet'
+import { toast } from '~helpers/toast'
 import verseToReference from '~helpers/verseToReference'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { RootState } from '~redux/modules/reducer'
@@ -52,6 +53,7 @@ import {
   selectNotes,
 } from '~redux/selectors/bible'
 import { makeSelectBookmarksInChapter } from '~redux/selectors/bookmarks'
+import { selectIsLogged } from '~redux/selectors/user'
 import type { AppDispatch } from '~redux/store'
 import { bibleDataRefreshSignalAtom, historyAtom } from '../../state/app'
 import {
@@ -199,6 +201,7 @@ const BibleViewer = ({
 
   const lang = useLanguage()
   const dispatch = useDispatch<AppDispatch>()
+  const isLogged = useSelector(selectIsLogged)
   const [pericope, setPericope] = useState<Pericope | null>(null)
   const [resourceType, onChangeResourceType] = useState<BibleResource>('strong')
   const [resourceModalSelection, setResourceModalSelection] = useState<{
@@ -598,6 +601,11 @@ const BibleViewer = ({
 
   // Add to study handlers
   const handleOpenAddToStudy = () => {
+    if (!isLogged) {
+      toast.info(t('study.loginRequired'))
+      return
+    }
+
     addToStudyModal.open()
   }
 
