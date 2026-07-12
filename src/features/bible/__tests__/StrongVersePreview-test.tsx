@@ -95,10 +95,10 @@ describe('StrongVersePreview', () => {
     expect(preview.findAllByType('ScrollView' as never)).toHaveLength(1)
     expect(preview.findAllByType('footer-sentinel' as never)).toHaveLength(1)
     expect(scrollView.findAllByType('footer-sentinel' as never)).toHaveLength(0)
-    expect(references.at(-1)).toBe('04017')
-    expect(finalToken.props.reference).toBe('04017')
+    expect(references.at(-1)).toBe('4017')
+    expect(finalToken.props.reference).toBe('4017')
     expect(scrollView.findAllByType('strong-reference' as never).at(-1)?.props.reference).toBe(
-      '04017'
+      '4017'
     )
   })
 
