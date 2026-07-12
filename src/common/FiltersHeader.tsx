@@ -70,6 +70,17 @@ type Props = {
   onReset?: () => void
 }
 
+export const getFiltersHeaderLabel = (
+  activeLabels: (string | undefined | null | false)[],
+  multipleFiltersLabel: (count: number) => string
+) => {
+  const labels = activeLabels.filter((label): label is string => Boolean(label))
+
+  if (labels.length === 0) return undefined
+  if (labels.length === 1) return labels[0]
+  return multipleFiltersLabel(labels.length)
+}
+
 const FiltersHeader = ({
   title,
   filterLabel,

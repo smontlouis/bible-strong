@@ -6,7 +6,7 @@ import { Alert, FlatList } from 'react-native'
 
 import { ActionSheetItem } from '~common/ActionMenu'
 import Empty from '~common/Empty'
-import FiltersHeader from '~common/FiltersHeader'
+import FiltersHeader, { getFiltersHeaderLabel } from '~common/FiltersHeader'
 import ColorFilterModal from '~common/ColorFilterModal'
 import TypeFilterModal from '~common/TypeFilterModal'
 import Box from '~common/ui/Box'
@@ -128,7 +128,6 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
     setColorFilter,
     setTypeFilter,
     resetFilters,
-    filterLabel,
     colorInfo,
     selectedTag,
     typeFilterLabel,
@@ -139,6 +138,26 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
     openTagsFromMain,
     openTypeFromMain,
   } = useHighlightFilters()
+
+  const filterLabel = getFiltersHeaderLabel(
+    [
+      filters.typeFilter && filters.typeFilter !== 'all' ? typeFilterLabel : undefined,
+      colorInfo?.name,
+      selectedTag?.name,
+      filters.testament === 'old'
+        ? t('Ancien Testament')
+        : filters.testament === 'new'
+          ? t('Nouveau Testament')
+          : undefined,
+      books.find(book => book.Numero === filters.book)?.Nom,
+      filters.sort === 'oldest'
+        ? t('entityList.sort.oldest')
+        : filters.sort === 'bible'
+          ? t('Ordre biblique')
+          : undefined,
+    ],
+    count => `${count} ${t('filtres')}`
+  )
 
   // Settings modal (for highlight actions)
   const [settingsData, setSettingsData] = useState<{ stringIds: VerseIds } | null>(null)

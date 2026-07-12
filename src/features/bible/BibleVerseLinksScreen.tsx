@@ -12,7 +12,7 @@ import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Header from '~common/Header'
 import Empty from '~common/Empty'
 
-import FiltersHeader from '~common/FiltersHeader'
+import FiltersHeader, { getFiltersHeaderLabel } from '~common/FiltersHeader'
 import { useSheet } from '~helpers/useSheet'
 import { unifiedTagsModalAtom } from '~state/app'
 import verseToReference from '~helpers/verseToReference'
@@ -230,6 +230,10 @@ const BibleVerseLinks = ({ isFormSheet = false }: BibleVerseLinksProps) => {
     queryState.linkType ||
     queryState.sort !== 'newest'
   )
+  const filterLabel = getFiltersHeaderLabel(
+    [...queryFilters.activeLabels, queryState.linkType ? typeLabel : undefined, selectedChip?.name],
+    count => `${count} ${t('filtres')}`
+  )
 
   const selectedLink = links.find(link => link.linkId === linkSettingsId)
 
@@ -241,7 +245,7 @@ const BibleVerseLinks = ({ isFormSheet = false }: BibleVerseLinksProps) => {
         ) : (
           <FiltersHeader
             title={t('Liens')}
-            filterLabel={selectedChip?.name}
+            filterLabel={filterLabel}
             hasBackButton={hasListBackButton}
             hasActiveFilters={activeFilters}
             onReset={() => setQueryState(defaultLinksListQueryState)}

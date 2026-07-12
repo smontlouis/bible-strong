@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux'
 import { useAtom, useSetAtom } from 'jotai/react'
 
 import Empty from '~common/Empty'
-import FiltersHeader from '~common/FiltersHeader'
+import FiltersHeader, { getFiltersHeaderLabel } from '~common/FiltersHeader'
 import Box from '~common/ui/Box'
 import FlatList from '~common/ui/FlatList'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
@@ -142,6 +142,10 @@ const BibleVerseNotes = ({
   const activeFilters = Boolean(
     queryState.query.trim() || queryState.tagId || queryState.sort !== 'newest'
   )
+  const filterLabel = getFiltersHeaderLabel(
+    [...queryFilters.activeLabels, selectedChip?.name],
+    count => `${count} ${t('filtres')}`
+  )
 
   const openNoteSettings = (noteId: string) => {
     setNoteSettingsId(noteId)
@@ -189,7 +193,7 @@ const BibleVerseNotes = ({
       <Box flex bg="reverse">
         <FiltersHeader
           title={t('Notes')}
-          filterLabel={selectedChip?.name}
+          filterLabel={filterLabel}
           hasBackButton={hasBackButton}
           hasActiveFilters={activeFilters}
           onReset={() => setQueryState(defaultNotesListQueryState)}

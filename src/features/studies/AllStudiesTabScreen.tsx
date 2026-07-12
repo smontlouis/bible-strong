@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useAtom, useSetAtom } from 'jotai/react'
 
 import Empty from '~common/Empty'
-import FiltersHeader from '~common/FiltersHeader'
+import FiltersHeader, { getFiltersHeaderLabel } from '~common/FiltersHeader'
 import RenameModal from '~common/RenameModal'
 import Box from '~common/ui/Box'
 import FabButton from '~common/ui/FabButton'
@@ -186,13 +186,21 @@ const StudiesScreen = ({
     queryState.publication !== 'all' ||
     queryState.sort !== 'newest'
   )
+  const filterLabel = getFiltersHeaderLabel(
+    [
+      ...queryFilters.activeLabels,
+      selectedChip?.name,
+      queryState.publication !== 'all' ? publicationLabels[queryState.publication] : undefined,
+    ],
+    count => `${count} ${t('filtres')}`
+  )
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
       <Box flex bg="reverse">
         <FiltersHeader
           title={t('Études')}
-          filterLabel={selectedChip?.name}
+          filterLabel={filterLabel}
           hasBackButton={showBackButton}
           hasActiveFilters={activeFilters}
           onReset={() => setQueryState(defaultStudiesListQueryState)}

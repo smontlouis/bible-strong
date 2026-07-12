@@ -28,6 +28,7 @@ export const useEntityListQueryFilters = ({
 
   return {
     sortLabel,
+    activeLabels: [query.trim() || undefined, sort !== 'newest' ? sortLabel : undefined],
     filters: [
       {
         key: 'search',
