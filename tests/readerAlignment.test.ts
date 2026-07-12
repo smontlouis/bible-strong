@@ -5,9 +5,18 @@ import {
   alignReaderVerse,
   renderReaderTaggedText
 } from "../src/readerAlignment.js";
-import { applyCuratedStrongOverrides } from "../src/curatedStrongOverrides.js";
+import {
+  applyCuratedStrongOverrides,
+  buildCuratedStrongOverrideIndex,
+  isLegacySingleModelAutoOverride,
+  isUnverifiedSemanticRefillOverride
+} from "../src/curatedStrongOverrides.js";
 import { buildStrongPhraseLexicon } from "../src/phraseTranslationLexicon.js";
 import { parseStrongTokens } from "../src/strongCsv.js";
+import {
+  getTranslationProfile,
+  INDEPENDENT_EDITORIAL_FAMILY_AGREEMENT
+} from "../src/translationProfiles.js";
 
 test("does not add empty tags only because the original has extra Strong occurrences", () => {
   const result = alignReaderVerse({
@@ -88,6 +97,151 @@ test("does not add editorial empty tags when target already has enough occurrenc
   });
 
   assert.equal(result.emptyStrongOccurrenceCount, 0);
+});
+
+test("computes editorial empty totals once per correlated family", () => {
+  const result = alignReaderVerse({
+    targetText: "Dieu vit.",
+    references: [
+      reference(
+        "Sg1910",
+        '<w strong="H0996">Dieu</w> <w strong="H0996">vit</w><w strong="H0996"></w><w strong="H0996"></w>.'
+      ),
+      reference(
+        "Darby",
+        'Dieu vit<w strong="H0996"></w><w strong="H0996"></w>.'
+      ),
+      reference(
+        "DarbyR",
+        'Dieu vit<w strong="H0996"></w><w strong="H0996"></w>.'
+      )
+    ]
+  });
+
+  assert.equal(result.strongWordOccurrenceCount, 2);
+  assert.equal(result.emptyStrongOccurrenceCount, 2);
+  assert.ok(
+    result.emptyAssignments.every(
+      (assignment) => assignment.source === "Darby-family+Sg1910"
+    )
+  );
+});
+
+test("uses the maximum empty count within a correlated editorial family", () => {
+  const empty = '<w strong="H0996"></w>';
+  const result = alignReaderVerse({
+    targetText: "Dieu",
+    references: [
+      reference("Sg1910", `Dieu${empty.repeat(3)}`),
+      reference("Darby", `Dieu${empty.repeat(2)}`),
+      reference("DarbyR", `Dieu${empty.repeat(2)}`)
+    ]
+  });
+
+  assert.equal(result.emptyStrongOccurrenceCount, 2);
+  assert.ok(
+    result.emptyAssignments.every(
+      (assignment) => assignment.source === "Darby-family+Sg1910"
+    )
+  );
+});
+
+test("keeps editorial empty agreement reachable for every production profile", () => {
+  for (const bible of [
+    "bfc",
+    "bds",
+    "frc97",
+    "nbs",
+    "nfc",
+    "nvs78p",
+    "ost",
+    "s21",
+    "fmar"
+  ]) {
+    assert.equal(
+      getTranslationProfile(bible).readerAlignment.minEmptySourceAgreement,
+      INDEPENDENT_EDITORIAL_FAMILY_AGREEMENT,
+      bible
+    );
+  }
+
+  const empty = 'Dieu<w strong="H0996"></w>';
+  const result = alignReaderVerse({
+    targetText: "Dieu",
+    references: [
+      reference("Sg1910", empty),
+      reference("Darby", empty),
+      reference("DarbyR", empty)
+    ],
+    readerPolicy: getTranslationProfile("bds").readerAlignment
+  });
+  assert.equal(result.emptyStrongOccurrenceCount, 1);
+});
+
+test("keeps a unanimously leading editorial empty before the first word", () => {
+  const text = '<w strong="H0996"></w>Dieu';
+  const result = alignReaderVerse({
+    targetText: "Dieu",
+    references: [reference("Sg1910", text), reference("Darby", text)]
+  });
+
+  assert.equal(result.emptyAssignments.length, 1);
+  assert.equal(result.emptyAssignments[0]?.insertAfterWordIndex, -1);
+  assert.match(
+    renderReaderTaggedText(result),
+    /^<w strong="H0996"[^>]*><\/w>Dieu$/u
+  );
+});
+
+test("serializes every reader occurrence when phrase carriers overlap", () => {
+  const result = alignReaderVerse({
+    targetText: "alpha beta gamma",
+    references: []
+  });
+  result.assignments.set(1, {
+    strong: ["H0002"],
+    confidence: 0.9,
+    source: "fixture-word",
+    method: "exact",
+    originalConfirmed: true
+  });
+  result.emptyAssignments.push({
+    strong: "H0003",
+    confidence: 0.8,
+    source: "fixture-empty",
+    method: "editorial-empty",
+    insertAfterWordIndex: 1
+  });
+  result.phraseAssignments.push(
+    {
+      strong: ["H0001"],
+      confidence: 0.9,
+      source: "fixture-phrase",
+      method: "learned-phrase",
+      startWordIndex: 0,
+      endWordIndex: 2,
+      originalConfirmed: true
+    },
+    {
+      strong: ["H0004"],
+      confidence: 0.85,
+      source: "fixture-crossing-phrase",
+      method: "learned-phrase",
+      startWordIndex: 1,
+      endWordIndex: 2,
+      originalConfirmed: true
+    }
+  );
+
+  const rendered = renderReaderTaggedText(result);
+  assert.equal(rendered.match(/\bstrong=/gu)?.length, 4);
+  for (const strong of ["H0001", "H0002", "H0003", "H0004"]) {
+    assert.match(rendered, new RegExp(`strong="${strong}"`, "u"));
+  }
+  assert.equal(rendered.match(/data-marker="true"/gu)?.length, 2);
+  assert.doesNotMatch(rendered, /data-marker="true"[^>]*data-target="word"/u);
+  assert.match(rendered, /<w strong="H0002"[^>]*>beta<\/w>/u);
+  assert.match(rendered, /<w strong="H0003"[^>]*><\/w>/u);
 });
 
 test("can block learned function-word enrichment for semantic profiles", () => {
@@ -185,6 +339,28 @@ test("enriches reader tags from original and learned exact translations", () => 
   assert.match(renderReaderTaggedText(result), /cieux<\/w>/);
   assert.match(renderReaderTaggedText(result), /strong="H8064"/);
   assert.equal(result.emptyStrongOccurrenceCount, 0);
+});
+
+test("positions learned reader carriers by original token ordinals", () => {
+  const result = alignReaderVerse({
+    targetText: "roi neutre roi",
+    references: [],
+    translationLexicon: semanticLexicon([["H0001", "roi"]]),
+    originalVerse: {
+      bookId: "Gen",
+      chapter: 1,
+      verse: 1,
+      strongSet: new Set(["H0010", "H0011", "H0012", "H0013", "H0001"]),
+      tokens: [
+        originalToken("o1", ["H0010", "H0011"]),
+        originalToken("o2", ["H0012", "H0013"]),
+        originalToken("o3", ["H0001"])
+      ]
+    }
+  });
+
+  assert.deepEqual(result.assignments.get(2)?.strong, ["H0001"]);
+  assert.equal(result.assignments.get(0), undefined);
 });
 
 test("does not window-match with too-short stems", () => {
@@ -612,6 +788,57 @@ test("learns repeated phrase candidates from Strong references", () => {
   );
 });
 
+test("does not learn a phrase from duplicated Darby-family hapaxes", () => {
+  const text = '<w strong="H3947">prit</w> <w strong="H0802">femme</w>';
+  const map = new Map([
+    [
+      "Gen.1.1",
+      {
+        row: {
+          bookId: "Gen",
+          chapter: 1,
+          verse: 1,
+          text
+        },
+        tokens: parseStrongTokens(text)
+      }
+    ]
+  ]);
+  const lexicon = buildStrongPhraseLexicon([
+    { name: "Darby", map },
+    { name: "DarbyR", map }
+  ]);
+
+  assert.equal(lexicon.byStrong.get("H0802"), undefined);
+});
+
+test("learns phrase evidence repeated in distinct verses of one family", () => {
+  const text = '<w strong="H3947">prit</w> <w strong="H0802">femme</w>';
+  const verse = (verseNumber: number) => ({
+    row: {
+      bookId: "Gen",
+      chapter: 1,
+      verse: verseNumber,
+      text
+    },
+    tokens: parseStrongTokens(text)
+  });
+  const map = new Map([
+    ["Gen.1.1", verse(1)],
+    ["Gen.1.2", verse(2)]
+  ]);
+  const lexicon = buildStrongPhraseLexicon([
+    { name: "Darby", map },
+    { name: "DarbyR", map }
+  ]);
+
+  assert.equal(
+    lexicon.byStrong.get("H0802")?.[0]?.phrase.join(" "),
+    "prit femme"
+  );
+  assert.equal(lexicon.byStrong.get("H0802")?.[0]?.source, "Darby-family");
+});
+
 test("applies reviewed LLM transfer overrides only when the target word still matches", () => {
   const result = alignReaderVerse({
     targetText:
@@ -629,6 +856,37 @@ test("applies reviewed LLM transfer overrides only when the target word still ma
   assert.deepEqual(result.assignments.get(18)?.strong, ["H7307"]);
   assert.deepEqual(result.assignments.get(21)?.strong, ["H7363"]);
   assert.equal(result.assignments.get(18)?.method, "curated-llm-transfer");
+});
+
+test("uses a prebuilt curated override index without reparsing decisions", () => {
+  const result = alignReaderVerse({
+    targetText: "Au commencement",
+    references: []
+  });
+  const overrideIndex = buildCuratedStrongOverrideIndex([
+    {
+      bible: "indexed",
+      ref: "Gen.1.1",
+      target: "word",
+      wordIndex: 1,
+      normalized: "commencement",
+      strong: ["H7225"],
+      confidence: 0.99,
+      source: "human-approved",
+      reason: "fixture"
+    }
+  ]);
+
+  assert.equal(
+    applyCuratedStrongOverrides({
+      bible: "indexed",
+      ref: "Gen.1.1",
+      result,
+      overrideIndex
+    }),
+    1
+  );
+  assert.deepEqual(result.assignments.get(1)?.strong, ["H7225"]);
 });
 
 test("skips reviewed LLM transfer overrides when token indexes drift", () => {
@@ -712,6 +970,138 @@ test("applies curated relocation overrides without deleting unrelated Strong", (
   assert.equal(applied, 1);
   assert.deepEqual(result.assignments.get(3)?.strong, ["H0120"]);
   assert.deepEqual(result.assignments.get(14)?.strong, ["H2145"]);
+});
+
+test("keeps the original placement when a curated relocation target drifts", () => {
+  const result = alignReaderVerse({
+    targetText:
+      "Dieu créa les personnes à son image : il les créa à l’image de Dieu ; homme et femme il les créa.",
+    references: []
+  });
+  result.assignments.set(14, {
+    strong: ["H0120", "H2145"],
+    confidence: 0.9,
+    source: "test",
+    method: "exact",
+    originalConfirmed: true
+  });
+
+  const applied = applyCuratedStrongOverrides({
+    bible: "fixture-move",
+    ref: "Gen.1.27",
+    result
+  });
+
+  assert.equal(applied, 0);
+  assert.deepEqual(result.assignments.get(14)?.strong, ["H0120", "H2145"]);
+  assert.equal(result.assignments.get(3), undefined);
+});
+
+test("does not duplicate a curated relocation when its source disappeared", () => {
+  const result = alignReaderVerse({
+    targetText:
+      "Dieu créa les humains à son image : il les créa à l’image de Dieu ; homme et femme il les créa.",
+    references: []
+  });
+
+  const applied = applyCuratedStrongOverrides({
+    bible: "fixture-move",
+    ref: "Gen.1.27",
+    result
+  });
+
+  assert.equal(applied, 0);
+  assert.equal(result.assignments.get(3), undefined);
+});
+
+test("does not relocate when the source coordinate contains duplicate occurrences", () => {
+  const result = alignReaderVerse({
+    targetText:
+      "Dieu créa les humains à son image : il les créa à l’image de Dieu ; homme et femme il les créa.",
+    references: []
+  });
+  result.assignments.set(14, {
+    strong: ["H0120", "H0120", "H2145"],
+    confidence: 0.9,
+    source: "test",
+    method: "test",
+    originalConfirmed: true
+  });
+
+  const applied = applyCuratedStrongOverrides({
+    bible: "fixture-move",
+    ref: "Gen.1.27",
+    result
+  });
+
+  assert.equal(applied, 0);
+  assert.deepEqual(result.assignments.get(14)?.strong, [
+    "H0120",
+    "H0120",
+    "H2145"
+  ]);
+  assert.equal(result.assignments.get(3), undefined);
+});
+
+test("identifies legacy single-model auto-accepts separately from human review", () => {
+  assert.equal(
+    isLegacySingleModelAutoOverride({
+      bible: "nbs",
+      ref: "Gen.1.1",
+      target: "word",
+      wordIndex: 0,
+      normalized: "commencement",
+      strong: ["H7225"],
+      confidence: 0.84,
+      source: "llm-review:human-approved",
+      reason: "Auto-accepted by review:llm because confidence met threshold."
+    }),
+    true
+  );
+  assert.equal(
+    isLegacySingleModelAutoOverride({
+      bible: "nbs",
+      ref: "Gen.1.1",
+      target: "word",
+      wordIndex: 0,
+      normalized: "commencement",
+      strong: ["H7225"],
+      confidence: 0.95,
+      source: "llm-review:human-approved",
+      reason: "Reviewed and accepted by a named reviewer."
+    }),
+    false
+  );
+});
+
+test("quarantines semantic-refill placements that have no consensus trace", () => {
+  const override = {
+    bible: "nbs",
+    ref: "Ps.23.4",
+    target: "word" as const,
+    wordIndex: 28,
+    normalized: "reconfort",
+    strong: ["H5162"],
+    confidence: 0.9,
+    source: "semantic-refill:llm",
+    reason: "Single-model lexical decision."
+  };
+  assert.equal(isUnverifiedSemanticRefillOverride(override), true);
+  assert.equal(
+    isUnverifiedSemanticRefillOverride({
+      ...override,
+      reason: "consensus-visible-high-confidence; two independent models"
+    }),
+    true
+  );
+  assert.equal(
+    isUnverifiedSemanticRefillOverride({
+      ...override,
+      source: "semantic-refill:llm-consensus-filtered",
+      reason: "Structured post-consensus filter evidence."
+    }),
+    false
+  );
 });
 
 function reference(name: string, text: string) {

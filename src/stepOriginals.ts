@@ -51,6 +51,64 @@ export interface StepOriginalData {
   evidenceIndex: StepOriginalEvidenceIndex;
 }
 
+type StepBackedOriginalToken = OriginalToken & {
+  /** Native 1-based `#NN` position from TAHOT/TAGNT. */
+  sourceTokenIndex: number;
+};
+
+/**
+ * Return the source-native STEP token position without confusing it with the
+ * contiguous array ordinal used by alignment scoring. The id fallback keeps
+ * the position available after an OriginalToken has been projected or cloned.
+ */
+export function getStepSourceTokenIndex(
+  token: OriginalToken
+): number | undefined {
+  const direct = (token as Partial<StepBackedOriginalToken>).sourceTokenIndex;
+  if (Number.isInteger(direct) && direct! > 0) return direct;
+
+  const encoded = token.id.match(
+    /^(?:TAHOT|TAGNT)\.[^.]+\.\d+\.\d+\.(\d+)\./u
+  )?.[1];
+  if (!encoded) return undefined;
+  const parsed = Number.parseInt(encoded, 10);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
+}
+
+export function selectStepEvidenceForOccurrence(
+  evidence: StepStrongEvidence[],
+  occurrence: { tokenIndex?: number; sourceStrong?: string },
+  limit = 4
+): StepStrongEvidence[] {
+  if (evidence.length === 0 || limit <= 0) return [];
+  const sourceStrong = occurrence.sourceStrong?.toUpperCase();
+  const sameToken = Number.isInteger(occurrence.tokenIndex)
+    ? evidence.filter((item) => item.tokenIndex === occurrence.tokenIndex)
+    : [];
+  const sameSense = sourceStrong
+    ? evidence.filter((item) => item.stepStrong.toUpperCase() === sourceStrong)
+    : [];
+  const exact = sameToken.filter(
+    (item) => item.stepStrong.toUpperCase() === sourceStrong
+  );
+  const selected =
+    exact.length > 0
+      ? exact
+      : sameToken.length > 0
+        ? sameToken
+        : sameSense.length > 0
+          ? sameSense
+          : evidence;
+
+  return [...selected]
+    .sort(
+      (left, right) =>
+        left.tokenIndex - right.tokenIndex ||
+        left.stepStrong.localeCompare(right.stepStrong)
+    )
+    .slice(0, limit);
+}
+
 interface StepOriginalReadOptions {
   bookIds?: Set<string>;
 }
@@ -288,8 +346,9 @@ function addTokenToOriginalVerseMap(
     } satisfies OriginalVerse);
 
   const suffix = key === token.ref ? "main" : "alt";
-  const originalToken: OriginalToken = {
+  const originalToken: StepBackedOriginalToken = {
     id: `${token.source}.${key}.${token.tokenIndex}.${token.type}.${suffix}`,
+    sourceTokenIndex: token.tokenIndex,
     text: token.surface,
     strong: pairs.map((pair) => pair.baseStrong),
     sourceStrong: pairs.map((pair) => pair.stepStrong),

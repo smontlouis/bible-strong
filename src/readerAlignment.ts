@@ -268,6 +268,7 @@ function relocateSemanticAssignments(options: {
   translationLexicon: StrongTranslationLexicon;
   readerPolicy: ReaderAlignmentPolicy;
 }): void {
+  const originalTokenCount = originalPositionTokenCount(options.occurrences);
   for (const occurrence of options.occurrences) {
     if (!isRelocatableOriginalOccurrence(occurrence)) {
       continue;
@@ -285,8 +286,9 @@ function relocateSemanticAssignments(options: {
       score: Math.max(
         scoreSemanticWordForOccurrence({
           strong: occurrence.strong,
-          originalTokenIndex: occurrence.tokenIndex,
-          originalCount: options.occurrences.length,
+          sourceStrong: occurrence.sourceStrong,
+          originalTokenIndex: occurrenceOrdinalTokenIndex(occurrence),
+          originalCount: originalTokenCount,
           word: options.words[wordIndex],
           wordCount: options.words.length,
           translationLexicon: options.translationLexicon
@@ -314,8 +316,9 @@ function relocateSemanticAssignments(options: {
 
         const score = scoreSemanticWordForOccurrence({
           strong: occurrence.strong,
-          originalTokenIndex: occurrence.tokenIndex,
-          originalCount: options.occurrences.length,
+          sourceStrong: occurrence.sourceStrong,
+          originalTokenIndex: occurrenceOrdinalTokenIndex(occurrence),
+          originalCount: originalTokenCount,
           word,
           wordCount: options.words.length,
           translationLexicon: options.translationLexicon
@@ -386,6 +389,7 @@ function scoreExistingReferenceAnchor(assignment: AssignedStrong): number {
 
 function scoreSemanticWordForOccurrence(options: {
   strong: string;
+  sourceStrong?: string;
   originalTokenIndex: number;
   originalCount: number;
   word: { wordIndex: number; normalized: string } | undefined;
@@ -399,7 +403,8 @@ function scoreSemanticWordForOccurrence(options: {
   const translation = findTranslationCandidate(
     options.translationLexicon,
     options.strong,
-    options.word.normalized
+    options.word.normalized,
+    options.sourceStrong
   );
   if (!translation) {
     return 0;
@@ -497,10 +502,12 @@ function findReaderEnrichmentCandidate(options: {
     }
   | undefined {
   const maxStrongPerWord = options.readerPolicy.maxStrongPerWord;
+  const originalTokenCount = originalPositionTokenCount(options.occurrences);
   const originalRatio =
-    options.occurrences.length <= 1
+    originalTokenCount <= 1
       ? 1
-      : options.occurrence.tokenIndex / (options.occurrences.length - 1);
+      : occurrenceOrdinalTokenIndex(options.occurrence) /
+        (originalTokenCount - 1);
   const phrase = options.phraseMatchIndex
     ? findBestPhraseMatch({
         matches: options.phraseMatchIndex,
@@ -564,7 +571,8 @@ function findReaderEnrichmentCandidate(options: {
       const learned = findTranslationCandidate(
         options.translationLexicon,
         options.occurrence.strong,
-        word.normalized
+        word.normalized,
+        options.occurrence.sourceStrong
       );
       const match = isAllowedLearnedTranslation(
         options.occurrence.strong,
@@ -579,8 +587,8 @@ function findReaderEnrichmentCandidate(options: {
       }
 
       const positionScore = scorePosition(
-        options.occurrence.tokenIndex,
-        options.occurrences.length,
+        occurrenceOrdinalTokenIndex(options.occurrence),
+        originalTokenCount,
         word.wordIndex,
         options.words.length
       );
@@ -710,6 +718,7 @@ function scoreBudgetPlacement(options: {
   occurrences: OriginalStrongOccurrence[];
   words: Array<{ wordIndex: number; normalized: string }>;
 }): number {
+  const originalTokenCount = originalPositionTokenCount(options.occurrences);
   const sameStrongOccurrences = options.occurrences.filter(
     (occurrence) => occurrence.strong === options.strong
   );
@@ -719,8 +728,8 @@ function scoreBudgetPlacement(options: {
       : Math.max(
           ...sameStrongOccurrences.map((occurrence) =>
             scorePosition(
-              occurrence.tokenIndex,
-              options.occurrences.length,
+              occurrenceOrdinalTokenIndex(occurrence),
+              originalTokenCount,
               options.wordIndex,
               options.words.length
             )
@@ -801,10 +810,16 @@ const FRENCH_FUNCTION_WORDS = new Set([
 ]);
 
 export function renderReaderTaggedText(result: ReaderAlignmentResult): string {
+  const wordCount = result.segments.filter(
+    (segment) => segment.kind === "word"
+  ).length;
+  const phrasePlan = buildReaderPhraseRenderPlan(result, wordCount);
+  const deferredMarkers = buildReaderDeferredMarkers(phrasePlan);
   let wordIndex = -1;
-  let output = renderEmptyAssignments(result.emptyAssignments, -1);
+  let output = `${renderReaderDeferredMarkers(
+    deferredMarkers.get(-1) ?? []
+  )}${renderEmptyAssignments(result.emptyAssignments, -1)}`;
   let activePhrase: ReaderPhraseAssignment | undefined;
-  const phraseStarts = buildPhraseStartMap(result.phraseAssignments);
 
   for (const segment of result.segments) {
     if (segment.kind === "text") {
@@ -813,7 +828,8 @@ export function renderReaderTaggedText(result: ReaderAlignmentResult): string {
     }
 
     wordIndex += 1;
-    const startingPhrase = phraseStarts.get(wordIndex);
+    output += renderReaderDeferredMarkers(deferredMarkers.get(wordIndex) ?? []);
+    const startingPhrase = phrasePlan.byStart.get(wordIndex);
     if (startingPhrase) {
       activePhrase = startingPhrase;
       output += `<w strong="${escapeHtml(startingPhrase.strong.join(" "))}" data-confidence="${startingPhrase.confidence.toFixed(
@@ -850,24 +866,160 @@ export function renderReaderTaggedText(result: ReaderAlignmentResult): string {
   return output;
 }
 
-function buildPhraseStartMap(
-  phraseAssignments: ReaderPhraseAssignment[]
-): Map<number, ReaderPhraseAssignment> {
+interface ReaderPhraseRenderPlan {
+  byStart: Map<number, ReaderPhraseAssignment>;
+  wrappers: ReaderPhraseAssignment[];
+  dropped: ReaderPhraseAssignment[];
+}
+
+interface ReaderDeferredMarker {
+  strong: string[];
+  confidence: number;
+  source: string;
+  method: string;
+  target: "phrase";
+  startWordIndex?: number;
+  endWordIndex?: number;
+}
+
+function buildReaderPhraseRenderPlan(
+  result: ReaderAlignmentResult,
+  wordCount: number
+): ReaderPhraseRenderPlan {
+  const grouped = new Map<string, ReaderPhraseAssignment[]>();
+  for (const phrase of result.phraseAssignments) {
+    const key = `${phrase.startWordIndex}:${phrase.endWordIndex}`;
+    const assignments = grouped.get(key) ?? [];
+    assignments.push(phrase);
+    grouped.set(key, assignments);
+  }
   const byStart = new Map<number, ReaderPhraseAssignment>();
+  const wrappers: ReaderPhraseAssignment[] = [];
+  const dropped: ReaderPhraseAssignment[] = [];
   let coveredUntil = -1;
 
-  for (const phrase of [...phraseAssignments].sort(
+  for (const group of [...grouped.values()].sort(
     (left, right) =>
-      left.startWordIndex - right.startWordIndex ||
-      right.endWordIndex - left.endWordIndex
+      left[0]!.startWordIndex - right[0]!.startWordIndex ||
+      right[0]!.endWordIndex - left[0]!.endWordIndex
   )) {
-    if (phrase.startWordIndex <= coveredUntil) continue;
-    if (phrase.endWordIndex < phrase.startWordIndex) continue;
+    const phrase = mergePhraseRenderGroup(group);
+    if (
+      phrase.startWordIndex < 0 ||
+      phrase.endWordIndex < phrase.startWordIndex ||
+      phrase.endWordIndex >= wordCount ||
+      phraseMasksExactCarrier(result, phrase) ||
+      phrase.startWordIndex <= coveredUntil
+    ) {
+      dropped.push(phrase);
+      continue;
+    }
     byStart.set(phrase.startWordIndex, phrase);
+    wrappers.push(phrase);
     coveredUntil = phrase.endWordIndex;
   }
 
-  return byStart;
+  return { byStart, wrappers, dropped };
+}
+
+function phraseMasksExactCarrier(
+  result: ReaderAlignmentResult,
+  phrase: ReaderPhraseAssignment
+): boolean {
+  for (const wordIndex of result.assignments.keys()) {
+    if (
+      wordIndex >= phrase.startWordIndex &&
+      wordIndex <= phrase.endWordIndex
+    ) {
+      return true;
+    }
+  }
+
+  return result.emptyAssignments.some(
+    (assignment) =>
+      assignment.insertAfterWordIndex >= phrase.startWordIndex &&
+      assignment.insertAfterWordIndex < phrase.endWordIndex
+  );
+}
+
+function mergePhraseRenderGroup(
+  group: ReaderPhraseAssignment[]
+): ReaderPhraseAssignment {
+  const first = group[0]!;
+  return {
+    ...first,
+    strong: group.flatMap((assignment) => assignment.strong),
+    confidence: Math.max(...group.map((assignment) => assignment.confidence)),
+    source: [...new Set(group.map((assignment) => assignment.source))].join(
+      "+"
+    ),
+    originalConfirmed: group.every((assignment) => assignment.originalConfirmed)
+  };
+}
+
+function buildReaderDeferredMarkers(
+  phrasePlan: ReaderPhraseRenderPlan
+): Map<number, ReaderDeferredMarker[]> {
+  const markers = new Map<number, ReaderDeferredMarker[]>();
+
+  for (const phrase of phrasePlan.dropped) {
+    const overlapping = phrasePlan.wrappers.find(
+      (wrapper) =>
+        wrapper.startWordIndex <= phrase.endWordIndex &&
+        wrapper.endWordIndex >= phrase.startWordIndex
+    );
+    const validStart =
+      phrase.startWordIndex >= 0 ? phrase.startWordIndex : undefined;
+    addReaderDeferredMarker(
+      markers,
+      overlapping?.startWordIndex ?? validStart ?? -1,
+      {
+        strong: phrase.strong,
+        confidence: phrase.confidence,
+        source: phrase.source,
+        method: phrase.method,
+        target: "phrase",
+        startWordIndex: phrase.startWordIndex,
+        endWordIndex: phrase.endWordIndex
+      }
+    );
+  }
+
+  return markers;
+}
+
+function addReaderDeferredMarker(
+  markers: Map<number, ReaderDeferredMarker[]>,
+  anchorWordIndex: number,
+  marker: ReaderDeferredMarker
+): void {
+  const entries = markers.get(anchorWordIndex) ?? [];
+  entries.push(marker);
+  markers.set(anchorWordIndex, entries);
+}
+
+function renderReaderDeferredMarkers(markers: ReaderDeferredMarker[]): string {
+  return markers
+    .map((marker) => {
+      const positions = [
+        marker.startWordIndex === undefined
+          ? ""
+          : ` data-start-word-index="${marker.startWordIndex}"`,
+        marker.endWordIndex === undefined
+          ? ""
+          : ` data-end-word-index="${marker.endWordIndex}"`
+      ].join("");
+      return `<w strong="${escapeHtml(
+        marker.strong.join(" ")
+      )}" data-empty="true" data-marker="true" data-target="${
+        marker.target
+      }" data-confidence="${marker.confidence.toFixed(
+        2
+      )}" data-source="${escapeHtml(marker.source)}" data-method="${escapeHtml(
+        marker.method
+      )}"${positions}></w>`;
+    })
+    .join("");
 }
 
 function buildEditorialEmptyAssignments(
@@ -876,14 +1028,15 @@ function buildEditorialEmptyAssignments(
   references: ReferenceSource[],
   policy: ReaderAlignmentPolicy
 ): ReaderEmptyAssignment[] {
-  const occurrencesByStrong = new Map<string, EmptyOccurrence[]>();
-  const totalCountsByStrong = new Map<string, number[]>();
+  const occurrencesByStrong = new Map<string, Map<string, EmptyOccurrence[]>>();
+  const totalCountsByStrong = new Map<string, Map<string, number>>();
 
   for (const reference of references) {
     if (!reference.verse) continue;
+    const family = reference.family ?? referenceWitnessFamily(reference.name);
 
     const sourceOccurrences = extractEmptyOccurrences(
-      reference.name,
+      family,
       reference.verse.row.text
     );
     const totalCounts = countOccurrencesByStrong(
@@ -891,15 +1044,32 @@ function buildEditorialEmptyAssignments(
     );
 
     for (const [strong, count] of totalCounts) {
-      const counts = totalCountsByStrong.get(strong) ?? [];
-      counts.push(count);
-      totalCountsByStrong.set(strong, counts);
+      const countsByFamily = totalCountsByStrong.get(strong) ?? new Map();
+      countsByFamily.set(
+        family,
+        Math.max(countsByFamily.get(family) ?? 0, count)
+      );
+      totalCountsByStrong.set(strong, countsByFamily);
     }
 
+    const editionOccurrencesByStrong = new Map<string, EmptyOccurrence[]>();
     for (const occurrence of sourceOccurrences) {
-      const occurrences = occurrencesByStrong.get(occurrence.strong) ?? [];
+      const occurrences =
+        editionOccurrencesByStrong.get(occurrence.strong) ?? [];
       occurrences.push(occurrence);
-      occurrencesByStrong.set(occurrence.strong, occurrences);
+      editionOccurrencesByStrong.set(occurrence.strong, occurrences);
+    }
+    for (const [strong, editionOccurrences] of editionOccurrencesByStrong) {
+      const occurrencesByFamily =
+        occurrencesByStrong.get(strong) ?? new Map<string, EmptyOccurrence[]>();
+      const familyOccurrences = occurrencesByFamily.get(family) ?? [];
+      // Darby and DarbyR are correlated editions. Within one family/verse,
+      // retain the edition with the largest occurrence count instead of
+      // adding both editorial renderings together.
+      if (editionOccurrences.length > familyOccurrences.length) {
+        occurrencesByFamily.set(family, editionOccurrences);
+      }
+      occurrencesByStrong.set(strong, occurrencesByFamily);
     }
   }
 
@@ -912,15 +1082,16 @@ function buildEditorialEmptyAssignments(
   ]);
   const assignments: ReaderEmptyAssignment[] = [];
 
-  for (const [strong, occurrences] of occurrencesByStrong) {
-    const bySource = groupBySource(occurrences);
+  for (const [strong, bySource] of occurrencesByStrong) {
     if (bySource.size < policy.minEmptySourceAgreement) continue;
 
     const sourceEmptyCounts = [...bySource.values()].map(
       (sourceOccurrences) => sourceOccurrences.length
     );
     const editorialEmptyCount = Math.min(...sourceEmptyCounts);
-    const expectedTotal = median(totalCountsByStrong.get(strong) ?? []);
+    const expectedTotal = median([
+      ...(totalCountsByStrong.get(strong)?.values() ?? [])
+    ]);
     const assignedCount = assignedCounts.get(strong) ?? 0;
     const missingCount = Math.max(0, expectedTotal - assignedCount);
     const count = Math.min(editorialEmptyCount, missingCount);
@@ -938,14 +1109,18 @@ function buildEditorialEmptyAssignments(
             : occurrence.afterWordIndex / (occurrence.wordCount - 1)
         )
       );
+      const unanimouslyLeading = occurrenceSlice.every(
+        (occurrence) => occurrence.afterWordIndex < 0
+      );
 
       assignments.push({
         strong,
         confidence: Math.min(0.82, 0.58 + bySource.size * 0.08),
         method: "editorial-empty",
         source: [...bySource.keys()].sort().join("+"),
-        insertAfterWordIndex:
-          targetWordCount <= 0
+        insertAfterWordIndex: unanimouslyLeading
+          ? -1
+          : targetWordCount <= 0
             ? -1
             : Math.min(
                 targetWordCount - 1,
@@ -960,6 +1135,12 @@ function buildEditorialEmptyAssignments(
       a.insertAfterWordIndex - b.insertAfterWordIndex ||
       a.strong.localeCompare(b.strong)
   );
+}
+
+function referenceWitnessFamily(name: string): string {
+  const normalized = name.toLowerCase().replace(/[^a-z0-9]+/gu, "");
+  if (normalized.startsWith("darby")) return "Darby-family";
+  return name;
 }
 
 function extractEmptyOccurrences(
@@ -981,7 +1162,7 @@ function extractEmptyOccurrences(
     if (!strong || strong.length === 0) continue;
 
     const before = html.slice(0, match.index ?? 0);
-    const afterWordIndex = Math.max(0, countWords(stripTags(before)) - 1);
+    const afterWordIndex = countWords(stripTags(before)) - 1;
 
     for (const code of strong) {
       occurrences.push({
@@ -1009,22 +1190,23 @@ function countOccurrencesByStrong(values: string[]): Map<string, number> {
   return counts;
 }
 
-function groupBySource(
-  occurrences: EmptyOccurrence[]
-): Map<string, EmptyOccurrence[]> {
-  const grouped = new Map<string, EmptyOccurrence[]>();
-  for (const occurrence of occurrences) {
-    const sourceOccurrences = grouped.get(occurrence.source) ?? [];
-    sourceOccurrences.push(occurrence);
-    grouped.set(occurrence.source, sourceOccurrences);
-  }
-  return grouped;
-}
-
 function median(values: number[]): number {
   if (values.length === 0) return 0;
   const sorted = [...values].sort((a, b) => a - b);
   return sorted[Math.floor(sorted.length / 2)] ?? 0;
+}
+
+function occurrenceOrdinalTokenIndex(
+  occurrence: OriginalStrongOccurrence
+): number {
+  return occurrence.ordinalTokenIndex ?? occurrence.tokenIndex;
+}
+
+function originalPositionTokenCount(
+  occurrences: OriginalStrongOccurrence[]
+): number {
+  if (occurrences.length === 0) return 0;
+  return Math.max(...occurrences.map(occurrenceOrdinalTokenIndex)) + 1;
 }
 
 function average(values: number[]): number {

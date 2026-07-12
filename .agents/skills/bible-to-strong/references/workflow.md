@@ -53,17 +53,25 @@ npm run strong:diagnose -- --bible <id>
 Masked gold evaluation of the diagnostic backend:
 
 ```sh
-npm run strong:evaluate -- --gold Sg1910 --limit 1000
-npm run strong:evaluate -- --gold Darby --limit 1000
-npm run strong:evaluate -- --gold DarbyR --limit 1000
+npm run strong:evaluate -- --gold Sg1910 --limit 1000 --backend diagnostic
+npm run strong:evaluate -- --gold Darby --limit 1000 --backend diagnostic
+npm run strong:evaluate -- --gold DarbyR --limit 1000 --backend diagnostic
+```
+
+Masked gold evaluation through the complete canonical generator:
+
+```sh
+npm run strong:evaluate -- --gold Sg1910 --limit 200 --backend canonical
+npm run strong:evaluate -- --gold Darby --limit 200 --backend canonical
+npm run strong:evaluate -- --gold DarbyR --limit 200 --backend canonical
 ```
 
 Full gold evaluation for production-maturity reports:
 
 ```sh
-npm run strong:evaluate -- --gold Sg1910
-npm run strong:evaluate -- --gold Darby
-npm run strong:evaluate -- --gold DarbyR
+npm run strong:evaluate -- --gold Sg1910 --backend canonical
+npm run strong:evaluate -- --gold Darby --backend canonical
+npm run strong:evaluate -- --gold DarbyR --backend canonical
 ```
 
 Diagnostic plus LLM suggestions only:
@@ -185,11 +193,10 @@ Current production-maturity evidence, dated 2026-06-29:
 | `1Cor` |                 7 |         -14 |                       +15 |         -1 |
 | `Acts` |                 8 |          -6 |                       +10 |         -4 |
 
-This is enough evidence to run the next controlled batch across several compact
-lexical packets, but the application rule remains consensus-only. Keep per-book
-caps, validate each model review, build exact visible high-confidence consensus,
-apply only that consensus, refresh the affected scope, and write a before/after
-benchmark report.
+This is historical evidence for the bounded batch design. Current production
+requires exact candidate-and-choice consensus from two distinct model
+identities, the current post-consensus filter, contract v2, and the locked batch
+transaction. Manual consensus/filter commands are benchmark previews only.
 
 The first controlled batch, replayed through the automatic post-consensus filter
 on 2026-06-30, initially left 27 safe consensus decisions applied across `Hos`,
@@ -198,14 +205,15 @@ on 2026-06-30, initially left 27 safe consensus decisions applied across `Hos`,
 follow-up. It also exposed two mandatory safety gates before application:
 
 - remove generic carriers such as `vais`, `ferai`, `fera`, `fasse`, `celle`,
-  and `quoi` unless at least two Strong witnesses use the same normalized
-  carrier. The automatic replay also held 2 Samuel `faisait`, `vais`, and
-  `fit`;
+  and `quoi` unless at least two independent witness families carry the Strong
+  on that exact normalized carrier. The automatic replay also held 2 Samuel
+  `faisait`, `vais`, and `fit`;
 - hold same-target stacking for review instead of applying both Strong codes to
-  the same French word automatically. That review must inspect the witnesses
-  before discarding either side. In `Rev.5.1`, the witness check showed
-  `G1855 -> dehors/revers/extérieur`, so NBS `dos` keeps `G1855`; `G3693`
-  remains advanced empty.
+  the same French word automatically. A non-generic carrier needs an exact
+  carrier witness or high-scoring direct deterministic evidence on the same
+  target. In `Rev.5.1`, `G1855 -> dehors/revers/extérieur` establishes the
+  Strong concept but does not alone validate NBS `dos`; `dos` requires direct
+  evidence at that target, while `G3693` remains advanced empty.
 
 `Lev` produced a clean 21-decision consensus in that batch and the filter marks
 all 21 safe. Follow-up isolation on 2026-06-30 showed the apparent refresh hang
@@ -231,7 +239,7 @@ Visible decisions with no token witness and no Strong support in `Sg1910`,
 `Darby`, or `DarbyR` must remain review items.
 
 Visible high-confidence consensus from two validated model reviews, then filter
-before application:
+for preview/benchmark inspection:
 
 ```sh
 npm run strong:review:gaps:consensus -- \
@@ -246,12 +254,11 @@ npm run strong:review:gaps:filter -- \
   --output outputs/gap-review/<id>/agent-review/<consensus-visible-high>-auto-filtered.json \
   --report-json reports/llm-gap-review-<id>-<scope>-post-consensus-filter.json \
   --report-md reports/llm-gap-review-<id>-<scope>-post-consensus-filter.md
-npm run strong:review:gaps:apply -- \
-  --bible <id> \
-  --input outputs/gap-review/<id>/agent-review/<consensus-visible-high>-auto-filtered.json \
-  --output-dir outputs/gap-review/<id>/agent-review/<consensus-visible-high>-auto-filtered-applied \
-  --apply
 ```
+
+Do not apply this standalone artifact. Production application is performed only
+by `strong:review:gaps:batch`, which recreates the exact two-model consensus and
+current filter result inside its locked version-2 transaction.
 
 Benchmark report with before/after metrics:
 
@@ -294,18 +301,20 @@ npm run strong:review:gaps:apply -- \
   --candidates outputs/gap-review/<id>/<scope>/gap-review-candidates.json
 ```
 
-Apply only the final validated arbiter decisions:
+Preview/finalize an arbiter review without applying it:
 
 ```sh
 npm run strong:review:gaps:apply -- \
   --bible <id> \
   --input outputs/gap-review/<id>/agent-review/<arbiter>.json \
-  --output-dir outputs/gap-review/<id>/agent-review/<arbiter>-applied \
+  --output-dir outputs/gap-review/<id>/agent-review/<arbiter>-validated \
   --candidates outputs/gap-review/<id>/<scope>/gap-review-candidates.json \
-  --finalize-reference-style \
-  --apply
-npm run strong:generate -- --bible <id>
+  --finalize-reference-style
 ```
+
+`--finalize-reference-style` is a preview/validation adapter only. Never append
+`--apply` to this standalone command; use the transactional batch for any
+production mutation.
 
 S21 concordance comparison:
 
@@ -372,6 +381,11 @@ Use `strong:export` when:
 - the canonical SQLite ledger already exists;
 - the caller needs either `--view reader` or `--view advanced`.
 
+Use `strong:refresh` only when the canonical SQLite ledger already contains an
+input fingerprint that matches the current Bible, sources, indexes, profile,
+and pipeline code. A changed override outside the requested scope requires a
+broader refresh or full generation.
+
 Use `strong:diagnose` when:
 
 - you need hard-verse diagnostics;
@@ -410,6 +424,10 @@ Always report at least:
 - original unrepresented Strong occurrence count;
 - original confirmation rate;
 - hard verse count;
+- carrier-exact precision/recall/F1 from a masked-gold canary;
+- carrier-overlap F1 when phrase spans are used;
+- placement risk and structural `placementQuality`, explicitly labelled as a
+  proxy rather than semantic accuracy;
 - translation profile;
 - profile token-coverage status;
 - LLM attempted count if any;
@@ -452,7 +470,12 @@ For gold evaluation, report:
 - evaluated verse count;
 - obvious failure modes.
 
-`strong:evaluate` masks a known Strong Bible by stripping its tags, runs the current diagnostic backend without using that Bible as a reference, and compares predicted Strong occurrences to the original gold Strong occurrences.
+`strong:evaluate` masks a known Strong Bible by stripping its tags and excludes
+that Bible as a reference. The diagnostic backend isolates reader alignment;
+the canonical backend runs the real ledger, including lexical auto-safe, with
+curated overrides disabled. It scores exact/overlapping carriers, empty versus
+visible classification, cardinality, confidence calibration, and inventory.
+Carrier-exact F1 is primary; inventory-only F1 does not prove correct placement.
 
 ## LLM Policy
 
@@ -467,7 +490,8 @@ Recommended LLM strategy:
 4. Run bounded diagnostic LLM suggestions by book with `--only <Book> --llm --llm-limit <n> --output-dir outputs/llm-books/<id>/<Book>` only for residual hard cases.
 5. Run `npm run strong:review:llm` against that book diagnostics file.
 6. High-confidence mechanically safe suggestions are pre-marked `accept`; weak function-word/particle cases remain `pending`.
-7. Open the viewer, load the review JSON, reject any bad auto-accepted suggestions, decide pending suggestions, and click `Enregistrer décisions`.
+7. Open the viewer, load the review JSON, decide pending suggestions, and click
+   `Enregistrer décisions`. Single-model suggestions are pending by default.
 8. Regenerate the full Bible with `npm run strong:generate -- --bible <id>`.
 9. Optionally run `strong:llm:transfer --gold` before large batches to evaluate prompt quality.
 
@@ -482,9 +506,13 @@ Default review pre-acceptance is conservative:
 Override the threshold if needed:
 
 ```sh
-npm run strong:review:llm -- --bible <id> --auto-accept-threshold 0.88
-npm run strong:review:llm -- --bible <id> --auto-accept false
+npm run strong:review:llm -- --bible <id>
+npm run strong:review:llm -- --bible <id> --auto-accept true --auto-accept-threshold 0.88
 ```
+
+`--auto-accept true` is exploratory only. It records
+`llm-review:single-model-auto`, not human approval, and those decisions are
+quarantined from production until independently validated.
 
 Do not let the LLM invent Strong codes. Valid suggestions must use Strong codes present in either:
 
@@ -524,7 +552,7 @@ Use this workflow when the canonical ledger already contains the Strong in
 right path for cases like a missing visible content Strong, not for rebuilding
 the whole Bible from scratch.
 
-The production shape is:
+The manual packet shape is useful for experiments and preview:
 
 1. Generate or refresh the canonical Strong ledger.
 2. Run `strong:review:gaps --audit` to create candidate and pending files.
@@ -533,9 +561,56 @@ The production shape is:
 5. Validate each proposer with `strong:review:gaps:apply`.
 6. Send packet + proposals + validations to an arbiter.
 7. Validate the arbiter output.
-8. Apply only validated arbiter decisions.
-9. Regenerate the canonical Strong ledger.
-10. Inspect the result in the viewer.
+8. Stop before application.
+
+The production shape is instead:
+
+1. Generate the canonical ledger and residual lexical report.
+2. Run `strong:review:gaps:batch --plan-only` and inspect stable task membership.
+3. Run the same batch output root without `--plan-only`.
+4. Let the batch own consensus, current filtering, application, scoped refresh,
+   gates, and rollback.
+5. Inspect the manifest, durable decision ledger, metrics, and viewer output.
+
+```sh
+npm run strong:review:gaps:batch -- \
+  --bible <id> \
+  --lexical-report outputs/lexical-candidates/<id>/bible-<id>-lexical-candidates-all.json \
+  --output-root outputs/gap-review/<id>/<run> \
+  --max-items-per-task 30 \
+  --min-confidence high \
+  --plan-only
+
+npm run strong:review:gaps:batch -- \
+  --bible <id> \
+  --lexical-report outputs/lexical-candidates/<id>/bible-<id>-lexical-candidates-all.json \
+  --output-root outputs/gap-review/<id>/<run> \
+  --max-items-per-task 30 \
+  --min-confidence high \
+  --skip-existing
+```
+
+For production-scale lexical residuals, prefer
+`strong:review:gaps:batch`. It sends shared verse/token context once, requires
+provider-side strict JSON with exactly one bounded choice per stable candidate
+id, and requires exact candidate-and-choice consensus from two distinct model
+identities. The second proposer is adaptive at candidate level: it receives
+only candidates for which proposer A left a visible consensus-eligible choice.
+Task membership and pagination remain stable across resume. Cache reuse is
+content-addressed over inputs and policy, not based on mtime; sidecars also
+verify fresh output hashes, and failed provider attempts cannot reuse an older
+review output. Applying a batch additionally requires the current lexical
+filter and contract v2, is protected by an inter-process lock plus transaction
+marker, and is transactional with scoped rollback. It writes every raw outcome
+plus the consensus and final post-filter verdict to
+`data/strong-review-decisions.json`, including pending/rejected decisions.
+
+`semanticRefillAgentReview --apply` refuses to write without that active batch
+lock/transaction and exact matching packet, Bible, scope, policy, provenance,
+and contract. A directly invoked `strong:review:gaps:apply` is therefore a
+validation/preview tool only. Although terminal contexts are durable, there is
+not yet a safe general pre-LLM skip: current cohort and filter policy can change
+consensus eligibility.
 
 Prefer chapter-sized packets. They preserve enough narrative context while
 keeping the decision surface small. Use book-sized packets only for short books
@@ -585,12 +660,13 @@ Confidence replaces pending/review state:
   French carrier in the reason/evidence, but still place the Strong.
 
 If local validation produces `pending-human` for a structurally valid
-reference-style candidate, the final adapter must convert it before preview or
-application. Pass `--finalize-reference-style` on the final arbiter validation
-or application command. That mode keeps mechanically safe `word`/`phrase`
-decisions, converts unsafe or unresolved targets to low-confidence `empty` at
+reference-style candidate, the final adapter may convert it for preview. Pass
+`--finalize-reference-style` on the final arbiter validation command only. That
+mode keeps mechanically safe `word`/`phrase` decisions, converts unsafe or
+unresolved targets to low-confidence `empty` at
 `sourcePlacement.insertAfterWordIndex`, and fills any missing candidate decision
-with the same low-confidence `empty` fallback.
+with the same low-confidence `empty` fallback. It never authorizes standalone
+production application.
 
 This rule came from the NBS Gen.3.6 regression test. The weak prompt caused both
 proposers to choose `H8378 -> desirable`, even though `desirable` already had
@@ -613,6 +689,29 @@ Preview/report requirements for this workflow:
 - color low-confidence placements yellow;
 - report true technical rejects separately from valid low-confidence or empty
   placements.
+
+## Historical Semantic-Refill Migration
+
+Plain `semantic-refill:llm` and `semantic-refill:llm-reference-style` overrides
+are always quarantined. Only `semantic-refill:llm-consensus-filtered` is
+production-eligible.
+
+Audit historical two-model artifacts without writing, inspect the report, then
+apply explicitly only if the proof counts are expected:
+
+```sh
+npm run strong:review:gaps:migrate-artifacts -- --bible <id>
+npm run strong:review:gaps:migrate-artifacts -- --bible <id> --apply
+```
+
+The migration requires distinct model provenance and an exact bounded choice,
+an `auditKind="missing"` candidate that remains open, a still-matching current
+target, current direct lexical evidence for that carrier, and no replacement,
+relocation, or carrier conflict. For NBS it examined 2,411 raw semantic-refill
+records, promoted 313, and left 2,098 quarantined. It reconstructed 2,480
+decision-ledger records: 2,043 `accepted-safe` and 437
+`needs-witness-review`. The separate 5,379 legacy single-model auto-accepts
+remain quarantined.
 
 ## Quality Gates
 

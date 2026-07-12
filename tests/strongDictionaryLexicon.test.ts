@@ -6,6 +6,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { readStrongDictionaryTranslationCandidates } from "../src/strongDictionaryLexicon.js";
+import {
+  buildStrongTranslationLexicon,
+  findTranslationCandidate
+} from "../src/translationLexicon.js";
 
 test("reads conservative French dictionary candidates from the production schema", async () => {
   const dbPath = await writeTempLexiconDb();
@@ -21,6 +25,20 @@ test("reads conservative French dictionary candidates from the production schema
         candidate.score >= 0.5
     )
   );
+  assert.equal(
+    candidates.find(
+      (candidate) =>
+        candidate.strong === "H0120" && candidate.normalized === "personne"
+    )?.reviewOnly,
+    true
+  );
+  assert.equal(
+    candidates.find(
+      (candidate) =>
+        candidate.strong === "G0014" && candidate.normalized === "bien"
+    )?.reviewOnly,
+    true
+  );
   assert.ok(
     candidates.some(
       (candidate) =>
@@ -28,6 +46,19 @@ test("reads conservative French dictionary candidates from the production schema
         candidate.normalized === "bien" &&
         candidate.source === "strong-lexicon-sqlite:fr-gloss-token"
     )
+  );
+
+  const productionLexicon = buildStrongTranslationLexicon([], {
+    dictionaryCandidates: candidates
+  });
+  assert.ok(findTranslationCandidate(productionLexicon, "H0120", "humain"));
+  assert.equal(
+    findTranslationCandidate(productionLexicon, "H0120", "personne"),
+    undefined
+  );
+  assert.equal(
+    findTranslationCandidate(productionLexicon, "H6213", "faire"),
+    undefined
   );
   assert.equal(
     candidates.some((candidate) => candidate.normalized === "le"),
@@ -75,6 +106,16 @@ test("reads conservative French dictionary candidates from the production schema
         candidate.strong === "G4771" && candidate.normalized === "toi-meme"
     )
   );
+  assert.ok(
+    findTranslationCandidate(productionLexicon, "H0001", "pere", "H0001A")
+  );
+  assert.equal(
+    findTranslationCandidate(productionLexicon, "H0001", "chef", "H0001A"),
+    undefined
+  );
+  assert.ok(
+    findTranslationCandidate(productionLexicon, "H0001", "chef", "H0001B")
+  );
 });
 
 async function writeTempLexiconDb(): Promise<string> {
@@ -114,7 +155,10 @@ async function writeTempLexiconDb(): Promise<string> {
         (4, 'Hebrew', 3228, 'H3228', 'H3228H = a group of', 'H3226G', 'ימיני', 'jaminite', 'N:N--PG', 'Jaminite', 'Descendant de Jamin, homme de la tribu de Siméon'),
         (5, 'Greek', 2424, 'G2424', 'G2424G =', 'G2424G', 'Ἰησοῦς', 'Iesous', 'N:N-M-P', 'Jesus', 'Jesus'),
         (6, 'Greek', 5546, 'G5546', 'G5546 = a Group member of', 'G2424G', 'Χριστιανός', 'christianos', 'N:N--T', 'Christian', 'A group member related to Jesus'),
-        (7, 'Greek', 4572, 'G4572', 'G4572 = the reflexive of', 'G4771', 'σεαυτοῦ', 'seautou', 'G:P', 'yourself', 'yourself');
+        (7, 'Greek', 4572, 'G4572', 'G4572 = the reflexive of', 'G4771', 'σεαυτοῦ', 'seautou', 'G:P', 'yourself', 'yourself'),
+        (8, 'Hebrew', 6213, 'H6213', 'H6213 =', 'H6213', 'עָשָׂה', 'asah', 'V', 'make', 'make'),
+        (9, 'Hebrew', 1, 'H0001', 'H0001A =', 'H0001', 'אָב', 'ab', 'N', 'father', 'father'),
+        (10, 'Hebrew', 1, 'H0001', 'H0001B =', 'H0001', 'אָב', 'ab', 'N', 'chief', 'chief');
       insert into LexiconTranslations
         (stepEntryId, language, gloss, meaning, meaningHtml)
       values
@@ -124,7 +168,10 @@ async function writeTempLexiconDb(): Promise<string> {
         (4, 'fr', 'Jaminite', 'Descendant de Jamin, homme de la tribu de Siméon', ''),
         (5, 'fr', 'Jésus', 'Jésus', ''),
         (6, 'fr', 'Chrétien', 'Chrétien, nom donné aux disciples par les païens.', ''),
-        (7, 'fr', 'toi-même', 'toi-même', '');
+        (7, 'fr', 'toi-même', 'toi-même', ''),
+        (8, 'fr', 'faire', 'faire, produire ou accomplir', ''),
+        (9, 'fr', 'père', 'père', ''),
+        (10, 'fr', 'chef', 'chef', '');
     `
   ]);
   return dbPath;

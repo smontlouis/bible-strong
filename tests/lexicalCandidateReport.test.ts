@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, writeFileSync } from "node:fs";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -9,9 +9,64 @@ import {
   buildLexicalCandidateReport,
   createLexicalCandidateSourceCache,
   isAutoSafeCandidate,
-  lexicalAutoSafePlacements
+  lexicalAutoSafePlacements,
+  writeLexicalCandidateReport,
+  type LexicalCandidateReport
 } from "../src/lexicalCandidateReport.js";
 import { type StrongTranslationCandidate } from "../src/translationLexicon.js";
+
+test("streams a lexical report to valid equivalent JSON", async () => {
+  const directory = mkdtempSync(path.join(tmpdir(), "lexical-report-stream-"));
+  const report: LexicalCandidateReport = {
+    bible: "fixture",
+    generatedAt: "2026-07-10T00:00:00.000Z",
+    inputPath: "fixture.sqlite",
+    scope: "all",
+    sources: { strongDictionary: true, rezoJdmFetch: false },
+    metrics: {
+      verses: 1,
+      auditItems: 1,
+      emptyAnnotations: 1,
+      readerEmptyAnnotations: 0,
+      advancedEmptyAnnotations: 1,
+      relocationAnnotations: 0,
+      itemsWithCandidates: 0,
+      emptyWithCandidates: 0,
+      relocationWithCandidates: 0,
+      candidateCount: 0,
+      highConfidenceCandidates: 0,
+      mediumConfidenceCandidates: 0,
+      lowConfidenceCandidates: 0,
+      occupiedCandidates: 0,
+      openCandidates: 0,
+      reviewableCandidates: 0,
+      autoSafeCandidates: 0,
+      autoSafeItems: 0,
+      groupAutoSafeItems: 0,
+      ambiguousHighItems: 0,
+      openHighItems: 0,
+      relocationBetterOpenItems: 0,
+      evidenceSourceCounts: {}
+    },
+    items: [
+      {
+        auditKind: "empty",
+        annotationId: "fixture-annotation",
+        ref: "Gen.1.1",
+        text: "Au commencement",
+        strong: "H7225",
+        insertAfterWordIndex: -1,
+        stepGlosses: [],
+        dictionaryTerms: [],
+        inferredTerms: [],
+        candidates: []
+      }
+    ]
+  };
+
+  const paths = await writeLexicalCandidateReport(report, directory);
+  assert.deepEqual(JSON.parse(await readFile(paths.jsonPath, "utf8")), report);
+});
 
 test("builds lexical candidates for advanced empty Strong annotations", async () => {
   const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-"));
@@ -64,6 +119,23 @@ test("builds lexical candidates for advanced empty Strong annotations", async ()
   assertTopCandidate(report, "Gen.1.9", "H6960", "amassent");
   assertTopCandidate(report, "Gen.1.11", "H1876", "donne");
   assertTopCandidate(report, "Gen.1.12", "H6213", "portent");
+  const kaikkiDerived = topCandidateFor(report, "Gen.1.9", "H6960");
+  assert.equal(
+    kaikkiDerived?.evidence.find((evidence) => evidence.source === "seed-term")
+      ?.reviewOnly,
+    true
+  );
+  assert.equal(
+    kaikkiDerived?.evidence.find((evidence) => evidence.source === "seed-term")
+      ?.provenanceRoot,
+    "kaikki"
+  );
+  assert.equal(
+    lexicalAutoSafePlacements(report).some(
+      (placement) => placement.item.strong === "H6960"
+    ),
+    false
+  );
 });
 
 test("reuses cached lexical sources across repeated report builds", async () => {
@@ -444,6 +516,136 @@ test("keeps generic direct candidates in review when a high-scoring synonym comp
   };
 
   assert.equal(isAutoSafeCandidate(item, item.candidates[0]!), false);
+});
+
+test("never auto-safes a generic carrier even with independent evidence", () => {
+  const item = {
+    auditKind: "empty",
+    annotationId: "Test.1.1:0:H0001",
+    ref: "Test.1.1",
+    text: "Il est là.",
+    strong: "H0001",
+    insertAfterWordIndex: 1,
+    stepGlosses: ["be"],
+    dictionaryTerms: ["etre"],
+    inferredTerms: [],
+    candidates: [
+      {
+        ...lexicalCandidate({
+          wordIndex: 1,
+          text: "est",
+          normalized: "est",
+          lemma: "etre",
+          score: 1,
+          evidenceSources: ["seed-term", "kaikki-gloss"]
+        }),
+        evidence: [
+          {
+            source: "seed-term",
+            provenanceRoot: "strong-dictionary",
+            detail: "dictionary evidence",
+            weight: 0.5
+          },
+          {
+            source: "kaikki-gloss",
+            provenanceRoot: "kaikki",
+            detail: "Kaikki evidence",
+            weight: 0.3
+          }
+        ]
+      }
+    ]
+  };
+
+  assert.equal(isAutoSafeCandidate(item, item.candidates[0]!), false);
+});
+
+test("does not count a Kaikki-derived seed and Kaikki gloss as two sources", () => {
+  const item = {
+    auditKind: "empty",
+    annotationId: "Test.1.1:0:H0001",
+    ref: "Test.1.1",
+    text: "Il rassemble.",
+    strong: "H0001",
+    insertAfterWordIndex: 1,
+    stepGlosses: ["gather"],
+    dictionaryTerms: [],
+    inferredTerms: ["rassembler"],
+    candidates: [
+      {
+        ...lexicalCandidate({
+          wordIndex: 1,
+          text: "rassemble",
+          normalized: "rassemble",
+          lemma: "rassembler",
+          score: 0.95,
+          evidenceSources: ["seed-term", "kaikki-gloss"]
+        }),
+        evidence: [
+          {
+            source: "seed-term",
+            provenanceRoot: "kaikki",
+            reviewOnly: true,
+            detail: "inferred from Kaikki reverse gloss",
+            weight: 0.42
+          },
+          {
+            source: "kaikki-gloss",
+            provenanceRoot: "kaikki",
+            detail: "same Kaikki gloss data",
+            weight: 0.3
+          }
+        ]
+      }
+    ]
+  };
+
+  assert.equal(isAutoSafeCandidate(item, item.candidates[0]!), false);
+});
+
+test("keeps prose dictionary seeds visible but review-only", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "lexical-candidates-review-"));
+  const ledgerPath = path.join(dir, "ledger.json");
+  writeFileSync(
+    ledgerPath,
+    JSON.stringify({
+      bible: "nbs",
+      generatedAt: "2026-07-10T00:00:00.000Z",
+      split: false,
+      metrics: {},
+      verses: [
+        verse(
+          "Test.1.1",
+          "Un résultat majestueux.",
+          [token(0, "Un"), token(1, "résultat"), token(2, "majestueux")],
+          empty("Test.1.1:0:H0001", "H0001", "glorious", 2)
+        )
+      ]
+    })
+  );
+
+  const report = await buildLexicalCandidateReport({
+    bible: "nbs",
+    onlyRef: "Test.1.1",
+    inputDir: dir,
+    outputDir: dir,
+    ledgerPath,
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    maxCandidatesPerEmpty: 5,
+    dictionaryCandidates: [
+      candidate("H0001", "majestueux", 0.3, {
+        reviewOnly: true,
+        provenanceRoot: "strong-lexicon-sqlite"
+      })
+    ]
+  });
+
+  const top = topCandidateFor(report, "Test.1.1", "H0001");
+  assert.equal(top?.normalized, "majestueux");
+  assert.equal(top?.evidence[0]?.reviewOnly, true);
+  assert.equal(top?.confidence, "medium");
+  assert.equal(report.metrics.autoSafeItems, 0);
 });
 
 test("allows numeric Strong components on occupied compound numbers", async () => {
@@ -1383,13 +1585,19 @@ function dictionaryCandidates(): StrongTranslationCandidate[] {
 function candidate(
   strong: string,
   normalized: string,
-  score: number
+  score: number,
+  options: {
+    reviewOnly?: boolean;
+    provenanceRoot?: string;
+  } = {}
 ): StrongTranslationCandidate {
   return {
     strong,
     normalized,
     score,
     source: "test",
+    provenanceRoot: options.provenanceRoot,
+    reviewOnly: options.reviewOnly,
     method: "dictionary-fr-exact"
   };
 }

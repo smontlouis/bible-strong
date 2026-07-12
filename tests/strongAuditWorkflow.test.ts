@@ -58,7 +58,13 @@ test("committed 10x5 audit baseline uses the stable sample", () => {
   ) as {
     selectedBooks: string[];
     scopes: Array<{ scope: string }>;
-    totals: { lexicalAutoSafeItems: number; emptyStrongCount: number };
+    totals: {
+      lexicalAutoSafeItems: number;
+      emptyStrongCount: number;
+      placementRiskCount: number;
+      placementQuality: number;
+      originalRepresentationRate: number;
+    };
   };
 
   assert.equal(baseline.scopes.length, 10);
@@ -75,7 +81,10 @@ test("committed 10x5 audit baseline uses the stable sample", () => {
     "John"
   ]);
   assert.equal(baseline.totals.lexicalAutoSafeItems, 0);
-  assert.equal(baseline.totals.emptyStrongCount, 3115);
+  assert.equal(baseline.totals.emptyStrongCount, 3964);
+  assert.equal(baseline.totals.placementRiskCount, 325);
+  assert.equal(baseline.totals.placementQuality, 0.978);
+  assert.equal(baseline.totals.originalRepresentationRate, 1);
 });
 
 test("builds an audit residual report from lexical candidate files", () => {

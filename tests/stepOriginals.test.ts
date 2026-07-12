@@ -5,10 +5,13 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  readStepOriginalData,
   readStepOriginalEvidenceIndex,
   readStepOriginalTokens,
-  readStepOriginalVerseMap
+  readStepOriginalVerseMap,
+  selectStepEvidenceForOccurrence
 } from "../src/stepOriginals.js";
+import { getOriginalStrongOccurrences } from "../src/completeAlignment.js";
 
 test("uses TAGNT dStrong as the STEP candidate instead of simple Strong", async () => {
   const filePath = await writeTempStepFile("TAGNT Mat-Jhn.txt", [
@@ -109,6 +112,92 @@ test("builds STEP evidence by verse and classical Strong", async () => {
   assert.equal(evidence?.morphology, "N-GSM-P");
 });
 
+test("selects STEP evidence for the exact repeated dStrong occurrence", () => {
+  const evidence = [
+    {
+      baseStrong: "H0001",
+      stepStrong: "H0001A",
+      source: "TAHOT" as const,
+      tokenIndex: 3,
+      type: "N",
+      surface: "first",
+      transliteration: "first",
+      gloss: "first sense",
+      morphology: "N",
+      editions: ""
+    },
+    {
+      baseStrong: "H0001",
+      stepStrong: "H0001B",
+      source: "TAHOT" as const,
+      tokenIndex: 9,
+      type: "N",
+      surface: "second",
+      transliteration: "second",
+      gloss: "second sense",
+      morphology: "N",
+      editions: ""
+    }
+  ];
+
+  const selected = selectStepEvidenceForOccurrence(evidence, {
+    tokenIndex: 9,
+    sourceStrong: "H0001B"
+  });
+
+  assert.deepEqual(
+    selected.map((item) => item.gloss),
+    ["second sense"]
+  );
+});
+
+test("keeps STEP source indexes separate from alignment ordinals", async () => {
+  const filePath = await writeTempStepFile("TAHOT Gen-Deu.txt", [
+    tahotSenseLine(1, "first", "H0001A"),
+    tahotSenseLine(2, "second", "H0001B")
+  ]);
+  const data = await readStepOriginalData([filePath]);
+  const verse = data.verseMap.get("Gen.1.1");
+  assert.ok(verse);
+  const occurrences = getOriginalStrongOccurrences(verse);
+
+  assert.deepEqual(
+    occurrences.map((occurrence) => ({
+      tokenIndex: occurrence.tokenIndex,
+      ordinalTokenIndex: occurrence.ordinalTokenIndex,
+      sourceTokenIndex: occurrence.sourceTokenIndex,
+      sourceStrong: occurrence.sourceStrong
+    })),
+    [
+      {
+        tokenIndex: 1,
+        ordinalTokenIndex: 0,
+        sourceTokenIndex: 1,
+        sourceStrong: "H0001A"
+      },
+      {
+        tokenIndex: 2,
+        ordinalTokenIndex: 1,
+        sourceTokenIndex: 2,
+        sourceStrong: "H0001B"
+      }
+    ]
+  );
+
+  const second = occurrences[1]!;
+  const selected = selectStepEvidenceForOccurrence(
+    data.evidenceIndex.get("Gen.1.1")?.get("H0001") ?? [],
+    {
+      tokenIndex: second.tokenIndex,
+      sourceStrong: second.sourceStrong
+    }
+  );
+  assert.deepEqual(
+    selected.map((item) => [item.tokenIndex, item.stepStrong, item.gloss]),
+    [[2, "H0001B", "second"]]
+  );
+});
+
 test("builds original inventory from STEP dStrong without WLC suffix normalization", async () => {
   const filePath = await writeTempStepFile("TAHOT Gen-Deu.txt", [
     [
@@ -198,4 +287,25 @@ async function writeTempStepFile(
   const filePath = path.join(dir, fileName);
   await writeFile(filePath, `${lines.join("\n")}\n`, "utf8");
   return filePath;
+}
+
+function tahotSenseLine(
+  tokenIndex: number,
+  gloss: string,
+  dStrong: string
+): string {
+  return [
+    `Gen.1.1#${String(tokenIndex).padStart(2, "0")}=N`,
+    gloss,
+    gloss,
+    gloss,
+    dStrong,
+    "HNcmsa",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ].join("\t");
 }

@@ -8,16 +8,24 @@ import {
   type OriginalToken,
   type OriginalVerse
 } from "./originalSource.js";
+import { getStepSourceTokenIndex } from "./stepOriginals.js";
 import { escapeHtml, tokenizeText, type TextSegment } from "./tokenize.js";
 import {
   findTranslationCandidate,
   type StrongTranslationLexicon
 } from "./translationLexicon.js";
+import { type ReaderAlignmentPolicy } from "./translationProfiles.js";
+import { maximumWeightMatching } from "./maximumWeightMatching.js";
 
 export interface OriginalStrongOccurrence {
   occurrenceId: string;
   tokenId: string;
+  /** Source-native STEP index when available; ordinal fallback otherwise. */
   tokenIndex: number;
+  /** Contiguous zero-based position used only for alignment scoring. */
+  ordinalTokenIndex?: number;
+  /** Explicit STEP `#NN` position, kept separate from the ordinal. */
+  sourceTokenIndex?: number;
   strong: string;
   sourceStrong: string;
   text: string;
@@ -71,6 +79,7 @@ export function alignCompleteVerse(options: {
   lexicon?: StrongLexicon;
   translationLexicon?: StrongTranslationLexicon;
   original?: OriginalVerse;
+  readerPolicy?: ReaderAlignmentPolicy;
 }): CompleteAlignmentResult {
   const base = alignVerse(
     options.targetText,
@@ -128,7 +137,12 @@ export function alignCompleteVerse(options: {
       originalOccurrences,
       usedOccurrences,
       wordAssignments,
-      translationLexicon: options.translationLexicon
+      translationLexicon: options.translationLexicon,
+      maxStrongPerWord: options.readerPolicy?.maxStrongPerWord ?? 3,
+      minScore: Math.max(
+        0.28,
+        (options.readerPolicy?.learnedTranslationMinScore ?? 0.36) - 0.08
+      )
     });
   }
 
@@ -200,86 +214,164 @@ function assignByTranslationLexicon(options: {
   usedOccurrences: Set<string>;
   wordAssignments: Map<number, CompleteWordAssignment>;
   translationLexicon: StrongTranslationLexicon;
+  maxStrongPerWord: number;
+  minScore: number;
 }): void {
   const words = getWordSegments(options.segments);
-  const maxStrongPerWord = 3;
+  let occurrences = options.originalOccurrences.filter(
+    (occurrence) => !options.usedOccurrences.has(occurrence.occurrenceId)
+  );
+  const wordByIndex = new Map(words.map((word) => [word.wordIndex, word]));
+  const originalTokenCount = originalPositionTokenCount(
+    options.originalOccurrences
+  );
 
-  for (const occurrence of options.originalOccurrences) {
-    if (options.usedOccurrences.has(occurrence.occurrenceId)) {
-      continue;
-    }
+  // A French carrier can legitimately represent more than one distinct
+  // original Strong. Model each remaining capacity unit as a matching slot.
+  // A large-but-bounded stacking penalty prefers an available open carrier,
+  // while a positive floor still permits stacking when it is the only lexical
+  // carrier in the verse.
+  while (occurrences.length > 0) {
+    const slots = words.flatMap((word) => {
+      const existingCount =
+        options.wordAssignments.get(word.wordIndex)?.strong.length ?? 0;
+      const remainingCapacity = Math.max(
+        0,
+        options.maxStrongPerWord - existingCount
+      );
+      return Array.from({ length: remainingCapacity }, (_, slotIndex) => ({
+        wordIndex: word.wordIndex,
+        stackDepth: existingCount + slotIndex
+      }));
+    });
+    if (slots.length === 0) break;
 
-    const candidate = words
-      .map((word) => {
+    const edges = occurrences.flatMap((occurrence, left) =>
+      slots.flatMap((slot, right) => {
+        const word = wordByIndex.get(slot.wordIndex);
+        if (!word) return [];
+        const existing = options.wordAssignments.get(word.wordIndex);
+        if (existing?.strong.includes(occurrence.strong)) return [];
+
         const translation = findTranslationCandidate(
           options.translationLexicon,
           occurrence.strong,
-          word.normalized
+          word.normalized,
+          occurrence.sourceStrong
         );
-
-        if (!translation) {
-          return undefined;
-        }
-
-        const existing = options.wordAssignments.get(word.wordIndex);
-        if ((existing?.strong.length ?? 0) >= maxStrongPerWord) {
-          return undefined;
-        }
-        if (existing?.strong.includes(occurrence.strong)) {
-          return undefined;
-        }
+        if (!translation) return [];
 
         const positionScore = scorePosition(
-          occurrence.tokenIndex,
-          options.originalOccurrences.length,
+          occurrenceOrdinalTokenIndex(occurrence),
+          originalTokenCount,
           word.wordIndex,
           words.length
         );
+        const score = translation.score * 0.72 + positionScore * 0.28;
+        if (score < options.minScore) return [];
 
-        return {
-          wordIndex: word.wordIndex,
-          translation,
-          score: translation.score * 0.72 + positionScore * 0.28
-        };
+        return [
+          {
+            left,
+            right,
+            weight: Math.max(
+              MIN_POSITIVE_MATCH_WEIGHT,
+              score - slot.stackDepth * STACKING_SLOT_PENALTY
+            ),
+            value: {
+              occurrence,
+              wordIndex: word.wordIndex,
+              translation,
+              score
+            }
+          }
+        ];
       })
-      .filter((value): value is NonNullable<typeof value> => Boolean(value))
-      .sort((a, b) => b.score - a.score)[0];
+    );
+    const rawMatches = maximumWeightMatching({
+      leftCount: occurrences.length,
+      rightCount: slots.length,
+      edges
+    });
+    if (rawMatches.length === 0) break;
 
-    if (!candidate || candidate.score < 0.28) {
-      continue;
+    const bestMatchByStrongTarget = new Map<
+      string,
+      (typeof rawMatches)[number]
+    >();
+    for (const match of rawMatches) {
+      const key = `${match.value.wordIndex}:${match.value.occurrence.strong}`;
+      const previous = bestMatchByStrongTarget.get(key);
+      if (
+        !previous ||
+        match.weight > previous.weight ||
+        (match.weight === previous.weight && match.left < previous.left)
+      ) {
+        bestMatchByStrongTarget.set(key, match);
+      }
+    }
+    const matches = [...bestMatchByStrongTarget.values()].sort(
+      (left, right) => left.left - right.left || left.right - right.right
+    );
+
+    const acceptedOccurrenceIds = new Set<string>();
+    const occupiedStrongTargets = new Set(
+      [...options.wordAssignments].flatMap(([wordIndex, assignment]) =>
+        assignment.strong.map((strong) => `${wordIndex}:${strong}`)
+      )
+    );
+
+    for (const match of matches) {
+      const candidate = match.value;
+      const occurrence = candidate.occurrence;
+      const targetKey = `${candidate.wordIndex}:${occurrence.strong}`;
+      // Capacity slots alone do not express the separate constraint that one
+      // Strong code must not be duplicated on the same French carrier. Keep the
+      // best such match and let a later iteration rematch the rejected one.
+      if (occupiedStrongTargets.has(targetKey)) continue;
+
+      const existing = options.wordAssignments.get(candidate.wordIndex);
+      const confidence = Math.min(0.88, 0.48 + candidate.score * 0.35);
+
+      if (existing) {
+        existing.strong.push(occurrence.strong);
+        existing.originalTokenIds.push(occurrence.tokenId);
+        existing.originalOccurrenceIds.push(occurrence.occurrenceId);
+        existing.confidence = Math.max(existing.confidence, confidence);
+        existing.method = mergeLabel(
+          existing.method,
+          candidate.translation.method
+        );
+        existing.source = mergeLabel(
+          existing.source,
+          candidate.translation.source
+        );
+      } else {
+        options.wordAssignments.set(candidate.wordIndex, {
+          strong: [occurrence.strong],
+          originalTokenIds: [occurrence.tokenId],
+          originalOccurrenceIds: [occurrence.occurrenceId],
+          confidence,
+          method: candidate.translation.method,
+          source: candidate.translation.source,
+          fallback: false
+        });
+      }
+
+      occupiedStrongTargets.add(targetKey);
+      acceptedOccurrenceIds.add(occurrence.occurrenceId);
+      options.usedOccurrences.add(occurrence.occurrenceId);
     }
 
-    const existing = options.wordAssignments.get(candidate.wordIndex);
-    const confidence = Math.min(0.88, 0.48 + candidate.score * 0.35);
-
-    if (existing) {
-      existing.strong.push(occurrence.strong);
-      existing.originalTokenIds.push(occurrence.tokenId);
-      existing.originalOccurrenceIds.push(occurrence.occurrenceId);
-      existing.confidence = Math.max(existing.confidence, confidence);
-      existing.method = mergeLabel(
-        existing.method,
-        candidate.translation.method
-      );
-      existing.source = mergeLabel(
-        existing.source,
-        candidate.translation.source
-      );
-    } else {
-      options.wordAssignments.set(candidate.wordIndex, {
-        strong: [occurrence.strong],
-        originalTokenIds: [occurrence.tokenId],
-        originalOccurrenceIds: [occurrence.occurrenceId],
-        confidence,
-        method: candidate.translation.method,
-        source: candidate.translation.source,
-        fallback: false
-      });
-    }
-
-    options.usedOccurrences.add(occurrence.occurrenceId);
+    if (acceptedOccurrenceIds.size === 0) break;
+    occurrences = occurrences.filter(
+      (occurrence) => !acceptedOccurrenceIds.has(occurrence.occurrenceId)
+    );
   }
 }
+
+const STACKING_SLOT_PENALTY = 0.5;
+const MIN_POSITIVE_MATCH_WEIGHT = 1e-6;
 
 export function renderCompleteTaggedText(
   result: CompleteAlignmentResult
@@ -342,14 +434,17 @@ export function countFrenchTokens(text: string): number {
 
 function toOccurrence(
   token: OriginalToken,
-  tokenIndex: number,
+  ordinalTokenIndex: number,
   strong: string,
   strongIndex: number
 ): OriginalStrongOccurrence {
+  const sourceTokenIndex = getStepSourceTokenIndex(token);
   return {
     occurrenceId: `${token.id}:${strongIndex}`,
     tokenId: token.id,
-    tokenIndex,
+    tokenIndex: sourceTokenIndex ?? ordinalTokenIndex,
+    ordinalTokenIndex,
+    sourceTokenIndex,
     strong,
     sourceStrong: token.sourceStrong?.[strongIndex] ?? strong,
     text: token.text,
@@ -358,6 +453,19 @@ function toOccurrence(
     morph: token.morph,
     pos: token.pos
   };
+}
+
+function occurrenceOrdinalTokenIndex(
+  occurrence: OriginalStrongOccurrence
+): number {
+  return occurrence.ordinalTokenIndex ?? occurrence.tokenIndex;
+}
+
+function originalPositionTokenCount(
+  occurrences: OriginalStrongOccurrence[]
+): number {
+  if (occurrences.length === 0) return 0;
+  return Math.max(...occurrences.map(occurrenceOrdinalTokenIndex)) + 1;
 }
 
 function findPreviousAssignedWordIndex(

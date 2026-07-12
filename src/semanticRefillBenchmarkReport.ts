@@ -71,8 +71,9 @@ interface BenchmarkSummary {
   };
   applied?: {
     dir: string;
+    validatedCount: number;
     acceptedCount: number;
-    acceptedByTarget: Record<string, number>;
+    validatedByTarget: Record<string, number>;
   };
   metricsDelta?: Array<{
     metric: string;
@@ -134,6 +135,12 @@ async function buildBenchmarkReport(options: {
         path.join(options.appliedDir, "accepted.json")
       )
     : undefined;
+  const application = options.appliedDir
+    ? await readJson<{
+        validatedCount: number;
+        appliedOverrideCount: number;
+      }>(path.join(options.appliedDir, "application.json"))
+    : undefined;
 
   const summary: BenchmarkSummary = {
     generatedAt: new Date().toISOString(),
@@ -177,13 +184,15 @@ async function buildBenchmarkReport(options: {
       ).length,
       rejectedReasons: countBy(rejected, (item) => item.reason ?? "unknown")
     },
-    applied: appliedAccepted
-      ? {
-          dir: options.appliedDir ?? "",
-          acceptedCount: appliedAccepted.length,
-          acceptedByTarget: countBy(appliedAccepted, decisionTarget)
-        }
-      : undefined,
+    applied:
+      appliedAccepted && application
+        ? {
+            dir: options.appliedDir ?? "",
+            validatedCount: application.validatedCount,
+            acceptedCount: application.appliedOverrideCount,
+            validatedByTarget: countBy(appliedAccepted, decisionTarget)
+          }
+        : undefined,
     metricsDelta:
       options.beforeMetricsPath && options.afterMetricsPath
         ? await buildMetricsDelta({
@@ -282,6 +291,12 @@ function renderMarkdown(summary: BenchmarkSummary): string {
   }
   if (summary.review.parseError) {
     lines.push(`- parse error: \`${summary.review.parseError}\``);
+  }
+  if (summary.applied) {
+    lines.push(
+      `- validated for application: \`${summary.applied.validatedCount}\``,
+      `- actual override mutations: \`${summary.applied.acceptedCount}\``
+    );
   }
 
   lines.push(

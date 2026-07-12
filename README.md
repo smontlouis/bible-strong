@@ -41,13 +41,19 @@ npm run strong:report:references -- --bible nbs
 ```
 
 For semantic gaps that remain in the ledger, build a constrained review packet
-before using any LLM:
+before using any LLM. For production-scale review, inspect a stable plan before
+running the transactional batch:
 
 ```sh
-npm run strong:review:gaps -- --bible nbs --only Gen.3 --audit --output-dir outputs/gap-review/nbs/Gen.3
-npm run strong:review:gaps:packet -- --bible nbs --only Gen.3 --candidates outputs/gap-review/nbs/Gen.3/gap-review-candidates.json
-npm run strong:review:gaps:apply -- --bible nbs --input outputs/gap-review/nbs/agent-review/review.json --candidates outputs/gap-review/nbs/Gen.3/gap-review-candidates.json
+npm run strong:review:gaps:batch -- --bible nbs --lexical-report outputs/lexical-candidates/nbs/bible-nbs-lexical-candidates-all.json --output-root outputs/gap-review/nbs/<run> --plan-only
+npm run strong:review:gaps:batch -- --bible nbs --lexical-report outputs/lexical-candidates/nbs/bible-nbs-lexical-candidates-all.json --output-root outputs/gap-review/nbs/<run> --skip-existing
 ```
+
+Production application requires the exact same bounded choice from two
+distinct models, the current lexical safety filter, a version-2 contract, and
+the batch write lock/transaction. Direct
+`strong:review:gaps:apply --apply` is intentionally refused outside that batch;
+`--finalize-reference-style` is preview/validation only.
 
 For residual hard verses, use LLM review as a bounded suggestion workflow:
 
@@ -72,11 +78,18 @@ npm run format
 There is one intended production artifact:
 
 ```text
-outputs/strong/<bible>/bible-<bible>-strong-ledger.json
+outputs/strong/<bible>/bible-<bible>-strong.sqlite
 ```
 
-That canonical ledger records each Strong annotation with placement, visibility,
-source, confidence, diagnostics, and reason.
+That canonical SQLite ledger records each verse and Strong annotation with
+placement, visibility, source, confidence, diagnostics, and reason.
+
+Use both masked-gold evaluator backends after alignment changes:
+
+```sh
+npm run strong:evaluate -- --gold Sg1910 --limit 1000 --backend diagnostic
+npm run strong:evaluate -- --gold Sg1910 --limit 200 --backend canonical
+```
 
 Two views are derived from it:
 
@@ -92,9 +105,20 @@ LLM review should not generate a Bible directly. Work from deterministic
 evidence: a hard-verse file, a gap-review packet, or a masked-gold transfer
 experiment. Accepted decisions must be validated and saved as curated overrides.
 
-`npm run viewer` starts the local UI server. Use `/viewer/` for TSV/CSV Strong
-inspection, `/viewer/lexicon.html` for the FR/EN Strong lexicon, and
-`/viewer/review.html` for LLM review.
+Plain historical `semantic-refill:llm` and
+`semantic-refill:llm-reference-style` records stay quarantined. Only
+`semantic-refill:llm-consensus-filtered` is eligible for production. To audit
+old two-model artifacts, run `strong:review:gaps:migrate-artifacts` without
+`--apply` first, inspect the report, then explicitly rerun with `--apply`.
+
+`npm run viewer` builds and starts the local UI server. `/viewer/` now reads the
+canonical SQLite ledger by chapter, so it cannot silently fall back to stale
+split JSON. `/viewer/review.html` is a read-only quality cockpit for current
+target drift, witness-review decisions, the stable LLM plan, applied consensus
+overrides, and quarantined history. It distinguishes `accepted-safe` records
+from overrides actually present in production. `/viewer/lexicon.html` keeps the
+FR/EN Strong lexicon. The legacy human-approved review form remains available
+from the quality cockpit, clearly separated from the transactional v2 batch.
 
 ## Reports
 

@@ -24,6 +24,11 @@ export interface CuratedStrongOverride {
   reason: string;
 }
 
+export type CuratedStrongOverrideIndex = ReadonlyMap<
+  string,
+  CuratedStrongOverride[]
+>;
+
 export const CURATED_STRONG_OVERRIDES: CuratedStrongOverride[] = [
   {
     bible: "nbs",
@@ -183,15 +188,27 @@ export function applyCuratedStrongOverrides(options: {
   bible: string;
   ref: string;
   result: ReaderAlignmentResult;
+  overrideIndex?: CuratedStrongOverrideIndex;
 }): number {
-  const overrides = getCuratedStrongOverrides().filter(
-    (override) =>
-      override.bible === options.bible.toLowerCase() &&
-      override.ref === options.ref
-  );
+  const bible = options.bible.toLowerCase();
+  const overrides = options.overrideIndex
+    ? (options.overrideIndex.get(overrideIndexKey(bible, options.ref)) ?? [])
+    : getCuratedStrongOverrides().filter(
+        (override) => override.bible === bible && override.ref === options.ref
+      );
   let appliedStrongCount = 0;
 
   for (const override of overrides) {
+    // A relocation is one logical operation. Validate both ends before
+    // mutating the result so token drift cannot delete the old placement
+    // without successfully creating the new one.
+    if (
+      !isValidOverrideDestination(options.result, override) ||
+      !isValidReplacementSource(options.result, override)
+    ) {
+      continue;
+    }
+
     applyReplacement(options.result, override);
 
     if (override.target === "phrase") {
@@ -308,6 +325,96 @@ export function applyCuratedStrongOverrides(options: {
   return appliedStrongCount;
 }
 
+export function buildCuratedStrongOverrideIndex(
+  overrides: CuratedStrongOverride[] = getCuratedStrongOverrides()
+): CuratedStrongOverrideIndex {
+  const index = new Map<string, CuratedStrongOverride[]>();
+  for (const override of overrides) {
+    const key = overrideIndexKey(override.bible.toLowerCase(), override.ref);
+    const entries = index.get(key) ?? [];
+    entries.push(override);
+    index.set(key, entries);
+  }
+  return index;
+}
+
+function overrideIndexKey(bible: string, ref: string): string {
+  return `${bible}\0${ref}`;
+}
+
+function isValidOverrideDestination(
+  result: ReaderAlignmentResult,
+  override: CuratedStrongOverride
+): boolean {
+  if (override.target === "phrase") {
+    return isValidPhraseOverride(result, override);
+  }
+
+  if ((override.target ?? "word") === "empty") {
+    return (
+      Number.isInteger(override.wordIndex) &&
+      override.wordIndex >= -1 &&
+      override.wordIndex < countWords(result)
+    );
+  }
+
+  const word = getWord(result, override.wordIndex);
+  return !!word && word.normalized === override.normalized;
+}
+
+function isValidReplacementSource(
+  result: ReaderAlignmentResult,
+  override: CuratedStrongOverride
+): boolean {
+  const replacement = override.replace;
+  if (!replacement) return true;
+
+  const expected = new Set(
+    override.strong.map((strong) => strong.toUpperCase())
+  );
+  const counts = new Map([...expected].map((strong) => [strong, 0]));
+  const countStrong = (strong: string): void => {
+    const normalized = strong.toUpperCase();
+    if (!expected.has(normalized)) return;
+    counts.set(normalized, (counts.get(normalized) ?? 0) + 1);
+  };
+
+  if (replacement.target === "word") {
+    if (!Number.isInteger(replacement.wordIndex)) return false;
+    for (const strong of result.assignments.get(replacement.wordIndex!)
+      ?.strong ?? []) {
+      countStrong(strong);
+    }
+  } else if (replacement.target === "phrase") {
+    if (
+      !Number.isInteger(replacement.startWordIndex) ||
+      !Number.isInteger(replacement.endWordIndex)
+    ) {
+      return false;
+    }
+    for (const assignment of result.phraseAssignments) {
+      if (
+        assignment.startWordIndex !== replacement.startWordIndex ||
+        assignment.endWordIndex !== replacement.endWordIndex
+      ) {
+        continue;
+      }
+      for (const strong of assignment.strong) {
+        countStrong(strong);
+      }
+    }
+  } else {
+    if (!Number.isInteger(replacement.wordIndex)) return false;
+    for (const assignment of result.emptyAssignments) {
+      if (assignment.insertAfterWordIndex === replacement.wordIndex) {
+        countStrong(assignment.strong);
+      }
+    }
+  }
+
+  return [...expected].every((strong) => counts.get(strong) === 1);
+}
+
 function applyReplacement(
   result: ReaderAlignmentResult,
   override: CuratedStrongOverride
@@ -356,11 +463,42 @@ function applyReplacement(
   }
 }
 
-export function getCuratedStrongOverrides(): CuratedStrongOverride[] {
-  return [
+export function getCuratedStrongOverrides(
+  options: { includeLegacySingleModelAuto?: boolean } = {}
+): CuratedStrongOverride[] {
+  const overrides = [
     ...CURATED_STRONG_OVERRIDES,
     ...readJsonCuratedStrongOverrides("data/curated-strong-overrides.json")
   ];
+
+  if (options.includeLegacySingleModelAuto) {
+    return overrides;
+  }
+
+  return overrides.filter(
+    (override) =>
+      !isLegacySingleModelAutoOverride(override) &&
+      !isUnverifiedSemanticRefillOverride(override)
+  );
+}
+
+export function isLegacySingleModelAutoOverride(
+  override: CuratedStrongOverride
+): boolean {
+  return (
+    override.source.startsWith("llm-review:single-model-auto") ||
+    (override.source === "llm-review:human-approved" &&
+      /auto-accepted by review:llm/iu.test(override.reason))
+  );
+}
+
+export function isUnverifiedSemanticRefillOverride(
+  override: CuratedStrongOverride
+): boolean {
+  return (
+    override.source === "semantic-refill:llm" ||
+    override.source === "semantic-refill:llm-reference-style"
+  );
 }
 
 function readJsonCuratedStrongOverrides(path: string): CuratedStrongOverride[] {
@@ -423,6 +561,13 @@ function getWord(
   }
 
   return undefined;
+}
+
+function countWords(result: ReaderAlignmentResult): number {
+  return result.segments.reduce(
+    (count, segment) => count + (segment.kind === "word" ? 1 : 0),
+    0
+  );
 }
 
 function isValidPhraseOverride(

@@ -158,6 +158,12 @@
     background: color-mix(in oklab, oklch(0.56 0.12 190) 48%, transparent);
   }
 
+  .strong-text w[data-source="curated-override"] {
+    background: color-mix(in oklab, oklch(0.66 0.16 42) 45%, transparent);
+    box-shadow: inset 0 -1px 0
+      color-mix(in oklab, oklch(0.8 0.13 55) 72%, transparent);
+  }
+
   .strong-text w[data-placement="empty"],
   .strong-text .empty-strong {
     @apply rounded-full border px-1.5 py-0 text-xs;
@@ -214,6 +220,336 @@
     box-shadow:
       0 0 0 1px rgba(255, 255, 255, 0.12),
       0 22px 70px rgba(0, 0, 0, 0.42);
+  }
+
+  .quality-shell {
+    background:
+      linear-gradient(120deg, rgba(23, 116, 105, 0.08), transparent 38%),
+      repeating-linear-gradient(
+        90deg,
+        transparent 0,
+        transparent 79px,
+        rgba(255, 255, 255, 0.018) 80px
+      ),
+      var(--background);
+  }
+
+  .quality-header {
+    position: relative;
+    overflow: hidden;
+    background:
+      linear-gradient(96deg, rgba(8, 15, 22, 0.97), rgba(18, 30, 35, 0.92)),
+      var(--card);
+  }
+
+  .quality-header::after {
+    position: absolute;
+    inset: 0 0 0 auto;
+    width: min(34vw, 520px);
+    content: "";
+    pointer-events: none;
+    opacity: 0.28;
+    background: repeating-linear-gradient(
+      135deg,
+      transparent 0,
+      transparent 11px,
+      rgba(105, 207, 188, 0.2) 12px,
+      transparent 13px
+    );
+    mask-image: linear-gradient(90deg, transparent, black);
+  }
+
+  .quality-kicker,
+  .quality-section-label,
+  .quality-pulse-label {
+    font-family:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+  }
+
+  .quality-kicker {
+    color: oklch(0.75 0.1 190);
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+
+  .quality-title {
+    max-width: 760px;
+    font-family: "Avenir Next", Avenir, "Helvetica Neue", sans-serif;
+    font-size: clamp(2rem, 4.2vw, 4.4rem);
+    font-weight: 640;
+    line-height: 0.98;
+    letter-spacing: -0.055em;
+  }
+
+  .quality-section-label {
+    color: var(--muted-foreground);
+    font-size: 0.64rem;
+    font-weight: 700;
+  }
+
+  .quality-pulse {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+    border: 1px solid color-mix(in oklab, var(--border) 82%, transparent);
+    border-top-color: var(--pulse-color, var(--primary));
+    border-radius: 0.5rem;
+    padding: 0.8rem;
+    background: rgba(7, 14, 20, 0.72);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.18);
+  }
+
+  .quality-pulse strong {
+    display: block;
+    margin-top: 0.35rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 1.65rem;
+    line-height: 1;
+  }
+
+  .quality-pulse > span:last-child {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--muted-foreground);
+    font-size: 0.68rem;
+  }
+
+  .quality-pulse-label {
+    color: var(--muted-foreground);
+    font-size: 0.58rem;
+  }
+
+  .quality-pulse-critical {
+    --pulse-color: oklch(0.68 0.19 29);
+  }
+
+  .quality-pulse-warn {
+    --pulse-color: oklch(0.76 0.15 75);
+  }
+
+  .quality-pulse-good {
+    --pulse-color: oklch(0.72 0.12 164);
+  }
+
+  .quality-pulse-neutral {
+    --pulse-color: oklch(0.68 0.1 245);
+  }
+
+  .quality-bucket {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 0.7rem;
+    border: 1px solid transparent;
+    border-radius: 0.5rem;
+    padding: 0.7rem;
+    text-align: left;
+    transition:
+      border-color 160ms ease,
+      background 160ms ease,
+      transform 160ms ease;
+  }
+
+  .quality-bucket:hover {
+    border-color: var(--border);
+    background: color-mix(in oklab, var(--muted) 58%, transparent);
+    transform: translateX(2px);
+  }
+
+  .quality-bucket-active {
+    border-color: color-mix(in oklab, var(--primary) 46%, var(--border));
+    background: color-mix(in oklab, var(--primary) 12%, transparent);
+  }
+
+  .quality-bucket-icon {
+    display: flex;
+    width: 2rem;
+    height: 2rem;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 0.4rem;
+    color: var(--primary);
+    background: color-mix(in oklab, var(--background) 65%, transparent);
+  }
+
+  .quality-bucket-icon svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .quality-bucket strong,
+  .quality-bucket small {
+    display: block;
+  }
+
+  .quality-bucket strong {
+    font-size: 0.82rem;
+  }
+
+  .quality-bucket small {
+    margin-top: 0.12rem;
+    overflow: hidden;
+    color: var(--muted-foreground);
+    font-size: 0.68rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .quality-bucket-count,
+  .quality-strong-code,
+  .quality-priority {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  .quality-bucket-count {
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .quality-gate {
+    background:
+      linear-gradient(135deg, rgba(44, 133, 112, 0.12), transparent 65%),
+      color-mix(in oklab, var(--card) 76%, transparent);
+  }
+
+  .quality-review-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 0.65rem;
+    padding: 1rem 1rem 1rem 1.15rem;
+    background: color-mix(in oklab, var(--card) 88%, transparent);
+    box-shadow: 0 16px 44px rgba(0, 0, 0, 0.12);
+    animation: quality-card-enter 360ms both cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .quality-review-card:hover {
+    border-color: color-mix(in oklab, var(--tier-color) 55%, var(--border));
+  }
+
+  .quality-card-rail {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: var(--tier-color);
+  }
+
+  .quality-tier-p0 {
+    --tier-color: oklch(0.68 0.19 29);
+  }
+
+  .quality-tier-p1 {
+    --tier-color: oklch(0.76 0.15 75);
+  }
+
+  .quality-tier-p2 {
+    --tier-color: oklch(0.69 0.11 231);
+  }
+
+  .quality-tier-p3 {
+    --tier-color: oklch(0.62 0.03 245);
+  }
+
+  .quality-priority {
+    border: 1px solid color-mix(in oklab, var(--tier-color) 65%, transparent);
+    border-radius: 999px;
+    padding: 0.12rem 0.42rem;
+    color: color-mix(in oklab, var(--tier-color) 85%, white);
+    background: color-mix(in oklab, var(--tier-color) 13%, transparent);
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .quality-strong-code {
+    border-radius: 0.3rem;
+    padding: 0.16rem 0.42rem;
+    color: oklch(0.88 0.09 190);
+    background: rgba(67, 174, 155, 0.1);
+    font-size: 0.75rem;
+  }
+
+  .quality-datum {
+    min-width: 0;
+    border: 1px solid color-mix(in oklab, var(--border) 72%, transparent);
+    border-radius: 0.4rem;
+    padding: 0.55rem 0.65rem;
+    background: color-mix(in oklab, var(--background) 35%, transparent);
+  }
+
+  .quality-datum span,
+  .quality-datum strong {
+    display: block;
+  }
+
+  .quality-datum span {
+    color: var(--muted-foreground);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .quality-datum strong {
+    margin-top: 0.26rem;
+    overflow: hidden;
+    font-size: 0.76rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .quality-reason-chip {
+    border: 1px dashed color-mix(in oklab, var(--tier-color) 48%, var(--border));
+    border-radius: 999px;
+    padding: 0.18rem 0.48rem;
+    color: var(--muted-foreground);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.6rem;
+  }
+
+  .quality-trace {
+    background:
+      linear-gradient(90deg, rgba(177, 92, 154, 0.1), transparent),
+      color-mix(in oklab, var(--muted) 35%, transparent);
+  }
+
+  .quality-trace-index {
+    display: inline-flex;
+    width: 1.4rem;
+    height: 1.4rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(220, 125, 192, 0.38);
+    border-radius: 999px;
+    color: rgb(245, 196, 229);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.58rem;
+  }
+
+  @keyframes quality-card-enter {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .quality-review-card {
+      animation: none;
+    }
+
+    .quality-bucket {
+      transition: none;
+    }
   }
 
   .workflow-flow .react-flow__controls,

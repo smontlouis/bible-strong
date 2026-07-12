@@ -2,12 +2,15 @@ import { existsSync, readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { writeJsonFileAtomic } from "./atomicFile.js";
 import { readBibleJson, type BibleVerse } from "./bibleJson.js";
 import {
   getCuratedStrongOverrides,
   type CuratedStrongOverride
 } from "./curatedStrongOverrides.js";
 import { referenceKey } from "./strongCsv.js";
+import { withReviewFileLock } from "./reviewFileLock.js";
+import { upsertCuratedStrongOverrides } from "./semanticRefillAgentReview.js";
 import { tokenizeText } from "./tokenize.js";
 
 export interface ReviewOptions {
@@ -247,61 +250,65 @@ export async function applyReviewDecisionPayload(options: {
   skipped: number;
   outputPath: string;
 }> {
-  const overridesPath =
-    options.overridesPath ?? "data/curated-strong-overrides.json";
-  const accepted = extractAcceptedOverrides(options.decisions);
-  const versesByBible = new Map<string, Map<string, BibleVerse>>();
-  const existing = getCuratedStrongOverrides();
-  const currentJson = existsSync(overridesPath)
-    ? readJsonFile<CuratedStrongOverride[]>(overridesPath)
-    : [];
-  const next = [...currentJson];
-  let added = 0;
-  let skipped = 0;
+  return withReviewFileLock(async () => {
+    const overridesPath =
+      options.overridesPath ?? "data/curated-strong-overrides.json";
+    const accepted = extractAcceptedOverrides(options.decisions);
+    const versesByBible = new Map<string, Map<string, BibleVerse>>();
+    const existing = getCuratedStrongOverrides();
+    const currentJson = existsSync(overridesPath)
+      ? readJsonFile<CuratedStrongOverride[]>(overridesPath)
+      : [];
+    const eligible: CuratedStrongOverride[] = [];
+    let skipped = 0;
 
-  for (const override of accepted) {
-    if (options.bible !== "multi" && override.bible !== options.bible) {
-      skipped += 1;
-      continue;
+    for (const override of accepted) {
+      if (options.bible !== "multi" && override.bible !== options.bible) {
+        skipped += 1;
+        continue;
+      }
+
+      const verses = await getVersesForBible(override.bible, versesByBible);
+      const verse = verses.get(override.ref);
+      const target = override.target ?? "word";
+      const isEmptyOverride = target === "empty";
+      const isPhraseOverride = target === "phrase";
+      const words = verse ? getWords(verse) : [];
+      const word = words[override.wordIndex];
+      const validEmptyIndex =
+        isEmptyOverride &&
+        verse &&
+        override.wordIndex >= -1 &&
+        override.wordIndex < words.length;
+      const validPhraseTarget =
+        isPhraseOverride && verse && isValidPhraseTarget(override, words);
+      const validWordTarget =
+        target === "word" && word && word.normalized === override.normalized;
+
+      if (
+        (!validWordTarget && !validEmptyIndex && !validPhraseTarget) ||
+        existing.some((candidate) => sameOverride(candidate, override))
+      ) {
+        skipped += 1;
+        continue;
+      }
+
+      eligible.push(override);
     }
 
-    const verses = await getVersesForBible(override.bible, versesByBible);
-    const verse = verses.get(override.ref);
-    const target = override.target ?? "word";
-    const isEmptyOverride = target === "empty";
-    const isPhraseOverride = target === "phrase";
-    const words = verse ? getWords(verse) : [];
-    const word = words[override.wordIndex];
-    const validEmptyIndex =
-      isEmptyOverride &&
-      verse &&
-      override.wordIndex >= -1 &&
-      override.wordIndex < words.length;
-    const validPhraseTarget =
-      isPhraseOverride && verse && isValidPhraseTarget(override, words);
-    const validWordTarget =
-      target === "word" && word && word.normalized === override.normalized;
+    const upserted = upsertCuratedStrongOverrides(currentJson, eligible);
+    skipped += eligible.length - upserted.appliedOverrideCount;
+    await writeJsonFileAtomic(
+      overridesPath,
+      sortOverrides(upserted.overrides as CuratedStrongOverride[])
+    );
 
-    if (
-      (!validWordTarget && !validEmptyIndex && !validPhraseTarget) ||
-      existing.some((candidate) => sameOverride(candidate, override)) ||
-      next.some((candidate) => sameOverride(candidate, override))
-    ) {
-      skipped += 1;
-      continue;
-    }
-
-    next.push(override);
-    added += 1;
-  }
-
-  await writeFile(
-    overridesPath,
-    `${JSON.stringify(sortOverrides(next), null, 2)}\n`,
-    "utf8"
-  );
-
-  return { accepted: added, skipped, outputPath: overridesPath };
+    return {
+      accepted: upserted.appliedOverrideCount,
+      skipped,
+      outputPath: overridesPath
+    };
+  });
 }
 
 function extractAcceptedOverrides(
@@ -396,6 +403,11 @@ const WEAK_AUTO_ACCEPT_WORDS = new Set([
 ]);
 
 function itemToOverride(item: ReviewItem): CuratedStrongOverride {
+  const sourceKind = /auto-accepted by strong:review:llm/iu.test(
+    item.reviewerNote
+  )
+    ? "single-model-auto"
+    : "human-approved";
   if (item.target === "phrase") {
     const startWordIndex = item.startWordIndex ?? item.wordIndex;
     const endWordIndex = item.endWordIndex ?? item.wordIndex;
@@ -410,7 +422,7 @@ function itemToOverride(item: ReviewItem): CuratedStrongOverride {
       normalizedPhrase: item.normalizedPhrase ?? [item.normalized],
       strong: item.strong,
       confidence: Math.min(0.92, Math.max(0.72, item.confidence)),
-      source: "llm-review:human-approved-phrase",
+      source: `llm-review:${sourceKind}-phrase`,
       reason: [item.llmReason, item.reviewerNote].filter(Boolean).join(" | ")
     };
   }
@@ -424,7 +436,7 @@ function itemToOverride(item: ReviewItem): CuratedStrongOverride {
       normalized: "",
       strong: item.strong,
       confidence: Math.min(0.9, Math.max(0.64, item.confidence)),
-      source: "llm-review:human-approved-empty",
+      source: `llm-review:${sourceKind}-empty`,
       reason: [item.llmReason, item.reviewerNote].filter(Boolean).join(" | ")
     };
   }
@@ -437,7 +449,7 @@ function itemToOverride(item: ReviewItem): CuratedStrongOverride {
     normalized: item.normalized,
     strong: item.strong,
     confidence: Math.min(0.92, Math.max(0.72, item.confidence)),
-    source: "llm-review:human-approved",
+    source: `llm-review:${sourceKind}`,
     reason: [item.llmReason, item.reviewerNote].filter(Boolean).join(" | ")
   };
 }
@@ -635,7 +647,7 @@ function parseCliOptions(argv: string[]): ReviewOptions {
       path.join(outputDir, `llm-review-${bible}.decisions.json`),
     overridesPath:
       args.get("overrides") ?? "data/curated-strong-overrides.json",
-    autoAccept: args.get("auto-accept") !== "false",
+    autoAccept: args.get("auto-accept") === "true",
     autoAcceptThreshold: Number.parseFloat(
       args.get("auto-accept-threshold") ?? "0.84"
     )

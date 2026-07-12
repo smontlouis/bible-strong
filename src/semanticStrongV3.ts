@@ -1,7 +1,8 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir } from "node:fs/promises";
 import path from "node:path";
 
+import { writeJsonFileAtomic } from "./atomicFile.js";
 import { readBibleJson, type BibleVerse } from "./bibleJson.js";
 import { getOriginalStrongOccurrences } from "./completeAlignment.js";
 import { applyCuratedStrongOverrides } from "./curatedStrongOverrides.js";
@@ -31,6 +32,7 @@ import {
 } from "./strongCsv.js";
 import { readStrongDictionaryTranslationCandidates } from "./strongDictionaryLexicon.js";
 import { tokenizeText } from "./tokenize.js";
+import { withReviewFileLock } from "./reviewFileLock.js";
 import {
   buildStrongTranslationLexicon,
   findTranslationCandidate,
@@ -715,7 +717,7 @@ function analyzeVerseForMissing(options: {
       verse: options.verse,
       occurrence: {
         strong,
-        originalStrong: occurrence.strong,
+        originalStrong: occurrence.sourceStrong,
         tokenIndex: occurrence.tokenIndex,
         occurrenceId: occurrence.occurrenceId,
         lemma: occurrence.lemma,
@@ -797,7 +799,8 @@ function proposeDeterministicDecision(options: {
       const translation = findTranslationCandidate(
         options.translationLexicon,
         options.occurrence.strong,
-        word.normalized
+        word.normalized,
+        options.occurrence.originalStrong
       );
       if (!translation) {
         return undefined;
@@ -1146,33 +1149,34 @@ async function applyValidatedDecisions(
   decisions: V3Decision[],
   overridesPath: string
 ): Promise<{ outputPath: string; added: number; skipped: number }> {
-  const current = existsSync(overridesPath)
-    ? (JSON.parse(readFileSync(overridesPath, "utf8")) as unknown[])
-    : [];
-  const currentOverrides = current.filter(isRecord);
-  const existing = new Set(currentOverrides.map(overrideKeyFromRecord));
-  let added = 0;
-  let skipped = 0;
+  return withReviewFileLock(async () => {
+    const current = existsSync(overridesPath)
+      ? (JSON.parse(readFileSync(overridesPath, "utf8")) as unknown[])
+      : [];
+    const currentOverrides = current.filter(isRecord);
+    const existing = new Set(currentOverrides.map(overrideKeyFromRecord));
+    let added = 0;
+    let skipped = 0;
 
-  for (const decision of decisions) {
-    const override = decisionToOverride(decision);
-    const key = overrideKeyFromRecord(override);
-    if (existing.has(key)) {
-      skipped += 1;
-      continue;
+    for (const decision of decisions) {
+      const override = decisionToOverride(decision);
+      const key = overrideKeyFromRecord(override);
+      if (existing.has(key)) {
+        skipped += 1;
+        continue;
+      }
+      currentOverrides.push(override);
+      existing.add(key);
+      added += 1;
     }
-    currentOverrides.push(override);
-    existing.add(key);
-    added += 1;
-  }
 
-  await writeFile(
-    overridesPath,
-    `${JSON.stringify(sortOverrideRecords(currentOverrides), null, 2)}\n`,
-    "utf8"
-  );
+    await writeJsonFileAtomic(
+      overridesPath,
+      sortOverrideRecords(currentOverrides)
+    );
 
-  return { outputPath: overridesPath, added, skipped };
+    return { outputPath: overridesPath, added, skipped };
+  });
 }
 
 function decisionToOverride(decision: V3Decision): Record<string, unknown> {
@@ -1585,7 +1589,7 @@ function parseCliOptions(argv: string[]): CliOptions {
 }
 
 async function writeJson(filePath: string, value: unknown): Promise<void> {
-  await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+  await writeJsonFileAtomic(filePath, value);
 }
 
 function getExistingOverrideKeys(): Set<string> {

@@ -4,12 +4,17 @@ import assert from "node:assert/strict";
 import {
   buildSemanticRefillLlmBatch,
   runSemanticRefillLlm,
-  SEMANTIC_REFILL_LLM_DECISION_TYPES,
   SEMANTIC_REFILL_LLM_JSON_SCHEMA,
   SEMANTIC_REFILL_LLM_SYSTEM_PROMPT,
+  type SemanticRefillLlmBatch,
+  type SemanticRefillLlmCandidatePacket,
   type SemanticRefillLlmResponse
 } from "../src/semanticRefillLlm.js";
-import { buildSemanticRefill } from "../src/semanticRefill.js";
+import {
+  buildSemanticRefill,
+  validateSemanticRefillDecision,
+  type SemanticRefillDecision
+} from "../src/semanticRefill.js";
 import {
   type StrongLedgerAnnotation,
   type StrongLedgerVerse
@@ -42,10 +47,19 @@ test("semantic refill LLM dry-run builds prompt and strict schema without callin
   assert.equal(result.metrics.dryRun, true);
   assert.equal(result.rawDecisions.length, 0);
   assert.equal(result.request.responseSchema.strict, true);
+  assert.equal(
+    result.request.responseSchema.schema.properties.decisions.minItems,
+    result.batch.candidates.length
+  );
+  assert.equal(
+    result.request.responseSchema.schema.properties.decisions.maxItems,
+    result.batch.candidates.length
+  );
   assert.deepEqual(
-    result.request.responseSchema.schema.properties.decisions.items.properties
-      .decision.enum,
-    SEMANTIC_REFILL_LLM_DECISION_TYPES
+    result.request.responseSchema.schema.properties.decisions.items.anyOf.map(
+      (branch) => branch.properties.id.enum[0]
+    ),
+    result.batch.candidates.map((candidate) => candidate.id)
   );
   assert.match(SEMANTIC_REFILL_LLM_SYSTEM_PROMPT, /duplicate/);
   assert.match(SEMANTIC_REFILL_LLM_SYSTEM_PROMPT, /not-rendered/);
@@ -59,7 +73,7 @@ test("semantic refill LLM dry-run builds prompt and strict schema without callin
   );
 });
 
-test("semantic refill LLM mock validates word and phrase decisions locally", async () => {
+test("semantic refill LLM mock validates bounded word and terminal decisions", async () => {
   const verses = [genesisOneTwenty()];
   const deterministic = buildSemanticRefill({
     bible: "nbs",
@@ -74,62 +88,14 @@ test("semantic refill LLM mock validates word and phrase decisions locally", asy
   const byStrong = new Map(batch.candidates.map((item) => [item.strong, item]));
   const mockResponse: SemanticRefillLlmResponse = {
     decisions: [
-      {
-        id: byStrong.get("H8317")!.id,
-        ref: "Gen.1.20",
-        decision: "word",
-        strong: ["H8317"],
-        confidence: 0.92,
-        reason: "grouillent rend le mouvement de pullulation.",
-        wordIndex: 5,
-        normalized: "grouillent",
-        startWordIndex: null,
-        endWordIndex: null,
-        normalizedPhrase: null,
-        evidence: ["candidate form grouillent"]
-      },
-      {
-        id: byStrong.get("H8318")!.id,
-        ref: "Gen.1.20",
-        decision: "phrase",
-        strong: ["H8318"],
-        confidence: 0.91,
-        reason: "petites betes rend la classe de creatures.",
-        wordIndex: null,
-        normalized: null,
-        startWordIndex: 7,
-        endWordIndex: 8,
-        normalizedPhrase: ["petites", "betes"],
-        evidence: ["candidate phrase petites betes"]
-      },
-      {
-        id: byStrong.get("H8064")!.id,
-        ref: "Gen.1.20",
-        decision: "pending-human",
-        strong: ["H8064"],
-        confidence: 0.7,
-        reason: "celeste peut porter le Strong mais demande revue.",
-        wordIndex: null,
-        normalized: null,
-        startWordIndex: null,
-        endWordIndex: null,
-        normalizedPhrase: null,
-        evidence: []
-      },
-      {
-        id: byStrong.get("H7549")!.id,
-        ref: "Gen.1.20",
-        decision: "not-rendered",
-        strong: ["H7549"],
-        confidence: 0.86,
-        reason: "test terminal reject classification.",
-        wordIndex: null,
-        normalized: null,
-        startWordIndex: null,
-        endWordIndex: null,
-        normalizedPhrase: null,
-        evidence: []
-      }
+      selection(byStrong.get("H8317")!, "word:5", 0.92, [
+        "candidate form grouillent"
+      ]),
+      selection(byStrong.get("H8318")!, "word:8", 0.91, [
+        "candidate word betes"
+      ]),
+      selection(byStrong.get("H8064")!, "pending-human", 0.7),
+      selection(byStrong.get("H7549")!, "not-rendered", 0.86)
     ]
   };
 
@@ -155,10 +121,9 @@ test("semantic refill LLM mock validates word and phrase decisions locally", asy
   assert.equal(
     result.validated.some(
       (decision) =>
-        decision.target === "phrase" &&
-        decision.startWordIndex === 7 &&
-        decision.endWordIndex === 8 &&
-        decision.normalized === "petites betes" &&
+        decision.target === "word" &&
+        decision.wordIndex === 8 &&
+        decision.normalized === "betes" &&
         decision.strong.includes("H8318")
     ),
     true
@@ -167,7 +132,7 @@ test("semantic refill LLM mock validates word and phrase decisions locally", asy
   assert.equal(result.rejected[0]?.reason, "llm-classified-not-rendered");
 });
 
-test("semantic refill LLM rejects invalid phrase normalization and reader duplicates", async () => {
+test("semantic refill LLM only accepts bounded choices and rejects reader duplicates", async () => {
   const verses = [genesisOneTwentyWithReaderDuplicate()];
   const deterministic = buildSemanticRefill({
     bible: "nbs",
@@ -179,39 +144,25 @@ test("semantic refill LLM rejects invalid phrase normalization and reader duplic
     scope: "Gen.1.20",
     candidates: deterministic.candidates
   });
-  const byStrong = new Map(batch.candidates.map((item) => [item.strong, item]));
-  const mockResponse: SemanticRefillLlmResponse = {
-    decisions: [
-      {
-        id: byStrong.get("H7549")!.id,
-        ref: "Gen.1.20",
-        decision: "phrase",
-        strong: ["H7549"],
-        confidence: 0.93,
-        reason: "normalisation volontairement fausse.",
-        wordIndex: null,
-        normalized: null,
-        startWordIndex: 24,
-        endWordIndex: 25,
-        normalizedPhrase: ["voute", "mer"],
-        evidence: []
-      },
-      {
-        id: byStrong.get("H8317")!.id,
-        ref: "Gen.1.20",
-        decision: "word",
-        strong: ["H8317"],
-        confidence: 0.95,
-        reason: "doublon deja present sur le mot.",
-        wordIndex: 5,
-        normalized: "grouillent",
-        startWordIndex: null,
-        endWordIndex: null,
-        normalizedPhrase: null,
-        evidence: []
-      }
-    ]
-  };
+  const invalidResponse = completeResponse(batch, {
+    H7549: { choiceId: "phrase:24-25", confidence: 0.93 }
+  });
+
+  await assert.rejects(
+    runSemanticRefillLlm({
+      bible: "nbs",
+      scope: "Gen.1.20",
+      verses,
+      candidates: deterministic.candidates,
+      mode: "mock",
+      mockResponse: invalidResponse
+    }),
+    /unknown-choice-id/
+  );
+
+  const mockResponse = completeResponse(batch, {
+    H8317: { choiceId: "word:5", confidence: 0.95 }
+  });
 
   const result = await runSemanticRefillLlm({
     bible: "nbs",
@@ -222,10 +173,12 @@ test("semantic refill LLM rejects invalid phrase normalization and reader duplic
     mockResponse
   });
 
-  assert.deepEqual(result.rejected.map((decision) => decision.reason).sort(), [
-    "duplicate-reader-word-strong",
-    "phrase-normalization-mismatch"
-  ]);
+  assert.equal(
+    result.rejected.some(
+      (decision) => decision.reason === "duplicate-reader-word-strong"
+    ),
+    true
+  );
   assert.equal(
     result.batch.candidates
       .find((candidate) => candidate.strong === "H8317")
@@ -258,22 +211,7 @@ test("semantic refill LLM keeps suspicious stacking pending", async () => {
   });
   const candidate = batch.candidates.find((item) => item.strong === "H8378")!;
   const mockResponse: SemanticRefillLlmResponse = {
-    decisions: [
-      {
-        id: candidate.id,
-        ref: "Gen.3.6",
-        decision: "word",
-        strong: ["H8378"],
-        confidence: 0.95,
-        reason: "desirable semble lexicalement direct.",
-        wordIndex: 4,
-        normalized: "desirable",
-        startWordIndex: null,
-        endWordIndex: null,
-        normalizedPhrase: null,
-        evidence: ["desirable"]
-      }
-    ]
+    decisions: [selection(candidate, "word:4", 0.95, ["desirable"])]
   };
 
   const result = await runSemanticRefillLlm({
@@ -335,22 +273,7 @@ test("semantic refill LLM reference-style finalization converts suspicious stack
   });
   const candidate = batch.candidates.find((item) => item.strong === "H8378")!;
   const mockResponse: SemanticRefillLlmResponse = {
-    decisions: [
-      {
-        id: candidate.id,
-        ref: "Gen.3.6",
-        decision: "word",
-        strong: ["H8378"],
-        confidence: 0.95,
-        reason: "desirable semble lexicalement direct.",
-        wordIndex: 4,
-        normalized: "desirable",
-        startWordIndex: null,
-        endWordIndex: null,
-        normalizedPhrase: null,
-        evidence: ["desirable"]
-      }
-    ]
+    decisions: [selection(candidate, "word:4", 0.95, ["desirable"])]
   };
 
   const result = await runSemanticRefillLlm({
@@ -377,7 +300,7 @@ test("semantic refill LLM reference-style finalization converts suspicious stack
   );
 });
 
-test("semantic refill LLM reference-style finalization fills missing candidate decisions with empty", async () => {
+test("semantic refill LLM rejects missing candidate decisions instead of fabricating empty", async () => {
   const verses = [genesisOneTwenty()];
   const deterministic = buildSemanticRefill({
     bible: "nbs",
@@ -392,59 +315,176 @@ test("semantic refill LLM reference-style finalization fills missing candidate d
   const byStrong = new Map(batch.candidates.map((item) => [item.strong, item]));
   const mockResponse: SemanticRefillLlmResponse = {
     decisions: [
-      {
-        id: byStrong.get("H8317")!.id,
-        ref: "Gen.1.20",
-        decision: "word",
-        strong: ["H8317"],
-        confidence: 0.92,
-        reason: "grouillent rend le mouvement de pullulation.",
-        wordIndex: 5,
-        normalized: "grouillent",
-        startWordIndex: null,
-        endWordIndex: null,
-        normalizedPhrase: null,
-        evidence: ["candidate form grouillent"]
-      }
+      selection(byStrong.get("H8317")!, "word:5", 0.92, [
+        "candidate form grouillent"
+      ])
     ]
   };
 
+  await assert.rejects(
+    runSemanticRefillLlm({
+      bible: "nbs",
+      scope: "Gen.1.20",
+      verses,
+      candidates: deterministic.candidates,
+      mode: "mock",
+      mockResponse,
+      referenceStyleFinalization: true
+    }),
+    /decision-count-mismatch/
+  );
+});
+
+test("semantic refill LLM applies the auto-accept threshold to visible overrides", async () => {
+  const verses = [genesisThreeSixWithOccupiedDesirable()];
+  const deterministic = buildSemanticRefill({
+    bible: "nbs",
+    scope: "Gen.3.6",
+    verses
+  });
+  const batch = buildSemanticRefillLlmBatch({
+    bible: "nbs",
+    scope: "Gen.3.6",
+    candidates: deterministic.candidates,
+    verses
+  });
+  const response = completeResponse(batch, {
+    H8378: { choiceId: "word:1", confidence: 0.89 }
+  });
+
   const result = await runSemanticRefillLlm({
     bible: "nbs",
-    scope: "Gen.1.20",
+    scope: "Gen.3.6",
     verses,
     candidates: deterministic.candidates,
     mode: "mock",
-    mockResponse,
-    referenceStyleFinalization: true
+    mockResponse: response,
+    autoAcceptThreshold: 0.9
   });
 
-  const emptyByStrong = new Map(
-    result.validated
-      .filter((decision) => decision.target === "empty")
-      .map((decision) => [decision.strong[0], decision])
-  );
-
-  assert.equal(result.pending.length, 0);
-  assert.equal(result.rejected.length, 0);
-  assert.equal(result.validated.length, batch.candidates.length);
+  assert.equal(result.validated.length, 0);
+  assert.equal(result.pending.length, 1);
   assert.equal(
-    result.validated.some(
-      (decision) =>
-        decision.target === "word" &&
-        decision.wordIndex === 5 &&
-        decision.strong.includes("H8317")
-    ),
-    true
+    result.pending[0]?.reason,
+    "below-auto-accept-threshold:0.89<0.9"
   );
-  assert.equal(emptyByStrong.get("H8318")?.wordIndex, 4);
-  assert.equal(emptyByStrong.get("H7549")?.wordIndex, 21);
-  assert.equal(emptyByStrong.get("H8064")?.wordIndex, 21);
-  assert.match(
-    emptyByStrong.get("H8318")?.reason ?? "",
-    /reference-style-empty-fallback:missing-llm-decision/
+  assert.equal(result.pending[0]?.override?.wordIndex, 1);
+});
+
+test("semantic refill candidate ids do not depend on queue order or position", () => {
+  const verses = [genesisOneTwenty()];
+  const deterministic = buildSemanticRefill({
+    bible: "nbs",
+    scope: "Gen.1.20",
+    verses
+  });
+  const full = buildSemanticRefillLlmBatch({
+    bible: "nbs",
+    scope: "Gen.1.20",
+    candidates: deterministic.candidates
+  });
+  const selectedAudit = deterministic.candidates.find(
+    (candidate) => candidate.strong === "H8064"
+  )!;
+  const isolated = buildSemanticRefillLlmBatch({
+    bible: "nbs",
+    scope: "Gen.1.20",
+    candidates: [selectedAudit]
+  });
+
+  assert.equal(
+    full.candidates.find((candidate) => candidate.strong === "H8064")?.id,
+    isolated.candidates[0]?.id
   );
 });
+
+test("relocation fails closed when its source coordinate is not unique", () => {
+  const base = genesisOneTwentyWithReaderDuplicate();
+  const verseWithDuplicateSource: StrongLedgerVerse = {
+    ...base,
+    annotations: [
+      ...base.annotations,
+      annotation({
+        strong: "H8317",
+        visibility: "reader",
+        placement: "word",
+        wordIndex: 5,
+        normalizedWord: "grouillent"
+      })
+    ]
+  };
+  const decision: SemanticRefillDecision = {
+    bible: "nbs",
+    ref: base.ref,
+    target: "word",
+    replace: { target: "word", wordIndex: 5 },
+    wordIndex: 8,
+    normalized: "betes",
+    strong: ["H8317"],
+    confidence: 0.91,
+    source: "semantic-refill:llm",
+    reason: "test",
+    status: "accept",
+    score: 0.91,
+    priority: "semantic-high",
+    evidence: []
+  };
+
+  assert.deepEqual(
+    validateSemanticRefillDecision({
+      verse: verseWithDuplicateSource,
+      decision
+    }),
+    { status: "rejected", reason: "relocation-source-not-unique:2" }
+  );
+  assert.deepEqual(
+    validateSemanticRefillDecision({
+      verse: {
+        ...verseWithDuplicateSource,
+        annotations: verseWithDuplicateSource.annotations.filter(
+          (item, index) => item.strong !== "H8317" || index === 0
+        )
+      },
+      decision
+    }),
+    { status: "validated" }
+  );
+});
+
+function selection(
+  candidate: SemanticRefillLlmCandidatePacket,
+  choiceId: string,
+  confidence: number,
+  evidence: string[] = []
+): SemanticRefillLlmResponse["decisions"][number] {
+  return {
+    id: candidate.id,
+    choiceId,
+    confidence,
+    reason: `test selection ${choiceId}`,
+    evidence
+  };
+}
+
+function completeResponse(
+  batch: SemanticRefillLlmBatch,
+  byStrong: Record<
+    string,
+    { choiceId: string; confidence: number; evidence?: string[] }
+  >
+): SemanticRefillLlmResponse {
+  return {
+    decisions: batch.candidates.map((candidate) => {
+      const requested = byStrong[candidate.strong];
+      return selection(
+        candidate,
+        requested?.choiceId ?? "reject",
+        requested?.confidence ?? 0.99,
+        requested?.evidence
+      );
+    })
+  };
+}
 
 function genesisOneTwentyWithReaderDuplicate(): StrongLedgerVerse {
   const base = genesisOneTwenty();

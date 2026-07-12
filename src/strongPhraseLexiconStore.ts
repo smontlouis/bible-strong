@@ -1,4 +1,4 @@
-import { existsSync, statSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
@@ -8,8 +8,11 @@ import {
   type StrongPhraseCandidate,
   type StrongPhraseLexicon
 } from "./phraseTranslationLexicon.js";
+import { contentFingerprint } from "./contentAddressedCache.js";
 
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
+const PHRASE_LEXICON_ALGORITHM_VERSION =
+  "phrase-specificity-and-independent-family-support-v2";
 export const DEFAULT_STRONG_PHRASE_LEXICON_SQLITE =
   "data/derived/strong-phrase-lexicon.sqlite";
 
@@ -28,16 +31,11 @@ interface MetadataRow {
 export function strongPhraseLexiconSourceFingerprint(
   references: Array<{ path: string }>
 ): string {
-  return JSON.stringify(
-    references.map((reference) => {
-      const stats = statSync(reference.path);
-      return {
-        path: reference.path,
-        size: stats.size,
-        mtimeMs: Math.round(stats.mtimeMs)
-      };
-    })
-  );
+  return contentFingerprint({
+    namespace: "strong-phrase-lexicon",
+    inputPaths: references.map((reference) => reference.path),
+    values: { algorithm: PHRASE_LEXICON_ALGORITHM_VERSION }
+  });
 }
 
 export function readStrongPhraseLexiconSqlite(options: {

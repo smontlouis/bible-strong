@@ -783,15 +783,13 @@ export const workflowNodes: Array<Node<WorkflowNodeData>> = [
         "Le LLM n'est appele qu'apres la generation deterministe, sur un packet limite de trous ou relocations clairement decrits.",
       details: [
         "Le packet donne au modele le contexte procedural: auditKind, currentTarget, sourcePlacement, nearbyOpenTargets, blockedTargets, occupiedTargets, availableTargets et warnings.",
-        "On ne demande pas au LLM de 'trouver la meilleure Bible'. On lui demande de trancher un petit nombre de cas audites avec contraintes fortes."
+        "Chaque candidat expose une liste de choix bornee et versionnee. Le modele doit rendre exactement un choiceId existant; une cible libre, un candidat oublie ou un contrat incomplet echoue ferme."
       ],
       inputs: ["Rapport residuel", "Gap candidates", "Ledger courant"],
       outputs: ["agent-packet-*.json"],
       example:
-        "Un chapitre peut contenir 30 candidats semantic-medium max pour comparer deux propositions LLM sans lancer une Bible entiere.",
-      commands: [
-        "npm run strong:review:gaps:lexical-packet -- --bible nbs --only Gen.1 --limit 30 --min-confidence medium"
-      ],
+        "Le plan NBS courant contient 2 701 candidats high ouverts, repartis en 132 taches stables de 30 items maximum.",
+      commands: ["npm run strong:review:gaps:batch -- --bible nbs --plan-only"],
       files: [
         "src/semanticRefillAgentPacket.ts",
         "src/semanticRefillLexicalPacket.ts"
@@ -799,6 +797,7 @@ export const workflowNodes: Array<Node<WorkflowNodeData>> = [
       metrics: ["Packet size", "min-priority", "candidate count"],
       guardrails: [
         "Pas de whole-Bible LLM aveugle.",
+        "Pagination par membership stable, jamais par offset fragile.",
         "Ne pas payer pour un packet sans candidats forts."
       ],
       risks: ["Contexte insuffisant", "Packet trop large"]
@@ -809,24 +808,29 @@ export const workflowNodes: Array<Node<WorkflowNodeData>> = [
     type: "workflowNode",
     position: { x: 2880, y: 520 },
     data: {
-      title: "Deux proposers",
-      eyebrow: "Redondance LLM",
+      title: "Consensus adaptatif",
+      eyebrow: "Deux modeles distincts",
       category: "llm",
       summary:
-        "Deux modeles independants proposent des decisions. On cherche les accords robustes, pas une autorite unique.",
+        "Deux modeles d'identite distincte sont requis. Le second n'est appele que pour les candidats qui peuvent encore produire un consensus visible valide.",
       details: [
-        "Le workflow benchmarke utilise un proposer A et un proposer B avec parametrages differents. Chaque sortie doit etre validee mecaniquement avant application.",
-        "Cette redondance reduit les hallucinations, mais ne suffit pas: deux modeles peuvent encore etre d'accord sur un mauvais porteur generique."
+        "Le premier resultat est valide contre le packet et son schema strict. Le batch derive ensuite un sous-packet compact pour le second modele, limite aux candidats encore eligibles.",
+        "Cette redondance reduit le cout sans affaiblir le contrat: deux identites normalisees distinctes restent obligatoires et chaque sortie est validee mecaniquement."
       ],
       inputs: ["Agent packet", "Modele A", "Modele B"],
       outputs: ["Review A", "Review B", "Validation dirs"],
       example:
-        "Si les deux modeles choisissent le meme Strong, meme cible et meme decision avec confiance haute, il peut entrer dans le consensus exact.",
+        "Si le premier modele choisit pending ou une cible invalide, le second appel peut etre evite pour ce candidat. Une decision visible valide declenche le sous-packet adaptatif.",
       commands: [
         "npm run strong:review:gaps:llm -- --input <packet> --output <review> --model <model>"
       ],
       files: ["outputs/gap-review/nbs/agent-review/*.json"],
-      metrics: ["accepted", "pending", "invalid decisions", "confidence"],
+      metrics: [
+        "eligible second-model candidates",
+        "saved calls",
+        "invalid decisions",
+        "confidence"
+      ],
       guardrails: [
         "Valider chaque review avant consensus.",
         "Ne pas utiliser pending-human comme final."
@@ -848,8 +852,8 @@ export const workflowNodes: Array<Node<WorkflowNodeData>> = [
       summary:
         "Le consensus exact extrait les accords, puis un filtre automatique retient les cas dangereux avant application.",
       details: [
-        "Le filtre post-consensus est obligatoire. Il retient les porteurs generiques comme 'faire', 'vais', 'fit', 'celle' si les temoins ne soutiennent pas clairement le meme carrier.",
-        "Il inspecte aussi le stacking meme cible, les decisions original-only sans support temoin et les deltas de risque positifs. Un consensus LLM n'est donc pas une autorisation de production."
+        "Le consensus exige le meme candidateId, le meme choiceId et la meme decision dans deux sorties de modeles distincts. Le contrat v2 est verifie avant tout filtrage.",
+        "Le filtre post-consensus retient les porteurs generiques, le stacking sans preuve, les decisions original-only et toute preuve lexicale review-only. Darby et DarbyR comptent comme une seule famille editoriale."
       ],
       inputs: ["Review A", "Review B", "Witness checks", "Risk metrics"],
       outputs: [
@@ -860,8 +864,7 @@ export const workflowNodes: Array<Node<WorkflowNodeData>> = [
       example:
         "Rom.4.17 G5607 -> 'existe' a ete retenu car visible sans token witness ni support Strong dans les temoins.",
       commands: [
-        "npm run strong:review:gaps:consensus -- --left-review <a> --right-review <b> --output <consensus>",
-        "npm run strong:review:gaps:filter -- --review <consensus> --output <filtered>"
+        "npm run strong:review:gaps:batch -- --bible nbs --output-root <run>"
       ],
       files: [
         "src/semanticRefillConsensusReview.ts",
@@ -870,6 +873,7 @@ export const workflowNodes: Array<Node<WorkflowNodeData>> = [
       metrics: ["safe decisions", "held decisions", "placementRiskCount delta"],
       guardrails: [
         "Exact consensus ne suffit pas.",
+        "Deux modeles normalises distincts sont obligatoires.",
         "Inspecter les temoins avant stacking."
       ],
       risks: ["Porteur generique faux", "Risque placement positif"]
@@ -880,26 +884,37 @@ export const workflowNodes: Array<Node<WorkflowNodeData>> = [
     type: "workflowNode",
     position: { x: 3600, y: 520 },
     data: {
-      title: "Overrides valides",
-      eyebrow: "Retour deterministe",
+      title: "Transaction + overrides",
+      eyebrow: "Commit controle",
       category: "llm",
       summary:
-        "Les decisions filtrees et acceptees deviennent des overrides audites. Elles ne remplacent pas le generateur: elles l'alimentent au prochain run.",
+        "Seul le batch peut transformer un accepted-safe en override production. Il detient le verrou, le marqueur de transaction et le contexte exact du packet filtre.",
       details: [
-        "Une decision appliquee doit garder sa provenance, sa confidence, sa raison et sa cible. Les low-confidence ou empty fallbacks restent visibles comme tels en review.",
-        "Le cycle mature boucle ensuite vers strong:generate. Le resultat final est encore une Bible generee par pipeline deterministe, enrichie par decisions validees."
+        "Avant ecriture, le batch sauvegarde overrides et decision ledger. Il applique, refresh le scope, controle les gates puis commit; toute erreur restaure les deux fichiers et le ledger.",
+        "Seule la source semantic-refill:llm-consensus-filtered est eligible. Les 5 379 auto-accepts single-model et 2 098 semantic-refill non verifies restent quarantines."
       ],
-      inputs: ["Review filtered", "Apply validated", "Human review si besoin"],
-      outputs: ["curated-strong-overrides.json", "Ledger regenere"],
+      inputs: [
+        "Consensus filtre v2",
+        "Lock batch",
+        "Transaction marker",
+        "Ledger courant"
+      ],
+      outputs: [
+        "curated-strong-overrides.json",
+        "strong-review-decisions.json",
+        "Ledger rafraichi"
+      ],
       example:
-        "Les decisions Lev filtrees ont ete appliquees, puis la regeneration a mesure emptyStrongCount -15 et placementRiskCount -5 sur le scope.",
+        "La migration historique n'a promu que 313 decisions encore prouvees aujourd'hui; 2 098 artefacts bruts sont restes en quarantaine.",
       commands: [
-        "npm run strong:review:gaps:apply -- --bible nbs --input <filtered> --apply",
-        "npm run strong:generate -- --bible nbs"
+        "npm run strong:review:gaps:batch -- --bible nbs --output-root <run>",
+        "npm run strong:review:gaps:migrate-artifacts -- --bible nbs"
       ],
       files: [
         "data/curated-strong-overrides.json",
-        "src/curatedStrongOverrides.ts"
+        "data/strong-review-decisions.json",
+        "src/reviewTransaction.ts",
+        "src/reviewFileLock.ts"
       ],
       metrics: [
         "emptyStrongCount delta",
@@ -908,9 +923,14 @@ export const workflowNodes: Array<Node<WorkflowNodeData>> = [
       ],
       guardrails: [
         "Ne jamais appliquer raw single-model review.",
-        "Recalculer le ledger apres application."
+        "Le standalone --apply est interdit.",
+        "Rollback overrides + decisions + ledger sur echec."
       ],
-      risks: ["Override obsolete", "Decision non auditable"]
+      risks: [
+        "Override obsolete",
+        "Transaction interrompue",
+        "Decision non auditable"
+      ]
     }
   },
   {

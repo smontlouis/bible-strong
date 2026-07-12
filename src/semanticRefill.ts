@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { writeJsonFileAtomic } from "./atomicFile.js";
 import {
   type CuratedStrongOverride,
   getCuratedStrongOverrides
@@ -16,6 +17,7 @@ import {
   strongLedgerSqlitePath
 } from "./strongLedgerStore.js";
 import { normalizeWord } from "./tokenize.js";
+import { withReviewFileLock } from "./reviewFileLock.js";
 
 export type CandidateTarget =
   | "word"
@@ -342,6 +344,20 @@ export function validateSemanticRefillDecision(options: {
     }
   }
 
+  if (options.decision.replace) {
+    const sourceMatches = options.verse.annotations.filter(
+      (annotation) =>
+        strong.includes(annotation.strong.toUpperCase()) &&
+        annotationMatchesReplacement(annotation, options.decision.replace!)
+    );
+    if (sourceMatches.length !== 1) {
+      return {
+        status: "rejected",
+        reason: `relocation-source-not-unique:${sourceMatches.length}`
+      };
+    }
+  }
+
   if (options.decision.target === "phrase") {
     const start = options.decision.startWordIndex;
     const end = options.decision.endWordIndex;
@@ -385,6 +401,29 @@ export function validateSemanticRefillDecision(options: {
   }
 
   return { status: "validated" };
+}
+
+function annotationMatchesReplacement(
+  annotation: StrongLedgerAnnotation,
+  replacement: NonNullable<CuratedStrongOverride["replace"]>
+): boolean {
+  if (replacement.target === "word") {
+    return (
+      annotation.placement === "word" &&
+      annotation.wordIndex === replacement.wordIndex
+    );
+  }
+  if (replacement.target === "phrase") {
+    return (
+      annotation.placement === "phrase" &&
+      annotation.startWordIndex === replacement.startWordIndex &&
+      annotation.endWordIndex === replacement.endWordIndex
+    );
+  }
+  return (
+    annotation.placement === "empty" &&
+    annotation.insertAfterWordIndex === replacement.wordIndex
+  );
 }
 
 async function readOrCreateLexicon(
@@ -1231,7 +1270,7 @@ async function writeRunOutputs(
 }
 
 async function writeJson(filePath: string, value: unknown): Promise<void> {
-  await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+  await writeJsonFileAtomic(filePath, value);
 }
 
 async function appendAcceptedOverrides(
@@ -1241,25 +1280,22 @@ async function appendAcceptedOverrides(
   const accepted = decisions.filter((decision) => decision.status === "accept");
   if (accepted.length === 0) return;
 
-  const current = existsSync(overridesPath)
-    ? (JSON.parse(await readFile(overridesPath, "utf8")) as unknown)
-    : [];
-  const overrides = Array.isArray(current) ? current : [];
-  const existingKeys = new Set(
-    getCuratedStrongOverrides().map((override) => overrideKey(override))
-  );
-  const additions = accepted
-    .map(stripDecisionFields)
-    .filter((override) => !existingKeys.has(overrideKey(override)));
+  await withReviewFileLock(async () => {
+    const current = existsSync(overridesPath)
+      ? (JSON.parse(await readFile(overridesPath, "utf8")) as unknown)
+      : [];
+    const overrides = Array.isArray(current) ? current : [];
+    const existingKeys = new Set(
+      getCuratedStrongOverrides().map((override) => overrideKey(override))
+    );
+    const additions = accepted
+      .map(stripDecisionFields)
+      .filter((override) => !existingKeys.has(overrideKey(override)));
 
-  if (additions.length === 0) return;
+    if (additions.length === 0) return;
 
-  await mkdir(path.dirname(overridesPath), { recursive: true });
-  await writeFile(
-    overridesPath,
-    `${JSON.stringify([...overrides, ...additions], null, 2)}\n`,
-    "utf8"
-  );
+    await writeJsonFileAtomic(overridesPath, [...overrides, ...additions]);
+  });
 }
 
 function stripDecisionFields(

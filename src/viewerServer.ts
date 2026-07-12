@@ -15,6 +15,17 @@ import {
   type ProductReviewEntry,
   type ProductReviewResult
 } from "./lexiconProductReview.js";
+import {
+  getStrongReviewItems,
+  getStrongReviewSummary,
+  getStrongViewerMetadata,
+  getStrongViewerVerses,
+  isStrongReviewBucket,
+  parseStrictInteger,
+  StrongViewerApiError,
+  validateBibleId,
+  validateBookId
+} from "./strongViewerApi.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_PORT = 4173;
@@ -99,6 +110,68 @@ const server = createServer(async (request, response) => {
       return;
     }
 
+    if (request.method === "GET" && url.pathname === "/api/strong/metadata") {
+      const bible = validateBibleId(url.searchParams.get("bible"));
+      sendJson(response, 200, getStrongViewerMetadata({ bible }));
+      return;
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/strong/verses") {
+      const bible = validateBibleId(url.searchParams.get("bible"));
+      const book = validateBookId(url.searchParams.get("book"));
+      const chapter = parseStrictInteger(url.searchParams.get("chapter"), {
+        name: "chapter",
+        min: 1,
+        max: 999
+      });
+      sendJson(response, 200, getStrongViewerVerses({ bible, book, chapter }));
+      return;
+    }
+
+    if (
+      request.method === "GET" &&
+      url.pathname === "/api/strong/review/summary"
+    ) {
+      const bible = validateBibleId(url.searchParams.get("bible"));
+      sendJson(response, 200, await getStrongReviewSummary({ bible }));
+      return;
+    }
+
+    if (
+      request.method === "GET" &&
+      url.pathname === "/api/strong/review/items"
+    ) {
+      const bible = validateBibleId(url.searchParams.get("bible"));
+      const bucket = url.searchParams.get("bucket");
+      if (!isStrongReviewBucket(bucket)) {
+        throw new StrongViewerApiError(400, "invalid-bucket");
+      }
+      const limit = parseStrictInteger(url.searchParams.get("limit"), {
+        name: "limit",
+        min: 1,
+        max: 200,
+        fallback: 50
+      });
+      const offset = parseStrictInteger(url.searchParams.get("offset"), {
+        name: "offset",
+        min: 0,
+        max: 1_000_000,
+        fallback: 0
+      });
+      sendJson(
+        response,
+        200,
+        await getStrongReviewItems({
+          bible,
+          bucket,
+          q: url.searchParams.get("q") ?? "",
+          limit,
+          offset
+        })
+      );
+      return;
+    }
+
     if (
       request.method === "GET" &&
       url.pathname === "/api/lexicon-v2/review-list"
@@ -122,6 +195,10 @@ const server = createServer(async (request, response) => {
 
     serveStatic(url.pathname, response, request.method === "HEAD");
   } catch (error) {
+    if (error instanceof StrongViewerApiError) {
+      sendJson(response, error.statusCode, { error: error.code });
+      return;
+    }
     sendJson(response, 500, {
       error: error instanceof Error ? error.message : "unknown-error"
     });

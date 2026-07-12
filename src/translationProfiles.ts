@@ -36,6 +36,11 @@ export interface TranslationProfile {
   notes: string;
 }
 
+// Production currently has two independent editorial witness families:
+// Sg1910 and Darby-family (Darby + DarbyR). Requiring three filenames would
+// silently disable editorial empty tags after correlated editions are folded.
+export const INDEPENDENT_EDITORIAL_FAMILY_AGREEMENT = 2;
+
 const DEFAULT_PROFILE: TranslationProfile = {
   bible: "default",
   family: "unknown",
@@ -45,7 +50,7 @@ const DEFAULT_PROFILE: TranslationProfile = {
   expectedTokenCoverage: { low: 0.4, high: 0.54 },
   readerAlignment: {
     maxStrongPerWord: 3,
-    minEmptySourceAgreement: 2,
+    minEmptySourceAgreement: INDEPENDENT_EDITORIAL_FAMILY_AGREEMENT,
     learnedTranslationMinScore: 0.36,
     learnedFunctionWordMode: "restricted"
   },
@@ -71,7 +76,7 @@ const PROFILES = new Map<string, TranslationProfile>([
       expectedTokenCoverage: { low: 0.38, high: 0.5 },
       readerAlignment: {
         maxStrongPerWord: 2,
-        minEmptySourceAgreement: 3,
+        minEmptySourceAgreement: INDEPENDENT_EDITORIAL_FAMILY_AGREEMENT,
         learnedTranslationMinScore: 0.43,
         learnedFunctionWordMode: "reference-only"
       },
@@ -96,7 +101,7 @@ const PROFILES = new Map<string, TranslationProfile>([
       expectedTokenCoverage: { low: 0.38, high: 0.48 },
       readerAlignment: {
         maxStrongPerWord: 2,
-        minEmptySourceAgreement: 3,
+        minEmptySourceAgreement: INDEPENDENT_EDITORIAL_FAMILY_AGREEMENT,
         learnedTranslationMinScore: 0.44,
         learnedFunctionWordMode: "reference-only"
       },
@@ -121,7 +126,7 @@ const PROFILES = new Map<string, TranslationProfile>([
       expectedTokenCoverage: { low: 0.38, high: 0.5 },
       readerAlignment: {
         maxStrongPerWord: 2,
-        minEmptySourceAgreement: 3,
+        minEmptySourceAgreement: INDEPENDENT_EDITORIAL_FAMILY_AGREEMENT,
         learnedTranslationMinScore: 0.43,
         learnedFunctionWordMode: "reference-only"
       },
@@ -146,7 +151,7 @@ const PROFILES = new Map<string, TranslationProfile>([
       expectedTokenCoverage: { low: 0.46, high: 0.56 },
       readerAlignment: {
         maxStrongPerWord: 3,
-        minEmptySourceAgreement: 2,
+        minEmptySourceAgreement: INDEPENDENT_EDITORIAL_FAMILY_AGREEMENT,
         learnedTranslationMinScore: 0.38,
         learnedFunctionWordMode: "restricted"
       },
@@ -171,7 +176,7 @@ const PROFILES = new Map<string, TranslationProfile>([
       expectedTokenCoverage: { low: 0.38, high: 0.5 },
       readerAlignment: {
         maxStrongPerWord: 2,
-        minEmptySourceAgreement: 3,
+        minEmptySourceAgreement: INDEPENDENT_EDITORIAL_FAMILY_AGREEMENT,
         learnedTranslationMinScore: 0.43,
         learnedFunctionWordMode: "reference-only"
       },
@@ -196,7 +201,7 @@ const PROFILES = new Map<string, TranslationProfile>([
       expectedTokenCoverage: { low: 0.46, high: 0.56 },
       readerAlignment: {
         maxStrongPerWord: 3,
-        minEmptySourceAgreement: 2,
+        minEmptySourceAgreement: INDEPENDENT_EDITORIAL_FAMILY_AGREEMENT,
         learnedTranslationMinScore: 0.38,
         learnedFunctionWordMode: "restricted"
       },
@@ -221,7 +226,7 @@ const PROFILES = new Map<string, TranslationProfile>([
       expectedTokenCoverage: { low: 0.48, high: 0.58 },
       readerAlignment: {
         maxStrongPerWord: 4,
-        minEmptySourceAgreement: 2,
+        minEmptySourceAgreement: INDEPENDENT_EDITORIAL_FAMILY_AGREEMENT,
         learnedTranslationMinScore: 0.34,
         learnedFunctionWordMode: "restricted"
       },
@@ -246,7 +251,7 @@ const PROFILES = new Map<string, TranslationProfile>([
       expectedTokenCoverage: { low: 0.47, high: 0.57 },
       readerAlignment: {
         maxStrongPerWord: 3,
-        minEmptySourceAgreement: 2,
+        minEmptySourceAgreement: INDEPENDENT_EDITORIAL_FAMILY_AGREEMENT,
         learnedTranslationMinScore: 0.38,
         learnedFunctionWordMode: "restricted"
       },
@@ -271,7 +276,7 @@ const PROFILES = new Map<string, TranslationProfile>([
       expectedTokenCoverage: { low: 0.48, high: 0.58 },
       readerAlignment: {
         maxStrongPerWord: 4,
-        minEmptySourceAgreement: 2,
+        minEmptySourceAgreement: INDEPENDENT_EDITORIAL_FAMILY_AGREEMENT,
         learnedTranslationMinScore: 0.34,
         learnedFunctionWordMode: "restricted"
       },
@@ -294,4 +299,8 @@ export function getTranslationProfile(bible: string): TranslationProfile {
       bible: bible.toLowerCase()
     }
   );
+}
+
+export function hasTranslationProfile(bible: string): boolean {
+  return PROFILES.has(bible.toLowerCase());
 }

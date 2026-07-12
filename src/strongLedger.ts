@@ -11,9 +11,17 @@ import {
   type CompleteAlignmentResult,
   type CompleteWordAssignment,
   type EmptyStrongAssignment,
+  type OriginalStrongOccurrence,
   getOriginalStrongOccurrences
 } from "./completeAlignment.js";
-import { applyCuratedStrongOverrides } from "./curatedStrongOverrides.js";
+import {
+  applyCuratedStrongOverrides,
+  buildCuratedStrongOverrideIndex,
+  getCuratedStrongOverrides,
+  type CuratedStrongOverride
+} from "./curatedStrongOverrides.js";
+import { contentFingerprint } from "./contentAddressedCache.js";
+import { maximumWeightMatching } from "./maximumWeightMatching.js";
 import { buildStrongLexicon } from "./lexicon.js";
 import {
   buildLexicalCandidateReport,
@@ -44,9 +52,17 @@ import {
   type StrongRow,
   type StrongVerseMap
 } from "./strongCsv.js";
-import { readStrongDictionaryTranslationCandidates } from "./strongDictionaryLexicon.js";
+import {
+  DEFAULT_PRODUCTION_STRONG_DICTIONARY,
+  readStrongDictionaryTranslationCandidates
+} from "./strongDictionaryLexicon.js";
+import {
+  defaultKaikkiSqlitePath,
+  DEFAULT_KAIKKI_JSONL
+} from "./kaikkiSqliteIndex.js";
 import {
   readStepOriginalData,
+  selectStepEvidenceForOccurrence,
   type StepOriginalEvidenceIndex,
   type StepStrongEvidence as SourceStepStrongEvidence
 } from "./stepOriginals.js";
@@ -55,9 +71,11 @@ import { buildStrongPhraseLexicon } from "./phraseTranslationLexicon.js";
 import { buildStrongTranslationLexicon } from "./translationLexicon.js";
 import {
   getTranslationProfile,
+  hasTranslationProfile,
   type TranslationProfile
 } from "./translationProfiles.js";
 import {
+  DEFAULT_STRONG_PHRASE_LEXICON_SQLITE,
   readStrongPhraseLexiconSqlite,
   strongPhraseLexiconSourceFingerprint,
   writeStrongPhraseLexiconSqlite
@@ -173,6 +191,9 @@ export interface StrongLedger {
   split?: boolean;
   verseFiles?: Array<{ bookId: string; path: string; verses: number }>;
   method: string;
+  inputFingerprint?: string;
+  overrideFingerprint?: string;
+  overrideFingerprintByRef?: Record<string, string>;
   translationProfile: TranslationProfile;
   references: Array<{ name: ReferenceName; path: string; verses: number }>;
   originalSources: OriginalSourceSummary[];
@@ -262,13 +283,17 @@ export interface StrongLedgerVerseMetrics {
   advancedTokenCoverage: number;
 }
 
-interface StrongLedgerOptions {
+export interface StrongLedgerOptions {
   bible: string;
   biblePath: string;
   outputDir: string;
   onlyRef?: string;
   writeArtifacts?: boolean;
   writeLexicalReport?: boolean;
+  profileBible?: string;
+  applyCuratedOverrides?: boolean;
+  excludedReferenceNames?: string[];
+  allowUnknownProfile?: boolean;
 }
 
 interface StrongLedgerRefreshOptions extends StrongLedgerOptions {
@@ -333,6 +358,34 @@ const FRENCH_LEXICAL_SOURCES = {
 
 const MAX_LEXICAL_AUTOSAFE_PASSES = 32;
 const STRONG_PERF_ENABLED = process.env.STRONG_PERF === "1";
+const STRONG_LEDGER_INPUT_VERSION = "canonical-ledger-input-v3";
+const STRONG_LEDGER_PIPELINE_SOURCES = [
+  "src/align.ts",
+  "src/atomicFile.ts",
+  "src/bibleJson.ts",
+  "src/books.ts",
+  "src/completeAlignment.ts",
+  "src/contentAddressedCache.ts",
+  "src/curatedStrongOverrides.ts",
+  "src/frenchLexicalSafety.ts",
+  "src/kaikkiSqliteIndex.ts",
+  "src/lexicalCandidateReport.ts",
+  "src/lexicon.ts",
+  "src/maximumWeightMatching.ts",
+  "src/originalSource.ts",
+  "src/phraseTranslationLexicon.ts",
+  "src/readerAlignment.ts",
+  "src/render.ts",
+  "src/stepOriginals.ts",
+  "src/strongCsv.ts",
+  "src/strongDictionaryLexicon.ts",
+  "src/strongLedger.ts",
+  "src/strongLedgerStore.ts",
+  "src/strongPhraseLexiconStore.ts",
+  "src/tokenize.ts",
+  "src/translationLexicon.ts",
+  "src/translationProfiles.ts"
+];
 
 const TECHNICAL_STRONG = new Set([
   "H0853",
@@ -350,21 +403,138 @@ const TECHNICAL_STRONG = new Set([
   "G1519"
 ]);
 
+export function strongLedgerInputFingerprint(
+  options: StrongLedgerOptions,
+  translationProfile = getTranslationProfile(
+    options.profileBible ?? options.bible
+  )
+): string {
+  const excludedReferences = new Set(options.excludedReferenceNames ?? []);
+  const kaikkSqlite = defaultKaikkiSqlitePath(DEFAULT_KAIKKI_JSONL);
+  const inputPaths = [
+    options.biblePath,
+    ...REFERENCES.filter(
+      (reference) => !excludedReferences.has(reference.name)
+    ).map((reference) => reference.path),
+    ...STEP_ORIGINAL_SOURCES,
+    DEFAULT_PRODUCTION_STRONG_DICTIONARY,
+    DEFAULT_KAIKKI_JSONL,
+    kaikkSqlite,
+    DEFAULT_STRONG_PHRASE_LEXICON_SQLITE,
+    FRENCH_LEXICAL_SOURCES.rezoJdmCache,
+    FRENCH_LEXICAL_SOURCES.openOffice,
+    FRENCH_LEXICAL_SOURCES.wolf,
+    ...STRONG_LEDGER_PIPELINE_SOURCES
+  ];
+
+  return contentFingerprint({
+    namespace: STRONG_LEDGER_INPUT_VERSION,
+    inputPaths,
+    values: {
+      bible: options.bible,
+      profileBible: options.profileBible ?? options.bible,
+      applyCuratedOverrides: options.applyCuratedOverrides !== false,
+      excludedReferenceNames: [...excludedReferences].sort(),
+      translationProfile
+    }
+  });
+}
+
+export function curatedOverrideFingerprints(
+  bible: string,
+  overrides: CuratedStrongOverride[] = getCuratedStrongOverrides()
+): Record<string, string> {
+  const byRef = new Map<string, CuratedStrongOverride[]>();
+  for (const override of overrides) {
+    if (override.bible !== bible) continue;
+    const entries = byRef.get(override.ref) ?? [];
+    entries.push(override);
+    byRef.set(override.ref, entries);
+  }
+
+  return Object.fromEntries(
+    [...byRef]
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([ref, entries]) => [
+        ref,
+        contentFingerprint({
+          namespace: "curated-strong-overrides-by-ref-v1",
+          values: entries.sort(compareCuratedOverride)
+        })
+      ])
+  );
+}
+
+export function changedOverrideRefs(
+  previous: Record<string, string> = {},
+  current: Record<string, string> = {}
+): string[] {
+  return [...new Set([...Object.keys(previous), ...Object.keys(current)])]
+    .filter((ref) => previous[ref] !== current[ref])
+    .sort();
+}
+
+function fingerprintOverrideMap(fingerprints: Record<string, string>): string {
+  return contentFingerprint({
+    namespace: "curated-strong-overrides-v1",
+    values: fingerprints
+  });
+}
+
+function compareCuratedOverride(
+  left: CuratedStrongOverride,
+  right: CuratedStrongOverride
+): number {
+  return (
+    left.wordIndex - right.wordIndex ||
+    (left.startWordIndex ?? -1) - (right.startWordIndex ?? -1) ||
+    (left.endWordIndex ?? -1) - (right.endWordIndex ?? -1) ||
+    left.strong.join(" ").localeCompare(right.strong.join(" ")) ||
+    left.source.localeCompare(right.source) ||
+    left.reason.localeCompare(right.reason)
+  );
+}
+
 export async function generateStrongLedger(
   options: StrongLedgerOptions
 ): Promise<StrongLedger> {
   const generateStart = perfStart();
+  const profileBible = options.profileBible ?? options.bible;
+  if (!options.allowUnknownProfile && !hasTranslationProfile(profileBible)) {
+    throw new Error(
+      `missing-translation-profile:${profileBible}. Add an explicit calibrated profile or pass --allow-unknown-profile for an exploratory run.`
+    );
+  }
+  const translationProfile = getTranslationProfile(profileBible);
+  const inputFingerprint = measureSync("fingerprint ledger inputs", () =>
+    strongLedgerInputFingerprint(options, translationProfile)
+  );
+  const overrideFingerprintByRef =
+    options.applyCuratedOverrides === false
+      ? {}
+      : curatedOverrideFingerprints(options.bible);
+  const overrideFingerprint = fingerprintOverrideMap(overrideFingerprintByRef);
+  const curatedOverrideIndex =
+    options.applyCuratedOverrides === false
+      ? undefined
+      : buildCuratedStrongOverrideIndex();
   const verses = await measureAsync("read target bible", async () =>
     filterVerses(await readBibleJson(options.biblePath), options)
   );
   const scopedBooks = new Set(verses.map((verse) => verse.bookId));
   const references = await measureAsync("load Strong references", () =>
-    loadReferences()
+    loadReferences(options.excludedReferenceNames)
   );
+  const referenceSummaries = references.map((reference) => ({
+    name: reference.name,
+    path: reference.path,
+    verses: reference.map.size
+  }));
   const originalData = await measureAsync("load STEP originals", () =>
     loadOriginalData(scopedBooks)
   );
   const originals = originalData.bundles;
+  const originalSummaries = originals.map((original) => original.summary);
   const originalByRef = measureSync("merge STEP originals", () =>
     mergeOriginalSources(originals)
   );
@@ -372,9 +542,8 @@ export async function generateStrongLedger(
   const lexicon = measureSync("build Strong lexicon", () =>
     buildStrongLexicon(references)
   );
-  const dictionaryCandidates = measureSync(
-    "load dictionary candidates",
-    readStrongDictionaryTranslationCandidates
+  const dictionaryCandidates = measureSync("load dictionary candidates", () =>
+    readStrongDictionaryTranslationCandidates(undefined, { strict: true })
   );
   const translationLexicon = measureSync("build translation lexicon", () =>
     buildStrongTranslationLexicon(references, {
@@ -386,7 +555,6 @@ export async function generateStrongLedger(
   );
   const lexicalSourceCache =
     createLexicalCandidateSourceCache(dictionaryCandidates);
-  const translationProfile = getTranslationProfile(options.bible);
   await mkdir(options.outputDir, { recursive: true });
 
   const paths = outputPaths(options);
@@ -421,11 +589,14 @@ export async function generateStrongLedger(
       readerPolicy: translationProfile.readerAlignment
     });
     readerAlignMs += perfElapsed(readerStart);
-    applyCuratedStrongOverrides({
-      bible: options.bible,
-      ref: formatRef(verse),
-      result: reader
-    });
+    if (options.applyCuratedOverrides !== false) {
+      applyCuratedStrongOverrides({
+        bible: options.bible,
+        ref: formatRef(verse),
+        result: reader,
+        overrideIndex: curatedOverrideIndex
+      });
+    }
 
     const completeStart = perfStart();
     const complete = alignCompleteVerse({
@@ -433,7 +604,8 @@ export async function generateStrongLedger(
       references: verseReferences,
       lexicon,
       translationLexicon,
-      original: original?.verse
+      original: original?.verse,
+      readerPolicy: translationProfile.readerAlignment
     });
     completeAlignMs += perfElapsed(completeStart);
 
@@ -550,7 +722,31 @@ export async function generateStrongLedger(
         lexicalCandidateOutputDir(options.bible)
       )
     );
+    residualLexicalReport = undefined;
   }
+
+  // Full-Bible inputs and lexical caches are substantially larger than the
+  // final in-memory ledger. Release them before SQLite serialization so V8
+  // does not need an oversized heap merely to keep already-consumed sources
+  // alive across the final await.
+  verses.length = 0;
+  references.length = 0;
+  originals.length = 0;
+  originalByRef.clear();
+  stepEvidenceByRef.clear();
+  lexicon.exact.clear();
+  lexicon.stem.clear();
+  translationLexicon.exact.clear();
+  translationLexicon.stem.clear();
+  translationLexicon.exactByStep?.clear();
+  translationLexicon.stemByStep?.clear();
+  phraseLexicon.byStrong.clear();
+  phraseLexicon.byStrongFirst?.clear();
+  dictionaryCandidates.length = 0;
+  lexicalSourceCache.dictionaryCandidates = undefined;
+  lexicalSourceCache.kaikki.clear();
+  lexicalSourceCache.synonymSources.clear();
+  incrementalLexicalPassRefs = undefined;
 
   const metrics = aggregateMetrics(
     options.bible,
@@ -562,14 +758,13 @@ export async function generateStrongLedger(
     generatedAt: metrics.generatedAt,
     inputPath: options.biblePath,
     scope: options.onlyRef ?? "all",
+    inputFingerprint,
+    overrideFingerprint,
+    overrideFingerprintByRef,
     method: `Canonical Strong ledger. Reader annotations come from the calibrated reader pipeline plus validated deterministic lexical auto-safe placement (${lexicalAutoSafeCount} placements). Advanced annotations add original-complete STEP TAHOT/TAGNT coverage as empty, duplicate, or extra visible annotations. STEP dStrong/eStrong evidence is preserved for lexical disambiguation; WLC/SBLGNT suffixes are not used as production lookup keys.`,
     translationProfile,
-    references: references.map((reference) => ({
-      name: reference.name,
-      path: reference.path,
-      verses: reference.map.size
-    })),
-    originalSources: originals.map((original) => original.summary),
+    references: referenceSummaries,
+    originalSources: originalSummaries,
     outputPaths: paths,
     metrics,
     verses: ledgerVerses
@@ -617,6 +812,44 @@ export async function refreshStrongLedger(
     sqlitePath: paths.sqlite,
     includeVerses: false
   });
+  const profileBible = options.profileBible ?? options.bible;
+  if (!options.allowUnknownProfile && !hasTranslationProfile(profileBible)) {
+    throw new Error(`missing-translation-profile:${profileBible}`);
+  }
+  const inputFingerprint = strongLedgerInputFingerprint(
+    options,
+    getTranslationProfile(profileBible)
+  );
+  if (!existing.inputFingerprint) {
+    throw new Error(
+      "strong-ledger-input-fingerprint-missing: run a full generation before using scoped refresh"
+    );
+  }
+  if (existing.inputFingerprint !== inputFingerprint) {
+    throw new Error(
+      "strong-ledger-input-fingerprint-mismatch: source data, derived indexes, profile, or pipeline code changed; run a full generation"
+    );
+  }
+  const overrideFingerprintByRef =
+    options.applyCuratedOverrides === false
+      ? {}
+      : curatedOverrideFingerprints(options.bible);
+  const changedRefs = changedOverrideRefs(
+    existing.overrideFingerprintByRef,
+    overrideFingerprintByRef
+  );
+  const uncoveredChangedRefs = changedRefs.filter(
+    (ref) => !scopes.some((scope) => strongRefMatchesScope(ref, scope))
+  );
+  if (uncoveredChangedRefs.length > 0) {
+    throw new Error(
+      `strong-ledger-override-scope-mismatch:${uncoveredChangedRefs
+        .slice(0, 20)
+        .join(
+          ","
+        )}: refresh every changed override scope or run a full generation`
+    );
+  }
   const refreshRoot = path.join(options.outputDir, ".refresh");
   const refreshedVerses: StrongLedgerVerse[] = [];
 
@@ -633,6 +866,9 @@ export async function refreshStrongLedger(
         writeArtifacts: false,
         writeLexicalReport: false
       });
+      if (scopedLedger.inputFingerprint !== inputFingerprint) {
+        throw new Error("strong-ledger-scoped-input-fingerprint-mismatch");
+      }
       refreshedVerses.push(...scopedLedger.verses);
     }
   } finally {
@@ -646,7 +882,12 @@ export async function refreshStrongLedger(
     sqlitePath: paths.sqlite,
     bible: options.bible,
     verses: refreshedVerses,
-    method
+    method,
+    metadata: {
+      inputFingerprint,
+      overrideFingerprint: fingerprintOverrideMap(overrideFingerprintByRef),
+      overrideFingerprintByRef
+    }
   });
   await Promise.all([
     writeFile(paths.metrics, `${JSON.stringify(metrics, null, 2)}\n`, "utf8"),
@@ -668,6 +909,9 @@ export async function refreshStrongLedger(
     ...existing,
     generatedAt: metrics.generatedAt,
     scope: "all",
+    inputFingerprint,
+    overrideFingerprint: fingerprintOverrideMap(overrideFingerprintByRef),
+    overrideFingerprintByRef,
     method,
     outputPaths: paths,
     metrics,
@@ -728,25 +972,112 @@ export function renderStrongTaggedText(
   const visible = annotations.filter((annotation) =>
     isVisibleInMode(annotation, mode)
   );
-  const phrases = buildPhraseStartMap(visible);
-  const words = groupAnnotations(
+  const wordCount = segments.filter(
+    (segment) => segment.kind === "word"
+  ).length;
+  const phrasePlan = buildPhraseRenderPlan(visible, wordCount);
+  const deferredMarkers = new Map<number, DeferredStrongMarker[]>();
+
+  for (const marker of phrasePlan.markers) {
+    addDeferredMarker(deferredMarkers, marker.anchorWordIndex, marker);
+  }
+
+  const renderableWordAnnotations: StrongLedgerAnnotation[] = [];
+  for (const group of groupAnnotations(
     visible.filter(
       (annotation) =>
         annotation.placement === "word" ||
-        (mode === "debug" &&
-          annotation.placement === "duplicate" &&
+        (annotation.placement === "duplicate" &&
           annotation.wordIndex !== undefined)
     ),
     (annotation) => String(annotation.wordIndex)
+  ).values()) {
+    const wordIndex = group[0]?.wordIndex;
+    if (wordIndex === undefined || wordIndex < 0 || wordIndex >= wordCount) {
+      addDeferredMarker(deferredMarkers, -1, {
+        anchorWordIndex: -1,
+        annotations: group,
+        target: "word",
+        metadata: {
+          marker: true,
+          wordIndex
+        }
+      });
+      continue;
+    }
+
+    const containingPhrase = phrasePlan.wrappers.find(
+      (phrase) =>
+        phrase.startWordIndex <= wordIndex && phrase.endWordIndex >= wordIndex
+    );
+    if (containingPhrase) {
+      addDeferredMarker(deferredMarkers, containingPhrase.startWordIndex, {
+        anchorWordIndex: containingPhrase.startWordIndex,
+        annotations: group,
+        target: "word",
+        metadata: {
+          marker: true,
+          wordIndex
+        }
+      });
+      continue;
+    }
+
+    renderableWordAnnotations.push(...group);
+  }
+
+  const renderableEmptyAnnotations: StrongLedgerAnnotation[] = [];
+  for (const annotation of visible.filter(
+    (item) =>
+      ["empty", "technical", "not-rendered"].includes(item.placement) ||
+      (item.placement === "duplicate" && item.wordIndex === undefined)
+  )) {
+    const insertAfterWordIndex = annotation.insertAfterWordIndex ?? -1;
+    const containingPhrase = phrasePlan.wrappers.find(
+      (phrase) =>
+        phrase.startWordIndex <= insertAfterWordIndex &&
+        phrase.endWordIndex > insertAfterWordIndex
+    );
+
+    if (containingPhrase) {
+      addDeferredMarker(deferredMarkers, containingPhrase.startWordIndex, {
+        anchorWordIndex: containingPhrase.startWordIndex,
+        annotations: [annotation],
+        target: annotation.placement,
+        metadata: {
+          marker: true,
+          insertAfterWordIndex
+        }
+      });
+      continue;
+    }
+
+    if (insertAfterWordIndex < -1 || insertAfterWordIndex >= wordCount) {
+      addDeferredMarker(deferredMarkers, -1, {
+        anchorWordIndex: -1,
+        annotations: [annotation],
+        target: annotation.placement,
+        metadata: {
+          marker: true,
+          insertAfterWordIndex
+        }
+      });
+      continue;
+    }
+
+    renderableEmptyAnnotations.push(annotation);
+  }
+
+  const words = groupAnnotations(renderableWordAnnotations, (annotation) =>
+    String(annotation.wordIndex)
   );
-  const empties = groupAnnotations(
-    visible.filter((annotation) =>
-      ["empty", "technical", "not-rendered"].includes(annotation.placement)
-    ),
-    (annotation) => String(annotation.insertAfterWordIndex ?? -1)
+  const empties = groupAnnotations(renderableEmptyAnnotations, (annotation) =>
+    String(annotation.insertAfterWordIndex ?? -1)
   );
 
-  let output = renderEmptyAnnotations(empties.get("-1") ?? []);
+  let output = `${renderDeferredMarkers(
+    deferredMarkers.get(-1) ?? []
+  )}${renderEmptyAnnotations(empties.get("-1") ?? [])}`;
   let wordIndex = -1;
   let activePhrase:
     | {
@@ -762,13 +1093,17 @@ export function renderStrongTaggedText(
     }
 
     wordIndex += 1;
-    const startingPhrase = phrases.get(wordIndex);
+    output += renderDeferredMarkers(deferredMarkers.get(wordIndex) ?? []);
+    const startingPhrase = phrasePlan.byStart.get(wordIndex);
     if (startingPhrase) {
       activePhrase = {
         endWordIndex: startingPhrase.endWordIndex,
         annotations: startingPhrase.annotations
       };
-      output += openStrongTag(startingPhrase.annotations, "phrase");
+      output += openStrongTag(startingPhrase.annotations, "phrase", {
+        startWordIndex: wordIndex,
+        endWordIndex: startingPhrase.endWordIndex
+      });
     }
 
     if (activePhrase) {
@@ -783,9 +1118,9 @@ export function renderStrongTaggedText(
 
     const wordAnnotations = words.get(String(wordIndex)) ?? [];
     if (wordAnnotations.length > 0) {
-      output += `${openStrongTag(wordAnnotations, "word")}${escapeHtml(
-        segment.text
-      )}</w>`;
+      output += `${openStrongTag(wordAnnotations, "word", {
+        wordIndex
+      })}${escapeHtml(segment.text)}</w>`;
     } else {
       output += escapeHtml(segment.text);
     }
@@ -797,6 +1132,118 @@ export function renderStrongTaggedText(
   }
 
   return output;
+}
+
+export function assertRenderedStrongInventory(options: {
+  ref: string;
+  wordCount: number;
+  annotations: StrongLedgerAnnotation[];
+  views: StrongLedgerVerse["views"];
+}): void {
+  const modes: Array<{
+    mode: "reader" | "advanced" | "debug";
+    html: string;
+  }> = [
+    { mode: "reader", html: options.views.readerHtml },
+    { mode: "advanced", html: options.views.advancedHtml },
+    { mode: "debug", html: options.views.debugHtml }
+  ];
+
+  for (const { mode, html } of modes) {
+    const expected = countStrings(
+      options.annotations
+        .filter((annotation) => isVisibleInMode(annotation, mode))
+        .map((annotation) =>
+          expectedRenderedStrongSignature(annotation, options.wordCount)
+        )
+    );
+    const actual = countStrings(renderedStrongSignatures(html));
+    const signatures = new Set([...expected.keys(), ...actual.keys()]);
+    const mismatches = [...signatures]
+      .filter((signature) => expected.get(signature) !== actual.get(signature))
+      .slice(0, 12)
+      .map(
+        (signature) =>
+          `${signature}:${expected.get(signature) ?? 0}->${actual.get(signature) ?? 0}`
+      );
+    if (mismatches.length > 0) {
+      throw new Error(
+        `rendered-strong-inventory-mismatch:${options.ref}:${mode}:${mismatches.join(",")}`
+      );
+    }
+  }
+}
+
+function expectedRenderedStrongSignature(
+  annotation: StrongLedgerAnnotation,
+  wordCount: number
+): string {
+  const strong = annotation.strong.toUpperCase();
+  if (
+    (annotation.placement === "word" || annotation.placement === "duplicate") &&
+    annotation.wordIndex !== undefined
+  ) {
+    const carrier =
+      annotation.wordIndex >= 0 && annotation.wordIndex < wordCount
+        ? "text"
+        : "marker";
+    return `${strong}|word|${annotation.wordIndex}|${carrier}`;
+  }
+  if (annotation.placement === "phrase") {
+    return `${strong}|phrase|${annotation.startWordIndex ?? ""}:${annotation.endWordIndex ?? ""}`;
+  }
+  return `${strong}|${annotation.placement}|${annotation.insertAfterWordIndex ?? -1}`;
+}
+
+function renderedStrongSignatures(html: string): string[] {
+  const signatures: string[] = [];
+  for (const match of html.matchAll(/<w\b([^>]*)>([\s\S]*?)<\/w>/giu)) {
+    const attributes = match[1] ?? "";
+    const body = match[2] ?? "";
+    const target = readHtmlAttribute(attributes, "data-target") ?? "word";
+    const strongCodes = (readHtmlAttribute(attributes, "strong") ?? "")
+      .split(/\s+/u)
+      .filter(Boolean)
+      .map((strong) => strong.toUpperCase());
+    for (const strong of strongCodes) {
+      if (target === "word") {
+        const index = readHtmlAttribute(attributes, "data-word-index") ?? "";
+        signatures.push(
+          `${strong}|word|${index}|${body.length > 0 ? "text" : "marker"}`
+        );
+        continue;
+      }
+      if (target === "phrase") {
+        const start =
+          readHtmlAttribute(attributes, "data-start-word-index") ?? "";
+        const end = readHtmlAttribute(attributes, "data-end-word-index") ?? "";
+        signatures.push(`${strong}|phrase|${start}:${end}`);
+        continue;
+      }
+      const anchor =
+        readHtmlAttribute(attributes, "data-insert-after-word-index") ?? "-1";
+      signatures.push(`${strong}|${target}|${anchor}`);
+    }
+  }
+  return signatures;
+}
+
+function readHtmlAttribute(
+  attributes: string,
+  name: string
+): string | undefined {
+  const escapedName = name.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  return new RegExp(`\\b${escapedName}=(["'])(.*?)\\1`, "iu").exec(
+    attributes
+  )?.[2];
+}
+
+function countStrings(values: string[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const value of values) {
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  }
+  return counts;
 }
 
 function buildStrongLedgerVerse(options: {
@@ -819,28 +1266,32 @@ function buildStrongLedgerVerse(options: {
     ...Object.values(referenceInventories).flat(),
     ...originalOccurrences.map((occurrence) => occurrence.strong)
   ]);
-  const annotations = [
-    ...readerPhraseAnnotations({
-      assignments: options.reader.phraseAssignments,
-      tokens,
-      profile: options.profile,
-      referenceSupport,
-      allowedStrong
-    }),
-    ...readerWordAnnotations({
-      assignments: options.reader.assignments,
-      tokens,
-      profile: options.profile,
-      referenceSupport,
-      allowedStrong
-    }),
-    ...readerEmptyAnnotations({
-      assignments: options.reader.emptyAssignments,
-      profile: options.profile,
-      referenceSupport,
-      allowedStrong
-    })
-  ];
+  const annotations = linkReaderAnnotationsToOriginalOccurrences({
+    annotations: [
+      ...readerPhraseAnnotations({
+        assignments: options.reader.phraseAssignments,
+        tokens,
+        profile: options.profile,
+        referenceSupport,
+        allowedStrong
+      }),
+      ...readerWordAnnotations({
+        assignments: options.reader.assignments,
+        tokens,
+        profile: options.profile,
+        referenceSupport,
+        allowedStrong
+      }),
+      ...readerEmptyAnnotations({
+        assignments: options.reader.emptyAssignments,
+        profile: options.profile,
+        referenceSupport,
+        allowedStrong
+      })
+    ],
+    originalOccurrences,
+    wordCount: tokens.length
+  });
   const readerCounts = countVisibleReaderStrong(annotations);
   annotations.push(
     ...advancedAnnotations({
@@ -859,7 +1310,11 @@ function buildStrongLedgerVerse(options: {
     )
     .map((annotation, index) => ({
       ...annotation,
-      step: stepEvidenceForStrong(options.stepEvidence, annotation.strong),
+      step: stepEvidenceForAnnotation(
+        options.stepEvidence,
+        annotation,
+        originalOccurrences
+      ),
       id: `${options.verse.bookId}.${options.verse.chapter}.${options.verse.verse}:${index}:${annotation.strong}`
     }));
 
@@ -878,6 +1333,12 @@ function buildStrongLedgerVerse(options: {
     normalizedAnnotations,
     "debug"
   );
+  assertRenderedStrongInventory({
+    ref: formatRef(options.verse),
+    wordCount: tokens.length,
+    annotations: normalizedAnnotations,
+    views: { readerHtml, advancedHtml, debugHtml }
+  });
   const inventories = {
     references: referenceInventories,
     original: originalOccurrences.map((occurrence) => occurrence.strong),
@@ -1066,27 +1527,20 @@ function completeWordAnnotations(options: {
     );
     const referenceSupport =
       options.referenceSupport.get(normalizedStrong) ?? [];
-    const referenceBacked = referenceSupport.length > 0;
 
     return {
       id: "",
       strong: normalizedStrong,
-      visibility: duplicate
-        ? "hidden"
-        : referenceBacked
-          ? "reader"
-          : "advanced",
+      visibility: completeWordVisibility(duplicate),
       placement: duplicate ? "duplicate" : "word",
-      source: referenceBacked
-        ? "reference-backed-original"
-        : "original-complete",
+      source: "original-complete",
       confidence: duplicate
         ? Math.max(options.assignment.confidence, 0.9)
         : options.assignment.confidence,
       reason: duplicate
         ? "Already represented in reader mode; kept in debug ledger to explain the original occurrence."
-        : referenceBacked
-          ? "Visible in normal mode because Strong witnesses expect this code and the original-complete alignment found a defensible French carrier."
+        : referenceSupport.length > 0
+          ? "A French Strong witness contains this code, but the original-complete pass is not independently calibrated as a reader carrier; retained only in advanced/debug mode."
           : "Visible only in advanced mode because STEP has an original Strong beyond the witness-backed normal view.",
       diagnostics: [options.assignment.method, options.assignment.source],
       wordIndex: options.wordIndex,
@@ -1099,6 +1553,10 @@ function completeWordAnnotations(options: {
   });
 }
 
+export function completeWordVisibility(duplicate: boolean): StrongVisibility {
+  return duplicate ? "hidden" : "advanced";
+}
+
 function completeEmptyAnnotation(options: {
   assignment: EmptyStrongAssignment;
   profile: TranslationProfile;
@@ -1109,21 +1567,20 @@ function completeEmptyAnnotation(options: {
   const duplicate = consumeReaderStrong(options.readerCounts, strong);
   const technical = TECHNICAL_STRONG.has(strong);
   const referenceSupport = options.referenceSupport.get(strong) ?? [];
-  const referenceBacked = referenceSupport.length > 0;
 
   return {
     id: "",
     strong,
-    visibility: duplicate ? "hidden" : referenceBacked ? "reader" : "advanced",
+    visibility: completeEmptyVisibility(duplicate),
     placement: duplicate ? "duplicate" : technical ? "technical" : "empty",
-    source: referenceBacked ? "reference-backed-original" : "original-complete",
+    source: "original-complete",
     confidence: options.assignment.confidence,
     reason: duplicate
       ? "Already represented in reader mode; kept in debug ledger to explain the original occurrence."
-      : referenceBacked
-        ? "Strong witnesses expect this code, but no reliable French carrier was found; exposed as an empty Strong in normal mode."
-        : technical
-          ? "STEP original Strong is technical or weakly rendered; exposed only in advanced/debug mode."
+      : technical
+        ? "STEP original Strong is technical or weakly rendered; exposed only in advanced/debug mode."
+        : referenceSupport.length > 0
+          ? "French Strong witnesses contain this code, but they do not prove an empty carrier in the target; retained only in advanced/debug mode."
           : "STEP original Strong has no reliable French word carrier; exposed as an empty Strong only in advanced/debug mode.",
     diagnostics: [options.assignment.method],
     insertAfterWordIndex: options.assignment.insertAfterWordIndex,
@@ -1134,6 +1591,10 @@ function completeEmptyAnnotation(options: {
     referenceSupport,
     profile: options.profile.bible
   };
+}
+
+export function completeEmptyVisibility(duplicate: boolean): StrongVisibility {
+  return duplicate ? "hidden" : "advanced";
 }
 
 function applyLexicalAutoSafePlacementsToLedger(options: {
@@ -1160,7 +1621,10 @@ function applyLexicalAutoSafePlacementsToLedger(options: {
     const targetKey = lexicalCandidateTargetKey(placement.candidate);
     if (
       targetKey &&
-      occupiedTargets.has(targetKey) &&
+      lexicalCandidateConflictsWithOccupiedTarget(
+        placement.candidate,
+        occupiedTargets
+      ) &&
       !canStackLexicalAutoSafe(placement)
     ) {
       continue;
@@ -1171,7 +1635,9 @@ function applyLexicalAutoSafePlacementsToLedger(options: {
 
     applyLexicalAutoSafePlacement(annotation, placement);
     changedRefs.add(verse.ref);
-    if (targetKey) occupiedTargets.add(targetKey);
+    if (targetKey) {
+      addOccupiedLexicalTarget(occupiedTargets, placement.candidate);
+    }
     occupiedTargetsByRef.set(placement.item.ref, occupiedTargets);
     applied += 1;
   }
@@ -1289,9 +1755,62 @@ function occupiedReaderTargets(verse: StrongLedgerVerse): Set<string> {
       targets.add(
         `phrase:${annotation.startWordIndex}:${annotation.endWordIndex}`
       );
+      for (
+        let wordIndex = annotation.startWordIndex;
+        wordIndex <= annotation.endWordIndex;
+        wordIndex += 1
+      ) {
+        targets.add(`word:${wordIndex}`);
+      }
     }
   }
   return targets;
+}
+
+function lexicalCandidateConflictsWithOccupiedTarget(
+  candidate: LexicalCandidate,
+  occupiedTargets: Set<string>
+): boolean {
+  if (
+    candidate.target !== "phrase" ||
+    candidate.startWordIndex === undefined ||
+    candidate.endWordIndex === undefined
+  ) {
+    return occupiedTargets.has(`word:${candidate.wordIndex}`);
+  }
+
+  for (
+    let wordIndex = candidate.startWordIndex;
+    wordIndex <= candidate.endWordIndex;
+    wordIndex += 1
+  ) {
+    if (occupiedTargets.has(`word:${wordIndex}`)) return true;
+  }
+  return occupiedTargets.has(
+    `phrase:${candidate.startWordIndex}:${candidate.endWordIndex}`
+  );
+}
+
+function addOccupiedLexicalTarget(
+  occupiedTargets: Set<string>,
+  candidate: LexicalCandidate
+): void {
+  const targetKey = lexicalCandidateTargetKey(candidate);
+  if (targetKey) occupiedTargets.add(targetKey);
+  if (
+    candidate.target !== "phrase" ||
+    candidate.startWordIndex === undefined ||
+    candidate.endWordIndex === undefined
+  ) {
+    return;
+  }
+  for (
+    let wordIndex = candidate.startWordIndex;
+    wordIndex <= candidate.endWordIndex;
+    wordIndex += 1
+  ) {
+    occupiedTargets.add(`word:${wordIndex}`);
+  }
 }
 
 function lexicalCandidateTargetKey(
@@ -1357,6 +1876,12 @@ function rebuildLedgerVerses(verses: StrongLedgerVerse[]): void {
         "debug"
       )
     };
+    assertRenderedStrongInventory({
+      ref: verse.ref,
+      wordCount: verse.tokens.length,
+      annotations: verse.annotations,
+      views: verse.views
+    });
   }
 }
 
@@ -1612,10 +2137,10 @@ function calculateVerseMetrics(
   const advancedTaggedTokenCount = countTaggedTokens(advancedVisible);
   const readerMultiStrongWordCount =
     countMultiStrongReaderWords(readerAnnotations);
-  const readerOverBudgetStrongCount = countOverBudgetStrong(readerAnnotations, [
-    ...expected.references,
-    ...expected.original
-  ]);
+  const readerOverBudgetStrongCount = countOverBudgetStrong(
+    readerAnnotations,
+    mergeStrongOccurrenceBudgets(expected.references, expected.original)
+  );
   const placementRiskCount =
     readerMultiStrongWordCount + readerOverBudgetStrongCount;
 
@@ -1908,6 +2433,21 @@ function countByStrong(strongCodes: string[]): Map<string, number> {
   return counts;
 }
 
+export function mergeStrongOccurrenceBudgets(
+  ...inventories: string[][]
+): string[] {
+  const counts = inventories.map(countByStrong);
+  const strong = new Set(counts.flatMap((items) => [...items.keys()]));
+  return [...strong]
+    .sort()
+    .flatMap((code) =>
+      Array.from(
+        { length: Math.max(...counts.map((items) => items.get(code) ?? 0)) },
+        () => code
+      )
+    );
+}
+
 function countRepresentedOccurrences(
   expected: string[],
   actual: string[]
@@ -2009,29 +2549,60 @@ function isVisibleInMode(
   );
 }
 
-function buildPhraseStartMap(annotations: StrongLedgerAnnotation[]): Map<
-  number,
-  {
-    endWordIndex: number;
-    annotations: StrongLedgerAnnotation[];
-  }
-> {
-  const phrases = groupAnnotations(
-    annotations.filter(
+interface PhraseRenderGroup {
+  startWordIndex: number;
+  endWordIndex: number;
+  annotations: StrongLedgerAnnotation[];
+}
+
+interface StrongTagRenderMetadata {
+  marker?: boolean;
+  wordIndex?: number;
+  startWordIndex?: number;
+  endWordIndex?: number;
+  insertAfterWordIndex?: number;
+}
+
+interface DeferredStrongMarker {
+  anchorWordIndex: number;
+  annotations: StrongLedgerAnnotation[];
+  target: string;
+  metadata: StrongTagRenderMetadata;
+}
+
+function buildPhraseRenderPlan(
+  annotations: StrongLedgerAnnotation[],
+  wordCount: number
+): {
+  byStart: Map<number, PhraseRenderGroup>;
+  wrappers: PhraseRenderGroup[];
+  markers: DeferredStrongMarker[];
+} {
+  const wordCarrierIndexes = new Set(
+    annotations
+      .filter(
+        (annotation) =>
+          (annotation.placement === "word" ||
+            annotation.placement === "duplicate") &&
+          annotation.wordIndex !== undefined
+      )
+      .map((annotation) => annotation.wordIndex!)
+  );
+  const emptyCarrierAnchors = annotations
+    .filter(
       (annotation) =>
-        annotation.placement === "phrase" &&
-        annotation.startWordIndex !== undefined &&
-        annotation.endWordIndex !== undefined
-    ),
+        ["empty", "technical", "not-rendered"].includes(annotation.placement) ||
+        (annotation.placement === "duplicate" &&
+          annotation.wordIndex === undefined)
+    )
+    .map((annotation) => annotation.insertAfterWordIndex ?? -1);
+  const phrases = groupAnnotations(
+    annotations.filter((annotation) => annotation.placement === "phrase"),
     (annotation) => `${annotation.startWordIndex}:${annotation.endWordIndex}`
   );
-  const byStart = new Map<
-    number,
-    {
-      endWordIndex: number;
-      annotations: StrongLedgerAnnotation[];
-    }
-  >();
+  const byStart = new Map<number, PhraseRenderGroup>();
+  const wrappers: PhraseRenderGroup[] = [];
+  const markers: DeferredStrongMarker[] = [];
   let coveredUntil = -1;
 
   for (const group of [...phrases.values()].sort(
@@ -2039,28 +2610,124 @@ function buildPhraseStartMap(annotations: StrongLedgerAnnotation[]): Map<
       (left[0]?.startWordIndex ?? 0) - (right[0]?.startWordIndex ?? 0) ||
       (right[0]?.endWordIndex ?? 0) - (left[0]?.endWordIndex ?? 0)
   )) {
-    const startWordIndex = group[0]?.startWordIndex ?? -1;
-    const endWordIndex = group[0]?.endWordIndex ?? -1;
-    if (startWordIndex <= coveredUntil) continue;
-    if (endWordIndex < startWordIndex) continue;
-    byStart.set(startWordIndex, { endWordIndex, annotations: group });
+    const startWordIndex = group[0]?.startWordIndex;
+    const endWordIndex = group[0]?.endWordIndex;
+    if (
+      startWordIndex === undefined ||
+      endWordIndex === undefined ||
+      startWordIndex < 0 ||
+      endWordIndex < startWordIndex ||
+      endWordIndex >= wordCount
+    ) {
+      markers.push({
+        anchorWordIndex: -1,
+        annotations: group,
+        target: "phrase",
+        metadata: {
+          marker: true,
+          startWordIndex,
+          endWordIndex
+        }
+      });
+      continue;
+    }
+
+    const masksExactCarrier =
+      [...wordCarrierIndexes].some(
+        (wordIndex) => wordIndex >= startWordIndex && wordIndex <= endWordIndex
+      ) ||
+      emptyCarrierAnchors.some(
+        (anchor) => anchor >= startWordIndex && anchor < endWordIndex
+      );
+    if (masksExactCarrier) {
+      const containingWrapper = wrappers.find(
+        (wrapper) =>
+          wrapper.startWordIndex <= startWordIndex &&
+          wrapper.endWordIndex >= startWordIndex
+      );
+      markers.push({
+        anchorWordIndex: containingWrapper?.startWordIndex ?? startWordIndex,
+        annotations: group,
+        target: "phrase",
+        metadata: {
+          marker: true,
+          startWordIndex,
+          endWordIndex
+        }
+      });
+      continue;
+    }
+
+    if (startWordIndex <= coveredUntil) {
+      const overlappingWrapper = wrappers.find(
+        (wrapper) =>
+          wrapper.startWordIndex <= endWordIndex &&
+          wrapper.endWordIndex >= startWordIndex
+      );
+      markers.push({
+        anchorWordIndex: overlappingWrapper?.startWordIndex ?? -1,
+        annotations: group,
+        target: "phrase",
+        metadata: {
+          marker: true,
+          startWordIndex,
+          endWordIndex
+        }
+      });
+      continue;
+    }
+
+    const wrapper = {
+      startWordIndex,
+      endWordIndex,
+      annotations: group
+    };
+    byStart.set(startWordIndex, wrapper);
+    wrappers.push(wrapper);
     coveredUntil = endWordIndex;
   }
 
-  return byStart;
+  return { byStart, wrappers, markers };
+}
+
+function addDeferredMarker(
+  markers: Map<number, DeferredStrongMarker[]>,
+  anchorWordIndex: number,
+  marker: DeferredStrongMarker
+): void {
+  const group = markers.get(anchorWordIndex) ?? [];
+  group.push(marker);
+  markers.set(anchorWordIndex, group);
+}
+
+function renderDeferredMarkers(markers: DeferredStrongMarker[]): string {
+  return markers
+    .map(
+      (marker) =>
+        `${openStrongTag(
+          marker.annotations,
+          marker.target,
+          marker.metadata
+        )}</w>`
+    )
+    .join("");
 }
 
 function renderEmptyAnnotations(annotations: StrongLedgerAnnotation[]): string {
   return annotations
     .map(
-      (annotation) => `${openStrongTag([annotation], annotation.placement)}</w>`
+      (annotation) =>
+        `${openStrongTag([annotation], annotation.placement, {
+          insertAfterWordIndex: annotation.insertAfterWordIndex ?? -1
+        })}</w>`
     )
     .join("");
 }
 
 function openStrongTag(
   annotations: StrongLedgerAnnotation[],
-  target: string
+  target: string,
+  metadata: StrongTagRenderMetadata = {}
 ): string {
   const strong = annotations.map((annotation) => annotation.strong).join(" ");
   const sourceStrong = uniqueStrings(
@@ -2091,6 +2758,21 @@ function openStrongTag(
     .filter(Boolean)
     .join("+");
   const reason = annotations[0]?.reason ?? "";
+  const positionAttributes = [
+    metadata.marker ? ` data-marker="true"` : "",
+    metadata.wordIndex !== undefined
+      ? ` data-word-index="${metadata.wordIndex}"`
+      : "",
+    metadata.startWordIndex !== undefined
+      ? ` data-start-word-index="${metadata.startWordIndex}"`
+      : "",
+    metadata.endWordIndex !== undefined
+      ? ` data-end-word-index="${metadata.endWordIndex}"`
+      : "",
+    metadata.insertAfterWordIndex !== undefined
+      ? ` data-insert-after-word-index="${metadata.insertAfterWordIndex}"`
+      : ""
+  ].join("");
 
   return `<w strong="${escapeHtml(strong)}" data-lexical-strong="${escapeHtml(
     lexicalStrong
@@ -2100,9 +2782,11 @@ function openStrongTag(
     source
   )}" data-placement="${escapeHtml(placement)}" data-target="${escapeHtml(
     target
-  )}" data-empty="${target === "word" || target === "phrase" ? "false" : "true"}" data-reason="${escapeHtml(
-    reason
-  )}">`;
+  )}" data-empty="${
+    !metadata.marker && (target === "word" || target === "phrase")
+      ? "false"
+      : "true"
+  }"${positionAttributes} data-reason="${escapeHtml(reason)}">`;
 }
 
 function groupAnnotations<T extends StrongLedgerAnnotation>(
@@ -2155,14 +2839,119 @@ function normalizedPhrase(
     .join(" ");
 }
 
-function stepEvidenceForStrong(
+/**
+ * Reader alignment is carrier-oriented while STEP evidence is occurrence-
+ * oriented. Link repeated Strong codes globally by relative position so each
+ * visible carrier can receive evidence from at most one original occurrence.
+ */
+export function linkReaderAnnotationsToOriginalOccurrences(options: {
+  annotations: StrongLedgerAnnotation[];
+  originalOccurrences: OriginalStrongOccurrence[];
+  wordCount: number;
+}): StrongLedgerAnnotation[] {
+  const annotations = options.annotations.map((annotation) => ({
+    ...annotation
+  }));
+  const annotationIndexesByStrong = new Map<string, number[]>();
+  const occurrencesByStrong = new Map<string, OriginalStrongOccurrence[]>();
+
+  for (const [index, annotation] of annotations.entries()) {
+    if (annotation.originalOccurrenceId) continue;
+    const strong = annotation.strong.toUpperCase();
+    const indexes = annotationIndexesByStrong.get(strong) ?? [];
+    indexes.push(index);
+    annotationIndexesByStrong.set(strong, indexes);
+  }
+  for (const occurrence of options.originalOccurrences) {
+    const strong = occurrence.strong.toUpperCase();
+    const occurrences = occurrencesByStrong.get(strong) ?? [];
+    occurrences.push(occurrence);
+    occurrencesByStrong.set(strong, occurrences);
+  }
+
+  const originalDenominator = Math.max(
+    1,
+    ...options.originalOccurrences.map(
+      (occurrence) => occurrence.ordinalTokenIndex ?? occurrence.tokenIndex
+    )
+  );
+  const readerDenominator = Math.max(1, options.wordCount - 1);
+
+  for (const [strong, annotationIndexes] of annotationIndexesByStrong) {
+    const occurrences = occurrencesByStrong.get(strong) ?? [];
+    const matches = maximumWeightMatching({
+      leftCount: annotationIndexes.length,
+      rightCount: occurrences.length,
+      edges: annotationIndexes.flatMap((annotationIndex, left) => {
+        const annotation = annotations[annotationIndex];
+        if (!annotation) return [];
+        const readerPosition = annotationCarrierPosition(annotation);
+        return occurrences.map((occurrence, right) => {
+          const ordinalTokenIndex =
+            occurrence.ordinalTokenIndex ?? occurrence.tokenIndex;
+          const distance = Math.abs(
+            readerPosition / readerDenominator -
+              ordinalTokenIndex / originalDenominator
+          );
+          return {
+            left,
+            right,
+            // The tiny order term makes equal-distance repeated carriers
+            // deterministic without overriding the positional objective.
+            weight: 2 - distance - Math.abs(left - right) * 1e-6,
+            value: { annotationIndex, occurrence }
+          };
+        });
+      })
+    });
+
+    for (const match of matches) {
+      const annotation = annotations[match.value.annotationIndex];
+      if (!annotation) continue;
+      annotation.originalOccurrenceId = match.value.occurrence.occurrenceId;
+      annotation.sourceStrong = match.value.occurrence.sourceStrong;
+    }
+  }
+
+  return annotations;
+}
+
+function annotationCarrierPosition(annotation: StrongLedgerAnnotation): number {
+  if (annotation.placement === "word") return annotation.wordIndex ?? 0;
+  if (annotation.placement === "phrase") {
+    return (
+      ((annotation.startWordIndex ?? 0) + (annotation.endWordIndex ?? 0)) / 2
+    );
+  }
+  return Math.max(0, (annotation.insertAfterWordIndex ?? -1) + 0.5);
+}
+
+function stepEvidenceForAnnotation(
   evidenceByStrong: Map<string, SourceStepStrongEvidence[]> | undefined,
-  strong: string
+  annotation: StrongLedgerAnnotation,
+  originalOccurrences: OriginalStrongOccurrence[]
 ): StrongStepEvidence[] | undefined {
-  const evidence = evidenceByStrong?.get(strong.toUpperCase());
+  const evidence = evidenceByStrong?.get(annotation.strong.toUpperCase());
   if (!evidence || evidence.length === 0) return undefined;
 
-  return evidence.slice(0, 4).map((item) => ({
+  const occurrence = annotation.originalOccurrenceId
+    ? originalOccurrences.find(
+        (candidate) =>
+          candidate.occurrenceId === annotation.originalOccurrenceId
+      )
+    : undefined;
+  const selected = occurrence
+    ? selectStepEvidenceForOccurrence(evidence, {
+        tokenIndex: occurrence.sourceTokenIndex ?? occurrence.tokenIndex,
+        sourceStrong: annotation.sourceStrong ?? occurrence.sourceStrong
+      })
+    : uniqueStepEvidenceOccurrenceCount(evidence) === 1
+      ? evidence.slice(0, 4)
+      : [];
+
+  if (selected.length === 0) return undefined;
+
+  return selected.map((item) => ({
     source: item.source,
     classicalStrong: item.baseStrong,
     dStrong: item.stepStrong,
@@ -2176,10 +2965,25 @@ function stepEvidenceForStrong(
   }));
 }
 
-async function loadReferences(): Promise<ReferenceMap[]> {
+function uniqueStepEvidenceOccurrenceCount(
+  evidence: SourceStepStrongEvidence[]
+): number {
+  return new Set(
+    evidence.map(
+      (item) =>
+        `${item.source}:${item.tokenIndex}:${item.stepStrong.toUpperCase()}`
+    )
+  ).size;
+}
+
+async function loadReferences(
+  excludedReferenceNames: string[] = []
+): Promise<ReferenceMap[]> {
   const references: ReferenceMap[] = [];
+  const excluded = new Set(excludedReferenceNames);
 
   for (const reference of REFERENCES) {
+    if (excluded.has(reference.name)) continue;
     const rows = await readStrongCsv(reference.path);
     references.push({
       ...reference,
@@ -2226,7 +3030,9 @@ async function loadOriginalData(bookIds?: Set<string>): Promise<{
   const evidence: StepOriginalEvidenceIndex = new Map();
 
   for (const sourcePath of stepOriginalSourcesForBooks(bookIds)) {
-    if (!existsSync(sourcePath)) continue;
+    if (!existsSync(sourcePath)) {
+      throw new Error(`missing-step-original-source:${sourcePath}`);
+    }
 
     const data = await readStepOriginalData([sourcePath], { bookIds });
     const source = stepOriginalSourceMetadata(sourcePath);
@@ -2359,6 +3165,21 @@ function verseMatchesScope(candidate: BibleVerse, scope: string): boolean {
   return true;
 }
 
+function strongRefMatchesScope(ref: string, scope: string): boolean {
+  const match = /^(?<bookId>[^.]+)\.(?<chapter>\d+)\.(?<verse>\d+)$/u.exec(ref);
+  if (!match?.groups) return false;
+  return verseMatchesScope(
+    {
+      bookNumber: "",
+      bookId: match.groups.bookId ?? "",
+      chapter: Number.parseInt(match.groups.chapter ?? "", 10),
+      verse: Number.parseInt(match.groups.verse ?? "", 10),
+      text: ""
+    },
+    scope
+  );
+}
+
 function parseScopeRange(scope: string):
   | {
       start: { bookId: string; chapter: number; verse: number };
@@ -2446,6 +3267,7 @@ function parseArgs(argv: string[]): {
   onlyRef?: string;
   outputDir: string;
   mode: "reader" | "advanced";
+  allowUnknownProfile: boolean;
 } {
   const args = new Map<string, string>();
   const command = ["export", "refresh", "migrate", "phrase-index"].includes(
@@ -2476,7 +3298,8 @@ function parseArgs(argv: string[]): {
     bible,
     onlyRef: args.get("only"),
     outputDir: args.get("output-dir") ?? path.join("outputs", "strong", bible),
-    mode
+    mode,
+    allowUnknownProfile: args.get("allow-unknown-profile") === "true"
   };
 }
 
@@ -2503,7 +3326,8 @@ async function main(): Promise<void> {
       bible: args.bible,
       biblePath,
       outputDir: args.outputDir,
-      onlyRef: args.onlyRef
+      onlyRef: args.onlyRef,
+      allowUnknownProfile: args.allowUnknownProfile
     });
     console.log(
       `Refreshed canonical Strong ledger: ${result.outputPaths.canonical}`
@@ -2541,7 +3365,8 @@ async function main(): Promise<void> {
     bible: args.bible,
     biblePath,
     outputDir: args.outputDir,
-    onlyRef: args.onlyRef
+    onlyRef: args.onlyRef,
+    allowUnknownProfile: args.allowUnknownProfile
   });
 
   console.log(

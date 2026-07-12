@@ -137,3 +137,99 @@ test("applies accepted empty review decisions as durable empty overrides", async
     await rm(tmp, { recursive: true, force: true });
   }
 });
+
+test("human approval replaces an identical quarantined semantic refill", async () => {
+  const tmp = await mkdtemp(path.join(tmpdir(), "llm-review-promote-"));
+  try {
+    const overridesPath = path.join(tmp, "curated-overrides.json");
+    const legacy = {
+      bible: "bds",
+      ref: "Heb.1.4",
+      target: "empty" as const,
+      wordIndex: -1,
+      normalized: "",
+      strong: ["G9996"],
+      confidence: 0.9,
+      source: "semantic-refill:llm",
+      reason: "consensus claimed in free-form text"
+    };
+    await writeFile(overridesPath, `${JSON.stringify([legacy])}\n`, "utf8");
+
+    const applied = await applyReviewDecisionPayload({
+      bible: "bds",
+      decisions: {
+        bible: "bds",
+        approvedOverrides: [
+          {
+            ...legacy,
+            source: "llm-review:human-approved-empty",
+            reason: "Explicit human approval."
+          }
+        ]
+      },
+      overridesPath
+    });
+
+    assert.equal(applied.accepted, 1);
+    const overrides = JSON.parse(
+      await readFile(overridesPath, "utf8")
+    ) as Array<Record<string, unknown>>;
+    assert.equal(overrides.length, 1);
+    assert.equal(overrides[0]?.source, "llm-review:human-approved-empty");
+  } finally {
+    await rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test("labels explicit single-model auto-accepts without claiming human review", async () => {
+  const tmp = await mkdtemp(path.join(tmpdir(), "llm-review-auto-source-"));
+
+  try {
+    const diagnosticsPath = path.join(tmp, "diagnostics.json");
+    const reviewPath = path.join(tmp, "review.json");
+    const decisionsPath = path.join(tmp, "decisions.json");
+    const overridesPath = path.join(tmp, "curated-overrides.json");
+    await writeFile(
+      diagnosticsPath,
+      `${JSON.stringify([
+        {
+          ref: "Heb.1.4",
+          llmSuggestions: [
+            {
+              target: "word",
+              wordIndex: 5,
+              strong: ["G9997"],
+              confidence: 0.91,
+              reason: "Single-model fixture."
+            }
+          ]
+        }
+      ])}\n`,
+      "utf8"
+    );
+    const review = await prepareReview({
+      command: "prepare",
+      bible: "bds",
+      diagnosticsPath,
+      reviewPath,
+      decisionsPath,
+      outputDir: tmp,
+      overridesPath,
+      autoAccept: true,
+      autoAcceptThreshold: 0.84
+    });
+
+    assert.equal(review.items[0]?.decision, "accept");
+    await applyReviewDecisionPayload({
+      bible: "bds",
+      decisions: { bible: "bds", items: review.items },
+      overridesPath
+    });
+    const overrides = JSON.parse(
+      await readFile(overridesPath, "utf8")
+    ) as Array<Record<string, unknown>>;
+    assert.equal(overrides[0]?.source, "llm-review:single-model-auto");
+  } finally {
+    await rm(tmp, { recursive: true, force: true });
+  }
+});

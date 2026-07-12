@@ -17,13 +17,15 @@ interface DictionaryRow {
 
 interface DictionaryForm {
   strong: string;
+  stepStrong?: string;
   form: string;
   score: number;
   source: string;
   method: StrongTranslationCandidate["method"];
+  reviewOnly?: boolean;
 }
 
-const DEFAULT_PRODUCTION_DB =
+export const DEFAULT_PRODUCTION_STRONG_DICTIONARY =
   "data/dictionaries/strong_lexicon.full.production.sqlite";
 const MAX_MEANING_CHARS = 180;
 const MAX_FORMS_PER_STRONG = 12;
@@ -61,19 +63,24 @@ const FUNCTION_WORDS = new Set([
 ]);
 
 export function readStrongDictionaryTranslationCandidates(
-  dbPath = DEFAULT_PRODUCTION_DB
+  dbPath = DEFAULT_PRODUCTION_STRONG_DICTIONARY,
+  options: { strict?: boolean } = {}
 ): StrongTranslationCandidate[] {
   if (!isReadableSqlite(dbPath)) {
+    if (options.strict) {
+      throw new Error(`missing-or-empty-strong-dictionary:${dbPath}`);
+    }
     return [];
   }
 
-  const rows = safeReadDictionaryRows(dbPath);
+  const rows = safeReadDictionaryRows(dbPath, options.strict ?? false);
   const formsByStrong = new Map<string, Map<string, DictionaryForm>>();
 
   for (const row of rows) {
-    for (const strong of candidateStrongCodes(row)) {
-      addGlossForms(formsByStrong, strong, row);
-      addMeaningForms(formsByStrong, strong, row);
+    for (const candidate of candidateStrongCodes(row)) {
+      const key = `${candidate.strong}|${candidate.stepStrong ?? ""}`;
+      addGlossForms(formsByStrong, key, candidate, row);
+      addMeaningForms(formsByStrong, key, candidate, row);
     }
   }
 
@@ -84,9 +91,12 @@ export function readStrongDictionaryTranslationCandidates(
       .flatMap((form) => [
         {
           strong: form.strong,
+          stepStrong: form.stepStrong,
           normalized: form.form,
           score: form.score,
           source: form.source,
+          provenanceRoot: "strong-lexicon-sqlite",
+          reviewOnly: form.reviewOnly,
           method: form.method
         },
         ...stemCandidate(form)
@@ -94,10 +104,14 @@ export function readStrongDictionaryTranslationCandidates(
   );
 }
 
-function safeReadDictionaryRows(dbPath: string): DictionaryRow[] {
+function safeReadDictionaryRows(
+  dbPath: string,
+  strict: boolean
+): DictionaryRow[] {
   try {
     return readDictionaryRows(dbPath);
-  } catch {
+  } catch (error) {
+    if (strict) throw error;
     return [];
   }
 }
@@ -127,29 +141,40 @@ function readDictionaryRows(dbPath: string): DictionaryRow[] {
   return JSON.parse(output) as DictionaryRow[];
 }
 
-function candidateStrongCodes(row: DictionaryRow): string[] {
-  const codes = new Set<string>();
+function candidateStrongCodes(
+  row: DictionaryRow
+): Array<{ strong: string; stepStrong?: string }> {
+  const codes = new Map<string, { strong: string; stepStrong?: string }>();
   const eStrong = normalizeClassicalStrong(row.eStrong);
-  if (eStrong) codes.add(eStrong);
+  const stepStrong = normalizeStepStrong(row.dStrong);
+  if (eStrong) codes.set(eStrong, { strong: eStrong, stepStrong });
 
   const uStrong = normalizeClassicalStrong(row.uStrong);
   if (uStrong && (uStrong === eStrong || isPronounRow(row))) {
-    codes.add(uStrong);
+    codes.set(uStrong, {
+      strong: uStrong,
+      stepStrong: uStrong === eStrong ? stepStrong : undefined
+    });
   }
-  return [...codes];
+  return [...codes.values()];
+}
+
+function normalizeStepStrong(value: string): string | undefined {
+  return value.toUpperCase().match(/\b[HG]\d{4,5}[A-Z]?(?:_[A-Z])?\b/u)?.[0];
 }
 
 function addGlossForms(
   formsByStrong: Map<string, Map<string, DictionaryForm>>,
-  strong: string,
+  key: string,
+  candidate: { strong: string; stepStrong?: string },
   row: DictionaryRow
 ): void {
   const words = normalizedWords(row.gloss);
   const contentWords = words.filter(isContentWord);
 
   if (contentWords.length === 1) {
-    addForm(formsByStrong, {
-      strong,
+    addForm(formsByStrong, key, {
+      ...candidate,
       form: contentWords[0] ?? "",
       score: 0.5,
       source: "strong-lexicon-sqlite:fr-gloss",
@@ -160,11 +185,12 @@ function addGlossForms(
 
   if (contentWords.length > 1 && contentWords.length <= 4) {
     for (const word of contentWords) {
-      addForm(formsByStrong, {
-        strong,
+      addForm(formsByStrong, key, {
+        ...candidate,
         form: word,
         score: 0.34,
         source: "strong-lexicon-sqlite:fr-gloss-token",
+        reviewOnly: true,
         method: "dictionary-fr-exact"
       });
     }
@@ -173,7 +199,8 @@ function addGlossForms(
 
 function addMeaningForms(
   formsByStrong: Map<string, Map<string, DictionaryForm>>,
-  strong: string,
+  key: string,
+  candidate: { strong: string; stepStrong?: string },
   row: DictionaryRow
 ): void {
   if (isProperNameRow(row)) return;
@@ -185,11 +212,12 @@ function addMeaningForms(
   }
 
   for (const [word, count] of counts) {
-    addForm(formsByStrong, {
-      strong,
+    addForm(formsByStrong, key, {
+      ...candidate,
       form: word,
       score: Math.min(0.3, 0.18 + count * 0.04),
       source: "strong-lexicon-sqlite:fr-meaning",
+      reviewOnly: true,
       method: "dictionary-fr-exact"
     });
   }
@@ -215,15 +243,16 @@ function isContentWord(word: string): boolean {
 
 function addForm(
   formsByStrong: Map<string, Map<string, DictionaryForm>>,
+  key: string,
   form: DictionaryForm
 ): void {
   if (!form.form) return;
-  const forms = formsByStrong.get(form.strong) ?? new Map();
+  const forms = formsByStrong.get(key) ?? new Map();
   const existing = forms.get(form.form);
   if (!existing || form.score > existing.score) {
     forms.set(form.form, form);
   }
-  formsByStrong.set(form.strong, forms);
+  formsByStrong.set(key, forms);
 }
 
 function stemCandidate(form: DictionaryForm): StrongTranslationCandidate[] {
@@ -232,9 +261,12 @@ function stemCandidate(form: DictionaryForm): StrongTranslationCandidate[] {
   return [
     {
       strong: form.strong,
+      stepStrong: form.stepStrong,
       normalized: stem,
       score: Math.max(0.18, form.score - 0.12),
       source: `${form.source}:stem`,
+      provenanceRoot: "strong-lexicon-sqlite",
+      reviewOnly: form.reviewOnly,
       method: "dictionary-fr-stem"
     }
   ];

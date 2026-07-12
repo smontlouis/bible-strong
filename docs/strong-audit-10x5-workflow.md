@@ -160,7 +160,7 @@ Rev, Prov, Dan, 2Sam, Amos, 1Sam, 1Tim, Heb, Ezek, John
   stayed at `0.9567`.
 - Compound STEP proper-name candidates are no longer counted as clean
   single-open high candidates in the residual report. The current 10x5 sample
-  has `compoundProperNameItems` at `0` and `cleanSingleOpenHighItems` at `0`;
+  has `compoundProperNameItems` at `0` and `cleanSingleOpenHighItems` at `77`;
   broader stress tests keep names such as `Lo-Rouhama` in a dedicated review
   queue when the underlying STEP evidence has multiple gloss parts or duplicate
   source occurrences.
@@ -168,12 +168,12 @@ Rev, Prov, Dan, 2Sam, Amos, 1Sam, 1Tim, Heb, Ezek, John
   high-blocked residual queues. This keeps synonym-only blocker noise separate
   from real direct-evidence ambiguity, so future deterministic placement rules
   can be evaluated against the right queue instead of a mixed count. On the
-  current 10x5 sample, the blocked count is `63`: `29` medium-blocked items and
-  `34` high-blocked items.
+  current 10x5 sample, the blocked count is `20`: `15` medium-blocked items and
+  `5` high-blocked items.
 - Inferred-seed high candidates are reported separately so false direct-looking
   candidates can be audited without weakening the validated dictionary-backed
   path. This is intentionally a diagnostic category; it does not lower
-  confidence or change ledger output yet. On the current 10x5 sample, `25`
+  confidence or change ledger output yet. On the current 10x5 sample, `54`
   high candidates use inferred seed evidence.
 - When an auxiliary-plus-participle phrase and its contained participle are
   both independently auto-safe, the phrase wins. This resolves a mechanical

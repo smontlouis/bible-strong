@@ -1,23 +1,25 @@
 # LLM Gap-Review Production Maturity
 
-Date: 2026-06-29
+Date: 2026-07-10
 
 ## Decision
 
-Continue the LLM pass as a bounded reviewer after deterministic candidate
-generation. Do not promote it to broad automatic application yet.
+Use the LLM only as a bounded reviewer after deterministic candidate
+generation. Production application is mature only through the locked batch
+runner; arbitrary standalone application remains prohibited.
 
 The mature workflow is:
 
 ```text
 canonical ledger
 -> gap candidates
--> compact packet
--> bounded LLM review
--> local validation
--> selective apply
--> refresh/generate
--> benchmark report
+-> stable batch plan / bounded choices
+-> proposer A
+-> adaptive candidate subset to proposer B
+-> exact consensus from two distinct models
+-> current lexical safety filter + contract v2
+-> locked transaction / scoped refresh / gates / rollback
+-> manifest + durable decision ledger
 ```
 
 ## What Is Implemented
@@ -26,10 +28,11 @@ canonical ledger
   review JSON with raw model content, usage, parsed decisions, and parse errors.
 - `strong:review:gaps:report` produces JSON and Markdown benchmark summaries
   with `--output-json` and `--output-md`.
-- `strong:review:gaps:apply --finalize-reference-style` finalizes only the
+- `strong:review:gaps:apply --finalize-reference-style` previews/finalizes only the
   candidates from the source packet. Valid unresolved, unsafe, or missing
   reference-style decisions become low-confidence `empty` overrides instead of
-  final pending items.
+  final pending items in the preview. It is validation-only, never a standalone
+  production apply path.
 - `strong:review:gaps:packet` now emits compact packets containing only verses
   referenced by selected candidates.
 - `strong:review:gaps:packet --min-priority semantic-medium` can now stop a
@@ -39,8 +42,47 @@ canonical ledger
   `strong:lexical-candidates` reports.
 - `strong:review:gaps:consensus` builds a visible high-confidence consensus
   review from two validated model outputs.
+- `strong:review:gaps:batch` fixes task membership/pagination, requires strict
+  bounded choices, calls proposer B adaptively at candidate level, verifies
+  exact consensus from two distinct model identities, applies the current
+  lexical filter and v2 contract, and owns the write lock, transaction marker,
+  refresh gates, and rollback.
+- `semanticRefillAgentReview --apply` refuses to run without that matching batch
+  transaction. Direct application and combining standalone
+  `--finalize-reference-style` with `--apply` are intentionally unsupported.
 
-## Evidence So Far
+## Current Production State
+
+Historical NBS records are fail-closed by source. Plain `semantic-refill:llm`
+and `semantic-refill:llm-reference-style` are always quarantined; only
+`semantic-refill:llm-consensus-filtered` is production-eligible. The 5,379
+legacy single-model auto-accepts also remain quarantined.
+
+The strict artifact migration examined 2,411 raw semantic-refill records. It
+promoted 313 whose two distinct model artifacts still agree on the same bounded
+choice and whose `missing` candidate, target, open state, and direct lexical
+evidence are current. It rejects replacement/relocation and carrier conflicts,
+leaving 2,098 raw records quarantined. It reconstructed 2,480 durable decisions:
+2,043 `accepted-safe` and 437 `needs-witness-review`.
+
+```sh
+npm run strong:review:gaps:migrate-artifacts -- --bible nbs
+npm run strong:review:gaps:migrate-artifacts -- --bible nbs --apply
+```
+
+Always inspect the first dry-run report before applying. The durable terminal
+context is useful for analysis, but there is no safe general pre-LLM skip yet:
+the current candidate cohort and filter policy can change consensus eligibility.
+
+The final 2026-07-10 NBS generation contains 31,169 verses, 363,503
+reader-visible and 486,297 advanced Strong occurrences, including 95,456 empty
+and 5,369 phrase occurrences. Reference carrier coverage is `0.8593`, original
+carrier rate `0.8029`, original representation `0.9999`, semantic missing count
+`395`, placement risk `6,831`, and structural placement quality `0.9808`.
+Reader/advanced token coverage is `0.4912`/`0.5204`. The full generation took
+156.32 seconds and about 4.33 GB max RSS.
+
+## Historical Evidence
 
 ### Gen / DeepSeek
 
@@ -426,10 +468,12 @@ Safety filter:
 - automatic post-consensus replay held 3 additional `2Sam` decisions for
   witness review: `H5046 -> faisait`, `H1980 -> vais`, and `H0559 -> fit`.
   Those overrides were removed and `2Sam` was refreshed;
-- checked the `Rev.5.1` same-target stacking decision against witnesses after
-  the first filter. The witnesses (`Sg1910`, `Darby`, `DarbyR`) place `G1855` on
-  `dehors` / `revers` / `extérieur`; NBS `dos` therefore keeps `G1855`, while
-  `G3693` remains advanced empty with no reference support;
+- historical note: the 2026-06-29 filter kept `Rev.5.1 G1855 -> dos` because
+  witnesses placed that Strong on `dehors` / `revers` / `extérieur`. That
+  cross-carrier rationale is deprecated: the current filter requires exact
+  carrier support from independent families or direct deterministic evidence
+  on `dos`; otherwise the decision remains in witness review. `Darby` and
+  `DarbyR` count as one family;
 - `Lev` produced a clean 21-decision consensus. Follow-up isolation on
   2026-06-30 showed the apparent `strong:refresh` hang was scoped-refresh
   performance, not a bad Leviticus decision: repeated auto-safe passes reread
@@ -483,43 +527,44 @@ Future model comparisons should use only compact packets.
 
 Apply only decisions that satisfy all of the following:
 
+- application is owned by `strong:review:gaps:batch`, not a standalone apply
+  command;
+- two distinct model identities returned the exact same stable candidate id and
+  bounded choice id;
 - `target` is `word` or `phrase`;
 - `confidence >= 0.84`;
-- local validation accepts the decision;
+- the current post-consensus lexical filter accepts the decision;
+- the filtered review carries contract version 2 and exact packet/Bible/scope
+  identity;
+- the batch write lock and transaction marker are active;
 - no suspicious stacking conversion occurred;
 - the decision is not a weak/function word unless the French carrier is clear.
 
 Keep low-confidence `empty` decisions as review artifacts unless product
 explicitly chooses empty overrides as durable reference-style display policy.
+`--finalize-reference-style` can create that preview, but cannot apply it.
 
 ## Next Test Plan
 
-1. Build or derive a higher-yield candidate queue for semantic carriers. Current
-   `function-low` packets mostly test restraint.
-2. Use `--min-priority semantic-medium` as the preflight gate for semantic
-   benchmark packets.
-3. Use lexical packets as the preferred source for high-yield semantic
-   benchmarks.
-4. Keep selective apply as the default. The first controlled multi-packet batch
-   now has 27 automatically filtered consensus decisions across 4 refreshed
-   books.
-5. Keep `strong:review:gaps:filter` mandatory before every apply: generic
-   carriers, same-target stacking, and positive risk delta must be held for
-   review.
-6. Leviticus is no longer blocked by a refresh hang and its 21 filtered
-   decisions are applied, but book-level refresh should be budgeted explicitly
-   because it still peaks around 7.46 GB RSS.
-7. Add an arbiter step only after two proposer outputs show non-zero visible
-   high-confidence candidates on the same packet and the safety filter leaves
-   unresolved high-value cases.
+1. Inspect `--plan-only` output before every paid run and keep task membership
+   stable when resuming.
+2. Continue improving deterministic direct evidence so fewer candidates reach
+   the LLM at all.
+3. Use adaptive proposer B at candidate level, but retain exact two-model
+   consensus for every applied decision.
+4. Cluster `needs-witness-review` decisions by Strong/carrier/provenance to turn
+   repeated review patterns into deterministic evidence rules.
+5. Design a safe pre-LLM reuse proof that includes the current cohort and filter
+   policy before enabling any terminal-decision skip.
+6. Keep the lexical filter, contract v2, transaction, scoped refresh, and
+   rollback gates mandatory.
 
 ## Go / No-Go
 
-Go for another bounded benchmark round. Batch 2 on 2026-06-30 added 17 filtered
-consensus decisions across `2Kgs.1-5`, `1Pet.1-5`, and `Rom.1-5`, with
-`emptyStrongCount -42`, `readerTaggedTokenCount +48`, and
-`placementRiskCount -6`. The filter held three agreed model decisions,
-including original-only `Rom.4.17 G5607 -> existe`, which is now covered by the
-`no-strong-witness-support` gate.
+Go for bounded production batches whose plan is inspected and whose exact
+two-model/filter/transaction gates remain enabled.
 
-No-go for broad automatic application.
+No-go for standalone `strong:review:gaps:apply --apply`, for
+combining `--finalize-reference-style` with `--apply`, for single-model
+promotion, for unbounded free-form targets, or for treating a prior terminal
+ledger record as a safe pre-LLM skip.

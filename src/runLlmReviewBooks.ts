@@ -361,7 +361,7 @@ function parseCliOptions(argv: string[]): BatchOptions {
       "anthropic/claude-sonnet-4.6",
     skipExisting:
       flags.has("skip-existing") || args.get("skip-existing") === "true",
-    autoAccept: args.get("auto-accept") !== "false",
+    autoAccept: args.get("auto-accept") === "true",
     autoAcceptThreshold: Number.parseFloat(
       args.get("auto-accept-threshold") ?? "0.84"
     )

@@ -1,6 +1,8 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { isGenericFrenchCarrier } from "./frenchLexicalSafety.js";
+
 import {
   buildStrongVerseMap,
   parseStrongTokens,
@@ -9,44 +11,54 @@ import {
   type StrongToken
 } from "./strongCsv.js";
 import {
+  assertSemanticRefillRawDecisionSubsetContract,
   type SemanticRefillLlmCandidatePacket,
   type SemanticRefillLlmRawDecision
 } from "./semanticRefillLlm.js";
+import { assertDistinctConsensusReviewModel } from "./semanticRefillConsensusReview.js";
 
-interface AgentReviewFile {
+export const POST_CONSENSUS_FILTER_POLICY_VERSION = 2;
+
+export interface AgentReviewFile {
   bible: string;
   books?: string[];
   scope: string;
   generatedAt: string;
   sourcePacket?: string;
   model?: string;
+  contract?: { version?: number };
   decisions: SemanticRefillLlmRawDecision[];
 }
 
-interface AgentPacketFile {
+export interface AgentPacketFile {
   bible: string;
   scope: string;
   candidates: SemanticRefillLlmCandidatePacket[];
 }
 
-interface ReferencePath {
+export interface ReferencePath {
   name: string;
   path: string;
 }
 
 interface WitnessHit {
   reference: string;
+  family: string;
+  exactCarrier: boolean;
   tokens: Array<{
     text: string;
     normalized: string;
   }>;
 }
 
-interface FilteredDecision {
+export interface FilteredDecision {
   decision: SemanticRefillLlmRawDecision;
   status: "accepted-safe" | "needs-witness-review" | "rejected-risky";
   reasons: string[];
   witnessHits: WitnessHit[];
+  exactWitnessFamilies: string[];
+  directDeterministicSupport: boolean;
+  carrierSupported: boolean;
   candidate?: SemanticRefillLlmCandidatePacket;
 }
 
@@ -64,6 +76,8 @@ interface FilterReport {
     rejectedRisky: number;
   };
   decisions: Array<{
+    candidateId: string;
+    choiceId: string;
     ref: string;
     strong: string[];
     target: string;
@@ -72,6 +86,8 @@ interface FilterReport {
     status: FilteredDecision["status"];
     reasons: string[];
     witnessHits: WitnessHit[];
+    exactWitnessFamilies: string[];
+    directDeterministicSupport: boolean;
   }>;
 }
 
@@ -80,69 +96,6 @@ const DEFAULT_REFERENCES: ReferencePath[] = [
   { name: "Darby", path: "data/strongs/Darby.csv" },
   { name: "DarbyR", path: "data/strongs/DarbyR.csv" }
 ];
-
-const GENERIC_CARRIERS = new Set([
-  "a",
-  "ai",
-  "as",
-  "avons",
-  "avez",
-  "aurait",
-  "auriez",
-  "auront",
-  "avait",
-  "avaient",
-  "ce",
-  "cela",
-  "celle",
-  "celles",
-  "celui",
-  "ceux",
-  "est",
-  "etait",
-  "etaient",
-  "etre",
-  "faire",
-  "fais",
-  "faisait",
-  "faisaient",
-  "faisant",
-  "fasse",
-  "fassent",
-  "fait",
-  "faites",
-  "faits",
-  "fera",
-  "ferai",
-  "feraient",
-  "ferais",
-  "ferait",
-  "feras",
-  "ferez",
-  "ferons",
-  "feront",
-  "fit",
-  "font",
-  "irai",
-  "ira",
-  "iront",
-  "met",
-  "mets",
-  "mettra",
-  "mettrai",
-  "mettre",
-  "mis",
-  "peut",
-  "peuvent",
-  "puisse",
-  "puissent",
-  "quoi",
-  "suis",
-  "va",
-  "vais",
-  "vas",
-  "vont"
-]);
 
 export async function filterConsensusReview(options: {
   reviewPath: string;
@@ -153,11 +106,27 @@ export async function filterConsensusReview(options: {
   referencePaths?: ReferencePath[];
 }): Promise<FilterReport> {
   const review = await readJson<AgentReviewFile>(options.reviewPath);
+  assertDistinctConsensusReviewModel(review.model);
   const packetPath = options.packetPath ?? review.sourcePacket;
   if (!packetPath) {
     throw new Error("missing-source-packet");
   }
   const packet = await readJson<AgentPacketFile>(packetPath);
+  if (
+    review.bible.toLowerCase() !== packet.bible.toLowerCase() ||
+    review.scope !== packet.scope
+  ) {
+    throw new Error(
+      `consensus-packet-scope-mismatch:${review.bible}:${review.scope}:${packet.bible}:${packet.scope}`
+    );
+  }
+  if (review.contract?.version !== 2) {
+    throw new Error("consensus-contract-v2-required");
+  }
+  assertSemanticRefillRawDecisionSubsetContract({
+    batch: packet,
+    rawDecisions: review.decisions
+  });
   const referenceMaps = await readReferenceMaps(
     options.referencePaths ?? DEFAULT_REFERENCES
   );
@@ -177,6 +146,8 @@ export async function filterConsensusReview(options: {
       .filter((item) => item.status === "accepted-safe")
       .map((item) => item.decision),
     postConsensusFilter: {
+      policyVersion: POST_CONSENSUS_FILTER_POLICY_VERSION,
+      sourceConsensusModel: review.model,
       sourceReview: options.reviewPath,
       sourcePacket: packetPath,
       acceptedSafe: filtered.filter((item) => item.status === "accepted-safe")
@@ -185,7 +156,14 @@ export async function filterConsensusReview(options: {
         (item) => item.status === "needs-witness-review"
       ).length,
       rejectedRisky: filtered.filter((item) => item.status === "rejected-risky")
-        .length
+        .length,
+      outcomes: filtered.map((item) => ({
+        decision: item.decision,
+        status: item.status,
+        reasons: item.reasons,
+        exactWitnessFamilies: item.exactWitnessFamilies,
+        directDeterministicSupport: item.directDeterministicSupport
+      }))
     }
   };
 
@@ -206,6 +184,8 @@ export async function filterConsensusReview(options: {
         .length
     },
     decisions: filtered.map((item) => ({
+      candidateId: item.decision.id,
+      choiceId: item.decision.choiceId,
       ref: item.decision.ref,
       strong: item.decision.strong,
       target: item.decision.decision,
@@ -213,7 +193,9 @@ export async function filterConsensusReview(options: {
       normalized: item.decision.normalized,
       status: item.status,
       reasons: item.reasons,
-      witnessHits: item.witnessHits
+      witnessHits: item.witnessHits,
+      exactWitnessFamilies: item.exactWitnessFamilies,
+      directDeterministicSupport: item.directDeterministicSupport
     }))
   };
 
@@ -261,14 +243,18 @@ function classifySingleDecision(options: {
     options.referenceMaps
   );
   const reasons: string[] = [];
-  const normalized = options.decision.normalized ?? "";
-  const exactWitnessSupport = witnessHits.filter((hit) =>
-    hit.tokens.some((token) => token.normalized === normalized)
-  ).length;
+  const exactWitnessFamilies = exactCarrierWitnessFamilies(witnessHits);
+  const directDeterministicSupport = options.candidate
+    ? candidateHasRobustDirectCarrierEvidence(
+        options.candidate,
+        options.decision
+      )
+    : false;
   const generic = isGenericCarrier(options.decision);
 
   if (
     witnessHits.length === 0 &&
+    !directDeterministicSupport &&
     options.candidate &&
     !candidateHasReferenceStrong(options.candidate, options.decision.strong)
   ) {
@@ -278,23 +264,45 @@ function classifySingleDecision(options: {
       status: "needs-witness-review",
       reasons,
       witnessHits,
+      exactWitnessFamilies,
+      directDeterministicSupport,
+      carrierSupported: false,
       candidate: options.candidate
     };
   }
 
-  if (generic && exactWitnessSupport < 2) {
+  if (generic && exactWitnessFamilies.length < 2) {
     reasons.push("generic-carrier-needs-witness-review");
     return {
       decision: options.decision,
       status: "needs-witness-review",
       reasons,
       witnessHits,
+      exactWitnessFamilies,
+      directDeterministicSupport,
+      carrierSupported: false,
       candidate: options.candidate
     };
   }
 
   if (generic) {
     reasons.push("generic-carrier-exact-witness-supported");
+  } else if (exactWitnessFamilies.length > 0) {
+    reasons.push("exact-carrier-witness-supported");
+  } else if (directDeterministicSupport) {
+    reasons.push("direct-deterministic-carrier-evidence");
+  } else {
+    reasons.push("carrier-needs-exact-witness-or-direct-evidence");
+    return {
+      decision: options.decision,
+      status: "needs-witness-review",
+      reasons,
+      witnessHits,
+      exactWitnessFamilies,
+      directDeterministicSupport,
+      carrierSupported: false,
+      candidate: options.candidate
+    };
   }
 
   return {
@@ -302,23 +310,28 @@ function classifySingleDecision(options: {
     status: "accepted-safe",
     reasons,
     witnessHits,
+    exactWitnessFamilies,
+    directDeterministicSupport,
+    carrierSupported: true,
     candidate: options.candidate
   };
 }
 
 function resolveStackingGroup(group: FilteredDecision[]): void {
-  const supported = group.filter((item) => item.witnessHits.length > 0);
+  const supported = group.filter(
+    (item) => item.carrierSupported && item.status === "accepted-safe"
+  );
   if (supported.length === 1) {
     const keep = supported[0];
     if (!keep) return;
     if (!keep.reasons.includes("generic-carrier-needs-witness-review")) {
       keep.status = "accepted-safe";
     }
-    keep.reasons.push("same-target-stacking-resolved-by-witness");
+    keep.reasons.push("same-target-stacking-resolved-by-carrier-support");
     for (const item of group) {
       if (item === keep) continue;
       item.status = "rejected-risky";
-      item.reasons.push("same-target-stacking-lacks-witness-support");
+      item.reasons.push("same-target-stacking-lacks-carrier-support");
     }
     return;
   }
@@ -327,8 +340,8 @@ function resolveStackingGroup(group: FilteredDecision[]): void {
     item.status = "needs-witness-review";
     item.reasons.push(
       supported.length > 1
-        ? "same-target-stacking-multiple-witness-supported"
-        : "same-target-stacking-no-witness-supported"
+        ? "same-target-stacking-multiple-carriers-supported"
+        : "same-target-stacking-no-carrier-supported"
     );
   }
 }
@@ -341,10 +354,13 @@ function witnessHitsForDecision(
   for (const [reference, map] of referenceMaps) {
     const verse = map.get(decision.ref);
     if (!verse) continue;
-    const tokens = tokensWithStrong(verse.row.text, decision.strong);
+    const verseTokens = parseStrongTokens(verse.row.text);
+    const tokens = tokensWithStrong(verseTokens, decision.strong);
     if (tokens.length === 0) continue;
     hits.push({
       reference,
+      family: editorialReferenceFamily(reference),
+      exactCarrier: referenceHasExactCarrier(verseTokens, decision),
       tokens: tokens.map((token) => ({
         text: token.text,
         normalized: token.normalized
@@ -354,9 +370,123 @@ function witnessHitsForDecision(
   return hits;
 }
 
-function tokensWithStrong(text: string, strong: string[]): StrongToken[] {
+function exactCarrierWitnessFamilies(witnessHits: WitnessHit[]): string[] {
+  const families = new Set<string>();
+  for (const hit of witnessHits) {
+    if (hit.exactCarrier) {
+      families.add(hit.family);
+    }
+  }
+  return [...families].sort();
+}
+
+function referenceHasExactCarrier(
+  tokens: StrongToken[],
+  decision: SemanticRefillLlmRawDecision
+): boolean {
+  const wanted = new Set(decision.strong.map((strong) => strong.toUpperCase()));
+  const carriesWantedStrong = (token: StrongToken): boolean =>
+    token.strong.some((strong) => wanted.has(strong.toUpperCase()));
+
+  if (decision.decision === "word") {
+    return (
+      typeof decision.normalized === "string" &&
+      tokens.some(
+        (token) =>
+          carriesWantedStrong(token) && token.normalized === decision.normalized
+      )
+    );
+  }
+
+  if (decision.decision === "phrase" && decision.normalizedPhrase) {
+    const phrase = decision.normalizedPhrase;
+    for (let start = 0; start <= tokens.length - phrase.length; start += 1) {
+      const window = tokens.slice(start, start + phrase.length);
+      if (
+        phrase.every(
+          (normalized, offset) => window[offset]?.normalized === normalized
+        ) &&
+        window.every(carriesWantedStrong)
+      ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+const DIRECT_EVIDENCE_PREFIXES = [
+  "seed-term:",
+  "seed-stem:",
+  "number-component:",
+  "kaikki-gloss:",
+  "proper-name-step:",
+  "proper-name-dictionary:"
+];
+
+function candidateHasRobustDirectCarrierEvidence(
+  candidate: SemanticRefillLlmCandidatePacket,
+  decision: SemanticRefillLlmRawDecision
+): boolean {
+  const wantedStrong = new Set(
+    decision.strong.map((strong) => strong.toUpperCase())
+  );
+  return candidate.deterministicCandidates.some(
+    (deterministic) =>
+      wantedStrong.has(deterministic.strong.toUpperCase()) &&
+      deterministic.score >= 0.84 &&
+      deterministicCandidateMatchesDecision(deterministic, decision) &&
+      deterministic.evidence.some((evidence) =>
+        DIRECT_EVIDENCE_PREFIXES.some((prefix) => evidence.startsWith(prefix))
+      )
+  );
+}
+
+function deterministicCandidateMatchesDecision(
+  deterministic: SemanticRefillLlmCandidatePacket["deterministicCandidates"][number],
+  decision: SemanticRefillLlmRawDecision
+): boolean {
+  if (deterministic.target !== decision.decision) return false;
+  if (decision.decision === "word") {
+    return (
+      deterministic.wordIndex === decision.wordIndex &&
+      deterministic.normalizedWord === decision.normalized
+    );
+  }
+  if (decision.decision === "phrase") {
+    return (
+      deterministic.startWordIndex === decision.startWordIndex &&
+      deterministic.endWordIndex === decision.endWordIndex &&
+      sameStrings(deterministic.normalizedPhrase, decision.normalizedPhrase)
+    );
+  }
+  return false;
+}
+
+function sameStrings(
+  left: string[] | undefined,
+  right: string[] | null
+): boolean {
+  if (!left || !right) return left === undefined && right === null;
+  return (
+    left.length === right.length &&
+    left.every((value, index) => value === right[index])
+  );
+}
+
+function editorialReferenceFamily(reference: string): string {
+  const normalized = reference.toLowerCase().replace(/[^a-z0-9]+/gu, "");
+  if (normalized.startsWith("darby")) return "Darby-family";
+  return reference;
+}
+
+function tokensWithStrong(
+  tokens: StrongToken[],
+  strong: string[]
+): StrongToken[] {
   const wanted = new Set(strong.map((code) => code.toUpperCase()));
-  return parseStrongTokens(text).filter((token) =>
+  return tokens.filter((token) =>
     token.strong.some((code) => wanted.has(code.toUpperCase()))
   );
 }
@@ -365,26 +495,75 @@ function groupByTarget(
   decisions: FilteredDecision[]
 ): Map<string, FilteredDecision[]> {
   const groups = new Map<string, FilteredDecision[]>();
-  for (const decision of decisions) {
-    if (decision.decision.decision === "phrase") continue;
-    const key = [
-      decision.decision.ref,
-      decision.decision.decision,
-      decision.decision.wordIndex ?? "",
-      decision.decision.normalized ?? ""
-    ].join("|");
-    const group = groups.get(key) ?? [];
-    group.push(decision);
-    groups.set(key, group);
+  const unseen = new Set(decisions);
+  let groupIndex = 0;
+
+  while (unseen.size > 0) {
+    const seed = unseen.values().next().value as FilteredDecision;
+    unseen.delete(seed);
+    const group = [seed];
+    const queue = [seed];
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      for (const candidate of [...unseen]) {
+        if (!carrierTargetsConflict(current.decision, candidate.decision)) {
+          continue;
+        }
+        unseen.delete(candidate);
+        group.push(candidate);
+        queue.push(candidate);
+      }
+    }
+    groups.set(`carrier-component:${groupIndex}`, group);
+    groupIndex += 1;
   }
   return groups;
+}
+
+function carrierTargetsConflict(
+  left: SemanticRefillLlmRawDecision,
+  right: SemanticRefillLlmRawDecision
+): boolean {
+  if (left.ref !== right.ref) return false;
+  const leftInterval = visibleCarrierInterval(left);
+  const rightInterval = visibleCarrierInterval(right);
+  if (leftInterval && rightInterval) {
+    return (
+      leftInterval.start <= rightInterval.end &&
+      rightInterval.start <= leftInterval.end
+    );
+  }
+  return (
+    left.decision === "empty" &&
+    right.decision === "empty" &&
+    left.wordIndex === right.wordIndex
+  );
+}
+
+function visibleCarrierInterval(
+  decision: SemanticRefillLlmRawDecision
+): { start: number; end: number } | undefined {
+  if (decision.decision === "word" && decision.wordIndex !== null) {
+    return { start: decision.wordIndex, end: decision.wordIndex };
+  }
+  if (
+    decision.decision === "phrase" &&
+    decision.startWordIndex !== null &&
+    decision.endWordIndex !== null
+  ) {
+    return {
+      start: decision.startWordIndex,
+      end: decision.endWordIndex
+    };
+  }
+  return undefined;
 }
 
 function isGenericCarrier(decision: SemanticRefillLlmRawDecision): boolean {
   return (
     decision.decision === "word" &&
     decision.normalized !== null &&
-    GENERIC_CARRIERS.has(decision.normalized)
+    isGenericFrenchCarrier(decision.normalized)
   );
 }
 
@@ -398,8 +577,8 @@ function candidateHasReferenceStrong(
   );
 }
 
-async function readReferenceMaps(
-  referencePaths: ReferencePath[]
+export async function readReferenceMaps(
+  referencePaths: ReferencePath[] = DEFAULT_REFERENCES
 ): Promise<Map<string, StrongVerseMap>> {
   const maps = new Map<string, StrongVerseMap>();
   for (const reference of referencePaths) {
@@ -439,7 +618,7 @@ function renderMarkdown(report: FilterReport): string {
         decision.witnessHits
           .map(
             (hit) =>
-              `${hit.reference}:${hit.tokens
+              `${hit.reference}[${hit.family}]:${hit.tokens
                 .map((token) => token.normalized)
                 .join("+")}`
           )

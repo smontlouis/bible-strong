@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import {
   WEAK_WORDS,
   validateSemanticRefillDecision,
@@ -25,6 +27,7 @@ export type SemanticRefillLlmMode = "dry-run" | "mock";
 
 export interface SemanticRefillLlmRawDecision {
   id: string;
+  choiceId: string;
   ref: string;
   decision: SemanticRefillLlmDecisionType;
   strong: string[];
@@ -39,14 +42,22 @@ export interface SemanticRefillLlmRawDecision {
 }
 
 export interface SemanticRefillLlmResponse {
-  decisions: SemanticRefillLlmRawDecision[];
+  decisions: SemanticRefillLlmSelection[];
+}
+
+export interface SemanticRefillLlmSelection {
+  id: string;
+  choiceId: string;
+  confidence: number;
+  reason: string;
+  evidence: string[];
 }
 
 export interface SemanticRefillLlmClientRequest {
   model: string;
   temperature: 0;
   messages: Array<{ role: "system" | "user"; content: string }>;
-  responseSchema: typeof SEMANTIC_REFILL_LLM_JSON_SCHEMA;
+  responseSchema: SemanticRefillLlmJsonSchema;
 }
 
 export interface SemanticRefillLlmClient {
@@ -129,6 +140,18 @@ export interface SemanticRefillLlmCandidatePacket {
     normalizedPhrase?: string[];
     evidence: string[];
   }>;
+  choices: SemanticRefillLlmChoice[];
+}
+
+export interface SemanticRefillLlmChoice {
+  id: string;
+  decision: SemanticRefillLlmDecisionType;
+  description: string;
+  wordIndex: number | null;
+  normalized: string | null;
+  startWordIndex: number | null;
+  endWordIndex: number | null;
+  normalizedPhrase: string[] | null;
 }
 
 export interface SemanticRefillLlmBatch {
@@ -184,7 +207,8 @@ export interface RunSemanticRefillLlmOptions {
 export const SEMANTIC_REFILL_LLM_SYSTEM_PROMPT = [
   "Tu es un expert d'alignement biblique Strong pour un backend semantic-refill.",
   "Réponds uniquement avec du JSON conforme au schema fourni.",
-  "N'invente jamais de Strong: utilise seulement les codes fournis dans chaque candidat.",
+  "Retourne exactement une sélection par candidat, avec son id et un choiceId fourni dans choices.",
+  "N'invente jamais d'id, de choiceId, de Strong, d'index ou de cible.",
   "Deux audits existent:",
   "- missing: le Strong attendu n'est pas encore visible; il faut l'ajouter sur word/phrase ou empty.",
   "- relocation: le Strong est déjà visible, mais peut être mal attaché; il faut choisir keep/duplicate si le placement actuel est correct, ou word/phrase/empty si le Strong doit être déplacé.",
@@ -197,80 +221,109 @@ export const SEMANTIC_REFILL_LLM_SYSTEM_PROMPT = [
   "- not-rendered: l'original n'est pas naturellement rendu dans le français.",
   "- pending-human: cas plausible mais trop ambigu pour automatiser.",
   "- reject: candidat faux ou insuffisamment justifié.",
-  "Pour word et phrase, les index et normalisations doivent correspondre exactement aux tokens fournis.",
+  "Pour word et phrase, sélectionne uniquement un choiceId fourni; les index et normalisations sont résolus par le backend.",
   "Ne tague pas articles, pronoms, conjonctions ou mots faibles sauf préposition/construction clairement traduite.",
   "Préserve la différence entre un équivalent lexical visible, un doublon et un original non rendu.",
   "Procédure obligatoire avant chaque décision:",
-  "1. Vérifie les Strong déjà présents dans existingReaderStrong/occupiedTargets.",
+  "1. Vérifie les Strong déjà présents dans verses.tokens[].occupied.",
   "2. Pour auditKind=relocation, compare currentTarget aux alternatives dans deterministicCandidates avant de garder le placement courant.",
   "3. Si la meilleure cible porte déjà un autre Strong, ne l'empile pas par défaut: cherche d'abord une cible française plausible non occupée.",
   "4. N'empile plusieurs Strong sur un même mot que si le français fusionne réellement plusieurs notions et qu'aucune cible non occupée plausible n'existe.",
   "5. Si deux cibles plausibles existent, préfère la distribution qui garde les Strong distincts sur des mots distincts.",
-  "6. Traite blockedTargets comme des cibles interdites pour decision=word, sauf fusion française indispensable.",
-  "7. Quand sourcePlacement.insertAfterWordIndex existe, consulte nearbyOpenTargets et préfère une cible sémantique proche de l'emplacement original vide.",
+  "6. Traite blockedTargetIndexes comme des cibles interdites pour decision=word, sauf fusion française indispensable.",
+  "7. Quand sourcePlacement.insertAfterWordIndex existe, consulte nearbyOpenTargetIndexes et préfère une cible sémantique proche de l'emplacement original vide.",
   "8. Si tu hésites entre une cible bloquée et une cible ouverte, choisis la cible ouverte ou pending-human, jamais un word auto-confiant sur la cible bloquée.",
   "9. Mentionne explicitement dans reason pourquoi une cible occupée est quand même choisie, ou pourquoi elle est évitée."
 ].join("\n");
 
 export const SEMANTIC_REFILL_LLM_JSON_SCHEMA = {
   name: "semantic_refill_llm_decisions",
+  strict: true
+} as const;
+
+interface SemanticRefillLlmSelectionSchemaBranch {
+  type: "object";
+  additionalProperties: false;
+  required: readonly ["id", "choiceId", "confidence", "reason", "evidence"];
+  properties: {
+    id: { type: "string"; enum: string[] };
+    choiceId: { type: "string"; enum: string[] };
+    confidence: { type: "number"; minimum: 0; maximum: 1 };
+    reason: { type: "string"; minLength: 1 };
+    evidence: { type: "array"; items: { type: "string" } };
+  };
+}
+
+export interface SemanticRefillLlmJsonSchema {
+  name: typeof SEMANTIC_REFILL_LLM_JSON_SCHEMA.name;
+  strict: true;
   schema: {
-    type: "object",
-    additionalProperties: false,
-    required: ["decisions"],
+    type: "object";
+    additionalProperties: false;
+    required: readonly ["decisions"];
     properties: {
       decisions: {
-        type: "array",
-        items: {
-          type: "object",
-          additionalProperties: false,
-          required: [
-            "id",
-            "ref",
-            "decision",
-            "strong",
-            "confidence",
-            "reason",
-            "wordIndex",
-            "normalized",
-            "startWordIndex",
-            "endWordIndex",
-            "normalizedPhrase",
-            "evidence"
-          ],
-          properties: {
-            id: { type: "string" },
-            ref: { type: "string" },
-            decision: {
-              type: "string",
-              enum: SEMANTIC_REFILL_LLM_DECISION_TYPES
-            },
-            strong: {
-              type: "array",
-              minItems: 1,
-              items: { type: "string", pattern: "^[HG][0-9]{4}$" }
-            },
-            confidence: { type: "number", minimum: 0, maximum: 1 },
-            reason: { type: "string" },
-            wordIndex: { type: ["integer", "null"] },
-            normalized: { type: ["string", "null"] },
-            startWordIndex: { type: ["integer", "null"] },
-            endWordIndex: { type: ["integer", "null"] },
-            normalizedPhrase: {
-              type: ["array", "null"],
-              items: { type: "string" }
-            },
-            evidence: {
-              type: "array",
-              items: { type: "string" }
-            }
+        type: "array";
+        minItems: number;
+        maxItems: number;
+        items: { anyOf: SemanticRefillLlmSelectionSchemaBranch[] };
+      };
+    };
+  };
+}
+
+export function buildSemanticRefillLlmJsonSchema(
+  batch: SemanticRefillLlmBatch
+): SemanticRefillLlmJsonSchema {
+  const candidates = batch.candidates.map(ensureCandidateChoices);
+  const branches = candidates.map((candidate) =>
+    selectionSchemaBranch(
+      [candidate.id],
+      candidate.choices.map((choice) => choice.id)
+    )
+  );
+
+  return {
+    name: SEMANTIC_REFILL_LLM_JSON_SCHEMA.name,
+    strict: true,
+    schema: {
+      type: "object",
+      additionalProperties: false,
+      required: ["decisions"],
+      properties: {
+        decisions: {
+          type: "array",
+          minItems: candidates.length,
+          maxItems: candidates.length,
+          items: {
+            anyOf:
+              branches.length > 0
+                ? branches
+                : [selectionSchemaBranch(["__no_candidate__"], ["reject"])]
           }
         }
       }
     }
-  },
-  strict: true
-} as const;
+  };
+}
+
+function selectionSchemaBranch(
+  candidateIds: string[],
+  choiceIds: string[]
+): SemanticRefillLlmSelectionSchemaBranch {
+  return {
+    type: "object",
+    additionalProperties: false,
+    required: ["id", "choiceId", "confidence", "reason", "evidence"],
+    properties: {
+      id: { type: "string", enum: candidateIds },
+      choiceId: { type: "string", enum: choiceIds },
+      confidence: { type: "number", minimum: 0, maximum: 1 },
+      reason: { type: "string", minLength: 1 },
+      evidence: { type: "array", items: { type: "string" } }
+    }
+  };
+}
 
 export async function runSemanticRefillLlm(
   options: RunSemanticRefillLlmOptions
@@ -283,9 +336,10 @@ export async function runSemanticRefillLlm(
   const rawDecisions =
     options.mode === "dry-run"
       ? []
-      : normalizeLlmResponse(
-          options.mockResponse ?? (await options.client?.complete(request))
-        ).decisions;
+      : parseSemanticRefillLlmResponse(
+          options.mockResponse ?? (await options.client?.complete(request)),
+          batch
+        );
   const evaluated = evaluateSemanticRefillLlmDecisions({
     bible: options.bible,
     verses: options.verses,
@@ -330,12 +384,13 @@ export function buildSemanticRefillLlmBatch(options: {
   return {
     bible: options.bible.toLowerCase(),
     scope: options.scope,
-    candidates: prioritized.map((candidate, index) =>
-      auditItemToPacket(
-        options.bible,
-        candidate,
-        index,
-        versesByRef.get(candidate.ref)
+    candidates: assertUniqueCandidateIds(
+      prioritized.map((candidate) =>
+        auditItemToPacket(
+          options.bible,
+          candidate,
+          versesByRef.get(candidate.ref)
+        )
       )
     )
   };
@@ -348,20 +403,110 @@ export function buildSemanticRefillLlmRequest(options: {
   return {
     model: options.model,
     temperature: 0,
-    responseSchema: SEMANTIC_REFILL_LLM_JSON_SCHEMA,
+    responseSchema: buildSemanticRefillLlmJsonSchema(options.batch),
     messages: [
       { role: "system", content: SEMANTIC_REFILL_LLM_SYSTEM_PROMPT },
       {
         role: "user",
-        content: JSON.stringify({
-          task: "semantic-refill-candidate-decisions",
-          bible: options.batch.bible,
-          scope: options.batch.scope,
-          schemaName: SEMANTIC_REFILL_LLM_JSON_SCHEMA.name,
-          candidates: options.batch.candidates
-        })
+        content: JSON.stringify(compactSemanticRefillPrompt(options.batch))
       }
     ]
+  };
+}
+
+export function compactSemanticRefillPrompt(batch: SemanticRefillLlmBatch): {
+  task: string;
+  bible: string;
+  scope: string;
+  schemaName: string;
+  rules: string[];
+  verses: Array<{
+    ref: string;
+    text: string;
+    tokens: Array<{
+      i: number;
+      t: string;
+      n: string;
+      occupied: string[];
+      weak: boolean;
+    }>;
+  }>;
+  candidates: Array<Record<string, unknown>>;
+} {
+  const verses = new Map<
+    string,
+    {
+      ref: string;
+      text: string;
+      tokens: Array<{
+        i: number;
+        t: string;
+        n: string;
+        occupied: string[];
+        weak: boolean;
+      }>;
+    }
+  >();
+  for (const candidate of batch.candidates) {
+    if (verses.has(candidate.ref)) continue;
+    const available = new Map(
+      candidate.availableTargets.map((target) => [target.wordIndex, target])
+    );
+    verses.set(candidate.ref, {
+      ref: candidate.ref,
+      text: candidate.text,
+      tokens: candidate.tokens.map((token) => ({
+        i: token.wordIndex,
+        t: token.text,
+        n: token.normalized,
+        occupied: available.get(token.wordIndex)?.occupiedStrong ?? [],
+        weak: available.get(token.wordIndex)?.weak ?? false
+      }))
+    });
+  }
+
+  return {
+    task: "semantic-refill-candidate-decisions",
+    bible: batch.bible,
+    scope: batch.scope,
+    schemaName: SEMANTIC_REFILL_LLM_JSON_SCHEMA.name,
+    rules: [
+      "Return exactly one selection per candidate id.",
+      "Use only a choiceId listed in that candidate's choices.",
+      "Do not return Strong codes, refs, word indexes, or target text."
+    ],
+    verses: [...verses.values()],
+    candidates: batch.candidates.map((candidate) => ({
+      id: candidate.id,
+      ref: candidate.ref,
+      auditKind: candidate.auditKind,
+      priority: candidate.priority,
+      strong: candidate.strong,
+      currentPlacement: candidate.currentPlacement,
+      currentTarget: candidate.currentTarget,
+      sourcePlacement: candidate.sourcePlacement,
+      referenceWitnesses: Object.entries(candidate.referenceInventory)
+        .filter(([, strong]) => strong.includes(candidate.strong))
+        .map(([name]) => name),
+      nearbyOpenTargetIndexes: candidate.nearbyOpenTargets.map(
+        (target) => target.wordIndex
+      ),
+      blockedTargetIndexes: candidate.blockedTargets.map(
+        (target) => target.wordIndex
+      ),
+      warnings: candidate.placementWarnings,
+      deterministicCandidates: candidate.deterministicCandidates.map(
+        (deterministic) => ({
+          target: deterministic.target,
+          score: deterministic.score,
+          wordIndex: deterministic.wordIndex,
+          startWordIndex: deterministic.startWordIndex,
+          endWordIndex: deterministic.endWordIndex,
+          evidence: deterministic.evidence
+        })
+      ),
+      choices: candidate.choices
+    }))
   };
 }
 
@@ -373,6 +518,20 @@ export function evaluateSemanticRefillLlmDecisions(options: {
   autoAcceptThreshold?: number;
   referenceStyleFinalization?: boolean;
 }): Pick<SemanticRefillLlmRunResult, "validated" | "pending" | "rejected"> {
+  const autoAcceptThreshold = options.autoAcceptThreshold ?? 0.84;
+  if (
+    !Number.isFinite(autoAcceptThreshold) ||
+    autoAcceptThreshold < 0 ||
+    autoAcceptThreshold > 1
+  ) {
+    throw new Error(`invalid-auto-accept-threshold:${autoAcceptThreshold}`);
+  }
+  if (options.referenceStyleFinalization) {
+    assertSemanticRefillRawDecisionContract({
+      batch: options.batch,
+      rawDecisions: options.rawDecisions
+    });
+  }
   const versesByRef = new Map(
     options.verses.map((verse) => [verse.ref, verse])
   );
@@ -382,7 +541,6 @@ export function evaluateSemanticRefillLlmDecisions(options: {
   const validated: SemanticRefillDecision[] = [];
   const pending: SemanticRefillLlmEvaluatedDecision[] = [];
   const rejected: SemanticRefillLlmEvaluatedDecision[] = [];
-  const handledCandidateIds = new Set<string>();
 
   for (const raw of options.rawDecisions) {
     const candidate = candidatesById.get(raw.id);
@@ -395,27 +553,34 @@ export function evaluateSemanticRefillLlmDecisions(options: {
       );
       continue;
     }
-    handledCandidateIds.add(candidate.id);
-
     const structural = validateRawDecision(candidate, normalizedRaw);
     if (structural) {
       rejected.push(rejectedEvaluation(normalizedRaw, structural));
       continue;
     }
 
-    if (isTerminalRejectType(normalizedRaw.decision)) {
-      if (
-        options.referenceStyleFinalization &&
-        normalizedRaw.decision !== "duplicate"
-      ) {
-        validated.push(
-          referenceStyleEmptyOverride({
-            bible: options.bible,
-            candidate,
-            raw: normalizedRaw,
-            reason: `reference-style-empty-fallback:llm-classified-${normalizedRaw.decision}`
-          })
-        );
+    if (isReferenceStyleEmptyType(normalizedRaw.decision)) {
+      if (options.referenceStyleFinalization) {
+        const fallback = referenceStyleEmptyOverride({
+          bible: options.bible,
+          candidate,
+          raw: normalizedRaw,
+          reason: `reference-style-empty-fallback:llm-classified-${normalizedRaw.decision}`
+        });
+        if (normalizedRaw.confidence < autoAcceptThreshold) {
+          pending.push(
+            pendingEvaluation(
+              normalizedRaw,
+              belowAutoAcceptThresholdReason(
+                normalizedRaw.confidence,
+                autoAcceptThreshold
+              ),
+              fallback
+            )
+          );
+        } else {
+          validated.push(fallback);
+        }
       } else {
         rejected.push(
           rejectedEvaluation(
@@ -427,29 +592,55 @@ export function evaluateSemanticRefillLlmDecisions(options: {
       continue;
     }
 
+    if (
+      normalizedRaw.decision === "duplicate" ||
+      normalizedRaw.decision === "reject"
+    ) {
+      rejected.push(
+        rejectedEvaluation(
+          normalizedRaw,
+          `llm-classified-${normalizedRaw.decision}`
+        )
+      );
+      continue;
+    }
+
+    if (normalizedRaw.decision === "pending-human") {
+      pending.push(
+        pendingEvaluation(
+          normalizedRaw,
+          "llm requested human review before a durable override"
+        )
+      );
+      continue;
+    }
+
     const override = rawDecisionToOverride({
       bible: options.bible,
       candidate,
       raw: normalizedRaw
     });
     if (!override) {
-      if (options.referenceStyleFinalization) {
-        validated.push(
-          referenceStyleEmptyOverride({
-            bible: options.bible,
-            candidate,
-            raw: normalizedRaw,
-            reason: "reference-style-empty-fallback:no-durable-visible-override"
-          })
-        );
-      } else {
-        pending.push(
-          pendingEvaluation(
-            normalizedRaw,
-            "llm requested human review before a durable override"
-          )
-        );
-      }
+      pending.push(
+        pendingEvaluation(
+          normalizedRaw,
+          "llm requested human review before a durable override"
+        )
+      );
+      continue;
+    }
+
+    if (normalizedRaw.confidence < autoAcceptThreshold) {
+      pending.push(
+        pendingEvaluation(
+          normalizedRaw,
+          belowAutoAcceptThresholdReason(
+            normalizedRaw.confidence,
+            autoAcceptThreshold
+          ),
+          override
+        )
+      );
       continue;
     }
 
@@ -501,37 +692,23 @@ export function evaluateSemanticRefillLlmDecisions(options: {
     validated.push(override);
   }
 
-  if (options.referenceStyleFinalization) {
-    for (const candidate of options.batch.candidates) {
-      if (handledCandidateIds.has(candidate.id)) continue;
-      if (!versesByRef.has(candidate.ref)) continue;
-      validated.push(
-        referenceStyleEmptyOverride({
-          bible: options.bible,
-          candidate,
-          reason: "reference-style-empty-fallback:missing-llm-decision"
-        })
-      );
-    }
-  }
-
   return { validated, pending, rejected };
+}
+
+function belowAutoAcceptThresholdReason(
+  confidence: number,
+  threshold: number
+): string {
+  return `below-auto-accept-threshold:${confidence}<${threshold}`;
 }
 
 function auditItemToPacket(
   bible: string,
   item: SemanticRefillAuditItem,
-  index: number,
   verse?: StrongLedgerVerse
 ): SemanticRefillLlmCandidatePacket {
-  return {
-    id: [
-      bible.toLowerCase(),
-      item.ref,
-      item.strong,
-      item.annotation.id || item.currentPlacement,
-      index
-    ].join(":"),
+  const packet = {
+    id: stableCandidateId(bible, item),
     bible: bible.toLowerCase(),
     ref: item.ref,
     text: item.text,
@@ -588,7 +765,12 @@ function auditItemToPacket(
       endWordIndex: candidate.endWordIndex,
       normalizedPhrase: candidate.normalizedPhrase,
       evidence: candidate.evidence
-    }))
+    })),
+    choices: []
+  };
+  return {
+    ...packet,
+    choices: buildSemanticRefillLlmChoices(packet)
   };
 }
 
@@ -749,6 +931,161 @@ function buildPlacementWarnings(
   return warnings;
 }
 
+function stableCandidateId(
+  bible: string,
+  item: SemanticRefillAuditItem
+): string {
+  const identity = JSON.stringify({
+    bible: bible.toLowerCase(),
+    ref: item.ref,
+    strong: item.strong.toUpperCase(),
+    auditKind: item.auditKind ?? "missing",
+    annotationId: item.annotation.id,
+    currentPlacement: item.currentPlacement,
+    sourcePlacement: item.annotation.placement,
+    insertAfterWordIndex: item.annotation.insertAfterWordIndex ?? null,
+    currentTarget: item.currentTarget ?? null
+  });
+  const digest = createHash("sha256")
+    .update(identity)
+    .digest("hex")
+    .slice(0, 20);
+  return `srl:${bible.toLowerCase()}:${item.ref}:${item.strong.toUpperCase()}:${digest}`;
+}
+
+function assertUniqueCandidateIds<T extends SemanticRefillLlmCandidatePacket>(
+  candidates: T[]
+): T[] {
+  const seen = new Set<string>();
+  for (const candidate of candidates) {
+    if (seen.has(candidate.id)) {
+      throw new Error(`duplicate-semantic-refill-candidate-id:${candidate.id}`);
+    }
+    seen.add(candidate.id);
+  }
+  return candidates;
+}
+
+export function ensureCandidateChoices(
+  candidate: SemanticRefillLlmCandidatePacket
+): SemanticRefillLlmCandidatePacket {
+  if (Array.isArray(candidate.choices) && candidate.choices.length > 0) {
+    return candidate;
+  }
+  return {
+    ...candidate,
+    choices: buildSemanticRefillLlmChoices(candidate)
+  };
+}
+
+export function buildSemanticRefillLlmChoices(
+  candidate:
+    | Omit<SemanticRefillLlmCandidatePacket, "choices">
+    | SemanticRefillLlmCandidatePacket
+): SemanticRefillLlmChoice[] {
+  const choices: SemanticRefillLlmChoice[] = [];
+  const seen = new Set<string>();
+  const add = (choice: SemanticRefillLlmChoice): void => {
+    if (seen.has(choice.id)) return;
+    seen.add(choice.id);
+    choices.push(choice);
+  };
+
+  for (const target of candidate.availableTargets) {
+    add({
+      id: `word:${target.wordIndex}`,
+      decision: "word",
+      description: [
+        `word ${target.wordIndex}: ${target.text} (${target.normalized})`,
+        target.weak ? "weak" : "content",
+        target.occupiedStrong.length > 0
+          ? `occupied:${target.occupiedStrong.join(",")}`
+          : "open"
+      ].join("; "),
+      wordIndex: target.wordIndex,
+      normalized: target.normalized,
+      startWordIndex: null,
+      endWordIndex: null,
+      normalizedPhrase: null
+    });
+  }
+
+  for (const target of candidate.deterministicCandidates) {
+    if (
+      target.target !== "phrase" ||
+      target.startWordIndex === undefined ||
+      target.endWordIndex === undefined ||
+      !target.normalizedPhrase ||
+      target.normalizedPhrase.length === 0
+    ) {
+      continue;
+    }
+    add({
+      id: `phrase:${target.startWordIndex}-${target.endWordIndex}`,
+      decision: "phrase",
+      description: `phrase ${target.startWordIndex}-${target.endWordIndex}: ${target.normalizedPhrase.join(" ")}`,
+      wordIndex: null,
+      normalized: null,
+      startWordIndex: target.startWordIndex,
+      endWordIndex: target.endWordIndex,
+      normalizedPhrase: target.normalizedPhrase
+    });
+  }
+
+  const emptyWordIndex =
+    candidate.sourcePlacement.insertAfterWordIndex ??
+    candidate.currentTarget?.wordIndex ??
+    0;
+  add({
+    id: "empty",
+    decision: "empty",
+    description: "Keep the Strong off visible French words.",
+    wordIndex: emptyWordIndex,
+    normalized: null,
+    startWordIndex: null,
+    endWordIndex: null,
+    normalizedPhrase: null
+  });
+
+  for (const decision of [
+    "technical",
+    "duplicate",
+    "not-rendered",
+    "pending-human",
+    "reject"
+  ] as const) {
+    add({
+      id: decision,
+      decision,
+      description: terminalChoiceDescription(decision),
+      wordIndex: null,
+      normalized: null,
+      startWordIndex: null,
+      endWordIndex: null,
+      normalizedPhrase: null
+    });
+  }
+
+  return choices;
+}
+
+function terminalChoiceDescription(
+  decision: Exclude<SemanticRefillLlmDecisionType, "word" | "phrase" | "empty">
+): string {
+  switch (decision) {
+    case "technical":
+      return "Technical or grammatical Strong; no reader carrier.";
+    case "duplicate":
+      return "Already represented correctly; keep the existing placement.";
+    case "not-rendered":
+      return "The source notion is not naturally rendered in French.";
+    case "pending-human":
+      return "No bounded choice is reliable enough; require human review.";
+    case "reject":
+      return "The candidate itself is invalid or unsupported.";
+  }
+}
+
 function compareAuditItems(
   left: SemanticRefillAuditItem,
   right: SemanticRefillAuditItem
@@ -778,19 +1115,190 @@ function bestScore(item: SemanticRefillAuditItem): number {
   return item.candidates[0]?.score ?? 0;
 }
 
-function normalizeLlmResponse(value: unknown): SemanticRefillLlmResponse {
-  if (!value || typeof value !== "object") return { decisions: [] };
-  const decisions = (value as { decisions?: unknown }).decisions;
-  if (!Array.isArray(decisions)) return { decisions: [] };
+export function parseSemanticRefillLlmResponse(
+  value: unknown,
+  batch: SemanticRefillLlmBatch
+): SemanticRefillLlmRawDecision[] {
+  if (!isRecord(value)) throw llmContractError("response-not-object");
+  assertExactKeys(value, ["decisions"], "response");
+  if (!Array.isArray(value.decisions)) {
+    throw llmContractError("missing-decisions-array");
+  }
+
+  const candidates = assertUniqueCandidateIds(
+    batch.candidates.map(ensureCandidateChoices)
+  );
+  if (value.decisions.length !== candidates.length) {
+    throw llmContractError(
+      `decision-count-mismatch:expected-${candidates.length}:received-${value.decisions.length}`
+    );
+  }
+
+  const candidatesById = new Map(
+    candidates.map((candidate) => [candidate.id, candidate])
+  );
+  const seen = new Set<string>();
+  const decisions: SemanticRefillLlmRawDecision[] = [];
+
+  for (const [index, raw] of value.decisions.entries()) {
+    if (!isRecord(raw)) {
+      throw llmContractError(`decision-${index}-not-object`);
+    }
+    assertExactKeys(
+      raw,
+      ["id", "choiceId", "confidence", "reason", "evidence"],
+      `decision-${index}`
+    );
+    if (typeof raw.id !== "string" || !raw.id) {
+      throw llmContractError(`decision-${index}-invalid-id`);
+    }
+    if (seen.has(raw.id)) {
+      throw llmContractError(`duplicate-candidate-id:${raw.id}`);
+    }
+    const candidate = candidatesById.get(raw.id);
+    if (!candidate) {
+      throw llmContractError(`unknown-candidate-id:${raw.id}`);
+    }
+    if (typeof raw.choiceId !== "string" || !raw.choiceId) {
+      throw llmContractError(`decision-${raw.id}-invalid-choice-id`);
+    }
+    const choice = candidate.choices.find(
+      (candidateChoice) => candidateChoice.id === raw.choiceId
+    );
+    if (!choice) {
+      throw llmContractError(
+        `unknown-choice-id:${raw.id}:${String(raw.choiceId)}`
+      );
+    }
+    if (
+      typeof raw.confidence !== "number" ||
+      !Number.isFinite(raw.confidence) ||
+      raw.confidence < 0 ||
+      raw.confidence > 1
+    ) {
+      throw llmContractError(`decision-${raw.id}-invalid-confidence`);
+    }
+    if (typeof raw.reason !== "string" || raw.reason.trim().length === 0) {
+      throw llmContractError(`decision-${raw.id}-missing-reason`);
+    }
+    if (
+      !Array.isArray(raw.evidence) ||
+      !raw.evidence.every((entry) => typeof entry === "string")
+    ) {
+      throw llmContractError(`decision-${raw.id}-invalid-evidence`);
+    }
+
+    seen.add(raw.id);
+    decisions.push(
+      choiceSelectionToRawDecision(candidate, choice, {
+        id: raw.id,
+        choiceId: raw.choiceId,
+        confidence: raw.confidence,
+        reason: raw.reason,
+        evidence: raw.evidence as string[]
+      })
+    );
+  }
+
+  const missing = candidates
+    .map((candidate) => candidate.id)
+    .filter((id) => !seen.has(id));
+  if (missing.length > 0) {
+    throw llmContractError(`missing-candidate-ids:${missing.join(",")}`);
+  }
+  return decisions;
+}
+
+export function assertSemanticRefillRawDecisionContract(options: {
+  batch: SemanticRefillLlmBatch;
+  rawDecisions: SemanticRefillLlmRawDecision[];
+}): void {
+  const candidates = assertUniqueCandidateIds(
+    options.batch.candidates.map(ensureCandidateChoices)
+  );
+  if (options.rawDecisions.length !== candidates.length) {
+    throw llmContractError(
+      `decision-count-mismatch:expected-${candidates.length}:received-${options.rawDecisions.length}`
+    );
+  }
+  assertSemanticRefillRawDecisionSubsetContract(options);
+  const seen = new Set(options.rawDecisions.map((raw) => raw.id));
+  const missing = candidates
+    .map((candidate) => candidate.id)
+    .filter((id) => !seen.has(id));
+  if (missing.length > 0) {
+    throw llmContractError(`missing-candidate-ids:${missing.join(",")}`);
+  }
+}
+
+export function assertSemanticRefillRawDecisionSubsetContract(options: {
+  batch: SemanticRefillLlmBatch;
+  rawDecisions: SemanticRefillLlmRawDecision[];
+}): void {
+  const candidates = assertUniqueCandidateIds(
+    options.batch.candidates.map(ensureCandidateChoices)
+  );
+  const byId = new Map(
+    candidates.map((candidate) => [candidate.id, candidate])
+  );
+  const seen = new Set<string>();
+  for (const raw of options.rawDecisions) {
+    if (seen.has(raw.id)) {
+      throw llmContractError(`duplicate-candidate-id:${raw.id}`);
+    }
+    const candidate = byId.get(raw.id);
+    if (!candidate) throw llmContractError(`unknown-candidate-id:${raw.id}`);
+    const error = validateRawDecision(candidate, raw);
+    if (error) throw llmContractError(`${raw.id}:${error}`);
+    seen.add(raw.id);
+  }
+}
+
+function choiceSelectionToRawDecision(
+  candidate: SemanticRefillLlmCandidatePacket,
+  choice: SemanticRefillLlmChoice,
+  selection: SemanticRefillLlmSelection
+): SemanticRefillLlmRawDecision {
   return {
-    decisions: decisions
-      .filter((decision): decision is SemanticRefillLlmRawDecision =>
-        Boolean(decision && typeof decision === "object")
-      )
-      .map((decision) =>
-        normalizeRawDecision(decision as Partial<SemanticRefillLlmRawDecision>)
-      )
+    id: candidate.id,
+    choiceId: choice.id,
+    ref: candidate.ref,
+    decision: choice.decision,
+    strong: [candidate.strong.toUpperCase()],
+    confidence: selection.confidence,
+    reason: selection.reason,
+    wordIndex: choice.wordIndex,
+    normalized: choice.normalized,
+    startWordIndex: choice.startWordIndex,
+    endWordIndex: choice.endWordIndex,
+    normalizedPhrase: choice.normalizedPhrase,
+    evidence: selection.evidence
   };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === "object" && !Array.isArray(value));
+}
+
+function assertExactKeys(
+  value: Record<string, unknown>,
+  expected: string[],
+  path: string
+): void {
+  const actual = Object.keys(value).sort();
+  const wanted = [...expected].sort();
+  if (
+    actual.length !== wanted.length ||
+    actual.some((key, index) => key !== wanted[index])
+  ) {
+    throw llmContractError(
+      `${path}-invalid-keys:expected-${wanted.join(",")}:received-${actual.join(",")}`
+    );
+  }
+}
+
+function llmContractError(reason: string): Error {
+  return new Error(`semantic-refill-llm-contract:${reason}`);
 }
 
 function normalizeRawDecision(
@@ -798,6 +1306,7 @@ function normalizeRawDecision(
 ): SemanticRefillLlmRawDecision {
   return {
     id: typeof raw.id === "string" ? raw.id : "",
+    choiceId: typeof raw.choiceId === "string" ? raw.choiceId : "",
     ref: typeof raw.ref === "string" ? raw.ref : "",
     decision: isLlmDecisionType(raw.decision) ? raw.decision : "reject",
     strong: Array.isArray(raw.strong)
@@ -843,15 +1352,39 @@ function validateRawDecision(
   if (!raw.strong.every((strong) => /^[HG]\d{4}$/u.test(strong))) {
     return "invalid-strong-format";
   }
-  const allowedStrong = new Set([
-    candidate.strong.toUpperCase(),
-    ...candidate.originalInventory,
-    ...Object.values(candidate.referenceInventory).flat()
-  ]);
-  if (!raw.strong.every((strong) => allowedStrong.has(strong))) {
+  if (
+    raw.strong.length !== 1 ||
+    raw.strong[0] !== candidate.strong.toUpperCase()
+  ) {
     return "strong-not-allowed-for-candidate";
   }
+  const candidateWithChoices = ensureCandidateChoices(candidate);
+  const choice = candidateWithChoices.choices.find(
+    (candidateChoice) => candidateChoice.id === raw.choiceId
+  );
+  if (!choice) return "choice-not-allowed-for-candidate";
+  if (raw.decision !== choice.decision) return "choice-decision-mismatch";
+  if (
+    raw.wordIndex !== choice.wordIndex ||
+    raw.normalized !== choice.normalized ||
+    raw.startWordIndex !== choice.startWordIndex ||
+    raw.endWordIndex !== choice.endWordIndex ||
+    !sameNullableStrings(raw.normalizedPhrase, choice.normalizedPhrase)
+  ) {
+    return "choice-target-mismatch";
+  }
   return undefined;
+}
+
+function sameNullableStrings(
+  left: string[] | null,
+  right: string[] | null
+): boolean {
+  if (left === null || right === null) return left === right;
+  return (
+    left.length === right.length &&
+    left.every((value, index) => value === right[index])
+  );
 }
 
 function rawDecisionToOverride(options: {
@@ -1045,15 +1578,10 @@ function findSuspiciousStacking(
   return "suspicious-stacking-on-occupied-word";
 }
 
-function isTerminalRejectType(
+function isReferenceStyleEmptyType(
   decision: SemanticRefillLlmDecisionType
 ): boolean {
-  return (
-    decision === "technical" ||
-    decision === "duplicate" ||
-    decision === "not-rendered" ||
-    decision === "reject"
-  );
+  return decision === "technical" || decision === "not-rendered";
 }
 
 function rejectedEvaluation(

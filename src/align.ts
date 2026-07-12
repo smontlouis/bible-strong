@@ -1,9 +1,16 @@
 import { tokenizeText, type TextSegment } from "./tokenize.js";
-import { type StrongToken, type StrongVerse } from "./strongCsv.js";
+import {
+  parseStrongOccurrences,
+  type StrongToken,
+  type StrongVerse
+} from "./strongCsv.js";
 import { normalizeOriginalStrong } from "./originalSource.js";
+import { maximumWeightMatching } from "./maximumWeightMatching.js";
 
 export interface ReferenceSource {
   name: string;
+  /** Correlated editions share a family and count as one consensus witness. */
+  family?: string;
   verse?: StrongVerse;
 }
 
@@ -55,7 +62,13 @@ interface Candidate {
   strong: string[];
   score: number;
   source: string;
+  witnessFamily: string;
   method: AssignedStrong["method"];
+}
+
+interface TargetWord {
+  wordIndex: number;
+  normalized: string;
 }
 
 const LOW_CONFIDENCE_THRESHOLD = 0.55;
@@ -68,23 +81,16 @@ export function alignVerse(
 ): AlignmentResult {
   const segments = tokenizeText(targetText);
   const assignments = new Map<number, AssignedStrong>();
-  let wordIndex = -1;
+  const words = getTargetWords(segments);
+  const matchedByReference = references.map((reference) =>
+    matchReferenceOccurrences(words, reference)
+  );
 
-  for (const segment of segments) {
-    if (segment.kind !== "word") {
-      continue;
-    }
-
-    wordIndex += 1;
+  for (const word of words) {
     const candidates: Candidate[] = [];
 
-    for (const reference of references) {
-      if (!reference.verse) {
-        continue;
-      }
-
-      const candidate = findCandidate(segment.normalized, reference);
-
+    for (const matched of matchedByReference) {
+      const candidate = matched.get(word.wordIndex);
       if (candidate) {
         candidates.push(candidate);
       }
@@ -94,7 +100,7 @@ export function alignVerse(
 
     if (chosen) {
       const originalConfirmed = isConfirmedByOriginal(chosen.strong, original);
-      assignments.set(wordIndex, {
+      assignments.set(word.wordIndex, {
         strong: chosen.strong,
         confidence: scoreWithOriginal(chosen.score, chosen.strong, original),
         source: sourceWithOriginal(chosen.source, chosen.strong, original),
@@ -105,13 +111,13 @@ export function alignVerse(
     }
 
     const lexiconCandidate = findLexiconCandidate(
-      segment.normalized,
+      word.normalized,
       lexicon,
       original
     );
 
     if (lexiconCandidate) {
-      assignments.set(wordIndex, {
+      assignments.set(word.wordIndex, {
         strong: lexiconCandidate.strong,
         confidence: lexiconCandidate.confidence,
         source: lexiconCandidate.source,
@@ -143,64 +149,123 @@ export function alignVerse(
   };
 }
 
-function findCandidate(
-  normalizedWord: string,
+function matchReferenceOccurrences(
+  words: TargetWord[],
   reference: ReferenceSource
-): Candidate | undefined {
+): Map<number, Candidate> {
   const tokens = reference.verse?.tokens ?? [];
-  const exact = tokens.find(
-    (token) => token.strong.length > 0 && token.normalized === normalizedWord
+  const strongTokens = referenceStrongTokens(reference);
+  const edges = strongTokens.flatMap(({ token, sourceIndex }, left) =>
+    words.flatMap((word) => {
+      const candidate = candidateForToken(word.normalized, token, reference);
+      if (!candidate) return [];
+      const position = positionSimilarity(
+        sourceIndex,
+        tokens.length,
+        word.wordIndex,
+        words.length
+      );
+      return [
+        {
+          left,
+          right: word.wordIndex,
+          // Position is used only to resolve the global occurrence mapping;
+          // it does not inflate the reported lexical confidence.
+          weight: candidate.score + position * 0.03,
+          value: candidate
+        }
+      ];
+    })
   );
 
-  if (exact) {
-    return {
-      strong: exact.strong,
-      score: 0.95,
-      source: reference.name,
-      method: "exact"
-    };
+  return new Map(
+    maximumWeightMatching({
+      leftCount: strongTokens.length,
+      rightCount: words.length,
+      edges
+    }).map((match) => [match.right, match.value])
+  );
+}
+
+function referenceStrongTokens(
+  reference: ReferenceSource
+): Array<{ token: StrongToken; sourceIndex: number }> {
+  const tokens = reference.verse?.tokens ?? [];
+  const tagged = tokens
+    .map((token, sourceIndex) => ({ token, sourceIndex }))
+    .filter(({ token }) => token.strong.length > 0);
+  if (!reference.verse) return tagged;
+
+  const totalCounts = countStrings(
+    parseStrongOccurrences(reference.verse.row.text)
+  );
+  const visibleCounts = countStrings(
+    tagged.flatMap(({ token }) => token.strong)
+  );
+
+  for (const [strong, total] of totalCounts) {
+    const missing = total - (visibleCounts.get(strong) ?? 0);
+    if (missing <= 0) continue;
+    const carriers = tagged.filter(({ token }) =>
+      token.strong.includes(strong)
+    );
+    const normalized = new Set(
+      carriers.map(({ token }) => token.normalized).filter(Boolean)
+    );
+    // An empty occurrence can borrow a visible lexical carrier only when the
+    // same reference uses one unambiguous surface form for this Strong.
+    if (normalized.size !== 1 || carriers.length === 0) continue;
+    const exemplar = carriers[0]!;
+    for (let index = 0; index < missing; index += 1) {
+      tagged.push({
+        sourceIndex: exemplar.sourceIndex,
+        token: {
+          text: exemplar.token.text,
+          normalized: exemplar.token.normalized,
+          strong: [strong]
+        }
+      });
+    }
+  }
+  return tagged;
+}
+
+function countStrings(values: string[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const value of values) {
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  }
+  return counts;
+}
+
+function candidateForToken(
+  normalizedWord: string,
+  token: StrongToken,
+  reference: ReferenceSource
+): Candidate | undefined {
+  const base = {
+    strong: token.strong,
+    source: reference.name,
+    witnessFamily: reference.family ?? inferWitnessFamily(reference.name)
+  };
+  if (token.normalized === normalizedWord) {
+    return { ...base, score: 0.95, method: "exact" };
   }
 
   const stem = stemWord(normalizedWord);
-  if (stem.length >= 4) {
-    const stemMatches = tokens.filter(
-      (token) =>
-        token.strong.length > 0 &&
-        stemWord(token.normalized).length >= 4 &&
-        stemWord(token.normalized) === stem
-    );
-
-    if (stemMatches.length > 0) {
-      return {
-        strong: mostCommonStrong(stemMatches),
-        score: 0.72,
-        source: reference.name,
-        method: "stem"
-      };
-    }
+  const tokenStem = stemWord(token.normalized);
+  if (stem.length >= 4 && tokenStem.length >= 4 && tokenStem === stem) {
+    return { ...base, score: 0.72, method: "stem" };
   }
 
-  const windowMatch = tokens.find((token) => {
-    const tokenStem = stemWord(token.normalized);
-
-    return (
-      token.strong.length > 0 &&
-      token.normalized.length >= 5 &&
-      normalizedWord.length >= 5 &&
-      stem.length >= 4 &&
-      tokenStem.length >= 4 &&
-      (token.normalized.startsWith(stem) ||
-        normalizedWord.startsWith(tokenStem))
-    );
-  });
-
-  if (windowMatch) {
-    return {
-      strong: windowMatch.strong,
-      score: 0.48,
-      source: reference.name,
-      method: "window"
-    };
+  if (
+    token.normalized.length >= 5 &&
+    normalizedWord.length >= 5 &&
+    stem.length >= 4 &&
+    tokenStem.length >= 4 &&
+    (token.normalized.startsWith(stem) || normalizedWord.startsWith(tokenStem))
+  ) {
+    return { ...base, score: 0.48, method: "window" };
   }
 
   return undefined;
@@ -314,9 +379,18 @@ function chooseCandidate(candidates: Candidate[]): Candidate | undefined {
       group,
       score:
         Math.max(...group.map((candidate) => candidate.score)) +
-        Math.min(0.2, (group.length - 1) * 0.1)
+        Math.min(
+          0.2,
+          (new Set(group.map((candidate) => candidate.witnessFamily)).size -
+            1) *
+            0.1
+        )
     }))
-    .sort((a, b) => b.score - a.score)[0];
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        a.group[0]!.strong.join(" ").localeCompare(b.group[0]!.strong.join(" "))
+    )[0];
 
   if (!agreed) {
     return undefined;
@@ -331,23 +405,31 @@ function chooseCandidate(candidates: Candidate[]): Candidate | undefined {
   };
 }
 
-function mostCommonStrong(tokens: StrongToken[]): string[] {
-  const counts = new Map<string, { strong: string[]; count: number }>();
-
-  for (const token of tokens) {
-    const key = token.strong.join(" ");
-    const existing = counts.get(key);
-
-    if (existing) {
-      existing.count += 1;
-    } else {
-      counts.set(key, { strong: token.strong, count: 1 });
-    }
+function getTargetWords(segments: TextSegment[]): TargetWord[] {
+  const words: TargetWord[] = [];
+  for (const segment of segments) {
+    if (segment.kind !== "word") continue;
+    words.push({ wordIndex: words.length, normalized: segment.normalized });
   }
+  return words;
+}
 
-  return (
-    [...counts.values()].sort((a, b) => b.count - a.count)[0]?.strong ?? []
-  );
+function inferWitnessFamily(name: string): string {
+  const normalized = name.toLowerCase().replace(/[^a-z0-9]+/gu, "");
+  if (normalized.startsWith("darby")) return "darby";
+  return normalized || name;
+}
+
+function positionSimilarity(
+  sourceIndex: number,
+  sourceCount: number,
+  targetIndex: number,
+  targetCount: number
+): number {
+  if (sourceCount <= 1 || targetCount <= 1) return 1;
+  const sourceRatio = sourceIndex / (sourceCount - 1);
+  const targetRatio = targetIndex / (targetCount - 1);
+  return Math.max(0, 1 - Math.abs(sourceRatio - targetRatio));
 }
 
 export function stemWord(word: string): string {

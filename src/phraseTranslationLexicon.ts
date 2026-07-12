@@ -26,6 +26,14 @@ interface PhraseCount {
   phraseKey: string;
   offset: number;
   count: number;
+  families: Set<string>;
+}
+
+interface PhraseObservation {
+  strong: string;
+  phraseKey: string;
+  offset: number;
+  count: number;
 }
 
 const MIN_PHRASE_COUNT = 2;
@@ -36,40 +44,52 @@ export function buildStrongPhraseLexicon(
   references: Array<{ name: string; map: StrongVerseMap }>
 ): StrongPhraseLexicon {
   const counts = new Map<string, PhraseCount>();
-  const source = references.map((reference) => reference.name).join("+");
 
-  for (const reference of references) {
-    for (const verse of reference.map.values()) {
-      const tokens = verse.tokens;
+  for (const [family, familyReferences] of groupReferencesByFamily(
+    references
+  )) {
+    for (const verseRef of collectVerseRefs(familyReferences)) {
+      const familyVerseCounts = new Map<string, PhraseObservation>();
 
-      for (let index = 0; index < tokens.length; index += 1) {
-        const token = tokens[index];
-        if (!token || token.strong.length === 0) continue;
+      for (const reference of familyReferences) {
+        const verse = reference.map.get(verseRef);
+        if (!verse) continue;
+        const editionVerseCounts = new Map<string, PhraseObservation>();
+        const tokens = verse.tokens;
 
-        for (const strong of token.strong) {
-          for (let length = 2; length <= MAX_PHRASE_LENGTH; length += 1) {
-            for (
-              let start = Math.max(0, index - length + 1);
-              start <= index && start + length <= tokens.length;
-              start += 1
-            ) {
-              if (!isUsefulPhraseSpan(tokens, start, length)) {
-                continue;
+        for (let index = 0; index < tokens.length; index += 1) {
+          const token = tokens[index];
+          if (!token || token.strong.length === 0) continue;
+
+          for (const strong of token.strong) {
+            for (let length = 2; length <= MAX_PHRASE_LENGTH; length += 1) {
+              for (
+                let start = Math.max(0, index - length + 1);
+                start <= index && start + length <= tokens.length;
+                start += 1
+              ) {
+                if (!isUsefulPhraseSpan(tokens, start, length)) {
+                  continue;
+                }
+
+                incrementPhraseObservation(editionVerseCounts, {
+                  strong,
+                  phraseKey: phraseKeyForSpan(tokens, start, length),
+                  offset: index - start
+                });
               }
-
-              increment(counts, {
-                strong,
-                phraseKey: phraseKeyForSpan(tokens, start, length),
-                offset: index - start
-              });
             }
           }
         }
+
+        mergeMaximumPhraseCounts(familyVerseCounts, editionVerseCounts);
       }
+
+      addEffectiveFamilyPhraseCounts(counts, family, familyVerseCounts);
     }
   }
 
-  const byStrong = normalizePhraseCounts(counts, source);
+  const byStrong = normalizePhraseCounts(counts);
   return createStrongPhraseLexicon(byStrong);
 }
 
@@ -262,9 +282,9 @@ function indexByStrongFirst(
   return indexed;
 }
 
-function increment(
-  counts: Map<string, PhraseCount>,
-  value: Pick<PhraseCount, "strong" | "phraseKey" | "offset">
+function incrementPhraseObservation(
+  counts: Map<string, PhraseObservation>,
+  value: Pick<PhraseObservation, "strong" | "phraseKey" | "offset">
 ): void {
   const key = `${value.strong}\t${value.offset}\t${value.phraseKey}`;
   const existing = counts.get(key);
@@ -274,12 +294,75 @@ function increment(
     return;
   }
 
-  counts.set(key, { ...value, count: 1 });
+  counts.set(key, {
+    strong: value.strong,
+    phraseKey: value.phraseKey,
+    offset: value.offset,
+    count: 1
+  });
+}
+
+function mergeMaximumPhraseCounts(
+  familyCounts: Map<string, PhraseObservation>,
+  editionCounts: Map<string, PhraseObservation>
+): void {
+  for (const value of editionCounts.values()) {
+    const key = `${value.strong}\t${value.offset}\t${value.phraseKey}`;
+    const existing = familyCounts.get(key);
+    if (!existing || value.count > existing.count) {
+      familyCounts.set(key, { ...value });
+    }
+  }
+}
+
+function collectVerseRefs(
+  references: Array<{ map: StrongVerseMap }>
+): Set<string> {
+  const refs = new Set<string>();
+  for (const reference of references) {
+    for (const ref of reference.map.keys()) refs.add(ref);
+  }
+  return refs;
+}
+
+function addEffectiveFamilyPhraseCounts(
+  counts: Map<string, PhraseCount>,
+  family: string,
+  familyVerseCounts: Map<string, PhraseObservation>
+): void {
+  for (const value of familyVerseCounts.values()) {
+    const key = `${value.strong}\t${value.offset}\t${value.phraseKey}`;
+    const existing = counts.get(key);
+    if (existing) {
+      existing.count += value.count;
+      existing.families.add(family);
+      continue;
+    }
+    counts.set(key, {
+      ...value,
+      families: new Set([family])
+    });
+  }
+}
+
+function groupReferencesByFamily(
+  references: Array<{ name: string; map: StrongVerseMap }>
+): Map<string, Array<{ name: string; map: StrongVerseMap }>> {
+  const grouped = new Map<
+    string,
+    Array<{ name: string; map: StrongVerseMap }>
+  >();
+  for (const reference of references) {
+    const family = referenceFamily(reference.name);
+    const familyReferences = grouped.get(family) ?? [];
+    familyReferences.push(reference);
+    grouped.set(family, familyReferences);
+  }
+  return grouped;
 }
 
 function normalizePhraseCounts(
-  counts: Map<string, PhraseCount>,
-  source: string
+  counts: Map<string, PhraseCount>
 ): Map<string, StrongPhraseCandidate[]> {
   const grouped = new Map<string, PhraseCount[]>();
 
@@ -291,18 +374,36 @@ function normalizePhraseCounts(
   }
 
   const lexicon = new Map<string, StrongPhraseCandidate[]>();
+  const totalsByPhrase = new Map<string, number>();
+  for (const entry of counts.values()) {
+    totalsByPhrase.set(
+      entry.phraseKey,
+      (totalsByPhrase.get(entry.phraseKey) ?? 0) + entry.count
+    );
+  }
 
   for (const [strong, entries] of grouped) {
     const maxCount = Math.max(...entries.map((entry) => entry.count));
     const candidates = entries
-      .map((entry) => ({
-        strong,
-        phrase: entry.phraseKey.split(" "),
-        offset: entry.offset,
-        score: entry.count / maxCount,
-        source,
-        method: "learned-phrase" as const
-      }))
+      .map((entry) => {
+        const forwardProbability = entry.count / maxCount;
+        const reverseProbability =
+          entry.count / (totalsByPhrase.get(entry.phraseKey) ?? entry.count);
+        const independentSupport = Math.min(1, entry.families.size / 2);
+        let score =
+          forwardProbability * 0.5 +
+          reverseProbability * 0.4 +
+          independentSupport * 0.1;
+        if (reverseProbability < 0.08) score = Math.min(score, 0.2);
+        return {
+          strong,
+          phrase: entry.phraseKey.split(" "),
+          offset: entry.offset,
+          score,
+          source: [...entry.families].sort().join("+"),
+          method: "learned-phrase" as const
+        };
+      })
       .filter((candidate) => candidate.score >= 0.16)
       .sort(
         (left, right) =>
@@ -316,6 +417,12 @@ function normalizePhraseCounts(
   }
 
   return lexicon;
+}
+
+function referenceFamily(name: string): string {
+  const normalized = name.toLowerCase().replace(/[^a-z0-9]+/gu, "");
+  if (normalized.startsWith("darby")) return "Darby-family";
+  return name;
 }
 
 function phraseEquals(

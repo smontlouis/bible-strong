@@ -289,7 +289,7 @@ export async function generateStrongReader(
       options.bible
     ),
     method:
-      "Reader-mode Strong generation. Tags are transferred from Sg1910, Darby, and DarbyR to matching French words, checked against WLC/SBLGNT verse inventories when available, then enriched from original Strong occurrences when learned French translation evidence identifies a real target word. Only editorial empty Strong tags that appear in at least two local Strong references are added. The goal is a fluent Strong Bible, not complete morphological coverage."
+      "Reader-mode Strong generation. Tags are transferred from Sg1910, Darby, and DarbyR to matching French words, checked against WLC/SBLGNT verse inventories when available, then enriched from original Strong occurrences when learned French translation evidence identifies a real target word. Editorial empty Strong tags require agreement from independent reference families; Darby and DarbyR count as one family. The goal is a fluent Strong Bible, not complete morphological coverage."
   };
 
   await writeFile(outputPath, `${lines.join("\n")}\n`, "utf8");

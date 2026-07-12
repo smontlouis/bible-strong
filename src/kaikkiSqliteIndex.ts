@@ -1,16 +1,18 @@
 import { createReadStream, existsSync } from "node:fs";
-import { mkdir } from "node:fs/promises";
+import { mkdir, rename, rm } from "node:fs/promises";
 import path from "node:path";
 import readline from "node:readline";
 import { DatabaseSync } from "node:sqlite";
 import { createGunzip } from "node:zlib";
 
 import { normalizeWord, tokenizeText } from "./tokenize.js";
+import { contentFingerprint } from "./contentAddressedCache.js";
 
 export interface KaikkiLookupIndex {
-  formToLemma: Map<string, string>;
+  formToLemma: Map<string, Set<string>>;
   lemmaGlossTokens: Map<string, Set<string>>;
   englishGlossToFrench: Map<string, Set<string>>;
+  englishTokenWeights: Map<string, number>;
 }
 
 interface KaikkiEntry {
@@ -25,29 +27,59 @@ interface KaikkiSense {
   form_of?: Array<{ word?: unknown }>;
 }
 
-const DEFAULT_KAIKKI_JSONL =
+export const DEFAULT_KAIKKI_JSONL =
   "data/external/french-lexical/kaikki/kaikki.org-dictionary-French.jsonl";
 
 const ENGLISH_STOP_WORDS = new Set([
+  "all",
+  "also",
   "and",
+  "any",
   "are",
+  "been",
+  "being",
+  "from",
   "for",
+  "have",
   "her",
   "him",
   "his",
+  "into",
+  "its",
   "let",
+  "make",
   "not",
+  "off",
+  "onto",
   "one",
+  "other",
+  "out",
+  "she",
+  "such",
   "the",
   "their",
   "them",
   "they",
+  "thing",
   "this",
   "that",
+  "than",
+  "then",
+  "there",
+  "these",
+  "those",
+  "through",
+  "under",
+  "upon",
+  "used",
   "with",
+  "without",
   "you",
   "your"
 ]);
+
+const KAIKKI_SCHEMA_VERSION = "2";
+export const MAX_REVERSE_GLOSS_DOCUMENT_FREQUENCY = 64;
 
 export function defaultKaikkiSqlitePath(
   jsonlPath = DEFAULT_KAIKKI_JSONL
@@ -65,14 +97,15 @@ export function readKaikkiSqliteIndex(options: {
   try {
     const targetWords = [...options.targetWords];
     for (const row of selectForms(db, targetWords)) {
-      index.formToLemma.set(row.form, row.lemma);
+      addMapSet(index.formToLemma, row.form, row.lemma);
     }
 
     const lemmaCandidates = new Set([
       ...targetWords,
-      ...index.formToLemma.values()
+      ...[...index.formToLemma.values()].flatMap((lemmas) => [...lemmas])
     ]);
     for (const row of selectLemmaGlossTokens(db, [...lemmaCandidates])) {
+      if (!isInformativeKaikkiEnglishToken(row.token)) continue;
       const tokens = index.lemmaGlossTokens.get(row.lemma) ?? new Set<string>();
       tokens.add(row.token);
       index.lemmaGlossTokens.set(row.lemma, tokens);
@@ -80,15 +113,40 @@ export function readKaikkiSqliteIndex(options: {
 
     for (const word of targetWords) {
       if (!index.formToLemma.has(word) && index.lemmaGlossTokens.has(word)) {
-        index.formToLemma.set(word, word);
+        index.formToLemma.set(word, new Set([word]));
       }
     }
 
-    for (const row of selectEnglishGlossTerms(db, [...options.englishHints])) {
+    const englishRows = selectEnglishGlossTerms(
+      db,
+      [...options.englishHints].filter(isInformativeKaikkiEnglishToken)
+    );
+    const frequencies = new Map<string, number>();
+    for (const row of englishRows) {
+      frequencies.set(
+        row.token,
+        Math.max(frequencies.get(row.token) ?? 0, row.documentFrequency)
+      );
+    }
+    const totalFrenchTerms =
+      readMetadataNumber(db, "distinctFrenchTerms") ??
+      readMetadataNumber(db, "entries") ??
+      1;
+    for (const row of englishRows) {
+      if (row.documentFrequency > MAX_REVERSE_GLOSS_DOCUMENT_FREQUENCY) {
+        continue;
+      }
       const terms =
         index.englishGlossToFrench.get(row.token) ?? new Set<string>();
       terms.add(row.french);
       index.englishGlossToFrench.set(row.token, terms);
+    }
+    for (const [token, frequency] of frequencies) {
+      if (frequency > MAX_REVERSE_GLOSS_DOCUMENT_FREQUENCY) continue;
+      index.englishTokenWeights.set(
+        token,
+        normalizedInverseDocumentFrequency(totalFrenchTerms, frequency)
+      );
     }
   } finally {
     db.close();
@@ -100,26 +158,33 @@ export async function buildKaikkiSqliteIndex(options: {
   jsonlPath: string;
   sqlitePath: string;
 }): Promise<{ sqlitePath: string; entries: number; forms: number }> {
+  const sourceFingerprint = kaikkiSourceFingerprint(options.jsonlPath);
   await mkdir(path.dirname(options.sqlitePath), { recursive: true });
-  const db = new DatabaseSync(options.sqlitePath);
+  const tempPath = `${options.sqlitePath}.tmp-${process.pid}-${Date.now()}`;
+  await rm(tempPath, { force: true });
+  const db = new DatabaseSync(tempPath);
   let entries = 0;
   let forms = 0;
+  let committed = false;
+  let buildError: unknown;
 
   try {
     db.exec(`
-      pragma journal_mode = WAL;
+      pragma journal_mode = DELETE;
       pragma synchronous = NORMAL;
       drop table if exists metadata;
       drop table if exists forms;
       drop table if exists lemma_gloss_tokens;
       drop table if exists english_gloss_to_french;
+      drop table if exists english_gloss_stats;
       create table metadata (
         key text primary key,
         value text not null
       );
       create table forms (
-        form text primary key,
-        lemma text not null
+        form text not null,
+        lemma text not null,
+        primary key (form, lemma)
       );
       create table lemma_gloss_tokens (
         lemma text not null,
@@ -130,6 +195,10 @@ export async function buildKaikkiSqliteIndex(options: {
         token text not null,
         french text not null,
         primary key (token, french)
+      );
+      create table english_gloss_stats (
+        token text primary key,
+        document_frequency integer not null
       );
       create index idx_kaikki_forms_lemma on forms (lemma);
       create index idx_kaikki_gloss_token on lemma_gloss_tokens (token);
@@ -161,15 +230,19 @@ export async function buildKaikkiSqliteIndex(options: {
       const normalizedWord = normalizeWord(entry.word);
       const glossTokens = entryGlossTokens(entry);
       if (!normalizedWord) continue;
+      const formLemmas = formOfLemmas(entry);
+      const reverseFrenchTerms =
+        formLemmas.length > 0 ? formLemmas : [normalizedWord];
 
       entries += 1;
       for (const token of glossTokens) {
         insertGloss.run(normalizedWord, token);
-        insertEnglish.run(token, normalizedWord);
+        for (const french of reverseFrenchTerms) {
+          insertEnglish.run(token, french);
+        }
       }
 
-      const formLemma = formOfLemma(entry);
-      if (formLemma) {
+      for (const formLemma of formLemmas) {
         insertForm.run(normalizedWord, formLemma);
         forms += 1;
         for (const token of glossTokens) {
@@ -186,22 +259,92 @@ export async function buildKaikkiSqliteIndex(options: {
       }
     }
     insertMeta.run("source", options.jsonlPath);
+    insertMeta.run("schemaVersion", KAIKKI_SCHEMA_VERSION);
+    insertMeta.run("sourceFingerprint", sourceFingerprint);
     insertMeta.run("generatedAt", new Date().toISOString());
     insertMeta.run("entries", String(entries));
     insertMeta.run("forms", String(forms));
+    db.exec(`
+      insert into english_gloss_stats (token, document_frequency)
+      select token, count(*)
+      from english_gloss_to_french
+      group by token;
+    `);
+    const distinctFrenchTerms = Number(
+      (
+        db
+          .prepare(
+            "select count(distinct french) as count from english_gloss_to_french"
+          )
+          .get() as unknown as { count: number | bigint }
+      ).count
+    );
+    insertMeta.run("distinctFrenchTerms", String(distinctFrenchTerms));
     db.exec("COMMIT");
+    committed = true;
   } catch (error) {
-    db.exec("ROLLBACK");
-    throw error;
+    if (!committed) {
+      try {
+        db.exec("ROLLBACK");
+      } catch {
+        // The transaction may not have started yet.
+      }
+    }
+    buildError = error;
   } finally {
     db.close();
+  }
+
+  if (buildError) {
+    await rm(tempPath, { force: true });
+    throw buildError;
+  }
+
+  try {
+    await rename(tempPath, options.sqlitePath);
+  } catch (error) {
+    await rm(tempPath, { force: true });
+    throw error;
   }
 
   return { sqlitePath: options.sqlitePath, entries, forms };
 }
 
-export function hasKaikkiSqliteIndex(sqlitePath: string): boolean {
-  return existsSync(sqlitePath);
+export function hasKaikkiSqliteIndex(
+  sqlitePath: string,
+  jsonlPath?: string
+): boolean {
+  if (!existsSync(sqlitePath)) return false;
+  const db = new DatabaseSync(sqlitePath, { readOnly: true });
+  try {
+    if (readMetadataValue(db, "schemaVersion") !== KAIKKI_SCHEMA_VERSION) {
+      return false;
+    }
+    if (
+      jsonlPath &&
+      readMetadataValue(db, "sourceFingerprint") !==
+        kaikkiSourceFingerprint(jsonlPath)
+    ) {
+      return false;
+    }
+    return (
+      hasTable(db, "forms") &&
+      hasTable(db, "lemma_gloss_tokens") &&
+      hasTable(db, "english_gloss_to_french") &&
+      hasTable(db, "english_gloss_stats")
+    );
+  } catch {
+    return false;
+  } finally {
+    db.close();
+  }
+}
+
+function kaikkiSourceFingerprint(jsonlPath: string): string {
+  return contentFingerprint({
+    namespace: "kaikki-french-source-v2",
+    inputPaths: [jsonlPath]
+  });
 }
 
 function selectForms(
@@ -230,14 +373,58 @@ function selectLemmaGlossTokens(
 function selectEnglishGlossTerms(
   db: DatabaseSync,
   tokens: string[]
-): Array<{ token: string; french: string }> {
-  return selectChunked(
+): Array<{ token: string; french: string; documentFrequency: number }> {
+  if (hasTable(db, "english_gloss_stats")) {
+    return selectEnglishGlossTermsWithStats(db, tokens);
+  }
+
+  const legacyRows = selectChunked(
     db,
     "token, french",
     "english_gloss_to_french",
     "token",
     tokens
   ) as Array<{ token: string; french: string }>;
+  const frequencyByToken = new Map<string, number>();
+  for (const row of legacyRows) {
+    frequencyByToken.set(row.token, (frequencyByToken.get(row.token) ?? 0) + 1);
+  }
+  return legacyRows.map((row) => ({
+    ...row,
+    documentFrequency: frequencyByToken.get(row.token) ?? 1
+  }));
+}
+
+function selectEnglishGlossTermsWithStats(
+  db: DatabaseSync,
+  tokens: string[]
+): Array<{ token: string; french: string; documentFrequency: number }> {
+  const rows: Array<{
+    token: string;
+    french: string;
+    documentFrequency: number;
+  }> = [];
+  const unique = [...new Set(tokens.filter(Boolean))];
+  for (let index = 0; index < unique.length; index += 500) {
+    const chunk = unique.slice(index, index + 500);
+    if (chunk.length === 0) continue;
+    const placeholders = chunk.map(() => "?").join(", ");
+    const batch = db
+      .prepare(
+        `select e.token as token, e.french as french,
+                s.document_frequency as documentFrequency
+         from english_gloss_to_french e
+         join english_gloss_stats s on s.token = e.token
+         where e.token in (${placeholders})`
+      )
+      .all(...chunk) as unknown as Array<{
+      token: string;
+      french: string;
+      documentFrequency: number;
+    }>;
+    rows.push(...batch);
+  }
+  return rows;
 }
 
 function selectChunked(
@@ -291,19 +478,27 @@ function entryGlossTokens(entry: KaikkiEntry): string[] {
   return [...new Set<string>(tokens)];
 }
 
-function formOfLemma(entry: KaikkiEntry): string | undefined {
+function formOfLemmas(entry: KaikkiEntry): string[] {
+  const lemmas = new Set<string>();
   for (const sense of entry.senses ?? []) {
-    const lemma = sense.form_of?.[0]?.word;
-    if (typeof lemma === "string") return normalizeWord(lemma);
+    for (const form of sense.form_of ?? []) {
+      if (typeof form.word !== "string") continue;
+      const lemma = normalizeWord(form.word);
+      if (lemma) lemmas.add(lemma);
+    }
   }
-  return undefined;
+  return [...lemmas];
 }
 
 function englishTokens(text: string): string[] {
   return tokenizeText(text)
     .filter((segment) => segment.kind === "word")
     .map((segment) => englishStem(segment.normalized))
-    .filter((token) => token.length >= 3 && !ENGLISH_STOP_WORDS.has(token));
+    .filter(isInformativeKaikkiEnglishToken);
+}
+
+export function isInformativeKaikkiEnglishToken(token: string): boolean {
+  return token.length >= 3 && !ENGLISH_STOP_WORDS.has(token);
 }
 
 function englishStem(word: string): string {
@@ -317,8 +512,58 @@ function emptyKaikkiIndex(): KaikkiLookupIndex {
   return {
     formToLemma: new Map(),
     lemmaGlossTokens: new Map(),
-    englishGlossToFrench: new Map()
+    englishGlossToFrench: new Map(),
+    englishTokenWeights: new Map()
   };
+}
+
+function addMapSet(
+  target: Map<string, Set<string>>,
+  key: string,
+  value: string
+): void {
+  const values = target.get(key) ?? new Set<string>();
+  values.add(value);
+  target.set(key, values);
+}
+
+function hasTable(db: DatabaseSync, table: string): boolean {
+  return Boolean(
+    db
+      .prepare(
+        "select 1 from sqlite_master where type = 'table' and name = ? limit 1"
+      )
+      .get(table)
+  );
+}
+
+function readMetadataNumber(db: DatabaseSync, key: string): number | undefined {
+  const raw = readMetadataValue(db, key);
+  if (!raw) return undefined;
+  const value = Number(raw);
+  return Number.isFinite(value) && value > 0 ? value : undefined;
+}
+
+function readMetadataValue(db: DatabaseSync, key: string): string | undefined {
+  if (!hasTable(db, "metadata")) return undefined;
+  const row = db
+    .prepare("select value from metadata where key = ?")
+    .get(key) as unknown as { value?: string } | undefined;
+  return row?.value;
+}
+
+function normalizedInverseDocumentFrequency(
+  totalDocuments: number,
+  documentFrequency: number
+): number {
+  const total = Math.max(1, totalDocuments);
+  const frequency = Math.max(1, Math.min(total, documentFrequency));
+  const denominator = Math.log(total + 1);
+  if (denominator <= 0) return 0;
+  return Math.max(
+    0,
+    Math.min(1, Math.log((total + 1) / frequency) / denominator)
+  );
 }
 
 function parseArgs(argv: string[]): {

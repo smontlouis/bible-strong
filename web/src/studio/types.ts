@@ -5,10 +5,19 @@ export interface StrongLedger {
   bible: string;
   generatedAt: string;
   scope: string;
+  apiBacked?: boolean;
+  books?: StrongBookOutline[];
   split?: boolean;
   verseFiles?: Array<{ bookId: string; path: string; verses: number }>;
   metrics: StrongLedgerMetrics;
   verses: StrongVerse[];
+}
+
+export interface StrongBookOutline {
+  bookId: string;
+  chapters: number[];
+  verseCount: number;
+  metrics: StrongBookMetrics;
 }
 
 export interface StrongLedgerMetrics {
@@ -101,6 +110,9 @@ export interface StrongAnnotation {
   confidence: number;
   reason: string;
   diagnostics?: string[];
+  referenceSupport?: string[];
+  profile?: string;
+  originalOccurrenceId?: string;
   wordIndex?: number;
   startWordIndex?: number;
   endWordIndex?: number;
@@ -120,6 +132,93 @@ export interface StrongAnnotation {
     gloss: string;
     morphology: string;
   }>;
+}
+
+export type StrongReviewBucket =
+  | "actionable"
+  | "needs-witness-review"
+  | "accepted-safe"
+  | "drifted"
+  | "planned"
+  | "quarantined";
+
+export interface StrongReviewSummary {
+  generatedAt: string;
+  bible: string;
+  production: {
+    eligible: number;
+    consensusFiltered: number;
+  };
+  quarantine: {
+    total: number;
+    legacySingleModel: number;
+    unverifiedSemanticRefill: number;
+  };
+  drift: {
+    invalidProduction: number;
+    invalidTotal: number;
+  };
+  decisions: {
+    total: number;
+    uniqueCandidates: number;
+    acceptedSafe: number;
+    needsWitnessReview: number;
+    rejectedRisky: number;
+  };
+  plan: {
+    available: boolean;
+    tasks: number;
+    items: number;
+    models: string[];
+    adaptiveSecondModel: boolean;
+    generatedAt?: string;
+  };
+}
+
+export interface StrongReviewPriority {
+  tier: "p0" | "p1" | "p2" | "p3";
+  score: number;
+  reasons: string[];
+}
+
+export interface StrongReviewDashboardItem {
+  id: string;
+  kind: string;
+  ref: string;
+  strong: string[];
+  status: string;
+  productionState: string;
+  target?:
+    | string
+    | {
+        type?: string;
+        label?: string;
+        wordIndex?: number;
+        startWordIndex?: number;
+        endWordIndex?: number;
+        normalized?: string;
+      };
+  source?: string;
+  reason: string;
+  confidence?: number;
+  model?: string;
+  models?: string[];
+  stage?: string;
+  exactWitnessFamilies?: string[];
+  directDeterministicSupport?: boolean;
+  evidence?: string[];
+  priority: StrongReviewPriority;
+  taskId?: string;
+}
+
+export interface StrongReviewItemsPage {
+  generatedAt: string;
+  bible: string;
+  bucket: StrongReviewBucket;
+  total: number;
+  limit: number;
+  offset: number;
+  items: StrongReviewDashboardItem[];
 }
 
 export interface ReviewFile {

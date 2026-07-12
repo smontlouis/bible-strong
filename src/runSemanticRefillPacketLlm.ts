@@ -1,21 +1,24 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import path from "node:path";
 
 import {
-  SEMANTIC_REFILL_LLM_JSON_SCHEMA,
+  buildSemanticRefillLlmRequest,
+  ensureCandidateChoices,
+  parseSemanticRefillLlmResponse,
   SEMANTIC_REFILL_LLM_SYSTEM_PROMPT,
   type SemanticRefillLlmCandidatePacket,
   type SemanticRefillLlmRawDecision
 } from "./semanticRefillLlm.js";
 
-interface AgentPacketFile {
+export interface AgentPacketFile {
   bible: string;
   scope: string;
   promptPolicy?: string;
   candidates: SemanticRefillLlmCandidatePacket[];
 }
 
-interface AgentReviewFile {
+export interface AgentReviewFile {
   bible: string;
   books: string[];
   scope: string;
@@ -23,6 +26,11 @@ interface AgentReviewFile {
   sourcePacket: string;
   model: string;
   rawContent: string;
+  contract: {
+    version: 2;
+    schemaName: string;
+    candidateCount: number;
+  };
   parseError?: string;
   usage?: {
     promptTokens?: number;
@@ -32,14 +40,18 @@ interface AgentReviewFile {
   decisions: SemanticRefillLlmRawDecision[];
 }
 
-async function runPacketLlm(options: {
+export async function runPacketLlm(options: {
   inputPath: string;
   outputPath: string;
   model: string;
 }): Promise<AgentReviewFile> {
-  const packet = JSON.parse(
+  const parsedPacket = JSON.parse(
     await readFile(options.inputPath, "utf8")
   ) as AgentPacketFile;
+  const packet: AgentPacketFile = {
+    ...parsedPacket,
+    candidates: parsedPacket.candidates.map(ensureCandidateChoices)
+  };
   const apiKey = process.env.AI_GATEWAY_KEY ?? process.env.AI_GATEWAY_API_KEY;
   if (!apiKey) throw new Error("missing-ai-gateway-key");
 
@@ -48,7 +60,11 @@ async function runPacketLlm(options: {
     model: options.model,
     packet
   });
-  const decisions = parseGatewayDecisions(response.content);
+  const decisions = parseGatewayDecisions(response.content, packet);
+  const request = buildSemanticRefillLlmRequest({
+    batch: packet,
+    model: options.model
+  });
   const review: AgentReviewFile = {
     bible: packet.bible,
     books: inferBooks(packet),
@@ -57,6 +73,11 @@ async function runPacketLlm(options: {
     sourcePacket: options.inputPath,
     model: options.model,
     rawContent: response.content,
+    contract: {
+      version: 2,
+      schemaName: request.responseSchema.name,
+      candidateCount: packet.candidates.length
+    },
     parseError: decisions.parseError,
     usage: response.usage,
     decisions: decisions.decisions
@@ -94,36 +115,12 @@ async function callGateway(options: {
         Authorization: `Bearer ${options.apiKey}`,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        model: options.model,
-        temperature: 0,
-        messages: [
-          {
-            role: "system",
-            content:
-              options.packet.promptPolicy ?? SEMANTIC_REFILL_LLM_SYSTEM_PROMPT
-          },
-          {
-            role: "user",
-            content: JSON.stringify({
-              task: "semantic-refill-candidate-decisions",
-              bible: options.packet.bible,
-              scope: options.packet.scope,
-              schemaName: SEMANTIC_REFILL_LLM_JSON_SCHEMA.name,
-              schema: SEMANTIC_REFILL_LLM_JSON_SCHEMA.schema,
-              rules: [
-                "Return one JSON object with a decisions array.",
-                "Return exactly one decision per candidate id.",
-                "Use only the Strong code from the candidate.",
-                "Prefer word or phrase only when the French carrier is reliable.",
-                "Use empty when no reliable visible French carrier exists.",
-                "Do not use pending-human as a final state for this packet."
-              ],
-              candidates: options.packet.candidates
-            })
-          }
-        ]
-      })
+      body: JSON.stringify(
+        buildGatewayRequestBody({
+          model: options.model,
+          packet: options.packet
+        })
+      )
     }
   ).finally(() => clearTimeout(timeout));
 
@@ -152,36 +149,70 @@ async function callGateway(options: {
   };
 }
 
-function parseGatewayDecisions(content: string): {
+export function buildGatewayRequestBody(options: {
+  model: string;
+  packet: AgentPacketFile;
+}): {
+  model: string;
+  temperature: 0;
+  messages: Array<{ role: "system" | "user"; content: string }>;
+  response_format: {
+    type: "json_schema";
+    json_schema: ReturnType<
+      typeof buildSemanticRefillLlmRequest
+    >["responseSchema"];
+  };
+} {
+  const packet = {
+    ...options.packet,
+    candidates: options.packet.candidates.map(ensureCandidateChoices)
+  };
+  const request = buildSemanticRefillLlmRequest({
+    batch: packet,
+    model: options.model
+  });
+  const messages = request.messages.map((message, index) =>
+    index === 0
+      ? {
+          ...message,
+          content:
+            options.packet.promptPolicy ?? SEMANTIC_REFILL_LLM_SYSTEM_PROMPT
+        }
+      : message
+  );
+  return {
+    model: request.model,
+    temperature: request.temperature,
+    messages,
+    response_format: {
+      type: "json_schema",
+      json_schema: request.responseSchema
+    }
+  };
+}
+
+export function parseGatewayDecisions(
+  content: string,
+  packet: AgentPacketFile
+): {
   decisions: SemanticRefillLlmRawDecision[];
   parseError?: string;
 } {
   try {
-    const parsed = JSON.parse(extractJson(content)) as { decisions?: unknown };
-    if (!Array.isArray(parsed.decisions)) {
-      return { decisions: [], parseError: "missing-decisions-array" };
-    }
-    return { decisions: parsed.decisions.filter(isRawDecision) };
+    const parsed = JSON.parse(content) as unknown;
+    return {
+      decisions: parseSemanticRefillLlmResponse(parsed, {
+        bible: packet.bible,
+        scope: packet.scope,
+        candidates: packet.candidates.map(ensureCandidateChoices)
+      })
+    };
   } catch (error) {
     return {
       decisions: [],
       parseError: error instanceof Error ? error.message : "unknown-parse-error"
     };
   }
-}
-
-function isRawDecision(value: unknown): value is SemanticRefillLlmRawDecision {
-  if (!value || typeof value !== "object") return false;
-  const item = value as Partial<SemanticRefillLlmRawDecision>;
-  return typeof item.id === "string" && typeof item.ref === "string";
-}
-
-function extractJson(content: string): string {
-  const trimmed = content.trim();
-  const start = trimmed.indexOf("{");
-  const end = trimmed.lastIndexOf("}");
-  if (start >= 0 && end > start) return trimmed.slice(start, end + 1);
-  return trimmed;
 }
 
 function inferBooks(packet: AgentPacketFile): string[] {
@@ -220,8 +251,21 @@ function readStringArg(
   return typeof value === "string" ? value : fallback;
 }
 
-function defaultOutputPath(inputPath: string, model: string): string {
-  const safeModel = model.replace(/[^0-9A-Za-z]+/gu, "-");
+export function packetReviewModelSlug(model: string): string {
+  const safeModel = model
+    .trim()
+    .replace(/[^0-9A-Za-z]+/gu, "-")
+    .replace(/^-|-$/gu, "")
+    .slice(0, 48);
+  const hash = createHash("sha256")
+    .update(model.trim().toLowerCase())
+    .digest("hex")
+    .slice(0, 10);
+  return `${safeModel || "model"}-${hash}`;
+}
+
+export function defaultOutputPath(inputPath: string, model: string): string {
+  const safeModel = packetReviewModelSlug(model);
   return path.join(path.dirname(inputPath), `llm-review-${safeModel}.json`);
 }
 

@@ -1,14 +1,21 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { once } from "node:events";
+import {
+  createReadStream,
+  createWriteStream,
+  existsSync,
+  readFileSync
+} from "node:fs";
+import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createGunzip } from "node:zlib";
-import { createReadStream } from "node:fs";
 import readline from "node:readline";
 
 import { stemWord } from "./align.js";
+import { writeTextFileAtomic } from "./atomicFile.js";
 import { BOOK_IDS } from "./books.js";
 import { readStrongDictionaryTranslationCandidates } from "./strongDictionaryLexicon.js";
+import { isGenericFrenchCarrier } from "./frenchLexicalSafety.js";
 import { normalizeWord, tokenizeText } from "./tokenize.js";
 import { type StrongTranslationCandidate } from "./translationLexicon.js";
 import { type StrongLedger } from "./strongLedger.js";
@@ -19,7 +26,10 @@ import {
 import {
   defaultKaikkiSqlitePath,
   hasKaikkiSqliteIndex,
-  readKaikkiSqliteIndex
+  isInformativeKaikkiEnglishToken,
+  MAX_REVERSE_GLOSS_DOCUMENT_FREQUENCY,
+  readKaikkiSqliteIndex,
+  type KaikkiLookupIndex
 } from "./kaikkiSqliteIndex.js";
 
 interface CliOptions {
@@ -134,15 +144,21 @@ export interface LexicalAutoSafePlacement {
 
 interface CandidateEvidence {
   source: string;
+  provenanceRoot?: string;
+  reviewOnly?: boolean;
   detail: string;
   weight: number;
 }
 
-interface KaikkiIndex {
-  formToLemma: Map<string, string>;
-  lemmaGlossTokens: Map<string, Set<string>>;
-  englishGlossToFrench: Map<string, Set<string>>;
+interface SeedTerm {
+  score: number;
+  source: string;
+  provenanceRoot: string;
+  reviewOnly: boolean;
 }
+
+type SeedTerms = Map<string, SeedTerm>;
+type KaikkiIndex = KaikkiLookupIndex;
 
 interface KaikkiEntry {
   word?: unknown;
@@ -294,7 +310,10 @@ export async function buildLexicalCandidateReport(
   const synonymSources = await readCachedSynonymSources(
     options,
     {
-      targetWords: new Set([...targetWords, ...kaikki.formToLemma.values()]),
+      targetWords: new Set([
+        ...targetWords,
+        ...[...kaikki.formToLemma.values()].flatMap((lemmas) => [...lemmas])
+      ]),
       dictionaryTerms: new Set(
         [...dictionaryStrongSet].flatMap((strong) => [
           ...(dictionaryByStrong.get(strong)?.keys() ?? [])
@@ -462,19 +481,86 @@ export async function writeLexicalCandidateReport(
     `bible-${report.bible}-lexical-candidates-${scopeSlug}.md`
   );
 
-  await Promise.all([
-    writeFile(jsonPath, `${JSON.stringify(report, null, 2)}\n`, "utf8"),
-    writeFile(markdownPath, renderMarkdownReport(report), "utf8")
-  ]);
+  // A full-Bible report is hundreds of megabytes. Serializing the entire
+  // object creates an equally large UTF-16 string and can exhaust V8's default
+  // heap while the ledger is still resident. Stream the large items array and
+  // render Markdown only after the JSON stream has closed.
+  await writeLexicalCandidateReportJson(jsonPath, report);
+  await writeTextFileAtomic(markdownPath, renderMarkdownReport(report));
 
   return { jsonPath, markdownPath };
+}
+
+async function writeLexicalCandidateReportJson(
+  outputPath: string,
+  report: LexicalCandidateReport
+): Promise<void> {
+  const temporaryPath = `${outputPath}.tmp-${process.pid}-${Date.now()}`;
+  const stream = createWriteStream(temporaryPath, { encoding: "utf8" });
+  try {
+    await writeStreamChunk(stream, "{\n");
+    const header: Array<[string, unknown]> = [
+      ["bible", report.bible],
+      ["generatedAt", report.generatedAt],
+      ["inputPath", report.inputPath],
+      ["scope", report.scope],
+      ["sources", report.sources],
+      ["metrics", report.metrics]
+    ];
+    for (const [key, value] of header) {
+      await writeStreamChunk(
+        stream,
+        `  ${JSON.stringify(key)}: ${indentJsonContinuation(
+          JSON.stringify(value, null, 2),
+          2
+        )},\n`
+      );
+    }
+    await writeStreamChunk(stream, '  "items": [\n');
+    for (let index = 0; index < report.items.length; index += 1) {
+      const item = report.items[index];
+      if (!item) continue;
+      await writeStreamChunk(
+        stream,
+        `${indentJsonBlock(JSON.stringify(item, null, 2), 4)}${
+          index + 1 < report.items.length ? "," : ""
+        }\n`
+      );
+    }
+    await writeStreamChunk(stream, "  ]\n}\n");
+    const finished = once(stream, "finish");
+    stream.end();
+    await finished;
+    await rename(temporaryPath, outputPath);
+  } catch (error) {
+    stream.destroy();
+    await rm(temporaryPath, { force: true });
+    throw error;
+  }
+}
+
+function indentJsonContinuation(value: string, spaces: number): string {
+  return value.replaceAll("\n", `\n${" ".repeat(spaces)}`);
+}
+
+function indentJsonBlock(value: string, spaces: number): string {
+  const indentation = " ".repeat(spaces);
+  return `${indentation}${value.replaceAll("\n", `\n${indentation}`)}`;
+}
+
+async function writeStreamChunk(
+  stream: NodeJS.WritableStream,
+  chunk: string
+): Promise<void> {
+  if (stream.write(chunk)) return;
+  await once(stream, "drain");
 }
 
 function buildCandidateItem(options: {
   auditKind: LexicalCandidateItem["auditKind"];
   verse: StrongLedger["verses"][number];
   annotation: StrongLedger["verses"][number]["annotations"][number];
-  dictionaryTerms: Map<string, number>;
+  dictionaryTerms: SeedTerms;
   kaikki: KaikkiIndex;
   synonymSources: SynonymSource[];
   maxCandidates: number;
@@ -482,13 +568,18 @@ function buildCandidateItem(options: {
   const stepGlosses = options.annotation.step?.map((step) => step.gloss) ?? [];
   const englishHints = stepGlossTokens(stepGlosses);
   const inferredTerms = inferredFrenchTerms(englishHints, options.kaikki);
-  const seedTerms = new Map<string, number>();
+  const seedTerms: SeedTerms = new Map();
 
-  for (const [term, score] of options.dictionaryTerms) {
-    seedTerms.set(term, Math.max(seedTerms.get(term) ?? 0, score));
+  for (const [term, seed] of options.dictionaryTerms) {
+    addSeedTerm(seedTerms, term, seed);
   }
   for (const term of inferredTerms) {
-    seedTerms.set(term, Math.max(seedTerms.get(term) ?? 0, 0.42));
+    addSeedTerm(seedTerms, term, {
+      score: 0.42,
+      source: "kaikki-inferred",
+      provenanceRoot: "kaikki",
+      reviewOnly: true
+    });
   }
 
   const scoredCandidates = options.verse.tokens
@@ -550,13 +641,20 @@ function buildCandidateItem(options: {
 function scoreTargetToken(options: {
   token: StrongLedger["verses"][number]["tokens"][number];
   verse: StrongLedger["verses"][number];
-  seedTerms: Map<string, number>;
+  seedTerms: SeedTerms;
   englishHints: string[];
   annotation: StrongLedger["verses"][number]["annotations"][number];
   kaikki: KaikkiIndex;
   synonymSources: SynonymSource[];
 }): LexicalCandidate | undefined {
-  const lemma = lemmaForToken(options.token.normalized, options.kaikki);
+  const lemmas = lemmasForToken(options.token.normalized, options.kaikki);
+  const lemma = bestLemmaForToken({
+    normalized: options.token.normalized,
+    lemmas,
+    seedTerms: options.seedTerms,
+    englishHints: options.englishHints,
+    kaikki: options.kaikki
+  });
   const evidence: CandidateEvidence[] = [];
   const properName = isProperNameAnnotation(options.annotation);
 
@@ -576,37 +674,47 @@ function scoreTargetToken(options: {
     });
     if (numberEvidence) evidence.push(numberEvidence);
 
-    const exactSeedScore =
-      Math.max(
-        options.seedTerms.get(options.token.normalized) ?? 0,
-        options.seedTerms.get(lemma) ?? 0
-      ) || 0;
-    if (exactSeedScore > 0) {
+    const exactSeed = bestExactSeed(
+      [options.token.normalized, ...lemmas],
+      options.seedTerms
+    );
+    if (exactSeed) {
       evidence.push({
         source: "seed-term",
+        provenanceRoot: exactSeed.seed.provenanceRoot,
+        reviewOnly: exactSeed.seed.reviewOnly,
         detail: `${lemma} matches Strong lexical hint`,
-        weight: Math.min(0.5, 0.26 + exactSeedScore * 0.4)
+        weight: Math.min(0.5, 0.26 + exactSeed.seed.score * 0.4)
       });
     } else {
-      const stemMatch = bestSeedStemMatch(lemma, options.seedTerms);
+      const stemMatch = [...lemmas]
+        .map((candidateLemma) =>
+          bestSeedStemMatch(candidateLemma, options.seedTerms)
+        )
+        .filter((match): match is NonNullable<typeof match> => Boolean(match))
+        .sort((left, right) => right.score - left.score)[0];
       if (stemMatch) {
         evidence.push({
           source: "seed-stem",
+          provenanceRoot: stemMatch.provenanceRoot,
+          reviewOnly: stemMatch.reviewOnly,
           detail: `${lemma} shares Strong lexical stem ${stemMatch.seed}`,
           weight: Math.min(0.42, 0.24 + stemMatch.score * 0.42)
         });
       }
     }
 
-    const glossOverlap = overlapCount(
-      options.kaikki.lemmaGlossTokens.get(lemma) ?? new Set(),
-      new Set(options.englishHints)
+    const glossOverlap = bestGlossOverlap(
+      lemmas,
+      options.englishHints,
+      options.kaikki
     );
-    if (glossOverlap > 0) {
+    if (glossOverlap.score > 0) {
       evidence.push({
         source: "kaikki-gloss",
+        provenanceRoot: "kaikki",
         detail: `${lemma} gloss overlaps ${options.englishHints.join(", ")}`,
-        weight: Math.min(0.32, 0.16 + glossOverlap * 0.08)
+        weight: Math.min(0.32, 0.14 + glossOverlap.score * 0.14)
       });
     }
 
@@ -628,7 +736,7 @@ function scoreTargetToken(options: {
     options.token.wordIndex,
     options.verse.tokens.length
   );
-  const sourceDiversity = new Set(evidence.map((item) => item.source)).size;
+  const sourceDiversity = evidenceRootCount(evidence);
   const safeOccupiedStack =
     occupied && isStackSafeLexicalCandidateEvidence(evidence);
   const rawScore =
@@ -645,7 +753,7 @@ function scoreTargetToken(options: {
     normalized: options.token.normalized,
     lemma,
     score,
-    confidence: candidateConfidence(score, evidence),
+    confidence: candidateConfidence(score, evidence, options.token.normalized),
     occupied,
     evidence
   };
@@ -680,6 +788,7 @@ function applyRelocationDirectTargetGuard(options: {
     if (candidate.occupied) return candidate;
     return capCandidateScore(candidate, MEDIUM_CONFIDENCE_THRESHOLD - 0.02, {
       source: "relocation-guard",
+      provenanceRoot: "relocation-guard",
       detail: `current target ${currentCandidate.text} has direct lexical evidence`,
       weight: 0
     });
@@ -687,23 +796,39 @@ function applyRelocationDirectTargetGuard(options: {
 }
 
 function hasDirectLexicalEvidence(candidate: LexicalCandidate): boolean {
-  return candidate.evidence.some((evidence) =>
-    DIRECT_LEXICAL_EVIDENCE_SOURCES.has(evidence.source)
-  );
+  return candidate.evidence.some(isSafeDirectLexicalEvidence);
 }
 
 function candidateConfidence(
   score: number,
-  evidence: CandidateEvidence[]
+  evidence: CandidateEvidence[],
+  normalizedTarget?: string
 ): LexicalCandidate["confidence"] {
   if (score < MEDIUM_CONFIDENCE_THRESHOLD) return "low";
+  if (normalizedTarget && isGenericFrenchCarrier(normalizedTarget)) {
+    return "medium";
+  }
   if (
     score >= HIGH_CONFIDENCE_THRESHOLD &&
-    evidence.some((item) => DIRECT_LEXICAL_EVIDENCE_SOURCES.has(item.source))
+    evidence.some(isSafeDirectLexicalEvidence)
   ) {
     return "high";
   }
   return "medium";
+}
+
+function isSafeDirectLexicalEvidence(evidence: CandidateEvidence): boolean {
+  return (
+    !evidence.reviewOnly && DIRECT_LEXICAL_EVIDENCE_SOURCES.has(evidence.source)
+  );
+}
+
+function evidenceRoot(evidence: CandidateEvidence): string {
+  return evidence.provenanceRoot ?? evidence.source;
+}
+
+function evidenceRootCount(evidence: CandidateEvidence[]): number {
+  return new Set(evidence.map(evidenceRoot)).size;
 }
 
 const DIRECT_LEXICAL_EVIDENCE_SOURCES = new Set([
@@ -729,6 +854,7 @@ function numberComponentEvidence(options: {
 
   return {
     source: "number-component",
+    provenanceRoot: "step-original",
     detail: `${options.targetText} contains numeric component ${matchingValue}`,
     weight: 0.78
   };
@@ -966,12 +1092,24 @@ const TEEN_UNIT_VALUES = new Map<number, number>([
 
 function bestSeedStemMatch(
   lemma: string,
-  seedTerms: Map<string, number>
-): { seed: string; score: number } | undefined {
+  seedTerms: SeedTerms
+):
+  | {
+      seed: string;
+      score: number;
+      provenanceRoot: string;
+      reviewOnly: boolean;
+    }
+  | undefined {
   const targetVariants = lexicalStemVariants(lemma);
-  const matches: Array<{ seed: string; score: number }> = [];
+  const matches: Array<{
+    seed: string;
+    score: number;
+    provenanceRoot: string;
+    reviewOnly: boolean;
+  }> = [];
 
-  for (const [seed, score] of seedTerms) {
+  for (const [seed, metadata] of seedTerms) {
     const seedVariants = lexicalStemVariants(seed);
     if (
       [...targetVariants].some((targetVariant) =>
@@ -980,11 +1118,50 @@ function bestSeedStemMatch(
         )
       )
     ) {
-      matches.push({ seed, score });
+      matches.push({
+        seed,
+        score: metadata.score,
+        provenanceRoot: metadata.provenanceRoot,
+        reviewOnly: metadata.reviewOnly
+      });
     }
   }
 
   return matches.sort((left, right) => right.score - left.score)[0];
+}
+
+function addSeedTerm(
+  terms: SeedTerms,
+  term: string,
+  candidate: SeedTerm
+): void {
+  const existing = terms.get(term);
+  if (
+    !existing ||
+    (existing.reviewOnly && !candidate.reviewOnly) ||
+    (existing.reviewOnly === candidate.reviewOnly &&
+      candidate.score > existing.score)
+  ) {
+    terms.set(term, candidate);
+  }
+}
+
+function bestExactSeed(
+  terms: Iterable<string>,
+  seeds: SeedTerms
+): { term: string; seed: SeedTerm } | undefined {
+  return [...new Set(terms)]
+    .map((term) => {
+      const seed = seeds.get(term);
+      return seed ? { term, seed } : undefined;
+    })
+    .filter((match): match is NonNullable<typeof match> => Boolean(match))
+    .sort(
+      (left, right) =>
+        Number(left.seed.reviewOnly) - Number(right.seed.reviewOnly) ||
+        right.seed.score - left.seed.score ||
+        left.term.localeCompare(right.term)
+    )[0];
 }
 
 function lexicalStemVariants(term: string): Set<string> {
@@ -1031,7 +1208,7 @@ function capCandidateScore(
   return {
     ...candidate,
     score,
-    confidence: candidateConfidence(score, evidenceList),
+    confidence: candidateConfidence(score, evidenceList, candidate.normalized),
     evidence: evidenceList
   };
 }
@@ -1055,7 +1232,7 @@ function isProperNameAnnotation(
 function properNameEvidence(options: {
   targetText: string;
   annotation: StrongLedger["verses"][number]["annotations"][number];
-  seedTerms: Map<string, number>;
+  seedTerms: SeedTerms;
 }): CandidateEvidence[] {
   if (isLowercaseProperNameStopTarget(options.targetText)) return [];
 
@@ -1069,6 +1246,7 @@ function properNameEvidence(options: {
   const evidence: CandidateEvidence[] = [
     {
       source: "proper-name-step",
+      provenanceRoot: "step-original",
       detail: `${options.targetText} matches STEP name key ${matchingStepKey}`,
       weight: 0.62
     }
@@ -1079,6 +1257,7 @@ function properNameEvidence(options: {
   if (matchingDictionaryKey) {
     evidence.push({
       source: "proper-name-dictionary",
+      provenanceRoot: "strong-dictionary",
       detail: `${options.targetText} matches Strong dictionary name key ${matchingDictionaryKey}`,
       weight: 0.22
     });
@@ -1135,11 +1314,12 @@ function properNameStepKeys(
 }
 
 function properNameDictionaryKeys(
-  seedTerms: Map<string, number>,
+  seedTerms: SeedTerms,
   stepKeys: Set<string>
 ): Set<string> {
   const keys = new Set<string>();
-  for (const seed of seedTerms.keys()) {
+  for (const [seed, metadata] of seedTerms) {
+    if (metadata.reviewOnly) continue;
     const seedKeys = nameKeyVariantsFromText(seed);
     if (!firstNameKeyMatch(seedKeys, stepKeys)) continue;
     addAll(keys, seedKeys);
@@ -1307,7 +1487,7 @@ function addAll<T>(target: Set<T>, values: Iterable<T>): void {
 
 function scorePhraseCandidates(options: {
   verse: StrongLedger["verses"][number];
-  seedTerms: Map<string, number>;
+  seedTerms: SeedTerms;
   annotation: StrongLedger["verses"][number]["annotations"][number];
   kaikki: KaikkiIndex;
   synonymSources: SynonymSource[];
@@ -1351,9 +1531,7 @@ function scorePhraseCandidates(options: {
           startWordIndex,
           options.verse.tokens.length
         );
-        const sourceDiversity = new Set(
-          hint.evidence.map((item) => item.source)
-        ).size;
+        const sourceDiversity = evidenceRootCount(hint.evidence);
         const rawScore =
           hint.evidence.reduce((sum, item) => sum + item.weight, 0) +
           position * 0.12 +
@@ -1386,7 +1564,7 @@ function scorePhraseCandidates(options: {
 
 function scoreAuxiliaryVerbPhraseCandidates(options: {
   verse: StrongLedger["verses"][number];
-  seedTerms: Map<string, number>;
+  seedTerms: SeedTerms;
   annotation: StrongLedger["verses"][number]["annotations"][number];
   kaikki: KaikkiIndex;
   synonymSources: SynonymSource[];
@@ -1441,12 +1619,13 @@ function scoreAuxiliaryVerbPhraseCandidates(options: {
     const evidence: CandidateEvidence[] = [
       {
         source: "french-auxiliary-phrase",
+        provenanceRoot: "step-morphology",
         detail: `${auxiliary.text} carries STEP auxiliary ${auxiliaryFamily}`,
         weight: 0.28
       },
       ...participleCandidate.evidence
     ];
-    const sourceDiversity = new Set(evidence.map((item) => item.source)).size;
+    const sourceDiversity = evidenceRootCount(evidence);
     const rawScore =
       participleCandidate.score +
       0.28 +
@@ -1551,12 +1730,12 @@ const FRENCH_AUXILIARY_FORMS = new Map<string, string>([
 ]);
 
 function phraseHintsFromSynonyms(
-  seedTerms: Map<string, number>,
+  seedTerms: SeedTerms,
   synonymSources: SynonymSource[]
 ): Map<string, { evidence: CandidateEvidence[] }> {
   const hints = new Map<string, { evidence: CandidateEvidence[] }>();
 
-  for (const seed of seedTerms.keys()) {
+  for (const [seed, seedMetadata] of seedTerms) {
     for (const source of synonymSources) {
       for (const phrase of source.phraseSynonymsByLemma.get(seed)?.values() ??
         []) {
@@ -1564,6 +1743,10 @@ function phraseHintsFromSynonyms(
         const existing = hints.get(key) ?? { evidence: [] };
         existing.evidence.push({
           source: `${source.name}-phrase`,
+          provenanceRoot: seedMetadata.reviewOnly
+            ? seedMetadata.provenanceRoot
+            : source.name,
+          reviewOnly: seedMetadata.reviewOnly,
           detail: `${phrase.phrase.join(" ")} links to seed ${seed}`,
           weight: weightedSynonymScore(phrase.weight, source.name) + 0.08
         });
@@ -1592,7 +1775,7 @@ function dedupePhraseCandidates(
 function synonymSourceEvidence(
   source: SynonymSource,
   lemma: string,
-  seedTerms: Map<string, number>
+  seedTerms: SeedTerms
 ): CandidateEvidence | undefined {
   const targetSynonyms = source.synonymsByLemma.get(lemma);
   const seedTermSet = new Set(seedTerms.keys());
@@ -1601,8 +1784,11 @@ function synonymSourceEvidence(
     seedTermSet
   );
   if (matchingTargetSynonym) {
+    const seed = seedTerms.get(matchingTargetSynonym.term);
     return {
       source: source.name,
+      provenanceRoot: seed?.reviewOnly ? seed.provenanceRoot : source.name,
+      reviewOnly: seed?.reviewOnly,
       detail: `${lemma} links to seed ${matchingTargetSynonym.term}`,
       weight: weightedSynonymScore(matchingTargetSynonym.weight, source.name)
     };
@@ -1614,6 +1800,10 @@ function synonymSourceEvidence(
     if (weight && weight > 0) {
       return {
         source: source.name,
+        provenanceRoot: seedTerms.get(seed)?.reviewOnly
+          ? seedTerms.get(seed)?.provenanceRoot
+          : source.name,
+        reviewOnly: seedTerms.get(seed)?.reviewOnly,
         detail: `${seed} links to target ${lemma}`,
         weight: weightedSynonymScore(weight, source.name)
       };
@@ -1921,7 +2111,7 @@ async function readKaikkiIndex(
   englishHints: Set<string>
 ): Promise<KaikkiIndex> {
   const sqlitePath = defaultKaikkiSqlitePath(filePath);
-  if (hasKaikkiSqliteIndex(sqlitePath)) {
+  if (hasKaikkiSqliteIndex(sqlitePath, filePath)) {
     return readKaikkiSqliteIndex({ sqlitePath, targetWords, englishHints });
   }
 
@@ -1930,6 +2120,7 @@ async function readKaikkiIndex(
     ? createReadStream(filePath).pipe(createGunzip())
     : createReadStream(filePath);
   const lines = readline.createInterface({ input });
+  let entryCount = 0;
 
   for await (const line of lines) {
     const entry = safeJsonParse(line);
@@ -1939,30 +2130,48 @@ async function readKaikkiIndex(
 
     const normalizedWord = normalizeWord(entry.word);
     const glossTokens = new Set(entryGlossTokens(entry));
+    const formLemmas = formOfLemmas(entry);
+    const reverseFrenchTerms =
+      formLemmas.size > 0 ? formLemmas : new Set([normalizedWord]);
+    entryCount += 1;
 
     for (const token of glossTokens) {
       if (englishHints.has(token)) {
         const terms =
           index.englishGlossToFrench.get(token) ?? new Set<string>();
-        terms.add(normalizedWord);
+        for (const french of reverseFrenchTerms) terms.add(french);
         index.englishGlossToFrench.set(token, terms);
       }
     }
 
     if (targetWords.has(normalizedWord)) {
-      const lemma = formOfLemma(entry) ?? normalizedWord;
-      index.formToLemma.set(normalizedWord, lemma);
-      index.lemmaGlossTokens.set(lemma, glossTokens);
+      const lemmas =
+        formLemmas.size > 0 ? formLemmas : new Set([normalizedWord]);
+      for (const lemma of lemmas) {
+        addMapSet(index.formToLemma, normalizedWord, lemma);
+        mergeMapSet(index.lemmaGlossTokens, lemma, glossTokens);
+      }
     }
 
     for (const form of entry.forms ?? []) {
       if (typeof form?.form !== "string") continue;
       const normalizedForm = normalizeWord(form.form);
       if (targetWords.has(normalizedForm)) {
-        index.formToLemma.set(normalizedForm, normalizedWord);
-        index.lemmaGlossTokens.set(normalizedWord, glossTokens);
+        addMapSet(index.formToLemma, normalizedForm, normalizedWord);
+        mergeMapSet(index.lemmaGlossTokens, normalizedWord, glossTokens);
       }
     }
+  }
+
+  for (const [token, terms] of index.englishGlossToFrench) {
+    if (terms.size > MAX_REVERSE_GLOSS_DOCUMENT_FREQUENCY) {
+      index.englishGlossToFrench.delete(token);
+      continue;
+    }
+    index.englishTokenWeights.set(
+      token,
+      normalizedInverseDocumentFrequency(entryCount, terms.size)
+    );
   }
 
   return index;
@@ -2013,24 +2222,111 @@ function entryGlossTokens(entry: KaikkiEntry): string[] {
   return [...new Set<string>(tokens)];
 }
 
-function formOfLemma(entry: KaikkiEntry): string | undefined {
+function formOfLemmas(entry: KaikkiEntry): Set<string> {
+  const lemmas = new Set<string>();
   for (const sense of entry.senses ?? []) {
-    const lemma = sense.form_of?.[0]?.word;
-    if (typeof lemma === "string") return normalizeWord(lemma);
+    for (const form of sense.form_of ?? []) {
+      if (typeof form.word !== "string") continue;
+      const lemma = normalizeWord(form.word);
+      if (lemma) lemmas.add(lemma);
+    }
   }
-  return undefined;
+  return lemmas;
 }
 
 function emptyKaikkiIndex(): KaikkiIndex {
   return {
     formToLemma: new Map(),
     lemmaGlossTokens: new Map(),
-    englishGlossToFrench: new Map()
+    englishGlossToFrench: new Map(),
+    englishTokenWeights: new Map()
   };
 }
 
-function lemmaForToken(normalized: string, kaikki: KaikkiIndex): string {
-  return kaikki.formToLemma.get(normalized) ?? normalized;
+function lemmasForToken(normalized: string, kaikki: KaikkiIndex): Set<string> {
+  return kaikki.formToLemma.get(normalized) ?? new Set([normalized]);
+}
+
+function bestLemmaForToken(options: {
+  normalized: string;
+  lemmas: Set<string>;
+  seedTerms: SeedTerms;
+  englishHints: string[];
+  kaikki: KaikkiIndex;
+}): string {
+  return (
+    [...options.lemmas]
+      .map((lemma) => {
+        const exact = options.seedTerms.get(lemma)?.score ?? 0;
+        const gloss = bestGlossOverlap(
+          new Set([lemma]),
+          options.englishHints,
+          options.kaikki
+        ).score;
+        return { lemma, score: exact + gloss * 0.5 };
+      })
+      .sort(
+        (left, right) =>
+          right.score - left.score ||
+          Number(left.lemma !== options.normalized) -
+            Number(right.lemma !== options.normalized) ||
+          left.lemma.localeCompare(right.lemma)
+      )[0]?.lemma ?? options.normalized
+  );
+}
+
+function bestGlossOverlap(
+  lemmas: Set<string>,
+  englishHints: string[],
+  kaikki: KaikkiIndex
+): { lemma?: string; score: number } {
+  const hints = new Set(englishHints);
+  let best: { lemma?: string; score: number } = { score: 0 };
+  for (const lemma of lemmas) {
+    let score = 0;
+    for (const token of kaikki.lemmaGlossTokens.get(lemma) ?? []) {
+      if (!hints.has(token)) continue;
+      const tokenWeight = kaikki.englishTokenWeights.get(token);
+      if (tokenWeight === undefined) continue;
+      score += tokenWeight;
+    }
+    if (score > best.score) best = { lemma, score };
+  }
+  return best;
+}
+
+function addMapSet(
+  target: Map<string, Set<string>>,
+  key: string,
+  value: string
+): void {
+  const values = target.get(key) ?? new Set<string>();
+  values.add(value);
+  target.set(key, values);
+}
+
+function mergeMapSet(
+  target: Map<string, Set<string>>,
+  key: string,
+  values: Iterable<string>
+): void {
+  const merged = target.get(key) ?? new Set<string>();
+  for (const value of values) merged.add(value);
+  target.set(key, merged);
+}
+
+function normalizedInverseDocumentFrequency(
+  totalDocuments: number,
+  documentFrequency: number
+): number {
+  const total = Math.max(1, totalDocuments);
+  const frequency = Math.max(1, Math.min(total, documentFrequency));
+  const denominator = Math.log(total + 1);
+  if (denominator <= 0) return 0;
+  return Math.max(
+    0,
+    Math.min(1, Math.log((total + 1) / frequency) / denominator)
+  );
 }
 
 function inferredFrenchTerms(
@@ -2072,16 +2368,18 @@ async function readStrongLedger(
 
 function groupDictionaryTerms(
   candidates: StrongTranslationCandidate[]
-): Map<string, Map<string, number>> {
-  const grouped = new Map<string, Map<string, number>>();
+): Map<string, SeedTerms> {
+  const grouped = new Map<string, SeedTerms>();
 
   for (const candidate of candidates) {
     if (!isContentWord(candidate.normalized)) continue;
-    const terms = grouped.get(candidate.strong) ?? new Map();
-    terms.set(
-      candidate.normalized,
-      Math.max(terms.get(candidate.normalized) ?? 0, candidate.score)
-    );
+    const terms = grouped.get(candidate.strong) ?? new Map<string, SeedTerm>();
+    addSeedTerm(terms, candidate.normalized, {
+      score: candidate.score,
+      source: candidate.source,
+      provenanceRoot: candidate.provenanceRoot ?? candidate.source,
+      reviewOnly: candidate.reviewOnly ?? false
+    });
     grouped.set(candidate.strong, terms);
   }
 
@@ -2200,7 +2498,7 @@ function englishTokens(text: string): string[] {
   return tokenizeText(text)
     .filter((segment) => segment.kind === "word")
     .map((segment) => englishStem(segment.normalized))
-    .filter((token) => token.length >= 3 && !ENGLISH_STOP_WORDS.has(token));
+    .filter(isInformativeKaikkiEnglishToken);
 }
 
 function englishStem(word: string): string {
@@ -2209,25 +2507,6 @@ function englishStem(word: string): string {
   if (word.endsWith("s") && word.length > 4) return word.slice(0, -1);
   return word;
 }
-
-const ENGLISH_STOP_WORDS = new Set([
-  "and",
-  "are",
-  "for",
-  "her",
-  "him",
-  "his",
-  "let",
-  "not",
-  "she",
-  "the",
-  "them",
-  "they",
-  "this",
-  "that",
-  "with",
-  "you"
-]);
 
 function isContentWord(word: string): boolean {
   return word.length >= 3 && !FUNCTION_WORDS.has(word) && !/^\d+$/u.test(word);
@@ -2264,10 +2543,12 @@ function phraseKeysForSpan(
   kaikki: KaikkiIndex
 ): string[] {
   const variants = span.map((token) => {
-    const lemma = lemmaForToken(token.normalized, kaikki);
-    return lemma === token.normalized
-      ? [token.normalized]
-      : [lemma, token.normalized];
+    return [
+      ...new Set([
+        ...lemmasForToken(token.normalized, kaikki),
+        token.normalized
+      ])
+    ];
   });
   const keys: string[] = [];
 
@@ -2312,14 +2593,6 @@ function isTechnicalLexicalNode(name: string): boolean {
     name.includes(">") ||
     name.includes("=")
   );
-}
-
-function overlapCount(left: Set<string>, right: Set<string>): number {
-  let count = 0;
-  for (const value of left) {
-    if (right.has(value)) count += 1;
-  }
-  return count;
 }
 
 function positionScore(
@@ -2684,9 +2957,10 @@ function isOpenHighLexicalDuplicateCandidate(
     candidate.confidence === "high" &&
     !candidate.occupied &&
     !isProperNameCandidate(candidate) &&
+    !isGenericFrenchCarrier(candidate.normalized) &&
     !isStackSafeLexicalCandidateEvidence(candidate.evidence) &&
     hasDirectLexicalEvidence(candidate) &&
-    new Set(candidate.evidence.map((evidence) => evidence.source)).size >= 2
+    evidenceRootCount(candidate.evidence) >= 2
   );
 }
 
@@ -2791,14 +3065,17 @@ export function isAutoSafeCandidate(
   candidate: LexicalCandidate
 ): boolean {
   if (candidate.confidence !== "high") return false;
+  if (
+    candidate.target === "word" &&
+    isGenericFrenchCarrier(candidate.normalized)
+  ) {
+    return false;
+  }
   const stackSafe = isStackSafeLexicalCandidateEvidence(candidate.evidence);
   if (candidate.occupied && !stackSafe) return false;
   if (!hasDirectLexicalEvidence(candidate)) return false;
   if (isSimpleStepProperNameAutoSafeCandidate(item, candidate)) return true;
-  if (
-    !stackSafe &&
-    new Set(candidate.evidence.map((evidence) => evidence.source)).size < 2
-  ) {
+  if (!stackSafe && evidenceRootCount(candidate.evidence) < 2) {
     return false;
   }
   if (item.auditKind === "relocation") {
@@ -3082,7 +3359,10 @@ function renderMarkdownReport(report: LexicalCandidateReport): string {
         `| ${candidateLabel(candidate)}: ${candidate.text} | ${candidate.score.toFixed(
           2
         )} | ${candidate.confidence}${candidate.occupied ? " / occupied" : ""} | ${candidate.evidence
-          .map((evidence) => `${evidence.source}: ${evidence.detail}`)
+          .map(
+            (evidence) =>
+              `${evidence.source}${evidence.reviewOnly ? " [review-only]" : ""} (${evidenceRoot(evidence)}): ${evidence.detail}`
+          )
           .join("<br>")} |`
       );
     }

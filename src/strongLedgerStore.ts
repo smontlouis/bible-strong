@@ -80,6 +80,7 @@ export async function replaceStrongLedgerSqliteVerses(options: {
   bible: string;
   verses: StrongLedgerVerse[];
   method: string;
+  metadata?: Partial<StrongLedger>;
 }): Promise<StrongLedgerMetrics> {
   if (options.verses.length === 0) {
     return readStrongLedgerMetricsSqlite(options.sqlitePath);
@@ -111,6 +112,7 @@ export async function replaceStrongLedgerSqliteVerses(options: {
     const ledger = readStrongLedgerMetadataFromOpenDatabase(db);
     writeMetadata(db, {
       ...ledger,
+      ...options.metadata,
       generatedAt: metrics.generatedAt,
       scope: "all",
       method: options.method,

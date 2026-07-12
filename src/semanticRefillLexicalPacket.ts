@@ -39,6 +39,7 @@ interface LexicalAgentPacketFile {
     includeOccupied: boolean;
     allowDuplicateTargets: boolean;
     auditKind: "all" | "empty" | "relocation";
+    offset: number;
     limit?: number;
   };
   summary: {
@@ -60,12 +61,13 @@ interface LexicalAgentPacketFile {
   candidates: SemanticRefillLlmCandidatePacket[];
 }
 
-async function buildLexicalAgentPacket(options: {
+export async function buildLexicalAgentPacket(options: {
   bible: string;
   scope: string;
   lexicalReportPath: string;
   ledgerDir: string;
   outputPath: string;
+  offset?: number;
   limit?: number;
   minConfidence: CandidateConfidence;
   includeOccupied: boolean;
@@ -97,15 +99,14 @@ async function buildLexicalAgentPacket(options: {
     )
     .filter((item): item is SemanticRefillAuditItem => !!item)
     .sort(compareAuditItems);
-  const selected = (
-    options.allowDuplicateTargets ? ranked : uniqueByBestTarget(ranked)
-  ).slice(0, options.limit);
-
-  if (selected.length === 0) {
-    throw new Error(
-      `no-lexical-candidates:${options.scope}:${options.minConfidence}`
-    );
-  }
+  const deduplicated = options.allowDuplicateTargets
+    ? ranked
+    : uniqueByBestTarget(ranked);
+  const selected = slicePacketItems(
+    deduplicated,
+    options.offset ?? 0,
+    options.limit
+  );
 
   const batch = buildSemanticRefillLlmBatch({
     bible: options.bible,
@@ -135,6 +136,7 @@ async function buildLexicalAgentPacket(options: {
       includeOccupied: options.includeOccupied,
       allowDuplicateTargets: options.allowDuplicateTargets,
       auditKind: options.auditKind,
+      offset: options.offset ?? 0,
       limit: options.limit
     },
     summary: {
@@ -191,7 +193,10 @@ function lexicalItemToAuditItem(options: {
     return undefined;
   }
 
-  const candidates = options.item.candidates
+  const currentCandidates = options.item.candidates.map((candidate) =>
+    recomputeLexicalCandidateOccupation(candidate, options.verse!)
+  );
+  const candidates = currentCandidates
     .filter(
       (candidate) =>
         confidenceRank(candidate.confidence) >=
@@ -202,8 +207,12 @@ function lexicalItemToAuditItem(options: {
     .sort(
       (left, right) =>
         right.score - left.score ||
-        candidateTargetKey(options.item.ref, left).localeCompare(
-          candidateTargetKey(options.item.ref, right)
+        candidateTargetKey(
+          options.item.ref,
+          options.item.strong,
+          left
+        ).localeCompare(
+          candidateTargetKey(options.item.ref, options.item.strong, right)
         )
     );
   if (candidates.length === 0) return undefined;
@@ -211,7 +220,7 @@ function lexicalItemToAuditItem(options: {
   const annotation = findAnnotation(options.verse, options.item);
   const bestConfidence = candidates[0]?.score ?? 0;
   const priority = priorityForConfidence(
-    options.item.candidates.find(
+    currentCandidates.find(
       (candidate) => candidate.score === candidates[0]?.score
     )?.confidence ?? options.minConfidence
   );
@@ -265,13 +274,43 @@ function lexicalItemToAuditItem(options: {
   };
 }
 
-function uniqueByBestTarget(
+export function recomputeLexicalCandidateOccupation(
+  candidate: LexicalCandidate,
+  verse: StrongLedgerVerse
+): LexicalCandidate {
+  const start = candidate.startWordIndex ?? candidate.wordIndex;
+  const end = candidate.endWordIndex ?? candidate.wordIndex;
+  const occupied = verse.annotations.some((annotation) => {
+    if (annotation.visibility !== "reader") return false;
+    if (annotation.placement === "word") {
+      return (
+        annotation.wordIndex !== undefined &&
+        annotation.wordIndex >= start &&
+        annotation.wordIndex <= end
+      );
+    }
+    if (annotation.placement !== "phrase") return false;
+    const annotationStart = annotation.startWordIndex;
+    const annotationEnd = annotation.endWordIndex;
+    return (
+      annotationStart !== undefined &&
+      annotationEnd !== undefined &&
+      annotationStart <= end &&
+      start <= annotationEnd
+    );
+  });
+  return occupied === candidate.occupied
+    ? candidate
+    : { ...candidate, occupied };
+}
+
+export function uniqueByBestTarget(
   items: SemanticRefillAuditItem[]
 ): SemanticRefillAuditItem[] {
   const seen = new Set<string>();
   const output: SemanticRefillAuditItem[] = [];
   for (const item of items) {
-    const key = candidateTargetKey(item.ref, item.candidates[0]);
+    const key = candidateTargetKey(item.ref, item.strong, item.candidates[0]);
     if (seen.has(key)) continue;
     seen.add(key);
     output.push(item);
@@ -281,12 +320,13 @@ function uniqueByBestTarget(
 
 function candidateTargetKey(
   ref: string,
+  strong: string,
   candidate: SemanticRefillCandidate | undefined
 ): string {
-  if (!candidate) return `${ref}|none`;
+  if (!candidate) return `${ref}|${strong.toUpperCase()}|none`;
   return [
     ref,
-    candidate.strong.toUpperCase(),
+    strong.toUpperCase(),
     candidate.target,
     candidate.wordIndex ?? "",
     candidate.startWordIndex ?? "",
@@ -294,6 +334,15 @@ function candidateTargetKey(
     candidate.normalizedWord ?? "",
     candidate.normalizedPhrase?.join(" ") ?? ""
   ].join("|");
+}
+
+export function slicePacketItems<T>(
+  items: T[],
+  offset: number,
+  limit?: number
+): T[] {
+  const start = Math.max(0, Math.trunc(offset));
+  return items.slice(start, limit === undefined ? undefined : start + limit);
 }
 
 function lexicalCandidateToSemantic(
@@ -305,7 +354,8 @@ function lexicalCandidateToSemantic(
     `lexical-confidence:${candidate.confidence}`,
     candidate.occupied ? "occupied-target" : "open-target",
     ...candidate.evidence.map(
-      (entry) => `${entry.source}:${entry.detail}:${entry.weight}`
+      (entry) =>
+        `${entry.reviewOnly ? "review-only:" : ""}${entry.source}:${entry.detail}:${entry.weight}`
     )
   ];
 
@@ -561,6 +611,7 @@ async function main(): Promise<void> {
     ),
     ledgerDir: readStringArg(args, "ledger-dir", `outputs/strong/${bible}`),
     outputPath,
+    offset: readOptionalNumberArg(args, "offset"),
     limit: readOptionalNumberArg(args, "limit"),
     minConfidence: readConfidenceArg(args, "min-confidence", "high"),
     includeOccupied: args.get("include-occupied") === true,

@@ -49,3 +49,33 @@ test("uses agreement across references to raise confidence", () => {
 
   assert.equal([...result.assignments.values()][0]?.confidence, 0.99);
 });
+
+test("matches repeated surface forms to distinct reference occurrences", () => {
+  const result = alignVerse("Dieu vit et Dieu parla", [
+    {
+      name: "fixture",
+      verse: {
+        row: { bookId: "Gen", chapter: 1, verse: 1, text: "" },
+        tokens: parseStrongTokens(
+          '<w strong="H0430">Dieu</w> vit et <w strong="H0410">Dieu</w> parla'
+        )
+      }
+    }
+  ]);
+
+  assert.deepEqual(result.assignments.get(0)?.strong, ["H0430"]);
+  assert.deepEqual(result.assignments.get(3)?.strong, ["H0410"]);
+});
+
+test("does not count Darby and DarbyR as independent consensus families", () => {
+  const references = ["Darby", "DarbyR"].map((name) => ({
+    name,
+    verse: {
+      row: { bookId: "Gen", chapter: 1, verse: 1, text: "" },
+      tokens: parseStrongTokens('<w strong="H0430">Dieu</w>')
+    }
+  }));
+  const result = alignVerse("Dieu", references);
+
+  assert.equal(result.assignments.get(0)?.confidence, 0.95);
+});

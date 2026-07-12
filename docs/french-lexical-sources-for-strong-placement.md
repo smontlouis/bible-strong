@@ -225,13 +225,13 @@ Optional external source flags remain:
 `strong:lexical-candidates` only produces a report. `strong:generate` is the
 production command that applies validated auto-safe placements.
 
-Current local command used for the STEP-first NBS Genesis 1-6 run:
+Equivalent current command for an NBS Genesis 1-6 audit:
 
 ```sh
 npm run strong:lexical-candidates -- \
   --bible nbs \
   --only Gen.1-Gen.6 \
-  --ledger outputs/strong-step-first/nbs/bible-nbs-strong-ledger.json \
+  --ledger outputs/strong/nbs/bible-nbs-strong.sqlite \
   --kaikki data/external/french-lexical/kaikki/kaikki.org-dictionary-French.jsonl \
   --jdm-cache data/external/french-lexical/rezojdm-cache \
   --openoffice data/external/french-lexical/openoffice/synonymes/handler/dictionary.go \
@@ -246,7 +246,7 @@ match:
 /outputs/lexical-candidates/<bible>/bible-<bible>-lexical-candidates-<scope>.json
 ```
 
-For `outputs/strong-step-first/nbs/bible-nbs-strong-ledger.json`, it loads:
+For `outputs/strong/nbs/bible-nbs-strong.sqlite`, it loads:
 
 ```text
 /outputs/lexical-candidates/nbs/bible-nbs-lexical-candidates-Gen.1-Gen.6.json
@@ -278,6 +278,33 @@ Interpretation:
 - `auto-safe` is deliberately strict and is applied by `strong:generate`.
 - residual reports should show `auto-safe items: 0`; remaining candidates are
   review material, not automatic production changes.
+
+## 2026-07-10 safety hardening
+
+The production index/scorer now adds these non-negotiable constraints:
+
+- Kaikki form lookup is many-to-many, so an ambiguous inflection does not
+  silently overwrite one lemma with another;
+- reverse English-gloss candidates use stop words, document-frequency caps,
+  and inverse-document-frequency weights;
+- Kaikki-derived terms remain `reviewOnly`; a seed inferred from Kaikki and a
+  Kaikki gloss share one provenance root and cannot masquerade as independent
+  evidence;
+- generic French lemmas/forms such as `être`, `avoir`, `faire`, and `aller`
+  cannot become production learned carriers merely through frequency;
+- multi-word dictionary `meaning` prose and multi-token gloss fragments are
+  review-only rather than flattened into single-word production evidence;
+- learned reference forms are contrastive: scoring includes both
+  `P(form | Strong)` and `P(Strong | form)`, plus support from independent
+  witness families. A common form shared by many Strong codes is downranked;
+- dictionary lookup can use the exact STEP `dStrong` for an occurrence and
+  rejects a candidate tied to a different disambiguated sense;
+- the Kaikki and phrase SQLite stores include schema/algorithm and content
+  fingerprints and are rebuilt atomically.
+
+After changing these rules, rebuild indexes and rerun the masked-gold canonical
+canaries plus the stable 10×5 audit before accepting any snapshot change.
+
 - `group auto-safe` means an individually ambiguous proper-name candidate was
   resolved by source order across repeated French carriers. The same mechanism
   also resolves repeated ordinary lexical carriers when the same Strong has the
