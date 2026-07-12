@@ -39,6 +39,7 @@ module.exports = [
       'builds/**',
       'dist/**',
       'docs/assets/app-flows/dist/**',
+      '.agents/**',
       '*.config.js',
       'babel.config.js',
       'metro.config.js',
