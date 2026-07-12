@@ -34,6 +34,8 @@ Core user activities:
 |---|---|---|
 | Bible version | A translation or source text identified by a code such as `LSG`, `KJV`, `BHS`, `SBLGNT`. | `src/helpers/bibleVersions.ts` |
 | Verse key | Canonical verse identifier used for user data, generally `book-chapter-verse` such as `1-27-2`. | `src/redux/modules/user.ts`, `src/redux/selectors/bible.ts` |
+| Versification | Declared book/chapter/verse numbering system used by a Bible version. The initial online-resource design preserves the app's current numeric location model and does not automatically convert between versifications. | Bible version metadata |
+| Bible canon | Declared set and ordering of books covered by a Bible version. Published coverage records what the application can actually open. | Bible version metadata |
 | Selected verses | The current verse selection in Bible view, used to create highlights, notes, tags, links, bookmarks, study entries, or shares. | `src/features/bible/SelectedVersesModal/` |
 | Highlight | Verse-level visual mark stored in Redux/Firestore under `user.bible.highlights`. | `src/redux/modules/user.ts`, `src/features/bible/ColorCirclesBar.tsx` |
 | Word annotation | Word/range-level mark created in Mode libre and stored under `user.bible.wordAnnotations`. | `src/features/bible/hooks/useAnnotationMode.ts`, `src/features/bible/BibleDOM/AnnotationMode/` |
@@ -58,8 +60,24 @@ Core user activities:
 | Interlinear | Original-language verse display with lexical/translation alignment. | `src/helpers/loadInterlineaireChapter.ts`, `src/features/bible/BibleDOM/InterlinearVerse*` |
 | Nave | Nave's topical Bible resource. | `src/features/nave/`, `src/helpers/loadNaveItem.ts` |
 | Resource database | Downloaded SQLite/JSON file used by study features. | `src/helpers/databases.ts`, `src/helpers/databaseTypes.ts` |
+| Offline copy | Complete resource content deliberately installed on the device for durable use without a network connection. An offline copy is a local source, not a query cache. | `src/features/resources/`, `src/features/settings/DownloadsScreen.tsx` |
+| Offline-copy metadata | Locally retained publication identity for an installed Offline copy: Resource revision, checksum, artifact schema version, installation time, and resource-specific counts where useful. | Resource installation layer |
+| Query cache | Temporary reuse of resource query results managed by the query layer. The initial online-resource implementation keeps this cache in memory; persistent partial caching is a separate future capability. | Query layer |
+| Resource revision | Identifier of the current published edition of one independently distributable resource identity, such as one Bible version or one language of a study resource. It is shared by remote reads and downloadable Offline copies; older revisions are not retained in the live resource database. | Resource publication pipeline |
+| Resource catalog | Minimal server manifest declaring the current Resource revision, online availability, offline-artifact location, and integrity metadata of each independently distributable resource identity. Product labels and initial adapter support remain application code. | Resource publication pipeline |
+| Resource delivery capabilities | Per-resource or per-version declaration of whether content can be read through remote Online access and whether a complete Offline copy can be downloaded. These capabilities are independent. | Resource catalog |
+| Resource distribution rights | Structured provenance, rights-holder, terms reference, attribution, review date, and allowed Online/Offline delivery modes for an editorial resource. It informs publication controls but does not replace legal review. | Canonical resource metadata |
+| Resource availability | User-relevant state describing whether an Offline copy is installed or why a requested resource cannot currently load. It does not expose technical source details such as SQLite, HTTP, or query cache. | Resource selectors, management surfaces, and resource viewers |
+| Resource access error | Structured failure classified as unavailable offline, not installed, unsupported, not found, corrupt or incomplete local copy, or remote service failure. It supports source fallback and an actionable viewer state without exposing raw storage or network errors. | `src/features/resources/` |
+| Resource domain contract | Storage-independent request and result model exposed by one Resource access capability. Local SQLite and remote HTTP adapters translate their representations into the same contract. | `src/features/resources/` |
 | Resource access | Domain interface used by app surfaces to read Bible/resource content without knowing whether the data comes from local storage, partial cache, or a future remote adapter. | `src/features/resources/` |
+| Search parity | Compatibility between online and offline search at the level of query meaning, filters, pagination, and result contract. It does not require identical relevance scores or result ordering from PostgreSQL and SQLite FTS5. | Bible and resource search |
 | Tab group | A group of app tabs persisted through Jotai/MMKV and optionally synced. | `src/state/tabs.ts`, `src/state/tabGroups.ts` |
+| Guest session | A period without an authenticated account during which locally created study data belongs to the device user rather than to a cloud account. A guest session may begin on a fresh installation or after an account logout has cleared the previous account's state. | Authentication and persistence |
+| Guest data | Account-eligible study data created during the current guest session. It excludes data retained from an authenticated account and device-owned resources or caches. | Redux/Jotai persistence |
+| Account-entry classification | The ownership decision made when authentication begins an account session: genuinely new account, existing account, provider link, restored session, or unknown. Unknown is an unresolved state, not evidence that the account is existing. | Authentication and synchronization |
+| Account-eligible guest data | Guest data whose domain type already participates in account synchronization. Guest adoption does not turn previously device-owned state into account-owned state. | Authentication and synchronization |
+| Guest adoption | The one-time ownership transition that assigns account-eligible Guest data to a genuinely new account before normal account hydration begins. | Authentication and synchronization |
 
 ## Domain Relationships
 
@@ -107,8 +125,38 @@ Core user activities:
 
 - The app is expected to work offline for already downloaded Bible/resource data.
 - Resource access modules should preserve the offline behavior of downloaded Bible/resource data while creating seams for future remote adapters.
+- Resource consumers use one query interface regardless of source. Resource access chooses between an installed Offline copy and remote access; the Query cache does not replace either source.
+- Local and remote adapters return the same Resource domain contract; SQLite rows and HTTP payload shapes do not escape their adapters.
+- Resource domain contracts have a shared machine-readable definition that supports runtime validation, inferred or generated TypeScript types, and OpenAPI documentation for the REST boundary.
+- Online and offline search preserve Search parity without promising identical ranking between their different search engines.
+- Remote editorial resources and their downloadable Offline copies are derived from the same Resource revision.
+- Bible resource metadata declares its Bible canon, Versification, and published coverage. The initial system preserves the existing numeric book/chapter/verse identity and does not provide automatic cross-versification conversion.
+- Resource revisions are published independently; the Resource catalog selects the active revision for each resource identity without creating one global catalogue revision.
+- Neon retains only the current published Resource revision for each resource identity. A replacement may coexist temporarily in staging during publication, but older revisions are removed after activation.
+- Remote editorial resources can be read without an authenticated user account; account authentication remains a concern of user-owned data rather than resource delivery.
+- Online access and Offline-copy download availability are independent Resource delivery capabilities; a resource may support either or both according to licensing and rollout constraints.
+- Resource delivery capabilities must agree with the resource's structured Resource distribution rights before publication.
+- The Resource catalog is publication metadata, not a remote feature-flag system. Initial remote-adapter support and stable product metadata remain in application code.
+- An installed Offline copy remains the preferred source when a newer Resource revision is available. The update is explicit; content does not switch between local and remote revisions according to connectivity.
+- Every installed Offline copy retains Offline-copy metadata so the app can detect updates, validate integrity, and interpret the artifact schema without inferring identity only from file existence.
+- A recoverable failure from an installed Offline copy, such as corruption or incomplete content, may fall back automatically to Online access. A genuine domain `not found` result is not reclassified as local corruption.
+- Normal resource consumption does not expose whether data came from SQLite, HTTP, or Query cache. A selector may indicate whether an Offline copy is installed, but it does not resolve or intercept content loading.
+- Selecting a resource opens its normal viewer. The viewer requests content through the query and Resource access layers, then renders either the content or an actionable unavailable state such as offering an Offline-copy download.
+- Resources remain visible and selectable in catalogs even when they may not currently load. Raw network and storage errors are translated into viewer states rather than pre-emptively removing or blocking catalog choices.
 - User-owned Bible data lives primarily in Redux state and is persisted locally through MMKV/redux-persist.
 - Authenticated user data can sync with Firestore; changes to sync semantics are sensitive.
+- Logging out ends the authenticated account session and clears its account-owned local state; any study data created afterward belongs to a new guest session.
+- A genuinely new account may adopt eligible guest data from the current guest session even when another account previously used the device.
+- Entering an existing account never adopts guest data; the existing account's cloud data becomes authoritative without requiring user confirmation.
+- While account-entry classification is unknown, guest data remains visible and neither guest adoption nor remote account hydration may begin.
+- A genuinely new account is established only by the credential operation that creates or first authenticates it. Restored authentication state, account timestamps, and empty remote data do not prove that an account is new.
+- Guest adoption preserves stable identifiers for user-authored source entities and Manual relations. System relations and derived relation indexes are rebuilt from their adopted sources rather than adopted independently.
+- Guest adoption follows the app's existing account-sync boundary for preferences: synchronized settings are eligible, while settings and state that are currently device-owned remain device-owned.
+- Guest adoption follows the existing sync contracts for Reading plans and Tab groups: synchronized plan state and workspace content are eligible, while downloaded content, caches, previews, and transient navigation state remain device-owned.
+- Creating a Study requires an authenticated account. A Study created through an unauthenticated UI path is invalid guest state and is not part of the guest-adoption contract.
+- A pending Guest adoption is permanently bound to the UID of the account that received it. It may resume after logout or restart only when that same account returns, and it can never be reassigned to another account.
+- Email verification does not determine Guest adoption eligibility. Adoption begins when account creation is confirmed and remains pending if remote authorization requires later verification.
+- Account-eligible Guest data comprises guest-creatable types already owned by account sync: highlights and custom colors, notes, bookmarks, tags and their tagged resource references, links, word annotations and annotation notes, Manual relations, synchronized settings, followed-plan progress, and synchronized Tab groups. Studies, System relations, derived indexes, downloads, caches, technical notification state, changelog state, and transient UI state are excluded.
 - Bible/resource database files are language-aware: many resources are language-specific, while some are shared.
 - The reading surface is WebView/DOM-backed; native UI often orchestrates state and bottom sheets around it.
 - React Compiler is enabled. Do not add `useMemo`, `useCallback`, or `memo()` unless there is a specific compiler-compatible reason already established in this repo.
