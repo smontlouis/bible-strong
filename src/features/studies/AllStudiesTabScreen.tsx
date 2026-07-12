@@ -161,7 +161,7 @@ const StudiesScreen = ({
   })
   const publicationLabels: Record<StudiesListQueryState['publication'], string> = {
     all: t('Tous'),
-    draft: t('Brouillons'),
+    draft: t('Non publiées'),
     published: t('Publiées'),
   }
   const matchingStudies = studies.filter(study => {
