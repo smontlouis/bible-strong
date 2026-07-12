@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 
 import Empty from '~common/Empty'
-import FiltersHeader from '~common/FiltersHeader'
+import FiltersHeader, { getFiltersHeaderLabel } from '~common/FiltersHeader'
 import { Tag } from '~common/types'
 import Container from '~common/ui/Container'
 import FlatList from '~common/ui/FlatList'
@@ -25,6 +25,9 @@ import { createNoteEndpoint } from '~features/studyRelations/endpoints'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import BibleNoteItem from '../bible/BibleNoteItem'
 import NotesSettingsModal from './NotesSettingsModal'
+import { useEntityListQueryFilters } from '~common/EntityListQueryFilters'
+import { queryEntityList, type EntityListSort } from '~features/entityListQuery/entityListQuery'
+import { defaultNotesListQueryState, notesListQueryAtom } from '~state/entityListFilters'
 
 type TNote = {
   noteId: string
@@ -42,12 +45,20 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
   const [, setNotesTab] = useAtom(notesAtom)
 
   const [notes, setNotes] = useState<TNote[]>([])
-  const [selectedChip, setSelectedChip] = useState<Tag | null>(null)
+  const [queryState, setQueryState] = useAtom(notesListQueryAtom)
   const [noteSettingsId, setNoteSettingsId] = useState<string | null>(null)
 
   const _notes = useSelector((state: RootState) => state.user.bible.notes)
   const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
   const relations = useSelector((state: RootState) => state.user.bible.relations)
+  const tags = useSelector((state: RootState) => state.user.bible.tags)
+  const selectedChip = queryState.tagId ? tags[queryState.tagId] || null : null
+
+  useEffect(() => {
+    if (queryState.tagId && !tags[queryState.tagId]) {
+      setQueryState(state => ({ ...state, tagId: null }))
+    }
+  }, [queryState.tagId, setQueryState, tags])
   const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const noteSettingsModal = useSheet()
@@ -57,7 +68,7 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
     setUnifiedTagsModal({
       mode: 'filter',
       selectedTag: selectedChip ?? undefined,
-      onSelect: (tag?: Tag) => setSelectedChip(tag ?? null),
+      onSelect: (tag?: Tag) => setQueryState(state => ({ ...state, tagId: tag?.id || null })),
     })
   }
 
@@ -130,19 +141,50 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
     )
   }
 
-  const filteredNotes = notes.filter(s =>
-    selectedChip ? s.notes.tags && s.notes.tags[selectedChip.id] : true
+  const sortOptions = [
+    { value: 'newest', label: t('entityList.sort.newest') },
+    { value: 'oldest', label: t('entityList.sort.oldest') },
+    { value: 'title-asc', label: t('entityList.sort.titleAsc') },
+    { value: 'title-desc', label: t('entityList.sort.titleDesc') },
+  ] satisfies readonly { value: EntityListSort; label: string }[]
+  const queryFilters = useEntityListQueryFilters({
+    query: queryState.query,
+    sort: queryState.sort,
+    sortOptions,
+    onQueryChange: query => setQueryState(state => ({ ...state, query })),
+    onSortChange: sort => setQueryState(state => ({ ...state, sort })),
+  })
+  const taggedNotes = notes.filter(s =>
+    selectedChip ? Boolean(s.notes.tags?.[selectedChip.id]) : true
+  )
+  const filteredNotes = queryEntityList(
+    taggedNotes.map(item => ({
+      ...item,
+      id: item.noteId,
+      title: getNoteTitle(item.notes, item.reference),
+      description: item.notes.description,
+      date: Number(item.notes.date || 0),
+    })),
+    queryState
+  )
+  const activeFilters = Boolean(
+    queryState.query.trim() || queryState.tagId || queryState.sort !== 'newest'
+  )
+  const filterLabel = getFiltersHeaderLabel(
+    [...queryFilters.activeLabels, selectedChip?.name],
+    count => `${count} ${t('filtres')}`
   )
 
   return (
     <Container>
       <FiltersHeader
         title={t('Notes')}
-        filterLabel={selectedChip?.name}
+        filterLabel={filterLabel}
         hasBackButton={hasBackButton}
-        hasActiveFilters={Boolean(selectedChip)}
-        onReset={() => setSelectedChip(null)}
+        hasActiveFilters={activeFilters}
+        onReset={() => setQueryState(defaultNotesListQueryState)}
         filters={[
+          ...queryFilters.filters,
           {
             key: 'tags',
             icon: 'tag',
@@ -152,6 +194,7 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
           },
         ]}
       />
+      {queryFilters.modals}
       {filteredNotes.length ? (
         <FlatList
           data={filteredNotes}
@@ -162,7 +205,13 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
       ) : (
         <Empty
           icon={require('~assets/images/empty-state-icons/note.svg')}
-          message={t("Vous n'avez pas encore de notes...")}
+          message={
+            notes.length
+              ? queryState.query.trim()
+                ? t('Aucun résultat trouvé pour "{{query}}"', { query: queryState.query })
+                : t('entityList.noFilterMatch')
+              : t("Vous n'avez pas encore de notes...")
+          }
         />
       )}
       <NotesSettingsModal

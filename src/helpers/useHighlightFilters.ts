@@ -1,10 +1,13 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSetAtom } from 'jotai/react'
+import { useAtom, useSetAtom } from 'jotai/react'
+import { useSelector } from 'react-redux'
 import type { SheetRef } from '~common/sheet'
 import type { HighlightFilters, Tag } from '~common/types'
 import { useColorInfo } from './useColorName'
 import { unifiedTagsModalAtom } from '~state/app'
+import { highlightsListQueryAtom } from '~state/entityListFilters'
+import type { RootState } from '~redux/modules/reducer'
 
 interface UseHighlightFiltersReturn {
   // Filter state
@@ -37,8 +40,9 @@ export function useHighlightFilters(): UseHighlightFiltersReturn {
   const { t } = useTranslation()
 
   // Filter state
-  const [filters, setFilters] = useState<HighlightFilters>({})
-  const [selectedTag, setSelectedTag] = useState<Tag>()
+  const [filters, setFilters] = useAtom(highlightsListQueryAtom)
+  const tags = useSelector((state: RootState) => state.user.bible.tags)
+  const selectedTag = filters.tagId ? tags[filters.tagId] : undefined
 
   // Modal refs (imperative API - no booleans)
   const colorModalRef = useRef<SheetRef>(null)
@@ -50,6 +54,15 @@ export function useHighlightFilters(): UseHighlightFiltersReturn {
   // Derived values
   const colorInfo = useColorInfo(filters.colorId)
 
+  useEffect(() => {
+    if (filters.tagId && !tags[filters.tagId]) {
+      setFilters(state => ({ ...state, tagId: undefined }))
+    }
+    if (filters.colorId && !colorInfo) {
+      setFilters(state => ({ ...state, colorId: undefined }))
+    }
+  }, [colorInfo, filters.colorId, filters.tagId, setFilters, tags])
+
   // Type filter label
   const getTypeFilterLabel = (): string => {
     if (!filters.typeFilter || filters.typeFilter === 'all') {
@@ -57,6 +70,9 @@ export function useHighlightFilters(): UseHighlightFiltersReturn {
     }
     if (filters.typeFilter === 'annotations') {
       return t('Annotations')
+    }
+    if (filters.typeFilter === 'highlights') {
+      return t('Surbrillances')
     }
     // It's a version code
     return filters.typeFilter
@@ -68,7 +84,10 @@ export function useHighlightFilters(): UseHighlightFiltersReturn {
   const activeFiltersCount =
     (filters.colorId ? 1 : 0) +
     (filters.tagId ? 1 : 0) +
-    (filters.typeFilter && filters.typeFilter !== 'all' ? 1 : 0)
+    (filters.typeFilter && filters.typeFilter !== 'all' ? 1 : 0) +
+    (filters.testament && filters.testament !== 'all' ? 1 : 0) +
+    (filters.book ? 1 : 0) +
+    (filters.sort && filters.sort !== 'newest' ? 1 : 0)
 
   const getFilterLabel = (): string | undefined => {
     if (activeFiltersCount === 0) return undefined
@@ -89,7 +108,6 @@ export function useHighlightFilters(): UseHighlightFiltersReturn {
   }
 
   const setTagFilter = (tag?: Tag) => {
-    setSelectedTag(tag)
     setFilters(f => ({ ...f, tagId: tag?.id }))
   }
 
@@ -99,7 +117,6 @@ export function useHighlightFilters(): UseHighlightFiltersReturn {
 
   const resetFilters = () => {
     setFilters({})
-    setSelectedTag(undefined)
   }
 
   // Modal navigation (imperative API)

@@ -1,11 +1,11 @@
 import { type SheetRef } from '~common/sheet'
 import { useEffect, useRef, useState } from 'react'
 import { FlatList } from 'react-native'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
-import { useSetAtom } from 'jotai/react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useAtom, useSetAtom } from 'jotai/react'
 
 import Empty from '~common/Empty'
-import FiltersHeader from '~common/FiltersHeader'
+import FiltersHeader, { getFiltersHeaderLabel } from '~common/FiltersHeader'
 import RenameModal from '~common/RenameModal'
 import Box from '~common/ui/Box'
 import FabButton from '~common/ui/FabButton'
@@ -30,6 +30,15 @@ import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import StudyItem from './StudyItem'
 import StudySettingsModal from './StudySettingsModal'
+import ChoiceFilterModal from '~common/ChoiceFilterModal'
+import { useEntityListQueryFilters } from '~common/EntityListQueryFilters'
+import { queryEntityList, type EntityListSort } from '~features/entityListQuery/entityListQuery'
+import {
+  defaultStudiesListQueryState,
+  studiesListQueryAtom,
+  type StudiesListQueryState,
+} from '~state/entityListFilters'
+import { selectStudyListRows } from '~redux/selectors/studies'
 
 type StudiesScreenProps = {
   hasBackButton?: boolean
@@ -61,6 +70,7 @@ const StudiesScreen = ({
   const studySettingsModal = useSheet()
   const openEntityRelations = useOpenEntityRelations()
   const renameModalRef = useRef<SheetRef>(null)
+  const publicationModalRef = useRef<SheetRef>(null)
   const [studyToRename, setStudyToRename] = useState<{ id: string; title: string } | null>(null)
   const [pendingStudyId, setPendingStudyId] = useState<string | null>(null)
 
@@ -101,24 +111,25 @@ const StudiesScreen = ({
     }
   }
 
-  const [selectedChip, setSelectedChip] = useState<Tag | null>(null)
+  const [queryState, setQueryState] = useAtom(studiesListQueryAtom)
+  const tags = useSelector((state: RootState) => state.user.bible.tags)
+  const selectedChip = queryState.tagId ? tags[queryState.tagId] || null : null
+
+  useEffect(() => {
+    if (queryState.tagId && !tags[queryState.tagId]) {
+      setQueryState(state => ({ ...state, tagId: null }))
+    }
+  }, [queryState.tagId, setQueryState, tags])
 
   const openTagsModal = () => {
     setUnifiedTagsModal({
       mode: 'filter',
       selectedTag: selectedChip ?? undefined,
-      onSelect: (tag?: Tag) => setSelectedChip(tag ?? null),
+      onSelect: (tag?: Tag) => setQueryState(state => ({ ...state, tagId: tag?.id || null })),
     })
   }
 
-  const studies = useSelector(
-    (state: RootState) =>
-      Object.entries(state.user.bible.studies).map(([studyId, study]) => ({
-        ...study,
-        id: study.id || studyId,
-      })),
-    shallowEqual
-  )
+  const studies = useSelector(selectStudyListRows)
   const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
 
   const pendingStudy = useSelector((state: RootState) =>
@@ -133,21 +144,68 @@ const StudiesScreen = ({
     }
   }, [pendingStudy, pendingStudyId, onStudyPress])
 
-  const filteredStudies = studies.filter(s =>
-    selectedChip ? s.tags && s.tags[selectedChip.id] : true
+  const sortOptions = [
+    { value: 'newest', label: t('entityList.sort.newest') },
+    { value: 'oldest', label: t('entityList.sort.oldest') },
+    { value: 'created-newest', label: t('entityList.sort.createdNewest') },
+    { value: 'created-oldest', label: t('entityList.sort.createdOldest') },
+    { value: 'title-asc', label: t('entityList.sort.titleAsc') },
+    { value: 'title-desc', label: t('entityList.sort.titleDesc') },
+  ] satisfies readonly { value: EntityListSort; label: string }[]
+  const queryFilters = useEntityListQueryFilters({
+    query: queryState.query,
+    sort: queryState.sort,
+    sortOptions,
+    onQueryChange: query => setQueryState(state => ({ ...state, query })),
+    onSortChange: sort => setQueryState(state => ({ ...state, sort })),
+  })
+  const publicationLabels: Record<StudiesListQueryState['publication'], string> = {
+    all: t('Tous'),
+    draft: t('Non publiées'),
+    published: t('Publiées'),
+  }
+  const matchingStudies = studies.filter(study => {
+    if (selectedChip && !study.tags?.[selectedChip.id]) return false
+    if (queryState.publication === 'published') return study.published === true
+    if (queryState.publication === 'draft') return study.published !== true
+    return true
+  })
+  const filteredStudies = queryEntityList(
+    matchingStudies.map(study => ({
+      ...study,
+      title: study.title || t('Étude sans titre'),
+      description: study.searchDescription,
+      date: Number(study.modified_at || 0),
+      createdAt: Number(study.created_at || 0),
+    })),
+    queryState
   )
-  filteredStudies.sort((a, b) => Number(b.modified_at) - Number(a.modified_at))
+  const activeFilters = Boolean(
+    queryState.query.trim() ||
+    queryState.tagId ||
+    queryState.publication !== 'all' ||
+    queryState.sort !== 'newest'
+  )
+  const filterLabel = getFiltersHeaderLabel(
+    [
+      ...queryFilters.activeLabels,
+      selectedChip?.name,
+      queryState.publication !== 'all' ? publicationLabels[queryState.publication] : undefined,
+    ],
+    count => `${count} ${t('filtres')}`
+  )
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
       <Box flex bg="reverse">
         <FiltersHeader
           title={t('Études')}
-          filterLabel={selectedChip?.name}
+          filterLabel={filterLabel}
           hasBackButton={showBackButton}
-          hasActiveFilters={Boolean(selectedChip)}
-          onReset={() => setSelectedChip(null)}
+          hasActiveFilters={activeFilters}
+          onReset={() => setQueryState(defaultStudiesListQueryState)}
           filters={[
+            ...queryFilters.filters,
             {
               key: 'tags',
               icon: 'tag',
@@ -155,7 +213,28 @@ const StudiesScreen = ({
               value: selectedChip?.name || t('Tous'),
               onPress: openTagsModal,
             },
+            {
+              key: 'publication',
+              icon: 'send',
+              label: t('Publication'),
+              value: publicationLabels[queryState.publication],
+              onPress: () => publicationModalRef.current?.present(),
+            },
           ]}
+        />
+        {queryFilters.modals}
+        <ChoiceFilterModal
+          ref={publicationModalRef}
+          title={t('Publication')}
+          selectedValue={queryState.publication}
+          options={Object.entries(publicationLabels).map(([value, label]) => ({
+            value: value as StudiesListQueryState['publication'],
+            label,
+          }))}
+          onSelect={publication => {
+            setQueryState(state => ({ ...state, publication }))
+            publicationModalRef.current?.dismiss()
+          }}
         />
         {filteredStudies.length ? (
           <FlatList
@@ -181,28 +260,16 @@ const StudiesScreen = ({
             }}
           />
         ) : (
-          <>
-            <FiltersHeader
-              title={t('Études')}
-              filterLabel={selectedChip?.name}
-              hasBackButton={showBackButton}
-              hasActiveFilters={Boolean(selectedChip)}
-              onReset={() => setSelectedChip(null)}
-              filters={[
-                {
-                  key: 'tags',
-                  icon: 'tag',
-                  label: t('Tags'),
-                  value: selectedChip?.name || t('Tous'),
-                  onPress: openTagsModal,
-                },
-              ]}
-            />
-            <Empty
-              icon={require('~assets/images/empty-state-icons/study.svg')}
-              message={t('Aucune étude...')}
-            />
-          </>
+          <Empty
+            icon={require('~assets/images/empty-state-icons/study.svg')}
+            message={
+              studies.length
+                ? queryState.query.trim()
+                  ? t('Aucun résultat trouvé pour "{{query}}"', { query: queryState.query })
+                  : t('entityList.noFilterMatch')
+                : t('Aucune étude...')
+            }
+          />
         )}
         {isLogged && (
           <FabButton

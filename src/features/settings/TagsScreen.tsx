@@ -2,15 +2,17 @@ import styled from '@emotion/native'
 import { Sheet, type SheetRef } from '~common/sheet'
 import React, { useEffect, useRef, useState } from 'react'
 import { Alert } from 'react-native'
-import { shallowEqual, useDispatch, useSelector, useStore } from 'react-redux'
+import { useDispatch, useSelector, useStore } from 'react-redux'
+import { useAtom } from 'jotai/react'
 
 import { useTranslation } from 'react-i18next'
 import { ActionSheetItem } from '~common/ActionMenu'
+import ChoiceFilterModal, { type ChoiceFilterOption } from '~common/ChoiceFilterModal'
 import Empty from '~common/Empty'
-import Header from '~common/Header'
+import FiltersHeader from '~common/FiltersHeader'
 import Link from '~common/Link'
 import RenameModal from '~common/RenameModal'
-import SearchInput from '~common/SearchInput'
+import SearchFilterModal from '~common/SearchFilterModal'
 import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import FabButton from '~common/ui/FabButton'
@@ -18,15 +20,20 @@ import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { LegendList } from '@legendapp/list'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import useFuzzy from '~helpers/useFuzzy'
 import { useSheet } from '~helpers/useSheet'
 import { addTag, removeTag, updateTag } from '~redux/modules/user'
-import { sortedTagsSelector } from '~redux/selectors/tags'
+import { selectTagListRows } from '~redux/selectors/tags'
 import { makeTagDataSelector } from '~redux/selectors/bible'
 import { Tag } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import { useCreateTabGroupFromTag } from './useCreateTabGroupFromTag'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { queryTagList } from '~features/entityListQuery/tagListQuery'
+import {
+  defaultTagListQueryState,
+  tagListQueryAtom,
+  type TagListSort,
+} from '~state/entityListFilters'
 
 const Chip = styled(Box)(({ theme }) => ({
   borderRadius: 20,
@@ -133,18 +140,38 @@ const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
   const { t } = useTranslation()
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : true
-  const tags = useSelector(sortedTagsSelector, shallowEqual)
+  const tagRows = useSelector(selectTagListRows)
+  const [queryState, setQueryState] = useAtom(tagListQueryAtom)
   const [isOpen, setOpen] = useState<Tag | undefined>(undefined)
   const renameModalRef = useRef<SheetRef>(null)
   const [tagToEdit, setTagToEdit] = useState<{ id: string; name: string } | null>(null)
-  const { keyword, result, search, resetSearch } = useFuzzy(tags, {
-    keys: ['name'],
-  })
   const dispatch = useDispatch()
   const { ref, open, close } = useSheet()
+  const searchModalRef = useRef<SheetRef>(null)
+  const sortModalRef = useRef<SheetRef>(null)
   const store = useStore<RootState>()
   const selectTagData = makeTagDataSelector()
   const createTabGroupFromTag = useCreateTabGroupFromTag()
+  const result = queryTagList(tagRows, queryState)
+
+  const sortOptions: readonly ChoiceFilterOption<TagListSort>[] = [
+    { value: 'name-asc', label: t('entityList.sort.nameAsc') },
+    { value: 'name-desc', label: t('entityList.sort.nameDesc') },
+    { value: 'count-asc', label: t('entityList.sort.countAsc') },
+    { value: 'count-desc', label: t('entityList.sort.countDesc') },
+  ]
+  const sortLabel =
+    sortOptions.find(option => option.value === queryState.sort)?.label ||
+    t('entityList.sort.nameAsc') ||
+    queryState.sort
+  const activeFiltersCount =
+    (queryState.query.trim() ? 1 : 0) + (queryState.sort !== defaultTagListQueryState.sort ? 1 : 0)
+  const filterLabel =
+    activeFiltersCount === 1
+      ? queryState.query.trim() || sortLabel
+      : activeFiltersCount > 1
+        ? `${activeFiltersCount} ${t('filtres')}`
+        : undefined
 
   useEffect(() => {
     if (isOpen) {
@@ -176,28 +203,61 @@ const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
       <Box flex bg="reverse">
-        <Header hasBackButton={hasBackButton} title={t('Étiquettes')}>
-          <Box pb={10} px={20}>
-            <SearchInput
-              placeholder={t('Chercher une étiquette')}
-              onChangeText={search}
-              onDelete={resetSearch}
-              value={keyword}
-              returnKeyType="done"
-            />
-          </Box>
-        </Header>
+        <FiltersHeader
+          hasBackButton={hasBackButton}
+          title={t('Étiquettes')}
+          filterLabel={filterLabel}
+          hasActiveFilters={activeFiltersCount > 0}
+          onReset={() => setQueryState(defaultTagListQueryState)}
+          filters={[
+            {
+              key: 'search',
+              icon: 'search',
+              label: t('Rechercher'),
+              value: queryState.query.trim() || t('Tout'),
+              onPress: () => searchModalRef.current?.present(),
+            },
+            {
+              key: 'sort',
+              icon: 'list',
+              label: t('Ordre'),
+              value: sortLabel,
+              onPress: () => sortModalRef.current?.present(),
+            },
+          ]}
+        />
+        <SearchFilterModal
+          ref={searchModalRef}
+          title={t('Rechercher')}
+          placeholder={t('Chercher une étiquette')}
+          value={queryState.query}
+          onChange={query => setQueryState(state => ({ ...state, query }))}
+        />
+        <ChoiceFilterModal
+          ref={sortModalRef}
+          title={t('Ordre')}
+          selectedValue={queryState.sort}
+          options={sortOptions}
+          onSelect={sort => {
+            setQueryState(state => ({ ...state, sort }))
+            sortModalRef.current?.dismiss()
+          }}
+        />
         {result.length ? (
           <LegendList
             data={result}
-            renderItem={({ item }: { item: Tag }) => <TagItem setOpen={setOpen} item={item} />}
-            keyExtractor={(item: Tag) => item.id}
+            renderItem={({ item }) => <TagItem setOpen={setOpen} item={item.tag} />}
+            keyExtractor={item => item.id}
             contentContainerStyle={{ paddingBottom: 70 }}
           />
         ) : (
           <Empty
             icon={require('~assets/images/empty-state-icons/tag.svg')}
-            message={t('Aucune étiquette...')}
+            message={
+              tagRows.length
+                ? t('Aucun résultat trouvé pour "{{query}}"', { query: queryState.query })
+                : t('Aucune étiquette...')
+            }
           />
         )}
 

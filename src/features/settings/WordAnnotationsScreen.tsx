@@ -1,22 +1,31 @@
-import React, { useState, useMemo } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { FlatList } from 'react-native'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 
-import Header from '~common/Header'
+import FiltersHeader, { getFiltersHeaderLabel } from '~common/FiltersHeader'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { RootState } from '~redux/modules/reducer'
 import { WordAnnotation } from '~redux/modules/user/wordAnnotations'
 import verseToReference from '~helpers/verseToReference'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-
-const Container = styled.View(({ theme }) => ({
-  flex: 1,
-  backgroundColor: theme.colors.lightGrey,
-}))
+import { useAtom, useSetAtom } from 'jotai/react'
+import ChoiceFilterModal from '~common/ChoiceFilterModal'
+import ColorFilterModal from '~common/ColorFilterModal'
+import type { SheetRef } from '~common/sheet'
+import { unifiedTagsModalAtom } from '~state/app'
+import {
+  defaultWordAnnotationsListQueryState,
+  wordAnnotationsListQueryAtom,
+} from '~state/entityListFilters'
+import { selectAvailableAnnotationVersions } from '~redux/selectors/bible'
+import { sections } from '~assets/bible_versions/books-desc'
+import { useColorInfo } from '~helpers/useColorName'
+import Container from '~common/ui/Container'
+import { getAnnotationGroupVerseKey } from '~features/entityListQuery/wordAnnotationsQuery'
 
 const TabContainer = styled.View(({ theme }) => ({
   flexDirection: 'row',
@@ -73,34 +82,125 @@ const EmptyText = styled.Text(({ theme }) => ({
   textAlign: 'center',
 }))
 
-type ViewMode = 'verse' | 'date' | 'flat'
-
 const WordAnnotationsScreen = () => {
   const { t } = useTranslation()
   const pushRouteOnce = usePushRouteOnce()
   const theme = useTheme()
-  const [viewMode, setViewMode] = useState<ViewMode>('verse')
+  const [queryState, setQueryState] = useAtom(wordAnnotationsListQueryAtom)
+  const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
+  const colorModalRef = useRef<SheetRef>(null)
+  const styleModalRef = useRef<SheetRef>(null)
+  const versionModalRef = useRef<SheetRef>(null)
+  const testamentModalRef = useRef<SheetRef>(null)
+  const bookModalRef = useRef<SheetRef>(null)
+  const sortModalRef = useRef<SheetRef>(null)
 
   // Get all annotations from Redux
   const annotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
+  const tags = useSelector((state: RootState) => state.user.bible.tags)
+  const versions = useSelector(selectAvailableAnnotationVersions)
+  const selectedTag = queryState.tagId ? tags[queryState.tagId] : undefined
+  const colorInfo = useColorInfo(queryState.colorId || undefined)
+  const books = sections.flatMap(section => section.data)
+  const filterLabel = getFiltersHeaderLabel(
+    [
+      colorInfo?.name,
+      selectedTag?.name,
+      queryState.annotationType
+        ? t(
+            queryState.annotationType === 'background'
+              ? 'Arrière-plan'
+              : queryState.annotationType === 'underline'
+                ? 'Souligné'
+                : 'Entouré'
+          )
+        : undefined,
+      queryState.version,
+      queryState.testament === 'old'
+        ? t('Ancien Testament')
+        : queryState.testament === 'new'
+          ? t('Nouveau Testament')
+          : undefined,
+      books.find(book => book.Numero === queryState.book)?.Nom,
+      queryState.view !== defaultWordAnnotationsListQueryState.view
+        ? queryState.view === 'date'
+          ? t('Par date')
+          : t('Liste')
+        : undefined,
+      queryState.sort !== defaultWordAnnotationsListQueryState.sort
+        ? queryState.sort === 'newest'
+          ? t('entityList.sort.newest')
+          : t('entityList.sort.oldest')
+        : undefined,
+    ],
+    count => `${count} ${t('filtres')}`
+  )
+
+  useEffect(() => {
+    if (queryState.tagId && !tags[queryState.tagId]) {
+      setQueryState(state => ({ ...state, tagId: null }))
+    }
+    if (queryState.version && !versions.includes(queryState.version)) {
+      setQueryState(state => ({ ...state, version: null }))
+    }
+    if (queryState.colorId && !colorInfo) {
+      setQueryState(state => ({ ...state, colorId: null }))
+    }
+  }, [
+    colorInfo,
+    queryState.colorId,
+    queryState.tagId,
+    queryState.version,
+    setQueryState,
+    tags,
+    versions,
+  ])
 
   // Convert to array and sort
-  const annotationsList = useMemo(() => {
+  const annotationsList = (() => {
     const list = Object.entries(annotations).map(([, annotation]) => ({
       ...annotation,
     }))
-
-    // Sort by date (newest first)
-    return list.sort((a, b) => b.date - a.date)
-  }, [annotations])
+    const filtered = list.filter(annotation => {
+      if (queryState.colorId && annotation.color !== queryState.colorId) return false
+      if (queryState.tagId && !annotation.tags?.[queryState.tagId]) return false
+      if (queryState.annotationType && annotation.type !== queryState.annotationType) return false
+      if (queryState.version && annotation.version !== queryState.version) return false
+      const booksInRanges = annotation.ranges.map(range => Number(range.verseKey.split('-')[0]))
+      if (queryState.book && !booksInRanges.includes(queryState.book)) return false
+      if (queryState.testament === 'old' && !booksInRanges.some(book => book <= 39)) return false
+      if (queryState.testament === 'new' && !booksInRanges.some(book => book >= 40)) return false
+      return true
+    })
+    return filtered.sort((left, right) => {
+      if (queryState.sort === 'newest')
+        return right.date - left.date || left.id.localeCompare(right.id)
+      if (queryState.sort === 'oldest')
+        return left.date - right.date || left.id.localeCompare(right.id)
+      const leftKey = left.ranges
+        .map(range => range.verseKey.split('-').map(Number))
+        .sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2])[0]
+      const rightKey = right.ranges
+        .map(range => range.verseKey.split('-').map(Number))
+        .sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2])[0]
+      return (
+        (leftKey?.[0] || 0) - (rightKey?.[0] || 0) ||
+        (leftKey?.[1] || 0) - (rightKey?.[1] || 0) ||
+        (leftKey?.[2] || 0) - (rightKey?.[2] || 0) ||
+        left.id.localeCompare(right.id)
+      )
+    })
+  })()
 
   // Group by verse
-  const groupedByVerse = useMemo(() => {
+  const groupedByVerse = (() => {
     const groups = new Map<string, typeof annotationsList>()
 
     annotationsList.forEach(annotation => {
-      // Use first range's verseKey as primary key
-      const verseKey = annotation.ranges[0]?.verseKey
+      const verseKey = getAnnotationGroupVerseKey(annotation, {
+        book: queryState.book,
+        testament: queryState.testament,
+      })
       if (!verseKey) return
 
       if (!groups.has(verseKey)) {
@@ -109,20 +209,36 @@ const WordAnnotationsScreen = () => {
       groups.get(verseKey)!.push(annotation)
     })
 
-    return Array.from(groups.entries()).map(([verseKey, annotations]) => ({
-      verseKey,
-      reference: verseToReference({ [verseKey]: true }),
-      annotations,
-    }))
-  }, [annotationsList])
+    const compareVerseKeys = (left: string, right: string) => {
+      const leftParts = left.split('-').map(Number)
+      const rightParts = right.split('-').map(Number)
+      return (
+        leftParts[0] - rightParts[0] || leftParts[1] - rightParts[1] || leftParts[2] - rightParts[2]
+      )
+    }
+    const compareDates = (
+      left: (typeof annotationsList)[number],
+      right: (typeof annotationsList)[number]
+    ) =>
+      (queryState.sort === 'oldest' ? left.date - right.date : right.date - left.date) ||
+      left.id.localeCompare(right.id)
+
+    return Array.from(groups.entries())
+      .sort(([left], [right]) => compareVerseKeys(left, right))
+      .map(([verseKey, groupedAnnotations]) => ({
+        verseKey,
+        reference: verseToReference({ [verseKey]: true }),
+        annotations: groupedAnnotations.sort(compareDates),
+      }))
+  })()
 
   // Group by date
-  const groupedByDate = useMemo(() => {
+  const groupedByDate = (() => {
     const groups = new Map<string, typeof annotationsList>()
 
     annotationsList.forEach(annotation => {
       const date = new Date(annotation.date)
-      const dateKey = date.toLocaleDateString()
+      const dateKey = date.toISOString().slice(0, 10)
 
       if (!groups.has(dateKey)) {
         groups.set(dateKey, [])
@@ -130,11 +246,18 @@ const WordAnnotationsScreen = () => {
       groups.get(dateKey)!.push(annotation)
     })
 
-    return Array.from(groups.entries()).map(([date, annotations]) => ({
-      date,
-      annotations,
-    }))
-  }, [annotationsList])
+    return Array.from(groups.entries())
+      .sort(([left], [right]) =>
+        queryState.sort === 'oldest' ? left.localeCompare(right) : right.localeCompare(left)
+      )
+      .map(([date, groupedAnnotations]) => ({
+        date,
+        label: new Date(`${date}T12:00:00`).toLocaleDateString(),
+        annotations: groupedAnnotations.sort(
+          (left, right) => left.date - right.date || left.id.localeCompare(right.id)
+        ),
+      }))
+  })()
 
   // Handle annotation tap - navigate to Bible verse
   const handleAnnotationPress = (annotation: WordAnnotation & { id: string }) => {
@@ -177,12 +300,16 @@ const WordAnnotationsScreen = () => {
     if (annotationsList.length === 0) {
       return (
         <EmptyState>
-          <EmptyText>{t("Vous n'avez pas encore annoté de mots...")}</EmptyText>
+          <EmptyText>
+            {Object.keys(annotations).length
+              ? t('entityList.noFilterMatch')
+              : t("Vous n'avez pas encore annoté de mots...")}
+          </EmptyText>
         </EmptyState>
       )
     }
 
-    if (viewMode === 'verse') {
+    if (queryState.view === 'verse') {
       return (
         <FlatList
           data={groupedByVerse}
@@ -201,7 +328,7 @@ const WordAnnotationsScreen = () => {
       )
     }
 
-    if (viewMode === 'date') {
+    if (queryState.view === 'date') {
       return (
         <FlatList
           data={groupedByDate}
@@ -210,7 +337,7 @@ const WordAnnotationsScreen = () => {
             <Box>
               <Box px={16} py={8}>
                 <Text fontSize={14} fontWeight="bold" color={theme.colors.tertiary}>
-                  {item.date}
+                  {item.label}
                 </Text>
               </Box>
               {item.annotations.map(renderAnnotationCard)}
@@ -231,18 +358,201 @@ const WordAnnotationsScreen = () => {
   }
 
   return (
-    <Container>
-      <Header title={t('Annotations')} hasBackButton />
+    <Container flex bg="lightGrey">
+      <FiltersHeader
+        title={t('Annotations')}
+        filterLabel={filterLabel}
+        hasBackButton
+        hasActiveFilters={
+          JSON.stringify(queryState) !== JSON.stringify(defaultWordAnnotationsListQueryState)
+        }
+        onReset={() => setQueryState(defaultWordAnnotationsListQueryState)}
+        filters={[
+          {
+            key: 'color',
+            icon: 'droplet',
+            label: t('Couleur'),
+            value: colorInfo?.name || t('Toutes'),
+            onPress: () => colorModalRef.current?.present(),
+          },
+          {
+            key: 'tag',
+            icon: 'tag',
+            label: t('Tags'),
+            value: selectedTag?.name || t('Tous'),
+            onPress: () =>
+              setUnifiedTagsModal({
+                mode: 'filter',
+                selectedTag,
+                onSelect: tag => setQueryState(state => ({ ...state, tagId: tag?.id || null })),
+              }),
+          },
+          {
+            key: 'style',
+            icon: 'edit-3',
+            label: t('Style'),
+            value: queryState.annotationType || t('Tous'),
+            onPress: () => styleModalRef.current?.present(),
+          },
+          {
+            key: 'version',
+            icon: 'book-open',
+            label: t('Version'),
+            value: queryState.version || t('Toutes'),
+            onPress: () => versionModalRef.current?.present(),
+          },
+          {
+            key: 'testament',
+            icon: 'book',
+            label: t('Testament'),
+            value:
+              queryState.testament === 'all'
+                ? t('Toute la Bible')
+                : queryState.testament === 'old'
+                  ? t('Ancien Testament')
+                  : t('Nouveau Testament'),
+            onPress: () => testamentModalRef.current?.present(),
+          },
+          {
+            key: 'book',
+            icon: 'bookmark',
+            label: t('Livre'),
+            value: books.find(book => book.Numero === queryState.book)?.Nom || t('Tous'),
+            onPress: () => bookModalRef.current?.present(),
+          },
+          {
+            key: 'sort',
+            icon: 'list',
+            label: t('Ordre'),
+            value:
+              queryState.sort === 'bible'
+                ? t('Ordre biblique')
+                : queryState.sort === 'newest'
+                  ? t('entityList.sort.newest')
+                  : t('entityList.sort.oldest'),
+            onPress: () => sortModalRef.current?.present(),
+          },
+        ]}
+      />
+      <ColorFilterModal
+        ref={colorModalRef}
+        selectedColorId={queryState.colorId || undefined}
+        onSelect={colorId => {
+          setQueryState(state => ({ ...state, colorId: colorId || null }))
+          colorModalRef.current?.dismiss()
+        }}
+      />
+      <ChoiceFilterModal
+        ref={styleModalRef}
+        title={t('Style')}
+        selectedValue={queryState.annotationType || 'all'}
+        options={[
+          { value: 'all', label: t('Tous') },
+          { value: 'background', label: t('Arrière-plan') },
+          { value: 'underline', label: t('Souligné') },
+          { value: 'circle', label: t('Entouré') },
+        ]}
+        onSelect={annotationType => {
+          setQueryState(state => ({
+            ...state,
+            annotationType:
+              annotationType === 'all' ? null : (annotationType as typeof state.annotationType),
+          }))
+          styleModalRef.current?.dismiss()
+        }}
+      />
+      <ChoiceFilterModal
+        ref={versionModalRef}
+        title={t('Version')}
+        selectedValue={queryState.version || 'all'}
+        options={[
+          { value: 'all', label: t('Toutes') },
+          ...versions.map(value => ({ value, label: value })),
+        ]}
+        onSelect={version => {
+          setQueryState(state => ({ ...state, version: version === 'all' ? null : version }))
+          versionModalRef.current?.dismiss()
+        }}
+      />
+      <ChoiceFilterModal
+        ref={testamentModalRef}
+        title={t('Testament')}
+        selectedValue={queryState.testament}
+        options={[
+          { value: 'all', label: t('Toute la Bible') },
+          { value: 'old', label: t('Ancien Testament') },
+          { value: 'new', label: t('Nouveau Testament') },
+        ]}
+        onSelect={testament => {
+          setQueryState(state => ({
+            ...state,
+            testament,
+            book:
+              state.book &&
+              ((testament === 'old' && state.book > 39) || (testament === 'new' && state.book < 40))
+                ? null
+                : state.book,
+          }))
+          testamentModalRef.current?.dismiss()
+        }}
+      />
+      <ChoiceFilterModal
+        ref={bookModalRef}
+        title={t('Livre')}
+        selectedValue={String(queryState.book || 0)}
+        options={[
+          { value: '0', label: t('Tous') },
+          ...books
+            .filter(
+              book =>
+                queryState.testament === 'all' ||
+                (queryState.testament === 'old' ? book.Numero <= 39 : book.Numero >= 40)
+            )
+            .map(book => ({ value: String(book.Numero), label: book.Nom })),
+        ]}
+        onSelect={book => {
+          const number = Number(book) || null
+          setQueryState(state => ({
+            ...state,
+            book: number,
+            testament: number ? (number <= 39 ? 'old' : 'new') : state.testament,
+          }))
+          bookModalRef.current?.dismiss()
+        }}
+      />
+      <ChoiceFilterModal
+        ref={sortModalRef}
+        title={t('Ordre')}
+        selectedValue={queryState.sort}
+        options={[
+          { value: 'bible', label: t('Ordre biblique') },
+          { value: 'newest', label: t('entityList.sort.newest') },
+          { value: 'oldest', label: t('entityList.sort.oldest') },
+        ]}
+        onSelect={sort => {
+          setQueryState(state => ({ ...state, sort }))
+          sortModalRef.current?.dismiss()
+        }}
+      />
 
       <TabContainer>
-        <Tab active={viewMode === 'verse'} onPress={() => setViewMode('verse')}>
-          <TabText active={viewMode === 'verse'}>{t('Par verset')}</TabText>
+        <Tab
+          active={queryState.view === 'verse'}
+          onPress={() => setQueryState(state => ({ ...state, view: 'verse' }))}
+        >
+          <TabText active={queryState.view === 'verse'}>{t('Par verset')}</TabText>
         </Tab>
-        <Tab active={viewMode === 'date'} onPress={() => setViewMode('date')}>
-          <TabText active={viewMode === 'date'}>{t('Par date')}</TabText>
+        <Tab
+          active={queryState.view === 'date'}
+          onPress={() => setQueryState(state => ({ ...state, view: 'date' }))}
+        >
+          <TabText active={queryState.view === 'date'}>{t('Par date')}</TabText>
         </Tab>
-        <Tab active={viewMode === 'flat'} onPress={() => setViewMode('flat')}>
-          <TabText active={viewMode === 'flat'}>{t('Liste')}</TabText>
+        <Tab
+          active={queryState.view === 'flat'}
+          onPress={() => setQueryState(state => ({ ...state, view: 'flat' }))}
+        >
+          <TabText active={queryState.view === 'flat'}>{t('Liste')}</TabText>
         </Tab>
       </TabContainer>
 
