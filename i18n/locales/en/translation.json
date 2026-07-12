@@ -705,6 +705,7 @@
   "study.verseAdded": "Verse added to study",
   "study.openStudy": "Open",
   "study.noStudies": "No studies found",
+  "study.loginRequired": "Sign in to create a study",
   "common.goTo": "Go to tab",
   "common.chooseCompareVersions": "Choose versions to compare",
   "premium.earlyAccess": "Early access",
