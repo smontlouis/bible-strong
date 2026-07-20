@@ -14,7 +14,6 @@ import {
 } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
-import { getBook } from '~helpers/bibleBookCatalog'
 import EntityChipList from '~common/EntityChipList'
 import Header from '~common/Header'
 import { VerseIds } from '~common/types'
@@ -31,6 +30,7 @@ import NoteEditorDOMComponent from '~features/bible/NoteEditorDOM/NoteEditorDOMC
 import { createNoteEndpoint } from '~features/studyRelations/endpoints'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
+import { getBibleViewParamsForVerseKeys } from '~features/studyRelations/openableStudyObjects'
 import { toast } from '~helpers/toast'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import verseToReference from '~helpers/verseToReference'
@@ -304,7 +304,7 @@ ${currentNote.description}
   }
 
   const navigateToBible = () => {
-    let verseKey: string
+    let verseKeys: string[]
     let version: string | undefined = currentNote?.version || initialVersion
 
     if (isMissingAnnotation) {
@@ -313,34 +313,20 @@ ${currentNote.description}
     }
 
     if (isAnnotationNote && annotation) {
-      // For annotation notes, use the annotation's verseKey and version
-      verseKey = annotation.ranges[0]?.verseKey
+      verseKeys = annotation.ranges.map(range => range.verseKey)
       version = annotation.version
     } else {
-      verseKey = initialVerseKeys[0] || relatedVerseKeys[0]
+      verseKeys = initialVerseKeys.length ? initialVerseKeys : relatedVerseKeys
     }
 
-    if (!verseKey) {
-      toast.error(t('Référence introuvable'))
-      return
-    }
-
-    const [Livre, Chapitre, Verset] = verseKey.split('-')
-    if (!Livre || !Chapitre || !Verset) {
+    if (!verseKeys.length) {
       toast.error(t('Référence introuvable'))
       return
     }
 
     pushRouteOnce({
       pathname: '/bible-view',
-      params: {
-        contextDisplayMode: 'focused',
-        book: JSON.stringify(getBook(Number(Livre))),
-        chapter: String(Number(Chapitre)),
-        verse: String(Number(Verset)),
-        focusVerses: JSON.stringify([Number(Verset)]),
-        ...(version && { version }),
-      },
+      params: getBibleViewParamsForVerseKeys(verseKeys, version),
     })
   }
 

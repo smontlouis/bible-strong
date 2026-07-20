@@ -5,8 +5,9 @@ import { Book } from '~assets/bible_versions/books-desc'
 import { getBook } from '~helpers/bibleBookCatalog'
 import generateUUID from '~helpers/generateUUID'
 
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
 import { atom } from 'jotai/vanilla'
+import { useAtomValue } from 'jotai/react'
 import {
   BibleContextDisplayMode,
   BibleTab,
@@ -21,12 +22,14 @@ import {
   BibleVerseResolutionStatus,
   getBibleLocationVerseKeys,
   resolveBibleVerses,
+  shouldShowBibleReferenceUnavailable,
 } from '~helpers/bibleVerseResolver'
-import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
-import Button from '~common/ui/Button'
-import verseToReference from '~helpers/verseToReference'
-import { useTranslation } from 'react-i18next'
+import { bibleDataRefreshSignalAtom } from '~state/app'
+import {
+  BiblePartialReferenceNotice,
+  BibleReferenceUnavailable,
+} from './BibleReferenceAvailability'
 
 type BibleScreenContentProps = {
   focusVerses?: number[]
@@ -70,27 +73,6 @@ const BibleScreenContent = ({
   return <BibleTabScreen bibleAtom={bibleAtom} isFormSheet={IS_FORM_SHEET} isInTab={false} />
 }
 
-const BibleReferenceUnavailable = ({ verseKeys }: { verseKeys: string[] }) => {
-  const router = useRouter()
-  const { t } = useTranslation()
-  const reference = verseToReference(verseKeys)
-
-  return (
-    <Box flex>
-      <Empty
-        source={require('~assets/images/empty.json')}
-        message={`${reference}\n${t('bibleVerse.textUnavailableInstalled')}`}
-      >
-        <Box mt={20}>
-          <Button onPress={() => router.push('/downloads')}>
-            {t('bible.error.goToDownloads')}
-          </Button>
-        </Box>
-      </Empty>
-    </Box>
-  )
-}
-
 const BibleScreen = () => {
   const params = useLocalSearchParams<{
     focusVerses?: string
@@ -112,10 +94,12 @@ const BibleScreen = () => {
   const chapter = params.chapter ? Number(params.chapter) : undefined
   const verse = params.verse ? Number(params.verse) : undefined
   const defaultVersion = useDefaultBibleVersion()
+  const bibleDataRefreshSignal = useAtomValue(bibleDataRefreshSignalAtom)
   const requestedVersion = params.version || undefined
   const bookNumber = typeof book === 'number' ? book : book?.Numero
   const [resolvedVersion, setResolvedVersion] = useState(requestedVersion || defaultVersion)
   const [resolutionStatus, setResolutionStatus] = useState<BibleVerseResolutionStatus>('resolved')
+  const [missingVerseKeys, setMissingVerseKeys] = useState<string[]>([])
   const [isResolvingVersion, setIsResolvingVersion] = useState(Boolean(bookNumber && chapter))
   const requestedVerseKeys = getBibleLocationVerseKeys({
     book: bookNumber,
@@ -131,6 +115,7 @@ const BibleScreen = () => {
     if (!bookNumber || !chapter) {
       setResolvedVersion(requestedVersion || defaultVersion)
       setResolutionStatus('resolved')
+      setMissingVerseKeys([])
       setIsResolvingVersion(false)
       return
     }
@@ -145,11 +130,15 @@ const BibleScreen = () => {
         if (!cancelled) {
           setResolvedVersion(resolution.version || requestedVersion || defaultVersion)
           setResolutionStatus(resolution.status)
+          setMissingVerseKeys(resolution.missingVerseKeys)
         }
       })
       .catch(error => {
         console.error('[BibleScreen] Failed to resolve a compatible Bible version:', error)
-        if (!cancelled) setResolutionStatus('reference-only')
+        if (!cancelled) {
+          setResolutionStatus('reference-only')
+          setMissingVerseKeys(requestedVerseKeysSignature.split('|'))
+        }
       })
       .finally(() => {
         if (!cancelled) setIsResolvingVersion(false)
@@ -158,15 +147,23 @@ const BibleScreen = () => {
     return () => {
       cancelled = true
     }
-  }, [bookNumber, chapter, requestedVerseKeysSignature, requestedVersion, defaultVersion])
+  }, [
+    bookNumber,
+    chapter,
+    requestedVerseKeysSignature,
+    requestedVersion,
+    defaultVersion,
+    bibleDataRefreshSignal,
+  ])
 
   if (isResolvingVersion) return null
-  if (resolutionStatus !== 'resolved') {
+  if (shouldShowBibleReferenceUnavailable(resolutionStatus)) {
     return <BibleReferenceUnavailable verseKeys={requestedVerseKeys} />
   }
 
-  return (
+  const content = (
     <BibleScreenContent
+      key={resolvedVersion}
       focusVerses={focusVerses}
       isSelectionMode={isSelectionMode}
       contextDisplayMode={contextDisplayMode}
@@ -176,6 +173,17 @@ const BibleScreen = () => {
       version={resolvedVersion}
     />
   )
+
+  if (resolutionStatus === 'partial') {
+    return (
+      <Box flex>
+        <BiblePartialReferenceNotice verseKeys={missingVerseKeys} />
+        {content}
+      </Box>
+    )
+  }
+
+  return content
 }
 
 export default BibleScreen

@@ -26,6 +26,7 @@ import { sections } from '~assets/bible_versions/books-desc'
 import { useColorInfo } from '~helpers/useColorName'
 import Container from '~common/ui/Container'
 import { getAnnotationGroupVerseKey } from '~features/entityListQuery/wordAnnotationsQuery'
+import { getBibleViewParamsForVerseKeys } from '~features/studyRelations/openableStudyObjects'
 import { isBookInTestament } from '~helpers/bibleBookCatalog'
 
 const TabContainer = styled.View(({ theme }) => ({
@@ -273,15 +274,12 @@ const WordAnnotationsScreen = () => {
     const firstRange = annotation.ranges[0]
     if (!firstRange) return
 
-    const [book, chapter, verse] = firstRange.verseKey.split('-').map(Number)
     pushRouteOnce({
       pathname: '/bible-view',
-      params: {
-        contextDisplayMode: 'focused',
-        book: String(book),
-        chapter: String(chapter),
-        verse: String(verse),
-      },
+      params: getBibleViewParamsForVerseKeys(
+        annotation.ranges.map(range => range.verseKey),
+        annotation.version
+      ),
     })
   }
 

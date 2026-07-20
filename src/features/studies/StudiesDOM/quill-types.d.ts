@@ -46,6 +46,7 @@ export interface QuillModule {
 export interface InlineVersePayload {
   title: string
   verses: string[]
+  version?: string
 }
 
 export interface InlineStrongPayload {

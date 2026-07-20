@@ -9,15 +9,11 @@ import type { AppDispatch } from '~redux/store'
 import { StudyTab, tabsAtom, tabsAtomsAtom } from '../../../state/tabs'
 import { useSlideNewTab } from '../../app-switcher/utils/useSlideNewTab'
 import { useTabAnimations } from '~features/app-switcher/utils/useTabAnimations'
-
-interface VerseData {
-  title: string
-  content: string
-  version: string
-  verses: string[]
-}
-
-type VerseFormat = 'inline' | 'block'
+import {
+  createVerseOperations,
+  type StudyVerseData,
+  type StudyVerseFormat,
+} from './verseOperations'
 
 type QuillDelta = NonNullable<Study['content']>
 
@@ -31,7 +27,11 @@ export const useAddVerseToStudy = () => {
   const studies = useSelector((state: RootState) => state.user.bible.studies)
   const { slideToIndex } = useTabAnimations()
 
-  const addVerseToStudy = (studyId: string, verseData: VerseData, format: VerseFormat) => {
+  const addVerseToStudy = (
+    studyId: string,
+    verseData: StudyVerseData,
+    format: StudyVerseFormat
+  ) => {
     const study = studies[studyId]
     const isNewStudy = !study
 
@@ -49,37 +49,7 @@ export const useAddVerseToStudy = () => {
     } else {
       delta = { ops: [] }
     }
-    // Create the verse operation based on format
-    if (format === 'inline') {
-      // Add inline verse link
-      // Format: { insert: "Jean 3:16", attributes: { "inline-verse": { title, verses } } }
-      delta.ops.push({
-        insert: verseData.title,
-        attributes: {
-          'inline-verse': {
-            title: verseData.title,
-            verses: verseData.verses,
-          },
-        },
-      })
-      // Add a space after
-      delta.ops.push({ insert: ' ' })
-    } else {
-      // Add block verse
-      // Format: { insert: { "block-verse": { title, content, version, verses } } }
-      delta.ops.push({
-        insert: {
-          'block-verse': {
-            title: verseData.title,
-            content: verseData.content,
-            version: verseData.version,
-            verses: verseData.verses,
-          },
-        },
-      })
-      // Add newline after block
-      delta.ops.push({ insert: '\n' })
-    }
+    delta.ops.push(...createVerseOperations(verseData, format))
 
     // Update study in Redux
     // If new study, also set title and created_at

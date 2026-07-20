@@ -3,7 +3,11 @@ import { useAtomValue } from 'jotai/react'
 import { Verse } from '~common/types'
 import { useDefaultBibleVersion } from '../state/useDefaultBibleVersion'
 import { bibleDataRefreshSignalAtom } from '~state/app'
-import { BibleVerseResolutionStatus, resolveBibleVerses } from './bibleVerseResolver'
+import {
+  BibleVerseResolutionStatus,
+  getBibleVerseResolutionRequestKey,
+  resolveBibleVerses,
+} from './bibleVerseResolver'
 
 export const verseStringToObject = (arrayString: string[]): Omit<Verse, 'Texte'>[] => {
   return arrayString.map(string => {
@@ -31,9 +35,16 @@ export const useResolvedBibleVerses = (
   const [status, setStatus] = React.useState<BibleVerseResolutionStatus>('reference-only')
   const [missingVerseKeys, setMissingVerseKeys] = React.useState<string[]>([])
   const [isLoading, setIsLoading] = React.useState(Boolean(verseIds.length))
+  const [resolvedRequestKey, setResolvedRequestKey] = React.useState<string>()
 
   const defaultVersion = useDefaultBibleVersion()
   const bibleDataRefreshSignal = useAtomValue(bibleDataRefreshSignalAtom)
+  const requestKey = getBibleVerseResolutionRequestKey({
+    verseKeys,
+    preferredVersion,
+    defaultVersion,
+    dataRefreshSignal: bibleDataRefreshSignal,
+  })
 
   React.useEffect(() => {
     let cancelled = false
@@ -45,6 +56,7 @@ export const useResolvedBibleVerses = (
         setResolvedVersion(preferredVersion || defaultVersion)
         setStatus('resolved')
         setMissingVerseKeys([])
+        setResolvedRequestKey(requestKey)
         setIsLoading(false)
         return
       }
@@ -74,6 +86,7 @@ export const useResolvedBibleVerses = (
         setResolvedVersion(resolution.version)
         setStatus(resolution.status)
         setMissingVerseKeys(resolution.missingVerseKeys)
+        setResolvedRequestKey(requestKey)
       } catch (error) {
         if (cancelled) return
         console.error('[useBibleVerses] Failed to resolve verses:', error)
@@ -81,6 +94,7 @@ export const useResolvedBibleVerses = (
         setResolvedVersion(undefined)
         setStatus('reference-only')
         setMissingVerseKeys(requestedVerseKeys)
+        setResolvedRequestKey(requestKey)
       } finally {
         if (!cancelled) setIsLoading(false)
       }
@@ -89,14 +103,14 @@ export const useResolvedBibleVerses = (
     return () => {
       cancelled = true
     }
-  }, [verseKeysSignature, preferredVersion, defaultVersion, bibleDataRefreshSignal])
+  }, [verseKeysSignature, preferredVersion, defaultVersion, bibleDataRefreshSignal, requestKey])
 
   return {
     verses,
     version: resolvedVersion,
     status,
     missingVerseKeys,
-    isLoading,
+    isLoading: isLoading || resolvedRequestKey !== requestKey,
   }
 }
 

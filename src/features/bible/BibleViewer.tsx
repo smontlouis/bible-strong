@@ -68,6 +68,7 @@ import {
   VersionCode,
 } from '../../state/tabs'
 import AnnotationToolbar from './AnnotationToolbar'
+import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
 import {
   BibleDOMWrapper,
   ParallelVerse,
@@ -718,11 +719,13 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
         {
           ...bible,
           id: `bible-${generateUUID()}`,
-          data: {
-            ...bible.data,
-            selectedVersion: newVersion,
-            contextDisplayMode: 'fullChapter',
-          },
+          data: selectBibleTabVersion(
+            {
+              ...bible.data,
+              contextDisplayMode: 'fullChapter',
+            },
+            newVersion
+          ),
         },
         {
           autoRedirect: true,

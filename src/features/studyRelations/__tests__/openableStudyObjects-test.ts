@@ -1,4 +1,5 @@
 import {
+  getBibleViewParamsForVerseKeys,
   getBibleViewParamsForSearchResult,
   getOpenableAction,
   getOpenableActionForRelationEndpoint,
@@ -29,6 +30,17 @@ jest.mock('~i18n', () => ({
 }))
 
 describe('openable study objects', () => {
+  it('builds one version-aware Bible destination for entity navigation', () => {
+    expect(getBibleViewParamsForVerseKeys(['1-1-1', '1-1-3'], 'VUL')).toEqual({
+      contextDisplayMode: 'focused',
+      book: JSON.stringify({ Numero: 1, Nom: 'Genèse', Chapitres: 50 }),
+      chapter: '1',
+      verse: '1',
+      focusVerses: JSON.stringify([1, 3]),
+      version: 'VUL',
+    })
+  })
+
   it('preserves Bible version context for passage search results', () => {
     expect(
       getBibleViewParamsForSearchResult({

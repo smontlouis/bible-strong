@@ -31,6 +31,7 @@ class VerseBlock extends Embed {
       if (isReadOnly) {
         dispatch('VIEW_BIBLE_VERSE', {
           arrayVerses: verses,
+          version,
         })
       }
     })

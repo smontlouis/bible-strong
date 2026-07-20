@@ -2,7 +2,6 @@ import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useSetAtom } from 'jotai/react'
 import { toast } from '~helpers/toast'
-import { getBook } from '~helpers/bibleBookCatalog'
 import { Tag } from '~common/types'
 import generateUUID from '~helpers/generateUUID'
 import formatVerseContent from '~helpers/formatVerseContent'
@@ -13,10 +12,11 @@ import {
   getDefaultBibleTab,
   MAX_TAB_GROUPS,
   GROUP_COLORS,
-  VersionCode,
 } from '~state/tabs'
 import { Note, Link, Study } from '~redux/modules/user'
 import { useTabAnimations } from '~features/app-switcher/utils/useTabAnimations'
+import { getTaggedBibleTabData, getTaggedWordAnnotationVerseKeys } from './taggedBibleTab'
+import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 
 // Structure d'un verset dans verseIds
 interface VerseId {
@@ -58,6 +58,7 @@ interface WordAnnotationData {
   version: string
   text: string
   verseKey: string
+  verseKeys?: string[]
   tags?: Record<string, { id: string; name: string }>
 }
 
@@ -82,6 +83,7 @@ export const useCreateTabGroupFromTag = () => {
   const groupsCount = useGroupsCount()
   const setTabGroups = useSetAtom(tabGroupsAtom)
   const { slideToIndex } = useTabAnimations()
+  const defaultVersion = useDefaultBibleVersion()
 
   const createTabGroupFromTag = (tag: Tag, tagData: TagData) => {
     // Vérifier la limite de groupes
@@ -96,13 +98,12 @@ export const useCreateTabGroupFromTag = () => {
     // Highlights → BibleTab
     tagData.highlights.forEach(h => {
       if (h.verseIds?.length) {
-        const firstVerse = h.verseIds[0]
-        const livre = firstVerse.Livre
-        const chapitre = firstVerse.Chapitre
-        const verset = firstVerse.Verset
-
         // Generate title from verse reference (e.g., "Genèse 1:1-5")
         const { title } = formatVerseContent(h.verseIds)
+        const verseKeys = h.verseIds.map(
+          highlightedVerse =>
+            `${highlightedVerse.Livre}-${highlightedVerse.Chapitre}-${highlightedVerse.Verset}`
+        )
 
         tabs.push({
           id: `bible-${generateUUID()}`,
@@ -111,11 +112,11 @@ export const useCreateTabGroupFromTag = () => {
           type: 'bible',
           data: {
             ...getDefaultBibleTab().data,
-            selectedBook: getBook(livre) || getBook(1)!,
-            selectedChapter: chapitre,
-            selectedVerse: verset,
-            focusVerses: h.verseIds.map(v => Number(v.Verset)),
-            contextDisplayMode: 'focused',
+            ...getTaggedBibleTabData({
+              verseKeys,
+              preferredVersion: h.version,
+              defaultVersion,
+            }),
           },
         })
       }
@@ -193,11 +194,12 @@ export const useCreateTabGroupFromTag = () => {
     tagData.links.forEach(l => {
       const firstVerseKey = l.verseKeys?.[0]
       if (!firstVerseKey) return
-      const [livre, chapitre, verset] = firstVerseKey.split('-').map(Number)
+      const linkVerseIds = l.verseKeys!.map(verseKey => {
+        const [Livre, Chapitre, Verset] = verseKey.split('-').map(Number)
+        return { Livre, Chapitre, Verset }
+      })
       // Generate title from verse reference
-      const { title: linkTitle } = formatVerseContent([
-        { Livre: livre, Chapitre: chapitre, Verset: verset },
-      ])
+      const { title: linkTitle } = formatVerseContent(linkVerseIds)
 
       tabs.push({
         id: `bible-${generateUUID()}`,
@@ -206,17 +208,18 @@ export const useCreateTabGroupFromTag = () => {
         type: 'bible',
         data: {
           ...getDefaultBibleTab().data,
-          selectedBook: getBook(livre) || getBook(1)!,
-          selectedChapter: chapitre,
-          selectedVerse: verset,
-          focusVerses: [verset],
-          contextDisplayMode: 'focused',
+          ...getTaggedBibleTabData({
+            verseKeys: l.verseKeys!,
+            preferredVersion: l.version,
+            defaultVersion,
+          }),
         },
       })
     })
 
     // WordAnnotations → BibleTab (ouvre le verset associé avec la version correcte)
     tagData.wordAnnotations?.forEach(a => {
+      const verseKeys = getTaggedWordAnnotationVerseKeys(a)
       const [livre, chapitre, verset] = a.verseKey.split('-').map(Number)
       // Generate title from verse reference + annotation text
       const { title: annotationTitle } = formatVerseContent([
@@ -230,12 +233,11 @@ export const useCreateTabGroupFromTag = () => {
         type: 'bible',
         data: {
           ...getDefaultBibleTab().data,
-          selectedBook: getBook(livre) || getBook(1)!,
-          selectedChapter: chapitre,
-          selectedVerse: verset,
-          selectedVersion: a.version as VersionCode,
-          focusVerses: [verset],
-          contextDisplayMode: 'focused',
+          ...getTaggedBibleTabData({
+            verseKeys,
+            preferredVersion: a.version,
+            defaultVersion,
+          }),
         },
       })
     })

@@ -39,7 +39,7 @@ class ModuleInlineVerse extends Module {
     )
   }
 
-  receiveVerseLink = ({ title, verses }: InlineVersePayload) => {
+  receiveVerseLink = ({ title, verses, version }: InlineVersePayload) => {
     const range = this.getInsertionRange()
     this.quill.focus()
     this.quill.setSelection(range, Quill.sources.SILENT)
@@ -49,12 +49,14 @@ class ModuleInlineVerse extends Module {
       this.quill.format('inline-verse', {
         title,
         verses,
+        version,
       })
       this.quill.setSelection(range.index + range.length + 1, Quill.sources.SILENT)
     } else {
       this.quill.insertText(range.index, title, 'inline-verse', {
         title,
         verses,
+        version,
       })
       this.quill.insertText(range.index, ' ', 'inline-verse', false)
     }

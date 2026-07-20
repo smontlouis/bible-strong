@@ -8,8 +8,8 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { RootState } from '~redux/modules/reducer'
 import { deleteNote } from '~redux/modules/user'
-import { getBook } from '~helpers/bibleBookCatalog'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { getBibleViewParamsForVerseKeys } from '~features/studyRelations/openableStudyObjects'
 
 type Props = {
   ref?: React.RefObject<SheetRef | null>
@@ -61,7 +61,7 @@ const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
   const navigateToBible = () => {
     if (!noteId) return
 
-    let verseKey: string
+    let verseKeys: string[]
     let version: string | undefined
 
     // Handle annotation notes
@@ -69,7 +69,7 @@ const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
       const annotationId = noteId.replace('annotation:', '')
       const annotation = wordAnnotations[annotationId]
       if (!annotation) return
-      verseKey = annotation.ranges[0]?.verseKey
+      verseKeys = annotation.ranges.map(range => range.verseKey)
       version = annotation.version
     } else {
       const relation = Object.values(relations).find(
@@ -82,22 +82,15 @@ const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
       )
       const verseEndpoint = relation?.endpoints.find(endpoint => endpoint.type === 'verse')
       if (verseEndpoint?.type !== 'verse') return
-      verseKey = verseEndpoint.verseKeys[0]
+      verseKeys = verseEndpoint.verseKeys
+      version = verseEndpoint.version
     }
 
-    const [Livre, Chapitre, Verset] = verseKey.split('-')
     close()
     setTimeout(() => {
       pushRouteOnce({
         pathname: '/bible-view',
-        params: {
-          contextDisplayMode: 'focused',
-          book: JSON.stringify(getBook(Number(Livre))),
-          chapter: String(Chapitre),
-          verse: String(Verset),
-          focusVerses: JSON.stringify([Number(Verset)]),
-          ...(version && { version }),
-        },
+        params: getBibleViewParamsForVerseKeys(verseKeys, version),
       })
     }, 300)
   }

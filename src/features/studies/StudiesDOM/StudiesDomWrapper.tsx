@@ -19,6 +19,7 @@ import StudyFooter from '../StudyFooter'
 import StudiesDOMComponent, { StudyDOMRef } from './StudiesDOMComponent'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { getBibleViewParamsForVerseKeys } from '~features/studyRelations/openableStudyObjects'
 
 type Props = {
   params: Readonly<EditStudyScreenProps>
@@ -143,23 +144,14 @@ export default function StudiesDomWrapper({
               ? JSON.parse(msgData.payload.arrayVerses)
               : msgData.payload?.arrayVerses
           ) as string[]
-          const [book, chapter, verse] = arrayVerses[0].split('-')
-          const focusVerses = arrayVerses
-            .filter(verseKey => {
-              const [keyBook, keyChapter] = verseKey.split('-')
-              return keyBook === book && keyChapter === chapter
-            })
-            .map(verseKey => Number(verseKey.split('-')[2]))
+          if (!arrayVerses.length) return
 
           pushRouteOnce({
             pathname: '/bible-view',
-            params: {
-              contextDisplayMode: 'focused',
-              book,
-              chapter,
-              verse,
-              focusVerses: JSON.stringify(focusVerses),
-            },
+            params: getBibleViewParamsForVerseKeys(
+              arrayVerses,
+              typeof msgData.payload?.version === 'string' ? msgData.payload.version : undefined
+            ),
           })
           return
         }

@@ -1,4 +1,5 @@
 import { getBook } from '~helpers/bibleBookCatalog'
+import { getBibleReferenceLocation } from '~helpers/bibleReferenceLocation'
 import type { SearchResult } from '~helpers/biblesDb'
 import type { SearchEntityResult } from '~features/search/shared/searchResultTypes'
 import type { RelationEndpoint } from './domain'
@@ -21,6 +22,19 @@ type BibleViewSearchResult = {
   version: string
 }
 
+export const getBibleViewParamsForVerseKeys = (verseKeys: string[], version?: string) => {
+  const { bookNumber, chapter, verse, focusVerses } = getBibleReferenceLocation(verseKeys)
+
+  return {
+    contextDisplayMode: 'focused',
+    book: JSON.stringify(getBook(bookNumber)),
+    chapter: String(chapter),
+    verse: String(verse),
+    focusVerses: JSON.stringify(focusVerses),
+    ...(version && { version }),
+  }
+}
+
 export const getBibleViewParamsForSearchResult = (result: BibleViewSearchResult) => ({
   contextDisplayMode: 'focused',
   book: JSON.stringify(getBook(result.book)),
@@ -35,25 +49,10 @@ export const getOpenableActionForRelationEndpoint = (
 ): OpenableStudyObjectAction => {
   switch (endpoint.type) {
     case 'verse': {
-      const [bookNumber, chapter, verse] = endpoint.verseKeys[0].split('-').map(Number)
-      const focusVerses = endpoint.verseKeys
-        .filter(key => {
-          const [keyBook, keyChapter] = key.split('-').map(Number)
-          return keyBook === bookNumber && keyChapter === chapter
-        })
-        .map(key => Number(key.split('-')[2]))
-
       return {
         type: 'route',
         pathname: '/bible-view',
-        params: {
-          contextDisplayMode: 'focused',
-          book: JSON.stringify(getBook(bookNumber)),
-          chapter: String(chapter),
-          verse: String(verse),
-          focusVerses: JSON.stringify(focusVerses),
-          ...(endpoint.version && { version: endpoint.version }),
-        },
+        params: getBibleViewParamsForVerseKeys(endpoint.verseKeys, endpoint.version),
       }
     }
     case 'note':

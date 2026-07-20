@@ -1,6 +1,7 @@
 import { produce } from 'immer'
 import React, { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useAtom } from 'jotai/react'
 
 import blackColors from '~themes/blackColors'
 import defaultColors from '~themes/colors'
@@ -17,10 +18,16 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import { getIfLocalResourceNeedsDownload } from '~features/resources/resourceAvailability'
 import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
-import { BibleTab } from '../../state/tabs'
+import { BibleTab, VersionCode } from '../../state/tabs'
 import { LocalUnifiedTagsModalProvider } from '~common/UnifiedTagsModalProvider'
 import { BookSelectorSheetProvider } from './BookSelectorSheet/BookSelectorSheetProvider'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
+import Box from '~common/ui/Box'
+import { useResolvedBibleVerses, verseStringToObject } from '~helpers/useBibleVerses'
+import {
+  BiblePartialReferenceNotice,
+  BibleReferenceUnavailable,
+} from './BibleReferenceAvailability'
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const deepmerge = require('@fastify/deepmerge')()
 
@@ -32,6 +39,18 @@ interface BibleTabScreenProps {
 
 const BibleTabScreen = ({ bibleAtom, isFormSheet, isInTab = true }: BibleTabScreenProps) => {
   const dispatch = useDispatch()
+  const [bible, setBible] = useAtom(bibleAtom)
+  const entityReference = bible.data.entityReference
+  const entityVerseKeys = entityReference?.verseKeys || []
+  const {
+    version: resolvedEntityVersion,
+    status: entityResolutionStatus,
+    missingVerseKeys,
+    isLoading: isResolvingEntity,
+  } = useResolvedBibleVerses(
+    verseStringToObject(entityVerseKeys),
+    entityReference?.preferredVersion
+  )
 
   const rawSettings = useSelector((state: RootState) => state.user.bible.settings)
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
@@ -71,7 +90,37 @@ const BibleTabScreen = ({ bibleAtom, isFormSheet, isInTab = true }: BibleTabScre
     })()
   }, [dispatch, settings.commentsDisplay])
 
-  const content = (
+  useEffect(() => {
+    if (!entityReference || !resolvedEntityVersion) return
+    if (isResolvingEntity) return
+    if (bible.data.selectedVersion === resolvedEntityVersion) return
+
+    setBible(
+      produce(draft => {
+        draft.data.selectedVersion = resolvedEntityVersion as VersionCode
+      })
+    )
+  }, [
+    bible.data.selectedVersion,
+    entityReference,
+    isResolvingEntity,
+    resolvedEntityVersion,
+    setBible,
+  ])
+
+  if (
+    entityReference &&
+    (isResolvingEntity ||
+      (resolvedEntityVersion && bible.data.selectedVersion !== resolvedEntityVersion))
+  ) {
+    return null
+  }
+
+  if (entityReference && entityResolutionStatus === 'reference-only') {
+    return <BibleReferenceUnavailable verseKeys={entityVerseKeys} />
+  }
+
+  const bibleContent = (
     <BibleViewer
       settings={settings}
       bibleAtom={bibleAtom}
@@ -79,6 +128,15 @@ const BibleTabScreen = ({ bibleAtom, isFormSheet, isInTab = true }: BibleTabScre
       isInTab={isInTab}
     />
   )
+  const content =
+    entityReference && entityResolutionStatus === 'partial' ? (
+      <Box flex>
+        <BiblePartialReferenceNotice verseKeys={missingVerseKeys} />
+        {bibleContent}
+      </Box>
+    ) : (
+      bibleContent
+    )
 
   if (isFormSheet) {
     return (

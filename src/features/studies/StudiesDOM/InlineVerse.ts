@@ -11,16 +11,18 @@ class InlineVerse extends Inline {
 
   static className = 'inline-verse'
 
-  static create({ title, verses }: InlineVersePayload) {
+  static create({ title, verses, version }: InlineVersePayload) {
     const node = super.create()
     node.setAttribute('data-title', title)
     node.setAttribute('data-verses', JSON.stringify(verses))
+    if (version) node.setAttribute('data-version', version)
 
     node.addEventListener('click', () => {
       const isReadOnly = document.querySelector('#editor')?.classList.contains('ql-disabled')
       if (isReadOnly) {
         dispatch('VIEW_BIBLE_VERSE', {
           arrayVerses: verses,
+          version,
         })
       }
     })
@@ -32,6 +34,7 @@ class InlineVerse extends Inline {
     return {
       title: domNode.getAttribute('data-title'),
       verses: JSON.parse(domNode.getAttribute('data-verses') || '[]') as string[],
+      version: domNode.getAttribute('data-version') || undefined,
     }
   }
 }

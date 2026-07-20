@@ -9,11 +9,22 @@ export type BibleVerseResolution = {
   missingVerseKeys: string[]
 }
 
+export const shouldShowBibleReferenceUnavailable = (status: BibleVerseResolutionStatus): boolean =>
+  status === 'reference-only'
+
 type ResolveBibleVersesOptions = {
   verseKeys: string[]
   preferredVersion?: string
   defaultVersion: string
 }
+
+export const getBibleVerseResolutionRequestKey = ({
+  verseKeys,
+  preferredVersion,
+  defaultVersion,
+  dataRefreshSignal,
+}: ResolveBibleVersesOptions & { dataRefreshSignal: number }): string =>
+  JSON.stringify([verseKeys, preferredVersion || '', defaultVersion, dataRefreshSignal])
 
 type BibleVerseResolverDependencies = {
   getInstalledVersions: () => Promise<string[]>

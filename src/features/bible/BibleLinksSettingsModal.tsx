@@ -6,10 +6,10 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useSetAtom } from 'jotai/react'
 import { ActionSheetItem } from '~common/ActionMenu'
 import { deleteLink } from '~redux/modules/user'
-import { getBook } from '~helpers/bibleBookCatalog'
 import { unifiedTagsModalAtom } from '../../state/app'
 import { RootState } from '~redux/modules/reducer'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { getBibleViewParamsForVerseKeys } from '~features/studyRelations/openableStudyObjects'
 
 type Props = {
   ref?: React.RefObject<SheetRef | null>
@@ -57,18 +57,11 @@ const LinksSettingsModal = ({ ref, linkId, onClosed, title, onEditRelations }: P
     )
     const verseEndpoint = relation?.endpoints.find(endpoint => endpoint.type === 'verse')
     if (verseEndpoint?.type !== 'verse' || !verseEndpoint.verseKeys[0]) return
-    const [Livre, Chapitre, Verset] = verseEndpoint.verseKeys[0].split('-')
     close()
     setTimeout(() => {
       pushRouteOnce({
         pathname: '/bible-view',
-        params: {
-          contextDisplayMode: 'focused',
-          book: JSON.stringify(getBook(Number(Livre))),
-          chapter: String(Chapitre),
-          verse: String(Verset),
-          focusVerses: JSON.stringify([Number(Verset)]),
-        },
+        params: getBibleViewParamsForVerseKeys(verseEndpoint.verseKeys, verseEndpoint.version),
       })
     }, 300)
   }

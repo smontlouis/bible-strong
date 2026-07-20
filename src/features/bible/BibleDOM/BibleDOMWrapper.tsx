@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isFullScreenBibleAtom } from 'src/state/app'
+import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
 import {
   BibleContextDisplayMode,
   BibleTab,
@@ -460,7 +461,7 @@ export const BibleDOMWrapper = ({
               getDefaultStore().set(
                 bibleAtom,
                 produce(draft => {
-                  draft.data.selectedVersion = version
+                  draft.data = selectBibleTabVersion(draft.data, version)
                 })
               ),
             setParallelVersion: (version: VersionCode, index: number) =>

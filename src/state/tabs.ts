@@ -18,6 +18,7 @@ import {
   getNextAvailableChapterLocation,
   getPreviousAvailableChapterLocation,
 } from '~helpers/bibleCoverage'
+import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
 
 // ============================================================================
 // SHARED BIBLE DOM (single WebView instance for all Bible tabs)
@@ -67,6 +68,10 @@ export interface BibleTab extends TabBase {
     isSelectionMode: StudyNavigateBibleType | undefined
     contextDisplayMode?: BibleContextDisplayMode
     isReadOnly?: boolean
+    entityReference?: {
+      verseKeys: string[]
+      preferredVersion?: VersionCode
+    }
   }
 }
 
@@ -716,7 +721,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const setSelectedVersion = (selectedVersion: VersionCode) =>
     setBibleTab(
       produce(draft => {
-        draft.data.selectedVersion = selectedVersion
+        draft.data = selectBibleTabVersion(draft.data, selectedVersion)
       })
     )
 
@@ -1020,7 +1025,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
           selectedChapter: selected.chapter,
           selectedVerse: selected.verse,
         }
-        draft.data.selectedVersion = selected.version
+        draft.data = selectBibleTabVersion(draft.data, selected.version)
         draft.data.selectedBook = selected.book
         draft.data.selectedChapter = selected.chapter
         draft.data.selectedVerse = selected.verse

@@ -1,4 +1,9 @@
-import { getBibleLocationVerseKeys, resolveBibleVerses } from '../bibleVerseResolver'
+import {
+  getBibleLocationVerseKeys,
+  getBibleVerseResolutionRequestKey,
+  resolveBibleVerses,
+  shouldShowBibleReferenceUnavailable,
+} from '../bibleVerseResolver'
 
 jest.mock('../biblesDb', () => ({
   getInstalledVersions: jest.fn(),
@@ -113,5 +118,43 @@ describe('getBibleLocationVerseKeys', () => {
         focusVerses: [1, 2, 4],
       })
     ).toEqual(['67-1-1', '67-1-2', '67-1-4'])
+  })
+})
+
+describe('shouldShowBibleReferenceUnavailable', () => {
+  it('opens the best installed version when only part of a verse range is available', () => {
+    expect(shouldShowBibleReferenceUnavailable('partial')).toBe(false)
+  })
+
+  it('shows the download fallback only when no installed Bible contains the reference', () => {
+    expect(shouldShowBibleReferenceUnavailable('reference-only')).toBe(true)
+  })
+})
+
+describe('getBibleVerseResolutionRequestKey', () => {
+  it('invalidates stale results when the selected version or installed data changes', () => {
+    const baseRequest = {
+      verseKeys: ['67-1-1'],
+      defaultVersion: 'LSG',
+      dataRefreshSignal: 0,
+    }
+    const initialKey = getBibleVerseResolutionRequestKey({
+      ...baseRequest,
+      preferredVersion: 'VUL',
+    })
+
+    expect(
+      getBibleVerseResolutionRequestKey({
+        ...baseRequest,
+        preferredVersion: 'KJV',
+      })
+    ).not.toBe(initialKey)
+    expect(
+      getBibleVerseResolutionRequestKey({
+        ...baseRequest,
+        preferredVersion: 'VUL',
+        dataRefreshSignal: 1,
+      })
+    ).not.toBe(initialKey)
   })
 })
