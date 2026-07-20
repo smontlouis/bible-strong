@@ -4,7 +4,10 @@ import { audioDefault, audioV2 } from './topBibleAudio'
 import { zeroFill } from './zeroFill'
 import type { BibleCanonId } from './bibleBookCatalog'
 
-export type BibleVersificationId = 'bible-strong-default' | 'clementine-vulgate'
+export type BibleVersificationId =
+  | 'bible-strong-default'
+  | 'bible-strong-french-4-chapter-joel'
+  | 'clementine-vulgate'
 
 export const getIfVersionNeedsUpdate = async (versionId: string) => {
   // Find a way to update the version
@@ -253,6 +256,7 @@ export const versions: Record<string, Version> = {
     c: '1872 - Domaine public',
     sourceUrl: 'https://sites.google.com/view/bibledelausanne',
     type: 'fr',
+    versificationId: 'bible-strong-french-4-chapter-joel',
   },
   BFC: {
     id: 'BFC',
@@ -455,7 +459,7 @@ export const versions: Record<string, Version> = {
     id: 'VUL',
     name: 'Vulgate clémentine (latin)',
     name_en: 'Clementine Vulgate (Latin)',
-    c: '1598 - Domaine public',
+    c: 'Domaine public - Clementine Text Project',
     sourceUrl:
       'https://bitbucket.org/clementinetextproject/text/src/edc85da058be630183d26e4deb6714ade80e600c/',
     type: 'other',

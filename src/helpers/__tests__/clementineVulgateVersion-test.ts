@@ -19,6 +19,7 @@ describe('Clementine Vulgate version', () => {
     expect(versions.VUL).toMatchObject({
       id: 'VUL',
       type: 'other',
+      c: 'Domaine public - Clementine Text Project',
       canonId: 'clementine-vulgate',
       versificationId: 'clementine-vulgate',
       sourceUrl:
@@ -36,5 +37,6 @@ describe('Clementine Vulgate version', () => {
   it('keeps existing versions on the default Protestant canon and versification', () => {
     expect(getBibleVersionCanonId('LSG')).toBe('protestant-66')
     expect(getBibleVersionVersificationId('LSG')).toBe('bible-strong-default')
+    expect(getBibleVersionVersificationId('LAU')).toBe('bible-strong-french-4-chapter-joel')
   })
 })
