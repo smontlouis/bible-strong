@@ -145,6 +145,7 @@ export const biblesRef: {
   LXX_FR: cdnUrl('bibles/bible-lxx-french.json'),
   // JER: cdnUrl('bibles/bible-jer.json'),
   LXX: cdnUrl('bibles/bible-lxx.json'),
+  VUL: cdnUrl('bibles/bible-vul.json'),
   TR1624: cdnUrl('bibles/bible-TR1624.json'),
   TR1894: cdnUrl('bibles/bible-TR1894.json'),
   AMP: cdnUrl('bibles/bible-amp.json'),

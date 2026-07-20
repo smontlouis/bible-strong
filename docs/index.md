@@ -23,6 +23,7 @@ This directory is the repo-level reference set for agents and humans working on 
 | `bible-viewer-swiftui-audit.md` | iOS-specific audit for a SwiftUI/native Bible reader. |
 | `bible-viewer-compose-audit.md` | Android-specific audit for a Jetpack Compose/native Bible reader. |
 | `bible-lausanne-source.md` | Lausanne Bible source provenance, generation, versification mapping, and validation. |
+| `agents/research/clementine-vulgate-source.md` | Clementine Vulgate source provenance, public-domain review, canon, and import recommendations. |
 
 ## Agent-Specific Docs
 

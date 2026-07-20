@@ -4,6 +4,8 @@ import { audioDefault, audioV2 } from './topBibleAudio'
 import { zeroFill } from './zeroFill'
 import type { BibleCanonId } from './bibleBookCatalog'
 
+export type BibleVersificationId = 'bible-strong-default' | 'clementine-vulgate'
+
 export const getIfVersionNeedsUpdate = async (versionId: string) => {
   // Find a way to update the version
   return false
@@ -94,6 +96,7 @@ export interface Version {
   hasPericope?: boolean
   getAudioUrl?: (bookNum: number, chapterNum: number) => string
   canonId?: BibleCanonId
+  versificationId?: BibleVersificationId
 }
 
 const getLsgAudioUrl = (bookNum: number, chapterNum: number) => {
@@ -448,6 +451,17 @@ export const versions: Record<string, Version> = {
     name_en: 'Septuagint (OT)',
     type: 'other',
   },
+  VUL: {
+    id: 'VUL',
+    name: 'Vulgate clémentine (latin)',
+    name_en: 'Clementine Vulgate (Latin)',
+    c: '1598 - Domaine public',
+    sourceUrl:
+      'https://bitbucket.org/clementinetextproject/text/src/edc85da058be630183d26e4deb6714ade80e600c/',
+    type: 'other',
+    canonId: 'clementine-vulgate',
+    versificationId: 'clementine-vulgate',
+  },
   SBLGNT: {
     id: 'SBLGNT',
     name: 'SBL NT. Grec (NT)',
@@ -475,6 +489,9 @@ export const versions: Record<string, Version> = {
 
 export const getBibleVersionCanonId = (versionId: string): BibleCanonId =>
   versions[versionId]?.canonId ?? 'protestant-66'
+
+export const getBibleVersionVersificationId = (versionId: string): BibleVersificationId =>
+  versions[versionId]?.versificationId ?? 'bible-strong-default'
 
 export const getVersions = () => {
   return versions
@@ -518,7 +535,8 @@ export const versionsBySections: VersionsBySection[] = Object.values(versions).r
       case 'TR1624':
       case 'TR1894':
       case 'DEL':
-      case 'LXX': {
+      case 'LXX':
+      case 'VUL': {
         sectionArray[3].data.push(version)
         return sectionArray
       }
@@ -587,7 +605,8 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(versions
       case 'TR1624':
       case 'TR1894':
       case 'DEL':
-      case 'LXX': {
+      case 'LXX':
+      case 'VUL': {
         sectionArray[2].data.push(versionEn)
         return sectionArray
       }
