@@ -124,6 +124,7 @@ export const biblesRef: {
   BDS: cdnUrl('bibles/bible-bds.json'),
   CHU: cdnUrl('bibles/bible-chu.json'),
   FMAR: cdnUrl('bibles/bible-fmar.json'),
+  LAU: cdnUrl('bibles/bible-lau.json'),
   FRC97: cdnUrl('bibles/bible-frc97.json'),
   NBS: cdnUrl('bibles/bible-nbs.json'),
   NEG79: cdnUrl('bibles/bible-neg79.json'),

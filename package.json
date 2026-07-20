@@ -41,6 +41,7 @@
     "docs:flows:build": "yarn docs:flows:data && vite build --config docs/assets/app-flows/viewer/vite.config.mjs",
     "docs:flows:dev": "yarn docs:flows:data && vite --config docs/assets/app-flows/viewer/vite.config.mjs",
     "bible:dbr:generate": "node scripts/generate-dbr-bible.mjs",
+    "bible:lau:generate": "node scripts/generate-lau-bible.mjs",
     "android": "expo run:android",
     "ios": "expo run:ios"
   },

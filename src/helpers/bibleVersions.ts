@@ -241,6 +241,14 @@ export const versions: Record<string, Version> = {
     hasRedWords: true,
     hasPericope: true,
   },
+  LAU: {
+    id: 'LAU',
+    name: 'Bible de Lausanne 1872',
+    name_en: 'Lausanne Bible 1872',
+    c: '1872 - Domaine public',
+    sourceUrl: 'https://sites.google.com/view/bibledelausanne',
+    type: 'fr',
+  },
   BFC: {
     id: 'BFC',
     name: 'Bible en Français courant',
@@ -558,6 +566,7 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(versions
       case 'CHU':
       case 'BDS':
       case 'FMAR':
+      case 'LAU':
       case 'BFC':
       case 'FRC97':
       case 'NFC':

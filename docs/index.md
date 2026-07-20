@@ -22,6 +22,7 @@ This directory is the repo-level reference set for agents and humans working on 
 | `bible-viewer-native-migration-audit.md` | Synthesis for migrating the Bible reader from DOM/WebView to native SwiftUI/Compose components. |
 | `bible-viewer-swiftui-audit.md` | iOS-specific audit for a SwiftUI/native Bible reader. |
 | `bible-viewer-compose-audit.md` | Android-specific audit for a Jetpack Compose/native Bible reader. |
+| `bible-lausanne-source.md` | Lausanne Bible source provenance, generation, versification mapping, and validation. |
 
 ## Agent-Specific Docs
 
