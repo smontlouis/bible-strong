@@ -7,7 +7,7 @@ import { useAtom, useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AppState, Platform } from 'react-native'
+import { Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isFullScreenBibleAtom } from 'src/state/app'
 import {
@@ -171,7 +171,6 @@ const DOM_WEBVIEW_INITIAL_SCRIPT =
 export type WebViewProps = {
   tabId: string
   bibleAtom: PrimitiveAtom<BibleTab>
-  isBibleViewReloadingAtom: PrimitiveAtom<boolean>
   book: Book
   chapter: number
   isLoading: boolean
@@ -211,8 +210,6 @@ export type WebViewProps = {
   goToNextChapter?: () => void
   setUnifiedTagsModal?: (payload: HighlightTagsModalPayload) => void
   onOpenResourceForVerse?: (resourceType: BibleResource, verseKey: string) => void
-  onMountTimeout?: () => void
-  onDOMMounted?: () => void
   onOpenBookmarkModal?: (bookmark: Bookmark) => void
   expandContext?: () => void
   collapseContext?: () => void
@@ -357,8 +354,6 @@ export const BibleDOMWrapper = ({
   isFormSheet,
   redWords,
   isLoading,
-  onMountTimeout,
-  onDOMMounted,
   error,
 }: WebViewProps) => {
   const { openVersionSelector } = useBookAndVersionSelector()
@@ -392,49 +387,6 @@ export const BibleDOMWrapper = ({
   // the race condition where prop updates are lost during WebView init.
   const [isDOMMounted, setIsDOMMounted] = useState(false)
   const versesToSend = isDOMMounted ? stableVerses : []
-  const mountTimeoutReportedRef = useRef(false)
-
-  // Watchdog: if the DOM component never signals DOM_COMPONENT_MOUNTED,
-  // the WebView is stuck (white screen). Fire onMountTimeout so the parent
-  // can force a remount.
-  useEffect(() => {
-    if (isDOMMounted) return
-    const MOUNT_TIMEOUT_MS = Platform.OS === 'android' ? 8000 : 5000
-    const timer = setTimeout(() => {
-      if (AppState.currentState !== 'active') {
-        appLogger.info('webview', 'bible_dom.mount.timeout.skipped_background', {
-          appState: AppState.currentState,
-          timeoutMs: MOUNT_TIMEOUT_MS,
-          version,
-          book: book.Numero,
-          chapter,
-        })
-        return
-      }
-
-      appLogger.warn('webview', 'bible_dom.mount.timeout', {
-        timeoutMs: MOUNT_TIMEOUT_MS,
-        version,
-        book: book.Numero,
-        chapter,
-      })
-      if (!mountTimeoutReportedRef.current) {
-        mountTimeoutReportedRef.current = true
-        Sentry.captureMessage('BibleDOM mount timeout (no DOM_COMPONENT_MOUNTED)', {
-          level: 'warning',
-          tags: { component: 'BibleDOMWrapper' },
-          extra: {
-            timeoutMs: MOUNT_TIMEOUT_MS,
-            version,
-            book: book.Numero,
-            chapter,
-          },
-        })
-      }
-      onMountTimeout?.()
-    }, MOUNT_TIMEOUT_MS)
-    return () => clearTimeout(timer)
-  }, [book.Numero, chapter, isDOMMounted, onMountTimeout, version])
 
   // Trim settings to only include active theme colors (reduces bridge serialization by ~3.8KB)
   const trimmedSettings = {
@@ -774,9 +726,7 @@ export const BibleDOMWrapper = ({
           book: book.Numero,
           chapter,
         })
-        mountTimeoutReportedRef.current = false
         setIsDOMMounted(true)
-        onDOMMounted?.()
         break
       }
 

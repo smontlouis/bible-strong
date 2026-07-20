@@ -1,5 +1,5 @@
 import { produce } from 'immer'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import blackColors from '~themes/blackColors'
@@ -13,7 +13,7 @@ import sunsetColors from '~themes/sunsetColors'
 
 import BibleViewer from './BibleViewer'
 
-import { atom, getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
+import { PrimitiveAtom } from 'jotai/vanilla'
 import { getIfLocalResourceNeedsDownload } from '~features/resources/resourceAvailability'
 import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
@@ -32,8 +32,6 @@ interface BibleTabScreenProps {
 
 const BibleTabScreen = ({ bibleAtom, isFormSheet, isInTab = true }: BibleTabScreenProps) => {
   const dispatch = useDispatch()
-  const [reloadKey, setReloadKey] = useState(0)
-  const isBibleViewReloadingAtom = useMemo(() => atom(false), [])
 
   const rawSettings = useSelector((state: RootState) => state.user.bible.settings)
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
@@ -73,19 +71,10 @@ const BibleTabScreen = ({ bibleAtom, isFormSheet, isInTab = true }: BibleTabScre
     })()
   }, [dispatch, settings.commentsDisplay])
 
-  const handleBibleViewerReload = () => {
-    console.log('[Bible] Bible component failed to mount, forcing reload')
-    setReloadKey(prev => prev + 1)
-    getDefaultStore().set(isBibleViewReloadingAtom, true)
-  }
-
   const content = (
     <BibleViewer
-      key={`bible-viewer-${reloadKey}`}
       settings={settings}
       bibleAtom={bibleAtom}
-      onMountTimeout={handleBibleViewerReload}
-      isBibleViewReloadingAtom={isBibleViewReloadingAtom}
       isFormSheet={isFormSheet}
       isInTab={isInTab}
     />

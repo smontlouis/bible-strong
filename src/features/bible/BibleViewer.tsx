@@ -85,7 +85,6 @@ import {
 import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
 import BibleFooter from './footer/BibleFooter'
 import { useAnnotationMode } from './hooks'
-import { LoadingView } from './LoadingView'
 import ResourcesModal from './resources/ResourceModal'
 import {
   getSelectedVerseKeys,
@@ -125,20 +124,11 @@ interface BibleViewerProps {
   bibleAtom: PrimitiveAtom<BibleTab>
   commentsDisplay?: boolean
   settings: RootState['user']['bible']['settings']
-  onMountTimeout?: () => void
-  isBibleViewReloadingAtom: PrimitiveAtom<boolean>
   isFormSheet?: boolean
   isInTab?: boolean
 }
 
-const BibleViewer = ({
-  bibleAtom,
-  settings,
-  onMountTimeout,
-  isBibleViewReloadingAtom,
-  isFormSheet,
-  isInTab,
-}: BibleViewerProps) => {
+const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerProps) => {
   const { t } = useTranslation()
   const pushRouteOnce = usePushRouteOnce()
   const openEntityRelations = useOpenEntityRelations()
@@ -750,7 +740,6 @@ const BibleViewer = ({
   const domProps = {
     tabId: bible.id,
     bibleAtom,
-    isBibleViewReloadingAtom,
     book,
     chapter,
     isLoading,
@@ -789,7 +778,6 @@ const BibleViewer = ({
     goToNextChapter: goToNextAvailableChapter,
     setUnifiedTagsModal,
     onOpenResourceForVerse: openResourceForVerse,
-    onMountTimeout,
     onOpenBookmarkModal: handleOpenBookmarkModal,
     expandContext: actions.expandContext,
     collapseContext: actions.collapseContext,
@@ -993,7 +981,6 @@ const BibleViewer = ({
         onSelectFormat={handleSelectFormat}
         reference={pendingVerseData?.verseData.title || selectedVersesReference}
       />
-      <LoadingView isBibleViewReloadingAtom={isBibleViewReloadingAtom} />
       <BookmarkModal
         sheetRef={bookmarkModalRef}
         onClose={() => {
