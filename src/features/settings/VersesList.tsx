@@ -14,7 +14,7 @@ const VersesList = ({ groupedHighlights, setSettings }: Props) => {
     <FlatList
       data={groupedHighlights}
       keyExtractor={(item: GroupedHighlightData) => item.date.toString()}
-      renderItem={({ item: { color, date, highlightsObj, tags, stringIds } }) => (
+      renderItem={({ item: { color, date, highlightsObj, tags, stringIds, version } }) => (
         <VerseComponent
           {...{
             color,
@@ -23,6 +23,7 @@ const VersesList = ({ groupedHighlights, setSettings }: Props) => {
             tags,
             setSettings,
             stringIds,
+            version,
           }}
         />
       )}

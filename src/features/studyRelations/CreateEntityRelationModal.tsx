@@ -221,7 +221,7 @@ const VerseTargetDescription = ({
 }: {
   endpoint: Extract<RelationEndpoint, { type: 'verse' }>
 }) => {
-  const verses = useBibleVerses(getVerseIds(endpoint))
+  const verses = useBibleVerses(getVerseIds(endpoint), endpoint.version)
   const description = verses.map(verse => verse.Texte).join(' ')
 
   if (!description) return null

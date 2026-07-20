@@ -1,9 +1,9 @@
 import React from 'react'
 import { useAtomValue } from 'jotai/react'
 import { Verse } from '~common/types'
-import { getMultipleVerses } from '~helpers/biblesDb'
 import { useDefaultBibleVersion } from '../state/useDefaultBibleVersion'
 import { bibleDataRefreshSignalAtom } from '~state/app'
+import { BibleVerseResolutionStatus, resolveBibleVerses } from './bibleVerseResolver'
 
 export const verseStringToObject = (arrayString: string[]): Omit<Verse, 'Texte'>[] => {
   return arrayString.map(string => {
@@ -12,39 +12,96 @@ export const verseStringToObject = (arrayString: string[]): Omit<Verse, 'Texte'>
   })
 }
 
-const useBibleVerses = (verseIds: Omit<Verse, 'Texte'>[]) => {
-  const [verses, setVerses] = React.useState<Verse[]>([])
+type ResolvedBibleVerses = {
+  verses: Verse[]
+  version?: string
+  status: BibleVerseResolutionStatus
+  missingVerseKeys: string[]
+  isLoading: boolean
+}
 
-  const version = useDefaultBibleVersion()
+export const useResolvedBibleVerses = (
+  verseIds: Omit<Verse, 'Texte'>[],
+  preferredVersion?: string
+): ResolvedBibleVerses => {
+  const verseKeys = verseIds.map(({ Livre, Chapitre, Verset }) => `${Livre}-${Chapitre}-${Verset}`)
+  const verseKeysSignature = verseKeys.join('|')
+  const [verses, setVerses] = React.useState<Verse[]>([])
+  const [resolvedVersion, setResolvedVersion] = React.useState<string>()
+  const [status, setStatus] = React.useState<BibleVerseResolutionStatus>('reference-only')
+  const [missingVerseKeys, setMissingVerseKeys] = React.useState<string[]>([])
+  const [isLoading, setIsLoading] = React.useState(Boolean(verseIds.length))
+
+  const defaultVersion = useDefaultBibleVersion()
   const bibleDataRefreshSignal = useAtomValue(bibleDataRefreshSignalAtom)
 
   React.useEffect(() => {
+    let cancelled = false
+
     const loadVerses = async () => {
-      if (!verseIds.length) {
+      const requestedVerseKeys = verseKeysSignature ? verseKeysSignature.split('|') : []
+      if (!requestedVerseKeys.length) {
         setVerses([])
+        setResolvedVersion(preferredVersion || defaultVersion)
+        setStatus('resolved')
+        setMissingVerseKeys([])
+        setIsLoading(false)
         return
       }
 
-      const verseKeys = verseIds.map(
-        ({ Livre, Chapitre, Verset }) => `${Livre}-${Chapitre}-${Verset}`
-      )
-      const versesMap = await getMultipleVerses(version, verseKeys)
-
-      const versesWithText = verseIds
-        .map(verse => {
-          const key = `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`
-          const text = versesMap[key]
-          if (!text) return undefined
-          return { ...verse, Texte: text } as Verse
+      setIsLoading(true)
+      try {
+        const resolution = await resolveBibleVerses({
+          verseKeys: requestedVerseKeys,
+          preferredVersion,
+          defaultVersion,
         })
-        .filter((verse): verse is Verse => Boolean(verse))
+        if (cancelled) return
 
-      setVerses(versesWithText)
+        setVerses(
+          requestedVerseKeys
+            .filter(key => resolution.texts[key])
+            .map(key => {
+              const [Livre, Chapitre, Verset] = key.split('-')
+              return {
+                Livre,
+                Chapitre,
+                Verset,
+                Texte: resolution.texts[key],
+              }
+            }) as Verse[]
+        )
+        setResolvedVersion(resolution.version)
+        setStatus(resolution.status)
+        setMissingVerseKeys(resolution.missingVerseKeys)
+      } catch (error) {
+        if (cancelled) return
+        console.error('[useBibleVerses] Failed to resolve verses:', error)
+        setVerses([])
+        setResolvedVersion(undefined)
+        setStatus('reference-only')
+        setMissingVerseKeys(requestedVerseKeys)
+      } finally {
+        if (!cancelled) setIsLoading(false)
+      }
     }
     loadVerses()
-  }, [verseIds, version, bibleDataRefreshSignal])
+    return () => {
+      cancelled = true
+    }
+  }, [verseKeysSignature, preferredVersion, defaultVersion, bibleDataRefreshSignal])
 
-  return verses
+  return {
+    verses,
+    version: resolvedVersion,
+    status,
+    missingVerseKeys,
+    isLoading,
+  }
+}
+
+const useBibleVerses = (verseIds: Omit<Verse, 'Texte'>[], preferredVersion?: string) => {
+  return useResolvedBibleVerses(verseIds, preferredVersion).verses
 }
 
 export default useBibleVerses

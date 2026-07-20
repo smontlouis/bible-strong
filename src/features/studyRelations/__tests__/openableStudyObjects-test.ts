@@ -89,6 +89,23 @@ describe('openable study objects', () => {
     })
   })
 
+  it('preserves a preferred version when opening a Verse endpoint', () => {
+    const endpoint = createVerseEndpoint(['1-1-1'], undefined, 'VUL')
+
+    expect(getOpenableActionForRelationEndpoint(endpoint)).toEqual({
+      type: 'route',
+      pathname: '/bible-view',
+      params: {
+        contextDisplayMode: 'focused',
+        book: JSON.stringify({ Numero: 1, Nom: 'Genèse', Chapitres: 50 }),
+        chapter: '1',
+        verse: '1',
+        focusVerses: JSON.stringify([1]),
+        version: 'VUL',
+      },
+    })
+  })
+
   it('opens Note and Strong endpoints through descriptors', () => {
     expect(getOpenableActionForRelationEndpoint(createNoteEndpoint('note-1'))).toEqual({
       type: 'note',

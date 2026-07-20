@@ -31,6 +31,7 @@ import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 export type HighlightData = {
   date: number
   color: string
+  version?: string
   verseIds: { Livre: number; Chapitre: number; Verset: number; Texte: string }[]
   tags: TagsObj
 }

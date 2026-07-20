@@ -131,7 +131,8 @@ const Header = ({
   const focusedVerseEndpoint = hasFocusVerses
     ? createVerseEndpoint(
         focusVerses.map(focusVerse => `${bookNumber}-${chapter}-${focusVerse}`),
-        focusedReference
+        focusedReference,
+        version
       )
     : null
   const focusedVerseRelationCount = useRelationCount(focusedVerseEndpoint)

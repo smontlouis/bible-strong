@@ -30,6 +30,7 @@ interface VerseId {
 interface HighlightData {
   date: number
   color: string
+  version?: string
   verseIds: VerseId[]
   stringIds: Record<string, boolean>
   tags: Record<string, { id: string; name: string }>

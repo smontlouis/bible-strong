@@ -1095,5 +1095,6 @@
   "Rechercher un passage, un Strong, une note, une étude, Nave ou un mot": "Search for a passage, Strong, note, study, Nave, or word",
   "Impossible de charger le lexique Strong.": "Unable to load the Strong lexicon.",
   "Impossible de charger la nave...": "Unable to load Nave...",
-  "Impossible de charger le dictionnaire...": "Unable to load the dictionary..."
+  "Impossible de charger le dictionnaire...": "Unable to load the dictionary...",
+  "bibleVerse.textUnavailableInstalled": "Text unavailable in the installed Bibles."
 }

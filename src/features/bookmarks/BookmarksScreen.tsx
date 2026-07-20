@@ -90,6 +90,7 @@ const BookmarksScreen = ({ isFormSheet = false }: BookmarksScreenProps) => {
         book: String(bookmark.book),
         chapter: String(bookmark.chapter),
         verse: bookmark.verse !== undefined ? String(bookmark.verse) : undefined,
+        ...(bookmark.version && { version: bookmark.version }),
       },
     })
   }

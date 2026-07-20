@@ -79,6 +79,7 @@ interface Note {
   description: string
   date: number
   tags?: Record<string, Tag>
+  version?: string // preferred Bible for rendering an attached passage
 }
 ```
 
@@ -93,6 +94,7 @@ type Highlight = {
   color: string
   tags?: TagsObj
   date: number
+  version?: string // Bible used when the highlight was created
 }
 ```
 
@@ -132,8 +134,13 @@ interface Link {
   videoId?: string
   date: number
   tags?: Record<string, Tag>
+  version?: string // preferred Bible for rendering an attached passage
 }
 ```
+
+Bookmarks already carry the same optional `version` preference. Verse relation endpoints may also
+carry `version`, but endpoint identity and duplicate detection deliberately ignore it: the durable
+identity remains the numeric verse key.
 
 ## Settings
 
@@ -191,5 +198,9 @@ Remote URLs are defined in `src/helpers/firebase.ts` and use `https://assets.bib
 
 `src/redux/firestoreMiddleware.ts` observes Redux actions and syncs user Bible data for authenticated users. Firestore subcollection helpers live in `src/helpers/firestoreSubcollections.ts`.
 
-Any change that rewrites keys, entity shapes, or sync timing must include migration and rollback thinking.
+Preferred Bible versions are additive optional fields in Redux persistence and Firestore
+subcollection documents. Legacy records require no rewrite and resolve against the default or
+another compatible installed Bible. The normal full-document subcollection sync preserves the
+field for new and updated entities.
 
+Any change that rewrites keys, entity shapes, or sync timing must include migration and rollback thinking.

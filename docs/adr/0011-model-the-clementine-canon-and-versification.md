@@ -30,6 +30,13 @@ Declare `clementine-vulgate` as both the canon and versification of version `VUL
 native references, including Joel in three chapters. Bible Strong does not automatically convert
 references between this versification and another version.
 
+Keep durable verse identity version-independent for highlights, notes, links, bookmarks, and study
+relations. New entities may store an optional preferred rendering version, but that version is not
+part of a relation endpoint key or duplicate key. When rendering or opening an existing entity,
+try its preferred version, then the user's default version, then another installed version that
+actually contains the requested numeric location. If none contains it, retain the entity and show
+its reference without text; never hide or delete user data because a compatible Bible is absent.
+
 Use the public-domain Clementine Text Project transcription at the pinned source revision recorded
 by the generator. Import normalization converts source encoding to Unicode, flattens editorial
 line-break and poetic delimiters without deleting their text, preserves speaker/acrostic/prologue
@@ -46,3 +53,7 @@ Baruch, and Joel can differ safely from the default catalog counts.
 Cross-version comparison can show texts at the same numeric location, but callers must not assume
 that those locations are semantically equivalent across versifications. Adding appendix books
 later requires separate identities, provenance, and an explicit canon decision.
+
+The preferred-version fields are additive and optional. Existing Redux and Firestore documents
+therefore require no state rewrite: legacy records follow the installed-version fallback, while
+normal subcollection synchronization preserves the new metadata.

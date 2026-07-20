@@ -52,6 +52,7 @@ export const getOpenableActionForRelationEndpoint = (
           chapter: String(chapter),
           verse: String(verse),
           focusVerses: JSON.stringify(focusVerses),
+          ...(endpoint.version && { version: endpoint.version }),
         },
       }
     }

@@ -44,6 +44,7 @@ import { isBookInTestament } from '~helpers/bibleBookCatalog'
 export type GroupedHighlightData = {
   date: number
   color: string
+  version?: string
   highlightsObj: Verse[]
   stringIds: VerseIds
   tags: TagsObj
@@ -69,6 +70,7 @@ const groupHighlightsByDate = (arr: GroupedHighlights, highlightTuple: [string, 
     arr.push({
       date: highlight.date,
       color: highlight.color,
+      version: highlight.version,
       highlightsObj: [],
       stringIds: {},
       tags: {},
@@ -488,6 +490,7 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
                     verseIds={item.data.highlightsObj}
                     stringIds={item.data.stringIds}
                     tags={item.data.tags}
+                    version={item.data.version}
                     setSettings={setSettingsData}
                   />
                 )

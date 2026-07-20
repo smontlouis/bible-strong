@@ -3,31 +3,37 @@ import React, { useEffect, useState } from 'react'
 import { ActivityIndicator } from 'react-native'
 import { EaseView } from 'react-native-ease'
 import { useSharedValue } from 'react-native-reanimated'
+import { useTranslation } from 'react-i18next'
 
-import { VerseIds, VerseRefContent } from '~common/types'
+import { VerseIds } from '~common/types'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import AccordionItem from '~features/bible/BookSelectorSheet/AccordionItem'
-import getVersesContent from '~helpers/getVersesContent'
+import { useResolvedBibleVerses, verseStringToObject } from '~helpers/useBibleVerses'
 import verseToReference from '~helpers/verseToReference'
-import { VersionCode } from '~state/tabs'
-import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 
 interface VerseAccordionProps {
   noteVerses: VerseIds
-  version?: VersionCode
+  version?: string
 }
 
 const VerseAccordion = ({ noteVerses, version }: VerseAccordionProps) => {
   const hasVerses = Object.keys(noteVerses).length > 0
   const theme = useTheme()
-  const defaultVersion = useDefaultBibleVersion()
+  const { t } = useTranslation()
   const [isExpanded, setIsExpanded] = useState(false)
-  const [verseContent, setVerseContent] = useState<VerseRefContent | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const verseKeys = Object.keys(noteVerses)
+  const { verses, isLoading } = useResolvedBibleVerses(verseStringToObject(verseKeys), version)
+  const verseContent = verses.length
+    ? {
+        content: verses
+          .map(verse => `${verses.length > 1 ? `${verse.Verset}. ` : ''}${verse.Texte}`)
+          .join(' '),
+      }
+    : null
 
   // Bridge React state to SharedValue for AccordionItem
   const isExpandedShared = useSharedValue(false)
@@ -35,33 +41,6 @@ const VerseAccordion = ({ noteVerses, version }: VerseAccordionProps) => {
   useEffect(() => {
     isExpandedShared.set(isExpanded)
   }, [isExpanded, isExpandedShared])
-
-  // Fetch verse content on mount or when verses change
-  useEffect(() => {
-    if (!hasVerses) {
-      setVerseContent(null)
-      setIsLoading(false)
-      return
-    }
-
-    const loadVerseContent = async () => {
-      setIsLoading(true)
-      const _version = version || defaultVersion
-      try {
-        const content = await getVersesContent({
-          verses: noteVerses,
-          version: _version,
-          hasVerseNumbers: Object.keys(noteVerses).length > 1,
-        })
-        setVerseContent(content)
-        setIsLoading(false)
-      } catch (e) {
-        console.error('[VerseAccordion] Failed to load verse:', e)
-        setIsLoading(false)
-      }
-    }
-    loadVerseContent()
-  }, [noteVerses, version, defaultVersion, hasVerses])
 
   const reference = verseToReference(noteVerses)
 
@@ -108,7 +87,7 @@ const VerseAccordion = ({ noteVerses, version }: VerseAccordionProps) => {
             </Paragraph>
           ) : (
             <Text fontSize={12} color="grey">
-              Impossible de charger le verset.
+              {t('bibleVerse.textUnavailableInstalled')}
             </Text>
           )}
         </Box>

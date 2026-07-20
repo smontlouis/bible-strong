@@ -104,6 +104,7 @@ const TagScreen = () => {
             date={item.data.date}
             verseIds={item.data.verseIds}
             tags={item.data.tags}
+            version={item.data.version}
           />
         )
       case 'annotation':

@@ -34,6 +34,7 @@ type TaggedEntity = { id: string | number; title: string; tags?: TagsObj }
 type HighlightVerseGroup = {
   date: number
   color: string
+  version?: string
   verseIds: { Livre: number; Chapitre: number; Verset: number; Texte: string }[]
   stringIds: Record<string, true>
   tags: TagsObj
@@ -489,6 +490,7 @@ const sortVersesByDate = (p: Record<string, Highlight>) =>
       arr.push({
         date: p[verse].date,
         color: p[verse].color,
+        version: p[verse].version,
         verseIds: [],
         stringIds: {},
         tags: {},

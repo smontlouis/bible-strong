@@ -83,7 +83,7 @@ const parseVerseKeys = (verseKeys?: string): VerseIds | undefined => {
 }
 
 const BibleLinkScreen = () => {
-  const params = useLocalSearchParams<{ linkId?: string; verseKeys?: string }>()
+  const params = useLocalSearchParams<{ linkId?: string; verseKeys?: string; version?: string }>()
   const [savedLinkId, setSavedLinkId] = useState<string | null>(null)
   const linkId = savedLinkId || params.linkId || null
   const linkVerses = parseVerseKeys(params.verseKeys)
@@ -163,6 +163,9 @@ const BibleLinkScreen = () => {
       linkType,
       videoId: videoId || undefined,
       date: Date.now(),
+      ...((currentLink?.version || params.version) && {
+        version: currentLink?.version || params.version,
+      }),
     }
 
     const targetVerses = currentLink && !linkVerses ? {} : linkVerses || displayedLinkVerses || {}

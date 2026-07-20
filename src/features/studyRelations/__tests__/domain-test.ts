@@ -1,5 +1,6 @@
 import {
   endpointIdentity,
+  createVerseEndpoint,
   dedupeRelationsByDuplicateKey,
   getRelationDisplayModel,
   getRelationDuplicateKey,
@@ -71,6 +72,15 @@ describe('study relation domain', () => {
       getRelationDuplicateKey([right, left], 'linked')
     )
     expect(endpointIdentity(left)).toBe('verse:1-1-1')
+  })
+
+  it('keeps verse identity independent from its preferred rendering version', () => {
+    const left = createVerseEndpoint(['1-1-1'], undefined, 'LSG')
+    const right = createVerseEndpoint(['1-1-1'], undefined, 'VUL')
+
+    expect(endpointIdentity(left)).toBe(endpointIdentity(right))
+    expect(left).toMatchObject({ version: 'LSG' })
+    expect(right).toMatchObject({ version: 'VUL' })
   })
 
   it('stores relation pair projections under Firestore-safe ids', () => {

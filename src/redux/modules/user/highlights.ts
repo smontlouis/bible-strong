@@ -32,7 +32,8 @@ export const changeHighlightColor = createAction(
 const addDateAndColorToVerses = (
   verses: SelectedVerses,
   highlightedVerses: HighlightsObj,
-  color: string
+  color: string,
+  version?: string
 ): HighlightsObj => {
   const date = Date.now()
   const formattedObj = Object.keys(verses).reduce<HighlightsObj>((obj, verse) => {
@@ -41,6 +42,9 @@ const addDateAndColorToVerses = (
       [verse]: {
         color: color || highlightedVerses[verse]?.color || '',
         date,
+        ...((version || highlightedVerses[verse]?.version) && {
+          version: version || highlightedVerses[verse]?.version,
+        }),
         ...(highlightedVerses[verse] && {
           tags: highlightedVerses[verse].tags || {},
         }),
@@ -55,15 +59,17 @@ const addDateAndColorToVerses = (
 export function addHighlight({
   color,
   selectedVerses,
+  version,
 }: {
   color: string
   selectedVerses: SelectedVerses
+  version?: string
 }) {
   return (dispatch: Dispatch, getState: () => RootState) => {
     const highlightedVerses = getState().user.bible.highlights
 
     return dispatch(
-      addHighlightAction(addDateAndColorToVerses(selectedVerses, highlightedVerses, color))
+      addHighlightAction(addDateAndColorToVerses(selectedVerses, highlightedVerses, color, version))
     )
   }
 }

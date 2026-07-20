@@ -63,6 +63,7 @@ interface NoteDetailTabScreenProps {
   notesAtom: PrimitiveAtom<NotesTab>
   noteId?: string
   initialVerseKeys?: string[]
+  initialVersion?: string
   onBackPress?: () => void
   isFormSheet?: boolean
 }
@@ -71,6 +72,7 @@ const NoteDetailTabScreen = ({
   notesAtom,
   noteId,
   initialVerseKeys = [],
+  initialVersion,
   onBackPress,
   isFormSheet = false,
 }: NoteDetailTabScreenProps) => {
@@ -218,7 +220,16 @@ const NoteDetailTabScreen = ({
           ? noteVerses
           : ({} as VerseIds)
     const action = addNote(
-      { ...currentNote, ...(noteKey ? { id: noteKey } : {}), title, description, date: Date.now() },
+      {
+        ...currentNote,
+        ...(noteKey ? { id: noteKey } : {}),
+        title,
+        description,
+        date: Date.now(),
+        ...((currentNote?.version || initialVersion || annotation?.version) && {
+          version: currentNote?.version || initialVersion || annotation?.version,
+        }),
+      },
       targetVerses
     )
     if (action) {
@@ -294,7 +305,7 @@ ${currentNote.description}
 
   const navigateToBible = () => {
     let verseKey: string
-    let version: string | undefined
+    let version: string | undefined = currentNote?.version || initialVersion
 
     if (isMissingAnnotation) {
       toast.error(t('Annotation introuvable'))
@@ -471,10 +482,14 @@ ${currentNote.description}
                   <VerseAccordion
                     key={`${verseKeys.join('/')}-${index}`}
                     noteVerses={verseKeysToVerseIds(verseKeys)}
+                    version={currentNote?.version || initialVersion}
                   />
                 ))
               ) : (
-                <VerseAccordion noteVerses={noteVerses} />
+                <VerseAccordion
+                  noteVerses={noteVerses}
+                  version={currentNote?.version || initialVersion}
+                />
               )
             ) : null}
             <NoteEditorDOMComponent

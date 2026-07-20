@@ -354,7 +354,8 @@ const attachNoteToVerse = (
 
   const normalizedVerseEndpoint = createVerseEndpoint(
     verseEndpoint.verseKeys,
-    verseEndpoint.verseKeys.join('/')
+    verseEndpoint.verseKeys.join('/'),
+    verseEndpoint.version || note.version
   )
   const relationId = getSystemRelationId('annotates', noteEndpoint.noteId, normalizedVerseEndpoint)
   const existingRelation = draft.bible.relations?.[relationId]
@@ -402,6 +403,8 @@ export interface Note {
   description: string
   date: number
   tags?: { [x: string]: Tag }
+  /** Bible used for the attached passage. Optional for legacy synced data. */
+  version?: string
 }
 
 export interface NotesObj {
@@ -414,6 +417,8 @@ export type Highlight = {
   color: string
   tags?: TagsObj
   date: number
+  /** Bible used when the highlight was created. Optional for legacy synced data. */
+  version?: string
 }
 
 export interface HighlightsObj {
@@ -457,6 +462,8 @@ export interface Link {
   videoId?: string // Pour YouTube, Vimeo, TikTok
   date: number
   tags?: { [x: string]: Tag }
+  /** Bible used for the attached passage. Optional for legacy synced data. */
+  version?: string
 }
 
 export interface LinksObj {
@@ -1199,7 +1206,11 @@ const userSlice = createSlice({
           if (!verseKeys.length) continue
           const noteEndpoint = createNoteEndpoint(noteId, getNoteTitle(note, ''))
           groupVerseKeysByChapter(verseKeys).forEach(verseKeyGroup => {
-            const verseEndpoint = createVerseEndpoint(verseKeyGroup, verseKeyGroup.join('/'))
+            const verseEndpoint = createVerseEndpoint(
+              verseKeyGroup,
+              verseKeyGroup.join('/'),
+              note.version
+            )
             upsertSystemRelation(
               state,
               createSystemRelation({

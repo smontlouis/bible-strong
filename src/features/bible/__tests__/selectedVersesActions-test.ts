@@ -66,6 +66,19 @@ describe('selectedVersesActions', () => {
     })
   })
 
+  it('preserves the source version for Link and Relation creation', () => {
+    expect(getSelectedVersesLinkParams({ '67-1-1': true }, 'VUL')).toEqual({
+      verseKeys: '67-1-1',
+      version: 'VUL',
+    })
+
+    expect(getSelectedVersesRelationEndpoint({ '67-1-1': true }, 'VUL')).toMatchObject({
+      type: 'verse',
+      verseKeys: ['67-1-1'],
+      version: 'VUL',
+    })
+  })
+
   it('builds Study payload verse keys from selected verses', () => {
     expect(getSelectedVersesStudyPayload({ '1-1-1': true, '1-1-2': true })).toEqual([
       '1-1-1',

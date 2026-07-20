@@ -17,7 +17,11 @@ const createNoteRouteAtom = (noteId?: string) =>
 
 const NoteScreen = () => {
   const router = useRouter()
-  const { noteId, verseKeys } = useLocalSearchParams<{ noteId?: string; verseKeys?: string }>()
+  const { noteId, verseKeys, version } = useLocalSearchParams<{
+    noteId?: string
+    verseKeys?: string
+    version?: string
+  }>()
   const notesAtomRef = useRef(createNoteRouteAtom(noteId))
   const initialVerseKeys = parseNoteVerseKeysParam(verseKeys)
 
@@ -26,6 +30,7 @@ const NoteScreen = () => {
       notesAtom={notesAtomRef.current}
       noteId={noteId}
       initialVerseKeys={initialVerseKeys}
+      initialVersion={version}
       onBackPress={router.back}
       isFormSheet={IS_FORM_SHEET}
     />

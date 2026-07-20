@@ -29,6 +29,27 @@ jest.mock('../firebase', () => ({
 }))
 
 describe('firestoreSubcollections', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('keeps optional source-version metadata in synced user entities', async () => {
+    await batchWriteSubcollection('user-1', 'highlights', {
+      set: {
+        '67-1-1': { color: 'yellow', date: 1, version: 'VUL', ignored: undefined },
+      },
+      delete: [],
+    })
+
+    const batch = (writeBatch as jest.Mock).mock.results[0].value
+    expect(batch.set).toHaveBeenCalledWith(
+      expect.anything(),
+      { color: 'yellow', date: 1, version: 'VUL' },
+      { merge: true }
+    )
+    expect(batch.commit).toHaveBeenCalled()
+  })
+
   it('rejects invalid document IDs instead of silently skipping them', async () => {
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
 

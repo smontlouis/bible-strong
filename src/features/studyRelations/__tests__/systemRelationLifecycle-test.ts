@@ -50,6 +50,18 @@ describe('systemRelationLifecycle', () => {
     ])
   })
 
+  it('copies the Link source version to Verse endpoints', () => {
+    const relations = addExternalLinkSystemRelations({
+      linkKey: 'link-1',
+      link: createLink({ version: 'VUL' }),
+      verseKeys: ['67-1-1'],
+    })
+
+    expect(
+      Object.values(relations)[0].endpoints.find(endpoint => endpoint.type === 'verse')
+    ).toMatchObject({ verseKeys: ['67-1-1'], version: 'VUL' })
+  })
+
   it('refreshes external Link endpoint labels without changing the Verse endpoint', () => {
     const relations = addExternalLinkSystemRelations({
       linkKey: 'link-1',

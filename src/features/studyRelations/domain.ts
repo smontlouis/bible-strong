@@ -35,6 +35,8 @@ export type RelationEndpointBase = {
 export type VerseRelationEndpoint = RelationEndpointBase & {
   type: 'verse'
   verseKeys: string[]
+  /** Preferred rendering version; deliberately excluded from endpoint identity. */
+  version?: string
   reference?: {
     start: { book: number; chapter: number; verse: number }
     end: { book: number; chapter: number; verse: number }
@@ -292,6 +294,7 @@ export const normalizeRelationEndpoint = (endpoint: LegacyRelationEndpoint): Rel
         type: 'verse',
         key,
         verseKeys,
+        ...(endpoint.version && { version: endpoint.version }),
         reference: endpoint.reference || getVerseReference(verseKeys),
         labelFallback:
           endpoint.labelFallback || getEndpointLegacyLabel(endpoint) || verseToReference(verseKeys),
@@ -491,8 +494,10 @@ export const relationIncludesVerseKey = (relation: Relation, verseKey: string): 
 
 export const createVerseEndpoint = (
   verseKeys: string[],
-  labelFallback?: string
-): RelationEndpoint => normalizeRelationEndpoint({ type: 'verse', verseKeys, labelFallback })
+  labelFallback?: string,
+  version?: string
+): RelationEndpoint =>
+  normalizeRelationEndpoint({ type: 'verse', verseKeys, labelFallback, version })
 
 export const createNoteEndpoint = (noteId: string, labelFallback?: string): RelationEndpoint =>
   normalizeRelationEndpoint({ type: 'note', noteId, labelFallback })
@@ -549,7 +554,7 @@ export const buildSystemRelationsForNotes = (
     if (verseKeys.length === 0) return relations
 
     const noteEndpoint = createNoteEndpoint(noteId, getNoteTitle(note, ''))
-    const verseEndpoint = createVerseEndpoint(verseKeys, verseKeys.join('/'))
+    const verseEndpoint = createVerseEndpoint(verseKeys, verseKeys.join('/'), note.version)
     const relation = createSystemRelation({
       id: getSystemRelationId('annotates', noteId, verseEndpoint),
       type: 'annotates',
@@ -567,7 +572,7 @@ export const buildSystemRelationsForLinks = (links: Record<string, Link> = {}): 
       linkKey.split('/').filter(key => Boolean(parseVerseKey(key)))
     )
     if (verseKeys.length === 0) return relations
-    const verseEndpoint = createVerseEndpoint(verseKeys, verseKeys.join('/'))
+    const verseEndpoint = createVerseEndpoint(verseKeys, verseKeys.join('/'), link.version)
     const externalLinkEndpoint = createExternalLinkEndpoint(verseEndpoint, linkKey, link)
     const relation = createSystemRelation({
       id: getSystemRelationId('externalLink', linkKey, verseEndpoint),

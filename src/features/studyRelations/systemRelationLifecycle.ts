@@ -36,7 +36,7 @@ export const addExternalLinkSystemRelations = ({
   const nextRelations = { ...relations }
 
   groupVerseKeysByChapter(verseKeys).forEach(verseKeyGroup => {
-    const verseEndpoint = createVerseEndpoint(verseKeyGroup, verseKeyGroup.join('/'))
+    const verseEndpoint = createVerseEndpoint(verseKeyGroup, verseKeyGroup.join('/'), link.version)
     const externalLinkEndpoint = createExternalLinkEndpoint(verseEndpoint, linkKey, link)
     const relation = createSystemRelation({
       id: getSystemRelationId('externalLink', linkKey, verseEndpoint),

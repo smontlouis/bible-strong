@@ -14,7 +14,7 @@ import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
 import truncate from '~helpers/truncate'
 import formatVerseContent from '~helpers/formatVerseContent'
 import { getBook } from '~helpers/bibleBookCatalog'
-import useBibleVerses from '~helpers/useBibleVerses'
+import { useResolvedBibleVerses } from '~helpers/useBibleVerses'
 import { removeBreakLines } from '~helpers/utils'
 import useLanguage from '~helpers/useLanguage'
 import { getDateLocale } from '~helpers/languageUtils'
@@ -41,6 +41,7 @@ export type HighlightSettingsData = {
   color: string
   date: number
   tags: TagsObj
+  version?: string
 }
 
 type VerseComponentProps = Omit<HighlightSettingsData, 'stringIds'> & {
@@ -54,10 +55,11 @@ const VerseComponent = ({
   verseIds,
   stringIds,
   tags,
+  version: sourceVersion,
   setSettings,
 }: VerseComponentProps) => {
   const pushRouteOnce = usePushRouteOnce()
-  const verses = useBibleVerses(verseIds)
+  const { verses, version } = useResolvedBibleVerses(verseIds, sourceVersion)
   const { t } = useTranslation()
   const lang = useLanguage()
 
@@ -77,21 +79,19 @@ const VerseComponent = ({
 
   const highlightType = resolveHighlightType(color)
 
-  if (!verses.length) {
-    return null
-  }
-
-  const { title, content } = formatVerseContent(verses)
+  const { title } = formatVerseContent(verseIds)
+  const { content } = formatVerseContent(verses)
   const formattedDate = distanceInWords(Number(date), Date.now(), {
     locale: getDateLocale(lang),
   })
-  const { Livre, Chapitre, Verset } = verses[0]
+  const { Livre, Chapitre, Verset } = verseIds[0]
   const bibleViewParams = {
     contextDisplayMode: 'focused',
     book: JSON.stringify(getBook(Number(Livre))),
     chapter: String(Chapitre),
     verse: String(Verset),
-    focusVerses: JSON.stringify(verses.map(v => Number(v.Verset))),
+    focusVerses: JSON.stringify(verseIds.map(v => Number(v.Verset))),
+    ...(version && { version }),
   }
   const openBibleView = () => {
     pushRouteOnce({
@@ -125,6 +125,7 @@ const VerseComponent = ({
                   color,
                   date,
                   tags,
+                  version: sourceVersion,
                 })
               }
             >
@@ -133,7 +134,9 @@ const VerseComponent = ({
           )}
         </Box>
         <Paragraph scale={-2} medium marginBottom={15}>
-          {truncate(removeBreakLines(content), 200)}
+          {content
+            ? truncate(removeBreakLines(content), 200)
+            : t('bibleVerse.textUnavailableInstalled')}
         </Paragraph>
         <EntityChipList tags={tags} />
       </Container>

@@ -1,7 +1,12 @@
 // Mock react-native before other imports
 import type { Bookmark } from '~common/types'
 import userReducer, { UserState, HighlightsObj } from '../user'
-import { addHighlightAction, removeHighlight, changeHighlightColor } from '../user/highlights'
+import {
+  addHighlight,
+  addHighlightAction,
+  removeHighlight,
+  changeHighlightColor,
+} from '../user/highlights'
 
 jest.mock('react-native', () => ({
   Appearance: {
@@ -187,6 +192,35 @@ describe('Highlights Reducer', () => {
       }
       const newState = userReducer(state, addHighlightAction(selectedVerses))
       expect(newState.bible.highlights['1-1-1'].color).toBe('blue')
+    })
+  })
+
+  describe('addHighlight', () => {
+    it('stores the source Bible version on every new highlight', () => {
+      const dispatch = jest.fn()
+      const thunk = addHighlight({
+        color: 'yellow',
+        selectedVerses: { '67-1-1': true },
+        version: 'VUL',
+      })
+
+      thunk(dispatch, () => ({ user: initialState }) as never)
+
+      expect(dispatch).toHaveBeenCalledWith(
+        addHighlightAction({
+          '67-1-1': expect.objectContaining({ color: 'yellow', version: 'VUL' }),
+        })
+      )
+    })
+
+    it('keeps working with legacy calls that have no source version', () => {
+      const dispatch = jest.fn()
+      const thunk = addHighlight({
+        color: 'yellow',
+        selectedVerses: { '1-1-1': true },
+      })
+
+      expect(() => thunk(dispatch, () => ({ user: initialState }) as never)).not.toThrow()
     })
   })
 

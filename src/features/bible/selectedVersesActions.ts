@@ -56,19 +56,24 @@ export const getSelectedVersesFocusAction = (
 ): SelectedVersesFocusAction =>
   selectedVersesIncludeFocus(selectedVerses, focusVerses) ? 'clear-focus' : 'pin-selected'
 
-export const getSelectedVersesLinkParams = (selectedVerses: VerseIds): { verseKeys: string } => ({
+export const getSelectedVersesLinkParams = (
+  selectedVerses: VerseIds,
+  version?: string
+): { verseKeys: string; version?: string } => ({
   verseKeys: getSelectedVerseKeys(selectedVerses).join(','),
+  ...(version && { version }),
 })
 
 export const getSelectedVersesStudyPayload = (selectedVerses: VerseIds): string[] =>
   getSelectedVerseKeys(selectedVerses)
 
 export const getSelectedVersesRelationEndpoint = (
-  selectedVerses: VerseIds
+  selectedVerses: VerseIds,
+  version?: string
 ): RelationEndpoint | null => {
   const verseKeys = getSelectedVerseKeys(selectedVerses)
   if (!verseKeys.length) return null
-  return createVerseEndpoint(verseKeys)
+  return createVerseEndpoint(verseKeys, undefined, version)
 }
 
 export const getSelectedVersesBookmarkLocation = getFirstSelectedVerseLocation

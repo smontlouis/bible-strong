@@ -498,7 +498,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   ])
 
   const addHiglightAndOpenQuickTags = (color: string) => {
-    dispatch(addHighlight({ color, selectedVerses }))
+    dispatch(addHighlight({ color, selectedVerses, version }))
   }
 
   const addTag = () => {
@@ -523,11 +523,11 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
 
   const toggleCreateNote = () => {
     const verseKeys = getSelectedVerseKeys(selectedVerses)
-    openNote({ verseKeys })
+    openNote({ verseKeys, version })
   }
 
   const toggleCreateLink = () => {
-    const params = getSelectedVersesLinkParams(selectedVerses)
+    const params = getSelectedVersesLinkParams(selectedVerses, version)
     pushRouteOnce({
       pathname: '/link',
       params,
@@ -535,7 +535,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   }
 
   const toggleCreateStudyRelation = () => {
-    const endpoint = getSelectedVersesRelationEndpoint(selectedVerses)
+    const endpoint = getSelectedVersesRelationEndpoint(selectedVerses, version)
     if (!endpoint) return
     setCreateRelationSourceEndpoint(endpoint)
     createRelationModal.open()
@@ -558,7 +558,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
 
     if (!verseIds.length) return
 
-    openEntityRelations(createVerseEndpoint(verseIds))
+    openEntityRelations(createVerseEndpoint(verseIds, undefined, version))
   }
 
   const openLink = (linkId: string) => {
@@ -566,7 +566,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   }
 
   const openBibleNote = (noteId: string, verseIds?: string[]) => {
-    openNote({ noteId, verseKeys: verseIds })
+    openNote({ noteId, verseKeys: verseIds, version })
   }
 
   const openResourceForVerse = (res: BibleResource, ver: string) => {
