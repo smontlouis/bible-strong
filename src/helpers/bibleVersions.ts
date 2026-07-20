@@ -409,6 +409,14 @@ export const versions: Record<string, Version> = {
     hasRedWords: true,
     hasPericope: true,
   },
+  NASB1995: {
+    id: 'NASB1995',
+    name: 'New American Standard Bible 1995',
+    c: '© 1960, 1962, 1963, 1968, 1971, 1972, 1973, 1975, 1977, 1995 The Lockman Foundation',
+    type: 'en',
+    canonId: 'protestant-66',
+    versificationId: 'bible-strong-default',
+  },
   NET: {
     id: 'NET',
     name: 'New English Translation',
@@ -534,6 +542,7 @@ export const versionsBySections: VersionsBySection[] = Object.values(versions).r
       case 'NIV':
       case 'ESV':
       case 'AMP':
+      case 'NASB1995':
       case 'NASB2020':
       case 'EASY':
       case 'TLV':
@@ -579,6 +588,7 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(versions
       case 'NKJV':
       case 'NIV':
       case 'AMP':
+      case 'NASB1995':
       case 'NASB2020':
       case 'EASY':
       case 'TLV':

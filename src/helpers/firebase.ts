@@ -150,6 +150,7 @@ export const biblesRef: {
   TR1894: cdnUrl('bibles/bible-TR1894.json'),
   AMP: cdnUrl('bibles/bible-amp.json'),
   DEL: cdnUrl('bibles/bible-del.json'),
+  NASB1995: cdnUrl('bibles/bible-nasb1995.json'),
   NASB2020: cdnUrl('bibles/bible-nasb2020.json'),
   EASY: cdnUrl('bibles/bible-easy.json'),
   TLV: cdnUrl('bibles/bible-tlv.json'),
