@@ -9,7 +9,7 @@ import generateUUID from '~helpers/generateUUID'
 import { StrongReference, StudyNavigateBibleType, VerseIds } from '~common/types'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
 import { storage } from '~helpers/storage'
-import { versions } from '~helpers/bibleVersions'
+import { getBibleVersionCanonId, versions } from '~helpers/bibleVersions'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import i18n, { getLanguage } from '~i18n'
 import { clampTabIndex, updateTabGroupActiveIndex, updateTabGroupTabs } from './tabWorkspace'
@@ -945,7 +945,8 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
         const target = getPreviousAvailableChapterLocation(
           currentBook,
           draft.data.selectedChapter,
-          coverage
+          coverage,
+          getBibleVersionCanonId(draft.data.selectedVersion)
         )
         if (!target) return
 
@@ -971,7 +972,8 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
         const target = getNextAvailableChapterLocation(
           currentBook,
           draft.data.selectedChapter,
-          coverage
+          coverage,
+          getBibleVersionCanonId(draft.data.selectedVersion)
         )
         if (!target) return
 

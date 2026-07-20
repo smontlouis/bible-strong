@@ -26,6 +26,7 @@ import { sections } from '~assets/bible_versions/books-desc'
 import { useColorInfo } from '~helpers/useColorName'
 import Container from '~common/ui/Container'
 import { getAnnotationGroupVerseKey } from '~features/entityListQuery/wordAnnotationsQuery'
+import { isBookInTestament } from '~helpers/bibleBookCatalog'
 
 const TabContainer = styled.View(({ theme }) => ({
   flexDirection: 'row',
@@ -168,8 +169,16 @@ const WordAnnotationsScreen = () => {
       if (queryState.version && annotation.version !== queryState.version) return false
       const booksInRanges = annotation.ranges.map(range => Number(range.verseKey.split('-')[0]))
       if (queryState.book && !booksInRanges.includes(queryState.book)) return false
-      if (queryState.testament === 'old' && !booksInRanges.some(book => book <= 39)) return false
-      if (queryState.testament === 'new' && !booksInRanges.some(book => book >= 40)) return false
+      if (
+        queryState.testament === 'old' &&
+        !booksInRanges.some(book => isBookInTestament(book, 'old'))
+      )
+        return false
+      if (
+        queryState.testament === 'new' &&
+        !booksInRanges.some(book => isBookInTestament(book, 'new'))
+      )
+        return false
       return true
     })
     return filtered.sort((left, right) => {
@@ -489,7 +498,8 @@ const WordAnnotationsScreen = () => {
             testament,
             book:
               state.book &&
-              ((testament === 'old' && state.book > 39) || (testament === 'new' && state.book < 40))
+              ((testament === 'old' && !isBookInTestament(state.book, 'old')) ||
+                (testament === 'new' && !isBookInTestament(state.book, 'new')))
                 ? null
                 : state.book,
           }))
@@ -506,7 +516,7 @@ const WordAnnotationsScreen = () => {
             .filter(
               book =>
                 queryState.testament === 'all' ||
-                (queryState.testament === 'old' ? book.Numero <= 39 : book.Numero >= 40)
+                isBookInTestament(book.Numero, queryState.testament)
             )
             .map(book => ({ value: String(book.Numero), label: book.Nom })),
         ]}
@@ -515,7 +525,11 @@ const WordAnnotationsScreen = () => {
           setQueryState(state => ({
             ...state,
             book: number,
-            testament: number ? (number <= 39 ? 'old' : 'new') : state.testament,
+            testament: number
+              ? isBookInTestament(number, 'new')
+                ? 'new'
+                : 'old'
+              : state.testament,
           }))
           bookModalRef.current?.dismiss()
         }}

@@ -8,7 +8,7 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { RootState } from '~redux/modules/reducer'
 import { deleteNote } from '~redux/modules/user'
-import books from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 type Props = {
@@ -92,7 +92,7 @@ const NotesSettingsModal = ({ ref, noteId, onClosed }: Props) => {
         pathname: '/bible-view',
         params: {
           contextDisplayMode: 'focused',
-          book: JSON.stringify(books[Number(Livre) - 1]),
+          book: JSON.stringify(getBook(Number(Livre))),
           chapter: String(Chapitre),
           verse: String(Verset),
           focusVerses: JSON.stringify([Number(Verset)]),

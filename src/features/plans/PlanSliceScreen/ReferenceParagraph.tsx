@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from '@emotion/native'
 
-import booksDesc from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
 import Paragraph from '~common/ui/Paragraph'
 import { BcvLanguage, BibleReferenceTarget, parseInlineBibleReferences } from '~helpers/bcvParser'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
@@ -15,7 +15,7 @@ interface ReferenceParagraphProps extends Omit<ParagraphProps, 'children'> {
 
 const getBibleViewParams = (target: BibleReferenceTarget) => ({
   contextDisplayMode: 'focused',
-  book: JSON.stringify(booksDesc[target.book - 1]),
+  book: JSON.stringify(getBook(target.book)),
   chapter: String(target.chapter),
   verse: String(target.verse),
   ...(target.focusVerses ? { focusVerses: JSON.stringify(target.focusVerses) } : {}),

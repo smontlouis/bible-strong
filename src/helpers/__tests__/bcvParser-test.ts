@@ -21,6 +21,8 @@ jest.mock('bible-passage-reference-parser/esm/bcv_parser.js', () => ({
             Acts: 44,
             John: 43,
             '1Cor': 46,
+            Tob: 75,
+            PrMan: 84,
           },
           chapters: {},
         },
@@ -161,6 +163,20 @@ describe('bcvParser', () => {
         focusVerses: undefined,
         osis: 'Gen.1.31-Gen.2.3',
       })
+    })
+
+    it('maps deuterocanonical OSIS codes to stable app book ids', () => {
+      expect(osisToBibleReferenceTarget('Tob.2.3')).toEqual({
+        book: 67,
+        chapter: 2,
+        verse: 3,
+        focusVerses: [3],
+        osis: 'Tob.2.3',
+      })
+    })
+
+    it('rejects apocryphal OSIS codes outside the supported Clementine canon', () => {
+      expect(osisToBibleReferenceTarget('PrMan.1.1')).toBeUndefined()
     })
   })
 })

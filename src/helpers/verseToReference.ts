@@ -1,4 +1,4 @@
-import books from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
 import i18n from '~i18n'
 
 /** Verse ID format: "book-chapter-verse" (e.g., "1-1-1") */
@@ -90,10 +90,13 @@ const verseToReference = (v: VerseInput, options: VerseToReferenceOptions = {}):
   // Handle BookChapterInput
   if (isBookChapterInput(v)) {
     const { bookNum, chapterNum, verses: inputVerses } = v
-    const bookName = books[bookNum - 1].Nom
+    const bookName = getBook(bookNum)?.Nom
+    const translatedBookName = bookName
+      ? i18n.t(bookName)
+      : i18n.t('Livre {{bookNumber}}', { bookNumber: bookNum })
     // If no verses, return just book and chapter
     if (!inputVerses || !inputVerses.length) {
-      return `${i18n.t(bookName)} ${chapterNum}`
+      return `${translatedBookName} ${chapterNum}`
     }
     verses = inputVerses.map(verse => `${bookNum}-${chapterNum}-${verse}`)
   }
@@ -136,7 +139,7 @@ const verseToReference = (v: VerseInput, options: VerseToReferenceOptions = {}):
 
   return Object.values(groupedByChapter)
     .map(group => {
-      const bookName = books[group.book - 1]?.Nom
+      const bookName = getBook(group.book)?.Nom
       const translatedBookName = bookName
         ? i18n.t(bookName)
         : i18n.t('Livre {{bookNumber}}', { bookNumber: group.book })

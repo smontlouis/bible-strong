@@ -1,5 +1,6 @@
 import { SQLStrongTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError, { DatabaseError } from '~helpers/catchDatabaseError'
+import { getStrongVerseTable } from './strongBookTables'
 
 export interface FoundVerseRow {
   Livre: number
@@ -11,9 +12,11 @@ export interface FoundVerseRow {
 const loadFoundVersesByBook = (
   book: number,
   reference: string
-): Promise<FoundVerseRow[] | DatabaseError> =>
-  catchDatabaseError(async () => {
-    const part = book > 39 ? 'LSGSNT2' : 'LSGSAT2'
+): Promise<FoundVerseRow[] | DatabaseError> => {
+  const part = getStrongVerseTable(book)
+  if (!part) return Promise.resolve([])
+
+  return catchDatabaseError(async () => {
     const result = await SQLStrongTransaction<FoundVerseRow>(
       `SELECT *
       FROM ${part}
@@ -31,5 +34,6 @@ const loadFoundVersesByBook = (
     )
     return result
   })
+}
 
 export default loadFoundVersesByBook

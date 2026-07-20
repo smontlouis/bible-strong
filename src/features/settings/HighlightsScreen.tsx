@@ -39,6 +39,7 @@ import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import ChoiceFilterModal from '~common/ChoiceFilterModal'
 import { highlightsListQueryAtom } from '~state/entityListFilters'
 import { sections } from '~assets/bible_versions/books-desc'
+import { isBookInTestament } from '~helpers/bibleBookCatalog'
 
 export type GroupedHighlightData = {
   date: number
@@ -193,9 +194,9 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
     if (filters.book) {
       highlights = highlights.filter(([id]) => Number(id.split('-')[0]) === filters.book)
     } else if (filters.testament === 'old') {
-      highlights = highlights.filter(([id]) => Number(id.split('-')[0]) <= 39)
+      highlights = highlights.filter(([id]) => isBookInTestament(Number(id.split('-')[0]), 'old'))
     } else if (filters.testament === 'new') {
-      highlights = highlights.filter(([id]) => Number(id.split('-')[0]) >= 40)
+      highlights = highlights.filter(([id]) => isBookInTestament(Number(id.split('-')[0]), 'new'))
     }
 
     return highlights
@@ -220,11 +221,11 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
       )
     } else if (filters.testament === 'old') {
       filteredAnnotations = filteredAnnotations.filter(a =>
-        a.verseKeys.some(verseKey => Number(verseKey.split('-')[0]) <= 39)
+        a.verseKeys.some(verseKey => isBookInTestament(Number(verseKey.split('-')[0]), 'old'))
       )
     } else if (filters.testament === 'new') {
       filteredAnnotations = filteredAnnotations.filter(a =>
-        a.verseKeys.some(verseKey => Number(verseKey.split('-')[0]) >= 40)
+        a.verseKeys.some(verseKey => isBookInTestament(Number(verseKey.split('-')[0]), 'new'))
       )
     }
 
@@ -398,8 +399,8 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
               testament,
               book:
                 state.book &&
-                ((testament === 'old' && state.book > 39) ||
-                  (testament === 'new' && state.book < 40))
+                ((testament === 'old' && !isBookInTestament(state.book, 'old')) ||
+                  (testament === 'new' && !isBookInTestament(state.book, 'new')))
                   ? undefined
                   : state.book,
             }))
@@ -417,7 +418,7 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
                 book =>
                   !filters.testament ||
                   filters.testament === 'all' ||
-                  (filters.testament === 'old' ? book.Numero <= 39 : book.Numero >= 40)
+                  isBookInTestament(book.Numero, filters.testament)
               )
               .map(book => ({ value: String(book.Numero), label: book.Nom })),
           ]}
@@ -426,7 +427,11 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
             setPersistedFilters(state => ({
               ...state,
               book: number,
-              testament: number ? (number <= 39 ? 'old' : 'new') : state.testament,
+              testament: number
+                ? isBookInTestament(number, 'new')
+                  ? 'new'
+                  : 'old'
+                : state.testament,
             }))
             bookModalRef.current?.dismiss()
           }}

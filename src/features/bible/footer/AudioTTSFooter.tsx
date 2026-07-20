@@ -12,7 +12,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import * as Sentry from '@sentry/react-native'
-import { Version, getVersions } from '~helpers/bibleVersions'
+import { Version, getBibleVersionCanonId, getVersions } from '~helpers/bibleVersions'
 import {
   getNextAvailableChapterLocation,
   getPreviousAvailableChapterLocation,
@@ -315,8 +315,9 @@ const AudioTTSFooter = ({
   bibleAtom,
   coverage,
 }: AudioTTSFooterProps) => {
-  const hasPreviousChapter = !!getPreviousAvailableChapterLocation(book, chapter, coverage)
-  const hasNextChapter = !!getNextAvailableChapterLocation(book, chapter, coverage)
+  const canonId = getBibleVersionCanonId(version)
+  const hasPreviousChapter = !!getPreviousAvailableChapterLocation(book, chapter, coverage, canonId)
+  const hasNextChapter = !!getNextAvailableChapterLocation(book, chapter, coverage, canonId)
 
   const {
     error,

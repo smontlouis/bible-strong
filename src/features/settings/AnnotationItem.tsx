@@ -14,7 +14,7 @@ import { getDateLocale } from '~helpers/languageUtils'
 import formatVerseContent from '~helpers/formatVerseContent'
 import { useResolvedColor } from '~helpers/useHighlightColors'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import books from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
 import type { GroupedWordAnnotation } from '~redux/selectors/bible'
 import type { TagsObj } from '~common/types'
 import { Chip } from '~common/ui/NewChip'
@@ -50,7 +50,7 @@ const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
   })
   const bibleViewParams = {
     contextDisplayMode: 'focused',
-    book: JSON.stringify(books[Livre - 1]),
+    book: JSON.stringify(getBook(Livre)),
     chapter: String(Chapitre),
     verse: String(Verset),
     version: item.version,

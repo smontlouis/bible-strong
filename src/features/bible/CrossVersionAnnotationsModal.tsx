@@ -7,7 +7,7 @@ import { Sheet } from '~common/sheet'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import books from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
 import type { CrossVersionAnnotation } from '~redux/selectors/bible'
 import { VersionCode } from '~state/tabs'
 import { Chip } from '~common/ui/NewChip'
@@ -47,7 +47,7 @@ interface CrossVersionAnnotationsModalProps {
 }
 
 const getBookName = (bookNumber: number): string => {
-  const book = books.find(b => b.Numero === bookNumber)
+  const book = getBook(bookNumber)
   if (book) return book.Nom
   return `Livre ${bookNumber}`
 }
@@ -97,7 +97,7 @@ const CrossVersionAnnotationsModal = ({
       pathname: '/bible-view',
       params: {
         contextDisplayMode: 'focused',
-        book: JSON.stringify(books[bookNumber - 1]),
+        book: JSON.stringify(getBook(bookNumber)),
         chapter: String(chapter),
         verse: String(verse),
         version,

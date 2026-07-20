@@ -635,9 +635,9 @@ function buildSearchFilter(ftsQuery: string, options?: SearchOptions) {
     existsParams.push(options.book)
   }
   if (options?.section === 'ot') {
-    existsConditions.push('vf.book <= 39')
+    existsConditions.push('(vf.book BETWEEN 1 AND 39 OR vf.book BETWEEN 67 AND 73)')
   } else if (options?.section === 'nt') {
-    existsConditions.push('vf.book > 39')
+    existsConditions.push('vf.book BETWEEN 40 AND 66')
   }
 
   if (existsConditions.length > 0) {

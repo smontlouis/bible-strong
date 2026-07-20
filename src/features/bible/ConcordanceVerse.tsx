@@ -2,7 +2,7 @@ import React from 'react'
 import styled from '@emotion/native'
 
 import Text from '~common/ui/Text'
-import books from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
 
 import Loading from '~common/Loading'
 import verseToStrong from '~helpers/verseToStrong'
@@ -90,7 +90,11 @@ class ConcordanceVerse extends React.Component<Props, ConcordanceVerseState> {
     return (
       <Container onPress={() => onOpenVerse(verse)}>
         <Text title fontSize={16} marginBottom={5}>
-          {this.props.t(books[bookNumber - 1].Nom)} {chapterNumber}:{verseNumber}
+          {this.props.t(
+            getBook(bookNumber)?.Nom || 'Livre {{bookNumber}}',
+            getBook(bookNumber) ? undefined : { bookNumber }
+          )}{' '}
+          {chapterNumber}:{verseNumber}
         </Text>
         <VerseText>{this.state.formattedTexte}</VerseText>
       </Container>

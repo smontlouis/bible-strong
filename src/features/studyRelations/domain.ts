@@ -1,4 +1,4 @@
-import books from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
 import type { Link, Note, Study } from '~redux/modules/user'
 import type { WordAnnotationsObj } from '~redux/modules/user/wordAnnotations'
 import verseToReference from '~helpers/verseToReference'
@@ -827,4 +827,4 @@ export const getRelationDisplayModel = (
 }
 
 export const getBookName = (bookNumber: number): string =>
-  books[bookNumber - 1]?.Nom || i18n.t('Livre {{bookNumber}}', { bookNumber })
+  getBook(bookNumber)?.Nom || i18n.t('Livre {{bookNumber}}', { bookNumber })

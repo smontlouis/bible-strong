@@ -4,7 +4,7 @@ import React from 'react'
 import { FlatList, TouchableOpacity } from 'react-native'
 
 import { useLocalSearchParams } from 'expo-router'
-import books from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
@@ -79,7 +79,7 @@ const ConcordanceScreen = () => {
               }}
             >
               <ListItem row alignItems="center" height={50}>
-                <Text fontSize={16}>{books[item.Livre - 1].Nom}</Text>
+                <Text fontSize={16}>{getBook(item.Livre)?.Nom || `Livre ${item.Livre}`}</Text>
                 <OccurencesNumber>
                   <Text>{item.versesCountByBook}</Text>
                 </OccurencesNumber>

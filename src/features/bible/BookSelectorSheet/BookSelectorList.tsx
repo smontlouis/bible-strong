@@ -9,6 +9,7 @@ import { SharedValue } from 'react-native-reanimated'
 import { BibleTab } from 'src/state/tabs'
 import { BookShortItem } from './BookShortItem'
 import ChapterGrid from './ChapterGrid'
+import { getBookCorpus } from '~helpers/bibleBookCatalog'
 
 interface BookSelectorListProps {
   initialScrollIndex: number
@@ -87,7 +88,7 @@ export const BookSelectorList = ({
       >
         {data.map(book => (
           <BookShortItem
-            isNT={book.Numero >= 40}
+            isNT={getBookCorpus(book.Numero) === 'new'}
             key={book.Numero}
             onChange={onGridBookSelect}
             book={book}

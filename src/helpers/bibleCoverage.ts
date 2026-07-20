@@ -1,18 +1,21 @@
-import books, { Book } from '~assets/bible_versions/books-desc'
+import { Book } from '~assets/bible_versions/books-desc'
+import { type BibleCanonId, getBook, getBooksForCanon } from '~helpers/bibleBookCatalog'
 import { getChapterVerseCount, type BibleVersionCoverage } from '~helpers/biblesDb'
 
 export const getCanonicalChapters = (book: Book) =>
   Array.from({ length: book.Chapitres }, (_, i) => i + 1)
 
-export const getAvailableBookNumbers = (coverage?: BibleVersionCoverage) =>
-  coverage?.books.length ? coverage.books : books.map(book => book.Numero)
+export const getAvailableBookNumbers = (
+  coverage?: BibleVersionCoverage,
+  canonId: BibleCanonId = 'protestant-66'
+) => getBooksForCanon(canonId, coverage?.books).map(book => book.Numero)
 
 export const getAvailableChapters = (book: Book, coverage?: BibleVersionCoverage) => {
   const chapters = coverage?.chaptersByBook[book.Numero]
   return chapters?.length ? chapters : getCanonicalChapters(book)
 }
 
-export const findBook = (bookNumber: number) => books.find(book => book.Numero === bookNumber)
+export const findBook = getBook
 
 export const getChapterVerseCountFromCoverage = (
   coverage: BibleVersionCoverage | undefined,
@@ -23,7 +26,8 @@ export const getChapterVerseCountFromCoverage = (
 export const getPreviousAvailableChapterLocation = (
   book: Book,
   chapter: number,
-  coverage?: BibleVersionCoverage
+  coverage?: BibleVersionCoverage,
+  canonId: BibleCanonId = 'protestant-66'
 ) => {
   const currentChapters = getAvailableChapters(book, coverage)
   const previousChapter = [...currentChapters].reverse().find(item => item < chapter)
@@ -32,7 +36,7 @@ export const getPreviousAvailableChapterLocation = (
     return { book, chapter: previousChapter }
   }
 
-  const availableBookNumbers = getAvailableBookNumbers(coverage)
+  const availableBookNumbers = getAvailableBookNumbers(coverage, canonId)
   const currentBookIndex = availableBookNumbers.indexOf(book.Numero)
   if (currentBookIndex <= 0) return null
 
@@ -49,7 +53,8 @@ export const getPreviousAvailableChapterLocation = (
 export const getNextAvailableChapterLocation = (
   book: Book,
   chapter: number,
-  coverage?: BibleVersionCoverage
+  coverage?: BibleVersionCoverage,
+  canonId: BibleCanonId = 'protestant-66'
 ) => {
   const currentChapters = getAvailableChapters(book, coverage)
   const nextChapter = currentChapters.find(item => item > chapter)
@@ -58,7 +63,7 @@ export const getNextAvailableChapterLocation = (
     return { book, chapter: nextChapter }
   }
 
-  const availableBookNumbers = getAvailableBookNumbers(coverage)
+  const availableBookNumbers = getAvailableBookNumbers(coverage, canonId)
   const currentBookIndex = availableBookNumbers.indexOf(book.Numero)
   if (currentBookIndex === -1 || currentBookIndex >= availableBookNumbers.length - 1) return null
 

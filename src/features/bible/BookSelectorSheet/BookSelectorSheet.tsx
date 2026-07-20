@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { DeviceEventEmitter, FlatList } from 'react-native'
 import { useSharedValue } from 'react-native-reanimated'
 import { BibleTab, BibleTabActions } from 'src/state/tabs'
-import books, { Book } from '~assets/bible_versions/books-desc'
+import { Book } from '~assets/bible_versions/books-desc'
 import Box from '~common/ui/Box'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
@@ -22,6 +22,8 @@ import { useQuery } from '~helpers/react-query-lite'
 import { getBibleVersionCoverage } from '~helpers/biblesDb'
 import { useTheme } from '@emotion/react'
 import { applyBookChapterSelection } from './bookSelectorSelection'
+import { getBooksForCanon } from '~helpers/bibleBookCatalog'
+import { getBibleVersionCanonId } from '~helpers/bibleVersions'
 interface BookSelectorSheetProps {
   selectedBookNum?: number
   sheetRef: React.RefObject<SheetRef | null>
@@ -52,6 +54,7 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
   const openInNewTab = useOpenInNewTab()
   const verseSheetRef = useRef<SheetRef>(null)
   const selectedVersion = bookSelectorData?.selectedVersion
+  const canonId = getBibleVersionCanonId(selectedVersion || '')
   const theme = useTheme()
 
   const { data: coverageData } = useQuery({
@@ -115,15 +118,12 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
   }, [bookSelectorActions, openInNewTab, t, bookSelectorData, bookSelectorHasVerses])
 
   const data = useMemo(() => {
-    const booksArray = Object.values(books).filter(book => {
-      if (!coverageData?.books?.length) return true
-      return coverageData.books.includes(book.Numero)
-    })
+    const booksArray = getBooksForCanon(canonId, coverageData?.books)
     if (isAlphabetical) {
       return [...booksArray].sort((a, b) => a.Nom.localeCompare(b.Nom))
     }
     return booksArray
-  }, [coverageData?.books, isAlphabetical])
+  }, [canonId, coverageData?.books, isAlphabetical])
 
   const initialScrollIndex = data.findIndex(
     book => book.Numero === (bookSelectorData?.selectedBook.Numero || 1)

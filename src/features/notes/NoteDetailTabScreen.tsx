@@ -14,7 +14,7 @@ import {
 } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
-import books from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
 import EntityChipList from '~common/EntityChipList'
 import Header from '~common/Header'
 import { VerseIds } from '~common/types'
@@ -324,7 +324,7 @@ ${currentNote.description}
       pathname: '/bible-view',
       params: {
         contextDisplayMode: 'focused',
-        book: JSON.stringify(books[Number(Livre) - 1]),
+        book: JSON.stringify(getBook(Number(Livre))),
         chapter: String(Number(Chapitre)),
         verse: String(Number(Verset)),
         focusVerses: JSON.stringify([Number(Verset)]),

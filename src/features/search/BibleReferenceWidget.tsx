@@ -1,6 +1,6 @@
 import { TouchableOpacity } from 'react-native'
 
-import booksDesc from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
 import Box, { HStack } from '~common/ui/Box'
 import { Chip } from '~common/ui/NewChip'
 import Paragraph from '~common/ui/Paragraph'
@@ -92,7 +92,9 @@ const ReferenceItem = ({ segment }: { segment: ParsedSegment }) => {
   const verses = useBibleVerses(verseIds)
 
   const title = segment.isWholeChapter
-    ? `${i18n.t(booksDesc[segment.book - 1]?.Nom)} ${segment.chapter}`
+    ? `${i18n.t(getBook(segment.book)?.Nom || 'Livre {{bookNumber}}', {
+        bookNumber: segment.book,
+      })} ${segment.chapter}`
     : formatVerseContent(verseIds).title
   const content = verses.map(v => v.Texte).join(' ')
 
@@ -104,7 +106,7 @@ const ReferenceItem = ({ segment }: { segment: ParsedSegment }) => {
           pathname: '/bible-view',
           params: {
             contextDisplayMode: 'focused',
-            book: JSON.stringify(booksDesc[segment.book - 1]),
+            book: JSON.stringify(getBook(segment.book)),
             chapter: String(segment.chapter),
             verse: String(segment.startVerse),
             ...(segment.isWholeChapter

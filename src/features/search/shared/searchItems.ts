@@ -1,4 +1,4 @@
-import booksDesc from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
 import { parseBibleReference } from '~features/search/BibleReferenceWidget'
 import type { SearchResult } from '~helpers/biblesDb'
 import { deltaToPlainText } from '~helpers/deltaToPlainText'
@@ -187,7 +187,9 @@ export const getReferenceSearchItems = (
       Verset: startVerse + i,
     }))
     const title = isWholeChapter
-      ? `${i18n.t(booksDesc[segment.book - 1]?.Nom)} ${segment.chapter}`
+      ? `${i18n.t(getBook(segment.book)?.Nom || 'Livre {{bookNumber}}', {
+          bookNumber: segment.book,
+        })} ${segment.chapter}`
       : formatVerseContent(verseIds).title
 
     return {

@@ -43,7 +43,8 @@ import { createStrongEndpoint } from '~features/studyRelations/endpoints'
 import type { RelationEndpoint } from '~redux/modules/user'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import booksDesc from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
+import { getStrongReferenceFamily } from '~helpers/strongBookTables'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 
 const LinkBox = Box.withComponent(Link)
@@ -96,7 +97,7 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
 
   const selectStrongTags = makeStrongTagsSelector()
   const code = strongReferenceParam?.Code || reference || ''
-  const isGreek = (book || 1) > 39
+  const isGreek = getStrongReferenceFamily(book || 1) === 'greek'
   const tags = useSelector((state: RootState) => selectStrongTags(state, code, isGreek))
   const strongEndpoint: Extract<RelationEndpoint, { type: 'strong' }> | null = strongReference
     ? createStrongEndpoint({
@@ -228,7 +229,7 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
       pathname: '/bible-view',
       params: {
         contextDisplayMode: 'focused',
-        book: JSON.stringify(booksDesc[bookNumber - 1]),
+        book: JSON.stringify(getBook(bookNumber)),
         chapter: String(verse.Chapitre),
         verse: String(verseNumber),
         focusVerses: JSON.stringify([verseNumber]),

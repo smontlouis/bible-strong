@@ -4,7 +4,7 @@ import React from 'react'
 
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { Trans, useTranslation } from 'react-i18next'
-import books from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Link from '~common/Link'
@@ -88,7 +88,7 @@ const HistoryItem = ({ item }: { item: HistoryItemType }) => {
         route="BibleView"
         params={{
           contextDisplayMode: 'focused',
-          book: books[bookNumber - 1],
+          book: getBook(bookNumber) || getBook(1)!,
           chapter: chapterNumber,
           verse: verseNumber,
           version: version as VersionCode,

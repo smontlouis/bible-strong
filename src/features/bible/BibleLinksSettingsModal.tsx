@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useSetAtom } from 'jotai/react'
 import { ActionSheetItem } from '~common/ActionMenu'
 import { deleteLink } from '~redux/modules/user'
-import books from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
 import { unifiedTagsModalAtom } from '../../state/app'
 import { RootState } from '~redux/modules/reducer'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
@@ -64,7 +64,7 @@ const LinksSettingsModal = ({ ref, linkId, onClosed, title, onEditRelations }: P
         pathname: '/bible-view',
         params: {
           contextDisplayMode: 'focused',
-          book: JSON.stringify(books[Number(Livre) - 1]),
+          book: JSON.stringify(getBook(Number(Livre))),
           chapter: String(Chapitre),
           verse: String(Verset),
           focusVerses: JSON.stringify([Number(Verset)]),

@@ -13,7 +13,7 @@ import Paragraph from '~common/ui/Paragraph'
 import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
 import truncate from '~helpers/truncate'
 import formatVerseContent from '~helpers/formatVerseContent'
-import books from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
 import useBibleVerses from '~helpers/useBibleVerses'
 import { removeBreakLines } from '~helpers/utils'
 import useLanguage from '~helpers/useLanguage'
@@ -88,7 +88,7 @@ const VerseComponent = ({
   const { Livre, Chapitre, Verset } = verses[0]
   const bibleViewParams = {
     contextDisplayMode: 'focused',
-    book: JSON.stringify(books[Number(Livre) - 1]),
+    book: JSON.stringify(getBook(Number(Livre))),
     chapter: String(Chapitre),
     verse: String(Verset),
     focusVerses: JSON.stringify(verses.map(v => Number(v.Verset))),

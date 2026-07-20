@@ -1,5 +1,6 @@
 import { SQLStrongTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError, { DatabaseError } from '~helpers/catchDatabaseError'
+import { getStrongVerseTable } from './strongBookTables'
 
 export interface VersesCountByBookRow {
   versesCountByBook: number
@@ -9,9 +10,11 @@ export interface VersesCountByBookRow {
 const loadStrongVersesCountByBook = (
   book: number,
   reference: string
-): Promise<VersesCountByBookRow[] | DatabaseError> =>
-  catchDatabaseError(async () => {
-    const part = book > 39 ? 'LSGSNT2' : 'LSGSAT2'
+): Promise<VersesCountByBookRow[] | DatabaseError> => {
+  const part = getStrongVerseTable(book)
+  if (!part) return Promise.resolve([])
+
+  return catchDatabaseError(async () => {
     const result = await SQLStrongTransaction<VersesCountByBookRow>(
       `SELECT count(*) as versesCountByBook, Livre
       FROM ${part}
@@ -30,5 +33,6 @@ const loadStrongVersesCountByBook = (
     )
     return result
   })
+}
 
 export default loadStrongVersesCountByBook

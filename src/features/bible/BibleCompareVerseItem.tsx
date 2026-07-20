@@ -8,7 +8,7 @@ import Link from '~common/Link'
 import Text from '~common/ui/Text'
 import { getIfVersionNeedsDownload, isStrongVersion } from '~helpers/bibleVersions'
 import { removeBreakLines } from '~helpers/utils'
-import books from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
 import type { VerseIds } from '~common/types'
 import type { VersionCode } from '~state/tabs'
 
@@ -78,7 +78,7 @@ class CompareVerseItem extends React.Component<CompareVerseItemProps, CompareVer
         route="BibleView"
         params={{
           contextDisplayMode: 'focused',
-          book: books[book - 1],
+          book: getBook(book) || getBook(1)!,
           chapter,
           verse,
           version: versionId,

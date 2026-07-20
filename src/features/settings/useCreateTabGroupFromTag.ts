@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useSetAtom } from 'jotai/react'
 import { toast } from '~helpers/toast'
-import books from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
 import { Tag } from '~common/types'
 import generateUUID from '~helpers/generateUUID'
 import formatVerseContent from '~helpers/formatVerseContent'
@@ -110,7 +110,7 @@ export const useCreateTabGroupFromTag = () => {
           type: 'bible',
           data: {
             ...getDefaultBibleTab().data,
-            selectedBook: books[livre - 1],
+            selectedBook: getBook(livre) || getBook(1)!,
             selectedChapter: chapitre,
             selectedVerse: verset,
             focusVerses: h.verseIds.map(v => Number(v.Verset)),
@@ -205,7 +205,7 @@ export const useCreateTabGroupFromTag = () => {
         type: 'bible',
         data: {
           ...getDefaultBibleTab().data,
-          selectedBook: books[livre - 1],
+          selectedBook: getBook(livre) || getBook(1)!,
           selectedChapter: chapitre,
           selectedVerse: verset,
           focusVerses: [verset],
@@ -229,7 +229,7 @@ export const useCreateTabGroupFromTag = () => {
         type: 'bible',
         data: {
           ...getDefaultBibleTab().data,
-          selectedBook: books[livre - 1],
+          selectedBook: getBook(livre) || getBook(1)!,
           selectedChapter: chapitre,
           selectedVerse: verset,
           selectedVersion: a.version as VersionCode,

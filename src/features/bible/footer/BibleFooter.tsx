@@ -61,6 +61,7 @@ const BibleFooter = ({
         goToPrevChapter={goToPrevChapter}
         disabled={disabled}
         coverage={coverage}
+        version={version}
       />
     )
   }

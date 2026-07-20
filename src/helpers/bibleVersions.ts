@@ -2,6 +2,7 @@ import { getLanguage } from '~i18n'
 import { getIfLocalResourceNeedsDownload } from '~features/resources/resourceAvailability'
 import { audioDefault, audioV2 } from './topBibleAudio'
 import { zeroFill } from './zeroFill'
+import type { BibleCanonId } from './bibleBookCatalog'
 
 export const getIfVersionNeedsUpdate = async (versionId: string) => {
   // Find a way to update the version
@@ -92,6 +93,7 @@ export interface Version {
   hasRedWords?: boolean
   hasPericope?: boolean
   getAudioUrl?: (bookNum: number, chapterNum: number) => string
+  canonId?: BibleCanonId
 }
 
 const getLsgAudioUrl = (bookNum: number, chapterNum: number) => {
@@ -470,6 +472,9 @@ export const versions: Record<string, Version> = {
     type: 'other',
   },
 }
+
+export const getBibleVersionCanonId = (versionId: string): BibleCanonId =>
+  versions[versionId]?.canonId ?? 'protestant-66'
 
 export const getVersions = () => {
   return versions

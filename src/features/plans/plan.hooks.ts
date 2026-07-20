@@ -9,7 +9,7 @@ import { getPlanByIdSelector, getOngoingPlanByIdSelector } from '~redux/selector
 
 import { ComputedPlan, ComputedPlanItem, Plan, Status } from 'src/common/types'
 import { RootState } from 'src/redux/modules/reducer'
-import books from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
 import { toast } from '~helpers/toast'
 import {
   defaultResourceAccess,
@@ -191,7 +191,9 @@ export const getChaptersForPlan = async (
   resourceAccess: ResourceAccessRegistry = defaultResourceAccess
 ): Promise<ChapterForPlan> => {
   const book = chapters.split('|').map(Number)[0]
-  const bookName = i18n.t(books[book - 1].Nom)
+  const bookName = getBook(book)?.Nom
+    ? i18n.t(getBook(book)!.Nom)
+    : i18n.t('Livre {{bookNumber}}', { bookNumber: book })
   const chaptersRange = chapterStringToArray(chapters)
 
   const pericope = await resourceAccess.bibleReading.loadPericope(version)

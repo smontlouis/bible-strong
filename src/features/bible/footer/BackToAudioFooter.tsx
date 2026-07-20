@@ -9,13 +9,14 @@ import Text from '~common/ui/Text'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import { useTabAnimations } from '~features/app-switcher/utils/useTabAnimations'
-import { useFindTabIndex } from '../../../state/tabs'
+import { useFindTabIndex, type VersionCode } from '../../../state/tabs'
 import { playingBibleTabIdAtom } from './atom'
 import {
   getNextAvailableChapterLocation,
   getPreviousAvailableChapterLocation,
 } from '~helpers/bibleCoverage'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
+import { getBibleVersionCanonId } from '~helpers/bibleVersions'
 
 type BackToAudioFooterProps = {
   book: Book
@@ -24,6 +25,7 @@ type BackToAudioFooterProps = {
   goToPrevChapter: () => void
   disabled?: boolean
   coverage?: BibleVersionCoverage
+  version: VersionCode
 }
 
 const BackToAudioFooter = ({
@@ -33,9 +35,11 @@ const BackToAudioFooter = ({
   goToPrevChapter,
   disabled,
   coverage,
+  version,
 }: BackToAudioFooterProps) => {
-  const hasPreviousChapter = !!getPreviousAvailableChapterLocation(book, chapter, coverage)
-  const hasNextChapter = !!getNextAvailableChapterLocation(book, chapter, coverage)
+  const canonId = getBibleVersionCanonId(version)
+  const hasPreviousChapter = !!getPreviousAvailableChapterLocation(book, chapter, coverage, canonId)
+  const hasNextChapter = !!getNextAvailableChapterLocation(book, chapter, coverage, canonId)
   const { slideToIndex } = useTabAnimations()
   const playingBibleTabId = useAtomValue(playingBibleTabIdAtom)
   const playingBibleTabIndex = useFindTabIndex(playingBibleTabId)

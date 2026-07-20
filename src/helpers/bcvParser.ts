@@ -45,6 +45,7 @@ const createBcvParser = (parserLanguage: BcvLanguage): BcvParserWithTranslations
   parser.set_options({
     consecutive_combination_strategy: 'separate',
     sequence_combination_strategy: 'separate',
+    testaments: 'ona',
   })
 
   return parser
@@ -63,13 +64,26 @@ export const bcv = getBcvParser()
 type BookID = string
 
 const trans = 'default'
+const DEUTEROCANONICAL_OSIS_BOOK_IDS: Record<string, number> = {
+  Tob: 67,
+  Jdt: 68,
+  Wis: 69,
+  Sir: 70,
+  Bar: 71,
+  '1Macc': 72,
+  '2Macc': 73,
+}
 
 function getLastVerseInChapter(book: BookID, chapter: number): number {
   return getBcvParser().translations.systems[trans].chapters[book][chapter - 1]
 }
 
 const getBookNumber = (book: BookID, parserLanguage?: BcvLanguage): number | undefined => {
-  return getBcvParser(parserLanguage).translations.systems[trans].order[book]
+  const deuterocanonicalBookId = DEUTEROCANONICAL_OSIS_BOOK_IDS[book]
+  if (deuterocanonicalBookId) return deuterocanonicalBookId
+
+  const parserBookId = getBcvParser(parserLanguage).translations.systems[trans].order[book]
+  return parserBookId >= 1 && parserBookId <= 66 ? parserBookId : undefined
 }
 
 const parseOsisRef = (osisRef: string, parserLanguage?: BcvLanguage) => {

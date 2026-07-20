@@ -6,6 +6,7 @@ import {
 } from '~features/entityListQuery/tagListQueryState'
 import type { EntityListSort } from '~features/entityListQuery/entityListQuery'
 import type { HighlightFilters } from '~common/types'
+import { getBook, isBookInTestament } from '~helpers/bibleBookCatalog'
 
 export {
   defaultTagListQueryState,
@@ -118,12 +119,11 @@ export const migrateHighlightsListQueryState = (value: unknown): HighlightFilter
     ? candidate.testament
     : 'all'
   const validBook =
-    typeof candidate.book === 'number' && candidate.book >= 1 && candidate.book <= 66
-      ? candidate.book
-      : undefined
+    typeof candidate.book === 'number' && getBook(candidate.book) ? candidate.book : undefined
   const book =
     validBook &&
-    ((testament === 'old' && validBook > 39) || (testament === 'new' && validBook < 40))
+    ((testament === 'old' && !isBookInTestament(validBook, 'old')) ||
+      (testament === 'new' && !isBookInTestament(validBook, 'new')))
       ? undefined
       : validBook
   return {
@@ -175,12 +175,11 @@ export const migrateWordAnnotationsListQueryState = (
     ? (candidate.testament as WordAnnotationsListQueryState['testament'])
     : 'all'
   const validBook =
-    typeof candidate.book === 'number' && candidate.book >= 1 && candidate.book <= 66
-      ? candidate.book
-      : null
+    typeof candidate.book === 'number' && getBook(candidate.book) ? candidate.book : null
   const book =
     validBook &&
-    ((testament === 'old' && validBook > 39) || (testament === 'new' && validBook < 40))
+    ((testament === 'old' && !isBookInTestament(validBook, 'old')) ||
+      (testament === 'new' && !isBookInTestament(validBook, 'new')))
       ? null
       : validBook
   return {

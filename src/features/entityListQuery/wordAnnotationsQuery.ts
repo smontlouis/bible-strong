@@ -1,4 +1,5 @@
 import type { WordAnnotation } from '~redux/modules/user/wordAnnotations'
+import { isBookInTestament } from '~helpers/bibleBookCatalog'
 
 export type GroupedWordAnnotationRow = {
   id: string
@@ -46,8 +47,8 @@ export const getAnnotationGroupVerseKey = (
     .filter(verseKey => {
       const book = Number(verseKey.split('-')[0])
       if (scope.book) return book === scope.book
-      if (scope.testament === 'old') return book <= 39
-      if (scope.testament === 'new') return book >= 40
+      if (scope.testament === 'old') return isBookInTestament(book, 'old')
+      if (scope.testament === 'new') return isBookInTestament(book, 'new')
       return true
     })
     .sort(compareVerseKeys)[0]

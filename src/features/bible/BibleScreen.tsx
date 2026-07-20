@@ -1,7 +1,8 @@
 import { produce } from 'immer'
 import { useMemo } from 'react'
 
-import books, { Book } from '~assets/bible_versions/books-desc'
+import { Book } from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
 import generateUUID from '~helpers/generateUUID'
 
 import { useLocalSearchParams } from 'expo-router'
@@ -47,7 +48,7 @@ const BibleScreen = () => {
       draft.id = `bible-${generateUUID()}`
       if (book)
         draft.data.selectedBook = Number.isInteger(book)
-          ? books[(book as number) - 1]
+          ? getBook(book as number) || getBook(1)!
           : (book as Book)
 
       if (chapter) draft.data.selectedChapter = chapter

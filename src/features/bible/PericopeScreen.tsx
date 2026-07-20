@@ -3,7 +3,7 @@ import { TouchableOpacity } from 'react-native'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 
-import books from '~assets/bible_versions/books-desc'
+import type { Book } from '~assets/bible_versions/books-desc'
 import ScrollView from '~common/ui/ScrollView'
 import PericopeHeader from './PericopeHeader'
 import Box from '~common/ui/Box'
@@ -20,6 +20,8 @@ import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import type { VersionCode } from '~state/tabs'
+import { getBook, getBooksForCanon } from '~helpers/bibleBookCatalog'
+import { getBibleVersionCanonId } from '~helpers/bibleVersions'
 
 type PericopeVerse = {
   h1?: string
@@ -71,8 +73,8 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
   const version = (params.version || defaultVersion) as VersionCode
   const hasBackButton = isFormSheet ? canGoBackInStack : true
 
-  const initialBookIndex = params.book ? Number(params.book) - 1 : 0
-  const [book, setBook] = useState(books[initialBookIndex] || books[0])
+  const initialBookNumber = params.book ? Number(params.book) : 1
+  const [book, setBook] = useState<Book>(getBook(initialBookNumber) || getBook(1)!)
 
   const { data: pericope } = useQuery({
     queryKey: ['bible-pericope', version],
@@ -81,6 +83,13 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
   const pericopeBook: PericopeBook = pericope
     ? clearEmpties((pericope[String(book.Numero)] || {}) as PericopeBook)
     : {}
+  const canonBooks = getBooksForCanon(getBibleVersionCanonId(version))
+  const currentBookIndex = canonBooks.findIndex(candidate => candidate.Numero === book.Numero)
+  const previousBook = currentBookIndex > 0 ? canonBooks[currentBookIndex - 1] : undefined
+  const nextBook =
+    currentBookIndex >= 0 && currentBookIndex < canonBooks.length - 1
+      ? canonBooks[currentBookIndex + 1]
+      : undefined
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
@@ -141,13 +150,13 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
           paddingVertical={10}
           justifyContent="space-between"
         >
-          {book.Numero !== 1 && (
-            <Link onPress={() => setBook(books[book.Numero - 2])}>
+          {previousBook && (
+            <Link onPress={() => setBook(previousBook)}>
               <StyledIcon name="arrow-left" size={30} />
             </Link>
           )}
-          {book.Numero !== 66 && (
-            <Link onPress={() => setBook(books[book.Numero])} style={{ marginLeft: 'auto' }}>
+          {nextBook && (
+            <Link onPress={() => setBook(nextBook)} style={{ marginLeft: 'auto' }}>
               <StyledIcon name="arrow-right" size={30} />
             </Link>
           )}

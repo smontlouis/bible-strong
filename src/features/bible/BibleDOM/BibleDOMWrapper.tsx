@@ -562,22 +562,14 @@ export const BibleDOMWrapper = ({
         // Disable chapter navigation in focused context or annotation mode
         if (isContextFocused || annotationMode) break
 
-        const hasNextChapter = !(book.Numero === 66 && chapter === 22)
-
-        if (hasNextChapter) {
-          goToNextChapter?.()
-        }
+        goToNextChapter?.()
         break
       }
       case SWIPE_RIGHT: {
         // Disable chapter navigation in focused context or annotation mode
         if (isContextFocused || annotationMode) break
 
-        const hasPreviousChapter = !(book.Numero === 1 && chapter === 1)
-
-        if (hasPreviousChapter) {
-          goToPrevChapter?.()
-        }
+        goToPrevChapter?.()
         break
       }
       case SWIPE_DOWN: {

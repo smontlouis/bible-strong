@@ -1,3 +1,5 @@
+import { getStrongReferenceFamily } from './strongBookTables'
+
 export type StrongReferenceFamily = 'hebrew' | 'greek'
 
 export type StrongLexiconEntry = {
@@ -67,8 +69,6 @@ const JOINER_PATTERN = /['’\-‐‑–—]/u
 const POSTFIX_BOUNDARY_PATTERN = /[.,;:!?…()[\]{}"«»]/u
 
 const canonicalizeReference = (reference: string | number): string => String(Number(reference))
-
-const getReferenceFamily = (book: number): StrongReferenceFamily => (book > 39 ? 'greek' : 'hebrew')
 
 const isValidReference = (
   reference: string,
@@ -389,7 +389,16 @@ export const parseStrongVerse = (
   book: number,
   lexiconEntries: StrongLexiconEntry[] = []
 ): StrongVerseModel => {
-  const family = getReferenceFamily(book)
+  const family = getStrongReferenceFamily(book)
+  if (!family) {
+    return {
+      visibleText: source,
+      runs: source ? [{ id: 'text-0', type: 'text', text: source }] : [],
+      occurrences: [],
+      morphology: [],
+      references: [],
+    }
+  }
   const markers = lexMarkers(source, family)
   const occurrences: DraftOccurrence[] = []
   const morphology: DraftMorphology[] = []

@@ -12,7 +12,7 @@ import waitForStrongDB from '~common/waitForStrongDB'
 import ConcordanceVerse from './ConcordanceVerse'
 import { FeatherIcon } from '~common/ui/Icon'
 
-import books from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
 import truncate from '~helpers/truncate'
 import { toast } from '~helpers/toast'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
@@ -76,7 +76,9 @@ const ConcordanceByBook = () => {
     <FormSheetScreen isFormSheet={isFormSheet}>
       <Header
         hasBackButton={hasBackButton}
-        title={`${truncate(Mot, 7)} dans ${books[book - 1].Nom}`}
+        title={`${truncate(Mot, 7)} dans ${
+          getBook(book)?.Nom || t('Livre {{bookNumber}}', { bookNumber: book })
+        }`}
         rightComponent={
           <MenuView
             actions={[
@@ -124,7 +126,7 @@ const ConcordanceByBook = () => {
                     pathname: '/bible-view',
                     params: {
                       contextDisplayMode: 'focused',
-                      book: JSON.stringify(books[bookNumber - 1]),
+                      book: JSON.stringify(getBook(bookNumber)),
                       chapter: String(verse.Chapitre),
                       verse: String(verseNumber),
                       focusVerses: JSON.stringify([verseNumber]),

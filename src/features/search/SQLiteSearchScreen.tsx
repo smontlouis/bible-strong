@@ -8,6 +8,7 @@ import { useTheme } from '@emotion/react'
 import { Image } from 'expo-image'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import booksDesc from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
 import DropdownMenu from '~common/DropdownMenu'
 import DownloadRequired from '~common/DownloadRequired'
 import Empty from '~common/Empty'
@@ -986,7 +987,7 @@ const ReferenceSearchResultRow = ({ item }: { item: SearchEntityResult }) => {
           pathname: '/bible-view',
           params: {
             contextDisplayMode: 'focused',
-            book: JSON.stringify(booksDesc[segment.book - 1]),
+            book: JSON.stringify(getBook(segment.book)),
             chapter: String(segment.chapter),
             verse: String(segment.startVerse),
             ...(segment.isWholeChapter

@@ -1,6 +1,7 @@
 import { SQLStrongTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError from '~helpers/catchDatabaseError'
 import { memoizeWithLang } from './memoize'
+import { getStrongVerseTable } from './strongBookTables'
 
 interface StrongVerseParams {
   Livre: number
@@ -14,9 +15,11 @@ interface StrongVerseRow {
 
 const loadStrongVerse = memoizeWithLang(
   'STRONG',
-  ({ Livre, Chapitre, Verset }: StrongVerseParams) =>
-    catchDatabaseError(async (): Promise<StrongVerseRow | undefined> => {
-      const part = Livre > 39 ? 'LSGSNT2' : 'LSGSAT2'
+  ({ Livre, Chapitre, Verset }: StrongVerseParams) => {
+    const part = getStrongVerseTable(Livre)
+    if (!part) return Promise.resolve(undefined)
+
+    return catchDatabaseError(async (): Promise<StrongVerseRow | undefined> => {
       const result = await SQLStrongTransaction<StrongVerseRow>(
         `SELECT Texte
             FROM ${part}
@@ -26,6 +29,7 @@ const loadStrongVerse = memoizeWithLang(
       )
       return result[0]
     })
+  }
 )
 
 export default loadStrongVerse

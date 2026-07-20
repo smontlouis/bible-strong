@@ -16,7 +16,7 @@ import { Book } from '~assets/bible_versions/books-desc'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
-import { Version, getVersions } from '~helpers/bibleVersions'
+import { Version, getBibleVersionCanonId, getVersions } from '~helpers/bibleVersions'
 import {
   getAvailableChapters,
   getNextAvailableChapterLocation,
@@ -296,8 +296,9 @@ const AudioUrlFooter = ({
   bibleAtom,
   coverage,
 }: AudioUrlFooterProps) => {
-  const hasPreviousChapter = !!getPreviousAvailableChapterLocation(book, chapter, coverage)
-  const hasNextChapter = !!getNextAvailableChapterLocation(book, chapter, coverage)
+  const canonId = getBibleVersionCanonId(version)
+  const hasPreviousChapter = !!getPreviousAvailableChapterLocation(book, chapter, coverage, canonId)
+  const hasNextChapter = !!getNextAvailableChapterLocation(book, chapter, coverage, canonId)
 
   const {
     error,

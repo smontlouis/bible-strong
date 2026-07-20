@@ -51,6 +51,16 @@ const expectSurfaceRun = (
 }
 
 describe('parseStrongVerse', () => {
+  it('leaves deuterocanonical text untouched because no Strong corpus exists', () => {
+    expect(parseStrongVerse('Tobie 1234', 67)).toEqual({
+      visibleText: 'Tobie 1234',
+      runs: [{ id: 'text-0', type: 'text', text: 'Tobie 1234' }],
+      occurrences: [],
+      morphology: [],
+      references: [],
+    })
+  })
+
   it('aligns the exact Matthew 14:33 Greek fixture without losing visible text', () => {
     const model = parseStrongVerse(MATTHEW_14_33, 40, [
       { Code: '1161', LSG: 'mais, et, maintenant, alors, aussi, néanmoins' },

@@ -1,4 +1,4 @@
-import books from '~assets/bible_versions/books-desc'
+import { getBook } from '~helpers/bibleBookCatalog'
 import type { SearchResult } from '~helpers/biblesDb'
 import type { SearchEntityResult } from '~features/search/shared/searchResultTypes'
 import type { RelationEndpoint } from './domain'
@@ -23,7 +23,7 @@ type BibleViewSearchResult = {
 
 export const getBibleViewParamsForSearchResult = (result: BibleViewSearchResult) => ({
   contextDisplayMode: 'focused',
-  book: JSON.stringify(books[result.book - 1]),
+  book: JSON.stringify(getBook(result.book)),
   chapter: String(result.chapter),
   verse: String(result.verse),
   version: result.version,
@@ -48,7 +48,7 @@ export const getOpenableActionForRelationEndpoint = (
         pathname: '/bible-view',
         params: {
           contextDisplayMode: 'focused',
-          book: JSON.stringify(books[bookNumber - 1]),
+          book: JSON.stringify(getBook(bookNumber)),
           chapter: String(chapter),
           verse: String(verse),
           focusVerses: JSON.stringify(focusVerses),

@@ -2,6 +2,7 @@ import { SQLStrongTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError, { DatabaseError } from '~helpers/catchDatabaseError'
 import { memoizeWithLang } from './memoize'
 import { StrongReference } from '~common/types'
+import { getStrongLexiconTable } from './strongBookTables'
 
 const updateReferencesOrder = (
   result: StrongReference[] | DatabaseError,
@@ -28,21 +29,26 @@ const updateReferencesOrder = (
   return updatedResult
 }
 
-const loadStrongReferences = memoizeWithLang('STRONG', async (references: string[], book: number) =>
-  catchDatabaseError(async () => {
-    references = references.filter(n => n.trim())
-    const part = book > 39 ? 'Grec' : 'Hebreu'
-    const sqlReq = references.reduce((sqlString, reference, index) => {
-      sqlString += `Code = ${reference} `
-      if (references.length - 1 !== index) {
-        sqlString += 'OR '
-      }
-      return sqlString
-    }, `SELECT * FROM ${part} WHERE `)
+const loadStrongReferences = memoizeWithLang(
+  'STRONG',
+  async (references: string[], book: number) => {
+    const part = getStrongLexiconTable(book)
+    if (!part) return []
 
-    const result = await SQLStrongTransaction<StrongReference>(sqlReq)
-    return updateReferencesOrder(result, references)
-  })
+    return catchDatabaseError(async () => {
+      references = references.filter(n => n.trim())
+      const sqlReq = references.reduce((sqlString, reference, index) => {
+        sqlString += `Code = ${reference} `
+        if (references.length - 1 !== index) {
+          sqlString += 'OR '
+        }
+        return sqlString
+      }, `SELECT * FROM ${part} WHERE `)
+
+      const result = await SQLStrongTransaction<StrongReference>(sqlReq)
+      return updateReferencesOrder(result, references)
+    })
+  }
 )
 
 export default loadStrongReferences

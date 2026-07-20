@@ -226,6 +226,46 @@ export const sections = [
     ],
   },
   {
+    title: 'Livres deutérocanoniques',
+    data: [
+      {
+        Numero: 67,
+        Nom: 'Tobie',
+        Chapitres: 14,
+      },
+      {
+        Numero: 68,
+        Nom: 'Judith',
+        Chapitres: 16,
+      },
+      {
+        Numero: 69,
+        Nom: 'Sagesse',
+        Chapitres: 19,
+      },
+      {
+        Numero: 70,
+        Nom: 'Siracide',
+        Chapitres: 51,
+      },
+      {
+        Numero: 71,
+        Nom: 'Baruch',
+        Chapitres: 6,
+      },
+      {
+        Numero: 72,
+        Nom: '1 Maccabées',
+        Chapitres: 16,
+      },
+      {
+        Numero: 73,
+        Nom: '2 Maccabées',
+        Chapitres: 15,
+      },
+    ],
+  },
+  {
     title: 'Évangiles',
     data: [
       {
@@ -717,6 +757,41 @@ const books = [
     Numero: 66,
     Nom: 'Apocalypse',
     Chapitres: 22,
+  },
+  {
+    Numero: 67,
+    Nom: 'Tobie',
+    Chapitres: 14,
+  },
+  {
+    Numero: 68,
+    Nom: 'Judith',
+    Chapitres: 16,
+  },
+  {
+    Numero: 69,
+    Nom: 'Sagesse',
+    Chapitres: 19,
+  },
+  {
+    Numero: 70,
+    Nom: 'Siracide',
+    Chapitres: 51,
+  },
+  {
+    Numero: 71,
+    Nom: 'Baruch',
+    Chapitres: 6,
+  },
+  {
+    Numero: 72,
+    Nom: '1 Maccabées',
+    Chapitres: 16,
+  },
+  {
+    Numero: 73,
+    Nom: '2 Maccabées',
+    Chapitres: 15,
   },
 ] as const
 

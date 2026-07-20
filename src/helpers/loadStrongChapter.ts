@@ -1,5 +1,6 @@
 import { SQLStrongTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError, { DatabaseError } from '~helpers/catchDatabaseError'
+import { getStrongVerseTable } from './strongBookTables'
 
 export interface StrongChapterRow {
   Livre: number
@@ -11,9 +12,11 @@ export interface StrongChapterRow {
 const loadStrongChapter = (
   Livre: number,
   Chapitre: number
-): Promise<StrongChapterRow[] | DatabaseError> =>
-  catchDatabaseError(async () => {
-    const part = Livre > 39 ? 'LSGSNT2' : 'LSGSAT2'
+): Promise<StrongChapterRow[] | DatabaseError> => {
+  const part = getStrongVerseTable(Livre)
+  if (!part) return Promise.resolve([])
+
+  return catchDatabaseError(async () => {
     const result = await SQLStrongTransaction<StrongChapterRow>(
       `SELECT *
             FROM ${part}
@@ -23,5 +26,6 @@ const loadStrongChapter = (
     )
     return result
   })
+}
 
 export default loadStrongChapter

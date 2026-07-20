@@ -3,10 +3,12 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import React from 'react'
 import { FlatList } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import books, { Book } from '~assets/bible_versions/books-desc'
+import { Book } from '~assets/bible_versions/books-desc'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import BookSelectorItem from './BookSelectorItem'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
+import { getBooksForCanon } from '~helpers/bibleBookCatalog'
+import { getBibleVersionCanonId } from '~helpers/bibleVersions'
 
 interface BookSelectorScreenProps {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -19,8 +21,9 @@ const BookSelector = ({ bibleAtom, onNavigate, coverage }: BookSelectorScreenPro
   const actions = useBibleTabActions(bibleAtom)
   const insets = useSafeAreaInsets()
   const {
-    data: { selectedBook },
+    data: { selectedBook, selectedVersion },
   } = bible
+  const books = getBooksForCanon(getBibleVersionCanonId(selectedVersion), coverage?.books)
 
   const onBookChange = (book: Book) => {
     onNavigate(1)
@@ -37,9 +40,7 @@ const BookSelector = ({ bibleAtom, onNavigate, coverage }: BookSelectorScreenPro
 
   return (
     <FlatList
-      data={Object.values(books).filter(
-        book => !coverage?.books.length || coverage.books.includes(book.Numero)
-      )}
+      data={books}
       renderItem={renderItem}
       keyExtractor={item => item.Numero.toString()}
       contentContainerStyle={{
