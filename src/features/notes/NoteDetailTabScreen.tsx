@@ -95,6 +95,7 @@ const NoteDetailTabScreen = ({
   const keyboardHeight = useKeyboardState(state => state.height)
   const { bottomBarHeight } = useBottomBarHeightInTab()
   const { colorScheme } = useCurrentThemeSelector()
+  const fontSizeScale = useSelector((state: RootState) => state.user.bible.settings.fontSizeScale)
   const isCreating = !noteId
 
   const handleSizeChange = (_width: number, height: number) => {
@@ -482,6 +483,7 @@ ${currentNote.description}
               encodedDefaultDescription={encodeURIComponent(currentNote?.description || '')}
               resetKey={editorResetKey}
               isEditing={isEditing}
+              fontSizeScale={fontSizeScale}
               colorScheme={colorScheme}
               textColor={theme.colors.default}
               editorBackgroundColor={theme.colors.opacity5}

@@ -1,8 +1,9 @@
 import { useSheetInternal } from '~common/sheet'
 import { useTheme } from '@emotion/react'
 import { useState } from 'react'
-import { Platform } from 'react-native'
+import { useSelector } from 'react-redux'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
+import { RootState } from '~redux/modules/reducer'
 import NoteEditorDOMComponent from './NoteEditorDOMComponent'
 
 interface Props {
@@ -32,6 +33,7 @@ export default function NoteEditorSheet({
 }: Props) {
   const theme = useTheme()
   const { colorScheme } = useCurrentThemeSelector()
+  const fontSizeScale = useSelector((state: RootState) => state.user.bible.settings.fontSizeScale)
   const [webViewHeight, setWebViewHeight] = useState(100)
   const { animatedKeyboardState } = useSheetInternal()
 
@@ -62,6 +64,7 @@ export default function NoteEditorSheet({
       encodedDefaultDescription={encodeURIComponent(defaultDescription)}
       resetKey={resetKey}
       isEditing={isEditing}
+      fontSizeScale={fontSizeScale}
       colorScheme={colorScheme}
       textColor={theme.colors.default}
       editorBackgroundColor={theme.colors.opacity5}

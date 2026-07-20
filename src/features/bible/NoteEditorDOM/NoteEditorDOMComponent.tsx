@@ -1,6 +1,7 @@
 'use dom'
 
 import { useEffect, useRef } from 'react'
+import { scaleFontSize } from '../BibleDOM/scaleFontSize'
 
 const MIN_EDITOR_HEIGHT = 240
 
@@ -12,6 +13,7 @@ interface Props {
   encodedDefaultDescription?: string
   resetKey?: number
   isEditing: boolean
+  fontSizeScale: number
   colorScheme: 'light' | 'dark'
   textColor?: string
   editorBackgroundColor?: string
@@ -33,6 +35,7 @@ export default function NoteEditorDOMComponent({
   encodedDefaultDescription,
   resetKey,
   isEditing,
+  fontSizeScale,
   colorScheme,
   textColor: textColorProp,
   editorBackgroundColor,
@@ -158,7 +161,7 @@ export default function NoteEditorDOMComponent({
           padding: 5,
           backgroundColor: isEditing ? bgColor : 'transparent',
           borderRadius: 8,
-          fontSize: 14,
+          fontSize: scaleFontSize(18, fontSizeScale),
           marginBottom: 10,
           outline: 'none',
           whiteSpace: 'pre-wrap',
@@ -180,7 +183,7 @@ export default function NoteEditorDOMComponent({
           padding: 5,
           backgroundColor: isEditing ? bgColor : 'transparent',
           borderRadius: 8,
-          fontSize: 14,
+          fontSize: scaleFontSize(18, fontSizeScale),
           outline: 'none',
           whiteSpace: 'pre-wrap',
           minHeight: 200,
