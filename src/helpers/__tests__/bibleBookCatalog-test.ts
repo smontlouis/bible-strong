@@ -21,6 +21,14 @@ describe('bibleBookCatalog', () => {
     expect(bookNumbers.slice(43, 48)).toEqual([39, 72, 73, 40, 41])
   })
 
+  it('orders stable book identities according to the modern Catholic canon', () => {
+    const bookNumbers = getBooksForCanon('catholic-73').map(book => book.Numero)
+
+    expect(bookNumbers).toHaveLength(73)
+    expect(bookNumbers.slice(14, 23)).toEqual([15, 16, 67, 68, 17, 72, 73, 18, 19])
+    expect(bookNumbers.slice(25, 32)).toEqual([22, 69, 70, 23, 24, 25, 71])
+  })
+
   it('filters installed coverage without losing the canon order', () => {
     const books = getBooksForCanon('clementine-vulgate', [40, 17, 68, 1, 67])
 

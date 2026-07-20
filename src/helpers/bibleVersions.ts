@@ -7,6 +7,7 @@ import type { BibleCanonId } from './bibleBookCatalog'
 export type BibleVersificationId =
   | 'bible-strong-default'
   | 'bible-strong-french-4-chapter-joel'
+  | 'bible-strong-catholic-extended-esther-daniel'
   | 'clementine-vulgate'
 
 export const getIfVersionNeedsUpdate = async (versionId: string) => {
@@ -263,6 +264,8 @@ export const versions: Record<string, Version> = {
     name: 'Bible en Français courant',
     c: '© Alliance Biblique Française',
     type: 'fr',
+    canonId: 'catholic-73',
+    versificationId: 'bible-strong-default',
     hasRedWords: true,
     hasPericope: true,
   },
@@ -271,6 +274,8 @@ export const versions: Record<string, Version> = {
     name: 'Français courant',
     c: '© Alliance Biblique Française',
     type: 'fr',
+    canonId: 'catholic-73',
+    versificationId: 'bible-strong-default',
     hasRedWords: true,
     hasPericope: true,
   },
@@ -279,6 +284,8 @@ export const versions: Record<string, Version> = {
     name: 'Nouvelle Français courant',
     c: "Alliance biblique française Bibli'0, ©2019",
     type: 'fr',
+    canonId: 'catholic-73',
+    versificationId: 'bible-strong-default',
     hasRedWords: true,
     hasPericope: true,
   },
@@ -349,6 +356,8 @@ export const versions: Record<string, Version> = {
     name: 'Bible catholique Crampon 1923',
     c: '© mission-web.com',
     type: 'fr',
+    canonId: 'catholic-73',
+    versificationId: 'bible-strong-catholic-extended-esther-daniel',
     hasRedWords: true,
     hasPericope: true,
   },
@@ -357,6 +366,8 @@ export const versions: Record<string, Version> = {
     name: 'Parole de Vie 2017',
     c: "© 2000 Société biblique française - Bibli'O",
     type: 'fr',
+    canonId: 'catholic-73',
+    versificationId: 'bible-strong-default',
     hasRedWords: true,
     hasPericope: true,
   },
