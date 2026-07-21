@@ -1,5 +1,58 @@
-export type ViewId = "viewer" | "workflow" | "lexicon" | "review";
+export type ViewId = "viewer" | "jsonl" | "workflow" | "lexicon" | "review";
 export type ReaderMode = "normal" | "advanced" | "debug";
+
+export type JsonlBibleId =
+  | "OST"
+  | "FMAR"
+  | "NVS78P"
+  | "NEG79"
+  | "NBS"
+  | "DBY"
+  | "DBYR"
+  | "LSG";
+
+export interface JsonlBibleVerse {
+  ref: string;
+  version: string;
+  book: number;
+  bookId: string;
+  chapter: number;
+  verse: number;
+  text: string;
+}
+
+export interface JsonlBibleCatalogVersion {
+  id: JsonlBibleId;
+  label: string;
+  shortLabel: string;
+  sourceVersion: string;
+  available: boolean;
+  path: string;
+  sizeBytes: number;
+  sha256?: string;
+  verseCount: number;
+  taggedTokenCount?: number;
+  enrichedTagCount?: number;
+  books: Array<{ bookId: string; chapters: number[]; verseCount: number }>;
+}
+
+export interface JsonlBibleCatalog {
+  generatedAt: string;
+  versions: JsonlBibleCatalogVersion[];
+  books: Array<{ bookId: string; chapters: number[] }>;
+}
+
+export interface JsonlBibleChapter {
+  bookId: string;
+  chapter: number;
+  versions: Array<{
+    id: JsonlBibleId;
+    label: string;
+    shortLabel: string;
+    sourceVersion: string;
+    verses: JsonlBibleVerse[];
+  }>;
+}
 
 export interface StrongLedger {
   bible: string;
@@ -269,8 +322,67 @@ export interface LexiconRow {
   meaningHtmlFr: string;
 }
 
+export interface LexiconMetadata {
+  database: string;
+  legacyDatabase: string | null;
+  releaseKey: string | null;
+  profile: string;
+  generatedAt: string | null;
+  entries: number;
+  translationsFr: number;
+  legacyEntries: number;
+  resourcesIncluded: boolean;
+  resourceEntries: number;
+  tipnrDatabase: string | null;
+  tipnrEntities: number;
+}
+
+export interface TipnrEntityContext {
+  id: number;
+  uniqueName: string;
+  uStrong: string;
+  category: string;
+  type: string;
+  displayNameEn: string;
+  displayNameFr: string;
+  descriptionEn: string;
+  descriptionFr: string;
+  summaryHtmlEn: string;
+  summaryHtmlFr: string;
+  briefestEn: string;
+  briefestFr: string;
+  briefEn: string;
+  briefFr: string;
+  shortDescriptionEn: string;
+  shortDescriptionFr: string;
+  articleHtmlEn: string;
+  articleHtmlFr: string;
+  matchKind: "uStrong-exact" | "classical-strong-fallback";
+  matchedStrong: string;
+}
+
 export interface LexiconEntryPayload {
   entry: LexiconRow;
+  identity: {
+    stepCode: string;
+    rawDStrong: string;
+    relationKind: string | null;
+    relatedStepCode: string | null;
+    relationLabelEn: string | null;
+    relationLabelFr: string | null;
+  } | null;
+  legacy: {
+    strong: string;
+    scope: "classical-strong";
+    code: number;
+    word: string;
+    phonetic: string;
+    original: string;
+    originHtml: string;
+    type: string;
+    lsg: string;
+    definitionHtml: string;
+  } | null;
   resources: Array<{
     source: string;
     kind: string;
@@ -278,4 +390,5 @@ export interface LexiconEntryPayload {
     contentHtmlFr: string;
     contentTextFr: string;
   }>;
+  tipnrEntities: TipnrEntityContext[];
 }

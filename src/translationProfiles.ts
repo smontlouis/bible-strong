@@ -216,6 +216,31 @@ const PROFILES = new Map<string, TranslationProfile>([
     }
   ],
   [
+    "neg79",
+    {
+      bible: "neg79",
+      family: "formal-readable",
+      label: "Nouvelle Edition de Geneve 1979",
+      style: "calibrated",
+      strongDensityPolicy: "medium",
+      expectedTokenCoverage: { low: 0.46, high: 0.56 },
+      readerAlignment: {
+        maxStrongPerWord: 3,
+        minEmptySourceAgreement: INDEPENDENT_EDITORIAL_FAMILY_AGREEMENT,
+        learnedTranslationMinScore: 0.38,
+        learnedFunctionWordMode: "restricted"
+      },
+      hardVerseThresholds: {
+        lowTokenCoverage: 0.27,
+        referenceDensityRatio: 0.7,
+        lowOriginalConfirmation: 0.72,
+        manyOriginalStrongUnplaced: 6
+      },
+      notes:
+        "Segond-family formal-readable translation. Use the same moderate-density calibration as NVS78P while preserving translation-specific alignments."
+    }
+  ],
+  [
     "ost",
     {
       bible: "ost",

@@ -11,6 +11,12 @@ import { fileURLToPath } from "node:url";
 
 import { applyReviewDecisionPayload, type DecisionFile } from "./llmReview.js";
 import {
+  getJsonlBibleCatalog,
+  getJsonlBibleChapter,
+  JsonlBibleViewerError,
+  parseJsonlBibleIds
+} from "./jsonlBibleViewer.js";
+import {
   buildProductReview,
   type ProductReviewEntry,
   type ProductReviewResult
@@ -29,15 +35,25 @@ import {
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_PORT = 4173;
+const DEFAULT_LEXICON_DB =
+  "data/dictionaries/strong_lexicon.en-fr.full.production.sqlite";
 const LEXICON_DB = path.resolve(
   ROOT,
-  "data/dictionaries/strong_lexicon.sqlite"
+  process.env.LEXICON_DB ?? DEFAULT_LEXICON_DB
+);
+const LEGACY_LEXICON_DB = path.resolve(
+  ROOT,
+  process.env.LEGACY_LEXICON_DB ?? "data/dictionaries/strong.legacy.sqlite"
 );
 const LEXICON_FR_V2_FINAL = path.resolve(
   ROOT,
   "outputs/lexicon-fr-v2/strong_lexicon_fr_v2.final.jsonl"
 );
-const ENTITIES_DB = path.resolve(ROOT, "data/entities/bible_entities.sqlite");
+const DEFAULT_ENTITIES_DB = "data/entities/bible_entities.production.sqlite";
+const ENTITIES_DB = path.resolve(
+  ROOT,
+  process.env.ENTITIES_DB ?? DEFAULT_ENTITIES_DB
+);
 
 let lexiconProductReviewCache: {
   mtimeMs: number;
@@ -49,6 +65,7 @@ const MIME_TYPES = new Map([
   [".js", "text/javascript; charset=utf-8"],
   [".css", "text/css; charset=utf-8"],
   [".json", "application/json; charset=utf-8"],
+  [".jsonl", "application/x-ndjson; charset=utf-8"],
   [".tsv", "text/tab-separated-values; charset=utf-8"],
   [".csv", "text/csv; charset=utf-8"],
   [".md", "text/markdown; charset=utf-8"]
@@ -74,6 +91,9 @@ const server = createServer(async (request, response) => {
       if (url.pathname === "/viewer/workflow.html") {
         url.searchParams.set("view", "workflow");
       }
+      if (url.pathname === "/viewer/jsonl.html") {
+        url.searchParams.set("view", "jsonl");
+      }
       serveStatic(
         "/viewer/app/index.html",
         response,
@@ -97,6 +117,11 @@ const server = createServer(async (request, response) => {
 
     if (request.method === "GET" && url.pathname === "/api/lexicon/search") {
       handleLexiconSearch(url, response);
+      return;
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/lexicon/metadata") {
+      handleLexiconMetadata(response);
       return;
     }
 
@@ -125,6 +150,37 @@ const server = createServer(async (request, response) => {
         max: 999
       });
       sendJson(response, 200, getStrongViewerVerses({ bible, book, chapter }));
+      return;
+    }
+
+    if (
+      request.method === "GET" &&
+      url.pathname === "/api/jsonl-bibles/catalog"
+    ) {
+      sendJson(response, 200, await getJsonlBibleCatalog({ root: ROOT }));
+      return;
+    }
+
+    if (
+      request.method === "GET" &&
+      url.pathname === "/api/jsonl-bibles/chapter"
+    ) {
+      const bookId = validateBookId(url.searchParams.get("book"));
+      const chapter = parseStrictInteger(url.searchParams.get("chapter"), {
+        name: "chapter",
+        min: 1,
+        max: 999
+      });
+      sendJson(
+        response,
+        200,
+        await getJsonlBibleChapter({
+          root: ROOT,
+          versions: parseJsonlBibleIds(url.searchParams.get("versions")),
+          bookId,
+          chapter
+        })
+      );
       return;
     }
 
@@ -195,6 +251,10 @@ const server = createServer(async (request, response) => {
 
     serveStatic(url.pathname, response, request.method === "HEAD");
   } catch (error) {
+    if (error instanceof JsonlBibleViewerError) {
+      sendJson(response, error.statusCode, { error: error.code });
+      return;
+    }
     if (error instanceof StrongViewerApiError) {
       sendJson(response, error.statusCode, { error: error.code });
       return;
@@ -234,6 +294,10 @@ function handleLexiconSearch(url: URL, response: ServerResponse): void {
   }
 
   const query = (url.searchParams.get("q") ?? "").trim();
+  const normalizedStrong = normalizeStrongQuery(query);
+  const classicalStrong = normalizedStrong
+    ? classicalStrongFromStepCode(normalizedStrong)
+    : null;
   const language = url.searchParams.get("language") ?? "all";
   const letter = (url.searchParams.get("letter") ?? "").trim().toLowerCase();
   const limit = clampNumber(url.searchParams.get("limit"), 1, 500, 40);
@@ -246,7 +310,6 @@ function handleLexiconSearch(url: URL, response: ServerResponse): void {
 
   if (query) {
     const like = sqlString(`%${query}%`);
-    const normalizedStrong = normalizeStrongQuery(query);
     const strongLike = normalizedStrong
       ? sqlString(`%${normalizedStrong}%`)
       : like;
@@ -254,6 +317,8 @@ function handleLexiconSearch(url: URL, response: ServerResponse): void {
       se.eStrong LIKE ${strongLike}
       OR se.dStrong LIKE ${strongLike}
       OR se.uStrong LIKE ${strongLike}
+      OR si.stepCode LIKE ${strongLike}
+      ${classicalStrong && classicalStrong !== normalizedStrong ? `OR se.eStrong = ${sqlString(classicalStrong)}` : ""}
       OR se.original LIKE ${like}
       OR se.transliteration LIKE ${like}
       OR se.classicTransliteration LIKE ${like}
@@ -295,12 +360,17 @@ function handleLexiconSearch(url: URL, response: ServerResponse): void {
       LEFT JOIN LexiconTranslations lt
         ON lt.stepEntryId = se.id
        AND lt.language = 'fr'
+      LEFT JOIN StepEntryIdentities si
+        ON si.stepEntryId = se.id
       ${whereSql}
       ORDER BY
         CASE
-          WHEN ${query ? "se.eStrong = " + sqlString(normalizeStrongQuery(query) ?? query) : "0"} THEN 0
-          WHEN ${query ? "se.eStrong LIKE " + sqlString(`${normalizeStrongQuery(query) ?? query}%`) : "0"} THEN 1
-          ELSE 2
+          WHEN ${query ? "si.stepCode = " + sqlString(normalizedStrong ?? query) : "0"} THEN 0
+          WHEN ${query ? "se.eStrong = " + sqlString(normalizedStrong ?? query) : "0"} THEN 1
+          WHEN ${classicalStrong && classicalStrong !== normalizedStrong ? "se.eStrong = " + sqlString(classicalStrong) : "0"} THEN 2
+          WHEN ${query ? "si.stepCode LIKE " + sqlString(`${normalizedStrong ?? query}%`) : "0"} THEN 3
+          WHEN ${query ? "se.eStrong LIKE " + sqlString(`${normalizedStrong ?? query}%`) : "0"} THEN 4
+          ELSE 5
         END,
         se.language,
         se.baseCode,
@@ -320,6 +390,77 @@ function handleLexiconSearch(url: URL, response: ServerResponse): void {
   });
 }
 
+function handleLexiconMetadata(response: ServerResponse): void {
+  if (!existsSync(LEXICON_DB)) {
+    sendJson(response, 500, { error: "lexicon-db-not-found" });
+    return;
+  }
+
+  const metadata = Object.fromEntries(
+    runSqlJson<{ key: string; value: string }>(
+      `SELECT key, value FROM DictionaryMeta WHERE key IN (
+        'generatedAt',
+        'lexiconEnrichedAt',
+        'lexiconV3Profile',
+        'lexiconV3ReleaseKey',
+        'lexiconViewerProfile',
+        'productionProfile'
+      ) ORDER BY key`
+    ).map((row) => [row.key, row.value])
+  );
+  const counts = runSqlJson<{
+    entries: number;
+    translationsFr: number;
+  }>(`
+    SELECT
+      (SELECT count(*) FROM StepEntries) AS entries,
+      (SELECT count(*) FROM LexiconTranslations WHERE language='fr')
+        AS translationsFr
+  `)[0];
+  const legacyEntries = existsSync(LEGACY_LEXICON_DB)
+    ? (runSqlJsonFromDb<{ count: number }>(
+        LEGACY_LEXICON_DB,
+        `SELECT
+           (SELECT count(*) FROM Grec WHERE Code > 0) +
+           (SELECT count(*) FROM Hebreu WHERE Code > 0) AS count`
+      )[0]?.count ?? 0)
+    : 0;
+  const resourceEntries = lexiconTableExists("LexiconResources")
+    ? (runSqlJson<{ count: number }>(
+        "SELECT count(*) AS count FROM LexiconResources"
+      )[0]?.count ?? 0)
+    : 0;
+  const tipnrEntities = existsSync(ENTITIES_DB)
+    ? (runSqlJsonFromDb<{ count: number }>(
+        ENTITIES_DB,
+        "SELECT count(*) AS count FROM Entities"
+      )[0]?.count ?? 0)
+    : 0;
+
+  sendJson(response, 200, {
+    database: path.relative(ROOT, LEXICON_DB),
+    legacyDatabase: existsSync(LEGACY_LEXICON_DB)
+      ? path.relative(ROOT, LEGACY_LEXICON_DB)
+      : null,
+    releaseKey: metadata.lexiconV3ReleaseKey ?? null,
+    profile:
+      metadata.lexiconViewerProfile ??
+      metadata.lexiconV3Profile ??
+      metadata.productionProfile ??
+      "unknown",
+    generatedAt: metadata.lexiconEnrichedAt ?? metadata.generatedAt ?? null,
+    entries: counts?.entries ?? 0,
+    translationsFr: counts?.translationsFr ?? 0,
+    legacyEntries,
+    resourcesIncluded: resourceEntries > 0,
+    resourceEntries,
+    tipnrDatabase: existsSync(ENTITIES_DB)
+      ? path.relative(ROOT, ENTITIES_DB)
+      : null,
+    tipnrEntities
+  });
+}
+
 function handleLexiconEntry(url: URL, response: ServerResponse): void {
   if (!existsSync(LEXICON_DB)) {
     sendJson(response, 500, { error: "lexicon-db-not-found" });
@@ -332,7 +473,13 @@ function handleLexiconEntry(url: URL, response: ServerResponse): void {
     return;
   }
 
-  const rows = runSqlJson(
+  const rows = runSqlJson<{
+    id: number;
+    language: "greek" | "hebrew";
+    baseCode: number;
+    uStrong: string;
+    [key: string]: unknown;
+  }>(
     `
       SELECT
         se.id,
@@ -365,24 +512,18 @@ function handleLexiconEntry(url: URL, response: ServerResponse): void {
     return;
   }
 
-  const resources = runSqlJson(
-    `
-      SELECT
-        lr.source,
-        lr.kind,
-        lr.contentHtml,
-        lrt.contentHtml AS contentHtmlFr,
-        lrt.contentText AS contentTextFr
-      FROM LexiconResources lr
-      LEFT JOIN LexiconResourceTranslations lrt
-        ON lrt.resourceId = lr.id
-       AND lrt.language = 'fr'
-      WHERE lr.stepEntryId = ${id}
-      ORDER BY lr.source, lr.kind
-    `
-  );
+  const legacy = readLegacyLexiconEntry(rows[0]);
+  const resources = readLexiconResources(id);
+  const identity = readStepEntryIdentity(id);
+  const tipnrEntities = readTipnrEntities(rows[0]);
 
-  sendJson(response, 200, { entry: rows[0], resources });
+  sendJson(response, 200, {
+    entry: rows[0],
+    identity,
+    legacy,
+    resources,
+    tipnrEntities
+  });
 }
 
 function handleEntityTree(response: ServerResponse): void {
@@ -493,22 +634,7 @@ function handleLexiconV2ReviewEntry(url: URL, response: ServerResponse): void {
     return;
   }
 
-  const resources = runSqlJson(
-    `
-      SELECT
-        lr.source,
-        lr.kind,
-        lr.contentHtml,
-        lrt.contentHtml AS contentHtmlFr,
-        lrt.contentText AS contentTextFr
-      FROM LexiconResources lr
-      LEFT JOIN LexiconResourceTranslations lrt
-        ON lrt.resourceId = lr.id
-       AND lrt.language = 'fr'
-      WHERE lr.stepEntryId = ${id}
-      ORDER BY lr.source, lr.kind
-    `
-  );
+  const resources = readLexiconResources(id);
 
   sendJson(response, 200, { entry, resources });
 }
@@ -641,7 +767,8 @@ function isReactViewerRoute(pathname: string): boolean {
     "/viewer/index.html",
     "/viewer/review.html",
     "/viewer/lexicon.html",
-    "/viewer/workflow.html"
+    "/viewer/workflow.html",
+    "/viewer/jsonl.html"
   ].includes(pathname);
 }
 
@@ -684,6 +811,164 @@ function runSqlJson<T = Record<string, unknown>>(sql: string): T[] {
   return runSqlJsonFromDb(LEXICON_DB, sql);
 }
 
+function readLexiconResources(stepEntryId: number): Record<string, unknown>[] {
+  if (!lexiconTableExists("LexiconResources")) return [];
+
+  const hasTranslations = lexiconTableExists("LexiconResourceTranslations");
+  return runSqlJson(`
+    SELECT
+      lr.source,
+      lr.kind,
+      lr.contentHtml,
+      ${hasTranslations ? "lrt.contentHtml" : "NULL"} AS contentHtmlFr,
+      ${hasTranslations ? "lrt.contentText" : "NULL"} AS contentTextFr
+    FROM LexiconResources lr
+    ${
+      hasTranslations
+        ? `LEFT JOIN LexiconResourceTranslations lrt
+             ON lrt.resourceId = lr.id
+            AND lrt.language = 'fr'`
+        : ""
+    }
+    WHERE lr.stepEntryId = ${stepEntryId}
+    ORDER BY lr.source, lr.kind
+  `);
+}
+
+function readStepEntryIdentity(
+  stepEntryId: number
+): Record<string, unknown> | null {
+  if (!lexiconTableExists("StepEntryIdentities")) return null;
+  return (
+    runSqlJson<Record<string, unknown>>(`
+      SELECT
+        stepCode,
+        rawDStrong,
+        relationKind,
+        relatedStepCode,
+        relationLabelEn,
+        relationLabelFr
+      FROM StepEntryIdentities
+      WHERE stepEntryId = ${stepEntryId}
+      LIMIT 1
+    `)[0] ?? null
+  );
+}
+
+function readLegacyLexiconEntry(entry: {
+  language: "greek" | "hebrew";
+  baseCode: number;
+}): Record<string, unknown> | null {
+  if (!existsSync(LEGACY_LEXICON_DB)) return null;
+
+  const greek = entry.language === "greek";
+  const table = greek ? "Grec" : "Hebreu";
+  const originalColumn = greek ? "Grec" : "Hebreu";
+  const prefix = greek ? "G" : "H";
+  const rows = runSqlJsonFromDb<Record<string, unknown>>(
+    LEGACY_LEXICON_DB,
+    `SELECT
+       Code AS code,
+       Mot AS word,
+       Phonetique AS phonetic,
+       ${originalColumn} AS original,
+       Origine AS originHtml,
+       Type AS type,
+       LSG AS lsg,
+       Definition AS definitionHtml
+     FROM ${table}
+     WHERE Code=${entry.baseCode}
+     LIMIT 1`
+  );
+  if (rows.length === 0) return null;
+
+  return {
+    strong: `${prefix}${String(entry.baseCode).padStart(4, "0")}`,
+    scope: "classical-strong",
+    ...rows[0]
+  };
+}
+
+function readTipnrEntities(entry: {
+  uStrong?: unknown;
+  eStrong?: unknown;
+  glossEn?: unknown;
+}): Record<string, unknown>[] {
+  if (!existsSync(ENTITIES_DB)) return [];
+
+  const uStrong = typeof entry.uStrong === "string" ? entry.uStrong.trim() : "";
+  if (!uStrong) return [];
+
+  const exactRows = readTipnrEntityRows({
+    where: `e.uStrong = ${sqlString(uStrong)}`,
+    matchKind: "uStrong-exact",
+    matchedStrong: uStrong
+  });
+  if (exactRows.length > 0) return exactRows;
+
+  const eStrong = typeof entry.eStrong === "string" ? entry.eStrong.trim() : "";
+  if (!eStrong) return [];
+  const glossEn = typeof entry.glossEn === "string" ? entry.glossEn.trim() : "";
+  const sameBaseAndGloss = glossEn
+    ? `(substr(e.uStrong, 1, ${eStrong.length}) = ${sqlString(eStrong)}
+       AND length(e.uStrong) > ${eStrong.length}
+       AND lower(trim(e.displayName)) = lower(${sqlString(glossEn)}))`
+    : "0";
+
+  return readTipnrEntityRows({
+    where: `(e.uStrong = ${sqlString(eStrong)} OR ${sameBaseAndGloss})`,
+    matchKind: "classical-strong-fallback",
+    matchedStrong: eStrong
+  });
+}
+
+function readTipnrEntityRows(input: {
+  where: string;
+  matchKind: "uStrong-exact" | "classical-strong-fallback";
+  matchedStrong: string;
+}): Record<string, unknown>[] {
+  return runSqlJsonFromDb<Record<string, unknown>>(
+    ENTITIES_DB,
+    `SELECT
+       e.id,
+       e.uniqueName,
+       e.uStrong,
+       e.category,
+       e.type,
+       e.displayName AS displayNameEn,
+       et.displayName AS displayNameFr,
+       e.description AS descriptionEn,
+       et.description AS descriptionFr,
+       e.summaryHtml AS summaryHtmlEn,
+       et.summaryHtml AS summaryHtmlFr,
+       e.briefest AS briefestEn,
+       et.briefest AS briefestFr,
+       e.brief AS briefEn,
+       et.brief AS briefFr,
+       e.shortDescription AS shortDescriptionEn,
+       et.shortDescription AS shortDescriptionFr,
+       e.articleHtml AS articleHtmlEn,
+       et.articleHtml AS articleHtmlFr,
+       ${sqlString(input.matchKind)} AS matchKind,
+       ${sqlString(input.matchedStrong)} AS matchedStrong
+     FROM Entities e
+     LEFT JOIN EntityTranslations et
+       ON et.entityId = e.id
+      AND et.language = 'fr'
+     WHERE ${input.where}
+     ORDER BY e.category, e.displayName, e.id`
+  );
+}
+
+function lexiconTableExists(table: string): boolean {
+  return (
+    runSqlJson<{ count: number }>(
+      `SELECT count(*) AS count FROM sqlite_master
+       WHERE type='table' AND name=${sqlString(table)}`
+    )[0]?.count === 1
+  );
+}
+
 function runSqlJsonFromDb<T = Record<string, unknown>>(
   dbPath: string,
   sql: string
@@ -705,7 +990,11 @@ function sqlString(value: string): string {
 function normalizeStrongQuery(query: string): string | null {
   const match = /^([gh])0*(\d{1,5})([a-z]?)$/i.exec(query.trim());
   if (!match) return null;
-  return `${match[1].toUpperCase()}${match[2].padStart(4, "0")}${match[3].toUpperCase()}`;
+  return `${match[1].toUpperCase()}${match[2].padStart(4, "0")}${match[3]}`;
+}
+
+function classicalStrongFromStepCode(strong: string): string {
+  return /^([GH]\d{4,5})[A-Za-z]$/.exec(strong)?.[1] ?? strong;
 }
 
 function clampNumber(

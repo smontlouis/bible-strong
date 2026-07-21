@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   assertRenderedStrongInventory,
+  applyLexicalAutoSafePlacementsToLedger,
   changedOverrideRefs,
   completeEmptyVisibility,
   completeWordVisibility,
@@ -17,6 +18,7 @@ import {
 } from "../src/strongLedger.js";
 import type { OriginalStrongOccurrence } from "../src/completeAlignment.js";
 import type { CuratedStrongOverride } from "../src/curatedStrongOverrides.js";
+import type { LexicalAutoSafePlacement } from "../src/lexicalCandidateReport.js";
 import { parseStrongOccurrences } from "../src/strongCsv.js";
 import { stripTags, tokenizeText } from "../src/tokenize.js";
 
@@ -38,6 +40,79 @@ test("keeps original-complete empty Strong occurrences out of reader mode", () =
 test("keeps original-complete word guesses out of reader mode", () => {
   assert.equal(completeWordVisibility(false), "advanced");
   assert.equal(completeWordVisibility(true), "hidden");
+});
+
+test("collapses lexical auto-safe duplicates of an already visible STEP occurrence", () => {
+  const existing = annotation({
+    id: "reader",
+    strong: "H8147",
+    visibility: "reader",
+    placement: "word",
+    source: "reference-transfer",
+    wordIndex: 5,
+    normalizedWord: "deux",
+    originalOccurrenceId: "TAHOT.Exod.26.21.9.L.main:0"
+  });
+  const duplicate = annotation({
+    id: "advanced",
+    strong: "H8147",
+    visibility: "advanced",
+    placement: "empty",
+    insertAfterWordIndex: 4,
+    originalTokenId: "TAHOT.Exod.26.21.9.L.main",
+    originalOccurrenceId: "TAHOT.Exod.26.21.9.L.main:0"
+  });
+  const targetVerse = verse({
+    ref: "Exod.26.21",
+    bookId: "Exod",
+    text: "deux bases",
+    annotations: [existing, duplicate]
+  });
+  const placement: LexicalAutoSafePlacement = {
+    item: {
+      auditKind: "empty",
+      annotationId: "advanced",
+      ref: targetVerse.ref,
+      text: targetVerse.text,
+      strong: "H8147",
+      stepGlosses: [],
+      dictionaryTerms: [],
+      inferredTerms: [],
+      candidates: []
+    },
+    candidate: {
+      target: "word",
+      wordIndex: 0,
+      text: "lave-toi",
+      normalized: "lave-toi",
+      lemma: "laver",
+      score: 0.99,
+      confidence: "high",
+      occupied: true,
+      evidence: [
+        {
+          source: "number-component",
+          detail: "test",
+          weight: 1
+        }
+      ]
+    },
+    kind: "auto-safe"
+  };
+
+  const result = applyLexicalAutoSafePlacementsToLedger({
+    verses: [targetVerse],
+    placements: [placement]
+  });
+
+  assert.equal(result.applied, 1);
+  assert.deepEqual([...result.changedRefs], ["Exod.26.21"]);
+  assert.equal(existing.visibility, "reader");
+  assert.equal(duplicate.visibility, "hidden");
+  assert.equal(duplicate.placement, "duplicate");
+  assert.equal(duplicate.wordIndex, 5);
+  assert.equal(duplicate.normalizedWord, "deux");
+  assert.ok(duplicate.diagnostics.includes("duplicate-reader-occurrence"));
 });
 
 test("links repeated reader carriers to distinct original STEP occurrences", () => {

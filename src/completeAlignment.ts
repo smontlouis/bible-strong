@@ -8,7 +8,10 @@ import {
   type OriginalToken,
   type OriginalVerse
 } from "./originalSource.js";
-import { getStepSourceTokenIndex } from "./stepOriginals.js";
+import {
+  getStepSourceIdentity,
+  getStepSourceTokenIndex
+} from "./stepOriginals.js";
 import { escapeHtml, tokenizeText, type TextSegment } from "./tokenize.js";
 import {
   findTranslationCandidate,
@@ -26,6 +29,8 @@ export interface OriginalStrongOccurrence {
   ordinalTokenIndex?: number;
   /** Explicit STEP `#NN` position, kept separate from the ordinal. */
   sourceTokenIndex?: number;
+  /** Physical STEP identity, stable across projected reference aliases. */
+  sourceIdentity?: string;
   strong: string;
   sourceStrong: string;
   text: string;
@@ -445,6 +450,7 @@ function toOccurrence(
     tokenIndex: sourceTokenIndex ?? ordinalTokenIndex,
     ordinalTokenIndex,
     sourceTokenIndex,
+    sourceIdentity: getStepSourceIdentity(token),
     strong,
     sourceStrong: token.sourceStrong?.[strongIndex] ?? strong,
     text: token.text,

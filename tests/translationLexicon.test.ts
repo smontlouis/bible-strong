@@ -89,3 +89,55 @@ test("uses family-aware effective counts for learned stems", () => {
 
   assert.equal(lexicon.stem.get("H0001"), undefined);
 });
+
+test("never applies a sense-specific carrier without the exact STEP identity", () => {
+  const lexicon = buildStrongTranslationLexicon([], {
+    dictionaryCandidates: [
+      {
+        strong: "G1492",
+        stepStrong: "G1492G",
+        normalized: "voir",
+        score: 0.5,
+        source: "fixture",
+        method: "dictionary-fr-exact"
+      }
+    ]
+  });
+
+  assert.equal(findTranslationCandidate(lexicon, "G1492", "voir"), undefined);
+  assert.equal(
+    findTranslationCandidate(lexicon, "G1492", "voir", "G1492H"),
+    undefined
+  );
+  assert.ok(findTranslationCandidate(lexicon, "G1492", "voir", "G1492G"));
+});
+
+test("preserves lowercase STEP suffixes as distinct identities", () => {
+  const lexicon = buildStrongTranslationLexicon([], {
+    dictionaryCandidates: [
+      {
+        strong: "H2148",
+        stepStrong: "H2148V",
+        normalized: "male",
+        score: 0.5,
+        source: "fixture",
+        method: "dictionary-fr-exact"
+      },
+      {
+        strong: "H2148",
+        stepStrong: "H2148v",
+        normalized: "souvenir",
+        score: 0.5,
+        source: "fixture",
+        method: "dictionary-fr-exact"
+      }
+    ]
+  });
+
+  assert.ok(findTranslationCandidate(lexicon, "H2148", "male", "H2148V"));
+  assert.equal(
+    findTranslationCandidate(lexicon, "H2148", "male", "H2148v"),
+    undefined
+  );
+  assert.ok(findTranslationCandidate(lexicon, "H2148", "souvenir", "H2148v"));
+});

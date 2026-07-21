@@ -1,6 +1,7 @@
 import { stemWord } from "./align.js";
 import { isGenericFrenchCarrier } from "./frenchLexicalSafety.js";
 import { type StrongVerseMap } from "./strongCsv.js";
+import { normalizeStepStrongCode } from "./lexiconV3/identity.js";
 
 export interface StrongTranslationCandidate {
   strong: string;
@@ -122,7 +123,9 @@ export function findTranslationCandidate(
   normalized: string,
   stepStrong?: string
 ): StrongTranslationCandidate | undefined {
-  const normalizedStep = stepStrong?.toUpperCase();
+  const normalizedStep = stepStrong
+    ? (normalizeStepStrongCode(stepStrong) ?? undefined)
+    : undefined;
   const stepExact = normalizedStep
     ? lexicon.exactByStep?.get(normalizedStep)?.get(normalized)
     : undefined;
@@ -152,10 +155,16 @@ function stepCandidateIsCompatible(
   candidate: StrongTranslationCandidate,
   wantedStepStrong: string | undefined
 ): boolean {
-  if (!wantedStepStrong || !candidate.stepStrong) return true;
-  const candidateStep = candidate.stepStrong.toUpperCase();
+  if (!candidate.stepStrong) return true;
+  const candidateStep = normalizeStepStrongCode(candidate.stepStrong);
+  if (!candidateStep) return false;
+  if (!wantedStepStrong) return isClassicalStepStrong(candidateStep);
   if (candidateStep === wantedStepStrong) return true;
-  return /^[HG]\d{4,5}$/u.test(candidateStep);
+  return isClassicalStepStrong(candidateStep);
+}
+
+function isClassicalStepStrong(value: string): boolean {
+  return /^[HG]\d{4,5}$/u.test(value);
 }
 
 function increment(
@@ -332,7 +341,8 @@ function addDictionaryCandidate(
         ? lexicon.stemByStep
         : lexicon.exactByStep;
     if (stepTarget) {
-      const stepKey = candidate.stepStrong.toUpperCase();
+      const stepKey = normalizeStepStrongCode(candidate.stepStrong);
+      if (!stepKey) return;
       const stepForms = stepTarget.get(stepKey) ?? new Map();
       const stepExisting = stepForms.get(candidate.normalized);
       if (!stepExisting || candidate.score > stepExisting.score) {

@@ -74,6 +74,7 @@ export interface SemanticRefillLlmCandidatePacket {
   auditKind: "missing" | "relocation";
   priority: RefillPriority;
   strong: string;
+  stepIdentity?: SemanticRefillAuditItem["stepIdentity"];
   currentPlacement: string;
   currentTarget?: SemanticRefillAuditItem["currentTarget"];
   sourcePlacement: {
@@ -482,6 +483,7 @@ export function compactSemanticRefillPrompt(batch: SemanticRefillLlmBatch): {
       auditKind: candidate.auditKind,
       priority: candidate.priority,
       strong: candidate.strong,
+      stepIdentity: candidate.stepIdentity,
       currentPlacement: candidate.currentPlacement,
       currentTarget: candidate.currentTarget,
       sourcePlacement: candidate.sourcePlacement,
@@ -539,8 +541,20 @@ export function evaluateSemanticRefillLlmDecisions(options: {
     options.batch.candidates.map((candidate) => [candidate.id, candidate])
   );
   const validated: SemanticRefillDecision[] = [];
+  const validatedRaw = new Map<
+    SemanticRefillDecision,
+    SemanticRefillLlmRawDecision
+  >();
   const pending: SemanticRefillLlmEvaluatedDecision[] = [];
   const rejected: SemanticRefillLlmEvaluatedDecision[] = [];
+
+  const accept = (
+    decision: SemanticRefillDecision,
+    raw: SemanticRefillLlmRawDecision
+  ): void => {
+    validated.push(decision);
+    validatedRaw.set(decision, raw);
+  };
 
   for (const raw of options.rawDecisions) {
     const candidate = candidatesById.get(raw.id);
@@ -579,7 +593,7 @@ export function evaluateSemanticRefillLlmDecisions(options: {
             )
           );
         } else {
-          validated.push(fallback);
+          accept(fallback, normalizedRaw);
         }
       } else {
         rejected.push(
@@ -650,13 +664,14 @@ export function evaluateSemanticRefillLlmDecisions(options: {
     });
     if (validation.status === "rejected") {
       if (options.referenceStyleFinalization) {
-        validated.push(
+        accept(
           referenceStyleEmptyOverride({
             bible: options.bible,
             candidate,
             raw: normalizedRaw,
             reason: `reference-style-empty-fallback:${validation.reason}`
-          })
+          }),
+          normalizedRaw
         );
       } else {
         rejected.push(rejectedEvaluation(normalizedRaw, validation.reason));
@@ -673,13 +688,14 @@ export function evaluateSemanticRefillLlmDecisions(options: {
     const stackingReason = findSuspiciousStacking(verse, override);
     if (stackingReason) {
       if (options.referenceStyleFinalization) {
-        validated.push(
+        accept(
           referenceStyleEmptyOverride({
             bible: options.bible,
             candidate,
             raw: normalizedRaw,
             reason: `reference-style-empty-fallback:${stackingReason}`
-          })
+          }),
+          normalizedRaw
         );
       } else {
         pending.push(
@@ -689,10 +705,50 @@ export function evaluateSemanticRefillLlmDecisions(options: {
       continue;
     }
 
-    validated.push(override);
+    accept(override, normalizedRaw);
+  }
+
+  if (!options.referenceStyleFinalization) {
+    const batchStacking = findSuspiciousBatchStacking(validated);
+    if (batchStacking.size > 0) {
+      const retained: SemanticRefillDecision[] = [];
+      for (const decision of validated) {
+        if (!batchStacking.has(decision)) {
+          retained.push(decision);
+          continue;
+        }
+        const raw = validatedRaw.get(decision);
+        if (!raw) throw new Error("missing-raw-decision-for-batch-stacking");
+        pending.push(
+          pendingEvaluation(
+            raw,
+            "suspicious-batch-stacking-on-same-word",
+            decision
+          )
+        );
+      }
+      return { validated: retained, pending, rejected };
+    }
   }
 
   return { validated, pending, rejected };
+}
+
+function findSuspiciousBatchStacking(
+  decisions: SemanticRefillDecision[]
+): Set<SemanticRefillDecision> {
+  const byWord = new Map<string, SemanticRefillDecision[]>();
+  for (const decision of decisions) {
+    if ((decision.target ?? "word") !== "word") continue;
+    const key = `${decision.ref}\u0000${decision.wordIndex}`;
+    const grouped = byWord.get(key) ?? [];
+    grouped.push(decision);
+    byWord.set(key, grouped);
+  }
+
+  return new Set(
+    [...byWord.values()].filter((grouped) => grouped.length > 1).flat()
+  );
 }
 
 function belowAutoAcceptThresholdReason(
@@ -715,6 +771,7 @@ function auditItemToPacket(
     auditKind: item.auditKind ?? "missing",
     priority: item.priority,
     strong: item.strong,
+    stepIdentity: item.stepIdentity,
     currentPlacement: item.currentPlacement,
     currentTarget: item.currentTarget,
     sourcePlacement: {
@@ -940,7 +997,10 @@ function stableCandidateId(
     ref: item.ref,
     strong: item.strong.toUpperCase(),
     auditKind: item.auditKind ?? "missing",
-    annotationId: item.annotation.id,
+    annotationId: item.stepIdentity ? undefined : item.annotation.id,
+    originalTokenId: item.stepIdentity?.originalTokenId,
+    originalOccurrenceIds: item.stepIdentity?.originalOccurrenceIds,
+    stepDStrong: item.stepIdentity?.dStrong,
     currentPlacement: item.currentPlacement,
     sourcePlacement: item.annotation.placement,
     insertAfterWordIndex: item.annotation.insertAfterWordIndex ?? null,

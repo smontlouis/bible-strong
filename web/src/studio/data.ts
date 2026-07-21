@@ -1,6 +1,9 @@
 import type {
   LexicalAuditItem,
   LexicalCandidateReport,
+  JsonlBibleCatalog,
+  JsonlBibleChapter,
+  JsonlBibleId,
   StrongLedger,
   StrongReviewBucket,
   StrongReviewItemsPage,
@@ -20,6 +23,25 @@ export async function loadLedger(path: string): Promise<StrongLedger> {
     return { ...ledger, apiBacked: true, verses: ledger.verses ?? [] };
   }
   return ledger;
+}
+
+export async function loadJsonlBibleCatalog(): Promise<JsonlBibleCatalog> {
+  return fetchJson<JsonlBibleCatalog>("/api/jsonl-bibles/catalog");
+}
+
+export async function loadJsonlBibleChapter(options: {
+  versions: JsonlBibleId[];
+  bookId: string;
+  chapter: number;
+}): Promise<JsonlBibleChapter> {
+  const params = new URLSearchParams({
+    versions: options.versions.join(","),
+    book: options.bookId,
+    chapter: String(options.chapter)
+  });
+  return fetchJson<JsonlBibleChapter>(
+    `/api/jsonl-bibles/chapter?${params.toString()}`
+  );
 }
 
 export async function loadBookVerses(
@@ -119,6 +141,7 @@ export function currentViewFromLocation(): string {
   const params = new URLSearchParams(window.location.search);
   if (params.has("review") || params.has("manifest")) return "review";
   if (window.location.pathname.endsWith("/workflow.html")) return "workflow";
+  if (window.location.pathname.endsWith("/jsonl.html")) return "jsonl";
   if (window.location.pathname.endsWith("/lexicon.html")) return "lexicon";
   if (window.location.pathname.endsWith("/review.html")) return "review";
   return params.get("view") ?? "viewer";

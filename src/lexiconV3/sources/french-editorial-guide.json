@@ -1,0 +1,140 @@
+{
+  "schemaVersion": "lexicon-v3-french-editorial-guide@1",
+  "locale": "fr",
+  "version": "2026-07-13.1",
+  "purpose": "Guide normatif pour la traduction interne du core lexical anglais validé vers le français.",
+  "sourceOfTruth": {
+    "semanticContent": "Le champ anglais promu et son identité STEP exacte sont seuls normatifs.",
+    "historicalFrench": "Le français historique est un témoin non fiable et ne peut jamais justifier un ajout ou une omission.",
+    "legacyStrong": "Le dictionnaire Strong classique sert uniquement d'indice terminologique et ne prouve jamais le sens d'un sous-STEP.",
+    "entities": "Les graphies de personnes, lieux, peuples et gentilés doivent être corroborées par le registre français d'entités lié au dStrong exact."
+  },
+  "style": {
+    "register": "français lexicographique contemporain, précis, sobre et naturel",
+    "address": "impersonnel",
+    "inclusiveLanguage": "respecter le genre et le nombre exprimés par la source sans introduire d'information absente",
+    "quotationMarks": "guillemets français lorsque la citation est française; conserver les formes originales sans les franciser",
+    "spacing": "typographie française avec espace insécable avant deux-points, point-virgule, point d'interrogation et point d'exclamation dans le rendu final",
+    "capitalization": "minuscule pour un lexème commun; majuscule uniquement pour un nom propre, un titre conventionnel ou le début d'une phrase"
+  },
+  "glossRules": {
+    "general": [
+      "Produire une vedette brève, pas une phrase ni une définition.",
+      "Conserver les distinctions de sens utiles au moyen de virgules ou de points-virgules sobres.",
+      "Ne jamais commencer un gloss verbal par « pour ».",
+      "Ne pas ajouter de point final.",
+      "Ne pas translittérer un lexème commun lorsque son sens français est connu."
+    ],
+    "verb": "infinitif présent; employer la forme pronominale seulement si elle appartient au sens lexical",
+    "noun": "lemme nominal français, normalement au singulier; préciser le genre uniquement lorsqu'il désambiguïse le sens",
+    "adjective": "masculin singulier, sauf gentilé ou forme lexicalisée imposant une autre convention",
+    "adverb": "forme adverbiale française",
+    "properName": "graphie biblique française canonique corroborée; à défaut, translittération STEP conservatrice explicitement signalée à l'audit",
+    "particle": "équivalent fonctionnel bref; éviter une paraphrase interprétative",
+    "number": "forme cardinale ou ordinale française correspondant exactement à la valeur de la source"
+  },
+  "meaningRules": [
+    "Traduire tous les sens, relations, restrictions, exemples, incertitudes, négations, modalités, nombres et renvois de la source anglaise.",
+    "Ne rien ajouter pour compléter une étymologie, une biographie, une localisation ou une doctrine.",
+    "Distinguer explicitement sens propre, figuré, métaphorique, technique et traditionnel lorsque la source les distingue.",
+    "Préserver les degrés d'incertitude : may, perhaps, probably, sometimes assumed, uncertain et leurs équivalents ne doivent pas devenir des affirmations.",
+    "Conserver les limites du sous-STEP; ne jamais importer le contexte général placé après le séparateur STEP lorsque le parent anglais ne le publie pas.",
+    "Rendre les abréviations grammaticales en français clair lorsqu'elles ne constituent pas une citation ou un identifiant protégé.",
+    "Préférer une phrase française naturelle à un calque syntaxique, sans modifier la portée sémantique."
+  ],
+  "protectedContent": {
+    "mustPreserve": [
+      "codes Strong et identités STEP cités",
+      "formes grecques et hébraïques citées",
+      "références bibliques, avec nom de livre français permis",
+      "nombres et intervalles",
+      "numérotation et ordre des sens",
+      "marqueurs de négation, modalité et incertitude"
+    ],
+    "mustNotExpose": [
+      "séparateur de provenance § absent du parent anglais publié",
+      "commentaires de quarantaine",
+      "identifiants internes d'agent ou hashes dans le texte affiché"
+    ]
+  },
+  "canonicalTerminology": {
+    "properly": "proprement, au sens strict",
+    "figuratively": "au sens figuré",
+    "metaphorically": "par métaphore",
+    "by implication": "par implication",
+    "by extension": "par extension",
+    "by metonymy": "par métonymie",
+    "collectively": "collectivement",
+    "intensively": "avec une valeur intensive",
+    "causative": "causatif",
+    "reflexive": "réfléchi",
+    "passive": "passif",
+    "active": "actif",
+    "middle voice": "voix moyenne",
+    "construct state": "état construit",
+    "absolute state": "état absolu",
+    "proper name": "nom propre",
+    "gentilic": "gentilé",
+    "of uncertain derivation": "d'origine incertaine",
+    "of foreign origin": "d'origine étrangère",
+    "probably": "probablement",
+    "perhaps": "peut-être",
+    "compare": "comparer",
+    "see": "voir"
+  },
+  "forbiddenCalques": [
+    {
+      "english": "light (adjective)",
+      "reject": "lumière",
+      "guidance": "léger, peu pesant, faible ou autre adjectif selon le sens"
+    },
+    {
+      "english": "staff (object)",
+      "reject": "personnel",
+      "guidance": "bâton, verge ou appui selon le sens"
+    },
+    {
+      "english": "revenue (return/arrival)",
+      "reject": "chiffre d'affaires",
+      "guidance": "retour, arrivée ou revenu uniquement si le contexte financier l'exige"
+    },
+    {
+      "english": "avenger",
+      "reject": "vengeresse sans preuve de genre",
+      "guidance": "vengeur, personne qui venge ou forme conforme à la morphologie"
+    },
+    {
+      "english": "covering",
+      "reject": "couvrant employé comme nom",
+      "guidance": "couverture, revêtement ou action de couvrir selon la catégorie"
+    }
+  ],
+  "entityRules": [
+    "L'identité dStrong exacte prime sur une ressemblance de nom.",
+    "Deux personnes homonymes peuvent partager une graphie française mais jamais une notice biographique par simple copie.",
+    "Les accents français conventionnels sont conservés : Gaïus, Abigaïl, Béthel, etc., lorsque le registre les atteste.",
+    "Un nom non corroboré reste un cas à auditer; il n'est pas francisé par intuition."
+  ],
+  "htmlPolicy": {
+    "authority": "Le texte français est canonique; le HTML est reconstruit localement et n'est jamais accepté directement d'un agent.",
+    "allowedTags": [
+      "b",
+      "br",
+      "def",
+      "em",
+      "greek",
+      "i",
+      "lb",
+      "note",
+      "p",
+      "ref",
+      "span",
+      "strong",
+      "sup",
+      "u"
+    ],
+    "attributes": "interdits",
+    "textEquivalence": "Le texte visible du HTML doit être exactement équivalent au champ texte après normalisation typographique autorisée."
+  },
+  "releaseRule": "Toute divergence non résolue, tout contrôle en échec ou toute incertitude éditoriale produit hold/block et interdit la release."
+}

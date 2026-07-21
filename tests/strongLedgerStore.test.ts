@@ -8,6 +8,7 @@ import type { StrongLedger, StrongLedgerVerse } from "../src/strongLedger.js";
 import {
   exportStrongLedgerTsvSqlite,
   readStrongLedgerSqlite,
+  readStrongLedgerVersesByRefsSqlite,
   readStrongLedgerVersesSqlite,
   strongLedgerSqlitePath,
   writeStrongLedgerSqlite
@@ -32,6 +33,16 @@ test("stores and reads Strong ledger verses by SQLite scope", async () => {
   assert.deepEqual(
     genOne.map((verse) => verse.ref),
     ["Gen.1.1", "Gen.1.2"]
+  );
+
+  const exactRefs = readStrongLedgerVersesByRefsSqlite({
+    sqlitePath,
+    bible: "test",
+    refs: ["Lev.1.1", "Gen.1.2", "Lev.1.1", "Missing.1.1"]
+  });
+  assert.deepEqual(
+    exactRefs.map((verse) => verse.ref),
+    ["Gen.1.2", "Lev.1.1"]
   );
 
   const readerTsv = path.join(dir, "reader.tsv");

@@ -6,6 +6,7 @@ import {
   type OriginalVerseMap
 } from "./originalSource.js";
 import { referenceKey } from "./strongCsv.js";
+import { normalizeStepStrongCode } from "./lexiconV3/identity.js";
 
 export interface StepOriginalToken {
   ref: string;
@@ -39,6 +40,10 @@ export interface StepStrongEvidence {
   gloss: string;
   morphology: string;
   editions: string;
+  /** Physical STEP token identity; stable across main/alternate ref aliases. */
+  stepSourceIdentity?: string;
+  stepMainRef?: string;
+  stepAlternateRefs?: string[];
 }
 
 export type StepOriginalEvidenceIndex = Map<
@@ -51,10 +56,31 @@ export interface StepOriginalData {
   evidenceIndex: StepOriginalEvidenceIndex;
 }
 
-type StepBackedOriginalToken = OriginalToken & {
+export type StepReferenceRole = "main" | "alt";
+
+export interface StepReferenceProvenance {
+  ref: string;
+  role: StepReferenceRole;
+}
+
+export type StepBackedOriginalToken = OriginalToken & {
   /** Native 1-based `#NN` position from TAHOT/TAGNT. */
   sourceTokenIndex: number;
+  /** Stable identity of the physical STEP token, independent of ref aliases. */
+  stepSourceIdentity: string;
+  /** Canonical ref written before parentheses in the STEP source. */
+  stepMainRef: string;
+  /** Alternate refs written between parentheses in the STEP source. */
+  stepAlternateRefs: string[];
+  /** Complete source provenance; aliases are not additional occurrences. */
+  stepReferenceProvenance: StepReferenceProvenance[];
 };
+
+export interface StepOriginalReferenceSelection {
+  refs: string[];
+  tokens: StepBackedOriginalToken[];
+  strongSet: Set<string>;
+}
 
 /**
  * Return the source-native STEP token position without confusing it with the
@@ -75,30 +101,62 @@ export function getStepSourceTokenIndex(
   return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
 
+/**
+ * Return the physical STEP token identity shared by its main and alternate-ref
+ * projections. Legacy projected tokens fall back to their historical id.
+ */
+export function getStepSourceIdentity(
+  token: OriginalToken
+): string | undefined {
+  const direct = (token as Partial<StepBackedOriginalToken>).stepSourceIdentity;
+  if (direct) return direct;
+
+  const legacy = token.id.match(
+    /^((?:TAHOT|TAGNT)\.[^.]+\.\d+\.\d+\.\d+\.[^.]+)\.(?:main|alt)$/u
+  )?.[1];
+  return legacy;
+}
+
 export function selectStepEvidenceForOccurrence(
   evidence: StepStrongEvidence[],
-  occurrence: { tokenIndex?: number; sourceStrong?: string },
+  occurrence: {
+    tokenIndex?: number;
+    sourceStrong?: string;
+    sourceIdentity?: string;
+  },
   limit = 4
 ): StepStrongEvidence[] {
   if (evidence.length === 0 || limit <= 0) return [];
-  const sourceStrong = occurrence.sourceStrong?.toUpperCase();
+  const sourceStrong = occurrence.sourceStrong
+    ? normalizeStepStrongCode(occurrence.sourceStrong)
+    : null;
+  const sameIdentity = occurrence.sourceIdentity
+    ? evidence.filter(
+        (item) => item.stepSourceIdentity === occurrence.sourceIdentity
+      )
+    : [];
   const sameToken = Number.isInteger(occurrence.tokenIndex)
     ? evidence.filter((item) => item.tokenIndex === occurrence.tokenIndex)
     : [];
   const sameSense = sourceStrong
-    ? evidence.filter((item) => item.stepStrong.toUpperCase() === sourceStrong)
+    ? evidence.filter((item) => item.stepStrong === sourceStrong)
     : [];
-  const exact = sameToken.filter(
-    (item) => item.stepStrong.toUpperCase() === sourceStrong
+  const identityAndSense = sameIdentity.filter(
+    (item) => item.stepStrong === sourceStrong
   );
+  const exact = sameToken.filter((item) => item.stepStrong === sourceStrong);
   const selected =
-    exact.length > 0
-      ? exact
-      : sameToken.length > 0
-        ? sameToken
-        : sameSense.length > 0
-          ? sameSense
-          : evidence;
+    identityAndSense.length > 0
+      ? identityAndSense
+      : sameIdentity.length > 0
+        ? sameIdentity
+        : exact.length > 0
+          ? exact
+          : sameToken.length > 0
+            ? sameToken
+            : sameSense.length > 0
+              ? sameSense
+              : evidence;
 
   return [...selected]
     .sort(
@@ -189,7 +247,7 @@ const STEP_TO_OSIS_BOOK = new Map<string, string>([
   ["Rev", "Rev"]
 ]);
 
-const STEP_CODE_PATTERN = /\b[HG]\d{4,5}[A-Z]?(?:_[A-Z])?\b/gu;
+const STEP_CODE_PATTERN = /\b[HG]\d{4,5}[A-Za-z]?(?:_[A-Za-z])?\b/gu;
 
 export async function readStepOriginalIndex(
   filePaths: string[]
@@ -253,6 +311,117 @@ export async function readStepOriginalVerseMap(
   }
 
   return map;
+}
+
+/**
+ * Select several reference projections as one logical source span. A STEP
+ * token referenced by both `Rom.3.25` and its alias `Rom.3.26` is returned
+ * once, while its complete main/alt provenance remains attached to the token.
+ */
+export function selectStepOriginalTokensForRefs(
+  verseMap: OriginalVerseMap,
+  refs: Iterable<string>,
+  options: {
+    requireMainRef?: boolean;
+    /**
+     * Select the STEP projection used by the French Strong reference space.
+     * When an alternate projection exists for one selected ref, exclude a
+     * different physical verse whose main ref merely collides with that ref.
+     */
+    preferAlternateRef?: boolean;
+  } = {}
+): StepOriginalReferenceSelection {
+  const selectedRefs = [...new Set(refs)];
+  const tokens: StepBackedOriginalToken[] = [];
+  const strongSet = new Set<string>();
+  const seenSourceIdentities = new Set<string>();
+
+  for (const ref of selectedRefs) {
+    const verse = verseMap.get(ref);
+    if (!verse) continue;
+    const hasAlternateProjection =
+      options.preferAlternateRef &&
+      verse.tokens.some((token) =>
+        (token as StepBackedOriginalToken).stepAlternateRefs.includes(ref)
+      );
+
+    for (const token of verse.tokens) {
+      const sourceIdentity = getStepSourceIdentity(token);
+      if (!sourceIdentity || seenSourceIdentities.has(sourceIdentity)) continue;
+      const stepToken = token as StepBackedOriginalToken;
+      if (
+        hasAlternateProjection &&
+        !stepToken.stepAlternateRefs.includes(ref)
+      ) {
+        continue;
+      }
+      if (
+        options.requireMainRef &&
+        !selectedRefs.includes(stepToken.stepMainRef)
+      ) {
+        continue;
+      }
+      seenSourceIdentities.add(sourceIdentity);
+      tokens.push(stepToken);
+      for (const strong of stepToken.strong) strongSet.add(strong);
+    }
+  }
+
+  return { refs: selectedRefs, tokens, strongSet };
+}
+
+/** Read STEP data and return one deduplicated logical span for a set of refs. */
+export async function readStepOriginalTokensForRefs(
+  filePaths: string[],
+  refs: Iterable<string>,
+  options: StepOriginalReadOptions = {}
+): Promise<StepOriginalReferenceSelection> {
+  const data = await readStepOriginalData(filePaths, options);
+  return selectStepOriginalTokensForRefs(data.verseMap, refs);
+}
+
+/** Select and deduplicate STEP annotation evidence across a canonical span. */
+export function selectStepEvidenceForRefs(
+  evidenceIndex: StepOriginalEvidenceIndex,
+  refs: Iterable<string>,
+  options: { requireMainRef?: boolean; preferAlternateRef?: boolean } = {}
+): Map<string, StepStrongEvidence[]> {
+  const selected = new Map<string, StepStrongEvidence[]>();
+  const seen = new Set<string>();
+  const selectedRefs = new Set(refs);
+  for (const ref of selectedRefs) {
+    const byStrong = evidenceIndex.get(ref);
+    if (!byStrong) continue;
+    const hasAlternateProjection =
+      options.preferAlternateRef &&
+      [...byStrong.values()].some((evidence) =>
+        evidence.some((item) => item.stepAlternateRefs?.includes(ref))
+      );
+    for (const [strong, evidence] of byStrong) {
+      const target = selected.get(strong) ?? [];
+      for (const item of evidence) {
+        if (hasAlternateProjection && !item.stepAlternateRefs?.includes(ref)) {
+          continue;
+        }
+        if (
+          options.requireMainRef &&
+          item.stepMainRef &&
+          !selectedRefs.has(item.stepMainRef)
+        ) {
+          continue;
+        }
+        const identity =
+          item.stepSourceIdentity ??
+          `${item.source}.${item.stepMainRef ?? ref}.${item.tokenIndex}.${item.type}`;
+        const key = `${identity}:${item.stepStrong}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        target.push(item);
+      }
+      if (target.length > 0) selected.set(strong, target);
+    }
+  }
+  return selected;
 }
 
 export async function readStepOriginalData(
@@ -346,9 +515,25 @@ function addTokenToOriginalVerseMap(
     } satisfies OriginalVerse);
 
   const suffix = key === token.ref ? "main" : "alt";
+  const stepSourceIdentity = [
+    token.source,
+    token.ref,
+    token.tokenIndex,
+    token.type
+  ].join(".");
   const originalToken: StepBackedOriginalToken = {
     id: `${token.source}.${key}.${token.tokenIndex}.${token.type}.${suffix}`,
     sourceTokenIndex: token.tokenIndex,
+    stepSourceIdentity,
+    stepMainRef: token.ref,
+    stepAlternateRefs: [...token.alternateRefs],
+    stepReferenceProvenance: [
+      { ref: token.ref, role: "main" },
+      ...token.alternateRefs.map((ref) => ({
+        ref,
+        role: "alt" as const
+      }))
+    ],
     text: token.surface,
     strong: pairs.map((pair) => pair.baseStrong),
     sourceStrong: pairs.map((pair) => pair.stepStrong),
@@ -386,7 +571,7 @@ function stepStrongPairs(
 
 function preferDisambiguatedStepStrong(values: string[]): string[] {
   const disambiguated = values.filter((value) =>
-    /^[HG]\d{4,5}[A-Z]$/u.test(value)
+    /^[HG]\d{4,5}[A-Za-z]$/u.test(value)
   );
   return disambiguated.length > 0 ? disambiguated : values;
 }
@@ -404,11 +589,10 @@ function parseReferenceKey(
 }
 
 export function normalizeClassicalStrong(strong: string): string | undefined {
-  const match = strong
-    .toUpperCase()
-    .match(/\b([HG])0*(\d{1,5})(?:[A-Z])?(?:_[A-Z])?\b/u);
+  const normalized = normalizeStepStrongCode(strong);
+  const match = normalized?.match(/^([HG])(\d{4,5})/u);
   if (!match) return undefined;
-  return `${match[1]}${match[2].padStart(4, "0")}`;
+  return `${match[1]}${match[2]}`;
 }
 
 function parseTahotToken(
@@ -520,7 +704,15 @@ function addTokenEvidence(
         transliteration: token.transliteration,
         gloss: token.gloss,
         morphology: token.morphology,
-        editions: token.editions
+        editions: token.editions,
+        stepSourceIdentity: [
+          token.source,
+          token.ref,
+          token.tokenIndex,
+          token.type
+        ].join("."),
+        stepMainRef: token.ref,
+        stepAlternateRefs: [...token.alternateRefs]
       });
     }
   }
@@ -559,7 +751,8 @@ function extractStepStrongCodes(values: string[]): string[] {
   const result: string[] = [];
   for (const value of values) {
     for (const match of value.matchAll(STEP_CODE_PATTERN)) {
-      const stepStrong = normalizeStepStrong(match[0]);
+      const stepStrong = normalizeStepStrongCode(match[0]);
+      if (!stepStrong) continue;
       if (isTechnicalHebrewMarker(stepStrong)) continue;
       result.push(stepStrong);
     }
@@ -567,16 +760,8 @@ function extractStepStrongCodes(values: string[]): string[] {
   return result;
 }
 
-function normalizeStepStrong(strong: string): string {
-  return strong
-    .replace(/_[A-Z]$/u, "")
-    .replace(/^([HG])0*(\d{1,5})/u, (_, prefix, digits) => {
-      return `${prefix}${String(digits).padStart(4, "0")}`;
-    });
-}
-
 function isTechnicalHebrewMarker(stepStrong: string): boolean {
-  return /^H90\d{2}$/u.test(stepStrong);
+  return /^H90\d{2}(?:[A-Za-z]|_[A-Za-z])?$/u.test(stepStrong);
 }
 
 function extractTransliteration(surface: string): string {

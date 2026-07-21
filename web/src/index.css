@@ -576,4 +576,426 @@
       display: none;
     }
   }
+
+  .jsonl-shell {
+    --jsonl-ost: oklch(0.72 0.12 56);
+    --jsonl-fmar: oklch(0.7 0.13 28);
+    --jsonl-nvs78p: oklch(0.7 0.12 305);
+    --jsonl-neg79: oklch(0.75 0.12 96);
+    --jsonl-nbs: oklch(0.7 0.13 340);
+    --jsonl-dby: oklch(0.69 0.11 190);
+    --jsonl-dbyr: oklch(0.68 0.12 250);
+    --jsonl-lsg: oklch(0.72 0.12 145);
+    background:
+      radial-gradient(
+        circle at 12% -8%,
+        color-mix(in oklab, var(--jsonl-ost) 10%, transparent),
+        transparent 32rem
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent 0,
+        transparent 95px,
+        rgba(255, 255, 255, 0.014) 96px
+      ),
+      var(--background);
+  }
+
+  .jsonl-masthead {
+    background:
+      linear-gradient(100deg, rgba(9, 15, 21, 0.98), rgba(18, 27, 32, 0.94)),
+      var(--background);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.2);
+  }
+
+  .jsonl-kicker {
+    color: oklch(0.8 0.1 72);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .jsonl-title {
+    font-family:
+      Charter, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    font-size: clamp(2rem, 4.5vw, 4.25rem);
+    font-weight: 520;
+    line-height: 0.92;
+    letter-spacing: -0.052em;
+  }
+
+  .jsonl-version-toggle {
+    border-color: color-mix(in oklab, var(--version-color) 40%, var(--border));
+    background: color-mix(in oklab, var(--version-color) 8%, transparent);
+    color: color-mix(in oklab, var(--version-color) 76%, white);
+  }
+
+  .jsonl-version-toggle.is-active {
+    border-color: color-mix(in oklab, var(--version-color) 70%, white 8%);
+    background: color-mix(in oklab, var(--version-color) 19%, transparent);
+    box-shadow: inset 0 0 0 1px
+      color-mix(in oklab, var(--version-color) 16%, transparent);
+  }
+
+  .jsonl-version-ost {
+    --version-color: var(--jsonl-ost);
+  }
+
+  .jsonl-version-fmar {
+    --version-color: var(--jsonl-fmar);
+  }
+
+  .jsonl-version-nvs78p {
+    --version-color: var(--jsonl-nvs78p);
+  }
+
+  .jsonl-version-neg79 {
+    --version-color: var(--jsonl-neg79);
+  }
+
+  .jsonl-version-nbs {
+    --version-color: var(--jsonl-nbs);
+  }
+
+  .jsonl-version-dby {
+    --version-color: var(--jsonl-dby);
+  }
+
+  .jsonl-version-dbyr {
+    --version-color: var(--jsonl-dbyr);
+  }
+
+  .jsonl-version-lsg {
+    --version-color: var(--jsonl-lsg);
+  }
+
+  .jsonl-version-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    flex: 0 0 auto;
+    border-radius: 999px;
+    background: var(--version-color, var(--primary));
+    box-shadow: 0 0 12px
+      color-mix(in oklab, var(--version-color) 52%, transparent);
+  }
+
+  .jsonl-stat-card {
+    overflow: hidden;
+    background:
+      linear-gradient(120deg, rgba(255, 255, 255, 0.03), transparent),
+      color-mix(in oklab, var(--card) 88%, transparent);
+  }
+
+  .jsonl-stat-icon {
+    display: flex;
+    width: 2.4rem;
+    height: 2.4rem;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid color-mix(in oklab, var(--jsonl-ost) 28%, var(--border));
+    border-radius: 0.5rem;
+    color: oklch(0.79 0.1 72);
+    background: color-mix(in oklab, var(--jsonl-ost) 9%, transparent);
+  }
+
+  .jsonl-stat-icon svg {
+    width: 1rem;
+  }
+
+  .jsonl-reading-table {
+    border-color: color-mix(in oklab, var(--border) 82%, transparent);
+    background: rgba(7, 12, 17, 0.55);
+    box-shadow: 0 26px 70px rgba(0, 0, 0, 0.24);
+  }
+
+  .jsonl-column-head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10, 16, 22, 0.96);
+    backdrop-filter: blur(16px);
+  }
+
+  .jsonl-version-heading {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    gap: 0.5rem;
+    align-items: center;
+    min-height: 3.1rem;
+    border-left: 1px solid var(--border);
+    padding: 0.65rem 0.8rem;
+    color: color-mix(in oklab, var(--version-color) 78%, white);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+  }
+
+  .jsonl-version-heading small {
+    justify-self: end;
+    color: var(--muted-foreground);
+    font-family: inherit;
+    font-size: 0.62rem;
+    letter-spacing: 0;
+  }
+
+  .jsonl-verse-row {
+    border-bottom: 1px solid color-mix(in oklab, var(--border) 74%, transparent);
+  }
+
+  .jsonl-verse-row:last-child {
+    border-bottom: 0;
+  }
+
+  .jsonl-verse-row:hover {
+    background: rgba(255, 255, 255, 0.018);
+  }
+
+  .jsonl-verse-gutter {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.25rem;
+    padding: 0.9rem 0.35rem;
+    color: var(--muted-foreground);
+    background: rgba(4, 9, 13, 0.62);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  .jsonl-verse-gutter strong {
+    color: oklch(0.83 0.08 72);
+    font-size: 1rem;
+  }
+
+  .jsonl-verse-gutter span {
+    max-width: 3.5rem;
+    overflow: hidden;
+    font-size: 0.54rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .jsonl-verse-cell {
+    position: relative;
+    min-height: 5rem;
+    border-left: 1px solid var(--border);
+    padding: 0.95rem 0.85rem 1.15rem;
+    transition:
+      background 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .jsonl-verse-cell::before {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 2px;
+    content: "";
+    opacity: 0.45;
+    background: var(--version-color, transparent);
+  }
+
+  .jsonl-verse-cell.is-selected {
+    background: color-mix(in oklab, var(--version-color) 8%, transparent);
+    box-shadow: inset 0 0 0 1px
+      color-mix(in oklab, var(--version-color) 32%, transparent);
+  }
+
+  .jsonl-verse-cell.is-missing {
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    font-style: italic;
+  }
+
+  .jsonl-verse-text {
+    color: oklch(0.92 0.014 85);
+    font-family:
+      Charter, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+
+  .jsonl-verse-text p {
+    display: inline;
+    margin: 0;
+  }
+
+  .jsonl-verse-text divinename {
+    font-variant: small-caps;
+    letter-spacing: 0.045em;
+  }
+
+  .jsonl-verse-text note {
+    display: inline-flex;
+    width: 1rem;
+    height: 1rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--muted-foreground);
+    font-family: ui-monospace, monospace;
+    font-size: 0.56rem;
+    vertical-align: super;
+  }
+
+  .jsonl-verse-text w {
+    position: relative;
+    display: inline;
+    margin: 0 0.08em;
+    border-radius: 0.24rem;
+    padding: 0.08em 0.16em;
+    background: color-mix(in oklab, var(--version-color) 18%, transparent);
+    box-decoration-break: clone;
+    color: color-mix(in oklab, var(--version-color) 32%, white);
+    font-weight: 620;
+    -webkit-box-decoration-break: clone;
+  }
+
+  .jsonl-verse-text w:hover,
+  .jsonl-verse-text w:focus-visible {
+    cursor: pointer;
+    background: color-mix(in oklab, var(--version-color) 34%, transparent);
+    outline: 1px solid color-mix(in oklab, var(--version-color) 80%, white 8%);
+  }
+
+  .jsonl-verse-text w::after {
+    position: relative;
+    top: -0.44em;
+    margin-left: 0.18rem;
+    content: attr(data-strong-label);
+    color: color-mix(in oklab, var(--version-color) 78%, white);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.48rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+  }
+
+  .jsonl-verse-text w:empty {
+    display: inline-flex;
+    min-width: 1.7rem;
+    min-height: 1rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed
+      color-mix(in oklab, var(--version-color) 62%, transparent);
+    border-radius: 999px;
+    vertical-align: middle;
+  }
+
+  .jsonl-verse-text w:empty::after {
+    top: 0;
+    margin: 0;
+  }
+
+  .jsonl-inspector {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent),
+      rgba(8, 14, 19, 0.7);
+  }
+
+  .jsonl-inspector-card {
+    overflow: hidden;
+    border-top-color: color-mix(
+      in oklab,
+      var(--version-color, var(--primary)) 65%,
+      var(--border)
+    );
+  }
+
+  .jsonl-inspector-word {
+    font-family: Charter, "Iowan Old Style", Georgia, serif;
+    font-size: 1.75rem;
+    font-weight: 520;
+  }
+
+  .jsonl-identity-level {
+    border-left: 2px solid var(--identity-color, var(--border));
+    padding: 0.6rem 0.7rem;
+    background: color-mix(
+      in oklab,
+      var(--identity-color, var(--muted)) 7%,
+      transparent
+    );
+  }
+
+  .jsonl-identity-level > div > span {
+    color: var(--identity-color, var(--foreground));
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+  }
+
+  .jsonl-identity-level code,
+  .jsonl-lookup-rule code {
+    border-radius: 0.3rem;
+    padding: 0.18rem 0.38rem;
+    color: color-mix(
+      in oklab,
+      var(--identity-color, var(--primary)) 72%,
+      white
+    );
+    background: rgba(0, 0, 0, 0.32);
+    font-size: 0.72rem;
+  }
+
+  .jsonl-identity-level em {
+    color: var(--muted-foreground);
+    font-size: 0.7rem;
+  }
+
+  .jsonl-identity-level p {
+    margin-top: 0.3rem;
+    color: var(--muted-foreground);
+    font-size: 0.7rem;
+    line-height: 1.45;
+  }
+
+  .jsonl-identity-level.is-classic {
+    --identity-color: oklch(0.72 0.12 56);
+  }
+
+  .jsonl-identity-level.is-extended {
+    --identity-color: oklch(0.69 0.11 190);
+  }
+
+  .jsonl-identity-level.is-distinguished {
+    --identity-color: oklch(0.68 0.12 250);
+  }
+
+  .jsonl-identity-level.is-unified {
+    --identity-color: oklch(0.72 0.12 145);
+  }
+
+  .jsonl-lookup-rule {
+    background: repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.018) 0,
+      rgba(255, 255, 255, 0.018) 6px,
+      transparent 6px,
+      transparent 12px
+    );
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .jsonl-verse-row {
+      animation: jsonl-row-enter 240ms ease both;
+    }
+  }
+
+  @keyframes jsonl-row-enter {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }

@@ -5,7 +5,7 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    ignores: ["dist", "node_modules", "viewer/app"]
+    ignores: ["dist", "node_modules", "outputs", "viewer/app"]
   },
   {
     rules: {

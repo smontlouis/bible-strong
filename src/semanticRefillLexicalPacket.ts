@@ -16,7 +16,7 @@ import {
   type StrongLedgerVerse
 } from "./strongLedger.js";
 import {
-  readStrongLedgerVersesSqlite,
+  readStrongLedgerVersesByRefsSqlite,
   strongLedgerSqlitePath
 } from "./strongLedgerStore.js";
 import {
@@ -26,6 +26,12 @@ import {
 } from "./semanticRefill.js";
 
 type CandidateConfidence = LexicalCandidate["confidence"];
+export type LexicalPacketCandidateClass =
+  | "all"
+  | "open-high"
+  | "ambiguous-high"
+  | "direct-high"
+  | "relocation-better-open";
 
 interface LexicalAgentPacketFile {
   generatedAt: string;
@@ -39,6 +45,7 @@ interface LexicalAgentPacketFile {
     includeOccupied: boolean;
     allowDuplicateTargets: boolean;
     auditKind: "all" | "empty" | "relocation";
+    candidateClass: LexicalPacketCandidateClass;
     offset: number;
     limit?: number;
   };
@@ -73,19 +80,24 @@ export async function buildLexicalAgentPacket(options: {
   includeOccupied: boolean;
   allowDuplicateTargets: boolean;
   auditKind: "all" | "empty" | "relocation";
+  candidateClass?: LexicalPacketCandidateClass;
 }): Promise<LexicalAgentPacketFile> {
   const report = JSON.parse(
     await readFile(options.lexicalReportPath, "utf8")
   ) as LexicalCandidateReport;
+  const candidateClass = options.candidateClass ?? "all";
+  const lexicalItems = report.items.filter(
+    (item) =>
+      refInScope(item.ref, options.scope) &&
+      matchesAuditKind(item, options.auditKind) &&
+      matchesCandidateClass(item, candidateClass)
+  );
   const verses = await readVerses(
     options.ledgerDir,
     options.bible,
-    options.scope
+    lexicalItems.map((item) => item.ref)
   );
   const versesByRef = new Map(verses.map((verse) => [verse.ref, verse]));
-  const lexicalItems = report.items.filter((item) =>
-    refInScope(item.ref, options.scope)
-  );
   const ranked = lexicalItems
     .map((item) =>
       lexicalItemToAuditItem({
@@ -99,9 +111,10 @@ export async function buildLexicalAgentPacket(options: {
     )
     .filter((item): item is SemanticRefillAuditItem => !!item)
     .sort(compareAuditItems);
+  const normalized = collapseSameTokenStepIdentities(ranked);
   const deduplicated = options.allowDuplicateTargets
-    ? ranked
-    : uniqueByBestTarget(ranked);
+    ? normalized
+    : uniqueByBestTarget(normalized);
   const selected = slicePacketItems(
     deduplicated,
     options.offset ?? 0,
@@ -136,6 +149,7 @@ export async function buildLexicalAgentPacket(options: {
       includeOccupied: options.includeOccupied,
       allowDuplicateTargets: options.allowDuplicateTargets,
       auditKind: options.auditKind,
+      candidateClass,
       offset: options.offset ?? 0,
       limit: options.limit
     },
@@ -196,13 +210,14 @@ function lexicalItemToAuditItem(options: {
   const currentCandidates = options.item.candidates.map((candidate) =>
     recomputeLexicalCandidateOccupation(candidate, options.verse!)
   );
-  const candidates = currentCandidates
+  const eligibleLexicalCandidates = currentCandidates
     .filter(
       (candidate) =>
         confidenceRank(candidate.confidence) >=
         confidenceRank(options.minConfidence)
     )
-    .filter((candidate) => options.includeOccupied || !candidate.occupied)
+    .filter((candidate) => options.includeOccupied || !candidate.occupied);
+  const candidates = eligibleLexicalCandidates
     .map((candidate) => lexicalCandidateToSemantic(candidate, options.item))
     .sort(
       (left, right) =>
@@ -218,11 +233,20 @@ function lexicalItemToAuditItem(options: {
   if (candidates.length === 0) return undefined;
 
   const annotation = findAnnotation(options.verse, options.item);
+  if (annotation && !isInternalPlacementReviewEligibleAnnotation(annotation)) {
+    return undefined;
+  }
+  const occurrenceAnnotation = resolveStepOccurrenceAnnotation(
+    options.verse,
+    annotation
+  );
   const bestConfidence = candidates[0]?.score ?? 0;
   const priority = priorityForConfidence(
-    currentCandidates.find(
-      (candidate) => candidate.score === candidates[0]?.score
-    )?.confidence ?? options.minConfidence
+    confidenceForSemanticCandidate(
+      eligibleLexicalCandidates,
+      candidates[0],
+      options.minConfidence
+    )
   );
 
   return {
@@ -244,7 +268,15 @@ function lexicalItemToAuditItem(options: {
       confidence: annotation?.confidence ?? bestConfidence,
       source: annotation?.source ?? "semantic-lexicon",
       diagnostics: annotation?.diagnostics ?? ["lexical-candidate-packet"],
-      referenceSupport: annotation?.referenceSupport ?? []
+      referenceSupport: annotation?.referenceSupport ?? [],
+      originalTokenId:
+        annotation?.originalTokenId ?? occurrenceAnnotation?.originalTokenId,
+      originalOccurrenceId:
+        annotation?.originalOccurrenceId ??
+        occurrenceAnnotation?.originalOccurrenceId,
+      sourceStrong:
+        annotation?.sourceStrong ?? occurrenceAnnotation?.sourceStrong,
+      step: annotation?.step ?? occurrenceAnnotation?.step
     },
     strong: options.item.strong.toUpperCase(),
     currentPlacement:
@@ -272,6 +304,32 @@ function lexicalItemToAuditItem(options: {
     eligible: true,
     reason: `lexical-candidate:${options.item.auditKind}:${options.minConfidence}-or-better`
   };
+}
+
+export function confidenceForSemanticCandidate(
+  lexicalCandidates: LexicalCandidate[],
+  semanticCandidate: SemanticRefillCandidate | undefined,
+  fallback: CandidateConfidence
+): CandidateConfidence {
+  if (!semanticCandidate) return fallback;
+  return (
+    lexicalCandidates.find((candidate) => {
+      if (candidate.target !== semanticCandidate.target) return false;
+      if (candidate.wordIndex !== semanticCandidate.wordIndex) return false;
+      if (
+        candidate.target === "phrase" &&
+        (candidate.startWordIndex !== semanticCandidate.startWordIndex ||
+          candidate.endWordIndex !== semanticCandidate.endWordIndex)
+      ) {
+        return false;
+      }
+      const normalized =
+        semanticCandidate.target === "phrase"
+          ? semanticCandidate.normalizedPhrase?.join(" ")
+          : semanticCandidate.normalizedWord;
+      return candidate.normalized === normalized;
+    })?.confidence ?? fallback
+  );
 }
 
 export function recomputeLexicalCandidateOccupation(
@@ -310,12 +368,135 @@ export function uniqueByBestTarget(
   const seen = new Set<string>();
   const output: SemanticRefillAuditItem[] = [];
   for (const item of items) {
-    const key = candidateTargetKey(item.ref, item.strong, item.candidates[0]);
+    const key = [
+      candidateTargetKey(item.ref, item.strong, item.candidates[0]),
+      item.annotation?.originalTokenId ?? ""
+    ].join("|");
     if (seen.has(key)) continue;
     seen.add(key);
     output.push(item);
   }
   return output;
+}
+
+/**
+ * One STEP source token can expose a classical Strong plus e/d/u identities.
+ * When two lexical-report rows share both the source token and the exact STEP
+ * dStrong identity, they are one carrier question, not two occurrences.
+ */
+export function collapseSameTokenStepIdentities(
+  items: SemanticRefillAuditItem[]
+): SemanticRefillAuditItem[] {
+  const groups = new Map<string, SemanticRefillAuditItem[]>();
+  for (const item of items) {
+    const key = stepIdentityGroupKey(item);
+    if (!key) continue;
+    const group = groups.get(key) ?? [];
+    group.push(item);
+    groups.set(key, group);
+  }
+
+  const replacement = new Map<
+    SemanticRefillAuditItem,
+    SemanticRefillAuditItem
+  >();
+  const suppressed = new Set<SemanticRefillAuditItem>();
+  for (const group of groups.values()) {
+    if (new Set(group.map((item) => item.strong.toUpperCase())).size < 2) {
+      for (const item of group) {
+        replacement.set(item, {
+          ...item,
+          stepIdentity: buildStepIdentity([item], item)
+        });
+      }
+      continue;
+    }
+    const primary = [...group].sort(compareStepIdentityPrimary)[0];
+    replacement.set(primary, {
+      ...primary,
+      stepIdentity: buildStepIdentity(group, primary)
+    });
+    for (const item of group) {
+      if (item !== primary) suppressed.add(item);
+    }
+  }
+
+  return items
+    .filter((item) => !suppressed.has(item))
+    .map((item) => replacement.get(item) ?? item);
+}
+
+function stepIdentityGroupKey(
+  item: SemanticRefillAuditItem
+): string | undefined {
+  const tokenId = item.annotation.originalTokenId;
+  const dStrong = exactUnique(
+    (item.annotation.step ?? []).map((evidence) => evidence.dStrong)
+  );
+  if (!tokenId || dStrong.length === 0) return undefined;
+  return `${item.ref}|${tokenId}|${dStrong.join(",")}`;
+}
+
+function compareStepIdentityPrimary(
+  left: SemanticRefillAuditItem,
+  right: SemanticRefillAuditItem
+): number {
+  return (
+    referenceWitnessCount(right) - referenceWitnessCount(left) ||
+    Number(stepClassicalSelf(right)) - Number(stepClassicalSelf(left)) ||
+    bestScore(right) - bestScore(left) ||
+    left.strong.localeCompare(right.strong)
+  );
+}
+
+function referenceWitnessCount(item: SemanticRefillAuditItem): number {
+  const strong = item.strong.toUpperCase();
+  return Object.values(item.referenceInventory).filter((inventory) =>
+    inventory.includes(strong)
+  ).length;
+}
+
+function stepClassicalSelf(item: SemanticRefillAuditItem): boolean {
+  const strong = item.strong.toUpperCase();
+  return (item.annotation.step ?? []).some(
+    (evidence) => evidence.classicalStrong.toUpperCase() === strong
+  );
+}
+
+function buildStepIdentity(
+  items: SemanticRefillAuditItem[],
+  primary: SemanticRefillAuditItem
+): NonNullable<SemanticRefillAuditItem["stepIdentity"]> {
+  const annotations = items.map((item) => item.annotation);
+  const evidence = annotations.flatMap((annotation) => annotation.step ?? []);
+  const primaryStrong = primary.strong.toUpperCase();
+  return {
+    originalTokenId: primary.annotation.originalTokenId!,
+    primaryStrong,
+    associatedStrong: [
+      ...new Set(
+        items
+          .map((item) => item.strong.toUpperCase())
+          .filter((strong) => strong !== primaryStrong)
+      )
+    ].sort(),
+    originalOccurrenceIds: exactUnique(
+      annotations.map((annotation) => annotation.originalOccurrenceId)
+    ),
+    classicalStrong: exactUnique(evidence.map((item) => item.classicalStrong)),
+    eStrong: exactUnique(evidence.map((item) => item.eStrong)),
+    dStrong: exactUnique(evidence.map((item) => item.dStrong)),
+    uStrong: exactUnique(evidence.map((item) => item.uStrong)),
+    sourceStrong: exactUnique(
+      annotations.map((annotation) => annotation.sourceStrong)
+    )
+  };
+}
+
+function exactUnique(values: Array<string | undefined>): string[] {
+  return [
+    ...new Set(values.filter((value): value is string => !!value))
+  ].sort();
 }
 
 function candidateTargetKey(
@@ -398,6 +579,24 @@ function findAnnotation(
   );
 }
 
+export function resolveStepOccurrenceAnnotation(
+  verse: StrongLedgerVerse,
+  annotation?: StrongLedgerAnnotation
+): StrongLedgerAnnotation | undefined {
+  if (!annotation) return undefined;
+  if (annotation.originalTokenId && annotation.step?.length) return annotation;
+  if (!annotation.originalOccurrenceId) return annotation;
+  return (
+    verse.annotations.find(
+      (candidate) =>
+        candidate !== annotation &&
+        candidate.originalOccurrenceId === annotation.originalOccurrenceId &&
+        Boolean(candidate.originalTokenId) &&
+        Boolean(candidate.step?.length)
+    ) ?? annotation
+  );
+}
+
 function annotationTarget(
   annotation: StrongLedgerAnnotation
 ): SemanticRefillAuditItem["currentTarget"] {
@@ -445,13 +644,46 @@ function lexicalCurrentTarget(
 async function readVerses(
   ledgerDir: string,
   bible: string,
-  scope: string
+  refs: string[]
 ): Promise<StrongLedgerVerse[]> {
-  return readStrongLedgerVersesSqlite({
+  return readStrongLedgerVersesByRefsSqlite({
     sqlitePath: strongLedgerSqlitePath(ledgerDir, bible),
     bible,
-    onlyRef: scope
+    refs
   });
+}
+
+export function matchesCandidateClass(
+  item: LexicalCandidateItem,
+  candidateClass: LexicalPacketCandidateClass
+): boolean {
+  if (candidateClass === "all") return true;
+  if (candidateClass === "relocation-better-open") {
+    if (item.auditKind !== "relocation" || !item.currentTarget) return false;
+    const bestOpen = item.candidates.find((candidate) => !candidate.occupied);
+    if (!bestOpen) return false;
+    const currentScore =
+      item.candidates.find(
+        (candidate) => candidate.wordIndex === item.currentTarget?.wordIndex
+      )?.score ?? 0;
+    return bestOpen.score >= currentScore + 0.12;
+  }
+  const high = item.candidates.filter(
+    (candidate) => candidate.confidence === "high"
+  );
+  const hasOpenHigh = high.some((candidate) => !candidate.occupied);
+  if (candidateClass === "open-high") return hasOpenHigh;
+  if (candidateClass === "ambiguous-high") {
+    return hasOpenHigh && high.length > 1;
+  }
+  return hasOpenHigh && high.length === 1;
+}
+
+function matchesAuditKind(
+  item: LexicalCandidateItem,
+  auditKind: "all" | "empty" | "relocation"
+): boolean {
+  return auditKind === "all" || item.auditKind === auditKind;
 }
 
 function refInScope(ref: string, scope: string): boolean {
@@ -587,6 +819,32 @@ function readAuditKindArg(
   throw new Error(`invalid-audit-kind:${String(value)}`);
 }
 
+function readCandidateClassArg(
+  args: Map<string, string | boolean>
+): LexicalPacketCandidateClass {
+  const value = args.get("candidate-class");
+  if (value === undefined) return "all";
+  if (
+    value === "all" ||
+    value === "open-high" ||
+    value === "ambiguous-high" ||
+    value === "direct-high" ||
+    value === "relocation-better-open"
+  ) {
+    return value;
+  }
+  throw new Error(`invalid-candidate-class:${String(value)}`);
+}
+
+export function isInternalPlacementReviewEligibleAnnotation(
+  annotation: StrongLedgerAnnotation
+): boolean {
+  return (
+    annotation.source !== "reference-only" &&
+    annotation.placement !== "not-rendered"
+  );
+}
+
 function defaultOutputPath(bible: string, scope: string): string {
   const safeScope = scope.replace(/[^0-9A-Za-z]+/gu, "-");
   return `outputs/gap-review/${bible}/agent-packets/agent-packet-${bible}-${safeScope}-lexical.json`;
@@ -616,7 +874,8 @@ async function main(): Promise<void> {
     minConfidence: readConfidenceArg(args, "min-confidence", "high"),
     includeOccupied: args.get("include-occupied") === true,
     allowDuplicateTargets: args.get("allow-duplicate-targets") === true,
-    auditKind: readAuditKindArg(args)
+    auditKind: readAuditKindArg(args),
+    candidateClass: readCandidateClassArg(args)
   });
 
   console.log(

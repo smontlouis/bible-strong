@@ -24,7 +24,12 @@ import {
   selectTaskLexicalItems
 } from "../src/runSemanticRefillGapReviewBatch.js";
 import {
+  collapseSameTokenStepIdentities,
+  confidenceForSemanticCandidate,
+  isInternalPlacementReviewEligibleAnnotation,
+  matchesCandidateClass,
   recomputeLexicalCandidateOccupation,
+  resolveStepOccurrenceAnnotation,
   slicePacketItems,
   uniqueByBestTarget
 } from "../src/semanticRefillLexicalPacket.js";
@@ -115,6 +120,277 @@ test("keeps distinct Strong candidates that share one best carrier", () => {
   assert.deepEqual(
     uniqueByBestTarget(items as never).map((candidate) => candidate.strong),
     ["H0001", "H0002"]
+  );
+});
+
+test("collapses STEP aliases from one original token into one carrier question", () => {
+  const item = (strong: string, witnesses: string[]) => ({
+    ref: "Acts.16.16",
+    strong,
+    annotation: {
+      originalTokenId: "TAGNT.Acts.16.16.13.N(k)O.main",
+      originalOccurrenceId: `TAGNT.Acts.16.16.13.N(k)O.main:${strong}`,
+      sourceStrong: "G5221",
+      step: [
+        {
+          classicalStrong: strong,
+          dStrong: "G5221"
+        }
+      ]
+    },
+    referenceInventory: {
+      Sg1910: witnesses,
+      Darby: witnesses,
+      DarbyR: witnesses
+    },
+    candidates: [
+      {
+        target: "word" as const,
+        strong,
+        wordIndex: 29,
+        normalizedWord: "rencontra",
+        score: 1,
+        evidence: []
+      }
+    ]
+  });
+
+  const normalized = collapseSameTokenStepIdentities([
+    item("G5221", []),
+    item("G0528", ["G0528"])
+  ] as never);
+
+  assert.equal(normalized.length, 1);
+  assert.equal(normalized[0].strong, "G0528");
+  assert.deepEqual(normalized[0].stepIdentity, {
+    originalTokenId: "TAGNT.Acts.16.16.13.N(k)O.main",
+    primaryStrong: "G0528",
+    associatedStrong: ["G5221"],
+    originalOccurrenceIds: [
+      "TAGNT.Acts.16.16.13.N(k)O.main:G0528",
+      "TAGNT.Acts.16.16.13.N(k)O.main:G5221"
+    ],
+    classicalStrong: ["G0528", "G5221"],
+    eStrong: [],
+    dStrong: ["G5221"],
+    uStrong: [],
+    sourceStrong: ["G5221"]
+  });
+});
+
+test("keeps real repeated Strong occurrences with distinct original tokens", () => {
+  const item = (originalTokenId: string) => ({
+    ref: "Acts.1.1",
+    strong: "G3165",
+    annotation: { originalTokenId },
+    candidates: [
+      {
+        target: "word" as const,
+        strong: "G3165",
+        wordIndex: 2,
+        normalizedWord: "moi",
+        score: 1,
+        evidence: []
+      }
+    ]
+  });
+
+  assert.equal(
+    uniqueByBestTarget([
+      item("TAGNT.Acts.1.1.4"),
+      item("TAGNT.Acts.1.1.14")
+    ] as never).length,
+    2
+  );
+});
+
+test("preserves case-sensitive STEP suffixes in grouped metadata", () => {
+  const item = (strong: string) => ({
+    ref: "1Chr.1.1",
+    strong,
+    annotation: {
+      originalTokenId: "TAHOT.1Chr.1.1.1",
+      step: [
+        { classicalStrong: strong, dStrong: "H2148V" },
+        { classicalStrong: strong, dStrong: "H2148v" }
+      ]
+    },
+    referenceInventory: {},
+    candidates: [
+      {
+        target: "word" as const,
+        strong,
+        wordIndex: 0,
+        normalizedWord: "mot",
+        score: 1,
+        evidence: []
+      }
+    ]
+  });
+
+  const [normalized] = collapseSameTokenStepIdentities([
+    item("H2148"),
+    item("H2149")
+  ] as never);
+  assert.deepEqual(normalized.stepIdentity?.dStrong, ["H2148V", "H2148v"]);
+});
+
+test("exposes STEP occurrence metadata even without an alias sibling", () => {
+  const [normalized] = collapseSameTokenStepIdentities([
+    {
+      ref: "Acts.1.1",
+      strong: "G0976",
+      annotation: {
+        originalTokenId: "TAGNT.Acts.1.1.1",
+        originalOccurrenceId: "TAGNT.Acts.1.1.1:0",
+        sourceStrong: "G0976",
+        step: [{ classicalStrong: "G0976", dStrong: "G0976" }]
+      },
+      referenceInventory: {},
+      candidates: []
+    }
+  ] as never);
+
+  assert.equal(normalized.stepIdentity?.originalTokenId, "TAGNT.Acts.1.1.1");
+  assert.deepEqual(normalized.stepIdentity?.dStrong, ["G0976"]);
+  assert.deepEqual(normalized.stepIdentity?.associatedStrong, []);
+});
+
+test("resolves visible relocation STEP metadata through the exact occurrence id", () => {
+  const visible = {
+    id: "1Kgs.22.47:1:H7604",
+    strong: "H7604",
+    originalOccurrenceId: "TAHOT.1Kgs.22.47.4.L.alt:0"
+  };
+  const original = {
+    id: "1Kgs.22.47:10:H7604",
+    strong: "H7604",
+    originalTokenId: "TAHOT.1Kgs.22.47.4.L.alt",
+    originalOccurrenceId: "TAHOT.1Kgs.22.47.4.L.alt:0",
+    step: [{ classicalStrong: "H7604", dStrong: "H7604" }]
+  };
+  const unrelated = {
+    id: "1Kgs.22.47:11:H7604",
+    strong: "H7604",
+    originalTokenId: "TAHOT.1Kgs.22.47.9.L.alt",
+    originalOccurrenceId: "TAHOT.1Kgs.22.47.9.L.alt:0",
+    step: [{ classicalStrong: "H7604", dStrong: "H7604" }]
+  };
+
+  assert.equal(
+    resolveStepOccurrenceAnnotation(
+      { annotations: [visible, unrelated, original] } as never,
+      visible as never
+    )?.originalTokenId,
+    "TAHOT.1Kgs.22.47.4.L.alt"
+  );
+});
+
+test("derives priority confidence from the exact selected target, not an equal score", () => {
+  const lexical = [
+    {
+      target: "word",
+      wordIndex: 4,
+      normalized: "est",
+      score: 0.7315,
+      confidence: "medium"
+    },
+    {
+      target: "word",
+      wordIndex: 10,
+      normalized: "sera",
+      score: 0.7315,
+      confidence: "high"
+    }
+  ];
+
+  assert.equal(
+    confidenceForSemanticCandidate(
+      lexical as never,
+      {
+        target: "word",
+        strong: "G3361",
+        wordIndex: 10,
+        normalizedWord: "sera",
+        score: 0.7315,
+        evidence: []
+      },
+      "medium"
+    ),
+    "high"
+  );
+});
+
+test("selects ambiguous and direct high candidate classes deterministically", () => {
+  const item = {
+    candidates: [
+      { confidence: "high", occupied: false },
+      { confidence: "high", occupied: true },
+      { confidence: "medium", occupied: false }
+    ]
+  };
+  assert.equal(matchesCandidateClass(item as never, "open-high"), true);
+  assert.equal(matchesCandidateClass(item as never, "ambiguous-high"), true);
+  assert.equal(matchesCandidateClass(item as never, "direct-high"), false);
+
+  const direct = {
+    candidates: [{ confidence: "high", occupied: false }]
+  };
+  assert.equal(matchesCandidateClass(direct as never, "direct-high"), true);
+  assert.equal(matchesCandidateClass(direct as never, "ambiguous-high"), false);
+});
+
+test("selects relocation candidates only when an open carrier is materially better", () => {
+  const better = {
+    auditKind: "relocation",
+    currentTarget: { wordIndex: 2 },
+    candidates: [
+      { wordIndex: 2, score: 0.4, occupied: true },
+      { wordIndex: 5, score: 0.52, occupied: false }
+    ]
+  };
+  assert.equal(
+    matchesCandidateClass(better as never, "relocation-better-open"),
+    true
+  );
+
+  const insufficientMargin = {
+    ...better,
+    candidates: [
+      { wordIndex: 2, score: 0.4, occupied: true },
+      { wordIndex: 5, score: 0.5199, occupied: false }
+    ]
+  };
+  assert.equal(
+    matchesCandidateClass(
+      insufficientMargin as never,
+      "relocation-better-open"
+    ),
+    false
+  );
+});
+
+test("excludes reference-only and not-rendered annotations from internal placement review", () => {
+  assert.equal(
+    isInternalPlacementReviewEligibleAnnotation({
+      source: "reference-only",
+      placement: "not-rendered"
+    } as never),
+    false
+  );
+  assert.equal(
+    isInternalPlacementReviewEligibleAnnotation({
+      source: "original-complete",
+      placement: "not-rendered"
+    } as never),
+    false
+  );
+  assert.equal(
+    isInternalPlacementReviewEligibleAnnotation({
+      source: "original-complete",
+      placement: "empty"
+    } as never),
+    true
   );
 });
 

@@ -5,13 +5,31 @@ import path from "node:path";
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { readStrongDictionaryTranslationCandidates } from "../src/strongDictionaryLexicon.js";
+import {
+  DEFAULT_PRODUCTION_STRONG_DICTIONARY,
+  readStrongDictionaryTranslationCandidates,
+  resolveDefaultStrongDictionaryInput
+} from "../src/strongDictionaryLexicon.js";
 import {
   buildStrongTranslationLexicon,
   findTranslationCandidate
 } from "../src/translationLexicon.js";
 
-test("reads conservative French dictionary candidates from the production schema", async () => {
+test("binds the legacy fallback explicitly when no V3 activation pointer exists", async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), "strong-pointer-test-"));
+  const input = resolveDefaultStrongDictionaryInput(
+    path.join(directory, "missing-current.json")
+  );
+  assert.deepEqual(input, {
+    path: DEFAULT_PRODUCTION_STRONG_DICTIONARY,
+    activation: {
+      mode: "legacy",
+      path: DEFAULT_PRODUCTION_STRONG_DICTIONARY
+    }
+  });
+});
+
+test("keeps legacy French dictionary candidates review-only", async () => {
   const dbPath = await writeTempLexiconDb();
 
   const candidates = readStrongDictionaryTranslationCandidates(dbPath);
@@ -22,7 +40,8 @@ test("reads conservative French dictionary candidates from the production schema
         candidate.strong === "H0120" &&
         candidate.normalized === "humain" &&
         candidate.method === "dictionary-fr-exact" &&
-        candidate.score >= 0.5
+        candidate.score >= 0.5 &&
+        candidate.reviewOnly === true
     )
   );
   assert.equal(
@@ -51,7 +70,10 @@ test("reads conservative French dictionary candidates from the production schema
   const productionLexicon = buildStrongTranslationLexicon([], {
     dictionaryCandidates: candidates
   });
-  assert.ok(findTranslationCandidate(productionLexicon, "H0120", "humain"));
+  assert.equal(
+    findTranslationCandidate(productionLexicon, "H0120", "humain"),
+    undefined
+  );
   assert.equal(
     findTranslationCandidate(productionLexicon, "H0120", "personne"),
     undefined
@@ -106,15 +128,140 @@ test("reads conservative French dictionary candidates from the production schema
         candidate.strong === "G4771" && candidate.normalized === "toi-meme"
     )
   );
-  assert.ok(
-    findTranslationCandidate(productionLexicon, "H0001", "pere", "H0001A")
+  assert.equal(
+    findTranslationCandidate(productionLexicon, "H0001", "pere", "H0001A"),
+    undefined
   );
   assert.equal(
     findTranslationCandidate(productionLexicon, "H0001", "chef", "H0001A"),
     undefined
   );
+  assert.equal(
+    findTranslationCandidate(productionLexicon, "H0001", "chef", "H0001B"),
+    undefined
+  );
+});
+
+test("v3 carrier terms isolate alignment evidence from display translations", async () => {
+  const dbPath = await writeTempLexiconDb();
+  execFileSync("sqlite3", [
+    dbPath,
+    `
+      create table LexiconCarrierTerms (
+        id integer primary key,
+        stepEntryId integer not null,
+        strong text not null,
+        stepStrong text,
+        locale text not null,
+        surface text not null,
+        normalized text not null,
+        termKind text not null,
+        state text not null,
+        policy text not null,
+        confidence real not null,
+        derivedFromVersionId integer,
+        contentHash text not null,
+        releaseKey text not null
+      );
+      create table LexiconFieldStatus (
+        stepEntryId integer not null,
+        locale text not null,
+        field text not null,
+        fieldVersionId integer not null,
+        releaseKey text not null
+      );
+      create table DictionaryMeta (key text primary key, value text not null);
+      insert into DictionaryMeta values
+        ('lexiconV3ReleaseKey', 'release-fixture'),
+        ('lexiconV3Profile', 'full'),
+        ('lexiconV3SourceFingerprint', '${"a".repeat(64)}'),
+        ('lexiconV3CodeFingerprint', '${"b".repeat(64)}'),
+        ('lexiconV3SnapshotFingerprint', '${"c".repeat(64)}'),
+        ('lexiconV3PolicyVersion', 'policy-fixture');
+      insert into LexiconFieldStatus values
+        (1, 'fr', 'gloss', 10, 'release-fixture'),
+        (2, 'fr', 'gloss', 11, 'release-fixture'),
+        (8, 'fr', 'gloss', 12, 'release-fixture'),
+        (5, 'fr', 'gloss', 13, 'release-fixture');
+      insert into LexiconCarrierTerms
+        (id, stepEntryId, strong, stepStrong, locale, surface, normalized,
+         termKind, state, policy, confidence, derivedFromVersionId, contentHash,
+         releaseKey)
+      values
+        (1, 1, 'H0120', 'H0120', 'fr', 'humain', 'humain',
+         'headword', 'auto_validated', 'auto_safe', 0.93, 10, 'hash-1', 'release-fixture'),
+        (2, 2, 'G0014', 'G0014', 'fr', 'bien', 'bien',
+         'headword', 'human_validated', 'review_only', 0.88, 11, 'hash-2', 'release-fixture'),
+        (3, 8, 'H6213', 'H6213', 'fr', 'faire', 'faire',
+         'headword', 'candidate', 'auto_safe', 0.99, 12, 'hash-3', 'release-fixture'),
+        (4, 5, 'G2424', 'G2424G', 'fr', 'Jésus', 'jesus',
+         'headword', 'human_validated', 'blocked', 1.0, 13, 'hash-4', 'release-fixture');
+      update LexiconTranslations
+      set gloss = 'contamination', meaning = 'contamination définitionnelle';
+    `
+  ]);
+
+  const candidates = readStrongDictionaryTranslationCandidates(dbPath, {
+    strict: true
+  });
+
   assert.ok(
-    findTranslationCandidate(productionLexicon, "H0001", "chef", "H0001B")
+    candidates.some(
+      (candidate) =>
+        candidate.strong === "H0120" &&
+        candidate.normalized === "humain" &&
+        candidate.reviewOnly !== true
+    )
+  );
+  assert.equal(
+    candidates.find(
+      (candidate) =>
+        candidate.strong === "G0014" && candidate.normalized === "bien"
+    )?.reviewOnly,
+    true
+  );
+  assert.equal(
+    candidates.some((candidate) => candidate.normalized === "contamination"),
+    false
+  );
+  assert.equal(
+    candidates.some(
+      (candidate) =>
+        candidate.strong === "H6213" && candidate.normalized === "faire"
+    ),
+    false
+  );
+  assert.equal(
+    candidates.some(
+      (candidate) =>
+        candidate.strong === "G2424" && candidate.normalized === "jesus"
+    ),
+    false
+  );
+});
+
+test("refuses authoring carrier tables that are not a promoted projection", async () => {
+  const dbPath = await writeTempLexiconDb();
+  execFileSync("sqlite3", [
+    dbPath,
+    `create table LexiconCarrierTerms (
+       id integer primary key,
+       strong text not null,
+       stepStrong text,
+       locale text not null,
+       normalized text not null,
+       state text not null,
+       policy text not null,
+       confidence real not null
+     );`
+  ]);
+
+  assert.throws(
+    () =>
+      readStrongDictionaryTranslationCandidates(dbPath, {
+        strict: true
+      }),
+    /unattested-v3-carrier-database/u
   );
 });
 

@@ -177,6 +177,37 @@ export function readStrongLedgerVersesSqlite(options: {
   }
 }
 
+export function readStrongLedgerVersesByRefsSqlite(options: {
+  sqlitePath: string;
+  bible: string;
+  refs: string[];
+}): StrongLedgerVerse[] {
+  const refs = [...new Set(options.refs)].filter(Boolean);
+  if (refs.length === 0) return [];
+  const db = openLedgerDatabase(options.sqlitePath);
+  try {
+    db.exec("create temp table requested_refs (ref text primary key)");
+    const insert = db.prepare(
+      "insert or ignore into requested_refs (ref) values (?)"
+    );
+    for (const ref of refs) insert.run(ref);
+    const rows = db
+      .prepare(
+        `select v.ref, v.book_id, v.chapter, v.verse, v.text,
+                v.tokens_json, v.annotations_json, v.inventories_json,
+                v.metrics_json, v.reader_html, v.advanced_html, v.debug_html
+         from verses v
+         inner join requested_refs requested on requested.ref = v.ref
+         where v.bible = ?
+         order by v.book_order, v.chapter, v.verse`
+      )
+      .all(options.bible) as unknown as SqliteRow[];
+    return rows.map(rowToVerse);
+  } finally {
+    db.close();
+  }
+}
+
 export async function exportStrongLedgerTsvSqlite(options: {
   sqlitePath: string;
   bible: string;

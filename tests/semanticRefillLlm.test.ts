@@ -132,6 +132,50 @@ test("semantic refill LLM mock validates bounded word and terminal decisions", a
   assert.equal(result.rejected[0]?.reason, "llm-classified-not-rendered");
 });
 
+test("semantic refill LLM holds word stacking created by decisions in the same batch", async () => {
+  const verses = [genesisOneTwenty()];
+  const deterministic = buildSemanticRefill({
+    bible: "nbs",
+    scope: "Gen.1.20",
+    verses
+  });
+  const batch = buildSemanticRefillLlmBatch({
+    bible: "nbs",
+    scope: "Gen.1.20",
+    candidates: deterministic.candidates
+  });
+  const byStrong = new Map(batch.candidates.map((item) => [item.strong, item]));
+  const mockResponse: SemanticRefillLlmResponse = {
+    decisions: [
+      selection(byStrong.get("H8317")!, "word:5", 0.92),
+      selection(byStrong.get("H8318")!, "word:5", 0.91),
+      selection(byStrong.get("H8064")!, "pending-human", 0.7),
+      selection(byStrong.get("H7549")!, "not-rendered", 0.86)
+    ]
+  };
+
+  const result = await runSemanticRefillLlm({
+    bible: "nbs",
+    scope: "Gen.1.20",
+    verses,
+    candidates: deterministic.candidates,
+    mode: "mock",
+    mockResponse
+  });
+
+  assert.equal(result.validated.length, 0);
+  assert.deepEqual(
+    result.pending
+      .filter(
+        (decision) =>
+          decision.reason === "suspicious-batch-stacking-on-same-word"
+      )
+      .map((decision) => decision.strong[0])
+      .sort(),
+    ["H8317", "H8318"]
+  );
+});
+
 test("semantic refill LLM only accepts bounded choices and rejects reader duplicates", async () => {
   const verses = [genesisOneTwentyWithReaderDuplicate()];
   const deterministic = buildSemanticRefill({

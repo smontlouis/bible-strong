@@ -19,6 +19,7 @@ import { isGenericFrenchCarrier } from "./frenchLexicalSafety.js";
 import { normalizeWord, tokenizeText } from "./tokenize.js";
 import { type StrongTranslationCandidate } from "./translationLexicon.js";
 import { type StrongLedger } from "./strongLedger.js";
+import { normalizeStepStrongCode } from "./lexiconV3/identity.js";
 import {
   readStrongLedgerSqlite,
   strongLedgerSqlitePath
@@ -158,6 +159,7 @@ interface SeedTerm {
 }
 
 type SeedTerms = Map<string, SeedTerm>;
+type DictionaryTermIndex = Map<string, Map<string, SeedTerms>>;
 type KaikkiIndex = KaikkiLookupIndex;
 
 interface KaikkiEntry {
@@ -304,9 +306,6 @@ export async function buildLexicalCandidateReport(
         options.sourceCache
       )
     : emptyKaikkiIndex();
-  const dictionaryStrongSet = new Set(
-    sourceAnnotations.map((annotation) => annotation.strong)
-  );
   const synonymSources = await readCachedSynonymSources(
     options,
     {
@@ -315,8 +314,12 @@ export async function buildLexicalCandidateReport(
         ...[...kaikki.formToLemma.values()].flatMap((lemmas) => [...lemmas])
       ]),
       dictionaryTerms: new Set(
-        [...dictionaryStrongSet].flatMap((strong) => [
-          ...(dictionaryByStrong.get(strong)?.keys() ?? [])
+        sourceAnnotations.flatMap((annotation) => [
+          ...dictionaryTermsFor(
+            dictionaryByStrong,
+            annotation.strong,
+            annotation.sourceStrong
+          ).keys()
         ])
       ),
       inferredTerms: new Set(
@@ -331,7 +334,11 @@ export async function buildLexicalCandidateReport(
       auditKind: kind,
       verse,
       annotation,
-      dictionaryTerms: dictionaryByStrong.get(annotation.strong) ?? new Map(),
+      dictionaryTerms: dictionaryTermsFor(
+        dictionaryByStrong,
+        annotation.strong,
+        annotation.sourceStrong
+      ),
       kaikki,
       synonymSources,
       maxCandidates: options.maxCandidatesPerEmpty
@@ -2368,22 +2375,52 @@ async function readStrongLedger(
 
 function groupDictionaryTerms(
   candidates: StrongTranslationCandidate[]
-): Map<string, SeedTerms> {
-  const grouped = new Map<string, SeedTerms>();
+): DictionaryTermIndex {
+  const grouped: DictionaryTermIndex = new Map();
 
   for (const candidate of candidates) {
     if (!isContentWord(candidate.normalized)) continue;
-    const terms = grouped.get(candidate.strong) ?? new Map<string, SeedTerm>();
+    const byStep =
+      grouped.get(candidate.strong) ?? new Map<string, SeedTerms>();
+    const normalizedStep = candidate.stepStrong
+      ? normalizeStepStrongCode(candidate.stepStrong)
+      : null;
+    const stepKey =
+      normalizedStep && !/^[HG]\d{4,5}$/u.test(normalizedStep)
+        ? normalizedStep
+        : "";
+    const terms = byStep.get(stepKey) ?? new Map<string, SeedTerm>();
     addSeedTerm(terms, candidate.normalized, {
       score: candidate.score,
       source: candidate.source,
       provenanceRoot: candidate.provenanceRoot ?? candidate.source,
       reviewOnly: candidate.reviewOnly ?? false
     });
-    grouped.set(candidate.strong, terms);
+    byStep.set(stepKey, terms);
+    grouped.set(candidate.strong, byStep);
   }
 
   return grouped;
+}
+
+function dictionaryTermsFor(
+  index: DictionaryTermIndex,
+  strong: string,
+  sourceStrong?: string
+): SeedTerms {
+  const byStep = index.get(strong);
+  if (!byStep) return new Map();
+  const selected: SeedTerms = new Map();
+  for (const [term, seed] of byStep.get("") ?? []) {
+    addSeedTerm(selected, term, seed);
+  }
+  const exactStep = sourceStrong ? normalizeStepStrongCode(sourceStrong) : null;
+  if (exactStep && !/^[HG]\d{4,5}$/u.test(exactStep)) {
+    for (const [term, seed] of byStep.get(exactStep) ?? []) {
+      addSeedTerm(selected, term, seed);
+    }
+  }
+  return selected;
 }
 
 function isCandidateEmptyAnnotation(

@@ -1,6 +1,6 @@
 ---
 name: bible-to-strong
-description: Use this skill when the user wants to generate, improve, evaluate, or compare a Strong-tagged Bible from a local Bible JSON file in this repository. It covers canonical Strong ledger generation, reader/advanced exports, bounded LLM review, gold evaluation against known Strong editions, quality reports, and safe handling of copyrighted or large generated artifacts.
+description: Use this skill when the user wants to generate, improve, evaluate, compare, minify, or publish a Strong-tagged Bible from a local Bible JSON file in this repository. It covers canonical Strong ledger generation, compact JSONL delivery with STEP identities, reader/advanced exports, bounded LLM review, gold evaluation against known Strong editions, quality reports, and safe handling of copyrighted or large generated artifacts.
 ---
 
 # Bible To Strong
@@ -18,6 +18,12 @@ Expected input:
 - Local lexicons for review and future deterministic evidence: `data/dictionaries/strong_fr.sqlite` and `data/dictionaries/strong_lexicon.full.production.sqlite`
 
 Generated full Bible outputs under `outputs/` are ignored by Git and must not be committed. The canonical production ledger is now SQLite-first: `outputs/strong/<id>/bible-<id>-strong.sqlite`.
+
+The canonical ledger and the downloadable Bible are deliberately different
+artifacts. The ledger keeps annotations, evidence, metrics, views, and audit
+provenance. A downloadable Bible must be projected from that ledger into a
+small verse-per-line JSONL artifact; never ship the large authoring ledger or
+its debug JSON as the product payload.
 
 ## Default Workflow
 
@@ -104,6 +110,193 @@ in-memory lexicon for every run.
 npm run strong:export -- --bible <id> --view reader
 npm run strong:export -- --bible <id> --view advanced
 ```
+
+### 3a. Publish a compact STEP-aware JSONL Bible
+
+After the canonical ledger passes its quality and integrity gates, create the
+downloadable Bible as a separate projection. This applies both to the three
+reference witnesses and to generated Bibles such as NBS.
+
+For the existing reference witnesses, the compact STEP-aware generation is:
+
+```sh
+npm run strong:references:jsonl
+npm run strong:references:jsonl:dstrong
+```
+
+For generated Bibles, publish directly and incrementally from
+`outputs/strong/<id>/bible-<id>-strong.sqlite`. Do not first materialize or
+parse a gigabyte-scale JSON ledger. Stream the SQLite verse rows in canonical
+reference order and write one JSON object per line. The default downloadable
+projection is the reader view; an advanced/debug projection must be a separate
+explicit artifact and must not silently replace the reader product.
+
+```sh
+npm run strong:jsonl -- --bible <id> --version <VERSION>
+```
+
+This writes `outputs/strong-jsonl/<id>/bible-<id>-strong.jsonl` and an
+immutable sibling `manifest.json`. Use `--only <Book>` or
+`--only <Book.Chapter>` only for a bounded validation preview, normally with a
+separate `--output-dir`; a scoped artifact is not a publishable full Bible.
+The command refuses to overwrite either artifact.
+
+When the user explicitly prefers recall over conservative placement, generated
+Bibles also support a deterministic permissive projection:
+
+```sh
+npm run strong:jsonl -- \
+  --bible <id> \
+  --version <VERSION> \
+  --view permissive
+```
+
+This mode is for the five generated/non-witness Bibles `ost`, `fmar`, `nvs78p`,
+`neg79`, and `nbs`. It must not be applied to the reference witnesses `darby`,
+`darbyr`, or `sg1910`: those sources already carry their own authored Strong
+placement and remain unchanged.
+
+The permissive publisher reads
+`outputs/strong/<id>/bible-<id>-strong-permissive-plan.json`, verifies that the
+plan fingerprint matches the SQLite ledger, and projects both reader and
+advanced annotations. For empty or weakly placed occurrences it applies the
+plan's stable best carrier when the lexical score reaches `0.48`; a relocation
+must improve the current carrier by at least `0.12`. Ties are resolved by the
+recorded deterministic carrier order. Exact normalized Strong dictionary terms
+are eligible even when the generic lexical candidate report omitted a proper
+name. Cases below the threshold remain empty.
+
+The permissive projection is derived only: it never mutates the canonical
+SQLite annotation, an approved LLM payload, or the conservative reader JSONL.
+If the same Strong is already present on the selected carrier, the projected
+occurrence remains empty instead of creating another identical placement. The
+final compact `strong` attribute is an ordered set: duplicate values such as
+`strong="H1961 H1961"` are serialized once, while different Strong identities
+on the same French carrier are all retained. The manifest records planned and
+applied promotions, skipped duplicate carriers, removed redundant values, and
+remaining empty tags.
+
+This writes
+`outputs/strong-jsonl-permissive/<id>/bible-<id>-strong.jsonl`. Publication must
+still preserve every verse and meaningful inline tag, including notes and
+`divineName`, and must still require exact STEP occurrence evidence before
+emitting `estrong`, `dstrong`, or `ustrong`.
+
+Use the same JSONL verse contract as the reference witnesses:
+
+```json
+{
+  "ref": "Gen.1.1",
+  "version": "NBS",
+  "book": 1,
+  "bookId": "Gen",
+  "chapter": 1,
+  "verse": 1,
+  "text": "..."
+}
+```
+
+The `text` field keeps meaningful inline Bible markup such as `<p>`, `<note>`,
+`<i>`, and `<divineName>`, but strips authoring/debug attributes. Strong and
+STEP identities belong to the `<w>` occurrence in the verse:
+
+```html
+<w strong="H1254" estrong="H1254a" dstrong="H1254A">créa</w>
+<w strong="G1138" ustrong="H1732">David</w>
+```
+
+Compact identity rules:
+
+- always keep `strong` as the backward-compatible identifier carried by the
+  Bible word;
+- add `estrong` only when the exact STEP extended identity is not already
+  represented by `strong`;
+- add `dstrong` only when the exact STEP disambiguated identity adds precision
+  beyond `estrong`/`strong`;
+- add `ustrong` only when it adds a distinct unified/group identity useful for
+  alternate forms, spellings, names, Hebrew/Aramaic equivalents, or navigation;
+- preserve STEP suffix case exactly: `H2148V` and `H2148v` are distinct;
+- omit redundant attributes instead of repeating the same value;
+- never add inline confidence, method, source, status, or diagnostic
+  `data-*` attributes to the downloadable artifact. Put provenance, counts,
+  unresolved cases, source hashes, and methods in a sibling manifest/report.
+
+For generated Bibles, prefer the ledger's exact
+`originalOccurrenceId`/STEP-evidence link for each annotation. This is stronger
+than re-running verse-order heuristics on already generated markup. Resolve
+`eStrong` and `uStrong` through the exact `dStrong` entry in `TBESH.txt` or
+`TBESG.txt`. When exact occurrence evidence is missing or ambiguous, retain the
+classical `strong` unchanged and report the case outside the Bible; never guess
+an `estrong`, `dstrong`, or `ustrong` during publication.
+
+These attributes normally describe one lexical occurrence at different levels,
+not four competing analyses. Product lookup should generally use
+`dstrong ?? estrong ?? strong` as the primary lexical target. `ustrong` is a
+grouping/navigation identity. A French carrier may occasionally represent
+multiple original occurrences; then the values on `<w>` form an
+occurrence-level set. Do not infer positional pairing between whitespace lists
+unless a future serialization contract explicitly records that pairing; retain
+the canonical ledger when exact per-occurrence relationships are needed.
+
+Publication validation must fail closed unless all of the following hold:
+
+- verse references, order, version, and chosen reader text survive the
+  projection;
+- stripping only the compact identity attributes reconstructs the intended
+  minified Strong markup;
+- every emitted STEP identity is backed by the exact ledger occurrence and
+  STEP lexicon entry;
+- existing structural markup, including divine names and notes, is preserved;
+- the JSONL parses line by line and has the expected verse count;
+- the manifest records source/artifact SHA-256 hashes, byte size, identity
+  counts, ambiguous/unresolved counts, view, and schema version;
+- the final response reports the size reduction from the canonical authoring
+  artifact to the downloadable JSONL.
+
+The generated-Bible publisher implements this contract in
+`src/generatedStrongJsonl.ts` and validates the output again line by line
+against SQLite before publishing it atomically. It must finish all source
+hashing before linking the JSONL and remove that link if immutable manifest
+publication fails; never leave a partial JSONL/manifest pair. Run it only after
+the current pipeline fingerprint matches the ledger and every approved review
+transaction has been finalized. A successful scoped preview against an older ledger proves
+the projection mechanism, not that the Bible itself is ready for release. Do
+not claim that a generated Bible such as NBS or OST is product-ready merely
+because its canonical SQLite ledger or a scoped JSONL preview exists.
+
+### 3b. Package all validated JSONL Bibles for delivery
+
+Once every individual generated Bible and the three STEP-aware reference
+witnesses are finalized, build one immutable delivery folder:
+
+```sh
+npm run strong:release:jsonl
+```
+
+This writes `outputs/releases/strong-jsonl/` with all downloadable JSONL files
+at the folder root, one normalized manifest per Bible under `manifests/`, and a
+single `catalog.json`. The packager verifies every source manifest, byte size,
+verse count, and SHA-256 before copying, then verifies the copied SHA-256 and
+publishes the complete folder atomically. It refuses an existing destination or
+any stale, altered, missing, scoped, or non-final source artifact.
+
+The individual SQLite ledgers and JSONL publication directories remain the
+canonical generation and audit artifacts. The release folder is a derived
+delivery package for Bible Strong and must not become a second authoring source.
+Like other generated full-Bible outputs, it stays under ignored `outputs/` and
+must not be committed.
+
+For the permissive high-recall delivery, package only the five generated
+Bibles:
+
+```sh
+npm run strong:release:jsonl -- --view permissive
+```
+
+This writes `outputs/releases/strong-jsonl-permissive/`. Its catalog must have
+exactly five `sourceType="generated"` entries and no reference witness. Verify
+both the individual artifact hashes and the packaged copies before deleting
+any deterministic intermediates.
 
 4. Run masked gold evaluation when changing alignment logic. Use the diagnostic
    backend for a broad fast sample and the canonical backend as the release canary:
@@ -284,6 +477,34 @@ npm run strong:review:gaps:lexical-packet -- \
   --min-confidence medium
 ```
 
+For the prioritized internal-only queue, select one disjoint candidate class at
+a time instead of mixing easy direct cases with ambiguous ones:
+
+```sh
+npm run strong:review:gaps:lexical-packet -- \
+  --bible <id> \
+  --only all \
+  --candidate-class ambiguous-high \
+  --audit-kind empty \
+  --lexical-report outputs/lexical-candidates/<id>/bible-<id>-lexical-candidates-all.json \
+  --output outputs/gap-review/<id>/<run>/packet-<id>-ambiguous-high-001.json \
+  --offset 0 \
+  --limit 20 \
+  --min-confidence high
+```
+
+Supported classes are `all`, `open-high`, `ambiguous-high`, `direct-high`, and
+`relocation-better-open`. `ambiguous-high` requires more than one high-confidence lexical
+candidate and at least one open high candidate. `direct-high` requires exactly
+one high candidate and that candidate must be open.
+`relocation-better-open` requires a visible relocation whose best open carrier
+scores at least `0.12` above its current carrier, matching the lexical report's
+priority metric. Combine these with
+`--audit-kind empty` or `--audit-kind relocation` to keep priority waves
+disjoint. The packet builder must read only the exact candidate refs from the
+canonical SQLite ledger; `--only all` is a report filter here, not permission to
+materialize all 31,169 verse rows.
+
 As of 2026-06-29, the lexical-packet + two-model + exact-consensus workflow has
 three positive NBS pilots after canonical refresh:
 
@@ -452,6 +673,262 @@ lexical auto-safe is zero, `readerVisibleStrongCount=363503`,
 uncalibrated original-complete guesses now remain advanced instead of inflating
 reader coverage.
 
+### Internal-only multi-agent review for a generated Bible
+
+Use this workflow when the user explicitly wants Codex sub-agents only and no
+AI Gateway/provider calls. Internal sub-agents are independent review turns,
+but the runtime does not attest that they are distinct model identities. Their
+agreement is therefore a strong suggestion, not by itself the two-provider
+production proof required by `strong:review:gaps:batch`.
+
+Before sending any candidate to an agent, normalize the STEP identity model at
+the original-token level:
+
+- group annotations by exact `originalTokenId` and STEP token identity;
+- distinguish multiple lexical occurrences from alternate `strong`,
+  `eStrong`, `dStrong`, and `uStrong` identities of one occurrence;
+- keep one carrier question for one original lexical occurrence;
+- expose compact identities as metadata on that question, never as separate
+  missing Strong candidates;
+- do not ask an agent to decide whether an alias is another occurrence;
+- preserve textual variants and edition support in the packet;
+- when a classical Strong and STEP extended identity share one token, plan one
+  product carrier such as `<w strong="G0528" estrong="G5221">…</w>`;
+- detect merged or shifted verse clauses before review and quarantine any
+  occurrence whose target verse cannot be established safely.
+
+The OST Acts 16 pilot documented in
+`reports/internal-agent-gap-review-ost-acts16.md` exposed why this is mandatory:
+`G0528` and `G5221` were variants of the same TAGNT token, but the unnormalized
+lexical packet presented them as two missing occurrences. Two proposers and an
+arbiter all made the same bounded mistake because the correct product-level
+choice was absent from the packet.
+
+Prioritize a generated Bible's review queue in this order:
+
+1. visible relocations with a better open content carrier;
+2. suspicious stacking and profile over-budget carriers;
+3. missing reader occurrences with an open high-confidence direct candidate;
+4. ambiguous high-confidence carriers;
+5. multi-word French expressions where the Strong belongs on a phrase;
+6. original-only or grammatical items, normally retained in advanced/empty
+   unless strong evidence supports reader visibility.
+
+Keep packets chapter-sized and normally cap them at 20-30 candidates. Every
+packet must contain target context, current reader/advanced state, exact STEP
+occurrence metadata, witness carriers rather than inventories alone, bounded
+word/phrase/empty/duplicate/technical choices, open/occupied/blocked targets,
+and placement warnings.
+
+Run two proposers in parallel with deliberately different review roles:
+
+- proposer A is occurrence/evidence-first: STEP identity, morphology, source
+  order, textual editions, and independent Strong witnesses;
+- proposer B is French/safety-first: syntax, semantic carrier, phrase scope,
+  open targets, generic words, and stacking risk.
+
+Keep roles independent per packet, even when a long run rotates a limited pool
+of internal threads. An agent that proposed a packet must not arbitrate or audit
+that same packet. The root agent may serve as the fourth safety auditor only if
+it did not propose or arbitrate the packet; record that provenance explicitly.
+
+Validate both outputs locally before arbitration. Require one bounded choice
+per stable candidate id, exact word/phrase indexes, matching normalized text,
+allowed Strong inventory, and zero malformed or missing decisions. Send only
+disagreements and sensitive agreements to the arbiter. Sensitive agreements
+include aliases, original-only items, verse shifts, generic carriers,
+occupied-target stacking, weak function words, and visible choices with no
+exact witness or direct lexical evidence.
+
+Internal proposer artifacts must use the current full raw-decision contract,
+not the historical compact OST shape. Alongside `id`, `choiceId`, confidence,
+reason, and evidence, materialize `ref`, `decision`, `strong` (containing only
+the candidate's own Strong), `wordIndex`, `normalized`, `startWordIndex`,
+`endWordIndex`, and `normalizedPhrase` from the exact selected packet choice;
+use explicit `null` values where the choice has no such coordinate. Run the
+non-mutating `strong:review:gaps:apply` validation before freezing the file.
+
+Freeze each locally validated proposer artifact before arbitration and record
+its SHA-256 in the arbitration input/manifest. A proposer must never silently
+edit a file that has already been declared validated or handed to the arbiter.
+If later context exposes an error, write an explicit revision, validate the
+whole revised packet again, update the recorded hash, and restart or explicitly
+invalidate the affected arbitration/audit. Downstream decisions are valid only
+for the exact frozen proposer hashes they reviewed.
+
+Create the immutable manifest only after both proposer turns have reached a
+completed status and both final files pass `parseSemanticRefillLlmResponse`.
+A proposer file already visible on the shared filesystem is not final while
+its proposer is still running. Rerunning the command against an existing
+manifest fails closed. If a hash changes, mark that freeze series superseded,
+revalidate the final file, create a new immutable freeze series, and never
+restore or silently rewrite the old manifest. Use `--verify` before
+arbitration, audit, and consolidation:
+
+```sh
+npm run strong:review:gaps:freeze -- \
+  --packet <packet-number> \
+  --output <freeze-manifest.json> \
+  --source packet=<packet.json> \
+  --source evidence=<proposer-evidence.json> \
+  --source french=<proposer-french.json>
+npm run strong:review:gaps:freeze -- \
+  --output <freeze-manifest.json> --verify
+```
+
+In a durable review decision, the `strong` array must contain only the
+candidate's own `strong` value. `stepIdentity.associatedStrong`, `eStrong`,
+`dStrong`, and `uStrong` remain occurrence metadata; do not copy them into the
+decision's allowed Strong inventory. The exact occurrence link and publisher
+preserve those identities. This distinction prevents a valid same-token alias
+from being misread as an additional target Strong during pre-application
+validation.
+
+Pre-application validation must evaluate the accepted decision set as a batch,
+not only one decision at a time against the unchanged ledger. When two or more
+decisions in the same batch create a word-level stack on a carrier that was
+previously open, move every involved decision to `pending-human` with
+`suspicious-batch-stacking-on-same-word`. A linguistically plausible
+compression or textual-variant pair is still a durable human decision; agent
+agreement and an initially open target do not make the new stack auto-safe.
+
+The arbiter receives the packet, both proposals, validation results, and local
+STEP/reference evidence. It may choose only a bounded packet choice and must
+not invent an unvalidated third carrier. A fourth internal auditor examines
+only proposed production-safe decisions and can return `safe`, `hold`, or
+`block`; it does not propose a new carrier.
+
+After the independent audit, build the contract-v2 safe subset mechanically.
+The command rejects unbounded arbiter choices, missing audits for green
+decisions, and arbiter/auditor choice mismatches; yellow and red decisions are
+never emitted:
+
+```sh
+npm run strong:review:gaps:internal-safe -- \
+  --packet <packet.json> \
+  --arbiter <arbiter.json> \
+  --auditor <auditor.json> \
+  --output <safe-reviewed.json>
+npm run strong:review:gaps:apply -- \
+  --bible <id> \
+  --input <safe-reviewed.json> \
+  --output-dir <validated-preview-dir> \
+  --ledger-dir outputs/strong/<id>
+```
+
+Omit `--apply` here. The preview is required to exercise whole-batch stacking
+guards while leaving the canonical ledger untouched.
+
+After every bounded packet has a validated non-mutating preview, consolidate
+only the generated `accepted.json` files with the previously approved-review
+candidate artifact. Use the approval-bundle command rather than concatenating
+JSON manually. Pass the earlier artifact first so an exact decision reviewed
+again by a later queue keeps the earlier provenance; exact duplicates are
+recorded and collapsed by Bible, reference, Strong inventory, target, indexes,
+and normalized carrier. The output is still only an approval candidate:
+
+```sh
+npm run strong:review:gaps:approval-bundle -- \
+  --bible <id> \
+  --output <human-approval-candidate.json> \
+  --source previous=<previous-approval-candidate.json> \
+  --source packet-001=<validated-preview-001/accepted.json> \
+  --source packet-002=<validated-preview-002/accepted.json>
+```
+
+Record the bundle's source hashes, raw source decision count, unique decision
+count, duplicate ledger, and decision-payload SHA-256. The bundle status
+`awaiting-explicit-human-durable-approval` is not approval. Never pass it to an
+applying transaction until the human explicitly approves that exact durable
+payload hash.
+
+Before requesting that approval, freeze the read-only chapter transaction
+plan. This command replays every source hash and count, reconstructs the exact
+deduplication result, verifies the payload hash, checks the canonical SQLite,
+and records one immutable payload hash per chapter scope. It refuses to
+overwrite an existing plan and does not mutate overrides or the ledger:
+
+```sh
+npm run strong:review:gaps:approval-plan -- \
+  --bible <id> \
+  --bundle <human-approval-candidate.json> \
+  --output <human-approval-application-plan.json> \
+  --ledger-dir outputs/strong/<id>
+```
+
+The plan remains `awaiting-explicit-human-durable-approval`. Its scope count is
+the exact number of locked chapter transactions and scoped refreshes required
+after approval; generating the plan is never equivalent to approving or
+applying it.
+
+Verify the complete execution path in read-only mode before asking for or
+recording approval. This replays the sources, bundle, plan, canonical SQLite,
+metrics, input fingerprint, and current curated-override fingerprint and always
+reports `appliedOverrideCount: 0`:
+
+```sh
+npm run strong:review:gaps:apply-approved -- \
+  --bible <id> \
+  --bundle <human-approval-candidate.json> \
+  --plan <human-approval-application-plan.json> \
+  --ledger-dir outputs/strong/<id>
+```
+
+Only after the human explicitly approves the exact payload SHA-256 may the
+same command receive `--apply --approved-sha256 <exact-hash>`. The approved
+runner replays all frozen inputs, serializes writes under the review lock,
+backs up both curated overrides and the human-approval ledger, applies one
+chapter scope, refreshes only that scope, runs every metric/integrity/visibility
+and residual-auto-safe gate, and rolls back both state files plus the scope on
+failure. A verified approval receipt is written inside the same transaction,
+so a restart can reconcile the narrow commit-before-manifest crash window.
+Use `--max-scopes <n>` for a bounded resumable slice. Add `--finalize` only when
+the run should perform the final complete regeneration and reader/advanced
+exports after all planned scopes are verified. Never pass `--apply` merely to
+test the command.
+
+Both plan creation and read-only execution verification recompute the current
+Strong-ledger input fingerprint; comparing only the SQLite byte hash is not
+enough. If either command reports `approval-plan-input-fingerprint-drift`, the
+old plan is invalid even when SQLite itself is byte-identical. Do not weaken
+that guard and do not attempt scoped refresh. Before human approval, record the
+invalidation and leave the canonical ledger untouched. After explicit approval
+of the unchanged decision payload, a full canonical regeneration with the
+then-current stable pipeline may establish the new baseline; freeze a new plan,
+rerun read-only verification, and only then begin chapter application.
+
+Classify results as follows:
+
+- **green**: exact proposer agreement, mechanically valid, direct same-target
+  evidence or exact witness support, no alias/verse/stacking/generic risk, and
+  auditor `safe`;
+- **yellow**: disagreement, arbiter-only choice, sensitive agreement, or weak
+  support; retain for human/viewer review;
+- **red**: malformed identity, unresolved verse mapping, invalid occurrence,
+  or unsafe carrier; keep advanced/empty or reject the candidate itself.
+
+Never bypass the existing production transaction because internal agents
+agree. Preview internal decisions first. Production mutation requires either
+the existing distinct-model batch proof or an explicit human-approved durable
+decision. Apply accepted decisions chapter by chapter with a backup, exact
+scope refresh, and rollback on any gate failure.
+
+For every applied scope require: unchanged verse count; SQLite integrity `ok`;
+no increase in `placementRiskCount`; no decrease in original representation or
+reference coverage; no new same-token identity duplication; no residual
+lexical auto-safe item; and an auditable before/after report. The sole bounded
+exception to the aggregate placement-risk delta is a newly created same-word
+stack in which every Strong is distinct, every resulting annotation carries
+`llm-review:human-approved`, and the exact approved payload assigns every one
+of those Strong identities to that exact verse and word. This covers genuine
+compound lexical carriers such as OST `Saint-Esprit` without weakening the
+duplicate or over-budget guards. Prove this from the scoped before/after verses
+inside the approval executor; do not change a fingerprinted generation metric
+mid-application. After all scopes, regenerate the complete ledger once, rerun
+global gates, and only then publish the STEP-aware compact JSONL. Agents choose
+French carriers; STEP and the publisher remain authoritative for `estrong`,
+`dstrong`, and `ustrong`.
+
 For experiments and inspection, two validated model reviews on the same lexical
 packet can be combined into a strict visible high-confidence consensus and run
 through the post-consensus filter:
@@ -537,6 +1014,56 @@ The agent packet is procedural. It includes `auditKind`, `currentTarget`, `sourc
 For relocation candidates, agents must compare `currentTarget` with `deterministicCandidates`. Use `duplicate` only when the current placement is correct. If a better visible carrier exists, output `word` or `phrase`; if no reliable carrier exists, output `empty`. Do not rely on hand-written semantic equivalence lists for cases such as NBS `Gen.1.27` (`homme` vs `humains`); solve those only with auditable external lexical evidence or bounded LLM review.
 
 For reference-style candidates, do not use `pending-human` as a final preview state and do not use `reject` for a legitimate Strong simply because no French carrier is found. The objective is to copy the reader style of `Darby`, `DarbyR`, and `Sg1910`: first try `word`, then `phrase`; if no reliable visible carrier exists, output `empty` at the candidate's `sourcePlacement.insertAfterWordIndex` so the Strong remains visible as a small empty tag in original/reference order. Every final decision gets a confidence score. The product vocabulary is high confidence vs low confidence, not accepted vs pending. Use low confidence for uncertain word/phrase placements, suspicious stacking, or empty fallbacks. Reserve `reject` only for invalid candidates, duplicate drift, bad ids, or mechanically impossible decisions. The final arbiter preview may pass `--finalize-reference-style`; this converts valid unresolved, unsafe, or missing agent decisions into low-confidence `empty` preview entries instead of leaving them pending. It does not make them production-eligible. The review/preview must show low-confidence decisions in yellow and empty decisions inline, with a reason such as "no reliable French carrier found".
+
+### Native/canonical versification alignment
+
+Before any LLM gap-review on a Bible whose verse boundaries may differ from
+STEP or the Strong witnesses, generate and freeze a versioned correspondence
+manifest:
+
+```sh
+npm run strong:versification -- --bible <id>
+```
+
+The v2 manifest is full-scope and monotone. Its blocks support `identity`,
+`merge`, `split`, `resegment` (N:M), `shift`, `chapter-boundary`, `omitted`, and
+`added`. The detector compares three local Strong witnesses and records both
+the best path and its ambiguity margin. A book-level low margin does not erase
+a locally strong structural block: production may retain the best path only
+when every non-identity block clears the local evidence threshold. Otherwise,
+retain only the exact top-two intersection and fall back to identity outside
+it. Empty canonical witness rows are valid source coordinates, not malformed
+text.
+
+Generation must validate exact target and canonical coverage before writing the
+manifest. The accepted report records the manifest SHA-256, block counts,
+detector version, thresholds, witnesses, and per-book resolution policy. Add
+the frozen manifest path to the Strong-ledger input fingerprint; a changed
+manifest always requires a full regeneration before scoped refresh.
+
+For each non-identity block, align the concatenated target text once against
+the deduplicated STEP tokens and combined witnesses, then project back to the
+Bible's native verse refs. Require all of these invariants:
+
+- every French word index belongs to exactly one native verse;
+- a phrase may not cross a native verse boundary;
+- every empty anchor has one deterministic native owner;
+- every physical STEP occurrence is represented exactly once;
+- all Strong identities of one physical STEP token are co-located on one
+  carrier;
+- witness inventories are partitioned, never copied into every verse;
+- curated overrides remain native-ref/local-index decisions and are applied
+  only after block projection;
+- a targeted refresh expands to every native verse in the touched block.
+
+Run non-mutating canaries before activating a manifest. Include at least one
+2:2 clause transfer, one merge/split, one chapter/count exception, and one
+same-token multi-identity case. Verify unchanged total occurrence inventory,
+100% original representation for the canary scope, and zero same-token
+duplication. Only then place the frozen manifest at
+`data/bibles/bible-<id>-verse-correspondence.json` or pass its exact path with
+`--verse-correspondence` for a full regeneration. Do not start LLM carrier
+review until that regeneration and its SQLite/integrity/quality gates pass.
 
 14. Run full checks before finalizing:
 

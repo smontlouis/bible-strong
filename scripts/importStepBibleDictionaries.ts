@@ -168,8 +168,8 @@ async function main(): Promise<void> {
     source: "STEPBible-Data",
     license: "CC BY 4.0",
     attribution: "STEP Bible (https://www.stepbible.org/)",
-    warning:
-      "TBESH Meaning field notes that permission should be gained from Online Bible before applying Hebrew definitions in a project.",
+    rights:
+      "This project holds permission to reuse, display, and translate the TBESH Meaning field; confirmed by the project owner on 2026-07-13.",
     sources: sourceDigests,
     counts: {
       stepEntries: entries.length,
@@ -576,8 +576,8 @@ function buildSql(input: {
     insertMeta("license", "CC BY 4.0"),
     insertMeta("attribution", "STEP Bible (https://www.stepbible.org/)"),
     insertMeta(
-      "warning",
-      "TBESH Meaning field notes that permission should be gained from Online Bible before applying Hebrew definitions in a project."
+      "rights",
+      "This project holds permission to reuse, display, and translate the TBESH Meaning field; confirmed by the project owner on 2026-07-13."
     ),
     insertMeta("sourceDigests", JSON.stringify(input.sourceDigests))
   ];

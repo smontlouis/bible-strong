@@ -11,8 +11,10 @@ import {
   isAutoSafeCandidate,
   lexicalAutoSafePlacements,
   writeLexicalCandidateReport,
+  type LexicalCandidateItem,
   type LexicalCandidateReport
 } from "../src/lexicalCandidateReport.js";
+import { type StrongLedgerVerse } from "../src/strongLedger.js";
 import { type StrongTranslationCandidate } from "../src/translationLexicon.js";
 
 test("streams a lexical report to valid equivalent JSON", async () => {
@@ -66,6 +68,33 @@ test("streams a lexical report to valid equivalent JSON", async () => {
 
   const paths = await writeLexicalCandidateReport(report, directory);
   assert.deepEqual(JSON.parse(await readFile(paths.jsonPath, "utf8")), report);
+});
+
+test("keeps dictionary seeds isolated by exact STEP sub-entry", async () => {
+  const report = await buildLexicalCandidateReport({
+    bible: "fixture",
+    inputDir: ".",
+    outputDir: ".",
+    fetchJdm: false,
+    fetchJdmLimit: 0,
+    maxCandidatesPerEmpty: 10,
+    ledger: {
+      verses: [
+        verse(
+          "Acts.1.1",
+          "Il voit et sait.",
+          [token(0, "Il"), token(1, "voit"), token(2, "et"), token(3, "sait")],
+          empty("Acts.1.1:0:G1492", "G1492", "to know", 0, "", "", "G1492H")
+        )
+      ]
+    },
+    dictionaryCandidates: [
+      candidate("G1492", "voir", 0.5, { stepStrong: "G1492G" }),
+      candidate("G1492", "savoir", 0.5, { stepStrong: "G1492H" })
+    ]
+  });
+
+  assert.deepEqual(report.items[0]?.dictionaryTerms, ["savoir"]);
 });
 
 test("builds lexical candidates for advanced empty Strong annotations", async () => {
@@ -354,7 +383,7 @@ test("promotes French auxiliary plus participle as an auto-safe verb phrase", as
 });
 
 test("ignores synonym-only outside competitors for strong auxiliary phrases", () => {
-  const item = {
+  const item: LexicalCandidateItem = {
     auditKind: "empty",
     annotationId: "Rom.4.14:22:G2758",
     ref: "Rom.4.14",
@@ -399,7 +428,7 @@ test("ignores synonym-only outside competitors for strong auxiliary phrases", ()
 });
 
 test("keeps auxiliary phrases in review when a direct outside competitor exists", () => {
-  const item = {
+  const item: LexicalCandidateItem = {
     auditKind: "empty",
     annotationId: "Rom.4.14:22:G2758",
     ref: "Rom.4.14",
@@ -436,7 +465,7 @@ test("keeps auxiliary phrases in review when a direct outside competitor exists"
 });
 
 test("prefers an auxiliary phrase when it contains the only competing auto-safe word", () => {
-  const item = {
+  const item: LexicalCandidateItem = {
     auditKind: "relocation",
     annotationId: "John.2.22:0:G1453",
     ref: "John.2.22",
@@ -484,7 +513,7 @@ test("prefers an auxiliary phrase when it contains the only competing auto-safe 
 });
 
 test("keeps generic direct candidates in review when a high-scoring synonym competitor exists", () => {
-  const item = {
+  const item: LexicalCandidateItem = {
     auditKind: "empty",
     annotationId: "Test.1.1:0:H0001",
     ref: "Test.1.1",
@@ -519,7 +548,7 @@ test("keeps generic direct candidates in review when a high-scoring synonym comp
 });
 
 test("never auto-safes a generic carrier even with independent evidence", () => {
-  const item = {
+  const item: LexicalCandidateItem = {
     auditKind: "empty",
     annotationId: "Test.1.1:0:H0001",
     ref: "Test.1.1",
@@ -561,7 +590,7 @@ test("never auto-safes a generic carrier even with independent evidence", () => 
 });
 
 test("does not count a Kaikki-derived seed and Kaikki gloss as two sources", () => {
-  const item = {
+  const item: LexicalCandidateItem = {
     auditKind: "empty",
     annotationId: "Test.1.1:0:H0001",
     ref: "Test.1.1",
@@ -1589,10 +1618,12 @@ function candidate(
   options: {
     reviewOnly?: boolean;
     provenanceRoot?: string;
+    stepStrong?: string;
   } = {}
 ): StrongTranslationCandidate {
   return {
     strong,
+    stepStrong: options.stepStrong,
     normalized,
     score,
     source: "test",
@@ -1655,7 +1686,7 @@ function verse(
   text: string,
   tokens: Array<{ wordIndex: number; text: string; normalized: string }>,
   annotation: unknown | unknown[]
-) {
+): StrongLedgerVerse {
   const [bookId, chapter, verseNumber] = ref.split(".");
   return {
     ref,
@@ -1668,7 +1699,7 @@ function verse(
     inventories: { references: {}, original: [] },
     metrics: {},
     views: {}
-  };
+  } as unknown as StrongLedgerVerse;
 }
 
 function token(wordIndex: number, text: string) {

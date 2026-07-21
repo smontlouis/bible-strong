@@ -117,8 +117,14 @@ split JSON. `/viewer/review.html` is a read-only quality cockpit for current
 target drift, witness-review decisions, the stable LLM plan, applied consensus
 overrides, and quarantined history. It distinguishes `accepted-safe` records
 from overrides actually present in production. `/viewer/lexicon.html` keeps the
-FR/EN Strong lexicon. The legacy human-approved review form remains available
-from the quality cockpit, clearly separated from the transactional v2 batch.
+FR/EN Strong lexicon. It reads the enriched
+`data/dictionaries/strong_lexicon.en-fr.full.production.sqlite` by default,
+including the bilingual STEP meanings and TFLSJ resources. The historical
+French Strong remains a separate, collapsible comparison sourced from
+`data/dictionaries/strong.legacy.sqlite`. Run `npm run lexicon:v3:enriched` to
+rebuild the enriched database, or set `LEXICON_DB` to test another SQLite. The
+legacy human-approved review form remains available from the
+quality cockpit, clearly separated from the transactional v2 batch.
 
 ## Reports
 

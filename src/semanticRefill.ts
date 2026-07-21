@@ -71,7 +71,22 @@ export interface SemanticRefillAuditItem {
     | "source"
     | "diagnostics"
     | "referenceSupport"
+    | "originalTokenId"
+    | "originalOccurrenceId"
+    | "sourceStrong"
+    | "step"
   >;
+  stepIdentity?: {
+    originalTokenId: string;
+    primaryStrong: string;
+    associatedStrong: string[];
+    originalOccurrenceIds: string[];
+    classicalStrong: string[];
+    eStrong: string[];
+    dStrong: string[];
+    uStrong: string[];
+    sourceStrong: string[];
+  };
   strong: string;
   currentPlacement: string;
   currentTarget?: {

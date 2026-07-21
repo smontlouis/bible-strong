@@ -70,6 +70,7 @@ import {
 import { pct, ratio } from "./format";
 import type {
   LexiconEntryPayload,
+  LexiconMetadata,
   LexiconRow,
   LexicalAuditItem,
   LexicalCandidate,
@@ -85,6 +86,7 @@ import type {
   StrongVerse,
   ViewId
 } from "./types";
+import { JsonlBibleView } from "./JsonlBibleView";
 import { WorkflowView } from "./WorkflowView";
 
 const navItems: Array<{
@@ -98,6 +100,12 @@ const navItems: Array<{
     label: "Ledger",
     description: "Strong placés, vides et preuves",
     icon: BookOpen
+  },
+  {
+    id: "jsonl",
+    label: "JSONL",
+    description: "Les 8 Bibles finales",
+    icon: Braces
   },
   {
     id: "workflow",
@@ -160,7 +168,7 @@ export function App() {
   const [loadingLedger, setLoadingLedger] = useState(false);
 
   useEffect(() => {
-    if (view === "workflow") {
+    if (view === "workflow" || view === "jsonl") {
       setLoadingLedger(false);
       return;
     }
@@ -215,7 +223,7 @@ export function App() {
               onValueChange={changeView}
               className="w-full lg:hidden"
             >
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 {navItems.map((item) => (
                   <TabsTrigger key={item.id} value={item.id}>
                     {item.label}
@@ -257,7 +265,7 @@ export function App() {
 
             <div className="hidden lg:block">
               {view === "workflow" ? <WorkflowStatus /> : null}
-              {view !== "workflow" ? (
+              {view !== "workflow" && view !== "jsonl" ? (
                 <LedgerStatus ledger={ledger} loading={loadingLedger} />
               ) : null}
             </div>
@@ -265,7 +273,7 @@ export function App() {
             <div
               className={cn(
                 "mt-auto hidden flex-col gap-2 lg:flex",
-                view === "workflow" && "lg:hidden"
+                (view === "workflow" || view === "jsonl") && "lg:hidden"
               )}
             >
               <label
@@ -299,6 +307,7 @@ export function App() {
           {view === "viewer" ? (
             <LedgerView ledger={ledger} loading={loadingLedger} />
           ) : null}
+          {view === "jsonl" ? <JsonlBibleView /> : null}
           {view === "workflow" ? <WorkflowView /> : null}
           {view === "lexicon" ? <LexiconView /> : null}
           {view === "review" ? <ReviewView /> : null}
@@ -1603,44 +1612,85 @@ function reviewTraceHref(annotation: StrongAnnotation) {
 }
 
 function LexiconView() {
-  const [query, setQuery] = useState("H0430");
+  const [query, setQuery] = useState(
+    () => new URLSearchParams(window.location.search).get("q") || "H0430"
+  );
   const [rows, setRows] = useState<LexiconRow[]>([]);
   const [selected, setSelected] = useState<LexiconEntryPayload | null>(null);
+  const [metadata, setMetadata] = useState<LexiconMetadata | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    fetch("/api/lexicon/metadata")
+      .then((response) => {
+        if (!response.ok)
+          throw new Error("Métadonnées du lexique indisponibles");
+        return response.json() as Promise<LexiconMetadata>;
+      })
+      .then(setMetadata)
+      .catch((error) =>
+        toast.error(
+          error instanceof Error ? error.message : "Lexique indisponible"
+        )
+      );
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
     const handle = window.setTimeout(() => {
       setLoading(true);
       fetch(`/api/lexicon/search?q=${encodeURIComponent(query)}&limit=40`)
-        .then((response) => response.json())
+        .then((response) => {
+          if (!response.ok) throw new Error("Recherche lexicale indisponible");
+          return response.json();
+        })
         .then((payload) => {
+          if (cancelled) return undefined;
           setRows(payload.rows ?? []);
           const first = payload.rows?.[0];
           if (first) return fetch(`/api/lexicon/entry?id=${first.id}`);
         })
         .then((response) => (response?.ok ? response.json() : undefined))
         .then((payload) => {
-          if (payload) setSelected(payload);
+          if (payload && !cancelled) setSelected(payload);
         })
         .catch((error) =>
-          toast.error(
-            error instanceof Error ? error.message : "Recherche impossible"
-          )
+          !cancelled
+            ? toast.error(
+                error instanceof Error ? error.message : "Recherche impossible"
+              )
+            : undefined
         )
-        .finally(() => setLoading(false));
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
     }, 180);
-    return () => window.clearTimeout(handle);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(handle);
+    };
   }, [query]);
 
   return (
-    <section className="grid h-screen min-h-0 grid-cols-1 xl:grid-cols-[380px_minmax(0,1fr)]">
+    <section className="grid h-dvh min-h-0 grid-cols-1 xl:grid-cols-[380px_minmax(0,1fr)]">
       <aside className="border-border/70 bg-card/60 min-h-0 border-b xl:border-r xl:border-b-0">
         <div className="flex h-full flex-col gap-4 p-4">
           <div>
-            <Badge variant="outline">Lexique TAHOT/TAGNT + FR</Badge>
+            <Badge variant="outline">
+              {metadata?.releaseKey ?? "Lexique STEP EN-FR"}
+            </Badge>
             <h2 className="mt-2 text-2xl font-semibold">Lexique</h2>
             <p className="text-muted-foreground text-sm">
-              Recherche par Strong, translittération, gloss ou traduction.
+              Recherche dans {metadata?.entries.toLocaleString("fr-FR") ?? "…"}
+              {" entrées STEP avec "}
+              {metadata?.translationsFr.toLocaleString("fr-FR") ?? "…"}
+              {" traductions françaises"}
+              {metadata?.resourcesIncluded
+                ? ` et ${metadata.resourceEntries.toLocaleString("fr-FR")} notices complémentaires bilingues.`
+                : "."}
+              {metadata?.tipnrEntities
+                ? ` Contexte TIPNR : ${metadata.tipnrEntities.toLocaleString("fr-FR")} entités.`
+                : ""}
             </p>
           </div>
           <div className="relative">
@@ -1714,19 +1764,40 @@ function LexiconEntryCard({
   compact?: boolean;
 }) {
   const entry = payload.entry;
+  const identity = payload.identity;
+  const stepCode =
+    identity?.stepCode || entry.dStrong.split(/\s+/u)[0] || entry.eStrong;
+  const sourceLabel =
+    entry.language === "greek"
+      ? "STEP TBESG · Abbott-Smith"
+      : "STEP TBESH · BDB abrégé";
   return (
     <Card>
       <CardHeader>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <CardTitle className={compact ? "text-lg" : "text-3xl"}>
-              {entry.eStrong}
+              {stepCode}
             </CardTitle>
             <CardDescription>
-              {entry.dStrong} · {entry.uStrong} · {entry.morph}
+              {identity?.relationLabelFr && identity.relatedStepCode ? (
+                <>
+                  {identity.relationLabelFr} {identity.relatedStepCode}
+                  {" · "}
+                  {identity.relationLabelEn} {identity.relatedStepCode}
+                </>
+              ) : (
+                <>Strong classique {entry.eStrong}</>
+              )}
+              {entry.morph ? ` · ${entry.morph}` : ""}
             </CardDescription>
           </div>
-          <Badge>{entry.language}</Badge>
+          <div className="flex flex-wrap items-center gap-2">
+            {stepCode !== entry.eStrong ? (
+              <Badge variant="outline">Strong {entry.eStrong}</Badge>
+            ) : null}
+            <Badge>{entry.language}</Badge>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
@@ -1736,46 +1807,315 @@ function LexiconEntryCard({
             label="Translittération"
             value={entry.transliteration || entry.classicTransliteration}
           />
-          <InfoBlock label="Gloss FR" value={entry.glossFr || "—"} />
-          <InfoBlock label="Gloss EN" value={entry.glossEn || "—"} />
         </div>
-        <div>
-          <h3 className="mb-2 text-sm font-semibold">Définition française</h3>
-          <div
-            className="prose-strong rounded-lg border p-4 text-sm"
-            dangerouslySetInnerHTML={{
-              __html:
+        <section className="overflow-hidden rounded-xl border">
+          <div className="bg-muted/30 flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3">
+            <div>
+              <h3 className="text-sm font-semibold">Sens principal STEP</h3>
+              <p className="text-muted-foreground text-xs">{sourceLabel}</p>
+            </div>
+            <Badge variant="outline">{stepCode}</Badge>
+          </div>
+          <div className="grid divide-y md:grid-cols-2 md:divide-x md:divide-y-0">
+            <LexiconLanguagePanel
+              language="Français"
+              locale="FR"
+              gloss={entry.glossFr}
+              html={
                 entry.meaningHtmlFr ||
                 entry.meaningSimpleFr ||
-                entry.meaningEn ||
-                "<p>Aucune définition.</p>"
-            }}
-          />
-        </div>
+                "<p>Aucune définition française.</p>"
+              }
+            />
+            <LexiconLanguagePanel
+              language="English"
+              locale="EN"
+              gloss={entry.glossEn}
+              html={entry.meaningEn || "<p>No English definition.</p>"}
+            />
+          </div>
+        </section>
+        {!compact && (payload.tipnrEntities ?? []).length > 0 ? (
+          <TipnrEntityContexts payload={payload} />
+        ) : null}
         {!compact && payload.resources.length > 0 ? (
           <div className="flex flex-col gap-3">
-            <h3 className="text-sm font-semibold">Ressources</h3>
+            <div>
+              <h3 className="text-sm font-semibold">
+                Dictionnaires complémentaires
+              </h3>
+              <p className="text-muted-foreground text-xs">
+                Chaque notice reste attribuée à sa source et est disponible dans
+                les deux langues.
+              </p>
+            </div>
             {payload.resources.slice(0, 5).map((resource) => (
-              <div
+              <details
                 key={lexiconResourceKey(resource)}
-                className="rounded-lg border p-4"
+                className="group overflow-hidden rounded-xl border"
               >
-                <div className="mb-2 flex items-center gap-2">
-                  <Badge variant="outline">{resource.source}</Badge>
-                  <Badge variant="secondary">{resource.kind}</Badge>
+                <summary className="bg-muted/20 flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 transition hover:bg-muted/40">
+                  <div className="flex items-center gap-2">
+                    <ChevronRight className="text-muted-foreground size-4 transition-transform group-open:rotate-90" />
+                    <strong className="text-sm">
+                      {resource.source === "TFLSJ"
+                        ? "LSJ complet"
+                        : resource.source}
+                    </strong>
+                    <Badge variant="secondary">FR + EN</Badge>
+                  </div>
+                  <Badge variant="outline">{resource.kind}</Badge>
+                </summary>
+                <div className="grid border-t md:grid-cols-2 md:divide-x">
+                  <LexiconLanguagePanel
+                    language="Français"
+                    locale="FR"
+                    gloss=""
+                    html={
+                      resource.contentHtmlFr ||
+                      "<p>Traduction indisponible.</p>"
+                    }
+                  />
+                  <LexiconLanguagePanel
+                    language="English"
+                    locale="EN"
+                    gloss=""
+                    html={resource.contentHtml || "<p>Content unavailable.</p>"}
+                  />
                 </div>
-                <div
-                  className="prose-strong text-sm"
-                  dangerouslySetInnerHTML={{
-                    __html: resource.contentHtmlFr || resource.contentHtml || ""
-                  }}
-                />
-              </div>
+              </details>
             ))}
           </div>
         ) : null}
+        {!compact ? <LegacyLexiconComparison payload={payload} /> : null}
       </CardContent>
     </Card>
+  );
+}
+
+function LexiconLanguagePanel({
+  language,
+  locale,
+  gloss,
+  html
+}: {
+  language: string;
+  locale: "FR" | "EN";
+  gloss: string;
+  html: string;
+}) {
+  return (
+    <article className="min-w-0 p-4 md:p-5">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <span className="text-muted-foreground text-xs font-medium uppercase tracking-[0.16em]">
+          {language}
+        </span>
+        <Badge variant={locale === "FR" ? "default" : "outline"}>
+          {locale}
+        </Badge>
+      </div>
+      {gloss ? <p className="mb-4 text-lg font-semibold">{gloss}</p> : null}
+      <div
+        className="prose-strong min-w-0 text-sm leading-relaxed"
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+    </article>
+  );
+}
+
+function TipnrEntityContexts({ payload }: { payload: LexiconEntryPayload }) {
+  return (
+    <div className="flex flex-col gap-3">
+      {(payload.tipnrEntities ?? []).map((entity) => (
+        <section
+          key={entity.id}
+          className="overflow-hidden rounded-xl border border-sky-400/30 bg-sky-500/5"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-sky-400/20 px-4 py-3">
+            <div>
+              <h3 className="text-sm font-semibold">
+                Contexte encyclopédique STEP
+              </h3>
+              <p className="text-muted-foreground text-xs">
+                {entity.matchKind === "uStrong-exact"
+                  ? "TIPNR · entité reliée exactement par uStrong"
+                  : "TIPNR · entité reliée au Strong classique correspondant"}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary">FR + EN</Badge>
+              <Badge variant="outline">{entity.matchedStrong}</Badge>
+            </div>
+          </div>
+          <div className="grid divide-y md:grid-cols-2 md:divide-x md:divide-y-0">
+            <TipnrLanguagePanel entity={entity} locale="FR" />
+            <TipnrLanguagePanel entity={entity} locale="EN" />
+          </div>
+          {entity.articleHtmlFr || entity.articleHtmlEn ? (
+            <details className="group border-t border-sky-400/20">
+              <summary className="bg-sky-500/5 flex cursor-pointer list-none items-center gap-2 px-4 py-3 transition hover:bg-sky-500/10">
+                <ChevronRight className="text-muted-foreground size-4 transition-transform group-open:rotate-90" />
+                <span className="text-sm font-semibold">
+                  Notice détaillée TIPNR
+                </span>
+              </summary>
+              <div className="grid border-t border-sky-400/20 md:grid-cols-2 md:divide-x">
+                <LexiconLanguagePanel
+                  language="Français"
+                  locale="FR"
+                  gloss=""
+                  html={prepareTipnrHtml(
+                    entity.articleHtmlFr ||
+                      "<p>Traduction française indisponible.</p>"
+                  )}
+                />
+                <LexiconLanguagePanel
+                  language="English"
+                  locale="EN"
+                  gloss=""
+                  html={prepareTipnrHtml(
+                    entity.articleHtmlEn ||
+                      "<p>English article unavailable.</p>"
+                  )}
+                />
+              </div>
+            </details>
+          ) : null}
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function TipnrLanguagePanel({
+  entity,
+  locale
+}: {
+  entity: LexiconEntryPayload["tipnrEntities"][number];
+  locale: "FR" | "EN";
+}) {
+  const french = locale === "FR";
+  const displayName = french ? entity.displayNameFr : entity.displayNameEn;
+  const description = french ? entity.descriptionFr : entity.descriptionEn;
+  const shortDescription = french
+    ? entity.shortDescriptionFr
+    : entity.shortDescriptionEn;
+  const summaryHtml = french ? entity.summaryHtmlFr : entity.summaryHtmlEn;
+  const brief = cleanTipnrText(french ? entity.briefFr : entity.briefEn);
+
+  return (
+    <article className="min-w-0 p-4 md:p-5">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <span className="text-muted-foreground text-xs font-medium uppercase tracking-[0.16em]">
+          {french ? "Français" : "English"}
+        </span>
+        <Badge variant={french ? "default" : "outline"}>{locale}</Badge>
+      </div>
+      <p className="text-lg font-semibold">{displayName || "—"}</p>
+      {description && description !== displayName ? (
+        <p className="text-muted-foreground mt-1 text-sm">{description}</p>
+      ) : null}
+      {shortDescription ? (
+        <p className="mt-4 text-sm leading-relaxed">{shortDescription}</p>
+      ) : null}
+      {summaryHtml ? (
+        <div
+          className="prose-strong mt-4 min-w-0 text-sm leading-relaxed"
+          dangerouslySetInnerHTML={{
+            __html: prepareTipnrHtml(summaryHtml)
+          }}
+        />
+      ) : null}
+      {brief && brief !== description ? (
+        <p className="text-muted-foreground mt-4 border-t pt-3 text-xs">
+          {brief}
+        </p>
+      ) : null}
+    </article>
+  );
+}
+
+function cleanTipnrText(value: string) {
+  return value.trim().replace(/^@Brief=\s*/iu, "");
+}
+
+function prepareTipnrHtml(value: string) {
+  return value
+    .trim()
+    .replace(/^#/u, "")
+    .replace(/^3(?=\p{L})/u, "")
+    .replace(/^@Brief=\s*/iu, "")
+    .replace(
+      /<strong="([HG]\d{4,5}[A-Z]*)">([\s\S]*?)<\/strong>/giu,
+      (_match, strong: string, label: string) =>
+        `<a href="/viewer/lexicon.html?q=${encodeURIComponent(strong)}">${label}</a>`
+    );
+}
+
+function LegacyLexiconComparison({
+  payload
+}: {
+  payload: LexiconEntryPayload;
+}) {
+  const legacy = payload.legacy;
+  if (!legacy) {
+    return (
+      <details className="group rounded-xl border border-dashed">
+        <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3">
+          <ChevronRight className="text-muted-foreground size-4 transition-transform group-open:rotate-90" />
+          <span className="text-sm font-semibold">Strong legacy français</span>
+          <Badge variant="secondary">Introuvable</Badge>
+        </summary>
+        <p className="text-muted-foreground border-t px-4 py-3 text-sm">
+          Aucune notice legacy ne correspond au Strong classique de cette entrée
+          STEP.
+        </p>
+      </details>
+    );
+  }
+
+  return (
+    <details className="group overflow-hidden rounded-xl border border-amber-400/30 bg-amber-500/5">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 transition hover:bg-amber-500/10">
+        <div className="flex items-center gap-2">
+          <ChevronRight className="text-muted-foreground size-4 transition-transform group-open:rotate-90" />
+          <span className="text-sm font-semibold">Strong legacy français</span>
+          <span className="text-muted-foreground text-xs">
+            source historique séparée
+          </span>
+        </div>
+        <Badge variant="outline">{legacy.strong}</Badge>
+      </summary>
+      <div className="border-t border-amber-400/20 p-4">
+        <p className="mb-1 text-lg font-semibold">{legacy.word || "—"}</p>
+        <p className="text-muted-foreground mb-3 text-xs">
+          {legacy.original} · {legacy.phonetic} · {legacy.type}
+        </p>
+        {legacy.lsg ? (
+          <div className="mb-3">
+            <span className="text-muted-foreground block text-xs">
+              Rendus LSG
+            </span>
+            <p className="text-sm">{legacy.lsg}</p>
+          </div>
+        ) : null}
+        {legacy.originHtml ? (
+          <div className="mb-3">
+            <span className="text-muted-foreground block text-xs">Origine</span>
+            <div
+              className="prose-strong text-sm"
+              dangerouslySetInnerHTML={{ __html: legacy.originHtml }}
+            />
+          </div>
+        ) : null}
+        <div
+          className="prose-strong text-sm"
+          dangerouslySetInnerHTML={{
+            __html: legacy.definitionHtml || "<p>Aucune définition.</p>"
+          }}
+        />
+      </div>
+    </details>
   );
 }
 
