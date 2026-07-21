@@ -21,12 +21,7 @@ import {
   selectAvailableAnnotationVersions,
   type GroupedWordAnnotation,
 } from '~redux/selectors/bible'
-import {
-  changeHighlightColor,
-  type Highlight,
-  type HighlightsObj,
-  removeHighlight,
-} from '~redux/modules/user'
+import { changeHighlightColor, removeHighlight } from '~redux/modules/user'
 import {
   removeWordAnnotationAction,
   changeWordAnnotationColor,
@@ -34,60 +29,22 @@ import {
 import { unifiedTagsModalAtom, colorChangeModalAtom } from '../../state/app'
 import VerseComponent from './Verse'
 import AnnotationItem from './AnnotationItem'
-import type { TagsObj, Verse, VerseIds } from '~common/types'
+import type { VerseIds } from '~common/types'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import ChoiceFilterModal from '~common/ChoiceFilterModal'
 import { highlightsListQueryAtom } from '~state/entityListFilters'
 import { sections } from '~assets/bible_versions/books-desc'
 import { isBookInTestament } from '~helpers/bibleBookCatalog'
-
-export type GroupedHighlightData = {
-  date: number
-  color: string
-  version?: string
-  highlightsObj: Verse[]
-  stringIds: VerseIds
-  tags: TagsObj
-}
-
-export type GroupedHighlights = GroupedHighlightData[]
+import {
+  buildGroupedHighlights,
+  type GroupedHighlightData,
+} from '~features/entityListQuery/highlightsQuery'
 
 type UnifiedHighlightItem =
   | { type: 'highlight'; data: GroupedHighlightData }
   | { type: 'annotation'; data: GroupedWordAnnotation }
 
-const filterByTag =
-  (tagId: string, highlightsObj: HighlightsObj) =>
-  ([vId]: [string, Highlight]) =>
-    Boolean(highlightsObj[vId].tags && highlightsObj[vId].tags[tagId])
-
-const groupHighlightsByDate = (arr: GroupedHighlights, highlightTuple: [string, Highlight]) => {
-  const [highlightId, highlight] = highlightTuple
-  const [Livre, Chapitre, Verset] = highlightId.split('-').map(Number)
-  const formattedVerse = { Livre, Chapitre, Verset, Texte: '' }
-
-  if (!arr.find(a => a.date === highlight.date)) {
-    arr.push({
-      date: highlight.date,
-      color: highlight.color,
-      version: highlight.version,
-      highlightsObj: [],
-      stringIds: {},
-      tags: {},
-    })
-  }
-
-  const dateInArray = arr.find(a => a.date === highlight.date)
-  if (dateInArray) {
-    dateInArray.stringIds[highlightId] = true
-    dateInArray.highlightsObj.push(formattedVerse)
-    dateInArray.highlightsObj.sort((a, b) => Number(a.Verset) - Number(b.Verset))
-    dateInArray.tags = { ...dateInArray.tags, ...highlight.tags }
-  }
-
-  arr.sort((a, b) => Number(b.date) - Number(a.date))
-  return arr
-}
+const selectAllWordAnnotations = makeAllWordAnnotationsSelector()
 
 type HighlightsScreenProps = {
   isFormSheet?: boolean
@@ -108,7 +65,6 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
   const books = sections.flatMap(section => section.data)
 
   // Word annotations selector
-  const selectAllWordAnnotations = makeAllWordAnnotationsSelector()
   const wordAnnotations = useSelector((state: RootState) => selectAllWordAnnotations(state))
 
   // Available annotation versions for type filter
@@ -163,27 +119,7 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
   }, [annotationSettingsData, openAnnotationSettings])
 
   // Filter highlights
-  const groupedHighlights = (() => {
-    let highlights = Object.entries(highlightsObj)
-
-    if (filters.colorId) {
-      highlights = highlights.filter(([, h]) => h.color === filters.colorId)
-    }
-    if (filters.tagId) {
-      highlights = highlights.filter(filterByTag(filters.tagId, highlightsObj))
-    }
-    if (filters.book) {
-      highlights = highlights.filter(([id]) => Number(id.split('-')[0]) === filters.book)
-    } else if (filters.testament === 'old') {
-      highlights = highlights.filter(([id]) => isBookInTestament(Number(id.split('-')[0]), 'old'))
-    } else if (filters.testament === 'new') {
-      highlights = highlights.filter(([id]) => isBookInTestament(Number(id.split('-')[0]), 'new'))
-    }
-
-    return highlights
-      .sort((a, b) => Number(b[1].date) - Number(a[1].date))
-      .reduce(groupHighlightsByDate, [])
-  })()
+  const groupedHighlights = buildGroupedHighlights(highlightsObj, filters)
 
   // Create unified list of highlights and annotations sorted by date
   const unifiedItems = (() => {

@@ -1,7 +1,10 @@
 import React from 'react'
 
 import FlatList from '~common/ui/FlatList'
-import { GroupedHighlightData, GroupedHighlights } from './HighlightsScreen'
+import type {
+  GroupedHighlightData,
+  GroupedHighlights,
+} from '~features/entityListQuery/highlightsQuery'
 import VerseComponent, { HighlightSettingsData } from './Verse'
 
 interface Props {
