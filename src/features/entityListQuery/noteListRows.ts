@@ -8,7 +8,7 @@ export type NoteListRow = {
   id: string
   noteId: string
   reference: string
-  notes: Note
+  note: Note
   title: string
   description: string
   date: number
@@ -60,12 +60,12 @@ export const buildNoteListRows = (
       id: noteId,
       noteId,
       reference,
-      notes: note,
+      note,
       title: getNoteTitle(note, reference),
       description: note.description,
       date: Number(note.date || 0),
     })
   }
 
-  return rows.sort((left, right) => right.date - left.date)
+  return rows
 }

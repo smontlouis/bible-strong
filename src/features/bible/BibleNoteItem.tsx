@@ -17,7 +17,7 @@ import truncate from '~helpers/truncate'
 import useLanguage from '~helpers/useLanguage'
 import { getDateLocale } from '~helpers/languageUtils'
 import { getNoteTitle } from '~helpers/getNoteTitle'
-import type { TNote } from './BibleVerseNotesScreen'
+import type { NoteListRow } from '~features/entityListQuery/noteListRows'
 
 const NoteLink = styled(Link)(({ theme }: { theme: Theme }) => ({
   paddingVertical: 20,
@@ -27,7 +27,7 @@ const NoteLink = styled(Link)(({ theme }: { theme: Theme }) => ({
 }))
 
 type Props = {
-  item: TNote
+  item: NoteListRow
   onPress: (noteId: string) => void
   onMenuPress: (noteId: string) => void
   relationCount?: number
@@ -39,12 +39,12 @@ const BibleNoteItem = ({ item, onPress, onMenuPress, relationCount, onRelationPr
   const theme = useTheme()
   const lang = useLanguage()
 
-  const formattedDate = distanceInWords(Number(item.notes.date), Date.now(), {
+  const formattedDate = distanceInWords(Number(item.note.date), Date.now(), {
     locale: getDateLocale(lang),
   })
   const relativeDate = t('Il y a {{formattedDate}}', { formattedDate })
   const metadataLabel = item.reference ? `${item.reference} - ${relativeDate}` : relativeDate
-  const noteTitle = getNoteTitle(item.notes, '')
+  const noteTitle = getNoteTitle(item.note, '')
 
   return (
     <Box>
@@ -60,13 +60,13 @@ const BibleNoteItem = ({ item, onPress, onMenuPress, relationCount, onRelationPr
               {noteTitle}
             </Text>
           )}
-          {!!item.notes.description && item.notes.description !== noteTitle && (
+          {!!item.note.description && item.note.description !== noteTitle && (
             <Paragraph scale={-3} scaleLineHeight={-1}>
-              {truncate(item.notes.description, 100)}
+              {truncate(item.note.description, 100)}
             </Paragraph>
           )}
           <EntityChipList
-            tags={item.notes.tags}
+            tags={item.note.tags}
             relationCount={relationCount}
             onRelationPress={onRelationPress}
           />

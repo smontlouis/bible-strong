@@ -75,7 +75,7 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
   const renderNote = ({ item }: { item: NoteListRow }) => {
     const endpoint: Extract<RelationEndpoint, { type: 'note' }> = createNoteEndpoint(
       item.noteId,
-      getNoteTitle(item.notes, item.reference)
+      getNoteTitle(item.note, item.reference)
     )
 
     return (
@@ -106,7 +106,7 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
     onSortChange: sort => setQueryState(state => ({ ...state, sort })),
   })
   const taggedNotes = notes.filter(s =>
-    selectedChip ? Boolean(s.notes.tags?.[selectedChip.id]) : true
+    selectedChip ? Boolean(s.note.tags?.[selectedChip.id]) : true
   )
   const filteredNotes = queryEntityList(taggedNotes, queryState)
   return (

@@ -29,8 +29,6 @@ import { useEntityListQueryFilters } from '~common/EntityListQueryFilters'
 import { queryEntityList, type EntityListSort } from '~features/entityListQuery/entityListQuery'
 import { defaultNotesListQueryState, notesListQueryAtom } from '~state/entityListFilters'
 
-export type TNote = NoteListRow
-
 type BibleVerseNotesProps = {
   isFormSheet?: boolean
   isNewTabSelection?: boolean
@@ -88,7 +86,7 @@ const BibleVerseNotes = ({
     onSortChange: sort => setQueryState(state => ({ ...state, sort })),
   })
   const matchingNotes = notes.filter(item =>
-    selectedChip ? Boolean(item.notes.tags?.[selectedChip.id]) : true
+    selectedChip ? Boolean(item.note.tags?.[selectedChip.id]) : true
   )
   const filteredNotes = queryEntityList(matchingNotes, queryState)
   const openNoteSettings = (noteId: string) => {
@@ -102,7 +100,7 @@ const BibleVerseNotes = ({
 
       resolveNewTabSelection({
         id: newTabId || 'new',
-        title: getNoteTitle(note?.notes, t('Notes')),
+        title: getNoteTitle(note?.note, t('Notes')),
         isRemovable: true,
         type: 'notes',
         data: {
@@ -115,10 +113,10 @@ const BibleVerseNotes = ({
     openNote({ noteId })
   }
 
-  const renderNote = ({ item }: { item: TNote }) => {
+  const renderNote = ({ item }: { item: NoteListRow }) => {
     const endpoint: Extract<RelationEndpoint, { type: 'note' }> = createNoteEndpoint(
       item.noteId,
-      getNoteTitle(item.notes, item.reference)
+      getNoteTitle(item.note, item.reference)
     )
 
     return (
@@ -156,7 +154,7 @@ const BibleVerseNotes = ({
           <FlatList
             data={filteredNotes}
             renderItem={renderNote}
-            keyExtractor={(item: TNote) => item.noteId}
+            keyExtractor={(item: NoteListRow) => item.noteId}
             style={{ paddingBottom: 30 }}
           />
         ) : (
