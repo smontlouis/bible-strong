@@ -3,19 +3,16 @@ import styled from '@emotion/native'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { withTheme } from '@emotion/react'
 import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
 import Container from '~common/ui/Container'
-import SectionList from '~common/ui/SectionList'
-import Border from '~common/ui/Border'
-import Header from '~common/Header'
 import { toggleCompareVersion } from '~redux/modules/user'
-import { getVersionsBySections, isStrongVersion } from '~helpers/bibleVersions'
+import { isStrongVersion, versions } from '~helpers/bibleVersions'
 import { useTranslation } from 'react-i18next'
 import Switch from '~common/ui/Switch'
 import type { RootState } from '~redux/modules/reducer'
 import type { AppDispatch } from '~redux/store'
-import type { Version } from '~helpers/bibleVersions'
 import type { Theme } from '~themes'
+import { useVersionCatalog, VersionCatalogHeader, VersionCatalogList } from './VersionCatalogView'
+import type { VersionCatalogItem } from './versionCatalog'
 
 const TextVersion = styled.Text<{ isSelected?: boolean; theme?: Theme }>(
   ({ isSelected, theme }) => ({
@@ -33,7 +30,7 @@ const TextName = styled.Text<{ isSelected?: boolean; theme?: Theme }>(({ isSelec
 }))
 
 type SwitchVersionProps = {
-  version: Version
+  version: VersionCatalogItem
   isSelected: boolean
   onChange: () => void
 }
@@ -44,10 +41,18 @@ const SwitchVersion = withTheme(({ version, isSelected, onChange }: SwitchVersio
   }
 
   return (
-    <Box paddingHorizontal={20} paddingVertical={10} row>
+    <Box
+      minHeight={76}
+      paddingHorizontal={20}
+      paddingVertical={12}
+      borderBottomWidth={1}
+      borderColor="border"
+      row
+      alignItems="center"
+    >
       <Box flex>
         <TextVersion isSelected={isSelected}>{version.id}</TextVersion>
-        <TextName isSelected={isSelected}>{version.name}</TextName>
+        <TextName isSelected={isSelected}>{version.displayName}</TextName>
       </Box>
       <Switch value={isSelected} onValueChange={onChange} />
     </Box>
@@ -61,23 +66,24 @@ const ToggleCompareVersesScreen = () => {
   )
   const dispatch = useDispatch<AppDispatch>()
   const { t } = useTranslation()
+  const versionCatalog = useVersionCatalog(
+    Object.values(versions).filter(version => !isStrongVersion(version.id)),
+    { resetSearchOnFocus: true }
+  )
 
   return (
     <Container>
-      <Header hasBackButton title={t('Sélectionner les versions')} />
-      <SectionList<Version, { title: string; data: Version[] }>
-        contentContainerStyle={{ paddingTop: 0 }}
-        stickySectionHeadersEnabled={false}
-        sections={getVersionsBySections()}
-        keyExtractor={item => item.id}
-        renderSectionHeader={({ section: { title } }) => (
-          <Box paddingHorizontal={20} marginTop={30}>
-            <Text fontSize={16} color="tertiary">
-              {title}
-            </Text>
-            <Border marginTop={10} />
-          </Box>
-        )}
+      <VersionCatalogHeader
+        title={t('Sélectionner les versions')}
+        hasBackButton
+        {...versionCatalog.headerProps}
+      />
+      <VersionCatalogList
+        sections={versionCatalog.sections}
+        grouping={versionCatalog.grouping}
+        query={versionCatalog.query}
+        openStyleInfo={versionCatalog.openStyleInfo}
+        scrollToTopKey={`${versionCatalog.focusKey}:${versionCatalog.filterKey}`}
         renderItem={({ item }) => (
           <SwitchVersion
             version={item}
@@ -88,6 +94,7 @@ const ToggleCompareVersesScreen = () => {
           />
         )}
       />
+      {versionCatalog.modals}
     </Container>
   )
 }

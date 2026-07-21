@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 
-import FiltersHeader, { getFiltersHeaderLabel } from '~common/FiltersHeader'
+import FiltersHeader from '~common/FiltersHeader'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { RootState } from '~redux/modules/reducer'
@@ -104,40 +104,6 @@ const WordAnnotationsScreen = () => {
   const selectedTag = queryState.tagId ? tags[queryState.tagId] : undefined
   const colorInfo = useColorInfo(queryState.colorId || undefined)
   const books = sections.flatMap(section => section.data)
-  const filterLabel = getFiltersHeaderLabel(
-    [
-      colorInfo?.name,
-      selectedTag?.name,
-      queryState.annotationType
-        ? t(
-            queryState.annotationType === 'background'
-              ? 'Arrière-plan'
-              : queryState.annotationType === 'underline'
-                ? 'Souligné'
-                : 'Entouré'
-          )
-        : undefined,
-      queryState.version,
-      queryState.testament === 'old'
-        ? t('Ancien Testament')
-        : queryState.testament === 'new'
-          ? t('Nouveau Testament')
-          : undefined,
-      books.find(book => book.Numero === queryState.book)?.Nom,
-      queryState.view !== defaultWordAnnotationsListQueryState.view
-        ? queryState.view === 'date'
-          ? t('Par date')
-          : t('Liste')
-        : undefined,
-      queryState.sort !== defaultWordAnnotationsListQueryState.sort
-        ? queryState.sort === 'newest'
-          ? t('entityList.sort.newest')
-          : t('entityList.sort.oldest')
-        : undefined,
-    ],
-    count => `${count} ${t('filtres')}`
-  )
-
   useEffect(() => {
     if (queryState.tagId && !tags[queryState.tagId]) {
       setQueryState(state => ({ ...state, tagId: null }))
@@ -368,11 +334,7 @@ const WordAnnotationsScreen = () => {
     <Container flex bg="lightGrey">
       <FiltersHeader
         title={t('Annotations')}
-        filterLabel={filterLabel}
         hasBackButton
-        hasActiveFilters={
-          JSON.stringify(queryState) !== JSON.stringify(defaultWordAnnotationsListQueryState)
-        }
         onReset={() => setQueryState(defaultWordAnnotationsListQueryState)}
         filters={[
           {
@@ -380,6 +342,7 @@ const WordAnnotationsScreen = () => {
             icon: 'droplet',
             label: t('Couleur'),
             value: colorInfo?.name || t('Toutes'),
+            active: Boolean(queryState.colorId),
             onPress: () => colorModalRef.current?.present(),
           },
           {
@@ -387,6 +350,7 @@ const WordAnnotationsScreen = () => {
             icon: 'tag',
             label: t('Tags'),
             value: selectedTag?.name || t('Tous'),
+            active: Boolean(queryState.tagId),
             onPress: () =>
               setUnifiedTagsModal({
                 mode: 'filter',
@@ -399,6 +363,7 @@ const WordAnnotationsScreen = () => {
             icon: 'edit-3',
             label: t('Style'),
             value: queryState.annotationType || t('Tous'),
+            active: Boolean(queryState.annotationType),
             onPress: () => styleModalRef.current?.present(),
           },
           {
@@ -406,6 +371,7 @@ const WordAnnotationsScreen = () => {
             icon: 'book-open',
             label: t('Version'),
             value: queryState.version || t('Toutes'),
+            active: Boolean(queryState.version),
             onPress: () => versionModalRef.current?.present(),
           },
           {
@@ -418,6 +384,7 @@ const WordAnnotationsScreen = () => {
                 : queryState.testament === 'old'
                   ? t('Ancien Testament')
                   : t('Nouveau Testament'),
+            active: queryState.testament !== 'all',
             onPress: () => testamentModalRef.current?.present(),
           },
           {
@@ -425,6 +392,7 @@ const WordAnnotationsScreen = () => {
             icon: 'bookmark',
             label: t('Livre'),
             value: books.find(book => book.Numero === queryState.book)?.Nom || t('Tous'),
+            active: Boolean(queryState.book),
             onPress: () => bookModalRef.current?.present(),
           },
           {
@@ -437,6 +405,7 @@ const WordAnnotationsScreen = () => {
                 : queryState.sort === 'newest'
                   ? t('entityList.sort.newest')
                   : t('entityList.sort.oldest'),
+            active: queryState.sort !== defaultWordAnnotationsListQueryState.sort,
             onPress: () => sortModalRef.current?.present(),
           },
         ]}

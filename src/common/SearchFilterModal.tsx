@@ -2,7 +2,6 @@ import React, { forwardRef, useEffect, useState } from 'react'
 
 import SearchInput from '~common/SearchInput'
 import { Sheet, SheetHeader, SheetView, type SheetRef } from '~common/sheet'
-import useDebounce from '~helpers/useDebounce'
 
 type Props = {
   title: string
@@ -14,17 +13,17 @@ type Props = {
 const SearchFilterModal = forwardRef<SheetRef, Props>(
   ({ title, placeholder, value, onChange }, ref) => {
     const [draft, setDraft] = useState(value)
-    const debouncedDraft = useDebounce(draft, 300)
 
     useEffect(() => {
       setDraft(value)
     }, [value])
 
     useEffect(() => {
-      if (debouncedDraft !== value) {
-        onChange(debouncedDraft)
-      }
-    }, [debouncedDraft, onChange, value])
+      if (draft === value) return
+
+      const timeout = setTimeout(() => onChange(draft), 300)
+      return () => clearTimeout(timeout)
+    }, [draft, onChange, value])
 
     return (
       <Sheet ref={ref} header={<SheetHeader title={title} />}>

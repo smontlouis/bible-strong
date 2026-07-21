@@ -15,7 +15,6 @@ import Box from '~common/ui/Box'
 import Checkbox from '~common/ui/Checkbox'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
-import Text from '~common/ui/Text'
 import { getIfVersionNeedsDownload, isStrongVersion, Version } from '~helpers/bibleVersions'
 import { isVersionInstalled, removeBibleVersion } from '~helpers/biblesDb'
 import { requireBiblePath } from '~helpers/requireBiblePath'
@@ -35,9 +34,12 @@ import { VersionCode, tabsAtom, BibleTab } from 'src/state/tabs'
 import { store } from '~redux/store'
 
 const Container = styled.View<{ needsUpdate?: boolean }>(({ needsUpdate, theme }) => ({
-  padding: 20,
-  paddingTop: 10,
-  paddingBottom: 10,
+  minHeight: 76,
+  paddingLeft: 20,
+  paddingRight: 4,
+  paddingVertical: 12,
+  borderBottomWidth: 1,
+  borderBottomColor: theme.colors.border,
   ...(needsUpdate
     ? {
         borderLeftColor: theme.colors.success,
@@ -47,6 +49,18 @@ const Container = styled.View<{ needsUpdate?: boolean }>(({ needsUpdate, theme }
 }))
 
 const TouchableContainer = Container.withComponent(TouchableOpacity)
+
+const ActionColumn = ({ children, opacity }: React.PropsWithChildren<{ opacity?: number }>) => (
+  <Box width={48} minHeight={48} center opacity={opacity}>
+    {children}
+  </Box>
+)
+
+const ActionButton = ({ children, onPress }: React.PropsWithChildren<{ onPress: () => void }>) => (
+  <TouchableOpacity onPress={onPress}>
+    <ActionColumn>{children}</ActionColumn>
+  </TouchableOpacity>
+)
 
 const TextVersion = styled.Text<{ isSelected?: boolean }>(({ isSelected, theme }) => ({
   color: isSelected ? theme.colors.primary : theme.colors.default,
@@ -83,7 +97,7 @@ const UpdateIcon = styled(Icon.Feather)(({ theme }) => ({
 }))
 
 interface Props {
-  version: Version
+  version: Version & { displayName?: string }
   isSelected?: boolean
   onChange?: (id: VersionCode) => void
   isParameters?: boolean
@@ -123,6 +137,11 @@ const VersionSelectorItem = ({
     }
   }
 
+  const startDownload = () => {
+    const item = createBibleDownloadItem(version.id)
+    downloadManager.enqueue([item])
+  }
+
   React.useEffect(() => {
     ;(async () => {
       if (shareFn && !isStrongVersion(version.id)) {
@@ -148,11 +167,6 @@ const VersionSelectorItem = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queueState?.status])
-
-  const startDownload = () => {
-    const item = createBibleDownloadItem(version.id)
-    downloadManager.enqueue([item])
-  }
 
   const updateVersion = async () => {
     await deleteVersion()
@@ -258,16 +272,9 @@ const VersionSelectorItem = ({
     }
 
     return (
-      <Box
-        width={32}
-        height={32}
-        alignItems="center"
-        justifyContent="center"
-        ml={12}
-        opacity={disabled ? 0.45 : 1}
-      >
+      <ActionColumn opacity={disabled ? 0.45 : 1}>
         <Checkbox checked={Boolean(isSelected)} variant="icon" size={22} />
-      </Box>
+      </ActionColumn>
     )
   }
 
@@ -286,7 +293,7 @@ const VersionSelectorItem = ({
           <Box disabled flex>
             <TextVersion>{version.id}</TextVersion>
             <HStack alignItems="center">
-              <TextName>{version.name}</TextName>
+              <TextName>{version.displayName || version.name}</TextName>
               {version?.hasAudio && (
                 <Box>
                   <FeatherIcon name="volume-2" size={16} color="primary" />
@@ -298,27 +305,23 @@ const VersionSelectorItem = ({
             </CopyrightText>
           </Box>
           {!isLoading && !isQueued && version.id !== 'LSGS' && version.id !== 'KJVS' && (
-            <TouchableOpacity
-              onPress={startDownload}
-              style={{ padding: 10, alignItems: 'flex-end' }}
-            >
-              <FeatherIcon name="download" size={20} />
-              {(version.id === 'INT' || version.id === 'INT_EN') && (
-                <Box center marginTop={5}>
-                  <Text fontSize={10}>20Mo</Text>
-                </Box>
-              )}
-            </TouchableOpacity>
+            <ActionButton onPress={startDownload}>
+              <FeatherIcon name="download-cloud" size={16} />
+            </ActionButton>
           )}
+          {!isLoading &&
+            !isQueued &&
+            (version.id === 'LSGS' || version.id === 'KJVS') &&
+            !showSelectionCheckbox && <ActionColumn />}
           {renderSelectionCheckbox(true)}
           {isQueued && (
-            <Box width={80} justifyContent="center" alignItems="flex-end" mr={10}>
+            <ActionColumn>
               <FeatherIcon name="clock" size={18} color="tertiary" />
-            </Box>
+            </ActionColumn>
           )}
           {isLoading && (
-            <Box width={80} justifyContent="center" alignItems="flex-end" mr={10}>
-              <Box width={60} height={4} borderRadius={2} bg="border" overflow="hidden">
+            <ActionColumn>
+              <Box width={36} height={4} borderRadius={2} bg="border" overflow="hidden">
                 <Animated.View
                   style={{
                     height: 4,
@@ -330,7 +333,7 @@ const VersionSelectorItem = ({
                   }}
                 />
               </Box>
-            </Box>
+            </ActionColumn>
           )}
         </Box>
       </Container>
@@ -343,7 +346,7 @@ const VersionSelectorItem = ({
         <Box flex row center>
           <Box flex>
             <TextVersion>{version.id}</TextVersion>
-            <TextName>{version.name}</TextName>
+            <TextName>{version.displayName || version.name}</TextName>
           </Box>
           {needsUpdate ? (
             <TouchableOpacity onPress={updateVersion} style={{ padding: 10 }}>
@@ -365,7 +368,7 @@ const VersionSelectorItem = ({
         <Box flex>
           <TextVersion isSelected={isSelected}>{version.id}</TextVersion>
           <HStack alignItems="center">
-            <TextName isSelected={isSelected}>{version.name}</TextName>
+            <TextName isSelected={isSelected}>{version.displayName || version.name}</TextName>
             {version?.hasAudio && (
               <Box>
                 <FeatherIcon name="volume-2" size={16} color="primary" />
@@ -377,6 +380,7 @@ const VersionSelectorItem = ({
           </CopyrightText>
         </Box>
         {renderSelectionCheckbox()}
+        {!showSelectionCheckbox && <ActionColumn />}
       </Box>
     </TouchableContainer>
   )

@@ -12,7 +12,7 @@ import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Header from '~common/Header'
 import Empty from '~common/Empty'
 
-import FiltersHeader, { getFiltersHeaderLabel } from '~common/FiltersHeader'
+import FiltersHeader from '~common/FiltersHeader'
 import { useSheet } from '~helpers/useSheet'
 import { unifiedTagsModalAtom } from '~state/app'
 import verseToReference from '~helpers/verseToReference'
@@ -224,17 +224,6 @@ const BibleVerseLinks = ({ isFormSheet = false }: BibleVerseLinksProps) => {
     typeOptions.find(option => option.value === (queryState.linkType || 'all'))?.label ||
     t('Tous') ||
     'Tous'
-  const activeFilters = Boolean(
-    queryState.query.trim() ||
-    queryState.tagId ||
-    queryState.linkType ||
-    queryState.sort !== 'newest'
-  )
-  const filterLabel = getFiltersHeaderLabel(
-    [...queryFilters.activeLabels, queryState.linkType ? typeLabel : undefined, selectedChip?.name],
-    count => `${count} ${t('filtres')}`
-  )
-
   const selectedLink = links.find(link => link.linkId === linkSettingsId)
 
   return (
@@ -245,9 +234,7 @@ const BibleVerseLinks = ({ isFormSheet = false }: BibleVerseLinksProps) => {
         ) : (
           <FiltersHeader
             title={t('Liens')}
-            filterLabel={filterLabel}
             hasBackButton={hasListBackButton}
-            hasActiveFilters={activeFilters}
             onReset={() => setQueryState(defaultLinksListQueryState)}
             filters={[
               ...queryFilters.filters,
@@ -256,6 +243,7 @@ const BibleVerseLinks = ({ isFormSheet = false }: BibleVerseLinksProps) => {
                 icon: 'link',
                 label: t('Type'),
                 value: typeLabel,
+                active: Boolean(queryState.linkType),
                 onPress: () => typeModalRef.current?.present(),
               },
               {
@@ -263,6 +251,7 @@ const BibleVerseLinks = ({ isFormSheet = false }: BibleVerseLinksProps) => {
                 icon: 'tag',
                 label: t('Tags'),
                 value: selectedChip?.name || t('Tous') || 'Tous',
+                active: Boolean(queryState.tagId),
                 onPress: openTagsModal,
               },
             ]}

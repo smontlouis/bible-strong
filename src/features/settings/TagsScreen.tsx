@@ -164,15 +164,6 @@ const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
     sortOptions.find(option => option.value === queryState.sort)?.label ||
     t('entityList.sort.nameAsc') ||
     queryState.sort
-  const activeFiltersCount =
-    (queryState.query.trim() ? 1 : 0) + (queryState.sort !== defaultTagListQueryState.sort ? 1 : 0)
-  const filterLabel =
-    activeFiltersCount === 1
-      ? queryState.query.trim() || sortLabel
-      : activeFiltersCount > 1
-        ? `${activeFiltersCount} ${t('filtres')}`
-        : undefined
-
   useEffect(() => {
     if (isOpen) {
       open()
@@ -206,15 +197,14 @@ const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
         <FiltersHeader
           hasBackButton={hasBackButton}
           title={t('Étiquettes')}
-          filterLabel={filterLabel}
-          hasActiveFilters={activeFiltersCount > 0}
           onReset={() => setQueryState(defaultTagListQueryState)}
           filters={[
             {
               key: 'search',
               icon: 'search',
               label: t('Rechercher'),
-              value: queryState.query.trim() || t('Tout'),
+              value: queryState.query.trim() || undefined,
+              active: Boolean(queryState.query.trim()),
               onPress: () => searchModalRef.current?.present(),
             },
             {
@@ -222,6 +212,7 @@ const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
               icon: 'list',
               label: t('Ordre'),
               value: sortLabel,
+              active: queryState.sort !== defaultTagListQueryState.sort,
               onPress: () => sortModalRef.current?.present(),
             },
           ]}

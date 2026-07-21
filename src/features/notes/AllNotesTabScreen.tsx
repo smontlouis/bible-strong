@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 
 import Empty from '~common/Empty'
-import FiltersHeader, { getFiltersHeaderLabel } from '~common/FiltersHeader'
+import FiltersHeader from '~common/FiltersHeader'
 import { Tag } from '~common/types'
 import Container from '~common/ui/Container'
 import FlatList from '~common/ui/FlatList'
@@ -167,21 +167,11 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
     })),
     queryState
   )
-  const activeFilters = Boolean(
-    queryState.query.trim() || queryState.tagId || queryState.sort !== 'newest'
-  )
-  const filterLabel = getFiltersHeaderLabel(
-    [...queryFilters.activeLabels, selectedChip?.name],
-    count => `${count} ${t('filtres')}`
-  )
-
   return (
     <Container>
       <FiltersHeader
         title={t('Notes')}
-        filterLabel={filterLabel}
         hasBackButton={hasBackButton}
-        hasActiveFilters={activeFilters}
         onReset={() => setQueryState(defaultNotesListQueryState)}
         filters={[
           ...queryFilters.filters,
@@ -190,6 +180,7 @@ const AllNotesTabScreen = ({ hasBackButton, notesAtom }: AllNotesTabScreenProps)
             icon: 'tag',
             label: t('Tags'),
             value: selectedChip?.name || t('Tous'),
+            active: Boolean(queryState.tagId),
             onPress: openTagsModal,
           },
         ]}

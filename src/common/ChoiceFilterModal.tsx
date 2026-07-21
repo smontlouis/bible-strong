@@ -3,8 +3,7 @@ import React, { forwardRef } from 'react'
 import { TouchableOpacity } from 'react-native'
 
 import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
-import Checkbox from '~common/ui/Checkbox'
-import { FeatherIcon } from '~common/ui/Icon'
+import Radio from '~common/ui/Radio'
 import Text from '~common/ui/Text'
 
 const ChoiceRow = styled(TouchableOpacity)(({ theme }) => ({
@@ -36,12 +35,16 @@ const ChoiceFilterModalInner = <T extends string>(
       {options.map(option => {
         const isSelected = option.value === selectedValue
         return (
-          <ChoiceRow key={option.value} onPress={() => onSelect(option.value)}>
-            <Checkbox checked={isSelected} marginRight={12} />
+          <ChoiceRow
+            key={option.value}
+            accessibilityRole="radio"
+            accessibilityState={{ checked: isSelected }}
+            onPress={() => onSelect(option.value)}
+          >
+            <Radio selected={isSelected} marginRight={12} />
             <Text flex={1} fontSize={16}>
               {option.label}
             </Text>
-            {isSelected && <FeatherIcon name="check" size={20} color="primary" />}
           </ChoiceRow>
         )
       })}

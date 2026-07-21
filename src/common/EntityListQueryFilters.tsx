@@ -28,13 +28,13 @@ export const useEntityListQueryFilters = ({
 
   return {
     sortLabel,
-    activeLabels: [query.trim() || undefined, sort !== 'newest' ? sortLabel : undefined],
     filters: [
       {
         key: 'search',
         icon: 'search' as const,
         label: t('Rechercher'),
-        value: query.trim() || t('Tout'),
+        value: query.trim() || undefined,
+        active: Boolean(query.trim()),
         onPress: () => searchRef.current?.present(),
       },
       {
@@ -42,6 +42,7 @@ export const useEntityListQueryFilters = ({
         icon: 'list' as const,
         label: t('Ordre'),
         value: sortLabel,
+        active: sort !== 'newest',
         onPress: () => sortRef.current?.present(),
       },
     ],

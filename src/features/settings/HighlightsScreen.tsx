@@ -6,7 +6,7 @@ import { Alert, FlatList } from 'react-native'
 
 import { ActionSheetItem } from '~common/ActionMenu'
 import Empty from '~common/Empty'
-import FiltersHeader, { getFiltersHeaderLabel } from '~common/FiltersHeader'
+import FiltersHeader from '~common/FiltersHeader'
 import ColorFilterModal from '~common/ColorFilterModal'
 import TypeFilterModal from '~common/TypeFilterModal'
 import Box from '~common/ui/Box'
@@ -134,33 +134,12 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
     colorInfo,
     selectedTag,
     typeFilterLabel,
-    activeFiltersCount,
     colorModalRef,
     typeModalRef,
     openColorFromMain,
     openTagsFromMain,
     openTypeFromMain,
   } = useHighlightFilters()
-
-  const filterLabel = getFiltersHeaderLabel(
-    [
-      filters.typeFilter && filters.typeFilter !== 'all' ? typeFilterLabel : undefined,
-      colorInfo?.name,
-      selectedTag?.name,
-      filters.testament === 'old'
-        ? t('Ancien Testament')
-        : filters.testament === 'new'
-          ? t('Nouveau Testament')
-          : undefined,
-      books.find(book => book.Numero === filters.book)?.Nom,
-      filters.sort === 'oldest'
-        ? t('entityList.sort.oldest')
-        : filters.sort === 'bible'
-          ? t('Ordre biblique')
-          : undefined,
-    ],
-    count => `${count} ${t('filtres')}`
-  )
 
   // Settings modal (for highlight actions)
   const [settingsData, setSettingsData] = useState<{ stringIds: VerseIds } | null>(null)
@@ -325,9 +304,7 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
         {/* Header with filter button */}
         <FiltersHeader
           title={t('Surbrillances')}
-          filterLabel={filterLabel}
           hasBackButton={hasBackButton}
-          hasActiveFilters={activeFiltersCount > 0}
           onReset={resetFilters}
           filters={[
             {
@@ -335,6 +312,7 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
               icon: 'layers',
               label: t('Type'),
               value: typeFilterLabel || t('Tout'),
+              active: Boolean(filters.typeFilter && filters.typeFilter !== 'all'),
               onPress: openTypeFromMain,
             },
             {
@@ -343,6 +321,7 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
               label: t('Couleur'),
               value: colorInfo?.name || t('Toutes'),
               color: filters.colorId ? colorInfo?.hex : undefined,
+              active: Boolean(filters.colorId),
               onPress: openColorFromMain,
             },
             {
@@ -350,6 +329,7 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
               icon: 'tag',
               label: t('Tags'),
               value: selectedTag?.name || t('Tous'),
+              active: Boolean(filters.tagId),
               onPress: openTagsFromMain,
             },
             {
@@ -362,6 +342,7 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
                   : filters.testament === 'new'
                     ? t('Nouveau Testament')
                     : t('Toute la Bible'),
+              active: Boolean(filters.testament && filters.testament !== 'all'),
               onPress: () => testamentModalRef.current?.present(),
             },
             {
@@ -369,6 +350,7 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
               icon: 'bookmark',
               label: t('Livre'),
               value: books.find(book => book.Numero === filters.book)?.Nom || t('Tous'),
+              active: Boolean(filters.book),
               onPress: () => bookModalRef.current?.present(),
             },
             {
@@ -381,6 +363,7 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
                   : filters.sort === 'bible'
                     ? t('Ordre biblique')
                     : t('entityList.sort.newest'),
+              active: Boolean(filters.sort && filters.sort !== 'newest'),
               onPress: () => sortModalRef.current?.present(),
             },
           ]}
