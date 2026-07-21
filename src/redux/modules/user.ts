@@ -135,6 +135,7 @@ export type UserDataSyncCollection =
   | 'highlights'
   | 'notes'
   | 'links'
+  | 'relations'
   | 'tags'
   | 'wordAnnotations'
   | 'studies'
@@ -156,6 +157,7 @@ const getInitialUserDataSyncState = (): UserDataSyncState => ({
     highlights: false,
     notes: false,
     links: false,
+    relations: false,
     tags: false,
     wordAnnotations: false,
     studies: false,
@@ -924,6 +926,7 @@ const userSlice = createSlice({
         collection === 'highlights' ||
         collection === 'notes' ||
         collection === 'links' ||
+        collection === 'relations' ||
         collection === 'tags' ||
         collection === 'wordAnnotations'
       ) {

@@ -121,8 +121,12 @@ const FiltersHeader = ({ title, hasBackButton, filters, onReset }: Props) => {
             <TouchableOpacity key={filter.key} onPress={filter.onPress}>
               <HStack alignItems="center" p={16} borderBottomWidth={1} borderColor="border">
                 <Box row flex={1}>
-                  <FeatherIcon name={filter.icon} size={20} color="tertiary" />
-                  <Text marginLeft={12} fontSize={16}>
+                  <FeatherIcon
+                    name={filter.icon}
+                    size={20}
+                    color={filter.active ? 'primary' : 'tertiary'}
+                  />
+                  <Text color={filter.active ? 'primary' : undefined} marginLeft={12} fontSize={16}>
                     {filter.label}
                   </Text>
                 </Box>

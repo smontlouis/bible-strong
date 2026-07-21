@@ -52,6 +52,7 @@ import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { makeSelectBookmarkForChapter } from '~redux/selectors/bookmarks'
 import { useBookAndVersionSelector } from './BookSelectorSheet/BookSelectorSheetProvider'
+import PassageExportSheet from './passageExport/PassageExportSheet'
 import { VerseSelectorPopup } from './VerseSelectorPopup'
 
 interface BibleHeaderProps {
@@ -97,6 +98,7 @@ const Header = ({
 
   // Bookmark ref
   const bookmarkModalRef = useRef<SheetRef>(null)
+  const exportSheetRef = useRef<SheetRef>(null)
   const bible = useAtomValue(bibleAtom)
   const contextDisplayMode = getBibleContextDisplayMode(bible.data)
   const isContextFocused = contextDisplayMode === 'focused'
@@ -218,11 +220,6 @@ const Header = ({
         ? 'arrow.up.left.and.arrow.down.right'
         : 'arrow.down.right.and.arrow.up.left',
     },
-    {
-      id: 'open-tab',
-      title: t('tab.openInNewTab'),
-      image: 'arrow.up.forward.square',
-    },
     ...(hasFocusVerses && onEditFocusTags
       ? [
           {
@@ -241,6 +238,16 @@ const Header = ({
           },
         ]
       : []),
+    {
+      id: 'export',
+      title: t('passageExport.menuAction'),
+      image: 'square.and.arrow.up',
+    },
+    {
+      id: 'open-tab',
+      title: t('tab.openInNewTab'),
+      image: 'arrow.up.forward.square',
+    },
     {
       id: 'clear-focus',
       title: t('Quitter le mode focus'),
@@ -324,6 +331,11 @@ const Header = ({
       id: 'bookmark',
       title: currentChapterBookmark ? t('Modifier le marque-page') : t('Ajouter un marque-page'),
       image: 'bookmark',
+    },
+    {
+      id: 'export',
+      title: t('passageExport.menuAction'),
+      image: 'square.and.arrow.up',
     },
     {
       id: 'open-tab',
@@ -513,6 +525,9 @@ const Header = ({
                       case 'relations':
                         openFocusedVerseRelations()
                         break
+                      case 'export':
+                        exportSheetRef.current?.present()
+                        break
                       case 'clear-focus':
                         actions.clearFocusVerses()
                         break
@@ -689,6 +704,9 @@ const Header = ({
                       case 'bookmark':
                         bookmarkModalRef.current?.present()
                         break
+                      case 'export':
+                        exportSheetRef.current?.present()
+                        break
                       case 'open-tab':
                         openInBibleTab()
                         break
@@ -729,6 +747,13 @@ const Header = ({
         chapter={chapter}
         version={version}
         existingBookmark={currentChapterBookmark || undefined}
+      />
+      <PassageExportSheet
+        ref={exportSheetRef}
+        sourceType="chapter"
+        bookNumber={bookNumber}
+        chapterNumber={chapter}
+        version={version}
       />
       {currentChapterBookmark && (
         <Box position="absolute" right={24} bottom={-18}>

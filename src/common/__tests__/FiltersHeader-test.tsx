@@ -150,6 +150,28 @@ describe('FiltersHeader', () => {
     ).toHaveLength(0)
   })
 
+  it('colors an active filter icon and label with the primary color', () => {
+    renderHeader([createFilter('order', 'list', true), createFilter('tags', 'tag')])
+
+    expect(
+      renderer.root.find(
+        node =>
+          String(node.type) === 'FeatherIcon' &&
+          node.props.name === 'list' &&
+          node.props.size === 20
+      ).props.color
+    ).toBe('primary')
+    expect(renderer.root.findByProps({ children: 'order' }).props.color).toBe('primary')
+
+    expect(
+      renderer.root.find(
+        node =>
+          String(node.type) === 'FeatherIcon' && node.props.name === 'tag' && node.props.size === 20
+      ).props.color
+    ).toBe('tertiary')
+    expect(renderer.root.findByProps({ children: 'tags' }).props.color).toBeUndefined()
+  })
+
   it('uses the same active state to expose and run reset', () => {
     const onReset = renderHeader([createFilter('search', 'search', true)])
     const resetButton = renderer.root.find(

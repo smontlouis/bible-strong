@@ -51,6 +51,13 @@ let openPromise: Promise<SQLite.SQLiteDatabase> | null = null
 let inFlightCount = 0
 let dbLockedForReset = false
 
+class BibleQueryCancelledError extends Error {
+  constructor() {
+    super('Bible query cancelled')
+    this.name = 'BibleQueryCancelledError'
+  }
+}
+
 const POLL_MS = 20
 
 async function waitForResetLock(): Promise<void> {
@@ -281,6 +288,7 @@ async function withDbError<T>(operation: string, fn: () => Promise<T>): Promise<
     try {
       return await fn()
     } catch (e) {
+      if (e instanceof BibleQueryCancelledError) throw e
       if (attempt === 0 && isReleasedHandleError(e)) {
         // DB handle was released concurrently — drop the singleton so the
         // next getDb() reopens a fresh connection, then retry once.
@@ -363,7 +371,8 @@ export function getVerseText(
  */
 export function getMultipleVerses(
   version: string,
-  verseKeys: string[]
+  verseKeys: string[],
+  shouldCancel?: () => boolean
 ): Promise<Record<string, string>> {
   if (verseKeys.length === 0) return Promise.resolve({})
 
@@ -374,6 +383,7 @@ export function getMultipleVerses(
     // Build a single query using OR clauses, batched to avoid SQL limits
     const BATCH_SIZE = 200
     for (let i = 0; i < verseKeys.length; i += BATCH_SIZE) {
+      if (shouldCancel?.()) throw new BibleQueryCancelledError()
       const batch = verseKeys.slice(i, i + BATCH_SIZE)
       const conditions = batch.map(() => '(book = ? AND chapter = ? AND verse = ?)').join(' OR ')
       const params: (string | number)[] = [version]
@@ -392,6 +402,7 @@ export function getMultipleVerses(
         `SELECT book, chapter, verse, text FROM verses WHERE version = ? AND (${conditions})`,
         params
       )
+      if (shouldCancel?.()) throw new BibleQueryCancelledError()
 
       for (const row of rows) {
         result[`${row.book}-${row.chapter}-${row.verse}`] = row.text

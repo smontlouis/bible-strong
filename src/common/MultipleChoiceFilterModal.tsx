@@ -3,7 +3,7 @@ import React, { forwardRef } from 'react'
 import { TouchableOpacity } from 'react-native'
 
 import { Sheet, SheetFlatList, SheetHeader, type SheetRef } from '~common/sheet'
-import Radio from '~common/ui/Radio'
+import Checkbox from '~common/ui/Checkbox'
 import Text from '~common/ui/Text'
 
 const ChoiceRow = styled(TouchableOpacity)(({ theme }) => ({
@@ -14,36 +14,37 @@ const ChoiceRow = styled(TouchableOpacity)(({ theme }) => ({
   borderBottomColor: theme.colors.border,
 }))
 
-export type ChoiceFilterOption<T extends string> = {
+export type MultipleChoiceFilterOption<T extends string> = {
   value: T
   label: string
 }
 
 type Props<T extends string> = {
   title: string
-  selectedValue: T
-  options: readonly ChoiceFilterOption<T>[]
-  onSelect: (value: T) => void
+  selectedValues: readonly T[]
+  options: readonly MultipleChoiceFilterOption<T>[]
+  onToggle: (value: T) => void
 }
 
-const ChoiceFilterModalInner = <T extends string>(
-  { title, selectedValue, options, onSelect }: Props<T>,
+const MultipleChoiceFilterModalInner = <T extends string>(
+  { title, selectedValues, options, onToggle }: Props<T>,
   ref: React.ForwardedRef<SheetRef>
 ) => (
   <Sheet ref={ref} header={<SheetHeader title={title} />}>
     <SheetFlatList
       data={options}
-      extraData={selectedValue}
+      extraData={selectedValues}
       keyExtractor={option => option.value}
       renderItem={({ item: option }) => {
-        const isSelected = option.value === selectedValue
+        const isSelected = selectedValues.includes(option.value)
         return (
           <ChoiceRow
-            accessibilityRole="radio"
+            accessibilityRole="checkbox"
             accessibilityState={{ checked: isSelected }}
-            onPress={() => onSelect(option.value)}
+            accessibilityLabel={option.label}
+            onPress={() => onToggle(option.value)}
           >
-            <Radio selected={isSelected} marginRight={12} />
+            <Checkbox checked={isSelected} fillChecked checkColor="white" mr={12} />
             <Text flex={1} fontSize={16}>
               {option.label}
             </Text>
@@ -54,8 +55,8 @@ const ChoiceFilterModalInner = <T extends string>(
   </Sheet>
 )
 
-const ChoiceFilterModal = forwardRef(ChoiceFilterModalInner) as <T extends string>(
+const MultipleChoiceFilterModal = forwardRef(MultipleChoiceFilterModalInner) as <T extends string>(
   props: Props<T> & { ref?: React.ForwardedRef<SheetRef> }
 ) => React.ReactElement
 
-export default ChoiceFilterModal
+export default MultipleChoiceFilterModal

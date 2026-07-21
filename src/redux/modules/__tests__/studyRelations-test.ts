@@ -272,6 +272,7 @@ describe('study relation reducer', () => {
     )
 
     expect(nextState.bible.relations).toEqual({})
+    expect(nextState.sync.loaded.relations).toBe(true)
   })
 
   it('backfills relations from pre-migration note data when importing a backup', () => {
