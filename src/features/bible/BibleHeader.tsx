@@ -54,6 +54,7 @@ import { makeSelectBookmarkForChapter } from '~redux/selectors/bookmarks'
 import { useBookAndVersionSelector } from './BookSelectorSheet/BookSelectorSheetProvider'
 import PassageExportSheet from './passageExport/PassageExportSheet'
 import { VerseSelectorPopup } from './VerseSelectorPopup'
+import { shouldShowBibleBackButton } from './bibleHeaderNavigation'
 
 interface BibleHeaderProps {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -92,7 +93,11 @@ const Header = ({
   const displayMode = useAtomValue(parallelDisplayModeAtom)
   const setDisplayMode = useSetAtom(parallelDisplayModeAtom)
   const canGoBackInStack = useCanGoBackInStack()
-  const hasBackButton = !isInTab || Boolean(isFormSheet && canGoBackInStack)
+  const hasBackButton = shouldShowBibleBackButton({
+    isFormSheet,
+    isInTab,
+    canGoBackInStack,
+  })
   const openInNewTab = useOpenInNewTab()
   const openEntityRelations = useOpenEntityRelations()
 
