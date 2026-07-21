@@ -33,6 +33,11 @@ Core user activities:
 | Term | Definition | Main code |
 |---|---|---|
 | Bible version | A translation or source text identified by a code such as `LSG`, `KJV`, `BHS`, `SBLGNT`. | `src/helpers/bibleVersions.ts` |
+| Bible version language | The language in which a Bible version presents its primary readable text, such as French, English, Hebrew, Greek, or Latin. It is independent from whether the version is a translation, original-language text, or interlinear resource. | Bible version metadata |
+| Bible resource kind | The nature of a Bible version: translation, original-language text, or interlinear resource. | Bible version metadata |
+| Translation reading profile | The single curated reading style assigned to a translated Bible version for discovery: word for word, balanced, thought for thought, or paraphrase. A translation remains explicitly unclassified when no reliable source or editorial decision supports an assignment. | Bible version metadata |
+| Bible version capability | An independently filterable feature offered by a Bible version, such as Strong data or audio. A capability is neither a language nor a translation approach. | Bible version metadata |
+| Bible version grouping | The mutually exclusive presentation used to organize the Bible version catalog: one alphabetical list, language sections, or translation-reading-profile sections. Versions are ordered alphabetically inside every section; style grouping places original, interlinear, and unclassified versions in an Other section; the choice is shared by all selectors and retained on the device without account synchronization. | Bible version selector |
 | Verse key | Canonical verse identifier used for user data, generally `book-chapter-verse` such as `1-27-2`. | `src/redux/modules/user.ts`, `src/redux/selectors/bible.ts` |
 | Versification | Declared book/chapter/verse numbering system used by a Bible version. The initial online-resource design preserves the app's current numeric location model and does not automatically convert between versifications. | Bible version metadata |
 | Bible canon | Declared set and ordering of books covered by a Bible version. Published coverage records what the application can actually open. | Bible version metadata |

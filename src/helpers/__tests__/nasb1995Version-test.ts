@@ -19,7 +19,7 @@ describe('NASB 1995 version', () => {
     expect(versions.NASB1995).toMatchObject({
       id: 'NASB1995',
       name: 'New American Standard Bible 1995',
-      c: '© 1960, 1962, 1963, 1968, 1971, 1972, 1973, 1975, 1977, 1995 The Lockman Foundation',
+      c: '© 1995 The Lockman Foundation',
       type: 'en',
       canonId: 'protestant-66',
       versificationId: 'bible-strong-default',
