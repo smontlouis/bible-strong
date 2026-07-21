@@ -28,7 +28,7 @@ import { Tag } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import { useCreateTabGroupFromTag } from './useCreateTabGroupFromTag'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
-import { queryTagList } from '~features/entityListQuery/tagListQuery'
+import { queryTagList, type TagListRow } from '~features/entityListQuery/tagListQuery'
 import {
   defaultTagListQueryState,
   tagListQueryAtom,
@@ -48,28 +48,26 @@ const Chip = styled(Box)(({ theme }) => ({
 }))
 
 type TagItemProps = {
-  item: Tag
+  item: TagListRow
   setOpen: (tag: Tag) => void
 }
 
 const TagItem = ({ item, setOpen }: TagItemProps) => {
   const { t } = useTranslation()
-  const selectTagData = useRef(makeTagDataSelector()).current
-  const tagData = useSelector((state: RootState) => selectTagData(state, item))
-  const highlightsNumber = tagData.highlights.length + tagData.wordAnnotations.length
-  const notesNumber = tagData.notes.length
-  const linksNumber = tagData.links.length
-  const studiesNumber = tagData.studies.length
-  const strongsNumber = tagData.strongsHebreu.length + tagData.strongsGrec.length
-  const wordsNumber = tagData.words.length
-  const navesNumber = tagData.naves.length
+  const highlightsNumber = item.counts.highlights + item.counts.wordAnnotations
+  const notesNumber = item.counts.notes
+  const linksNumber = item.counts.links
+  const studiesNumber = item.counts.studies
+  const strongsNumber = item.counts.strongsHebreu + item.counts.strongsGrec
+  const wordsNumber = item.counts.words
+  const navesNumber = item.counts.naves
 
   return (
     <Box>
       <Link route="Tag" params={{ tagId: item.id }}>
         <Box padding={20} row pr={0} py={10}>
           <Box flex justifyContent="center">
-            <Text bold>{item.name}</Text>
+            <Text bold>{item.title}</Text>
             <Box row>
               {!!strongsNumber && (
                 <Chip>
@@ -122,7 +120,7 @@ const TagItem = ({ item, setOpen }: TagItemProps) => {
               )}
             </Box>
           </Box>
-          <Link onPress={() => setOpen(item)} padding>
+          <Link onPress={() => setOpen(item.tag)} padding>
             <FeatherIcon name="more-vertical" size={20} />
           </Link>
         </Box>
@@ -237,7 +235,7 @@ const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
         {result.length ? (
           <LegendList
             data={result}
-            renderItem={({ item }) => <TagItem setOpen={setOpen} item={item.tag} />}
+            renderItem={({ item }) => <TagItem setOpen={setOpen} item={item} />}
             keyExtractor={item => item.id}
             contentContainerStyle={{ paddingBottom: 70 }}
           />

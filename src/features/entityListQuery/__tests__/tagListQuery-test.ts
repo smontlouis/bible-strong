@@ -22,7 +22,7 @@ const tags: Tag[] = [
 ]
 
 const inventory: TagEntityInventory = {
-  highlights: { '1-1-1': {} },
+  highlights: { '1-1-1': { date: 10 }, '1-1-2': { date: 10 } },
   notes: { 'note-1': {}, 'note-2': {} },
   studies: { 'study-1': {} },
 }
@@ -50,6 +50,34 @@ describe('tag list query', () => {
       'grace',
       'study-a',
     ])
+  })
+
+  it('exposes display counts without resolving complete tagged entities in each row', () => {
+    const rows = buildTagListRows(
+      [
+        {
+          id: 'counts',
+          name: 'Comptages',
+          highlights: { '1-1-1': true, '1-1-2': true, missing: true },
+          notes: { 'note-1': true, missing: true },
+          studies: { 'study-1': true },
+        },
+      ],
+      inventory
+    )
+
+    expect(rows[0].counts).toEqual({
+      highlights: 1,
+      notes: 1,
+      links: 0,
+      studies: 1,
+      strongsHebreu: 0,
+      strongsGrec: 0,
+      words: 0,
+      naves: 0,
+      wordAnnotations: 0,
+    })
+    expect(rows[0].itemCount).toBe(4)
   })
 
   it('uses tag identity as the deterministic tie-breaker', () => {

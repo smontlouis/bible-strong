@@ -13,14 +13,11 @@ import BibleNoteItem from './BibleNoteItem'
 import { Tag } from '~common/types'
 import { useSheet } from '~helpers/useSheet'
 import { unifiedTagsModalAtom } from '~state/app'
-import verseToReference from '~helpers/verseToReference'
 import { getNoteTitle } from '~helpers/getNoteTitle'
 import { RootState } from '~redux/modules/reducer'
-import { Note } from '~redux/modules/user'
-import {
-  getRelationVerseKeysForEntity,
-  selectRelationCountsByEndpointIdentity,
-} from '~redux/selectors/bible'
+import { selectRelationCountsByEndpointIdentity } from '~redux/selectors/bible'
+import { selectNoteListRows } from '~redux/selectors/notes'
+import type { NoteListRow } from '~features/entityListQuery/noteListRows'
 import BibleNotesSettingsModal from './BibleNotesSettingsModal'
 import { endpointIdentity, type RelationEndpoint } from '~features/studyRelations/domain'
 import { createNoteEndpoint } from '~features/studyRelations/endpoints'
@@ -32,11 +29,7 @@ import { useEntityListQueryFilters } from '~common/EntityListQueryFilters'
 import { queryEntityList, type EntityListSort } from '~features/entityListQuery/entityListQuery'
 import { defaultNotesListQueryState, notesListQueryAtom } from '~state/entityListFilters'
 
-export type TNote = {
-  noteId: string
-  reference: string
-  notes: Note
-}
+export type TNote = NoteListRow
 
 type BibleVerseNotesProps = {
   isFormSheet?: boolean
@@ -59,9 +52,7 @@ const BibleVerseNotes = ({
   const openEntityRelations = useOpenEntityRelations()
   const openNote = useOpenNote()
 
-  const notesObj = useSelector((state: RootState) => state.user.bible.notes)
-  const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
-  const relations = useSelector((state: RootState) => state.user.bible.relations)
+  const notes = useSelector((state: RootState) => selectNoteListRows(state, t('annotation')))
   const tags = useSelector((state: RootState) => state.user.bible.tags)
   const selectedChip = queryState.tagId ? tags[queryState.tagId] || null : null
 
@@ -83,32 +74,6 @@ const BibleVerseNotes = ({
     })
   }
 
-  // Compute notes directly (React Compiler handles memoization)
-  const notes: TNote[] = []
-
-  Object.entries(notesObj).forEach(([noteKey, note]) => {
-    // Handle annotation notes (key format: annotation:{annotationId})
-    if (noteKey.startsWith('annotation:')) {
-      const annotationId = noteKey.replace('annotation:', '')
-      const annotation = wordAnnotations[annotationId]
-
-      if (!annotation) {
-        // Skip orphaned annotation notes
-        return
-      }
-
-      const firstRange = annotation.ranges[0]
-      const reference = `${verseToReference({ [firstRange.verseKey]: true })} (${t('annotation')})`
-      notes.push({ noteId: noteKey, reference, notes: note })
-      return
-    }
-
-    const verseKeys = getRelationVerseKeysForEntity(relations, 'note', noteKey, 'annotates')
-    const verseNumbers = Object.fromEntries(verseKeys.map(key => [key, true]))
-
-    notes.push({ noteId: noteKey, reference: verseToReference(verseNumbers), notes: note })
-  })
-
   const sortOptions = [
     { value: 'newest', label: t('entityList.sort.newest') },
     { value: 'oldest', label: t('entityList.sort.oldest') },
@@ -122,23 +87,10 @@ const BibleVerseNotes = ({
     onQueryChange: query => setQueryState(state => ({ ...state, query })),
     onSortChange: sort => setQueryState(state => ({ ...state, sort })),
   })
-  const filteredNotes = queryEntityList(
-    notes.reduce<(TNote & { id: string; title: string; description: string; date: number })[]>(
-      (result, item) => {
-        if (selectedChip && !item.notes.tags?.[selectedChip.id]) return result
-        result.push({
-          ...item,
-          id: item.noteId,
-          title: getNoteTitle(item.notes, item.reference),
-          description: item.notes.description,
-          date: Number(item.notes.date || 0),
-        })
-        return result
-      },
-      []
-    ),
-    queryState
+  const matchingNotes = notes.filter(item =>
+    selectedChip ? Boolean(item.notes.tags?.[selectedChip.id]) : true
   )
+  const filteredNotes = queryEntityList(matchingNotes, queryState)
   const openNoteSettings = (noteId: string) => {
     setNoteSettingsId(noteId)
     noteSettingsModal.open()
