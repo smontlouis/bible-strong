@@ -3,6 +3,7 @@ import { getIfLocalResourceNeedsDownload } from '~features/resources/resourceAva
 import { audioDefault, audioV2 } from './topBibleAudio'
 import { zeroFill } from './zeroFill'
 import type { BibleCanonId } from './bibleBookCatalog'
+import type { StrongBibleDatasetId } from './strongBiblePublications'
 
 export type BibleVersificationId =
   | 'bible-strong-default'
@@ -111,6 +112,8 @@ export interface Version {
   getAudioUrl?: (bookNum: number, chapterNum: number) => string
   canonId?: BibleCanonId
   versificationId?: BibleVersificationId
+  strongDatasetId?: StrongBibleDatasetId
+  hidden?: boolean
 }
 
 const getLsgAudioUrl = (bookNum: number, chapterNum: number) => {
@@ -153,6 +156,7 @@ export const versions: Record<string, Version> = {
     hasPericope: true,
     hasAudio: true,
     getAudioUrl: getLsgAudioUrl,
+    strongDatasetId: 'LSG',
   },
   LSGS: {
     id: 'LSGS',
@@ -163,6 +167,7 @@ export const versions: Record<string, Version> = {
     readingProfile: 'word-for-word',
     hasAudio: true,
     getAudioUrl: getLsgAudioUrl,
+    hidden: true,
   },
   NBS: {
     id: 'NBS',
@@ -230,6 +235,7 @@ export const versions: Record<string, Version> = {
     language: 'fr',
     readingProfile: 'word-for-word',
     hasRedWords: true,
+    strongDatasetId: 'DBY',
   },
   DBR: {
     id: 'DBR',
@@ -238,6 +244,7 @@ export const versions: Record<string, Version> = {
     type: 'fr',
     language: 'fr',
     readingProfile: 'word-for-word',
+    strongDatasetId: 'DBYR',
   },
   OST: {
     id: 'OST',
@@ -624,6 +631,7 @@ interface VersionsBySection {
 }
 export const versionsBySections: VersionsBySection[] = Object.values(versions).reduce(
   (sectionArray, version) => {
+    if (version.hidden) return sectionArray
     switch (version.id) {
       case 'LSG':
       case 'LSGS':
@@ -678,6 +686,7 @@ export const versionsBySections: VersionsBySection[] = Object.values(versions).r
 
 export const versionsBySections_en: VersionsBySection[] = Object.values(versions).reduce(
   (sectionArray, version) => {
+    if (version.hidden) return sectionArray
     const versionEn = { ...version, name: version.name_en || version.name }
     switch (version.id) {
       case 'KJV':

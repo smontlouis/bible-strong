@@ -14,6 +14,10 @@ import {
 import { localDictionaryAccess, type DictionaryAccess } from '~features/resources/dictionaryAccess'
 import { localNaveAccess, type NaveAccess } from '~features/resources/naveAccess'
 import { localStrongAccess, type StrongAccess } from '~features/resources/strongAccess'
+import {
+  localStrongBibleResourceAccess,
+  type StrongBibleResourceAccess,
+} from '~features/resources/strongBibleResourceAccess'
 
 export type ResourceAccessRegistry = {
   bibleContent: BibleContentAccess
@@ -22,6 +26,7 @@ export type ResourceAccessRegistry = {
   dictionary: DictionaryAccess
   nave: NaveAccess
   strong: StrongAccess
+  strongBible: StrongBibleResourceAccess
 }
 
 export const defaultResourceAccess: ResourceAccessRegistry = {
@@ -31,6 +36,7 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
   dictionary: localDictionaryAccess,
   nave: localNaveAccess,
   strong: localStrongAccess,
+  strongBible: localStrongBibleResourceAccess,
 }
 
 const ResourceAccessContext = createContext<ResourceAccessRegistry>(defaultResourceAccess)

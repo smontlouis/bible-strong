@@ -350,6 +350,7 @@ const Resource = ({
         >
           <BibleVerseDetailCard
             verse={verseObj}
+            selectedVersion={selectedVersion}
             updateVerse={updateVerse}
             isSelectionMode={isSelectionMode}
           />

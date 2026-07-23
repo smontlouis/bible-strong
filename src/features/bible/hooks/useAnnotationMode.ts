@@ -167,6 +167,7 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
 
     // Generate ID before dispatch so we can use it for auto-selection
     const annotationId = generateUUID()
+    const textRevision = versesRef.current.find(verse => verse.TextRevision)?.TextRevision
 
     reduxDispatch(
       addWordAnnotation({
@@ -175,6 +176,7 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
         ranges,
         color: payload.color,
         type: payload.type,
+        textRevision,
       })
     )
 

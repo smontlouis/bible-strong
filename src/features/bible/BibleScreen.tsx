@@ -26,6 +26,7 @@ import {
 } from '~helpers/bibleVerseResolver'
 import Box from '~common/ui/Box'
 import { bibleDataRefreshSignalAtom } from '~state/app'
+import type { StrongMode } from '~helpers/strongBiblePublications'
 import {
   BiblePartialReferenceNotice,
   BibleReferenceUnavailable,
@@ -39,6 +40,7 @@ type BibleScreenContentProps = {
   chapter?: number
   verse?: number
   version: string
+  strongMode?: StrongMode
 }
 
 const BibleScreenContent = ({
@@ -49,6 +51,7 @@ const BibleScreenContent = ({
   chapter,
   verse,
   version,
+  strongMode,
 }: BibleScreenContentProps) => {
   const initialValues = produce(getDefaultBibleTab(version as VersionCode), draft => {
     draft.id = `bible-${generateUUID()}`
@@ -64,6 +67,7 @@ const BibleScreenContent = ({
     if (contextDisplayMode) {
       draft.data.contextDisplayMode = contextDisplayMode
     }
+    if (strongMode) draft.data.strongMode = strongMode
   })
 
   // Always create an on-the-fly atom for this screen
@@ -83,6 +87,7 @@ const BibleScreen = () => {
     chapter?: string
     verse?: string
     version?: string
+    strongMode?: StrongMode
   }>()
 
   // Parse params from URL strings
@@ -96,6 +101,7 @@ const BibleScreen = () => {
   const defaultVersion = useDefaultBibleVersion()
   const bibleDataRefreshSignal = useAtomValue(bibleDataRefreshSignalAtom)
   const requestedVersion = params.version || undefined
+  const strongMode = params.strongMode
   const bookNumber = typeof book === 'number' ? book : book?.Numero
   const [resolvedVersion, setResolvedVersion] = useState(requestedVersion || defaultVersion)
   const [resolutionStatus, setResolutionStatus] = useState<BibleVerseResolutionStatus>('resolved')
@@ -171,6 +177,7 @@ const BibleScreen = () => {
       chapter={chapter}
       verse={verse}
       version={resolvedVersion}
+      strongMode={strongMode}
     />
   )
 

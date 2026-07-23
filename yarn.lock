@@ -7298,6 +7298,7 @@ __metadata:
     react-native-webview: "npm:13.16.1"
     react-native-worklets: "npm:0.8.3"
     react-native-youtube-iframe: "npm:^2.4.1"
+    react-native-zip-archive: "npm:9.0.2"
     react-redux: "npm:^9.2.0"
     react-test-renderer: "npm:19.2.3"
     reanimated-color-picker: "npm:^4.1.1"
@@ -15551,6 +15552,16 @@ __metadata:
     react-native-webview:
       optional: true
   checksum: 10c0/966fe52c3a298b01e58259d3f9bf9c94d8764ec7452918f9e0b2cc7f977461b8d9d8e3023a1b5fcc6ca0d470ec0ea3cc4dc1714a6e6ae62b3b16e552faf8deda
+  languageName: node
+  linkType: hard
+
+"react-native-zip-archive@npm:9.0.2":
+  version: 9.0.2
+  resolution: "react-native-zip-archive@npm:9.0.2"
+  peerDependencies:
+    react: ">=18.0.0"
+    react-native: ">=0.70.0"
+  checksum: 10c0/fb84e01eec6ac3d49041f4fa6bd66a12e2360e36b9647e3b7ed7fa9629a1ca5666d95bc6e12c106c818dc836b40cdea1dc5992f152f5f3d93df37c8e00a1a3a7
   languageName: node
   linkType: hard
 

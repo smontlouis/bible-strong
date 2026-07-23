@@ -4,6 +4,12 @@ import { versions, isStrongVersion, type Version } from '~helpers/bibleVersions'
 import { biblesRef, getDatabaseUrl } from '~helpers/firebase'
 import { databases, getDbPath } from '~helpers/databases'
 import { requireBiblePath } from '~helpers/requireBiblePath'
+import {
+  getStrongBiblePublication,
+  isStrongCapableBibleVersion,
+  type StrongBibleVersionId,
+} from '~helpers/strongBiblePublications'
+import type { StrongBibleSidecarAvailability } from './strongBibleSidecar'
 
 const BIBLE_ESTIMATED_SIZE = 2_500_000
 
@@ -15,20 +21,26 @@ export function createBibleDownloadItem(versionId: string): DownloadItem {
   if (!version) throw new Error(`Unknown Bible version: ${versionId}`)
 
   const isStrong = isStrongVersion(versionId)
+  const publication = isStrongCapableBibleVersion(versionId)
+    ? getStrongBiblePublication(versionId)
+    : undefined
 
   const type: DownloadItemType = isStrong ? 'bible-strong' : 'bible'
-  const url = isStrong
-    ? versionId === 'INT'
-      ? getDatabaseUrl('INTERLINEAIRE', 'fr')
-      : versionId === 'INT_EN'
-        ? getDatabaseUrl('INTERLINEAIRE', 'en')
-        : biblesRef[versionId]
-    : biblesRef[versionId]
+  const url = publication
+    ? publication.canonical.url
+    : isStrong
+      ? versionId === 'INT'
+        ? getDatabaseUrl('INTERLINEAIRE', 'fr')
+        : versionId === 'INT_EN'
+          ? getDatabaseUrl('INTERLINEAIRE', 'en')
+          : biblesRef[versionId]
+      : biblesRef[versionId]
 
   const destinationPath = isStrong ? requireBiblePath(versionId) : undefined
 
   // Strong/Interlinear are ~20MB SQLite files, regular bibles are ~2.5MB JSON
-  const estimatedSize = isStrong ? 20_000_000 : BIBLE_ESTIMATED_SIZE
+  const estimatedSize =
+    publication?.canonical.archiveBytes ?? (isStrong ? 20_000_000 : BIBLE_ESTIMATED_SIZE)
 
   return {
     id: `bible:${versionId}`,
@@ -40,10 +52,42 @@ export function createBibleDownloadItem(versionId: string): DownloadItem {
     estimatedSize,
     hasRedWords: version.hasRedWords,
     hasPericope: version.hasPericope,
+    ...(publication ? { canonicalArtifact: publication.canonical } : {}),
     addedAt: Date.now(),
     retryCount: 0,
   }
 }
+
+export function createStrongSidecarDownloadItem(versionId: StrongBibleVersionId): DownloadItem {
+  const version = versions[versionId]
+  const publication = getStrongBiblePublication(versionId)
+  return {
+    id: `bible-strong:${versionId}`,
+    type: 'bible-strong-sidecar',
+    name: `${version.name} — Strong`,
+    versionId,
+    url: publication.strong.url,
+    estimatedSize: publication.strong.archiveBytes,
+    strongArtifact: publication.strong,
+    strongDatasetId: publication.datasetId,
+    addedAt: Date.now(),
+    retryCount: 0,
+  }
+}
+
+export const createStrongSidecarDownloadPlan = (
+  versionId: StrongBibleVersionId,
+  availabilityStatus: StrongBibleSidecarAvailability['status']
+): DownloadItem[] => {
+  const sidecar = createStrongSidecarDownloadItem(versionId)
+  return availabilityStatus === 'base-missing' || availabilityStatus === 'base-incompatible'
+    ? [createBibleDownloadItem(versionId), sidecar]
+    : [sidecar]
+}
+
+export const dedupeDownloadItems = (items: DownloadItem[]): DownloadItem[] => [
+  ...new Map(items.map(item => [item.id, item])).values(),
+]
 
 /**
  * Create a DownloadItem for a resource database (Strong, Dictionnaire, Nave, etc.).

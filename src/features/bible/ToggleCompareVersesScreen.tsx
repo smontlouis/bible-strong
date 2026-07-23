@@ -67,7 +67,7 @@ const ToggleCompareVersesScreen = () => {
   const dispatch = useDispatch<AppDispatch>()
   const { t } = useTranslation()
   const versionCatalog = useVersionCatalog(
-    Object.values(versions).filter(version => !isStrongVersion(version.id)),
+    Object.values(versions).filter(version => !version.hidden && !isStrongVersion(version.id)),
     { resetSearchOnFocus: true }
   )
 

@@ -11,6 +11,13 @@ import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import loadInterlineaireChapter from '~helpers/loadInterlineaireChapter'
 import { strongDB } from '~helpers/sqlite'
 import { localStrongAccess, type StrongAccess } from './strongAccess'
+import {
+  isStrongCapableBibleVersion,
+  resolveStrongBibleVersion,
+  type StrongBibleVersionId,
+  type StrongMode,
+} from '~helpers/strongBiblePublications'
+import { loadStrongBibleChapterSpans } from '~helpers/strongBibleSidecar'
 
 export type InterlinearVerse = {
   Texte: string
@@ -28,6 +35,7 @@ export type BibleChapterRequest = {
   book: number
   chapter: number
   version: string
+  strongMode?: StrongMode
 }
 
 export type BibleContentAccess = {
@@ -44,6 +52,7 @@ type BibleContentAccessDependencies = {
   initStrongDatabase: () => Promise<unknown>
   isStrongDatabaseInitialized: () => boolean
   logError: (message: string, error: unknown) => void
+  loadStrongBibleChapterSpans?: typeof loadStrongBibleChapterSpans
 }
 
 const defaultDependencies: BibleContentAccessDependencies = {
@@ -54,6 +63,7 @@ const defaultDependencies: BibleContentAccessDependencies = {
   initStrongDatabase: () => strongDB.init(),
   isStrongDatabaseInitialized: () => Boolean(strongDB.get()),
   logError: (message, error) => console.log(message, error),
+  loadStrongBibleChapterSpans,
 }
 
 const hasNoChapterRows = (result: unknown): boolean =>
@@ -115,7 +125,30 @@ const loadRegularBibleChapter = async (
     return errorResult(await buildNoVersesError(request, dependencies))
   }
 
-  return successResult(verses)
+  if (
+    request.strongMode !== 'visible' ||
+    !isStrongCapableBibleVersion(request.version) ||
+    !dependencies.loadStrongBibleChapterSpans
+  ) {
+    return successResult(verses)
+  }
+
+  try {
+    const spansByVerse = await dependencies.loadStrongBibleChapterSpans(
+      request.version as StrongBibleVersionId,
+      request.book,
+      request.chapter
+    )
+    return successResult(
+      verses.map(verse => ({
+        ...verse,
+        StrongSpans: spansByVerse[verse.Verset] ?? [],
+      }))
+    )
+  } catch (error) {
+    dependencies.logError('[BibleContentAccess] Strong sidecar unavailable:', error)
+    return successResult(verses)
+  }
 }
 
 export const loadBibleContentChapter = async (
@@ -123,19 +156,25 @@ export const loadBibleContentChapter = async (
   dependencies: BibleContentAccessDependencies = defaultDependencies
 ): Promise<BibleChapterResult<BibleChapterData>> => {
   try {
-    if (request.version === 'INT') {
-      return await loadInterlinearBibleChapter(request, 'fr', dependencies)
+    const resolved = resolveStrongBibleVersion(request.version, request.strongMode)
+    const normalizedRequest = {
+      ...request,
+      version: resolved.versionId,
+      strongMode: resolved.strongMode,
+    }
+    if (normalizedRequest.version === 'INT') {
+      return await loadInterlinearBibleChapter(normalizedRequest, 'fr', dependencies)
     }
 
-    if (request.version === 'INT_EN') {
-      return await loadInterlinearBibleChapter(request, 'en', dependencies)
+    if (normalizedRequest.version === 'INT_EN') {
+      return await loadInterlinearBibleChapter(normalizedRequest, 'en', dependencies)
     }
 
-    if (request.version === 'LSGS' || request.version === 'KJVS') {
-      return await loadStrongBibleChapter(request, dependencies)
+    if (normalizedRequest.version === 'KJVS') {
+      return await loadStrongBibleChapter(normalizedRequest, dependencies)
     }
 
-    return await loadRegularBibleChapter(request, dependencies)
+    return await loadRegularBibleChapter(normalizedRequest, dependencies)
   } catch (error) {
     dependencies.logError('[BibleContentAccess] Error loading chapter:', error)
 

@@ -20,7 +20,9 @@ const VersionSelectorSheet = ({ sheetRef }: VersionSelectorSheetProps) => {
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
   const theme = useTheme()
-  const versionCatalog = useVersionCatalog(Object.values(versions))
+  const versionCatalog = useVersionCatalog(
+    Object.values(versions).filter(version => !version.hidden)
+  )
   const [revealKey, setRevealKey] = React.useState(0)
 
   const { actions, data, parallelVersionIndex } = useAtomValue(versionSelectorDataAtom)

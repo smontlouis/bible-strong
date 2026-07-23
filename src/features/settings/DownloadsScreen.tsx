@@ -28,7 +28,12 @@ import {
   type ResourceLanguage,
 } from '~helpers/databaseTypes'
 import { isLocalResourceAvailable } from '~features/resources/resourceAvailability'
-import { createBibleDownloadItem, createDatabaseDownloadItem } from '~helpers/downloadItemFactory'
+import {
+  createBibleDownloadItem,
+  createDatabaseDownloadItem,
+  createStrongSidecarDownloadPlan,
+  dedupeDownloadItems,
+} from '~helpers/downloadItemFactory'
 import { useDownloadQueue } from '~helpers/useDownloadQueue'
 import { isVersionInstalled, removeBibleVersion } from '~helpers/biblesDb'
 import { installedVersionsSignalAtom } from '~state/app'
@@ -41,6 +46,16 @@ import { dbManager } from '~helpers/sqlite'
 import { deleteRedWordsFile } from '~helpers/redWords'
 import { deletePericopeFile } from '~helpers/pericopes'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
+import {
+  getStrongBiblePublication,
+  isStrongCapableBibleVersion,
+  type StrongBibleVersionId,
+} from '~helpers/strongBiblePublications'
+import {
+  getStrongBibleSidecarAvailability,
+  removeStrongBibleSidecar,
+  type StrongBibleSidecarAvailability,
+} from '~helpers/strongBibleSidecar'
 
 // ---------------------------------------------------------------------------
 // Unified section item type
@@ -102,9 +117,9 @@ function buildSharedDatabaseItems(): UnifiedItem[] {
 function buildBibleItems(versionList: Version[], appLang: string): UnifiedItem[] {
   return versionList
     .filter(v => v.id !== 'LSGS' && v.id !== 'KJVS') // Strong versions hidden in downloads
-    .map(v => {
+    .flatMap(v => {
       const displayName = appLang === 'en' && v.name_en ? v.name_en : v.name
-      return {
+      const base: UnifiedItem = {
         id: `bible:${v.id}`,
         name: `${v.id}  ${displayName}`,
         subtitle: v.c,
@@ -115,6 +130,19 @@ function buildBibleItems(versionList: Version[], appLang: string): UnifiedItem[]
           | 'other',
         searchText: `${v.id} ${v.name} ${v.name_en || ''} ${v.c || ''}`.toLowerCase(),
       }
+      if (!isStrongCapableBibleVersion(v.id)) return [base]
+      const publication = getStrongBiblePublication(v.id)
+      return [
+        base,
+        {
+          id: `bible-strong:${v.id}`,
+          name: `${v.id}  ${displayName} — Strong`,
+          subtitle: 'Index Strong optionnel',
+          estimatedSize: publication.strong.archiveBytes,
+          lang: 'fr',
+          searchText: `${v.id} ${v.name} strong ${publication.datasetId}`.toLowerCase(),
+        },
+      ]
     })
 }
 
@@ -218,6 +246,9 @@ function buildAllSections(appLang: string, t: (key: string) => string): UnifiedS
 
 function useDownloadedItems() {
   const [downloadedSet, setDownloadedSet] = useState<Set<string>>(new Set())
+  const [strongAvailability, setStrongAvailability] = useState<
+    Map<StrongBibleVersionId, StrongBibleSidecarAvailability>
+  >(new Map())
   const installedSignal = useAtomValue(installedVersionsSignalAtom)
 
   React.useEffect(() => {
@@ -232,6 +263,19 @@ function useDownloadedItems() {
       if (vId === 'LSGS' || vId === 'KJVS') continue
       const available = await isLocalResourceAvailable({ kind: 'bible', versionId: vId })
       if (available) set.add(`bible:${vId}`)
+    }
+
+    const availabilityMap = new Map<StrongBibleVersionId, StrongBibleSidecarAvailability>()
+    for (const versionId of ['LSG', 'DBY', 'DBR'] as StrongBibleVersionId[]) {
+      const availability = await getStrongBibleSidecarAvailability(versionId)
+      availabilityMap.set(versionId, availability)
+      if (
+        availability.status === 'available' ||
+        availability.status === 'incompatible' ||
+        availability.status === 'corrupt'
+      ) {
+        set.add(`bible-strong:${versionId}`)
+      }
     }
 
     // Check databases for both languages
@@ -261,9 +305,10 @@ function useDownloadedItems() {
     }
 
     setDownloadedSet(set)
+    setStrongAvailability(availabilityMap)
   }
 
-  return downloadedSet
+  return { downloadedSet, strongAvailability }
 }
 
 // ---------------------------------------------------------------------------
@@ -286,7 +331,7 @@ const DownloadsScreen = () => {
   const [langFilter, setLangFilter] = useState<Set<LangFilter>>(new Set())
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(() => new Set())
 
-  const downloadedSet = useDownloadedItems()
+  const { downloadedSet, strongAvailability } = useDownloadedItems()
   const allSections = buildAllSections(lang, t)
 
   // Initialize all sections as collapsed once we know them
@@ -362,16 +407,25 @@ const DownloadsScreen = () => {
   }
 
   const handleBatchDownload = () => {
-    const items = Array.from(selectedItems)
-      .filter(id => !downloadedSet.has(id))
-      .map(id => {
-        if (id.startsWith('bible:')) {
-          const versionId = id.replace('bible:', '')
-          return createBibleDownloadItem(versionId)
-        }
-        const parts = id.split(':')
-        return createDatabaseDownloadItem(parts[1] as DatabaseId, parts[2] as ResourceLanguage)
-      })
+    const items = dedupeDownloadItems(
+      Array.from(selectedItems)
+        .filter(id => !downloadedSet.has(id))
+        .flatMap(id => {
+          if (id.startsWith('bible-strong:')) {
+            const versionId = id.replace('bible-strong:', '') as StrongBibleVersionId
+            return createStrongSidecarDownloadPlan(
+              versionId,
+              strongAvailability.get(versionId)?.status ?? 'base-missing'
+            )
+          }
+          if (id.startsWith('bible:')) {
+            const versionId = id.replace('bible:', '')
+            return [createBibleDownloadItem(versionId)]
+          }
+          const parts = id.split(':')
+          return [createDatabaseDownloadItem(parts[1] as DatabaseId, parts[2] as ResourceLanguage)]
+        })
+    )
 
     if (items.length > 0) {
       enqueue(items)
@@ -408,6 +462,16 @@ const DownloadsScreen = () => {
   }
 
   const handleDownloadItem = (item: UnifiedItem) => {
+    if (item.id.startsWith('bible-strong:')) {
+      const versionId = item.id.replace('bible-strong:', '') as StrongBibleVersionId
+      const availability = strongAvailability.get(versionId)
+      const items = createStrongSidecarDownloadPlan(
+        versionId,
+        availability?.status ?? 'base-missing'
+      )
+      enqueue(items)
+      return
+    }
     if (item.id.startsWith('bible:')) {
       const versionId = item.id.replace('bible:', '')
       enqueue([createBibleDownloadItem(versionId)])
@@ -571,12 +635,19 @@ const DownloadsScreen = () => {
           }
 
           const isDefault = item.id === `bible:${defaultVersion}`
+          const strongVersionId = item.id.startsWith('bible-strong:')
+            ? (item.id.replace('bible-strong:', '') as StrongBibleVersionId)
+            : undefined
+          const availability = strongVersionId ? strongAvailability.get(strongVersionId) : undefined
+          const strongStatusSubtitle = availability
+            ? getStrongAvailabilityLabel(availability, t)
+            : undefined
 
           return (
             <DownloadableItem
               itemId={item.id}
               name={item.name}
-              subtitle={item.subtitle}
+              subtitle={strongStatusSubtitle ?? item.subtitle}
               estimatedSize={item.estimatedSize}
               isSelectMode={isSelectMode}
               isSelected={selectedItems.has(item.id)}
@@ -617,7 +688,9 @@ const DownloadsScreen = () => {
 // ---------------------------------------------------------------------------
 
 async function deleteItem(itemId: string): Promise<void> {
-  if (itemId.startsWith('bible:')) {
+  if (itemId.startsWith('bible-strong:')) {
+    await removeStrongBibleSidecar(itemId.replace('bible-strong:', '') as StrongBibleVersionId)
+  } else if (itemId.startsWith('bible:')) {
     const versionId = itemId.replace('bible:', '')
     if (isStrongVersion(versionId)) {
       // Strong/Interlinear: delete SQLite file
@@ -651,6 +724,28 @@ async function deleteItem(itemId: string): Promise<void> {
     const lang = (parts[2] || 'fr') as ResourceLanguage
     const db = dbManager.getDB(dbId, lang)
     await db.delete()
+  }
+}
+
+function getStrongAvailabilityLabel(
+  availability: StrongBibleSidecarAvailability,
+  t: (key: string) => string
+): string {
+  switch (availability.status) {
+    case 'available':
+      return t('Index Strong installé et compatible')
+    case 'base-missing':
+      return t('La Bible sera téléchargée avant son index Strong')
+    case 'base-incompatible':
+      return t('La Bible doit être mise à jour avant son index Strong')
+    case 'missing':
+      return t('Index Strong optionnel')
+    case 'incompatible':
+      return t('Index Strong incompatible — mise à jour nécessaire')
+    case 'corrupt':
+      return t('Index Strong endommagé — réinstallation nécessaire')
+    case 'unsupported':
+      return t('Mode Strong indisponible')
   }
 }
 

@@ -27,6 +27,7 @@ import { getBibleVersionCoverage } from '~helpers/biblesDb'
 import generateUUID from '~helpers/generateUUID'
 import getVersesContent from '~helpers/getVersesContent'
 import { useQuery } from '~helpers/react-query-lite'
+import { resolveStrongNavigationVersionId } from '~helpers/strongBiblePublications'
 import useLanguage from '~helpers/useLanguage'
 import { useSheet } from '~helpers/useSheet'
 import { toast } from '~helpers/toast'
@@ -208,6 +209,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   const {
     data: {
       selectedVersion: version,
+      strongMode,
       selectedBook: book,
       selectedChapter: chapter,
       selectedVerse: verse,
@@ -387,6 +389,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
       book: book.Numero,
       chapter,
       version,
+      strongMode,
     })
 
     // If main Bible version fails, set error and stop
@@ -493,6 +496,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     book,
     chapter,
     version,
+    strongMode,
     parallelVersionsKey,
     settings.commentsDisplay,
     bibleDataRefreshSignal,
@@ -678,11 +682,12 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
           params: {
             book: String(code.book),
             reference: code.reference,
+            strongBibleVersionId: resolveStrongNavigationVersionId(version),
           },
         })
       }
     },
-    [pushRouteOnce]
+    [pushRouteOnce, version]
   )
 
   // Cross-version annotations modal handlers

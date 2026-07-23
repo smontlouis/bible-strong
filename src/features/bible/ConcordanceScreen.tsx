@@ -10,12 +10,14 @@ import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Text from '~common/ui/Text'
-import { DatabaseError } from '~helpers/catchDatabaseError'
 import useAsync from '~helpers/useAsync'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { IS_FORM_SHEET } from '~helpers/constants'
+import { useSelector } from 'react-redux'
+import type { RootState } from '~redux/modules/reducer'
+import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
 
 const OccurencesNumber = styled.View(({ theme }) => ({
   marginLeft: 10,
@@ -36,13 +38,14 @@ const StyledIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.default,
 }))
 
-const hasDatabaseError = (value: unknown): value is DatabaseError =>
-  typeof value === 'object' && value !== null && 'error' in value
-
 const ConcordanceScreen = () => {
   const pushRouteOnce = usePushRouteOnce()
   const resources = useResourceAccess()
-  const params = useLocalSearchParams<{ strongReference?: string; book?: string }>()
+  const params = useLocalSearchParams<{
+    strongReference?: string
+    book?: string
+    strongBibleVersionId?: string
+  }>()
   const isFormSheet = IS_FORM_SHEET
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : true
@@ -50,15 +53,37 @@ const ConcordanceScreen = () => {
   // Parse params from URL strings
   const strongReference = params.strongReference ? JSON.parse(params.strongReference) : {}
   const book = params.book ? Number(params.book) : 0
-
-  const { data: versesCountByBook, status } = useAsync(
-    async () => await resources.strong.loadVersesCountByBook(book, strongReference.Code)
+  const defaultStrongBibleVersionId = useSelector(
+    (state: RootState) => state.user.bible.settings.defaultStrongBibleVersionId ?? 'LSG'
   )
-  const data = hasDatabaseError(versesCountByBook) ? [] : versesCountByBook
+  const requestedStrongBibleVersionId =
+    (params.strongBibleVersionId as StrongBibleVersionId | undefined) ?? defaultStrongBibleVersionId
+
+  const { data: result, status } = useAsync(
+    async () =>
+      resources.strongBible.loadCountsByBook({
+        currentVersionId: requestedStrongBibleVersionId,
+        defaultVersionId: defaultStrongBibleVersionId,
+        book,
+        reference: strongReference.Code,
+      }),
+    [
+      resources.strongBible,
+      requestedStrongBibleVersionId,
+      defaultStrongBibleVersionId,
+      book,
+      strongReference.Code,
+    ]
+  )
+  const data = result?.status === 'available' ? result.counts : []
+  const sourceVersionId = result?.status === 'available' ? result.provenance.versionId : undefined
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
-      <Header hasBackButton={hasBackButton} title={`Concordance ${strongReference.Code}`} />
+      <Header
+        hasBackButton={hasBackButton}
+        title={`Concordance ${strongReference.Code}${sourceVersionId ? ` · ${sourceVersionId}` : ''}`}
+      />
       {status === 'Pending' && <Loading />}
       {status === 'Resolved' && (
         <FlatList
@@ -74,6 +99,7 @@ const ConcordanceScreen = () => {
                   params: {
                     book: String(item.Livre),
                     strongReference: JSON.stringify(strongReference),
+                    strongBibleVersionId: sourceVersionId,
                   },
                 })
               }}

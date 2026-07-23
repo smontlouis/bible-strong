@@ -19,6 +19,11 @@ import {
   getPreviousAvailableChapterLocation,
 } from '~helpers/bibleCoverage'
 import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
+import {
+  resolveStrongBibleVersion,
+  type StrongBibleVersionId,
+  type StrongMode,
+} from '~helpers/strongBiblePublications'
 
 // ============================================================================
 // SHARED BIBLE DOM (single WebView instance for all Bible tabs)
@@ -53,6 +58,7 @@ export interface BibleTab extends TabBase {
   type: 'bible'
   data: {
     selectedVersion: VersionCode
+    strongMode?: StrongMode
     selectedBook: Book
     selectedChapter: number
     selectedVerse: number
@@ -95,6 +101,7 @@ export interface StrongTab extends TabBase {
     book?: number
     reference?: string
     strongReference?: StrongReference
+    strongBibleVersionId?: StrongBibleVersionId
   }
 }
 
@@ -235,6 +242,7 @@ export const getDefaultBibleTab = (version?: VersionCode): BibleTab => ({
   type: 'bible',
   data: {
     selectedVersion: version || getDefaultBibleVersion(getLanguage()),
+    strongMode: 'hidden',
     selectedBook: { Numero: 1, Nom: 'Genèse', Chapitres: 50 },
     selectedChapter: 1,
     selectedVerse: 1,
@@ -380,6 +388,24 @@ const migrateTabsToRemovable = (tabs: TabItem[]): TabItem[] => {
   return tabs.map(tab => {
     // First migrate old tab types
     tab = migrateTabTypes(tab)
+    if (tab.type === 'bible') {
+      const resolved = resolveStrongBibleVersion(tab.data.selectedVersion, tab.data.strongMode)
+      tab = {
+        ...tab,
+        data: {
+          ...tab.data,
+          selectedVersion: resolved.versionId as VersionCode,
+          strongMode: resolved.strongMode,
+          parallelVersions: [
+            ...new Set(
+              tab.data.parallelVersions.map(parallelVersion =>
+                parallelVersion === 'LSGS' ? ('LSG' as VersionCode) : parallelVersion
+              )
+            ),
+          ],
+        },
+      }
+    }
 
     const needsIdMigration = tab.id === 'bible'
     const needsRemovableMigration = tab.isRemovable === false
@@ -725,6 +751,13 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
       })
     )
 
+  const setStrongMode = (strongMode: StrongMode) =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.strongMode = strongMode
+      })
+    )
+
   const setSelectedBook = (selectedBook: Book) =>
     setBibleTab(
       produce(draft => {
@@ -1035,6 +1068,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
 
   return {
     setSelectedVersion,
+    setStrongMode,
     setSelectedBook,
     setSelectedChapter,
     setSelectedVerse,

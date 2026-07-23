@@ -43,7 +43,7 @@ const StyledReference = styled('span')<
   })
 )
 
-const BibleStrongRef = ({
+export const BibleStrongRef = ({
   book,
   reference,
   isParallel,

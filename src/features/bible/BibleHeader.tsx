@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { FadeIn, FadeOut } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
+import { Alert } from 'react-native'
 import { isFullScreenBibleAtom } from 'src/state/app'
 import {
   BibleTab,
@@ -55,6 +56,13 @@ import { useBookAndVersionSelector } from './BookSelectorSheet/BookSelectorSheet
 import PassageExportSheet from './passageExport/PassageExportSheet'
 import { VerseSelectorPopup } from './VerseSelectorPopup'
 import { shouldShowBibleBackButton } from './bibleHeaderNavigation'
+import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
+import { getStrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
+import {
+  createStrongSidecarDownloadPlan,
+  createStrongSidecarDownloadItem,
+} from '~helpers/downloadItemFactory'
+import { downloadManager } from '~helpers/downloadManager'
 
 interface BibleHeaderProps {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -115,6 +123,7 @@ const Header = ({
     isSelectionMode,
     parallelVersions,
     focusVerses,
+    strongMode = 'hidden',
   } = bible.data
   const bookNumber = book.Numero
   const bookName = book.Nom
@@ -306,6 +315,19 @@ const Header = ({
 
   const mainMenuActions: MenuAction[] = [
     { id: 'params', title: t('Police et paramêtres'), image: 'textformat' },
+    ...(isStrongCapableBibleVersion(version)
+      ? [
+          {
+            id: 'strong-mode',
+            title:
+              strongMode === 'visible'
+                ? t('Masquer les numéros Strong')
+                : t('Afficher les numéros Strong'),
+            image: 'number' as const,
+            state: strongMode === 'visible' ? ('on' as const) : ('off' as const),
+          },
+        ]
+      : []),
     ...(!commentsDisplay && lang === 'fr'
       ? [
           {
@@ -348,6 +370,41 @@ const Header = ({
       image: 'arrow.up.forward.square',
     },
   ]
+
+  const toggleStrongMode = async () => {
+    if (!isStrongCapableBibleVersion(version)) return
+    if (strongMode === 'visible') {
+      actions.setStrongMode('hidden')
+      return
+    }
+
+    const availability = await getStrongBibleSidecarAvailability(version)
+    if (availability.status === 'available') {
+      actions.setStrongMode('visible')
+      return
+    }
+
+    const publicationSize = createStrongSidecarDownloadItem(version).estimatedSize
+    const sizeMb = Math.ceil(publicationSize / 1_000_000)
+    Alert.alert(
+      t('Mode Strong'),
+      t(
+        'Les données Strong de cette Bible ne sont pas encore installées. Télécharger environ {{size}} Mo ?',
+        { size: sizeMb }
+      ),
+      [
+        { text: t('Annuler'), style: 'cancel' },
+        {
+          text: t('Télécharger'),
+          onPress: () => {
+            const items = createStrongSidecarDownloadPlan(version, availability.status)
+            actions.setStrongMode('visible')
+            downloadManager.enqueue(items)
+          },
+        },
+      ]
+    )
+  }
 
   if (annotationModeEnabled) {
     return (
@@ -692,6 +749,9 @@ const Header = ({
                     switch (nativeEvent.event) {
                       case 'params':
                         onBibleParamsClick()
+                        break
+                      case 'strong-mode':
+                        toggleStrongMode()
                         break
                       case 'comments-on':
                         onOpenCommentaire()

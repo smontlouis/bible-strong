@@ -240,7 +240,11 @@ class DownloadManager {
 
       // Signal to BibleViewer instances to reload verses (a version they
       // were trying to display may now be available).
-      if (item.type === 'bible' || item.type === 'bible-strong') {
+      if (
+        item.type === 'bible' ||
+        item.type === 'bible-strong' ||
+        item.type === 'bible-strong-sidecar'
+      ) {
         this.jotaiStore.set(bibleDataRefreshSignalAtom, (c: number) => c + 1)
       }
     } catch (e) {

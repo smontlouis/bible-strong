@@ -7,6 +7,8 @@ import { downloadRedWordsFile, versionHasRedWords } from '~helpers/redWords'
 import { downloadPericopeFile, versionHasPericope } from '~helpers/pericopes'
 import type { DatabaseId } from '~helpers/databaseTypes'
 import type { DownloadItem } from '~state/downloadQueue'
+import { installStrongBibleSidecar } from './strongBibleSidecar'
+import type { StrongBibleVersionId } from './strongBiblePublications'
 
 export interface ResourceInstallationCallbacks {
   onDownloadProgress: (progress: number) => void
@@ -53,6 +55,7 @@ const installBible = async (item: DownloadItem, callbacks: ResourceInstallationC
       callbacks.onInsertProgress(progress)
     },
     isCancelled: callbacks.isCancelled,
+    canonicalArtifact: item.canonicalArtifact,
   })
 
   callbacks.onResumable(null)
@@ -79,6 +82,20 @@ const installDatabase = async (item: DownloadItem, callbacks: ResourceInstallati
   await dbManager.getDB(dbId as DatabaseId, lang).init()
 }
 
+const installBibleStrongSidecar = async (
+  item: DownloadItem,
+  callbacks: ResourceInstallationCallbacks
+) => {
+  await installStrongBibleSidecar(item.versionId as StrongBibleVersionId, {
+    onDownloadProgress: ({ totalBytesWritten }) => {
+      callbacks.onDownloadProgress(Math.min(totalBytesWritten / item.estimatedSize, 1))
+    },
+    onResumable: callbacks.onResumable,
+    onStatusInserting: callbacks.onStatusInserting,
+    isCancelled: callbacks.isCancelled,
+  })
+}
+
 export const installResourceDatabaseItem = async (
   item: DownloadItem,
   callbacks: ResourceInstallationCallbacks
@@ -89,6 +106,9 @@ export const installResourceDatabaseItem = async (
       break
     case 'bible-strong':
       await installBibleStrong(item, callbacks)
+      break
+    case 'bible-strong-sidecar':
+      await installBibleStrongSidecar(item, callbacks)
       break
     case 'database':
       await installDatabase(item, callbacks)

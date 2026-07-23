@@ -2,6 +2,7 @@ import { createAction } from '@reduxjs/toolkit'
 import { PreferredColorScheme, PreferredDarkTheme, PreferredLightTheme } from '~common/types'
 import defaultColors from '~themes/colors'
 import { HighlightType } from '../user'
+import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
 
 // Action type constants for backward compatibility
 export const SET_SETTINGS_ALIGN_CONTENT = 'user/SET_SETTINGS_ALIGN_CONTENT'
@@ -26,6 +27,7 @@ export const TOGGLE_SETTINGS_SHARE_APP_NAME = 'user/SET_SETTINGS_SHARE_APP_NAME'
 export const SET_DEFAULT_COLOR_NAME = 'user/SET_DEFAULT_COLOR_NAME'
 export const SET_DEFAULT_COLOR_TYPE = 'user/SET_DEFAULT_COLOR_TYPE'
 export const SET_DEFAULT_BIBLE_VERSION = 'user/SET_DEFAULT_BIBLE_VERSION'
+export const SET_DEFAULT_STRONG_BIBLE_VERSION = 'user/SET_DEFAULT_STRONG_BIBLE_VERSION'
 export const SET_SETTINGS_RED_WORDS_DISPLAY = 'user/SET_SETTINGS_RED_WORDS_DISPLAY'
 
 // RTK Action Creators
@@ -124,6 +126,11 @@ export const setDefaultColorType = createAction(
 export const setDefaultBibleVersion = createAction(
   SET_DEFAULT_BIBLE_VERSION,
   (payload: string) => ({ payload })
+)
+
+export const setDefaultStrongBibleVersion = createAction(
+  SET_DEFAULT_STRONG_BIBLE_VERSION,
+  (payload: StrongBibleVersionId) => ({ payload })
 )
 
 export const setSettingsRedWordsDisplay = createAction(

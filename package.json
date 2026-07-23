@@ -154,6 +154,7 @@
     "react-native-webview": "13.16.1",
     "react-native-worklets": "0.8.3",
     "react-native-youtube-iframe": "^2.4.1",
+    "react-native-zip-archive": "9.0.2",
     "react-redux": "^9.2.0",
     "reanimated-color-picker": "^4.1.1",
     "redux": "^4.0.5",

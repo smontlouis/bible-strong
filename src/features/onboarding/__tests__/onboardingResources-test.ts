@@ -4,6 +4,7 @@ import {
   getDefaultOnboardingResourceSelection,
   getOnboardingDatabaseResourceOptions,
   getOnboardingResourceSelectionId,
+  toggleOnboardingResourceSelection,
 } from '../onboardingResources'
 
 jest.mock('~helpers/languageUtils', () => ({
@@ -30,6 +31,15 @@ jest.mock('~helpers/downloadItemFactory', () => ({
         lang,
       }) as DownloadItem
   ),
+  createStrongSidecarDownloadItem: jest.fn(
+    (versionId: string): DownloadItem =>
+      ({
+        id: `bible-strong:${versionId}`,
+        type: 'bible-strong-sidecar',
+        name: `${versionId} Strong`,
+        versionId,
+      }) as DownloadItem
+  ),
 }))
 
 jest.mock('~helpers/databases', () => ({
@@ -53,6 +63,12 @@ describe('onboardingResources', () => {
         lang: 'fr',
       })
     ).toBe('database:STRONG:fr')
+  })
+
+  it('stores Strong sidecar selections separately from their base Bible', () => {
+    expect(getOnboardingResourceSelectionId({ kind: 'bible-strong', versionId: 'DBY' })).toBe(
+      'bible-strong:DBY'
+    )
   })
 
   it('creates the default selection from the active language', () => {
@@ -94,5 +110,38 @@ describe('onboardingResources', () => {
         lang: 'en',
       })
     )
+  })
+
+  it('converts Strong sidecar selections through the download item Adapter', () => {
+    expect(
+      createDownloadItemFromOnboardingSelection({
+        kind: 'bible-strong',
+        versionId: 'DBR',
+      })
+    ).toEqual(
+      expect.objectContaining({
+        id: 'bible-strong:DBR',
+        versionId: 'DBR',
+      })
+    )
+  })
+
+  it('selecting Strong also selects its base Bible and deselecting the base removes Strong', () => {
+    const withStrong = toggleOnboardingResourceSelection([], {
+      kind: 'bible-strong',
+      versionId: 'LSG',
+    })
+
+    expect(withStrong).toEqual([
+      { kind: 'bible', versionId: 'LSG' },
+      { kind: 'bible-strong', versionId: 'LSG' },
+    ])
+
+    expect(
+      toggleOnboardingResourceSelection(withStrong, {
+        kind: 'bible',
+        versionId: 'LSG',
+      })
+    ).toEqual([])
   })
 })

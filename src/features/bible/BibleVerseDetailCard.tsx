@@ -18,6 +18,8 @@ import BibleVerseDetailFooter from './BibleVerseDetailFooter'
 
 import { useTranslation } from 'react-i18next'
 import { ScrollView } from 'react-native'
+import { useRouter } from 'expo-router'
+import { useSelector } from 'react-redux'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { StrongReference, StudyNavigateBibleType } from '~common/types'
 import { CarouselProvider } from '~helpers/CarouselContext'
@@ -25,8 +27,12 @@ import { getChapterVerseCountSafe } from '~helpers/bibleCoverage'
 import { parseStrongVerse } from '~helpers/strongVerseParser'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
-import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 import { useResourceAccess } from '~features/resources/resourceAccess'
+import type { StrongBibleProvenance } from '~features/resources/strongBibleResourceAccess'
+import type { RootState } from '~redux/modules/reducer'
+import Button from '~common/ui/Button'
+import Text from '~common/ui/Text'
+import type { VersionCode } from '~state/tabs'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -70,6 +76,7 @@ interface Verse {
 
 interface Props {
   verse: Verse
+  selectedVersion: VersionCode
   isSelectionMode?: StudyNavigateBibleType
   updateVerse: (direction: number) => void
 }
@@ -81,12 +88,21 @@ interface State {
   currentStrongReference: StrongReference | null
   versesInCurrentChapter: number | null
   formattedTexte: React.ReactNode | null
+  provenance: StrongBibleProvenance | null
 }
 
-const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateVerse }) => {
+const BibleVerseDetailCard: React.FC<Props> = ({
+  verse,
+  selectedVersion,
+  isSelectionMode,
+  updateVerse,
+}) => {
   const theme = useTheme()
   const { t } = useTranslation()
-  const defaultVersion = useDefaultBibleVersion()
+  const router = useRouter()
+  const defaultStrongVersion = useSelector(
+    (rootState: RootState) => rootState.user.bible.settings.defaultStrongBibleVersionId ?? 'LSG'
+  )
   const resources = useResourceAccess()
   const verseBook = verse.Livre
   const verseChapter = verse.Chapitre
@@ -105,6 +121,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
     currentStrongReference: null,
     versesInCurrentChapter: null,
     formattedTexte: null,
+    provenance: null,
   })
 
   const findRefIndex = (ref: string | number) =>
@@ -136,6 +153,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
         isSelectionMode={isSelectionMode}
         book={String(verse.Livre)}
         strongReference={item}
+        strongBibleVersionId={state.provenance?.versionId}
         index={index}
       />
     )
@@ -153,28 +171,32 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
         currentStrongReference: null,
         versesInCurrentChapter: null,
         formattedTexte: null,
+        provenance: null,
       }))
 
       try {
-        const strongVerse = await resources.strong.loadVerse({
-          Livre: verseBook,
-          Chapitre: verseChapter,
-          Verset: verseNumber,
+        const result = await resources.strongBible.loadVerse({
+          currentVersionId: selectedVersion,
+          defaultVersionId: defaultStrongVersion,
+          book: verseBook,
+          chapter: verseChapter,
+          verse: verseNumber,
         })
         if (!isCurrent) return
 
-        if (!strongVerse || 'error' in strongVerse || !strongVerse.Texte) {
+        if (result.status !== 'available') {
           setState(prev => ({
             ...prev,
             isCarouselLoading: false,
-            error: strongVerse && 'error' in strongVerse ? strongVerse.error : true,
+            error: true,
           }))
           return
         }
 
+        const strongVerse = result.verse
         const parsedVerse = parseStrongVerse(strongVerse.Texte, verseBook)
         const [versesInCurrentChapterResult, strongReferencesResult] = await Promise.all([
-          getChapterVerseCountSafe(defaultVersion, verseBook, verseChapter),
+          getChapterVerseCountSafe(result.provenance.versionId, verseBook, verseChapter),
           resources.strong.loadReferences(parsedVerse.references, verseBook),
         ])
         if (!isCurrent) return
@@ -211,6 +233,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
           currentStrongReference: strongReferences[0] || null,
           versesInCurrentChapter:
             versesInCurrentChapterResult || countLsgChapters[`${verseBook}-${verseChapter}`],
+          provenance: result.provenance,
         }))
         carouselRef.current?.scrollTo({ index: 0, animated: false })
       } catch {
@@ -227,7 +250,15 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
     return () => {
       isCurrent = false
     }
-  }, [defaultVersion, resources.strong, verseBook, verseChapter, verseNumber])
+  }, [
+    defaultStrongVersion,
+    resources.strong,
+    resources.strongBible,
+    selectedVersion,
+    verseBook,
+    verseChapter,
+    verseNumber,
+  ])
 
   const { isCarouselLoading, versesInCurrentChapter, error, formattedTexte } = state
 
@@ -244,6 +275,11 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
               : ''
           }`}
         />
+        <Box px={30} pb={30}>
+          <Button onPress={() => router.push('/downloads')}>
+            {t('Gérer les téléchargements Strong')}
+          </Button>
+        </Box>
       </Container>
     )
   }
@@ -260,6 +296,17 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
     <Box flex={1} onLayout={e => setBoxHeight(e.nativeEvent.layout.height)}>
       <Box maxHeight={boxHeight / 2} position="relative" zIndex={1}>
         <ScrollView contentContainerStyle={{ paddingTop: 10 }}>
+          {state.provenance && (
+            <Text px={30} pb={6} fontSize={11} color="tertiary">
+              {state.provenance.isFallback
+                ? t('Strong fourni par {{version}} (Bible Strong par défaut)', {
+                    version: state.provenance.versionId,
+                  })
+                : t('Strong fourni par {{version}}', {
+                    version: state.provenance.versionId,
+                  })}
+            </Text>
+          )}
           <StyledVerse>
             <VersetWrapper>
               <NumberText>{verse.Verset}</NumberText>

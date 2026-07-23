@@ -20,6 +20,7 @@ import { StrongReference, StudyNavigateBibleType } from '~common/types'
 import { Theme } from '@emotion/react'
 import { SheetScrollView } from '~common/sheet'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -87,6 +88,7 @@ type Props = {
   isSelectionMode?: StudyNavigateBibleType
   isModal?: boolean
   onClosed?: () => void
+  strongBibleVersionId?: StrongBibleVersionId
 }
 
 const StrongCard = (props: Props) => {
@@ -115,6 +117,7 @@ const StrongCard = (props: Props) => {
       params: {
         book: bookNum,
         reference: reference,
+        strongBibleVersionId: props.strongBibleVersionId,
       },
     })
   }
@@ -155,6 +158,7 @@ const StrongCard = (props: Props) => {
         params: {
           book: String(Number(book)),
           strongReference: JSON.stringify(strongReference),
+          strongBibleVersionId: props.strongBibleVersionId,
         },
       })
     }

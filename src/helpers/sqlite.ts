@@ -20,6 +20,12 @@ import {
 } from './databaseTypes'
 import { appLogger } from '~helpers/agentObservability'
 
+export type SQLiteDatabase = SQLite.SQLiteDatabase
+
+export const openSQLiteDatabase = (
+  ...args: Parameters<typeof SQLite.openDatabaseAsync>
+): ReturnType<typeof SQLite.openDatabaseAsync> => SQLite.openDatabaseAsync(...args)
+
 // Original DB class for backward compatibility
 class DB {
   db?: SQLite.SQLiteDatabase

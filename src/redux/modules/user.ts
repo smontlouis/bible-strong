@@ -67,6 +67,7 @@ import {
   addWordAnnotationAction,
   changeWordAnnotationColorAction,
   changeWordAnnotationTypeAction,
+  realignWordAnnotationsAction,
   removeWordAnnotationAction,
   removeWordAnnotationsInRangeAction,
   updateWordAnnotationAction,
@@ -82,6 +83,7 @@ import {
   decreaseSettingsFontSizeScale,
   increaseSettingsFontSizeScale,
   setDefaultBibleVersion,
+  setDefaultStrongBibleVersion,
   setDefaultColorName,
   setDefaultColorType,
   setSettingsAlignContent,
@@ -532,6 +534,7 @@ export interface UserState {
     wordAnnotations: WordAnnotationsObj
     settings: {
       defaultBibleVersion?: string
+      defaultStrongBibleVersionId?: 'LSG' | 'DBY' | 'DBR'
       alignContent: 'left' | 'justify'
       lineHeight: 'normal' | 'small' | 'large'
       fontSizeScale: number
@@ -628,6 +631,7 @@ const getInitialState = (): UserState => ({
     wordAnnotations: {},
     settings: {
       defaultBibleVersion: getDefaultBibleVersion(getLanguage()),
+      defaultStrongBibleVersionId: 'LSG',
       alignContent: 'left',
       lineHeight: 'normal',
       fontSizeScale: 0,
@@ -1107,6 +1111,15 @@ const userSlice = createSlice({
         state.bible.wordAnnotations[id].type = type
       }
     })
+    builder.addCase(realignWordAnnotationsAction, (state, action) => {
+      for (const [id, changes] of Object.entries(action.payload.updates)) {
+        const annotation = state.bible.wordAnnotations[id]
+        if (!annotation) continue
+        annotation.ranges = changes.ranges
+        annotation.textRevision = changes.textRevision
+        if (changes.version) annotation.version = changes.version
+      }
+    })
     builder.addCase(removeWordAnnotationsInRangeAction, (state, action) => {
       const { version, start, end } = action.payload
       const selection = normalizeWordSelectionRange(start, end)
@@ -1386,6 +1399,9 @@ const userSlice = createSlice({
     })
     builder.addCase(setDefaultBibleVersion, (state, action) => {
       state.bible.settings.defaultBibleVersion = action.payload
+    })
+    builder.addCase(setDefaultStrongBibleVersion, (state, action) => {
+      state.bible.settings.defaultStrongBibleVersionId = action.payload
     })
 
     // Studies

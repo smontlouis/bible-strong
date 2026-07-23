@@ -2,6 +2,15 @@
 
 jest.mock('~helpers/biblesDb', () => ({
   getChapterVerses: jest.fn(),
+  getVerseText: jest.fn(),
+}))
+
+jest.mock('~helpers/firebase', () => ({
+  cdnUrl: (path: string) => `https://assets.example/${path}`,
+}))
+
+jest.mock('~helpers/strongBibleSidecar', () => ({
+  loadStrongBibleChapterSpans: jest.fn(),
 }))
 
 jest.mock('~helpers/bibleVersions', () => ({
@@ -81,17 +90,41 @@ describe('BibleContentAccess', () => {
     expect(dependencies.loadInterlinearChapter).toHaveBeenCalledWith(1, 1, 'en')
   })
 
-  it('initializes Strong content before loading Strong Bible chapters', async () => {
+  it('migrates legacy LSGS reads to canonical LSG with Strong visible', async () => {
     const dependencies = createDependencies()
-    dependencies.isStrongDatabaseInitialized.mockReturnValue(false)
-    dependencies.strongAccess.loadChapter.mockResolvedValue([
-      { Livre: 1, Chapitre: 1, Verset: 1, Texte: 'strong text' },
+    dependencies.getChapterVerses.mockResolvedValue([
+      { Livre: 1, Chapitre: 1, Verset: 1, Texte: 'canonical text' },
     ])
+    const loadStrongBibleChapterSpans = jest.fn().mockResolvedValue({
+      1: [
+        {
+          ordinal: 0,
+          startOffset: 0,
+          length: 9,
+          identities: [{ kind: 'strong', code: 'H0001' }],
+        },
+      ],
+    })
 
-    await loadBibleContentChapter({ book: 1, chapter: 1, version: 'LSGS' }, dependencies)
+    await expect(
+      loadBibleContentChapter(
+        { book: 1, chapter: 1, version: 'LSGS' },
+        { ...dependencies, loadStrongBibleChapterSpans }
+      )
+    ).resolves.toEqual(
+      expect.objectContaining({
+        success: true,
+        data: [
+          expect.objectContaining({
+            Texte: 'canonical text',
+            StrongSpans: expect.any(Array),
+          }),
+        ],
+      })
+    )
 
-    expect(dependencies.initStrongDatabase).toHaveBeenCalled()
-    expect(dependencies.strongAccess.loadChapter).toHaveBeenCalledWith(1, 1)
+    expect(dependencies.getChapterVerses).toHaveBeenCalledWith('LSG', 1, 1)
+    expect(dependencies.strongAccess.loadChapter).not.toHaveBeenCalled()
   })
 
   it('returns BIBLE_NOT_FOUND when a chapter has no rows and the version needs download', async () => {

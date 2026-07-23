@@ -20,7 +20,9 @@ const CompareVersionSelectorSheet = ({ sheetRef }: CompareVersionSelectorSheetPr
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
   const dispatch = useDispatch<AppDispatch>()
-  const versionCatalog = useVersionCatalog(Object.values(versions))
+  const versionCatalog = useVersionCatalog(
+    Object.values(versions).filter(version => !version.hidden)
+  )
   const [scrollToTopKey, setScrollToTopKey] = React.useState(0)
   const versionsToCompare = useSelector(
     (state: RootState) => Object.keys(state.user.bible.settings.compare),

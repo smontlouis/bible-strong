@@ -46,6 +46,7 @@ import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { getBook } from '~helpers/bibleBookCatalog'
 import { getStrongReferenceFamily } from '~helpers/strongBookTables'
 import { useResourceAccess } from '~features/resources/resourceAccess'
+import type { StrongBibleProvenance } from '~features/resources/strongBibleResourceAccess'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -79,14 +80,25 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
   const hasBackButton = isFormSheet ? canGoBackInStack : !isInTab
 
   const {
-    data: { book, reference, strongReference: strongReferenceParam },
+    data: {
+      book,
+      reference,
+      strongReference: strongReferenceParam,
+      strongBibleVersionId: requestedStrongBibleVersionId,
+    },
   } = strongTab
+  const defaultStrongBibleVersionId = useSelector(
+    (state: RootState) => state.user.bible.settings.defaultStrongBibleVersionId ?? 'LSG'
+  )
 
   const [error, setError] = useState<string | undefined>()
   const [strongReference, setStrongReference] = useState<StrongReference | undefined>()
   const [verses, setVerses] = useState<Verse[]>([])
   const [count, setCount] = useState<number>(0)
   const [concordanceLoading, setConcordanceLoading] = useState(true)
+  const [concordanceProvenance, setConcordanceProvenance] = useState<StrongBibleProvenance | null>(
+    null
+  )
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const openEntityRelations = useOpenEntityRelations()
 
@@ -132,20 +144,32 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
       type: 'strong',
     })
     setStrongReference(loadedStrongReference)
-    const firstFoundVersesResult = await resources.strong.loadFirstFoundVerses(
-      book || 1,
-      loadedStrongReference.Code
-    )
-    const strongVersesCountResult = await resources.strong.loadVersesCount(
-      book || 1,
-      loadedStrongReference.Code
-    )
-
-    if (firstFoundVersesResult && !('error' in firstFoundVersesResult)) {
-      setVerses(firstFoundVersesResult)
+    const resolutionRequest = {
+      currentVersionId: requestedStrongBibleVersionId ?? defaultStrongBibleVersionId,
+      defaultVersionId: defaultStrongBibleVersionId,
+      book: book || 1,
+      reference: loadedStrongReference.Code,
+      limit: 15,
+      offset: 0,
     }
-    if (strongVersesCountResult && !('error' in strongVersesCountResult)) {
-      setCount(strongVersesCountResult[0]?.versesCount)
+    const [foundVersesResult, countsResult] = await Promise.all([
+      resources.strongBible.loadFoundVersesByBook(resolutionRequest),
+      resources.strongBible.loadCountsByBook(resolutionRequest),
+    ])
+
+    if (foundVersesResult.status === 'available') {
+      setVerses(foundVersesResult.verses)
+      setConcordanceProvenance(foundVersesResult.provenance)
+    } else {
+      setVerses([])
+      setConcordanceProvenance(null)
+    }
+    if (countsResult.status === 'available') {
+      setCount(
+        countsResult.counts.reduce((total, item) => total + Number(item.versesCountByBook), 0)
+      )
+    } else {
+      setCount(0)
     }
     setConcordanceLoading(false)
   }
@@ -233,6 +257,8 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
         chapter: String(verse.Chapitre),
         verse: String(verseNumber),
         focusVerses: JSON.stringify([verseNumber]),
+        version: concordanceProvenance?.versionId,
+        strongMode: concordanceProvenance ? 'visible' : undefined,
       },
     })
   }
@@ -415,7 +441,11 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
                     <LinkBox
                       ml="auto"
                       route="Concordance"
-                      params={{ strongReference, book }}
+                      params={{
+                        strongReference,
+                        book,
+                        strongBibleVersionId: concordanceProvenance?.versionId,
+                      }}
                       bg="opacity5"
                       borderRadius={20}
                       px={10}
@@ -426,6 +456,13 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
                   )}
                 </Box>
                 <Box my={10}>
+                  {concordanceProvenance && (
+                    <Text color="tertiary" fontSize={12} mb={8}>
+                      {t('Occurrences selon {{version}}', {
+                        version: concordanceProvenance.versionId,
+                      })}
+                    </Text>
+                  )}
                   {verses.map(item => (
                     <ConcordanceVerse
                       onOpenVerse={openConcordanceVerse}
@@ -446,6 +483,7 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
                           params: {
                             strongReference: JSON.stringify(strongReference),
                             book: String(book),
+                            strongBibleVersionId: concordanceProvenance?.versionId,
                           },
                         })
                       }

@@ -76,6 +76,7 @@ type DictionnaireVerseDetailScreenProps = {
 type ConcordanceByBookScreenProps = {
   strongReference: StrongReference
   book: number
+  strongBibleVersionId?: 'LSG' | 'DBY' | 'DBR'
 }
 
 type BibleScreenProps = {
@@ -88,6 +89,7 @@ type BibleScreenProps = {
   chapter?: number
   verse?: number
   version?: VersionCode
+  strongMode?: 'visible' | 'hidden'
 }
 
 type CompareVersesScreenProps = {
@@ -141,6 +143,7 @@ type EventScreenProps = {
 type ConcordanceScreenProps = {
   strongReference: StrongReference
   book: number
+  strongBibleVersionId?: 'LSG' | 'DBY' | 'DBR'
 }
 
 type CommentariesScreenProps = {

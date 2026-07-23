@@ -134,6 +134,28 @@ export interface Verse {
   Chapitre: string | number
   Verset: string | number
   Texte: string
+  StrongTexte?: string
+  TextRevision?: string
+  Layout?: {
+    offset: number
+    order: number
+    type: 'open' | 'close' | 'self'
+    tag: string
+    attributes?: Record<string, string>
+  }[]
+  StartTags?: {
+    tag: string
+    attributes?: Record<string, string>
+  }[]
+  StrongSpans?: {
+    ordinal: number
+    startOffset: number
+    length: number
+    identities: {
+      kind: 'strong' | 'estrong' | 'dstrong' | 'ustrong'
+      code: string
+    }[]
+  }[]
 }
 
 export interface Pericope {

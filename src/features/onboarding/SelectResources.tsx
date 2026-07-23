@@ -11,11 +11,17 @@ import Text from '~common/ui/Text'
 import { getVersionsBySections } from '~helpers/bibleVersions'
 import useLanguage from '~helpers/useLanguage'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
+import {
+  getStrongBiblePublication,
+  isStrongCapableBibleVersion,
+  type StrongBibleVersionId,
+} from '~helpers/strongBiblePublications'
 import { selectedResourcesAtom } from './atom'
 import {
   getDefaultOnboardingResourceSelection,
   getOnboardingDatabaseResourceOptions,
   getOnboardingResourceSelectionId,
+  toggleOnboardingResourceSelection,
   type OnboardingResourceSelection,
 } from './onboardingResources'
 import ResourceItem from './ResourceItem'
@@ -33,13 +39,7 @@ const DownloadFiles = ({ setStep }: { setStep: React.Dispatch<React.SetStateActi
   }, [])
 
   const onPressItem = (resource: OnboardingResourceSelection) => {
-    const resourceId = getOnboardingResourceSelectionId(resource)
-    setSelectedResources(res => {
-      if (res.find(r => getOnboardingResourceSelectionId(r) === resourceId)) {
-        return res.filter(r => getOnboardingResourceSelectionId(r) !== resourceId)
-      }
-      return [...res, resource]
-    })
+    setSelectedResources(res => toggleOnboardingResourceSelection(res, resource))
   }
 
   const isSelected = (resource: OnboardingResourceSelection) => {
@@ -108,17 +108,43 @@ const DownloadFiles = ({ setStep }: { setStep: React.Dispatch<React.SetStateActi
         )}
         renderItem={({ item: version }) =>
           version.id === 'LSGS' || version.id === 'KJVS' ? null : (
-            <ResourceItem
-              name={version.name}
-              isSelected={isSelected({ kind: 'bible', versionId: version.id })}
-              isDisabled={version.id === getDefaultBibleVersion(lang)}
-              onPress={() => {
-                onPressItem({
-                  kind: 'bible',
-                  versionId: version.id,
-                })
-              }}
-            />
+            <>
+              <ResourceItem
+                name={version.name}
+                isSelected={isSelected({ kind: 'bible', versionId: version.id })}
+                isDisabled={version.id === getDefaultBibleVersion(lang)}
+                onPress={() => {
+                  onPressItem({
+                    kind: 'bible',
+                    versionId: version.id,
+                  })
+                }}
+              />
+              {isStrongCapableBibleVersion(version.id) && (
+                <Box pl={20}>
+                  <ResourceItem
+                    name={t('Mode Strong')}
+                    subTitle={t(
+                      'Ajoute les numéros Strong à cette Bible. Le texte biblique reste utilisable sans ce téléchargement.'
+                    )}
+                    fileSize={
+                      getStrongBiblePublication(version.id as StrongBibleVersionId).strong
+                        .archiveBytes
+                    }
+                    isSelected={isSelected({
+                      kind: 'bible-strong',
+                      versionId: version.id as StrongBibleVersionId,
+                    })}
+                    onPress={() =>
+                      onPressItem({
+                        kind: 'bible-strong',
+                        versionId: version.id as StrongBibleVersionId,
+                      })
+                    }
+                  />
+                </Box>
+              )}
+            </>
           )
         }
       />

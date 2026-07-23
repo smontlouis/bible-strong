@@ -21,7 +21,7 @@ import { useDispatch } from './DispatchProvider'
 import { Bookmark, SelectedCode, StudyNavigateBibleType, Verse as TVerse } from '~common/types'
 import { RootStyles, TaggedVerse, VerseRelationItem } from './BibleDOMWrapper'
 import { ParallelDisplayMode } from 'src/state/tabs'
-import verseToStrong from './verseToStrong'
+import verseToStrong, { BibleStrongRef } from './verseToStrong'
 import { verseToRedWords } from './verseToRedWords'
 import { ContainerText, resolveHighlightInfo } from './ContainerText'
 import { convertHex } from './convertHex'
@@ -36,6 +36,10 @@ import {
   getRelationItemNavigationActions,
   getVerseStudyRelationsPayload,
 } from './relationDisplayActions'
+import {
+  buildCanonicalVersePresentation,
+  type CanonicalVersePresentationNode,
+} from './canonicalVersePresentation'
 
 const VerseText = styled('span')<RootStyles & { isParallel?: boolean }>(
   ({ isParallel, settings: { fontSizeScale, lineHeight } }) => ({
@@ -178,14 +182,38 @@ const getVerseText = ({
   settings: RootState['user']['bible']['settings']
   redWords?: Record<string, { start: number; end: number }[]> | null
 }): (string | JSX.Element)[] => {
-  const isStrongVersion = version === 'LSGS' || version === 'KJVS'
+  const isStrongVersion =
+    Boolean(verse.StrongTexte) ||
+    Boolean(verse.StrongSpans) ||
+    version === 'LSGS' ||
+    version === 'KJVS'
   const verseKey = `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`
+
+  if (verse.TextRevision) {
+    const hasVisibleStrong = !annotationMode && Boolean(verse.StrongSpans)
+    const redColor = getRedColor(settings)
+    const presentation = buildCanonicalVersePresentation({
+      text: verse.Texte,
+      startTags: verse.StartTags,
+      layout: verse.Layout,
+      strongSpans: hasVisibleStrong ? verse.StrongSpans : [],
+      redWordRanges: !annotationMode && !hasVisibleStrong ? (redWords?.[verseKey] ?? []) : [],
+    })
+    return renderCanonicalPresentation(presentation, {
+      book: verse.Livre,
+      isParallel,
+      isDisabled: annotationMode,
+      selectedCode,
+      settings,
+      redColor,
+    })
+  }
 
   if (isStrongVersion) {
     return annotationMode
       ? [verse.Texte]
       : verseToStrong({
-          Texte: verse.Texte,
+          Texte: verse.StrongTexte ?? verse.Texte,
           Livre: verse.Livre,
           isParallel,
           isDisabled: annotationMode,
@@ -202,6 +230,77 @@ const getVerseText = ({
 
   return [verse.Texte]
 }
+
+const renderCanonicalPresentation = (
+  nodes: CanonicalVersePresentationNode[],
+  options: {
+    book: string | number
+    isParallel?: boolean
+    isDisabled: boolean
+    selectedCode: SelectedCode | null
+    settings: RootState['user']['bible']['settings']
+    redColor: string
+  },
+  keyPrefix = 'canonical'
+): (string | JSX.Element)[] =>
+  nodes.map((node, index) => {
+    const key = `${keyPrefix}-${index}`
+    if (node.kind === 'text') return node.text
+    if (node.kind === 'strong-reference') {
+      return (
+        <BibleStrongRef
+          key={key}
+          book={options.book}
+          reference={node.reference}
+          isParallel={options.isParallel}
+          isDisabled={options.isDisabled}
+          selectedCode={options.selectedCode}
+          settings={options.settings}
+        />
+      )
+    }
+
+    const children = renderCanonicalPresentation(node.children, options, key)
+    switch (node.tag.toLocaleLowerCase()) {
+      case 'p':
+        return (
+          <span key={key} style={{ display: 'block', marginBlock: '0.35em' }}>
+            {children}
+          </span>
+        )
+      case 'lg':
+        return (
+          <span key={key} style={{ display: 'block', marginBlock: '0.25em' }}>
+            {children}
+          </span>
+        )
+      case 'l':
+        return (
+          <span key={key} style={{ display: 'block', paddingInlineStart: '1em' }}>
+            {children}
+          </span>
+        )
+      case 'i':
+        return <em key={key}>{children}</em>
+      case 'sup':
+        return <sup key={key}>{children}</sup>
+      case 'divinename':
+      case 'small-caps':
+        return (
+          <span key={key} style={{ fontVariantCaps: 'small-caps' }}>
+            {children}
+          </span>
+        )
+      case 'red-word':
+        return (
+          <span key={key} style={{ color: options.redColor }}>
+            {children}
+          </span>
+        )
+      default:
+        return <span key={key}>{children}</span>
+    }
+  })
 
 // When verse has both a background-type highlight AND word annotations,
 // show highlight on number instead of full verse background
@@ -379,7 +478,11 @@ const Verse = ({
     }
   }
 
-  const isStrongVersion = version === 'LSGS' || version === 'KJVS'
+  const isStrongVersion =
+    Boolean(verse.StrongTexte) ||
+    Boolean(verse.StrongSpans) ||
+    version === 'LSGS' ||
+    version === 'KJVS'
 
   const text = getVerseText({
     verse,
