@@ -2,6 +2,7 @@ import {
   Archive,
   Bot,
   BookOpen,
+  Bug,
   Braces,
   CheckCircle2,
   CircleAlert,
@@ -17,6 +18,7 @@ import {
   Loader2,
   LockKeyhole,
   MessageSquareText,
+  Network,
   RefreshCw,
   Search,
   ShieldAlert,
@@ -25,7 +27,16 @@ import {
   TriangleAlert,
   type LucideIcon
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore
+} from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -86,8 +97,45 @@ import type {
   StrongVerse,
   ViewId
 } from "./types";
-import { JsonlBibleView } from "./JsonlBibleView";
-import { WorkflowView } from "./WorkflowView";
+
+const JsonlBibleView = lazy(() =>
+  import("./JsonlBibleView").then((module) => ({
+    default: module.JsonlBibleView
+  }))
+);
+const WorkflowView = lazy(() =>
+  import("./WorkflowView").then((module) => ({
+    default: module.WorkflowView
+  }))
+);
+
+const VIEW_NAVIGATION_EVENT = "bible-strong:navigate";
+
+function subscribeToLocation(callback: () => void) {
+  window.addEventListener("popstate", callback);
+  window.addEventListener(VIEW_NAVIGATION_EVENT, callback);
+  return () => {
+    window.removeEventListener("popstate", callback);
+    window.removeEventListener(VIEW_NAVIGATION_EVENT, callback);
+  };
+}
+
+function currentViewSnapshot() {
+  return currentViewFromLocation() as ViewId;
+}
+
+function notifyNavigation() {
+  window.dispatchEvent(new Event(VIEW_NAVIGATION_EVENT));
+}
+
+function ViewLoading() {
+  return (
+    <div className="text-muted-foreground flex min-h-[40dvh] items-center justify-center gap-2 text-sm">
+      <Loader2 className="size-4 animate-spin" />
+      Chargement de la vue…
+    </div>
+  );
+}
 
 const navItems: Array<{
   id: ViewId;
@@ -103,9 +151,9 @@ const navItems: Array<{
   },
   {
     id: "jsonl",
-    label: "JSONL",
-    description: "Les 8 Bibles finales",
-    icon: Braces
+    label: "Bibles",
+    description: "Lire et comparer les 8 versions",
+    icon: BookOpen
   },
   {
     id: "workflow",
@@ -118,12 +166,6 @@ const navItems: Array<{
     label: "Lexique",
     description: "Strong + TAHOT/TAGNT",
     icon: Database
-  },
-  {
-    id: "review",
-    label: "Qualité",
-    description: "Consensus, quarantaine et priorités",
-    icon: MessageSquareText
   }
 ];
 
@@ -160,15 +202,22 @@ const REVIEW_PROVENANCE_STEPS = [
 ] as const;
 
 export function App() {
-  const [view, setView] = useState<ViewId>(
-    () => currentViewFromLocation() as ViewId
+  const view = useSyncExternalStore(
+    subscribeToLocation,
+    currentViewSnapshot,
+    () => "viewer" as ViewId
   );
   const [ledger, setLedger] = useState<StrongLedger | null>(null);
-  const [ledgerPath, setLedgerPath] = useState(() => defaultLedgerPath());
+  const [ledgerPath, setLedgerPathState] = useState(
+    () =>
+      new URLSearchParams(window.location.search).get("file") ||
+      window.localStorage.getItem("bible-strong:ledger-source") ||
+      defaultLedgerPath()
+  );
   const [loadingLedger, setLoadingLedger] = useState(false);
 
   useEffect(() => {
-    if (view === "workflow" || view === "jsonl") {
+    if (view !== "viewer") {
       setLoadingLedger(false);
       return;
     }
@@ -192,11 +241,17 @@ export function App() {
     };
   }, [ledgerPath, view]);
 
+  function setLedgerPath(path: string) {
+    setLedgerPathState(path);
+    window.localStorage.setItem("bible-strong:ledger-source", path);
+  }
+
   function changeView(next: string) {
-    setView(next as ViewId);
+    window.localStorage.setItem("bible-strong:last-view", next);
     const url = new URL(window.location.href);
     url.searchParams.set("view", next);
-    window.history.replaceState(null, "", url);
+    window.history.pushState(null, "", url);
+    notifyNavigation();
   }
 
   return (
@@ -223,7 +278,7 @@ export function App() {
               onValueChange={changeView}
               className="w-full lg:hidden"
             >
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="grid w-full grid-cols-4">
                 {navItems.map((item) => (
                   <TabsTrigger key={item.id} value={item.id}>
                     {item.label}
@@ -265,7 +320,7 @@ export function App() {
 
             <div className="hidden lg:block">
               {view === "workflow" ? <WorkflowStatus /> : null}
-              {view !== "workflow" && view !== "jsonl" ? (
+              {view === "viewer" ? (
                 <LedgerStatus ledger={ledger} loading={loadingLedger} />
               ) : null}
             </div>
@@ -273,7 +328,7 @@ export function App() {
             <div
               className={cn(
                 "mt-auto hidden flex-col gap-2 lg:flex",
-                (view === "workflow" || view === "jsonl") && "lg:hidden"
+                view !== "viewer" && "lg:hidden"
               )}
             >
               <label
@@ -307,13 +362,34 @@ export function App() {
           {view === "viewer" ? (
             <LedgerView ledger={ledger} loading={loadingLedger} />
           ) : null}
-          {view === "jsonl" ? <JsonlBibleView /> : null}
-          {view === "workflow" ? <WorkflowView /> : null}
+          {view === "jsonl" ? (
+            <Suspense fallback={<ViewLoading />}>
+              <JsonlBibleView renderLexiconEntry={renderBibleLexiconEntry} />
+            </Suspense>
+          ) : null}
+          {view === "workflow" ? (
+            <Suspense fallback={<ViewLoading />}>
+              <WorkflowView />
+            </Suspense>
+          ) : null}
           {view === "lexicon" ? <LexiconView /> : null}
           {view === "review" ? <ReviewView /> : null}
         </main>
       </div>
     </div>
+  );
+}
+
+function renderBibleLexiconEntry(
+  payload: LexiconEntryPayload,
+  options: { locale: "fr" | "en"; debug: boolean }
+) {
+  return (
+    <LexiconEntryCard
+      payload={payload}
+      locale={options.locale}
+      debug={options.debug}
+    />
   );
 }
 
@@ -1611,14 +1687,112 @@ function reviewTraceHref(annotation: StrongAnnotation) {
   return `/viewer/review.html?${params}`;
 }
 
+function returnToBibles() {
+  const url = new URL(window.location.href);
+  url.searchParams.set("view", "jsonl");
+  url.searchParams.delete("q");
+  url.searchParams.delete("from");
+  window.history.pushState(null, "", url);
+  notifyNavigation();
+}
+
+function lexiconStepCode(row: LexiconRow) {
+  return /^([GH]\d{4,5}[A-Z]?)/u.exec(row.dStrong.trim())?.[1] ?? row.eStrong;
+}
+
+const LEXICON_ALPHABET = "abcdefghijklmnopqrstuvwxyz".split("");
+const LEXICON_PAGE_SIZE = 40;
+
 function LexiconView() {
+  const initialParams = new URLSearchParams(window.location.search);
   const [query, setQuery] = useState(
-    () => new URLSearchParams(window.location.search).get("q") || "H0430"
+    () =>
+      initialParams.get("q") ||
+      window.localStorage.getItem("bible-strong:lexicon-query") ||
+      ""
+  );
+  const [language, setLanguage] = useState(
+    () => initialParams.get("language") || "all"
+  );
+  const [letter, setLetter] = useState(() => initialParams.get("letter") || "");
+  const [page, setPage] = useState(() =>
+    Math.max(1, Number(initialParams.get("page")) || 1)
+  );
+  const [contentLocale, setContentLocale] = useState<"fr" | "en">(() => {
+    const value =
+      initialParams.get("locale") ||
+      window.localStorage.getItem("bible-strong:lexicon-locale");
+    return value === "en" ? "en" : "fr";
+  });
+  const [debugMode, setDebugMode] = useState(
+    () =>
+      initialParams.get("debug") === "1" ||
+      window.localStorage.getItem("bible-strong:lexicon-debug") === "1"
   );
   const [rows, setRows] = useState<LexiconRow[]>([]);
   const [selected, setSelected] = useState<LexiconEntryPayload | null>(null);
   const [metadata, setMetadata] = useState<LexiconMetadata | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+  const requestSerial = useRef(0);
+  const entryRequestController = useRef<AbortController | null>(null);
+  const entryCache = useRef(new Map<number, LexiconEntryPayload>());
+  const cameFromBibles =
+    new URLSearchParams(window.location.search).get("from") === "bibles";
+
+  const loadEntry = useCallback(async (id: number) => {
+    entryRequestController.current?.abort();
+    const cachedEntry = entryCache.current.get(id);
+    if (cachedEntry) {
+      requestSerial.current += 1;
+      entryCache.current.delete(id);
+      entryCache.current.set(id, cachedEntry);
+      setSelected(cachedEntry);
+      setLoadingDetail(false);
+      return;
+    }
+    const controller = new AbortController();
+    entryRequestController.current = controller;
+    const serial = ++requestSerial.current;
+    setLoadingDetail(true);
+    try {
+      const response = await fetch(
+        `/api/lexicon/entry?id=${id}&include=extended`,
+        { signal: controller.signal }
+      );
+      if (!response.ok) throw new Error("Notice lexicale indisponible");
+      const completeEntry = (await response.json()) as LexiconEntryPayload;
+      if (serial === requestSerial.current) {
+        entryCache.current.set(id, completeEntry);
+        if (entryCache.current.size > 24) {
+          const oldestId = entryCache.current.keys().next().value;
+          if (oldestId !== undefined) entryCache.current.delete(oldestId);
+        }
+        setSelected(completeEntry);
+      }
+    } catch (error) {
+      if (
+        serial === requestSerial.current &&
+        !(error instanceof Error && error.name === "AbortError")
+      ) {
+        toast.error(
+          error instanceof Error ? error.message : "Notice indisponible"
+        );
+      }
+    } finally {
+      if (serial === requestSerial.current) {
+        setLoadingDetail(false);
+        entryRequestController.current = null;
+      }
+    }
+  }, []);
+
+  useEffect(
+    () => () => {
+      entryRequestController.current?.abort();
+    },
+    []
+  );
 
   useEffect(() => {
     fetch("/api/lexicon/metadata")
@@ -1636,10 +1810,34 @@ function LexiconView() {
   }, []);
 
   useEffect(() => {
+    requestSerial.current += 1;
+    entryRequestController.current?.abort();
+    entryRequestController.current = null;
+    setLoadingDetail(false);
     let cancelled = false;
+    const controller = new AbortController();
     const handle = window.setTimeout(() => {
+      const normalized = query.trim();
+      const url = new URL(window.location.href);
+      if (normalized) url.searchParams.set("q", normalized);
+      else url.searchParams.delete("q");
+      if (language !== "all") url.searchParams.set("language", language);
+      else url.searchParams.delete("language");
+      if (letter) url.searchParams.set("letter", letter);
+      else url.searchParams.delete("letter");
+      if (page > 1) url.searchParams.set("page", String(page));
+      else url.searchParams.delete("page");
+      window.history.replaceState(null, "", url);
+      window.localStorage.setItem("bible-strong:lexicon-query", normalized);
       setLoading(true);
-      fetch(`/api/lexicon/search?q=${encodeURIComponent(query)}&limit=40`)
+      const params = new URLSearchParams({
+        q: normalized,
+        language,
+        letter,
+        limit: String(LEXICON_PAGE_SIZE),
+        offset: String((page - 1) * LEXICON_PAGE_SIZE)
+      });
+      fetch(`/api/lexicon/search?${params}`, { signal: controller.signal })
         .then((response) => {
           if (!response.ok) throw new Error("Recherche lexicale indisponible");
           return response.json();
@@ -1647,15 +1845,20 @@ function LexiconView() {
         .then((payload) => {
           if (cancelled) return undefined;
           setRows(payload.rows ?? []);
-          const first = payload.rows?.[0];
-          if (first) return fetch(`/api/lexicon/entry?id=${first.id}`);
-        })
-        .then((response) => (response?.ok ? response.json() : undefined))
-        .then((payload) => {
-          if (payload && !cancelled) setSelected(payload);
+          const requestedEntry = new URL(window.location.href).searchParams.get(
+            "entry"
+          );
+          const requestedRow = requestedEntry
+            ? payload.rows?.find(
+                (row: LexiconRow) => lexiconStepCode(row) === requestedEntry
+              )
+            : null;
+          const initialRow = requestedRow || payload.rows?.[0];
+          if (initialRow) void loadEntry(initialRow.id);
+          else setSelected(null);
         })
         .catch((error) =>
-          !cancelled
+          !cancelled && error instanceof Error && error.name !== "AbortError"
             ? toast.error(
                 error instanceof Error ? error.message : "Recherche impossible"
               )
@@ -1667,227 +1870,612 @@ function LexiconView() {
     }, 180);
     return () => {
       cancelled = true;
+      controller.abort();
       window.clearTimeout(handle);
     };
-  }, [query]);
+  }, [language, letter, loadEntry, page, query]);
+
+  function selectRow(row: LexiconRow) {
+    const url = new URL(window.location.href);
+    url.searchParams.set("entry", lexiconStepCode(row));
+    window.history.replaceState(null, "", url);
+    void loadEntry(row.id);
+  }
+
+  function changeContentLocale(value: "fr" | "en") {
+    setContentLocale(value);
+    window.localStorage.setItem("bible-strong:lexicon-locale", value);
+    const url = new URL(window.location.href);
+    url.searchParams.set("locale", value);
+    window.history.replaceState(null, "", url);
+  }
+
+  function changeDebugMode(value: boolean) {
+    setDebugMode(value);
+    window.localStorage.setItem(
+      "bible-strong:lexicon-debug",
+      value ? "1" : "0"
+    );
+    const url = new URL(window.location.href);
+    if (value) url.searchParams.set("debug", "1");
+    else url.searchParams.delete("debug");
+    window.history.replaceState(null, "", url);
+  }
 
   return (
-    <section className="grid h-dvh min-h-0 grid-cols-1 xl:grid-cols-[380px_minmax(0,1fr)]">
-      <aside className="border-border/70 bg-card/60 min-h-0 border-b xl:border-r xl:border-b-0">
-        <div className="flex h-full flex-col gap-4 p-4">
-          <div>
-            <Badge variant="outline">
-              {metadata?.releaseKey ?? "Lexique STEP EN-FR"}
-            </Badge>
-            <h2 className="mt-2 text-2xl font-semibold">Lexique</h2>
-            <p className="text-muted-foreground text-sm">
-              Recherche dans {metadata?.entries.toLocaleString("fr-FR") ?? "…"}
-              {" entrées STEP avec "}
-              {metadata?.translationsFr.toLocaleString("fr-FR") ?? "…"}
-              {" traductions françaises"}
-              {metadata?.resourcesIncluded
-                ? ` et ${metadata.resourceEntries.toLocaleString("fr-FR")} notices complémentaires bilingues.`
-                : "."}
-              {metadata?.tipnrEntities
-                ? ` Contexte TIPNR : ${metadata.tipnrEntities.toLocaleString("fr-FR")} entités.`
-                : ""}
-            </p>
+    <section className="flex h-dvh min-h-0 flex-col overflow-hidden">
+      <header className="border-border/70 bg-card/65 shrink-0 border-b px-4 py-4 lg:px-6">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              {cameFromBibles ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="mb-1 -ml-2"
+                  onClick={returnToBibles}
+                >
+                  <ChevronLeft data-icon="inline-start" />
+                  Retour aux Bibles
+                </Button>
+              ) : null}
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-2xl font-semibold tracking-tight">
+                  {contentLocale === "fr" ? "Lexique Strong" : "Strong Lexicon"}
+                </h2>
+                {debugMode ? (
+                  <Badge variant="outline">
+                    {metadata?.releaseKey ?? "STEP EN-FR"}
+                  </Badge>
+                ) : null}
+              </div>
+              <p className="text-muted-foreground mt-1 text-sm">
+                {metadata?.entries.toLocaleString(
+                  contentLocale === "fr" ? "fr-FR" : "en-US"
+                ) ?? "…"}{" "}
+                {contentLocale === "fr"
+                  ? "mots documentés"
+                  : "documented words"}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <div
+                className="bg-muted/60 flex rounded-lg border p-1"
+                aria-label={
+                  contentLocale === "fr"
+                    ? "Langue du contenu"
+                    : "Content language"
+                }
+              >
+                {(["fr", "en"] as const).map((locale) => (
+                  <button
+                    key={locale}
+                    type="button"
+                    onClick={() => changeContentLocale(locale)}
+                    aria-pressed={contentLocale === locale}
+                    className={cn(
+                      "rounded-md px-3 py-1.5 text-xs font-semibold transition",
+                      contentLocale === locale
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {locale.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+              <Button
+                type="button"
+                size="sm"
+                variant={debugMode ? "default" : "outline"}
+                onClick={() => changeDebugMode(!debugMode)}
+                aria-pressed={debugMode}
+              >
+                <Bug data-icon="inline-start" />
+                {debugMode
+                  ? contentLocale === "fr"
+                    ? "Debug actif"
+                    : "Debug on"
+                  : contentLocale === "fr"
+                    ? "Mode debug"
+                    : "Debug mode"}
+              </Button>
+            </div>
           </div>
-          <div className="relative">
-            <Search className="text-muted-foreground pointer-events-none absolute top-2.5 left-3" />
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              className="pl-9"
-              placeholder="H0430, Dieu, logos..."
-            />
+
+          <div className="grid gap-2 sm:grid-cols-[minmax(260px,520px)_170px_auto]">
+            <div className="relative">
+              <Search className="text-muted-foreground pointer-events-none absolute top-2.5 left-3" />
+              <Input
+                value={query}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setPage(1);
+                }}
+                className="pl-9"
+                placeholder={
+                  contentLocale === "fr"
+                    ? "Code Strong, mot français, grec ou hébreu"
+                    : "Strong code, English, Greek or Hebrew word"
+                }
+              />
+            </div>
+            <Select
+              value={language}
+              onValueChange={(value) => {
+                setLanguage(value);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger
+                aria-label={
+                  contentLocale === "fr"
+                    ? "Langue du lexique"
+                    : "Lexicon language"
+                }
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="all">
+                    {contentLocale === "fr"
+                      ? "Toutes les langues"
+                      : "All languages"}
+                  </SelectItem>
+                  <SelectItem value="hebrew">
+                    {contentLocale === "fr" ? "Hébreu" : "Hebrew"}
+                  </SelectItem>
+                  <SelectItem value="greek">
+                    {contentLocale === "fr" ? "Grec" : "Greek"}
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <Button
+              type="button"
+              onClick={() => {
+                setLetter("");
+                setPage(1);
+              }}
+            >
+              {contentLocale === "fr" ? "Rechercher" : "Search"}
+            </Button>
+          </div>
+
+          <div
+            className="flex flex-wrap items-center gap-1"
+            aria-label="Index alphabétique"
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setLetter("");
+                setPage(1);
+              }}
+              className={cn(
+                "hover:bg-muted rounded-md border px-2.5 py-1 text-xs font-semibold transition",
+                !letter && "border-primary bg-primary text-primary-foreground"
+              )}
+            >
+              A–Z
+            </button>
+            {LEXICON_ALPHABET.map((item) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => {
+                  setLetter(item);
+                  setQuery("");
+                  setPage(1);
+                }}
+                className={cn(
+                  "hover:bg-muted size-7 rounded-md border text-xs font-semibold uppercase transition",
+                  letter === item &&
+                    "border-primary bg-primary text-primary-foreground"
+                )}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+        </div>
+      </header>
+
+      <div className="grid min-h-0 flex-1 grid-cols-1 xl:grid-cols-[minmax(520px,0.9fr)_minmax(0,1.6fr)]">
+        <aside className="border-border/70 bg-card/35 flex min-h-0 flex-col border-b xl:border-r xl:border-b-0">
+          <div className="bg-muted/40 text-muted-foreground grid grid-cols-[110px_150px_minmax(0,1fr)] gap-3 border-b px-4 py-2 text-[0.68rem] font-semibold tracking-wider uppercase">
+            <span>{debugMode ? "Code STEP" : "Strong"}</span>
+            <span>
+              {contentLocale === "fr" ? "Translittération" : "Transliteration"}
+            </span>
+            <span>
+              {contentLocale === "fr" ? "Sens français" : "English meaning"}
+            </span>
           </div>
           <ScrollArea className="min-h-0 flex-1">
-            <div className="flex flex-col gap-2 pr-3">
+            <div className="divide-border/60 divide-y">
               {loading ? (
-                <p className="text-muted-foreground text-sm">Recherche...</p>
+                <div className="text-muted-foreground flex items-center gap-2 p-4 text-sm">
+                  <Loader2 className="size-4 animate-spin" />
+                  {contentLocale === "fr" ? "Recherche…" : "Searching…"}
+                </div>
               ) : null}
-              {rows.map((row) => (
-                <button
-                  key={row.id}
-                  type="button"
-                  onClick={async () => {
-                    const response = await fetch(
-                      `/api/lexicon/entry?id=${row.id}`
-                    );
-                    if (response.ok) setSelected(await response.json());
-                  }}
-                  className={cn(
-                    "hover:bg-muted rounded-lg border p-3 text-left transition",
-                    selected?.entry.id === row.id &&
-                      "border-primary/40 bg-primary/10"
-                  )}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <strong>{row.eStrong}</strong>
-                    <Badge variant="secondary">{row.language}</Badge>
-                  </div>
-                  <p className="mt-1 truncate text-sm">
-                    {row.glossFr || row.glossEn}
-                  </p>
-                  <p className="text-muted-foreground truncate text-xs">
-                    {row.transliteration || row.original}
-                  </p>
-                </button>
-              ))}
+              {!loading && rows.length === 0 ? (
+                <p className="text-muted-foreground p-5 text-sm">
+                  {contentLocale === "fr"
+                    ? "Aucune entrée ne correspond à ces filtres."
+                    : "No entry matches these filters."}
+                </p>
+              ) : null}
+              {rows.map((row) => {
+                const stepCode = lexiconStepCode(row);
+                return (
+                  <button
+                    key={row.id}
+                    type="button"
+                    onClick={() => selectRow(row)}
+                    className={cn(
+                      "hover:bg-muted/70 grid w-full grid-cols-[110px_150px_minmax(0,1fr)] gap-3 px-4 py-2.5 text-left text-sm transition",
+                      selected?.entry.id === row.id &&
+                        "bg-primary/10 shadow-[inset_3px_0_0_var(--primary)]"
+                    )}
+                  >
+                    <span className="min-w-0">
+                      <strong className="text-primary block">{stepCode}</strong>
+                      {stepCode !== row.eStrong ? (
+                        <small className="text-muted-foreground">
+                          Strong {row.eStrong}
+                        </small>
+                      ) : null}
+                    </span>
+                    <span className="truncate">
+                      {lexiconTransliteration(row) || row.original}
+                    </span>
+                    <span className="truncate">
+                      {contentLocale === "fr"
+                        ? row.glossFr || row.glossEn
+                        : row.glossEn || row.glossFr}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </ScrollArea>
-        </div>
-      </aside>
-      <ScrollArea className="min-h-0">
-        <div className="p-4">
-          {selected ? (
-            <LexiconEntryCard payload={selected} />
-          ) : (
-            <EmptyPanel
-              icon={Database}
-              title="Aucune entrée"
-              copy="Lance une recherche pour afficher une fiche lexicale."
-            />
-          )}
-        </div>
-      </ScrollArea>
+          <footer className="flex items-center justify-between gap-3 border-t p-3">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={page === 1 || loading}
+              onClick={() => setPage((current) => Math.max(1, current - 1))}
+            >
+              <ChevronLeft data-icon="inline-start" />
+              {contentLocale === "fr" ? "Précédent" : "Previous"}
+            </Button>
+            <span className="text-muted-foreground text-xs">Page {page}</span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={rows.length < LEXICON_PAGE_SIZE || loading}
+              onClick={() => setPage((current) => current + 1)}
+            >
+              {contentLocale === "fr" ? "Suivant" : "Next"}{" "}
+              <ChevronRight data-icon="inline-end" />
+            </Button>
+          </footer>
+        </aside>
+
+        <ScrollArea className="min-h-0">
+          <div className="p-4">
+            {loading || loadingDetail ? (
+              <LexiconEntryLoader locale={contentLocale} />
+            ) : selected ? (
+              <LexiconEntryCard
+                payload={selected}
+                locale={contentLocale}
+                debug={debugMode}
+              />
+            ) : (
+              <EmptyPanel
+                icon={Database}
+                title={contentLocale === "fr" ? "Aucune entrée" : "No entry"}
+                copy={
+                  contentLocale === "fr"
+                    ? "Lance une recherche pour afficher une fiche lexicale."
+                    : "Search to display a lexical entry."
+                }
+              />
+            )}
+          </div>
+        </ScrollArea>
+      </div>
     </section>
+  );
+}
+
+function LexiconEntryLoader({ locale }: { locale: "fr" | "en" }) {
+  const french = locale === "fr";
+  return (
+    <div
+      className="border-border/70 bg-card/70 flex min-h-[420px] items-center justify-center overflow-hidden rounded-xl border"
+      role="status"
+      aria-live="polite"
+    >
+      <div className="relative flex max-w-md flex-col items-center px-8 text-center">
+        <div className="bg-primary/10 absolute size-36 animate-pulse rounded-full blur-3xl" />
+        <div className="border-primary/20 bg-background relative mb-5 grid size-14 place-items-center rounded-full border shadow-lg">
+          <Loader2 className="text-primary size-6 animate-spin" />
+        </div>
+        <p className="font-serif text-xl font-semibold">
+          {french
+            ? "Chargement de la fiche complète"
+            : "Loading the complete entry"}
+        </p>
+        <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+          {french
+            ? "Définition, contexte, grammaire, relations et occurrences sont récupérés ensemble."
+            : "Definition, context, grammar, relationships and occurrences are loaded together."}
+        </p>
+      </div>
+    </div>
   );
 }
 
 function LexiconEntryCard({
   payload,
-  compact = false
+  compact = false,
+  locale = "fr",
+  debug = false
 }: {
   payload: LexiconEntryPayload;
   compact?: boolean;
+  locale?: "fr" | "en";
+  debug?: boolean;
 }) {
   const entry = payload.entry;
   const identity = payload.identity;
+  const french = locale === "fr";
   const stepCode =
     identity?.stepCode || entry.dStrong.split(/\s+/u)[0] || entry.eStrong;
-  const sourceLabel =
-    entry.language === "greek"
-      ? "STEP TBESG · Abbott-Smith"
-      : "STEP TBESH · BDB abrégé";
+  const gloss = french ? entry.glossFr || entry.glossEn : entry.glossEn;
+  const meaning = french
+    ? entry.meaningHtmlFr ||
+      entry.meaningSimpleFr ||
+      "<p>Aucune définition française disponible.</p>"
+    : entry.meaningEn || "<p>No English definition available.</p>";
+  const transliteration = lexiconTransliteration(entry);
+  const resources = payload.resources ?? [];
+  const substantiveResources = resources.filter(
+    (resource) => !isMissingLsjFallback(resource)
+  );
+  const lsjAbsent = resources.some(isMissingLsjFallback);
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <CardTitle className={compact ? "text-lg" : "text-3xl"}>
-              {stepCode}
-            </CardTitle>
-            <CardDescription>
-              {identity?.relationLabelFr && identity.relatedStepCode ? (
-                <>
-                  {identity.relationLabelFr} {identity.relatedStepCode}
-                  {" · "}
-                  {identity.relationLabelEn} {identity.relatedStepCode}
-                </>
-              ) : (
-                <>Strong classique {entry.eStrong}</>
-              )}
-              {entry.morph ? ` · ${entry.morph}` : ""}
-            </CardDescription>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {stepCode !== entry.eStrong ? (
-              <Badge variant="outline">Strong {entry.eStrong}</Badge>
-            ) : null}
-            <Badge>{entry.language}</Badge>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-5">
-        <div className="grid gap-3 md:grid-cols-2">
-          <InfoBlock label="Original" value={entry.original} />
-          <InfoBlock
-            label="Translittération"
-            value={entry.transliteration || entry.classicTransliteration}
-          />
-        </div>
-        <section className="overflow-hidden rounded-xl border">
-          <div className="bg-muted/30 flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3">
-            <div>
-              <h3 className="text-sm font-semibold">Sens principal STEP</h3>
-              <p className="text-muted-foreground text-xs">{sourceLabel}</p>
+    <Card className="border-0 bg-transparent shadow-none">
+      <CardContent className="flex flex-col gap-4 p-0">
+        <details open className="lexicon-panel">
+          <summary className="lexicon-panel-summary flex-wrap">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <ChevronRight className="lexicon-panel-chevron" />
+              <h3 className="lexicon-panel-title">
+                {french ? "Mot et identité" : "Word and identity"}
+              </h3>
+              <Badge variant="outline">{stepCode}</Badge>
+              {stepCode !== entry.eStrong ? (
+                <Badge variant="secondary">Strong {entry.eStrong}</Badge>
+              ) : null}
+              <Badge variant="secondary">
+                {entry.language === "hebrew"
+                  ? french
+                    ? "hébreu"
+                    : "Hebrew"
+                  : french
+                    ? "grec"
+                    : "Greek"}
+              </Badge>
             </div>
-            <Badge variant="outline">{stepCode}</Badge>
-          </div>
-          <div className="grid divide-y md:grid-cols-2 md:divide-x md:divide-y-0">
-            <LexiconLanguagePanel
-              language="Français"
-              locale="FR"
-              gloss={entry.glossFr}
-              html={
-                entry.meaningHtmlFr ||
-                entry.meaningSimpleFr ||
-                "<p>Aucune définition française.</p>"
-              }
+          </summary>
+          <CardHeader className="lexicon-panel-content block bg-[linear-gradient(135deg,var(--color-muted),transparent_42%)] p-5 md:p-6">
+            <div className="flex max-w-2xl flex-col items-start gap-5 text-left">
+              {gloss ? (
+                <div className="w-full">
+                  <CardDescription className="mb-1.5 text-xs font-medium uppercase tracking-[0.16em]">
+                    {french ? "Sens principal" : "Main sense"}
+                  </CardDescription>
+                  <p className="text-xl font-semibold tracking-tight">
+                    {gloss}
+                  </p>
+                  {debug ? (
+                    <DebugFieldTag
+                      source={
+                        french && entry.glossFr
+                          ? "LEXIQUE_FR.LexiconTranslations.gloss"
+                          : "LEXIQUE_STEP.StepEntries.gloss"
+                      }
+                    />
+                  ) : null}
+                </div>
+              ) : null}
+
+              <div className="w-full border-t pt-5">
+                <CardDescription className="mb-2 text-xs font-medium uppercase tracking-[0.16em]">
+                  {french ? "Mot original" : "Original word"}
+                </CardDescription>
+                <CardTitle
+                  className={cn(
+                    "text-left font-serif tracking-tight",
+                    compact ? "text-2xl" : "text-4xl"
+                  )}
+                  dir="auto"
+                >
+                  {entry.original}
+                </CardTitle>
+                {debug ? (
+                  <DebugFieldTag source="LEXIQUE_STEP.StepEntries.original" />
+                ) : null}
+              </div>
+
+              {transliteration || entry.pronunciation ? (
+                <dl className="flex w-full flex-col gap-3 border-t pt-5 text-sm">
+                  {transliteration ? (
+                    <div className="flex flex-col items-start gap-0.5">
+                      <dt className="text-muted-foreground text-xs">
+                        {french ? "Translittération" : "Transliteration"}
+                      </dt>
+                      <dd className="font-medium">{transliteration}</dd>
+                      {debug ? (
+                        <DebugFieldTag
+                          source={
+                            entry.classicTransliteration
+                              ? "LEXIQUE_STEP.StepEntries.classicTransliteration"
+                              : "LEXIQUE_STEP.StepEntries.transliteration"
+                          }
+                        />
+                      ) : null}
+                    </div>
+                  ) : null}
+                  {entry.pronunciation ? (
+                    <div className="flex flex-col items-start gap-0.5">
+                      <dt className="text-muted-foreground text-xs">
+                        {french ? "Prononciation" : "Pronunciation"}
+                      </dt>
+                      <dd className="font-medium">{entry.pronunciation}</dd>
+                      {debug ? (
+                        <DebugFieldTag source="LEXIQUE_STEP.StepEntries.pronunciation" />
+                      ) : null}
+                    </div>
+                  ) : null}
+                </dl>
+              ) : null}
+            </div>
+          </CardHeader>
+        </details>
+        <details open className="lexicon-panel">
+          <summary className="lexicon-panel-summary justify-start">
+            <ChevronRight className="lexicon-panel-chevron" />
+            <h3 className="lexicon-panel-title">
+              {french ? "Définition" : "Definition"}
+            </h3>
+          </summary>
+          <div className="lexicon-panel-content p-4 md:p-5">
+            <div
+              className="prose-strong min-w-0 text-[0.95rem] leading-7"
+              dangerouslySetInnerHTML={{ __html: meaning }}
             />
-            <LexiconLanguagePanel
-              language="English"
-              locale="EN"
-              gloss={entry.glossEn}
-              html={entry.meaningEn || "<p>No English definition.</p>"}
-            />
+            {debug ? (
+              <DebugFieldTag
+                source={
+                  french && entry.meaningHtmlFr
+                    ? "LEXIQUE_FR.LexiconTranslations.meaningHtml"
+                    : french && entry.meaningSimpleFr
+                      ? "LEXIQUE_FR.LexiconTranslations.meaning"
+                      : "LEXIQUE_STEP.StepEntries.meaning"
+                }
+              />
+            ) : null}
           </div>
-        </section>
+        </details>
         {!compact && (payload.tipnrEntities ?? []).length > 0 ? (
-          <TipnrEntityContexts payload={payload} />
+          <TipnrEntityContexts
+            payload={payload}
+            locale={locale}
+            debug={debug}
+          />
         ) : null}
-        {!compact && payload.resources.length > 0 ? (
+        {!compact ? (
+          <LexiconMorphologyPanel
+            payload={payload}
+            locale={locale}
+            debug={debug}
+          />
+        ) : null}
+        {!compact ? (
+          <LexiconRelationsPanel
+            payload={payload}
+            locale={locale}
+            debug={debug}
+          />
+        ) : null}
+        {!compact && substantiveResources.length > 0 ? (
           <div className="flex flex-col gap-3">
             <div>
-              <h3 className="text-sm font-semibold">
-                Dictionnaires complémentaires
+              <h3 className="text-muted-foreground text-xs font-semibold uppercase tracking-[0.16em]">
+                {french ? "Pour aller plus loin" : "Explore further"}
               </h3>
-              <p className="text-muted-foreground text-xs">
-                Chaque notice reste attribuée à sa source et est disponible dans
-                les deux langues.
-              </p>
             </div>
-            {payload.resources.slice(0, 5).map((resource) => (
+            {substantiveResources.slice(0, 5).map((resource) => (
               <details
+                open
                 key={lexiconResourceKey(resource)}
-                className="group overflow-hidden rounded-xl border"
+                className="lexicon-panel"
               >
-                <summary className="bg-muted/20 flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 transition hover:bg-muted/40">
+                <summary className="lexicon-panel-summary">
                   <div className="flex items-center gap-2">
-                    <ChevronRight className="text-muted-foreground size-4 transition-transform group-open:rotate-90" />
-                    <strong className="text-sm">
+                    <ChevronRight className="lexicon-panel-chevron" />
+                    <strong className="lexicon-panel-title">
                       {resource.source === "TFLSJ"
-                        ? "LSJ complet"
-                        : resource.source}
+                        ? french
+                          ? "Dictionnaire grec détaillé"
+                          : "Detailed Greek dictionary"
+                        : french
+                          ? "Notice complémentaire"
+                          : "Additional note"}
                     </strong>
-                    <Badge variant="secondary">FR + EN</Badge>
                   </div>
-                  <Badge variant="outline">{resource.kind}</Badge>
                 </summary>
-                <div className="grid border-t md:grid-cols-2 md:divide-x">
+                <div className="lexicon-panel-content">
                   <LexiconLanguagePanel
-                    language="Français"
-                    locale="FR"
+                    language={french ? "Français" : "English"}
+                    locale={french ? "FR" : "EN"}
                     gloss=""
                     html={
-                      resource.contentHtmlFr ||
-                      "<p>Traduction indisponible.</p>"
+                      french
+                        ? resource.contentHtmlFr ||
+                          "<p>Traduction indisponible.</p>"
+                        : resource.contentHtml || "<p>Content unavailable.</p>"
                     }
-                  />
-                  <LexiconLanguagePanel
-                    language="English"
-                    locale="EN"
-                    gloss=""
-                    html={resource.contentHtml || "<p>Content unavailable.</p>"}
+                    showLocale={debug}
+                    debugSource={
+                      debug
+                        ? french && resource.contentHtmlFr
+                          ? "LEXIQUE_FR.LexiconResourceTranslations.contentHtml"
+                          : resource.source === "TFLSJ"
+                            ? "DICTIONNAIRE_LSJ.LexiconResources.contentHtml"
+                            : "LEXIQUE_STEP.LexiconResources.contentHtml"
+                        : undefined
+                    }
                   />
                 </div>
               </details>
             ))}
           </div>
         ) : null}
-        {!compact ? <LegacyLexiconComparison payload={payload} /> : null}
+        {!compact && debug && lsjAbsent ? (
+          <details open className="lexicon-panel border-dashed">
+            <summary className="lexicon-panel-summary text-muted-foreground">
+              <span className="flex items-center gap-2">
+                <ChevronRight className="lexicon-panel-chevron" />
+                LSJ
+              </span>
+              <Badge variant="outline">
+                {french ? "absent" : "not available"}
+              </Badge>
+            </summary>
+            <div className="lexicon-panel-content p-4">
+              <p className="text-muted-foreground text-sm">
+                {french
+                  ? "Aucune notice LSJ n’est disponible pour cette entrée."
+                  : "No LSJ entry is available for this record."}
+              </p>
+              <DebugFieldTag source="DICTIONNAIRE_LSJ.LexiconResources.contentHtml" />
+            </div>
+          </details>
+        ) : null}
+        {!compact && debug ? (
+          <LegacyLexiconComparison payload={payload} />
+        ) : null}
       </CardContent>
     </Card>
   );
@@ -1897,102 +2485,747 @@ function LexiconLanguagePanel({
   language,
   locale,
   gloss,
-  html
+  html,
+  showLocale = true,
+  debugSource
 }: {
   language: string;
   locale: "FR" | "EN";
   gloss: string;
   html: string;
+  showLocale?: boolean;
+  debugSource?: string;
 }) {
   return (
     <article className="min-w-0 p-4 md:p-5">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <span className="text-muted-foreground text-xs font-medium uppercase tracking-[0.16em]">
-          {language}
-        </span>
-        <Badge variant={locale === "FR" ? "default" : "outline"}>
-          {locale}
-        </Badge>
-      </div>
+      {showLocale ? (
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <span className="text-muted-foreground text-xs font-medium uppercase tracking-[0.16em]">
+            {language}
+          </span>
+          <Badge variant={locale === "FR" ? "default" : "outline"}>
+            {locale}
+          </Badge>
+        </div>
+      ) : null}
       {gloss ? <p className="mb-4 text-lg font-semibold">{gloss}</p> : null}
       <div
         className="prose-strong min-w-0 text-sm leading-relaxed"
         dangerouslySetInnerHTML={{ __html: html }}
       />
+      {debugSource ? <DebugFieldTag source={debugSource} /> : null}
     </article>
   );
 }
 
-function TipnrEntityContexts({ payload }: { payload: LexiconEntryPayload }) {
+function DebugFieldTag({
+  source,
+  className
+}: {
+  source: string;
+  className?: string;
+}) {
+  return (
+    <span
+      className={cn(
+        "mt-1.5 flex w-fit max-w-full items-center gap-1.5 rounded border border-amber-400/35 bg-amber-500/10 px-2 py-1 font-mono text-[0.62rem] leading-none text-amber-800 dark:border-amber-400/25 dark:bg-amber-400/8 dark:text-amber-200",
+        className
+      )}
+      aria-label={`Source : ${source}`}
+    >
+      <Database className="size-3 shrink-0 opacity-80" aria-hidden="true" />
+      <code className="truncate">{source}</code>
+    </span>
+  );
+}
+
+function LexiconMorphologyPanel({
+  payload,
+  locale,
+  debug
+}: {
+  payload: LexiconEntryPayload;
+  locale: "fr" | "en";
+  debug: boolean;
+}) {
+  if (!payload.entry.morph && payload.morphology.length === 0) return null;
+  const primary = payload.morphology[0];
+  const french = locale === "fr";
+  const meaning = primary
+    ? french
+      ? primary.meaningFr || primary.meaningEn
+      : primary.meaningEn
+    : "";
+  const description = primary
+    ? french
+      ? primary.descriptionFr || primary.descriptionEn
+      : primary.descriptionEn
+    : "";
+  const showDescription =
+    Boolean(description) &&
+    !isRedundantMorphologyDescription(meaning, description);
+  return (
+    <details open className="lexicon-panel">
+      <summary className="lexicon-panel-summary flex-wrap">
+        <div className="flex items-center gap-2">
+          <ChevronRight className="lexicon-panel-chevron" />
+          <h3 className="lexicon-panel-title">
+            {french ? "Informations grammaticales" : "Grammar"}
+          </h3>
+        </div>
+        <div className="flex flex-col items-end">
+          <Badge variant="outline">
+            {payload.entry.morph || primary?.code}
+          </Badge>
+          {debug ? (
+            <DebugFieldTag source="LEXIQUE_STEP.StepEntries.morph" />
+          ) : null}
+        </div>
+      </summary>
+      {primary ? (
+        <div className="lexicon-panel-content p-4">
+          <p className="text-sm font-semibold">{meaning}</p>
+          {debug ? (
+            <DebugFieldTag
+              source={
+                french && primary.meaningFr
+                  ? "MORPHOLOGIE_STEP.MorphologyCodeTranslations.meaning"
+                  : "MORPHOLOGIE_STEP.MorphologyCodes.meaning"
+              }
+            />
+          ) : null}
+          {showDescription ? (
+            <div className="mt-3">
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                {description}
+              </p>
+              {debug ? (
+                <DebugFieldTag
+                  source={
+                    french && primary.descriptionFr
+                      ? "MORPHOLOGIE_STEP.MorphologyCodeTranslations.description"
+                      : "MORPHOLOGIE_STEP.MorphologyCodes.description"
+                  }
+                />
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </details>
+  );
+}
+
+function isRedundantMorphologyDescription(
+  meaning: string,
+  description: string
+) {
+  const normalize = (value: string) =>
+    value
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/gu, "")
+      .toLocaleLowerCase("fr-FR")
+      .replace(/^\s*(?:categorie\s+lexicale|lexical\s+category)\s*[:=]\s*/u, "")
+      .replace(/[^\p{L}\p{N}]+/gu, " ")
+      .trim();
+
+  return normalize(meaning) === normalize(description);
+}
+
+function LexiconRelationsPanel({
+  payload,
+  locale,
+  debug
+}: {
+  payload: LexiconEntryPayload;
+  locale: "fr" | "en";
+  debug: boolean;
+}) {
+  const relations = payload.relations ?? [];
+  if (relations.length === 0) return null;
+  const french = locale === "fr";
+  const groups = [
+    {
+      id: "subentry",
+      title: french ? "Autres sens" : "Other meanings"
+    },
+    {
+      id: "identity",
+      title: french ? "Variantes et équivalents" : "Variants and equivalents"
+    },
+    {
+      id: "family",
+      title: french ? "Même famille de mots" : "Word family"
+    }
+  ] as const;
+  return (
+    <details open className="lexicon-panel">
+      <summary className="lexicon-panel-summary">
+        <div className="flex items-center gap-2">
+          <ChevronRight className="lexicon-panel-chevron" />
+          <Network className="text-muted-foreground size-4" />
+          <h3 className="lexicon-panel-title">
+            {french ? "Mots liés" : "Related words"}
+          </h3>
+        </div>
+        <Badge variant="secondary">{relations.length}</Badge>
+      </summary>
+      <div className="lexicon-panel-content divide-y">
+        {groups.map((group) => {
+          const items = relations.filter(
+            (relation) => relation.groupKind === group.id
+          );
+          if (items.length === 0) return null;
+          return (
+            <section key={group.id} className="min-w-0 px-4 py-5">
+              <div>
+                <h4 className="lexicon-field-label">{group.title}</h4>
+              </div>
+              <div className="text-muted-foreground mt-4 grid grid-cols-[minmax(0,1fr)_auto] gap-4 px-3 text-[10px] font-semibold tracking-[0.14em] uppercase sm:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)_auto]">
+                <span>{french ? "Mot" : "Word"}</span>
+                <span className="hidden sm:block">
+                  {french ? "Relation" : "Relationship"}
+                </span>
+                <span>Strong</span>
+              </div>
+              <div className="mt-2 overflow-hidden rounded-xl border">
+                {items.slice(0, 24).map((relation) => {
+                  const relatedGloss =
+                    (french ? relation.glossFr : relation.glossEn) ||
+                    relation.glossEn ||
+                    relation.transliteration ||
+                    relation.toStepCode;
+                  const glossSource =
+                    french && relation.glossFr
+                      ? "LEXIQUE_FR.LexiconTranslations.gloss"
+                      : relation.glossEn
+                        ? "LEXIQUE_STEP.StepEntries.gloss"
+                        : relation.transliteration
+                          ? "LEXIQUE_STEP.StepEntries.transliteration"
+                          : "LEXIQUE_STEP.LexiconRelations.toStepCode";
+                  return (
+                    <a
+                      key={`${relation.id}-${relation.toStepCode}`}
+                      href={`/viewer/lexicon.html?q=${encodeURIComponent(relation.toStepCode)}`}
+                      className="hover:bg-muted/65 grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-4 border-b px-3 py-3.5 transition last:border-b-0 sm:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)_auto]"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm leading-5 font-semibold break-words">
+                          {relatedGloss}
+                        </p>
+                        {debug ? <DebugFieldTag source={glossSource} /> : null}
+                        <p className="text-muted-foreground mt-1 text-xs leading-5 sm:hidden">
+                          {french ? relation.labelFr : relation.labelEn}
+                        </p>
+                        {debug ? (
+                          <div className="sm:hidden">
+                            <DebugFieldTag
+                              source={`LEXIQUE_STEP.LexiconRelations.${french ? "labelFr" : "labelEn"}`}
+                            />
+                          </div>
+                        ) : null}
+                      </div>
+                      <div className="hidden min-w-0 sm:block">
+                        <p className="text-muted-foreground text-xs leading-5 break-words">
+                          {french ? relation.labelFr : relation.labelEn}
+                        </p>
+                        {debug ? (
+                          <DebugFieldTag
+                            source={`LEXIQUE_STEP.LexiconRelations.${french ? "labelFr" : "labelEn"}`}
+                          />
+                        ) : null}
+                      </div>
+                      <div className="flex min-w-16 shrink-0 flex-col items-end">
+                        <Badge variant="outline" className="font-mono">
+                          {relation.toStepCode}
+                        </Badge>
+                        {debug ? (
+                          <DebugFieldTag source="LEXIQUE_STEP.LexiconRelations.toStepCode" />
+                        ) : null}
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })}
+      </div>
+    </details>
+  );
+}
+
+function LexiconOccurrencesPanel({
+  payload,
+  locale,
+  debug
+}: {
+  payload: LexiconEntryPayload;
+  locale: "fr" | "en";
+  debug: boolean;
+}) {
+  const occurrences = payload.occurrences;
+  if (!occurrences) return null;
+  const french = locale === "fr";
+  const stats = occurrences.exactStats || occurrences.classicalStats;
+  if (!stats) return null;
+  return (
+    <details open className="lexicon-panel">
+      <summary className="lexicon-panel-summary flex-wrap">
+        <div className="flex items-center gap-2">
+          <ChevronRight className="lexicon-panel-chevron" />
+          <div>
+            <h3 className="lexicon-panel-title">
+              {french ? "Emplois dans la Bible" : "Uses in the Bible"}
+            </h3>
+            <p className="text-muted-foreground text-xs">
+              {stats.totalCount.toLocaleString(french ? "fr-FR" : "en-US")}{" "}
+              {french ? "occurrences dans" : "occurrences across"}{" "}
+              {stats.verseCount.toLocaleString(french ? "fr-FR" : "en-US")}{" "}
+              {french ? "versets" : "verses"}
+            </p>
+            {debug ? (
+              <div className="flex flex-wrap gap-1">
+                <DebugFieldTag source="OCCURRENCES_STEP.OccurrenceStats.totalCount" />
+                <DebugFieldTag source="OCCURRENCES_STEP.OccurrenceStats.verseCount" />
+              </div>
+            ) : null}
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <div className="flex flex-col items-end">
+            <Badge variant="secondary">
+              {french ? "AT" : "OT"}{" "}
+              {stats.oldTestamentCount.toLocaleString(
+                french ? "fr-FR" : "en-US"
+              )}
+            </Badge>
+            {debug ? (
+              <DebugFieldTag source="OCCURRENCES_STEP.OccurrenceStats.oldTestamentCount" />
+            ) : null}
+          </div>
+          <div className="flex flex-col items-end">
+            <Badge variant="secondary">
+              NT{" "}
+              {stats.newTestamentCount.toLocaleString(
+                french ? "fr-FR" : "en-US"
+              )}
+            </Badge>
+            {debug ? (
+              <DebugFieldTag source="OCCURRENCES_STEP.OccurrenceStats.newTestamentCount" />
+            ) : null}
+          </div>
+        </div>
+      </summary>
+      <div className="lexicon-panel-content p-4">
+        {occurrences.exactStats && occurrences.classicalStats ? (
+          <div className="mb-4">
+            <p className="text-muted-foreground text-xs">
+              {french ? "Sous-entrée STEP" : "STEP subentry"}:{" "}
+              {occurrences.exactStats.totalCount.toLocaleString("fr-FR")}
+              {french
+                ? " occurrence(s). Strong classique : "
+                : " occurrence(s). Classical Strong: "}
+              {occurrences.classicalStats.totalCount.toLocaleString("fr-FR")}
+              {" occurrence(s)."}
+            </p>
+            {debug ? (
+              <div className="flex flex-wrap gap-1">
+                <DebugFieldTag source="OCCURRENCES_STEP.OccurrenceStats.identityKind" />
+                <DebugFieldTag source="OCCURRENCES_STEP.OccurrenceStats.totalCount" />
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+        {occurrences.forms.length > 0 ? (
+          <div>
+            <h4 className="text-sm font-semibold">
+              {french ? "Formes rencontrées" : "Observed forms"}
+            </h4>
+            <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+              {occurrences.forms.map((form) => (
+                <div key={form.code} className="rounded-lg border p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex flex-col items-start">
+                      <Badge variant="outline">{form.code}</Badge>
+                      {debug ? (
+                        <DebugFieldTag source="OCCURRENCES_STEP.OccurrenceMorphology.code" />
+                      ) : null}
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <span className="text-muted-foreground text-xs">
+                        {form.count.toLocaleString("fr-FR")}×
+                      </span>
+                      {debug ? (
+                        <DebugFieldTag source="OCCURRENCES_STEP.OccurrenceMorphology.code" />
+                      ) : null}
+                    </div>
+                  </div>
+                  <p className="mt-2 text-sm font-medium">
+                    {(french ? form.meaningFr : form.meaningEn) ||
+                      form.meaningEn ||
+                      form.code}
+                  </p>
+                  {debug ? (
+                    <DebugFieldTag
+                      source={
+                        french && form.meaningFr
+                          ? "MORPHOLOGIE_STEP.MorphologyCodeTranslations.meaning"
+                          : "MORPHOLOGIE_STEP.MorphologyCodes.meaning"
+                      }
+                    />
+                  ) : null}
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    {debug && french && form.meaningEn && form.meaningFr
+                      ? form.meaningEn
+                      : ""}
+                    {form.exampleSurface ? ` · ${form.exampleSurface}` : ""}
+                  </p>
+                  {debug && form.exampleSurface ? (
+                    <DebugFieldTag source="OCCURRENCES_STEP.Occurrences.surface" />
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+        {occurrences.samples.length > 0 ? (
+          <div className="mt-5">
+            <h4 className="text-sm font-semibold">
+              {french ? "Premières occurrences" : "First occurrences"}
+            </h4>
+            <div className="mt-3 overflow-x-auto rounded-lg border">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-muted/30 text-muted-foreground text-xs">
+                  <tr>
+                    <th className="px-3 py-2">
+                      {french ? "Référence" : "Reference"}
+                      {debug ? (
+                        <DebugFieldTag source="OCCURRENCES_STEP.Occurrences.mainRef" />
+                      ) : null}
+                    </th>
+                    <th className="px-3 py-2">
+                      {french ? "Forme" : "Form"}
+                      {debug ? (
+                        <DebugFieldTag source="OCCURRENCES_STEP.Occurrences.surface" />
+                      ) : null}
+                    </th>
+                    <th className="px-3 py-2">
+                      {french ? "Translittération" : "Transliteration"}
+                      {debug ? (
+                        <DebugFieldTag source="OCCURRENCES_STEP.Occurrences.transliteration" />
+                      ) : null}
+                    </th>
+                    {!french || debug ? (
+                      <th className="px-3 py-2">
+                        Gloss EN
+                        {debug ? (
+                          <DebugFieldTag source="OCCURRENCES_STEP.Occurrences.gloss" />
+                        ) : null}
+                      </th>
+                    ) : null}
+                    <th className="px-3 py-2">
+                      {french ? "Morphologie" : "Morphology"}
+                      {debug ? (
+                        <DebugFieldTag source="OCCURRENCES_STEP.Occurrences.morphology" />
+                      ) : null}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {occurrences.samples.slice(0, 16).map((sample, index) => (
+                    <tr
+                      key={`${sample.ref}-${sample.stepCode}-${sample.surface}-${index}`}
+                    >
+                      <td className="whitespace-nowrap px-3 py-2 font-medium">
+                        {sample.ref}
+                      </td>
+                      <td className="px-3 py-2" dir="auto">
+                        {sample.surface}
+                      </td>
+                      <td className="px-3 py-2">{sample.transliteration}</td>
+                      {!french || debug ? (
+                        <td className="px-3 py-2">{sample.gloss}</td>
+                      ) : null}
+                      <td className="whitespace-nowrap px-3 py-2">
+                        {sample.morphology || "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </details>
+  );
+}
+
+function TipnrEntityContexts({
+  payload,
+  locale,
+  debug
+}: {
+  payload: LexiconEntryPayload;
+  locale: "fr" | "en";
+  debug: boolean;
+}) {
+  const french = locale === "fr";
   return (
     <div className="flex flex-col gap-3">
       {(payload.tipnrEntities ?? []).map((entity) => (
-        <section
-          key={entity.id}
-          className="overflow-hidden rounded-xl border border-sky-400/30 bg-sky-500/5"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-sky-400/20 px-4 py-3">
-            <div>
-              <h3 className="text-sm font-semibold">
-                Contexte encyclopédique STEP
-              </h3>
-              <p className="text-muted-foreground text-xs">
-                {entity.matchKind === "uStrong-exact"
-                  ? "TIPNR · entité reliée exactement par uStrong"
-                  : "TIPNR · entité reliée au Strong classique correspondant"}
-              </p>
-            </div>
+        <details open key={entity.id} className="lexicon-panel">
+          <summary className="lexicon-panel-summary flex-wrap">
             <div className="flex items-center gap-2">
-              <Badge variant="secondary">FR + EN</Badge>
-              <Badge variant="outline">{entity.matchedStrong}</Badge>
+              <ChevronRight className="lexicon-panel-chevron" />
+              <h3 className="lexicon-panel-title">
+                {french ? "Contexte biblique" : "Biblical context"}
+              </h3>
             </div>
-          </div>
-          <div className="grid divide-y md:grid-cols-2 md:divide-x md:divide-y-0">
-            <TipnrLanguagePanel entity={entity} locale="FR" />
-            <TipnrLanguagePanel entity={entity} locale="EN" />
-          </div>
-          {entity.articleHtmlFr || entity.articleHtmlEn ? (
-            <details className="group border-t border-sky-400/20">
-              <summary className="bg-sky-500/5 flex cursor-pointer list-none items-center gap-2 px-4 py-3 transition hover:bg-sky-500/10">
-                <ChevronRight className="text-muted-foreground size-4 transition-transform group-open:rotate-90" />
-                <span className="text-sm font-semibold">
-                  Notice détaillée TIPNR
-                </span>
-              </summary>
-              <div className="grid border-t border-sky-400/20 md:grid-cols-2 md:divide-x">
-                <LexiconLanguagePanel
-                  language="Français"
-                  locale="FR"
-                  gloss=""
-                  html={prepareTipnrHtml(
-                    entity.articleHtmlFr ||
-                      "<p>Traduction française indisponible.</p>"
-                  )}
-                />
-                <LexiconLanguagePanel
-                  language="English"
-                  locale="EN"
-                  gloss=""
-                  html={prepareTipnrHtml(
-                    entity.articleHtmlEn ||
-                      "<p>English article unavailable.</p>"
-                  )}
-                />
+            {debug ? (
+              <div className="flex flex-col items-end">
+                <Badge variant="outline">{entity.matchedStrong}</Badge>
+                <DebugFieldTag source="ENTITES_TIPNR.Entities.uStrong" />
               </div>
-            </details>
-          ) : null}
-        </section>
+            ) : null}
+          </summary>
+          <div className="lexicon-panel-content">
+            <TipnrLanguagePanel
+              entity={entity}
+              locale={french ? "FR" : "EN"}
+              showLocale={debug}
+              debug={debug}
+            />
+            <TipnrEntityEvidence
+              entity={entity}
+              locale={locale}
+              debug={debug}
+            />
+            {entity.articleHtmlFr || entity.articleHtmlEn ? (
+              <section className="border-t p-4 md:p-5">
+                <h4 className="lexicon-field-label">
+                  {french ? "Notice détaillée" : "Detailed article"}
+                </h4>
+                <div
+                  className="prose-strong min-w-0 text-sm leading-relaxed"
+                  dangerouslySetInnerHTML={{
+                    __html: prepareTipnrHtml(
+                      french
+                        ? entity.articleHtmlFr ||
+                            "<p>Traduction française indisponible.</p>"
+                        : entity.articleHtmlEn ||
+                            "<p>English article unavailable.</p>"
+                    )
+                  }}
+                />
+                {debug ? (
+                  <DebugFieldTag
+                    source={`ENTITES_TIPNR.${french ? "EntityTranslations" : "Entities"}.articleHtml`}
+                  />
+                ) : null}
+              </section>
+            ) : null}
+          </div>
+        </details>
       ))}
     </div>
   );
 }
 
+function TipnrEntityEvidence({
+  entity,
+  locale,
+  debug
+}: {
+  entity: LexiconEntryPayload["tipnrEntities"][number];
+  locale: "fr" | "en";
+  debug: boolean;
+}) {
+  const french = locale === "fr";
+  const hasPlace = entity.latitude != null && entity.longitude != null;
+  const hasRelations = entity.relations.length > 0;
+  const hasReferences = entity.references.length > 0;
+  if (!hasPlace && !hasRelations && !hasReferences) return null;
+
+  return (
+    <div className="flex flex-col gap-5 border-t p-4 md:p-5">
+      {hasPlace ? (
+        <section className="lexicon-field-section">
+          <h4 className="lexicon-field-label">
+            {french ? "Localisation" : "Location"}
+          </h4>
+          <p className="text-muted-foreground mt-2 text-xs">
+            {entity.openBibleName ||
+              (french ? entity.displayNameFr : entity.displayNameEn) ||
+              entity.displayNameEn}
+            {entity.area ? ` · ${entity.area}` : ""}
+          </p>
+          {debug ? (
+            <div className="flex flex-wrap gap-1">
+              <DebugFieldTag source="ENTITES_TIPNR.EntityPlaces.openBibleName" />
+              {entity.area ? (
+                <DebugFieldTag source="ENTITES_TIPNR.EntityPlaces.area" />
+              ) : null}
+            </div>
+          ) : null}
+          <p className="mt-2 font-mono text-xs">
+            {entity.latitude}, {entity.longitude}
+          </p>
+          {debug ? (
+            <div className="flex flex-wrap gap-1">
+              <DebugFieldTag source="ENTITES_TIPNR.EntityPlaces.latitude" />
+              <DebugFieldTag source="ENTITES_TIPNR.EntityPlaces.longitude" />
+            </div>
+          ) : null}
+          <div className="mt-3 flex flex-wrap gap-2">
+            {entity.googleMapUrl ? (
+              <a
+                href={entity.googleMapUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-xs font-medium text-sky-500 hover:underline"
+              >
+                Google Maps <ExternalLink className="size-3" />
+              </a>
+            ) : null}
+            {entity.palopenmapsUrl ? (
+              <a
+                href={entity.palopenmapsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-xs font-medium text-sky-500 hover:underline"
+              >
+                OpenBible Maps <ExternalLink className="size-3" />
+              </a>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+      {hasRelations ? (
+        <section className="lexicon-field-section">
+          <div className="flex items-center justify-between gap-3">
+            <h4 className="lexicon-field-label mb-0">
+              {french ? "Relations" : "Relationships"}
+            </h4>
+            <Badge variant="outline">
+              {entity.relationCount.toLocaleString("fr-FR")}
+            </Badge>
+          </div>
+          <div className="mt-3 flex flex-col gap-2">
+            {entity.relations.slice(0, 20).map((relation, index) => {
+              const label =
+                (french ? relation.displayNameFr : relation.displayNameEn) ||
+                relation.displayNameEn ||
+                relation.toUniqueName;
+              const content = (
+                <div className="flex min-w-0 flex-1 flex-col items-start">
+                  <span className="max-w-full truncate">{label}</span>
+                  {debug ? (
+                    <DebugFieldTag
+                      source={`ENTITES_TIPNR.${french && relation.displayNameFr ? "EntityTranslations.displayName" : "Entities.displayName"}`}
+                    />
+                  ) : null}
+                  <span className="text-muted-foreground mt-1 text-xs">
+                    {entityRelationLabel(relation.relation, locale)}
+                  </span>
+                  {debug ? (
+                    <DebugFieldTag source="ENTITES_TIPNR.EntityRelations.relation" />
+                  ) : null}
+                </div>
+              );
+              return relation.uStrong ? (
+                <a
+                  key={`${relation.relation}-${relation.toUniqueName}-${index}`}
+                  href={`/viewer/lexicon.html?q=${encodeURIComponent(relation.uStrong)}`}
+                  className="hover:bg-muted flex items-start justify-between gap-3 rounded-md border px-3 py-2 text-sm transition"
+                >
+                  {content}
+                </a>
+              ) : (
+                <div
+                  key={`${relation.relation}-${relation.toUniqueName}-${index}`}
+                  className="flex items-start justify-between gap-3 rounded-md border px-3 py-2 text-sm"
+                >
+                  {content}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+      {hasReferences ? (
+        <section className="lexicon-field-section">
+          <div className="flex items-center justify-between gap-3">
+            <h4 className="lexicon-field-label mb-0">
+              {french ? "Références bibliques" : "Bible references"}
+            </h4>
+            <Badge variant="outline">
+              {entity.referenceCount.toLocaleString(french ? "fr-FR" : "en-US")}
+            </Badge>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {entity.references.slice(0, 30).map((reference) => (
+              <Badge
+                key={`${reference.book}-${reference.chapter}-${reference.verse}-${reference.suffix}`}
+                variant="outline"
+              >
+                {reference.refText ||
+                  `${reference.book}.${reference.chapter}.${reference.verse}${reference.suffix}`}
+              </Badge>
+            ))}
+            {entity.referenceCount > entity.references.length ? (
+              <Badge variant="secondary">
+                +
+                {(
+                  entity.referenceCount - entity.references.length
+                ).toLocaleString("fr-FR")}
+              </Badge>
+            ) : null}
+          </div>
+          {debug ? (
+            <DebugFieldTag source="ENTITES_TIPNR.EntityRefs.refText" />
+          ) : null}
+        </section>
+      ) : null}
+    </div>
+  );
+}
+
+function entityRelationLabel(value: string, locale: "fr" | "en") {
+  const labelsFr: Record<string, string> = {
+    father: "père",
+    mother: "mère",
+    offspring: "enfant",
+    sibling: "fratrie",
+    partner: "conjoint·e",
+    founder_or_origin: "fondateur / origine",
+    resident: "résident"
+  };
+  const labelsEn: Record<string, string> = {
+    father: "father",
+    mother: "mother",
+    offspring: "child",
+    sibling: "sibling",
+    partner: "partner",
+    founder_or_origin: "founder / origin",
+    resident: "resident"
+  };
+  return (
+    (locale === "fr" ? labelsFr : labelsEn)[value] || value.replaceAll("_", " ")
+  );
+}
+
 function TipnrLanguagePanel({
   entity,
-  locale
+  locale,
+  showLocale = true,
+  debug = false
 }: {
   entity: LexiconEntryPayload["tipnrEntities"][number];
   locale: "FR" | "EN";
+  showLocale?: boolean;
+  debug?: boolean;
 }) {
   const french = locale === "FR";
   const displayName = french ? entity.displayNameFr : entity.displayNameEn;
@@ -2004,32 +3237,80 @@ function TipnrLanguagePanel({
   const brief = cleanTipnrText(french ? entity.briefFr : entity.briefEn);
 
   return (
-    <article className="min-w-0 p-4 md:p-5">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <span className="text-muted-foreground text-xs font-medium uppercase tracking-[0.16em]">
-          {french ? "Français" : "English"}
-        </span>
-        <Badge variant={french ? "default" : "outline"}>{locale}</Badge>
+    <article className="flex min-w-0 flex-col gap-5 p-4 md:p-5">
+      {showLocale ? (
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <span className="text-muted-foreground text-xs font-medium uppercase tracking-[0.16em]">
+            {french ? "Français" : "English"}
+          </span>
+          <Badge variant={french ? "default" : "outline"}>{locale}</Badge>
+        </div>
+      ) : null}
+      <div className="lexicon-field-section">
+        <h4 className="lexicon-field-label">{french ? "Nom" : "Name"}</h4>
+        <p className="text-lg font-semibold">{displayName || "—"}</p>
+        {debug ? (
+          <DebugFieldTag
+            source={`ENTITES_TIPNR.${french ? "EntityTranslations" : "Entities"}.displayName`}
+          />
+        ) : null}
       </div>
-      <p className="text-lg font-semibold">{displayName || "—"}</p>
       {description && description !== displayName ? (
-        <p className="text-muted-foreground mt-1 text-sm">{description}</p>
+        <div className="lexicon-field-section">
+          <h4 className="lexicon-field-label">
+            {french ? "Identité" : "Identity"}
+          </h4>
+          <p className="text-muted-foreground text-sm">{description}</p>
+          {debug ? (
+            <DebugFieldTag
+              source={`ENTITES_TIPNR.${french ? "EntityTranslations" : "Entities"}.description`}
+            />
+          ) : null}
+        </div>
       ) : null}
       {shortDescription ? (
-        <p className="mt-4 text-sm leading-relaxed">{shortDescription}</p>
+        <div className="lexicon-field-section">
+          <h4 className="lexicon-field-label">
+            {french ? "En bref" : "In brief"}
+          </h4>
+          <p className="text-sm leading-relaxed">{shortDescription}</p>
+          {debug ? (
+            <DebugFieldTag
+              source={`ENTITES_TIPNR.${french ? "EntityTranslations" : "Entities"}.shortDescription`}
+            />
+          ) : null}
+        </div>
       ) : null}
       {summaryHtml ? (
-        <div
-          className="prose-strong mt-4 min-w-0 text-sm leading-relaxed"
-          dangerouslySetInnerHTML={{
-            __html: prepareTipnrHtml(summaryHtml)
-          }}
-        />
+        <div className="lexicon-field-section">
+          <h4 className="lexicon-field-label">
+            {french ? "Synthèse biblique" : "Biblical summary"}
+          </h4>
+          <div
+            className="prose-strong min-w-0 text-sm leading-relaxed"
+            dangerouslySetInnerHTML={{
+              __html: prepareTipnrHtml(summaryHtml)
+            }}
+          />
+          {debug ? (
+            <DebugFieldTag
+              source={`ENTITES_TIPNR.${french ? "EntityTranslations" : "Entities"}.summaryHtml`}
+            />
+          ) : null}
+        </div>
       ) : null}
       {brief && brief !== description ? (
-        <p className="text-muted-foreground mt-4 border-t pt-3 text-xs">
-          {brief}
-        </p>
+        <div className="lexicon-field-section">
+          <h4 className="lexicon-field-label">
+            {french ? "Résumé" : "Summary"}
+          </h4>
+          <p className="text-muted-foreground text-xs">{brief}</p>
+          {debug ? (
+            <DebugFieldTag
+              source={`ENTITES_TIPNR.${french ? "EntityTranslations" : "Entities"}.brief`}
+            />
+          ) : null}
+        </div>
       ) : null}
     </article>
   );
@@ -2046,6 +3327,10 @@ function prepareTipnrHtml(value: string) {
     .replace(/^3(?=\p{L})/u, "")
     .replace(/^@Brief=\s*/iu, "")
     .replace(
+      /(?:<br\s*\/?>\s*)?<a\b[^>]*href=["']https:\/\/(?:www\.)?stepbible\.org\/html\/names\.html(?:\?[^"']*)?["'][^>]*>[\s\S]*?<\/a>\s*$/giu,
+      ""
+    )
+    .replace(
       /<strong="([HG]\d{4,5}[A-Z]*)">([\s\S]*?)<\/strong>/giu,
       (_match, strong: string, label: string) =>
         `<a href="/viewer/lexicon.html?q=${encodeURIComponent(strong)}">${label}</a>`
@@ -2058,65 +3343,114 @@ function LegacyLexiconComparison({
   payload: LexiconEntryPayload;
 }) {
   const legacy = payload.legacy;
+  const legacyTable = payload.entry.language === "greek" ? "Grec" : "Hebreu";
   if (!legacy) {
     return (
-      <details className="group rounded-xl border border-dashed">
-        <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3">
-          <ChevronRight className="text-muted-foreground size-4 transition-transform group-open:rotate-90" />
-          <span className="text-sm font-semibold">Strong legacy français</span>
+      <details open className="lexicon-panel border-dashed">
+        <summary className="lexicon-panel-summary">
+          <div className="flex items-center gap-2">
+            <ChevronRight className="lexicon-panel-chevron" />
+            <span className="lexicon-panel-title">Strong legacy français</span>
+          </div>
           <Badge variant="secondary">Introuvable</Badge>
         </summary>
-        <p className="text-muted-foreground border-t px-4 py-3 text-sm">
-          Aucune notice legacy ne correspond au Strong classique de cette entrée
-          STEP.
-        </p>
+        <div className="lexicon-panel-content px-4 py-3">
+          <p className="text-muted-foreground text-sm">
+            Aucune notice legacy ne correspond au Strong classique de cette
+            entrée STEP.
+          </p>
+          <DebugFieldTag source={`STRONG_LEGACY.${legacyTable}.Code`} />
+        </div>
       </details>
     );
   }
 
   return (
-    <details className="group overflow-hidden rounded-xl border border-amber-400/30 bg-amber-500/5">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 transition hover:bg-amber-500/10">
+    <details open className="lexicon-panel">
+      <summary className="lexicon-panel-summary flex-wrap">
         <div className="flex items-center gap-2">
-          <ChevronRight className="text-muted-foreground size-4 transition-transform group-open:rotate-90" />
-          <span className="text-sm font-semibold">Strong legacy français</span>
-          <span className="text-muted-foreground text-xs">
-            source historique séparée
-          </span>
+          <ChevronRight className="lexicon-panel-chevron" />
+          <span className="lexicon-panel-title">Strong legacy français</span>
         </div>
-        <Badge variant="outline">{legacy.strong}</Badge>
+        <div className="flex flex-col items-end">
+          <Badge variant="outline">{legacy.strong}</Badge>
+          <DebugFieldTag source={`STRONG_LEGACY.${legacyTable}.Code`} />
+        </div>
       </summary>
-      <div className="border-t border-amber-400/20 p-4">
-        <p className="mb-1 text-lg font-semibold">{legacy.word || "—"}</p>
-        <p className="text-muted-foreground mb-3 text-xs">
-          {legacy.original} · {legacy.phonetic} · {legacy.type}
-        </p>
+      <div className="lexicon-panel-content p-4">
+        <div>
+          <p className="text-lg font-semibold">{legacy.word || "—"}</p>
+          <DebugFieldTag source={`STRONG_LEGACY.${legacyTable}.Mot`} />
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div>
+            <span className="text-muted-foreground block text-xs">
+              Original
+            </span>
+            <p className="mt-1 text-sm" dir="auto">
+              {legacy.original || "—"}
+            </p>
+            <DebugFieldTag
+              source={`STRONG_LEGACY.${legacyTable}.${legacyTable}`}
+            />
+          </div>
+          <div>
+            <span className="text-muted-foreground block text-xs">
+              Phonétique
+            </span>
+            <p className="mt-1 text-sm">{legacy.phonetic || "—"}</p>
+            <DebugFieldTag source={`STRONG_LEGACY.${legacyTable}.Phonetique`} />
+          </div>
+          <div>
+            <span className="text-muted-foreground block text-xs">Type</span>
+            <p className="mt-1 text-sm">{legacy.type || "—"}</p>
+            <DebugFieldTag source={`STRONG_LEGACY.${legacyTable}.Type`} />
+          </div>
+        </div>
         {legacy.lsg ? (
-          <div className="mb-3">
+          <div className="mt-4">
             <span className="text-muted-foreground block text-xs">
               Rendus LSG
             </span>
             <p className="text-sm">{legacy.lsg}</p>
+            <DebugFieldTag source={`STRONG_LEGACY.${legacyTable}.LSG`} />
           </div>
         ) : null}
         {legacy.originHtml ? (
-          <div className="mb-3">
+          <div className="mt-4">
             <span className="text-muted-foreground block text-xs">Origine</span>
             <div
               className="prose-strong text-sm"
-              dangerouslySetInnerHTML={{ __html: legacy.originHtml }}
+              dangerouslySetInnerHTML={{
+                __html: prepareLegacyHtml(legacy.originHtml)
+              }}
             />
+            <DebugFieldTag source={`STRONG_LEGACY.${legacyTable}.Origine`} />
           </div>
         ) : null}
-        <div
-          className="prose-strong text-sm"
-          dangerouslySetInnerHTML={{
-            __html: legacy.definitionHtml || "<p>Aucune définition.</p>"
-          }}
-        />
+        <div className="mt-4">
+          <span className="text-muted-foreground block text-xs">
+            Définition
+          </span>
+          <div
+            className="prose-strong mt-1 text-sm"
+            dangerouslySetInnerHTML={{
+              __html: prepareLegacyHtml(
+                legacy.definitionHtml || "<p>Aucune définition.</p>"
+              )
+            }}
+          />
+          <DebugFieldTag source={`STRONG_LEGACY.${legacyTable}.Definition`} />
+        </div>
       </div>
     </details>
   );
+}
+
+function lexiconTransliteration(
+  entry: Pick<LexiconRow, "classicTransliteration" | "transliteration">
+) {
+  return entry.classicTransliteration.trim() || entry.transliteration.trim();
 }
 
 function InfoBlock({ label, value }: { label: string; value: string }) {
@@ -2134,6 +3468,31 @@ function lexiconResourceKey(
   const content =
     resource.contentHtmlFr || resource.contentTextFr || resource.contentHtml;
   return `${resource.source}|${resource.kind}|${content.length}|${content.slice(0, 80)}`;
+}
+
+function isMissingLsjFallback(
+  resource: LexiconEntryPayload["resources"][number]
+) {
+  if (resource.source !== "TFLSJ") return false;
+  const content = [
+    resource.contentHtml,
+    resource.contentHtmlFr,
+    resource.contentTextFr
+  ]
+    .join(" ")
+    .toLowerCase();
+  return (
+    content.includes("lsj has no entry") ||
+    content.includes("lsj ne contient aucune entrée") ||
+    (content.includes("abbott-smith") && content.includes("lsj"))
+  );
+}
+
+function prepareLegacyHtml(value: string) {
+  return value.replace(
+    /<img\b[^>]*\bsrc=["'][^"']*ClearPix\.gif["'][^>]*>/giu,
+    "&emsp;"
+  );
 }
 
 function ReviewView() {

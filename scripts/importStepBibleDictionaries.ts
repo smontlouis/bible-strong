@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { LEXICAL_MORPHOLOGY_SUPPLEMENTS } from "../src/lexiconV3/morphologySupplements.js";
 
 interface StepSource {
   language: "greek" | "hebrew";
@@ -135,6 +136,10 @@ async function main(): Promise<void> {
     sourceDigests[source.localName] = sha256(content);
     morphologyCodes.push(...parseMorphologyCodes(content, source));
   }
+
+  // STEP's lexicon files contain a small number of documented morphology
+  // values that are absent from the standalone brief-code lists.
+  morphologyCodes.push(...LEXICAL_MORPHOLOGY_SUPPLEMENTS);
 
   const tempPath = `${outputPath}.tmp`;
   await rm(tempPath, { force: true });
@@ -376,7 +381,7 @@ function parseBriefMorphologyCodes(
       scope: "lexical_brief",
       example,
       meaning,
-      description: "",
+      description: meaning ? `Lexical category: ${meaning}.` : "",
       source: source.source
     });
   }

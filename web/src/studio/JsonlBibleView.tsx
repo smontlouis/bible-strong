@@ -1,5 +1,6 @@
 import {
   Braces,
+  Bug,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -11,18 +12,12 @@ import {
   Search,
   X
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -40,7 +35,8 @@ import type {
   JsonlBibleCatalog,
   JsonlBibleChapter,
   JsonlBibleId,
-  JsonlBibleVerse
+  JsonlBibleVerse,
+  LexiconEntryPayload
 } from "./types";
 
 const VERSION_ORDER: JsonlBibleId[] = [
@@ -64,24 +60,82 @@ interface SelectedOccurrence {
   ustrong: string[];
 }
 
-export function JsonlBibleView() {
+export function JsonlBibleView({
+  renderLexiconEntry
+}: {
+  renderLexiconEntry?: (
+    payload: LexiconEntryPayload,
+    options: { locale: "fr" | "en"; debug: boolean }
+  ) => ReactNode;
+}) {
+  const searchParams = new URLSearchParams(window.location.search);
   const [catalog, setCatalog] = useState<JsonlBibleCatalog | null>(null);
   const [chapterData, setChapterData] = useState<JsonlBibleChapter | null>(
     null
   );
   const [loading, setLoading] = useState(true);
   const [bookId, setBookId] = useState(
-    () => new URLSearchParams(window.location.search).get("book") ?? "Gen"
+    () =>
+      searchParams.get("book") ??
+      window.localStorage.getItem("bible-strong:bibles:book") ??
+      "Gen"
   );
   const [chapter, setChapter] = useState(
     () =>
-      Number(new URLSearchParams(window.location.search).get("chapter")) || 1
+      Number(
+        searchParams.get("chapter") ??
+          window.localStorage.getItem("bible-strong:bibles:chapter")
+      ) || 1
   );
-  const [query, setQuery] = useState("");
-  const [selectedVersions, setSelectedVersions] =
-    useState<JsonlBibleId[]>(VERSION_ORDER);
+  const [query, setQuery] = useState(
+    () =>
+      searchParams.get("bq") ??
+      window.localStorage.getItem("bible-strong:bibles:query") ??
+      ""
+  );
+  const [selectedVersions, setSelectedVersions] = useState<JsonlBibleId[]>(
+    () => {
+      const saved = window.localStorage.getItem("bible-strong:bibles:versions");
+      if (!saved) return VERSION_ORDER;
+      const requested = saved.split(",") as JsonlBibleId[];
+      return VERSION_ORDER.filter((id) => requested.includes(id));
+    }
+  );
   const [selectedOccurrence, setSelectedOccurrence] =
     useState<SelectedOccurrence | null>(null);
+  const [contentLocale, setContentLocale] = useState<"fr" | "en">(() => {
+    const value =
+      searchParams.get("locale") ||
+      window.localStorage.getItem("bible-strong:lexicon-locale");
+    return value === "en" ? "en" : "fr";
+  });
+  const [debugMode, setDebugMode] = useState(
+    () =>
+      searchParams.get("debug") === "1" ||
+      window.localStorage.getItem("bible-strong:lexicon-debug") === "1"
+  );
+  const initialBookId = useRef(bookId).current;
+  const initialChapter = useRef(chapter).current;
+
+  function changeContentLocale(value: "fr" | "en") {
+    setContentLocale(value);
+    window.localStorage.setItem("bible-strong:lexicon-locale", value);
+    const url = new URL(window.location.href);
+    url.searchParams.set("locale", value);
+    window.history.replaceState(null, "", url);
+  }
+
+  function changeDebugMode(value: boolean) {
+    setDebugMode(value);
+    window.localStorage.setItem(
+      "bible-strong:lexicon-debug",
+      value ? "1" : "0"
+    );
+    const url = new URL(window.location.href);
+    if (value) url.searchParams.set("debug", "1");
+    else url.searchParams.delete("debug");
+    window.history.replaceState(null, "", url);
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -92,9 +146,12 @@ export function JsonlBibleView() {
         const available = nextCatalog.versions
           .filter((version) => version.available)
           .map((version) => version.id);
-        setSelectedVersions(available);
+        setSelectedVersions((current) => {
+          const retained = current.filter((id) => available.includes(id));
+          return retained.length ? retained : available;
+        });
         const requestedBook = nextCatalog.books.find(
-          (book) => book.bookId === bookId
+          (book) => book.bookId === initialBookId
         );
         if (!requestedBook) {
           const first = nextCatalog.books[0];
@@ -102,7 +159,7 @@ export function JsonlBibleView() {
             setBookId(first.bookId);
             setChapter(first.chapters[0] ?? 1);
           }
-        } else if (!requestedBook.chapters.includes(chapter)) {
+        } else if (!requestedBook.chapters.includes(initialChapter)) {
           setChapter(requestedBook.chapters[0] ?? 1);
         }
       })
@@ -121,24 +178,20 @@ export function JsonlBibleView() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [initialBookId, initialChapter]);
 
   const availableVersions = useMemo(
     () => catalog?.versions.filter((version) => version.available) ?? [],
     [catalog]
   );
-  const availableIds = useMemo(
-    () => availableVersions.map((version) => version.id),
-    [availableVersions]
-  );
-
   useEffect(() => {
-    if (!catalog || availableIds.length === 0 || !bookId || !chapter) return;
+    if (!catalog || selectedVersions.length === 0 || !bookId || !chapter)
+      return;
     let cancelled = false;
     setLoading(true);
     setSelectedOccurrence(null);
     loadJsonlBibleChapter({
-      versions: availableIds,
+      versions: selectedVersions,
       bookId,
       chapter
     })
@@ -160,15 +213,24 @@ export function JsonlBibleView() {
     return () => {
       cancelled = true;
     };
-  }, [availableIds.join(","), bookId, catalog, chapter]);
+  }, [bookId, catalog, chapter, selectedVersions]);
 
   useEffect(() => {
     const url = new URL(window.location.href);
     url.searchParams.set("view", "jsonl");
     url.searchParams.set("book", bookId);
     url.searchParams.set("chapter", String(chapter));
+    if (query) url.searchParams.set("bq", query);
+    else url.searchParams.delete("bq");
     window.history.replaceState(null, "", url);
-  }, [bookId, chapter]);
+    window.localStorage.setItem("bible-strong:bibles:book", bookId);
+    window.localStorage.setItem("bible-strong:bibles:chapter", String(chapter));
+    window.localStorage.setItem("bible-strong:bibles:query", query);
+    window.localStorage.setItem(
+      "bible-strong:bibles:versions",
+      selectedVersions.join(",")
+    );
+  }, [bookId, chapter, query, selectedVersions]);
 
   const chapters = useMemo(
     () => catalog?.books.find((book) => book.bookId === bookId)?.chapters ?? [],
@@ -238,17 +300,17 @@ export function JsonlBibleView() {
           <div className="max-w-2xl">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="outline" className="jsonl-kicker gap-1.5">
-                <Braces /> JSONL compact
+                <Braces /> Bibles locales
               </Badge>
               <Badge variant="secondary">reader view</Badge>
               <span className="text-muted-foreground text-xs">
                 strong · eStrong · dStrong · uStrong
               </span>
             </div>
-            <h2 className="jsonl-title mt-3">Table de concordance</h2>
+            <h2 className="jsonl-title mt-3">Bibles</h2>
             <p className="text-muted-foreground mt-2 max-w-xl text-sm leading-6">
-              Huit traductions alignées verset par verset, chargées chapitre
-              par chapitre depuis les JSONL finaux.
+              Compare les traductions verset par verset. Seules les colonnes
+              actives et le chapitre courant sont chargés.
             </p>
           </div>
 
@@ -358,7 +420,7 @@ export function JsonlBibleView() {
         </div>
       </header>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 2xl:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="grid min-h-0 flex-1 grid-cols-1 2xl:grid-cols-[minmax(0,1fr)_520px]">
         <div className="min-h-0 overflow-auto">
           <div className="space-y-4 p-4">
             <JsonlCatalogStrip catalog={catalog} selected={selectedVersions} />
@@ -434,22 +496,25 @@ export function JsonlBibleView() {
           </div>
         </div>
 
-        <aside className="jsonl-inspector border-border/70 bg-card/55 hidden min-h-0 border-l 2xl:block">
-          <JsonlIdentityInspector
+        <aside
+          className={cn(
+            "jsonl-inspector border-border/70 bg-card/95 z-30 min-h-0 overflow-hidden border shadow-2xl",
+            selectedOccurrence
+              ? "fixed inset-x-3 bottom-3 h-[72vh] rounded-xl 2xl:static 2xl:h-auto 2xl:rounded-none 2xl:border-y-0 2xl:border-r-0 2xl:shadow-none"
+              : "hidden 2xl:block 2xl:border-y-0 2xl:border-r-0 2xl:shadow-none"
+          )}
+        >
+          <JsonlLexiconInspector
             occurrence={selectedOccurrence}
             onClear={() => setSelectedOccurrence(null)}
+            renderLexiconEntry={renderLexiconEntry}
+            locale={contentLocale}
+            debug={debugMode}
+            onLocaleChange={changeContentLocale}
+            onDebugChange={changeDebugMode}
           />
         </aside>
       </div>
-
-      {selectedOccurrence ? (
-        <div className="border-border bg-card fixed inset-x-3 bottom-3 z-30 max-h-[58vh] overflow-auto rounded-xl border shadow-2xl 2xl:hidden">
-          <JsonlIdentityInspector
-            occurrence={selectedOccurrence}
-            onClear={() => setSelectedOccurrence(null)}
-          />
-        </div>
-      ) : null}
     </section>
   );
 }
@@ -554,6 +619,8 @@ function JsonlVerseCell({
     >
       <div
         className="jsonl-verse-text"
+        role="group"
+        aria-label={`Mots annotés de ${verse.ref} dans ${version}`}
         onClick={(event) => {
           const target = (event.target as HTMLElement).closest(
             "w[strong]"
@@ -576,110 +643,189 @@ function JsonlVerseCell({
   );
 }
 
-function JsonlIdentityInspector({
+function JsonlLexiconInspector({
   occurrence,
-  onClear
+  onClear,
+  renderLexiconEntry,
+  locale,
+  debug,
+  onLocaleChange,
+  onDebugChange
 }: {
   occurrence: SelectedOccurrence | null;
   onClear: () => void;
+  renderLexiconEntry?: (
+    payload: LexiconEntryPayload,
+    options: { locale: "fr" | "en"; debug: boolean }
+  ) => ReactNode;
+  locale: "fr" | "en";
+  debug: boolean;
+  onLocaleChange: (locale: "fr" | "en") => void;
+  onDebugChange: (debug: boolean) => void;
 }) {
-  const primary = occurrence
-    ? (occurrence.dstrong[0] ??
-      occurrence.estrong[0] ??
-      occurrence.strong[0] ??
-      "")
-    : "";
-  const [gloss, setGloss] = useState<string>("");
+  const candidateCodes = useMemo(
+    () => preferredLexiconCodes(occurrence),
+    [occurrence]
+  );
+  const [selectedCode, setSelectedCode] = useState("");
+  const activeStrong = candidateCodes.includes(selectedCode)
+    ? selectedCode
+    : (candidateCodes[0] ?? "");
+  const [entry, setEntry] = useState<LexiconEntryPayload | null>(null);
+  const [entryError, setEntryError] = useState("");
+  const entryCache = useRef(new Map<string, LexiconEntryPayload>());
 
   useEffect(() => {
-    setGloss("");
-    if (!primary) return;
-    fetch(`/api/lexicon/search?q=${encodeURIComponent(primary)}&limit=1`)
-      .then((response) => response.json())
-      .then((payload) => {
-        const row = payload.rows?.[0];
-        setGloss(row?.glossFr || row?.glossEn || row?.meaningSimpleFr || "");
-      })
-      .catch(() => undefined);
-  }, [primary]);
+    let cancelled = false;
+    const controller = new AbortController();
+    setEntryError("");
+    if (!activeStrong) {
+      setEntry(null);
+      return;
+    }
+
+    const cached = entryCache.current.get(activeStrong);
+    if (cached) {
+      setEntry(cached);
+      return;
+    }
+
+    setEntry(null);
+    void (async () => {
+      try {
+        const entryResponse = await fetch(
+          `/api/lexicon/entry?strong=${encodeURIComponent(activeStrong)}&include=extended`,
+          { signal: controller.signal }
+        );
+        if (!entryResponse.ok) {
+          throw new Error("Notice lexicale indisponible");
+        }
+        const payload = (await entryResponse.json()) as LexiconEntryPayload;
+        if (cancelled) return;
+        entryCache.current.set(activeStrong, payload);
+        setEntry(payload);
+      } catch (error) {
+        if (
+          cancelled ||
+          (error instanceof Error && error.name === "AbortError")
+        ) {
+          return;
+        }
+        setEntryError(
+          error instanceof Error ? error.message : "Notice indisponible"
+        );
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [activeStrong]);
 
   return (
     <ScrollArea className="h-full">
-      <div className="space-y-4 p-4">
+      <div className="flex flex-col gap-4 p-4">
         {!occurrence ? (
           <JsonlEmpty
             icon={CircleDot}
-            title="Inspecteur d’identité"
-            copy="Clique sur un mot coloré pour voir les identités Strong exactes inscrites dans le JSONL."
+            title="Fiche lexicale"
+            copy="Clique sur un mot coloré pour charger ici sa notice Strong complète."
           />
         ) : (
           <>
-            <Card className="jsonl-inspector-card">
-              <CardHeader>
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <Badge
-                      variant="outline"
-                      className={cn(
-                        "mb-2",
-                        `jsonl-version-${occurrence.version.toLowerCase()}`
-                      )}
-                    >
-                      <span className="jsonl-version-dot" />
-                      {occurrence.version} · {occurrence.ref}
-                    </Badge>
-                    <CardTitle className="jsonl-inspector-word">
-                      {occurrence.surface || "Strong vide"}
-                    </CardTitle>
-                    <CardDescription>
-                      {gloss || "Résolution lexicale exacte de l’occurrence"}
-                    </CardDescription>
+            <div className="bg-card/95 sticky top-0 z-10 rounded-xl border p-4 shadow-sm backdrop-blur">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "mb-2",
+                      `jsonl-version-${occurrence.version.toLowerCase()}`
+                    )}
+                  >
+                    <span className="jsonl-version-dot" />
+                    {occurrence.version} · {occurrence.ref}
+                  </Badge>
+                  <h3 className="truncate text-xl font-semibold tracking-tight">
+                    {occurrence.surface || "Strong vide"}
+                  </h3>
+                  <p className="text-muted-foreground mt-1 font-mono text-xs">
+                    {activeStrong || "Aucun Strong exploitable"}
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center gap-1.5">
+                  <div
+                    className="bg-muted/60 flex rounded-lg border p-1"
+                    aria-label="Langue du contenu lexical"
+                  >
+                    {(["fr", "en"] as const).map((value) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => onLocaleChange(value)}
+                        aria-pressed={locale === value}
+                        className={cn(
+                          "rounded-md px-2 py-1 text-[11px] font-semibold transition",
+                          locale === value
+                            ? "bg-background text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        {value.toUpperCase()}
+                      </button>
+                    ))}
                   </div>
+                  <Button
+                    type="button"
+                    variant={debug ? "default" : "outline"}
+                    size="icon-sm"
+                    aria-label={
+                      debug ? "Désactiver le debug" : "Activer le debug"
+                    }
+                    aria-pressed={debug}
+                    onClick={() => onDebugChange(!debug)}
+                  >
+                    <Bug />
+                  </Button>
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    aria-label="Fermer l’inspecteur"
+                    aria-label="Fermer la fiche lexicale"
                     onClick={onClear}
                   >
                     <X />
                   </Button>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <IdentityLevel
-                  label="Strong"
-                  value={occurrence.strong}
-                  copy="Identifiant classique compatible avec l’application."
-                  tone="classic"
-                />
-                <IdentityLevel
-                  label="eStrong"
-                  value={occurrence.estrong}
-                  copy="Extension morphologique ou lexicale STEP."
-                  tone="extended"
-                />
-                <IdentityLevel
-                  label="dStrong"
-                  value={occurrence.dstrong}
-                  copy="Sens ou forme désambiguïsée pour cette occurrence."
-                  tone="distinguished"
-                />
-                <IdentityLevel
-                  label="uStrong"
-                  value={occurrence.ustrong}
-                  copy="Identité de regroupement et navigation croisée."
-                  tone="unified"
-                />
-              </CardContent>
-            </Card>
-            <div className="jsonl-lookup-rule rounded-lg border p-3 text-sm">
-              <p className="font-semibold">Cible lexicale primaire</p>
-              <code>{primary || "—"}</code>
-              <p className="text-muted-foreground mt-2 text-xs leading-5">
-                Priorité utilisée : dStrong, puis eStrong, puis Strong. uStrong
-                sert au regroupement.
-              </p>
+              </div>
+              {candidateCodes.length > 1 ? (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {candidateCodes.map((code) => (
+                    <Button
+                      key={code}
+                      type="button"
+                      variant={code === activeStrong ? "secondary" : "outline"}
+                      size="sm"
+                      className="h-7 px-2 font-mono text-xs"
+                      onClick={() => setSelectedCode(code)}
+                    >
+                      {code}
+                    </Button>
+                  ))}
+                </div>
+              ) : null}
             </div>
+
+            {entryError ? (
+              <JsonlEmpty
+                icon={CircleDot}
+                title="Notice indisponible"
+                copy={entryError}
+              />
+            ) : null}
+            {entry && renderLexiconEntry
+              ? renderLexiconEntry(entry, { locale, debug })
+              : null}
           </>
         )}
       </div>
@@ -687,32 +833,23 @@ function JsonlIdentityInspector({
   );
 }
 
-function IdentityLevel({
-  label,
-  value,
-  copy,
-  tone
-}: {
-  label: string;
-  value: string[];
-  copy: string;
-  tone: string;
-}) {
-  return (
-    <div className={cn("jsonl-identity-level", `is-${tone}`)}>
-      <div className="flex items-center justify-between gap-2">
-        <span>{label}</span>
-        <div className="flex flex-wrap justify-end gap-1">
-          {value.length ? (
-            value.map((code) => <code key={code}>{code}</code>)
-          ) : (
-            <em>non émis</em>
-          )}
-        </div>
-      </div>
-      <p>{copy}</p>
-    </div>
-  );
+function preferredLexiconCodes(
+  occurrence: SelectedOccurrence | null
+): string[] {
+  if (!occurrence) return [];
+  const preferred = occurrence.dstrong.length
+    ? occurrence.dstrong
+    : occurrence.estrong.length
+      ? occurrence.estrong
+      : occurrence.strong;
+  return [...new Set(preferred.map(normalizeLexiconStrong).filter(Boolean))];
+}
+
+function normalizeLexiconStrong(value: string) {
+  const compact = value.trim().toUpperCase();
+  const match = compact.match(/^([GH])0*(\d+)([A-Z]?)$/u);
+  if (!match) return compact;
+  return `${match[1]}${match[2].padStart(4, "0")}${match[3] ?? ""}`;
 }
 
 function JsonlEmpty({

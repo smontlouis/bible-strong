@@ -333,8 +333,13 @@ export interface LexiconMetadata {
   legacyEntries: number;
   resourcesIncluded: boolean;
   resourceEntries: number;
+  relationEntries: number;
+  morphologyTranslations: number;
+  occurrenceDatabase: string | null;
+  occurrenceCount: number;
   tipnrDatabase: string | null;
   tipnrEntities: number;
+  tipnrPlaces: number;
 }
 
 export interface TipnrEntityContext {
@@ -357,8 +362,100 @@ export interface TipnrEntityContext {
   shortDescriptionFr: string;
   articleHtmlEn: string;
   articleHtmlFr: string;
+  openBibleName: string | null;
+  googleMapUrl: string | null;
+  palopenmapsUrl: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  area: string | null;
+  referenceCount: number;
+  relationCount: number;
+  references: Array<{
+    book: string;
+    chapter: number;
+    verse: number;
+    suffix: string;
+    refText: string;
+  }>;
+  relations: Array<{
+    relation: string;
+    certainty: string;
+    toEntityId: number | null;
+    toUniqueName: string;
+    uStrong: string | null;
+    displayNameEn: string | null;
+    displayNameFr: string | null;
+    category: string | null;
+  }>;
   matchKind: "uStrong-exact" | "classical-strong-fallback";
   matchedStrong: string;
+}
+
+export interface LexiconRelation {
+  id: number;
+  toStepEntryId: number | null;
+  toStepCode: string;
+  groupKind: "identity" | "subentry" | "family";
+  relationKind: string;
+  labelEn: string;
+  labelFr: string;
+  source: string;
+  language: string | null;
+  eStrong: string | null;
+  uStrong: string | null;
+  original: string | null;
+  transliteration: string | null;
+  glossEn: string | null;
+  glossFr: string | null;
+}
+
+export interface LexiconMorphology {
+  code: string;
+  normalizedCode: string;
+  language: string;
+  scope: string;
+  meaningEn: string;
+  descriptionEn: string;
+  meaningFr: string | null;
+  descriptionFr: string | null;
+}
+
+export interface LexiconOccurrenceStats {
+  identityKind: "step" | "classical";
+  strongCode: string;
+  totalCount: number;
+  oldTestamentCount: number;
+  newTestamentCount: number;
+  verseCount: number;
+  morphologyCount: number;
+  surfaceCount: number;
+  firstRef: string;
+}
+
+export interface LexiconOccurrences {
+  scope: "step" | "classical-fallback";
+  exactStats: LexiconOccurrenceStats | null;
+  classicalStats: LexiconOccurrenceStats | null;
+  samples: Array<{
+    ref: string;
+    source: "TAHOT" | "TAGNT";
+    surface: string;
+    transliteration: string;
+    gloss: string;
+    morphology: string;
+    editions: string;
+    stepCode: string;
+    baseStrong: string;
+  }>;
+  forms: Array<{
+    code: string;
+    count: number;
+    exampleSurface: string;
+    meaningEn?: string;
+    descriptionEn?: string;
+    meaningFr?: string | null;
+    descriptionFr?: string | null;
+  }>;
 }
 
 export interface LexiconEntryPayload {
@@ -391,4 +488,7 @@ export interface LexiconEntryPayload {
     contentTextFr: string;
   }>;
   tipnrEntities: TipnrEntityContext[];
+  relations: LexiconRelation[];
+  morphology: LexiconMorphology[];
+  occurrences: LexiconOccurrences | null;
 }

@@ -99,6 +99,44 @@
 }
 
 @layer components {
+  .lexicon-panel {
+    @apply overflow-hidden rounded-xl border bg-card/70 shadow-sm;
+  }
+
+  .lexicon-panel-summary {
+    @apply flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 bg-muted/20 px-4 py-3 transition-colors hover:bg-muted/40;
+  }
+
+  .lexicon-panel-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .lexicon-panel-chevron {
+    @apply size-4 shrink-0 text-muted-foreground transition-transform duration-200;
+  }
+
+  .lexicon-panel[open] > .lexicon-panel-summary .lexicon-panel-chevron {
+    transform: rotate(90deg);
+  }
+
+  .lexicon-panel-title {
+    @apply text-sm font-semibold tracking-tight;
+  }
+
+  .lexicon-panel-content {
+    @apply border-t;
+  }
+
+  .lexicon-field-section {
+    @apply border-t pt-5 first:border-t-0 first:pt-0;
+  }
+
+  .lexicon-field-label {
+    @apply text-muted-foreground mb-2 text-xs font-medium uppercase tracking-[0.16em];
+  }
+}
+
+@layer components {
   .legend-dot {
     @apply inline-block size-2 rounded-full;
   }

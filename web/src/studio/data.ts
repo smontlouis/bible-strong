@@ -140,11 +140,16 @@ function inferLexicalReportPath(ledger: StrongLedger) {
 export function currentViewFromLocation(): string {
   const params = new URLSearchParams(window.location.search);
   if (params.has("review") || params.has("manifest")) return "review";
+  const explicitView = params.get("view");
+  if (explicitView) return explicitView;
   if (window.location.pathname.endsWith("/workflow.html")) return "workflow";
   if (window.location.pathname.endsWith("/jsonl.html")) return "jsonl";
   if (window.location.pathname.endsWith("/lexicon.html")) return "lexicon";
   if (window.location.pathname.endsWith("/review.html")) return "review";
-  return params.get("view") ?? "viewer";
+  return (
+    window.localStorage.getItem("bible-strong:last-view") ??
+    "viewer"
+  );
 }
 
 export function defaultLedgerPath() {

@@ -1,12 +1,16 @@
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
+  copyFileSync,
   existsSync,
   mkdirSync,
+  readFileSync,
+  renameSync,
   rmSync,
   statSync,
   writeFileSync
 } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { basename, dirname, extname, join, resolve } from "node:path";
 
 const DEFAULT_SOURCE = "data/entities/bible_entities.sqlite";
 const DEFAULT_OUTPUT = "data/entities/bible_entities.production.sqlite";
@@ -24,6 +28,7 @@ type CountRow = {
   relations: number;
   places: number;
   names: number;
+  translationProvenance: number;
 };
 
 function main(): void {
@@ -31,59 +36,106 @@ function main(): void {
   const sourcePath = resolve(args.source ?? DEFAULT_SOURCE);
   const outputPath = resolve(args.output ?? DEFAULT_OUTPUT);
   const reportPath = resolve(args.report ?? DEFAULT_REPORT);
+  const archiveDir = resolve(args.archive ?? join(dirname(outputPath), "archive"));
 
   if (!existsSync(sourcePath)) {
     throw new Error(`Source database not found: ${sourcePath}`);
   }
+  if (sourcePath === outputPath) {
+    throw new Error("Source and output database paths must be different");
+  }
 
   mkdirSync(dirname(outputPath), { recursive: true });
   mkdirSync(dirname(reportPath), { recursive: true });
-  if (existsSync(outputPath)) rmSync(outputPath);
+  const temporaryPath = `${outputPath}.tmp-${process.pid}-${Date.now()}`;
+  const sourceSha256 = sha256File(sourcePath);
+  const generatedAt = new Date().toISOString();
 
-  buildProductionDb(sourcePath, outputPath);
-  runSql(outputPath, "VACUUM;");
+  try {
+    buildProductionDb(sourcePath, temporaryPath, sourceSha256, generatedAt);
+    runSql(temporaryPath, "VACUUM;");
 
-  const sourceBytes = statSync(sourcePath).size;
-  const outputBytes = statSync(outputPath).size;
-  const gzipBytes = gzipSize(outputPath);
-  const stats = dbStats(outputPath);
-  const counts = productionCounts(outputPath);
-  const integrity = runScalar(outputPath, "PRAGMA integrity_check;");
+    const sourceIntegrity = runScalar(sourcePath, "PRAGMA integrity_check;");
+    const integrity = runScalar(temporaryPath, "PRAGMA integrity_check;");
+    const foreignKeyErrors = runScalar(temporaryPath, "PRAGMA foreign_key_check;");
+    assertIntegrity("source", sourceIntegrity);
+    assertIntegrity("temporary production", integrity);
+    if (foreignKeyErrors !== "") {
+      throw new Error(
+        `Temporary production database failed foreign_key_check:\n${foreignKeyErrors}`
+      );
+    }
 
-  writeFileSync(
-    reportPath,
-    renderReport({
-      sourcePath,
-      outputPath,
-      sourceBytes,
-      outputBytes,
-      gzipBytes,
-      stats,
-      counts,
-      integrity
-    }),
-    "utf8"
-  );
+    const sourceCounts = productionCounts(sourcePath);
+    const counts = productionCounts(temporaryPath);
+    assertCountsMatch(sourceCounts, counts);
 
-  console.log(
-    JSON.stringify(
-      {
+    const sourceBytes = statSync(sourcePath).size;
+    const outputBytes = statSync(temporaryPath).size;
+    const gzipBytes = gzipSize(temporaryPath);
+    const stats = dbStats(temporaryPath);
+    const outputSha256 = sha256File(temporaryPath);
+    const archivePath = archiveExistingOutput(outputPath, archiveDir);
+
+    // The temporary file lives beside the destination, so this is an atomic
+    // replacement on the supported POSIX production filesystems.
+    renameSync(temporaryPath, outputPath);
+
+    writeFileSync(
+      reportPath,
+      renderReport({
         sourcePath,
         outputPath,
-        reportPath,
+        archivePath,
+        sourceSha256,
+        outputSha256,
         sourceBytes,
         outputBytes,
         gzipBytes,
-        reductionPct: roundPct(1 - outputBytes / sourceBytes),
+        stats,
+        counts,
         integrity
-      },
-      null,
-      2
-    )
-  );
+      }),
+      "utf8"
+    );
+
+    console.log(
+      JSON.stringify(
+        {
+          sourcePath,
+          outputPath,
+          archivePath,
+          reportPath,
+          sourceSha256,
+          outputSha256,
+          sourceBytes,
+          outputBytes,
+          gzipBytes,
+          reductionPct: roundPct(1 - outputBytes / sourceBytes),
+          counts,
+          integrity
+        },
+        null,
+        2
+      )
+    );
+  } finally {
+    // A failed build must never disturb the last known-good production file.
+    if (existsSync(temporaryPath)) rmSync(temporaryPath);
+  }
 }
 
-function buildProductionDb(sourcePath: string, outputPath: string): void {
+function buildProductionDb(
+  sourcePath: string,
+  outputPath: string,
+  sourceSha256: string,
+  generatedAt: string
+): void {
+  const optionalProvenanceSql = buildOptionalTableCopySql(
+    sourcePath,
+    "EntityTranslationProvenance"
+  );
+
   runSql(
     sourcePath,
     `
@@ -205,14 +257,17 @@ function buildProductionDb(sourcePath: string, outputPath: string): void {
 
       INSERT INTO out.EntityMeta (key, value)
       SELECT key, value
-      FROM main.EntityMeta
-      WHERE key IN ('attribution', 'license', 'source', 'sourceDigests');
+      FROM main.EntityMeta;
 
-      INSERT INTO out.EntityMeta (key, value)
+      INSERT OR REPLACE INTO out.EntityMeta (key, value)
       VALUES
-        ('productionGeneratedAt', ${sqlString(new Date().toISOString())}),
+        ('productionGeneratedAt', ${sqlString(generatedAt)}),
         ('productionProfile', 'mobile-safe-v1'),
+        ('productionPublicationMode', 'atomic-v1'),
+        ('productionSourceSha256', ${sqlString(sourceSha256)}),
         ('removedColumns', 'rawJson,rawHeader,source,createdAt,updatedAt,ids-on-child-tables');
+
+      ${optionalProvenanceSql}
 
       CREATE INDEX out.idx_entities_category ON Entities(category);
       CREATE INDEX out.idx_entities_displayName ON Entities(displayName);
@@ -228,7 +283,7 @@ function buildProductionDb(sourcePath: string, outputPath: string): void {
 }
 
 function productionCounts(dbPath: string): CountRow {
-  const rows = runJson<CountRow>(
+  const rows = runJson<Omit<CountRow, "translationProvenance">>(
     dbPath,
     `
       SELECT
@@ -242,7 +297,138 @@ function productionCounts(dbPath: string): CountRow {
   );
   const [row] = rows;
   if (!row) throw new Error("Failed to read production counts");
-  return row;
+  return {
+    ...row,
+    translationProvenance: tableExists(
+      dbPath,
+      "EntityTranslationProvenance"
+    )
+      ? Number(
+          runScalar(
+            dbPath,
+            "SELECT count(*) FROM EntityTranslationProvenance;"
+          )
+        )
+      : 0
+  };
+}
+
+function buildOptionalTableCopySql(dbPath: string, tableName: string): string {
+  const createSql = runScalar(
+    dbPath,
+    `SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ${sqlString(tableName)};`
+  );
+  if (!createSql) return "";
+
+  const qualifiedCreateSql = createSql.replace(
+    /^CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:"EntityTranslationProvenance"|`EntityTranslationProvenance`|\[EntityTranslationProvenance\]|EntityTranslationProvenance)/i,
+    "CREATE TABLE out.EntityTranslationProvenance"
+  );
+  if (qualifiedCreateSql === createSql) {
+    throw new Error(`Unsupported CREATE TABLE statement for ${tableName}`);
+  }
+
+  const indexes = runJson<{ name: string; sql: string }>(
+    dbPath,
+    `
+      SELECT name, sql
+      FROM sqlite_master
+      WHERE type = 'index'
+        AND tbl_name = ${sqlString(tableName)}
+        AND sql IS NOT NULL
+      ORDER BY name
+    `
+  );
+  const indexSql = indexes
+    .map((index) => qualifyIndexCreateSql(index.sql, index.name))
+    .join("\n");
+
+  return `
+    ${qualifiedCreateSql};
+    INSERT INTO out.EntityTranslationProvenance
+    SELECT * FROM main.EntityTranslationProvenance;
+    ${indexSql}
+  `;
+}
+
+function qualifyIndexCreateSql(createSql: string, indexName: string): string {
+  const qualified = createSql.replace(
+    /^(CREATE\s+(?:UNIQUE\s+)?INDEX\s+(?:IF\s+NOT\s+EXISTS\s+)?)(?:"[^"]+"|`[^`]+`|\[[^\]]+\]|[^\s]+)(\s+ON\s+)/i,
+    `$1out.${quoteIdentifier(indexName)}$2`
+  );
+  if (qualified === createSql) {
+    throw new Error(`Unsupported CREATE INDEX statement for ${indexName}`);
+  }
+  return `${qualified};`;
+}
+
+function tableExists(dbPath: string, tableName: string): boolean {
+  return (
+    runScalar(
+      dbPath,
+      `SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = ${sqlString(tableName)};`
+    ) === "1"
+  );
+}
+
+function assertIntegrity(label: string, result: string): void {
+  if (result !== "ok") {
+    throw new Error(`${label} database failed integrity_check: ${result}`);
+  }
+}
+
+function assertCountsMatch(expected: CountRow, actual: CountRow): void {
+  const mismatches = (Object.keys(expected) as Array<keyof CountRow>)
+    .filter((key) => expected[key] !== actual[key])
+    .map((key) => `${key}: source=${expected[key]}, production=${actual[key]}`);
+  if (mismatches.length > 0) {
+    throw new Error(
+      `Production row counts do not match source:\n${mismatches.join("\n")}`
+    );
+  }
+}
+
+function archiveExistingOutput(
+  outputPath: string,
+  archiveDir: string
+): string | null {
+  if (!existsSync(outputPath)) return null;
+
+  mkdirSync(archiveDir, { recursive: true });
+  const hash = sha256File(outputPath);
+  const extension = extname(outputPath);
+  const stem = basename(outputPath, extension);
+  const archivePath = join(
+    archiveDir,
+    `${stem}.pre-${hash.slice(0, 12)}${extension}`
+  );
+
+  if (existsSync(archivePath)) {
+    const archiveHash = sha256File(archivePath);
+    if (archiveHash !== hash) {
+      throw new Error(
+        `Archive collision at ${archivePath}: expected ${hash}, found ${archiveHash}`
+      );
+    }
+    return archivePath;
+  }
+
+  const temporaryArchivePath = `${archivePath}.tmp-${process.pid}-${Date.now()}`;
+  try {
+    copyFileSync(outputPath, temporaryArchivePath);
+    const archiveHash = sha256File(temporaryArchivePath);
+    if (archiveHash !== hash) {
+      throw new Error(`Archived production database failed hash verification`);
+    }
+    renameSync(temporaryArchivePath, archivePath);
+  } finally {
+    if (existsSync(temporaryArchivePath)) rmSync(temporaryArchivePath);
+  }
+  return archivePath;
+}
+
+function sha256File(filePath: string): string {
+  return createHash("sha256").update(readFileSync(filePath)).digest("hex");
 }
 
 function dbStats(dbPath: string): DbStatRow[] {
@@ -290,6 +476,9 @@ function runScalar(dbPath: string, sql: string): string {
 function renderReport(input: {
   sourcePath: string;
   outputPath: string;
+  archivePath: string | null;
+  sourceSha256: string;
+  outputSha256: string;
   sourceBytes: number;
   outputBytes: number;
   gzipBytes: number;
@@ -312,6 +501,9 @@ Generated: ${new Date().toISOString()}
 
 - Source: \`${input.sourcePath}\`
 - Output: \`${input.outputPath}\`
+- Previous output archive: ${input.archivePath ? `\`${input.archivePath}\`` : "none (first publication)"}
+- Source SHA-256: \`${input.sourceSha256}\`
+- Output SHA-256: \`${input.outputSha256}\`
 - Integrity: \`${input.integrity}\`
 
 ## Size
@@ -335,6 +527,7 @@ Generated: ${new Date().toISOString()}
 | EntityRelations | ${input.counts.relations} |
 | EntityPlaces | ${input.counts.places} |
 | EntityNames | ${input.counts.names} |
+| EntityTranslationProvenance | ${input.counts.translationProvenance} |
 
 ## Removed
 
@@ -389,6 +582,10 @@ function parseArgs(args: string[]): Record<string, string> {
 
 function sqlString(value: string): string {
   return `'${value.replace(/'/g, "''")}'`;
+}
+
+function quoteIdentifier(value: string): string {
+  return `"${value.replace(/"/g, '""')}"`;
 }
 
 main();

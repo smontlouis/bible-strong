@@ -1,4 +1,3 @@
-import { spawnSync } from "node:child_process";
 import { createReadStream, existsSync } from "node:fs";
 import {
   createServer,
@@ -7,6 +6,7 @@ import {
 } from "node:http";
 import path from "node:path";
 import { statSync } from "node:fs";
+import { DatabaseSync } from "node:sqlite";
 import { fileURLToPath } from "node:url";
 
 import { applyReviewDecisionPayload, type DecisionFile } from "./llmReview.js";
@@ -54,11 +54,24 @@ const ENTITIES_DB = path.resolve(
   ROOT,
   process.env.ENTITIES_DB ?? DEFAULT_ENTITIES_DB
 );
+const DEFAULT_OCCURRENCES_DB =
+  "data/dictionaries/strong_lexicon.occurrences.production.sqlite";
+const OCCURRENCES_DB = path.resolve(
+  ROOT,
+  process.env.OCCURRENCES_DB ?? DEFAULT_OCCURRENCES_DB
+);
+// Kept for a possible future concordance view. The production viewer does not
+// touch the large occurrences database while this flag is disabled.
+const LEXICON_OCCURRENCES_ENABLED = false;
 
 let lexiconProductReviewCache: {
   mtimeMs: number;
   result: ProductReviewResult;
 } | null = null;
+const readonlyDatabases = new Map<
+  string,
+  { database: DatabaseSync; mtimeMs: number }
+>();
 
 const MIME_TYPES = new Map([
   [".html", "text/html; charset=utf-8"],
@@ -401,9 +414,11 @@ function handleLexiconMetadata(response: ServerResponse): void {
       `SELECT key, value FROM DictionaryMeta WHERE key IN (
         'generatedAt',
         'lexiconEnrichedAt',
+        'lexiconFrenchQualityReleaseKey',
         'lexiconV3Profile',
         'lexiconV3ReleaseKey',
         'lexiconViewerProfile',
+        'lexiconViewerEnrichedAt',
         'productionProfile'
       ) ORDER BY key`
     ).map((row) => [row.key, row.value])
@@ -436,28 +451,69 @@ function handleLexiconMetadata(response: ServerResponse): void {
         "SELECT count(*) AS count FROM Entities"
       )[0]?.count ?? 0)
     : 0;
+  const relationEntries = lexiconTableExists("LexiconRelations")
+    ? (runSqlJson<{ count: number }>(
+        "SELECT count(*) AS count FROM LexiconRelations"
+      )[0]?.count ?? 0)
+    : 0;
+  const morphologyTranslations = lexiconTableExists(
+    "MorphologyCodeTranslations"
+  )
+    ? (runSqlJson<{ count: number }>(
+        `SELECT count(*) AS count FROM MorphologyCodeTranslations
+         WHERE language='fr'`
+      )[0]?.count ?? 0)
+    : 0;
+  const occurrenceCount =
+    LEXICON_OCCURRENCES_ENABLED && existsSync(OCCURRENCES_DB)
+      ? (runSqlJsonFromDb<{ count: number }>(
+          OCCURRENCES_DB,
+          "SELECT count(*) AS count FROM Occurrences"
+        )[0]?.count ?? 0)
+      : 0;
+  const tipnrPlaces = existsSync(ENTITIES_DB)
+    ? (runSqlJsonFromDb<{ count: number }>(
+        ENTITIES_DB,
+        "SELECT count(*) AS count FROM EntityPlaces"
+      )[0]?.count ?? 0)
+    : 0;
 
   sendJson(response, 200, {
     database: path.relative(ROOT, LEXICON_DB),
     legacyDatabase: existsSync(LEGACY_LEXICON_DB)
       ? path.relative(ROOT, LEGACY_LEXICON_DB)
       : null,
-    releaseKey: metadata.lexiconV3ReleaseKey ?? null,
+    releaseKey:
+      metadata.lexiconFrenchQualityReleaseKey ??
+      metadata.lexiconV3ReleaseKey ??
+      null,
     profile:
       metadata.lexiconViewerProfile ??
       metadata.lexiconV3Profile ??
       metadata.productionProfile ??
       "unknown",
-    generatedAt: metadata.lexiconEnrichedAt ?? metadata.generatedAt ?? null,
+    generatedAt:
+      metadata.lexiconViewerEnrichedAt ??
+      metadata.lexiconEnrichedAt ??
+      metadata.generatedAt ??
+      null,
     entries: counts?.entries ?? 0,
     translationsFr: counts?.translationsFr ?? 0,
     legacyEntries,
     resourcesIncluded: resourceEntries > 0,
     resourceEntries,
+    relationEntries,
+    morphologyTranslations,
+    occurrenceDatabase:
+      LEXICON_OCCURRENCES_ENABLED && existsSync(OCCURRENCES_DB)
+        ? path.relative(ROOT, OCCURRENCES_DB)
+        : null,
+    occurrenceCount,
     tipnrDatabase: existsSync(ENTITIES_DB)
       ? path.relative(ROOT, ENTITIES_DB)
       : null,
-    tipnrEntities
+    tipnrEntities,
+    tipnrPlaces
   });
 }
 
@@ -467,7 +523,31 @@ function handleLexiconEntry(url: URL, response: ServerResponse): void {
     return;
   }
 
-  const id = Number.parseInt(url.searchParams.get("id") ?? "", 10);
+  let id = Number.parseInt(url.searchParams.get("id") ?? "", 10);
+  if (!Number.isInteger(id) || id <= 0) {
+    const requestedStrong = normalizeStrongQuery(
+      url.searchParams.get("strong") ?? ""
+    );
+    if (requestedStrong) {
+      id =
+        runSqlJson<{ id: number }>(
+          `SELECT se.id
+           FROM StepEntries se
+           LEFT JOIN StepEntryIdentities si ON si.stepEntryId=se.id
+           WHERE si.stepCode=${sqlString(requestedStrong)}
+              OR se.uStrong=${sqlString(requestedStrong)}
+              OR se.eStrong=${sqlString(requestedStrong)}
+           ORDER BY
+             CASE
+               WHEN si.stepCode=${sqlString(requestedStrong)} THEN 0
+               WHEN se.uStrong=${sqlString(requestedStrong)} THEN 1
+               ELSE 2
+             END,
+             se.id
+           LIMIT 1`
+        )[0]?.id ?? Number.NaN;
+    }
+  }
   if (!Number.isInteger(id) || id <= 0) {
     sendJson(response, 400, { error: "invalid-id" });
     return;
@@ -512,17 +592,31 @@ function handleLexiconEntry(url: URL, response: ServerResponse): void {
     return;
   }
 
-  const legacy = readLegacyLexiconEntry(rows[0]);
-  const resources = readLexiconResources(id);
+  const include = url.searchParams.get("include") ?? "all";
+  const extended = include === "all" || include === "extended";
   const identity = readStepEntryIdentity(id);
-  const tipnrEntities = readTipnrEntities(rows[0]);
+  const legacy = extended ? readLegacyLexiconEntry(rows[0]) : null;
+  const resources = extended ? readLexiconResources(id) : [];
+  const tipnrEntities = extended ? readTipnrEntities(rows[0]) : [];
+  const relations = extended ? readLexiconRelations(id) : [];
+  const morphology = extended ? readLexiconMorphology(rows[0].morph) : [];
+  const occurrences =
+    extended && LEXICON_OCCURRENCES_ENABLED
+      ? readLexiconOccurrences(
+          typeof identity?.stepCode === "string" ? identity.stepCode : "",
+          typeof rows[0].eStrong === "string" ? rows[0].eStrong : ""
+        )
+      : null;
 
   sendJson(response, 200, {
     entry: rows[0],
     identity,
     legacy,
     resources,
-    tipnrEntities
+    tipnrEntities,
+    relations,
+    morphology,
+    occurrences
   });
 }
 
@@ -855,6 +949,162 @@ function readStepEntryIdentity(
   );
 }
 
+function readLexiconRelations(stepEntryId: number): Record<string, unknown>[] {
+  if (!lexiconTableExists("LexiconRelations")) return [];
+  return runSqlJson(`
+    SELECT
+      r.id,
+      r.toStepEntryId,
+      r.toStepCode,
+      r.groupKind,
+      r.relationKind,
+      r.labelEn,
+      r.labelFr,
+      r.source,
+      target.language,
+      target.eStrong,
+      target.uStrong,
+      target.original,
+      target.transliteration,
+      target.gloss AS glossEn,
+      translated.gloss AS glossFr
+    FROM LexiconRelations r
+    LEFT JOIN StepEntries target ON target.id=r.toStepEntryId
+    LEFT JOIN LexiconTranslations translated
+      ON translated.stepEntryId=target.id AND translated.language='fr'
+    WHERE r.fromStepEntryId=${stepEntryId}
+    ORDER BY r.groupKind, r.sortOrder, r.toStepCode, r.id
+  `);
+}
+
+function readLexiconMorphology(value: unknown): Record<string, unknown>[] {
+  if (typeof value !== "string" || !value.trim()) return [];
+  if (!lexiconTableExists("MorphologyCodes")) return [];
+  const normalized = value.replaceAll(" ", "");
+  return runSqlJson(`
+    SELECT
+      mc.code,
+      mc.normalizedCode,
+      mc.language,
+      mc.scope,
+      mc.meaning AS meaningEn,
+      mc.description AS descriptionEn,
+      mct.meaning AS meaningFr,
+      mct.description AS descriptionFr
+    FROM MorphologyCodes mc
+    LEFT JOIN MorphologyCodeTranslations mct
+      ON mct.morphologyCodeId=mc.id AND mct.language='fr'
+    WHERE mc.scope='lexical_brief'
+      AND (mc.code=${sqlString(value)} OR mc.normalizedCode=${sqlString(normalized)})
+    ORDER BY CASE WHEN mc.code=${sqlString(value)} THEN 0 ELSE 1 END, mc.id
+    LIMIT 4
+  `);
+}
+
+function readLexiconOccurrences(
+  stepCode: string,
+  eStrong: string
+): Record<string, unknown> | null {
+  if (!existsSync(OCCURRENCES_DB) || (!stepCode && !eStrong)) return null;
+  const exactStats = stepCode
+    ? (runSqlJsonFromDb<Record<string, unknown>>(
+        OCCURRENCES_DB,
+        `SELECT * FROM OccurrenceStats
+         WHERE identityKind='step' AND strongCode=${sqlString(stepCode)}
+         LIMIT 1`
+      )[0] ?? null)
+    : null;
+  const classicalStats = eStrong
+    ? (runSqlJsonFromDb<Record<string, unknown>>(
+        OCCURRENCES_DB,
+        `SELECT * FROM OccurrenceStats
+         WHERE identityKind='classical' AND strongCode=${sqlString(eStrong)}
+         LIMIT 1`
+      )[0] ?? null)
+    : null;
+  const useExact = Boolean(exactStats && stepCode);
+  const predicate = useExact
+    ? `o.stepCode=${sqlString(stepCode)}`
+    : `o.baseStrong=${sqlString(eStrong)}`;
+  const samples = runSqlJsonFromDb<Record<string, unknown>>(
+    OCCURRENCES_DB,
+    `SELECT
+       o.mainRef AS ref,
+       o.source,
+       o.surface,
+       o.transliteration,
+       o.gloss,
+       o.morphology,
+       o.editions,
+       o.stepCode,
+       o.baseStrong
+     FROM Occurrences o
+     WHERE ${predicate}
+     GROUP BY o.mainRef, o.surface, o.morphology, o.stepCode
+     ORDER BY o.bookOrder, o.chapter, o.verse, o.tokenIndex
+     LIMIT 24`
+  );
+  const forms = runSqlJsonFromDb<{
+    code: string;
+    count: number;
+    exampleSurface: string;
+  }>(
+    OCCURRENCES_DB,
+    `SELECT
+       om.code,
+       count(*) AS count,
+       (SELECT o2.surface
+        FROM OccurrenceMorphology om2
+        JOIN Occurrences o2 ON o2.id=om2.occurrenceId
+        WHERE om2.code=om.code AND ${predicate.replaceAll("o.", "o2.")}
+        ORDER BY o2.bookOrder, o2.chapter, o2.verse, o2.tokenIndex
+        LIMIT 1) AS exampleSurface
+     FROM OccurrenceMorphology om
+     JOIN Occurrences o ON o.id=om.occurrenceId
+     WHERE ${predicate}
+     GROUP BY om.code
+     ORDER BY count(*) DESC, om.code
+     LIMIT 24`
+  );
+  const descriptions = readMorphologyDescriptions(
+    forms.map((form) => form.code)
+  );
+  return {
+    scope: useExact ? "step" : "classical-fallback",
+    exactStats,
+    classicalStats,
+    samples,
+    forms: forms.map((form) => ({
+      ...form,
+      ...(descriptions.get(form.code) ?? {})
+    }))
+  };
+}
+
+function readMorphologyDescriptions(
+  codes: string[]
+): Map<string, Record<string, unknown>> {
+  const uniqueCodes = [...new Set(codes.filter(Boolean))];
+  if (uniqueCodes.length === 0 || !lexiconTableExists("MorphologyCodes")) {
+    return new Map();
+  }
+  const rows = runSqlJson<Record<string, unknown> & { code: string }>(`
+    SELECT
+      mc.code,
+      mc.meaning AS meaningEn,
+      mc.description AS descriptionEn,
+      mct.meaning AS meaningFr,
+      mct.description AS descriptionFr
+    FROM MorphologyCodes mc
+    LEFT JOIN MorphologyCodeTranslations mct
+      ON mct.morphologyCodeId=mc.id AND mct.language='fr'
+    WHERE mc.scope='tagged_full'
+      AND mc.code IN (${uniqueCodes.map(sqlString).join(",")})
+    ORDER BY mc.id
+  `);
+  return new Map(rows.map((row) => [row.code, row]));
+}
+
 function readLegacyLexiconEntry(entry: {
   language: "greek" | "hebrew";
   baseCode: number;
@@ -927,7 +1177,7 @@ function readTipnrEntityRows(input: {
   matchKind: "uStrong-exact" | "classical-strong-fallback";
   matchedStrong: string;
 }): Record<string, unknown>[] {
-  return runSqlJsonFromDb<Record<string, unknown>>(
+  const rows = runSqlJsonFromDb<Record<string, unknown> & { id: number }>(
     ENTITIES_DB,
     `SELECT
        e.id,
@@ -949,14 +1199,63 @@ function readTipnrEntityRows(input: {
        et.shortDescription AS shortDescriptionFr,
        e.articleHtml AS articleHtmlEn,
        et.articleHtml AS articleHtmlFr,
+       p.openBibleName,
+       p.googleMapUrl,
+       p.palopenmapsUrl,
+       p.latitude,
+       p.longitude,
+       p.area,
+       (SELECT count(*) FROM EntityRefs refs WHERE refs.entityId=e.id)
+         AS referenceCount,
+       (SELECT count(*) FROM EntityRelations relations
+        WHERE relations.fromEntityId=e.id) AS relationCount,
        ${sqlString(input.matchKind)} AS matchKind,
        ${sqlString(input.matchedStrong)} AS matchedStrong
      FROM Entities e
      LEFT JOIN EntityTranslations et
        ON et.entityId = e.id
       AND et.language = 'fr'
+     LEFT JOIN EntityPlaces p ON p.entityId=e.id
      WHERE ${input.where}
      ORDER BY e.category, e.displayName, e.id`
+  );
+  return rows.map((row) => ({
+    ...row,
+    references: readTipnrReferences(row.id),
+    relations: readTipnrRelations(row.id)
+  }));
+}
+
+function readTipnrReferences(entityId: number): Record<string, unknown>[] {
+  return runSqlJsonFromDb(
+    ENTITIES_DB,
+    `SELECT book, chapter, verse, suffix, refText
+     FROM EntityRefs
+     WHERE entityId=${entityId}
+     ORDER BY book, chapter, verse, suffix
+     LIMIT 40`
+  );
+}
+
+function readTipnrRelations(entityId: number): Record<string, unknown>[] {
+  return runSqlJsonFromDb(
+    ENTITIES_DB,
+    `SELECT
+       relation.relation,
+       relation.certainty,
+       relation.toEntityId,
+       relation.toUniqueName,
+       target.uStrong,
+       target.displayName AS displayNameEn,
+       translated.displayName AS displayNameFr,
+       target.category
+     FROM EntityRelations relation
+     LEFT JOIN Entities target ON target.id=relation.toEntityId
+     LEFT JOIN EntityTranslations translated
+       ON translated.entityId=target.id AND translated.language='fr'
+     WHERE relation.fromEntityId=${entityId}
+     ORDER BY relation.relation, target.displayName, relation.toUniqueName
+     LIMIT 80`
   );
 }
 
@@ -973,14 +1272,25 @@ function runSqlJsonFromDb<T = Record<string, unknown>>(
   dbPath: string,
   sql: string
 ): T[] {
-  const result = spawnSync("sqlite3", ["-json", dbPath, sql], {
-    encoding: "utf8",
-    maxBuffer: 1024 * 1024 * 30
-  });
-  if (result.status !== 0) {
-    throw new Error(`sqlite3 failed: ${result.stderr}`);
+  const mtimeMs = statSync(dbPath).mtimeMs;
+  let cached = readonlyDatabases.get(dbPath);
+  if (!cached || cached.mtimeMs !== mtimeMs) {
+    cached?.database.close();
+    cached = {
+      database: new DatabaseSync(dbPath, { readOnly: true }),
+      mtimeMs
+    };
+    readonlyDatabases.set(dbPath, cached);
   }
-  return JSON.parse(result.stdout || "[]") as T[];
+  try {
+    return cached.database.prepare(sql).all() as T[];
+  } catch (error) {
+    throw new Error(
+      `sqlite3 failed for ${path.basename(dbPath)}: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
 }
 
 function sqlString(value: string): string {
@@ -990,7 +1300,7 @@ function sqlString(value: string): string {
 function normalizeStrongQuery(query: string): string | null {
   const match = /^([gh])0*(\d{1,5})([a-z]?)$/i.exec(query.trim());
   if (!match) return null;
-  return `${match[1].toUpperCase()}${match[2].padStart(4, "0")}${match[3]}`;
+  return `${match[1].toUpperCase()}${match[2].padStart(4, "0")}${match[3].toUpperCase()}`;
 }
 
 function classicalStrongFromStepCode(strong: string): string {
