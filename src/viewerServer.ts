@@ -13,6 +13,8 @@ import { applyReviewDecisionPayload, type DecisionFile } from "./llmReview.js";
 import {
   getJsonlBibleCatalog,
   getJsonlBibleChapter,
+  getJsonlBibleConcordance,
+  getJsonlBibleLemmaStats,
   JsonlBibleViewerError,
   parseJsonlBibleIds
 } from "./jsonlBibleViewer.js";
@@ -192,6 +194,94 @@ const server = createServer(async (request, response) => {
           versions: parseJsonlBibleIds(url.searchParams.get("versions")),
           bookId,
           chapter
+        })
+      );
+      return;
+    }
+
+    if (
+      request.method === "GET" &&
+      url.pathname === "/api/jsonl-bibles/concordance"
+    ) {
+      const versions = parseJsonlBibleIds(url.searchParams.get("version"));
+      if (versions.length !== 1) {
+        throw new JsonlBibleViewerError(
+          400,
+          "concordance-requires-one-version"
+        );
+      }
+      const code = url.searchParams.get("code");
+      if (!code) {
+        throw new JsonlBibleViewerError(400, "missing-concordance-code");
+      }
+      const requestedBook = url.searchParams.get("book");
+      const lemma = url.searchParams.get("lemma");
+      const partOfSpeech = url.searchParams.get("pos");
+      if (partOfSpeech !== null && lemma === null) {
+        throw new JsonlBibleViewerError(
+          400,
+          "concordance-pos-filter-requires-lemma"
+        );
+      }
+      if (
+        (lemma !== null && (lemma.length === 0 || lemma.length > 200)) ||
+        (partOfSpeech !== null &&
+          (partOfSpeech.length === 0 || partOfSpeech.length > 32))
+      ) {
+        throw new JsonlBibleViewerError(
+          400,
+          "invalid-concordance-lemma-filter"
+        );
+      }
+      sendJson(
+        response,
+        200,
+        getJsonlBibleConcordance({
+          root: ROOT,
+          version: versions[0]!,
+          code,
+          bookId: requestedBook ? validateBookId(requestedBook) : undefined,
+          lemma: lemma ?? undefined,
+          partOfSpeech: partOfSpeech ?? undefined,
+          limit: parseStrictInteger(url.searchParams.get("limit"), {
+            name: "limit",
+            min: 1,
+            max: 100,
+            fallback: 20
+          }),
+          offset: parseStrictInteger(url.searchParams.get("offset"), {
+            name: "offset",
+            min: 0,
+            max: 1_000_000,
+            fallback: 0
+          })
+        })
+      );
+      return;
+    }
+
+    if (
+      request.method === "GET" &&
+      url.pathname === "/api/jsonl-bibles/lemma-stats"
+    ) {
+      const versions = parseJsonlBibleIds(url.searchParams.get("version"));
+      if (versions.length !== 1) {
+        throw new JsonlBibleViewerError(
+          400,
+          "lemma-stats-requires-one-version"
+        );
+      }
+      const code = url.searchParams.get("code");
+      if (!code) {
+        throw new JsonlBibleViewerError(400, "missing-lemma-code");
+      }
+      sendJson(
+        response,
+        200,
+        getJsonlBibleLemmaStats({
+          root: ROOT,
+          version: versions[0]!,
+          code
         })
       );
       return;

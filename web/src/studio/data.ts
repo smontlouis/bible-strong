@@ -3,6 +3,8 @@ import type {
   LexicalCandidateReport,
   JsonlBibleCatalog,
   JsonlBibleChapter,
+  JsonlBibleConcordance,
+  JsonlBibleLemmaStats,
   JsonlBibleId,
   StrongLedger,
   StrongReviewBucket,
@@ -41,6 +43,46 @@ export async function loadJsonlBibleChapter(options: {
   });
   return fetchJson<JsonlBibleChapter>(
     `/api/jsonl-bibles/chapter?${params.toString()}`
+  );
+}
+
+export async function loadJsonlBibleConcordance(options: {
+  version: JsonlBibleId;
+  code: string;
+  limit?: number;
+  offset?: number;
+  bookId?: string;
+  lemma?: string;
+  partOfSpeech?: string;
+}): Promise<JsonlBibleConcordance> {
+  const params = new URLSearchParams({
+    version: options.version,
+    code: options.code,
+    limit: String(options.limit ?? 20),
+    offset: String(options.offset ?? 0)
+  });
+  if (options.bookId) params.set("book", options.bookId);
+  if (options.lemma !== undefined) {
+    params.set("lemma", options.lemma);
+    if (options.partOfSpeech !== undefined) {
+      params.set("pos", options.partOfSpeech);
+    }
+  }
+  return fetchJson<JsonlBibleConcordance>(
+    `/api/jsonl-bibles/concordance?${params.toString()}`
+  );
+}
+
+export async function loadJsonlBibleLemmaStats(options: {
+  version: JsonlBibleId;
+  code: string;
+}): Promise<JsonlBibleLemmaStats> {
+  const params = new URLSearchParams({
+    version: options.version,
+    code: options.code
+  });
+  return fetchJson<JsonlBibleLemmaStats>(
+    `/api/jsonl-bibles/lemma-stats?${params.toString()}`
   );
 }
 
@@ -146,10 +188,7 @@ export function currentViewFromLocation(): string {
   if (window.location.pathname.endsWith("/jsonl.html")) return "jsonl";
   if (window.location.pathname.endsWith("/lexicon.html")) return "lexicon";
   if (window.location.pathname.endsWith("/review.html")) return "review";
-  return (
-    window.localStorage.getItem("bible-strong:last-view") ??
-    "viewer"
-  );
+  return window.localStorage.getItem("bible-strong:last-view") ?? "viewer";
 }
 
 export function defaultLedgerPath() {

@@ -54,6 +54,50 @@ export interface JsonlBibleChapter {
   }>;
 }
 
+export interface JsonlBibleConcordance {
+  version: JsonlBibleId;
+  versionLabel: string;
+  requestedCode: string;
+  matchedKind: "strong" | "estrong" | "dstrong" | "ustrong";
+  matchedCode: string;
+  lemmaFilter?: {
+    lemma: string;
+    partOfSpeech?: string;
+  };
+  total: number;
+  limit: number;
+  offset: number;
+  items: Array<{
+    ref: string;
+    bookId: string;
+    chapter: number;
+    verse: number;
+    surface: string;
+    startOffset: number;
+    endOffset: number;
+    text: string;
+  }>;
+}
+
+export interface JsonlBibleLemmaStats {
+  available: boolean;
+  version: JsonlBibleId;
+  versionLabel: string;
+  datasetVersion?: string;
+  requestedCode: string;
+  matchedKind?: "strong" | "estrong" | "dstrong" | "ustrong";
+  matchedCode?: string;
+  total: number;
+  resolved: number;
+  unresolvedAmbiguous: number;
+  unavailable: number;
+  lemmas: Array<{
+    lemma: string;
+    partOfSpeech: string;
+    occurrences: number;
+  }>;
+}
+
 export interface StrongLedger {
   bible: string;
   generatedAt: string;

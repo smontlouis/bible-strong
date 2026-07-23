@@ -675,6 +675,21 @@
       color-mix(in oklab, var(--version-color) 16%, transparent);
   }
 
+  .jsonl-display-switch {
+    border-color: color-mix(in oklab, var(--border) 82%, transparent);
+    background: rgba(4, 9, 13, 0.58);
+  }
+
+  .jsonl-display-switch button {
+    color: var(--muted-foreground);
+  }
+
+  .jsonl-display-switch button.is-active {
+    color: oklch(0.91 0.04 78);
+    background: color-mix(in oklab, oklch(0.72 0.12 72) 16%, var(--card));
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.26);
+  }
+
   .jsonl-version-ost {
     --version-color: var(--jsonl-ost);
   }
@@ -746,6 +761,163 @@
     border-color: color-mix(in oklab, var(--border) 82%, transparent);
     background: rgba(7, 12, 17, 0.55);
     box-shadow: 0 26px 70px rgba(0, 0, 0, 0.24);
+  }
+
+  .jsonl-natural-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr));
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .jsonl-natural-column {
+    overflow: hidden;
+    border: 1px solid color-mix(in oklab, var(--border) 84%, transparent);
+    border-radius: 0.9rem;
+    background:
+      linear-gradient(
+        115deg,
+        color-mix(in oklab, var(--version-color) 5%, transparent),
+        transparent 18rem
+      ),
+      rgba(7, 12, 17, 0.72);
+    box-shadow: 0 24px 62px rgba(0, 0, 0, 0.22);
+  }
+
+  .jsonl-natural-heading {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    min-height: 3.5rem;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    padding: 0.8rem 1rem;
+    background: rgba(10, 16, 22, 0.94);
+    backdrop-filter: blur(16px);
+  }
+
+  .jsonl-natural-heading div {
+    display: flex;
+    min-width: 0;
+    align-items: baseline;
+    gap: 0.65rem;
+  }
+
+  .jsonl-natural-heading strong {
+    color: color-mix(in oklab, var(--version-color) 76%, white);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+  }
+
+  .jsonl-natural-heading span:last-child {
+    overflow: hidden;
+    color: var(--muted-foreground);
+    font-size: 0.7rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .jsonl-natural-page {
+    max-width: 49rem;
+    margin: 0 auto;
+    padding: clamp(1.4rem, 4vw, 3rem) clamp(1.15rem, 4.5vw, 3.4rem);
+  }
+
+  .jsonl-reading-block {
+    margin: 0 0 1.4em;
+    color: oklch(0.92 0.014 85);
+    font-family:
+      Charter, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    font-size: clamp(1.05rem, 0.7vw + 0.88rem, 1.24rem);
+    line-height: 1.85;
+    text-wrap: pretty;
+  }
+
+  .jsonl-reading-block:last-child {
+    margin-bottom: 0;
+  }
+
+  .jsonl-reading-block.is-poetry {
+    margin-block: 1.65rem;
+    padding-left: clamp(0.8rem, 4vw, 2.5rem);
+    border-left: 2px solid
+      color-mix(in oklab, var(--version-color) 45%, var(--border));
+    font-style: italic;
+  }
+
+  .jsonl-reading-block.is-poetry l {
+    display: block;
+    padding-left: 1.2rem;
+    text-indent: -1.2rem;
+  }
+
+  .jsonl-reading-verse {
+    scroll-margin-top: 9rem;
+    border-radius: 0.28rem;
+    transition:
+      background 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .jsonl-reading-verse.is-selected {
+    background: color-mix(in oklab, var(--version-color) 10%, transparent);
+    box-shadow: 0 0 0 0.2rem
+      color-mix(in oklab, var(--version-color) 10%, transparent);
+  }
+
+  .jsonl-natural-page .jsonl-verse-text w {
+    margin: 0;
+    border-bottom: 1px dotted
+      color-mix(in oklab, var(--version-color) 34%, transparent);
+    border-radius: 0.12rem;
+    padding: 0;
+    color: inherit;
+    background: transparent;
+    font-weight: inherit;
+  }
+
+  .jsonl-natural-page .jsonl-verse-text w:hover,
+  .jsonl-natural-page .jsonl-verse-text w:focus-visible {
+    background: color-mix(in oklab, var(--version-color) 20%, transparent);
+    box-shadow: 0 0 0 0.14rem
+      color-mix(in oklab, var(--version-color) 20%, transparent);
+    outline: none;
+  }
+
+  .jsonl-natural-page .jsonl-verse-text w::after {
+    display: none;
+  }
+
+  .jsonl-natural-page .jsonl-verse-text w:empty {
+    display: none;
+  }
+
+  .jsonl-inline-verse-number {
+    position: relative;
+    top: -0.25em;
+    display: inline-block;
+    min-width: 1.2rem;
+    margin-right: 0.16rem;
+    color: color-mix(
+      in oklab,
+      var(--version-color) 72%,
+      var(--muted-foreground)
+    );
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.57em;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+  }
+
+  .jsonl-inline-verse-number:hover,
+  .jsonl-inline-verse-number:focus-visible {
+    color: color-mix(in oklab, var(--version-color) 72%, white);
+    outline: none;
   }
 
   .jsonl-column-head {
@@ -867,17 +1039,75 @@
   }
 
   .jsonl-verse-text note {
+    position: relative;
+    display: inline;
+    color: inherit;
+    vertical-align: super;
+  }
+
+  .jsonl-note-marker {
     display: inline-flex;
-    width: 1rem;
-    height: 1rem;
+    width: 1.05rem;
+    height: 1.05rem;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--border);
+    border: 1px solid
+      color-mix(in oklab, var(--version-color) 44%, var(--border));
     border-radius: 999px;
-    color: var(--muted-foreground);
+    color: color-mix(in oklab, var(--version-color) 72%, white);
+    background: color-mix(in oklab, var(--version-color) 10%, var(--card));
     font-family: ui-monospace, monospace;
-    font-size: 0.56rem;
-    vertical-align: super;
+    font-size: 0.58rem;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 1;
+    cursor: help;
+  }
+
+  .jsonl-note-content {
+    position: absolute;
+    z-index: 20;
+    bottom: calc(100% + 0.65rem);
+    left: 50%;
+    display: block;
+    width: min(19rem, 72vw);
+    padding: 0.75rem 0.85rem;
+    border: 1px solid
+      color-mix(in oklab, var(--version-color) 35%, var(--border));
+    border-radius: 0.55rem;
+    opacity: 0;
+    color: var(--foreground);
+    background: color-mix(in oklab, var(--card) 94%, black);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.42);
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    font-style: normal;
+    line-height: 1.5;
+    pointer-events: none;
+    transform: translate(-50%, 0.25rem);
+    transition:
+      opacity 130ms ease,
+      transform 130ms ease;
+  }
+
+  .jsonl-verse-text note:hover .jsonl-note-content,
+  .jsonl-verse-text note:focus .jsonl-note-content,
+  .jsonl-verse-text note:focus-within .jsonl-note-content {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, 0);
+  }
+
+  .jsonl-note-content ref {
+    color: color-mix(in oklab, var(--version-color) 72%, white);
+    font-style: normal;
+    text-decoration: underline;
+    text-decoration-color: color-mix(
+      in oklab,
+      var(--version-color) 45%,
+      transparent
+    );
+    text-underline-offset: 0.15em;
   }
 
   .jsonl-verse-text w {

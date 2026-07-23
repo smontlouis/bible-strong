@@ -12,20 +12,20 @@ import {
 } from "../src/jsonlBibleViewer.js";
 
 const sources = [
-  ["outputs/releases/strong-jsonl-permissive/bible-ost-strong.jsonl", "OST"],
-  ["outputs/releases/strong-jsonl-permissive/bible-fmar-strong.jsonl", "FMAR"],
+  ["outputs/strong-jsonl-permissive/ost/bible-ost-strong.jsonl", "OST"],
+  ["outputs/strong-jsonl-permissive/fmar/bible-fmar-strong.jsonl", "FMAR"],
   [
-    "outputs/releases/strong-jsonl-permissive/bible-nvs78p-strong.jsonl",
+    "outputs/strong-jsonl-permissive/nvs78p/bible-nvs78p-strong.jsonl",
     "NVS78P"
   ],
   [
-    "outputs/releases/strong-jsonl-permissive/bible-neg79-strong.jsonl",
+    "outputs/strong-jsonl-permissive/neg79/bible-neg79-strong.jsonl",
     "NEG79"
   ],
-  ["outputs/releases/strong-jsonl-permissive/bible-nbs-strong.jsonl", "NBS"],
-  ["outputs/releases/strong-jsonl/bible-darby-strong.jsonl", "DARBY"],
-  ["outputs/releases/strong-jsonl/bible-darbyr-strong.jsonl", "DARBYR"],
-  ["outputs/releases/strong-jsonl/bible-sg1910-strong.jsonl", "SG1910"]
+  ["outputs/strong-jsonl-permissive/nbs/bible-nbs-strong.jsonl", "NBS"],
+  ["outputs/releases/strong-jsonl-v3/bible-darby-strong.jsonl", "DARBY"],
+  ["outputs/releases/strong-jsonl-v3/bible-darbyr-strong.jsonl", "DARBYR"],
+  ["outputs/releases/strong-jsonl-v3/bible-sg1910-strong.jsonl", "SG1910"]
 ] as const;
 
 test("catalogues and reads the eight compact JSONL Bibles by chapter", async () => {

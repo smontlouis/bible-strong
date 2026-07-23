@@ -169,7 +169,7 @@ async function writeFixtureSources(root: string): Promise<void> {
   const referenceDirectory = path.join(
     root,
     "outputs",
-    "strong-references-jsonl-step"
+    "strong-references-jsonl-step-ctb-v2"
   );
   await mkdir(referenceDirectory, { recursive: true });
   const artifacts = [];

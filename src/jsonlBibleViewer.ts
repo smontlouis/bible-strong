@@ -4,16 +4,24 @@ import path from "node:path";
 import { createInterface } from "node:readline";
 
 import { BOOK_IDS } from "./books.js";
+import {
+  queryStrongBibleConcordance,
+  queryStrongBibleLemmaStats,
+  readStrongBibleSqliteChapter,
+  readStrongBibleSqliteInfo,
+  type StrongIdentityKind
+} from "./strongBibleSqlite.js";
 
-const JSONL_BIBLE_SOURCES = [
+export const JSONL_BIBLE_SOURCES = [
   {
     id: "OST",
     label: "Ostervald",
     shortLabel: "OST",
     sourceVersion: "OST",
-    relativePath:
-      "outputs/releases/strong-jsonl-permissive/bible-ost-strong.jsonl",
-    manifestPath: "outputs/releases/strong-jsonl-permissive/manifests/ost.json"
+    relativePath: "outputs/strong-jsonl-permissive/ost/bible-ost-strong.jsonl",
+    sqliteRelativePath:
+      "outputs/releases/bible-strong-production-v4/bibles/bible-ost-strong.sqlite",
+    manifestPath: "outputs/strong-jsonl-permissive/ost/manifest.json"
   },
   {
     id: "FMAR",
@@ -21,8 +29,10 @@ const JSONL_BIBLE_SOURCES = [
     shortLabel: "FMAR",
     sourceVersion: "FMAR",
     relativePath:
-      "outputs/releases/strong-jsonl-permissive/bible-fmar-strong.jsonl",
-    manifestPath: "outputs/releases/strong-jsonl-permissive/manifests/fmar.json"
+      "outputs/strong-jsonl-permissive/fmar/bible-fmar-strong.jsonl",
+    sqliteRelativePath:
+      "outputs/releases/bible-strong-production-v4/bibles/bible-fmar-strong.sqlite",
+    manifestPath: "outputs/strong-jsonl-permissive/fmar/manifest.json"
   },
   {
     id: "NVS78P",
@@ -30,9 +40,11 @@ const JSONL_BIBLE_SOURCES = [
     shortLabel: "NVS78P",
     sourceVersion: "NVS78P",
     relativePath:
-      "outputs/releases/strong-jsonl-permissive/bible-nvs78p-strong.jsonl",
+      "outputs/strong-jsonl-permissive/nvs78p/bible-nvs78p-strong.jsonl",
+    sqliteRelativePath:
+      "outputs/releases/bible-strong-production-v4/bibles/bible-nvs78p-strong.sqlite",
     manifestPath:
-      "outputs/releases/strong-jsonl-permissive/manifests/nvs78p.json"
+      "outputs/strong-jsonl-permissive/nvs78p/manifest.json"
   },
   {
     id: "NEG79",
@@ -40,42 +52,51 @@ const JSONL_BIBLE_SOURCES = [
     shortLabel: "NEG79",
     sourceVersion: "NEG79",
     relativePath:
-      "outputs/releases/strong-jsonl-permissive/bible-neg79-strong.jsonl",
+      "outputs/strong-jsonl-permissive/neg79/bible-neg79-strong.jsonl",
+    sqliteRelativePath:
+      "outputs/releases/bible-strong-production-v4/bibles/bible-neg79-strong.sqlite",
     manifestPath:
-      "outputs/releases/strong-jsonl-permissive/manifests/neg79.json"
+      "outputs/strong-jsonl-permissive/neg79/manifest.json"
   },
   {
     id: "NBS",
     label: "Nouvelle Bible Segond",
     shortLabel: "NBS",
     sourceVersion: "NBS",
-    relativePath:
-      "outputs/releases/strong-jsonl-permissive/bible-nbs-strong.jsonl",
-    manifestPath: "outputs/releases/strong-jsonl-permissive/manifests/nbs.json"
+    relativePath: "outputs/strong-jsonl-permissive/nbs/bible-nbs-strong.jsonl",
+    sqliteRelativePath:
+      "outputs/releases/bible-strong-production-v4/bibles/bible-nbs-strong.sqlite",
+    manifestPath: "outputs/strong-jsonl-permissive/nbs/manifest.json"
   },
   {
     id: "DBY",
     label: "Darby",
     shortLabel: "DBY",
     sourceVersion: "DARBY",
-    relativePath: "outputs/releases/strong-jsonl/bible-darby-strong.jsonl",
-    manifestPath: "outputs/releases/strong-jsonl/manifests/darby.json"
+    relativePath: "outputs/releases/strong-jsonl-v3/bible-darby-strong.jsonl",
+    sqliteRelativePath:
+      "outputs/releases/bible-strong-production-v4/bibles/bible-dby-strong.sqlite",
+    manifestPath: "outputs/releases/strong-jsonl-v3/manifests/darby.json"
   },
   {
     id: "DBYR",
     label: "Darby révisée",
     shortLabel: "DBYR",
     sourceVersion: "DARBYR",
-    relativePath: "outputs/releases/strong-jsonl/bible-darbyr-strong.jsonl",
-    manifestPath: "outputs/releases/strong-jsonl/manifests/darbyr.json"
+    relativePath: "outputs/releases/strong-jsonl-v3/bible-darbyr-strong.jsonl",
+    sqliteRelativePath:
+      "outputs/releases/bible-strong-production-v4/bibles/bible-dbyr-strong.sqlite",
+    manifestPath: "outputs/releases/strong-jsonl-v3/manifests/darbyr.json"
   },
   {
     id: "LSG",
     label: "Louis Segond 1910",
     shortLabel: "LSG",
     sourceVersion: "SG1910",
-    relativePath: "outputs/releases/strong-jsonl/bible-sg1910-strong.jsonl",
-    manifestPath: "outputs/releases/strong-jsonl/manifests/sg1910.json"
+    relativePath: "outputs/releases/strong-jsonl-v3/bible-sg1910-strong.jsonl",
+    sqliteRelativePath:
+      "outputs/releases/bible-strong-production-v4/bibles/bible-lsg-strong.sqlite",
+    manifestPath: "outputs/releases/strong-jsonl-v3/manifests/sg1910.json"
   }
 ] as const;
 
@@ -124,6 +145,50 @@ export interface JsonlBibleChapter {
   }>;
 }
 
+export interface JsonlBibleConcordance {
+  version: JsonlBibleId;
+  versionLabel: string;
+  requestedCode: string;
+  matchedKind: StrongIdentityKind;
+  matchedCode: string;
+  lemmaFilter?: {
+    lemma: string;
+    partOfSpeech?: string;
+  };
+  total: number;
+  limit: number;
+  offset: number;
+  items: Array<{
+    ref: string;
+    bookId: string;
+    chapter: number;
+    verse: number;
+    surface: string;
+    startOffset: number;
+    endOffset: number;
+    text: string;
+  }>;
+}
+
+export interface JsonlBibleLemmaStats {
+  available: boolean;
+  version: JsonlBibleId;
+  versionLabel: string;
+  datasetVersion?: string;
+  requestedCode: string;
+  matchedKind?: StrongIdentityKind;
+  matchedCode?: string;
+  total: number;
+  resolved: number;
+  unresolvedAmbiguous: number;
+  unavailable: number;
+  lemmas: Array<{
+    lemma: string;
+    partOfSpeech: string;
+    occurrences: number;
+  }>;
+}
+
 interface CatalogCacheEntry {
   fingerprint: string;
   value: JsonlBibleCatalog;
@@ -168,6 +233,33 @@ export async function getJsonlBibleCatalog(options: {
   const versions = await Promise.all(
     JSONL_BIBLE_SOURCES.map(async (source) => {
       const filePath = path.resolve(root, source.relativePath);
+      const sqlitePath = path.resolve(root, source.sqliteRelativePath);
+      if (existsSync(sqlitePath)) {
+        const [fileStats, info] = await Promise.all([
+          stat(sqlitePath),
+          Promise.resolve(readStrongBibleSqliteInfo(sqlitePath))
+        ]);
+        if (
+          info.datasetId !== source.id ||
+          info.version !== source.sourceVersion
+        ) {
+          throw new JsonlBibleViewerError(
+            500,
+            `sqlite-bible-metadata-mismatch:${source.id}`
+          );
+        }
+        return {
+          ...source,
+          available: true,
+          path: source.sqliteRelativePath,
+          sizeBytes: fileStats.size,
+          sha256: info.sourceSha256,
+          verseCount: info.verseCount,
+          taggedTokenCount: info.occurrenceCount,
+          enrichedTagCount: info.identityCount - info.occurrenceCount,
+          books: info.books
+        } satisfies JsonlBibleCatalogVersion;
+      }
       if (!existsSync(filePath)) {
         return {
           ...source,
@@ -240,6 +332,20 @@ export async function getJsonlBibleChapter(options: {
   const versions = await Promise.all(
     selected.map(async (source) => {
       const filePath = path.resolve(options.root, source.relativePath);
+      const sqlitePath = path.resolve(options.root, source.sqliteRelativePath);
+      if (existsSync(sqlitePath)) {
+        return {
+          id: source.id,
+          label: source.label,
+          shortLabel: source.shortLabel,
+          sourceVersion: source.sourceVersion,
+          verses: readStrongBibleSqliteChapter({
+            sqlitePath,
+            bookId: options.bookId,
+            chapter: options.chapter
+          })
+        };
+      }
       if (!existsSync(filePath)) {
         throw new JsonlBibleViewerError(
           404,
@@ -261,6 +367,161 @@ export async function getJsonlBibleChapter(options: {
     })
   );
   return { bookId: options.bookId, chapter: options.chapter, versions };
+}
+
+export function getJsonlBibleConcordance(options: {
+  root: string;
+  version: JsonlBibleId;
+  code: string;
+  bookId?: string;
+  lemma?: string;
+  partOfSpeech?: string;
+  limit?: number;
+  offset?: number;
+}): JsonlBibleConcordance {
+  const source = JSONL_BIBLE_SOURCES.find(
+    (item) => item.id === options.version
+  );
+  if (!source) {
+    throw new JsonlBibleViewerError(400, "invalid-jsonl-bible-version");
+  }
+  const sqlitePath = path.resolve(options.root, source.sqliteRelativePath);
+  if (!existsSync(sqlitePath)) {
+    throw new JsonlBibleViewerError(
+      404,
+      `strong-bible-sqlite-not-found:${source.id}`
+    );
+  }
+  const requestedCode = options.code.trim();
+  if (!/^[GH]\d{1,5}[A-Za-z]*$/u.test(requestedCode)) {
+    throw new JsonlBibleViewerError(400, "invalid-concordance-code");
+  }
+  const kinds: StrongIdentityKind[] = /[A-Za-z]$/u.test(requestedCode)
+    ? ["dstrong", "estrong"]
+    : ["strong"];
+  const candidates = [
+    requestedCode,
+    requestedCode.replace(
+      /^([GH])0*(\d+)/u,
+      (_, family, digits) => `${family}${String(digits).padStart(4, "0")}`
+    )
+  ].filter((value, index, values) => values.indexOf(value) === index);
+  for (const kind of kinds) {
+    for (const code of candidates) {
+      const result = queryStrongBibleConcordance({
+        sqlitePath,
+        kind,
+        code,
+        bookId: options.bookId,
+        lemma: options.lemma,
+        partOfSpeech: options.partOfSpeech,
+        limit: options.limit,
+        offset: options.offset
+      });
+      if (result.total > 0) {
+        return {
+          version: source.id,
+          versionLabel: source.label,
+          requestedCode,
+          matchedKind: kind,
+          matchedCode: code,
+          ...(options.lemma !== undefined
+            ? {
+                lemmaFilter: {
+                  lemma: options.lemma,
+                  ...(options.partOfSpeech !== undefined
+                    ? { partOfSpeech: options.partOfSpeech }
+                    : {})
+                }
+              }
+            : {}),
+          total: result.total,
+          limit: Math.min(Math.max(options.limit ?? 20, 1), 100),
+          offset: Math.max(options.offset ?? 0, 0),
+          items: result.items
+        };
+      }
+    }
+  }
+  return {
+    version: source.id,
+    versionLabel: source.label,
+    requestedCode,
+    matchedKind: kinds[0]!,
+    matchedCode: requestedCode,
+    total: 0,
+    limit: Math.min(Math.max(options.limit ?? 20, 1), 100),
+    offset: Math.max(options.offset ?? 0, 0),
+    items: []
+  };
+}
+
+export function getJsonlBibleLemmaStats(options: {
+  root: string;
+  version: JsonlBibleId;
+  code: string;
+}): JsonlBibleLemmaStats {
+  const source = JSONL_BIBLE_SOURCES.find(
+    (item) => item.id === options.version
+  );
+  if (!source) {
+    throw new JsonlBibleViewerError(400, "invalid-jsonl-bible-version");
+  }
+  const requestedCode = options.code.trim();
+  if (!/^[GH]\d{1,5}[A-Za-z]*$/u.test(requestedCode)) {
+    throw new JsonlBibleViewerError(400, "invalid-lemma-code");
+  }
+  const unavailable = {
+    available: false,
+    version: source.id,
+    versionLabel: source.label,
+    requestedCode,
+    total: 0,
+    resolved: 0,
+    unresolvedAmbiguous: 0,
+    unavailable: 0,
+    lemmas: []
+  } satisfies JsonlBibleLemmaStats;
+  if (!["LSG", "DBY", "DBYR"].includes(source.id)) return unavailable;
+  const sqlitePath = path.resolve(options.root, source.sqliteRelativePath);
+  if (!existsSync(sqlitePath)) return unavailable;
+  const info = readStrongBibleSqliteInfo(sqlitePath);
+  if (info.lexemeAssignmentCount === 0) return unavailable;
+  const datasetVersion = "ctb-reference-lemmas@1";
+  const kinds: StrongIdentityKind[] = /[A-Za-z]$/u.test(requestedCode)
+    ? ["dstrong", "estrong"]
+    : ["strong"];
+  const candidates = [
+    requestedCode,
+    requestedCode.replace(
+      /^([GH])0*(\d+)/u,
+      (_, family, digits) => `${family}${String(digits).padStart(4, "0")}`
+    )
+  ].filter((value, index, values) => values.indexOf(value) === index);
+  for (const kind of kinds) {
+    for (const code of candidates) {
+      const result = queryStrongBibleLemmaStats({ sqlitePath, kind, code });
+      if (result.total > 0) {
+        return {
+          available: true,
+          version: source.id,
+          versionLabel: source.label,
+          datasetVersion,
+          requestedCode,
+          ...result,
+          unresolvedAmbiguous: 0,
+          unavailable: result.total - result.resolved
+        };
+      }
+    }
+  }
+  return {
+    ...unavailable,
+    available: true,
+    datasetVersion,
+    matchedKind: kinds[0],
+    matchedCode: requestedCode
+  };
 }
 
 async function scanJsonlBibleOutline(
@@ -388,9 +649,14 @@ async function sourceFingerprint(root: string): Promise<string> {
   const parts = await Promise.all(
     JSONL_BIBLE_SOURCES.map(async (source) => {
       const filePath = path.resolve(root, source.relativePath);
+      const sqlitePath = path.resolve(root, source.sqliteRelativePath);
+      if (existsSync(sqlitePath)) {
+        const fileStats = await stat(sqlitePath);
+        return `${source.id}:sqlite:${fileStats.size}:${fileStats.mtimeMs}`;
+      }
       if (!existsSync(filePath)) return `${source.id}:missing`;
       const fileStats = await stat(filePath);
-      return `${source.id}:${fileStats.size}:${fileStats.mtimeMs}`;
+      return `${source.id}:jsonl:${fileStats.size}:${fileStats.mtimeMs}`;
     })
   );
   return parts.join("|");

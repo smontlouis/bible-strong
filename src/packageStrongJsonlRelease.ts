@@ -12,6 +12,7 @@ import {
 import path from "node:path";
 
 export const STRONG_JSONL_RELEASE_SCHEMA_VERSION = 1;
+export const DEFAULT_STRONG_JSONL_RELEASE = "outputs/releases/strong-jsonl-v3";
 export type StrongJsonlReleaseView = "reader" | "permissive";
 
 interface ReleaseSource {
@@ -103,8 +104,8 @@ function referenceSource(
     label,
     version,
     sourceType: "reference-witness",
-    artifactPath: `outputs/strong-references-jsonl-step/${file}`,
-    manifestPath: "outputs/strong-references-jsonl-step/manifest.json",
+    artifactPath: `outputs/strong-references-jsonl-step-ctb-v2/${file}`,
+    manifestPath: "outputs/strong-references-jsonl-step-ctb-v2/manifest.json",
     manifestArtifactFile: file
   };
 }
@@ -123,7 +124,7 @@ export async function packageStrongJsonlRelease(
     root,
     options.outputDir ??
       (view === "reader"
-        ? "outputs/releases/strong-jsonl"
+        ? DEFAULT_STRONG_JSONL_RELEASE
         : "outputs/releases/strong-jsonl-permissive")
   );
   if (existsSync(outputDir)) {
@@ -137,10 +138,24 @@ export async function packageStrongJsonlRelease(
 
   try {
     for (const source of releaseSources(view)) {
-      const sourceArtifactPath = path.join(root, source.artifactPath);
-      const sourceManifestPath = path.join(root, source.manifestPath);
+      const resolvedSource =
+        source.sourceType === "generated" &&
+        view === "reader" &&
+        !existsSync(path.join(root, source.artifactPath))
+          ? {
+              ...source,
+              artifactPath: `outputs/releases/strong-jsonl-v3/bible-${source.id}-strong.jsonl`,
+              manifestPath: `outputs/releases/strong-jsonl-v3/manifests/${source.id}.json`
+            }
+          : source;
+      const sourceArtifactPath = path.join(root, resolvedSource.artifactPath);
+      const sourceManifestPath = path.join(root, resolvedSource.manifestPath);
       const sourceManifest = await readJson(sourceManifestPath);
-      const expected = sourceArtifactFromManifest(source, sourceManifest, view);
+      const expected = sourceArtifactFromManifest(
+        resolvedSource,
+        sourceManifest,
+        view
+      );
       const [actualSha256, actualStat, sourceManifestSha256] =
         await Promise.all([
           sha256File(sourceArtifactPath),
@@ -185,8 +200,8 @@ export async function packageStrongJsonlRelease(
         format: "strong-jsonl-release-manifest",
         ...entry,
         source: {
-          artifactPath: source.artifactPath,
-          manifestPath: source.manifestPath,
+          artifactPath: resolvedSource.artifactPath,
+          manifestPath: resolvedSource.manifestPath,
           manifestSha256: sourceManifestSha256
         },
         sourceManifest
@@ -232,6 +247,17 @@ function sourceArtifactFromManifest(
     throw new Error(`strong-jsonl-release-invalid-manifest:${source.id}`);
   }
   if (source.sourceType === "generated") {
+    if (
+      manifest.format === "strong-jsonl-release-manifest" &&
+      manifest.id === source.id &&
+      manifest.version === source.version
+    ) {
+      return parseSourceArtifact(source.id, {
+        sha256: manifest.sha256,
+        sizeBytes: manifest.sizeBytes,
+        verseCount: manifest.verseCount
+      });
+    }
     if (
       manifest.status !== "validated-full-artifact" ||
       manifest.scope !== "all" ||

@@ -1,4 +1,5 @@
 import {
+  BookOpenText,
   Braces,
   Bug,
   Check,
@@ -9,6 +10,7 @@ import {
   Fingerprint,
   Layers3,
   Loader2,
+  Rows3,
   Search,
   X
 } from "lucide-react";
@@ -60,12 +62,23 @@ interface SelectedOccurrence {
   ustrong: string[];
 }
 
+type BibleDisplayMode = "reading" | "verses";
+
+interface ReadingBlock {
+  type: "paragraph" | "poetry";
+  verses: JsonlBibleVerse[];
+}
+
 export function JsonlBibleView({
   renderLexiconEntry
 }: {
   renderLexiconEntry?: (
     payload: LexiconEntryPayload,
-    options: { locale: "fr" | "en"; debug: boolean }
+    options: {
+      locale: "fr" | "en";
+      debug: boolean;
+      concordanceVersion: JsonlBibleId;
+    }
   ) => ReactNode;
 }) {
   const searchParams = new URLSearchParams(window.location.search);
@@ -103,6 +116,12 @@ export function JsonlBibleView({
   );
   const [selectedOccurrence, setSelectedOccurrence] =
     useState<SelectedOccurrence | null>(null);
+  const [displayMode, setDisplayMode] = useState<BibleDisplayMode>(() => {
+    const saved = window.localStorage.getItem(
+      "bible-strong:bibles:display-mode"
+    );
+    return saved === "verses" ? "verses" : "reading";
+  });
   const [contentLocale, setContentLocale] = useState<"fr" | "en">(() => {
     const value =
       searchParams.get("locale") ||
@@ -168,7 +187,7 @@ export function JsonlBibleView({
           toast.error(
             error instanceof Error
               ? error.message
-              : "Catalogue JSONL inaccessible"
+              : "Catalogue des Bibles inaccessible"
           );
         }
       })
@@ -203,7 +222,7 @@ export function JsonlBibleView({
           toast.error(
             error instanceof Error
               ? error.message
-              : "Chapitre JSONL inaccessible"
+              : "Chapitre biblique inaccessible"
           );
         }
       })
@@ -231,6 +250,13 @@ export function JsonlBibleView({
       selectedVersions.join(",")
     );
   }, [bookId, chapter, query, selectedVersions]);
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      "bible-strong:bibles:display-mode",
+      displayMode
+    );
+  }, [displayMode]);
 
   const chapters = useMemo(
     () => catalog?.books.find((book) => book.bookId === bookId)?.chapters ?? [],
@@ -309,8 +335,8 @@ export function JsonlBibleView({
             </div>
             <h2 className="jsonl-title mt-3">Bibles</h2>
             <p className="text-muted-foreground mt-2 max-w-xl text-sm leading-6">
-              Compare les traductions verset par verset. Seules les colonnes
-              actives et le chapitre courant sont chargés.
+              Lis les paragraphes, notes et mises en forme éditoriales des
+              traductions, ou repasse à la comparaison verset par verset.
             </p>
           </div>
 
@@ -391,8 +417,37 @@ export function JsonlBibleView({
           </div>
         </div>
         <div className="border-border/60 flex flex-wrap items-center gap-2 border-t px-4 py-2.5">
+          <div
+            className="jsonl-display-switch mr-2 flex rounded-lg border p-1"
+            aria-label="Mode d’affichage biblique"
+          >
+            <button
+              type="button"
+              aria-pressed={displayMode === "reading"}
+              onClick={() => setDisplayMode("reading")}
+              className={cn(
+                "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold transition",
+                displayMode === "reading" && "is-active"
+              )}
+            >
+              <BookOpenText className="size-3.5" />
+              Lecture
+            </button>
+            <button
+              type="button"
+              aria-pressed={displayMode === "verses"}
+              onClick={() => setDisplayMode("verses")}
+              className={cn(
+                "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold transition",
+                displayMode === "verses" && "is-active"
+              )}
+            >
+              <Rows3 className="size-3.5" />
+              Versets
+            </button>
+          </div>
           <span className="text-muted-foreground mr-1 text-xs font-semibold tracking-widest uppercase">
-            Colonnes
+            Versions
           </span>
           {availableVersions.map((version) => {
             const active = selectedVersions.includes(version.id);
@@ -428,7 +483,7 @@ export function JsonlBibleView({
               <JsonlEmpty
                 icon={Loader2}
                 title="Lecture du chapitre"
-                copy="Le serveur parcourt uniquement les huit JSONL locaux."
+                copy="Le serveur interroge uniquement les huit SQLite bibliques locaux."
                 spinning
               />
             ) : verseGroups.length === 0 ? (
@@ -437,6 +492,18 @@ export function JsonlBibleView({
                 title="Aucun verset"
                 copy="Modifie le filtre ou réactive une version."
               />
+            ) : displayMode === "reading" ? (
+              <div className="jsonl-natural-grid">
+                {visibleVersions.map((version) => (
+                  <JsonlReadingColumn
+                    key={version.id}
+                    version={version}
+                    query={query}
+                    selectedOccurrence={selectedOccurrence}
+                    onSelect={setSelectedOccurrence}
+                  />
+                ))}
+              </div>
             ) : (
               <div className="jsonl-reading-table overflow-x-auto rounded-xl border">
                 <div style={{ minWidth: selectedGridWidth + 72 }}>
@@ -546,7 +613,7 @@ function JsonlCatalogStrip({
       />
       <JsonlStat
         icon={FileCode2}
-        label="Poids JSONL"
+        label="Poids SQLite"
         value={formatBytes(totalSize)}
         detail="artefacts compacts réunis"
       />
@@ -643,6 +710,132 @@ function JsonlVerseCell({
   );
 }
 
+function JsonlReadingColumn({
+  version,
+  query,
+  selectedOccurrence,
+  onSelect
+}: {
+  version: JsonlBibleChapter["versions"][number];
+  query: string;
+  selectedOccurrence: SelectedOccurrence | null;
+  onSelect: (occurrence: SelectedOccurrence) => void;
+}) {
+  const blocks = useMemo(() => {
+    const needle = query.trim().toLocaleLowerCase("fr-FR");
+    return buildReadingBlocks(version.verses).filter(
+      (block) =>
+        !needle ||
+        block.verses.some(
+          (verse) =>
+            verse.ref.toLocaleLowerCase("fr-FR").includes(needle) ||
+            `${stripMarkup(verse.text)} ${verse.text}`
+              .toLocaleLowerCase("fr-FR")
+              .includes(needle)
+        )
+    );
+  }, [query, version.verses]);
+
+  return (
+    <article
+      className={cn(
+        "jsonl-natural-column",
+        `jsonl-version-${version.id.toLowerCase()}`
+      )}
+    >
+      <header className="jsonl-natural-heading">
+        <span className="jsonl-version-dot" />
+        <div>
+          <strong>{version.shortLabel}</strong>
+          <span>{version.label}</span>
+        </div>
+      </header>
+      <div className="jsonl-natural-page">
+        {blocks.map((block) => (
+          <div
+            key={`${block.type}:${block.verses[0]?.ref}`}
+            className={cn(
+              "jsonl-reading-block",
+              block.type === "poetry" && "is-poetry"
+            )}
+          >
+            {block.verses.map((verse) => (
+              <JsonlReadingVerse
+                key={verse.ref}
+                version={version.id}
+                verse={verse}
+                selected={
+                  selectedOccurrence?.ref === verse.ref &&
+                  selectedOccurrence.version === version.id
+                }
+                onSelect={onSelect}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </article>
+  );
+}
+
+function JsonlReadingVerse({
+  version,
+  verse,
+  selected,
+  onSelect
+}: {
+  version: JsonlBibleId;
+  verse: JsonlBibleVerse;
+  selected: boolean;
+  onSelect: (occurrence: SelectedOccurrence) => void;
+}) {
+  const html = useMemo(
+    () => sanitizeAndDecorateJsonlText(stripReadingLayoutTags(verse.text)),
+    [verse.text]
+  );
+
+  function selectWord(target: HTMLElement) {
+    onSelect(occurrenceFromElement(target, verse.ref, version));
+  }
+
+  return (
+    <span
+      id={`verse-${version}-${verse.ref}`}
+      className={cn("jsonl-reading-verse", selected && "is-selected")}
+      data-verse-ref={verse.ref}
+    >
+      <a
+        className="jsonl-inline-verse-number"
+        href={`#verse-${version}-${verse.ref}`}
+        aria-label={verse.ref}
+      >
+        {verse.verse}
+      </a>
+      <span
+        className="jsonl-verse-text"
+        role="group"
+        aria-label={`Mots annotés de ${verse.ref} dans ${version}`}
+        onClick={(event) => {
+          const target = (event.target as HTMLElement).closest(
+            "w[strong]"
+          ) as HTMLElement | null;
+          if (target) selectWord(target);
+        }}
+        onKeyDown={(event) => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          const target = (event.target as HTMLElement).closest(
+            "w[strong]"
+          ) as HTMLElement | null;
+          if (!target) return;
+          event.preventDefault();
+          selectWord(target);
+        }}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />{" "}
+    </span>
+  );
+}
+
 function JsonlLexiconInspector({
   occurrence,
   onClear,
@@ -656,7 +849,11 @@ function JsonlLexiconInspector({
   onClear: () => void;
   renderLexiconEntry?: (
     payload: LexiconEntryPayload,
-    options: { locale: "fr" | "en"; debug: boolean }
+    options: {
+      locale: "fr" | "en";
+      debug: boolean;
+      concordanceVersion: JsonlBibleId;
+    }
   ) => ReactNode;
   locale: "fr" | "en";
   debug: boolean;
@@ -824,7 +1021,11 @@ function JsonlLexiconInspector({
               />
             ) : null}
             {entry && renderLexiconEntry
-              ? renderLexiconEntry(entry, { locale, debug })
+              ? renderLexiconEntry(entry, {
+                  locale,
+                  debug,
+                  concordanceVersion: occurrence.version
+                })
               : null}
           </>
         )}
@@ -878,6 +1079,57 @@ function JsonlEmpty({
   );
 }
 
+function buildReadingBlocks(verses: JsonlBibleVerse[]): ReadingBlock[] {
+  const blocks: ReadingBlock[] = [];
+  let current: ReadingBlock | null = null;
+  let paragraphOpen = false;
+  let poetryOpen = false;
+
+  const flush = () => {
+    if (current?.verses.length) blocks.push(current);
+    current = null;
+  };
+
+  for (const verse of verses) {
+    const opensParagraph = /<p(?:\s[^>]*)?>/iu.test(verse.text);
+    const closesParagraph = /<\/p>/iu.test(verse.text);
+    const opensPoetry = /<lg(?:\s[^>]*)?>/iu.test(verse.text);
+    const closesPoetry = /<\/lg>/iu.test(verse.text);
+    const hasPoetryLine = /<l(?:\s[^>]*)?>/iu.test(verse.text);
+    const type: ReadingBlock["type"] =
+      poetryOpen || opensPoetry || hasPoetryLine ? "poetry" : "paragraph";
+
+    if (
+      !current ||
+      current.type !== type ||
+      opensParagraph ||
+      opensPoetry ||
+      (!paragraphOpen && !poetryOpen)
+    ) {
+      flush();
+      current = { type, verses: [] };
+    }
+
+    current.verses.push(verse);
+    if (opensParagraph) paragraphOpen = true;
+    if (opensPoetry) poetryOpen = true;
+    if (closesParagraph) {
+      paragraphOpen = false;
+      flush();
+    }
+    if (closesPoetry) {
+      poetryOpen = false;
+      flush();
+    }
+  }
+  flush();
+  return blocks;
+}
+
+function stripReadingLayoutTags(value: string): string {
+  return value.replace(/<\/?(?:p|lg)(?:\s[^>]*)?>/giu, "");
+}
+
 function sanitizeAndDecorateJsonlText(html: string): string {
   if (typeof document === "undefined") return "";
   const template = document.createElement("template");
@@ -906,6 +1158,10 @@ function sanitizeAndDecorateJsonlText(html: string): string {
       node.replaceWith(...node.childNodes);
       return;
     }
+    const noteLabel =
+      node.tagName === "NOTE" ? node.getAttribute("n")?.trim() : null;
+    const referenceId =
+      node.tagName === "REF" ? node.getAttribute("id")?.trim() : null;
     const compactAttributes = new Set([
       "strong",
       "estrong",
@@ -933,6 +1189,23 @@ function sanitizeAndDecorateJsonlText(html: string): string {
           .filter(Boolean)
           .join(" · ")
       );
+    } else if (node.tagName === "NOTE") {
+      const content = document.createElement("span");
+      content.className = "jsonl-note-content";
+      content.append(...node.childNodes);
+      const marker = document.createElement("span");
+      marker.className = "jsonl-note-marker";
+      marker.textContent = noteLabel || "•";
+      node.append(marker, content);
+      node.setAttribute("tabindex", "0");
+      node.setAttribute("role", "note");
+      node.setAttribute(
+        "aria-label",
+        `Note${noteLabel ? ` ${noteLabel}` : ""} : ${content.textContent?.trim() ?? ""}`
+      );
+    } else if (node.tagName === "REF" && referenceId) {
+      node.setAttribute("data-reference", referenceId);
+      node.setAttribute("title", referenceId);
     }
   });
   return template.innerHTML;

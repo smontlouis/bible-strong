@@ -17,7 +17,6 @@ import {
   GitCompareArrows,
   Loader2,
   LockKeyhole,
-  MessageSquareText,
   Network,
   RefreshCw,
   Search,
@@ -75,6 +74,8 @@ import {
   loadBookVerses,
   loadLexicalItemsByRef,
   loadLedger,
+  loadJsonlBibleConcordance,
+  loadJsonlBibleLemmaStats,
   loadStrongReviewItems,
   loadStrongReviewSummary
 } from "./data";
@@ -83,6 +84,9 @@ import type {
   LexiconEntryPayload,
   LexiconMetadata,
   LexiconRow,
+  JsonlBibleConcordance,
+  JsonlBibleLemmaStats,
+  JsonlBibleId,
   LexicalAuditItem,
   LexicalCandidate,
   ReaderMode,
@@ -382,13 +386,18 @@ export function App() {
 
 function renderBibleLexiconEntry(
   payload: LexiconEntryPayload,
-  options: { locale: "fr" | "en"; debug: boolean }
+  options: {
+    locale: "fr" | "en";
+    debug: boolean;
+    concordanceVersion: JsonlBibleId;
+  }
 ) {
   return (
     <LexiconEntryCard
       payload={payload}
       locale={options.locale}
       debug={options.debug}
+      concordanceVersion={options.concordanceVersion}
     />
   );
 }
@@ -2228,12 +2237,14 @@ function LexiconEntryCard({
   payload,
   compact = false,
   locale = "fr",
-  debug = false
+  debug = false,
+  concordanceVersion = "LSG"
 }: {
   payload: LexiconEntryPayload;
   compact?: boolean;
   locale?: "fr" | "en";
   debug?: boolean;
+  concordanceVersion?: JsonlBibleId;
 }) {
   const entry = payload.entry;
   const identity = payload.identity;
@@ -2452,6 +2463,14 @@ function LexiconEntryCard({
             ))}
           </div>
         ) : null}
+        {!compact ? (
+          <LexiconConcordancePanel
+            code={stepCode}
+            version={concordanceVersion}
+            locale={locale}
+            debug={debug}
+          />
+        ) : null}
         {!compact && debug && lsjAbsent ? (
           <details open className="lexicon-panel border-dashed">
             <summary className="lexicon-panel-summary text-muted-foreground">
@@ -2478,6 +2497,360 @@ function LexiconEntryCard({
         ) : null}
       </CardContent>
     </Card>
+  );
+}
+
+function partOfSpeechLabel(partOfSpeech: string, french: boolean): string {
+  const labels = french
+    ? {
+        A: "article indéf.",
+        E: "mot négatif",
+        F: "nombre cardinal",
+        G: "mot étranger",
+        H: "mot translittéré",
+        J: "dét. indéf.",
+        N: "nom propre",
+        O: "pronom sujet",
+        P: "pronom indéf.",
+        Q: "pronom",
+        X: "aux. être",
+        a: "article déf.",
+        adj: "adj.",
+        adv: "adv.",
+        c: "conj. sub.",
+        ç: "conj. coord.",
+        conj: "conj.",
+        d: "adverbe",
+        det: "dét.",
+        e: "négation",
+        f: "dét. possessif",
+        g: "dét. interrogatif",
+        j: "adjectif",
+        n: "nom commun",
+        name: "nom propre",
+        noun: "nom",
+        num: "nombre",
+        o: "interjection",
+        p: "pronom démonstratif",
+        phrase: "loc.",
+        prep: "prép.",
+        q: "pronom personnel",
+        pron: "pron.",
+        r: "pronom relatif",
+        v: "verbe",
+        x: "aux. avoir",
+        y: "semi-auxiliaire",
+        "§": "non traduit séparément",
+        "°": "ponctuation",
+        Ë: "dét. négatif",
+        Ï: "interjection",
+        â: "aux. avoir",
+        é: "préposition",
+        ê: "verbe d’état",
+        ë: "verbe impersonnel",
+        ï: "présentatif",
+        ž: "pronom « en »",
+        verb: "verbe"
+      }
+    : {
+        A: "indef. article",
+        E: "negative word",
+        F: "cardinal number",
+        G: "foreign word",
+        H: "transliterated word",
+        J: "indef. determiner",
+        N: "proper noun",
+        O: "subject pronoun",
+        P: "indef. pronoun",
+        Q: "pronoun",
+        X: "be auxiliary",
+        a: "def. article",
+        c: "sub. conjunction",
+        ç: "coord. conjunction",
+        d: "adverb",
+        e: "negation",
+        f: "possessive determiner",
+        g: "interrogative determiner",
+        j: "adjective",
+        n: "common noun",
+        o: "interjection",
+        p: "demonstrative pronoun",
+        q: "personal pronoun",
+        r: "relative pronoun",
+        v: "verb",
+        x: "have auxiliary",
+        y: "semi-auxiliary",
+        "§": "not separately translated",
+        "°": "punctuation",
+        Ë: "negative determiner",
+        Ï: "interjection",
+        â: "have auxiliary",
+        é: "preposition",
+        ê: "stative verb",
+        ë: "impersonal verb",
+        ï: "presentative",
+        ž: "“en” pronoun"
+      };
+  return labels[partOfSpeech as keyof typeof labels] ?? partOfSpeech;
+}
+
+function groupLemmaStats(lemmas: JsonlBibleLemmaStats["lemmas"]) {
+  const grouped = new Map<
+    string,
+    { lemma: string; partOfSpeech: string[]; occurrences: number }
+  >();
+  for (const item of lemmas) {
+    const current = grouped.get(item.lemma) ?? {
+      lemma: item.lemma,
+      partOfSpeech: [],
+      occurrences: 0
+    };
+    if (!current.partOfSpeech.includes(item.partOfSpeech)) {
+      current.partOfSpeech.push(item.partOfSpeech);
+    }
+    current.occurrences += item.occurrences;
+    grouped.set(item.lemma, current);
+  }
+  return [...grouped.values()].sort(
+    (left, right) =>
+      right.occurrences - left.occurrences ||
+      left.lemma.localeCompare(right.lemma, "fr")
+  );
+}
+
+function LexiconConcordancePanel({
+  code,
+  version,
+  locale,
+  debug
+}: {
+  code: string;
+  version: JsonlBibleId;
+  locale: "fr" | "en";
+  debug: boolean;
+}) {
+  const french = locale === "fr";
+  const [offset, setOffset] = useState(0);
+  const [payload, setPayload] = useState<JsonlBibleConcordance | null>(null);
+  const [lemmaStats, setLemmaStats] = useState<JsonlBibleLemmaStats | null>(
+    null
+  );
+  const [selectedLemma, setSelectedLemma] = useState<string | null>(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setError("");
+    void Promise.all([
+      loadJsonlBibleConcordance({
+        version,
+        code,
+        limit: 20,
+        offset,
+        lemma: selectedLemma ?? undefined
+      }),
+      loadJsonlBibleLemmaStats({ version, code }).catch(() => null)
+    ])
+      .then(([result, stats]) => {
+        if (!controller.signal.aborted) {
+          setPayload(result);
+          setLemmaStats(stats);
+        }
+      })
+      .catch((reason: unknown) => {
+        if (controller.signal.aborted) return;
+        setError(
+          reason instanceof Error
+            ? reason.message
+            : french
+              ? "Concordance indisponible."
+              : "Concordance unavailable."
+        );
+      });
+    return () => controller.abort();
+  }, [code, french, offset, selectedLemma, version]);
+
+  useEffect(() => {
+    setOffset(0);
+    setPayload(null);
+    setLemmaStats(null);
+    setSelectedLemma(null);
+  }, [code, version]);
+
+  if (error) {
+    return (
+      <details open className="lexicon-panel">
+        <summary className="lexicon-panel-summary">
+          <span className="flex items-center gap-2">
+            <ChevronRight className="lexicon-panel-chevron" />
+            <BookOpen className="size-4" />
+            <strong className="lexicon-panel-title">
+              {french ? "Emplois dans la Bible" : "Uses in the Bible"}
+            </strong>
+          </span>
+        </summary>
+        <p className="text-muted-foreground p-4 text-sm">{error}</p>
+      </details>
+    );
+  }
+  if (!payload) return null;
+  const groupedLemmas = groupLemmaStats(lemmaStats?.lemmas ?? []);
+
+  return (
+    <details open className="lexicon-panel">
+      <summary className="lexicon-panel-summary flex-wrap">
+        <span className="flex items-center gap-2">
+          <ChevronRight className="lexicon-panel-chevron" />
+          <BookOpen className="size-4" />
+          <strong className="lexicon-panel-title">
+            {french ? "Emplois dans la Bible" : "Uses in the Bible"}
+          </strong>
+        </span>
+        <span className="flex items-center gap-2">
+          <Badge variant="secondary">{payload.versionLabel}</Badge>
+          <Badge variant="outline">
+            {payload.total.toLocaleString(french ? "fr-FR" : "en-US")}
+          </Badge>
+        </span>
+      </summary>
+      <div className="lexicon-panel-content">
+        <div className="border-border/60 flex flex-wrap items-center gap-2 border-b px-4 py-3 text-xs">
+          <span className="text-muted-foreground">
+            {french ? "Concordance exacte" : "Exact concordance"}
+          </span>
+          <Badge variant="outline">{payload.matchedCode}</Badge>
+          {debug ? (
+            <DebugFieldTag
+              source={`BIBLE_${payload.version}.StrongCodes.${payload.matchedKind} → WordStrongCodes.codeId`}
+            />
+          ) : null}
+        </div>
+        {lemmaStats?.available && lemmaStats.total > 0 ? (
+          <div className="border-border/60 border-b px-4 py-4">
+            <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+              <div>
+                <p className="text-muted-foreground text-[0.68rem] font-semibold uppercase tracking-[0.16em]">
+                  {french
+                    ? "Formes françaises regroupées"
+                    : "Grouped French forms"}
+                </p>
+                <p className="mt-1 text-sm font-medium">
+                  {french ? "Lemmes dans" : "Lemmas in"}{" "}
+                  {lemmaStats.versionLabel}
+                </p>
+              </div>
+              <span className="text-muted-foreground text-xs">
+                {lemmaStats.resolved.toLocaleString(french ? "fr-FR" : "en-US")}{" "}
+                / {lemmaStats.total.toLocaleString(french ? "fr-FR" : "en-US")}{" "}
+                {french ? "classés" : "classified"}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {groupedLemmas.slice(0, 16).map((lemma) => (
+                <button
+                  key={lemma.lemma}
+                  type="button"
+                  aria-pressed={selectedLemma === lemma.lemma}
+                  title={
+                    french
+                      ? `Filtrer sur le lemme « ${lemma.lemma} »`
+                      : `Filter by the “${lemma.lemma}” lemma`
+                  }
+                  className={cn(
+                    "border-border bg-muted/40 hover:border-primary/60 hover:bg-primary/10 inline-flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-sm transition-colors",
+                    selectedLemma === lemma.lemma &&
+                      "border-primary bg-primary/15 text-primary"
+                  )}
+                  onClick={() => {
+                    setOffset(0);
+                    setSelectedLemma((current) =>
+                      current === lemma.lemma ? null : lemma.lemma
+                    );
+                  }}
+                >
+                  <strong>{lemma.lemma}</strong>
+                  <span className="text-muted-foreground text-xs">
+                    [
+                    {lemma.partOfSpeech
+                      .map((value) => partOfSpeechLabel(value, french))
+                      .join(" / ")}
+                    ]
+                  </span>
+                  <span className="bg-background/80 rounded px-1.5 py-0.5 text-xs tabular-nums">
+                    {lemma.occurrences.toLocaleString(
+                      french ? "fr-FR" : "en-US"
+                    )}
+                  </span>
+                </button>
+              ))}
+            </div>
+            {debug ? (
+              <DebugFieldTag
+                source={`BIBLE_${lemmaStats.version}.FrenchLexemes.lemma · BIBLE_${lemmaStats.version}.FrenchLexemes.partOfSpeech · BIBLE_${lemmaStats.version}.WordSpans.lexemeId`}
+              />
+            ) : null}
+          </div>
+        ) : null}
+        {payload.items.length === 0 ? (
+          <p className="text-muted-foreground p-4 text-sm">
+            {french
+              ? "Aucun emploi exact dans cette traduction."
+              : "No exact use in this translation."}
+          </p>
+        ) : (
+          <ol className="divide-border/60 divide-y">
+            {payload.items.map((item, index) => (
+              <li
+                key={`${item.ref}:${item.startOffset}:${index}`}
+                className="grid gap-2 px-4 py-3 md:grid-cols-[90px_minmax(0,1fr)]"
+              >
+                <a
+                  href={`?view=jsonl&book=${encodeURIComponent(item.bookId)}&chapter=${item.chapter}&entry=${encodeURIComponent(payload.matchedCode)}`}
+                  className="text-primary text-sm font-semibold hover:underline"
+                >
+                  {item.ref.replaceAll(".", " ")}
+                </a>
+                <p className="text-sm leading-6">
+                  {item.text.slice(0, item.startOffset)}
+                  <mark className="bg-primary/15 text-foreground rounded px-0.5 font-semibold">
+                    {item.text.slice(item.startOffset, item.endOffset)}
+                  </mark>
+                  {item.text.slice(item.endOffset)}
+                </p>
+              </li>
+            ))}
+          </ol>
+        )}
+        {payload.total > payload.limit ? (
+          <div className="flex items-center justify-between gap-3 border-t p-3">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={offset === 0}
+              onClick={() => setOffset(Math.max(0, offset - payload.limit))}
+            >
+              <ChevronLeft data-icon="inline-start" />
+              {french ? "Précédent" : "Previous"}
+            </Button>
+            <span className="text-muted-foreground text-xs">
+              {offset + 1}–{Math.min(offset + payload.limit, payload.total)} /{" "}
+              {payload.total}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={offset + payload.limit >= payload.total}
+              onClick={() => setOffset(offset + payload.limit)}
+            >
+              {french ? "Suivant" : "Next"}
+              <ChevronRight data-icon="inline-end" />
+            </Button>
+          </div>
+        ) : null}
+      </div>
+    </details>
   );
 }
 
@@ -2750,213 +3123,6 @@ function LexiconRelationsPanel({
             </section>
           );
         })}
-      </div>
-    </details>
-  );
-}
-
-function LexiconOccurrencesPanel({
-  payload,
-  locale,
-  debug
-}: {
-  payload: LexiconEntryPayload;
-  locale: "fr" | "en";
-  debug: boolean;
-}) {
-  const occurrences = payload.occurrences;
-  if (!occurrences) return null;
-  const french = locale === "fr";
-  const stats = occurrences.exactStats || occurrences.classicalStats;
-  if (!stats) return null;
-  return (
-    <details open className="lexicon-panel">
-      <summary className="lexicon-panel-summary flex-wrap">
-        <div className="flex items-center gap-2">
-          <ChevronRight className="lexicon-panel-chevron" />
-          <div>
-            <h3 className="lexicon-panel-title">
-              {french ? "Emplois dans la Bible" : "Uses in the Bible"}
-            </h3>
-            <p className="text-muted-foreground text-xs">
-              {stats.totalCount.toLocaleString(french ? "fr-FR" : "en-US")}{" "}
-              {french ? "occurrences dans" : "occurrences across"}{" "}
-              {stats.verseCount.toLocaleString(french ? "fr-FR" : "en-US")}{" "}
-              {french ? "versets" : "verses"}
-            </p>
-            {debug ? (
-              <div className="flex flex-wrap gap-1">
-                <DebugFieldTag source="OCCURRENCES_STEP.OccurrenceStats.totalCount" />
-                <DebugFieldTag source="OCCURRENCES_STEP.OccurrenceStats.verseCount" />
-              </div>
-            ) : null}
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <div className="flex flex-col items-end">
-            <Badge variant="secondary">
-              {french ? "AT" : "OT"}{" "}
-              {stats.oldTestamentCount.toLocaleString(
-                french ? "fr-FR" : "en-US"
-              )}
-            </Badge>
-            {debug ? (
-              <DebugFieldTag source="OCCURRENCES_STEP.OccurrenceStats.oldTestamentCount" />
-            ) : null}
-          </div>
-          <div className="flex flex-col items-end">
-            <Badge variant="secondary">
-              NT{" "}
-              {stats.newTestamentCount.toLocaleString(
-                french ? "fr-FR" : "en-US"
-              )}
-            </Badge>
-            {debug ? (
-              <DebugFieldTag source="OCCURRENCES_STEP.OccurrenceStats.newTestamentCount" />
-            ) : null}
-          </div>
-        </div>
-      </summary>
-      <div className="lexicon-panel-content p-4">
-        {occurrences.exactStats && occurrences.classicalStats ? (
-          <div className="mb-4">
-            <p className="text-muted-foreground text-xs">
-              {french ? "Sous-entrée STEP" : "STEP subentry"}:{" "}
-              {occurrences.exactStats.totalCount.toLocaleString("fr-FR")}
-              {french
-                ? " occurrence(s). Strong classique : "
-                : " occurrence(s). Classical Strong: "}
-              {occurrences.classicalStats.totalCount.toLocaleString("fr-FR")}
-              {" occurrence(s)."}
-            </p>
-            {debug ? (
-              <div className="flex flex-wrap gap-1">
-                <DebugFieldTag source="OCCURRENCES_STEP.OccurrenceStats.identityKind" />
-                <DebugFieldTag source="OCCURRENCES_STEP.OccurrenceStats.totalCount" />
-              </div>
-            ) : null}
-          </div>
-        ) : null}
-        {occurrences.forms.length > 0 ? (
-          <div>
-            <h4 className="text-sm font-semibold">
-              {french ? "Formes rencontrées" : "Observed forms"}
-            </h4>
-            <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-              {occurrences.forms.map((form) => (
-                <div key={form.code} className="rounded-lg border p-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex flex-col items-start">
-                      <Badge variant="outline">{form.code}</Badge>
-                      {debug ? (
-                        <DebugFieldTag source="OCCURRENCES_STEP.OccurrenceMorphology.code" />
-                      ) : null}
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <span className="text-muted-foreground text-xs">
-                        {form.count.toLocaleString("fr-FR")}×
-                      </span>
-                      {debug ? (
-                        <DebugFieldTag source="OCCURRENCES_STEP.OccurrenceMorphology.code" />
-                      ) : null}
-                    </div>
-                  </div>
-                  <p className="mt-2 text-sm font-medium">
-                    {(french ? form.meaningFr : form.meaningEn) ||
-                      form.meaningEn ||
-                      form.code}
-                  </p>
-                  {debug ? (
-                    <DebugFieldTag
-                      source={
-                        french && form.meaningFr
-                          ? "MORPHOLOGIE_STEP.MorphologyCodeTranslations.meaning"
-                          : "MORPHOLOGIE_STEP.MorphologyCodes.meaning"
-                      }
-                    />
-                  ) : null}
-                  <p className="text-muted-foreground mt-1 text-xs">
-                    {debug && french && form.meaningEn && form.meaningFr
-                      ? form.meaningEn
-                      : ""}
-                    {form.exampleSurface ? ` · ${form.exampleSurface}` : ""}
-                  </p>
-                  {debug && form.exampleSurface ? (
-                    <DebugFieldTag source="OCCURRENCES_STEP.Occurrences.surface" />
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : null}
-        {occurrences.samples.length > 0 ? (
-          <div className="mt-5">
-            <h4 className="text-sm font-semibold">
-              {french ? "Premières occurrences" : "First occurrences"}
-            </h4>
-            <div className="mt-3 overflow-x-auto rounded-lg border">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-muted/30 text-muted-foreground text-xs">
-                  <tr>
-                    <th className="px-3 py-2">
-                      {french ? "Référence" : "Reference"}
-                      {debug ? (
-                        <DebugFieldTag source="OCCURRENCES_STEP.Occurrences.mainRef" />
-                      ) : null}
-                    </th>
-                    <th className="px-3 py-2">
-                      {french ? "Forme" : "Form"}
-                      {debug ? (
-                        <DebugFieldTag source="OCCURRENCES_STEP.Occurrences.surface" />
-                      ) : null}
-                    </th>
-                    <th className="px-3 py-2">
-                      {french ? "Translittération" : "Transliteration"}
-                      {debug ? (
-                        <DebugFieldTag source="OCCURRENCES_STEP.Occurrences.transliteration" />
-                      ) : null}
-                    </th>
-                    {!french || debug ? (
-                      <th className="px-3 py-2">
-                        Gloss EN
-                        {debug ? (
-                          <DebugFieldTag source="OCCURRENCES_STEP.Occurrences.gloss" />
-                        ) : null}
-                      </th>
-                    ) : null}
-                    <th className="px-3 py-2">
-                      {french ? "Morphologie" : "Morphology"}
-                      {debug ? (
-                        <DebugFieldTag source="OCCURRENCES_STEP.Occurrences.morphology" />
-                      ) : null}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {occurrences.samples.slice(0, 16).map((sample, index) => (
-                    <tr
-                      key={`${sample.ref}-${sample.stepCode}-${sample.surface}-${index}`}
-                    >
-                      <td className="whitespace-nowrap px-3 py-2 font-medium">
-                        {sample.ref}
-                      </td>
-                      <td className="px-3 py-2" dir="auto">
-                        {sample.surface}
-                      </td>
-                      <td className="px-3 py-2">{sample.transliteration}</td>
-                      {!french || debug ? (
-                        <td className="px-3 py-2">{sample.gloss}</td>
-                      ) : null}
-                      <td className="whitespace-nowrap px-3 py-2">
-                        {sample.morphology || "—"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ) : null}
       </div>
     </details>
   );

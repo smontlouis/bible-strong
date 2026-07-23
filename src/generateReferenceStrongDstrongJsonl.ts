@@ -127,7 +127,7 @@ function parseCliOptions(argv: string[]): {
     if (key && value) args.set(key, value);
   }
   return {
-    inputDir: args.get("input-dir") ?? "outputs/strong-references-jsonl",
+    inputDir: args.get("input-dir") ?? "outputs/strong-references-jsonl-lemmas",
     outputDir: args.get("output-dir") ?? "outputs/strong-references-jsonl-step",
     references: (args.get("references") ?? "")
       .split(",")
