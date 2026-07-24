@@ -4,15 +4,17 @@ import { AnimatedProgressCircle } from '@convective/react-native-reanimated-prog
 
 type Props = {
   progress: number
+  size?: number
+  thickness?: number
 }
 
-const Progress = ({ progress }: Props) => {
+const Progress = ({ progress, size = 40, thickness = 3 }: Props) => {
   const theme = useTheme()
   return (
     <AnimatedProgressCircle
-      size={40}
+      size={size}
       progress={progress}
-      thickness={3}
+      thickness={thickness}
       color={theme.colors.primary}
       unfilledColor={theme.colors.lightGrey}
       animationDuration={300}

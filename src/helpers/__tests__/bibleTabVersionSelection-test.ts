@@ -36,4 +36,18 @@ describe('selectBibleTabVersion', () => {
       strongMode: 'visible',
     })
   })
+
+  it('preserves a pending Strong activation while another version is selected', () => {
+    const data = {
+      selectedVersion: 'DBY',
+      strongMode: 'hidden',
+      pendingStrongModeVersionId: 'DBY',
+    } as Parameters<typeof selectBibleTabVersion>[0]
+
+    expect(selectBibleTabVersion(data, 'BFC')).toMatchObject({
+      selectedVersion: 'BFC',
+      strongMode: 'hidden',
+      pendingStrongModeVersionId: 'DBY',
+    })
+  })
 })

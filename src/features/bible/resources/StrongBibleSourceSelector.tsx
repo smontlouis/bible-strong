@@ -22,7 +22,7 @@ import {
   type StrongBibleSidecarAvailability,
 } from '~helpers/strongBibleSidecar'
 import { useDownloadItemStatus, useDownloadQueue } from '~helpers/useDownloadQueue'
-import { downloadCompletionSignalAtom } from '~state/downloadQueue'
+import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/downloadQueue'
 import type { BibleTab } from '~state/tabs'
 
 type SharedProps = {
@@ -112,10 +112,7 @@ const StrongBibleSourceRow = ({
   const failedDownload = [bibleDownload, strongDownload].find(state => state?.status === 'failed')
   const isAvailable = availability?.status === 'available'
   const version = versions[versionId]
-  const progress =
-    activeDownload?.status === 'inserting'
-      ? 0.8 + activeDownload.insertProgress * 0.2
-      : (activeDownload?.downloadProgress ?? 0)
+  const progress = activeDownload ? getDownloadItemProgress(activeDownload) : 0
 
   return (
     <Box

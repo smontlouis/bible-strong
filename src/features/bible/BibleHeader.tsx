@@ -32,6 +32,7 @@ import Box, {
 import { FormSheetHandle } from '~common/ui/FormSheetScreen'
 import { FeatherIcon, IonIcon } from '~common/ui/Icon'
 import Text, { AnimatedText } from '~common/ui/Text'
+import Progress from '~common/ui/Progress'
 import {
   BIBLE_FORM_SHEET_HEADER_HEIGHT,
   HEADER_HEIGHT,
@@ -63,7 +64,11 @@ import {
   createStrongSidecarDownloadItem,
 } from '~helpers/downloadItemFactory'
 import { downloadManager } from '~helpers/downloadManager'
+import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import StrongMark from './StrongMark'
+import { getStrongModeDownloadPresentation } from './strongModeDownloadState'
+
+const STRONG_MODE_COMPLETION_HOLD_MS = 450
 
 interface BibleHeaderProps {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -126,11 +131,22 @@ const Header = ({
     parallelVersions,
     focusVerses,
     strongMode = 'hidden',
+    pendingStrongModeVersionId,
   } = bible.data
   const bookNumber = book.Numero
   const bookName = book.Nom
   const isParallel = parallelVersions.length > 0
   const displayVerses = focusVerses
+  const bibleDownload = useDownloadItemStatus(`bible:${version}`)
+  const strongSidecarDownload = useDownloadItemStatus(`bible-strong:${version}`)
+  const strongDownloadPresentation = getStrongModeDownloadPresentation(
+    bibleDownload,
+    strongSidecarDownload
+  )
+  const isStrongDownloadVisible =
+    strongMode === 'hidden' &&
+    (strongDownloadPresentation.status === 'active' ||
+      (pendingStrongModeVersionId === version && strongDownloadPresentation.status === 'completed'))
 
   // Check if verses are selected
   const hasSelectedVerses = selectedVerses && Object.keys(selectedVerses).length > 0
@@ -175,6 +191,45 @@ const Header = ({
     })
     actions.setTitle(`${ref} - ${selectedVersion}`)
   }, [actions, bible])
+
+  useEffect(() => {
+    if (!isStrongCapableBibleVersion(version) || pendingStrongModeVersionId !== version) return
+
+    if (strongDownloadPresentation.status === 'failed') {
+      actions.finishPendingStrongModeDownload(version, false)
+      return
+    }
+
+    if (strongDownloadPresentation.status === 'active') return
+
+    let cancelled = false
+    const completionObserved = strongDownloadPresentation.status === 'completed'
+    const timeout = setTimeout(
+      () => {
+        getStrongBibleSidecarAvailability(version)
+          .then(availability => {
+            if (cancelled) return
+
+            if (availability.status === 'available') {
+              actions.finishPendingStrongModeDownload(version, true)
+            } else if (completionObserved) {
+              actions.finishPendingStrongModeDownload(version, false)
+            }
+          })
+          .catch(() => {
+            if (!cancelled && completionObserved) {
+              actions.finishPendingStrongModeDownload(version, false)
+            }
+          })
+      },
+      completionObserved ? STRONG_MODE_COMPLETION_HOLD_MS : 0
+    )
+
+    return () => {
+      cancelled = true
+      clearTimeout(timeout)
+    }
+  }, [actions, pendingStrongModeVersionId, strongDownloadPresentation.status, version])
 
   const { addParallelVersion, removeParallelVersion, removeAllParallelVersions } = actions
 
@@ -362,6 +417,7 @@ const Header = ({
 
   const toggleStrongMode = async () => {
     if (!isStrongCapableBibleVersion(version)) return
+    if (isStrongDownloadVisible) return
     const requestId = ++strongModeToggleRequestRef.current
     const currentStrongMode =
       getDefaultStore().get(bibleAtom).data.strongMode ?? ('hidden' as const)
@@ -393,7 +449,7 @@ const Header = ({
           text: t('Télécharger'),
           onPress: () => {
             const items = createStrongSidecarDownloadPlan(version, availability.status)
-            actions.setStrongMode('visible')
+            actions.setPendingStrongModeVersion(version)
             downloadManager.enqueue(items)
           },
         },
@@ -740,23 +796,37 @@ const Header = ({
                 {isStrongCapableBibleVersion(version) && (
                   <AnimatedTouchableBox
                     onPress={toggleStrongMode}
+                    disabled={isStrongDownloadVisible}
                     center
                     width={40}
                     height={40}
                     accessibilityRole="button"
                     accessibilityLabel={
-                      strongMode === 'visible'
-                        ? t('Masquer les numéros Strong')
-                        : t('Afficher les numéros Strong')
+                      isStrongDownloadVisible
+                        ? t('Téléchargement en cours')
+                        : strongMode === 'visible'
+                          ? t('Masquer les numéros Strong')
+                          : t('Afficher les numéros Strong')
                     }
-                    accessibilityState={{ selected: strongMode === 'visible' }}
+                    accessibilityState={{
+                      disabled: isStrongDownloadVisible,
+                      selected: strongMode === 'visible',
+                    }}
                     style={{
                       opacity: fullScreenOpacity,
                       transitionProperty: 'opacity',
                       transitionDuration: 300,
                     }}
                   >
-                    <StrongMark highlighted={strongMode === 'visible'} />
+                    {isStrongDownloadVisible ? (
+                      <Progress
+                        progress={Math.max(strongDownloadPresentation.progress, 0.04)}
+                        size={22}
+                        thickness={2.5}
+                      />
+                    ) : (
+                      <StrongMark highlighted={strongMode === 'visible'} />
+                    )}
                   </AnimatedTouchableBox>
                 )}
 

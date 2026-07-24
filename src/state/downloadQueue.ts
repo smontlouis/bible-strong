@@ -52,6 +52,13 @@ export interface DownloadItemState {
   error?: string
 }
 
+export const getDownloadItemProgress = (state: DownloadItemState): number => {
+  if (state.status === 'completed') return 1
+  if (state.status === 'downloading') return state.downloadProgress * 0.8
+  if (state.status === 'inserting') return 0.8 + state.insertProgress * 0.2
+  return 0
+}
+
 // ---------------------------------------------------------------------------
 // Atoms — runtime source of truth
 // ---------------------------------------------------------------------------
@@ -109,10 +116,7 @@ export const overallProgressAtom = atom(get => {
 
   // Weight: downloading items contribute their downloadProgress, inserting items add insert progress
   const progressSum = active.reduce((sum, s) => {
-    if (s.status === 'completed') return sum + 1
-    if (s.status === 'downloading') return sum + s.downloadProgress * 0.8
-    if (s.status === 'inserting') return sum + 0.8 + s.insertProgress * 0.2
-    return sum // queued = 0
+    return sum + getDownloadItemProgress(s)
   }, 0)
 
   return {

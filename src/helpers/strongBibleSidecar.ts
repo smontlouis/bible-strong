@@ -52,6 +52,7 @@ export interface StrongBibleSidecarInstallCallbacks {
   onDownloadProgress?: FileSystem.DownloadProgressCallback
   onResumable?: (resumable: FileSystem.DownloadResumable | null) => void
   onStatusInserting?: () => void
+  onInsertProgress?: (progress: number) => void
   isCancelled?: () => boolean
 }
 
@@ -170,16 +171,22 @@ export const installStrongBibleSidecar = async (
       'STRONG_BIBLE_ARCHIVE_CHECKSUM_MISMATCH'
     )
     callbacks.onStatusInserting?.()
+    callbacks.onInsertProgress?.(0)
     await FileSystem.deleteAsync(extractionDirectory, { idempotent: true })
     await FileSystem.makeDirectoryAsync(extractionDirectory, { intermediates: true })
+    callbacks.onInsertProgress?.(0.1)
     await unzip(toNativeFilePath(archivePath), toNativeFilePath(extractionDirectory), 'UTF-8')
+    callbacks.onInsertProgress?.(0.55)
     await verifyFileSha256(
       extractedPath,
       publication.strong.contentSha256,
       'STRONG_BIBLE_CONTENT_CHECKSUM_MISMATCH'
     )
+    callbacks.onInsertProgress?.(0.7)
     await verifyExtractedStrongBibleSidecar(versionId, extractionDirectory)
+    callbacks.onInsertProgress?.(0.9)
     await activateStrongBibleSidecar(versionId, extractedPath)
+    callbacks.onInsertProgress?.(1)
   } finally {
     callbacks.onResumable?.(null)
     await FileSystem.deleteAsync(archivePath, { idempotent: true })

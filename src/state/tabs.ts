@@ -59,6 +59,7 @@ export interface BibleTab extends TabBase {
   data: {
     selectedVersion: VersionCode
     strongMode?: StrongMode
+    pendingStrongModeVersionId?: StrongBibleVersionId
     strongBibleSourceVersionId?: StrongBibleVersionId
     selectedBook: Book
     selectedChapter: number
@@ -759,6 +760,25 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
       })
     )
 
+  const setPendingStrongModeVersion = (versionId?: StrongBibleVersionId) =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.pendingStrongModeVersionId = versionId
+      })
+    )
+
+  const finishPendingStrongModeDownload = (versionId: StrongBibleVersionId, succeeded: boolean) =>
+    setBibleTab(
+      produce(draft => {
+        if (draft.data.pendingStrongModeVersionId !== versionId) return
+
+        draft.data.pendingStrongModeVersionId = undefined
+        if (succeeded && draft.data.selectedVersion === versionId) {
+          draft.data.strongMode = 'visible'
+        }
+      })
+    )
+
   const setSelectedBook = (selectedBook: Book) =>
     setBibleTab(
       produce(draft => {
@@ -1070,6 +1090,8 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   return {
     setSelectedVersion,
     setStrongMode,
+    setPendingStrongModeVersion,
+    finishPendingStrongModeDownload,
     setSelectedBook,
     setSelectedChapter,
     setSelectedVerse,

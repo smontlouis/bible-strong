@@ -92,6 +92,7 @@ const installBibleStrongSidecar = async (
     },
     onResumable: callbacks.onResumable,
     onStatusInserting: callbacks.onStatusInserting,
+    onInsertProgress: callbacks.onInsertProgress,
     isCancelled: callbacks.isCancelled,
   })
 }

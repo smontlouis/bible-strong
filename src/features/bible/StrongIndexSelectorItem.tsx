@@ -16,7 +16,7 @@ import {
   type StrongBibleSidecarAvailability,
 } from '~helpers/strongBibleSidecar'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
-import { downloadCompletionSignalAtom } from '~state/downloadQueue'
+import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/downloadQueue'
 
 interface Props {
   versionId: StrongBibleVersionId
@@ -64,10 +64,7 @@ const StrongIndexSelectorItem = ({ versionId, onAvailabilityChange }: Props) => 
   const strongActiveDownload = isActiveDownload(strongDownload?.status) ? strongDownload : undefined
   const failedDownload = [bibleDownload, strongDownload].find(state => state?.status === 'failed')
   const isAvailable = availability?.status === 'available'
-  const progress =
-    strongActiveDownload?.status === 'inserting'
-      ? 0.8 + strongActiveDownload.insertProgress * 0.2
-      : (strongActiveDownload?.downloadProgress ?? 0)
+  const progress = strongActiveDownload ? getDownloadItemProgress(strongActiveDownload) : 0
 
   const handlePress = async () => {
     if (isChecking || isAvailable || strongActiveDownload) return
