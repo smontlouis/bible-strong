@@ -124,7 +124,6 @@ const StrongBibleSourceRow = ({
       minHeight={76}
       px={16}
       py={10}
-      bg={selected ? 'lightPrimary' : 'lightGrey'}
       borderBottomWidth={isLast ? 0 : 1}
       borderColor="border"
     >
@@ -308,36 +307,33 @@ export const StrongBibleSourceSheet = ({
       header={<SheetHeader title={t('strongSource.sheetTitle')} />}
     >
       <SheetScrollView contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
-        <Pressable
-          accessibilityRole="radio"
-          accessibilityState={{ checked: !strongBibleSourceVersionId }}
-          onPress={() => selectSource()}
-          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-        >
-          <Box
-            row
-            alignItems="center"
-            minHeight={76}
-            p={16}
-            borderRadius={18}
-            bg={!strongBibleSourceVersionId ? 'lightPrimary' : 'lightGrey'}
+        <Box overflow="hidden">
+          <Pressable
+            accessibilityRole="radio"
+            accessibilityState={{ checked: !strongBibleSourceVersionId }}
+            onPress={() => selectSource()}
+            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           >
-            <Radio selected={!strongBibleSourceVersionId} size={22} marginRight={12} />
-            <Box flex>
-              <Text fontSize={15} bold>
-                {t('Automatique')}
-              </Text>
-              <Text fontSize={12} color="tertiary" mt={3}>
-                {automaticDescription}
-              </Text>
+            <Box
+              row
+              alignItems="center"
+              minHeight={76}
+              px={16}
+              py={10}
+              borderBottomWidth={1}
+              borderColor="border"
+            >
+              <Radio selected={!strongBibleSourceVersionId} size={22} marginRight={12} />
+              <Box flex>
+                <Text fontSize={15} bold>
+                  {t('Automatique')}
+                </Text>
+                <Text fontSize={12} color="tertiary" mt={3}>
+                  {automaticDescription}
+                </Text>
+              </Box>
             </Box>
-          </Box>
-        </Pressable>
-
-        <Text ml={4} mt={20} mb={8} fontSize={12} bold color="tertiary">
-          {t('strongSource.chooseBible')}
-        </Text>
-        <Box borderRadius={18} overflow="hidden">
+          </Pressable>
           {STRONG_BIBLE_FALLBACK_PRIORITY.map((versionId, index) => (
             <StrongBibleSourceRow
               key={versionId}
