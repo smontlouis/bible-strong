@@ -10,6 +10,9 @@ export const STRONG_BIBLE_FALLBACK_PRIORITY = [
   'DBR',
 ] as const satisfies readonly StrongBibleVersionId[]
 
+export const STRONG_NUMBERS_ATTRIBUTION =
+  'Numéros Strong affectés en 2026 par “Concordances et Traductions de la Bible” (concordance.bible).'
+
 type PublicationArtifact = {
   url: string
   entry: string

@@ -43,6 +43,7 @@ import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import {
   getStrongBiblePublication,
   isStrongCapableBibleVersion,
+  STRONG_NUMBERS_ATTRIBUTION,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
 import {
@@ -136,7 +137,7 @@ function buildBibleItems(
       {
         id: `bible-strong:${v.id}`,
         name: t('downloads.strongIndexName', { bible: strongIndexBibleName }),
-        subtitle: 'Index Strong optionnel',
+        subtitle: STRONG_NUMBERS_ATTRIBUTION,
         parentItemId: base.id,
         estimatedSize: publication.strong.archiveBytes,
         lang: 'fr',
@@ -646,13 +647,6 @@ const DownloadsScreen = () => {
           }
 
           const isDefault = item.id === `bible:${defaultVersion}`
-          const strongVersionId = item.id.startsWith('bible-strong:')
-            ? (item.id.replace('bible-strong:', '') as StrongBibleVersionId)
-            : undefined
-          const availability = strongVersionId ? strongAvailability.get(strongVersionId) : undefined
-          const strongStatusSubtitle = availability
-            ? getStrongAvailabilityLabel(availability, t)
-            : undefined
           const isNestedDependency =
             item.parentItemId !== undefined && section.data[index - 1]?.id === item.parentItemId
 
@@ -660,7 +654,7 @@ const DownloadsScreen = () => {
             <DownloadableItem
               itemId={item.id}
               name={item.name}
-              subtitle={strongStatusSubtitle ?? item.subtitle}
+              subtitle={item.subtitle}
               estimatedSize={item.estimatedSize}
               isSelectMode={isSelectMode}
               isSelected={selectedItems.has(item.id)}
@@ -692,28 +686,6 @@ const DownloadsScreen = () => {
       )}
     </Container>
   )
-}
-
-function getStrongAvailabilityLabel(
-  availability: StrongBibleSidecarAvailability,
-  t: (key: string) => string
-): string {
-  switch (availability.status) {
-    case 'available':
-      return t('Index Strong installé et compatible')
-    case 'base-missing':
-      return t('La Bible sera téléchargée avant son index Strong')
-    case 'base-incompatible':
-      return t('La Bible doit être mise à jour avant son index Strong')
-    case 'missing':
-      return t('Index Strong optionnel')
-    case 'incompatible':
-      return t('Index Strong incompatible — mise à jour nécessaire')
-    case 'corrupt':
-      return t('Index Strong endommagé — réinstallation nécessaire')
-    case 'unsupported':
-      return t('Mode Strong indisponible')
-  }
 }
 
 export default DownloadsScreen

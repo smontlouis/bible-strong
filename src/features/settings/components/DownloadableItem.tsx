@@ -161,7 +161,7 @@ const DownloadableItem = ({
               </Text>
             )}
             {subtitle && visualState !== 'queued' && visualState !== 'failed' && (
-              <Text fontSize={12} color="tertiary" mt={2} numberOfLines={2}>
+              <Text fontSize={12} color="tertiary" mt={2} numberOfLines={isDependency ? 3 : 2}>
                 {subtitle}
               </Text>
             )}

@@ -1169,12 +1169,5 @@
   "Utilisée pour les concordances lorsque la Bible ouverte n'a pas de données Strong installées.": "Used for concordances when the open Bible has no installed Strong data.",
   "{{version}} · installé": "{{version}} · installed",
   "{{version}} · à télécharger": "{{version}} · download required",
-  "downloads.strongIndexName": "Strong index for {{bible}}",
-  "Index Strong installé et compatible": "Strong index installed and compatible",
-  "La Bible sera téléchargée avant son index Strong": "The Bible will be downloaded before its Strong index",
-  "La Bible doit être mise à jour avant son index Strong": "The Bible must be updated before its Strong index",
-  "Index Strong optionnel": "Optional Strong index",
-  "Index Strong incompatible — mise à jour nécessaire": "Strong index incompatible — update required",
-  "Index Strong endommagé — réinstallation nécessaire": "Strong index damaged — reinstall required",
-  "Mode Strong indisponible": "Strong mode unavailable"
+  "downloads.strongIndexName": "Strong index for {{bible}}"
 }

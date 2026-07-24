@@ -47,6 +47,10 @@ is LSG in French and KJV in English; the other language's Bible remains removabl
 application language must ensure the target language's required Bible is downloaded. Removing a
 sidecar never removes its Bible or the shared global Strong database.
 
+In download management, identify each sidecar as an index belonging to its canonical Bible and
+display the required Strong-number attribution from Concordances et Traductions de la Bible.
+Availability and compatibility states continue to drive actions without replacing that provenance.
+
 Before activating a new canonical text revision, journal an idempotent word-annotation migration.
 Move an annotation only when its remembered text can be aligned deterministically. Leave ambiguous
 or missing annotations unchanged and visible.
