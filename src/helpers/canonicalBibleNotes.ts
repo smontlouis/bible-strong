@@ -1,4 +1,5 @@
 import { ElementType, parseDocument } from 'htmlparser2'
+import { normalizeOsisReference } from './osisReference'
 
 export type CanonicalBibleNoteMarkupNode =
   | {
@@ -78,12 +79,16 @@ const convertParsedNode = (node: ParsedNode): CanonicalBibleNoteMarkupNode[] => 
   const children = node.children.flatMap(convertParsedNode)
   const normalizedTag = node.name.toLocaleLowerCase()
   if (!SUPPORTED_TAGS.has(normalizedTag)) return children
+  const attributes = { ...node.attribs }
+  if (normalizedTag === 'ref' && attributes.id) {
+    attributes.id = normalizeOsisReference(attributes.id)
+  }
 
   return [
     {
       kind: 'element',
       tag: CANONICAL_TAG_NAMES[normalizedTag]!,
-      attributes: { ...node.attribs },
+      attributes,
       children,
     },
   ]

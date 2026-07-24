@@ -75,6 +75,15 @@ and renders note content in a native bottom sheet. Publisher-note labels are gen
 rather than text nodes. In annotation mode they remain visible but ignore pointer and verse-touch
 events, so selectable text and persisted annotation offsets remain unchanged.
 
+References embedded in Schema V3 publisher notes use the internal
+`<ref id="…">` envelope, with `id` treated as an OSIS passage identifier and
+the human-readable label treated as display text only. For compatibility with
+the first V3 DBY publication, the reader expands a relative numeric range end
+to a complete OSIS endpoint before navigation. The normalizer accepts only
+supported canonical book identifiers. Because the reading surface has one
+current chapter, a multichapter range opens at its first endpoint; displaying
+the complete range requires a future multichapter viewer contract.
+
 ## Validation
 
 The tab-scoped source choice was explicitly approved as part of issue 199. Automated validation
@@ -100,3 +109,7 @@ mismatch; disabling Expo download caching and versioning the publication URL res
 then confirmed the Strong control changing from progress to active, Strong spans rendering, a
 publisher-note label opening its native sheet, and the same label remaining visible but inert in
 Mode libre without changing the selected Bible text.
+
+Reference parsing tests cover complete OSIS identifiers, the three relative
+DBY range forms, rejection of unknown book identifiers, same-chapter focus
+verses and the documented first-endpoint behavior for multichapter ranges.

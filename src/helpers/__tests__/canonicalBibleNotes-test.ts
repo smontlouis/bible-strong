@@ -52,4 +52,20 @@ describe('canonicalBibleNotes', () => {
       ])
     )
   })
+
+  it('normalizes relative OSIS ranges carried by reference tags', () => {
+    const nodes = parseCanonicalBibleNoteMarkup(
+      '<note n="a">voir <ref id="Rom.8.1-11">Romains 8.1-11</ref></note>'
+    )
+
+    expect(nodes).toEqual([
+      { kind: 'text', text: 'voir ' },
+      {
+        kind: 'element',
+        tag: 'ref',
+        attributes: { id: 'Rom.8.1-Rom.8.11' },
+        children: [{ kind: 'text', text: 'Romains 8.1-11' }],
+      },
+    ])
+  })
 })

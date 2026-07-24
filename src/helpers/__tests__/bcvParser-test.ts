@@ -19,6 +19,7 @@ jest.mock('bible-passage-reference-parser/esm/bcv_parser.js', () => ({
             Gen: 1,
             Ps: 19,
             Acts: 44,
+            Rom: 45,
             John: 43,
             '1Cor': 46,
             Tob: 75,
@@ -155,6 +156,26 @@ describe('bcvParser', () => {
   })
 
   describe('osisToBibleReferenceTarget', () => {
+    it('normalizes a relative verse range from canonical Bible notes', () => {
+      expect(osisToBibleReferenceTarget('Rom.5.13-17')).toEqual({
+        book: 45,
+        chapter: 5,
+        verse: 13,
+        focusVerses: [13, 14, 15, 16, 17],
+        osis: 'Rom.5.13-Rom.5.17',
+      })
+    })
+
+    it('normalizes a relative chapter range from canonical Bible notes', () => {
+      expect(osisToBibleReferenceTarget('Rom.1-8')).toEqual({
+        book: 45,
+        chapter: 1,
+        verse: 1,
+        focusVerses: undefined,
+        osis: 'Rom.1-Rom.8',
+      })
+    })
+
     it('uses the first passage for multi-chapter ranges', () => {
       expect(osisToBibleReferenceTarget('Gen.1.31-Gen.2.3')).toEqual({
         book: 1,

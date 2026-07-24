@@ -27,9 +27,7 @@ const CanonicalBibleNoteSheet = ({
   return (
     <Sheet
       ref={sheetRef}
-      header={
-        <SheetHeader title={label ? t('Note {{label}}', { label }) : t('Note')} />
-      }
+      header={<SheetHeader title={label ? t('Note {{label}}', { label }) : t('Note')} />}
     >
       <SheetScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 18 }}>
         <Text fontSize={18} lineHeight={29} selectable>
