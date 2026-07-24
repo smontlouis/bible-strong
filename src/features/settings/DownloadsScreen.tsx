@@ -35,16 +35,10 @@ import {
   dedupeDownloadItems,
 } from '~helpers/downloadItemFactory'
 import { useDownloadQueue } from '~helpers/useDownloadQueue'
-import { isVersionInstalled, removeBibleVersion } from '~helpers/biblesDb'
 import { installedVersionsSignalAtom } from '~state/app'
 import useLanguage from '~helpers/useLanguage'
 import { RootState } from '~redux/modules/reducer'
 import { getDefaultStore } from 'jotai/vanilla'
-import { requireBiblePath } from '~helpers/requireBiblePath'
-import * as FileSystem from 'expo-file-system/legacy'
-import { dbManager } from '~helpers/sqlite'
-import { deleteRedWordsFile } from '~helpers/redWords'
-import { deletePericopeFile } from '~helpers/pericopes'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import {
   getStrongBiblePublication,
@@ -53,9 +47,12 @@ import {
 } from '~helpers/strongBiblePublications'
 import {
   getStrongBibleSidecarAvailability,
-  removeStrongBibleSidecar,
   type StrongBibleSidecarAvailability,
 } from '~helpers/strongBibleSidecar'
+import {
+  createDownloadedItemDeletionPlan,
+  deleteDownloadedItem,
+} from '~helpers/deleteDownloadedItem'
 import { buildBibleVersionGroups } from './downloadVersionGroups'
 
 // ---------------------------------------------------------------------------
@@ -200,13 +197,11 @@ function useDownloadedItems() {
   const [strongAvailability, setStrongAvailability] = useState<
     Map<StrongBibleVersionId, StrongBibleSidecarAvailability>
   >(new Map())
+  const checkGeneration = React.useRef(0)
   const installedSignal = useAtomValue(installedVersionsSignalAtom)
 
-  React.useEffect(() => {
-    checkAll()
-  }, [installedSignal])
-
   const checkAll = async () => {
+    const generation = ++checkGeneration.current
     const set = new Set<string>()
 
     // Check all Bible versions
@@ -255,11 +250,16 @@ function useDownloadedItems() {
       if (available) set.add(`database:${dbId}:fr`)
     }
 
+    if (generation !== checkGeneration.current) return
     setDownloadedSet(set)
     setStrongAvailability(availabilityMap)
   }
 
-  return { downloadedSet, strongAvailability }
+  React.useEffect(() => {
+    void checkAll()
+  }, [installedSignal])
+
+  return { downloadedSet, strongAvailability, refreshDownloadedItems: checkAll }
 }
 
 // ---------------------------------------------------------------------------
@@ -272,7 +272,7 @@ const DownloadsScreen = () => {
   const lang = useLanguage()
   const needsUpdateMap = useSelector((state: RootState) => state.user.needsUpdate)
   const defaultVersion = getDefaultBibleVersion(lang)
-  const { enqueue } = useDownloadQueue()
+  const { enqueue, clearCompleted } = useDownloadQueue()
 
   // Local state
   const [isSelectMode, setIsSelectMode] = useState(false)
@@ -282,7 +282,7 @@ const DownloadsScreen = () => {
   const [langFilter, setLangFilter] = useState<Set<LangFilter>>(new Set())
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(() => new Set())
 
-  const { downloadedSet, strongAvailability } = useDownloadedItems()
+  const { downloadedSet, strongAvailability, refreshDownloadedItems } = useDownloadedItems()
   const allSections = buildAllSections(lang, t)
 
   // Initialize all sections as collapsed once we know them
@@ -357,6 +357,12 @@ const DownloadsScreen = () => {
     })
   }
 
+  const refreshInstalledStateAfterDeletion = async () => {
+    clearCompleted()
+    await refreshDownloadedItems()
+    getDefaultStore().set(installedVersionsSignalAtom, (c: number) => c + 1)
+  }
+
   const handleBatchDownload = () => {
     const items = dedupeDownloadItems(
       Array.from(selectedItems)
@@ -387,24 +393,31 @@ const DownloadsScreen = () => {
 
   const handleBatchDelete = () => {
     // Exclude default versions from batch delete
-    const deletableIds = Array.from(selectedItems).filter(id => {
-      if (!downloadedSet.has(id)) return false
-      if (id === `bible:${defaultVersion}`) return false
-      return true
-    })
-    if (deletableIds.length === 0) return
+    const deletionPlans = Array.from(selectedItems)
+      .filter(id => downloadedSet.has(id) && id !== `bible:${defaultVersion}`)
+      .map(id => createDownloadedItemDeletionPlan(id))
+    if (deletionPlans.length === 0) return
 
-    Alert.alert(t('Attention'), t('downloads.deleteCount', { count: deletableIds.length }), [
+    const deletesStrongSidecar = deletionPlans.some(
+      plan =>
+        plan.kind === 'bible' &&
+        plan.strongSidecar !== undefined &&
+        downloadedSet.has(plan.strongSidecar.itemId)
+    )
+    const confirmation = deletesStrongSidecar
+      ? t('downloads.deleteCountWithStrong', { count: deletionPlans.length })
+      : t('downloads.deleteCount', { count: deletionPlans.length })
+
+    Alert.alert(t('Attention'), confirmation, [
       { text: t('Non'), style: 'cancel' },
       {
         text: t('Oui'),
         style: 'destructive',
         onPress: async () => {
-          for (const id of deletableIds) {
-            await deleteItem(id)
+          for (const plan of deletionPlans) {
+            await deleteDownloadedItem(plan)
           }
-          // Signal refresh
-          getDefaultStore().set(installedVersionsSignalAtom, (c: number) => c + 1)
+          await refreshInstalledStateAfterDeletion()
           setIsSelectMode(false)
           setSelectedItems(new Set())
         },
@@ -433,13 +446,40 @@ const DownloadsScreen = () => {
   }
 
   const handleRedownloadItem = (item: UnifiedItem) => {
+    const deletionPlan = createDownloadedItemDeletionPlan(item.id, { bibleMode: 'replace' })
     Alert.alert(t('Attention'), t('downloads.redownloadConfirm'), [
       { text: t('Non'), style: 'cancel' },
       {
         text: t('Oui'),
         onPress: async () => {
-          await deleteItem(item.id)
-          getDefaultStore().set(installedVersionsSignalAtom, (c: number) => c + 1)
+          await deleteDownloadedItem(deletionPlan)
+          await refreshInstalledStateAfterDeletion()
+          handleDownloadItem(item)
+        },
+      },
+    ])
+  }
+
+  const handleUpdateItem = (item: UnifiedItem) => {
+    const isRequiredBible = item.id === `bible:${defaultVersion}`
+    const deletionPlan = createDownloadedItemDeletionPlan(item.id, {
+      bibleMode: isRequiredBible ? 'replace' : 'remove',
+    })
+    const deletesStrongSidecar =
+      deletionPlan.kind === 'bible' &&
+      deletionPlan.strongSidecar !== undefined &&
+      downloadedSet.has(deletionPlan.strongSidecar.itemId)
+    const confirmation = deletesStrongSidecar
+      ? t('downloads.updateBibleWithStrongConfirm')
+      : t('downloads.redownloadConfirm')
+
+    Alert.alert(t('Attention'), confirmation, [
+      { text: t('Non'), style: 'cancel' },
+      {
+        text: t('Oui'),
+        onPress: async () => {
+          await deleteDownloadedItem(deletionPlan)
+          await refreshInstalledStateAfterDeletion()
           handleDownloadItem(item)
         },
       },
@@ -447,14 +487,23 @@ const DownloadsScreen = () => {
   }
 
   const handleDeleteItem = (item: UnifiedItem) => {
-    Alert.alert(t('Attention'), t('downloads.deleteConfirm'), [
+    const deletionPlan = createDownloadedItemDeletionPlan(item.id)
+    const deletesStrongSidecar =
+      deletionPlan.kind === 'bible' &&
+      deletionPlan.strongSidecar !== undefined &&
+      downloadedSet.has(deletionPlan.strongSidecar.itemId)
+    const confirmation = deletesStrongSidecar
+      ? t('downloads.deleteBibleWithStrongConfirm')
+      : t('downloads.deleteConfirm')
+
+    Alert.alert(t('Attention'), confirmation, [
       { text: t('Non'), style: 'cancel' },
       {
         text: t('Oui'),
         style: 'destructive',
         onPress: async () => {
-          await deleteItem(item.id)
-          getDefaultStore().set(installedVersionsSignalAtom, (c: number) => c + 1)
+          await deleteDownloadedItem(deletionPlan)
+          await refreshInstalledStateAfterDeletion()
         },
       },
     ])
@@ -606,10 +655,7 @@ const DownloadsScreen = () => {
               onDownload={() => handleDownloadItem(item)}
               onDelete={isDefault ? undefined : () => handleDeleteItem(item)}
               onRedownload={isDefault ? () => handleRedownloadItem(item) : undefined}
-              onUpdate={() => {
-                handleDeleteItem(item)
-                handleDownloadItem(item)
-              }}
+              onUpdate={() => handleUpdateItem(item)}
               isDownloaded={isDownloaded}
               isDefault={isDefault}
               needsUpdate={needsUpdateKey ? needsUpdateMap[needsUpdateKey] : false}
@@ -632,50 +678,6 @@ const DownloadsScreen = () => {
       )}
     </Container>
   )
-}
-
-// ---------------------------------------------------------------------------
-// Delete helper
-// ---------------------------------------------------------------------------
-
-async function deleteItem(itemId: string): Promise<void> {
-  if (itemId.startsWith('bible-strong:')) {
-    await removeStrongBibleSidecar(itemId.replace('bible-strong:', '') as StrongBibleVersionId)
-  } else if (itemId.startsWith('bible:')) {
-    const versionId = itemId.replace('bible:', '')
-    if (isStrongVersion(versionId)) {
-      // Strong/Interlinear: delete SQLite file
-      const path = requireBiblePath(versionId)
-      const file = await FileSystem.getInfoAsync(path)
-      if (file.exists) {
-        await FileSystem.deleteAsync(file.uri)
-      }
-      if (versionId === 'INT' || versionId === 'INT_EN') {
-        const lang = versionId === 'INT' ? 'fr' : 'en'
-        await dbManager.getDB('INTERLINEAIRE', lang).delete()
-      }
-    } else {
-      // Regular Bible: remove from bibles.sqlite
-      const installed = await isVersionInstalled(versionId)
-      if (installed) {
-        await removeBibleVersion(versionId)
-      }
-      // Clean up legacy JSON
-      const legacyPath = `${FileSystem.documentDirectory}bible-${versionId}.json`
-      const legacyFile = await FileSystem.getInfoAsync(legacyPath)
-      if (legacyFile.exists) {
-        await FileSystem.deleteAsync(legacyFile.uri)
-      }
-    }
-    deleteRedWordsFile(versionId)
-    deletePericopeFile(versionId)
-  } else if (itemId.startsWith('database:')) {
-    const parts = itemId.split(':')
-    const dbId = parts[1] as DatabaseId
-    const lang = (parts[2] || 'fr') as ResourceLanguage
-    const db = dbManager.getDB(dbId, lang)
-    await db.delete()
-  }
 }
 
 function getStrongAvailabilityLabel(

@@ -36,6 +36,13 @@ Resolve Strong navigation from the compatible sidecar of the currently open Bibl
 the installed default Strong Bible. Keep the existing global Strong database for shared lexical
 definitions.
 
+Removing a canonical Bible explicitly also removes its version-specific Strong sidecar. Replacing
+or re-downloading the Bible required by the active application language preserves that sidecar so
+it can be reused after the compatible canonical text has been installed again. The required Bible
+is LSG in French and KJV in English; the other language's Bible remains removable. Switching the
+application language must ensure the target language's required Bible is downloaded. Removing a
+sidecar never removes its Bible or the shared global Strong database.
+
 Before activating a new canonical text revision, journal an idempotent word-annotation migration.
 Move an annotation only when its remembered text can be aligned deterministically. Leave ambiguous
 or missing annotations unchanged and visible.
