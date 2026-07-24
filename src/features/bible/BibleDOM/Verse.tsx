@@ -39,6 +39,7 @@ import {
 import {
   buildCanonicalVersePresentation,
   shouldInsertCanonicalParagraphBreak,
+  shouldInsertCanonicalParagraphBreakBeforeVerse,
   type CanonicalVersePresentationNode,
 } from './canonicalVersePresentation'
 
@@ -264,6 +265,7 @@ const renderCanonicalPresentation = (
     }
     if (node.kind === 'paragraph-start') {
       if (
+        node.offset === 0 ||
         !shouldInsertCanonicalParagraphBreak({
           offset: node.offset,
           verse: options.verse,
@@ -505,6 +507,14 @@ const Verse = ({
     redWords,
   })
 
+  const paragraphBreakBeforeVerse =
+    Boolean(verse.TextRevision) &&
+    shouldInsertCanonicalParagraphBreakBeforeVerse({
+      layout: verse.Layout,
+      verse: verse.Verset,
+      textDisplay: settings.textDisplay,
+    })
+
   const verseKey = `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`
 
   const numberHighlight = getNumberHighlight({ highlightedColor, hasWordAnnotations, settings })
@@ -668,90 +678,93 @@ const Verse = ({
   }
 
   return (
-    <Wrapper
-      settings={settings}
-      id={`verset-${verse.Verset}`}
-      isSelectedMode={isSelectedMode}
-      isSelected={isSelected}
-      fadePosition={fadePosition}
-    >
-      <ContainerText
-        isFocused={isFocused}
+    <>
+      {paragraphBreakBeforeVerse && <br />}
+      <Wrapper
         settings={settings}
-        isTouched={isTouched}
+        id={`verset-${verse.Verset}`}
+        isSelectedMode={isSelectedMode}
         isSelected={isSelected}
-        isVerseToScroll={isVerseToScroll && Number(verse.Verset) !== 1}
-        highlightedColor={numberHighlight.show ? undefined : highlightedColor}
+        fadePosition={fadePosition}
       >
-        <NumberText
+        <ContainerText
           isFocused={isFocused}
           settings={settings}
-          highlightBg={numberHighlight.bg}
-          highlightColor={numberHighlight.color}
+          isTouched={isTouched}
+          isSelected={isSelected}
+          isVerseToScroll={isVerseToScroll && Number(verse.Verset) !== 1}
+          highlightedColor={numberHighlight.show ? undefined : highlightedColor}
         >
-          {verse.Verset}{' '}
-        </NumberText>
-        {bookmark && !isSelectionMode && (
-          <BookmarkIcon
+          <NumberText
+            isFocused={isFocused}
             settings={settings}
-            color={bookmark.color}
-            onClick={openBookmarkModal}
-            isDisabled={annotationMode}
-          />
-        )}
-        {relationCount &&
-          (settings.relationsDisplay || 'inline') !== 'inline' &&
-          !isSelectionMode && (
-            <RelationsCount
+            highlightBg={numberHighlight.bg}
+            highlightColor={numberHighlight.color}
+          >
+            {verse.Verset}{' '}
+          </NumberText>
+          {bookmark && !isSelectionMode && (
+            <BookmarkIcon
               settings={settings}
-              onClick={navigateToVerseStudyRelations}
-              count={relationCount}
+              color={bookmark.color}
+              onClick={openBookmarkModal}
               isDisabled={annotationMode}
             />
           )}
-        {taggedItemsCount > 0 &&
-          (settings.tagsDisplay !== 'inline' || hasNonHighlightTags) &&
-          !isSelectionMode && (
-            <TagsIndicator
-              count={taggedItemsCount}
-              settings={settings}
-              onClick={navigateToVerseTags}
-              isDisabled={annotationMode}
-            />
-          )}
+          {relationCount &&
+            (settings.relationsDisplay || 'inline') !== 'inline' &&
+            !isSelectionMode && (
+              <RelationsCount
+                settings={settings}
+                onClick={navigateToVerseStudyRelations}
+                count={relationCount}
+                isDisabled={annotationMode}
+              />
+            )}
+          {taggedItemsCount > 0 &&
+            (settings.tagsDisplay !== 'inline' || hasNonHighlightTags) &&
+            !isSelectionMode && (
+              <TagsIndicator
+                count={taggedItemsCount}
+                settings={settings}
+                onClick={navigateToVerseTags}
+                isDisabled={annotationMode}
+              />
+            )}
 
-        <VerseText
-          isParallel={isParallel}
-          settings={settings}
-          id={`verse-text-${verseKey}`}
-          data-verse-key={verseKey}
-        >
-          {text}
-        </VerseText>
-      </ContainerText>
-      {otherVersionAnnotations && otherVersionAnnotations.length > 0 && !isSelectionMode && (
-        <VersionAnnotationIndicator
-          versions={otherVersionAnnotations}
-          settings={settings}
-          onClick={openCrossVersionModal}
-          isDisabled={annotationMode}
-        />
-      )}
-      {tag && settings.tagsDisplay === 'inline' && (
-        <VerseTags settings={settings} tag={tag} isDisabled={annotationMode} />
-      )}
-      {relationItems &&
-        (settings.relationsDisplay || 'inline') === 'inline' &&
-        !isSelectionMode && (
-          <RelationsText
+          <VerseText
             isParallel={isParallel}
             settings={settings}
-            onClick={navigateToRelationItem}
-            relationItems={relationItems}
+            id={`verse-text-${verseKey}`}
+            data-verse-key={verseKey}
+          >
+            {text}
+          </VerseText>
+        </ContainerText>
+        {otherVersionAnnotations && otherVersionAnnotations.length > 0 && !isSelectionMode && (
+          <VersionAnnotationIndicator
+            versions={otherVersionAnnotations}
+            settings={settings}
+            onClick={openCrossVersionModal}
             isDisabled={annotationMode}
           />
         )}
-    </Wrapper>
+        {tag && settings.tagsDisplay === 'inline' && (
+          <VerseTags settings={settings} tag={tag} isDisabled={annotationMode} />
+        )}
+        {relationItems &&
+          (settings.relationsDisplay || 'inline') === 'inline' &&
+          !isSelectionMode && (
+            <RelationsText
+              isParallel={isParallel}
+              settings={settings}
+              onClick={navigateToRelationItem}
+              relationItems={relationItems}
+              isDisabled={annotationMode}
+            />
+          )}
+      </Wrapper>
+    </>
   )
 }
 

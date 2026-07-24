@@ -148,6 +148,27 @@ export const shouldInsertCanonicalParagraphBreak = ({
   textDisplay: 'inline' | 'block'
 }) => offset > 0 || (Number(verse) !== 1 && textDisplay === 'inline')
 
+export const shouldInsertCanonicalParagraphBreakBeforeVerse = ({
+  layout = [],
+  verse,
+  textDisplay,
+}: {
+  layout?: Verse['Layout']
+  verse: string | number
+  textDisplay: 'inline' | 'block'
+}) =>
+  layout.some(
+    event =>
+      event.type === 'open' &&
+      isParagraphTag(event.tag) &&
+      clampOffset(event.offset, Number.MAX_SAFE_INTEGER) === 0
+  ) &&
+  shouldInsertCanonicalParagraphBreak({
+    offset: 0,
+    verse,
+    textDisplay,
+  })
+
 const currentChildren = (stack: PresentationContainer[]) => stack[stack.length - 1]!.children
 
 const isParagraphTag = (tag: string) => tag.toLocaleLowerCase() === 'p'

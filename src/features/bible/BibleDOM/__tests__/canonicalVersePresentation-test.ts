@@ -2,6 +2,7 @@ import {
   buildCanonicalVersePresentation,
   getCanonicalPresentationText,
   shouldInsertCanonicalParagraphBreak,
+  shouldInsertCanonicalParagraphBreakBeforeVerse,
 } from '../canonicalVersePresentation'
 
 describe('canonicalVersePresentation', () => {
@@ -60,6 +61,39 @@ describe('canonicalVersePresentation', () => {
         textDisplay: 'block',
       })
     ).toBe(true)
+  })
+
+  it('places a verse-boundary paragraph break before the whole verse', () => {
+    const paragraphOpening = [{ offset: 0, order: 0, type: 'open' as const, tag: 'p' }]
+
+    expect(
+      shouldInsertCanonicalParagraphBreakBeforeVerse({
+        layout: paragraphOpening,
+        verse: 2,
+        textDisplay: 'inline',
+      })
+    ).toBe(true)
+    expect(
+      shouldInsertCanonicalParagraphBreakBeforeVerse({
+        layout: [],
+        verse: 2,
+        textDisplay: 'inline',
+      })
+    ).toBe(false)
+    expect(
+      shouldInsertCanonicalParagraphBreakBeforeVerse({
+        layout: paragraphOpening,
+        verse: 1,
+        textDisplay: 'inline',
+      })
+    ).toBe(false)
+    expect(
+      shouldInsertCanonicalParagraphBreakBeforeVerse({
+        layout: paragraphOpening,
+        verse: 2,
+        textDisplay: 'block',
+      })
+    ).toBe(false)
   })
 
   it('adds Strong references without changing canonical selectable text or layout', () => {
