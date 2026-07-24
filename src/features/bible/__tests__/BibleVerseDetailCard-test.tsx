@@ -1,0 +1,253 @@
+import React from 'react'
+import { act, create, type ReactTestRenderer } from 'react-test-renderer'
+
+import BibleVerseDetailCard from '../BibleVerseDetailCard'
+
+const mockLoadVerse = jest.fn()
+const mockLoadReferences = jest.fn()
+const mockResourceAccess = {
+  strongBible: { loadVerse: mockLoadVerse },
+  strong: { loadReferences: mockLoadReferences },
+}
+
+jest.mock('@emotion/native', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  const createStyledComponent = (type: React.ElementType | string) => () =>
+    function StyledComponent({
+      children,
+      ...props
+    }: React.PropsWithChildren<Record<string, unknown>>) {
+      return ReactModule.createElement(type as React.ElementType, props, children)
+    }
+  const styled = Object.assign((type: React.ElementType) => createStyledComponent(type), {
+    View: createStyledComponent('View'),
+  })
+
+  return { __esModule: true, default: styled }
+})
+
+jest.mock('@emotion/react', () => ({
+  useTheme: () => ({ colors: { default: '#000' } }),
+}))
+
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ push: jest.fn() }),
+}))
+
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, values?: { version?: string }) =>
+      values?.version ? key.replace('{{version}}', values.version) : key,
+  }),
+}))
+
+jest.mock('react-redux', () => ({
+  useSelector: (selector: (state: unknown) => unknown) =>
+    selector({
+      user: {
+        bible: {
+          settings: { defaultStrongBibleVersionId: 'LSG' },
+        },
+      },
+    }),
+}))
+
+jest.mock('react-native', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  return {
+    ScrollView: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
+      ReactModule.createElement('ScrollView', props, children),
+  }
+})
+
+jest.mock('react-native-reanimated-carousel', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  return {
+    __esModule: true,
+    default: ({ data }: { data: unknown[] }) =>
+      ReactModule.createElement('Carousel', { itemCount: data.length }),
+  }
+})
+
+jest.mock('~features/resources/resourceAccess', () => ({
+  useResourceAccess: () => mockResourceAccess,
+}))
+
+jest.mock('~common/waitForStrongDB', () => ({
+  __esModule: true,
+  default: () => (Component: React.ComponentType) => Component,
+}))
+
+jest.mock('~helpers/bibleCoverage', () => ({
+  getChapterVerseCountSafe: jest.fn(async () => 31),
+}))
+
+jest.mock('~helpers/strongVerseParser', () => ({
+  parseStrongVerse: () => ({ references: ['430'] }),
+}))
+
+jest.mock('~helpers/verseToStrong', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  return jest.fn(async (verse: { Texte: string }) => ({
+    formattedTexte: ReactModule.createElement('FormattedVerse', null, verse.Texte),
+  }))
+})
+
+jest.mock('~helpers/useLayoutSize', () => ({
+  useLayoutSize: () => ({
+    ref: { current: null },
+    size: { width: 320, height: 400 },
+    onLayout: jest.fn(),
+  }),
+}))
+
+jest.mock('~helpers/utils', () => ({
+  wp: (value: number) => value,
+}))
+
+jest.mock('~helpers/strongBiblePublications', () => ({
+  STRONG_BIBLE_FALLBACK_PRIORITY: ['LSG', 'DBY', 'DBR'],
+}))
+
+jest.mock('~helpers/CarouselContext', () => ({
+  CarouselProvider: ({ children }: React.PropsWithChildren) => <>{children}</>,
+}))
+
+jest.mock('~common/Empty', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  return () => ReactModule.createElement('Empty')
+})
+jest.mock('~common/Loading', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  return () => ReactModule.createElement('Loading')
+})
+jest.mock('~common/ui/Button', () => ({
+  __esModule: true,
+  default: ({ children }: React.PropsWithChildren) => <>{children}</>,
+}))
+jest.mock('~common/ui/Box', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  return {
+    __esModule: true,
+    default: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
+      ReactModule.createElement('Box', props, children),
+  }
+})
+jest.mock('~common/ui/Container', () => ({
+  __esModule: true,
+  default: ({ children }: React.PropsWithChildren) => <>{children}</>,
+}))
+jest.mock('~common/ui/Paragraph', () => ({
+  __esModule: true,
+  default: ({ children }: React.PropsWithChildren) => <>{children}</>,
+}))
+jest.mock('~common/ui/RoundedCorner', () => () => null)
+jest.mock('~common/ui/Text', () => ({
+  __esModule: true,
+  default: ({ children }: React.PropsWithChildren) => <>{children}</>,
+}))
+jest.mock('../BibleVerseDetailFooter', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  return () => ReactModule.createElement('VerseFooter')
+})
+jest.mock('../StrongCard', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  return () => ReactModule.createElement('StrongCard')
+})
+
+const makeAvailableVerse = (text: string) => ({
+  status: 'available' as const,
+  verse: { Texte: text },
+  provenance: {
+    versionId: 'DBY' as const,
+    datasetId: 'DBY' as const,
+    textRevision: 'test',
+    textSha256: 'test',
+  },
+})
+
+const renderCard = (verseNumber: number) => (
+  <BibleVerseDetailCard
+    verse={{ Livre: 1, Chapitre: 1, Verset: verseNumber }}
+    selectedVersion="BFC"
+    updateVerse={jest.fn()}
+  />
+)
+
+describe('BibleVerseDetailCard', () => {
+  let renderer: ReactTestRenderer
+  let consoleError: jest.SpyInstance
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockLoadReferences.mockResolvedValue([{ Code: 430 }])
+    ;(
+      globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }
+    ).IS_REACT_ACT_ENVIRONMENT = true
+    consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined)
+  })
+
+  afterEach(() => {
+    act(() => renderer?.unmount())
+    consoleError.mockRestore()
+  })
+
+  it('keeps the displayed Strong verse while the next verse is loading', async () => {
+    let resolveNextVerse: (value: ReturnType<typeof makeAvailableVerse>) => void = () => undefined
+    const nextVerse = new Promise<ReturnType<typeof makeAvailableVerse>>(resolve => {
+      resolveNextVerse = resolve
+    })
+    mockLoadVerse
+      .mockResolvedValueOnce(makeAvailableVerse('Ancien verset'))
+      .mockReturnValueOnce(nextVerse)
+
+    await act(async () => {
+      renderer = create(renderCard(1))
+    })
+    expect(JSON.stringify(renderer.toJSON())).toContain('Ancien verset')
+
+    await act(async () => {
+      renderer.update(renderCard(2))
+      await Promise.resolve()
+    })
+
+    const pendingTree = JSON.stringify(renderer.toJSON())
+    expect(pendingTree).toContain('Ancien verset')
+    expect(pendingTree).not.toContain('"type":"Loading"')
+
+    await act(async () => {
+      resolveNextVerse(makeAvailableVerse('Nouveau verset'))
+      await nextVerse
+    })
+    const loadedTree = JSON.stringify(renderer.toJSON())
+    expect(loadedTree).toContain('Nouveau verset')
+    expect(loadedTree).not.toContain('Ancien verset')
+  })
+
+  it('does not duplicate the selected Strong Bible below the header', async () => {
+    mockLoadVerse.mockResolvedValueOnce(makeAvailableVerse('Verset'))
+
+    await act(async () => {
+      renderer = create(renderCard(1))
+    })
+
+    expect(JSON.stringify(renderer.toJSON())).not.toContain('Strong fourni par DBY')
+  })
+
+  it('keeps the displayed Strong verse when the next verse cannot be loaded', async () => {
+    mockLoadVerse
+      .mockResolvedValueOnce(makeAvailableVerse('Verset conservé'))
+      .mockResolvedValueOnce({ status: 'unavailable', attempts: [] })
+
+    await act(async () => {
+      renderer = create(renderCard(1))
+    })
+    await act(async () => {
+      renderer.update(renderCard(2))
+    })
+
+    const failedTree = JSON.stringify(renderer.toJSON())
+    expect(failedTree).toContain('Verset conservé')
+    expect(failedTree).not.toContain('"type":"Empty"')
+  })
+})

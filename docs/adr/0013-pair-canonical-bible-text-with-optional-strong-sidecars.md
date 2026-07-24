@@ -70,3 +70,7 @@ covered resolver priority, manual override fallback, and Firestore tab-group ser
 simulator smoke test opened BCC1923 without an LSG sidecar, confirmed automatic DBY resolution,
 selected DBY manually, returned to automatic mode, verified unavailable LSG and DBR entries were
 disabled, and confirmed the separate lexical-language menu remained available.
+
+A follow-up iOS smoke test confirmed that the source pill shrinks for a manual three-letter source,
+expands only as far as `Auto · DBY`, avoids duplicate provenance below the header, and keeps the
+displayed verse and lexical cards visible while navigating to the next verse.

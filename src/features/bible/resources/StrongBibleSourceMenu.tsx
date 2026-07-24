@@ -112,14 +112,18 @@ const StrongBibleSourceMenu = ({ bibleAtom, isOpen, resolvedProvenance }: Props)
     : resolvedProvenance
       ? t('Automatique · {{version}}', { version: resolvedProvenance.versionId })
       : t('Automatique')
+  const layoutKey = strongBibleSourceVersionId
+    ? `manual-${strongBibleSourceVersionId}`
+    : `auto-${resolvedProvenance?.versionId ?? 'pending'}`
 
   return (
     <MenuView
+      key={layoutKey}
       testID="strong-bible-source-menu"
       actions={actions}
       onPressAction={({ nativeEvent }) => handleAction(nativeEvent.event)}
     >
-      <Box row center height={32} width={100} px={10} borderRadius={16} bg="lightGrey">
+      <Box row center height={32} px={10} borderRadius={16} bg="lightGrey" maxWidth={100}>
         <Text numberOfLines={1} fontSize={12} bold>
           {label}
         </Text>
