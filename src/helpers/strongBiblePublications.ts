@@ -4,6 +4,12 @@ export type StrongMode = 'visible' | 'hidden'
 export type StrongBibleVersionId = 'LSG' | 'DBY' | 'DBR'
 export type StrongBibleDatasetId = 'LSG' | 'DBY' | 'DBYR'
 
+export const STRONG_BIBLE_FALLBACK_PRIORITY = [
+  'LSG',
+  'DBY',
+  'DBR',
+] as const satisfies readonly StrongBibleVersionId[]
+
 type PublicationArtifact = {
   url: string
   entry: string

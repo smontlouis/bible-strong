@@ -15,6 +15,7 @@ import {
 import {
   isStrongCapableBibleVersion,
   resolveStrongBibleVersion,
+  STRONG_BIBLE_FALLBACK_PRIORITY,
   type StrongBibleDatasetId,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
@@ -28,6 +29,8 @@ export interface StrongBibleProvenance {
 export interface StrongBibleResolutionRequest {
   currentVersionId: string
   defaultVersionId: StrongBibleVersionId
+  preferredVersionId?: StrongBibleVersionId
+  fallbackVersionIds?: readonly StrongBibleVersionId[]
 }
 
 export interface StrongBibleVerseRequest extends StrongBibleResolutionRequest {
@@ -149,7 +152,13 @@ export const createStrongBibleResourceAccess = (
       }
   > => {
     const currentVersionId = resolveStrongBibleVersion(request.currentVersionId).versionId
-    const candidates = [...new Set([currentVersionId, request.defaultVersionId])]
+    const fallbackVersionIds = request.fallbackVersionIds ?? [
+      request.defaultVersionId,
+      ...STRONG_BIBLE_FALLBACK_PRIORITY,
+    ]
+    const candidates = [
+      ...new Set([request.preferredVersionId, currentVersionId, ...fallbackVersionIds]),
+    ].filter((candidate): candidate is string => Boolean(candidate))
     const attempts: StrongBibleAttempt[] = []
 
     for (const candidate of candidates) {

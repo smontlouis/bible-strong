@@ -59,6 +59,7 @@ export interface BibleTab extends TabBase {
   data: {
     selectedVersion: VersionCode
     strongMode?: StrongMode
+    strongBibleSourceVersionId?: StrongBibleVersionId
     selectedBook: Book
     selectedChapter: number
     selectedVerse: number

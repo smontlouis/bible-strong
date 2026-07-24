@@ -1164,6 +1164,8 @@
   "Occurrences selon {{version}}": "Occurrences in {{version}}",
   "Ajoute les numéros Strong à cette Bible. Le texte biblique reste utilisable sans ce téléchargement.": "Adds Strong numbers to this Bible. The Bible text remains available without this download.",
   "Bible Strong par défaut": "Default Strong Bible",
+  "Automatique": "Automatic",
+  "Automatique · {{version}}": "Auto · {{version}}",
   "Utilisée pour les concordances lorsque la Bible ouverte n'a pas de données Strong installées.": "Used for concordances when the open Bible has no installed Strong data.",
   "{{version}} · installé": "{{version}} · installed",
   "{{version}} · à télécharger": "{{version}} · download required",

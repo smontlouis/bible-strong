@@ -33,6 +33,10 @@ import type { RootState } from '~redux/modules/reducer'
 import Button from '~common/ui/Button'
 import Text from '~common/ui/Text'
 import type { VersionCode } from '~state/tabs'
+import {
+  STRONG_BIBLE_FALLBACK_PRIORITY,
+  type StrongBibleVersionId,
+} from '~helpers/strongBiblePublications'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -77,6 +81,8 @@ interface Verse {
 interface Props {
   verse: Verse
   selectedVersion: VersionCode
+  preferredStrongVersionId?: StrongBibleVersionId
+  onStrongBibleProvenanceChange?: (provenance: StrongBibleProvenance | null) => void
   isSelectionMode?: StudyNavigateBibleType
   updateVerse: (direction: number) => void
 }
@@ -94,6 +100,8 @@ interface State {
 const BibleVerseDetailCard: React.FC<Props> = ({
   verse,
   selectedVersion,
+  preferredStrongVersionId,
+  onStrongBibleProvenanceChange,
   isSelectionMode,
   updateVerse,
 }) => {
@@ -173,11 +181,14 @@ const BibleVerseDetailCard: React.FC<Props> = ({
         formattedTexte: null,
         provenance: null,
       }))
+      onStrongBibleProvenanceChange?.(null)
 
       try {
         const result = await resources.strongBible.loadVerse({
           currentVersionId: selectedVersion,
           defaultVersionId: defaultStrongVersion,
+          preferredVersionId: preferredStrongVersionId,
+          fallbackVersionIds: STRONG_BIBLE_FALLBACK_PRIORITY,
           book: verseBook,
           chapter: verseChapter,
           verse: verseNumber,
@@ -192,6 +203,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
           }))
           return
         }
+        onStrongBibleProvenanceChange?.(result.provenance)
 
         const strongVerse = result.verse
         const parsedVerse = parseStrongVerse(strongVerse.Texte, verseBook)
@@ -252,6 +264,8 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     }
   }, [
     defaultStrongVersion,
+    onStrongBibleProvenanceChange,
+    preferredStrongVersionId,
     resources.strong,
     resources.strongBible,
     selectedVersion,
@@ -298,13 +312,9 @@ const BibleVerseDetailCard: React.FC<Props> = ({
         <ScrollView contentContainerStyle={{ paddingTop: 10 }}>
           {state.provenance && (
             <Text px={30} pb={6} fontSize={11} color="tertiary">
-              {state.provenance.isFallback
-                ? t('Strong fourni par {{version}} (Bible Strong par défaut)', {
-                    version: state.provenance.versionId,
-                  })
-                : t('Strong fourni par {{version}}', {
-                    version: state.provenance.versionId,
-                  })}
+              {t('Strong fourni par {{version}}', {
+                version: state.provenance.versionId,
+              })}
             </Text>
           )}
           <StyledVerse>

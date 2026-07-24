@@ -2,7 +2,7 @@ import { useTheme } from '@emotion/react'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import React, { memo, useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BackHandler, View } from 'react-native'
 import { useResourceLanguage } from 'src/state/resourcesLanguage'
@@ -24,13 +24,16 @@ import DictionnaireVerseDetailCard from '~features/dictionnary/DictionnaireVerse
 import NaveModalCard from '~features/nave/NaveModalCard'
 import formatVerseContent from '~helpers/formatVerseContent'
 import generateUUID from '~helpers/generateUUID'
+import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
 import { toast } from '~helpers/toast'
+import type { StrongBibleProvenance } from '~features/resources/strongBibleResourceAccess'
 import { BibleTab, useBibleTabActions, VersionCode } from '../../../state/tabs'
 import BibleVerseDetailCard from '../BibleVerseDetailCard'
 import CompareVersionSelectorSheet from '../CompareVersionSelectorSheet'
 import { ReferenceCard } from '../ReferenceCard'
 import CompareCard from './CompareCard'
 import ResourcesModalFooter from './ResourcesModalFooter'
+import StrongBibleSourceMenu from './StrongBibleSourceMenu'
 
 type ResourceVerse = {
   Livre: number
@@ -76,229 +79,240 @@ type Props = {
 //   }, [navigation, resourceModalRef])
 // }
 
-const ResourcesModal = memo(
-  ({
-    resourceModalRef,
-    resourceType,
-    onChangeResourceType,
-    bibleAtom,
-    isSelectionMode,
-    selectedVersion,
-    selectedVerses: selectedVersesProp,
-    onChangeVerse,
-  }: Props) => {
-    const { t } = useTranslation()
-    const compareVersionSelectorRef = React.useRef<SheetRef>(null)
-    const [isOpen, setIsOpen] = useState(false)
-    const openInNewTab = useOpenInNewTab()
-    const bible = useAtomValue(bibleAtom)
-    const [strongLanguage, setStrongLanguage] = useResourceLanguage('STRONG')
-    const [dictionaryLanguage, setDictionaryLanguage] = useResourceLanguage('DICTIONNAIRE')
-    const [naveLanguage, setNaveLanguage] = useResourceLanguage('NAVE')
-    const [commentariesLanguage, setCommentariesLanguage] = useResourceLanguage('COMMENTARIES')
-    const {
-      data: { selectedVersion: bibleSelectedVersion, selectedVerses: bibleSelectedVerses },
-    } = bible
-    const selectedVerses = selectedVersesProp ?? bibleSelectedVerses
-    const effectiveSelectedVersion = selectedVersion ?? bibleSelectedVersion
-    const selectedVerse = Object.keys(selectedVerses)[0]
+const ResourcesModal = ({
+  resourceModalRef,
+  resourceType,
+  onChangeResourceType,
+  bibleAtom,
+  isSelectionMode,
+  selectedVersion,
+  selectedVerses: selectedVersesProp,
+  onChangeVerse,
+}: Props) => {
+  const { t } = useTranslation()
+  const compareVersionSelectorRef = React.useRef<SheetRef>(null)
+  const [isOpen, setIsOpen] = useState(false)
+  const openInNewTab = useOpenInNewTab()
+  const bible = useAtomValue(bibleAtom)
+  const [strongLanguage, setStrongLanguage] = useResourceLanguage('STRONG')
+  const [dictionaryLanguage, setDictionaryLanguage] = useResourceLanguage('DICTIONNAIRE')
+  const [naveLanguage, setNaveLanguage] = useResourceLanguage('NAVE')
+  const [commentariesLanguage, setCommentariesLanguage] = useResourceLanguage('COMMENTARIES')
+  const {
+    data: {
+      selectedVersion: bibleSelectedVersion,
+      selectedVerses: bibleSelectedVerses,
+      strongBibleSourceVersionId,
+    },
+  } = bible
+  const [resolvedStrongProvenance, setResolvedStrongProvenance] =
+    useState<StrongBibleProvenance | null>(null)
+  const selectedVerses = selectedVersesProp ?? bibleSelectedVerses
+  const effectiveSelectedVersion = selectedVersion ?? bibleSelectedVersion
+  const selectedVerse = Object.keys(selectedVerses)[0]
 
-    const { title } = formatVerseContent([selectedVerse])
+  const { title } = formatVerseContent([selectedVerse])
 
-    const getSubtitleByResourceType = () => {
-      switch (resourceType) {
-        case 'strong':
-          return t('Lexique hébreu & grec')
-        case 'commentary':
-          return t('Commentaires')
-        case 'dictionary':
-          return t('Dictionnaire')
-        case 'nave':
-          return t('Par thèmes')
-        case 'reference':
-          return t('Références croisées')
-        case 'compare':
-          return t('Comparer les versions')
-        default:
-          return ''
-      }
+  const getSubtitleByResourceType = () => {
+    switch (resourceType) {
+      case 'strong':
+        return t('Lexique hébreu & grec')
+      case 'commentary':
+        return t('Commentaires')
+      case 'dictionary':
+        return t('Dictionnaire')
+      case 'nave':
+        return t('Par thèmes')
+      case 'reference':
+        return t('Références croisées')
+      case 'compare':
+        return t('Comparer les versions')
+      default:
+        return ''
     }
+  }
 
-    const toggleResourceLanguage = (
-      currentLanguage: 'fr' | 'en',
-      setLanguage: (language: 'fr' | 'en') => void
-    ) => {
-      const nextLanguage = currentLanguage === 'fr' ? 'en' : 'fr'
-      setLanguage(nextLanguage)
-      toast(t('menu.languageChanged', { language: nextLanguage === 'fr' ? 'Français' : 'English' }))
+  const toggleResourceLanguage = (
+    currentLanguage: 'fr' | 'en',
+    setLanguage: (language: 'fr' | 'en') => void
+  ) => {
+    const nextLanguage = currentLanguage === 'fr' ? 'en' : 'fr'
+    setLanguage(nextLanguage)
+    toast(t('menu.languageChanged', { language: nextLanguage === 'fr' ? 'Français' : 'English' }))
+  }
+
+  const getMenuActionsByResourceType = (): MenuAction[] => {
+    const languageAction = (currentLanguage: 'fr' | 'en'): MenuAction => ({
+      id: 'language',
+      title: `${t('menu.language')}: ${currentLanguage === 'fr' ? 'Français' : 'English'}`,
+      image: 'globe',
+    })
+
+    switch (resourceType) {
+      case 'strong':
+        return [languageAction(strongLanguage)]
+      case 'dictionary':
+        return [languageAction(dictionaryLanguage)]
+      case 'nave':
+        return [languageAction(naveLanguage)]
+      case 'commentary':
+        return [
+          languageAction(commentariesLanguage),
+          {
+            id: 'open-tab',
+            title: t('tab.openInNewTab'),
+            image: 'arrow.up.forward.square',
+          },
+        ]
+      case 'compare':
+        return [
+          {
+            id: 'choose-versions',
+            title: t('common.chooseCompareVersions'),
+            image: 'checkmark.square',
+          },
+          {
+            id: 'open-tab',
+            title: t('tab.openInNewTab'),
+            image: 'arrow.up.forward.square',
+          },
+        ]
+      default:
+        return []
     }
+  }
 
-    const getMenuActionsByResourceType = (): MenuAction[] => {
-      const languageAction = (currentLanguage: 'fr' | 'en'): MenuAction => ({
-        id: 'language',
-        title: `${t('menu.language')}: ${currentLanguage === 'fr' ? 'Français' : 'English'}`,
-        image: 'globe',
-      })
-
-      switch (resourceType) {
-        case 'strong':
-          return [languageAction(strongLanguage)]
-        case 'dictionary':
-          return [languageAction(dictionaryLanguage)]
-        case 'nave':
-          return [languageAction(naveLanguage)]
-        case 'commentary':
-          return [
-            languageAction(commentariesLanguage),
-            {
-              id: 'open-tab',
-              title: t('tab.openInNewTab'),
-              image: 'arrow.up.forward.square',
-            },
-          ]
-        case 'compare':
-          return [
-            {
-              id: 'choose-versions',
-              title: t('common.chooseCompareVersions'),
-              image: 'checkmark.square',
-            },
-            {
-              id: 'open-tab',
-              title: t('tab.openInNewTab'),
-              image: 'arrow.up.forward.square',
-            },
-          ]
-        default:
-          return []
-      }
+  const handleMenuAction = (actionId: string) => {
+    switch (actionId) {
+      case 'language':
+        if (resourceType === 'strong') toggleResourceLanguage(strongLanguage, setStrongLanguage)
+        if (resourceType === 'dictionary') {
+          toggleResourceLanguage(dictionaryLanguage, setDictionaryLanguage)
+        }
+        if (resourceType === 'nave') toggleResourceLanguage(naveLanguage, setNaveLanguage)
+        if (resourceType === 'commentary') {
+          toggleResourceLanguage(commentariesLanguage, setCommentariesLanguage)
+        }
+        break
+      case 'choose-versions':
+        compareVersionSelectorRef.current?.present()
+        break
+      case 'open-tab':
+        if (resourceType === 'commentary') {
+          openInNewTab({
+            id: `commentary-${generateUUID()}`,
+            title: t('tabs.new'),
+            isRemovable: true,
+            type: 'commentary',
+            data: { verse: selectedVerse },
+          })
+        }
+        if (resourceType === 'compare') {
+          openInNewTab({
+            id: `compare-${generateUUID()}`,
+            title: t('tabs.new'),
+            isRemovable: true,
+            type: 'compare',
+            data: { selectedVerses },
+          })
+        }
+        break
     }
+  }
 
-    const handleMenuAction = (actionId: string) => {
-      switch (actionId) {
-        case 'language':
-          if (resourceType === 'strong') toggleResourceLanguage(strongLanguage, setStrongLanguage)
-          if (resourceType === 'dictionary') {
-            toggleResourceLanguage(dictionaryLanguage, setDictionaryLanguage)
-          }
-          if (resourceType === 'nave') toggleResourceLanguage(naveLanguage, setNaveLanguage)
-          if (resourceType === 'commentary') {
-            toggleResourceLanguage(commentariesLanguage, setCommentariesLanguage)
-          }
-          break
-        case 'choose-versions':
-          compareVersionSelectorRef.current?.present()
-          break
-        case 'open-tab':
-          if (resourceType === 'commentary') {
-            openInNewTab({
-              id: `commentary-${generateUUID()}`,
-              title: t('tabs.new'),
-              isRemovable: true,
-              type: 'commentary',
-              data: { verse: selectedVerse },
-            })
-          }
-          if (resourceType === 'compare') {
-            openInNewTab({
-              id: `compare-${generateUUID()}`,
-              title: t('tabs.new'),
-              isRemovable: true,
-              type: 'compare',
-              data: { selectedVerses },
-            })
-          }
-          break
-      }
-    }
+  const closeModal = () => {
+    resourceModalRef.current?.close()
+  }
 
-    const closeModal = () => {
-      resourceModalRef.current?.close()
-    }
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (!isOpen) return false
 
-    useEffect(() => {
-      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-        if (!isOpen) return false
+      closeModal()
+      return true
+    })
 
-        closeModal()
-        return true
-      })
+    return () => subscription.remove()
+  }, [isOpen])
 
-      return () => subscription.remove()
-    }, [isOpen])
-
-    const renderRightComponent = () => {
-      const menuActions = getMenuActionsByResourceType()
-
-      return (
-        <Box row alignItems="center">
-          {menuActions.length ? (
-            <MenuView
-              actions={menuActions}
-              onPressAction={({ nativeEvent }) => handleMenuAction(nativeEvent.event)}
-            >
-              <Box row center height={54} width={44}>
-                <FeatherIcon name="more-vertical" size={18} />
-              </Box>
-            </MenuView>
-          ) : null}
-        </Box>
-      )
-    }
-
-    const footerRenderer = useCallback(
-      (props: SheetFooterProps) => {
-        return (
-          <SheetFooter px={0} py={0} {...props}>
-            <ResourcesModalFooter
-              resourceType={resourceType}
-              onChangeResourceType={onChangeResourceType}
-            />
-          </SheetFooter>
-        )
-      },
-      [resourceType, onChangeResourceType]
-    )
-
-    const theme = useTheme()
+  const renderRightComponent = () => {
+    const menuActions = getMenuActionsByResourceType()
 
     return (
-      <>
-        <Sheet
-          ref={resourceModalRef}
-          snapPoints={[1]}
-          footer={footerRenderer}
-          onOpenChange={setIsOpen}
-          onClose={() => setIsOpen(false)}
-          backgroundColor={theme.colors.reverse}
-          header={
-            <SheetHeader
-              hasBackButton
-              onBackPress={closeModal}
-              title={title}
-              subTitle={getSubtitleByResourceType()}
-              rightComponent={renderRightComponent()}
-            />
-          }
-        >
-          {resourceType && (
-            <View style={{ flex: 1 }}>
-              <Resource
-                resourceType={resourceType}
-                bibleAtom={bibleAtom}
-                isSelectionMode={isSelectionMode}
-                selectedVersion={effectiveSelectedVersion}
-                selectedVerses={selectedVerses}
-                onChangeVerse={onChangeVerse}
-              />
-            </View>
-          )}
-        </Sheet>
-        <CompareVersionSelectorSheet sheetRef={compareVersionSelectorRef} />
-      </>
+      <Box row alignItems="center">
+        {resourceType === 'strong' ? (
+          <StrongBibleSourceMenu
+            key={isOpen ? 'open' : 'closed'}
+            bibleAtom={bibleAtom}
+            isOpen={isOpen}
+            resolvedProvenance={resolvedStrongProvenance}
+          />
+        ) : null}
+        {menuActions.length ? (
+          <MenuView
+            actions={menuActions}
+            onPressAction={({ nativeEvent }) => handleMenuAction(nativeEvent.event)}
+          >
+            <Box row center height={54} width={44}>
+              <FeatherIcon name="more-vertical" size={18} />
+            </Box>
+          </MenuView>
+        ) : null}
+      </Box>
     )
   }
-)
+
+  const footerRenderer = (props: SheetFooterProps) => {
+    return (
+      <SheetFooter px={0} py={0} {...props}>
+        <ResourcesModalFooter
+          resourceType={resourceType}
+          onChangeResourceType={onChangeResourceType}
+        />
+      </SheetFooter>
+    )
+  }
+
+  const theme = useTheme()
+
+  return (
+    <>
+      <Sheet
+        ref={resourceModalRef}
+        snapPoints={[1]}
+        footer={footerRenderer}
+        onOpenChange={setIsOpen}
+        onClose={() => setIsOpen(false)}
+        backgroundColor={theme.colors.reverse}
+        header={
+          <SheetHeader
+            hasBackButton
+            onBackPress={closeModal}
+            title={title}
+            subTitle={getSubtitleByResourceType()}
+            rightComponent={renderRightComponent()}
+          />
+        }
+      >
+        {resourceType && (
+          <View style={{ flex: 1 }}>
+            <Resource
+              resourceType={resourceType}
+              bibleAtom={bibleAtom}
+              isSelectionMode={isSelectionMode}
+              selectedVersion={effectiveSelectedVersion}
+              preferredStrongVersionId={strongBibleSourceVersionId}
+              onStrongBibleProvenanceChange={setResolvedStrongProvenance}
+              selectedVerses={selectedVerses}
+              onChangeVerse={onChangeVerse}
+            />
+          </View>
+        )}
+      </Sheet>
+      <CompareVersionSelectorSheet sheetRef={compareVersionSelectorRef} />
+    </>
+  )
+}
 
 const resources = ['strong', 'dictionary', 'nave', 'reference', 'commentary', 'compare']
 
@@ -307,6 +321,8 @@ const Resource = ({
   resourceType,
   isSelectionMode,
   selectedVersion,
+  preferredStrongVersionId,
+  onStrongBibleProvenanceChange,
   selectedVerses,
   onChangeVerse,
 }: {
@@ -314,6 +330,8 @@ const Resource = ({
   resourceType: BibleResource | null
   isSelectionMode?: StudyNavigateBibleType
   selectedVersion: VersionCode
+  preferredStrongVersionId?: StrongBibleVersionId
+  onStrongBibleProvenanceChange?: (provenance: StrongBibleProvenance | null) => void
   selectedVerses: VerseIds
   onChangeVerse?: (verseKey: string) => void
 }) => {
@@ -351,6 +369,8 @@ const Resource = ({
           <BibleVerseDetailCard
             verse={verseObj}
             selectedVersion={selectedVersion}
+            preferredStrongVersionId={preferredStrongVersionId}
+            onStrongBibleProvenanceChange={onStrongBibleProvenanceChange}
             updateVerse={updateVerse}
             isSelectionMode={isSelectionMode}
           />
@@ -393,4 +413,4 @@ const Resource = ({
   )
 }
 
-export default memo(ResourcesModal)
+export default ResourcesModal

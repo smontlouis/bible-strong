@@ -96,7 +96,102 @@ describe('strongBibleResourceAccess', () => {
     )
   })
 
-  it('returns an actionable unavailable state when neither sidecar can be used', async () => {
+  it('uses the next installed Strong Bible from the default fallback order', async () => {
+    const dependencies = createDependencies()
+    dependencies.getAvailability
+      .mockResolvedValueOnce({ status: 'missing' })
+      .mockResolvedValueOnce(available('DBY'))
+    dependencies.getVerseText.mockResolvedValue('Au commencement')
+    dependencies.getVerseSpans.mockResolvedValue([])
+    const access = createStrongBibleResourceAccess(dependencies)
+
+    const result = await access.loadVerse({
+      currentVersionId: 'BFC',
+      defaultVersionId: 'LSG',
+      book: 1,
+      chapter: 1,
+      verse: 1,
+    })
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: 'available',
+        provenance: {
+          versionId: 'DBY',
+          datasetId: 'DBY',
+          isFallback: true,
+        },
+      })
+    )
+    expect(dependencies.getAvailability).toHaveBeenNthCalledWith(1, 'LSG')
+    expect(dependencies.getAvailability).toHaveBeenNthCalledWith(2, 'DBY')
+  })
+
+  it('uses an installed manual Strong Bible choice before the current Bible', async () => {
+    const dependencies = createDependencies()
+    dependencies.getAvailability.mockResolvedValue(available('DBR'))
+    dependencies.getVerseText.mockResolvedValue('Au commencement')
+    dependencies.getVerseSpans.mockResolvedValue([])
+    const access = createStrongBibleResourceAccess(dependencies)
+
+    const result = await access.loadVerse({
+      currentVersionId: 'DBY',
+      defaultVersionId: 'LSG',
+      preferredVersionId: 'DBR',
+      fallbackVersionIds: ['LSG', 'DBY', 'DBR'],
+      book: 1,
+      chapter: 1,
+      verse: 1,
+    })
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: 'available',
+        provenance: {
+          versionId: 'DBR',
+          datasetId: 'DBYR',
+          isFallback: true,
+        },
+      })
+    )
+    expect(dependencies.getAvailability).toHaveBeenCalledTimes(1)
+    expect(dependencies.getAvailability).toHaveBeenCalledWith('DBR')
+  })
+
+  it('returns to automatic resolution when a manual Strong Bible choice is unavailable', async () => {
+    const dependencies = createDependencies()
+    dependencies.getAvailability
+      .mockResolvedValueOnce({ status: 'missing' })
+      .mockResolvedValueOnce(available('DBY'))
+    dependencies.getVerseText.mockResolvedValue('Au commencement')
+    dependencies.getVerseSpans.mockResolvedValue([])
+    const access = createStrongBibleResourceAccess(dependencies)
+
+    const result = await access.loadVerse({
+      currentVersionId: 'DBY',
+      defaultVersionId: 'LSG',
+      preferredVersionId: 'DBR',
+      fallbackVersionIds: ['LSG', 'DBY', 'DBR'],
+      book: 1,
+      chapter: 1,
+      verse: 1,
+    })
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: 'available',
+        provenance: {
+          versionId: 'DBY',
+          datasetId: 'DBY',
+          isFallback: false,
+        },
+      })
+    )
+    expect(dependencies.getAvailability).toHaveBeenNthCalledWith(1, 'DBR')
+    expect(dependencies.getAvailability).toHaveBeenNthCalledWith(2, 'DBY')
+  })
+
+  it('returns an actionable unavailable state when no fallback sidecar can be used', async () => {
     const dependencies = createDependencies()
     dependencies.getAvailability
       .mockResolvedValueOnce({ status: 'base-missing' })
@@ -105,6 +200,7 @@ describe('strongBibleResourceAccess', () => {
         baseTextRevision: 'new',
         sidecarTextRevision: 'old',
       })
+      .mockResolvedValueOnce({ status: 'missing' })
     const access = createStrongBibleResourceAccess(dependencies)
 
     const result = await access.loadVerse({
@@ -120,6 +216,7 @@ describe('strongBibleResourceAccess', () => {
       attempts: [
         { versionId: 'DBY', status: 'base-missing' },
         { versionId: 'LSG', status: 'incompatible' },
+        { versionId: 'DBR', status: 'missing' },
       ],
     })
     expect(dependencies.getVerseText).not.toHaveBeenCalled()

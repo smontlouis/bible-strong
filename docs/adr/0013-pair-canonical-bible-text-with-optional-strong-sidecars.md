@@ -32,9 +32,13 @@ Treat DBR as the application version backed by the DBYR generation dataset. Reta
 legacy persisted identifier that resolves to LSG with Strong visible; do not expose it as a
 downloadable or selectable Bible.
 
-Resolve Strong navigation from the compatible sidecar of the currently open Bible, falling back to
-the installed default Strong Bible. Keep the existing global Strong database for shared lexical
-definitions.
+In the verse-resource modal, resolve Strong navigation from the compatible sidecar of the currently
+open Bible, then from the first installed sidecar in the LSG, DBY, DBR priority order. Expose the
+resolved Bible source and let the user override it for the current Bible tab. A missing manual
+choice returns to automatic resolution. Other Strong navigation first uses the configured default
+Strong Bible, then the remaining installed sidecars in that same priority order. Keep the existing
+global Strong database for shared lexical definitions; its French or English language setting
+changes definitions, not the Bible source used for Strong word placement.
 
 Removing a canonical Bible explicitly also removes its version-specific Strong sidecar. Replacing
 or re-downloading the Bible required by the active application language preserves that sidecar so
@@ -58,3 +62,11 @@ Canonical text presentation is now a publication contract rather than something 
 Strong markup on the phone. Any text or layout change creates a new text revision and can trigger an
 annotation realignment attempt. Failed automatic realignment is deliberately non-destructive, so a
 small number of annotations may remain visually offset after a text update.
+
+## Validation
+
+The tab-scoped source choice was explicitly approved as part of issue 199. Automated validation
+covered resolver priority, manual override fallback, and Firestore tab-group serialization. An iOS
+simulator smoke test opened BCC1923 without an LSG sidecar, confirmed automatic DBY resolution,
+selected DBY manually, returned to automatic mode, verified unavailable LSG and DBR entries were
+disabled, and confirmed the separate lexical-language menu remained available.
