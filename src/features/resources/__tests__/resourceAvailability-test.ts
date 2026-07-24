@@ -50,7 +50,6 @@ const createDependencies = ({
 
     return `file:///docs/SQLite/${lang}/${fileNameByDb[dbId] ?? `${dbId.toLowerCase()}.sqlite`}`
   }),
-  getDocumentDirectory: jest.fn(() => 'file:///docs/'),
   getCurrentResourceLanguage: jest.fn(() => currentLang),
 })
 
@@ -74,19 +73,17 @@ describe('resourceAvailability', () => {
     )
   })
 
-  it('falls back to a legacy Bible JSON file', async () => {
+  it('does not report a legacy JSON as readable before its SQLite migration succeeds', async () => {
     const dependencies = createDependencies({
       files: new Set(['file:///docs/bible-DBY.json']),
     })
 
     await expect(
       getLocalResourceAvailability({ kind: 'bible', versionId: 'DBY' }, dependencies)
-    ).resolves.toEqual(
-      expect.objectContaining({
-        status: 'available',
-        source: 'legacy-bible-json',
-      })
-    )
+    ).resolves.toEqual({
+      status: 'missing',
+      resource: { kind: 'bible', versionId: 'DBY' },
+    })
   })
 
   it('maps interlinear Bible versions to the interlinear resource database', async () => {

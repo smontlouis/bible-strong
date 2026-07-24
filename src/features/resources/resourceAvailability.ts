@@ -27,7 +27,7 @@ export type LocalResourceAvailability =
   | {
       status: 'available'
       resource: LocalResourceRef
-      source: 'bibles-sqlite' | 'legacy-bible-json' | 'database-file'
+      source: 'bibles-sqlite' | 'database-file'
     }
   | {
       status: 'missing'
@@ -41,7 +41,6 @@ type ResourceAvailabilityDependencies = {
   initLanguageDirs: (lang: ResourceLanguage) => Promise<unknown>
   isVersionInstalled: (versionId: string) => Promise<boolean>
   getDbPath: (dbId: DatabaseId, lang: ResourceLanguage) => string
-  getDocumentDirectory: () => string
   getCurrentResourceLanguage: () => ResourceLanguage
 }
 
@@ -51,7 +50,6 @@ const defaultDependencies: ResourceAvailabilityDependencies = {
   initLanguageDirs,
   isVersionInstalled,
   getDbPath,
-  getDocumentDirectory: () => FileSystem.documentDirectory ?? '',
   getCurrentResourceLanguage: () => getLanguage(),
 }
 
@@ -139,21 +137,9 @@ export const getLocalResourceAvailability = async (
     }
   }
 
-  const expectedPath = `${dependencies.getDocumentDirectory()}bible-${resource.versionId}.json`
-  const legacyFile = await dependencies.getFileInfo(expectedPath)
-
-  if (legacyFile.exists) {
-    return {
-      status: 'available',
-      resource,
-      source: 'legacy-bible-json',
-    }
-  }
-
   return {
     status: 'missing',
     resource,
-    expectedPath,
   }
 }
 
