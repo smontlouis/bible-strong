@@ -131,14 +131,16 @@ const VersionIdentity = ({
               onToggleStrongIndex()
             }}
           >
-            <Box row alignItems="center" ml={5}>
-              <StrongMark highlighted={false} />
-              <Box width={32} height={28} center>
-                <FeatherIcon
-                  name={isStrongIndexExpanded ? 'chevron-down' : 'chevron-right'}
-                  size={16}
-                  color="tertiary"
-                />
+            <Box width={38} height={28} center ml={5} overflow="visible">
+              <Box position="relative" width={22} height={24} center overflow="visible">
+                <StrongMark highlighted={false} />
+                <Box position="absolute" width={16} height={16} center right={-10} bottom={0}>
+                  <FeatherIcon
+                    name={isStrongIndexExpanded ? 'chevron-up' : 'chevron-down'}
+                    size={12}
+                    color="tertiary"
+                  />
+                </Box>
               </Box>
             </Box>
           </TouchableOpacity>

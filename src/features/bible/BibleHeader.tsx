@@ -457,6 +457,43 @@ const Header = ({
     )
   }
 
+  const strongModeButton = isStrongCapableBibleVersion(version) ? (
+    <AnimatedTouchableBox
+      onPress={toggleStrongMode}
+      disabled={isStrongDownloadVisible}
+      center
+      width={40}
+      height={40}
+      accessibilityRole="button"
+      accessibilityLabel={
+        isStrongDownloadVisible
+          ? t('Téléchargement en cours')
+          : strongMode === 'visible'
+            ? t('Masquer les numéros Strong')
+            : t('Afficher les numéros Strong')
+      }
+      accessibilityState={{
+        disabled: isStrongDownloadVisible,
+        selected: strongMode === 'visible',
+      }}
+      style={{
+        opacity: fullScreenOpacity,
+        transitionProperty: 'opacity',
+        transitionDuration: 300,
+      }}
+    >
+      {isStrongDownloadVisible ? (
+        <Progress
+          progress={Math.max(strongDownloadPresentation.progress, 0.04)}
+          size={22}
+          thickness={2.5}
+        />
+      ) : (
+        <StrongMark highlighted={strongMode === 'visible'} />
+      )}
+    </AnimatedTouchableBox>
+  ) : null
+
   if (annotationModeEnabled) {
     return (
       <AnimatedVStack
@@ -621,6 +658,7 @@ const Header = ({
                     limit={2}
                   />
                 </Box>
+                {strongModeButton}
                 <MenuView
                   actions={focusMenuActions}
                   onPressAction={({ nativeEvent }) => {
@@ -793,42 +831,7 @@ const Header = ({
                   </MenuView>
                 )}
 
-                {isStrongCapableBibleVersion(version) && (
-                  <AnimatedTouchableBox
-                    onPress={toggleStrongMode}
-                    disabled={isStrongDownloadVisible}
-                    center
-                    width={40}
-                    height={40}
-                    accessibilityRole="button"
-                    accessibilityLabel={
-                      isStrongDownloadVisible
-                        ? t('Téléchargement en cours')
-                        : strongMode === 'visible'
-                          ? t('Masquer les numéros Strong')
-                          : t('Afficher les numéros Strong')
-                    }
-                    accessibilityState={{
-                      disabled: isStrongDownloadVisible,
-                      selected: strongMode === 'visible',
-                    }}
-                    style={{
-                      opacity: fullScreenOpacity,
-                      transitionProperty: 'opacity',
-                      transitionDuration: 300,
-                    }}
-                  >
-                    {isStrongDownloadVisible ? (
-                      <Progress
-                        progress={Math.max(strongDownloadPresentation.progress, 0.04)}
-                        size={22}
-                        thickness={2.5}
-                      />
-                    ) : (
-                      <StrongMark highlighted={strongMode === 'visible'} />
-                    )}
-                  </AnimatedTouchableBox>
-                )}
+                {strongModeButton}
 
                 {/* Three-dots menu */}
                 <MenuView
