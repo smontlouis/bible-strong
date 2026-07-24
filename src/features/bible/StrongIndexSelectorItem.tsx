@@ -94,45 +94,45 @@ const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: 
   if (isAvailable || !expanded) return null
 
   return (
-    <TouchableOpacity
-      accessibilityRole="button"
-      accessibilityLabel={t('downloads.strongIndexName', { bible: versionId })}
-      accessibilityState={{ disabled: isChecking || Boolean(strongActiveDownload) }}
-      activeOpacity={strongActiveDownload ? 1 : 0.7}
-      disabled={isChecking || Boolean(strongActiveDownload)}
-      onPress={handlePress}
+    <Box
+      minHeight={52}
+      pl={56}
+      pr={4}
+      py={6}
+      justifyContent="center"
+      borderBottomWidth={1}
+      borderColor="border"
     >
       <Box
-        minHeight={64}
-        pl={56}
-        pr={4}
-        py={10}
-        justifyContent="center"
-        borderBottomWidth={1}
+        pos="absolute"
+        top={-10}
+        left={32}
+        width={16}
+        height={36}
+        borderLeftWidth={2}
+        borderBottomWidth={2}
+        borderBottomLeftRadius={10}
         borderColor="border"
-      >
-        <Box
-          pos="absolute"
-          top={-14}
-          left={32}
-          width={16}
-          height={36}
-          borderLeftWidth={2}
-          borderBottomWidth={2}
-          borderBottomLeftRadius={10}
-          borderColor="border"
-        />
-        <Box row alignItems="center">
-          <Box flex>
-            <Text fontSize={14} bold numberOfLines={1}>
-              {t('versionSelector.strongIndex')}
-            </Text>
-            <Text fontSize={10} color="tertiary" mt={2} numberOfLines={2}>
-              {t('versionSelector.strongAttribution')}
-            </Text>
-          </Box>
+      />
+      <Box row alignItems="center">
+        <Box disabled flex>
+          <Text fontSize={14} numberOfLines={1}>
+            {t('versionSelector.strongIndex')}
+          </Text>
+          <Text fontSize={10} color="tertiary" mt={2} numberOfLines={2}>
+            {t('versionSelector.strongAttribution')}
+          </Text>
+        </Box>
 
-          <Box width={48} minHeight={48} center>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel={t('downloads.strongIndexName', { bible: versionId })}
+          accessibilityState={{ disabled: isChecking || Boolean(strongActiveDownload) }}
+          activeOpacity={strongActiveDownload ? 1 : 0.7}
+          disabled={isChecking || Boolean(strongActiveDownload)}
+          onPress={handlePress}
+        >
+          <Box width={48} minHeight={40} center>
             {isChecking ? (
               <ActivityIndicator size="small" />
             ) : strongActiveDownload?.status === 'queued' ? (
@@ -157,9 +157,9 @@ const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: 
               <FeatherIcon name={failedDownload ? 'rotate-cw' : 'download-cloud'} size={16} />
             )}
           </Box>
-        </Box>
+        </TouchableOpacity>
       </Box>
-    </TouchableOpacity>
+    </Box>
   )
 }
 

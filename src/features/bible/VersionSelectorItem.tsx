@@ -119,21 +119,20 @@ const VersionIdentity = ({
           <FeatherIcon name="volume-2" size={16} color="primary" />
         </Box>
       )}
-      {showCapabilities && showStrongCapability && (
-        <Box row alignItems="center" ml={5}>
-          <Box>
-            <StrongMark highlighted={isStrongIndexAvailable} />
-          </Box>
-          {!isStrongIndexAvailable && onToggleStrongIndex && (
-            <TouchableOpacity
-              accessibilityRole="button"
-              accessibilityLabel={strongToggleLabel}
-              accessibilityState={{ expanded: isStrongIndexExpanded }}
-              onPress={event => {
-                event.stopPropagation()
-                onToggleStrongIndex()
-              }}
-            >
+      {showCapabilities &&
+        showStrongCapability &&
+        (!isStrongIndexAvailable && onToggleStrongIndex ? (
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel={strongToggleLabel}
+            accessibilityState={{ expanded: isStrongIndexExpanded }}
+            onPress={event => {
+              event.stopPropagation()
+              onToggleStrongIndex()
+            }}
+          >
+            <Box row alignItems="center" ml={5}>
+              <StrongMark highlighted={false} />
               <Box width={32} height={28} center>
                 <FeatherIcon
                   name={isStrongIndexExpanded ? 'chevron-down' : 'chevron-right'}
@@ -141,10 +140,13 @@ const VersionIdentity = ({
                   color="tertiary"
                 />
               </Box>
-            </TouchableOpacity>
-          )}
-        </Box>
-      )}
+            </Box>
+          </TouchableOpacity>
+        ) : (
+          <Box ml={5}>
+            <StrongMark highlighted={isStrongIndexAvailable} />
+          </Box>
+        ))}
     </HStack>
     {showPublicationDetails && (
       <Text
@@ -158,7 +160,7 @@ const VersionIdentity = ({
       </Text>
     )}
     {showPublicationDetails && isStrongIndexAvailable && strongAttribution && (
-      <Text color="default" fontSize={10} opacity={0.5}>
+      <Text color={color} fontSize={10} opacity={0.5}>
         {strongAttribution}
       </Text>
     )}
@@ -374,6 +376,16 @@ const VersionSelectorItem = ({
     )
   }
 
+  const renderSelectedIndicator = () => (
+    <ActionColumn>
+      {isSelected && (
+        <Box width={22} height={22} borderRadius={11} bg="primary" center>
+          <FeatherIcon name="check" size={14} color="white" />
+        </Box>
+      )}
+    </ActionColumn>
+  )
+
   if (
     typeof versionNeedsDownload === 'undefined' ||
     (isParameters && version.id === 'LSGS') ||
@@ -493,7 +505,7 @@ const VersionSelectorItem = ({
             strongAttribution={t('versionSelector.strongAttribution')}
           />
           {renderSelectionCheckbox()}
-          {!showSelectionCheckbox && <ActionColumn />}
+          {!showSelectionCheckbox && renderSelectedIndicator()}
         </Box>
       </VersionItemContainer>
       {showStrongCapability && strongVersionId && (
