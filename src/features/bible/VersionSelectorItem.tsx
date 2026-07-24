@@ -92,8 +92,8 @@ const TextName = styled.Text<{ isSelected?: boolean }>(({ isSelected, theme }) =
   backgroundColor: 'transparent',
 }))
 
-const StrongCapabilityMark = styled.Text(({ theme }) => ({
-  color: theme.colors.primary,
+const StrongCapabilityMark = styled.Text<{ isAvailable?: boolean }>(({ isAvailable, theme }) => ({
+  color: isAvailable ? theme.colors.primary : theme.colors.tertiary,
   fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   fontSize: 17,
   fontWeight: 'bold',
@@ -133,6 +133,7 @@ const VersionSelectorItem = ({
   const lang = useLanguage()
   const theme: Theme = useTheme()
   const [versionNeedsDownload, setVersionNeedsDownload] = React.useState<boolean>()
+  const [isStrongIndexAvailable, setStrongIndexAvailable] = React.useState<boolean>()
   const needsUpdate = useSelector((state: RootState) => state.user.needsUpdate[version.id])
   const dispatch = useDispatch()
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
@@ -147,6 +148,7 @@ const VersionSelectorItem = ({
   const CopyrightText = version.sourceUrl ? TextSourceLink : TextCopyright
   const strongVersionId = isStrongCapableBibleVersion(version.id) ? version.id : undefined
   const showStrongCapability = showStrongIndex && Boolean(strongVersionId)
+  const showStrongDependency = showStrongCapability && !isStrongIndexAvailable
   const openSourceUrl = () => {
     if (version.sourceUrl) {
       Linking.openURL(version.sourceUrl)
@@ -305,7 +307,7 @@ const VersionSelectorItem = ({
   if (versionNeedsDownload) {
     return (
       <Box>
-        <Container hasDependency={showStrongCapability}>
+        <Container hasDependency={showStrongDependency}>
           <Box flex row alignItems="center">
             <Box disabled flex>
               <TextVersion>{version.id}</TextVersion>
@@ -316,11 +318,18 @@ const VersionSelectorItem = ({
                     <FeatherIcon name="volume-2" size={16} color="primary" />
                   </Box>
                 )}
-                {showStrongCapability && <StrongCapabilityMark>S</StrongCapabilityMark>}
+                {showStrongCapability && (
+                  <StrongCapabilityMark isAvailable={isStrongIndexAvailable}>
+                    S
+                  </StrongCapabilityMark>
+                )}
               </HStack>
               <CopyrightText onPress={version.sourceUrl ? openSourceUrl : undefined}>
                 {version.c}
               </CopyrightText>
+              {isStrongIndexAvailable && (
+                <TextCopyright>{t('versionSelector.strongAttribution')}</TextCopyright>
+              )}
             </Box>
             {!isLoading && !isQueued && version.id !== 'LSGS' && version.id !== 'KJVS' && (
               <ActionButton onPress={startDownload}>
@@ -356,7 +365,10 @@ const VersionSelectorItem = ({
           </Box>
         </Container>
         {showStrongCapability && strongVersionId && (
-          <StrongIndexSelectorItem versionId={strongVersionId} />
+          <StrongIndexSelectorItem
+            versionId={strongVersionId}
+            onAvailabilityChange={setStrongIndexAvailable}
+          />
         )}
       </Box>
     )
@@ -388,7 +400,7 @@ const VersionSelectorItem = ({
     <Box>
       <TouchableContainer
         needsUpdate={needsUpdate}
-        hasDependency={showStrongCapability}
+        hasDependency={showStrongDependency}
         onPress={() => onChange && onChange(version.id)}
       >
         <Box flex row alignItems="center">
@@ -401,18 +413,26 @@ const VersionSelectorItem = ({
                   <FeatherIcon name="volume-2" size={16} color="primary" />
                 </Box>
               )}
-              {showStrongCapability && <StrongCapabilityMark>S</StrongCapabilityMark>}
+              {showStrongCapability && (
+                <StrongCapabilityMark isAvailable={isStrongIndexAvailable}>S</StrongCapabilityMark>
+              )}
             </HStack>
             <CopyrightText onPress={version.sourceUrl ? openSourceUrl : undefined}>
               {version.c}
             </CopyrightText>
+            {isStrongIndexAvailable && (
+              <TextCopyright>{t('versionSelector.strongAttribution')}</TextCopyright>
+            )}
           </Box>
           {renderSelectionCheckbox()}
           {!showSelectionCheckbox && <ActionColumn />}
         </Box>
       </TouchableContainer>
       {showStrongCapability && strongVersionId && (
-        <StrongIndexSelectorItem versionId={strongVersionId} />
+        <StrongIndexSelectorItem
+          versionId={strongVersionId}
+          onAvailabilityChange={setStrongIndexAvailable}
+        />
       )}
     </Box>
   )

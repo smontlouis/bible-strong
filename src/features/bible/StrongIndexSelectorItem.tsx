@@ -20,12 +20,13 @@ import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 
 interface Props {
   versionId: StrongBibleVersionId
+  onAvailabilityChange: (isAvailable: boolean) => void
 }
 
 const isActiveDownload = (status?: string) =>
   status === 'queued' || status === 'downloading' || status === 'inserting'
 
-const StrongIndexSelectorItem = ({ versionId }: Props) => {
+const StrongIndexSelectorItem = ({ versionId, onAvailabilityChange }: Props) => {
   const theme = useTheme()
   const { t } = useTranslation()
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
@@ -40,10 +41,16 @@ const StrongIndexSelectorItem = ({ versionId }: Props) => {
 
     getStrongBibleSidecarAvailability(versionId)
       .then(nextAvailability => {
-        if (!cancelled) setAvailability(nextAvailability)
+        if (!cancelled) {
+          setAvailability(nextAvailability)
+          onAvailabilityChange(nextAvailability.status === 'available')
+        }
       })
       .catch(() => {
-        if (!cancelled) setAvailability(undefined)
+        if (!cancelled) {
+          setAvailability(undefined)
+          onAvailabilityChange(false)
+        }
       })
       .finally(() => {
         if (!cancelled) setIsChecking(false)
@@ -52,7 +59,7 @@ const StrongIndexSelectorItem = ({ versionId }: Props) => {
     return () => {
       cancelled = true
     }
-  }, [downloadCompletionSignal, versionId])
+  }, [downloadCompletionSignal, onAvailabilityChange, versionId])
 
   const strongActiveDownload = isActiveDownload(strongDownload?.status) ? strongDownload : undefined
   const failedDownload = [bibleDownload, strongDownload].find(state => state?.status === 'failed')
@@ -71,6 +78,7 @@ const StrongIndexSelectorItem = ({ versionId }: Props) => {
       try {
         resolvedAvailability = await getStrongBibleSidecarAvailability(versionId)
         setAvailability(resolvedAvailability)
+        onAvailabilityChange(resolvedAvailability.status === 'available')
       } catch {
         return
       } finally {
@@ -85,21 +93,21 @@ const StrongIndexSelectorItem = ({ versionId }: Props) => {
     }
   }
 
+  if (isAvailable) return null
+
   return (
     <TouchableOpacity
       accessibilityRole="button"
       accessibilityLabel={t('downloads.strongIndexName', { bible: versionId })}
-      accessibilityState={{
-        disabled: isChecking || isAvailable || Boolean(strongActiveDownload),
-      }}
-      activeOpacity={isAvailable || strongActiveDownload ? 1 : 0.7}
-      disabled={isChecking || isAvailable || Boolean(strongActiveDownload)}
+      accessibilityState={{ disabled: isChecking || Boolean(strongActiveDownload) }}
+      activeOpacity={strongActiveDownload ? 1 : 0.7}
+      disabled={isChecking || Boolean(strongActiveDownload)}
       onPress={handlePress}
     >
       <Box
         minHeight={64}
-        pl={78}
-        pr={16}
+        pl={56}
+        pr={4}
         py={10}
         justifyContent="center"
         borderBottomWidth={1}
@@ -108,8 +116,8 @@ const StrongIndexSelectorItem = ({ versionId }: Props) => {
         <Box
           pos="absolute"
           top={-14}
-          left={52}
-          width={20}
+          left={32}
+          width={16}
           height={36}
           borderLeftWidth={2}
           borderBottomWidth={2}
@@ -121,12 +129,12 @@ const StrongIndexSelectorItem = ({ versionId }: Props) => {
             <Text fontSize={14} bold numberOfLines={1}>
               {t('versionSelector.strongIndex')}
             </Text>
-            <Text fontSize={10} color="tertiary" mt={2} numberOfLines={3}>
-              {t('downloads.strongAttribution')}
+            <Text fontSize={10} color="tertiary" mt={2} numberOfLines={2}>
+              {t('versionSelector.strongAttribution')}
             </Text>
           </Box>
 
-          <Box width={48} minHeight={44} ml={8} center>
+          <Box width={48} minHeight={48} center>
             {isChecking ? (
               <ActivityIndicator size="small" />
             ) : strongActiveDownload?.status === 'queued' ? (
@@ -147,14 +155,8 @@ const StrongIndexSelectorItem = ({ versionId }: Props) => {
                   }}
                 />
               </Box>
-            ) : isAvailable ? (
-              <FeatherIcon name="check" size={17} color="primary" />
             ) : (
-              <FeatherIcon
-                name={failedDownload ? 'rotate-cw' : 'download-cloud'}
-                size={16}
-                color="primary"
-              />
+              <FeatherIcon name={failedDownload ? 'rotate-cw' : 'download-cloud'} size={16} />
             )}
           </Box>
         </Box>
