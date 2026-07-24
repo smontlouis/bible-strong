@@ -303,6 +303,7 @@ const ResourcesModal = ({
               selectedVersion={effectiveSelectedVersion}
               preferredStrongVersionId={strongBibleSourceVersionId}
               onStrongBibleProvenanceChange={setResolvedStrongProvenance}
+              onOpenStrongBibleSourceSheet={() => strongBibleSourceSheetRef.current?.present()}
               selectedVerses={selectedVerses}
               onChangeVerse={onChangeVerse}
             />
@@ -329,6 +330,7 @@ const Resource = ({
   selectedVersion,
   preferredStrongVersionId,
   onStrongBibleProvenanceChange,
+  onOpenStrongBibleSourceSheet,
   selectedVerses,
   onChangeVerse,
 }: {
@@ -338,6 +340,7 @@ const Resource = ({
   selectedVersion: VersionCode
   preferredStrongVersionId?: StrongBibleVersionId
   onStrongBibleProvenanceChange?: (provenance: StrongBibleProvenance | null) => void
+  onOpenStrongBibleSourceSheet: () => void
   selectedVerses: VerseIds
   onChangeVerse?: (verseKey: string) => void
 }) => {
@@ -377,6 +380,7 @@ const Resource = ({
             selectedVersion={selectedVersion}
             preferredStrongVersionId={preferredStrongVersionId}
             onStrongBibleProvenanceChange={onStrongBibleProvenanceChange}
+            onOpenStrongBibleSourceSheet={onOpenStrongBibleSourceSheet}
             updateVerse={updateVerse}
             isSelectionMode={isSelectionMode}
           />

@@ -115,16 +115,21 @@ jest.mock('~helpers/CarouselContext', () => ({
 
 jest.mock('~common/Empty', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
-  return () => ReactModule.createElement('Empty')
+  return ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
+    ReactModule.createElement('Empty', props, children)
 })
 jest.mock('~common/Loading', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
   return () => ReactModule.createElement('Loading')
 })
-jest.mock('~common/ui/Button', () => ({
-  __esModule: true,
-  default: ({ children }: React.PropsWithChildren) => <>{children}</>,
-}))
+jest.mock('~common/ui/Button', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  return {
+    __esModule: true,
+    default: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
+      ReactModule.createElement('Button', props, children),
+  }
+})
 jest.mock('~common/ui/Box', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
   return {
@@ -137,6 +142,13 @@ jest.mock('~common/ui/Container', () => ({
   __esModule: true,
   default: ({ children }: React.PropsWithChildren) => <>{children}</>,
 }))
+jest.mock('~common/ui/Icon', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  return {
+    FeatherIcon: (props: Record<string, unknown>) =>
+      ReactModule.createElement('FeatherIcon', props),
+  }
+})
 jest.mock('~common/ui/Paragraph', () => ({
   __esModule: true,
   default: ({ children }: React.PropsWithChildren) => <>{children}</>,
@@ -166,11 +178,17 @@ const makeAvailableVerse = (text: string) => ({
   },
 })
 
-const renderCard = (verseNumber: number) => (
+const renderCard = (
+  verseNumber: number,
+  onOpenStrongBibleSourceSheet = jest.fn(),
+  onStrongBibleProvenanceChange = jest.fn()
+) => (
   <BibleVerseDetailCard
     verse={{ Livre: 1, Chapitre: 1, Verset: verseNumber }}
     selectedVersion="BFC"
     updateVerse={jest.fn()}
+    onOpenStrongBibleSourceSheet={onOpenStrongBibleSourceSheet}
+    onStrongBibleProvenanceChange={onStrongBibleProvenanceChange}
   />
 )
 
@@ -234,20 +252,44 @@ describe('BibleVerseDetailCard', () => {
     expect(JSON.stringify(renderer.toJSON())).not.toContain('Strong fourni par DBY')
   })
 
+  it('offers the Strong Bible selector when no Strong Bible is available', async () => {
+    const openStrongBibleSourceSheet = jest.fn()
+    mockLoadVerse.mockResolvedValueOnce({ status: 'unavailable', attempts: [] })
+
+    await act(async () => {
+      renderer = create(renderCard(1, openStrongBibleSourceSheet))
+    })
+
+    expect(renderer.root.findByProps({ message: 'strongSource.unavailableMessage' })).toBeDefined()
+    expect(renderer.root.findByProps({ onPress: openStrongBibleSourceSheet }).props.children).toBe(
+      'strongSource.chooseAction'
+    )
+
+    act(() => {
+      renderer.root.findByProps({ onPress: openStrongBibleSourceSheet }).props.onPress()
+    })
+    expect(openStrongBibleSourceSheet).toHaveBeenCalledTimes(1)
+  })
+
   it('keeps the displayed Strong verse when the next verse cannot be loaded', async () => {
+    const onStrongBibleProvenanceChange = jest.fn()
     mockLoadVerse
       .mockResolvedValueOnce(makeAvailableVerse('Verset conservé'))
       .mockResolvedValueOnce({ status: 'unavailable', attempts: [] })
 
     await act(async () => {
-      renderer = create(renderCard(1))
+      renderer = create(renderCard(1, jest.fn(), onStrongBibleProvenanceChange))
     })
     await act(async () => {
-      renderer.update(renderCard(2))
+      renderer.update(renderCard(2, jest.fn(), onStrongBibleProvenanceChange))
     })
 
     const failedTree = JSON.stringify(renderer.toJSON())
     expect(failedTree).toContain('Verset conservé')
     expect(failedTree).not.toContain('"type":"Empty"')
+    expect(onStrongBibleProvenanceChange).toHaveBeenCalledWith(
+      expect.objectContaining({ versionId: 'DBY' })
+    )
+    expect(onStrongBibleProvenanceChange).not.toHaveBeenCalledWith(null)
   })
 })

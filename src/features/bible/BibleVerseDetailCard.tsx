@@ -10,6 +10,7 @@ import Empty from '~common/Empty'
 import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
+import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import RoundedCorner from '~common/ui/RoundedCorner'
 import StrongCard from './StrongCard'
@@ -82,12 +83,13 @@ interface Props {
   selectedVersion: VersionCode
   preferredStrongVersionId?: StrongBibleVersionId
   onStrongBibleProvenanceChange?: (provenance: StrongBibleProvenance | null) => void
+  onOpenStrongBibleSourceSheet: () => void
   isSelectionMode?: StudyNavigateBibleType
   updateVerse: (direction: number) => void
 }
 
 interface State {
-  error: boolean | 'CORRUPTED_DATABASE' | 'DISK_IO' | 'UNKNOWN_ERROR'
+  error: boolean | 'CORRUPTED_DATABASE' | 'DISK_IO' | 'UNKNOWN_ERROR' | 'STRONG_BIBLE_UNAVAILABLE'
   strongReferences: StrongReference[]
   currentStrongReference: StrongReference | null
   versesInCurrentChapter: number | null
@@ -101,6 +103,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   selectedVersion,
   preferredStrongVersionId,
   onStrongBibleProvenanceChange,
+  onOpenStrongBibleSourceSheet,
   isSelectionMode,
   updateVerse,
 }) => {
@@ -115,6 +118,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   const verseChapter = verse.Chapitre
   const verseNumber = verse.Verset
   const carouselRef = useRef<ICarouselInstance>(null)
+  const hasDisplayedStrongVerseRef = useRef(false)
   const [boxHeight, setBoxHeight] = useState(0)
   const {
     ref: carouselContainerRef,
@@ -199,7 +203,10 @@ const BibleVerseDetailCard: React.FC<Props> = ({
         if (!isCurrent) return
 
         if (result.status !== 'available') {
-          showInitialLoadError(true)
+          if (!hasDisplayedStrongVerseRef.current) {
+            onStrongBibleProvenanceChange?.(null)
+          }
+          showInitialLoadError(result.status === 'unavailable' ? 'STRONG_BIBLE_UNAVAILABLE' : true)
           return
         }
 
@@ -231,6 +238,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
         )
         if (!isCurrent) return
 
+        hasDisplayedStrongVerseRef.current = true
         setState(prev => ({
           ...prev,
           error: false,
@@ -273,6 +281,23 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   const { versesInCurrentChapter, error, formattedTexte } = state
 
   if (error) {
+    if (error === 'STRONG_BIBLE_UNAVAILABLE') {
+      return (
+        <Container>
+          <Empty
+            iconElement={<FeatherIcon name="book-open" size={36} color="tertiary" />}
+            message={t('strongSource.unavailableMessage')}
+          >
+            <Box mt={24} width={260}>
+              <Button onPress={onOpenStrongBibleSourceSheet}>
+                {t('strongSource.chooseAction')}
+              </Button>
+            </Box>
+          </Empty>
+        </Container>
+      )
+    }
+
     return (
       <Container>
         <Empty
