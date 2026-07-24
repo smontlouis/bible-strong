@@ -68,4 +68,19 @@ describe('canonicalBibleNotes', () => {
       },
     ])
   })
+
+  it('normalizes V4 space-separated OSIS references into one navigable reference list', () => {
+    const nodes = parseCanonicalBibleNoteMarkup(
+      '<note n="a"><ref id="Ps.33.6 Acts.14.15 Heb.11.3">references</ref></note>'
+    )
+
+    expect(nodes).toEqual([
+      {
+        kind: 'element',
+        tag: 'ref',
+        attributes: { id: 'Ps.33.6,Acts.14.15,Heb.11.3' },
+        children: [{ kind: 'text', text: 'references' }],
+      },
+    ])
+  })
 })

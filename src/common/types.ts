@@ -148,6 +148,7 @@ export interface Verse {
     attributes?: Record<string, string>
   }[]
   Notes?: import('~helpers/canonicalBibleNotes').CanonicalBibleNote[]
+  Headings?: import('~helpers/canonicalBibleHeadings').CanonicalBibleHeading[]
   StrongSpans?: {
     ordinal: number
     startOffset: number

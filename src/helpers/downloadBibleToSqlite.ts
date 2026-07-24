@@ -191,7 +191,8 @@ const validateCanonicalBiblePublication = (
     data.textSha256 !== artifact.textSha256 ||
     data.schemaVersion !== artifact.schemaVersion ||
     data.verseCount !== artifact.verseCount ||
-    data.noteCount !== artifact.noteCount
+    data.noteCount !== artifact.noteCount ||
+    data.headingCount !== artifact.headingCount
   ) {
     throw new Error('CANONICAL_BIBLE_METADATA_MISMATCH')
   }

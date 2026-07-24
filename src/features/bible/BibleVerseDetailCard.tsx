@@ -34,7 +34,7 @@ import type { RootState } from '~redux/modules/reducer'
 import Button from '~common/ui/Button'
 import type { VersionCode } from '~state/tabs'
 import {
-  STRONG_BIBLE_FALLBACK_PRIORITY,
+  getStrongBibleFallbackPriority,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
 
@@ -195,7 +195,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
           currentVersionId: selectedVersion,
           defaultVersionId: defaultStrongVersion,
           preferredVersionId: preferredStrongVersionId,
-          fallbackVersionIds: STRONG_BIBLE_FALLBACK_PRIORITY,
+          fallbackVersionIds: getStrongBibleFallbackPriority(selectedVersion),
           book: verseBook,
           chapter: verseChapter,
           verse: verseNumber,

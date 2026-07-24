@@ -29,9 +29,12 @@ SQLite file and apply it as an overlay at read time. Require exact `textRevision
 agreement before using a sidecar. Installation verifies archive and content checksums and activates
 replacements atomically.
 
-Treat DBR as the application version backed by the DBYR generation dataset. Retain LSGS only as a
+Treat DBR as the application version backed by the DBYR generation dataset. English Strong-capable
+publications use the same pair contract for KJV, NASB 2020, NASB 1995, BSB, ASV, Darby, RLT,
+Revised Webster and RV 1895. Retain LSGS only as a
 legacy persisted identifier that resolves to LSG with Strong visible; do not expose it as a
-downloadable or selectable Bible.
+downloadable or selectable Bible. Remove KJVS from the product catalog and resolve any legacy KJVS
+tab state to KJV with Strong visible.
 
 In the verse-resource modal, resolve Strong navigation from the compatible sidecar of the currently
 open Bible, then from the first installed sidecar in the LSG, DBY, DBR priority order. Expose the
@@ -49,7 +52,8 @@ application language must ensure the target language's required Bible is downloa
 sidecar never removes its Bible or the shared global Strong database.
 
 In download management, identify each sidecar as an index belonging to its canonical Bible and
-display the required Strong-number attribution from Concordances et Traductions de la Bible.
+display the required Strong-number attribution from Concordances et Traductions de la Bible for the
+French publications, and the CrossWire/STEP provenance for the English publications.
 Availability and compatibility states continue to drive actions without replacing that provenance.
 
 Before activating a new canonical text revision, journal an idempotent word-annotation migration.
@@ -83,6 +87,13 @@ to a complete OSIS endpoint before navigation. The normalizer accepts only
 supported canonical book identifiers. Because the reading surface has one
 current chapter, a multichapter range opens at its first endpoint; displaying
 the complete range requires a future multichapter viewer contract.
+
+Schema V4 additionally embeds headings/pericopes and red-letter layout in the canonical JSON.
+Persist headings in the shared Bible database and derive the existing pericope view model from
+them. Render the canonical `red` events directly. For V4 publications, neither installation nor
+reading may download or consult the historical pericope and red-word JSON side files. Space-
+separated OSIS identifiers in enriched notes normalize to the comma-separated passage contract
+understood by the viewer.
 
 ## Validation
 

@@ -46,7 +46,12 @@ describe('Bible version catalog metadata', () => {
       ],
       en: [
         'KJV',
-        'KJVS',
+        'BSB',
+        'ASV',
+        'DARBY',
+        'RLT',
+        'RWEBSTER',
+        'RV1895',
         'INT_EN',
         'NKJV',
         'ESV',
@@ -84,7 +89,11 @@ describe('Bible version catalog metadata', () => {
         'BCC1923',
         'LXX_FR',
         'KJV',
-        'KJVS',
+        'ASV',
+        'DARBY',
+        'RLT',
+        'RWEBSTER',
+        'RV1895',
         'NKJV',
         'ESV',
         'TLV',
@@ -92,13 +101,13 @@ describe('Bible version catalog metadata', () => {
         'NASB2020',
         'AMP',
       ],
-      balanced: ['NIV', 'NET', 'GW', 'CSB'],
+      balanced: ['BSB', 'NIV', 'NET', 'GW', 'CSB'],
       'thought-for-thought': ['BDS', 'BFC', 'FRC97', 'NFC', 'PDV2017', 'EASY', 'NLT'],
       paraphrase: ['POV'],
       other: ['INT', 'INT_EN', 'BHS', 'LXX', 'VUL', 'SBLGNT', 'TR1624', 'TR1894', 'DEL'],
     } as const
 
-    expect(Object.keys(versions)).toHaveLength(45)
+    expect(Object.keys(versions)).toHaveLength(50)
 
     for (const [language, ids] of Object.entries(expectedLanguages)) {
       expect(ids.map(id => versions[id].language)).toEqual(ids.map(() => language))

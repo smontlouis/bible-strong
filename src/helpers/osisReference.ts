@@ -138,7 +138,8 @@ const serializeOsisSegment = ({ start, end }: OsisSegment): string =>
 
 export const normalizeOsisReference = (osis: string): string =>
   osis
-    .split(',')
+    .trim()
+    .split(/[,\s]+/u)
     .map(segment => {
       const parsed = parseOsisSegment(segment)
       return parsed ? serializeOsisSegment(parsed) : segment

@@ -360,19 +360,25 @@ const renderCanonicalPresentation = (
       case 'p':
         return <React.Fragment key={key}>{children}</React.Fragment>
       case 'lg':
+      case 'list':
         return (
           <span key={key} data-canonical-poetry-group style={{ display: 'contents' }}>
             {children}
           </span>
         )
       case 'l':
+      case 'item':
         return (
           <span key={key} data-canonical-poetry-line style={{ display: 'contents' }}>
             {children}
           </span>
         )
       case 'i':
-        return <em key={key}>{children}</em>
+        return node.attributes?.type === 'bold' ? (
+          <strong key={key}>{children}</strong>
+        ) : (
+          <em key={key}>{children}</em>
+        )
       case 'sup':
         return <sup key={key}>{children}</sup>
       case 'divinename':
@@ -382,11 +388,18 @@ const renderCanonicalPresentation = (
             {children}
           </span>
         )
+      case 'red':
       case 'red-word':
         return (
           <span key={key} style={{ color: options.redColor }}>
             {children}
           </span>
+        )
+      case 'span':
+        return node.attributes?.type === 'x-p' || node.attributes?.['data-osis-tag'] === 'lb' ? (
+          <br key={key} />
+        ) : (
+          <span key={key}>{children}</span>
         )
       default:
         return <span key={key}>{children}</span>

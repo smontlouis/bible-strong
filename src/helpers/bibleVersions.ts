@@ -20,8 +20,20 @@ export type TranslationReadingProfile =
   | 'paraphrase'
 
 export const getIfVersionNeedsUpdate = async (versionId: string) => {
-  // Find a way to update the version
-  return false
+  const { getStrongBiblePublication, isStrongCapableBibleVersion } =
+    await import('./strongBiblePublications')
+  if (!isStrongCapableBibleVersion(versionId)) return false
+
+  const { getBibleVersionMetadata } = await import('./biblesDb')
+  const installedMetadata = await getBibleVersionMetadata(versionId)
+  if (!installedMetadata) return false
+
+  const publication = getStrongBiblePublication(versionId)
+  return (
+    installedMetadata.textRevision !== publication.canonical.textRevision ||
+    installedMetadata.textSha256 !== publication.canonical.textSha256 ||
+    installedMetadata.schemaVersion !== publication.canonical.schemaVersion
+  )
 }
 
 export const getIfVersionNeedsDownload = async (versionId: string) => {
@@ -356,7 +368,8 @@ export const versions: Record<string, Version> = {
   KJV: {
     id: 'KJV',
     name: 'King James Version',
-    c: '1611 Libre de droit',
+    c: 'Public Domain except in the United Kingdom (Crown rights)',
+    sourceUrl: 'https://www.crosswire.org/sword/modules/ModInfo.jsp?modName=KJV',
     type: 'en',
     language: 'en',
     readingProfile: 'word-for-word',
@@ -364,16 +377,74 @@ export const versions: Record<string, Version> = {
     hasPericope: true,
     hasAudio: true,
     getAudioUrl: getWordPocketKjvAudioUrl,
+    strongDatasetId: 'KJV',
   },
-  KJVS: {
-    id: 'KJVS',
-    name: 'King James Version Strong',
-    c: '1611 Libre de droit',
+  BSB: {
+    id: 'BSB',
+    name: 'Berean Standard Bible',
+    c: '© Berean Bible — CC0 / Public Domain',
+    sourceUrl: 'https://berean.bible/licensing.htm',
+    type: 'en',
+    language: 'en',
+    readingProfile: 'balanced',
+    hasPericope: true,
+    strongDatasetId: 'BSB',
+  },
+  ASV: {
+    id: 'ASV',
+    name: 'American Standard Version',
+    c: '1901 — Public Domain',
+    sourceUrl: 'https://www.crosswire.org/sword/modules/ModInfo.jsp?modName=ASV',
     type: 'en',
     language: 'en',
     readingProfile: 'word-for-word',
-    hasAudio: true,
-    getAudioUrl: getWordPocketKjvAudioUrl,
+    hasPericope: true,
+    strongDatasetId: 'ASV',
+  },
+  DARBY: {
+    id: 'DARBY',
+    name: 'Darby Bible',
+    c: '1889 — Public Domain',
+    sourceUrl: 'https://www.crosswire.org/sword/modules/ModInfo.jsp?modName=Darby',
+    type: 'en',
+    language: 'en',
+    readingProfile: 'word-for-word',
+    hasPericope: true,
+    strongDatasetId: 'DARBY_EN',
+  },
+  RLT: {
+    id: 'RLT',
+    name: 'Revised Literal Translation',
+    c: '© 2018 Michael W. Jones, Sr. — GPL',
+    sourceUrl: 'https://www.crosswire.org/sword/modules/ModInfo.jsp?modName=RLT',
+    type: 'en',
+    language: 'en',
+    readingProfile: 'word-for-word',
+    hasRedWords: true,
+    hasPericope: true,
+    strongDatasetId: 'RLT',
+  },
+  RWEBSTER: {
+    id: 'RWEBSTER',
+    name: "Revised Webster's Bible",
+    c: '1833 — Public Domain',
+    sourceUrl: 'https://www.crosswire.org/sword/modules/ModInfo.jsp?modName=RWebster',
+    type: 'en',
+    language: 'en',
+    readingProfile: 'word-for-word',
+    hasPericope: true,
+    strongDatasetId: 'RWEBSTER',
+  },
+  RV1895: {
+    id: 'RV1895',
+    name: 'Revised Version 1895',
+    c: '1895 — Public Domain',
+    sourceUrl: 'https://www.stepbible.org/',
+    type: 'en',
+    language: 'en',
+    readingProfile: 'word-for-word',
+    hasPericope: true,
+    strongDatasetId: 'RV1895',
   },
   INT_EN: {
     id: 'INT_EN',
@@ -493,22 +564,28 @@ export const versions: Record<string, Version> = {
   NASB2020: {
     id: 'NASB2020',
     name: 'New American Standard Bible 2020',
-    c: '© 2020 The Lockman Foundation',
+    c: '© 1960–2020 The Lockman Foundation. All rights reserved.',
+    sourceUrl: 'https://www.lockman.org/new-american-standard-bible-nasb/',
     type: 'en',
     language: 'en',
     readingProfile: 'word-for-word',
     hasRedWords: true,
     hasPericope: true,
+    strongDatasetId: 'NASB2020',
   },
   NASB1995: {
     id: 'NASB1995',
     name: 'New American Standard Bible 1995',
-    c: '© 1995 The Lockman Foundation',
+    c: '© 1960–1995 The Lockman Foundation. All rights reserved.',
+    sourceUrl: 'https://www.lockman.org/new-american-standard-bible-nasb/',
     type: 'en',
     language: 'en',
     readingProfile: 'word-for-word',
     canonId: 'protestant-66',
     versificationId: 'bible-strong-default',
+    hasRedWords: true,
+    hasPericope: true,
+    strongDatasetId: 'NASB1995',
   },
   NET: {
     id: 'NET',
@@ -655,7 +732,6 @@ export const versionsBySections: VersionsBySection[] = Object.values(versions).r
         return sectionArray
       }
       case 'KJV':
-      case 'KJVS':
       case 'NKJV':
       case 'NIV':
       case 'ESV':
@@ -702,7 +778,6 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(versions
     const versionEn = { ...version, name: version.name_en || version.name }
     switch (version.id) {
       case 'KJV':
-      case 'KJVS':
       case 'INT_EN':
       case 'NKJV':
       case 'NIV':
@@ -775,4 +850,4 @@ export const getVersionsBySections = () => {
 }
 
 export const isStrongVersion = (version: string) =>
-  version === 'INT' || version === 'INT_EN' || version === 'LSGS' || version === 'KJVS'
+  version === 'INT' || version === 'INT_EN' || version === 'LSGS'

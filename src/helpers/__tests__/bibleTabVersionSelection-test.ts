@@ -37,6 +37,18 @@ describe('selectBibleTabVersion', () => {
     })
   })
 
+  it('maps the removed legacy KJVS selection to KJV with Strong visible', () => {
+    expect(
+      selectBibleTabVersion(
+        { selectedVersion: 'KJVS' } as Parameters<typeof selectBibleTabVersion>[0],
+        'KJVS'
+      )
+    ).toMatchObject({
+      selectedVersion: 'KJV',
+      strongMode: 'visible',
+    })
+  })
+
   it('preserves a pending Strong activation while another version is selected', () => {
     const data = {
       selectedVersion: 'DBY',

@@ -1181,6 +1181,7 @@
   "versionSelector.showStrongIndex": "Show the Strong index for {{bible}}",
   "versionSelector.hideStrongIndex": "Hide the Strong index for {{bible}}",
   "versionSelector.strongAttribution": "Strong numbers assigned by concordance.bible.",
+  "versionSelector.strongAttributionEnglishSources": "Strong data provided by CrossWire Bible Society and STEP Bible.",
   "versionSelector.interlinearIndex": "Interlinear index",
   "versionSelector.showInterlinearIndex": "Show the interlinear index",
   "versionSelector.hideInterlinearIndex": "Hide the interlinear index",

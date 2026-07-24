@@ -227,4 +227,45 @@ describe('canonicalVersePresentation', () => {
     ])
     expect(getCanonicalPresentationText(presentation)).toBe('Au commencement Jésus parla.')
   })
+
+  it('preserves canonical V4 red tags as presentation elements', () => {
+    const presentation = buildCanonicalVersePresentation({
+      text: 'Jesus said',
+      layout: [
+        { offset: 0, order: 0, type: 'open', tag: 'red' },
+        { offset: 10, order: 1, type: 'close', tag: 'red' },
+      ],
+    })
+
+    expect(presentation).toEqual([
+      {
+        kind: 'element',
+        tag: 'red',
+        attributes: undefined,
+        children: [{ kind: 'text', text: 'Jesus said' }],
+      },
+    ])
+    expect(getCanonicalPresentationText(presentation)).toBe('Jesus said')
+  })
+
+  it('treats V4 list items as block starts without altering their text', () => {
+    const presentation = buildCanonicalVersePresentation({
+      text: 'First item',
+      layout: [
+        { offset: 0, order: 0, type: 'open', tag: 'item', attributes: { type: 'x-indent-1' } },
+        { offset: 10, order: 1, type: 'close', tag: 'item' },
+      ],
+    })
+
+    expect(presentation).toEqual([
+      { kind: 'line-start', offset: 0 },
+      {
+        kind: 'element',
+        tag: 'item',
+        attributes: { type: 'x-indent-1' },
+        children: [{ kind: 'text', text: 'First item' }],
+      },
+    ])
+    expect(getCanonicalPresentationText(presentation)).toBe('First item')
+  })
 })

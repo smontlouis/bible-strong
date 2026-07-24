@@ -14,7 +14,8 @@ import type { StrongBibleProvenance } from '~features/resources/strongBibleResou
 import { versions } from '~helpers/bibleVersions'
 import { createStrongSidecarDownloadPlan } from '~helpers/downloadItemFactory'
 import {
-  STRONG_BIBLE_FALLBACK_PRIORITY,
+  ENGLISH_STRONG_BIBLE_PRIORITY,
+  FRENCH_STRONG_BIBLE_PRIORITY,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
 import {
@@ -215,6 +216,10 @@ export const StrongBibleSourceSheet = ({
     StrongBibleSidecarAvailability
   > | null>(null)
   const strongBibleSourceVersionId = bible.data.strongBibleSourceVersionId
+  const sourceVersionIds =
+    versions[bible.data.selectedVersion]?.language === 'en'
+      ? ENGLISH_STRONG_BIBLE_PRIORITY
+      : FRENCH_STRONG_BIBLE_PRIORITY
 
   const setStrongBibleSourceVersion = (versionId?: StrongBibleVersionId) => {
     setBible(updateStrongBibleSourceVersion(versionId))
@@ -225,7 +230,7 @@ export const StrongBibleSourceSheet = ({
 
     let cancelled = false
     Promise.all(
-      STRONG_BIBLE_FALLBACK_PRIORITY.map(async versionId => ({
+      sourceVersionIds.map(async versionId => ({
         versionId,
         availability: await getStrongBibleSidecarAvailability(versionId),
       }))
@@ -268,6 +273,7 @@ export const StrongBibleSourceSheet = ({
     pendingSelectionVersionId,
     setBible,
     strongBibleSourceVersionId,
+    sourceVersionIds,
   ])
 
   const selectSource = (versionId?: StrongBibleVersionId) => {
@@ -325,7 +331,7 @@ export const StrongBibleSourceSheet = ({
               </Box>
             </Box>
           </Pressable>
-          {STRONG_BIBLE_FALLBACK_PRIORITY.map((versionId, index) => (
+          {sourceVersionIds.map((versionId, index) => (
             <StrongBibleSourceRow
               key={versionId}
               versionId={versionId}
@@ -334,7 +340,7 @@ export const StrongBibleSourceSheet = ({
               selected={strongBibleSourceVersionId === versionId}
               onSelect={() => selectSource(versionId)}
               onDownload={() => void downloadSource(versionId)}
-              isLast={index === STRONG_BIBLE_FALLBACK_PRIORITY.length - 1}
+              isLast={index === sourceVersionIds.length - 1}
             />
           ))}
         </Box>

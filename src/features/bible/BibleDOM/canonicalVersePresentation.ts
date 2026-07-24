@@ -123,7 +123,7 @@ export const buildCanonicalVersePresentation = ({
         if (isParagraphTag(event.tag)) {
           currentChildren(stack).push({ kind: 'paragraph-start', offset })
           openElement(stack, event.tag, event.attributes)
-        } else if (isPoeticLineTag(event.tag)) {
+        } else if (isLineStartTag(event.tag)) {
           currentChildren(stack).push({ kind: 'line-start', offset })
           openElement(stack, event.tag, event.attributes)
         } else if (isPoeticLineGroupTag(event.tag)) {
@@ -134,12 +134,16 @@ export const buildCanonicalVersePresentation = ({
       } else if (event.type === 'close') {
         closeElement(stack, event.tag)
       } else {
-        currentChildren(stack).push({
-          kind: 'element',
-          tag: event.tag,
-          attributes: event.attributes,
-          children: [],
-        })
+        if (isLineBreakSpan(event.tag, event.attributes)) {
+          currentChildren(stack).push({ kind: 'line-start', offset })
+        } else {
+          currentChildren(stack).push({
+            kind: 'element',
+            tag: event.tag,
+            attributes: event.attributes,
+            children: [],
+          })
+        }
       }
     }
     for (let index = 0; index < (redStarts.get(offset) ?? 0); index += 1) {
@@ -185,7 +189,7 @@ export const shouldInsertCanonicalBlockBreakBeforeVerse = ({
   layout.some(
     event =>
       event.type === 'open' &&
-      isBlockStartTag(event.tag) &&
+      isBlockStartEvent(event) &&
       clampOffset(event.offset, Number.MAX_SAFE_INTEGER) === 0
   ) &&
   shouldInsertCanonicalParagraphBreak({
@@ -198,8 +202,16 @@ const currentChildren = (stack: PresentationContainer[]) => stack[stack.length -
 
 const isParagraphTag = (tag: string) => tag.toLocaleLowerCase() === 'p'
 const isPoeticLineTag = (tag: string) => tag.toLocaleLowerCase() === 'l'
+const isListItemTag = (tag: string) => tag.toLocaleLowerCase() === 'item'
+const isLineStartTag = (tag: string) => isPoeticLineTag(tag) || isListItemTag(tag)
 const isPoeticLineGroupTag = (tag: string) => tag.toLocaleLowerCase() === 'lg'
-const isBlockStartTag = (tag: string) => isParagraphTag(tag) || isPoeticLineTag(tag)
+const isBlockStartTag = (tag: string) => isParagraphTag(tag) || isLineStartTag(tag)
+const isLineBreakSpan = (tag: string, attributes?: Record<string, string>) =>
+  tag.toLocaleLowerCase() === 'span' &&
+  (attributes?.type === 'x-p' || attributes?.['data-osis-tag'] === 'lb')
+const isBlockStartEvent = (event: NonNullable<Verse['Layout']>[number]) =>
+  (event.type === 'open' && isBlockStartTag(event.tag)) ||
+  (event.type === 'self' && isLineBreakSpan(event.tag, event.attributes))
 
 const openElement = (
   stack: PresentationContainer[],

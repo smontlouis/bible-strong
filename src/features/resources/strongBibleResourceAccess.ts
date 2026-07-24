@@ -13,9 +13,10 @@ import {
   type StrongBibleVerseCountByBook,
 } from '~helpers/strongBibleSidecar'
 import {
+  ENGLISH_STRONG_BIBLE_PRIORITY,
+  FRENCH_STRONG_BIBLE_PRIORITY,
   isStrongCapableBibleVersion,
   resolveStrongBibleVersion,
-  STRONG_BIBLE_FALLBACK_PRIORITY,
   type StrongBibleDatasetId,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
@@ -152,9 +153,19 @@ export const createStrongBibleResourceAccess = (
       }
   > => {
     const currentVersionId = resolveStrongBibleVersion(request.currentVersionId).versionId
+    const useEnglishPriority =
+      ENGLISH_STRONG_BIBLE_PRIORITY.includes(
+        currentVersionId as (typeof ENGLISH_STRONG_BIBLE_PRIORITY)[number]
+      ) ||
+      ENGLISH_STRONG_BIBLE_PRIORITY.includes(
+        request.defaultVersionId as (typeof ENGLISH_STRONG_BIBLE_PRIORITY)[number]
+      )
+    const languagePriority = useEnglishPriority
+      ? ENGLISH_STRONG_BIBLE_PRIORITY
+      : FRENCH_STRONG_BIBLE_PRIORITY
     const fallbackVersionIds = request.fallbackVersionIds ?? [
-      request.defaultVersionId,
-      ...STRONG_BIBLE_FALLBACK_PRIORITY,
+      ...(useEnglishPriority ? [] : [request.defaultVersionId]),
+      ...languagePriority,
     ]
     const candidates = [
       ...new Set([request.preferredVersionId, currentVersionId, ...fallbackVersionIds]),

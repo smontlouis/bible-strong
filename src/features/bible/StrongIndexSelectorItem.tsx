@@ -9,7 +9,10 @@ import Progress from '~common/ui/Progress'
 import Text from '~common/ui/Text'
 import { downloadManager } from '~helpers/downloadManager'
 import { createStrongSidecarDownloadPlan } from '~helpers/downloadItemFactory'
-import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
+import {
+  getStrongBibleAttributionKey,
+  type StrongBibleVersionId,
+} from '~helpers/strongBiblePublications'
 import {
   getStrongBibleSidecarAvailability,
   type StrongBibleSidecarAvailability,
@@ -118,7 +121,7 @@ const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: 
             {t('versionSelector.strongIndex')}
           </Text>
           <Text fontSize={10} color="tertiary" mt={2} numberOfLines={2}>
-            {t('versionSelector.strongAttribution')}
+            {t(getStrongBibleAttributionKey(versionId))}
           </Text>
         </Box>
 

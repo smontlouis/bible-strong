@@ -406,8 +406,9 @@ const migrateTabsToRemovable = (tabs: TabItem[]): TabItem[] => {
           strongMode: resolved.strongMode,
           parallelVersions: [
             ...new Set(
-              tab.data.parallelVersions.map(parallelVersion =>
-                parallelVersion === 'LSGS' ? ('LSG' as VersionCode) : parallelVersion
+              tab.data.parallelVersions.map(
+                parallelVersion =>
+                  resolveStrongBibleVersion(parallelVersion).versionId as VersionCode
               )
             ),
           ],

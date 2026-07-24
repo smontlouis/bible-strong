@@ -7,6 +7,7 @@ import { requireBiblePath } from '~helpers/requireBiblePath'
 import {
   getStrongBiblePublication,
   isStrongCapableBibleVersion,
+  usesCanonicalBibleExtras,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
 import type { StrongBibleSidecarAvailability } from './strongBibleSidecar'
@@ -62,8 +63,8 @@ export function createBibleDownloadItem(versionId: string): DownloadItem {
     url,
     destinationPath,
     estimatedSize,
-    hasRedWords: version.hasRedWords,
-    hasPericope: version.hasPericope,
+    hasRedWords: usesCanonicalBibleExtras(versionId) ? false : version.hasRedWords,
+    hasPericope: usesCanonicalBibleExtras(versionId) ? false : version.hasPericope,
     ...(publication ? { canonicalArtifact: publication.canonical } : {}),
     ...(interlinearPublication ? { archiveArtifact: interlinearPublication.canonical } : {}),
     addedAt: Date.now(),

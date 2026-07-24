@@ -437,7 +437,7 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
                   <Box px={10} py={5} ml={10} bg="lightPrimary" borderRadius={20}>
                     <Text>{count}</Text>
                   </Box>
-                  {count > 15 && (
+                  {count > 15 && book !== undefined && (
                     <LinkBox
                       ml="auto"
                       route="Concordance"

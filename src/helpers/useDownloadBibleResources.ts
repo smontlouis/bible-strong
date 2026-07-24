@@ -7,6 +7,7 @@ import { isVersionInstalled } from '~helpers/biblesDb'
 import { requireBiblePath } from '~helpers/requireBiblePath'
 import { versionHasRedWords, hasRedWordsFile, downloadRedWordsFile } from '~helpers/redWords'
 import { versionHasPericope, hasPericopeFile, downloadPericopeFile } from '~helpers/pericopes'
+import { usesCanonicalBibleExtras } from '~helpers/strongBiblePublications'
 
 interface ResourceDefinition {
   label: string
@@ -42,6 +43,7 @@ function useDownloadBibleResources(): void {
       console.log('[BibleResources] Starting migration check...')
 
       for (const version of Object.values(versions)) {
+        if (usesCanonicalBibleExtras(version.id)) continue
         // Check if this version is installed (SQLite or legacy file)
         let versionExists = false
         if (!isStrongVersion(version.id)) {

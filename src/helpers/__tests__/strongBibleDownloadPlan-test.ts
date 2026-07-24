@@ -9,6 +9,12 @@ jest.mock('~helpers/firebase', () => ({
 jest.mock('~helpers/bibleVersions', () => ({
   versions: {
     DBY: { id: 'DBY', name: 'Bible Darby' },
+    KJV: {
+      id: 'KJV',
+      name: 'King James Version',
+      hasRedWords: true,
+      hasPericope: true,
+    },
     BHG: { id: 'BHG', name: 'Bible hébraïque et grecque' },
   },
   isStrongVersion: () => false,
@@ -25,11 +31,20 @@ jest.mock('~helpers/requireBiblePath', () => ({
 
 import {
   createInterlinearSidecarDownloadPlan,
+  createBibleDownloadItem,
   createStrongSidecarDownloadPlan,
   dedupeDownloadItems,
 } from '../downloadItemFactory'
 
 describe('Strong Bible download planning', () => {
+  it('does not queue legacy red-word or pericope files for a canonical V4 publication', () => {
+    expect(createBibleDownloadItem('KJV')).toEqual(
+      expect.objectContaining({
+        hasRedWords: false,
+        hasPericope: false,
+      })
+    )
+  })
   it.each(['base-missing', 'base-incompatible'] as const)(
     'queues the canonical Bible before its sidecar when status is %s',
     status => {

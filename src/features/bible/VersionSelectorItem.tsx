@@ -29,7 +29,10 @@ import { RootState } from '~redux/modules/reducer'
 import { setDefaultBibleVersion, setVersionUpdated } from '~redux/modules/user'
 import { VersionCode, tabsAtom, BibleTab } from 'src/state/tabs'
 import { store } from '~redux/store'
-import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
+import {
+  getStrongBibleAttributionKey,
+  isStrongCapableBibleVersion,
+} from '~helpers/strongBiblePublications'
 import StrongIndexSelectorItem from './StrongIndexSelectorItem'
 import StrongMark from './StrongMark'
 import { isInterlinearCapableBibleVersion } from '~helpers/interlinearBiblePublications'
@@ -486,7 +489,9 @@ const VersionSelectorItem = ({
                 isStrongIndexExpanded={isStrongIndexExpanded}
                 onToggleStrongIndex={showStrongDependency ? toggleStrongIndex : undefined}
                 strongToggleLabel={strongToggleLabel}
-                strongAttribution={t('versionSelector.strongAttribution')}
+                strongAttribution={
+                  strongVersionId ? t(getStrongBibleAttributionKey(strongVersionId)) : undefined
+                }
                 showInterlinearCapability={showInterlinearCapability}
                 isInterlinearIndexAvailable={isInterlinearIndexAvailable}
                 isInterlinearIndexExpanded={isInterlinearIndexExpanded}
@@ -581,7 +586,9 @@ const VersionSelectorItem = ({
             isStrongIndexExpanded={isStrongIndexExpanded}
             onToggleStrongIndex={showStrongDependency ? toggleStrongIndex : undefined}
             strongToggleLabel={strongToggleLabel}
-            strongAttribution={t('versionSelector.strongAttribution')}
+            strongAttribution={
+              strongVersionId ? t(getStrongBibleAttributionKey(strongVersionId)) : undefined
+            }
             showInterlinearCapability={showInterlinearCapability}
             isInterlinearIndexAvailable={isInterlinearIndexAvailable}
             isInterlinearIndexExpanded={isInterlinearIndexExpanded}

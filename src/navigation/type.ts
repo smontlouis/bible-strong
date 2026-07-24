@@ -9,6 +9,7 @@ import {
   StudyNavigateBibleType,
 } from '~common/types'
 import { Theme } from '~themes/index'
+import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
 
 interface Verse {
   Livre: string
@@ -76,7 +77,7 @@ type DictionnaireVerseDetailScreenProps = {
 type ConcordanceByBookScreenProps = {
   strongReference: StrongReference
   book: number
-  strongBibleVersionId?: 'LSG' | 'DBY' | 'DBR'
+  strongBibleVersionId?: StrongBibleVersionId
 }
 
 type BibleScreenProps = {
@@ -143,7 +144,7 @@ type EventScreenProps = {
 type ConcordanceScreenProps = {
   strongReference: StrongReference
   book: number
-  strongBibleVersionId?: 'LSG' | 'DBY' | 'DBR'
+  strongBibleVersionId?: StrongBibleVersionId
 }
 
 type CommentariesScreenProps = {

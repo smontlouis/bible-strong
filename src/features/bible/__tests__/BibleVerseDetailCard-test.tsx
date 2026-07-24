@@ -107,6 +107,9 @@ jest.mock('~helpers/utils', () => ({
 
 jest.mock('~helpers/strongBiblePublications', () => ({
   STRONG_BIBLE_FALLBACK_PRIORITY: ['LSG', 'DBY', 'DBR'],
+  FRENCH_STRONG_BIBLE_PRIORITY: ['LSG', 'DBY', 'DBR'],
+  ENGLISH_STRONG_BIBLE_PRIORITY: ['KJV'],
+  getStrongBibleFallbackPriority: () => ['LSG', 'DBY', 'DBR'],
 }))
 
 jest.mock('~helpers/CarouselContext', () => ({

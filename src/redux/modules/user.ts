@@ -17,6 +17,7 @@ import { FireAuthProfile } from '~helpers/FireAuth'
 import { firebaseDb } from '~helpers/firebase'
 import { getNoteTitle } from '~helpers/getNoteTitle'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
+import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
 import { getLanguage } from '~i18n'
 import { TabGroup, tabGroupsAtom } from '~state/tabs'
 import blackColors from '~themes/blackColors'
@@ -534,7 +535,7 @@ export interface UserState {
     wordAnnotations: WordAnnotationsObj
     settings: {
       defaultBibleVersion?: string
-      defaultStrongBibleVersionId?: 'LSG' | 'DBY' | 'DBR'
+      defaultStrongBibleVersionId?: StrongBibleVersionId
       alignContent: 'left' | 'justify'
       lineHeight: 'normal' | 'small' | 'large'
       fontSizeScale: number
@@ -631,7 +632,7 @@ const getInitialState = (): UserState => ({
     wordAnnotations: {},
     settings: {
       defaultBibleVersion: getDefaultBibleVersion(getLanguage()),
-      defaultStrongBibleVersionId: 'LSG',
+      defaultStrongBibleVersionId: getLanguage() === 'en' ? 'KJV' : 'LSG',
       alignContent: 'left',
       lineHeight: 'normal',
       fontSizeScale: 0,

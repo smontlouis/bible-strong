@@ -42,8 +42,10 @@ import { RootState } from '~redux/modules/reducer'
 import { getDefaultStore } from 'jotai/vanilla'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import {
+  getStrongBibleAttributionKey,
   getStrongBiblePublication,
   isStrongCapableBibleVersion,
+  STRONG_BIBLE_PUBLICATIONS,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
 import {
@@ -166,10 +168,10 @@ function buildBibleItems(
       {
         id: `bible-strong:${v.id}`,
         name: t('downloads.strongIndexName', { bible: strongIndexBibleName }),
-        subtitle: t('downloads.strongAttribution'),
+        subtitle: t(getStrongBibleAttributionKey(v.id)),
         parentItemId: base.id,
         estimatedSize: publication.strong.archiveBytes,
-        lang: 'fr',
+        lang: v.type === 'en' ? 'en' : 'fr',
         searchText:
           `${v.id} ${v.name} ${strongIndexBibleName} strong index ${publication.datasetId}`.toLowerCase(),
       },
@@ -256,7 +258,7 @@ function useDownloadedItems() {
     }
 
     const availabilityMap = new Map<StrongBibleVersionId, StrongBibleSidecarAvailability>()
-    for (const versionId of ['LSG', 'DBY', 'DBR'] as StrongBibleVersionId[]) {
+    for (const versionId of Object.keys(STRONG_BIBLE_PUBLICATIONS) as StrongBibleVersionId[]) {
       const availability = await getStrongBibleSidecarAvailability(versionId)
       availabilityMap.set(versionId, availability)
       if (

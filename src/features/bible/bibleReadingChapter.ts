@@ -7,7 +7,8 @@ import {
 } from '~features/resources/resourceAccess'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import type { VersionCode } from '~state/tabs'
-import type { StrongMode } from '~helpers/strongBiblePublications'
+import { type StrongMode, usesCanonicalBibleExtras } from '~helpers/strongBiblePublications'
+import { getCanonicalChapterPericope } from '~helpers/canonicalBibleHeadings'
 import type { InterlinearMode } from '~helpers/interlinearBiblePublications'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import type { ParallelVerse } from './BibleDOM/BibleDOMWrapper'
@@ -46,17 +47,37 @@ export const loadBibleReadingMain = async (
   }: BibleReadingChapterRequest,
   resourceAccess: ResourceAccessRegistry = defaultResourceAccess
 ): Promise<BibleReadingMainResult> => {
-  const [pericope, mainResult] = await Promise.all([
-    resourceAccess.bibleReading.loadPericope(version),
-    resourceAccess.bibleContent.loadChapter({
-      book,
-      chapter,
-      version,
-      strongMode,
-      interlinearMode,
-      interlinearLocale,
-    }),
-  ])
+  const canonicalExtras = usesCanonicalBibleExtras(version)
+  if (!canonicalExtras) {
+    const [pericope, mainResult] = await Promise.all([
+      resourceAccess.bibleReading.loadPericope(version),
+      resourceAccess.bibleContent.loadChapter({
+        book,
+        chapter,
+        version,
+        strongMode,
+        interlinearMode,
+        interlinearLocale,
+      }),
+    ])
+    return {
+      pericope,
+      mainResult: mainResult as BibleChapterResult<Verse[] | null>,
+    }
+  }
+
+  const mainResult = await resourceAccess.bibleContent.loadChapter({
+    book,
+    chapter,
+    version,
+    strongMode,
+    interlinearMode,
+    interlinearLocale,
+  })
+  const pericope =
+    mainResult.success && mainResult.data
+      ? getCanonicalChapterPericope(mainResult.data as Verse[])
+      : {}
 
   return {
     pericope,
@@ -127,6 +148,7 @@ export const loadBibleReadingRedWords = async (
   { version }: BibleReadingChapterRequest,
   resourceAccess: ResourceAccessRegistry = defaultResourceAccess
 ): Promise<RedWordsByVerse | null> => {
+  if (usesCanonicalBibleExtras(version)) return null
   try {
     return await resourceAccess.bibleReading.loadRedWords(version)
   } catch {
