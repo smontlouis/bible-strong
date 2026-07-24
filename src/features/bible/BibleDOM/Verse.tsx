@@ -38,6 +38,7 @@ import {
 } from './relationDisplayActions'
 import {
   buildCanonicalVersePresentation,
+  shouldInsertCanonicalParagraphBreak,
   type CanonicalVersePresentationNode,
 } from './canonicalVersePresentation'
 
@@ -201,6 +202,7 @@ const getVerseText = ({
     })
     return renderCanonicalPresentation(presentation, {
       book: verse.Livre,
+      verse: verse.Verset,
       isParallel,
       isDisabled: annotationMode,
       selectedCode,
@@ -235,6 +237,7 @@ const renderCanonicalPresentation = (
   nodes: CanonicalVersePresentationNode[],
   options: {
     book: string | number
+    verse: string | number
     isParallel?: boolean
     isDisabled: boolean
     selectedCode: SelectedCode | null
@@ -259,15 +262,23 @@ const renderCanonicalPresentation = (
         />
       )
     }
+    if (node.kind === 'paragraph-start') {
+      if (
+        !shouldInsertCanonicalParagraphBreak({
+          offset: node.offset,
+          verse: options.verse,
+          textDisplay: options.settings.textDisplay,
+        })
+      ) {
+        return <React.Fragment key={key} />
+      }
+      return <br key={key} />
+    }
 
     const children = renderCanonicalPresentation(node.children, options, key)
     switch (node.tag.toLocaleLowerCase()) {
       case 'p':
-        return (
-          <span key={key} style={{ display: 'block', marginBlock: '0.35em' }}>
-            {children}
-          </span>
-        )
+        return <React.Fragment key={key}>{children}</React.Fragment>
       case 'lg':
         return (
           <span key={key} style={{ display: 'block', marginBlock: '0.25em' }}>

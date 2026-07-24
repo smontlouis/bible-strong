@@ -1,24 +1,65 @@
 import {
   buildCanonicalVersePresentation,
   getCanonicalPresentationText,
+  shouldInsertCanonicalParagraphBreak,
 } from '../canonicalVersePresentation'
 
 describe('canonicalVersePresentation', () => {
-  it('reopens presentation tags active at the beginning of a verse', () => {
+  it('does not restart a paragraph that is already active at the beginning of a verse', () => {
     const presentation = buildCanonicalVersePresentation({
       text: 'les cieux.',
       startTags: [{ tag: 'p' }],
       layout: [{ offset: 10, order: 1, type: 'close', tag: 'p' }],
     })
 
+    expect(presentation).toEqual([{ kind: 'text', text: 'les cieux.' }])
+  })
+
+  it('represents a paragraph boundary once where the paragraph actually opens', () => {
+    const presentation = buildCanonicalVersePresentation({
+      text: 'Avant. Après.',
+      layout: [
+        { offset: 7, order: 0, type: 'open', tag: 'p' },
+        { offset: 13, order: 1, type: 'close', tag: 'p' },
+      ],
+    })
+
     expect(presentation).toEqual([
-      {
-        kind: 'element',
-        tag: 'p',
-        attributes: undefined,
-        children: [{ kind: 'text', text: 'les cieux.' }],
-      },
+      { kind: 'text', text: 'Avant. ' },
+      { kind: 'paragraph-start', offset: 7 },
+      { kind: 'text', text: 'Après.' },
     ])
+  })
+
+  it('keeps mid-verse paragraph boundaries in both text display modes', () => {
+    expect(
+      shouldInsertCanonicalParagraphBreak({
+        offset: 0,
+        verse: 1,
+        textDisplay: 'inline',
+      })
+    ).toBe(false)
+    expect(
+      shouldInsertCanonicalParagraphBreak({
+        offset: 0,
+        verse: 2,
+        textDisplay: 'inline',
+      })
+    ).toBe(true)
+    expect(
+      shouldInsertCanonicalParagraphBreak({
+        offset: 0,
+        verse: 2,
+        textDisplay: 'block',
+      })
+    ).toBe(false)
+    expect(
+      shouldInsertCanonicalParagraphBreak({
+        offset: 7,
+        verse: 2,
+        textDisplay: 'block',
+      })
+    ).toBe(true)
   })
 
   it('adds Strong references without changing canonical selectable text or layout', () => {

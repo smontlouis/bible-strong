@@ -3,6 +3,7 @@ import type { Verse } from '~common/types'
 export type CanonicalVersePresentationNode =
   | { kind: 'text'; text: string }
   | { kind: 'strong-reference'; reference: string }
+  | { kind: 'paragraph-start'; offset: number }
   | {
       kind: 'element'
       tag: string
@@ -33,7 +34,11 @@ export const buildCanonicalVersePresentation = ({
   const root: PresentationContainer = { children: [] }
   const stack: PresentationContainer[] = [root]
   for (const activeTag of startTags) {
-    openElement(stack, activeTag.tag, activeTag.attributes)
+    if (isParagraphTag(activeTag.tag)) {
+      openTransparentElement(stack, activeTag.tag)
+    } else {
+      openElement(stack, activeTag.tag, activeTag.attributes)
+    }
   }
 
   const eventsByOffset = new Map<number, NonNullable<Verse['Layout']>>()
@@ -97,7 +102,12 @@ export const buildCanonicalVersePresentation = ({
     }
     for (const event of eventsByOffset.get(offset) ?? []) {
       if (event.type === 'open') {
-        openElement(stack, event.tag, event.attributes)
+        if (isParagraphTag(event.tag)) {
+          currentChildren(stack).push({ kind: 'paragraph-start', offset })
+          openTransparentElement(stack, event.tag)
+        } else {
+          openElement(stack, event.tag, event.attributes)
+        }
       } else if (event.type === 'close') {
         closeElement(stack, event.tag)
       } else {
@@ -123,11 +133,28 @@ export const getCanonicalPresentationText = (nodes: CanonicalVersePresentationNo
     .map(node => {
       if (node.kind === 'text') return node.text
       if (node.kind === 'strong-reference') return ''
+      if (node.kind === 'paragraph-start') return ''
       return getCanonicalPresentationText(node.children)
     })
     .join('')
 
+export const shouldInsertCanonicalParagraphBreak = ({
+  offset,
+  verse,
+  textDisplay,
+}: {
+  offset: number
+  verse: string | number
+  textDisplay: 'inline' | 'block'
+}) => offset > 0 || (Number(verse) !== 1 && textDisplay === 'inline')
+
 const currentChildren = (stack: PresentationContainer[]) => stack[stack.length - 1]!.children
+
+const isParagraphTag = (tag: string) => tag.toLocaleLowerCase() === 'p'
+
+const openTransparentElement = (stack: PresentationContainer[], tag: string) => {
+  stack.push({ tag, children: currentChildren(stack) })
+}
 
 const openElement = (
   stack: PresentationContainer[],
