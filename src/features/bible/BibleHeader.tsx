@@ -516,7 +516,7 @@ const Header = ({
       >
         {isFormSheet && <FormSheetHandle />}
 
-        <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
+        <HStack maxWidth={830} mx="auto" alignItems="center" width="100%" overflow="visible">
           {hasBackButton && (
             <Box position="absolute" left={0} top={5} zIndex={2}>
               <Back
@@ -541,7 +541,7 @@ const Header = ({
             onPress={onExitAnnotationMode}
             position="absolute"
             right={0}
-            bottom={10}
+            bottom={isFormSheet ? -10 : 0}
           >
             <Box bg="reverse" borderRadius={8} height={28} px={12} center>
               <Text color="primary" bold fontSize={12}>

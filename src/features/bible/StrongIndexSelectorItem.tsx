@@ -1,12 +1,11 @@
-import { useTheme } from '@emotion/react'
 import { useAtomValue } from 'jotai/react'
 import React from 'react'
 import { ActivityIndicator, TouchableOpacity } from 'react-native'
-import Animated from 'react-native-reanimated'
 import { useTranslation } from 'react-i18next'
 
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import Progress from '~common/ui/Progress'
 import Text from '~common/ui/Text'
 import { downloadManager } from '~helpers/downloadManager'
 import { createStrongSidecarDownloadPlan } from '~helpers/downloadItemFactory'
@@ -28,7 +27,6 @@ const isActiveDownload = (status?: string) =>
   status === 'queued' || status === 'downloading' || status === 'inserting'
 
 const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: Props) => {
-  const theme = useTheme()
   const { t } = useTranslation()
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const bibleDownload = useDownloadItemStatus(`bible:${versionId}`)
@@ -138,21 +136,7 @@ const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: 
             ) : strongActiveDownload?.status === 'queued' ? (
               <FeatherIcon name="clock" size={18} color="tertiary" />
             ) : strongActiveDownload ? (
-              <Box width={36} height={4} borderRadius={2} bg="border" overflow="hidden">
-                <Animated.View
-                  style={{
-                    height: 4,
-                    borderRadius: 2,
-                    backgroundColor:
-                      strongActiveDownload.status === 'inserting'
-                        ? theme.colors.success
-                        : theme.colors.primary,
-                    width: `${Math.round(progress * 100)}%`,
-                    transitionProperty: 'width',
-                    transitionDuration: 150,
-                  }}
-                />
-              </Box>
+              <Progress progress={Math.max(progress, 0.04)} size={22} thickness={2.5} />
             ) : (
               <FeatherIcon name={failedDownload ? 'rotate-cw' : 'download-cloud'} size={16} />
             )}

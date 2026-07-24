@@ -4,14 +4,13 @@ import { Alert, Linking, TouchableOpacity } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { dbManager } from '~helpers/sqlite'
 
-import { useTheme } from '@emotion/react'
 import { useAtomValue } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import Animated from 'react-native-reanimated'
 import Box from '~common/ui/Box'
 import Checkbox from '~common/ui/Checkbox'
 import { FeatherIcon } from '~common/ui/Icon'
+import Progress from '~common/ui/Progress'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import { getIfVersionNeedsDownload, isStrongVersion, Version } from '~helpers/bibleVersions'
@@ -28,7 +27,6 @@ import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
 import { RootState } from '~redux/modules/reducer'
 import { setDefaultBibleVersion, setVersionUpdated } from '~redux/modules/user'
-import { Theme } from '~themes'
 import { VersionCode, tabsAtom, BibleTab } from 'src/state/tabs'
 import { store } from '~redux/store'
 import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
@@ -194,7 +192,6 @@ const VersionSelectorItem = ({
 }: Props) => {
   const { t } = useTranslation()
   const lang = useLanguage()
-  const theme: Theme = useTheme()
   const [versionNeedsDownload, setVersionNeedsDownload] = React.useState<boolean>()
   const [isStrongIndexAvailable, setStrongIndexAvailable] = React.useState<boolean>()
   const [isStrongIndexExpanded, setStrongIndexExpanded] = React.useState(false)
@@ -436,18 +433,7 @@ const VersionSelectorItem = ({
             )}
             {isLoading && (
               <ActionColumn>
-                <Box width={36} height={4} borderRadius={2} bg="border" overflow="hidden">
-                  <Animated.View
-                    style={{
-                      height: 4,
-                      borderRadius: 2,
-                      backgroundColor: theme.colors.primary,
-                      width: `${Math.round(downloadProgress * 100)}%`,
-                      transitionProperty: 'width',
-                      transitionDuration: 150,
-                    }}
-                  />
-                </Box>
+                <Progress progress={Math.max(downloadProgress, 0.04)} size={22} thickness={2.5} />
               </ActionColumn>
             )}
           </Box>
