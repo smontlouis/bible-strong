@@ -733,7 +733,6 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     const target = osisToBibleReferenceTarget(osis)
     if (!target) return
 
-    canonicalBibleNoteModal.close()
     pushRouteOnce({
       pathname: '/bible-view',
       params: {
