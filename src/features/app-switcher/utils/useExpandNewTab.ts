@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { usePrevious } from '~helpers/usePrevious'
 import wait from '~helpers/wait'
 import { tabsCountAtom } from '../../../state/tabs'
-import { useAppSwitcherContext } from '../AppSwitcherProvider'
+import { useAppSwitcherContext } from '../AppSwitcherContext'
 import useMeasureTabPreview from './useMesureTabPreview'
 import { useTabAnimations } from './useTabAnimations'
 

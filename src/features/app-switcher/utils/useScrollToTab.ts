@@ -1,4 +1,4 @@
-import { useAppSwitcherContext } from '../AppSwitcherProvider'
+import { useAppSwitcherContext } from '../AppSwitcherContext'
 
 interface ScrollOptions {
   animated?: boolean // défaut: false (comportement actuel)

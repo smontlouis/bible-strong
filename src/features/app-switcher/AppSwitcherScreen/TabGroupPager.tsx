@@ -14,7 +14,7 @@ import {
   bufferedGroupIdsAtom,
   appSwitcherModeAtom,
 } from '../../../state/tabs'
-import { useAppSwitcherContext } from '../AppSwitcherProvider'
+import { useAppSwitcherContext } from '../AppSwitcherContext'
 import { rubberBand } from '../utils/tabHelpers'
 import CreateGroupPage from './CreateGroupPage'
 import TabGroupPage from './TabGroupPage'

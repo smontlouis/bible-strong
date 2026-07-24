@@ -1,77 +1,14 @@
 import { FlashListRef } from '@shopify/flash-list'
 import { PrimitiveAtom, getDefaultStore } from 'jotai'
 import { useAtomValue } from 'jotai/react'
-import React, { createContext, useCallback, useContext, useRef } from 'react'
+import React, { useCallback, useRef } from 'react'
 import { ScrollView, View, useWindowDimensions } from 'react-native'
 import { AnimatedRef, SharedValue, useSharedValue, withSpring } from 'react-native-reanimated'
 import { TabItem, activeGroupIdAtom, tabGroupsAtom, tabsCountAtom } from '~state/tabs'
+import { AppSwitcherContext, type AppSwitcherContextValue } from './AppSwitcherContext'
 import { useOnceAtoms } from './utils/useOnceAtoms'
 import { useProviderEffects } from './utils/useProviderEffects'
 import useTabConstants from './utils/useTabConstants'
-
-type AppSwitcherContextValues = {
-  // === Tab Expand/Collapse ===
-  // Mutated by: useTabAnimations, useTabBarSwipeGesture, useTabPreview
-  activeTabPreview: {
-    index: SharedValue<number>
-    top: SharedValue<number>
-    left: SharedValue<number>
-    opacity: SharedValue<number>
-    animationProgress: SharedValue<number>
-    zIndex: SharedValue<number>
-  }
-
-  // === Active Tab Screen ===
-  // Mutated by: useTabAnimations, useTabBarSwipeGesture (via tabHelpers)
-  activeTabScreen: {
-    opacity: SharedValue<number>
-    tabId: SharedValue<string | null>
-  }
-
-  // === Preview Carousel (overlay during swipe) ===
-  // Mutated by: useTabAnimations, useTabBarSwipeGesture
-  tabPreviewCarousel: {
-    translateY: SharedValue<number>
-    opacity: SharedValue<number>
-  }
-
-  // === Group Pagination ===
-  // Mutated by: TabGroupPager, navigateToPage, useProviderEffects (reset)
-  activeGroupIndex: SharedValue<number>
-  groupPager: {
-    ref: React.RefObject<ScrollView | null>
-    translateX: SharedValue<number>
-    scrollX: SharedValue<number>
-    navigateToPage: (pageIndex: number, groupsLength: number) => void
-  }
-  createGroupPage: {
-    isFullyVisible: SharedValue<boolean>
-  }
-
-  // === Refs & Registries (non-animated) ===
-  flashListRefs: {
-    registerRef: (
-      groupId: string,
-      ref: React.RefObject<FlashListRef<PrimitiveAtom<TabItem>> | null>
-    ) => void
-    getActiveRef: () => React.RefObject<FlashListRef<PrimitiveAtom<TabItem>> | null>
-  }
-  scrollView: {
-    y: SharedValue<number>
-    padding: SharedValue<number>
-  }
-  tabPreviews: {
-    refs: React.RefObject<React.RefObject<View>[]>
-    registerRef: (index: number, ref: AnimatedRef<View>) => void
-    visibleIndices: React.RefObject<Set<number>>
-    setVisibleIndices: (indices: number[]) => void
-  }
-
-  // === Tabs count for UI thread access (worklets can't read Jotai) ===
-  tabsCountShared: SharedValue<number>
-}
-
-const AppSwitcherContext = createContext<AppSwitcherContextValues | undefined>(undefined)
 
 interface AppSwitcherProviderProps {
   children: React.ReactNode
@@ -225,7 +162,7 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
     isFullyVisible: createGroupPageIsFullyVisible,
   }
 
-  const contextValue: AppSwitcherContextValues = {
+  const contextValue: AppSwitcherContextValue = {
     activeTabPreview,
     activeTabScreen,
     flashListRefs,
@@ -239,14 +176,4 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
   }
 
   return <AppSwitcherContext.Provider value={contextValue}>{children}</AppSwitcherContext.Provider>
-}
-
-export const useAppSwitcherContext = () => {
-  const context = useContext(AppSwitcherContext)
-
-  if (!context) {
-    throw new Error('useAppSwitcherContext must be used within an AppSwitcherProvider')
-  }
-
-  return context
 }

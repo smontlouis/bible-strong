@@ -3,7 +3,7 @@ import React, { useDeferredValue } from 'react'
 import { useAnimatedStyle } from 'react-native-reanimated'
 import Box, { AnimatedBox } from '~common/ui/Box'
 import { tabsAtomsAtom } from '../../../state/tabs'
-import { useAppSwitcherContext } from '../AppSwitcherProvider'
+import { useAppSwitcherContext } from '../AppSwitcherContext'
 import useTabConstants from '../utils/useTabConstants'
 import TabPreview from './TabPreview'
 
