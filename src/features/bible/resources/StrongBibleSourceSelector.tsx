@@ -182,24 +182,18 @@ const StrongBibleSourceRow = ({
       ) : !isAvailable ? (
         <Pressable
           accessibilityRole="button"
+          accessibilityLabel={failedDownload ? t('downloads.retry') : t('downloads.download')}
           onPress={onDownload}
           style={({ pressed }) => ({
             marginLeft: 12,
-            minHeight: 40,
+            width: 48,
+            minHeight: 48,
+            alignItems: 'center',
             justifyContent: 'center',
             opacity: pressed ? 0.7 : 1,
           })}
         >
-          <Box row center minHeight={40} minWidth={96} px={12} borderRadius={20} bg="lightPrimary">
-            <FeatherIcon
-              name={failedDownload ? 'rotate-cw' : 'download'}
-              size={14}
-              color="primary"
-            />
-            <Text ml={6} fontSize={12} bold color="primary">
-              {failedDownload ? t('downloads.retry') : t('downloads.download')}
-            </Text>
-          </Box>
+          <FeatherIcon name={failedDownload ? 'rotate-cw' : 'download-cloud'} size={16} />
         </Pressable>
       ) : null}
     </Box>
