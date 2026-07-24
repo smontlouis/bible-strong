@@ -32,6 +32,7 @@ describe('Strong Bible download planning', () => {
         'bible:DBY',
         'bible-strong:DBY',
       ])
+      expect(createStrongSidecarDownloadPlan('DBY', status)[1]?.dependsOnId).toBe('bible:DBY')
     }
   )
 

@@ -13,6 +13,7 @@ import {
 import { installedVersionsSignalAtom, bibleDataRefreshSignalAtom } from '~state/app'
 import { storage } from '~helpers/storage'
 import { installResourceDatabaseItem } from '~helpers/resourceDatabaseInstallation'
+import { getDownloadQueueDecision } from '~helpers/downloadQueueScheduling'
 
 const PERSIST_KEY = 'downloadQueue'
 const MAX_RETRIES = 2
@@ -199,7 +200,16 @@ class DownloadManager {
     try {
       while (true) {
         const states = this.jotaiStore.get(downloadItemStatesAtom)
-        const next = Array.from(states.values()).find(s => s.status === 'queued')
+        const { next, blocked } = getDownloadQueueDecision(states)
+        if (blocked) {
+          this.updateItemStatus(
+            blocked.item.id,
+            'failed',
+            `Dependency failed: ${blocked.item.dependsOnId}`
+          )
+          continue
+        }
+
         if (!next) break
 
         await this.processItem(next)

@@ -33,7 +33,7 @@ import CompareVersionSelectorSheet from '../CompareVersionSelectorSheet'
 import { ReferenceCard } from '../ReferenceCard'
 import CompareCard from './CompareCard'
 import ResourcesModalFooter from './ResourcesModalFooter'
-import StrongBibleSourceMenu from './StrongBibleSourceMenu'
+import { StrongBibleSourceButton, StrongBibleSourceSheet } from './StrongBibleSourceSelector'
 
 type ResourceVerse = {
   Livre: number
@@ -91,6 +91,7 @@ const ResourcesModal = ({
 }: Props) => {
   const { t } = useTranslation()
   const compareVersionSelectorRef = React.useRef<SheetRef>(null)
+  const strongBibleSourceSheetRef = React.useRef<SheetRef>(null)
   const [isOpen, setIsOpen] = useState(false)
   const openInNewTab = useOpenInNewTab()
   const bible = useAtomValue(bibleAtom)
@@ -241,11 +242,10 @@ const ResourcesModal = ({
     return (
       <Box row alignItems="center">
         {resourceType === 'strong' ? (
-          <StrongBibleSourceMenu
-            key={isOpen ? 'open' : 'closed'}
+          <StrongBibleSourceButton
             bibleAtom={bibleAtom}
-            isOpen={isOpen}
             resolvedProvenance={resolvedStrongProvenance}
+            onPress={() => strongBibleSourceSheetRef.current?.present()}
           />
         ) : null}
         {menuActions.length ? (
@@ -310,6 +310,12 @@ const ResourcesModal = ({
         )}
       </Sheet>
       <CompareVersionSelectorSheet sheetRef={compareVersionSelectorRef} />
+      <StrongBibleSourceSheet
+        sheetRef={strongBibleSourceSheetRef}
+        bibleAtom={bibleAtom}
+        isResourceModalOpen={isOpen}
+        resolvedProvenance={resolvedStrongProvenance}
+      />
     </>
   )
 }

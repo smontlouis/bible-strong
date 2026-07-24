@@ -1170,5 +1170,10 @@
   "{{version}} · installé": "{{version}} · installed",
   "{{version}} · à télécharger": "{{version}} · download required",
   "downloads.strongIndexName": "Strong index for {{bible}}",
-  "downloads.strongAttribution": "Numéros Strong affectés en 2026 par “Concordances et Traductions de la Bible” (concordance.bible)."
+  "downloads.strongAttribution": "Numéros Strong affectés en 2026 par “Concordances et Traductions de la Bible” (concordance.bible).",
+  "strongSource.sheetTitle": "Strong Bible",
+  "strongSource.chooseBible": "Choose a Bible",
+  "strongSource.autoDescription.openBible": "Selected from the open Bible",
+  "strongSource.autoDescription.available": "Available Strong Bible selected",
+  "strongSource.autoDescription.default": "Selection follows the open Bible"
 }

@@ -80,9 +80,12 @@ export const createStrongSidecarDownloadPlan = (
   availabilityStatus: StrongBibleSidecarAvailability['status']
 ): DownloadItem[] => {
   const sidecar = createStrongSidecarDownloadItem(versionId)
-  return availabilityStatus === 'base-missing' || availabilityStatus === 'base-incompatible'
-    ? [createBibleDownloadItem(versionId), sidecar]
-    : [sidecar]
+  if (availabilityStatus !== 'base-missing' && availabilityStatus !== 'base-incompatible') {
+    return [sidecar]
+  }
+
+  const bible = createBibleDownloadItem(versionId)
+  return [bible, { ...sidecar, dependsOnId: bible.id }]
 }
 
 export const dedupeDownloadItems = (items: DownloadItem[]): DownloadItem[] => [

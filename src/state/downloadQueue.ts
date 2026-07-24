@@ -30,6 +30,8 @@ export interface DownloadItem {
   canonicalArtifact?: StrongBiblePublication['canonical']
   strongArtifact?: StrongBiblePublication['strong']
   strongDatasetId?: StrongBiblePublication['datasetId']
+  /** Item that must complete before this one can be processed. */
+  dependsOnId?: string
   addedAt: number
   retryCount: number
 }
