@@ -56,6 +56,7 @@ import {
   removeStrongBibleSidecar,
   type StrongBibleSidecarAvailability,
 } from '~helpers/strongBibleSidecar'
+import { buildBibleVersionGroups } from './downloadVersionGroups'
 
 // ---------------------------------------------------------------------------
 // Unified section item type
@@ -148,24 +149,13 @@ function buildBibleItems(versionList: Version[], appLang: string): UnifiedItem[]
 
 function buildAllSections(appLang: string, t: (key: string) => string): UnifiedSection[] {
   const allVersions = Object.values(versions) as Version[]
-
-  // Segond + French interlinear
-  const segondVersions = allVersions.filter(v =>
-    ['LSG', 'NBS', 'NEG79', 'NVS78P', 'S21', 'INT'].includes(v.id)
-  )
-  const otherFrenchVersions = allVersions.filter(
-    v => v.type === 'fr' && !['LSG', 'LSGS', 'NBS', 'NEG79', 'NVS78P', 'S21', 'INT'].includes(v.id)
-  )
-  // English + English interlinear
-  const englishVersions = allVersions.filter(
-    v => (v.type === 'en' && v.id !== 'KJVS') || v.id === 'INT_EN'
-  )
-  // All French bibles for English mode (single section)
-  const allFrenchVersions = allVersions.filter(v => v.type === 'fr' && v.id !== 'LSGS')
-  const otherVersions = allVersions.filter(v => v.type === 'other')
+  const bibleSections = buildBibleVersionGroups(allVersions).map(group => ({
+    key: group.key,
+    title: t(group.titleKey),
+    data: buildBibleItems(group.versions, appLang),
+  }))
 
   if (appLang === 'en') {
-    // English mode: same structure as French but English content first
     return [
       {
         key: 'db-en',
@@ -177,30 +167,15 @@ function buildAllSections(appLang: string, t: (key: string) => string): UnifiedS
         title: t('downloads.section.crossReferences'),
         data: buildSharedDatabaseItems(),
       },
-      {
-        key: 'bible-en',
-        title: t('downloads.section.bibleEn'),
-        data: buildBibleItems(englishVersions, appLang),
-      },
-      {
-        key: 'bible-fr',
-        title: t('downloads.section.bibleFr'),
-        data: buildBibleItems(allFrenchVersions, appLang),
-      },
+      ...bibleSections,
       {
         key: 'db-fr',
         title: t('downloads.section.dbFr'),
         data: buildDatabaseItems('fr'),
       },
-      {
-        key: 'bible-other',
-        title: t('downloads.section.bibleOther'),
-        data: buildBibleItems(otherVersions, appLang),
-      },
     ].filter(s => s.data.length > 0)
   }
 
-  // French mode
   return [
     {
       key: 'db-fr',
@@ -212,30 +187,11 @@ function buildAllSections(appLang: string, t: (key: string) => string): UnifiedS
       title: t('downloads.section.crossReferences'),
       data: buildSharedDatabaseItems(),
     },
-    {
-      key: 'bible-segond',
-      title: t('downloads.section.bibleSegond'),
-      data: buildBibleItems(segondVersions, appLang),
-    },
-    {
-      key: 'bible-fr-other',
-      title: t('downloads.section.bibleFrOther'),
-      data: buildBibleItems(otherFrenchVersions, appLang),
-    },
-    {
-      key: 'bible-en',
-      title: t('downloads.section.bibleEn'),
-      data: buildBibleItems(englishVersions, appLang),
-    },
+    ...bibleSections,
     {
       key: 'db-en',
       title: t('downloads.section.dbEn'),
       data: buildDatabaseItems('en'),
-    },
-    {
-      key: 'bible-other',
-      title: t('downloads.section.bibleOther'),
-      data: buildBibleItems(otherVersions, appLang),
     },
   ].filter(s => s.data.length > 0)
 }
