@@ -158,6 +158,7 @@ export const installStrongBibleSidecar = async (
     await downloadWithCdnFallback({
       url: publication.strong.url,
       destinationPath: archivePath,
+      downloadOptions: { cache: false },
       onDownloadProgress: callbacks.onDownloadProgress,
       onResumable: callbacks.onResumable,
       isCancelled: callbacks.isCancelled,
@@ -407,8 +408,7 @@ const readStrongBibleSidecarSnapshot = async (
        (SELECT COUNT(*) FROM WordSpans WHERE isAligned=0) AS unalignedOccurrenceCount,
        (SELECT COUNT(*) FROM WordStrongCodes) AS identityCount,
        (SELECT COUNT(*) FROM WordSpans WHERE lexemeId IS NOT NULL) AS lexemeAssignmentCount,
-       (SELECT COUNT(*) FROM FrenchLexemes) AS lexemeCount,
-       (SELECT COUNT(*) FROM VerseNotes) AS noteCount`
+       (SELECT COUNT(*) FROM FrenchLexemes) AS lexemeCount`
   )
   const verseColumns = await database.getAllAsync<{ name: string }>('PRAGMA table_info(Verses)')
   if (!counts) throw new Error('STRONG_BIBLE_COUNT_MISSING')
@@ -435,7 +435,6 @@ const getExpectedSidecar = (versionId: StrongBibleVersionId): ExpectedStrongBibl
     identityCount: publication.strong.identityCount,
     lexemeAssignmentCount: publication.strong.lexemeAssignmentCount,
     lexemeCount: publication.strong.lexemeCount,
-    noteCount: publication.strong.noteCount,
   }
 }
 

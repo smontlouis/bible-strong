@@ -1,9 +1,12 @@
 import type { Verse } from '~common/types'
+import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 
 export type CanonicalVersePresentationNode =
   | { kind: 'text'; text: string }
   | { kind: 'strong-reference'; reference: string }
   | { kind: 'paragraph-start'; offset: number }
+  | { kind: 'line-start'; offset: number }
+  | { kind: 'note-reference'; note: CanonicalBibleNote }
   | {
       kind: 'element'
       tag: string
@@ -15,6 +18,7 @@ interface CanonicalVersePresentationInput {
   text: string
   startTags?: Verse['StartTags']
   layout?: Verse['Layout']
+  notes?: Verse['Notes']
   strongSpans?: Verse['StrongSpans']
   redWordRanges?: Array<{ start: number; end: number }>
 }
@@ -28,24 +32,30 @@ export const buildCanonicalVersePresentation = ({
   text,
   startTags = [],
   layout = [],
+  notes = [],
   strongSpans = [],
   redWordRanges = [],
 }: CanonicalVersePresentationInput): CanonicalVersePresentationNode[] => {
   const root: PresentationContainer = { children: [] }
   const stack: PresentationContainer[] = [root]
   for (const activeTag of startTags) {
-    if (isParagraphTag(activeTag.tag)) {
-      openTransparentElement(stack, activeTag.tag)
-    } else {
-      openElement(stack, activeTag.tag, activeTag.attributes)
-    }
+    openElement(stack, activeTag.tag, activeTag.attributes)
   }
 
-  const eventsByOffset = new Map<number, NonNullable<Verse['Layout']>>()
+  type PresentationEvent =
+    | { kind: 'layout'; order: number; event: NonNullable<Verse['Layout']>[number] }
+    | { kind: 'note'; order: number; note: CanonicalBibleNote }
+  const eventsByOffset = new Map<number, PresentationEvent[]>()
   for (const event of layout) {
     const offset = clampOffset(event.offset, text.length)
     const events = eventsByOffset.get(offset) ?? []
-    events.push(event)
+    events.push({ kind: 'layout', order: event.order, event })
+    eventsByOffset.set(offset, events)
+  }
+  for (const note of notes) {
+    const offset = clampOffset(note.offset, text.length)
+    const events = eventsByOffset.get(offset) ?? []
+    events.push({ kind: 'note', order: note.order, note: { ...note, offset } })
     eventsByOffset.set(offset, events)
   }
   for (const events of eventsByOffset.values()) {
@@ -100,11 +110,24 @@ export const buildCanonicalVersePresentation = ({
     for (const reference of referencesByOffset.get(offset) ?? []) {
       currentChildren(stack).push({ kind: 'strong-reference', reference })
     }
-    for (const event of eventsByOffset.get(offset) ?? []) {
+    for (const presentationEvent of eventsByOffset.get(offset) ?? []) {
+      if (presentationEvent.kind === 'note') {
+        currentChildren(stack).push({
+          kind: 'note-reference',
+          note: presentationEvent.note,
+        })
+        continue
+      }
+      const { event } = presentationEvent
       if (event.type === 'open') {
         if (isParagraphTag(event.tag)) {
           currentChildren(stack).push({ kind: 'paragraph-start', offset })
-          openTransparentElement(stack, event.tag)
+          openElement(stack, event.tag, event.attributes)
+        } else if (isPoeticLineTag(event.tag)) {
+          currentChildren(stack).push({ kind: 'line-start', offset })
+          openElement(stack, event.tag, event.attributes)
+        } else if (isPoeticLineGroupTag(event.tag)) {
+          openElement(stack, event.tag, event.attributes)
         } else {
           openElement(stack, event.tag, event.attributes)
         }
@@ -134,6 +157,8 @@ export const getCanonicalPresentationText = (nodes: CanonicalVersePresentationNo
       if (node.kind === 'text') return node.text
       if (node.kind === 'strong-reference') return ''
       if (node.kind === 'paragraph-start') return ''
+      if (node.kind === 'line-start') return ''
+      if (node.kind === 'note-reference') return ''
       return getCanonicalPresentationText(node.children)
     })
     .join('')
@@ -148,7 +173,7 @@ export const shouldInsertCanonicalParagraphBreak = ({
   textDisplay: 'inline' | 'block'
 }) => offset > 0 || (Number(verse) !== 1 && textDisplay === 'inline')
 
-export const shouldInsertCanonicalParagraphBreakBeforeVerse = ({
+export const shouldInsertCanonicalBlockBreakBeforeVerse = ({
   layout = [],
   verse,
   textDisplay,
@@ -160,7 +185,7 @@ export const shouldInsertCanonicalParagraphBreakBeforeVerse = ({
   layout.some(
     event =>
       event.type === 'open' &&
-      isParagraphTag(event.tag) &&
+      isBlockStartTag(event.tag) &&
       clampOffset(event.offset, Number.MAX_SAFE_INTEGER) === 0
   ) &&
   shouldInsertCanonicalParagraphBreak({
@@ -172,10 +197,9 @@ export const shouldInsertCanonicalParagraphBreakBeforeVerse = ({
 const currentChildren = (stack: PresentationContainer[]) => stack[stack.length - 1]!.children
 
 const isParagraphTag = (tag: string) => tag.toLocaleLowerCase() === 'p'
-
-const openTransparentElement = (stack: PresentationContainer[], tag: string) => {
-  stack.push({ tag, children: currentChildren(stack) })
-}
+const isPoeticLineTag = (tag: string) => tag.toLocaleLowerCase() === 'l'
+const isPoeticLineGroupTag = (tag: string) => tag.toLocaleLowerCase() === 'lg'
+const isBlockStartTag = (tag: string) => isParagraphTag(tag) || isPoeticLineTag(tag)
 
 const openElement = (
   stack: PresentationContainer[],

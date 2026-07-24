@@ -147,6 +147,7 @@ export interface Verse {
     tag: string
     attributes?: Record<string, string>
   }[]
+  Notes?: import('~helpers/canonicalBibleNotes').CanonicalBibleNote[]
   StrongSpans?: {
     ordinal: number
     startOffset: number

@@ -45,8 +45,8 @@ describe('Strong Bible publications', () => {
       const publication = getStrongBiblePublication(versionId)
       expect(publication.canonical.textRevision).toBe(publication.strong.textRevision)
       expect(publication.canonical.textSha256).toBe(publication.strong.textSha256)
-      expect(publication.canonical.url).toMatch(/\.json\.zip$/)
-      expect(publication.strong.url).toMatch(/\.sqlite\.zip$/)
+      expect(publication.canonical.url).toMatch(/\.json\.zip(?:\?|$)/)
+      expect(publication.strong.url).toMatch(/\.sqlite\.zip(?:\?|$)/)
     }
   })
 })

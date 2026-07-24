@@ -62,6 +62,7 @@ export async function downloadAndInsertBible(
     await downloadWithCdnFallback({
       url: downloadUrl,
       destinationPath: tempPath,
+      downloadOptions: { cache: false },
       onDownloadProgress: opts.onDownloadProgress,
       onResumable: opts.onResumable,
       isCancelled: opts.isCancelled,
@@ -171,7 +172,8 @@ const validateCanonicalBiblePublication = (
     data.textRevision !== artifact.textRevision ||
     data.textSha256 !== artifact.textSha256 ||
     data.schemaVersion !== artifact.schemaVersion ||
-    data.verseCount !== artifact.verseCount
+    data.verseCount !== artifact.verseCount ||
+    data.noteCount !== artifact.noteCount
   ) {
     throw new Error('CANONICAL_BIBLE_METADATA_MISMATCH')
   }

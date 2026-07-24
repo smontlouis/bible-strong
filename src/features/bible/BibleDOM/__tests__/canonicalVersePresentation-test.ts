@@ -2,7 +2,7 @@ import {
   buildCanonicalVersePresentation,
   getCanonicalPresentationText,
   shouldInsertCanonicalParagraphBreak,
-  shouldInsertCanonicalParagraphBreakBeforeVerse,
+  shouldInsertCanonicalBlockBreakBeforeVerse,
 } from '../canonicalVersePresentation'
 
 describe('canonicalVersePresentation', () => {
@@ -13,7 +13,15 @@ describe('canonicalVersePresentation', () => {
       layout: [{ offset: 10, order: 1, type: 'close', tag: 'p' }],
     })
 
-    expect(presentation).toEqual([{ kind: 'text', text: 'les cieux.' }])
+    expect(presentation).toEqual([
+      {
+        kind: 'element',
+        tag: 'p',
+        attributes: undefined,
+        children: [{ kind: 'text', text: 'les cieux.' }],
+      },
+    ])
+    expect(JSON.stringify(presentation)).not.toContain('"kind":"paragraph-start"')
   })
 
   it('represents a paragraph boundary once where the paragraph actually opens', () => {
@@ -28,7 +36,12 @@ describe('canonicalVersePresentation', () => {
     expect(presentation).toEqual([
       { kind: 'text', text: 'Avant. ' },
       { kind: 'paragraph-start', offset: 7 },
-      { kind: 'text', text: 'Après.' },
+      {
+        kind: 'element',
+        tag: 'p',
+        attributes: undefined,
+        children: [{ kind: 'text', text: 'Après.' }],
+      },
     ])
   })
 
@@ -67,28 +80,28 @@ describe('canonicalVersePresentation', () => {
     const paragraphOpening = [{ offset: 0, order: 0, type: 'open' as const, tag: 'p' }]
 
     expect(
-      shouldInsertCanonicalParagraphBreakBeforeVerse({
+      shouldInsertCanonicalBlockBreakBeforeVerse({
         layout: paragraphOpening,
         verse: 2,
         textDisplay: 'inline',
       })
     ).toBe(true)
     expect(
-      shouldInsertCanonicalParagraphBreakBeforeVerse({
+      shouldInsertCanonicalBlockBreakBeforeVerse({
         layout: [],
         verse: 2,
         textDisplay: 'inline',
       })
     ).toBe(false)
     expect(
-      shouldInsertCanonicalParagraphBreakBeforeVerse({
+      shouldInsertCanonicalBlockBreakBeforeVerse({
         layout: paragraphOpening,
         verse: 1,
         textDisplay: 'inline',
       })
     ).toBe(false)
     expect(
-      shouldInsertCanonicalParagraphBreakBeforeVerse({
+      shouldInsertCanonicalBlockBreakBeforeVerse({
         layout: paragraphOpening,
         verse: 2,
         textDisplay: 'block',
@@ -126,6 +139,74 @@ describe('canonicalVersePresentation', () => {
     expect(getCanonicalPresentationText(visible)).toBe('Dieu créa.')
     expect(JSON.stringify(visible)).toContain('"reference":"430"')
     expect(visible[0]).toEqual(expect.objectContaining({ kind: 'element', tag: 'small-caps' }))
+  })
+
+  it('inserts V3 notes at their canonical text offset without changing selectable text', () => {
+    const presentation = buildCanonicalVersePresentation({
+      text: 'La terre était vide.',
+      notes: [
+        {
+          offset: 19,
+          order: 5,
+          kind: 'note',
+          markup: '<note n="a">le vide<i>.</i></note>',
+        },
+      ],
+    })
+
+    expect(presentation).toEqual([
+      { kind: 'text', text: 'La terre était vide' },
+      {
+        kind: 'note-reference',
+        note: {
+          offset: 19,
+          order: 5,
+          kind: 'note',
+          markup: '<note n="a">le vide<i>.</i></note>',
+        },
+      },
+      { kind: 'text', text: '.' },
+    ])
+    expect(getCanonicalPresentationText(presentation)).toBe('La terre était vide.')
+  })
+
+  it('represents each poetic line boundary without losing cross-verse line groups', () => {
+    const presentation = buildCanonicalVersePresentation({
+      text: 'Première ligne.Deuxième ligne.',
+      startTags: [{ tag: 'lg' }],
+      layout: [
+        { offset: 0, order: 0, type: 'open', tag: 'l' },
+        { offset: 15, order: 1, type: 'close', tag: 'l' },
+        { offset: 15, order: 2, type: 'open', tag: 'l' },
+        { offset: 30, order: 3, type: 'close', tag: 'l' },
+        { offset: 30, order: 4, type: 'close', tag: 'lg' },
+      ],
+    })
+
+    expect(presentation).toEqual([
+      {
+        kind: 'element',
+        tag: 'lg',
+        attributes: undefined,
+        children: [
+          { kind: 'line-start', offset: 0 },
+          {
+            kind: 'element',
+            tag: 'l',
+            attributes: undefined,
+            children: [{ kind: 'text', text: 'Première ligne.' }],
+          },
+          { kind: 'line-start', offset: 15 },
+          {
+            kind: 'element',
+            tag: 'l',
+            attributes: undefined,
+            children: [{ kind: 'text', text: 'Deuxième ligne.' }],
+          },
+        ],
+      },
+    ])
+    expect(getCanonicalPresentationText(presentation)).toBe('Première ligne.Deuxième ligne.')
   })
 
   it('interprets red-word ranges as inclusive word indices', () => {

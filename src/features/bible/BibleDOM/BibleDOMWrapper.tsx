@@ -84,6 +84,7 @@ import {
   NAVIGATE_TO_VERSE_STUDY_RELATIONS,
   NAVIGATE_TO_VERSION,
   OPEN_BOOKMARK_MODAL,
+  OPEN_CANONICAL_BIBLE_NOTE,
   OPEN_CROSS_VERSION_MODAL,
   OPEN_HIGHLIGHT_TAGS,
   OPEN_VERSE_TAGS_MODAL,
@@ -101,6 +102,7 @@ import {
 } from './dispatch'
 import {
   getBookmarkPayload,
+  getCanonicalBibleNotePayload,
   getNoteNavigationPayload,
   getNumberPayload,
   getStringPayload,
@@ -116,6 +118,7 @@ import { downloadManager } from '~helpers/downloadManager'
 import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { resetBiblesDb } from '~helpers/biblesDb'
+import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 
 export type { StudyRelationsModalTarget } from './bibleDomBridgeCommands'
 
@@ -238,6 +241,7 @@ export type WebViewProps = {
   taggedVersesInChapter?: Record<number, number>
   versesWithNonHighlightTags?: Record<number, boolean>
   onOpenVerseTagsModal?: (verseKey: string) => void
+  onOpenCanonicalBibleNote?: (note: CanonicalBibleNote) => void
   onOpenStudyRelationsModal?: (target: StudyRelationsModalTarget) => void
   isFormSheet?: boolean
   // Enter annotation mode from double-tap
@@ -347,6 +351,7 @@ export const BibleDOMWrapper = ({
   onOpenBookmarkModal,
   onOpenCrossVersionModal,
   onOpenVerseTagsModal,
+  onOpenCanonicalBibleNote,
   setUnifiedTagsModal,
   bibleAtom,
   goToPrevChapter,
@@ -412,6 +417,7 @@ export const BibleDOMWrapper = ({
     downloading: t('bible.error.downloading'),
     inserting: t('bible.error.inserting'),
     resetDatabase: t('bible.error.resetDatabase'),
+    openCanonicalBibleNote: t('Afficher la note'),
   }
   const dispatch: Dispatch = async action => {
     appLogger.debug('webview', 'bible_dom.dispatch', { actionType: action.type })
@@ -597,6 +603,12 @@ export const BibleDOMWrapper = ({
       case OPEN_BOOKMARK_MODAL: {
         const bookmark = getBookmarkPayload(action.payload)
         if (bookmark) onOpenBookmarkModal?.(bookmark)
+        break
+      }
+
+      case OPEN_CANONICAL_BIBLE_NOTE: {
+        const note = getCanonicalBibleNotePayload(action.payload)
+        if (note) onOpenCanonicalBibleNote?.(note)
         break
       }
 

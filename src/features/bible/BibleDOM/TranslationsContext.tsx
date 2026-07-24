@@ -19,6 +19,7 @@ export interface BibleDOMTranslations {
   downloading: string
   inserting: string
   resetDatabase: string
+  openCanonicalBibleNote: string
 }
 
 const TranslationsContext = createContext<BibleDOMTranslations | null>(null)

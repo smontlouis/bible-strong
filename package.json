@@ -117,6 +117,7 @@
     "global": "^4.4.0",
     "goober": "^2.1.16",
     "hoist-non-react-statics": "^3.3.0",
+    "htmlparser2": "^10.1.0",
     "i18next": "^19.5.1",
     "immer": "^9.0.16",
     "intl": "^1.2.5",

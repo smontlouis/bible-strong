@@ -242,6 +242,7 @@
   "Comment.": "Comments",
   "Comparer": "Compare",
   "Note": "Note",
+  "Note {{label}}": "Note {{label}}",
   "Copier": "Copy",
   "Partager": "Share",
   "Tout sélectionner": "Select all",
@@ -1180,5 +1181,6 @@
   "strongSource.autoDescription.available": "Available Strong Bible selected",
   "strongSource.autoDescription.default": "Selection follows the open Bible",
   "strongSource.unavailableMessage": "You need a Bible with a Strong index to view the lexicon for this verse.",
-  "strongSource.chooseAction": "Choose a Strong Bible"
+  "strongSource.chooseAction": "Choose a Strong Bible",
+  "Afficher la note": "Show note"
 }

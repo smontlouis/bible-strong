@@ -14,7 +14,6 @@ export interface StrongBibleSidecarCounts {
   identityCount: number
   lexemeAssignmentCount: number
   lexemeCount: number
-  noteCount: number
 }
 
 export interface StrongBibleSidecarSnapshot {
@@ -79,7 +78,6 @@ export const validateStrongBibleSidecarSnapshot = (
     'identityCount',
     'lexemeAssignmentCount',
     'lexemeCount',
-    'noteCount',
   ] as const) {
     if (snapshot.counts[key] !== expected[key]) {
       throw new Error(`STRONG_BIBLE_COUNT_MISMATCH:${key}`)

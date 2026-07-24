@@ -5,6 +5,7 @@ import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_VERSE_STUDY_RELATIONS,
   OPEN_BOOKMARK_MODAL,
+  OPEN_CANONICAL_BIBLE_NOTE,
   OPEN_CROSS_VERSION_MODAL,
   OPEN_VERSE_TAGS_MODAL,
 } from './dispatch'
@@ -39,9 +40,10 @@ import {
 import {
   buildCanonicalVersePresentation,
   shouldInsertCanonicalParagraphBreak,
-  shouldInsertCanonicalParagraphBreakBeforeVerse,
+  shouldInsertCanonicalBlockBreakBeforeVerse,
   type CanonicalVersePresentationNode,
 } from './canonicalVersePresentation'
+import { getCanonicalBibleNoteLabel, type CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 
 const VerseText = styled('span')<RootStyles & { isParallel?: boolean }>(
   ({ isParallel, settings: { fontSizeScale, lineHeight } }) => ({
@@ -67,6 +69,39 @@ const NumberText = styled<
     ...(highlightColor && { color: highlightColor }),
   }),
 }))
+
+// harness-allow-styled: this renders an HTML button inside the Bible DOM WebView,
+// where React Native UI primitives cannot be used.
+const CanonicalNoteButton = styled('button')<RootStyles & { isDisabled?: boolean }>(
+  ({ isDisabled, settings: { theme, colors, fontSizeScale } }) => ({
+    appearance: 'none',
+    WebkitAppearance: 'none',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: scaleFontSize(8, fontSizeScale),
+    padding: 0,
+    marginInline: '2px',
+    border: 0,
+    background: 'transparent',
+    color: colors[theme].primary,
+    fontFamily: 'Georgia, serif',
+    fontSize: scaleFontSize(11, fontSizeScale),
+    fontStyle: 'italic',
+    fontWeight: 700,
+    lineHeight: 1,
+    verticalAlign: 'super',
+    cursor: 'pointer',
+    pointerEvents: isDisabled ? 'none' : 'auto',
+    opacity: isDisabled ? 0.65 : 1,
+    '&::after': {
+      content: 'attr(data-note-label)',
+    },
+    '&:active': {
+      opacity: 0.55,
+    },
+  })
+)
 
 const Wrapper = styled('span')<
   RootStyles & {
@@ -175,6 +210,8 @@ const getVerseText = ({
   selectedCode,
   settings,
   redWords,
+  openCanonicalBibleNoteLabel,
+  onOpenCanonicalNote,
 }: {
   verse: TVerse
   version: string
@@ -183,6 +220,8 @@ const getVerseText = ({
   selectedCode: SelectedCode | null
   settings: RootState['user']['bible']['settings']
   redWords?: Record<string, { start: number; end: number }[]> | null
+  openCanonicalBibleNoteLabel: string
+  onOpenCanonicalNote: (note: CanonicalBibleNote) => void
 }): (string | JSX.Element)[] => {
   const isStrongVersion =
     Boolean(verse.StrongTexte) ||
@@ -198,6 +237,7 @@ const getVerseText = ({
       text: verse.Texte,
       startTags: verse.StartTags,
       layout: verse.Layout,
+      notes: verse.Notes,
       strongSpans: hasVisibleStrong ? verse.StrongSpans : [],
       redWordRanges: !annotationMode && !hasVisibleStrong ? (redWords?.[verseKey] ?? []) : [],
     })
@@ -209,6 +249,8 @@ const getVerseText = ({
       selectedCode,
       settings,
       redColor,
+      openCanonicalBibleNoteLabel,
+      onOpenCanonicalNote,
     })
   }
 
@@ -244,6 +286,8 @@ const renderCanonicalPresentation = (
     selectedCode: SelectedCode | null
     settings: RootState['user']['bible']['settings']
     redColor: string
+    openCanonicalBibleNoteLabel: string
+    onOpenCanonicalNote: (note: CanonicalBibleNote) => void
   },
   keyPrefix = 'canonical'
 ): (string | JSX.Element)[] =>
@@ -276,6 +320,39 @@ const renderCanonicalPresentation = (
       }
       return <br key={key} />
     }
+    if (node.kind === 'line-start') {
+      return (
+        <React.Fragment key={key}>
+          {node.offset > 0 && <br />}
+          <span aria-hidden style={{ display: 'inline-block', width: '0.75em' }} />
+        </React.Fragment>
+      )
+    }
+    if (node.kind === 'note-reference') {
+      const noteLabel = getCanonicalBibleNoteLabel(node.note.markup) ?? 'i'
+      return (
+        <CanonicalNoteButton
+          key={key}
+          settings={options.settings}
+          type="button"
+          isDisabled={options.isDisabled}
+          disabled={options.isDisabled}
+          aria-hidden={options.isDisabled}
+          aria-label={options.isDisabled ? undefined : options.openCanonicalBibleNoteLabel}
+          data-ignore-verse-touch
+          data-note-label={noteLabel}
+          onClick={
+            options.isDisabled
+              ? undefined
+              : event => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  options.onOpenCanonicalNote(node.note)
+                }
+          }
+        />
+      )
+    }
 
     const children = renderCanonicalPresentation(node.children, options, key)
     switch (node.tag.toLocaleLowerCase()) {
@@ -283,13 +360,13 @@ const renderCanonicalPresentation = (
         return <React.Fragment key={key}>{children}</React.Fragment>
       case 'lg':
         return (
-          <span key={key} style={{ display: 'block', marginBlock: '0.25em' }}>
+          <span key={key} data-canonical-poetry-group style={{ display: 'contents' }}>
             {children}
           </span>
         )
       case 'l':
         return (
-          <span key={key} style={{ display: 'block', paddingInlineStart: '1em' }}>
+          <span key={key} data-canonical-poetry-line style={{ display: 'contents' }}>
             {children}
           </span>
         )
@@ -505,11 +582,18 @@ const Verse = ({
     selectedCode,
     settings,
     redWords,
+    openCanonicalBibleNoteLabel: translations.openCanonicalBibleNote,
+    onOpenCanonicalNote: note => {
+      dispatch({
+        type: OPEN_CANONICAL_BIBLE_NOTE,
+        payload: note,
+      })
+    },
   })
 
   const paragraphBreakBeforeVerse =
     Boolean(verse.TextRevision) &&
-    shouldInsertCanonicalParagraphBreakBeforeVerse({
+    shouldInsertCanonicalBlockBreakBeforeVerse({
       layout: verse.Layout,
       verse: verse.Verset,
       textDisplay: settings.textDisplay,

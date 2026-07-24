@@ -20,7 +20,6 @@ const validSnapshot = {
     identityCount: 30,
     lexemeAssignmentCount: 20,
     lexemeCount: 8,
-    noteCount: 2,
   },
   verseColumns: ['id', 'bookOrder', 'chapter', 'verse'],
 }
@@ -38,7 +37,6 @@ const expected = {
   identityCount: 30,
   lexemeAssignmentCount: 20,
   lexemeCount: 8,
-  noteCount: 2,
 }
 
 describe('Strong Bible sidecar validation', () => {

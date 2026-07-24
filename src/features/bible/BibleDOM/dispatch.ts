@@ -37,6 +37,7 @@ export const OPEN_CROSS_VERSION_MODAL = 'OPEN_CROSS_VERSION_MODAL'
 
 // Verse tags modal
 export const OPEN_VERSE_TAGS_MODAL = 'OPEN_VERSE_TAGS_MODAL'
+export const OPEN_CANONICAL_BIBLE_NOTE = 'OPEN_CANONICAL_BIBLE_NOTE'
 
 // Interlinear mode toggle
 export const TOGGLE_INT_COMPLETE = 'TOGGLE_INT_COMPLETE'

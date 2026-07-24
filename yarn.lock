@@ -7256,6 +7256,7 @@ __metadata:
     goober: "npm:^2.1.16"
     googleapis: "npm:^171.4.0"
     hoist-non-react-statics: "npm:^3.3.0"
+    htmlparser2: "npm:^10.1.0"
     i18next: "npm:^19.5.1"
     i18next-parser: "npm:9.4.0"
     immer: "npm:^9.0.16"

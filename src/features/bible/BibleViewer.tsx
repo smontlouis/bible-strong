@@ -24,6 +24,9 @@ import VerseFormatSheet from '~features/studies/VerseFormatSheet'
 import CreateEntityRelationModal from '~features/studyRelations/CreateEntityRelationModal'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { getBibleVersionCoverage } from '~helpers/biblesDb'
+import { osisToBibleReferenceTarget } from '~helpers/bcvParser'
+import { getBook } from '~helpers/bibleBookCatalog'
+import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import generateUUID from '~helpers/generateUUID'
 import getVersesContent from '~helpers/getVersesContent'
 import { useQuery } from '~helpers/react-query-lite'
@@ -102,6 +105,7 @@ import SelectedVersesModal from './SelectedVersesModal'
 import { getBibleDOMDestination } from './SharedBibleDOM'
 import SnapshotPlaceholder from './SnapshotPlaceholder'
 import VerseTagsModal from './VerseTagsModal'
+import CanonicalBibleNoteSheet from './CanonicalBibleNoteSheet'
 
 const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: number) => {
   if (pericope && pericope[book] && pericope[book][chapter]) {
@@ -173,6 +177,8 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   // Verse tags modal
   const verseTagsModal = useSheet()
   const [verseTagsModalKey, setVerseTagsModalKey] = useState<string | null>(null)
+  const canonicalBibleNoteModal = useSheet()
+  const [canonicalBibleNote, setCanonicalBibleNote] = useState<CanonicalBibleNote | null>(null)
 
   const [createRelationSourceEndpoint, setCreateRelationSourceEndpoint] =
     useState<RelationEndpoint | null>(null)
@@ -718,6 +724,28 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     [actions, crossVersionModal]
   )
 
+  const handleOpenCanonicalBibleNote = (note: CanonicalBibleNote) => {
+    setCanonicalBibleNote(note)
+    canonicalBibleNoteModal.open()
+  }
+
+  const handleCanonicalBibleReferencePress = (osis: string) => {
+    const target = osisToBibleReferenceTarget(osis)
+    if (!target) return
+
+    canonicalBibleNoteModal.close()
+    pushRouteOnce({
+      pathname: '/bible-view',
+      params: {
+        contextDisplayMode: 'focused',
+        book: JSON.stringify(getBook(target.book)),
+        chapter: String(target.chapter),
+        verse: String(target.verse),
+        ...(target.focusVerses ? { focusVerses: JSON.stringify(target.focusVerses) } : {}),
+      },
+    })
+  }
+
   const handleCrossVersionOpenInNewTab = useCallback(
     (newVersion: VersionCode) => {
       openInNewTab(
@@ -808,6 +836,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     taggedVersesInChapter,
     versesWithNonHighlightTags,
     onOpenVerseTagsModal: handleOpenVerseTagsModal,
+    onOpenCanonicalBibleNote: handleOpenCanonicalBibleNote,
     onOpenStudyRelationsModal: openVerseStudyRelationsModal,
     // Double-tap to enter annotation mode
     onEnterAnnotationMode: handleEnterAnnotationModeFromDoubleTap,
@@ -1031,6 +1060,11 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
         ref={verseTagsModal.getRef()}
         verseKey={verseTagsModalKey}
         version={displayedVersion}
+      />
+      <CanonicalBibleNoteSheet
+        sheetRef={canonicalBibleNoteModal.getRef()}
+        note={canonicalBibleNote}
+        onReferencePress={handleCanonicalBibleReferencePress}
       />
     </Box>
   )

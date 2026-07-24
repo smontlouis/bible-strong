@@ -242,6 +242,7 @@
   "Comment.": "Comment.",
   "Comparer": "Comparer",
   "Note": "Note",
+  "Note {{label}}": "Note {{label}}",
   "Copier": "Copier",
   "Partager": "Partager",
   "Tout sélectionner": "Tout sélectionner",
@@ -1139,5 +1140,6 @@
   "strongSource.autoDescription.available": "Bible Strong disponible sélectionnée",
   "strongSource.autoDescription.default": "Sélection selon la Bible ouverte",
   "strongSource.unavailableMessage": "Vous avez besoin d’une Bible avec un index Strong pour afficher le lexique de ce verset.",
-  "strongSource.chooseAction": "Choisir une Bible Strong"
+  "strongSource.chooseAction": "Choisir une Bible Strong",
+  "Afficher la note": "Afficher la note"
 }

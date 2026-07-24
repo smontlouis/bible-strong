@@ -1,4 +1,5 @@
 import type { Bookmark, StudyNavigateBibleType, Verse } from '~common/types'
+import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 
 export type StudyRelationsModalTarget =
   | string
@@ -78,3 +79,22 @@ export const getNoteNavigationPayload = (
 
 export const getBookmarkPayload = (payload: unknown): Bookmark | undefined =>
   isRecord(payload) ? (payload as unknown as Bookmark) : undefined
+
+export const getCanonicalBibleNotePayload = (payload: unknown): CanonicalBibleNote | undefined => {
+  if (
+    !isRecord(payload) ||
+    typeof payload.offset !== 'number' ||
+    typeof payload.order !== 'number' ||
+    payload.kind !== 'note' ||
+    typeof payload.markup !== 'string'
+  ) {
+    return undefined
+  }
+
+  return {
+    offset: payload.offset,
+    order: payload.order,
+    kind: 'note',
+    markup: payload.markup,
+  }
+}
