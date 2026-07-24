@@ -1,7 +1,7 @@
 import * as Icon from '@expo/vector-icons'
 import * as FileSystem from 'expo-file-system/legacy'
 import React from 'react'
-import { Alert, Linking, TouchableOpacity } from 'react-native'
+import { Alert, Linking, Platform, TouchableOpacity } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { dbManager } from '~helpers/sqlite'
 
@@ -32,21 +32,25 @@ import { setDefaultBibleVersion, setVersionUpdated } from '~redux/modules/user'
 import { Theme } from '~themes'
 import { VersionCode, tabsAtom, BibleTab } from 'src/state/tabs'
 import { store } from '~redux/store'
+import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
+import StrongIndexSelectorItem from './StrongIndexSelectorItem'
 
-const Container = styled.View<{ needsUpdate?: boolean }>(({ needsUpdate, theme }) => ({
-  minHeight: 76,
-  paddingLeft: 20,
-  paddingRight: 4,
-  paddingVertical: 12,
-  borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border,
-  ...(needsUpdate
-    ? {
-        borderLeftColor: theme.colors.success,
-        borderLeftWidth: 5,
-      }
-    : {}),
-}))
+const Container = styled.View<{ needsUpdate?: boolean; hasDependency?: boolean }>(
+  ({ needsUpdate, hasDependency, theme }) => ({
+    minHeight: 76,
+    paddingLeft: 20,
+    paddingRight: 4,
+    paddingVertical: 12,
+    borderBottomWidth: hasDependency ? 0 : 1,
+    borderBottomColor: theme.colors.border,
+    ...(needsUpdate
+      ? {
+          borderLeftColor: theme.colors.success,
+          borderLeftWidth: 5,
+        }
+      : {}),
+  })
+)
 
 const TouchableContainer = Container.withComponent(TouchableOpacity)
 
@@ -88,6 +92,14 @@ const TextName = styled.Text<{ isSelected?: boolean }>(({ isSelected, theme }) =
   backgroundColor: 'transparent',
 }))
 
+const StrongCapabilityMark = styled.Text(({ theme }) => ({
+  color: theme.colors.primary,
+  fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+  fontSize: 17,
+  fontWeight: 'bold',
+  marginLeft: 5,
+}))
+
 const DeleteIcon = styled(Icon.Feather)(({ theme }) => ({
   color: theme.colors.quart,
 }))
@@ -104,6 +116,7 @@ interface Props {
   shareFn?: (fn: () => void) => void
   onDownloadComplete?: (id: VersionCode) => void
   showSelectionCheckbox?: boolean
+  showStrongIndex?: boolean
 }
 
 const VersionSelectorItem = ({
@@ -114,6 +127,7 @@ const VersionSelectorItem = ({
   shareFn,
   onDownloadComplete,
   showSelectionCheckbox,
+  showStrongIndex,
 }: Props) => {
   const { t } = useTranslation()
   const lang = useLanguage()
@@ -131,6 +145,8 @@ const VersionSelectorItem = ({
   const isQueued = queueState?.status === 'queued'
   const downloadProgress = queueState?.downloadProgress ?? 0
   const CopyrightText = version.sourceUrl ? TextSourceLink : TextCopyright
+  const strongVersionId = isStrongCapableBibleVersion(version.id) ? version.id : undefined
+  const showStrongCapability = showStrongIndex && Boolean(strongVersionId)
   const openSourceUrl = () => {
     if (version.sourceUrl) {
       Linking.openURL(version.sourceUrl)
@@ -288,55 +304,61 @@ const VersionSelectorItem = ({
 
   if (versionNeedsDownload) {
     return (
-      <Container>
-        <Box flex row alignItems="center">
-          <Box disabled flex>
-            <TextVersion>{version.id}</TextVersion>
-            <HStack alignItems="center">
-              <TextName>{version.displayName || version.name}</TextName>
-              {version?.hasAudio && (
-                <Box>
-                  <FeatherIcon name="volume-2" size={16} color="primary" />
+      <Box>
+        <Container hasDependency={showStrongCapability}>
+          <Box flex row alignItems="center">
+            <Box disabled flex>
+              <TextVersion>{version.id}</TextVersion>
+              <HStack alignItems="center">
+                <TextName>{version.displayName || version.name}</TextName>
+                {version?.hasAudio && (
+                  <Box ml={4}>
+                    <FeatherIcon name="volume-2" size={16} color="primary" />
+                  </Box>
+                )}
+                {showStrongCapability && <StrongCapabilityMark>S</StrongCapabilityMark>}
+              </HStack>
+              <CopyrightText onPress={version.sourceUrl ? openSourceUrl : undefined}>
+                {version.c}
+              </CopyrightText>
+            </Box>
+            {!isLoading && !isQueued && version.id !== 'LSGS' && version.id !== 'KJVS' && (
+              <ActionButton onPress={startDownload}>
+                <FeatherIcon name="download-cloud" size={16} />
+              </ActionButton>
+            )}
+            {!isLoading &&
+              !isQueued &&
+              (version.id === 'LSGS' || version.id === 'KJVS') &&
+              !showSelectionCheckbox && <ActionColumn />}
+            {renderSelectionCheckbox(true)}
+            {isQueued && (
+              <ActionColumn>
+                <FeatherIcon name="clock" size={18} color="tertiary" />
+              </ActionColumn>
+            )}
+            {isLoading && (
+              <ActionColumn>
+                <Box width={36} height={4} borderRadius={2} bg="border" overflow="hidden">
+                  <Animated.View
+                    style={{
+                      height: 4,
+                      borderRadius: 2,
+                      backgroundColor: theme.colors.primary,
+                      width: `${Math.round(downloadProgress * 100)}%`,
+                      transitionProperty: 'width',
+                      transitionDuration: 150,
+                    }}
+                  />
                 </Box>
-              )}
-            </HStack>
-            <CopyrightText onPress={version.sourceUrl ? openSourceUrl : undefined}>
-              {version.c}
-            </CopyrightText>
+              </ActionColumn>
+            )}
           </Box>
-          {!isLoading && !isQueued && version.id !== 'LSGS' && version.id !== 'KJVS' && (
-            <ActionButton onPress={startDownload}>
-              <FeatherIcon name="download-cloud" size={16} />
-            </ActionButton>
-          )}
-          {!isLoading &&
-            !isQueued &&
-            (version.id === 'LSGS' || version.id === 'KJVS') &&
-            !showSelectionCheckbox && <ActionColumn />}
-          {renderSelectionCheckbox(true)}
-          {isQueued && (
-            <ActionColumn>
-              <FeatherIcon name="clock" size={18} color="tertiary" />
-            </ActionColumn>
-          )}
-          {isLoading && (
-            <ActionColumn>
-              <Box width={36} height={4} borderRadius={2} bg="border" overflow="hidden">
-                <Animated.View
-                  style={{
-                    height: 4,
-                    borderRadius: 2,
-                    backgroundColor: theme.colors.primary,
-                    width: `${Math.round(downloadProgress * 100)}%`,
-                    transitionProperty: 'width',
-                    transitionDuration: 150,
-                  }}
-                />
-              </Box>
-            </ActionColumn>
-          )}
-        </Box>
-      </Container>
+        </Container>
+        {showStrongCapability && strongVersionId && (
+          <StrongIndexSelectorItem versionId={strongVersionId} />
+        )}
+      </Box>
     )
   }
 
@@ -363,26 +385,36 @@ const VersionSelectorItem = ({
   }
 
   return (
-    <TouchableContainer needsUpdate={needsUpdate} onPress={() => onChange && onChange(version.id)}>
-      <Box flex row alignItems="center">
-        <Box flex>
-          <TextVersion isSelected={isSelected}>{version.id}</TextVersion>
-          <HStack alignItems="center">
-            <TextName isSelected={isSelected}>{version.displayName || version.name}</TextName>
-            {version?.hasAudio && (
-              <Box>
-                <FeatherIcon name="volume-2" size={16} color="primary" />
-              </Box>
-            )}
-          </HStack>
-          <CopyrightText onPress={version.sourceUrl ? openSourceUrl : undefined}>
-            {version.c}
-          </CopyrightText>
+    <Box>
+      <TouchableContainer
+        needsUpdate={needsUpdate}
+        hasDependency={showStrongCapability}
+        onPress={() => onChange && onChange(version.id)}
+      >
+        <Box flex row alignItems="center">
+          <Box flex>
+            <TextVersion isSelected={isSelected}>{version.id}</TextVersion>
+            <HStack alignItems="center">
+              <TextName isSelected={isSelected}>{version.displayName || version.name}</TextName>
+              {version?.hasAudio && (
+                <Box ml={4}>
+                  <FeatherIcon name="volume-2" size={16} color="primary" />
+                </Box>
+              )}
+              {showStrongCapability && <StrongCapabilityMark>S</StrongCapabilityMark>}
+            </HStack>
+            <CopyrightText onPress={version.sourceUrl ? openSourceUrl : undefined}>
+              {version.c}
+            </CopyrightText>
+          </Box>
+          {renderSelectionCheckbox()}
+          {!showSelectionCheckbox && <ActionColumn />}
         </Box>
-        {renderSelectionCheckbox()}
-        {!showSelectionCheckbox && <ActionColumn />}
-      </Box>
-    </TouchableContainer>
+      </TouchableContainer>
+      {showStrongCapability && strongVersionId && (
+        <StrongIndexSelectorItem versionId={strongVersionId} />
+      )}
+    </Box>
   )
 }
 

@@ -1170,6 +1170,7 @@
   "{{version}} · installé": "{{version}} · installed",
   "{{version}} · à télécharger": "{{version}} · download required",
   "downloads.strongIndexName": "Strong index for {{bible}}",
+  "versionSelector.strongIndex": "Strong index",
   "downloads.strongAttribution": "Numéros Strong affectés en 2026 par “Concordances et Traductions de la Bible” (concordance.bible).",
   "strongSource.sheetTitle": "Choose a Strong Bible",
   "strongSource.autoDescription.openBible": "Selected from the open Bible",

@@ -79,6 +79,7 @@ const VersionSelectorSheet = ({ sheetRef }: VersionSelectorSheetProps) => {
               onChange={handleVersionSelect}
               version={item}
               isSelected={item.id === selectedVersion}
+              showStrongIndex
             />
           )}
         />
