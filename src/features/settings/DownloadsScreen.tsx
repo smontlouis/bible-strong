@@ -43,7 +43,6 @@ import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import {
   getStrongBiblePublication,
   isStrongCapableBibleVersion,
-  STRONG_NUMBERS_ATTRIBUTION,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
 import {
@@ -137,7 +136,7 @@ function buildBibleItems(
       {
         id: `bible-strong:${v.id}`,
         name: t('downloads.strongIndexName', { bible: strongIndexBibleName }),
-        subtitle: STRONG_NUMBERS_ATTRIBUTION,
+        subtitle: t('downloads.strongAttribution'),
         parentItemId: base.id,
         estimatedSize: publication.strong.archiveBytes,
         lang: 'fr',

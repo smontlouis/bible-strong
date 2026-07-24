@@ -1128,5 +1128,6 @@
   "Utilisée pour les concordances lorsque la Bible ouverte n'a pas de données Strong installées.": "Utilisée pour les concordances lorsque la Bible ouverte n'a pas de données Strong installées.",
   "{{version}} · installé": "{{version}} · installé",
   "{{version}} · à télécharger": "{{version}} · à télécharger",
-  "downloads.strongIndexName": "Index Strong de {{bible}}"
+  "downloads.strongIndexName": "Index Strong de {{bible}}",
+  "downloads.strongAttribution": "Numéros Strong affectés en 2026 par “Concordances et Traductions de la Bible” (concordance.bible)."
 }
