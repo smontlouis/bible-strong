@@ -63,6 +63,7 @@ import {
   createStrongSidecarDownloadItem,
 } from '~helpers/downloadItemFactory'
 import { downloadManager } from '~helpers/downloadManager'
+import StrongMark from './StrongMark'
 
 interface BibleHeaderProps {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -112,6 +113,7 @@ const Header = ({
   // Bookmark ref
   const bookmarkModalRef = useRef<SheetRef>(null)
   const exportSheetRef = useRef<SheetRef>(null)
+  const strongModeToggleRequestRef = useRef(0)
   const bible = useAtomValue(bibleAtom)
   const contextDisplayMode = getBibleContextDisplayMode(bible.data)
   const isContextFocused = contextDisplayMode === 'focused'
@@ -315,19 +317,6 @@ const Header = ({
 
   const mainMenuActions: MenuAction[] = [
     { id: 'params', title: t('Police et paramêtres'), image: 'textformat' },
-    ...(isStrongCapableBibleVersion(version)
-      ? [
-          {
-            id: 'strong-mode',
-            title:
-              strongMode === 'visible'
-                ? t('Masquer les numéros Strong')
-                : t('Afficher les numéros Strong'),
-            image: 'number' as const,
-            state: strongMode === 'visible' ? ('on' as const) : ('off' as const),
-          },
-        ]
-      : []),
     ...(!commentsDisplay && lang === 'fr'
       ? [
           {
@@ -373,12 +362,18 @@ const Header = ({
 
   const toggleStrongMode = async () => {
     if (!isStrongCapableBibleVersion(version)) return
-    if (strongMode === 'visible') {
+    const requestId = ++strongModeToggleRequestRef.current
+    const currentStrongMode =
+      getDefaultStore().get(bibleAtom).data.strongMode ?? ('hidden' as const)
+
+    if (currentStrongMode === 'visible') {
       actions.setStrongMode('hidden')
       return
     }
 
     const availability = await getStrongBibleSidecarAvailability(version)
+    if (requestId !== strongModeToggleRequestRef.current) return
+
     if (availability.status === 'available') {
       actions.setStrongMode('visible')
       return
@@ -742,6 +737,29 @@ const Header = ({
                   </MenuView>
                 )}
 
+                {isStrongCapableBibleVersion(version) && (
+                  <AnimatedTouchableBox
+                    onPress={toggleStrongMode}
+                    center
+                    width={40}
+                    height={40}
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      strongMode === 'visible'
+                        ? t('Masquer les numéros Strong')
+                        : t('Afficher les numéros Strong')
+                    }
+                    accessibilityState={{ selected: strongMode === 'visible' }}
+                    style={{
+                      opacity: fullScreenOpacity,
+                      transitionProperty: 'opacity',
+                      transitionDuration: 300,
+                    }}
+                  >
+                    <StrongMark highlighted={strongMode === 'visible'} />
+                  </AnimatedTouchableBox>
+                )}
+
                 {/* Three-dots menu */}
                 <MenuView
                   actions={mainMenuActions}
@@ -749,9 +767,6 @@ const Header = ({
                     switch (nativeEvent.event) {
                       case 'params':
                         onBibleParamsClick()
-                        break
-                      case 'strong-mode':
-                        toggleStrongMode()
                         break
                       case 'comments-on':
                         onOpenCommentaire()

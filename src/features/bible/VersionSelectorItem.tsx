@@ -1,7 +1,7 @@
 import * as Icon from '@expo/vector-icons'
 import * as FileSystem from 'expo-file-system/legacy'
 import React from 'react'
-import { Alert, Linking, Platform, TouchableOpacity } from 'react-native'
+import { Alert, Linking, TouchableOpacity } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { dbManager } from '~helpers/sqlite'
 
@@ -34,6 +34,7 @@ import { VersionCode, tabsAtom, BibleTab } from 'src/state/tabs'
 import { store } from '~redux/store'
 import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
 import StrongIndexSelectorItem from './StrongIndexSelectorItem'
+import StrongMark from './StrongMark'
 
 const Container = styled.View<{ needsUpdate?: boolean; hasDependency?: boolean }>(
   ({ needsUpdate, hasDependency, theme }) => ({
@@ -90,14 +91,6 @@ const TextName = styled.Text<{ isSelected?: boolean }>(({ isSelected, theme }) =
   color: isSelected ? theme.colors.primary : theme.colors.default,
   fontSize: 16,
   backgroundColor: 'transparent',
-}))
-
-const StrongCapabilityMark = styled.Text<{ isAvailable?: boolean }>(({ isAvailable, theme }) => ({
-  color: isAvailable ? theme.colors.primary : theme.colors.tertiary,
-  fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
-  fontSize: 17,
-  fontWeight: 'bold',
-  marginLeft: 5,
 }))
 
 const DeleteIcon = styled(Icon.Feather)(({ theme }) => ({
@@ -319,9 +312,9 @@ const VersionSelectorItem = ({
                   </Box>
                 )}
                 {showStrongCapability && (
-                  <StrongCapabilityMark isAvailable={isStrongIndexAvailable}>
-                    S
-                  </StrongCapabilityMark>
+                  <Box ml={5}>
+                    <StrongMark highlighted={isStrongIndexAvailable} />
+                  </Box>
                 )}
               </HStack>
               <CopyrightText onPress={version.sourceUrl ? openSourceUrl : undefined}>
@@ -414,7 +407,9 @@ const VersionSelectorItem = ({
                 </Box>
               )}
               {showStrongCapability && (
-                <StrongCapabilityMark isAvailable={isStrongIndexAvailable}>S</StrongCapabilityMark>
+                <Box ml={5}>
+                  <StrongMark highlighted={isStrongIndexAvailable} />
+                </Box>
               )}
             </HStack>
             <CopyrightText onPress={version.sourceUrl ? openSourceUrl : undefined}>
