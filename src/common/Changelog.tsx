@@ -1,11 +1,10 @@
 import React, { useRef, useEffect } from 'react'
-import { SheetFooter, Sheet, SheetScrollView, type SheetRef, SheetHeader } from '~common/sheet'
+import { Sheet, SheetScrollView, type SheetRef, SheetHeader } from '~common/sheet'
 import distanceInWords from 'date-fns/formatDistance'
 
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { useAtom, useAtomValue } from 'jotai/react'
 
-import Button from '~common/ui/Button'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { logTypes } from '~helpers/changelog'
@@ -101,12 +100,6 @@ const Changelog = () => {
     dispatch(saveAllLogsAsSeen(changelog))
   }
 
-  const handleClose = () => {
-    markLogsAsSeen()
-    setManualOpen(false)
-    modalRef.current?.dismiss()
-  }
-
   const handleDismiss = () => {
     markLogsAsSeen()
     setManualOpen(false)
@@ -116,18 +109,12 @@ const Changelog = () => {
     <Sheet
       ref={modalRef}
       snapPoints={[0.4, 1]}
-      dismissible={false}
       header={
         <SheetHeader
           title={t('Quoi de neuf ?')}
           subTitle={t('Les changements depuis votre dernière visite')}
         />
       }
-      footer={props => (
-        <SheetFooter alignItems="center" {...props}>
-          <Button onPress={handleClose}>{t('Fermer')}</Button>
-        </SheetFooter>
-      )}
       onDismiss={handleDismiss}
     >
       <SheetScrollView>
