@@ -1130,6 +1130,8 @@
   "{{version}} · à télécharger": "{{version}} · à télécharger",
   "downloads.strongIndexName": "Index Strong de {{bible}}",
   "versionSelector.strongIndex": "Index Strong",
+  "versionSelector.showStrongIndex": "Afficher l’index Strong de {{bible}}",
+  "versionSelector.hideStrongIndex": "Masquer l’index Strong de {{bible}}",
   "versionSelector.strongAttribution": "Numéros Strong affectés par concordance.bible.",
   "downloads.strongAttribution": "Numéros Strong affectés en 2026 par “Concordances et Traductions de la Bible” (concordance.bible).",
   "strongSource.sheetTitle": "Choisir une Bible Strong",

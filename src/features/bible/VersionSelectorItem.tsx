@@ -86,6 +86,9 @@ const VersionIdentity = ({
   onCopyrightPress,
   showStrongCapability,
   isStrongIndexAvailable,
+  isStrongIndexExpanded,
+  onToggleStrongIndex,
+  strongToggleLabel,
   strongAttribution,
 }: {
   version: Version & { displayName?: string }
@@ -98,6 +101,9 @@ const VersionIdentity = ({
   onCopyrightPress?: () => void
   showStrongCapability?: boolean
   isStrongIndexAvailable?: boolean
+  isStrongIndexExpanded?: boolean
+  onToggleStrongIndex?: () => void
+  strongToggleLabel?: string
   strongAttribution?: string
 }) => (
   <Box flex>
@@ -114,8 +120,29 @@ const VersionIdentity = ({
         </Box>
       )}
       {showCapabilities && showStrongCapability && (
-        <Box ml={5}>
-          <StrongMark highlighted={isStrongIndexAvailable} />
+        <Box row alignItems="center" ml={5}>
+          <Box>
+            <StrongMark highlighted={isStrongIndexAvailable} />
+          </Box>
+          {!isStrongIndexAvailable && onToggleStrongIndex && (
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel={strongToggleLabel}
+              accessibilityState={{ expanded: isStrongIndexExpanded }}
+              onPress={event => {
+                event.stopPropagation()
+                onToggleStrongIndex()
+              }}
+            >
+              <Box width={32} height={28} center>
+                <FeatherIcon
+                  name={isStrongIndexExpanded ? 'chevron-down' : 'chevron-right'}
+                  size={16}
+                  color="tertiary"
+                />
+              </Box>
+            </TouchableOpacity>
+          )}
         </Box>
       )}
     </HStack>
@@ -147,6 +174,7 @@ interface Props {
   onDownloadComplete?: (id: VersionCode) => void
   showSelectionCheckbox?: boolean
   showStrongIndex?: boolean
+  strongCollapseKey?: number
 }
 
 const VersionSelectorItem = ({
@@ -158,12 +186,14 @@ const VersionSelectorItem = ({
   onDownloadComplete,
   showSelectionCheckbox,
   showStrongIndex,
+  strongCollapseKey,
 }: Props) => {
   const { t } = useTranslation()
   const lang = useLanguage()
   const theme: Theme = useTheme()
   const [versionNeedsDownload, setVersionNeedsDownload] = React.useState<boolean>()
   const [isStrongIndexAvailable, setStrongIndexAvailable] = React.useState<boolean>()
+  const [isStrongIndexExpanded, setStrongIndexExpanded] = React.useState(false)
   const needsUpdate = useSelector((state: RootState) => state.user.needsUpdate[version.id])
   const dispatch = useDispatch()
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
@@ -178,6 +208,10 @@ const VersionSelectorItem = ({
   const strongVersionId = isStrongCapableBibleVersion(version.id) ? version.id : undefined
   const showStrongCapability = showStrongIndex && Boolean(strongVersionId)
   const showStrongDependency = showStrongCapability && !isStrongIndexAvailable
+  const toggleStrongIndex = () => setStrongIndexExpanded(expanded => !expanded)
+  const strongToggleLabel = isStrongIndexExpanded
+    ? t('versionSelector.hideStrongIndex', { bible: version.id })
+    : t('versionSelector.showStrongIndex', { bible: version.id })
   const openSourceUrl = () => {
     if (version.sourceUrl) {
       Linking.openURL(version.sourceUrl)
@@ -221,6 +255,14 @@ const VersionSelectorItem = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queueState?.status])
+
+  React.useEffect(() => {
+    setStrongIndexExpanded(false)
+  }, [strongCollapseKey])
+
+  React.useEffect(() => {
+    if (isStrongIndexAvailable) setStrongIndexExpanded(false)
+  }, [isStrongIndexAvailable])
 
   const updateVersion = async () => {
     await deleteVersion()
@@ -343,7 +385,7 @@ const VersionSelectorItem = ({
   if (versionNeedsDownload) {
     return (
       <Box>
-        <VersionItemContainer hasDependency={showStrongDependency}>
+        <VersionItemContainer hasDependency={showStrongDependency && isStrongIndexExpanded}>
           <Box flex row alignItems="center">
             <Box disabled flex>
               <VersionIdentity
@@ -357,6 +399,9 @@ const VersionSelectorItem = ({
                 onCopyrightPress={version.sourceUrl ? openSourceUrl : undefined}
                 showStrongCapability={showStrongCapability}
                 isStrongIndexAvailable={isStrongIndexAvailable}
+                isStrongIndexExpanded={isStrongIndexExpanded}
+                onToggleStrongIndex={showStrongDependency ? toggleStrongIndex : undefined}
+                strongToggleLabel={strongToggleLabel}
                 strongAttribution={t('versionSelector.strongAttribution')}
               />
             </Box>
@@ -396,6 +441,7 @@ const VersionSelectorItem = ({
         {showStrongCapability && strongVersionId && (
           <StrongIndexSelectorItem
             versionId={strongVersionId}
+            expanded={isStrongIndexExpanded}
             onAvailabilityChange={setStrongIndexAvailable}
           />
         )}
@@ -426,7 +472,7 @@ const VersionSelectorItem = ({
     <Box>
       <VersionItemContainer
         needsUpdate={needsUpdate}
-        hasDependency={showStrongDependency}
+        hasDependency={showStrongDependency && isStrongIndexExpanded}
         onPress={() => onChange && onChange(version.id)}
       >
         <Box flex row alignItems="center">
@@ -441,6 +487,9 @@ const VersionSelectorItem = ({
             onCopyrightPress={version.sourceUrl ? openSourceUrl : undefined}
             showStrongCapability={showStrongCapability}
             isStrongIndexAvailable={isStrongIndexAvailable}
+            isStrongIndexExpanded={isStrongIndexExpanded}
+            onToggleStrongIndex={showStrongDependency ? toggleStrongIndex : undefined}
+            strongToggleLabel={strongToggleLabel}
             strongAttribution={t('versionSelector.strongAttribution')}
           />
           {renderSelectionCheckbox()}
@@ -450,6 +499,7 @@ const VersionSelectorItem = ({
       {showStrongCapability && strongVersionId && (
         <StrongIndexSelectorItem
           versionId={strongVersionId}
+          expanded={isStrongIndexExpanded}
           onAvailabilityChange={setStrongIndexAvailable}
         />
       )}

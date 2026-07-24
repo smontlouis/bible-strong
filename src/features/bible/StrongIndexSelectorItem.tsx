@@ -20,13 +20,14 @@ import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/do
 
 interface Props {
   versionId: StrongBibleVersionId
+  expanded: boolean
   onAvailabilityChange: (isAvailable: boolean) => void
 }
 
 const isActiveDownload = (status?: string) =>
   status === 'queued' || status === 'downloading' || status === 'inserting'
 
-const StrongIndexSelectorItem = ({ versionId, onAvailabilityChange }: Props) => {
+const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: Props) => {
   const theme = useTheme()
   const { t } = useTranslation()
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
@@ -90,7 +91,7 @@ const StrongIndexSelectorItem = ({ versionId, onAvailabilityChange }: Props) => 
     }
   }
 
-  if (isAvailable) return null
+  if (isAvailable || !expanded) return null
 
   return (
     <TouchableOpacity

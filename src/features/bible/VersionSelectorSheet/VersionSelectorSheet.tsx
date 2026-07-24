@@ -80,6 +80,7 @@ const VersionSelectorSheet = ({ sheetRef }: VersionSelectorSheetProps) => {
               version={item}
               isSelected={item.id === selectedVersion}
               showStrongIndex
+              strongCollapseKey={revealKey}
             />
           )}
         />
