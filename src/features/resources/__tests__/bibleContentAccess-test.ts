@@ -13,6 +13,10 @@ jest.mock('~helpers/strongBibleSidecar', () => ({
   loadStrongBibleChapterSpans: jest.fn(),
 }))
 
+jest.mock('~helpers/interlinearBibleSidecar', () => ({
+  loadInterlinearChapterTokens: jest.fn(),
+}))
+
 jest.mock('~helpers/bibleVersions', () => ({
   getIfVersionNeedsDownload: jest.fn(),
 }))
@@ -66,6 +70,88 @@ describe('BibleContentAccess', () => {
     )
 
     expect(dependencies.getChapterVerses).toHaveBeenCalledWith('LSG', 1, 1)
+  })
+
+  it('keeps BHG as a normal original-language Bible when interlinear mode is hidden', async () => {
+    const dependencies = createDependencies()
+    dependencies.getChapterVerses.mockResolvedValue([
+      { Livre: 1, Chapitre: 1, Verset: 1, Texte: 'בְּרֵאשִׁית' },
+    ])
+    const loadInterlinearChapterTokens = jest.fn()
+
+    await expect(
+      loadBibleContentChapter(
+        { book: 1, chapter: 1, version: 'BHG', interlinearMode: 'hidden' },
+        { ...dependencies, loadInterlinearChapterTokens }
+      )
+    ).resolves.toEqual(
+      expect.objectContaining({
+        success: true,
+        data: [{ Livre: 1, Chapitre: 1, Verset: 1, Texte: 'בְּרֵאשִׁית' }],
+      })
+    )
+    expect(loadInterlinearChapterTokens).not.toHaveBeenCalled()
+  })
+
+  it('overlays the localized interlinear index without replacing canonical BHG text', async () => {
+    const dependencies = createDependencies()
+    dependencies.getChapterVerses.mockResolvedValue([
+      { Livre: 1, Chapitre: 1, Verset: 1, Texte: 'בְּרֵאשִׁית' },
+    ])
+    const tokens = [
+      {
+        ordinal: 0,
+        startOffset: 0,
+        length: 8,
+        segments: [],
+      },
+    ]
+    const loadInterlinearChapterTokens = jest.fn().mockResolvedValue({ 1: tokens })
+
+    await expect(
+      loadBibleContentChapter(
+        {
+          book: 1,
+          chapter: 1,
+          version: 'BHG',
+          interlinearMode: 'visible',
+          interlinearLocale: 'en',
+        },
+        { ...dependencies, loadInterlinearChapterTokens }
+      )
+    ).resolves.toEqual(
+      expect.objectContaining({
+        success: true,
+        data: [
+          expect.objectContaining({
+            Texte: 'בְּרֵאשִׁית',
+            InterlinearTokens: tokens,
+          }),
+        ],
+      })
+    )
+    expect(loadInterlinearChapterTokens).toHaveBeenCalledWith('BHG', 'en', 1, 1)
+  })
+
+  it('falls back to canonical BHG text when the interlinear index cannot be loaded', async () => {
+    const dependencies = createDependencies()
+    const verses = [{ Livre: 1, Chapitre: 1, Verset: 1, Texte: 'בְּרֵאשִׁית' }]
+    dependencies.getChapterVerses.mockResolvedValue(verses)
+    const loadInterlinearChapterTokens = jest.fn().mockRejectedValue(new Error('missing'))
+
+    await expect(
+      loadBibleContentChapter(
+        {
+          book: 1,
+          chapter: 1,
+          version: 'BHG',
+          interlinearMode: 'visible',
+          interlinearLocale: 'fr',
+        },
+        { ...dependencies, loadInterlinearChapterTokens }
+      )
+    ).resolves.toEqual(expect.objectContaining({ success: true, data: verses }))
+    expect(dependencies.logError).toHaveBeenCalled()
   })
 
   it('routes French interlinear versions to French interlinear content', async () => {

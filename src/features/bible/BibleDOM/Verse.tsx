@@ -30,6 +30,7 @@ import { HIGHLIGHT_BACKGROUND_OPACITY, getContrastTextColor } from '~helpers/hig
 import { isDarkTheme } from './utils'
 const InterlinearVerseComplete = React.lazy(() => import('./InterlinearVerseComplete'))
 const InterlinearVerse = React.lazy(() => import('./InterlinearVerse'))
+const StructuredInterlinearVerse = React.lazy(() => import('./StructuredInterlinearVerse'))
 import VerseTags from './VerseTags'
 import { BibleError } from '~helpers/bibleErrors'
 import { useTranslations } from './TranslationsContext'
@@ -779,14 +780,16 @@ const Verse = ({
           isVerseToScroll={isVerseToScroll && Number(verse.Verset) !== 1}
           highlightedColor={numberHighlight.show ? undefined : highlightedColor}
         >
-          <NumberText
-            isFocused={isFocused}
-            settings={settings}
-            highlightBg={numberHighlight.bg}
-            highlightColor={numberHighlight.color}
-          >
-            {verse.Verset}{' '}
-          </NumberText>
+          {(version !== 'BHG' || Number(verse.Verset) !== 0) && (
+            <NumberText
+              isFocused={isFocused}
+              settings={settings}
+              highlightBg={numberHighlight.bg}
+              highlightColor={numberHighlight.color}
+            >
+              {verse.Verset}{' '}
+            </NumberText>
+          )}
           {bookmark && !isSelectionMode && (
             <BookmarkIcon
               settings={settings}
@@ -822,7 +825,18 @@ const Verse = ({
             id={`verse-text-${verseKey}`}
             data-verse-key={verseKey}
           >
-            {text}
+            {version === 'BHG' && verse.InterlinearTokens?.length ? (
+              <React.Suspense fallback={<>{verse.Texte}</>}>
+                <StructuredInterlinearVerse
+                  isHebreu={isHebreu}
+                  settings={settings}
+                  verse={verse}
+                  selectedCode={selectedCode}
+                />
+              </React.Suspense>
+            ) : (
+              text
+            )}
           </VerseText>
         </ContainerText>
         {otherVersionAnnotations && otherVersionAnnotations.length > 0 && !isSelectionMode && (

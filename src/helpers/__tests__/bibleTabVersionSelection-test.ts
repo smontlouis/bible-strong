@@ -50,4 +50,27 @@ describe('selectBibleTabVersion', () => {
       pendingStrongModeVersionId: 'DBY',
     })
   })
+
+  it('selects BHG in simple mode before its optional interlinear index is enabled', () => {
+    expect(
+      selectBibleTabVersion(
+        { selectedVersion: 'LSG' } as Parameters<typeof selectBibleTabVersion>[0],
+        'BHG'
+      )
+    ).toMatchObject({
+      selectedVersion: 'BHG',
+      interlinearMode: 'hidden',
+    })
+  })
+
+  it('keeps legacy interlinear versions addressable for persisted tabs', () => {
+    expect(
+      selectBibleTabVersion(
+        { selectedVersion: 'INT' } as Parameters<typeof selectBibleTabVersion>[0],
+        'INT'
+      )
+    ).toMatchObject({
+      selectedVersion: 'INT',
+    })
+  })
 })

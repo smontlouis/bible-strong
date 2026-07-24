@@ -759,7 +759,12 @@ const LoadedBibleContent = ({
     if (Object.keys(selectedVerses).length > 0) return
 
     // Don't enter annotation mode for interlinear versions (different DOM structure)
-    if (version === 'INT' || version === 'INT_EN') return
+    if (
+      version === 'INT' ||
+      version === 'INT_EN' ||
+      (version === 'BHG' && verses.some(verse => Boolean(verse.InterlinearTokens?.length)))
+    )
+      return
 
     // Don't enter annotation mode in parallel verse mode
     if (isParallelVerseMode) return
@@ -1096,7 +1101,8 @@ const LoadedBibleContent = ({
 
   const isHebreu =
     version === 'BHS' ||
-    ((version === 'INT' || version === 'INT_EN') && Number(verses[0].Livre) < 40)
+    ((version === 'INT' || version === 'INT_EN' || version === 'BHG') &&
+      Number(verses[0].Livre) < 40)
   const introComment = comments?.[0]
   const isParallelVerse = Boolean(parallelVerses?.length)
   const parallelVersionTitles = isParallelVerse

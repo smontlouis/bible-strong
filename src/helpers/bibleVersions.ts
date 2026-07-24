@@ -11,7 +11,7 @@ export type BibleVersificationId =
   | 'bible-strong-catholic-extended-esther-daniel'
   | 'clementine-vulgate'
 
-export type BibleVersionLanguage = 'fr' | 'en' | 'he' | 'grc' | 'la'
+export type BibleVersionLanguage = 'fr' | 'en' | 'he' | 'grc' | 'he-grc' | 'la'
 
 export type TranslationReadingProfile =
   | 'word-for-word'
@@ -217,6 +217,17 @@ export const versions: Record<string, Version> = {
     type: 'fr',
     language: 'fr',
     readingProfile: null,
+    hidden: true,
+  },
+  BHG: {
+    id: 'BHG',
+    name: 'Bible hébraïque et grecque',
+    name_en: 'Hebrew & Greek Bible',
+    c: 'STEPBible.org / Tyndale House Cambridge — CC BY 4.0',
+    sourceUrl: 'https://github.com/STEPBible/STEPBible-Data',
+    type: 'other',
+    language: 'he-grc',
+    readingProfile: null,
   },
   KJF: {
     id: 'KJF',
@@ -372,6 +383,7 @@ export const versions: Record<string, Version> = {
     type: 'en',
     language: 'en',
     readingProfile: null,
+    hidden: true,
   },
   NKJV: {
     id: 'NKJV',

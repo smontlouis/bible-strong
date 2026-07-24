@@ -14,6 +14,7 @@ describe('buildBibleVersionGroups', () => {
       bibleVersion('INT_EN', 'en'),
       bibleVersion('KJVS', 'en'),
       bibleVersion('BHS', 'other', 'he'),
+      bibleVersion('BHG', 'other', 'he-grc'),
       bibleVersion('SBLGNT', 'other', 'grc'),
       bibleVersion('VUL', 'other', 'la'),
       { ...bibleVersion('HIDDEN', 'fr'), hidden: true },
@@ -36,7 +37,7 @@ describe('buildBibleVersionGroups', () => {
     expect(englishIds).toEqual(['INT_EN', 'KJV'])
     expect(englishIds).not.toContain('KJVS')
 
-    expect(groups[2]!.versions.map(version => version.id)).toEqual(['BHS', 'SBLGNT', 'VUL'])
+    expect(groups[2]!.versions.map(version => version.id)).toEqual(['BHG', 'BHS', 'SBLGNT'])
   })
 
   it.each([

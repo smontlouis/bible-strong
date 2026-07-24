@@ -32,6 +32,7 @@ import {
   createBibleDownloadItem,
   createDatabaseDownloadItem,
   createStrongSidecarDownloadPlan,
+  createInterlinearSidecarDownloadPlan,
   dedupeDownloadItems,
 } from '~helpers/downloadItemFactory'
 import { useDownloadQueue } from '~helpers/useDownloadQueue'
@@ -54,6 +55,11 @@ import {
   deleteDownloadedItem,
 } from '~helpers/deleteDownloadedItem'
 import { buildBibleVersionGroups, getStrongIndexBibleName } from './downloadVersionGroups'
+import { BHG_INTERLINEAR_PUBLICATION } from '~helpers/interlinearBiblePublications'
+import {
+  getInterlinearSidecarAvailability,
+  type InterlinearSidecarAvailability,
+} from '~helpers/interlinearBibleSidecar'
 
 // ---------------------------------------------------------------------------
 // Unified section item type
@@ -124,9 +130,33 @@ function buildBibleItems(
       id: `bible:${v.id}`,
       name: `${v.id}  ${displayName}`,
       subtitle: v.c,
-      estimatedSize: isStrongVersion(v.id) ? 20_000_000 : 2_500_000,
+      estimatedSize:
+        v.id === 'BHG'
+          ? BHG_INTERLINEAR_PUBLICATION.canonical.archiveBytes
+          : isStrongVersion(v.id)
+            ? 20_000_000
+            : 2_500_000,
       lang: (v.type === 'en' ? 'en' : v.type === 'other' ? 'other' : 'fr') as 'fr' | 'en' | 'other',
       searchText: `${v.id} ${v.name} ${v.name_en || ''} ${v.c || ''}`.toLowerCase(),
+    }
+    if (v.id === 'BHG') {
+      return [
+        base,
+        ...(['fr', 'en'] as ResourceLanguage[]).map(locale => {
+          const artifact = BHG_INTERLINEAR_PUBLICATION.indexes[locale]
+          return {
+            id: `bible-interlinear:BHG:${locale}`,
+            name: `${t('downloads.interlinearIndexName')} · ${t(
+              `versionCatalog.language.${locale}`
+            )}`,
+            subtitle: t('downloads.interlinearAttribution'),
+            parentItemId: base.id,
+            estimatedSize: artifact.archiveBytes,
+            lang: 'other' as const,
+            searchText: `BHG STEP interlinear ${locale}`.toLowerCase(),
+          }
+        }),
+      ]
     }
     if (!isStrongCapableBibleVersion(v.id)) return [base]
     const publication = getStrongBiblePublication(v.id)
@@ -208,6 +238,9 @@ function useDownloadedItems() {
   const [strongAvailability, setStrongAvailability] = useState<
     Map<StrongBibleVersionId, StrongBibleSidecarAvailability>
   >(new Map())
+  const [interlinearAvailability, setInterlinearAvailability] = useState<
+    Map<ResourceLanguage, InterlinearSidecarAvailability>
+  >(new Map())
   const checkGeneration = React.useRef(0)
   const installedSignal = useAtomValue(installedVersionsSignalAtom)
 
@@ -232,6 +265,24 @@ function useDownloadedItems() {
         availability.status === 'corrupt'
       ) {
         set.add(`bible-strong:${versionId}`)
+      }
+    }
+
+    const interlinearAvailabilityEntries = await Promise.all(
+      (['fr', 'en'] as ResourceLanguage[]).map(async locale => {
+        const availability = await getInterlinearSidecarAvailability(locale)
+        return [locale, availability] as const
+      })
+    )
+    const interlinearAvailabilityMap = new Map<ResourceLanguage, InterlinearSidecarAvailability>()
+    for (const [locale, availability] of interlinearAvailabilityEntries) {
+      interlinearAvailabilityMap.set(locale, availability)
+      if (
+        availability.status === 'available' ||
+        availability.status === 'incompatible' ||
+        availability.status === 'corrupt'
+      ) {
+        set.add(`bible-interlinear:BHG:${locale}`)
       }
     }
 
@@ -264,13 +315,19 @@ function useDownloadedItems() {
     if (generation !== checkGeneration.current) return
     setDownloadedSet(set)
     setStrongAvailability(availabilityMap)
+    setInterlinearAvailability(interlinearAvailabilityMap)
   }
 
   React.useEffect(() => {
     void checkAll()
   }, [installedSignal])
 
-  return { downloadedSet, strongAvailability, refreshDownloadedItems: checkAll }
+  return {
+    downloadedSet,
+    strongAvailability,
+    interlinearAvailability,
+    refreshDownloadedItems: checkAll,
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -293,7 +350,8 @@ const DownloadsScreen = () => {
   const [langFilter, setLangFilter] = useState<Set<LangFilter>>(new Set())
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(() => new Set())
 
-  const { downloadedSet, strongAvailability, refreshDownloadedItems } = useDownloadedItems()
+  const { downloadedSet, strongAvailability, interlinearAvailability, refreshDownloadedItems } =
+    useDownloadedItems()
   const allSections = buildAllSections(lang, t)
 
   // Initialize all sections as collapsed once we know them
@@ -386,6 +444,13 @@ const DownloadsScreen = () => {
               strongAvailability.get(versionId)?.status ?? 'base-missing'
             )
           }
+          if (id.startsWith('bible-interlinear:')) {
+            const locale = id.split(':')[2] as ResourceLanguage
+            return createInterlinearSidecarDownloadPlan(
+              locale,
+              interlinearAvailability.get(locale)?.status ?? 'base-missing'
+            )
+          }
           if (id.startsWith('bible:')) {
             const versionId = id.replace('bible:', '')
             return [createBibleDownloadItem(versionId)]
@@ -415,9 +480,16 @@ const DownloadsScreen = () => {
         plan.strongSidecar !== undefined &&
         downloadedSet.has(plan.strongSidecar.itemId)
     )
-    const confirmation = deletesStrongSidecar
-      ? t('downloads.deleteCountWithStrong', { count: deletionPlans.length })
-      : t('downloads.deleteCount', { count: deletionPlans.length })
+    const deletesInterlinearSidecar = deletionPlans.some(
+      plan =>
+        plan.kind === 'bible' &&
+        plan.interlinearSidecars?.some(sidecar => downloadedSet.has(sidecar.itemId))
+    )
+    const confirmation = deletesInterlinearSidecar
+      ? t('downloads.deleteCountWithInterlinear', { count: deletionPlans.length })
+      : deletesStrongSidecar
+        ? t('downloads.deleteCountWithStrong', { count: deletionPlans.length })
+        : t('downloads.deleteCount', { count: deletionPlans.length })
 
     Alert.alert(t('Attention'), confirmation, [
       { text: t('Non'), style: 'cancel' },
@@ -445,6 +517,16 @@ const DownloadsScreen = () => {
         availability?.status ?? 'base-missing'
       )
       enqueue(items)
+      return
+    }
+    if (item.id.startsWith('bible-interlinear:')) {
+      const locale = item.id.split(':')[2] as ResourceLanguage
+      enqueue(
+        createInterlinearSidecarDownloadPlan(
+          locale,
+          interlinearAvailability.get(locale)?.status ?? 'base-missing'
+        )
+      )
       return
     }
     if (item.id.startsWith('bible:')) {
@@ -480,9 +562,14 @@ const DownloadsScreen = () => {
       deletionPlan.kind === 'bible' &&
       deletionPlan.strongSidecar !== undefined &&
       downloadedSet.has(deletionPlan.strongSidecar.itemId)
-    const confirmation = deletesStrongSidecar
-      ? t('downloads.updateBibleWithStrongConfirm')
-      : t('downloads.redownloadConfirm')
+    const deletesInterlinearSidecar =
+      deletionPlan.kind === 'bible' &&
+      deletionPlan.interlinearSidecars?.some(sidecar => downloadedSet.has(sidecar.itemId))
+    const confirmation = deletesInterlinearSidecar
+      ? t('downloads.updateBibleWithInterlinearConfirm')
+      : deletesStrongSidecar
+        ? t('downloads.updateBibleWithStrongConfirm')
+        : t('downloads.redownloadConfirm')
 
     Alert.alert(t('Attention'), confirmation, [
       { text: t('Non'), style: 'cancel' },
@@ -503,9 +590,14 @@ const DownloadsScreen = () => {
       deletionPlan.kind === 'bible' &&
       deletionPlan.strongSidecar !== undefined &&
       downloadedSet.has(deletionPlan.strongSidecar.itemId)
-    const confirmation = deletesStrongSidecar
-      ? t('downloads.deleteBibleWithStrongConfirm')
-      : t('downloads.deleteConfirm')
+    const deletesInterlinearSidecar =
+      deletionPlan.kind === 'bible' &&
+      deletionPlan.interlinearSidecars?.some(sidecar => downloadedSet.has(sidecar.itemId))
+    const confirmation = deletesInterlinearSidecar
+      ? t('downloads.deleteBibleWithInterlinearConfirm')
+      : deletesStrongSidecar
+        ? t('downloads.deleteBibleWithStrongConfirm')
+        : t('downloads.deleteConfirm')
 
     Alert.alert(t('Attention'), confirmation, [
       { text: t('Non'), style: 'cancel' },

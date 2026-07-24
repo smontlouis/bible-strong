@@ -8,9 +8,11 @@ import {
   type BibleJsonData,
   type CanonicalBibleJsonData,
   type InsertBibleOptions,
+  type LegacyBibleJsonData,
 } from '~helpers/biblesDb'
 import { downloadWithCdnFallback } from '~helpers/downloadWithCdnFallback'
 import type { StrongBiblePublication } from '~helpers/strongBiblePublications'
+import type { InterlinearPublicationArtifact } from '~helpers/interlinearBiblePublications'
 import { planWordAnnotationRealignment } from '~helpers/wordAnnotationRealignment'
 import { realignWordAnnotationsAction } from '~redux/modules/user'
 import { persistor, store } from '~redux/store'
@@ -25,6 +27,7 @@ export interface DownloadAndInsertOptions extends InsertBibleOptions {
   /** Return the DownloadResumable so the caller can pause/cancel it */
   onResumable?: (resumable: FileSystem.DownloadResumable | null) => void
   canonicalArtifact?: StrongBiblePublication['canonical']
+  archiveArtifact?: InterlinearPublicationArtifact
 }
 
 /**
@@ -50,7 +53,8 @@ export async function downloadAndInsertBible(
   // Ensure DB is open
   await openBiblesDb()
 
-  const isArchive = Boolean(opts.canonicalArtifact)
+  const archiveArtifact = opts.canonicalArtifact ?? opts.archiveArtifact
+  const isArchive = Boolean(archiveArtifact)
   const tempPath = `${FileSystem.cacheDirectory}bible-${versionId}-temp.${
     isArchive ? 'zip' : 'json'
   }`
@@ -77,16 +81,19 @@ export async function downloadAndInsertBible(
     const jsonPath = await resolveDownloadedBibleJson({
       downloadedPath: tempPath,
       extractionDirectory,
-      canonicalArtifact: opts.canonicalArtifact,
+      archiveArtifact,
     })
     const data = await FileSystem.readAsStringAsync(jsonPath)
     const jsonData = JSON.parse(data) as BibleJsonData
     validateCanonicalBiblePublication(versionId, jsonData, opts.canonicalArtifact)
-    const realignmentPlan = await buildRealignmentPlan(versionId, jsonData)
+    const targetTextRevision = isCanonicalBibleJsonData(jsonData)
+      ? jsonData.textRevision
+      : opts.archiveArtifact?.textRevision
+    const realignmentPlan = await buildRealignmentPlan(versionId, jsonData, targetTextRevision)
     if (realignmentPlan && Object.keys(realignmentPlan.updates).length > 0) {
       persistAnnotationMigrationJournal({
         versionId,
-        textRevision: (jsonData as CanonicalBibleJsonData).textRevision,
+        textRevision: targetTextRevision!,
         updates: realignmentPlan.updates,
       })
     }
@@ -96,6 +103,17 @@ export async function downloadAndInsertBible(
     await insertBibleVersion(versionId, jsonData, {
       onInsertProgress: opts.onInsertProgress,
       isCancelled: opts.isCancelled,
+      ...(opts.archiveArtifact
+        ? {
+            publicationMetadata: {
+              textRevision: opts.archiveArtifact.textRevision,
+              textSha256: opts.archiveArtifact.textSha256,
+              sourceSha256: opts.archiveArtifact.contentSha256,
+              schemaVersion: opts.archiveArtifact.schemaVersion,
+              verseCount: opts.archiveArtifact.verseCount,
+            },
+          }
+        : {}),
     })
     if (realignmentPlan && Object.keys(realignmentPlan.updates).length > 0) {
       store.dispatch(realignWordAnnotationsAction(realignmentPlan.updates))
@@ -126,30 +144,30 @@ export async function downloadAndInsertBible(
 const resolveDownloadedBibleJson = async ({
   downloadedPath,
   extractionDirectory,
-  canonicalArtifact,
+  archiveArtifact,
 }: {
   downloadedPath: string
   extractionDirectory: string
-  canonicalArtifact?: StrongBiblePublication['canonical']
+  archiveArtifact?: StrongBiblePublication['canonical'] | InterlinearPublicationArtifact
 }): Promise<string> => {
-  if (!canonicalArtifact) return downloadedPath
+  if (!archiveArtifact) return downloadedPath
 
   await verifyFileSha256(
     downloadedPath,
-    canonicalArtifact.archiveSha256,
+    archiveArtifact.archiveSha256,
     'CANONICAL_BIBLE_ARCHIVE_CHECKSUM_MISMATCH'
   )
   await FileSystem.deleteAsync(extractionDirectory, { idempotent: true })
   await FileSystem.makeDirectoryAsync(extractionDirectory, { intermediates: true })
   await unzip(toNativeFilePath(downloadedPath), toNativeFilePath(extractionDirectory), 'UTF-8')
-  const jsonPath = `${extractionDirectory}${canonicalArtifact.entry}`
+  const jsonPath = `${extractionDirectory}${archiveArtifact.entry}`
   const info = await FileSystem.getInfoAsync(jsonPath)
   if (!info.exists) {
-    throw new Error(`CANONICAL_BIBLE_ARCHIVE_ENTRY_MISSING:${canonicalArtifact.entry}`)
+    throw new Error(`CANONICAL_BIBLE_ARCHIVE_ENTRY_MISSING:${archiveArtifact.entry}`)
   }
   await verifyFileSha256(
     jsonPath,
-    canonicalArtifact.contentSha256,
+    archiveArtifact.contentSha256,
     'CANONICAL_BIBLE_CONTENT_CHECKSUM_MISMATCH'
   )
   return jsonPath
@@ -179,14 +197,20 @@ const validateCanonicalBiblePublication = (
   }
 }
 
-const buildRealignmentPlan = async (versionId: string, data: BibleJsonData) => {
-  if (!isCanonicalBibleJsonData(data)) return null
+const buildRealignmentPlan = async (
+  versionId: string,
+  data: BibleJsonData,
+  publicationTextRevision?: string
+) => {
+  const canonicalData = isCanonicalBibleJsonData(data) ? data : undefined
+  const textRevision = canonicalData?.textRevision ?? publicationTextRevision
+  if (!textRevision) return null
   const annotations = store.getState().user.bible.wordAnnotations
   const sourceVersions = versionId === 'LSG' ? new Set(['LSG', 'LSGS']) : new Set([versionId])
   const affectedAnnotations = Object.values(annotations).filter(
     annotation =>
       sourceVersions.has(annotation.version) &&
-      (annotation.version !== versionId || annotation.textRevision !== data.textRevision)
+      (annotation.version !== versionId || annotation.textRevision !== textRevision)
   )
   if (affectedAnnotations.length === 0) return null
 
@@ -199,7 +223,10 @@ const buildRealignmentPlan = async (versionId: string, data: BibleJsonData) => {
   const candidateVerses = Object.fromEntries(
     verseKeys.flatMap(verseKey => {
       const [book, chapter, verse] = verseKey.split('-')
-      const candidate = data.verses[book]?.[chapter]?.[verse]?.text
+      const versePayload = canonicalData
+        ? canonicalData.verses[book]?.[chapter]?.[verse]
+        : (data as LegacyBibleJsonData)[book]?.[chapter]?.[verse]
+      const candidate = typeof versePayload === 'string' ? versePayload : versePayload?.text
       return candidate === undefined ? [] : [[verseKey, candidate]]
     })
   )
@@ -207,7 +234,7 @@ const buildRealignmentPlan = async (versionId: string, data: BibleJsonData) => {
   return planWordAnnotationRealignment({
     annotations,
     version: versionId,
-    textRevision: data.textRevision,
+    textRevision,
     candidateVerses,
     previousVersesByVersion: {
       [versionId]: previousVerses,

@@ -98,7 +98,7 @@ describe('Bible version catalog metadata', () => {
       other: ['INT', 'INT_EN', 'BHS', 'LXX', 'VUL', 'SBLGNT', 'TR1624', 'TR1894', 'DEL'],
     } as const
 
-    expect(Object.keys(versions)).toHaveLength(44)
+    expect(Object.keys(versions)).toHaveLength(45)
 
     for (const [language, ids] of Object.entries(expectedLanguages)) {
       expect(ids.map(id => versions[id].language)).toEqual(ids.map(() => language))
@@ -116,6 +116,7 @@ const labels: VersionCatalogLabels = {
     en: 'Anglais',
     he: 'Hébreu',
     grc: 'Grec',
+    'he-grc': 'Hébreu et grec',
     la: 'Latin',
   },
   profiles: {

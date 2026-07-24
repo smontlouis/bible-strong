@@ -14,6 +14,7 @@ import { requireBiblePath } from './requireBiblePath'
 import { dbManager } from './sqlite'
 import { isStrongCapableBibleVersion, type StrongBibleVersionId } from './strongBiblePublications'
 import { removeStrongBibleSidecar } from './strongBibleSidecar'
+import { removeInterlinearSidecar } from './interlinearBibleSidecar'
 
 interface DeleteDownloadedItemOptions {
   bibleMode?: 'remove' | 'replace'
@@ -30,8 +31,13 @@ export type DownloadedItemDeletionPlan =
         itemId: string
         versionId: StrongBibleVersionId
       }
+      interlinearSidecars?: {
+        itemId: string
+        language: ResourceLanguage
+      }[]
     }
   | { kind: 'strong-sidecar'; versionId: StrongBibleVersionId }
+  | { kind: 'interlinear-sidecar'; language: ResourceLanguage }
   | { kind: 'database'; databaseId: DatabaseId; language: ResourceLanguage }
   | { kind: 'unknown'; itemId: string }
 
@@ -50,6 +56,14 @@ export const createDownloadedItemDeletionPlan = (
     }
   }
 
+  if (itemId.startsWith('bible-interlinear:')) {
+    const [, versionId, language] = itemId.split(':')
+    if (versionId !== 'BHG' || (language !== 'fr' && language !== 'en')) {
+      return { kind: 'unknown', itemId }
+    }
+    return { kind: 'interlinear-sidecar', language }
+  }
+
   if (itemId.startsWith('bible:')) {
     const versionId = itemId.replace('bible:', '')
     if (!Object.prototype.hasOwnProperty.call(versions, versionId)) {
@@ -62,6 +76,13 @@ export const createDownloadedItemDeletionPlan = (
       strongSidecar:
         bibleMode === 'remove' && isStrongCapableBibleVersion(versionId)
           ? { itemId: `bible-strong:${versionId}`, versionId }
+          : undefined,
+      interlinearSidecars:
+        bibleMode === 'remove' && versionId === 'BHG'
+          ? (['fr', 'en'] as ResourceLanguage[]).map(language => ({
+              itemId: `bible-interlinear:BHG:${language}`,
+              language,
+            }))
           : undefined,
     }
   }
@@ -89,9 +110,19 @@ export const deleteDownloadedItem = async (plan: DownloadedItemDeletionPlan): Pr
     return
   }
 
+  if (plan.kind === 'interlinear-sidecar') {
+    await removeInterlinearSidecar(plan.language)
+    return
+  }
+
   if (plan.kind === 'bible') {
     if (plan.strongSidecar) {
       await removeStrongBibleSidecar(plan.strongSidecar.versionId)
+    }
+    if (plan.interlinearSidecars) {
+      await Promise.all(
+        plan.interlinearSidecars.map(sidecar => removeInterlinearSidecar(sidecar.language))
+      )
     }
 
     const { versionId } = plan

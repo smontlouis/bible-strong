@@ -10,6 +10,11 @@ import {
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
 import type { StrongBibleSidecarAvailability } from './strongBibleSidecar'
+import {
+  BHG_INTERLINEAR_PUBLICATION,
+  isInterlinearCapableBibleVersion,
+} from './interlinearBiblePublications'
+import type { InterlinearSidecarAvailability } from './interlinearBibleSidecar'
 
 const BIBLE_ESTIMATED_SIZE = 2_500_000
 
@@ -24,23 +29,30 @@ export function createBibleDownloadItem(versionId: string): DownloadItem {
   const publication = isStrongCapableBibleVersion(versionId)
     ? getStrongBiblePublication(versionId)
     : undefined
+  const interlinearPublication = isInterlinearCapableBibleVersion(versionId)
+    ? BHG_INTERLINEAR_PUBLICATION
+    : undefined
 
   const type: DownloadItemType = isStrong ? 'bible-strong' : 'bible'
-  const url = publication
-    ? publication.canonical.url
-    : isStrong
-      ? versionId === 'INT'
-        ? getDatabaseUrl('INTERLINEAIRE', 'fr')
-        : versionId === 'INT_EN'
-          ? getDatabaseUrl('INTERLINEAIRE', 'en')
-          : biblesRef[versionId]
-      : biblesRef[versionId]
+  const url = interlinearPublication
+    ? interlinearPublication.canonical.url
+    : publication
+      ? publication.canonical.url
+      : isStrong
+        ? versionId === 'INT'
+          ? getDatabaseUrl('INTERLINEAIRE', 'fr')
+          : versionId === 'INT_EN'
+            ? getDatabaseUrl('INTERLINEAIRE', 'en')
+            : biblesRef[versionId]
+        : biblesRef[versionId]
 
   const destinationPath = isStrong ? requireBiblePath(versionId) : undefined
 
   // Strong/Interlinear are ~20MB SQLite files, regular bibles are ~2.5MB JSON
   const estimatedSize =
-    publication?.canonical.archiveBytes ?? (isStrong ? 20_000_000 : BIBLE_ESTIMATED_SIZE)
+    interlinearPublication?.canonical.archiveBytes ??
+    publication?.canonical.archiveBytes ??
+    (isStrong ? 20_000_000 : BIBLE_ESTIMATED_SIZE)
 
   return {
     id: `bible:${versionId}`,
@@ -53,9 +65,39 @@ export function createBibleDownloadItem(versionId: string): DownloadItem {
     hasRedWords: version.hasRedWords,
     hasPericope: version.hasPericope,
     ...(publication ? { canonicalArtifact: publication.canonical } : {}),
+    ...(interlinearPublication ? { archiveArtifact: interlinearPublication.canonical } : {}),
     addedAt: Date.now(),
     retryCount: 0,
   }
+}
+
+export function createInterlinearSidecarDownloadItem(lang: ResourceLanguage): DownloadItem {
+  const artifact = BHG_INTERLINEAR_PUBLICATION.indexes[lang]
+  return {
+    id: `bible-interlinear:BHG:${lang}`,
+    type: 'bible-interlinear-sidecar',
+    name: `BHG — Interlinéaire ${lang.toUpperCase()}`,
+    versionId: 'BHG',
+    lang,
+    url: artifact.url,
+    estimatedSize: artifact.archiveBytes,
+    interlinearArtifact: artifact,
+    interlinearDatasetId: BHG_INTERLINEAR_PUBLICATION.datasetId,
+    addedAt: Date.now(),
+    retryCount: 0,
+  }
+}
+
+export const createInterlinearSidecarDownloadPlan = (
+  lang: ResourceLanguage,
+  availabilityStatus: InterlinearSidecarAvailability['status']
+): DownloadItem[] => {
+  const sidecar = createInterlinearSidecarDownloadItem(lang)
+  if (availabilityStatus !== 'base-missing' && availabilityStatus !== 'base-incompatible') {
+    return [sidecar]
+  }
+  const bible = createBibleDownloadItem('BHG')
+  return [bible, { ...sidecar, dependsOnId: bible.id }]
 }
 
 export function createStrongSidecarDownloadItem(versionId: StrongBibleVersionId): DownloadItem {

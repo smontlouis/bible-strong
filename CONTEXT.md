@@ -62,7 +62,7 @@ Core user activities:
 | Plan slice | One reading unit inside a reading plan; it can contain Bible text, meditation text, image, video, or a chapter/verse reference. | `src/features/plans/PlanSliceScreen/` |
 | Plan tab | App tab anchored to one reading plan, with a plan slice optionally opened inside the tab. | `src/features/plans/`, `src/state/tabs.ts` |
 | Strong | Hebrew/Greek lexical identifiers and concordance resources. | `src/features/bible/Strong*`, `src/helpers/loadStrong*` |
-| Interlinear | Original-language verse display with lexical/translation alignment. | `src/helpers/loadInterlineaireChapter.ts`, `src/features/bible/BibleDOM/InterlinearVerse*` |
+| Interlinear | Original-language verse display with lexical/translation alignment. BHG is the canonical readable Hebrew/Aramaic and Greek Bible; optional localized interlinear indexes add glosses, transliteration, morphology and lexical identities without duplicating its text. | `src/helpers/interlinearBibleSidecar.ts`, `src/features/bible/BibleDOM/StructuredInterlinearVerse.tsx` |
 | Nave | Nave's topical Bible resource. | `src/features/nave/`, `src/helpers/loadNaveItem.ts` |
 | Resource database | Downloaded SQLite/JSON file used by study features. | `src/helpers/databases.ts`, `src/helpers/databaseTypes.ts` |
 | Offline copy | Complete resource content deliberately installed on the device for durable use without a network connection. An offline copy is a local source, not a query cache. | `src/features/resources/`, `src/features/settings/DownloadsScreen.tsx` |

@@ -9,6 +9,7 @@ jest.mock('~helpers/firebase', () => ({
 jest.mock('~helpers/bibleVersions', () => ({
   versions: {
     DBY: { id: 'DBY', name: 'Bible Darby' },
+    BHG: { id: 'BHG', name: 'Bible hébraïque et grecque' },
   },
   isStrongVersion: () => false,
 }))
@@ -22,7 +23,11 @@ jest.mock('~helpers/requireBiblePath', () => ({
   requireBiblePath: jest.fn(),
 }))
 
-import { createStrongSidecarDownloadPlan, dedupeDownloadItems } from '../downloadItemFactory'
+import {
+  createInterlinearSidecarDownloadPlan,
+  createStrongSidecarDownloadPlan,
+  dedupeDownloadItems,
+} from '../downloadItemFactory'
 
 describe('Strong Bible download planning', () => {
   it.each(['base-missing', 'base-incompatible'] as const)(
@@ -52,4 +57,24 @@ describe('Strong Bible download planning', () => {
       'bible-strong:DBY',
     ])
   })
+})
+
+describe('Interlinear Bible download planning', () => {
+  it.each(['base-missing', 'base-incompatible'] as const)(
+    'queues BHG before its localized index when status is %s',
+    status => {
+      const plan = createInterlinearSidecarDownloadPlan('fr', status)
+      expect(plan.map(item => item.id)).toEqual(['bible:BHG', 'bible-interlinear:BHG:fr'])
+      expect(plan[1]?.dependsOnId).toBe('bible:BHG')
+    }
+  )
+
+  it.each(['missing', 'incompatible', 'corrupt'] as const)(
+    'queues only the localized index when BHG is compatible and status is %s',
+    status => {
+      expect(createInterlinearSidecarDownloadPlan('en', status).map(item => item.id)).toEqual([
+        'bible-interlinear:BHG:en',
+      ])
+    }
+  )
 })

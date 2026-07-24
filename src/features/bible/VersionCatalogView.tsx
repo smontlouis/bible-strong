@@ -35,6 +35,7 @@ const STYLE_INFO_KEYS: Record<TranslationReadingProfile, string> = {
 }
 
 const EMPTY_DOWNLOADED_VERSION_IDS = new Set<string>()
+const ESTIMATED_CATALOG_ROW_HEIGHT = 72
 
 export const useVersionCatalog = (
   catalog: Version[],
@@ -64,6 +65,7 @@ export const useVersionCatalog = (
       en: t('versionCatalog.language.en'),
       he: t('versionCatalog.language.he'),
       grc: t('versionCatalog.language.grc'),
+      'he-grc': t('versionCatalog.language.heGrc'),
       la: t('versionCatalog.language.la'),
     },
     profiles: {
@@ -275,6 +277,38 @@ const scrollToCatalogVersion = (
   return true
 }
 
+const getEstimatedCatalogOffset = (sections: VersionCatalogSection[], versionId: string) => {
+  const location = getVersionCatalogLocation(sections, versionId)
+  if (!location) return null
+
+  const precedingItemCount = sections
+    .slice(0, location.sectionIndex)
+    .reduce((count, section) => count + section.data.length + 1, 0)
+
+  return (precedingItemCount + location.itemIndex) * ESTIMATED_CATALOG_ROW_HEIGHT
+}
+
+const scheduleCatalogVersionReveal = (
+  list: SectionList<VersionCatalogItem, VersionCatalogSection> | null,
+  sections: VersionCatalogSection[],
+  versionId: string,
+  onRevealed: () => void
+) => {
+  const estimatedOffset = getEstimatedCatalogOffset(sections, versionId)
+  if (estimatedOffset === null) return null
+
+  list?.getScrollResponder()?.scrollTo({
+    animated: false,
+    y: estimatedOffset,
+  })
+
+  return requestAnimationFrame(() => {
+    if (scrollToCatalogVersion(list, sections, versionId)) {
+      onRevealed()
+    }
+  })
+}
+
 export const VersionCatalogList = ({
   sections,
   grouping,
@@ -289,6 +323,8 @@ export const VersionCatalogList = ({
 }: VersionCatalogListProps) => {
   const { t } = useTranslation()
   const listRef = React.useRef<SectionList<VersionCatalogItem, VersionCatalogSection>>(null)
+  const listHeightRef = React.useRef(0)
+  const previousScrollToTopKeyRef = React.useRef(scrollToTopKey)
   const [pendingReveal, setPendingReveal] = React.useState(Boolean(revealVersionId))
 
   React.useEffect(() => {
@@ -297,6 +333,9 @@ export const VersionCatalogList = ({
 
   React.useEffect(() => {
     if (scrollToTopKey === undefined) return
+    if (previousScrollToTopKeyRef.current === scrollToTopKey) return
+
+    previousScrollToTopKeyRef.current = scrollToTopKey
 
     const frame = requestAnimationFrame(() => {
       listRef.current?.getScrollResponder()?.scrollTo({ animated: false, y: 0 })
@@ -305,22 +344,23 @@ export const VersionCatalogList = ({
   }, [scrollToTopKey])
 
   React.useEffect(() => {
-    if (!pendingReveal || !revealVersionId) return
+    if (!pendingReveal || !revealVersionId || listHeightRef.current <= 0) return
 
-    const frame = requestAnimationFrame(() => {
-      if (scrollToCatalogVersion(listRef.current, sections, revealVersionId)) {
-        setPendingReveal(false)
-      }
-    })
+    const frame = scheduleCatalogVersionReveal(listRef.current, sections, revealVersionId, () =>
+      setPendingReveal(false)
+    )
 
-    return () => cancelAnimationFrame(frame)
+    return () => {
+      if (frame !== null) cancelAnimationFrame(frame)
+    }
   }, [pendingReveal, revealVersionId, sections])
 
-  const revealSelectedVersion = () => {
-    if (!pendingReveal || !revealVersionId) return
-    if (scrollToCatalogVersion(listRef.current, sections, revealVersionId)) {
+  function revealSelectedVersion() {
+    if (!pendingReveal || !revealVersionId || listHeightRef.current <= 0) return
+
+    scheduleCatalogVersionReveal(listRef.current, sections, revealVersionId, () =>
       setPendingReveal(false)
-    }
+    )
   }
 
   return (
@@ -335,11 +375,21 @@ export const VersionCatalogList = ({
       sections={sections}
       keyExtractor={item => item.id}
       initialNumToRender={44}
+      getItemLayout={(_, index) => ({
+        index,
+        length: ESTIMATED_CATALOG_ROW_HEIGHT,
+        offset: ESTIMATED_CATALOG_ROW_HEIGHT * index,
+      })}
+      onLayout={event => {
+        listHeightRef.current = event.nativeEvent.layout.height
+        revealSelectedVersion()
+      }}
       onContentSizeChange={revealSelectedVersion}
       onScrollToIndexFailed={({ averageItemLength, index }) => {
+        setPendingReveal(Boolean(revealVersionId))
         listRef.current?.getScrollResponder()?.scrollTo({
           animated: false,
-          y: averageItemLength * index,
+          y: (averageItemLength || ESTIMATED_CATALOG_ROW_HEIGHT) * index,
         })
       }}
       ListHeaderComponent={listHeaderComponent}

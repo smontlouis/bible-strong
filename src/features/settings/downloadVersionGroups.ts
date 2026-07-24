@@ -9,7 +9,7 @@ export interface BibleVersionGroup {
   versions: Version[]
 }
 
-const ORIGINAL_LANGUAGES = new Set<Version['language']>(['he', 'grc', 'la'])
+const ORIGINAL_LANGUAGES = new Set<Version['language']>(['he', 'grc', 'he-grc'])
 
 export const getStrongIndexBibleName = (bibleName: string): string =>
   bibleName.replace(/^Bible\s+/i, '')

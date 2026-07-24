@@ -11,6 +11,7 @@ jest.mock('~helpers/bibleVersions', () => ({
     LSG: { id: 'LSG' },
     DBY: { id: 'DBY' },
     DBR: { id: 'DBR' },
+    BHG: { id: 'BHG' },
   },
   isStrongVersion: () => false,
 }))
@@ -47,16 +48,22 @@ jest.mock('../strongBibleSidecar', () => ({
   removeStrongBibleSidecar: jest.fn(),
 }))
 
+jest.mock('../interlinearBibleSidecar', () => ({
+  removeInterlinearSidecar: jest.fn(),
+}))
+
 import * as FileSystem from 'expo-file-system/legacy'
 import { isVersionInstalled, removeBibleVersion } from '../biblesDb'
 import { createDownloadedItemDeletionPlan, deleteDownloadedItem } from '../deleteDownloadedItem'
 import { dbManager } from '../sqlite'
 import { removeStrongBibleSidecar } from '../strongBibleSidecar'
+import { removeInterlinearSidecar } from '../interlinearBibleSidecar'
 
 const mockGetInfoAsync = jest.mocked(FileSystem.getInfoAsync)
 const mockIsVersionInstalled = jest.mocked(isVersionInstalled)
 const mockRemoveBibleVersion = jest.mocked(removeBibleVersion)
 const mockRemoveStrongBibleSidecar = jest.mocked(removeStrongBibleSidecar)
+const mockRemoveInterlinearSidecar = jest.mocked(removeInterlinearSidecar)
 const mockGetDatabase = jest.mocked(dbManager.getDB)
 
 describe('deleteDownloadedItem', () => {
@@ -94,6 +101,21 @@ describe('deleteDownloadedItem', () => {
     await deleteDownloadedItem(createDownloadedItemDeletionPlan('bible-strong:DBY'))
 
     expect(mockRemoveStrongBibleSidecar).toHaveBeenCalledWith('DBY')
+    expect(mockRemoveBibleVersion).not.toHaveBeenCalled()
+  })
+
+  it('removes both localized interlinear indexes before uninstalling BHG', async () => {
+    await deleteDownloadedItem(createDownloadedItemDeletionPlan('bible:BHG'))
+
+    expect(mockRemoveInterlinearSidecar).toHaveBeenCalledWith('fr')
+    expect(mockRemoveInterlinearSidecar).toHaveBeenCalledWith('en')
+    expect(mockRemoveBibleVersion).toHaveBeenCalledWith('BHG')
+  })
+
+  it('removes one localized interlinear index without removing BHG', async () => {
+    await deleteDownloadedItem(createDownloadedItemDeletionPlan('bible-interlinear:BHG:en'))
+
+    expect(mockRemoveInterlinearSidecar).toHaveBeenCalledWith('en')
     expect(mockRemoveBibleVersion).not.toHaveBeenCalled()
   })
 

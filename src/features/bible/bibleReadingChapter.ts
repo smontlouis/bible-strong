@@ -8,6 +8,8 @@ import {
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import type { VersionCode } from '~state/tabs'
 import type { StrongMode } from '~helpers/strongBiblePublications'
+import type { InterlinearMode } from '~helpers/interlinearBiblePublications'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
 import type { ParallelVerse } from './BibleDOM/BibleDOMWrapper'
 
 export type CommentsByVerse = Record<string, string>
@@ -18,6 +20,8 @@ export interface BibleReadingChapterRequest {
   chapter: number
   version: VersionCode
   strongMode?: StrongMode
+  interlinearMode?: InterlinearMode
+  interlinearLocale?: ResourceLanguage
 }
 
 export interface BibleReadingExtrasRequest extends BibleReadingChapterRequest {
@@ -32,12 +36,26 @@ export interface BibleReadingMainResult {
 }
 
 export const loadBibleReadingMain = async (
-  { book, chapter, version, strongMode }: BibleReadingChapterRequest,
+  {
+    book,
+    chapter,
+    version,
+    strongMode,
+    interlinearMode,
+    interlinearLocale,
+  }: BibleReadingChapterRequest,
   resourceAccess: ResourceAccessRegistry = defaultResourceAccess
 ): Promise<BibleReadingMainResult> => {
   const [pericope, mainResult] = await Promise.all([
     resourceAccess.bibleReading.loadPericope(version),
-    resourceAccess.bibleContent.loadChapter({ book, chapter, version, strongMode }),
+    resourceAccess.bibleContent.loadChapter({
+      book,
+      chapter,
+      version,
+      strongMode,
+      interlinearMode,
+      interlinearLocale,
+    }),
   ])
 
   return {

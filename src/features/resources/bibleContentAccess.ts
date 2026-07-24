@@ -18,6 +18,9 @@ import {
   type StrongMode,
 } from '~helpers/strongBiblePublications'
 import { loadStrongBibleChapterSpans } from '~helpers/strongBibleSidecar'
+import type { InterlinearMode } from '~helpers/interlinearBiblePublications'
+import { loadInterlinearChapterTokens } from '~helpers/interlinearBibleSidecar'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
 
 export type InterlinearVerse = {
   Texte: string
@@ -36,6 +39,8 @@ export type BibleChapterRequest = {
   chapter: number
   version: string
   strongMode?: StrongMode
+  interlinearMode?: InterlinearMode
+  interlinearLocale?: ResourceLanguage
 }
 
 export type BibleContentAccess = {
@@ -53,6 +58,7 @@ type BibleContentAccessDependencies = {
   isStrongDatabaseInitialized: () => boolean
   logError: (message: string, error: unknown) => void
   loadStrongBibleChapterSpans?: typeof loadStrongBibleChapterSpans
+  loadInterlinearChapterTokens?: typeof loadInterlinearChapterTokens
 }
 
 const defaultDependencies: BibleContentAccessDependencies = {
@@ -64,6 +70,7 @@ const defaultDependencies: BibleContentAccessDependencies = {
   isStrongDatabaseInitialized: () => Boolean(strongDB.get()),
   logError: (message, error) => console.log(message, error),
   loadStrongBibleChapterSpans,
+  loadInterlinearChapterTokens,
 }
 
 const hasNoChapterRows = (result: unknown): boolean =>
@@ -123,6 +130,30 @@ const loadRegularBibleChapter = async (
   const verses = await dependencies.getChapterVerses(request.version, request.book, request.chapter)
   if (verses.length === 0) {
     return errorResult(await buildNoVersesError(request, dependencies))
+  }
+
+  if (
+    request.version === 'BHG' &&
+    request.interlinearMode === 'visible' &&
+    dependencies.loadInterlinearChapterTokens
+  ) {
+    try {
+      const tokensByVerse = await dependencies.loadInterlinearChapterTokens(
+        'BHG',
+        request.interlinearLocale ?? 'fr',
+        request.book,
+        request.chapter
+      )
+      return successResult(
+        verses.map(verse => ({
+          ...verse,
+          InterlinearTokens: tokensByVerse[Number(verse.Verset)] ?? [],
+        }))
+      )
+    } catch (error) {
+      dependencies.logError('[BibleContentAccess] Interlinear sidecar unavailable:', error)
+      return successResult(verses)
+    }
   }
 
   if (

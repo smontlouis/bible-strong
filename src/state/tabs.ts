@@ -24,6 +24,8 @@ import {
   type StrongBibleVersionId,
   type StrongMode,
 } from '~helpers/strongBiblePublications'
+import type { InterlinearMode } from '~helpers/interlinearBiblePublications'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
 
 // ============================================================================
 // SHARED BIBLE DOM (single WebView instance for all Bible tabs)
@@ -61,6 +63,9 @@ export interface BibleTab extends TabBase {
     strongMode?: StrongMode
     pendingStrongModeVersionId?: StrongBibleVersionId
     strongBibleSourceVersionId?: StrongBibleVersionId
+    interlinearMode?: InterlinearMode
+    interlinearLocale?: ResourceLanguage
+    pendingInterlinearDownload?: boolean
     selectedBook: Book
     selectedChapter: number
     selectedVerse: number
@@ -245,6 +250,7 @@ export const getDefaultBibleTab = (version?: VersionCode): BibleTab => ({
   data: {
     selectedVersion: version || getDefaultBibleVersion(getLanguage()),
     strongMode: 'hidden',
+    interlinearMode: 'hidden',
     selectedBook: { Numero: 1, Nom: 'Genèse', Chapitres: 50 },
     selectedChapter: 1,
     selectedVerse: 1,
@@ -760,6 +766,36 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
       })
     )
 
+  const setInterlinearMode = (
+    interlinearMode: InterlinearMode,
+    interlinearLocale?: ResourceLanguage
+  ) =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.interlinearMode = interlinearMode
+        if (interlinearLocale) draft.data.interlinearLocale = interlinearLocale
+      })
+    )
+
+  const setPendingInterlinearDownload = (pendingInterlinearDownload: boolean) =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.pendingInterlinearDownload = pendingInterlinearDownload
+      })
+    )
+
+  const finishPendingInterlinearDownload = (locale: ResourceLanguage, succeeded: boolean) =>
+    setBibleTab(
+      produce(draft => {
+        if (!draft.data.pendingInterlinearDownload) return
+        draft.data.pendingInterlinearDownload = false
+        if (succeeded && draft.data.selectedVersion === 'BHG') {
+          draft.data.interlinearMode = 'visible'
+          draft.data.interlinearLocale = locale
+        }
+      })
+    )
+
   const setPendingStrongModeVersion = (versionId?: StrongBibleVersionId) =>
     setBibleTab(
       produce(draft => {
@@ -1090,6 +1126,9 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   return {
     setSelectedVersion,
     setStrongMode,
+    setInterlinearMode,
+    setPendingInterlinearDownload,
+    finishPendingInterlinearDownload,
     setPendingStrongModeVersion,
     finishPendingStrongModeDownload,
     setSelectedBook,

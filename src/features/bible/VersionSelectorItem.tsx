@@ -32,6 +32,10 @@ import { store } from '~redux/store'
 import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
 import StrongIndexSelectorItem from './StrongIndexSelectorItem'
 import StrongMark from './StrongMark'
+import { isInterlinearCapableBibleVersion } from '~helpers/interlinearBiblePublications'
+import InterlinearIndexSelectorItem from './InterlinearIndexSelectorItem'
+import InterlinearMark from './InterlinearMark'
+import { removeInterlinearSidecar } from '~helpers/interlinearBibleSidecar'
 
 const VersionItemContainer = ({
   children,
@@ -88,6 +92,12 @@ const VersionIdentity = ({
   onToggleStrongIndex,
   strongToggleLabel,
   strongAttribution,
+  showInterlinearCapability,
+  isInterlinearIndexAvailable,
+  isInterlinearIndexExpanded,
+  onToggleInterlinearIndex,
+  interlinearToggleLabel,
+  interlinearAttribution,
 }: {
   version: Version & { displayName?: string }
   color: string
@@ -103,6 +113,12 @@ const VersionIdentity = ({
   onToggleStrongIndex?: () => void
   strongToggleLabel?: string
   strongAttribution?: string
+  showInterlinearCapability?: boolean
+  isInterlinearIndexAvailable?: boolean
+  isInterlinearIndexExpanded?: boolean
+  onToggleInterlinearIndex?: () => void
+  interlinearToggleLabel?: string
+  interlinearAttribution?: string
 }) => (
   <Box flex>
     <Text color={color} fontSize={12} opacity={0.5} bold>
@@ -147,6 +163,36 @@ const VersionIdentity = ({
             <StrongMark highlighted={isStrongIndexAvailable} />
           </Box>
         ))}
+      {showCapabilities &&
+        showInterlinearCapability &&
+        (!isInterlinearIndexAvailable && onToggleInterlinearIndex ? (
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel={interlinearToggleLabel}
+            accessibilityState={{ expanded: isInterlinearIndexExpanded }}
+            onPress={event => {
+              event.stopPropagation()
+              onToggleInterlinearIndex()
+            }}
+          >
+            <Box width={38} height={28} center ml={5} overflow="visible">
+              <Box position="relative" width={22} height={24} center overflow="visible">
+                <InterlinearMark highlighted={false} />
+                <Box position="absolute" width={16} height={16} center right={-10} bottom={0}>
+                  <FeatherIcon
+                    name={isInterlinearIndexExpanded ? 'chevron-up' : 'chevron-down'}
+                    size={12}
+                    color="tertiary"
+                  />
+                </Box>
+              </Box>
+            </Box>
+          </TouchableOpacity>
+        ) : (
+          <Box ml={5}>
+            <InterlinearMark highlighted={isInterlinearIndexAvailable} />
+          </Box>
+        ))}
     </HStack>
     {showPublicationDetails && (
       <Text
@@ -162,6 +208,11 @@ const VersionIdentity = ({
     {showPublicationDetails && isStrongIndexAvailable && strongAttribution && (
       <Text color={color} fontSize={10} opacity={0.5}>
         {strongAttribution}
+      </Text>
+    )}
+    {showPublicationDetails && isInterlinearIndexAvailable && interlinearAttribution && (
+      <Text color={color} fontSize={10} opacity={0.5}>
+        {interlinearAttribution}
       </Text>
     )}
   </Box>
@@ -195,6 +246,8 @@ const VersionSelectorItem = ({
   const [versionNeedsDownload, setVersionNeedsDownload] = React.useState<boolean>()
   const [isStrongIndexAvailable, setStrongIndexAvailable] = React.useState<boolean>()
   const [isStrongIndexExpanded, setStrongIndexExpanded] = React.useState(false)
+  const [isInterlinearIndexAvailable, setInterlinearIndexAvailable] = React.useState<boolean>()
+  const [isInterlinearIndexExpanded, setInterlinearIndexExpanded] = React.useState(false)
   const needsUpdate = useSelector((state: RootState) => state.user.needsUpdate[version.id])
   const dispatch = useDispatch()
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
@@ -213,6 +266,12 @@ const VersionSelectorItem = ({
   const strongToggleLabel = isStrongIndexExpanded
     ? t('versionSelector.hideStrongIndex', { bible: version.id })
     : t('versionSelector.showStrongIndex', { bible: version.id })
+  const showInterlinearCapability = showStrongIndex && isInterlinearCapableBibleVersion(version.id)
+  const showInterlinearDependency = showInterlinearCapability && !isInterlinearIndexAvailable
+  const toggleInterlinearIndex = () => setInterlinearIndexExpanded(expanded => !expanded)
+  const interlinearToggleLabel = isInterlinearIndexExpanded
+    ? t('versionSelector.hideInterlinearIndex')
+    : t('versionSelector.showInterlinearIndex')
   const openSourceUrl = () => {
     if (version.sourceUrl) {
       Linking.openURL(version.sourceUrl)
@@ -259,11 +318,16 @@ const VersionSelectorItem = ({
 
   React.useEffect(() => {
     setStrongIndexExpanded(false)
+    setInterlinearIndexExpanded(false)
   }, [strongCollapseKey])
 
   React.useEffect(() => {
     if (isStrongIndexAvailable) setStrongIndexExpanded(false)
   }, [isStrongIndexAvailable])
+
+  React.useEffect(() => {
+    if (isInterlinearIndexAvailable) setInterlinearIndexExpanded(false)
+  }, [isInterlinearIndexAvailable])
 
   const updateVersion = async () => {
     await deleteVersion()
@@ -318,6 +382,10 @@ const VersionSelectorItem = ({
 
     if (JSON.stringify(tabs) !== JSON.stringify(updatedTabs)) {
       jotaiStore.set(tabsAtom, updatedTabs)
+    }
+
+    if (version.id === 'BHG') {
+      await Promise.all([removeInterlinearSidecar('fr'), removeInterlinearSidecar('en')])
     }
 
     if (isStrongVersion(version.id)) {
@@ -396,7 +464,12 @@ const VersionSelectorItem = ({
   if (versionNeedsDownload) {
     return (
       <Box>
-        <VersionItemContainer hasDependency={showStrongDependency && isStrongIndexExpanded}>
+        <VersionItemContainer
+          hasDependency={
+            (showStrongDependency && isStrongIndexExpanded) ||
+            (showInterlinearDependency && isInterlinearIndexExpanded)
+          }
+        >
           <Box flex row alignItems="center">
             <Box disabled flex>
               <VersionIdentity
@@ -414,6 +487,14 @@ const VersionSelectorItem = ({
                 onToggleStrongIndex={showStrongDependency ? toggleStrongIndex : undefined}
                 strongToggleLabel={strongToggleLabel}
                 strongAttribution={t('versionSelector.strongAttribution')}
+                showInterlinearCapability={showInterlinearCapability}
+                isInterlinearIndexAvailable={isInterlinearIndexAvailable}
+                isInterlinearIndexExpanded={isInterlinearIndexExpanded}
+                onToggleInterlinearIndex={
+                  showInterlinearDependency ? toggleInterlinearIndex : undefined
+                }
+                interlinearToggleLabel={interlinearToggleLabel}
+                interlinearAttribution={t('versionSelector.interlinearAttribution')}
               />
             </Box>
             {!isLoading && !isQueued && version.id !== 'LSGS' && version.id !== 'KJVS' && (
@@ -445,6 +526,13 @@ const VersionSelectorItem = ({
             onAvailabilityChange={setStrongIndexAvailable}
           />
         )}
+        {showInterlinearCapability && (
+          <InterlinearIndexSelectorItem
+            locale={lang}
+            expanded={isInterlinearIndexExpanded}
+            onAvailabilityChange={setInterlinearIndexAvailable}
+          />
+        )}
       </Box>
     )
   }
@@ -472,7 +560,10 @@ const VersionSelectorItem = ({
     <Box>
       <VersionItemContainer
         needsUpdate={needsUpdate}
-        hasDependency={showStrongDependency && isStrongIndexExpanded}
+        hasDependency={
+          (showStrongDependency && isStrongIndexExpanded) ||
+          (showInterlinearDependency && isInterlinearIndexExpanded)
+        }
         onPress={() => onChange && onChange(version.id)}
       >
         <Box flex row alignItems="center">
@@ -491,6 +582,14 @@ const VersionSelectorItem = ({
             onToggleStrongIndex={showStrongDependency ? toggleStrongIndex : undefined}
             strongToggleLabel={strongToggleLabel}
             strongAttribution={t('versionSelector.strongAttribution')}
+            showInterlinearCapability={showInterlinearCapability}
+            isInterlinearIndexAvailable={isInterlinearIndexAvailable}
+            isInterlinearIndexExpanded={isInterlinearIndexExpanded}
+            onToggleInterlinearIndex={
+              showInterlinearDependency ? toggleInterlinearIndex : undefined
+            }
+            interlinearToggleLabel={interlinearToggleLabel}
+            interlinearAttribution={t('versionSelector.interlinearAttribution')}
           />
           {renderSelectionCheckbox()}
           {!showSelectionCheckbox && renderSelectedIndicator()}
@@ -501,6 +600,13 @@ const VersionSelectorItem = ({
           versionId={strongVersionId}
           expanded={isStrongIndexExpanded}
           onAvailabilityChange={setStrongIndexAvailable}
+        />
+      )}
+      {showInterlinearCapability && (
+        <InterlinearIndexSelectorItem
+          locale={lang}
+          expanded={isInterlinearIndexExpanded}
+          onAvailabilityChange={setInterlinearIndexAvailable}
         />
       )}
     </Box>

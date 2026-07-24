@@ -216,6 +216,8 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     data: {
       selectedVersion: version,
       strongMode,
+      interlinearMode,
+      interlinearLocale,
       selectedBook: book,
       selectedChapter: chapter,
       selectedVerse: verse,
@@ -396,6 +398,8 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
       chapter,
       version,
       strongMode,
+      interlinearMode,
+      interlinearLocale: interlinearLocale ?? lang,
     })
 
     // If main Bible version fails, set error and stop
@@ -503,6 +507,8 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     chapter,
     version,
     strongMode,
+    interlinearMode,
+    interlinearLocale,
     parallelVersionsKey,
     settings.commentsDisplay,
     bibleDataRefreshSignal,

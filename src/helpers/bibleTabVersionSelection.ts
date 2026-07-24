@@ -1,5 +1,6 @@
 import type { BibleTab, VersionCode } from '~state/tabs'
 import { resolveStrongBibleVersion } from './strongBiblePublications'
+import { isInterlinearCapableBibleVersion } from './interlinearBiblePublications'
 
 export const selectBibleTabVersion = (
   data: BibleTab['data'],
@@ -10,6 +11,7 @@ export const selectBibleTabVersion = (
     ...data,
     selectedVersion: resolved.versionId as VersionCode,
     strongMode: resolved.strongMode,
+    interlinearMode: isInterlinearCapableBibleVersion(resolved.versionId) ? 'hidden' : undefined,
     ...(data.entityReference && {
       entityReference: {
         ...data.entityReference,

@@ -1,6 +1,10 @@
 import { atom } from 'jotai/vanilla'
 import type { ResourceLanguage, DatabaseId } from '~helpers/databaseTypes'
 import type { StrongBiblePublication } from '~helpers/strongBiblePublications'
+import type {
+  InterlinearBiblePublication,
+  InterlinearPublicationArtifact,
+} from '~helpers/interlinearBiblePublications'
 
 // ---------------------------------------------------------------------------
 // Per-item lookup atom factory
@@ -12,7 +16,12 @@ import type { Atom } from 'jotai/vanilla'
 // Types
 // ---------------------------------------------------------------------------
 
-export type DownloadItemType = 'bible' | 'bible-strong' | 'bible-strong-sidecar' | 'database'
+export type DownloadItemType =
+  | 'bible'
+  | 'bible-strong'
+  | 'bible-strong-sidecar'
+  | 'bible-interlinear-sidecar'
+  | 'database'
 
 export interface DownloadItem {
   /** Unique identifier, e.g. "bible:LSG", "database:STRONG:fr" */
@@ -28,8 +37,11 @@ export interface DownloadItem {
   hasRedWords?: boolean
   hasPericope?: boolean
   canonicalArtifact?: StrongBiblePublication['canonical']
+  archiveArtifact?: InterlinearPublicationArtifact
   strongArtifact?: StrongBiblePublication['strong']
   strongDatasetId?: StrongBiblePublication['datasetId']
+  interlinearArtifact?: InterlinearPublicationArtifact
+  interlinearDatasetId?: InterlinearBiblePublication['datasetId']
   /** Item that must complete before this one can be processed. */
   dependsOnId?: string
   addedAt: number

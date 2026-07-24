@@ -630,6 +630,13 @@ export function getBibleVersionMetadata(version: string): Promise<BibleVersionMe
 export interface InsertBibleOptions {
   onInsertProgress?: (progress: number) => void
   isCancelled?: () => boolean
+  publicationMetadata?: {
+    textRevision: string
+    textSha256: string
+    sourceSha256?: string
+    schemaVersion: number
+    verseCount: number
+  }
 }
 
 export function insertBibleVersion(
@@ -703,6 +710,14 @@ export function insertBibleVersion(
         )
       }
       if (
+        options?.publicationMetadata &&
+        allRows.length !== options.publicationMetadata.verseCount
+      ) {
+        throw new Error(
+          `BIBLE_PUBLICATION_VERSE_COUNT_MISMATCH:${allRows.length}:${options.publicationMetadata.verseCount}`
+        )
+      }
+      if (
         canonicalPublication?.noteCount !== undefined &&
         canonicalNoteCount !== canonicalPublication.noteCount
       ) {
@@ -749,6 +764,7 @@ export function insertBibleVersion(
       )
 
       // Record metadata
+      const publicationMetadata = canonicalPublication ?? options?.publicationMetadata
       await d.runAsync(
         `INSERT INTO versions_meta(
            version, installed_at, verse_count, text_revision,
@@ -758,10 +774,10 @@ export function insertBibleVersion(
           version,
           Date.now(),
           totalCount,
-          canonicalPublication?.textRevision ?? null,
-          canonicalPublication?.textSha256 ?? null,
-          canonicalPublication?.sourceSha256 ?? null,
-          canonicalPublication?.schemaVersion ?? null,
+          publicationMetadata?.textRevision ?? null,
+          publicationMetadata?.textSha256 ?? null,
+          publicationMetadata?.sourceSha256 ?? null,
+          publicationMetadata?.schemaVersion ?? null,
         ]
       )
     })

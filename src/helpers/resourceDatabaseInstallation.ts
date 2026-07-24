@@ -9,6 +9,7 @@ import type { DatabaseId } from '~helpers/databaseTypes'
 import type { DownloadItem } from '~state/downloadQueue'
 import { installStrongBibleSidecar } from './strongBibleSidecar'
 import type { StrongBibleVersionId } from './strongBiblePublications'
+import { installInterlinearSidecar } from './interlinearBibleSidecar'
 
 export interface ResourceInstallationCallbacks {
   onDownloadProgress: (progress: number) => void
@@ -56,6 +57,7 @@ const installBible = async (item: DownloadItem, callbacks: ResourceInstallationC
     },
     isCancelled: callbacks.isCancelled,
     canonicalArtifact: item.canonicalArtifact,
+    archiveArtifact: item.archiveArtifact,
   })
 
   callbacks.onResumable(null)
@@ -97,6 +99,29 @@ const installBibleStrongSidecar = async (
   })
 }
 
+const installBibleInterlinearSidecar = async (
+  item: DownloadItem,
+  callbacks: ResourceInstallationCallbacks
+) => {
+  if (
+    !item.lang ||
+    !item.interlinearArtifact ||
+    item.interlinearDatasetId !== 'STEP' ||
+    item.url !== item.interlinearArtifact.url
+  ) {
+    throw new Error(`INVALID_INTERLINEAR_DOWNLOAD_ITEM:${item.id}`)
+  }
+  await installInterlinearSidecar(item.lang, item.interlinearArtifact, item.interlinearDatasetId, {
+    onDownloadProgress: ({ totalBytesWritten }) => {
+      callbacks.onDownloadProgress(Math.min(totalBytesWritten / item.estimatedSize, 1))
+    },
+    onResumable: callbacks.onResumable,
+    onStatusInserting: callbacks.onStatusInserting,
+    onInsertProgress: callbacks.onInsertProgress,
+    isCancelled: callbacks.isCancelled,
+  })
+}
+
 export const installResourceDatabaseItem = async (
   item: DownloadItem,
   callbacks: ResourceInstallationCallbacks
@@ -110,6 +135,9 @@ export const installResourceDatabaseItem = async (
       break
     case 'bible-strong-sidecar':
       await installBibleStrongSidecar(item, callbacks)
+      break
+    case 'bible-interlinear-sidecar':
+      await installBibleInterlinearSidecar(item, callbacks)
       break
     case 'database':
       await installDatabase(item, callbacks)

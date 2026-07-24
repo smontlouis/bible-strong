@@ -60,6 +60,8 @@ import { shouldShowBibleBackButton } from './bibleHeaderNavigation'
 import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
 import { getStrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
 import {
+  createInterlinearSidecarDownloadItem,
+  createInterlinearSidecarDownloadPlan,
   createStrongSidecarDownloadPlan,
   createStrongSidecarDownloadItem,
 } from '~helpers/downloadItemFactory'
@@ -67,6 +69,10 @@ import { downloadManager } from '~helpers/downloadManager'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import StrongMark from './StrongMark'
 import { getStrongModeDownloadPresentation } from './strongModeDownloadState'
+import { isInterlinearCapableBibleVersion } from '~helpers/interlinearBiblePublications'
+import { getInterlinearSidecarAvailability } from '~helpers/interlinearBibleSidecar'
+import { getDownloadItemProgress } from '~state/downloadQueue'
+import InterlinearMark from './InterlinearMark'
 
 const STRONG_MODE_COMPLETION_HOLD_MS = 450
 
@@ -119,6 +125,7 @@ const Header = ({
   const bookmarkModalRef = useRef<SheetRef>(null)
   const exportSheetRef = useRef<SheetRef>(null)
   const strongModeToggleRequestRef = useRef(0)
+  const interlinearModeToggleRequestRef = useRef(0)
   const bible = useAtomValue(bibleAtom)
   const contextDisplayMode = getBibleContextDisplayMode(bible.data)
   const isContextFocused = contextDisplayMode === 'focused'
@@ -132,6 +139,9 @@ const Header = ({
     focusVerses,
     strongMode = 'hidden',
     pendingStrongModeVersionId,
+    interlinearMode = 'hidden',
+    interlinearLocale,
+    pendingInterlinearDownload,
   } = bible.data
   const bookNumber = book.Numero
   const bookName = book.Nom
@@ -147,6 +157,18 @@ const Header = ({
     strongMode === 'hidden' &&
     (strongDownloadPresentation.status === 'active' ||
       (pendingStrongModeVersionId === version && strongDownloadPresentation.status === 'completed'))
+  const activeInterlinearLocale = interlinearLocale ?? lang
+  const interlinearDownload = useDownloadItemStatus(
+    `bible-interlinear:BHG:${activeInterlinearLocale}`
+  )
+  const isInterlinearDownloadActive =
+    interlinearDownload?.status === 'queued' ||
+    interlinearDownload?.status === 'downloading' ||
+    interlinearDownload?.status === 'inserting'
+  const isInterlinearDownloadVisible =
+    interlinearMode === 'hidden' &&
+    (isInterlinearDownloadActive ||
+      (pendingInterlinearDownload && interlinearDownload?.status === 'completed'))
 
   // Check if verses are selected
   const hasSelectedVerses = selectedVerses && Object.keys(selectedVerses).length > 0
@@ -230,6 +252,48 @@ const Header = ({
       clearTimeout(timeout)
     }
   }, [actions, pendingStrongModeVersionId, strongDownloadPresentation.status, version])
+
+  useEffect(() => {
+    if (!pendingInterlinearDownload || version !== 'BHG') return
+    if (interlinearDownload?.status === 'failed') {
+      actions.finishPendingInterlinearDownload(activeInterlinearLocale, false)
+      return
+    }
+    if (isInterlinearDownloadActive) return
+
+    let cancelled = false
+    const completionObserved = interlinearDownload?.status === 'completed'
+    const timeout = setTimeout(
+      () => {
+        getInterlinearSidecarAvailability(activeInterlinearLocale)
+          .then(availability => {
+            if (cancelled) return
+            if (availability.status === 'available') {
+              actions.finishPendingInterlinearDownload(activeInterlinearLocale, true)
+            } else if (completionObserved) {
+              actions.finishPendingInterlinearDownload(activeInterlinearLocale, false)
+            }
+          })
+          .catch(() => {
+            if (!cancelled && completionObserved) {
+              actions.finishPendingInterlinearDownload(activeInterlinearLocale, false)
+            }
+          })
+      },
+      completionObserved ? STRONG_MODE_COMPLETION_HOLD_MS : 0
+    )
+    return () => {
+      cancelled = true
+      clearTimeout(timeout)
+    }
+  }, [
+    actions,
+    activeInterlinearLocale,
+    interlinearDownload?.status,
+    isInterlinearDownloadActive,
+    pendingInterlinearDownload,
+    version,
+  ])
 
   const { addParallelVersion, removeParallelVersion, removeAllParallelVersions } = actions
 
@@ -494,6 +558,77 @@ const Header = ({
     </AnimatedTouchableBox>
   ) : null
 
+  const toggleInterlinearMode = async () => {
+    if (!isInterlinearCapableBibleVersion(version) || isInterlinearDownloadVisible) return
+    const requestId = ++interlinearModeToggleRequestRef.current
+    const currentMode = getDefaultStore().get(bibleAtom).data.interlinearMode ?? 'hidden'
+    if (currentMode === 'visible') {
+      actions.setInterlinearMode('hidden', activeInterlinearLocale)
+      return
+    }
+    const availability = await getInterlinearSidecarAvailability(activeInterlinearLocale)
+    if (requestId !== interlinearModeToggleRequestRef.current) return
+    if (availability.status === 'available') {
+      actions.setInterlinearMode('visible', activeInterlinearLocale)
+      return
+    }
+    const sizeMb = Math.ceil(
+      createInterlinearSidecarDownloadItem(activeInterlinearLocale).estimatedSize / 1_000_000
+    )
+    Alert.alert(
+      t('Mode interlinéaire'),
+      t('L’index interlinéaire n’est pas encore installé. Télécharger environ {{size}} Mo ?', {
+        size: sizeMb,
+      }),
+      [
+        { text: t('Annuler'), style: 'cancel' },
+        {
+          text: t('Télécharger'),
+          onPress: () => {
+            actions.setInterlinearMode('hidden', activeInterlinearLocale)
+            actions.setPendingInterlinearDownload(true)
+            downloadManager.enqueue(
+              createInterlinearSidecarDownloadPlan(activeInterlinearLocale, availability.status)
+            )
+          },
+        },
+      ]
+    )
+  }
+
+  const interlinearModeButton = isInterlinearCapableBibleVersion(version) ? (
+    <AnimatedTouchableBox
+      onPress={toggleInterlinearMode}
+      disabled={isInterlinearDownloadVisible}
+      center
+      width={40}
+      height={40}
+      accessibilityRole="button"
+      accessibilityLabel={
+        isInterlinearDownloadVisible
+          ? t('Téléchargement en cours')
+          : interlinearMode === 'visible'
+            ? t('Masquer le mode interlinéaire')
+            : t('Afficher le mode interlinéaire')
+      }
+      accessibilityState={{
+        disabled: isInterlinearDownloadVisible,
+        selected: interlinearMode === 'visible',
+      }}
+      style={opacityTransitionStyle}
+    >
+      {isInterlinearDownloadVisible && interlinearDownload ? (
+        <Progress
+          progress={Math.max(getDownloadItemProgress(interlinearDownload), 0.04)}
+          size={22}
+          thickness={2.5}
+        />
+      ) : (
+        <InterlinearMark highlighted={interlinearMode === 'visible'} />
+      )}
+    </AnimatedTouchableBox>
+  ) : null
+
   if (annotationModeEnabled) {
     return (
       <AnimatedVStack
@@ -659,6 +794,7 @@ const Header = ({
                   />
                 </Box>
                 {strongModeButton}
+                {interlinearModeButton}
                 <MenuView
                   actions={focusMenuActions}
                   onPressAction={({ nativeEvent }) => {
@@ -832,6 +968,7 @@ const Header = ({
                 )}
 
                 {strongModeButton}
+                {interlinearModeButton}
 
                 {/* Three-dots menu */}
                 <MenuView

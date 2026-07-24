@@ -157,6 +157,7 @@ export interface Verse {
       code: string
     }[]
   }[]
+  InterlinearTokens?: import('~helpers/interlinearBibleSidecar').InterlinearToken[]
 }
 
 export interface Pericope {
