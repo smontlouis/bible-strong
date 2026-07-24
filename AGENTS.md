@@ -149,26 +149,21 @@ The app uses environment-based builds with different Firebase configurations:
 
 ```typescript
 // Typical screen component
-import styled from '@emotion/native'
-import { useTheme } from '@emotion/react'
 import { useSelector, useDispatch } from 'react-redux'
+import Box from '~common/ui/Box'
+import Text from '~common/ui/Text'
 
 const MyScreen = () => {
-  const theme = useTheme()
   const dispatch = useDispatch()
   const userData = useSelector(state => state.user)
 
   return (
-    <Container>
+    <Box flex={1} bg="lightGrey">
+      <Text>{userData.displayName}</Text>
       {/* content */}
-    </Container>
+    </Box>
   )
 }
-
-const Container = styled.View(({ theme }) => ({
-  flex: 1,
-  backgroundColor: theme.colors.lightGrey,
-}))
 ```
 
 ### State Management Rules
@@ -280,7 +275,7 @@ const MyComponent = () => { /* ... */ }
 
 ## Layout Components (Box, HStack, VStack)
 
-Prefer layout components over StyleSheet for styling:
+Prefer layout components over `StyleSheet` or new `styled` wrappers:
 
 ```typescript
 // ❌ Avoid StyleSheet
@@ -297,7 +292,7 @@ const styles = StyleSheet.create({
 </View>
 
 // ✅ Use Box, HStack, VStack
-import { Box, HStack, VStack } from '~common/ui'
+import Box, { HStack, VStack } from '~common/ui/Box'
 
 <HStack flex={1} p={16}>
   <Box mr={8}><Text>Item 1</Text></Box>
@@ -309,6 +304,8 @@ import { Box, HStack, VStack } from '~common/ui'
 - **Box**: Base container with style props (p, m, flex, bg, etc.)
 - **HStack**: Horizontal layout (flexDirection: 'row')
 - **VStack**: Vertical layout (flexDirection: 'column')
+
+Do not introduce `styled` in feature code when these primitives can express the design. Extend or add a shared primitive under `src/common/ui/` for reusable gaps. Rare feature-level exceptions must explain the missing primitive with `// harness-allow-styled: <reason>`. Run `yarn agents:styles:check` for UI changes.
 
 ## Reanimated 4 Best Practices
 

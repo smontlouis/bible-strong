@@ -1,11 +1,9 @@
-import * as Icon from '@expo/vector-icons'
 import * as FileSystem from 'expo-file-system/legacy'
 import React from 'react'
 import { Alert, Linking, TouchableOpacity } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { dbManager } from '~helpers/sqlite'
 
-import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import { useAtomValue } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
@@ -15,6 +13,7 @@ import Box from '~common/ui/Box'
 import Checkbox from '~common/ui/Checkbox'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
+import Text from '~common/ui/Text'
 import { getIfVersionNeedsDownload, isStrongVersion, Version } from '~helpers/bibleVersions'
 import { isVersionInstalled, removeBibleVersion } from '~helpers/biblesDb'
 import { requireBiblePath } from '~helpers/requireBiblePath'
@@ -36,24 +35,33 @@ import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
 import StrongIndexSelectorItem from './StrongIndexSelectorItem'
 import StrongMark from './StrongMark'
 
-const Container = styled.View<{ needsUpdate?: boolean; hasDependency?: boolean }>(
-  ({ needsUpdate, hasDependency, theme }) => ({
-    minHeight: 76,
-    paddingLeft: 20,
-    paddingRight: 4,
-    paddingVertical: 12,
-    borderBottomWidth: hasDependency ? 0 : 1,
-    borderBottomColor: theme.colors.border,
-    ...(needsUpdate
-      ? {
-          borderLeftColor: theme.colors.success,
-          borderLeftWidth: 5,
-        }
-      : {}),
-  })
-)
+const VersionItemContainer = ({
+  children,
+  needsUpdate,
+  hasDependency,
+  onPress,
+}: React.PropsWithChildren<{
+  needsUpdate?: boolean
+  hasDependency?: boolean
+  onPress?: () => void
+}>) => {
+  const content = (
+    <Box
+      minHeight={76}
+      pl={20}
+      pr={4}
+      py={12}
+      borderBottomWidth={hasDependency ? 0 : 1}
+      borderColor="border"
+      borderLeftWidth={needsUpdate ? 5 : 0}
+      borderLeftColor={needsUpdate ? 'success' : undefined}
+    >
+      {children}
+    </Box>
+  )
 
-const TouchableContainer = Container.withComponent(TouchableOpacity)
+  return onPress ? <TouchableOpacity onPress={onPress}>{content}</TouchableOpacity> : content
+}
 
 const ActionColumn = ({ children, opacity }: React.PropsWithChildren<{ opacity?: number }>) => (
   <Box width={48} minHeight={48} center opacity={opacity}>
@@ -67,39 +75,68 @@ const ActionButton = ({ children, onPress }: React.PropsWithChildren<{ onPress: 
   </TouchableOpacity>
 )
 
-const TextVersion = styled.Text<{ isSelected?: boolean }>(({ isSelected, theme }) => ({
-  color: isSelected ? theme.colors.primary : theme.colors.default,
-  fontSize: 12,
-  opacity: 0.5,
-  fontWeight: 'bold',
-}))
-
-const TextCopyright = styled.Text<{ isSelected?: boolean }>(({ isSelected, theme }) => ({
-  color: isSelected ? theme.colors.primary : theme.colors.default,
-  fontSize: 10,
-  backgroundColor: 'transparent',
-  opacity: 0.5,
-}))
-
-const TextSourceLink = styled(TextCopyright)(({ theme }) => ({
-  color: theme.colors.primary,
-  textDecorationLine: 'underline',
-  opacity: 0.75,
-}))
-
-const TextName = styled.Text<{ isSelected?: boolean }>(({ isSelected, theme }) => ({
-  color: isSelected ? theme.colors.primary : theme.colors.default,
-  fontSize: 16,
-  backgroundColor: 'transparent',
-}))
-
-const DeleteIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.quart,
-}))
-
-const UpdateIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.success,
-}))
+const VersionIdentity = ({
+  version,
+  color,
+  showPublicationDetails = false,
+  showCapabilities = false,
+  copyrightColor,
+  copyrightOpacity,
+  copyrightStyle,
+  onCopyrightPress,
+  showStrongCapability,
+  isStrongIndexAvailable,
+  strongAttribution,
+}: {
+  version: Version & { displayName?: string }
+  color: string
+  showPublicationDetails?: boolean
+  showCapabilities?: boolean
+  copyrightColor?: string
+  copyrightOpacity?: number
+  copyrightStyle?: { textDecorationLine: 'underline' }
+  onCopyrightPress?: () => void
+  showStrongCapability?: boolean
+  isStrongIndexAvailable?: boolean
+  strongAttribution?: string
+}) => (
+  <Box flex>
+    <Text color={color} fontSize={12} opacity={0.5} bold>
+      {version.id}
+    </Text>
+    <HStack alignItems="center">
+      <Text color={color} fontSize={16}>
+        {version.displayName || version.name}
+      </Text>
+      {showCapabilities && version.hasAudio && (
+        <Box ml={4}>
+          <FeatherIcon name="volume-2" size={16} color="primary" />
+        </Box>
+      )}
+      {showCapabilities && showStrongCapability && (
+        <Box ml={5}>
+          <StrongMark highlighted={isStrongIndexAvailable} />
+        </Box>
+      )}
+    </HStack>
+    {showPublicationDetails && (
+      <Text
+        color={copyrightColor}
+        fontSize={10}
+        opacity={copyrightOpacity}
+        onPress={onCopyrightPress}
+        style={copyrightStyle}
+      >
+        {version.c}
+      </Text>
+    )}
+    {showPublicationDetails && isStrongIndexAvailable && strongAttribution && (
+      <Text color="default" fontSize={10} opacity={0.5}>
+        {strongAttribution}
+      </Text>
+    )}
+  </Box>
+)
 
 interface Props {
   version: Version & { displayName?: string }
@@ -138,7 +175,6 @@ const VersionSelectorItem = ({
   const isLoading = queueState?.status === 'downloading' || queueState?.status === 'inserting'
   const isQueued = queueState?.status === 'queued'
   const downloadProgress = queueState?.downloadProgress ?? 0
-  const CopyrightText = version.sourceUrl ? TextSourceLink : TextCopyright
   const strongVersionId = isStrongCapableBibleVersion(version.id) ? version.id : undefined
   const showStrongCapability = showStrongIndex && Boolean(strongVersionId)
   const showStrongDependency = showStrongCapability && !isStrongIndexAvailable
@@ -147,6 +183,13 @@ const VersionSelectorItem = ({
       Linking.openURL(version.sourceUrl)
     }
   }
+
+  const versionColor = isSelected ? 'primary' : 'default'
+  const copyrightColor = version.sourceUrl ? 'primary' : versionColor
+  const copyrightOpacity = version.sourceUrl ? 0.75 : 0.5
+  const copyrightStyle = version.sourceUrl
+    ? { textDecorationLine: 'underline' as const }
+    : undefined
 
   const startDownload = () => {
     const item = createBibleDownloadItem(version.id)
@@ -300,29 +343,22 @@ const VersionSelectorItem = ({
   if (versionNeedsDownload) {
     return (
       <Box>
-        <Container hasDependency={showStrongDependency}>
+        <VersionItemContainer hasDependency={showStrongDependency}>
           <Box flex row alignItems="center">
             <Box disabled flex>
-              <TextVersion>{version.id}</TextVersion>
-              <HStack alignItems="center">
-                <TextName>{version.displayName || version.name}</TextName>
-                {version?.hasAudio && (
-                  <Box ml={4}>
-                    <FeatherIcon name="volume-2" size={16} color="primary" />
-                  </Box>
-                )}
-                {showStrongCapability && (
-                  <Box ml={5}>
-                    <StrongMark highlighted={isStrongIndexAvailable} />
-                  </Box>
-                )}
-              </HStack>
-              <CopyrightText onPress={version.sourceUrl ? openSourceUrl : undefined}>
-                {version.c}
-              </CopyrightText>
-              {isStrongIndexAvailable && (
-                <TextCopyright>{t('versionSelector.strongAttribution')}</TextCopyright>
-              )}
+              <VersionIdentity
+                version={version}
+                color="default"
+                showPublicationDetails
+                showCapabilities
+                copyrightColor={copyrightColor}
+                copyrightOpacity={copyrightOpacity}
+                copyrightStyle={copyrightStyle}
+                onCopyrightPress={version.sourceUrl ? openSourceUrl : undefined}
+                showStrongCapability={showStrongCapability}
+                isStrongIndexAvailable={isStrongIndexAvailable}
+                strongAttribution={t('versionSelector.strongAttribution')}
+              />
             </Box>
             {!isLoading && !isQueued && version.id !== 'LSGS' && version.id !== 'KJVS' && (
               <ActionButton onPress={startDownload}>
@@ -356,7 +392,7 @@ const VersionSelectorItem = ({
               </ActionColumn>
             )}
           </Box>
-        </Container>
+        </VersionItemContainer>
         {showStrongCapability && strongVersionId && (
           <StrongIndexSelectorItem
             versionId={strongVersionId}
@@ -369,60 +405,48 @@ const VersionSelectorItem = ({
 
   if (isParameters) {
     return (
-      <Container needsUpdate={needsUpdate}>
+      <VersionItemContainer needsUpdate={needsUpdate}>
         <Box flex row center>
-          <Box flex>
-            <TextVersion>{version.id}</TextVersion>
-            <TextName>{version.displayName || version.name}</TextName>
-          </Box>
+          <VersionIdentity version={version} color="default" />
           {needsUpdate ? (
             <TouchableOpacity onPress={updateVersion} style={{ padding: 10 }}>
-              <UpdateIcon name="download" size={18} />
+              <FeatherIcon name="download" size={18} color="success" />
             </TouchableOpacity>
           ) : version.id !== getDefaultBibleVersion(lang) ? (
             <TouchableOpacity onPress={confirmDelete} style={{ padding: 10 }}>
-              <DeleteIcon name="trash-2" size={18} />
+              <FeatherIcon name="trash-2" size={18} color="quart" />
             </TouchableOpacity>
           ) : null}
         </Box>
-      </Container>
+      </VersionItemContainer>
     )
   }
 
   return (
     <Box>
-      <TouchableContainer
+      <VersionItemContainer
         needsUpdate={needsUpdate}
         hasDependency={showStrongDependency}
         onPress={() => onChange && onChange(version.id)}
       >
         <Box flex row alignItems="center">
-          <Box flex>
-            <TextVersion isSelected={isSelected}>{version.id}</TextVersion>
-            <HStack alignItems="center">
-              <TextName isSelected={isSelected}>{version.displayName || version.name}</TextName>
-              {version?.hasAudio && (
-                <Box ml={4}>
-                  <FeatherIcon name="volume-2" size={16} color="primary" />
-                </Box>
-              )}
-              {showStrongCapability && (
-                <Box ml={5}>
-                  <StrongMark highlighted={isStrongIndexAvailable} />
-                </Box>
-              )}
-            </HStack>
-            <CopyrightText onPress={version.sourceUrl ? openSourceUrl : undefined}>
-              {version.c}
-            </CopyrightText>
-            {isStrongIndexAvailable && (
-              <TextCopyright>{t('versionSelector.strongAttribution')}</TextCopyright>
-            )}
-          </Box>
+          <VersionIdentity
+            version={version}
+            color={versionColor}
+            showPublicationDetails
+            showCapabilities
+            copyrightColor={copyrightColor}
+            copyrightOpacity={copyrightOpacity}
+            copyrightStyle={copyrightStyle}
+            onCopyrightPress={version.sourceUrl ? openSourceUrl : undefined}
+            showStrongCapability={showStrongCapability}
+            isStrongIndexAvailable={isStrongIndexAvailable}
+            strongAttribution={t('versionSelector.strongAttribution')}
+          />
           {renderSelectionCheckbox()}
           {!showSelectionCheckbox && <ActionColumn />}
         </Box>
-      </TouchableContainer>
+      </VersionItemContainer>
       {showStrongCapability && strongVersionId && (
         <StrongIndexSelectorItem
           versionId={strongVersionId}

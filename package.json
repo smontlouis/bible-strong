@@ -27,6 +27,7 @@
     "agents:start:logged": "node scripts/agents-start-logged.mjs",
     "agents:architecture": "node scripts/agents-architecture-lint.mjs",
     "agents:architecture:check": "node scripts/agents-architecture-lint.mjs --check",
+    "agents:styles:check": "node scripts/agents-style-lint.mjs",
     "agents:quality": "node scripts/agents-quality-report.mjs",
     "agents:quality:check": "node scripts/agents-quality-report.mjs --check",
     "agents:logs:clear": "node scripts/agents-log-session.mjs clear",
