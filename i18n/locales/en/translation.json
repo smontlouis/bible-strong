@@ -1002,7 +1002,7 @@
   "downloads.section.crossReferences": "Cross-references",
   "downloads.section.bibleEn": "English Bibles",
   "downloads.section.bibleFr": "French Bibles",
-  "downloads.section.bibleOther": "Original-language Bibles",
+  "downloads.section.bibleOriginal": "Original-language Bibles",
   "downloads.filter.all": "All",
   "downloads.filter.downloaded": "Downloaded",
   "downloads.filter.notDownloaded": "Not downloaded",

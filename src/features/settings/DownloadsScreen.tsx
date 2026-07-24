@@ -116,40 +116,35 @@ function buildSharedDatabaseItems(): UnifiedItem[] {
 }
 
 function buildBibleItems(versionList: Version[], appLang: string): UnifiedItem[] {
-  return versionList
-    .filter(v => v.id !== 'LSGS' && v.id !== 'KJVS') // Strong versions hidden in downloads
-    .flatMap(v => {
-      const displayName = appLang === 'en' && v.name_en ? v.name_en : v.name
-      const base: UnifiedItem = {
-        id: `bible:${v.id}`,
-        name: `${v.id}  ${displayName}`,
-        subtitle: v.c,
-        estimatedSize: isStrongVersion(v.id) ? 20_000_000 : 2_500_000,
-        lang: (v.type === 'en' ? 'en' : v.type === 'other' ? 'other' : 'fr') as
-          | 'fr'
-          | 'en'
-          | 'other',
-        searchText: `${v.id} ${v.name} ${v.name_en || ''} ${v.c || ''}`.toLowerCase(),
-      }
-      if (!isStrongCapableBibleVersion(v.id)) return [base]
-      const publication = getStrongBiblePublication(v.id)
-      return [
-        base,
-        {
-          id: `bible-strong:${v.id}`,
-          name: `${v.id}  ${displayName} — Strong`,
-          subtitle: 'Index Strong optionnel',
-          estimatedSize: publication.strong.archiveBytes,
-          lang: 'fr',
-          searchText: `${v.id} ${v.name} strong ${publication.datasetId}`.toLowerCase(),
-        },
-      ]
-    })
+  return versionList.flatMap(v => {
+    const displayName = appLang === 'en' && v.name_en ? v.name_en : v.name
+    const base: UnifiedItem = {
+      id: `bible:${v.id}`,
+      name: `${v.id}  ${displayName}`,
+      subtitle: v.c,
+      estimatedSize: isStrongVersion(v.id) ? 20_000_000 : 2_500_000,
+      lang: (v.type === 'en' ? 'en' : v.type === 'other' ? 'other' : 'fr') as 'fr' | 'en' | 'other',
+      searchText: `${v.id} ${v.name} ${v.name_en || ''} ${v.c || ''}`.toLowerCase(),
+    }
+    if (!isStrongCapableBibleVersion(v.id)) return [base]
+    const publication = getStrongBiblePublication(v.id)
+    return [
+      base,
+      {
+        id: `bible-strong:${v.id}`,
+        name: `${v.id}  ${displayName} — Strong`,
+        subtitle: 'Index Strong optionnel',
+        estimatedSize: publication.strong.archiveBytes,
+        lang: 'fr',
+        searchText: `${v.id} ${v.name} strong ${publication.datasetId}`.toLowerCase(),
+      },
+    ]
+  })
 }
 
 function buildAllSections(appLang: string, t: (key: string) => string): UnifiedSection[] {
   const allVersions = Object.values(versions) as Version[]
-  const bibleSections = buildBibleVersionGroups(allVersions).map(group => ({
+  const bibleSections = buildBibleVersionGroups(allVersions, appLang).map(group => ({
     key: group.key,
     title: t(group.titleKey),
     data: buildBibleItems(group.versions, appLang),
