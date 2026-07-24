@@ -11,6 +11,9 @@ export interface BibleVersionGroup {
 
 const ORIGINAL_LANGUAGES = new Set<Version['language']>(['he', 'grc', 'la'])
 
+export const getStrongIndexBibleName = (bibleName: string): string =>
+  bibleName.replace(/^Bible\s+/i, '')
+
 export const buildBibleVersionGroups = (
   versionList: Version[],
   appLanguage: string

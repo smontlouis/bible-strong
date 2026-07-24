@@ -27,6 +27,7 @@ interface DownloadableItemProps {
   isDownloaded?: boolean
   isDefault?: boolean
   needsUpdate?: boolean
+  variant?: 'standard' | 'dependency'
 }
 
 const formatSize = (
@@ -53,10 +54,12 @@ const DownloadableItem = ({
   isDownloaded,
   isDefault,
   needsUpdate,
+  variant = 'standard',
 }: DownloadableItemProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const queueState = useDownloadItemStatus(itemId)
+  const isDependency = variant === 'dependency'
 
   // Determine visual state
   const visualState = getVisualState({
@@ -101,16 +104,30 @@ const DownloadableItem = ({
       <Animated.View
         style={{
           paddingRight: 20,
-          paddingLeft: 45,
-          paddingVertical: 12,
+          paddingLeft: isDependency ? 78 : 45,
+          paddingVertical: isDependency ? 10 : 12,
           opacity: visualState === 'not-downloaded' ? 0.5 : 1,
           backgroundColor: visualState === 'selected' ? theme.colors.lightPrimary : 'transparent',
           borderLeftWidth: visualState === 'needs-update' ? 4 : 0,
           borderLeftColor: visualState === 'needs-update' ? theme.colors.success : 'transparent',
+          overflow: 'visible',
           transitionProperty: ['opacity', 'backgroundColor'],
           transitionDuration: 200,
         }}
       >
+        {isDependency ? (
+          <Box
+            pos="absolute"
+            top={-14}
+            left={52}
+            width={20}
+            height={36}
+            borderLeftWidth={2}
+            borderBottomWidth={2}
+            borderBottomLeftRadius={10}
+            borderColor="border"
+          />
+        ) : null}
         <Box row flex alignItems="center">
           {/* Checkbox in select mode */}
           {isSelectMode && (
@@ -128,7 +145,7 @@ const DownloadableItem = ({
 
           {/* Content */}
           <Box flex>
-            <Text fontSize={15} bold numberOfLines={1}>
+            <Text fontSize={isDependency ? 14 : 15} bold numberOfLines={1}>
               {name}
             </Text>
 

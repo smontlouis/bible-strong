@@ -1,5 +1,5 @@
 import type { Version } from '~helpers/bibleVersions'
-import { buildBibleVersionGroups } from '../downloadVersionGroups'
+import { buildBibleVersionGroups, getStrongIndexBibleName } from '../downloadVersionGroups'
 
 describe('buildBibleVersionGroups', () => {
   it('presents one French, one English, then one original-language Bible section', () => {
@@ -37,6 +37,14 @@ describe('buildBibleVersionGroups', () => {
     expect(englishIds).not.toContain('KJVS')
 
     expect(groups[2]!.versions.map(version => version.id)).toEqual(['BHS', 'SBLGNT', 'VUL'])
+  })
+
+  it.each([
+    ['Bible Segond 1910', 'Segond 1910'],
+    ['Bible Darby', 'Darby'],
+    ['Bible Darby révisée', 'Darby révisée'],
+  ])('names the Strong index as a dependency of %s', (bibleName, indexBibleName) => {
+    expect(getStrongIndexBibleName(bibleName)).toBe(indexBibleName)
   })
 })
 

@@ -53,7 +53,7 @@ import {
   createDownloadedItemDeletionPlan,
   deleteDownloadedItem,
 } from '~helpers/deleteDownloadedItem'
-import { buildBibleVersionGroups } from './downloadVersionGroups'
+import { buildBibleVersionGroups, getStrongIndexBibleName } from './downloadVersionGroups'
 
 // ---------------------------------------------------------------------------
 // Unified section item type
@@ -63,6 +63,7 @@ interface UnifiedItem {
   id: string // itemId for DownloadableItem, e.g. "bible:LSG" or "database:STRONG:fr"
   name: string
   subtitle?: string
+  parentItemId?: string
   estimatedSize: number
   lang: 'fr' | 'en' | 'other'
   searchText: string // for search filtering
@@ -112,7 +113,11 @@ function buildSharedDatabaseItems(): UnifiedItem[] {
   })
 }
 
-function buildBibleItems(versionList: Version[], appLang: string): UnifiedItem[] {
+function buildBibleItems(
+  versionList: Version[],
+  appLang: string,
+  t: (key: string, options?: Record<string, unknown>) => string
+): UnifiedItem[] {
   return versionList.flatMap(v => {
     const displayName = appLang === 'en' && v.name_en ? v.name_en : v.name
     const base: UnifiedItem = {
@@ -125,26 +130,32 @@ function buildBibleItems(versionList: Version[], appLang: string): UnifiedItem[]
     }
     if (!isStrongCapableBibleVersion(v.id)) return [base]
     const publication = getStrongBiblePublication(v.id)
+    const strongIndexBibleName = getStrongIndexBibleName(displayName)
     return [
       base,
       {
         id: `bible-strong:${v.id}`,
-        name: `${v.id}  ${displayName} — Strong`,
+        name: t('downloads.strongIndexName', { bible: strongIndexBibleName }),
         subtitle: 'Index Strong optionnel',
+        parentItemId: base.id,
         estimatedSize: publication.strong.archiveBytes,
         lang: 'fr',
-        searchText: `${v.id} ${v.name} strong ${publication.datasetId}`.toLowerCase(),
+        searchText:
+          `${v.id} ${v.name} ${strongIndexBibleName} strong index ${publication.datasetId}`.toLowerCase(),
       },
     ]
   })
 }
 
-function buildAllSections(appLang: string, t: (key: string) => string): UnifiedSection[] {
+function buildAllSections(
+  appLang: string,
+  t: (key: string, options?: Record<string, unknown>) => string
+): UnifiedSection[] {
   const allVersions = Object.values(versions) as Version[]
   const bibleSections = buildBibleVersionGroups(allVersions, appLang).map(group => ({
     key: group.key,
     title: t(group.titleKey),
-    data: buildBibleItems(group.versions, appLang),
+    data: buildBibleItems(group.versions, appLang, t),
   }))
 
   if (appLang === 'en') {
@@ -624,7 +635,7 @@ const DownloadsScreen = () => {
             />
           )
         }}
-        renderItem={({ item }) => {
+        renderItem={({ item, index, section }) => {
           const isDownloaded = downloadedSet.has(item.id)
           // Extract the raw database or version id for needsUpdate check
           let needsUpdateKey: string | undefined
@@ -642,6 +653,8 @@ const DownloadsScreen = () => {
           const strongStatusSubtitle = availability
             ? getStrongAvailabilityLabel(availability, t)
             : undefined
+          const isNestedDependency =
+            item.parentItemId !== undefined && section.data[index - 1]?.id === item.parentItemId
 
           return (
             <DownloadableItem
@@ -659,6 +672,7 @@ const DownloadsScreen = () => {
               isDownloaded={isDownloaded}
               isDefault={isDefault}
               needsUpdate={needsUpdateKey ? needsUpdateMap[needsUpdateKey] : false}
+              variant={isNestedDependency ? 'dependency' : 'standard'}
             />
           )
         }}
