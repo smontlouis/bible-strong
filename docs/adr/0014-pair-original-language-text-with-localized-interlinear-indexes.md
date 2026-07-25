@@ -40,6 +40,17 @@ including text between indexed tokens. It disables entry into word-annotation mo
 structure is not a one-to-one text rendering; simple BHG mode keeps the normal annotation contract.
 Psalm superscriptions published as verse zero remain addressable but render without a visible zero.
 
+BHG keeps one persisted display preference with four states: original text, detailed interlinear,
+original text with Strong identities, or continuous Latin transliteration. The legacy `visible`
+state remains readable and maps to detailed interlinear mode. Strong and transliteration are
+language-neutral and may use either compatible installed index.
+
+Gloss language is a separate persisted preference. Automatic follows the application language and
+may fall back to the other installed localized index. An explicit French or English choice never
+silently substitutes the other language: if its index is missing, the selector offers that index
+for download. A completed interlinear-index download invalidates currently displayed Bible data so
+the requested mode or newly available gloss language appears without navigating away.
+
 ## Consequences
 
 Users can download one compact original-language Bible and opt into only the interlinear language
@@ -49,4 +60,3 @@ is explicit rather than inferred from filenames.
 The app must maintain a second sidecar lifecycle alongside Strong sidecars and retain legacy
 interlinear loaders during the migration period. Any canonical source-text change requires new
 text-revision metadata and regenerated localized indexes.
-

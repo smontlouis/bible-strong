@@ -24,7 +24,7 @@ import {
   type StrongBibleVersionId,
   type StrongMode,
 } from '~helpers/strongBiblePublications'
-import type { InterlinearMode } from '~helpers/interlinearBiblePublications'
+import type { InterlinearDisplayMode, InterlinearMode } from '~helpers/interlinearBiblePublications'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 
 // ============================================================================
@@ -66,6 +66,8 @@ export interface BibleTab extends TabBase {
     interlinearMode?: InterlinearMode
     interlinearLocale?: ResourceLanguage
     pendingInterlinearDownload?: boolean
+    pendingInterlinearMode?: InterlinearDisplayMode
+    pendingInterlinearLocale?: ResourceLanguage
     selectedBook: Book
     selectedChapter: number
     selectedVerse: number
@@ -774,14 +776,24 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     setBibleTab(
       produce(draft => {
         draft.data.interlinearMode = interlinearMode
-        if (interlinearLocale) draft.data.interlinearLocale = interlinearLocale
+        draft.data.interlinearLocale = interlinearLocale
       })
     )
 
-  const setPendingInterlinearDownload = (pendingInterlinearDownload: boolean) =>
+  const setPendingInterlinearDownload = (
+    pendingInterlinearDownload: boolean,
+    pendingInterlinearMode: InterlinearDisplayMode = 'interlinear',
+    pendingInterlinearLocale?: ResourceLanguage
+  ) =>
     setBibleTab(
       produce(draft => {
         draft.data.pendingInterlinearDownload = pendingInterlinearDownload
+        draft.data.pendingInterlinearMode = pendingInterlinearDownload
+          ? pendingInterlinearMode
+          : undefined
+        draft.data.pendingInterlinearLocale = pendingInterlinearDownload
+          ? pendingInterlinearLocale
+          : undefined
       })
     )
 
@@ -789,10 +801,15 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     setBibleTab(
       produce(draft => {
         if (!draft.data.pendingInterlinearDownload) return
+        const isLegacyPendingDownload = !draft.data.pendingInterlinearMode
+        const pendingMode = draft.data.pendingInterlinearMode ?? 'interlinear'
+        const pendingLocale = draft.data.pendingInterlinearLocale
         draft.data.pendingInterlinearDownload = false
+        draft.data.pendingInterlinearMode = undefined
+        draft.data.pendingInterlinearLocale = undefined
         if (succeeded && draft.data.selectedVersion === 'BHG') {
-          draft.data.interlinearMode = 'visible'
-          draft.data.interlinearLocale = locale
+          draft.data.interlinearMode = pendingMode
+          draft.data.interlinearLocale = isLegacyPendingDownload ? locale : pendingLocale
         }
       })
     )

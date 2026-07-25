@@ -45,6 +45,7 @@ import {
   type CanonicalVersePresentationNode,
 } from './canonicalVersePresentation'
 import { getCanonicalBibleNoteLabel, type CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
+import { isInterlinearModeEnabled, type InterlinearMode } from '~helpers/interlinearDisplayMode'
 
 const VerseText = styled('span')<RootStyles & { isParallel?: boolean }>(
   ({ isParallel, settings: { fontSizeScale, lineHeight } }) => ({
@@ -458,6 +459,7 @@ interface Props {
   relationCount?: number
   relationItems?: VerseRelationItem[]
   version: string
+  interlinearMode?: InterlinearMode
   isHebreu: boolean
   selectedCode: SelectedCode | null
   isFocused?: boolean
@@ -501,6 +503,7 @@ const Verse = ({
   relationItems,
   isSelectionMode,
   version,
+  interlinearMode,
   isHebreu,
   selectedCode,
   isSelectedMode,
@@ -838,13 +841,16 @@ const Verse = ({
             id={`verse-text-${verseKey}`}
             data-verse-key={verseKey}
           >
-            {version === 'BHG' && verse.InterlinearTokens?.length ? (
+            {version === 'BHG' &&
+            isInterlinearModeEnabled(interlinearMode) &&
+            verse.InterlinearTokens?.length ? (
               <React.Suspense fallback={<>{verse.Texte}</>}>
                 <StructuredInterlinearVerse
                   isHebreu={isHebreu}
                   settings={settings}
                   verse={verse}
                   selectedCode={selectedCode}
+                  mode={interlinearMode}
                 />
               </React.Suspense>
             ) : (

@@ -92,7 +92,7 @@ const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: 
     }
   }
 
-  if (isAvailable || !expanded) return null
+  if (!expanded) return null
 
   return (
     <Box
@@ -115,7 +115,7 @@ const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: 
         borderBottomLeftRadius={10}
         borderColor="border"
       />
-      <Box row alignItems="center">
+      <Box row alignItems="center" opacity={isAvailable ? 1 : 0.5}>
         <Box disabled flex>
           <Text fontSize={14} numberOfLines={1}>
             {t('versionSelector.strongIndex')}
@@ -125,26 +125,32 @@ const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: 
           </Text>
         </Box>
 
-        <TouchableOpacity
-          accessibilityRole="button"
-          accessibilityLabel={t('downloads.strongIndexName', { bible: versionId })}
-          accessibilityState={{ disabled: isChecking || Boolean(strongActiveDownload) }}
-          activeOpacity={strongActiveDownload ? 1 : 0.7}
-          disabled={isChecking || Boolean(strongActiveDownload)}
-          onPress={handlePress}
-        >
+        {isAvailable ? (
           <Box width={48} minHeight={40} center>
-            {isChecking ? (
-              <ActivityIndicator size="small" />
-            ) : strongActiveDownload?.status === 'queued' ? (
-              <FeatherIcon name="clock" size={18} color="tertiary" />
-            ) : strongActiveDownload ? (
-              <Progress progress={Math.max(progress, 0.04)} size={22} thickness={2.5} />
-            ) : (
-              <FeatherIcon name={failedDownload ? 'rotate-cw' : 'download-cloud'} size={16} />
-            )}
+            <FeatherIcon name="check" size={18} color="primary" />
           </Box>
-        </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel={t('downloads.strongIndexName', { bible: versionId })}
+            accessibilityState={{ disabled: isChecking || Boolean(strongActiveDownload) }}
+            activeOpacity={strongActiveDownload ? 1 : 0.7}
+            disabled={isChecking || Boolean(strongActiveDownload)}
+            onPress={handlePress}
+          >
+            <Box width={48} minHeight={40} center>
+              {isChecking ? (
+                <ActivityIndicator size="small" />
+              ) : strongActiveDownload?.status === 'queued' ? (
+                <FeatherIcon name="clock" size={18} color="tertiary" />
+              ) : strongActiveDownload ? (
+                <Progress progress={Math.max(progress, 0.04)} size={22} thickness={2.5} />
+              ) : (
+                <FeatherIcon name={failedDownload ? 'rotate-cw' : 'download-cloud'} size={16} />
+              )}
+            </Box>
+          </TouchableOpacity>
+        )}
       </Box>
     </Box>
   )

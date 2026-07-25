@@ -729,7 +729,7 @@ const DownloadsScreen = () => {
             />
           )
         }}
-        renderItem={({ item, index, section }) => {
+        renderItem={({ item }) => {
           const isDownloaded = downloadedSet.has(item.id)
           // Extract the raw database or version id for needsUpdate check
           let needsUpdateKey: string | undefined
@@ -740,8 +740,7 @@ const DownloadsScreen = () => {
           }
 
           const isDefault = item.id === `bible:${defaultVersion}`
-          const isNestedDependency =
-            item.parentItemId !== undefined && section.data[index - 1]?.id === item.parentItemId
+          const isNestedDependency = item.parentItemId !== undefined
 
           return (
             <DownloadableItem

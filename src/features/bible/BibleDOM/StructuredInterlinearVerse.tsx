@@ -4,15 +4,17 @@ import { scaleFontSize } from './scaleFontSize'
 import type { SelectedCode, Verse } from '~common/types'
 import type { RootState } from '~redux/modules/reducer'
 import { buildInterlinearVerseLayout } from '~helpers/interlinearVerseLayout'
+import { normalizeInterlinearMode, type InterlinearMode } from '~helpers/interlinearDisplayMode'
 
 interface Props {
   verse: Verse
   settings: RootState['user']['bible']['settings']
   isHebreu: boolean
   selectedCode?: SelectedCode | null
+  mode?: InterlinearMode
 }
 
-const StructuredInterlinearVerse = ({ verse, settings, isHebreu, selectedCode }: Props) => {
+const StructuredInterlinearVerse = ({ verse, settings, isHebreu, selectedCode, mode }: Props) => {
   const dispatch = useDispatch()
   const colors = settings.colors[settings.theme]
   const tokens = verse.InterlinearTokens ?? []
@@ -26,6 +28,8 @@ const StructuredInterlinearVerse = ({ verse, settings, isHebreu, selectedCode }:
     })
   }
   const layout = buildInterlinearVerseLayout(verse.Texte, tokens)
+  const displayMode = normalizeInterlinearMode(mode)
+  const line = (values: string[]) => [...new Set(values.filter(Boolean))].join(' · ')
 
   return (
     <>
@@ -38,7 +42,80 @@ const StructuredInterlinearVerse = ({ verse, settings, isHebreu, selectedCode }:
         const selected = identities.some(
           identity => Number(selectedCode?.reference) === Number(identity.code.match(/\d+/u)?.[0])
         )
-        const line = (values: string[]) => [...new Set(values.filter(Boolean))].join(' · ')
+        const transliteration = line(token.segments.map(segment => segment.transliteration))
+        const strongReferences = line(
+          identities
+            .filter(identity => identity.kind === 'strong')
+            .map(identity => `S:${identity.code}`)
+        )
+
+        if (displayMode === 'strong') {
+          return (
+            <span key={`${token.ordinal}:${token.startOffset}`}>
+              {prefix}
+              <button
+                type="button"
+                data-ignore-verse-touch
+                disabled={!preferredIdentity}
+                onClick={() => navigateToStrong(preferredIdentity?.code)}
+                style={{
+                  appearance: 'none',
+                  border: 0,
+                  borderRadius: 4,
+                  background: selected ? colors.primary : 'transparent',
+                  color: selected ? colors.reverse : colors.default,
+                  display: 'inline',
+                  margin: 0,
+                  padding: '1px 2px',
+                  fontFamily: settings.fontFamily,
+                  fontSize: 'inherit',
+                }}
+              >
+                <span dir={isHebreu ? 'rtl' : 'ltr'}>{surface}</span>
+                {strongReferences && (
+                  <sup
+                    style={{
+                      color: selected ? colors.reverse : colors.primary,
+                      fontFamily: 'Arial',
+                      fontSize: scaleFontSize(9, settings.fontSizeScale),
+                      marginInlineStart: 2,
+                    }}
+                  >
+                    {strongReferences}
+                  </sup>
+                )}
+              </button>
+            </span>
+          )
+        }
+
+        if (displayMode === 'transliteration') {
+          return (
+            <span key={`${token.ordinal}:${token.startOffset}`}>
+              {prefix}
+              <button
+                type="button"
+                data-ignore-verse-touch
+                disabled={!preferredIdentity}
+                onClick={() => navigateToStrong(preferredIdentity?.code)}
+                style={{
+                  appearance: 'none',
+                  border: 0,
+                  borderRadius: 4,
+                  background: selected ? colors.primary : 'transparent',
+                  color: selected ? colors.reverse : colors.default,
+                  display: 'inline',
+                  margin: 0,
+                  padding: '1px 2px',
+                  fontFamily: settings.fontFamily,
+                  fontSize: 'inherit',
+                }}
+              >
+                {transliteration || surface}
+              </button>
+            </span>
+          )
+        }
 
         return (
           <span key={`${token.ordinal}:${token.startOffset}`}>
@@ -56,12 +133,17 @@ const StructuredInterlinearVerse = ({ verse, settings, isHebreu, selectedCode }:
                 color: selected ? colors.reverse : colors.default,
                 display: 'inline-flex',
                 flexDirection: 'column',
-                alignItems: 'center',
+                // The Hebrew reader sets the whole chapter to RTL. Force a stable
+                // flex axis here so flex-end stays the physical right edge; the
+                // original word keeps its own RTL direction on the child span.
+                direction: 'ltr',
+                alignItems: isHebreu ? 'flex-end' : 'flex-start',
                 gap: 3,
                 margin: '3px 2px 10px',
                 padding: '5px 6px',
                 verticalAlign: 'top',
                 fontFamily: settings.fontFamily,
+                textAlign: isHebreu ? 'right' : 'left',
               }}
             >
               <span

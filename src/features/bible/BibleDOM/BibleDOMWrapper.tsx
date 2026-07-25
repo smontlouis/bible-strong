@@ -46,6 +46,7 @@ import {
 import { HelpTip } from '~features/tips/HelpTip'
 import { appLogger } from '~helpers/agentObservability'
 import { BibleError } from '~helpers/bibleErrors'
+import type { InterlinearMode } from '~helpers/interlinearDisplayMode'
 import { toast } from '~helpers/toast'
 import { RootState } from '~redux/modules/reducer'
 import {
@@ -182,6 +183,7 @@ export type WebViewProps = {
   removeSelectedVerse: (id: string) => void
   setSelectedVerse: (selectedVerse: number) => void
   version: VersionCode
+  interlinearMode?: InterlinearMode
   contextDisplayMode: BibleContextDisplayMode
   isSelectionMode: StudyNavigateBibleType | undefined
   verses: Verse[]
@@ -317,6 +319,7 @@ export const BibleDOMWrapper = ({
   verseToScroll,
   contextDisplayMode,
   version,
+  interlinearMode,
   pericopeChapter,
   book,
   chapter,
@@ -804,6 +807,7 @@ export const BibleDOMWrapper = ({
         verseToScroll={verseToScroll}
         contextDisplayMode={contextDisplayMode}
         version={version}
+        interlinearMode={interlinearMode}
         pericopeChapter={pericopeChapter}
         book={book}
         chapter={chapter}

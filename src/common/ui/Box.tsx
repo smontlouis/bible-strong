@@ -16,6 +16,7 @@ import Animated, {
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
+import { resolveBoxBackgroundColor, type BoxBackgroundOpacity } from './boxColor'
 import Text, { AnimatedText, TextProps } from './Text'
 
 export type BoxProps = {
@@ -111,6 +112,7 @@ export type BoxProps = {
 
   backgroundColor?: string
   bg?: string
+  bgOpacity?: BoxBackgroundOpacity
 
   background?: boolean
   rounded?: boolean
@@ -202,17 +204,13 @@ const Box = styled.View<BoxProps>(props => ({
 
   opacity: props.disabled ? 0.6 : (props.opacity ?? 1),
 
-  backgroundColor: props.theme.colors[
-    (props.backgroundColor ?? props.bg) as keyof typeof props.theme.colors
-  ]
-    ? props.theme.colors[(props.backgroundColor ?? props.bg) as keyof typeof props.theme.colors]
-    : (props.backgroundColor ?? props.bg),
-
-  ...(props.background
-    ? {
-        backgroundColor: props.theme.colors.reverse,
-      }
-    : {}),
+  backgroundColor: resolveBoxBackgroundColor({
+    backgroundColor: props.backgroundColor,
+    bg: props.bg,
+    bgOpacity: props.bgOpacity,
+    background: props.background,
+    colors: props.theme.colors,
+  }),
 
   ...(props.rounded
     ? {

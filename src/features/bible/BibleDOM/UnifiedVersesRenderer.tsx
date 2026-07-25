@@ -95,6 +95,7 @@ export interface UnifiedVersesRendererProps {
   verseToScroll: number | undefined
   contextDisplayMode: WebViewProps['contextDisplayMode']
   version: string
+  interlinearMode?: WebViewProps['interlinearMode']
   pericopeChapter: PericopeChapter
   isSelectionMode: WebViewProps['isSelectionMode']
   selectedCode: WebViewProps['selectedCode']
@@ -200,6 +201,7 @@ export function UnifiedVersesRenderer({
   verseToScroll,
   contextDisplayMode,
   version,
+  interlinearMode,
   pericopeChapter,
   isSelectionMode,
   selectedCode,
@@ -341,6 +343,7 @@ export function UnifiedVersesRenderer({
             <Verse
               isHebreu={isHebreu}
               version={version}
+              interlinearMode={interlinearMode}
               verse={verse}
               isParallelVerse={isParallelVerse}
               parallelVerse={parallelVerse}

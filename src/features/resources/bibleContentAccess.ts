@@ -18,7 +18,12 @@ import {
   type StrongMode,
 } from '~helpers/strongBiblePublications'
 import { loadStrongBibleChapterSpans } from '~helpers/strongBibleSidecar'
-import type { InterlinearMode } from '~helpers/interlinearBiblePublications'
+import {
+  getInterlinearLocalePriority,
+  isInterlinearModeEnabled,
+  normalizeInterlinearMode,
+  type InterlinearMode,
+} from '~helpers/interlinearDisplayMode'
 import { loadInterlinearChapterTokens } from '~helpers/interlinearBibleSidecar'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 
@@ -41,6 +46,7 @@ export type BibleChapterRequest = {
   strongMode?: StrongMode
   interlinearMode?: InterlinearMode
   interlinearLocale?: ResourceLanguage
+  interlinearLocaleAutomatic?: boolean
 }
 
 export type BibleContentAccess = {
@@ -134,26 +140,38 @@ const loadRegularBibleChapter = async (
 
   if (
     request.version === 'BHG' &&
-    request.interlinearMode === 'visible' &&
+    isInterlinearModeEnabled(request.interlinearMode) &&
     dependencies.loadInterlinearChapterTokens
   ) {
-    try {
-      const tokensByVerse = await dependencies.loadInterlinearChapterTokens(
-        'BHG',
-        request.interlinearLocale ?? 'fr',
-        request.book,
-        request.chapter
-      )
-      return successResult(
-        verses.map(verse => ({
-          ...verse,
-          InterlinearTokens: tokensByVerse[Number(verse.Verset)] ?? [],
-        }))
-      )
-    } catch (error) {
-      dependencies.logError('[BibleContentAccess] Interlinear sidecar unavailable:', error)
-      return successResult(verses)
+    const preferredLocale = request.interlinearLocale ?? 'fr'
+    const displayMode = normalizeInterlinearMode(request.interlinearMode)
+    const locales =
+      request.interlinearLocaleAutomatic || displayMode !== 'interlinear'
+        ? getInterlinearLocalePriority(preferredLocale)
+        : ([preferredLocale] as const)
+
+    for (const locale of locales) {
+      try {
+        const tokensByVerse = await dependencies.loadInterlinearChapterTokens(
+          'BHG',
+          locale,
+          request.book,
+          request.chapter
+        )
+        return successResult(
+          verses.map(verse => ({
+            ...verse,
+            InterlinearTokens: tokensByVerse[Number(verse.Verset)] ?? [],
+          }))
+        )
+      } catch (error) {
+        dependencies.logError(
+          `[BibleContentAccess] Interlinear ${locale} sidecar unavailable:`,
+          error
+        )
+      }
     }
+    return successResult(verses)
   }
 
   if (

@@ -23,6 +23,7 @@ export interface BibleReadingChapterRequest {
   strongMode?: StrongMode
   interlinearMode?: InterlinearMode
   interlinearLocale?: ResourceLanguage
+  interlinearLocaleAutomatic?: boolean
 }
 
 export interface BibleReadingExtrasRequest extends BibleReadingChapterRequest {
@@ -44,6 +45,7 @@ export const loadBibleReadingMain = async (
     strongMode,
     interlinearMode,
     interlinearLocale,
+    interlinearLocaleAutomatic,
   }: BibleReadingChapterRequest,
   resourceAccess: ResourceAccessRegistry = defaultResourceAccess
 ): Promise<BibleReadingMainResult> => {
@@ -58,6 +60,7 @@ export const loadBibleReadingMain = async (
         strongMode,
         interlinearMode,
         interlinearLocale,
+        interlinearLocaleAutomatic,
       }),
     ])
     return {
@@ -73,6 +76,7 @@ export const loadBibleReadingMain = async (
     strongMode,
     interlinearMode,
     interlinearLocale,
+    interlinearLocaleAutomatic,
   })
   const pericope =
     mainResult.success && mainResult.data

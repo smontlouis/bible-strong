@@ -152,6 +152,65 @@ describe('BibleContentAccess', () => {
       )
     ).resolves.toEqual(expect.objectContaining({ success: true, data: verses }))
     expect(dependencies.logError).toHaveBeenCalled()
+    expect(loadInterlinearChapterTokens).toHaveBeenCalledTimes(1)
+  })
+
+  it('falls back to the other gloss locale only in automatic interlinear mode', async () => {
+    const dependencies = createDependencies()
+    dependencies.getChapterVerses.mockResolvedValue([
+      { Livre: 1, Chapitre: 1, Verset: 1, Texte: 'בְּרֵאשִׁית' },
+    ])
+    const tokens = [{ ordinal: 0, startOffset: 0, length: 8, segments: [] }]
+    const loadInterlinearChapterTokens = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('French index missing'))
+      .mockResolvedValueOnce({ 1: tokens })
+
+    const result = await loadBibleContentChapter(
+      {
+        book: 1,
+        chapter: 1,
+        version: 'BHG',
+        interlinearMode: 'interlinear',
+        interlinearLocale: 'fr',
+        interlinearLocaleAutomatic: true,
+      },
+      { ...dependencies, loadInterlinearChapterTokens }
+    )
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        success: true,
+        data: [expect.objectContaining({ InterlinearTokens: tokens })],
+      })
+    )
+    expect(loadInterlinearChapterTokens).toHaveBeenNthCalledWith(1, 'BHG', 'fr', 1, 1)
+    expect(loadInterlinearChapterTokens).toHaveBeenNthCalledWith(2, 'BHG', 'en', 1, 1)
+  })
+
+  it('allows language-neutral display modes to use either installed index', async () => {
+    const dependencies = createDependencies()
+    dependencies.getChapterVerses.mockResolvedValue([
+      { Livre: 1, Chapitre: 1, Verset: 1, Texte: 'בְּרֵאשִׁית' },
+    ])
+    const loadInterlinearChapterTokens = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('French index missing'))
+      .mockResolvedValueOnce({ 1: [] })
+
+    await loadBibleContentChapter(
+      {
+        book: 1,
+        chapter: 1,
+        version: 'BHG',
+        interlinearMode: 'strong',
+        interlinearLocale: 'fr',
+      },
+      { ...dependencies, loadInterlinearChapterTokens }
+    )
+
+    expect(loadInterlinearChapterTokens).toHaveBeenNthCalledWith(1, 'BHG', 'fr', 1, 1)
+    expect(loadInterlinearChapterTokens).toHaveBeenNthCalledWith(2, 'BHG', 'en', 1, 1)
   })
 
   it('routes French interlinear versions to French interlinear content', async () => {

@@ -1,7 +1,12 @@
 import { cdnUrl } from './firebase'
 import type { ResourceLanguage } from './databaseTypes'
 
-export type InterlinearMode = 'visible' | 'hidden'
+export {
+  getInterlinearLocalePriority,
+  isInterlinearModeEnabled,
+  normalizeInterlinearMode,
+} from './interlinearDisplayMode'
+export type { InterlinearDisplayMode, InterlinearMode } from './interlinearDisplayMode'
 export type InterlinearBibleVersionId = 'BHG'
 
 export type InterlinearPublicationArtifact = {

@@ -125,6 +125,7 @@ type Props = Pick<
   | 'verseToScroll'
   | 'contextDisplayMode'
   | 'version'
+  | 'interlinearMode'
   | 'pericopeChapter'
   | 'book'
   | 'chapter'
@@ -523,6 +524,7 @@ const LoadedBibleContent = ({
   verseToScroll,
   contextDisplayMode,
   version,
+  interlinearMode,
   pericopeChapter,
   book,
   chapter,
@@ -1216,6 +1218,7 @@ const LoadedBibleContent = ({
               verseToScroll={verseToScroll}
               contextDisplayMode={contextDisplayMode}
               version={version}
+              interlinearMode={interlinearMode}
               pericopeChapter={pericopeChapter}
               isSelectionMode={isSelectionMode}
               selectedCode={selectedCode}

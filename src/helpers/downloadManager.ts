@@ -253,7 +253,8 @@ class DownloadManager {
       if (
         item.type === 'bible' ||
         item.type === 'bible-strong' ||
-        item.type === 'bible-strong-sidecar'
+        item.type === 'bible-strong-sidecar' ||
+        item.type === 'bible-interlinear-sidecar'
       ) {
         this.jotaiStore.set(bibleDataRefreshSignalAtom, (c: number) => c + 1)
       }
