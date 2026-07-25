@@ -403,6 +403,8 @@ export const VersionCatalogList = ({
             row
             alignItems="center"
             bg="lightGrey"
+            borderBottomWidth={1}
+            borderColor="border"
           >
             <Text flex fontSize={16} opacity={0.8}>
               {section.title}

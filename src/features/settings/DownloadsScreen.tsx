@@ -571,12 +571,12 @@ const DownloadsScreen = () => {
       ? t('downloads.updateBibleWithInterlinearConfirm')
       : deletesStrongSidecar
         ? t('downloads.updateBibleWithStrongConfirm')
-        : t('downloads.redownloadConfirm')
+        : t('downloads.updateConfirm')
 
-    Alert.alert(t('Attention'), confirmation, [
-      { text: t('Non'), style: 'cancel' },
+    Alert.alert(t('downloads.updateAvailable'), confirmation, [
+      { text: t('downloads.later'), style: 'cancel' },
       {
-        text: t('Oui'),
+        text: t('downloads.update'),
         onPress: async () => {
           await deleteDownloadedItem(deletionPlan)
           await refreshInstalledStateAfterDeletion()

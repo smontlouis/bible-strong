@@ -4,8 +4,9 @@ import type { PrimitiveAtom } from 'jotai/vanilla'
 import { useEffect, useState, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, Pressable } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
+import { Sheet, SheetFlatList, SheetHeader, type SheetRef } from '~common/sheet'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Radio from '~common/ui/Radio'
@@ -39,6 +40,48 @@ type SheetProps = SharedProps & {
   sheetRef: RefObject<SheetRef | null>
   isResourceModalOpen: boolean
 }
+
+const ENGLISH_FIRST_SOURCE_GROUPS = [
+  {
+    language: 'en',
+    titleKey: 'versionCatalog.language.en',
+    versionIds: ENGLISH_STRONG_BIBLE_PRIORITY,
+  },
+  {
+    language: 'fr',
+    titleKey: 'versionCatalog.language.fr',
+    versionIds: FRENCH_STRONG_BIBLE_PRIORITY,
+  },
+] as const
+const FRENCH_FIRST_SOURCE_GROUPS = [
+  {
+    language: 'fr',
+    titleKey: 'versionCatalog.language.fr',
+    versionIds: FRENCH_STRONG_BIBLE_PRIORITY,
+  },
+  {
+    language: 'en',
+    titleKey: 'versionCatalog.language.en',
+    versionIds: ENGLISH_STRONG_BIBLE_PRIORITY,
+  },
+] as const
+
+type StrongBibleSourceLanguage = 'en' | 'fr'
+
+type StrongBibleSourceListItem =
+  | {
+      type: 'section'
+      key: string
+      language: StrongBibleSourceLanguage
+      titleKey: string
+      expanded: boolean
+    }
+  | {
+      type: 'source'
+      key: StrongBibleVersionId
+      versionId: StrongBibleVersionId
+      isLast: boolean
+    }
 
 const updateStrongBibleSourceVersion = (versionId?: StrongBibleVersionId) =>
   produce((draft: BibleTab) => {
@@ -122,7 +165,7 @@ const StrongBibleSourceRow = ({
       minHeight={76}
       px={16}
       py={10}
-      borderBottomWidth={isLast ? 0 : 1}
+      borderBottomWidth={1}
       borderColor="border"
     >
       <Pressable
@@ -205,6 +248,7 @@ export const StrongBibleSourceSheet = ({
   resolvedProvenance,
 }: SheetProps) => {
   const { t } = useTranslation()
+  const insets = useSafeAreaInsets()
   const bible = useAtomValue(bibleAtom)
   const setBible = useSetAtom(bibleAtom)
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
@@ -216,10 +260,34 @@ export const StrongBibleSourceSheet = ({
     StrongBibleSidecarAvailability
   > | null>(null)
   const strongBibleSourceVersionId = bible.data.strongBibleSourceVersionId
-  const sourceVersionIds =
-    versions[bible.data.selectedVersion]?.language === 'en'
-      ? ENGLISH_STRONG_BIBLE_PRIORITY
-      : FRENCH_STRONG_BIBLE_PRIORITY
+  const isEnglishBible = versions[bible.data.selectedVersion]?.language === 'en'
+  const sourceGroups = isEnglishBible ? ENGLISH_FIRST_SOURCE_GROUPS : FRENCH_FIRST_SOURCE_GROUPS
+  const [expandedLanguages, setExpandedLanguages] = useState<
+    Record<StrongBibleSourceLanguage, boolean>
+  >({
+    en: isEnglishBible,
+    fr: !isEnglishBible,
+  })
+  const sourceListData: StrongBibleSourceListItem[] = sourceGroups.flatMap(group => {
+    const section: StrongBibleSourceListItem = {
+      type: 'section',
+      key: group.titleKey,
+      language: group.language,
+      titleKey: group.titleKey,
+      expanded: expandedLanguages[group.language],
+    }
+    if (!section.expanded) return [section]
+
+    return [
+      section,
+      ...group.versionIds.map((versionId, index) => ({
+        type: 'source' as const,
+        key: versionId,
+        versionId,
+        isLast: index === group.versionIds.length - 1,
+      })),
+    ]
+  })
 
   const setStrongBibleSourceVersion = (versionId?: StrongBibleVersionId) => {
     setBible(updateStrongBibleSourceVersion(versionId))
@@ -230,10 +298,12 @@ export const StrongBibleSourceSheet = ({
 
     let cancelled = false
     Promise.all(
-      sourceVersionIds.map(async versionId => ({
-        versionId,
-        availability: await getStrongBibleSidecarAvailability(versionId),
-      }))
+      sourceGroups.flatMap(group =>
+        group.versionIds.map(async versionId => ({
+          versionId,
+          availability: await getStrongBibleSidecarAvailability(versionId),
+        }))
+      )
     )
       .then(results => {
         if (cancelled) return
@@ -273,7 +343,7 @@ export const StrongBibleSourceSheet = ({
     pendingSelectionVersionId,
     setBible,
     strongBibleSourceVersionId,
-    sourceVersionIds,
+    sourceGroups,
   ])
 
   const selectSource = (versionId?: StrongBibleVersionId) => {
@@ -297,14 +367,30 @@ export const StrongBibleSourceSheet = ({
         : t('strongSource.autoDescription.openBible')
       : t('strongSource.autoDescription.default')
 
+  const handleSheetOpenChange = (isOpen: boolean) => {
+    setIsSheetOpen(isOpen)
+    if (!isOpen) return
+
+    setExpandedLanguages({
+      en: isEnglishBible,
+      fr: !isEnglishBible,
+    })
+  }
+
   return (
     <Sheet
       ref={sheetRef}
-      onOpenChange={setIsSheetOpen}
+      onOpenChange={handleSheetOpenChange}
       header={<SheetHeader title={t('strongSource.sheetTitle')} />}
+      snapPoints={[0.5, 1]}
     >
-      <SheetScrollView contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
-        <Box overflow="hidden">
+      <SheetFlatList
+        data={sourceListData}
+        keyExtractor={item => item.key}
+        contentContainerStyle={{
+          paddingBottom: 28 + insets.bottom,
+        }}
+        ListHeaderComponent={
           <Pressable
             accessibilityRole="radio"
             accessibilityState={{ checked: !strongBibleSourceVersionId }}
@@ -331,20 +417,56 @@ export const StrongBibleSourceSheet = ({
               </Box>
             </Box>
           </Pressable>
-          {sourceVersionIds.map((versionId, index) => (
+        }
+        renderItem={({ item }) =>
+          item.type === 'section' ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t(item.titleKey)}
+              accessibilityState={{ expanded: item.expanded }}
+              onPress={() =>
+                setExpandedLanguages(current => ({
+                  ...current,
+                  [item.language]: !current[item.language],
+                }))
+              }
+              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+            >
+              <Box
+                minHeight={48}
+                paddingLeft={20}
+                paddingRight={8}
+                row
+                alignItems="center"
+                bg="lightGrey"
+                borderBottomWidth={1}
+                borderColor="border"
+              >
+                <Text flex fontSize={16} opacity={0.8}>
+                  {t(item.titleKey)}
+                </Text>
+                <Box width={40} height={40} center>
+                  <FeatherIcon
+                    name={item.expanded ? 'chevron-down' : 'chevron-right'}
+                    size={20}
+                    color="tertiary"
+                  />
+                </Box>
+              </Box>
+            </Pressable>
+          ) : (
             <StrongBibleSourceRow
-              key={versionId}
-              versionId={versionId}
-              availability={availabilityByVersion?.get(versionId)}
+              versionId={item.versionId}
+              availability={availabilityByVersion?.get(item.versionId)}
               isChecking={!availabilityByVersion}
-              selected={strongBibleSourceVersionId === versionId}
-              onSelect={() => selectSource(versionId)}
-              onDownload={() => void downloadSource(versionId)}
-              isLast={index === sourceVersionIds.length - 1}
+              selected={strongBibleSourceVersionId === item.versionId}
+              onSelect={() => selectSource(item.versionId)}
+              onDownload={() => void downloadSource(item.versionId)}
+              isLast={item.isLast}
             />
-          ))}
-        </Box>
-      </SheetScrollView>
+          )
+        }
+      />
     </Sheet>
   )
 }
