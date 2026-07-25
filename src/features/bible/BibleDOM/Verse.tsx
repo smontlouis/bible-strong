@@ -78,6 +78,7 @@ const CanonicalNoteButton = styled('button')<RootStyles & { isDisabled?: boolean
   ({ isDisabled, settings: { theme, colors, fontSizeScale } }) => ({
     appearance: 'none',
     WebkitAppearance: 'none',
+    position: 'relative',
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -96,6 +97,11 @@ const CanonicalNoteButton = styled('button')<RootStyles & { isDisabled?: boolean
     cursor: 'pointer',
     pointerEvents: isDisabled ? 'none' : 'auto',
     opacity: isDisabled ? 0.65 : 1,
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      inset: '-6px',
+    },
     '&::after': {
       content: 'attr(data-note-label)',
     },
