@@ -117,7 +117,7 @@ const ResourcesModal = ({
   const getSubtitleByResourceType = () => {
     switch (resourceType) {
       case 'strong':
-        return t('Lexique hébreu & grec')
+        return t('Lexique')
       case 'commentary':
         return t('Commentaires')
       case 'dictionary':
@@ -286,7 +286,6 @@ const ResourcesModal = ({
         backgroundColor={theme.colors.reverse}
         header={
           <SheetHeader
-            hasBackButton
             onBackPress={closeModal}
             title={title}
             subTitle={getSubtitleByResourceType()}
