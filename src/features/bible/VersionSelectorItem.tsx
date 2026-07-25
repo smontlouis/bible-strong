@@ -24,7 +24,10 @@ import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 import { installedVersionsSignalAtom, bibleDataRefreshSignalAtom } from '~state/app'
 import { downloadManager } from '~helpers/downloadManager'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
-import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
+import {
+  createBibleDownloadItem,
+  createStrongSidecarDownloadPlan,
+} from '~helpers/downloadItemFactory'
 import { RootState } from '~redux/modules/reducer'
 import { setDefaultBibleVersion, setVersionUpdated } from '~redux/modules/user'
 import { VersionCode, tabsAtom, BibleTab } from 'src/state/tabs'
@@ -33,12 +36,17 @@ import {
   getStrongBibleAttributionKey,
   isStrongCapableBibleVersion,
 } from '~helpers/strongBiblePublications'
+import {
+  getStrongBibleSidecarAvailability,
+  type StrongBibleSidecarAvailability,
+} from '~helpers/strongBibleSidecar'
 import StrongIndexSelectorItem from './StrongIndexSelectorItem'
 import StrongMark from './StrongMark'
 import { isInterlinearCapableBibleVersion } from '~helpers/interlinearBiblePublications'
 import InterlinearIndexSelectorItem from './InterlinearIndexSelectorItem'
 import InterlinearMark from './InterlinearMark'
 import { removeInterlinearSidecar } from '~helpers/interlinearBibleSidecar'
+import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/downloadQueue'
 
 const VersionItemContainer = ({
   children,
@@ -233,10 +241,12 @@ interface Props {
   onChange?: (id: VersionCode) => void
   isParameters?: boolean
   shareFn?: (fn: () => void) => void
+  onDownloadStart?: (id: VersionCode) => void
   onDownloadComplete?: (id: VersionCode) => void
   showSelectionCheckbox?: boolean
   showStrongIndex?: boolean
   strongCollapseKey?: number
+  selectionRequirement?: 'bible' | 'strong'
 }
 
 const VersionSelectorItem = ({
@@ -245,10 +255,12 @@ const VersionSelectorItem = ({
   onChange,
   isParameters,
   shareFn,
+  onDownloadStart,
   onDownloadComplete,
   showSelectionCheckbox,
   showStrongIndex,
   strongCollapseKey,
+  selectionRequirement = 'bible',
 }: Props) => {
   const { t } = useTranslation()
   const lang = useLanguage()
@@ -260,19 +272,34 @@ const VersionSelectorItem = ({
   const [isEnglishInterlinearIndexAvailable, setEnglishInterlinearIndexAvailable] =
     React.useState<boolean>()
   const [isInterlinearIndexExpanded, setInterlinearIndexExpanded] = React.useState(false)
+  const [strongSelectionAvailability, setStrongSelectionAvailability] =
+    React.useState<StrongBibleSidecarAvailability>()
   const needsUpdate = useSelector((state: RootState) => state.user.needsUpdate[version.id])
   const dispatch = useDispatch()
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
   const installedVersionsSignal = useAtomValue(installedVersionsSignalAtom)
+  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
 
   // Subscribe to download queue state for this item
   const itemId = `bible:${version.id}`
   const queueState = useDownloadItemStatus(itemId)
-  const isLoading = queueState?.status === 'downloading' || queueState?.status === 'inserting'
-  const isQueued = queueState?.status === 'queued'
-  const downloadProgress = queueState?.downloadProgress ?? 0
+  const previousBibleDownloadStatusRef = React.useRef(queueState?.status)
   const strongVersionId = isStrongCapableBibleVersion(version.id) ? version.id : undefined
-  const showStrongCapability = showStrongIndex && Boolean(strongVersionId)
+  const requiresStrong = selectionRequirement === 'strong' && Boolean(strongVersionId)
+  const strongQueueState = useDownloadItemStatus(`bible-strong:${version.id}`)
+  const activeQueueState = requiresStrong
+    ? [queueState, strongQueueState].find(
+        state =>
+          state?.status === 'queued' ||
+          state?.status === 'downloading' ||
+          state?.status === 'inserting'
+      )
+    : queueState
+  const isLoading =
+    activeQueueState?.status === 'downloading' || activeQueueState?.status === 'inserting'
+  const isQueued = activeQueueState?.status === 'queued'
+  const downloadProgress = activeQueueState ? getDownloadItemProgress(activeQueueState) : 0
+  const showStrongCapability = (showStrongIndex || requiresStrong) && Boolean(strongVersionId)
   const toggleStrongIndex = () => setStrongIndexExpanded(expanded => !expanded)
   const strongToggleLabel = isStrongIndexExpanded
     ? t('versionSelector.hideStrongIndex', { bible: version.id })
@@ -297,36 +324,74 @@ const VersionSelectorItem = ({
     ? { textDecorationLine: 'underline' as const }
     : undefined
 
-  const startDownload = () => {
+  const startDownload = async () => {
+    if (requiresStrong && strongVersionId) {
+      const availability =
+        strongSelectionAvailability ?? (await getStrongBibleSidecarAvailability(strongVersionId))
+      onDownloadStart?.(version.id)
+      downloadManager.enqueue(createStrongSidecarDownloadPlan(strongVersionId, availability.status))
+      return
+    }
+
     const item = createBibleDownloadItem(version.id)
     downloadManager.enqueue([item])
   }
 
   React.useEffect(() => {
-    ;(async () => {
+    let cancelled = false
+
+    const loadAvailability = async () => {
       if (shareFn && !isStrongVersion(version.id)) {
         shareFn(() => {
           setVersionNeedsDownload(true)
-          startDownload()
+          void startDownload()
         })
       }
 
       const v = await getIfVersionNeedsDownload(version.id)
-      setVersionNeedsDownload(v)
-    })()
+      if (!cancelled) setVersionNeedsDownload(v)
+    }
+
+    void loadAvailability()
+
+    return () => {
+      cancelled = true
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOnboardingCompleted, installedVersionsSignal])
 
-  // Watch for download completion
   React.useEffect(() => {
-    if (queueState?.status === 'completed') {
-      setVersionNeedsDownload(false)
-      if (onDownloadComplete) {
-        onDownloadComplete(version.id)
-      }
+    if (!requiresStrong || !strongVersionId) return
+
+    let cancelled = false
+    getStrongBibleSidecarAvailability(strongVersionId)
+      .then(availability => {
+        if (cancelled) return
+        setStrongSelectionAvailability(availability)
+        setStrongIndexAvailable(availability.status === 'available')
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setStrongSelectionAvailability({ status: 'missing' })
+          setStrongIndexAvailable(false)
+        }
+      })
+
+    return () => {
+      cancelled = true
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queueState?.status])
+  }, [downloadCompletionSignal, installedVersionsSignal, requiresStrong, strongVersionId])
+
+  // Watch for Bible-only download completion
+  React.useEffect(() => {
+    const previousStatus = previousBibleDownloadStatusRef.current
+    previousBibleDownloadStatusRef.current = queueState?.status
+
+    if (!requiresStrong && previousStatus !== 'completed' && queueState?.status === 'completed') {
+      setVersionNeedsDownload(false)
+      onDownloadComplete?.(version.id)
+    }
+  }, [onDownloadComplete, queueState?.status, requiresStrong, version.id])
 
   React.useEffect(() => {
     setStrongIndexExpanded(false)
@@ -335,7 +400,7 @@ const VersionSelectorItem = ({
 
   const updateVersion = async () => {
     await deleteVersion()
-    startDownload()
+    await startDownload()
     dispatch(setVersionUpdated(version.id))
   }
 
@@ -472,15 +537,21 @@ const VersionSelectorItem = ({
     </>
   ) : null
 
+  const selectionNeedsDownload = requiresStrong
+    ? strongSelectionAvailability
+      ? strongSelectionAvailability.status !== 'available'
+      : undefined
+    : versionNeedsDownload
+
   if (
-    typeof versionNeedsDownload === 'undefined' ||
+    typeof selectionNeedsDownload === 'undefined' ||
     (isParameters && version.id === 'LSGS') ||
     (isParameters && version.id === 'KJVS')
   ) {
     return null
   }
 
-  if (versionNeedsDownload) {
+  if (selectionNeedsDownload) {
     return (
       <Box>
         <VersionItemContainer
@@ -503,7 +574,9 @@ const VersionSelectorItem = ({
                 showStrongCapability={showStrongCapability}
                 isStrongIndexAvailable={isStrongIndexAvailable}
                 isStrongIndexExpanded={isStrongIndexExpanded}
-                onToggleStrongIndex={showStrongCapability ? toggleStrongIndex : undefined}
+                onToggleStrongIndex={
+                  showStrongIndex && showStrongCapability ? toggleStrongIndex : undefined
+                }
                 strongToggleLabel={strongToggleLabel}
                 strongAttribution={
                   strongVersionId ? t(getStrongBibleAttributionKey(strongVersionId)) : undefined
@@ -519,7 +592,7 @@ const VersionSelectorItem = ({
               />
             </Box>
             {!isLoading && !isQueued && version.id !== 'LSGS' && version.id !== 'KJVS' && (
-              <ActionButton onPress={startDownload}>
+              <ActionButton onPress={() => void startDownload()}>
                 <FeatherIcon name="download-cloud" size={16} />
               </ActionButton>
             )}
@@ -540,7 +613,7 @@ const VersionSelectorItem = ({
             )}
           </Box>
         </VersionItemContainer>
-        {showStrongCapability && strongVersionId && (
+        {showStrongIndex && showStrongCapability && strongVersionId && (
           <StrongIndexSelectorItem
             versionId={strongVersionId}
             expanded={isStrongIndexExpanded}
@@ -594,7 +667,9 @@ const VersionSelectorItem = ({
             showStrongCapability={showStrongCapability}
             isStrongIndexAvailable={isStrongIndexAvailable}
             isStrongIndexExpanded={isStrongIndexExpanded}
-            onToggleStrongIndex={showStrongCapability ? toggleStrongIndex : undefined}
+            onToggleStrongIndex={
+              showStrongIndex && showStrongCapability ? toggleStrongIndex : undefined
+            }
             strongToggleLabel={strongToggleLabel}
             strongAttribution={
               strongVersionId ? t(getStrongBibleAttributionKey(strongVersionId)) : undefined
@@ -612,7 +687,7 @@ const VersionSelectorItem = ({
           {!showSelectionCheckbox && renderSelectedIndicator()}
         </Box>
       </VersionItemContainer>
-      {showStrongCapability && strongVersionId && (
+      {showStrongIndex && showStrongCapability && strongVersionId && (
         <StrongIndexSelectorItem
           versionId={strongVersionId}
           expanded={isStrongIndexExpanded}

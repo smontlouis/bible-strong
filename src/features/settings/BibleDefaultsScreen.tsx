@@ -1,71 +1,101 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
+import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 
-import Container from '~common/ui/Container'
+import Header from '~common/Header'
+import type { SheetRef } from '~common/sheet'
 import Box, { TouchableBox } from '~common/ui/Box'
+import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { versions } from '~helpers/bibleVersions'
-import { setDefaultBibleVersion, setDefaultStrongBibleVersion } from '~redux/modules/user'
-import { RootState } from '~redux/modules/reducer'
-import { getLanguage } from '~i18n'
-import { getDefaultBibleVersion } from '~helpers/languageUtils'
-import VersionSelectorItem from '~features/bible/VersionSelectorItem'
-import { VersionCode } from 'src/state/tabs'
-import {
-  useVersionCatalog,
-  VersionCatalogHeader,
-  VersionCatalogList,
-} from '~features/bible/VersionCatalogView'
+import StrongMark from '~features/bible/StrongMark'
 import { getVersionDisplayName } from '~features/bible/versionCatalog'
+import { versions, type Version } from '~helpers/bibleVersions'
+import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import {
-  STRONG_BIBLE_PUBLICATIONS,
+  resolveStrongNavigationVersionId,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
 import { getStrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
-import { useAtomValue } from 'jotai/react'
+import { getLanguage } from '~i18n'
+import { RootState } from '~redux/modules/reducer'
+import { setDefaultBibleVersion, setDefaultStrongBibleVersion } from '~redux/modules/user'
 import { downloadCompletionSignalAtom } from '~state/downloadQueue'
+import type { VersionCode } from '~state/tabs'
+import BibleDefaultSelectorSheet from './BibleDefaultSelectorSheet'
 
-type SelectedVersionCardProps = {
-  code: string
-  name: string
+type DefaultVersionCardProps = {
+  title: string
+  description: string
+  version: Version
+  displayName: string
+  strongAvailable?: boolean
+  onPress: () => void
 }
 
-const SelectedVersionCard = ({ code, name }: SelectedVersionCardProps) => {
-  const { t } = useTranslation()
-
-  return (
-    <Box mt={16} p={16} bg="primary" borderRadius={12} row alignItems="center">
-      <Box flex>
-        <Text color="reverse" fontSize={12} bold opacity={0.8}>
-          {t('bibleDefaults.selectedVersion')}
+const DefaultVersionCard = ({
+  title,
+  description,
+  version,
+  displayName,
+  strongAvailable,
+  onPress,
+}: DefaultVersionCardProps) => (
+  <TouchableBox
+    accessibilityRole="button"
+    accessibilityLabel={`${title}, ${displayName}`}
+    onPress={onPress}
+    p={18}
+    borderWidth={1}
+    borderColor="border"
+    borderRadius={14}
+    bg="reverse"
+  >
+    <Box row alignItems="flex-start">
+      <Box flex pr={12}>
+        <Text fontSize={16} bold>
+          {title}
         </Text>
-        <Text mt={5} color="reverse" fontSize={12} bold opacity={0.8}>
-          {code}
-        </Text>
-        <Text mt={2} color="reverse" fontSize={18} bold>
-          {name}
+        <Text mt={4} fontSize={12} color="grey" lineHeight={17}>
+          {description}
         </Text>
       </Box>
-      <Box ml={12} width={36} height={36} borderRadius={18} bg="reverse" center>
-        <FeatherIcon name="check" size={20} color="primary" />
+      <Box width={32} height={32} center>
+        <FeatherIcon name="chevron-right" size={20} color="tertiary" />
       </Box>
     </Box>
-  )
-}
+
+    <Box mt={18} row alignItems="center">
+      <Box flex>
+        <Text fontSize={12} color="grey" bold>
+          {version.id}
+        </Text>
+        <Box mt={2} row alignItems="center">
+          <Text fontSize={18}>{displayName}</Text>
+          {typeof strongAvailable === 'boolean' && (
+            <Box ml={6}>
+              <StrongMark highlighted={strongAvailable} />
+            </Box>
+          )}
+        </Box>
+        <Text mt={3} fontSize={10} color="grey" numberOfLines={2}>
+          {version.c}
+        </Text>
+      </Box>
+    </Box>
+  </TouchableBox>
+)
 
 const BibleDefaultsScreen = () => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const versionCatalog = useVersionCatalog(
-    Object.values(versions).filter(
-      version => !version.hidden && (version.language === 'fr' || version.language === 'en')
-    ),
-    { resetSearchOnFocus: true }
-  )
-
   const language = getLanguage()
+  const readingSheetRef = React.useRef<SheetRef>(null)
+  const strongSheetRef = React.useRef<SheetRef>(null)
+  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
+  const [isDefaultStrongAvailable, setDefaultStrongAvailable] = React.useState(false)
+
   const preferredVersion = useSelector(
     (state: RootState) =>
       state.user.bible.settings.defaultBibleVersion || getDefaultBibleVersion(language)
@@ -73,122 +103,75 @@ const BibleDefaultsScreen = () => {
   const defaultVersion = versions[preferredVersion]
     ? preferredVersion
     : getDefaultBibleVersion(language)
+  const storedDefaultStrongVersion = useSelector(
+    (state: RootState) =>
+      state.user.bible.settings.defaultStrongBibleVersionId as string | undefined
+  )
+  const defaultStrongVersion =
+    resolveStrongNavigationVersionId(storedDefaultStrongVersion ?? '') ?? 'LSG'
   const selectedVersion = versions[defaultVersion]
-  const selectedVersionName = getVersionDisplayName(selectedVersion, language)
-  const defaultStrongVersion = useSelector(
-    (state: RootState) => state.user.bible.settings.defaultStrongBibleVersionId ?? 'LSG'
-  )
-  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
-  const [availableStrongVersions, setAvailableStrongVersions] = useState<Set<StrongBibleVersionId>>(
-    new Set()
-  )
+  const selectedStrongVersion = versions[defaultStrongVersion]
 
-  useEffect(() => {
+  React.useEffect(() => {
     let cancelled = false
-    Promise.all(
-      (Object.keys(STRONG_BIBLE_PUBLICATIONS) as StrongBibleVersionId[]).map(async versionId => ({
-        versionId,
-        availability: await getStrongBibleSidecarAvailability(versionId),
-      }))
-    )
-      .then(results => {
-        if (cancelled) return
-        setAvailableStrongVersions(
-          new Set(
-            results
-              .filter(({ availability }) => availability.status === 'available')
-              .map(({ versionId }) => versionId)
-          )
-        )
+    getStrongBibleSidecarAvailability(defaultStrongVersion)
+      .then(availability => {
+        if (!cancelled) setDefaultStrongAvailable(availability.status === 'available')
       })
       .catch(() => {
-        if (!cancelled) setAvailableStrongVersions(new Set())
+        if (!cancelled) setDefaultStrongAvailable(false)
       })
+
     return () => {
       cancelled = true
     }
-  }, [downloadCompletionSignal])
+  }, [defaultStrongVersion, downloadCompletionSignal])
 
-  const handleVersionChange = (versionId: VersionCode) => {
+  const selectReadingVersion = (versionId: VersionCode) => {
     dispatch(setDefaultBibleVersion(versionId))
   }
 
+  const selectStrongVersion = (versionId: VersionCode) => {
+    dispatch(setDefaultStrongBibleVersion(versionId as StrongBibleVersionId))
+  }
+
   return (
-    <Container>
-      <VersionCatalogHeader
-        title={t('bibleDefaults.title')}
-        hasBackButton
-        {...versionCatalog.headerProps}
+    <Container flex>
+      <Header hasBackButton title={t('bibleDefaults.title')} />
+
+      <Box flex px={20} pt={24} gap={16}>
+        <DefaultVersionCard
+          title={t('bibleDefaults.defaultReadingTitle')}
+          description={t('bibleDefaults.defaultVersionDescription')}
+          version={selectedVersion}
+          displayName={getVersionDisplayName(selectedVersion, language)}
+          onPress={() => readingSheetRef.current?.present()}
+        />
+
+        <DefaultVersionCard
+          title={t('bibleDefaults.defaultStrongTitle')}
+          description={t('bibleDefaults.defaultStrongDescription')}
+          version={selectedStrongVersion}
+          displayName={getVersionDisplayName(selectedStrongVersion, language)}
+          strongAvailable={isDefaultStrongAvailable}
+          onPress={() => strongSheetRef.current?.present()}
+        />
+      </Box>
+
+      <BibleDefaultSelectorSheet
+        kind="reading"
+        selectedVersionId={defaultVersion}
+        sheetRef={readingSheetRef}
+        title={t('bibleDefaults.chooseReadingTitle')}
+        onSelect={selectReadingVersion}
       />
-      <VersionCatalogList
-        sections={versionCatalog.sections}
-        grouping={versionCatalog.grouping}
-        query={versionCatalog.query}
-        openStyleInfo={versionCatalog.openStyleInfo}
-        scrollToTopKey={versionCatalog.filterKey}
-        listHeaderComponent={
-          <Box paddingHorizontal={20} paddingVertical={15}>
-            <Text fontSize={14} color="grey">
-              {t('bibleDefaults.defaultVersionDescription')}
-            </Text>
-            <SelectedVersionCard code={selectedVersion.id} name={selectedVersionName} />
-            <Text mt={28} fontSize={16} bold>
-              {t('Bible Strong par défaut')}
-            </Text>
-            <Text mt={6} fontSize={14} color="grey">
-              {t(
-                "Utilisée pour les concordances lorsque la Bible ouverte n'a pas de données Strong installées."
-              )}
-            </Text>
-            <Box mt={10} gap={8}>
-              {(Object.keys(STRONG_BIBLE_PUBLICATIONS) as StrongBibleVersionId[]).map(
-                strongVersionId => {
-                  const strongVersion = versions[strongVersionId]
-                  const isSelected = defaultStrongVersion === strongVersionId
-                  const isAvailable = availableStrongVersions.has(strongVersionId)
-                  return (
-                    <TouchableBox
-                      key={strongVersionId}
-                      row
-                      alignItems="center"
-                      p={12}
-                      borderRadius={10}
-                      bg={isSelected ? 'lightGrey' : 'reverse'}
-                      borderWidth={1}
-                      borderColor={isSelected ? 'primary' : 'border'}
-                      opacity={isAvailable ? 1 : 0.5}
-                      onPress={
-                        isAvailable
-                          ? () => dispatch(setDefaultStrongBibleVersion(strongVersionId))
-                          : undefined
-                      }
-                    >
-                      <Box flex>
-                        <Text bold={isSelected}>{strongVersion.name}</Text>
-                        <Text mt={2} fontSize={12} color="grey">
-                          {isAvailable
-                            ? t('{{version}} · installé', { version: strongVersionId })
-                            : t('{{version}} · à télécharger', { version: strongVersionId })}
-                        </Text>
-                      </Box>
-                      {isSelected && <FeatherIcon name="check" size={18} color="primary" />}
-                    </TouchableBox>
-                  )
-                }
-              )}
-            </Box>
-          </Box>
-        }
-        renderItem={({ item: version }) => (
-          <VersionSelectorItem
-            version={version}
-            isSelected={defaultVersion === version.id}
-            onChange={handleVersionChange}
-            onDownloadComplete={handleVersionChange}
-          />
-        )}
+      <BibleDefaultSelectorSheet
+        kind="strong"
+        selectedVersionId={defaultStrongVersion}
+        sheetRef={strongSheetRef}
+        title={t('bibleDefaults.chooseStrongTitle')}
+        onSelect={selectStrongVersion}
       />
-      {versionCatalog.modals}
     </Container>
   )
 }
