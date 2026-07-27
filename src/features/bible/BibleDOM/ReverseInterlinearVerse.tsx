@@ -14,9 +14,10 @@ interface Props {
   verse: Verse
   settings: RootState['user']['bible']['settings']
   selectedCode?: SelectedCode | null
+  isParallel: boolean
 }
 
-const ReverseInterlinearVerse = ({ verse, settings, selectedCode }: Props) => {
+const ReverseInterlinearVerse = ({ verse, settings, selectedCode, isParallel }: Props) => {
   const dispatch = useDispatch()
   const colors = settings.colors[settings.theme]
   const isHebrew = Number(verse.Livre) <= 39
@@ -77,7 +78,7 @@ const ReverseInterlinearVerse = ({ verse, settings, selectedCode }: Props) => {
                 padding: '5px 6px',
                 verticalAlign: 'baseline',
                 fontFamily: settings.fontFamily,
-                fontSize: 'inherit',
+                fontSize: scaleFontSize(isParallel ? 16 : 17, settings.fontSizeScale),
                 textAlign: 'left',
               }}
             >
@@ -95,7 +96,7 @@ const ReverseInterlinearVerse = ({ verse, settings, selectedCode }: Props) => {
                   dir={isHebrew ? 'rtl' : 'ltr'}
                   style={{
                     color: selected ? colors.reverse : colors.primary,
-                    fontSize: scaleFontSize(15, settings.fontSizeScale),
+                    fontSize: scaleFontSize(17, settings.fontSizeScale),
                     lineHeight: 1.2,
                   }}
                 >

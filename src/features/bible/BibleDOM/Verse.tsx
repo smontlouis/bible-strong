@@ -48,10 +48,11 @@ import {
 import { getCanonicalBibleNoteLabel, type CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import { isInterlinearModeEnabled, type InterlinearMode } from '~helpers/interlinearDisplayMode'
 import { getParallelVerseModeProps } from './verseRenderingModel'
+import { getBibleTextFontSize } from './verseTypography'
 
 const VerseText = styled('span')<RootStyles & { isParallel?: boolean }>(
   ({ isParallel, settings: { fontSizeScale, lineHeight } }) => ({
-    fontSize: scaleFontSize(isParallel ? 16 : 19, fontSizeScale),
+    fontSize: getBibleTextFontSize(Boolean(isParallel), fontSizeScale),
     lineHeight: scaleLineHeight(isParallel ? 26 : 32, lineHeight, fontSizeScale),
     whiteSpace: 'pre-line',
   })
@@ -868,6 +869,7 @@ const Verse = ({
             {verse.ReverseInterlinearSpans?.length ? (
               <React.Suspense fallback={<>{verse.Texte}</>}>
                 <ReverseInterlinearVerse
+                  isParallel={Boolean(isParallel)}
                   settings={settings}
                   verse={verse}
                   selectedCode={selectedCode}

@@ -2,8 +2,7 @@ import { useAtomValue } from 'jotai/react'
 import type { PrimitiveAtom } from 'jotai/vanilla'
 import { useEffect, useState, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Platform, Pressable } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Alert, Platform, Pressable } from 'react-native'
 
 import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 import { SheetView } from '~common/sheet-expo-ui'
@@ -41,7 +40,6 @@ const isActiveDownload = (status?: string) =>
 
 const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const { t } = useTranslation()
-  const insets = useSafeAreaInsets()
   const appLanguage = useLanguage()
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
@@ -88,11 +86,14 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
     return resolved
   }
 
-  const downloadLocale = async (
+  const requestDownload = async (
     locale: ResourceLanguage,
-    modeAfterDownload?: InterlinearDisplayMode
+    modeLabel: string,
+    modeAfterDownload?: InterlinearDisplayMode,
+    knownAvailability?: InterlinearSidecarAvailability
   ) => {
     const resolvedAvailability =
+      knownAvailability ??
       availability[locale] ??
       (await getInterlinearSidecarAvailability(locale).catch(() => undefined))
     if (!resolvedAvailability) return
@@ -104,11 +105,29 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
       return
     }
 
-    if (modeAfterDownload) {
-      actions.setPendingInterlinearDownload(true, modeAfterDownload, selectedLocale)
-    }
-    downloadManager.enqueue(
-      createInterlinearSidecarDownloadPlan(locale, resolvedAvailability.status)
+    const plan = createInterlinearSidecarDownloadPlan(locale, resolvedAvailability.status)
+    const size = Math.max(
+      1,
+      Math.ceil(plan.reduce((total, item) => total + item.estimatedSize, 0) / 1_000_000)
+    )
+    Alert.alert(
+      t('Télécharger'),
+      t(
+        'Les ressources manquantes pour « {{mode}} » représentent environ {{size}} Mo. Voulez-vous les télécharger ?',
+        { mode: modeLabel, size }
+      ),
+      [
+        { text: t('Annuler'), style: 'cancel' },
+        {
+          text: t('Télécharger'),
+          onPress: () => {
+            if (modeAfterDownload) {
+              actions.setPendingInterlinearDownload(true, modeAfterDownload, locale)
+            }
+            downloadManager.enqueue(plan)
+          },
+        },
+      ]
     )
   }
 
@@ -130,7 +149,14 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
       return
     }
 
-    await downloadLocale(preferredLocale, mode)
+    await requestDownload(
+      preferredLocale,
+      t(
+        mode === 'interlinear' ? 'Interlinéaire' : mode === 'strong' ? 'Strong' : 'Translittération'
+      ),
+      mode,
+      resolvedAvailability[preferredLocale]
+    )
   }
 
   const selectLocale = (locale: ResourceLanguage) => {
@@ -154,7 +180,16 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
             : t('Télécharger l’index interlinéaire {{language}}', { language: label })
         }
         disabled={downloading}
-        onPress={() => (available ? selectLocale(locale) : downloadLocale(locale))}
+        onPress={() =>
+          available
+            ? selectLocale(locale)
+            : requestDownload(
+                locale,
+                `${t('Interlinéaire')} ${label}`,
+                undefined,
+                availability[locale]
+              )
+        }
         style={({ pressed }) => ({ flex: 1, opacity: pressed ? 0.72 : 1 })}
       >
         <Box
@@ -183,6 +218,31 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
     )
   }
 
+  const hasLoadedAvailability = Boolean(availability.fr && availability.en)
+  const preferredAvailable = isAvailable(selectedLocale)
+  const fallbackLocale: ResourceLanguage = selectedLocale === 'fr' ? 'en' : 'fr'
+  const fallbackAvailable = isAvailable(fallbackLocale)
+  const interlinearDownloadRequired = hasLoadedAvailability && !preferredAvailable
+  const fallbackCapableDownloadRequired =
+    hasLoadedAvailability && !preferredAvailable && !fallbackAvailable
+  const pendingMode = bible.data.pendingInterlinearMode
+  const pendingLocale = bible.data.pendingInterlinearLocale
+  const pendingDownload = getDownload(pendingLocale ?? selectedLocale)
+  const getModeDownloadState = (mode: InterlinearDisplayMode) => {
+    const downloading =
+      Boolean(bible.data.pendingInterlinearDownload) &&
+      pendingMode === mode &&
+      pendingLocale === selectedLocale
+    return {
+      downloading,
+      progress: pendingDownload ? getDownloadItemProgress(pendingDownload) : 0,
+    }
+  }
+  const interlinearDownloadState = getModeDownloadState('interlinear')
+  const strongDownloadState = getModeDownloadState('strong')
+  const transliterationDownloadState = getModeDownloadState('transliteration')
+  const downloadLabel = (mode: string) => t('Télécharger les ressources pour {{mode}}', { mode })
+
   return (
     <Sheet ref={sheetRef} header={<SheetHeader title={t('Affichage du texte')} />}>
       <SheetView p={16} gap={10}>
@@ -207,6 +267,18 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
             description={t('Mot par mot')}
             selected={selectedMode === 'interlinear'}
             onPress={() => selectMode('interlinear')}
+            downloadRequired={interlinearDownloadRequired}
+            downloading={interlinearDownloadState.downloading}
+            downloadProgress={interlinearDownloadState.progress}
+            downloadAccessibilityLabel={downloadLabel(t('Interlinéaire'))}
+            onDownloadPress={() =>
+              requestDownload(
+                selectedLocale,
+                t('Interlinéaire'),
+                'interlinear',
+                availability[selectedLocale]
+              )
+            }
           >
             <Box alignSelf="center" alignItems={isHebrew ? 'flex-end' : 'flex-start'}>
               <Text fontSize={25} lineHeight={30} style={{ fontFamily: serifFontFamily }}>
@@ -228,6 +300,13 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
             description={t('Texte + numéros')}
             selected={selectedMode === 'strong'}
             onPress={() => selectMode('strong')}
+            downloadRequired={fallbackCapableDownloadRequired}
+            downloading={strongDownloadState.downloading}
+            downloadProgress={strongDownloadState.progress}
+            downloadAccessibilityLabel={downloadLabel(t('Strong'))}
+            onDownloadPress={() =>
+              requestDownload(selectedLocale, t('Strong'), 'strong', availability[selectedLocale])
+            }
           >
             <Box row center gap={7}>
               <Text fontSize={25} style={{ fontFamily: serifFontFamily }}>
@@ -243,6 +322,18 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
             description={t('Caractères latins')}
             selected={selectedMode === 'transliteration'}
             onPress={() => selectMode('transliteration')}
+            downloadRequired={fallbackCapableDownloadRequired}
+            downloading={transliterationDownloadState.downloading}
+            downloadProgress={transliterationDownloadState.progress}
+            downloadAccessibilityLabel={downloadLabel(t('Translittération'))}
+            onDownloadPress={() =>
+              requestDownload(
+                selectedLocale,
+                t('Translittération'),
+                'transliteration',
+                availability[selectedLocale]
+              )
+            }
           >
             <Text
               fontSize={20}

@@ -135,4 +135,26 @@ describe('BibleDisplayModeCard', () => {
     expect(pressable.props.disabled).toBe(true)
     expect(downloadIndicator.props.children.props.progress).toBe(0.42)
   })
+
+  it('keeps progress in place of the list radio while a confirmed download is active', () => {
+    const card = BibleDisplayModeCard({
+      layout: 'list',
+      label: 'Strong',
+      description: 'Texte + numéros',
+      selected: false,
+      onPress: jest.fn(),
+      downloadRequired: false,
+      downloading: true,
+      downloadProgress: 0.42,
+      onDownloadPress: jest.fn(),
+      children: <span>Aperçu</span>,
+    })
+    const pressable = getCardPressable(card)
+    const content = pressable.props.children as React.ReactElement<{ children: React.ReactNode }>
+    const downloadIndicator = React.Children.toArray(content.props.children).at(
+      0
+    ) as React.ReactElement<{ children: React.ReactElement<{ progress?: number }> }>
+
+    expect(downloadIndicator.props.children.props.progress).toBe(0.42)
+  })
 })

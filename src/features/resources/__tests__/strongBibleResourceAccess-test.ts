@@ -96,6 +96,99 @@ describe('strongBibleResourceAccess', () => {
     )
   })
 
+  it('uses the configured default before same-language fallbacks', async () => {
+    const dependencies = createDependencies()
+    dependencies.getAvailability.mockImplementation(async versionId =>
+      versionId === 'LSG' ? available('LSG') : { status: 'missing' }
+    )
+    dependencies.getVerseText.mockResolvedValue('Au commencement')
+    dependencies.getVerseSpans.mockResolvedValue([])
+    const access = createStrongBibleResourceAccess(dependencies)
+
+    const result = await access.loadVerse({
+      currentVersionId: 'ASV',
+      defaultVersionId: 'LSG',
+      fallbackVersionIds: ['KJV', 'NASB2020', 'ASV'],
+      book: 1,
+      chapter: 1,
+      verse: 1,
+    })
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: 'available',
+        provenance: {
+          versionId: 'LSG',
+          datasetId: 'LSG',
+          isFallback: true,
+        },
+      })
+    )
+    expect(dependencies.getAvailability).toHaveBeenNthCalledWith(1, 'ASV')
+    expect(dependencies.getAvailability).toHaveBeenNthCalledWith(2, 'LSG')
+  })
+
+  it('keeps French fallbacks after an unavailable English default', async () => {
+    const dependencies = createDependencies()
+    dependencies.getAvailability.mockImplementation(async versionId =>
+      versionId === 'DBY' ? available('DBY') : { status: 'missing' }
+    )
+    dependencies.getVerseText.mockResolvedValue('Au commencement')
+    dependencies.getVerseSpans.mockResolvedValue([])
+    const access = createStrongBibleResourceAccess(dependencies)
+
+    const result = await access.loadVerse({
+      currentVersionId: 'BFC',
+      defaultVersionId: 'KJV',
+      book: 1,
+      chapter: 1,
+      verse: 1,
+    })
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: 'available',
+        provenance: expect.objectContaining({ versionId: 'DBY' }),
+      })
+    )
+    expect(dependencies.getAvailability).toHaveBeenNthCalledWith(1, 'KJV')
+    expect(dependencies.getAvailability).toHaveBeenNthCalledWith(2, 'LSG')
+    expect(dependencies.getAvailability).toHaveBeenNthCalledWith(3, 'DBY')
+  })
+
+  it('keeps English fallbacks after an unavailable French default', async () => {
+    const dependencies = createDependencies()
+    dependencies.getAvailability.mockImplementation(async versionId =>
+      versionId === 'KJV'
+        ? {
+            ...available('LSG'),
+            versionId: 'KJV',
+            datasetId: 'KJV',
+          }
+        : { status: 'missing' }
+    )
+    dependencies.getVerseText.mockResolvedValue('In the beginning')
+    dependencies.getVerseSpans.mockResolvedValue([])
+    const access = createStrongBibleResourceAccess(dependencies)
+
+    const result = await access.loadVerse({
+      currentVersionId: 'NIV',
+      defaultVersionId: 'LSG',
+      book: 1,
+      chapter: 1,
+      verse: 1,
+    })
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: 'available',
+        provenance: expect.objectContaining({ versionId: 'KJV' }),
+      })
+    )
+    expect(dependencies.getAvailability).toHaveBeenNthCalledWith(1, 'LSG')
+    expect(dependencies.getAvailability).toHaveBeenNthCalledWith(2, 'KJV')
+  })
+
   it('uses the next installed Strong Bible from the default fallback order', async () => {
     const dependencies = createDependencies()
     dependencies.getAvailability

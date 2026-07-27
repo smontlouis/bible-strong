@@ -88,12 +88,15 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const [downloadPlanIds, setDownloadPlanIds] = useState<
     Partial<Record<Exclude<StrongMode, 'hidden'>, string[]>>
   >({})
+  const [modeAwaitingSelection, setModeAwaitingSelection] = useState<
+    Exclude<StrongMode, 'hidden'> | undefined
+  >(bible.data.pendingStrongModeVersionId === version ? bible.data.pendingStrongMode : undefined)
   const isHebrew = bible.data.selectedBook.Numero <= 39
-  const originalPreview = isHebrew ? 'בְּרֵאשִׁית' : 'λόγος'
-  const translationPreview = appLanguage === 'fr' ? 'commencement' : 'beginning'
-  const transliterationPreview = isHebrew ? 'be.re.Shit' : 'logos'
-  const morphologyPreview = isHebrew ? 'HNcfsa' : 'GNcmsn'
-  const strongPreview = isHebrew ? 'H7225' : 'G3056'
+  const originalPreview = isHebrew ? 'אֱלֹהִים' : 'θεός'
+  const translationPreview = appLanguage === 'fr' ? 'Dieu' : 'God'
+  const transliterationPreview = isHebrew ? 'Elohim' : 'theos'
+  const morphologyPreview = isHebrew ? 'HNcmpa' : 'GNcmsn'
+  const strongPreview = isHebrew ? 'H0430' : 'G2316'
   const serifFontFamily = Platform.OS === 'ios' ? 'Georgia' : 'serif'
 
   useEffect(() => {
@@ -155,6 +158,18 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const strongDownloadPresentation = getModeDownloadPresentation('visible')
   const reverseInterlinearDownloadPresentation = getModeDownloadPresentation('reverse-interlinear')
 
+  useEffect(() => {
+    if (bible.data.pendingStrongModeVersionId === version && bible.data.pendingStrongMode) {
+      setModeAwaitingSelection(bible.data.pendingStrongMode)
+    }
+  }, [bible.data.pendingStrongMode, bible.data.pendingStrongModeVersionId, version])
+
+  useEffect(() => {
+    if (!modeAwaitingSelection || selectedMode !== modeAwaitingSelection) return
+    setModeAwaitingSelection(undefined)
+    sheetRef.current?.dismiss()
+  }, [modeAwaitingSelection, selectedMode, sheetRef])
+
   const selectMode = (mode: StrongMode) => {
     if (!isStrongCapableBibleVersion(version)) return
     if (
@@ -163,6 +178,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
       (mode === 'reverse-interlinear' && reverseInterlinearAvailable)
     ) {
       actions.setStrongMode(mode)
+      sheetRef.current?.dismiss()
     }
   }
 
@@ -185,6 +201,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
       })
       if (!plan.items.length) {
         actions.setStrongMode(mode)
+        sheetRef.current?.dismiss()
         return
       }
 
@@ -201,6 +218,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
           {
             text: t('Télécharger'),
             onPress: () => {
+              setModeAwaitingSelection(mode)
               setDownloadPlanIds(current => ({
                 ...current,
                 [mode]: plan.items.map(item => item.id),
@@ -226,67 +244,73 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const hasLoadedAvailability = Boolean(availability.strong)
   const strongDownloadRequired = hasLoadedAvailability && !strongAvailable
   const reverseInterlinearDownloadRequired = hasLoadedAvailability && !reverseInterlinearAvailable
+  const strongDownloading =
+    strongDownloadPresentation.status === 'active' ||
+    (modeAwaitingSelection === 'visible' && strongDownloadPresentation.status !== 'failed')
+  const reverseInterlinearDownloading =
+    reverseInterlinearDownloadPresentation.status === 'active' ||
+    (modeAwaitingSelection === 'reverse-interlinear' &&
+      reverseInterlinearDownloadPresentation.status !== 'failed')
 
   const downloadLabel = (mode: string) => t('Télécharger les ressources pour {{mode}}', { mode })
 
   return (
     <Sheet ref={sheetRef} header={<SheetHeader title={t('Affichage du texte')} />}>
       <SheetView p={16} gap={10}>
-        <Box row gap={10}>
-          <BibleDisplayModeCard
-            label={t('Texte')}
-            description={t('Traduction seule')}
-            selected={selectedMode === 'hidden'}
-            onPress={() => selectMode('hidden')}
-          >
-            <Text fontSize={20} lineHeight={26} textAlign="center">
+        <BibleDisplayModeCard
+          layout="list"
+          label={t('Texte')}
+          description={t('Traduction seule')}
+          selected={selectedMode === 'hidden'}
+          onPress={() => selectMode('hidden')}
+        >
+          <Text fontSize={16} lineHeight={21} textAlign="right">
+            {translationPreview}
+          </Text>
+        </BibleDisplayModeCard>
+        <BibleDisplayModeCard
+          layout="list"
+          label={t('Strong')}
+          description={t('Texte + numéros')}
+          selected={selectedMode === 'visible'}
+          onPress={() => selectMode('visible')}
+          downloadRequired={strongDownloadRequired}
+          downloading={strongDownloading}
+          downloadProgress={strongDownloadPresentation.progress}
+          downloadAccessibilityLabel={downloadLabel(t('Strong'))}
+          onDownloadPress={() => requestDownload('visible')}
+        >
+          <Box row center gap={4}>
+            <Text fontSize={16}>{translationPreview}</Text>
+            <Text fontSize={10} color="tertiary" style={{ fontFamily: serifFontFamily }}>
+              {strongPreview}
+            </Text>
+          </Box>
+        </BibleDisplayModeCard>
+        <BibleDisplayModeCard
+          layout="list"
+          label={t('Interlinéaire inversé')}
+          description={t('Traduction puis original')}
+          selected={selectedMode === 'reverse-interlinear'}
+          onPress={() => selectMode('reverse-interlinear')}
+          downloadRequired={reverseInterlinearDownloadRequired}
+          downloading={reverseInterlinearDownloading}
+          downloadProgress={reverseInterlinearDownloadPresentation.progress}
+          downloadAccessibilityLabel={downloadLabel(t('Interlinéaire inversé'))}
+          onDownloadPress={() => requestDownload('reverse-interlinear')}
+        >
+          <Box alignItems="flex-end">
+            <Text bold fontSize={14} lineHeight={18}>
               {translationPreview}
             </Text>
-          </BibleDisplayModeCard>
-          <BibleDisplayModeCard
-            label={t('Interlinéaire inversé')}
-            description={t('Traduction puis original')}
-            selected={selectedMode === 'reverse-interlinear'}
-            onPress={() => selectMode('reverse-interlinear')}
-            downloadRequired={reverseInterlinearDownloadRequired}
-            downloading={reverseInterlinearDownloadPresentation.status === 'active'}
-            downloadProgress={reverseInterlinearDownloadPresentation.progress}
-            downloadAccessibilityLabel={downloadLabel(t('Interlinéaire inversé'))}
-            onDownloadPress={() => requestDownload('reverse-interlinear')}
-          >
-            <Box alignSelf="center" alignItems="flex-start">
-              <Text bold fontSize={16} lineHeight={21}>
-                {translationPreview}
-              </Text>
-              <Text fontSize={19} lineHeight={24} style={{ fontFamily: serifFontFamily }}>
-                {originalPreview}
-              </Text>
-              <Text fontSize={10} color="tertiary">
-                {`${transliterationPreview} · ${morphologyPreview} · ${strongPreview}`}
-              </Text>
-            </Box>
-          </BibleDisplayModeCard>
-        </Box>
-        <Box row>
-          <BibleDisplayModeCard
-            label={t('Strong')}
-            description={t('Texte + numéros')}
-            selected={selectedMode === 'visible'}
-            onPress={() => selectMode('visible')}
-            downloadRequired={strongDownloadRequired}
-            downloading={strongDownloadPresentation.status === 'active'}
-            downloadProgress={strongDownloadPresentation.progress}
-            downloadAccessibilityLabel={downloadLabel(t('Strong'))}
-            onDownloadPress={() => requestDownload('visible')}
-          >
-            <Box row center gap={7}>
-              <Text fontSize={20}>{translationPreview}</Text>
-              <Text fontSize={12} color="tertiary" style={{ fontFamily: serifFontFamily }}>
-                {strongPreview}
-              </Text>
-            </Box>
-          </BibleDisplayModeCard>
-        </Box>
+            <Text fontSize={16} lineHeight={20} style={{ fontFamily: serifFontFamily }}>
+              {originalPreview}
+            </Text>
+            <Text fontSize={8} color="tertiary">
+              {`${transliterationPreview} · ${morphologyPreview} · ${strongPreview}`}
+            </Text>
+          </Box>
+        </BibleDisplayModeCard>
       </SheetView>
     </Sheet>
   )

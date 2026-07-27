@@ -4,11 +4,13 @@ import { Pressable } from 'react-native'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Progress from '~common/ui/Progress'
+import Radio from '~common/ui/Radio'
 import Text from '~common/ui/Text'
 
 type Props = {
   label: string
   description: string
+  layout?: 'card' | 'list'
   selected: boolean
   onPress: () => void
   downloadRequired?: boolean
@@ -22,6 +24,7 @@ type Props = {
 const BibleDisplayModeCard = ({
   label,
   description,
+  layout = 'card',
   selected,
   onPress,
   downloadRequired = false,
@@ -30,69 +33,103 @@ const BibleDisplayModeCard = ({
   downloadAccessibilityLabel,
   onDownloadPress,
   children,
-}: Props) => (
-  <Box flex height={148} position="relative">
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected, disabled: downloading }}
-      accessibilityLabel={
-        downloadRequired ? downloadAccessibilityLabel : `${label}. ${description}`
-      }
-      disabled={downloading}
-      onPress={downloadRequired ? onDownloadPress : onPress}
-      style={({ pressed }) => ({ flex: 1, opacity: pressed ? 0.72 : 1 })}
-    >
-      <Box
-        height={148}
-        p={12}
-        borderRadius={16}
-        borderWidth={selected ? 2 : 1}
-        borderColor={selected ? 'primary' : 'border'}
-        bg={selected ? 'lightPrimary' : 'reverse'}
-        bgOpacity="050"
-        opacity={downloadRequired ? 0.72 : 1}
+}: Props) => {
+  const isList = layout === 'list'
+  const showDownloadControl = downloadRequired || downloading
+
+  return (
+    <Box flex={isList ? undefined : 1} height={isList ? 92 : 148} position="relative">
+      <Pressable
+        accessibilityRole={isList && !showDownloadControl ? 'radio' : 'button'}
+        accessibilityState={
+          isList && !showDownloadControl
+            ? { checked: selected, disabled: downloading }
+            : { selected, disabled: downloading }
+        }
+        accessibilityLabel={
+          showDownloadControl ? downloadAccessibilityLabel : `${label}. ${description}`
+        }
+        disabled={downloading}
+        onPress={downloadRequired ? onDownloadPress : onPress}
+        style={({ pressed }) => ({ flex: 1, opacity: pressed ? 0.72 : 1 })}
       >
-        <Text
-          bold
-          fontSize={15}
-          color={selected ? 'primary' : 'default'}
-          textAlign="center"
-          numberOfLines={1}
+        <Box
+          height={isList ? 92 : 148}
+          p={isList ? 16 : 12}
+          borderRadius={16}
+          borderWidth={isList ? 1 : selected ? 2 : 1}
+          borderColor={isList ? 'border' : selected ? 'primary' : 'border'}
+          bg={isList ? 'reverse' : selected ? 'lightPrimary' : 'reverse'}
+          bgOpacity="050"
+          opacity={downloadRequired ? 0.72 : 1}
+          row={isList}
+          alignItems={isList ? 'center' : undefined}
+          gap={isList ? 12 : undefined}
         >
-          {label}
-        </Text>
-        <Box flex center>
-          {children}
-        </Box>
-        <Text
-          fontSize={11}
-          color="tertiary"
-          textAlign="center"
-          numberOfLines={1}
-          px={downloadRequired ? 28 : 0}
-        >
-          {description}
-        </Text>
-        {downloadRequired && (
-          <Box
-            position="absolute"
-            bottom={0}
-            left={0}
-            width={44}
-            height={44}
-            center
-            pointerEvents="none"
-          >
-            {downloading ? (
-              <Progress progress={Math.max(downloadProgress, 0.04)} size={22} thickness={2.5} />
+          {isList &&
+            (showDownloadControl ? (
+              <Box width={22} height={22} center pointerEvents="none">
+                {downloading ? (
+                  <Progress progress={Math.max(downloadProgress, 0.04)} size={22} thickness={2.5} />
+                ) : (
+                  <FeatherIcon name="download-cloud" size={19} color="default" />
+                )}
+              </Box>
             ) : (
-              <FeatherIcon name="download-cloud" size={17} color="primary" />
+              <Radio selected={selected} size={22} />
+            ))}
+          <Box flex={isList ? 1.15 : undefined} justifyContent={isList ? 'center' : undefined}>
+            <Text
+              bold
+              fontSize={isList ? 14 : 15}
+              color={selected ? 'primary' : 'default'}
+              textAlign={isList ? 'left' : 'center'}
+              numberOfLines={isList ? 2 : 1}
+              lineHeight={isList ? 17 : undefined}
+            >
+              {label}
+            </Text>
+            {isList && (
+              <Text fontSize={10} color="tertiary" numberOfLines={2} lineHeight={13} mt={2}>
+                {description}
+              </Text>
             )}
           </Box>
-        )}
-      </Box>
-    </Pressable>
-  </Box>
-)
+          <Box flex={1} center={!isList} alignItems={isList ? 'flex-end' : undefined}>
+            {children}
+          </Box>
+          {!isList && (
+            <Text
+              fontSize={11}
+              color="tertiary"
+              textAlign="center"
+              numberOfLines={1}
+              px={showDownloadControl ? 28 : 0}
+            >
+              {description}
+            </Text>
+          )}
+          {showDownloadControl && !isList && (
+            <Box
+              position="absolute"
+              bottom={0}
+              left={0}
+              width={44}
+              height={44}
+              center
+              pointerEvents="none"
+            >
+              {downloading ? (
+                <Progress progress={Math.max(downloadProgress, 0.04)} size={22} thickness={2.5} />
+              ) : (
+                <FeatherIcon name="download-cloud" size={17} color="default" />
+              )}
+            </Box>
+          )}
+        </Box>
+      </Pressable>
+    </Box>
+  )
+}
 
 export default BibleDisplayModeCard

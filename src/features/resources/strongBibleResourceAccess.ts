@@ -13,8 +13,7 @@ import {
   type StrongBibleVerseCountByBook,
 } from '~helpers/strongBibleSidecar'
 import {
-  ENGLISH_STRONG_BIBLE_PRIORITY,
-  FRENCH_STRONG_BIBLE_PRIORITY,
+  getStrongBibleFallbackPriority,
   isStrongCapableBibleVersion,
   resolveStrongBibleVersion,
   type StrongBibleDatasetId,
@@ -153,22 +152,15 @@ export const createStrongBibleResourceAccess = (
       }
   > => {
     const currentVersionId = resolveStrongBibleVersion(request.currentVersionId).versionId
-    const useEnglishPriority =
-      ENGLISH_STRONG_BIBLE_PRIORITY.includes(
-        currentVersionId as (typeof ENGLISH_STRONG_BIBLE_PRIORITY)[number]
-      ) ||
-      ENGLISH_STRONG_BIBLE_PRIORITY.includes(
-        request.defaultVersionId as (typeof ENGLISH_STRONG_BIBLE_PRIORITY)[number]
-      )
-    const languagePriority = useEnglishPriority
-      ? ENGLISH_STRONG_BIBLE_PRIORITY
-      : FRENCH_STRONG_BIBLE_PRIORITY
-    const fallbackVersionIds = request.fallbackVersionIds ?? [
-      ...(useEnglishPriority ? [] : [request.defaultVersionId]),
-      ...languagePriority,
-    ]
+    const languagePriority = getStrongBibleFallbackPriority(currentVersionId)
+    const fallbackVersionIds = request.fallbackVersionIds ?? languagePriority
     const candidates = [
-      ...new Set([request.preferredVersionId, currentVersionId, ...fallbackVersionIds]),
+      ...new Set([
+        request.preferredVersionId,
+        currentVersionId,
+        request.defaultVersionId,
+        ...fallbackVersionIds,
+      ]),
     ].filter((candidate): candidate is string => Boolean(candidate))
     const attempts: StrongBibleAttempt[] = []
 

@@ -576,10 +576,7 @@ const Header = ({
           thickness={2.5}
         />
       ) : (
-        <InterlinearMark
-          highlighted={isInterlinearModeEnabled(interlinearMode)}
-          originalLanguage={bookNumber <= 39 ? 'hebrew' : 'greek'}
-        />
+        <InterlinearMark highlighted={isInterlinearModeEnabled(interlinearMode)} />
       )}
     </AnimatedTouchableBox>
   ) : null
