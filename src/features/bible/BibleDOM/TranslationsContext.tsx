@@ -20,6 +20,7 @@ export interface BibleDOMTranslations {
   inserting: string
   resetDatabase: string
   openCanonicalBibleNote: string
+  pericopeIndex: string
 }
 
 const TranslationsContext = createContext<BibleDOMTranslations | null>(null)

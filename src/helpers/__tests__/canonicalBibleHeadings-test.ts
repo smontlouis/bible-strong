@@ -1,6 +1,36 @@
-import { getCanonicalChapterPericope } from '../canonicalBibleHeadings'
+import {
+  getCanonicalBibleHeadingReferences,
+  getCanonicalChapterPericope,
+} from '../canonicalBibleHeadings'
 
 describe('canonicalBibleHeadings', () => {
+  it('preserves the exact OSIS targets and text positions of parallel references', () => {
+    expect(
+      getCanonicalBibleHeadingReferences({
+        offset: 0,
+        order: 0,
+        kind: 'parallel',
+        type: 'parallel',
+        text: ' (John 1:1–5; Hebrews 11:1–3) ',
+        markup:
+          '<title type="parallel"> (<reference osisref="John.1.1-John.1.5" type="parallel">John 1:1–5</reference>; <reference osisref="Heb.11.1-Heb.11.3" type="parallel">Hebrews 11:1–3</reference>) </title>',
+      })
+    ).toEqual([
+      {
+        osis: 'John.1.1-John.1.5',
+        text: 'John 1:1–5',
+        start: 1,
+        end: 11,
+      },
+      {
+        osis: 'Heb.11.1-Heb.11.3',
+        text: 'Hebrews 11:1–3',
+        start: 13,
+        end: 27,
+      },
+    ])
+  })
+
   it('maps V4 headings to the existing chapter pericope contract', () => {
     expect(
       getCanonicalChapterPericope([

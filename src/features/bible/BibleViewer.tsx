@@ -823,6 +823,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     setUnifiedTagsModal,
     onOpenResourceForVerse: openResourceForVerse,
     onOpenBookmarkModal: handleOpenBookmarkModal,
+    onOpenCanonicalBibleReference: handleCanonicalBibleReferencePress,
     expandContext: actions.expandContext,
     collapseContext: actions.collapseContext,
     clearFocusVerses: actions.clearFocusVerses,

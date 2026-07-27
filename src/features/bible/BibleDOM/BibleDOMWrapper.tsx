@@ -86,6 +86,7 @@ import {
   NAVIGATE_TO_VERSION,
   OPEN_BOOKMARK_MODAL,
   OPEN_CANONICAL_BIBLE_NOTE,
+  OPEN_CANONICAL_BIBLE_REFERENCE,
   OPEN_CROSS_VERSION_MODAL,
   OPEN_HIGHLIGHT_TAGS,
   OPEN_VERSE_TAGS_MODAL,
@@ -217,6 +218,7 @@ export type WebViewProps = {
   setUnifiedTagsModal?: (payload: HighlightTagsModalPayload) => void
   onOpenResourceForVerse?: (resourceType: BibleResource, verseKey: string) => void
   onOpenBookmarkModal?: (bookmark: Bookmark) => void
+  onOpenCanonicalBibleReference?: (osis: string) => void
   expandContext?: () => void
   collapseContext?: () => void
   clearFocusVerses?: () => void
@@ -337,6 +339,7 @@ export const BibleDOMWrapper = ({
   versesWithNonHighlightTags,
   onOpenResourceForVerse,
   onOpenStudyRelationsModal,
+  onOpenCanonicalBibleReference,
   openNote,
   openLink,
   removeParallelVersion,
@@ -421,6 +424,7 @@ export const BibleDOMWrapper = ({
     inserting: t('bible.error.inserting'),
     resetDatabase: t('bible.error.resetDatabase'),
     openCanonicalBibleNote: t('Afficher la note'),
+    pericopeIndex: t('Péricopes'),
   }
   const dispatch: Dispatch = async action => {
     appLogger.debug('webview', 'bible_dom.dispatch', { actionType: action.type })
@@ -612,6 +616,12 @@ export const BibleDOMWrapper = ({
       case OPEN_CANONICAL_BIBLE_NOTE: {
         const note = getCanonicalBibleNotePayload(action.payload)
         if (note) onOpenCanonicalBibleNote?.(note)
+        break
+      }
+
+      case OPEN_CANONICAL_BIBLE_REFERENCE: {
+        const osis = getStringPayload(action.payload)
+        if (osis) onOpenCanonicalBibleReference?.(osis)
         break
       }
 
