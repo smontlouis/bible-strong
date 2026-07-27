@@ -1,8 +1,34 @@
 import { getDownloadItemProgress, type DownloadItemState } from '~state/downloadQueue'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
+import type { StrongBibleVersionId, StrongMode } from '~helpers/strongBiblePublications'
 
 export type StrongModeDownloadPresentation = {
   status: 'idle' | 'active' | 'completed' | 'failed'
   progress: number
+}
+
+export const getConfirmedStrongModeDownloadIds = ({
+  mode,
+  version,
+  requestedIds,
+  pendingVersion,
+  pendingMode,
+  pendingInterlinearLocale,
+}: {
+  mode: Exclude<StrongMode, 'hidden'>
+  version: StrongBibleVersionId
+  requestedIds?: string[]
+  pendingVersion?: StrongBibleVersionId
+  pendingMode?: Exclude<StrongMode, 'hidden'>
+  pendingInterlinearLocale?: ResourceLanguage
+}): string[] => {
+  if (requestedIds?.length) return requestedIds
+  if (pendingVersion !== version || pendingMode !== mode) return []
+
+  const strongIds = [`bible:${version}`, `bible-strong:${version}`]
+  return mode === 'reverse-interlinear'
+    ? [...strongIds, 'bible:BHG', `bible-interlinear:BHG:${pendingInterlinearLocale ?? 'fr'}`]
+    : strongIds
 }
 
 const isActive = (state?: DownloadItemState) =>

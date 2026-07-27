@@ -32,7 +32,10 @@ import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import { useBibleTabActions, type BibleTab } from '~state/tabs'
 
 import BibleDisplayModeCard from './BibleDisplayModeCard'
-import { getDownloadPlanPresentation } from './strongModeDownloadState'
+import {
+  getConfirmedStrongModeDownloadIds,
+  getDownloadPlanPresentation,
+} from './strongModeDownloadState'
 
 type Props = {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -43,9 +46,6 @@ type AvailabilityState = {
   strong?: StrongBibleSidecarAvailability
   interlinear: InterlinearAvailabilityCandidate[]
 }
-
-const isActiveDownload = (status?: string) =>
-  status === 'queued' || status === 'downloading' || status === 'inserting'
 
 const readStrongAvailability = async (
   version: string
@@ -85,7 +85,6 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const frenchInterlinearDownload = useDownloadItemStatus('bible-interlinear:BHG:fr')
   const englishInterlinearDownload = useDownloadItemStatus('bible-interlinear:BHG:en')
   const [availability, setAvailability] = useState<AvailabilityState>({ interlinear: [] })
-  const [preparingMode, setPreparingMode] = useState<Exclude<StrongMode, 'hidden'>>()
   const [downloadPlanIds, setDownloadPlanIds] = useState<
     Partial<Record<Exclude<StrongMode, 'hidden'>, string[]>>
   >({})
@@ -128,12 +127,6 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
     ({ availability: sidecarAvailability }) => sidecarAvailability.status === 'available'
   )
   const reverseInterlinearAvailable = strongAvailable && Boolean(installedInterlinear)
-  const strongDownloading = isActiveDownload(strongDownload?.status)
-  const reverseInterlinearDownloading =
-    strongDownloading ||
-    isActiveDownload(bhgDownload?.status) ||
-    isActiveDownload(frenchInterlinearDownload?.status) ||
-    isActiveDownload(englishInterlinearDownload?.status)
   const downloadStatesById = new Map(
     [
       bibleDownload,
@@ -143,13 +136,24 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
       englishInterlinearDownload,
     ].flatMap(state => (state ? [[state.item.id, state] as const] : []))
   )
-  const getModeDownloadProgress = (mode: Exclude<StrongMode, 'hidden'>) =>
-    getDownloadPlanPresentation(
-      (downloadPlanIds[mode] ?? []).flatMap(id => {
+  const getModeDownloadPresentation = (mode: Exclude<StrongMode, 'hidden'>) => {
+    const confirmedIds = getConfirmedStrongModeDownloadIds({
+      mode,
+      version: version as StrongBibleVersionId,
+      requestedIds: downloadPlanIds[mode],
+      pendingVersion: bible.data.pendingStrongModeVersionId,
+      pendingMode: bible.data.pendingStrongMode,
+      pendingInterlinearLocale: bible.data.pendingStrongInterlinearLocale,
+    })
+    return getDownloadPlanPresentation(
+      confirmedIds.flatMap(id => {
         const state = downloadStatesById.get(id)
         return state ? [state] : []
       })
-    ).progress
+    )
+  }
+  const strongDownloadPresentation = getModeDownloadPresentation('visible')
+  const reverseInterlinearDownloadPresentation = getModeDownloadPresentation('reverse-interlinear')
 
   const selectMode = (mode: StrongMode) => {
     if (!isStrongCapableBibleVersion(version)) return
@@ -162,23 +166,15 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
     }
   }
 
-  const requestDownload = async (mode: Exclude<StrongMode, 'hidden'>) => {
-    if (!isStrongCapableBibleVersion(version) || preparingMode) return
-    setPreparingMode(mode)
+  const requestDownload = (mode: Exclude<StrongMode, 'hidden'>) => {
+    if (!isStrongCapableBibleVersion(version)) return
     try {
-      const strong = await readStrongAvailability(version)
+      const strong = availability.strong
       if (!strong) throw new Error('STRONG_AVAILABILITY_UNAVAILABLE')
-      const interlinear =
-        mode === 'reverse-interlinear'
-          ? await readInterlinearAvailabilities(version, appLanguage)
-          : []
+      const interlinear = mode === 'reverse-interlinear' ? availability.interlinear : []
       if (mode === 'reverse-interlinear' && !interlinear.length) {
         throw new Error('INTERLINEAR_AVAILABILITY_UNAVAILABLE')
       }
-      setAvailability(current => ({
-        strong,
-        interlinear: mode === 'reverse-interlinear' ? interlinear : current.interlinear,
-      }))
 
       const versionId = version as StrongBibleVersionId
       const plan = createStrongModeDownloadPlan({
@@ -224,8 +220,6 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
         t('Erreur'),
         t("Une erreur est survenue. Assurez-vous d'être connecté à Internet.")
       )
-    } finally {
-      setPreparingMode(undefined)
     }
   }
 
@@ -255,8 +249,8 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
             selected={selectedMode === 'reverse-interlinear'}
             onPress={() => selectMode('reverse-interlinear')}
             downloadRequired={reverseInterlinearDownloadRequired}
-            downloading={reverseInterlinearDownloading || preparingMode === 'reverse-interlinear'}
-            downloadProgress={getModeDownloadProgress('reverse-interlinear')}
+            downloading={reverseInterlinearDownloadPresentation.status === 'active'}
+            downloadProgress={reverseInterlinearDownloadPresentation.progress}
             downloadAccessibilityLabel={downloadLabel(t('Interlinéaire inversé'))}
             onDownloadPress={() => requestDownload('reverse-interlinear')}
           >
@@ -280,8 +274,8 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
             selected={selectedMode === 'visible'}
             onPress={() => selectMode('visible')}
             downloadRequired={strongDownloadRequired}
-            downloading={strongDownloading || preparingMode === 'visible'}
-            downloadProgress={getModeDownloadProgress('visible')}
+            downloading={strongDownloadPresentation.status === 'active'}
+            downloadProgress={strongDownloadPresentation.progress}
             downloadAccessibilityLabel={downloadLabel(t('Strong'))}
             onDownloadPress={() => requestDownload('visible')}
           >

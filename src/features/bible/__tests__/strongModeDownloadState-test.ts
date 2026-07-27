@@ -1,6 +1,7 @@
 import type { DownloadItemState } from '~state/downloadQueue'
 
 import {
+  getConfirmedStrongModeDownloadIds,
   getDownloadPlanPresentation,
   getStrongModeDownloadPresentation,
 } from '../strongModeDownloadState'
@@ -122,5 +123,38 @@ describe('getDownloadPlanPresentation', () => {
       status: 'active',
       progress: 0.44,
     })
+  })
+})
+
+describe('getConfirmedStrongModeDownloadIds', () => {
+  it('does not expose unrelated active downloads before confirmation', () => {
+    expect(
+      getConfirmedStrongModeDownloadIds({
+        mode: 'reverse-interlinear',
+        version: 'BSB',
+      })
+    ).toEqual([])
+  })
+
+  it('uses the exact plan after confirmation', () => {
+    expect(
+      getConfirmedStrongModeDownloadIds({
+        mode: 'reverse-interlinear',
+        version: 'BSB',
+        requestedIds: ['bible-strong:BSB', 'bible-interlinear:BHG:en'],
+      })
+    ).toEqual(['bible-strong:BSB', 'bible-interlinear:BHG:en'])
+  })
+
+  it('restores the confirmed plan when the sheet is reopened', () => {
+    expect(
+      getConfirmedStrongModeDownloadIds({
+        mode: 'reverse-interlinear',
+        version: 'BSB',
+        pendingVersion: 'BSB',
+        pendingMode: 'reverse-interlinear',
+        pendingInterlinearLocale: 'en',
+      })
+    ).toEqual(['bible:BSB', 'bible-strong:BSB', 'bible:BHG', 'bible-interlinear:BHG:en'])
   })
 })
