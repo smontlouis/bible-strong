@@ -5525,6 +5525,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/query-core@npm:5.101.4":
+  version: 5.101.4
+  resolution: "@tanstack/query-core@npm:5.101.4"
+  checksum: 10c0/a407960303431e6498c6518cf6f8cc7283d3e4a95dbdc5e9fa42c217b9dd7afaffb82a4f2d36b38f578f745e8cf69ff8551abb947f5abcc0a290f3e3e75dc654
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query@npm:^5.101.4":
+  version: 5.101.4
+  resolution: "@tanstack/react-query@npm:5.101.4"
+  dependencies:
+    "@tanstack/query-core": "npm:5.101.4"
+  peerDependencies:
+    react: ^18 || ^19
+  checksum: 10c0/92e7c5b44740e753b05a6a19c166ea1a000df64c1bf5edb315d08a5b555a9f16a9d35288ac38f650bd38fc3015b135c392749fd6db24d09db42bfaf758d119fa
+  languageName: node
+  linkType: hard
+
 "@testing-library/jest-dom@npm:^6.9.1":
   version: 6.9.1
   resolution: "@testing-library/jest-dom@npm:6.9.1"
@@ -7201,6 +7219,7 @@ __metadata:
     "@reduxjs/toolkit": "npm:^1.3.4"
     "@sentry/react-native": "npm:~7.11.0"
     "@shopify/flash-list": "npm:2.0.2"
+    "@tanstack/react-query": "npm:^5.101.4"
     "@types/babel__preset-env": "npm:^7"
     "@types/color": "npm:^3.0.6"
     "@types/debounce": "npm:^1.2.4"

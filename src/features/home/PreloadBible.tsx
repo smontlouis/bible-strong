@@ -13,7 +13,7 @@ const PreloadBible = ({ children }: PropsWithChildren) => {
   const version = useDefaultBibleVersion()
 
   // Check if the Bible version is available (SQLite or JSON)
-  const { status } = useAsync(async () => {
+  const { status } = useAsync(['preload-bible', isOnboardingCompleted, version], async () => {
     if (!isOnboardingCompleted) {
       return null
     }
@@ -23,7 +23,7 @@ const PreloadBible = ({ children }: PropsWithChildren) => {
     const needsDownload = await getIfVersionNeedsDownload(version)
     if (needsDownload) return null
     return true
-  }, [isOnboardingCompleted, version])
+  })
 
   if (!isOnboardingCompleted || status !== 'Resolved') {
     return (

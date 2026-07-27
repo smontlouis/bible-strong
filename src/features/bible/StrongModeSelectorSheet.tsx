@@ -1,5 +1,6 @@
 import { useAtomValue } from 'jotai/react'
 import type { PrimitiveAtom } from 'jotai/vanilla'
+import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState, type RefObject } from 'react'
 import { Alert, Platform } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -84,7 +85,6 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const bhgDownload = useDownloadItemStatus('bible:BHG')
   const frenchInterlinearDownload = useDownloadItemStatus('bible-interlinear:BHG:fr')
   const englishInterlinearDownload = useDownloadItemStatus('bible-interlinear:BHG:en')
-  const [availability, setAvailability] = useState<AvailabilityState>({ interlinear: [] })
   const [downloadPlanIds, setDownloadPlanIds] = useState<
     Partial<Record<Exclude<StrongMode, 'hidden'>, string[]>>
   >({})
@@ -99,31 +99,28 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const strongPreview = isHebrew ? 'H0430' : 'G2316'
   const serifFontFamily = Platform.OS === 'ios' ? 'Georgia' : 'serif'
 
-  useEffect(() => {
-    let cancelled = false
-    setAvailability({ interlinear: [] })
-    Promise.allSettled([
-      readStrongAvailability(version),
-      readInterlinearAvailabilities(version, appLanguage),
-    ]).then(([strongResult, interlinearResult]) => {
-      if (cancelled) return
-      setAvailability({
+  const { data: availability = { interlinear: [] } } = useQuery<AvailabilityState>({
+    queryKey: [
+      'strong-mode-availability',
+      version,
+      appLanguage,
+      downloadCompletionSignal,
+      bhgDownload?.status,
+      englishInterlinearDownload?.status,
+      frenchInterlinearDownload?.status,
+      strongDownload?.status,
+    ],
+    queryFn: async () => {
+      const [strongResult, interlinearResult] = await Promise.allSettled([
+        readStrongAvailability(version),
+        readInterlinearAvailabilities(version, appLanguage),
+      ])
+      return {
         strong: strongResult.status === 'fulfilled' ? strongResult.value : undefined,
         interlinear: interlinearResult.status === 'fulfilled' ? interlinearResult.value : [],
-      })
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [
-    appLanguage,
-    bhgDownload?.status,
-    downloadCompletionSignal,
-    englishInterlinearDownload?.status,
-    frenchInterlinearDownload?.status,
-    strongDownload?.status,
-    version,
-  ])
+      }
+    },
+  })
 
   const strongAvailable = availability.strong?.status === 'available'
   const installedInterlinear = availability.interlinear.find(

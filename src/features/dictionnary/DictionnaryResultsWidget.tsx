@@ -41,6 +41,7 @@ const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
   const [limit, setLimit] = useState(LIMIT)
 
   const { results } = useResultsByLetterOrSearch({
+    queryKey: ['dictionary'],
     query: resources.dictionary.search,
     value: searchValue,
   })

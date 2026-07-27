@@ -29,7 +29,7 @@ import { getBook } from '~helpers/bibleBookCatalog'
 import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import generateUUID from '~helpers/generateUUID'
 import getVersesContent from '~helpers/getVersesContent'
-import { useQuery } from '~helpers/react-query-lite'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { resolveStrongNavigationVersionId } from '~helpers/strongBiblePublications'
 import useLanguage from '~helpers/useLanguage'
 import { useSheet } from '~helpers/useSheet'
@@ -73,11 +73,7 @@ import {
 } from '../../state/tabs'
 import AnnotationToolbar from './AnnotationToolbar'
 import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
-import {
-  BibleDOMWrapper,
-  ParallelVerse,
-  type StudyRelationsModalTarget,
-} from './BibleDOM/BibleDOMWrapper'
+import { BibleDOMWrapper, type StudyRelationsModalTarget } from './BibleDOM/BibleDOMWrapper'
 import BibleParamsModal from './BibleParamsModal'
 import {
   loadBibleReadingComments,
@@ -85,7 +81,6 @@ import {
   loadBibleReadingParallelVerses,
   loadBibleReadingRedWords,
   loadBibleReadingSecondaryVerses,
-  RedWordsByVerse,
 } from './bibleReadingChapter'
 import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
 import BibleFooter from './footer/BibleFooter'
@@ -115,6 +110,8 @@ const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: nu
   return {}
 }
 
+const EMPTY_VERSES: Verse[] = []
+
 // Module-scope selectors - created once, memoization cache persists across renders
 const selectHighlightsByChapter = makeHighlightsByChapterSelector()
 const selectNotesByChapter = makeNotesByChapterSelector()
@@ -141,13 +138,6 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   const openNote = useOpenNote()
   const bibleDataRefreshSignal = useAtomValue(bibleDataRefreshSignalAtom)
 
-  const [error, setError] = useState<BibleError | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [verses, setVerses] = useState<Verse[]>([])
-  const [parallelVerses, setParallelVerses] = useState<ParallelVerse[]>([])
-  const [secondaryVerses, setSecondaryVerses] = useState<Verse[] | null>(null)
-  const [comments, setComments] = useState<{ [key: string]: string } | null>(null)
-  const [redWords, setRedWords] = useState<RedWordsByVerse | null>(null)
   const setUnifiedTagsModal = useUnifiedTagsModal()
   const [selectedCode, setSelectedCodeState] = useState<SelectedCode | null>(null)
   const bookmarkModalRef = useRef<SheetRef>(null)
@@ -200,7 +190,6 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   const lang = useLanguage()
   const dispatch = useDispatch<AppDispatch>()
   const isLogged = useSelector(selectIsLogged)
-  const [pericope, setPericope] = useState<Pericope | null>(null)
   const [resourceType, onChangeResourceType] = useState<BibleResource>('strong')
   const [resourceModalSelection, setResourceModalSelection] = useState<{
     selectedVersion: VersionCode
@@ -237,6 +226,116 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   })
   const goToPrevAvailableChapter = () => actions.goToPrevChapter(coverageData)
   const goToNextAvailableChapter = () => actions.goToNextChapter(coverageData)
+  const parallelVersionsKey = parallelVersions.join(',')
+
+  const mainReadingQuery = useQuery({
+    queryKey: [
+      'bible-reading-main',
+      version,
+      book.Numero,
+      chapter,
+      strongMode,
+      interlinearMode,
+      interlinearLocale ?? lang,
+      !interlinearLocale,
+      bibleDataRefreshSignal,
+    ],
+    queryFn: () =>
+      loadBibleReadingMain({
+        book: book.Numero,
+        chapter,
+        version,
+        strongMode,
+        interlinearMode,
+        interlinearLocale: interlinearLocale ?? lang,
+        interlinearLocaleAutomatic: !interlinearLocale,
+      }),
+    placeholderData: keepPreviousData,
+    staleTime: Infinity,
+  })
+  const mainReading = mainReadingQuery.data
+  const mainResult = mainReading?.mainResult
+  const verses =
+    mainResult?.success && mainResult.data ? (mainResult.data as Verse[]) : EMPTY_VERSES
+  const pericope = mainReading?.pericope ?? null
+  const isLoading = mainReadingQuery.isFetching
+  const error: BibleError | null = mainReadingQuery.error
+    ? {
+        type: 'UNKNOWN_ERROR',
+        version,
+        book: book.Numero,
+        chapter,
+        message:
+          mainReadingQuery.error instanceof Error
+            ? mainReadingQuery.error.message
+            : 'Unknown error',
+      }
+    : mainResult && !mainResult.success
+      ? (mainResult.error ?? {
+          type: 'UNKNOWN_ERROR',
+          version,
+          book: book.Numero,
+          chapter,
+          message: 'Unknown error',
+        })
+      : null
+
+  const extrasRequest = {
+    book: book.Numero,
+    chapter,
+    version,
+    parallelVersions,
+    commentsDisplay: settings.commentsDisplay,
+    lang,
+  }
+  const extrasEnabled =
+    Boolean(mainResult?.success && mainResult.data) && !mainReadingQuery.isPlaceholderData
+  const { data: parallelVerses = [] } = useQuery({
+    queryKey: [
+      'bible-reading-parallel',
+      version,
+      book.Numero,
+      chapter,
+      parallelVersionsKey,
+      bibleDataRefreshSignal,
+    ],
+    queryFn: () => loadBibleReadingParallelVerses(extrasRequest),
+    enabled: extrasEnabled,
+    staleTime: Infinity,
+  })
+  const { data: secondaryVerses = null } = useQuery({
+    queryKey: [
+      'bible-reading-secondary',
+      version,
+      book.Numero,
+      chapter,
+      lang,
+      bibleDataRefreshSignal,
+    ],
+    queryFn: () => loadBibleReadingSecondaryVerses(extrasRequest),
+    enabled: extrasEnabled,
+    staleTime: Infinity,
+  })
+  const { data: comments = null } = useQuery({
+    queryKey: [
+      'bible-reading-comments',
+      version,
+      book.Numero,
+      chapter,
+      settings.commentsDisplay,
+      lang,
+      bibleDataRefreshSignal,
+    ],
+    queryFn: () => loadBibleReadingComments(extrasRequest),
+    enabled: extrasEnabled,
+    staleTime: Infinity,
+  })
+  const { data: redWords = null } = useQuery({
+    queryKey: ['bible-reading-red-words', version, book.Numero, chapter, bibleDataRefreshSignal],
+    queryFn: () => loadBibleReadingRedWords(extrasRequest),
+    enabled: extrasEnabled,
+    staleTime: Infinity,
+  })
 
   // Shared Bible DOM: detect if this tab is the active Bible tab
   const activeBibleTabId = useAtomValue(activeBibleTabIdAtom)
@@ -384,46 +483,19 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   )
   const taggedVersesInChapter = taggedVersesData.counts
   const versesWithNonHighlightTags = taggedVersesData.hasNonHighlightTags
+  const recordedHistoryKeyRef = useRef<string | undefined>(undefined)
 
-  // Guard against stale background hydration results after chapter change
-  const loadIdRef = useRef(0)
-
-  const loadVerses = async () => {
-    setIsLoading(true)
-    const currentLoadId = ++loadIdRef.current
-
-    // Phase 1: Load main verses + pericopes (critical path)
-    const { pericope: pericopeToLoad, mainResult } = await loadBibleReadingMain({
-      book: book.Numero,
-      chapter,
-      version,
-      strongMode,
-      interlinearMode,
-      interlinearLocale: interlinearLocale ?? lang,
-      interlinearLocaleAutomatic: !interlinearLocale,
-    })
-
-    // If main Bible version fails, set error and stop
-    if (!mainResult.success || !mainResult.data) {
-      setError(mainResult.error!)
-      setIsLoading(false)
+  useEffect(() => {
+    if (mainReadingQuery.isPlaceholderData || !mainResult?.success || !mainResult.data) {
       return
     }
+    const historyKey = `${version}:${book.Numero}:${chapter}:${mainReadingQuery.dataUpdatedAt}`
+    if (recordedHistoryKeyRef.current === historyKey) return
+    recordedHistoryKeyRef.current = historyKey
 
-    // Stale check after async
-    if (loadIdRef.current !== currentLoadId) return
-
-    const versesToLoad = mainResult.data as Verse[]
-
-    // Display main verses immediately
-    setIsLoading(false)
     setDisplayedBook(book.Numero)
     setDisplayedChapter(chapter)
     setDisplayedVersion(version)
-    setPericope(pericopeToLoad)
-    setVerses(versesToLoad)
-    setError(null)
-
     addHistory({
       book: book.Numero,
       chapter,
@@ -437,84 +509,26 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
       message: 'Load verses',
       data: { book: book.Numero, chapter, verse, version },
     })
-
-    // Phase 2: Hydrate secondary data in background (non-blocking)
-    const extrasRequest = {
-      book: book.Numero,
-      chapter,
-      version,
-      parallelVersions,
-      commentsDisplay: settings.commentsDisplay,
-      lang,
-    }
-
-    // Parallel versions
-    loadBibleReadingParallelVerses(extrasRequest).then(parallelVersesToLoad => {
-      if (loadIdRef.current !== currentLoadId) return
-      setParallelVerses(parallelVersesToLoad)
-    })
-
-    // Secondary verses for interlinear mode
-    loadBibleReadingSecondaryVerses(extrasRequest).then(secondaryVersesToLoad => {
-      if (loadIdRef.current !== currentLoadId) return
-      setSecondaryVerses(secondaryVersesToLoad)
-    })
-
-    // Comments
-    loadBibleReadingComments(extrasRequest)
-      .then(commentsToLoad => {
-        if (loadIdRef.current !== currentLoadId) return
-        setComments(commentsToLoad)
-      })
-      .catch(() => {
-        if (loadIdRef.current !== currentLoadId) return
-        setComments(null)
-      })
-
-    // Red words (memoized, fast on subsequent calls)
-    loadBibleReadingRedWords(extrasRequest)
-      .then(redWordsToLoad => {
-        if (loadIdRef.current !== currentLoadId) return
-        setRedWords(redWordsToLoad)
-      })
-      .catch(() => setRedWords(null))
-  }
+  }, [
+    addHistory,
+    book.Numero,
+    chapter,
+    mainReadingQuery.dataUpdatedAt,
+    mainReadingQuery.isPlaceholderData,
+    mainResult,
+    verse,
+    version,
+  ])
 
   const prevBook = usePrevious(book.Numero)
   const prevChapter = usePrevious(chapter)
-  const parallelVersionsKey = parallelVersions.join(',')
 
   useEffect(() => {
-    loadVerses().catch(e => {
-      console.log('[Bible] Error loading verses:', e)
-      // Set a generic error if something unexpected happens
-      setError({
-        type: 'UNKNOWN_ERROR',
-        version,
-        book: book.Numero,
-        chapter,
-        message: e?.message || 'Unknown error',
-      })
-      setIsLoading(false)
-    })
-
     // Only clear selected verses when book or chapter changes
     if (prevBook !== undefined && (prevBook !== book.Numero || prevChapter !== chapter)) {
       actions.clearSelectedVerses()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    book,
-    chapter,
-    version,
-    strongMode,
-    interlinearMode,
-    interlinearLocale,
-    lang,
-    parallelVersionsKey,
-    settings.commentsDisplay,
-    bibleDataRefreshSignal,
-  ])
+  }, [actions, book.Numero, chapter, prevBook, prevChapter])
 
   const addHiglightAndOpenQuickTags = (color: string) => {
     dispatch(addHighlight({ color, selectedVerses, version }))

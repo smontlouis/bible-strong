@@ -10,7 +10,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import ScrollView from '~common/ui/ScrollView'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
-import { useQuery } from '~helpers/react-query-lite'
+import { useQuery } from '@tanstack/react-query'
 import { toast } from '~helpers/toast'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResourceLanguage } from 'src/state/resourcesLanguage'
@@ -33,7 +33,7 @@ const TimelineHomeScreen = ({ hasBackButton, isFormSheet = false, onSectionPress
   const [timelineResourceLanguage, setTimelineResourceLanguage] = useResourceLanguage('TIMELINE')
 
   const { data: events } = useQuery({
-    queryKey: 'timeline',
+    queryKey: ['timeline'],
     queryFn: getEvents,
   })
 

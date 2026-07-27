@@ -1,6 +1,7 @@
 import { produce } from 'immer'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import type { PrimitiveAtom } from 'jotai/vanilla'
+import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, Pressable } from 'react-native'
@@ -335,11 +336,6 @@ export const StrongBibleSourceSheet = ({
   const { enqueue } = useDownloadQueue()
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [pendingSelectionVersionId, setPendingSelectionVersionId] = useState<StrongBibleVersionId>()
-  const [availabilityByVersion, setAvailabilityByVersion] = useState<Map<
-    StrongBibleVersionId,
-    StrongBibleSidecarAvailability
-  > | null>(null)
-  const [bhgAvailability, setBhgAvailability] = useState<BhgLexiconAvailability>()
   const strongBibleSourceVersionId = bible.data.strongBibleSourceVersionId
   const isBhgBible = bible.data.selectedVersion === 'BHG'
   const preferredInterlinearLocale = bible.data.interlinearLocale ?? getLanguage()
@@ -378,75 +374,66 @@ export const StrongBibleSourceSheet = ({
     setBible(updateStrongBibleSourceVersion(versionId))
   }
 
-  useEffect(() => {
-    if (!isResourceModalOpen && !isSheetOpen) return
-
-    let cancelled = false
-    Promise.all([
-      Promise.all(
-        sourceGroups.flatMap(group =>
-          group.versionIds.map(async versionId => ({
-            versionId,
-            availability: await getStrongBibleSidecarAvailability(versionId),
-          }))
-        )
-      ),
-      isBhgBible
-        ? getBhgLexiconAvailability(preferredInterlinearLocale)
-        : Promise.resolve(undefined),
-    ])
-      .then(([results, nextBhgAvailability]) => {
-        if (cancelled) return
-        setBhgAvailability(nextBhgAvailability)
-
-        const nextAvailability = new Map<StrongBibleVersionId, StrongBibleSidecarAvailability>(
+  const availabilityQuery = useQuery({
+    queryKey: [
+      'strong-bible-source-availability',
+      isEnglishBible ? 'en' : 'fr',
+      isBhgBible,
+      preferredInterlinearLocale,
+      downloadCompletionSignal,
+    ],
+    queryFn: async () => {
+      const [results, nextBhgAvailability] = await Promise.all([
+        Promise.all(
+          sourceGroups.flatMap(group =>
+            group.versionIds.map(async versionId => ({
+              versionId,
+              availability: await getStrongBibleSidecarAvailability(versionId),
+            }))
+          )
+        ),
+        isBhgBible
+          ? getBhgLexiconAvailability(preferredInterlinearLocale)
+          : Promise.resolve(undefined),
+      ])
+      return {
+        availabilityByVersion: new Map<StrongBibleVersionId, StrongBibleSidecarAvailability>(
           results.map(({ versionId, availability }) => [versionId, availability] as const)
-        )
-        setAvailabilityByVersion(nextAvailability)
+        ),
+        bhgAvailability: nextBhgAvailability,
+      }
+    },
+    enabled: isResourceModalOpen || isSheetOpen,
+  })
+  const availabilityByVersion =
+    availabilityQuery.data?.availabilityByVersion ??
+    (availabilityQuery.isError
+      ? new Map<StrongBibleVersionId, StrongBibleSidecarAvailability>()
+      : null)
+  const bhgAvailability: BhgLexiconAvailability | undefined =
+    availabilityQuery.data?.bhgAvailability ??
+    (availabilityQuery.isError && isBhgBible ? { status: 'unavailable', attempts: [] } : undefined)
 
-        if (
-          pendingSelectionVersionId &&
-          nextAvailability.get(pendingSelectionVersionId)?.status === 'available'
-        ) {
-          setBible(updateStrongBibleSourceVersion(pendingSelectionVersionId))
-          setPendingSelectionVersionId(undefined)
-          return
-        }
+  useEffect(() => {
+    const nextAvailability = availabilityQuery.data?.availabilityByVersion
+    if (!nextAvailability) return
 
-        if (
-          strongBibleSourceVersionId &&
-          nextAvailability.get(strongBibleSourceVersionId)?.status !== 'available'
-        ) {
-          setBible(updateStrongBibleSourceVersion())
-        }
-      })
-      .catch(() => {
-        if (cancelled) return
-        setAvailabilityByVersion(new Map())
-        setBhgAvailability(
-          isBhgBible
-            ? {
-                status: 'unavailable',
-                attempts: [],
-              }
-            : undefined
-        )
-      })
-
-    return () => {
-      cancelled = true
+    if (
+      pendingSelectionVersionId &&
+      nextAvailability.get(pendingSelectionVersionId)?.status === 'available'
+    ) {
+      setBible(updateStrongBibleSourceVersion(pendingSelectionVersionId))
+      setPendingSelectionVersionId(undefined)
+      return
     }
-  }, [
-    downloadCompletionSignal,
-    isResourceModalOpen,
-    isSheetOpen,
-    isBhgBible,
-    pendingSelectionVersionId,
-    preferredInterlinearLocale,
-    setBible,
-    strongBibleSourceVersionId,
-    sourceGroups,
-  ])
+
+    if (
+      strongBibleSourceVersionId &&
+      nextAvailability.get(strongBibleSourceVersionId)?.status !== 'available'
+    ) {
+      setBible(updateStrongBibleSourceVersion())
+    }
+  }, [availabilityQuery.data, pendingSelectionVersionId, setBible, strongBibleSourceVersionId])
 
   const selectSource = (versionId?: StrongBibleVersionId) => {
     setPendingSelectionVersionId(undefined)

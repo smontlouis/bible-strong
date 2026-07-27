@@ -1,7 +1,8 @@
 import { format } from 'date-fns'
 import * as FileSystem from 'expo-file-system/legacy'
 import * as Sharing from 'expo-sharing'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Alert, Platform } from 'react-native'
 import { useDispatch } from 'react-redux'
@@ -36,30 +37,35 @@ const AutomaticBackupsScreen = () => {
 const AutoBackupsList = () => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const [backups, setBackups] = useState<BackupInfo[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [isRestoring, setIsRestoring] = useState(false)
-  const [isExporting, setIsExporting] = useState<string | null>(null)
+  const {
+    data: backups = [],
+    isPending: isLoading,
+    isFetching,
+    refetch: loadBackups,
+  } = useQuery({
+    queryKey: ['automatic-backups'],
+    queryFn: () => autoBackupManager.listBackups(),
+  })
 
-  useEffect(() => {
-    loadBackups()
-  }, [])
+  const restoreMutation = useMutation({
+    networkMode: 'always',
+    mutationFn: async (backup: BackupInfo) => {
+      const backupData = await autoBackupManager.restoreBackup(backup.filename)
+      if (!backupData) throw new Error('Failed to read backup')
+      return backupData
+    },
+    onSuccess: backupData => {
+      dispatch(importData(backupData.data))
+      toast.success(t('backups.restoreSuccess'))
+    },
+    onError: error => {
+      console.error('Failed to restore backup:', error)
+      toast.error(t('backups.restoreError'))
+    },
+  })
 
-  const loadBackups = async () => {
-    setIsLoading(true)
-    try {
-      const backupList = await autoBackupManager.listBackups()
-      setBackups(backupList)
-    } catch (error) {
-      console.error('Failed to load backups:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleRestore = async (backup: BackupInfo) => {
-    if (isRestoring) return
-
+  const handleRestore = (backup: BackupInfo) => {
+    if (restoreMutation.isPending) return
     Alert.alert(
       t('backups.restoreTitle'),
       t('backups.restoreMessage', {
@@ -73,35 +79,15 @@ const AutoBackupsList = () => {
         {
           text: t('backups.restore'),
           style: 'destructive',
-          onPress: async () => {
-            setIsRestoring(true)
-            try {
-              const backupData = await autoBackupManager.restoreBackup(backup.filename)
-
-              if (!backupData) {
-                throw new Error('Failed to read backup')
-              }
-
-              dispatch(importData(backupData.data))
-
-              toast.success(t('backups.restoreSuccess'))
-            } catch (error) {
-              console.error('Failed to restore backup:', error)
-              toast.error(t('backups.restoreError'))
-            } finally {
-              setIsRestoring(false)
-            }
-          },
+          onPress: () => restoreMutation.mutate(backup),
         },
       ]
     )
   }
 
-  const handleExport = async (backup: BackupInfo) => {
-    if (isExporting) return
-
-    setIsExporting(backup.filename)
-    try {
+  const exportMutation = useMutation({
+    networkMode: 'always',
+    mutationFn: async (backup: BackupInfo) => {
       const backupData = await autoBackupManager.restoreBackup(backup.filename)
 
       if (!backupData) {
@@ -141,14 +127,17 @@ const AutoBackupsList = () => {
           console.log('[AutoBackups] Share error:', error)
         })
       }
-
-      toast.success(t('backups.exportSuccess'))
-    } catch (error) {
+    },
+    onSuccess: () => toast.success(t('backups.exportSuccess')),
+    onError: error => {
       console.error('Failed to export backup:', error)
       toast.error(t('Une erreur est survenue'))
-    } finally {
-      setIsExporting(null)
-    }
+    },
+  })
+
+  const handleExport = (backup: BackupInfo) => {
+    if (exportMutation.isPending) return
+    exportMutation.mutate(backup)
   }
 
   if (isLoading) {
@@ -170,8 +159,13 @@ const AutoBackupsList = () => {
           {t('backups.count', { count: backups.length })} -{' '}
           {(backups.reduce((acc, b) => acc + b.size, 0) / 1024).toFixed(0)} KB
         </Text>
-        <Button small onPress={loadBackups} disabled={isLoading} style={{ paddingHorizontal: 10 }}>
-          <Text fontSize={11}>{isLoading ? '...' : t('backups.refresh')}</Text>
+        <Button
+          small
+          onPress={() => loadBackups()}
+          disabled={isFetching}
+          style={{ paddingHorizontal: 10 }}
+        >
+          <Text fontSize={11}>{isFetching ? '...' : t('backups.refresh')}</Text>
         </Button>
       </Box>
       {backups.map(backup => (
@@ -211,9 +205,9 @@ const AutoBackupsList = () => {
               style={{ width: 100, marginRight: 10 }}
               small
               onPress={() => handleRestore(backup)}
-              disabled={isRestoring}
+              disabled={restoreMutation.isPending}
             >
-              <Text fontSize={12} opacity={isRestoring ? 0.4 : 1}>
+              <Text fontSize={12} opacity={restoreMutation.isPending ? 0.4 : 1}>
                 {t('backups.restore')}
               </Text>
             </Button>
@@ -222,10 +216,19 @@ const AutoBackupsList = () => {
               small
               reverse
               onPress={() => handleExport(backup)}
-              disabled={isExporting !== null}
+              disabled={exportMutation.isPending}
             >
-              <Text fontSize={12} opacity={isExporting === backup.filename ? 0.4 : 1}>
-                {isExporting === backup.filename ? '...' : t('backups.export')}
+              <Text
+                fontSize={12}
+                opacity={
+                  exportMutation.isPending && exportMutation.variables?.filename === backup.filename
+                    ? 0.4
+                    : 1
+                }
+              >
+                {exportMutation.isPending && exportMutation.variables?.filename === backup.filename
+                  ? '...'
+                  : t('backups.export')}
               </Text>
             </Button>
           </Box>

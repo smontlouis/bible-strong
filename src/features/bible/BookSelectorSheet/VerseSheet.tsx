@@ -13,7 +13,7 @@ import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import generateUUID from '~helpers/generateUUID'
-import { useQuery } from '~helpers/react-query-lite'
+import { useQuery } from '@tanstack/react-query'
 
 interface VerseSheetProps {
   sheetRef: React.RefObject<SheetRef | null>

@@ -6,7 +6,7 @@ import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
-import { useQuery } from '~helpers/react-query-lite'
+import { useQuery } from '@tanstack/react-query'
 import { wp } from '~helpers/utils'
 import EventDetailVerse from './EventDetailVerse'
 import { getEvents } from './events'
@@ -29,7 +29,7 @@ const Media = ({
   const { t } = useTranslation()
 
   const { data: events } = useQuery({
-    queryKey: 'timeline',
+    queryKey: ['timeline'],
     queryFn: getEvents,
   })
 

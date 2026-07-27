@@ -99,8 +99,16 @@ const DictionaryListScreen = ({
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
 
   const { results, isLoading } = useResultsByLetterOrSearch(
-    { query: resources.dictionary.search, value: debouncedSearchValue },
-    { query: resources.dictionary.listByLetter, value: letter }
+    {
+      queryKey: ['dictionary'],
+      query: resources.dictionary.search,
+      value: debouncedSearchValue,
+    },
+    {
+      queryKey: ['dictionary'],
+      query: resources.dictionary.listByLetter,
+      value: letter,
+    }
   )
 
   const dictionaryResults = Array.isArray(results) ? results : []

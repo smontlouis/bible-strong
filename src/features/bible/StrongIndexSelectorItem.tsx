@@ -1,4 +1,5 @@
 import { useAtomValue } from 'jotai/react'
+import { useQuery } from '@tanstack/react-query'
 import React from 'react'
 import { ActivityIndicator, TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -34,34 +35,16 @@ const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: 
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const bibleDownload = useDownloadItemStatus(`bible:${versionId}`)
   const strongDownload = useDownloadItemStatus(`bible-strong:${versionId}`)
-  const [availability, setAvailability] = React.useState<StrongBibleSidecarAvailability>()
-  const [isChecking, setIsChecking] = React.useState(true)
+  const availabilityQuery = useQuery({
+    queryKey: ['strong-index-availability', versionId, downloadCompletionSignal],
+    queryFn: () => getStrongBibleSidecarAvailability(versionId),
+  })
+  const availability = availabilityQuery.data
+  const isChecking = availabilityQuery.isPending || availabilityQuery.isFetching
 
   React.useEffect(() => {
-    let cancelled = false
-    setIsChecking(true)
-
-    getStrongBibleSidecarAvailability(versionId)
-      .then(nextAvailability => {
-        if (!cancelled) {
-          setAvailability(nextAvailability)
-          onAvailabilityChange(nextAvailability.status === 'available')
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setAvailability(undefined)
-          onAvailabilityChange(false)
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setIsChecking(false)
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [downloadCompletionSignal, onAvailabilityChange, versionId])
+    onAvailabilityChange(availability?.status === 'available')
+  }, [availability?.status, onAvailabilityChange])
 
   const strongActiveDownload = isActiveDownload(strongDownload?.status) ? strongDownload : undefined
   const failedDownload = [bibleDownload, strongDownload].find(state => state?.status === 'failed')
@@ -73,16 +56,8 @@ const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: 
 
     let resolvedAvailability: StrongBibleSidecarAvailability | undefined = availability
     if (!resolvedAvailability) {
-      setIsChecking(true)
-      try {
-        resolvedAvailability = await getStrongBibleSidecarAvailability(versionId)
-        setAvailability(resolvedAvailability)
-        onAvailabilityChange(resolvedAvailability.status === 'available')
-      } catch {
-        return
-      } finally {
-        setIsChecking(false)
-      }
+      const result = await availabilityQuery.refetch()
+      resolvedAvailability = result.data
     }
 
     if (resolvedAvailability) {

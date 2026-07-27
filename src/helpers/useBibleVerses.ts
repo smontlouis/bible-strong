@@ -1,4 +1,4 @@
-import React from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai/react'
 import { Verse } from '~common/types'
 import { useDefaultBibleVersion } from '../state/useDefaultBibleVersion'
@@ -29,14 +29,6 @@ export const useResolvedBibleVerses = (
   preferredVersion?: string
 ): ResolvedBibleVerses => {
   const verseKeys = verseIds.map(({ Livre, Chapitre, Verset }) => `${Livre}-${Chapitre}-${Verset}`)
-  const verseKeysSignature = verseKeys.join('|')
-  const [verses, setVerses] = React.useState<Verse[]>([])
-  const [resolvedVersion, setResolvedVersion] = React.useState<string>()
-  const [status, setStatus] = React.useState<BibleVerseResolutionStatus>('reference-only')
-  const [missingVerseKeys, setMissingVerseKeys] = React.useState<string[]>([])
-  const [isLoading, setIsLoading] = React.useState(Boolean(verseIds.length))
-  const [resolvedRequestKey, setResolvedRequestKey] = React.useState<string>()
-
   const defaultVersion = useDefaultBibleVersion()
   const bibleDataRefreshSignal = useAtomValue(bibleDataRefreshSignalAtom)
   const requestKey = getBibleVerseResolutionRequestKey({
@@ -46,32 +38,25 @@ export const useResolvedBibleVerses = (
     dataRefreshSignal: bibleDataRefreshSignal,
   })
 
-  React.useEffect(() => {
-    let cancelled = false
-
-    const loadVerses = async () => {
-      const requestedVerseKeys = verseKeysSignature ? verseKeysSignature.split('|') : []
-      if (!requestedVerseKeys.length) {
-        setVerses([])
-        setResolvedVersion(preferredVersion || defaultVersion)
-        setStatus('resolved')
-        setMissingVerseKeys([])
-        setResolvedRequestKey(requestKey)
-        setIsLoading(false)
-        return
+  const { data, isPending } = useQuery({
+    queryKey: ['resolved-bible-verses', requestKey],
+    queryFn: async () => {
+      if (!verseKeys.length) {
+        return {
+          verses: [],
+          version: preferredVersion || defaultVersion,
+          status: 'resolved' as const,
+          missingVerseKeys: [],
+        }
       }
-
-      setIsLoading(true)
       try {
         const resolution = await resolveBibleVerses({
-          verseKeys: requestedVerseKeys,
+          verseKeys,
           preferredVersion,
           defaultVersion,
         })
-        if (cancelled) return
-
-        setVerses(
-          requestedVerseKeys
+        return {
+          verses: verseKeys
             .filter(key => resolution.texts[key])
             .map(key => {
               const [Livre, Chapitre, Verset] = key.split('-')
@@ -81,36 +66,30 @@ export const useResolvedBibleVerses = (
                 Verset,
                 Texte: resolution.texts[key],
               }
-            }) as Verse[]
-        )
-        setResolvedVersion(resolution.version)
-        setStatus(resolution.status)
-        setMissingVerseKeys(resolution.missingVerseKeys)
-        setResolvedRequestKey(requestKey)
+            }) as Verse[],
+          version: resolution.version,
+          status: resolution.status,
+          missingVerseKeys: resolution.missingVerseKeys,
+        }
       } catch (error) {
-        if (cancelled) return
         console.error('[useBibleVerses] Failed to resolve verses:', error)
-        setVerses([])
-        setResolvedVersion(undefined)
-        setStatus('reference-only')
-        setMissingVerseKeys(requestedVerseKeys)
-        setResolvedRequestKey(requestKey)
-      } finally {
-        if (!cancelled) setIsLoading(false)
+        return {
+          verses: [],
+          version: undefined,
+          status: 'reference-only' as const,
+          missingVerseKeys: verseKeys,
+        }
       }
-    }
-    loadVerses()
-    return () => {
-      cancelled = true
-    }
-  }, [verseKeysSignature, preferredVersion, defaultVersion, bibleDataRefreshSignal, requestKey])
+    },
+    staleTime: Infinity,
+  })
 
   return {
-    verses,
-    version: resolvedVersion,
-    status,
-    missingVerseKeys,
-    isLoading: isLoading || resolvedRequestKey !== requestKey,
+    verses: data?.verses ?? [],
+    version: data?.version,
+    status: data?.status ?? 'reference-only',
+    missingVerseKeys: data?.missingVerseKeys ?? verseKeys,
+    isLoading: isPending,
   }
 }
 

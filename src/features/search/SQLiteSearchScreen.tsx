@@ -5,6 +5,7 @@ import { FlatList, ScrollView, TouchableOpacity } from 'react-native'
 import { KeyboardAwareScrollView, useKeyboardState } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTheme } from '@emotion/react'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { Image } from 'expo-image'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import booksDesc from '~assets/bible_versions/books-desc'
@@ -41,6 +42,8 @@ import type { RootState } from '~redux/modules/reducer'
 import { useSelector } from 'react-redux'
 import { searchFiltersAtom, SearchItemType, SearchSection } from '~state/searchFilters'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
+import { installedVersionsSignalAtom } from '~state/app'
+import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import SharedSearchEntityResultRow from './shared/SearchEntityResultRow'
 import SearchItemFilterBar, {
   getNextSearchItemFilters,
@@ -98,6 +101,8 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const keyboardFooterBottom = useKeyboardFooterBottom(SEARCH_ALPHABET_FOOTER_HEIGHT)
   const openStudyObject = useOpenStudyObject()
   const resources = useResourceAccess()
+  const installedVersionsSignal = useAtomValue(installedVersionsSignalAtom)
+  const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const notes = useSelector((state: RootState) => state.user.bible.notes)
   const links = useSelector((state: RootState) => state.user.bible.links)
   const studies = useSelector((state: RootState) => state.user.bible.studies)
@@ -110,23 +115,12 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const setGlobalFilters = useSetAtom(searchFiltersAtom)
 
   const debouncedSearchValue = useDebounce(searchValue, 300)
-  const [results, setResults] = useState<SearchResult[] | null>(null)
   const [noteResults, setNoteResults] = useState<SearchEntityResult[]>([])
   const [linkResults, setLinkResults] = useState<SearchEntityResult[]>([])
   const [studyResults, setStudyResults] = useState<SearchEntityResult[]>([])
-  const [strongResults, setStrongResults] = useState<LexiqueRow[]>([])
-  const [dictionaryResults, setDictionaryResults] = useState<DictionaryRow[]>([])
-  const [naveResults, setNaveResults] = useState<NaveRow[]>([])
-  const [totalCount, setTotalCount] = useState(0)
-  const [isSearching, setIsSearching] = useState(false)
   const [isNoteSearching, setIsNoteSearching] = useState(false)
   const [isLinkSearching, setIsLinkSearching] = useState(false)
   const [isStudySearching, setIsStudySearching] = useState(false)
-  const [isStrongSearching, setIsStrongSearching] = useState(false)
-  const [isDictionarySearching, setIsDictionarySearching] = useState(false)
-  const [isNaveSearching, setIsNaveSearching] = useState(false)
-  const [searchError, setSearchError] = useState<string | null>(null)
-  const [hasInstalledVersions, setHasInstalledVersions] = useState(true)
   const [visibleCounts, setVisibleCounts] = useState<Partial<Record<SearchSectionId, number>>>({})
   const [strongLetter, setStrongLetter] = useState('a')
   const [dictionaryLetter, setDictionaryLetter] = useState('a')
@@ -137,7 +131,6 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const [selectedVersion, _setSelectedVersion] = useState(globalFilters.selectedVersion)
   const [sortOrder, _setSortOrder] = useState<SearchSortOrder>(globalFilters.sortOrder)
   const [itemFilters, _setItemFilters] = useState(globalFilters.itemFilters)
-  const [installedVersions, setInstalledVersions] = useState<string[]>([])
   const activeItemFilterTypes = searchItemFilterOrder.filter(itemType => itemFilters[itemType])
   const singleActiveItemType =
     activeItemFilterTypes.length === 1 ? activeItemFilterTypes[0] : undefined
@@ -172,19 +165,21 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     }))
   }
 
-  // Load installed versions on mount
+  const installedVersionsQuery = useQuery({
+    queryKey: ['search-installed-bible-versions', installedVersionsSignal],
+    queryFn: () => resources.bibleSearch.getInstalledVersions(),
+  })
+  const installedVersions = installedVersionsQuery.data ?? []
+  const hasInstalledVersions = !installedVersionsQuery.isSuccess || installedVersions.length > 0
+
   useEffect(() => {
-    ;(async () => {
-      const versions = await resources.bibleSearch.getInstalledVersions()
-      setInstalledVersions(versions)
-      setHasInstalledVersions(versions.length > 0)
-      if (selectedVersion && !versions.includes(selectedVersion)) {
-        setSelectedVersion('')
-      }
-    })()
+    if (!installedVersionsQuery.isSuccess) return
+    if (selectedVersion && !installedVersions.includes(selectedVersion)) {
+      setSelectedVersion('')
+    }
     // Reconcile the persisted filter when the installed-version inventory changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resources.bibleSearch])
+  }, [installedVersions, installedVersionsQuery.isSuccess, selectedVersion])
 
   const books = [
     {
@@ -329,36 +324,22 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     }
   }, [browseItemType, debouncedSearchValue, itemFilters.links, links, searchValue, t])
 
-  // Run search
-  useEffect(() => {
-    const trimmed = debouncedSearchValue?.trim() ?? ''
-
-    // Not enough characters → clear & show empty state
-    if (
-      !itemFilters.passages ||
-      searchValue.trim().length < MIN_SEARCH_LENGTH ||
-      trimmed.length < MIN_SEARCH_LENGTH
-    ) {
-      setResults(null)
-      setTotalCount(0)
-      setSearchError(null)
-      setIsSearching(false)
-      return
-    }
-
-    // Strong's code → skip Bible FTS, only widgets will search
-    if (STRONG_CODE_REGEX.test(trimmed)) {
-      setResults([])
-      setTotalCount(0)
-      setSearchError(null)
-      return
-    }
-
-    let cancelled = false
-
-    const doSearch = async () => {
-      setIsSearching(true)
-      setSearchError(null)
+  const trimmedSearchValue = debouncedSearchValue.trim()
+  const shouldSearchPassages =
+    itemFilters.passages &&
+    searchValue.trim().length >= MIN_SEARCH_LENGTH &&
+    trimmedSearchValue.length >= MIN_SEARCH_LENGTH &&
+    !STRONG_CODE_REGEX.test(trimmedSearchValue)
+  const passageQuery = useQuery({
+    queryKey: [
+      'sqlite-passage-search',
+      trimmedSearchValue,
+      section,
+      book,
+      selectedVersion,
+      sortOrder,
+    ],
+    queryFn: async () => {
       try {
         const sectionMap: Record<string, 'ot' | 'nt'> = { at: 'ot', nt: 'nt' }
         const options: SearchOptions = {
@@ -386,199 +367,130 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           }
         )
 
-        if (!cancelled) {
-          setResults(searchResults)
-          setTotalCount(count)
-        }
+        return { results: searchResults, count }
       } catch (e) {
-        if (!cancelled) {
-          appLogger.error('database', 'search.sqlite.failed', { error: e })
-          console.error('[Search] FTS5 error:', e)
-          setResults([])
-          setTotalCount(0)
-          setSearchError(t('search.error.searchFailed'))
-        }
+        appLogger.error('database', 'search.sqlite.failed', { error: e })
+        console.error('[Search] FTS5 error:', e)
+        throw e
       }
-      if (!cancelled) {
-        setIsSearching(false)
-      }
-    }
+    },
+    enabled: shouldSearchPassages,
+    placeholderData: keepPreviousData,
+  })
+  const results: SearchResult[] | null = !itemFilters.passages
+    ? null
+    : STRONG_CODE_REGEX.test(trimmedSearchValue)
+      ? []
+      : shouldSearchPassages
+        ? (passageQuery.data?.results ?? null)
+        : null
+  const totalCount = passageQuery.data?.count ?? 0
+  const isSearching = shouldSearchPassages && passageQuery.isFetching
+  const searchError = passageQuery.isError ? t('search.error.searchFailed') : null
 
-    doSearch()
-
-    return () => {
-      cancelled = true
-      setIsSearching(false)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    debouncedSearchValue,
-    section,
-    book,
-    selectedVersion,
-    sortOrder,
-    itemFilters.passages,
-    searchValue,
-  ])
-
-  useEffect(() => {
-    const trimmed = debouncedSearchValue.trim()
-    const shouldSearch =
-      itemFilters.strong &&
-      ((browseItemType === 'strong' && searchValue.trim() === trimmed) ||
-        (browseItemType !== 'strong' &&
-          searchValue.trim().length >= MIN_SEARCH_LENGTH &&
-          trimmed.length >= MIN_SEARCH_LENGTH))
-
-    if (!shouldSearch || strongDb.isLoading || strongDb.proposeDownload) {
-      if (browseItemType === 'strong' && searchValue.trim() !== trimmed) {
-        return
-      }
-      setStrongResults([])
-      setIsStrongSearching(false)
-      return
-    }
-
-    let cancelled = false
-    setIsStrongSearching(true)
-    const loader =
-      browseItemType === 'strong' && !trimmed
-        ? resources.strong.listLexiconByLetter(strongLetter)
-        : resources.strong.searchLexicon(trimmed)
-
-    loader
-      .then(results => {
-        if (cancelled) return
-        setStrongResults(isDatabaseError(results) ? [] : results)
-        setIsStrongSearching(false)
-      })
-      .catch(error => {
-        if (cancelled) return
+  const shouldSearchStrong =
+    itemFilters.strong &&
+    ((browseItemType === 'strong' && searchValue.trim() === trimmedSearchValue) ||
+      (browseItemType !== 'strong' &&
+        searchValue.trim().length >= MIN_SEARCH_LENGTH &&
+        trimmedSearchValue.length >= MIN_SEARCH_LENGTH)) &&
+    !strongDb.isLoading &&
+    !strongDb.proposeDownload
+  const strongQuery = useQuery({
+    queryKey: [
+      'sqlite-strong-search',
+      resourcesLanguage.STRONG,
+      browseItemType,
+      trimmedSearchValue,
+      strongLetter,
+    ],
+    queryFn: async () => {
+      try {
+        const result =
+          browseItemType === 'strong' && !trimmedSearchValue
+            ? await resources.strong.listLexiconByLetter(strongLetter)
+            : await resources.strong.searchLexicon(trimmedSearchValue)
+        return isDatabaseError(result) ? [] : result
+      } catch (error) {
         appLogger.error('database', 'search.strong.failed', { error })
-        setStrongResults([])
-        setIsStrongSearching(false)
-      })
-
-    return () => {
-      cancelled = true
-      setIsStrongSearching(false)
-    }
-  }, [
-    browseItemType,
-    debouncedSearchValue,
-    itemFilters.strong,
-    searchValue,
-    strongDb.isLoading,
-    strongDb.proposeDownload,
-    strongLetter,
-    resources.strong,
-  ])
-
-  useEffect(() => {
-    const trimmed = debouncedSearchValue.trim()
-    const shouldSearch =
-      itemFilters.dictionary &&
-      ((browseItemType === 'dictionary' && searchValue.trim() === trimmed) ||
-        (browseItemType !== 'dictionary' &&
-          searchValue.trim().length >= MIN_SEARCH_LENGTH &&
-          trimmed.length >= MIN_SEARCH_LENGTH))
-
-    if (!shouldSearch || dictionaryDb.isLoading || dictionaryDb.proposeDownload) {
-      if (browseItemType === 'dictionary' && searchValue.trim() !== trimmed) {
-        return
+        throw error
       }
-      setDictionaryResults([])
-      setIsDictionarySearching(false)
-      return
-    }
+    },
+    enabled: shouldSearchStrong,
+    placeholderData: keepPreviousData,
+  })
+  const strongResults: LexiqueRow[] = shouldSearchStrong ? (strongQuery.data ?? []) : []
+  const isStrongSearching = shouldSearchStrong && strongQuery.isFetching
 
-    let cancelled = false
-    setIsDictionarySearching(true)
-    const loader =
-      browseItemType === 'dictionary' && !trimmed
-        ? resources.dictionary.listByLetter(dictionaryLetter)
-        : resources.dictionary.search(trimmed)
-
-    loader
-      .then(results => {
-        if (cancelled) return
-        setDictionaryResults(isDatabaseError(results) ? [] : results)
-        setIsDictionarySearching(false)
-      })
-      .catch(error => {
-        if (cancelled) return
+  const shouldSearchDictionary =
+    itemFilters.dictionary &&
+    ((browseItemType === 'dictionary' && searchValue.trim() === trimmedSearchValue) ||
+      (browseItemType !== 'dictionary' &&
+        searchValue.trim().length >= MIN_SEARCH_LENGTH &&
+        trimmedSearchValue.length >= MIN_SEARCH_LENGTH)) &&
+    !dictionaryDb.isLoading &&
+    !dictionaryDb.proposeDownload
+  const dictionaryQuery = useQuery({
+    queryKey: [
+      'sqlite-dictionary-search',
+      resourcesLanguage.DICTIONNAIRE,
+      browseItemType,
+      trimmedSearchValue,
+      dictionaryLetter,
+    ],
+    queryFn: async () => {
+      try {
+        const result =
+          browseItemType === 'dictionary' && !trimmedSearchValue
+            ? await resources.dictionary.listByLetter(dictionaryLetter)
+            : await resources.dictionary.search(trimmedSearchValue)
+        return isDatabaseError(result) ? [] : result
+      } catch (error) {
         appLogger.error('database', 'search.dictionary.failed', { error })
-        setDictionaryResults([])
-        setIsDictionarySearching(false)
-      })
-
-    return () => {
-      cancelled = true
-      setIsDictionarySearching(false)
-    }
-  }, [
-    browseItemType,
-    debouncedSearchValue,
-    dictionaryLetter,
-    itemFilters.dictionary,
-    searchValue,
-    dictionaryDb.isLoading,
-    dictionaryDb.proposeDownload,
-    resources.dictionary,
-  ])
-
-  useEffect(() => {
-    const trimmed = debouncedSearchValue.trim()
-    const shouldSearch =
-      itemFilters.nave &&
-      ((browseItemType === 'nave' && searchValue.trim() === trimmed) ||
-        (browseItemType !== 'nave' &&
-          searchValue.trim().length >= MIN_SEARCH_LENGTH &&
-          trimmed.length >= MIN_SEARCH_LENGTH))
-
-    if (!shouldSearch || naveDb.isLoading || naveDb.proposeDownload) {
-      if (browseItemType === 'nave' && searchValue.trim() !== trimmed) {
-        return
+        throw error
       }
-      setNaveResults([])
-      setIsNaveSearching(false)
-      return
-    }
+    },
+    enabled: shouldSearchDictionary,
+    placeholderData: keepPreviousData,
+  })
+  const dictionaryResults: DictionaryRow[] = shouldSearchDictionary
+    ? (dictionaryQuery.data ?? [])
+    : []
+  const isDictionarySearching = shouldSearchDictionary && dictionaryQuery.isFetching
 
-    let cancelled = false
-    setIsNaveSearching(true)
-    const loader =
-      browseItemType === 'nave' && !trimmed
-        ? resources.nave.listByLetter(naveLetter)
-        : resources.nave.search(trimmed)
-
-    loader
-      .then(results => {
-        if (cancelled) return
-        setNaveResults(isDatabaseError(results) ? [] : results)
-        setIsNaveSearching(false)
-      })
-      .catch(error => {
-        if (cancelled) return
+  const shouldSearchNave =
+    itemFilters.nave &&
+    ((browseItemType === 'nave' && searchValue.trim() === trimmedSearchValue) ||
+      (browseItemType !== 'nave' &&
+        searchValue.trim().length >= MIN_SEARCH_LENGTH &&
+        trimmedSearchValue.length >= MIN_SEARCH_LENGTH)) &&
+    !naveDb.isLoading &&
+    !naveDb.proposeDownload
+  const naveQuery = useQuery({
+    queryKey: [
+      'sqlite-nave-search',
+      resourcesLanguage.NAVE,
+      browseItemType,
+      trimmedSearchValue,
+      naveLetter,
+    ],
+    queryFn: async () => {
+      try {
+        const result =
+          browseItemType === 'nave' && !trimmedSearchValue
+            ? await resources.nave.listByLetter(naveLetter)
+            : await resources.nave.search(trimmedSearchValue)
+        return isDatabaseError(result) ? [] : result
+      } catch (error) {
         appLogger.error('database', 'search.nave.failed', { error })
-        setNaveResults([])
-        setIsNaveSearching(false)
-      })
-
-    return () => {
-      cancelled = true
-      setIsNaveSearching(false)
-    }
-  }, [
-    browseItemType,
-    debouncedSearchValue,
-    itemFilters.nave,
-    naveLetter,
-    naveDb.isLoading,
-    naveDb.proposeDownload,
-    searchValue,
-    resources.nave,
-  ])
+        throw error
+      }
+    },
+    enabled: shouldSearchNave,
+    placeholderData: keepPreviousData,
+  })
+  const naveResults: NaveRow[] = shouldSearchNave ? (naveQuery.data ?? []) : []
+  const isNaveSearching = shouldSearchNave && naveQuery.isFetching
 
   const searchModel = getSearchResultsModel({
     query: searchValue,

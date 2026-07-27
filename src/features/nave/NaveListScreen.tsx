@@ -98,8 +98,8 @@ const NaveListScreen = ({
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
 
   const { results, isLoading } = useResultsByLetterOrSearch(
-    { query: resources.nave.search, value: debouncedSearchValue },
-    { query: resources.nave.listByLetter, value: letter }
+    { queryKey: ['nave'], query: resources.nave.search, value: debouncedSearchValue },
+    { queryKey: ['nave'], query: resources.nave.listByLetter, value: letter }
   )
   const naveResults = Array.isArray(results) ? (results as NaveRow[]) : []
   const sectionResults = useSectionResults(naveResults)

@@ -1,5 +1,6 @@
 import { produce } from 'immer'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo } from 'react'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useDispatch, useSelector } from 'react-redux'
 import { useAtom, useAtomValue } from 'jotai/react'
 
@@ -54,7 +55,6 @@ const BibleTabScreen = ({ bibleAtom, isFormSheet, isInTab = true }: BibleTabScre
   const selectedChapter = bible.data.selectedChapter
   const selectedVerse = bible.data.selectedVerse
   const resourceSelectionKey = `${selectedVersion}:${parallelVersions.join(',')}`
-  const [resolvedResourceSelectionKey, setResolvedResourceSelectionKey] = useState<string>()
   const entityReference = bible.data.entityReference
   const entityVerseKeys = entityReference?.verseKeys || []
   const {
@@ -71,82 +71,91 @@ const BibleTabScreen = ({ bibleAtom, isFormSheet, isInTab = true }: BibleTabScre
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
   const { theme: currentTheme } = useCurrentThemeSelector()
 
+  const parallelVersionsKey = parallelVersions.join(',')
+  const resourceResolutionQuery = useQuery({
+    queryKey: [
+      'bible-tab-resource-resolution',
+      selectedVersion,
+      strongMode,
+      interlinearMode,
+      interlinearLocale,
+      parallelVersionsKey,
+      selectedBook.Numero,
+      selectedChapter,
+      selectedVerse,
+      lang,
+      downloadCompletionSignal,
+    ],
+    queryFn: () =>
+      resolveBibleTabResources(
+        {
+          selectedVersion,
+          strongMode,
+          interlinearMode,
+          interlinearLocale,
+          parallelVersions,
+          selectedBook,
+          selectedChapter,
+          selectedVerse,
+        },
+        lang
+      ),
+    enabled: !entityReference,
+    placeholderData: keepPreviousData,
+  })
+  const resolvedData = resourceResolutionQuery.data
+  const resolvedResourceSelectionKey = resourceResolutionQuery.isError
+    ? resourceSelectionKey
+    : resolvedData
+      ? `${resolvedData.selectedVersion}:${resolvedData.parallelVersions.join(',')}`
+      : undefined
+
   useEffect(() => {
-    if (entityReference) return
+    if (entityReference || resourceResolutionQuery.isPlaceholderData || !resolvedData) return
 
-    let cancelled = false
-    const parallelVersionsKey = parallelVersions.join(',')
+    const selectionChanged =
+      resolvedData.selectedVersion !== selectedVersion ||
+      resolvedData.strongMode !== strongMode ||
+      resolvedData.interlinearMode !== interlinearMode ||
+      resolvedData.interlinearLocale !== interlinearLocale ||
+      resolvedData.parallelVersions.join(',') !== parallelVersionsKey ||
+      resolvedData.selectedBook.Numero !== selectedBook.Numero ||
+      resolvedData.selectedChapter !== selectedChapter ||
+      resolvedData.selectedVerse !== selectedVerse
+    if (selectionChanged) {
+      setBible(
+        produce(draft => {
+          if (
+            draft.data.selectedVersion !== selectedVersion ||
+            draft.data.parallelVersions.join(',') !== parallelVersionsKey
+          ) {
+            return
+          }
 
-    resolveBibleTabResources(
-      {
-        selectedVersion,
-        strongMode,
-        interlinearMode,
-        interlinearLocale,
-        parallelVersions,
-        selectedBook,
-        selectedChapter,
-        selectedVerse,
-      },
-      lang
-    )
-      .then(resolvedData => {
-        if (cancelled) return
-
-        const resolvedKey = `${resolvedData.selectedVersion}:${resolvedData.parallelVersions.join(',')}`
-        const selectionChanged =
-          resolvedData.selectedVersion !== selectedVersion ||
-          resolvedData.strongMode !== strongMode ||
-          resolvedData.interlinearMode !== interlinearMode ||
-          resolvedData.interlinearLocale !== interlinearLocale ||
-          resolvedData.parallelVersions.join(',') !== parallelVersionsKey ||
-          resolvedData.selectedBook.Numero !== selectedBook.Numero ||
-          resolvedData.selectedChapter !== selectedChapter ||
-          resolvedData.selectedVerse !== selectedVerse
-        if (selectionChanged) {
-          setBible(
-            produce(draft => {
-              if (
-                draft.data.selectedVersion !== selectedVersion ||
-                draft.data.parallelVersions.join(',') !== parallelVersionsKey
-              ) {
-                return
-              }
-
-              draft.data.selectedVersion = resolvedData.selectedVersion
-              draft.data.strongMode = resolvedData.strongMode
-              draft.data.interlinearMode = resolvedData.interlinearMode
-              draft.data.interlinearLocale = resolvedData.interlinearLocale
-              draft.data.parallelVersions = resolvedData.parallelVersions
-              draft.data.selectedBook = resolvedData.selectedBook
-              draft.data.selectedChapter = resolvedData.selectedChapter
-              draft.data.selectedVerse = resolvedData.selectedVerse
-              draft.data.temp = {
-                selectedBook: resolvedData.selectedBook,
-                selectedChapter: resolvedData.selectedChapter,
-                selectedVerse: resolvedData.selectedVerse,
-              }
-            })
-          )
-        }
-        setResolvedResourceSelectionKey(resolvedKey)
-      })
-      .catch(() => {
-        if (!cancelled) setResolvedResourceSelectionKey(resourceSelectionKey)
-      })
-
-    return () => {
-      cancelled = true
+          draft.data.selectedVersion = resolvedData.selectedVersion
+          draft.data.strongMode = resolvedData.strongMode
+          draft.data.interlinearMode = resolvedData.interlinearMode
+          draft.data.interlinearLocale = resolvedData.interlinearLocale
+          draft.data.parallelVersions = resolvedData.parallelVersions
+          draft.data.selectedBook = resolvedData.selectedBook
+          draft.data.selectedChapter = resolvedData.selectedChapter
+          draft.data.selectedVerse = resolvedData.selectedVerse
+          draft.data.temp = {
+            selectedBook: resolvedData.selectedBook,
+            selectedChapter: resolvedData.selectedChapter,
+            selectedVerse: resolvedData.selectedVerse,
+          }
+        })
+      )
     }
   }, [
-    downloadCompletionSignal,
     entityReference,
     interlinearLocale,
     interlinearMode,
-    lang,
-    parallelVersions,
-    resourceSelectionKey,
-    selectedBook,
+    parallelVersionsKey,
+    resolvedData,
+    resourceResolutionQuery.isPlaceholderData,
+    selectedBook.Numero,
     selectedChapter,
     selectedVerse,
     selectedVersion,
@@ -172,21 +181,18 @@ const BibleTabScreen = ({ bibleAtom, isFormSheet, isInTab = true }: BibleTabScre
     [rawSettings, fontFamily, currentTheme]
   )
 
-  const getIfMhyCommentsNeedsDownload = async () => {
-    return getIfLocalResourceNeedsDownload({ kind: 'database', databaseId: 'MHY' })
-  }
+  const commentsAvailabilityQuery = useQuery({
+    queryKey: ['mhy-comments-availability', settings.commentsDisplay],
+    queryFn: () => getIfLocalResourceNeedsDownload({ kind: 'database', databaseId: 'MHY' }),
+    enabled: settings.commentsDisplay,
+  })
 
   useEffect(() => {
-    ;(async () => {
-      if (settings.commentsDisplay) {
-        const mhyCommentsNeedsDownload = await getIfMhyCommentsNeedsDownload()
-        if (mhyCommentsNeedsDownload) {
-          console.log('[Bible] Error with commentaires, deactivating...')
-          dispatch(setSettingsCommentaires(false))
-        }
-      }
-    })()
-  }, [dispatch, settings.commentsDisplay])
+    if (commentsAvailabilityQuery.data) {
+      console.log('[Bible] Error with commentaires, deactivating...')
+      dispatch(setSettingsCommentaires(false))
+    }
+  }, [commentsAvailabilityQuery.data, dispatch])
 
   useEffect(() => {
     if (!entityReference || !resolvedEntityVersion) return

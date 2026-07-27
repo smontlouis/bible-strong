@@ -2,7 +2,7 @@ import { useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
-import { useQuery } from '~helpers/react-query-lite'
+import { useQuery } from '@tanstack/react-query'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { getEvents } from './events'
 import TimelineEventDetailView from './TimelineEventDetailView'
@@ -15,7 +15,7 @@ const EventScreen = () => {
   const openInNewTab = useOpenInNewTab()
   const params = useLocalSearchParams<{ slug?: string }>()
   const { data: sections } = useQuery({
-    queryKey: 'timeline',
+    queryKey: ['timeline'],
     queryFn: getEvents,
   })
 

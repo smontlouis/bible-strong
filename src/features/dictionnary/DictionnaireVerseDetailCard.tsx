@@ -23,7 +23,7 @@ import { useResourceAccess } from '~features/resources/resourceAccess'
 import captureError from '~helpers/captureError'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import type { DictionaryItem } from '~features/resources/dictionaryAccess'
-import { QueryStatus, useQuery } from '~helpers/react-query-lite'
+import { useQuery } from '@tanstack/react-query'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
@@ -114,12 +114,10 @@ const verseToDictionnary = async (
 const useFormattedText = ({
   verse,
   wordsInVerse,
-  status,
   resourceLang,
 }: {
   verse: Verse
   wordsInVerse?: string[]
-  status: QueryStatus
   resourceLang: string
 }) => {
   const resources = useResourceAccess()
@@ -219,11 +217,7 @@ const DictionnaireVerseDetailScreen = ({
   const resourceLang = resourcesLanguage.DICTIONNAIRE
   const { enqueue } = useDownloadQueue()
 
-  const {
-    status,
-    error: dictionaryWordsError,
-    data: wordsInVerse,
-  } = useQuery<string[]>({
+  const { error: dictionaryWordsError, data: wordsInVerse } = useQuery<string[]>({
     queryKey: ['dictionaryWords', `${Livre}-${Chapitre}-${Verset}`, resourceLang],
     queryFn: () => resources.dictionary.loadWordsForVerse(`${Livre}-${Chapitre}-${Verset}`),
   })
@@ -236,7 +230,7 @@ const DictionnaireVerseDetailScreen = ({
     setCurrentWord,
     versesInCurrentChapter,
     requiredBibleVersion,
-  } = useFormattedText({ verse, wordsInVerse, status, resourceLang })
+  } = useFormattedText({ verse, wordsInVerse, resourceLang })
   const requiredBibleDownloadStatus = useDownloadItemStatus(
     requiredBibleVersion ? `bible:${requiredBibleVersion}` : ''
   )

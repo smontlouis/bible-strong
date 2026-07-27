@@ -60,20 +60,20 @@ const ConcordanceScreen = () => {
     (params.strongBibleVersionId as StrongBibleVersionId | undefined) ?? defaultStrongBibleVersionId
 
   const { data: result, status } = useAsync(
-    async () =>
+    [
+      'strong-counts-by-book',
+      requestedStrongBibleVersionId,
+      defaultStrongBibleVersionId,
+      book,
+      strongReference.Code,
+    ],
+    () =>
       resources.strongBible.loadCountsByBook({
         currentVersionId: requestedStrongBibleVersionId,
         defaultVersionId: defaultStrongBibleVersionId,
         book,
         reference: strongReference.Code,
-      }),
-    [
-      resources.strongBible,
-      requestedStrongBibleVersionId,
-      defaultStrongBibleVersionId,
-      book,
-      strongReference.Code,
-    ]
+      })
   )
   const data = result?.status === 'available' ? result.counts : []
   const sourceVersionId = result?.status === 'available' ? result.provenance.versionId : undefined

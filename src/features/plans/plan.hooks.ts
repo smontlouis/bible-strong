@@ -1,5 +1,6 @@
 import { to } from 'await-to-js'
 import React from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import i18n from '~i18n'
 
@@ -229,23 +230,17 @@ export const getChaptersForPlan = async (
 }
 
 export const useChapterToContent = (chapters: string) => {
-  const [status, setStatus] = React.useState<Status>('Idle')
-  const [content, setContent] = React.useState<ChapterForPlan>()
-
   const version = useDefaultBibleVersion()
-
-  React.useEffect(() => {
-    ;(async () => {
-      try {
-        setStatus('Pending')
-        const result = await getChaptersForPlan(chapters, version)
-        setContent(result)
-        setStatus('Resolved')
-      } catch {
-        setStatus('Rejected')
-      }
-    })()
-  }, [chapters, version])
+  const {
+    data: content,
+    isPending,
+    isError,
+  } = useQuery({
+    queryKey: ['plan-chapters', version, chapters],
+    queryFn: () => getChaptersForPlan(chapters, version),
+    staleTime: Infinity,
+  })
+  const status: Status = isPending ? 'Pending' : isError ? 'Rejected' : 'Resolved'
 
   return { status, content }
 }
@@ -304,23 +299,17 @@ export const getVersesForPlan = async (
 }
 
 export const useVersesToContent = (verses: string) => {
-  const [status, setStatus] = React.useState<Status>('Idle')
-  const [content, setContent] = React.useState<VerseForPlan>()
-
   const version = useDefaultBibleVersion()
-
-  React.useEffect(() => {
-    ;(async () => {
-      try {
-        setStatus('Pending')
-        const result = await getVersesForPlan(verses, version)
-        setContent(result)
-        setStatus('Resolved')
-      } catch {
-        setStatus('Rejected')
-      }
-    })()
-  }, [verses, version])
+  const {
+    data: content,
+    isPending,
+    isError,
+  } = useQuery({
+    queryKey: ['plan-verses', version, verses],
+    queryFn: () => getVersesForPlan(verses, version),
+    staleTime: Infinity,
+  })
+  const status: Status = isPending ? 'Pending' : isError ? 'Rejected' : 'Resolved'
 
   return { status, content }
 }

@@ -1,4 +1,5 @@
 import { useAtomValue } from 'jotai/react'
+import { useQuery } from '@tanstack/react-query'
 import React from 'react'
 import { ActivityIndicator, TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -31,34 +32,16 @@ const InterlinearIndexSelectorItem = ({ locale, expanded, onAvailabilityChange }
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const bibleDownload = useDownloadItemStatus('bible:BHG')
   const indexDownload = useDownloadItemStatus(`bible-interlinear:BHG:${locale}`)
-  const [availability, setAvailability] = React.useState<InterlinearSidecarAvailability>()
-  const [isChecking, setIsChecking] = React.useState(true)
+  const availabilityQuery = useQuery({
+    queryKey: ['interlinear-index-availability', locale, downloadCompletionSignal],
+    queryFn: () => getInterlinearSidecarAvailability(locale),
+  })
+  const availability = availabilityQuery.data
+  const isChecking = availabilityQuery.isPending || availabilityQuery.isFetching
 
   React.useEffect(() => {
-    let cancelled = false
-    setIsChecking(true)
-
-    getInterlinearSidecarAvailability(locale)
-      .then(nextAvailability => {
-        if (!cancelled) {
-          setAvailability(nextAvailability)
-          onAvailabilityChange(nextAvailability.status === 'available')
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setAvailability(undefined)
-          onAvailabilityChange(false)
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setIsChecking(false)
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [downloadCompletionSignal, locale, onAvailabilityChange])
+    onAvailabilityChange(availability?.status === 'available')
+  }, [availability?.status, onAvailabilityChange])
 
   const activeDownload = isActiveDownload(indexDownload?.status) ? indexDownload : undefined
   const failedDownload = [bibleDownload, indexDownload].find(state => state?.status === 'failed')
@@ -70,12 +53,8 @@ const InterlinearIndexSelectorItem = ({ locale, expanded, onAvailabilityChange }
 
     let resolvedAvailability: InterlinearSidecarAvailability | undefined = availability
     if (!resolvedAvailability) {
-      setIsChecking(true)
-      resolvedAvailability = await getInterlinearSidecarAvailability(locale).catch(() => undefined)
-      setIsChecking(false)
-      if (!resolvedAvailability) return
-      setAvailability(resolvedAvailability)
-      onAvailabilityChange(resolvedAvailability.status === 'available')
+      const result = await availabilityQuery.refetch()
+      resolvedAvailability = result.data
     }
 
     if (!resolvedAvailability || resolvedAvailability.status === 'available') return

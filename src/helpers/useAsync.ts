@@ -1,26 +1,12 @@
-import { DependencyList, useEffect, useState } from 'react'
+import { type QueryKey, useQuery } from '@tanstack/react-query'
 import { Status } from '~common/types'
-import { to } from 'await-to-js'
 
-const useAsync = <T>(fn: () => Promise<T>, deps: DependencyList = []) => {
-  const [status, setStatus] = useState<Status>('Idle')
-  const [data, setData] = useState<T>()
-  const [error, setError] = useState<Error>()
-
-  useEffect(() => {
-    ;(async () => {
-      setStatus('Pending')
-      const [err, response] = await to(fn())
-      if (!err) {
-        setStatus('Resolved')
-        setData(response)
-      } else {
-        setStatus('Rejected')
-        setError(err)
-      }
-    })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps)
+const useAsync = <T>(queryKey: QueryKey, queryFn: () => Promise<T>) => {
+  const { data, error, isPending, isError } = useQuery({
+    queryKey,
+    queryFn,
+  })
+  const status: Status = isPending ? 'Pending' : isError ? 'Rejected' : 'Resolved'
 
   return { status, data, error }
 }

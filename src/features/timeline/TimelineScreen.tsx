@@ -5,7 +5,7 @@ import TimelineSection from './TimelineSection'
 import { TimelineSection as TimelineSectionProps, ShallowTimelineSection } from './types'
 
 import { useLocalSearchParams } from 'expo-router'
-import { useQuery } from '~helpers/react-query-lite'
+import { useQuery } from '@tanstack/react-query'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { getEvents } from './events'
 import Box from '~common/ui/Box'
@@ -52,7 +52,7 @@ const Timeline = ({
   }, [onSectionChange])
 
   const { data: events } = useQuery({
-    queryKey: 'timeline',
+    queryKey: ['timeline'],
     queryFn: getEvents,
   })
 

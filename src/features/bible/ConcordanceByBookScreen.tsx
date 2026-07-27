@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { MenuView } from '~common/ui/MenuView'
 import { useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
@@ -39,7 +40,6 @@ const ConcordanceByBook = () => {
     strongBibleVersionId?: string
   }>()
   const { t } = useTranslation()
-  const [verses, setVerses] = useState<FoundVerseRow[]>([])
   const isFormSheet = IS_FORM_SHEET
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : true
@@ -49,100 +49,63 @@ const ConcordanceByBook = () => {
   )
   const requestedStrongBibleVersionId =
     (params.strongBibleVersionId as StrongBibleVersionId | undefined) ?? defaultStrongBibleVersionId
-  const [provenance, setProvenance] = useState<StrongBibleProvenance | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [hasMore, setHasMore] = useState(true)
-
   const book = params.book ? Number(params.book) : 0
   const strongReference = params.strongReference
     ? JSON.parse(params.strongReference)
     : { Code: 0, Mot: '' }
   const { Code, Mot } = strongReference
   const routeLexiconLsg = strongReference.LSG || ''
-  const [lexiconEntry, setLexiconEntry] = useState<StrongLexiconEntry>({
-    Code,
-    LSG: routeLexiconLsg,
-  })
-
-  const loadVersePage = async (offset: number, replace: boolean) => {
-    if (!book || !Code || isLoading) return
-    setIsLoading(true)
-    try {
-      const result = await resources.strongBible.loadFoundVersesByBook({
+  const occurrencesQuery = useInfiniteQuery({
+    queryKey: [
+      'strong-occurrences-by-book',
+      requestedStrongBibleVersionId,
+      defaultStrongBibleVersionId,
+      book,
+      Code,
+    ],
+    queryFn: ({ pageParam }) =>
+      resources.strongBible.loadFoundVersesByBook({
         currentVersionId: requestedStrongBibleVersionId,
         defaultVersionId: defaultStrongBibleVersionId,
         book,
         reference: Code,
         limit: PAGE_SIZE,
-        offset,
-      })
-      if (result.status === 'available') {
-        setVerses(current =>
-          replace
-            ? (result.verses as FoundVerseRow[])
-            : [...current, ...(result.verses as FoundVerseRow[])]
-        )
-        setProvenance(result.provenance)
-        setHasMore(result.verses.length === PAGE_SIZE)
-      } else {
-        if (replace) setVerses([])
-        setProvenance(null)
-        setHasMore(false)
-      }
-    } catch {
-      toast(t('Impossible de charger les occurrences suivantes.'))
-    } finally {
-      setIsLoading(false)
-    }
-  }
+        offset: pageParam,
+      }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) =>
+      lastPage.status === 'available' && lastPage.verses.length === PAGE_SIZE
+        ? pages.reduce(
+            (count, page) => count + (page.status === 'available' ? page.verses.length : 0),
+            0
+          )
+        : undefined,
+    enabled: Boolean(book && Code),
+  })
+  const verses =
+    occurrencesQuery.data?.pages.flatMap(page =>
+      page.status === 'available' ? (page.verses as FoundVerseRow[]) : []
+    ) ?? []
+  const availablePage = occurrencesQuery.data?.pages.find(page => page.status === 'available')
+  const provenance: StrongBibleProvenance | null =
+    availablePage?.status === 'available' ? availablePage.provenance : null
+  const isLoading = occurrencesQuery.isPending || occurrencesQuery.isFetchingNextPage
+
+  const { data: loadedLexiconEntry } = useQuery({
+    queryKey: ['strong-lexicon-entry', strongResourceLanguage, Code, book],
+    queryFn: async () => (await resources.strong.loadReference(String(Code), book)) ?? null,
+    enabled: Boolean(book && Code),
+  })
+  const lexiconEntry: StrongLexiconEntry =
+    loadedLexiconEntry && !('error' in loadedLexiconEntry)
+      ? loadedLexiconEntry
+      : { Code, LSG: routeLexiconLsg }
 
   useEffect(() => {
-    let isCurrent = true
-    const loadVerses = async () => {
-      if (!book || !Code) return
-      setIsLoading(true)
-      setHasMore(true)
-      setLexiconEntry({ Code, LSG: routeLexiconLsg })
-      const [foundVersesResult, currentLexiconEntry] = await Promise.all([
-        resources.strongBible.loadFoundVersesByBook({
-          currentVersionId: requestedStrongBibleVersionId,
-          defaultVersionId: defaultStrongBibleVersionId,
-          book,
-          reference: Code,
-          limit: PAGE_SIZE,
-          offset: 0,
-        }),
-        resources.strong.loadReference(String(Code), book),
-      ])
-      if (!isCurrent) return
-      if (foundVersesResult.status === 'available') {
-        setVerses(foundVersesResult.verses as FoundVerseRow[])
-        setProvenance(foundVersesResult.provenance)
-        setHasMore(foundVersesResult.verses.length === PAGE_SIZE)
-      } else {
-        setVerses([])
-        setProvenance(null)
-        setHasMore(false)
-      }
-      if (currentLexiconEntry && !('error' in currentLexiconEntry)) {
-        setLexiconEntry(currentLexiconEntry)
-      }
-      setIsLoading(false)
+    if (occurrencesQuery.isFetchNextPageError) {
+      toast(t('Impossible de charger les occurrences suivantes.'))
     }
-    loadVerses()
-    return () => {
-      isCurrent = false
-    }
-  }, [
-    book,
-    Code,
-    defaultStrongBibleVersionId,
-    requestedStrongBibleVersionId,
-    resources.strong,
-    resources.strongBible,
-    routeLexiconLsg,
-    strongResourceLanguage,
-  ])
+  }, [occurrencesQuery.isFetchNextPageError, t])
 
   const toggleStrongLanguage = () => {
     const nextLanguage = strongResourceLanguage === 'fr' ? 'en' : 'fr'
@@ -189,7 +152,9 @@ const ConcordanceByBook = () => {
           removeClippedSubviews
           data={verses}
           onEndReached={() => {
-            if (hasMore && !isLoading) loadVersePage(verses.length, false)
+            if (occurrencesQuery.hasNextPage && !occurrencesQuery.isFetchingNextPage) {
+              occurrencesQuery.fetchNextPage()
+            }
           }}
           onEndReachedThreshold={0.5}
           ListEmptyComponent={

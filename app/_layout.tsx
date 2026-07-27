@@ -40,7 +40,8 @@ import { ResourceAccessProvider } from '~features/resources/resourceAccess'
 import { appLogger } from '~helpers/agentObservability'
 import { DBStateProvider } from '~helpers/databaseState'
 import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
-import { QueryClient, QueryClientProvider } from '~helpers/react-query-lite'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { configureQueryManagers, queryClient } from '~helpers/queryClient'
 import {
   useMigrateFromAsyncStorage,
   useMigrateFromFileSystemStorage,
@@ -113,7 +114,7 @@ const initSentry = () => {
   })
 }
 
-const queryClient = new QueryClient()
+configureQueryManagers()
 
 // Hook to load app resources
 const useAppLoad = () => {

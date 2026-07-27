@@ -8,7 +8,7 @@ import { BibleTab, useBibleTabActions } from 'src/state/tabs'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import { useQuery } from '~helpers/react-query-lite'
+import { useQuery } from '@tanstack/react-query'
 
 type VerseSelectorPopupProps = {
   bibleAtom: PrimitiveAtom<BibleTab>

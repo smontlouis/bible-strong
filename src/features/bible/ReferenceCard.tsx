@@ -1,10 +1,10 @@
 // TODO - SPLIT THIS :(
 
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { ActivityIndicator, ScrollView } from 'react-native'
 
 import { useTheme } from '@emotion/react'
-import { useQuery } from '~helpers/react-query-lite'
+import { useQuery } from '@tanstack/react-query'
 import Empty from '~common/Empty'
 import Link from '~common/Link'
 import { VerseRefContent } from '~common/types'
@@ -18,15 +18,11 @@ import { useResourceAccess } from '~features/resources/resourceAccess'
 import { VersionCode } from '../../state/tabs'
 
 const ReferenceItem = ({ reference, version }: { reference: string; version: VersionCode }) => {
-  const [Verse, setVerse] = useState<VerseRefContent | null>(null)
-
-  useEffect(() => {
-    const loadVerse = async () => {
-      const verse = await getVersesContent({ verses: reference, version })
-      setVerse(verse)
-    }
-    loadVerse()
-  }, [reference, version])
+  const { data: Verse } = useQuery<VerseRefContent>({
+    queryKey: ['reference-verse-content', version, reference],
+    queryFn: () => getVersesContent({ verses: reference, version }),
+    staleTime: Infinity,
+  })
 
   if (!Verse) {
     return null
@@ -64,7 +60,8 @@ export const ReferenceCard = waitForTresorModal(
 
     const { isLoading, error, data } = useQuery({
       queryKey: ['references', selectedVerse],
-      queryFn: () => resources.bibleReading.loadTresorReferences(selectedVerse),
+      queryFn: async () =>
+        (await resources.bibleReading.loadTresorReferences(selectedVerse)) ?? null,
     })
 
     if (error) {

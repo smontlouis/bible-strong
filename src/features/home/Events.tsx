@@ -3,7 +3,7 @@ import { HStack, VStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { firebaseDb } from '~helpers/firebase'
-import { useQuery } from '~helpers/react-query-lite'
+import { useQuery } from '@tanstack/react-query'
 import { getLanguage } from '~i18n'
 import { getDateLocale } from '~helpers/languageUtils'
 import { format } from 'date-fns'
@@ -13,6 +13,7 @@ import { StyleSheet, Linking, TouchableOpacity } from 'react-native'
 import MaskedView from '@react-native-masked-view/masked-view'
 import { Image } from 'expo-image'
 import { LinearGradient } from 'expo-linear-gradient'
+import useLanguage from '~helpers/useLanguage'
 
 type Event = {
   title: string
@@ -31,11 +32,11 @@ type Event = {
   url: string
 }
 
-const getEvents = async () => {
+const getEvents = async (language: string) => {
   const events = await firebaseDb
     .collection('events')
     .where('status', '==', 'published')
-    .where('lang', '==', getLanguage())
+    .where('lang', '==', language)
     .get()
   return events.docs.map(x => x.data() as Event)
 }
@@ -77,10 +78,11 @@ const EventPeriod = ({ event }: { event: Event }) => {
 
 export const Events = () => {
   const { t } = useTranslation()
+  const language = useLanguage()
 
   const { data: events } = useQuery({
-    queryKey: ['events'],
-    queryFn: () => getEvents(),
+    queryKey: ['events', language],
+    queryFn: () => getEvents(language),
   })
 
   const event = events?.[0]

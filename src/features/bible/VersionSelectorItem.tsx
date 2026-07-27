@@ -1,5 +1,6 @@
 import * as FileSystem from 'expo-file-system/legacy'
 import React from 'react'
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Alert, Linking, TouchableOpacity } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { dbManager } from '~helpers/sqlite'
@@ -47,6 +48,18 @@ import InterlinearIndexSelectorItem from './InterlinearIndexSelectorItem'
 import InterlinearMark from './InterlinearMark'
 import { removeInterlinearSidecar } from '~helpers/interlinearBibleSidecar'
 import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/downloadQueue'
+
+const getVersionDownloadQueryKey = (
+  versionId: string,
+  isOnboardingCompleted: boolean,
+  installedVersionsSignal: number
+) =>
+  [
+    'bible-version-needs-download',
+    versionId,
+    isOnboardingCompleted,
+    installedVersionsSignal,
+  ] as const
 
 const VersionItemContainer = ({
   children,
@@ -264,7 +277,6 @@ const VersionSelectorItem = ({
 }: Props) => {
   const { t } = useTranslation()
   const lang = useLanguage()
-  const [versionNeedsDownload, setVersionNeedsDownload] = React.useState<boolean>()
   const [isStrongIndexAvailable, setStrongIndexAvailable] = React.useState<boolean>()
   const [isStrongIndexExpanded, setStrongIndexExpanded] = React.useState(false)
   const [isFrenchInterlinearIndexAvailable, setFrenchInterlinearIndexAvailable] =
@@ -272,8 +284,7 @@ const VersionSelectorItem = ({
   const [isEnglishInterlinearIndexAvailable, setEnglishInterlinearIndexAvailable] =
     React.useState<boolean>()
   const [isInterlinearIndexExpanded, setInterlinearIndexExpanded] = React.useState(false)
-  const [strongSelectionAvailability, setStrongSelectionAvailability] =
-    React.useState<StrongBibleSidecarAvailability>()
+  const queryClient = useQueryClient()
   const needsUpdate = useSelector((state: RootState) => state.user.needsUpdate[version.id])
   const dispatch = useDispatch()
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
@@ -286,6 +297,28 @@ const VersionSelectorItem = ({
   const previousBibleDownloadStatusRef = React.useRef(queueState?.status)
   const strongVersionId = isStrongCapableBibleVersion(version.id) ? version.id : undefined
   const requiresStrong = selectionRequirement === 'strong' && Boolean(strongVersionId)
+  const { data: versionNeedsDownload } = useQuery({
+    queryKey: getVersionDownloadQueryKey(
+      version.id,
+      isOnboardingCompleted,
+      installedVersionsSignal
+    ),
+    queryFn: () => getIfVersionNeedsDownload(version.id),
+    placeholderData: keepPreviousData,
+  })
+  const strongSelectionQuery = useQuery({
+    queryKey: [
+      'strong-selection-availability',
+      strongVersionId,
+      installedVersionsSignal,
+      downloadCompletionSignal,
+    ],
+    queryFn: () => getStrongBibleSidecarAvailability(strongVersionId!),
+    enabled: requiresStrong,
+    placeholderData: keepPreviousData,
+  })
+  const strongSelectionAvailability: StrongBibleSidecarAvailability | undefined =
+    strongSelectionQuery.data ?? (strongSelectionQuery.isError ? { status: 'missing' } : undefined)
   const strongQueueState = useDownloadItemStatus(`bible-strong:${version.id}`)
   const activeQueueState = requiresStrong
     ? [queueState, strongQueueState].find(
@@ -338,49 +371,23 @@ const VersionSelectorItem = ({
   }
 
   React.useEffect(() => {
-    let cancelled = false
-
-    const loadAvailability = async () => {
-      if (shareFn && !isStrongVersion(version.id)) {
-        shareFn(() => {
-          setVersionNeedsDownload(true)
-          void startDownload()
-        })
-      }
-
-      const v = await getIfVersionNeedsDownload(version.id)
-      if (!cancelled) setVersionNeedsDownload(v)
-    }
-
-    void loadAvailability()
-
-    return () => {
-      cancelled = true
+    if (shareFn && !isStrongVersion(version.id)) {
+      shareFn(() => {
+        queryClient.setQueryData(
+          getVersionDownloadQueryKey(version.id, isOnboardingCompleted, installedVersionsSignal),
+          true
+        )
+        void startDownload()
+      })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOnboardingCompleted, installedVersionsSignal])
+  }, [isOnboardingCompleted, installedVersionsSignal, queryClient, shareFn, version.id])
 
   React.useEffect(() => {
-    if (!requiresStrong || !strongVersionId) return
-
-    let cancelled = false
-    getStrongBibleSidecarAvailability(strongVersionId)
-      .then(availability => {
-        if (cancelled) return
-        setStrongSelectionAvailability(availability)
-        setStrongIndexAvailable(availability.status === 'available')
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setStrongSelectionAvailability({ status: 'missing' })
-          setStrongIndexAvailable(false)
-        }
-      })
-
-    return () => {
-      cancelled = true
+    if (requiresStrong) {
+      setStrongIndexAvailable(strongSelectionAvailability?.status === 'available')
     }
-  }, [downloadCompletionSignal, installedVersionsSignal, requiresStrong, strongVersionId])
+  }, [requiresStrong, strongSelectionAvailability?.status])
 
   // Watch for Bible-only download completion
   React.useEffect(() => {
@@ -388,10 +395,21 @@ const VersionSelectorItem = ({
     previousBibleDownloadStatusRef.current = queueState?.status
 
     if (!requiresStrong && previousStatus !== 'completed' && queueState?.status === 'completed') {
-      setVersionNeedsDownload(false)
+      queryClient.setQueryData(
+        getVersionDownloadQueryKey(version.id, isOnboardingCompleted, installedVersionsSignal),
+        false
+      )
       onDownloadComplete?.(version.id)
     }
-  }, [onDownloadComplete, queueState?.status, requiresStrong, version.id])
+  }, [
+    onDownloadComplete,
+    queryClient,
+    queueState?.status,
+    requiresStrong,
+    version.id,
+    installedVersionsSignal,
+    isOnboardingCompleted,
+  ])
 
   React.useEffect(() => {
     setStrongIndexExpanded(false)
@@ -481,7 +499,10 @@ const VersionSelectorItem = ({
 
     deleteRedWordsFile(version.id)
     deletePericopeFile(version.id)
-    setVersionNeedsDownload(true)
+    queryClient.setQueryData(
+      getVersionDownloadQueryKey(version.id, isOnboardingCompleted, installedVersionsSignal),
+      true
+    )
 
     jotaiStore.set(installedVersionsSignalAtom, (c: number) => c + 1)
     // Trigger BibleViewer instances to reload so tabs that were showing

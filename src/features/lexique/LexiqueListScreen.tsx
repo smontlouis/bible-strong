@@ -99,8 +99,16 @@ const LexiqueListScreen = ({
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
 
   const { results, isLoading } = useResultsByLetterOrSearch(
-    { query: resources.strong.searchLexicon, value: debouncedSearchValue },
-    { query: resources.strong.listLexiconByLetter, value: letter }
+    {
+      queryKey: ['strong-lexicon'],
+      query: resources.strong.searchLexicon,
+      value: debouncedSearchValue,
+    },
+    {
+      queryKey: ['strong-lexicon'],
+      query: resources.strong.listLexiconByLetter,
+      value: letter,
+    }
   )
 
   const lexiqueResults = Array.isArray(results) ? results : []

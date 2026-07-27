@@ -1,5 +1,6 @@
 import styled from '@emotion/native'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { Share } from 'react-native'
 import { useSelector } from 'react-redux'
@@ -25,11 +26,11 @@ import waitForStrongDB from '~common/waitForStrongDB'
 import capitalize from '~helpers/capitalize'
 
 import { produce } from 'immer'
-import { useAtom, useSetAtom } from 'jotai/react'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'expo-router'
-import { StrongReference, Verse } from '~common/types'
+import { Verse } from '~common/types'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
@@ -47,6 +48,7 @@ import { getBook } from '~helpers/bibleBookCatalog'
 import { getStrongReferenceFamily } from '~helpers/strongBookTables'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { StrongBibleProvenance } from '~features/resources/strongBibleResourceAccess'
+import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -91,14 +93,7 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
     (state: RootState) => state.user.bible.settings.defaultStrongBibleVersionId ?? 'LSG'
   )
 
-  const [error, setError] = useState<string | undefined>()
-  const [strongReference, setStrongReference] = useState<StrongReference | undefined>()
-  const [verses, setVerses] = useState<Verse[]>([])
-  const [count, setCount] = useState<number>(0)
-  const [concordanceLoading, setConcordanceLoading] = useState(true)
-  const [concordanceProvenance, setConcordanceProvenance] = useState<StrongBibleProvenance | null>(
-    null
-  )
+  const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const openEntityRelations = useOpenEntityRelations()
 
@@ -111,6 +106,75 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
   const code = strongReferenceParam?.Code || reference || ''
   const isGreek = getStrongReferenceFamily(book || 1) === 'greek'
   const tags = useSelector((state: RootState) => selectStrongTags(state, code, isGreek))
+  const strongQuery = useQuery({
+    queryKey: [
+      'strong-detail',
+      resourcesLanguage.STRONG,
+      reference,
+      strongReferenceParam?.Code,
+      book,
+      requestedStrongBibleVersionId,
+      defaultStrongBibleVersionId,
+    ],
+    queryFn: async () => {
+      let loadedStrongReference = strongReferenceParam
+
+      if (reference) {
+        const result = await resources.strong.loadReference(reference, book || 1)
+        if (!result || 'error' in result) {
+          return {
+            error: result && 'error' in result ? result.error : undefined,
+            strongReference: undefined,
+            verses: [],
+            count: 0,
+            provenance: null,
+          }
+        }
+        loadedStrongReference = result
+      }
+
+      if (!loadedStrongReference) {
+        return {
+          error: undefined,
+          strongReference: undefined,
+          verses: [],
+          count: 0,
+          provenance: null,
+        }
+      }
+
+      const resolutionRequest = {
+        currentVersionId: requestedStrongBibleVersionId ?? defaultStrongBibleVersionId,
+        defaultVersionId: defaultStrongBibleVersionId,
+        book: book || 1,
+        reference: loadedStrongReference.Code,
+        limit: 15,
+        offset: 0,
+      }
+      const [foundVersesResult, countsResult] = await Promise.all([
+        resources.strongBible.loadFoundVersesByBook(resolutionRequest),
+        resources.strongBible.loadCountsByBook(resolutionRequest),
+      ])
+      return {
+        error: undefined,
+        strongReference: loadedStrongReference,
+        verses: foundVersesResult.status === 'available' ? foundVersesResult.verses : [],
+        count:
+          countsResult.status === 'available'
+            ? countsResult.counts.reduce((total, item) => total + Number(item.versesCountByBook), 0)
+            : 0,
+        provenance: foundVersesResult.status === 'available' ? foundVersesResult.provenance : null,
+      }
+    },
+    enabled: Boolean(strongReferenceParam || reference),
+  })
+  const strongReference = strongQuery.data?.strongReference
+  const verses = strongQuery.data?.verses ?? []
+  const count = strongQuery.data?.count ?? 0
+  const concordanceProvenance: StrongBibleProvenance | null = strongQuery.data?.provenance ?? null
+  const concordanceLoading = strongQuery.isPending
+  const error =
+    strongQuery.data?.error ?? (strongQuery.isError ? String(strongQuery.error) : undefined)
   const strongEndpoint: Extract<RelationEndpoint, { type: 'strong' }> | null = strongReference
     ? createStrongEndpoint({
         language: strongReference.Grec ? 'greek' : 'hebrew',
@@ -120,59 +184,18 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
       })
     : null
   const relationCount = useRelationCount(strongEndpoint)
+  const historyDataUpdatedAtRef = useRef(0)
 
-  const loadData = async () => {
-    let loadedStrongReference = strongReferenceParam
-
-    if (reference) {
-      const result = await resources.strong.loadReference(reference, book || 1)
-      if (!result || 'error' in result) {
-        setError(result && 'error' in result ? result.error : undefined)
-        return
-      }
-      loadedStrongReference = result
-    }
-
-    if (!loadedStrongReference) {
-      return
-    }
-
+  useEffect(() => {
+    if (!strongReference || historyDataUpdatedAtRef.current === strongQuery.dataUpdatedAt) return
+    historyDataUpdatedAtRef.current = strongQuery.dataUpdatedAt
     addHistory({
-      ...loadedStrongReference,
+      ...strongReference,
       book: book || 1,
       date: Date.now(),
       type: 'strong',
     })
-    setStrongReference(loadedStrongReference)
-    const resolutionRequest = {
-      currentVersionId: requestedStrongBibleVersionId ?? defaultStrongBibleVersionId,
-      defaultVersionId: defaultStrongBibleVersionId,
-      book: book || 1,
-      reference: loadedStrongReference.Code,
-      limit: 15,
-      offset: 0,
-    }
-    const [foundVersesResult, countsResult] = await Promise.all([
-      resources.strongBible.loadFoundVersesByBook(resolutionRequest),
-      resources.strongBible.loadCountsByBook(resolutionRequest),
-    ])
-
-    if (foundVersesResult.status === 'available') {
-      setVerses(foundVersesResult.verses)
-      setConcordanceProvenance(foundVersesResult.provenance)
-    } else {
-      setVerses([])
-      setConcordanceProvenance(null)
-    }
-    if (countsResult.status === 'available') {
-      setCount(
-        countsResult.counts.reduce((total, item) => total + Number(item.versesCountByBook), 0)
-      )
-    } else {
-      setCount(0)
-    }
-    setConcordanceLoading(false)
-  }
+  }, [addHistory, book, strongQuery.dataUpdatedAt, strongReference])
 
   // Go back to list view (for tab context)
   const goBack = useCallback(() => {
@@ -196,11 +219,6 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
       })
     )
   }, [strongReference, t, setStrongTab])
-
-  useEffect(() => {
-    loadData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reference, book])
 
   const shareContent = async () => {
     const { Code, Hebreu, Grec, Mot, Phonetique, Definition, Type, LSG } = strongReference!
