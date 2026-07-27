@@ -1,16 +1,17 @@
-import React, { ComponentType, useEffect, useState } from 'react'
+import React, { ComponentType, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { DatabaseError } from '~helpers/catchDatabaseError'
 import { useWaitForDatabase } from '~common/waitForStrongDB'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { LexiqueRow } from '~features/resources/strongAccess'
 
 import { useResultsByLetterOrSearch } from './useUtilities'
 import LexiqueResultItem from './LexiqueResultItem'
+import { useAtomValue } from 'jotai/react'
+import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 
 const hideIfNoDatabase =
   <P extends object>(WrappedComponent: ComponentType<P>) =>
@@ -30,25 +31,17 @@ interface LexiqueResultsWidgetProps {
   searchValue: string
 }
 
-const isDatabaseError = (value: unknown): value is DatabaseError =>
-  typeof value === 'object' && value !== null && 'error' in value
-
 const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
   const resources = useResourceAccess()
-  const [error, setError] = useState<DatabaseError['error'] | null>(null)
+  const resourceLanguage = useAtomValue(resourcesLanguageAtom).STRONG
   const [limit, setLimit] = useState(LIMIT)
 
-  const { results } = useResultsByLetterOrSearch({
+  const { results, error } = useResultsByLetterOrSearch({
     queryKey: ['strong-lexicon'],
     query: resources.strong.searchLexicon,
     value: searchValue,
+    resourceLanguage,
   })
-
-  useEffect(() => {
-    if (isDatabaseError(results)) {
-      setError(results.error)
-    }
-  }, [results])
 
   if (error) {
     return null

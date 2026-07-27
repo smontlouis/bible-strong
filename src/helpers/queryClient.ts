@@ -5,8 +5,11 @@ import { AppState, Platform } from 'react-native'
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      networkMode: 'always',
+      networkMode: 'offlineFirst',
       retry: 1,
+    },
+    mutations: {
+      networkMode: 'online',
     },
   },
 })

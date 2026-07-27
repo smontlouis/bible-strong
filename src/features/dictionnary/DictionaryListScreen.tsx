@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -14,7 +14,6 @@ import FormSheetScreen from '~common/ui/FormSheetScreen'
 import SectionList from '~common/ui/SectionList'
 import Text from '~common/ui/Text'
 import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
-import { DatabaseError } from '~helpers/catchDatabaseError'
 import { getFirstLetterFrom } from '~helpers/alphabet'
 import type {
   DictionnaireLetterRow,
@@ -26,6 +25,8 @@ import { useResultsByLetterOrSearch, useSearchValue } from '../lexique/useUtilit
 import DictionnaireItem from './DictionnaireItem'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
+import { useAtomValue } from 'jotai/react'
+import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 
 type DictionaryRow = DictionnaireLetterRow | DictionnaireSearchRow
 
@@ -33,9 +34,6 @@ interface DictionarySection {
   title: string
   data: DictionaryRow[]
 }
-
-const isDatabaseError = (value: unknown): value is DatabaseError =>
-  typeof value === 'object' && value !== null && 'error' in value
 
 const getDictionaryItemLayout = sectionListGetItemLayout({
   getItemHeight: () => 60,
@@ -45,32 +43,21 @@ const getDictionaryItemLayout = sectionListGetItemLayout({
 })
 
 const useSectionResults = (results: DictionaryRow[]) => {
-  const [sectionResults, setSectionResults] = useState<DictionarySection[]>([])
-
-  useEffect(() => {
-    if (!results.length) {
-      setSectionResults([])
-      return
+  return results.reduce<DictionarySection[]>((list, dbItem) => {
+    const listItem = list.find(
+      item => item.title && item.title === getFirstLetterFrom(dbItem.sanitized_word)
+    )
+    if (!listItem) {
+      list.push({
+        title: getFirstLetterFrom(dbItem.sanitized_word),
+        data: [dbItem],
+      })
+    } else {
+      listItem.data.push(dbItem)
     }
-    const sectionResults = results.reduce<DictionarySection[]>((list, dbItem) => {
-      const listItem = list.find(
-        item => item.title && item.title === getFirstLetterFrom(dbItem.sanitized_word)
-      )
-      if (!listItem) {
-        list.push({
-          title: getFirstLetterFrom(dbItem.sanitized_word),
-          data: [dbItem],
-        })
-      } else {
-        listItem.data.push(dbItem)
-      }
 
-      return list
-    }, [])
-    setSectionResults(sectionResults)
-  }, [results])
-
-  return sectionResults
+    return list
+  }, [])
 }
 
 interface DictionaryListScreenProps {
@@ -91,34 +78,30 @@ const DictionaryListScreen = ({
 }: DictionaryListScreenProps) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
+  const dictionaryResourceLanguage = useAtomValue(resourcesLanguageAtom).DICTIONNAIRE
   const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
   const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
-  const [error, setError] = useState<DatabaseError['error'] | null>(null)
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
 
-  const { results, isLoading } = useResultsByLetterOrSearch(
+  const { results, isLoading, error } = useResultsByLetterOrSearch(
     {
       queryKey: ['dictionary'],
       query: resources.dictionary.search,
       value: debouncedSearchValue,
+      resourceLanguage: dictionaryResourceLanguage,
     },
     {
       queryKey: ['dictionary'],
       query: resources.dictionary.listByLetter,
       value: letter,
+      resourceLanguage: dictionaryResourceLanguage,
     }
   )
 
   const dictionaryResults = Array.isArray(results) ? results : []
   const sectionResults = useSectionResults(dictionaryResults)
-
-  useEffect(() => {
-    if (isDatabaseError(results)) {
-      setError(results.error)
-    }
-  }, [results])
 
   const selectWord = (word: string) => {
     if (isNewTabSelection) {

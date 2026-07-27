@@ -4,7 +4,7 @@ import { Alert, Platform, type LayoutChangeEvent } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import Box from '~common/ui/Box'
 import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
-import { BibleError } from '~helpers/bibleErrors'
+import { BibleError, BibleLoadingError } from '~helpers/bibleErrors'
 import { usePrevious } from '~helpers/usePrevious'
 import BibleHeader from './BibleHeader'
 
@@ -30,6 +30,7 @@ import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import generateUUID from '~helpers/generateUUID'
 import getVersesContent from '~helpers/getVersesContent'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { localQueryOptions } from '~helpers/queryOptions'
 import { resolveStrongNavigationVersionId } from '~helpers/strongBiblePublications'
 import useLanguage from '~helpers/useLanguage'
 import { useSheet } from '~helpers/useSheet'
@@ -223,6 +224,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     queryKey: ['bible-version-coverage', version],
     queryFn: () => getBibleVersionCoverage(version),
     enabled: !!version,
+    ...localQueryOptions,
   })
   const goToPrevAvailableChapter = () => actions.goToPrevChapter(coverageData)
   const goToNextAvailableChapter = () => actions.goToNextChapter(coverageData)
@@ -240,8 +242,8 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
       !interlinearLocale,
       bibleDataRefreshSignal,
     ],
-    queryFn: () =>
-      loadBibleReadingMain({
+    queryFn: async () => {
+      const reading = await loadBibleReadingMain({
         book: book.Numero,
         chapter,
         version,
@@ -249,9 +251,22 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
         interlinearMode,
         interlinearLocale: interlinearLocale ?? lang,
         interlinearLocaleAutomatic: !interlinearLocale,
-      }),
+      })
+      if (!reading.mainResult.success) {
+        const readingError = reading.mainResult.error
+        throw new BibleLoadingError(
+          readingError?.type ?? 'UNKNOWN_ERROR',
+          readingError?.version ?? version,
+          readingError?.book ?? book.Numero,
+          readingError?.chapter ?? chapter,
+          readingError?.message
+        )
+      }
+      return reading
+    },
     placeholderData: keepPreviousData,
     staleTime: Infinity,
+    ...localQueryOptions,
   })
   const mainReading = mainReadingQuery.data
   const mainResult = mainReading?.mainResult
@@ -260,25 +275,25 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   const pericope = mainReading?.pericope ?? null
   const isLoading = mainReadingQuery.isFetching
   const error: BibleError | null = mainReadingQuery.error
-    ? {
-        type: 'UNKNOWN_ERROR',
-        version,
-        book: book.Numero,
-        chapter,
-        message:
-          mainReadingQuery.error instanceof Error
-            ? mainReadingQuery.error.message
-            : 'Unknown error',
-      }
-    : mainResult && !mainResult.success
-      ? (mainResult.error ?? {
+    ? mainReadingQuery.error instanceof BibleLoadingError
+      ? {
+          type: mainReadingQuery.error.type,
+          version: mainReadingQuery.error.version,
+          book: mainReadingQuery.error.book,
+          chapter: mainReadingQuery.error.chapter,
+          message: mainReadingQuery.error.message,
+        }
+      : {
           type: 'UNKNOWN_ERROR',
           version,
           book: book.Numero,
           chapter,
-          message: 'Unknown error',
-        })
-      : null
+          message:
+            mainReadingQuery.error instanceof Error
+              ? mainReadingQuery.error.message
+              : 'Unknown error',
+        }
+    : null
 
   const extrasRequest = {
     book: book.Numero,
@@ -302,6 +317,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     queryFn: () => loadBibleReadingParallelVerses(extrasRequest),
     enabled: extrasEnabled,
     staleTime: Infinity,
+    ...localQueryOptions,
   })
   const { data: secondaryVerses = null } = useQuery({
     queryKey: [
@@ -315,6 +331,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     queryFn: () => loadBibleReadingSecondaryVerses(extrasRequest),
     enabled: extrasEnabled,
     staleTime: Infinity,
+    ...localQueryOptions,
   })
   const { data: comments = null } = useQuery({
     queryKey: [
@@ -329,12 +346,14 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     queryFn: () => loadBibleReadingComments(extrasRequest),
     enabled: extrasEnabled,
     staleTime: Infinity,
+    ...localQueryOptions,
   })
   const { data: redWords = null } = useQuery({
     queryKey: ['bible-reading-red-words', version, book.Numero, chapter, bibleDataRefreshSignal],
     queryFn: () => loadBibleReadingRedWords(extrasRequest),
     enabled: extrasEnabled,
     staleTime: Infinity,
+    ...localQueryOptions,
   })
 
   // Shared Bible DOM: detect if this tab is the active Bible tab

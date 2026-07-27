@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { MenuView } from '~common/ui/MenuView'
 import { shallowEqual, useSelector } from 'react-redux'
 
@@ -26,6 +27,7 @@ import { selectCompareVersions } from '~redux/selectors/user'
 import { CompareTab, SelectedVerses, VersionCode } from '../../state/tabs'
 import CompareVersionSelectorSheet from './CompareVersionSelectorSheet'
 import type { SheetRef } from '~common/sheet'
+import { localQueryOptions } from '~helpers/queryOptions'
 
 interface CompareVersesTabScreenProps {
   compareAtom: PrimitiveAtom<CompareTab>
@@ -59,10 +61,22 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
     data: { selectedVerses },
   } = compareTab
 
-  const [prevNextItems, setPrevNextItems] = React.useState<PrevNextItems>()
+  const versionsToCompare = useSelector(selectCompareVersions, shallowEqual)
+  const selectedVerseKeys = Object.keys(selectedVerses)
+  const { data: prevNextItems } = useQuery({
+    queryKey: ['compare-prev-next', selectedVerseKeys[0], versionsToCompare],
+    queryFn: async (): Promise<PrevNextItems> => {
+      const [livre, chapitre, verse] = selectedVerseKeys[0].split('-').map(Number)
+      const versesInCurrentChapter =
+        (await getMaxChapterVerseCount(versionsToCompare, livre, chapitre)) ||
+        countLsgChapters[`${livre}-${chapitre}`]
+      return { verseNumber: verse, versesInCurrentChapter }
+    },
+    enabled: selectedVerseKeys.length === 1,
+    ...localQueryOptions,
+  })
   const title = verseToReference(selectedVerses)
   const openInNewTab = useOpenInNewTab()
-  const versionsToCompare = useSelector(selectCompareVersions, shallowEqual)
   useEffect(() => {
     setTitle(`${t('Comparer')} ${title}`)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -72,30 +86,6 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
     const [livre, chapitre, verse] = Object.keys(selectedVerses)[0].split('-').map(Number)
     setSelectedVerses({ [`${livre}-${chapitre}-${verse + value}`]: true })
   }
-
-  React.useEffect(() => {
-    const hasPrevNextButtons = Object.keys(selectedVerses).length === 1
-    let cancelled = false
-
-    const loadPrevNextData = async () => {
-      const [livre, chapitre, verse] = Object.keys(selectedVerses)[0].split('-').map(Number)
-      const versesInCurrentChapter =
-        (await getMaxChapterVerseCount(versionsToCompare, livre, chapitre)) ||
-        countLsgChapters[`${livre}-${chapitre}`]
-      if (cancelled) return
-      setPrevNextItems({
-        verseNumber: verse,
-        versesInCurrentChapter,
-      })
-    }
-
-    if (hasPrevNextButtons) {
-      loadPrevNextData()
-    }
-    return () => {
-      cancelled = true
-    }
-  }, [selectedVerses, versionsToCompare])
 
   return (
     <Container>

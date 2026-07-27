@@ -1,4 +1,4 @@
-import React, { ComponentType, useEffect, useState } from 'react'
+import React, { ComponentType, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 
 import Link from '~common/Link'
@@ -7,10 +7,11 @@ import Text from '~common/ui/Text'
 import type { NaveSearchRow } from '~features/resources/naveAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { useWaitForDatabase } from '~common/waitForNaveDB'
-import { DatabaseError } from '~helpers/catchDatabaseError'
 
 import { useResultsByLetterOrSearch } from '../lexique/useUtilities'
 import NaveResultItem from './NaveResultItem'
+import { useAtomValue } from 'jotai/react'
+import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 
 const hideIfNoDatabase =
   <P extends object>(WrappedComponent: ComponentType<P>) =>
@@ -32,25 +33,17 @@ interface LexiqueResultsWidgetProps {
   searchValue: string
 }
 
-const isDatabaseError = (value: unknown): value is DatabaseError =>
-  typeof value === 'object' && value !== null && 'error' in value
-
 const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
   const resources = useResourceAccess()
-  const [error, setError] = useState<DatabaseError['error'] | null>(null)
+  const resourceLanguage = useAtomValue(resourcesLanguageAtom).NAVE
   const [limit, setLimit] = useState(LIMIT)
 
-  const { results } = useResultsByLetterOrSearch({
+  const { results, error } = useResultsByLetterOrSearch({
     queryKey: ['nave'],
     query: resources.nave.search,
     value: searchValue,
+    resourceLanguage,
   })
-
-  useEffect(() => {
-    if (isDatabaseError(results)) {
-      setError(results.error)
-    }
-  }, [results])
 
   if (error) {
     return null

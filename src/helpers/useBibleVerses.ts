@@ -8,6 +8,7 @@ import {
   getBibleVerseResolutionRequestKey,
   resolveBibleVerses,
 } from './bibleVerseResolver'
+import { localQueryOptions } from './queryOptions'
 
 export const verseStringToObject = (arrayString: string[]): Omit<Verse, 'Texte'>[] => {
   return arrayString.map(string => {
@@ -22,6 +23,7 @@ type ResolvedBibleVerses = {
   status: BibleVerseResolutionStatus
   missingVerseKeys: string[]
   isLoading: boolean
+  error: Error | null
 }
 
 export const useResolvedBibleVerses = (
@@ -38,7 +40,7 @@ export const useResolvedBibleVerses = (
     dataRefreshSignal: bibleDataRefreshSignal,
   })
 
-  const { data, isPending } = useQuery({
+  const { data, error, isPending } = useQuery({
     queryKey: ['resolved-bible-verses', requestKey],
     queryFn: async () => {
       if (!verseKeys.length) {
@@ -49,39 +51,30 @@ export const useResolvedBibleVerses = (
           missingVerseKeys: [],
         }
       }
-      try {
-        const resolution = await resolveBibleVerses({
-          verseKeys,
-          preferredVersion,
-          defaultVersion,
-        })
-        return {
-          verses: verseKeys
-            .filter(key => resolution.texts[key])
-            .map(key => {
-              const [Livre, Chapitre, Verset] = key.split('-')
-              return {
-                Livre,
-                Chapitre,
-                Verset,
-                Texte: resolution.texts[key],
-              }
-            }) as Verse[],
-          version: resolution.version,
-          status: resolution.status,
-          missingVerseKeys: resolution.missingVerseKeys,
-        }
-      } catch (error) {
-        console.error('[useBibleVerses] Failed to resolve verses:', error)
-        return {
-          verses: [],
-          version: undefined,
-          status: 'reference-only' as const,
-          missingVerseKeys: verseKeys,
-        }
+      const resolution = await resolveBibleVerses({
+        verseKeys,
+        preferredVersion,
+        defaultVersion,
+      })
+      return {
+        verses: verseKeys
+          .filter(key => resolution.texts[key])
+          .map(key => {
+            const [Livre, Chapitre, Verset] = key.split('-')
+            return {
+              Livre,
+              Chapitre,
+              Verset,
+              Texte: resolution.texts[key],
+            }
+          }) as Verse[],
+        version: resolution.version,
+        status: resolution.status,
+        missingVerseKeys: resolution.missingVerseKeys,
       }
     },
     staleTime: Infinity,
+    ...localQueryOptions,
   })
 
   return {
@@ -90,6 +83,7 @@ export const useResolvedBibleVerses = (
     status: data?.status ?? 'reference-only',
     missingVerseKeys: data?.missingVerseKeys ?? verseKeys,
     isLoading: isPending,
+    error,
   }
 }
 

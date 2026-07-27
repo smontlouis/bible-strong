@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import * as FileSystem from 'expo-file-system/legacy'
 import { useTranslation } from 'react-i18next'
 import { useAtomValue } from 'jotai/react'
@@ -8,6 +8,7 @@ import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import { BASE_SQLITE_DIR } from '~helpers/databaseTypes'
+import { localQueryOptions } from '~helpers/queryOptions'
 
 const formatBytes = (
   bytes: number,
@@ -22,17 +23,10 @@ const formatBytes = (
 
 const StorageSummaryCard = () => {
   const { t } = useTranslation()
-  const [usedBytes, setUsedBytes] = useState(0)
-  const [freeBytes, setFreeBytes] = useState(0)
   const completionSignal = useAtomValue(downloadCompletionSignalAtom)
-
-  useEffect(() => {
-    calculateStorage()
-  }, [completionSignal])
-
-  const calculateStorage = async () => {
-    try {
-      // Calculate used storage from SQLite directory
+  const { data: storage } = useQuery({
+    queryKey: ['storage-summary', completionSignal],
+    queryFn: async () => {
       let total = 0
 
       const sqliteDir = await FileSystem.getInfoAsync(BASE_SQLITE_DIR)
@@ -40,14 +34,13 @@ const StorageSummaryCard = () => {
         total += await getDirSize(BASE_SQLITE_DIR)
       }
 
-      setUsedBytes(total)
-
       const free = await FileSystem.getFreeDiskStorageAsync()
-      setFreeBytes(free)
-    } catch (e) {
-      console.error('[StorageSummary] Error calculating storage:', e)
-    }
-  }
+      return { usedBytes: total, freeBytes: free }
+    },
+    ...localQueryOptions,
+  })
+  const usedBytes = storage?.usedBytes ?? 0
+  const freeBytes = storage?.freeBytes ?? 0
 
   const totalAvailable = usedBytes + freeBytes
   const progressRatio = totalAvailable > 0 ? usedBytes / totalAvailable : 0

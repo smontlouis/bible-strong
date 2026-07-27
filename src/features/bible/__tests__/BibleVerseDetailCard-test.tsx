@@ -1,5 +1,6 @@
 import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import BibleVerseDetailCard from '../BibleVerseDetailCard'
 
@@ -9,6 +10,7 @@ const mockResourceAccess = {
   lexiconBible: { loadVerse: mockLoadVerse },
   strong: { loadReferences: mockLoadReferences },
 }
+let queryClient: QueryClient
 
 jest.mock('@emotion/native', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
@@ -181,20 +183,27 @@ const makeAvailableVerse = (text: string) => ({
   },
 })
 
+const flushQueryUpdates = async () => {
+  await new Promise(resolve => setTimeout(resolve, 0))
+  await new Promise(resolve => setTimeout(resolve, 0))
+}
+
 const renderCard = (
   verseNumber: number,
   onOpenStrongBibleSourceSheet = jest.fn(),
   onStrongBibleProvenanceChange = jest.fn(),
   selectedVersion: 'BFC' | 'BHG' = 'BFC'
 ) => (
-  <BibleVerseDetailCard
-    verse={{ Livre: 1, Chapitre: 1, Verset: verseNumber }}
-    selectedVersion={selectedVersion}
-    preferredInterlinearLocale="fr"
-    updateVerse={jest.fn()}
-    onOpenStrongBibleSourceSheet={onOpenStrongBibleSourceSheet}
-    onStrongBibleProvenanceChange={onStrongBibleProvenanceChange}
-  />
+  <QueryClientProvider client={queryClient}>
+    <BibleVerseDetailCard
+      verse={{ Livre: 1, Chapitre: 1, Verset: verseNumber }}
+      selectedVersion={selectedVersion}
+      preferredInterlinearLocale="fr"
+      updateVerse={jest.fn()}
+      onOpenStrongBibleSourceSheet={onOpenStrongBibleSourceSheet}
+      onStrongBibleProvenanceChange={onStrongBibleProvenanceChange}
+    />
+  </QueryClientProvider>
 )
 
 describe('BibleVerseDetailCard', () => {
@@ -203,6 +212,11 @@ describe('BibleVerseDetailCard', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false, networkMode: 'always' },
+      },
+    })
     mockLoadReferences.mockResolvedValue([{ Code: 430 }])
     ;(
       globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }
@@ -212,6 +226,7 @@ describe('BibleVerseDetailCard', () => {
 
   afterEach(() => {
     act(() => renderer?.unmount())
+    queryClient.clear()
     consoleError.mockRestore()
   })
 
@@ -226,12 +241,17 @@ describe('BibleVerseDetailCard', () => {
 
     await act(async () => {
       renderer = create(renderCard(1))
+      await flushQueryUpdates()
+    })
+    await act(async () => {
+      renderer.update(renderCard(1))
+      await flushQueryUpdates()
     })
     expect(JSON.stringify(renderer.toJSON())).toContain('Ancien verset')
 
     await act(async () => {
       renderer.update(renderCard(2))
-      await Promise.resolve()
+      await flushQueryUpdates()
     })
 
     const pendingTree = JSON.stringify(renderer.toJSON())
@@ -241,6 +261,7 @@ describe('BibleVerseDetailCard', () => {
     await act(async () => {
       resolveNextVerse(makeAvailableVerse('Nouveau verset'))
       await nextVerse
+      await flushQueryUpdates()
     })
     const loadedTree = JSON.stringify(renderer.toJSON())
     expect(loadedTree).toContain('Nouveau verset')
@@ -252,6 +273,7 @@ describe('BibleVerseDetailCard', () => {
 
     await act(async () => {
       renderer = create(renderCard(1))
+      await flushQueryUpdates()
     })
 
     expect(JSON.stringify(renderer.toJSON())).not.toContain('Strong fourni par DBY')
@@ -262,6 +284,7 @@ describe('BibleVerseDetailCard', () => {
 
     await act(async () => {
       renderer = create(renderCard(1, jest.fn(), jest.fn(), 'BHG'))
+      await flushQueryUpdates()
     })
 
     expect(mockLoadVerse).toHaveBeenCalledWith(
@@ -278,6 +301,11 @@ describe('BibleVerseDetailCard', () => {
 
     await act(async () => {
       renderer = create(renderCard(1, openStrongBibleSourceSheet))
+      await flushQueryUpdates()
+    })
+    await act(async () => {
+      renderer.update(renderCard(1, openStrongBibleSourceSheet))
+      await flushQueryUpdates()
     })
 
     expect(renderer.root.findByProps({ message: 'strongSource.unavailableMessage' })).toBeDefined()
@@ -299,9 +327,15 @@ describe('BibleVerseDetailCard', () => {
 
     await act(async () => {
       renderer = create(renderCard(1, jest.fn(), onStrongBibleProvenanceChange))
+      await flushQueryUpdates()
+    })
+    await act(async () => {
+      renderer.update(renderCard(1, jest.fn(), onStrongBibleProvenanceChange))
+      await flushQueryUpdates()
     })
     await act(async () => {
       renderer.update(renderCard(2, jest.fn(), onStrongBibleProvenanceChange))
+      await flushQueryUpdates()
     })
 
     const failedTree = JSON.stringify(renderer.toJSON())

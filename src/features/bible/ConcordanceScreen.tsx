@@ -1,6 +1,7 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import React from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { FlatList, TouchableOpacity } from 'react-native'
 
 import { useLocalSearchParams } from 'expo-router'
@@ -10,7 +11,6 @@ import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Text from '~common/ui/Text'
-import useAsync from '~helpers/useAsync'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
@@ -18,6 +18,7 @@ import { IS_FORM_SHEET } from '~helpers/constants'
 import { useSelector } from 'react-redux'
 import type { RootState } from '~redux/modules/reducer'
 import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
+import { localQueryOptions } from '~helpers/queryOptions'
 
 const OccurencesNumber = styled.View(({ theme }) => ({
   marginLeft: 10,
@@ -59,22 +60,27 @@ const ConcordanceScreen = () => {
   const requestedStrongBibleVersionId =
     (params.strongBibleVersionId as StrongBibleVersionId | undefined) ?? defaultStrongBibleVersionId
 
-  const { data: result, status } = useAsync(
-    [
+  const {
+    data: result,
+    isPending,
+    isSuccess,
+  } = useQuery({
+    queryKey: [
       'strong-counts-by-book',
       requestedStrongBibleVersionId,
       defaultStrongBibleVersionId,
       book,
       strongReference.Code,
     ],
-    () =>
+    queryFn: () =>
       resources.strongBible.loadCountsByBook({
         currentVersionId: requestedStrongBibleVersionId,
         defaultVersionId: defaultStrongBibleVersionId,
         book,
         reference: strongReference.Code,
-      })
-  )
+      }),
+    ...localQueryOptions,
+  })
   const data = result?.status === 'available' ? result.counts : []
   const sourceVersionId = result?.status === 'available' ? result.provenance.versionId : undefined
 
@@ -84,8 +90,8 @@ const ConcordanceScreen = () => {
         hasBackButton={hasBackButton}
         title={`Concordance ${strongReference.Code}${sourceVersionId ? ` · ${sourceVersionId}` : ''}`}
       />
-      {status === 'Pending' && <Loading />}
-      {status === 'Resolved' && (
+      {isPending && <Loading />}
+      {isSuccess && (
         <FlatList
           style={{ marginTop: 5, padding: 20 }}
           removeClippedSubviews

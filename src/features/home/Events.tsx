@@ -4,6 +4,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { firebaseDb } from '~helpers/firebase'
 import { useQuery } from '@tanstack/react-query'
+import { remoteQueryOptions } from '~helpers/queryOptions'
 import { getLanguage } from '~i18n'
 import { getDateLocale } from '~helpers/languageUtils'
 import { format } from 'date-fns'
@@ -83,6 +84,7 @@ export const Events = () => {
   const { data: events } = useQuery({
     queryKey: ['events', language],
     queryFn: () => getEvents(language),
+    ...remoteQueryOptions,
   })
 
   const event = events?.[0]

@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from '~helpers/toast'
 import * as Updates from 'expo-updates'
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { remoteQueryOptions } from '~helpers/queryOptions'
 
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -86,6 +87,7 @@ const ErrorFallback = ({ error, errorInfo }: ErrorFallbackProps) => {
       return check.isAvailable
     },
     staleTime: Infinity,
+    ...remoteQueryOptions,
     refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
@@ -106,7 +108,9 @@ const ErrorFallback = ({ error, errorInfo }: ErrorFallbackProps) => {
       update.mutate()
     }
   }, [update, updateCheck.data])
-  const isLoading = updateCheck.isPending || update.isPending
+  const isLoading =
+    (updateCheck.isPending && updateCheck.fetchStatus === 'fetching') ||
+    (update.isPending && !update.isPaused)
   const updateReady = update.data === true
 
   const errorDetails = `

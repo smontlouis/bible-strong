@@ -3,6 +3,7 @@ import { SectionList, TouchableOpacity, type SectionListRenderItem } from 'react
 import { useNavigation } from 'expo-router'
 import { useAtom, useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
 
 import ChoiceFilterModal from '~common/ChoiceFilterModal'
 import FiltersHeader from '~common/FiltersHeader'
@@ -26,6 +27,7 @@ import {
   type VersionCatalogItem,
   type VersionCatalogSection,
 } from './versionCatalog'
+import { localQueryOptions } from '~helpers/queryOptions'
 
 const STYLE_INFO_KEYS: Record<TranslationReadingProfile, string> = {
   'word-for-word': 'versionCatalog.style.wordForWord.description',
@@ -48,8 +50,11 @@ export const useVersionCatalog = (
   const [grouping, setGrouping] = useAtom(bibleVersionGroupingAtom)
   const [query, setQuery] = React.useState('')
   const [availability, setAvailability] = React.useState<BibleVersionAvailability>('all')
-  const [downloadedVersionIds, setDownloadedVersionIds] =
-    React.useState<ReadonlySet<string> | null>(null)
+  const { data: downloadedVersionIds = null } = useQuery({
+    queryKey: ['downloaded-bible-version-ids', installedVersionsSignal],
+    queryFn: () => getDownloadedBibleVersionIds(installedVersionsSignal),
+    ...localQueryOptions,
+  })
   const [activeStyleInfo, setActiveStyleInfo] = React.useState<TranslationReadingProfile | null>(
     null
   )
@@ -117,19 +122,6 @@ export const useVersionCatalog = (
     const unsubscribe = navigation.addListener('focus', handleFocus)
     return () => unsubscribe()
   }, [navigation, resetSearchOnFocus])
-
-  React.useEffect(() => {
-    let cancelled = false
-
-    getDownloadedBibleVersionIds(installedVersionsSignal).then(versionIds => {
-      if (cancelled) return
-      setDownloadedVersionIds(versionIds)
-    })
-
-    return () => {
-      cancelled = true
-    }
-  }, [installedVersionsSignal])
 
   const openStyleInfo = (readingProfile: TranslationReadingProfile) => {
     setActiveStyleInfo(readingProfile)

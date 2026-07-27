@@ -1,6 +1,7 @@
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import React, { useEffect, useRef, useState } from 'react'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 
 import waitForStrongDB from '~common/waitForStrongDB'
@@ -40,6 +41,8 @@ import {
   getStrongBibleFallbackPriority,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
+import { localQueryOptions } from '~helpers/queryOptions'
+import { isDatabaseError } from '~helpers/queryResult'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -92,10 +95,24 @@ interface Props {
   updateVerse: (direction: number) => void
 }
 
-interface State {
-  error: boolean | 'CORRUPTED_DATABASE' | 'DISK_IO' | 'UNKNOWN_ERROR' | 'STRONG_BIBLE_UNAVAILABLE'
+type StrongVerseQueryErrorCode =
+  | 'CORRUPTED_DATABASE'
+  | 'DISK_IO'
+  | 'UNKNOWN_ERROR'
+  | 'STRONG_BIBLE_UNAVAILABLE'
+
+class StrongVerseQueryError extends Error {
+  code: StrongVerseQueryErrorCode
+
+  constructor(code: StrongVerseQueryErrorCode) {
+    super(code)
+    this.name = 'StrongVerseQueryError'
+    this.code = code
+  }
+}
+
+interface StrongVerseQueryData {
   strongReferences: StrongReference[]
-  currentStrongReference: StrongReference | null
   versesInCurrentChapter: number | null
   formattedTexte: React.ReactNode | null
   provenance: LexiconBibleProvenance | null
@@ -131,36 +148,92 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     size: carouselContainerSize,
     onLayout: onCarouselContainerLayout,
   } = useLayoutSize()
-  const [state, setState] = useState<State>({
-    error: false,
-    strongReferences: [],
-    currentStrongReference: null,
-    versesInCurrentChapter: null,
-    formattedTexte: null,
-    provenance: null,
-    displayedVerse: null,
+  const [currentStrongReference, setCurrentStrongReference] = useState<StrongReference | null>(null)
+
+  const strongVerseQuery = useQuery({
+    queryKey: [
+      'strong-verse-detail',
+      selectedVersion,
+      defaultStrongVersion,
+      preferredStrongVersionId,
+      preferredInterlinearLocale,
+      verseBook,
+      verseChapter,
+      verseNumber,
+      downloadCompletionSignal,
+    ],
+    queryFn: async (): Promise<StrongVerseQueryData> => {
+      const result = await resources.lexiconBible.loadVerse({
+        currentVersionId: selectedVersion,
+        defaultVersionId: defaultStrongVersion,
+        preferredVersionId: preferredStrongVersionId,
+        preferredInterlinearLocale,
+        fallbackVersionIds: getStrongBibleFallbackPriority(selectedVersion),
+        book: verseBook,
+        chapter: verseChapter,
+        verse: verseNumber,
+      })
+      if (result.status !== 'available') {
+        throw new StrongVerseQueryError(
+          result.status === 'unavailable' ? 'STRONG_BIBLE_UNAVAILABLE' : 'UNKNOWN_ERROR'
+        )
+      }
+
+      const strongVerse = result.verse
+      const parsedVerse = parseStrongVerse(strongVerse.Texte, verseBook)
+      const [versesInCurrentChapterResult, strongReferencesResult] = await Promise.all([
+        getChapterVerseCountSafe(result.provenance.versionId, verseBook, verseChapter),
+        resources.strong.loadReferences(parsedVerse.references, verseBook),
+      ])
+      if (isDatabaseError(strongReferencesResult)) {
+        throw new StrongVerseQueryError(strongReferencesResult.error)
+      }
+
+      const strongReferences = strongReferencesResult.filter(
+        (reference): reference is StrongReference => typeof reference !== 'string'
+      )
+      const { formattedTexte } = await verseToStrong(
+        { ...strongVerse, Livre: verseBook },
+        undefined,
+        undefined,
+        strongReferences
+      )
+
+      return {
+        formattedTexte,
+        strongReferences,
+        versesInCurrentChapter:
+          versesInCurrentChapterResult || countLsgChapters[`${verseBook}-${verseChapter}`],
+        provenance: result.provenance,
+        displayedVerse: {
+          Livre: verseBook,
+          Chapitre: verseChapter,
+          Verset: verseNumber,
+        },
+      }
+    },
+    placeholderData: keepPreviousData,
+    staleTime: Infinity,
+    ...localQueryOptions,
   })
+  const strongVerseData = strongVerseQuery.data
+  const strongReferences = strongVerseData?.strongReferences ?? []
 
   const findRefIndex = (ref: string | number) =>
-    state.strongReferences.findIndex(r => Number(r.Code) === Number(ref))
+    strongReferences.findIndex(r => Number(r.Code) === Number(ref))
 
   const goToCarouselItem = (ref: string | number) => {
     const index = findRefIndex(ref)
     if (index !== -1) {
       carouselRef.current?.scrollTo({ index, animated: true })
     }
-    setState(prev => ({
-      ...prev,
-      currentStrongReference:
-        prev.strongReferences.find(r => Number(r.Code) === Number(ref)) || null,
-    }))
+    setCurrentStrongReference(
+      strongReferences.find(reference => Number(reference.Code) === Number(ref)) || null
+    )
   }
 
   const onSnapToItem = (index: number) => {
-    setState(prev => ({
-      ...prev,
-      currentStrongReference: prev.strongReferences[index] || null,
-    }))
+    setCurrentStrongReference(strongReferences[index] || null)
   }
 
   const renderItem = ({ item, index }: { item: StrongReference; index: number }) => {
@@ -168,10 +241,12 @@ const BibleVerseDetailCard: React.FC<Props> = ({
       <StrongCard
         theme={theme}
         isSelectionMode={isSelectionMode}
-        book={String(state.displayedVerse?.Livre ?? verse.Livre)}
+        book={String(strongVerseData?.displayedVerse?.Livre ?? verse.Livre)}
         strongReference={item}
         strongBibleVersionId={
-          state.provenance?.versionId === 'BHG' ? undefined : state.provenance?.versionId
+          strongVerseData?.provenance?.versionId === 'BHG'
+            ? undefined
+            : strongVerseData?.provenance?.versionId
         }
         index={index}
       />
@@ -179,117 +254,33 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   }
 
   useEffect(() => {
-    let isCurrent = true
+    if (!strongVerseData || strongVerseQuery.isPlaceholderData) return
+    hasDisplayedStrongVerseRef.current = true
+    setCurrentStrongReference(strongVerseData.strongReferences[0] || null)
+    onStrongBibleProvenanceChange?.(strongVerseData.provenance)
+    carouselRef.current?.scrollTo({ index: 0, animated: false })
+  }, [onStrongBibleProvenanceChange, strongVerseData, strongVerseQuery.isPlaceholderData])
 
-    const showInitialLoadError = (error: State['error']) => {
-      setState(prev =>
-        prev.formattedTexte
-          ? prev
-          : {
-              ...prev,
-              error,
-            }
-      )
+  useEffect(() => {
+    if (
+      !hasDisplayedStrongVerseRef.current &&
+      strongVerseQuery.error instanceof StrongVerseQueryError &&
+      strongVerseQuery.error.code === 'STRONG_BIBLE_UNAVAILABLE'
+    ) {
+      onStrongBibleProvenanceChange?.(null)
     }
+  }, [onStrongBibleProvenanceChange, strongVerseQuery.error])
 
-    const loadPage = async () => {
-      setState(prev => ({
-        ...prev,
-        error: false,
-      }))
-
-      try {
-        const result = await resources.lexiconBible.loadVerse({
-          currentVersionId: selectedVersion,
-          defaultVersionId: defaultStrongVersion,
-          preferredVersionId: preferredStrongVersionId,
-          preferredInterlinearLocale,
-          fallbackVersionIds: getStrongBibleFallbackPriority(selectedVersion),
-          book: verseBook,
-          chapter: verseChapter,
-          verse: verseNumber,
-        })
-        if (!isCurrent) return
-
-        if (result.status !== 'available') {
-          if (!hasDisplayedStrongVerseRef.current) {
-            onStrongBibleProvenanceChange?.(null)
-          }
-          showInitialLoadError(result.status === 'unavailable' ? 'STRONG_BIBLE_UNAVAILABLE' : true)
-          return
-        }
-
-        const strongVerse = result.verse
-        const parsedVerse = parseStrongVerse(strongVerse.Texte, verseBook)
-        const [versesInCurrentChapterResult, strongReferencesResult] = await Promise.all([
-          getChapterVerseCountSafe(result.provenance.versionId, verseBook, verseChapter),
-          resources.strong.loadReferences(parsedVerse.references, verseBook),
-        ])
-        if (!isCurrent) return
-
-        if (!strongReferencesResult || 'error' in strongReferencesResult) {
-          showInitialLoadError(
-            strongReferencesResult && 'error' in strongReferencesResult
-              ? strongReferencesResult.error
-              : true
-          )
-          return
-        }
-
-        const strongReferences = strongReferencesResult.filter(
-          (reference): reference is StrongReference => typeof reference !== 'string'
-        )
-        const { formattedTexte } = await verseToStrong(
-          { ...strongVerse, Livre: verseBook },
-          undefined,
-          undefined,
-          strongReferences
-        )
-        if (!isCurrent) return
-
-        hasDisplayedStrongVerseRef.current = true
-        setState(prev => ({
-          ...prev,
-          error: false,
-          formattedTexte,
-          strongReferences,
-          currentStrongReference: strongReferences[0] || null,
-          versesInCurrentChapter:
-            versesInCurrentChapterResult || countLsgChapters[`${verseBook}-${verseChapter}`],
-          provenance: result.provenance,
-          displayedVerse: {
-            Livre: verseBook,
-            Chapitre: verseChapter,
-            Verset: verseNumber,
-          },
-        }))
-        onStrongBibleProvenanceChange?.(result.provenance)
-        carouselRef.current?.scrollTo({ index: 0, animated: false })
-      } catch {
-        if (!isCurrent) return
-        showInitialLoadError('UNKNOWN_ERROR')
-      }
-    }
-
-    loadPage()
-    return () => {
-      isCurrent = false
-    }
-  }, [
-    defaultStrongVersion,
-    downloadCompletionSignal,
-    onStrongBibleProvenanceChange,
-    preferredInterlinearLocale,
-    preferredStrongVersionId,
-    resources.lexiconBible,
-    resources.strong,
-    selectedVersion,
-    verseBook,
-    verseChapter,
-    verseNumber,
-  ])
-
-  const { versesInCurrentChapter, error, formattedTexte } = state
+  const { versesInCurrentChapter, formattedTexte } = strongVerseData ?? {
+    versesInCurrentChapter: null,
+    formattedTexte: null,
+  }
+  const error =
+    !strongVerseData && strongVerseQuery.error instanceof StrongVerseQueryError
+      ? strongVerseQuery.error.code
+      : !strongVerseData && strongVerseQuery.isError
+        ? 'UNKNOWN_ERROR'
+        : false
 
   if (error) {
     if (error === 'STRONG_BIBLE_UNAVAILABLE') {
@@ -334,8 +325,8 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     return <Loading />
   }
 
-  const currentStrongReferenceIndex = state.strongReferences.findIndex(
-    r => Number(r?.Code) === Number(state.currentStrongReference?.Code)
+  const currentStrongReferenceIndex = strongReferences.findIndex(
+    r => Number(r?.Code) === Number(currentStrongReference?.Code)
   )
 
   return (
@@ -344,11 +335,11 @@ const BibleVerseDetailCard: React.FC<Props> = ({
         <ScrollView contentContainerStyle={{ paddingTop: 10 }}>
           <StyledVerse>
             <VersetWrapper>
-              <NumberText>{state.displayedVerse?.Verset ?? verse.Verset}</NumberText>
+              <NumberText>{strongVerseData?.displayedVerse?.Verset ?? verse.Verset}</NumberText>
             </VersetWrapper>
             <CarouselProvider
               value={{
-                currentStrongReference: state.currentStrongReference,
+                currentStrongReference,
                 goToCarouselItem,
               }}
             >
@@ -388,7 +379,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
             flex: 1,
             width: '100%',
           }}
-          data={state.strongReferences}
+          data={strongReferences}
           renderItem={renderItem}
           onSnapToItem={onSnapToItem}
           defaultIndex={currentStrongReferenceIndex === -1 ? 0 : currentStrongReferenceIndex}

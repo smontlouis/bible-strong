@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { Share } from 'react-native'
 import { WebView } from 'react-native-webview'
@@ -7,7 +8,7 @@ import truncHTML from 'trunc-html'
 
 import { useRouter } from 'expo-router'
 import { produce } from 'immer'
-import { useAtom, useSetAtom } from 'jotai/react'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import Header from '~common/Header'
@@ -21,7 +22,6 @@ import waitForNaveDB from '~common/waitForNaveDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
-import type { NaveItemRow } from '~features/resources/naveAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import useHTMLView, { type HTMLViewLinkPayload } from '~helpers/useHTMLView'
 import { RootState } from '~redux/modules/reducer'
@@ -35,6 +35,9 @@ import type { RelationEndpoint } from '~redux/modules/user'
 import ScrollView from '~common/ui/ScrollView'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { localQueryOptions } from '~helpers/queryOptions'
+import { unwrapDatabaseResult } from '~helpers/queryResult'
+import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 
 interface NaveDetailScreenProps {
   naveAtom: PrimitiveAtom<NaveTab>
@@ -55,6 +58,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
   } = naveTab
 
   const addHistory = useSetAtom(historyAtom)
+  const naveResourceLanguage = useAtomValue(resourcesLanguageAtom).NAVE
 
   // Go back to list view (for tab context)
   const goBack = useCallback(() => {
@@ -70,7 +74,14 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     }
   }, [isInTab, setNaveTab, router])
 
-  const [naveItem, setNaveItem] = useState<NaveItemRow | null>(null)
+  const { data: naveItem = null } = useQuery({
+    queryKey: ['nave-detail', naveResourceLanguage, name_lower],
+    queryFn: async () =>
+      name_lower ? (unwrapDatabaseResult(await resources.nave.loadItem(name_lower)) ?? null) : null,
+    enabled: !!name_lower,
+    staleTime: Infinity,
+    ...localQueryOptions,
+  })
   const { t } = useTranslation()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const selectNaveTags = makeNaveTagsSelector()
@@ -99,19 +110,14 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
   }, [naveItem?.name, name])
 
   useEffect(() => {
-    if (!name_lower) return
-    resources.nave.loadItem(name_lower).then(result => {
-      if (!result || 'error' in result) return
-      setNaveItem(result)
-      addHistory({
-        name: result.name,
-        name_lower: result.name_lower,
-        type: 'nave',
-        date: Date.now(),
-      })
+    if (!naveItem) return
+    addHistory({
+      name: naveItem.name,
+      name_lower: naveItem.name_lower,
+      type: 'nave',
+      date: Date.now(),
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name, name_lower, resources.nave])
+  }, [addHistory, naveItem])
 
   const openLink = ({ href }: HTMLViewLinkPayload) => {
     const [type, item] = href.split('=')

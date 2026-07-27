@@ -8,7 +8,8 @@ import notifee, {
 import addDays from 'date-fns/fp/addDays'
 import setHours from 'date-fns/fp/setHours'
 import setMinutes from 'date-fns/fp/setMinutes'
-import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from '~helpers/toast'
@@ -25,6 +26,7 @@ import { setNotificationVOD } from '~redux/modules/user'
 import { VersionCode } from '../../state/tabs'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 import { getDayOfTheYear } from './getDayOfTheYear'
+import { localQueryOptions } from '~helpers/queryOptions'
 
 export type VerseOfTheDayData =
   | (VerseRefContent & {
@@ -44,38 +46,31 @@ const hasVerseContent = (
   !!verseOfTheDay && 'content' in verseOfTheDay
 
 const useGetVerseOfTheDay = (version: VersionCode, addDay: number) => {
-  const [verseOfTheDay, setVOD] = useState<VerseOfTheDayData>(false)
-
-  useEffect(() => {
-    const dayOfTheYear =
-      getDayOfTheYear(addDay) + 1 < 1 || getDayOfTheYear(addDay) + 1 > 366
-        ? 1
-        : getDayOfTheYear(addDay) + 1
-    const loadVerse = async () => {
-      try {
-        const reference = versesOfTheDay[dayOfTheYear]
-        const [bookName, chapter, verse] = reference.split('.')
-        const book = booksDesc2.find(b => b[1] === bookName)?.[0]
-        const vod = await getVersesContent({
-          verses: `${book}-${chapter}-${verse}`,
-          version,
-        })
-        setVOD({
-          v: reference,
-          book: Number(book),
-          chapter: Number(chapter),
-          verse: Number(verse),
-          ...vod,
-        })
-      } catch {
-        setVOD({ error: true })
+  const requestedDay = getDayOfTheYear(addDay) + 1
+  const dayOfTheYear = requestedDay < 1 || requestedDay > 366 ? 1 : requestedDay
+  const query = useQuery({
+    queryKey: ['verse-of-the-day', version, dayOfTheYear],
+    queryFn: async () => {
+      const reference = versesOfTheDay[dayOfTheYear]
+      const [bookName, chapter, verse] = reference.split('.')
+      const book = booksDesc2.find(b => b[1] === bookName)?.[0]
+      const vod = await getVersesContent({
+        verses: `${book}-${chapter}-${verse}`,
+        version,
+      })
+      return {
+        v: reference,
+        book: Number(book),
+        chapter: Number(chapter),
+        verse: Number(verse),
+        ...vod,
       }
-    }
-    loadVerse()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [version])
+    },
+    staleTime: Infinity,
+    ...localQueryOptions,
+  })
 
-  return verseOfTheDay
+  return query.isError ? ({ error: true } as const) : (query.data ?? false)
 }
 
 export const useVerseOfTheDay = (addDay: number) => {

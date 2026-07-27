@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import i18n from '~i18n'
+import { remoteQueryOptions } from '~helpers/queryOptions'
 
 interface ImageUrls {
   small?: string
@@ -13,29 +14,25 @@ interface VerseOfTheDay {
 }
 
 export const useImageUrls = (verseOfTheDay: VerseOfTheDay | false): ImageUrls | null => {
-  const [imageUrls, setImageUrls] = useState<ImageUrls | null>(null)
   const verseId = verseOfTheDay && 'v' in verseOfTheDay ? verseOfTheDay.v : undefined
-
-  useEffect(() => {
-    const loadImageUrls = async () => {
-      try {
-        const imageRes = await fetch(
-          `https://nodejs.bible.com/api/images/items/3.1?page=1&category=prerendered&usfm%5B0%5D=${verseId}&language_tag=${i18n.language}`
-        )
-        const imageJSON = await imageRes.json()
-        setImageUrls({
-          small: `https:${imageJSON.images[imageJSON.images.length - 1].renditions[0].url}`,
-          large: `https:${imageJSON.images[imageJSON.images.length - 1].renditions[2].url}`,
-        })
-      } catch {
-        setImageUrls({
-          error: true,
-        })
+  const query = useQuery({
+    queryKey: ['verse-image-urls', verseId, i18n.language],
+    queryFn: async () => {
+      const imageRes = await fetch(
+        `https://nodejs.bible.com/api/images/items/3.1?page=1&category=prerendered&usfm%5B0%5D=${verseId}&language_tag=${i18n.language}`
+      )
+      if (!imageRes.ok) throw new Error(`Verse image request failed (${imageRes.status})`)
+      const imageJSON = await imageRes.json()
+      const image = imageJSON.images.at(-1)
+      if (!image) throw new Error('Verse image response is empty')
+      return {
+        small: `https:${image.renditions[0].url}`,
+        large: `https:${image.renditions[2].url}`,
       }
-    }
-    if (verseId) {
-      loadImageUrls()
-    }
-  }, [verseId])
-  return imageUrls
+    },
+    enabled: !!verseId,
+    ...remoteQueryOptions,
+  })
+
+  return query.isError || query.fetchStatus === 'paused' ? { error: true } : (query.data ?? null)
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { MenuView } from '~common/ui/MenuView'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
@@ -24,7 +24,6 @@ import { useSearchValue, useResultsByLetterOrSearch } from '../lexique/useUtilit
 import { useTranslation } from 'react-i18next'
 import { NaveTab } from '../../state/tabs'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import type { DatabaseError } from '~helpers/catchDatabaseError'
 import { toast } from '~helpers/toast'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
@@ -36,9 +35,6 @@ type NaveSection = {
   data: NaveRow[]
 }
 
-const isDatabaseError = (value: unknown): value is DatabaseError =>
-  !!value && typeof value === 'object' && 'error' in value
-
 const getNaveItemLayout = sectionListGetItemLayout({
   getItemHeight: () => 60,
   getSectionHeaderHeight: () => 50,
@@ -47,27 +43,16 @@ const getNaveItemLayout = sectionListGetItemLayout({
 }) as (data: NaveSection[], index: number) => { length: number; offset: number; index: number }
 
 const useSectionResults = (results: NaveRow[]) => {
-  const [sectionResults, setSectionResults] = useState<NaveSection[]>([])
-
-  useEffect(() => {
-    if (!results.length) {
-      setSectionResults([])
-      return
+  return results.reduce<NaveSection[]>((list, naveItem) => {
+    const listItem = list.find(item => item.title === naveItem.letter)
+    if (!listItem) {
+      list.push({ title: naveItem.letter, data: [naveItem] })
+    } else {
+      listItem.data.push(naveItem)
     }
-    const sectionResults = results.reduce<NaveSection[]>((list, naveItem) => {
-      const listItem = list.find(item => item.title === naveItem.letter)
-      if (!listItem) {
-        list.push({ title: naveItem.letter, data: [naveItem] })
-      } else {
-        listItem.data.push(naveItem)
-      }
 
-      return list
-    }, [])
-    setSectionResults(sectionResults)
-  }, [results])
-
-  return sectionResults
+    return list
+  }, [])
 }
 
 interface NaveListScreenProps {
@@ -93,22 +78,25 @@ const NaveListScreen = ({
   const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
   const lang = useLanguage()
   const [naveResourceLanguage, setNaveResourceLanguage] = useResourceLanguage('NAVE')
-  const [error, setError] = useState<DatabaseError['error'] | null>(null)
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
 
-  const { results, isLoading } = useResultsByLetterOrSearch(
-    { queryKey: ['nave'], query: resources.nave.search, value: debouncedSearchValue },
-    { queryKey: ['nave'], query: resources.nave.listByLetter, value: letter }
+  const { results, isLoading, error } = useResultsByLetterOrSearch(
+    {
+      queryKey: ['nave'],
+      query: resources.nave.search,
+      value: debouncedSearchValue,
+      resourceLanguage: naveResourceLanguage,
+    },
+    {
+      queryKey: ['nave'],
+      query: resources.nave.listByLetter,
+      value: letter,
+      resourceLanguage: naveResourceLanguage,
+    }
   )
   const naveResults = Array.isArray(results) ? (results as NaveRow[]) : []
   const sectionResults = useSectionResults(naveResults)
-
-  useEffect(() => {
-    if (isDatabaseError(results)) {
-      setError(results.error)
-    }
-  }, [results])
 
   const selectNave = (nameLower: string, name: string) => {
     if (isNewTabSelection) {

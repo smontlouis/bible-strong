@@ -1,14 +1,13 @@
 import styled from '@emotion/native'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { MenuView } from '~common/ui/MenuView'
-import { to } from 'await-to-js'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, ScrollView } from 'react-native'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import { LinkBox } from '~common/Link'
 import Loading from '~common/Loading'
-import { Status } from '~common/types'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Paragraph from '~common/ui/Paragraph'
@@ -32,7 +31,7 @@ import { HStack } from '~common/ui/Stack'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { firebaseDb } from '~helpers/firebase'
-import memoize from '~helpers/memoize'
+import { localQueryOptions, remoteQueryOptions } from '~helpers/queryOptions'
 import { Theme } from '~themes'
 import { CommentaryTab } from '../../state/tabs'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
@@ -63,7 +62,7 @@ const StyledVerse = styled.View({
   flexDirection: 'row',
 })
 
-const fetchComments = memoize(async (verse: string) => {
+const fetchComments = async (verse: string) => {
   const verseCommentRef = await firebaseDb.collection('verse-commentaries').doc(verse).get()
 
   if (!verseCommentRef.exists) {
@@ -78,99 +77,81 @@ const fetchComments = memoize(async (verse: string) => {
     .collection('commentaries')
     .orderBy('order')
     .where('isSDA', '==', false)
+    .limit(3)
     .get()
 
   const comments = snapshot.docs.map(x => x.data())
 
   return { ...verseComment, comments } as Comments
-})
+}
 
-const fetchMoreComments = memoize(async (verse: string, id?: string) => {
-  const query = id
-    ? firebaseDb
-        .collection('verse-commentaries')
-        .doc(verse)
-        .collection('commentaries')
-        .orderBy('id')
-        .startAfter(id)
-        .limit(8)
-        .get()
-    : firebaseDb
-        .collection('verse-commentaries')
-        .doc(verse)
-        .collection('commentaries')
-        .orderBy('id')
-        .limit(8)
-        .get()
-
-  const snapshot = await query
+const fetchMoreComments = async (verse: string, order: number) => {
+  const snapshot = await firebaseDb
+    .collection('verse-commentaries')
+    .doc(verse)
+    .collection('commentaries')
+    .orderBy('order')
+    .startAfter(order)
+    .limit(8)
+    .get()
 
   const comments = snapshot.docs.map(x => x.data()) as CommentType[]
 
   return comments
-})
+}
 
 const useComments = (verse: string) => {
-  const [status, setStatus] = useState<Status>('Idle')
-  const [moreStatus, setMoreStatus] = useState<Status>('Idle')
-  const [data, setData] = useState<Comments>()
-  const [error, setError] = useState<Error>()
-  const [count, setCount] = useState(0)
-  const [page, setPage] = useState(3)
+  const query = useInfiniteQuery({
+    queryKey: ['commentaries', verse],
+    initialPageParam: null as number | null,
+    queryFn: async ({ pageParam }) => {
+      if (!pageParam) return fetchComments(verse)
 
-  const reset = () => {
-    setCount(0)
-    setPage(3)
-    setMoreStatus('Idle')
-    setStatus('Idle')
-  }
-
-  const loadMore = async (id?: string) => {
-    setMoreStatus('Pending')
-    const comments = await fetchMoreComments(verse, id)
-
-    setData(s => {
-      return { ...s, comments: [...s!.comments, ...comments] } as Comments
-    })
-    setPage(s => s + comments.length)
-    setMoreStatus('Resolved')
-  }
-
-  useEffect(() => {
-    ;(async () => {
-      reset()
-      setStatus('Pending')
-      const [err, res] = await to(fetchComments(verse))
-      if (err) {
-        setError(err)
-        setStatus('Rejected')
-        return
+      return {
+        id: verse,
+        count: 0,
+        comments: await fetchMoreComments(verse, pageParam),
+      } satisfies Comments
+    },
+    getNextPageParam: (lastPage, pages) => {
+      const loadedCommentCount = pages.reduce((count, page) => count + page.comments.length, 0)
+      return lastPage.comments.length > 0 && loadedCommentCount < pages[0].count
+        ? lastPage.comments.at(-1)?.order
+        : undefined
+    },
+    ...remoteQueryOptions,
+  })
+  const data = query.data
+    ? {
+        ...query.data.pages[0],
+        comments: query.data.pages.flatMap(page => page.comments),
       }
+    : undefined
 
-      setData(res)
-      setCount(res!.count)
-      setStatus('Resolved')
-    })()
-  }, [verse])
-
-  return { status, data, error, loadMore, canLoad: page < count, moreStatus }
+  return {
+    data,
+    error: query.error,
+    loadMore: query.fetchNextPage,
+    canLoad: query.hasNextPage,
+    isPending: query.isPending && query.fetchStatus === 'fetching',
+    isError: query.isError || query.fetchStatus === 'paused',
+    isFetchingMore: query.isFetchingNextPage,
+  }
 }
 
 const useVerseInCurrentChapter = (
   book: string | number | undefined,
   chapter: string | number | undefined
 ) => {
-  const [versesInCurrentChapter, setVersesInCurrentChapter] = React.useState<number>()
   const defaultVersion = useDefaultBibleVersion()
-  useEffect(() => {
-    if (!book || !chapter) return
-    ;(async () => {
-      const v =
-        (await getChapterVerseCountSafe(defaultVersion, Number(book), Number(chapter))) ||
-        countLsgChapters[`${book}-${chapter}`]
-      setVersesInCurrentChapter(v)
-    })()
-  }, [book, chapter, defaultVersion])
+  const { data: versesInCurrentChapter } = useQuery({
+    queryKey: ['commentary-chapter-verse-count', defaultVersion, book, chapter],
+    queryFn: async () =>
+      (await getChapterVerseCountSafe(defaultVersion, Number(book), Number(chapter))) ||
+      countLsgChapters[`${book}-${chapter}`],
+    enabled: !!book && !!chapter,
+    ...localQueryOptions,
+  })
   return { versesInCurrentChapter }
 }
 
@@ -206,7 +187,7 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
       })
     )
 
-  const { status, data, error, loadMore, canLoad, moreStatus } = useComments(verse)
+  const { data, error, loadMore, canLoad, isPending, isError, isFetchingMore } = useComments(verse)
   const verseFormatted = useMemo(() => verseStringToObject([verse]), [verse])
 
   const { title: headerTitle } = verseFormatted
@@ -217,22 +198,17 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
   const [verseText] = useBibleVerses(verseFormatted)
   const { versesInCurrentChapter } = useVerseInCurrentChapter(verseText?.Livre, verseText?.Chapitre)
   const { enqueue } = useDownloadQueue()
-  const [requiredBibleVersion, setRequiredBibleVersion] = useState<string | null>(null)
+  const { data: requiredBibleVersion = null } = useQuery({
+    queryKey: ['commentary-required-bible', defaultVersion, verse, !!verseText],
+    queryFn: async () => {
+      if (verseText || !verse) return null
+      return (await getIfVersionNeedsDownload(defaultVersion)) ? defaultVersion : null
+    },
+    ...localQueryOptions,
+  })
   const requiredBibleDownloadStatus = useDownloadItemStatus(
     requiredBibleVersion ? `bible:${requiredBibleVersion}` : ''
   )
-
-  useEffect(() => {
-    ;(async () => {
-      if (verseText || !verse) {
-        setRequiredBibleVersion(null)
-        return
-      }
-
-      const needsDownload = await getIfVersionNeedsDownload(defaultVersion)
-      setRequiredBibleVersion(needsDownload ? defaultVersion : null)
-    })()
-  }, [defaultVersion, verse, verseText])
 
   const updateVerse = (value: -1 | 1) => {
     const [b, c, v] = verse.split('-').map(Number)
@@ -335,11 +311,11 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
           <Box bg="lightGrey">
             <RoundedCorner />
           </Box>
-          {status === 'Pending' || status === 'Idle' ? (
+          {isPending ? (
             <Box height={100} center>
               <Loading />
             </Box>
-          ) : status === 'Rejected' ? (
+          ) : isError ? (
             <Empty
               icon={require('~assets/images/empty-state-icons/comment.svg')}
               message={
@@ -361,14 +337,14 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
                   lightShadow
                   bg="reverse"
                   center
-                  opacity={moreStatus === 'Pending' ? 0.3 : 1}
+                  opacity={isFetchingMore ? 0.3 : 1}
                   onPress={() => {
-                    if (moreStatus !== 'Pending') {
-                      loadMore(data?.comments[data?.comments.length - 1]?.id)
+                    if (!isFetchingMore) {
+                      loadMore()
                     }
                   }}
                 >
-                  {moreStatus === 'Pending' ? (
+                  {isFetchingMore ? (
                     <ActivityIndicator />
                   ) : (
                     <HStack row center>

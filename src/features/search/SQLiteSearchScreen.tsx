@@ -28,7 +28,6 @@ import type {
 } from '~features/resources/bibleSearchAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { appLogger } from '~helpers/agentObservability'
-import { DatabaseError } from '~helpers/catchDatabaseError'
 import type { LexiqueRow } from '~features/resources/strongAccess'
 import useDebounce from '~helpers/useDebounce'
 import useBibleVerses from '~helpers/useBibleVerses'
@@ -70,6 +69,8 @@ import {
   type SQLiteSearchResultSection,
   type SearchSectionId,
 } from './searchResultsModel'
+import { localQueryOptions } from '~helpers/queryOptions'
+import { unwrapDatabaseResult } from '~helpers/queryResult'
 
 type Props = {
   searchValue: string
@@ -82,9 +83,6 @@ const SEARCH_ALPHABET_FOOTER_HEIGHT = 70
 
 type DictionaryRow = DictionarySearchRow
 type NaveRow = NaveSearchItemRow
-
-const isDatabaseError = (value: unknown): value is DatabaseError =>
-  typeof value === 'object' && value !== null && 'error' in value
 
 const useKeyboardFooterBottom = (footerHeight: number) => {
   const insets = useSafeAreaInsets()
@@ -168,6 +166,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const installedVersionsQuery = useQuery({
     queryKey: ['search-installed-bible-versions', installedVersionsSignal],
     queryFn: () => resources.bibleSearch.getInstalledVersions(),
+    ...localQueryOptions,
   })
   const installedVersions = installedVersionsQuery.data ?? []
   const hasInstalledVersions = !installedVersionsQuery.isSuccess || installedVersions.length > 0
@@ -376,6 +375,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     },
     enabled: shouldSearchPassages,
     placeholderData: keepPreviousData,
+    ...localQueryOptions,
   })
   const results: SearchResult[] | null = !itemFilters.passages
     ? null
@@ -410,7 +410,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           browseItemType === 'strong' && !trimmedSearchValue
             ? await resources.strong.listLexiconByLetter(strongLetter)
             : await resources.strong.searchLexicon(trimmedSearchValue)
-        return isDatabaseError(result) ? [] : result
+        return unwrapDatabaseResult(result)
       } catch (error) {
         appLogger.error('database', 'search.strong.failed', { error })
         throw error
@@ -418,6 +418,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     },
     enabled: shouldSearchStrong,
     placeholderData: keepPreviousData,
+    ...localQueryOptions,
   })
   const strongResults: LexiqueRow[] = shouldSearchStrong ? (strongQuery.data ?? []) : []
   const isStrongSearching = shouldSearchStrong && strongQuery.isFetching
@@ -444,7 +445,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           browseItemType === 'dictionary' && !trimmedSearchValue
             ? await resources.dictionary.listByLetter(dictionaryLetter)
             : await resources.dictionary.search(trimmedSearchValue)
-        return isDatabaseError(result) ? [] : result
+        return unwrapDatabaseResult(result)
       } catch (error) {
         appLogger.error('database', 'search.dictionary.failed', { error })
         throw error
@@ -452,6 +453,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     },
     enabled: shouldSearchDictionary,
     placeholderData: keepPreviousData,
+    ...localQueryOptions,
   })
   const dictionaryResults: DictionaryRow[] = shouldSearchDictionary
     ? (dictionaryQuery.data ?? [])
@@ -480,7 +482,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           browseItemType === 'nave' && !trimmedSearchValue
             ? await resources.nave.listByLetter(naveLetter)
             : await resources.nave.search(trimmedSearchValue)
-        return isDatabaseError(result) ? [] : result
+        return unwrapDatabaseResult(result)
       } catch (error) {
         appLogger.error('database', 'search.nave.failed', { error })
         throw error
@@ -488,6 +490,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     },
     enabled: shouldSearchNave,
     placeholderData: keepPreviousData,
+    ...localQueryOptions,
   })
   const naveResults: NaveRow[] = shouldSearchNave ? (naveQuery.data ?? []) : []
   const isNaveSearching = shouldSearchNave && naveQuery.isFetching

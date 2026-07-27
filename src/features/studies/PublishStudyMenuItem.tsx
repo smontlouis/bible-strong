@@ -1,5 +1,5 @@
-import { to } from 'await-to-js'
-import React, { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, PermissionsAndroid, Platform, Share } from 'react-native'
 import { useDispatch } from 'react-redux'
@@ -16,6 +16,7 @@ import useConnection from '~helpers/useConnection'
 import { publishStudy, Study } from '~redux/modules/user'
 import type { AppDispatch } from '~redux/store'
 import Clipboard from '@react-native-clipboard/clipboard'
+import { remoteQueryOptions } from '~helpers/queryOptions'
 
 interface Props {
   study: Study
@@ -23,28 +24,27 @@ interface Props {
 }
 
 const useStudyStatus = (study: Study) => {
-  const { current: url } = React.useRef(`https://bible-strong.app/studies/${study.id}`)
-  const [status, setStatus] = useState<Status>('Idle')
-  const [data, setData] = useState<number>()
-  const [error, setError] = useState<Error>()
+  const url = `https://bible-strong.app/studies/${study.id}`
+  const query = useQuery({
+    queryKey: ['published-study-status', study.id],
+    queryFn: async () => {
+      const response = await fetch(url)
+      return response.status
+    },
+    enabled: study.published,
+    ...remoteQueryOptions,
+  })
+  const status: Status = !study.published
+    ? 'Idle'
+    : query.fetchStatus === 'paused'
+      ? 'Rejected'
+      : query.isPending
+        ? 'Pending'
+        : query.isError
+          ? 'Rejected'
+          : 'Resolved'
 
-  useEffect(() => {
-    ;(async () => {
-      if (!study.published) return
-
-      setStatus('Pending')
-      const [err, response] = await to(fetch(url))
-      if (!err) {
-        setStatus('Resolved')
-        setData(response?.status)
-      } else {
-        setStatus('Rejected')
-        setError(err)
-      }
-    })()
-  }, [study.published, study.id, url])
-
-  return { url, status, data, error }
+  return { url, status, data: query.data }
 }
 
 const PublishStudyMenuItem = ({ study, onClosed }: Props) => {

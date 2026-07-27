@@ -1,5 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient'
-import React, { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import React, { useState } from 'react'
 
 import { useTranslation } from 'react-i18next'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -14,6 +15,8 @@ import waitForStrongWidget from './waitForStrongWidget'
 import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
 import { StrongReference } from '~common/types'
 import { useResourceAccess } from '~features/resources/resourceAccess'
+import { localQueryOptions } from '~helpers/queryOptions'
+import { unwrapDatabaseResult } from '~helpers/queryResult'
 
 type StrongOfTheDayProps = {
   type: 'grec' | 'hebreu'
@@ -29,32 +32,20 @@ const StrongOfTheDay = ({
   const { t } = useTranslation()
   const resources = useResourceAccess()
 
-  const [error, setError] = useState<'NOT_FOUND' | true | false>(false)
-  const [startRandom, setStartRandom] = useState(true)
-  const [strongReference, setStrongRef] = useState<StrongReference | undefined>(undefined)
-
-  useEffect(() => {
-    const loadStrong = async () => {
-      if (!startRandom) return
-
-      const strongReference = await resources.strong.loadRandomReference(type === 'grec' ? 40 : 1)
-
-      if (!strongReference) {
-        setError('NOT_FOUND')
-      }
-
-      if (strongReference && 'error' in strongReference) {
-        console.log(`[Home] Failed to load strong for type ${type}`)
-
-        setError(true)
-        return
-      }
-
-      setStrongRef(strongReference as StrongReference | undefined)
-      setStartRandom(false)
-    }
-    loadStrong()
-  }, [resources.strong, type, startRandom])
+  const [randomSeed, setRandomSeed] = useState(0)
+  const strongQuery = useQuery({
+    queryKey: ['home-strong-random', type, randomSeed],
+    queryFn: async (): Promise<StrongReference | null> =>
+      unwrapDatabaseResult(await resources.strong.loadRandomReference(type === 'grec' ? 40 : 1)) ??
+      null,
+    ...localQueryOptions,
+  })
+  const strongReference = strongQuery.data
+  const error = strongQuery.isError
+    ? true
+    : strongQuery.isSuccess && !strongReference
+      ? 'NOT_FOUND'
+      : false
 
   if (error) {
     return (
@@ -74,7 +65,7 @@ const StrongOfTheDay = ({
     )
   }
 
-  if (!strongReference) {
+  if (strongQuery.isPending || !strongReference) {
     return <WidgetLoading />
   }
 
@@ -95,7 +86,7 @@ const StrongOfTheDay = ({
         >
           <LinearGradient start={[0.1, 0.2]} style={{ height: 130 }} colors={[color1, color2]} />
         </Box>
-        <RandomButton onPress={() => setStartRandom(true)} />
+        <RandomButton onPress={() => setRandomSeed(seed => seed + 1)} />
         <Box flex={1} center mt={20}>
           <Box backgroundColor="rgba(0,0,0,0.1)" paddingHorizontal={5} paddingVertical={3} rounded>
             <Text fontSize={10} style={{ color: 'white' }}>

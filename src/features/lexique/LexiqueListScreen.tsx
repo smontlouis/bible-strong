@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { MenuView } from '~common/ui/MenuView'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
@@ -13,7 +13,6 @@ import FormSheetScreen from '~common/ui/FormSheetScreen'
 import SectionList from '~common/ui/SectionList'
 import Text from '~common/ui/Text'
 import { getFirstLetterFrom } from '~helpers/alphabet'
-import { DatabaseError } from '~helpers/catchDatabaseError'
 
 import { useResultsByLetterOrSearch, useSearchValue } from './useUtilities'
 
@@ -35,9 +34,6 @@ interface LexiqueSection {
   data: LexiqueRow[]
 }
 
-const isDatabaseError = (value: unknown): value is DatabaseError =>
-  typeof value === 'object' && value !== null && 'error' in value
-
 const getLexiqueItemLayout = sectionListGetItemLayout({
   getItemHeight: () => 80,
   getSectionHeaderHeight: () => 50,
@@ -46,29 +42,16 @@ const getLexiqueItemLayout = sectionListGetItemLayout({
 })
 
 const useSectionResults = (results: LexiqueRow[]) => {
-  const [sectionResults, setSectionResults] = useState<LexiqueSection[]>([])
-
-  useEffect(() => {
-    if (!results.length) {
-      setSectionResults([])
-      return
+  return results.reduce<LexiqueSection[]>((list, dbItem) => {
+    const listItem = list.find(item => item.title && item.title === getFirstLetterFrom(dbItem.Mot))
+    if (!listItem) {
+      list.push({ title: getFirstLetterFrom(dbItem.Mot), data: [dbItem] })
+    } else {
+      listItem.data.push(dbItem)
     }
-    const sectionResults = results.reduce<LexiqueSection[]>((list, dbItem) => {
-      const listItem = list.find(
-        item => item.title && item.title === getFirstLetterFrom(dbItem.Mot)
-      )
-      if (!listItem) {
-        list.push({ title: getFirstLetterFrom(dbItem.Mot), data: [dbItem] })
-      } else {
-        listItem.data.push(dbItem)
-      }
 
-      return list
-    }, [])
-    setSectionResults(sectionResults)
-  }, [results])
-
-  return sectionResults
+    return list
+  }, [])
 }
 
 interface LexiqueListScreenProps {
@@ -94,31 +77,26 @@ const LexiqueListScreen = ({
   const canGoBackInStack = useCanGoBackInStack()
   const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
   const [strongResourceLanguage, setStrongResourceLanguage] = useResourceLanguage('STRONG')
-  const [error, setError] = useState<DatabaseError['error'] | null>(null)
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
 
-  const { results, isLoading } = useResultsByLetterOrSearch(
+  const { results, isLoading, error } = useResultsByLetterOrSearch(
     {
       queryKey: ['strong-lexicon'],
       query: resources.strong.searchLexicon,
       value: debouncedSearchValue,
+      resourceLanguage: strongResourceLanguage,
     },
     {
       queryKey: ['strong-lexicon'],
       query: resources.strong.listLexiconByLetter,
       value: letter,
+      resourceLanguage: strongResourceLanguage,
     }
   )
 
   const lexiqueResults = Array.isArray(results) ? results : []
   const sectionResults = useSectionResults(lexiqueResults)
-
-  useEffect(() => {
-    if (isDatabaseError(results)) {
-      setError(results.error)
-    }
-  }, [results])
 
   const selectStrong = (book: number, reference: string, title?: string) => {
     if (isNewTabSelection) {

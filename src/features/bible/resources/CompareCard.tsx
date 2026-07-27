@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import React from 'react'
 import { shallowEqual, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 
@@ -11,6 +12,7 @@ import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
 import { versions } from '~helpers/bibleVersions'
 import { getMaxChapterVerseCount } from '~helpers/bibleCoverage'
 import { selectCompareVersions } from '~redux/selectors/user'
+import { localQueryOptions } from '~helpers/queryOptions'
 
 interface CompareCardProps {
   selectedVerses: VerseIds
@@ -21,37 +23,19 @@ const CompareCard = ({ selectedVerses, onChangeVerse }: CompareCardProps) => {
   const { t } = useTranslation()
   const versionsToCompare = useSelector(selectCompareVersions, shallowEqual)
 
-  const [prevNextItems, setPrevNextItems] = useState<{
-    verseNumber: string
-    versesInCurrentChapter: number
-  } | null>(null)
-
-  const hasPrevNextButtons = Object.keys(selectedVerses).length === 1
-
-  useEffect(() => {
-    let cancelled = false
-
-    const loadPrevNextItems = async () => {
-      const [livre, chapitre, verse] = Object.keys(selectedVerses)[0].split('-')
+  const selectedVerseKeys = Object.keys(selectedVerses)
+  const { data: prevNextItems = null } = useQuery({
+    queryKey: ['resource-compare-prev-next', selectedVerseKeys[0], versionsToCompare],
+    queryFn: async () => {
+      const [livre, chapitre, verse] = selectedVerseKeys[0].split('-')
       const versesInCurrentChapter =
         (await getMaxChapterVerseCount(versionsToCompare, Number(livre), Number(chapitre))) ||
         countLsgChapters[`${livre}-${chapitre}`]
-      if (cancelled) return
-      setPrevNextItems({
-        verseNumber: verse,
-        versesInCurrentChapter,
-      })
-    }
-
-    if (hasPrevNextButtons) {
-      loadPrevNextItems()
-    } else {
-      setPrevNextItems(null)
-    }
-    return () => {
-      cancelled = true
-    }
-  }, [selectedVerses, hasPrevNextButtons, versionsToCompare])
+      return { verseNumber: verse, versesInCurrentChapter }
+    },
+    enabled: selectedVerseKeys.length === 1,
+    ...localQueryOptions,
+  })
 
   const goToVerse = (value: number) => {
     const [livre, chapitre, verse] = Object.keys(selectedVerses)[0].split('-').map(Number)

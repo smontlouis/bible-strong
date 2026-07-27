@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { Share } from 'react-native'
 import { useSelector } from 'react-redux'
@@ -15,7 +16,7 @@ import useHTMLView, { type HTMLViewLinkPayload } from '~helpers/useHTMLView'
 
 import { useRouter } from 'expo-router'
 import { produce } from 'immer'
-import { useAtom, useSetAtom } from 'jotai/react'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { toast } from '~helpers/toast'
@@ -24,7 +25,6 @@ import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
-import type { DictionaryItem } from '~features/resources/dictionaryAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { RootState } from '~redux/modules/reducer'
 import { makeWordTagsSelector } from '~redux/selectors/bible'
@@ -37,6 +37,8 @@ import type { RelationEndpoint } from '~redux/modules/user'
 import AppScrollView from '~common/ui/ScrollView'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { localQueryOptions } from '~helpers/queryOptions'
+import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 
 interface DictionaryDetailScreenProps {
   dictionaryAtom: PrimitiveAtom<DictionaryTab>
@@ -61,7 +63,14 @@ const DictionnaryDetailScreen = ({
 
   const openInNewTab = useOpenInNewTab()
   const { t } = useTranslation()
-  const [dictionnaireItem, setDictionnaireItem] = useState<DictionaryItem | null>(null)
+  const dictionaryResourceLanguage = useAtomValue(resourcesLanguageAtom).DICTIONNAIRE
+  const { data: dictionnaireItem = null } = useQuery({
+    queryKey: ['dictionary-detail', dictionaryResourceLanguage, word],
+    queryFn: async () => (word ? ((await resources.dictionary.loadItem(word)) ?? null) : null),
+    enabled: !!word,
+    staleTime: Infinity,
+    ...localQueryOptions,
+  })
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const addHistory = useSetAtom(historyAtom)
 
@@ -102,18 +111,13 @@ const DictionnaryDetailScreen = ({
   }, [word])
 
   useEffect(() => {
-    if (!word) return
-    resources.dictionary.loadItem(word).then(result => {
-      setDictionnaireItem(result ?? null)
-
-      addHistory({
-        word,
-        type: 'word',
-        date: Date.now(),
-      })
+    if (!word || !dictionnaireItem) return
+    addHistory({
+      word,
+      type: 'word',
+      date: Date.now(),
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resources.dictionary, word])
+  }, [addHistory, dictionnaireItem, word])
 
   const openLink = ({ href, type }: HTMLViewLinkPayload) => {
     if (type === 'verse') {

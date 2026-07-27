@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import { useAtomValue } from 'jotai'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 
 import Empty from '~common/Empty'
@@ -31,6 +31,7 @@ import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
 import { useDownloadQueue, useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import DictionnaireCard from './DictionnaireCard'
 import DictionnaireVerseReference from './DictionnaireVerseReference'
+import { localQueryOptions } from '~helpers/queryOptions'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -122,21 +123,20 @@ const useFormattedText = ({
 }) => {
   const resources = useResourceAccess()
   const installedVersionsSignal = useAtomValue(installedVersionsSignalAtom)
-  const [currentWord, setCurrentWord] = useState<string>()
-  const [versesInCurrentChapter, setVersesInCurrentChapter] = useState(0)
-  const [formattedText, setFormattedText] = useState<JSX.Element | JSX.Element[] | undefined>()
-  const [requiredBibleVersion, setRequiredBibleVersion] = useState<string | null>(null)
+  const [selectedWord, setSelectedWord] = useState<string>()
 
   const { Livre, Chapitre, Verset } = verse
-
-  useEffect(() => {
-    ;(async () => {
-      if (!wordsInVerse) {
-        return
-      }
-      setRequiredBibleVersion(null)
-      setCurrentWord(wordsInVerse[0])
-
+  const chapterQuery = useQuery({
+    queryKey: [
+      'dictionary-verse-chapter',
+      resourceLang,
+      Livre,
+      Chapitre,
+      Verset,
+      wordsInVerse,
+      installedVersionsSignal,
+    ],
+    queryFn: async () => {
       const defaultVersion = getDefaultBibleVersion(resourceLang)
       const chapterVerses = await resources.bibleContent.loadChapterVerses(
         defaultVersion,
@@ -150,26 +150,23 @@ const useFormattedText = ({
       }
       const verseText = bible[Livre]?.[Chapitre]?.[Verset]
       if (!verseText && (await getIfVersionNeedsDownload(defaultVersion))) {
-        setRequiredBibleVersion(defaultVersion)
-        setFormattedText(undefined)
-        setVersesInCurrentChapter(0)
-        return
+        return {
+          formattedText: undefined,
+          versesInCurrentChapter: 0,
+          requiredBibleVersion: defaultVersion,
+        }
       }
 
-      const verseToDictionnaryText = await verseToDictionnary(verse, wordsInVerse, bible)
-      setFormattedText(verseToDictionnaryText)
-      setVersesInCurrentChapter(Object.keys(bible[Livre][Chapitre]).length)
-    })()
-  }, [
-    wordsInVerse,
-    verse,
-    resourceLang,
-    Chapitre,
-    Livre,
-    Verset,
-    resources.bibleContent,
-    installedVersionsSignal,
-  ])
+      return {
+        formattedText: await verseToDictionnary(verse, wordsInVerse ?? [], bible),
+        versesInCurrentChapter: Object.keys(bible[Livre][Chapitre]).length,
+        requiredBibleVersion: null,
+      }
+    },
+    enabled: !!wordsInVerse,
+    staleTime: Infinity,
+    ...localQueryOptions,
+  })
 
   const { error: wordsError, data: words } = useQuery<(DictionaryItem | undefined)[]>({
     enabled: Boolean(wordsInVerse),
@@ -181,16 +178,19 @@ const useFormattedText = ({
           return word
         })
       ),
+    ...localQueryOptions,
   })
+  const currentWord =
+    selectedWord && wordsInVerse?.includes(selectedWord) ? selectedWord : wordsInVerse?.[0]
 
   return {
-    wordsError,
-    formattedText,
+    wordsError: wordsError ?? chapterQuery.error,
+    formattedText: chapterQuery.data?.formattedText,
     words,
     currentWord,
-    setCurrentWord,
-    versesInCurrentChapter,
-    requiredBibleVersion,
+    setCurrentWord: setSelectedWord,
+    versesInCurrentChapter: chapterQuery.data?.versesInCurrentChapter ?? 0,
+    requiredBibleVersion: chapterQuery.data?.requiredBibleVersion ?? null,
   }
 }
 
@@ -220,6 +220,7 @@ const DictionnaireVerseDetailScreen = ({
   const { error: dictionaryWordsError, data: wordsInVerse } = useQuery<string[]>({
     queryKey: ['dictionaryWords', `${Livre}-${Chapitre}-${Verset}`, resourceLang],
     queryFn: () => resources.dictionary.loadWordsForVerse(`${Livre}-${Chapitre}-${Verset}`),
+    ...localQueryOptions,
   })
 
   const {

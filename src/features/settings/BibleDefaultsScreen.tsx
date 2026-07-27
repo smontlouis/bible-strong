@@ -1,4 +1,5 @@
 import React from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
@@ -24,6 +25,7 @@ import { setDefaultBibleVersion, setDefaultStrongBibleVersion } from '~redux/mod
 import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import type { VersionCode } from '~state/tabs'
 import BibleDefaultSelectorSheet from './BibleDefaultSelectorSheet'
+import { localQueryOptions } from '~helpers/queryOptions'
 
 type DefaultVersionCardProps = {
   title: string
@@ -94,7 +96,6 @@ const BibleDefaultsScreen = () => {
   const readingSheetRef = React.useRef<SheetRef>(null)
   const strongSheetRef = React.useRef<SheetRef>(null)
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
-  const [isDefaultStrongAvailable, setDefaultStrongAvailable] = React.useState(false)
 
   const preferredVersion = useSelector(
     (state: RootState) =>
@@ -111,21 +112,16 @@ const BibleDefaultsScreen = () => {
     resolveStrongNavigationVersionId(storedDefaultStrongVersion ?? '') ?? 'LSG'
   const selectedVersion = versions[defaultVersion]
   const selectedStrongVersion = versions[defaultStrongVersion]
-
-  React.useEffect(() => {
-    let cancelled = false
-    getStrongBibleSidecarAvailability(defaultStrongVersion)
-      .then(availability => {
-        if (!cancelled) setDefaultStrongAvailable(availability.status === 'available')
-      })
-      .catch(() => {
-        if (!cancelled) setDefaultStrongAvailable(false)
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [defaultStrongVersion, downloadCompletionSignal])
+  const { data: isDefaultStrongAvailable = false } = useQuery({
+    queryKey: [
+      'default-strong-sidecar-availability',
+      defaultStrongVersion,
+      downloadCompletionSignal,
+    ],
+    queryFn: async () =>
+      (await getStrongBibleSidecarAvailability(defaultStrongVersion)).status === 'available',
+    ...localQueryOptions,
+  })
 
   const selectReadingVersion = (versionId: VersionCode) => {
     dispatch(setDefaultBibleVersion(versionId))
