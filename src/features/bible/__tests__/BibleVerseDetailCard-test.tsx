@@ -6,7 +6,7 @@ import BibleVerseDetailCard from '../BibleVerseDetailCard'
 const mockLoadVerse = jest.fn()
 const mockLoadReferences = jest.fn()
 const mockResourceAccess = {
-  strongBible: { loadVerse: mockLoadVerse },
+  lexiconBible: { loadVerse: mockLoadVerse },
   strong: { loadReferences: mockLoadReferences },
 }
 
@@ -184,11 +184,13 @@ const makeAvailableVerse = (text: string) => ({
 const renderCard = (
   verseNumber: number,
   onOpenStrongBibleSourceSheet = jest.fn(),
-  onStrongBibleProvenanceChange = jest.fn()
+  onStrongBibleProvenanceChange = jest.fn(),
+  selectedVersion: 'BFC' | 'BHG' = 'BFC'
 ) => (
   <BibleVerseDetailCard
     verse={{ Livre: 1, Chapitre: 1, Verset: verseNumber }}
-    selectedVersion="BFC"
+    selectedVersion={selectedVersion}
+    preferredInterlinearLocale="fr"
     updateVerse={jest.fn()}
     onOpenStrongBibleSourceSheet={onOpenStrongBibleSourceSheet}
     onStrongBibleProvenanceChange={onStrongBibleProvenanceChange}
@@ -253,6 +255,21 @@ describe('BibleVerseDetailCard', () => {
     })
 
     expect(JSON.stringify(renderer.toJSON())).not.toContain('Strong fourni par DBY')
+  })
+
+  it('requests the contextual BHG lexicon source with the tab interlinear locale', async () => {
+    mockLoadVerse.mockResolvedValueOnce(makeAvailableVerse('Verset'))
+
+    await act(async () => {
+      renderer = create(renderCard(1, jest.fn(), jest.fn(), 'BHG'))
+    })
+
+    expect(mockLoadVerse).toHaveBeenCalledWith(
+      expect.objectContaining({
+        currentVersionId: 'BHG',
+        preferredInterlinearLocale: 'fr',
+      })
+    )
   })
 
   it('offers the Strong Bible selector when no Strong Bible is available', async () => {

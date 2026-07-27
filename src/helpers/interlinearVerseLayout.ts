@@ -1,21 +1,26 @@
 import type { InterlinearToken } from './interlinearBibleSidecar'
 
-export interface InterlinearVersePiece {
-  prefix: string
-  surface: string
-  token: InterlinearToken
+interface VerseOffsetToken {
+  startOffset: number
+  length: number
 }
 
-export interface InterlinearVerseLayout {
-  pieces: InterlinearVersePiece[]
+export interface TokenizedVersePiece<Token extends VerseOffsetToken> {
+  prefix: string
+  surface: string
+  token: Token
+}
+
+export interface TokenizedVerseLayout<Token extends VerseOffsetToken> {
+  pieces: TokenizedVersePiece<Token>[]
   trailing: string
 }
 
-export const buildInterlinearVerseLayout = (
+export const buildTokenizedVerseLayout = <Token extends VerseOffsetToken>(
   text: string,
-  tokens: InterlinearToken[]
-): InterlinearVerseLayout => {
-  const pieces: InterlinearVersePiece[] = []
+  tokens: Token[]
+): TokenizedVerseLayout<Token> => {
+  const pieces: TokenizedVersePiece<Token>[] = []
   let consumedOffset = 0
 
   for (const token of [...tokens].sort((left, right) => left.startOffset - right.startOffset)) {
@@ -41,3 +46,6 @@ export const buildInterlinearVerseLayout = (
     trailing: text.slice(consumedOffset),
   }
 }
+
+export const buildInterlinearVerseLayout = (text: string, tokens: InterlinearToken[]) =>
+  buildTokenizedVerseLayout(text, tokens)

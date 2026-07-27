@@ -13,6 +13,9 @@ export const normalizeInterlinearMode = (
 export const isInterlinearModeEnabled = (mode?: InterlinearMode): boolean =>
   normalizeInterlinearMode(mode) !== 'hidden'
 
+export const shouldSuppressVerseGestures = (version: string, mode?: InterlinearMode): boolean =>
+  version === 'BHG' && isInterlinearModeEnabled(mode)
+
 export const getInterlinearLocalePriority = (
   preferredLocale: ResourceLanguage
 ): readonly [ResourceLanguage, ResourceLanguage] =>

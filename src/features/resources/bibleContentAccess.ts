@@ -17,7 +17,10 @@ import {
   type StrongBibleVersionId,
   type StrongMode,
 } from '~helpers/strongBiblePublications'
-import { loadStrongBibleChapterSpans } from '~helpers/strongBibleSidecar'
+import {
+  loadReverseInterlinearChapterSpans,
+  loadStrongBibleChapterSpans,
+} from '~helpers/strongBibleSidecar'
 import {
   getInterlinearLocalePriority,
   isInterlinearModeEnabled,
@@ -26,6 +29,12 @@ import {
 } from '~helpers/interlinearDisplayMode'
 import { loadInterlinearChapterTokens } from '~helpers/interlinearBibleSidecar'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
+import {
+  buildReverseInterlinearSpans,
+  getMissingReverseInterlinearStrongCodes,
+  type ReverseInterlinearLexicalEntry,
+} from '~helpers/reverseInterlinearBible'
+import { resolveDisplayedStrongIdentities } from '~helpers/strongIdentities'
 
 export type InterlinearVerse = {
   Texte: string
@@ -57,13 +66,14 @@ export type BibleContentAccess = {
 
 type BibleContentAccessDependencies = {
   loadInterlinearChapter: typeof loadInterlineaireChapter
-  strongAccess: Pick<StrongAccess, 'loadChapter'>
+  strongAccess: Pick<StrongAccess, 'loadChapter' | 'loadReferences'>
   getChapterVerses: typeof getChapterVerses
   getIfVersionNeedsDownload: typeof getIfVersionNeedsDownload
   initStrongDatabase: () => Promise<unknown>
   isStrongDatabaseInitialized: () => boolean
   logError: (message: string, error: unknown) => void
   loadStrongBibleChapterSpans?: typeof loadStrongBibleChapterSpans
+  loadReverseInterlinearChapterSpans?: typeof loadReverseInterlinearChapterSpans
   loadInterlinearChapterTokens?: typeof loadInterlinearChapterTokens
 }
 
@@ -76,6 +86,7 @@ const defaultDependencies: BibleContentAccessDependencies = {
   isStrongDatabaseInitialized: () => Boolean(strongDB.get()),
   logError: (message, error) => console.log(message, error),
   loadStrongBibleChapterSpans,
+  loadReverseInterlinearChapterSpans,
   loadInterlinearChapterTokens,
 }
 
@@ -175,6 +186,121 @@ const loadRegularBibleChapter = async (
   }
 
   if (
+    request.strongMode === 'reverse-interlinear' &&
+    isStrongCapableBibleVersion(request.version) &&
+    dependencies.loadReverseInterlinearChapterSpans &&
+    dependencies.loadInterlinearChapterTokens
+  ) {
+    try {
+      const [targetSpansByVerse, originalVerses] = await Promise.all([
+        dependencies.loadReverseInterlinearChapterSpans(
+          request.version as StrongBibleVersionId,
+          request.book,
+          request.chapter
+        ),
+        dependencies.getChapterVerses('BHG', request.book, request.chapter),
+      ])
+      const preferredLocale = request.interlinearLocale ?? 'fr'
+      let sourceTokensByVerse: Awaited<ReturnType<typeof loadInterlinearChapterTokens>> = {}
+      for (const locale of getInterlinearLocalePriority(preferredLocale)) {
+        try {
+          sourceTokensByVerse = await dependencies.loadInterlinearChapterTokens(
+            'BHG',
+            locale,
+            request.book,
+            request.chapter
+          )
+          break
+        } catch (error) {
+          dependencies.logError(
+            `[BibleContentAccess] Reverse interlinear ${locale} index unavailable:`,
+            error
+          )
+        }
+      }
+
+      const originalTextByVerse = new Map(
+        originalVerses.map(verse => [Number(verse.Verset), verse.Texte] as const)
+      )
+      let lexicalEntries: ReverseInterlinearLexicalEntry[] = []
+      let reverseSpansByVerse = Object.fromEntries(
+        Object.entries(targetSpansByVerse).map(([verse, spans]) => [
+          verse,
+          buildReverseInterlinearSpans({
+            originalText: originalTextByVerse.get(Number(verse)) ?? '',
+            targetSpans: spans,
+            sourceTokens: sourceTokensByVerse[Number(verse)] ?? [],
+            lexicalEntries,
+          }),
+        ])
+      )
+      const fallbackReferences = [
+        ...new Set(
+          Object.values(reverseSpansByVerse).flat().flatMap(getMissingReverseInterlinearStrongCodes)
+        ),
+      ]
+      if (fallbackReferences.length > 0) {
+        try {
+          if (!dependencies.isStrongDatabaseInitialized()) {
+            await dependencies.initStrongDatabase()
+          }
+          const loadedEntries = await dependencies.strongAccess.loadReferences(
+            fallbackReferences,
+            request.book
+          )
+          if (Array.isArray(loadedEntries)) {
+            lexicalEntries = loadedEntries.flatMap(entry => {
+              if (
+                typeof entry !== 'object' ||
+                entry == null ||
+                !('Code' in entry) ||
+                !('Phonetique' in entry)
+              ) {
+                return []
+              }
+              const Hebreu =
+                'Hebreu' in entry && typeof entry.Hebreu === 'string' ? entry.Hebreu : ''
+              const Grec = 'Grec' in entry && typeof entry.Grec === 'string' ? entry.Grec : ''
+              if (!Hebreu && !Grec) return []
+              return [
+                {
+                  Code: entry.Code as string | number,
+                  Hebreu,
+                  Grec,
+                  Phonetique: String(entry.Phonetique ?? ''),
+                },
+              ]
+            })
+            reverseSpansByVerse = Object.fromEntries(
+              Object.entries(targetSpansByVerse).map(([verse, spans]) => [
+                verse,
+                buildReverseInterlinearSpans({
+                  originalText: originalTextByVerse.get(Number(verse)) ?? '',
+                  targetSpans: spans,
+                  sourceTokens: sourceTokensByVerse[Number(verse)] ?? [],
+                  lexicalEntries,
+                }),
+              ])
+            )
+          }
+        } catch (error) {
+          dependencies.logError('[BibleContentAccess] Strong lexical fallback unavailable:', error)
+        }
+      }
+
+      return successResult(
+        verses.map(verse => ({
+          ...verse,
+          ReverseInterlinearSpans: reverseSpansByVerse[Number(verse.Verset)] ?? [],
+        }))
+      )
+    } catch (error) {
+      dependencies.logError('[BibleContentAccess] Reverse interlinear unavailable:', error)
+      return successResult(verses)
+    }
+  }
+
+  if (
     request.strongMode !== 'visible' ||
     !isStrongCapableBibleVersion(request.version) ||
     !dependencies.loadStrongBibleChapterSpans
@@ -188,11 +314,43 @@ const loadRegularBibleChapter = async (
       request.book,
       request.chapter
     )
+    let alignedTokensByVerse: Awaited<ReturnType<typeof loadInterlinearChapterTokens>> = {}
+    if (dependencies.loadInterlinearChapterTokens) {
+      for (const locale of getInterlinearLocalePriority(request.interlinearLocale ?? 'fr')) {
+        try {
+          alignedTokensByVerse = await dependencies.loadInterlinearChapterTokens(
+            'BHG',
+            locale,
+            request.book,
+            request.chapter
+          )
+          break
+        } catch {
+          // The Strong view remains available without the optional BHG alignment.
+        }
+      }
+    }
     return successResult(
-      verses.map(verse => ({
-        ...verse,
-        StrongSpans: spansByVerse[verse.Verset] ?? [],
-      }))
+      verses.map(verse => {
+        const alignedTokens = alignedTokensByVerse[verse.Verset] ?? []
+        const alignedTokensById = new Map(
+          alignedTokens.flatMap(token => (token.id == null ? [] : [[token.id, token] as const]))
+        )
+        return {
+          ...verse,
+          StrongSpans: (spansByVerse[verse.Verset] ?? []).map(span => ({
+            ...span,
+            identities: resolveDisplayedStrongIdentities(
+              span.identities,
+              (span.stepTokenIds ?? []).flatMap(
+                tokenId =>
+                  alignedTokensById.get(tokenId)?.segments.flatMap(segment => segment.identities) ??
+                  []
+              )
+            ),
+          })),
+        }
+      })
     )
   } catch (error) {
     dependencies.logError('[BibleContentAccess] Strong sidecar unavailable:', error)

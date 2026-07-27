@@ -158,6 +158,7 @@ export interface Verse {
       code: string
     }[]
   }[]
+  ReverseInterlinearSpans?: import('~helpers/reverseInterlinearBible').ReverseInterlinearSpan[]
   InterlinearTokens?: import('~helpers/interlinearBibleSidecar').InterlinearToken[]
 }
 

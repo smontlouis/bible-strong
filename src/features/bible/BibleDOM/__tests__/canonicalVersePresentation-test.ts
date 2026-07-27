@@ -137,8 +137,31 @@ describe('canonicalVersePresentation', () => {
 
     expect(getCanonicalPresentationText(hidden)).toBe('Dieu créa.')
     expect(getCanonicalPresentationText(visible)).toBe('Dieu créa.')
-    expect(JSON.stringify(visible)).toContain('"reference":"430"')
+    expect(JSON.stringify(visible)).toContain('"references":["H0430"]')
     expect(visible[0]).toEqual(expect.objectContaining({ kind: 'element', tag: 'small-caps' }))
+  })
+
+  it('shows every effective Strong identity attached to a translated span', () => {
+    const presentation = buildCanonicalVersePresentation({
+      text: 'Then the LORD',
+      strongSpans: [
+        {
+          ordinal: 0,
+          startOffset: 5,
+          length: 8,
+          identities: [
+            { kind: 'strong', code: 'H3068' },
+            { kind: 'dstrong', code: 'H3068G' },
+            { kind: 'strong', code: 'H0413' },
+          ],
+        },
+      ],
+    })
+
+    expect(presentation).toEqual([
+      { kind: 'text', text: 'Then the LORD' },
+      { kind: 'strong-reference', references: ['H3068G', 'H0413'] },
+    ])
   })
 
   it('inserts V3 notes at their canonical text offset without changing selectable text', () => {

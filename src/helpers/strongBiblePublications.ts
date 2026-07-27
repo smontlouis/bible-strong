@@ -1,6 +1,10 @@
 import { cdnUrl } from './firebase'
+import {
+  REVERSE_INTERLINEAR_STEP_CONTRACT,
+  STRONG_BIBLE_REVERSE_INTERLINEAR_CANDIDATES,
+} from './strongBibleReverseInterlinearCandidate'
 
-export type StrongMode = 'visible' | 'hidden'
+export type StrongMode = 'visible' | 'hidden' | 'reverse-interlinear'
 export type StrongBibleVersionId =
   | 'LSG'
   | 'DBY'
@@ -75,6 +79,10 @@ export type StrongBiblePublication = {
     identityCount: number
     lexemeAssignmentCount: number
     lexemeCount: number
+    reverseInterlinearSchemaVersion?: number
+    reverseInterlinearStepRevision?: string
+    reverseInterlinearStepTextSha256?: string
+    reverseInterlinearCompatibleRuntimeSha256s?: string[]
   }
 }
 
@@ -181,7 +189,7 @@ const makeEnglishPublication = ({
   }
 }
 
-export const STRONG_BIBLE_PUBLICATIONS: Record<StrongBibleVersionId, StrongBiblePublication> = {
+const BASE_STRONG_BIBLE_PUBLICATIONS: Record<StrongBibleVersionId, StrongBiblePublication> = {
   LSG: {
     applicationVersionId: 'LSG',
     datasetId: 'LSG',
@@ -555,6 +563,62 @@ export const STRONG_BIBLE_PUBLICATIONS: Record<StrongBibleVersionId, StrongBible
     ],
   }),
 }
+
+export const STRONG_BIBLE_PUBLICATIONS = Object.fromEntries(
+  Object.entries(BASE_STRONG_BIBLE_PUBLICATIONS).map(([versionId, publication]) => {
+    const candidate =
+      STRONG_BIBLE_REVERSE_INTERLINEAR_CANDIDATES[
+        versionId as keyof typeof STRONG_BIBLE_REVERSE_INTERLINEAR_CANDIDATES
+      ]
+    const fileId = versionId.toLocaleLowerCase()
+    const canonical = candidate.canonical
+    const strong = candidate.strong
+    return [
+      versionId,
+      {
+        ...publication,
+        canonical: {
+          ...publication.canonical,
+          url: cdnUrl(`bibles/bible-${fileId}.json.zip?v=${canonical[0].slice(0, 12)}`),
+          archiveSha256: canonical[0],
+          archiveBytes: canonical[1],
+          contentSha256: canonical[2],
+          contentBytes: canonical[3],
+          textRevision: canonical[4],
+          textSha256: canonical[5],
+          schemaVersion: canonical[6],
+          verseCount: canonical[7],
+          noteCount: canonical[8],
+          headingCount: canonical[9],
+        },
+        strong: {
+          ...publication.strong,
+          url: cdnUrl(`bibles/bible-${fileId}-strong.sqlite.zip?v=${strong[0].slice(0, 12)}`),
+          archiveSha256: strong[0],
+          archiveBytes: strong[1],
+          contentSha256: strong[2],
+          contentBytes: strong[3],
+          textRevision: canonical[4],
+          textSha256: canonical[5],
+          strongRevision: strong[4],
+          schemaVersion: strong[5],
+          verseCount: canonical[7],
+          occurrenceCount: strong[6],
+          unalignedOccurrenceCount: strong[7],
+          identityCount: strong[8],
+          lexemeAssignmentCount: strong[9],
+          lexemeCount: strong[10],
+          reverseInterlinearSchemaVersion: REVERSE_INTERLINEAR_STEP_CONTRACT.schemaVersion,
+          reverseInterlinearStepRevision: REVERSE_INTERLINEAR_STEP_CONTRACT.stepRevision,
+          reverseInterlinearStepTextSha256: REVERSE_INTERLINEAR_STEP_CONTRACT.stepTextSha256,
+          reverseInterlinearCompatibleRuntimeSha256s: [
+            ...REVERSE_INTERLINEAR_STEP_CONTRACT.compatibleRuntimeSha256s,
+          ],
+        },
+      },
+    ]
+  })
+) as Record<StrongBibleVersionId, StrongBiblePublication>
 
 export const isStrongCapableBibleVersion = (versionId: string): versionId is StrongBibleVersionId =>
   versionId in STRONG_BIBLE_PUBLICATIONS

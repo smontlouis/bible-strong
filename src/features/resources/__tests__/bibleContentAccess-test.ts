@@ -11,6 +11,7 @@ jest.mock('~helpers/firebase', () => ({
 
 jest.mock('~helpers/strongBibleSidecar', () => ({
   loadStrongBibleChapterSpans: jest.fn(),
+  loadReverseInterlinearChapterSpans: jest.fn(),
 }))
 
 jest.mock('~helpers/interlinearBibleSidecar', () => ({
@@ -39,12 +40,14 @@ jest.mock('../strongAccess', () => ({
 }))
 
 import { BibleLoadingError } from '~helpers/bibleErrors'
+import type { StrongReference } from '~common/types'
 import { loadBibleContentChapter } from '../bibleContentAccess'
 
 const createDependencies = () => ({
   loadInterlinearChapter: jest.fn(),
   strongAccess: {
     loadChapter: jest.fn(),
+    loadReferences: jest.fn(async () => [] as StrongReference[]),
   },
   getChapterVerses: jest.fn(),
   getIfVersionNeedsDownload: jest.fn(async () => false),
@@ -270,6 +273,187 @@ describe('BibleContentAccess', () => {
 
     expect(dependencies.getChapterVerses).toHaveBeenCalledWith('LSG', 1, 1)
     expect(dependencies.strongAccess.loadChapter).not.toHaveBeenCalled()
+  })
+
+  it('enriches a Strong group with aligned disambiguated identities when BHG is installed', async () => {
+    const dependencies = createDependencies()
+    dependencies.getChapterVerses.mockResolvedValue([
+      { Livre: 3, Chapitre: 1, Verset: 1, Texte: 'Then the LORD' },
+    ])
+    const loadStrongBibleChapterSpans = jest.fn().mockResolvedValue({
+      1: [
+        {
+          ordinal: 0,
+          startOffset: 0,
+          length: 13,
+          stepTokenIds: [37329, 37332],
+          identities: [
+            { kind: 'strong', code: 'H3068' },
+            { kind: 'strong', code: 'H413' },
+          ],
+        },
+      ],
+    })
+    const loadInterlinearChapterTokens = jest.fn().mockResolvedValue({
+      1: [
+        {
+          id: 37329,
+          ordinal: 0,
+          startOffset: 0,
+          length: 4,
+          segments: [
+            {
+              ordinal: 0,
+              startOffset: 0,
+              length: 4,
+              transliteration: '',
+              lemma: '',
+              morphology: '',
+              gloss: '',
+              identities: [{ kind: 'strong', code: 'H0413' }],
+            },
+          ],
+        },
+        {
+          id: 37332,
+          ordinal: 1,
+          startOffset: 5,
+          length: 4,
+          segments: [
+            {
+              ordinal: 0,
+              startOffset: 0,
+              length: 4,
+              transliteration: '',
+              lemma: '',
+              morphology: '',
+              gloss: '',
+              identities: [
+                { kind: 'strong', code: 'H3068' },
+                { kind: 'dstrong', code: 'H3068G' },
+              ],
+            },
+          ],
+        },
+      ],
+    })
+
+    const result = await loadBibleContentChapter(
+      { book: 3, chapter: 1, version: 'BSB', strongMode: 'visible' },
+      { ...dependencies, loadStrongBibleChapterSpans, loadInterlinearChapterTokens }
+    )
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        success: true,
+        data: [
+          expect.objectContaining({
+            StrongSpans: [
+              expect.objectContaining({
+                identities: [
+                  { kind: 'dstrong', code: 'H3068G' },
+                  { kind: 'strong', code: 'H0413' },
+                ],
+              }),
+            ],
+          }),
+        ],
+      })
+    )
+  })
+
+  it('overlays a Strong Bible with the aligned original text in reverse interlinear mode', async () => {
+    const dependencies = createDependencies()
+    dependencies.getChapterVerses.mockImplementation(async version =>
+      version === 'BHG'
+        ? [{ Livre: 1, Chapitre: 1, Verset: 1, Texte: 'בְּרֵאשִׁית' }]
+        : [{ Livre: 1, Chapitre: 1, Verset: 1, Texte: 'Au commencement' }]
+    )
+    const loadReverseInterlinearChapterSpans = jest.fn().mockResolvedValue({
+      1: [
+        {
+          ordinal: 0,
+          startOffset: 3,
+          length: 12,
+          identities: [
+            { kind: 'strong', code: 'H7225' },
+            { kind: 'strong', code: 'H1254' },
+          ],
+          stepTokenIds: [1],
+        },
+      ],
+    })
+    const loadInterlinearChapterTokens = jest.fn().mockResolvedValue({
+      1: [
+        {
+          id: 1,
+          ordinal: 0,
+          startOffset: 0,
+          length: 11,
+          segments: [
+            {
+              ordinal: 0,
+              startOffset: 0,
+              length: 11,
+              transliteration: 'be.re.Shit',
+              lemma: 'רֵאשִׁית',
+              morphology: 'HNcfsa',
+              gloss: 'commencement',
+              identities: [{ kind: 'strong', code: 'H7225' }],
+            },
+          ],
+        },
+      ],
+    })
+    dependencies.strongAccess.loadReferences.mockResolvedValue([
+      {
+        Code: '1254',
+        Hebreu: 'בָּרָא',
+        Phonetique: "ba.Ra'",
+      } as StrongReference,
+    ])
+
+    await expect(
+      loadBibleContentChapter(
+        {
+          book: 1,
+          chapter: 1,
+          version: 'LSG',
+          strongMode: 'reverse-interlinear',
+          interlinearLocale: 'fr',
+        },
+        {
+          ...dependencies,
+          loadReverseInterlinearChapterSpans,
+          loadInterlinearChapterTokens,
+        }
+      )
+    ).resolves.toEqual(
+      expect.objectContaining({
+        success: true,
+        data: [
+          expect.objectContaining({
+            Texte: 'Au commencement',
+            ReverseInterlinearSpans: [
+              expect.objectContaining({
+                sourceTokens: [
+                  expect.objectContaining({ surface: 'בְּרֵאשִׁית' }),
+                  expect.objectContaining({
+                    surface: 'בָּרָא',
+                    lexicalFallback: true,
+                    segments: [expect.objectContaining({ morphology: '' })],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      })
+    )
+
+    expect(loadReverseInterlinearChapterSpans).toHaveBeenCalledWith('LSG', 1, 1)
+    expect(loadInterlinearChapterTokens).toHaveBeenCalledWith('BHG', 'fr', 1, 1)
+    expect(dependencies.strongAccess.loadReferences).toHaveBeenCalledWith(['1254'], 1)
   })
 
   it('returns BIBLE_NOT_FOUND when a chapter has no rows and the version needs download', async () => {

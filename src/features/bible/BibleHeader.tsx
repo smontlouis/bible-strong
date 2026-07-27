@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next'
 import { FadeIn, FadeOut } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
-import { Alert } from 'react-native'
 import { isFullScreenBibleAtom } from 'src/state/app'
 import {
   BibleTab,
@@ -59,11 +58,6 @@ import { VerseSelectorPopup } from './VerseSelectorPopup'
 import { shouldShowBibleBackButton } from './bibleHeaderNavigation'
 import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
 import { getStrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
-import {
-  createStrongSidecarDownloadPlan,
-  createStrongSidecarDownloadItem,
-} from '~helpers/downloadItemFactory'
-import { downloadManager } from '~helpers/downloadManager'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import StrongMark from './StrongMark'
 import { getStrongModeDownloadPresentation } from './strongModeDownloadState'
@@ -75,6 +69,7 @@ import { getInterlinearSidecarAvailability } from '~helpers/interlinearBibleSide
 import { getDownloadItemProgress } from '~state/downloadQueue'
 import InterlinearMark from './InterlinearMark'
 import InterlinearModeSelectorSheet from './InterlinearModeSelectorSheet'
+import StrongModeSelectorSheet from './StrongModeSelectorSheet'
 
 const STRONG_MODE_COMPLETION_HOLD_MS = 450
 
@@ -127,7 +122,7 @@ const Header = ({
   const bookmarkModalRef = useRef<SheetRef>(null)
   const exportSheetRef = useRef<SheetRef>(null)
   const interlinearModeSheetRef = useRef<SheetRef>(null)
-  const strongModeToggleRequestRef = useRef(0)
+  const strongModeSheetRef = useRef<SheetRef>(null)
   const bible = useAtomValue(bibleAtom)
   const contextDisplayMode = getBibleContextDisplayMode(bible.data)
   const isContextFocused = contextDisplayMode === 'focused'
@@ -141,6 +136,8 @@ const Header = ({
     focusVerses,
     strongMode = 'hidden',
     pendingStrongModeVersionId,
+    pendingStrongMode,
+    pendingStrongInterlinearLocale,
     interlinearMode = 'hidden',
     interlinearLocale,
     pendingInterlinearDownload,
@@ -156,11 +153,8 @@ const Header = ({
     bibleDownload,
     strongSidecarDownload
   )
-  const isStrongDownloadVisible =
-    strongMode === 'hidden' &&
-    (strongDownloadPresentation.status === 'active' ||
-      (pendingStrongModeVersionId === version && strongDownloadPresentation.status === 'completed'))
-  const activeInterlinearLocale = pendingInterlinearLocale ?? interlinearLocale ?? lang
+  const activeInterlinearLocale =
+    pendingStrongInterlinearLocale ?? pendingInterlinearLocale ?? interlinearLocale ?? lang
   const interlinearDownload = useDownloadItemStatus(
     `bible-interlinear:BHG:${activeInterlinearLocale}`
   )
@@ -172,6 +166,19 @@ const Header = ({
     interlinearMode === 'hidden' &&
     (isInterlinearDownloadActive ||
       (pendingInterlinearDownload && interlinearDownload?.status === 'completed'))
+  const isStrongDownloadVisible =
+    strongMode === 'hidden' &&
+    pendingStrongModeVersionId === version &&
+    (strongDownloadPresentation.status === 'active' ||
+      strongDownloadPresentation.status === 'completed' ||
+      (pendingStrongMode === 'reverse-interlinear' &&
+        (isInterlinearDownloadActive || interlinearDownload?.status === 'completed')))
+  const strongModeDownloadProgress =
+    pendingStrongMode === 'reverse-interlinear' &&
+    strongDownloadPresentation.status !== 'active' &&
+    interlinearDownload
+      ? getDownloadItemProgress(interlinearDownload)
+      : strongDownloadPresentation.progress
 
   // Check if verses are selected
   const hasSelectedVerses = selectedVerses && Object.keys(selectedVerses).length > 0
@@ -220,24 +227,46 @@ const Header = ({
   useEffect(() => {
     if (!isStrongCapableBibleVersion(version) || pendingStrongModeVersionId !== version) return
 
-    if (strongDownloadPresentation.status === 'failed') {
+    if (
+      strongDownloadPresentation.status === 'failed' ||
+      (pendingStrongMode === 'reverse-interlinear' && interlinearDownload?.status === 'failed')
+    ) {
       actions.finishPendingStrongModeDownload(version, false)
       return
     }
 
-    if (strongDownloadPresentation.status === 'active') return
+    if (
+      strongDownloadPresentation.status === 'active' ||
+      (pendingStrongMode === 'reverse-interlinear' && isInterlinearDownloadActive)
+    )
+      return
 
     let cancelled = false
     const completionObserved = strongDownloadPresentation.status === 'completed'
     const timeout = setTimeout(
       () => {
-        getStrongBibleSidecarAvailability(version)
-          .then(availability => {
+        Promise.all([
+          getStrongBibleSidecarAvailability(version),
+          ...(pendingStrongMode === 'reverse-interlinear'
+            ? [
+                getInterlinearSidecarAvailability(activeInterlinearLocale),
+                getInterlinearSidecarAvailability(activeInterlinearLocale === 'fr' ? 'en' : 'fr'),
+              ]
+            : []),
+        ])
+          .then(([strongAvailability, ...interlinearAvailabilities]) => {
             if (cancelled) return
 
-            if (availability.status === 'available') {
+            const reverseInterlinearReady =
+              pendingStrongMode !== 'reverse-interlinear' ||
+              interlinearAvailabilities.some(availability => availability.status === 'available')
+            if (strongAvailability.status === 'available' && reverseInterlinearReady) {
               actions.finishPendingStrongModeDownload(version, true)
-            } else if (completionObserved) {
+            } else if (
+              completionObserved &&
+              (pendingStrongMode !== 'reverse-interlinear' ||
+                interlinearDownload?.status === 'completed')
+            ) {
               actions.finishPendingStrongModeDownload(version, false)
             }
           })
@@ -254,7 +283,17 @@ const Header = ({
       cancelled = true
       clearTimeout(timeout)
     }
-  }, [actions, pendingStrongModeVersionId, strongDownloadPresentation.status, version])
+  }, [
+    actions,
+    activeInterlinearLocale,
+    interlinearDownload?.status,
+    isInterlinearDownloadActive,
+    pendingStrongMode,
+    pendingStrongInterlinearLocale,
+    pendingStrongModeVersionId,
+    strongDownloadPresentation.status,
+    version,
+  ])
 
   useEffect(() => {
     if (!pendingInterlinearDownload || version !== 'BHG') return
@@ -482,51 +521,9 @@ const Header = ({
     },
   ]
 
-  const toggleStrongMode = async () => {
-    if (!isStrongCapableBibleVersion(version)) return
-    if (isStrongDownloadVisible) return
-    const requestId = ++strongModeToggleRequestRef.current
-    const currentStrongMode =
-      getDefaultStore().get(bibleAtom).data.strongMode ?? ('hidden' as const)
-
-    if (currentStrongMode === 'visible') {
-      actions.setStrongMode('hidden')
-      return
-    }
-
-    const availability = await getStrongBibleSidecarAvailability(version)
-    if (requestId !== strongModeToggleRequestRef.current) return
-
-    if (availability.status === 'available') {
-      actions.setStrongMode('visible')
-      return
-    }
-
-    const publicationSize = createStrongSidecarDownloadItem(version).estimatedSize
-    const sizeMb = Math.ceil(publicationSize / 1_000_000)
-    Alert.alert(
-      t('Mode Strong'),
-      t(
-        'Les données Strong de cette Bible ne sont pas encore installées. Télécharger environ {{size}} Mo ?',
-        { size: sizeMb }
-      ),
-      [
-        { text: t('Annuler'), style: 'cancel' },
-        {
-          text: t('Télécharger'),
-          onPress: () => {
-            const items = createStrongSidecarDownloadPlan(version, availability.status)
-            actions.setPendingStrongModeVersion(version)
-            downloadManager.enqueue(items)
-          },
-        },
-      ]
-    )
-  }
-
   const strongModeButton = isStrongCapableBibleVersion(version) ? (
     <AnimatedTouchableBox
-      onPress={toggleStrongMode}
+      onPress={() => strongModeSheetRef.current?.present()}
       disabled={isStrongDownloadVisible}
       center
       width={40}
@@ -535,13 +532,11 @@ const Header = ({
       accessibilityLabel={
         isStrongDownloadVisible
           ? t('Téléchargement en cours')
-          : strongMode === 'visible'
-            ? t('Masquer les numéros Strong')
-            : t('Afficher les numéros Strong')
+          : t('Choisir l’affichage de la Bible Strong')
       }
       accessibilityState={{
         disabled: isStrongDownloadVisible,
-        selected: strongMode === 'visible',
+        selected: strongMode !== 'hidden',
       }}
       style={{
         opacity: fullScreenOpacity,
@@ -550,13 +545,9 @@ const Header = ({
       }}
     >
       {isStrongDownloadVisible ? (
-        <Progress
-          progress={Math.max(strongDownloadPresentation.progress, 0.04)}
-          size={22}
-          thickness={2.5}
-        />
+        <Progress progress={Math.max(strongModeDownloadProgress, 0.04)} size={22} thickness={2.5} />
       ) : (
-        <StrongMark highlighted={strongMode === 'visible'} />
+        <StrongMark highlighted={strongMode !== 'hidden'} />
       )}
     </AnimatedTouchableBox>
   ) : null
@@ -570,9 +561,7 @@ const Header = ({
       height={40}
       accessibilityRole="button"
       accessibilityLabel={
-        isInterlinearDownloadVisible
-          ? t('Téléchargement en cours')
-          : t('Choisir le mode d’affichage')
+        isInterlinearDownloadVisible ? t('Téléchargement en cours') : t('Options du texte original')
       }
       accessibilityState={{
         disabled: isInterlinearDownloadVisible,
@@ -587,7 +576,10 @@ const Header = ({
           thickness={2.5}
         />
       ) : (
-        <InterlinearMark highlighted={isInterlinearModeEnabled(interlinearMode)} />
+        <InterlinearMark
+          highlighted={isInterlinearModeEnabled(interlinearMode)}
+          originalLanguage={bookNumber <= 39 ? 'hebrew' : 'greek'}
+        />
       )}
     </AnimatedTouchableBox>
   ) : null
@@ -1010,6 +1002,9 @@ const Header = ({
       />
       {isInterlinearCapableBibleVersion(version) && (
         <InterlinearModeSelectorSheet bibleAtom={bibleAtom} sheetRef={interlinearModeSheetRef} />
+      )}
+      {isStrongCapableBibleVersion(version) && (
+        <StrongModeSelectorSheet bibleAtom={bibleAtom} sheetRef={strongModeSheetRef} />
       )}
       {currentChapterBookmark && (
         <Box position="absolute" right={24} bottom={-18}>

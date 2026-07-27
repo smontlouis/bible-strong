@@ -1,9 +1,10 @@
 import type { Verse } from '~common/types'
 import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
+import { getDisplayedStrongIdentities } from '~helpers/strongIdentities'
 
 export type CanonicalVersePresentationNode =
   | { kind: 'text'; text: string }
-  | { kind: 'strong-reference'; reference: string }
+  | { kind: 'strong-reference'; references: string[] }
   | { kind: 'paragraph-start'; offset: number }
   | { kind: 'line-start'; offset: number }
   | { kind: 'note-reference'; note: CanonicalBibleNote }
@@ -69,10 +70,8 @@ export const buildCanonicalVersePresentation = ({
     }
     const offset = span.startOffset + span.length
     const references = referencesByOffset.get(offset) ?? []
-    for (const identity of span.identities) {
-      if (identity.kind !== 'strong') continue
-      const reference = identity.code.match(/\d+/u)?.[0]
-      if (reference) references.push(String(Number(reference)))
+    for (const identity of getDisplayedStrongIdentities(span.identities)) {
+      references.push(identity.code)
     }
     referencesByOffset.set(offset, [...new Set(references)])
   }
@@ -107,8 +106,9 @@ export const buildCanonicalVersePresentation = ({
     for (let index = 0; index < (redEnds.get(offset) ?? 0); index += 1) {
       closeElement(stack, 'red-word')
     }
-    for (const reference of referencesByOffset.get(offset) ?? []) {
-      currentChildren(stack).push({ kind: 'strong-reference', reference })
+    const references = referencesByOffset.get(offset) ?? []
+    if (references.length > 0) {
+      currentChildren(stack).push({ kind: 'strong-reference', references })
     }
     for (const presentationEvent of eventsByOffset.get(offset) ?? []) {
       if (presentationEvent.kind === 'note') {

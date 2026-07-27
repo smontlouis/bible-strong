@@ -31,6 +31,7 @@ import { isDarkTheme } from './utils'
 const InterlinearVerseComplete = React.lazy(() => import('./InterlinearVerseComplete'))
 const InterlinearVerse = React.lazy(() => import('./InterlinearVerse'))
 const StructuredInterlinearVerse = React.lazy(() => import('./StructuredInterlinearVerse'))
+const ReverseInterlinearVerse = React.lazy(() => import('./ReverseInterlinearVerse'))
 import VerseTags from './VerseTags'
 import { BibleError } from '~helpers/bibleErrors'
 import { useTranslations } from './TranslationsContext'
@@ -46,6 +47,7 @@ import {
 } from './canonicalVersePresentation'
 import { getCanonicalBibleNoteLabel, type CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import { isInterlinearModeEnabled, type InterlinearMode } from '~helpers/interlinearDisplayMode'
+import { getParallelVerseModeProps } from './verseRenderingModel'
 
 const VerseText = styled('span')<RootStyles & { isParallel?: boolean }>(
   ({ isParallel, settings: { fontSizeScale, lineHeight } }) => ({
@@ -234,6 +236,7 @@ const getVerseText = ({
   const isStrongVersion =
     Boolean(verse.StrongTexte) ||
     Boolean(verse.StrongSpans) ||
+    Boolean(verse.ReverseInterlinearSpans) ||
     version === 'LSGS' ||
     version === 'KJVS'
   const verseKey = `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`
@@ -307,7 +310,7 @@ const renderCanonicalPresentation = (
         <BibleStrongRef
           key={key}
           book={options.book}
-          reference={node.reference}
+          references={node.references}
           isParallel={options.isParallel}
           isDisabled={options.isDisabled}
           selectedCode={options.selectedCode}
@@ -594,6 +597,7 @@ const Verse = ({
   const isStrongVersion =
     Boolean(verse.StrongTexte) ||
     Boolean(verse.StrongSpans) ||
+    Boolean(verse.ReverseInterlinearSpans) ||
     version === 'LSGS' ||
     version === 'KJVS'
 
@@ -653,6 +657,12 @@ const Verse = ({
         <div>
           {parallelVerse.map((p, i) => {
             const isMainVersion = i === 0
+            const parallelModeProps = getParallelVerseModeProps({
+              columnIndex: i,
+              interlinearMode,
+              isINTComplete,
+              secondaryVerse,
+            })
             return (
               <div key={i}>
                 <VerticalVersionTitle
@@ -670,6 +680,7 @@ const Verse = ({
                     isHebreu={isHebreu}
                     verse={p.verse}
                     version={p.version}
+                    {...parallelModeProps}
                     settings={settings}
                     isSelected={isSelected}
                     isSelectedMode={isSelectedMode}
@@ -715,6 +726,12 @@ const Verse = ({
       >
         {parallelVerse.map((p, i) => {
           const isMainVersion = i === 0
+          const parallelModeProps = getParallelVerseModeProps({
+            columnIndex: i,
+            interlinearMode,
+            isINTComplete,
+            secondaryVerse,
+          })
 
           // Error state: show translated error message
           if (p.error) {
@@ -739,6 +756,7 @@ const Verse = ({
                 isHebreu={isHebreu}
                 verse={p.verse}
                 version={p.version}
+                {...parallelModeProps}
                 settings={settings}
                 isSelected={isSelected}
                 isSelectedMode={isSelectedMode}
@@ -847,9 +865,17 @@ const Verse = ({
             id={`verse-text-${verseKey}`}
             data-verse-key={verseKey}
           >
-            {version === 'BHG' &&
-            isInterlinearModeEnabled(interlinearMode) &&
-            verse.InterlinearTokens?.length ? (
+            {verse.ReverseInterlinearSpans?.length ? (
+              <React.Suspense fallback={<>{verse.Texte}</>}>
+                <ReverseInterlinearVerse
+                  settings={settings}
+                  verse={verse}
+                  selectedCode={selectedCode}
+                />
+              </React.Suspense>
+            ) : version === 'BHG' &&
+              isInterlinearModeEnabled(interlinearMode) &&
+              verse.InterlinearTokens?.length ? (
               <React.Suspense fallback={<>{verse.Texte}</>}>
                 <StructuredInterlinearVerse
                   isHebreu={isHebreu}

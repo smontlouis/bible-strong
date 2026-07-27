@@ -18,6 +18,7 @@ import StrongCard from './StrongCard'
 import BibleVerseDetailFooter from './BibleVerseDetailFooter'
 
 import { useTranslation } from 'react-i18next'
+import { useAtomValue } from 'jotai/react'
 import { ScrollView } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSelector } from 'react-redux'
@@ -29,10 +30,12 @@ import { parseStrongVerse } from '~helpers/strongVerseParser'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import type { StrongBibleProvenance } from '~features/resources/strongBibleResourceAccess'
+import type { LexiconBibleProvenance } from '~features/resources/lexiconBibleResourceAccess'
 import type { RootState } from '~redux/modules/reducer'
 import Button from '~common/ui/Button'
 import type { VersionCode } from '~state/tabs'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
+import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import {
   getStrongBibleFallbackPriority,
   type StrongBibleVersionId,
@@ -82,7 +85,8 @@ interface Props {
   verse: Verse
   selectedVersion: VersionCode
   preferredStrongVersionId?: StrongBibleVersionId
-  onStrongBibleProvenanceChange?: (provenance: StrongBibleProvenance | null) => void
+  preferredInterlinearLocale: ResourceLanguage
+  onStrongBibleProvenanceChange?: (provenance: LexiconBibleProvenance | null) => void
   onOpenStrongBibleSourceSheet: () => void
   isSelectionMode?: StudyNavigateBibleType
   updateVerse: (direction: number) => void
@@ -94,7 +98,7 @@ interface State {
   currentStrongReference: StrongReference | null
   versesInCurrentChapter: number | null
   formattedTexte: React.ReactNode | null
-  provenance: StrongBibleProvenance | null
+  provenance: LexiconBibleProvenance | null
   displayedVerse: Verse | null
 }
 
@@ -102,6 +106,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   verse,
   selectedVersion,
   preferredStrongVersionId,
+  preferredInterlinearLocale,
   onStrongBibleProvenanceChange,
   onOpenStrongBibleSourceSheet,
   isSelectionMode,
@@ -114,6 +119,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     (rootState: RootState) => rootState.user.bible.settings.defaultStrongBibleVersionId ?? 'LSG'
   )
   const resources = useResourceAccess()
+  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const verseBook = verse.Livre
   const verseChapter = verse.Chapitre
   const verseNumber = verse.Verset
@@ -164,7 +170,9 @@ const BibleVerseDetailCard: React.FC<Props> = ({
         isSelectionMode={isSelectionMode}
         book={String(state.displayedVerse?.Livre ?? verse.Livre)}
         strongReference={item}
-        strongBibleVersionId={state.provenance?.versionId}
+        strongBibleVersionId={
+          state.provenance?.versionId === 'BHG' ? undefined : state.provenance?.versionId
+        }
         index={index}
       />
     )
@@ -191,10 +199,11 @@ const BibleVerseDetailCard: React.FC<Props> = ({
       }))
 
       try {
-        const result = await resources.strongBible.loadVerse({
+        const result = await resources.lexiconBible.loadVerse({
           currentVersionId: selectedVersion,
           defaultVersionId: defaultStrongVersion,
           preferredVersionId: preferredStrongVersionId,
+          preferredInterlinearLocale,
           fallbackVersionIds: getStrongBibleFallbackPriority(selectedVersion),
           book: verseBook,
           chapter: verseChapter,
@@ -268,10 +277,12 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     }
   }, [
     defaultStrongVersion,
+    downloadCompletionSignal,
     onStrongBibleProvenanceChange,
+    preferredInterlinearLocale,
     preferredStrongVersionId,
+    resources.lexiconBible,
     resources.strong,
-    resources.strongBible,
     selectedVersion,
     verseBook,
     verseChapter,

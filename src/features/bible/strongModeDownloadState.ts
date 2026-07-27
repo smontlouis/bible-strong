@@ -8,6 +8,32 @@ export type StrongModeDownloadPresentation = {
 const isActive = (state?: DownloadItemState) =>
   state?.status === 'queued' || state?.status === 'downloading' || state?.status === 'inserting'
 
+export const getDownloadPlanPresentation = (
+  states: DownloadItemState[]
+): StrongModeDownloadPresentation => {
+  if (!states.length) return { status: 'idle', progress: 0 }
+  if (states.some(state => state.status === 'failed' || state.status === 'cancelled')) {
+    return { status: 'failed', progress: 0 }
+  }
+
+  const totalSize = states.reduce((sum, state) => sum + state.item.estimatedSize, 0)
+  const progress =
+    totalSize > 0
+      ? states.reduce(
+          (sum, state) => sum + getDownloadItemProgress(state) * state.item.estimatedSize,
+          0
+        ) / totalSize
+      : 0
+
+  if (states.every(state => state.status === 'completed')) {
+    return { status: 'completed', progress: 1 }
+  }
+  return {
+    status: states.some(state => isActive(state)) ? 'active' : 'idle',
+    progress,
+  }
+}
+
 export const getStrongModeDownloadPresentation = (
   bibleDownload?: DownloadItemState,
   sidecarDownload?: DownloadItemState
@@ -18,25 +44,5 @@ export const getStrongModeDownloadPresentation = (
     sidecarDownload.item.dependsOnId === bibleDownload?.item.id ? bibleDownload : undefined
   const plan = dependency ? [dependency, sidecarDownload] : [sidecarDownload]
 
-  if (plan.some(state => state.status === 'failed' || state.status === 'cancelled')) {
-    return { status: 'failed', progress: 0 }
-  }
-
-  const totalSize = plan.reduce((sum, state) => sum + state.item.estimatedSize, 0)
-  const progress =
-    totalSize > 0
-      ? plan.reduce(
-          (sum, state) => sum + getDownloadItemProgress(state) * state.item.estimatedSize,
-          0
-        ) / totalSize
-      : 0
-
-  if (sidecarDownload.status === 'completed') {
-    return { status: 'completed', progress: 1 }
-  }
-
-  return {
-    status: plan.some(state => isActive(state)) ? 'active' : 'idle',
-    progress,
-  }
+  return getDownloadPlanPresentation(plan)
 }

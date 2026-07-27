@@ -58,6 +58,7 @@ import { getCaretInfoFromPoint } from './AnnotationMode/domUtils'
 import { UnifiedVersesRenderer } from './UnifiedVersesRenderer'
 import { isDarkTheme } from './utils'
 import { getScrollTargetVerse } from './verseRenderingModel'
+import { shouldSuppressVerseGestures } from '~helpers/interlinearDisplayMode'
 
 declare global {
   interface Window {
@@ -600,6 +601,9 @@ const LoadedBibleContent = ({
   })
 
   // Gesture handlers for unified touch selection
+  const hasReverseInterlinear = verses.some(verse => Boolean(verse.ReverseInterlinearSpans?.length))
+  const suppressVerseGestures =
+    shouldSuppressVerseGestures(version, interlinearMode) || hasReverseInterlinear
 
   const handleTapVerseAnnotationMode = (vKey: string, position: { x: number; y: number }) => {
     const containerRect = containerRef.current?.getBoundingClientRect()
@@ -697,6 +701,8 @@ const LoadedBibleContent = ({
   }
 
   const handleTapVerse = (verseKey: string, position: { x: number; y: number }) => {
+    if (suppressVerseGestures) return
+
     if (annotationMode) {
       handleTapVerseAnnotationMode(verseKey, position)
       return
@@ -711,6 +717,8 @@ const LoadedBibleContent = ({
   }
 
   const handleDoubleTapVerse = (vKey: string, position: { x: number; y: number }) => {
+    if (suppressVerseGestures) return
+
     // Find the word at the double-tap position
     const verse = versesMap.get(vKey)
     if (!verse) return
@@ -764,7 +772,8 @@ const LoadedBibleContent = ({
     if (
       version === 'INT' ||
       version === 'INT_EN' ||
-      (version === 'BHG' && verses.some(verse => Boolean(verse.InterlinearTokens?.length)))
+      (version === 'BHG' && verses.some(verse => Boolean(verse.InterlinearTokens?.length))) ||
+      hasReverseInterlinear
     )
       return
 
@@ -789,6 +798,7 @@ const LoadedBibleContent = ({
   }
 
   const handleLongPressVerse = (vKey: string) => {
+    if (suppressVerseGestures) return
     if (annotationMode) return // No long-press action in annotation mode
     if (isSelectionMode) return // No long-press in selection mode
 
@@ -834,7 +844,7 @@ const LoadedBibleContent = ({
       onTapVerse: handleTapVerse,
       onDoubleTapVerse: handleDoubleTapVerse,
       onLongPressVerse: handleLongPressVerse,
-      onTouchedVerseChange: setTouchedVerseKey,
+      onTouchedVerseChange: suppressVerseGestures ? undefined : setTouchedVerseKey,
       onTapEmpty: () => {
         // In annotation mode, tapping on empty space clears selection
         if (annotationMode) {

@@ -34,7 +34,9 @@ publications use the same pair contract for KJV, NASB 2020, NASB 1995, BSB, ASV,
 Revised Webster and RV 1895. Retain LSGS only as a
 legacy persisted identifier that resolves to LSG with Strong visible; do not expose it as a
 downloadable or selectable Bible. Remove KJVS from the product catalog and resolve any legacy KJVS
-tab state to KJV with Strong visible.
+tab state to KJV with Strong visible. These alias migrations do not require the optional sidecar:
+when it is missing, the canonical LSG or KJV text remains readable and the Strong control can offer
+the corresponding index for download.
 
 In the verse-resource modal, resolve Strong navigation from the compatible sidecar of the currently
 open Bible, then from the first installed sidecar in the LSG, DBY, DBR priority order. Expose the

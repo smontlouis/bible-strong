@@ -1,6 +1,6 @@
 import { useAtomValue } from 'jotai/react'
 import type { PrimitiveAtom } from 'jotai/vanilla'
-import { useEffect, useState, type ReactNode, type RefObject } from 'react'
+import { useEffect, useState, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Platform, Pressable } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -26,6 +26,7 @@ import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import useLanguage from '~helpers/useLanguage'
 import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/downloadQueue'
 import { useBibleTabActions, type BibleTab } from '~state/tabs'
+import BibleDisplayModeCard from './BibleDisplayModeCard'
 
 type Props = {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -37,50 +38,6 @@ type DisplayMode = 'hidden' | InterlinearDisplayMode
 
 const isActiveDownload = (status?: string) =>
   status === 'queued' || status === 'downloading' || status === 'inserting'
-
-type ModeCardProps = {
-  label: string
-  description: string
-  selected: boolean
-  onPress: () => void
-  children: ReactNode
-}
-
-const ModeCard = ({ label, description, selected, onPress, children }: ModeCardProps) => (
-  <Pressable
-    accessibilityRole="button"
-    accessibilityState={{ selected }}
-    accessibilityLabel={`${label}. ${description}`}
-    onPress={onPress}
-    style={({ pressed }) => ({ flex: 1, opacity: pressed ? 0.72 : 1 })}
-  >
-    <Box
-      height={148}
-      p={12}
-      borderRadius={16}
-      borderWidth={selected ? 2 : 1}
-      borderColor={selected ? 'primary' : 'border'}
-      bg={selected ? 'lightPrimary' : 'reverse'}
-      bgOpacity="050"
-    >
-      <Text
-        bold
-        fontSize={15}
-        color={selected ? 'primary' : 'default'}
-        textAlign="center"
-        numberOfLines={1}
-      >
-        {label}
-      </Text>
-      <Box flex center>
-        {children}
-      </Box>
-      <Text fontSize={11} color="tertiary" textAlign="center" numberOfLines={1}>
-        {description}
-      </Text>
-    </Box>
-  </Pressable>
-)
 
 const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const { t } = useTranslation()
@@ -230,7 +187,7 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
     <Sheet ref={sheetRef} header={<SheetHeader title={t('Affichage du texte')} />}>
       <SheetView p={16} gap={10}>
         <Box row gap={10}>
-          <ModeCard
+          <BibleDisplayModeCard
             label={t('Original')}
             description={t('Hébreu ou grec')}
             selected={selectedMode === 'hidden'}
@@ -244,8 +201,8 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
             >
               {originalPreview}
             </Text>
-          </ModeCard>
-          <ModeCard
+          </BibleDisplayModeCard>
+          <BibleDisplayModeCard
             label={t('Interlinéaire')}
             description={t('Mot par mot')}
             selected={selectedMode === 'interlinear'}
@@ -262,11 +219,11 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
                 {glossPreview}
               </Text>
             </Box>
-          </ModeCard>
+          </BibleDisplayModeCard>
         </Box>
 
         <Box row gap={10}>
-          <ModeCard
+          <BibleDisplayModeCard
             label={t('Strong')}
             description={t('Texte + numéros')}
             selected={selectedMode === 'strong'}
@@ -280,8 +237,8 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
                 {isHebrew ? 'H0430' : 'G3056'}
               </Text>
             </Box>
-          </ModeCard>
-          <ModeCard
+          </BibleDisplayModeCard>
+          <BibleDisplayModeCard
             label={t('Translittération')}
             description={t('Caractères latins')}
             selected={selectedMode === 'transliteration'}
@@ -295,7 +252,7 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
             >
               {transliterationPreview}
             </Text>
-          </ModeCard>
+          </BibleDisplayModeCard>
         </Box>
 
         {selectedMode === 'interlinear' && (

@@ -3,6 +3,7 @@ import {
   getAdjacentFocusVerses,
   getFadePosition,
   getFocusVerseNumbers,
+  getParallelVerseModeProps,
   getParallelVerseRows,
   getScrollTargetVerse,
   getTaggedVersesByLastVerse,
@@ -152,5 +153,38 @@ describe('verseRenderingModel', () => {
       { version: 'LSG', verse },
       { version: 'KJV', verse: { ...verse, Texte: '' }, error: undefined },
     ])
+  })
+
+  it.each(['interlinear', 'strong', 'transliteration'] as const)(
+    'keeps the primary BHG %s mode in parallel display',
+    interlinearMode => {
+      expect(
+        getParallelVerseModeProps({
+          columnIndex: 0,
+          interlinearMode,
+          isINTComplete: true,
+          secondaryVerse: verse,
+        })
+      ).toEqual({
+        interlinearMode,
+        isINTComplete: true,
+        secondaryVerse: verse,
+      })
+    }
+  )
+
+  it('does not apply the primary interlinear mode to another parallel Bible', () => {
+    expect(
+      getParallelVerseModeProps({
+        columnIndex: 1,
+        interlinearMode: 'strong',
+        isINTComplete: true,
+        secondaryVerse: verse,
+      })
+    ).toEqual({
+      interlinearMode: undefined,
+      isINTComplete: undefined,
+      secondaryVerse: undefined,
+    })
   })
 })

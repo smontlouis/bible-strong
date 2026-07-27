@@ -28,6 +28,7 @@ export interface InterlinearSegment {
 }
 
 export interface InterlinearToken {
+  id?: number
   ordinal: number
   startOffset: number
   length: number
@@ -241,6 +242,7 @@ export const loadInterlinearChapterTokens = async (
     let token = tokens.get(row.tokenId)
     if (!token) {
       token = {
+        id: row.tokenId,
         ordinal: row.readingOrdinal,
         startOffset: row.tokenStartOffset,
         length: row.tokenLength,

@@ -9,6 +9,7 @@ import { scaleFontSize } from './scaleFontSize'
 import { isDarkTheme, noSelect } from './utils'
 import { getDisabledStyles } from './disabledStyles'
 import { scaleLineHeight } from './scaleLineHeight'
+import { getStrongReferenceNumber } from '~helpers/strongIdentities'
 
 const StyledReference = styled('span')<
   RootStyles & { isSelected: boolean; isParallel?: boolean; isDisabled?: boolean }
@@ -21,10 +22,10 @@ const StyledReference = styled('span')<
   }) => ({
     fontFamily,
     ...noSelect,
-    color: isSelected ? colors[theme].reverse : 'inherit',
+    color: isSelected ? colors[theme].reverse : colors[theme].primary,
     backgroundColor: isSelected ? colors[theme].primary : 'inherit',
-    fontSize: scaleFontSize(isParallel ? 16 : 19, fontSizeScale),
-    lineHeight: scaleLineHeight(isParallel ? 26 : 32, lineHeight, fontSizeScale),
+    fontSize: scaleFontSize(isParallel ? 14 : 16, fontSizeScale),
+    lineHeight: scaleLineHeight(isParallel ? 24 : 30, lineHeight, fontSizeScale),
     boxShadow: isDarkTheme(theme)
       ? `0 0 10px 0 rgba(255, 255, 255, 0.1)`
       : `0 0 10px 0 rgba(0, 0, 0, 0.2)`,
@@ -45,27 +46,35 @@ const StyledReference = styled('span')<
 
 export const BibleStrongRef = ({
   book,
-  reference,
+  references,
   isParallel,
   isDisabled,
   selectedCode,
   settings,
 }: {
   book: string | number
-  reference: string
+  references: string[]
   isParallel?: boolean
   isDisabled?: boolean
   selectedCode?: SelectedCode | null
   settings: RootState['user']['bible']['settings']
 }) => {
   const dispatch = useDispatch()
-  const isSelected = Number(selectedCode?.reference) === Number(reference)
+  const numericReferences = references.flatMap(reference => {
+    const numericReference = getStrongReferenceNumber(reference)
+    return numericReference ? [numericReference] : []
+  })
+  const numericReference = numericReferences[0]
+  const isSelected =
+    numericReferences.length > 0 &&
+    numericReferences.includes(getStrongReferenceNumber(selectedCode?.reference ?? '') ?? '')
 
   const navigateToStrong = (event: React.MouseEvent<HTMLSpanElement>) => {
     event.stopPropagation()
+    if (!numericReference) return
     dispatch({
       type: NAVIGATE_TO_STRONG,
-      payload: { reference: `${Number(reference)}`, book },
+      payload: { reference: numericReference, book },
     })
   }
 
@@ -78,7 +87,7 @@ export const BibleStrongRef = ({
       isDisabled={isDisabled}
       settings={settings}
     >
-      {reference}
+      {references.join(' · ')}
     </StyledReference>
   )
 }
@@ -101,7 +110,7 @@ const verseToStrong = ({
       return (
         <BibleStrongRef
           book={Livre}
-          reference={item}
+          references={[item]}
           key={i}
           isParallel={isParallel}
           isDisabled={isDisabled}

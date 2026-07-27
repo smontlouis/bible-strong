@@ -99,4 +99,51 @@ describe('Strong Bible sidecar validation', () => {
       )
     ).toThrow('STRONG_BIBLE_METADATA_MISMATCH:datasetId')
   })
+
+  it('requires compact reverse-interlinear pointers and the exact STEP runtime contract', () => {
+    const reverseSnapshot = {
+      ...validSnapshot,
+      metadata: {
+        ...validSnapshot.metadata,
+        schemaVersion: 4,
+        reverseInterlinearSchemaVersion: 2,
+        reverseInterlinearStepRevision: 'bhg-step-revision',
+        reverseInterlinearStepTextSha256: 'bhg-step-text-sha',
+        reverseInterlinearCompatibleRuntimeSha256s: ['runtime-fr', 'runtime-en'],
+      },
+      wordSpanColumns: ['verseId', 'ordinal', 'stepTokenId'],
+      tableNames: ['WordSpans', 'WordStepTokenExtras'],
+    }
+    const reverseExpected = {
+      ...expected,
+      schemaVersion: 4,
+      reverseInterlinearSchemaVersion: 2,
+      reverseInterlinearStepRevision: 'bhg-step-revision',
+      reverseInterlinearStepTextSha256: 'bhg-step-text-sha',
+      reverseInterlinearCompatibleRuntimeSha256s: ['runtime-fr', 'runtime-en'],
+    }
+
+    expect(() => validateStrongBibleSidecarSnapshot(reverseSnapshot, reverseExpected)).not.toThrow()
+    expect(() =>
+      validateStrongBibleSidecarSnapshot(
+        {
+          ...reverseSnapshot,
+          wordSpanColumns: ['verseId', 'ordinal'],
+        },
+        reverseExpected
+      )
+    ).toThrow('STRONG_BIBLE_REVERSE_INTERLINEAR_SCHEMA_MISSING')
+    expect(() =>
+      validateStrongBibleSidecarSnapshot(
+        {
+          ...reverseSnapshot,
+          metadata: {
+            ...reverseSnapshot.metadata,
+            reverseInterlinearCompatibleRuntimeSha256s: ['another-runtime'],
+          },
+        },
+        reverseExpected
+      )
+    ).toThrow('STRONG_BIBLE_METADATA_MISMATCH:reverseInterlinear')
+  })
 })

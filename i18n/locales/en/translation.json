@@ -1200,6 +1200,7 @@
   "Afficher le mode interlinéaire": "Show interlinear mode",
   "Masquer le mode interlinéaire": "Hide interlinear mode",
   "Choisir le mode d’affichage": "Choose display mode",
+  "Options du texte original": "Original text options",
   "Mode interlinéaire": "Interlinear mode",
   "Mode d’affichage": "Display mode",
   "Texte original": "Original text",
@@ -1223,6 +1224,11 @@
   "Hébreu ou grec": "Hebrew or Greek",
   "Mot par mot": "Word by word",
   "Texte + numéros": "Text + numbers",
+  "Texte": "Text",
+  "Traduction seule": "Translation only",
+  "Interlinéaire inversé": "Reverse interlinear",
+  "Traduction puis original": "Translation then original",
+  "Choisir l’affichage de la Bible Strong": "Choose the Strong Bible display",
   "Caractères latins": "Latin characters",
   "Télécharger l’index interlinéaire {{language}}": "Download the {{language}} interlinear index",
   "downloads.strongAttribution": "Numéros Strong affectés en 2026 par “Concordances et Traductions de la Bible” (concordance.bible).",
@@ -1232,5 +1238,7 @@
   "strongSource.autoDescription.default": "Selection follows the open Bible",
   "strongSource.unavailableMessage": "You need a Bible with a Strong index to view the lexicon for this verse.",
   "strongSource.chooseAction": "Choose a Strong Bible",
-  "Afficher la note": "Show note"
+  "Afficher la note": "Show note",
+  "Télécharger les ressources pour {{mode}}": "Download resources for {{mode}}",
+  "Les ressources manquantes pour « {{mode}} » représentent environ {{size}} Mo. Voulez-vous les télécharger ?": "The missing resources for “{{mode}}” require approximately {{size}} MB. Would you like to download them?"
 }

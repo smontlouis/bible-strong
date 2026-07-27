@@ -32,18 +32,28 @@ Removing BHG explicitly removes both localized indexes; removing one index never
 the other locale. A failed or missing index leaves BHG fully readable in simple mode.
 
 Hide `INT` and `INT_EN` from new catalogs while retaining their identifiers and existing loaders so
-persisted tabs and already downloaded legacy resources remain usable. Do not migrate a persisted
-legacy tab automatically to BHG because BHG may not yet be installed.
+persisted tabs and already downloaded legacy resources remain usable. Resolve a persisted legacy
+tab to BHG when the canonical BHG text is installed, preserving the legacy French or English gloss
+locale and enabling interlinear mode only when that localized index is compatible. If BHG is not
+installed, keep an available legacy interlinear rather than breaking the tab. If neither resource
+is available, fall back to an installed required Bible. This resolution never starts a download.
 
 Advanced BHG rendering preserves the canonical source text through published UTF-16 offsets,
 including text between indexed tokens. It disables entry into word-annotation mode because its DOM
 structure is not a one-to-one text rendering; simple BHG mode keeps the normal annotation contract.
 Psalm superscriptions published as verse zero remain addressable but render without a visible zero.
 
+When the resource modal opens its Lexicon view from BHG, an installed compatible BHG interlinear
+index is the contextual first source. It appears explicitly in the source selector and is selected
+automatically for BHG, while a manually selected traditional Strong Bible remains an override. This
+contextual choice does not change the user's global default Strong Bible. If neither localized BHG
+index is compatible, the existing traditional Strong fallback order remains available.
+
 BHG keeps one persisted display preference with four states: original text, detailed interlinear,
 original text with Strong identities, or continuous Latin transliteration. The legacy `visible`
 state remains readable and maps to detailed interlinear mode. Strong and transliteration are
-language-neutral and may use either compatible installed index.
+language-neutral and may use either compatible installed index. In parallel display, BHG keeps its
+active mode when it is the primary Bible; that mode is not applied to the additional Bible columns.
 
 Gloss language is a separate persisted preference. Automatic follows the application language and
 may fall back to the other installed localized index. An explicit French or English choice never

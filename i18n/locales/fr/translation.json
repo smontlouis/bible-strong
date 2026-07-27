@@ -1159,6 +1159,7 @@
   "Afficher le mode interlinéaire": "Afficher le mode interlinéaire",
   "Masquer le mode interlinéaire": "Masquer le mode interlinéaire",
   "Choisir le mode d’affichage": "Choisir le mode d’affichage",
+  "Options du texte original": "Options du texte original",
   "Mode interlinéaire": "Mode interlinéaire",
   "Mode d’affichage": "Mode d’affichage",
   "Texte original": "Texte original",
@@ -1182,6 +1183,11 @@
   "Hébreu ou grec": "Hébreu ou grec",
   "Mot par mot": "Mot par mot",
   "Texte + numéros": "Texte + numéros",
+  "Texte": "Texte",
+  "Traduction seule": "Traduction seule",
+  "Interlinéaire inversé": "Interlinéaire inversé",
+  "Traduction puis original": "Traduction puis original",
+  "Choisir l’affichage de la Bible Strong": "Choisir l’affichage de la Bible Strong",
   "Caractères latins": "Caractères latins",
   "Télécharger l’index interlinéaire {{language}}": "Télécharger l’index interlinéaire {{language}}",
   "downloads.strongAttribution": "Numéros Strong affectés en 2026 par “Concordances et Traductions de la Bible” (concordance.bible).",
@@ -1191,5 +1197,7 @@
   "strongSource.autoDescription.default": "Sélection selon la Bible ouverte",
   "strongSource.unavailableMessage": "Vous avez besoin d’une Bible avec un index Strong pour afficher le lexique de ce verset.",
   "strongSource.chooseAction": "Choisir une Bible Strong",
-  "Afficher la note": "Afficher la note"
+  "Afficher la note": "Afficher la note",
+  "Télécharger les ressources pour {{mode}}": "Télécharger les ressources pour {{mode}}",
+  "Les ressources manquantes pour « {{mode}} » représentent environ {{size}} Mo. Voulez-vous les télécharger ?": "Les ressources manquantes pour « {{mode}} » représentent environ {{size}} Mo. Voulez-vous les télécharger ?"
 }

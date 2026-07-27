@@ -26,6 +26,7 @@ import {
 } from '~helpers/strongBiblePublications'
 import type { InterlinearDisplayMode, InterlinearMode } from '~helpers/interlinearBiblePublications'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
+import { applyPendingStrongMode, applyStrongModeSelection } from '~helpers/strongModeState'
 
 // ============================================================================
 // SHARED BIBLE DOM (single WebView instance for all Bible tabs)
@@ -62,6 +63,8 @@ export interface BibleTab extends TabBase {
     selectedVersion: VersionCode
     strongMode?: StrongMode
     pendingStrongModeVersionId?: StrongBibleVersionId
+    pendingStrongMode?: Exclude<StrongMode, 'hidden'>
+    pendingStrongInterlinearLocale?: ResourceLanguage
     strongBibleSourceVersionId?: StrongBibleVersionId
     interlinearMode?: InterlinearMode
     interlinearLocale?: ResourceLanguage
@@ -765,7 +768,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const setStrongMode = (strongMode: StrongMode) =>
     setBibleTab(
       produce(draft => {
-        draft.data.strongMode = strongMode
+        applyStrongModeSelection(draft.data, strongMode)
       })
     )
 
@@ -814,10 +817,19 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
       })
     )
 
-  const setPendingStrongModeVersion = (versionId?: StrongBibleVersionId) =>
+  const setPendingStrongModeVersion = (
+    versionId?: StrongBibleVersionId,
+    pendingStrongMode: Exclude<StrongMode, 'hidden'> = 'visible',
+    pendingStrongInterlinearLocale?: ResourceLanguage
+  ) =>
     setBibleTab(
       produce(draft => {
-        draft.data.pendingStrongModeVersionId = versionId
+        applyPendingStrongMode(
+          draft.data,
+          versionId,
+          pendingStrongMode,
+          pendingStrongInterlinearLocale
+        )
       })
     )
 
@@ -826,9 +838,12 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
       produce(draft => {
         if (draft.data.pendingStrongModeVersionId !== versionId) return
 
+        const pendingMode = draft.data.pendingStrongMode ?? 'visible'
         draft.data.pendingStrongModeVersionId = undefined
+        draft.data.pendingStrongMode = undefined
+        draft.data.pendingStrongInterlinearLocale = undefined
         if (succeeded && draft.data.selectedVersion === versionId) {
-          draft.data.strongMode = 'visible'
+          draft.data.strongMode = pendingMode
         }
       })
     )

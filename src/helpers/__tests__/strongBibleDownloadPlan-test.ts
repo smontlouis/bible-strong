@@ -35,6 +35,7 @@ import {
   createStrongSidecarDownloadPlan,
   dedupeDownloadItems,
 } from '../downloadItemFactory'
+import { createStrongModeDownloadPlan } from '../strongModeDownloadPlan'
 
 describe('Strong Bible download planning', () => {
   it('does not queue legacy red-word or pericope files for a canonical V4 publication', () => {
@@ -92,4 +93,60 @@ describe('Interlinear Bible download planning', () => {
       ])
     }
   )
+})
+
+describe('Strong display mode download planning', () => {
+  it('queues only the missing Strong sidecar for Strong mode', () => {
+    const plan = createStrongModeDownloadPlan({
+      mode: 'visible',
+      versionId: 'DBY',
+      strongAvailability: { status: 'missing' },
+      interlinearAvailabilities: [],
+    })
+
+    expect(plan.items.map(item => item.id)).toEqual(['bible-strong:DBY'])
+    expect(plan.preferredInterlinearLocale).toBeUndefined()
+  })
+
+  it('queues Strong, BHG, then the localized index for reverse interlinear mode', () => {
+    const plan = createStrongModeDownloadPlan({
+      mode: 'reverse-interlinear',
+      versionId: 'DBY',
+      strongAvailability: { status: 'missing' },
+      interlinearAvailabilities: [
+        { locale: 'fr', availability: { status: 'base-missing' } },
+        { locale: 'en', availability: { status: 'base-missing' } },
+      ],
+    })
+
+    expect(plan.items.map(item => item.id)).toEqual([
+      'bible-strong:DBY',
+      'bible:BHG',
+      'bible-interlinear:BHG:fr',
+    ])
+    expect(plan.items[2]?.dependsOnId).toBe('bible:BHG')
+    expect(plan.preferredInterlinearLocale).toBe('fr')
+  })
+
+  it('reuses an installed interlinear index instead of downloading another locale', () => {
+    const plan = createStrongModeDownloadPlan({
+      mode: 'reverse-interlinear',
+      versionId: 'DBY',
+      strongAvailability: { status: 'missing' },
+      interlinearAvailabilities: [
+        { locale: 'fr', availability: { status: 'missing' } },
+        {
+          locale: 'en',
+          availability: {
+            status: 'available',
+            locale: 'en',
+            textRevision: 'bhg-v4',
+          },
+        },
+      ],
+    })
+
+    expect(plan.items.map(item => item.id)).toEqual(['bible-strong:DBY'])
+    expect(plan.preferredInterlinearLocale).toBe('en')
+  })
 })

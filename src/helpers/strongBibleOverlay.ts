@@ -4,6 +4,7 @@ export interface StrongBibleSpan {
   ordinal: number
   startOffset: number
   length: number
+  stepTokenIds?: number[]
   identities: {
     kind: StrongBibleIdentityKind
     code: string

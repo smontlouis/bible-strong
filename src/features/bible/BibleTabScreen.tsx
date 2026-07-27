@@ -1,7 +1,7 @@
 import { produce } from 'immer'
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useAtom } from 'jotai/react'
+import { useAtom, useAtomValue } from 'jotai/react'
 
 import blackColors from '~themes/blackColors'
 import defaultColors from '~themes/colors'
@@ -28,6 +28,9 @@ import {
   BiblePartialReferenceNotice,
   BibleReferenceUnavailable,
 } from './BibleReferenceAvailability'
+import useLanguage from '~helpers/useLanguage'
+import { downloadCompletionSignalAtom } from '~state/downloadQueue'
+import { resolveBibleTabResources } from '~helpers/bibleTabResourceResolution'
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const deepmerge = require('@fastify/deepmerge')()
 
@@ -40,6 +43,18 @@ interface BibleTabScreenProps {
 const BibleTabScreen = ({ bibleAtom, isFormSheet, isInTab = true }: BibleTabScreenProps) => {
   const dispatch = useDispatch()
   const [bible, setBible] = useAtom(bibleAtom)
+  const lang = useLanguage()
+  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
+  const selectedVersion = bible.data.selectedVersion
+  const strongMode = bible.data.strongMode
+  const interlinearMode = bible.data.interlinearMode
+  const interlinearLocale = bible.data.interlinearLocale
+  const parallelVersions = bible.data.parallelVersions
+  const selectedBook = bible.data.selectedBook
+  const selectedChapter = bible.data.selectedChapter
+  const selectedVerse = bible.data.selectedVerse
+  const resourceSelectionKey = `${selectedVersion}:${parallelVersions.join(',')}`
+  const [resolvedResourceSelectionKey, setResolvedResourceSelectionKey] = useState<string>()
   const entityReference = bible.data.entityReference
   const entityVerseKeys = entityReference?.verseKeys || []
   const {
@@ -55,6 +70,89 @@ const BibleTabScreen = ({ bibleAtom, isFormSheet, isInTab = true }: BibleTabScre
   const rawSettings = useSelector((state: RootState) => state.user.bible.settings)
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
   const { theme: currentTheme } = useCurrentThemeSelector()
+
+  useEffect(() => {
+    if (entityReference) return
+
+    let cancelled = false
+    const parallelVersionsKey = parallelVersions.join(',')
+
+    resolveBibleTabResources(
+      {
+        selectedVersion,
+        strongMode,
+        interlinearMode,
+        interlinearLocale,
+        parallelVersions,
+        selectedBook,
+        selectedChapter,
+        selectedVerse,
+      },
+      lang
+    )
+      .then(resolvedData => {
+        if (cancelled) return
+
+        const resolvedKey = `${resolvedData.selectedVersion}:${resolvedData.parallelVersions.join(',')}`
+        const selectionChanged =
+          resolvedData.selectedVersion !== selectedVersion ||
+          resolvedData.strongMode !== strongMode ||
+          resolvedData.interlinearMode !== interlinearMode ||
+          resolvedData.interlinearLocale !== interlinearLocale ||
+          resolvedData.parallelVersions.join(',') !== parallelVersionsKey ||
+          resolvedData.selectedBook.Numero !== selectedBook.Numero ||
+          resolvedData.selectedChapter !== selectedChapter ||
+          resolvedData.selectedVerse !== selectedVerse
+        if (selectionChanged) {
+          setBible(
+            produce(draft => {
+              if (
+                draft.data.selectedVersion !== selectedVersion ||
+                draft.data.parallelVersions.join(',') !== parallelVersionsKey
+              ) {
+                return
+              }
+
+              draft.data.selectedVersion = resolvedData.selectedVersion
+              draft.data.strongMode = resolvedData.strongMode
+              draft.data.interlinearMode = resolvedData.interlinearMode
+              draft.data.interlinearLocale = resolvedData.interlinearLocale
+              draft.data.parallelVersions = resolvedData.parallelVersions
+              draft.data.selectedBook = resolvedData.selectedBook
+              draft.data.selectedChapter = resolvedData.selectedChapter
+              draft.data.selectedVerse = resolvedData.selectedVerse
+              draft.data.temp = {
+                selectedBook: resolvedData.selectedBook,
+                selectedChapter: resolvedData.selectedChapter,
+                selectedVerse: resolvedData.selectedVerse,
+              }
+            })
+          )
+        }
+        setResolvedResourceSelectionKey(resolvedKey)
+      })
+      .catch(() => {
+        if (!cancelled) setResolvedResourceSelectionKey(resourceSelectionKey)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [
+    downloadCompletionSignal,
+    entityReference,
+    interlinearLocale,
+    interlinearMode,
+    lang,
+    parallelVersions,
+    resourceSelectionKey,
+    selectedBook,
+    selectedChapter,
+    selectedVerse,
+    selectedVersion,
+    setBible,
+    strongMode,
+  ])
 
   const settings = useMemo(
     () =>
@@ -113,6 +211,10 @@ const BibleTabScreen = ({ bibleAtom, isFormSheet, isInTab = true }: BibleTabScre
     (isResolvingEntity ||
       (resolvedEntityVersion && bible.data.selectedVersion !== resolvedEntityVersion))
   ) {
+    return null
+  }
+
+  if (!entityReference && resolvedResourceSelectionKey !== resourceSelectionKey) {
     return null
   }
 

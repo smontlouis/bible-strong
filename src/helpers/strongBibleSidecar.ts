@@ -218,16 +218,23 @@ export const loadStrongBibleChapterSpans = async (
     identityOrder: number | null
     kind: number | null
     code: string | null
+    primaryStepTokenId: number | null
+    sourceOrder: number | null
+    extraStepTokenId: number | null
   }>(
     `SELECT v.verse, o.ordinal, o.startOffset, o.length,
-            w.identityOrder, c.kind, c.code
+            w.identityOrder, c.kind, c.code,
+            o.stepTokenId AS primaryStepTokenId,
+            e.sourceOrder, e.stepTokenId AS extraStepTokenId
      FROM Verses v
      JOIN WordSpans o ON o.verseId=v.id
      LEFT JOIN WordStrongCodes w
        ON w.verseId=o.verseId AND w.ordinal=o.ordinal
      LEFT JOIN StrongCodes c ON c.id=w.codeId
+     LEFT JOIN WordStepTokenExtras e
+       ON e.verseId=o.verseId AND e.targetOrdinal=o.ordinal
      WHERE v.bookOrder=? AND v.chapter=? AND o.isAligned=1
-     ORDER BY v.verse, o.ordinal, w.identityOrder`,
+     ORDER BY v.verse, o.ordinal, w.identityOrder, e.sourceOrder`,
     [book, chapter]
   )
   const spansByVerse: Record<number, StrongBibleSpan[]> = {}
@@ -240,14 +247,94 @@ export const loadStrongBibleChapterSpans = async (
         ordinal: row.ordinal,
         startOffset: row.startOffset,
         length: row.length,
+        stepTokenIds: row.primaryStepTokenId == null ? [] : [row.primaryStepTokenId],
         identities: [],
       }
       spanKeys.set(key, span)
       spansByVerse[row.verse] ??= []
       spansByVerse[row.verse].push(span)
     }
+    if (row.extraStepTokenId != null && !span.stepTokenIds?.includes(row.extraStepTokenId)) {
+      span.stepTokenIds?.push(row.extraStepTokenId)
+    }
     const kind = row.kind == null ? undefined : IDENTITY_KINDS[row.kind]
-    if (kind && row.code) {
+    if (
+      kind &&
+      row.code &&
+      !span.identities.some(identity => identity.kind === kind && identity.code === row.code)
+    ) {
+      span.identities.push({
+        kind: kind as StrongBibleIdentityKind,
+        code: row.code,
+      })
+    }
+  }
+  return spansByVerse
+}
+
+export const loadReverseInterlinearChapterSpans = async (
+  versionId: StrongBibleVersionId,
+  book: number,
+  chapter: number
+): Promise<Record<number, StrongBibleSpan[]>> => {
+  const availability = await getStrongBibleSidecarAvailability(versionId)
+  if (availability.status !== 'available') {
+    throw new Error(`STRONG_BIBLE_SIDECAR_${availability.status.toUpperCase()}:${versionId}`)
+  }
+  const database = await openStrongBibleSidecar(versionId)
+  const rows = await database.getAllAsync<{
+    verse: number
+    ordinal: number
+    startOffset: number
+    length: number
+    identityOrder: number | null
+    kind: number | null
+    code: string | null
+    primaryStepTokenId: number | null
+    sourceOrder: number | null
+    extraStepTokenId: number | null
+  }>(
+    `SELECT v.verse, o.ordinal, o.startOffset, o.length,
+            w.identityOrder, c.kind, c.code,
+            o.stepTokenId AS primaryStepTokenId,
+            e.sourceOrder, e.stepTokenId AS extraStepTokenId
+       FROM Verses v
+       JOIN WordSpans o ON o.verseId=v.id
+       LEFT JOIN WordStrongCodes w
+         ON w.verseId=o.verseId AND w.ordinal=o.ordinal
+       LEFT JOIN StrongCodes c ON c.id=w.codeId
+       LEFT JOIN WordStepTokenExtras e
+         ON e.verseId=o.verseId AND e.targetOrdinal=o.ordinal
+      WHERE v.bookOrder=? AND v.chapter=? AND o.isAligned=1
+      ORDER BY v.verse, o.ordinal, w.identityOrder, e.sourceOrder`,
+    [book, chapter]
+  )
+  const spansByVerse: Record<number, StrongBibleSpan[]> = {}
+  const spanKeys = new Map<string, StrongBibleSpan>()
+  for (const row of rows) {
+    const key = `${row.verse}:${row.ordinal}`
+    let span = spanKeys.get(key)
+    if (!span) {
+      span = {
+        ordinal: row.ordinal,
+        startOffset: row.startOffset,
+        length: row.length,
+        stepTokenIds: row.primaryStepTokenId == null ? [] : [row.primaryStepTokenId],
+        identities: [],
+      }
+      spanKeys.set(key, span)
+      spansByVerse[row.verse] ??= []
+      spansByVerse[row.verse].push(span)
+    }
+    if (row.extraStepTokenId != null && !span.stepTokenIds?.includes(row.extraStepTokenId)) {
+      span.stepTokenIds?.push(row.extraStepTokenId)
+    }
+    const kind = row.kind == null ? undefined : IDENTITY_KINDS[row.kind]
+    if (
+      kind &&
+      row.code &&
+      !span.identities.some(identity => identity.kind === kind && identity.code === row.code)
+    ) {
       span.identities.push({
         kind: kind as StrongBibleIdentityKind,
         code: row.code,
@@ -373,6 +460,14 @@ const readMetadata = async (database: SQLiteDatabase): Promise<StrongBibleSideca
     textSha256: metadata.textSha256 ?? '',
     strongRevision: metadata.strongRevision ?? '',
     schemaVersion: Number(metadata.schemaVersion ?? 0),
+    reverseInterlinearSchemaVersion: metadata.reverseInterlinearSchemaVersion
+      ? Number(metadata.reverseInterlinearSchemaVersion)
+      : undefined,
+    reverseInterlinearStepRevision: metadata.reverseInterlinearStepRevision,
+    reverseInterlinearStepTextSha256: metadata.reverseInterlinearStepTextSha256,
+    reverseInterlinearCompatibleRuntimeSha256s: parseStringArray(
+      metadata.reverseInterlinearCompatibleRuntimeSha256s
+    ),
   }
 }
 
@@ -411,12 +506,32 @@ const readStrongBibleSidecarSnapshot = async (
        (SELECT COUNT(*) FROM FrenchLexemes) AS lexemeCount`
   )
   const verseColumns = await database.getAllAsync<{ name: string }>('PRAGMA table_info(Verses)')
+  const wordSpanColumns = await database.getAllAsync<{ name: string }>(
+    'PRAGMA table_info(WordSpans)'
+  )
+  const tableNames = await database.getAllAsync<{ name: string }>(
+    `SELECT name FROM sqlite_schema WHERE type='table'`
+  )
   if (!counts) throw new Error('STRONG_BIBLE_COUNT_MISSING')
   return {
     integrity: integrity?.integrity_check ?? '',
     metadata,
     counts,
     verseColumns: verseColumns.map(column => column.name),
+    wordSpanColumns: wordSpanColumns.map(column => column.name),
+    tableNames: tableNames.map(table => table.name),
+  }
+}
+
+const parseStringArray = (value?: string): string[] | undefined => {
+  if (!value) return undefined
+  try {
+    const parsed = JSON.parse(value) as unknown
+    return Array.isArray(parsed)
+      ? parsed.filter((item): item is string => typeof item === 'string')
+      : undefined
+  } catch {
+    return undefined
   }
 }
 
@@ -435,6 +550,11 @@ const getExpectedSidecar = (versionId: StrongBibleVersionId): ExpectedStrongBibl
     identityCount: publication.strong.identityCount,
     lexemeAssignmentCount: publication.strong.lexemeAssignmentCount,
     lexemeCount: publication.strong.lexemeCount,
+    reverseInterlinearSchemaVersion: publication.strong.reverseInterlinearSchemaVersion,
+    reverseInterlinearStepRevision: publication.strong.reverseInterlinearStepRevision,
+    reverseInterlinearStepTextSha256: publication.strong.reverseInterlinearStepTextSha256,
+    reverseInterlinearCompatibleRuntimeSha256s:
+      publication.strong.reverseInterlinearCompatibleRuntimeSha256s,
   }
 }
 

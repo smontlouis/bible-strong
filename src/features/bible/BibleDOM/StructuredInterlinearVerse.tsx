@@ -5,6 +5,7 @@ import type { SelectedCode, Verse } from '~common/types'
 import type { RootState } from '~redux/modules/reducer'
 import { buildInterlinearVerseLayout } from '~helpers/interlinearVerseLayout'
 import { normalizeInterlinearMode, type InterlinearMode } from '~helpers/interlinearDisplayMode'
+import { getDisplayedStrongIdentities, getStrongReferenceNumber } from '~helpers/strongIdentities'
 
 interface Props {
   verse: Verse
@@ -20,11 +21,11 @@ const StructuredInterlinearVerse = ({ verse, settings, isHebreu, selectedCode, m
   const tokens = verse.InterlinearTokens ?? []
   const navigateToStrong = (reference?: string) => {
     if (!reference) return
-    const numericReference = reference.match(/\d+/u)?.[0]
+    const numericReference = getStrongReferenceNumber(reference)
     if (!numericReference) return
     dispatch({
       type: NAVIGATE_TO_STRONG,
-      payload: { reference: `${Number(numericReference)}`, book: isHebreu ? 1 : 40 },
+      payload: { reference: numericReference, book: isHebreu ? 1 : 40 },
     })
   }
   const layout = buildInterlinearVerseLayout(verse.Texte, tokens)
@@ -35,19 +36,14 @@ const StructuredInterlinearVerse = ({ verse, settings, isHebreu, selectedCode, m
     <>
       {layout.pieces.map(({ prefix, surface, token }) => {
         const identities = token.segments.flatMap(segment => segment.identities)
-        const preferredIdentity =
-          identities.find(identity => identity.kind === 'strong') ??
-          identities.find(identity => identity.kind === 'dstrong') ??
-          identities[0]
-        const selected = identities.some(
-          identity => Number(selectedCode?.reference) === Number(identity.code.match(/\d+/u)?.[0])
-        )
+        const displayedIdentities = getDisplayedStrongIdentities(identities)
+        const preferredIdentity = displayedIdentities[0] ?? identities[0]
+        const selectedReference = getStrongReferenceNumber(selectedCode?.reference ?? '')
+        const selected =
+          selectedReference !== undefined &&
+          identities.some(identity => selectedReference === getStrongReferenceNumber(identity.code))
         const transliteration = line(token.segments.map(segment => segment.transliteration))
-        const strongReferences = line(
-          identities
-            .filter(identity => identity.kind === 'strong')
-            .map(identity => `S:${identity.code}`)
-        )
+        const displayedStrongReferences = line(displayedIdentities.map(identity => identity.code))
 
         if (displayMode === 'strong') {
           return (
@@ -72,7 +68,7 @@ const StructuredInterlinearVerse = ({ verse, settings, isHebreu, selectedCode, m
                 }}
               >
                 <span dir={isHebreu ? 'rtl' : 'ltr'}>{surface}</span>
-                {strongReferences && (
+                {displayedStrongReferences && (
                   <sup
                     style={{
                       color: selected ? colors.reverse : colors.primary,
@@ -81,7 +77,7 @@ const StructuredInterlinearVerse = ({ verse, settings, isHebreu, selectedCode, m
                       marginInlineStart: 2,
                     }}
                   >
-                    {strongReferences}
+                    {displayedStrongReferences}
                   </sup>
                 )}
               </button>
@@ -191,17 +187,7 @@ const StructuredInterlinearVerse = ({ verse, settings, isHebreu, selectedCode, m
                   lineHeight: 1.2,
                 }}
               >
-                {line(
-                  identities.map(identity => {
-                    const label = {
-                      strong: 'S',
-                      estrong: 'E',
-                      dstrong: 'D',
-                      ustrong: 'U',
-                    }[identity.kind]
-                    return `${label}:${identity.code}`
-                  })
-                )}
+                {line(displayedIdentities.map(identity => identity.code))}
               </span>
             </button>
           </span>

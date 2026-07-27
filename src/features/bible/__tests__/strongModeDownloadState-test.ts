@@ -1,6 +1,9 @@
 import type { DownloadItemState } from '~state/downloadQueue'
 
-import { getStrongModeDownloadPresentation } from '../strongModeDownloadState'
+import {
+  getDownloadPlanPresentation,
+  getStrongModeDownloadPresentation,
+} from '../strongModeDownloadState'
 
 const makeState = (
   id: string,
@@ -98,6 +101,26 @@ describe('getStrongModeDownloadPresentation', () => {
     expect(getStrongModeDownloadPresentation(undefined, sidecar)).toEqual({
       status: 'completed',
       progress: 1,
+    })
+  })
+})
+
+describe('getDownloadPlanPresentation', () => {
+  it('combines every resource in a reverse-interlinear download plan by size', () => {
+    const strong = makeState('bible-strong:BSB', 'completed', { estimatedSize: 20 })
+    const bhg = makeState('bible:BHG', 'downloading', {
+      type: 'bible',
+      estimatedSize: 60,
+      downloadProgress: 0.5,
+    })
+    const interlinear = makeState('bible-interlinear:BHG:fr', 'queued', {
+      type: 'bible-interlinear-sidecar',
+      estimatedSize: 20,
+    })
+
+    expect(getDownloadPlanPresentation([strong, bhg, interlinear])).toEqual({
+      status: 'active',
+      progress: 0.44,
     })
   })
 })

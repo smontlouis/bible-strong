@@ -26,7 +26,7 @@ import formatVerseContent from '~helpers/formatVerseContent'
 import generateUUID from '~helpers/generateUUID'
 import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
 import { toast } from '~helpers/toast'
-import type { StrongBibleProvenance } from '~features/resources/strongBibleResourceAccess'
+import type { LexiconBibleProvenance } from '~features/resources/lexiconBibleResourceAccess'
 import { BibleTab, useBibleTabActions, VersionCode } from '../../../state/tabs'
 import BibleVerseDetailCard from '../BibleVerseDetailCard'
 import CompareVersionSelectorSheet from '../CompareVersionSelectorSheet'
@@ -34,6 +34,8 @@ import { ReferenceCard } from '../ReferenceCard'
 import CompareCard from './CompareCard'
 import ResourcesModalFooter from './ResourcesModalFooter'
 import { StrongBibleSourceButton, StrongBibleSourceSheet } from './StrongBibleSourceSelector'
+import { getLanguage } from '~i18n'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
 
 type ResourceVerse = {
   Livre: number
@@ -107,7 +109,7 @@ const ResourcesModal = ({
     },
   } = bible
   const [resolvedStrongProvenance, setResolvedStrongProvenance] =
-    useState<StrongBibleProvenance | null>(null)
+    useState<LexiconBibleProvenance | null>(null)
   const selectedVerses = selectedVersesProp ?? bibleSelectedVerses
   const effectiveSelectedVersion = selectedVersion ?? bibleSelectedVersion
   const selectedVerse = Object.keys(selectedVerses)[0]
@@ -301,6 +303,7 @@ const ResourcesModal = ({
               isSelectionMode={isSelectionMode}
               selectedVersion={effectiveSelectedVersion}
               preferredStrongVersionId={strongBibleSourceVersionId}
+              preferredInterlinearLocale={bible.data.interlinearLocale ?? getLanguage()}
               onStrongBibleProvenanceChange={setResolvedStrongProvenance}
               onOpenStrongBibleSourceSheet={() => strongBibleSourceSheetRef.current?.present()}
               selectedVerses={selectedVerses}
@@ -328,6 +331,7 @@ const Resource = ({
   isSelectionMode,
   selectedVersion,
   preferredStrongVersionId,
+  preferredInterlinearLocale,
   onStrongBibleProvenanceChange,
   onOpenStrongBibleSourceSheet,
   selectedVerses,
@@ -338,7 +342,8 @@ const Resource = ({
   isSelectionMode?: StudyNavigateBibleType
   selectedVersion: VersionCode
   preferredStrongVersionId?: StrongBibleVersionId
-  onStrongBibleProvenanceChange?: (provenance: StrongBibleProvenance | null) => void
+  preferredInterlinearLocale: ResourceLanguage
+  onStrongBibleProvenanceChange?: (provenance: LexiconBibleProvenance | null) => void
   onOpenStrongBibleSourceSheet: () => void
   selectedVerses: VerseIds
   onChangeVerse?: (verseKey: string) => void
@@ -378,6 +383,7 @@ const Resource = ({
             verse={verseObj}
             selectedVersion={selectedVersion}
             preferredStrongVersionId={preferredStrongVersionId}
+            preferredInterlinearLocale={preferredInterlinearLocale}
             onStrongBibleProvenanceChange={onStrongBibleProvenanceChange}
             onOpenStrongBibleSourceSheet={onOpenStrongBibleSourceSheet}
             updateVerse={updateVerse}

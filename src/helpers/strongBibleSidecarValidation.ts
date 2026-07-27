@@ -5,6 +5,10 @@ export interface StrongBibleSidecarMetadata {
   textSha256: string
   strongRevision: string
   schemaVersion: number
+  reverseInterlinearSchemaVersion?: number
+  reverseInterlinearStepRevision?: string
+  reverseInterlinearStepTextSha256?: string
+  reverseInterlinearCompatibleRuntimeSha256s?: string[]
 }
 
 export interface StrongBibleSidecarCounts {
@@ -21,6 +25,8 @@ export interface StrongBibleSidecarSnapshot {
   metadata: StrongBibleSidecarMetadata
   counts: StrongBibleSidecarCounts
   verseColumns: string[]
+  wordSpanColumns?: string[]
+  tableNames?: string[]
 }
 
 export type ExpectedStrongBibleSidecar = StrongBibleSidecarMetadata & StrongBibleSidecarCounts
@@ -42,7 +48,8 @@ export const classifyStrongBibleSidecarMetadata = (
     metadata.textRevision !== expected.textRevision ||
     metadata.textSha256 !== expected.textSha256 ||
     metadata.strongRevision !== expected.strongRevision ||
-    metadata.schemaVersion !== expected.schemaVersion
+    metadata.schemaVersion !== expected.schemaVersion ||
+    !matchesReverseInterlinearMetadata(metadata, expected)
   ) {
     return 'incompatible'
   }
@@ -71,6 +78,18 @@ export const validateStrongBibleSidecarSnapshot = (
     }
   }
 
+  if (!matchesReverseInterlinearMetadata(snapshot.metadata, expected)) {
+    throw new Error('STRONG_BIBLE_METADATA_MISMATCH:reverseInterlinear')
+  }
+
+  if (
+    expected.reverseInterlinearSchemaVersion != null &&
+    (!snapshot.wordSpanColumns?.includes('stepTokenId') ||
+      !snapshot.tableNames?.includes('WordStepTokenExtras'))
+  ) {
+    throw new Error('STRONG_BIBLE_REVERSE_INTERLINEAR_SCHEMA_MISSING')
+  }
+
   for (const key of [
     'verseCount',
     'occurrenceCount',
@@ -90,4 +109,18 @@ export const validateStrongBibleSidecarSnapshot = (
   ) {
     throw new Error('STRONG_BIBLE_DUPLICATED_TEXT')
   }
+}
+
+const matchesReverseInterlinearMetadata = (
+  metadata: StrongBibleSidecarMetadata,
+  expected: ExpectedStrongBibleSidecar
+): boolean => {
+  if (expected.reverseInterlinearSchemaVersion == null) return true
+  return (
+    metadata.reverseInterlinearSchemaVersion === expected.reverseInterlinearSchemaVersion &&
+    metadata.reverseInterlinearStepRevision === expected.reverseInterlinearStepRevision &&
+    metadata.reverseInterlinearStepTextSha256 === expected.reverseInterlinearStepTextSha256 &&
+    JSON.stringify(metadata.reverseInterlinearCompatibleRuntimeSha256s ?? []) ===
+      JSON.stringify(expected.reverseInterlinearCompatibleRuntimeSha256s ?? [])
+  )
 }

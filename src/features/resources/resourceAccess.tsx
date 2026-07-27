@@ -18,12 +18,17 @@ import {
   localStrongBibleResourceAccess,
   type StrongBibleResourceAccess,
 } from '~features/resources/strongBibleResourceAccess'
+import {
+  localLexiconBibleResourceAccess,
+  type LexiconBibleResourceAccess,
+} from '~features/resources/lexiconBibleResourceAccess'
 
 export type ResourceAccessRegistry = {
   bibleContent: BibleContentAccess
   bibleReading: BibleReadingResourceAccess
   bibleSearch: BibleSearchAccess
   dictionary: DictionaryAccess
+  lexiconBible: LexiconBibleResourceAccess
   nave: NaveAccess
   strong: StrongAccess
   strongBible: StrongBibleResourceAccess
@@ -34,6 +39,7 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
   bibleReading: localBibleReadingResourceAccess,
   bibleSearch: localBibleSearchAccess,
   dictionary: localDictionaryAccess,
+  lexiconBible: localLexiconBibleResourceAccess,
   nave: localNaveAccess,
   strong: localStrongAccess,
   strongBible: localStrongBibleResourceAccess,

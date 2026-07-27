@@ -1,5 +1,6 @@
 import type { Verse as TVerse } from '~common/types'
 import type { BibleError } from '~helpers/bibleErrors'
+import type { InterlinearMode } from '~helpers/interlinearDisplayMode'
 import type { WordAnnotationsObj } from '~redux/modules/user'
 import type { ParallelVerse, TaggedVerse, WebViewProps } from './BibleDOMWrapper'
 
@@ -119,3 +120,22 @@ export const getParallelVerseRows = (
 
   return result
 }
+
+export const getParallelVerseModeProps = ({
+  columnIndex,
+  interlinearMode,
+  isINTComplete,
+  secondaryVerse,
+}: {
+  columnIndex: number
+  interlinearMode?: InterlinearMode
+  isINTComplete?: boolean
+  secondaryVerse?: TVerse | null
+}) =>
+  columnIndex === 0
+    ? { interlinearMode, isINTComplete, secondaryVerse }
+    : {
+        interlinearMode: undefined,
+        isINTComplete: undefined,
+        secondaryVerse: undefined,
+      }
