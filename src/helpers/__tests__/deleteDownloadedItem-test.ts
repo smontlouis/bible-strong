@@ -52,6 +52,12 @@ jest.mock('../interlinearBibleSidecar', () => ({
   removeInterlinearSidecar: jest.fn(),
 }))
 
+jest.mock('../resourcePublication', () => ({
+  resourcePublicationStore: {
+    remove: jest.fn(),
+  },
+}))
+
 import * as FileSystem from 'expo-file-system/legacy'
 import { isVersionInstalled, removeBibleVersion } from '../biblesDb'
 import { createDownloadedItemDeletionPlan, deleteDownloadedItem } from '../deleteDownloadedItem'

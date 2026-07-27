@@ -2,7 +2,7 @@ import * as FileSystem from 'expo-file-system/legacy'
 
 import { downloadAndInsertBible } from '~helpers/downloadBibleToSqlite'
 import { downloadWithCdnFallback } from '~helpers/downloadWithCdnFallback'
-import { dbManager } from '~helpers/sqlite'
+import { dbManager, openSQLiteDatabase } from '~helpers/sqlite'
 import { downloadRedWordsFile, versionHasRedWords } from '~helpers/redWords'
 import { downloadPericopeFile, versionHasPericope } from '~helpers/pericopes'
 import type { DatabaseId } from '~helpers/databaseTypes'
@@ -10,6 +10,8 @@ import type { DownloadItem } from '~state/downloadQueue'
 import { installStrongBibleSidecar } from './strongBibleSidecar'
 import type { StrongBibleVersionId } from './strongBiblePublications'
 import { installInterlinearSidecar } from './interlinearBibleSidecar'
+import type { DownloadWithCdnFallbackResult } from './downloadWithCdnFallback'
+import { restoreOrphanedResourceBackup } from './atomicResourceFile'
 
 export interface ResourceInstallationCallbacks {
   onDownloadProgress: (progress: number) => void
@@ -19,19 +21,28 @@ export interface ResourceInstallationCallbacks {
   isCancelled: () => boolean
 }
 
-const downloadSidecarBibleFiles = (item: DownloadItem, versionId: string) => {
+const downloadSidecarBibleFiles = async (item: DownloadItem, versionId: string) => {
+  const downloads: Promise<boolean>[] = []
   if (item.hasRedWords && versionHasRedWords(versionId)) {
-    downloadRedWordsFile(versionId)
+    downloads.push(downloadRedWordsFile(versionId))
   }
   if (item.hasPericope && versionHasPericope(versionId)) {
-    downloadPericopeFile(versionId)
+    downloads.push(downloadPericopeFile(versionId))
+  }
+  const results = await Promise.all(downloads)
+  if (results.some(result => !result)) {
+    throw new Error(`BIBLE_SIDECAR_DOWNLOAD_FAILED:${versionId}`)
   }
 }
 
-const downloadFile = async (item: DownloadItem, callbacks: ResourceInstallationCallbacks) => {
-  await downloadWithCdnFallback({
+const downloadFile = async (
+  item: DownloadItem,
+  callbacks: ResourceInstallationCallbacks,
+  destinationPath = item.destinationPath!
+) => {
+  const result = await downloadWithCdnFallback({
     url: item.url,
-    destinationPath: item.destinationPath!,
+    destinationPath,
     onDownloadProgress: ({ totalBytesWritten }) => {
       callbacks.onDownloadProgress(Math.min(totalBytesWritten / item.estimatedSize, 1))
     },
@@ -41,12 +52,13 @@ const downloadFile = async (item: DownloadItem, callbacks: ResourceInstallationC
   })
 
   if (callbacks.isCancelled()) throw new Error('CANCELLED')
+  return result
 }
 
 const installBible = async (item: DownloadItem, callbacks: ResourceInstallationCallbacks) => {
   const versionId = item.versionId!
 
-  await downloadAndInsertBible(versionId, item.url, {
+  const result = await downloadAndInsertBible(versionId, item.url, {
     onDownloadProgress: ({ totalBytesWritten }) => {
       callbacks.onDownloadProgress(Math.min(totalBytesWritten / item.estimatedSize, 1))
     },
@@ -61,34 +73,151 @@ const installBible = async (item: DownloadItem, callbacks: ResourceInstallationC
   })
 
   callbacks.onResumable(null)
-  downloadSidecarBibleFiles(item, versionId)
+  await downloadSidecarBibleFiles(item, versionId)
+  return result
 }
 
 const installBibleStrong = async (item: DownloadItem, callbacks: ResourceInstallationCallbacks) => {
-  await downloadFile(item, callbacks)
-
   const versionId = item.versionId!
-  if (versionId === 'INT' || versionId === 'INT_EN') {
-    const lang = versionId === 'INT' ? 'fr' : 'en'
-    await dbManager.getDB('INTERLINEAIRE', lang).init()
+  const destinationPath = item.destinationPath!
+  const temporaryPath = `${destinationPath}.download`
+  const backupPath = `${destinationPath}.backup`
+  await FileSystem.deleteAsync(temporaryPath, { idempotent: true })
+  const result = await downloadFile(item, callbacks, temporaryPath)
+  const fileName = temporaryPath.split('/').pop()!
+  const directory = temporaryPath.slice(0, -(fileName.length + 1))
+  const candidate = await openSQLiteDatabase(fileName, { useNewConnection: true }, directory)
+  try {
+    const integrity = await candidate.getFirstAsync<{ integrity_check: string }>(
+      'PRAGMA integrity_check'
+    )
+    if (integrity?.integrity_check !== 'ok') {
+      throw new Error(`BIBLE_DATABASE_INTEGRITY_FAILED:${versionId}`)
+    }
+  } finally {
+    await candidate.closeAsync()
   }
 
-  downloadSidecarBibleFiles(item, versionId)
+  const database =
+    versionId === 'INT' || versionId === 'INT_EN'
+      ? dbManager.getDB('INTERLINEAIRE', versionId === 'INT' ? 'fr' : 'en')
+      : undefined
+  await database?.close()
+  await restoreOrphanedResourceBackup(destinationPath, backupPath)
+  await FileSystem.deleteAsync(backupPath, { idempotent: true })
+  const installed = await FileSystem.getInfoAsync(destinationPath)
+  if (installed.exists) {
+    await FileSystem.moveAsync({ from: destinationPath, to: backupPath })
+  }
+  try {
+    await FileSystem.moveAsync({ from: temporaryPath, to: destinationPath })
+    await database?.init()
+    await FileSystem.deleteAsync(backupPath, { idempotent: true })
+  } catch (error) {
+    await FileSystem.deleteAsync(destinationPath, { idempotent: true })
+    const backup = await FileSystem.getInfoAsync(backupPath)
+    if (backup.exists) {
+      await FileSystem.moveAsync({ from: backupPath, to: destinationPath })
+      await database?.init()
+    }
+    throw error
+  } finally {
+    await FileSystem.deleteAsync(temporaryPath, { idempotent: true })
+  }
+
+  await downloadSidecarBibleFiles(item, versionId)
+  return result
 }
 
 const installDatabase = async (item: DownloadItem, callbacks: ResourceInstallationCallbacks) => {
-  await downloadFile(item, callbacks)
-
   const dbId = item.databaseId!
   const lang = item.lang || 'fr'
-  await dbManager.getDB(dbId as DatabaseId, lang).init()
+  const destinationPath = item.destinationPath!
+  const temporaryPath = `${destinationPath}.download`
+  const backupPath = `${destinationPath}.backup`
+  await FileSystem.deleteAsync(temporaryPath, { idempotent: true })
+  const result = await downloadFile(item, callbacks, temporaryPath)
+
+  try {
+    if (dbId === 'TIMELINE') {
+      const timeline = JSON.parse(await FileSystem.readAsStringAsync(temporaryPath)) as unknown
+      if (
+        !Array.isArray(timeline) ||
+        timeline.some(
+          event =>
+            typeof event !== 'object' ||
+            event === null ||
+            !('slug' in event) ||
+            typeof event.slug !== 'string'
+        )
+      ) {
+        throw new Error(`RESOURCE_DATABASE_SCHEMA_MISMATCH:${dbId}:${lang}`)
+      }
+    } else {
+      const fileName = temporaryPath.split('/').pop()!
+      const directory = temporaryPath.slice(0, -(fileName.length + 1))
+      const candidate = await openSQLiteDatabase(fileName, { useNewConnection: true }, directory)
+      try {
+        const integrity = await candidate.getFirstAsync<{ integrity_check: string }>(
+          'PRAGMA integrity_check'
+        )
+        if (integrity?.integrity_check !== 'ok') {
+          throw new Error(`RESOURCE_DATABASE_INTEGRITY_FAILED:${dbId}:${lang}`)
+        }
+        const tables = await candidate.getAllAsync<{ name: string }>(
+          `SELECT name FROM sqlite_schema WHERE type='table'`
+        )
+        const tableNames = new Set(tables.map(table => table.name.toLowerCase()))
+        const requiredTables: Partial<Record<DatabaseId, string[]>> = {
+          STRONG: ['grec', 'hebreu'],
+          DICTIONNAIRE: ['dictionnaire'],
+          NAVE: ['topics', 'verses'],
+          TRESOR: ['commentaires'],
+          MHY: ['commentaires'],
+          INTERLINEAIRE: ['interlineaire'],
+        }
+        if (
+          requiredTables[dbId as DatabaseId]?.some(table => !tableNames.has(table.toLowerCase()))
+        ) {
+          throw new Error(`RESOURCE_DATABASE_SCHEMA_MISMATCH:${dbId}:${lang}`)
+        }
+      } finally {
+        await candidate.closeAsync()
+      }
+    }
+
+    const database = dbManager.getDB(dbId as DatabaseId, lang)
+    await database.close()
+    await restoreOrphanedResourceBackup(destinationPath, backupPath)
+    await FileSystem.deleteAsync(backupPath, { idempotent: true })
+    const installed = await FileSystem.getInfoAsync(destinationPath)
+    if (installed.exists) {
+      await FileSystem.moveAsync({ from: destinationPath, to: backupPath })
+    }
+    try {
+      await FileSystem.moveAsync({ from: temporaryPath, to: destinationPath })
+      if (dbId !== 'TIMELINE') await database.init()
+      await FileSystem.deleteAsync(backupPath, { idempotent: true })
+    } catch (error) {
+      await FileSystem.deleteAsync(destinationPath, { idempotent: true })
+      const backup = await FileSystem.getInfoAsync(backupPath)
+      if (backup.exists) {
+        await FileSystem.moveAsync({ from: backupPath, to: destinationPath })
+        if (dbId !== 'TIMELINE') await database.init()
+      }
+      throw error
+    }
+    return result
+  } finally {
+    await FileSystem.deleteAsync(temporaryPath, { idempotent: true })
+  }
 }
 
 const installBibleStrongSidecar = async (
   item: DownloadItem,
   callbacks: ResourceInstallationCallbacks
 ) => {
-  await installStrongBibleSidecar(item.versionId as StrongBibleVersionId, {
+  return installStrongBibleSidecar(item.versionId as StrongBibleVersionId, {
     onDownloadProgress: ({ totalBytesWritten }) => {
       callbacks.onDownloadProgress(Math.min(totalBytesWritten / item.estimatedSize, 1))
     },
@@ -111,7 +240,7 @@ const installBibleInterlinearSidecar = async (
   ) {
     throw new Error(`INVALID_INTERLINEAR_DOWNLOAD_ITEM:${item.id}`)
   }
-  await installInterlinearSidecar(item.lang, item.interlinearArtifact, item.interlinearDatasetId, {
+  return installInterlinearSidecar(item.lang, item.interlinearArtifact, item.interlinearDatasetId, {
     onDownloadProgress: ({ totalBytesWritten }) => {
       callbacks.onDownloadProgress(Math.min(totalBytesWritten / item.estimatedSize, 1))
     },
@@ -125,22 +254,17 @@ const installBibleInterlinearSidecar = async (
 export const installResourceDatabaseItem = async (
   item: DownloadItem,
   callbacks: ResourceInstallationCallbacks
-) => {
+): Promise<DownloadWithCdnFallbackResult> => {
   switch (item.type) {
     case 'bible':
-      await installBible(item, callbacks)
-      break
+      return installBible(item, callbacks)
     case 'bible-strong':
-      await installBibleStrong(item, callbacks)
-      break
+      return installBibleStrong(item, callbacks)
     case 'bible-strong-sidecar':
-      await installBibleStrongSidecar(item, callbacks)
-      break
+      return installBibleStrongSidecar(item, callbacks)
     case 'bible-interlinear-sidecar':
-      await installBibleInterlinearSidecar(item, callbacks)
-      break
+      return installBibleInterlinearSidecar(item, callbacks)
     case 'database':
-      await installDatabase(item, callbacks)
-      break
+      return installDatabase(item, callbacks)
   }
 }

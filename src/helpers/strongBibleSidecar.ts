@@ -4,7 +4,7 @@ import { unzip } from 'react-native-zip-archive'
 import { getBibleVersionMetadata } from './biblesDb'
 import { getSharedSqliteDirPath } from './databaseTypes'
 import { downloadWithCdnFallback } from './downloadWithCdnFallback'
-import { toNativeFilePath, verifyFileSha256 } from './fileIntegrity'
+import { toNativeFilePath } from './fileIntegrity'
 import { openSQLiteDatabase, type SQLiteDatabase } from './sqlite'
 import {
   classifyStrongBibleSidecarMetadata,
@@ -20,6 +20,7 @@ import {
   type StrongBibleVersionId,
 } from './strongBiblePublications'
 import type { StrongBibleIdentityKind, StrongBibleSpan } from './strongBibleOverlay'
+import { restoreOrphanedResourceBackup } from './atomicResourceFile'
 
 const sidecarDatabases = new Map<StrongBibleVersionId, SQLiteDatabase>()
 const validatedSidecars = new Map<StrongBibleVersionId, StrongBibleSidecarMetadata>()
@@ -69,21 +70,10 @@ export const getStrongBibleSidecarAvailability = async (
   versionId: string
 ): Promise<StrongBibleSidecarAvailability> => {
   if (!isStrongCapableBibleVersion(versionId)) return { status: 'unsupported' }
-  const publication = getStrongBiblePublication(versionId)
   const baseMetadata = await getBibleVersionMetadata(versionId)
   if (!baseMetadata) return { status: 'base-missing' }
-  if (
-    baseMetadata.textRevision !== publication.strong.textRevision ||
-    baseMetadata.textSha256 !== publication.strong.textSha256
-  ) {
-    return {
-      status: 'base-incompatible',
-      baseTextRevision: baseMetadata.textRevision,
-      requiredTextRevision: publication.strong.textRevision,
-    }
-  }
-
   const path = getStrongBibleSidecarPath(versionId)
+  await restoreOrphanedResourceBackup(path, `${path}.backup`)
   const info = await FileSystem.getInfoAsync(path)
   if (!info.exists) return { status: 'missing' }
 
@@ -92,14 +82,12 @@ export const getStrongBibleSidecarAvailability = async (
     let metadata = validatedSidecars.get(versionId)
     if (!metadata) {
       metadata = await readMetadata(database)
-      const compatibility = classifyStrongBibleSidecarMetadata(
-        metadata,
-        getExpectedSidecar(versionId),
-        {
-          textRevision: baseMetadata.textRevision ?? '',
-          textSha256: baseMetadata.textSha256 ?? '',
-        }
-      )
+      const snapshot = await readStrongBibleSidecarSnapshot(database)
+      const expected = getExpectedSidecar(versionId, snapshot)
+      const compatibility = classifyStrongBibleSidecarMetadata(metadata, expected, {
+        textRevision: baseMetadata.textRevision ?? '',
+        textSha256: baseMetadata.textSha256 ?? '',
+      })
       if (compatibility === 'incompatible') {
         return {
           status: 'incompatible',
@@ -107,8 +95,7 @@ export const getStrongBibleSidecarAvailability = async (
           sidecarTextRevision: metadata.textRevision,
         }
       }
-      const snapshot = await readStrongBibleSidecarSnapshot(database)
-      validateStrongBibleSidecarSnapshot(snapshot, getExpectedSidecar(versionId))
+      validateStrongBibleSidecarSnapshot(snapshot, expected)
       metadata = snapshot.metadata
       validatedSidecars.set(versionId, metadata)
     }
@@ -140,22 +127,15 @@ export const getStrongBibleSidecarAvailability = async (
 export const installStrongBibleSidecar = async (
   versionId: StrongBibleVersionId,
   callbacks: StrongBibleSidecarInstallCallbacks = {}
-): Promise<void> => {
+) => {
   const publication = getStrongBiblePublication(versionId)
   const baseMetadata = await getBibleVersionMetadata(versionId)
   if (!baseMetadata) throw new Error(`STRONG_BIBLE_BASE_MISSING:${versionId}`)
-  if (
-    baseMetadata.textRevision !== publication.strong.textRevision ||
-    baseMetadata.textSha256 !== publication.strong.textSha256
-  ) {
-    throw new Error(`STRONG_BIBLE_BASE_REVISION_INCOMPATIBLE:${versionId}`)
-  }
-
   const archivePath = `${FileSystem.cacheDirectory}bible-${versionId}-strong-temp.zip`
   const extractionDirectory = `${FileSystem.cacheDirectory}bible-${versionId}-strong-extract/`
   const extractedPath = `${extractionDirectory}${publication.strong.entry}`
   try {
-    await downloadWithCdnFallback({
+    const downloadResult = await downloadWithCdnFallback({
       url: publication.strong.url,
       destinationPath: archivePath,
       downloadOptions: { cache: false },
@@ -166,11 +146,6 @@ export const installStrongBibleSidecar = async (
     })
     if (callbacks.isCancelled?.()) throw new Error('CANCELLED')
 
-    await verifyFileSha256(
-      archivePath,
-      publication.strong.archiveSha256,
-      'STRONG_BIBLE_ARCHIVE_CHECKSUM_MISMATCH'
-    )
     callbacks.onStatusInserting?.()
     callbacks.onInsertProgress?.(0)
     await FileSystem.deleteAsync(extractionDirectory, { idempotent: true })
@@ -178,16 +153,15 @@ export const installStrongBibleSidecar = async (
     callbacks.onInsertProgress?.(0.1)
     await unzip(toNativeFilePath(archivePath), toNativeFilePath(extractionDirectory), 'UTF-8')
     callbacks.onInsertProgress?.(0.55)
-    await verifyFileSha256(
-      extractedPath,
-      publication.strong.contentSha256,
-      'STRONG_BIBLE_CONTENT_CHECKSUM_MISMATCH'
-    )
     callbacks.onInsertProgress?.(0.7)
-    await verifyExtractedStrongBibleSidecar(versionId, extractionDirectory)
+    await verifyExtractedStrongBibleSidecar(versionId, extractionDirectory, {
+      textRevision: baseMetadata.textRevision ?? '',
+      textSha256: baseMetadata.textSha256 ?? '',
+    })
     callbacks.onInsertProgress?.(0.9)
     await activateStrongBibleSidecar(versionId, extractedPath)
     callbacks.onInsertProgress?.(1)
+    return downloadResult
   } finally {
     callbacks.onResumable?.(null)
     await FileSystem.deleteAsync(archivePath, { idempotent: true })
@@ -473,7 +447,8 @@ const readMetadata = async (database: SQLiteDatabase): Promise<StrongBibleSideca
 
 const verifyExtractedStrongBibleSidecar = async (
   versionId: StrongBibleVersionId,
-  directory: string
+  directory: string,
+  baseMetadata: Pick<StrongBibleSidecarMetadata, 'textRevision' | 'textSha256'>
 ): Promise<void> => {
   const publication = getStrongBiblePublication(versionId)
   const database = await openSQLiteDatabase(
@@ -483,7 +458,14 @@ const verifyExtractedStrongBibleSidecar = async (
   )
   try {
     const snapshot = await readStrongBibleSidecarSnapshot(database)
-    validateStrongBibleSidecarSnapshot(snapshot, getExpectedSidecar(versionId))
+    const expected = getExpectedSidecar(versionId, snapshot)
+    if (
+      classifyStrongBibleSidecarMetadata(snapshot.metadata, expected, baseMetadata) ===
+      'incompatible'
+    ) {
+      throw new Error(`STRONG_BIBLE_BASE_REVISION_INCOMPATIBLE:${versionId}`)
+    }
+    validateStrongBibleSidecarSnapshot(snapshot, expected)
   } finally {
     await database.closeAsync()
   }
@@ -535,26 +517,24 @@ const parseStringArray = (value?: string): string[] | undefined => {
   }
 }
 
-const getExpectedSidecar = (versionId: StrongBibleVersionId): ExpectedStrongBibleSidecar => {
+const getExpectedSidecar = (
+  versionId: StrongBibleVersionId,
+  snapshot: StrongBibleSidecarSnapshot
+): ExpectedStrongBibleSidecar => {
   const publication = getStrongBiblePublication(versionId)
   return {
     applicationVersionId: versionId,
     datasetId: publication.datasetId,
-    textRevision: publication.strong.textRevision,
-    textSha256: publication.strong.textSha256,
-    strongRevision: publication.strong.strongRevision,
+    textRevision: snapshot.metadata.textRevision,
+    textSha256: snapshot.metadata.textSha256,
+    strongRevision: snapshot.metadata.strongRevision,
     schemaVersion: publication.strong.schemaVersion,
-    verseCount: publication.strong.verseCount,
-    occurrenceCount: publication.strong.occurrenceCount,
-    unalignedOccurrenceCount: publication.strong.unalignedOccurrenceCount,
-    identityCount: publication.strong.identityCount,
-    lexemeAssignmentCount: publication.strong.lexemeAssignmentCount,
-    lexemeCount: publication.strong.lexemeCount,
+    ...snapshot.counts,
     reverseInterlinearSchemaVersion: publication.strong.reverseInterlinearSchemaVersion,
-    reverseInterlinearStepRevision: publication.strong.reverseInterlinearStepRevision,
-    reverseInterlinearStepTextSha256: publication.strong.reverseInterlinearStepTextSha256,
+    reverseInterlinearStepRevision: snapshot.metadata.reverseInterlinearStepRevision,
+    reverseInterlinearStepTextSha256: snapshot.metadata.reverseInterlinearStepTextSha256,
     reverseInterlinearCompatibleRuntimeSha256s:
-      publication.strong.reverseInterlinearCompatibleRuntimeSha256s,
+      snapshot.metadata.reverseInterlinearCompatibleRuntimeSha256s,
   }
 }
 
@@ -567,6 +547,7 @@ const activateStrongBibleSidecar = async (
   const destinationPath = getStrongBibleSidecarPath(versionId)
   const backupPath = `${destinationPath}.backup`
   await closeStrongBibleSidecar(versionId)
+  await restoreOrphanedResourceBackup(destinationPath, backupPath)
   await FileSystem.deleteAsync(backupPath, { idempotent: true })
   const destinationInfo = await FileSystem.getInfoAsync(destinationPath)
   if (destinationInfo.exists) {

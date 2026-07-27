@@ -11,6 +11,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import type { DownloadItemState } from '~state/downloadQueue'
 import { downloadManager } from '~helpers/downloadManager'
+import { useResourcePublicationStatus } from '~helpers/useResourcePublicationStatus'
 
 interface DownloadableItemProps {
   itemId: string
@@ -27,6 +28,8 @@ interface DownloadableItemProps {
   isDownloaded?: boolean
   isDefault?: boolean
   needsUpdate?: boolean
+  resourceUrl: string
+  relatedResources?: { resourceId: string; url: string }[]
   variant?: 'standard' | 'dependency'
 }
 
@@ -54,11 +57,20 @@ const DownloadableItem = ({
   isDownloaded,
   isDefault,
   needsUpdate,
+  resourceUrl,
+  relatedResources,
   variant = 'standard',
 }: DownloadableItemProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const queueState = useDownloadItemStatus(itemId)
+  const publication = useResourcePublicationStatus({
+    resourceId: itemId,
+    url: resourceUrl,
+    isInstalled: Boolean(isDownloaded),
+    relatedResources,
+  })
+  const effectiveNeedsUpdate = needsUpdate || publication.status === 'update-available'
   const isDependency = variant === 'dependency'
 
   // Determine visual state
@@ -67,7 +79,7 @@ const DownloadableItem = ({
     isSelectMode,
     isSelected,
     isDownloaded,
-    needsUpdate,
+    needsUpdate: effectiveNeedsUpdate,
   })
 
   const handlePress = () => {

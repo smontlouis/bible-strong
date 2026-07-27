@@ -5,6 +5,7 @@ import { getDbPath, initLanguageDirs } from '~helpers/databases'
 import { initSQLiteDir } from '~helpers/sqlite'
 import { getLanguage } from '~i18n'
 import type { DatabaseId, ResourceLanguage } from '~helpers/databaseTypes'
+import { restoreOrphanedResourceBackup } from '~helpers/atomicResourceFile'
 
 type FileInfo = {
   exists: boolean
@@ -42,6 +43,7 @@ type ResourceAvailabilityDependencies = {
   isVersionInstalled: (versionId: string) => Promise<boolean>
   getDbPath: (dbId: DatabaseId, lang: ResourceLanguage) => string
   getCurrentResourceLanguage: () => ResourceLanguage
+  restoreBackup?: (path: string) => Promise<void>
 }
 
 const defaultDependencies: ResourceAvailabilityDependencies = {
@@ -51,6 +53,7 @@ const defaultDependencies: ResourceAvailabilityDependencies = {
   isVersionInstalled,
   getDbPath,
   getCurrentResourceLanguage: () => getLanguage(),
+  restoreBackup: path => restoreOrphanedResourceBackup(path, `${path}.backup`),
 }
 
 export const getLocalResourceKey = (resource: LocalResourceRef): string => {
@@ -89,6 +92,7 @@ export const getLocalResourceAvailability = async (
     await dependencies.initLanguageDirs(lang)
 
     const expectedPath = dependencies.getDbPath(resource.databaseId, lang)
+    await dependencies.restoreBackup?.(expectedPath)
     const file = await dependencies.getFileInfo(expectedPath)
 
     if (file.exists) {

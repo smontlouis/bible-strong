@@ -54,7 +54,7 @@ export const BHG_INTERLINEAR_PUBLICATION: InterlinearBiblePublication = {
   segmentCount: 607175,
   identityCount: 868863,
   canonical: {
-    url: cdnUrl('bibles/bible-step.json.zip?v=5d7b283e3e20'),
+    url: cdnUrl('bibles/bible-step.json.zip'),
     entry: 'bible-step.json',
     archiveSha256: '5d7b283e3e20ec748844acfe46877bae7e4e6045d4e4455116f6218a54b18fd6',
     archiveBytes: 1783949,
@@ -67,7 +67,7 @@ export const BHG_INTERLINEAR_PUBLICATION: InterlinearBiblePublication = {
   },
   indexes: {
     fr: {
-      url: cdnUrl('bibles/bible-step-interlinear-fr.sqlite.zip?v=8dece3156a40'),
+      url: cdnUrl('bibles/bible-step-interlinear-fr.sqlite.zip'),
       entry: 'bible-step-interlinear-fr.sqlite',
       archiveSha256: '8dece3156a40240dbe5da3ae1e883c25d1ca4b959ba743ac09f1c4b6e8378c15',
       archiveBytes: 19781886,
@@ -79,7 +79,7 @@ export const BHG_INTERLINEAR_PUBLICATION: InterlinearBiblePublication = {
       textSha256,
     },
     en: {
-      url: cdnUrl('bibles/bible-step-interlinear-en.sqlite.zip?v=280643f41938'),
+      url: cdnUrl('bibles/bible-step-interlinear-en.sqlite.zip'),
       entry: 'bible-step-interlinear-en.sqlite',
       archiveSha256: '280643f4193835535d3ac2167a414172b1a01ade3accced9a7a10bbe90c24076',
       archiveBytes: 20176808,

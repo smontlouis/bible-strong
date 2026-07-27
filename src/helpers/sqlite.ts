@@ -19,6 +19,7 @@ import {
   getSharedSqliteDirPath,
 } from './databaseTypes'
 import { appLogger } from '~helpers/agentObservability'
+import { restoreOrphanedResourceBackup } from './atomicResourceFile'
 
 export type SQLiteDatabase = SQLite.SQLiteDatabase
 
@@ -92,6 +93,7 @@ class LanguageAwareDB {
     this.initPromise = (async () => {
       // Ensure the directory exists
       await initLanguageDirs(this.lang)
+      await restoreOrphanedResourceBackup(this.path, `${this.path}.backup`)
 
       // Check if database file exists and has content BEFORE opening
       // This prevents SQLite from creating empty 0-byte files

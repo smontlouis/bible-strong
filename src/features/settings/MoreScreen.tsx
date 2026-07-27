@@ -5,7 +5,6 @@ import * as Updates from 'expo-updates'
 import React, { memo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, Alert, Platform } from 'react-native'
-import { useSelector } from 'react-redux'
 import { type SheetRef } from '~common/sheet'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import Header from '~common/Header'
@@ -16,7 +15,6 @@ import Box, { SafeAreaBox } from '~common/ui/Box'
 import CardLinkItem from '~common/ui/CardLinkItem'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import IconCircle from '~common/ui/IconCircle'
-import PulsingDot from '~common/ui/PulsingDot'
 import ScrollView from '~common/ui/ScrollView'
 import SectionCard, { SectionCardHeader } from '~common/ui/SectionCard'
 import Text from '~common/ui/Text'
@@ -27,7 +25,6 @@ import { toast } from '~helpers/toast'
 import useLanguage from '~helpers/useLanguage'
 import useLogin from '~helpers/useLogin'
 import DeleteAccountModal from '~features/profile/components/DeleteAccountModal'
-import { RootState } from '~redux/modules/reducer'
 import { changelogModalAtom } from '~state/app'
 import app from '../../../package.json'
 
@@ -72,9 +69,6 @@ export const More = ({ closeMenu }: MoreProps) => {
   const openChangelogModal = useSetAtom(changelogModalAtom)
 
   const lang = useLanguage()
-  const hasUpdate = useSelector((state: RootState) =>
-    Object.values(state.user.needsUpdate).some(v => v)
-  )
   const { t } = useTranslation()
 
   const promptLogout = () => {
@@ -254,7 +248,6 @@ export const More = ({ closeMenu }: MoreProps) => {
           <CardLinkItem route="Downloads">
             <IconCircle bg="rgba(107, 114, 128, 0.1)">
               <Box>
-                {hasUpdate && <PulsingDot style={{ position: 'absolute', top: 0, right: 8 }} />}
                 <FeatherIcon name="download" size={20} color="grey" />
               </Box>
             </IconCircle>

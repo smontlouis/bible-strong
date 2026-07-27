@@ -20,10 +20,9 @@ import { checkBiblesDbHealth, openBiblesDb, resetBiblesDb } from '~helpers/bible
 import { checkDatabasesStorage } from '~helpers/sqlite'
 import { storage } from '~helpers/storage'
 import { toast } from '~helpers/toast'
-import useDownloadBibleResources from '~helpers/useDownloadBibleResources'
 import useInitFireAuth from '~helpers/useInitFireAuth'
 import useLiveUpdates from '~helpers/useLiveUpdates'
-import { getChangelog, getDatabaseUpdate, getVersionUpdate } from '~redux/modules/user'
+import { getChangelog } from '~redux/modules/user'
 import { useTabGroupsSync } from '~state/useTabGroupsSync'
 import { resumePendingAnnotationMigration } from '~helpers/annotationMigrationJournal'
 
@@ -166,8 +165,6 @@ const InitHooks = (_props: InitHooksProps) => {
       })
 
       dispatch(getChangelog())
-      dispatch(getVersionUpdate())
-      dispatch(getDatabaseUpdate())
     })
 
     return () => {
@@ -178,7 +175,6 @@ const InitHooks = (_props: InitHooksProps) => {
 
   useLiveUpdates()
   useTabGroupsSync()
-  useDownloadBibleResources()
   useAppRatingCheck()
 
   return <MigrationModal />

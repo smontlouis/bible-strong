@@ -14,6 +14,8 @@ import { installedVersionsSignalAtom, bibleDataRefreshSignalAtom } from '~state/
 import { storage } from '~helpers/storage'
 import { installResourceDatabaseItem } from '~helpers/resourceDatabaseInstallation'
 import { getDownloadQueueDecision } from '~helpers/downloadQueueScheduling'
+import { resourcePublicationStore } from '~helpers/resourcePublication'
+import { queryClient } from '~helpers/queryClient'
 
 const PERSIST_KEY = 'downloadQueue'
 const MAX_RETRIES = 2
@@ -232,7 +234,7 @@ class DownloadManager {
     try {
       this.updateItemStatus(item.id, 'downloading')
 
-      await installResourceDatabaseItem(item, {
+      const installed = await installResourceDatabaseItem(item, {
         onDownloadProgress: progress => this.updateItemProgress(item.id, progress, 0),
         onInsertProgress: progress => this.updateItemProgress(item.id, 1, progress),
         onStatusInserting: () => this.updateItemStatus(item.id, 'inserting'),
@@ -242,6 +244,12 @@ class DownloadManager {
         isCancelled: () => this.cancelledIds.has(item.id),
       })
 
+      resourcePublicationStore.write(item.id, {
+        ...installed.publication,
+        sourceUrl: installed.sourceUrl,
+        installedAt: Date.now(),
+      })
+      await queryClient.invalidateQueries({ queryKey: ['resource-publication', item.id] })
       this.updateItemStatus(item.id, 'completed')
 
       // Signal to VersionSelectorItem instances

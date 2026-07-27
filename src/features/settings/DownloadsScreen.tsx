@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { Alert, TextInput, TouchableOpacity } from 'react-native'
 import { useTheme } from '@emotion/react'
 import { useTranslation } from 'react-i18next'
-import { useSelector } from 'react-redux'
 import { useAtomValue } from 'jotai/react'
 
 import Header from '~common/Header'
@@ -33,12 +32,13 @@ import {
   createDatabaseDownloadItem,
   createStrongSidecarDownloadPlan,
   createInterlinearSidecarDownloadPlan,
+  createStrongSidecarDownloadItem,
+  createInterlinearSidecarDownloadItem,
   dedupeDownloadItems,
 } from '~helpers/downloadItemFactory'
 import { useDownloadQueue } from '~helpers/useDownloadQueue'
 import { installedVersionsSignalAtom } from '~state/app'
 import useLanguage from '~helpers/useLanguage'
-import { RootState } from '~redux/modules/reducer'
 import { getDefaultStore } from 'jotai/vanilla'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import {
@@ -62,6 +62,8 @@ import {
   getInterlinearSidecarAvailability,
   type InterlinearSidecarAvailability,
 } from '~helpers/interlinearBibleSidecar'
+import { getPericopeUrl, versionHasPericope } from '~helpers/pericopes'
+import { getRedWordsUrl, versionHasRedWords } from '~helpers/redWords'
 
 // ---------------------------------------------------------------------------
 // Unified section item type
@@ -340,7 +342,6 @@ const DownloadsScreen = () => {
   const { t } = useTranslation()
   const theme = useTheme()
   const lang = useLanguage()
-  const needsUpdateMap = useSelector((state: RootState) => state.user.needsUpdate)
   const defaultVersion = getDefaultBibleVersion(lang)
   const { enqueue, clearCompleted } = useDownloadQueue()
 
@@ -577,11 +578,7 @@ const DownloadsScreen = () => {
       { text: t('downloads.later'), style: 'cancel' },
       {
         text: t('downloads.update'),
-        onPress: async () => {
-          await deleteDownloadedItem(deletionPlan)
-          await refreshInstalledStateAfterDeletion()
-          handleDownloadItem(item)
-        },
+        onPress: () => handleDownloadItem(item),
       },
     ])
   }
@@ -731,20 +728,50 @@ const DownloadsScreen = () => {
         }}
         renderItem={({ item }) => {
           const isDownloaded = downloadedSet.has(item.id)
-          // Extract the raw database or version id for needsUpdate check
-          let needsUpdateKey: string | undefined
-          if (item.id.startsWith('bible:')) {
-            needsUpdateKey = item.id.replace('bible:', '')
-          } else if (item.id.startsWith('database:')) {
-            needsUpdateKey = item.id.split(':')[1]
-          }
+          const resourceDownloadItem = item.id.startsWith('bible-strong:')
+            ? createStrongSidecarDownloadItem(
+                item.id.replace('bible-strong:', '') as StrongBibleVersionId
+              )
+            : item.id.startsWith('bible-interlinear:')
+              ? createInterlinearSidecarDownloadItem(item.id.split(':')[2] as ResourceLanguage)
+              : item.id.startsWith('bible:')
+                ? createBibleDownloadItem(item.id.replace('bible:', ''))
+                : createDatabaseDownloadItem(
+                    item.id.split(':')[1] as DatabaseId,
+                    item.id.split(':')[2] as ResourceLanguage
+                  )
 
           const isDefault = item.id === `bible:${defaultVersion}`
           const isNestedDependency = item.parentItemId !== undefined
+          const bibleVersionId = item.id.startsWith('bible:')
+            ? item.id.replace('bible:', '')
+            : undefined
+          const relatedResources = bibleVersionId
+            ? [
+                ...(versionHasPericope(bibleVersionId)
+                  ? [
+                      {
+                        resourceId: `bible-pericope:${bibleVersionId}`,
+                        url: getPericopeUrl(bibleVersionId),
+                      },
+                    ]
+                  : []),
+                ...(versionHasRedWords(bibleVersionId)
+                  ? [
+                      {
+                        resourceId: `bible-red-words:${bibleVersionId}`,
+                        url: getRedWordsUrl(bibleVersionId),
+                      },
+                    ]
+                  : []),
+              ]
+            : undefined
 
           return (
             <DownloadableItem
               itemId={item.id}
+              resourceUrl={resourceDownloadItem.url}
+              relatedResources={relatedResources}
               name={item.name}
               subtitle={item.subtitle}
               estimatedSize={item.estimatedSize}
@@ -757,7 +784,20 @@ const DownloadsScreen = () => {
               onUpdate={() => handleUpdateItem(item)}
               isDownloaded={isDownloaded}
               isDefault={isDefault}
-              needsUpdate={needsUpdateKey ? needsUpdateMap[needsUpdateKey] : false}
+              needsUpdate={
+                item.id.startsWith('bible-strong:')
+                  ? ['incompatible', 'corrupt'].includes(
+                      strongAvailability.get(
+                        item.id.replace('bible-strong:', '') as StrongBibleVersionId
+                      )?.status ?? ''
+                    )
+                  : item.id.startsWith('bible-interlinear:')
+                    ? ['base-incompatible', 'corrupt'].includes(
+                        interlinearAvailability.get(item.id.split(':')[2] as ResourceLanguage)
+                          ?.status ?? ''
+                      )
+                    : false
+              }
               variant={isNestedDependency ? 'dependency' : 'standard'}
             />
           )

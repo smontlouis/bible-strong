@@ -3,10 +3,12 @@ import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { getDbPath } from '~helpers/databases'
-import { getDatabaseUrl } from '~helpers/firebase'
 import { dbManager, initSQLiteDirForLang } from '~helpers/sqlite'
 import { toast } from '~helpers/toast'
 import type { DatabaseId, ResourceLanguage } from '~helpers/databaseTypes'
+import { createDatabaseDownloadItem } from '~helpers/downloadItemFactory'
+import { downloadManager } from '~helpers/downloadManager'
+import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 
 type ResourceDatabaseAccessState = {
   startDownload: boolean
@@ -45,6 +47,8 @@ export const useResourceDatabaseAccess = ({
   const actionsRef = useRef(actions)
   actionsRef.current = actions
   const prevLangRef = useRef<ResourceLanguage>(lang)
+  const itemId = `database:${dbId}:${lang}`
+  const queueState = useDownloadItemStatus(itemId)
 
   useEffect(() => {
     const currentActions = actionsRef.current
@@ -59,6 +63,18 @@ export const useResourceDatabaseAccess = ({
     }
 
     const db = dbManager.getDB(dbId, lang)
+
+    if (queueState?.status === 'downloading' || queueState?.status === 'inserting') {
+      currentActions.setProgress(
+        queueState.status === 'inserting' ? queueState.insertProgress : queueState.downloadProgress
+      )
+      return
+    }
+    if (queueState?.status === 'failed' || queueState?.status === 'cancelled') {
+      currentActions.setProposeDownload(true)
+      currentActions.setStartDownload(false)
+      return
+    }
 
     if (db.get()) {
       currentActions.setLoading(false)
@@ -80,31 +96,8 @@ export const useResourceDatabaseAccess = ({
         }
 
         try {
-          const downloadKey = `${downloadKeyPrefix}_${lang}`
-          const downloadFlags = window as unknown as Window & Record<string, boolean>
-          if (!downloadFlags[downloadKey]) {
-            downloadFlags[downloadKey] = true
-
-            const sqliteDbUri = getDatabaseUrl(dbId, lang)
-
-            console.log(`[${logName}] Downloading ${sqliteDbUri} to ${dbPath}`)
-
-            await initSQLiteDirForLang(lang)
-
-            await FileSystem.createDownloadResumable(
-              sqliteDbUri,
-              dbPath,
-              undefined,
-              ({ totalBytesWritten }) => {
-                currentActions.setProgress(getResourceDatabaseProgress(totalBytesWritten, fileSize))
-              }
-            ).downloadAsync()
-
-            await db.init()
-
-            currentActions.setLoading(false)
-            downloadFlags[downloadKey] = false
-          }
+          await initSQLiteDirForLang(lang)
+          downloadManager.enqueue([createDatabaseDownloadItem(dbId, lang)])
         } catch (error) {
           console.log(`[${logName}] Download error:`, error)
           toast.error(
@@ -121,5 +114,17 @@ export const useResourceDatabaseAccess = ({
     }
 
     loadDBAsync()
-  }, [dbId, downloadKeyPrefix, ensureDirBeforePrompt, fileSize, lang, logName, startDownload, t])
+  }, [
+    dbId,
+    downloadKeyPrefix,
+    ensureDirBeforePrompt,
+    fileSize,
+    lang,
+    logName,
+    queueState?.downloadProgress,
+    queueState?.insertProgress,
+    queueState?.status,
+    startDownload,
+    t,
+  ])
 }

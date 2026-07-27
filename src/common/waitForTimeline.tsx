@@ -8,12 +8,15 @@ import Loading from '~common/Loading'
 import { toast } from '~helpers/toast'
 import bibleMemoize from '~helpers/bibleStupidMemoize'
 import { getDbPath, databases } from '~helpers/databases'
-import { getDatabaseUrl } from '~helpers/firebase'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { hp } from '~helpers/utils'
 import Box from './ui/Box'
 import Progress from './ui/Progress'
+import { createDatabaseDownloadItem } from '~helpers/downloadItemFactory'
+import { downloadManager } from '~helpers/downloadManager'
+import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
+import { restoreOrphanedResourceBackup } from '~helpers/atomicResourceFile'
 
 export const useWaitForDatabase = () => {
   const { t } = useTranslation()
@@ -28,6 +31,7 @@ export const useWaitForDatabase = () => {
   const resourceLang = resourcesLanguage.TIMELINE
 
   const prevLangRef = useRef<ResourceLanguage>(resourceLang)
+  const queueState = useDownloadItemStatus(`database:TIMELINE:${resourceLang}`)
 
   useEffect(() => {
     // Reset state when language changes
@@ -43,10 +47,15 @@ export const useWaitForDatabase = () => {
 
     const loadDBAsync = async () => {
       const path = getDbPath('TIMELINE', resourceLang)
+      await restoreOrphanedResourceBackup(path, `${path}.backup`)
       const file = await FileSystem.getInfoAsync(path)
 
       // Use language-specific cache key
       const cacheKey = `timeline_${resourceLang}`
+      if (queueState?.status === 'completed') {
+        delete bibleMemoize[cacheKey]
+        delete bibleMemoize.timeline
+      }
 
       if (!file.exists) {
         // Waiting for user to accept to download
@@ -56,40 +65,18 @@ export const useWaitForDatabase = () => {
         }
 
         try {
-          const fileUri = getDatabaseUrl('TIMELINE', resourceLang)
-
-          console.log(`[Timeline] Downloading ${fileUri} to ${path}`)
-
-          // Ensure directory exists
-          const dirPath = path.substring(0, path.lastIndexOf('/'))
-          const dirInfo = await FileSystem.getInfoAsync(dirPath)
-          if (!dirInfo.exists) {
-            await FileSystem.makeDirectoryAsync(dirPath, {
-              intermediates: true,
-            })
-          }
-
-          await FileSystem.createDownloadResumable(
-            fileUri,
-            path,
-            undefined,
-            ({ totalBytesWritten }) => {
-              const fileSize = databases(resourceLang).TIMELINE.fileSize
-              const idxProgress = Math.floor((totalBytesWritten / fileSize) * 100) / 100
-              setProgress(idxProgress)
-            }
-          ).downloadAsync()
-
-          if (bibleMemoize[cacheKey]) {
-            setLoading(false)
+          if (queueState?.status === 'downloading' || queueState?.status === 'inserting') {
+            setProgress(
+              queueState.status === 'inserting'
+                ? queueState.insertProgress
+                : queueState.downloadProgress
+            )
             return
           }
-
-          const data = await FileSystem.readAsStringAsync(path || '')
-          bibleMemoize[cacheKey] = JSON.parse(data)
-          // Keep backward compatibility
-          bibleMemoize.timeline = bibleMemoize[cacheKey]
-          setLoading(false)
+          if (queueState?.status === 'failed' || queueState?.status === 'cancelled') {
+            throw new Error(queueState.error ?? 'TIMELINE_DOWNLOAD_FAILED')
+          }
+          downloadManager.enqueue([createDatabaseDownloadItem('TIMELINE', resourceLang)])
         } catch (e) {
           console.log('[Timeline] Download error:', e)
           toast.error(
@@ -113,7 +100,16 @@ export const useWaitForDatabase = () => {
     }
 
     loadDBAsync()
-  }, [dispatch, startDownload, resourceLang, t])
+  }, [
+    dispatch,
+    queueState?.downloadProgress,
+    queueState?.error,
+    queueState?.insertProgress,
+    queueState?.status,
+    resourceLang,
+    startDownload,
+    t,
+  ])
 
   return {
     isLoading,

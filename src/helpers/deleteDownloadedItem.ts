@@ -15,6 +15,7 @@ import { dbManager } from './sqlite'
 import { isStrongCapableBibleVersion, type StrongBibleVersionId } from './strongBiblePublications'
 import { removeStrongBibleSidecar } from './strongBibleSidecar'
 import { removeInterlinearSidecar } from './interlinearBibleSidecar'
+import { resourcePublicationStore } from './resourcePublication'
 
 interface DeleteDownloadedItemOptions {
   bibleMode?: 'remove' | 'replace'
@@ -107,22 +108,26 @@ export const createDownloadedItemDeletionPlan = (
 export const deleteDownloadedItem = async (plan: DownloadedItemDeletionPlan): Promise<void> => {
   if (plan.kind === 'strong-sidecar') {
     await removeStrongBibleSidecar(plan.versionId)
+    resourcePublicationStore.remove(`bible-strong:${plan.versionId}`)
     return
   }
 
   if (plan.kind === 'interlinear-sidecar') {
     await removeInterlinearSidecar(plan.language)
+    resourcePublicationStore.remove(`bible-interlinear:BHG:${plan.language}`)
     return
   }
 
   if (plan.kind === 'bible') {
     if (plan.strongSidecar) {
       await removeStrongBibleSidecar(plan.strongSidecar.versionId)
+      resourcePublicationStore.remove(plan.strongSidecar.itemId)
     }
     if (plan.interlinearSidecars) {
       await Promise.all(
         plan.interlinearSidecars.map(sidecar => removeInterlinearSidecar(sidecar.language))
       )
+      plan.interlinearSidecars.forEach(sidecar => resourcePublicationStore.remove(sidecar.itemId))
     }
 
     const { versionId } = plan
@@ -150,11 +155,13 @@ export const deleteDownloadedItem = async (plan: DownloadedItemDeletionPlan): Pr
     }
 
     await Promise.all([deleteRedWordsFile(versionId), deletePericopeFile(versionId)])
+    resourcePublicationStore.remove(`bible:${versionId}`)
     return
   }
 
   if (plan.kind === 'database') {
     await dbManager.getDB(plan.databaseId, plan.language).delete()
+    resourcePublicationStore.remove(`database:${plan.databaseId}:${plan.language}`)
     return
   }
 

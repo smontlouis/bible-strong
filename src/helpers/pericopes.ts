@@ -2,6 +2,7 @@ import { createBibleResourceHelpers } from './bibleResource'
 
 const helpers = createBibleResourceHelpers({
   label: 'Pericope',
+  resourceIdPrefix: 'bible-pericope',
   getFileName: versionId => `bible-${versionId.toLowerCase()}-pericope.json`,
   getCdnPath: versionId => `bibles/bible-${versionId.toLowerCase()}-pericope.json`,
   versionHasFeature: version => !!version.hasPericope,

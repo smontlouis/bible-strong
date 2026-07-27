@@ -2,7 +2,7 @@ import * as FileSystem from 'expo-file-system/legacy'
 import React from 'react'
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Alert, Linking, TouchableOpacity } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { dbManager } from '~helpers/sqlite'
 
 import { useAtomValue } from 'jotai/react'
@@ -17,8 +17,8 @@ import Text from '~common/ui/Text'
 import { getIfVersionNeedsDownload, isStrongVersion, Version } from '~helpers/bibleVersions'
 import { isVersionInstalled, removeBibleVersion } from '~helpers/biblesDb'
 import { requireBiblePath } from '~helpers/requireBiblePath'
-import { deleteRedWordsFile } from '~helpers/redWords'
-import { deletePericopeFile } from '~helpers/pericopes'
+import { deleteRedWordsFile, getRedWordsUrl, versionHasRedWords } from '~helpers/redWords'
+import { deletePericopeFile, getPericopeUrl, versionHasPericope } from '~helpers/pericopes'
 import useLanguage from '~helpers/useLanguage'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
@@ -29,8 +29,7 @@ import {
   createBibleDownloadItem,
   createStrongSidecarDownloadPlan,
 } from '~helpers/downloadItemFactory'
-import { RootState } from '~redux/modules/reducer'
-import { setDefaultBibleVersion, setVersionUpdated } from '~redux/modules/user'
+import { setDefaultBibleVersion } from '~redux/modules/user'
 import { VersionCode, tabsAtom, BibleTab } from 'src/state/tabs'
 import { store } from '~redux/store'
 import {
@@ -48,6 +47,8 @@ import InterlinearIndexSelectorItem from './InterlinearIndexSelectorItem'
 import InterlinearMark from './InterlinearMark'
 import { removeInterlinearSidecar } from '~helpers/interlinearBibleSidecar'
 import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/downloadQueue'
+import { useResourcePublicationStatus } from '~helpers/useResourcePublicationStatus'
+import { resourcePublicationStore } from '~helpers/resourcePublication'
 
 const getVersionDownloadQueryKey = (
   versionId: string,
@@ -285,7 +286,6 @@ const VersionSelectorItem = ({
     React.useState<boolean>()
   const [isInterlinearIndexExpanded, setInterlinearIndexExpanded] = React.useState(false)
   const queryClient = useQueryClient()
-  const needsUpdate = useSelector((state: RootState) => state.user.needsUpdate[version.id])
   const dispatch = useDispatch()
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
   const installedVersionsSignal = useAtomValue(installedVersionsSignalAtom)
@@ -306,6 +306,31 @@ const VersionSelectorItem = ({
     queryFn: () => getIfVersionNeedsDownload(version.id),
     placeholderData: keepPreviousData,
   })
+  const bibleDownloadItem = createBibleDownloadItem(version.id)
+  const publicationStatus = useResourcePublicationStatus({
+    resourceId: bibleDownloadItem.id,
+    url: bibleDownloadItem.url,
+    isInstalled: versionNeedsDownload === false,
+    relatedResources: [
+      ...(versionHasPericope(version.id)
+        ? [
+            {
+              resourceId: `bible-pericope:${version.id}`,
+              url: getPericopeUrl(version.id),
+            },
+          ]
+        : []),
+      ...(versionHasRedWords(version.id)
+        ? [
+            {
+              resourceId: `bible-red-words:${version.id}`,
+              url: getRedWordsUrl(version.id),
+            },
+          ]
+        : []),
+    ],
+  })
+  const needsUpdate = publicationStatus.status === 'update-available'
   const strongSelectionQuery = useQuery({
     queryKey: [
       'strong-selection-availability',
@@ -417,9 +442,7 @@ const VersionSelectorItem = ({
   }, [strongCollapseKey])
 
   const updateVersion = async () => {
-    await deleteVersion()
     await startDownload()
-    dispatch(setVersionUpdated(version.id))
   }
 
   const deleteVersion = async () => {
@@ -508,6 +531,7 @@ const VersionSelectorItem = ({
     // Trigger BibleViewer instances to reload so tabs that were showing
     // this version updates (e.g. shows the BIBLE_NOT_FOUND error view).
     jotaiStore.set(bibleDataRefreshSignalAtom, (c: number) => c + 1)
+    resourcePublicationStore.remove(`bible:${version.id}`)
   }
 
   const confirmDelete = () => {

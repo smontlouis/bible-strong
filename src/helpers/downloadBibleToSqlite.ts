@@ -10,13 +10,16 @@ import {
   type InsertBibleOptions,
   type LegacyBibleJsonData,
 } from '~helpers/biblesDb'
-import { downloadWithCdnFallback } from '~helpers/downloadWithCdnFallback'
+import {
+  downloadWithCdnFallback,
+  type DownloadWithCdnFallbackResult,
+} from '~helpers/downloadWithCdnFallback'
 import type { StrongBiblePublication } from '~helpers/strongBiblePublications'
 import type { InterlinearPublicationArtifact } from '~helpers/interlinearBiblePublications'
 import { planWordAnnotationRealignment } from '~helpers/wordAnnotationRealignment'
 import { realignWordAnnotationsAction } from '~redux/modules/user'
 import { persistor, store } from '~redux/store'
-import { toNativeFilePath, verifyFileSha256 } from './fileIntegrity'
+import { getFileSha256, toNativeFilePath } from './fileIntegrity'
 import {
   clearAnnotationMigrationJournal,
   persistAnnotationMigrationJournal,
@@ -43,7 +46,7 @@ export async function downloadAndInsertBible(
   versionId: string,
   downloadUrl: string,
   onProgressOrOptions?: FileSystem.DownloadProgressCallback | DownloadAndInsertOptions
-): Promise<void> {
+): Promise<DownloadWithCdnFallbackResult> {
   // Normalize arguments: support both legacy callback and new options object
   const opts: DownloadAndInsertOptions =
     typeof onProgressOrOptions === 'function'
@@ -63,7 +66,7 @@ export async function downloadAndInsertBible(
   try {
     // 1. Download to temp file
     console.log(`[DownloadBible] Downloading ${versionId} from ${downloadUrl}`)
-    await downloadWithCdnFallback({
+    const downloadResult = await downloadWithCdnFallback({
       url: downloadUrl,
       destinationPath: tempPath,
       downloadOptions: { cache: false },
@@ -86,9 +89,15 @@ export async function downloadAndInsertBible(
     const data = await FileSystem.readAsStringAsync(jsonPath)
     const jsonData = JSON.parse(data) as BibleJsonData
     validateCanonicalBiblePublication(versionId, jsonData, opts.canonicalArtifact)
+    const downloadedTextChecksum = await getFileSha256(jsonPath)
+    const revisionPrefix =
+      opts.archiveArtifact?.textRevision.split('-')[0] ?? versionId.toLowerCase()
+    const downloadedTextRevision = `${revisionPrefix}-${downloadedTextChecksum.slice(0, 20)}`
     const targetTextRevision = isCanonicalBibleJsonData(jsonData)
       ? jsonData.textRevision
-      : opts.archiveArtifact?.textRevision
+      : archiveArtifact
+        ? downloadedTextRevision
+        : undefined
     const realignmentPlan = await buildRealignmentPlan(versionId, jsonData, targetTextRevision)
     if (realignmentPlan && Object.keys(realignmentPlan.updates).length > 0) {
       persistAnnotationMigrationJournal({
@@ -103,17 +112,27 @@ export async function downloadAndInsertBible(
     await insertBibleVersion(versionId, jsonData, {
       onInsertProgress: opts.onInsertProgress,
       isCancelled: opts.isCancelled,
-      ...(opts.archiveArtifact
+      ...(isCanonicalBibleJsonData(jsonData)
         ? {
             publicationMetadata: {
-              textRevision: opts.archiveArtifact.textRevision,
-              textSha256: opts.archiveArtifact.textSha256,
-              sourceSha256: opts.archiveArtifact.contentSha256,
-              schemaVersion: opts.archiveArtifact.schemaVersion,
-              verseCount: opts.archiveArtifact.verseCount,
+              textRevision: jsonData.textRevision,
+              textSha256: jsonData.textSha256,
+              sourceSha256: jsonData.sourceSha256,
+              schemaVersion: jsonData.schemaVersion,
+              verseCount: jsonData.verseCount,
             },
           }
-        : {}),
+        : opts.archiveArtifact
+          ? {
+              publicationMetadata: {
+                textRevision: downloadedTextRevision,
+                textSha256: downloadedTextChecksum,
+                sourceSha256: downloadedTextChecksum,
+                schemaVersion: opts.archiveArtifact.schemaVersion,
+                verseCount: countBibleJsonVerses(jsonData),
+              },
+            }
+          : {}),
     })
     if (realignmentPlan && Object.keys(realignmentPlan.updates).length > 0) {
       store.dispatch(realignWordAnnotationsAction(realignmentPlan.updates))
@@ -128,6 +147,7 @@ export async function downloadAndInsertBible(
     }
 
     console.log(`[DownloadBible] ${versionId} ready`)
+    return downloadResult
   } finally {
     // 4. Clean up temp file
     const tempInfo = await FileSystem.getInfoAsync(tempPath)
@@ -141,6 +161,17 @@ export async function downloadAndInsertBible(
   }
 }
 
+const countBibleJsonVerses = (data: BibleJsonData): number => {
+  const verses = isCanonicalBibleJsonData(data) ? data.verses : data
+  let count = 0
+  for (const book of Object.values(verses) as Record<string, unknown>[]) {
+    for (const chapter of Object.values(book) as Record<string, unknown>[]) {
+      count += Object.keys(chapter).length
+    }
+  }
+  return count
+}
+
 const resolveDownloadedBibleJson = async ({
   downloadedPath,
   extractionDirectory,
@@ -152,11 +183,6 @@ const resolveDownloadedBibleJson = async ({
 }): Promise<string> => {
   if (!archiveArtifact) return downloadedPath
 
-  await verifyFileSha256(
-    downloadedPath,
-    archiveArtifact.archiveSha256,
-    'CANONICAL_BIBLE_ARCHIVE_CHECKSUM_MISMATCH'
-  )
   await FileSystem.deleteAsync(extractionDirectory, { idempotent: true })
   await FileSystem.makeDirectoryAsync(extractionDirectory, { intermediates: true })
   await unzip(toNativeFilePath(downloadedPath), toNativeFilePath(extractionDirectory), 'UTF-8')
@@ -165,11 +191,6 @@ const resolveDownloadedBibleJson = async ({
   if (!info.exists) {
     throw new Error(`CANONICAL_BIBLE_ARCHIVE_ENTRY_MISSING:${archiveArtifact.entry}`)
   }
-  await verifyFileSha256(
-    jsonPath,
-    archiveArtifact.contentSha256,
-    'CANONICAL_BIBLE_CONTENT_CHECKSUM_MISMATCH'
-  )
   return jsonPath
 }
 
@@ -185,15 +206,7 @@ const validateCanonicalBiblePublication = (
   if (!isCanonicalBibleJsonData(data)) {
     throw new Error('CANONICAL_BIBLE_INVALID_FORMAT')
   }
-  if (
-    data.applicationVersionId !== versionId ||
-    data.textRevision !== artifact.textRevision ||
-    data.textSha256 !== artifact.textSha256 ||
-    data.schemaVersion !== artifact.schemaVersion ||
-    data.verseCount !== artifact.verseCount ||
-    data.noteCount !== artifact.noteCount ||
-    data.headingCount !== artifact.headingCount
-  ) {
+  if (data.applicationVersionId !== versionId || data.schemaVersion !== artifact.schemaVersion) {
     throw new Error('CANONICAL_BIBLE_METADATA_MISMATCH')
   }
 }

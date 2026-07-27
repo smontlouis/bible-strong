@@ -4,13 +4,14 @@ import { unzip } from 'react-native-zip-archive'
 import { getBibleVersionMetadata } from './biblesDb'
 import { getSharedSqliteDirPath, type ResourceLanguage } from './databaseTypes'
 import { downloadWithCdnFallback } from './downloadWithCdnFallback'
-import { toNativeFilePath, verifyFileSha256 } from './fileIntegrity'
+import { toNativeFilePath } from './fileIntegrity'
 import {
   BHG_INTERLINEAR_PUBLICATION,
   type InterlinearBibleVersionId,
   type InterlinearPublicationArtifact,
 } from './interlinearBiblePublications'
 import { openSQLiteDatabase, type SQLiteDatabase } from './sqlite'
+import { restoreOrphanedResourceBackup } from './atomicResourceFile'
 
 const databases = new Map<ResourceLanguage, SQLiteDatabase>()
 
@@ -63,14 +64,9 @@ export const getInterlinearSidecarAvailability = async (
 ): Promise<InterlinearSidecarAvailability> => {
   const baseMetadata = await getBibleVersionMetadata('BHG')
   if (!baseMetadata) return { status: 'base-missing' }
-  if (
-    baseMetadata.textRevision !== BHG_INTERLINEAR_PUBLICATION.canonical.textRevision ||
-    baseMetadata.textSha256 !== BHG_INTERLINEAR_PUBLICATION.canonical.textSha256
-  ) {
-    return { status: 'base-incompatible' }
-  }
-
-  const info = await FileSystem.getInfoAsync(getInterlinearSidecarPath(locale))
+  const sidecarPath = getInterlinearSidecarPath(locale)
+  await restoreOrphanedResourceBackup(sidecarPath, `${sidecarPath}.backup`)
+  const info = await FileSystem.getInfoAsync(sidecarPath)
   if (!info.exists) return { status: 'missing' }
 
   try {
@@ -81,8 +77,8 @@ export const getInterlinearSidecarAvailability = async (
         String(BHG_INTERLINEAR_PUBLICATION.indexes[locale].schemaVersion) ||
       metadata.datasetId !== BHG_INTERLINEAR_PUBLICATION.datasetId ||
       metadata.locale !== locale ||
-      metadata.textRevision !== BHG_INTERLINEAR_PUBLICATION.canonical.textRevision ||
-      metadata.textSha256 !== BHG_INTERLINEAR_PUBLICATION.canonical.textSha256
+      metadata.textRevision !== baseMetadata.textRevision ||
+      metadata.textSha256 !== baseMetadata.textSha256
     ) {
       return { status: 'incompatible' }
     }
@@ -95,7 +91,7 @@ export const getInterlinearSidecarAvailability = async (
     return {
       status: 'available',
       locale,
-      textRevision: BHG_INTERLINEAR_PUBLICATION.canonical.textRevision,
+      textRevision: metadata.textRevision,
     }
   } catch (error) {
     return { status: 'corrupt', reason: error instanceof Error ? error.message : String(error) }
@@ -110,18 +106,11 @@ export const installInterlinearSidecar = async (
 ) => {
   const baseMetadata = await getBibleVersionMetadata('BHG')
   if (!baseMetadata) throw new Error('INTERLINEAR_BASE_MISSING:BHG')
-  if (
-    baseMetadata.textRevision !== BHG_INTERLINEAR_PUBLICATION.canonical.textRevision ||
-    baseMetadata.textSha256 !== BHG_INTERLINEAR_PUBLICATION.canonical.textSha256
-  ) {
-    throw new Error('INTERLINEAR_BASE_INCOMPATIBLE:BHG')
-  }
-
   const archivePath = `${FileSystem.cacheDirectory}bhg-interlinear-${locale}.zip`
   const extractionDirectory = `${FileSystem.cacheDirectory}bhg-interlinear-${locale}/`
   const extractedPath = `${extractionDirectory}${artifact.entry}`
   try {
-    await downloadWithCdnFallback({
+    const downloadResult = await downloadWithCdnFallback({
       url: artifact.url,
       destinationPath: archivePath,
       downloadOptions: { cache: false },
@@ -131,22 +120,12 @@ export const installInterlinearSidecar = async (
       logTag: 'InterlinearBibleSidecar',
     })
     if (callbacks.isCancelled?.()) throw new Error('CANCELLED')
-    await verifyFileSha256(
-      archivePath,
-      artifact.archiveSha256,
-      'INTERLINEAR_ARCHIVE_CHECKSUM_MISMATCH'
-    )
     callbacks.onStatusInserting?.()
     callbacks.onInsertProgress?.(0)
     await FileSystem.deleteAsync(extractionDirectory, { idempotent: true })
     await FileSystem.makeDirectoryAsync(extractionDirectory, { intermediates: true })
     await unzip(toNativeFilePath(archivePath), toNativeFilePath(extractionDirectory), 'UTF-8')
     callbacks.onInsertProgress?.(0.5)
-    await verifyFileSha256(
-      extractedPath,
-      artifact.contentSha256,
-      'INTERLINEAR_CONTENT_CHECKSUM_MISMATCH'
-    )
     const candidate = await openSQLiteDatabase(
       artifact.entry,
       { useNewConnection: true },
@@ -162,8 +141,8 @@ export const installInterlinearSidecar = async (
         metadata.schemaVersion !== String(artifact.schemaVersion) ||
         metadata.datasetId !== datasetId ||
         metadata.locale !== locale ||
-        metadata.textRevision !== artifact.textRevision ||
-        metadata.textSha256 !== artifact.textSha256
+        metadata.textRevision !== baseMetadata.textRevision ||
+        metadata.textSha256 !== baseMetadata.textSha256
       ) {
         throw new Error('INTERLINEAR_SIDECAR_VALIDATION_FAILED')
       }
@@ -173,6 +152,7 @@ export const installInterlinearSidecar = async (
     callbacks.onInsertProgress?.(0.8)
     await activateInterlinearSidecar(locale, extractedPath)
     callbacks.onInsertProgress?.(1)
+    return downloadResult
   } finally {
     callbacks.onResumable?.(null)
     await FileSystem.deleteAsync(archivePath, { idempotent: true })
@@ -304,6 +284,7 @@ const activateInterlinearSidecar = async (locale: ResourceLanguage, extractedPat
   const backup = `${destination}.backup`
   await FileSystem.makeDirectoryAsync(getInterlinearSidecarDirectory(), { intermediates: true })
   await closeInterlinearSidecar(locale)
+  await restoreOrphanedResourceBackup(destination, backup)
   await FileSystem.deleteAsync(backup, { idempotent: true })
   const current = await FileSystem.getInfoAsync(destination)
   if (current.exists) await FileSystem.moveAsync({ from: destination, to: backup })
