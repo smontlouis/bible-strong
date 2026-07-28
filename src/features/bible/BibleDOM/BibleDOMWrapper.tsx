@@ -79,7 +79,7 @@ import {
   NAVIGATE_TO_BIBLE_VIEW,
   NAVIGATE_TO_PERICOPE,
   NAVIGATE_TO_RELATION_ENDPOINT,
-  NAVIGATE_TO_STRONG,
+  OPEN_STRONG_SELECTION,
   NAVIGATE_TO_TAG,
   NAVIGATE_TO_VERSE_LINKS,
   NAVIGATE_TO_VERSE_STUDY_RELATIONS,
@@ -107,6 +107,7 @@ import {
   getCanonicalBibleNotePayload,
   getNoteNavigationPayload,
   getNumberPayload,
+  getStrongRelationSelectionPayload,
   getStringPayload,
   getStudyRelationsModalTarget,
   getToastPayload,
@@ -121,6 +122,7 @@ import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { resetBiblesDb } from '~helpers/biblesDb'
 import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
+import { getStrongSelectionPayload, type StrongSelection } from '~helpers/strongSelection'
 
 export type { StudyRelationsModalTarget } from './bibleDomBridgeCommands'
 
@@ -208,7 +210,7 @@ export type WebViewProps = {
   pericopeChapter: PericopeChapter
   openNote?: (noteId: string, verseIds?: string[]) => void
   openLink?: (linkId: string) => void
-  setSelectedCode: (selectedCode: SelectedCode) => void
+  setSelectedCode: (selectedCode: StrongSelection) => void
   selectedCode: SelectedCode | null
   comments: { [key: string]: string } | null
   removeParallelVersion?: (index: number) => void
@@ -499,10 +501,9 @@ export const BibleDOMWrapper = ({
         addParallelVersion?.()
         break
       }
-      case NAVIGATE_TO_STRONG: {
-        if (isRecord(action.payload)) {
-          setSelectedCode(action.payload as SelectedCode) // { reference, book }
-        }
+      case OPEN_STRONG_SELECTION: {
+        const selection = getStrongSelectionPayload(action.payload)
+        if (selection) setSelectedCode(selection)
         break
       }
       case TOGGLE_SELECTED_VERSE: {
@@ -533,7 +534,12 @@ export const BibleDOMWrapper = ({
       }
       case NAVIGATE_TO_RELATION_ENDPOINT: {
         if (isRecord(action.payload)) {
-          openRelationEndpoint(action.payload as RelationEndpoint)
+          const strongSelection = getStrongRelationSelectionPayload(action.payload, version)
+          if (strongSelection) {
+            setSelectedCode(strongSelection)
+          } else {
+            openRelationEndpoint(action.payload as RelationEndpoint)
+          }
         }
         break
       }

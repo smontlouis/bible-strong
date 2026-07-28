@@ -1,5 +1,6 @@
 import type { Bookmark, StudyNavigateBibleType, Verse } from '~common/types'
 import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
+import { createStrongSelection, type StrongSelection } from '~helpers/strongSelection'
 
 export type StudyRelationsModalTarget =
   | string
@@ -29,6 +30,22 @@ export const getStringPayload = (payload: unknown): string | undefined =>
 
 export const getNumberPayload = (payload: unknown): number | undefined =>
   typeof payload === 'number' ? payload : undefined
+
+export const getStrongRelationSelectionPayload = (
+  payload: unknown,
+  version: string
+): StrongSelection | undefined => {
+  if (
+    !isRecord(payload) ||
+    payload.type !== 'strong' ||
+    typeof payload.code !== 'string' ||
+    (payload.language !== 'hebrew' && payload.language !== 'greek')
+  ) {
+    return undefined
+  }
+
+  return createStrongSelection([payload.code], payload.language === 'hebrew' ? 1 : 40, version)
+}
 
 export const getToastPayload = (payload: unknown): { message?: string; type?: string } => {
   if (!isRecord(payload)) return {}

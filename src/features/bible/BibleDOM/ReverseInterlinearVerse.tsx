@@ -6,18 +6,19 @@ import {
   resolveDisplayedStrongIdentities,
 } from '~helpers/strongIdentities'
 
-import { NAVIGATE_TO_STRONG } from './dispatch'
 import { useDispatch } from './DispatchProvider'
 import { scaleFontSize } from './scaleFontSize'
+import { dispatchStrongSelection } from './strongSelectionAction'
 
 interface Props {
   verse: Verse
+  version: string
   settings: RootState['user']['bible']['settings']
   selectedCode?: SelectedCode | null
   isParallel: boolean
 }
 
-const ReverseInterlinearVerse = ({ verse, settings, selectedCode, isParallel }: Props) => {
+const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode, isParallel }: Props) => {
   const dispatch = useDispatch()
   const colors = settings.colors[settings.theme]
   const isHebrew = Number(verse.Livre) <= 39
@@ -25,13 +26,8 @@ const ReverseInterlinearVerse = ({ verse, settings, selectedCode, isParallel }: 
   const uniqueLine = (values: string[], separator = ' · ') =>
     [...new Set(values.filter(Boolean))].join(separator)
 
-  const navigateToStrong = (reference?: string) => {
-    const numericReference = getStrongReferenceNumber(reference ?? '')
-    if (!numericReference) return
-    dispatch({
-      type: NAVIGATE_TO_STRONG,
-      payload: { reference: numericReference, book: isHebrew ? 1 : 40 },
-    })
+  const openStrongSelection = (references: string[]) => {
+    dispatchStrongSelection(dispatch, references, isHebrew ? 1 : 40, version)
   }
 
   return (
@@ -41,6 +37,13 @@ const ReverseInterlinearVerse = ({ verse, settings, selectedCode, isParallel }: 
         const identities = segments.flatMap(segment => segment.identities)
         const displayedIdentities = resolveDisplayedStrongIdentities(token.identities, identities)
         const preferredIdentity = displayedIdentities[0] ?? token.identities[0]
+        const selectionReferences = (
+          displayedIdentities.length
+            ? displayedIdentities
+            : preferredIdentity
+              ? [preferredIdentity]
+              : []
+        ).map(identity => identity.code)
         const selectedReference = getStrongReferenceNumber(selectedCode?.reference ?? '')
         const selected =
           selectedReference !== undefined &&
@@ -62,7 +65,7 @@ const ReverseInterlinearVerse = ({ verse, settings, selectedCode, isParallel }: 
               type="button"
               data-ignore-verse-touch
               disabled={!preferredIdentity}
-              onClick={() => navigateToStrong(preferredIdentity?.code)}
+              onClick={() => openStrongSelection(selectionReferences)}
               style={{
                 appearance: 'none',
                 border: 0,

@@ -255,6 +255,7 @@ const getVerseText = ({
     })
     return renderCanonicalPresentation(presentation, {
       book: verse.Livre,
+      version,
       verse: verse.Verset,
       isParallel,
       isDisabled: annotationMode,
@@ -272,6 +273,7 @@ const getVerseText = ({
       : verseToStrong({
           Texte: verse.StrongTexte ?? verse.Texte,
           Livre: verse.Livre,
+          version,
           isParallel,
           isDisabled: annotationMode,
           selectedCode,
@@ -292,6 +294,7 @@ const renderCanonicalPresentation = (
   nodes: CanonicalVersePresentationNode[],
   options: {
     book: string | number
+    version: string
     verse: string | number
     isParallel?: boolean
     isDisabled: boolean
@@ -311,6 +314,7 @@ const renderCanonicalPresentation = (
         <BibleStrongRef
           key={key}
           book={options.book}
+          version={options.version}
           references={node.references}
           isParallel={options.isParallel}
           isDisabled={options.isDisabled}
@@ -788,6 +792,7 @@ const Verse = ({
             isHebreu={isHebreu}
             settings={settings}
             verse={verse}
+            version={version}
             selectedCode={selectedCode}
           />
         ) : (
@@ -796,6 +801,7 @@ const Verse = ({
             isHebreu={isHebreu}
             settings={settings}
             verse={verse}
+            version={version}
             selectedCode={selectedCode}
           />
         )}
@@ -872,6 +878,7 @@ const Verse = ({
                   isParallel={Boolean(isParallel)}
                   settings={settings}
                   verse={verse}
+                  version={version}
                   selectedCode={selectedCode}
                 />
               </React.Suspense>
@@ -883,6 +890,7 @@ const Verse = ({
                   isHebreu={isHebreu}
                   settings={settings}
                   verse={verse}
+                  version={version}
                   selectedCode={selectedCode}
                   mode={interlinearMode}
                 />

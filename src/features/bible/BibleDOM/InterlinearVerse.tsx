@@ -3,11 +3,12 @@ import { styled } from 'goober'
 
 import { scaleFontSize } from './scaleFontSize'
 import { useDispatch } from './DispatchProvider'
-import { NAVIGATE_TO_STRONG } from './dispatch'
 import { RootStyles } from './BibleDOMWrapper'
 import { CloseVerseText, VerseText, Wrapper } from './interlinearStyles'
 import { SelectedCode, Verse } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
+import { getStrongReferenceNumber } from '~helpers/strongIdentities'
+import { dispatchStrongSelection } from './strongSelectionAction'
 
 const Section = styled('div')<RootStyles & { isSelected?: boolean }>(
   ({ settings: { theme, colors } }) => ({
@@ -121,21 +122,26 @@ const ParsingTag = styled('div')<RootStyles & { isSelected?: boolean }>(
 
 interface Props {
   verse: Verse
+  version: string
   settings: RootState['user']['bible']['settings']
   isHebreu: boolean
   secondaryVerse?: Verse | null
   selectedCode?: SelectedCode | null
 }
 
-const InterlinearVerse = ({ verse, settings, isHebreu, secondaryVerse, selectedCode }: Props) => {
+const InterlinearVerse = ({
+  verse,
+  version,
+  settings,
+  isHebreu,
+  secondaryVerse,
+  selectedCode,
+}: Props) => {
   const dispatch = useDispatch()
   const [showSecondaryVerse, setShowSecondaryVerse] = useState(false)
 
-  const navigateToStrong = (reference: string, isHebreu: boolean) => {
-    dispatch({
-      type: NAVIGATE_TO_STRONG,
-      payload: { reference, book: isHebreu ? 1 : 40 },
-    })
+  const openStrongSelection = (reference: string, isHebreu: boolean) => {
+    dispatchStrongSelection(dispatch, [reference], isHebreu ? 1 : 40, version)
   }
 
   const sections = verse.Texte.split('@')
@@ -150,7 +156,7 @@ const InterlinearVerse = ({ verse, settings, isHebreu, secondaryVerse, selectedC
       <NumberText settings={settings}>{verse.Verset} </NumberText>
       {sections.map((section, i) => {
         const [code, hebreu, mot, parsingTag, phonetique] = section.split('#')
-        const isSelected = selectedCode?.reference?.toString() === code
+        const isSelected = selectedCode?.reference === getStrongReferenceNumber(code)
 
         return (
           <div key={i} style={{ position: 'relative', display: 'inline-block' }}>
@@ -161,7 +167,7 @@ const InterlinearVerse = ({ verse, settings, isHebreu, secondaryVerse, selectedC
               {phonetique && <Phonetique settings={settings}>{phonetique}</Phonetique>}
               {parsingTag && <ParsingTag settings={settings}>{parsingTag}</ParsingTag>}
             </AbsoluteSection>
-            <Section onClick={() => navigateToStrong(code, isHebreu)} settings={settings}>
+            <Section onClick={() => openStrongSelection(code, isHebreu)} settings={settings}>
               <Hebreu isSelected={isSelected} settings={settings}>
                 {hebreu}
               </Hebreu>

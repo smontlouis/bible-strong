@@ -2,6 +2,7 @@ import {
   getCanonicalBibleNotePayload,
   getNoteNavigationPayload,
   getNumberPayload,
+  getStrongRelationSelectionPayload,
   getStringPayload,
   getStudyRelationsModalTarget,
   getToastPayload,
@@ -14,6 +15,23 @@ describe('bibleDomBridgeCommands', () => {
     expect(getStringPayload({ value: 'note-1' })).toBeUndefined()
     expect(getNumberPayload(2)).toBe(2)
     expect(getNumberPayload('2')).toBeUndefined()
+  })
+
+  it('turns Strong relation endpoints into viewer Strong selections', () => {
+    expect(
+      getStrongRelationSelectionPayload({ type: 'strong', language: 'hebrew', code: '3068' }, 'DBY')
+    ).toEqual({
+      book: 1,
+      reference: '3068',
+      references: ['H3068'],
+      version: 'DBY',
+    })
+    expect(
+      getStrongRelationSelectionPayload(
+        { type: 'strong', language: 'unknown', code: '3068' },
+        'DBY'
+      )
+    ).toBeUndefined()
   })
 
   it('parses toast payloads from object messages only', () => {

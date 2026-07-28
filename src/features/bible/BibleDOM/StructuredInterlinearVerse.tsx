@@ -1,4 +1,3 @@
-import { NAVIGATE_TO_STRONG } from './dispatch'
 import { useDispatch } from './DispatchProvider'
 import { scaleFontSize } from './scaleFontSize'
 import type { SelectedCode, Verse } from '~common/types'
@@ -6,27 +5,30 @@ import type { RootState } from '~redux/modules/reducer'
 import { buildInterlinearVerseLayout } from '~helpers/interlinearVerseLayout'
 import { normalizeInterlinearMode, type InterlinearMode } from '~helpers/interlinearDisplayMode'
 import { getDisplayedStrongIdentities, getStrongReferenceNumber } from '~helpers/strongIdentities'
+import { dispatchStrongSelection } from './strongSelectionAction'
 
 interface Props {
   verse: Verse
+  version: string
   settings: RootState['user']['bible']['settings']
   isHebreu: boolean
   selectedCode?: SelectedCode | null
   mode?: InterlinearMode
 }
 
-const StructuredInterlinearVerse = ({ verse, settings, isHebreu, selectedCode, mode }: Props) => {
+const StructuredInterlinearVerse = ({
+  verse,
+  version,
+  settings,
+  isHebreu,
+  selectedCode,
+  mode,
+}: Props) => {
   const dispatch = useDispatch()
   const colors = settings.colors[settings.theme]
   const tokens = verse.InterlinearTokens ?? []
-  const navigateToStrong = (reference?: string) => {
-    if (!reference) return
-    const numericReference = getStrongReferenceNumber(reference)
-    if (!numericReference) return
-    dispatch({
-      type: NAVIGATE_TO_STRONG,
-      payload: { reference: numericReference, book: isHebreu ? 1 : 40 },
-    })
+  const openStrongSelection = (references: string[]) => {
+    dispatchStrongSelection(dispatch, references, isHebreu ? 1 : 40, version)
   }
   const layout = buildInterlinearVerseLayout(verse.Texte, tokens)
   const displayMode = normalizeInterlinearMode(mode)
@@ -38,6 +40,13 @@ const StructuredInterlinearVerse = ({ verse, settings, isHebreu, selectedCode, m
         const identities = token.segments.flatMap(segment => segment.identities)
         const displayedIdentities = getDisplayedStrongIdentities(identities)
         const preferredIdentity = displayedIdentities[0] ?? identities[0]
+        const selectionReferences = (
+          displayedIdentities.length
+            ? displayedIdentities
+            : preferredIdentity
+              ? [preferredIdentity]
+              : []
+        ).map(identity => identity.code)
         const selectedReference = getStrongReferenceNumber(selectedCode?.reference ?? '')
         const selected =
           selectedReference !== undefined &&
@@ -53,7 +62,7 @@ const StructuredInterlinearVerse = ({ verse, settings, isHebreu, selectedCode, m
                 type="button"
                 data-ignore-verse-touch
                 disabled={!preferredIdentity}
-                onClick={() => navigateToStrong(preferredIdentity?.code)}
+                onClick={() => openStrongSelection(selectionReferences)}
                 style={{
                   appearance: 'none',
                   border: 0,
@@ -93,7 +102,7 @@ const StructuredInterlinearVerse = ({ verse, settings, isHebreu, selectedCode, m
                 type="button"
                 data-ignore-verse-touch
                 disabled={!preferredIdentity}
-                onClick={() => navigateToStrong(preferredIdentity?.code)}
+                onClick={() => openStrongSelection(selectionReferences)}
                 style={{
                   appearance: 'none',
                   border: 0,
@@ -120,7 +129,7 @@ const StructuredInterlinearVerse = ({ verse, settings, isHebreu, selectedCode, m
               type="button"
               data-ignore-verse-touch
               disabled={!preferredIdentity}
-              onClick={() => navigateToStrong(preferredIdentity?.code)}
+              onClick={() => openStrongSelection(selectionReferences)}
               style={{
                 appearance: 'none',
                 border: 0,

@@ -1,6 +1,5 @@
 import type React from 'react'
 import { styled } from 'goober'
-import { NAVIGATE_TO_STRONG } from './dispatch'
 import { RootStyles } from './BibleDOMWrapper'
 import { useDispatch } from './DispatchProvider'
 import { SelectedCode, Verse } from '~common/types'
@@ -10,6 +9,7 @@ import { isDarkTheme, noSelect } from './utils'
 import { getDisabledStyles } from './disabledStyles'
 import { scaleLineHeight } from './scaleLineHeight'
 import { getStrongReferenceNumber } from '~helpers/strongIdentities'
+import { dispatchStrongSelection } from './strongSelectionAction'
 
 const StyledReference = styled('span')<
   RootStyles & { isSelected: boolean; isParallel?: boolean; isDisabled?: boolean }
@@ -46,6 +46,7 @@ const StyledReference = styled('span')<
 
 export const BibleStrongRef = ({
   book,
+  version,
   references,
   isParallel,
   isDisabled,
@@ -53,6 +54,7 @@ export const BibleStrongRef = ({
   settings,
 }: {
   book: string | number
+  version: string
   references: string[]
   isParallel?: boolean
   isDisabled?: boolean
@@ -64,23 +66,18 @@ export const BibleStrongRef = ({
     const numericReference = getStrongReferenceNumber(reference)
     return numericReference ? [numericReference] : []
   })
-  const numericReference = numericReferences[0]
   const isSelected =
     numericReferences.length > 0 &&
     numericReferences.includes(getStrongReferenceNumber(selectedCode?.reference ?? '') ?? '')
 
-  const navigateToStrong = (event: React.MouseEvent<HTMLSpanElement>) => {
+  const openStrongSelection = (event: React.MouseEvent<HTMLSpanElement>) => {
     event.stopPropagation()
-    if (!numericReference) return
-    dispatch({
-      type: NAVIGATE_TO_STRONG,
-      payload: { reference: numericReference, book },
-    })
+    dispatchStrongSelection(dispatch, references, book, version)
   }
 
   return (
     <StyledReference
-      onClick={navigateToStrong}
+      onClick={openStrongSelection}
       data-ignore-verse-touch
       isSelected={isSelected}
       isParallel={isParallel}
@@ -95,11 +92,13 @@ export const BibleStrongRef = ({
 const verseToStrong = ({
   Texte,
   Livre,
+  version,
   isParallel,
   isDisabled,
   selectedCode,
   settings,
 }: Pick<Verse, 'Texte' | 'Livre'> & {
+  version: string
   isParallel?: boolean
   isDisabled?: boolean
   selectedCode?: SelectedCode | null
@@ -110,6 +109,7 @@ const verseToStrong = ({
       return (
         <BibleStrongRef
           book={Livre}
+          version={version}
           references={[item]}
           key={i}
           isParallel={isParallel}

@@ -31,7 +31,7 @@ import generateUUID from '~helpers/generateUUID'
 import getVersesContent from '~helpers/getVersesContent'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { localQueryOptions } from '~helpers/queryOptions'
-import { resolveStrongNavigationVersionId } from '~helpers/strongBiblePublications'
+import type { StrongSelection } from '~helpers/strongSelection'
 import useLanguage from '~helpers/useLanguage'
 import { useSheet } from '~helpers/useSheet'
 import { toast } from '~helpers/toast'
@@ -102,6 +102,7 @@ import { getBibleDOMDestination } from './SharedBibleDOM'
 import SnapshotPlaceholder from './SnapshotPlaceholder'
 import VerseTagsModal from './VerseTagsModal'
 import CanonicalBibleNoteSheet from './CanonicalBibleNoteSheet'
+import StrongSelectionSheet from './StrongSelectionSheet'
 
 const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: number) => {
   if (pericope && pericope[book] && pericope[book][chapter]) {
@@ -170,6 +171,8 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   const [verseTagsModalKey, setVerseTagsModalKey] = useState<string | null>(null)
   const canonicalBibleNoteModal = useSheet()
   const [canonicalBibleNote, setCanonicalBibleNote] = useState<CanonicalBibleNote | null>(null)
+  const strongSelectionModal = useSheet()
+  const [strongSelectionData, setStrongSelectionData] = useState<StrongSelection | null>(null)
 
   const [createRelationSourceEndpoint, setCreateRelationSourceEndpoint] =
     useState<RelationEndpoint | null>(null)
@@ -720,22 +723,16 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     setTimeout(() => bookmarkModalRef.current?.present(), 0)
   }, [])
 
-  const setSelectedCode = useCallback(
-    (code: SelectedCode | null) => {
-      setSelectedCodeState(code)
-      if (code) {
-        pushRouteOnce({
-          pathname: '/strong',
-          params: {
-            book: String(code.book),
-            reference: code.reference,
-            strongBibleVersionId: resolveStrongNavigationVersionId(version),
-          },
-        })
-      }
-    },
-    [pushRouteOnce, version]
-  )
+  const setSelectedCode = (selection: StrongSelection) => {
+    setSelectedCodeState(selection)
+    setStrongSelectionData(selection)
+    strongSelectionModal.open()
+  }
+
+  const closeStrongSelection = () => {
+    setSelectedCodeState(null)
+    setStrongSelectionData(null)
+  }
 
   // Cross-version annotations modal handlers
   const handleOpenCrossVersionModal = useCallback(
@@ -1107,6 +1104,12 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
         sheetRef={canonicalBibleNoteModal.getRef()}
         note={canonicalBibleNote}
         onReferencePress={handleCanonicalBibleReferencePress}
+      />
+      <StrongSelectionSheet
+        sheetRef={strongSelectionModal.getRef()}
+        version={strongSelectionData?.version}
+        references={strongSelectionData?.references ?? []}
+        onClose={closeStrongSelection}
       />
     </Box>
   )
