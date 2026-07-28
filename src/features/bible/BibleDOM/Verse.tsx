@@ -318,6 +318,7 @@ const renderCanonicalPresentation = (
           book={options.book}
           version={options.version}
           identities={node.identities}
+          morphologies={node.morphologies}
           word={node.word}
           chapter={options.chapter}
           verse={options.verse}

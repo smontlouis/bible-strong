@@ -13,6 +13,7 @@ import {
   dispatchStrongSelection,
   getStrongSelectionWordFromTextSegment,
 } from './strongSelectionAction'
+import type { StrongSelectionMorphology } from '~helpers/strongSelection'
 
 const StyledReference = styled('span')<
   RootStyles & { isSelected: boolean; isParallel?: boolean; isDisabled?: boolean }
@@ -51,6 +52,7 @@ export const BibleStrongRef = ({
   book,
   version,
   identities,
+  morphologies,
   word,
   chapter,
   verse,
@@ -62,6 +64,7 @@ export const BibleStrongRef = ({
   book: string | number
   version: string
   identities: StrongIdentity[]
+  morphologies?: StrongSelectionMorphology[]
   word?: string
   chapter?: string | number
   verse?: string | number
@@ -81,7 +84,12 @@ export const BibleStrongRef = ({
 
   const openStrongSelection = (event: React.MouseEvent<HTMLSpanElement>) => {
     event.stopPropagation()
-    dispatchStrongSelection(dispatch, identities, book, version, { word, chapter, verse })
+    dispatchStrongSelection(dispatch, identities, book, version, {
+      word,
+      chapter,
+      verse,
+      morphologies,
+    })
   }
 
   return (

@@ -278,7 +278,7 @@ describe('BibleContentAccess', () => {
               length: 4,
               transliteration: '',
               lemma: '',
-              morphology: '',
+              morphology: 'HR',
               gloss: '',
               identities: [{ kind: 'strong', code: 'H0413' }],
             },
@@ -296,7 +296,7 @@ describe('BibleContentAccess', () => {
               length: 4,
               transliteration: '',
               lemma: '',
-              morphology: '',
+              morphology: 'HNp',
               gloss: '',
               identities: [
                 { kind: 'strong', code: 'H3068' },
@@ -323,6 +323,16 @@ describe('BibleContentAccess', () => {
                 identities: [
                   { kind: 'dstrong', code: 'H3068G' },
                   { kind: 'strong', code: 'H0413' },
+                ],
+                morphologies: [
+                  {
+                    identity: { kind: 'dstrong', code: 'H3068G' },
+                    codes: ['HNp'],
+                  },
+                  {
+                    identity: { kind: 'strong', code: 'H0413' },
+                    codes: ['HR'],
+                  },
                 ],
               }),
             ],

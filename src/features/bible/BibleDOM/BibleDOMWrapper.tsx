@@ -100,6 +100,7 @@ import {
   SWIPE_RIGHT,
   SWIPE_UP,
   TOGGLE_SELECTED_VERSE,
+  isPersonalBibleDataAction,
 } from './dispatch'
 import {
   getBookmarkPayload,
@@ -181,6 +182,7 @@ export type WebViewProps = {
   book: Book
   chapter: number
   isLoading: boolean
+  personalBibleDataEnabled?: boolean
   addSelectedVerse: (id: string) => void
   removeSelectedVerse: (id: string) => void
   setSelectedVerse: (selectedVerse: number) => void
@@ -365,6 +367,7 @@ export const BibleDOMWrapper = ({
   isFormSheet,
   redWords,
   isLoading,
+  personalBibleDataEnabled = true,
   error,
 }: WebViewProps) => {
   const { openVersionSelector } = useBookAndVersionSelector()
@@ -428,6 +431,8 @@ export const BibleDOMWrapper = ({
   const dispatch: Dispatch = async action => {
     appLogger.debug('webview', 'bible_dom.dispatch', { actionType: action.type })
     if (__DEV__) console.log('[Bible] DISPATCH:', action.type)
+    if (!personalBibleDataEnabled && isPersonalBibleDataAction(action.type)) return
+
     switch (action.type) {
       case NAVIGATE_TO_BIBLE_VERSE_DETAIL: {
         if (!action.params) break

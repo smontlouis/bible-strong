@@ -38,6 +38,19 @@ tab state to KJV with Strong visible. These alias migrations do not require the 
 when it is missing, the canonical LSG or KJV text remains readable and the Strong control can offer
 the corresponding index for download.
 
+Reverse-interlinear display is a lexical reading surface rather than an annotation surface. While
+it is active, keep personal Bible data out of the viewer: selected verses, highlights, word
+annotations, notes, tags, bookmarks, links and study relations are neither rendered nor editable.
+Clear an active verse selection or annotation session when entering the mode, and ignore personal
+data actions that were already in flight. Normal text and Strong-number display retain the standard
+personal-data behavior. Publisher content and editorial comments are not personal Bible data and
+remain available.
+
+When a compatible BHG interlinear index supplies the STEP tokens aligned to a Strong span, Strong
+display forwards their contextual morphology into the Strong selection sheet together with the
+resolved identities. Strong display remains usable without that optional alignment; in that case
+the sheet simply has no contextual morphology to show.
+
 In the verse-resource modal, resolve Strong navigation from the compatible sidecar of the currently
 open Bible, then from the first installed sidecar in the LSG, DBY, DBR priority order. Expose the
 resolved Bible source and let the user override it for the current Bible tab. A missing manual

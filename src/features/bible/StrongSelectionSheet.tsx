@@ -32,6 +32,9 @@ import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
+import { createStrongSelectionPreviewCard } from './strongSelectionPreviewCard'
+import { getStrongSelectionPreviewIndex } from './strongSelectionPreviewCarousel'
+import { getStrongSelectionPreviewHtmlStyles } from './strongSelectionPreviewHtmlStyles'
 
 type StrongSelectionSheetProps = {
   sheetRef: React.RefObject<SheetRef | null>
@@ -42,6 +45,7 @@ type StrongSelectionSheetProps = {
   word?: string
   identities: StrongIdentity[]
   morphologies: StrongSelectionMorphology[]
+  onDismissStart: () => void
   onClose: () => void
 }
 
@@ -54,6 +58,7 @@ const StrongSelectionSheet = ({
   word,
   identities,
   morphologies,
+  onDismissStart,
   onClose,
 }: StrongSelectionSheetProps) => {
   const { t } = useTranslation()
@@ -62,6 +67,7 @@ const StrongSelectionSheet = ({
   const pushRouteOnce = usePushRouteOnce()
   const resources = useResourceAccess()
   const previewPagerRef = useRef<ScrollView>(null)
+  const programmaticPreviewScrollRef = useRef(false)
   const [selectedPreviewIndex, setSelectedPreviewIndex] = useState(0)
   const resourceLanguage = useAtomValue(resourcesLanguageAtom).STRONG
   const selectionKey = [
@@ -140,6 +146,7 @@ const StrongSelectionSheet = ({
   }
 
   const selectPreview = (index: number) => {
+    programmaticPreviewScrollRef.current = true
     setSelectedPreviewIndex(index)
     previewPagerRef.current?.scrollTo({
       x: carouselStep * index,
@@ -148,8 +155,23 @@ const StrongSelectionSheet = ({
   }
 
   const syncSelectedPreview = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const index = Math.round(event.nativeEvent.contentOffset.x / carouselStep)
+    const index = getStrongSelectionPreviewIndex(
+      event.nativeEvent.contentOffset.x,
+      carouselStep,
+      previewQuery.data?.length ?? 0
+    )
     setSelectedPreviewIndex(index)
+  }
+
+  const syncSelectedPreviewDuringSwipe = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (!programmaticPreviewScrollRef.current) {
+      syncSelectedPreview(event)
+    }
+  }
+
+  const finishPreviewScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    programmaticPreviewScrollRef.current = false
+    syncSelectedPreview(event)
   }
 
   const sheetTitle = word
@@ -163,6 +185,7 @@ const StrongSelectionSheet = ({
       backdrop={false}
       ref={sheetRef}
       header={<SheetHeader title={sheetTitle} />}
+      onDismissStart={onDismissStart}
       onDismiss={onClose}
     >
       <SheetView pt={12} pb={24} gap={14}>
@@ -284,7 +307,11 @@ const StrongSelectionSheet = ({
               snapToInterval={carouselStep}
               snapToAlignment="start"
               decelerationRate="fast"
-              onMomentumScrollEnd={syncSelectedPreview}
+              onScrollBeginDrag={() => {
+                programmaticPreviewScrollRef.current = false
+              }}
+              onScroll={syncSelectedPreviewDuringSwipe}
+              onMomentumScrollEnd={finishPreviewScroll}
               scrollEventThrottle={16}
               contentContainerStyle={{
                 gap: carouselGap,
@@ -300,6 +327,7 @@ const StrongSelectionSheet = ({
                   morphologies,
                   preview.selectedIdentity
                 )
+                const card = createStrongSelectionPreviewCard(preview, morphologyCodes)
 
                 return (
                   <Box
@@ -319,36 +347,22 @@ const StrongSelectionSheet = ({
                         gap={9}
                       >
                         <HStack justifyContent="space-between" alignItems="flex-start" gap={12}>
-                          <VStack flex gap={5}>
+                          <VStack flex gap={4}>
+                            <Text bold fontSize={16}>
+                              {card.gloss}
+                            </Text>
                             <HStack alignItems="baseline" gap={8} wrap>
-                              <Text bold fontSize={18}>
-                                {preview.gloss}
-                              </Text>
-                              <Text color="tertiary" fontSize={12}>
-                                {preview.stepCode}
-                              </Text>
-                            </HStack>
-                            <HStack alignItems="baseline" gap={8} wrap>
-                              <Text fontSize={19}>{preview.original}</Text>
-                              {!!preview.transliteration && (
-                                <Text color="tertiary" fontSize={13}>
-                                  {preview.transliteration}
+                              <Text fontSize={17}>{card.original}</Text>
+                              {!!card.transliteration && (
+                                <Text color="tertiary" fontSize={12}>
+                                  {card.transliteration}
                                 </Text>
                               )}
                             </HStack>
-                            {!!morphologyCodes.length && (
-                              <HStack alignItems="baseline" gap={6} wrap>
-                                <Text color="tertiary" fontSize={11}>
-                                  {t('Morphologie')}
-                                </Text>
-                                <Text
-                                  color="tertiary"
-                                  fontSize={12}
-                                  style={{ fontFamily: 'Arial' }}
-                                >
-                                  {morphologyCodes.join(' · ')}
-                                </Text>
-                              </HStack>
+                            {!!card.morphology && (
+                              <Text color="tertiary" fontSize={11} style={{ fontFamily: 'Arial' }}>
+                                {card.morphology}
+                              </Text>
                             )}
                           </VStack>
                           <FeatherIcon name="chevron-right" size={18} color="tertiary" />
@@ -369,36 +383,7 @@ const StrongSelectionSheet = ({
                           >
                             <StylizedHTMLView
                               value={descriptionHtml}
-                              htmlStyle={{
-                                p: {
-                                  color: theme.colors.tertiary,
-                                  fontSize: 13,
-                                  lineHeight: 18,
-                                  marginTop: 0,
-                                  marginBottom: 5,
-                                },
-                                li: {
-                                  color: theme.colors.tertiary,
-                                  fontSize: 13,
-                                  lineHeight: 18,
-                                },
-                                ol: {
-                                  color: theme.colors.tertiary,
-                                  fontSize: 13,
-                                  lineHeight: 18,
-                                },
-                                ul: {
-                                  color: theme.colors.tertiary,
-                                  fontSize: 13,
-                                  lineHeight: 18,
-                                },
-                                strong: {
-                                  color: theme.colors.tertiary,
-                                  fontSize: 13,
-                                  lineHeight: 18,
-                                  fontWeight: 'bold',
-                                },
-                              }}
+                              htmlStyle={getStrongSelectionPreviewHtmlStyles(theme)}
                             />
                           </MaskedView>
                         ) : (

@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react-native'
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react'
 import { Alert, Platform, type LayoutChangeEvent } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import Box from '~common/ui/Box'
@@ -102,6 +102,10 @@ import SnapshotPlaceholder from './SnapshotPlaceholder'
 import VerseTagsModal from './VerseTagsModal'
 import CanonicalBibleNoteSheet from './CanonicalBibleNoteSheet'
 import StrongSelectionSheet from './StrongSelectionSheet'
+import {
+  getBibleViewerPersonalData,
+  shouldHideBibleViewerPersonalData,
+} from './bibleViewerPersonalData'
 
 const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: number) => {
   if (pericope && pericope[book] && pericope[book][chapter]) {
@@ -219,6 +223,11 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
       selectedVerses,
     },
   } = bible
+  const hidePersonalBibleData = shouldHideBibleViewerPersonalData({
+    version,
+    strongMode,
+    interlinearMode,
+  })
   const contextDisplayMode = getBibleContextDisplayMode(bible.data)
   const isContextFocused = contextDisplayMode === 'focused'
   const selectedVersesReference = verseToReference(selectedVerses)
@@ -358,16 +367,18 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
 
   // Handler for entering annotation mode (from SelectedVersesModal)
   const handleEnterAnnotationMode = useCallback(() => {
+    if (hidePersonalBibleData) return
     // Clear selected verses and close the modal
     actions.clearSelectedVerses()
     versesModal.close()
 
     annotationMode.enterMode(version)
     annotationToolbar.open()
-  }, [actions, versesModal, annotationMode, annotationToolbar, version])
+  }, [actions, versesModal, annotationMode, annotationToolbar, version, hidePersonalBibleData])
 
   // Handler for entering annotation mode (from double-tap on verse)
   const handleEnterAnnotationModeFromDoubleTap = () => {
+    if (hidePersonalBibleData) return
     annotationMode.enterMode(version)
     annotationToolbar.open()
   }
@@ -378,6 +389,21 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     annotationMode.exitMode()
     annotationToolbar.close()
   }, [annotationMode, annotationToolbar])
+
+  const clearHiddenPersonalBibleState = useEffectEvent(() => {
+    if (hasSelectedVerses(selectedVerses)) {
+      actions.clearSelectedVerses()
+    }
+    versesModal.close()
+    if (annotationMode.enabled) {
+      annotationMode.exitMode()
+      annotationToolbar.close()
+    }
+  })
+
+  useEffect(() => {
+    if (hidePersonalBibleData) clearHiddenPersonalBibleState()
+  }, [hidePersonalBibleData])
 
   // Handler for opening annotation note modal
   const handleAnnotationNotePress = useCallback(() => {
@@ -718,6 +744,10 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     setStrongSelectionData(null)
   }
 
+  const startClosingStrongSelection = () => {
+    setSelectedCodeState(null)
+  }
+
   // Cross-version annotations modal handlers
   const handleOpenCrossVersionModal = useCallback(
     (verseKey: string, versions: CrossVersionAnnotation[]) => {
@@ -793,25 +823,9 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
 
   // console.log('[Bible] BibleViewer', version, book.Numero, chapter, verse)
 
-  // Build the props object for BibleDOMWrapper (same props as before, just extracted)
-  const domProps = {
-    tabId: bible.id,
-    bibleAtom,
-    book,
-    chapter,
-    isLoading,
-    addSelectedVerse: actions.addSelectedVerse,
-    removeSelectedVerse: actions.removeSelectedVerse,
-    setSelectedVerse: actions.setSelectedVerse,
-    version,
-    interlinearMode,
-    contextDisplayMode,
+  // Apply the mode policy before personal Bible data crosses the DOM bridge.
+  const viewerPersonalData = getBibleViewerPersonalData(hidePersonalBibleData, {
     isSelectionMode,
-    verses,
-    parallelVerses,
-    parallelColumnWidth,
-    parallelDisplayMode,
-    focusVerses,
     selectedVerses,
     highlightedVerses: highlightedVersesByChapter,
     notedVerses: notesByChapter,
@@ -821,11 +835,45 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     allLinks,
     studyRelations: studyRelationsByChapter,
     wordAnnotations: wordAnnotationsByChapter,
+    annotationMode: annotationMode.enabled,
+    wordAnnotationsInOtherVersions,
+    taggedVersesInChapter,
+    versesWithNonHighlightTags,
+  })
+
+  const domProps = {
+    tabId: bible.id,
+    bibleAtom,
+    book,
+    chapter,
+    isLoading,
+    personalBibleDataEnabled: !hidePersonalBibleData,
+    addSelectedVerse: hidePersonalBibleData ? () => undefined : actions.addSelectedVerse,
+    removeSelectedVerse: hidePersonalBibleData ? () => undefined : actions.removeSelectedVerse,
+    setSelectedVerse: actions.setSelectedVerse,
+    version,
+    interlinearMode,
+    contextDisplayMode,
+    isSelectionMode: viewerPersonalData.isSelectionMode,
+    verses,
+    parallelVerses,
+    parallelColumnWidth,
+    parallelDisplayMode,
+    focusVerses,
+    selectedVerses: viewerPersonalData.selectedVerses,
+    highlightedVerses: viewerPersonalData.highlightedVerses,
+    notedVerses: viewerPersonalData.notedVerses,
+    allNotes: viewerPersonalData.allNotes,
+    bookmarkedVerses: viewerPersonalData.bookmarkedVerses,
+    linkedVerses: viewerPersonalData.linkedVerses,
+    allLinks: viewerPersonalData.allLinks,
+    studyRelations: viewerPersonalData.studyRelations,
+    wordAnnotations: viewerPersonalData.wordAnnotations,
     settings,
     verseToScroll: verse,
     pericopeChapter: getPericopeChapter(pericope, displayedBook, displayedChapter),
-    openNote: openBibleNote,
-    openLink,
+    openNote: hidePersonalBibleData ? undefined : openBibleNote,
+    openLink: hidePersonalBibleData ? undefined : openLink,
     setSelectedCode,
     selectedCode,
     comments,
@@ -833,35 +881,39 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     addParallelVersion: actions.addParallelVersion,
     goToPrevChapter: goToPrevAvailableChapter,
     goToNextChapter: goToNextAvailableChapter,
-    setUnifiedTagsModal,
+    setUnifiedTagsModal: hidePersonalBibleData ? undefined : setUnifiedTagsModal,
     onOpenResourceForVerse: openResourceForVerse,
-    onOpenBookmarkModal: handleOpenBookmarkModal,
+    onOpenBookmarkModal: hidePersonalBibleData ? undefined : handleOpenBookmarkModal,
     onOpenCanonicalBibleReference: handleCanonicalBibleReferencePress,
     expandContext: actions.expandContext,
     collapseContext: actions.collapseContext,
     clearFocusVerses: actions.clearFocusVerses,
     // Annotation mode props
-    annotationMode: annotationMode.enabled,
+    annotationMode: viewerPersonalData.annotationMode,
     clearSelectionTrigger: annotationMode.clearSelectionTrigger,
     applyAnnotationTrigger: annotationMode.applyAnnotationTrigger,
     eraseSelectionTrigger: annotationMode.eraseSelectionTrigger,
-    onSelectionChanged: annotationMode.handleSelectionChanged,
-    onCreateAnnotation: annotationMode.handleCreateAnnotation,
-    onEraseSelection: annotationMode.handleEraseSelection,
-    onAnnotationSelected: annotationMode.handleAnnotationSelected,
+    onSelectionChanged: hidePersonalBibleData ? undefined : annotationMode.handleSelectionChanged,
+    onCreateAnnotation: hidePersonalBibleData ? undefined : annotationMode.handleCreateAnnotation,
+    onEraseSelection: hidePersonalBibleData ? undefined : annotationMode.handleEraseSelection,
+    onAnnotationSelected: hidePersonalBibleData
+      ? undefined
+      : annotationMode.handleAnnotationSelected,
     clearAnnotationSelectionTrigger: annotationMode.clearAnnotationSelectionTrigger,
     selectedAnnotationId: annotationMode.selectedAnnotation?.id ?? null,
     // Cross-version annotations
-    wordAnnotationsInOtherVersions,
-    onOpenCrossVersionModal: handleOpenCrossVersionModal,
+    wordAnnotationsInOtherVersions: viewerPersonalData.wordAnnotationsInOtherVersions,
+    onOpenCrossVersionModal: hidePersonalBibleData ? undefined : handleOpenCrossVersionModal,
     // Verse tags
-    taggedVersesInChapter,
-    versesWithNonHighlightTags,
-    onOpenVerseTagsModal: handleOpenVerseTagsModal,
+    taggedVersesInChapter: viewerPersonalData.taggedVersesInChapter,
+    versesWithNonHighlightTags: viewerPersonalData.versesWithNonHighlightTags,
+    onOpenVerseTagsModal: hidePersonalBibleData ? undefined : handleOpenVerseTagsModal,
     onOpenCanonicalBibleNote: handleOpenCanonicalBibleNote,
-    onOpenStudyRelationsModal: openVerseStudyRelationsModal,
+    onOpenStudyRelationsModal: hidePersonalBibleData ? undefined : openVerseStudyRelationsModal,
     // Double-tap to enter annotation mode
-    onEnterAnnotationMode: handleEnterAnnotationModeFromDoubleTap,
+    onEnterAnnotationMode: hidePersonalBibleData
+      ? undefined
+      : handleEnterAnnotationModeFromDoubleTap,
     // Red words
     redWords: settings.redWordsDisplay ? redWords : null,
     isFormSheet,
@@ -951,7 +1003,8 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
         isFormSheet={isFormSheet}
         isInTab={isInTab}
         onExitAnnotationMode={handleExitAnnotationMode}
-        annotationModeEnabled={annotationMode.enabled}
+        annotationModeEnabled={annotationMode.enabled && !hidePersonalBibleData}
+        hidePersonalBibleData={hidePersonalBibleData}
         onEditFocusTags={editFocusTags}
       />
       <Box flex={1} zIndex={domLayerZIndex}>
@@ -987,33 +1040,37 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
           version={version}
         />
       )}
-      <SelectedVersesModal
-        ref={versesModal.getRef()}
-        isSelectionMode={isSelectionMode}
-        selectedVerseHighlightColor={selectedVerseHighlightColor}
-        onChangeResourceType={val => {
-          setResourceModalSelection(null)
-          onChangeResourceType(val)
-          resourceModal.open()
-        }}
-        onCreateNoteClick={toggleCreateNote}
-        onCreateLinkClick={toggleCreateLink}
-        onCreateStudyRelationClick={toggleCreateStudyRelation}
-        addHighlight={addHiglightAndOpenQuickTags}
-        addTag={addTag}
-        removeHighlight={() => {
-          dispatch(removeHighlight({ selectedVerses }))
-        }}
-        clearSelectedVerses={actions.clearSelectedVerses}
-        selectedVerses={selectedVerses}
-        selectAllVerses={selectAllVerses}
-        version={version}
-        onAddToStudy={handleOpenAddToStudy}
-        onAddBookmark={handleAddBookmark}
-        onPinVerses={handlePinVerses}
-        onEnterAnnotationMode={parallelVersions.length > 0 ? undefined : handleEnterAnnotationMode}
-        focusVerses={focusVerses}
-      />
+      {!hidePersonalBibleData && (
+        <SelectedVersesModal
+          ref={versesModal.getRef()}
+          isSelectionMode={isSelectionMode}
+          selectedVerseHighlightColor={selectedVerseHighlightColor}
+          onChangeResourceType={val => {
+            setResourceModalSelection(null)
+            onChangeResourceType(val)
+            resourceModal.open()
+          }}
+          onCreateNoteClick={toggleCreateNote}
+          onCreateLinkClick={toggleCreateLink}
+          onCreateStudyRelationClick={toggleCreateStudyRelation}
+          addHighlight={addHiglightAndOpenQuickTags}
+          addTag={addTag}
+          removeHighlight={() => {
+            dispatch(removeHighlight({ selectedVerses }))
+          }}
+          clearSelectedVerses={actions.clearSelectedVerses}
+          selectedVerses={selectedVerses}
+          selectAllVerses={selectAllVerses}
+          version={version}
+          onAddToStudy={handleOpenAddToStudy}
+          onAddBookmark={handleAddBookmark}
+          onPinVerses={handlePinVerses}
+          onEnterAnnotationMode={
+            parallelVersions.length > 0 ? undefined : handleEnterAnnotationMode
+          }
+          focusVerses={focusVerses}
+        />
+      )}
       <CreateEntityRelationModal
         ref={createRelationModal.getRef()}
         sourceEndpoint={createRelationSourceEndpoint}
@@ -1068,7 +1125,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
         onNotePress={handleAnnotationNotePress}
         onTagsPress={handleAnnotationTagsPress}
         tagsCount={Object.keys(annotationMode.selectedAnnotation?.tags || {}).length}
-        isEnabled={annotationMode.enabled}
+        isEnabled={annotationMode.enabled && !hidePersonalBibleData}
       />
       <CrossVersionAnnotationsModal
         sheetRef={crossVersionModal.getRef()}
@@ -1097,6 +1154,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
         word={strongSelectionData?.word}
         identities={strongSelectionData?.identities ?? []}
         morphologies={strongSelectionData?.morphologies ?? []}
+        onDismissStart={startClosingStrongSelection}
         onClose={closeStrongSelection}
       />
     </Box>

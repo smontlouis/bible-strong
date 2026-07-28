@@ -90,6 +90,7 @@ export type SheetProps = {
   dismissible?: boolean
   onClose?: () => void
   onDismiss?: () => void
+  onDismissStart?: () => void
   onOpenChange?: (isOpen: boolean) => void
   onPresent?: () => void
 }
@@ -202,6 +203,7 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
     maxWidth,
     onClose,
     onDismiss,
+    onDismissStart,
     onOpenChange,
     onPresent,
     scrollableOptions,
@@ -283,6 +285,7 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
           onOpenChange?.(true)
           onPresent?.()
         }}
+        onWillDismiss={onDismissStart}
         onDidDismiss={() => {
           onOpenChange?.(false)
           onClose?.()

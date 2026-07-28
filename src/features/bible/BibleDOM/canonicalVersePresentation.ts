@@ -5,11 +5,17 @@ import {
   getDisplayedStrongIdentities,
   type StrongIdentity,
 } from '~helpers/strongIdentities'
+import type { StrongSelectionMorphology } from '~helpers/strongSelection'
 import { getStrongSelectionWordFromTextSegment } from './strongSelectionAction'
 
 export type CanonicalVersePresentationNode =
   | { kind: 'text'; text: string }
-  | { kind: 'strong-reference'; identities: StrongIdentity[]; word: string }
+  | {
+      kind: 'strong-reference'
+      identities: StrongIdentity[]
+      morphologies?: StrongSelectionMorphology[]
+      word: string
+    }
   | { kind: 'paragraph-start'; offset: number }
   | { kind: 'line-start'; offset: number }
   | { kind: 'note-reference'; note: CanonicalBibleNote }
@@ -68,7 +74,14 @@ export const buildCanonicalVersePresentation = ({
     events.sort((left, right) => left.order - right.order)
   }
 
-  const strongReferencesByOffset = new Map<number, { identities: StrongIdentity[]; word: string }>()
+  const strongReferencesByOffset = new Map<
+    number,
+    {
+      identities: StrongIdentity[]
+      morphologies?: StrongSelectionMorphology[]
+      word: string
+    }
+  >()
   for (const span of strongSpans) {
     if (span.length <= 0 || span.startOffset < 0 || span.startOffset + span.length > text.length) {
       continue
@@ -83,6 +96,20 @@ export const buildCanonicalVersePresentation = ({
         !strongReference.identities.some(candidate => areStrongIdentitiesEqual(candidate, identity))
       ) {
         strongReference.identities.push(identity)
+      }
+    }
+    for (const morphology of span.morphologies ?? []) {
+      const existing = strongReference.morphologies?.find(candidate =>
+        areStrongIdentitiesEqual(candidate.identity, morphology.identity)
+      )
+      if (existing) {
+        existing.codes = [...new Set([...existing.codes, ...morphology.codes])]
+      } else {
+        strongReference.morphologies ??= []
+        strongReference.morphologies.push({
+          identity: morphology.identity,
+          codes: [...new Set(morphology.codes)],
+        })
       }
     }
     strongReferencesByOffset.set(offset, strongReference)

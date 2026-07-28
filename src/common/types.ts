@@ -157,6 +157,7 @@ export interface Verse {
       kind: 'strong' | 'estrong' | 'dstrong' | 'ustrong'
       code: string
     }[]
+    morphologies?: import('~helpers/strongSelection').StrongSelectionMorphology[]
   }[]
   ReverseInterlinearSpans?: import('~helpers/reverseInterlinearBible').ReverseInterlinearSpan[]
   InterlinearTokens?: import('~helpers/interlinearBibleSidecar').InterlinearToken[]

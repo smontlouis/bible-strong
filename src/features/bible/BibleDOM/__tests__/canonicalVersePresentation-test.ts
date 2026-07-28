@@ -154,6 +154,16 @@ describe('canonicalVersePresentation', () => {
             { kind: 'dstrong', code: 'H3068G' },
             { kind: 'strong', code: 'H0413' },
           ],
+          morphologies: [
+            {
+              identity: { kind: 'dstrong', code: 'H3068G' },
+              codes: ['HNp'],
+            },
+            {
+              identity: { kind: 'strong', code: 'H0413' },
+              codes: ['HR'],
+            },
+          ],
         },
       ],
     })
@@ -166,6 +176,16 @@ describe('canonicalVersePresentation', () => {
         identities: [
           { kind: 'dstrong', code: 'H3068G' },
           { kind: 'strong', code: 'H0413' },
+        ],
+        morphologies: [
+          {
+            identity: { kind: 'dstrong', code: 'H3068G' },
+            codes: ['HNp'],
+          },
+          {
+            identity: { kind: 'strong', code: 'H0413' },
+            codes: ['HR'],
+          },
         ],
       },
     ])

@@ -76,6 +76,7 @@ interface BibleHeaderProps {
   commentsDisplay?: boolean
   onExitAnnotationMode?: () => void
   annotationModeEnabled?: boolean
+  hidePersonalBibleData?: boolean
   onEditFocusTags?: () => void
   isInTab?: boolean
 }
@@ -87,6 +88,7 @@ const Header = ({
   commentsDisplay,
   onExitAnnotationMode,
   annotationModeEnabled,
+  hidePersonalBibleData = false,
   onEditFocusTags,
   isInTab,
 }: BibleHeaderProps) => {
@@ -163,14 +165,16 @@ const Header = ({
   })
 
   // Check if verses are selected
-  const hasSelectedVerses = selectedVerses && Object.keys(selectedVerses).length > 0
+  const hasSelectedVerses =
+    !hidePersonalBibleData && selectedVerses && Object.keys(selectedVerses).length > 0
   const selectedVersesReference = verseToReference(selectedVerses)
 
   // Check if current chapter has a bookmark
   const selectBookmarkForChapter = makeSelectBookmarkForChapter()
-  const currentChapterBookmark = useSelector((state: RootState) =>
+  const storedCurrentChapterBookmark = useSelector((state: RootState) =>
     selectBookmarkForChapter(state, bookNumber, chapter)
   )
+  const currentChapterBookmark = hidePersonalBibleData ? undefined : storedCurrentChapterBookmark
 
   const hasFocusVerses = focusVerses && focusVerses.length > 0
   const focusedReference = hasFocusVerses
@@ -183,16 +187,16 @@ const Header = ({
         version
       )
     : null
-  const focusedVerseRelationCount = useRelationCount(focusedVerseEndpoint)
+  const storedFocusedVerseRelationCount = useRelationCount(focusedVerseEndpoint)
+  const focusedVerseRelationCount = hidePersonalBibleData ? 0 : storedFocusedVerseRelationCount
   const highlights = useSelector((state: RootState) => state.user.bible.highlights)
-  const focusedVerseTags = (hasFocusVerses ? focusVerses : []).reduce<TagsObj>(
-    (acc, focusVerse) => {
-      const verseKey = `${bookNumber}-${chapter}-${focusVerse}`
-      const tags = highlights[verseKey]?.tags
-      return tags ? { ...acc, ...tags } : acc
-    },
-    {}
-  )
+  const focusedVerseTags = (
+    hasFocusVerses && !hidePersonalBibleData ? focusVerses : []
+  ).reduce<TagsObj>((acc, focusVerse) => {
+    const verseKey = `${bookNumber}-${chapter}-${focusVerse}`
+    const tags = highlights[verseKey]?.tags
+    return tags ? { ...acc, ...tags } : acc
+  }, {})
   const hasFocusedVerseTags = Object.keys(focusedVerseTags).length > 0
   const hasFocusEntityChips = hasFocusedVerseTags || focusedVerseRelationCount > 0
 
@@ -266,7 +270,7 @@ const Header = ({
         ? 'arrow.up.left.and.arrow.down.right'
         : 'arrow.down.right.and.arrow.up.left',
     },
-    ...(hasFocusVerses && onEditFocusTags
+    ...(hasFocusVerses && !hidePersonalBibleData && onEditFocusTags
       ? [
           {
             id: 'tags',
@@ -275,7 +279,7 @@ const Header = ({
           },
         ]
       : []),
-    ...(focusedVerseEndpoint
+    ...(focusedVerseEndpoint && !hidePersonalBibleData
       ? [
           {
             id: 'relations',
@@ -373,11 +377,17 @@ const Header = ({
       state: isParallel ? 'on' : 'off',
     },
     { id: 'history', title: t('Historique'), image: 'clock.arrow.circlepath' },
-    {
-      id: 'bookmark',
-      title: currentChapterBookmark ? t('Modifier le marque-page') : t('Ajouter un marque-page'),
-      image: 'bookmark',
-    },
+    ...(!hidePersonalBibleData
+      ? [
+          {
+            id: 'bookmark',
+            title: currentChapterBookmark
+              ? t('Modifier le marque-page')
+              : t('Ajouter un marque-page'),
+            image: 'bookmark' as const,
+          },
+        ]
+      : []),
     {
       id: 'export',
       title: t('passageExport.menuAction'),

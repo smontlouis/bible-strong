@@ -9,6 +9,7 @@ export interface StrongBibleSpan {
     kind: StrongBibleIdentityKind
     code: string
   }[]
+  morphologies?: import('./strongSelection').StrongSelectionMorphology[]
 }
 
 export const buildStrongAnnotatedText = (

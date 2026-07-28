@@ -36,6 +36,7 @@ import {
   createStrongIdentityForBook,
   resolveDisplayedStrongIdentities,
 } from '~helpers/strongIdentities'
+import { collectStrongSelectionMorphologies } from '~helpers/strongSelection'
 import { getResourceLanguage } from '~state/resourcesLanguage'
 
 export type BibleChapterData = Verse[] | null
@@ -273,17 +274,21 @@ const loadRegularBibleChapter = async (
         )
         return {
           ...verse,
-          StrongSpans: (spansByVerse[verse.Verset] ?? []).map(span => ({
-            ...span,
-            identities: resolveDisplayedStrongIdentities(
+          StrongSpans: (spansByVerse[verse.Verset] ?? []).map(span => {
+            const alignedSegments = (span.stepTokenIds ?? []).flatMap(
+              tokenId => alignedTokensById.get(tokenId)?.segments ?? []
+            )
+            const identities = resolveDisplayedStrongIdentities(
               span.identities,
-              (span.stepTokenIds ?? []).flatMap(
-                tokenId =>
-                  alignedTokensById.get(tokenId)?.segments.flatMap(segment => segment.identities) ??
-                  []
-              )
-            ),
-          })),
+              alignedSegments.flatMap(segment => segment.identities)
+            )
+            const morphologies = collectStrongSelectionMorphologies(identities, alignedSegments)
+            return {
+              ...span,
+              identities,
+              ...(morphologies.length ? { morphologies } : {}),
+            }
+          }),
         }
       })
     )

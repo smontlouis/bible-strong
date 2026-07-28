@@ -42,6 +42,11 @@ Advanced BHG rendering preserves the canonical source text through published UTF
 including text between indexed tokens. It disables entry into word-annotation mode because its DOM
 structure is not a one-to-one text rendering; simple BHG mode keeps the normal annotation contract.
 Psalm superscriptions published as verse zero remain addressable but render without a visible zero.
+All advanced BHG display states also keep personal Bible data out of the viewer: selected verses,
+highlights, word annotations, notes, tags, bookmarks, links and study relations are neither rendered
+nor editable. Entering one of these states clears an active verse selection or annotation session
+and ignores personal-data actions that were already in flight. Publisher content and editorial
+comments remain available because they are not personal Bible data.
 
 When the resource modal opens its Lexicon view from BHG, an installed compatible BHG interlinear
 index is the contextual first source. It appears explicitly in the source selector and is selected
