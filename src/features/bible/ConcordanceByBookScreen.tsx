@@ -21,7 +21,7 @@ import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResourceLanguage } from 'src/state/resourcesLanguage'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import type { FoundVerseRow } from '~features/resources/strongAccess'
+import type { Verse } from '~common/types'
 import { IS_FORM_SHEET } from '~helpers/constants'
 import type { StrongLexiconEntry } from '~helpers/strongVerseParser'
 import { useSelector } from 'react-redux'
@@ -84,7 +84,7 @@ const ConcordanceByBook = () => {
   })
   const verses =
     occurrencesQuery.data?.pages.flatMap(page =>
-      page.status === 'available' ? (page.verses as FoundVerseRow[]) : []
+      page.status === 'available' ? page.verses : []
     ) ?? []
   const availablePage = occurrencesQuery.data?.pages.find(page => page.status === 'available')
   const provenance: StrongBibleProvenance | null =
@@ -169,8 +169,8 @@ const ConcordanceByBook = () => {
               </Box>
             ) : null
           }
-          keyExtractor={(item: FoundVerseRow) => `${item.Livre}-${item.Chapitre}-${item.Verset}`}
-          renderItem={({ item }: { item: FoundVerseRow }) => {
+          keyExtractor={(item: Verse) => `${item.Livre}-${item.Chapitre}-${item.Verset}`}
+          renderItem={({ item }: { item: Verse }) => {
             return (
               <ConcordanceVerse
                 concordanceFor={Code}

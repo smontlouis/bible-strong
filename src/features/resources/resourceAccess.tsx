@@ -15,6 +15,10 @@ import { localDictionaryAccess, type DictionaryAccess } from '~features/resource
 import { localNaveAccess, type NaveAccess } from '~features/resources/naveAccess'
 import { localStrongAccess, type StrongAccess } from '~features/resources/strongAccess'
 import {
+  localStrongLexiconAccess,
+  type StrongLexiconAccess,
+} from '~features/resources/strongLexiconAccess'
+import {
   localStrongBibleResourceAccess,
   type StrongBibleResourceAccess,
 } from '~features/resources/strongBibleResourceAccess'
@@ -31,6 +35,7 @@ export type ResourceAccessRegistry = {
   lexiconBible: LexiconBibleResourceAccess
   nave: NaveAccess
   strong: StrongAccess
+  strongLexicon: StrongLexiconAccess
   strongBible: StrongBibleResourceAccess
 }
 
@@ -42,6 +47,7 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
   lexiconBible: localLexiconBibleResourceAccess,
   nave: localNaveAccess,
   strong: localStrongAccess,
+  strongLexicon: localStrongLexiconAccess,
   strongBible: localStrongBibleResourceAccess,
 }
 

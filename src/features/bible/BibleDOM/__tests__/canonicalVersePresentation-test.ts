@@ -162,10 +162,52 @@ describe('canonicalVersePresentation', () => {
       { kind: 'text', text: 'Then the LORD' },
       {
         kind: 'strong-reference',
+        word: 'Then the LORD',
         identities: [
           { kind: 'dstrong', code: 'H3068G' },
           { kind: 'strong', code: 'H0413' },
         ],
+      },
+    ])
+  })
+
+  it('includes an unaligned translated prefix in the Strong selection label', () => {
+    const presentation = buildCanonicalVersePresentation({
+      text: 'Au commencement Dieu',
+      strongSpans: [
+        {
+          ordinal: 0,
+          startOffset: 3,
+          length: 12,
+          identities: [
+            { kind: 'dstrong', code: 'H7225G' },
+            { kind: 'strong', code: 'H9003' },
+          ],
+        },
+        {
+          ordinal: 1,
+          startOffset: 16,
+          length: 4,
+          identities: [{ kind: 'dstrong', code: 'H0430G' }],
+        },
+      ],
+    })
+
+    expect(presentation).toEqual([
+      { kind: 'text', text: 'Au commencement' },
+      {
+        kind: 'strong-reference',
+        word: 'Au commencement',
+        identities: [
+          { kind: 'dstrong', code: 'H7225G' },
+          { kind: 'strong', code: 'H9003' },
+        ],
+      },
+      { kind: 'text', text: ' Dieu' },
+      {
+        kind: 'strong-reference',
+        word: 'Dieu',
+        identities: [{ kind: 'dstrong', code: 'H0430G' }],
       },
     ])
   })

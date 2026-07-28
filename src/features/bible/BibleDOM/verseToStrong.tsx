@@ -9,7 +9,10 @@ import { isDarkTheme, noSelect } from './utils'
 import { getDisabledStyles } from './disabledStyles'
 import { scaleLineHeight } from './scaleLineHeight'
 import { getStrongReferenceNumber, type StrongIdentity } from '~helpers/strongIdentities'
-import { dispatchStrongSelection } from './strongSelectionAction'
+import {
+  dispatchStrongSelection,
+  getStrongSelectionWordFromTextSegment,
+} from './strongSelectionAction'
 
 const StyledReference = styled('span')<
   RootStyles & { isSelected: boolean; isParallel?: boolean; isDisabled?: boolean }
@@ -48,6 +51,9 @@ export const BibleStrongRef = ({
   book,
   version,
   identities,
+  word,
+  chapter,
+  verse,
   isParallel,
   isDisabled,
   selectedCode,
@@ -56,6 +62,9 @@ export const BibleStrongRef = ({
   book: string | number
   version: string
   identities: StrongIdentity[]
+  word?: string
+  chapter?: string | number
+  verse?: string | number
   isParallel?: boolean
   isDisabled?: boolean
   selectedCode?: SelectedCode | null
@@ -72,7 +81,7 @@ export const BibleStrongRef = ({
 
   const openStrongSelection = (event: React.MouseEvent<HTMLSpanElement>) => {
     event.stopPropagation()
-    dispatchStrongSelection(dispatch, identities, book, version)
+    dispatchStrongSelection(dispatch, identities, book, version, { word, chapter, verse })
   }
 
   return (
@@ -92,25 +101,32 @@ export const BibleStrongRef = ({
 const verseToStrong = ({
   Texte,
   Livre,
+  Chapitre,
+  Verset,
   version,
   isParallel,
   isDisabled,
   selectedCode,
   settings,
-}: Pick<Verse, 'Texte' | 'Livre'> & {
+}: Pick<Verse, 'Texte' | 'Livre' | 'Chapitre' | 'Verset'> & {
   version: string
   isParallel?: boolean
   isDisabled?: boolean
   selectedCode?: SelectedCode | null
   settings: RootState['user']['bible']['settings']
 }): (string | JSX.Element)[] => {
-  return Texte.split(/(\d+[^{.|\s}]?\d+(?!\.?\d))/g).map((item, i) => {
+  const parts = Texte.split(/(\d+[^{.|\s}]?\d+(?!\.?\d))/g)
+  return parts.map((item, i) => {
     if (Number.isInteger(Number(item))) {
+      const word = getStrongSelectionWordFromTextSegment(parts[i - 1])
       return (
         <BibleStrongRef
           book={Livre}
           version={version}
           identities={[{ kind: 'strong', code: item }]}
+          word={word}
+          chapter={Chapitre}
+          verse={Verset}
           key={i}
           isParallel={isParallel}
           isDisabled={isDisabled}

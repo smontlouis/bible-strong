@@ -12,6 +12,7 @@ import type { StrongBibleVersionId } from './strongBiblePublications'
 import { installInterlinearSidecar } from './interlinearBibleSidecar'
 import type { DownloadWithCdnFallbackResult } from './downloadWithCdnFallback'
 import { restoreOrphanedResourceBackup } from './atomicResourceFile'
+import { installStrongLexiconModule } from './strongLexiconModules'
 
 export interface ResourceInstallationCallbacks {
   onDownloadProgress: (progress: number) => void
@@ -169,7 +170,6 @@ const installDatabase = async (item: DownloadItem, callbacks: ResourceInstallati
         )
         const tableNames = new Set(tables.map(table => table.name.toLowerCase()))
         const requiredTables: Partial<Record<DatabaseId, string[]>> = {
-          STRONG: ['grec', 'hebreu'],
           DICTIONNAIRE: ['dictionnaire'],
           NAVE: ['topics', 'verses'],
           TRESOR: ['commentaires'],
@@ -251,6 +251,28 @@ const installBibleInterlinearSidecar = async (
   })
 }
 
+const installLexiconModule = async (
+  item: DownloadItem,
+  callbacks: ResourceInstallationCallbacks
+) => {
+  if (
+    !item.strongLexiconModuleId ||
+    !item.strongLexiconArtifact ||
+    item.url !== item.strongLexiconArtifact.url
+  ) {
+    throw new Error(`INVALID_STRONG_LEXICON_DOWNLOAD_ITEM:${item.id}`)
+  }
+  return installStrongLexiconModule(item.strongLexiconModuleId, {
+    onDownloadProgress: ({ totalBytesWritten }) => {
+      callbacks.onDownloadProgress(Math.min(totalBytesWritten / item.estimatedSize, 1))
+    },
+    onResumable: callbacks.onResumable,
+    onStatusInserting: callbacks.onStatusInserting,
+    onInsertProgress: callbacks.onInsertProgress,
+    isCancelled: callbacks.isCancelled,
+  })
+}
+
 export const installResourceDatabaseItem = async (
   item: DownloadItem,
   callbacks: ResourceInstallationCallbacks
@@ -264,6 +286,8 @@ export const installResourceDatabaseItem = async (
       return installBibleStrongSidecar(item, callbacks)
     case 'bible-interlinear-sidecar':
       return installBibleInterlinearSidecar(item, callbacks)
+    case 'strong-lexicon-module':
+      return installLexiconModule(item, callbacks)
     case 'database':
       return installDatabase(item, callbacks)
   }

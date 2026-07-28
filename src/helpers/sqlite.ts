@@ -5,7 +5,6 @@ import {
   databaseInterlineaireName,
   databaseMhyName,
   databaseNaveName,
-  databaseStrongName,
   databaseTresorName,
   getDatabases,
   getDbPath,
@@ -255,7 +254,6 @@ export const dbManager = new DBManager()
 
 // Legacy exports for backward compatibility
 // These will be gradually replaced in the codebase
-export const strongDB = new DB(databaseStrongName)
 export const dictionnaireDB = new DB(databaseDictionnaireName)
 export const mhyDB = new DB(databaseMhyName)
 export const naveDB = new DB(databaseNaveName)
@@ -267,7 +265,6 @@ export const deleteAllDatabases = async () => {
   await dbManager.closeAll()
 
   // Delete legacy databases
-  strongDB.delete()
   dictionnaireDB.delete()
   tresorDB.delete()
   mhyDB.delete()
@@ -329,7 +326,6 @@ export const checkDatabasesStorage = async () => {
   console.log('[DBManager] Checking databases...')
   await Promise.all(
     [
-      databaseStrongName,
       databaseDictionnaireName,
       databaseInterlineaireName,
       databaseTresorName,

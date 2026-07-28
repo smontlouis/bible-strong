@@ -26,6 +26,7 @@ const createDependencies = (): jest.Mocked<LexiconBibleResourceDependencies> => 
     loadVerse: jest.fn(),
     loadCountsByBook: jest.fn(),
     loadFoundVersesByBook: jest.fn(),
+    loadLemmaStats: jest.fn(),
   },
   getInterlinearAvailability: jest.fn(),
   loadInterlinearChapterTokens: jest.fn(),

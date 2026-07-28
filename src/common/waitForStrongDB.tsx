@@ -1,67 +1,64 @@
-import React from 'react'
+import { useQuery } from '@tanstack/react-query'
+import React, { useEffect, useState } from 'react'
 import { useAtomValue } from 'jotai'
 
 import { useTranslation } from 'react-i18next'
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
-import { DBAction, useDBStateValue } from '~helpers/databaseState'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
-import type { ResourceLanguage } from '~helpers/databaseTypes'
 import Box from './ui/Box'
 import Progress from './ui/Progress'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
-import { useResourceDatabaseAccess } from './resourceDatabaseAccess'
-
-const STRONG_FILE_SIZE = 34941952
-
-const useStrong = (
-  dispatch: React.Dispatch<DBAction>,
-  startDownload: boolean,
-  lang: ResourceLanguage
-) => {
-  useResourceDatabaseAccess({
-    dbId: 'STRONG',
-    fileSize: STRONG_FILE_SIZE,
-    downloadKeyPrefix: 'strongDownloadHasStarted',
-    logName: 'Strong',
-    ensureDirBeforePrompt: true,
-    state: { startDownload, lang },
-    actions: {
-      setLoading: value => dispatch({ type: 'strong.setLoading', payload: value }),
-      setProposeDownload: value => dispatch({ type: 'strong.setProposeDownload', payload: value }),
-      setStartDownload: value => dispatch({ type: 'strong.setStartDownload', payload: value }),
-      setProgress: value => dispatch({ type: 'strong.setProgress', payload: value }),
-    },
-  })
-}
+import { createStrongLexiconModuleDownloadItem } from '~helpers/downloadItemFactory'
+import { downloadManager } from '~helpers/downloadManager'
+import { getStrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
+import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 
 export const useWaitForDatabase = () => {
-  const [
-    {
-      strong: { isLoading, proposeDownload, startDownload, progress },
-    },
-    dispatch,
-  ] = useDBStateValue()
-
-  // Get current resource language from Jotai
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const resourceLang = resourcesLanguage.STRONG
-
-  useStrong(dispatch, startDownload, resourceLang)
-
-  const setStartDownload = (value: boolean) => {
-    dispatch({
-      type: 'strong.setStartDownload',
-      payload: value,
-    })
+  const [startDownload, setStartDownload] = useState(false)
+  const download = useDownloadItemStatus('strong-lexicon:core')
+  const availabilityQuery = useQuery({
+    queryKey: ['strong-lexicon', 'availability', 'core'],
+    queryFn: () => getStrongLexiconModuleAvailability('core'),
+    networkMode: 'always',
+  })
+  const availability = availabilityQuery.data
+  const active =
+    download?.status === 'queued' ||
+    download?.status === 'downloading' ||
+    download?.status === 'inserting'
+  const downloadFailed = download?.status === 'failed' || download?.status === 'cancelled'
+  const downloadRequested = startDownload && !downloadFailed
+  const requestDownload = (value: boolean) => {
+    if (value && download?.status === 'failed') {
+      downloadManager.retry('strong-lexicon:core')
+    } else if (value && download?.status === 'cancelled') {
+      downloadManager.enqueue([createStrongLexiconModuleDownloadItem('core')])
+    }
+    setStartDownload(value)
   }
+
+  useEffect(() => {
+    if (!downloadRequested || availability?.status === 'available' || active) return
+    downloadManager.enqueue([createStrongLexiconModuleDownloadItem('core')])
+  }, [active, availability?.status, downloadRequested])
+
+  const isLoading = availabilityQuery.isPending || availability?.status !== 'available'
+  const proposeDownload = isLoading && !active
+  const progress = download
+    ? download.status === 'inserting'
+      ? 0.8 + download.insertProgress * 0.2
+      : download.downloadProgress * 0.8
+    : 0
 
   return {
     isLoading,
     progress,
     proposeDownload,
-    startDownload,
-    setStartDownload,
+    startDownload: downloadRequested,
+    setStartDownload: requestDownload,
     resourceLang,
   }
 }

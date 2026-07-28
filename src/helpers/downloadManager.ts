@@ -262,9 +262,13 @@ class DownloadManager {
         item.type === 'bible' ||
         item.type === 'bible-strong' ||
         item.type === 'bible-strong-sidecar' ||
-        item.type === 'bible-interlinear-sidecar'
+        item.type === 'bible-interlinear-sidecar' ||
+        item.type === 'strong-lexicon-module'
       ) {
         this.jotaiStore.set(bibleDataRefreshSignalAtom, (c: number) => c + 1)
+      }
+      if (item.type === 'strong-lexicon-module') {
+        await queryClient.invalidateQueries({ queryKey: ['strong-lexicon'] })
       }
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : String(e)

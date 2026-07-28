@@ -17,8 +17,8 @@ import Text from '~common/ui/Text'
 import { getIfVersionNeedsDownload, isStrongVersion, Version } from '~helpers/bibleVersions'
 import { isVersionInstalled, removeBibleVersion } from '~helpers/biblesDb'
 import { requireBiblePath } from '~helpers/requireBiblePath'
-import { deleteRedWordsFile, getRedWordsUrl, versionHasRedWords } from '~helpers/redWords'
-import { deletePericopeFile, getPericopeUrl, versionHasPericope } from '~helpers/pericopes'
+import { deleteRedWordsFile } from '~helpers/redWords'
+import { deletePericopeFile } from '~helpers/pericopes'
 import useLanguage from '~helpers/useLanguage'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
@@ -49,6 +49,7 @@ import { removeInterlinearSidecar } from '~helpers/interlinearBibleSidecar'
 import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/downloadQueue'
 import { useResourcePublicationStatus } from '~helpers/useResourcePublicationStatus'
 import { resourcePublicationStore } from '~helpers/resourcePublication'
+import { getBibleRelatedPublicationResources } from '~helpers/bibleRelatedPublications'
 
 const getVersionDownloadQueryKey = (
   versionId: string,
@@ -311,24 +312,7 @@ const VersionSelectorItem = ({
     resourceId: bibleDownloadItem.id,
     url: bibleDownloadItem.url,
     isInstalled: versionNeedsDownload === false,
-    relatedResources: [
-      ...(versionHasPericope(version.id)
-        ? [
-            {
-              resourceId: `bible-pericope:${version.id}`,
-              url: getPericopeUrl(version.id),
-            },
-          ]
-        : []),
-      ...(versionHasRedWords(version.id)
-        ? [
-            {
-              resourceId: `bible-red-words:${version.id}`,
-              url: getRedWordsUrl(version.id),
-            },
-          ]
-        : []),
-    ],
+    relatedResources: getBibleRelatedPublicationResources(version.id),
   })
   const needsUpdate = publicationStatus.status === 'update-available'
   const strongSelectionQuery = useQuery({

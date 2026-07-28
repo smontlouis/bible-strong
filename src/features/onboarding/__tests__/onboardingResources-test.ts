@@ -44,7 +44,6 @@ jest.mock('~helpers/downloadItemFactory', () => ({
 
 jest.mock('~helpers/databases', () => ({
   databases: jest.fn(() => ({
-    STRONG: { id: 'STRONG', name: 'Strong', desc: '', fileSize: 1, path: '' },
     MHY: { id: 'MHY', name: 'Matthew Henry', desc: '', fileSize: 1, path: '' },
     NAVE: { id: 'NAVE', name: 'Nave', desc: '', fileSize: 1, path: '' },
   })),
@@ -55,14 +54,8 @@ describe('onboardingResources', () => {
     expect(getOnboardingResourceSelectionId({ kind: 'bible', versionId: 'LSG' })).toBe('bible:LSG')
   })
 
-  it('stores database selections as durable identifiers including language', () => {
-    expect(
-      getOnboardingResourceSelectionId({
-        kind: 'database',
-        databaseId: 'STRONG',
-        lang: 'fr',
-      })
-    ).toBe('database:STRONG:fr')
+  it('stores the modular Strong core with its dedicated durable identifier', () => {
+    expect(getOnboardingResourceSelectionId({ kind: 'strong-lexicon' })).toBe('strong-lexicon:core')
   })
 
   it('stores Strong sidecar selections separately from their base Bible', () => {

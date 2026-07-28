@@ -5,6 +5,10 @@ import type {
   InterlinearBiblePublication,
   InterlinearPublicationArtifact,
 } from '~helpers/interlinearBiblePublications'
+import type {
+  StrongLexiconModuleId,
+  StrongLexiconPublicationArtifact,
+} from '~helpers/strongLexiconPublications'
 
 // ---------------------------------------------------------------------------
 // Per-item lookup atom factory
@@ -21,10 +25,11 @@ export type DownloadItemType =
   | 'bible-strong'
   | 'bible-strong-sidecar'
   | 'bible-interlinear-sidecar'
+  | 'strong-lexicon-module'
   | 'database'
 
 export interface DownloadItem {
-  /** Unique identifier, e.g. "bible:LSG", "database:STRONG:fr" */
+  /** Unique identifier, e.g. "bible:LSG", "strong-lexicon:core" */
   id: string
   type: DownloadItemType
   name: string
@@ -42,6 +47,8 @@ export interface DownloadItem {
   strongDatasetId?: StrongBiblePublication['datasetId']
   interlinearArtifact?: InterlinearPublicationArtifact
   interlinearDatasetId?: InterlinearBiblePublication['datasetId']
+  strongLexiconModuleId?: StrongLexiconModuleId
+  strongLexiconArtifact?: StrongLexiconPublicationArtifact
   /** Item that must complete before this one can be processed. */
   dependsOnId?: string
   addedAt: number

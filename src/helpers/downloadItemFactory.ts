@@ -16,6 +16,10 @@ import {
   isInterlinearCapableBibleVersion,
 } from './interlinearBiblePublications'
 import type { InterlinearSidecarAvailability } from './interlinearBibleSidecar'
+export {
+  createStrongLexiconModuleDownloadItem,
+  createStrongLexiconModuleDownloadPlan,
+} from './strongLexiconDownloadItems'
 
 const BIBLE_ESTIMATED_SIZE = 2_500_000
 

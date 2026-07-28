@@ -33,7 +33,9 @@ const createDependencies = (): jest.Mocked<StrongBibleResourceDependencies> => (
   getVerseSpans: jest.fn(),
   getChapterSpans: jest.fn(),
   getCountsByBook: jest.fn(),
+  getResolvedIdentity: jest.fn(),
   getFoundVerseLocations: jest.fn(),
+  getLemmaStats: jest.fn(),
   getMultipleVerses: jest.fn(),
   annotateText: jest.fn((text: string, _spans) => `${text} 123`),
 })
@@ -323,6 +325,11 @@ describe('strongBibleResourceAccess', () => {
       { Livre: 1, Chapitre: 1, Verset: 2 },
       { Livre: 1, Chapitre: 2, Verset: 1 },
     ])
+    dependencies.getResolvedIdentity.mockResolvedValue({
+      id: 42,
+      kind: 'dstrong',
+      code: 'H7225A',
+    })
     dependencies.getMultipleVerses.mockResolvedValue({
       '1-1-1': 'Au commencement',
       '1-1-2': 'La terre',
@@ -343,6 +350,11 @@ describe('strongBibleResourceAccess', () => {
     })
 
     expect(result.status).toBe('available')
+    expect(result).toEqual(
+      expect.objectContaining({
+        identity: { id: 42, kind: 'dstrong', code: 'H7225A' },
+      })
+    )
     expect(dependencies.getFoundVerseLocations).toHaveBeenCalledWith('DBY', 1, '7225', {
       limit: 15,
       offset: 30,
@@ -351,5 +363,62 @@ describe('strongBibleResourceAccess', () => {
     expect(dependencies.getChapterSpans).toHaveBeenNthCalledWith(1, 'DBY', 1, 1)
     expect(dependencies.getChapterSpans).toHaveBeenNthCalledWith(2, 'DBY', 1, 2)
     expect(dependencies.getVerseSpans).not.toHaveBeenCalled()
+  })
+
+  it('loads an all-Bible concordance page with an optional French lemma filter', async () => {
+    const dependencies = createDependencies()
+    dependencies.getAvailability.mockResolvedValue(available('DBY'))
+    dependencies.getFoundVerseLocations.mockResolvedValue([
+      { Livre: 1, Chapitre: 1, Verset: 1 },
+      { Livre: 40, Chapitre: 1, Verset: 1 },
+    ])
+    dependencies.getMultipleVerses.mockResolvedValue({
+      '1-1-1': 'Au commencement',
+      '40-1-1': 'Généalogie',
+    })
+    dependencies.getChapterSpans.mockResolvedValue({ 1: [] })
+    const access = createStrongBibleResourceAccess(dependencies)
+
+    await access.loadFoundVersesByBook({
+      currentVersionId: 'DBY',
+      defaultVersionId: 'LSG',
+      book: 1,
+      reference: 'H7225G',
+      limit: 20,
+      allBooks: true,
+      lexemeId: 2671,
+    })
+
+    expect(dependencies.getFoundVerseLocations).toHaveBeenCalledWith('DBY', 1, 'H7225G', {
+      limit: 20,
+      offset: undefined,
+      allBooks: true,
+      lexemeId: 2671,
+    })
+    expect(dependencies.getChapterSpans).toHaveBeenCalledWith('DBY', 1, 1)
+    expect(dependencies.getChapterSpans).toHaveBeenCalledWith('DBY', 40, 1)
+  })
+
+  it('returns grouped French lemma statistics for the resolved version', async () => {
+    const dependencies = createDependencies()
+    dependencies.getAvailability.mockResolvedValue(available('DBY'))
+    dependencies.getLemmaStats.mockResolvedValue([
+      { id: 1, lemma: 'commencement', partOfSpeech: 'n', occurrenceCount: 19 },
+    ])
+    const access = createStrongBibleResourceAccess(dependencies)
+
+    const result = await access.loadLemmaStats({
+      currentVersionId: 'DBY',
+      defaultVersionId: 'LSG',
+      book: 1,
+      reference: 'H7225G',
+    })
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: 'available',
+        lemmas: [{ id: 1, lemma: 'commencement', partOfSpeech: 'n', occurrenceCount: 19 }],
+      })
+    )
   })
 })

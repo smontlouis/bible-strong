@@ -256,6 +256,7 @@ const getVerseText = ({
     return renderCanonicalPresentation(presentation, {
       book: verse.Livre,
       version,
+      chapter: verse.Chapitre,
       verse: verse.Verset,
       isParallel,
       isDisabled: annotationMode,
@@ -273,6 +274,8 @@ const getVerseText = ({
       : verseToStrong({
           Texte: verse.StrongTexte ?? verse.Texte,
           Livre: verse.Livre,
+          Chapitre: verse.Chapitre,
+          Verset: verse.Verset,
           version,
           isParallel,
           isDisabled: annotationMode,
@@ -295,6 +298,7 @@ const renderCanonicalPresentation = (
   options: {
     book: string | number
     version: string
+    chapter: string | number
     verse: string | number
     isParallel?: boolean
     isDisabled: boolean
@@ -316,6 +320,9 @@ const renderCanonicalPresentation = (
           book={options.book}
           version={options.version}
           identities={node.identities}
+          word={node.word}
+          chapter={options.chapter}
+          verse={options.verse}
           isParallel={options.isParallel}
           isDisabled={options.isDisabled}
           selectedCode={options.selectedCode}

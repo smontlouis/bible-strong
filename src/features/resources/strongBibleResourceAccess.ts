@@ -3,12 +3,16 @@ import { getMultipleVerses, getVerseText } from '~helpers/biblesDb'
 import { buildStrongAnnotatedText, type StrongBibleSpan } from '~helpers/strongBibleOverlay'
 import {
   getStrongBibleSidecarAvailability,
+  getResolvedStrongBibleConcordanceIdentity,
   loadStrongBibleChapterSpans,
+  loadStrongBibleLemmaStats,
   loadStrongBibleOccurrenceLocations,
   loadStrongBibleVerseCountsByBook,
   loadStrongBibleVerseSpans,
   type StrongBibleOccurrenceLocation,
   type StrongBibleOccurrencePage,
+  type StrongBibleLemmaStat,
+  type ResolvedStrongBibleIdentity,
   type StrongBibleSidecarAvailability,
   type StrongBibleVerseCountByBook,
 } from '~helpers/strongBibleSidecar'
@@ -44,6 +48,8 @@ export interface StrongBibleConcordanceRequest extends StrongBibleResolutionRequ
   reference: string | number
   limit?: number
   offset?: number
+  allBooks?: boolean
+  lexemeId?: number
 }
 
 export type StrongBibleAttempt = {
@@ -76,6 +82,7 @@ export type StrongBibleCountsResult =
       status: 'available'
       provenance: StrongBibleProvenance
       counts: StrongBibleVerseCountByBook[]
+      identity?: ResolvedStrongBibleIdentity
     }
 
 export type StrongBibleFoundVersesResult =
@@ -84,6 +91,16 @@ export type StrongBibleFoundVersesResult =
       status: 'available'
       provenance: StrongBibleProvenance
       verses: Verse[]
+      identity?: ResolvedStrongBibleIdentity
+    }
+
+export type StrongBibleLemmaStatsResult =
+  | StrongBibleUnavailable
+  | {
+      status: 'available'
+      provenance: StrongBibleProvenance
+      lemmas: StrongBibleLemmaStat[]
+      identity?: ResolvedStrongBibleIdentity
     }
 
 export interface StrongBibleResourceDependencies {
@@ -110,12 +127,22 @@ export interface StrongBibleResourceDependencies {
     book: number,
     reference: string | number
   ) => Promise<StrongBibleVerseCountByBook[]>
+  getResolvedIdentity: (
+    versionId: StrongBibleVersionId,
+    book: number,
+    reference: string | number
+  ) => Promise<ResolvedStrongBibleIdentity | undefined>
   getFoundVerseLocations: (
     versionId: StrongBibleVersionId,
     book: number,
     reference: string | number,
     page?: StrongBibleOccurrencePage
   ) => Promise<StrongBibleOccurrenceLocation[]>
+  getLemmaStats: (
+    versionId: StrongBibleVersionId,
+    book: number,
+    reference: string | number
+  ) => Promise<StrongBibleLemmaStat[]>
   getMultipleVerses: (versionId: string, verseKeys: string[]) => Promise<Record<string, string>>
   annotateText: (canonicalText: string, spans: StrongBibleSpan[]) => string
 }
@@ -126,6 +153,7 @@ export interface StrongBibleResourceAccess {
   loadFoundVersesByBook: (
     request: StrongBibleConcordanceRequest
   ) => Promise<StrongBibleFoundVersesResult>
+  loadLemmaStats: (request: StrongBibleConcordanceRequest) => Promise<StrongBibleLemmaStatsResult>
 }
 
 const defaultDependencies: StrongBibleResourceDependencies = {
@@ -134,7 +162,9 @@ const defaultDependencies: StrongBibleResourceDependencies = {
   getVerseSpans: loadStrongBibleVerseSpans,
   getChapterSpans: loadStrongBibleChapterSpans,
   getCountsByBook: loadStrongBibleVerseCountsByBook,
+  getResolvedIdentity: getResolvedStrongBibleConcordanceIdentity,
   getFoundVerseLocations: loadStrongBibleOccurrenceLocations,
+  getLemmaStats: loadStrongBibleLemmaStats,
   getMultipleVerses,
   annotateText: buildStrongAnnotatedText,
 }
@@ -213,14 +243,23 @@ export const createStrongBibleResourceAccess = (
     async loadCountsByBook(request) {
       const resolution = await resolve(request)
       if (resolution.status !== 'available') return resolution
-      return {
-        status: 'available',
-        provenance: resolution.provenance,
-        counts: await dependencies.getCountsByBook(
+      const [counts, identity] = await Promise.all([
+        dependencies.getCountsByBook(
           resolution.provenance.versionId,
           request.book,
           request.reference
         ),
+        dependencies.getResolvedIdentity(
+          resolution.provenance.versionId,
+          request.book,
+          request.reference
+        ),
+      ])
+      return {
+        status: 'available',
+        provenance: resolution.provenance,
+        counts,
+        ...(identity ? { identity } : {}),
       }
     },
 
@@ -228,24 +267,34 @@ export const createStrongBibleResourceAccess = (
       const resolution = await resolve(request)
       if (resolution.status !== 'available') return resolution
       const { versionId } = resolution.provenance
-      const locations = await dependencies.getFoundVerseLocations(
-        versionId,
-        request.book,
-        request.reference,
-        { limit: request.limit, offset: request.offset }
-      )
+      const [locations, identity] = await Promise.all([
+        dependencies.getFoundVerseLocations(versionId, request.book, request.reference, {
+          limit: request.limit,
+          offset: request.offset,
+          allBooks: request.allBooks,
+          lexemeId: request.lexemeId,
+        }),
+        dependencies.getResolvedIdentity(versionId, request.book, request.reference),
+      ])
       const keys = locations.map(
         location => `${location.Livre}-${location.Chapitre}-${location.Verset}`
       )
       const texts = await dependencies.getMultipleVerses(versionId, keys)
-      const chapters = [...new Set(locations.map(location => location.Chapitre))]
-      const chapterSpans = new Map<number, Record<number, StrongBibleSpan[]>>(
+      const chapters = [
+        ...new Map(
+          locations.map(location => [
+            `${location.Livre}-${location.Chapitre}`,
+            { book: location.Livre, chapter: location.Chapitre },
+          ])
+        ).values(),
+      ]
+      const chapterSpans = new Map<string, Record<number, StrongBibleSpan[]>>(
         await Promise.all(
           chapters.map(
-            async chapter =>
+            async ({ book, chapter }) =>
               [
-                chapter,
-                await dependencies.getChapterSpans(versionId, request.book, chapter),
+                `${book}-${chapter}`,
+                await dependencies.getChapterSpans(versionId, book, chapter),
               ] as const
           )
         )
@@ -255,7 +304,8 @@ export const createStrongBibleResourceAccess = (
         const key = `${location.Livre}-${location.Chapitre}-${location.Verset}`
         const text = texts[key]
         if (text == null) continue
-        const spans = chapterSpans.get(location.Chapitre)?.[location.Verset] ?? []
+        const spans =
+          chapterSpans.get(`${location.Livre}-${location.Chapitre}`)?.[location.Verset] ?? []
         verses.push({
           ...location,
           Texte: dependencies.annotateText(text, spans),
@@ -265,6 +315,30 @@ export const createStrongBibleResourceAccess = (
         status: 'available',
         provenance: resolution.provenance,
         verses,
+        ...(identity ? { identity } : {}),
+      }
+    },
+
+    async loadLemmaStats(request) {
+      const resolution = await resolve(request)
+      if (resolution.status !== 'available') return resolution
+      const [lemmas, identity] = await Promise.all([
+        dependencies.getLemmaStats(
+          resolution.provenance.versionId,
+          request.book,
+          request.reference
+        ),
+        dependencies.getResolvedIdentity(
+          resolution.provenance.versionId,
+          request.book,
+          request.reference
+        ),
+      ])
+      return {
+        status: 'available',
+        provenance: resolution.provenance,
+        lemmas,
+        ...(identity ? { identity } : {}),
       }
     },
   }

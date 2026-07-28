@@ -22,16 +22,28 @@ export const getDisplayedStrongIdentities = <Identity extends StrongIdentity>(
   const disambiguatedFamilies = new Set(
     disambiguated.map(identity => getClassicalStrongFamily(identity.code))
   )
+  const extended = identities.filter(
+    identity =>
+      identity.kind === 'estrong' &&
+      !disambiguatedFamilies.has(getClassicalStrongFamily(identity.code))
+  )
+  const extendedFamilies = new Set(
+    extended.map(identity => getClassicalStrongFamily(identity.code))
+  )
   const classical = identities.filter(
     identity =>
       identity.kind === 'strong' &&
-      !disambiguatedFamilies.has(getClassicalStrongFamily(identity.code))
+      !disambiguatedFamilies.has(getClassicalStrongFamily(identity.code)) &&
+      !extendedFamilies.has(getClassicalStrongFamily(identity.code))
   )
 
-  return [...disambiguated, ...classical].filter(
-    (identity, index, selected) =>
-      selected.findIndex(candidate => areStrongIdentitiesEqual(candidate, identity)) === index
-  )
+  const seenFamilies = new Set<string>()
+  return [...disambiguated, ...extended, ...classical].filter(identity => {
+    const family = getClassicalStrongFamily(identity.code)
+    if (seenFamilies.has(family)) return false
+    seenFamilies.add(family)
+    return true
+  })
 }
 
 export const getStrongReferenceNumber = (code: string | number): string | undefined => {

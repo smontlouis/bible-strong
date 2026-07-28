@@ -52,6 +52,16 @@ jest.mock('../interlinearBibleSidecar', () => ({
   removeInterlinearSidecar: jest.fn(),
 }))
 
+jest.mock('../strongLexiconModules', () => ({
+  removeStrongLexiconModule: jest.fn(),
+}))
+
+jest.mock('../queryClient', () => ({
+  queryClient: {
+    invalidateQueries: jest.fn(),
+  },
+}))
+
 jest.mock('../resourcePublication', () => ({
   resourcePublicationStore: {
     remove: jest.fn(),
@@ -64,12 +74,14 @@ import { createDownloadedItemDeletionPlan, deleteDownloadedItem } from '../delet
 import { dbManager } from '../sqlite'
 import { removeStrongBibleSidecar } from '../strongBibleSidecar'
 import { removeInterlinearSidecar } from '../interlinearBibleSidecar'
+import { removeStrongLexiconModule } from '../strongLexiconModules'
 
 const mockGetInfoAsync = jest.mocked(FileSystem.getInfoAsync)
 const mockIsVersionInstalled = jest.mocked(isVersionInstalled)
 const mockRemoveBibleVersion = jest.mocked(removeBibleVersion)
 const mockRemoveStrongBibleSidecar = jest.mocked(removeStrongBibleSidecar)
 const mockRemoveInterlinearSidecar = jest.mocked(removeInterlinearSidecar)
+const mockRemoveStrongLexiconModule = jest.mocked(removeStrongLexiconModule)
 const mockGetDatabase = jest.mocked(dbManager.getDB)
 
 describe('deleteDownloadedItem', () => {
@@ -123,6 +135,12 @@ describe('deleteDownloadedItem', () => {
 
     expect(mockRemoveInterlinearSidecar).toHaveBeenCalledWith('en')
     expect(mockRemoveBibleVersion).not.toHaveBeenCalled()
+  })
+
+  it('removes a modular Strong lexicon resource', async () => {
+    await deleteDownloadedItem(createDownloadedItemDeletionPlan('strong-lexicon:resources'))
+
+    expect(mockRemoveStrongLexiconModule).toHaveBeenCalledWith('resources')
   })
 
   it('rejects an unknown download item instead of silently reporting success', async () => {

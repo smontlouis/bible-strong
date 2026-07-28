@@ -61,7 +61,7 @@ Core user activities:
 | Reading plan | Structured sequence of Bible readings, meditations, media, or teaching slices followed by the user. | `src/features/plans/`, `src/redux/modules/plan.ts` |
 | Plan slice | One reading unit inside a reading plan; it can contain Bible text, meditation text, image, video, or a chapter/verse reference. | `src/features/plans/PlanSliceScreen/` |
 | Plan tab | App tab anchored to one reading plan, with a plan slice optionally opened inside the tab. | `src/features/plans/`, `src/state/tabs.ts` |
-| Strong | Hebrew/Greek lexical identifiers and concordance resources. | `src/features/bible/Strong*`, `src/helpers/loadStrong*` |
+| Strong | Hebrew/Greek lexical identifiers resolved by the modular core lexicon, with optional LSJ/TIPNR enrichments and version-specific concordance sidecars. | `src/features/resources/strongLexiconAccess.ts`, `src/helpers/strongLexiconModules.ts`, `src/helpers/strongBibleSidecar.ts` |
 | Interlinear | Original-language verse display with lexical/translation alignment. BHG is the canonical readable Hebrew/Aramaic and Greek Bible; optional localized interlinear indexes add glosses, transliteration, morphology and lexical identities without duplicating its text. | `src/helpers/interlinearBibleSidecar.ts`, `src/features/bible/BibleDOM/StructuredInterlinearVerse.tsx` |
 | Nave | Nave's topical Bible resource. | `src/features/nave/`, `src/helpers/loadNaveItem.ts` |
 | Resource database | Downloaded SQLite/JSON file used by study features. | `src/helpers/databases.ts`, `src/helpers/databaseTypes.ts` |

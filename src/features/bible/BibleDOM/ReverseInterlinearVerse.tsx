@@ -9,7 +9,10 @@ import {
 
 import { useDispatch } from './DispatchProvider'
 import { scaleFontSize } from './scaleFontSize'
-import { dispatchStrongSelection } from './strongSelectionAction'
+import {
+  dispatchStrongSelection,
+  getStrongSelectionWordFromTextSegment,
+} from './strongSelectionAction'
 
 interface Props {
   verse: Verse
@@ -27,8 +30,12 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode, isPar
   const uniqueLine = (values: string[], separator = ' · ') =>
     [...new Set(values.filter(Boolean))].join(separator)
 
-  const openStrongSelection = (identities: StrongIdentity[]) => {
-    dispatchStrongSelection(dispatch, identities, isHebrew ? 1 : 40, version)
+  const openStrongSelection = (identities: StrongIdentity[], word: string) => {
+    dispatchStrongSelection(dispatch, identities, isHebrew ? 1 : 40, version, {
+      word,
+      chapter: verse.Chapitre,
+      verse: verse.Verset,
+    })
   }
 
   return (
@@ -56,6 +63,8 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode, isPar
         const transliteration = uniqueLine(segments.map(segment => segment.transliteration))
         const morphology = uniqueLine(segments.map(segment => segment.morphology))
         const strongReferences = uniqueLine(displayedIdentities.map(identity => identity.code))
+        const selectionWord =
+          getStrongSelectionWordFromTextSegment(`${prefix}${surface}`) ?? surface
 
         return (
           <span key={`${token.ordinal}:${token.startOffset}`}>
@@ -64,7 +73,7 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode, isPar
               type="button"
               data-ignore-verse-touch
               disabled={!preferredIdentity}
-              onClick={() => openStrongSelection(selectionIdentities)}
+              onClick={() => openStrongSelection(selectionIdentities, selectionWord)}
               style={{
                 appearance: 'none',
                 border: 0,

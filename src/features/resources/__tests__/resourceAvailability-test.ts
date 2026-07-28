@@ -43,7 +43,6 @@ const createDependencies = ({
   isVersionInstalled: jest.fn(async (versionId: string) => installedVersions.has(versionId)),
   getDbPath: jest.fn((dbId: string, lang: string) => {
     const fileNameByDb: Record<string, string> = {
-      STRONG: 'strong.sqlite',
       INTERLINEAIRE: 'interlineaire.sqlite',
       NAVE: 'nave.sqlite',
     }
@@ -103,10 +102,9 @@ describe('resourceAvailability', () => {
     expect(dependencies.initLanguageDirs).toHaveBeenCalledWith('fr')
   })
 
-  it('maps Strong Bible versions to the active Strong resource database', async () => {
+  it('maps legacy Strong Bible aliases to their canonical installed Bible', async () => {
     const dependencies = createDependencies({
-      currentLang: 'en',
-      files: new Set(['file:///docs/SQLite/en/strong.sqlite']),
+      installedVersions: new Set(['KJV']),
     })
 
     await expect(
@@ -114,11 +112,11 @@ describe('resourceAvailability', () => {
     ).resolves.toEqual(
       expect.objectContaining({
         status: 'available',
-        source: 'database-file',
+        source: 'bibles-sqlite',
       })
     )
 
-    expect(dependencies.initLanguageDirs).toHaveBeenCalledWith('en')
+    expect(dependencies.isVersionInstalled).toHaveBeenCalledWith('KJV')
   })
 
   it('reports missing resources as needing download', async () => {

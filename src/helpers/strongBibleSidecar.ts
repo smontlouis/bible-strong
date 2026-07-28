@@ -21,6 +21,7 @@ import {
 } from './strongBiblePublications'
 import type { StrongBibleIdentityKind, StrongBibleSpan } from './strongBibleOverlay'
 import { restoreOrphanedResourceBackup } from './atomicResourceFile'
+import { getStrongBibleConcordanceCandidates } from './strongBibleConcordance'
 
 const sidecarDatabases = new Map<StrongBibleVersionId, SQLiteDatabase>()
 const validatedSidecars = new Map<StrongBibleVersionId, StrongBibleSidecarMetadata>()
@@ -342,6 +343,15 @@ export interface StrongBibleOccurrenceLocation {
 export interface StrongBibleOccurrencePage {
   limit?: number
   offset?: number
+  allBooks?: boolean
+  lexemeId?: number
+}
+
+export interface StrongBibleLemmaStat {
+  id: number
+  lemma: string
+  partOfSpeech: string
+  occurrenceCount: number
 }
 
 export const loadStrongBibleVerseCountsByBook = async (
@@ -351,15 +361,17 @@ export const loadStrongBibleVerseCountsByBook = async (
 ): Promise<StrongBibleVerseCountByBook[]> => {
   await assertStrongBibleSidecarAvailable(versionId)
   const database = await openStrongBibleSidecar(versionId)
+  const identity = await resolveStrongBibleConcordanceIdentity(database, referenceBook, reference)
+  if (!identity) return []
   return database.getAllAsync<StrongBibleVerseCountByBook>(
     `SELECT v.bookOrder AS Livre, COUNT(DISTINCT v.id) AS versesCountByBook
      FROM StrongCodes c
      JOIN WordStrongCodes w ON w.codeId=c.id
      JOIN Verses v ON v.id=w.verseId
-     WHERE c.kind=0 AND c.code=?
+     WHERE c.id=?
      GROUP BY v.bookOrder
      ORDER BY v.bookOrder`,
-    [toStandardStrongCode(referenceBook, reference)]
+    [identity.id]
   )
 }
 
@@ -371,6 +383,18 @@ export const loadStrongBibleOccurrenceLocations = async (
 ): Promise<StrongBibleOccurrenceLocation[]> => {
   await assertStrongBibleSidecarAvailable(versionId)
   const database = await openStrongBibleSidecar(versionId)
+  const identity = await resolveStrongBibleConcordanceIdentity(database, book, reference)
+  if (!identity) return []
+  const filters = ['c.id=?']
+  const parameters: number[] = [identity.id]
+  if (!page.allBooks) {
+    filters.push('v.bookOrder=?')
+    parameters.push(book)
+  }
+  if (page.lexemeId != null) {
+    filters.push('s.lexemeId=?')
+    parameters.push(page.lexemeId)
+  }
   return database.getAllAsync<StrongBibleOccurrenceLocation>(
     `SELECT DISTINCT
        v.bookOrder AS Livre,
@@ -378,11 +402,33 @@ export const loadStrongBibleOccurrenceLocations = async (
        v.verse AS Verset
      FROM StrongCodes c
      JOIN WordStrongCodes w ON w.codeId=c.id
+     JOIN WordSpans s ON s.verseId=w.verseId AND s.ordinal=w.ordinal
      JOIN Verses v ON v.id=w.verseId
-     WHERE c.kind=0 AND c.code=? AND v.bookOrder=?
-     ORDER BY v.chapter, v.verse
+     WHERE ${filters.join(' AND ')}
+     ORDER BY v.bookOrder, v.chapter, v.verse
      LIMIT ? OFFSET ?`,
-    [toStandardStrongCode(book, reference), book, page.limit ?? -1, Math.max(0, page.offset ?? 0)]
+    [...parameters, page.limit ?? -1, Math.max(0, page.offset ?? 0)]
+  )
+}
+
+export const loadStrongBibleLemmaStats = async (
+  versionId: StrongBibleVersionId,
+  book: number,
+  reference: string | number
+): Promise<StrongBibleLemmaStat[]> => {
+  await assertStrongBibleSidecarAvailable(versionId)
+  const database = await openStrongBibleSidecar(versionId)
+  const identity = await resolveStrongBibleConcordanceIdentity(database, book, reference)
+  if (!identity) return []
+  return database.getAllAsync<StrongBibleLemmaStat>(
+    `SELECT l.id, l.lemma, l.partOfSpeech, COUNT(*) AS occurrenceCount
+       FROM WordStrongCodes w
+       JOIN WordSpans s ON s.verseId=w.verseId AND s.ordinal=w.ordinal
+       JOIN FrenchLexemes l ON l.id=s.lexemeId
+      WHERE w.codeId=?
+      GROUP BY l.id, l.lemma, l.partOfSpeech
+      ORDER BY occurrenceCount DESC, l.lemma`,
+    [identity.id]
   )
 }
 
@@ -395,9 +441,40 @@ const assertStrongBibleSidecarAvailable = async (
   }
 }
 
-const toStandardStrongCode = (book: number, reference: string | number): string => {
-  const prefix = book <= 39 ? 'H' : 'G'
-  return `${prefix}${String(Number(reference)).padStart(4, '0')}`
+export type ResolvedStrongBibleIdentity = {
+  id: number
+  kind: (typeof IDENTITY_KINDS)[number]
+  code: string
+}
+
+export const resolveStrongBibleConcordanceIdentity = async (
+  database: SQLiteDatabase,
+  book: number,
+  reference: string | number
+): Promise<ResolvedStrongBibleIdentity | undefined> => {
+  const candidates = getStrongBibleConcordanceCandidates(book, reference)
+  for (const candidate of candidates) {
+    const row = await database.getFirstAsync<{ id: number; kind: number; code: string }>(
+      'SELECT id, kind, code FROM StrongCodes WHERE kind=? AND code=? LIMIT 1',
+      [candidate.kind, candidate.code]
+    )
+    const kind = row ? IDENTITY_KINDS[row.kind] : undefined
+    if (row && kind) return { id: row.id, kind, code: row.code }
+  }
+  return undefined
+}
+
+export const getResolvedStrongBibleConcordanceIdentity = async (
+  versionId: StrongBibleVersionId,
+  book: number,
+  reference: string | number
+): Promise<ResolvedStrongBibleIdentity | undefined> => {
+  await assertStrongBibleSidecarAvailable(versionId)
+  return resolveStrongBibleConcordanceIdentity(
+    await openStrongBibleSidecar(versionId),
+    book,
+    reference
+  )
 }
 
 const openStrongBibleSidecar = async (versionId: StrongBibleVersionId): Promise<SQLiteDatabase> => {

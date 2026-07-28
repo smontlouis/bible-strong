@@ -53,7 +53,6 @@ export const databasesRef = {
   DICTIONNAIRE: cdnUrl('databases/dictionnaire.sqlite'),
   INTERLINEAIRE: cdnUrl('databases/interlineaire.sqlite'),
   NAVE: cdnUrl('databases/nave-fr.sqlite'),
-  STRONG: cdnUrl('databases/strong.sqlite'),
   TIMELINE: cdnUrl('databases/bible-timeline-events.json'),
 }
 
@@ -64,7 +63,6 @@ export const databasesEnRef = {
   DICTIONNAIRE: cdnUrl('databases/en/dictionnaire.sqlite'),
   INTERLINEAIRE: cdnUrl('databases/en/interlineaire.sqlite'),
   NAVE: cdnUrl('databases/en/nave.sqlite'),
-  STRONG: cdnUrl('databases/en/strong.sqlite'),
   TIMELINE: cdnUrl('databases/en/bible-timeline-events.json'),
 }
 
@@ -75,7 +73,6 @@ interface DatabasesRef {
   DICTIONNAIRE: string
   INTERLINEAIRE: string
   NAVE: string
-  STRONG: string
   TIMELINE: string
 }
 

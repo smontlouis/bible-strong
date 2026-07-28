@@ -64,10 +64,7 @@ export const getLocalResourceKey = (resource: LocalResourceRef): string => {
   return `database:${resource.databaseId}:${resource.lang ?? 'current'}`
 }
 
-const getBibleDatabaseRef = (
-  versionId: string,
-  currentLang: ResourceLanguage
-): ResourceDatabaseRef | null => {
+const getBibleDatabaseRef = (versionId: string): ResourceDatabaseRef | null => {
   if (versionId === 'INT') {
     return { kind: 'database', databaseId: 'INTERLINEAIRE', lang: 'fr' }
   }
@@ -76,12 +73,11 @@ const getBibleDatabaseRef = (
     return { kind: 'database', databaseId: 'INTERLINEAIRE', lang: 'en' }
   }
 
-  if (versionId === 'LSGS' || versionId === 'KJVS') {
-    return { kind: 'database', databaseId: 'STRONG', lang: currentLang }
-  }
-
   return null
 }
+
+const getCanonicalLegacyBibleVersion = (versionId: string): string =>
+  versionId === 'LSGS' ? 'LSG' : versionId === 'KJVS' ? 'KJV' : versionId
 
 export const getLocalResourceAvailability = async (
   resource: LocalResourceRef,
@@ -111,7 +107,7 @@ export const getLocalResourceAvailability = async (
   }
 
   const currentLang = dependencies.getCurrentResourceLanguage()
-  const databaseRef = getBibleDatabaseRef(resource.versionId, currentLang)
+  const databaseRef = getBibleDatabaseRef(resource.versionId)
 
   if (databaseRef) {
     const availability = await getLocalResourceAvailability(databaseRef, dependencies)
@@ -132,7 +128,9 @@ export const getLocalResourceAvailability = async (
 
   await dependencies.initSQLiteDir()
 
-  const installed = await dependencies.isVersionInstalled(resource.versionId)
+  const installed = await dependencies.isVersionInstalled(
+    getCanonicalLegacyBibleVersion(resource.versionId)
+  )
   if (installed) {
     return {
       status: 'available',

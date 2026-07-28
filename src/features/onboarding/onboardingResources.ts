@@ -3,6 +3,7 @@ import {
   createBibleDownloadItem,
   createDatabaseDownloadItem,
   createStrongSidecarDownloadItem,
+  createStrongLexiconModuleDownloadItem,
 } from '~helpers/downloadItemFactory'
 import { databases } from '~helpers/databases'
 import { getDefaultBibleVersion, type ActiveLanguage } from '~helpers/languageUtils'
@@ -27,6 +28,9 @@ export type OnboardingResourceSelection =
       kind: 'bible-strong'
       versionId: StrongBibleVersionId
     }
+  | {
+      kind: 'strong-lexicon'
+    }
 
 export const getOnboardingResourceSelectionId = (resource: OnboardingResourceSelection): string => {
   if (resource.kind === 'bible') {
@@ -34,6 +38,9 @@ export const getOnboardingResourceSelectionId = (resource: OnboardingResourceSel
   }
   if (resource.kind === 'bible-strong') {
     return `bible-strong:${resource.versionId}`
+  }
+  if (resource.kind === 'strong-lexicon') {
+    return 'strong-lexicon:core'
   }
 
   return `database:${resource.databaseId}:${resource.lang}`
@@ -91,6 +98,9 @@ export const createDownloadItemFromOnboardingSelection = (
   }
   if (resource.kind === 'bible-strong') {
     return createStrongSidecarDownloadItem(resource.versionId)
+  }
+  if (resource.kind === 'strong-lexicon') {
+    return createStrongLexiconModuleDownloadItem('core')
   }
 
   return createDatabaseDownloadItem(resource.databaseId, resource.lang)

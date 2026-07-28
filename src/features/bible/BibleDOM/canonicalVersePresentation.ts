@@ -5,10 +5,11 @@ import {
   getDisplayedStrongIdentities,
   type StrongIdentity,
 } from '~helpers/strongIdentities'
+import { getStrongSelectionWordFromTextSegment } from './strongSelectionAction'
 
 export type CanonicalVersePresentationNode =
   | { kind: 'text'; text: string }
-  | { kind: 'strong-reference'; identities: StrongIdentity[] }
+  | { kind: 'strong-reference'; identities: StrongIdentity[]; word: string }
   | { kind: 'paragraph-start'; offset: number }
   | { kind: 'line-start'; offset: number }
   | { kind: 'note-reference'; note: CanonicalBibleNote }
@@ -67,19 +68,33 @@ export const buildCanonicalVersePresentation = ({
     events.sort((left, right) => left.order - right.order)
   }
 
-  const identitiesByOffset = new Map<number, StrongIdentity[]>()
+  const strongReferencesByOffset = new Map<number, { identities: StrongIdentity[]; word: string }>()
   for (const span of strongSpans) {
     if (span.length <= 0 || span.startOffset < 0 || span.startOffset + span.length > text.length) {
       continue
     }
     const offset = span.startOffset + span.length
-    const identities = identitiesByOffset.get(offset) ?? []
+    const strongReference = strongReferencesByOffset.get(offset) ?? {
+      identities: [],
+      word: text.slice(span.startOffset, offset),
+    }
     for (const identity of getDisplayedStrongIdentities(span.identities)) {
-      if (!identities.some(candidate => areStrongIdentitiesEqual(candidate, identity))) {
-        identities.push(identity)
+      if (
+        !strongReference.identities.some(candidate => areStrongIdentitiesEqual(candidate, identity))
+      ) {
+        strongReference.identities.push(identity)
       }
     }
-    identitiesByOffset.set(offset, identities)
+    strongReferencesByOffset.set(offset, strongReference)
+  }
+  let previousStrongOffset = 0
+  for (const [offset, strongReference] of [...strongReferencesByOffset.entries()].sort(
+    ([left], [right]) => left - right
+  )) {
+    strongReference.word =
+      getStrongSelectionWordFromTextSegment(text.slice(previousStrongOffset, offset)) ??
+      strongReference.word
+    previousStrongOffset = offset
   }
 
   const redStarts = new Map<number, number>()
@@ -96,7 +111,7 @@ export const buildCanonicalVersePresentation = ({
     0,
     text.length,
     ...eventsByOffset.keys(),
-    ...identitiesByOffset.keys(),
+    ...strongReferencesByOffset.keys(),
     ...redStarts.keys(),
     ...redEnds.keys(),
   ].sort((left, right) => left - right)
@@ -112,9 +127,9 @@ export const buildCanonicalVersePresentation = ({
     for (let index = 0; index < (redEnds.get(offset) ?? 0); index += 1) {
       closeElement(stack, 'red-word')
     }
-    const identities = identitiesByOffset.get(offset) ?? []
-    if (identities.length > 0) {
-      currentChildren(stack).push({ kind: 'strong-reference', identities })
+    const strongReference = strongReferencesByOffset.get(offset)
+    if (strongReference?.identities.length) {
+      currentChildren(stack).push({ kind: 'strong-reference', ...strongReference })
     }
     for (const presentationEvent of eventsByOffset.get(offset) ?? []) {
       if (presentationEvent.kind === 'note') {

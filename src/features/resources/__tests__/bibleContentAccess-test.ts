@@ -24,15 +24,6 @@ jest.mock('~helpers/bibleVersions', () => ({
 
 jest.mock('~helpers/loadInterlineaireChapter', () => jest.fn())
 
-jest.mock('~helpers/loadStrongChapter', () => jest.fn())
-
-jest.mock('~helpers/sqlite', () => ({
-  strongDB: {
-    get: jest.fn(),
-    init: jest.fn(),
-  },
-}))
-
 jest.mock('../strongAccess', () => ({
   localStrongAccess: {
     loadChapter: jest.fn(),

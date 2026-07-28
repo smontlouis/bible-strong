@@ -1,39 +1,12 @@
-import { OPEN_STRONG_SELECTION } from '../dispatch'
-import { dispatchStrongSelection } from '../strongSelectionAction'
+import { getStrongSelectionWordFromTextSegment } from '../strongSelectionAction'
 
-describe('dispatchStrongSelection', () => {
-  it('keeps the version and identity kinds of the clicked Bible column', () => {
-    const dispatch = jest.fn()
-
-    dispatchStrongSelection(
-      dispatch,
-      [
-        { kind: 'dstrong', code: 'H3068G' },
-        { kind: 'strong', code: 'H0413' },
-      ],
-      1,
-      'BSB'
-    )
-
-    expect(dispatch).toHaveBeenCalledWith({
-      type: OPEN_STRONG_SELECTION,
-      payload: {
-        book: 1,
-        reference: '3068',
-        identities: [
-          { kind: 'dstrong', code: 'H3068G' },
-          { kind: 'strong', code: 'H0413' },
-        ],
-        version: 'BSB',
-      },
-    })
+describe('getStrongSelectionWordFromTextSegment', () => {
+  it('keeps the complete translated segment associated with a Strong group', () => {
+    expect(getStrongSelectionWordFromTextSegment(' Au commencement ')).toBe('Au commencement')
+    expect(getStrongSelectionWordFromTextSegment(' et la terre ')).toBe('et la terre')
   })
 
-  it('does not dispatch an invalid Strong selection', () => {
-    const dispatch = jest.fn()
-
-    dispatchStrongSelection(dispatch, [{ kind: 'strong', code: 'invalid' }], 1, 'LSG')
-
-    expect(dispatch).not.toHaveBeenCalled()
+  it('removes punctuation around the translated segment', () => {
+    expect(getStrongSelectionWordFromTextSegment(' , “la parole” ')).toBe('la parole')
   })
 })

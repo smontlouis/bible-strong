@@ -24,6 +24,15 @@ describe('interlinear Strong identity display', () => {
     ])
   })
 
+  it('prefers an extended identity over its classical family when no dStrong exists', () => {
+    expect(
+      getDisplayedStrongIdentities([
+        { kind: 'strong', code: 'G3056' },
+        { kind: 'estrong', code: 'G3056' },
+      ])
+    ).toEqual([{ kind: 'estrong', code: 'G3056' }])
+  })
+
   it('removes duplicate identities', () => {
     expect(
       getDisplayedStrongIdentities([

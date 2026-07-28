@@ -49,7 +49,6 @@
   "src/features/dictionnary/DictionnaireVerseReference.tsx": 3,
   "src/features/home/UserWidget.tsx": 2,
   "src/features/lexique/LexiqueItem.tsx": 3,
-  "src/features/lexique/StrongDetailScreen.tsx": 4,
   "src/features/nave/NaveItem.tsx": 2,
   "src/features/nave/NaveModalItem.tsx": 2,
   "src/features/onboarding/OnBoarding.tsx": 2,

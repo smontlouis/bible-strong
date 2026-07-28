@@ -9,7 +9,6 @@ import {
 import { getChapterVerses, getVerseText } from '~helpers/biblesDb'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import loadInterlineaireChapter from '~helpers/loadInterlineaireChapter'
-import { strongDB } from '~helpers/sqlite'
 import { localStrongAccess, type StrongAccess } from './strongAccess'
 import {
   isStrongCapableBibleVersion,
@@ -66,11 +65,9 @@ export type BibleContentAccess = {
 
 type BibleContentAccessDependencies = {
   loadInterlinearChapter: typeof loadInterlineaireChapter
-  strongAccess: Pick<StrongAccess, 'loadChapter' | 'loadReferences'>
+  strongAccess: Pick<StrongAccess, 'loadReferences'>
   getChapterVerses: typeof getChapterVerses
   getIfVersionNeedsDownload: typeof getIfVersionNeedsDownload
-  initStrongDatabase: () => Promise<unknown>
-  isStrongDatabaseInitialized: () => boolean
   logError: (message: string, error: unknown) => void
   loadStrongBibleChapterSpans?: typeof loadStrongBibleChapterSpans
   loadReverseInterlinearChapterSpans?: typeof loadReverseInterlinearChapterSpans
@@ -82,8 +79,6 @@ const defaultDependencies: BibleContentAccessDependencies = {
   strongAccess: localStrongAccess,
   getChapterVerses,
   getIfVersionNeedsDownload,
-  initStrongDatabase: () => strongDB.init(),
-  isStrongDatabaseInitialized: () => Boolean(strongDB.get()),
   logError: (message, error) => console.log(message, error),
   loadStrongBibleChapterSpans,
   loadReverseInterlinearChapterSpans,
@@ -117,22 +112,6 @@ const loadInterlinearBibleChapter = async (
   dependencies: BibleContentAccessDependencies
 ): Promise<BibleChapterResult<BibleChapterData>> => {
   const result = await dependencies.loadInterlinearChapter(request.book, request.chapter, lang)
-  if (hasNoChapterRows(result)) {
-    return errorResult(await buildNoVersesError(request, dependencies))
-  }
-
-  return successResult(result as BibleChapterData)
-}
-
-const loadStrongBibleChapter = async (
-  request: BibleChapterRequest,
-  dependencies: BibleContentAccessDependencies
-): Promise<BibleChapterResult<BibleChapterData>> => {
-  if (!dependencies.isStrongDatabaseInitialized()) {
-    await dependencies.initStrongDatabase()
-  }
-
-  const result = await dependencies.strongAccess.loadChapter(request.book, request.chapter)
   if (hasNoChapterRows(result)) {
     return errorResult(await buildNoVersesError(request, dependencies))
   }
@@ -241,9 +220,6 @@ const loadRegularBibleChapter = async (
       ]
       if (fallbackReferences.length > 0) {
         try {
-          if (!dependencies.isStrongDatabaseInitialized()) {
-            await dependencies.initStrongDatabase()
-          }
           const loadedEntries = await dependencies.strongAccess.loadReferences(
             fallbackReferences,
             request.book
@@ -375,10 +351,6 @@ export const loadBibleContentChapter = async (
 
     if (normalizedRequest.version === 'INT_EN') {
       return await loadInterlinearBibleChapter(normalizedRequest, 'en', dependencies)
-    }
-
-    if (normalizedRequest.version === 'KJVS') {
-      return await loadStrongBibleChapter(normalizedRequest, dependencies)
     }
 
     return await loadRegularBibleChapter(normalizedRequest, dependencies)

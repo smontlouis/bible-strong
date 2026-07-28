@@ -22,12 +22,11 @@ import waitForStrongDB from '~common/waitForStrongDB'
 import { StrongTab } from '../../state/tabs'
 import LexiqueItem from './LexiqueItem'
 import { FeatherIcon } from '~common/ui/Icon'
-import { toast } from '~helpers/toast'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
-import { useResourceLanguage } from 'src/state/resourcesLanguage'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { LexiqueRow } from '~features/resources/strongAccess'
+import { useStrongLexiconLanguage } from './useStrongLexiconLanguage'
 
 interface LexiqueSection {
   title: string
@@ -76,7 +75,11 @@ const LexiqueListScreen = ({
   const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
   const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
-  const [strongResourceLanguage, setStrongResourceLanguage] = useResourceLanguage('STRONG')
+  const {
+    language: strongResourceLanguage,
+    menuTitle: strongLanguageMenuTitle,
+    toggleLanguage: toggleStrongLanguage,
+  } = useStrongLexiconLanguage()
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
 
@@ -116,12 +119,6 @@ const LexiqueListScreen = ({
     onStrongSelect?.(book, reference)
   }
 
-  const toggleStrongLanguage = () => {
-    const nextLanguage = strongResourceLanguage === 'fr' ? 'en' : 'fr'
-    setStrongResourceLanguage(nextLanguage)
-    toast(t('menu.languageChanged', { language: nextLanguage === 'fr' ? 'Français' : 'English' }))
-  }
-
   if (error) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
@@ -154,9 +151,7 @@ const LexiqueListScreen = ({
               actions={[
                 {
                   id: 'language',
-                  title: `${t('menu.language')}: ${
-                    strongResourceLanguage === 'fr' ? 'Français' : 'English'
-                  }`,
+                  title: strongLanguageMenuTitle,
                   image: 'globe',
                 },
               ]}

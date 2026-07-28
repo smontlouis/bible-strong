@@ -6,7 +6,6 @@ import type { ActiveLanguage } from '~helpers/languageUtils'
 export type ResourceLanguage = ActiveLanguage
 
 export type DatabaseId =
-  | 'STRONG'
   | 'DICTIONNAIRE'
   | 'NAVE'
   | 'TRESOR'
@@ -17,7 +16,6 @@ export type DatabaseId =
 
 // Databases that have language-specific content
 export const LANGUAGE_SPECIFIC_DBS: DatabaseId[] = [
-  'STRONG',
   'DICTIONNAIRE',
   'NAVE',
   'MHY',
@@ -30,7 +28,6 @@ export const SHARED_DBS: DatabaseId[] = ['TRESOR', 'BIBLES']
 
 // Databases that can have their language changed by the user
 export const USER_SELECTABLE_DBS: DatabaseId[] = [
-  'STRONG',
   'DICTIONNAIRE',
   'NAVE',
   'MHY',

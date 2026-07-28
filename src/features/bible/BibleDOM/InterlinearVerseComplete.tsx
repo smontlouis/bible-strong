@@ -134,12 +134,13 @@ const InterlinearVerse = ({
   const dispatch = useDispatch()
   const [showSecondaryVerse, setShowSecondaryVerse] = useState(false)
 
-  const openStrongSelection = (reference: string, isHebreu: boolean) => {
+  const openStrongSelection = (reference: string, isHebreu: boolean, word: string) => {
     dispatchStrongSelection(
       dispatch,
       [{ kind: 'strong', code: reference }],
       isHebreu ? 1 : 40,
-      version
+      version,
+      { word, chapter: verse.Chapitre, verse: verse.Verset }
     )
   }
 
@@ -168,7 +169,7 @@ const InterlinearVerse = ({
         return (
           <Section
             key={i}
-            onClick={() => openStrongSelection(code, isHebreu)}
+            onClick={() => openStrongSelection(code, isHebreu, hebreu)}
             settings={settings}
             isSelected={isSelected}
           >

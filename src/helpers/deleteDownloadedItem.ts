@@ -16,6 +16,9 @@ import { isStrongCapableBibleVersion, type StrongBibleVersionId } from './strong
 import { removeStrongBibleSidecar } from './strongBibleSidecar'
 import { removeInterlinearSidecar } from './interlinearBibleSidecar'
 import { resourcePublicationStore } from './resourcePublication'
+import { removeStrongLexiconModule } from './strongLexiconModules'
+import type { StrongLexiconModuleId } from './strongLexiconPublications'
+import { queryClient } from './queryClient'
 
 interface DeleteDownloadedItemOptions {
   bibleMode?: 'remove' | 'replace'
@@ -39,6 +42,7 @@ export type DownloadedItemDeletionPlan =
     }
   | { kind: 'strong-sidecar'; versionId: StrongBibleVersionId }
   | { kind: 'interlinear-sidecar'; language: ResourceLanguage }
+  | { kind: 'strong-lexicon-module'; moduleId: StrongLexiconModuleId }
   | { kind: 'database'; databaseId: DatabaseId; language: ResourceLanguage }
   | { kind: 'unknown'; itemId: string }
 
@@ -46,6 +50,14 @@ export const createDownloadedItemDeletionPlan = (
   itemId: string,
   { bibleMode = 'remove' }: DeleteDownloadedItemOptions = {}
 ): DownloadedItemDeletionPlan => {
+  if (itemId.startsWith('strong-lexicon:')) {
+    const moduleId = itemId.replace('strong-lexicon:', '') as StrongLexiconModuleId
+    if (!['core', 'resources', 'entities'].includes(moduleId)) {
+      return { kind: 'unknown', itemId }
+    }
+    return { kind: 'strong-lexicon-module', moduleId }
+  }
+
   if (itemId.startsWith('bible-strong:')) {
     const versionId = itemId.replace('bible-strong:', '')
     if (!isStrongCapableBibleVersion(versionId)) {
@@ -106,6 +118,12 @@ export const createDownloadedItemDeletionPlan = (
 }
 
 export const deleteDownloadedItem = async (plan: DownloadedItemDeletionPlan): Promise<void> => {
+  if (plan.kind === 'strong-lexicon-module') {
+    await removeStrongLexiconModule(plan.moduleId)
+    resourcePublicationStore.remove(`strong-lexicon:${plan.moduleId}`)
+    await queryClient.invalidateQueries({ queryKey: ['strong-lexicon'] })
+    return
+  }
   if (plan.kind === 'strong-sidecar') {
     await removeStrongBibleSidecar(plan.versionId)
     resourcePublicationStore.remove(`bible-strong:${plan.versionId}`)

@@ -9,6 +9,9 @@ import {
 export type StrongSelection = SelectedCode & {
   version: string
   identities: StrongIdentity[]
+  word?: string
+  chapter?: number
+  verse?: number
 }
 
 const normalizeStrongIdentity = (
@@ -40,7 +43,8 @@ const isStrongIdentity = (identity: unknown): identity is StrongIdentity => {
 export const createStrongSelection = (
   identities: readonly StrongIdentity[],
   bookValue: string | number,
-  versionValue: string
+  versionValue: string,
+  context: { word?: string; chapter?: string | number; verse?: string | number } = {}
 ): StrongSelection | undefined => {
   const book = Number(bookValue)
   const version = versionValue.trim()
@@ -61,11 +65,17 @@ export const createStrongSelection = (
 
   if (!reference || normalizedIdentities.length === 0) return undefined
 
+  const chapter = Number(context.chapter)
+  const verse = Number(context.verse)
+  const word = context.word?.trim()
   return {
     book,
     reference,
     identities: normalizedIdentities,
     version,
+    ...(word ? { word } : {}),
+    ...(Number.isInteger(chapter) && chapter > 0 ? { chapter } : {}),
+    ...(Number.isInteger(verse) && verse > 0 ? { verse } : {}),
   }
 }
 
@@ -79,5 +89,15 @@ export const getStrongSelectionPayload = (payload: unknown): StrongSelection | u
   if (typeof candidate.book !== 'number' && typeof candidate.book !== 'string') return undefined
   if (typeof candidate.version !== 'string') return undefined
 
-  return createStrongSelection(candidate.identities, candidate.book, candidate.version)
+  return createStrongSelection(candidate.identities, candidate.book, candidate.version, {
+    word: typeof candidate.word === 'string' ? candidate.word : undefined,
+    chapter:
+      typeof candidate.chapter === 'number' || typeof candidate.chapter === 'string'
+        ? candidate.chapter
+        : undefined,
+    verse:
+      typeof candidate.verse === 'number' || typeof candidate.verse === 'string'
+        ? candidate.verse
+        : undefined,
+  })
 }

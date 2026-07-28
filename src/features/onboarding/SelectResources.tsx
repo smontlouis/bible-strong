@@ -25,6 +25,7 @@ import {
   type OnboardingResourceSelection,
 } from './onboardingResources'
 import ResourceItem from './ResourceItem'
+import { getStrongLexiconPublication } from '~helpers/strongLexiconPublications'
 
 const DownloadFiles = ({ setStep }: { setStep: React.Dispatch<React.SetStateAction<number>> }) => {
   const { t } = useTranslation()
@@ -69,6 +70,13 @@ const DownloadFiles = ({ setStep }: { setStep: React.Dispatch<React.SetStateActi
             <Text padding={20} title fontSize={25}>
               {t('Bases de données')}
             </Text>
+            <ResourceItem
+              name={t('Lexique Strong')}
+              subTitle={t('Définitions françaises et anglaises, morphologie et mots liés')}
+              fileSize={getStrongLexiconPublication('core').archiveBytes}
+              isSelected={isSelected({ kind: 'strong-lexicon' })}
+              onPress={() => onPressItem({ kind: 'strong-lexicon' })}
+            />
             {Object.values(databases).map(db => (
               <ResourceItem
                 key={db.id}

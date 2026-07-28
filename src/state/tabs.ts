@@ -7,6 +7,7 @@ import { shallowEqual } from 'react-redux'
 import books, { Book } from '~assets/bible_versions/books-desc'
 import generateUUID from '~helpers/generateUUID'
 import { StrongReference, StudyNavigateBibleType, VerseIds } from '~common/types'
+import type { StrongIdentityKind } from '~helpers/strongIdentities'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
 import { storage } from '~helpers/storage'
 import { getBibleVersionCanonId, versions } from '~helpers/bibleVersions'
@@ -114,6 +115,12 @@ export interface StrongTab extends TabBase {
     reference?: string
     strongReference?: StrongReference
     strongBibleVersionId?: StrongBibleVersionId
+    identityKind?: StrongIdentityKind
+    identityCode?: string
+    bibleVersion?: string
+    clickedWord?: string
+    bibleChapter?: number
+    bibleVerse?: number
   }
 }
 
