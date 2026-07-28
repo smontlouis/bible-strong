@@ -84,7 +84,7 @@
     "@types/color": "^3.0.6",
     "@types/react-redux": "^7.1.33",
     "await-to-js": "^2.1.1",
-    "bible-passage-reference-parser": "^3.2.0",
+    "bible-passage-reference-parser": "file:./vendor/bcv-parser",
     "color": "^4.2.3",
     "colorsys": "^1.0.22",
     "date-fns": "^2.9.0",
@@ -202,6 +202,11 @@
   },
   "private": true,
   "packageManager": "yarn@4.12.0",
+  "jest": {
+    "transformIgnorePatterns": [
+      "/node_modules/(?!bible-passage-reference-parser/)"
+    ]
+  },
   "staticFeatureFlags": {
     "DISABLE_COMMIT_PAUSING_MECHANISM": true,
     "ANDROID_SYNCHRONOUSLY_UPDATE_UI_PROPS": true,

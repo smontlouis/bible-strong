@@ -7173,10 +7173,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bible-passage-reference-parser@npm:^3.2.0":
-  version: 3.2.0
-  resolution: "bible-passage-reference-parser@npm:3.2.0"
-  checksum: 10c0/0ea26feff399827bbc501b2f45ffaf709658cf3885004dd00cf0613f061112af4fe4244afec3334a57422861e601d473f52ddaa44fa6a7a800d5d29b2657edef
+"bible-passage-reference-parser@file:./vendor/bcv-parser::locator=bible-strong%40workspace%3A.":
+  version: 3.2.0-bible-strong.1
+  resolution: "bible-passage-reference-parser@file:./vendor/bcv-parser#./vendor/bcv-parser::hash=3e1c73&locator=bible-strong%40workspace%3A."
+  checksum: 10c0/dbd431cf2375a7174dc95896f354ca7951fb3ea198d62576fe054cfba068d11d133f93e023960ef7abbc8553fe60502386d71b6721faac409b9d013ccb48091d
   languageName: node
   linkType: hard
 
@@ -7233,7 +7233,7 @@ __metadata:
     babel-plugin-module-resolver: "npm:^3.2.0"
     babel-plugin-transform-remove-console: "npm:^6.9.4"
     babel-preset-expo: "npm:~56.0.0"
-    bible-passage-reference-parser: "npm:^3.2.0"
+    bible-passage-reference-parser: "file:./vendor/bcv-parser"
     color: "npm:^4.2.3"
     colorsys: "npm:^1.0.22"
     date-fns: "npm:^2.9.0"

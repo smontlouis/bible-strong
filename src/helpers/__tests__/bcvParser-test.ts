@@ -68,9 +68,18 @@ jest.mock('bible-passage-reference-parser/esm/bcv_parser.js', () => ({
 }))
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { osisToBibleReferenceTarget, parseInlineBibleReferences } = require('../bcvParser')
+const { bcv, osisToBibleReferenceTarget, parseInlineBibleReferences } = require('../bcvParser')
 
 describe('bcvParser', () => {
+  it('uses strict book matching for prose extraction', () => {
+    expect(bcv.set_options).toHaveBeenCalledWith({
+      book_match_strategy: 'strict',
+      consecutive_combination_strategy: 'separate',
+      sequence_combination_strategy: 'separate',
+      testaments: 'ona',
+    })
+  })
+
   describe('parseInlineBibleReferences', () => {
     it('detects French references with source text positions', () => {
       const text = 'Lisez Jean 3:16 et 1 Corinthiens 13:4-8.'

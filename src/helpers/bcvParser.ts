@@ -44,6 +44,7 @@ const createBcvParser = (parserLanguage: BcvLanguage): BcvParserWithTranslations
   const parser = new bcv_parser(parserLanguage === 'fr' ? fr : en) as BcvParserWithTranslations
 
   parser.set_options({
+    book_match_strategy: 'strict',
     consecutive_combination_strategy: 'separate',
     sequence_combination_strategy: 'separate',
     testaments: 'ona',
