@@ -22,8 +22,6 @@ jest.mock('~helpers/bibleVersions', () => ({
   getIfVersionNeedsDownload: jest.fn(),
 }))
 
-jest.mock('~helpers/loadInterlineaireChapter', () => jest.fn())
-
 jest.mock('../strongAccess', () => ({
   localStrongAccess: {
     loadChapter: jest.fn(),
@@ -35,7 +33,6 @@ import type { StrongReference } from '~common/types'
 import { loadBibleContentChapter } from '../bibleContentAccess'
 
 const createDependencies = () => ({
-  loadInterlinearChapter: jest.fn(),
   strongAccess: {
     loadChapter: jest.fn(),
     loadReferences: jest.fn(async () => [] as StrongReference[]),
@@ -205,28 +202,6 @@ describe('BibleContentAccess', () => {
 
     expect(loadInterlinearChapterTokens).toHaveBeenNthCalledWith(1, 'BHG', 'fr', 1, 1)
     expect(loadInterlinearChapterTokens).toHaveBeenNthCalledWith(2, 'BHG', 'en', 1, 1)
-  })
-
-  it('routes French interlinear versions to French interlinear content', async () => {
-    const dependencies = createDependencies()
-    dependencies.loadInterlinearChapter.mockResolvedValue([
-      { Livre: 1, Chapitre: 1, Verset: 1, Texte: 'בראשית' },
-    ])
-
-    await loadBibleContentChapter({ book: 1, chapter: 1, version: 'INT' }, dependencies)
-
-    expect(dependencies.loadInterlinearChapter).toHaveBeenCalledWith(1, 1, 'fr')
-  })
-
-  it('routes English interlinear versions to English interlinear content', async () => {
-    const dependencies = createDependencies()
-    dependencies.loadInterlinearChapter.mockResolvedValue([
-      { Livre: 1, Chapitre: 1, Verset: 1, Texte: 'In beginning' },
-    ])
-
-    await loadBibleContentChapter({ book: 1, chapter: 1, version: 'INT_EN' }, dependencies)
-
-    expect(dependencies.loadInterlinearChapter).toHaveBeenCalledWith(1, 1, 'en')
   })
 
   it('migrates legacy LSGS reads to canonical LSG with Strong visible', async () => {

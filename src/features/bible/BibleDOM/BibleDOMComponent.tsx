@@ -26,7 +26,6 @@ import {
   SWIPE_DOWN,
   SWIPE_UP,
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
-  TOGGLE_INT_COMPLETE,
   TOGGLE_SELECTED_VERSE,
   OPEN_DOWNLOADS,
   RESET_BIBLE_DATABASE,
@@ -114,7 +113,6 @@ type Props = Pick<
   | 'parallelColumnWidth'
   | 'parallelDisplayMode'
   | 'focusVerses'
-  | 'secondaryVerses'
   | 'selectedVerses'
   | 'highlightedVerses'
   | 'bookmarkedVerses'
@@ -137,7 +135,6 @@ type Props = Pick<
   dispatch: Dispatch
   dom: import('expo/dom').DOMProps
   translations: BibleDOMTranslations
-  isINTComplete: boolean
   // Pre-computed metadata from native side
   comments: { [key: string]: string } | null
   taggedVerses: TaggedVerse[] | null
@@ -199,34 +196,6 @@ const RightDirection = styled('div')<RootStyles>(({ settings: { theme, colors } 
   fontFamily: 'arial',
   fontSize: '13px',
   color: colors[theme].darkGrey,
-}))
-
-const IntMode = styled('div')<RootStyles>(({ settings: { theme, colors, fontFamily } }) => ({
-  fontFamily,
-  webkitTouchCallout: 'none',
-  mozUserSelect: 'none',
-  msUserSelect: 'none',
-  khtmlUserSelect: 'none',
-  webkitUserSelect: 'none',
-  color: colors[theme].default,
-  fontSize: '14px',
-  display: 'inline-block',
-
-  backgroundColor: colors[theme].reverse,
-  boxShadow: isDarkTheme(theme)
-    ? `0 0 10px 0 rgba(255, 255, 255, 0.1)`
-    : `0 0 10px 0 rgba(0, 0, 0, 0.2)`,
-  borderRadius: '8px',
-  paddingInline: '8px',
-  paddingBlock: '4px',
-  wordBreak: 'break-word',
-  marginInline: '4px',
-  transition: 'opacity 0.2s ease-in-out',
-
-  cursor: 'pointer',
-  '&:active': {
-    opacity: 0.6,
-  },
 }))
 
 const ReturnToSelectedVerseButton = styled('button')<
@@ -512,7 +481,6 @@ const LoadedBibleContent = ({
   parallelColumnWidth = 75,
   parallelDisplayMode = 'horizontal',
   focusVerses,
-  secondaryVerses,
   comments,
   selectedVerses,
   highlightedVerses,
@@ -539,7 +507,6 @@ const LoadedBibleContent = ({
   eraseSelectionTrigger,
   selectedAnnotationId,
   redWords,
-  isINTComplete,
   // Pre-computed metadata from native side
   taggedVerses,
   versesWithAnnotationNotes,
@@ -768,10 +735,8 @@ const LoadedBibleContent = ({
     // Normal mode: don't enter annotation mode if verses are selected
     if (Object.keys(selectedVerses).length > 0) return
 
-    // Don't enter annotation mode for interlinear versions (different DOM structure)
+    // Don't enter annotation mode for interlinear views (different DOM structure)
     if (
-      version === 'INT' ||
-      version === 'INT_EN' ||
       (version === 'BHG' && verses.some(verse => Boolean(verse.InterlinearTokens?.length))) ||
       hasReverseInterlinear
     )
@@ -1111,10 +1076,7 @@ const LoadedBibleContent = ({
     })
   }
 
-  const isHebreu =
-    version === 'BHS' ||
-    ((version === 'INT' || version === 'INT_EN' || version === 'BHG') &&
-      Number(verses[0].Livre) < 40)
+  const isHebreu = version === 'BHS' || (version === 'BHG' && Number(verses[0].Livre) < 40)
   const introComment = comments?.[0]
   const isParallelVerse = Boolean(parallelVerses?.length)
   const parallelVersionTitles = isParallelVerse
@@ -1199,18 +1161,6 @@ const LoadedBibleContent = ({
                 : 1
             }
           >
-            {(version === 'INT' || version === 'INT_EN') && !isParallelVerse && (
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '40px' }}>
-                <IntMode
-                  settings={settings}
-                  onClick={() => dispatch({ type: TOGGLE_INT_COMPLETE })}
-                >
-                  {isINTComplete
-                    ? translations.interlinearDetailed
-                    : translations.interlinearCompact}
-                </IntMode>
-              </div>
-            )}
             {isHebreu && <RightDirection settings={settings}>Sens de la lecture ←</RightDirection>}
             {!!introComment && settings.commentsDisplay && (
               <Comment isIntro id="comment-0" settings={settings} comment={introComment} />
@@ -1221,7 +1171,6 @@ const LoadedBibleContent = ({
               verses={verses}
               parallelVerses={parallelVerses}
               focusVerses={focusVerses}
-              secondaryVerses={secondaryVerses}
               selectedVerses={selectedVerses}
               highlightedVerses={highlightedVerses}
               settings={settings}
@@ -1232,7 +1181,6 @@ const LoadedBibleContent = ({
               pericopeChapter={pericopeChapter}
               isSelectionMode={isSelectionMode}
               selectedCode={selectedCode}
-              isINTComplete={isINTComplete}
               isHebreu={isHebreu}
               isParallelVerse={isParallelVerse}
               comments={comments}

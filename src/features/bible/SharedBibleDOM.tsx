@@ -80,7 +80,6 @@ const SharedBibleDOM = () => {
     verses: [],
     parallelVerses: [],
     focusVerses: undefined,
-    secondaryVerses: null,
     selectedVerses: {},
     highlightedVerses: {},
     notedVerses: {},

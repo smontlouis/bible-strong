@@ -1,4 +1,4 @@
-import { createStrongSelection } from '~helpers/strongSelection'
+import { createStrongSelection, type StrongSelectionContext } from '~helpers/strongSelection'
 import type { StrongIdentity } from '~helpers/strongIdentities'
 import { OPEN_STRONG_SELECTION } from './dispatch'
 
@@ -19,7 +19,7 @@ export const dispatchStrongSelection = (
   identities: readonly StrongIdentity[],
   book: string | number,
   version: string,
-  context?: { word?: string; chapter?: string | number; verse?: string | number }
+  context?: StrongSelectionContext
 ) => {
   const selection = createStrongSelection(identities, book, version, context)
   if (!selection) return

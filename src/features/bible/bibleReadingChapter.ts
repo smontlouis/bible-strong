@@ -5,7 +5,6 @@ import {
   defaultResourceAccess,
   type ResourceAccessRegistry,
 } from '~features/resources/resourceAccess'
-import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import type { VersionCode } from '~state/tabs'
 import { type StrongMode, usesCanonicalBibleExtras } from '~helpers/strongBiblePublications'
 import { getCanonicalChapterPericope } from '~helpers/canonicalBibleHeadings'
@@ -29,7 +28,6 @@ export interface BibleReadingChapterRequest {
 export interface BibleReadingExtrasRequest extends BibleReadingChapterRequest {
   parallelVersions: VersionCode[]
   commentsDisplay: boolean
-  lang: string
 }
 
 export interface BibleReadingMainResult {
@@ -116,24 +114,6 @@ export const loadBibleReadingParallelVerses = async (
       error: result.error as BibleError | undefined,
     }
   })
-}
-
-export const loadBibleReadingSecondaryVerses = async (
-  { book, chapter, version, lang }: BibleReadingExtrasRequest,
-  resourceAccess: ResourceAccessRegistry = defaultResourceAccess
-): Promise<Verse[] | null> => {
-  if (version !== 'INT' && version !== 'INT_EN') return null
-
-  const secondaryResult = await resourceAccess.bibleContent.loadChapter({
-    book,
-    chapter,
-    version: getDefaultBibleVersion(lang),
-  })
-  if (secondaryResult.success && secondaryResult.data) {
-    return secondaryResult.data as Verse[]
-  }
-
-  return null
 }
 
 export const loadBibleReadingComments = async (

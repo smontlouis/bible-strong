@@ -78,13 +78,20 @@ export const resolveBibleTabResources = async (
         interlinearMode: hasLocalizedIndex ? 'interlinear' : 'hidden',
         interlinearLocale: legacyLocale,
       }
-    } else if (!(await isBibleAvailable(nextData.selectedVersion))) {
+    } else {
       nextData = await selectInstalledFallback(
         nextData,
         applicationLanguage,
         isBibleAvailable,
         dependencies.getBibleCoverage
       )
+      if (getLegacyInterlinearLocale(nextData.selectedVersion)) {
+        nextData = {
+          ...selectResourceVersion(nextData, 'BHG'),
+          interlinearMode: 'hidden',
+          interlinearLocale: legacyLocale,
+        }
+      }
     }
   } else if (!(await isBibleAvailable(nextData.selectedVersion))) {
     nextData = await selectInstalledFallback(
@@ -118,8 +125,10 @@ export const resolveBibleTabResources = async (
     const parallelLegacyLocale = getLegacyInterlinearLocale(resolvedVersion)
     let availableVersion: VersionCode | undefined
 
-    if (parallelLegacyLocale && (await isBibleAvailable('BHG'))) {
-      availableVersion = 'BHG'
+    if (parallelLegacyLocale) {
+      if (await isBibleAvailable('BHG')) {
+        availableVersion = 'BHG'
+      }
     } else if (await isBibleAvailable(resolvedVersion)) {
       availableVersion = resolvedVersion
     }

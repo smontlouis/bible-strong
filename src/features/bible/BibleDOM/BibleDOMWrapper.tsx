@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/react-native'
 import * as Haptics from 'expo-haptics'
 import { useRouter } from 'expo-router'
 import produce from 'immer'
-import { useAtom, useSetAtom } from 'jotai/react'
+import { useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -18,7 +18,6 @@ import {
   ParallelDisplayMode,
   VersionCode,
 } from 'src/state/tabs'
-import { isINTCompleteAtom } from '../footer/atom'
 import BibleDOMComponent from './BibleDOMComponent'
 import {
   sortVersesToTags,
@@ -99,7 +98,6 @@ import {
   SWIPE_LEFT,
   SWIPE_RIGHT,
   SWIPE_UP,
-  TOGGLE_INT_COMPLETE,
   TOGGLE_SELECTED_VERSE,
 } from './dispatch'
 import {
@@ -195,7 +193,6 @@ export type WebViewProps = {
   parallelDisplayMode?: ParallelDisplayMode
 
   focusVerses: (string | number)[] | undefined
-  secondaryVerses: Verse[] | null
   selectedVerses: VerseIds
   highlightedVerses: HighlightsObj
   notedVerses: NotesObj
@@ -309,7 +306,6 @@ export const BibleDOMWrapper = ({
   parallelColumnWidth = 75,
   parallelDisplayMode = 'horizontal',
   focusVerses,
-  secondaryVerses,
   selectedVerses,
   highlightedVerses,
   notedVerses,
@@ -373,7 +369,6 @@ export const BibleDOMWrapper = ({
   const { openVersionSelector } = useBookAndVersionSelector()
   const openRelationEndpoint = useOpenRelationEndpoint()
   const isContextFocused = contextDisplayMode === 'focused'
-  const [isINTComplete, setIsINTComplete] = useAtom(isINTCompleteAtom)
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
   const theme = useTheme()
   const insets = useSafeAreaInsets()
@@ -414,8 +409,6 @@ export const BibleDOMWrapper = ({
     parallelChapterNotFound: t('bible.error.parallelChapterNotFound'),
     parallelLoadError: t('bible.error.parallelLoadError'),
     exitFocus: t('tab.exitFocus'),
-    interlinearDetailed: t('bible.interlinear.detailed'),
-    interlinearCompact: t('bible.interlinear.compact'),
     versionNotFound: t('bible.error.versionNotFound'),
     chapterNotFound: t('bible.error.chapterNotFound'),
     databaseCorrupted: t('bible.error.databaseCorrupted'),
@@ -709,11 +702,6 @@ export const BibleDOMWrapper = ({
         break
       }
 
-      case TOGGLE_INT_COMPLETE: {
-        setIsINTComplete(prev => !prev)
-        break
-      }
-
       case DOWNLOAD_BIBLE_VERSION: {
         const requestedVersion = getStringPayload(action.payload)
         if (!requestedVersion) break
@@ -814,7 +802,6 @@ export const BibleDOMWrapper = ({
         parallelColumnWidth={parallelColumnWidth}
         parallelDisplayMode={parallelDisplayMode}
         focusVerses={focusVerses}
-        secondaryVerses={secondaryVerses}
         selectedVerses={selectedVerses}
         highlightedVerses={highlightedVerses}
         bookmarkedVerses={bookmarkedVerses}
@@ -846,7 +833,6 @@ export const BibleDOMWrapper = ({
         error={error}
         errorDownloadState={errorDownloadState}
         isResettingDatabase={isResettingDatabase}
-        isINTComplete={isINTComplete}
         taggedVerses={taggedVerses}
         versesWithAnnotationNotes={versesWithAnnotationNotes}
         annotationNotesCountByVerse={annotationNotesCountByVerse}

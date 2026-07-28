@@ -9,6 +9,10 @@ import {
   getStrongReferenceNumber,
   type StrongIdentity,
 } from '~helpers/strongIdentities'
+import {
+  collectStrongSelectionMorphologies,
+  type StrongSelectionMorphology,
+} from '~helpers/strongSelection'
 import { dispatchStrongSelection } from './strongSelectionAction'
 
 interface Props {
@@ -31,11 +35,16 @@ const StructuredInterlinearVerse = ({
   const dispatch = useDispatch()
   const colors = settings.colors[settings.theme]
   const tokens = verse.InterlinearTokens ?? []
-  const openStrongSelection = (identities: StrongIdentity[], word: string) => {
+  const openStrongSelection = (
+    identities: StrongIdentity[],
+    word: string,
+    morphologies: StrongSelectionMorphology[]
+  ) => {
     dispatchStrongSelection(dispatch, identities, isHebreu ? 1 : 40, version, {
       word,
       chapter: verse.Chapitre,
       verse: verse.Verset,
+      morphologies,
     })
   }
   const layout = buildInterlinearVerseLayout(verse.Texte, tokens)
@@ -59,6 +68,10 @@ const StructuredInterlinearVerse = ({
           identities.some(identity => selectedReference === getStrongReferenceNumber(identity.code))
         const transliteration = line(token.segments.map(segment => segment.transliteration))
         const displayedStrongReferences = line(displayedIdentities.map(identity => identity.code))
+        const selectionMorphologies = collectStrongSelectionMorphologies(
+          selectionIdentities,
+          token.segments
+        )
 
         if (displayMode === 'strong') {
           return (
@@ -68,7 +81,9 @@ const StructuredInterlinearVerse = ({
                 type="button"
                 data-ignore-verse-touch
                 disabled={!preferredIdentity}
-                onClick={() => openStrongSelection(selectionIdentities, surface)}
+                onClick={() =>
+                  openStrongSelection(selectionIdentities, surface, selectionMorphologies)
+                }
                 style={{
                   appearance: 'none',
                   border: 0,
@@ -108,7 +123,9 @@ const StructuredInterlinearVerse = ({
                 type="button"
                 data-ignore-verse-touch
                 disabled={!preferredIdentity}
-                onClick={() => openStrongSelection(selectionIdentities, surface)}
+                onClick={() =>
+                  openStrongSelection(selectionIdentities, surface, selectionMorphologies)
+                }
                 style={{
                   appearance: 'none',
                   border: 0,
@@ -135,7 +152,9 @@ const StructuredInterlinearVerse = ({
               type="button"
               data-ignore-verse-touch
               disabled={!preferredIdentity}
-              onClick={() => openStrongSelection(selectionIdentities, surface)}
+              onClick={() =>
+                openStrongSelection(selectionIdentities, surface, selectionMorphologies)
+              }
               style={{
                 appearance: 'none',
                 border: 0,

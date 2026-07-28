@@ -8,7 +8,6 @@ import {
 } from '~helpers/bibleErrors'
 import { getChapterVerses, getVerseText } from '~helpers/biblesDb'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
-import loadInterlineaireChapter from '~helpers/loadInterlineaireChapter'
 import { localStrongAccess, type StrongAccess } from './strongAccess'
 import {
   isStrongCapableBibleVersion,
@@ -35,17 +34,7 @@ import {
 } from '~helpers/reverseInterlinearBible'
 import { resolveDisplayedStrongIdentities } from '~helpers/strongIdentities'
 
-export type InterlinearVerse = {
-  Texte: string
-  Verset: number
-  Livre: number
-  Chapitre: number
-  Hebreu?: string
-  Grec?: string
-  [key: string]: string | number | undefined
-}
-
-export type BibleChapterData = Verse[] | InterlinearVerse[] | null
+export type BibleChapterData = Verse[] | null
 
 export type BibleChapterRequest = {
   book: number
@@ -64,7 +53,6 @@ export type BibleContentAccess = {
 }
 
 type BibleContentAccessDependencies = {
-  loadInterlinearChapter: typeof loadInterlineaireChapter
   strongAccess: Pick<StrongAccess, 'loadReferences'>
   getChapterVerses: typeof getChapterVerses
   getIfVersionNeedsDownload: typeof getIfVersionNeedsDownload
@@ -75,7 +63,6 @@ type BibleContentAccessDependencies = {
 }
 
 const defaultDependencies: BibleContentAccessDependencies = {
-  loadInterlinearChapter: loadInterlineaireChapter,
   strongAccess: localStrongAccess,
   getChapterVerses,
   getIfVersionNeedsDownload,
@@ -84,11 +71,6 @@ const defaultDependencies: BibleContentAccessDependencies = {
   loadReverseInterlinearChapterSpans,
   loadInterlinearChapterTokens,
 }
-
-const hasNoChapterRows = (result: unknown): boolean =>
-  !result ||
-  (typeof result === 'object' && 'error' in result) ||
-  (Array.isArray(result) && result.length === 0)
 
 const buildNoVersesError = async (
   request: BibleChapterRequest,
@@ -104,19 +86,6 @@ const buildNoVersesError = async (
   }
 
   return createBibleError('CHAPTER_NOT_FOUND', request.version, request.book, request.chapter)
-}
-
-const loadInterlinearBibleChapter = async (
-  request: BibleChapterRequest,
-  lang: 'fr' | 'en',
-  dependencies: BibleContentAccessDependencies
-): Promise<BibleChapterResult<BibleChapterData>> => {
-  const result = await dependencies.loadInterlinearChapter(request.book, request.chapter, lang)
-  if (hasNoChapterRows(result)) {
-    return errorResult(await buildNoVersesError(request, dependencies))
-  }
-
-  return successResult(result as BibleChapterData)
 }
 
 const loadRegularBibleChapter = async (
@@ -345,14 +314,6 @@ export const loadBibleContentChapter = async (
       version: resolved.versionId,
       strongMode: resolved.strongMode,
     }
-    if (normalizedRequest.version === 'INT') {
-      return await loadInterlinearBibleChapter(normalizedRequest, 'fr', dependencies)
-    }
-
-    if (normalizedRequest.version === 'INT_EN') {
-      return await loadInterlinearBibleChapter(normalizedRequest, 'en', dependencies)
-    }
-
     return await loadRegularBibleChapter(normalizedRequest, dependencies)
   } catch (error) {
     dependencies.logError('[BibleContentAccess] Error loading chapter:', error)

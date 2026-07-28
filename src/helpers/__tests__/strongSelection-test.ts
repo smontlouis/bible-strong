@@ -1,4 +1,9 @@
-import { createStrongSelection, getStrongSelectionPayload } from '../strongSelection'
+import {
+  collectStrongSelectionMorphologies,
+  createStrongSelection,
+  getStrongSelectionMorphologyCodes,
+  getStrongSelectionPayload,
+} from '../strongSelection'
 
 describe('strongSelection', () => {
   it('preserves every displayed Strong identity in order', () => {
@@ -29,6 +34,82 @@ describe('strongSelection', () => {
       reference: '25',
       identities: [{ kind: 'strong', code: 'G25' }],
       version: 'BHG',
+    })
+  })
+
+  it('associates contextual morphology with each displayed Strong identity', () => {
+    const identities = [
+      { kind: 'dstrong' as const, code: 'H3068G' },
+      { kind: 'strong' as const, code: 'H0413' },
+    ]
+    const morphologies = collectStrongSelectionMorphologies(identities, [
+      {
+        identities: [
+          { kind: 'strong', code: 'H3068' },
+          { kind: 'dstrong', code: 'H3068G' },
+        ],
+        morphology: 'HNp',
+      },
+      {
+        identities: [{ kind: 'strong', code: 'H0413' }],
+        morphology: 'HR',
+      },
+      {
+        identities: [{ kind: 'strong', code: 'H0413' }],
+        morphology: 'HR',
+      },
+    ])
+
+    expect(morphologies).toEqual([
+      { identity: { kind: 'dstrong', code: 'H3068G' }, codes: ['HNp'] },
+      { identity: { kind: 'strong', code: 'H0413' }, codes: ['HR'] },
+    ])
+    expect(getStrongSelectionMorphologyCodes(morphologies, identities[1])).toEqual(['HR'])
+  })
+
+  it('preserves contextual morphology when creating and validating a selection', () => {
+    const payload = {
+      book: 1,
+      identities: [
+        { kind: 'dstrong' as const, code: 'H3068G' },
+        { kind: 'strong' as const, code: 'H0413' },
+      ],
+      version: 'DBY',
+      morphologies: [
+        {
+          identity: { kind: 'dstrong' as const, code: 'H3068G' },
+          codes: [' HNp ', 'HNp'],
+        },
+        {
+          identity: { kind: 'strong' as const, code: 'H0413' },
+          codes: ['HR'],
+        },
+      ],
+    }
+
+    expect(
+      createStrongSelection(payload.identities, payload.book, payload.version, {
+        morphologies: payload.morphologies,
+      })
+    ).toEqual({
+      book: 1,
+      reference: '3068',
+      identities: payload.identities,
+      version: 'DBY',
+      morphologies: [
+        { identity: { kind: 'dstrong', code: 'H3068G' }, codes: ['HNp'] },
+        { identity: { kind: 'strong', code: 'H0413' }, codes: ['HR'] },
+      ],
+    })
+    expect(getStrongSelectionPayload(payload)).toEqual({
+      book: 1,
+      reference: '3068',
+      identities: payload.identities,
+      version: 'DBY',
+      morphologies: [
+        { identity: { kind: 'dstrong', code: 'H3068G' }, codes: ['HNp'] },
+        { identity: { kind: 'strong', code: 'H0413' }, codes: ['HR'] },
+      ],
     })
   })
 

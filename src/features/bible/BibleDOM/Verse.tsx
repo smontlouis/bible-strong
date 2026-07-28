@@ -28,8 +28,6 @@ import { ContainerText, resolveHighlightInfo } from './ContainerText'
 import { convertHex } from './convertHex'
 import { HIGHLIGHT_BACKGROUND_OPACITY, getContrastTextColor } from '~helpers/highlightUtils'
 import { isDarkTheme } from './utils'
-const InterlinearVerseComplete = React.lazy(() => import('./InterlinearVerseComplete'))
-const InterlinearVerse = React.lazy(() => import('./InterlinearVerse'))
 const StructuredInterlinearVerse = React.lazy(() => import('./StructuredInterlinearVerse'))
 const ReverseInterlinearVerse = React.lazy(() => import('./ReverseInterlinearVerse'))
 import VerseTags from './VerseTags'
@@ -472,7 +470,6 @@ interface Props {
     verse: TVerse
     error?: BibleError
   }[]
-  secondaryVerse?: TVerse | null
   isSelected: boolean
   highlightedColor?: keyof RootStyles['settings']['colors'][keyof RootStyles['settings']['colors']]
   annotationNotesCount?: number
@@ -486,7 +483,6 @@ interface Props {
   isFocused?: boolean
   isParallel?: boolean
   isParallelVerse?: boolean
-  isINTComplete?: boolean
   tag: TaggedVerse | undefined
   bookmark?: Bookmark
   fadePosition?: 'top' | 'bottom'
@@ -514,7 +510,6 @@ interface Props {
 const Verse = ({
   verse,
   parallelVerse,
-  secondaryVerse,
   isSelected,
   highlightedColor,
   annotationNotesCount,
@@ -531,7 +526,6 @@ const Verse = ({
   isFocused,
   isParallel,
   isParallelVerse,
-  isINTComplete,
   tag,
   bookmark,
   fadePosition,
@@ -672,8 +666,6 @@ const Verse = ({
             const parallelModeProps = getParallelVerseModeProps({
               columnIndex: i,
               interlinearMode,
-              isINTComplete,
-              secondaryVerse,
             })
             return (
               <div key={i}>
@@ -741,8 +733,6 @@ const Verse = ({
           const parallelModeProps = getParallelVerseModeProps({
             columnIndex: i,
             interlinearMode,
-            isINTComplete,
-            secondaryVerse,
           })
 
           // Error state: show translated error message
@@ -787,32 +777,6 @@ const Verse = ({
           )
         })}
       </div>
-    )
-  }
-
-  if (version === 'INT' || version === 'INT_EN') {
-    return (
-      <React.Suspense fallback={<span>{verse.Texte}</span>}>
-        {isINTComplete ? (
-          <InterlinearVerseComplete
-            secondaryVerse={secondaryVerse}
-            isHebreu={isHebreu}
-            settings={settings}
-            verse={verse}
-            version={version}
-            selectedCode={selectedCode}
-          />
-        ) : (
-          <InterlinearVerse
-            secondaryVerse={secondaryVerse}
-            isHebreu={isHebreu}
-            settings={settings}
-            verse={verse}
-            version={version}
-            selectedCode={selectedCode}
-          />
-        )}
-      </React.Suspense>
     )
   }
 

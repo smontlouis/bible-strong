@@ -24,6 +24,10 @@ import { useResourceAccess } from '~features/resources/resourceAccess'
 import { createStrongLexiconModuleDownloadItem } from '~helpers/downloadItemFactory'
 import { downloadManager } from '~helpers/downloadManager'
 import type { StrongIdentity } from '~helpers/strongIdentities'
+import {
+  getStrongSelectionMorphologyCodes,
+  type StrongSelectionMorphology,
+} from '~helpers/strongSelection'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
@@ -36,6 +40,7 @@ type StrongSelectionSheetProps = {
   verse?: number
   word?: string
   identities: StrongIdentity[]
+  morphologies: StrongSelectionMorphology[]
   onClose: () => void
 }
 
@@ -47,6 +52,7 @@ const StrongSelectionSheet = ({
   verse,
   word,
   identities,
+  morphologies,
   onClose,
 }: StrongSelectionSheetProps) => {
   const { t } = useTranslation()
@@ -57,9 +63,16 @@ const StrongSelectionSheet = ({
   const previewPagerRef = useRef<ScrollView>(null)
   const [selectedPreviewIndex, setSelectedPreviewIndex] = useState(0)
   const resourceLanguage = useAtomValue(resourcesLanguageAtom).STRONG
-  const selectionKey = identities.map(identity => `${identity.kind}:${identity.code}`).join('|')
+  const selectionKey = [
+    ...identities.map(identity => `${identity.kind}:${identity.code}`),
+    ...morphologies.map(
+      morphology =>
+        `${morphology.identity.kind}:${morphology.identity.code}:${morphology.codes.join(',')}`
+    ),
+  ].join('|')
   const carouselGap = 12
   const carouselHorizontalPadding = 20
+  const previewSkeletonHeight = morphologies.length ? 178 : 153
   const coreDownload = useDownloadItemStatus('strong-lexicon:core')
   const availabilityQuery = useQuery({
     queryKey: ['strong-lexicon', 'availability', 'core'],
@@ -192,7 +205,7 @@ const StrongSelectionSheet = ({
             <HStack gap={carouselGap} pl={carouselHorizontalPadding}>
               <VStack
                 width={windowWidth - carouselHorizontalPadding * 2 - 24}
-                height={153}
+                height={previewSkeletonHeight}
                 bg="lightGrey"
                 bgOpacity="050"
                 borderRadius={14}
@@ -208,6 +221,7 @@ const StrongSelectionSheet = ({
                   <Box width={52} height={22} bg="border" bgOpacity="050" borderRadius={6} />
                   <Box width={76} height={14} bg="border" bgOpacity="050" borderRadius={5} />
                 </HStack>
+                <Box width={94} height={12} bg="border" bgOpacity="050" borderRadius={4} />
                 <VStack gap={7} mt={2}>
                   <Box width="100%" height={12} bg="border" bgOpacity="050" borderRadius={4} />
                   <Box width="88%" height={12} bg="border" bgOpacity="050" borderRadius={4} />
@@ -216,7 +230,7 @@ const StrongSelectionSheet = ({
               </VStack>
               <Box
                 width={windowWidth - carouselHorizontalPadding * 2 - 24}
-                height={153}
+                height={previewSkeletonHeight}
                 bg="lightGrey"
                 bgOpacity="050"
                 borderRadius={14}
@@ -279,6 +293,10 @@ const StrongSelectionSheet = ({
                 const descriptionHtml = preview.definitionHtml
                   ? truncHTML(preview.definitionHtml, 360).html
                   : undefined
+                const morphologyCodes = getStrongSelectionMorphologyCodes(
+                  morphologies,
+                  preview.selectedIdentity
+                )
 
                 return (
                   <Box
@@ -315,6 +333,20 @@ const StrongSelectionSheet = ({
                                 </Text>
                               )}
                             </HStack>
+                            {!!morphologyCodes.length && (
+                              <HStack alignItems="baseline" gap={6} wrap>
+                                <Text color="tertiary" fontSize={11}>
+                                  {t('Morphologie')}
+                                </Text>
+                                <Text
+                                  color="tertiary"
+                                  fontSize={12}
+                                  style={{ fontFamily: 'Arial' }}
+                                >
+                                  {morphologyCodes.join(' · ')}
+                                </Text>
+                              </HStack>
+                            )}
                           </VStack>
                           <FeatherIcon name="chevron-right" size={18} color="tertiary" />
                         </HStack>

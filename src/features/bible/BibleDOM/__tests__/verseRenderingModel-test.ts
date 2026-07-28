@@ -162,13 +162,9 @@ describe('verseRenderingModel', () => {
         getParallelVerseModeProps({
           columnIndex: 0,
           interlinearMode,
-          isINTComplete: true,
-          secondaryVerse: verse,
         })
       ).toEqual({
         interlinearMode,
-        isINTComplete: true,
-        secondaryVerse: verse,
       })
     }
   )
@@ -178,13 +174,9 @@ describe('verseRenderingModel', () => {
       getParallelVerseModeProps({
         columnIndex: 1,
         interlinearMode: 'strong',
-        isINTComplete: true,
-        secondaryVerse: verse,
       })
     ).toEqual({
       interlinearMode: undefined,
-      isINTComplete: undefined,
-      secondaryVerse: undefined,
     })
   })
 })

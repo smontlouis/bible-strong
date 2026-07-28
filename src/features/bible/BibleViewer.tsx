@@ -81,7 +81,6 @@ import {
   loadBibleReadingMain,
   loadBibleReadingParallelVerses,
   loadBibleReadingRedWords,
-  loadBibleReadingSecondaryVerses,
 } from './bibleReadingChapter'
 import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
 import BibleFooter from './footer/BibleFooter'
@@ -304,7 +303,6 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     version,
     parallelVersions,
     commentsDisplay: settings.commentsDisplay,
-    lang,
   }
   const extrasEnabled =
     Boolean(mainResult?.success && mainResult.data) && !mainReadingQuery.isPlaceholderData
@@ -318,20 +316,6 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
       bibleDataRefreshSignal,
     ],
     queryFn: () => loadBibleReadingParallelVerses(extrasRequest),
-    enabled: extrasEnabled,
-    staleTime: Infinity,
-    ...localQueryOptions,
-  })
-  const { data: secondaryVerses = null } = useQuery({
-    queryKey: [
-      'bible-reading-secondary',
-      version,
-      book.Numero,
-      chapter,
-      lang,
-      bibleDataRefreshSignal,
-    ],
-    queryFn: () => loadBibleReadingSecondaryVerses(extrasRequest),
     enabled: extrasEnabled,
     staleTime: Infinity,
     ...localQueryOptions,
@@ -828,7 +812,6 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     parallelColumnWidth,
     parallelDisplayMode,
     focusVerses,
-    secondaryVerses,
     selectedVerses,
     highlightedVerses: highlightedVersesByChapter,
     notedVerses: notesByChapter,
@@ -1113,6 +1096,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
         verse={strongSelectionData?.verse}
         word={strongSelectionData?.word}
         identities={strongSelectionData?.identities ?? []}
+        morphologies={strongSelectionData?.morphologies ?? []}
         onClose={closeStrongSelection}
       />
     </Box>

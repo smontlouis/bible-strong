@@ -6,6 +6,10 @@ import {
   resolveDisplayedStrongIdentities,
   type StrongIdentity,
 } from '~helpers/strongIdentities'
+import {
+  collectStrongSelectionMorphologies,
+  type StrongSelectionMorphology,
+} from '~helpers/strongSelection'
 
 import { useDispatch } from './DispatchProvider'
 import { scaleFontSize } from './scaleFontSize'
@@ -30,11 +34,16 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode, isPar
   const uniqueLine = (values: string[], separator = ' · ') =>
     [...new Set(values.filter(Boolean))].join(separator)
 
-  const openStrongSelection = (identities: StrongIdentity[], word: string) => {
+  const openStrongSelection = (
+    identities: StrongIdentity[],
+    word: string,
+    morphologies: StrongSelectionMorphology[]
+  ) => {
     dispatchStrongSelection(dispatch, identities, isHebrew ? 1 : 40, version, {
       word,
       chapter: verse.Chapitre,
       verse: verse.Verset,
+      morphologies,
     })
   }
 
@@ -65,6 +74,10 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode, isPar
         const strongReferences = uniqueLine(displayedIdentities.map(identity => identity.code))
         const selectionWord =
           getStrongSelectionWordFromTextSegment(`${prefix}${surface}`) ?? surface
+        const selectionMorphologies = collectStrongSelectionMorphologies(
+          selectionIdentities,
+          segments
+        )
 
         return (
           <span key={`${token.ordinal}:${token.startOffset}`}>
@@ -73,7 +86,9 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode, isPar
               type="button"
               data-ignore-verse-touch
               disabled={!preferredIdentity}
-              onClick={() => openStrongSelection(selectionIdentities, selectionWord)}
+              onClick={() =>
+                openStrongSelection(selectionIdentities, selectionWord, selectionMorphologies)
+              }
               style={{
                 appearance: 'none',
                 border: 0,

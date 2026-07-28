@@ -124,18 +124,12 @@ export const getParallelVerseRows = (
 export const getParallelVerseModeProps = ({
   columnIndex,
   interlinearMode,
-  isINTComplete,
-  secondaryVerse,
 }: {
   columnIndex: number
   interlinearMode?: InterlinearMode
-  isINTComplete?: boolean
-  secondaryVerse?: TVerse | null
 }) =>
   columnIndex === 0
-    ? { interlinearMode, isINTComplete, secondaryVerse }
+    ? { interlinearMode }
     : {
         interlinearMode: undefined,
-        isINTComplete: undefined,
-        secondaryVerse: undefined,
       }

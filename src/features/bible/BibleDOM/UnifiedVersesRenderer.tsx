@@ -95,7 +95,6 @@ export interface UnifiedVersesRendererProps {
   verses: TVerse[]
   parallelVerses: ParallelVerse[]
   focusVerses: WebViewProps['focusVerses']
-  secondaryVerses: TVerse[] | null
   selectedVerses: { [key: string]: boolean }
   highlightedVerses: HighlightsObj
   settings: RootStyles['settings']
@@ -106,7 +105,6 @@ export interface UnifiedVersesRendererProps {
   pericopeChapter: PericopeChapter
   isSelectionMode: WebViewProps['isSelectionMode']
   selectedCode: WebViewProps['selectedCode']
-  isINTComplete: boolean
   isHebreu: boolean
   isParallelVerse: boolean
   comments: { [key: string]: string } | null
@@ -258,7 +256,6 @@ export function UnifiedVersesRenderer({
   verses,
   parallelVerses,
   focusVerses,
-  secondaryVerses,
   selectedVerses,
   highlightedVerses,
   settings,
@@ -269,7 +266,6 @@ export function UnifiedVersesRenderer({
   pericopeChapter,
   isSelectionMode,
   selectedCode,
-  isINTComplete,
   isHebreu,
   isParallelVerse,
   comments,
@@ -390,7 +386,6 @@ export function UnifiedVersesRenderer({
 
         const comment = comments?.[Verset]
         const isVerseToScroll = !isContextFocused && verseToScroll == Verset
-        const secondaryVerse = secondaryVerses && secondaryVerses[i]
         const parallelVerse = isParallelVerse
           ? getParallelVerseRows(i, parallelVerses, verse, version)
           : []
@@ -413,7 +408,6 @@ export function UnifiedVersesRenderer({
               verse={verse}
               isParallelVerse={isParallelVerse}
               parallelVerse={parallelVerse}
-              secondaryVerse={secondaryVerse}
               settings={settings}
               isSelected={isSelected}
               isSelectedMode={hasSelectedVerses}
@@ -425,7 +419,6 @@ export function UnifiedVersesRenderer({
               isVerseToScroll={isVerseToScroll}
               selectedCode={selectedCode}
               isFocused={isFocused}
-              isINTComplete={isINTComplete}
               tag={tag}
               bookmark={bookmark}
               fadePosition={fadePosition}
