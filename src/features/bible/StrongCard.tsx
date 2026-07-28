@@ -97,7 +97,7 @@ const StrongCard = (props: Props) => {
   const pushRouteOnce = usePushRouteOnce()
   const openedFromTab = useAtomValue(openedFromTabAtom)
 
-  const linkToStrong = (str1: string, str2: number) => {
+  const linkToStrong = (str1: string, str2: string | number) => {
     const { book } = props
 
     let bookNum: string | undefined

@@ -64,6 +64,7 @@
     "@invertase/react-native-apple-authentication": "^2.3.0",
     "@legendapp/list": "^2.0.19",
     "@lodev09/react-native-true-sheet": "^3.10.1",
+    "@native-html/render": "^1.0.3",
     "@notifee/react-native": "^7.8.2",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-clipboard/clipboard": "^1.14.0",
