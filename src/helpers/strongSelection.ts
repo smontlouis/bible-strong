@@ -1,20 +1,44 @@
 import type { SelectedCode } from '~common/types'
-import { getStrongReferenceNumber } from './strongIdentities'
+import {
+  areStrongIdentitiesEqual,
+  getStrongReferenceNumber,
+  STRONG_IDENTITY_KINDS,
+  type StrongIdentity,
+} from './strongIdentities'
 
 export type StrongSelection = SelectedCode & {
   version: string
-  references: string[]
+  identities: StrongIdentity[]
 }
 
-const normalizeStrongCode = (reference: string, book: number): string | undefined => {
-  const code = reference.trim()
-  if (/^[HG]\d+[A-Z]*$/iu.test(code)) return code.toUpperCase()
-  if (/^\d+$/u.test(code)) return `${book <= 39 ? 'H' : 'G'}${code}`
-  return undefined
+const normalizeStrongIdentity = (
+  identity: StrongIdentity,
+  book: number
+): StrongIdentity | undefined => {
+  const code = identity.code.trim()
+  const normalizedCode = /^[HG]\d+[A-Z]*$/iu.test(code)
+    ? code.toUpperCase()
+    : /^\d+$/u.test(code)
+      ? `${book <= 39 ? 'H' : 'G'}${code}`
+      : undefined
+
+  if (!normalizedCode) return undefined
+
+  return { kind: identity.kind, code: normalizedCode }
+}
+
+const isStrongIdentityKind = (kind: unknown): kind is StrongIdentity['kind'] =>
+  typeof kind === 'string' &&
+  STRONG_IDENTITY_KINDS.includes(kind as (typeof STRONG_IDENTITY_KINDS)[number])
+
+const isStrongIdentity = (identity: unknown): identity is StrongIdentity => {
+  if (typeof identity !== 'object' || identity === null) return false
+  const candidate = identity as Record<string, unknown>
+  return isStrongIdentityKind(candidate.kind) && typeof candidate.code === 'string'
 }
 
 export const createStrongSelection = (
-  references: readonly string[],
+  identities: readonly StrongIdentity[],
   bookValue: string | number,
   versionValue: string
 ): StrongSelection | undefined => {
@@ -23,20 +47,24 @@ export const createStrongSelection = (
   if (!Number.isInteger(book) || book < 1 || book > 66) return undefined
   if (!version) return undefined
 
-  const normalizedReferences = references
-    .flatMap(reference => {
-      const normalized = normalizeStrongCode(reference, book)
-      return normalized ? [normalized] : []
-    })
-    .filter((reference, index, allReferences) => allReferences.indexOf(reference) === index)
-  const reference = getStrongReferenceNumber(normalizedReferences[0] ?? '')
+  const normalizedIdentities: StrongIdentity[] = []
+  for (const identity of identities) {
+    const normalized = normalizeStrongIdentity(identity, book)
+    if (
+      normalized &&
+      !normalizedIdentities.some(candidate => areStrongIdentitiesEqual(candidate, normalized))
+    ) {
+      normalizedIdentities.push(normalized)
+    }
+  }
+  const reference = getStrongReferenceNumber(normalizedIdentities[0]?.code ?? '')
 
-  if (!reference || normalizedReferences.length === 0) return undefined
+  if (!reference || normalizedIdentities.length === 0) return undefined
 
   return {
     book,
     reference,
-    references: normalizedReferences,
+    identities: normalizedIdentities,
     version,
   }
 }
@@ -45,14 +73,11 @@ export const getStrongSelectionPayload = (payload: unknown): StrongSelection | u
   if (typeof payload !== 'object' || payload === null) return undefined
 
   const candidate = payload as Record<string, unknown>
-  if (!Array.isArray(candidate.references)) return undefined
-
-  const references = candidate.references.filter(
-    (reference): reference is string => typeof reference === 'string'
-  )
-  if (references.length !== candidate.references.length) return undefined
+  if (!Array.isArray(candidate.identities) || !candidate.identities.every(isStrongIdentity)) {
+    return undefined
+  }
   if (typeof candidate.book !== 'number' && typeof candidate.book !== 'string') return undefined
   if (typeof candidate.version !== 'string') return undefined
 
-  return createStrongSelection(references, candidate.book, candidate.version)
+  return createStrongSelection(candidate.identities, candidate.book, candidate.version)
 }

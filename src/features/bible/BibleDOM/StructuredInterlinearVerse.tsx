@@ -4,7 +4,11 @@ import type { SelectedCode, Verse } from '~common/types'
 import type { RootState } from '~redux/modules/reducer'
 import { buildInterlinearVerseLayout } from '~helpers/interlinearVerseLayout'
 import { normalizeInterlinearMode, type InterlinearMode } from '~helpers/interlinearDisplayMode'
-import { getDisplayedStrongIdentities, getStrongReferenceNumber } from '~helpers/strongIdentities'
+import {
+  getDisplayedStrongIdentities,
+  getStrongReferenceNumber,
+  type StrongIdentity,
+} from '~helpers/strongIdentities'
 import { dispatchStrongSelection } from './strongSelectionAction'
 
 interface Props {
@@ -27,8 +31,8 @@ const StructuredInterlinearVerse = ({
   const dispatch = useDispatch()
   const colors = settings.colors[settings.theme]
   const tokens = verse.InterlinearTokens ?? []
-  const openStrongSelection = (references: string[]) => {
-    dispatchStrongSelection(dispatch, references, isHebreu ? 1 : 40, version)
+  const openStrongSelection = (identities: StrongIdentity[]) => {
+    dispatchStrongSelection(dispatch, identities, isHebreu ? 1 : 40, version)
   }
   const layout = buildInterlinearVerseLayout(verse.Texte, tokens)
   const displayMode = normalizeInterlinearMode(mode)
@@ -40,13 +44,11 @@ const StructuredInterlinearVerse = ({
         const identities = token.segments.flatMap(segment => segment.identities)
         const displayedIdentities = getDisplayedStrongIdentities(identities)
         const preferredIdentity = displayedIdentities[0] ?? identities[0]
-        const selectionReferences = (
-          displayedIdentities.length
-            ? displayedIdentities
-            : preferredIdentity
-              ? [preferredIdentity]
-              : []
-        ).map(identity => identity.code)
+        const selectionIdentities = displayedIdentities.length
+          ? displayedIdentities
+          : preferredIdentity
+            ? [preferredIdentity]
+            : []
         const selectedReference = getStrongReferenceNumber(selectedCode?.reference ?? '')
         const selected =
           selectedReference !== undefined &&
@@ -62,7 +64,7 @@ const StructuredInterlinearVerse = ({
                 type="button"
                 data-ignore-verse-touch
                 disabled={!preferredIdentity}
-                onClick={() => openStrongSelection(selectionReferences)}
+                onClick={() => openStrongSelection(selectionIdentities)}
                 style={{
                   appearance: 'none',
                   border: 0,
@@ -102,7 +104,7 @@ const StructuredInterlinearVerse = ({
                 type="button"
                 data-ignore-verse-touch
                 disabled={!preferredIdentity}
-                onClick={() => openStrongSelection(selectionReferences)}
+                onClick={() => openStrongSelection(selectionIdentities)}
                 style={{
                   appearance: 'none',
                   border: 0,
@@ -129,7 +131,7 @@ const StructuredInterlinearVerse = ({
               type="button"
               data-ignore-verse-touch
               disabled={!preferredIdentity}
-              onClick={() => openStrongSelection(selectionReferences)}
+              onClick={() => openStrongSelection(selectionIdentities)}
               style={{
                 appearance: 'none',
                 border: 0,

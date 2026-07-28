@@ -8,7 +8,7 @@ import { scaleFontSize } from './scaleFontSize'
 import { isDarkTheme, noSelect } from './utils'
 import { getDisabledStyles } from './disabledStyles'
 import { scaleLineHeight } from './scaleLineHeight'
-import { getStrongReferenceNumber } from '~helpers/strongIdentities'
+import { getStrongReferenceNumber, type StrongIdentity } from '~helpers/strongIdentities'
 import { dispatchStrongSelection } from './strongSelectionAction'
 
 const StyledReference = styled('span')<
@@ -47,7 +47,7 @@ const StyledReference = styled('span')<
 export const BibleStrongRef = ({
   book,
   version,
-  references,
+  identities,
   isParallel,
   isDisabled,
   selectedCode,
@@ -55,15 +55,15 @@ export const BibleStrongRef = ({
 }: {
   book: string | number
   version: string
-  references: string[]
+  identities: StrongIdentity[]
   isParallel?: boolean
   isDisabled?: boolean
   selectedCode?: SelectedCode | null
   settings: RootState['user']['bible']['settings']
 }) => {
   const dispatch = useDispatch()
-  const numericReferences = references.flatMap(reference => {
-    const numericReference = getStrongReferenceNumber(reference)
+  const numericReferences = identities.flatMap(identity => {
+    const numericReference = getStrongReferenceNumber(identity.code)
     return numericReference ? [numericReference] : []
   })
   const isSelected =
@@ -72,7 +72,7 @@ export const BibleStrongRef = ({
 
   const openStrongSelection = (event: React.MouseEvent<HTMLSpanElement>) => {
     event.stopPropagation()
-    dispatchStrongSelection(dispatch, references, book, version)
+    dispatchStrongSelection(dispatch, identities, book, version)
   }
 
   return (
@@ -84,7 +84,7 @@ export const BibleStrongRef = ({
       isDisabled={isDisabled}
       settings={settings}
     >
-      {references.join(' · ')}
+      {identities.map(identity => identity.code).join(' · ')}
     </StyledReference>
   )
 }
@@ -110,7 +110,7 @@ const verseToStrong = ({
         <BibleStrongRef
           book={Livre}
           version={version}
-          references={[item]}
+          identities={[{ kind: 'strong', code: item }]}
           key={i}
           isParallel={isParallel}
           isDisabled={isDisabled}

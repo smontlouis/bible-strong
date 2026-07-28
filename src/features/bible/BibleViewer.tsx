@@ -1108,7 +1108,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
       <StrongSelectionSheet
         sheetRef={strongSelectionModal.getRef()}
         version={strongSelectionData?.version}
-        references={strongSelectionData?.references ?? []}
+        identities={strongSelectionData?.identities ?? []}
         onClose={closeStrongSelection}
       />
     </Box>

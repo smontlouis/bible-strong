@@ -1,10 +1,14 @@
 import type { Verse } from '~common/types'
 import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
-import { getDisplayedStrongIdentities } from '~helpers/strongIdentities'
+import {
+  areStrongIdentitiesEqual,
+  getDisplayedStrongIdentities,
+  type StrongIdentity,
+} from '~helpers/strongIdentities'
 
 export type CanonicalVersePresentationNode =
   | { kind: 'text'; text: string }
-  | { kind: 'strong-reference'; references: string[] }
+  | { kind: 'strong-reference'; identities: StrongIdentity[] }
   | { kind: 'paragraph-start'; offset: number }
   | { kind: 'line-start'; offset: number }
   | { kind: 'note-reference'; note: CanonicalBibleNote }
@@ -63,17 +67,19 @@ export const buildCanonicalVersePresentation = ({
     events.sort((left, right) => left.order - right.order)
   }
 
-  const referencesByOffset = new Map<number, string[]>()
+  const identitiesByOffset = new Map<number, StrongIdentity[]>()
   for (const span of strongSpans) {
     if (span.length <= 0 || span.startOffset < 0 || span.startOffset + span.length > text.length) {
       continue
     }
     const offset = span.startOffset + span.length
-    const references = referencesByOffset.get(offset) ?? []
+    const identities = identitiesByOffset.get(offset) ?? []
     for (const identity of getDisplayedStrongIdentities(span.identities)) {
-      references.push(identity.code)
+      if (!identities.some(candidate => areStrongIdentitiesEqual(candidate, identity))) {
+        identities.push(identity)
+      }
     }
-    referencesByOffset.set(offset, [...new Set(references)])
+    identitiesByOffset.set(offset, identities)
   }
 
   const redStarts = new Map<number, number>()
@@ -90,7 +96,7 @@ export const buildCanonicalVersePresentation = ({
     0,
     text.length,
     ...eventsByOffset.keys(),
-    ...referencesByOffset.keys(),
+    ...identitiesByOffset.keys(),
     ...redStarts.keys(),
     ...redEnds.keys(),
   ].sort((left, right) => left - right)
@@ -106,9 +112,9 @@ export const buildCanonicalVersePresentation = ({
     for (let index = 0; index < (redEnds.get(offset) ?? 0); index += 1) {
       closeElement(stack, 'red-word')
     }
-    const references = referencesByOffset.get(offset) ?? []
-    if (references.length > 0) {
-      currentChildren(stack).push({ kind: 'strong-reference', references })
+    const identities = identitiesByOffset.get(offset) ?? []
+    if (identities.length > 0) {
+      currentChildren(stack).push({ kind: 'strong-reference', identities })
     }
     for (const presentationEvent of eventsByOffset.get(offset) ?? []) {
       if (presentationEvent.kind === 'note') {

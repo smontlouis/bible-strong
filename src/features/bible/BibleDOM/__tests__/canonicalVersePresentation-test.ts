@@ -137,7 +137,7 @@ describe('canonicalVersePresentation', () => {
 
     expect(getCanonicalPresentationText(hidden)).toBe('Dieu créa.')
     expect(getCanonicalPresentationText(visible)).toBe('Dieu créa.')
-    expect(JSON.stringify(visible)).toContain('"references":["H0430"]')
+    expect(JSON.stringify(visible)).toContain('"identities":[{"kind":"strong","code":"H0430"}]')
     expect(visible[0]).toEqual(expect.objectContaining({ kind: 'element', tag: 'small-caps' }))
   })
 
@@ -160,7 +160,13 @@ describe('canonicalVersePresentation', () => {
 
     expect(presentation).toEqual([
       { kind: 'text', text: 'Then the LORD' },
-      { kind: 'strong-reference', references: ['H3068G', 'H0413'] },
+      {
+        kind: 'strong-reference',
+        identities: [
+          { kind: 'dstrong', code: 'H3068G' },
+          { kind: 'strong', code: 'H0413' },
+        ],
+      },
     ])
   })
 

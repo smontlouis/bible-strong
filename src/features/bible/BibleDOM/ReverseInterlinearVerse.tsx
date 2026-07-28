@@ -4,6 +4,7 @@ import { buildTokenizedVerseLayout } from '~helpers/interlinearVerseLayout'
 import {
   getStrongReferenceNumber,
   resolveDisplayedStrongIdentities,
+  type StrongIdentity,
 } from '~helpers/strongIdentities'
 
 import { useDispatch } from './DispatchProvider'
@@ -26,8 +27,8 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode, isPar
   const uniqueLine = (values: string[], separator = ' · ') =>
     [...new Set(values.filter(Boolean))].join(separator)
 
-  const openStrongSelection = (references: string[]) => {
-    dispatchStrongSelection(dispatch, references, isHebrew ? 1 : 40, version)
+  const openStrongSelection = (identities: StrongIdentity[]) => {
+    dispatchStrongSelection(dispatch, identities, isHebrew ? 1 : 40, version)
   }
 
   return (
@@ -37,13 +38,11 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode, isPar
         const identities = segments.flatMap(segment => segment.identities)
         const displayedIdentities = resolveDisplayedStrongIdentities(token.identities, identities)
         const preferredIdentity = displayedIdentities[0] ?? token.identities[0]
-        const selectionReferences = (
-          displayedIdentities.length
-            ? displayedIdentities
-            : preferredIdentity
-              ? [preferredIdentity]
-              : []
-        ).map(identity => identity.code)
+        const selectionIdentities = displayedIdentities.length
+          ? displayedIdentities
+          : preferredIdentity
+            ? [preferredIdentity]
+            : []
         const selectedReference = getStrongReferenceNumber(selectedCode?.reference ?? '')
         const selected =
           selectedReference !== undefined &&
@@ -65,7 +64,7 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode, isPar
               type="button"
               data-ignore-verse-touch
               disabled={!preferredIdentity}
-              onClick={() => openStrongSelection(selectionReferences)}
+              onClick={() => openStrongSelection(selectionIdentities)}
               style={{
                 appearance: 'none',
                 border: 0,

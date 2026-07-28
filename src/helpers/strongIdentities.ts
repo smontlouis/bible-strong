@@ -1,7 +1,14 @@
+export const STRONG_IDENTITY_KINDS = ['strong', 'estrong', 'dstrong', 'ustrong'] as const
+
+export type StrongIdentityKind = (typeof STRONG_IDENTITY_KINDS)[number]
+
 export type StrongIdentity = {
-  kind: 'strong' | 'estrong' | 'dstrong' | 'ustrong'
+  kind: StrongIdentityKind
   code: string
 }
+
+export const areStrongIdentitiesEqual = (left: StrongIdentity, right: StrongIdentity): boolean =>
+  left.kind === right.kind && left.code === right.code
 
 const getClassicalStrongFamily = (code: string) => {
   const match = code.match(/^([HG])0*(\d+)/iu)
@@ -23,9 +30,7 @@ export const getDisplayedStrongIdentities = <Identity extends StrongIdentity>(
 
   return [...disambiguated, ...classical].filter(
     (identity, index, selected) =>
-      selected.findIndex(
-        candidate => candidate.kind === identity.kind && candidate.code === identity.code
-      ) === index
+      selected.findIndex(candidate => areStrongIdentitiesEqual(candidate, identity)) === index
   )
 }
 
@@ -64,8 +69,6 @@ export const resolveDisplayedStrongIdentities = (
     })
     .filter(
       (identity, index, identities) =>
-        identities.findIndex(
-          candidate => candidate.kind === identity.kind && candidate.code === identity.code
-        ) === index
+        identities.findIndex(candidate => areStrongIdentitiesEqual(candidate, identity)) === index
     )
 }

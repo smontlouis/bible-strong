@@ -44,7 +44,11 @@ export const getStrongRelationSelectionPayload = (
     return undefined
   }
 
-  return createStrongSelection([payload.code], payload.language === 'hebrew' ? 1 : 40, version)
+  return createStrongSelection(
+    [{ kind: 'strong', code: payload.code }],
+    payload.language === 'hebrew' ? 1 : 40,
+    version
+  )
 }
 
 export const getToastPayload = (payload: unknown): { message?: string; type?: string } => {

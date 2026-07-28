@@ -135,7 +135,12 @@ const InterlinearVerse = ({
   const [showSecondaryVerse, setShowSecondaryVerse] = useState(false)
 
   const openStrongSelection = (reference: string, isHebreu: boolean) => {
-    dispatchStrongSelection(dispatch, [reference], isHebreu ? 1 : 40, version)
+    dispatchStrongSelection(
+      dispatch,
+      [{ kind: 'strong', code: reference }],
+      isHebreu ? 1 : 40,
+      version
+    )
   }
 
   const sections = verse.Texte.split('@')

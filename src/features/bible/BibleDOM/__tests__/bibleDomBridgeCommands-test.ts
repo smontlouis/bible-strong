@@ -23,7 +23,7 @@ describe('bibleDomBridgeCommands', () => {
     ).toEqual({
       book: 1,
       reference: '3068',
-      references: ['H3068'],
+      identities: [{ kind: 'strong', code: 'H3068' }],
       version: 'DBY',
     })
     expect(

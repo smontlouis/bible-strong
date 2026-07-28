@@ -2,18 +2,19 @@ import { useTranslation } from 'react-i18next'
 import { Sheet, SheetHeader, SheetView, type SheetRef } from '~common/sheet'
 import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import type { StrongIdentity } from '~helpers/strongIdentities'
 
 type StrongSelectionSheetProps = {
   sheetRef: React.RefObject<SheetRef | null>
   version?: string
-  references: string[]
+  identities: StrongIdentity[]
   onClose: () => void
 }
 
 const StrongSelectionSheet = ({
   sheetRef,
   version,
-  references,
+  identities,
   onClose,
 }: StrongSelectionSheetProps) => {
   const { t } = useTranslation()
@@ -36,9 +37,9 @@ const StrongSelectionSheet = ({
             {t('Strong')}
           </Text>
           <HStack bg="lightGrey" borderRadius={12} px={14} py={12} gap={8} wrap>
-            {references.map(reference => (
-              <Text key={reference} bold fontSize={17} selectable>
-                {reference}
+            {identities.map(identity => (
+              <Text key={`${identity.kind}:${identity.code}`} bold fontSize={17} selectable>
+                {identity.code}
               </Text>
             ))}
           </HStack>
