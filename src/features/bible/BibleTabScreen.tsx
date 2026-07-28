@@ -183,7 +183,12 @@ const BibleTabScreen = ({ bibleAtom, isFormSheet, isInTab = true }: BibleTabScre
 
   const commentsAvailabilityQuery = useQuery({
     queryKey: ['mhy-comments-availability', settings.commentsDisplay],
-    queryFn: () => getIfLocalResourceNeedsDownload({ kind: 'database', databaseId: 'MHY' }),
+    queryFn: () =>
+      getIfLocalResourceNeedsDownload({
+        kind: 'database',
+        databaseId: 'MHY',
+        language: lang,
+      }),
     enabled: settings.commentsDisplay,
   })
 

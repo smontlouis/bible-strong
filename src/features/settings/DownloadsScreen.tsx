@@ -29,16 +29,11 @@ import {
 } from '~helpers/databaseTypes'
 import { isLocalResourceAvailable } from '~features/resources/resourceAvailability'
 import {
-  createBibleDownloadItem,
-  createDatabaseDownloadItem,
-  createStrongSidecarDownloadPlan,
-  createInterlinearSidecarDownloadPlan,
-  createStrongSidecarDownloadItem,
-  createInterlinearSidecarDownloadItem,
+  createOfflineCopyDownloadItem,
+  createOfflineCopyDownloadPlan,
   dedupeDownloadItems,
-  createStrongLexiconModuleDownloadItem,
-  createStrongLexiconModuleDownloadPlan,
 } from '~helpers/downloadItemFactory'
+import { createOfflineCopyId, parseOfflineCopyId } from '~helpers/offlineCopy'
 import { useDownloadQueue } from '~helpers/useDownloadQueue'
 import { installedVersionsSignalAtom } from '~state/app'
 import useLanguage from '~helpers/useLanguage'
@@ -98,21 +93,29 @@ interface UnifiedSection {
 
 function buildDatabaseItems(lang: ResourceLanguage): UnifiedItem[] {
   const allDbs = databases(lang)
-  return LANGUAGE_SPECIFIC_DBS.filter(dbId => dbId !== 'INTERLINEAIRE' && dbId !== 'TIMELINE')
-    .filter(dbId => (lang === 'en' ? !FRENCH_ONLY_DBS.includes(dbId) : true))
-    .map(dbId => {
-      const db = allDbs[dbId as keyof typeof allDbs]
-      if (!db) return null
-      return {
-        id: `database:${dbId}:${lang}`,
-        name: db.name,
-        subtitle: db.desc,
-        estimatedSize: db.fileSize,
-        lang: lang as 'fr' | 'en',
-        searchText: `${db.name} ${db.desc} ${dbId}`.toLowerCase(),
-      }
-    })
-    .filter(Boolean) as UnifiedItem[]
+  return LANGUAGE_SPECIFIC_DBS.flatMap(dbId => {
+    if (
+      dbId === 'BIBLES' ||
+      dbId === 'INTERLINEAIRE' ||
+      dbId === 'TIMELINE' ||
+      (lang === 'en' && FRENCH_ONLY_DBS.includes(dbId))
+    ) {
+      return []
+    }
+    const db = allDbs[dbId as keyof typeof allDbs]
+    return db
+      ? [
+          {
+            id: createOfflineCopyId({ kind: 'database', databaseId: dbId, language: lang }),
+            name: db.name,
+            subtitle: db.desc,
+            estimatedSize: db.fileSize,
+            lang: lang as 'fr' | 'en',
+            searchText: `${db.name} ${db.desc} ${dbId}`.toLowerCase(),
+          },
+        ]
+      : []
+  })
 }
 
 function buildStrongLexiconItems(
@@ -120,28 +123,37 @@ function buildStrongLexiconItems(
 ): UnifiedItem[] {
   return [
     {
-      id: 'strong-lexicon:core',
+      id: createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'core' }),
       name: t('Lexique Strong'),
       subtitle: t('Définitions françaises et anglaises, morphologie et mots liés'),
-      estimatedSize: createStrongLexiconModuleDownloadItem('core').estimatedSize,
+      estimatedSize: createOfflineCopyDownloadItem({
+        kind: 'strong-lexicon-module',
+        moduleId: 'core',
+      }).estimatedSize,
       lang: 'other',
       searchText: 'strong lexique grec hébreu core step morphology'.toLowerCase(),
     },
     {
-      id: 'strong-lexicon:resources',
+      id: createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'resources' }),
       name: t('Dictionnaire grec détaillé'),
       subtitle: t('Notices LSJ/TFLSJ et traductions françaises'),
-      parentItemId: 'strong-lexicon:core',
-      estimatedSize: createStrongLexiconModuleDownloadItem('resources').estimatedSize,
+      parentItemId: createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'core' }),
+      estimatedSize: createOfflineCopyDownloadItem({
+        kind: 'strong-lexicon-module',
+        moduleId: 'resources',
+      }).estimatedSize,
       lang: 'other',
       searchText: 'strong grec lsj tflsj ressources'.toLowerCase(),
     },
     {
-      id: 'strong-lexicon:entities',
+      id: createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'entities' }),
       name: t('Entités bibliques'),
       subtitle: t('Personnes, lieux, groupes, relations et références'),
-      parentItemId: 'strong-lexicon:core',
-      estimatedSize: createStrongLexiconModuleDownloadItem('entities').estimatedSize,
+      parentItemId: createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'core' }),
+      estimatedSize: createOfflineCopyDownloadItem({
+        kind: 'strong-lexicon-module',
+        moduleId: 'entities',
+      }).estimatedSize,
       lang: 'other',
       searchText: 'strong entités bibliques personnes lieux groupes'.toLowerCase(),
     },
@@ -150,10 +162,12 @@ function buildStrongLexiconItems(
 
 function buildSharedDatabaseItems(): UnifiedItem[] {
   const allDbs = databases('fr')
-  return SHARED_DBS.filter(dbId => dbId !== 'BIBLES' && dbId in allDbs).map(dbId => {
+  return SHARED_DBS.filter(
+    (dbId): dbId is Exclude<DatabaseId, 'BIBLES'> => dbId !== 'BIBLES' && dbId in allDbs
+  ).map(dbId => {
     const db = allDbs[dbId as keyof typeof allDbs]
     return {
-      id: `database:${dbId}:fr`, // shared use fr as default
+      id: createOfflineCopyId({ kind: 'database', databaseId: dbId, language: 'fr' }),
       name: db.name,
       subtitle: db.desc,
       estimatedSize: db.fileSize,
@@ -171,7 +185,7 @@ function buildBibleItems(
   return versionList.flatMap(v => {
     const displayName = appLang === 'en' && v.name_en ? v.name_en : v.name
     const base: UnifiedItem = {
-      id: `bible:${v.id}`,
+      id: createOfflineCopyId({ kind: 'bible', versionId: v.id }),
       name: `${v.id}  ${displayName}`,
       subtitle: v.c,
       estimatedSize:
@@ -189,7 +203,11 @@ function buildBibleItems(
         ...(['fr', 'en'] as ResourceLanguage[]).map(locale => {
           const artifact = BHG_INTERLINEAR_PUBLICATION.indexes[locale]
           return {
-            id: `bible-interlinear:BHG:${locale}`,
+            id: createOfflineCopyId({
+              kind: 'interlinear-index',
+              versionId: 'BHG',
+              language: locale,
+            }),
             name: `${t('downloads.interlinearIndexName')} · ${t(
               `versionCatalog.language.${locale}`
             )}`,
@@ -208,7 +226,7 @@ function buildBibleItems(
     return [
       base,
       {
-        id: `bible-strong:${v.id}`,
+        id: createOfflineCopyId({ kind: 'strong-bible-index', versionId: v.id }),
         name: t('downloads.strongIndexName', { bible: strongIndexBibleName }),
         subtitle: t(getStrongBibleAttributionKey(v.id)),
         parentItemId: base.id,
@@ -313,7 +331,12 @@ function useDownloadedItems() {
           availability.status === 'corrupt' ||
           availability.status === 'core-missing'
         ) {
-          set.add(`strong-lexicon:${moduleId}`)
+          set.add(
+            createOfflineCopyId({
+              kind: 'strong-lexicon-module',
+              moduleId,
+            })
+          )
         }
       }
 
@@ -330,7 +353,7 @@ function useDownloadedItems() {
           })
       )
       for (const [vId, available] of bibleEntries) {
-        if (available) set.add(`bible:${vId}`)
+        if (available) set.add(createOfflineCopyId({ kind: 'bible', versionId: vId }))
       }
 
       const availabilityMap = new Map<StrongBibleVersionId, StrongBibleSidecarAvailability>()
@@ -347,7 +370,7 @@ function useDownloadedItems() {
           availability.status === 'incompatible' ||
           availability.status === 'corrupt'
         ) {
-          set.add(`bible-strong:${versionId}`)
+          set.add(createOfflineCopyId({ kind: 'strong-bible-index', versionId }))
         }
       }
 
@@ -365,45 +388,71 @@ function useDownloadedItems() {
           availability.status === 'incompatible' ||
           availability.status === 'corrupt'
         ) {
-          set.add(`bible-interlinear:BHG:${locale}`)
+          set.add(
+            createOfflineCopyId({
+              kind: 'interlinear-index',
+              versionId: 'BHG',
+              language: locale,
+            })
+          )
         }
       }
 
       // Check databases for both languages
       const databaseEntries = await Promise.all(
         (['fr', 'en'] as ResourceLanguage[]).flatMap(lang =>
-          LANGUAGE_SPECIFIC_DBS.filter(
-            dbId =>
-              dbId !== 'INTERLINEAIRE' &&
-              dbId !== 'TIMELINE' &&
-              (lang !== 'en' || !FRENCH_ONLY_DBS.includes(dbId))
-          ).map(async dbId => {
-            const available = await isLocalResourceAvailable({
-              kind: 'database',
-              databaseId: dbId,
-              lang,
-            })
-            return [dbId, lang, available] as const
-          })
+          LANGUAGE_SPECIFIC_DBS.flatMap(dbId =>
+            dbId !== 'BIBLES' &&
+            dbId !== 'INTERLINEAIRE' &&
+            dbId !== 'TIMELINE' &&
+            (lang !== 'en' || !FRENCH_ONLY_DBS.includes(dbId))
+              ? [
+                  isLocalResourceAvailable({
+                    kind: 'database',
+                    databaseId: dbId,
+                    language: lang,
+                  }).then(available => [dbId, lang, available] as const),
+                ]
+              : []
+          )
         )
       )
       for (const [dbId, lang, available] of databaseEntries) {
-        if (available) set.add(`database:${dbId}:${lang}`)
+        if (available) {
+          set.add(
+            createOfflineCopyId({
+              kind: 'database',
+              databaseId: dbId,
+              language: lang,
+            })
+          )
+        }
       }
 
       // Check shared databases
       const sharedEntries = await Promise.all(
-        SHARED_DBS.filter(dbId => dbId !== 'BIBLES').map(async dbId => {
-          const available = await isLocalResourceAvailable({
-            kind: 'database',
-            databaseId: dbId,
-            lang: 'fr',
-          })
-          return [dbId, available] as const
-        })
+        SHARED_DBS.flatMap(dbId =>
+          dbId === 'BIBLES'
+            ? []
+            : [
+                isLocalResourceAvailable({
+                  kind: 'database',
+                  databaseId: dbId,
+                  language: 'fr',
+                }).then(available => [dbId, available] as const),
+              ]
+        )
       )
       for (const [dbId, available] of sharedEntries) {
-        if (available) set.add(`database:${dbId}:fr`)
+        if (available) {
+          set.add(
+            createOfflineCopyId({
+              kind: 'database',
+              databaseId: dbId,
+              language: 'fr',
+            })
+          )
+        }
       }
 
       return {
@@ -441,6 +490,14 @@ const DownloadsScreen = () => {
   const theme = useTheme()
   const lang = useLanguage()
   const defaultVersion = getDefaultBibleVersion(lang)
+  const defaultBibleOfflineCopyId = createOfflineCopyId({
+    kind: 'bible',
+    versionId: defaultVersion,
+  })
+  const strongLexiconCoreOfflineCopyId = createOfflineCopyId({
+    kind: 'strong-lexicon-module',
+    moduleId: 'core',
+  })
   const { enqueue, clearCompleted } = useDownloadQueue()
 
   // Local state
@@ -538,39 +595,39 @@ const DownloadsScreen = () => {
     getDefaultStore().set(installedVersionsSignalAtom, (c: number) => c + 1)
   }
 
+  const createDownloadPlanForId = (itemId: string) => {
+    const identity = parseOfflineCopyId(itemId)
+    if (!identity) throw new Error(`UNKNOWN_OFFLINE_COPY:${itemId}`)
+
+    switch (identity.kind) {
+      case 'strong-bible-index':
+        return createOfflineCopyDownloadPlan(identity, {
+          availabilityStatus: strongAvailability.get(identity.versionId)?.status ?? 'base-missing',
+        })
+      case 'interlinear-index':
+        return createOfflineCopyDownloadPlan(identity, {
+          availabilityStatus:
+            interlinearAvailability.get(identity.language)?.status ?? 'base-missing',
+        })
+      case 'strong-lexicon-module':
+        return createOfflineCopyDownloadPlan(identity, {
+          isStrongLexiconCoreAvailable:
+            strongLexiconAvailability.get('core')?.status === 'available',
+        })
+      case 'bible':
+      case 'database':
+        return createOfflineCopyDownloadPlan(identity)
+      case 'bible-pericope':
+      case 'bible-red-words':
+        throw new Error(`BIBLE_CHILD_RESOURCE_REQUIRES_PARENT:${itemId}`)
+    }
+  }
+
   const handleBatchDownload = () => {
     const items = dedupeDownloadItems(
-      Array.from(selectedItems)
-        .filter(id => !downloadedSet.has(id))
-        .flatMap(id => {
-          if (id.startsWith('bible-strong:')) {
-            const versionId = id.replace('bible-strong:', '') as StrongBibleVersionId
-            return createStrongSidecarDownloadPlan(
-              versionId,
-              strongAvailability.get(versionId)?.status ?? 'base-missing'
-            )
-          }
-          if (id.startsWith('strong-lexicon:')) {
-            const moduleId = id.replace('strong-lexicon:', '') as StrongLexiconModuleId
-            return createStrongLexiconModuleDownloadPlan(
-              moduleId,
-              strongLexiconAvailability.get('core')?.status === 'available'
-            )
-          }
-          if (id.startsWith('bible-interlinear:')) {
-            const locale = id.split(':')[2] as ResourceLanguage
-            return createInterlinearSidecarDownloadPlan(
-              locale,
-              interlinearAvailability.get(locale)?.status ?? 'base-missing'
-            )
-          }
-          if (id.startsWith('bible:')) {
-            const versionId = id.replace('bible:', '')
-            return [createBibleDownloadItem(versionId)]
-          }
-          const parts = id.split(':')
-          return [createDatabaseDownloadItem(parts[1] as DatabaseId, parts[2] as ResourceLanguage)]
-        })
+      Array.from(selectedItems).flatMap(id =>
+        downloadedSet.has(id) ? [] : createDownloadPlanForId(id)
+      )
     )
 
     if (items.length > 0) {
@@ -582,12 +639,13 @@ const DownloadsScreen = () => {
 
   const handleBatchDelete = () => {
     // Exclude default versions from batch delete
-    const deletionPlans = Array.from(selectedItems)
-      .filter(
-        id =>
-          downloadedSet.has(id) && id !== `bible:${defaultVersion}` && id !== 'strong-lexicon:core'
-      )
-      .map(id => createDownloadedItemDeletionPlan(id))
+    const deletionPlans = Array.from(selectedItems).flatMap(id =>
+      downloadedSet.has(id) &&
+      id !== defaultBibleOfflineCopyId &&
+      id !== strongLexiconCoreOfflineCopyId
+        ? [createDownloadedItemDeletionPlan(id)]
+        : []
+    )
     if (deletionPlans.length === 0) return
 
     const deletesStrongSidecar = deletionPlans.some(
@@ -625,43 +683,7 @@ const DownloadsScreen = () => {
   }
 
   const handleDownloadItem = (item: UnifiedItem) => {
-    if (item.id.startsWith('strong-lexicon:')) {
-      const moduleId = item.id.replace('strong-lexicon:', '') as StrongLexiconModuleId
-      enqueue(
-        createStrongLexiconModuleDownloadPlan(
-          moduleId,
-          strongLexiconAvailability.get('core')?.status === 'available'
-        )
-      )
-      return
-    }
-    if (item.id.startsWith('bible-strong:')) {
-      const versionId = item.id.replace('bible-strong:', '') as StrongBibleVersionId
-      const availability = strongAvailability.get(versionId)
-      const items = createStrongSidecarDownloadPlan(
-        versionId,
-        availability?.status ?? 'base-missing'
-      )
-      enqueue(items)
-      return
-    }
-    if (item.id.startsWith('bible-interlinear:')) {
-      const locale = item.id.split(':')[2] as ResourceLanguage
-      enqueue(
-        createInterlinearSidecarDownloadPlan(
-          locale,
-          interlinearAvailability.get(locale)?.status ?? 'base-missing'
-        )
-      )
-      return
-    }
-    if (item.id.startsWith('bible:')) {
-      const versionId = item.id.replace('bible:', '')
-      enqueue([createBibleDownloadItem(versionId)])
-    } else {
-      const parts = item.id.split(':')
-      enqueue([createDatabaseDownloadItem(parts[1] as DatabaseId, parts[2] as ResourceLanguage)])
-    }
+    enqueue(createDownloadPlanForId(item.id))
   }
 
   const handleRedownloadItem = (item: UnifiedItem) => {
@@ -680,7 +702,7 @@ const DownloadsScreen = () => {
   }
 
   const handleUpdateItem = (item: UnifiedItem) => {
-    const isRequiredBible = item.id === `bible:${defaultVersion}`
+    const isRequiredBible = item.id === defaultBibleOfflineCopyId
     const deletionPlan = createDownloadedItemDeletionPlan(item.id, {
       bibleMode: isRequiredBible ? 'replace' : 'remove',
     })
@@ -755,7 +777,10 @@ const DownloadsScreen = () => {
   // Count downloadable/deletable in selection
   const selectedDownloadable = Array.from(selectedItems).filter(id => !downloadedSet.has(id)).length
   const selectedDeletable = Array.from(selectedItems).filter(
-    id => downloadedSet.has(id) && id !== `bible:${defaultVersion}` && id !== 'strong-lexicon:core'
+    id =>
+      downloadedSet.has(id) &&
+      id !== defaultBibleOfflineCopyId &&
+      id !== strongLexiconCoreOfflineCopyId
   ).length
 
   return (
@@ -853,29 +878,15 @@ const DownloadsScreen = () => {
         }}
         renderItem={({ item }) => {
           const isDownloaded = downloadedSet.has(item.id)
-          const resourceDownloadItem = item.id.startsWith('bible-strong:')
-            ? createStrongSidecarDownloadItem(
-                item.id.replace('bible-strong:', '') as StrongBibleVersionId
-              )
-            : item.id.startsWith('strong-lexicon:')
-              ? createStrongLexiconModuleDownloadItem(
-                  item.id.replace('strong-lexicon:', '') as StrongLexiconModuleId
-                )
-              : item.id.startsWith('bible-interlinear:')
-                ? createInterlinearSidecarDownloadItem(item.id.split(':')[2] as ResourceLanguage)
-                : item.id.startsWith('bible:')
-                  ? createBibleDownloadItem(item.id.replace('bible:', ''))
-                  : createDatabaseDownloadItem(
-                      item.id.split(':')[1] as DatabaseId,
-                      item.id.split(':')[2] as ResourceLanguage
-                    )
+          const identity = parseOfflineCopyId(item.id)
+          if (!identity) return null
+          const resourceDownloadItem = createOfflineCopyDownloadItem(identity)
 
           const isDefault =
-            item.id === `bible:${defaultVersion}` || item.id === 'strong-lexicon:core'
+            (identity.kind === 'bible' && identity.versionId === defaultVersion) ||
+            (identity.kind === 'strong-lexicon-module' && identity.moduleId === 'core')
           const isNestedDependency = item.parentItemId !== undefined
-          const bibleVersionId = item.id.startsWith('bible:')
-            ? item.id.replace('bible:', '')
-            : undefined
+          const bibleVersionId = identity.kind === 'bible' ? identity.versionId : undefined
           const relatedResources = bibleVersionId
             ? getBibleRelatedPublicationResources(bibleVersionId)
             : undefined
@@ -898,22 +909,17 @@ const DownloadsScreen = () => {
               isDownloaded={isDownloaded}
               isDefault={isDefault}
               needsUpdate={
-                item.id.startsWith('bible-strong:')
+                identity.kind === 'strong-bible-index'
                   ? ['incompatible', 'corrupt'].includes(
-                      strongAvailability.get(
-                        item.id.replace('bible-strong:', '') as StrongBibleVersionId
-                      )?.status ?? ''
+                      strongAvailability.get(identity.versionId)?.status ?? ''
                     )
-                  : item.id.startsWith('strong-lexicon:')
+                  : identity.kind === 'strong-lexicon-module'
                     ? ['incompatible', 'corrupt', 'core-missing'].includes(
-                        strongLexiconAvailability.get(
-                          item.id.replace('strong-lexicon:', '') as StrongLexiconModuleId
-                        )?.status ?? ''
+                        strongLexiconAvailability.get(identity.moduleId)?.status ?? ''
                       )
-                    : item.id.startsWith('bible-interlinear:')
+                    : identity.kind === 'interlinear-index'
                       ? ['base-incompatible', 'corrupt'].includes(
-                          interlinearAvailability.get(item.id.split(':')[2] as ResourceLanguage)
-                            ?.status ?? ''
+                          interlinearAvailability.get(identity.language)?.status ?? ''
                         )
                       : false
               }

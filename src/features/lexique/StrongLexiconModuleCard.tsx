@@ -9,6 +9,7 @@ import { downloadManager } from '~helpers/downloadManager'
 import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
 import type { StrongLexiconModuleId } from '~helpers/strongLexiconPublications'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
 
 type Props = {
   moduleId: Exclude<StrongLexiconModuleId, 'core'>
@@ -19,7 +20,7 @@ type Props = {
 
 const StrongLexiconModuleCard = ({ moduleId, availability, title, description }: Props) => {
   const { t } = useTranslation()
-  const itemId = `strong-lexicon:${moduleId}`
+  const itemId = createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId })
   const download = useDownloadItemStatus(itemId)
   const downloading =
     download?.status === 'queued' ||

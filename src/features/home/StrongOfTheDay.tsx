@@ -13,10 +13,11 @@ import truncate from '~helpers/truncate'
 import RandomButton from './RandomButton'
 import waitForStrongWidget from './waitForStrongWidget'
 import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
-import { StrongReference } from '~common/types'
 import { useResourceAccess } from '~features/resources/resourceAccess'
+import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 import { localQueryOptions } from '~helpers/queryOptions'
-import { unwrapDatabaseResult } from '~helpers/queryResult'
+import { useAtomValue } from 'jotai/react'
+import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 
 type StrongOfTheDayProps = {
   type: 'grec' | 'hebreu'
@@ -31,13 +32,16 @@ const StrongOfTheDay = ({
 }: StrongOfTheDayProps) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
+  const resourceLanguage = useAtomValue(resourcesLanguageAtom).STRONG
 
   const [randomSeed, setRandomSeed] = useState(0)
   const strongQuery = useQuery({
-    queryKey: ['home-strong-random', type, randomSeed],
-    queryFn: async (): Promise<StrongReference | null> =>
-      unwrapDatabaseResult(await resources.strong.loadRandomReference(type === 'grec' ? 40 : 1)) ??
-      null,
+    queryKey: ['home-strong-random', type, resourceLanguage, randomSeed],
+    queryFn: async (): Promise<StrongLexiconSearchResult | null> =>
+      (await resources.strongLexicon.random(
+        type === 'grec' ? 'greek' : 'hebrew',
+        resourceLanguage
+      )) ?? null,
     ...localQueryOptions,
   })
   const strongReference = strongQuery.data
@@ -69,10 +73,11 @@ const StrongOfTheDay = ({
     return <WidgetLoading />
   }
 
-  const { Grec, Hebreu, Mot } = strongReference
+  const { original, gloss, stepCode, language } = strongReference
+  const book = language === 'greek' ? 40 : 1
 
   return (
-    <Link route="Strong" params={{ book: Grec ? 40 : 1, strongReference }}>
+    <Link route="Strong" params={{ book, reference: stepCode }}>
       <WidgetContainer>
         <Box
           style={{
@@ -94,7 +99,7 @@ const StrongOfTheDay = ({
             </Text>
           </Box>
           <Paragraph title scale={-2} style={{ color: 'white' }}>
-            {truncate(Mot, 10)}
+            {truncate(gloss, 10)}
           </Paragraph>
           <Paragraph
             style={{ color: 'white', opacity: 0.5 }}
@@ -102,7 +107,7 @@ const StrongOfTheDay = ({
             scaleLineHeight={-2}
             marginBottom={3}
           >
-            {truncate(Grec, 10) || truncate(Hebreu, 10)}
+            {truncate(original, 10)}
           </Paragraph>
         </Box>
         <Link route="Lexique" style={{ width: '100%' }}>

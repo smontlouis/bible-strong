@@ -11,7 +11,8 @@ import {
   type InterlinearPublicationArtifact,
 } from './interlinearBiblePublications'
 import { openSQLiteDatabase, type SQLiteDatabase } from './sqlite'
-import { restoreOrphanedResourceBackup } from './atomicResourceFile'
+import { installAtomicResourceFile, restoreOrphanedResourceBackup } from './atomicResourceFile'
+import type { ResourceInstallationLifecycle } from './resourceInstallationLifecycle'
 
 const databases = new Map<ResourceLanguage, SQLiteDatabase>()
 
@@ -52,6 +53,7 @@ export interface InterlinearSidecarInstallCallbacks {
   onStatusInserting?: () => void
   onInsertProgress?: (progress: number) => void
   isCancelled?: () => boolean
+  installationLifecycle?: ResourceInstallationLifecycle
 }
 
 export const getInterlinearSidecarDirectory = () => `${getSharedSqliteDirPath()}/interlinear-bibles`
@@ -120,6 +122,7 @@ export const installInterlinearSidecar = async (
       logTag: 'InterlinearBibleSidecar',
     })
     if (callbacks.isCancelled?.()) throw new Error('CANCELLED')
+    await callbacks.installationLifecycle?.prepare(downloadResult)
     callbacks.onStatusInserting?.()
     callbacks.onInsertProgress?.(0)
     await FileSystem.deleteAsync(extractionDirectory, { idempotent: true })
@@ -150,7 +153,9 @@ export const installInterlinearSidecar = async (
       await candidate.closeAsync()
     }
     callbacks.onInsertProgress?.(0.8)
-    await activateInterlinearSidecar(locale, extractedPath)
+    await activateInterlinearSidecar(locale, extractedPath, () =>
+      callbacks.installationLifecycle?.commit(downloadResult)
+    )
     callbacks.onInsertProgress?.(1)
     return downloadResult
   } finally {
@@ -279,22 +284,18 @@ const readMetadata = async (database: SQLiteDatabase) => {
   return Object.fromEntries(rows.map(({ key, value }) => [key, value]))
 }
 
-const activateInterlinearSidecar = async (locale: ResourceLanguage, extractedPath: string) => {
+const activateInterlinearSidecar = async (
+  locale: ResourceLanguage,
+  extractedPath: string,
+  beforeCommit?: () => void | Promise<void>
+) => {
   const destination = getInterlinearSidecarPath(locale)
-  const backup = `${destination}.backup`
   await FileSystem.makeDirectoryAsync(getInterlinearSidecarDirectory(), { intermediates: true })
-  await closeInterlinearSidecar(locale)
-  await restoreOrphanedResourceBackup(destination, backup)
-  await FileSystem.deleteAsync(backup, { idempotent: true })
-  const current = await FileSystem.getInfoAsync(destination)
-  if (current.exists) await FileSystem.moveAsync({ from: destination, to: backup })
-  try {
-    await FileSystem.moveAsync({ from: extractedPath, to: destination })
-    await FileSystem.deleteAsync(backup, { idempotent: true })
-  } catch (error) {
-    await FileSystem.deleteAsync(destination, { idempotent: true })
-    const backupInfo = await FileSystem.getInfoAsync(backup)
-    if (backupInfo.exists) await FileSystem.moveAsync({ from: backup, to: destination })
-    throw error
-  }
+  await installAtomicResourceFile({
+    candidatePath: extractedPath,
+    destinationPath: destination,
+    beforeSwap: () => closeInterlinearSidecar(locale),
+    afterSwap: beforeCommit,
+    beforeRollback: () => closeInterlinearSidecar(locale),
+  })
 }

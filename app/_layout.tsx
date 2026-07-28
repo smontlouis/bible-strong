@@ -57,6 +57,7 @@ import getTheme, { baseTheme, Theme } from '~themes/index'
 import { setI18n } from '../i18n'
 import { PlaybackService } from '../playbackService'
 import { PortalProvider } from 'react-native-teleport'
+import { downloadManager } from '~helpers/downloadManager'
 
 // Register background event handler for Notifee
 // This prevents ANR when notifications fire while app is in background
@@ -127,6 +128,12 @@ const useAppLoad = () => {
 
   useEffect(() => {
     ;(async () => {
+      try {
+        await downloadManager.restore()
+      } catch (error) {
+        appLogger.error('startup', 'resource_recovery.failed', { error })
+        return
+      }
       appLogger.info('startup', 'i18n.init.started')
       await setI18n()
       appLogger.info('startup', 'i18n.init.completed')

@@ -29,6 +29,7 @@ import {
   type StrongSelectionMorphology,
 } from '~helpers/strongSelection'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 
@@ -73,7 +74,9 @@ const StrongSelectionSheet = ({
   const carouselGap = 12
   const carouselHorizontalPadding = 20
   const previewSkeletonHeight = morphologies.length ? 178 : 153
-  const coreDownload = useDownloadItemStatus('strong-lexicon:core')
+  const coreDownload = useDownloadItemStatus(
+    createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'core' })
+  )
   const availabilityQuery = useQuery({
     queryKey: ['strong-lexicon', 'availability', 'core'],
     queryFn: () => resources.strongLexicon.getModuleAvailability('core'),

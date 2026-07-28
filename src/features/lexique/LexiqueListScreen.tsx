@@ -25,12 +25,12 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import type { LexiqueRow } from '~features/resources/strongAccess'
+import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 import { useStrongLexiconLanguage } from './useStrongLexiconLanguage'
 
 interface LexiqueSection {
   title: string
-  data: LexiqueRow[]
+  data: StrongLexiconSearchResult[]
 }
 
 const getLexiqueItemLayout = sectionListGetItemLayout({
@@ -40,11 +40,12 @@ const getLexiqueItemLayout = sectionListGetItemLayout({
   getSectionFooterHeight: () => 0,
 })
 
-const useSectionResults = (results: LexiqueRow[]) => {
+const useSectionResults = (results: StrongLexiconSearchResult[]) => {
   return results.reduce<LexiqueSection[]>((list, dbItem) => {
-    const listItem = list.find(item => item.title && item.title === getFirstLetterFrom(dbItem.Mot))
+    const initial = getFirstLetterFrom(dbItem.gloss)
+    const listItem = list.find(item => item.title && item.title === initial)
     if (!listItem) {
-      list.push({ title: getFirstLetterFrom(dbItem.Mot), data: [dbItem] })
+      list.push({ title: initial, data: [dbItem] })
     } else {
       listItem.data.push(dbItem)
     }
@@ -86,13 +87,14 @@ const LexiqueListScreen = ({
   const { results, isLoading, error } = useResultsByLetterOrSearch(
     {
       queryKey: ['strong-lexicon'],
-      query: resources.strong.searchLexicon,
+      query: value => resources.strongLexicon.search(value, strongResourceLanguage, 200),
       value: debouncedSearchValue,
       resourceLanguage: strongResourceLanguage,
     },
     {
       queryKey: ['strong-lexicon'],
-      query: resources.strong.listLexiconByLetter,
+      query: value =>
+        resources.strongLexicon.browseByGlossPrefix(value, strongResourceLanguage, 500),
       value: letter,
       resourceLanguage: strongResourceLanguage,
     }
@@ -178,7 +180,7 @@ const LexiqueListScreen = ({
           {isLoading ? (
             <Loading message={t('Chargement...')} />
           ) : sectionResults.length ? (
-            <SectionList<LexiqueRow, LexiqueSection>
+            <SectionList<StrongLexiconSearchResult, LexiqueSection>
               renderItem={({ item, index }) => (
                 <LexiqueItem
                   key={index}
@@ -200,7 +202,7 @@ const LexiqueListScreen = ({
               )}
               stickySectionHeadersEnabled
               sections={sectionResults}
-              keyExtractor={item => item.Mot + item.Code}
+              keyExtractor={item => `${item.id}:${item.stepCode}`}
             />
           ) : (
             <Empty

@@ -560,8 +560,17 @@ export type StrongLexiconAccess = {
     identity: StrongIdentity,
     language: ResourceLanguage
   ) => Promise<StrongLexiconEntry | undefined>
+  loadEntries: (
+    identities: StrongIdentity[],
+    language: ResourceLanguage
+  ) => Promise<StrongLexiconEntry[]>
   search: (
     query: string,
+    language: ResourceLanguage,
+    limit?: number
+  ) => Promise<StrongLexiconSearchResult[]>
+  browseByGlossPrefix: (
+    prefix: string,
     language: ResourceLanguage,
     limit?: number
   ) => Promise<StrongLexiconSearchResult[]>
@@ -639,6 +648,13 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
     return row ? toEntry(core, row, identity, language, true) : undefined
   },
 
+  async loadEntries(identities, language) {
+    const entries = await Promise.all(
+      identities.map(identity => localStrongLexiconAccess.loadEntry(identity, language))
+    )
+    return entries.filter((entry): entry is StrongLexiconEntry => Boolean(entry))
+  },
+
   async search(query, language, limit = 100) {
     const core = await getStrongLexiconDatabase('core')
     const normalized = query.trim()
@@ -658,6 +674,27 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
         ORDER BY COALESCE(NULLIF(tr.gloss, ''), e.gloss), e.baseCode
         LIMIT ?`,
       [language, like, like, like, like, like, like, like, limit]
+    )
+    return rows.map(row => toSearchResult(row, language))
+  },
+
+  async browseByGlossPrefix(prefix, language, limit = 500) {
+    const normalizedPrefix = prefix.trim()
+    if (!normalizedPrefix) return []
+    const core = await getStrongLexiconDatabase('core')
+    const rows = await core.getAllAsync<CoreEntryRow>(
+      `SELECT e.*, i.stepCode,
+              tr.gloss AS localizedGloss,
+              tr.meaning AS localizedMeaning,
+              tr.meaningHtml AS localizedMeaningHtml
+         FROM StepEntries e
+         JOIN StepEntryIdentities i ON i.stepEntryId=e.id
+         LEFT JOIN LexiconTranslations tr
+           ON tr.stepEntryId=e.id AND tr.language=?
+        WHERE COALESCE(NULLIF(tr.gloss, ''), e.gloss) LIKE ?
+        ORDER BY COALESCE(NULLIF(tr.gloss, ''), e.gloss), e.baseCode
+        LIMIT ?`,
+      [language, `${normalizedPrefix}%`, limit]
     )
     return rows.map(row => toSearchResult(row, language))
   },

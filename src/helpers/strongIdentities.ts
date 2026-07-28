@@ -7,6 +7,25 @@ export type StrongIdentity = {
   code: string
 }
 
+export const createStrongIdentity = (
+  reference: string | number,
+  lexicalLanguage: 'greek' | 'hebrew'
+): StrongIdentity => {
+  const normalized = String(reference).trim().toUpperCase()
+  const code = /^[HG]/u.test(normalized)
+    ? normalized
+    : `${lexicalLanguage === 'hebrew' ? 'H' : 'G'}${String(Number(normalized)).padStart(4, '0')}`
+  return {
+    kind: /^[HG]\d+[A-Z]+$/u.test(code) ? 'dstrong' : 'strong',
+    code,
+  }
+}
+
+export const createStrongIdentityForBook = (
+  reference: string | number,
+  book: number
+): StrongIdentity => createStrongIdentity(reference, book <= 39 ? 'hebrew' : 'greek')
+
 export const areStrongIdentitiesEqual = (left: StrongIdentity, right: StrongIdentity): boolean =>
   left.kind === right.kind && left.code === right.code
 

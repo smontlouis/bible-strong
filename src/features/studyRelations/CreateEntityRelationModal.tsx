@@ -46,7 +46,7 @@ import {
   searchReferenceAndStrongTargets,
   type RelationTargetResult,
 } from './targetSearch'
-import type { LexiqueRow } from '~features/resources/strongAccess'
+import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 
@@ -359,16 +359,14 @@ const CreateEntityRelationModal = ({
     ],
     queryFn: () =>
       deferredStrongSearchValue.trim()
-        ? resources.strong.searchLexicon(deferredStrongSearchValue)
-        : resources.strong.listLexiconByLetter(strongLetter),
+        ? resources.strongLexicon.search(deferredStrongSearchValue, resourcesLanguage.STRONG, 200)
+        : resources.strongLexicon.browseByGlossPrefix(strongLetter, resourcesLanguage.STRONG, 500),
     enabled: shouldLoadStrongTargets,
   })
   const strongError =
     strongQuery.data && isDatabaseError(strongQuery.data) ? strongQuery.data.error : null
-  const strongResults: LexiqueRow[] =
-    shouldLoadStrongTargets && strongQuery.data && !isDatabaseError(strongQuery.data)
-      ? strongQuery.data
-      : []
+  const strongResults: StrongLexiconSearchResult[] =
+    shouldLoadStrongTargets && strongQuery.data ? strongQuery.data : []
 
   const shouldLoadNaveTargets =
     isAllowed('nave') &&

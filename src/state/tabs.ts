@@ -25,9 +25,9 @@ import {
   type StrongBibleVersionId,
   type StrongMode,
 } from '~helpers/strongBiblePublications'
-import type { InterlinearDisplayMode, InterlinearMode } from '~helpers/interlinearBiblePublications'
+import type { InterlinearMode } from '~helpers/interlinearBiblePublications'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import { applyPendingStrongMode, applyStrongModeSelection } from '~helpers/strongModeState'
+import type { PendingBibleModeAcquisition } from '~helpers/bibleModeAcquisition'
 
 // ============================================================================
 // SHARED BIBLE DOM (single WebView instance for all Bible tabs)
@@ -63,15 +63,10 @@ export interface BibleTab extends TabBase {
   data: {
     selectedVersion: VersionCode
     strongMode?: StrongMode
-    pendingStrongModeVersionId?: StrongBibleVersionId
-    pendingStrongMode?: Exclude<StrongMode, 'hidden'>
-    pendingStrongInterlinearLocale?: ResourceLanguage
     strongBibleSourceVersionId?: StrongBibleVersionId
     interlinearMode?: InterlinearMode
     interlinearLocale?: ResourceLanguage
-    pendingInterlinearDownload?: boolean
-    pendingInterlinearMode?: InterlinearDisplayMode
-    pendingInterlinearLocale?: ResourceLanguage
+    pendingModeAcquisition?: PendingBibleModeAcquisition
     selectedBook: Book
     selectedChapter: number
     selectedVerse: number
@@ -775,7 +770,8 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const setStrongMode = (strongMode: StrongMode) =>
     setBibleTab(
       produce(draft => {
-        applyStrongModeSelection(draft.data, strongMode)
+        draft.data.strongMode = strongMode
+        draft.data.pendingModeAcquisition = undefined
       })
     )
 
@@ -787,70 +783,30 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
       produce(draft => {
         draft.data.interlinearMode = interlinearMode
         draft.data.interlinearLocale = interlinearLocale
+        draft.data.pendingModeAcquisition = undefined
       })
     )
 
-  const setPendingInterlinearDownload = (
-    pendingInterlinearDownload: boolean,
-    pendingInterlinearMode: InterlinearDisplayMode = 'interlinear',
-    pendingInterlinearLocale?: ResourceLanguage
-  ) =>
+  const startBibleModeAcquisition = (acquisition: PendingBibleModeAcquisition) =>
     setBibleTab(
       produce(draft => {
-        draft.data.pendingInterlinearDownload = pendingInterlinearDownload
-        draft.data.pendingInterlinearMode = pendingInterlinearDownload
-          ? pendingInterlinearMode
-          : undefined
-        draft.data.pendingInterlinearLocale = pendingInterlinearDownload
-          ? pendingInterlinearLocale
-          : undefined
+        draft.data.pendingModeAcquisition = acquisition
       })
     )
 
-  const finishPendingInterlinearDownload = (locale: ResourceLanguage, succeeded: boolean) =>
+  const finishBibleModeAcquisition = (succeeded: boolean) =>
     setBibleTab(
       produce(draft => {
-        if (!draft.data.pendingInterlinearDownload) return
-        const isLegacyPendingDownload = !draft.data.pendingInterlinearMode
-        const pendingMode = draft.data.pendingInterlinearMode ?? 'interlinear'
-        const pendingLocale = draft.data.pendingInterlinearLocale
-        draft.data.pendingInterlinearDownload = false
-        draft.data.pendingInterlinearMode = undefined
-        draft.data.pendingInterlinearLocale = undefined
-        if (succeeded && draft.data.selectedVersion === 'BHG') {
-          draft.data.interlinearMode = pendingMode
-          draft.data.interlinearLocale = isLegacyPendingDownload ? locale : pendingLocale
+        const acquisition = draft.data.pendingModeAcquisition
+        draft.data.pendingModeAcquisition = undefined
+        if (!succeeded || !acquisition) return
+
+        if (acquisition.kind === 'strong' && draft.data.selectedVersion === acquisition.versionId) {
+          draft.data.strongMode = acquisition.mode
         }
-      })
-    )
-
-  const setPendingStrongModeVersion = (
-    versionId?: StrongBibleVersionId,
-    pendingStrongMode: Exclude<StrongMode, 'hidden'> = 'visible',
-    pendingStrongInterlinearLocale?: ResourceLanguage
-  ) =>
-    setBibleTab(
-      produce(draft => {
-        applyPendingStrongMode(
-          draft.data,
-          versionId,
-          pendingStrongMode,
-          pendingStrongInterlinearLocale
-        )
-      })
-    )
-
-  const finishPendingStrongModeDownload = (versionId: StrongBibleVersionId, succeeded: boolean) =>
-    setBibleTab(
-      produce(draft => {
-        if (draft.data.pendingStrongModeVersionId !== versionId) return
-
-        const pendingMode = draft.data.pendingStrongMode ?? 'visible'
-        draft.data.pendingStrongModeVersionId = undefined
-        draft.data.pendingStrongMode = undefined
-        draft.data.pendingStrongInterlinearLocale = undefined
-        if (succeeded && draft.data.selectedVersion === versionId) {
-          draft.data.strongMode = pendingMode
+        if (acquisition.kind === 'interlinear' && draft.data.selectedVersion === 'BHG') {
+          draft.data.interlinearMode = acquisition.mode
+          draft.data.interlinearLocale = acquisition.locale
         }
       })
     )
@@ -1167,10 +1123,8 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     setSelectedVersion,
     setStrongMode,
     setInterlinearMode,
-    setPendingInterlinearDownload,
-    finishPendingInterlinearDownload,
-    setPendingStrongModeVersion,
-    finishPendingStrongModeDownload,
+    startBibleModeAcquisition,
+    finishBibleModeAcquisition,
     setSelectedBook,
     setSelectedChapter,
     setSelectedVerse,

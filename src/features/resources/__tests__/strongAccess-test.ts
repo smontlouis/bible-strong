@@ -1,4 +1,4 @@
-import { getStrongReferenceFamily } from '../strongAccessModel'
+import { getStrongReferenceFamily } from '~helpers/strongBookTables'
 
 describe('StrongAccess', () => {
   it('maps Old Testament books to Hebrew references', () => {

@@ -33,7 +33,7 @@ export function useDownloadQueue() {
 /**
  * Hook for a single item's download status. Returns undefined if not in queue.
  */
-export function useDownloadItemStatus(itemId: string): DownloadItemState | undefined {
+export function useDownloadItemStatus(itemId?: string): DownloadItemState | undefined {
   const statusAtom = downloadStatusForIdAtom(itemId)
   return useAtomValue(statusAtom)
 }

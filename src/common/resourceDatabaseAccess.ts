@@ -9,6 +9,7 @@ import type { DatabaseId, ResourceLanguage } from '~helpers/databaseTypes'
 import { createDatabaseDownloadItem } from '~helpers/downloadItemFactory'
 import { downloadManager } from '~helpers/downloadManager'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
 
 type ResourceDatabaseAccessState = {
   startDownload: boolean
@@ -47,7 +48,7 @@ export const useResourceDatabaseAccess = ({
   const actionsRef = useRef(actions)
   actionsRef.current = actions
   const prevLangRef = useRef<ResourceLanguage>(lang)
-  const itemId = `database:${dbId}:${lang}`
+  const itemId = createOfflineCopyId({ kind: 'database', databaseId: dbId, language: lang })
   const queueState = useDownloadItemStatus(itemId)
 
   useEffect(() => {

@@ -49,17 +49,27 @@ describe('selectBibleTabVersion', () => {
     })
   })
 
-  it('preserves a pending Strong activation while another version is selected', () => {
+  it('preserves an acquisition transaction while another version is selected', () => {
     const data = {
       selectedVersion: 'DBY',
       strongMode: 'hidden',
-      pendingStrongModeVersionId: 'DBY',
+      pendingModeAcquisition: {
+        kind: 'strong',
+        versionId: 'DBY',
+        mode: 'visible',
+        planIds: ['bible-strong:DBY'],
+      },
     } as Parameters<typeof selectBibleTabVersion>[0]
 
     expect(selectBibleTabVersion(data, 'BFC')).toMatchObject({
       selectedVersion: 'BFC',
       strongMode: 'hidden',
-      pendingStrongModeVersionId: 'DBY',
+      pendingModeAcquisition: {
+        kind: 'strong',
+        versionId: 'DBY',
+        mode: 'visible',
+        planIds: ['bible-strong:DBY'],
+      },
     })
   })
 

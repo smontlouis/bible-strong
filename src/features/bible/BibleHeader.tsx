@@ -57,21 +57,17 @@ import PassageExportSheet from './passageExport/PassageExportSheet'
 import { VerseSelectorPopup } from './VerseSelectorPopup'
 import { shouldShowBibleBackButton } from './bibleHeaderNavigation'
 import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
-import { getStrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
-import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import StrongMark from './StrongMark'
-import { getStrongModeDownloadPresentation } from './strongModeDownloadState'
 import {
   isInterlinearCapableBibleVersion,
   isInterlinearModeEnabled,
 } from '~helpers/interlinearBiblePublications'
-import { getInterlinearSidecarAvailability } from '~helpers/interlinearBibleSidecar'
-import { getDownloadItemProgress } from '~state/downloadQueue'
+import { downloadItemStatesAtom } from '~state/downloadQueue'
+import { getBibleModeAcquisitionPresentation } from '~helpers/bibleModeAcquisition'
 import InterlinearMark from './InterlinearMark'
 import InterlinearModeSelectorSheet from './InterlinearModeSelectorSheet'
 import StrongModeSelectorSheet from './StrongModeSelectorSheet'
-
-const STRONG_MODE_COMPLETION_HOLD_MS = 450
+import { useBibleModeAcquisitionCompletion } from './useBibleModeAcquisitionCompletion'
 
 interface BibleHeaderProps {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -135,50 +131,36 @@ const Header = ({
     parallelVersions,
     focusVerses,
     strongMode = 'hidden',
-    pendingStrongModeVersionId,
-    pendingStrongMode,
-    pendingStrongInterlinearLocale,
     interlinearMode = 'hidden',
-    interlinearLocale,
-    pendingInterlinearDownload,
-    pendingInterlinearLocale,
+    pendingModeAcquisition,
   } = bible.data
   const bookNumber = book.Numero
   const bookName = book.Nom
   const isParallel = parallelVersions.length > 0
   const displayVerses = focusVerses
-  const bibleDownload = useDownloadItemStatus(`bible:${version}`)
-  const strongSidecarDownload = useDownloadItemStatus(`bible-strong:${version}`)
-  const strongDownloadPresentation = getStrongModeDownloadPresentation(
-    bibleDownload,
-    strongSidecarDownload
+  const downloadStates = useAtomValue(downloadItemStatesAtom)
+  const acquisitionPresentation = getBibleModeAcquisitionPresentation(
+    pendingModeAcquisition,
+    downloadStates
   )
-  const activeInterlinearLocale =
-    pendingStrongInterlinearLocale ?? pendingInterlinearLocale ?? interlinearLocale ?? lang
-  const interlinearDownload = useDownloadItemStatus(
-    `bible-interlinear:BHG:${activeInterlinearLocale}`
-  )
-  const isInterlinearDownloadActive =
-    interlinearDownload?.status === 'queued' ||
-    interlinearDownload?.status === 'downloading' ||
-    interlinearDownload?.status === 'inserting'
   const isInterlinearDownloadVisible =
     interlinearMode === 'hidden' &&
-    (isInterlinearDownloadActive ||
-      (pendingInterlinearDownload && interlinearDownload?.status === 'completed'))
+    pendingModeAcquisition?.kind === 'interlinear' &&
+    (acquisitionPresentation.status === 'active' || acquisitionPresentation.status === 'completed')
   const isStrongDownloadVisible =
     strongMode === 'hidden' &&
-    pendingStrongModeVersionId === version &&
-    (strongDownloadPresentation.status === 'active' ||
-      strongDownloadPresentation.status === 'completed' ||
-      (pendingStrongMode === 'reverse-interlinear' &&
-        (isInterlinearDownloadActive || interlinearDownload?.status === 'completed')))
-  const strongModeDownloadProgress =
-    pendingStrongMode === 'reverse-interlinear' &&
-    strongDownloadPresentation.status !== 'active' &&
-    interlinearDownload
-      ? getDownloadItemProgress(interlinearDownload)
-      : strongDownloadPresentation.progress
+    pendingModeAcquisition?.kind === 'strong' &&
+    pendingModeAcquisition.versionId === version &&
+    (acquisitionPresentation.status === 'active' || acquisitionPresentation.status === 'completed')
+
+  useBibleModeAcquisitionCompletion({
+    acquisition: pendingModeAcquisition,
+    finish: actions.finishBibleModeAcquisition,
+    onSucceeded: acquisition => {
+      const sheetRef = acquisition.kind === 'strong' ? strongModeSheetRef : interlinearModeSheetRef
+      sheetRef.current?.dismiss()
+    },
+  })
 
   // Check if verses are selected
   const hasSelectedVerses = selectedVerses && Object.keys(selectedVerses).length > 0
@@ -223,119 +205,6 @@ const Header = ({
     })
     actions.setTitle(`${ref} - ${selectedVersion}`)
   }, [actions, bible])
-
-  useEffect(() => {
-    if (!isStrongCapableBibleVersion(version) || pendingStrongModeVersionId !== version) return
-
-    if (
-      strongDownloadPresentation.status === 'failed' ||
-      (pendingStrongMode === 'reverse-interlinear' && interlinearDownload?.status === 'failed')
-    ) {
-      actions.finishPendingStrongModeDownload(version, false)
-      return
-    }
-
-    if (
-      strongDownloadPresentation.status === 'active' ||
-      (pendingStrongMode === 'reverse-interlinear' && isInterlinearDownloadActive)
-    )
-      return
-
-    let cancelled = false
-    const completionObserved = strongDownloadPresentation.status === 'completed'
-    const timeout = setTimeout(
-      () => {
-        Promise.all([
-          getStrongBibleSidecarAvailability(version),
-          ...(pendingStrongMode === 'reverse-interlinear'
-            ? [
-                getInterlinearSidecarAvailability(activeInterlinearLocale),
-                getInterlinearSidecarAvailability(activeInterlinearLocale === 'fr' ? 'en' : 'fr'),
-              ]
-            : []),
-        ])
-          .then(([strongAvailability, ...interlinearAvailabilities]) => {
-            if (cancelled) return
-
-            const reverseInterlinearReady =
-              pendingStrongMode !== 'reverse-interlinear' ||
-              interlinearAvailabilities.some(availability => availability.status === 'available')
-            if (strongAvailability.status === 'available' && reverseInterlinearReady) {
-              actions.finishPendingStrongModeDownload(version, true)
-            } else if (
-              completionObserved &&
-              (pendingStrongMode !== 'reverse-interlinear' ||
-                interlinearDownload?.status === 'completed')
-            ) {
-              actions.finishPendingStrongModeDownload(version, false)
-            }
-          })
-          .catch(() => {
-            if (!cancelled && completionObserved) {
-              actions.finishPendingStrongModeDownload(version, false)
-            }
-          })
-      },
-      completionObserved ? STRONG_MODE_COMPLETION_HOLD_MS : 0
-    )
-
-    return () => {
-      cancelled = true
-      clearTimeout(timeout)
-    }
-  }, [
-    actions,
-    activeInterlinearLocale,
-    interlinearDownload?.status,
-    isInterlinearDownloadActive,
-    pendingStrongMode,
-    pendingStrongInterlinearLocale,
-    pendingStrongModeVersionId,
-    strongDownloadPresentation.status,
-    version,
-  ])
-
-  useEffect(() => {
-    if (!pendingInterlinearDownload || version !== 'BHG') return
-    if (interlinearDownload?.status === 'failed') {
-      actions.finishPendingInterlinearDownload(activeInterlinearLocale, false)
-      return
-    }
-    if (isInterlinearDownloadActive) return
-
-    let cancelled = false
-    const completionObserved = interlinearDownload?.status === 'completed'
-    const timeout = setTimeout(
-      () => {
-        getInterlinearSidecarAvailability(activeInterlinearLocale)
-          .then(availability => {
-            if (cancelled) return
-            if (availability.status === 'available') {
-              actions.finishPendingInterlinearDownload(activeInterlinearLocale, true)
-            } else if (completionObserved) {
-              actions.finishPendingInterlinearDownload(activeInterlinearLocale, false)
-            }
-          })
-          .catch(() => {
-            if (!cancelled && completionObserved) {
-              actions.finishPendingInterlinearDownload(activeInterlinearLocale, false)
-            }
-          })
-      },
-      completionObserved ? STRONG_MODE_COMPLETION_HOLD_MS : 0
-    )
-    return () => {
-      cancelled = true
-      clearTimeout(timeout)
-    }
-  }, [
-    actions,
-    activeInterlinearLocale,
-    interlinearDownload?.status,
-    isInterlinearDownloadActive,
-    pendingInterlinearDownload,
-    version,
-  ])
 
   const { addParallelVersion, removeParallelVersion, removeAllParallelVersions } = actions
 
@@ -545,7 +414,11 @@ const Header = ({
       }}
     >
       {isStrongDownloadVisible ? (
-        <Progress progress={Math.max(strongModeDownloadProgress, 0.04)} size={22} thickness={2.5} />
+        <Progress
+          progress={Math.max(acquisitionPresentation.progress, 0.04)}
+          size={22}
+          thickness={2.5}
+        />
       ) : (
         <StrongMark highlighted={strongMode !== 'hidden'} />
       )}
@@ -569,9 +442,9 @@ const Header = ({
       }}
       style={opacityTransitionStyle}
     >
-      {isInterlinearDownloadVisible && interlinearDownload ? (
+      {isInterlinearDownloadVisible ? (
         <Progress
-          progress={Math.max(getDownloadItemProgress(interlinearDownload), 0.04)}
+          progress={Math.max(acquisitionPresentation.progress, 0.04)}
           size={22}
           thickness={2.5}
         />

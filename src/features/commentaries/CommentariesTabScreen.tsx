@@ -40,6 +40,7 @@ import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
 import { useDownloadItemStatus, useDownloadQueue } from '~helpers/useDownloadQueue'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
 
 const VersetWrapper = styled.View(() => ({
   width: 25,
@@ -207,7 +208,9 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
     ...localQueryOptions,
   })
   const requiredBibleDownloadStatus = useDownloadItemStatus(
-    requiredBibleVersion ? `bible:${requiredBibleVersion}` : ''
+    requiredBibleVersion
+      ? createOfflineCopyId({ kind: 'bible', versionId: requiredBibleVersion })
+      : undefined
   )
 
   const updateVerse = (value: -1 | 1) => {

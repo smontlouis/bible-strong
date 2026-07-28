@@ -1,9 +1,7 @@
-import * as FileSystem from 'expo-file-system/legacy'
 import React from 'react'
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Alert, Linking, TouchableOpacity } from 'react-native'
 import { useDispatch } from 'react-redux'
-import { dbManager } from '~helpers/sqlite'
 
 import { useAtomValue } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
@@ -15,10 +13,6 @@ import Progress from '~common/ui/Progress'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import { getIfVersionNeedsDownload, isStrongVersion, Version } from '~helpers/bibleVersions'
-import { isVersionInstalled, removeBibleVersion } from '~helpers/biblesDb'
-import { requireBiblePath } from '~helpers/requireBiblePath'
-import { deleteRedWordsFile } from '~helpers/redWords'
-import { deletePericopeFile } from '~helpers/pericopes'
 import useLanguage from '~helpers/useLanguage'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
@@ -45,11 +39,14 @@ import StrongMark from './StrongMark'
 import { isInterlinearCapableBibleVersion } from '~helpers/interlinearBiblePublications'
 import InterlinearIndexSelectorItem from './InterlinearIndexSelectorItem'
 import InterlinearMark from './InterlinearMark'
-import { removeInterlinearSidecar } from '~helpers/interlinearBibleSidecar'
 import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/downloadQueue'
 import { useResourcePublicationStatus } from '~helpers/useResourcePublicationStatus'
-import { resourcePublicationStore } from '~helpers/resourcePublication'
 import { getBibleRelatedPublicationResources } from '~helpers/bibleRelatedPublications'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
+import {
+  createDownloadedItemDeletionPlan,
+  deleteDownloadedItem,
+} from '~helpers/deleteDownloadedItem'
 
 const getVersionDownloadQueryKey = (
   versionId: string,
@@ -293,7 +290,7 @@ const VersionSelectorItem = ({
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
 
   // Subscribe to download queue state for this item
-  const itemId = `bible:${version.id}`
+  const itemId = createOfflineCopyId({ kind: 'bible', versionId: version.id })
   const queueState = useDownloadItemStatus(itemId)
   const previousBibleDownloadStatusRef = React.useRef(queueState?.status)
   const strongVersionId = isStrongCapableBibleVersion(version.id) ? version.id : undefined
@@ -328,7 +325,11 @@ const VersionSelectorItem = ({
   })
   const strongSelectionAvailability: StrongBibleSidecarAvailability | undefined =
     strongSelectionQuery.data ?? (strongSelectionQuery.isError ? { status: 'missing' } : undefined)
-  const strongQueueState = useDownloadItemStatus(`bible-strong:${version.id}`)
+  const strongQueueState = useDownloadItemStatus(
+    isStrongCapableBibleVersion(version.id)
+      ? createOfflineCopyId({ kind: 'strong-bible-index', versionId: version.id })
+      : undefined
+  )
   const activeQueueState = requiresStrong
     ? [queueState, strongQueueState].find(
         state =>
@@ -478,34 +479,11 @@ const VersionSelectorItem = ({
       jotaiStore.set(tabsAtom, updatedTabs)
     }
 
-    if (version.id === 'BHG') {
-      await Promise.all([removeInterlinearSidecar('fr'), removeInterlinearSidecar('en')])
-    }
-
-    if (isStrongVersion(version.id)) {
-      const path = requireBiblePath(version.id)
-      const file = await FileSystem.getInfoAsync(path)
-      if (file.exists) {
-        await FileSystem.deleteAsync(file.uri)
-      }
-      if (version.id === 'INT' || version.id === 'INT_EN') {
-        const vLang = version.id === 'INT' ? 'fr' : 'en'
-        dbManager.getDB('INTERLINEAIRE', vLang).delete()
-      }
-    } else {
-      const installed = await isVersionInstalled(version.id)
-      if (installed) {
-        await removeBibleVersion(version.id)
-      }
-      const legacyPath = `${FileSystem.documentDirectory}bible-${version.id}.json`
-      const legacyFile = await FileSystem.getInfoAsync(legacyPath)
-      if (legacyFile.exists) {
-        await FileSystem.deleteAsync(legacyFile.uri)
-      }
-    }
-
-    deleteRedWordsFile(version.id)
-    deletePericopeFile(version.id)
+    const bibleOfflineCopyId = createOfflineCopyId({
+      kind: 'bible',
+      versionId: version.id,
+    })
+    await deleteDownloadedItem(createDownloadedItemDeletionPlan(bibleOfflineCopyId))
     queryClient.setQueryData(
       getVersionDownloadQueryKey(version.id, isOnboardingCompleted, installedVersionsSignal),
       true
@@ -515,7 +493,6 @@ const VersionSelectorItem = ({
     // Trigger BibleViewer instances to reload so tabs that were showing
     // this version updates (e.g. shows the BIBLE_NOT_FOUND error view).
     jotaiStore.set(bibleDataRefreshSignalAtom, (c: number) => c + 1)
-    resourcePublicationStore.remove(`bible:${version.id}`)
   }
 
   const confirmDelete = () => {

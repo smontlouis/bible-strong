@@ -2,7 +2,6 @@ import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import React from 'react'
 
-import { useTranslation } from 'react-i18next'
 import Link from '~common/Link'
 import StylizedHTMLView from '~common/StylizedHTMLView'
 import Box from '~common/ui/Box'
@@ -16,11 +15,12 @@ import { useAtomValue } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
 import { useRouter } from 'expo-router'
 import { currentStudyIdAtom, openedFromTabAtom } from '~features/studies/atom'
-import { StrongReference, StudyNavigateBibleType } from '~common/types'
+import { StudyNavigateBibleType } from '~common/types'
 import { Theme } from '@emotion/react'
 import { SheetScrollView } from '~common/sheet'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
+import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -84,7 +84,7 @@ type Props = {
   index?: number
   theme: Theme
   book: string
-  strongReference: StrongReference
+  strongEntry: StrongLexiconEntry
   isSelectionMode?: StudyNavigateBibleType
   isModal?: boolean
   onClosed?: () => void
@@ -92,7 +92,6 @@ type Props = {
 }
 
 const StrongCard = (props: Props) => {
-  const { t } = useTranslation()
   const router = useRouter()
   const pushRouteOnce = usePushRouteOnce()
   const openedFromTab = useAtomValue(openedFromTabAtom)
@@ -123,14 +122,12 @@ const StrongCard = (props: Props) => {
   }
 
   const openStrong = () => {
-    const {
-      book,
-      strongReference,
-      isSelectionMode,
-      strongReference: { Code, Type, Mot, Phonetique, Definition, LSG, Hebreu, Grec },
-    } = props
-
-    // onClosed?.()
+    const { book, strongEntry, isSelectionMode } = props
+    const Type = strongEntry.morphology?.meaning ?? ''
+    const Mot = strongEntry.gloss
+    const Phonetique = strongEntry.transliteration
+    const Definition = strongEntry.definitionHtml ?? ''
+    const original = strongEntry.original
 
     if (isSelectionMode) {
       const store = getDefaultStore()
@@ -143,12 +140,12 @@ const StrongCard = (props: Props) => {
           studyId: currentStudyId,
           type: isSelectionMode,
           title: Mot,
-          codeStrong: Code,
+          codeStrong: strongEntry.classicStrong,
           strongType: Type,
           phonetique: Phonetique,
           definition: Definition,
-          translatedBy: LSG,
-          original: Hebreu || Grec,
+          translatedBy: '',
+          original,
           book,
         },
       })
@@ -157,19 +154,19 @@ const StrongCard = (props: Props) => {
         pathname: '/strong',
         params: {
           book: String(Number(book)),
-          strongReference: JSON.stringify(strongReference),
+          identityKind: strongEntry.selectedIdentity.kind,
+          identityCode: strongEntry.selectedIdentity.code,
           strongBibleVersionId: props.strongBibleVersionId,
         },
       })
     }
   }
 
-  const {
-    isSelectionMode,
-    strongReference: { Code, Hebreu, Grec, Mot, Phonetique, Definition, LSG },
-    theme,
-    isModal,
-  } = props
+  const { isSelectionMode, strongEntry, theme, isModal } = props
+  const Mot = strongEntry.gloss
+  const Phonetique = strongEntry.transliteration
+  const Definition = strongEntry.definitionHtml ?? ''
+  const original = strongEntry.original
 
   return (
     <Container overflow="visible" isModal={isModal}>
@@ -190,7 +187,10 @@ const StrongCard = (props: Props) => {
                 </Text>
               </Link>
               <Box mr={10} mt={3}>
-                <ListenToStrong type={Hebreu ? 'hebreu' : 'grec'} code={Code} />
+                <ListenToStrong
+                  type={strongEntry.language === 'hebrew' ? 'hebreu' : 'grec'}
+                  code={strongEntry.baseCode}
+                />
               </Box>
               <Link onPress={openStrong}>
                 {isSelectionMode ? (
@@ -202,7 +202,7 @@ const StrongCard = (props: Props) => {
             </Header>
           </Box>
           <Text color="darkGrey" bold fontSize={16} textAlign="left">
-            {Hebreu || Grec}
+            {original}
           </Text>
           {/* {!!Type && (
               <Text titleItalic color="darkGrey" fontSize={12}>
@@ -216,7 +216,7 @@ const StrongCard = (props: Props) => {
       <SheetScrollView style={{ marginBottom: 15 }}>
         {!!Definition && (
           <ViewItem>
-            <SubTitle color="darkGrey">Définition - {Code}</SubTitle>
+            <SubTitle color="darkGrey">Définition - {strongEntry.stepCode}</SubTitle>
             <StylizedHTMLView
               htmlStyle={{
                 p: { ...smallTextStyle(theme) },
@@ -230,24 +230,6 @@ const StrongCard = (props: Props) => {
               }}
               value={Definition}
               onLinkPress={linkToStrong}
-            />
-          </ViewItem>
-        )}
-        {!!LSG && (
-          <ViewItem>
-            <SubTitle color="darkGrey">{t('Généralement traduit par')}</SubTitle>
-            <StylizedHTMLView
-              htmlStyle={{
-                p: { ...smallTextStyle(theme) },
-                em: { ...smallTextStyle(theme) },
-                strong: { ...smallTextStyle(theme) },
-                a: { ...smallLinkStyle(theme) },
-                i: { ...smallTextStyle(theme) },
-                li: { ...smallTextStyle(theme) },
-                ol: { ...smallTextStyle(theme) },
-                ul: { ...smallTextStyle(theme) },
-              }}
-              value={LSG}
             />
           </ViewItem>
         )}

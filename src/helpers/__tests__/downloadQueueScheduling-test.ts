@@ -1,4 +1,4 @@
-import type { DownloadItemState, DownloadStatus } from '~state/downloadQueue'
+import type { DownloadItem, DownloadItemState, DownloadStatus } from '~state/downloadQueue'
 
 import { getDownloadQueueDecision } from '../downloadQueueScheduling'
 
@@ -16,7 +16,7 @@ const createState = (
     dependsOnId,
     addedAt: 0,
     retryCount: 0,
-  },
+  } as DownloadItem,
   status,
   downloadProgress: 0,
   insertProgress: 0,

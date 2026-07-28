@@ -24,6 +24,7 @@ import {
   clearAnnotationMigrationJournal,
   persistAnnotationMigrationJournal,
 } from './annotationMigrationJournal'
+import type { ResourceInstallationLifecycle } from './resourceInstallationLifecycle'
 
 export interface DownloadAndInsertOptions extends InsertBibleOptions {
   onDownloadProgress?: FileSystem.DownloadProgressCallback
@@ -31,6 +32,7 @@ export interface DownloadAndInsertOptions extends InsertBibleOptions {
   onResumable?: (resumable: FileSystem.DownloadResumable | null) => void
   canonicalArtifact?: StrongBiblePublication['canonical']
   archiveArtifact?: InterlinearPublicationArtifact
+  installationLifecycle?: ResourceInstallationLifecycle
 }
 
 /**
@@ -89,6 +91,7 @@ export async function downloadAndInsertBible(
     const data = await FileSystem.readAsStringAsync(jsonPath)
     const jsonData = JSON.parse(data) as BibleJsonData
     validateCanonicalBiblePublication(versionId, jsonData, opts.canonicalArtifact)
+    await opts.installationLifecycle?.prepare(downloadResult)
     const downloadedTextChecksum = await getFileSha256(jsonPath)
     const revisionPrefix =
       opts.archiveArtifact?.textRevision.split('-')[0] ?? versionId.toLowerCase()
@@ -112,6 +115,7 @@ export async function downloadAndInsertBible(
     await insertBibleVersion(versionId, jsonData, {
       onInsertProgress: opts.onInsertProgress,
       isCancelled: opts.isCancelled,
+      beforeCommit: () => opts.installationLifecycle?.commit(downloadResult),
       ...(isCanonicalBibleJsonData(jsonData)
         ? {
             publicationMetadata: {
@@ -120,6 +124,7 @@ export async function downloadAndInsertBible(
               sourceSha256: jsonData.sourceSha256,
               schemaVersion: jsonData.schemaVersion,
               verseCount: jsonData.verseCount,
+              resourceGeneration: downloadResult.publication.generation,
             },
           }
         : opts.archiveArtifact
@@ -130,14 +135,31 @@ export async function downloadAndInsertBible(
                 sourceSha256: downloadedTextChecksum,
                 schemaVersion: opts.archiveArtifact.schemaVersion,
                 verseCount: countBibleJsonVerses(jsonData),
+                resourceGeneration: downloadResult.publication.generation,
               },
             }
-          : {}),
+          : {
+              publicationMetadata: {
+                textRevision: downloadedTextRevision,
+                textSha256: downloadedTextChecksum,
+                sourceSha256: downloadedTextChecksum,
+                schemaVersion: 0,
+                verseCount: countBibleJsonVerses(jsonData),
+                resourceGeneration: downloadResult.publication.generation,
+              },
+            }),
     })
     if (realignmentPlan && Object.keys(realignmentPlan.updates).length > 0) {
-      store.dispatch(realignWordAnnotationsAction(realignmentPlan.updates))
-      await persistor.flush()
-      clearAnnotationMigrationJournal()
+      try {
+        store.dispatch(realignWordAnnotationsAction(realignmentPlan.updates))
+        await persistor.flush()
+        clearAnnotationMigrationJournal()
+      } catch (error) {
+        console.error(
+          `[DownloadBible] ${versionId} installed, but annotation realignment persistence failed:`,
+          error
+        )
+      }
     }
     if (realignmentPlan?.unchangedAmbiguousAnnotationIds.length) {
       console.info(

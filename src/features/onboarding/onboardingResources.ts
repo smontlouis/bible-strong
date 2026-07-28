@@ -9,6 +9,7 @@ import { databases } from '~helpers/databases'
 import { getDefaultBibleVersion, type ActiveLanguage } from '~helpers/languageUtils'
 import type { DatabaseId, ResourceLanguage } from '~helpers/databaseTypes'
 import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
 
 type DownloadableDatabaseResources = ReturnType<typeof databases>
 export type OnboardingDatabaseResourceOption =
@@ -21,7 +22,7 @@ export type OnboardingResourceSelection =
     }
   | {
       kind: 'database'
-      databaseId: DatabaseId
+      databaseId: Exclude<DatabaseId, 'BIBLES'>
       lang: ResourceLanguage
     }
   | {
@@ -34,16 +35,23 @@ export type OnboardingResourceSelection =
 
 export const getOnboardingResourceSelectionId = (resource: OnboardingResourceSelection): string => {
   if (resource.kind === 'bible') {
-    return `bible:${resource.versionId}`
+    return createOfflineCopyId({ kind: 'bible', versionId: resource.versionId })
   }
   if (resource.kind === 'bible-strong') {
-    return `bible-strong:${resource.versionId}`
+    return createOfflineCopyId({
+      kind: 'strong-bible-index',
+      versionId: resource.versionId,
+    })
   }
   if (resource.kind === 'strong-lexicon') {
-    return 'strong-lexicon:core'
+    return createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'core' })
   }
 
-  return `database:${resource.databaseId}:${resource.lang}`
+  return createOfflineCopyId({
+    kind: 'database',
+    databaseId: resource.databaseId,
+    language: resource.lang,
+  })
 }
 
 export const toggleOnboardingResourceSelection = (
@@ -57,7 +65,7 @@ export const toggleOnboardingResourceSelection = (
     if (isSelected) {
       return selected.filter(item => getOnboardingResourceSelectionId(item) !== resourceId)
     }
-    const baseId = `bible:${resource.versionId}`
+    const baseId = createOfflineCopyId({ kind: 'bible', versionId: resource.versionId })
     const withBase = selected.some(item => getOnboardingResourceSelectionId(item) === baseId)
       ? selected
       : [...selected, { kind: 'bible' as const, versionId: resource.versionId }]
@@ -66,10 +74,12 @@ export const toggleOnboardingResourceSelection = (
 
   if (resource.kind === 'bible') {
     if (!isSelected) return [...selected, resource]
-    const strongId = `bible-strong:${resource.versionId}`
     return selected.filter(item => {
       const itemId = getOnboardingResourceSelectionId(item)
-      return itemId !== resourceId && itemId !== strongId
+      return !(
+        itemId === resourceId ||
+        (item.kind === 'bible-strong' && item.versionId === resource.versionId)
+      )
     })
   }
 
@@ -88,7 +98,7 @@ export const getDefaultOnboardingResourceSelection = (
 export const getOnboardingDatabaseResourceOptions = (
   lang: ResourceLanguage
 ): OnboardingDatabaseResourceOption[] =>
-  Object.values(databases(lang)).filter(db => (lang !== 'fr' ? db.id !== 'MHY' : true))
+  Object.values(databases(lang)).filter(db => lang === 'fr' || db.id !== 'MHY')
 
 export const createDownloadItemFromOnboardingSelection = (
   resource: OnboardingResourceSelection

@@ -70,7 +70,7 @@ const createDatabase = () => ({
     if (code === 'H0413') return rows.H0413
     return null
   }),
-  getAllAsync: jest.fn(async () => []),
+  getAllAsync: jest.fn(async (): Promise<unknown[]> => []),
 })
 
 describe('strongLexiconAccess', () => {
@@ -133,5 +133,22 @@ describe('strongLexiconAccess', () => {
     await expect(
       localStrongLexiconAccess.loadEntry({ kind: 'dstrong', code: 'H9999Z' }, 'fr')
     ).resolves.toBeUndefined()
+  })
+
+  it('browses localized glosses by prefix inside SQLite before applying the limit', async () => {
+    const database = createDatabase()
+    database.getAllAsync.mockResolvedValue([rows.H3068G])
+    mockGetStrongLexiconDatabase.mockResolvedValue(database as unknown as SQLiteDatabase)
+
+    await expect(localStrongLexiconAccess.browseByGlossPrefix('S', 'fr', 25)).resolves.toEqual([
+      expect.objectContaining({
+        stepCode: 'H3068G',
+        gloss: 'SEIGNEUR',
+      }),
+    ])
+    expect(database.getAllAsync).toHaveBeenCalledWith(
+      expect.stringContaining("COALESCE(NULLIF(tr.gloss, ''), e.gloss) LIKE ?"),
+      ['fr', 'S%', 25]
+    )
   })
 })

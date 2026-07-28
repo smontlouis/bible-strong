@@ -36,6 +36,7 @@ import { downloadManager } from '~helpers/downloadManager'
 import generateUUID from '~helpers/generateUUID'
 import type { StrongIdentity, StrongIdentityKind } from '~helpers/strongIdentities'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import {
   isStrongCapableBibleVersion,
   type StrongBibleVersionId,
@@ -140,7 +141,9 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
   const defaultStrongBibleVersionId = useSelector(
     (state: RootState) => state.user.bible.settings.defaultStrongBibleVersionId ?? 'LSG'
   )
-  const coreDownload = useDownloadItemStatus('strong-lexicon:core')
+  const coreDownload = useDownloadItemStatus(
+    createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'core' })
+  )
   const coreAvailability = useQuery({
     queryKey: ['strong-lexicon', 'availability', 'core'],
     queryFn: () => resources.strongLexicon.getModuleAvailability('core'),

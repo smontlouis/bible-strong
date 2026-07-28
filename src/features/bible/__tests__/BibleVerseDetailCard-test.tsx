@@ -5,10 +5,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import BibleVerseDetailCard from '../BibleVerseDetailCard'
 
 const mockLoadVerse = jest.fn()
-const mockLoadReferences = jest.fn()
+const mockLoadEntries = jest.fn()
 const mockResourceAccess = {
   lexiconBible: { loadVerse: mockLoadVerse },
-  strong: { loadReferences: mockLoadReferences },
+  strongLexicon: { loadEntries: mockLoadEntries },
 }
 let queryClient: QueryClient
 
@@ -73,6 +73,10 @@ jest.mock('react-native-reanimated-carousel', () => {
 
 jest.mock('~features/resources/resourceAccess', () => ({
   useResourceAccess: () => mockResourceAccess,
+}))
+
+jest.mock('~state/resourcesLanguage', () => ({
+  useResourcesLanguageValue: () => ({ STRONG: 'fr' }),
 }))
 
 jest.mock('~common/waitForStrongDB', () => ({
@@ -217,7 +221,17 @@ describe('BibleVerseDetailCard', () => {
         queries: { retry: false, networkMode: 'always' },
       },
     })
-    mockLoadReferences.mockResolvedValue([{ Code: 430 }])
+    mockLoadEntries.mockResolvedValue([
+      {
+        baseCode: 430,
+        stepCode: 'H0430',
+        selectedIdentity: { kind: 'strong', code: 'H0430' },
+        language: 'hebrew',
+        original: 'אֱלֹהִים',
+        transliteration: 'Elohim',
+        gloss: 'Dieu',
+      },
+    ])
     ;(
       globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }
     ).IS_REACT_ACT_ENVIRONMENT = true

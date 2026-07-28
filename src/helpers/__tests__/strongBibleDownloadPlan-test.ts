@@ -32,12 +32,38 @@ jest.mock('~helpers/requireBiblePath', () => ({
 import {
   createInterlinearSidecarDownloadPlan,
   createBibleDownloadItem,
+  createOfflineCopyDownloadItem,
+  createOfflineCopyDownloadPlan,
   createStrongSidecarDownloadPlan,
   dedupeDownloadItems,
 } from '../downloadItemFactory'
 import { createStrongModeDownloadPlan } from '../strongModeDownloadPlan'
 
 describe('Strong Bible download planning', () => {
+  it('plans a Strong Offline copy from its canonical identity', () => {
+    const plan = createOfflineCopyDownloadPlan(
+      { kind: 'strong-bible-index', versionId: 'DBY' },
+      { availabilityStatus: 'base-missing' }
+    )
+
+    expect(plan.map(item => item.id)).toEqual(['bible:DBY', 'bible-strong:DBY'])
+    expect(plan[1]?.dependsOnId).toBe('bible:DBY')
+  })
+
+  it('describes the requested Offline copy without substituting its dependency', () => {
+    expect(
+      createOfflineCopyDownloadItem({
+        kind: 'strong-bible-index',
+        versionId: 'DBY',
+      })
+    ).toEqual(
+      expect.objectContaining({
+        id: 'bible-strong:DBY',
+        type: 'bible-strong-sidecar',
+      })
+    )
+  })
+
   it('does not queue legacy red-word or pericope files for a canonical V4 publication', () => {
     expect(createBibleDownloadItem('KJV')).toEqual(
       expect.objectContaining({

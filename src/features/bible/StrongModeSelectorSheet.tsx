@@ -1,7 +1,7 @@
 import { useAtomValue } from 'jotai/react'
 import type { PrimitiveAtom } from 'jotai/vanilla'
 import { useQuery } from '@tanstack/react-query'
-import { useEffect, useState, type RefObject } from 'react'
+import { type RefObject } from 'react'
 import { Alert, Platform } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
@@ -15,7 +15,6 @@ import { getInterlinearLocalePriority } from '~helpers/interlinearDisplayMode'
 import { getInterlinearSidecarAvailability } from '~helpers/interlinearBibleSidecar'
 import {
   createStrongModeDownloadPlan,
-  getDownloadPlanEstimatedSize,
   type InterlinearAvailabilityCandidate,
 } from '~helpers/strongModeDownloadPlan'
 import {
@@ -27,16 +26,13 @@ import {
   type StrongBibleVersionId,
   type StrongMode,
 } from '~helpers/strongBiblePublications'
-import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import useLanguage from '~helpers/useLanguage'
-import { downloadCompletionSignalAtom } from '~state/downloadQueue'
+import { downloadCompletionSignalAtom, downloadItemStatesAtom } from '~state/downloadQueue'
 import { useBibleTabActions, type BibleTab } from '~state/tabs'
+import { getBibleModeAcquisitionPresentation } from '~helpers/bibleModeAcquisition'
 
 import BibleDisplayModeCard from './BibleDisplayModeCard'
-import {
-  getConfirmedStrongModeDownloadIds,
-  getDownloadPlanPresentation,
-} from './strongModeDownloadState'
+import { confirmBibleModeAcquisition } from './confirmBibleModeAcquisition'
 
 type Props = {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -78,19 +74,14 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
+  const downloadStates = useAtomValue(downloadItemStatesAtom)
   const selectedMode = bible.data.strongMode ?? 'hidden'
   const version = bible.data.selectedVersion
-  const bibleDownload = useDownloadItemStatus(`bible:${version}`)
-  const strongDownload = useDownloadItemStatus(`bible-strong:${version}`)
-  const bhgDownload = useDownloadItemStatus('bible:BHG')
-  const frenchInterlinearDownload = useDownloadItemStatus('bible-interlinear:BHG:fr')
-  const englishInterlinearDownload = useDownloadItemStatus('bible-interlinear:BHG:en')
-  const [downloadPlanIds, setDownloadPlanIds] = useState<
-    Partial<Record<Exclude<StrongMode, 'hidden'>, string[]>>
-  >({})
-  const [modeAwaitingSelection, setModeAwaitingSelection] = useState<
-    Exclude<StrongMode, 'hidden'> | undefined
-  >(bible.data.pendingStrongModeVersionId === version ? bible.data.pendingStrongMode : undefined)
+  const pendingAcquisition =
+    bible.data.pendingModeAcquisition?.kind === 'strong' &&
+    bible.data.pendingModeAcquisition.versionId === version
+      ? bible.data.pendingModeAcquisition
+      : undefined
   const isHebrew = bible.data.selectedBook.Numero <= 39
   const originalPreview = isHebrew ? 'אֱלֹהִים' : 'θεός'
   const translationPreview = appLanguage === 'fr' ? 'Dieu' : 'God'
@@ -100,16 +91,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const serifFontFamily = Platform.OS === 'ios' ? 'Georgia' : 'serif'
 
   const { data: availability = { interlinear: [] } } = useQuery<AvailabilityState>({
-    queryKey: [
-      'strong-mode-availability',
-      version,
-      appLanguage,
-      downloadCompletionSignal,
-      bhgDownload?.status,
-      englishInterlinearDownload?.status,
-      frenchInterlinearDownload?.status,
-      strongDownload?.status,
-    ],
+    queryKey: ['strong-mode-availability', version, appLanguage, downloadCompletionSignal],
     queryFn: async () => {
       const [strongResult, interlinearResult] = await Promise.allSettled([
         readStrongAvailability(version),
@@ -127,45 +109,14 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
     ({ availability: sidecarAvailability }) => sidecarAvailability.status === 'available'
   )
   const reverseInterlinearAvailable = strongAvailable && Boolean(installedInterlinear)
-  const downloadStatesById = new Map(
-    [
-      bibleDownload,
-      strongDownload,
-      bhgDownload,
-      frenchInterlinearDownload,
-      englishInterlinearDownload,
-    ].flatMap(state => (state ? [[state.item.id, state] as const] : []))
-  )
   const getModeDownloadPresentation = (mode: Exclude<StrongMode, 'hidden'>) => {
-    const confirmedIds = getConfirmedStrongModeDownloadIds({
-      mode,
-      version: version as StrongBibleVersionId,
-      requestedIds: downloadPlanIds[mode],
-      pendingVersion: bible.data.pendingStrongModeVersionId,
-      pendingMode: bible.data.pendingStrongMode,
-      pendingInterlinearLocale: bible.data.pendingStrongInterlinearLocale,
-    })
-    return getDownloadPlanPresentation(
-      confirmedIds.flatMap(id => {
-        const state = downloadStatesById.get(id)
-        return state ? [state] : []
-      })
+    return getBibleModeAcquisitionPresentation(
+      pendingAcquisition?.mode === mode ? pendingAcquisition : undefined,
+      downloadStates
     )
   }
   const strongDownloadPresentation = getModeDownloadPresentation('visible')
   const reverseInterlinearDownloadPresentation = getModeDownloadPresentation('reverse-interlinear')
-
-  useEffect(() => {
-    if (bible.data.pendingStrongModeVersionId === version && bible.data.pendingStrongMode) {
-      setModeAwaitingSelection(bible.data.pendingStrongMode)
-    }
-  }, [bible.data.pendingStrongMode, bible.data.pendingStrongModeVersionId, version])
-
-  useEffect(() => {
-    if (!modeAwaitingSelection || selectedMode !== modeAwaitingSelection) return
-    setModeAwaitingSelection(undefined)
-    sheetRef.current?.dismiss()
-  }, [modeAwaitingSelection, selectedMode, sheetRef])
 
   const selectMode = (mode: StrongMode) => {
     if (!isStrongCapableBibleVersion(version)) return
@@ -174,6 +125,9 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
       (mode === 'visible' && strongAvailable) ||
       (mode === 'reverse-interlinear' && reverseInterlinearAvailable)
     ) {
+      if (bible.data.pendingModeAcquisition) {
+        actions.finishBibleModeAcquisition(false)
+      }
       actions.setStrongMode(mode)
       sheetRef.current?.dismiss()
     }
@@ -202,34 +156,23 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
         return
       }
 
-      const size = Math.max(1, Math.ceil(getDownloadPlanEstimatedSize(plan.items) / 1_000_000))
       const modeLabel = mode === 'visible' ? t('Strong') : t('Interlinéaire inversé')
-      Alert.alert(
-        t('Télécharger'),
-        t(
-          'Les ressources manquantes pour « {{mode}} » représentent environ {{size}} Mo. Voulez-vous les télécharger ?',
-          { mode: modeLabel, size }
-        ),
-        [
-          { text: t('Annuler'), style: 'cancel' },
-          {
-            text: t('Télécharger'),
-            onPress: () => {
-              setModeAwaitingSelection(mode)
-              setDownloadPlanIds(current => ({
-                ...current,
-                [mode]: plan.items.map(item => item.id),
-              }))
-              actions.setPendingStrongModeVersion(
-                versionId,
-                mode,
-                mode === 'reverse-interlinear' ? plan.preferredInterlinearLocale : undefined
-              )
-              downloadManager.enqueue(plan.items)
-            },
-          },
-        ]
-      )
+      confirmBibleModeAcquisition({
+        plan: plan.items,
+        modeLabel,
+        translate: t,
+        onConfirm: () => {
+          actions.startBibleModeAcquisition({
+            kind: 'strong',
+            versionId,
+            mode,
+            interlinearLocale:
+              mode === 'reverse-interlinear' ? plan.preferredInterlinearLocale : undefined,
+            planIds: plan.items.map(item => item.id),
+          })
+          downloadManager.enqueue(plan.items)
+        },
+      })
     } catch {
       Alert.alert(
         t('Erreur'),
@@ -242,12 +185,10 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const strongDownloadRequired = hasLoadedAvailability && !strongAvailable
   const reverseInterlinearDownloadRequired = hasLoadedAvailability && !reverseInterlinearAvailable
   const strongDownloading =
-    strongDownloadPresentation.status === 'active' ||
-    (modeAwaitingSelection === 'visible' && strongDownloadPresentation.status !== 'failed')
+    pendingAcquisition?.mode === 'visible' && strongDownloadPresentation.status !== 'failed'
   const reverseInterlinearDownloading =
-    reverseInterlinearDownloadPresentation.status === 'active' ||
-    (modeAwaitingSelection === 'reverse-interlinear' &&
-      reverseInterlinearDownloadPresentation.status !== 'failed')
+    pendingAcquisition?.mode === 'reverse-interlinear' &&
+    reverseInterlinearDownloadPresentation.status !== 'failed'
 
   const downloadLabel = (mode: string) => t('Télécharger les ressources pour {{mode}}', { mode })
 

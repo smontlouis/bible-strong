@@ -28,6 +28,7 @@ import { useSelector } from 'react-redux'
 import type { RootState } from '~redux/modules/reducer'
 import type { StrongBibleProvenance } from '~features/resources/strongBibleResourceAccess'
 import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
+import { createStrongIdentityForBook } from '~helpers/strongIdentities'
 
 const PAGE_SIZE = 50
 
@@ -54,7 +55,6 @@ const ConcordanceByBook = () => {
     ? JSON.parse(params.strongReference)
     : { Code: 0, Mot: '' }
   const { Code, Mot } = strongReference
-  const routeLexiconLsg = strongReference.LSG || ''
   const occurrencesQuery = useInfiniteQuery({
     queryKey: [
       'strong-occurrences-by-book',
@@ -93,13 +93,16 @@ const ConcordanceByBook = () => {
 
   const { data: loadedLexiconEntry } = useQuery({
     queryKey: ['strong-lexicon-entry', strongResourceLanguage, Code, book],
-    queryFn: async () => (await resources.strong.loadReference(String(Code), book)) ?? null,
+    queryFn: async () =>
+      (await resources.strongLexicon.loadEntry(
+        createStrongIdentityForBook(String(Code), book),
+        strongResourceLanguage
+      )) ?? null,
     enabled: Boolean(book && Code),
   })
-  const lexiconEntry: StrongLexiconEntry =
-    loadedLexiconEntry && !('error' in loadedLexiconEntry)
-      ? loadedLexiconEntry
-      : { Code, LSG: routeLexiconLsg }
+  const lexiconEntry: StrongLexiconEntry = loadedLexiconEntry
+    ? { Code: loadedLexiconEntry.baseCode, LSG: loadedLexiconEntry.gloss }
+    : { Code, LSG: strongReference.LSG || '' }
 
   useEffect(() => {
     if (occurrencesQuery.isFetchNextPageError) {

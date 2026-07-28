@@ -19,6 +19,7 @@ import {
   type StrongBibleSidecarAvailability,
 } from '~helpers/strongBibleSidecar'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/downloadQueue'
 
 interface Props {
@@ -33,8 +34,10 @@ const isActiveDownload = (status?: string) =>
 const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: Props) => {
   const { t } = useTranslation()
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
-  const bibleDownload = useDownloadItemStatus(`bible:${versionId}`)
-  const strongDownload = useDownloadItemStatus(`bible-strong:${versionId}`)
+  const bibleDownload = useDownloadItemStatus(createOfflineCopyId({ kind: 'bible', versionId }))
+  const strongDownload = useDownloadItemStatus(
+    createOfflineCopyId({ kind: 'strong-bible-index', versionId })
+  )
   const availabilityQuery = useQuery({
     queryKey: ['strong-index-availability', versionId, downloadCompletionSignal],
     queryFn: () => getStrongBibleSidecarAvailability(versionId),

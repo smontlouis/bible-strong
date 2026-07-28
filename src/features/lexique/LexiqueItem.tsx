@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react'
+import React from 'react'
 import styled from '@emotion/native'
 import { Pressable } from 'react-native'
 
@@ -7,6 +7,7 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useTranslation } from 'react-i18next'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 
 const SectionItem = styled(Box)(({ theme }) => ({
   height: 80,
@@ -33,63 +34,57 @@ const Chip = styled(Box)<ChipProps>(({ theme, isHebreu }) => ({
   marginBottom: 3,
 }))
 
-interface LexiqueItemProps {
-  Mot: string
-  Grec?: string
-  Hebreu?: string
-  Code: string
-  lexiqueType: string
+interface LexiqueItemProps extends StrongLexiconSearchResult {
   onSelect?: (book: number, reference: string, title?: string) => void
 }
 
-const LexiqueItem = memo(({ Mot, Grec, Hebreu, Code, lexiqueType, onSelect }: LexiqueItemProps) => {
+const LexiqueItem = ({ stepCode, language, original, gloss, onSelect }: LexiqueItemProps) => {
   const { t } = useTranslation()
   const pushRouteOnce = usePushRouteOnce()
-  const book = lexiqueType === 'Hébreu' ? 1 : 40
+  const book = language === 'hebrew' ? 1 : 40
+  const lexiqueType = language === 'hebrew' ? 'Hébreu' : 'Grec'
 
-  const handlePress = useCallback(() => {
+  const handlePress = () => {
     if (onSelect) {
-      onSelect(book, Code, Mot)
+      onSelect(book, stepCode, gloss)
     } else {
       pushRouteOnce({
         pathname: '/strong',
-        params: { book: String(book), reference: Code },
+        params: { book: String(book), reference: stepCode },
       })
     }
-  }, [onSelect, book, Code, Mot, pushRouteOnce])
+  }
 
   const content = (
     <SectionItem>
       <Box row>
-        <Chip isHebreu={lexiqueType === 'Hébreu'}>
+        <Chip isHebreu={language === 'hebrew'}>
           <Text fontSize={10}>{t(lexiqueType)}</Text>
         </Chip>
         <Chip marginLeft={5}>
-          <Text fontSize={10}>{Code}</Text>
+          <Text fontSize={10}>{stepCode}</Text>
         </Chip>
       </Box>
       <Box row>
         <Text title fontSize={18} color="default" flex paddingRight={20}>
-          {Mot}
+          {gloss}
         </Text>
         <Text fontSize={18} color="default">
-          {Grec || Hebreu}
+          {original}
         </Text>
       </Box>
     </SectionItem>
   )
 
-  // If onSelect is provided, use Pressable directly instead of Link
   if (onSelect) {
     return <Pressable onPress={handlePress}>{content}</Pressable>
   }
 
-  // Otherwise use Link for standard navigation
   return (
-    <Link route="Strong" params={{ book, reference: Code }}>
+    <Link route="Strong" params={{ book, reference: stepCode }}>
       {content}
     </Link>
   )
-})
+}
 
 export default LexiqueItem

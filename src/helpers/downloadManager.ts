@@ -12,14 +12,51 @@ import {
 } from '~state/downloadQueue'
 import { installedVersionsSignalAtom, bibleDataRefreshSignalAtom } from '~state/app'
 import { storage } from '~helpers/storage'
-import { installResourceDatabaseItem } from '~helpers/resourceDatabaseInstallation'
+import {
+  installResourceDatabaseItem,
+  synchronizeOptionalBibleResources,
+} from '~helpers/resourceDatabaseInstallation'
 import { getDownloadQueueDecision } from '~helpers/downloadQueueScheduling'
-import { resourcePublicationStore } from '~helpers/resourcePublication'
-import { queryClient } from '~helpers/queryClient'
+import { getDownloadItemIdentity } from '~helpers/offlineCopy'
+import { invalidateOfflineCopyQueries } from '~helpers/offlineCopyQueries'
+import {
+  beginResourceInstallation,
+  commitResourceInstallation,
+  completeResourceInstallation,
+  reconcileResourceInstallationJournal,
+  rollbackResourceInstallation,
+  type ResourceInstallationJournal,
+  type ResourceInstallationRecoveryTarget,
+} from '~helpers/resourceInstallationJournal'
+import { getStrongBibleSidecarPath } from '~helpers/strongBibleSidecar'
+import { getInterlinearSidecarPath } from '~helpers/interlinearBibleSidecar'
+import { getStrongLexiconModulePath } from '~helpers/strongLexiconModules'
+import { isAtomicResourceFileRollbackError } from '~helpers/atomicResourceFile'
 
 const PERSIST_KEY = 'downloadQueue'
 const MAX_RETRIES = 2
 const PERSIST_DEBOUNCE_MS = 2000
+
+const getResourceInstallationRecoveryTarget = (
+  item: DownloadItem
+): ResourceInstallationRecoveryTarget => {
+  switch (item.type) {
+    case 'bible':
+      return { kind: 'bible-sqlite', versionId: item.versionId }
+    case 'bible-strong':
+    case 'database':
+      return { kind: 'file', destinationPath: item.destinationPath }
+    case 'bible-strong-sidecar':
+      return { kind: 'file', destinationPath: getStrongBibleSidecarPath(item.versionId) }
+    case 'bible-interlinear-sidecar':
+      return { kind: 'file', destinationPath: getInterlinearSidecarPath(item.lang) }
+    case 'strong-lexicon-module':
+      return {
+        kind: 'file',
+        destinationPath: getStrongLexiconModulePath(item.strongLexiconModuleId),
+      }
+  }
+}
 
 // ---------------------------------------------------------------------------
 // DownloadManager — singleton
@@ -148,7 +185,8 @@ class DownloadManager {
   }
 
   /** Restore queue from persisted state (call at app startup). */
-  restore(): void {
+  async restore(): Promise<void> {
+    await reconcileResourceInstallationJournal()
     try {
       const raw = storage.getString(PERSIST_KEY)
       if (!raw) return
@@ -157,10 +195,18 @@ class DownloadManager {
       const states = new Map(this.jotaiStore.get(downloadItemStatesAtom))
 
       for (const itemState of persisted) {
-        // Only restore queued and failed items
-        if (itemState.status === 'queued' || itemState.status === 'failed') {
+        if (
+          itemState.status === 'queued' ||
+          itemState.status === 'downloading' ||
+          itemState.status === 'inserting' ||
+          itemState.status === 'failed'
+        ) {
           states.set(itemState.item.id, {
             ...itemState,
+            status:
+              itemState.status === 'downloading' || itemState.status === 'inserting'
+                ? 'queued'
+                : itemState.status,
             downloadProgress: 0,
             insertProgress: 0,
           })
@@ -234,22 +280,55 @@ class DownloadManager {
     try {
       this.updateItemStatus(item.id, 'downloading')
 
-      const installed = await installResourceDatabaseItem(item, {
-        onDownloadProgress: progress => this.updateItemProgress(item.id, progress, 0),
-        onInsertProgress: progress => this.updateItemProgress(item.id, 1, progress),
-        onStatusInserting: () => this.updateItemStatus(item.id, 'inserting'),
-        onResumable: resumable => {
-          this.currentResumable = resumable
-        },
-        isCancelled: () => this.cancelledIds.has(item.id),
-      })
+      let installationJournal: ResourceInstallationJournal | undefined
+      let installationCommitted = false
+      let installationCompleted = false
+      try {
+        await installResourceDatabaseItem(item, {
+          onDownloadProgress: progress => this.updateItemProgress(item.id, progress, 0),
+          onInsertProgress: progress => this.updateItemProgress(item.id, 1, progress),
+          onStatusInserting: () => this.updateItemStatus(item.id, 'inserting'),
+          onResumable: resumable => {
+            this.currentResumable = resumable
+          },
+          isCancelled: () => this.cancelledIds.has(item.id),
+          installationLifecycle: {
+            prepare: installed => {
+              installationJournal = beginResourceInstallation(
+                item.id,
+                installed,
+                getResourceInstallationRecoveryTarget(item)
+              )
+            },
+            commit: () => {
+              if (!installationJournal) {
+                throw new Error(`RESOURCE_INSTALLATION_NOT_PREPARED:${item.id}`)
+              }
+              commitResourceInstallation(installationJournal)
+              installationCommitted = true
+            },
+          },
+        })
+        if (!installationJournal || !installationCommitted) {
+          throw new Error(`RESOURCE_PUBLICATION_NOT_COMMITTED:${item.id}`)
+        }
+        installationCompleted = true
+        completeResourceInstallation(installationJournal)
+        if (item.type === 'bible' || item.type === 'bible-strong') {
+          await synchronizeOptionalBibleResources(item, item.versionId)
+        }
+      } catch (error) {
+        if (
+          installationJournal &&
+          !installationCompleted &&
+          !isAtomicResourceFileRollbackError(error)
+        ) {
+          rollbackResourceInstallation(installationJournal)
+        }
+        throw error
+      }
 
-      resourcePublicationStore.write(item.id, {
-        ...installed.publication,
-        sourceUrl: installed.sourceUrl,
-        installedAt: Date.now(),
-      })
-      await queryClient.invalidateQueries({ queryKey: ['resource-publication', item.id] })
+      await invalidateOfflineCopyQueries(getDownloadItemIdentity(item))
       this.updateItemStatus(item.id, 'completed')
 
       // Signal to VersionSelectorItem instances
@@ -266,9 +345,6 @@ class DownloadManager {
         item.type === 'strong-lexicon-module'
       ) {
         this.jotaiStore.set(bibleDataRefreshSignalAtom, (c: number) => c + 1)
-      }
-      if (item.type === 'strong-lexicon-module') {
-        await queryClient.invalidateQueries({ queryKey: ['strong-lexicon'] })
       }
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : String(e)
@@ -340,10 +416,20 @@ class DownloadManager {
   private persistNow(): void {
     try {
       const states = this.jotaiStore.get(downloadItemStatesAtom)
-      // Only persist queued and failed items
-      const toPersist = Array.from(states.values()).filter(
-        s => s.status === 'queued' || s.status === 'failed'
-      )
+      const toPersist = Array.from(states.values()).flatMap(state => {
+        if (state.status === 'queued' || state.status === 'failed') return [state]
+        if (state.status === 'downloading' || state.status === 'inserting') {
+          return [
+            {
+              ...state,
+              status: 'queued' as const,
+              downloadProgress: 0,
+              insertProgress: 0,
+            },
+          ]
+        }
+        return []
+      })
       storage.set(PERSIST_KEY, JSON.stringify(toPersist))
     } catch (e) {
       console.error('[DownloadManager] Persist failed:', e)

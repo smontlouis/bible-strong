@@ -13,7 +13,6 @@ import {
 } from '~features/resources/bibleSearchAccess'
 import { localDictionaryAccess, type DictionaryAccess } from '~features/resources/dictionaryAccess'
 import { localNaveAccess, type NaveAccess } from '~features/resources/naveAccess'
-import { localStrongAccess, type StrongAccess } from '~features/resources/strongAccess'
 import {
   localStrongLexiconAccess,
   type StrongLexiconAccess,
@@ -34,7 +33,6 @@ export type ResourceAccessRegistry = {
   dictionary: DictionaryAccess
   lexiconBible: LexiconBibleResourceAccess
   nave: NaveAccess
-  strong: StrongAccess
   strongLexicon: StrongLexiconAccess
   strongBible: StrongBibleResourceAccess
 }
@@ -46,7 +44,6 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
   dictionary: localDictionaryAccess,
   lexiconBible: localLexiconBibleResourceAccess,
   nave: localNaveAccess,
-  strong: localStrongAccess,
   strongLexicon: localStrongLexiconAccess,
   strongBible: localStrongBibleResourceAccess,
 }

@@ -1,4 +1,4 @@
-import type { DownloadItem, DownloadItemType } from '~state/downloadQueue'
+import type { DownloadItem } from '~state/downloadQueue'
 import type { DatabaseId, ResourceLanguage } from '~helpers/databaseTypes'
 import { versions, isStrongVersion, type Version } from '~helpers/bibleVersions'
 import { biblesRef, getDatabaseUrl } from '~helpers/firebase'
@@ -16,6 +16,11 @@ import {
   isInterlinearCapableBibleVersion,
 } from './interlinearBiblePublications'
 import type { InterlinearSidecarAvailability } from './interlinearBibleSidecar'
+import { createOfflineCopyId, type OfflineCopyIdentity } from './offlineCopyId'
+import {
+  createStrongLexiconModuleDownloadItem,
+  createStrongLexiconModuleDownloadPlan,
+} from './strongLexiconDownloadItems'
 export {
   createStrongLexiconModuleDownloadItem,
   createStrongLexiconModuleDownloadPlan,
@@ -38,7 +43,6 @@ export function createBibleDownloadItem(versionId: string): DownloadItem {
     ? BHG_INTERLINEAR_PUBLICATION
     : undefined
 
-  const type: DownloadItemType = isStrong ? 'bible-strong' : 'bible'
   const url = interlinearPublication
     ? interlinearPublication.canonical.url
     : publication
@@ -59,27 +63,42 @@ export function createBibleDownloadItem(versionId: string): DownloadItem {
     publication?.canonical.archiveBytes ??
     (isStrong ? 20_000_000 : BIBLE_ESTIMATED_SIZE)
 
-  return {
-    id: `bible:${versionId}`,
-    type,
+  const common = {
+    id: createOfflineCopyId({ kind: 'bible', versionId }),
     name: version.name,
     versionId,
     url,
-    destinationPath,
     estimatedSize,
-    hasRedWords: usesCanonicalBibleExtras(versionId) ? false : version.hasRedWords,
-    hasPericope: usesCanonicalBibleExtras(versionId) ? false : version.hasPericope,
-    ...(publication ? { canonicalArtifact: publication.canonical } : {}),
-    ...(interlinearPublication ? { archiveArtifact: interlinearPublication.canonical } : {}),
+    hasRedWords: usesCanonicalBibleExtras(versionId) ? false : Boolean(version.hasRedWords),
+    hasPericope: usesCanonicalBibleExtras(versionId) ? false : Boolean(version.hasPericope),
     addedAt: Date.now(),
     retryCount: 0,
+  }
+
+  if (isStrong) {
+    return {
+      ...common,
+      type: 'bible-strong',
+      destinationPath: destinationPath!,
+    }
+  }
+
+  return {
+    ...common,
+    type: 'bible',
+    ...(publication ? { canonicalArtifact: publication.canonical } : {}),
+    ...(interlinearPublication ? { archiveArtifact: interlinearPublication.canonical } : {}),
   }
 }
 
 export function createInterlinearSidecarDownloadItem(lang: ResourceLanguage): DownloadItem {
   const artifact = BHG_INTERLINEAR_PUBLICATION.indexes[lang]
   return {
-    id: `bible-interlinear:BHG:${lang}`,
+    id: createOfflineCopyId({
+      kind: 'interlinear-index',
+      versionId: 'BHG',
+      language: lang,
+    }),
     type: 'bible-interlinear-sidecar',
     name: `BHG — Interlinéaire ${lang.toUpperCase()}`,
     versionId: 'BHG',
@@ -109,7 +128,7 @@ export function createStrongSidecarDownloadItem(versionId: StrongBibleVersionId)
   const version = versions[versionId]
   const publication = getStrongBiblePublication(versionId)
   return {
-    id: `bible-strong:${versionId}`,
+    id: createOfflineCopyId({ kind: 'strong-bible-index', versionId }),
     type: 'bible-strong-sidecar',
     name: `${version.name} — Strong`,
     versionId,
@@ -139,16 +158,70 @@ export const dedupeDownloadItems = (items: DownloadItem[]): DownloadItem[] => [
   ...new Map(items.map(item => [item.id, item])).values(),
 ]
 
+type OfflineCopyDownloadPlanContext = {
+  availabilityStatus?:
+    | StrongBibleSidecarAvailability['status']
+    | InterlinearSidecarAvailability['status']
+  isStrongLexiconCoreAvailable?: boolean
+}
+
+export const createOfflineCopyDownloadItem = (identity: OfflineCopyIdentity): DownloadItem => {
+  switch (identity.kind) {
+    case 'bible':
+      return createBibleDownloadItem(identity.versionId)
+    case 'strong-bible-index':
+      return createStrongSidecarDownloadItem(identity.versionId)
+    case 'interlinear-index':
+      return createInterlinearSidecarDownloadItem(identity.language)
+    case 'strong-lexicon-module':
+      return createStrongLexiconModuleDownloadItem(identity.moduleId)
+    case 'database':
+      return createDatabaseDownloadItem(identity.databaseId, identity.language)
+    case 'bible-pericope':
+    case 'bible-red-words':
+      throw new Error(`BIBLE_CHILD_RESOURCE_REQUIRES_PARENT:${createOfflineCopyId(identity)}`)
+  }
+}
+
+export const createOfflineCopyDownloadPlan = (
+  identity: OfflineCopyIdentity,
+  context: OfflineCopyDownloadPlanContext = {}
+): DownloadItem[] => {
+  switch (identity.kind) {
+    case 'bible':
+      return [createBibleDownloadItem(identity.versionId)]
+    case 'strong-bible-index':
+      return createStrongSidecarDownloadPlan(
+        identity.versionId,
+        (context.availabilityStatus as StrongBibleSidecarAvailability['status'] | undefined) ??
+          'base-missing'
+      )
+    case 'interlinear-index':
+      return createInterlinearSidecarDownloadPlan(
+        identity.language,
+        (context.availabilityStatus as InterlinearSidecarAvailability['status'] | undefined) ??
+          'base-missing'
+      )
+    case 'strong-lexicon-module':
+      return createStrongLexiconModuleDownloadPlan(
+        identity.moduleId,
+        context.isStrongLexiconCoreAvailable ?? false
+      )
+    case 'database':
+      return [createDatabaseDownloadItem(identity.databaseId, identity.language)]
+    case 'bible-pericope':
+    case 'bible-red-words':
+      throw new Error(`BIBLE_CHILD_RESOURCE_REQUIRES_PARENT:${createOfflineCopyId(identity)}`)
+  }
+}
+
 /**
  * Create a DownloadItem for a resource database (Strong, Dictionnaire, Nave, etc.).
  */
 export function createDatabaseDownloadItem(
-  databaseId: DatabaseId,
+  databaseId: Exclude<DatabaseId, 'BIBLES'>,
   lang: ResourceLanguage
 ): DownloadItem {
-  // Exclude internal-only databases
-  if (databaseId === 'BIBLES') throw new Error('BIBLES database is managed internally')
-
   const allDbs = databases(lang)
   const db = allDbs[databaseId as keyof typeof allDbs]
   if (!db) throw new Error(`Unknown database: ${databaseId}`)
@@ -157,7 +230,7 @@ export function createDatabaseDownloadItem(
   const destinationPath = getDbPath(databaseId, lang)
 
   return {
-    id: `database:${databaseId}:${lang}`,
+    id: createOfflineCopyId({ kind: 'database', databaseId, language: lang }),
     type: 'database',
     name: db.name,
     databaseId,
@@ -168,27 +241,4 @@ export function createDatabaseDownloadItem(
     addedAt: Date.now(),
     retryCount: 0,
   }
-}
-
-/**
- * Extract the versionId or databaseId+lang from a download item id string.
- */
-export function parseDownloadItemId(itemId: string): {
-  type: 'bible' | 'database'
-  versionId?: string
-  databaseId?: DatabaseId
-  lang?: ResourceLanguage
-} {
-  if (itemId.startsWith('bible:')) {
-    return { type: 'bible', versionId: itemId.replace('bible:', '') }
-  }
-  if (itemId.startsWith('database:')) {
-    const parts = itemId.split(':')
-    return {
-      type: 'database',
-      databaseId: parts[1] as DatabaseId,
-      lang: parts[2] as ResourceLanguage,
-    }
-  }
-  throw new Error(`Invalid download item id: ${itemId}`)
 }

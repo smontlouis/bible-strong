@@ -47,6 +47,7 @@ import { appLogger } from '~helpers/agentObservability'
 import { BibleError } from '~helpers/bibleErrors'
 import type { InterlinearMode } from '~helpers/interlinearDisplayMode'
 import { toast } from '~helpers/toast'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import { RootState } from '~redux/modules/reducer'
 import {
   HighlightsObj,
@@ -376,7 +377,10 @@ export const BibleDOMWrapper = ({
   const router = useRouter()
   const pushRouteOnce = usePushRouteOnce()
   const [isResettingDatabase, setIsResettingDatabase] = useState(false)
-  const errorDownloadItemId = error ? `bible:${error.version}` : `bible:${version}`
+  const errorDownloadItemId = createOfflineCopyId({
+    kind: 'bible',
+    versionId: error?.version ?? version,
+  })
   const queueState = useDownloadItemStatus(errorDownloadItemId)
   const errorDownloadState: BibleDOMDownloadState | undefined = error
     ? {

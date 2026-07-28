@@ -17,6 +17,7 @@ import { createDatabaseDownloadItem } from '~helpers/downloadItemFactory'
 import { downloadManager } from '~helpers/downloadManager'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { restoreOrphanedResourceBackup } from '~helpers/atomicResourceFile'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
 
 export const useWaitForDatabase = () => {
   const { t } = useTranslation()
@@ -31,7 +32,13 @@ export const useWaitForDatabase = () => {
   const resourceLang = resourcesLanguage.TIMELINE
 
   const prevLangRef = useRef<ResourceLanguage>(resourceLang)
-  const queueState = useDownloadItemStatus(`database:TIMELINE:${resourceLang}`)
+  const queueState = useDownloadItemStatus(
+    createOfflineCopyId({
+      kind: 'database',
+      databaseId: 'TIMELINE',
+      language: resourceLang,
+    })
+  )
 
   useEffect(() => {
     // Reset state when language changes

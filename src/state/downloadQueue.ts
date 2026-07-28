@@ -1,59 +1,12 @@
 import { atom } from 'jotai/vanilla'
-import type { ResourceLanguage, DatabaseId } from '~helpers/databaseTypes'
-import type { StrongBiblePublication } from '~helpers/strongBiblePublications'
-import type {
-  InterlinearBiblePublication,
-  InterlinearPublicationArtifact,
-} from '~helpers/interlinearBiblePublications'
-import type {
-  StrongLexiconModuleId,
-  StrongLexiconPublicationArtifact,
-} from '~helpers/strongLexiconPublications'
-
-// ---------------------------------------------------------------------------
-// Per-item lookup atom factory
-// ---------------------------------------------------------------------------
-
 import type { Atom } from 'jotai/vanilla'
+import type { DownloadItem } from '~helpers/offlineCopy'
+
+export type { DownloadItem, DownloadItemType } from '~helpers/offlineCopy'
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-
-export type DownloadItemType =
-  | 'bible'
-  | 'bible-strong'
-  | 'bible-strong-sidecar'
-  | 'bible-interlinear-sidecar'
-  | 'strong-lexicon-module'
-  | 'database'
-
-export interface DownloadItem {
-  /** Unique identifier, e.g. "bible:LSG", "strong-lexicon:core" */
-  id: string
-  type: DownloadItemType
-  name: string
-  versionId?: string
-  databaseId?: DatabaseId
-  lang?: ResourceLanguage
-  url: string
-  destinationPath?: string
-  estimatedSize: number
-  hasRedWords?: boolean
-  hasPericope?: boolean
-  canonicalArtifact?: StrongBiblePublication['canonical']
-  archiveArtifact?: InterlinearPublicationArtifact
-  strongArtifact?: StrongBiblePublication['strong']
-  strongDatasetId?: StrongBiblePublication['datasetId']
-  interlinearArtifact?: InterlinearPublicationArtifact
-  interlinearDatasetId?: InterlinearBiblePublication['datasetId']
-  strongLexiconModuleId?: StrongLexiconModuleId
-  strongLexiconArtifact?: StrongLexiconPublicationArtifact
-  /** Item that must complete before this one can be processed. */
-  dependsOnId?: string
-  addedAt: number
-  retryCount: number
-}
 
 export type DownloadStatus =
   | 'queued'
@@ -146,9 +99,11 @@ export const overallProgressAtom = atom(get => {
 })
 
 const itemStatusCache = new Map<string, Atom<DownloadItemState | undefined>>()
+const missingItemStatusAtom = atom<DownloadItemState | undefined>(undefined)
 
 /** O(1) lookup atom for a single item's download status. */
-export const downloadStatusForIdAtom = (itemId: string): Atom<DownloadItemState | undefined> => {
+export const downloadStatusForIdAtom = (itemId?: string): Atom<DownloadItemState | undefined> => {
+  if (!itemId) return missingItemStatusAtom
   if (!itemStatusCache.has(itemId)) {
     itemStatusCache.set(
       itemId,

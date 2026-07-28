@@ -3,7 +3,7 @@ import type { PrimitiveAtom } from 'jotai/vanilla'
 import { useQuery } from '@tanstack/react-query'
 import { type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, Platform, Pressable } from 'react-native'
+import { Platform, Pressable } from 'react-native'
 
 import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 import { SheetView } from '~common/sheet-expo-ui'
@@ -24,9 +24,16 @@ import {
 } from '~helpers/interlinearBibleSidecar'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import useLanguage from '~helpers/useLanguage'
-import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/downloadQueue'
+import {
+  downloadCompletionSignalAtom,
+  downloadItemStatesAtom,
+  getDownloadItemProgress,
+} from '~state/downloadQueue'
 import { useBibleTabActions, type BibleTab } from '~state/tabs'
+import { getBibleModeAcquisitionPresentation } from '~helpers/bibleModeAcquisition'
 import BibleDisplayModeCard from './BibleDisplayModeCard'
+import { confirmBibleModeAcquisition } from './confirmBibleModeAcquisition'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
 
 type Props = {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -45,8 +52,13 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
-  const frenchDownload = useDownloadItemStatus('bible-interlinear:BHG:fr')
-  const englishDownload = useDownloadItemStatus('bible-interlinear:BHG:en')
+  const downloadStates = useAtomValue(downloadItemStatesAtom)
+  const frenchDownload = useDownloadItemStatus(
+    createOfflineCopyId({ kind: 'interlinear-index', versionId: 'BHG', language: 'fr' })
+  )
+  const englishDownload = useDownloadItemStatus(
+    createOfflineCopyId({ kind: 'interlinear-index', versionId: 'BHG', language: 'en' })
+  )
   const selectedMode = normalizeInterlinearMode(bible.data.interlinearMode)
   const selectedLocale: ResourceLanguage = bible.data.interlinearLocale ?? appLanguage
   const isHebrew = bible.data.selectedBook.Numero <= 39
@@ -54,6 +66,10 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const transliterationPreview = isHebrew ? 'Elohim bara' : 'logos en'
   const glossPreview = isHebrew ? 'Dieu · H0430' : 'Parole · G3056'
   const serifFontFamily = Platform.OS === 'ios' ? 'Georgia' : 'serif'
+  const pendingAcquisition =
+    bible.data.pendingModeAcquisition?.kind === 'interlinear'
+      ? bible.data.pendingModeAcquisition
+      : undefined
 
   const availabilityQuery = useQuery<AvailabilityByLocale>({
     queryKey: [
@@ -97,40 +113,38 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
     if (!resolvedAvailability) return
     if (resolvedAvailability.status === 'available') {
       if (modeAfterDownload) {
-        actions.setInterlinearMode(modeAfterDownload, selectedLocale)
+        actions.setInterlinearMode(modeAfterDownload, locale)
+        sheetRef.current?.dismiss()
       }
       return
     }
 
     const plan = createInterlinearSidecarDownloadPlan(locale, resolvedAvailability.status)
-    const size = Math.max(
-      1,
-      Math.ceil(plan.reduce((total, item) => total + item.estimatedSize, 0) / 1_000_000)
-    )
-    Alert.alert(
-      t('Télécharger'),
-      t(
-        'Les ressources manquantes pour « {{mode}} » représentent environ {{size}} Mo. Voulez-vous les télécharger ?',
-        { mode: modeLabel, size }
-      ),
-      [
-        { text: t('Annuler'), style: 'cancel' },
-        {
-          text: t('Télécharger'),
-          onPress: () => {
-            if (modeAfterDownload) {
-              actions.setPendingInterlinearDownload(true, modeAfterDownload, locale)
-            }
-            downloadManager.enqueue(plan)
-          },
-        },
-      ]
-    )
+    confirmBibleModeAcquisition({
+      plan,
+      modeLabel,
+      translate: t,
+      onConfirm: () => {
+        if (modeAfterDownload) {
+          actions.startBibleModeAcquisition({
+            kind: 'interlinear',
+            mode: modeAfterDownload,
+            locale,
+            planIds: plan.map(item => item.id),
+          })
+        }
+        downloadManager.enqueue(plan)
+      },
+    })
   }
 
   const selectMode = async (mode: DisplayMode) => {
     if (mode === 'hidden') {
+      if (bible.data.pendingModeAcquisition) {
+        actions.finishBibleModeAcquisition(false)
+      }
       actions.setInterlinearMode('hidden', selectedLocale)
+      sheetRef.current?.dismiss()
       return
     }
 
@@ -143,6 +157,7 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
       (mayFallback && resolvedAvailability[fallbackLocale]?.status === 'available')
     ) {
       actions.setInterlinearMode(mode, selectedLocale)
+      sheetRef.current?.dismiss()
       return
     }
 
@@ -222,17 +237,12 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const interlinearDownloadRequired = hasLoadedAvailability && !preferredAvailable
   const fallbackCapableDownloadRequired =
     hasLoadedAvailability && !preferredAvailable && !fallbackAvailable
-  const pendingMode = bible.data.pendingInterlinearMode
-  const pendingLocale = bible.data.pendingInterlinearLocale
-  const pendingDownload = getDownload(pendingLocale ?? selectedLocale)
   const getModeDownloadState = (mode: InterlinearDisplayMode) => {
-    const downloading =
-      Boolean(bible.data.pendingInterlinearDownload) &&
-      pendingMode === mode &&
-      pendingLocale === selectedLocale
+    const acquisition = pendingAcquisition?.mode === mode ? pendingAcquisition : undefined
+    const presentation = getBibleModeAcquisitionPresentation(acquisition, downloadStates)
     return {
-      downloading,
-      progress: pendingDownload ? getDownloadItemProgress(pendingDownload) : 0,
+      downloading: Boolean(acquisition) && presentation.status !== 'failed',
+      progress: presentation.progress,
     }
   }
   const interlinearDownloadState = getModeDownloadState('interlinear')

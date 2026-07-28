@@ -22,21 +22,25 @@ jest.mock('~helpers/bibleVersions', () => ({
   getIfVersionNeedsDownload: jest.fn(),
 }))
 
-jest.mock('../strongAccess', () => ({
-  localStrongAccess: {
-    loadChapter: jest.fn(),
+jest.mock('~state/resourcesLanguage', () => ({
+  getResourceLanguage: () => 'fr',
+}))
+
+jest.mock('../strongLexiconAccess', () => ({
+  localStrongLexiconAccess: {
+    loadPreview: jest.fn(),
   },
 }))
 
 import { BibleLoadingError } from '~helpers/bibleErrors'
-import type { StrongReference } from '~common/types'
+import type { StrongLexiconPreview } from '../strongLexiconAccess'
 import { loadBibleContentChapter } from '../bibleContentAccess'
 
 const createDependencies = () => ({
-  strongAccess: {
-    loadChapter: jest.fn(),
-    loadReferences: jest.fn(async () => [] as StrongReference[]),
+  strongLexicon: {
+    loadPreview: jest.fn(async () => [] as StrongLexiconPreview[]),
   },
+  getStrongResourceLanguage: jest.fn(() => 'fr' as const),
   getChapterVerses: jest.fn(),
   getIfVersionNeedsDownload: jest.fn(async () => false),
   initStrongDatabase: jest.fn(async () => true),
@@ -238,7 +242,7 @@ describe('BibleContentAccess', () => {
     )
 
     expect(dependencies.getChapterVerses).toHaveBeenCalledWith('LSG', 1, 1)
-    expect(dependencies.strongAccess.loadChapter).not.toHaveBeenCalled()
+    expect(dependencies.strongLexicon.loadPreview).not.toHaveBeenCalled()
   })
 
   it('enriches a Strong group with aligned disambiguated identities when BHG is installed', async () => {
@@ -371,12 +375,17 @@ describe('BibleContentAccess', () => {
         },
       ],
     })
-    dependencies.strongAccess.loadReferences.mockResolvedValue([
+    dependencies.strongLexicon.loadPreview.mockResolvedValue([
       {
-        Code: '1254',
-        Hebreu: 'בָּרָא',
-        Phonetique: "ba.Ra'",
-      } as StrongReference,
+        id: 1254,
+        selectedIdentity: { kind: 'strong', code: 'H1254' },
+        stepCode: 'H1254',
+        classicStrong: 'H1254',
+        language: 'hebrew',
+        original: 'בָּרָא',
+        transliteration: "ba.Ra'",
+        gloss: 'créer',
+      },
     ])
 
     await expect(
@@ -419,7 +428,10 @@ describe('BibleContentAccess', () => {
 
     expect(loadReverseInterlinearChapterSpans).toHaveBeenCalledWith('LSG', 1, 1)
     expect(loadInterlinearChapterTokens).toHaveBeenCalledWith('BHG', 'fr', 1, 1)
-    expect(dependencies.strongAccess.loadReferences).toHaveBeenCalledWith(['1254'], 1)
+    expect(dependencies.strongLexicon.loadPreview).toHaveBeenCalledWith(
+      [{ kind: 'strong', code: 'H1254' }],
+      'fr'
+    )
   })
 
   it('returns BIBLE_NOT_FOUND when a chapter has no rows and the version needs download', async () => {

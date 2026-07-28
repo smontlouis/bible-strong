@@ -75,6 +75,7 @@ import { dbManager } from '../sqlite'
 import { removeStrongBibleSidecar } from '../strongBibleSidecar'
 import { removeInterlinearSidecar } from '../interlinearBibleSidecar'
 import { removeStrongLexiconModule } from '../strongLexiconModules'
+import { queryClient } from '../queryClient'
 
 const mockGetInfoAsync = jest.mocked(FileSystem.getInfoAsync)
 const mockIsVersionInstalled = jest.mocked(isVersionInstalled)
@@ -83,6 +84,7 @@ const mockRemoveStrongBibleSidecar = jest.mocked(removeStrongBibleSidecar)
 const mockRemoveInterlinearSidecar = jest.mocked(removeInterlinearSidecar)
 const mockRemoveStrongLexiconModule = jest.mocked(removeStrongLexiconModule)
 const mockGetDatabase = jest.mocked(dbManager.getDB)
+const mockInvalidateQueries = jest.mocked(queryClient.invalidateQueries)
 
 describe('deleteDownloadedItem', () => {
   beforeEach(() => {
@@ -120,6 +122,10 @@ describe('deleteDownloadedItem', () => {
 
     expect(mockRemoveStrongBibleSidecar).toHaveBeenCalledWith('DBY')
     expect(mockRemoveBibleVersion).not.toHaveBeenCalled()
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['bible'] })
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({
+      queryKey: ['resource-publication', 'bible-strong:DBY'],
+    })
   })
 
   it('removes both localized interlinear indexes before uninstalling BHG', async () => {

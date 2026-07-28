@@ -8,7 +8,7 @@ import {
 } from '~helpers/bibleErrors'
 import { getChapterVerses, getVerseText } from '~helpers/biblesDb'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
-import { localStrongAccess, type StrongAccess } from './strongAccess'
+import { localStrongLexiconAccess, type StrongLexiconAccess } from './strongLexiconAccess'
 import {
   isStrongCapableBibleVersion,
   resolveStrongBibleVersion,
@@ -32,7 +32,11 @@ import {
   getMissingReverseInterlinearStrongCodes,
   type ReverseInterlinearLexicalEntry,
 } from '~helpers/reverseInterlinearBible'
-import { resolveDisplayedStrongIdentities } from '~helpers/strongIdentities'
+import {
+  createStrongIdentityForBook,
+  resolveDisplayedStrongIdentities,
+} from '~helpers/strongIdentities'
+import { getResourceLanguage } from '~state/resourcesLanguage'
 
 export type BibleChapterData = Verse[] | null
 
@@ -53,7 +57,8 @@ export type BibleContentAccess = {
 }
 
 type BibleContentAccessDependencies = {
-  strongAccess: Pick<StrongAccess, 'loadReferences'>
+  strongLexicon: Pick<StrongLexiconAccess, 'loadPreview'>
+  getStrongResourceLanguage: () => ResourceLanguage
   getChapterVerses: typeof getChapterVerses
   getIfVersionNeedsDownload: typeof getIfVersionNeedsDownload
   logError: (message: string, error: unknown) => void
@@ -63,7 +68,8 @@ type BibleContentAccessDependencies = {
 }
 
 const defaultDependencies: BibleContentAccessDependencies = {
-  strongAccess: localStrongAccess,
+  strongLexicon: localStrongLexiconAccess,
+  getStrongResourceLanguage: () => getResourceLanguage('STRONG'),
   getChapterVerses,
   getIfVersionNeedsDownload,
   logError: (message, error) => console.log(message, error),
@@ -189,45 +195,29 @@ const loadRegularBibleChapter = async (
       ]
       if (fallbackReferences.length > 0) {
         try {
-          const loadedEntries = await dependencies.strongAccess.loadReferences(
-            fallbackReferences,
-            request.book
+          const loadedEntries = await dependencies.strongLexicon.loadPreview(
+            fallbackReferences.map(reference =>
+              createStrongIdentityForBook(reference, request.book)
+            ),
+            dependencies.getStrongResourceLanguage()
           )
-          if (Array.isArray(loadedEntries)) {
-            lexicalEntries = loadedEntries.flatMap(entry => {
-              if (
-                typeof entry !== 'object' ||
-                entry == null ||
-                !('Code' in entry) ||
-                !('Phonetique' in entry)
-              ) {
-                return []
-              }
-              const Hebreu =
-                'Hebreu' in entry && typeof entry.Hebreu === 'string' ? entry.Hebreu : ''
-              const Grec = 'Grec' in entry && typeof entry.Grec === 'string' ? entry.Grec : ''
-              if (!Hebreu && !Grec) return []
-              return [
-                {
-                  Code: entry.Code as string | number,
-                  Hebreu,
-                  Grec,
-                  Phonetique: String(entry.Phonetique ?? ''),
-                },
-              ]
-            })
-            reverseSpansByVerse = Object.fromEntries(
-              Object.entries(targetSpansByVerse).map(([verse, spans]) => [
-                verse,
-                buildReverseInterlinearSpans({
-                  originalText: originalTextByVerse.get(Number(verse)) ?? '',
-                  targetSpans: spans,
-                  sourceTokens: sourceTokensByVerse[Number(verse)] ?? [],
-                  lexicalEntries,
-                }),
-              ])
-            )
-          }
+          lexicalEntries = loadedEntries.map(entry => ({
+            Code: entry.classicStrong,
+            Hebreu: entry.language === 'hebrew' ? entry.original : '',
+            Grec: entry.language === 'greek' ? entry.original : '',
+            Phonetique: entry.transliteration,
+          }))
+          reverseSpansByVerse = Object.fromEntries(
+            Object.entries(targetSpansByVerse).map(([verse, spans]) => [
+              verse,
+              buildReverseInterlinearSpans({
+                originalText: originalTextByVerse.get(Number(verse)) ?? '',
+                targetSpans: spans,
+                sourceTokens: sourceTokensByVerse[Number(verse)] ?? [],
+                lexicalEntries,
+              }),
+            ])
+          )
         } catch (error) {
           dependencies.logError('[BibleContentAccess] Strong lexical fallback unavailable:', error)
         }

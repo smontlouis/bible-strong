@@ -5,14 +5,26 @@ import { versions, Version } from '~helpers/bibleVersions'
 import { downloadWithCdnFallback } from './downloadWithCdnFallback'
 import { resourcePublicationStore } from './resourcePublication'
 import { queryClient } from './queryClient'
-import { restoreOrphanedResourceBackup } from './atomicResourceFile'
+import {
+  installAtomicResourceFile,
+  isAtomicResourceFileRollbackError,
+  restoreOrphanedResourceBackup,
+} from './atomicResourceFile'
+import { createOfflineCopyId } from './offlineCopyId'
+import {
+  beginResourceInstallation,
+  commitResourceInstallation,
+  completeResourceInstallation,
+  rollbackResourceInstallation,
+} from './resourceInstallationJournal'
 
 export interface BibleResourceConfig {
   label: string
-  resourceIdPrefix: string
+  identityKind: 'bible-pericope' | 'bible-red-words'
   getFileName: (versionId: string) => string
   getCdnPath: (versionId: string) => string
   versionHasFeature: (version: Version) => boolean
+  validate: (value: unknown) => void
 }
 
 export interface BibleResourceHelpers {
@@ -25,7 +37,7 @@ export interface BibleResourceHelpers {
 }
 
 export function createBibleResourceHelpers(config: BibleResourceConfig): BibleResourceHelpers {
-  const { label, resourceIdPrefix, getFileName, getCdnPath, versionHasFeature } = config
+  const { label, identityKind, getFileName, getCdnPath, versionHasFeature, validate } = config
 
   function getFilePath(versionId: string): string {
     return `${FileSystem.documentDirectory}${getFileName(versionId)}`
@@ -52,7 +64,6 @@ export function createBibleResourceHelpers(config: BibleResourceConfig): BibleRe
       const url = getFileUrl(versionId)
       const path = getFilePath(versionId)
       const temporaryPath = `${path}.download`
-      const backupPath = `${path}.backup`
       console.log(`[${label}] Downloading ${url} to ${path}`)
       await FileSystem.deleteAsync(temporaryPath, { idempotent: true })
       const downloaded = await downloadWithCdnFallback({
@@ -61,27 +72,31 @@ export function createBibleResourceHelpers(config: BibleResourceConfig): BibleRe
         downloadOptions: { cache: false },
         logTag: label,
       })
-      JSON.parse(await FileSystem.readAsStringAsync(temporaryPath))
-      await restoreOrphanedResourceBackup(path, backupPath)
-      await FileSystem.deleteAsync(backupPath, { idempotent: true })
-      const current = await FileSystem.getInfoAsync(path)
-      if (current.exists) await FileSystem.moveAsync({ from: path, to: backupPath })
+      validate(JSON.parse(await FileSystem.readAsStringAsync(temporaryPath)) as unknown)
       try {
-        await FileSystem.moveAsync({ from: temporaryPath, to: path })
-        resourcePublicationStore.write(`${resourceIdPrefix}:${versionId}`, {
-          ...downloaded.publication,
-          sourceUrl: downloaded.sourceUrl,
-          installedAt: Date.now(),
+        const resourceId = createOfflineCopyId({ kind: identityKind, versionId })
+        const journal = beginResourceInstallation(resourceId, downloaded, {
+          kind: 'file',
+          destinationPath: path,
         })
+        let activationCompleted = false
+        try {
+          await installAtomicResourceFile({
+            candidatePath: temporaryPath,
+            destinationPath: path,
+            afterSwap: () => commitResourceInstallation(journal),
+          })
+          activationCompleted = true
+          completeResourceInstallation(journal)
+        } catch (error) {
+          if (!activationCompleted && !isAtomicResourceFileRollbackError(error)) {
+            rollbackResourceInstallation(journal)
+          }
+          throw error
+        }
         await queryClient.invalidateQueries({
-          queryKey: ['resource-publication', `${resourceIdPrefix}:${versionId}`],
+          queryKey: ['resource-publication', resourceId],
         })
-        await FileSystem.deleteAsync(backupPath, { idempotent: true })
-      } catch (error) {
-        await FileSystem.deleteAsync(path, { idempotent: true })
-        const backup = await FileSystem.getInfoAsync(backupPath)
-        if (backup.exists) await FileSystem.moveAsync({ from: backupPath, to: path })
-        throw error
       } finally {
         await FileSystem.deleteAsync(temporaryPath, { idempotent: true })
       }
@@ -101,7 +116,7 @@ export function createBibleResourceHelpers(config: BibleResourceConfig): BibleRe
         await FileSystem.deleteAsync(info.uri)
         console.log(`[${label}] Deleted ${versionId}`)
       }
-      resourcePublicationStore.remove(`${resourceIdPrefix}:${versionId}`)
+      resourcePublicationStore.remove(createOfflineCopyId({ kind: identityKind, versionId }))
     } catch (e) {
       console.log(`[${label}] Failed to delete ${versionId}:`, e)
     }

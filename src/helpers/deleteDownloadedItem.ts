@@ -1,13 +1,8 @@
 import * as FileSystem from 'expo-file-system/legacy'
 
 import { isVersionInstalled, removeBibleVersion } from './biblesDb'
-import { isStrongVersion, versions } from './bibleVersions'
-import {
-  LANGUAGE_SPECIFIC_DBS,
-  SHARED_DBS,
-  type DatabaseId,
-  type ResourceLanguage,
-} from './databaseTypes'
+import { isStrongVersion } from './bibleVersions'
+import { type DatabaseId, type ResourceLanguage } from './databaseTypes'
 import { deletePericopeFile } from './pericopes'
 import { deleteRedWordsFile } from './redWords'
 import { requireBiblePath } from './requireBiblePath'
@@ -18,13 +13,12 @@ import { removeInterlinearSidecar } from './interlinearBibleSidecar'
 import { resourcePublicationStore } from './resourcePublication'
 import { removeStrongLexiconModule } from './strongLexiconModules'
 import type { StrongLexiconModuleId } from './strongLexiconPublications'
-import { queryClient } from './queryClient'
+import { invalidateOfflineCopyQueries } from './offlineCopyQueries'
+import { createOfflineCopyId, parseOfflineCopyId, type OfflineCopyIdentity } from './offlineCopy'
 
 interface DeleteDownloadedItemOptions {
   bibleMode?: 'remove' | 'replace'
 }
-
-const DATABASE_IDS = new Set<DatabaseId>([...LANGUAGE_SPECIFIC_DBS, ...SHARED_DBS])
 
 export type DownloadedItemDeletionPlan =
   | {
@@ -44,108 +38,130 @@ export type DownloadedItemDeletionPlan =
   | { kind: 'interlinear-sidecar'; language: ResourceLanguage }
   | { kind: 'strong-lexicon-module'; moduleId: StrongLexiconModuleId }
   | { kind: 'database'; databaseId: DatabaseId; language: ResourceLanguage }
+  | {
+      kind: 'bible-child'
+      identity: Extract<OfflineCopyIdentity, { kind: 'bible-pericope' | 'bible-red-words' }>
+    }
   | { kind: 'unknown'; itemId: string }
 
 export const createDownloadedItemDeletionPlan = (
   itemId: string,
   { bibleMode = 'remove' }: DeleteDownloadedItemOptions = {}
 ): DownloadedItemDeletionPlan => {
-  if (itemId.startsWith('strong-lexicon:')) {
-    const moduleId = itemId.replace('strong-lexicon:', '') as StrongLexiconModuleId
-    if (!['core', 'resources', 'entities'].includes(moduleId)) {
-      return { kind: 'unknown', itemId }
-    }
-    return { kind: 'strong-lexicon-module', moduleId }
-  }
+  const identity = parseOfflineCopyId(itemId)
+  if (!identity) return { kind: 'unknown', itemId }
 
-  if (itemId.startsWith('bible-strong:')) {
-    const versionId = itemId.replace('bible-strong:', '')
-    if (!isStrongCapableBibleVersion(versionId)) {
-      return { kind: 'unknown', itemId }
-    }
-    return {
-      kind: 'strong-sidecar',
-      versionId,
-    }
-  }
-
-  if (itemId.startsWith('bible-interlinear:')) {
-    const [, versionId, language] = itemId.split(':')
-    if (versionId !== 'BHG' || (language !== 'fr' && language !== 'en')) {
-      return { kind: 'unknown', itemId }
-    }
-    return { kind: 'interlinear-sidecar', language }
-  }
-
-  if (itemId.startsWith('bible:')) {
-    const versionId = itemId.replace('bible:', '')
-    if (!Object.prototype.hasOwnProperty.call(versions, versionId)) {
-      return { kind: 'unknown', itemId }
-    }
-    return {
-      kind: 'bible',
-      versionId,
-      bibleMode,
-      strongSidecar:
-        bibleMode === 'remove' && isStrongCapableBibleVersion(versionId)
-          ? { itemId: `bible-strong:${versionId}`, versionId }
-          : undefined,
-      interlinearSidecars:
-        bibleMode === 'remove' && versionId === 'BHG'
-          ? (['fr', 'en'] as ResourceLanguage[]).map(language => ({
-              itemId: `bible-interlinear:BHG:${language}`,
-              language,
-            }))
-          : undefined,
-    }
-  }
-
-  if (itemId.startsWith('database:')) {
-    const parts = itemId.split(':')
-    const databaseId = parts[1] as DatabaseId
-    const language = parts[2] || 'fr'
-    if (!DATABASE_IDS.has(databaseId) || (language !== 'fr' && language !== 'en')) {
-      return { kind: 'unknown', itemId }
-    }
-    return {
-      kind: 'database',
-      databaseId,
-      language,
+  switch (identity.kind) {
+    case 'strong-lexicon-module':
+      return { kind: 'strong-lexicon-module', moduleId: identity.moduleId }
+    case 'strong-bible-index':
+      return { kind: 'strong-sidecar', versionId: identity.versionId }
+    case 'interlinear-index':
+      return { kind: 'interlinear-sidecar', language: identity.language }
+    case 'database':
+      return {
+        kind: 'database',
+        databaseId: identity.databaseId,
+        language: identity.language,
+      }
+    case 'bible-pericope':
+    case 'bible-red-words':
+      return { kind: 'bible-child', identity }
+    case 'bible': {
+      const { versionId } = identity
+      return {
+        kind: 'bible',
+        versionId,
+        bibleMode,
+        strongSidecar:
+          bibleMode === 'remove' && isStrongCapableBibleVersion(versionId)
+            ? {
+                itemId: createOfflineCopyId({
+                  kind: 'strong-bible-index',
+                  versionId,
+                }),
+                versionId,
+              }
+            : undefined,
+        interlinearSidecars:
+          bibleMode === 'remove' && versionId === 'BHG'
+            ? (['fr', 'en'] as ResourceLanguage[]).map(language => ({
+                itemId: createOfflineCopyId({
+                  kind: 'interlinear-index',
+                  versionId: 'BHG',
+                  language,
+                }),
+                language,
+              }))
+            : undefined,
+      }
     }
   }
+}
 
-  return { kind: 'unknown', itemId }
+const invalidateAndForgetPublication = async (identity: OfflineCopyIdentity): Promise<void> => {
+  resourcePublicationStore.remove(createOfflineCopyId(identity))
+  await invalidateOfflineCopyQueries(identity)
 }
 
 export const deleteDownloadedItem = async (plan: DownloadedItemDeletionPlan): Promise<void> => {
+  if (plan.kind === 'bible-child') {
+    if (plan.identity.kind === 'bible-pericope') {
+      await deletePericopeFile(plan.identity.versionId)
+    } else {
+      await deleteRedWordsFile(plan.identity.versionId)
+    }
+    await invalidateAndForgetPublication(plan.identity)
+    return
+  }
   if (plan.kind === 'strong-lexicon-module') {
     await removeStrongLexiconModule(plan.moduleId)
-    resourcePublicationStore.remove(`strong-lexicon:${plan.moduleId}`)
-    await queryClient.invalidateQueries({ queryKey: ['strong-lexicon'] })
+    await invalidateAndForgetPublication({
+      kind: 'strong-lexicon-module',
+      moduleId: plan.moduleId,
+    })
     return
   }
   if (plan.kind === 'strong-sidecar') {
     await removeStrongBibleSidecar(plan.versionId)
-    resourcePublicationStore.remove(`bible-strong:${plan.versionId}`)
+    await invalidateAndForgetPublication({
+      kind: 'strong-bible-index',
+      versionId: plan.versionId,
+    })
     return
   }
 
   if (plan.kind === 'interlinear-sidecar') {
     await removeInterlinearSidecar(plan.language)
-    resourcePublicationStore.remove(`bible-interlinear:BHG:${plan.language}`)
+    await invalidateAndForgetPublication({
+      kind: 'interlinear-index',
+      versionId: 'BHG',
+      language: plan.language,
+    })
     return
   }
 
   if (plan.kind === 'bible') {
     if (plan.strongSidecar) {
       await removeStrongBibleSidecar(plan.strongSidecar.versionId)
-      resourcePublicationStore.remove(plan.strongSidecar.itemId)
+      await invalidateAndForgetPublication({
+        kind: 'strong-bible-index',
+        versionId: plan.strongSidecar.versionId,
+      })
     }
     if (plan.interlinearSidecars) {
       await Promise.all(
         plan.interlinearSidecars.map(sidecar => removeInterlinearSidecar(sidecar.language))
       )
-      plan.interlinearSidecars.forEach(sidecar => resourcePublicationStore.remove(sidecar.itemId))
+      await Promise.all(
+        plan.interlinearSidecars.map(sidecar =>
+          invalidateAndForgetPublication({
+            kind: 'interlinear-index',
+            versionId: 'BHG',
+            language: sidecar.language,
+          })
+        )
+      )
     }
 
     const { versionId } = plan
@@ -173,13 +189,21 @@ export const deleteDownloadedItem = async (plan: DownloadedItemDeletionPlan): Pr
     }
 
     await Promise.all([deleteRedWordsFile(versionId), deletePericopeFile(versionId)])
-    resourcePublicationStore.remove(`bible:${versionId}`)
+    await Promise.all([
+      invalidateAndForgetPublication({ kind: 'bible-red-words', versionId }),
+      invalidateAndForgetPublication({ kind: 'bible-pericope', versionId }),
+    ])
+    await invalidateAndForgetPublication({ kind: 'bible', versionId })
     return
   }
 
   if (plan.kind === 'database') {
     await dbManager.getDB(plan.databaseId, plan.language).delete()
-    resourcePublicationStore.remove(`database:${plan.databaseId}:${plan.language}`)
+    await invalidateAndForgetPublication({
+      kind: 'database',
+      databaseId: plan.databaseId as Exclude<DatabaseId, 'BIBLES'>,
+      language: plan.language,
+    })
     return
   }
 

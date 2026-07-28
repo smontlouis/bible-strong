@@ -3,6 +3,7 @@ import {
   getStrongLexiconPublication,
   type StrongLexiconModuleId,
 } from './strongLexiconPublications'
+import { createOfflineCopyId } from './offlineCopyId'
 
 export function createStrongLexiconModuleDownloadItem(
   moduleId: StrongLexiconModuleId
@@ -14,7 +15,7 @@ export function createStrongLexiconModuleDownloadItem(
     entities: 'Entités bibliques',
   }
   return {
-    id: `strong-lexicon:${moduleId}`,
+    id: createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId }),
     type: 'strong-lexicon-module',
     name: names[moduleId],
     url: artifact.url,

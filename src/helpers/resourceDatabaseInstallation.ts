@@ -7,12 +7,21 @@ import { downloadRedWordsFile, versionHasRedWords } from '~helpers/redWords'
 import { downloadPericopeFile, versionHasPericope } from '~helpers/pericopes'
 import type { DatabaseId } from '~helpers/databaseTypes'
 import type { DownloadItem } from '~state/downloadQueue'
+import type {
+  BibleDownloadItem,
+  DatabaseDownloadItem,
+  InterlinearIndexDownloadItem,
+  LegacyBibleDatabaseDownloadItem,
+  StrongBibleIndexDownloadItem,
+  StrongLexiconModuleDownloadItem,
+} from './offlineCopy'
 import { installStrongBibleSidecar } from './strongBibleSidecar'
 import type { StrongBibleVersionId } from './strongBiblePublications'
 import { installInterlinearSidecar } from './interlinearBibleSidecar'
 import type { DownloadWithCdnFallbackResult } from './downloadWithCdnFallback'
-import { restoreOrphanedResourceBackup } from './atomicResourceFile'
+import { installAtomicResourceFile } from './atomicResourceFile'
 import { installStrongLexiconModule } from './strongLexiconModules'
+import type { ResourceInstallationLifecycle } from './resourceInstallationLifecycle'
 
 export interface ResourceInstallationCallbacks {
   onDownloadProgress: (progress: number) => void
@@ -20,24 +29,44 @@ export interface ResourceInstallationCallbacks {
   onStatusInserting: () => void
   onResumable: (resumable: FileSystem.DownloadResumable | null) => void
   isCancelled: () => boolean
+  installationLifecycle: ResourceInstallationLifecycle
 }
 
-const downloadSidecarBibleFiles = async (item: DownloadItem, versionId: string) => {
-  const downloads: Promise<boolean>[] = []
+export const synchronizeOptionalBibleResources = async (
+  item: BibleDownloadItem | LegacyBibleDatabaseDownloadItem,
+  versionId: string
+) => {
+  const downloads: (() => Promise<boolean>)[] = []
   if (item.hasRedWords && versionHasRedWords(versionId)) {
-    downloads.push(downloadRedWordsFile(versionId))
+    downloads.push(() => downloadRedWordsFile(versionId))
   }
   if (item.hasPericope && versionHasPericope(versionId)) {
-    downloads.push(downloadPericopeFile(versionId))
+    downloads.push(() => downloadPericopeFile(versionId))
   }
-  const results = await Promise.all(downloads)
-  if (results.some(result => !result)) {
-    throw new Error(`BIBLE_SIDECAR_DOWNLOAD_FAILED:${versionId}`)
+  // The durable installation journal is intentionally single-writer.
+  const results = await downloads.reduce<Promise<PromiseSettledResult<boolean>[]>>(
+    (previous, download) =>
+      previous.then(settled =>
+        download().then(
+          value => [...settled, { status: 'fulfilled' as const, value }],
+          reason => [...settled, { status: 'rejected' as const, reason }]
+        )
+      ),
+    Promise.resolve([])
+  )
+  if (
+    results.some(
+      result => result.status === 'rejected' || (result.status === 'fulfilled' && !result.value)
+    )
+  ) {
+    console.warn(
+      `[ResourceInstallation] Optional Bible resources could not all be refreshed: ${versionId}`
+    )
   }
 }
 
 const downloadFile = async (
-  item: DownloadItem,
+  item: LegacyBibleDatabaseDownloadItem | DatabaseDownloadItem,
   callbacks: ResourceInstallationCallbacks,
   destinationPath = item.destinationPath!
 ) => {
@@ -56,8 +85,8 @@ const downloadFile = async (
   return result
 }
 
-const installBible = async (item: DownloadItem, callbacks: ResourceInstallationCallbacks) => {
-  const versionId = item.versionId!
+const installBible = async (item: BibleDownloadItem, callbacks: ResourceInstallationCallbacks) => {
+  const versionId = item.versionId
 
   const result = await downloadAndInsertBible(versionId, item.url, {
     onDownloadProgress: ({ totalBytesWritten }) => {
@@ -71,20 +100,23 @@ const installBible = async (item: DownloadItem, callbacks: ResourceInstallationC
     isCancelled: callbacks.isCancelled,
     canonicalArtifact: item.canonicalArtifact,
     archiveArtifact: item.archiveArtifact,
+    installationLifecycle: callbacks.installationLifecycle,
   })
 
   callbacks.onResumable(null)
-  await downloadSidecarBibleFiles(item, versionId)
   return result
 }
 
-const installBibleStrong = async (item: DownloadItem, callbacks: ResourceInstallationCallbacks) => {
-  const versionId = item.versionId!
-  const destinationPath = item.destinationPath!
+const installBibleStrong = async (
+  item: LegacyBibleDatabaseDownloadItem,
+  callbacks: ResourceInstallationCallbacks
+) => {
+  const versionId = item.versionId
+  const destinationPath = item.destinationPath
   const temporaryPath = `${destinationPath}.download`
-  const backupPath = `${destinationPath}.backup`
   await FileSystem.deleteAsync(temporaryPath, { idempotent: true })
   const result = await downloadFile(item, callbacks, temporaryPath)
+  await callbacks.installationLifecycle.prepare(result)
   const fileName = temporaryPath.split('/').pop()!
   const directory = temporaryPath.slice(0, -(fileName.length + 1))
   const candidate = await openSQLiteDatabase(fileName, { useNewConnection: true }, directory)
@@ -103,41 +135,36 @@ const installBibleStrong = async (item: DownloadItem, callbacks: ResourceInstall
     versionId === 'INT' || versionId === 'INT_EN'
       ? dbManager.getDB('INTERLINEAIRE', versionId === 'INT' ? 'fr' : 'en')
       : undefined
-  await database?.close()
-  await restoreOrphanedResourceBackup(destinationPath, backupPath)
-  await FileSystem.deleteAsync(backupPath, { idempotent: true })
-  const installed = await FileSystem.getInfoAsync(destinationPath)
-  if (installed.exists) {
-    await FileSystem.moveAsync({ from: destinationPath, to: backupPath })
-  }
   try {
-    await FileSystem.moveAsync({ from: temporaryPath, to: destinationPath })
-    await database?.init()
-    await FileSystem.deleteAsync(backupPath, { idempotent: true })
-  } catch (error) {
-    await FileSystem.deleteAsync(destinationPath, { idempotent: true })
-    const backup = await FileSystem.getInfoAsync(backupPath)
-    if (backup.exists) {
-      await FileSystem.moveAsync({ from: backupPath, to: destinationPath })
-      await database?.init()
-    }
-    throw error
+    await installAtomicResourceFile({
+      candidatePath: temporaryPath,
+      destinationPath,
+      beforeSwap: () => database?.close(),
+      afterSwap: async () => {
+        await database?.init()
+        await callbacks.installationLifecycle.commit(result)
+      },
+      beforeRollback: () => database?.close(),
+      afterRollback: restored => (restored ? database?.init() : undefined),
+    })
   } finally {
     await FileSystem.deleteAsync(temporaryPath, { idempotent: true })
   }
 
-  await downloadSidecarBibleFiles(item, versionId)
   return result
 }
 
-const installDatabase = async (item: DownloadItem, callbacks: ResourceInstallationCallbacks) => {
-  const dbId = item.databaseId!
-  const lang = item.lang || 'fr'
-  const destinationPath = item.destinationPath!
+const installDatabase = async (
+  item: DatabaseDownloadItem,
+  callbacks: ResourceInstallationCallbacks
+) => {
+  const dbId = item.databaseId
+  const lang = item.lang
+  const destinationPath = item.destinationPath
   const temporaryPath = `${destinationPath}.download`
-  const backupPath = `${destinationPath}.backup`
   await FileSystem.deleteAsync(temporaryPath, { idempotent: true })
   const result = await downloadFile(item, callbacks, temporaryPath)
+  await callbacks.installationLifecycle.prepare(result)
 
   try {
     if (dbId === 'TIMELINE') {
@@ -187,26 +214,17 @@ const installDatabase = async (item: DownloadItem, callbacks: ResourceInstallati
     }
 
     const database = dbManager.getDB(dbId as DatabaseId, lang)
-    await database.close()
-    await restoreOrphanedResourceBackup(destinationPath, backupPath)
-    await FileSystem.deleteAsync(backupPath, { idempotent: true })
-    const installed = await FileSystem.getInfoAsync(destinationPath)
-    if (installed.exists) {
-      await FileSystem.moveAsync({ from: destinationPath, to: backupPath })
-    }
-    try {
-      await FileSystem.moveAsync({ from: temporaryPath, to: destinationPath })
-      if (dbId !== 'TIMELINE') await database.init()
-      await FileSystem.deleteAsync(backupPath, { idempotent: true })
-    } catch (error) {
-      await FileSystem.deleteAsync(destinationPath, { idempotent: true })
-      const backup = await FileSystem.getInfoAsync(backupPath)
-      if (backup.exists) {
-        await FileSystem.moveAsync({ from: backupPath, to: destinationPath })
+    await installAtomicResourceFile({
+      candidatePath: temporaryPath,
+      destinationPath,
+      beforeSwap: () => database.close(),
+      afterSwap: async () => {
         if (dbId !== 'TIMELINE') await database.init()
-      }
-      throw error
-    }
+        await callbacks.installationLifecycle.commit(result)
+      },
+      beforeRollback: () => database.close(),
+      afterRollback: restored => (restored && dbId !== 'TIMELINE' ? database.init() : undefined),
+    })
     return result
   } finally {
     await FileSystem.deleteAsync(temporaryPath, { idempotent: true })
@@ -214,7 +232,7 @@ const installDatabase = async (item: DownloadItem, callbacks: ResourceInstallati
 }
 
 const installBibleStrongSidecar = async (
-  item: DownloadItem,
+  item: StrongBibleIndexDownloadItem,
   callbacks: ResourceInstallationCallbacks
 ) => {
   return installStrongBibleSidecar(item.versionId as StrongBibleVersionId, {
@@ -225,19 +243,15 @@ const installBibleStrongSidecar = async (
     onStatusInserting: callbacks.onStatusInserting,
     onInsertProgress: callbacks.onInsertProgress,
     isCancelled: callbacks.isCancelled,
+    installationLifecycle: callbacks.installationLifecycle,
   })
 }
 
 const installBibleInterlinearSidecar = async (
-  item: DownloadItem,
+  item: InterlinearIndexDownloadItem,
   callbacks: ResourceInstallationCallbacks
 ) => {
-  if (
-    !item.lang ||
-    !item.interlinearArtifact ||
-    item.interlinearDatasetId !== 'STEP' ||
-    item.url !== item.interlinearArtifact.url
-  ) {
+  if (item.interlinearDatasetId !== 'STEP' || item.url !== item.interlinearArtifact.url) {
     throw new Error(`INVALID_INTERLINEAR_DOWNLOAD_ITEM:${item.id}`)
   }
   return installInterlinearSidecar(item.lang, item.interlinearArtifact, item.interlinearDatasetId, {
@@ -248,18 +262,15 @@ const installBibleInterlinearSidecar = async (
     onStatusInserting: callbacks.onStatusInserting,
     onInsertProgress: callbacks.onInsertProgress,
     isCancelled: callbacks.isCancelled,
+    installationLifecycle: callbacks.installationLifecycle,
   })
 }
 
 const installLexiconModule = async (
-  item: DownloadItem,
+  item: StrongLexiconModuleDownloadItem,
   callbacks: ResourceInstallationCallbacks
 ) => {
-  if (
-    !item.strongLexiconModuleId ||
-    !item.strongLexiconArtifact ||
-    item.url !== item.strongLexiconArtifact.url
-  ) {
+  if (item.url !== item.strongLexiconArtifact.url) {
     throw new Error(`INVALID_STRONG_LEXICON_DOWNLOAD_ITEM:${item.id}`)
   }
   return installStrongLexiconModule(item.strongLexiconModuleId, {
@@ -270,6 +281,7 @@ const installLexiconModule = async (
     onStatusInserting: callbacks.onStatusInserting,
     onInsertProgress: callbacks.onInsertProgress,
     isCancelled: callbacks.isCancelled,
+    installationLifecycle: callbacks.installationLifecycle,
   })
 }
 

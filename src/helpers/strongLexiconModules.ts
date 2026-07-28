@@ -1,7 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy'
 import { unzip } from 'react-native-zip-archive'
 
-import { restoreOrphanedResourceBackup } from './atomicResourceFile'
+import { installAtomicResourceFile, restoreOrphanedResourceBackup } from './atomicResourceFile'
 import { getSharedSqliteDirPath } from './databaseTypes'
 import { downloadWithCdnFallback } from './downloadWithCdnFallback'
 import { toNativeFilePath } from './fileIntegrity'
@@ -10,6 +10,7 @@ import {
   getStrongLexiconPublication,
   type StrongLexiconModuleId,
 } from './strongLexiconPublications'
+import type { ResourceInstallationLifecycle } from './resourceInstallationLifecycle'
 
 export type StrongLexiconModuleAvailability =
   | { status: 'missing'; moduleId: StrongLexiconModuleId }
@@ -34,6 +35,7 @@ export interface StrongLexiconInstallCallbacks {
   onStatusInserting?: () => void
   onInsertProgress?: (progress: number) => void
   isCancelled?: () => boolean
+  installationLifecycle?: ResourceInstallationLifecycle
 }
 
 const moduleDatabases = new Map<StrongLexiconModuleId, SQLiteDatabase>()
@@ -210,33 +212,23 @@ export const closeStrongLexiconModule = async (moduleId: StrongLexiconModuleId):
 
 const activateStrongLexiconModule = async (
   moduleId: StrongLexiconModuleId,
-  extractedPath: string
+  extractedPath: string,
+  beforeCommit?: () => void | Promise<void>
 ): Promise<void> => {
   const destinationPath = getStrongLexiconModulePath(moduleId)
-  const backupPath = `${destinationPath}.backup`
-  await closeStrongLexiconModule(moduleId)
-  await restoreOrphanedResourceBackup(destinationPath, backupPath)
-  await FileSystem.deleteAsync(backupPath, { idempotent: true })
-  const installed = await FileSystem.getInfoAsync(destinationPath)
-  if (installed.exists) {
-    await FileSystem.moveAsync({ from: destinationPath, to: backupPath })
-  }
-  try {
-    await FileSystem.moveAsync({ from: extractedPath, to: destinationPath })
-    const availability = await getStrongLexiconModuleAvailability(moduleId)
-    if (availability.status !== 'available') {
-      throw new Error(`STRONG_LEXICON_ACTIVATION_FAILED:${moduleId}:${availability.status}`)
-    }
-    await FileSystem.deleteAsync(backupPath, { idempotent: true })
-  } catch (error) {
-    await closeStrongLexiconModule(moduleId)
-    await FileSystem.deleteAsync(destinationPath, { idempotent: true })
-    const backup = await FileSystem.getInfoAsync(backupPath)
-    if (backup.exists) {
-      await FileSystem.moveAsync({ from: backupPath, to: destinationPath })
-    }
-    throw error
-  }
+  await installAtomicResourceFile({
+    candidatePath: extractedPath,
+    destinationPath,
+    beforeSwap: () => closeStrongLexiconModule(moduleId),
+    afterSwap: async () => {
+      const availability = await getStrongLexiconModuleAvailability(moduleId)
+      if (availability.status !== 'available') {
+        throw new Error(`STRONG_LEXICON_ACTIVATION_FAILED:${moduleId}:${availability.status}`)
+      }
+      await beforeCommit?.()
+    },
+    beforeRollback: () => closeStrongLexiconModule(moduleId),
+  })
 }
 
 export const installStrongLexiconModule = async (
@@ -258,6 +250,7 @@ export const installStrongLexiconModule = async (
       logTag: `StrongLexicon:${moduleId}`,
     })
     if (callbacks.isCancelled?.()) throw new Error('CANCELLED')
+    await callbacks.installationLifecycle?.prepare(result)
 
     callbacks.onStatusInserting?.()
     callbacks.onInsertProgress?.(0)
@@ -268,7 +261,9 @@ export const installStrongLexiconModule = async (
     callbacks.onInsertProgress?.(0.6)
     callbacks.onInsertProgress?.(0.8)
     await FileSystem.makeDirectoryAsync(getStrongLexiconDirectory(), { intermediates: true })
-    await activateStrongLexiconModule(moduleId, extractedPath)
+    await activateStrongLexiconModule(moduleId, extractedPath, () =>
+      callbacks.installationLifecycle?.commit(result)
+    )
     callbacks.onInsertProgress?.(1)
     return result
   } finally {

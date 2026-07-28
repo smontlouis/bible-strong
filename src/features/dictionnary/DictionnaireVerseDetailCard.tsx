@@ -32,6 +32,7 @@ import { useDownloadQueue, useDownloadItemStatus } from '~helpers/useDownloadQue
 import DictionnaireCard from './DictionnaireCard'
 import DictionnaireVerseReference from './DictionnaireVerseReference'
 import { localQueryOptions } from '~helpers/queryOptions'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -233,7 +234,9 @@ const DictionnaireVerseDetailScreen = ({
     requiredBibleVersion,
   } = useFormattedText({ verse, wordsInVerse, resourceLang })
   const requiredBibleDownloadStatus = useDownloadItemStatus(
-    requiredBibleVersion ? `bible:${requiredBibleVersion}` : ''
+    requiredBibleVersion
+      ? createOfflineCopyId({ kind: 'bible', versionId: requiredBibleVersion })
+      : undefined
   )
 
   const goToWord = (word: string) => {

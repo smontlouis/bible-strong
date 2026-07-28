@@ -13,12 +13,15 @@ import { createStrongLexiconModuleDownloadItem } from '~helpers/downloadItemFact
 import { downloadManager } from '~helpers/downloadManager'
 import { getStrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
 
 export const useWaitForDatabase = () => {
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const resourceLang = resourcesLanguage.STRONG
   const [startDownload, setStartDownload] = useState(false)
-  const download = useDownloadItemStatus('strong-lexicon:core')
+  const download = useDownloadItemStatus(
+    createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'core' })
+  )
   const availabilityQuery = useQuery({
     queryKey: ['strong-lexicon', 'availability', 'core'],
     queryFn: () => getStrongLexiconModuleAvailability('core'),
@@ -33,7 +36,9 @@ export const useWaitForDatabase = () => {
   const downloadRequested = startDownload && !downloadFailed
   const requestDownload = (value: boolean) => {
     if (value && download?.status === 'failed') {
-      downloadManager.retry('strong-lexicon:core')
+      downloadManager.retry(
+        createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'core' })
+      )
     } else if (value && download?.status === 'cancelled') {
       downloadManager.enqueue([createStrongLexiconModuleDownloadItem('core')])
     }

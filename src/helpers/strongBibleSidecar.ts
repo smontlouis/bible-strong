@@ -20,8 +20,9 @@ import {
   type StrongBibleVersionId,
 } from './strongBiblePublications'
 import type { StrongBibleIdentityKind, StrongBibleSpan } from './strongBibleOverlay'
-import { restoreOrphanedResourceBackup } from './atomicResourceFile'
+import { installAtomicResourceFile, restoreOrphanedResourceBackup } from './atomicResourceFile'
 import { getStrongBibleConcordanceCandidates } from './strongBibleConcordance'
+import type { ResourceInstallationLifecycle } from './resourceInstallationLifecycle'
 
 const sidecarDatabases = new Map<StrongBibleVersionId, SQLiteDatabase>()
 const validatedSidecars = new Map<StrongBibleVersionId, StrongBibleSidecarMetadata>()
@@ -56,6 +57,7 @@ export interface StrongBibleSidecarInstallCallbacks {
   onStatusInserting?: () => void
   onInsertProgress?: (progress: number) => void
   isCancelled?: () => boolean
+  installationLifecycle?: ResourceInstallationLifecycle
 }
 
 export const getStrongBibleSidecarDirectory = (): string =>
@@ -146,6 +148,7 @@ export const installStrongBibleSidecar = async (
       logTag: 'StrongBibleSidecar',
     })
     if (callbacks.isCancelled?.()) throw new Error('CANCELLED')
+    await callbacks.installationLifecycle?.prepare(downloadResult)
 
     callbacks.onStatusInserting?.()
     callbacks.onInsertProgress?.(0)
@@ -160,7 +163,9 @@ export const installStrongBibleSidecar = async (
       textSha256: baseMetadata.textSha256 ?? '',
     })
     callbacks.onInsertProgress?.(0.9)
-    await activateStrongBibleSidecar(versionId, extractedPath)
+    await activateStrongBibleSidecar(versionId, extractedPath, () =>
+      callbacks.installationLifecycle?.commit(downloadResult)
+    )
     callbacks.onInsertProgress?.(1)
     return downloadResult
   } finally {
@@ -617,29 +622,17 @@ const getExpectedSidecar = (
 
 const activateStrongBibleSidecar = async (
   versionId: StrongBibleVersionId,
-  extractedPath: string
+  extractedPath: string,
+  beforeCommit?: () => void | Promise<void>
 ): Promise<void> => {
   const directory = getStrongBibleSidecarDirectory()
   await FileSystem.makeDirectoryAsync(directory, { intermediates: true })
   const destinationPath = getStrongBibleSidecarPath(versionId)
-  const backupPath = `${destinationPath}.backup`
-  await closeStrongBibleSidecar(versionId)
-  await restoreOrphanedResourceBackup(destinationPath, backupPath)
-  await FileSystem.deleteAsync(backupPath, { idempotent: true })
-  const destinationInfo = await FileSystem.getInfoAsync(destinationPath)
-  if (destinationInfo.exists) {
-    await FileSystem.moveAsync({ from: destinationPath, to: backupPath })
-  }
-
-  try {
-    await FileSystem.moveAsync({ from: extractedPath, to: destinationPath })
-    await FileSystem.deleteAsync(backupPath, { idempotent: true })
-  } catch (error) {
-    await FileSystem.deleteAsync(destinationPath, { idempotent: true })
-    const backupInfo = await FileSystem.getInfoAsync(backupPath)
-    if (backupInfo.exists) {
-      await FileSystem.moveAsync({ from: backupPath, to: destinationPath })
-    }
-    throw error
-  }
+  await installAtomicResourceFile({
+    candidatePath: extractedPath,
+    destinationPath,
+    beforeSwap: () => closeStrongBibleSidecar(versionId),
+    afterSwap: beforeCommit,
+    beforeRollback: () => closeStrongBibleSidecar(versionId),
+  })
 }

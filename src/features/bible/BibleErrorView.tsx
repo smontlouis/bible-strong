@@ -13,6 +13,7 @@ import { toast } from '~helpers/toast'
 import { downloadManager } from '~helpers/downloadManager'
 import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
 
 /**
  * Get localized error message based on error type
@@ -37,7 +38,7 @@ const BibleErrorView = ({ error }: { error: BibleError }) => {
   const showActions = error.type === 'DATABASE_CORRUPTED' || error.type === 'BIBLE_NOT_FOUND'
 
   // Subscribe to download queue state for this version (only relevant when missing)
-  const downloadItemId = `bible:${error.version}`
+  const downloadItemId = createOfflineCopyId({ kind: 'bible', versionId: error.version })
   const queueState = useDownloadItemStatus(downloadItemId)
   const isDownloading = queueState?.status === 'downloading'
   const isInserting = queueState?.status === 'inserting'

@@ -16,6 +16,7 @@ import {
   type InterlinearSidecarAvailability,
 } from '~helpers/interlinearBibleSidecar'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/downloadQueue'
 
 interface Props {
@@ -30,8 +31,12 @@ const isActiveDownload = (status?: string) =>
 const InterlinearIndexSelectorItem = ({ locale, expanded, onAvailabilityChange }: Props) => {
   const { t } = useTranslation()
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
-  const bibleDownload = useDownloadItemStatus('bible:BHG')
-  const indexDownload = useDownloadItemStatus(`bible-interlinear:BHG:${locale}`)
+  const bibleDownload = useDownloadItemStatus(
+    createOfflineCopyId({ kind: 'bible', versionId: 'BHG' })
+  )
+  const indexDownload = useDownloadItemStatus(
+    createOfflineCopyId({ kind: 'interlinear-index', versionId: 'BHG', language: locale })
+  )
   const availabilityQuery = useQuery({
     queryKey: ['interlinear-index-availability', locale, downloadCompletionSignal],
     queryFn: () => getInterlinearSidecarAvailability(locale),

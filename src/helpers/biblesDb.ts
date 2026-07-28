@@ -74,6 +74,7 @@ export interface BibleVersionMetadata {
   textSha256?: string
   sourceSha256?: string
   schemaVersion?: number
+  resourceGeneration?: string
 }
 
 export interface SearchResult {
@@ -210,7 +211,8 @@ export async function openBiblesDb(): Promise<SQLite.SQLiteDatabase> {
           text_revision TEXT,
           text_sha256 TEXT,
           source_sha256 TEXT,
-          schema_version INTEGER
+          schema_version INTEGER,
+          resource_generation TEXT
         );
       `)
       await ensureTableColumn(instance, 'verses', 'layout_json', "TEXT NOT NULL DEFAULT '[]'")
@@ -221,6 +223,7 @@ export async function openBiblesDb(): Promise<SQLite.SQLiteDatabase> {
       await ensureTableColumn(instance, 'versions_meta', 'text_sha256', 'TEXT')
       await ensureTableColumn(instance, 'versions_meta', 'source_sha256', 'TEXT')
       await ensureTableColumn(instance, 'versions_meta', 'schema_version', 'INTEGER')
+      await ensureTableColumn(instance, 'versions_meta', 'resource_generation', 'TEXT')
 
       db = instance
       openPromise = null
@@ -631,9 +634,10 @@ export function getBibleVersionMetadata(version: string): Promise<BibleVersionMe
       text_sha256: string | null
       source_sha256: string | null
       schema_version: number | null
+      resource_generation: string | null
     }>(
       `SELECT version, installed_at, verse_count, text_revision, text_sha256,
-              source_sha256, schema_version
+              source_sha256, schema_version, resource_generation
        FROM versions_meta WHERE version = ?`,
       [version]
     )
@@ -646,6 +650,7 @@ export function getBibleVersionMetadata(version: string): Promise<BibleVersionMe
       ...(row.text_sha256 ? { textSha256: row.text_sha256 } : {}),
       ...(row.source_sha256 ? { sourceSha256: row.source_sha256 } : {}),
       ...(row.schema_version != null ? { schemaVersion: row.schema_version } : {}),
+      ...(row.resource_generation ? { resourceGeneration: row.resource_generation } : {}),
     }
   })
 }
@@ -664,12 +669,14 @@ export function getBibleVersionMetadata(version: string): Promise<BibleVersionMe
 export interface InsertBibleOptions {
   onInsertProgress?: (progress: number) => void
   isCancelled?: () => boolean
+  beforeCommit?: () => void | Promise<void>
   publicationMetadata?: {
     textRevision: string
     textSha256: string
     sourceSha256?: string
     schemaVersion: number
     verseCount: number
+    resourceGeneration?: string
   }
 }
 
@@ -824,8 +831,8 @@ export function insertBibleVersion(
       await d.runAsync(
         `INSERT INTO versions_meta(
            version, installed_at, verse_count, text_revision,
-           text_sha256, source_sha256, schema_version
-         ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+           text_sha256, source_sha256, schema_version, resource_generation
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           version,
           Date.now(),
@@ -834,8 +841,10 @@ export function insertBibleVersion(
           publicationMetadata?.textSha256 ?? null,
           publicationMetadata?.sourceSha256 ?? null,
           publicationMetadata?.schemaVersion ?? null,
+          options?.publicationMetadata?.resourceGeneration ?? null,
         ]
       )
+      await options?.beforeCommit?.()
     })
 
     console.log(`[BiblesDB] Inserted version ${version}`)

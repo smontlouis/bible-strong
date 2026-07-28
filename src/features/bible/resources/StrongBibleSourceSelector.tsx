@@ -43,6 +43,7 @@ import {
 } from '~state/downloadQueue'
 import type { BibleTab } from '~state/tabs'
 import { getLanguage } from '~i18n'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
 
 type SharedProps = {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -272,8 +273,10 @@ const StrongBibleSourceRow = ({
   onSelect: () => void
   onDownload: () => void
 }) => {
-  const bibleDownload = useDownloadItemStatus(`bible:${versionId}`)
-  const strongDownload = useDownloadItemStatus(`bible-strong:${versionId}`)
+  const bibleDownload = useDownloadItemStatus(createOfflineCopyId({ kind: 'bible', versionId }))
+  const strongDownload = useDownloadItemStatus(
+    createOfflineCopyId({ kind: 'strong-bible-index', versionId })
+  )
   const downloads = [bibleDownload, strongDownload]
 
   return (
@@ -302,9 +305,15 @@ const BhgStrongSourceRow = ({
   onSelect: () => void
   onDownload: () => void
 }) => {
-  const bibleDownload = useDownloadItemStatus('bible:BHG')
-  const frenchDownload = useDownloadItemStatus('bible-interlinear:BHG:fr')
-  const englishDownload = useDownloadItemStatus('bible-interlinear:BHG:en')
+  const bibleDownload = useDownloadItemStatus(
+    createOfflineCopyId({ kind: 'bible', versionId: 'BHG' })
+  )
+  const frenchDownload = useDownloadItemStatus(
+    createOfflineCopyId({ kind: 'interlinear-index', versionId: 'BHG', language: 'fr' })
+  )
+  const englishDownload = useDownloadItemStatus(
+    createOfflineCopyId({ kind: 'interlinear-index', versionId: 'BHG', language: 'en' })
+  )
   const downloads = [bibleDownload, frenchDownload, englishDownload]
 
   return (

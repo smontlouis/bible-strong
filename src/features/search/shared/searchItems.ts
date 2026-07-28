@@ -7,7 +7,7 @@ import type {
   DictionnaireLetterRow,
   DictionnaireSearchRow,
 } from '~features/resources/dictionaryAccess'
-import type { LexiqueRow } from '~features/resources/strongAccess'
+import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 import type { NaveLetterRow, NaveSearchRow } from '~features/resources/naveAccess'
 import i18n from '~i18n'
 import type { Link, Note, Study } from '~redux/modules/user'
@@ -41,26 +41,20 @@ export const createVerseKeys = (
     (_, index) => `${book}-${chapter}-${startVerse + index}`
   )
 
-export const getStrongCode = (strong: LexiqueRow) =>
-  String(
-    (strong as LexiqueRow & { code?: string | number }).Code ??
-      (strong as { code?: string | number }).code ??
-      ''
-  )
+export const getStrongCode = (strong: StrongLexiconSearchResult) => strong.classicStrong
 
-export const getStrongOriginalWord = (strong: LexiqueRow) =>
-  'Grec' in strong ? strong.Grec : strong.Hebreu
+export const getStrongOriginalWord = (strong: StrongLexiconSearchResult) => strong.original
 
-export const isGreekStrong = (strong: LexiqueRow) => 'Grec' in strong
+export const isGreekStrong = (strong: StrongLexiconSearchResult) => strong.language === 'greek'
 
 export const getStrongEndpoint = (
-  strong: LexiqueRow
+  strong: StrongLexiconSearchResult
 ): NonNullable<SearchEntityResult['endpoint']> => {
   const isGreek = isGreekStrong(strong)
   return createStrongEndpoint({
     language: isGreek ? 'greek' : 'hebrew',
     code: getStrongCode(strong),
-    labelFallback: strong.Mot,
+    labelFallback: strong.gloss,
     originalWord: getStrongOriginalWord(strong),
   })
 }
@@ -207,18 +201,22 @@ export const getReferenceSearchItems = (
     }
   })
 
-export const getStrongSearchItems = (results: LexiqueRow[], t: Translate = translate) =>
+export const getStrongSearchItems = (
+  results: StrongLexiconSearchResult[],
+  t: Translate = translate
+) =>
   results.map<SearchEntityResult>(strong => {
     const code = getStrongCode(strong)
     const isGreek = isGreekStrong(strong)
     const prefix = isGreek ? 'G' : 'H'
+    const lexiqueType = isGreek ? 'Grec' : 'Hébreu'
     return {
-      id: `strong:${strong.lexiqueType}:${code}:${strong.Mot}`,
+      id: `strong:${strong.language}:${strong.id}:${code}`,
       type: 'strong',
       iconType: 'strong',
-      title: strong.Mot,
-      chip: `${prefix}${code}`,
-      subtitle: t(strong.lexiqueType),
+      title: strong.gloss,
+      chip: code.startsWith(prefix) ? code : `${prefix}${code}`,
+      subtitle: t(lexiqueType),
       description: getStrongOriginalWord(strong),
       endpoint: getStrongEndpoint(strong),
     }

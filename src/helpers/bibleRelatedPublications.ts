@@ -1,6 +1,7 @@
 import { getPericopeUrl, versionHasPericope } from './pericopes'
 import { getRedWordsUrl, versionHasRedWords } from './redWords'
 import { usesCanonicalBibleExtras } from './strongBiblePublications'
+import { createOfflineCopyId } from './offlineCopyId'
 
 export interface BibleRelatedPublicationResource {
   resourceId: string
@@ -16,7 +17,7 @@ export const getBibleRelatedPublicationResources = (
     ...(versionHasPericope(versionId)
       ? [
           {
-            resourceId: `bible-pericope:${versionId}`,
+            resourceId: createOfflineCopyId({ kind: 'bible-pericope', versionId }),
             url: getPericopeUrl(versionId),
           },
         ]
@@ -24,7 +25,7 @@ export const getBibleRelatedPublicationResources = (
     ...(versionHasRedWords(versionId)
       ? [
           {
-            resourceId: `bible-red-words:${versionId}`,
+            resourceId: createOfflineCopyId({ kind: 'bible-red-words', versionId }),
             url: getRedWordsUrl(versionId),
           },
         ]

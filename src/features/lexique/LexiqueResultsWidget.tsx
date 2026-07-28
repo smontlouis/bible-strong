@@ -6,7 +6,7 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useWaitForDatabase } from '~common/waitForStrongDB'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import type { LexiqueRow } from '~features/resources/strongAccess'
+import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 
 import { useResultsByLetterOrSearch } from './useUtilities'
 import LexiqueResultItem from './LexiqueResultItem'
@@ -38,7 +38,7 @@ const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
 
   const { results, error } = useResultsByLetterOrSearch({
     queryKey: ['strong-lexicon'],
-    query: resources.strong.searchLexicon,
+    query: value => resources.strongLexicon.search(value, resourceLanguage, 200),
     value: searchValue,
     resourceLanguage,
   })
@@ -55,10 +55,16 @@ const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
 
   return (
     <>
-      {lexiqueResults.slice(0, limit).map((strong: LexiqueRow) => {
-        const { Mot, Code } = strong
-        const variant = 'Grec' in strong ? 'grec' : 'hebreu'
-        return <LexiqueResultItem key={Code + Mot} id={Code} title={Mot} variant={variant} />
+      {lexiqueResults.slice(0, limit).map((strong: StrongLexiconSearchResult) => {
+        const variant = strong.language === 'greek' ? 'grec' : 'hebreu'
+        return (
+          <LexiqueResultItem
+            key={`${strong.id}:${strong.stepCode}`}
+            id={strong.stepCode}
+            title={strong.gloss}
+            variant={variant}
+          />
+        )
       })}
       {lexiqueResults.length > limit && (
         <Link onPress={() => setLimit(l => l + 5)}>

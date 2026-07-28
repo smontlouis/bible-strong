@@ -3,47 +3,65 @@ import * as FileSystem from 'expo-file-system/legacy'
 import { isVersionInstalled } from '~helpers/biblesDb'
 import { getDbPath, initLanguageDirs } from '~helpers/databases'
 import { initSQLiteDir } from '~helpers/sqlite'
-import { getLanguage } from '~i18n'
-import type { DatabaseId, ResourceLanguage } from '~helpers/databaseTypes'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { restoreOrphanedResourceBackup } from '~helpers/atomicResourceFile'
+import { createOfflineCopyId, type OfflineCopyIdentity } from '~helpers/offlineCopyId'
+import {
+  getStrongBibleSidecarAvailability,
+  type StrongBibleSidecarAvailability,
+} from '~helpers/strongBibleSidecar'
+import {
+  getInterlinearSidecarAvailability,
+  type InterlinearSidecarAvailability,
+} from '~helpers/interlinearBibleSidecar'
+import {
+  getStrongLexiconModuleAvailability,
+  type StrongLexiconModuleAvailability,
+} from '~helpers/strongLexiconModules'
 
 type FileInfo = {
   exists: boolean
 }
 
-export type BibleResourceRef = {
-  kind: 'bible'
-  versionId: string
-}
-
-export type ResourceDatabaseRef = {
-  kind: 'database'
-  databaseId: DatabaseId
-  lang?: ResourceLanguage
-}
-
-export type LocalResourceRef = BibleResourceRef | ResourceDatabaseRef
+export type LocalResourceRef = OfflineCopyIdentity
 
 export type LocalResourceAvailability =
   | {
       status: 'available'
       resource: LocalResourceRef
-      source: 'bibles-sqlite' | 'database-file'
     }
   | {
       status: 'missing'
       resource: LocalResourceRef
       expectedPath?: string
     }
+  | (Exclude<StrongBibleSidecarAvailability, { status: 'available' | 'missing' }> & {
+      resource: LocalResourceRef
+    })
+  | (Exclude<InterlinearSidecarAvailability, { status: 'available' | 'missing' }> & {
+      resource: LocalResourceRef
+    })
+  | (Exclude<StrongLexiconModuleAvailability, { status: 'available' | 'missing' }> & {
+      resource: LocalResourceRef
+    })
 
 type ResourceAvailabilityDependencies = {
   getFileInfo: (path: string) => Promise<FileInfo>
   initSQLiteDir: () => Promise<unknown>
   initLanguageDirs: (lang: ResourceLanguage) => Promise<unknown>
   isVersionInstalled: (versionId: string) => Promise<boolean>
-  getDbPath: (dbId: DatabaseId, lang: ResourceLanguage) => string
-  getCurrentResourceLanguage: () => ResourceLanguage
+  getDbPath: (
+    dbId: Extract<OfflineCopyIdentity, { kind: 'database' }>['databaseId'],
+    lang: ResourceLanguage
+  ) => string
   restoreBackup?: (path: string) => Promise<void>
+  getStrongBibleAvailability?: (versionId: string) => Promise<StrongBibleSidecarAvailability>
+  getInterlinearAvailability?: (
+    language: ResourceLanguage
+  ) => Promise<InterlinearSidecarAvailability>
+  getStrongLexiconAvailability?: (
+    moduleId: Extract<OfflineCopyIdentity, { kind: 'strong-lexicon-module' }>['moduleId']
+  ) => Promise<StrongLexiconModuleAvailability>
 }
 
 const defaultDependencies: ResourceAvailabilityDependencies = {
@@ -52,25 +70,24 @@ const defaultDependencies: ResourceAvailabilityDependencies = {
   initLanguageDirs,
   isVersionInstalled,
   getDbPath,
-  getCurrentResourceLanguage: () => getLanguage(),
   restoreBackup: path => restoreOrphanedResourceBackup(path, `${path}.backup`),
+  getStrongBibleAvailability: getStrongBibleSidecarAvailability,
+  getInterlinearAvailability: getInterlinearSidecarAvailability,
+  getStrongLexiconAvailability: getStrongLexiconModuleAvailability,
 }
 
-export const getLocalResourceKey = (resource: LocalResourceRef): string => {
-  if (resource.kind === 'bible') {
-    return `bible:${resource.versionId}`
-  }
+export const getLocalResourceKey = (resource: LocalResourceRef): string =>
+  createOfflineCopyId(resource)
 
-  return `database:${resource.databaseId}:${resource.lang ?? 'current'}`
-}
-
-const getBibleDatabaseRef = (versionId: string): ResourceDatabaseRef | null => {
+const getBibleDatabaseRef = (
+  versionId: string
+): Extract<OfflineCopyIdentity, { kind: 'database' }> | null => {
   if (versionId === 'INT') {
-    return { kind: 'database', databaseId: 'INTERLINEAIRE', lang: 'fr' }
+    return { kind: 'database', databaseId: 'INTERLINEAIRE', language: 'fr' }
   }
 
   if (versionId === 'INT_EN') {
-    return { kind: 'database', databaseId: 'INTERLINEAIRE', lang: 'en' }
+    return { kind: 'database', databaseId: 'INTERLINEAIRE', language: 'en' }
   }
 
   return null
@@ -83,8 +100,47 @@ export const getLocalResourceAvailability = async (
   resource: LocalResourceRef,
   dependencies: ResourceAvailabilityDependencies = defaultDependencies
 ): Promise<LocalResourceAvailability> => {
+  if (resource.kind === 'bible-pericope' || resource.kind === 'bible-red-words') {
+    const expectedPath =
+      resource.kind === 'bible-pericope'
+        ? `${FileSystem.documentDirectory}bible-${resource.versionId.toLowerCase()}-pericope.json`
+        : `${FileSystem.documentDirectory}red-words-${resource.versionId}.json`
+    await dependencies.restoreBackup?.(expectedPath)
+    const file = await dependencies.getFileInfo(expectedPath)
+    return file.exists
+      ? { status: 'available', resource }
+      : { status: 'missing', resource, expectedPath }
+  }
+
+  if (resource.kind === 'strong-bible-index') {
+    const availability = await (
+      dependencies.getStrongBibleAvailability ?? getStrongBibleSidecarAvailability
+    )(resource.versionId)
+    return availability.status === 'available'
+      ? { status: 'available', resource }
+      : { ...availability, resource }
+  }
+
+  if (resource.kind === 'interlinear-index') {
+    const availability = await (
+      dependencies.getInterlinearAvailability ?? getInterlinearSidecarAvailability
+    )(resource.language)
+    return availability.status === 'available'
+      ? { status: 'available', resource }
+      : { ...availability, resource }
+  }
+
+  if (resource.kind === 'strong-lexicon-module') {
+    const availability = await (
+      dependencies.getStrongLexiconAvailability ?? getStrongLexiconModuleAvailability
+    )(resource.moduleId)
+    return availability.status === 'available'
+      ? { status: 'available', resource }
+      : { ...availability, resource }
+  }
+
   if (resource.kind === 'database') {
-    const lang = resource.lang ?? dependencies.getCurrentResourceLanguage()
+    const lang = resource.language
     await dependencies.initLanguageDirs(lang)
 
     const expectedPath = dependencies.getDbPath(resource.databaseId, lang)
@@ -94,19 +150,17 @@ export const getLocalResourceAvailability = async (
     if (file.exists) {
       return {
         status: 'available',
-        resource: { ...resource, lang },
-        source: 'database-file',
+        resource,
       }
     }
 
     return {
       status: 'missing',
-      resource: { ...resource, lang },
+      resource,
       expectedPath,
     }
   }
 
-  const currentLang = dependencies.getCurrentResourceLanguage()
   const databaseRef = getBibleDatabaseRef(resource.versionId)
 
   if (databaseRef) {
@@ -115,15 +169,10 @@ export const getLocalResourceAvailability = async (
       return {
         status: 'available',
         resource,
-        source: 'database-file',
       }
     }
 
-    return {
-      status: 'missing',
-      resource,
-      expectedPath: availability.expectedPath,
-    }
+    return { ...availability, resource }
   }
 
   await dependencies.initSQLiteDir()
@@ -135,7 +184,6 @@ export const getLocalResourceAvailability = async (
     return {
       status: 'available',
       resource,
-      source: 'bibles-sqlite',
     }
   }
 

@@ -28,7 +28,7 @@ import type {
 } from '~features/resources/bibleSearchAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { appLogger } from '~helpers/agentObservability'
-import type { LexiqueRow } from '~features/resources/strongAccess'
+import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 import useDebounce from '~helpers/useDebounce'
 import useBibleVerses from '~helpers/useBibleVerses'
 import { removeBreakLines } from '~helpers/utils'
@@ -408,9 +408,17 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       try {
         const result =
           browseItemType === 'strong' && !trimmedSearchValue
-            ? await resources.strong.listLexiconByLetter(strongLetter)
-            : await resources.strong.searchLexicon(trimmedSearchValue)
-        return unwrapDatabaseResult(result)
+            ? await resources.strongLexicon.browseByGlossPrefix(
+                strongLetter,
+                resourcesLanguage.STRONG,
+                500
+              )
+            : await resources.strongLexicon.search(
+                trimmedSearchValue,
+                resourcesLanguage.STRONG,
+                200
+              )
+        return result
       } catch (error) {
         appLogger.error('database', 'search.strong.failed', { error })
         throw error
@@ -420,7 +428,9 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     placeholderData: keepPreviousData,
     ...localQueryOptions,
   })
-  const strongResults: LexiqueRow[] = shouldSearchStrong ? (strongQuery.data ?? []) : []
+  const strongResults: StrongLexiconSearchResult[] = shouldSearchStrong
+    ? (strongQuery.data ?? [])
+    : []
   const isStrongSearching = shouldSearchStrong && strongQuery.isFetching
 
   const shouldSearchDictionary =
