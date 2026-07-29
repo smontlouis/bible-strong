@@ -60,7 +60,7 @@ type BibleVerseLinksScreenProps = {
   withBack?: boolean
 }
 
-type StrongScreenProps =
+type StrongRouteParams =
   | {
       book: number
       reference: string
@@ -163,7 +163,7 @@ export type MainStackProps = {
   Note: NoteScreenProps
   BibleVerseLinks: BibleVerseLinksScreenProps
   Highlights: undefined
-  Strong: StrongScreenProps
+  Strong: StrongRouteParams
   DictionnaireVerseDetail: DictionnaireVerseDetailScreenProps
   ConcordanceByBook: ConcordanceByBookScreenProps
   BibleView: BibleScreenProps

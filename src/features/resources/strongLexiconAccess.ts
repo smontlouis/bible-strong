@@ -36,11 +36,17 @@ export type StrongLexiconEntityRelation = {
   relation: string
   certainty: string
   targetId?: number
+  targetUniqueName?: string
+  targetUStrong?: string
+  targetCategory?: string
+  targetType?: string
   targetName: string
 }
 
 export type StrongLexiconEntity = {
   id: number
+  uniqueName: string
+  uStrong: string
   name: string
   category: string
   type: string
@@ -260,6 +266,53 @@ const loadMorphology = async (
   }
 }
 
+const loadMorphologies = async (
+  database: SQLiteDatabase,
+  codes: string[],
+  language: ResourceLanguage
+): Promise<StrongLexiconMorphology[]> => {
+  const normalizedCodes = [...new Set(codes.map(code => code.trim()).filter(Boolean))]
+  if (!normalizedCodes.length) return []
+
+  const placeholders = normalizedCodes.map(() => '?').join(', ')
+  const rows = await database.getAllAsync<
+    MorphologyRow & { normalizedCode: string; scope: string }
+  >(
+    `SELECT m.code, m.normalizedCode, m.scope, m.meaning, m.description,
+            tr.meaning AS localizedMeaning,
+            tr.description AS localizedDescription
+       FROM MorphologyCodes m
+       LEFT JOIN MorphologyCodeTranslations tr
+         ON tr.morphologyCodeId=m.id AND tr.language=?
+      WHERE m.code IN (${placeholders}) OR m.normalizedCode IN (${placeholders})
+      ORDER BY CASE m.scope
+        WHEN 'tagged_full' THEN 0
+        WHEN 'lexical_brief' THEN 1
+        ELSE 2
+      END, m.id`,
+    [language, ...normalizedCodes, ...normalizedCodes]
+  )
+
+  return normalizedCodes.map(requestedCode => {
+    const row = rows.find(
+      candidate =>
+        candidate.code.toUpperCase() === requestedCode.toUpperCase() ||
+        candidate.normalizedCode.toUpperCase() === requestedCode.toUpperCase()
+    )
+    if (!row) return { code: requestedCode, meaning: requestedCode }
+
+    const meaning = chooseLocalized(language, row.localizedMeaning, row.meaning)
+    const description = chooseLocalized(language, row.localizedDescription, row.description)
+    return {
+      code: requestedCode,
+      meaning,
+      ...(normalizeText(description) !== normalizeText(meaning) && description
+        ? { description }
+        : {}),
+    }
+  })
+}
+
 const loadRelations = async (
   database: SQLiteDatabase,
   entryId: number,
@@ -358,57 +411,31 @@ const loadResources = async (
   return { resources, lsjAbsent }
 }
 
-const loadEntity = async (
-  database: SQLiteDatabase | null,
-  row: CoreEntryRow,
-  language: ResourceLanguage
-): Promise<StrongLexiconEntity | undefined> => {
-  if (!database) return undefined
-  const entity = await database.getFirstAsync<{
-    id: number
-    uStrong: string
-    displayName: string
-    category: string
-    type: string
-    description: string
-    shortDescription: string
-    summaryHtml: string
-    brief: string
-    articleHtml: string
-    localizedDisplayName: string | null
-    localizedDescription: string | null
-    localizedShortDescription: string | null
-    localizedSummaryHtml: string | null
-    localizedBrief: string | null
-    localizedArticleHtml: string | null
-  }>(
-    `SELECT e.*,
-            tr.displayName AS localizedDisplayName,
-            tr.description AS localizedDescription,
-            tr.shortDescription AS localizedShortDescription,
-            tr.summaryHtml AS localizedSummaryHtml,
-            tr.brief AS localizedBrief,
-            tr.articleHtml AS localizedArticleHtml
-       FROM Entities e
-       LEFT JOIN EntityTranslations tr ON tr.entityId=e.id AND tr.language=?
-      WHERE e.uStrong=? OR e.uStrong=?
-         OR (substr(e.uStrong, 1, 1)=? AND CAST(substr(e.uStrong, 2, 4) AS INTEGER)=?
-             AND lower(e.displayName)=lower(?))
-      ORDER BY CASE WHEN e.uStrong=? THEN 0 WHEN e.uStrong=? THEN 1 ELSE 2 END, e.id
-      LIMIT 1`,
-    [
-      language,
-      row.uStrong,
-      row.eStrong,
-      row.language === 'greek' ? 'G' : 'H',
-      row.baseCode,
-      row.gloss,
-      row.uStrong,
-      row.eStrong,
-    ]
-  )
-  if (!entity) return undefined
+type EntityRow = {
+  id: number
+  uniqueName: string
+  uStrong: string
+  displayName: string
+  category: string
+  type: string
+  description: string
+  shortDescription: string
+  summaryHtml: string
+  brief: string
+  articleHtml: string
+  localizedDisplayName: string | null
+  localizedDescription: string | null
+  localizedShortDescription: string | null
+  localizedSummaryHtml: string | null
+  localizedBrief: string | null
+  localizedArticleHtml: string | null
+}
 
+const hydrateEntity = async (
+  database: SQLiteDatabase,
+  entity: EntityRow,
+  language: ResourceLanguage
+): Promise<StrongLexiconEntity> => {
   const [place, relations, references, referenceCount] = await Promise.all([
     database.getFirstAsync<{
       openBibleName: string
@@ -422,11 +449,19 @@ const loadEntity = async (
       relation: string
       certainty: string
       toEntityId: number | null
+      targetUniqueName: string | null
+      targetUStrong: string | null
+      targetCategory: string | null
+      targetType: string | null
       targetName: string | null
       localizedTargetName: string | null
       toUniqueName: string
     }>(
       `SELECT r.relation, r.certainty, r.toEntityId, r.toUniqueName,
+              target.uniqueName AS targetUniqueName,
+              target.uStrong AS targetUStrong,
+              target.category AS targetCategory,
+              target.type AS targetType,
               target.displayName AS targetName,
               tr.displayName AS localizedTargetName
          FROM EntityRelations r
@@ -434,14 +469,13 @@ const loadEntity = async (
          LEFT JOIN EntityTranslations tr ON tr.entityId=target.id AND tr.language=?
         WHERE r.fromEntityId=?
         ORDER BY r.relation, target.displayName
-        LIMIT 20`,
+        LIMIT 60`,
       [language, entity.id]
     ),
     database.getAllAsync<{ refText: string }>(
       `SELECT refText FROM EntityRefs
         WHERE entityId=?
-        ORDER BY book, chapter, verse, suffix
-        LIMIT 30`,
+        ORDER BY book, chapter, verse, suffix`,
       [entity.id]
     ),
     database.getFirstAsync<{ count: number }>(
@@ -452,6 +486,8 @@ const loadEntity = async (
 
   return {
     id: entity.id,
+    uniqueName: entity.uniqueName,
+    uStrong: entity.uStrong,
     name: chooseLocalized(language, entity.localizedDisplayName, entity.displayName),
     category: entity.category,
     type: entity.type,
@@ -481,13 +517,56 @@ const loadEntity = async (
       relation: relation.relation,
       certainty: relation.certainty,
       ...(relation.toEntityId == null ? {} : { targetId: relation.toEntityId }),
+      ...(relation.targetUniqueName || relation.toUniqueName
+        ? { targetUniqueName: relation.targetUniqueName || relation.toUniqueName }
+        : {}),
+      ...(relation.targetUStrong ? { targetUStrong: relation.targetUStrong } : {}),
+      ...(relation.targetCategory ? { targetCategory: relation.targetCategory } : {}),
+      ...(relation.targetType ? { targetType: relation.targetType } : {}),
       targetName:
         chooseLocalized(language, relation.localizedTargetName, relation.targetName ?? '') ||
         relation.toUniqueName,
     })),
     references: references.map(reference => reference.refText),
-    hiddenReferenceCount: Math.max(0, Number(referenceCount?.count ?? 0) - 30),
+    hiddenReferenceCount: Math.max(0, Number(referenceCount?.count ?? 0) - references.length),
   }
+}
+
+const loadEntityForEntry = async (
+  database: SQLiteDatabase | null,
+  row: CoreEntryRow,
+  language: ResourceLanguage
+): Promise<StrongLexiconEntity | undefined> => {
+  if (!database) return undefined
+  const entity = await database.getFirstAsync<EntityRow>(
+    `SELECT e.*,
+            tr.displayName AS localizedDisplayName,
+            tr.description AS localizedDescription,
+            tr.shortDescription AS localizedShortDescription,
+            tr.summaryHtml AS localizedSummaryHtml,
+            tr.brief AS localizedBrief,
+            tr.articleHtml AS localizedArticleHtml
+       FROM Entities e
+       LEFT JOIN EntityTranslations tr ON tr.entityId=e.id AND tr.language=?
+      WHERE e.uStrong=? OR e.uStrong=?
+         OR (substr(e.uStrong, 1, 1)=? AND CAST(substr(e.uStrong, 2, 4) AS INTEGER)=?
+             AND lower(e.displayName)=lower(?))
+      ORDER BY CASE WHEN e.uStrong=? THEN 0 WHEN e.uStrong=? THEN 1 ELSE 2 END, e.id
+      LIMIT 1`,
+    [
+      language,
+      row.uStrong,
+      row.eStrong,
+      row.language === 'greek' ? 'G' : 'H',
+      row.baseCode,
+      row.gloss,
+      row.uStrong,
+      row.eStrong,
+    ]
+  )
+  if (!entity) return undefined
+
+  return hydrateEntity(database, entity, language)
 }
 
 const toEntry = async (
@@ -515,7 +594,9 @@ const toEntry = async (
     includeExtended
       ? loadResources(resourcesDatabase, row.id, language)
       : Promise.resolve({ resources: [], lsjAbsent: false }),
-    includeExtended ? loadEntity(entitiesDatabase, row, language) : Promise.resolve(undefined),
+    includeExtended
+      ? loadEntityForEntry(entitiesDatabase, row, language)
+      : Promise.resolve(undefined),
   ])
   const definitionHtml =
     language === 'fr'
@@ -564,6 +645,14 @@ export type StrongLexiconAccess = {
     identities: StrongIdentity[],
     language: ResourceLanguage
   ) => Promise<StrongLexiconEntry[]>
+  loadMorphologies: (
+    codes: string[],
+    language: ResourceLanguage
+  ) => Promise<StrongLexiconMorphology[]>
+  loadEntity: (
+    uniqueName: string,
+    language: ResourceLanguage
+  ) => Promise<StrongLexiconEntity | undefined>
   search: (
     query: string,
     language: ResourceLanguage,
@@ -642,6 +731,31 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
     return previews
   },
 
+  async loadEntity(uniqueName, language) {
+    const availability = await getStrongLexiconModuleAvailability('entities')
+    if (availability.status !== 'available') return undefined
+    const database = await getOptionalStrongLexiconDatabase('entities')
+    if (!database) return undefined
+
+    const entity = await database.getFirstAsync<EntityRow>(
+      `SELECT e.*,
+              tr.displayName AS localizedDisplayName,
+              tr.description AS localizedDescription,
+              tr.shortDescription AS localizedShortDescription,
+              tr.summaryHtml AS localizedSummaryHtml,
+              tr.brief AS localizedBrief,
+              tr.articleHtml AS localizedArticleHtml
+         FROM Entities e
+         LEFT JOIN EntityTranslations tr ON tr.entityId=e.id AND tr.language=?
+        WHERE e.uniqueName=?
+        LIMIT 1`,
+      [language, uniqueName]
+    )
+    if (!entity) return undefined
+
+    return hydrateEntity(database, entity, language)
+  },
+
   async loadEntry(identity, language) {
     const core = await getStrongLexiconDatabase('core')
     const row = await resolveCoreEntry(core, identity, language)
@@ -653,6 +767,11 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
       identities.map(identity => localStrongLexiconAccess.loadEntry(identity, language))
     )
     return entries.filter((entry): entry is StrongLexiconEntry => Boolean(entry))
+  },
+
+  async loadMorphologies(codes, language) {
+    const core = await getStrongLexiconDatabase('core')
+    return loadMorphologies(core, codes, language)
   },
 
   async search(query, language, limit = 100) {

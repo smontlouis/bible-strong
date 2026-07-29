@@ -69,14 +69,21 @@ type AppScrollViewProps = ScrollViewProps & {
   children: React.ReactNode
   backgroundColor?: string
   contentContainerStyle?: StyleProp<ViewStyle>
+  ref?: React.Ref<React.ComponentRef<typeof ScrollView>>
 }
 
-const AppScrollView = ({ children, contentContainerStyle = {}, ...props }: AppScrollViewProps) => {
+const AppScrollView = ({
+  children,
+  contentContainerStyle = {},
+  ref,
+  ...props
+}: AppScrollViewProps) => {
   const orientation = useDeviceOrientation()
   const insets = useSafeAreaInsets()
 
   return (
     <ScrollView
+      ref={ref}
       {...props}
       orientation={orientation}
       contentContainerStyle={{

@@ -706,7 +706,11 @@ Routes: `/faq`, `/support`, `/changelog`.
 | `/bookmarks` | `BookmarksScreen` | Favoris bibliques. |
 | `/history` | `HistoryScreen` | Historique de navigation Bible. |
 | `/pericope` | `PericopeScreen` | Sections/péricopes bibliques. |
-| `/strong` | `StrongScreen` | Détail Strong. |
+| `/strong` | `StrongDetailScreen` | Détail d'une entrée Strong. |
+| `/strong/entity` | `StrongEntityPage` | Entité biblique liée à une entrée Strong. |
+| `/strong/dictionary` | `StrongDictionaryPage` | Notice détaillée du dictionnaire grec. |
+| `/strong/related` | `StrongRelatedPage` | Mots et identités lexicales liés. |
+| `/strong/concordance` | `StrongConcordancePage` | Concordance complète d'une entrée Strong. |
 | `/lexique` | `LexiqueScreen` | Lexique Strong. |
 | `/concordance` | `ConcordanceScreen` | Concordance Strong. |
 | `/concordance-by-book` | `ConcordanceByBookScreen` | Concordance par livre. |

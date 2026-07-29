@@ -116,6 +116,7 @@ export interface StrongTab extends TabBase {
     clickedWord?: string
     bibleChapter?: number
     bibleVerse?: number
+    morphologyCodes?: string[]
   }
 }
 

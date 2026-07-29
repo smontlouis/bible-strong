@@ -151,4 +151,115 @@ describe('strongLexiconAccess', () => {
       ['fr', 'S%', 25]
     )
   })
+
+  it('loads the full localized morphology for the selected verse token', async () => {
+    const database = createDatabase()
+    database.getAllAsync.mockResolvedValue([
+      {
+        code: 'N-NPM-T',
+        normalizedCode: 'N-NPM-T',
+        scope: 'tagged_full',
+        meaning: 'Noun Nominative Plural Masculine Title',
+        description: 'Full English description',
+        localizedMeaning: 'Nom, nominatif, masculin, pluriel, titre',
+        localizedDescription:
+          'Fonction : nom; Cas : nominatif; Genre : masculin; Nombre : pluriel.',
+      },
+    ])
+    mockGetStrongLexiconDatabase.mockResolvedValue(database as unknown as SQLiteDatabase)
+
+    await expect(localStrongLexiconAccess.loadMorphologies(['N-NPM-T'], 'fr')).resolves.toEqual([
+      {
+        code: 'N-NPM-T',
+        meaning: 'Nom, nominatif, masculin, pluriel, titre',
+        description: 'Fonction : nom; Cas : nominatif; Genre : masculin; Nombre : pluriel.',
+      },
+    ])
+    expect(database.getAllAsync).toHaveBeenCalledWith(
+      expect.stringContaining("WHEN 'tagged_full' THEN 0"),
+      ['fr', 'N-NPM-T', 'N-NPM-T']
+    )
+  })
+
+  it('loads a Biblical entity by its durable unique name with navigable relations', async () => {
+    const entitiesDatabase = {
+      getFirstAsync: jest.fn(async (sql: string) => {
+        if (sql.includes('FROM Entities e')) {
+          return {
+            id: 2321,
+            uniqueName: 'Peter@Matt.4.18',
+            uStrong: 'G4074G',
+            displayName: 'Peter',
+            category: 'person',
+            type: 'Male',
+            description: 'Apostle',
+            shortDescription: 'One of the twelve apostles',
+            summaryHtml: '',
+            brief: 'Apostle of Jesus',
+            articleHtml: '',
+            localizedDisplayName: 'Pierre',
+            localizedDescription: 'Apôtre',
+            localizedShortDescription: 'Un des douze apôtres',
+            localizedSummaryHtml: '',
+            localizedBrief: 'Apôtre de Jésus',
+            localizedArticleHtml: '',
+          }
+        }
+        if (sql.includes('EntityPlaces')) return null
+        if (sql.includes('COUNT(*)')) return { count: 1 }
+        return null
+      }),
+      getAllAsync: jest.fn(async (sql: string) => {
+        if (sql.includes('EntityRelations')) {
+          return [
+            {
+              relation: 'sibling',
+              certainty: 'asserted',
+              toEntityId: 114,
+              targetUniqueName: 'Andrew@Matt.4.18',
+              targetUStrong: 'G0406',
+              targetCategory: 'person',
+              targetType: 'Male',
+              targetName: 'Andrew',
+              localizedTargetName: 'André',
+              toUniqueName: 'Andrew@Matt.4.18',
+            },
+          ]
+        }
+        if (sql.includes('EntityRefs')) return [{ refText: 'Matt.4.18' }]
+        return []
+      }),
+    }
+    mockGetStrongLexiconModuleAvailability.mockResolvedValue({
+      status: 'available',
+      moduleId: 'entities',
+      schemaVersion: 1,
+    })
+    mockGetOptionalStrongLexiconDatabase.mockResolvedValue(
+      entitiesDatabase as unknown as SQLiteDatabase
+    )
+
+    await expect(localStrongLexiconAccess.loadEntity('Peter@Matt.4.18', 'fr')).resolves.toEqual(
+      expect.objectContaining({
+        uniqueName: 'Peter@Matt.4.18',
+        uStrong: 'G4074G',
+        name: 'Pierre',
+        category: 'person',
+        relations: [
+          expect.objectContaining({
+            relation: 'sibling',
+            targetName: 'André',
+            targetUniqueName: 'Andrew@Matt.4.18',
+            targetUStrong: 'G0406',
+            targetCategory: 'person',
+            targetType: 'Male',
+          }),
+        ],
+      })
+    )
+    expect(entitiesDatabase.getFirstAsync).toHaveBeenCalledWith(
+      expect.stringContaining('WHERE e.uniqueName=?'),
+      ['fr', 'Peter@Matt.4.18']
+    )
+  })
 })

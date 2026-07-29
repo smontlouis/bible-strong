@@ -26,6 +26,7 @@ const Header = ({
   title,
   detail,
   subTitle,
+  fontSize = 16,
   onTitlePress,
   rightComponent,
   onCustomBackPress,
@@ -47,11 +48,11 @@ const Header = ({
         )}
         <VStack flex pl={hasBackButton ? 0 : 20}>
           <HStack>
-            <Text numberOfLines={1} bold fontSize={16} onPress={onTitlePress} shrink={1}>
+            <Text numberOfLines={1} bold fontSize={fontSize} onPress={onTitlePress} shrink={1}>
               {title}
             </Text>
             {!!detail && (
-              <Text numberOfLines={1} bold fontSize={16} color="grey" shrink={1}>
+              <Text numberOfLines={1} bold fontSize={fontSize} color="grey" shrink={1}>
                 {` ${detail}`}
               </Text>
             )}

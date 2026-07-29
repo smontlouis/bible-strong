@@ -3,31 +3,26 @@ import { produce } from 'immer'
 import { useAtom, useSetAtom } from 'jotai/react'
 import type { PrimitiveAtom } from 'jotai/vanilla'
 import React, { useEffect, useRef, useState } from 'react'
-import { Alert, Linking, Share, TouchableOpacity } from 'react-native'
+import { Alert, Share } from 'react-native'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { useRouter } from 'expo-router'
 
 import Empty from '~common/Empty'
-import EntityChipList from '~common/EntityChipList'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
-import StylizedHTMLView from '~common/StylizedHTMLView'
-import Box, { HStack, VStack } from '~common/ui/Box'
+import Box, { VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
-import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
-import ConcordanceVerse from '~features/bible/ConcordanceVerse'
-import ListenToStrong from '~features/bible/ListenStrong'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
-import StrongLexiconModuleCard from './StrongLexiconModuleCard'
-import { useRelationCount } from '~features/studyRelations/useRelationCount'
+import type {
+  StrongLexiconEntry,
+  StrongLexiconEntityRelation,
+} from '~features/resources/strongLexiconAccess'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { createStrongEndpoint } from '~features/studyRelations/endpoints'
 import type { StrongReference, Verse } from '~common/types'
@@ -42,18 +37,32 @@ import {
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
 import { getBook } from '~helpers/bibleBookCatalog'
+import verseToReference from '~helpers/verseToReference'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { RootState } from '~redux/modules/reducer'
-import { makeStrongTagsSelector } from '~redux/selectors/bible'
 import { historyAtom, unifiedTagsModalAtom } from '~state/app'
 import type { StrongTab } from '../../state/tabs'
+import StrongConcordancePage from './StrongConcordancePage'
+import StrongDetailMainPage from './StrongDetailMainPage'
+import type { StrongDetailPage, StrongDetailRouteContext } from './strongDetailRoutes'
+import { createStrongDetailRoute } from './strongDetailRoutes'
+import StrongDictionaryPage from './StrongDictionaryPage'
+import StrongEntityPage from './StrongEntityPage'
+import StrongRelatedPage from './StrongRelatedPage'
 import { useStrongLexiconLanguage } from './useStrongLexiconLanguage'
-import { resolveRelatedStrongNavigation } from './strongDetailNavigation'
+import { getBibleViewRouteForStrongOsisReference } from './strongReferenceNavigation'
 
 interface StrongDetailScreenProps {
   strongAtom: PrimitiveAtom<StrongTab>
   isFormSheet?: boolean
+  initialPage?: StrongDetailPage
+}
+
+type StrongNavigationNode = {
+  page: StrongDetailPage
+  context: StrongDetailRouteContext
+  entityKey?: string
 }
 
 const stripHtml = (value: string): string =>
@@ -72,7 +81,7 @@ const normalizeIdentity = ({
   reference,
   strongReference,
   book,
-}: StrongTab['data']): StrongIdentity | undefined => {
+}: StrongDetailRouteContext): StrongIdentity | undefined => {
   const rawCode = identityCode || reference || strongReference?.Code
   if (!rawCode) return undefined
   const normalized = String(rawCode).trim().toUpperCase()
@@ -99,27 +108,34 @@ const toLegacyStrongReference = (entry: StrongLexiconEntry): StrongReference => 
   book: entry.language === 'hebrew' ? '1' : '40',
 })
 
-const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <VStack gap={8} mt={24}>
-    <Text bold fontSize={17}>
-      {title}
-    </Text>
-    {children}
-  </VStack>
-)
-
-const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScreenProps) => {
-  const router = useRouter()
+const StrongDetailScreen = ({
+  strongAtom,
+  isFormSheet = false,
+  initialPage = 'index',
+}: StrongDetailScreenProps) => {
   const pushRouteOnce = usePushRouteOnce()
   const [strongTab, setStrongTab] = useAtom(strongAtom)
-  const [selectedLemmaId, setSelectedLemmaId] = useState<number>()
+  const [navigationStack, setNavigationStack] = useState<StrongNavigationNode[]>([
+    {
+      page: initialPage,
+      context: strongTab.data,
+    },
+  ])
+  const activeNode = navigationStack.at(-1)!
+  const activeContext = activeNode.context
+  const identity = normalizeIdentity(activeContext)
+  const navigationKey = identity ? `${identity.kind}:${identity.code}` : 'unknown'
+  const [lemmaSelection, setLemmaSelection] = useState<{
+    navigationKey: string
+    lemmaId?: number
+  }>({ navigationKey })
+  const selectedLemmaId =
+    lemmaSelection.navigationKey === navigationKey ? lemmaSelection.lemmaId : undefined
   const resources = useResourceAccess()
   const { isInTab } = useTabContext()
   const canGoBackInStack = useCanGoBackInStack()
-  const hasBackButton = isFormSheet ? canGoBackInStack : !isInTab
   const {
     language: resourceLanguage,
-    languageLabel: resourceLanguageLabel,
     menuTitle: strongLanguageMenuTitle,
     toggleLanguage: toggleStrongLanguage,
   } = useStrongLexiconLanguage()
@@ -129,18 +145,10 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
   const openInNewTab = useOpenInNewTab()
   const { t } = useTranslation()
   const historyDataUpdatedAtRef = useRef(0)
-  const {
-    strongBibleVersionId: requestedStrongBibleVersionId,
-    bibleVersion,
-    clickedWord,
-    book: clickedBook,
-    bibleChapter,
-    bibleVerse,
-  } = strongTab.data
-  const identity = normalizeIdentity(strongTab.data)
   const defaultStrongBibleVersionId = useSelector(
     (state: RootState) => state.user.bible.settings.defaultStrongBibleVersionId ?? 'LSG'
   )
+  const readingFontFamily = useSelector((state: RootState) => state.user.fontFamily)
   const coreDownload = useDownloadItemStatus(
     createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'core' })
   )
@@ -158,15 +166,16 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
   const entry = entryQuery.data
   const legacyEntry = entry ? toLegacyStrongReference(entry) : undefined
   const currentStrongBibleVersionId: StrongBibleVersionId =
-    bibleVersion && isStrongCapableBibleVersion(bibleVersion)
-      ? bibleVersion
-      : requestedStrongBibleVersionId && isStrongCapableBibleVersion(requestedStrongBibleVersionId)
-        ? requestedStrongBibleVersionId
+    activeContext.bibleVersion && isStrongCapableBibleVersion(activeContext.bibleVersion)
+      ? activeContext.bibleVersion
+      : activeContext.strongBibleVersionId &&
+          isStrongCapableBibleVersion(activeContext.strongBibleVersionId)
+        ? activeContext.strongBibleVersionId
         : defaultStrongBibleVersionId
   const concordanceQuery = useQuery({
     queryKey: [
-      'strong-lexicon',
-      'concordance',
+      'strong-detail',
+      'concordance-preview',
       currentStrongBibleVersionId,
       entry?.selectedIdentity,
       selectedLemmaId,
@@ -177,7 +186,7 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
         defaultVersionId: defaultStrongBibleVersionId,
         book: entry?.language === 'hebrew' ? 1 : 40,
         reference: entry!.selectedIdentity.code,
-        limit: 20,
+        limit: 3,
         offset: 0,
         allBooks: true,
         lexemeId: selectedLemmaId,
@@ -201,12 +210,6 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
             : countsResult.status === 'available'
               ? countsResult.provenance.versionId
               : currentStrongBibleVersionId,
-        identity:
-          versesResult.status === 'available'
-            ? versesResult.identity
-            : countsResult.status === 'available'
-              ? countsResult.identity
-              : undefined,
       }
     },
     enabled: Boolean(entry),
@@ -214,7 +217,7 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
   })
   const lemmaStatsQuery = useQuery({
     queryKey: [
-      'strong-lexicon',
+      'strong-detail',
       'lemma-stats',
       currentStrongBibleVersionId,
       entry?.selectedIdentity,
@@ -229,12 +232,64 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
     enabled: Boolean(entry),
     networkMode: 'always',
   })
-
+  const contextVerseQuery = useQuery({
+    queryKey: [
+      'strong-detail',
+      'verse-context',
+      activeContext.bibleVersion,
+      activeContext.book,
+      activeContext.bibleChapter,
+      activeContext.bibleVerse,
+    ],
+    queryFn: () =>
+      resources.strongBible.loadVerse({
+        currentVersionId: currentStrongBibleVersionId,
+        defaultVersionId: defaultStrongBibleVersionId,
+        book: activeContext.book!,
+        chapter: activeContext.bibleChapter!,
+        verse: activeContext.bibleVerse!,
+      }),
+    enabled: Boolean(
+      activeContext.bibleVersion &&
+      activeContext.book &&
+      activeContext.bibleChapter &&
+      activeContext.bibleVerse
+    ),
+    networkMode: 'always',
+  })
+  const contextMorphologiesQuery = useQuery({
+    queryKey: [
+      'strong-detail',
+      'context-morphologies',
+      resourceLanguage,
+      activeContext.morphologyCodes,
+    ],
+    queryFn: () =>
+      resources.strongLexicon.loadMorphologies(
+        activeContext.morphologyCodes ?? [],
+        resourceLanguage
+      ),
+    enabled: Boolean(
+      activeContext.morphologyCodes?.length && coreAvailability.data?.status === 'available'
+    ),
+    networkMode: 'always',
+  })
+  const directEntityQuery = useQuery({
+    queryKey: ['strong-lexicon', 'entity', resourceLanguage, activeNode.entityKey],
+    queryFn: () => resources.strongLexicon.loadEntity(activeNode.entityKey!, resourceLanguage),
+    enabled: Boolean(
+      activeNode.page === 'entity' &&
+      activeNode.entityKey &&
+      activeNode.entityKey !== entry?.entity?.uniqueName
+    ),
+    networkMode: 'always',
+  })
+  const activeEntity = activeNode.entityKey
+    ? activeNode.entityKey === entry?.entity?.uniqueName
+      ? entry.entity
+      : directEntityQuery.data
+    : entry?.entity
   const code = entry ? String(entry.baseCode) : ''
-  const selectStrongTags = makeStrongTagsSelector()
-  const tags = useSelector((state: RootState) =>
-    selectStrongTags(state, code, entry?.language === 'greek')
-  )
   const strongEndpoint = entry
     ? createStrongEndpoint({
         language: entry.language,
@@ -243,7 +298,6 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
         originalWord: entry.original,
       })
     : null
-  const relationCount = useRelationCount(strongEndpoint)
 
   useEffect(() => {
     if (!entry || historyDataUpdatedAtRef.current === entryQuery.dataUpdatedAt) return
@@ -265,44 +319,80 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
     )
   }, [entry, setStrongTab])
 
-  const goBack = () => {
+  const openPage = (
+    page: Exclude<StrongDetailPage, 'index'>,
+    options: { entityKey?: string } = {}
+  ) => {
     if (isInTab) {
-      setStrongTab(
-        produce(draft => {
-          draft.title = t('Lexique')
-          draft.data = {}
-        })
-      )
-    } else {
-      router.back()
-    }
-  }
-
-  const selectRelatedEntry = (stepCode: string) => {
-    const navigation = resolveRelatedStrongNavigation({
-      isInTab,
-      stepCode,
-      strongBibleVersionId: requestedStrongBibleVersionId,
-      bibleVersion,
-    })
-
-    if (navigation.mode === 'update-tab') {
-      setStrongTab(
-        produce(draft => {
-          draft.data.book = navigation.identity.book
-          draft.data.identityKind = navigation.identity.identityKind
-          draft.data.identityCode = navigation.identity.identityCode
-          draft.data.reference = navigation.identity.reference
-          draft.data.strongReference = undefined
-          draft.data.clickedWord = undefined
-          draft.data.bibleChapter = undefined
-          draft.data.bibleVerse = undefined
-        })
-      )
+      setNavigationStack(stack => [...stack, { page, context: activeContext, ...options }])
       return
     }
+    pushRouteOnce(
+      createStrongDetailRoute(page, activeContext, {
+        ...options,
+      })
+    )
+  }
 
-    pushRouteOnce(navigation.route)
+  const openStrong = (stepCode: string) => {
+    const context: StrongDetailRouteContext = {
+      book: stepCode.startsWith('G') ? 40 : 1,
+      identityKind: 'dstrong',
+      identityCode: stepCode,
+      reference: stepCode,
+      strongBibleVersionId: activeContext.strongBibleVersionId,
+      bibleVersion: activeContext.bibleVersion,
+    }
+    if (isInTab) {
+      setNavigationStack(stack => [...stack, { page: 'index', context }])
+      return
+    }
+    pushRouteOnce(createStrongDetailRoute('index', context))
+  }
+
+  const goBackInTab = () => {
+    if (navigationStack.length > 1) {
+      setNavigationStack(stack => stack.slice(0, -1))
+      return
+    }
+    if (activeNode.page !== 'index') {
+      setNavigationStack([{ page: 'index', context: activeContext }])
+      return
+    }
+    setStrongTab(
+      produce(draft => {
+        draft.title = t('Lexique')
+        draft.data = {}
+      })
+    )
+  }
+
+  const openBibleReference = (osis: string) => {
+    const route = getBibleViewRouteForStrongOsisReference(osis)
+    if (route) pushRouteOnce(route)
+  }
+
+  const openConcordanceVerse = (verse: Verse, version?: string) => {
+    const bookNumber = Number(verse.Livre)
+    const verseNumber = Number(verse.Verset)
+    const resolvedVersion = version ?? concordanceQuery.data?.version
+    pushRouteOnce({
+      pathname: '/bible-view',
+      params: {
+        contextDisplayMode: 'focused',
+        book: JSON.stringify(getBook(bookNumber)),
+        chapter: String(verse.Chapitre),
+        verse: String(verseNumber),
+        focusVerses: JSON.stringify([verseNumber]),
+        version: resolvedVersion,
+        strongMode: 'visible',
+      },
+    })
+  }
+
+  const openEntityRelation = (relation: StrongLexiconEntityRelation) => {
+    if (!relation.targetUniqueName) return
+    openPage('entity', { entityKey: relation.targetUniqueName })
   }
 
   const requestCoreDownload = () => {
@@ -319,23 +409,6 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
         },
       ]
     )
-  }
-
-  const openConcordanceVerse = (verse: Verse) => {
-    const bookNumber = Number(verse.Livre)
-    const verseNumber = Number(verse.Verset)
-    pushRouteOnce({
-      pathname: '/bible-view',
-      params: {
-        contextDisplayMode: 'focused',
-        book: JSON.stringify(getBook(bookNumber)),
-        chapter: String(verse.Chapitre),
-        verse: String(verseNumber),
-        focusVerses: JSON.stringify([verseNumber]),
-        version: concordanceQuery.data?.version,
-        strongMode: 'visible',
-      },
-    })
   }
 
   const shareEntry = () => {
@@ -367,11 +440,11 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
       isRemovable: true,
       type: 'strong',
       data: {
+        ...activeContext,
         book: entry.language === 'hebrew' ? 1 : 40,
         reference: entry.stepCode,
         identityKind: 'dstrong',
         identityCode: entry.stepCode,
-        bibleVersion,
       },
     })
   }
@@ -380,11 +453,18 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
     coreDownload?.status === 'queued' ||
     coreDownload?.status === 'downloading' ||
     coreDownload?.status === 'inserting'
+  const hasMainBackButton = isFormSheet ? canGoBackInStack : !isInTab
+  const hasBackButton = activeNode.page !== 'index' || hasMainBackButton
+
   if (coreAvailability.isPending || (coreAvailability.data?.status === 'available' && !entry)) {
     if (entryQuery.isError) {
       return (
         <FormSheetScreen isFormSheet={isFormSheet}>
-          <Header hasBackButton={hasBackButton} onCustomBackPress={goBack} title={t('Lexique')} />
+          <Header
+            hasBackButton={hasBackButton}
+            onCustomBackPress={isInTab ? goBackInTab : undefined}
+            title={t('Lexique')}
+          />
           <Empty
             source={require('~assets/images/empty.json')}
             message={t("Cette entrée Strong n'a pas pu être chargée.")}
@@ -394,7 +474,11 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
     }
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
-        <Header hasBackButton={hasBackButton} onCustomBackPress={goBack} title={t('Lexique')} />
+        <Header
+          hasBackButton={hasBackButton}
+          onCustomBackPress={isInTab ? goBackInTab : undefined}
+          title={t('Lexique')}
+        />
         <Loading message={t('Chargement...')} />
       </FormSheetScreen>
     )
@@ -403,7 +487,11 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
   if (coreAvailability.data?.status !== 'available') {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
-        <Header hasBackButton={hasBackButton} onCustomBackPress={goBack} title={t('Lexique')} />
+        <Header
+          hasBackButton={hasBackButton}
+          onCustomBackPress={isInTab ? goBackInTab : undefined}
+          title={t('Lexique')}
+        />
         <VStack flex px={20} center gap={16}>
           <FeatherIcon name="book-open" size={34} color="default" />
           <Text bold fontSize={20} textAlign="center">
@@ -425,7 +513,11 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
   if (!entry || !legacyEntry) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
-        <Header hasBackButton={hasBackButton} onCustomBackPress={goBack} title={t('Lexique')} />
+        <Header
+          hasBackButton={hasBackButton}
+          onCustomBackPress={isInTab ? goBackInTab : undefined}
+          title={t('Lexique')}
+        />
         <Empty
           source={require('~assets/images/empty.json')}
           message={t('Aucune entrée lexicale trouvée pour {{code}}.', {
@@ -436,407 +528,138 @@ const StrongDetailScreen = ({ strongAtom, isFormSheet = false }: StrongDetailScr
     )
   }
 
-  const definitionFallback = t('strongLexicon.definitionUnavailable', {
-    language: resourceLanguageLabel,
-  })
-  const relationGroups = [
-    {
-      id: 'subentry' as const,
-      title: t('strongLexicon.otherMeanings'),
-    },
-    {
-      id: 'identity' as const,
-      title: t('strongLexicon.variants'),
-    },
-    {
-      id: 'family' as const,
-      title: t('strongLexicon.wordFamily'),
-    },
-  ]
+  const pageTitles: Record<StrongDetailPage, string> = {
+    index: t('strongDetail.title'),
+    entity: activeEntity?.name ?? t('strongDetail.entity.title'),
+    dictionary: t('strongLexicon.greekDictionary'),
+    related: t('strongDetail.related.title'),
+    concordance: t('Concordance'),
+  }
+  const contextVerse =
+    contextVerseQuery.data?.status === 'available' ? contextVerseQuery.data.verse : undefined
+  const contextReference =
+    activeContext.book && activeContext.bibleChapter && activeContext.bibleVerse
+      ? verseToReference({
+          bookNum: activeContext.book,
+          chapterNum: activeContext.bibleChapter,
+          verses: [activeContext.bibleVerse],
+        })
+      : undefined
+  const lemmaStats = lemmaStatsQuery.data?.status === 'available' ? lemmaStatsQuery.data.lemmas : []
+  const menu = (
+    <MenuView
+      actions={
+        [
+          { id: 'language', title: strongLanguageMenuTitle, image: 'globe' },
+          { id: 'tags', title: t('Étiquettes'), image: 'tag' },
+          strongEndpoint
+            ? {
+                id: 'relations',
+                title: t('Éditer les relations'),
+                image: 'arrow.triangle.merge',
+              }
+            : null,
+          { id: 'share', title: t('Partager'), image: 'square.and.arrow.up' },
+          {
+            id: 'open-tab',
+            title: t('tab.openInNewTab'),
+            image: 'arrow.up.forward.square',
+          },
+        ].filter(Boolean) as MenuAction[]
+      }
+      onPressAction={({ nativeEvent }) => {
+        if (nativeEvent.event === 'language') toggleStrongLanguage()
+        if (nativeEvent.event === 'tags') openTags()
+        if (nativeEvent.event === 'relations' && strongEndpoint) {
+          openEntityRelations(strongEndpoint)
+        }
+        if (nativeEvent.event === 'share') shareEntry()
+        if (nativeEvent.event === 'open-tab') openStrongInNewTab()
+      }}
+    >
+      <Box row center height={60} width={60}>
+        <FeatherIcon name="more-vertical" size={18} />
+      </Box>
+    </MenuView>
+  )
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
       <Header
         hasBackButton={hasBackButton}
-        onCustomBackPress={goBack}
-        title={entry.gloss}
-        detail={`${entry.stepCode} · ${entry.transliteration}`}
-        rightComponent={
-          <MenuView
-            actions={
-              [
-                {
-                  id: 'language',
-                  title: strongLanguageMenuTitle,
-                  image: 'globe',
-                },
-                { id: 'tags', title: t('Étiquettes'), image: 'tag' },
-                strongEndpoint
-                  ? {
-                      id: 'relations',
-                      title: t('Éditer les relations'),
-                      image: 'arrow.triangle.merge',
-                    }
-                  : null,
-                { id: 'share', title: t('Partager'), image: 'square.and.arrow.up' },
-                {
-                  id: 'open-tab',
-                  title: t('tab.openInNewTab'),
-                  image: 'arrow.up.forward.square',
-                },
-              ].filter(Boolean) as MenuAction[]
-            }
-            onPressAction={({ nativeEvent }) => {
-              switch (nativeEvent.event) {
-                case 'tags':
-                  openTags()
-                  break
-                case 'share':
-                  shareEntry()
-                  break
-                case 'relations':
-                  if (strongEndpoint) openEntityRelations(strongEndpoint)
-                  break
-                case 'open-tab':
-                  openStrongInNewTab()
-                  break
-                case 'language':
-                  toggleStrongLanguage()
-                  break
-              }
-            }}
-          >
-            <Box row center height={60} width={60}>
-              <FeatherIcon name="more-vertical" size={18} />
-            </Box>
-          </MenuView>
+        onCustomBackPress={isInTab ? goBackInTab : undefined}
+        title={pageTitles[activeNode.page]}
+        fontSize={activeNode.page === 'index' ? 19 : undefined}
+        subTitle={
+          activeNode.page === 'index'
+            ? `${t(entry.language === 'greek' ? 'Grec' : 'Hébreu')} · ${entry.stepCode}`
+            : undefined
         }
+        rightComponent={menu}
       />
-      <ScrollView style={{ paddingHorizontal: 20, flex: 1 }}>
-        <VStack pb={40}>
-          <VStack bg="lightGrey" borderRadius={14} px={14} py={13} gap={8}>
-            {!!(bibleVersion || requestedStrongBibleVersionId) && (
-              <HStack justifyContent="space-between" gap={12}>
-                <Text color="tertiary">{t('Version')}</Text>
-                <Text bold>{bibleVersion || requestedStrongBibleVersionId}</Text>
-              </HStack>
-            )}
-            {!!clickedWord && (
-              <HStack justifyContent="space-between" gap={12}>
-                <Text color="tertiary">
-                  {bibleChapter && bibleVerse
-                    ? `${getBook(clickedBook ?? 0)?.Nom ?? ''} ${bibleChapter}:${bibleVerse}`.trim()
-                    : t('strongLexicon.selectedWord')}
-                </Text>
-                <Text bold>{clickedWord}</Text>
-              </HStack>
-            )}
-            <HStack justifyContent="space-between" gap={12}>
-              <Text color="tertiary">{entry.selectedIdentity.kind}</Text>
-              <Text bold>{entry.selectedIdentity.code}</Text>
-            </HStack>
-          </VStack>
 
-          {(tags || relationCount > 0) && (
-            <Box mt={14}>
-              <EntityChipList
-                tags={tags}
-                relationCount={relationCount}
-                onRelationPress={() => strongEndpoint && openEntityRelations(strongEndpoint)}
-              />
-            </Box>
-          )}
-
-          <Section title={t('strongLexicon.wordAndIdentity')}>
-            <VStack gap={6}>
-              <Text fontSize={27}>{entry.original}</Text>
-              <Text fontSize={16} color="tertiary">
-                {entry.transliteration}
-                {entry.pronunciation ? ` · ${entry.pronunciation}` : ''}
-              </Text>
-              <HStack gap={8} wrap alignItems="center">
-                <Box bg="lightPrimary" borderRadius={12} px={9} py={5}>
-                  <Text bold>{entry.stepCode}</Text>
-                </Box>
-                {entry.classicStrong !== entry.stepCode && (
-                  <Box bg="opacity5" borderRadius={12} px={9} py={5}>
-                    <Text>{entry.classicStrong}</Text>
-                  </Box>
-                )}
-                <ListenToStrong
-                  type={entry.language === 'hebrew' ? 'hebreu' : 'grec'}
-                  code={entry.baseCode}
-                />
-              </HStack>
-            </VStack>
-          </Section>
-
-          <Section title={t('Définition')}>
-            {entry.definitionHtml ? (
-              <StylizedHTMLView value={entry.definitionHtml} />
-            ) : (
-              <Text color="tertiary">{definitionFallback}</Text>
-            )}
-          </Section>
-
-          {entry.entity ? (
-            <Section title={t('strongLexicon.biblicalContext')}>
-              <VStack bg="lightGrey" borderRadius={14} px={14} py={14} gap={9}>
-                <Text bold fontSize={19}>
-                  {entry.entity.name}
-                </Text>
-                {!!entry.entity.description && <Text>{entry.entity.description}</Text>}
-                {!!entry.entity.shortDescription && <Text>{entry.entity.shortDescription}</Text>}
-                {!!entry.entity.summaryHtml && (
-                  <StylizedHTMLView value={entry.entity.summaryHtml} />
-                )}
-                {!!entry.entity.brief && <Text>{entry.entity.brief}</Text>}
-                {!!entry.entity.articleHtml && (
-                  <StylizedHTMLView value={entry.entity.articleHtml} />
-                )}
-                {!!entry.entity.place && (
-                  <VStack gap={6}>
-                    <Text bold>{entry.entity.place.name}</Text>
-                    {!!entry.entity.place.area && (
-                      <Text color="tertiary">{entry.entity.place.area}</Text>
-                    )}
-                    {entry.entity.place.latitude != null &&
-                      entry.entity.place.longitude != null && (
-                        <Text color="tertiary" fontSize={12}>
-                          {entry.entity.place.latitude}, {entry.entity.place.longitude}
-                        </Text>
-                      )}
-                    <HStack gap={8} wrap>
-                      {!!entry.entity.place.googleMapUrl && (
-                        <TouchableOpacity
-                          onPress={() => Linking.openURL(entry.entity!.place!.googleMapUrl!)}
-                        >
-                          <Text color="primary" fontSize={12}>
-                            {t('Google Maps')}
-                          </Text>
-                        </TouchableOpacity>
-                      )}
-                      {!!entry.entity.place.palopenmapsUrl && (
-                        <TouchableOpacity
-                          onPress={() => Linking.openURL(entry.entity!.place!.palopenmapsUrl!)}
-                        >
-                          <Text color="primary" fontSize={12}>
-                            {t('Carte biblique')}
-                          </Text>
-                        </TouchableOpacity>
-                      )}
-                    </HStack>
-                  </VStack>
-                )}
-                {entry.entity.relations.map(relation => (
-                  <Text key={`${relation.relation}:${relation.targetId}:${relation.targetName}`}>
-                    <Text color="tertiary">{relation.relation}: </Text>
-                    {relation.targetName}
-                    {relation.certainty ? ` · ${relation.certainty}` : ''}
-                  </Text>
-                ))}
-                {entry.entity.references.length > 0 && (
-                  <Text color="tertiary" fontSize={12}>
-                    {entry.entity.references.join(' · ')}
-                    {entry.entity.hiddenReferenceCount > 0
-                      ? ` · +${entry.entity.hiddenReferenceCount}`
-                      : ''}
-                  </Text>
-                )}
-              </VStack>
-            </Section>
-          ) : entry.modules.entities.status !== 'available' ? (
-            <Section title={t('strongLexicon.biblicalContext')}>
-              <StrongLexiconModuleCard
-                moduleId="entities"
-                availability={entry.modules.entities}
-                title={t('strongLexicon.biblicalEntities')}
-                description={t('strongLexicon.biblicalEntitiesDescription')}
-              />
-            </Section>
-          ) : null}
-
-          {!!entry.morphology && (
-            <Section title={t('strongLexicon.grammar')}>
-              <VStack gap={4}>
-                <Text bold>{entry.morphology.meaning}</Text>
-                {!!entry.morphology.description && (
-                  <Text color="tertiary">{entry.morphology.description}</Text>
-                )}
-              </VStack>
-            </Section>
-          )}
-
-          {relationGroups.map(group => {
-            const relations = entry.relations.filter(relation => relation.group === group.id)
-            if (!relations.length) return null
-            return (
-              <Section key={group.id} title={group.title}>
-                <VStack gap={8}>
-                  {relations.map(relation => (
-                    <TouchableOpacity
-                      key={`${relation.stepCode}:${relation.label}`}
-                      onPress={() => selectRelatedEntry(relation.stepCode)}
-                      activeOpacity={0.7}
-                    >
-                      <HStack
-                        bg="lightGrey"
-                        borderRadius={12}
-                        px={12}
-                        py={10}
-                        alignItems="center"
-                        gap={10}
-                      >
-                        <VStack flex gap={2}>
-                          <Text bold>{relation.gloss || relation.transliteration}</Text>
-                          <Text color="tertiary" fontSize={12}>
-                            {relation.label} · {relation.stepCode}
-                          </Text>
-                        </VStack>
-                        <Text fontSize={18}>{relation.original}</Text>
-                        <FeatherIcon name="chevron-right" size={16} color="tertiary" />
-                      </HStack>
-                    </TouchableOpacity>
-                  ))}
-                </VStack>
-              </Section>
-            )
-          })}
-
-          {entry.resources.length > 0 ? (
-            <Section title={t('strongLexicon.learnMore')}>
-              <VStack gap={18}>
-                {entry.resources.map(resource => (
-                  <VStack key={resource.id} gap={6}>
-                    <Text bold>{resource.title}</Text>
-                    <StylizedHTMLView value={resource.contentHtml} />
-                  </VStack>
-                ))}
-              </VStack>
-            </Section>
-          ) : entry.modules.resources.status !== 'available' ? (
-            <Section title={t('strongLexicon.learnMore')}>
-              <StrongLexiconModuleCard
-                moduleId="resources"
-                availability={entry.modules.resources}
-                title={t('strongLexicon.greekDictionary')}
-                description={t('strongLexicon.greekDictionaryDescription')}
-              />
-            </Section>
-          ) : null}
-
-          <Section title={t('strongLexicon.bibleOccurrences')}>
-            {concordanceQuery.isPending ? (
-              <Loading />
-            ) : (
-              <VStack gap={8}>
-                <HStack alignItems="center" gap={8}>
-                  <Box bg="lightPrimary" borderRadius={14} px={9} py={5}>
-                    <Text>{concordanceQuery.data?.count ?? 0}</Text>
-                  </Box>
-                  <Text color="tertiary" fontSize={12}>
-                    {t('Occurrences selon {{version}}', {
-                      version: concordanceQuery.data?.version ?? currentStrongBibleVersionId,
-                    })}
-                  </Text>
-                </HStack>
-                {!!concordanceQuery.data?.identity && (
-                  <Text color="tertiary" fontSize={11}>
-                    {concordanceQuery.data.identity.kind} · {concordanceQuery.data.identity.code}
-                  </Text>
-                )}
-                {lemmaStatsQuery.data?.status === 'available' &&
-                  lemmaStatsQuery.data.lemmas.length > 0 && (
-                    <VStack gap={7} mt={4}>
-                      <Text color="tertiary" fontSize={12}>
-                        {t('Filtrer par lemme')}
-                      </Text>
-                      <HStack gap={7} wrap>
-                        <TouchableOpacity
-                          onPress={() => setSelectedLemmaId(undefined)}
-                          activeOpacity={0.7}
-                        >
-                          <Box
-                            bg={selectedLemmaId == null ? 'primary' : 'lightGrey'}
-                            borderRadius={16}
-                            px={10}
-                            py={7}
-                          >
-                            <Text
-                              color={selectedLemmaId == null ? 'reverse' : 'default'}
-                              fontSize={12}
-                            >
-                              {t('Tous')}
-                            </Text>
-                          </Box>
-                        </TouchableOpacity>
-                        {lemmaStatsQuery.data.lemmas.map(lemma => (
-                          <TouchableOpacity
-                            key={lemma.id}
-                            onPress={() => setSelectedLemmaId(lemma.id)}
-                            activeOpacity={0.7}
-                          >
-                            <Box
-                              bg={selectedLemmaId === lemma.id ? 'primary' : 'lightGrey'}
-                              borderRadius={16}
-                              px={10}
-                              py={7}
-                            >
-                              <Text
-                                color={selectedLemmaId === lemma.id ? 'reverse' : 'default'}
-                                fontSize={12}
-                              >
-                                {lemma.lemma} · {lemma.occurrenceCount}
-                              </Text>
-                            </Box>
-                          </TouchableOpacity>
-                        ))}
-                      </HStack>
-                    </VStack>
-                  )}
-                {concordanceQuery.data?.verses.map(verse => (
-                  <ConcordanceVerse
-                    key={`${verse.Livre}-${verse.Chapitre}-${verse.Verset}`}
-                    onOpenVerse={openConcordanceVerse}
-                    t={t}
-                    concordanceFor={String(entry.baseCode)}
-                    lexiconEntry={legacyEntry}
-                    verse={verse}
-                  />
-                ))}
-                {(concordanceQuery.data?.count ?? 0) >
-                  (concordanceQuery.data?.verses.length ?? 0) && (
-                  <TouchableOpacity
-                    onPress={() =>
-                      pushRouteOnce({
-                        pathname: '/concordance-by-book',
-                        params: {
-                          book: String(entry.language === 'hebrew' ? 1 : 40),
-                          strongReference: JSON.stringify({
-                            ...legacyEntry,
-                            Code: entry.selectedIdentity.code,
-                            Mot: entry.gloss,
-                          }),
-                          strongBibleVersionId:
-                            concordanceQuery.data?.version ?? currentStrongBibleVersionId,
-                        },
-                      })
-                    }
-                    activeOpacity={0.7}
-                  >
-                    <HStack justifyContent="center" alignItems="center" gap={5} py={10}>
-                      <Text color="primary" bold>
-                        {t('strongLexicon.seeAllOccurrences')}
-                      </Text>
-                      <FeatherIcon name="chevron-right" size={16} color="primary" />
-                    </HStack>
-                  </TouchableOpacity>
-                )}
-              </VStack>
-            )}
-          </Section>
-        </VStack>
-      </ScrollView>
+      {activeNode.page === 'index' && (
+        <StrongDetailMainPage
+          entry={entry}
+          legacyEntry={legacyEntry}
+          contextVerse={contextVerse}
+          contextReference={contextReference}
+          contextVersion={
+            contextVerseQuery.data?.status === 'available'
+              ? contextVerseQuery.data.provenance.versionId
+              : activeContext.bibleVersion
+          }
+          clickedWord={activeContext.clickedWord}
+          contextMorphologies={contextMorphologiesQuery.data}
+          resourcesAvailability={entry.modules.resources}
+          entitiesAvailability={entry.modules.entities}
+          concordanceCount={concordanceQuery.data?.count ?? 0}
+          concordanceVersion={concordanceQuery.data?.version ?? currentStrongBibleVersionId}
+          concordanceVerses={concordanceQuery.data?.verses ?? []}
+          concordanceLoading={concordanceQuery.isPending}
+          lemmaStats={lemmaStats}
+          selectedLemmaId={selectedLemmaId}
+          readingFontFamily={readingFontFamily}
+          onSelectLemma={lemmaId => setLemmaSelection({ navigationKey, lemmaId })}
+          onOpenPage={page =>
+            openPage(page, page === 'entity' ? { entityKey: entry.entity?.uniqueName } : {})
+          }
+          onOpenStrong={openStrong}
+          onOpenBibleReference={openBibleReference}
+          onOpenConcordanceVerse={openConcordanceVerse}
+          onOpenEntityRelation={openEntityRelation}
+        />
+      )}
+      {activeNode.page === 'entity' && (
+        <StrongEntityPage
+          entity={activeEntity}
+          availability={entry.modules.entities}
+          loading={directEntityQuery.isPending && !activeEntity}
+          onOpenBibleReference={openBibleReference}
+          onOpenStrong={openStrong}
+          onOpenEntityRelation={openEntityRelation}
+        />
+      )}
+      {activeNode.page === 'dictionary' && (
+        <StrongDictionaryPage
+          entry={entry}
+          availability={entry.modules.resources}
+          onOpenBibleReference={openBibleReference}
+          onOpenStrong={openStrong}
+        />
+      )}
+      {activeNode.page === 'related' && (
+        <StrongRelatedPage entry={entry} onOpenStrong={openStrong} />
+      )}
+      {activeNode.page === 'concordance' && (
+        <StrongConcordancePage
+          entry={entry}
+          legacyEntry={legacyEntry}
+          currentVersionId={currentStrongBibleVersionId}
+          defaultVersionId={defaultStrongBibleVersionId}
+          onOpenVerse={openConcordanceVerse}
+        />
+      )}
     </FormSheetScreen>
   )
 }

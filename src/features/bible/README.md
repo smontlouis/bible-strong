@@ -62,7 +62,6 @@ BibleScreen/
 └── Screens/               # Écrans spécialisés
     ├── BibleLinkScreen
     ├── NoteDetailTabScreen
-    ├── StrongScreen
     ├── CompareVersesScreen
     ├── HistoryScreen
     └── PericopeScreen

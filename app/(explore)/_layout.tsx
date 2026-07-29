@@ -14,7 +14,6 @@ const ExploreLayout = () => {
       }}
     >
       <Stack.Screen name="bible-view" />
-      <Stack.Screen name="strong" />
       <Stack.Screen name="concordance" />
       <Stack.Screen name="concordance-by-book" />
       <Stack.Screen name="dictionnary-detail" />

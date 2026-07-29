@@ -308,6 +308,16 @@ function InnerApp() {
                                   },
                                 }}
                               />
+                              <Stack.Screen
+                                name="strong"
+                                options={createFormSheetOptions(theme, {
+                                  contentStyle: {
+                                    bottom: 0,
+                                  },
+                                  sheetAllowedDetents: [1],
+                                  sheetExpandsWhenScrolledToEdge: true,
+                                })}
+                              />
                             </Stack>
                             <ThemedToaster />
                             <DeferredModals />

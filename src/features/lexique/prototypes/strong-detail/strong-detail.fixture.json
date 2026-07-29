@@ -1,0 +1,508 @@
+{
+  "prototype": {
+    "question": "Comment hiérarchiser la fiche détaillée d’un Strong sans répétitions ?",
+    "databaseRelease": "strong-lexicon-modular-v1-candidate"
+  },
+  "context": {
+    "version": "SG1910",
+    "reference": "Matthieu 16:16",
+    "osisReference": "Matt.16.16",
+    "selectedText": "Pierre",
+    "verseText": "Simon Pierre répondit : Tu es le Christ, le Fils du Dieu vivant.",
+    "token": {
+      "strong": "G4074",
+      "dStrong": "G4074G",
+      "resolvedUStrong": "G4074G",
+      "lemma": "Pierre",
+      "partOfSpeech": "Nom propre",
+      "morphology": {
+        "code": "N:N-M-P",
+        "meaning": "nom propre (masculin) de personne"
+      }
+    }
+  },
+  "entry": {
+    "id": 4106,
+    "language": "greek",
+    "stepCode": "G4074G",
+    "classicStrong": "G4074",
+    "eStrong": "G4074",
+    "dStrong": "G4074G =",
+    "uStrong": "G4074G",
+    "original": "Πέτρος",
+    "transliteration": "Petros",
+    "pronunciation": "pet'-ros",
+    "gloss": "Pierre",
+    "definitionHtml": "<b>Πέτρος</b>, -ου, ὁ (c.-à-d. <b>une pierre</b>, voir : πέτρα, Κηφᾶς), <br>  <b>Simon Pierre</b>, <b>l'Apôtre</b>: Mat.4:18 10:2, Marc.3:16, Luc.5:8, Jean.1:41, 43, al. <br> (AS)",
+    "morphology": {
+      "code": "N:N-M-P",
+      "meaning": "nom propre (masculin) de personne",
+      "description": "Catégorie lexicale : nom propre (masculin) de personne."
+    },
+    "relations": [
+      {
+        "groupKind": "family",
+        "label": "même racine",
+        "stepCode": "G4073",
+        "gloss": "rocher",
+        "original": "πέτρα",
+        "transliteration": "petra"
+      },
+      {
+        "groupKind": "identity",
+        "label": "nom associé",
+        "stepCode": "G0920",
+        "gloss": "Bar-Jonas",
+        "original": "Βαριωνᾶς",
+        "transliteration": "Bariōnas"
+      },
+      {
+        "groupKind": "identity",
+        "label": "nom associé",
+        "stepCode": "G2786",
+        "gloss": "Céphas",
+        "original": "Κηφᾶς",
+        "transliteration": "Kēphas"
+      },
+      {
+        "groupKind": "identity",
+        "label": "nom associé",
+        "stepCode": "G4613O",
+        "gloss": "Simon",
+        "original": "Σίμων",
+        "transliteration": "Simōn"
+      },
+      {
+        "groupKind": "identity",
+        "label": "variante orthographique",
+        "stepCode": "G4826K",
+        "gloss": "Siméon",
+        "original": "Συμεών",
+        "transliteration": "Sumeōn"
+      },
+      {
+        "groupKind": "identity",
+        "label": "même identité unifiée",
+        "stepCode": "G0920",
+        "gloss": "Bar-Jonas",
+        "original": "Βαριωνᾶς",
+        "transliteration": "Bariōnas"
+      },
+      {
+        "groupKind": "identity",
+        "label": "même identité unifiée",
+        "stepCode": "G2786",
+        "gloss": "Céphas",
+        "original": "Κηφᾶς",
+        "transliteration": "Kēphas"
+      },
+      {
+        "groupKind": "identity",
+        "label": "même identité unifiée",
+        "stepCode": "G4613O",
+        "gloss": "Simon",
+        "original": "Σίμων",
+        "transliteration": "Simōn"
+      },
+      {
+        "groupKind": "identity",
+        "label": "même identité unifiée",
+        "stepCode": "G4826K",
+        "gloss": "Siméon",
+        "original": "Συμεών",
+        "transliteration": "Sumeōn"
+      },
+      {
+        "groupKind": "subentry",
+        "label": "autre sens STEP",
+        "stepCode": "G4074H",
+        "gloss": "[femme de Pierre]",
+        "original": "[unnamed]",
+        "transliteration": "Petros"
+      },
+      {
+        "groupKind": "subentry",
+        "label": "autre sens STEP",
+        "stepCode": "G4074I",
+        "gloss": "[belle-mère de Pierre]",
+        "original": "[unnamed]",
+        "transliteration": "Petros"
+      }
+    ],
+    "resources": [
+      {
+        "id": 4106,
+        "source": "TFLSJ",
+        "kind": "classical_full",
+        "contentHtml": "<b> πέτρος</b>, ὁ <br /> (chez les poètes plus tardifs ἡ, [Réf. IIIe s. av. J.-C.+ (« Anthologia Graeca » 7.274 (Ier s. av. J.-C.(?): Honestus Epigrammaticus), 479 (IIIe s. av. J.-C.: Theodoridas Epigrammaticus)))], <b>pierre</b> (distingué de πέτρα, voir ce terme); dans [Réf. VIIIe s. av. J.-C.+ (VIIIe s. av. J.-C.: Homerus Epicus)], utilisé par les guerriers, λάζετο πέτρον μάρμαρον ὀκριόεντα [Réf. VIIIe s. av. J.-C.+ (VIIIe s. av. J.-C.: Ilias Homerus Epicus « Iliade » 16.734; βαλὼν μυλοειδέϊ πέτρῳ 7.270, comparer 20.288, Ve s. av. J.-C.: Euripides Tragicus « Andromaque » 1128 (jamais dans Odyssea Homerus Epicus « Odyssée », VIIIe s. av. J.-C.); ἔδικε πέτρῳ Ve s. av. J.-C.: Pindarus Lyricus « O. » 10(11).72; ἄγαλμ᾽ Ἀΐδα ξεστὸν π. ἔμβαλον στέρνῳ [auteur préc.] « N. » 10.67; νιφάδι γογγύλων πέτρων IVe-Ve s. av. J.-C.: Aeschylus Tragicus « Fragmenta - American Journal of Philology » 199.7; ἐκ χερῶν πέτροισιν ἠράσσοντο [auteur préc.] « Pers. » 460; λευσθῆναι πέτροις Ve s. av. J.-C.: Sophocles Tragicus « Œdipe à Colone » 435; πέτρους ἐπεκυλίνδουν Ve-VIe s. av. J.-C.: Xenophon Historicus « Helléniques » 3.5.20, etc.)]; ἐν πέτροισι πέτρον ἐκτρίβων, pour produire du feu, [Réf. Ve s. av. J.-C.+ (Ve s. av. J.-C.: Sophocles Tragicus « Philoctète » 296)]; d'un <b>rocher</b> formant un point de repère, [Réf. IIIe s. av. J.-C.+ ([auteur préc.] « OC » 1595; τόνδ᾽ ἀνέθηκα π. ἀειράμενος « IG » 42(1).125 (Épidaure, IIIe s. av. J.-C.)))]<br /><Level3><b>2</b></Level3> proverbial, πάντα κινῆσαι πέτρον « ne laisser aucune pierre non retournée », [Réf. Ve s. av. J.-C.+ (Ve s. av. J.-C.: Euripides Tragicus « Les Héraclides » 1002, comparer Ve-VIe s. av. J.-C.: Plato Philosophus « Lois » 843a)]; comme expression de l'imperturbabilité, καὶ γὰρ ἂν πέτρου φύσιν σύ γ᾽ ὀργάνειας [Réf. Ve s. av. J.-C.+ (Ve s. av. J.-C.: Sophocles Tragicus « Œdipe roi » 334, comparer Ve s. av. J.-C.: Euripides Tragicus « Médée » 28.)]<br /><Level2><b>II</b></Level2> une sorte de <b>roseau,</b> [Réf. (Peripl.M.Rubr. 65.)] — Le terme courant en prose est λίθος.",
+        "title": "Dictionnaire grec détaillé"
+      }
+    ],
+    "entity": {
+      "id": 2321,
+      "uStrong": "G4074G",
+      "category": "person",
+      "type": "Male",
+      "name": "Pierre",
+      "description": "Apôtre vivant à l'époque du Nouveau Testament",
+      "shortDescription": "Pierre, également connu sous le nom de Simon, Céphas ou Simon Bar-Jonas, était l'un des douze apôtres de Jésus et un dirigeant éminent de l'église chrétienne primitive.",
+      "summaryHtml": "#Un apôtre vivant à l'époque du Nouveau Testament, mentionné pour la première fois en Mat.4.18 ; <br>désigné sous le nom de Pierre<G4074G> (Πέτρος), ou Simon<G4613O> (Σίμων), ou Siméon<G4826K> (Συμεών), ou Céphas<G2786> (Κηφᾶς), ou Bar-Jonas (KJV= Bar-Jona, NIV= « fils de Jonas ») <G0920> (Βαριωνᾶς) ; <br> fils de Jean<G2491K> ; <br>frère d'André<G0406>.",
+      "brief": "Apôtre de Jésus, dirigeant dans l'église primitive",
+      "articleHtml": "Pierre, nommé à l'origine Simon, était l'un des douze apôtres de Jésus-Christ et a joué un rôle crucial dans l'église chrétienne primitive. Il était le fils de Jonas (ou Jean) et le frère d'André, qui l'a présenté à Jésus (Jean 1:40-42). Jésus lui a donné le nom de Céphas (araméen) ou Pierre (grec), ce qui signifie « rocher » (Jean 1:42, Matthieu 16:18). ¶Pierre était un pêcheur de Bethsaïda en Galilée (Jean 1:44) et était marié (Matthieu 8:14 ; 1 Corinthiens 9:5). Il est devenu l'un des disciples les plus proches de Jésus, connu pour sa foi audacieuse et son leadership. Il faisait partie du cercle restreint de Jésus, témoin d'événements clés tels que la Transfiguration (Matthieu 17:1-9) et la prière de Jésus à Gethsémané (Marc 14:32-42). ¶Malgré son dévouement, Pierre a nié connaître Jésus à trois reprises pendant le procès de Jésus (Luc 22:54-62). Après la résurrection de Jésus, Pierre a été restauré et chargé de diriger l'église (Jean 21:15-19). Le jour de la Pentecôte, Pierre a prêché avec puissance, et environ 3 000 personnes ont été baptisées (Actes 2:14-41). ¶Pierre a joué un rôle déterminant dans la diffusion de l'Évangile aux Juifs comme aux Gentils. Il a accompli des miracles (Actes 3:1-10 ; 9:32-43) et a défendu l'inclusion des Gentils dans l'église (Actes 10-11 ; 15:7-11). Il a écrit deux épîtres, 1 et 2 Pierre, pour encourager et instruire les croyants confrontés à la persécution. ¶La tradition soutient que Pierre a été martyrisé à Rome sous le règne de Néron, crucifié la tête en bas à sa demande, car il ne se sentait pas digne de mourir de la même manière que Jésus.",
+      "relations": [
+        {
+          "relation": "father",
+          "certainty": "asserted",
+          "targetUStrong": "G2491K",
+          "targetSex": "Male",
+          "targetName": "Jean"
+        },
+        {
+          "relation": "partner",
+          "certainty": "asserted",
+          "targetUStrong": "G4074H",
+          "targetSex": "Female",
+          "targetName": "la femme de Pierre"
+        },
+        {
+          "relation": "sibling",
+          "certainty": "asserted",
+          "targetUStrong": "G0406",
+          "targetSex": "Male",
+          "targetName": "André"
+        }
+      ],
+      "names": [
+        {
+          "significance": "SameFormAsPrevious",
+          "dStrong": "G4074G",
+          "eStrong": "G4074",
+          "original": "Πέτρος",
+          "displayName": "(KJV= Peter)",
+          "refsText": "Luk.22.62; Act.10.23a; Gal.1.18; Gal.2.11; Gal.2.14"
+        },
+        {
+          "significance": "Named",
+          "dStrong": "G0920",
+          "eStrong": "G0920",
+          "original": "Βαριωνᾶς",
+          "displayName": "Bar-Jonah (KJV= Bar-Jona; NIV= son of Jonah)",
+          "refsText": "Mat.16.17"
+        },
+        {
+          "significance": "Named",
+          "dStrong": "G2786",
+          "eStrong": "G2786",
+          "original": "Κηφᾶς",
+          "displayName": "Cephas",
+          "refsText": "Jhn.1.42; 1Co.1.12; 1Co.3.22; 1Co.9.5; 1Co.15.5; Gal.2.9"
+        },
+        {
+          "significance": "SameFormAsPrevious",
+          "dStrong": "G2786",
+          "eStrong": "G2786",
+          "original": "Κηφᾶς",
+          "displayName": "Cephas (KJV= Peter)",
+          "refsText": "Gal.1.18; Gal.2.11; Gal.2.14"
+        },
+        {
+          "significance": "Named",
+          "dStrong": "G4074G",
+          "eStrong": "G4074",
+          "original": "Πέτρος",
+          "displayName": "Peter",
+          "refsText": "Mat.4.18; Mat.8.14; Mat.10.2; Mat.14.28; Mat.14.29; Mat.15.15; Mat.16.16; Mat.16.18; Mat.16.22; Mat.16.23; Mat.17.1; Mat.17.4; Mat.17.24; Mat.18.21; Mat.19.27; Mat.26.33; Mat.26.35; Mat.26.37; Mat.26.40; Mat.26.58; Mat.26.69; Mat.26.73; Mat.26.75; Mrk.3.16; Mrk.5.37; Mrk.8.29; Mrk.8.32; Mrk.8.33; Mrk.9.2; Mrk.9.5; Mrk.10.28; Mrk.11.21; Mrk.13.3; Mrk.14.29; Mrk.14.33; Mrk.14.37; Mrk.14.54; Mrk.14.66; Mrk.14.67; Mrk.14.70; Mrk.14.72; Mrk.16.7; Mrk.16.6; Luk.5.8; Luk.6.14; Luk.8.45; Luk.8.51; Luk.9.20; Luk.9.28; Luk.9.32; Luk.9.33; Luk.12.41; Luk.18.28; Luk.22.8; Luk.22.34; Luk.22.54; Luk.22.55; Luk.22.58; Luk.22.60; Luk.22.61a; Luk.22.61b; Luk.24.12; Jhn.1.40; Jhn.1.42; Jhn.1.44; Jhn.6.8; Jhn.6.68; Jhn.13.6; Jhn.13.8; Jhn.13.9; Jhn.13.24; Jhn.13.36; Jhn.13.37; Jhn.18.10; Jhn.18.11; Jhn.18.15; Jhn.18.16a; Jhn.18.16b; Jhn.18.17; Jhn.18.18; Jhn.18.25; Jhn.18.26; Jhn.18.27; Jhn.20.2; Jhn.20.3; Jhn.20.4; Jhn.20.6; Jhn.21.2; Jhn.21.3; Jhn.21.7a; Jhn.21.7b; Jhn.21.11; Jhn.21.15; Jhn.21.17; Jhn.21.20; Jhn.21.21; Act.1.13; Act.1.15; Act.2.14; Act.2.37; Act.2.38; Act.3.1; Act.3.3; Act.3.4; Act.3.6; Act.3.11; Act.3.12; Act.4.8; Act.4.13; Act.4.19; Act.5.3; Act.5.8; Act.5.9; Act.5.15; Act.5.29; Act.8.14; Act.8.20; Act.9.32; Act.9.34; Act.9.38; Act.9.39; Act.9.40a; Act.9.40b; Act.10.5; Act.10.9; Act.10.13; Act.10.14; Act.10.17; Act.10.18; Act.10.19; Act.10.21; Act.10.25; Act.10.26; Act.10.32; Act.10.34; Act.10.44; Act.10.45; Act.10.46; Act.11.2; Act.11.4; Act.11.7; Act.11.13; Act.12.3; Act.12.5; Act.12.6; Act.12.7; Act.12.11; Act.12.14a; Act.12.14b; Act.12.16; Act.12.18; Act.15.7; Gal.2.7; Gal.2.8; 1Pe.1.1; 2Pe.1.1"
+        },
+        {
+          "significance": "Spelled",
+          "dStrong": "G4826K",
+          "eStrong": "G4826",
+          "original": "Συμεών",
+          "displayName": "Simeon (Var, KJV, NIV= Simon)",
+          "refsText": "Act.15.14; 2Pe.1.1"
+        },
+        {
+          "significance": "Named",
+          "dStrong": "G4613O",
+          "eStrong": "G4613",
+          "original": "Σίμων",
+          "displayName": "Simon",
+          "refsText": "Mat.4.18; Mat.10.2; Mat.16.16; Mat.16.17; Mat.17.25; Mrk.1.16; Mrk.1.29; Mrk.1.30; Mrk.1.36; Mrk.3.16; Mrk.14.37; Luk.4.38a; Luk.4.38b; Luk.5.3; Luk.5.4; Luk.5.5; Luk.5.8; Luk.5.10a; Luk.5.10b; Luk.6.14; Luk.22.31a; Luk.22.31b; Luk.24.34; Jhn.1.40; Jhn.1.41; Jhn.1.42; Jhn.6.8; Jhn.6.68; Jhn.13.6; Jhn.13.9; Jhn.13.24; Jhn.13.36; Jhn.18.10; Jhn.18.15; Jhn.18.25; Jhn.20.2; Jhn.20.6; Jhn.21.2; Jhn.21.3; Jhn.21.7; Jhn.21.11; Jhn.21.15a; Jhn.21.15b; Jhn.21.16; Jhn.21.17; Act.10.5; Act.10.18; Act.10.32a; Act.11.13; 2Pe.1.1"
+        },
+        {
+          "significance": "SameFormAsPrevious",
+          "dStrong": "G4074G",
+          "eStrong": "G4074",
+          "original": "Πέτρος",
+          "displayName": "he (KJV, NIV= Peter)",
+          "refsText": "Mat.17.26; Act.10.23b; Act.12.13"
+        }
+      ],
+      "references": [
+        "1Co.1.12",
+        "1Co.3.22",
+        "1Co.9.5",
+        "1Co.15.5",
+        "1Pe.1.1",
+        "2Pe.1.1",
+        "Act.1.13",
+        "Act.1.15",
+        "Act.2.14",
+        "Act.2.37",
+        "Act.2.38",
+        "Act.3.1",
+        "Act.3.3",
+        "Act.3.4",
+        "Act.3.6",
+        "Act.3.11",
+        "Act.3.12",
+        "Act.4.8",
+        "Act.4.13",
+        "Act.4.19",
+        "Act.5.3",
+        "Act.5.8",
+        "Act.5.9",
+        "Act.5.15",
+        "Act.5.29",
+        "Act.8.14",
+        "Act.8.20",
+        "Act.9.32",
+        "Act.9.34",
+        "Act.9.38",
+        "Act.9.39",
+        "Act.9.40a",
+        "Act.9.40b",
+        "Act.10.5",
+        "Act.10.9",
+        "Act.10.13",
+        "Act.10.14",
+        "Act.10.17",
+        "Act.10.18",
+        "Act.10.19",
+        "Act.10.21",
+        "Act.10.23a",
+        "Act.10.23b",
+        "Act.10.25",
+        "Act.10.26",
+        "Act.10.32",
+        "Act.10.32a",
+        "Act.10.34",
+        "Act.10.44",
+        "Act.10.45",
+        "Act.10.46",
+        "Act.11.2",
+        "Act.11.4",
+        "Act.11.7",
+        "Act.11.13",
+        "Act.12.3",
+        "Act.12.5",
+        "Act.12.6",
+        "Act.12.7",
+        "Act.12.11",
+        "Act.12.13",
+        "Act.12.14a",
+        "Act.12.14b",
+        "Act.12.16",
+        "Act.12.18",
+        "Act.15.7",
+        "Act.15.14",
+        "Gal.1.18",
+        "Gal.2.7",
+        "Gal.2.8",
+        "Gal.2.9",
+        "Gal.2.11",
+        "Gal.2.14",
+        "Jhn.1.40",
+        "Jhn.1.41",
+        "Jhn.1.42",
+        "Jhn.1.44",
+        "Jhn.6.8",
+        "Jhn.6.68",
+        "Jhn.13.6",
+        "Jhn.13.8",
+        "Jhn.13.9",
+        "Jhn.13.24",
+        "Jhn.13.36",
+        "Jhn.13.37",
+        "Jhn.18.10",
+        "Jhn.18.11",
+        "Jhn.18.15",
+        "Jhn.18.16a",
+        "Jhn.18.16b",
+        "Jhn.18.17",
+        "Jhn.18.18",
+        "Jhn.18.25",
+        "Jhn.18.26",
+        "Jhn.18.27",
+        "Jhn.20.2",
+        "Jhn.20.3",
+        "Jhn.20.4",
+        "Jhn.20.6",
+        "Jhn.21.2",
+        "Jhn.21.3",
+        "Jhn.21.7",
+        "Jhn.21.7a",
+        "Jhn.21.7b",
+        "Jhn.21.11",
+        "Jhn.21.15",
+        "Jhn.21.15a",
+        "Jhn.21.15b",
+        "Jhn.21.16",
+        "Jhn.21.17",
+        "Jhn.21.20",
+        "Jhn.21.21",
+        "Luk.4.38a",
+        "Luk.4.38b",
+        "Luk.5.3",
+        "Luk.5.4",
+        "Luk.5.5",
+        "Luk.5.8",
+        "Luk.5.10a",
+        "Luk.5.10b",
+        "Luk.6.14",
+        "Luk.8.45",
+        "Luk.8.51",
+        "Luk.9.20",
+        "Luk.9.28",
+        "Luk.9.32",
+        "Luk.9.33",
+        "Luk.12.41",
+        "Luk.18.28",
+        "Luk.22.8",
+        "Luk.22.31a",
+        "Luk.22.31b",
+        "Luk.22.34",
+        "Luk.22.54",
+        "Luk.22.55",
+        "Luk.22.58",
+        "Luk.22.60",
+        "Luk.22.61a",
+        "Luk.22.61b",
+        "Luk.22.62",
+        "Luk.24.12",
+        "Luk.24.34",
+        "Mat.4.18",
+        "Mat.8.14",
+        "Mat.10.2",
+        "Mat.14.28",
+        "Mat.14.29",
+        "Mat.15.15",
+        "Mat.16.16",
+        "Mat.16.17",
+        "Mat.16.18",
+        "Mat.16.22",
+        "Mat.16.23",
+        "Mat.17.1",
+        "Mat.17.4",
+        "Mat.17.24",
+        "Mat.17.25",
+        "Mat.17.26",
+        "Mat.18.21",
+        "Mat.19.27",
+        "Mat.26.33",
+        "Mat.26.35",
+        "Mat.26.37",
+        "Mat.26.40",
+        "Mat.26.58",
+        "Mat.26.69",
+        "Mat.26.73",
+        "Mat.26.75",
+        "Mrk.1.16",
+        "Mrk.1.29",
+        "Mrk.1.30",
+        "Mrk.1.36",
+        "Mrk.3.16",
+        "Mrk.5.37",
+        "Mrk.8.29",
+        "Mrk.8.32",
+        "Mrk.8.33",
+        "Mrk.9.2",
+        "Mrk.9.5",
+        "Mrk.10.28",
+        "Mrk.11.21",
+        "Mrk.13.3",
+        "Mrk.14.29",
+        "Mrk.14.33",
+        "Mrk.14.37",
+        "Mrk.14.54",
+        "Mrk.14.66",
+        "Mrk.14.67",
+        "Mrk.14.70",
+        "Mrk.14.72",
+        "Mrk.16.6",
+        "Mrk.16.7"
+      ],
+      "referenceCount": 192
+    }
+  },
+  "concordance": {
+    "version": "SG1910",
+    "identity": {
+      "kind": "dstrong",
+      "code": "G4074G"
+    },
+    "count": 153,
+    "lemmas": [
+      {
+        "id": "proper-name",
+        "lemma": "Pierre",
+        "occurrenceCount": 146
+      },
+      {
+        "id": "common-noun",
+        "lemma": "pierre",
+        "occurrenceCount": 7
+      }
+    ],
+    "sample": [
+      {
+        "reference": "Matt.4.18",
+        "text": "Comme il marchait le long de la mer de Galilée, il vit deux frères, Simon, appelé Pierre, et André, son frère, qui jetaient un filet dans la mer ; car ils étaient pêcheurs."
+      },
+      {
+        "reference": "Matt.8.14",
+        "text": "Jésus se rendit ensuite à la maison de Pierre, dont il vit la belle-mère couchée et ayant la fièvre."
+      },
+      {
+        "reference": "Matt.10.2",
+        "text": "Voici les noms des douze apôtres. Le premier, Simon appelé Pierre, et André, son frère ; Jacques, fils de Zébédée, et Jean, son frère ;"
+      },
+      {
+        "reference": "Matt.14.28",
+        "text": "Pierre lui répondit : Seigneur, si c’est toi, ordonne que j’aille vers toi sur les eaux."
+      },
+      {
+        "reference": "Matt.14.29",
+        "text": "Et il dit : Viens ! Pierre sortit de la barque, et marcha sur les eaux, pour aller vers Jésus."
+      },
+      {
+        "reference": "Matt.15.15",
+        "text": "Pierre, prenant la parole, lui dit : Explique-nous cette parabole."
+      },
+      {
+        "reference": "Matt.16.16",
+        "text": "Simon Pierre répondit : Tu es le Christ, le Fils du Dieu vivant."
+      },
+      {
+        "reference": "Matt.16.18",
+        "text": "Et moi, je te dis que tu es Pierre, et que sur cette pierre je bâtirai mon Église, et que les portes du séjour des morts ne prévaudront point contre elle."
+      },
+      {
+        "reference": "Matt.16.22",
+        "text": "Pierre, l’ayant pris à part, se mit à le reprendre, et dit : À Dieu ne plaise, Seigneur ! Cela ne t’arrivera pas."
+      },
+      {
+        "reference": "Matt.16.23",
+        "text": "Mais Jésus, se retournant, dit à Pierre : Arrière de moi, Satan ! tu m’es en scandale ; car tes pensées ne sont pas les pensées de Dieu, mais celles des hommes."
+      },
+      {
+        "reference": "Matt.17.1",
+        "text": "Six jours après, Jésus prit avec lui Pierre, Jacques, et Jean, son frère, et il les conduisit à l’écart sur une haute montagne."
+      },
+      {
+        "reference": "Matt.17.4",
+        "text": "Pierre, prenant la parole, dit à Jésus : Seigneur, il est bon que nous soyons ici ; si tu le veux, je dresserai ici trois tentes, une pour toi, une pour Moïse, et une pour Élie."
+      }
+    ]
+  }
+}

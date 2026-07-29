@@ -114,10 +114,17 @@ type StylizedHTMLViewProps = {
   value?: string
   onLinkPress?: LinkPressHandler
   htmlStyle?: Record<string, MixedStyleDeclaration>
+  additionalSystemFonts?: string[]
   theme: Theme
 }
 
-const StylizedHTMLView = ({ value, htmlStyle, onLinkPress, theme }: StylizedHTMLViewProps) => {
+const StylizedHTMLView = ({
+  value,
+  htmlStyle,
+  additionalSystemFonts = [],
+  onLinkPress,
+  theme,
+}: StylizedHTMLViewProps) => {
   const { width } = useWindowDimensions()
   const [measuredContentWidth, setMeasuredContentWidth] = useState<number | null>(null)
   const lastLayoutWidth = useRef<number | null>(null)
@@ -162,6 +169,7 @@ const StylizedHTMLView = ({ value, htmlStyle, onLinkPress, theme }: StylizedHTML
             ...defaultSystemFonts,
             monospaceFontFamily,
             ...Object.values(theme.fontFamily),
+            ...additionalSystemFonts,
           ]}
           domVisitors={{
             onElement: element => {

@@ -130,6 +130,7 @@ const StrongSelectionSheet = ({
   }
 
   const openEntry = (identity: StrongIdentity) => {
+    const morphologyCodes = getStrongSelectionMorphologyCodes(morphologies, identity)
     pushRouteOnce({
       pathname: '/strong',
       params: {
@@ -141,6 +142,7 @@ const StrongSelectionSheet = ({
         clickedWord: word,
         bibleChapter: chapter == null ? undefined : String(chapter),
         bibleVerse: verse == null ? undefined : String(verse),
+        morphologyCodes: morphologyCodes.length ? JSON.stringify(morphologyCodes) : undefined,
       },
     })
   }
