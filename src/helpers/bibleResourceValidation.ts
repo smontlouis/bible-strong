@@ -32,8 +32,9 @@ export const validateRedWordsResource = (value: unknown): void => {
             isRecord(range) &&
             Number.isInteger(range.start) &&
             Number.isInteger(range.end) &&
-            Number(range.start) >= 0 &&
-            Number(range.end) >= Number(range.start)
+            // Legacy publications use this empty range for verses without words.
+            ((Number(range.start) === 0 && Number(range.end) === -1) ||
+              (Number(range.start) >= 0 && Number(range.end) >= Number(range.start)))
         )
     )
 

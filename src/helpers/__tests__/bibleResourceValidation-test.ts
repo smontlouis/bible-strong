@@ -30,6 +30,14 @@ describe('Bible child resource validation', () => {
     ).not.toThrow()
   })
 
+  it('accepts the empty-verse sentinel used by published red-word resources', () => {
+    expect(() =>
+      validateRedWordsResource({
+        '41-11-26': [{ start: 0, end: -1 }],
+      })
+    ).not.toThrow()
+  })
+
   it('rejects malformed or inverted red-word ranges', () => {
     expect(() =>
       validateRedWordsResource({

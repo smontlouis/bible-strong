@@ -26,7 +26,7 @@ export function verseToRedWords(
   // Convert word-index ranges to character ranges
   const charRanges: [number, number][] = []
   for (const { start, end } of ranges) {
-    if (start >= wordBounds.length) continue
+    if (start < 0 || end < start || start >= wordBounds.length) continue
     const cEnd = Math.min(end, wordBounds.length - 1)
     charRanges.push([wordBounds[start][0], wordBounds[cEnd][1]])
   }
