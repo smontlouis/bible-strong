@@ -4,6 +4,36 @@ import type {
 } from '~features/resources/strongLexiconAccess'
 
 export type StrongEntityPresentationKind = 'person' | 'place' | 'group' | 'other'
+export type StrongEntityAvatarKey =
+  | 'male'
+  | 'female'
+  | 'group'
+  | 'place'
+  | 'supernatural'
+  | 'time'
+  | 'musical'
+  | 'other'
+  | 'title'
+  | 'language'
+  | 'star'
+
+const OTHER_ENTITY_AVATARS: Record<string, StrongEntityAvatarKey> = {
+  supernatural: 'supernatural',
+  time: 'time',
+  musical: 'musical',
+  other: 'other',
+  title: 'title',
+  language: 'language',
+  star: 'star',
+}
+
+export const getStrongEntityAvatarKey = (category: string, type: string): StrongEntityAvatarKey => {
+  if (category === 'person') return type.toLowerCase() === 'female' ? 'female' : 'male'
+  if (category === 'group') return 'group'
+  if (category === 'place') return 'place'
+  if (category !== 'other') return 'other'
+  return OTHER_ENTITY_AVATARS[type.toLowerCase()] ?? 'other'
+}
 
 const ENTITY_PRESENTATIONS = {
   person: {
@@ -19,7 +49,7 @@ const ENTITY_PRESENTATIONS = {
   group: {
     kind: 'group',
     icon: 'users',
-    showsRelationshipGraph: false,
+    showsRelationshipGraph: true,
   },
   other: {
     kind: 'other',
@@ -41,7 +71,7 @@ export const splitStrongEntityRelations = (
   graph: StrongLexiconEntityRelation[]
   remaining: StrongLexiconEntityRelation[]
 } => {
-  if (getStrongEntityPresentation(entity).kind !== 'person') {
+  if (!getStrongEntityPresentation(entity).showsRelationshipGraph) {
     return { graph: [], remaining: entity.relations }
   }
 

@@ -1,5 +1,6 @@
 import type { StrongLexiconEntity } from '~features/resources/strongLexiconAccess'
 import {
+  getStrongEntityAvatarKey,
   getStrongEntityPresentation,
   splitStrongEntityRelations,
 } from '../strongEntityPresentation'
@@ -23,6 +24,24 @@ const createEntity = (overrides: Partial<StrongLexiconEntity> = {}): StrongLexic
 
 describe('Strong Biblical entity presentation', () => {
   it.each([
+    ['person', 'Male', 'male'],
+    ['person', 'Female', 'female'],
+    ['group', 'Group', 'group'],
+    ['place', 'Place', 'place'],
+    ['other', 'Supernatural', 'supernatural'],
+    ['other', 'Time', 'time'],
+    ['other', 'Musical', 'musical'],
+    ['other', 'Other', 'other'],
+    ['other', 'Title', 'title'],
+    ['other', 'Language', 'language'],
+    ['other', 'Star', 'star'],
+    ['other', 'Unexpected', 'other'],
+    ['unexpected', 'Female', 'other'],
+  ] as const)('uses the %s/%s entity avatar', (category, type, expectedAvatar) => {
+    expect(getStrongEntityAvatarKey(category, type)).toBe(expectedAvatar)
+  })
+
+  it.each([
     ['person', 'person', 'user'],
     ['place', 'place', 'map-pin'],
     ['group', 'group', 'users'],
@@ -32,7 +51,7 @@ describe('Strong Biblical entity presentation', () => {
     expect(getStrongEntityPresentation(createEntity({ category }))).toEqual({
       kind,
       icon,
-      showsRelationshipGraph: kind === 'person',
+      showsRelationshipGraph: kind === 'person' || kind === 'group',
     })
   })
 
@@ -65,12 +84,25 @@ describe('Strong Biblical entity presentation', () => {
     expect(result.remaining.map(item => item.relation)).toEqual(['resident', 'founder_or_origin'])
   })
 
-  it('uses a list instead of a family graph for places and groups', () => {
+  it('uses a list instead of a relationship graph for places', () => {
     const relations = [{ relation: 'resident', certainty: 'asserted', targetName: 'Pierre' }]
 
     expect(splitStrongEntityRelations(createEntity({ category: 'place', relations }))).toEqual({
       graph: [],
       remaining: relations,
+    })
+  })
+
+  it('uses the relationship graph for groups', () => {
+    const relations = [
+      { relation: 'father', certainty: 'asserted', targetName: 'Canaan' },
+      { relation: 'sibling', certainty: 'asserted', targetName: 'Héthiens' },
+      { relation: 'resident', certainty: 'asserted', targetName: 'Amoréens' },
+    ]
+
+    expect(splitStrongEntityRelations(createEntity({ category: 'group', relations }))).toEqual({
+      graph: relations,
+      remaining: [],
     })
   })
 })

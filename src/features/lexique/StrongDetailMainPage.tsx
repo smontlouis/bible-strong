@@ -36,6 +36,7 @@ import { splitStrongEntityRelations } from './strongEntityPresentation'
 import { splitStrongLexicalRelations } from './strongLexiconRelations'
 import { hasHiddenStrongPreviewItems } from './strongDetailPreview'
 import { getScaledStrongTextStyle, type StrongReadingTypography } from './strongEditorialHtmlStyles'
+import { isStrongOriginalUnnamed } from './strongOriginalPresentation'
 
 type Anchor = 'context' | 'definition' | 'entity' | 'related' | 'concordance'
 
@@ -194,6 +195,8 @@ const StrongDetailMainPage = ({
   const lexicalRelations = splitStrongLexicalRelations(entry.relations)
   const displayedRelationCount = Math.min(lexicalRelations.relatedWords.length, 4)
   const displayedConcordanceCount = Math.min(concordanceVerses.length, 3)
+  const isOriginalUnnamed = isStrongOriginalUnnamed(entry.original)
+  const originalLabel = isOriginalUnnamed ? t('strongDetail.unnamedPerson') : entry.original
 
   return (
     <ScrollView
@@ -218,27 +221,34 @@ const StrongDetailMainPage = ({
         </Text>
         <HStack alignItems="flex-end" gap={16}>
           <VStack flex gap={5}>
-            <Text fontWeight="400" style={getScaledStrongTextStyle(40, 45, readingTypography)}>
-              {entry.original}
+            <Text
+              fontWeight="400"
+              style={getScaledStrongTextStyle(
+                isOriginalUnnamed ? 32 : 40,
+                isOriginalUnnamed ? 38 : 45,
+                readingTypography
+              )}
+            >
+              {originalLabel}
             </Text>
             <Text fontWeight="500" fontSize={25}>
               {entry.gloss}
             </Text>
-            <Text color="tertiary" fontSize={14}>
-              {[entry.transliteration, entry.pronunciation].filter(Boolean).join(' · ')}
-            </Text>
+            {!isOriginalUnnamed && (entry.transliteration || entry.pronunciation) && (
+              <Text color="tertiary" fontSize={14}>
+                {[entry.transliteration, entry.pronunciation].filter(Boolean).join(' · ')}
+              </Text>
+            )}
           </VStack>
-          {hasStrongAudio(
-            entry.language === 'hebrew' ? 'hebreu' : 'grec',
-            entry.baseCode
-          ) && (
-            <Box bg="primary" bgOpacity="010" borderRadius={24} size={48} center>
-              <ListenToStrong
-                type={entry.language === 'hebrew' ? 'hebreu' : 'grec'}
-                code={entry.baseCode}
-              />
-            </Box>
-          )}
+          {!isOriginalUnnamed &&
+            hasStrongAudio(entry.language === 'hebrew' ? 'hebreu' : 'grec', entry.baseCode) && (
+              <Box bg="primary" bgOpacity="010" borderRadius={24} size={48} center>
+                <ListenToStrong
+                  type={entry.language === 'hebrew' ? 'hebreu' : 'grec'}
+                  code={entry.baseCode}
+                />
+              </Box>
+            )}
         </HStack>
       </VStack>
 
@@ -333,43 +343,44 @@ const StrongDetailMainPage = ({
         )}
       </StrongEditorialSection>
 
-      {dictionaryResource ? (
-        <StrongEditorialSection title={t('strongDetail.dictionary.light')}>
-          <Text color="tertiary" fontSize={12}>
-            {dictionaryResource.source} · {dictionaryResource.title}
-          </Text>
-          <StrongEditorialPreview
-            value={dictionaryResource.contentHtml}
-            readingTypography={readingTypography}
-            numberOfLines={5}
-            onOpenBibleReference={onOpenBibleReference}
-            onOpenStrong={onOpenStrong}
-            onOverflowChange={overflows =>
-              setDictionaryPreview(current =>
-                current?.resourceId === dictionaryResource.id && current.overflows === overflows
-                  ? current
-                  : { resourceId: dictionaryResource.id, overflows }
-              )
-            }
-          />
-          {dictionaryPreview?.resourceId === dictionaryResource.id &&
-            dictionaryPreview.overflows && (
-              <StrongPreviewLink
-                label={t('strongDetail.dictionary.open')}
-                onPress={() => onOpenPage('dictionary')}
-              />
-            )}
-        </StrongEditorialSection>
-      ) : resourcesAvailability.status !== 'available' && entry.language === 'greek' ? (
-        <StrongEditorialSection title={t('strongDetail.dictionary.light')}>
-          <StrongLexiconModuleCard
-            moduleId="resources"
-            availability={resourcesAvailability}
-            title={t('strongLexicon.greekDictionary')}
-            description={t('strongLexicon.greekDictionaryDescription')}
-          />
-        </StrongEditorialSection>
-      ) : null}
+      {!isOriginalUnnamed &&
+        (dictionaryResource ? (
+          <StrongEditorialSection title={t('strongDetail.dictionary.light')}>
+            <Text color="tertiary" fontSize={12}>
+              {dictionaryResource.source} · {dictionaryResource.title}
+            </Text>
+            <StrongEditorialPreview
+              value={dictionaryResource.contentHtml}
+              readingTypography={readingTypography}
+              numberOfLines={5}
+              onOpenBibleReference={onOpenBibleReference}
+              onOpenStrong={onOpenStrong}
+              onOverflowChange={overflows =>
+                setDictionaryPreview(current =>
+                  current?.resourceId === dictionaryResource.id && current.overflows === overflows
+                    ? current
+                    : { resourceId: dictionaryResource.id, overflows }
+                )
+              }
+            />
+            {dictionaryPreview?.resourceId === dictionaryResource.id &&
+              dictionaryPreview.overflows && (
+                <StrongPreviewLink
+                  label={t('strongDetail.dictionary.open')}
+                  onPress={() => onOpenPage('dictionary')}
+                />
+              )}
+          </StrongEditorialSection>
+        ) : resourcesAvailability.status !== 'available' && entry.language === 'greek' ? (
+          <StrongEditorialSection title={t('strongDetail.dictionary.light')}>
+            <StrongLexiconModuleCard
+              moduleId="resources"
+              availability={resourcesAvailability}
+              title={t('strongLexicon.greekDictionary')}
+              description={t('strongLexicon.greekDictionaryDescription')}
+            />
+          </StrongEditorialSection>
+        ) : null)}
 
       {!!entry.entity ? (
         <VStack
@@ -399,7 +410,11 @@ const StrongDetailMainPage = ({
           {!!entityRelations?.graph.length && (
             <VStack mt={7} gap={10}>
               <Text bold fontSize={17}>
-                {t('strongDetail.entity.personalRelationships')}
+                {t(
+                  entry.entity.category === 'group'
+                    ? 'strongDetail.entity.relationships'
+                    : 'strongDetail.entity.personalRelationships'
+                )}
               </Text>
               <StrongEntityRelationGraph
                 entity={entry.entity}
@@ -492,7 +507,10 @@ const StrongDetailMainPage = ({
                     px={10}
                     py={7}
                   >
-                    <Text color={selectedLemmaId === lemma.id ? 'reverse' : 'default'} fontSize={12}>
+                    <Text
+                      color={selectedLemmaId === lemma.id ? 'reverse' : 'default'}
+                      fontSize={12}
+                    >
                       {lemma.lemma} · {lemma.occurrenceCount}
                     </Text>
                   </Box>

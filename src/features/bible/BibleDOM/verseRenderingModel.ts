@@ -101,6 +101,14 @@ export const getVersesWithWordAnnotations = (
   return verseKeys
 }
 
+export const shouldHighlightOnlyVerseNumber = ({
+  hasWordAnnotations,
+  isStrongModeVerse,
+}: {
+  hasWordAnnotations?: boolean
+  isStrongModeVerse?: boolean
+}) => Boolean(hasWordAnnotations) || Boolean(isStrongModeVerse)
+
 export const getParallelVerseRows = (
   index: number,
   parallelVerses: ParallelVerse[],

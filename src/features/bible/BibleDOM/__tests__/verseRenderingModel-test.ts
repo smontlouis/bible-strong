@@ -9,6 +9,7 @@ import {
   getTaggedVersesByLastVerse,
   getVersesWithWordAnnotations,
   isVerseDimmedInFocusedContext,
+  shouldHighlightOnlyVerseNumber,
   shouldRenderVerseInFocusedContext,
 } from '../verseRenderingModel'
 
@@ -134,6 +135,27 @@ describe('verseRenderingModel', () => {
     }
 
     expect([...getVersesWithWordAnnotations(annotations, 'LSG')]).toEqual(['1-1-2'])
+  })
+
+  it('limits verse highlights to the verse number in Strong display mode', () => {
+    expect(
+      shouldHighlightOnlyVerseNumber({
+        hasWordAnnotations: false,
+        isStrongModeVerse: true,
+      })
+    ).toBe(true)
+    expect(
+      shouldHighlightOnlyVerseNumber({
+        hasWordAnnotations: false,
+        isStrongModeVerse: false,
+      })
+    ).toBe(false)
+    expect(
+      shouldHighlightOnlyVerseNumber({
+        hasWordAnnotations: true,
+        isStrongModeVerse: false,
+      })
+    ).toBe(true)
   })
 
   it('creates placeholder parallel rows for missing verses', () => {

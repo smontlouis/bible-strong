@@ -1233,6 +1233,7 @@
   "strongDetail.related.open": "Voir tous les mots liés",
   "strongDetail.concordance.open": "Voir toute la concordance",
   "strongDetail.title": "Étude de mot",
+  "strongDetail.unnamedPerson": "Personne non nommée",
   "strongDetail.entity.title": "Entité biblique",
   "strongDetail.entity.person": "Personne",
   "strongDetail.entity.place": "Lieu",

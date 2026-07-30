@@ -29,7 +29,8 @@ import {
   type StrongReadingTypography,
 } from './strongEditorialHtmlStyles'
 import { isStrongEditorialPreviewOverflowing } from './strongDetailPreview'
-import { getStrongEntityPresentation, splitStrongEntityRelations } from './strongEntityPresentation'
+import { getStrongEntityAvatarKey, splitStrongEntityRelations } from './strongEntityPresentation'
+import { isStrongOriginalUnnamed } from './strongOriginalPresentation'
 
 export const StrongEyebrow = ({ children }: { children: React.ReactNode }) => (
   <Text color="primary" fontSize={11} bold textTransform="uppercase">
@@ -102,7 +103,7 @@ export const StrongLexicalRelationCard = ({
           {relation.gloss || relation.transliteration}
         </Text>
       </VStack>
-      {!!relation.original && (
+      {!isStrongOriginalUnnamed(relation.original) && (
         <Text style={getScaledStrongTextStyle(18, 24, readingTypography)}>{relation.original}</Text>
       )}
       <FeatherIcon name="chevron-right" size={16} color="tertiary" />
@@ -283,6 +284,23 @@ const getEntityLabel = (category: string, type: string, t: TFunction<'translatio
   return t(`strongDetail.entity.type.${typeKey}`, { defaultValue: type })
 }
 
+const ENTITY_AVATAR_IMAGES = {
+  male: require('~assets/images/entity-avatars/male.png'),
+  female: require('~assets/images/entity-avatars/female.png'),
+  group: require('~assets/images/entity-avatars/group.png'),
+  place: require('~assets/images/entity-avatars/place.png'),
+  supernatural: require('~assets/images/entity-avatars/supernatural.png'),
+  time: require('~assets/images/entity-avatars/time.png'),
+  musical: require('~assets/images/entity-avatars/musical.png'),
+  other: require('~assets/images/entity-avatars/other.png'),
+  title: require('~assets/images/entity-avatars/title.png'),
+  language: require('~assets/images/entity-avatars/language.png'),
+  star: require('~assets/images/entity-avatars/star.png'),
+}
+
+const getEntityAvatarSource = (category: string, type: string) =>
+  ENTITY_AVATAR_IMAGES[getStrongEntityAvatarKey(category, type)]
+
 export const StrongEntitySummaryCard = ({
   entity,
   expanded = false,
@@ -299,20 +317,20 @@ export const StrongEntitySummaryCard = ({
   onOpenStrong: (stepCode: string) => void
 }) => {
   const { t } = useTranslation()
-  const presentation = getStrongEntityPresentation(entity)
   const detailedDescription = entity.articleHtml || entity.summaryHtml
 
   return (
     <VStack
       bg={expanded || plain ? undefined : 'lightGrey'}
-      borderRadius={20}
       p={expanded || plain ? 0 : 18}
       gap={13}
     >
       <HStack gap={12} alignItems="center">
-        <Box size={48} borderRadius={24} bg="lightPrimary" center>
-          <FeatherIcon name={presentation.icon} color="primary" size={23} />
-        </Box>
+        <Image
+          source={getEntityAvatarSource(entity.category, entity.type)}
+          style={{ width: 48, height: 48 }}
+          contentFit="contain"
+        />
         <VStack flex gap={3}>
           <StrongEyebrow>{getEntityLabel(entity.category, entity.type, t)}</StrongEyebrow>
           <Text bold fontSize={20}>
@@ -351,18 +369,17 @@ export const StrongEntitySummaryCard = ({
   )
 }
 
-const PERSON_IMAGE = require('./prototypes/strong-detail/assets/male.png')
-const WOMAN_IMAGE = require('./prototypes/strong-detail/assets/female.png')
-
 const relationLabelKey = (relation: string) => `strongDetail.entity.relation.${relation}`
 
 const EntityGraphNode = ({
   name,
+  category,
   type,
   code,
   center = false,
 }: {
   name: string
+  category?: string
   type?: string
   code?: string
   center?: boolean
@@ -377,7 +394,7 @@ const EntityGraphNode = ({
       center
     >
       <Image
-        source={type === 'Female' ? WOMAN_IMAGE : PERSON_IMAGE}
+        source={getEntityAvatarSource(category ?? 'other', type ?? 'Other')}
         style={{ width: center ? 76 : 54, height: center ? 76 : 54 }}
         contentFit="contain"
       />
@@ -446,7 +463,13 @@ export const StrongEntityRelationGraph = ({
       </Svg>
 
       <Box position="absolute" left={center.x - 48} top={108} width={96}>
-        <EntityGraphNode name={entity.name} type={entity.type} code={entity.uStrong} center />
+        <EntityGraphNode
+          name={entity.name}
+          category={entity.category}
+          type={entity.type}
+          code={entity.uStrong}
+          center
+        />
       </Box>
 
       {graph.map((relation, index) => {
@@ -466,6 +489,7 @@ export const StrongEntityRelationGraph = ({
           >
             <EntityGraphNode
               name={relation.targetName}
+              category={relation.targetCategory}
               type={relation.targetType}
               code={relation.targetUStrong}
             />

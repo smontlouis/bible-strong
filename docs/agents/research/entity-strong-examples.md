@@ -105,7 +105,4 @@ WHERE i.stepCode = 'G0792';
   (« Tarpélien », décrit comme un groupe de fonctionnaires), mais c’est l’un des deux seuls
   enregistrements hébreux publiés pour ce type ; il est conservé ici sans le reclasser.
 - Le fichier SQLite n’est pas versionné dans Git : le résultat reflète la copie primaire installée,
-  identique octet pour octet à l’artefact officiel actuellement pointé par le code. La fiche de
-  Pierre versionnée dans
-  `src/features/lexique/prototypes/strong-detail/strong-detail.fixture.json:7-146` confirme
-  indépendamment l’exemple `G4074G`.
+  identique octet pour octet à l’artefact officiel actuellement pointé par le code.

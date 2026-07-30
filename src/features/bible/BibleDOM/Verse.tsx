@@ -45,7 +45,7 @@ import {
 } from './canonicalVersePresentation'
 import { getCanonicalBibleNoteLabel, type CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import { isInterlinearModeEnabled, type InterlinearMode } from '~helpers/interlinearDisplayMode'
-import { getParallelVerseModeProps } from './verseRenderingModel'
+import { getParallelVerseModeProps, shouldHighlightOnlyVerseNumber } from './verseRenderingModel'
 import { getBibleTextFontSize } from './verseTypography'
 
 const VerseText = styled('span')<RootStyles & { isParallel?: boolean }>(
@@ -405,18 +405,23 @@ const renderCanonicalPresentation = (
     }
   })
 
-// When verse has both a background-type highlight AND word annotations,
-// show highlight on number instead of full verse background
+// Keep background highlights off the verse text when word annotations or
+// the translated Strong presentation add their own inline decorations.
 const getNumberHighlight = ({
   highlightedColor,
   hasWordAnnotations,
+  isStrongModeVerse,
   settings,
 }: {
   highlightedColor?: keyof RootStyles['settings']['colors'][keyof RootStyles['settings']['colors']]
   hasWordAnnotations?: boolean
+  isStrongModeVerse?: boolean
   settings: RootState['user']['bible']['settings']
 }): { show: boolean; bg?: string; color?: string } => {
-  if (!highlightedColor || !hasWordAnnotations) {
+  if (
+    !highlightedColor ||
+    !shouldHighlightOnlyVerseNumber({ hasWordAnnotations, isStrongModeVerse })
+  ) {
     return { show: false }
   }
 
@@ -579,7 +584,8 @@ const Verse = ({
     }
   }
 
-  const isStrongVersion = Boolean(verse.StrongSpans) || Boolean(verse.ReverseInterlinearSpans)
+  const isStrongModeVerse = Boolean(verse.StrongSpans)
+  const isStrongVersion = isStrongModeVerse || Boolean(verse.ReverseInterlinearSpans)
 
   const text = getVerseText({
     verse,
@@ -608,7 +614,12 @@ const Verse = ({
 
   const verseKey = `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`
 
-  const numberHighlight = getNumberHighlight({ highlightedColor, hasWordAnnotations, settings })
+  const numberHighlight = getNumberHighlight({
+    highlightedColor,
+    hasWordAnnotations,
+    isStrongModeVerse,
+    settings,
+  })
 
   // Notify the annotation highlight system that DOM layout may have changed.
   // This fires per-verse rather than once at the parent level because each verse
