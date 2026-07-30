@@ -12,6 +12,13 @@ interface Props {
   code: string | number
 }
 
+export const hasStrongAudio = (type: Props['type'], code: Props['code']) => {
+  const numericCode = Number(code)
+  const maximumCode = type === 'hebreu' ? 8674 : 5624
+
+  return Number.isInteger(numericCode) && numericCode >= 1 && numericCode <= maximumCode
+}
+
 const ListenToStrong = ({ type, code }: Props) => {
   const codeId = `${code}`.padStart(4, '0')
   const audioId = `${type}-${codeId}`
@@ -22,6 +29,8 @@ const ListenToStrong = ({ type, code }: Props) => {
 
   const { getStatus, play } = useStrongAudio()
   const audioStatus = getStatus(audioId)
+
+  if (!hasStrongAudio(type, code)) return null
 
   const playAudio = () => {
     play({ id: audioId, url })

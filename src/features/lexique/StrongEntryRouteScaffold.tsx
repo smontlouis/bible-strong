@@ -43,7 +43,7 @@ const StrongEntryRouteScaffold = ({
   fontSize,
   isFormSheet = false,
   onBack,
-  showEntryMenu = true,
+  showEntryMenu = false,
   subTitle,
   title,
 }: Props) => {

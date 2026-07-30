@@ -6,7 +6,7 @@ import Loading from '~common/Loading'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import ConcordanceVerse from '~features/bible/ConcordanceVerse'
-import ListenToStrong from '~features/bible/ListenStrong'
+import ListenToStrong, { hasStrongAudio } from '~features/bible/ListenStrong'
 import type {
   StrongLexiconEntry,
   StrongLexiconEntityRelation,
@@ -228,12 +228,17 @@ const StrongDetailMainPage = ({
               {[entry.transliteration, entry.pronunciation].filter(Boolean).join(' · ')}
             </Text>
           </VStack>
-          <Box bg="primary" bgOpacity="010" borderRadius={24} size={48} center>
-            <ListenToStrong
-              type={entry.language === 'hebrew' ? 'hebreu' : 'grec'}
-              code={entry.baseCode}
-            />
-          </Box>
+          {hasStrongAudio(
+            entry.language === 'hebrew' ? 'hebreu' : 'grec',
+            entry.baseCode
+          ) && (
+            <Box bg="primary" bgOpacity="010" borderRadius={24} size={48} center>
+              <ListenToStrong
+                type={entry.language === 'hebrew' ? 'hebreu' : 'grec'}
+                code={entry.baseCode}
+              />
+            </Box>
+          )}
         </HStack>
       </VStack>
 
@@ -252,7 +257,11 @@ const StrongDetailMainPage = ({
               label: t('strongDetail.jump.related'),
               visible: lexicalRelations.relatedWords.length > 0,
             },
-            { id: 'concordance', label: t('Concordance'), visible: true },
+            {
+              id: 'concordance',
+              label: t('Concordance'),
+              visible: concordanceCount > 0,
+            },
           ]}
           onPress={scrollToAnchor}
         />
@@ -443,75 +452,77 @@ const StrongDetailMainPage = ({
         </StrongEditorialSection>
       )}
 
-      <StrongEditorialSection
-        title={t('Concordance')}
-        onLayout={event => setAnchor('concordance', event.nativeEvent.layout.y)}
-      >
-        <HStack alignItems="baseline" gap={8}>
-          <Text bold fontSize={30}>
-            {concordanceCount}
-          </Text>
-          <Text color="tertiary" fontSize={12}>
-            {t('strongDetail.concordance.usesIn', { version: concordanceVersion })}
-          </Text>
-        </HStack>
-        {lemmaStats.length > 0 && (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={{ marginHorizontal: -20 }}
-            contentContainerStyle={{ paddingHorizontal: 20, gap: 7 }}
-          >
-            <TouchableBox onPress={() => onSelectLemma(undefined)}>
-              <Box
-                bg={selectedLemmaId == null ? 'primary' : 'lightGrey'}
-                borderRadius={16}
-                px={10}
-                py={7}
-              >
-                <Text color={selectedLemmaId == null ? 'reverse' : 'default'} fontSize={12}>
-                  {t('Tous')} · {concordanceTotalCount}
-                </Text>
-              </Box>
-            </TouchableBox>
-            {lemmaStats.map(lemma => (
-              <TouchableBox key={lemma.id} onPress={() => onSelectLemma(lemma.id)}>
+      {concordanceCount > 0 && (
+        <StrongEditorialSection
+          title={t('Concordance')}
+          onLayout={event => setAnchor('concordance', event.nativeEvent.layout.y)}
+        >
+          <HStack alignItems="baseline" gap={8}>
+            <Text bold fontSize={26}>
+              {concordanceCount}
+            </Text>
+            <Text color="tertiary" fontSize={14}>
+              {t('strongDetail.concordance.usesIn', { version: concordanceVersion })}
+            </Text>
+          </HStack>
+          {lemmaStats.length > 0 && (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={{ marginHorizontal: -20 }}
+              contentContainerStyle={{ paddingHorizontal: 20, gap: 7 }}
+            >
+              <TouchableBox onPress={() => onSelectLemma(undefined)}>
                 <Box
-                  bg={selectedLemmaId === lemma.id ? 'primary' : 'lightGrey'}
+                  bg={selectedLemmaId == null ? 'primary' : 'lightGrey'}
                   borderRadius={16}
                   px={10}
                   py={7}
                 >
-                  <Text color={selectedLemmaId === lemma.id ? 'reverse' : 'default'} fontSize={12}>
-                    {lemma.lemma} · {lemma.occurrenceCount}
+                  <Text color={selectedLemmaId == null ? 'reverse' : 'default'} fontSize={12}>
+                    {t('Tous')} · {concordanceTotalCount}
                   </Text>
                 </Box>
               </TouchableBox>
-            ))}
-          </ScrollView>
-        )}
-        {concordanceLoading ? (
-          <Loading />
-        ) : (
-          <VStack>
-            {concordanceVerses.slice(0, displayedConcordanceCount).map(verse => (
-              <ConcordanceVerse
-                key={`${verse.Livre}-${verse.Chapitre}-${verse.Verset}`}
-                onOpenVerse={onOpenConcordanceVerse}
-                t={t}
-                concordanceFor={String(entry.baseCode)}
-                verse={verse}
-              />
-            ))}
-          </VStack>
-        )}
-        {hasHiddenStrongPreviewItems(concordanceCount, displayedConcordanceCount) && (
-          <StrongPreviewLink
-            label={t('strongDetail.concordance.open')}
-            onPress={() => onOpenPage('concordance')}
-          />
-        )}
-      </StrongEditorialSection>
+              {lemmaStats.map(lemma => (
+                <TouchableBox key={lemma.id} onPress={() => onSelectLemma(lemma.id)}>
+                  <Box
+                    bg={selectedLemmaId === lemma.id ? 'primary' : 'lightGrey'}
+                    borderRadius={16}
+                    px={10}
+                    py={7}
+                  >
+                    <Text color={selectedLemmaId === lemma.id ? 'reverse' : 'default'} fontSize={12}>
+                      {lemma.lemma} · {lemma.occurrenceCount}
+                    </Text>
+                  </Box>
+                </TouchableBox>
+              ))}
+            </ScrollView>
+          )}
+          {concordanceLoading ? (
+            <Loading />
+          ) : (
+            <VStack>
+              {concordanceVerses.slice(0, displayedConcordanceCount).map(verse => (
+                <ConcordanceVerse
+                  key={`${verse.Livre}-${verse.Chapitre}-${verse.Verset}`}
+                  onOpenVerse={onOpenConcordanceVerse}
+                  t={t}
+                  concordanceFor={String(entry.baseCode)}
+                  verse={verse}
+                />
+              ))}
+            </VStack>
+          )}
+          {hasHiddenStrongPreviewItems(concordanceTotalCount, displayedConcordanceCount) && (
+            <StrongPreviewLink
+              label={t('strongDetail.concordance.open')}
+              onPress={() => onOpenPage('concordance')}
+            />
+          )}
+        </StrongEditorialSection>
+      )}
     </ScrollView>
   )
 }

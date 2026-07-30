@@ -223,6 +223,7 @@ const StrongMainScreen = ({
       fontSize={19}
       isFormSheet={isFormSheet}
       onBack={onBack}
+      showEntryMenu
       subTitle={
         entry
           ? `${t(entry.language === 'greek' ? 'Grec' : 'Hébreu')} · ${entry.stepCode}`

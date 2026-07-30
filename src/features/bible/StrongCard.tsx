@@ -6,7 +6,7 @@ import Link from '~common/Link'
 import StylizedHTMLView from '~common/StylizedHTMLView'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import ListenToStrong from './ListenStrong'
+import ListenToStrong, { hasStrongAudio } from './ListenStrong'
 
 import capitalize from '~helpers/capitalize'
 import truncate from '~helpers/truncate'
@@ -186,12 +186,17 @@ const StrongCard = (props: Props) => {
                   )}
                 </Text>
               </Link>
-              <Box mr={10} mt={3}>
-                <ListenToStrong
-                  type={strongEntry.language === 'hebrew' ? 'hebreu' : 'grec'}
-                  code={strongEntry.baseCode}
-                />
-              </Box>
+              {hasStrongAudio(
+                strongEntry.language === 'hebrew' ? 'hebreu' : 'grec',
+                strongEntry.baseCode
+              ) && (
+                <Box mr={10} mt={3}>
+                  <ListenToStrong
+                    type={strongEntry.language === 'hebrew' ? 'hebreu' : 'grec'}
+                    code={strongEntry.baseCode}
+                  />
+                </Box>
+              )}
               <Link onPress={openStrong}>
                 {isSelectionMode ? (
                   <IconFeather name="share" size={20} />
