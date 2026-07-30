@@ -12,6 +12,14 @@ import {
 import { basename, dirname, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { LEXICAL_MORPHOLOGY_SUPPLEMENTS } from "../src/lexiconV3/morphologySupplements.js";
+import {
+  assertPinnedStepLexicon,
+  parseStepRelatedNumbers,
+  STEP_GREEK_LEXICON_COMMIT,
+  STEP_GREEK_LEXICON_SHA256,
+  STEP_HEBREW_LEXICON_SHA256,
+  type StepRelatedNumbersEntry
+} from "../src/stepRelatedNumbers.js";
 
 const DEFAULT_LEXICON =
   "data/dictionaries/strong_lexicon.en-fr.full.production.sqlite";
@@ -19,7 +27,9 @@ const DEFAULT_LEGACY = "data/dictionaries/strong.legacy.sqlite";
 const DEFAULT_MORPHOLOGY =
   "outputs/lexicon-v3/french-editorial/morphology-translations.jsonl";
 const DEFAULT_ARCHIVE = "data/dictionaries/archive";
-const BUILDER_VERSION = "lexicon-viewer-enrichment@1";
+const DEFAULT_STEP_GREEK = "data/external/stepbible/lexicon_greek.txt";
+const DEFAULT_STEP_HEBREW = "data/external/stepbible/lexicon_hebrew.txt";
+const BUILDER_VERSION = "lexicon-viewer-enrichment@2";
 
 interface MorphologyTranslation {
   morphologyCodeId: number;
@@ -33,6 +43,8 @@ interface MorphologyTranslation {
 
 interface StepRow {
   id: number;
+  language: "greek" | "hebrew";
+  baseCode: number;
   eStrong: string;
   uStrong: string;
   stepCode: string;
@@ -66,14 +78,41 @@ function main(): void {
   const lexiconPath = resolve(args.lexicon ?? DEFAULT_LEXICON);
   const legacyPath = resolve(args.legacy ?? DEFAULT_LEGACY);
   const morphologyPath = resolve(args.morphology ?? DEFAULT_MORPHOLOGY);
+  const stepGreekPath = resolve(args["step-greek"] ?? DEFAULT_STEP_GREEK);
+  const stepHebrewPath = resolve(args["step-hebrew"] ?? DEFAULT_STEP_HEBREW);
   const archiveDir = resolve(args.archive ?? DEFAULT_ARCHIVE);
   const summaryPath = resolve(
     args.summary ?? `${lexiconPath}.viewer-summary.json`
   );
+  const manifestPath = resolve(
+    args.manifest ?? resolve(dirname(lexiconPath), "manifest.json")
+  );
+  const reportPath = resolve(
+    args.report ?? resolve(dirname(lexiconPath), "report.md")
+  );
+  const generatedAt = args["generated-at"] ?? new Date().toISOString();
 
-  for (const source of [lexiconPath, legacyPath, morphologyPath]) {
+  for (const source of [
+    lexiconPath,
+    legacyPath,
+    morphologyPath,
+    stepGreekPath,
+    stepHebrewPath
+  ]) {
     if (!existsSync(source)) throw new Error(`missing-source:${source}`);
   }
+  const stepGreekContent = readFileSync(stepGreekPath);
+  const stepHebrewContent = readFileSync(stepHebrewPath);
+  assertPinnedStepLexicon(stepGreekContent, STEP_GREEK_LEXICON_SHA256, "greek");
+  assertPinnedStepLexicon(
+    stepHebrewContent,
+    STEP_HEBREW_LEXICON_SHA256,
+    "hebrew"
+  );
+  const stepRelatedEntries = [
+    ...parseStepRelatedNumbers(stepGreekContent.toString("utf8")),
+    ...parseStepRelatedNumbers(stepHebrewContent.toString("utf8"))
+  ];
 
   mkdirSync(dirname(summaryPath), { recursive: true });
   mkdirSync(archiveDir, { recursive: true });
@@ -82,6 +121,37 @@ function main(): void {
     archiveDir,
     `${basename(lexiconPath, ".sqlite")}.pre-viewer-${sourceSha256.slice(0, 12)}.sqlite`
   );
+  if (
+    isCurrentRelationEnrichment({
+      lexiconPath,
+      legacySha256: sha256File(legacyPath),
+      morphologySha256: sha256File(morphologyPath)
+    })
+  ) {
+    const db = new DatabaseSync(lexiconPath, { readOnly: true });
+    let summary: Record<string, unknown>;
+    try {
+      summary = verify(db);
+    } finally {
+      db.close();
+    }
+    const result = {
+      ...summary,
+      lexiconPath,
+      archivePath,
+      summaryPath,
+      sourceSha256,
+      outputSha256: sourceSha256,
+      outputBytes: statSync(lexiconPath).size,
+      builderVersion: BUILDER_VERSION,
+      generatedAt,
+      unchanged: true
+    };
+    writeFileSync(summaryPath, `${JSON.stringify(result, null, 2)}\n`, "utf8");
+    updateCandidateArtifacts({ manifestPath, reportPath, result });
+    process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+    return;
+  }
   if (!existsSync(archivePath)) copyFileSync(lexiconPath, archivePath);
 
   const temporary = `${lexiconPath}.viewer-tmp-${process.pid}`;
@@ -97,18 +167,21 @@ function main(): void {
       db.exec("BEGIN IMMEDIATE;");
       try {
         rebuildMorphologyTranslations(db, morphologyPath);
-        rebuildRelations(db);
+        rebuildRelations(db, stepRelatedEntries);
         const setMeta = db.prepare(
           `INSERT INTO DictionaryMeta(key, value) VALUES (?, ?)
            ON CONFLICT(key) DO UPDATE SET value=excluded.value`
         );
         const metadata: Record<string, string> = {
-          lexiconViewerEnrichedAt: new Date().toISOString(),
+          lexiconViewerEnrichedAt: generatedAt,
           lexiconViewerEnrichmentVersion: BUILDER_VERSION,
           lexiconViewerLegacySha256: sha256File(legacyPath),
           lexiconViewerMorphologySha256: sha256File(morphologyPath),
+          lexiconViewerStepCompiledCommit: STEP_GREEK_LEXICON_COMMIT,
+          lexiconViewerStepGreekSha256: STEP_GREEK_LEXICON_SHA256,
+          lexiconViewerStepHebrewSha256: STEP_HEBREW_LEXICON_SHA256,
           lexiconViewerProfile:
-            "step-en-fr-full+relations+morphology+legacy-external"
+            "step-en-fr-full+typed-relations+step-related+morphology+legacy-external"
         };
         for (const [key, value] of Object.entries(metadata)) {
           setMeta.run(key, value);
@@ -134,14 +207,139 @@ function main(): void {
       outputSha256: sha256File(lexiconPath),
       outputBytes: statSync(lexiconPath).size,
       builderVersion: BUILDER_VERSION,
-      generatedAt: new Date().toISOString()
+      generatedAt
     };
     writeFileSync(summaryPath, `${JSON.stringify(result, null, 2)}\n`, "utf8");
+    updateCandidateArtifacts({
+      manifestPath,
+      reportPath,
+      result
+    });
     process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
   } catch (error) {
     rmSync(temporary, { force: true });
     throw error;
   }
+}
+
+function isCurrentRelationEnrichment(options: {
+  lexiconPath: string;
+  legacySha256: string;
+  morphologySha256: string;
+}): boolean {
+  const db = new DatabaseSync(options.lexiconPath, { readOnly: true });
+  try {
+    const metadata = Object.fromEntries(
+      (
+        db
+          .prepare(
+            `SELECT key,value FROM DictionaryMeta
+             WHERE key IN (
+               'lexiconViewerEnrichmentVersion',
+               'lexiconViewerLegacySha256',
+               'lexiconViewerMorphologySha256',
+               'lexiconViewerStepCompiledCommit',
+               'lexiconViewerStepGreekSha256',
+               'lexiconViewerStepHebrewSha256'
+             )`
+          )
+          .all() as Array<{ key: string; value: string }>
+      ).map((row) => [row.key, row.value])
+    );
+    const stepRelatedCount = scalar(
+      db,
+      `SELECT count(*) FROM LexiconRelations
+       WHERE source='STEP_RELATED_NUMBERS'`
+    );
+    return (
+      metadata.lexiconViewerEnrichmentVersion === BUILDER_VERSION &&
+      metadata.lexiconViewerLegacySha256 === options.legacySha256 &&
+      metadata.lexiconViewerMorphologySha256 === options.morphologySha256 &&
+      metadata.lexiconViewerStepCompiledCommit === STEP_GREEK_LEXICON_COMMIT &&
+      metadata.lexiconViewerStepGreekSha256 === STEP_GREEK_LEXICON_SHA256 &&
+      metadata.lexiconViewerStepHebrewSha256 === STEP_HEBREW_LEXICON_SHA256 &&
+      stepRelatedCount > 0
+    );
+  } finally {
+    db.close();
+  }
+}
+
+function updateCandidateArtifacts(options: {
+  manifestPath: string;
+  reportPath: string;
+  result: Record<string, unknown>;
+}): void {
+  const counts =
+    typeof options.result.counts === "object" && options.result.counts
+      ? (options.result.counts as Record<string, unknown>)
+      : {};
+  if (existsSync(options.manifestPath)) {
+    const manifest = JSON.parse(
+      readFileSync(options.manifestPath, "utf8")
+    ) as Record<string, unknown> & {
+      output?: Record<string, unknown>;
+      relationEnrichment?: Record<string, unknown>;
+    };
+    const previousOutputHash = String(
+      manifest.output?.databaseSha256 ?? options.result.sourceSha256 ?? ""
+    );
+    manifest.output = {
+      ...(manifest.output ?? {}),
+      translationDatabaseSha256:
+        manifest.output?.translationDatabaseSha256 ?? previousOutputHash,
+      databaseSha256: options.result.outputSha256
+    };
+    manifest.relationEnrichment = {
+      schema: "step-related-relations@1",
+      builderVersion: options.result.builderVersion,
+      generatedAt: options.result.generatedAt,
+      inputSha256: manifest.output.translationDatabaseSha256,
+      outputSha256: options.result.outputSha256,
+      stepCompiledCommit: STEP_GREEK_LEXICON_COMMIT,
+      stepGreekSha256: STEP_GREEK_LEXICON_SHA256,
+      stepHebrewSha256: STEP_HEBREW_LEXICON_SHA256,
+      relations: counts.relations,
+      stepRelatedRelations: counts.stepRelatedRelations,
+      unresolvedStepRelatedRelations: counts.unresolvedStepRelatedRelations
+    };
+    writeFileSync(
+      options.manifestPath,
+      `${JSON.stringify(manifest, null, 2)}\n`,
+      "utf8"
+    );
+  }
+
+  if (existsSync(options.reportPath)) {
+    const start = "<!-- step-related-enrichment:start -->";
+    const end = "<!-- step-related-enrichment:end -->";
+    const section = `${start}
+## Relations lexicales STEP
+
+- Version : \`${String(options.result.builderVersion)}\`
+- Commit compilé STEP : \`${STEP_GREEK_LEXICON_COMMIT}\`
+- Relations totales : ${String(counts.relations ?? 0)}
+- Relations \`StepRelatedNos2\` : ${String(counts.stepRelatedRelations ?? 0)}
+- Relations STEP non résolues : ${String(counts.unresolvedStepRelatedRelations ?? 0)}
+- SHA-256 candidate finale : \`${String(options.result.outputSha256)}\`
+
+Toutes les relations restent en SQLite. L’application place les relations
+\`same_estrong\` sous « Autres sens » et déduplique « Mots liés » par cible.
+${end}`;
+    const current = readFileSync(options.reportPath, "utf8").trimEnd();
+    const pattern = new RegExp(
+      `${escapeRegExp(start)}[\\s\\S]*?${escapeRegExp(end)}`,
+      "u"
+    );
+    const updated = pattern.test(current)
+      ? current.replace(pattern, section)
+      : `${current}\n\n${section}`;
+    writeFileSync(options.reportPath, `${updated}\n`, "utf8");
+  }
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 }
 
 function rebuildMorphologyTranslations(
@@ -262,7 +460,10 @@ function rebuildMorphologyTranslations(
   }
 }
 
-function rebuildRelations(db: DatabaseSync): void {
+function rebuildRelations(
+  db: DatabaseSync,
+  stepRelatedEntries: StepRelatedNumbersEntry[]
+): void {
   db.exec(`
     DROP TABLE IF EXISTS LexiconRelationProvenance;
     DROP TABLE IF EXISTS LexiconRelations;
@@ -295,7 +496,8 @@ function rebuildRelations(db: DatabaseSync): void {
 
   const rows = db
     .prepare(
-      `SELECT se.id, se.eStrong, se.uStrong, i.stepCode, i.relationKind,
+      `SELECT se.id, se.language, se.baseCode, se.eStrong, se.uStrong,
+              i.stepCode, i.relationKind,
               i.relatedStepCode, i.relationLabelEn, i.relationLabelFr
        FROM StepEntries se
        JOIN StepEntryIdentities i ON i.stepEntryId=se.id
@@ -305,6 +507,9 @@ function rebuildRelations(db: DatabaseSync): void {
   const byStepCode = new Map(rows.map((row) => [row.stepCode, row]));
   const byEStrong = groupBy(rows, (row) => row.eStrong);
   const byUStrong = groupBy(rows, (row) => row.uStrong);
+  const byClassicStrong = groupBy(rows, (row) =>
+    classicStrong(row.language, row.baseCode)
+  );
   const relations: RelationInsert[] = [];
 
   for (const row of rows) {
@@ -372,6 +577,27 @@ function rebuildRelations(db: DatabaseSync): void {
     }
   }
 
+  for (const entry of stepRelatedEntries) {
+    const from = byStepCode.get(entry.code);
+    if (!from) continue;
+    entry.relatedCodes.forEach((relatedCode, index) => {
+      const target = byStepCode.get(relatedCode);
+      if (!target) return;
+      relations.push({
+        fromStepEntryId: from.id,
+        toStepEntryId: target.id,
+        toStepCode: target.stepCode,
+        groupKind: "family",
+        relationKind: "step_related",
+        labelEn: "Related STEP word",
+        labelFr: "mot lié STEP",
+        source: "STEP_RELATED_NUMBERS",
+        evidence: `${entry.code}:@StepRelatedNos2:${entry.fieldLine}`,
+        sortOrder: 70 + index
+      });
+    });
+  }
+
   const legacyRows = db
     .prepare(
       `SELECT 'greek' AS language, Code AS code, Origine AS originHtml
@@ -384,11 +610,11 @@ function rebuildRelations(db: DatabaseSync): void {
   for (const legacy of legacyRows) {
     const prefix = legacy.language === "greek" ? "G" : "H";
     const fromCode = `${prefix}${String(legacy.code).padStart(4, "0")}`;
-    const fromEntries = byEStrong.get(fromCode) ?? [];
+    const fromEntries = byClassicStrong.get(fromCode) ?? [];
     if (fromEntries.length === 0) continue;
     const linkedCodes = extractLegacyStrongLinks(legacy.originHtml);
     for (const linkedCode of linkedCodes) {
-      const targetEntries = byEStrong.get(linkedCode) ?? [];
+      const targetEntries = byClassicStrong.get(linkedCode) ?? [];
       const target =
         targetEntries.find((entry) => entry.stepCode === linkedCode) ??
         targetEntries[0] ??
@@ -474,6 +700,10 @@ function rebuildRelations(db: DatabaseSync): void {
   }
 }
 
+function classicStrong(language: "greek" | "hebrew", baseCode: number): string {
+  return `${language === "greek" ? "G" : "H"}${String(baseCode).padStart(4, "0")}`;
+}
+
 function reverseRelation(kind: string): {
   kind: string;
   labelEn: string;
@@ -534,6 +764,15 @@ function verify(db: DatabaseSync): Record<string, unknown> {
       db,
       "SELECT count(*) FROM LexiconRelationProvenance"
     ),
+    stepRelatedRelations: scalar(
+      db,
+      "SELECT count(*) FROM LexiconRelations WHERE source='STEP_RELATED_NUMBERS'"
+    ),
+    unresolvedStepRelatedRelations: scalar(
+      db,
+      `SELECT count(*) FROM LexiconRelations
+       WHERE source='STEP_RELATED_NUMBERS' AND toStepEntryId IS NULL`
+    ),
     relationOrphans: scalar(
       db,
       `SELECT count(*) FROM LexiconRelations r
@@ -547,6 +786,14 @@ function verify(db: DatabaseSync): Record<string, unknown> {
   }
   if (counts.relations !== counts.relationProvenance) {
     throw new Error("incomplete-relation-provenance");
+  }
+  if (counts.stepRelatedRelations === 0) {
+    throw new Error("missing-step-related-relations");
+  }
+  if (counts.unresolvedStepRelatedRelations !== 0) {
+    throw new Error(
+      `unresolved-step-related-relations:${counts.unresolvedStepRelatedRelations}`
+    );
   }
   if (counts.relationOrphans !== 0) {
     throw new Error(`relation-orphans:${counts.relationOrphans}`);
@@ -590,8 +837,13 @@ function parseArgs(argv: readonly string[]): Record<string, string> {
     "lexicon",
     "legacy",
     "morphology",
+    "step-greek",
+    "step-hebrew",
     "archive",
-    "summary"
+    "summary",
+    "manifest",
+    "report",
+    "generated-at"
   ]);
   const result: Record<string, string> = {};
   for (let index = 0; index < argv.length; index += 1) {

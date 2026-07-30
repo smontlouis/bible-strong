@@ -368,6 +368,7 @@ export interface LexiconRow {
 
 export interface LexiconMetadata {
   database: string;
+  resourcesDatabase: string | null;
   legacyDatabase: string | null;
   releaseKey: string | null;
   profile: string;

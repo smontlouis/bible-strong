@@ -33,6 +33,10 @@ import {
 import { cn } from "@/lib/utils";
 import { bookLabel } from "./bookNames";
 import { loadJsonlBibleCatalog, loadJsonlBibleChapter } from "./data";
+import {
+  preferredLexiconIdentities,
+  type SelectedOccurrence
+} from "./jsonlBibleIdentities";
 import type {
   JsonlBibleCatalog,
   JsonlBibleChapter,
@@ -51,16 +55,6 @@ const VERSION_ORDER: JsonlBibleId[] = [
   "DBYR",
   "LSG"
 ];
-
-interface SelectedOccurrence {
-  ref: string;
-  version: JsonlBibleId;
-  surface: string;
-  strong: string[];
-  estrong: string[];
-  dstrong: string[];
-  ustrong: string[];
-}
 
 type BibleDisplayMode = "reading" | "verses";
 
@@ -860,14 +854,15 @@ function JsonlLexiconInspector({
   onLocaleChange: (locale: "fr" | "en") => void;
   onDebugChange: (debug: boolean) => void;
 }) {
-  const candidateCodes = useMemo(
-    () => preferredLexiconCodes(occurrence),
+  const candidateIdentities = useMemo(
+    () => preferredLexiconIdentities(occurrence),
     [occurrence]
   );
   const [selectedCode, setSelectedCode] = useState("");
-  const activeStrong = candidateCodes.includes(selectedCode)
-    ? selectedCode
-    : (candidateCodes[0] ?? "");
+  const activeIdentity =
+    candidateIdentities.find((identity) => identity.code === selectedCode) ??
+    candidateIdentities[0];
+  const activeStrong = activeIdentity?.code ?? "";
   const [entry, setEntry] = useState<LexiconEntryPayload | null>(null);
   const [entryError, setEntryError] = useState("");
   const entryCache = useRef(new Map<string, LexiconEntryPayload>());
@@ -948,7 +943,9 @@ function JsonlLexiconInspector({
                     {occurrence.surface || "Strong vide"}
                   </h3>
                   <p className="text-muted-foreground mt-1 font-mono text-xs">
-                    {activeStrong || "Aucun Strong exploitable"}
+                    {activeIdentity
+                      ? `${activeIdentity.kind} · ${activeIdentity.code}`
+                      : "Aucune identité lexicale"}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
@@ -995,18 +992,23 @@ function JsonlLexiconInspector({
                   </Button>
                 </div>
               </div>
-              {candidateCodes.length > 1 ? (
+              {candidateIdentities.length > 1 ? (
                 <div className="mt-3 flex flex-wrap gap-1.5">
-                  {candidateCodes.map((code) => (
+                  {candidateIdentities.map((identity) => (
                     <Button
-                      key={code}
+                      key={identity.code}
                       type="button"
-                      variant={code === activeStrong ? "secondary" : "outline"}
+                      variant={
+                        identity.code === activeStrong ? "secondary" : "outline"
+                      }
                       size="sm"
-                      className="h-7 px-2 font-mono text-xs"
-                      onClick={() => setSelectedCode(code)}
+                      className="h-7 gap-1.5 px-2 text-xs"
+                      onClick={() => setSelectedCode(identity.code)}
                     >
-                      {code}
+                      <span className="text-muted-foreground font-sans text-[10px]">
+                        {identity.kind}
+                      </span>
+                      <span className="font-mono">{identity.code}</span>
                     </Button>
                   ))}
                 </div>
@@ -1032,25 +1034,6 @@ function JsonlLexiconInspector({
       </div>
     </ScrollArea>
   );
-}
-
-function preferredLexiconCodes(
-  occurrence: SelectedOccurrence | null
-): string[] {
-  if (!occurrence) return [];
-  const preferred = occurrence.dstrong.length
-    ? occurrence.dstrong
-    : occurrence.estrong.length
-      ? occurrence.estrong
-      : occurrence.strong;
-  return [...new Set(preferred.map(normalizeLexiconStrong).filter(Boolean))];
-}
-
-function normalizeLexiconStrong(value: string) {
-  const compact = value.trim().toUpperCase();
-  const match = compact.match(/^([GH])0*(\d+)([A-Z]?)$/u);
-  if (!match) return compact;
-  return `${match[1]}${match[2].padStart(4, "0")}${match[3] ?? ""}`;
 }
 
 function JsonlEmpty({

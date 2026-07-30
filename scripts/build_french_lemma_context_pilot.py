@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a conservative, contextual French-lemma pilot for the LSG SQLite."""
+"""Build conservative contextual French lemmas for a Strong Bible SQLite."""
 
 from __future__ import annotations
 
@@ -75,6 +75,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--kaikki", required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--report", required=True)
+    parser.add_argument("--dataset")
     parser.add_argument("--model", default="gsd")
     return parser.parse_args()
 
@@ -131,16 +132,23 @@ def metadata(connection: sqlite3.Connection, key: str) -> str:
 
 def read_source(
     connection: sqlite3.Connection,
+    expected_dataset: str | None,
 ) -> tuple[list[tuple[int, str, list[Span]]], list[Span]]:
     columns = {
         str(row[1]) for row in connection.execute("PRAGMA table_info(WordSpans)")
     }
-    if "lexemeId" in columns:
-        raise RuntimeError("source-already-enriched")
-    if metadata(connection, "schemaVersion") != "2":
+    if metadata(connection, "schemaVersion") != "3":
         raise RuntimeError("incompatible-schema")
-    if metadata(connection, "datasetId") != "LSG":
+    dataset = metadata(connection, "datasetId")
+    if expected_dataset is not None and dataset != expected_dataset:
         raise RuntimeError("incompatible-dataset")
+    assigned = int(
+        connection.execute(
+            "SELECT COUNT(*) FROM WordSpans WHERE lexemeId IS NOT NULL"
+        ).fetchone()[0]
+    )
+    if assigned:
+        raise RuntimeError("source-already-enriched")
 
     verses: list[tuple[int, str, list[Span]]] = []
     all_spans: list[Span] = []
@@ -409,15 +417,8 @@ def enrich_database(
     try:
         connection.executescript(
             """
-            ALTER TABLE WordSpans ADD COLUMN lexemeId INTEGER;
             ALTER TABLE WordSpans ADD COLUMN lemmaMethod INTEGER NOT NULL
               DEFAULT 0 CHECK(lemmaMethod BETWEEN 0 AND 7);
-            CREATE TABLE FrenchLexemes (
-              id INTEGER PRIMARY KEY,
-              lemma TEXT NOT NULL,
-              partOfSpeech TEXT NOT NULL,
-              UNIQUE(lemma, partOfSpeech)
-            );
             CREATE TABLE FrenchLemmaMetadata (
               key TEXT PRIMARY KEY,
               value TEXT NOT NULL
@@ -432,14 +433,24 @@ def enrich_database(
                 if decision.candidate is not None:
                     lexeme_id = lexeme_ids.get(decision.candidate)
                     if lexeme_id is None:
-                        cursor = connection.execute(
+                        connection.execute(
                             """
-                            INSERT INTO FrenchLexemes(lemma, partOfSpeech)
+                            INSERT OR IGNORE INTO FrenchLexemes(
+                              lemma, partOfSpeech
+                            )
                             VALUES (?, ?)
                             """,
                             decision.candidate,
                         )
-                        lexeme_id = int(cursor.lastrowid)
+                        lexeme_id = int(
+                            connection.execute(
+                                """
+                                SELECT id FROM FrenchLexemes
+                                WHERE lemma=? AND partOfSpeech=?
+                                """,
+                                decision.candidate,
+                            ).fetchone()[0]
+                        )
                         lexeme_ids[decision.candidate] = lexeme_id
                 if decision.method != 0:
                     connection.execute(
@@ -470,6 +481,23 @@ def enrich_database(
             connection.executemany(
                 "INSERT INTO FrenchLemmaMetadata(key, value) VALUES (?, ?)",
                 metadata_values.items(),
+            )
+            resolved = sum(methods[index] for index in (1, 2, 5, 6))
+            lexeme_count = int(
+                connection.execute(
+                    "SELECT COUNT(*) FROM FrenchLexemes"
+                ).fetchone()[0]
+            )
+            connection.executemany(
+                """
+                INSERT INTO ResourceMetadata(key, value) VALUES (?, ?)
+                ON CONFLICT(key) DO UPDATE SET value=excluded.value
+                """,
+                (
+                    ("lexemeAssignmentCount", str(resolved)),
+                    ("lexemeCount", str(lexeme_count)),
+                    ("lemmaDatasetVersion", VERSION),
+                ),
             )
         connection.execute("ANALYZE")
         connection.execute("VACUUM")
@@ -534,7 +562,7 @@ def main() -> None:
     try:
         connection = sqlite3.connect(temporary)
         try:
-            verses, spans = read_source(connection)
+            verses, spans = read_source(connection, args.dataset)
         finally:
             connection.close()
         target_forms = {span.normalized for span in spans if span.normalized}

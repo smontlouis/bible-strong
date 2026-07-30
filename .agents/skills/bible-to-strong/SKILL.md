@@ -1,13 +1,17 @@
 ---
 name: bible-to-strong
-description: Use this skill when the user wants to generate, improve, evaluate, compare, minify, or publish a Strong-tagged Bible from a local Bible JSON file in this repository. It covers canonical Strong ledger generation, compact JSONL delivery with STEP identities, reader/advanced exports, bounded LLM review, gold evaluation against known Strong editions, quality reports, and safe handling of copyrighted or large generated artifacts.
+description: Deterministic Strong-Bible command workflow for this repository. Use only when the user explicitly invokes `bible-to-strong` / `$bible-to-strong`, explicitly asks to use this skill, or asks to execute the repository's deterministic `strong:*` generation, refresh, evaluation, export, or publication commands for a local Bible. Do not trigger for conceptual Strong questions, database or JSON schema discussions, source research/import, mobile integration, ordinary code changes, or general Bible data work.
 ---
 
 # Bible To Strong
 
 ## Scope
 
-Use this skill in this repository when asked to create or improve a Strong-tagged Bible for a local version such as `nbs`, `s21`, `bds`, `fmar`, etc.
+Use this skill only for explicitly requested execution of the deterministic
+Strong-Bible pipeline for a local version such as `nbs`, `s21`, `bds`, or
+`fmar`. Do not load it merely because a conversation mentions Strong numbers,
+Bible formats, STEP, occurrences, SQLite, JSON, production releases, or mobile
+integration.
 
 Expected input:
 

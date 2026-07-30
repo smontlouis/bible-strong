@@ -1,20 +1,32 @@
 import { createHash, randomUUID } from "node:crypto";
 import { createReadStream, existsSync } from "node:fs";
-import { copyFile, mkdir, rename, rm, stat, writeFile } from "node:fs/promises";
+import {
+  copyFile,
+  mkdir,
+  readFile,
+  rename,
+  rm,
+  stat,
+  writeFile
+} from "node:fs/promises";
 import path from "node:path";
+import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 import { DatabaseSync } from "node:sqlite";
+import { execFile } from "node:child_process";
 
+import { DEFAULT_KAIKKI_FRENCH_JSONL } from "./frenchLemmaPilot.js";
 import { JSONL_BIBLE_SOURCES } from "./jsonlBibleViewer.js";
 import {
   compileStrongBibleJsonlToSqlite,
   STRONG_BIBLE_SQLITE_SCHEMA_VERSION,
+  verifyStrongBibleSqlite,
   type StrongBibleSqliteSummary
 } from "./strongBibleSqlite.js";
 
-export const PRODUCTION_RESOURCE_RELEASE_SCHEMA_VERSION = 4;
+export const PRODUCTION_RESOURCE_RELEASE_SCHEMA_VERSION = 5;
 export const DEFAULT_PRODUCTION_RESOURCE_RELEASE =
-  "outputs/releases/bible-strong-production-v4";
+  "outputs/releases/bible-strong-production-v5";
 
 const SHARED_RESOURCES = [
   {
@@ -43,6 +55,7 @@ const SHARED_RESOURCES = [
     requiredTables: ["Occurrences", "OccurrenceMorphology", "OccurrenceStats"]
   }
 ] as const;
+const execFileAsync = promisify(execFile);
 
 export interface ProductionResourceCatalog {
   schemaVersion: number;
@@ -61,6 +74,9 @@ export interface ProductionResourceCatalog {
     occurrenceCount: number;
     identityCount: number;
     noteCount: number;
+    lexemeAssignmentCount: number;
+    lexemeCount: number;
+    lemmaCoveragePercent: number;
     previousSizeBytes?: number;
     savedBytes?: number;
     reductionPercent?: number;
@@ -102,6 +118,11 @@ export async function packageProductionResources(
   const resourceEntries: ProductionResourceCatalog["resources"] = [];
 
   try {
+    const compiledBibles: Array<{
+      source: (typeof JSONL_BIBLE_SOURCES)[number];
+      file: string;
+      summary: StrongBibleSqliteSummary;
+    }> = [];
     for (const source of JSONL_BIBLE_SOURCES) {
       const inputPath = path.resolve(root, source.relativePath);
       const file = `bibles/bible-${source.id.toLowerCase()}-strong.sqlite`;
@@ -111,9 +132,50 @@ export async function packageProductionResources(
         datasetId: source.id,
         expectedVersion: source.sourceVersion
       });
+      compiledBibles.push({ source, file, summary });
+    }
+
+    const lemmaEnrichments = [];
+    for (const { source, file } of compiledBibles.filter(({ source }) =>
+      source.relativePath.includes("permissive")
+    )) {
+      lemmaEnrichments.push(
+        await enrichGeneratedBibleLemmas({
+          root,
+          temporaryDir,
+          datasetId: source.id,
+          file
+        })
+      );
+    }
+    await writeJson(
+      path.join(temporaryDir, "manifests", "generated-french-lemmas.json"),
+      {
+        format: "generated-french-lemma-manifest",
+        version: PRODUCTION_RESOURCE_RELEASE_SCHEMA_VERSION,
+        enrichments: lemmaEnrichments
+      }
+    );
+
+    for (const compiled of compiledBibles) {
+      const { source, file } = compiled;
+      const outputPath = path.join(temporaryDir, file);
+      const verification = verifyStrongBibleSqlite({
+        sqlitePath: outputPath,
+        expectedDatasetId: source.id,
+        expectedVersion: source.sourceVersion,
+        expectedSourceSha256: compiled.summary.sourceSha256
+      });
+      const outputStats = await stat(outputPath);
+      const summary: StrongBibleSqliteSummary = {
+        ...compiled.summary,
+        ...verification,
+        outputSha256: await sha256File(outputPath),
+        outputBytes: outputStats.size
+      };
       const previousPath = path.resolve(
         root,
-        "outputs/releases/bible-strong-production-v3",
+        "outputs/releases/bible-strong-production-v4",
         file
       );
       const previousSizeBytes = existsSync(previousPath)
@@ -134,6 +196,14 @@ export async function packageProductionResources(
         occurrenceCount: summary.occurrenceCount,
         identityCount: summary.identityCount,
         noteCount: summary.noteCount,
+        lexemeAssignmentCount: summary.lexemeAssignmentCount,
+        lexemeCount: summary.lexemeCount,
+        lemmaCoveragePercent: Number(
+          (
+            (summary.lexemeAssignmentCount / summary.occurrenceCount) *
+            100
+          ).toFixed(2)
+        ),
         ...(previousSizeBytes === undefined
           ? {}
           : {
@@ -205,6 +275,66 @@ export async function packageProductionResources(
     await rm(temporaryDir, { recursive: true, force: true });
     throw error;
   }
+}
+
+async function enrichGeneratedBibleLemmas(options: {
+  root: string;
+  temporaryDir: string;
+  datasetId: string;
+  file: string;
+}): Promise<Record<string, unknown>> {
+  const source = path.join(options.temporaryDir, options.file);
+  const output = `${source}.contextual`;
+  const reportPath = path.join(
+    options.temporaryDir,
+    "manifests",
+    `${options.datasetId.toLowerCase()}-french-lemmas.json`
+  );
+  const python = path.join(
+    options.root,
+    "outputs/tools/french-lemmas-venv/bin/python"
+  );
+  const script = path.join(
+    options.root,
+    "scripts/build_french_lemma_context_pilot.py"
+  );
+  if (!existsSync(python)) {
+    throw new Error(
+      `production-resource-french-lemma-runtime-missing:${python}`
+    );
+  }
+  await mkdir(path.dirname(reportPath), { recursive: true });
+  await execFileAsync(
+    python,
+    [
+      script,
+      "--source",
+      source,
+      "--kaikki",
+      path.join(options.root, DEFAULT_KAIKKI_FRENCH_JSONL),
+      "--output",
+      output,
+      "--report",
+      reportPath,
+      "--dataset",
+      options.datasetId
+    ],
+    { maxBuffer: 1024 * 1024 }
+  );
+  await rm(source);
+  await rename(output, source);
+  const report = JSON.parse(await readFile(reportPath, "utf8")) as Record<
+    string,
+    unknown
+  >;
+  const normalizedReport = {
+    ...report,
+    datasetId: options.datasetId,
+    sourceDatabase: options.file,
+    outputDatabase: options.file
+  };
+  await writeJson(reportPath, normalizedReport);
+  return normalizedReport;
 }
 
 function bibleManifest(

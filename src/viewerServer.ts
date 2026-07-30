@@ -37,11 +37,27 @@ import {
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_PORT = 4173;
-const DEFAULT_LEXICON_DB =
-  "data/dictionaries/strong_lexicon.en-fr.full.production.sqlite";
+const MODULAR_LEXICON_DIR =
+  "outputs/releases/strong-lexicon-modular-v1-candidate";
+const MODULAR_CORE_DB = path.join(
+  MODULAR_LEXICON_DIR,
+  "strong_lexicon.core.sqlite"
+);
+const MODULAR_RESOURCES_DB = path.join(
+  MODULAR_LEXICON_DIR,
+  "strong_lexicon.resources.sqlite"
+);
+const MODULAR_ENTITIES_DB = path.join(
+  MODULAR_LEXICON_DIR,
+  "bible_entities.production.sqlite"
+);
 const LEXICON_DB = path.resolve(
   ROOT,
-  process.env.LEXICON_DB ?? DEFAULT_LEXICON_DB
+  process.env.LEXICON_DB ?? MODULAR_CORE_DB
+);
+const LEXICON_RESOURCES_DB = path.resolve(
+  ROOT,
+  process.env.LEXICON_RESOURCES_DB ?? MODULAR_RESOURCES_DB
 );
 const LEGACY_LEXICON_DB = path.resolve(
   ROOT,
@@ -51,7 +67,11 @@ const LEXICON_FR_V2_FINAL = path.resolve(
   ROOT,
   "outputs/lexicon-fr-v2/strong_lexicon_fr_v2.final.jsonl"
 );
-const DEFAULT_ENTITIES_DB = "data/entities/bible_entities.production.sqlite";
+const DEFAULT_ENTITIES_DB = existsSync(
+  path.resolve(ROOT, MODULAR_ENTITIES_DB)
+)
+  ? MODULAR_ENTITIES_DB
+  : "data/entities/bible_entities.production.sqlite";
 const ENTITIES_DB = path.resolve(
   ROOT,
   process.env.ENTITIES_DB ?? DEFAULT_ENTITIES_DB
@@ -391,8 +411,8 @@ async function handleApplyReview(
 }
 
 function handleLexiconSearch(url: URL, response: ServerResponse): void {
-  if (!existsSync(LEXICON_DB)) {
-    sendJson(response, 500, { error: "lexicon-db-not-found" });
+  if (!lexiconCoreAvailable()) {
+    sendJson(response, 500, { error: "lexicon-core-module-not-found" });
     return;
   }
 
@@ -494,8 +514,8 @@ function handleLexiconSearch(url: URL, response: ServerResponse): void {
 }
 
 function handleLexiconMetadata(response: ServerResponse): void {
-  if (!existsSync(LEXICON_DB)) {
-    sendJson(response, 500, { error: "lexicon-db-not-found" });
+  if (!lexiconCoreAvailable()) {
+    sendJson(response, 500, { error: "lexicon-core-module-not-found" });
     return;
   }
 
@@ -530,8 +550,10 @@ function handleLexiconMetadata(response: ServerResponse): void {
            (SELECT count(*) FROM Hebreu WHERE Code > 0) AS count`
       )[0]?.count ?? 0)
     : 0;
-  const resourceEntries = lexiconTableExists("LexiconResources")
-    ? (runSqlJson<{ count: number }>(
+  const resourcesAvailable = lexiconResourcesAvailable();
+  const resourceEntries = resourcesAvailable
+    ? (runSqlJsonFromDb<{ count: number }>(
+        LEXICON_RESOURCES_DB,
         "SELECT count(*) AS count FROM LexiconResources"
       )[0]?.count ?? 0)
     : 0;
@@ -570,6 +592,9 @@ function handleLexiconMetadata(response: ServerResponse): void {
 
   sendJson(response, 200, {
     database: path.relative(ROOT, LEXICON_DB),
+    resourcesDatabase: resourcesAvailable
+      ? path.relative(ROOT, LEXICON_RESOURCES_DB)
+      : null,
     legacyDatabase: existsSync(LEGACY_LEXICON_DB)
       ? path.relative(ROOT, LEGACY_LEXICON_DB)
       : null,
@@ -608,8 +633,8 @@ function handleLexiconMetadata(response: ServerResponse): void {
 }
 
 function handleLexiconEntry(url: URL, response: ServerResponse): void {
-  if (!existsSync(LEXICON_DB)) {
-    sendJson(response, 500, { error: "lexicon-db-not-found" });
+  if (!lexiconCoreAvailable()) {
+    sendJson(response, 500, { error: "lexicon-core-module-not-found" });
     return;
   }
 
@@ -619,6 +644,13 @@ function handleLexiconEntry(url: URL, response: ServerResponse): void {
       url.searchParams.get("strong") ?? ""
     );
     if (requestedStrong) {
+      const classicalMatch = /^([GH])(\d+)$/u.exec(requestedStrong);
+      const classicalFallback = classicalMatch
+        ? `OR (
+             se.language=${sqlString(classicalMatch[1] === "G" ? "greek" : "hebrew")}
+             AND se.baseCode=${Number.parseInt(classicalMatch[2], 10)}
+           )`
+        : "";
       id =
         runSqlJson<{ id: number }>(
           `SELECT se.id
@@ -627,11 +659,13 @@ function handleLexiconEntry(url: URL, response: ServerResponse): void {
            WHERE si.stepCode=${sqlString(requestedStrong)}
               OR se.uStrong=${sqlString(requestedStrong)}
               OR se.eStrong=${sqlString(requestedStrong)}
+              ${classicalFallback}
            ORDER BY
              CASE
                WHEN si.stepCode=${sqlString(requestedStrong)} THEN 0
                WHEN se.uStrong=${sqlString(requestedStrong)} THEN 1
-               ELSE 2
+               WHEN se.eStrong=${sqlString(requestedStrong)} THEN 2
+               ELSE 3
              END,
              se.id
            LIMIT 1`
@@ -762,8 +796,8 @@ function handleEntityTree(response: ServerResponse): void {
 }
 
 function handleLexiconV2ReviewList(url: URL, response: ServerResponse): void {
-  if (!existsSync(LEXICON_DB)) {
-    sendJson(response, 500, { error: "lexicon-db-not-found" });
+  if (!lexiconCoreAvailable()) {
+    sendJson(response, 500, { error: "lexicon-core-module-not-found" });
     return;
   }
   if (!existsSync(LEXICON_FR_V2_FINAL)) {
@@ -796,8 +830,8 @@ function handleLexiconV2ReviewList(url: URL, response: ServerResponse): void {
 }
 
 function handleLexiconV2ReviewEntry(url: URL, response: ServerResponse): void {
-  if (!existsSync(LEXICON_DB)) {
-    sendJson(response, 500, { error: "lexicon-db-not-found" });
+  if (!lexiconCoreAvailable()) {
+    sendJson(response, 500, { error: "lexicon-core-module-not-found" });
     return;
   }
   if (!existsSync(LEXICON_FR_V2_FINAL)) {
@@ -996,16 +1030,19 @@ function runSqlJson<T = Record<string, unknown>>(sql: string): T[] {
 }
 
 function readLexiconResources(stepEntryId: number): Record<string, unknown>[] {
-  if (!lexiconTableExists("LexiconResources")) return [];
+  if (!lexiconResourcesAvailable()) return [];
 
-  const hasTranslations = lexiconTableExists("LexiconResourceTranslations");
-  return runSqlJson(`
+  const hasTranslations = databaseTableExists(
+    LEXICON_RESOURCES_DB,
+    "LexiconResourceTranslations"
+  );
+  return runSqlJsonFromDb(LEXICON_RESOURCES_DB, `
     SELECT
       lr.source,
       lr.kind,
       lr.contentHtml,
       ${hasTranslations ? "lrt.contentHtml" : "NULL"} AS contentHtmlFr,
-      ${hasTranslations ? "lrt.contentText" : "NULL"} AS contentTextFr
+      '' AS contentTextFr
     FROM LexiconResources lr
     ${
       hasTranslations
@@ -1027,11 +1064,11 @@ function readStepEntryIdentity(
     runSqlJson<Record<string, unknown>>(`
       SELECT
         stepCode,
-        rawDStrong,
-        relationKind,
-        relatedStepCode,
-        relationLabelEn,
-        relationLabelFr
+        '' AS rawDStrong,
+        NULL AS relationKind,
+        NULL AS relatedStepCode,
+        NULL AS relationLabelEn,
+        NULL AS relationLabelFr
       FROM StepEntryIdentities
       WHERE stepEntryId = ${stepEntryId}
       LIMIT 1
@@ -1047,10 +1084,10 @@ function readLexiconRelations(stepEntryId: number): Record<string, unknown>[] {
       r.toStepEntryId,
       r.toStepCode,
       r.groupKind,
-      r.relationKind,
-      r.labelEn,
-      r.labelFr,
-      r.source,
+      kind.kind AS relationKind,
+      kind.labelEn,
+      kind.labelFr,
+      '' AS source,
       target.language,
       target.eStrong,
       target.uStrong,
@@ -1059,6 +1096,7 @@ function readLexiconRelations(stepEntryId: number): Record<string, unknown>[] {
       target.gloss AS glossEn,
       translated.gloss AS glossFr
     FROM LexiconRelations r
+    JOIN RelationKinds kind ON kind.id=r.relationKindId
     LEFT JOIN StepEntries target ON target.id=r.toStepEntryId
     LEFT JOIN LexiconTranslations translated
       ON translated.stepEntryId=target.id AND translated.language='fr'
@@ -1350,8 +1388,60 @@ function readTipnrRelations(entityId: number): Record<string, unknown>[] {
 }
 
 function lexiconTableExists(table: string): boolean {
+  return databaseTableExists(LEXICON_DB, table);
+}
+
+function lexiconCoreAvailable(): boolean {
   return (
-    runSqlJson<{ count: number }>(
+    databaseTableExists(LEXICON_DB, "StepEntries") &&
+    databaseMetadataValue(LEXICON_DB, "moduleKind") === "core"
+  );
+}
+
+function lexiconResourcesAvailable(): boolean {
+  if (
+    !databaseTableExists(LEXICON_RESOURCES_DB, "LexiconResources") ||
+    databaseMetadataValue(LEXICON_RESOURCES_DB, "moduleKind") !==
+      "resources"
+  ) {
+    return false;
+  }
+
+  const coreRevision = databaseMetadataValue(
+    LEXICON_DB,
+    "lexiconRevision"
+  );
+  const resourcesRevision = databaseMetadataValue(
+    LEXICON_RESOURCES_DB,
+    "lexiconRevision"
+  );
+  return (
+    coreRevision !== null &&
+    resourcesRevision !== null &&
+    coreRevision === resourcesRevision
+  );
+}
+
+function databaseMetadataValue(
+  dbPath: string,
+  key: string
+): string | null {
+  if (!databaseTableExists(dbPath, "DictionaryMeta")) return null;
+  return (
+    runSqlJsonFromDb<{ value: string }>(
+      dbPath,
+      `SELECT value FROM DictionaryMeta
+        WHERE key=${sqlString(key)}
+        LIMIT 1`
+    )[0]?.value ?? null
+  );
+}
+
+function databaseTableExists(dbPath: string, table: string): boolean {
+  if (!existsSync(dbPath)) return false;
+  return (
+    runSqlJsonFromDb<{ count: number }>(
+      dbPath,
       `SELECT count(*) AS count FROM sqlite_master
        WHERE type='table' AND name=${sqlString(table)}`
     )[0]?.count === 1

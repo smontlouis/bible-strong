@@ -9,7 +9,8 @@ import { fileURLToPath } from "node:url";
 import { normalizeWord } from "./tokenize.js";
 import type { StrongIdentityKind } from "./strongBibleSqlite.js";
 
-export const FRENCH_LEMMA_PILOT_VERSION = "french-lemma-pilot@1";
+export const FRENCH_LEMMA_PILOT_VERSION =
+  "french-lemma-kaikki-strong-context@2";
 export const DEFAULT_LSG_LEMMA_PILOT_OUTPUT =
   "outputs/pilots/french-lemmas-lsg/bible-lsg-strong-lemmas.sqlite";
 export const DEFAULT_LSG_LEMMA_PILOT_REPORT =
@@ -92,6 +93,90 @@ export interface FrenchLemmaStats {
     partOfSpeech: string;
     occurrences: number;
   }>;
+}
+
+export interface FrenchLemmaDatabaseEnrichment {
+  datasetId: string;
+  database: string;
+  spanCount: number;
+  distinctNormalizedForms: number;
+  dictionaryCoveredForms: number;
+  dictionaryCoveragePercent: number;
+  resolvedUniqueCount: number;
+  resolvedStrongContextCount: number;
+  unresolvedAmbiguousCount: number;
+  unavailableCount: number;
+  resolvedCount: number;
+  resolvedPercent: number;
+  lexemeCount: number;
+}
+
+export async function enrichFrenchLemmaDatabasesInPlace(options: {
+  targets: Array<{ database: string; datasetId: string }>;
+  kaikkiJsonl: string;
+}): Promise<FrenchLemmaDatabaseEnrichment[]> {
+  const kaikkiJsonl = path.resolve(options.kaikkiJsonl);
+  if (!existsSync(kaikkiJsonl)) {
+    throw new Error(`french-lemma-pilot-source-missing:${kaikkiJsonl}`);
+  }
+  const targets = options.targets.map((target) => ({
+    datasetId: target.datasetId,
+    database: path.resolve(target.database)
+  }));
+  const spansByDatabase = new Map<string, SpanRow[]>();
+  const allTargetForms = new Set<string>();
+  for (const target of targets) {
+    if (!existsSync(target.database)) {
+      throw new Error(`french-lemma-pilot-source-missing:${target.database}`);
+    }
+    const database = new DatabaseSync(target.database);
+    try {
+      assertCompatibleSource(database, target.datasetId);
+      const spans = readSpans(database);
+      spansByDatabase.set(target.database, spans);
+      for (const span of spans) {
+        if (span.normalized) allTargetForms.add(span.normalized);
+      }
+    } finally {
+      database.close();
+    }
+  }
+
+  const candidates = await readTargetKaikkiCandidates(
+    kaikkiJsonl,
+    allTargetForms
+  );
+  return targets.map((target) => {
+    const spans = spansByDatabase.get(target.database)!;
+    const decisions = resolveLemmaDecisions(spans, candidates);
+    const counts = applyLemmaDecisions(target.database, spans, decisions);
+    const targetForms = new Set(
+      spans.map(({ normalized }) => normalized).filter(Boolean)
+    );
+    const nonEmptySpanCount = spans.filter(({ normalized }) =>
+      Boolean(normalized)
+    ).length;
+    const dictionaryCoveredForms = [...targetForms].filter(
+      (form) => (candidates.get(form)?.length ?? 0) > 0
+    ).length;
+    const resolvedCount =
+      counts.resolvedUniqueCount + counts.resolvedStrongContextCount;
+    verifyPilotDatabase(target.database, spans.length);
+    return {
+      datasetId: target.datasetId,
+      database: target.database,
+      spanCount: spans.length,
+      distinctNormalizedForms: targetForms.size,
+      dictionaryCoveredForms,
+      dictionaryCoveragePercent: percent(
+        dictionaryCoveredForms,
+        targetForms.size
+      ),
+      ...counts,
+      resolvedCount,
+      resolvedPercent: percent(resolvedCount, nonEmptySpanCount)
+    };
+  });
 }
 
 export function getFrenchLemmaDatasetVersion(sqlitePath: string): string {
@@ -282,7 +367,10 @@ export async function buildFrenchLemmaPilot(options: {
   }
 }
 
-function assertCompatibleSource(database: DatabaseSync): void {
+function assertCompatibleSource(
+  database: DatabaseSync,
+  expectedDatasetId?: string
+): void {
   const schemaVersion = String(
     (
       database
@@ -297,7 +385,10 @@ function assertCompatibleSource(database: DatabaseSync): void {
         .get() as { value: string }
     ).value
   );
-  if (schemaVersion !== "3" || datasetId !== "LSG") {
+  if (
+    schemaVersion !== "3" ||
+    (expectedDatasetId !== undefined && datasetId !== expectedDatasetId)
+  ) {
     throw new Error(
       `french-lemma-pilot-incompatible-source:${schemaVersion}:${datasetId}`
     );
@@ -617,6 +708,19 @@ function applyLemmaDecisions(
       })) {
         insertMetadata.run(key, value);
       }
+      const upsertResourceMetadata = database.prepare(`
+        INSERT INTO ResourceMetadata(key, value) VALUES (?, ?)
+        ON CONFLICT(key) DO UPDATE SET value=excluded.value
+      `);
+      upsertResourceMetadata.run(
+        "lexemeAssignmentCount",
+        String((methodCounts.get(1) ?? 0) + (methodCounts.get(2) ?? 0))
+      );
+      upsertResourceMetadata.run("lexemeCount", String(lexemeIds.size));
+      upsertResourceMetadata.run(
+        "lemmaDatasetVersion",
+        FRENCH_LEMMA_PILOT_VERSION
+      );
       database.exec("COMMIT");
     } catch (error) {
       database.exec("ROLLBACK");

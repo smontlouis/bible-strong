@@ -20,7 +20,7 @@ export const JSONL_BIBLE_SOURCES = [
     sourceVersion: "OST",
     relativePath: "outputs/strong-jsonl-permissive/ost/bible-ost-strong.jsonl",
     sqliteRelativePath:
-      "outputs/releases/bible-strong-production-v4/bibles/bible-ost-strong.sqlite",
+      "outputs/releases/bible-strong-production-v5/bibles/bible-ost-strong.sqlite",
     manifestPath: "outputs/strong-jsonl-permissive/ost/manifest.json"
   },
   {
@@ -31,7 +31,7 @@ export const JSONL_BIBLE_SOURCES = [
     relativePath:
       "outputs/strong-jsonl-permissive/fmar/bible-fmar-strong.jsonl",
     sqliteRelativePath:
-      "outputs/releases/bible-strong-production-v4/bibles/bible-fmar-strong.sqlite",
+      "outputs/releases/bible-strong-production-v5/bibles/bible-fmar-strong.sqlite",
     manifestPath: "outputs/strong-jsonl-permissive/fmar/manifest.json"
   },
   {
@@ -42,9 +42,8 @@ export const JSONL_BIBLE_SOURCES = [
     relativePath:
       "outputs/strong-jsonl-permissive/nvs78p/bible-nvs78p-strong.jsonl",
     sqliteRelativePath:
-      "outputs/releases/bible-strong-production-v4/bibles/bible-nvs78p-strong.sqlite",
-    manifestPath:
-      "outputs/strong-jsonl-permissive/nvs78p/manifest.json"
+      "outputs/releases/bible-strong-production-v5/bibles/bible-nvs78p-strong.sqlite",
+    manifestPath: "outputs/strong-jsonl-permissive/nvs78p/manifest.json"
   },
   {
     id: "NEG79",
@@ -54,9 +53,8 @@ export const JSONL_BIBLE_SOURCES = [
     relativePath:
       "outputs/strong-jsonl-permissive/neg79/bible-neg79-strong.jsonl",
     sqliteRelativePath:
-      "outputs/releases/bible-strong-production-v4/bibles/bible-neg79-strong.sqlite",
-    manifestPath:
-      "outputs/strong-jsonl-permissive/neg79/manifest.json"
+      "outputs/releases/bible-strong-production-v5/bibles/bible-neg79-strong.sqlite",
+    manifestPath: "outputs/strong-jsonl-permissive/neg79/manifest.json"
   },
   {
     id: "NBS",
@@ -65,7 +63,7 @@ export const JSONL_BIBLE_SOURCES = [
     sourceVersion: "NBS",
     relativePath: "outputs/strong-jsonl-permissive/nbs/bible-nbs-strong.jsonl",
     sqliteRelativePath:
-      "outputs/releases/bible-strong-production-v4/bibles/bible-nbs-strong.sqlite",
+      "outputs/releases/bible-strong-production-v5/bibles/bible-nbs-strong.sqlite",
     manifestPath: "outputs/strong-jsonl-permissive/nbs/manifest.json"
   },
   {
@@ -75,7 +73,7 @@ export const JSONL_BIBLE_SOURCES = [
     sourceVersion: "DARBY",
     relativePath: "outputs/releases/strong-jsonl-v3/bible-darby-strong.jsonl",
     sqliteRelativePath:
-      "outputs/releases/bible-strong-production-v4/bibles/bible-dby-strong.sqlite",
+      "outputs/releases/bible-strong-production-v5/bibles/bible-dby-strong.sqlite",
     manifestPath: "outputs/releases/strong-jsonl-v3/manifests/darby.json"
   },
   {
@@ -85,7 +83,7 @@ export const JSONL_BIBLE_SOURCES = [
     sourceVersion: "DARBYR",
     relativePath: "outputs/releases/strong-jsonl-v3/bible-darbyr-strong.jsonl",
     sqliteRelativePath:
-      "outputs/releases/bible-strong-production-v4/bibles/bible-dbyr-strong.sqlite",
+      "outputs/releases/bible-strong-production-v5/bibles/bible-dbyr-strong.sqlite",
     manifestPath: "outputs/releases/strong-jsonl-v3/manifests/darbyr.json"
   },
   {
@@ -95,7 +93,7 @@ export const JSONL_BIBLE_SOURCES = [
     sourceVersion: "SG1910",
     relativePath: "outputs/releases/strong-jsonl-v3/bible-sg1910-strong.jsonl",
     sqliteRelativePath:
-      "outputs/releases/bible-strong-production-v4/bibles/bible-lsg-strong.sqlite",
+      "outputs/releases/bible-strong-production-v5/bibles/bible-lsg-strong.sqlite",
     manifestPath: "outputs/releases/strong-jsonl-v3/manifests/sg1910.json"
   }
 ] as const;
@@ -482,12 +480,11 @@ export function getJsonlBibleLemmaStats(options: {
     unavailable: 0,
     lemmas: []
   } satisfies JsonlBibleLemmaStats;
-  if (!["LSG", "DBY", "DBYR"].includes(source.id)) return unavailable;
   const sqlitePath = path.resolve(options.root, source.sqliteRelativePath);
   if (!existsSync(sqlitePath)) return unavailable;
   const info = readStrongBibleSqliteInfo(sqlitePath);
   if (info.lexemeAssignmentCount === 0) return unavailable;
-  const datasetVersion = "ctb-reference-lemmas@1";
+  const datasetVersion = info.lemmaDatasetVersion ?? "ctb-reference-lemmas@1";
   const kinds: StrongIdentityKind[] = /[A-Za-z]$/u.test(requestedCode)
     ? ["dstrong", "estrong"]
     : ["strong"];

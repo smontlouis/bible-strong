@@ -21,6 +21,17 @@ export interface StrongBibleJsonlVerse {
   chapter: number;
   verse: number;
   text: string;
+  headings?: StrongBibleJsonlHeading[];
+}
+
+export interface StrongBibleJsonlHeading {
+  offset: number;
+  order: number;
+  kind: "pericope" | "heading" | "parallel";
+  type: string;
+  text: string;
+  markup: string;
+  attributes?: Record<string, string>;
 }
 
 export interface StrongBibleSqliteSummary {
@@ -99,8 +110,16 @@ interface OpenOccurrence {
   identities: ParsedOccurrence["identities"];
 }
 
-const LAYOUT_TAGS = new Set(["p", "l", "lg"]);
-const RUN_TAGS = new Set(["i", "divinename", "small-caps", "sup"]);
+const LAYOUT_TAGS = new Set(["p", "l", "lg", "list", "item"]);
+const RUN_TAGS = new Set([
+  "i",
+  "divinename",
+  "small-caps",
+  "sup",
+  "red",
+  "q",
+  "span"
+]);
 const IDENTITY_KINDS: StrongIdentityKind[] = [
   "strong",
   "estrong",
@@ -126,7 +145,12 @@ const MARKUP_TAGS = [
   "i",
   "divineName",
   "small-caps",
-  "sup"
+  "sup",
+  "red",
+  "q",
+  "span",
+  "list",
+  "item"
 ] as const;
 
 export async function compileStrongBibleJsonlToSqlite(options: {
@@ -628,6 +652,7 @@ export function readStrongBibleSqliteInfo(sqlitePath: string): {
   identityCount: number;
   lexemeAssignmentCount: number;
   lexemeCount: number;
+  lemmaDatasetVersion?: string;
   books: Array<{ bookId: string; chapters: number[]; verseCount: number }>;
 } {
   const database = new DatabaseSync(sqlitePath, { readOnly: true });
@@ -678,6 +703,9 @@ export function readStrongBibleSqliteInfo(sqlitePath: string): {
             .get() as { count: number }
         ).count
       ),
+      ...(metadata.lemmaDatasetVersion
+        ? { lemmaDatasetVersion: metadata.lemmaDatasetVersion }
+        : {}),
       books: BOOK_IDS.filter((bookId) => books.has(bookId)).map((bookId) => ({
         bookId,
         ...books.get(bookId)!

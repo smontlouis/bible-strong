@@ -11,7 +11,7 @@ import {
 } from "../src/frenchLemmaPilot.js";
 import { compileStrongBibleJsonlToSqlite } from "../src/strongBibleSqlite.js";
 
-test("enriches LSG word spans with conservative French lemma decisions", async (t) => {
+test("enriches any generated Bible with conservative French lemma decisions", async (t) => {
   const directory = await mkdtemp(path.join(tmpdir(), "french-lemma-pilot-"));
   t.after(async () => rm(directory, { recursive: true, force: true }));
   const inputPath = path.join(directory, "lsg.jsonl");
@@ -34,7 +34,7 @@ test("enriches LSG word spans with conservative French lemma decisions", async (
       .map((word, index) =>
         JSON.stringify({
           ref: `Gen.1.${index + 1}`,
-          version: "LSG",
+          version: "FMAR",
           book: 1,
           bookId: "Gen",
           chapter: 1,
@@ -92,8 +92,8 @@ test("enriches LSG word spans with conservative French lemma decisions", async (
   await compileStrongBibleJsonlToSqlite({
     inputPath,
     outputPath: sourceDatabase,
-    datasetId: "LSG",
-    expectedVersion: "LSG"
+    datasetId: "FMAR",
+    expectedVersion: "FMAR"
   });
 
   const report = await buildFrenchLemmaPilot({
@@ -111,6 +111,16 @@ test("enriches LSG word spans with conservative French lemma decisions", async (
   assert.equal(report.integrityCheck, "ok");
 
   const database = new DatabaseSync(outputDatabase, { readOnly: true });
+  const metadata = Object.fromEntries(
+    (
+      database
+        .prepare("SELECT key, value FROM ResourceMetadata")
+        .all() as Array<{
+        key: string;
+        value: string;
+      }>
+    ).map(({ key, value }) => [key, value])
+  );
   const rows = database
     .prepare(
       `
@@ -125,6 +135,9 @@ test("enriches LSG word spans with conservative French lemma decisions", async (
     .all()
     .map((row) => ({ ...row }));
   database.close();
+  assert.equal(metadata.lexemeAssignmentCount, "4");
+  assert.equal(metadata.lexemeCount, "2");
+  assert.equal(metadata.lemmaDatasetVersion, report.version);
   assert.deepEqual(rows, [
     {
       surface: "Parabole",

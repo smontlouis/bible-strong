@@ -171,7 +171,7 @@ interface StepOriginalReadOptions {
   bookIds?: Set<string>;
 }
 
-const STEP_TO_OSIS_BOOK = new Map<string, string>([
+export const STEP_TO_OSIS_BOOK = new Map<string, string>([
   ["Gen", "Gen"],
   ["Exo", "Exod"],
   ["Lev", "Lev"],

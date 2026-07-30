@@ -4,6 +4,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { LEXICAL_MORPHOLOGY_SUPPLEMENTS } from "../src/lexiconV3/morphologySupplements.js";
+import { classifyTflsjAvailability } from "../src/stepLexiconResourceAvailability.js";
 
 interface StepSource {
   language: "greek" | "hebrew";
@@ -110,6 +111,7 @@ async function main(): Promise<void> {
 
   const entries: StepEntry[] = [];
   const lexiconResources: LexiconResource[] = [];
+  let suppressedLexiconResourcePlaceholders = 0;
   const morphologyCodes: MorphologyCode[] = [];
   const sourceDigests: Record<string, string> = {};
 
@@ -126,7 +128,9 @@ async function main(): Promise<void> {
     await downloadIfNeeded(source.url, sourcePath, args.refresh === "true");
     const content = await readFile(sourcePath, "utf8");
     sourceDigests[source.localName] = sha256(content);
-    lexiconResources.push(...parseLexiconResources(content, source));
+    const parsed = parseLexiconResources(content, source);
+    lexiconResources.push(...parsed.resources);
+    suppressedLexiconResourcePlaceholders += parsed.suppressedPlaceholders;
   }
 
   for (const source of MORPHOLOGY_SOURCES) {
@@ -183,6 +187,7 @@ async function main(): Promise<void> {
       hebrewStepEntries: entries.filter((entry) => entry.language === "hebrew")
         .length,
       lexiconResources: lexiconResources.length,
+      suppressedLexiconResourcePlaceholders,
       greekLexiconResources: lexiconResources.filter(
         (resource) => resource.language === "greek"
       ).length,
@@ -291,8 +296,12 @@ function parseStepEntries(content: string, source: StepSource): StepEntry[] {
 function parseLexiconResources(
   content: string,
   source: LexiconResourceSource
-): LexiconResource[] {
+): {
+  resources: LexiconResource[];
+  suppressedPlaceholders: number;
+} {
   const resources: LexiconResource[] = [];
+  let suppressedPlaceholders = 0;
   const lines = content.replace(/^\uFEFF/, "").split(/\r?\n/);
   const prefix = source.language === "greek" ? "G" : "H";
   const dataLinePattern = new RegExp(`^${prefix}\\d{4,5}[A-Za-z]?\\t`);
@@ -307,7 +316,16 @@ function parseLexiconResources(
       continue;
     }
 
-    const contentHtml = cleanLexiconHtml(fields.slice(7).join("\t"));
+    const rawContentHtml = fields.slice(7).join("\t");
+    const availability =
+      source.source === "TFLSJ"
+        ? classifyTflsjAvailability(rawContentHtml)
+        : "lsj_article";
+    if (availability === "abbott_smith_fallback") {
+      suppressedPlaceholders += 1;
+      continue;
+    }
+    const contentHtml = cleanLexiconHtml(rawContentHtml);
 
     resources.push({
       language: source.language,
@@ -320,7 +338,7 @@ function parseLexiconResources(
     });
   }
 
-  return resources;
+  return { resources, suppressedPlaceholders };
 }
 
 function parseMorphologyCodes(
@@ -611,15 +629,15 @@ function buildSql(input: {
 
   for (const resource of input.lexiconResources) {
     statements.push(
-      `INSERT INTO LexiconResources (stepEntryId, source, kind, contentHtml) VALUES ((SELECT id FROM StepEntries WHERE language = ${sqlString(
-        resource.language
-      )} AND eStrong = ${sqlString(resource.eStrong)} AND dStrong = ${sqlString(
-        resource.dStrong
-      )} AND uStrong = ${sqlString(resource.uStrong)}), ${[
-        sqlString(resource.source),
-        sqlString(resource.kind),
-        sqlString(resource.contentHtml)
-      ].join(", ")});`
+      `INSERT INTO LexiconResources (id, stepEntryId, source, kind, contentHtml)
+       SELECT id, id, ${sqlString(resource.source)}, ${sqlString(
+         resource.kind
+       )}, ${sqlString(resource.contentHtml)}
+       FROM StepEntries WHERE language = ${sqlString(
+         resource.language
+       )} AND eStrong = ${sqlString(resource.eStrong)} AND dStrong = ${sqlString(
+         resource.dStrong
+       )} AND uStrong = ${sqlString(resource.uStrong)};`
     );
   }
 
