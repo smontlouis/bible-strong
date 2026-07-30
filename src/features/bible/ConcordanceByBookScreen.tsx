@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import { MenuView } from '~common/ui/MenuView'
 import { useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
@@ -23,12 +23,10 @@ import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { Verse } from '~common/types'
 import { IS_FORM_SHEET } from '~helpers/constants'
-import type { StrongLexiconEntry } from '~helpers/strongVerseParser'
 import { useSelector } from 'react-redux'
 import type { RootState } from '~redux/modules/reducer'
 import type { StrongBibleProvenance } from '~features/resources/strongBibleResourceAccess'
 import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
-import { createStrongIdentityForBook } from '~helpers/strongIdentities'
 
 const PAGE_SIZE = 50
 
@@ -90,19 +88,6 @@ const ConcordanceByBook = () => {
   const provenance: StrongBibleProvenance | null =
     availablePage?.status === 'available' ? availablePage.provenance : null
   const isLoading = occurrencesQuery.isPending || occurrencesQuery.isFetchingNextPage
-
-  const { data: loadedLexiconEntry } = useQuery({
-    queryKey: ['strong-lexicon-entry', strongResourceLanguage, Code, book],
-    queryFn: async () =>
-      (await resources.strongLexicon.loadEntry(
-        createStrongIdentityForBook(String(Code), book),
-        strongResourceLanguage
-      )) ?? null,
-    enabled: Boolean(book && Code),
-  })
-  const lexiconEntry: StrongLexiconEntry = loadedLexiconEntry
-    ? { Code: loadedLexiconEntry.baseCode, LSG: loadedLexiconEntry.gloss }
-    : { Code, LSG: strongReference.LSG || '' }
 
   useEffect(() => {
     if (occurrencesQuery.isFetchNextPageError) {
@@ -177,7 +162,6 @@ const ConcordanceByBook = () => {
             return (
               <ConcordanceVerse
                 concordanceFor={Code}
-                lexiconEntry={lexiconEntry}
                 verse={item}
                 t={t}
                 onOpenVerse={verse => {

@@ -18,8 +18,6 @@ const createEntity = (overrides: Partial<StrongLexiconEntity> = {}): StrongLexic
   articleHtml: '',
   matchedStrong: 'G4074G',
   relations: [],
-  references: [],
-  hiddenReferenceCount: 0,
   ...overrides,
 })
 

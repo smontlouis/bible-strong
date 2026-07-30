@@ -134,7 +134,6 @@ export interface Verse {
   Chapitre: string | number
   Verset: string | number
   Texte: string
-  StrongTexte?: string
   TextRevision?: string
   Layout?: {
     offset: number

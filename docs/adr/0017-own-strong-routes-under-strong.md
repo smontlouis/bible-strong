@@ -22,11 +22,13 @@ pages in the nested Strong stack.
 
 Route files read their own parameters and render the relevant Strong detail page without the
 legacy `StrongScreen` adapter. Expo Router owns standalone page history and back behavior. The
-internal Strong navigation stack remains limited to the app-switcher Strong tab, whose navigation
-does not use the Expo Router stack.
+app-switcher Strong tab only owns the transition between the lexicon list and the selected Strong
+entry. Once an entry is selected, it renders the same main screen and uses the same Expo Router
+routes for every secondary page; it does not maintain a parallel Strong navigation stack.
 
 ## Consequences
 
 Strong routes no longer inherit ownership from Explore. Direct subpage links use normal router
 history instead of redirecting to a fabricated parent Strong page. Route parameters remain the
-complete handoff between sibling pages, while the Strong tab retains its local workspace behavior.
+complete handoff between sibling pages. The Strong tab retains only its lexicon selection state,
+so route and tab presentations cannot diverge in their secondary navigation behavior.

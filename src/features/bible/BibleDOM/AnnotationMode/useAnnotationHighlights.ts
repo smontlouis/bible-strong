@@ -16,8 +16,8 @@ import {
 
 /**
  * Merges all DOMRects on the same line into single rectangles.
- * This creates cleaner highlights when text spans multiple DOM nodes (e.g., LSGS verses
- * where Strong's references create gaps between text nodes).
+ * This creates cleaner highlights when canonical Strong references create
+ * multiple DOM text nodes.
  */
 function mergeRectsOnSameLine(rects: DOMRect[]): DOMRect[] {
   if (rects.length === 0) return []
@@ -97,7 +97,7 @@ function calculateRectsForWordRange({
   const verseEl = document.getElementById(`verse-text-${verseKey}`)
   if (!verseEl) return []
 
-  // Collect all text nodes to handle LSGS/KJVS verses with Strong's refs
+  // Collect all text nodes to handle canonical Strong references.
   const { fullText, textNodes } = collectAnnotationTextNodes(verseEl)
   if (!fullText || textNodes.length === 0) return []
 

@@ -12,6 +12,12 @@ describe('linkifyStrongReferences', () => {
     )
   })
 
+  it('turns disambiguated STEP codes into links without dropping their suffix', () => {
+    expect(linkifyStrongReferences('<p>Voir H0549H et G0007G.</p>')).toBe(
+      '<p>Voir <a href="strong://H0549H" data-strong-number="0549H" data-strong-book="1">H0549H</a> et <a href="strong://G0007G" data-strong-number="0007G" data-strong-book="40">G0007G</a>.</p>'
+    )
+  })
+
   it('does not alter references in attributes or existing anchors', () => {
     expect(
       linkifyStrongReferences('<p data-code="H7225"><a href="/H7225">H7225</a> G746</p>')
@@ -21,7 +27,7 @@ describe('linkifyStrongReferences', () => {
   })
 
   it('does not match partial Strong references', () => {
-    expect(linkifyStrongReferences('<p>AH7225 H7225G G746a</p>')).toBe('<p>AH7225 H7225G G746a</p>')
+    expect(linkifyStrongReferences('<p>AH7225 H2O G746a</p>')).toBe('<p>AH7225 H2O G746a</p>')
   })
 })
 
@@ -61,5 +67,14 @@ describe('getLegacyLinkPressArguments', () => {
         'data-strong-book': '1',
       })
     ).toEqual(['7225', 1])
+  })
+
+  it('preserves a disambiguated STEP suffix in the historical link arguments', () => {
+    expect(
+      getLegacyLinkPressArguments('strong://H0549H', {
+        'data-strong-number': '0549H',
+        'data-strong-book': '1',
+      })
+    ).toEqual(['0549H', 1])
   })
 })

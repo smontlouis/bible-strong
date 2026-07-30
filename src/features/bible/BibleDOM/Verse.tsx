@@ -22,7 +22,7 @@ import { useDispatch } from './DispatchProvider'
 import { Bookmark, SelectedCode, StudyNavigateBibleType, Verse as TVerse } from '~common/types'
 import { RootStyles, TaggedVerse, VerseRelationItem } from './BibleDOMWrapper'
 import { ParallelDisplayMode } from 'src/state/tabs'
-import verseToStrong, { BibleStrongRef } from './verseToStrong'
+import { BibleStrongRef } from './BibleStrongReference'
 import { verseToRedWords } from './verseToRedWords'
 import { ContainerText, resolveHighlightInfo } from './ContainerText'
 import { convertHex } from './convertHex'
@@ -232,12 +232,6 @@ const getVerseText = ({
   openCanonicalBibleNoteLabel: string
   onOpenCanonicalNote: (note: CanonicalBibleNote) => void
 }): (string | JSX.Element)[] => {
-  const isStrongVersion =
-    Boolean(verse.StrongTexte) ||
-    Boolean(verse.StrongSpans) ||
-    Boolean(verse.ReverseInterlinearSpans) ||
-    version === 'LSGS' ||
-    version === 'KJVS'
   const verseKey = `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`
 
   if (verse.TextRevision) {
@@ -264,22 +258,6 @@ const getVerseText = ({
       openCanonicalBibleNoteLabel,
       onOpenCanonicalNote,
     })
-  }
-
-  if (isStrongVersion) {
-    return annotationMode
-      ? [verse.Texte]
-      : verseToStrong({
-          Texte: verse.StrongTexte ?? verse.Texte,
-          Livre: verse.Livre,
-          Chapitre: verse.Chapitre,
-          Verset: verse.Verset,
-          version,
-          isParallel,
-          isDisabled: annotationMode,
-          selectedCode,
-          settings,
-        })
   }
 
   // Red words - only in non-annotation mode, when data exists
@@ -601,12 +579,7 @@ const Verse = ({
     }
   }
 
-  const isStrongVersion =
-    Boolean(verse.StrongTexte) ||
-    Boolean(verse.StrongSpans) ||
-    Boolean(verse.ReverseInterlinearSpans) ||
-    version === 'LSGS' ||
-    version === 'KJVS'
+  const isStrongVersion = Boolean(verse.StrongSpans) || Boolean(verse.ReverseInterlinearSpans)
 
   const text = getVerseText({
     verse,

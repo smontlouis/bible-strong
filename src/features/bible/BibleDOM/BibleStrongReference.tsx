@@ -2,26 +2,30 @@ import type React from 'react'
 import { styled } from 'goober'
 import { RootStyles } from './BibleDOMWrapper'
 import { useDispatch } from './DispatchProvider'
-import { SelectedCode, Verse } from '~common/types'
+import { SelectedCode } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import { scaleFontSize } from './scaleFontSize'
 import { isDarkTheme, noSelect } from './utils'
 import { getDisabledStyles } from './disabledStyles'
 import { scaleLineHeight } from './scaleLineHeight'
 import { getStrongReferenceNumber, type StrongIdentity } from '~helpers/strongIdentities'
-import {
-  dispatchStrongSelection,
-  getStrongSelectionWordFromTextSegment,
-} from './strongSelectionAction'
+import { dispatchStrongSelection } from './strongSelectionAction'
 import type { StrongSelectionMorphology } from '~helpers/strongSelection'
+import UntranslatedStrongMarker from './UntranslatedStrongMarker'
 
 const StyledReference = styled('span')<
-  RootStyles & { isSelected: boolean; isParallel?: boolean; isDisabled?: boolean }
+  RootStyles & {
+    isSelected: boolean
+    isParallel?: boolean
+    isDisabled?: boolean
+    $isUntranslated?: boolean
+  }
 >(
   ({
     isSelected,
     isParallel,
     isDisabled,
+    $isUntranslated,
     settings: { theme, colors, fontFamily, fontSizeScale, lineHeight },
   }) => ({
     fontFamily,
@@ -39,6 +43,17 @@ const StyledReference = styled('span')<
     paddingBlock: '4px',
     wordBreak: 'break-word',
     marginInline: '4px',
+    ...($isUntranslated
+      ? {
+          width: scaleFontSize(24, fontSizeScale),
+          height: scaleFontSize(24, fontSizeScale),
+          padding: 0,
+          borderRadius: '50%',
+          boxShadow: 'none',
+          backgroundColor: 'transparent',
+          verticalAlign: 'middle',
+        }
+      : {}),
 
     cursor: 'pointer',
     '&:active': {
@@ -81,8 +96,12 @@ export const BibleStrongRef = ({
   const isSelected =
     numericReferences.length > 0 &&
     numericReferences.includes(getStrongReferenceNumber(selectedCode?.reference ?? '') ?? '')
+  const isUntranslated = !word
+  const colors = settings.colors[settings.theme]
 
-  const openStrongSelection = (event: React.MouseEvent<HTMLSpanElement>) => {
+  const openStrongSelection = (
+    event: React.MouseEvent<HTMLSpanElement> | React.KeyboardEvent<HTMLSpanElement>
+  ) => {
     event.stopPropagation()
     dispatchStrongSelection(dispatch, identities, book, version, {
       word,
@@ -95,56 +114,29 @@ export const BibleStrongRef = ({
   return (
     <StyledReference
       onClick={openStrongSelection}
+      onKeyDown={event => {
+        if (event.key === 'Enter' || event.key === ' ') openStrongSelection(event)
+      }}
+      role="button"
+      tabIndex={isDisabled ? -1 : 0}
+      aria-label={
+        isUntranslated ? identities.map(identity => identity.code).join(' · ') : undefined
+      }
       data-ignore-verse-touch
       isSelected={isSelected}
       isParallel={isParallel}
       isDisabled={isDisabled}
+      $isUntranslated={isUntranslated}
       settings={settings}
     >
-      {identities.map(identity => identity.code).join(' · ')}
+      {isUntranslated ? (
+        <UntranslatedStrongMarker
+          color={isSelected ? colors.reverse : colors.primary}
+          backgroundColor={isSelected ? colors.primary : colors.lightPrimary}
+        />
+      ) : (
+        identities.map(identity => identity.code).join(' · ')
+      )}
     </StyledReference>
   )
 }
-
-const verseToStrong = ({
-  Texte,
-  Livre,
-  Chapitre,
-  Verset,
-  version,
-  isParallel,
-  isDisabled,
-  selectedCode,
-  settings,
-}: Pick<Verse, 'Texte' | 'Livre' | 'Chapitre' | 'Verset'> & {
-  version: string
-  isParallel?: boolean
-  isDisabled?: boolean
-  selectedCode?: SelectedCode | null
-  settings: RootState['user']['bible']['settings']
-}): (string | JSX.Element)[] => {
-  const parts = Texte.split(/(\d+[^{.|\s}]?\d+(?!\.?\d))/g)
-  return parts.map((item, i) => {
-    if (Number.isInteger(Number(item))) {
-      const word = getStrongSelectionWordFromTextSegment(parts[i - 1])
-      return (
-        <BibleStrongRef
-          book={Livre}
-          version={version}
-          identities={[{ kind: 'strong', code: item }]}
-          word={word}
-          chapter={Chapitre}
-          verse={Verset}
-          key={i}
-          isParallel={isParallel}
-          isDisabled={isDisabled}
-          selectedCode={selectedCode}
-          settings={settings}
-        />
-      )
-    }
-    return item
-  })
-}
-
-export default verseToStrong

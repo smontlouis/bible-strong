@@ -19,7 +19,7 @@ import {
   isStrongCapableBibleVersion,
   type StrongBibleVersionId,
 } from './strongBiblePublications'
-import type { StrongBibleIdentityKind, StrongBibleSpan } from './strongBibleOverlay'
+import type { StrongBibleIdentityKind, StrongBibleSpan } from './canonicalStrongVerse'
 import { installAtomicResourceFile, restoreOrphanedResourceBackup } from './atomicResourceFile'
 import { getStrongBibleConcordanceCandidates } from './strongBibleConcordance'
 import type { ResourceInstallationLifecycle } from './resourceInstallationLifecycle'
@@ -213,7 +213,7 @@ export const loadStrongBibleChapterSpans = async (
      LEFT JOIN StrongCodes c ON c.id=w.codeId
      LEFT JOIN WordStepTokenExtras e
        ON e.verseId=o.verseId AND e.targetOrdinal=o.ordinal
-     WHERE v.bookOrder=? AND v.chapter=? AND o.isAligned=1
+     WHERE v.bookOrder=? AND v.chapter=? AND (o.isAligned=1 OR o.length=0)
      ORDER BY v.verse, o.ordinal, w.identityOrder, e.sourceOrder`,
     [book, chapter]
   )
@@ -285,7 +285,7 @@ export const loadReverseInterlinearChapterSpans = async (
        LEFT JOIN StrongCodes c ON c.id=w.codeId
        LEFT JOIN WordStepTokenExtras e
          ON e.verseId=o.verseId AND e.targetOrdinal=o.ordinal
-      WHERE v.bookOrder=? AND v.chapter=? AND o.isAligned=1
+      WHERE v.bookOrder=? AND v.chapter=? AND (o.isAligned=1 OR o.length=0)
       ORDER BY v.verse, o.ordinal, w.identityOrder, e.sourceOrder`,
     [book, chapter]
   )
@@ -426,7 +426,7 @@ export const loadStrongBibleLemmaStats = async (
   const identity = await resolveStrongBibleConcordanceIdentity(database, book, reference)
   if (!identity) return []
   return database.getAllAsync<StrongBibleLemmaStat>(
-    `SELECT l.id, l.lemma, l.partOfSpeech, COUNT(*) AS occurrenceCount
+    `SELECT l.id, l.lemma, l.partOfSpeech, COUNT(DISTINCT s.verseId) AS occurrenceCount
        FROM WordStrongCodes w
        JOIN WordSpans s ON s.verseId=w.verseId AND s.ordinal=w.ordinal
        JOIN FrenchLexemes l ON l.id=s.lexemeId

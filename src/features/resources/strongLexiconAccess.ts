@@ -17,6 +17,7 @@ export type StrongLexiconMorphology = {
 
 export type StrongLexiconRelation = {
   group: 'subentry' | 'identity' | 'family'
+  relationKind: string
   label: string
   stepCode: string
   gloss: string
@@ -65,8 +66,6 @@ export type StrongLexiconEntity = {
     palopenmapsUrl?: string
   }
   relations: StrongLexiconEntityRelation[]
-  references: string[]
-  hiddenReferenceCount: number
 }
 
 export type StrongLexiconEntry = {
@@ -320,6 +319,7 @@ const loadRelations = async (
 ): Promise<StrongLexiconRelation[]> => {
   const rows = await database.getAllAsync<{
     groupKind: 'subentry' | 'identity' | 'family'
+    relationKind: string
     labelEn: string
     labelFr: string
     stepCode: string
@@ -329,7 +329,7 @@ const loadRelations = async (
     transliteration: string
     classicTransliteration: string
   }>(
-    `SELECT r.groupKind, k.labelEn, k.labelFr,
+    `SELECT r.groupKind, k.kind AS relationKind, k.labelEn, k.labelFr,
             r.toStepCode AS stepCode,
             target.gloss, tr.gloss AS localizedGloss,
             target.original, target.transliteration, target.classicTransliteration
@@ -339,8 +339,7 @@ const loadRelations = async (
        LEFT JOIN LexiconTranslations tr
          ON tr.stepEntryId=target.id AND tr.language=?
       WHERE r.fromStepEntryId=?
-      ORDER BY r.groupKind, r.sortOrder
-      LIMIT 72`,
+      ORDER BY r.groupKind, r.sortOrder`,
     [language, entryId]
   )
   const counts = new Map<string, number>()
@@ -351,6 +350,7 @@ const loadRelations = async (
     return [
       {
         group: row.groupKind,
+        relationKind: row.relationKind,
         label: language === 'fr' ? row.labelFr || row.labelEn : row.labelEn,
         stepCode: row.stepCode,
         gloss: chooseLocalized(language, row.localizedGloss, row.gloss),
@@ -436,7 +436,7 @@ const hydrateEntity = async (
   entity: EntityRow,
   language: ResourceLanguage
 ): Promise<StrongLexiconEntity> => {
-  const [place, relations, references, referenceCount] = await Promise.all([
+  const [place, relations] = await Promise.all([
     database.getFirstAsync<{
       openBibleName: string
       area: string
@@ -471,16 +471,6 @@ const hydrateEntity = async (
         ORDER BY r.relation, target.displayName
         LIMIT 60`,
       [language, entity.id]
-    ),
-    database.getAllAsync<{ refText: string }>(
-      `SELECT refText FROM EntityRefs
-        WHERE entityId=?
-        ORDER BY book, chapter, verse, suffix`,
-      [entity.id]
-    ),
-    database.getFirstAsync<{ count: number }>(
-      'SELECT COUNT(*) AS count FROM EntityRefs WHERE entityId=?',
-      [entity.id]
     ),
   ])
 
@@ -527,8 +517,6 @@ const hydrateEntity = async (
         chooseLocalized(language, relation.localizedTargetName, relation.targetName ?? '') ||
         relation.toUniqueName,
     })),
-    references: references.map(reference => reference.refText),
-    hiddenReferenceCount: Math.max(0, Number(referenceCount?.count ?? 0) - references.length),
   }
 }
 

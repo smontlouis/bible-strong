@@ -1,22 +1,30 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { ScrollView, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
-import Loading from '~common/Loading'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import ConcordanceVerse from '~features/bible/ConcordanceVerse'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
 import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
-import type { StrongReference, Verse } from '~common/types'
+import type { Verse } from '~common/types'
 
-const PAGE_SIZE = 30
+const PAGE_SIZE = 60
+const PLACEHOLDER_COUNT = 6
+
+const ConcordancePlaceholder = () => (
+  <VStack minHeight={104} py={10} gap={7} borderBottomWidth={1} borderColor="border">
+    <Box height={14} width="28%" borderRadius={4} bg="lightGrey" />
+    <Box height={14} width="92%" borderRadius={4} bg="lightGrey" />
+    <Box height={14} width="78%" borderRadius={4} bg="lightGrey" />
+    <Box height={14} width="58%" borderRadius={4} bg="lightGrey" />
+  </VStack>
+)
 
 type Props = {
   entry: StrongLexiconEntry
-  legacyEntry: StrongReference
   currentVersionId: StrongBibleVersionId
   defaultVersionId: StrongBibleVersionId
   onOpenVerse: (verse: Verse, version?: string) => void
@@ -24,7 +32,6 @@ type Props = {
 
 const StrongConcordancePage = ({
   entry,
-  legacyEntry,
   currentVersionId,
   defaultVersionId,
   onOpenVerse,
@@ -32,6 +39,8 @@ const StrongConcordancePage = ({
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const [selectedLemmaId, setSelectedLemmaId] = useState<number>()
+  const [revealedVerseKeys, setRevealedVerseKeys] = useState<string[]>([])
+  const readyVerseKeys = useRef(new Set<string>())
   const request = {
     currentVersionId,
     defaultVersionId,
@@ -56,6 +65,7 @@ const StrongConcordancePage = ({
       currentVersionId,
       entry.selectedIdentity,
       selectedLemmaId,
+      PAGE_SIZE,
     ],
     queryFn: ({ pageParam }) =>
       resources.strongBible.loadFoundVersesByBook({
@@ -86,11 +96,19 @@ const StrongConcordancePage = ({
       return lastPage.verses.length < PAGE_SIZE ? undefined : pages.length * PAGE_SIZE
     },
     networkMode: 'always',
+    placeholderData: previousData => previousData,
   })
   const verses =
     concordanceQuery.data?.pages.flatMap(page =>
       page.status === 'available' ? page.verses : []
     ) ?? []
+  const verseKeys = verses.map(verse => `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`)
+  const isReplacingResults =
+    concordanceQuery.isPending ||
+    (concordanceQuery.isFetching && !concordanceQuery.isFetchingNextPage)
+  const hasHiddenVerses = verseKeys.some(key => !revealedVerseKeys.includes(key))
+  const showPlaceholders =
+    isReplacingResults || concordanceQuery.isFetchingNextPage || hasHiddenVerses
   const count =
     selectedLemmaId == null
       ? countsQuery.data?.status === 'available'
@@ -107,11 +125,24 @@ const StrongConcordancePage = ({
       ? concordanceQuery.data.pages.find(page => page.status === 'available')!.provenance.versionId
       : currentVersionId
 
+  useEffect(() => {
+    readyVerseKeys.current.clear()
+    setRevealedVerseKeys([])
+  }, [selectedLemmaId])
+
+  const markVerseReady = (verse: Verse) => {
+    const key = `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`
+    readyVerseKeys.current.add(key)
+    if (verseKeys.every(verseKey => readyVerseKeys.current.has(verseKey))) {
+      setRevealedVerseKeys(verseKeys)
+    }
+  }
+
   const loadMoreIfNeeded = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent
     const distanceFromBottom = contentSize.height - (contentOffset.y + layoutMeasurement.height)
     if (
-      distanceFromBottom < 320 &&
+      distanceFromBottom < Math.max(640, layoutMeasurement.height * 1.5) &&
       concordanceQuery.hasNextPage &&
       !concordanceQuery.isFetchingNextPage
     ) {
@@ -123,7 +154,7 @@ const StrongConcordancePage = ({
     <ScrollView
       style={{ flex: 1 }}
       onScroll={loadMoreIfNeeded}
-      scrollEventThrottle={120}
+      scrollEventThrottle={32}
       contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 }}
     >
       <HStack alignItems="baseline" gap={8}>
@@ -177,23 +208,26 @@ const StrongConcordancePage = ({
         </ScrollView>
       )}
 
-      {concordanceQuery.isPending ? (
-        <Loading />
-      ) : (
-        <VStack mt={15}>
-          {verses.map(verse => (
+      <VStack mt={15}>
+        {verses.map(verse => {
+          const verseKey = `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`
+          return (
             <ConcordanceVerse
-              key={`${verse.Livre}-${verse.Chapitre}-${verse.Verset}`}
+              key={`${selectedLemmaId ?? 'all'}-${verseKey}`}
               onOpenVerse={item => onOpenVerse(item, version)}
+              onReady={markVerseReady}
+              hiddenUntilReady={isReplacingResults || !revealedVerseKeys.includes(verseKey)}
               t={t}
               concordanceFor={String(entry.baseCode)}
-              lexiconEntry={legacyEntry}
               verse={verse}
             />
+          )
+        })}
+        {showPlaceholders &&
+          Array.from({ length: PLACEHOLDER_COUNT }, (_, index) => (
+            <ConcordancePlaceholder key={index} />
           ))}
-          {concordanceQuery.isFetchingNextPage && <Loading />}
-        </VStack>
-      )}
+      </VStack>
     </ScrollView>
   )
 }

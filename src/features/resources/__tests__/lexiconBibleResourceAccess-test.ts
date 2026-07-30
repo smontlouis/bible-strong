@@ -31,7 +31,6 @@ const createDependencies = (): jest.Mocked<LexiconBibleResourceDependencies> => 
   getInterlinearAvailability: jest.fn(),
   loadInterlinearChapterTokens: jest.fn(),
   getVerseText: jest.fn(),
-  annotateText: jest.fn((text, spans) => `${text} ${spans[0]?.identities[0]?.code ?? ''}`),
 })
 
 describe('lexiconBibleResourceAccess', () => {
@@ -91,7 +90,15 @@ describe('lexiconBibleResourceAccess', () => {
         Livre: 1,
         Chapitre: 1,
         Verset: 1,
-        Texte: 'בְּרֵאשִׁית H07225A',
+        Texte: 'בְּרֵאשִׁית',
+        StrongSpans: [
+          {
+            ordinal: 0,
+            startOffset: 0,
+            length: 10,
+            identities: [{ kind: 'dstrong', code: 'H07225A' }],
+          },
+        ],
       },
     })
     expect(dependencies.strongBible.loadVerse).not.toHaveBeenCalled()

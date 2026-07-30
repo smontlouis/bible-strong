@@ -5,7 +5,6 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 
 import waitForStrongDB from '~common/waitForStrongDB'
-import verseToStrong from '~helpers/verseToStrong'
 
 import Empty from '~common/Empty'
 import Loading from '~common/Loading'
@@ -15,6 +14,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import RoundedCorner from '~common/ui/RoundedCorner'
 import StrongCard from './StrongCard'
+import CanonicalStrongVerseText from './CanonicalStrongVerseText'
 
 import BibleVerseDetailFooter from './BibleVerseDetailFooter'
 
@@ -27,7 +27,6 @@ import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { StudyNavigateBibleType } from '~common/types'
 import { CarouselProvider } from '~helpers/CarouselContext'
 import { getChapterVerseCountSafe } from '~helpers/bibleCoverage'
-import { parseStrongVerse } from '~helpers/strongVerseParser'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
 import { useResourceAccess } from '~features/resources/resourceAccess'
@@ -43,7 +42,7 @@ import {
 } from '~helpers/strongBiblePublications'
 import { localQueryOptions } from '~helpers/queryOptions'
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
-import { createStrongIdentityForBook } from '~helpers/strongIdentities'
+import { getDisplayedStrongIdentities } from '~helpers/strongIdentities'
 import { useResourcesLanguageValue } from '~state/resourcesLanguage'
 
 const slideWidth = wp(60)
@@ -186,25 +185,20 @@ const BibleVerseDetailCard: React.FC<Props> = ({
       }
 
       const strongVerse = result.verse
-      const parsedVerse = parseStrongVerse(strongVerse.Texte, verseBook)
+      const strongIdentities = [
+        ...new Map(
+          (strongVerse.StrongSpans ?? [])
+            .flatMap(span => getDisplayedStrongIdentities(span.identities))
+            .map(identity => [`${identity.kind}:${identity.code}`, identity])
+        ).values(),
+      ]
       const [versesInCurrentChapterResult, strongReferencesResult] = await Promise.all([
         getChapterVerseCountSafe(result.provenance.versionId, verseBook, verseChapter),
-        resources.strongLexicon.loadEntries(
-          parsedVerse.references.map(reference =>
-            createStrongIdentityForBook(reference, verseBook)
-          ),
-          strongResourceLanguage
-        ),
+        resources.strongLexicon.loadEntries(strongIdentities, strongResourceLanguage),
       ])
       const strongReferences = strongReferencesResult
-      const { formattedTexte } = await verseToStrong(
-        { ...strongVerse, Livre: verseBook },
-        undefined,
-        undefined,
-        strongReferences.map(entry => ({
-          Code: entry.baseCode,
-          LSG: entry.gloss,
-        }))
+      const formattedTexte = (
+        <CanonicalStrongVerseText verse={{ ...strongVerse, Livre: verseBook }} />
       )
 
       return {

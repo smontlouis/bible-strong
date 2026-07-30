@@ -15,6 +15,7 @@ export type CanonicalVersePresentationNode =
       identities: StrongIdentity[]
       morphologies?: StrongSelectionMorphology[]
       word: string
+      isUntranslated?: boolean
     }
   | { kind: 'paragraph-start'; offset: number }
   | { kind: 'line-start'; offset: number }
@@ -74,23 +75,35 @@ export const buildCanonicalVersePresentation = ({
     events.sort((left, right) => left.order - right.order)
   }
 
-  const strongReferencesByOffset = new Map<
-    number,
-    {
-      identities: StrongIdentity[]
-      morphologies?: StrongSelectionMorphology[]
-      word: string
-    }
-  >()
+  type StrongReference = Extract<CanonicalVersePresentationNode, { kind: 'strong-reference' }> & {
+    ordinal: number
+    offset: number
+  }
+  const strongReferences: StrongReference[] = []
   for (const span of strongSpans) {
-    if (span.length <= 0 || span.startOffset < 0 || span.startOffset + span.length > text.length) {
+    if (span.length < 0 || span.startOffset < 0 || span.startOffset + span.length > text.length) {
       continue
     }
     const offset = span.startOffset + span.length
-    const strongReference = strongReferencesByOffset.get(offset) ?? {
-      identities: [],
-      word: text.slice(span.startOffset, offset),
-    }
+    const strongReference: StrongReference =
+      span.length > 0
+        ? (strongReferences.find(
+            reference => !reference.isUntranslated && reference.offset === offset
+          ) ?? {
+            kind: 'strong-reference' as const,
+            identities: [],
+            word: text.slice(span.startOffset, offset),
+            ordinal: span.ordinal,
+            offset,
+          })
+        : {
+            kind: 'strong-reference' as const,
+            identities: [],
+            word: '',
+            isUntranslated: true,
+            ordinal: span.ordinal,
+            offset,
+          }
     for (const identity of getDisplayedStrongIdentities(span.identities)) {
       if (
         !strongReference.identities.some(candidate => areStrongIdentitiesEqual(candidate, identity))
@@ -112,16 +125,28 @@ export const buildCanonicalVersePresentation = ({
         })
       }
     }
-    strongReferencesByOffset.set(offset, strongReference)
+    if (
+      strongReference.identities.length &&
+      !strongReferences.some(reference => reference === strongReference)
+    ) {
+      strongReferences.push(strongReference)
+    }
   }
+  strongReferences.sort((left, right) => left.offset - right.offset || left.ordinal - right.ordinal)
   let previousStrongOffset = 0
-  for (const [offset, strongReference] of [...strongReferencesByOffset.entries()].sort(
-    ([left], [right]) => left - right
-  )) {
+  for (const strongReference of strongReferences) {
+    if (strongReference.isUntranslated) continue
     strongReference.word =
-      getStrongSelectionWordFromTextSegment(text.slice(previousStrongOffset, offset)) ??
-      strongReference.word
-    previousStrongOffset = offset
+      getStrongSelectionWordFromTextSegment(
+        text.slice(previousStrongOffset, strongReference.offset)
+      ) ?? strongReference.word
+    previousStrongOffset = strongReference.offset
+  }
+  const strongReferencesByOffset = new Map<number, StrongReference[]>()
+  for (const strongReference of strongReferences) {
+    const references = strongReferencesByOffset.get(strongReference.offset) ?? []
+    references.push(strongReference)
+    strongReferencesByOffset.set(strongReference.offset, references)
   }
 
   const redStarts = new Map<number, number>()
@@ -154,9 +179,12 @@ export const buildCanonicalVersePresentation = ({
     for (let index = 0; index < (redEnds.get(offset) ?? 0); index += 1) {
       closeElement(stack, 'red-word')
     }
-    const strongReference = strongReferencesByOffset.get(offset)
-    if (strongReference?.identities.length) {
-      currentChildren(stack).push({ kind: 'strong-reference', ...strongReference })
+    for (const {
+      ordinal: _ordinal,
+      offset: _offset,
+      ...strongReference
+    } of strongReferencesByOffset.get(offset) ?? []) {
+      currentChildren(stack).push(strongReference)
     }
     for (const presentationEvent of eventsByOffset.get(offset) ?? []) {
       if (presentationEvent.kind === 'note') {

@@ -10,7 +10,7 @@ import {
   type InterlinearToken,
 } from '~helpers/interlinearBibleSidecar'
 import { getDisplayedStrongIdentities } from '~helpers/strongIdentities'
-import { buildStrongAnnotatedText, type StrongBibleSpan } from '~helpers/strongBibleOverlay'
+import type { StrongBibleSpan } from '~helpers/canonicalStrongVerse'
 import {
   localStrongBibleResourceAccess,
   type StrongBibleResourceAccess,
@@ -70,7 +70,6 @@ export interface LexiconBibleResourceDependencies {
     chapter: number,
     verse: number
   ) => Promise<string | null>
-  annotateText: (canonicalText: string, spans: StrongBibleSpan[]) => string
 }
 
 export interface LexiconBibleResourceAccess {
@@ -82,7 +81,6 @@ const defaultDependencies: LexiconBibleResourceDependencies = {
   getInterlinearAvailability: getInterlinearSidecarAvailability,
   loadInterlinearChapterTokens,
   getVerseText,
-  annotateText: buildStrongAnnotatedText,
 }
 
 const resolveBhgAvailability = async (
@@ -157,7 +155,8 @@ export const createLexiconBibleResourceAccess = (
                 Livre: request.book,
                 Chapitre: request.chapter,
                 Verset: request.verse,
-                Texte: dependencies.annotateText(text, spans),
+                Texte: text,
+                StrongSpans: spans,
               },
             }
           }

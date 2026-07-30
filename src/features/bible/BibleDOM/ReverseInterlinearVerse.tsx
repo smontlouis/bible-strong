@@ -17,6 +17,7 @@ import {
   dispatchStrongSelection,
   getStrongSelectionWordFromTextSegment,
 } from './strongSelectionAction'
+import UntranslatedStrongMarker from './UntranslatedStrongMarker'
 
 interface Props {
   verse: Verse
@@ -39,7 +40,7 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode, isPar
     word: string,
     morphologies: StrongSelectionMorphology[]
   ) => {
-    dispatchStrongSelection(dispatch, identities, isHebrew ? 1 : 40, version, {
+    dispatchStrongSelection(dispatch, identities, verse.Livre, version, {
       word,
       chapter: verse.Chapitre,
       verse: verse.Verset,
@@ -72,8 +73,9 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode, isPar
         const transliteration = uniqueLine(segments.map(segment => segment.transliteration))
         const morphology = uniqueLine(segments.map(segment => segment.morphology))
         const strongReferences = uniqueLine(displayedIdentities.map(identity => identity.code))
-        const selectionWord =
-          getStrongSelectionWordFromTextSegment(`${prefix}${surface}`) ?? surface
+        const selectionWord = surface
+          ? (getStrongSelectionWordFromTextSegment(`${prefix}${surface}`) ?? surface)
+          : ''
         const selectionMorphologies = collectStrongSelectionMorphologies(
           selectionIdentities,
           segments
@@ -84,6 +86,7 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode, isPar
             {prefix}
             <button
               type="button"
+              aria-label={selectionIdentities.map(identity => identity.code).join(' · ')}
               data-ignore-verse-touch
               disabled={!preferredIdentity}
               onClick={() =>
@@ -115,7 +118,12 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode, isPar
                   lineHeight: 1.2,
                 }}
               >
-                {surface}
+                {surface || (
+                  <UntranslatedStrongMarker
+                    color={selected ? colors.reverse : colors.primary}
+                    backgroundColor={selected ? colors.primary : colors.lightPrimary}
+                  />
+                )}
               </span>
               {original && (
                 <span

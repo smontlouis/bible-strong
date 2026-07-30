@@ -39,4 +39,15 @@ describe('buildInterlinearVerseLayout', () => {
       layout.pieces.map(piece => `${piece.prefix}${piece.surface}`).join('') + layout.trailing
     ).toBe(text)
   })
+
+  it('keeps zero-length tokens at their insertion point without consuming canonical text', () => {
+    const text = 'Il prit'
+    const layout = buildInterlinearVerseLayout(text, [token(2, 0, 0), token(3, 4, 1)])
+
+    expect(layout.pieces).toEqual([
+      { prefix: 'Il', surface: '', token: token(2, 0, 0) },
+      { prefix: ' ', surface: 'prit', token: token(3, 4, 1) },
+    ])
+    expect(layout.trailing).toBe('')
+  })
 })

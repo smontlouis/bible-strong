@@ -1,9 +1,16 @@
 import { Image } from 'expo-image'
+import { useTheme } from '@emotion/react'
 import React, { useState } from 'react'
-import { Linking, Text as NativeText, type LayoutChangeEvent } from 'react-native'
+import {
+  Linking,
+  Text as NativeText,
+  type LayoutChangeEvent,
+  type NativeSyntheticEvent,
+  type TextLayoutEventData,
+} from 'react-native'
 import Svg, { Line } from 'react-native-svg'
 import { useTranslation, type TFunction } from 'react-i18next'
-import { parseDocument } from 'htmlparser2'
+import { DomUtils, parseDocument } from 'htmlparser2'
 import { hasChildren, isTag, isText, type ChildNode } from 'domhandler'
 
 import StylizedHTMLView from '~common/StylizedHTMLView'
@@ -15,8 +22,13 @@ import type {
   StrongLexiconEntityRelation,
   StrongLexiconRelation,
 } from '~features/resources/strongLexiconAccess'
-import { formatStrongOsisReference } from './strongReferenceNavigation'
 import { linkifyStrongEditorialBibleReferences } from './strongEditorialHtml'
+import {
+  getScaledStrongTextStyle,
+  getStrongEditorialHtmlStyles,
+  type StrongReadingTypography,
+} from './strongEditorialHtmlStyles'
+import { isStrongEditorialPreviewOverflowing } from './strongDetailPreview'
 import { getStrongEntityPresentation, splitStrongEntityRelations } from './strongEntityPresentation'
 
 export const StrongEyebrow = ({ children }: { children: React.ReactNode }) => (
@@ -68,11 +80,11 @@ export const StrongPreviewLink = ({ label, onPress }: { label: string; onPress: 
 
 export const StrongLexicalRelationCard = ({
   relation,
-  readingFontFamily,
+  readingTypography,
   onPress,
 }: {
   relation: StrongLexiconRelation
-  readingFontFamily?: string
+  readingTypography: StrongReadingTypography
   onPress: () => void
 }) => (
   <TouchableBox
@@ -83,17 +95,15 @@ export const StrongLexicalRelationCard = ({
   >
     <HStack bg="lightGrey" borderRadius={17} px={15} py={13} alignItems="center" gap={12}>
       <VStack flex gap={3}>
-        <Text bold fontSize={16}>
-          {relation.gloss || relation.transliteration}
-        </Text>
         <Text color="tertiary" fontSize={12}>
           {relation.label} · {relation.stepCode}
         </Text>
+        <Text bold fontSize={16}>
+          {relation.gloss || relation.transliteration}
+        </Text>
       </VStack>
       {!!relation.original && (
-        <Text fontSize={21} style={{ fontFamily: readingFontFamily }}>
-          {relation.original}
-        </Text>
+        <Text style={getScaledStrongTextStyle(18, 24, readingTypography)}>{relation.original}</Text>
       )}
       <FeatherIcon name="chevron-right" size={16} color="tertiary" />
     </HStack>
@@ -102,32 +112,27 @@ export const StrongLexicalRelationCard = ({
 
 type StrongEditorialHtmlProps = {
   value?: string
-  readingFontFamily?: string
+  readingTypography: StrongReadingTypography
   onOpenBibleReference: (osis: string) => void
   onOpenStrong: (stepCode: string) => void
 }
 
 export const StrongEditorialHtml = ({
   value,
-  readingFontFamily,
+  readingTypography,
   onOpenBibleReference,
   onOpenStrong,
 }: StrongEditorialHtmlProps) => {
+  const theme = useTheme()
   if (!value) return null
 
   return (
     <StylizedHTMLView
-      value={linkifyStrongEditorialBibleReferences(value)}
-      htmlStyle={{
-        p: { fontFamily: readingFontFamily, fontSize: 18, lineHeight: 28 },
-        b: { fontFamily: readingFontFamily, fontSize: 18, lineHeight: 28 },
-        strong: { fontFamily: readingFontFamily, fontSize: 18, lineHeight: 28 },
-        em: { fontFamily: readingFontFamily, fontSize: 18, lineHeight: 28 },
-        i: { fontFamily: readingFontFamily, fontSize: 18, lineHeight: 28 },
-        a: { fontFamily: readingFontFamily, fontSize: 18, lineHeight: 28 },
-        li: { fontFamily: readingFontFamily, fontSize: 18, lineHeight: 28 },
-      }}
-      additionalSystemFonts={readingFontFamily ? [readingFontFamily] : undefined}
+      value={linkifyStrongEditorialBibleReferences(value, theme.colors.primary)}
+      htmlStyle={getStrongEditorialHtmlStyles(theme, readingTypography)}
+      additionalSystemFonts={
+        readingTypography.fontFamily ? [readingTypography.fontFamily] : undefined
+      }
       onLinkPress={(target, metadata) => {
         if (typeof metadata === 'number') {
           onOpenStrong(`${metadata <= 39 ? 'H' : 'G'}${target}`)
@@ -147,17 +152,54 @@ export const StrongEditorialHtml = ({
   )
 }
 
-const renderEditorialPreviewNodes = (nodes: ChildNode[], path = 'preview'): React.ReactNode[] =>
+type EditorialPreviewLinkOptions = {
+  linkColor: string
+  onOpenBibleReference: (osis: string) => void
+  onOpenStrong: (stepCode: string) => void
+}
+
+const openEditorialPreviewLink = (
+  target: string,
+  { onOpenBibleReference, onOpenStrong }: EditorialPreviewLinkOptions
+) => {
+  if (target.startsWith('bible://')) {
+    onOpenBibleReference(target.slice('bible://'.length))
+    return
+  }
+  if (target.startsWith('strong://')) {
+    onOpenStrong(target.slice('strong://'.length))
+    return
+  }
+  if (/^https?:\/\//iu.test(target)) Linking.openURL(target)
+}
+
+const renderEditorialPreviewNodes = (
+  nodes: ChildNode[],
+  linkOptions: EditorialPreviewLinkOptions,
+  path = 'preview'
+): React.ReactNode[] =>
   nodes.flatMap((node, index) => {
     const key = `${path}-${index}`
     if (isText(node)) return node.data
     if (!hasChildren(node)) return []
-    if (!isTag(node)) return renderEditorialPreviewNodes(node.children, key)
+    if (!isTag(node)) return renderEditorialPreviewNodes(node.children, linkOptions, key)
 
     const tagName = node.name.toLowerCase()
     if (tagName === 'br') return '\n'
 
-    const children = renderEditorialPreviewNodes(node.children, key)
+    const children = renderEditorialPreviewNodes(node.children, linkOptions, key)
+    if (tagName === 'a' && node.attribs.href) {
+      return (
+        <NativeText
+          key={key}
+          accessibilityRole="link"
+          onPress={() => openEditorialPreviewLink(node.attribs.href, linkOptions)}
+          style={{ color: linkOptions.linkColor }}
+        >
+          {children}
+        </NativeText>
+      )
+    }
     if (tagName === 'b' || tagName === 'strong') {
       return (
         <NativeText key={key} style={{ fontWeight: '700' }}>
@@ -185,15 +227,35 @@ const renderEditorialPreviewNodes = (nodes: ChildNode[], path = 'preview'): Reac
 
 export const StrongEditorialPreview = ({
   value,
-  readingFontFamily,
+  readingTypography,
   numberOfLines = 5,
+  onOverflowChange,
+  onOpenBibleReference,
+  onOpenStrong,
 }: {
   value?: string
-  readingFontFamily?: string
+  readingTypography: StrongReadingTypography
   numberOfLines?: number
+  onOverflowChange?: (overflows: boolean) => void
+  onOpenBibleReference: (osis: string) => void
+  onOpenStrong: (stepCode: string) => void
 }) => {
+  const theme = useTheme()
   if (!value) return null
-  const document = parseDocument(value, { decodeEntities: true })
+  const document = parseDocument(
+    linkifyStrongEditorialBibleReferences(value, theme.colors.primary),
+    { decodeEntities: true }
+  )
+  const fullText = DomUtils.textContent(document)
+  const reportOverflow = (event: NativeSyntheticEvent<TextLayoutEventData>) => {
+    onOverflowChange?.(
+      isStrongEditorialPreviewOverflowing(
+        fullText,
+        event.nativeEvent.lines.map(line => line.text),
+        numberOfLines
+      )
+    )
+  }
 
   return (
     <Text
@@ -201,9 +263,14 @@ export const StrongEditorialPreview = ({
       lineHeight={28}
       numberOfLines={numberOfLines}
       ellipsizeMode="tail"
-      style={{ fontFamily: readingFontFamily }}
+      onTextLayout={reportOverflow}
+      style={getScaledStrongTextStyle(18, 28, readingTypography)}
     >
-      {renderEditorialPreviewNodes(document.children)}
+      {renderEditorialPreviewNodes(document.children, {
+        linkColor: theme.colors.primary,
+        onOpenBibleReference,
+        onOpenStrong,
+      })}
     </Text>
   )
 }
@@ -220,17 +287,20 @@ export const StrongEntitySummaryCard = ({
   entity,
   expanded = false,
   plain = false,
+  readingTypography,
   onOpenBibleReference,
   onOpenStrong,
 }: {
   entity: StrongLexiconEntity
   expanded?: boolean
   plain?: boolean
+  readingTypography: StrongReadingTypography
   onOpenBibleReference: (osis: string) => void
   onOpenStrong: (stepCode: string) => void
 }) => {
   const { t } = useTranslation()
   const presentation = getStrongEntityPresentation(entity)
+  const detailedDescription = entity.articleHtml || entity.summaryHtml
 
   return (
     <VStack
@@ -255,13 +325,27 @@ export const StrongEntitySummaryCard = ({
           )}
         </VStack>
       </HStack>
-      {!!entity.shortDescription && <Text lineHeight={23}>{entity.shortDescription}</Text>}
-      {expanded && (
+      {!!entity.shortDescription && (
         <StrongEditorialHtml
-          value={entity.articleHtml || entity.summaryHtml}
+          value={entity.shortDescription}
+          readingTypography={readingTypography}
           onOpenBibleReference={onOpenBibleReference}
           onOpenStrong={onOpenStrong}
         />
+      )}
+      {expanded && !!detailedDescription && (
+        <Box
+          pt={entity.shortDescription ? 13 : 0}
+          borderTopWidth={entity.shortDescription ? 1 : 0}
+          borderColor="border"
+        >
+          <StrongEditorialHtml
+            value={detailedDescription}
+            readingTypography={readingTypography}
+            onOpenBibleReference={onOpenBibleReference}
+            onOpenStrong={onOpenStrong}
+          />
+        </Box>
       )}
     </VStack>
   )
@@ -439,44 +523,5 @@ export const StrongEntityRelationList = ({
         </TouchableBox>
       ))}
     </VStack>
-  )
-}
-
-export const StrongReferenceCloud = ({
-  references,
-  hiddenCount = 0,
-  onOpenReference,
-  limit,
-}: {
-  references: string[]
-  hiddenCount?: number
-  onOpenReference: (osis: string) => void
-  limit?: number
-}) => {
-  const visible = limit == null ? references : references.slice(0, limit)
-  const remaining = Math.max(0, references.length - visible.length) + hiddenCount
-
-  return (
-    <HStack wrap gap={7}>
-      {visible.map(reference => (
-        <TouchableBox
-          key={reference}
-          onPress={() => onOpenReference(reference)}
-          activeOpacity={0.7}
-          accessibilityRole="link"
-        >
-          <Box bg="lightGrey" borderRadius={16} px={10} py={7}>
-            <Text fontSize={12}>{formatStrongOsisReference(reference)}</Text>
-          </Box>
-        </TouchableBox>
-      ))}
-      {remaining > 0 && (
-        <Box bg="lightPrimary" borderRadius={16} px={10} py={7}>
-          <Text color="primary" bold fontSize={12}>
-            +{remaining}
-          </Text>
-        </Box>
-      )}
-    </HStack>
   )
 }

@@ -37,10 +37,43 @@ const createDependencies = (): jest.Mocked<StrongBibleResourceDependencies> => (
   getFoundVerseLocations: jest.fn(),
   getLemmaStats: jest.fn(),
   getMultipleVerses: jest.fn(),
-  annotateText: jest.fn((text: string, _spans) => `${text} 123`),
 })
 
 describe('strongBibleResourceAccess', () => {
+  it('keeps Strong spans on a contextual verse so untranslated occurrences remain positionable', async () => {
+    const dependencies = createDependencies()
+    const spans = [
+      {
+        ordinal: 0,
+        startOffset: 2,
+        length: 0,
+        identities: [{ kind: 'strong' as const, code: 'H0347' }],
+      },
+    ]
+    dependencies.getAvailability.mockResolvedValue(available('LSG'))
+    dependencies.getVerseText.mockResolvedValue('Il prit la parole et dit :')
+    dependencies.getVerseSpans.mockResolvedValue(spans)
+    const access = createStrongBibleResourceAccess(dependencies)
+
+    const result = await access.loadVerse({
+      currentVersionId: 'LSG',
+      defaultVersionId: 'LSG',
+      book: 18,
+      chapter: 3,
+      verse: 2,
+    })
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: 'available',
+        verse: expect.objectContaining({
+          Texte: 'Il prit la parole et dit :',
+          StrongSpans: spans,
+        }),
+      })
+    )
+  })
+
   it('uses the current Bible when its compatible sidecar is installed', async () => {
     const dependencies = createDependencies()
     dependencies.getAvailability.mockResolvedValue(available('DBY'))
@@ -363,6 +396,49 @@ describe('strongBibleResourceAccess', () => {
     expect(dependencies.getChapterSpans).toHaveBeenNthCalledWith(1, 'DBY', 1, 1)
     expect(dependencies.getChapterSpans).toHaveBeenNthCalledWith(2, 'DBY', 1, 2)
     expect(dependencies.getVerseSpans).not.toHaveBeenCalled()
+  })
+
+  it('keeps Strong spans on concordance verses so empty occurrences remain positionable', async () => {
+    const dependencies = createDependencies()
+    const spans = [
+      {
+        ordinal: 0,
+        startOffset: 2,
+        length: 0,
+        identities: [{ kind: 'strong' as const, code: 'H0347' }],
+      },
+    ]
+    dependencies.getAvailability.mockResolvedValue(available('LSG'))
+    dependencies.getFoundVerseLocations.mockResolvedValue([{ Livre: 18, Chapitre: 3, Verset: 2 }])
+    dependencies.getResolvedIdentity.mockResolvedValue({
+      id: 347,
+      kind: 'strong',
+      code: 'H0347',
+    })
+    dependencies.getMultipleVerses.mockResolvedValue({
+      '18-3-2': 'Il prit la parole et dit :',
+    })
+    dependencies.getChapterSpans.mockResolvedValue({ 2: spans })
+    const access = createStrongBibleResourceAccess(dependencies)
+
+    const result = await access.loadFoundVersesByBook({
+      currentVersionId: 'LSG',
+      defaultVersionId: 'LSG',
+      book: 18,
+      reference: 'H0347',
+    })
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: 'available',
+        verses: [
+          expect.objectContaining({
+            Texte: 'Il prit la parole et dit :',
+            StrongSpans: spans,
+          }),
+        ],
+      })
+    )
   })
 
   it('loads an all-Bible concordance page with an optional French lemma filter', async () => {

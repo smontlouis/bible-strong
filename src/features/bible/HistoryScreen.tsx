@@ -14,8 +14,8 @@ import Container from '~common/ui/Container'
 import FlatList from '~common/ui/FlatList'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { StrongReference } from '~common/types'
 import formatVerseContent from '~helpers/formatVerseContent'
+import { getHistoryStrongReference } from '~helpers/historyStrongReference'
 import useLanguage from '~helpers/useLanguage'
 import { getDateLocale } from '~helpers/languageUtils'
 import {
@@ -42,11 +42,12 @@ const HistoryItem = ({ item }: { item: HistoryItemType }) => {
 
   if (item.type === 'strong') {
     const { Hebreu, Grec, Mot, date, book } = item
+    const persistedReference = getHistoryStrongReference(item)
     const ago = distanceInWords(Number(date), Date.now(), {
       locale: getDateLocale(lang),
     })
     return (
-      <Link route="Strong" params={{ book, strongReference: item as unknown as StrongReference }}>
+      <Link route="Strong" params={{ book, reference: persistedReference ?? '' }}>
         <Box padding={20} row alignItems="center">
           <Box>
             <Text bold>{Mot}</Text>

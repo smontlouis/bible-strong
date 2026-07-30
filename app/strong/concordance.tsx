@@ -1,4 +1,4 @@
-import StrongDetailRouteScreen from '~features/lexique/StrongDetailRouteScreen'
+import StrongConcordanceRouteScreen from '~features/lexique/StrongConcordanceRouteScreen'
 import { useStrongRoute } from '~features/lexique/useStrongRoute'
 import { IS_FORM_SHEET } from '~helpers/constants'
 
@@ -6,11 +6,10 @@ const StrongConcordanceRoute = () => {
   const route = useStrongRoute('concordance')
 
   return (
-    <StrongDetailRouteScreen
+    <StrongConcordanceRouteScreen
       key={route.identity}
       context={route.context}
       isFormSheet={IS_FORM_SHEET}
-      page="concordance"
     />
   )
 }

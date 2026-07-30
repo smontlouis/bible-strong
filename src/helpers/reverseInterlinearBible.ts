@@ -1,6 +1,6 @@
 import type { InterlinearIdentityKind, InterlinearToken } from './interlinearBibleSidecar'
 import { getDisplayedStrongIdentities, getStrongReferenceNumber } from './strongIdentities'
-import type { StrongBibleSpan } from './strongBibleOverlay'
+import type { StrongBibleSpan } from './canonicalStrongVerse'
 
 export interface ReverseInterlinearSourceToken extends InterlinearToken {
   surface: string

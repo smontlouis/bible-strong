@@ -1,4 +1,4 @@
-const STRONG_REF_PATTERN = /\b([HG])(\d+)\b/g
+const STRONG_REF_PATTERN = /\b([HG])(\d{4}[A-Z]|\d+)\b/g
 const HTML_TOKEN_PATTERN = /<!--[\s\S]*?-->|<[^>]*>/g
 const WIDTH_SENSITIVE_CONTENT_PATTERN = /<(?:iframe|img|svg|table|video)(?:\s|>)/i
 
@@ -36,10 +36,10 @@ export const linkifyStrongReferences = (html: string) => {
       ? text
       : text.replace(
           STRONG_REF_PATTERN,
-          (_match, prefix: 'H' | 'G', number: string) =>
-            `<a href="strong://${prefix}${number}" ${STRONG_NUMBER_ATTRIBUTE}="${number}" ${STRONG_BOOK_ATTRIBUTE}="${
+          (_match, prefix: 'H' | 'G', reference: string) =>
+            `<a href="strong://${prefix}${reference}" ${STRONG_NUMBER_ATTRIBUTE}="${reference}" ${STRONG_BOOK_ATTRIBUTE}="${
               prefix === 'H' ? 1 : 40
-            }">${prefix}${number}</a>`
+            }">${prefix}${reference}</a>`
         )
 
   for (const match of html.matchAll(HTML_TOKEN_PATTERN)) {

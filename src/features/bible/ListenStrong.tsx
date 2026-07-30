@@ -2,7 +2,7 @@ import React from 'react'
 import { ActivityIndicator } from 'react-native'
 import { LinkBox } from '~common/Link'
 import Box from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
+import { IonIcon } from '~common/ui/Icon'
 import { useStrongAudio } from './StrongAudioProvider'
 
 type AudioStatus = 'Idle' | 'Loading' | 'Playing'
@@ -31,7 +31,7 @@ const ListenToStrong = ({ type, code }: Props) => {
     <Box>
       {audioStatus === 'Idle' && (
         <LinkBox onPress={playAudio}>
-          <FeatherIcon name="play-circle" size={20} color="primary" />
+          <IonIcon name="play" size={20} color="primary" style={{ marginLeft: 2 }} />
         </LinkBox>
       )}
       {audioStatus === 'Loading' && (
@@ -41,7 +41,7 @@ const ListenToStrong = ({ type, code }: Props) => {
       )}
       {audioStatus === 'Playing' && (
         <Box>
-          <FeatherIcon name="play-circle" size={20} color="primary" style={{ opacity: 0.5 }} />
+          <IonIcon name="play" size={20} color="primary" style={{ opacity: 0.3, marginLeft: 2 }} />
         </Box>
       )}
     </Box>

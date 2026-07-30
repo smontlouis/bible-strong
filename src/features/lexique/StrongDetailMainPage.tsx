@@ -14,30 +14,33 @@ import type {
 } from '~features/resources/strongLexiconAccess'
 import type { StrongBibleLemmaStat } from '~helpers/strongBibleSidecar'
 import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
-import type { StrongReference, Verse } from '~common/types'
+import { getStrongReferenceNumber } from '~helpers/strongIdentities'
+import type { Verse } from '~common/types'
 import StrongLexiconModuleCard from './StrongLexiconModuleCard'
 import {
   StrongEditorialHtml,
   StrongEditorialPreview,
   StrongEditorialSection,
+  StrongEyebrow,
   StrongEntityRelationGraph,
   StrongEntityRelationList,
   StrongEntitySummaryCard,
   StrongLexicalRelationCard,
   StrongPreviewLink,
-  StrongReferenceCloud,
 } from './StrongDetailUI'
 import {
   formatStrongContextMorphology,
   getStrongContextVerseText,
 } from './strongContextPresentation'
 import { splitStrongEntityRelations } from './strongEntityPresentation'
+import { splitStrongLexicalRelations } from './strongLexiconRelations'
+import { hasHiddenStrongPreviewItems } from './strongDetailPreview'
+import { getScaledStrongTextStyle, type StrongReadingTypography } from './strongEditorialHtmlStyles'
 
 type Anchor = 'context' | 'definition' | 'entity' | 'related' | 'concordance'
 
 type Props = {
   entry: StrongLexiconEntry
-  legacyEntry: StrongReference
   contextVerse?: Verse
   contextReference?: string
   contextVersion?: string
@@ -46,12 +49,13 @@ type Props = {
   resourcesAvailability: StrongLexiconModuleAvailability
   entitiesAvailability: StrongLexiconModuleAvailability
   concordanceCount: number
+  concordanceTotalCount: number
   concordanceVersion: string
   concordanceVerses: Verse[]
   concordanceLoading: boolean
   lemmaStats: StrongBibleLemmaStat[]
   selectedLemmaId?: number
-  readingFontFamily: string
+  readingTypography: StrongReadingTypography
   onSelectLemma: (lemmaId?: number) => void
   onOpenPage: (page: 'entity' | 'dictionary' | 'related' | 'concordance') => void
   onOpenStrong: (stepCode: string) => void
@@ -63,37 +67,39 @@ type Props = {
 const HighlightedVerse = ({
   text,
   word,
-  readingFontFamily,
+  untranslatedOffset,
+  readingTypography,
 }: {
   text: string
   word?: string
-  readingFontFamily: string
+  untranslatedOffset?: number
+  readingTypography: StrongReadingTypography
 }) => {
-  if (!word)
+  if (untranslatedOffset != null)
     return (
-      <Text fontSize={18} lineHeight={28} style={{ fontFamily: readingFontFamily }}>
-        {text}
+      <Text style={getScaledStrongTextStyle(20, 30, readingTypography)}>
+        {text.slice(0, untranslatedOffset)}
+        <Text color="primary" bold>
+          {' ●'}
+        </Text>
+        {text.slice(untranslatedOffset)}
       </Text>
     )
+  if (!word) return <Text style={getScaledStrongTextStyle(18, 28, readingTypography)}>{text}</Text>
   const index = text.toLocaleLowerCase().indexOf(word.toLocaleLowerCase())
   if (index < 0)
-    return (
-      <Text fontSize={18} lineHeight={28} style={{ fontFamily: readingFontFamily }}>
-        {text}
-      </Text>
-    )
+    return <Text style={getScaledStrongTextStyle(18, 28, readingTypography)}>{text}</Text>
 
   return (
-    <Text fontSize={20} lineHeight={30} style={{ fontFamily: readingFontFamily }}>
+    <Text style={getScaledStrongTextStyle(20, 30, readingTypography)}>
       {text.slice(0, index)}
       <Text
         bg="lightPrimary"
         color="primary"
         bold
-        fontSize={20}
         borderRadius={5}
         px={3}
-        style={{ fontFamily: readingFontFamily }}
+        style={getScaledStrongTextStyle(20, 30, readingTypography)}
       >
         {text.slice(index, index + word.length)}
       </Text>
@@ -130,7 +136,6 @@ const JumpNavigationContent = ({
 
 const StrongDetailMainPage = ({
   entry,
-  legacyEntry,
   contextVerse,
   contextReference,
   contextVersion,
@@ -139,12 +144,13 @@ const StrongDetailMainPage = ({
   resourcesAvailability,
   entitiesAvailability,
   concordanceCount,
+  concordanceTotalCount,
   concordanceVersion,
   concordanceVerses,
   concordanceLoading,
   lemmaStats,
   selectedLemmaId,
-  readingFontFamily,
+  readingTypography,
   onSelectLemma,
   onOpenPage,
   onOpenStrong,
@@ -155,6 +161,10 @@ const StrongDetailMainPage = ({
   const { t } = useTranslation()
   const scrollRef = useRef<ScrollViewType>(null)
   const [anchorOffsets, setAnchorOffsets] = useState<Partial<Record<Anchor, number>>>({})
+  const [dictionaryPreview, setDictionaryPreview] = useState<{
+    resourceId: number
+    overflows: boolean
+  }>()
   const setAnchor = (anchor: Anchor, y: number) => {
     setAnchorOffsets(current => (current[anchor] === y ? current : { ...current, [anchor]: y }))
   }
@@ -171,9 +181,19 @@ const StrongDetailMainPage = ({
         : entry.entity?.category === 'group'
           ? t('strongDetail.entity.group')
           : t('strongDetail.jump.entity')
-  const contextText = contextVerse
-    ? getStrongContextVerseText(contextVerse, entry, clickedWord)
-    : undefined
+  const contextText = contextVerse ? getStrongContextVerseText(contextVerse) : undefined
+  const untranslatedContextOffset = contextVerse?.StrongSpans?.find(
+    span =>
+      span.length === 0 &&
+      span.identities.some(
+        identity =>
+          getStrongReferenceNumber(identity.code) === getStrongReferenceNumber(entry.baseCode)
+      )
+  )?.startOffset
+  const dictionaryResource = entry.resources[0]
+  const lexicalRelations = splitStrongLexicalRelations(entry.relations)
+  const displayedRelationCount = Math.min(lexicalRelations.relatedWords.length, 4)
+  const displayedConcordanceCount = Math.min(concordanceVerses.length, 3)
 
   return (
     <ScrollView
@@ -198,12 +218,7 @@ const StrongDetailMainPage = ({
         </Text>
         <HStack alignItems="flex-end" gap={16}>
           <VStack flex gap={5}>
-            <Text
-              fontSize={40}
-              lineHeight={45}
-              fontWeight="400"
-              style={{ fontFamily: readingFontFamily }}
-            >
+            <Text fontWeight="400" style={getScaledStrongTextStyle(40, 45, readingTypography)}>
               {entry.original}
             </Text>
             <Text fontWeight="500" fontSize={25}>
@@ -213,14 +228,7 @@ const StrongDetailMainPage = ({
               {[entry.transliteration, entry.pronunciation].filter(Boolean).join(' · ')}
             </Text>
           </VStack>
-          <Box
-            bg="lightPrimary"
-            borderRadius={24}
-            borderWidth={1}
-            borderColor="primary"
-            size={48}
-            center
-          >
+          <Box bg="primary" bgOpacity="010" borderRadius={24} size={48} center>
             <ListenToStrong
               type={entry.language === 'hebrew' ? 'hebreu' : 'grec'}
               code={entry.baseCode}
@@ -229,15 +237,7 @@ const StrongDetailMainPage = ({
         </HStack>
       </VStack>
 
-      <Box
-        mx={-20}
-        py={10}
-        bg="reverse"
-        borderBottomWidth={1}
-        borderTopWidth={1}
-        borderColor="border"
-        zIndex={10}
-      >
+      <Box mx={-20} py={10} bg="reverse" borderBottomWidth={1} borderColor="border" zIndex={10}>
         <JumpNavigationContent
           anchors={[
             {
@@ -250,7 +250,7 @@ const StrongDetailMainPage = ({
             {
               id: 'related',
               label: t('strongDetail.jump.related'),
-              visible: entry.relations.length > 0,
+              visible: lexicalRelations.relatedWords.length > 0,
             },
             { id: 'concordance', label: t('Concordance'), visible: true },
           ]}
@@ -267,7 +267,8 @@ const StrongDetailMainPage = ({
             <HighlightedVerse
               text={contextText ?? ''}
               word={clickedWord || entry.gloss}
-              readingFontFamily={readingFontFamily}
+              untranslatedOffset={untranslatedContextOffset}
+              readingTypography={readingTypography}
             />
             <VStack gap={4}>
               <Text color="tertiary" fontSize={12}>
@@ -297,7 +298,7 @@ const StrongDetailMainPage = ({
         {entry.definitionHtml ? (
           <StrongEditorialHtml
             value={entry.definitionHtml}
-            readingFontFamily={readingFontFamily}
+            readingTypography={readingTypography}
             onOpenBibleReference={onOpenBibleReference}
             onOpenStrong={onOpenStrong}
           />
@@ -308,22 +309,47 @@ const StrongDetailMainPage = ({
             })}
           </Text>
         )}
+        {lexicalRelations.alternateSenses.length > 0 && (
+          <VStack mt={10} pt={18} borderTopWidth={1} borderColor="border" gap={9}>
+            <StrongEyebrow>{t('strongLexicon.otherMeanings')}</StrongEyebrow>
+            {lexicalRelations.alternateSenses.map(relation => (
+              <StrongLexicalRelationCard
+                key={relation.stepCode}
+                relation={relation}
+                readingTypography={readingTypography}
+                onPress={() => onOpenStrong(relation.stepCode)}
+              />
+            ))}
+          </VStack>
+        )}
       </StrongEditorialSection>
 
-      {entry.resources.length > 0 ? (
+      {dictionaryResource ? (
         <StrongEditorialSection title={t('strongDetail.dictionary.light')}>
           <Text color="tertiary" fontSize={12}>
-            {entry.resources[0].source} · {entry.resources[0].title}
+            {dictionaryResource.source} · {dictionaryResource.title}
           </Text>
           <StrongEditorialPreview
-            value={entry.resources[0].contentHtml}
-            readingFontFamily={readingFontFamily}
+            value={dictionaryResource.contentHtml}
+            readingTypography={readingTypography}
             numberOfLines={5}
+            onOpenBibleReference={onOpenBibleReference}
+            onOpenStrong={onOpenStrong}
+            onOverflowChange={overflows =>
+              setDictionaryPreview(current =>
+                current?.resourceId === dictionaryResource.id && current.overflows === overflows
+                  ? current
+                  : { resourceId: dictionaryResource.id, overflows }
+              )
+            }
           />
-          <StrongPreviewLink
-            label={t('strongDetail.dictionary.open')}
-            onPress={() => onOpenPage('dictionary')}
-          />
+          {dictionaryPreview?.resourceId === dictionaryResource.id &&
+            dictionaryPreview.overflows && (
+              <StrongPreviewLink
+                label={t('strongDetail.dictionary.open')}
+                onPress={() => onOpenPage('dictionary')}
+              />
+            )}
         </StrongEditorialSection>
       ) : resourcesAvailability.status !== 'available' && entry.language === 'greek' ? (
         <StrongEditorialSection title={t('strongDetail.dictionary.light')}>
@@ -353,8 +379,13 @@ const StrongDetailMainPage = ({
           <StrongEntitySummaryCard
             entity={entry.entity}
             plain
+            readingTypography={readingTypography}
             onOpenBibleReference={onOpenBibleReference}
             onOpenStrong={onOpenStrong}
+          />
+          <StrongPreviewLink
+            label={t('strongDetail.entity.open', { name: entry.entity.name })}
+            onPress={() => onOpenPage('entity')}
           />
           {!!entityRelations?.graph.length && (
             <VStack mt={7} gap={10}>
@@ -373,30 +404,6 @@ const StrongDetailMainPage = ({
               onOpenEntity={onOpenEntityRelation}
             />
           )}
-          {entry.entity.references.length > 0 && (
-            <VStack mt={7} gap={10}>
-              <HStack justifyContent="space-between" alignItems="baseline" gap={12}>
-                <Text bold fontSize={17}>
-                  {t('strongDetail.entity.firstReferences')}
-                </Text>
-                <Text color="tertiary" fontSize={11}>
-                  {t('strongDetail.entity.totalReferences', {
-                    count: entry.entity.references.length + entry.entity.hiddenReferenceCount,
-                  })}
-                </Text>
-              </HStack>
-              <StrongReferenceCloud
-                references={entry.entity.references}
-                hiddenCount={entry.entity.hiddenReferenceCount}
-                limit={10}
-                onOpenReference={onOpenBibleReference}
-              />
-            </VStack>
-          )}
-          <StrongPreviewLink
-            label={t('strongDetail.entity.open', { name: entry.entity.name })}
-            onPress={() => onOpenPage('entity')}
-          />
         </VStack>
       ) : entitiesAvailability.status !== 'available' ? (
         <StrongEditorialSection title={t('strongDetail.entity.context')} separated>
@@ -409,25 +416,30 @@ const StrongDetailMainPage = ({
         </StrongEditorialSection>
       ) : null}
 
-      {entry.relations.length > 0 && (
+      {lexicalRelations.relatedWords.length > 0 && (
         <StrongEditorialSection
           title={t('strongDetail.related.title')}
           onLayout={event => setAnchor('related', event.nativeEvent.layout.y)}
         >
           <VStack gap={9}>
-            {entry.relations.slice(0, 4).map(relation => (
+            {lexicalRelations.relatedWords.slice(0, displayedRelationCount).map(relation => (
               <StrongLexicalRelationCard
-                key={`${relation.stepCode}:${relation.label}`}
+                key={relation.stepCode}
                 relation={relation}
-                readingFontFamily={readingFontFamily}
+                readingTypography={readingTypography}
                 onPress={() => onOpenStrong(relation.stepCode)}
               />
             ))}
           </VStack>
-          <StrongPreviewLink
-            label={t('strongDetail.related.open')}
-            onPress={() => onOpenPage('related')}
-          />
+          {hasHiddenStrongPreviewItems(
+            lexicalRelations.relatedWords.length,
+            displayedRelationCount
+          ) && (
+            <StrongPreviewLink
+              label={t('strongDetail.related.open')}
+              onPress={() => onOpenPage('related')}
+            />
+          )}
         </StrongEditorialSection>
       )}
 
@@ -458,7 +470,7 @@ const StrongDetailMainPage = ({
                 py={7}
               >
                 <Text color={selectedLemmaId == null ? 'reverse' : 'default'} fontSize={12}>
-                  {t('Tous')} · {concordanceCount}
+                  {t('Tous')} · {concordanceTotalCount}
                 </Text>
               </Box>
             </TouchableBox>
@@ -482,22 +494,23 @@ const StrongDetailMainPage = ({
           <Loading />
         ) : (
           <VStack>
-            {concordanceVerses.slice(0, 3).map(verse => (
+            {concordanceVerses.slice(0, displayedConcordanceCount).map(verse => (
               <ConcordanceVerse
                 key={`${verse.Livre}-${verse.Chapitre}-${verse.Verset}`}
                 onOpenVerse={onOpenConcordanceVerse}
                 t={t}
                 concordanceFor={String(entry.baseCode)}
-                lexiconEntry={legacyEntry}
                 verse={verse}
               />
             ))}
           </VStack>
         )}
-        <StrongPreviewLink
-          label={t('strongDetail.concordance.open')}
-          onPress={() => onOpenPage('concordance')}
-        />
+        {hasHiddenStrongPreviewItems(concordanceCount, displayedConcordanceCount) && (
+          <StrongPreviewLink
+            label={t('strongDetail.concordance.open')}
+            onPress={() => onOpenPage('concordance')}
+          />
+        )}
       </StrongEditorialSection>
     </ScrollView>
   )

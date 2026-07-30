@@ -1,6 +1,6 @@
 import type { Verse } from '~common/types'
 import { getMultipleVerses, getVerseText } from '~helpers/biblesDb'
-import { buildStrongAnnotatedText, type StrongBibleSpan } from '~helpers/strongBibleOverlay'
+import type { StrongBibleSpan } from '~helpers/canonicalStrongVerse'
 import {
   getStrongBibleSidecarAvailability,
   getResolvedStrongBibleConcordanceIdentity,
@@ -144,7 +144,6 @@ export interface StrongBibleResourceDependencies {
     reference: string | number
   ) => Promise<StrongBibleLemmaStat[]>
   getMultipleVerses: (versionId: string, verseKeys: string[]) => Promise<Record<string, string>>
-  annotateText: (canonicalText: string, spans: StrongBibleSpan[]) => string
 }
 
 export interface StrongBibleResourceAccess {
@@ -166,7 +165,6 @@ const defaultDependencies: StrongBibleResourceDependencies = {
   getFoundVerseLocations: loadStrongBibleOccurrenceLocations,
   getLemmaStats: loadStrongBibleLemmaStats,
   getMultipleVerses,
-  annotateText: buildStrongAnnotatedText,
 }
 
 export const createStrongBibleResourceAccess = (
@@ -235,7 +233,8 @@ export const createStrongBibleResourceAccess = (
           Livre: request.book,
           Chapitre: request.chapter,
           Verset: request.verse,
-          Texte: dependencies.annotateText(text, spans),
+          Texte: text,
+          StrongSpans: spans,
         },
       }
     },
@@ -308,7 +307,8 @@ export const createStrongBibleResourceAccess = (
           chapterSpans.get(`${location.Livre}-${location.Chapitre}`)?.[location.Verset] ?? []
         verses.push({
           ...location,
-          Texte: dependencies.annotateText(text, spans),
+          Texte: text,
+          StrongSpans: spans,
         })
       }
       return {

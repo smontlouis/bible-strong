@@ -3,9 +3,36 @@ import {
   createStrongSelection,
   getStrongSelectionMorphologyCodes,
   getStrongSelectionPayload,
+  isSameSelectedStrongReference,
 } from '../strongSelection'
 
 describe('strongSelection', () => {
+  describe('isSameSelectedStrongReference', () => {
+    it('matches the selected Strong using its normalized reference', () => {
+      expect(
+        isSameSelectedStrongReference({ book: 40, reference: 'G0025' }, { reference: '25' })
+      ).toBe(true)
+    })
+
+    it.each([
+      [
+        { book: 40, reference: '25' },
+        { book: 40, reference: '26' },
+      ],
+      [null, { book: 40, reference: '25' }],
+    ])('does not match a different or absent selection', (current, next) => {
+      expect(isSameSelectedStrongReference(current, next)).toBe(false)
+    })
+
+    it('matches a visibly selected Strong across entry paths using different book values', () => {
+      const relationSelection = { book: 40, reference: 'G25' }
+
+      expect(isSameSelectedStrongReference({ book: 43, reference: '25' }, relationSelection)).toBe(
+        true
+      )
+    })
+  })
+
   it('preserves every displayed Strong identity in order', () => {
     expect(
       createStrongSelection(

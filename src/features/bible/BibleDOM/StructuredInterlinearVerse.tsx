@@ -14,6 +14,7 @@ import {
   type StrongSelectionMorphology,
 } from '~helpers/strongSelection'
 import { dispatchStrongSelection } from './strongSelectionAction'
+import UntranslatedStrongMarker from './UntranslatedStrongMarker'
 
 interface Props {
   verse: Verse
@@ -40,7 +41,7 @@ const StructuredInterlinearVerse = ({
     word: string,
     morphologies: StrongSelectionMorphology[]
   ) => {
-    dispatchStrongSelection(dispatch, identities, isHebreu ? 1 : 40, version, {
+    dispatchStrongSelection(dispatch, identities, verse.Livre, version, {
       word,
       chapter: verse.Chapitre,
       verse: verse.Verset,
@@ -79,6 +80,7 @@ const StructuredInterlinearVerse = ({
               {prefix}
               <button
                 type="button"
+                aria-label={selectionIdentities.map(identity => identity.code).join(' · ')}
                 data-ignore-verse-touch
                 disabled={!preferredIdentity}
                 onClick={() =>
@@ -97,7 +99,14 @@ const StructuredInterlinearVerse = ({
                   fontSize: 'inherit',
                 }}
               >
-                <span dir={isHebreu ? 'rtl' : 'ltr'}>{surface}</span>
+                <span dir={isHebreu ? 'rtl' : 'ltr'}>
+                  {surface || (
+                    <UntranslatedStrongMarker
+                      color={selected ? colors.reverse : colors.primary}
+                      backgroundColor={selected ? colors.primary : colors.lightPrimary}
+                    />
+                  )}
+                </span>
                 {displayedStrongReferences && (
                   <sup
                     style={{
@@ -121,6 +130,7 @@ const StructuredInterlinearVerse = ({
               {prefix}
               <button
                 type="button"
+                aria-label={selectionIdentities.map(identity => identity.code).join(' · ')}
                 data-ignore-verse-touch
                 disabled={!preferredIdentity}
                 onClick={() =>
@@ -139,7 +149,12 @@ const StructuredInterlinearVerse = ({
                   fontSize: 'inherit',
                 }}
               >
-                {transliteration || surface}
+                {transliteration || surface || (
+                  <UntranslatedStrongMarker
+                    color={selected ? colors.reverse : colors.primary}
+                    backgroundColor={selected ? colors.primary : colors.lightPrimary}
+                  />
+                )}
               </button>
             </span>
           )
@@ -150,6 +165,7 @@ const StructuredInterlinearVerse = ({
             {prefix}
             <button
               type="button"
+              aria-label={selectionIdentities.map(identity => identity.code).join(' · ')}
               data-ignore-verse-touch
               disabled={!preferredIdentity}
               onClick={() =>
@@ -184,7 +200,12 @@ const StructuredInterlinearVerse = ({
                   lineHeight: 1.2,
                 }}
               >
-                {surface}
+                {surface || (
+                  <UntranslatedStrongMarker
+                    color={selected ? colors.reverse : colors.primary}
+                    backgroundColor={selected ? colors.primary : colors.lightPrimary}
+                  />
+                )}
               </span>
               <span
                 style={{

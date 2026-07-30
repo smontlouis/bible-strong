@@ -31,7 +31,7 @@ import generateUUID from '~helpers/generateUUID'
 import getVersesContent from '~helpers/getVersesContent'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { localQueryOptions } from '~helpers/queryOptions'
-import type { StrongSelection } from '~helpers/strongSelection'
+import { isSameSelectedStrongReference, type StrongSelection } from '~helpers/strongSelection'
 import useLanguage from '~helpers/useLanguage'
 import { useSheet } from '~helpers/useSheet'
 import { toast } from '~helpers/toast'
@@ -106,6 +106,12 @@ import {
   getBibleViewerPersonalData,
   shouldHideBibleViewerPersonalData,
 } from './bibleViewerPersonalData'
+import {
+  getStrongSelectionDOMContextKey,
+  getStrongSelectionRelationItemsKey,
+  getStrongSelectionRenderedContentKey,
+  shouldDismissStrongSelectionForViewerState,
+} from './strongSelectionLifecycle'
 
 const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: number) => {
   if (pericope && pericope[book] && pericope[book][chapter]) {
@@ -175,6 +181,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   const canonicalBibleNoteModal = useSheet()
   const [canonicalBibleNote, setCanonicalBibleNote] = useState<CanonicalBibleNote | null>(null)
   const strongSelectionModal = useSheet()
+  const strongSelectionModalRef = strongSelectionModal.getRef()
   const [strongSelectionData, setStrongSelectionData] = useState<StrongSelection | null>(null)
 
   const [createRelationSourceEndpoint, setCreateRelationSourceEndpoint] =
@@ -359,6 +366,10 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   const isActiveBibleTab = !isFormSheet && activeBibleTabId === bible.id
   const useSharedDOM = Platform.OS === 'ios' ? false : isInTab
   const domLayerZIndex = -1
+  const strongSelectionRenderedContentKey = getStrongSelectionRenderedContentKey(
+    verses,
+    parallelVerses
+  )
 
   // Displayed values - updated only when verses are loaded to keep annotations in sync
   const [displayedBook, setDisplayedBook] = useState(book.Numero)
@@ -493,6 +504,23 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   const studyRelationsByChapter = useSelector((state: RootState) =>
     selectStudyRelationsByChapter(state, displayedBook, displayedChapter)
   )
+  const strongSelectionDOMContextKey = getStrongSelectionDOMContextKey({
+    version,
+    book: book.Numero,
+    chapter,
+    strongMode,
+    interlinearMode,
+    interlinearLocale: interlinearLocale ?? lang,
+    parallelVersions,
+    focusVerses,
+    contextDisplayMode,
+    renderedContentKey: strongSelectionRenderedContentKey,
+    relationItemsKey: getStrongSelectionRelationItemsKey(studyRelationsByChapter),
+    annotationModeEnabled: annotationMode.enabled,
+    strongRelationItemsVisible:
+      (settings.relationsDisplay || 'inline') === 'inline' && !isSelectionMode,
+  })
+  const previousStrongSelectionDOMContextKey = usePrevious(strongSelectionDOMContextKey)
 
   const wordAnnotationsByChapter = useSelector((state: RootState) =>
     selectWordAnnotationsByChapter(state, displayedBook, displayedChapter, displayedVersion)
@@ -734,6 +762,12 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   }, [])
 
   const setSelectedCode = (selection: StrongSelection) => {
+    if (isSameSelectedStrongReference(selectedCode, selection)) {
+      setSelectedCodeState(null)
+      strongSelectionModal.close()
+      return
+    }
+
     setSelectedCodeState(selection)
     setStrongSelectionData(selection)
     strongSelectionModal.open()
@@ -747,6 +781,35 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   const startClosingStrongSelection = () => {
     setSelectedCodeState(null)
   }
+
+  const dismissStrongSelection = useEffectEvent(() => {
+    if (!strongSelectionData) return
+
+    setSelectedCodeState(null)
+    strongSelectionModal.close()
+  })
+
+  useEffect(() => {
+    if (
+      previousStrongSelectionDOMContextKey !== undefined &&
+      previousStrongSelectionDOMContextKey !== strongSelectionDOMContextKey
+    ) {
+      dismissStrongSelection()
+    }
+  }, [previousStrongSelectionDOMContextKey, strongSelectionDOMContextKey])
+
+  useEffect(() => {
+    if (shouldDismissStrongSelectionForViewerState({ isActiveBibleTab, isFormSheet, isInTab })) {
+      dismissStrongSelection()
+    }
+  }, [isActiveBibleTab, isFormSheet, isInTab])
+
+  useLayoutEffect(
+    () => () => {
+      strongSelectionModalRef.current?.dismiss()
+    },
+    [strongSelectionModalRef]
+  )
 
   // Cross-version annotations modal handlers
   const handleOpenCrossVersionModal = useCallback(
@@ -1146,7 +1209,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
         onReferencePress={handleCanonicalBibleReferencePress}
       />
       <StrongSelectionSheet
-        sheetRef={strongSelectionModal.getRef()}
+        sheetRef={strongSelectionModalRef}
         version={strongSelectionData?.version}
         book={strongSelectionData?.book}
         chapter={strongSelectionData?.chapter}

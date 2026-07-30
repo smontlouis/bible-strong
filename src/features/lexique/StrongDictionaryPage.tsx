@@ -3,15 +3,17 @@ import { ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
 import Empty from '~common/Empty'
-import Text from '~common/ui/Text'
+import { VStack } from '~common/ui/Box'
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
 import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
 import { StrongEditorialHtml, StrongEyebrow } from './StrongDetailUI'
 import StrongLexiconModuleCard from './StrongLexiconModuleCard'
+import type { StrongReadingTypography } from './strongEditorialHtmlStyles'
 
 type Props = {
   entry: StrongLexiconEntry
   availability: StrongLexiconModuleAvailability
+  readingTypography: StrongReadingTypography
   onOpenBibleReference: (osis: string) => void
   onOpenStrong: (stepCode: string) => void
 }
@@ -19,6 +21,7 @@ type Props = {
 const StrongDictionaryPage = ({
   entry,
   availability,
+  readingTypography,
   onOpenBibleReference,
   onOpenStrong,
 }: Props) => {
@@ -53,15 +56,15 @@ const StrongDictionaryPage = ({
       style={{ flex: 1 }}
       contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 }}
     >
-      <StrongEyebrow>{resource.source}</StrongEyebrow>
-      <Text bold fontSize={22} mt={6} mb={14}>
-        {resource.title}
-      </Text>
-      <StrongEditorialHtml
-        value={resource.contentHtml}
-        onOpenBibleReference={onOpenBibleReference}
-        onOpenStrong={onOpenStrong}
-      />
+      <VStack gap={14}>
+        <StrongEyebrow>{resource.source}</StrongEyebrow>
+        <StrongEditorialHtml
+          value={resource.contentHtml}
+          readingTypography={readingTypography}
+          onOpenBibleReference={onOpenBibleReference}
+          onOpenStrong={onOpenStrong}
+        />
+      </VStack>
     </ScrollView>
   )
 }

@@ -10,8 +10,8 @@ describe('Strong lexicon modular publications', () => {
     expect(getStrongLexiconPublication('core')).toMatchObject({
       required: true,
       entry: 'strong_lexicon.core.sqlite',
-      archiveBytes: 6_525_271,
-      schemaVersion: 1,
+      archiveBytes: 5_621_474,
+      schemaVersion: 2,
     })
     expect(
       getStrongLexiconPublication('core').url.endsWith('databases/strong_lexicon.core.sqlite.zip')

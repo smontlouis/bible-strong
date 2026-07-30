@@ -23,6 +23,7 @@ jest.mock('@emotion/native', () => {
     }
   const styled = Object.assign((type: React.ElementType) => createStyledComponent(type), {
     View: createStyledComponent('View'),
+    TouchableOpacity: createStyledComponent('TouchableOpacity'),
   })
 
   return { __esModule: true, default: styled }
@@ -84,20 +85,15 @@ jest.mock('~common/waitForStrongDB', () => ({
   default: () => (Component: React.ComponentType) => Component,
 }))
 
+jest.mock('../CanonicalStrongVerseText', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  return ({ verse }: { verse: { Texte: string } }) =>
+    ReactModule.createElement('CanonicalStrongVerseText', null, verse.Texte)
+})
+
 jest.mock('~helpers/bibleCoverage', () => ({
   getChapterVerseCountSafe: jest.fn(async () => 31),
 }))
-
-jest.mock('~helpers/strongVerseParser', () => ({
-  parseStrongVerse: () => ({ references: ['430'] }),
-}))
-
-jest.mock('~helpers/verseToStrong', () => {
-  const ReactModule = jest.requireActual<typeof React>('react')
-  return jest.fn(async (verse: { Texte: string }) => ({
-    formattedTexte: ReactModule.createElement('FormattedVerse', null, verse.Texte),
-  }))
-})
 
 jest.mock('~helpers/useLayoutSize', () => ({
   useLayoutSize: () => ({

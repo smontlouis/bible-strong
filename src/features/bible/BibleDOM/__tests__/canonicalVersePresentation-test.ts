@@ -191,6 +191,32 @@ describe('canonicalVersePresentation', () => {
     ])
   })
 
+  it('keeps an empty Strong occurrence at its canonical offset without changing the text', () => {
+    const presentation = buildCanonicalVersePresentation({
+      text: 'Il prit la parole et dit :',
+      strongSpans: [
+        {
+          ordinal: 0,
+          startOffset: 2,
+          length: 0,
+          identities: [{ kind: 'strong', code: 'H0347' }],
+        },
+      ],
+    })
+
+    expect(presentation).toEqual([
+      { kind: 'text', text: 'Il' },
+      {
+        kind: 'strong-reference',
+        word: '',
+        identities: [{ kind: 'strong', code: 'H0347' }],
+        isUntranslated: true,
+      },
+      { kind: 'text', text: ' prit la parole et dit :' },
+    ])
+    expect(getCanonicalPresentationText(presentation)).toBe('Il prit la parole et dit :')
+  })
+
   it('includes an unaligned translated prefix in the Strong selection label', () => {
     const presentation = buildCanonicalVersePresentation({
       text: 'Au commencement Dieu',

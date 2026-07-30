@@ -70,7 +70,7 @@ const createDatabase = () => ({
     if (code === 'H0413') return rows.H0413
     return null
   }),
-  getAllAsync: jest.fn(async (): Promise<unknown[]> => []),
+  getAllAsync: jest.fn(async (_sql: string, _parameters?: unknown[]): Promise<unknown[]> => []),
 })
 
 describe('strongLexiconAccess', () => {
@@ -109,6 +109,8 @@ describe('strongLexiconAccess', () => {
   })
 
   it('loads the French rich definition while preserving the selected identity type', async () => {
+    const database = createDatabase()
+    mockGetStrongLexiconDatabase.mockResolvedValue(database as unknown as SQLiteDatabase)
     const entry = await localStrongLexiconAccess.loadEntry(
       { kind: 'dstrong', code: 'H3068G' },
       'fr'
@@ -123,6 +125,11 @@ describe('strongLexiconAccess', () => {
         definitionHtml: '<p>celui qui existe</p>',
       })
     )
+    const relationQuery = database.getAllAsync.mock.calls.find(([sql]) =>
+      String(sql).includes('FROM LexiconRelations')
+    )?.[0]
+    expect(relationQuery).toBeDefined()
+    expect(String(relationQuery)).not.toContain('LIMIT 72')
   })
 
   it('returns no entry when none of the STEP or classical fallbacks resolves', async () => {
@@ -206,7 +213,6 @@ describe('strongLexiconAccess', () => {
           }
         }
         if (sql.includes('EntityPlaces')) return null
-        if (sql.includes('COUNT(*)')) return { count: 1 }
         return null
       }),
       getAllAsync: jest.fn(async (sql: string) => {
@@ -226,7 +232,6 @@ describe('strongLexiconAccess', () => {
             },
           ]
         }
-        if (sql.includes('EntityRefs')) return [{ refText: 'Matt.4.18' }]
         return []
       }),
     }
@@ -260,6 +265,14 @@ describe('strongLexiconAccess', () => {
     expect(entitiesDatabase.getFirstAsync).toHaveBeenCalledWith(
       expect.stringContaining('WHERE e.uniqueName=?'),
       ['fr', 'Peter@Matt.4.18']
+    )
+    expect(entitiesDatabase.getFirstAsync).not.toHaveBeenCalledWith(
+      expect.stringContaining('EntityRefs'),
+      expect.anything()
+    )
+    expect(entitiesDatabase.getAllAsync).not.toHaveBeenCalledWith(
+      expect.stringContaining('EntityRefs'),
+      expect.anything()
     )
   })
 })

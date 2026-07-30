@@ -32,6 +32,18 @@ export type StrongSelectionContext = {
   morphologies?: readonly StrongSelectionMorphology[]
 }
 
+export const isSameSelectedStrongReference = (
+  current: SelectedCode | null | undefined,
+  next: Pick<SelectedCode, 'reference'>
+): boolean => {
+  if (!current) return false
+
+  const currentReference = getStrongReferenceNumber(current.reference)
+  const nextReference = getStrongReferenceNumber(next.reference)
+
+  return Boolean(currentReference && nextReference && currentReference === nextReference)
+}
+
 const normalizeStrongIdentity = (
   identity: StrongIdentity,
   book: number

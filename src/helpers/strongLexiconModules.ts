@@ -18,7 +18,6 @@ export type StrongLexiconModuleAvailability =
   | {
       status: 'incompatible'
       moduleId: StrongLexiconModuleId
-      expectedRevision?: string
       installedRevision?: string
     }
   | { status: 'corrupt'; moduleId: StrongLexiconModuleId; reason: string }
@@ -78,9 +77,11 @@ const readKeyValueTable = async (
   return Object.fromEntries(rows.map(row => [row.key, row.value]))
 }
 
-const validateModuleDatabase = async (
+export const validateStrongLexiconModuleDatabase = async (
   moduleId: StrongLexiconModuleId,
-  database: SQLiteDatabase
+  database: SQLiteDatabase,
+  getCoreAvailability: () => Promise<StrongLexiconModuleAvailability> = () =>
+    getStrongLexiconModuleAvailability('core')
 ): Promise<StrongLexiconModuleAvailability> => {
   const integrity = await database.getFirstAsync<{ integrity_check: string }>(
     'PRAGMA integrity_check'
@@ -118,17 +119,9 @@ const validateModuleDatabase = async (
   }
 
   if (moduleId === 'resources') {
-    const core = await getStrongLexiconModuleAvailability('core')
+    const core = await getCoreAvailability()
     if (core.status !== 'available') {
       return { status: 'core-missing', moduleId }
-    }
-    if (core.revision !== revision) {
-      return {
-        status: 'incompatible',
-        moduleId,
-        expectedRevision: core.revision,
-        installedRevision: revision,
-      }
     }
   }
 
@@ -165,7 +158,7 @@ export const getStrongLexiconModuleAvailability = async (
   try {
     const database = await openInstalledModule(moduleId)
     if (!database) return { status: 'missing', moduleId }
-    const availability = await validateModuleDatabase(moduleId, database)
+    const availability = await validateStrongLexiconModuleDatabase(moduleId, database)
     validatedModules.set(moduleId, availability)
     return availability
   } catch (error) {

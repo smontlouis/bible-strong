@@ -3,14 +3,13 @@ import { useTranslation } from 'react-i18next'
 
 import Header from '~common/Header'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
-import type { StrongLexiconEntityRelation } from '~features/resources/strongLexiconAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
-import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import StrongEntityPage from './StrongEntityPage'
-import { createStrongDetailRoute, type StrongDetailRouteContext } from './strongDetailRoutes'
-import { getBibleViewRouteForStrongOsisReference } from './strongReferenceNavigation'
+import type { StrongDetailRouteContext } from './strongDetailRoutes'
 import { useStrongLexiconLanguage } from './useStrongLexiconLanguage'
+import { useStrongReadingTypography } from './useStrongReadingTypography'
+import { useStrongRouteNavigation } from './useStrongRouteNavigation'
 
 type Props = {
   context: StrongDetailRouteContext
@@ -21,9 +20,10 @@ type Props = {
 const StrongEntityRouteScreen = ({ context, entityKey, isFormSheet = false }: Props) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
-  const pushRouteOnce = usePushRouteOnce()
+  const readingTypography = useStrongReadingTypography()
   const canGoBackInStack = useCanGoBackInStack()
   const { language } = useStrongLexiconLanguage()
+  const navigation = useStrongRouteNavigation(context)
   const availabilityQuery = useQuery({
     queryKey: ['strong-lexicon', 'availability', 'entities'],
     queryFn: () => resources.strongLexicon.getModuleAvailability('entities'),
@@ -40,33 +40,6 @@ const StrongEntityRouteScreen = ({ context, entityKey, isFormSheet = false }: Pr
     moduleId: 'entities' as const,
   }
 
-  const openBibleReference = (osis: string) => {
-    const route = getBibleViewRouteForStrongOsisReference(osis)
-    if (route) pushRouteOnce(route)
-  }
-
-  const openStrong = (stepCode: string) => {
-    pushRouteOnce(
-      createStrongDetailRoute('index', {
-        book: stepCode.startsWith('G') ? 40 : 1,
-        identityKind: 'dstrong',
-        identityCode: stepCode,
-        reference: stepCode,
-        strongBibleVersionId: context.strongBibleVersionId,
-        bibleVersion: context.bibleVersion,
-      })
-    )
-  }
-
-  const openEntityRelation = (relation: StrongLexiconEntityRelation) => {
-    if (!relation.targetUniqueName) return
-    pushRouteOnce(
-      createStrongDetailRoute('entity', context, {
-        entityKey: relation.targetUniqueName,
-      })
-    )
-  }
-
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
       <Header
@@ -76,13 +49,14 @@ const StrongEntityRouteScreen = ({ context, entityKey, isFormSheet = false }: Pr
       <StrongEntityPage
         entity={entityQuery.data}
         availability={availability}
+        readingTypography={readingTypography}
         loading={
           availabilityQuery.isPending ||
           (Boolean(entityKey) && availability.status === 'available' && entityQuery.isPending)
         }
-        onOpenBibleReference={openBibleReference}
-        onOpenStrong={openStrong}
-        onOpenEntityRelation={openEntityRelation}
+        onOpenBibleReference={navigation.openBibleReference}
+        onOpenStrong={navigation.openStrong}
+        onOpenEntityRelation={navigation.openEntityRelation}
       />
     </FormSheetScreen>
   )

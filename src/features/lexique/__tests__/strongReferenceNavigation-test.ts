@@ -26,6 +26,12 @@ describe('Strong reference navigation', () => {
     expect(formatStrongOsisReference('Matt.16.18')).toBe('Matthieu 16:18')
   })
 
+  it('preserves chapter-only and cross-chapter ranges in the label', () => {
+    expect(formatStrongOsisReference('Matt.16')).toBe('Matthieu 16')
+    expect(formatStrongOsisReference('Matt.16.18-Matt.17.2')).toBe('Matthieu 16:18-17:2')
+    expect(formatStrongOsisReference('Matt.16-Matt.18')).toBe('Matthieu 16-18')
+  })
+
   it('opens an OSIS reference in a focused Bible Viewer without forcing a version', () => {
     expect(getBibleViewRouteForStrongOsisReference('Matt.16.18')).toEqual({
       pathname: '/bible-view',

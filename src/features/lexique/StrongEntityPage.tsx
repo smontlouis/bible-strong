@@ -17,15 +17,16 @@ import {
   StrongEntityRelationGraph,
   StrongEntityRelationList,
   StrongEntitySummaryCard,
-  StrongReferenceCloud,
 } from './StrongDetailUI'
 import StrongLexiconModuleCard from './StrongLexiconModuleCard'
 import { splitStrongEntityRelations } from './strongEntityPresentation'
+import type { StrongReadingTypography } from './strongEditorialHtmlStyles'
 
 type Props = {
   entity?: StrongLexiconEntity
   availability: StrongLexiconModuleAvailability
   loading: boolean
+  readingTypography: StrongReadingTypography
   onOpenBibleReference: (osis: string) => void
   onOpenStrong: (stepCode: string) => void
   onOpenEntityRelation: (relation: StrongLexiconEntityRelation) => void
@@ -35,6 +36,7 @@ const StrongEntityPage = ({
   entity,
   availability,
   loading,
+  readingTypography,
   onOpenBibleReference,
   onOpenStrong,
   onOpenEntityRelation,
@@ -76,6 +78,7 @@ const StrongEntityPage = ({
       <StrongEntitySummaryCard
         entity={entity}
         expanded
+        readingTypography={readingTypography}
         onOpenBibleReference={onOpenBibleReference}
         onOpenStrong={onOpenStrong}
       />
@@ -135,26 +138,6 @@ const StrongEntityPage = ({
           separated
         >
           <StrongEntityRelationList relations={remaining} onOpenEntity={onOpenEntityRelation} />
-        </StrongEditorialSection>
-      )}
-
-      {entity.references.length > 0 && (
-        <StrongEditorialSection title={t('strongDetail.entity.references')} separated>
-          <HStack justifyContent="space-between" alignItems="baseline">
-            <Text bold fontSize={18}>
-              {t('strongDetail.entity.firstReferences')}
-            </Text>
-            <Text color="tertiary" fontSize={11}>
-              {t('strongDetail.entity.totalReferences', {
-                count: entity.references.length + entity.hiddenReferenceCount,
-              })}
-            </Text>
-          </HStack>
-          <StrongReferenceCloud
-            references={entity.references}
-            hiddenCount={entity.hiddenReferenceCount}
-            onOpenReference={onOpenBibleReference}
-          />
         </StrongEditorialSection>
       )}
     </ScrollView>

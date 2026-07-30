@@ -4,20 +4,23 @@ import {
 } from '../strongContextPresentation'
 
 describe('strongContextPresentation', () => {
-  it('removes every Strong and morphology marker from the contextual verse', () => {
+  it('uses canonical verse text without reconstructing it from Strong markers', () => {
     expect(
-      getStrongContextVerseText(
-        {
-          Livre: 40,
-          Chapitre: 16,
-          Verset: 1,
-          Texte:
-            'Les 3588 pharisiens 5330 (5754) et 2532 les sadducéens 4523 abordèrent 4334 Jésus.',
-        },
-        { baseCode: 5330, gloss: 'Pharisien' },
-        'pharisiens'
-      )
-    ).toBe('Les pharisiens et les sadducéens abordèrent Jésus.')
+      getStrongContextVerseText({
+        Livre: 40,
+        Chapitre: 16,
+        Verset: 1,
+        Texte: ' Les pharisiens\n et les sadducéens abordèrent Jésus. ',
+        StrongSpans: [
+          {
+            ordinal: 0,
+            startOffset: 5,
+            length: 10,
+            identities: [{ kind: 'strong', code: 'G5330' }],
+          },
+        ],
+      })
+    ).toBe(' Les pharisiens\n et les sadducéens abordèrent Jésus. ')
   })
 
   it('formats the human morphology before its technical code', () => {
