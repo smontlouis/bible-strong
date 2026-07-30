@@ -10,11 +10,27 @@ import {
   type InterlinearBibleVersionId,
   type InterlinearPublicationArtifact,
 } from './interlinearBiblePublications'
+import { AsyncConnectionRegistry } from './asyncConnectionRegistry'
 import { openSQLiteDatabase, type SQLiteDatabase } from './sqlite'
 import { installAtomicResourceFile, restoreOrphanedResourceBackup } from './atomicResourceFile'
 import type { ResourceInstallationLifecycle } from './resourceInstallationLifecycle'
 
-const databases = new Map<ResourceLanguage, SQLiteDatabase>()
+class InterlinearSidecarMissingError extends Error {}
+
+const interlinearConnections = new AsyncConnectionRegistry<ResourceLanguage, SQLiteDatabase>(
+  async locale => {
+    const path = getInterlinearSidecarPath(locale)
+    await restoreOrphanedResourceBackup(path, `${path}.backup`)
+    const file = await FileSystem.getInfoAsync(path)
+    if (!file.exists || file.size === 0) throw new InterlinearSidecarMissingError()
+
+    const directory = getInterlinearSidecarDirectory()
+    await FileSystem.makeDirectoryAsync(directory, { intermediates: true })
+    const filename = `bible-bhg-interlinear-${locale}.sqlite`
+    return openSQLiteDatabase(filename, { useNewConnection: true }, directory)
+  },
+  database => database.closeAsync()
+)
 
 export type InterlinearIdentityKind = 'strong' | 'estrong' | 'dstrong' | 'ustrong'
 
@@ -66,37 +82,41 @@ export const getInterlinearSidecarAvailability = async (
 ): Promise<InterlinearSidecarAvailability> => {
   const baseMetadata = await getBibleVersionMetadata('BHG')
   if (!baseMetadata) return { status: 'base-missing' }
-  const sidecarPath = getInterlinearSidecarPath(locale)
-  await restoreOrphanedResourceBackup(sidecarPath, `${sidecarPath}.backup`)
-  const info = await FileSystem.getInfoAsync(sidecarPath)
-  if (!info.exists) return { status: 'missing' }
 
   try {
-    const database = await openInterlinearSidecar(locale)
-    const metadata = await readMetadata(database)
-    if (
-      metadata.schemaVersion !==
-        String(BHG_INTERLINEAR_PUBLICATION.indexes[locale].schemaVersion) ||
-      metadata.datasetId !== BHG_INTERLINEAR_PUBLICATION.datasetId ||
-      metadata.locale !== locale ||
-      metadata.textRevision !== baseMetadata.textRevision ||
-      metadata.textSha256 !== baseMetadata.textSha256
-    ) {
-      return { status: 'incompatible' }
-    }
-    const integrity = await database.getFirstAsync<{ integrity_check: string }>(
-      'PRAGMA integrity_check'
-    )
-    if (integrity?.integrity_check !== 'ok') {
-      return { status: 'corrupt', reason: integrity?.integrity_check ?? 'integrity-check-missing' }
-    }
-    return {
-      status: 'available',
-      locale,
-      textRevision: metadata.textRevision,
-    }
+    return await withInterlinearSidecar(locale, async database => {
+      const metadata = await readMetadata(database)
+      if (
+        metadata.schemaVersion !==
+          String(BHG_INTERLINEAR_PUBLICATION.indexes[locale].schemaVersion) ||
+        metadata.datasetId !== BHG_INTERLINEAR_PUBLICATION.datasetId ||
+        metadata.locale !== locale ||
+        metadata.textRevision !== baseMetadata.textRevision ||
+        metadata.textSha256 !== baseMetadata.textSha256
+      ) {
+        return { status: 'incompatible' }
+      }
+      const integrity = await database.getFirstAsync<{
+        integrity_check: string
+      }>('PRAGMA integrity_check')
+      if (integrity?.integrity_check !== 'ok') {
+        return {
+          status: 'corrupt',
+          reason: integrity?.integrity_check ?? 'integrity-check-missing',
+        }
+      }
+      return {
+        status: 'available',
+        locale,
+        textRevision: metadata.textRevision,
+      }
+    })
   } catch (error) {
-    return { status: 'corrupt', reason: error instanceof Error ? error.message : String(error) }
+    if (error instanceof InterlinearSidecarMissingError) return { status: 'missing' }
+    return {
+      status: 'corrupt',
+      reason: error instanceof Error ? error.message : String(error),
+    }
   }
 }
 
@@ -126,7 +146,9 @@ export const installInterlinearSidecar = async (
     callbacks.onStatusInserting?.()
     callbacks.onInsertProgress?.(0)
     await FileSystem.deleteAsync(extractionDirectory, { idempotent: true })
-    await FileSystem.makeDirectoryAsync(extractionDirectory, { intermediates: true })
+    await FileSystem.makeDirectoryAsync(extractionDirectory, {
+      intermediates: true,
+    })
     await unzip(toNativeFilePath(archivePath), toNativeFilePath(extractionDirectory), 'UTF-8')
     callbacks.onInsertProgress?.(0.5)
     const candidate = await openSQLiteDatabase(
@@ -136,9 +158,9 @@ export const installInterlinearSidecar = async (
     )
     try {
       const metadata = await readMetadata(candidate)
-      const integrity = await candidate.getFirstAsync<{ integrity_check: string }>(
-        'PRAGMA integrity_check'
-      )
+      const integrity = await candidate.getFirstAsync<{
+        integrity_check: string
+      }>('PRAGMA integrity_check')
       if (
         integrity?.integrity_check !== 'ok' ||
         metadata.schemaVersion !== String(artifact.schemaVersion) ||
@@ -166,8 +188,11 @@ export const installInterlinearSidecar = async (
 }
 
 export const removeInterlinearSidecar = async (locale: ResourceLanguage) => {
-  await closeInterlinearSidecar(locale)
-  await FileSystem.deleteAsync(getInterlinearSidecarPath(locale), { idempotent: true })
+  await interlinearConnections.withExclusiveAccess(locale, () =>
+    FileSystem.deleteAsync(getInterlinearSidecarPath(locale), {
+      idempotent: true,
+    })
+  )
 }
 
 export const loadInterlinearChapterTokens = async (
@@ -180,26 +205,26 @@ export const loadInterlinearChapterTokens = async (
   if (availability.status !== 'available') {
     throw new Error(`INTERLINEAR_SIDECAR_${availability.status.toUpperCase()}:BHG:${locale}`)
   }
-  const database = await openInterlinearSidecar(locale)
-  const rows = await database.getAllAsync<{
-    verse: number
-    tokenId: number
-    readingOrdinal: number
-    tokenStartOffset: number
-    tokenLength: number
-    segmentOrdinal: number
-    segmentStartOffset: number
-    segmentLength: number
-    transliteration: string
-    lemma: string
-    morphology: string
-    gloss: string
-    strong: string | null
-    estrong: string | null
-    dstrong: string | null
-    ustrong: string | null
-  }>(
-    `SELECT v.verse, t.id AS tokenId, t.readingOrdinal,
+  const rows = await withInterlinearSidecar(locale, database =>
+    database.getAllAsync<{
+      verse: number
+      tokenId: number
+      readingOrdinal: number
+      tokenStartOffset: number
+      tokenLength: number
+      segmentOrdinal: number
+      segmentStartOffset: number
+      segmentLength: number
+      transliteration: string
+      lemma: string
+      morphology: string
+      gloss: string
+      strong: string | null
+      estrong: string | null
+      dstrong: string | null
+      ustrong: string | null
+    }>(
+      `SELECT v.verse, t.id AS tokenId, t.readingOrdinal,
             t.startOffset AS tokenStartOffset, t.length AS tokenLength,
             s.ordinal AS segmentOrdinal, s.startOffset AS segmentStartOffset,
             s.length AS segmentLength, tr.value AS transliteration,
@@ -219,7 +244,8 @@ export const loadInterlinearChapterTokens = async (
        LEFT JOIN StrongCodes c3 ON c3.id=s.uStrongCodeId
       WHERE v.bookOrder=? AND v.chapter=?
       ORDER BY v.verse, t.readingOrdinal, s.ordinal`,
-    [book, chapter]
+      [book, chapter]
+    )
   )
   const result: InterlinearChapterTokens = {}
   const tokens = new Map<number, InterlinearToken>()
@@ -259,23 +285,10 @@ export const loadInterlinearChapterTokens = async (
   return result
 }
 
-const openInterlinearSidecar = async (locale: ResourceLanguage) => {
-  const existing = databases.get(locale)
-  if (existing) return existing
-  const directory = getInterlinearSidecarDirectory()
-  await FileSystem.makeDirectoryAsync(directory, { intermediates: true })
-  const filename = `bible-bhg-interlinear-${locale}.sqlite`
-  const database = await openSQLiteDatabase(filename, { useNewConnection: true }, directory)
-  databases.set(locale, database)
-  return database
-}
-
-const closeInterlinearSidecar = async (locale: ResourceLanguage) => {
-  const database = databases.get(locale)
-  if (!database) return
-  databases.delete(locale)
-  await database.closeAsync()
-}
+const withInterlinearSidecar = <Result>(
+  locale: ResourceLanguage,
+  operation: (database: SQLiteDatabase) => Promise<Result>
+) => interlinearConnections.use(locale, operation)
 
 const readMetadata = async (database: SQLiteDatabase) => {
   const rows = await database.getAllAsync<{ key: string; value: string }>(
@@ -290,12 +303,14 @@ const activateInterlinearSidecar = async (
   beforeCommit?: () => void | Promise<void>
 ) => {
   const destination = getInterlinearSidecarPath(locale)
-  await FileSystem.makeDirectoryAsync(getInterlinearSidecarDirectory(), { intermediates: true })
-  await installAtomicResourceFile({
-    candidatePath: extractedPath,
-    destinationPath: destination,
-    beforeSwap: () => closeInterlinearSidecar(locale),
-    afterSwap: beforeCommit,
-    beforeRollback: () => closeInterlinearSidecar(locale),
+  await FileSystem.makeDirectoryAsync(getInterlinearSidecarDirectory(), {
+    intermediates: true,
   })
+  await interlinearConnections.withExclusiveAccess(locale, () =>
+    installAtomicResourceFile({
+      candidatePath: extractedPath,
+      destinationPath: destination,
+      afterSwap: beforeCommit,
+    })
+  )
 }

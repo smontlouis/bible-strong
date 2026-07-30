@@ -2,6 +2,7 @@ import * as FileSystem from 'expo-file-system/legacy'
 import { unzip } from 'react-native-zip-archive'
 
 import { installAtomicResourceFile, restoreOrphanedResourceBackup } from './atomicResourceFile'
+import { AsyncConnectionRegistry } from './asyncConnectionRegistry'
 import { getSharedSqliteDirPath } from './databaseTypes'
 import { downloadWithCdnFallback } from './downloadWithCdnFallback'
 import { toNativeFilePath } from './fileIntegrity'
@@ -37,7 +38,26 @@ export interface StrongLexiconInstallCallbacks {
   installationLifecycle?: ResourceInstallationLifecycle
 }
 
-const moduleDatabases = new Map<StrongLexiconModuleId, SQLiteDatabase>()
+class StrongLexiconModuleMissingError extends Error {}
+
+const moduleConnections = new AsyncConnectionRegistry<StrongLexiconModuleId, SQLiteDatabase>(
+  async moduleId => {
+    const path = getStrongLexiconModulePath(moduleId)
+    await restoreOrphanedResourceBackup(path, `${path}.backup`)
+    const file = await FileSystem.getInfoAsync(path)
+    if (!file.exists || file.size === 0) {
+      throw new StrongLexiconModuleMissingError()
+    }
+
+    const publication = getStrongLexiconPublication(moduleId)
+    return openSQLiteDatabase(
+      publication.entry,
+      { useNewConnection: true },
+      getStrongLexiconDirectory()
+    )
+  },
+  database => database.closeAsync()
+)
 const validatedModules = new Map<StrongLexiconModuleId, StrongLexiconModuleAvailability>()
 
 const REQUIRED_TABLES: Record<StrongLexiconModuleId, string[]> = {
@@ -128,25 +148,19 @@ export const validateStrongLexiconModuleDatabase = async (
   return { status: 'available', moduleId, revision, schemaVersion }
 }
 
-const openInstalledModule = async (
-  moduleId: StrongLexiconModuleId
-): Promise<SQLiteDatabase | null> => {
-  const existing = moduleDatabases.get(moduleId)
-  if (existing) return existing
-
-  const path = getStrongLexiconModulePath(moduleId)
-  await restoreOrphanedResourceBackup(path, `${path}.backup`)
-  const file = await FileSystem.getInfoAsync(path)
-  if (!file.exists || file.size === 0) return null
-
-  const publication = getStrongLexiconPublication(moduleId)
-  const database = await openSQLiteDatabase(
-    publication.entry,
-    { useNewConnection: true },
-    getStrongLexiconDirectory()
-  )
-  moduleDatabases.set(moduleId, database)
-  return database
+const withInstalledModule = async <Result>(
+  moduleId: StrongLexiconModuleId,
+  operation: (database: SQLiteDatabase) => Promise<Result>
+): Promise<{ found: false } | { found: true; result: Result }> => {
+  try {
+    return {
+      found: true,
+      result: await moduleConnections.use(moduleId, operation),
+    }
+  } catch (error) {
+    if (error instanceof StrongLexiconModuleMissingError) return { found: false }
+    throw error
+  }
 }
 
 export const getStrongLexiconModuleAvailability = async (
@@ -156,51 +170,67 @@ export const getStrongLexiconModuleAvailability = async (
   if (cached) return cached
 
   try {
-    const database = await openInstalledModule(moduleId)
-    if (!database) return { status: 'missing', moduleId }
-    const availability = await validateStrongLexiconModuleDatabase(moduleId, database)
-    validatedModules.set(moduleId, availability)
-    return availability
+    const installedModule = await withInstalledModule(moduleId, async database => {
+      try {
+        const availability = await validateStrongLexiconModuleDatabase(moduleId, database)
+        validatedModules.set(moduleId, availability)
+        return availability
+      } catch (error) {
+        const availability: StrongLexiconModuleAvailability = {
+          status: 'corrupt',
+          moduleId,
+          reason: error instanceof Error ? error.message : String(error),
+        }
+        validatedModules.set(moduleId, availability)
+        return availability
+      }
+    })
+    if (!installedModule.found) return { status: 'missing', moduleId }
+    return installedModule.result
   } catch (error) {
-    const availability: StrongLexiconModuleAvailability = {
+    return {
       status: 'corrupt',
       moduleId,
       reason: error instanceof Error ? error.message : String(error),
     }
-    validatedModules.set(moduleId, availability)
-    return availability
   }
 }
 
-export const getStrongLexiconDatabase = async (
-  moduleId: StrongLexiconModuleId
-): Promise<SQLiteDatabase> => {
+export const withStrongLexiconDatabase = async <Result>(
+  moduleId: StrongLexiconModuleId,
+  operation: (database: SQLiteDatabase) => Promise<Result>
+): Promise<Result> => {
   const availability = await getStrongLexiconModuleAvailability(moduleId)
   if (availability.status !== 'available') {
     throw new Error(`STRONG_LEXICON_MODULE_${availability.status.toUpperCase()}:${moduleId}`)
   }
-  const database = await openInstalledModule(moduleId)
-  if (!database) throw new Error(`STRONG_LEXICON_MODULE_MISSING:${moduleId}`)
-  return database
+  const installedModule = await withInstalledModule(moduleId, operation)
+  if (!installedModule.found) throw new Error(`STRONG_LEXICON_MODULE_MISSING:${moduleId}`)
+  return installedModule.result
 }
 
-export const getOptionalStrongLexiconDatabase = async (
-  moduleId: Exclude<StrongLexiconModuleId, 'core'>
-): Promise<SQLiteDatabase | null> => {
+export const withOptionalStrongLexiconDatabase = async <Result>(
+  moduleId: Exclude<StrongLexiconModuleId, 'core'>,
+  operation: (database: SQLiteDatabase) => Promise<Result>
+): Promise<Result | null> => {
   const availability = await getStrongLexiconModuleAvailability(moduleId)
   if (availability.status !== 'available') return null
-  return openInstalledModule(moduleId)
+  const installedModule = await withInstalledModule(moduleId, operation)
+  return installedModule.found ? installedModule.result : null
 }
 
 export const closeStrongLexiconModule = async (moduleId: StrongLexiconModuleId): Promise<void> => {
+  await moduleConnections.withExclusiveAccess(moduleId, async () => {
+    invalidateStrongLexiconValidation(moduleId)
+  })
+}
+
+const invalidateStrongLexiconValidation = (moduleId: StrongLexiconModuleId): void => {
   validatedModules.delete(moduleId)
   if (moduleId === 'core') {
     validatedModules.delete('resources')
     validatedModules.delete('entities')
   }
-  const database = moduleDatabases.get(moduleId)
-  moduleDatabases.delete(moduleId)
-  await database?.closeAsync()
 }
 
 const activateStrongLexiconModule = async (
@@ -209,18 +239,13 @@ const activateStrongLexiconModule = async (
   beforeCommit?: () => void | Promise<void>
 ): Promise<void> => {
   const destinationPath = getStrongLexiconModulePath(moduleId)
-  await installAtomicResourceFile({
-    candidatePath: extractedPath,
-    destinationPath,
-    beforeSwap: () => closeStrongLexiconModule(moduleId),
-    afterSwap: async () => {
-      const availability = await getStrongLexiconModuleAvailability(moduleId)
-      if (availability.status !== 'available') {
-        throw new Error(`STRONG_LEXICON_ACTIVATION_FAILED:${moduleId}:${availability.status}`)
-      }
-      await beforeCommit?.()
-    },
-    beforeRollback: () => closeStrongLexiconModule(moduleId),
+  await moduleConnections.withExclusiveAccess(moduleId, async () => {
+    invalidateStrongLexiconValidation(moduleId)
+    await installAtomicResourceFile({
+      candidatePath: extractedPath,
+      destinationPath,
+      afterSwap: beforeCommit,
+    })
   })
 }
 
@@ -252,6 +277,19 @@ export const installStrongLexiconModule = async (
     callbacks.onInsertProgress?.(0.15)
     await unzip(toNativeFilePath(archivePath), toNativeFilePath(extractionDirectory), 'UTF-8')
     callbacks.onInsertProgress?.(0.6)
+    const candidate = await openSQLiteDatabase(
+      publication.entry,
+      { useNewConnection: true },
+      extractionDirectory
+    )
+    try {
+      const availability = await validateStrongLexiconModuleDatabase(moduleId, candidate)
+      if (availability.status !== 'available') {
+        throw new Error(`STRONG_LEXICON_ACTIVATION_FAILED:${moduleId}:${availability.status}`)
+      }
+    } finally {
+      await candidate.closeAsync()
+    }
     callbacks.onInsertProgress?.(0.8)
     await FileSystem.makeDirectoryAsync(getStrongLexiconDirectory(), { intermediates: true })
     await activateStrongLexiconModule(moduleId, extractedPath, () =>
@@ -267,6 +305,8 @@ export const installStrongLexiconModule = async (
 }
 
 export const removeStrongLexiconModule = async (moduleId: StrongLexiconModuleId): Promise<void> => {
-  await closeStrongLexiconModule(moduleId)
-  await FileSystem.deleteAsync(getStrongLexiconModulePath(moduleId), { idempotent: true })
+  await moduleConnections.withExclusiveAccess(moduleId, async () => {
+    invalidateStrongLexiconValidation(moduleId)
+    await FileSystem.deleteAsync(getStrongLexiconModulePath(moduleId), { idempotent: true })
+  })
 }

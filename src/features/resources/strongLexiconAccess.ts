@@ -3,9 +3,9 @@ import type { ResourceLanguage } from '~helpers/databaseTypes'
 import type { StrongIdentity, StrongIdentityKind } from '~helpers/strongIdentities'
 import type { StrongLexiconModuleId } from '~helpers/strongLexiconPublications'
 import {
-  getOptionalStrongLexiconDatabase,
-  getStrongLexiconDatabase,
   getStrongLexiconModuleAvailability,
+  withOptionalStrongLexiconDatabase,
+  withStrongLexiconDatabase,
   type StrongLexiconModuleAvailability,
 } from '~helpers/strongLexiconModules'
 
@@ -568,22 +568,20 @@ const toEntry = async (
     getStrongLexiconModuleAvailability('resources'),
     getStrongLexiconModuleAvailability('entities'),
   ])
-  const [morphology, relations, resourcesDatabase, entitiesDatabase] = await Promise.all([
+  const [morphology, relations] = await Promise.all([
     loadMorphology(core, row, language),
     includeExtended ? loadRelations(core, row.id, language) : Promise.resolve([]),
-    includeExtended && resourcesAvailability.status === 'available'
-      ? getOptionalStrongLexiconDatabase('resources')
-      : Promise.resolve(null),
-    includeExtended && entitiesAvailability.status === 'available'
-      ? getOptionalStrongLexiconDatabase('entities')
-      : Promise.resolve(null),
   ])
   const [resourceResult, entity] = await Promise.all([
-    includeExtended
-      ? loadResources(resourcesDatabase, row.id, language)
+    includeExtended && resourcesAvailability.status === 'available'
+      ? withOptionalStrongLexiconDatabase('resources', database =>
+          loadResources(database, row.id, language)
+        ).then(result => result ?? { resources: [], lsjAbsent: false })
       : Promise.resolve({ resources: [], lsjAbsent: false }),
-    includeExtended
-      ? loadEntityForEntry(entitiesDatabase, row, language)
+    includeExtended && entitiesAvailability.status === 'available'
+      ? withOptionalStrongLexiconDatabase('entities', database =>
+          loadEntityForEntry(database, row, language)
+        ).then(result => result ?? undefined)
       : Promise.resolve(undefined),
   ])
   const definitionHtml =
@@ -685,48 +683,47 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
   getModuleAvailability: getStrongLexiconModuleAvailability,
 
   async loadPreview(identities, language) {
-    const core = await getStrongLexiconDatabase('core')
-    const candidates = identities
-      .filter(identity => identity.kind !== 'ustrong')
-      .sort((left, right) => {
-        const priority: Record<StrongIdentityKind, number> = {
-          dstrong: 0,
-          estrong: 1,
-          strong: 2,
-          ustrong: 3,
-        }
-        return priority[left.kind] - priority[right.kind]
-      })
-    const seenEntries = new Set<number>()
-    const previews: StrongLexiconPreview[] = []
-    for (const identity of candidates) {
-      const row = await resolveCoreEntry(core, identity, language)
-      if (!row || seenEntries.has(row.id)) continue
-      seenEntries.add(row.id)
-      const entry = await toEntry(core, row, identity, language, false)
-      previews.push({
-        id: entry.id,
-        selectedIdentity: entry.selectedIdentity,
-        stepCode: entry.stepCode,
-        classicStrong: entry.classicStrong,
-        language: entry.language,
-        original: entry.original,
-        transliteration: entry.transliteration,
-        gloss: entry.gloss,
-        definitionHtml: entry.definitionHtml,
-      })
-    }
-    return previews
+    return withStrongLexiconDatabase('core', async core => {
+      const candidates = identities
+        .filter(identity => identity.kind !== 'ustrong')
+        .sort((left, right) => {
+          const priority: Record<StrongIdentityKind, number> = {
+            dstrong: 0,
+            estrong: 1,
+            strong: 2,
+            ustrong: 3,
+          }
+          return priority[left.kind] - priority[right.kind]
+        })
+      const seenEntries = new Set<number>()
+      const previews: StrongLexiconPreview[] = []
+      for (const identity of candidates) {
+        const row = await resolveCoreEntry(core, identity, language)
+        if (!row || seenEntries.has(row.id)) continue
+        seenEntries.add(row.id)
+        const entry = await toEntry(core, row, identity, language, false)
+        previews.push({
+          id: entry.id,
+          selectedIdentity: entry.selectedIdentity,
+          stepCode: entry.stepCode,
+          classicStrong: entry.classicStrong,
+          language: entry.language,
+          original: entry.original,
+          transliteration: entry.transliteration,
+          gloss: entry.gloss,
+          definitionHtml: entry.definitionHtml,
+        })
+      }
+      return previews
+    })
   },
 
   async loadEntity(uniqueName, language) {
     const availability = await getStrongLexiconModuleAvailability('entities')
     if (availability.status !== 'available') return undefined
-    const database = await getOptionalStrongLexiconDatabase('entities')
-    if (!database) return undefined
-
-    const entity = await database.getFirstAsync<EntityRow>(
-      `SELECT e.*,
+    const entity = await withOptionalStrongLexiconDatabase('entities', async database => {
+      const row = await database.getFirstAsync<EntityRow>(
+        `SELECT e.*,
               tr.displayName AS localizedDisplayName,
               tr.description AS localizedDescription,
               tr.shortDescription AS localizedShortDescription,
@@ -737,17 +734,18 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
          LEFT JOIN EntityTranslations tr ON tr.entityId=e.id AND tr.language=?
         WHERE e.uniqueName=?
         LIMIT 1`,
-      [language, uniqueName]
-    )
-    if (!entity) return undefined
-
-    return hydrateEntity(database, entity, language)
+        [language, uniqueName]
+      )
+      return row ? hydrateEntity(database, row, language) : undefined
+    })
+    return entity ?? undefined
   },
 
   async loadEntry(identity, language) {
-    const core = await getStrongLexiconDatabase('core')
-    const row = await resolveCoreEntry(core, identity, language)
-    return row ? toEntry(core, row, identity, language, true) : undefined
+    return withStrongLexiconDatabase('core', async core => {
+      const row = await resolveCoreEntry(core, identity, language)
+      return row ? toEntry(core, row, identity, language, true) : undefined
+    })
   },
 
   async loadEntries(identities, language) {
@@ -758,16 +756,15 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
   },
 
   async loadMorphologies(codes, language) {
-    const core = await getStrongLexiconDatabase('core')
-    return loadMorphologies(core, codes, language)
+    return withStrongLexiconDatabase('core', core => loadMorphologies(core, codes, language))
   },
 
   async search(query, language, limit = 100) {
-    const core = await getStrongLexiconDatabase('core')
     const normalized = query.trim()
     const like = `%${normalized}%`
-    const rows = await core.getAllAsync<CoreEntryRow>(
-      `SELECT e.*, i.stepCode,
+    return withStrongLexiconDatabase('core', async core => {
+      const rows = await core.getAllAsync<CoreEntryRow>(
+        `SELECT e.*, i.stepCode,
               tr.gloss AS localizedGloss,
               tr.meaning AS localizedMeaning,
               tr.meaningHtml AS localizedMeaningHtml
@@ -780,17 +777,18 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
            OR e.gloss LIKE ? OR tr.gloss LIKE ?
         ORDER BY COALESCE(NULLIF(tr.gloss, ''), e.gloss), e.baseCode
         LIMIT ?`,
-      [language, like, like, like, like, like, like, like, limit]
-    )
-    return rows.map(row => toSearchResult(row, language))
+        [language, like, like, like, like, like, like, like, limit]
+      )
+      return rows.map(row => toSearchResult(row, language))
+    })
   },
 
   async browseByGlossPrefix(prefix, language, limit = 500) {
     const normalizedPrefix = prefix.trim()
     if (!normalizedPrefix) return []
-    const core = await getStrongLexiconDatabase('core')
-    const rows = await core.getAllAsync<CoreEntryRow>(
-      `SELECT e.*, i.stepCode,
+    return withStrongLexiconDatabase('core', async core => {
+      const rows = await core.getAllAsync<CoreEntryRow>(
+        `SELECT e.*, i.stepCode,
               tr.gloss AS localizedGloss,
               tr.meaning AS localizedMeaning,
               tr.meaningHtml AS localizedMeaningHtml
@@ -801,15 +799,16 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
         WHERE COALESCE(NULLIF(tr.gloss, ''), e.gloss) LIKE ?
         ORDER BY COALESCE(NULLIF(tr.gloss, ''), e.gloss), e.baseCode
         LIMIT ?`,
-      [language, `${normalizedPrefix}%`, limit]
-    )
-    return rows.map(row => toSearchResult(row, language))
+        [language, `${normalizedPrefix}%`, limit]
+      )
+      return rows.map(row => toSearchResult(row, language))
+    })
   },
 
   async random(lexicalLanguage, language) {
-    const core = await getStrongLexiconDatabase('core')
-    const row = await core.getFirstAsync<CoreEntryRow>(
-      `SELECT e.*, i.stepCode,
+    return withStrongLexiconDatabase('core', async core => {
+      const row = await core.getFirstAsync<CoreEntryRow>(
+        `SELECT e.*, i.stepCode,
               tr.gloss AS localizedGloss,
               tr.meaning AS localizedMeaning,
               tr.meaningHtml AS localizedMeaningHtml
@@ -820,8 +819,9 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
         WHERE e.language=? AND e.gloss <> ''
         ORDER BY RANDOM()
         LIMIT 1`,
-      [language, lexicalLanguage]
-    )
-    return row ? toSearchResult(row, language) : undefined
+        [language, lexicalLanguage]
+      )
+      return row ? toSearchResult(row, language) : undefined
+    })
   },
 }

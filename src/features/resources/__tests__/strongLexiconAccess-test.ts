@@ -1,23 +1,23 @@
 /* eslint-disable import/first */
 
 jest.mock('~helpers/strongLexiconModules', () => ({
-  getStrongLexiconDatabase: jest.fn(),
-  getOptionalStrongLexiconDatabase: jest.fn(),
   getStrongLexiconModuleAvailability: jest.fn(),
+  withStrongLexiconDatabase: jest.fn(),
+  withOptionalStrongLexiconDatabase: jest.fn(),
 }))
 
 import {
-  getOptionalStrongLexiconDatabase,
-  getStrongLexiconDatabase,
   getStrongLexiconModuleAvailability,
+  withOptionalStrongLexiconDatabase,
+  withStrongLexiconDatabase,
 } from '~helpers/strongLexiconModules'
 import type { StrongLexiconModuleId } from '~helpers/strongLexiconPublications'
 import type { SQLiteDatabase } from '~helpers/sqlite'
 import { localStrongLexiconAccess } from '../strongLexiconAccess'
 
-const mockGetStrongLexiconDatabase = jest.mocked(getStrongLexiconDatabase)
-const mockGetOptionalStrongLexiconDatabase = jest.mocked(getOptionalStrongLexiconDatabase)
 const mockGetStrongLexiconModuleAvailability = jest.mocked(getStrongLexiconModuleAvailability)
+const mockWithStrongLexiconDatabase = jest.mocked(withStrongLexiconDatabase)
+const mockWithOptionalStrongLexiconDatabase = jest.mocked(withOptionalStrongLexiconDatabase)
 
 const rows = {
   H3068G: {
@@ -77,8 +77,10 @@ describe('strongLexiconAccess', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     const database = createDatabase()
-    mockGetStrongLexiconDatabase.mockResolvedValue(database as unknown as SQLiteDatabase)
-    mockGetOptionalStrongLexiconDatabase.mockResolvedValue(null)
+    mockWithStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(database as unknown as SQLiteDatabase)
+    )
+    mockWithOptionalStrongLexiconDatabase.mockResolvedValue(null)
     mockGetStrongLexiconModuleAvailability.mockImplementation(
       async (moduleId: StrongLexiconModuleId) => ({
         status: 'missing',
@@ -110,7 +112,9 @@ describe('strongLexiconAccess', () => {
 
   it('loads the French rich definition while preserving the selected identity type', async () => {
     const database = createDatabase()
-    mockGetStrongLexiconDatabase.mockResolvedValue(database as unknown as SQLiteDatabase)
+    mockWithStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(database as unknown as SQLiteDatabase)
+    )
     const entry = await localStrongLexiconAccess.loadEntry(
       { kind: 'dstrong', code: 'H3068G' },
       'fr'
@@ -135,7 +139,9 @@ describe('strongLexiconAccess', () => {
   it('returns no entry when none of the STEP or classical fallbacks resolves', async () => {
     const database = createDatabase()
     database.getFirstAsync.mockResolvedValue(null)
-    mockGetStrongLexiconDatabase.mockResolvedValue(database as unknown as SQLiteDatabase)
+    mockWithStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(database as unknown as SQLiteDatabase)
+    )
 
     await expect(
       localStrongLexiconAccess.loadEntry({ kind: 'dstrong', code: 'H9999Z' }, 'fr')
@@ -145,7 +151,9 @@ describe('strongLexiconAccess', () => {
   it('browses localized glosses by prefix inside SQLite before applying the limit', async () => {
     const database = createDatabase()
     database.getAllAsync.mockResolvedValue([rows.H3068G])
-    mockGetStrongLexiconDatabase.mockResolvedValue(database as unknown as SQLiteDatabase)
+    mockWithStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(database as unknown as SQLiteDatabase)
+    )
 
     await expect(localStrongLexiconAccess.browseByGlossPrefix('S', 'fr', 25)).resolves.toEqual([
       expect.objectContaining({
@@ -173,7 +181,9 @@ describe('strongLexiconAccess', () => {
           'Fonction : nom; Cas : nominatif; Genre : masculin; Nombre : pluriel.',
       },
     ])
-    mockGetStrongLexiconDatabase.mockResolvedValue(database as unknown as SQLiteDatabase)
+    mockWithStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(database as unknown as SQLiteDatabase)
+    )
 
     await expect(localStrongLexiconAccess.loadMorphologies(['N-NPM-T'], 'fr')).resolves.toEqual([
       {
@@ -240,8 +250,8 @@ describe('strongLexiconAccess', () => {
       moduleId: 'entities',
       schemaVersion: 1,
     })
-    mockGetOptionalStrongLexiconDatabase.mockResolvedValue(
-      entitiesDatabase as unknown as SQLiteDatabase
+    mockWithOptionalStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(entitiesDatabase as unknown as SQLiteDatabase)
     )
 
     await expect(localStrongLexiconAccess.loadEntity('Peter@Matt.4.18', 'fr')).resolves.toEqual(

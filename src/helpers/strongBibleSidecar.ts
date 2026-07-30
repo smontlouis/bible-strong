@@ -5,6 +5,7 @@ import { getBibleVersionMetadata } from './biblesDb'
 import { getSharedSqliteDirPath } from './databaseTypes'
 import { downloadWithCdnFallback } from './downloadWithCdnFallback'
 import { toNativeFilePath } from './fileIntegrity'
+import { AsyncConnectionRegistry } from './asyncConnectionRegistry'
 import { openSQLiteDatabase, type SQLiteDatabase } from './sqlite'
 import {
   classifyStrongBibleSidecarMetadata,
@@ -24,7 +25,25 @@ import { installAtomicResourceFile, restoreOrphanedResourceBackup } from './atom
 import { getStrongBibleConcordanceCandidates } from './strongBibleConcordance'
 import type { ResourceInstallationLifecycle } from './resourceInstallationLifecycle'
 
-const sidecarDatabases = new Map<StrongBibleVersionId, SQLiteDatabase>()
+class StrongBibleSidecarMissingError extends Error {}
+
+const strongBibleConnections = new AsyncConnectionRegistry<StrongBibleVersionId, SQLiteDatabase>(
+  async versionId => {
+    const path = getStrongBibleSidecarPath(versionId)
+    await restoreOrphanedResourceBackup(path, `${path}.backup`)
+    const file = await FileSystem.getInfoAsync(path)
+    if (!file.exists || file.size === 0) throw new StrongBibleSidecarMissingError()
+
+    const directory = getStrongBibleSidecarDirectory()
+    await FileSystem.makeDirectoryAsync(directory, { intermediates: true })
+    return openSQLiteDatabase(
+      getStrongBibleSidecarFileName(versionId),
+      { useNewConnection: true },
+      directory
+    )
+  },
+  database => database.closeAsync()
+)
 const validatedSidecars = new Map<StrongBibleVersionId, StrongBibleSidecarMetadata>()
 const IDENTITY_KINDS = ['strong', 'estrong', 'dstrong', 'ustrong'] as const
 
@@ -75,51 +94,49 @@ export const getStrongBibleSidecarAvailability = async (
   if (!isStrongCapableBibleVersion(versionId)) return { status: 'unsupported' }
   const baseMetadata = await getBibleVersionMetadata(versionId)
   if (!baseMetadata) return { status: 'base-missing' }
-  const path = getStrongBibleSidecarPath(versionId)
-  await restoreOrphanedResourceBackup(path, `${path}.backup`)
-  const info = await FileSystem.getInfoAsync(path)
-  if (!info.exists) return { status: 'missing' }
 
   try {
-    const database = await openStrongBibleSidecar(versionId)
-    let metadata = validatedSidecars.get(versionId)
-    if (!metadata) {
-      metadata = await readMetadata(database)
-      const snapshot = await readStrongBibleSidecarSnapshot(database)
-      const expected = getExpectedSidecar(versionId, snapshot)
-      const compatibility = classifyStrongBibleSidecarMetadata(metadata, expected, {
-        textRevision: baseMetadata.textRevision ?? '',
-        textSha256: baseMetadata.textSha256 ?? '',
-      })
-      if (compatibility === 'incompatible') {
+    return await withStrongBibleSidecar(versionId, async database => {
+      let metadata = validatedSidecars.get(versionId)
+      if (!metadata) {
+        metadata = await readMetadata(database)
+        const snapshot = await readStrongBibleSidecarSnapshot(database)
+        const expected = getExpectedSidecar(versionId, snapshot)
+        const compatibility = classifyStrongBibleSidecarMetadata(metadata, expected, {
+          textRevision: baseMetadata.textRevision ?? '',
+          textSha256: baseMetadata.textSha256 ?? '',
+        })
+        if (compatibility === 'incompatible') {
+          return {
+            status: 'incompatible',
+            baseTextRevision: baseMetadata.textRevision,
+            sidecarTextRevision: metadata.textRevision,
+          }
+        }
+        validateStrongBibleSidecarSnapshot(snapshot, expected)
+        metadata = snapshot.metadata
+        validatedSidecars.set(versionId, metadata)
+      }
+      if (
+        baseMetadata.textRevision !== metadata.textRevision ||
+        baseMetadata.textSha256 !== metadata.textSha256
+      ) {
         return {
           status: 'incompatible',
           baseTextRevision: baseMetadata.textRevision,
           sidecarTextRevision: metadata.textRevision,
         }
       }
-      validateStrongBibleSidecarSnapshot(snapshot, expected)
-      metadata = snapshot.metadata
-      validatedSidecars.set(versionId, metadata)
-    }
-    if (
-      baseMetadata.textRevision !== metadata.textRevision ||
-      baseMetadata.textSha256 !== metadata.textSha256
-    ) {
       return {
-        status: 'incompatible',
-        baseTextRevision: baseMetadata.textRevision,
-        sidecarTextRevision: metadata.textRevision,
+        status: 'available',
+        versionId,
+        datasetId: metadata.datasetId,
+        textRevision: metadata.textRevision,
+        strongRevision: metadata.strongRevision,
       }
-    }
-    return {
-      status: 'available',
-      versionId,
-      datasetId: metadata.datasetId,
-      textRevision: metadata.textRevision,
-      strongRevision: metadata.strongRevision,
-    }
+    })
   } catch (error) {
+    if (error instanceof StrongBibleSidecarMissingError) return { status: 'missing' }
     return {
       status: 'corrupt',
       reason: error instanceof Error ? error.message : String(error),
@@ -176,8 +193,10 @@ export const installStrongBibleSidecar = async (
 }
 
 export const removeStrongBibleSidecar = async (versionId: StrongBibleVersionId): Promise<void> => {
-  await closeStrongBibleSidecar(versionId)
-  await FileSystem.deleteAsync(getStrongBibleSidecarPath(versionId), { idempotent: true })
+  await strongBibleConnections.withExclusiveAccess(versionId, async () => {
+    validatedSidecars.delete(versionId)
+    await FileSystem.deleteAsync(getStrongBibleSidecarPath(versionId), { idempotent: true })
+  })
 }
 
 type StrongBibleSpanRow = {
@@ -243,9 +262,9 @@ export const loadStrongBibleChapterSpans = async (
   if (availability.status !== 'available') {
     throw new Error(`STRONG_BIBLE_SIDECAR_${availability.status.toUpperCase()}:${versionId}`)
   }
-  const database = await openStrongBibleSidecar(versionId)
-  const rows = await database.getAllAsync<StrongBibleSpanRow>(
-    `SELECT v.verse, o.ordinal, o.startOffset, o.length,
+  const rows = await withStrongBibleSidecar(versionId, database =>
+    database.getAllAsync<StrongBibleSpanRow>(
+      `SELECT v.verse, o.ordinal, o.startOffset, o.length,
             w.identityOrder, c.kind, c.code,
             o.stepTokenId AS primaryStepTokenId,
             e.sourceOrder, e.stepTokenId AS extraStepTokenId
@@ -258,7 +277,8 @@ export const loadStrongBibleChapterSpans = async (
        ON e.verseId=o.verseId AND e.targetOrdinal=o.ordinal
      WHERE v.bookOrder=? AND v.chapter=? AND (o.isAligned=1 OR o.length=0)
      ORDER BY v.verse, o.ordinal, w.identityOrder, e.sourceOrder`,
-    [book, chapter]
+      [book, chapter]
+    )
   )
   return Object.fromEntries(groupStrongBibleSpanRows(rows, row => row.verse)) as Record<
     number,
@@ -275,20 +295,20 @@ export const loadReverseInterlinearChapterSpans = async (
   if (availability.status !== 'available') {
     throw new Error(`STRONG_BIBLE_SIDECAR_${availability.status.toUpperCase()}:${versionId}`)
   }
-  const database = await openStrongBibleSidecar(versionId)
-  const rows = await database.getAllAsync<{
-    verse: number
-    ordinal: number
-    startOffset: number
-    length: number
-    identityOrder: number | null
-    kind: number | null
-    code: string | null
-    primaryStepTokenId: number | null
-    sourceOrder: number | null
-    extraStepTokenId: number | null
-  }>(
-    `SELECT v.verse, o.ordinal, o.startOffset, o.length,
+  const rows = await withStrongBibleSidecar(versionId, database =>
+    database.getAllAsync<{
+      verse: number
+      ordinal: number
+      startOffset: number
+      length: number
+      identityOrder: number | null
+      kind: number | null
+      code: string | null
+      primaryStepTokenId: number | null
+      sourceOrder: number | null
+      extraStepTokenId: number | null
+    }>(
+      `SELECT v.verse, o.ordinal, o.startOffset, o.length,
             w.identityOrder, c.kind, c.code,
             o.stepTokenId AS primaryStepTokenId,
             e.sourceOrder, e.stepTokenId AS extraStepTokenId
@@ -301,7 +321,8 @@ export const loadReverseInterlinearChapterSpans = async (
          ON e.verseId=o.verseId AND e.targetOrdinal=o.ordinal
       WHERE v.bookOrder=? AND v.chapter=? AND (o.isAligned=1 OR o.length=0)
       ORDER BY v.verse, o.ordinal, w.identityOrder, e.sourceOrder`,
-    [book, chapter]
+      [book, chapter]
+    )
   )
   const spansByVerse: Record<number, StrongBibleSpan[]> = {}
   const spanKeys = new Map<string, StrongBibleSpan>()
@@ -365,7 +386,6 @@ export const loadStrongBibleVersesSpans = async (
 ): Promise<Record<string, StrongBibleSpan[]>> => {
   if (!locations.length) return {}
   await assertStrongBibleSidecarAvailable(versionId)
-  const database = await openStrongBibleSidecar(versionId)
   const uniqueLocations = [
     ...new Map(
       locations.map(location => [
@@ -382,10 +402,9 @@ export const loadStrongBibleVersesSpans = async (
     location.Chapitre,
     location.Verset,
   ])
-  const rows = await database.getAllAsync<
-    StrongBibleSpanRow & { bookOrder: number; chapter: number }
-  >(
-    `SELECT v.bookOrder, v.chapter, v.verse,
+  const rows = await withStrongBibleSidecar(versionId, database =>
+    database.getAllAsync<StrongBibleSpanRow & { bookOrder: number; chapter: number }>(
+      `SELECT v.bookOrder, v.chapter, v.verse,
             o.ordinal, o.startOffset, o.length,
             w.identityOrder, c.kind, c.code,
             o.stepTokenId AS primaryStepTokenId,
@@ -399,7 +418,8 @@ export const loadStrongBibleVersesSpans = async (
          ON e.verseId=o.verseId AND e.targetOrdinal=o.ordinal
       WHERE (${locationFilters}) AND (o.isAligned=1 OR o.length=0)
       ORDER BY v.bookOrder, v.chapter, v.verse, o.ordinal, w.identityOrder, e.sourceOrder`,
-    parameters
+      parameters
+    )
   )
   return Object.fromEntries(
     groupStrongBibleSpanRows(rows, row => `${row.bookOrder}-${row.chapter}-${row.verse}`)
@@ -426,19 +446,20 @@ export const loadStrongBibleVerseCountsByBook = async (
   reference: string | number
 ): Promise<StrongBibleVerseCountByBook[]> => {
   await assertStrongBibleSidecarAvailable(versionId)
-  const database = await openStrongBibleSidecar(versionId)
-  const identity = await resolveStrongBibleConcordanceIdentity(database, referenceBook, reference)
-  if (!identity) return []
-  return database.getAllAsync<StrongBibleVerseCountByBook>(
-    `SELECT v.bookOrder AS Livre, COUNT(DISTINCT v.id) AS versesCountByBook
+  return withStrongBibleSidecar(versionId, async database => {
+    const identity = await resolveStrongBibleConcordanceIdentity(database, referenceBook, reference)
+    if (!identity) return []
+    return database.getAllAsync<StrongBibleVerseCountByBook>(
+      `SELECT v.bookOrder AS Livre, COUNT(DISTINCT v.id) AS versesCountByBook
      FROM StrongCodes c
      JOIN WordStrongCodes w ON w.codeId=c.id
      JOIN Verses v ON v.id=w.verseId
      WHERE c.id=?
      GROUP BY v.bookOrder
      ORDER BY v.bookOrder`,
-    [identity.id]
-  )
+      [identity.id]
+    )
+  })
 }
 
 export const loadStrongBibleOccurrenceLocations = async (
@@ -448,21 +469,21 @@ export const loadStrongBibleOccurrenceLocations = async (
   page: StrongBibleOccurrencePage = {}
 ): Promise<StrongBibleOccurrenceLocation[]> => {
   await assertStrongBibleSidecarAvailable(versionId)
-  const database = await openStrongBibleSidecar(versionId)
-  const identity = await resolveStrongBibleConcordanceIdentity(database, book, reference)
-  if (!identity) return []
-  const filters = ['c.id=?']
-  const parameters: number[] = [identity.id]
-  if (!page.allBooks) {
-    filters.push('v.bookOrder=?')
-    parameters.push(book)
-  }
-  if (page.lexemeId != null) {
-    filters.push('s.lexemeId=?')
-    parameters.push(page.lexemeId)
-  }
-  return database.getAllAsync<StrongBibleOccurrenceLocation>(
-    `SELECT DISTINCT
+  return withStrongBibleSidecar(versionId, async database => {
+    const identity = await resolveStrongBibleConcordanceIdentity(database, book, reference)
+    if (!identity) return []
+    const filters = ['c.id=?']
+    const parameters: number[] = [identity.id]
+    if (!page.allBooks) {
+      filters.push('v.bookOrder=?')
+      parameters.push(book)
+    }
+    if (page.lexemeId != null) {
+      filters.push('s.lexemeId=?')
+      parameters.push(page.lexemeId)
+    }
+    return database.getAllAsync<StrongBibleOccurrenceLocation>(
+      `SELECT DISTINCT
        v.bookOrder AS Livre,
        v.chapter AS Chapitre,
        v.verse AS Verset
@@ -473,8 +494,9 @@ export const loadStrongBibleOccurrenceLocations = async (
      WHERE ${filters.join(' AND ')}
      ORDER BY v.bookOrder, v.chapter, v.verse
      LIMIT ? OFFSET ?`,
-    [...parameters, page.limit ?? -1, Math.max(0, page.offset ?? 0)]
-  )
+      [...parameters, page.limit ?? -1, Math.max(0, page.offset ?? 0)]
+    )
+  })
 }
 
 export const loadStrongBibleLemmaStats = async (
@@ -483,19 +505,20 @@ export const loadStrongBibleLemmaStats = async (
   reference: string | number
 ): Promise<StrongBibleLemmaStat[]> => {
   await assertStrongBibleSidecarAvailable(versionId)
-  const database = await openStrongBibleSidecar(versionId)
-  const identity = await resolveStrongBibleConcordanceIdentity(database, book, reference)
-  if (!identity) return []
-  return database.getAllAsync<StrongBibleLemmaStat>(
-    `SELECT l.id, l.lemma, l.partOfSpeech, COUNT(DISTINCT s.verseId) AS occurrenceCount
+  return withStrongBibleSidecar(versionId, async database => {
+    const identity = await resolveStrongBibleConcordanceIdentity(database, book, reference)
+    if (!identity) return []
+    return database.getAllAsync<StrongBibleLemmaStat>(
+      `SELECT l.id, l.lemma, l.partOfSpeech, COUNT(DISTINCT s.verseId) AS occurrenceCount
        FROM WordStrongCodes w
        JOIN WordSpans s ON s.verseId=w.verseId AND s.ordinal=w.ordinal
        JOIN FrenchLexemes l ON l.id=s.lexemeId
       WHERE w.codeId=?
       GROUP BY l.id, l.lemma, l.partOfSpeech
       ORDER BY occurrenceCount DESC, l.lemma`,
-    [identity.id]
-  )
+      [identity.id]
+    )
+  })
 }
 
 const assertStrongBibleSidecarAvailable = async (
@@ -536,34 +559,15 @@ export const getResolvedStrongBibleConcordanceIdentity = async (
   reference: string | number
 ): Promise<ResolvedStrongBibleIdentity | undefined> => {
   await assertStrongBibleSidecarAvailable(versionId)
-  return resolveStrongBibleConcordanceIdentity(
-    await openStrongBibleSidecar(versionId),
-    book,
-    reference
+  return withStrongBibleSidecar(versionId, database =>
+    resolveStrongBibleConcordanceIdentity(database, book, reference)
   )
 }
 
-const openStrongBibleSidecar = async (versionId: StrongBibleVersionId): Promise<SQLiteDatabase> => {
-  const existing = sidecarDatabases.get(versionId)
-  if (existing) return existing
-  const directory = getStrongBibleSidecarDirectory()
-  await FileSystem.makeDirectoryAsync(directory, { intermediates: true })
-  const database = await openSQLiteDatabase(
-    getStrongBibleSidecarFileName(versionId),
-    { useNewConnection: true },
-    directory
-  )
-  sidecarDatabases.set(versionId, database)
-  return database
-}
-
-const closeStrongBibleSidecar = async (versionId: StrongBibleVersionId): Promise<void> => {
-  validatedSidecars.delete(versionId)
-  const database = sidecarDatabases.get(versionId)
-  if (!database) return
-  sidecarDatabases.delete(versionId)
-  await database.closeAsync()
-}
+const withStrongBibleSidecar = <Result>(
+  versionId: StrongBibleVersionId,
+  operation: (database: SQLiteDatabase) => Promise<Result>
+) => strongBibleConnections.use(versionId, operation)
 
 const readMetadata = async (database: SQLiteDatabase): Promise<StrongBibleSidecarMetadata> => {
   const rows = await database.getAllAsync<{ key: string; value: string }>(
@@ -698,11 +702,12 @@ const activateStrongBibleSidecar = async (
   const directory = getStrongBibleSidecarDirectory()
   await FileSystem.makeDirectoryAsync(directory, { intermediates: true })
   const destinationPath = getStrongBibleSidecarPath(versionId)
-  await installAtomicResourceFile({
-    candidatePath: extractedPath,
-    destinationPath,
-    beforeSwap: () => closeStrongBibleSidecar(versionId),
-    afterSwap: beforeCommit,
-    beforeRollback: () => closeStrongBibleSidecar(versionId),
+  await strongBibleConnections.withExclusiveAccess(versionId, async () => {
+    validatedSidecars.delete(versionId)
+    await installAtomicResourceFile({
+      candidatePath: extractedPath,
+      destinationPath,
+      afterSwap: beforeCommit,
+    })
   })
 }
