@@ -7257,9 +7257,9 @@ __metadata:
   linkType: hard
 
 "bible-passage-reference-parser@file:./vendor/bcv-parser::locator=bible-strong%40workspace%3A.":
-  version: 3.2.0-bible-strong.1
-  resolution: "bible-passage-reference-parser@file:./vendor/bcv-parser#./vendor/bcv-parser::hash=3e1c73&locator=bible-strong%40workspace%3A."
-  checksum: 10c0/dbd431cf2375a7174dc95896f354ca7951fb3ea198d62576fe054cfba068d11d133f93e023960ef7abbc8553fe60502386d71b6721faac409b9d013ccb48091d
+  version: 3.2.0-bible-strong.2
+  resolution: "bible-passage-reference-parser@file:./vendor/bcv-parser#./vendor/bcv-parser::hash=ed58c9&locator=bible-strong%40workspace%3A."
+  checksum: 10c0/db059b506c876575e36ff11e75fa6c92fd47df35c429b4ed9d92da67925d9618fade432ee3b10f69609127ae577c49dcfc931ca5e551bc5a2571dacbdef61dc0
   languageName: node
   linkType: hard
 

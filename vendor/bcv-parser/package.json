@@ -1,6 +1,6 @@
 {
   "name": "bible-passage-reference-parser",
-  "version": "3.2.0-bible-strong.1",
+  "version": "3.2.0-bible-strong.2",
   "description": "Bible Strong's reproducible snapshot of its Bible reference parser",
   "type": "module",
   "main": "esm/",

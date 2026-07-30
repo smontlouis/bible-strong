@@ -150,12 +150,12 @@ var bcv_regexps = class {
       {
         osis: ["2Kgs"],
         testament: "o",
-        regexp: /(?:^|(?<=[^\p{L}\p{N}])(?<!\d:(?=\d)))((?:Deuxi[eè]mes?\s*Rois|(?:2(?:(?:em|d)|èm)e\.|2(?:d?|e)\.|II\.)\s*Rois|(?:2(?:(?:em|d)|èm)e\s*|2[de]\s*|II\s*)Rois|2(?:\s*Rois|(?:Kgs|\s*R))))(?:(?=[\d\s.:,;\x1e\x1f&\(\)（）\[\]\/"'\*=~\-–—])|$)/giu
+        regexp: /(?:^|(?<=[^\p{L}\p{N}])(?<!\d:(?=\d)))((?:Deuxi[eè]mes?\s*Rois|(?:2(?:(?:em|d)|èm)e\.|2(?:d?|e)\.|II\.)\s*Rois|(?:2(?:(?:em|d)|èm)e\s*|2[de]\s*|II\s*)Rois|2(?:\s*Rois|(?:Kgs|\s*Ro?))))(?:(?=[\d\s.:,;\x1e\x1f&\(\)（）\[\]\/"'\*=~\-–—])|$)/giu
       },
       {
         osis: ["1Kgs"],
         testament: "o",
-        regexp: /(?:^|(?<=[^\p{L}\p{N}])(?<!\d:(?=\d)))((?:Premi(?:eres?\s*Rois|ères?\s*Rois|ers?\s*Rois)|(?:(?:1(?:e?|è)re|I)\.|1(?:er)?\.)\s*Rois|(?:(?:1(?:e?|è)re|I)|1er)\s*Rois|1(?:\s*Rois|(?:Kgs|\s*R))))(?:(?=[\d\s.:,;\x1e\x1f&\(\)（）\[\]\/"'\*=~\-–—])|$)/giu
+        regexp: /(?:^|(?<=[^\p{L}\p{N}])(?<!\d:(?=\d)))((?:Premi(?:eres?\s*Rois|ères?\s*Rois|ers?\s*Rois)|(?:(?:1(?:e?|è)re|I)\.|1(?:er)?\.)\s*Rois|(?:(?:1(?:e?|è)re|I)|1er)\s*Rois|1(?:\s*Rois|(?:Kgs|\s*Ro?))))(?:(?=[\d\s.:,;\x1e\x1f&\(\)（）\[\]\/"'\*=~\-–—])|$)/giu
       },
       {
         osis: ["2Chr"],
@@ -171,7 +171,7 @@ var bcv_regexps = class {
         osis: ["Ezra"],
         testament: "o",
         starts: "e",
-        regexp: /(?:^|(?<=[^\p{L}]))(E(?:sd(?:ras|r?)|zra))(?:(?=[\d\s.:,;\x1e\x1f&\(\)（）\[\]\/"'\*=~\-–—])|$)/giu
+        regexp: /(?:^|(?<=[^\p{L}]))(E(?:sd(?:ras|r?)|sr|zra))(?:(?=[\d\s.:,;\x1e\x1f&\(\)（）\[\]\/"'\*=~\-–—])|$)/giu
       },
       {
         osis: ["Neh"],
@@ -232,7 +232,7 @@ var bcv_regexps = class {
         osis: ["Song"],
         testament: "o",
         starts: "cs",
-        regexp: /(?:^|(?<=[^\p{L}]))((?:C(?:(?:antique(?:\s*des\s*[Cc]antiques|s)|nt|t)|a(?:ntique)?)|Song))(?:(?=[\d\s.:,;\x1e\x1f&\(\)（）\[\]\/"'\*=~\-–—])|$)/giu
+        regexp: /(?:^|(?<=[^\p{L}]))((?:C(?:(?:antique(?:\s*des\s*[Cc]antiques|s)|nt|t)|an|a(?:ntique)?)|Song))(?:(?=[\d\s.:,;\x1e\x1f&\(\)（）\[\]\/"'\*=~\-–—])|$)/giu
       },
       {
         osis: ["Jer"],
@@ -243,7 +243,7 @@ var bcv_regexps = class {
       {
         osis: ["Ezek"],
         testament: "o",
-        regexp: /(?:^|(?<=[^\p{L}]))((?:Ez[eé]ch(?:iel)?|Éz[eé]ch(?:iel)?|Ez(?:ek|(?:e|é)?)))(?:(?=[\d\s.:,;\x1e\x1f&\(\)（）\[\]\/"'\*=~\-–—])|$)/giu
+        regexp: /(?:^|(?<=[^\p{L}]))((?:Ez[eé]ch(?:iel)?|Éz[eé](?:ch(?:iel)?)?|Ez(?:ek|(?:e|é)?)))(?:(?=[\d\s.:,;\x1e\x1f&\(\)（）\[\]\/"'\*=~\-–—])|$)/giu
       },
       {
         osis: ["Dan"],
@@ -255,7 +255,7 @@ var bcv_regexps = class {
         osis: ["Hos"],
         testament: "o",
         starts: "ho",
-        regexp: /(?:^|(?<=[^\p{L}]))((?:Os(?:[eé]e)?|Hos))(?:(?=[\d\s.:,;\x1e\x1f&\(\)（）\[\]\/"'\*=~\-–—])|$)/giu
+        regexp: /(?:^|(?<=[^\p{L}]))((?:Os(?:[eé]e?)?|Hos))(?:(?=[\d\s.:,;\x1e\x1f&\(\)（）\[\]\/"'\*=~\-–—])|$)/giu
       },
       {
         osis: ["Joel"],

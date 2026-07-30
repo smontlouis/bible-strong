@@ -35,6 +35,16 @@ describe('Strong editorial HTML', () => {
     )
   })
 
+  it('links legacy French references from Strong entity descriptions without changing books', () => {
+    expect(
+      linkifyStrongEditorialBibleReferences(
+        '<p>1Ro.1 ; 2 etc. ; 2Ro.8.19 ; Esr.3.10 ; Can.4.4 ; Ézé.34.23 ; Osé.3.5</p>'
+      )
+    ).toBe(
+      '<p><a href="bible://1Kgs.1">1 Rois 1</a> ; <a href="bible://1Kgs.2">1 Rois 2</a> etc. ; <a href="bible://2Kgs.8.19">2 Rois 8:19</a> ; <a href="bible://Ezra.3.10">Esdras 3:10</a> ; <a href="bible://Song.4.4">Cantique des Cantiques 4:4</a> ; <a href="bible://Ezek.34.23">Ézéchiel 34:23</a> ; <a href="bible://Hos.3.5">Osée 3:5</a></p>'
+    )
+  })
+
   it('keeps the longest bilingual match before applying language priority', () => {
     expect(linkifyStrongEditorialBibleReferences('<p>See 1 John 3:2.</p>')).toBe(
       '<p>See <a href="bible://1John.3.2">1 Jean 3:2</a>.</p>'
