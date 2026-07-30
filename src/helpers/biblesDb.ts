@@ -4,6 +4,7 @@ import * as SQLite from 'expo-sqlite'
 import { getSharedSqliteDirPath } from '~helpers/databaseTypes'
 import { databaseBiblesName } from '~helpers/databases'
 import { buildNearFtsQuery, sanitizeFtsQuery } from '~helpers/bibleSearchQuery'
+import { getImportableBibleVerses } from '~helpers/bibleJsonImport'
 import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import type { CanonicalBibleHeading } from '~helpers/canonicalBibleHeadings'
 
@@ -714,49 +715,36 @@ export function insertBibleVersion(
       const allRows: [string, number, number, number, string, string, string, string, string][] = []
       let canonicalNoteCount = 0
       let canonicalHeadingCount = 0
-      for (const bookStr of Object.keys(versesData)) {
-        const bookNum = Number(bookStr)
-        if (isNaN(bookNum)) continue
-        const chapters = versesData[bookStr]
-        for (const chapterStr of Object.keys(chapters)) {
-          const chapterNum = Number(chapterStr)
-          if (isNaN(chapterNum)) continue
-          const verses = chapters[chapterStr]
-          for (const verseStr of Object.keys(verses)) {
-            // Skip non-numeric verse keys (e.g. "12a", "20+NUM" — variant verses)
-            if (!/^\d+$/.test(verseStr)) continue
-            const verseNum = Number(verseStr)
-            const verseData = verses[verseStr]
-            if (typeof verseData === 'string') {
-              allRows.push([
-                version,
-                bookNum,
-                chapterNum,
-                verseNum,
-                verseData,
-                '[]',
-                '[]',
-                '[]',
-                '[]',
-              ])
-              continue
-            }
-            if (!verseData || typeof verseData.text !== 'string') continue
-            canonicalNoteCount += verseData.notes?.length ?? 0
-            canonicalHeadingCount += verseData.headings?.length ?? 0
-            allRows.push([
-              version,
-              bookNum,
-              chapterNum,
-              verseNum,
-              verseData.text,
-              JSON.stringify(verseData.startTags ?? []),
-              JSON.stringify(verseData.layout ?? []),
-              JSON.stringify(verseData.notes ?? []),
-              JSON.stringify(verseData.headings ?? []),
-            ])
-          }
+      for (const { bookNumber, chapterNumber, verseNumber, verseData } of getImportableBibleVerses(
+        versesData
+      )) {
+        if (typeof verseData === 'string') {
+          allRows.push([
+            version,
+            bookNumber,
+            chapterNumber,
+            verseNumber,
+            verseData,
+            '[]',
+            '[]',
+            '[]',
+            '[]',
+          ])
+          continue
         }
+        canonicalNoteCount += verseData.notes?.length ?? 0
+        canonicalHeadingCount += verseData.headings?.length ?? 0
+        allRows.push([
+          version,
+          bookNumber,
+          chapterNumber,
+          verseNumber,
+          verseData.text,
+          JSON.stringify(verseData.startTags ?? []),
+          JSON.stringify(verseData.layout ?? []),
+          JSON.stringify(verseData.notes ?? []),
+          JSON.stringify(verseData.headings ?? []),
+        ])
       }
       if (canonicalPublication && allRows.length !== canonicalPublication.verseCount) {
         throw new Error(

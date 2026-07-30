@@ -25,6 +25,7 @@ import {
   persistAnnotationMigrationJournal,
 } from './annotationMigrationJournal'
 import type { ResourceInstallationLifecycle } from './resourceInstallationLifecycle'
+import { countImportableBibleVerses } from './bibleJsonImport'
 
 export interface DownloadAndInsertOptions extends InsertBibleOptions {
   onDownloadProgress?: FileSystem.DownloadProgressCallback
@@ -91,6 +92,9 @@ export async function downloadAndInsertBible(
     const data = await FileSystem.readAsStringAsync(jsonPath)
     const jsonData = JSON.parse(data) as BibleJsonData
     validateCanonicalBiblePublication(versionId, jsonData, opts.canonicalArtifact)
+    const importableVerseCount = isCanonicalBibleJsonData(jsonData)
+      ? countImportableBibleVerses(jsonData.verses)
+      : countImportableBibleVerses(jsonData)
     await opts.installationLifecycle?.prepare(downloadResult)
     const downloadedTextChecksum = await getFileSha256(jsonPath)
     const revisionPrefix =
@@ -134,7 +138,7 @@ export async function downloadAndInsertBible(
                 textSha256: downloadedTextChecksum,
                 sourceSha256: downloadedTextChecksum,
                 schemaVersion: opts.archiveArtifact.schemaVersion,
-                verseCount: countBibleJsonVerses(jsonData),
+                verseCount: importableVerseCount,
                 resourceGeneration: downloadResult.publication.generation,
               },
             }
@@ -144,7 +148,7 @@ export async function downloadAndInsertBible(
                 textSha256: downloadedTextChecksum,
                 sourceSha256: downloadedTextChecksum,
                 schemaVersion: 0,
-                verseCount: countBibleJsonVerses(jsonData),
+                verseCount: importableVerseCount,
                 resourceGeneration: downloadResult.publication.generation,
               },
             }),
@@ -181,17 +185,6 @@ export async function downloadAndInsertBible(
       await FileSystem.deleteAsync(extractionDirectory, { idempotent: true })
     }
   }
-}
-
-const countBibleJsonVerses = (data: BibleJsonData): number => {
-  const verses = isCanonicalBibleJsonData(data) ? data.verses : data
-  let count = 0
-  for (const book of Object.values(verses) as Record<string, unknown>[]) {
-    for (const chapter of Object.values(book) as Record<string, unknown>[]) {
-      count += Object.keys(chapter).length
-    }
-  }
-  return count
 }
 
 const resolveDownloadedBibleJson = async ({
