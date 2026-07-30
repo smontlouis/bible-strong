@@ -180,47 +180,28 @@ export const removeStrongBibleSidecar = async (versionId: StrongBibleVersionId):
   await FileSystem.deleteAsync(getStrongBibleSidecarPath(versionId), { idempotent: true })
 }
 
-export const loadStrongBibleChapterSpans = async (
-  versionId: StrongBibleVersionId,
-  book: number,
-  chapter: number
-): Promise<Record<number, StrongBibleSpan[]>> => {
-  const availability = await getStrongBibleSidecarAvailability(versionId)
-  if (availability.status !== 'available') {
-    throw new Error(`STRONG_BIBLE_SIDECAR_${availability.status.toUpperCase()}:${versionId}`)
-  }
-  const database = await openStrongBibleSidecar(versionId)
-  const rows = await database.getAllAsync<{
-    verse: number
-    ordinal: number
-    startOffset: number
-    length: number
-    identityOrder: number | null
-    kind: number | null
-    code: string | null
-    primaryStepTokenId: number | null
-    sourceOrder: number | null
-    extraStepTokenId: number | null
-  }>(
-    `SELECT v.verse, o.ordinal, o.startOffset, o.length,
-            w.identityOrder, c.kind, c.code,
-            o.stepTokenId AS primaryStepTokenId,
-            e.sourceOrder, e.stepTokenId AS extraStepTokenId
-     FROM Verses v
-     JOIN WordSpans o ON o.verseId=v.id
-     LEFT JOIN WordStrongCodes w
-       ON w.verseId=o.verseId AND w.ordinal=o.ordinal
-     LEFT JOIN StrongCodes c ON c.id=w.codeId
-     LEFT JOIN WordStepTokenExtras e
-       ON e.verseId=o.verseId AND e.targetOrdinal=o.ordinal
-     WHERE v.bookOrder=? AND v.chapter=? AND (o.isAligned=1 OR o.length=0)
-     ORDER BY v.verse, o.ordinal, w.identityOrder, e.sourceOrder`,
-    [book, chapter]
-  )
-  const spansByVerse: Record<number, StrongBibleSpan[]> = {}
+type StrongBibleSpanRow = {
+  verse: number
+  ordinal: number
+  startOffset: number
+  length: number
+  identityOrder: number | null
+  kind: number | null
+  code: string | null
+  primaryStepTokenId: number | null
+  sourceOrder: number | null
+  extraStepTokenId: number | null
+}
+
+const groupStrongBibleSpanRows = <Row extends StrongBibleSpanRow, GroupKey extends string | number>(
+  rows: Row[],
+  getGroupKey: (row: Row) => GroupKey
+): Map<GroupKey, StrongBibleSpan[]> => {
+  const spansByGroup = new Map<GroupKey, StrongBibleSpan[]>()
   const spanKeys = new Map<string, StrongBibleSpan>()
   for (const row of rows) {
-    const key = `${row.verse}:${row.ordinal}`
+    const groupKey = getGroupKey(row)
+    const key = `${groupKey}:${row.ordinal}`
     let span = spanKeys.get(key)
     if (!span) {
       span = {
@@ -231,8 +212,9 @@ export const loadStrongBibleChapterSpans = async (
         identities: [],
       }
       spanKeys.set(key, span)
-      spansByVerse[row.verse] ??= []
-      spansByVerse[row.verse].push(span)
+      const groupSpans = spansByGroup.get(groupKey) ?? []
+      groupSpans.push(span)
+      spansByGroup.set(groupKey, groupSpans)
     }
     if (row.extraStepTokenId != null && !span.stepTokenIds?.includes(row.extraStepTokenId)) {
       span.stepTokenIds?.push(row.extraStepTokenId)
@@ -249,7 +231,39 @@ export const loadStrongBibleChapterSpans = async (
       })
     }
   }
-  return spansByVerse
+  return spansByGroup
+}
+
+export const loadStrongBibleChapterSpans = async (
+  versionId: StrongBibleVersionId,
+  book: number,
+  chapter: number
+): Promise<Record<number, StrongBibleSpan[]>> => {
+  const availability = await getStrongBibleSidecarAvailability(versionId)
+  if (availability.status !== 'available') {
+    throw new Error(`STRONG_BIBLE_SIDECAR_${availability.status.toUpperCase()}:${versionId}`)
+  }
+  const database = await openStrongBibleSidecar(versionId)
+  const rows = await database.getAllAsync<StrongBibleSpanRow>(
+    `SELECT v.verse, o.ordinal, o.startOffset, o.length,
+            w.identityOrder, c.kind, c.code,
+            o.stepTokenId AS primaryStepTokenId,
+            e.sourceOrder, e.stepTokenId AS extraStepTokenId
+     FROM Verses v
+     JOIN WordSpans o ON o.verseId=v.id
+     LEFT JOIN WordStrongCodes w
+       ON w.verseId=o.verseId AND w.ordinal=o.ordinal
+     LEFT JOIN StrongCodes c ON c.id=w.codeId
+     LEFT JOIN WordStepTokenExtras e
+       ON e.verseId=o.verseId AND e.targetOrdinal=o.ordinal
+     WHERE v.bookOrder=? AND v.chapter=? AND (o.isAligned=1 OR o.length=0)
+     ORDER BY v.verse, o.ordinal, w.identityOrder, e.sourceOrder`,
+    [book, chapter]
+  )
+  return Object.fromEntries(groupStrongBibleSpanRows(rows, row => row.verse)) as Record<
+    number,
+    StrongBibleSpan[]
+  >
 }
 
 export const loadReverseInterlinearChapterSpans = async (
@@ -343,6 +357,53 @@ export interface StrongBibleOccurrenceLocation {
   Livre: number
   Chapitre: number
   Verset: number
+}
+
+export const loadStrongBibleVersesSpans = async (
+  versionId: StrongBibleVersionId,
+  locations: StrongBibleOccurrenceLocation[]
+): Promise<Record<string, StrongBibleSpan[]>> => {
+  if (!locations.length) return {}
+  await assertStrongBibleSidecarAvailable(versionId)
+  const database = await openStrongBibleSidecar(versionId)
+  const uniqueLocations = [
+    ...new Map(
+      locations.map(location => [
+        `${location.Livre}-${location.Chapitre}-${location.Verset}`,
+        location,
+      ])
+    ).values(),
+  ]
+  const locationFilters = uniqueLocations
+    .map(() => '(v.bookOrder=? AND v.chapter=? AND v.verse=?)')
+    .join(' OR ')
+  const parameters = uniqueLocations.flatMap(location => [
+    location.Livre,
+    location.Chapitre,
+    location.Verset,
+  ])
+  const rows = await database.getAllAsync<
+    StrongBibleSpanRow & { bookOrder: number; chapter: number }
+  >(
+    `SELECT v.bookOrder, v.chapter, v.verse,
+            o.ordinal, o.startOffset, o.length,
+            w.identityOrder, c.kind, c.code,
+            o.stepTokenId AS primaryStepTokenId,
+            e.sourceOrder, e.stepTokenId AS extraStepTokenId
+       FROM Verses v
+       JOIN WordSpans o ON o.verseId=v.id
+       LEFT JOIN WordStrongCodes w
+         ON w.verseId=o.verseId AND w.ordinal=o.ordinal
+       LEFT JOIN StrongCodes c ON c.id=w.codeId
+       LEFT JOIN WordStepTokenExtras e
+         ON e.verseId=o.verseId AND e.targetOrdinal=o.ordinal
+      WHERE (${locationFilters}) AND (o.isAligned=1 OR o.length=0)
+      ORDER BY v.bookOrder, v.chapter, v.verse, o.ordinal, w.identityOrder, e.sourceOrder`,
+    parameters
+  )
+  return Object.fromEntries(
+    groupStrongBibleSpanRows(rows, row => `${row.bookOrder}-${row.chapter}-${row.verse}`)
+  )
 }
 
 export interface StrongBibleOccurrencePage {

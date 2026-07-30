@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
-import React, { useEffect, useRef, useState } from 'react'
-import { ScrollView, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
+import { LegendList } from '@legendapp/list'
+import React, { useState } from 'react'
+import { ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
@@ -39,8 +40,6 @@ const StrongConcordancePage = ({
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const [selectedLemmaId, setSelectedLemmaId] = useState<number>()
-  const [revealedVerseKeys, setRevealedVerseKeys] = useState<string[]>([])
-  const readyVerseKeys = useRef(new Set<string>())
   const request = {
     currentVersionId,
     defaultVersionId,
@@ -49,20 +48,37 @@ const StrongConcordancePage = ({
     allBooks: true,
   }
   const countsQuery = useQuery({
-    queryKey: ['strong-detail', 'concordance-counts', currentVersionId, entry.selectedIdentity],
+    queryKey: [
+      'strong-detail',
+      'concordance-counts',
+      currentVersionId,
+      defaultVersionId,
+      entry.selectedIdentity,
+    ],
     queryFn: () => resources.strongBible.loadCountsByBook(request),
     networkMode: 'always',
+    staleTime: Infinity,
+    gcTime: Infinity,
   })
   const lemmaQuery = useQuery({
-    queryKey: ['strong-detail', 'lemma-stats', currentVersionId, entry.selectedIdentity],
+    queryKey: [
+      'strong-detail',
+      'lemma-stats',
+      currentVersionId,
+      defaultVersionId,
+      entry.selectedIdentity,
+    ],
     queryFn: () => resources.strongBible.loadLemmaStats(request),
     networkMode: 'always',
+    staleTime: Infinity,
+    gcTime: Infinity,
   })
   const concordanceQuery = useInfiniteQuery({
     queryKey: [
       'strong-detail',
       'concordance-pages',
       currentVersionId,
+      defaultVersionId,
       entry.selectedIdentity,
       selectedLemmaId,
       PAGE_SIZE,
@@ -96,19 +112,13 @@ const StrongConcordancePage = ({
       return lastPage.verses.length < PAGE_SIZE ? undefined : pages.length * PAGE_SIZE
     },
     networkMode: 'always',
-    placeholderData: previousData => previousData,
+    staleTime: Infinity,
+    gcTime: Infinity,
   })
   const verses =
     concordanceQuery.data?.pages.flatMap(page =>
       page.status === 'available' ? page.verses : []
     ) ?? []
-  const verseKeys = verses.map(verse => `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`)
-  const isReplacingResults =
-    concordanceQuery.isPending ||
-    (concordanceQuery.isFetching && !concordanceQuery.isFetchingNextPage)
-  const hasHiddenVerses = verseKeys.some(key => !revealedVerseKeys.includes(key))
-  const showPlaceholders =
-    isReplacingResults || concordanceQuery.isFetchingNextPage || hasHiddenVerses
   const count =
     selectedLemmaId == null
       ? countsQuery.data?.status === 'available'
@@ -125,110 +135,97 @@ const StrongConcordancePage = ({
       ? concordanceQuery.data.pages.find(page => page.status === 'available')!.provenance.versionId
       : currentVersionId
 
-  useEffect(() => {
-    readyVerseKeys.current.clear()
-    setRevealedVerseKeys([])
-  }, [selectedLemmaId])
-
-  const markVerseReady = (verse: Verse) => {
-    const key = `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`
-    readyVerseKeys.current.add(key)
-    if (verseKeys.every(verseKey => readyVerseKeys.current.has(verseKey))) {
-      setRevealedVerseKeys(verseKeys)
-    }
-  }
-
-  const loadMoreIfNeeded = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent
-    const distanceFromBottom = contentSize.height - (contentOffset.y + layoutMeasurement.height)
-    if (
-      distanceFromBottom < Math.max(640, layoutMeasurement.height * 1.5) &&
-      concordanceQuery.hasNextPage &&
-      !concordanceQuery.isFetchingNextPage
-    ) {
-      concordanceQuery.fetchNextPage()
-    }
-  }
+  const placeholders = (
+    <VStack>
+      {Array.from({ length: PLACEHOLDER_COUNT }, (_, index) => (
+        <ConcordancePlaceholder key={index} />
+      ))}
+    </VStack>
+  )
 
   return (
-    <ScrollView
-      style={{ flex: 1 }}
-      onScroll={loadMoreIfNeeded}
-      scrollEventThrottle={32}
+    <LegendList
+      data={verses}
+      estimatedItemSize={104}
+      drawDistance={312}
+      recycleItems
       contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 }}
-    >
-      <HStack alignItems="baseline" gap={8}>
-        <Text bold fontSize={32}>
-          {count}
-        </Text>
-        <Text color="tertiary" fontSize={12}>
-          {t('strongDetail.concordance.usesIn', { version })}
-        </Text>
-      </HStack>
+      keyExtractor={verse => `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`}
+      onEndReached={() => {
+        if (concordanceQuery.hasNextPage && !concordanceQuery.isFetchingNextPage) {
+          concordanceQuery.fetchNextPage()
+        }
+      }}
+      onEndReachedThreshold={0.75}
+      ListHeaderComponent={
+        <>
+          <HStack alignItems="baseline" gap={8}>
+            <Text bold fontSize={32}>
+              {count}
+            </Text>
+            <Text color="tertiary" fontSize={12}>
+              {t('strongDetail.concordance.usesIn', { version })}
+            </Text>
+          </HStack>
 
-      {lemmaQuery.data?.status === 'available' && lemmaQuery.data.lemmas.length > 0 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={{ marginHorizontal: -20, marginTop: 16 }}
-          contentContainerStyle={{ paddingHorizontal: 20, gap: 7 }}
-        >
-          <TouchableBox onPress={() => setSelectedLemmaId(undefined)}>
-            <Box
-              bg={selectedLemmaId == null ? 'primary' : 'lightGrey'}
-              borderRadius={16}
-              px={10}
-              py={7}
+          {lemmaQuery.data?.status === 'available' && lemmaQuery.data.lemmas.length > 0 && (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={{ marginHorizontal: -20, marginTop: 16 }}
+              contentContainerStyle={{ paddingHorizontal: 20, gap: 7 }}
             >
-              <Text color={selectedLemmaId == null ? 'reverse' : 'default'} fontSize={12}>
-                {t('Tous')} ·{' '}
-                {countsQuery.data?.status === 'available'
-                  ? countsQuery.data.counts.reduce(
-                      (total, current) => total + Number(current.versesCountByBook),
-                      0
-                    )
-                  : 0}
-              </Text>
-            </Box>
-          </TouchableBox>
-          {lemmaQuery.data.lemmas.map(lemma => (
-            <TouchableBox key={lemma.id} onPress={() => setSelectedLemmaId(lemma.id)}>
-              <Box
-                bg={selectedLemmaId === lemma.id ? 'primary' : 'lightGrey'}
-                borderRadius={16}
-                px={10}
-                py={7}
-              >
-                <Text color={selectedLemmaId === lemma.id ? 'reverse' : 'default'} fontSize={12}>
-                  {lemma.lemma} · {lemma.occurrenceCount}
-                </Text>
-              </Box>
-            </TouchableBox>
-          ))}
-        </ScrollView>
+              <TouchableBox onPress={() => setSelectedLemmaId(undefined)}>
+                <Box
+                  bg={selectedLemmaId == null ? 'primary' : 'lightGrey'}
+                  borderRadius={16}
+                  px={10}
+                  py={7}
+                >
+                  <Text color={selectedLemmaId == null ? 'reverse' : 'default'} fontSize={12}>
+                    {t('Tous')} ·{' '}
+                    {countsQuery.data?.status === 'available'
+                      ? countsQuery.data.counts.reduce(
+                          (total, current) => total + Number(current.versesCountByBook),
+                          0
+                        )
+                      : 0}
+                  </Text>
+                </Box>
+              </TouchableBox>
+              {lemmaQuery.data.lemmas.map(lemma => (
+                <TouchableBox key={lemma.id} onPress={() => setSelectedLemmaId(lemma.id)}>
+                  <Box
+                    bg={selectedLemmaId === lemma.id ? 'primary' : 'lightGrey'}
+                    borderRadius={16}
+                    px={10}
+                    py={7}
+                  >
+                    <Text
+                      color={selectedLemmaId === lemma.id ? 'reverse' : 'default'}
+                      fontSize={12}
+                    >
+                      {lemma.lemma} · {lemma.occurrenceCount}
+                    </Text>
+                  </Box>
+                </TouchableBox>
+              ))}
+            </ScrollView>
+          )}
+        </>
+      }
+      ListHeaderComponentStyle={{ paddingBottom: 15 }}
+      ListEmptyComponent={concordanceQuery.isPending ? placeholders : null}
+      ListFooterComponent={concordanceQuery.isFetchingNextPage ? placeholders : null}
+      renderItem={({ item }) => (
+        <ConcordanceVerse
+          onOpenVerse={verse => onOpenVerse(verse, version)}
+          t={t}
+          concordanceFor={String(entry.baseCode)}
+          verse={item}
+        />
       )}
-
-      <VStack mt={15}>
-        {verses.map(verse => {
-          const verseKey = `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`
-          return (
-            <ConcordanceVerse
-              key={`${selectedLemmaId ?? 'all'}-${verseKey}`}
-              onOpenVerse={item => onOpenVerse(item, version)}
-              onReady={markVerseReady}
-              hiddenUntilReady={isReplacingResults || !revealedVerseKeys.includes(verseKey)}
-              t={t}
-              concordanceFor={String(entry.baseCode)}
-              verse={verse}
-            />
-          )
-        })}
-        {showPlaceholders &&
-          Array.from({ length: PLACEHOLDER_COUNT }, (_, index) => (
-            <ConcordancePlaceholder key={index} />
-          ))}
-      </VStack>
-    </ScrollView>
+    />
   )
 }
 

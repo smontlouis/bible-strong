@@ -62,6 +62,7 @@ describe('Offline copy identity', () => {
     ).toEqual([
       ['strong-lexicon'],
       ['strong-lexicon-entry'],
+      ['strong-detail'],
       ['home-strong-random'],
       ['sqlite-strong-search'],
       ['relation-strong-targets'],
@@ -72,10 +73,23 @@ describe('Offline copy identity', () => {
   it('declares Bible and publication invalidations for a Bible mutation', () => {
     expect(getOfflineCopyInvalidationKeys({ kind: 'bible', versionId: 'DBY' })).toEqual([
       ['bible'],
+      ['strong-detail'],
       ['bible-version-coverage', 'DBY'],
       ['downloaded-bible-version-ids'],
       ['strong-mode-availability', 'DBY'],
       ['resource-publication', 'bible:DBY'],
+    ])
+  })
+
+  it('invalidates Strong detail data when a Strong Bible index changes', () => {
+    expect(
+      getOfflineCopyInvalidationKeys({ kind: 'strong-bible-index', versionId: 'DBY' })
+    ).toEqual([
+      ['bible'],
+      ['strong-detail'],
+      ['strong-index-availability', 'DBY'],
+      ['strong-mode-availability', 'DBY'],
+      ['resource-publication', 'bible-strong:DBY'],
     ])
   })
 

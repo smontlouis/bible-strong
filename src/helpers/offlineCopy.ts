@@ -106,6 +106,7 @@ export const getOfflineCopyInvalidationKeys = (identity: OfflineCopyIdentity): Q
       return [
         ['strong-lexicon'],
         ['strong-lexicon-entry'],
+        ['strong-detail'],
         ['home-strong-random'],
         ['sqlite-strong-search'],
         ['relation-strong-targets'],
@@ -114,6 +115,7 @@ export const getOfflineCopyInvalidationKeys = (identity: OfflineCopyIdentity): Q
     case 'bible':
       return [
         ['bible'],
+        ['strong-detail'],
         ['bible-version-coverage', identity.versionId],
         ['downloaded-bible-version-ids'],
         ['strong-mode-availability', identity.versionId],
@@ -122,6 +124,7 @@ export const getOfflineCopyInvalidationKeys = (identity: OfflineCopyIdentity): Q
     case 'strong-bible-index':
       return [
         ['bible'],
+        ['strong-detail'],
         ['strong-index-availability', identity.versionId],
         ['strong-mode-availability', identity.versionId],
         publicationKey,

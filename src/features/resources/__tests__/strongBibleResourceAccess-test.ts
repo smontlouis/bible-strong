@@ -17,6 +17,7 @@ jest.mock('~helpers/strongBibleSidecar', () => ({
   loadStrongBibleOccurrenceLocations: jest.fn(),
   loadStrongBibleVerseCountsByBook: jest.fn(),
   loadStrongBibleVerseSpans: jest.fn(),
+  loadStrongBibleVersesSpans: jest.fn(),
 }))
 
 const available = (versionId: 'LSG' | 'DBY' | 'DBR') => ({
@@ -31,7 +32,7 @@ const createDependencies = (): jest.Mocked<StrongBibleResourceDependencies> => (
   getAvailability: jest.fn(),
   getVerseText: jest.fn(),
   getVerseSpans: jest.fn(),
-  getChapterSpans: jest.fn(),
+  getVersesSpans: jest.fn(),
   getCountsByBook: jest.fn(),
   getResolvedIdentity: jest.fn(),
   getFoundVerseLocations: jest.fn(),
@@ -350,7 +351,7 @@ describe('strongBibleResourceAccess', () => {
     expect(dependencies.getVerseText).not.toHaveBeenCalled()
   })
 
-  it('paginates in SQLite and loads sidecar spans once per chapter', async () => {
+  it('paginates in SQLite and loads all requested sidecar spans in one batch', async () => {
     const dependencies = createDependencies()
     dependencies.getAvailability.mockResolvedValue(available('DBY'))
     dependencies.getFoundVerseLocations.mockResolvedValue([
@@ -368,9 +369,11 @@ describe('strongBibleResourceAccess', () => {
       '1-1-2': 'La terre',
       '1-2-1': 'Ainsi furent achevés',
     })
-    dependencies.getChapterSpans
-      .mockResolvedValueOnce({ 1: [], 2: [] })
-      .mockResolvedValueOnce({ 1: [] })
+    dependencies.getVersesSpans.mockResolvedValue({
+      '1-1-1': [],
+      '1-1-2': [],
+      '1-2-1': [],
+    })
     const access = createStrongBibleResourceAccess(dependencies)
 
     const result = await access.loadFoundVersesByBook({
@@ -392,9 +395,12 @@ describe('strongBibleResourceAccess', () => {
       limit: 15,
       offset: 30,
     })
-    expect(dependencies.getChapterSpans).toHaveBeenCalledTimes(2)
-    expect(dependencies.getChapterSpans).toHaveBeenNthCalledWith(1, 'DBY', 1, 1)
-    expect(dependencies.getChapterSpans).toHaveBeenNthCalledWith(2, 'DBY', 1, 2)
+    expect(dependencies.getVersesSpans).toHaveBeenCalledTimes(1)
+    expect(dependencies.getVersesSpans).toHaveBeenCalledWith('DBY', [
+      { Livre: 1, Chapitre: 1, Verset: 1 },
+      { Livre: 1, Chapitre: 1, Verset: 2 },
+      { Livre: 1, Chapitre: 2, Verset: 1 },
+    ])
     expect(dependencies.getVerseSpans).not.toHaveBeenCalled()
   })
 
@@ -418,7 +424,7 @@ describe('strongBibleResourceAccess', () => {
     dependencies.getMultipleVerses.mockResolvedValue({
       '18-3-2': 'Il prit la parole et dit :',
     })
-    dependencies.getChapterSpans.mockResolvedValue({ 2: spans })
+    dependencies.getVersesSpans.mockResolvedValue({ '18-3-2': spans })
     const access = createStrongBibleResourceAccess(dependencies)
 
     const result = await access.loadFoundVersesByBook({
@@ -452,7 +458,10 @@ describe('strongBibleResourceAccess', () => {
       '1-1-1': 'Au commencement',
       '40-1-1': 'Généalogie',
     })
-    dependencies.getChapterSpans.mockResolvedValue({ 1: [] })
+    dependencies.getVersesSpans.mockResolvedValue({
+      '1-1-1': [],
+      '40-1-1': [],
+    })
     const access = createStrongBibleResourceAccess(dependencies)
 
     await access.loadFoundVersesByBook({
@@ -471,8 +480,10 @@ describe('strongBibleResourceAccess', () => {
       allBooks: true,
       lexemeId: 2671,
     })
-    expect(dependencies.getChapterSpans).toHaveBeenCalledWith('DBY', 1, 1)
-    expect(dependencies.getChapterSpans).toHaveBeenCalledWith('DBY', 40, 1)
+    expect(dependencies.getVersesSpans).toHaveBeenCalledWith('DBY', [
+      { Livre: 1, Chapitre: 1, Verset: 1 },
+      { Livre: 40, Chapitre: 1, Verset: 1 },
+    ])
   })
 
   it('returns grouped French lemma statistics for the resolved version', async () => {

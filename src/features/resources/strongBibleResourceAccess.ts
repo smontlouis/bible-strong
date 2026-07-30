@@ -4,11 +4,11 @@ import type { StrongBibleSpan } from '~helpers/canonicalStrongVerse'
 import {
   getStrongBibleSidecarAvailability,
   getResolvedStrongBibleConcordanceIdentity,
-  loadStrongBibleChapterSpans,
   loadStrongBibleLemmaStats,
   loadStrongBibleOccurrenceLocations,
   loadStrongBibleVerseCountsByBook,
   loadStrongBibleVerseSpans,
+  loadStrongBibleVersesSpans,
   type StrongBibleOccurrenceLocation,
   type StrongBibleOccurrencePage,
   type StrongBibleLemmaStat,
@@ -117,11 +117,10 @@ export interface StrongBibleResourceDependencies {
     chapter: number,
     verse: number
   ) => Promise<StrongBibleSpan[]>
-  getChapterSpans: (
+  getVersesSpans: (
     versionId: StrongBibleVersionId,
-    book: number,
-    chapter: number
-  ) => Promise<Record<number, StrongBibleSpan[]>>
+    locations: StrongBibleOccurrenceLocation[]
+  ) => Promise<Record<string, StrongBibleSpan[]>>
   getCountsByBook: (
     versionId: StrongBibleVersionId,
     book: number,
@@ -159,7 +158,7 @@ const defaultDependencies: StrongBibleResourceDependencies = {
   getAvailability: getStrongBibleSidecarAvailability,
   getVerseText,
   getVerseSpans: loadStrongBibleVerseSpans,
-  getChapterSpans: loadStrongBibleChapterSpans,
+  getVersesSpans: loadStrongBibleVersesSpans,
   getCountsByBook: loadStrongBibleVerseCountsByBook,
   getResolvedIdentity: getResolvedStrongBibleConcordanceIdentity,
   getFoundVerseLocations: loadStrongBibleOccurrenceLocations,
@@ -278,37 +277,19 @@ export const createStrongBibleResourceAccess = (
       const keys = locations.map(
         location => `${location.Livre}-${location.Chapitre}-${location.Verset}`
       )
-      const texts = await dependencies.getMultipleVerses(versionId, keys)
-      const chapters = [
-        ...new Map(
-          locations.map(location => [
-            `${location.Livre}-${location.Chapitre}`,
-            { book: location.Livre, chapter: location.Chapitre },
-          ])
-        ).values(),
-      ]
-      const chapterSpans = new Map<string, Record<number, StrongBibleSpan[]>>(
-        await Promise.all(
-          chapters.map(
-            async ({ book, chapter }) =>
-              [
-                `${book}-${chapter}`,
-                await dependencies.getChapterSpans(versionId, book, chapter),
-              ] as const
-          )
-        )
-      )
+      const [texts, spansByVerse] = await Promise.all([
+        dependencies.getMultipleVerses(versionId, keys),
+        dependencies.getVersesSpans(versionId, locations),
+      ])
       const verses: Verse[] = []
       for (const location of locations) {
         const key = `${location.Livre}-${location.Chapitre}-${location.Verset}`
         const text = texts[key]
         if (text == null) continue
-        const spans =
-          chapterSpans.get(`${location.Livre}-${location.Chapitre}`)?.[location.Verset] ?? []
         verses.push({
           ...location,
           Texte: text,
-          StrongSpans: spans,
+          StrongSpans: spansByVerse[key] ?? [],
         })
       }
       return {
