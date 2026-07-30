@@ -9,6 +9,7 @@ import {
 export type StrongSelection = SelectedCode & {
   version: string
   identities: StrongIdentity[]
+  occurrenceId?: string
   morphologies?: StrongSelectionMorphology[]
   word?: string
   chapter?: number
@@ -26,6 +27,7 @@ export type StrongSelectionMorphologySource = {
 }
 
 export type StrongSelectionContext = {
+  occurrenceId?: string
   word?: string
   chapter?: string | number
   verse?: string | number
@@ -144,6 +146,7 @@ export const createStrongSelection = (
 
   const chapter = Number(context.chapter)
   const verse = Number(context.verse)
+  const occurrenceId = context.occurrenceId?.trim()
   const word = context.word?.trim()
   const morphologies: StrongSelectionMorphology[] = []
   for (const morphology of context.morphologies ?? []) {
@@ -172,6 +175,7 @@ export const createStrongSelection = (
     reference,
     identities: normalizedIdentities,
     version,
+    ...(occurrenceId ? { occurrenceId } : {}),
     ...(morphologies.length ? { morphologies } : {}),
     ...(word ? { word } : {}),
     ...(Number.isInteger(chapter) && chapter > 0 ? { chapter } : {}),
@@ -197,6 +201,8 @@ export const getStrongSelectionPayload = (payload: unknown): StrongSelection | u
   }
 
   return createStrongSelection(candidate.identities, candidate.book, candidate.version, {
+    occurrenceId:
+      typeof candidate.occurrenceId === 'string' ? candidate.occurrenceId : undefined,
     word: typeof candidate.word === 'string' ? candidate.word : undefined,
     chapter:
       typeof candidate.chapter === 'number' || typeof candidate.chapter === 'string'

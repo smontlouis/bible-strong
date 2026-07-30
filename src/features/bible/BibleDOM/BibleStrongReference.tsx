@@ -68,6 +68,7 @@ export const BibleStrongRef = ({
   version,
   identities,
   morphologies,
+  occurrenceId,
   word,
   chapter,
   verse,
@@ -80,6 +81,7 @@ export const BibleStrongRef = ({
   version: string
   identities: StrongIdentity[]
   morphologies?: StrongSelectionMorphology[]
+  occurrenceId: string
   word?: string
   chapter?: string | number
   verse?: string | number
@@ -104,6 +106,7 @@ export const BibleStrongRef = ({
   ) => {
     event.stopPropagation()
     dispatchStrongSelection(dispatch, identities, book, version, {
+      occurrenceId,
       word,
       chapter,
       verse,

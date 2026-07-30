@@ -38,9 +38,11 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode, isPar
   const openStrongSelection = (
     identities: StrongIdentity[],
     word: string,
-    morphologies: StrongSelectionMorphology[]
+    morphologies: StrongSelectionMorphology[],
+    occurrenceId: string
   ) => {
     dispatchStrongSelection(dispatch, identities, verse.Livre, version, {
+      occurrenceId,
       word,
       chapter: verse.Chapitre,
       verse: verse.Verset,
@@ -80,6 +82,7 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode, isPar
           selectionIdentities,
           segments
         )
+        const occurrenceId = `${verse.Livre}:${verse.Chapitre}:${verse.Verset}:${version}:reverse:${token.ordinal}:${token.startOffset}`
 
         return (
           <span key={`${token.ordinal}:${token.startOffset}`}>
@@ -90,7 +93,12 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode, isPar
               data-ignore-verse-touch
               disabled={!preferredIdentity}
               onClick={() =>
-                openStrongSelection(selectionIdentities, selectionWord, selectionMorphologies)
+                openStrongSelection(
+                  selectionIdentities,
+                  selectionWord,
+                  selectionMorphologies,
+                  occurrenceId
+                )
               }
               style={{
                 appearance: 'none',

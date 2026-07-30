@@ -31,7 +31,7 @@ import generateUUID from '~helpers/generateUUID'
 import getVersesContent from '~helpers/getVersesContent'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { localQueryOptions } from '~helpers/queryOptions'
-import { isSameSelectedStrongReference, type StrongSelection } from '~helpers/strongSelection'
+import type { StrongSelection } from '~helpers/strongSelection'
 import useLanguage from '~helpers/useLanguage'
 import { useSheet } from '~helpers/useSheet'
 import { toast } from '~helpers/toast'
@@ -762,7 +762,10 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   }, [])
 
   const setSelectedCode = (selection: StrongSelection) => {
-    if (isSameSelectedStrongReference(selectedCode, selection)) {
+    if (
+      strongSelectionData?.occurrenceId &&
+      strongSelectionData.occurrenceId === selection.occurrenceId
+    ) {
       setSelectedCodeState(null)
       strongSelectionModal.close()
       return

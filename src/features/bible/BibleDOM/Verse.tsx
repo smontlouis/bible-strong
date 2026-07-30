@@ -297,6 +297,7 @@ const renderCanonicalPresentation = (
           version={options.version}
           identities={node.identities}
           morphologies={node.morphologies}
+          occurrenceId={`${options.book}:${options.chapter}:${options.verse}:${options.version}:${key}`}
           word={node.word}
           chapter={options.chapter}
           verse={options.verse}

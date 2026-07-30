@@ -39,9 +39,11 @@ const StructuredInterlinearVerse = ({
   const openStrongSelection = (
     identities: StrongIdentity[],
     word: string,
-    morphologies: StrongSelectionMorphology[]
+    morphologies: StrongSelectionMorphology[],
+    occurrenceId: string
   ) => {
     dispatchStrongSelection(dispatch, identities, verse.Livre, version, {
+      occurrenceId,
       word,
       chapter: verse.Chapitre,
       verse: verse.Verset,
@@ -73,6 +75,7 @@ const StructuredInterlinearVerse = ({
           selectionIdentities,
           token.segments
         )
+        const occurrenceId = `${verse.Livre}:${verse.Chapitre}:${verse.Verset}:${version}:structured:${token.ordinal}:${token.startOffset}`
 
         if (displayMode === 'strong') {
           return (
@@ -84,7 +87,12 @@ const StructuredInterlinearVerse = ({
                 data-ignore-verse-touch
                 disabled={!preferredIdentity}
                 onClick={() =>
-                  openStrongSelection(selectionIdentities, surface, selectionMorphologies)
+                  openStrongSelection(
+                    selectionIdentities,
+                    surface,
+                    selectionMorphologies,
+                    occurrenceId
+                  )
                 }
                 style={{
                   appearance: 'none',
@@ -134,7 +142,12 @@ const StructuredInterlinearVerse = ({
                 data-ignore-verse-touch
                 disabled={!preferredIdentity}
                 onClick={() =>
-                  openStrongSelection(selectionIdentities, surface, selectionMorphologies)
+                  openStrongSelection(
+                    selectionIdentities,
+                    surface,
+                    selectionMorphologies,
+                    occurrenceId
+                  )
                 }
                 style={{
                   appearance: 'none',
@@ -169,7 +182,12 @@ const StructuredInterlinearVerse = ({
               data-ignore-verse-touch
               disabled={!preferredIdentity}
               onClick={() =>
-                openStrongSelection(selectionIdentities, surface, selectionMorphologies)
+                openStrongSelection(
+                  selectionIdentities,
+                  surface,
+                  selectionMorphologies,
+                  occurrenceId
+                )
               }
               style={{
                 appearance: 'none',
