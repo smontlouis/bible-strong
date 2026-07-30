@@ -102,8 +102,8 @@ const StructuredInterlinearVerse = ({
                 <span dir={isHebreu ? 'rtl' : 'ltr'}>
                   {surface || (
                     <UntranslatedStrongMarker
-                      color={selected ? colors.reverse : colors.primary}
-                      backgroundColor={selected ? colors.primary : colors.lightPrimary}
+                      color={selected ? colors.primary : 'transparent'}
+                      backgroundColor={colors.lightPrimary}
                     />
                   )}
                 </span>
@@ -151,8 +151,8 @@ const StructuredInterlinearVerse = ({
               >
                 {transliteration || surface || (
                   <UntranslatedStrongMarker
-                    color={selected ? colors.reverse : colors.primary}
-                    backgroundColor={selected ? colors.primary : colors.lightPrimary}
+                    color={selected ? colors.primary : 'transparent'}
+                    backgroundColor={colors.lightPrimary}
                   />
                 )}
               </button>
@@ -202,8 +202,8 @@ const StructuredInterlinearVerse = ({
               >
                 {surface || (
                   <UntranslatedStrongMarker
-                    color={selected ? colors.reverse : colors.primary}
-                    backgroundColor={selected ? colors.primary : colors.lightPrimary}
+                    color={selected ? colors.primary : 'transparent'}
+                    backgroundColor={colors.lightPrimary}
                   />
                 )}
               </span>

@@ -35,11 +35,11 @@ const StyledCircle = styled.TouchableOpacity<SelectableProps>(({ theme }) => ({
 
 const StyledInsideCircle = styled.View<SelectableProps & { isConcordance?: boolean }>(
   ({ theme, isSelected, isConcordance }) => ({
-    width: isConcordance ? 9 : 15,
-    height: isConcordance ? 9 : 15,
-    borderRadius: isConcordance ? 9 / 2 : 15 / 2,
-    marginHorizontal: isConcordance ? 3 : 0,
-    marginTop: isConcordance ? 15 : 0,
+    width: isConcordance ? 12 : 15,
+    height: isConcordance ? 12 : 15,
+    borderRadius: isConcordance ? 15 : 15 / 2,
+    marginHorizontal: isConcordance ? 4 : 0,
+    marginTop: isConcordance ? 0 : 0,
     backgroundColor: isSelected || isConcordance ? theme.colors.primary : theme.colors.lightPrimary,
     alignItems: 'center',
     justifyContent: 'center',

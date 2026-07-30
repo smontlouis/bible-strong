@@ -79,7 +79,7 @@ const HighlightedVerse = ({
     return (
       <Text style={getScaledStrongTextStyle(20, 30, readingTypography)}>
         {text.slice(0, untranslatedOffset)}
-        <Text color="primary" bold>
+        <Text color="primary" bold style={getScaledStrongTextStyle(26, 30, readingTypography)}>
           {' ●'}
         </Text>
         {text.slice(untranslatedOffset)}

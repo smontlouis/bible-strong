@@ -120,8 +120,8 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode, isPar
               >
                 {surface || (
                   <UntranslatedStrongMarker
-                    color={selected ? colors.reverse : colors.primary}
-                    backgroundColor={selected ? colors.primary : colors.lightPrimary}
+                    color={selected ? colors.primary : 'transparent'}
+                    backgroundColor={colors.lightPrimary}
                   />
                 )}
               </span>

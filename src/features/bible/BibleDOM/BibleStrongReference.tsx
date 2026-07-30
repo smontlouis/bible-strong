@@ -131,8 +131,8 @@ export const BibleStrongRef = ({
     >
       {isUntranslated ? (
         <UntranslatedStrongMarker
-          color={isSelected ? colors.reverse : colors.primary}
-          backgroundColor={isSelected ? colors.primary : colors.lightPrimary}
+          color={isSelected ? colors.primary : 'transparent'}
+          backgroundColor={colors.lightPrimary}
         />
       ) : (
         identities.map(identity => identity.code).join(' · ')
