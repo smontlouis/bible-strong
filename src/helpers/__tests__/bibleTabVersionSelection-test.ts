@@ -25,30 +25,6 @@ describe('selectBibleTabVersion', () => {
     })
   })
 
-  it('maps the legacy LSGS selection to LSG with Strong visible', () => {
-    expect(
-      selectBibleTabVersion(
-        { selectedVersion: 'LSGS' } as Parameters<typeof selectBibleTabVersion>[0],
-        'LSGS'
-      )
-    ).toMatchObject({
-      selectedVersion: 'LSG',
-      strongMode: 'visible',
-    })
-  })
-
-  it('maps the removed legacy KJVS selection to KJV with Strong visible', () => {
-    expect(
-      selectBibleTabVersion(
-        { selectedVersion: 'KJVS' } as Parameters<typeof selectBibleTabVersion>[0],
-        'KJVS'
-      )
-    ).toMatchObject({
-      selectedVersion: 'KJV',
-      strongMode: 'visible',
-    })
-  })
-
   it('preserves an acquisition transaction while another version is selected', () => {
     const data = {
       selectedVersion: 'DBY',
@@ -82,17 +58,6 @@ describe('selectBibleTabVersion', () => {
     ).toMatchObject({
       selectedVersion: 'BHG',
       interlinearMode: 'hidden',
-    })
-  })
-
-  it('keeps legacy interlinear versions addressable for persisted tabs', () => {
-    expect(
-      selectBibleTabVersion(
-        { selectedVersion: 'INT' } as Parameters<typeof selectBibleTabVersion>[0],
-        'INT'
-      )
-    ).toMatchObject({
-      selectedVersion: 'INT',
     })
   })
 })

@@ -41,7 +41,6 @@ const DATABASE_DOMAIN_QUERY_KEYS: Record<Exclude<DatabaseId, 'BIBLES'>, QueryKey
   ],
   TRESOR: [['commentaries']],
   MHY: [['commentaries']],
-  INTERLINEAIRE: [['bible'], ['interlinear']],
   TIMELINE: [['timeline']],
 }
 
@@ -167,14 +166,6 @@ export type BibleDownloadItem = DownloadItemCommon & {
   archiveArtifact?: InterlinearPublicationArtifact
 }
 
-export type LegacyBibleDatabaseDownloadItem = DownloadItemCommon & {
-  type: 'bible-strong'
-  versionId: string
-  destinationPath: string
-  hasRedWords: boolean
-  hasPericope: boolean
-}
-
 export type StrongBibleIndexDownloadItem = DownloadItemCommon & {
   type: 'bible-strong-sidecar'
   versionId: StrongBibleVersionId
@@ -205,7 +196,6 @@ export type DatabaseDownloadItem = DownloadItemCommon & {
 
 export type DownloadItem =
   | BibleDownloadItem
-  | LegacyBibleDatabaseDownloadItem
   | StrongBibleIndexDownloadItem
   | InterlinearIndexDownloadItem
   | StrongLexiconModuleDownloadItem
@@ -216,7 +206,6 @@ export type DownloadItemType = DownloadItem['type']
 export const getDownloadItemIdentity = (item: DownloadItem): OfflineCopyIdentity => {
   switch (item.type) {
     case 'bible':
-    case 'bible-strong':
       return { kind: 'bible', versionId: item.versionId }
     case 'bible-strong-sidecar':
       return { kind: 'strong-bible-index', versionId: item.versionId }

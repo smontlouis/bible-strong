@@ -81,4 +81,27 @@ describe('redux migrations', () => {
 
     warnSpy.mockRestore()
   })
+
+  it('migrates removed Bible identities from persisted user settings and records', () => {
+    const state = createLegacyState() as any
+    state.user.bible.settings = {
+      defaultBibleVersion: 'KJVS',
+      defaultStrongBibleVersionId: 'LSGS',
+      compare: { LSGS: true, INT_EN: true },
+    }
+    state.user.bible.bookmarks = { bookmark: { version: 'KJVS' } }
+    state.user.bible.highlights = { '1-1-1': { version: 'LSGS' } }
+    state.user.bible.wordAnnotations = { annotation: { version: 'INT' } }
+
+    const migrated = migrations[36](state)
+
+    expect(migrated.user.bible.settings).toMatchObject({
+      defaultBibleVersion: 'KJV',
+      defaultStrongBibleVersionId: 'LSG',
+      compare: { LSG: true, BHG: true },
+    })
+    expect(migrated.user.bible.bookmarks.bookmark.version).toBe('KJV')
+    expect(migrated.user.bible.highlights['1-1-1'].version).toBe('LSG')
+    expect(migrated.user.bible.wordAnnotations.annotation.version).toBe('BHG')
+  })
 })

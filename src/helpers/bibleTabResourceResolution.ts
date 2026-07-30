@@ -38,12 +38,6 @@ const defaultDependencies: BibleTabResourceResolutionDependencies = {
   getBibleCoverage: getBibleVersionCoverage,
 }
 
-const getLegacyInterlinearLocale = (versionId: string): ResourceLanguage | undefined => {
-  if (versionId === 'INT') return 'fr'
-  if (versionId === 'INT_EN') return 'en'
-  return undefined
-}
-
 export const resolveBibleTabResources = async (
   data: BibleTabResourceState,
   applicationLanguage: ResourceLanguage,
@@ -69,31 +63,7 @@ export const resolveBibleTabResources = async (
           strongMode: resolvedStrong.strongMode,
         }
 
-  const legacyLocale = getLegacyInterlinearLocale(nextData.selectedVersion)
-  if (legacyLocale) {
-    if (await isBibleAvailable('BHG')) {
-      const hasLocalizedIndex = await dependencies.isInterlinearIndexAvailable(legacyLocale)
-      nextData = {
-        ...selectResourceVersion(nextData, 'BHG'),
-        interlinearMode: hasLocalizedIndex ? 'interlinear' : 'hidden',
-        interlinearLocale: legacyLocale,
-      }
-    } else {
-      nextData = await selectInstalledFallback(
-        nextData,
-        applicationLanguage,
-        isBibleAvailable,
-        dependencies.getBibleCoverage
-      )
-      if (getLegacyInterlinearLocale(nextData.selectedVersion)) {
-        nextData = {
-          ...selectResourceVersion(nextData, 'BHG'),
-          interlinearMode: 'hidden',
-          interlinearLocale: legacyLocale,
-        }
-      }
-    }
-  } else if (!(await isBibleAvailable(nextData.selectedVersion))) {
+  if (!(await isBibleAvailable(nextData.selectedVersion))) {
     nextData = await selectInstalledFallback(
       nextData,
       applicationLanguage,
@@ -122,16 +92,7 @@ export const resolveBibleTabResources = async (
   const resolvedParallelVersions: VersionCode[] = []
   for (const parallelVersion of nextData.parallelVersions) {
     const resolvedVersion = resolveStrongBibleVersion(parallelVersion).versionId as VersionCode
-    const parallelLegacyLocale = getLegacyInterlinearLocale(resolvedVersion)
-    let availableVersion: VersionCode | undefined
-
-    if (parallelLegacyLocale) {
-      if (await isBibleAvailable('BHG')) {
-        availableVersion = 'BHG'
-      }
-    } else if (await isBibleAvailable(resolvedVersion)) {
-      availableVersion = resolvedVersion
-    }
+    const availableVersion = (await isBibleAvailable(resolvedVersion)) ? resolvedVersion : undefined
 
     if (
       availableVersion &&

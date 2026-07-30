@@ -35,7 +35,6 @@ const getLanguageAwareSQLTransaction = (dbId: DatabaseId) => {
         'DICTIONNAIRE',
         'NAVE',
         'MHY',
-        'INTERLINEAIRE',
         'TIMELINE',
       ]
       if (selectableDbIds.includes(dbId as keyof ResourcesLanguageState)) {
@@ -99,14 +98,12 @@ export const SQLDictionnaireTransaction = getLanguageAwareSQLTransaction('DICTIO
 export const SQLNaveTransaction = getLanguageAwareSQLTransaction('NAVE')
 export const SQLTresorTransaction = getLanguageAwareSQLTransaction('TRESOR')
 export const SQLMHYTransaction = getLanguageAwareSQLTransaction('MHY')
-export const SQLInterlineaireTransaction = getLanguageAwareSQLTransaction('INTERLINEAIRE')
 
 // Aliases for explicit naming (same as above)
 export const SQLDictionnaireTransactionLang = SQLDictionnaireTransaction
 export const SQLNaveTransactionLang = SQLNaveTransaction
 export const SQLTresorTransactionLang = SQLTresorTransaction
 export const SQLMHYTransactionLang = SQLMHYTransaction
-export const SQLInterlineaireTransactionLang = SQLInterlineaireTransaction
 
 // Export factory functions for custom usage
 export { getSQLTransaction, getLanguageAwareSQLTransaction, getSQLTransactionForLang }

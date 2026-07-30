@@ -1,9 +1,8 @@
 import type { DownloadItem } from '~state/downloadQueue'
 import type { DatabaseId, ResourceLanguage } from '~helpers/databaseTypes'
-import { versions, isStrongVersion, type Version } from '~helpers/bibleVersions'
+import { versions, type Version } from '~helpers/bibleVersions'
 import { biblesRef, getDatabaseUrl } from '~helpers/firebase'
 import { databases, getDbPath } from '~helpers/databases'
-import { requireBiblePath } from '~helpers/requireBiblePath'
 import {
   getStrongBiblePublication,
   isStrongCapableBibleVersion,
@@ -35,7 +34,6 @@ export function createBibleDownloadItem(versionId: string): DownloadItem {
   const version = versions[versionId as keyof typeof versions] as Version | undefined
   if (!version) throw new Error(`Unknown Bible version: ${versionId}`)
 
-  const isStrong = isStrongVersion(versionId)
   const publication = isStrongCapableBibleVersion(versionId)
     ? getStrongBiblePublication(versionId)
     : undefined
@@ -47,21 +45,12 @@ export function createBibleDownloadItem(versionId: string): DownloadItem {
     ? interlinearPublication.canonical.url
     : publication
       ? publication.canonical.url
-      : isStrong
-        ? versionId === 'INT'
-          ? getDatabaseUrl('INTERLINEAIRE', 'fr')
-          : versionId === 'INT_EN'
-            ? getDatabaseUrl('INTERLINEAIRE', 'en')
-            : biblesRef[versionId]
-        : biblesRef[versionId]
+      : biblesRef[versionId]
 
-  const destinationPath = isStrong ? requireBiblePath(versionId) : undefined
-
-  // Strong/Interlinear are ~20MB SQLite files, regular bibles are ~2.5MB JSON
   const estimatedSize =
     interlinearPublication?.canonical.archiveBytes ??
     publication?.canonical.archiveBytes ??
-    (isStrong ? 20_000_000 : BIBLE_ESTIMATED_SIZE)
+    BIBLE_ESTIMATED_SIZE
 
   const common = {
     id: createOfflineCopyId({ kind: 'bible', versionId }),
@@ -73,14 +62,6 @@ export function createBibleDownloadItem(versionId: string): DownloadItem {
     hasPericope: usesCanonicalBibleExtras(versionId) ? false : Boolean(version.hasPericope),
     addedAt: Date.now(),
     retryCount: 0,
-  }
-
-  if (isStrong) {
-    return {
-      ...common,
-      type: 'bible-strong',
-      destinationPath: destinationPath!,
-    }
   }
 
   return {

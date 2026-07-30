@@ -15,6 +15,7 @@ import {
   rebuildRelationPairs,
   type RelationsObj,
 } from '~features/studyRelations/domain'
+import { migrateLegacyBibleVersionId } from '~helpers/legacyBibleVersionMigration'
 
 type LegacyRootState = RootState & {
   bible?: Record<string, unknown>
@@ -61,6 +62,16 @@ const migrateRelations = (state: LegacyRootState): RootState => {
     },
   } as RootState
 }
+
+const migrateVersionedRecords = <T extends Record<string, unknown>>(records: T): T =>
+  Object.fromEntries(
+    Object.entries(records).map(([key, value]) => [
+      key,
+      value && typeof value === 'object' && 'version' in value && typeof value.version === 'string'
+        ? { ...value, version: migrateLegacyBibleVersionId(value.version) }
+        : value,
+    ])
+  ) as T
 
 export default {
   // Added 'press' in 'settings'
@@ -552,6 +563,40 @@ export default {
           relations,
           relationIndex: rebuildRelationIndexes(relations),
           relationPairs: rebuildRelationPairs(relations),
+        },
+      },
+    }
+  },
+  36: (state: RootState) => {
+    const settings = state.user.bible.settings
+    const compare = Object.fromEntries(
+      Object.entries(settings.compare).map(([versionId, enabled]) => [
+        migrateLegacyBibleVersionId(versionId),
+        enabled,
+      ])
+    )
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        bible: {
+          ...state.user.bible,
+          bookmarks: migrateVersionedRecords(state.user.bible.bookmarks),
+          highlights: migrateVersionedRecords(state.user.bible.highlights),
+          notes: migrateVersionedRecords(state.user.bible.notes),
+          wordAnnotations: migrateVersionedRecords(state.user.bible.wordAnnotations),
+          settings: {
+            ...settings,
+            defaultBibleVersion: settings.defaultBibleVersion
+              ? migrateLegacyBibleVersionId(settings.defaultBibleVersion)
+              : settings.defaultBibleVersion,
+            defaultStrongBibleVersionId: settings.defaultStrongBibleVersionId
+              ? (migrateLegacyBibleVersionId(
+                  settings.defaultStrongBibleVersionId
+                ) as typeof settings.defaultStrongBibleVersionId)
+              : settings.defaultStrongBibleVersionId,
+            compare,
+          },
         },
       },
     }

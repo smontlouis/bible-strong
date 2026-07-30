@@ -642,7 +642,6 @@ export const getStrongBibleAttributionKey = (
 
 const ENGLISH_BIBLE_VERSION_IDS = new Set([
   ...ENGLISH_STRONG_BIBLE_PRIORITY,
-  'INT_EN',
   'NKJV',
   'ESV',
   'NIV',
@@ -671,13 +670,6 @@ export const resolveStrongBibleVersion = (
   versionId: string,
   strongMode: StrongMode = 'hidden'
 ): { versionId: string; strongMode: StrongMode } => {
-  if (versionId === 'LSGS') {
-    return { versionId: 'LSG', strongMode: 'visible' }
-  }
-  if (versionId === 'KJVS') {
-    return { versionId: 'KJV', strongMode: 'visible' }
-  }
-
   return {
     versionId,
     strongMode: isStrongCapableBibleVersion(versionId) ? strongMode : 'hidden',

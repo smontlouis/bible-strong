@@ -11,7 +11,6 @@ import type {
   BibleDownloadItem,
   DatabaseDownloadItem,
   InterlinearIndexDownloadItem,
-  LegacyBibleDatabaseDownloadItem,
   StrongBibleIndexDownloadItem,
   StrongLexiconModuleDownloadItem,
 } from './offlineCopy'
@@ -33,7 +32,7 @@ export interface ResourceInstallationCallbacks {
 }
 
 export const synchronizeOptionalBibleResources = async (
-  item: BibleDownloadItem | LegacyBibleDatabaseDownloadItem,
+  item: BibleDownloadItem,
   versionId: string
 ) => {
   const downloads: (() => Promise<boolean>)[] = []
@@ -66,7 +65,7 @@ export const synchronizeOptionalBibleResources = async (
 }
 
 const downloadFile = async (
-  item: LegacyBibleDatabaseDownloadItem | DatabaseDownloadItem,
+  item: DatabaseDownloadItem,
   callbacks: ResourceInstallationCallbacks,
   destinationPath = item.destinationPath!
 ) => {
@@ -104,53 +103,6 @@ const installBible = async (item: BibleDownloadItem, callbacks: ResourceInstalla
   })
 
   callbacks.onResumable(null)
-  return result
-}
-
-const installBibleStrong = async (
-  item: LegacyBibleDatabaseDownloadItem,
-  callbacks: ResourceInstallationCallbacks
-) => {
-  const versionId = item.versionId
-  const destinationPath = item.destinationPath
-  const temporaryPath = `${destinationPath}.download`
-  await FileSystem.deleteAsync(temporaryPath, { idempotent: true })
-  const result = await downloadFile(item, callbacks, temporaryPath)
-  await callbacks.installationLifecycle.prepare(result)
-  const fileName = temporaryPath.split('/').pop()!
-  const directory = temporaryPath.slice(0, -(fileName.length + 1))
-  const candidate = await openSQLiteDatabase(fileName, { useNewConnection: true }, directory)
-  try {
-    const integrity = await candidate.getFirstAsync<{ integrity_check: string }>(
-      'PRAGMA integrity_check'
-    )
-    if (integrity?.integrity_check !== 'ok') {
-      throw new Error(`BIBLE_DATABASE_INTEGRITY_FAILED:${versionId}`)
-    }
-  } finally {
-    await candidate.closeAsync()
-  }
-
-  const database =
-    versionId === 'INT' || versionId === 'INT_EN'
-      ? dbManager.getDB('INTERLINEAIRE', versionId === 'INT' ? 'fr' : 'en')
-      : undefined
-  try {
-    await installAtomicResourceFile({
-      candidatePath: temporaryPath,
-      destinationPath,
-      beforeSwap: () => database?.close(),
-      afterSwap: async () => {
-        await database?.init()
-        await callbacks.installationLifecycle.commit(result)
-      },
-      beforeRollback: () => database?.close(),
-      afterRollback: restored => (restored ? database?.init() : undefined),
-    })
-  } finally {
-    await FileSystem.deleteAsync(temporaryPath, { idempotent: true })
-  }
-
   return result
 }
 
@@ -201,7 +153,6 @@ const installDatabase = async (
           NAVE: ['topics', 'verses'],
           TRESOR: ['commentaires'],
           MHY: ['commentaires'],
-          INTERLINEAIRE: ['interlineaire'],
         }
         if (
           requiredTables[dbId as DatabaseId]?.some(table => !tableNames.has(table.toLowerCase()))
@@ -292,8 +243,6 @@ export const installResourceDatabaseItem = async (
   switch (item.type) {
     case 'bible':
       return installBible(item, callbacks)
-    case 'bible-strong':
-      return installBibleStrong(item, callbacks)
     case 'bible-strong-sidecar':
       return installBibleStrongSidecar(item, callbacks)
     case 'bible-interlinear-sidecar':

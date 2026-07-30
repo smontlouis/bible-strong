@@ -10,7 +10,7 @@ import {
 import { getDbFileName, initLanguageDirs } from '~helpers/databases'
 
 // SQLite databases that need migration
-const SQLITE_DBS_TO_MIGRATE: DatabaseId[] = ['DICTIONNAIRE', 'NAVE', 'MHY', 'INTERLINEAIRE']
+const SQLITE_DBS_TO_MIGRATE: DatabaseId[] = ['DICTIONNAIRE', 'NAVE', 'MHY']
 
 // JSON files that need migration
 const JSON_DBS_TO_MIGRATE: DatabaseId[] = ['TIMELINE']

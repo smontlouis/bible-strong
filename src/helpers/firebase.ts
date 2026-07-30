@@ -51,7 +51,6 @@ export const databasesRef = {
   MHY: cdnUrl('databases/commentaires-mhy.sqlite'),
   TRESOR: cdnUrl('databases/commentaires-tresor.sqlite'),
   DICTIONNAIRE: cdnUrl('databases/dictionnaire.sqlite'),
-  INTERLINEAIRE: cdnUrl('databases/interlineaire.sqlite'),
   NAVE: cdnUrl('databases/nave-fr.sqlite'),
   TIMELINE: cdnUrl('databases/bible-timeline-events.json'),
 }
@@ -61,7 +60,6 @@ export const databasesEnRef = {
   MHY: cdnUrl('databases/en/commentaires-mhy.sqlite'),
   TRESOR: cdnUrl('databases/commentaires-tresor.sqlite'), // Shared across languages
   DICTIONNAIRE: cdnUrl('databases/en/dictionnaire.sqlite'),
-  INTERLINEAIRE: cdnUrl('databases/en/interlineaire.sqlite'),
   NAVE: cdnUrl('databases/en/nave.sqlite'),
   TIMELINE: cdnUrl('databases/en/bible-timeline-events.json'),
 }
@@ -71,7 +69,6 @@ interface DatabasesRef {
   MHY: string
   TRESOR: string
   DICTIONNAIRE: string
-  INTERLINEAIRE: string
   NAVE: string
   TIMELINE: string
 }

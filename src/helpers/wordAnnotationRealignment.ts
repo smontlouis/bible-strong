@@ -38,7 +38,7 @@ export const planWordAnnotationRealignment = ({
   const updates: WordAnnotationRealignmentPlan['updates'] = {}
   const unchangedAmbiguousAnnotationIds: string[] = []
   let realignedRangeCount = 0
-  const sourceVersions = new Set<string>(version === 'LSG' ? ['LSG', 'LSGS'] : [version])
+  const sourceVersions = new Set<string>([version])
 
   for (const annotation of Object.values(annotations)) {
     if (!sourceVersions.has(annotation.version)) continue

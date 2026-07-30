@@ -19,7 +19,7 @@ export const buildBibleVersionGroups = (
   appLanguage: string
 ): BibleVersionGroup[] => {
   const visibleVersions = versionList
-    .filter(version => !version.hidden && version.id !== 'KJVS')
+    .filter(version => !version.hidden)
     .sort((left, right) => {
       const leftName = appLanguage === 'en' ? (left.name_en ?? left.name) : left.name
       const rightName = appLanguage === 'en' ? (right.name_en ?? right.name) : right.name

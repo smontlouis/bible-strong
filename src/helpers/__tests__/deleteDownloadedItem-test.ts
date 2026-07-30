@@ -13,7 +13,6 @@ jest.mock('~helpers/bibleVersions', () => ({
     DBR: { id: 'DBR' },
     BHG: { id: 'BHG' },
   },
-  isStrongVersion: () => false,
 }))
 
 jest.mock('../biblesDb', () => ({

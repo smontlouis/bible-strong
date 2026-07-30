@@ -43,7 +43,7 @@ describe('Offline copy identity', () => {
   it.each([
     'bible:',
     'bible-strong:UNKNOWN',
-    'bible-interlinear:INT:fr',
+    'bible-interlinear:OTHER:fr',
     'bible-interlinear:BHG:de',
     'strong-lexicon:unknown',
     'database:BIBLES:fr',

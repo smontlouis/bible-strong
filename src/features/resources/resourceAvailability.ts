@@ -79,23 +79,6 @@ const defaultDependencies: ResourceAvailabilityDependencies = {
 export const getLocalResourceKey = (resource: LocalResourceRef): string =>
   createOfflineCopyId(resource)
 
-const getBibleDatabaseRef = (
-  versionId: string
-): Extract<OfflineCopyIdentity, { kind: 'database' }> | null => {
-  if (versionId === 'INT') {
-    return { kind: 'database', databaseId: 'INTERLINEAIRE', language: 'fr' }
-  }
-
-  if (versionId === 'INT_EN') {
-    return { kind: 'database', databaseId: 'INTERLINEAIRE', language: 'en' }
-  }
-
-  return null
-}
-
-const getCanonicalLegacyBibleVersion = (versionId: string): string =>
-  versionId === 'LSGS' ? 'LSG' : versionId === 'KJVS' ? 'KJV' : versionId
-
 export const getLocalResourceAvailability = async (
   resource: LocalResourceRef,
   dependencies: ResourceAvailabilityDependencies = defaultDependencies
@@ -161,25 +144,9 @@ export const getLocalResourceAvailability = async (
     }
   }
 
-  const databaseRef = getBibleDatabaseRef(resource.versionId)
-
-  if (databaseRef) {
-    const availability = await getLocalResourceAvailability(databaseRef, dependencies)
-    if (availability.status === 'available') {
-      return {
-        status: 'available',
-        resource,
-      }
-    }
-
-    return { ...availability, resource }
-  }
-
   await dependencies.initSQLiteDir()
 
-  const installed = await dependencies.isVersionInstalled(
-    getCanonicalLegacyBibleVersion(resource.versionId)
-  )
+  const installed = await dependencies.isVersionInstalled(resource.versionId)
   if (installed) {
     return {
       status: 'available',

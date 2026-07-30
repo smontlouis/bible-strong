@@ -1,11 +1,9 @@
 import * as FileSystem from 'expo-file-system/legacy'
 
 import { isVersionInstalled, removeBibleVersion } from './biblesDb'
-import { isStrongVersion } from './bibleVersions'
 import { type DatabaseId, type ResourceLanguage } from './databaseTypes'
 import { deletePericopeFile } from './pericopes'
 import { deleteRedWordsFile } from './redWords'
-import { requireBiblePath } from './requireBiblePath'
 import { dbManager } from './sqlite'
 import { isStrongCapableBibleVersion, type StrongBibleVersionId } from './strongBiblePublications'
 import { removeStrongBibleSidecar } from './strongBibleSidecar'
@@ -165,27 +163,15 @@ export const deleteDownloadedItem = async (plan: DownloadedItemDeletionPlan): Pr
     }
 
     const { versionId } = plan
-    if (isStrongVersion(versionId)) {
-      const path = requireBiblePath(versionId)
-      const file = await FileSystem.getInfoAsync(path)
-      if (file.exists) {
-        await FileSystem.deleteAsync(file.uri)
-      }
-      if (versionId === 'INT' || versionId === 'INT_EN') {
-        const lang = versionId === 'INT' ? 'fr' : 'en'
-        await dbManager.getDB('INTERLINEAIRE', lang).delete()
-      }
-    } else {
-      const installed = await isVersionInstalled(versionId)
-      if (installed) {
-        await removeBibleVersion(versionId)
-      }
+    const installed = await isVersionInstalled(versionId)
+    if (installed) {
+      await removeBibleVersion(versionId)
+    }
 
-      const legacyPath = `${FileSystem.documentDirectory}bible-${versionId}.json`
-      const legacyFile = await FileSystem.getInfoAsync(legacyPath)
-      if (legacyFile.exists) {
-        await FileSystem.deleteAsync(legacyFile.uri)
-      }
+    const legacyPath = `${FileSystem.documentDirectory}bible-${versionId}.json`
+    const legacyFile = await FileSystem.getInfoAsync(legacyPath)
+    if (legacyFile.exists) {
+      await FileSystem.deleteAsync(legacyFile.uri)
     }
 
     await Promise.all([deleteRedWordsFile(versionId), deletePericopeFile(versionId)])

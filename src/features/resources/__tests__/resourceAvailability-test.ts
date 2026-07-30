@@ -58,7 +58,6 @@ const createDependencies = ({
   isVersionInstalled: jest.fn(async (versionId: string) => installedVersions.has(versionId)),
   getDbPath: jest.fn((dbId: string, lang: string) => {
     const fileNameByDb: Record<string, string> = {
-      INTERLINEAIRE: 'interlineaire.sqlite',
       NAVE: 'nave.sqlite',
     }
 
@@ -109,38 +108,6 @@ describe('resourceAvailability', () => {
       status: 'missing',
       resource: { kind: 'bible', versionId: 'DBY' },
     })
-  })
-
-  it('maps interlinear Bible versions to the interlinear resource database', async () => {
-    const dependencies = createDependencies({
-      files: new Set(['file:///docs/SQLite/fr/interlineaire.sqlite']),
-    })
-
-    await expect(
-      getLocalResourceAvailability({ kind: 'bible', versionId: 'INT' }, dependencies)
-    ).resolves.toEqual(
-      expect.objectContaining({
-        status: 'available',
-      })
-    )
-
-    expect(dependencies.initLanguageDirs).toHaveBeenCalledWith('fr')
-  })
-
-  it('maps legacy Strong Bible aliases to their canonical installed Bible', async () => {
-    const dependencies = createDependencies({
-      installedVersions: new Set(['KJV']),
-    })
-
-    await expect(
-      getLocalResourceAvailability({ kind: 'bible', versionId: 'KJVS' }, dependencies)
-    ).resolves.toEqual(
-      expect.objectContaining({
-        status: 'available',
-      })
-    )
-
-    expect(dependencies.isVersionInstalled).toHaveBeenCalledWith('KJV')
   })
 
   it('reports missing resources as needing download', async () => {

@@ -6,7 +6,7 @@ import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
 import Link from '~common/Link'
 import Text from '~common/ui/Text'
-import { getIfVersionNeedsDownload, isStrongVersion } from '~helpers/bibleVersions'
+import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import { removeBreakLines } from '~helpers/utils'
 import { getBook } from '~helpers/bibleBookCatalog'
 import type { VerseIds } from '~common/types'
@@ -69,7 +69,7 @@ class CompareVerseItem extends React.Component<CompareVerseItemProps, CompareVer
 
     const [book, chapter, verse] = Object.keys(selectedVerses)[0].split('-').map(Number)
 
-    if ((!content && versionNeedsDownload) || isStrongVersion(versionId)) {
+    if (!content && versionNeedsDownload) {
       return null
     }
 

@@ -28,6 +28,11 @@ import {
 import type { InterlinearMode } from '~helpers/interlinearBiblePublications'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import type { PendingBibleModeAcquisition } from '~helpers/bibleModeAcquisition'
+import {
+  migrateLegacyBibleTabData,
+  migrateLegacyBibleVersionId,
+  migrateLegacyParallelVersions,
+} from '~helpers/legacyBibleVersionMigration'
 
 // ============================================================================
 // SHARED BIBLE DOM (single WebView instance for all Bible tabs)
@@ -405,21 +410,36 @@ const migrateTabsToRemovable = (tabs: TabItem[]): TabItem[] => {
     // First migrate old tab types
     tab = migrateTabTypes(tab)
     if (tab.type === 'bible') {
-      const resolved = resolveStrongBibleVersion(tab.data.selectedVersion, tab.data.strongMode)
+      const migratedData = migrateLegacyBibleTabData(
+        tab.data as BibleTab['data'] & { selectedVersion: string }
+      )
+      const resolved = resolveStrongBibleVersion(
+        migratedData.selectedVersion,
+        migratedData.strongMode
+      )
+      tab = {
+        ...tab,
+        data: {
+          ...migratedData,
+          selectedVersion: resolved.versionId as VersionCode,
+          strongMode: resolved.strongMode,
+        },
+      }
+    } else if (tab.type === 'strong') {
       tab = {
         ...tab,
         data: {
           ...tab.data,
-          selectedVersion: resolved.versionId as VersionCode,
-          strongMode: resolved.strongMode,
-          parallelVersions: [
-            ...new Set(
-              tab.data.parallelVersions.map(
-                parallelVersion =>
-                  resolveStrongBibleVersion(parallelVersion).versionId as VersionCode
-              )
-            ),
-          ],
+          ...(tab.data.strongBibleVersionId
+            ? {
+                strongBibleVersionId: migrateLegacyBibleVersionId(
+                  tab.data.strongBibleVersionId
+                ) as StrongBibleVersionId,
+              }
+            : {}),
+          ...(tab.data.bibleVersion
+            ? { bibleVersion: migrateLegacyBibleVersionId(tab.data.bibleVersion) }
+            : {}),
         },
       }
     }
@@ -508,7 +528,10 @@ export const activeGroupIdAtom = atomWithAsyncStorage<string>('activeGroupIdAtom
 // Persisted atom for global parallel versions preference
 export const savedParallelVersionsAtom = atomWithAsyncStorage<VersionCode[]>(
   'savedParallelVersions',
-  []
+  [],
+  {
+    migrate: versions => migrateLegacyParallelVersions(versions) as VersionCode[],
+  }
 )
 
 // Persisted atom for parallel column width preference (75 or 50 percent)

@@ -2,7 +2,6 @@ import * as FileSystem from 'expo-file-system/legacy'
 import * as SQLite from 'expo-sqlite'
 import {
   databaseDictionnaireName,
-  databaseInterlineaireName,
   databaseMhyName,
   databaseNaveName,
   databaseTresorName,
@@ -257,7 +256,6 @@ export const dbManager = new DBManager()
 export const dictionnaireDB = new DB(databaseDictionnaireName)
 export const mhyDB = new DB(databaseMhyName)
 export const naveDB = new DB(databaseNaveName)
-export const interlineaireDB = new DB(databaseInterlineaireName)
 export const tresorDB = new DB(databaseTresorName)
 
 export const deleteAllDatabases = async () => {
@@ -269,12 +267,6 @@ export const deleteAllDatabases = async () => {
   tresorDB.delete()
   mhyDB.delete()
   naveDB.delete()
-  interlineaireDB.delete()
-
-  const intFile = await FileSystem.getInfoAsync(
-    `${FileSystem.documentDirectory}SQLite/${databaseInterlineaireName}`
-  )
-  if (intFile.exists) FileSystem.deleteAsync(intFile.uri)
 
   await Promise.all(
     Object.values(getDatabases()).map(async db => {
@@ -325,13 +317,9 @@ export const checkDatabasesStorage = async () => {
 
   console.log('[DBManager] Checking databases...')
   await Promise.all(
-    [
-      databaseDictionnaireName,
-      databaseInterlineaireName,
-      databaseTresorName,
-      databaseMhyName,
-      databaseNaveName,
-    ].map(dbName => checkForDatabase(dbName, dir))
+    [databaseDictionnaireName, databaseTresorName, databaseMhyName, databaseNaveName].map(dbName =>
+      checkForDatabase(dbName, dir)
+    )
   )
 }
 

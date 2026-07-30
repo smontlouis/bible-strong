@@ -5,7 +5,7 @@ import { withTheme } from '@emotion/react'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import { toggleCompareVersion } from '~redux/modules/user'
-import { isStrongVersion, versions } from '~helpers/bibleVersions'
+import { versions } from '~helpers/bibleVersions'
 import { useTranslation } from 'react-i18next'
 import Switch from '~common/ui/Switch'
 import type { RootState } from '~redux/modules/reducer'
@@ -36,10 +36,6 @@ type SwitchVersionProps = {
 }
 
 const SwitchVersion = withTheme(({ version, isSelected, onChange }: SwitchVersionProps) => {
-  if (isStrongVersion(version.id)) {
-    return null
-  }
-
   return (
     <Box
       minHeight={76}
@@ -67,7 +63,7 @@ const ToggleCompareVersesScreen = () => {
   const dispatch = useDispatch<AppDispatch>()
   const { t } = useTranslation()
   const versionCatalog = useVersionCatalog(
-    Object.values(versions).filter(version => !version.hidden && !isStrongVersion(version.id)),
+    Object.values(versions).filter(version => !version.hidden),
     { resetSearchOnFocus: true }
   )
 

@@ -208,43 +208,6 @@ describe('BibleContentAccess', () => {
     expect(loadInterlinearChapterTokens).toHaveBeenNthCalledWith(2, 'BHG', 'en', 1, 1)
   })
 
-  it('migrates legacy LSGS reads to canonical LSG with Strong visible', async () => {
-    const dependencies = createDependencies()
-    dependencies.getChapterVerses.mockResolvedValue([
-      { Livre: 1, Chapitre: 1, Verset: 1, Texte: 'canonical text' },
-    ])
-    const loadStrongBibleChapterSpans = jest.fn().mockResolvedValue({
-      1: [
-        {
-          ordinal: 0,
-          startOffset: 0,
-          length: 9,
-          identities: [{ kind: 'strong', code: 'H0001' }],
-        },
-      ],
-    })
-
-    await expect(
-      loadBibleContentChapter(
-        { book: 1, chapter: 1, version: 'LSGS' },
-        { ...dependencies, loadStrongBibleChapterSpans }
-      )
-    ).resolves.toEqual(
-      expect.objectContaining({
-        success: true,
-        data: [
-          expect.objectContaining({
-            Texte: 'canonical text',
-            StrongSpans: expect.any(Array),
-          }),
-        ],
-      })
-    )
-
-    expect(dependencies.getChapterVerses).toHaveBeenCalledWith('LSG', 1, 1)
-    expect(dependencies.strongLexicon.loadPreview).not.toHaveBeenCalled()
-  })
-
   it('enriches a Strong group with aligned disambiguated identities when BHG is installed', async () => {
     const dependencies = createDependencies()
     dependencies.getChapterVerses.mockResolvedValue([

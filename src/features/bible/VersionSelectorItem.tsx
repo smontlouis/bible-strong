@@ -12,7 +12,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Progress from '~common/ui/Progress'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
-import { getIfVersionNeedsDownload, isStrongVersion, Version } from '~helpers/bibleVersions'
+import { getIfVersionNeedsDownload, Version } from '~helpers/bibleVersions'
 import useLanguage from '~helpers/useLanguage'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
@@ -381,7 +381,7 @@ const VersionSelectorItem = ({
   }
 
   React.useEffect(() => {
-    if (shareFn && !isStrongVersion(version.id)) {
+    if (shareFn) {
       shareFn(() => {
         queryClient.setQueryData(
           getVersionDownloadQueryKey(version.id, isOnboardingCompleted, installedVersionsSignal),
@@ -549,11 +549,7 @@ const VersionSelectorItem = ({
       : undefined
     : versionNeedsDownload
 
-  if (
-    typeof selectionNeedsDownload === 'undefined' ||
-    (isParameters && version.id === 'LSGS') ||
-    (isParameters && version.id === 'KJVS')
-  ) {
+  if (typeof selectionNeedsDownload === 'undefined') {
     return null
   }
 
@@ -597,15 +593,11 @@ const VersionSelectorItem = ({
                 interlinearAttribution={t('versionSelector.interlinearAttribution')}
               />
             </Box>
-            {!isLoading && !isQueued && version.id !== 'LSGS' && version.id !== 'KJVS' && (
+            {!isLoading && !isQueued && (
               <ActionButton onPress={() => void startDownload()}>
                 <FeatherIcon name="download-cloud" size={16} />
               </ActionButton>
             )}
-            {!isLoading &&
-              !isQueued &&
-              (version.id === 'LSGS' || version.id === 'KJVS') &&
-              !showSelectionCheckbox && <ActionColumn />}
             {renderSelectionCheckbox(true)}
             {isQueued && (
               <ActionColumn>

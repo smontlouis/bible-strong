@@ -66,13 +66,6 @@ const RESOURCES_CONFIG: ResourceConfig[] = [
     icon: 'nave',
   },
   {
-    id: 'INTERLINEAIRE',
-    labelKey: 'Interlinéaire',
-    descriptionKey: 'resourceLanguage.interlineaireDesc',
-    iconType: 'feather',
-    icon: 'align-left',
-  },
-  {
     id: 'TIMELINE',
     labelKey: 'Chronologie',
     descriptionKey: 'resourceLanguage.timelineDesc',

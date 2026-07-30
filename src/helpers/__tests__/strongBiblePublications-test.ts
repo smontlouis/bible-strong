@@ -30,20 +30,6 @@ describe('Strong Bible publications', () => {
     expect(isStrongCapableBibleVersion(versionId)).toBe(true)
   })
 
-  it('maps the legacy LSGS identity to logical LSG with Strong visible', () => {
-    expect(resolveStrongBibleVersion('LSGS')).toEqual({
-      versionId: 'LSG',
-      strongMode: 'visible',
-    })
-  })
-
-  it('maps the removed legacy KJVS identity to logical KJV with Strong visible', () => {
-    expect(resolveStrongBibleVersion('KJVS')).toEqual({
-      versionId: 'KJV',
-      strongMode: 'visible',
-    })
-  })
-
   it('uses an English fallback order for English Bibles without their own index', () => {
     expect(getStrongBibleFallbackPriority('NIV')[0]).toBe('KJV')
     expect(getStrongBibleFallbackPriority('BFC')[0]).toBe('LSG')
@@ -58,9 +44,7 @@ describe('Strong Bible publications', () => {
 
   it('preserves the current Strong-capable Bible in direct Strong navigation', () => {
     expect(resolveStrongNavigationVersionId('DBY')).toBe('DBY')
-    expect(resolveStrongNavigationVersionId('LSGS')).toBe('LSG')
     expect(resolveStrongNavigationVersionId('KJV')).toBe('KJV')
-    expect(resolveStrongNavigationVersionId('KJVS')).toBe('KJV')
   })
 
   it('declares a revision-compatible pair for every supported Bible', () => {

@@ -167,66 +167,6 @@ describe('word annotation realignment', () => {
     expect(result.unchangedAmbiguousAnnotationIds).toEqual(['annotation-1'])
   })
 
-  it('maps an ambiguous legacy LSGS annotation to LSG without moving it', () => {
-    const existing = annotation(
-      [
-        {
-          verseKey: '1-1-1',
-          startWordIndex: 0,
-          endWordIndex: 0,
-          text: 'Dieu',
-        },
-      ],
-      'old',
-      'LSGS'
-    )
-
-    const result = planWordAnnotationRealignment({
-      annotations: { 'annotation-1': existing },
-      version: 'LSG',
-      textRevision: 'new',
-      candidateVerses: { '1-1-1': 'Au Dieu vivant, Dieu fidèle.' },
-    })
-
-    expect(result.updates['annotation-1']).toEqual({
-      version: 'LSG',
-      ranges: existing.ranges,
-      textRevision: 'old',
-    })
-    expect(result.unchangedAmbiguousAnnotationIds).toEqual(['annotation-1'])
-  })
-
-  it('never uses historical LSG text as context for a legacy LSGS annotation', () => {
-    const existing = annotation(
-      [
-        {
-          verseKey: '1-1-1',
-          startWordIndex: 2,
-          endWordIndex: 2,
-          text: 'Dieu',
-        },
-      ],
-      'old',
-      'LSGS'
-    )
-
-    const result = planWordAnnotationRealignment({
-      annotations: { 'annotation-1': existing },
-      version: 'LSG',
-      textRevision: 'new',
-      candidateVerses: { '1-1-1': 'Au Dieu fidèle puis le Dieu vivant est.' },
-      previousVersesByVersion: {
-        LSG: { '1-1-1': 'Le vrai Dieu vivant est fidèle.' },
-      },
-    })
-
-    expect(result.updates['annotation-1']).toEqual({
-      version: 'LSG',
-      ranges: existing.ranges,
-      textRevision: 'old',
-    })
-  })
-
   it('can use the matching version history to disambiguate repeated text', () => {
     const existing = annotation([
       {

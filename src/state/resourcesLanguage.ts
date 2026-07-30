@@ -10,7 +10,6 @@ export type ResourcesLanguageState = {
   DICTIONNAIRE: ResourceLanguage
   NAVE: ResourceLanguage
   MHY: ResourceLanguage
-  INTERLINEAIRE: ResourceLanguage
   TIMELINE: ResourceLanguage
   COMMENTARIES: ResourceLanguage
 }
@@ -23,7 +22,6 @@ const getDefaultResourcesLanguage = (): ResourcesLanguageState => {
     DICTIONNAIRE: defaultLang,
     NAVE: defaultLang,
     MHY: defaultLang,
-    INTERLINEAIRE: defaultLang,
     TIMELINE: defaultLang,
     COMMENTARIES: defaultLang,
   }
@@ -64,7 +62,6 @@ export const resetAllResourcesLanguage = (lang: ResourceLanguage) => {
     DICTIONNAIRE: lang,
     NAVE: lang,
     MHY: lang,
-    INTERLINEAIRE: lang,
     TIMELINE: lang,
     COMMENTARIES: lang,
   })

@@ -32,6 +32,7 @@ import { getStrongBibleSidecarPath } from '~helpers/strongBibleSidecar'
 import { getInterlinearSidecarPath } from '~helpers/interlinearBibleSidecar'
 import { getStrongLexiconModulePath } from '~helpers/strongLexiconModules'
 import { isAtomicResourceFileRollbackError } from '~helpers/atomicResourceFile'
+import { migrateLegacyDownloadQueue } from '~helpers/legacyBibleVersionMigration'
 
 const PERSIST_KEY = 'downloadQueue'
 const MAX_RETRIES = 2
@@ -43,7 +44,6 @@ const getResourceInstallationRecoveryTarget = (
   switch (item.type) {
     case 'bible':
       return { kind: 'bible-sqlite', versionId: item.versionId }
-    case 'bible-strong':
     case 'database':
       return { kind: 'file', destinationPath: item.destinationPath }
     case 'bible-strong-sidecar':
@@ -190,8 +190,10 @@ class DownloadManager {
     try {
       const raw = storage.getString(PERSIST_KEY)
       if (!raw) return
+      const migratedRaw = migrateLegacyDownloadQueue(raw)
+      if (migratedRaw !== raw) storage.set(PERSIST_KEY, migratedRaw)
 
-      const persisted: DownloadItemState[] = JSON.parse(raw)
+      const persisted: DownloadItemState[] = JSON.parse(migratedRaw)
       const states = new Map(this.jotaiStore.get(downloadItemStatesAtom))
 
       for (const itemState of persisted) {
@@ -314,7 +316,7 @@ class DownloadManager {
         }
         installationCompleted = true
         completeResourceInstallation(installationJournal)
-        if (item.type === 'bible' || item.type === 'bible-strong') {
+        if (item.type === 'bible') {
           await synchronizeOptionalBibleResources(item, item.versionId)
         }
       } catch (error) {
@@ -339,7 +341,6 @@ class DownloadManager {
       // were trying to display may now be available).
       if (
         item.type === 'bible' ||
-        item.type === 'bible-strong' ||
         item.type === 'bible-strong-sidecar' ||
         item.type === 'bible-interlinear-sidecar' ||
         item.type === 'strong-lexicon-module'

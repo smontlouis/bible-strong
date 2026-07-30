@@ -14,7 +14,6 @@ import {
 } from '~helpers/databaseTypes'
 
 export const databaseDictionnaireName = 'dictionnaire.sqlite'
-export const databaseInterlineaireName = 'interlineaire.sqlite'
 export const databaseTresorName = 'commentaires-tresor.sqlite'
 export const databaseMhyName = 'mhy.sqlite'
 export const databaseNaveName = 'nave.sqlite'
@@ -27,7 +26,6 @@ export const databaseFileNames: Record<DatabaseId, string> = {
   NAVE: databaseNaveName,
   TRESOR: databaseTresorName,
   MHY: databaseMhyName,
-  INTERLINEAIRE: databaseInterlineaireName,
   TIMELINE: 'bible-timeline-events.json',
   BIBLES: databaseBiblesName,
 }
@@ -175,13 +173,6 @@ export const databases = (lang?: ResourceLanguage) => {
       desc: i18n.t('Commentaires concis de Matthew Henry. Traduction Dominique Osché.'),
       fileSize: 6574080,
       path: getDbPath('MHY', effectiveLang),
-    },
-    INTERLINEAIRE: {
-      id: 'INTERLINEAIRE' as const,
-      name: i18n.t('Interlinéaire'),
-      desc: i18n.t('Texte interlinéaire hébreu/grec'),
-      fileSize: 0, // Size varies
-      path: getDbPath('INTERLINEAIRE', effectiveLang),
     },
     TIMELINE: {
       id: 'TIMELINE' as const,

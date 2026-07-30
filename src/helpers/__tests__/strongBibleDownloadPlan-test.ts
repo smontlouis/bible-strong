@@ -17,7 +17,6 @@ jest.mock('~helpers/bibleVersions', () => ({
     },
     BHG: { id: 'BHG', name: 'Bible hébraïque et grecque' },
   },
-  isStrongVersion: () => false,
 }))
 
 jest.mock('~helpers/databases', () => ({

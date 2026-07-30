@@ -8,11 +8,7 @@ describe('buildBibleVersionGroups', () => {
       bibleVersion('S21', 'fr'),
       bibleVersion('DBY', 'fr'),
       bibleVersion('DBR', 'fr'),
-      bibleVersion('INT', 'fr'),
-      { ...bibleVersion('LSGS', 'fr'), hidden: true },
       bibleVersion('KJV', 'en'),
-      bibleVersion('INT_EN', 'en'),
-      bibleVersion('KJVS', 'en'),
       bibleVersion('BHS', 'other', 'he'),
       bibleVersion('BHG', 'other', 'he-grc'),
       bibleVersion('SBLGNT', 'other', 'grc'),
@@ -29,13 +25,11 @@ describe('buildBibleVersionGroups', () => {
     ])
 
     const frenchIds = groups[0]!.versions.map(version => version.id)
-    expect(frenchIds).toEqual(['DBR', 'DBY', 'INT', 'LSG', 'S21'])
-    expect(frenchIds).not.toContain('LSGS')
+    expect(frenchIds).toEqual(['DBR', 'DBY', 'LSG', 'S21'])
     expect(frenchIds).not.toContain('HIDDEN')
 
     const englishIds = groups[1]!.versions.map(version => version.id)
-    expect(englishIds).toEqual(['INT_EN', 'KJV'])
-    expect(englishIds).not.toContain('KJVS')
+    expect(englishIds).toEqual(['KJV'])
 
     expect(groups[2]!.versions.map(version => version.id)).toEqual(['BHG', 'BHS', 'SBLGNT'])
   })

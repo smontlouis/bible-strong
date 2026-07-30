@@ -58,6 +58,7 @@ import { setI18n } from '../i18n'
 import { PlaybackService } from '../playbackService'
 import { PortalProvider } from 'react-native-teleport'
 import { downloadManager } from '~helpers/downloadManager'
+import { cleanupLegacyBibleResources } from '~helpers/legacyBibleUpgrade'
 
 // Register background event handler for Notifee
 // This prevents ANR when notifications fire while app is in background
@@ -128,6 +129,11 @@ const useAppLoad = () => {
 
   useEffect(() => {
     ;(async () => {
+      try {
+        await cleanupLegacyBibleResources()
+      } catch (error) {
+        appLogger.error('startup', 'legacy_bible_cleanup.failed', { error })
+      }
       try {
         await downloadManager.restore()
       } catch (error) {

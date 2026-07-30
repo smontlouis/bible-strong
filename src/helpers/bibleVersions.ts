@@ -170,17 +170,6 @@ export const versions: Record<string, Version> = {
     getAudioUrl: getLsgAudioUrl,
     strongDatasetId: 'LSG',
   },
-  LSGS: {
-    id: 'LSGS',
-    name: 'Bible Segond 1910 + Strongs',
-    c: '1910 - Libre de droit',
-    type: 'fr',
-    language: 'fr',
-    readingProfile: 'word-for-word',
-    hasAudio: true,
-    getAudioUrl: getLsgAudioUrl,
-    hidden: true,
-  },
   NBS: {
     id: 'NBS',
     name: 'Nouvelle Bible Segond',
@@ -220,16 +209,6 @@ export const versions: Record<string, Version> = {
     readingProfile: 'word-for-word',
     hasRedWords: true,
     hasPericope: true,
-  },
-  INT: {
-    id: 'INT',
-    name: 'Bible Interlinéaire',
-    name_en: 'Interlinear Bible (FR)',
-    c: '©',
-    type: 'fr',
-    language: 'fr',
-    readingProfile: null,
-    hidden: true,
   },
   BHG: {
     id: 'BHG',
@@ -445,16 +424,6 @@ export const versions: Record<string, Version> = {
     readingProfile: 'word-for-word',
     hasPericope: true,
     strongDatasetId: 'RV1895',
-  },
-  INT_EN: {
-    id: 'INT_EN',
-    name: 'Bible Interlinéaire (EN)',
-    name_en: 'Interlinear Bible',
-    c: '©',
-    type: 'en',
-    language: 'en',
-    readingProfile: null,
-    hidden: true,
   },
   NKJV: {
     id: 'NKJV',
@@ -723,7 +692,6 @@ export const versionsBySections: VersionsBySection[] = Object.values(versions).r
     if (version.hidden) return sectionArray
     switch (version.id) {
       case 'LSG':
-      case 'LSGS':
       case 'NBS':
       case 'NEG79':
       case 'NVS78P':
@@ -743,8 +711,7 @@ export const versionsBySections: VersionsBySection[] = Object.values(versions).r
       case 'NET':
       case 'GW':
       case 'CSB':
-      case 'NLT':
-      case 'INT_EN': {
+      case 'NLT': {
         sectionArray[2].data.push(version)
         return sectionArray
       }
@@ -778,7 +745,6 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(versions
     const versionEn = { ...version, name: version.name_en || version.name }
     switch (version.id) {
       case 'KJV':
-      case 'INT_EN':
       case 'NKJV':
       case 'NIV':
       case 'AMP':
@@ -795,8 +761,6 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(versions
         return sectionArray
       }
       case 'LSG':
-      case 'LSGS':
-      case 'INT':
       case 'NBS':
       case 'NEG79':
       case 'NVS78P':
@@ -848,6 +812,3 @@ export const getVersionsBySections = () => {
 
   return versionsBySections_en
 }
-
-export const isStrongVersion = (version: string) =>
-  version === 'INT' || version === 'INT_EN' || version === 'LSGS'

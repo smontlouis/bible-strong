@@ -18,7 +18,7 @@ import DownloadSectionHeader from './components/DownloadSectionHeader'
 import GlobalDownloadBar from './components/GlobalDownloadBar'
 import BatchActionBar from './components/BatchActionBar'
 
-import { versions, isStrongVersion, type Version } from '~helpers/bibleVersions'
+import { versions, type Version } from '~helpers/bibleVersions'
 import { databases } from '~helpers/databases'
 import {
   LANGUAGE_SPECIFIC_DBS,
@@ -96,7 +96,6 @@ function buildDatabaseItems(lang: ResourceLanguage): UnifiedItem[] {
   return LANGUAGE_SPECIFIC_DBS.flatMap(dbId => {
     if (
       dbId === 'BIBLES' ||
-      dbId === 'INTERLINEAIRE' ||
       dbId === 'TIMELINE' ||
       (lang === 'en' && FRENCH_ONLY_DBS.includes(dbId))
     ) {
@@ -189,11 +188,7 @@ function buildBibleItems(
       name: `${v.id}  ${displayName}`,
       subtitle: v.c,
       estimatedSize:
-        v.id === 'BHG'
-          ? BHG_INTERLINEAR_PUBLICATION.canonical.archiveBytes
-          : isStrongVersion(v.id)
-            ? 20_000_000
-            : 2_500_000,
+        v.id === 'BHG' ? BHG_INTERLINEAR_PUBLICATION.canonical.archiveBytes : 2_500_000,
       lang: (v.type === 'en' ? 'en' : v.type === 'other' ? 'other' : 'fr') as 'fr' | 'en' | 'other',
       searchText: `${v.id} ${v.name} ${v.name_en || ''} ${v.c || ''}`.toLowerCase(),
     }
@@ -342,15 +337,13 @@ function useDownloadedItems() {
 
       // Check all Bible versions
       const bibleEntries = await Promise.all(
-        Object.keys(versions)
-          .filter(vId => vId !== 'LSGS' && vId !== 'KJVS')
-          .map(async versionId => {
-            const available = await isLocalResourceAvailable({
-              kind: 'bible',
-              versionId,
-            })
-            return [versionId, available] as const
+        Object.keys(versions).map(async versionId => {
+          const available = await isLocalResourceAvailable({
+            kind: 'bible',
+            versionId,
           })
+          return [versionId, available] as const
+        })
       )
       for (const [vId, available] of bibleEntries) {
         if (available) set.add(createOfflineCopyId({ kind: 'bible', versionId: vId }))
@@ -403,7 +396,6 @@ function useDownloadedItems() {
         (['fr', 'en'] as ResourceLanguage[]).flatMap(lang =>
           LANGUAGE_SPECIFIC_DBS.flatMap(dbId =>
             dbId !== 'BIBLES' &&
-            dbId !== 'INTERLINEAIRE' &&
             dbId !== 'TIMELINE' &&
             (lang !== 'en' || !FRENCH_ONLY_DBS.includes(dbId))
               ? [

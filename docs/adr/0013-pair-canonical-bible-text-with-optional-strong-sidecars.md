@@ -31,12 +31,12 @@ replacements atomically.
 
 Treat DBR as the application version backed by the DBYR generation dataset. English Strong-capable
 publications use the same pair contract for KJV, NASB 2020, NASB 1995, BSB, ASV, Darby, RLT,
-Revised Webster and RV 1895. Retain LSGS only as a
-legacy persisted identifier that resolves to LSG with Strong visible; do not expose it as a
-downloadable or selectable Bible. Remove KJVS from the product catalog and resolve any legacy KJVS
-tab state to KJV with Strong visible. These alias migrations do not require the optional sidecar:
-when it is missing, the canonical LSG or KJV text remains readable and the Strong control can offer
-the corresponding index for download.
+Revised Webster and RV 1895. Remove the former LSGS, KJVS, INT and INT_EN Bible identities entirely:
+they are not catalog entries, downloadable resources, selectable versions or runtime aliases. A
+one-time persisted-state migration maps them to LSG, KJV or BHG with the corresponding mode and
+locale. The same upgrade deletes their obsolete local files, databases and queued downloads.
+Afterward, LSG, KJV and BHG are the only corresponding canonical Bible identities; optional
+sidecars provide Strong and interlinear placement without duplicating the Bible text.
 
 Reverse-interlinear display is a lexical reading surface rather than an annotation surface. While
 it is active, keep personal Bible data out of the viewer: selected verses, highlights, word

@@ -22,12 +22,10 @@ describe('Bible version catalog metadata', () => {
     const expectedLanguages = {
       fr: [
         'LSG',
-        'LSGS',
         'NBS',
         'NEG79',
         'NVS78P',
         'S21',
-        'INT',
         'KJF',
         'DBY',
         'DBR',
@@ -52,7 +50,6 @@ describe('Bible version catalog metadata', () => {
         'RLT',
         'RWEBSTER',
         'RV1895',
-        'INT_EN',
         'NKJV',
         'ESV',
         'NIV',
@@ -74,7 +71,6 @@ describe('Bible version catalog metadata', () => {
     const expectedProfiles = {
       'word-for-word': [
         'LSG',
-        'LSGS',
         'NBS',
         'NEG79',
         'NVS78P',
@@ -104,10 +100,10 @@ describe('Bible version catalog metadata', () => {
       balanced: ['BSB', 'NIV', 'NET', 'GW', 'CSB'],
       'thought-for-thought': ['BDS', 'BFC', 'FRC97', 'NFC', 'PDV2017', 'EASY', 'NLT'],
       paraphrase: ['POV'],
-      other: ['INT', 'INT_EN', 'BHS', 'LXX', 'VUL', 'SBLGNT', 'TR1624', 'TR1894', 'DEL'],
+      other: ['BHG', 'BHS', 'LXX', 'VUL', 'SBLGNT', 'TR1624', 'TR1894', 'DEL'],
     } as const
 
-    expect(Object.keys(versions)).toHaveLength(50)
+    expect(Object.keys(versions)).toHaveLength(47)
 
     for (const [language, ids] of Object.entries(expectedLanguages)) {
       expect(ids.map(id => versions[id].language)).toEqual(ids.map(() => language))
@@ -175,7 +171,7 @@ describe('Bible version catalog query', () => {
     const byName = getVersionCatalogSections({
       catalog: Object.values(versions),
       grouping: 'alphabetical',
-      query: 'INTERLINEAIRE',
+      query: 'hebraique',
       uiLanguage: 'fr',
       labels,
     })
@@ -187,7 +183,7 @@ describe('Bible version catalog query', () => {
       labels,
     })
 
-    expect(byName[0].data.map(version => version.id)).toEqual(['INT', 'INT_EN'])
+    expect(byName[0].data.map(version => version.id)).toEqual(['BHG'])
     expect(byCode[0].data.map(version => version.id)).toEqual(['NASB1995'])
   })
 
@@ -231,7 +227,7 @@ describe('Bible version catalog query', () => {
 
   it('orders style sections by the approved spectrum and collects null profiles under Other', () => {
     const sections = getVersionCatalogSections({
-      catalog: [versions.POV, versions.INT, versions.NIV, versions.BDS, versions.LSG],
+      catalog: [versions.POV, versions.BHG, versions.NIV, versions.BDS, versions.LSG],
       grouping: 'style',
       query: '',
       uiLanguage: 'fr',
@@ -245,12 +241,12 @@ describe('Bible version catalog query', () => {
       'paraphrase',
       'other',
     ])
-    expect(sections.map(section => section.data[0].id)).toEqual(['LSG', 'NIV', 'BDS', 'POV', 'INT'])
+    expect(sections.map(section => section.data[0].id)).toEqual(['LSG', 'NIV', 'BDS', 'POV', 'BHG'])
   })
 
   it('applies search inside the active grouping and removes empty sections', () => {
     const sections = getVersionCatalogSections({
-      catalog: [versions.LSG, versions.NIV, versions.BDS, versions.POV, versions.INT],
+      catalog: [versions.LSG, versions.NIV, versions.BDS, versions.POV, versions.BHG],
       grouping: 'style',
       query: 'semeur',
       uiLanguage: 'fr',

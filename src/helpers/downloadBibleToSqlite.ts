@@ -242,7 +242,7 @@ const buildRealignmentPlan = async (
   const textRevision = canonicalData?.textRevision ?? publicationTextRevision
   if (!textRevision) return null
   const annotations = store.getState().user.bible.wordAnnotations
-  const sourceVersions = versionId === 'LSG' ? new Set(['LSG', 'LSGS']) : new Set([versionId])
+  const sourceVersions = new Set([versionId])
   const affectedAnnotations = Object.values(annotations).filter(
     annotation =>
       sourceVersions.has(annotation.version) &&

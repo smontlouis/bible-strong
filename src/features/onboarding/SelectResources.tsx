@@ -114,47 +114,45 @@ const DownloadFiles = ({ setStep }: { setStep: React.Dispatch<React.SetStateActi
             <Border marginTop={10} />
           </Box>
         )}
-        renderItem={({ item: version }) =>
-          version.id === 'LSGS' || version.id === 'KJVS' ? null : (
-            <>
-              <ResourceItem
-                name={version.name}
-                isSelected={isSelected({ kind: 'bible', versionId: version.id })}
-                isDisabled={version.id === getDefaultBibleVersion(lang)}
-                onPress={() => {
-                  onPressItem({
-                    kind: 'bible',
-                    versionId: version.id,
-                  })
-                }}
-              />
-              {isStrongCapableBibleVersion(version.id) && (
-                <Box pl={20}>
-                  <ResourceItem
-                    name={t('Mode Strong')}
-                    subTitle={t(
-                      'Ajoute les numéros Strong à cette Bible. Le texte biblique reste utilisable sans ce téléchargement.'
-                    )}
-                    fileSize={
-                      getStrongBiblePublication(version.id as StrongBibleVersionId).strong
-                        .archiveBytes
-                    }
-                    isSelected={isSelected({
+        renderItem={({ item: version }) => (
+          <>
+            <ResourceItem
+              name={version.name}
+              isSelected={isSelected({ kind: 'bible', versionId: version.id })}
+              isDisabled={version.id === getDefaultBibleVersion(lang)}
+              onPress={() => {
+                onPressItem({
+                  kind: 'bible',
+                  versionId: version.id,
+                })
+              }}
+            />
+            {isStrongCapableBibleVersion(version.id) && (
+              <Box pl={20}>
+                <ResourceItem
+                  name={t('Mode Strong')}
+                  subTitle={t(
+                    'Ajoute les numéros Strong à cette Bible. Le texte biblique reste utilisable sans ce téléchargement.'
+                  )}
+                  fileSize={
+                    getStrongBiblePublication(version.id as StrongBibleVersionId).strong
+                      .archiveBytes
+                  }
+                  isSelected={isSelected({
+                    kind: 'bible-strong',
+                    versionId: version.id as StrongBibleVersionId,
+                  })}
+                  onPress={() =>
+                    onPressItem({
                       kind: 'bible-strong',
                       versionId: version.id as StrongBibleVersionId,
-                    })}
-                    onPress={() =>
-                      onPressItem({
-                        kind: 'bible-strong',
-                        versionId: version.id as StrongBibleVersionId,
-                      })
-                    }
-                  />
-                </Box>
-              )}
-            </>
-          )
-        }
+                    })
+                  }
+                />
+              </Box>
+            )}
+          </>
+        )}
       />
       <Box padding={20}>
         <Button onPress={() => setStep(2)}>{t('Continuer')}</Button>

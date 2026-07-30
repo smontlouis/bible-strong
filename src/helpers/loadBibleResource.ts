@@ -1,12 +1,6 @@
 import * as FileSystem from 'expo-file-system/legacy'
 
-/**
- * Maps Strong's interlinear versions to their base Bible version,
- * since LSGS/KJVS share Bible data files with LSG/KJV.
- */
 export function getBaseVersion(versionId: string): string {
-  if (versionId === 'LSGS') return 'LSG'
-  if (versionId === 'KJVS') return 'KJV'
   return versionId
 }
 

@@ -59,96 +59,6 @@ const createDependencies = (
 })
 
 describe('resolveBibleTabResources', () => {
-  it.each([
-    ['LSGS', 'LSG'],
-    ['KJVS', 'KJV'],
-  ] as const)(
-    'migrates %s to its canonical Bible with Strong visible',
-    async (legacy, canonical) => {
-      const result = await resolveBibleTabResources(
-        createData(legacy),
-        'fr',
-        createDependencies([canonical])
-      )
-
-      expect(result).toMatchObject({
-        selectedVersion: canonical,
-        strongMode: 'visible',
-      })
-    }
-  )
-
-  it.each([
-    ['INT', 'fr'],
-    ['INT_EN', 'en'],
-  ] as const)('migrates %s to BHG with its localized interlinear index', async (legacy, locale) => {
-    const result = await resolveBibleTabResources(
-      createData(legacy),
-      'fr',
-      createDependencies(['BHG', legacy], [locale])
-    )
-
-    expect(result).toMatchObject({
-      selectedVersion: 'BHG',
-      interlinearMode: 'interlinear',
-      interlinearLocale: locale,
-    })
-  })
-
-  it('opens BHG in simple mode when its canonical text exists without the legacy locale index', async () => {
-    const result = await resolveBibleTabResources(
-      createData('INT_EN'),
-      'fr',
-      createDependencies(['BHG', 'INT_EN'])
-    )
-
-    expect(result).toMatchObject({
-      selectedVersion: 'BHG',
-      interlinearMode: 'hidden',
-      interlinearLocale: 'en',
-    })
-  })
-
-  it('falls back from an installed legacy interlinear when BHG is not installed', async () => {
-    const result = await resolveBibleTabResources(
-      createData('INT'),
-      'fr',
-      createDependencies(['INT', 'LSG'])
-    )
-
-    expect(result).toMatchObject({
-      selectedVersion: 'LSG',
-      interlinearMode: undefined,
-    })
-  })
-
-  it('points a legacy interlinear tab to BHG download when no fallback Bible is installed', async () => {
-    const result = await resolveBibleTabResources(
-      createData('INT_EN'),
-      'fr',
-      createDependencies(['INT_EN'])
-    )
-
-    expect(result).toMatchObject({
-      selectedVersion: 'BHG',
-      interlinearMode: 'hidden',
-      interlinearLocale: 'en',
-    })
-  })
-
-  it('removes a legacy interlinear parallel version when BHG is not installed', async () => {
-    const result = await resolveBibleTabResources(
-      {
-        ...createData('LSG'),
-        parallelVersions: ['INT'],
-      },
-      'fr',
-      createDependencies(['LSG', 'INT'])
-    )
-
-    expect(result.parallelVersions).toEqual([])
-  })
-
   it('falls back to an installed language default when the selected Bible is unavailable', async () => {
     const result = await resolveBibleTabResources(
       createData('BFC'),
@@ -219,10 +129,10 @@ describe('resolveBibleTabResources', () => {
     })
   })
 
-  it('normalizes and removes unavailable parallel versions without duplicating BHG', async () => {
+  it('removes unavailable parallel versions', async () => {
     const data = {
       ...createData('BHG'),
-      parallelVersions: ['INT', 'LSGS', 'BFC'] as BibleTab['data']['parallelVersions'],
+      parallelVersions: ['BFC'] as BibleTab['data']['parallelVersions'],
     }
     const result = await resolveBibleTabResources(
       data,
@@ -230,6 +140,6 @@ describe('resolveBibleTabResources', () => {
       createDependencies(['BHG', 'LSG'], ['fr'])
     )
 
-    expect(result.parallelVersions).toEqual(['LSG'])
+    expect(result.parallelVersions).toEqual([])
   })
 })
