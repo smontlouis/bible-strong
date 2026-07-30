@@ -981,6 +981,8 @@
   "downloads.redownloadConfirm": "Retélécharger cette version ? Cela peut corriger les problèmes de chargement.",
   "downloads.updateAvailable": "Mise à jour disponible",
   "downloads.updateConfirm": "Une nouvelle version est disponible. Voulez-vous la télécharger maintenant ?",
+  "downloads.updateCountConfirm_one": "{{count}} élément peut être mis à jour. Voulez-vous l’ajouter à la file de téléchargement ?",
+  "downloads.updateCountConfirm_other": "{{count}} éléments peuvent être mis à jour. Voulez-vous les ajouter à la file de téléchargement ?",
   "downloads.later": "Plus tard",
   "downloads.update": "Mettre à jour",
   "downloads.updateBibleWithStrongConfirm": "Mettre à jour cette Bible ? Son index Strong associé sera supprimé et devra être retéléchargé.",

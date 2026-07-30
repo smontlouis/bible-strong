@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQueries, useQuery } from '@tanstack/react-query'
 import { Alert, TextInput, TouchableOpacity } from 'react-native'
 import { useTheme } from '@emotion/react'
 import { useTranslation } from 'react-i18next'
@@ -66,6 +66,11 @@ import {
   type StrongLexiconModuleAvailability,
 } from '~helpers/strongLexiconModules'
 import type { StrongLexiconModuleId } from '~helpers/strongLexiconPublications'
+import {
+  compareResourcePublications,
+  fetchResourcePublication,
+  resourcePublicationStore,
+} from '~helpers/resourcePublication'
 
 // ---------------------------------------------------------------------------
 // Unified section item type
@@ -508,6 +513,69 @@ const DownloadsScreen = () => {
     refreshDownloadedItems,
   } = useDownloadedItems()
   const allSections = buildAllSections(lang, t)
+  const publicationResources = allSections.flatMap(section =>
+    section.data.flatMap(item => {
+      if (!downloadedSet.has(item.id)) return []
+      const identity = parseOfflineCopyId(item.id)
+      if (!identity) return []
+      const downloadItem = createOfflineCopyDownloadItem(identity)
+      const relatedResources =
+        identity.kind === 'bible'
+          ? getBibleRelatedPublicationResources(identity.versionId) ?? []
+          : []
+
+      return [
+        { itemId: item.id, resourceId: item.id, url: downloadItem.url },
+        ...relatedResources.map(resource => ({ itemId: item.id, ...resource })),
+      ]
+    })
+  )
+  const publicationQueries = useQueries({
+    queries: publicationResources.map(resource => ({
+      queryKey: ['resource-publication', resource.resourceId, resource.url],
+      queryFn: () => fetchResourcePublication(resource.url),
+      staleTime: 6 * 60 * 60 * 1000,
+      refetchOnMount: 'always' as const,
+      retry: 1,
+    })),
+  })
+  const publicationUpdateIds = new Set(
+    publicationResources.flatMap((resource, index) => {
+      const remotePublication = publicationQueries[index]?.data
+      return remotePublication &&
+        compareResourcePublications(
+          resourcePublicationStore.read(resource.resourceId),
+          remotePublication
+        ) === 'update-available'
+        ? [resource.itemId]
+        : []
+    })
+  )
+
+  const itemNeedsUpdate = (item: UnifiedItem) => {
+    if (publicationUpdateIds.has(item.id)) return true
+    const identity = parseOfflineCopyId(item.id)
+    if (!identity) return false
+
+    if (identity.kind === 'strong-bible-index') {
+      return ['incompatible', 'corrupt'].includes(
+        strongAvailability.get(identity.versionId)?.status ?? ''
+      )
+    }
+    if (identity.kind === 'strong-lexicon-module') {
+      return ['incompatible', 'corrupt', 'core-missing'].includes(
+        strongLexiconAvailability.get(identity.moduleId)?.status ?? ''
+      )
+    }
+    if (identity.kind === 'interlinear-index') {
+      return ['base-incompatible', 'corrupt'].includes(
+        interlinearAvailability.get(identity.language)?.status ?? ''
+      )
+    }
+    return false
+  }
+
+  const itemsToUpdate = allSections.flatMap(section => section.data).filter(itemNeedsUpdate)
 
   // Initialize all sections as collapsed once we know them
   const allSectionKeys = allSections.map(s => s.key).join(',')
@@ -720,6 +788,26 @@ const DownloadsScreen = () => {
     ])
   }
 
+  const handleUpdateAll = () => {
+    Alert.alert(
+      t('downloads.updateAvailable'),
+      t(
+        itemsToUpdate.length === 1
+          ? 'downloads.updateCountConfirm_one'
+          : 'downloads.updateCountConfirm_other',
+        { count: itemsToUpdate.length }
+      ),
+      [
+        { text: t('downloads.later'), style: 'cancel' },
+        {
+          text: t('downloads.update'),
+          onPress: () =>
+            enqueue(dedupeDownloadItems(itemsToUpdate.flatMap(item => createDownloadPlanForId(item.id)))),
+        },
+      ]
+    )
+  }
+
   const handleDeleteItem = (item: UnifiedItem) => {
     const deletionPlan = createDownloadedItemDeletionPlan(item.id)
     const deletesStrongSidecar =
@@ -781,19 +869,30 @@ const DownloadsScreen = () => {
         hasBackButton
         title={t('downloads.title')}
         rightComponent={
-          <TouchableOpacity
-            onPress={() => {
-              setIsSelectMode(prev => !prev)
-              if (isSelectMode) setSelectedItems(new Set())
-            }}
-            style={{ paddingHorizontal: 16, padding: 8 }}
-          >
-            <FeatherIcon
-              name={isSelectMode ? 'check' : 'check-square'}
-              size={20}
-              color={isSelectMode ? 'success' : 'primary'}
-            />
-          </TouchableOpacity>
+          <Box row alignItems="center">
+            {itemsToUpdate.length > 0 && !isSelectMode && (
+              <TouchableOpacity
+                onPress={handleUpdateAll}
+                accessibilityLabel={t('downloads.update')}
+                style={{ padding: 8 }}
+              >
+                <FeatherIcon name="refresh-cw" size={20} color="success" />
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              onPress={() => {
+                setIsSelectMode(prev => !prev)
+                if (isSelectMode) setSelectedItems(new Set())
+              }}
+              style={{ paddingHorizontal: 16, padding: 8 }}
+            >
+              <FeatherIcon
+                name={isSelectMode ? 'check' : 'check-square'}
+                size={20}
+                color={isSelectMode ? 'success' : 'primary'}
+              />
+            </TouchableOpacity>
+          </Box>
         }
       />
 
@@ -900,21 +999,7 @@ const DownloadsScreen = () => {
               onUpdate={() => handleUpdateItem(item)}
               isDownloaded={isDownloaded}
               isDefault={isDefault}
-              needsUpdate={
-                identity.kind === 'strong-bible-index'
-                  ? ['incompatible', 'corrupt'].includes(
-                      strongAvailability.get(identity.versionId)?.status ?? ''
-                    )
-                  : identity.kind === 'strong-lexicon-module'
-                    ? ['incompatible', 'corrupt', 'core-missing'].includes(
-                        strongLexiconAvailability.get(identity.moduleId)?.status ?? ''
-                      )
-                    : identity.kind === 'interlinear-index'
-                      ? ['base-incompatible', 'corrupt'].includes(
-                          interlinearAvailability.get(identity.language)?.status ?? ''
-                        )
-                      : false
-              }
+              needsUpdate={itemNeedsUpdate(item)}
               variant={isNestedDependency ? 'dependency' : 'standard'}
             />
           )
