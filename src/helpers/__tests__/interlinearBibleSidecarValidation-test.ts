@@ -1,7 +1,7 @@
 import { classifyInterlinearBibleSidecarSnapshot } from '../interlinearBibleSidecarValidation'
 
 const expected = {
-  schemaVersion: 3,
+  schemaVersion: 5,
   datasetId: 'STEP',
   locale: 'en',
   textRevision: 'bhg-text-revision',
@@ -30,6 +30,7 @@ const tableColumns = {
   Morphologies: ['id', 'code'],
   Glosses: ['id', 'text'],
   StrongCodes: ['id', 'code'],
+  StrongVerseIndex: ['codeId', 'verseId', 'kindMask'],
 }
 
 const classify = (schemaVersion: string, columns: Record<string, string[]> = tableColumns) =>
@@ -46,11 +47,11 @@ const classify = (schemaVersion: string, columns: Record<string, string[]> = tab
   )
 
 describe('classifyInterlinearBibleSidecarSnapshot', () => {
-  it('accepts a newer additive sidecar schema', () => {
+  it('accepts the concordance-capable sidecar schema', () => {
     expect(classify('5')).toBe('compatible')
   })
 
-  it.each(['2', '1.5', 'not-a-version'])(
+  it.each(['4', '3', '1.5', 'not-a-version'])(
     'rejects unsupported sidecar schema version %s',
     schemaVersion => {
       expect(classify(schemaVersion)).toBe('incompatible')

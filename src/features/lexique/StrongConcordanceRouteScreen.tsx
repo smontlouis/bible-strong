@@ -36,6 +36,7 @@ const StrongConcordanceRouteScreen = ({ context, isFormSheet }: Props) => {
           entry={entryState.entry}
           currentVersionId={currentVersionId}
           defaultVersionId={defaultVersionId}
+          preferredInterlinearLocale={entryState.languageState.language}
           onOpenVerse={navigation.openConcordanceVerse}
         />
       )}

@@ -36,6 +36,7 @@ import { splitStrongEntityRelations } from './strongEntityPresentation'
 import { splitStrongLexicalRelations } from './strongLexiconRelations'
 import { hasHiddenStrongPreviewItems } from './strongDetailPreview'
 import { getScaledStrongTextStyle, type StrongReadingTypography } from './strongEditorialHtmlStyles'
+import { formatStrongLemmaPartOfSpeech } from './strongLemmaPartOfSpeech'
 import { isStrongOriginalUnnamed } from './strongOriginalPresentation'
 
 type Anchor = 'context' | 'definition' | 'entity' | 'related' | 'concordance'
@@ -159,7 +160,7 @@ const StrongDetailMainPage = ({
   onOpenConcordanceVerse,
   onOpenEntityRelation,
 }: Props) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const scrollRef = useRef<ScrollViewType>(null)
   const [anchorOffsets, setAnchorOffsets] = useState<Partial<Record<Anchor, number>>>({})
   const [dictionaryPreview, setDictionaryPreview] = useState<{
@@ -511,7 +512,9 @@ const StrongDetailMainPage = ({
                       color={selectedLemmaId === lemma.id ? 'reverse' : 'default'}
                       fontSize={12}
                     >
-                      {lemma.lemma} · {lemma.occurrenceCount}
+                      {lemma.lemma}{' '}
+                      {formatStrongLemmaPartOfSpeech(lemma.partOfSpeech, i18n.language)} ·{' '}
+                      {lemma.occurrenceCount}
                     </Text>
                   </Box>
                 </TouchableBox>

@@ -7,8 +7,10 @@ import type { StrongDetailRouteContext } from './strongDetailRoutes'
 export const resolveStrongBibleVersionId = (
   context: StrongDetailRouteContext,
   defaultVersionId: StrongBibleVersionId
-): StrongBibleVersionId =>
-  context.bibleVersion && isStrongCapableBibleVersion(context.bibleVersion)
+): StrongBibleVersionId | 'BHG' =>
+  context.bibleVersion === 'BHG'
+    ? 'BHG'
+    : context.bibleVersion && isStrongCapableBibleVersion(context.bibleVersion)
     ? context.bibleVersion
     : context.strongBibleVersionId && isStrongCapableBibleVersion(context.strongBibleVersionId)
       ? context.strongBibleVersionId

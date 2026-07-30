@@ -35,6 +35,7 @@ const interlinearConnections = new AsyncConnectionRegistry<ResourceLanguage, SQL
   },
   database => database.closeAsync()
 )
+const validatedSidecars = new Map<ResourceLanguage, { textRevision: string; textSha256: string }>()
 
 export type InterlinearIdentityKind = 'strong' | 'estrong' | 'dstrong' | 'ustrong'
 
@@ -58,6 +59,30 @@ export interface InterlinearToken {
 }
 
 export type InterlinearChapterTokens = Record<number, InterlinearToken[]>
+
+export interface InterlinearStrongVerseCountByBook {
+  Livre: number
+  versesCountByBook: number
+}
+
+interface InterlinearStrongOccurrenceLocation {
+  verseId: number
+  Livre: number
+  Chapitre: number
+  Verset: number
+}
+
+export interface InterlinearStrongOccurrence {
+  Livre: number
+  Chapitre: number
+  Verset: number
+  tokens: InterlinearToken[]
+}
+
+export interface InterlinearStrongOccurrencePage {
+  occurrences: InterlinearStrongOccurrence[]
+  nextCursor?: string
+}
 
 export type InterlinearSidecarAvailability =
   | { status: 'base-missing' }
@@ -86,6 +111,14 @@ export const getInterlinearSidecarAvailability = async (
 ): Promise<InterlinearSidecarAvailability> => {
   const baseMetadata = await getBibleVersionMetadata('BHG')
   if (!baseMetadata) return { status: 'base-missing' }
+  const validated = validatedSidecars.get(locale)
+  if (
+    validated &&
+    validated.textRevision === baseMetadata.textRevision &&
+    validated.textSha256 === baseMetadata.textSha256
+  ) {
+    return { status: 'available', locale, textRevision: validated.textRevision }
+  }
 
   try {
     return await withInterlinearSidecar(locale, async database => {
@@ -107,17 +140,23 @@ export const getInterlinearSidecarAvailability = async (
           baseMetadata
         ) !== 'compatible'
       ) {
+        validatedSidecars.delete(locale)
         return { status: 'incompatible' }
       }
-      const integrity = await database.getFirstAsync<{
-        integrity_check: string
-      }>('PRAGMA integrity_check')
+      const integrity = await database.getFirstAsync<{ integrity_check: string }>(
+        'PRAGMA integrity_check'
+      )
       if (integrity?.integrity_check !== 'ok') {
+        validatedSidecars.delete(locale)
         return {
           status: 'corrupt',
           reason: integrity?.integrity_check ?? 'integrity-check-missing',
         }
       }
+      validatedSidecars.set(locale, {
+        textRevision: metadata.textRevision,
+        textSha256: metadata.textSha256,
+      })
       return {
         status: 'available',
         locale,
@@ -125,11 +164,9 @@ export const getInterlinearSidecarAvailability = async (
       }
     })
   } catch (error) {
+    validatedSidecars.delete(locale)
     if (error instanceof InterlinearSidecarMissingError) return { status: 'missing' }
-    return {
-      status: 'corrupt',
-      reason: error instanceof Error ? error.message : String(error),
-    }
+    return { status: 'corrupt', reason: error instanceof Error ? error.message : String(error) }
   }
 }
 
@@ -159,9 +196,7 @@ export const installInterlinearSidecar = async (
     callbacks.onStatusInserting?.()
     callbacks.onInsertProgress?.(0)
     await FileSystem.deleteAsync(extractionDirectory, { idempotent: true })
-    await FileSystem.makeDirectoryAsync(extractionDirectory, {
-      intermediates: true,
-    })
+    await FileSystem.makeDirectoryAsync(extractionDirectory, { intermediates: true })
     await unzip(toNativeFilePath(archivePath), toNativeFilePath(extractionDirectory), 'UTF-8')
     callbacks.onInsertProgress?.(0.5)
     const candidate = await openSQLiteDatabase(
@@ -208,66 +243,75 @@ export const installInterlinearSidecar = async (
 }
 
 export const removeInterlinearSidecar = async (locale: ResourceLanguage) => {
-  await interlinearConnections.withExclusiveAccess(locale, () =>
-    FileSystem.deleteAsync(getInterlinearSidecarPath(locale), {
-      idempotent: true,
-    })
-  )
+  await interlinearConnections.withExclusiveAccess(locale, () => {
+    validatedSidecars.delete(locale)
+    return FileSystem.deleteAsync(getInterlinearSidecarPath(locale), { idempotent: true })
+  })
 }
 
-export const loadInterlinearChapterTokens = async (
-  _versionId: InterlinearBibleVersionId,
+type InterlinearTokenRow = {
+  verseId: number
+  verse: number
+  tokenId: number
+  readingOrdinal: number
+  tokenStartOffset: number
+  tokenLength: number
+  segmentOrdinal: number
+  segmentStartOffset: number
+  segmentLength: number
+  transliteration: string
+  lemma: string
+  morphology: string
+  gloss: string
+  strong: string | null
+  estrong: string | null
+  dstrong: string | null
+  ustrong: string | null
+}
+
+const loadInterlinearTokenRows = (
   locale: ResourceLanguage,
-  book: number,
-  chapter: number
-): Promise<InterlinearChapterTokens> => {
-  const availability = await getInterlinearSidecarAvailability(locale)
-  if (availability.status !== 'available') {
-    throw new Error(`INTERLINEAR_SIDECAR_${availability.status.toUpperCase()}:BHG:${locale}`)
-  }
-  const rows = await withInterlinearSidecar(locale, database =>
-    database.getAllAsync<{
-      verse: number
-      tokenId: number
-      readingOrdinal: number
-      tokenStartOffset: number
-      tokenLength: number
-      segmentOrdinal: number
-      segmentStartOffset: number
-      segmentLength: number
-      transliteration: string
-      lemma: string
-      morphology: string
-      gloss: string
-      strong: string | null
-      estrong: string | null
-      dstrong: string | null
-      ustrong: string | null
-    }>(
-      `SELECT v.verse, t.id AS tokenId, t.readingOrdinal,
-            t.startOffset AS tokenStartOffset, t.length AS tokenLength,
-            s.ordinal AS segmentOrdinal, s.startOffset AS segmentStartOffset,
-            s.length AS segmentLength, tr.value AS transliteration,
-            l.value AS lemma, m.code AS morphology, g.text AS gloss,
-            c0.code AS strong, c1.code AS estrong,
-            c2.code AS dstrong, c3.code AS ustrong
-       FROM Verses v
-       JOIN Tokens t ON t.verseId=v.id
-       JOIN Segments s ON s.tokenId=t.id
-       JOIN Transliterations tr ON tr.id=s.transliterationId
-       JOIN Lemmas l ON l.id=s.lemmaId
-       JOIN Morphologies m ON m.id=s.morphologyId
-       JOIN Glosses g ON g.id=s.glossId
-       LEFT JOIN StrongCodes c0 ON c0.id=s.strongCodeId
-       LEFT JOIN StrongCodes c1 ON c1.id=s.eStrongCodeId
-       LEFT JOIN StrongCodes c2 ON c2.id=s.dStrongCodeId
-       LEFT JOIN StrongCodes c3 ON c3.id=s.uStrongCodeId
-      WHERE v.bookOrder=? AND v.chapter=?
-      ORDER BY v.verse, t.readingOrdinal, s.ordinal`,
-      [book, chapter]
-    )
+  where: string,
+  parameters: (string | number)[]
+) =>
+  withInterlinearSidecar(locale, database =>
+    loadInterlinearTokenRowsFromDatabase(database, where, parameters)
   )
-  const result: InterlinearChapterTokens = {}
+
+const loadInterlinearTokenRowsFromDatabase = (
+  database: SQLiteDatabase,
+  where: string,
+  parameters: (string | number)[]
+) =>
+  database.getAllAsync<InterlinearTokenRow>(
+    `SELECT v.id AS verseId, v.verse, t.id AS tokenId, t.readingOrdinal,
+              t.startOffset AS tokenStartOffset, t.length AS tokenLength,
+              s.ordinal AS segmentOrdinal, s.startOffset AS segmentStartOffset,
+              s.length AS segmentLength, tr.value AS transliteration,
+              l.value AS lemma, m.code AS morphology, g.text AS gloss,
+              c0.code AS strong, c1.code AS estrong,
+              c2.code AS dstrong, c3.code AS ustrong
+         FROM Verses v
+         JOIN Tokens t ON t.verseId=v.id
+         JOIN Segments s ON s.tokenId=t.id
+         JOIN Transliterations tr ON tr.id=s.transliterationId
+         JOIN Lemmas l ON l.id=s.lemmaId
+         JOIN Morphologies m ON m.id=s.morphologyId
+         JOIN Glosses g ON g.id=s.glossId
+         LEFT JOIN StrongCodes c0 ON c0.id=s.strongCodeId
+         LEFT JOIN StrongCodes c1 ON c1.id=s.eStrongCodeId
+         LEFT JOIN StrongCodes c2 ON c2.id=s.dStrongCodeId
+         LEFT JOIN StrongCodes c3 ON c3.id=s.uStrongCodeId
+        WHERE ${where}
+        ORDER BY v.id, t.readingOrdinal, s.ordinal`,
+    parameters
+  )
+
+const groupInterlinearTokenRows = (
+  rows: InterlinearTokenRow[],
+  keyOf: (row: InterlinearTokenRow) => number
+): Record<number, InterlinearToken[]> => {
+  const result: Record<number, InterlinearToken[]> = {}
   const tokens = new Map<number, InterlinearToken>()
   for (const row of rows) {
     let token = tokens.get(row.tokenId)
@@ -280,8 +324,9 @@ export const loadInterlinearChapterTokens = async (
         segments: [],
       }
       tokens.set(row.tokenId, token)
-      result[row.verse] ??= []
-      result[row.verse].push(token)
+      const key = keyOf(row)
+      result[key] ??= []
+      result[key].push(token)
     }
     const identities = (
       [
@@ -303,6 +348,128 @@ export const loadInterlinearChapterTokens = async (
     })
   }
   return result
+}
+
+const assertInterlinearSidecarAvailable = async (locale: ResourceLanguage) => {
+  const availability = await getInterlinearSidecarAvailability(locale)
+  if (availability.status !== 'available') {
+    throw new Error(`INTERLINEAR_SIDECAR_${availability.status.toUpperCase()}:BHG:${locale}`)
+  }
+}
+
+export const loadInterlinearChapterTokens = async (
+  _versionId: InterlinearBibleVersionId,
+  locale: ResourceLanguage,
+  book: number,
+  chapter: number
+): Promise<InterlinearChapterTokens> => {
+  await assertInterlinearSidecarAvailable(locale)
+  return groupInterlinearTokenRows(
+    await loadInterlinearTokenRows(locale, 'v.bookOrder=? AND v.chapter=?', [book, chapter]),
+    row => row.verse
+  )
+}
+
+export const loadInterlinearVerseTokens = async (
+  _versionId: InterlinearBibleVersionId,
+  locale: ResourceLanguage,
+  book: number,
+  chapter: number,
+  verse: number
+): Promise<InterlinearToken[]> => {
+  await assertInterlinearSidecarAvailable(locale)
+  const tokensByVerse = groupInterlinearTokenRows(
+    await loadInterlinearTokenRows(locale, 'v.bookOrder=? AND v.chapter=? AND v.verse=?', [
+      book,
+      chapter,
+      verse,
+    ]),
+    row => row.verse
+  )
+  return tokensByVerse[verse] ?? []
+}
+
+export const loadInterlinearStrongVerseCountsByBook = async (
+  locale: ResourceLanguage,
+  reference: string | number
+): Promise<InterlinearStrongVerseCountByBook[]> => {
+  return withInterlinearSidecar(locale, database =>
+    database.getAllAsync<InterlinearStrongVerseCountByBook>(
+      `SELECT v.bookOrder AS Livre, COUNT(*) AS versesCountByBook
+       FROM StrongVerseIndex i
+       JOIN StrongCodes c ON c.id=i.codeId
+       JOIN Verses v ON v.id=i.verseId
+      WHERE c.code=?
+      GROUP BY v.bookOrder
+      ORDER BY v.bookOrder`,
+      [String(reference)]
+    )
+  )
+}
+
+const parseStrongOccurrenceCursor = (cursor?: string): number => {
+  if (!cursor) return 0
+  const match = /^bhg:(\d+)$/.exec(cursor)
+  const verseId = Number(match?.[1])
+  if (!Number.isInteger(verseId) || verseId < 1) {
+    throw new Error('INTERLINEAR_INVALID_CONCORDANCE_CURSOR')
+  }
+  return verseId
+}
+
+export const loadInterlinearStrongOccurrencePage = async (
+  locale: ResourceLanguage,
+  reference: string | number,
+  options: { book?: number; limit?: number; cursor?: string } = {}
+): Promise<InterlinearStrongOccurrencePage> => {
+  await assertInterlinearSidecarAvailable(locale)
+  const afterVerseId = parseStrongOccurrenceCursor(options.cursor)
+  const limit = Math.max(1, options.limit ?? 60)
+  const bookFilter = options.book == null ? '' : 'AND v.bookOrder=?'
+  const parameters = [
+    String(reference),
+    afterVerseId,
+    ...(options.book == null ? [] : [options.book]),
+    limit + 1,
+  ]
+  return withInterlinearSidecar(locale, async database => {
+    const locations = await database.getAllAsync<InterlinearStrongOccurrenceLocation>(
+      `SELECT v.id AS verseId,
+       v.bookOrder AS Livre,
+       v.chapter AS Chapitre,
+       v.verse AS Verset
+       FROM StrongVerseIndex i
+       JOIN StrongCodes c ON c.id=i.codeId
+       JOIN Verses v ON v.id=i.verseId
+      WHERE c.code=? AND i.verseId>?
+      ${bookFilter}
+      ORDER BY i.verseId
+      LIMIT ?`,
+      parameters
+    )
+    const pageLocations = locations.slice(0, limit)
+    const verseIds = pageLocations.map(({ verseId }) => verseId)
+    const tokensByVerseId = verseIds.length
+      ? groupInterlinearTokenRows(
+          await loadInterlinearTokenRowsFromDatabase(
+            database,
+            `v.id IN (${verseIds.map(() => '?').join(', ')})`,
+            verseIds
+          ),
+          row => row.verseId
+        )
+      : {}
+    const lastLocation = pageLocations.at(-1)
+    return {
+      occurrences: pageLocations.map(({ verseId, ...location }) => ({
+        ...location,
+        tokens: tokensByVerseId[verseId] ?? [],
+      })),
+      ...(locations.length > limit && lastLocation
+        ? { nextCursor: `bhg:${lastLocation.verseId}` }
+        : {}),
+    }
+  })
 }
 
 const withInterlinearSidecar = <Result>(
@@ -335,14 +502,13 @@ const activateInterlinearSidecar = async (
   beforeCommit?: () => void | Promise<void>
 ) => {
   const destination = getInterlinearSidecarPath(locale)
-  await FileSystem.makeDirectoryAsync(getInterlinearSidecarDirectory(), {
-    intermediates: true,
-  })
-  await interlinearConnections.withExclusiveAccess(locale, () =>
-    installAtomicResourceFile({
+  await FileSystem.makeDirectoryAsync(getInterlinearSidecarDirectory(), { intermediates: true })
+  await interlinearConnections.withExclusiveAccess(locale, () => {
+    validatedSidecars.delete(locale)
+    return installAtomicResourceFile({
       candidatePath: extractedPath,
       destinationPath: destination,
       afterSwap: beforeCommit,
     })
-  )
+  })
 }

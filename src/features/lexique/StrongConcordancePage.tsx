@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { LegendList } from '@legendapp/list'
-import React, { useState } from 'react'
+import { useAtomValue } from 'jotai/react'
+import React, { useEffect, useState } from 'react'
 import { ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
@@ -9,8 +10,14 @@ import Text from '~common/ui/Text'
 import ConcordanceVerse from '~features/bible/ConcordanceVerse'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
-import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
+import {
+  isStrongCapableBibleVersion,
+  type StrongBibleVersionId,
+} from '~helpers/strongBiblePublications'
 import type { Verse } from '~common/types'
+import { downloadCompletionSignalAtom } from '~state/downloadQueue'
+import { formatStrongLemmaPartOfSpeech } from './strongLemmaPartOfSpeech'
 
 const PAGE_SIZE = 60
 const PLACEHOLDER_COUNT = 6
@@ -26,8 +33,9 @@ const ConcordancePlaceholder = () => (
 
 type Props = {
   entry: StrongLexiconEntry
-  currentVersionId: StrongBibleVersionId
+  currentVersionId: StrongBibleVersionId | 'BHG'
   defaultVersionId: StrongBibleVersionId
+  preferredInterlinearLocale: ResourceLanguage
   onOpenVerse: (verse: Verse, version?: string) => void
 }
 
@@ -35,14 +43,26 @@ const StrongConcordancePage = ({
   entry,
   currentVersionId,
   defaultVersionId,
+  preferredInterlinearLocale,
   onOpenVerse,
 }: Props) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const resources = useResourceAccess()
+  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const [selectedLemmaId, setSelectedLemmaId] = useState<number>()
+  const sourceKey = `${currentVersionId}:${defaultVersionId}:${preferredInterlinearLocale}:${entry.selectedIdentity.kind}:${entry.selectedIdentity.code}:${downloadCompletionSignal}`
+  const [fallbackSource, setFallbackSource] = useState<{
+    key: string
+    versionId?: StrongBibleVersionId
+  }>({ key: sourceKey })
+  const effectiveCurrentVersionId =
+    fallbackSource.key === sourceKey && fallbackSource.versionId
+      ? fallbackSource.versionId
+      : currentVersionId
   const request = {
-    currentVersionId,
+    currentVersionId: effectiveCurrentVersionId,
     defaultVersionId,
+    preferredInterlinearLocale,
     book: entry.language === 'hebrew' ? 1 : 40,
     reference: entry.selectedIdentity.code,
     allBooks: true,
@@ -51,11 +71,13 @@ const StrongConcordancePage = ({
     queryKey: [
       'strong-detail',
       'concordance-counts',
-      currentVersionId,
+      effectiveCurrentVersionId,
       defaultVersionId,
+      preferredInterlinearLocale,
+      downloadCompletionSignal,
       entry.selectedIdentity,
     ],
-    queryFn: () => resources.strongBible.loadCountsByBook(request),
+    queryFn: () => resources.lexiconBible.loadCountsByBook(request),
     networkMode: 'always',
     staleTime: Infinity,
     gcTime: Infinity,
@@ -64,11 +86,13 @@ const StrongConcordancePage = ({
     queryKey: [
       'strong-detail',
       'lemma-stats',
-      currentVersionId,
+      effectiveCurrentVersionId,
       defaultVersionId,
+      preferredInterlinearLocale,
+      downloadCompletionSignal,
       entry.selectedIdentity,
     ],
-    queryFn: () => resources.strongBible.loadLemmaStats(request),
+    queryFn: () => resources.lexiconBible.loadLemmaStats(request),
     networkMode: 'always',
     staleTime: Infinity,
     gcTime: Infinity,
@@ -77,22 +101,30 @@ const StrongConcordancePage = ({
     queryKey: [
       'strong-detail',
       'concordance-pages',
-      currentVersionId,
+      effectiveCurrentVersionId,
       defaultVersionId,
+      preferredInterlinearLocale,
+      downloadCompletionSignal,
       entry.selectedIdentity,
       selectedLemmaId,
       PAGE_SIZE,
     ],
     queryFn: ({ pageParam }) =>
-      resources.strongBible.loadFoundVersesByBook({
+      resources.lexiconBible.loadFoundVersesByBook({
         ...request,
         limit: PAGE_SIZE,
-        offset: pageParam,
+        offset: pageParam.offset,
+        cursor: pageParam.cursor,
         lexemeId: selectedLemmaId,
       }),
-    initialPageParam: 0,
+    initialPageParam: { offset: 0, cursor: undefined as string | undefined },
     getNextPageParam: (lastPage, pages) => {
       if (lastPage.status !== 'available') return undefined
+      if (lastPage.provenance.versionId === 'BHG') {
+        return 'nextCursor' in lastPage && lastPage.nextCursor
+          ? { cursor: lastPage.nextCursor, offset: pages.length * PAGE_SIZE }
+          : undefined
+      }
       const expectedCount =
         selectedLemmaId == null
           ? countsQuery.data?.status === 'available'
@@ -109,12 +141,32 @@ const StrongConcordancePage = ({
         0
       )
       if (expectedCount != null && loadedCount >= expectedCount) return undefined
-      return lastPage.verses.length < PAGE_SIZE ? undefined : pages.length * PAGE_SIZE
+      return lastPage.verses.length < PAGE_SIZE
+        ? undefined
+        : { cursor: undefined, offset: pages.length * PAGE_SIZE }
     },
     networkMode: 'always',
     staleTime: Infinity,
     gcTime: Infinity,
   })
+  const resolvedFallbackVersionId = [
+    countsQuery.data?.status === 'available' ? countsQuery.data.provenance.versionId : undefined,
+    lemmaQuery.data?.status === 'available' ? lemmaQuery.data.provenance.versionId : undefined,
+    concordanceQuery.data?.pages.find(page => page.status === 'available')?.status === 'available'
+      ? concordanceQuery.data.pages.find(page => page.status === 'available')!.provenance.versionId
+      : undefined,
+  ].find((versionId): versionId is StrongBibleVersionId =>
+    Boolean(versionId && versionId !== 'BHG' && isStrongCapableBibleVersion(versionId))
+  )
+  useEffect(() => {
+    if (
+      currentVersionId === 'BHG' &&
+      effectiveCurrentVersionId === 'BHG' &&
+      resolvedFallbackVersionId
+    ) {
+      setFallbackSource({ key: sourceKey, versionId: resolvedFallbackVersionId })
+    }
+  }, [currentVersionId, effectiveCurrentVersionId, resolvedFallbackVersionId, sourceKey])
   const verses =
     concordanceQuery.data?.pages.flatMap(page =>
       page.status === 'available' ? page.verses : []
@@ -133,7 +185,7 @@ const StrongConcordancePage = ({
   const version =
     concordanceQuery.data?.pages.find(page => page.status === 'available')?.status === 'available'
       ? concordanceQuery.data.pages.find(page => page.status === 'available')!.provenance.versionId
-      : currentVersionId
+      : effectiveCurrentVersionId
 
   const placeholders = (
     <VStack>
@@ -205,7 +257,9 @@ const StrongConcordancePage = ({
                       color={selectedLemmaId === lemma.id ? 'reverse' : 'default'}
                       fontSize={12}
                     >
-                      {lemma.lemma} · {lemma.occurrenceCount}
+                      {lemma.lemma}{' '}
+                      {formatStrongLemmaPartOfSpeech(lemma.partOfSpeech, i18n.language)} ·{' '}
+                      {lemma.occurrenceCount}
                     </Text>
                   </Box>
                 </TouchableBox>

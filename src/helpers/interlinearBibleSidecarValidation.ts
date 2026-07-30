@@ -41,6 +41,7 @@ export const INTERLINEAR_BIBLE_SIDECAR_REQUIRED_TABLE_COLUMNS = {
   Morphologies: ['id', 'code'],
   Glosses: ['id', 'text'],
   StrongCodes: ['id', 'code'],
+  StrongVerseIndex: ['codeId', 'verseId', 'kindMask'],
 } as const
 
 export const classifyInterlinearBibleSidecarSnapshot = (

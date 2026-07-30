@@ -1,15 +1,19 @@
 import { useQuery } from '@tanstack/react-query'
-import { useSetAtom } from 'jotai/react'
+import { useAtomValue, useSetAtom } from 'jotai/react'
 import React, { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 
 import type { Verse } from '~common/types'
-import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
+import {
+  isStrongCapableBibleVersion,
+  type StrongBibleVersionId,
+} from '~helpers/strongBiblePublications'
 import verseToReference from '~helpers/verseToReference'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { RootState } from '~redux/modules/reducer'
 import { historyAtom } from '~state/app'
+import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import { resolveStrongBibleVersionId } from './resolveStrongBibleVersionId'
 import StrongDetailMainPage from './StrongDetailMainPage'
 import StrongEntryRouteScaffold from './StrongEntryRouteScaffold'
@@ -58,22 +62,36 @@ const StrongMainScreen = ({
     (state: RootState) => state.user.bible.settings.defaultStrongBibleVersionId ?? 'LSG'
   )
   const readingTypography = useStrongReadingTypography()
-  const currentStrongBibleVersionId: StrongBibleVersionId = resolveStrongBibleVersionId(
+  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
+  const currentStrongBibleVersionId = resolveStrongBibleVersionId(
     activeContext,
     defaultStrongBibleVersionId
   )
+  const concordanceSourceKey = `${navigationKey}:${currentStrongBibleVersionId}:${defaultStrongBibleVersionId}:${resourceLanguage}:${downloadCompletionSignal}`
+  const [concordanceFallbackSource, setConcordanceFallbackSource] = useState<{
+    key: string
+    versionId?: StrongBibleVersionId
+  }>({ key: concordanceSourceKey })
+  const concordanceStrongBibleVersionId =
+    concordanceFallbackSource.key === concordanceSourceKey && concordanceFallbackSource.versionId
+      ? concordanceFallbackSource.versionId
+      : currentStrongBibleVersionId
   const concordanceQuery = useQuery({
     queryKey: [
       'strong-detail',
       'concordance-preview',
-      currentStrongBibleVersionId,
+      concordanceStrongBibleVersionId,
+      defaultStrongBibleVersionId,
+      resourceLanguage,
+      downloadCompletionSignal,
       entry?.selectedIdentity,
       selectedLemmaId,
     ],
     queryFn: async () => {
       const request = {
-        currentVersionId: currentStrongBibleVersionId,
+        currentVersionId: concordanceStrongBibleVersionId,
         defaultVersionId: defaultStrongBibleVersionId,
+        preferredInterlinearLocale: resourceLanguage,
         book: entry?.language === 'hebrew' ? 1 : 40,
         reference: entry!.selectedIdentity.code,
         limit: 3,
@@ -81,13 +99,13 @@ const StrongMainScreen = ({
         allBooks: true,
         lexemeId: selectedLemmaId,
       }
-      const versesResult = await resources.strongBible.loadFoundVersesByBook(request)
+      const versesResult = await resources.lexiconBible.loadFoundVersesByBook(request)
       return {
         verses: versesResult.status === 'available' ? versesResult.verses : [],
         version:
           versesResult.status === 'available'
             ? versesResult.provenance.versionId
-            : currentStrongBibleVersionId,
+            : concordanceStrongBibleVersionId,
       }
     },
     enabled: Boolean(entry),
@@ -98,17 +116,21 @@ const StrongMainScreen = ({
     queryKey: [
       'strong-detail',
       'concordance-total',
-      currentStrongBibleVersionId,
+      concordanceStrongBibleVersionId,
+      defaultStrongBibleVersionId,
+      resourceLanguage,
+      downloadCompletionSignal,
       entry?.selectedIdentity,
     ],
     queryFn: () =>
-      resources.strongBible.loadCountsByBook({
-        currentVersionId: currentStrongBibleVersionId,
+      resources.lexiconBible.loadCountsByBook({
+        currentVersionId: concordanceStrongBibleVersionId,
         defaultVersionId: defaultStrongBibleVersionId,
+        preferredInterlinearLocale: resourceLanguage,
         book: entry?.language === 'hebrew' ? 1 : 40,
         reference: entry!.selectedIdentity.code,
         allBooks: true,
-    }),
+      }),
     enabled: Boolean(entry),
     networkMode: 'always',
   })
@@ -116,13 +138,17 @@ const StrongMainScreen = ({
     queryKey: [
       'strong-detail',
       'lemma-stats',
-      currentStrongBibleVersionId,
+      concordanceStrongBibleVersionId,
+      defaultStrongBibleVersionId,
+      resourceLanguage,
+      downloadCompletionSignal,
       entry?.selectedIdentity,
     ],
     queryFn: () =>
-      resources.strongBible.loadLemmaStats({
-        currentVersionId: currentStrongBibleVersionId,
+      resources.lexiconBible.loadLemmaStats({
+        currentVersionId: concordanceStrongBibleVersionId,
         defaultVersionId: defaultStrongBibleVersionId,
+        preferredInterlinearLocale: resourceLanguage,
         book: entry?.language === 'hebrew' ? 1 : 40,
         reference: entry!.selectedIdentity.code,
       }),
@@ -133,15 +159,19 @@ const StrongMainScreen = ({
     queryKey: [
       'strong-detail',
       'verse-context',
-      activeContext.bibleVersion,
+      currentStrongBibleVersionId,
+      defaultStrongBibleVersionId,
+      resourceLanguage,
+      downloadCompletionSignal,
       activeContext.book,
       activeContext.bibleChapter,
       activeContext.bibleVerse,
     ],
     queryFn: () =>
-      resources.strongBible.loadVerse({
+      resources.lexiconBible.loadVerse({
         currentVersionId: currentStrongBibleVersionId,
         defaultVersionId: defaultStrongBibleVersionId,
+        preferredInterlinearLocale: resourceLanguage,
         book: activeContext.book!,
         chapter: activeContext.bibleChapter!,
         verse: activeContext.bibleVerse!,
@@ -171,6 +201,34 @@ const StrongMainScreen = ({
     ),
     networkMode: 'always',
   })
+  const resolvedConcordanceFallbackVersionId = [
+    concordanceQuery.isPlaceholderData ? undefined : concordanceQuery.data?.version,
+    concordanceTotalQuery.data?.status === 'available'
+      ? concordanceTotalQuery.data.provenance.versionId
+      : undefined,
+    lemmaStatsQuery.data?.status === 'available'
+      ? lemmaStatsQuery.data.provenance.versionId
+      : undefined,
+  ].find((versionId): versionId is StrongBibleVersionId =>
+    Boolean(versionId && versionId !== 'BHG' && isStrongCapableBibleVersion(versionId))
+  )
+  useEffect(() => {
+    if (
+      currentStrongBibleVersionId === 'BHG' &&
+      concordanceStrongBibleVersionId === 'BHG' &&
+      resolvedConcordanceFallbackVersionId
+    ) {
+      setConcordanceFallbackSource({
+        key: concordanceSourceKey,
+        versionId: resolvedConcordanceFallbackVersionId,
+      })
+    }
+  }, [
+    concordanceSourceKey,
+    concordanceStrongBibleVersionId,
+    currentStrongBibleVersionId,
+    resolvedConcordanceFallbackVersionId,
+  ])
   useEffect(() => {
     if (!entry || historyDataUpdatedAtRef.current === entryQuery.dataUpdatedAt) return
     historyDataUpdatedAtRef.current = entryQuery.dataUpdatedAt
@@ -247,7 +305,7 @@ const StrongMainScreen = ({
           entitiesAvailability={entry.modules.entities}
           concordanceCount={concordanceCount}
           concordanceTotalCount={concordanceTotalCount}
-          concordanceVersion={concordanceQuery.data?.version ?? currentStrongBibleVersionId}
+          concordanceVersion={concordanceQuery.data?.version ?? concordanceStrongBibleVersionId}
           concordanceVerses={concordanceQuery.data?.verses ?? []}
           concordanceLoading={concordanceQuery.isPending}
           lemmaStats={lemmaStats}
