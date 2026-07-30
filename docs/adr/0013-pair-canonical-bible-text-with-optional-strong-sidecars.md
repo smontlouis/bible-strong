@@ -29,6 +29,11 @@ SQLite file and apply it as an overlay at read time. Require exact `textRevision
 agreement before using a sidecar. Installation verifies archive and content checksums and activates
 replacements atomically.
 
+Treat sidecar schema declarations as minimum reader contracts rather than exact publication pins.
+Sidecar formats evolve additively: readers accept newer schema versions when their required tables,
+columns, text identity and STEP runtime contract remain available. Extra compatible STEP runtime
+hashes are additive and do not invalidate an older reader.
+
 Treat DBR as the application version backed by the DBYR generation dataset. English Strong-capable
 publications use the same pair contract for KJV, NASB 2020, NASB 1995, BSB, ASV, Darby, RLT,
 Revised Webster and RV 1895. Remove the former LSGS, KJVS, INT and INT_EN Bible identities entirely:

@@ -630,21 +630,30 @@ const readStrongBibleSidecarSnapshot = async (
        (SELECT COUNT(*) FROM WordSpans WHERE lexemeId IS NOT NULL) AS lexemeAssignmentCount,
        (SELECT COUNT(*) FROM FrenchLexemes) AS lexemeCount`
   )
-  const verseColumns = await database.getAllAsync<{ name: string }>('PRAGMA table_info(Verses)')
-  const wordSpanColumns = await database.getAllAsync<{ name: string }>(
-    'PRAGMA table_info(WordSpans)'
-  )
-  const tableNames = await database.getAllAsync<{ name: string }>(
-    `SELECT name FROM sqlite_schema WHERE type='table'`
+  const requiredTableNames = [
+    'Verses',
+    'WordSpans',
+    'StrongCodes',
+    'WordStrongCodes',
+    'FrenchLexemes',
+    'WordStepTokenExtras',
+  ] as const
+  const tableColumns = Object.fromEntries(
+    await Promise.all(
+      requiredTableNames.map(async tableName => {
+        const columns = await database.getAllAsync<{ name: string }>(
+          `PRAGMA table_info(${tableName})`
+        )
+        return [tableName, columns.map(column => column.name)] as const
+      })
+    )
   )
   if (!counts) throw new Error('STRONG_BIBLE_COUNT_MISSING')
   return {
     integrity: integrity?.integrity_check ?? '',
     metadata,
     counts,
-    verseColumns: verseColumns.map(column => column.name),
-    wordSpanColumns: wordSpanColumns.map(column => column.name),
-    tableNames: tableNames.map(table => table.name),
+    tableColumns,
   }
 }
 
@@ -674,10 +683,10 @@ const getExpectedSidecar = (
     schemaVersion: publication.strong.schemaVersion,
     ...snapshot.counts,
     reverseInterlinearSchemaVersion: publication.strong.reverseInterlinearSchemaVersion,
-    reverseInterlinearStepRevision: snapshot.metadata.reverseInterlinearStepRevision,
-    reverseInterlinearStepTextSha256: snapshot.metadata.reverseInterlinearStepTextSha256,
+    reverseInterlinearStepRevision: publication.strong.reverseInterlinearStepRevision,
+    reverseInterlinearStepTextSha256: publication.strong.reverseInterlinearStepTextSha256,
     reverseInterlinearCompatibleRuntimeSha256s:
-      snapshot.metadata.reverseInterlinearCompatibleRuntimeSha256s,
+      publication.strong.reverseInterlinearCompatibleRuntimeSha256s,
   }
 }
 
