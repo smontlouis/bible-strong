@@ -10,6 +10,10 @@ import {
   type InterlinearBibleVersionId,
   type InterlinearPublicationArtifact,
 } from './interlinearBiblePublications'
+import {
+  classifyInterlinearBibleSidecarSnapshot,
+  INTERLINEAR_BIBLE_SIDECAR_REQUIRED_TABLE_COLUMNS,
+} from './interlinearBibleSidecarValidation'
 import { AsyncConnectionRegistry } from './asyncConnectionRegistry'
 import { openSQLiteDatabase, type SQLiteDatabase } from './sqlite'
 import { installAtomicResourceFile, restoreOrphanedResourceBackup } from './atomicResourceFile'
@@ -85,14 +89,23 @@ export const getInterlinearSidecarAvailability = async (
 
   try {
     return await withInterlinearSidecar(locale, async database => {
-      const metadata = await readMetadata(database)
+      const [metadata, tableColumns] = await Promise.all([
+        readMetadata(database),
+        readTableColumns(database),
+      ])
+      const artifact = BHG_INTERLINEAR_PUBLICATION.indexes[locale]
       if (
-        metadata.schemaVersion !==
-          String(BHG_INTERLINEAR_PUBLICATION.indexes[locale].schemaVersion) ||
-        metadata.datasetId !== BHG_INTERLINEAR_PUBLICATION.datasetId ||
-        metadata.locale !== locale ||
-        metadata.textRevision !== baseMetadata.textRevision ||
-        metadata.textSha256 !== baseMetadata.textSha256
+        classifyInterlinearBibleSidecarSnapshot(
+          { metadata, tableColumns },
+          {
+            schemaVersion: artifact.schemaVersion,
+            datasetId: BHG_INTERLINEAR_PUBLICATION.datasetId,
+            locale,
+            textRevision: artifact.textRevision,
+            textSha256: artifact.textSha256,
+          },
+          baseMetadata
+        ) !== 'compatible'
       ) {
         return { status: 'incompatible' }
       }
@@ -157,17 +170,24 @@ export const installInterlinearSidecar = async (
       extractionDirectory
     )
     try {
-      const metadata = await readMetadata(candidate)
-      const integrity = await candidate.getFirstAsync<{
-        integrity_check: string
-      }>('PRAGMA integrity_check')
+      const [metadata, tableColumns, integrity] = await Promise.all([
+        readMetadata(candidate),
+        readTableColumns(candidate),
+        candidate.getFirstAsync<{ integrity_check: string }>('PRAGMA integrity_check'),
+      ])
       if (
         integrity?.integrity_check !== 'ok' ||
-        metadata.schemaVersion !== String(artifact.schemaVersion) ||
-        metadata.datasetId !== datasetId ||
-        metadata.locale !== locale ||
-        metadata.textRevision !== baseMetadata.textRevision ||
-        metadata.textSha256 !== baseMetadata.textSha256
+        classifyInterlinearBibleSidecarSnapshot(
+          { metadata, tableColumns },
+          {
+            schemaVersion: artifact.schemaVersion,
+            datasetId,
+            locale,
+            textRevision: artifact.textRevision,
+            textSha256: artifact.textSha256,
+          },
+          baseMetadata
+        ) !== 'compatible'
       ) {
         throw new Error('INTERLINEAR_SIDECAR_VALIDATION_FAILED')
       }
@@ -296,6 +316,18 @@ const readMetadata = async (database: SQLiteDatabase) => {
   )
   return Object.fromEntries(rows.map(({ key, value }) => [key, value]))
 }
+
+const readTableColumns = async (database: SQLiteDatabase) =>
+  Object.fromEntries(
+    await Promise.all(
+      Object.keys(INTERLINEAR_BIBLE_SIDECAR_REQUIRED_TABLE_COLUMNS).map(async tableName => {
+        const columns = await database.getAllAsync<{ name: string }>(
+          `PRAGMA table_info("${tableName}")`
+        )
+        return [tableName, columns.map(({ name }) => name)]
+      })
+    )
+  )
 
 const activateInterlinearSidecar = async (
   locale: ResourceLanguage,
