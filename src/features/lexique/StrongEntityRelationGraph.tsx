@@ -2,7 +2,7 @@ import { useTheme } from '@emotion/react'
 import { AnimatePresence } from '@alloc/moti'
 import React, { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Image, Pressable } from 'react-native'
+import { ActivityIndicator, Image, Pressable } from 'react-native'
 import Svg, { Line } from 'react-native-svg'
 import { useQueryClient } from '@tanstack/react-query'
 import { scheduleOnRN } from 'react-native-worklets'
@@ -45,9 +45,9 @@ const CENTER_LABEL_WIDTH = 120
 const SATELLITE_NODE_SIZE = 58
 const SATELLITE_WIDTH = 92
 const CAMERA_RELATION_MIN_SCALE = 0.3
-const PAGINATION_ENTRY_DELAY = 300
+const PAGINATION_ENTRY_DELAY = 200
 const PAGINATION_STAGGER_DELAY = 0
-const PAGINATION_NODE_DURATION = 100
+const PAGINATION_NODE_DURATION = 150
 const PAGINATION_NODE_MIN_SCALE = 1
 const PAGINATION_ENTRY_ROTATION_DEG = 10
 const PAGINATION_EXIT_ROTATION_DEG = 30
@@ -56,7 +56,7 @@ const DEFAULT_PAGINATION_STAGGER_INDEX = 0
 const GRAPH_LAYER_POOL_SIZE = 3
 
 const pressedOpacityStyle = ({ pressed }: { pressed: boolean }) => ({
-  opacity: pressed ? 0.8 : 1,
+  transform: [{ scale: pressed ? 0.98 : 1 }],
 })
 
 type Point = {
@@ -901,11 +901,13 @@ const GraphPageButton = ({
 const GraphHistoryButton = ({
   icon,
   side,
+  loading = false,
   accessibilityLabel,
   onPress,
 }: {
   icon: React.ComponentProps<typeof FeatherIcon>['name']
   side: 'left' | 'right'
+  loading?: boolean
   accessibilityLabel: string
   onPress: () => void
 }) => (
@@ -922,10 +924,15 @@ const GraphHistoryButton = ({
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
+      accessibilityState={{ busy: loading }}
       style={pressedOpacityStyle}
     >
       <Box size={32} borderRadius={16} bg="lightGrey" center>
-        <FeatherIcon name={icon} color="primary" size={icon === 'arrow-left' ? 16 : 14} />
+        {loading ? (
+          <ActivityIndicator size="small" />
+        ) : (
+          <FeatherIcon name={icon} color="primary" size={icon === 'arrow-left' ? 16 : 14} />
+        )}
       </Box>
     </Pressable>
   </MotiBox>
@@ -935,6 +942,7 @@ const GraphFooter = ({
   pageIndex,
   pageCount,
   hasHistory,
+  isResetting,
   onGoBack,
   onReset,
   onGoToPage,
@@ -942,6 +950,7 @@ const GraphFooter = ({
   pageIndex: number
   pageCount: number
   hasHistory: boolean
+  isResetting: boolean
   onGoBack: () => void
   onReset: () => void
   onGoToPage: (pageIndex: number) => void
@@ -971,11 +980,12 @@ const GraphFooter = ({
             onPress={onGoBack}
           />
         )}
-        {hasHistory && (
+        {(hasHistory || isResetting) && (
           <GraphHistoryButton
             key="graph-history-reset"
             icon="rotate-ccw"
             side="right"
+            loading={isResetting}
             accessibilityLabel={t('strongDetail.entity.graphReset')}
             onPress={onReset}
           />
@@ -1245,8 +1255,10 @@ const GraphSceneLayer = ({
   const layerIsVisible = visible && entryIsPrepared
   const showsProfileAction = scene.navigation.activeEntity.uniqueName !== currentProfileEntityKey
   const canOpenProfile = interactive && showsProfileAction
-  const rendersPersistentNodes = exit?.kind !== 'pagination'
-
+  const animatesCenter =
+    entry?.kind === 'camera' ||
+    exit?.kind === 'camera' ||
+    carry.some(motion => motion.kind === 'camera')
   useLayoutEffect(() => {
     if (!visible || !entry || entryIsPrepared) return
 
@@ -1333,7 +1345,7 @@ const GraphSceneLayer = ({
           />
         )
       })}
-      {rendersPersistentNodes && scene.previousEntity && scene.previousPositionIndex != null && (
+      {scene.previousEntity && scene.previousPositionIndex != null && (
         <GraphPreviousConnection
           center={center}
           position={graphPosition(scene.previousPositionIndex, width)}
@@ -1347,7 +1359,7 @@ const GraphSceneLayer = ({
 
   const nodes = (
     <>
-      {rendersPersistentNodes && (
+      {animatesCenter && (
         <GraphCenterNode
           entity={scene.navigation.activeEntity}
           center={center}
@@ -1372,7 +1384,7 @@ const GraphSceneLayer = ({
         />
       ))}
 
-      {rendersPersistentNodes && scene.previousEntity && scene.previousPositionIndex != null && (
+      {scene.previousEntity && scene.previousPositionIndex != null && (
         <GraphPreviousNode
           entity={scene.previousEntity}
           relation={scene.previousRelation}
@@ -1426,6 +1438,7 @@ export const StrongEntityRelationGraph = ({
     createGraphLayerPool(buildGraphScene(rootNavigation))
   )
   const [motions, setMotions] = useState<GraphLayerMotion[]>([])
+  const [isResetting, setIsResetting] = useState(false)
   const nextLayerZIndex = useRef(0)
   const nextMotionId = useRef(0)
   const latestRelationRequestId = useRef(0)
@@ -1435,8 +1448,15 @@ export const StrongEntityRelationGraph = ({
     nextLayerZIndex.current = 0
     setNavigation(nextNavigation)
     setMotions([])
+    setIsResetting(false)
     setSceneLayers(createGraphLayerPool(buildGraphScene(nextNavigation)))
   }, [entity])
+
+  useEffect(() => {
+    if (isResetting && navigation.history.length === 0 && motions.length === 0) {
+      setIsResetting(false)
+    }
+  }, [isResetting, motions.length, navigation.history.length])
 
   const activeScene = buildGraphScene(navigation)
   const visibleTargetNames = activeScene.page.relations
@@ -1609,6 +1629,7 @@ export const StrongEntityRelationGraph = ({
 
   const resetNavigation = () => {
     if (!navigation.history.length) return
+    setIsResetting(true)
     const sequenceId = ++latestRelationRequestId.current
     getResetSteps(navigation).forEach(({ sourceScene, previousEntry, to }, index) => {
       setTimeout(() => {
@@ -1639,10 +1660,19 @@ export const StrongEntityRelationGraph = ({
 
   const graphRelations = splitStrongEntityRelations(navigation.activeEntity).graph
   const hasHistory = navigation.history.length > 0
+  const hasCameraMotion = motions.some(motion => motion.kind === 'camera')
+  const showsProfileAction = navigation.activeEntity.uniqueName !== currentProfileEntityKey
   if (!graphRelations.length && !activeScene.previousEntity) return null
 
   return (
-    <VStack borderWidth={1} borderColor="border" borderRadius={20} bg="reverse" overflow="hidden">
+    <VStack
+      borderWidth={1}
+      borderColor="border"
+      borderRadius={20}
+      bg="reverse"
+      overflow="hidden"
+      pointerEvents={isResetting ? 'none' : 'auto'}
+    >
       <Box
         height={GRAPH_HEIGHT}
         onLayout={event => setWidth(event.nativeEvent.layout.width)}
@@ -1670,12 +1700,30 @@ export const StrongEntityRelationGraph = ({
             onGoBack={goBack}
           />
         ))}
+        <Box
+          position="absolute"
+          inset={0}
+          zIndex={1000}
+          opacity={hasCameraMotion ? 0 : 1}
+          pointerEvents={hasCameraMotion ? 'none' : 'box-none'}
+          accessibilityElementsHidden={hasCameraMotion}
+          importantForAccessibility={hasCameraMotion ? 'no-hide-descendants' : 'auto'}
+        >
+          <GraphCenterNode
+            entity={navigation.activeEntity}
+            center={{ x: width / 2, y: CENTER_Y }}
+            canOpenProfile={showsProfileAction}
+            showsProfileAction={showsProfileAction}
+            onOpenProfile={onOpenProfile}
+          />
+        </Box>
       </Box>
 
       <GraphFooter
         pageIndex={activeScene.page.pageIndex}
         pageCount={activeScene.page.pageCount}
         hasHistory={hasHistory}
+        isResetting={isResetting}
         onGoBack={goBack}
         onReset={resetNavigation}
         onGoToPage={goToPage}
