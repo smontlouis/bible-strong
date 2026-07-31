@@ -46,10 +46,12 @@ const SATELLITE_NODE_SIZE = 58
 const SATELLITE_WIDTH = 92
 const CAMERA_RELATION_MIN_SCALE = 0.3
 const PAGINATION_ENTRY_DELAY = 300
-const PAGINATION_STAGGER_DELAY = 40
+const PAGINATION_STAGGER_DELAY = 0
 const PAGINATION_NODE_DURATION = 100
-const PAGINATION_NODE_MIN_SCALE = 0.6
-const PAGINATION_TRANSLATE_FACTOR = 0.2
+const PAGINATION_NODE_MIN_SCALE = 1
+const PAGINATION_ENTRY_ROTATION_DEG = 10
+const PAGINATION_EXIT_ROTATION_DEG = 30
+const PAGINATION_TRANSLATE_FACTOR = 0
 const DEFAULT_PAGINATION_STAGGER_INDEX = 0
 const GRAPH_LAYER_POOL_SIZE = 3
 
@@ -218,6 +220,22 @@ const getExitScale = (role: NodeExitRole | undefined, progress: number): number 
     return interpolate(progress, [0, 1], [1, CAMERA_RELATION_MIN_SCALE], Extrapolation.CLAMP)
   }
   return 1
+}
+
+const rotateGraphRadius = (
+  radiusX: number,
+  radiusY: number,
+  degrees: number,
+  radiusScale: number
+): Point => {
+  'worklet'
+  const radians = (degrees * Math.PI) / 180
+  const cosine = Math.cos(radians)
+  const sine = Math.sin(radians)
+  return {
+    x: (radiusX * cosine - radiusY * sine) * radiusScale,
+    y: (radiusX * sine + radiusY * cosine) * radiusScale,
+  }
 }
 
 const getRelationEntryRole = (
@@ -681,20 +699,26 @@ const LayerNodeMotion = ({
     const paginationExitScale = exitIsPaginationRelation
       ? interpolate(exitValue, [0, 1], [1, PAGINATION_NODE_MIN_SCALE], Extrapolation.CLAMP)
       : 1
-    let translateX = 0
-    let translateY = 0
+    const radiusX = -(offsetToCenter?.x ?? 0)
+    const radiusY = -(offsetToCenter?.y ?? 0)
+    let radiusScale = 1
+    let rotationDegrees = 0
     let opacity = 1
 
     if (entryIsPaginationRelation) {
-      translateX += (offsetToCenter?.x ?? 0) * PAGINATION_TRANSLATE_FACTOR * (1 - entryValue)
-      translateY += (offsetToCenter?.y ?? 0) * PAGINATION_TRANSLATE_FACTOR * (1 - entryValue)
+      radiusScale *= 1 - PAGINATION_TRANSLATE_FACTOR * (1 - entryValue)
+      rotationDegrees +=
+        (entry?.paginationDirection ?? 1) * PAGINATION_ENTRY_ROTATION_DEG * (1 - entryValue)
       opacity *= entryValue
     }
     if (exitIsPaginationRelation) {
-      translateX += (offsetToCenter?.x ?? 0) * PAGINATION_TRANSLATE_FACTOR * exitValue
-      translateY += (offsetToCenter?.y ?? 0) * PAGINATION_TRANSLATE_FACTOR * exitValue
+      radiusScale *= 1 - PAGINATION_TRANSLATE_FACTOR * exitValue
+      rotationDegrees -= (exit?.paginationDirection ?? 1) * PAGINATION_EXIT_ROTATION_DEG * exitValue
       opacity *= 1 - exitValue
     }
+    const rotatedRadius = rotateGraphRadius(radiusX, radiusY, rotationDegrees, radiusScale)
+    const translateX = rotatedRadius.x - radiusX
+    const translateY = rotatedRadius.y - radiusY
 
     return {
       opacity,
@@ -739,14 +763,31 @@ const GraphRelationConnection = ({
       true,
       false
     )
-    const enteredX =
-      position.x + (center.x - position.x) * PAGINATION_TRANSLATE_FACTOR * (1 - entryValue)
-    const enteredY =
-      position.y + (center.y - position.y) * PAGINATION_TRANSLATE_FACTOR * (1 - entryValue)
+    const entryIsPagination = entry?.kind === 'pagination'
+    const exitIsPagination = exit?.kind === 'pagination'
+    let radiusScale = 1
+    let rotationDegrees = 0
+
+    if (entryIsPagination) {
+      radiusScale *= 1 - PAGINATION_TRANSLATE_FACTOR * (1 - entryValue)
+      rotationDegrees +=
+        (entry?.paginationDirection ?? 1) * PAGINATION_ENTRY_ROTATION_DEG * (1 - entryValue)
+    }
+    if (exitIsPagination) {
+      radiusScale *= 1 - PAGINATION_TRANSLATE_FACTOR * exitValue
+      rotationDegrees -= (exit?.paginationDirection ?? 1) * PAGINATION_EXIT_ROTATION_DEG * exitValue
+    }
+
+    const rotatedRadius = rotateGraphRadius(
+      position.x - center.x,
+      position.y - center.y,
+      rotationDegrees,
+      radiusScale
+    )
 
     return {
-      x2: enteredX + (center.x - enteredX) * PAGINATION_TRANSLATE_FACTOR * exitValue,
-      y2: enteredY + (center.y - enteredY) * PAGINATION_TRANSLATE_FACTOR * exitValue,
+      x2: center.x + rotatedRadius.x,
+      y2: center.y + rotatedRadius.y,
       opacity: entryValue * (1 - exitValue),
     }
   })
@@ -809,7 +850,10 @@ const GraphMotionDriver = ({
       motion.progress.set(
         withTiming(
           1,
-          { duration: motion.paginationDuration ?? PAGINATION_NODE_DURATION, easing: Easing.linear },
+          {
+            duration: motion.paginationDuration ?? PAGINATION_NODE_DURATION,
+            easing: Easing.linear,
+          },
           finished => {
             if (finished) scheduleOnRN(finish)
           }
