@@ -8,6 +8,8 @@ import { formatStrongOsisReference } from './strongReferenceNavigation'
 
 const HTML_TOKEN_PATTERN = /<!--[\\s\\S]*?-->|<[^>]*>/gu
 const LEGACY_REFERENCE_TAG_PATTERN = /^(?:<ref=(?:"[^"]*"|'[^']*')>|<\/ref\s*>)$/iu
+const ESCAPED_LEGACY_REFERENCE_TAG_PATTERN =
+  /&lt;(?:ref=(?:&quot;[\s\S]*?&quot;|&#34;[\s\S]*?&#34;|&apos;[\s\S]*?&apos;|&#39;[\s\S]*?&#39;|"[^"]*"|'[^']*')|\/ref\s*)&gt;/giu
 const LEGACY_BLOCK_TAG_PATTERN = /^<(\/?)(?:level[1-4]|re)>$/iu
 const LEGACY_INLINE_TAG_PATTERN = /^<(\/?)(?:note|date|author|def|corr)>$/iu
 const LEGACY_LINE_BREAK_TAG_PATTERN = /^<lb\s*\/?>$/iu
@@ -15,13 +17,14 @@ const LEGACY_STRONG_CODE_TAG_PATTERN = /^<([HG]\d+[A-Z]?)>$/u
 const LEGACY_EMPHASIS_TAG_PATTERN = /^<(?:strong|s\s+trong)="[HG]\d+[A-Z]?">$/iu
 
 const normalizeLegacyEditorialHtml = (html: string): string => {
+  const normalizedInput = html.replace(ESCAPED_LEGACY_REFERENCE_TAG_PATTERN, '')
   let cursor = 0
   let result = ''
 
-  for (const match of html.matchAll(HTML_TOKEN_PATTERN)) {
+  for (const match of normalizedInput.matchAll(HTML_TOKEN_PATTERN)) {
     const index = match.index ?? 0
     const token = match[0]
-    result += html.slice(cursor, index)
+    result += normalizedInput.slice(cursor, index)
     const blockTag = token.match(LEGACY_BLOCK_TAG_PATTERN)
     const inlineTag = token.match(LEGACY_INLINE_TAG_PATTERN)
     const strongCodeTag = token.match(LEGACY_STRONG_CODE_TAG_PATTERN)
@@ -41,7 +44,7 @@ const normalizeLegacyEditorialHtml = (html: string): string => {
     cursor = index + token.length
   }
 
-  return result + html.slice(cursor)
+  return result + normalizedInput.slice(cursor)
 }
 
 const escapeHtmlText = (value: string): string =>

@@ -77,6 +77,16 @@ describe('Strong editorial HTML', () => {
     )
   })
 
+  it('removes escaped legacy reference wrappers before linking their contents', () => {
+    expect(
+      linkifyStrongEditorialBibleReferences(
+        'before &lt;ref=&quot;Job.3.8; 41:1; Psalm 74:14&quot;&gt;Job.3.8; Job 41:1; Psalm 74:14&lt;/ref&gt; after'
+      )
+    ).toBe(
+      'before <a href="bible://Job.3.8">Job 3:8</a>; <a href="bible://Job.41.1">Job 41:1</a>; <a href="bible://Ps.74.14">Psaumes 74:14</a> after'
+    )
+  })
+
   it('converts legacy dictionary levels to renderable blocks', () => {
     expect(
       linkifyStrongEditorialBibleReferences(
