@@ -35,10 +35,12 @@ import { getStrongEntityAvatarSource } from './strongEntityAvatars'
 import { getGraphScenePositionIndexes } from './strongEntityGraphLayout'
 import { useStrongLexiconLanguage } from './useStrongLexiconLanguage'
 
-const GRAPH_HEIGHT = 340
-const CENTER_Y = 164
+const GRAPH_HEIGHT = 410
+const CENTER_Y = 188
+const CENTER_NODE_SIZE = 82
+const CENTER_LABEL_WIDTH = 120
+const SATELLITE_NODE_SIZE = 58
 const SATELLITE_WIDTH = 92
-const SATELLITE_TOP_OFFSET = 40
 
 type Point = {
   x: number
@@ -128,12 +130,12 @@ const getRelationVisual = (
 const graphPosition = (index: number, width: number): Point => {
   const center = width / 2
   const positions = [
-    { x: center, y: 54 },
-    { x: 54, y: 246 },
-    { x: width - 54, y: 246 },
-    { x: 54, y: 82 },
-    { x: width - 54, y: 82 },
-    { x: center, y: 274 },
+    { x: center, y: 52 },
+    { x: 54, y: 284 },
+    { x: width - 54, y: 284 },
+    { x: 54, y: 92 },
+    { x: width - 54, y: 92 },
+    { x: center, y: 324 },
   ]
   return positions[index] ?? positions[5]
 }
@@ -170,14 +172,12 @@ const buildGraphScene = (navigation: GraphNavigation): GraphScene => {
 }
 
 const EntityGraphNode = ({
-  name,
   category,
   type,
   center = false,
   avatarProgress,
   avatarRole,
 }: {
-  name: string
   category?: string
   type?: string
   center?: boolean
@@ -213,26 +213,21 @@ const EntityGraphNode = ({
   })
 
   return (
-    <VStack alignItems="center" gap={4} overflow="visible">
-      <AnimatedBox
-        size={center ? 82 : 58}
-        borderRadius={center ? 41 : 29}
-        bg={center ? 'lightPrimary' : 'lightGrey'}
-        borderWidth={center ? 2 : 1}
-        borderColor={center ? 'primary' : 'border'}
-        overflow="visible"
-        center
-        style={avatarStyle}
-      >
-        <Image
-          source={getStrongEntityAvatarSource(category ?? 'other', type ?? 'Other')}
-          style={{ width: center ? 76 : 54, height: center ? 76 : 54 }}
-        />
-      </AnimatedBox>
-      <Text bold fontSize={center ? 15 : 12} textAlign="center" numberOfLines={2}>
-        {name}
-      </Text>
-    </VStack>
+    <AnimatedBox
+      size={center ? CENTER_NODE_SIZE : SATELLITE_NODE_SIZE}
+      borderRadius={center ? CENTER_NODE_SIZE / 2 : SATELLITE_NODE_SIZE / 2}
+      bg={center ? 'lightPrimary' : 'lightGrey'}
+      borderWidth={center ? 2 : 1}
+      borderColor={center ? 'primary' : 'border'}
+      overflow="visible"
+      center
+      style={avatarStyle}
+    >
+      <Image
+        source={getStrongEntityAvatarSource(category ?? 'other', type ?? 'Other')}
+        style={{ width: center ? 76 : 54, height: center ? 76 : 54 }}
+      />
+    </AnimatedBox>
   )
 }
 
@@ -267,49 +262,61 @@ const GraphSatelliteContent = ({
       disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={`${label}, ${name}`}
+      style={{ width: SATELLITE_NODE_SIZE, height: SATELLITE_NODE_SIZE, overflow: 'visible' }}
     >
-      <Box width={SATELLITE_WIDTH} position="relative" alignItems="center">
+      <Box size={SATELLITE_NODE_SIZE} position="relative" overflow="visible">
         <EntityGraphNode
-          name={name}
           category={category}
           type={type}
           avatarProgress={avatarProgress}
           avatarRole={avatarRole}
         />
-        <HStack
-          bg="lightGrey"
-          borderRadius={12}
-          px={7}
-          py={3}
-          mt={3}
-          maxWidth={SATELLITE_WIDTH}
+        <VStack
+          position="absolute"
+          top={SATELLITE_NODE_SIZE + 4}
+          left={(SATELLITE_NODE_SIZE - SATELLITE_WIDTH) / 2}
+          width={SATELLITE_WIDTH}
           alignItems="center"
-          gap={3}
+          overflow="visible"
         >
-          <IonIcon name={visual.icon} color={visual.color} size={10} />
-          <Text
-            color="default"
-            fontSize={9}
-            bold
-            numberOfLines={1}
-            textTransform="capitalize"
-            opacity={0.5}
-          >
-            {label}
+          <Text bold fontSize={12} textAlign="center" numberOfLines={2}>
+            {name}
           </Text>
-        </HStack>
+          <HStack
+            bg="lightGrey"
+            borderRadius={12}
+            px={7}
+            py={3}
+            mt={3}
+            maxWidth={SATELLITE_WIDTH}
+            alignItems="center"
+            gap={3}
+          >
+            <IonIcon name={visual.icon} color={visual.color} size={10} />
+            <Text
+              color="default"
+              fontSize={9}
+              bold
+              numberOfLines={1}
+              textTransform="capitalize"
+              opacity={0.5}
+            >
+              {label}
+            </Text>
+          </HStack>
+        </VStack>
         {back && (
           <Box
             position="absolute"
-            left={10}
-            top={21}
+            left={-8}
+            top={19}
             width={20}
             height={20}
             borderRadius={20}
             center
-            bg="darkGrey"
+            bg="lightGrey"
           >
-            <FeatherIcon name="chevron-left" color="reverse" size={14} />
+            <FeatherIcon name="chevron-left" color="default" size={14} />
           </Box>
         )}
       </Box>
@@ -496,21 +503,40 @@ const GraphSceneLayer = ({
 
   const nodes = (
     <>
-      <Box position="absolute" left={center.x - 48} top={108} width={96}>
+      <Box
+        position="absolute"
+        left={center.x - CENTER_NODE_SIZE / 2}
+        top={center.y - CENTER_NODE_SIZE / 2}
+        size={CENTER_NODE_SIZE}
+        overflow="visible"
+      >
         <LayerNodeMotion
           entry={entry}
           exit={exit}
           entryRole={entry?.selectedUniqueName ? 'center' : undefined}
           exitRole={exit?.selectedUniqueName ? 'center' : undefined}
         >
-          <EntityGraphNode
-            name={scene.navigation.activeEntity.name}
-            category={scene.navigation.activeEntity.category}
-            type={scene.navigation.activeEntity.type}
-            center
-            avatarProgress={exit?.selectedUniqueName ? exit.progress : undefined}
-            avatarRole={exit?.selectedUniqueName ? 'center' : undefined}
-          />
+          <Box size={CENTER_NODE_SIZE} position="relative" overflow="visible">
+            <EntityGraphNode
+              category={scene.navigation.activeEntity.category}
+              type={scene.navigation.activeEntity.type}
+              center
+              avatarProgress={exit?.selectedUniqueName ? exit.progress : undefined}
+              avatarRole={exit?.selectedUniqueName ? 'center' : undefined}
+            />
+            <Box
+              position="absolute"
+              top={CENTER_NODE_SIZE + 4}
+              left={(CENTER_NODE_SIZE - CENTER_LABEL_WIDTH) / 2}
+              width={CENTER_LABEL_WIDTH}
+              alignItems="center"
+              overflow="visible"
+            >
+              <Text bold fontSize={15} textAlign="center" numberOfLines={2}>
+                {scene.navigation.activeEntity.name}
+              </Text>
+            </Box>
+          </Box>
         </LayerNodeMotion>
       </Box>
 
@@ -542,10 +568,10 @@ const GraphSceneLayer = ({
           <Box
             key={node.key}
             position="absolute"
-            left={position.x - SATELLITE_WIDTH / 2}
-            top={position.y - SATELLITE_TOP_OFFSET}
-            width={SATELLITE_WIDTH}
-            alignItems="center"
+            left={position.x - SATELLITE_NODE_SIZE / 2}
+            top={position.y - SATELLITE_NODE_SIZE / 2}
+            size={SATELLITE_NODE_SIZE}
+            overflow="visible"
           >
             <LayerNodeMotion
               entry={entry}
@@ -570,10 +596,10 @@ const GraphSceneLayer = ({
       {scene.previousEntity && scene.previousPositionIndex != null && (
         <Box
           position="absolute"
-          left={graphPosition(scene.previousPositionIndex, width).x - SATELLITE_WIDTH / 2}
-          top={graphPosition(scene.previousPositionIndex, width).y - SATELLITE_TOP_OFFSET}
-          width={SATELLITE_WIDTH}
-          alignItems="center"
+          left={graphPosition(scene.previousPositionIndex, width).x - SATELLITE_NODE_SIZE / 2}
+          top={graphPosition(scene.previousPositionIndex, width).y - SATELLITE_NODE_SIZE / 2}
+          size={SATELLITE_NODE_SIZE}
+          overflow="visible"
         >
           <LayerNodeMotion
             entry={entry}
@@ -623,6 +649,7 @@ const GraphSceneLayer = ({
     <AnimatedBox
       position="absolute"
       inset={0}
+      overflow="visible"
       pointerEvents={interactive ? 'auto' : 'none'}
       style={layerStyle}
     >
