@@ -60,4 +60,70 @@ describe('Strong editorial HTML', () => {
       '<p><a href="https://example.com">Jean 1:40</a> et <a href="bible://Matt.4.18">Matthieu 4:18</a></p>'
     )
   })
+
+  it('preserves entity copy wrapped in legacy reference tags', () => {
+    expect(
+      linkifyStrongEditorialBibleReferences(
+        'In <ref="Galatians 1:13-14">Galatians 1:13-14</ref>, Paul refers to his former way of life in Judaism.'
+      )
+    ).toBe(
+      'In <a href="bible://Gal.1.13-Gal.1.14">Galates 1:13-14</a>, Paul refers to his former way of life in Judaism.'
+    )
+  })
+
+  it('preserves dictionary copy wrapped in single-quoted legacy reference tags', () => {
+    expect(linkifyStrongEditorialBibleReferences("before <ref='Eph.2.4'>Eph.2:4</ref> after")).toBe(
+      'before <a href="bible://Eph.2.4">Éphésiens 2:4</a> after'
+    )
+  })
+
+  it('converts legacy dictionary levels to renderable blocks', () => {
+    expect(
+      linkifyStrongEditorialBibleReferences(
+        '<Level1><b>A</b></Level1><Level2><b>A.1</b></Level2><Level3>A.1.a</Level3><Level4>note</Level4>'
+      )
+    ).toBe('<div><b>A</b></div><div><b>A.1</b></div><div>A.1.a</div><div>note</div>')
+  })
+
+  it('converts legacy related-entry sections to renderable blocks', () => {
+    expect(linkifyStrongEditorialBibleReferences('<re><i>SYN.</i>: καλός</re>')).toBe(
+      '<div><i>SYN.</i>: καλός</div>'
+    )
+  })
+
+  it('converts legacy inline dictionary tags to renderable spans', () => {
+    expect(
+      linkifyStrongEditorialBibleReferences(
+        '<note>variant</note><date>500 BC</date><author>Homer</author><def>meaning</def><corr>corrected</corr>'
+      )
+    ).toBe(
+      '<span>variant</span><span>500 BC</span><span>Homer</span><span>meaning</span><span>corrected</span>'
+    )
+  })
+
+  it('converts legacy dictionary line breaks without swallowing subsequent copy', () => {
+    expect(linkifyStrongEditorialBibleReferences('before<lb />after')).toBe('before<br />after')
+  })
+
+  it('restores Strong codes encoded as legacy HTML tags', () => {
+    expect(linkifyStrongEditorialBibleReferences('called Jerusalem <H3389> after')).toBe(
+      'called Jerusalem H3389 after'
+    )
+  })
+
+  it('preserves standard HTML headings', () => {
+    expect(linkifyStrongEditorialBibleReferences('<h1>Heading</h1>')).toBe('<h1>Heading</h1>')
+  })
+
+  it('repairs legacy strong tags without swallowing subsequent copy', () => {
+    expect(
+      linkifyStrongEditorialBibleReferences('before <strong="H7676">Sabbath</strong> after')
+    ).toBe('before <strong>Sabbath</strong> after')
+  })
+
+  it('repairs the malformed Teraphim emphasis tag', () => {
+    expect(
+      linkifyStrongEditorialBibleReferences('before <s trong="H8655">Teraphim</strong> after')
+    ).toBe('before <strong>Teraphim</strong> after')
+  })
 })

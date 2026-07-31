@@ -7,6 +7,42 @@ import {
 import { formatStrongOsisReference } from './strongReferenceNavigation'
 
 const HTML_TOKEN_PATTERN = /<!--[\\s\\S]*?-->|<[^>]*>/gu
+const LEGACY_REFERENCE_TAG_PATTERN = /^(?:<ref=(?:"[^"]*"|'[^']*')>|<\/ref\s*>)$/iu
+const LEGACY_BLOCK_TAG_PATTERN = /^<(\/?)(?:level[1-4]|re)>$/iu
+const LEGACY_INLINE_TAG_PATTERN = /^<(\/?)(?:note|date|author|def|corr)>$/iu
+const LEGACY_LINE_BREAK_TAG_PATTERN = /^<lb\s*\/?>$/iu
+const LEGACY_STRONG_CODE_TAG_PATTERN = /^<([HG]\d+[A-Z]?)>$/u
+const LEGACY_EMPHASIS_TAG_PATTERN = /^<(?:strong|s\s+trong)="[HG]\d+[A-Z]?">$/iu
+
+const normalizeLegacyEditorialHtml = (html: string): string => {
+  let cursor = 0
+  let result = ''
+
+  for (const match of html.matchAll(HTML_TOKEN_PATTERN)) {
+    const index = match.index ?? 0
+    const token = match[0]
+    result += html.slice(cursor, index)
+    const blockTag = token.match(LEGACY_BLOCK_TAG_PATTERN)
+    const inlineTag = token.match(LEGACY_INLINE_TAG_PATTERN)
+    const strongCodeTag = token.match(LEGACY_STRONG_CODE_TAG_PATTERN)
+    if (blockTag) {
+      result += `<${blockTag[1]}div>`
+    } else if (inlineTag) {
+      result += `<${inlineTag[1]}span>`
+    } else if (LEGACY_LINE_BREAK_TAG_PATTERN.test(token)) {
+      result += '<br />'
+    } else if (strongCodeTag) {
+      result += strongCodeTag[1].toUpperCase()
+    } else if (LEGACY_EMPHASIS_TAG_PATTERN.test(token)) {
+      result += '<strong>'
+    } else if (!LEGACY_REFERENCE_TAG_PATTERN.test(token)) {
+      result += token
+    }
+    cursor = index + token.length
+  }
+
+  return result + html.slice(cursor)
+}
 
 const escapeHtmlText = (value: string): string =>
   value
@@ -67,13 +103,14 @@ const linkifyText = (text: string, linkColor?: string): string => {
 }
 
 export const linkifyStrongEditorialBibleReferences = (html: string, linkColor?: string): string => {
+  const normalizedHtml = normalizeLegacyEditorialHtml(html)
   let anchorDepth = 0
   let cursor = 0
   let result = ''
 
-  for (const match of html.matchAll(HTML_TOKEN_PATTERN)) {
+  for (const match of normalizedHtml.matchAll(HTML_TOKEN_PATTERN)) {
     const index = match.index ?? 0
-    const text = html.slice(cursor, index)
+    const text = normalizedHtml.slice(cursor, index)
     result += anchorDepth > 0 ? text : linkifyText(text, linkColor)
 
     const token = match[0]
@@ -87,6 +124,6 @@ export const linkifyStrongEditorialBibleReferences = (html: string, linkColor?: 
     cursor = index + token.length
   }
 
-  const remaining = html.slice(cursor)
+  const remaining = normalizedHtml.slice(cursor)
   return result + (anchorDepth > 0 ? remaining : linkifyText(remaining, linkColor))
 }
