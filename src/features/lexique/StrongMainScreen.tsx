@@ -322,6 +322,7 @@ const StrongMainScreen = ({
           onOpenStrong={routeNavigation.openStrong}
           onOpenBibleReference={routeNavigation.openBibleReference}
           onOpenConcordanceVerse={openConcordanceVerse}
+          onOpenEntityProfile={routeNavigation.openEntity}
           onOpenEntityRelation={routeNavigation.openEntityRelation}
         />
       )}

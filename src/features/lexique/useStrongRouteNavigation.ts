@@ -26,13 +26,17 @@ export const useStrongRouteNavigation = (context: StrongDetailRouteContext) => {
     )
   }
 
-  const openEntityRelation = (relation: StrongLexiconEntityRelation) => {
-    if (!relation.targetUniqueName) return
+  const openEntity = (entityKey: string) => {
+    if (!entityKey) return
     pushRouteOnce(
       createStrongDetailRoute('entity', context, {
-        entityKey: relation.targetUniqueName,
+        entityKey,
       })
     )
+  }
+
+  const openEntityRelation = (relation: StrongLexiconEntityRelation) => {
+    if (relation.targetUniqueName) openEntity(relation.targetUniqueName)
   }
 
   const openConcordanceVerse = (verse: Verse, version?: string) => {
@@ -55,6 +59,7 @@ export const useStrongRouteNavigation = (context: StrongDetailRouteContext) => {
   return {
     openBibleReference,
     openStrong,
+    openEntity,
     openEntityRelation,
     openConcordanceVerse,
   }

@@ -29,6 +29,7 @@ type Props = {
   readingTypography: StrongReadingTypography
   onOpenBibleReference: (osis: string) => void
   onOpenStrong: (stepCode: string) => void
+  onOpenEntityProfile: (entityKey: string) => void
   onOpenEntityRelation: (relation: StrongLexiconEntityRelation) => void
 }
 
@@ -39,6 +40,7 @@ const StrongEntityPage = ({
   readingTypography,
   onOpenBibleReference,
   onOpenStrong,
+  onOpenEntityProfile,
   onOpenEntityRelation,
 }: Props) => {
   const { t } = useTranslation()
@@ -124,7 +126,12 @@ const StrongEntityPage = ({
 
       {graph.length > 0 && (
         <StrongEditorialSection title={t('strongDetail.entity.relationships')} separated>
-          <StrongEntityRelationGraph entity={entity} onOpenEntity={onOpenEntityRelation} />
+          <StrongEntityRelationGraph
+            entity={entity}
+            currentProfileEntityKey={entity.uniqueName}
+            onOpenProfile={onOpenEntityProfile}
+            onOpenEntity={onOpenEntityRelation}
+          />
         </StrongEditorialSection>
       )}
 

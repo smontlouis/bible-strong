@@ -56,6 +56,7 @@ const StrongEntityRouteScreen = ({ context, entityKey, isFormSheet = false }: Pr
         }
         onOpenBibleReference={navigation.openBibleReference}
         onOpenStrong={navigation.openStrong}
+        onOpenEntityProfile={navigation.openEntity}
         onOpenEntityRelation={navigation.openEntityRelation}
       />
     </FormSheetScreen>

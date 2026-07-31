@@ -331,10 +331,14 @@ export const StrongEntitySummaryCard = ({
                   borderRadius={10}
                   px={7}
                   py={3}
+                  row
+                  alignItems="center"
+                  gap={2}
                 >
                   <Text color="tertiary" fontSize={11} bold>
                     {code}
                   </Text>
+                  <FeatherIcon name="chevron-right" color="tertiary" size={10} />
                 </TouchableBox>
               ))}
             </HStack>

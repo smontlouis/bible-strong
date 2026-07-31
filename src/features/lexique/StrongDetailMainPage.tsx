@@ -63,6 +63,7 @@ type Props = {
   onOpenStrong: (stepCode: string) => void
   onOpenBibleReference: (osis: string) => void
   onOpenConcordanceVerse: (verse: Verse) => void
+  onOpenEntityProfile: (entityKey: string) => void
   onOpenEntityRelation: (relation: StrongLexiconEntityRelation) => void
 }
 
@@ -158,6 +159,7 @@ const StrongDetailMainPage = ({
   onOpenStrong,
   onOpenBibleReference,
   onOpenConcordanceVerse,
+  onOpenEntityProfile,
   onOpenEntityRelation,
 }: Props) => {
   const { t, i18n } = useTranslation()
@@ -419,6 +421,7 @@ const StrongDetailMainPage = ({
               </Text>
               <StrongEntityRelationGraph
                 entity={entry.entity}
+                onOpenProfile={onOpenEntityProfile}
                 onOpenEntity={onOpenEntityRelation}
               />
             </VStack>

@@ -140,6 +140,25 @@ const graphPosition = (index: number, width: number): Point => {
   return positions[index] ?? positions[5]
 }
 
+const getBackIndicatorPosition = (
+  positionIndex: number
+): {
+  left?: number
+  right?: number
+  top: number
+  transform: [{ rotate: string }]
+} => {
+  const positions = [
+    { left: 18, top: -8, transform: [{ rotate: '90deg' }] },
+    { left: -4, top: 34, transform: [{ rotate: '-45deg' }] },
+    { right: -4, top: 38, transform: [{ rotate: '-135deg' }] },
+    { left: 0, top: 0, transform: [{ rotate: '45deg' }] },
+    { right: 0, top: 0, transform: [{ rotate: '135deg' }] },
+    { left: 20, top: 46, transform: [{ rotate: '-90deg' }] },
+  ]
+  return positions[positionIndex] ?? positions[0]
+}
+
 const buildGraphScene = (navigation: GraphNavigation): GraphScene => {
   const previousEntry = navigation.history.at(-1)
   const previousEntity = previousEntry?.entity
@@ -238,6 +257,7 @@ const GraphSatelliteContent = ({
   label,
   relation,
   back,
+  positionIndex,
   avatarProgress,
   avatarRole,
   disabled,
@@ -249,6 +269,7 @@ const GraphSatelliteContent = ({
   label: string
   relation: string
   back: boolean
+  positionIndex?: number
   avatarProgress?: SharedValue<number>
   avatarRole?: 'selected'
   disabled: boolean
@@ -279,7 +300,7 @@ const GraphSatelliteContent = ({
           alignItems="center"
           overflow="visible"
         >
-          <Text bold fontSize={12} textAlign="center" numberOfLines={2}>
+          <Text bold fontSize={12} textAlign="center" numberOfLines={1}>
             {name}
           </Text>
           <HStack
@@ -308,8 +329,7 @@ const GraphSatelliteContent = ({
         {back && (
           <Box
             position="absolute"
-            left={-8}
-            top={19}
+            {...getBackIndicatorPosition(positionIndex ?? 0)}
             width={20}
             height={20}
             borderRadius={20}
@@ -399,6 +419,8 @@ const GraphSceneLayer = ({
   entry,
   exit,
   interactive,
+  currentProfileEntityKey,
+  onOpenProfile,
   onOpenRelation,
   onGoBack,
 }: {
@@ -408,11 +430,15 @@ const GraphSceneLayer = ({
   entry?: GraphLayerMotion
   exit?: GraphLayerMotion
   interactive: boolean
+  currentProfileEntityKey?: string
+  onOpenProfile: (entityKey: string) => void
   onOpenRelation: (relation: StrongLexiconEntityRelation, positionIndex: number) => void
   onGoBack: () => void
 }) => {
   const { t } = useTranslation()
   const theme = useTheme()
+  const showsProfileAction = scene.navigation.activeEntity.uniqueName !== currentProfileEntityKey
+  const canOpenProfile = interactive && showsProfileAction
 
   const center = { x: width / 2, y: CENTER_Y }
   const entryPosition =
@@ -517,14 +543,22 @@ const GraphSceneLayer = ({
           exitRole={exit?.selectedUniqueName ? 'center' : undefined}
         >
           <Box size={CENTER_NODE_SIZE} position="relative" overflow="visible">
-            <EntityGraphNode
-              category={scene.navigation.activeEntity.category}
-              type={scene.navigation.activeEntity.type}
-              center
-              avatarProgress={exit?.selectedUniqueName ? exit.progress : undefined}
-              avatarRole={exit?.selectedUniqueName ? 'center' : undefined}
-            />
-            <Box
+            <Pressable
+              disabled={!canOpenProfile}
+              onPress={() => onOpenProfile(scene.navigation.activeEntity.uniqueName)}
+              accessibilityRole="button"
+              accessibilityLabel={t('strongDetail.entity.viewProfile')}
+              style={{ width: CENTER_NODE_SIZE, height: CENTER_NODE_SIZE }}
+            >
+              <EntityGraphNode
+                category={scene.navigation.activeEntity.category}
+                type={scene.navigation.activeEntity.type}
+                center
+                avatarProgress={exit?.selectedUniqueName ? exit.progress : undefined}
+                avatarRole={exit?.selectedUniqueName ? 'center' : undefined}
+              />
+            </Pressable>
+            <VStack
               position="absolute"
               top={CENTER_NODE_SIZE + 4}
               left={(CENTER_NODE_SIZE - CENTER_LABEL_WIDTH) / 2}
@@ -532,10 +566,33 @@ const GraphSceneLayer = ({
               alignItems="center"
               overflow="visible"
             >
-              <Text bold fontSize={15} textAlign="center" numberOfLines={2}>
+              <Text bold fontSize={15} textAlign="center" numberOfLines={1}>
                 {scene.navigation.activeEntity.name}
               </Text>
-            </Box>
+              {showsProfileAction && (
+                <Pressable
+                  disabled={!canOpenProfile}
+                  onPress={() => onOpenProfile(scene.navigation.activeEntity.uniqueName)}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('strongDetail.entity.viewProfile')}
+                >
+                  <HStack
+                    bg="lightGrey"
+                    borderRadius={12}
+                    px={7}
+                    py={3}
+                    mt={3}
+                    alignItems="center"
+                    gap={2}
+                  >
+                    <Text color="tertiary" fontSize={9} bold>
+                      {t('strongDetail.entity.viewProfile')}
+                    </Text>
+                    <IonIcon name="chevron-forward" color="tertiary" size={10} />
+                  </HStack>
+                </Pressable>
+              )}
+            </VStack>
           </Box>
         </LayerNodeMotion>
       </Box>
@@ -626,6 +683,7 @@ const GraphSceneLayer = ({
               }
               relation={scene.previousRelation?.relation ?? ''}
               back
+              positionIndex={scene.previousPositionIndex}
               avatarProgress={
                 exit && scene.previousEntity.uniqueName === exit.selectedUniqueName
                   ? exit.progress
@@ -661,9 +719,13 @@ const GraphSceneLayer = ({
 
 export const StrongEntityRelationGraph = ({
   entity,
+  currentProfileEntityKey,
+  onOpenProfile,
   onOpenEntity,
 }: {
   entity: StrongLexiconEntity
+  currentProfileEntityKey?: string
+  onOpenProfile: (entityKey: string) => void
   onOpenEntity: (relation: StrongLexiconEntityRelation) => void
 }) => {
   const { t } = useTranslation()
@@ -883,11 +945,14 @@ export const StrongEntityRelationGraph = ({
   }
 
   const resetNavigation = () => {
-    if (!navigation.history.length) return
+    const previousEntry = activeScene.previousEntry
+    if (!previousEntry) return
     latestRelationRequestId.current += 1
 
     beginTransition({
-      kind: 'fade',
+      kind: 'camera',
+      selectedUniqueName: previousEntry.entity.uniqueName,
+      selectedPositionIndex: activeScene.previousPositionIndex,
       to: {
         activeEntity: entity,
         history: [],
@@ -933,6 +998,8 @@ export const StrongEntityRelationGraph = ({
             entry={layer.entry}
             exit={layer.exit}
             interactive={index === sceneLayers.length - 1}
+            currentProfileEntityKey={currentProfileEntityKey}
+            onOpenProfile={onOpenProfile}
             onOpenRelation={openRelation}
             onGoBack={goBack}
           />
