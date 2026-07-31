@@ -283,7 +283,12 @@ const GraphSatelliteContent = ({
       disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={`${label}, ${name}`}
-      style={{ width: SATELLITE_NODE_SIZE, height: SATELLITE_NODE_SIZE, overflow: 'visible' }}
+      style={({ pressed }) => ({
+        width: SATELLITE_NODE_SIZE,
+        height: SATELLITE_NODE_SIZE,
+        overflow: 'visible',
+        opacity: pressed ? 0.8 : 1,
+      })}
     >
       <Box size={SATELLITE_NODE_SIZE} position="relative" overflow="visible">
         <EntityGraphNode
@@ -336,7 +341,7 @@ const GraphSatelliteContent = ({
             center
             bg="lightGrey"
           >
-            <FeatherIcon name="chevron-left" color="default" size={14} />
+            <FeatherIcon name="chevron-left" color="primary" size={14} />
           </Box>
         )}
       </Box>
@@ -548,7 +553,11 @@ const GraphSceneLayer = ({
               onPress={() => onOpenProfile(scene.navigation.activeEntity.uniqueName)}
               accessibilityRole="button"
               accessibilityLabel={t('strongDetail.entity.viewProfile')}
-              style={{ width: CENTER_NODE_SIZE, height: CENTER_NODE_SIZE }}
+              style={({ pressed }) => ({
+                width: CENTER_NODE_SIZE,
+                height: CENTER_NODE_SIZE,
+                opacity: pressed ? 0.8 : 1,
+              })}
             >
               <EntityGraphNode
                 category={scene.navigation.activeEntity.category}
@@ -575,6 +584,7 @@ const GraphSceneLayer = ({
                   onPress={() => onOpenProfile(scene.navigation.activeEntity.uniqueName)}
                   accessibilityRole="button"
                   accessibilityLabel={t('strongDetail.entity.viewProfile')}
+                  style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
                 >
                   <HStack
                     bg="lightGrey"
@@ -805,11 +815,13 @@ export const StrongEntityRelationGraph = ({
     kind,
     selectedUniqueName,
     selectedPositionIndex,
+    sourceScene = activeScene,
   }: {
     to: GraphNavigation
     kind: GraphLayerMotion['kind']
     selectedUniqueName?: string
     selectedPositionIndex?: number
+    sourceScene?: GraphScene
   }) => {
     const targetScene = buildGraphScene(to)
     if (reduceMotion) {
@@ -831,7 +843,7 @@ export const StrongEntityRelationGraph = ({
       progress: makeMutable(0),
       selectedUniqueName,
       selectedPositionIndex,
-      departingUniqueName: activeScene.navigation.activeEntity.uniqueName,
+      departingUniqueName: sourceScene.navigation.activeEntity.uniqueName,
     }
     const targetLayer: GraphSceneLayerState = {
       id: ++nextLayerId.current,
@@ -945,19 +957,37 @@ export const StrongEntityRelationGraph = ({
   }
 
   const resetNavigation = () => {
-    const previousEntry = activeScene.previousEntry
-    if (!previousEntry) return
-    latestRelationRequestId.current += 1
+    if (!navigation.history.length) return
+    const sequenceId = ++latestRelationRequestId.current
+    const steps: Array<{
+      sourceScene: GraphScene
+      previousEntry: GraphHistoryEntry
+      to: GraphNavigation
+    }> = []
+    let sourceNavigation = navigation
 
-    beginTransition({
-      kind: 'camera',
-      selectedUniqueName: previousEntry.entity.uniqueName,
-      selectedPositionIndex: activeScene.previousPositionIndex,
-      to: {
-        activeEntity: entity,
-        history: [],
-        requestedPageIndex: 0,
-      },
+    for (let index = navigation.history.length - 1; index >= 0; index -= 1) {
+      const previousEntry = navigation.history[index]
+      const to: GraphNavigation = {
+        activeEntity: previousEntry.entity,
+        history: navigation.history.slice(0, index),
+        requestedPageIndex: previousEntry.pageIndex,
+      }
+      steps.push({ sourceScene: buildGraphScene(sourceNavigation), previousEntry, to })
+      sourceNavigation = to
+    }
+
+    steps.forEach(({ sourceScene, previousEntry, to }, index) => {
+      setTimeout(() => {
+        if (latestRelationRequestId.current !== sequenceId) return
+        beginTransition({
+          kind: 'camera',
+          sourceScene,
+          selectedUniqueName: previousEntry.entity.uniqueName,
+          selectedPositionIndex: sourceScene.previousPositionIndex,
+          to,
+        })
+      }, index * 350)
     })
   }
 
@@ -978,7 +1008,7 @@ export const StrongEntityRelationGraph = ({
   if (!graphRelations.length && !activeScene.previousEntity) return null
 
   return (
-    <VStack borderWidth={1} borderColor="border" borderRadius={24} bg="reverse" overflow="hidden">
+    <VStack borderWidth={1} borderColor="border" borderRadius={20} bg="reverse" overflow="hidden">
       <Box
         height={GRAPH_HEIGHT}
         onLayout={event => setWidth(event.nativeEvent.layout.width)}
@@ -1007,9 +1037,9 @@ export const StrongEntityRelationGraph = ({
       </Box>
 
       <HStack
-        height={44}
         center
-        gap={18}
+        py={6}
+        gap={12}
         position="relative"
         borderTopWidth={1}
         borderColor="border"
@@ -1034,6 +1064,7 @@ export const StrongEntityRelationGraph = ({
                 onPress={goBack}
                 accessibilityRole="button"
                 accessibilityLabel={t('strongDetail.entity.graphBack')}
+                style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
               >
                 <Box size={32} borderRadius={16} bg="lightGrey" center>
                   <FeatherIcon name="arrow-left" color="primary" size={16} />
@@ -1057,6 +1088,7 @@ export const StrongEntityRelationGraph = ({
                 onPress={resetNavigation}
                 accessibilityRole="button"
                 accessibilityLabel={t('strongDetail.entity.graphReset')}
+                style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
               >
                 <Box size={32} borderRadius={16} bg="lightGrey" center>
                   <FeatherIcon name="rotate-ccw" color="primary" size={14} />
@@ -1074,6 +1106,7 @@ export const StrongEntityRelationGraph = ({
           accessibilityState={{
             disabled: activeScene.page.pageIndex === 0,
           }}
+          style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
         >
           <Box
             size={32}
@@ -1098,6 +1131,7 @@ export const StrongEntityRelationGraph = ({
           accessibilityState={{
             disabled: activeScene.page.pageIndex === activeScene.page.pageCount - 1,
           }}
+          style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
         >
           <Box
             size={32}
