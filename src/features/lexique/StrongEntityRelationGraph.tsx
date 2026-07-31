@@ -1,6 +1,6 @@
 import { useTheme } from '@emotion/react'
 import { AnimatePresence } from '@alloc/moti'
-import React, { useEffect, useEffectEvent, useRef, useState } from 'react'
+import React, { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Image, Pressable } from 'react-native'
 import Svg, { Line } from 'react-native-svg'
@@ -44,10 +44,12 @@ const CENTER_NODE_SIZE = 82
 const CENTER_LABEL_WIDTH = 120
 const SATELLITE_NODE_SIZE = 58
 const SATELLITE_WIDTH = 92
-const PAGINATION_STAGGER_DELAY = 0.1
-const PAGINATION_NODE_DURATION = 0.45
-const PAGINATION_DURATION = 480
-const PAGINATION_TRANSLATE_FACTOR = 0.35
+const CAMERA_RELATION_MIN_SCALE = 0.3
+const PAGINATION_ENTRY_DELAY = 300
+const PAGINATION_STAGGER_DELAY = 40
+const PAGINATION_NODE_DURATION = 100
+const PAGINATION_NODE_MIN_SCALE = 0.6
+const PAGINATION_TRANSLATE_FACTOR = 0.2
 const DEFAULT_PAGINATION_STAGGER_INDEX = 0
 const GRAPH_LAYER_POOL_SIZE = 3
 
@@ -96,6 +98,7 @@ type GraphMotionSpec =
 type GraphLayerMotion = GraphMotionSpec & {
   id: number
   progress: SharedValue<number>
+  paginationDuration?: number
   selectedUniqueName?: string
   selectedPositionIndex?: number
   departingUniqueName?: string
@@ -140,12 +143,15 @@ const getStaggeredPaginationProgress = (
   value: number,
   isPagination: boolean,
   staggerIndex: number,
-  fallback: number
+  fallback: number,
+  paginationDuration: number,
+  initialDelay = 0
 ): number => {
   'worklet'
   if (!isPagination) return fallback
-  const delay = staggerIndex * PAGINATION_STAGGER_DELAY
-  return interpolate(value, [delay, delay + PAGINATION_NODE_DURATION], [0, 1], Extrapolation.CLAMP)
+  const delay = (initialDelay + staggerIndex * PAGINATION_STAGGER_DELAY) / paginationDuration
+  const nodeDuration = PAGINATION_NODE_DURATION / paginationDuration
+  return interpolate(value, [delay, delay + nodeDuration], [0, 1], Extrapolation.CLAMP)
 }
 
 const getLayerProgressValues = (
@@ -172,13 +178,16 @@ const getLayerProgressValues = (
       rawEntryValue,
       entry?.kind === 'pagination' && isPositioned,
       entryStaggerIndex,
-      entryFallback
+      entryFallback,
+      entry?.paginationDuration ?? PAGINATION_NODE_DURATION,
+      PAGINATION_ENTRY_DELAY
     ),
     exitValue: getStaggeredPaginationProgress(
       rawExitValue,
       exit?.kind === 'pagination' && isPositioned,
       exitStaggerIndex,
-      exitFallback
+      exitFallback,
+      exit?.paginationDuration ?? PAGINATION_NODE_DURATION
     ),
   }
 }
@@ -192,7 +201,7 @@ const getEntryScale = (role: NodeEntryRole | undefined, progress: number): numbe
     return interpolate(progress, [0, 1], [1.42, 1], Extrapolation.CLAMP)
   }
   if (role === 'relation') {
-    return interpolate(progress, [0, 1], [0.3, 1], Extrapolation.CLAMP)
+    return interpolate(progress, [0, 1], [CAMERA_RELATION_MIN_SCALE, 1], Extrapolation.CLAMP)
   }
   return 1
 }
@@ -206,7 +215,7 @@ const getExitScale = (role: NodeExitRole | undefined, progress: number): number 
     return interpolate(progress, [0, 1], [1, 1.42], Extrapolation.CLAMP)
   }
   if (role === 'relation') {
-    return interpolate(progress, [0, 1], [1, 0.3], Extrapolation.CLAMP)
+    return interpolate(progress, [0, 1], [1, CAMERA_RELATION_MIN_SCALE], Extrapolation.CLAMP)
   }
   return 1
 }
@@ -441,6 +450,7 @@ const getResetSteps = (navigation: GraphNavigation): GraphResetStep[] => {
 const createGraphLayerMotion = (
   request: GraphTransitionRequest,
   sourceScene: GraphScene,
+  targetScene: GraphScene,
   id: number
 ): GraphLayerMotion => {
   const motionBase = {
@@ -451,10 +461,18 @@ const createGraphLayerMotion = (
     departingUniqueName: sourceScene.navigation.activeEntity.uniqueName,
   }
   if (request.kind === 'pagination') {
+    const animatedNodeCount = Math.max(
+      sourceScene.relationNodes.length,
+      targetScene.relationNodes.length
+    )
     return {
       ...motionBase,
       kind: 'pagination',
       paginationDirection: request.paginationDirection,
+      paginationDuration:
+        PAGINATION_ENTRY_DELAY +
+        Math.max(0, animatedNodeCount - 1) * PAGINATION_STAGGER_DELAY +
+        PAGINATION_NODE_DURATION,
     }
   }
   return { ...motionBase, kind: 'camera' }
@@ -653,10 +671,16 @@ const LayerNodeMotion = ({
       positionIndex != null,
       true
     )
-    const entryScale = getEntryScale(entryRole, entryValue)
-    const exitScale = getExitScale(exitRole, exitValue)
     const entryIsPaginationRelation = entry?.kind === 'pagination' && positionIndex != null
     const exitIsPaginationRelation = exit?.kind === 'pagination' && positionIndex != null
+    const entryScale = getEntryScale(entryIsPaginationRelation ? undefined : entryRole, entryValue)
+    const exitScale = getExitScale(exitIsPaginationRelation ? undefined : exitRole, exitValue)
+    const paginationEntryScale = entryIsPaginationRelation
+      ? interpolate(entryValue, [0, 1], [PAGINATION_NODE_MIN_SCALE, 1], Extrapolation.CLAMP)
+      : 1
+    const paginationExitScale = exitIsPaginationRelation
+      ? interpolate(exitValue, [0, 1], [1, PAGINATION_NODE_MIN_SCALE], Extrapolation.CLAMP)
+      : 1
     let translateX = 0
     let translateY = 0
     let opacity = 1
@@ -674,7 +698,11 @@ const LayerNodeMotion = ({
 
     return {
       opacity,
-      transform: [{ translateX }, { translateY }, { scale: entryScale * exitScale }],
+      transform: [
+        { translateX },
+        { translateY },
+        { scale: entryScale * exitScale * paginationEntryScale * paginationExitScale },
+      ],
     }
   })
 
@@ -779,9 +807,13 @@ const GraphMotionDriver = ({
     motion.progress.set(0)
     if (motion.kind === 'pagination') {
       motion.progress.set(
-        withTiming(1, { duration: PAGINATION_DURATION, easing: Easing.linear }, finished => {
-          if (finished) scheduleOnRN(finish)
-        })
+        withTiming(
+          1,
+          { duration: motion.paginationDuration ?? PAGINATION_NODE_DURATION, easing: Easing.linear },
+          finished => {
+            if (finished) scheduleOnRN(finish)
+          }
+        )
       )
     } else {
       motion.progress.set(
@@ -1164,9 +1196,19 @@ const GraphSceneLayer = ({
   onGoBack: () => void
 }) => {
   const theme = useTheme()
+  const [preparedEntryId, setPreparedEntryId] = useState(entry?.id)
+  const entryIsPrepared = !entry || preparedEntryId === entry.id
+  const layerIsVisible = visible && entryIsPrepared
   const showsProfileAction = scene.navigation.activeEntity.uniqueName !== currentProfileEntityKey
   const canOpenProfile = interactive && showsProfileAction
   const rendersPersistentNodes = exit?.kind !== 'pagination'
+
+  useLayoutEffect(() => {
+    if (!visible || !entry || entryIsPrepared) return
+
+    const frame = requestAnimationFrame(() => setPreparedEntryId(entry.id))
+    return () => cancelAnimationFrame(frame)
+  }, [entry, entryIsPrepared, visible])
 
   const center = { x: width / 2, y: CENTER_Y }
   const entryPosition = getMotionPosition(entry, center, width)
@@ -1306,10 +1348,10 @@ const GraphSceneLayer = ({
       position="absolute"
       inset={0}
       overflow="visible"
-      pointerEvents={interactive ? 'auto' : 'none'}
-      accessibilityElementsHidden={!visible}
-      importantForAccessibility={visible ? 'auto' : 'no-hide-descendants'}
-      style={[{ display: visible ? 'flex' : 'none', zIndex }, layerStyle]}
+      pointerEvents={interactive && layerIsVisible ? 'auto' : 'none'}
+      accessibilityElementsHidden={!layerIsVisible}
+      importantForAccessibility={layerIsVisible ? 'auto' : 'no-hide-descendants'}
+      style={[{ display: layerIsVisible ? 'flex' : 'none', zIndex }, layerStyle]}
     >
       {connections}
       {nodes}
@@ -1406,7 +1448,7 @@ export const StrongEntityRelationGraph = ({
       return
     }
 
-    const motion = createGraphLayerMotion(request, sourceScene, ++nextMotionId.current)
+    const motion = createGraphLayerMotion(request, sourceScene, targetScene, ++nextMotionId.current)
 
     setMotions(current => [...current, motion])
     setSceneLayers(current => {
