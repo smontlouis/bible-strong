@@ -49,6 +49,7 @@ const PAGINATION_NODE_DURATION = 0.45
 const PAGINATION_DURATION = 480
 const PAGINATION_TRANSLATE_FACTOR = 0.35
 const DEFAULT_PAGINATION_STAGGER_INDEX = 0
+const GRAPH_LAYER_POOL_SIZE = 3
 
 const pressedOpacityStyle = ({ pressed }: { pressed: boolean }) => ({
   opacity: pressed ? 0.8 : 1,
@@ -113,6 +114,9 @@ type GraphSceneLayerState = {
   carry: GraphLayerMotion[]
   entry?: GraphLayerMotion
   exit?: GraphLayerMotion
+  visible: boolean
+  current: boolean
+  zIndex: number
 }
 
 type NodeEntryRole = 'center' | 'previous' | 'relation'
@@ -355,6 +359,33 @@ const createRootNavigation = (entity: StrongLexiconEntity): GraphNavigation => (
   history: [],
   requestedPageIndex: 0,
 })
+
+const createGraphLayerPool = (scene: GraphScene): GraphSceneLayerState[] =>
+  Array.from({ length: GRAPH_LAYER_POOL_SIZE }, (_, id) => ({
+    id,
+    scene,
+    carry: [],
+    visible: id === 0,
+    current: id === 0,
+    zIndex: id === 0 ? 0 : -1,
+  }))
+
+const getCurrentGraphLayer = (layers: GraphSceneLayerState[]): GraphSceneLayerState | undefined =>
+  layers.find(layer => layer.current)
+
+const getReusableGraphLayer = (
+  layers: GraphSceneLayerState[]
+): GraphSceneLayerState | undefined => {
+  const hiddenLayer = layers.find(layer => !layer.visible)
+  if (hiddenLayer) return hiddenLayer
+
+  return layers
+    .filter(layer => !layer.current)
+    .reduce<GraphSceneLayerState | undefined>((oldest, layer) => {
+      if (!oldest || layer.zIndex < oldest.zIndex) return layer
+      return oldest
+    }, undefined)
+}
 
 const getForwardHistory = ({
   rootEntity,
@@ -1111,6 +1142,8 @@ const GraphSceneLayer = ({
   carry,
   entry,
   exit,
+  visible,
+  zIndex,
   interactive,
   currentProfileEntityKey,
   onOpenProfile,
@@ -1122,6 +1155,8 @@ const GraphSceneLayer = ({
   carry: GraphLayerMotion[]
   entry?: GraphLayerMotion
   exit?: GraphLayerMotion
+  visible: boolean
+  zIndex: number
   interactive: boolean
   currentProfileEntityKey?: string
   onOpenProfile: (entityKey: string) => void
@@ -1202,7 +1237,7 @@ const GraphSceneLayer = ({
         const position = graphPosition(node.positionIndex, width)
         return (
           <GraphRelationConnection
-            key={`line:${node.key}`}
+            key={`line-position:${node.positionIndex}`}
             center={center}
             position={position}
             positionIndex={node.positionIndex}
@@ -1240,7 +1275,7 @@ const GraphSceneLayer = ({
 
       {scene.relationNodes.map(node => (
         <GraphRelationNodeView
-          key={node.key}
+          key={`relation-position:${node.positionIndex}`}
           node={node}
           center={center}
           width={width}
@@ -1272,7 +1307,9 @@ const GraphSceneLayer = ({
       inset={0}
       overflow="visible"
       pointerEvents={interactive ? 'auto' : 'none'}
-      style={layerStyle}
+      accessibilityElementsHidden={!visible}
+      importantForAccessibility={visible ? 'auto' : 'no-hide-descendants'}
+      style={[{ display: visible ? 'flex' : 'none', zIndex }, layerStyle]}
     >
       {connections}
       {nodes}
@@ -1299,29 +1336,20 @@ export const StrongEntityRelationGraph = ({
   const [width, setWidth] = useState(330)
   const rootNavigation = createRootNavigation(entity)
   const [navigation, setNavigation] = useState<GraphNavigation>(rootNavigation)
-  const [sceneLayers, setSceneLayers] = useState<GraphSceneLayerState[]>([
-    {
-      id: 0,
-      scene: buildGraphScene(rootNavigation),
-      carry: [],
-    },
-  ])
+  const [sceneLayers, setSceneLayers] = useState<GraphSceneLayerState[]>(() =>
+    createGraphLayerPool(buildGraphScene(rootNavigation))
+  )
   const [motions, setMotions] = useState<GraphLayerMotion[]>([])
-  const nextLayerId = useRef(0)
+  const nextLayerZIndex = useRef(0)
   const nextMotionId = useRef(0)
   const latestRelationRequestId = useRef(0)
 
   useEffect(() => {
     const nextNavigation = createRootNavigation(entity)
+    nextLayerZIndex.current = 0
     setNavigation(nextNavigation)
     setMotions([])
-    setSceneLayers([
-      {
-        id: ++nextLayerId.current,
-        scene: buildGraphScene(nextNavigation),
-        carry: [],
-      },
-    ])
+    setSceneLayers(createGraphLayerPool(buildGraphScene(nextNavigation)))
   }, [entity])
 
   const activeScene = buildGraphScene(navigation)
@@ -1345,13 +1373,25 @@ export const StrongEntityRelationGraph = ({
   const finishMotion = (motionId: number) => {
     setMotions(current => current.filter(motion => motion.id !== motionId))
     setSceneLayers(current =>
-      current
-        .filter(layer => layer.exit?.id !== motionId)
-        .map(layer => ({
+      current.map(layer => {
+        if (layer.exit?.id === motionId) {
+          return {
+            ...layer,
+            carry: [],
+            entry: undefined,
+            exit: undefined,
+            visible: false,
+            current: false,
+            zIndex: -1,
+          }
+        }
+
+        return {
           ...layer,
           carry: layer.carry.filter(motion => motion.id !== motionId),
           entry: layer.entry?.id === motionId ? undefined : layer.entry,
-        }))
+        }
+      })
     )
   }
 
@@ -1359,46 +1399,48 @@ export const StrongEntityRelationGraph = ({
     const { to, sourceScene = activeScene } = request
     const targetScene = buildGraphScene(to)
     if (reduceMotion) {
+      nextLayerZIndex.current = 0
       setNavigation(to)
       setMotions([])
-      setSceneLayers([
-        {
-          id: ++nextLayerId.current,
-          scene: targetScene,
-          carry: [],
-        },
-      ])
+      setSceneLayers(createGraphLayerPool(targetScene))
       return
     }
 
     const motion = createGraphLayerMotion(request, sourceScene, ++nextMotionId.current)
-    const targetLayer: GraphSceneLayerState = {
-      id: ++nextLayerId.current,
-      scene: targetScene,
-      carry: [],
-      entry: motion,
-    }
 
     setMotions(current => [...current, motion])
     setSceneLayers(current => {
-      const sourceLayer = current.at(-1)
-      if (!sourceLayer) return [targetLayer]
+      const sourceLayer = getCurrentGraphLayer(current)
+      const targetLayer = getReusableGraphLayer(current)
+      if (!sourceLayer || !targetLayer) return createGraphLayerPool(targetScene)
       const inheritedMotions = [
         ...sourceLayer.carry,
         ...(sourceLayer.entry ? [sourceLayer.entry] : []),
       ]
+      const targetZIndex = ++nextLayerZIndex.current
 
-      return [
-        ...current.slice(0, -1),
-        {
-          ...sourceLayer,
-          exit: motion,
-        },
-        {
-          ...targetLayer,
-          carry: inheritedMotions,
-        },
-      ]
+      return current.map(layer => {
+        if (layer.id === sourceLayer.id) {
+          return {
+            ...layer,
+            current: false,
+            exit: motion,
+          }
+        }
+        if (layer.id === targetLayer.id) {
+          return {
+            ...layer,
+            scene: targetScene,
+            carry: inheritedMotions,
+            entry: motion,
+            exit: undefined,
+            visible: true,
+            current: true,
+            zIndex: targetZIndex,
+          }
+        }
+        return layer
+      })
     })
     setNavigation(to)
   }
@@ -1525,7 +1567,7 @@ export const StrongEntityRelationGraph = ({
         {motions.map(motion => (
           <GraphMotionDriver key={motion.id} motion={motion} onFinished={finishMotion} />
         ))}
-        {sceneLayers.map((layer, index) => (
+        {sceneLayers.map(layer => (
           <GraphSceneLayer
             key={layer.id}
             scene={layer.scene}
@@ -1533,7 +1575,9 @@ export const StrongEntityRelationGraph = ({
             carry={layer.carry}
             entry={layer.entry}
             exit={layer.exit}
-            interactive={index === sceneLayers.length - 1}
+            visible={layer.visible}
+            zIndex={layer.zIndex}
+            interactive={layer.current}
             currentProfileEntityKey={currentProfileEntityKey}
             onOpenProfile={onOpenProfile}
             onOpenRelation={openRelation}
