@@ -6,16 +6,19 @@ import { Image, Pressable } from 'react-native'
 import Svg, { Line } from 'react-native-svg'
 import { useQueryClient } from '@tanstack/react-query'
 import { scheduleOnRN } from 'react-native-worklets'
-import {
+import Animated, {
   cancelAnimation,
+  Easing,
   Extrapolation,
   interpolate,
   interpolateColor,
   makeMutable,
   type SharedValue,
+  useAnimatedProps,
   useAnimatedStyle,
   useReducedMotion,
   withSpring,
+  withTiming,
 } from 'react-native-reanimated'
 
 import Box, { AnimatedBox, HStack, MotiBox, VStack } from '~common/ui/Box'
@@ -32,7 +35,7 @@ import {
   splitStrongEntityRelations,
 } from './strongEntityPresentation'
 import { getStrongEntityAvatarSource } from './strongEntityAvatars'
-import { getGraphScenePositionIndexes } from './strongEntityGraphLayout'
+import { getGraphScenePositionIndexes, GRAPH_POSITION_INDEXES } from './strongEntityGraphLayout'
 import { useStrongLexiconLanguage } from './useStrongLexiconLanguage'
 
 const GRAPH_HEIGHT = 410
@@ -41,6 +44,15 @@ const CENTER_NODE_SIZE = 82
 const CENTER_LABEL_WIDTH = 120
 const SATELLITE_NODE_SIZE = 58
 const SATELLITE_WIDTH = 92
+const PAGINATION_STAGGER_DELAY = 0.1
+const PAGINATION_NODE_DURATION = 0.45
+const PAGINATION_DURATION = 480
+const PAGINATION_TRANSLATE_FACTOR = 0.35
+const DEFAULT_PAGINATION_STAGGER_INDEX = 0
+
+const pressedOpacityStyle = ({ pressed }: { pressed: boolean }) => ({
+  opacity: pressed ? 0.8 : 1,
+})
 
 type Point = {
   x: number
@@ -76,13 +88,23 @@ type GraphScene = {
   relationNodes: GraphRelationNode[]
 }
 
-type GraphLayerMotion = {
+type GraphMotionSpec =
+  | { kind: 'camera'; paginationDirection?: never }
+  | { kind: 'pagination'; paginationDirection: 1 | -1 }
+
+type GraphLayerMotion = GraphMotionSpec & {
   id: number
-  kind: 'camera' | 'fade'
   progress: SharedValue<number>
   selectedUniqueName?: string
   selectedPositionIndex?: number
   departingUniqueName?: string
+}
+
+type GraphTransitionRequest = GraphMotionSpec & {
+  to: GraphNavigation
+  selectedUniqueName?: string
+  selectedPositionIndex?: number
+  sourceScene?: GraphScene
 }
 
 type GraphSceneLayerState = {
@@ -91,6 +113,135 @@ type GraphSceneLayerState = {
   carry: GraphLayerMotion[]
   entry?: GraphLayerMotion
   exit?: GraphLayerMotion
+}
+
+type NodeEntryRole = 'center' | 'previous' | 'relation'
+type NodeExitRole = 'center' | 'selected' | 'relation'
+type AvatarRole = 'center' | 'selected'
+
+const AnimatedLine = Animated.createAnimatedComponent(Line)
+
+const getPaginationStaggerIndex = (
+  positionIndex: number | undefined,
+  direction: GraphLayerMotion['paginationDirection']
+): number => {
+  if (positionIndex == null) return 0
+  let index = GRAPH_POSITION_INDEXES.findIndex(candidate => candidate === positionIndex)
+  if (index < 0) index = DEFAULT_PAGINATION_STAGGER_INDEX
+  if (direction === -1) return GRAPH_POSITION_INDEXES.length - 1 - index
+  return index
+}
+
+const getStaggeredPaginationProgress = (
+  value: number,
+  isPagination: boolean,
+  staggerIndex: number,
+  fallback: number
+): number => {
+  'worklet'
+  if (!isPagination) return fallback
+  const delay = staggerIndex * PAGINATION_STAGGER_DELAY
+  return interpolate(value, [delay, delay + PAGINATION_NODE_DURATION], [0, 1], Extrapolation.CLAMP)
+}
+
+const getLayerProgressValues = (
+  entry: GraphLayerMotion | undefined,
+  exit: GraphLayerMotion | undefined,
+  entryStaggerIndex: number,
+  exitStaggerIndex: number,
+  isPositioned: boolean,
+  preserveCameraProgress: boolean
+): { entryValue: number; exitValue: number } => {
+  'worklet'
+  const rawEntryValue = entry?.progress.get() ?? 1
+  const rawExitValue = exit?.progress.get() ?? 0
+  let entryFallback = 1
+  let exitFallback = 0
+
+  if (preserveCameraProgress) {
+    entryFallback = rawEntryValue
+    exitFallback = rawExitValue
+  }
+
+  return {
+    entryValue: getStaggeredPaginationProgress(
+      rawEntryValue,
+      entry?.kind === 'pagination' && isPositioned,
+      entryStaggerIndex,
+      entryFallback
+    ),
+    exitValue: getStaggeredPaginationProgress(
+      rawExitValue,
+      exit?.kind === 'pagination' && isPositioned,
+      exitStaggerIndex,
+      exitFallback
+    ),
+  }
+}
+
+const getEntryScale = (role: NodeEntryRole | undefined, progress: number): number => {
+  'worklet'
+  if (role === 'center') {
+    return interpolate(progress, [0, 1], [0.71, 1], Extrapolation.CLAMP)
+  }
+  if (role === 'previous') {
+    return interpolate(progress, [0, 1], [1.42, 1], Extrapolation.CLAMP)
+  }
+  if (role === 'relation') {
+    return interpolate(progress, [0, 1], [0.3, 1], Extrapolation.CLAMP)
+  }
+  return 1
+}
+
+const getExitScale = (role: NodeExitRole | undefined, progress: number): number => {
+  'worklet'
+  if (role === 'center') {
+    return interpolate(progress, [0, 1], [1, 0.71], Extrapolation.CLAMP)
+  }
+  if (role === 'selected') {
+    return interpolate(progress, [0, 1], [1, 1.42], Extrapolation.CLAMP)
+  }
+  if (role === 'relation') {
+    return interpolate(progress, [0, 1], [1, 0.3], Extrapolation.CLAMP)
+  }
+  return 1
+}
+
+const getRelationEntryRole = (
+  uniqueName: string | undefined,
+  motion: GraphLayerMotion | undefined
+): NodeEntryRole | undefined => {
+  if (!motion) return undefined
+  return uniqueName === motion.departingUniqueName ? 'previous' : 'relation'
+}
+
+const getRelationExitRole = (
+  uniqueName: string | undefined,
+  motion: GraphLayerMotion | undefined
+): NodeExitRole | undefined => {
+  if (!motion) return undefined
+  return uniqueName === motion.selectedUniqueName ? 'selected' : 'relation'
+}
+
+const getPreviousEntryRole = (
+  uniqueName: string,
+  motion: GraphLayerMotion | undefined
+): NodeEntryRole | undefined =>
+  uniqueName === motion?.departingUniqueName ? 'previous' : undefined
+
+const getPreviousExitRole = (
+  uniqueName: string,
+  motion: GraphLayerMotion | undefined
+): NodeExitRole | undefined => (uniqueName === motion?.selectedUniqueName ? 'selected' : undefined)
+
+const isMotionSelection = (
+  uniqueName: string | undefined,
+  motion: GraphLayerMotion | undefined
+): boolean => Boolean(uniqueName && uniqueName === motion?.selectedUniqueName)
+
+const getCenterRole = (motion: GraphLayerMotion | undefined): 'center' | undefined => {
+  if (motion?.selectedUniqueName) return 'center'
+  return undefined
 }
 
 const relationLabelKey = (relation: string) => `strongDetail.entity.relation.${relation}`
@@ -140,13 +291,22 @@ const graphPosition = (index: number, width: number): Point => {
   return positions[index] ?? positions[5]
 }
 
+const getMotionPosition = (
+  motion: GraphLayerMotion | undefined,
+  center: Point,
+  width: number
+): Point => {
+  if (motion?.selectedPositionIndex == null) return center
+  return graphPosition(motion.selectedPositionIndex, width)
+}
+
 const getBackIndicatorPosition = (
   positionIndex: number
 ): {
   left?: number
   right?: number
   top: number
-  transform: [{ rotate: string }]
+  transform: { rotate: string }[]
 } => {
   const positions = [
     { left: 18, top: -8, transform: [{ rotate: '90deg' }] },
@@ -190,6 +350,111 @@ const buildGraphScene = (navigation: GraphNavigation): GraphScene => {
   }
 }
 
+const createRootNavigation = (entity: StrongLexiconEntity): GraphNavigation => ({
+  activeEntity: entity,
+  history: [],
+  requestedPageIndex: 0,
+})
+
+const getForwardHistory = ({
+  rootEntity,
+  navigation,
+  target,
+  relation,
+  pageIndex,
+  relationPositionIndex,
+}: {
+  rootEntity: StrongLexiconEntity
+  navigation: GraphNavigation
+  target: StrongLexiconEntity
+  relation: StrongLexiconEntityRelation
+  pageIndex: number
+  relationPositionIndex: number
+}): GraphHistoryEntry[] => {
+  if (target.uniqueName === rootEntity.uniqueName) return []
+  return [
+    ...navigation.history,
+    {
+      entity: navigation.activeEntity,
+      relation,
+      pageIndex,
+      relationPositionIndex,
+    },
+  ]
+}
+
+type GraphResetStep = {
+  sourceScene: GraphScene
+  previousEntry: GraphHistoryEntry
+  to: GraphNavigation
+}
+
+const getResetSteps = (navigation: GraphNavigation): GraphResetStep[] => {
+  const steps: GraphResetStep[] = []
+  let sourceNavigation = navigation
+
+  for (let index = navigation.history.length - 1; index >= 0; index -= 1) {
+    const previousEntry = navigation.history[index]
+    const to: GraphNavigation = {
+      activeEntity: previousEntry.entity,
+      history: navigation.history.slice(0, index),
+      requestedPageIndex: previousEntry.pageIndex,
+    }
+    steps.push({ sourceScene: buildGraphScene(sourceNavigation), previousEntry, to })
+    sourceNavigation = to
+  }
+
+  return steps
+}
+
+const createGraphLayerMotion = (
+  request: GraphTransitionRequest,
+  sourceScene: GraphScene,
+  id: number
+): GraphLayerMotion => {
+  const motionBase = {
+    id,
+    progress: makeMutable(0),
+    selectedUniqueName: request.selectedUniqueName,
+    selectedPositionIndex: request.selectedPositionIndex,
+    departingUniqueName: sourceScene.navigation.activeEntity.uniqueName,
+  }
+  if (request.kind === 'pagination') {
+    return {
+      ...motionBase,
+      kind: 'pagination',
+      paginationDirection: request.paginationDirection,
+    }
+  }
+  return { ...motionBase, kind: 'camera' }
+}
+
+const getAvatarBorderStyle = (
+  role: AvatarRole | undefined,
+  center: boolean,
+  progress: number,
+  neutralColor: string,
+  selectedColor: string
+) => {
+  'worklet'
+  if (role === 'selected') {
+    return {
+      borderColor: interpolateColor(progress, [0, 1], [neutralColor, selectedColor]),
+      borderWidth: interpolate(progress, [0, 1], [1, 2], Extrapolation.CLAMP),
+    }
+  }
+  if (role === 'center') {
+    return {
+      borderColor: interpolateColor(progress, [0, 1], [selectedColor, neutralColor]),
+      borderWidth: interpolate(progress, [0, 1], [2, 1], Extrapolation.CLAMP),
+    }
+  }
+  return {
+    borderColor: center ? selectedColor : neutralColor,
+    borderWidth: center ? 2 : 1,
+  }
+}
+
 const EntityGraphNode = ({
   category,
   type,
@@ -201,34 +466,14 @@ const EntityGraphNode = ({
   type?: string
   center?: boolean
   avatarProgress?: SharedValue<number>
-  avatarRole?: 'center' | 'selected'
+  avatarRole?: AvatarRole
 }) => {
   const theme = useTheme()
   const neutralBorderColor = theme.colors.border
   const selectedBorderColor = theme.colors.primary
   const avatarStyle = useAnimatedStyle(() => {
     const value = avatarProgress?.get() ?? 0
-    const borderColor =
-      avatarRole === 'selected'
-        ? interpolateColor(value, [0, 1], [neutralBorderColor, selectedBorderColor])
-        : avatarRole === 'center'
-          ? interpolateColor(value, [0, 1], [selectedBorderColor, neutralBorderColor])
-          : center
-            ? selectedBorderColor
-            : neutralBorderColor
-    const borderWidth =
-      avatarRole === 'selected'
-        ? interpolate(value, [0, 1], [1, 2], Extrapolation.CLAMP)
-        : avatarRole === 'center'
-          ? interpolate(value, [0, 1], [2, 1], Extrapolation.CLAMP)
-          : center
-            ? 2
-            : 1
-
-    return {
-      borderColor,
-      borderWidth,
-    }
+    return getAvatarBorderStyle(avatarRole, center, value, neutralBorderColor, selectedBorderColor)
   })
 
   return (
@@ -287,7 +532,7 @@ const GraphSatelliteContent = ({
         width: SATELLITE_NODE_SIZE,
         height: SATELLITE_NODE_SIZE,
         overflow: 'visible',
-        opacity: pressed ? 0.8 : 1,
+        ...pressedOpacityStyle({ pressed }),
       })}
     >
       <Box size={SATELLITE_NODE_SIZE} position="relative" overflow="visible">
@@ -354,36 +599,51 @@ const LayerNodeMotion = ({
   exit,
   entryRole,
   exitRole,
+  positionIndex,
+  offsetToCenter,
   children,
 }: {
   entry?: GraphLayerMotion
   exit?: GraphLayerMotion
-  entryRole?: 'center' | 'previous' | 'relation'
-  exitRole?: 'center' | 'selected' | 'relation'
+  entryRole?: NodeEntryRole
+  exitRole?: NodeExitRole
+  positionIndex?: number
+  offsetToCenter?: Point
   children: React.ReactNode
 }) => {
+  const entryStaggerIndex = getPaginationStaggerIndex(positionIndex, entry?.paginationDirection)
+  const exitStaggerIndex = getPaginationStaggerIndex(positionIndex, exit?.paginationDirection)
   const animatedStyle = useAnimatedStyle(() => {
-    const entryValue = entry?.progress.get() ?? 1
-    const exitValue = exit?.progress.get() ?? 0
-    const entryScale =
-      entryRole === 'center'
-        ? interpolate(entryValue, [0, 1], [0.71, 1], Extrapolation.CLAMP)
-        : entryRole === 'previous'
-          ? interpolate(entryValue, [0, 1], [1.42, 1], Extrapolation.CLAMP)
-          : entryRole === 'relation'
-            ? interpolate(entryValue, [0, 1], [0.3, 1], Extrapolation.CLAMP)
-            : 1
-    const exitScale =
-      exitRole === 'center'
-        ? interpolate(exitValue, [0, 1], [1, 0.71], Extrapolation.CLAMP)
-        : exitRole === 'selected'
-          ? interpolate(exitValue, [0, 1], [1, 1.42], Extrapolation.CLAMP)
-          : exitRole === 'relation'
-            ? interpolate(exitValue, [0, 1], [1, 0.3], Extrapolation.CLAMP)
-            : 1
+    const { entryValue, exitValue } = getLayerProgressValues(
+      entry,
+      exit,
+      entryStaggerIndex,
+      exitStaggerIndex,
+      positionIndex != null,
+      true
+    )
+    const entryScale = getEntryScale(entryRole, entryValue)
+    const exitScale = getExitScale(exitRole, exitValue)
+    const entryIsPaginationRelation = entry?.kind === 'pagination' && positionIndex != null
+    const exitIsPaginationRelation = exit?.kind === 'pagination' && positionIndex != null
+    let translateX = 0
+    let translateY = 0
+    let opacity = 1
+
+    if (entryIsPaginationRelation) {
+      translateX += (offsetToCenter?.x ?? 0) * PAGINATION_TRANSLATE_FACTOR * (1 - entryValue)
+      translateY += (offsetToCenter?.y ?? 0) * PAGINATION_TRANSLATE_FACTOR * (1 - entryValue)
+      opacity *= entryValue
+    }
+    if (exitIsPaginationRelation) {
+      translateX += (offsetToCenter?.x ?? 0) * PAGINATION_TRANSLATE_FACTOR * exitValue
+      translateY += (offsetToCenter?.y ?? 0) * PAGINATION_TRANSLATE_FACTOR * exitValue
+      opacity *= 1 - exitValue
+    }
 
     return {
-      transform: [{ scale: entryScale * exitScale }],
+      opacity,
+      transform: [{ translateX }, { translateY }, { scale: entryScale * exitScale }],
     }
   })
 
@@ -391,6 +651,87 @@ const LayerNodeMotion = ({
     <AnimatedBox overflow="visible" style={animatedStyle}>
       {children}
     </AnimatedBox>
+  )
+}
+
+const GraphRelationConnection = ({
+  center,
+  position,
+  positionIndex,
+  color,
+  entry,
+  exit,
+}: {
+  center: Point
+  position: Point
+  positionIndex: number
+  color: string
+  entry?: GraphLayerMotion
+  exit?: GraphLayerMotion
+}) => {
+  const entryStaggerIndex = getPaginationStaggerIndex(positionIndex, entry?.paginationDirection)
+  const exitStaggerIndex = getPaginationStaggerIndex(positionIndex, exit?.paginationDirection)
+  const animatedProps = useAnimatedProps(() => {
+    const { entryValue, exitValue } = getLayerProgressValues(
+      entry,
+      exit,
+      entryStaggerIndex,
+      exitStaggerIndex,
+      true,
+      false
+    )
+    const enteredX =
+      position.x + (center.x - position.x) * PAGINATION_TRANSLATE_FACTOR * (1 - entryValue)
+    const enteredY =
+      position.y + (center.y - position.y) * PAGINATION_TRANSLATE_FACTOR * (1 - entryValue)
+
+    return {
+      x2: enteredX + (center.x - enteredX) * PAGINATION_TRANSLATE_FACTOR * exitValue,
+      y2: enteredY + (center.y - enteredY) * PAGINATION_TRANSLATE_FACTOR * exitValue,
+      opacity: entryValue * (1 - exitValue),
+    }
+  })
+
+  return (
+    <AnimatedLine
+      animatedProps={animatedProps}
+      x1={center.x}
+      y1={center.y}
+      stroke={color}
+      strokeWidth={1.4}
+    />
+  )
+}
+
+const GraphPreviousConnection = ({
+  center,
+  position,
+  neutralColor,
+  selectedColor,
+  entry,
+}: {
+  center: Point
+  position: Point
+  neutralColor: string
+  selectedColor: string
+  entry?: GraphLayerMotion
+}) => {
+  const animatedProps = useAnimatedProps(() => {
+    const progress = entry?.kind === 'camera' ? entry.progress.get() : 1
+    return {
+      stroke: interpolateColor(progress, [0, 1], [neutralColor, selectedColor]),
+      strokeWidth: progress === 1 ? 1.8 : 1.4,
+    }
+  })
+
+  return (
+    <AnimatedLine
+      animatedProps={animatedProps}
+      x1={center.x}
+      y1={center.y}
+      x2={position.x}
+      y2={position.y}
+    />
   )
 }
 
@@ -405,16 +746,363 @@ const GraphMotionDriver = ({
 
   useEffect(() => {
     motion.progress.set(0)
-    motion.progress.set(
-      withSpring(1, { duration: 400 }, finished => {
-        if (finished) scheduleOnRN(finish)
-      })
-    )
+    if (motion.kind === 'pagination') {
+      motion.progress.set(
+        withTiming(1, { duration: PAGINATION_DURATION, easing: Easing.linear }, finished => {
+          if (finished) scheduleOnRN(finish)
+        })
+      )
+    } else {
+      motion.progress.set(
+        withSpring(1, { duration: 400 }, finished => {
+          if (finished) scheduleOnRN(finish)
+        })
+      )
+    }
 
     return () => cancelAnimation(motion.progress)
   }, [motion])
 
   return null
+}
+
+const GraphPageButton = ({
+  icon,
+  disabled,
+  accessibilityLabel,
+  onPress,
+}: {
+  icon: React.ComponentProps<typeof FeatherIcon>['name']
+  disabled: boolean
+  accessibilityLabel: string
+  onPress: () => void
+}) => (
+  <Pressable
+    disabled={disabled}
+    onPress={onPress}
+    accessibilityRole="button"
+    accessibilityLabel={accessibilityLabel}
+    accessibilityState={{ disabled }}
+    style={pressedOpacityStyle}
+  >
+    <Box size={32} borderRadius={16} bg="lightGrey" center opacity={disabled ? 0.4 : 1}>
+      <FeatherIcon name={icon} color="primary" size={18} />
+    </Box>
+  </Pressable>
+)
+
+const GraphHistoryButton = ({
+  icon,
+  side,
+  accessibilityLabel,
+  onPress,
+}: {
+  icon: React.ComponentProps<typeof FeatherIcon>['name']
+  side: 'left' | 'right'
+  accessibilityLabel: string
+  onPress: () => void
+}) => (
+  <MotiBox
+    position="absolute"
+    {...{ [side]: 8 }}
+    top={6}
+    from={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ type: 'timing', duration: 180 }}
+  >
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      style={pressedOpacityStyle}
+    >
+      <Box size={32} borderRadius={16} bg="lightGrey" center>
+        <FeatherIcon name={icon} color="primary" size={icon === 'arrow-left' ? 16 : 14} />
+      </Box>
+    </Pressable>
+  </MotiBox>
+)
+
+const GraphFooter = ({
+  pageIndex,
+  pageCount,
+  hasHistory,
+  onGoBack,
+  onReset,
+  onGoToPage,
+}: {
+  pageIndex: number
+  pageCount: number
+  hasHistory: boolean
+  onGoBack: () => void
+  onReset: () => void
+  onGoToPage: (pageIndex: number) => void
+}) => {
+  const { t } = useTranslation()
+
+  return (
+    <HStack
+      center
+      py={6}
+      gap={12}
+      position="relative"
+      borderTopWidth={1}
+      borderColor="border"
+      accessibilityLabel={t('strongDetail.entity.graphPage', {
+        current: pageIndex + 1,
+        count: pageCount,
+      })}
+    >
+      <AnimatePresence>
+        {hasHistory && (
+          <GraphHistoryButton
+            key="graph-history-back"
+            icon="arrow-left"
+            side="left"
+            accessibilityLabel={t('strongDetail.entity.graphBack')}
+            onPress={onGoBack}
+          />
+        )}
+        {hasHistory && (
+          <GraphHistoryButton
+            key="graph-history-reset"
+            icon="rotate-ccw"
+            side="right"
+            accessibilityLabel={t('strongDetail.entity.graphReset')}
+            onPress={onReset}
+          />
+        )}
+      </AnimatePresence>
+
+      <GraphPageButton
+        icon="chevron-left"
+        disabled={pageIndex === 0}
+        onPress={() => onGoToPage(pageIndex - 1)}
+        accessibilityLabel={t('strongDetail.entity.graphPreviousPage')}
+      />
+
+      <Text bold color="tertiary" fontSize={12}>
+        {pageIndex + 1} / {pageCount}
+      </Text>
+
+      <GraphPageButton
+        icon="chevron-right"
+        disabled={pageIndex === pageCount - 1}
+        onPress={() => onGoToPage(pageIndex + 1)}
+        accessibilityLabel={t('strongDetail.entity.graphNextPage')}
+      />
+    </HStack>
+  )
+}
+
+const GraphCenterNode = ({
+  entity,
+  center,
+  entry,
+  exit,
+  canOpenProfile,
+  showsProfileAction,
+  onOpenProfile,
+}: {
+  entity: StrongLexiconEntity
+  center: Point
+  entry?: GraphLayerMotion
+  exit?: GraphLayerMotion
+  canOpenProfile: boolean
+  showsProfileAction: boolean
+  onOpenProfile: (entityKey: string) => void
+}) => {
+  const { t } = useTranslation()
+  const openProfile = () => onOpenProfile(entity.uniqueName)
+  const entryRole = getCenterRole(entry)
+  const exitRole = getCenterRole(exit)
+
+  return (
+    <Box
+      position="absolute"
+      left={center.x - CENTER_NODE_SIZE / 2}
+      top={center.y - CENTER_NODE_SIZE / 2}
+      size={CENTER_NODE_SIZE}
+      overflow="visible"
+    >
+      <LayerNodeMotion entry={entry} exit={exit} entryRole={entryRole} exitRole={exitRole}>
+        <Box size={CENTER_NODE_SIZE} position="relative" overflow="visible">
+          <Pressable
+            disabled={!canOpenProfile}
+            onPress={openProfile}
+            accessibilityRole="button"
+            accessibilityLabel={t('strongDetail.entity.viewProfile')}
+            style={({ pressed }) => ({
+              width: CENTER_NODE_SIZE,
+              height: CENTER_NODE_SIZE,
+              ...pressedOpacityStyle({ pressed }),
+            })}
+          >
+            <EntityGraphNode
+              category={entity.category}
+              type={entity.type}
+              center
+              avatarProgress={exitRole ? exit?.progress : undefined}
+              avatarRole={exitRole}
+            />
+          </Pressable>
+          <VStack
+            position="absolute"
+            top={CENTER_NODE_SIZE + 4}
+            left={(CENTER_NODE_SIZE - CENTER_LABEL_WIDTH) / 2}
+            width={CENTER_LABEL_WIDTH}
+            alignItems="center"
+            overflow="visible"
+          >
+            <Text bold fontSize={15} textAlign="center" numberOfLines={1}>
+              {entity.name}
+            </Text>
+            {showsProfileAction && (
+              <Pressable
+                disabled={!canOpenProfile}
+                onPress={openProfile}
+                accessibilityRole="button"
+                accessibilityLabel={t('strongDetail.entity.viewProfile')}
+                style={pressedOpacityStyle}
+              >
+                <HStack
+                  bg="lightGrey"
+                  borderRadius={12}
+                  px={7}
+                  py={3}
+                  mt={3}
+                  alignItems="center"
+                  gap={2}
+                >
+                  <Text color="tertiary" fontSize={9} bold>
+                    {t('strongDetail.entity.viewProfile')}
+                  </Text>
+                  <IonIcon name="chevron-forward" color="tertiary" size={10} />
+                </HStack>
+              </Pressable>
+            )}
+          </VStack>
+        </Box>
+      </LayerNodeMotion>
+    </Box>
+  )
+}
+
+const GraphRelationNodeView = ({
+  node,
+  center,
+  width,
+  entry,
+  exit,
+  interactive,
+  onOpenRelation,
+}: {
+  node: GraphRelationNode
+  center: Point
+  width: number
+  entry?: GraphLayerMotion
+  exit?: GraphLayerMotion
+  interactive: boolean
+  onOpenRelation: (relation: StrongLexiconEntityRelation, positionIndex: number) => void
+}) => {
+  const { t } = useTranslation()
+  const { relation, positionIndex } = node
+  const uniqueName = relation.targetUniqueName
+  const position = graphPosition(positionIndex, width)
+  const isSelected = isMotionSelection(uniqueName, exit)
+
+  return (
+    <Box
+      position="absolute"
+      left={position.x - SATELLITE_NODE_SIZE / 2}
+      top={position.y - SATELLITE_NODE_SIZE / 2}
+      size={SATELLITE_NODE_SIZE}
+      overflow="visible"
+    >
+      <LayerNodeMotion
+        entry={entry}
+        exit={exit}
+        positionIndex={positionIndex}
+        offsetToCenter={{ x: center.x - position.x, y: center.y - position.y }}
+        entryRole={getRelationEntryRole(uniqueName, entry)}
+        exitRole={getRelationExitRole(uniqueName, exit)}
+      >
+        <GraphSatelliteContent
+          name={relation.targetName}
+          category={relation.targetCategory}
+          type={relation.targetType}
+          label={t(characterRelationLabelKey(relation), {
+            defaultValue: relation.relation,
+          })}
+          relation={relation.relation}
+          back={false}
+          avatarProgress={isSelected ? exit?.progress : undefined}
+          avatarRole={isSelected ? 'selected' : undefined}
+          disabled={!uniqueName || !interactive}
+          onPress={() => onOpenRelation(relation, positionIndex)}
+        />
+      </LayerNodeMotion>
+    </Box>
+  )
+}
+
+const GraphPreviousNode = ({
+  entity,
+  relation,
+  positionIndex,
+  width,
+  entry,
+  exit,
+  interactive,
+  onGoBack,
+}: {
+  entity: StrongLexiconEntity
+  relation?: StrongLexiconEntityRelation
+  positionIndex: number
+  width: number
+  entry?: GraphLayerMotion
+  exit?: GraphLayerMotion
+  interactive: boolean
+  onGoBack: () => void
+}) => {
+  const { t } = useTranslation()
+  const position = graphPosition(positionIndex, width)
+  const isSelected = isMotionSelection(entity.uniqueName, exit)
+  const label = relation
+    ? t(characterRelationLabelKey(relation), { defaultValue: relation.relation })
+    : ''
+
+  return (
+    <Box
+      position="absolute"
+      left={position.x - SATELLITE_NODE_SIZE / 2}
+      top={position.y - SATELLITE_NODE_SIZE / 2}
+      size={SATELLITE_NODE_SIZE}
+      overflow="visible"
+    >
+      <LayerNodeMotion
+        entry={entry}
+        exit={exit}
+        entryRole={getPreviousEntryRole(entity.uniqueName, entry)}
+        exitRole={getPreviousExitRole(entity.uniqueName, exit)}
+      >
+        <GraphSatelliteContent
+          name={entity.name}
+          category={entity.category}
+          type={entity.type}
+          label={label}
+          relation={relation?.relation ?? ''}
+          back
+          positionIndex={positionIndex}
+          avatarProgress={isSelected ? exit?.progress : undefined}
+          avatarRole={isSelected ? 'selected' : undefined}
+          disabled={!interactive}
+          onPress={onGoBack}
+        />
+      </LayerNodeMotion>
+    </Box>
+  )
 }
 
 const GraphSceneLayer = ({
@@ -440,18 +1128,14 @@ const GraphSceneLayer = ({
   onOpenRelation: (relation: StrongLexiconEntityRelation, positionIndex: number) => void
   onGoBack: () => void
 }) => {
-  const { t } = useTranslation()
   const theme = useTheme()
   const showsProfileAction = scene.navigation.activeEntity.uniqueName !== currentProfileEntityKey
   const canOpenProfile = interactive && showsProfileAction
+  const rendersPersistentNodes = exit?.kind !== 'pagination'
 
   const center = { x: width / 2, y: CENTER_Y }
-  const entryPosition =
-    entry?.selectedPositionIndex == null
-      ? center
-      : graphPosition(entry.selectedPositionIndex, width)
-  const exitPosition =
-    exit?.selectedPositionIndex == null ? center : graphPosition(exit.selectedPositionIndex, width)
+  const entryPosition = getMotionPosition(entry, center, width)
+  const exitPosition = getMotionPosition(exit, center, width)
   const entryOffset = {
     x: center.x - entryPosition.x,
     y: center.y - entryPosition.y,
@@ -461,11 +1145,9 @@ const GraphSceneLayer = ({
     y: center.y - exitPosition.y,
   }
   const carryOffsets = carry.map(motion => {
-    const position =
-      motion.selectedPositionIndex == null
-        ? center
-        : graphPosition(motion.selectedPositionIndex, width)
+    const position = getMotionPosition(motion, center, width)
     return {
+      kind: motion.kind,
       progress: motion.progress,
       x: center.x - position.x,
       y: center.y - position.y,
@@ -474,30 +1156,41 @@ const GraphSceneLayer = ({
   const layerStyle = useAnimatedStyle(() => {
     const entryValue = entry?.progress.get() ?? 1
     const exitValue = exit?.progress.get() ?? 0
-    const entryOpacity = entry ? entryValue : 1
-    const exitOpacity = exit ? 1 - exitValue : 1
+    let entryOpacity = 1
+    let exitOpacity = 1
+    let entryTranslateX = 0
+    let entryTranslateY = 0
+    let exitTranslateX = 0
+    let exitTranslateY = 0
     let carriedTranslateX = 0
     let carriedTranslateY = 0
+
+    if (entry?.kind === 'camera') {
+      entryOpacity = entryValue
+      entryTranslateX = -entryOffset.x * (1 - entryValue)
+      entryTranslateY = -entryOffset.y * (1 - entryValue)
+    }
+    if (exit?.kind === 'camera') {
+      exitOpacity = 1 - exitValue
+      exitTranslateX = exitOffset.x * exitValue
+      exitTranslateY = exitOffset.y * exitValue
+    }
     for (const offset of carryOffsets) {
       const value = offset.progress.get()
-      carriedTranslateX -= offset.x * (1 - value)
-      carriedTranslateY -= offset.y * (1 - value)
+      if (offset.kind === 'camera') {
+        carriedTranslateX -= offset.x * (1 - value)
+        carriedTranslateY -= offset.y * (1 - value)
+      }
     }
 
     return {
       opacity: entryOpacity * exitOpacity,
       transform: [
         {
-          translateX:
-            carriedTranslateX +
-            (entry ? -entryOffset.x * (1 - entryValue) : 0) +
-            (exit ? exitOffset.x * exitValue : 0),
+          translateX: carriedTranslateX + entryTranslateX + exitTranslateX,
         },
         {
-          translateY:
-            carriedTranslateY +
-            (entry ? -entryOffset.y * (1 - entryValue) : 0) +
-            (exit ? exitOffset.y * exitValue : 0),
+          translateY: carriedTranslateY + entryTranslateY + exitTranslateY,
         },
       ],
     }
@@ -508,25 +1201,24 @@ const GraphSceneLayer = ({
       {scene.relationNodes.map(node => {
         const position = graphPosition(node.positionIndex, width)
         return (
-          <Line
+          <GraphRelationConnection
             key={`line:${node.key}`}
-            x1={center.x}
-            y1={center.y}
-            x2={position.x}
-            y2={position.y}
-            stroke={theme.colors.border}
-            strokeWidth={1.4}
+            center={center}
+            position={position}
+            positionIndex={node.positionIndex}
+            color={theme.colors.border}
+            entry={entry}
+            exit={exit}
           />
         )
       })}
-      {scene.previousEntity && scene.previousPositionIndex != null && (
-        <Line
-          x1={center.x}
-          y1={center.y}
-          x2={graphPosition(scene.previousPositionIndex, width).x}
-          y2={graphPosition(scene.previousPositionIndex, width).y}
-          stroke={theme.colors.border}
-          strokeWidth={1.4}
+      {rendersPersistentNodes && scene.previousEntity && scene.previousPositionIndex != null && (
+        <GraphPreviousConnection
+          center={center}
+          position={graphPosition(scene.previousPositionIndex, width)}
+          neutralColor={theme.colors.border}
+          selectedColor={theme.colors.primary}
+          entry={entry}
         />
       )}
     </Svg>
@@ -534,181 +1226,42 @@ const GraphSceneLayer = ({
 
   const nodes = (
     <>
-      <Box
-        position="absolute"
-        left={center.x - CENTER_NODE_SIZE / 2}
-        top={center.y - CENTER_NODE_SIZE / 2}
-        size={CENTER_NODE_SIZE}
-        overflow="visible"
-      >
-        <LayerNodeMotion
+      {rendersPersistentNodes && (
+        <GraphCenterNode
+          entity={scene.navigation.activeEntity}
+          center={center}
           entry={entry}
           exit={exit}
-          entryRole={entry?.selectedUniqueName ? 'center' : undefined}
-          exitRole={exit?.selectedUniqueName ? 'center' : undefined}
-        >
-          <Box size={CENTER_NODE_SIZE} position="relative" overflow="visible">
-            <Pressable
-              disabled={!canOpenProfile}
-              onPress={() => onOpenProfile(scene.navigation.activeEntity.uniqueName)}
-              accessibilityRole="button"
-              accessibilityLabel={t('strongDetail.entity.viewProfile')}
-              style={({ pressed }) => ({
-                width: CENTER_NODE_SIZE,
-                height: CENTER_NODE_SIZE,
-                opacity: pressed ? 0.8 : 1,
-              })}
-            >
-              <EntityGraphNode
-                category={scene.navigation.activeEntity.category}
-                type={scene.navigation.activeEntity.type}
-                center
-                avatarProgress={exit?.selectedUniqueName ? exit.progress : undefined}
-                avatarRole={exit?.selectedUniqueName ? 'center' : undefined}
-              />
-            </Pressable>
-            <VStack
-              position="absolute"
-              top={CENTER_NODE_SIZE + 4}
-              left={(CENTER_NODE_SIZE - CENTER_LABEL_WIDTH) / 2}
-              width={CENTER_LABEL_WIDTH}
-              alignItems="center"
-              overflow="visible"
-            >
-              <Text bold fontSize={15} textAlign="center" numberOfLines={1}>
-                {scene.navigation.activeEntity.name}
-              </Text>
-              {showsProfileAction && (
-                <Pressable
-                  disabled={!canOpenProfile}
-                  onPress={() => onOpenProfile(scene.navigation.activeEntity.uniqueName)}
-                  accessibilityRole="button"
-                  accessibilityLabel={t('strongDetail.entity.viewProfile')}
-                  style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
-                >
-                  <HStack
-                    bg="lightGrey"
-                    borderRadius={12}
-                    px={7}
-                    py={3}
-                    mt={3}
-                    alignItems="center"
-                    gap={2}
-                  >
-                    <Text color="tertiary" fontSize={9} bold>
-                      {t('strongDetail.entity.viewProfile')}
-                    </Text>
-                    <IonIcon name="chevron-forward" color="tertiary" size={10} />
-                  </HStack>
-                </Pressable>
-              )}
-            </VStack>
-          </Box>
-        </LayerNodeMotion>
-      </Box>
+          canOpenProfile={canOpenProfile}
+          showsProfileAction={showsProfileAction}
+          onOpenProfile={onOpenProfile}
+        />
+      )}
 
-      {scene.relationNodes.map(node => {
-        const relation = node.relation
-        const uniqueName = relation.targetUniqueName
+      {scene.relationNodes.map(node => (
+        <GraphRelationNodeView
+          key={node.key}
+          node={node}
+          center={center}
+          width={width}
+          entry={entry}
+          exit={exit}
+          interactive={interactive}
+          onOpenRelation={onOpenRelation}
+        />
+      ))}
 
-        const position = graphPosition(node.positionIndex, width)
-        const content = (
-          <GraphSatelliteContent
-            name={relation.targetName}
-            category={relation.targetCategory}
-            type={relation.targetType}
-            label={t(characterRelationLabelKey(relation), {
-              defaultValue: relation.relation,
-            })}
-            relation={relation.relation}
-            back={false}
-            avatarProgress={
-              exit && uniqueName === exit.selectedUniqueName ? exit.progress : undefined
-            }
-            avatarRole={uniqueName === exit?.selectedUniqueName ? 'selected' : undefined}
-            disabled={!uniqueName || !interactive}
-            onPress={() => onOpenRelation(relation, node.positionIndex)}
-          />
-        )
-
-        return (
-          <Box
-            key={node.key}
-            position="absolute"
-            left={position.x - SATELLITE_NODE_SIZE / 2}
-            top={position.y - SATELLITE_NODE_SIZE / 2}
-            size={SATELLITE_NODE_SIZE}
-            overflow="visible"
-          >
-            <LayerNodeMotion
-              entry={entry}
-              exit={exit}
-              entryRole={
-                uniqueName === entry?.departingUniqueName
-                  ? 'previous'
-                  : entry
-                    ? 'relation'
-                    : undefined
-              }
-              exitRole={
-                uniqueName === exit?.selectedUniqueName ? 'selected' : exit ? 'relation' : undefined
-              }
-            >
-              {content}
-            </LayerNodeMotion>
-          </Box>
-        )
-      })}
-
-      {scene.previousEntity && scene.previousPositionIndex != null && (
-        <Box
-          position="absolute"
-          left={graphPosition(scene.previousPositionIndex, width).x - SATELLITE_NODE_SIZE / 2}
-          top={graphPosition(scene.previousPositionIndex, width).y - SATELLITE_NODE_SIZE / 2}
-          size={SATELLITE_NODE_SIZE}
-          overflow="visible"
-        >
-          <LayerNodeMotion
-            entry={entry}
-            exit={exit}
-            entryRole={
-              scene.previousEntity.uniqueName === entry?.departingUniqueName
-                ? 'previous'
-                : undefined
-            }
-            exitRole={
-              scene.previousEntity.uniqueName === exit?.selectedUniqueName ? 'selected' : undefined
-            }
-          >
-            <GraphSatelliteContent
-              name={scene.previousEntity.name}
-              category={scene.previousEntity.category}
-              type={scene.previousEntity.type}
-              label={
-                scene.previousRelation
-                  ? t(characterRelationLabelKey(scene.previousRelation), {
-                      defaultValue: scene.previousRelation.relation,
-                    })
-                  : ''
-              }
-              relation={scene.previousRelation?.relation ?? ''}
-              back
-              positionIndex={scene.previousPositionIndex}
-              avatarProgress={
-                exit && scene.previousEntity.uniqueName === exit.selectedUniqueName
-                  ? exit.progress
-                  : undefined
-              }
-              avatarRole={
-                scene.previousEntity.uniqueName === exit?.selectedUniqueName
-                  ? 'selected'
-                  : undefined
-              }
-              disabled={!interactive}
-              onPress={onGoBack}
-            />
-          </LayerNodeMotion>
-        </Box>
+      {rendersPersistentNodes && scene.previousEntity && scene.previousPositionIndex != null && (
+        <GraphPreviousNode
+          entity={scene.previousEntity}
+          relation={scene.previousRelation}
+          positionIndex={scene.previousPositionIndex}
+          width={width}
+          entry={entry}
+          exit={exit}
+          interactive={interactive}
+          onGoBack={onGoBack}
+        />
       )}
     </>
   )
@@ -744,11 +1297,7 @@ export const StrongEntityRelationGraph = ({
   const { language } = useStrongLexiconLanguage()
   const reduceMotion = useReducedMotion()
   const [width, setWidth] = useState(330)
-  const rootNavigation: GraphNavigation = {
-    activeEntity: entity,
-    history: [],
-    requestedPageIndex: 0,
-  }
+  const rootNavigation = createRootNavigation(entity)
   const [navigation, setNavigation] = useState<GraphNavigation>(rootNavigation)
   const [sceneLayers, setSceneLayers] = useState<GraphSceneLayerState[]>([
     {
@@ -763,11 +1312,7 @@ export const StrongEntityRelationGraph = ({
   const latestRelationRequestId = useRef(0)
 
   useEffect(() => {
-    const nextNavigation: GraphNavigation = {
-      activeEntity: entity,
-      history: [],
-      requestedPageIndex: 0,
-    }
+    const nextNavigation = createRootNavigation(entity)
     setNavigation(nextNavigation)
     setMotions([])
     setSceneLayers([
@@ -810,19 +1355,8 @@ export const StrongEntityRelationGraph = ({
     )
   }
 
-  const beginTransition = ({
-    to,
-    kind,
-    selectedUniqueName,
-    selectedPositionIndex,
-    sourceScene = activeScene,
-  }: {
-    to: GraphNavigation
-    kind: GraphLayerMotion['kind']
-    selectedUniqueName?: string
-    selectedPositionIndex?: number
-    sourceScene?: GraphScene
-  }) => {
+  const beginTransition = (request: GraphTransitionRequest) => {
+    const { to, sourceScene = activeScene } = request
     const targetScene = buildGraphScene(to)
     if (reduceMotion) {
       setNavigation(to)
@@ -837,14 +1371,7 @@ export const StrongEntityRelationGraph = ({
       return
     }
 
-    const motion: GraphLayerMotion = {
-      id: ++nextMotionId.current,
-      kind,
-      progress: makeMutable(0),
-      selectedUniqueName,
-      selectedPositionIndex,
-      departingUniqueName: sourceScene.navigation.activeEntity.uniqueName,
-    }
+    const motion = createGraphLayerMotion(request, sourceScene, ++nextMotionId.current)
     const targetLayer: GraphSceneLayerState = {
       id: ++nextLayerId.current,
       scene: targetScene,
@@ -892,18 +1419,14 @@ export const StrongEntityRelationGraph = ({
       selectedPositionIndex: relationPositionIndex,
       to: {
         activeEntity: target,
-        history:
-          target.uniqueName === entity.uniqueName
-            ? []
-            : [
-                ...navigation.history,
-                {
-                  entity: navigation.activeEntity,
-                  relation,
-                  pageIndex: activeScene.page.pageIndex,
-                  relationPositionIndex,
-                },
-              ],
+        history: getForwardHistory({
+          rootEntity: entity,
+          navigation,
+          target,
+          relation,
+          pageIndex: activeScene.page.pageIndex,
+          relationPositionIndex,
+        }),
         requestedPageIndex: 0,
       },
     })
@@ -959,25 +1482,7 @@ export const StrongEntityRelationGraph = ({
   const resetNavigation = () => {
     if (!navigation.history.length) return
     const sequenceId = ++latestRelationRequestId.current
-    const steps: Array<{
-      sourceScene: GraphScene
-      previousEntry: GraphHistoryEntry
-      to: GraphNavigation
-    }> = []
-    let sourceNavigation = navigation
-
-    for (let index = navigation.history.length - 1; index >= 0; index -= 1) {
-      const previousEntry = navigation.history[index]
-      const to: GraphNavigation = {
-        activeEntity: previousEntry.entity,
-        history: navigation.history.slice(0, index),
-        requestedPageIndex: previousEntry.pageIndex,
-      }
-      steps.push({ sourceScene: buildGraphScene(sourceNavigation), previousEntry, to })
-      sourceNavigation = to
-    }
-
-    steps.forEach(({ sourceScene, previousEntry, to }, index) => {
+    getResetSteps(navigation).forEach(({ sourceScene, previousEntry, to }, index) => {
       setTimeout(() => {
         if (latestRelationRequestId.current !== sequenceId) return
         beginTransition({
@@ -995,7 +1500,8 @@ export const StrongEntityRelationGraph = ({
     if (nextPageIndex === activeScene.page.pageIndex) return
     latestRelationRequestId.current += 1
     beginTransition({
-      kind: 'fade',
+      kind: 'pagination',
+      paginationDirection: nextPageIndex > activeScene.page.pageIndex ? 1 : -1,
       to: {
         ...navigation,
         requestedPageIndex: nextPageIndex,
@@ -1036,114 +1542,14 @@ export const StrongEntityRelationGraph = ({
         ))}
       </Box>
 
-      <HStack
-        center
-        py={6}
-        gap={12}
-        position="relative"
-        borderTopWidth={1}
-        borderColor="border"
-        accessibilityLabel={t('strongDetail.entity.graphPage', {
-          current: activeScene.page.pageIndex + 1,
-          count: activeScene.page.pageCount,
-        })}
-      >
-        <AnimatePresence>
-          {hasHistory && (
-            <MotiBox
-              key="graph-history-back"
-              position="absolute"
-              left={8}
-              top={6}
-              from={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ type: 'timing', duration: 180 }}
-            >
-              <Pressable
-                onPress={goBack}
-                accessibilityRole="button"
-                accessibilityLabel={t('strongDetail.entity.graphBack')}
-                style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
-              >
-                <Box size={32} borderRadius={16} bg="lightGrey" center>
-                  <FeatherIcon name="arrow-left" color="primary" size={16} />
-                </Box>
-              </Pressable>
-            </MotiBox>
-          )}
-
-          {hasHistory && (
-            <MotiBox
-              key="graph-history-reset"
-              position="absolute"
-              right={8}
-              top={6}
-              from={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ type: 'timing', duration: 180 }}
-            >
-              <Pressable
-                onPress={resetNavigation}
-                accessibilityRole="button"
-                accessibilityLabel={t('strongDetail.entity.graphReset')}
-                style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
-              >
-                <Box size={32} borderRadius={16} bg="lightGrey" center>
-                  <FeatherIcon name="rotate-ccw" color="primary" size={14} />
-                </Box>
-              </Pressable>
-            </MotiBox>
-          )}
-        </AnimatePresence>
-
-        <Pressable
-          disabled={activeScene.page.pageIndex === 0}
-          onPress={() => goToPage(activeScene.page.pageIndex - 1)}
-          accessibilityRole="button"
-          accessibilityLabel={t('strongDetail.entity.graphPreviousPage')}
-          accessibilityState={{
-            disabled: activeScene.page.pageIndex === 0,
-          }}
-          style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
-        >
-          <Box
-            size={32}
-            borderRadius={16}
-            bg="lightGrey"
-            center
-            opacity={activeScene.page.pageIndex === 0 ? 0.4 : 1}
-          >
-            <FeatherIcon name="chevron-left" color="primary" size={18} />
-          </Box>
-        </Pressable>
-
-        <Text bold color="tertiary" fontSize={12}>
-          {activeScene.page.pageIndex + 1} / {activeScene.page.pageCount}
-        </Text>
-
-        <Pressable
-          disabled={activeScene.page.pageIndex === activeScene.page.pageCount - 1}
-          onPress={() => goToPage(activeScene.page.pageIndex + 1)}
-          accessibilityRole="button"
-          accessibilityLabel={t('strongDetail.entity.graphNextPage')}
-          accessibilityState={{
-            disabled: activeScene.page.pageIndex === activeScene.page.pageCount - 1,
-          }}
-          style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
-        >
-          <Box
-            size={32}
-            borderRadius={16}
-            bg="lightGrey"
-            center
-            opacity={activeScene.page.pageIndex === activeScene.page.pageCount - 1 ? 0.4 : 1}
-          >
-            <FeatherIcon name="chevron-right" color="primary" size={18} />
-          </Box>
-        </Pressable>
-      </HStack>
+      <GraphFooter
+        pageIndex={activeScene.page.pageIndex}
+        pageCount={activeScene.page.pageCount}
+        hasHistory={hasHistory}
+        onGoBack={goBack}
+        onReset={resetNavigation}
+        onGoToPage={goToPage}
+      />
     </VStack>
   )
 }
