@@ -199,6 +199,11 @@ describe('strongLexiconAccess', () => {
   })
 
   it('loads a Biblical entity by its durable unique name with navigable relations', async () => {
+    const coreDatabase = {
+      getAllAsync: jest.fn(async (sql: string) =>
+        sql.includes('FROM StepEntries e') ? [{ stepCode: 'G4074G' }, { stepCode: 'G4074' }] : []
+      ),
+    }
     const entitiesDatabase = {
       getFirstAsync: jest.fn(async (sql: string) => {
         if (sql.includes('FROM Entities e')) {
@@ -253,11 +258,15 @@ describe('strongLexiconAccess', () => {
     mockWithOptionalStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
       operation(entitiesDatabase as unknown as SQLiteDatabase)
     )
+    mockWithStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(coreDatabase as unknown as SQLiteDatabase)
+    )
 
     await expect(localStrongLexiconAccess.loadEntity('Peter@Matt.4.18', 'fr')).resolves.toEqual(
       expect.objectContaining({
         uniqueName: 'Peter@Matt.4.18',
         uStrong: 'G4074G',
+        strongCodes: ['G4074G', 'G4074'],
         name: 'Pierre',
         category: 'person',
         relations: [
@@ -283,6 +292,10 @@ describe('strongLexiconAccess', () => {
     expect(entitiesDatabase.getAllAsync).not.toHaveBeenCalledWith(
       expect.stringContaining('EntityRefs'),
       expect.anything()
+    )
+    expect(coreDatabase.getAllAsync).toHaveBeenCalledWith(
+      expect.stringContaining('WHERE e.uStrong=?'),
+      ['G4074G', 'G4074G']
     )
   })
 })

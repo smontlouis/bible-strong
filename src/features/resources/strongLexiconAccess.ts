@@ -48,6 +48,7 @@ export type StrongLexiconEntity = {
   id: number
   uniqueName: string
   uStrong: string
+  strongCodes: string[]
   name: string
   category: string
   type: string
@@ -431,10 +432,27 @@ type EntityRow = {
   localizedArticleHtml: string | null
 }
 
+const loadEntityStrongCodes = async (
+  database: SQLiteDatabase,
+  uStrong: string
+): Promise<string[]> => {
+  const rows = await database.getAllAsync<{ stepCode: string }>(
+    `SELECT DISTINCT i.stepCode
+       FROM StepEntries e
+       JOIN StepEntryIdentities i ON i.stepEntryId=e.id
+      WHERE e.uStrong=?
+      ORDER BY CASE WHEN i.stepCode=? THEN 0 ELSE 1 END, i.stepCode`,
+    [uStrong, uStrong]
+  )
+  const codes = rows.map(row => row.stepCode).filter(Boolean)
+  return codes.includes(uStrong) ? codes : [uStrong, ...codes]
+}
+
 const hydrateEntity = async (
   database: SQLiteDatabase,
   entity: EntityRow,
-  language: ResourceLanguage
+  language: ResourceLanguage,
+  strongCodes: string[] = [entity.uStrong]
 ): Promise<StrongLexiconEntity> => {
   const [place, relations] = await Promise.all([
     database.getFirstAsync<{
@@ -478,6 +496,7 @@ const hydrateEntity = async (
     id: entity.id,
     uniqueName: entity.uniqueName,
     uStrong: entity.uStrong,
+    strongCodes,
     name: chooseLocalized(language, entity.localizedDisplayName, entity.displayName),
     category: entity.category,
     type: entity.type,
@@ -521,6 +540,7 @@ const hydrateEntity = async (
 }
 
 const loadEntityForEntry = async (
+  core: SQLiteDatabase,
   database: SQLiteDatabase | null,
   row: CoreEntryRow,
   language: ResourceLanguage
@@ -554,7 +574,11 @@ const loadEntityForEntry = async (
   )
   if (!entity) return undefined
 
-  return hydrateEntity(database, entity, language)
+  const [hydratedEntity, strongCodes] = await Promise.all([
+    hydrateEntity(database, entity, language),
+    loadEntityStrongCodes(core, entity.uStrong),
+  ])
+  return { ...hydratedEntity, strongCodes }
 }
 
 const toEntry = async (
@@ -580,7 +604,7 @@ const toEntry = async (
       : Promise.resolve({ resources: [], lsjAbsent: false }),
     includeExtended && entitiesAvailability.status === 'available'
       ? withOptionalStrongLexiconDatabase('entities', database =>
-          loadEntityForEntry(database, row, language)
+          loadEntityForEntry(core, database, row, language)
         ).then(result => result ?? undefined)
       : Promise.resolve(undefined),
   ])
@@ -738,7 +762,11 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
       )
       return row ? hydrateEntity(database, row, language) : undefined
     })
-    return entity ?? undefined
+    if (!entity) return undefined
+    const strongCodes = await withStrongLexiconDatabase('core', database =>
+      loadEntityStrongCodes(database, entity.uStrong)
+    )
+    return { ...entity, strongCodes }
   },
 
   async loadEntry(identity, language) {

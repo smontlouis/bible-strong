@@ -319,9 +319,25 @@ export const StrongEntitySummaryCard = ({
             {entity.name}
           </Text>
           {!plain && (
-            <Text color="tertiary" fontSize={12}>
-              {entity.uStrong}
-            </Text>
+            <HStack gap={6} wrap>
+              {entity.strongCodes.map(code => (
+                <TouchableBox
+                  key={code}
+                  onPress={() => onOpenStrong(code)}
+                  activeOpacity={0.7}
+                  accessibilityRole="link"
+                  accessibilityLabel={code}
+                  bg="lightGrey"
+                  borderRadius={10}
+                  px={7}
+                  py={3}
+                >
+                  <Text color="tertiary" fontSize={11} bold>
+                    {code}
+                  </Text>
+                </TouchableBox>
+              ))}
+            </HStack>
           )}
         </VStack>
       </HStack>

@@ -14,6 +14,7 @@ const createEntity = (overrides: Partial<StrongLexiconEntity> = {}): StrongLexic
   id: 1,
   uniqueName: 'Peter@Matt.4.18',
   uStrong: 'G4074G',
+  strongCodes: ['G4074G'],
   name: 'Pierre',
   category: 'person',
   type: 'Male',
