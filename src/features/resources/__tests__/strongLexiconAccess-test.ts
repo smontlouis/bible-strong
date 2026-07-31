@@ -13,7 +13,7 @@ import {
 } from '~helpers/strongLexiconModules'
 import type { StrongLexiconModuleId } from '~helpers/strongLexiconPublications'
 import type { SQLiteDatabase } from '~helpers/sqlite'
-import { localStrongLexiconAccess } from '../strongLexiconAccess'
+import { formatStrongEntityDisplayName, localStrongLexiconAccess } from '../strongLexiconAccess'
 
 const mockGetStrongLexiconModuleAvailability = jest.mocked(getStrongLexiconModuleAvailability)
 const mockWithStrongLexiconDatabase = jest.mocked(withStrongLexiconDatabase)
@@ -198,7 +198,7 @@ describe('strongLexiconAccess', () => {
     )
   })
 
-  it('loads a Biblical entity by its durable unique name with navigable relations', async () => {
+  it('loads a Biblical entity by its durable unique name with localized relations', async () => {
     const coreDatabase = {
       getAllAsync: jest.fn(async (sql: string) =>
         sql.includes('FROM StepEntries e') ? [{ stepCode: 'G4074G' }, { stepCode: 'G4074' }] : []
@@ -231,23 +231,21 @@ describe('strongLexiconAccess', () => {
         return null
       }),
       getAllAsync: jest.fn(async (sql: string) => {
-        if (sql.includes('EntityRelations')) {
-          return [
-            {
-              relation: 'sibling',
-              certainty: 'asserted',
-              toEntityId: 114,
-              targetUniqueName: 'Andrew@Matt.4.18',
-              targetUStrong: 'G0406',
-              targetCategory: 'person',
-              targetType: 'Male',
-              targetName: 'Andrew',
-              localizedTargetName: 'André',
-              toUniqueName: 'Andrew@Matt.4.18',
-            },
-          ]
-        }
-        return []
+        if (!sql.includes('EntityRelations')) return []
+        return [
+          {
+            relation: 'sibling',
+            certainty: 'asserted',
+            targetId: 114,
+            targetUniqueName: 'Andrew@Matt.4.18',
+            targetUStrong: 'G0406',
+            targetCategory: 'person',
+            targetType: 'Male',
+            targetName: 'Andrew',
+            localizedTargetName: 'André',
+            toUniqueName: 'Andrew@Matt.4.18',
+          },
+        ]
       }),
     }
     mockGetStrongLexiconModuleAvailability.mockResolvedValue({
@@ -272,6 +270,7 @@ describe('strongLexiconAccess', () => {
         relations: [
           expect.objectContaining({
             relation: 'sibling',
+            targetId: 114,
             targetName: 'André',
             targetUniqueName: 'Andrew@Matt.4.18',
             targetUStrong: 'G0406',
@@ -285,6 +284,121 @@ describe('strongLexiconAccess', () => {
       expect.stringContaining('WHERE e.uniqueName=?'),
       ['fr', 'Peter@Matt.4.18']
     )
+    expect(coreDatabase.getAllAsync).toHaveBeenCalledWith(
+      expect.stringContaining('WHERE e.uStrong=?'),
+      ['G4074G', 'G4074G']
+    )
+  })
+
+  it('resolves legacy relation targets and leaves missing targets non-navigable', async () => {
+    const coreDatabase = {
+      getAllAsync: jest.fn(async (sql: string) =>
+        sql.includes('FROM StepEntries e') ? [{ stepCode: 'H6882' }] : []
+      ),
+    }
+    const entitiesDatabase = {
+      getFirstAsync: jest.fn(async (sql: string) => {
+        if (sql.includes('FROM Entities e')) {
+          return {
+            id: 3067,
+            uniqueName: 'Zorathites@1Ch.2.53-',
+            uStrong: 'H6882',
+            displayName: 'Zorathites',
+            category: 'group',
+            type: 'Group',
+            description: 'People of Zorah',
+            shortDescription: 'People of Zorah',
+            summaryHtml: '',
+            brief: 'People of Zorah',
+            articleHtml: '',
+            localizedDisplayName: null,
+            localizedDescription: null,
+            localizedShortDescription: null,
+            localizedSummaryHtml: '',
+            localizedBrief: null,
+            localizedArticleHtml: '',
+          }
+        }
+        if (sql.includes('EntityPlaces')) return null
+        return null
+      }),
+      getAllAsync: jest.fn(async (sql: string) => {
+        if (sql.includes('EntityRelations')) {
+          return [
+            {
+              relation: 'offspring',
+              certainty: 'asserted',
+              toEntityId: null,
+              targetId: 3465,
+              targetUniqueName: 'Etam@1Ch.4.3-',
+              targetUStrong: 'H5862H',
+              targetCategory: 'place',
+              targetType: 'Place',
+              targetName: 'Etam',
+              localizedTargetName: null,
+              toUniqueName: 'town|Etam@1Ch.4.3-',
+            },
+            {
+              relation: 'founder_or_origin',
+              certainty: 'asserted',
+              toEntityId: null,
+              targetId: null,
+              targetUniqueName: null,
+              targetUStrong: null,
+              targetCategory: null,
+              targetType: null,
+              targetName: null,
+              localizedTargetName: null,
+              toUniqueName: 'Asshur@Gen.10.11',
+            },
+          ]
+        }
+        return []
+      }),
+    }
+    mockGetStrongLexiconModuleAvailability.mockResolvedValue({
+      status: 'available',
+      moduleId: 'entities',
+      schemaVersion: 1,
+    })
+    mockWithOptionalStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(entitiesDatabase as unknown as SQLiteDatabase)
+    )
+    mockWithStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(coreDatabase as unknown as SQLiteDatabase)
+    )
+
+    await expect(
+      localStrongLexiconAccess.loadEntity('Zorathites@1Ch.2.53-', 'fr')
+    ).resolves.toEqual(
+      expect.objectContaining({
+        uniqueName: 'Zorathites@1Ch.2.53-',
+        uStrong: 'H6882',
+        strongCodes: ['H6882'],
+        name: 'Zorathites',
+        category: 'group',
+        relations: [
+          expect.objectContaining({
+            relation: 'offspring',
+            targetId: 3465,
+            targetName: 'Etam',
+            targetUniqueName: 'Etam@1Ch.4.3-',
+            targetUStrong: 'H5862H',
+            targetCategory: 'place',
+            targetType: 'Place',
+          }),
+          {
+            relation: 'founder_or_origin',
+            certainty: 'asserted',
+            targetName: 'Asshur@Gen.10.11',
+          },
+        ],
+      })
+    )
+    expect(entitiesDatabase.getFirstAsync).toHaveBeenCalledWith(
+      expect.stringContaining('WHERE e.uniqueName=?'),
+      ['fr', 'Zorathites@1Ch.2.53-']
+    )
     expect(entitiesDatabase.getFirstAsync).not.toHaveBeenCalledWith(
       expect.stringContaining('EntityRefs'),
       expect.anything()
@@ -293,9 +407,21 @@ describe('strongLexiconAccess', () => {
       expect.stringContaining('EntityRefs'),
       expect.anything()
     )
+    expect(entitiesDatabase.getAllAsync).toHaveBeenCalledWith(
+      expect.stringContaining("substr(r.toUniqueName, instr(r.toUniqueName, '|') + 1)"),
+      ['fr', 3067]
+    )
     expect(coreDatabase.getAllAsync).toHaveBeenCalledWith(
       expect.stringContaining('WHERE e.uStrong=?'),
-      ['G4074G', 'G4074G']
+      ['H6882', 'H6882']
     )
+  })
+
+  it.each([
+    ['a_wife_of_Eliphaz', 'a wife of Eliphaz'],
+    ['Achor_Valley', 'Achor Valley'],
+    ['unknown_woman@Gen.10.11', 'unknown woman@Gen.10.11'],
+  ])('formats the TIPNR display name %s', (input, expected) => {
+    expect(formatStrongEntityDisplayName(input)).toBe(expected)
   })
 })

@@ -44,7 +44,7 @@ const ENTITY_PRESENTATIONS = {
   place: {
     kind: 'place',
     icon: 'map-pin',
-    showsRelationshipGraph: false,
+    showsRelationshipGraph: true,
   },
   group: {
     kind: 'group',

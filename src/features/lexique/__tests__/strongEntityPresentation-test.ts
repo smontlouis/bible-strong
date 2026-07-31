@@ -57,7 +57,7 @@ describe('Strong Biblical entity presentation', () => {
     expect(getStrongEntityPresentation(createEntity({ category }))).toEqual({
       kind,
       icon,
-      showsRelationshipGraph: kind === 'person' || kind === 'group',
+      showsRelationshipGraph: kind === 'person' || kind === 'place' || kind === 'group',
     })
   })
 
@@ -92,12 +92,12 @@ describe('Strong Biblical entity presentation', () => {
     expect(result.remaining).toEqual([])
   })
 
-  it('uses a list instead of a relationship graph for places', () => {
+  it('uses the relationship graph for places', () => {
     const relations = [{ relation: 'resident', certainty: 'asserted', targetName: 'Pierre' }]
 
     expect(splitStrongEntityRelations(createEntity({ category: 'place', relations }))).toEqual({
-      graph: [],
-      remaining: relations,
+      graph: relations,
+      remaining: [],
     })
   })
 

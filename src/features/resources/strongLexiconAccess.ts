@@ -432,6 +432,8 @@ type EntityRow = {
   localizedArticleHtml: string | null
 }
 
+export const formatStrongEntityDisplayName = (value: string): string => value.replace(/_+/gu, ' ')
+
 const loadEntityStrongCodes = async (
   database: SQLiteDatabase,
   uStrong: string
@@ -466,7 +468,7 @@ const hydrateEntity = async (
     database.getAllAsync<{
       relation: string
       certainty: string
-      toEntityId: number | null
+      targetId: number | null
       targetUniqueName: string | null
       targetUStrong: string | null
       targetCategory: string | null
@@ -475,7 +477,8 @@ const hydrateEntity = async (
       localizedTargetName: string | null
       toUniqueName: string
     }>(
-      `SELECT r.relation, r.certainty, r.toEntityId, r.toUniqueName,
+      `SELECT r.relation, r.certainty, r.toUniqueName,
+              target.id AS targetId,
               target.uniqueName AS targetUniqueName,
               target.uStrong AS targetUStrong,
               target.category AS targetCategory,
@@ -483,7 +486,17 @@ const hydrateEntity = async (
               target.displayName AS targetName,
               tr.displayName AS localizedTargetName
          FROM EntityRelations r
-         LEFT JOIN Entities target ON target.id=r.toEntityId
+         LEFT JOIN Entities target ON target.id=COALESCE(
+           r.toEntityId,
+           (SELECT fallback.id
+              FROM Entities fallback
+             WHERE fallback.uniqueName=CASE
+               WHEN instr(r.toUniqueName, '|') > 0
+                 THEN substr(r.toUniqueName, instr(r.toUniqueName, '|') + 1)
+               ELSE r.toUniqueName
+             END
+             LIMIT 1)
+         )
          LEFT JOIN EntityTranslations tr ON tr.entityId=target.id AND tr.language=?
         WHERE r.fromEntityId=?
         ORDER BY r.relation, target.displayName
@@ -497,7 +510,9 @@ const hydrateEntity = async (
     uniqueName: entity.uniqueName,
     uStrong: entity.uStrong,
     strongCodes,
-    name: chooseLocalized(language, entity.localizedDisplayName, entity.displayName),
+    name: formatStrongEntityDisplayName(
+      chooseLocalized(language, entity.localizedDisplayName, entity.displayName)
+    ),
     category: entity.category,
     type: entity.type,
     description: chooseLocalized(language, entity.localizedDescription, entity.description),
@@ -513,7 +528,7 @@ const hydrateEntity = async (
     ...(place
       ? {
           place: {
-            name: place.openBibleName,
+            name: formatStrongEntityDisplayName(place.openBibleName),
             area: place.area,
             ...(place.latitude == null ? {} : { latitude: place.latitude }),
             ...(place.longitude == null ? {} : { longitude: place.longitude }),
@@ -525,16 +540,15 @@ const hydrateEntity = async (
     relations: relations.map(relation => ({
       relation: relation.relation,
       certainty: relation.certainty,
-      ...(relation.toEntityId == null ? {} : { targetId: relation.toEntityId }),
-      ...(relation.targetUniqueName || relation.toUniqueName
-        ? { targetUniqueName: relation.targetUniqueName || relation.toUniqueName }
-        : {}),
+      ...(relation.targetId == null ? {} : { targetId: relation.targetId }),
+      ...(relation.targetUniqueName ? { targetUniqueName: relation.targetUniqueName } : {}),
       ...(relation.targetUStrong ? { targetUStrong: relation.targetUStrong } : {}),
       ...(relation.targetCategory ? { targetCategory: relation.targetCategory } : {}),
       ...(relation.targetType ? { targetType: relation.targetType } : {}),
-      targetName:
+      targetName: formatStrongEntityDisplayName(
         chooseLocalized(language, relation.localizedTargetName, relation.targetName ?? '') ||
-        relation.toUniqueName,
+          relation.toUniqueName
+      ),
     })),
   }
 }

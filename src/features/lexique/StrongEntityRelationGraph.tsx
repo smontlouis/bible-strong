@@ -25,9 +25,10 @@ import Box, { AnimatedBox, HStack, MotiBox, VStack } from '~common/ui/Box'
 import { FeatherIcon, IonIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import type {
-  StrongLexiconEntity,
-  StrongLexiconEntityRelation,
+import {
+  formatStrongEntityDisplayName,
+  type StrongLexiconEntity,
+  type StrongLexiconEntityRelation,
 } from '~features/resources/strongLexiconAccess'
 import {
   getStrongEntityPresentation,
@@ -588,13 +589,14 @@ const GraphSatelliteContent = ({
   onPress: () => void
 }) => {
   const visual = getRelationVisual(relation)
+  const displayName = formatStrongEntityDisplayName(name)
 
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
-      accessibilityLabel={`${label}, ${name}`}
+      accessibilityLabel={`${label}, ${displayName}`}
       style={({ pressed }) => ({
         width: SATELLITE_NODE_SIZE,
         height: SATELLITE_NODE_SIZE,
@@ -618,7 +620,7 @@ const GraphSatelliteContent = ({
           overflow="visible"
         >
           <Text bold fontSize={12} textAlign="center" numberOfLines={1}>
-            {name}
+            {displayName}
           </Text>
           <HStack
             bg="lightGrey"
@@ -1073,7 +1075,7 @@ const GraphCenterNode = ({
             overflow="visible"
           >
             <Text bold fontSize={15} textAlign="center" numberOfLines={1}>
-              {entity.name}
+              {formatStrongEntityDisplayName(entity.name)}
             </Text>
             {showsProfileAction && (
               <Pressable
@@ -1605,8 +1607,7 @@ export const StrongEntityRelationGraph = ({
       if (requestId !== latestRelationRequestId.current) return
       if (target) startRelationTransition(relation, target, relationPositionIndex)
     } catch {
-      if (requestId !== latestRelationRequestId.current) return
-      onOpenEntity(relation)
+      return
     }
   }
 

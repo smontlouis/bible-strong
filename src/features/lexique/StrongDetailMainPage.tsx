@@ -414,9 +414,9 @@ const StrongDetailMainPage = ({
             <VStack mt={7} gap={10}>
               <Text bold fontSize={17}>
                 {t(
-                  entry.entity.category === 'group'
-                    ? 'strongDetail.entity.relationships'
-                    : 'strongDetail.entity.personalRelationships'
+                  entry.entity.category === 'person'
+                    ? 'strongDetail.entity.personalRelationships'
+                    : 'strongDetail.entity.relationships'
                 )}
               </Text>
               <StrongEntityRelationGraph
