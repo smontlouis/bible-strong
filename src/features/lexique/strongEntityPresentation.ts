@@ -90,10 +90,31 @@ export const splitStrongEntityRelations = (
       return leftPriority - rightPriority || left.index - right.index
     })
 
-  const graph = prioritized.slice(0, 6).map(item => item.relation)
-  const graphSet = new Set(graph)
+  const graph = prioritized.map(item => item.relation)
   return {
     graph,
-    remaining: entity.relations.filter(relation => !graphSet.has(relation)),
+    remaining: [],
+  }
+}
+
+const ROOT_RELATION_PAGE_SIZE = 6
+const NESTED_RELATION_PAGE_SIZE = 5
+
+export const getStrongEntityRelationPage = (
+  relations: StrongLexiconEntityRelation[],
+  previousEntityUniqueName: string | undefined,
+  requestedPageIndex: number
+) => {
+  const navigableRelations = previousEntityUniqueName
+    ? relations.filter(relation => relation.targetUniqueName !== previousEntityUniqueName)
+    : relations
+  const pageSize = previousEntityUniqueName ? NESTED_RELATION_PAGE_SIZE : ROOT_RELATION_PAGE_SIZE
+  const pageCount = Math.max(1, Math.ceil(navigableRelations.length / pageSize))
+  const pageIndex = Math.max(0, Math.min(requestedPageIndex, pageCount - 1))
+
+  return {
+    pageIndex,
+    pageCount,
+    relations: navigableRelations.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize),
   }
 }

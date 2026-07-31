@@ -1,9 +1,14 @@
 import type { StrongLexiconEntity } from '~features/resources/strongLexiconAccess'
 import {
+  getStrongEntityRelationPage,
   getStrongEntityAvatarKey,
   getStrongEntityPresentation,
   splitStrongEntityRelations,
 } from '../strongEntityPresentation'
+import {
+  getGraphScenePositionIndexes,
+  getOppositeGraphPositionIndex,
+} from '../strongEntityGraphLayout'
 
 const createEntity = (overrides: Partial<StrongLexiconEntity> = {}): StrongLexiconEntity => ({
   id: 1,
@@ -55,7 +60,7 @@ describe('Strong Biblical entity presentation', () => {
     })
   })
 
-  it('keeps six prioritized personal relations in the graph and lists the rest', () => {
+  it('keeps every prioritized personal relation in the paginated graph', () => {
     const relations = [
       'resident',
       'offspring',
@@ -80,8 +85,10 @@ describe('Strong Biblical entity presentation', () => {
       'sibling',
       'sibling',
       'offspring',
+      'resident',
+      'founder_or_origin',
     ])
-    expect(result.remaining.map(item => item.relation)).toEqual(['resident', 'founder_or_origin'])
+    expect(result.remaining).toEqual([])
   })
 
   it('uses a list instead of a relationship graph for places', () => {
@@ -103,6 +110,64 @@ describe('Strong Biblical entity presentation', () => {
     expect(splitStrongEntityRelations(createEntity({ category: 'group', relations }))).toEqual({
       graph: relations,
       remaining: [],
+    })
+  })
+
+  it('paginates six relations at the root and reserves one slot for the previous entity', () => {
+    const relations = Array.from({ length: 13 }, (_, index) => ({
+      relation: 'offspring',
+      certainty: 'asserted',
+      targetUniqueName: `Target-${index + 1}`,
+      targetName: `Target ${index + 1}`,
+    }))
+
+    expect(getStrongEntityRelationPage(relations, undefined, 1)).toMatchObject({
+      pageIndex: 1,
+      pageCount: 3,
+      relations: relations.slice(6, 12),
+    })
+    expect(getStrongEntityRelationPage(relations, 'Previous', 1)).toMatchObject({
+      pageIndex: 1,
+      pageCount: 3,
+      relations: relations.slice(5, 10),
+    })
+  })
+
+  it('removes the previous entity from regular relations and clamps an outdated page', () => {
+    const relations = [
+      {
+        relation: 'father',
+        certainty: 'asserted',
+        targetUniqueName: 'Adam',
+        targetName: 'Adam',
+      },
+      ...Array.from({ length: 6 }, (_, index) => ({
+        relation: 'sibling',
+        certainty: 'asserted',
+        targetUniqueName: `Sibling-${index + 1}`,
+        targetName: `Sibling ${index + 1}`,
+      })),
+    ]
+
+    const result = getStrongEntityRelationPage(relations, 'Adam', 99)
+
+    expect(result.pageIndex).toBe(1)
+    expect(result.pageCount).toBe(2)
+    expect(result.relations.map(relation => relation.targetName)).toEqual(['Sibling 6'])
+  })
+
+  it('maps every graph position to the opposite position on the same axis', () => {
+    expect([0, 1, 2, 3, 4, 5].map(getOppositeGraphPositionIndex)).toEqual([5, 4, 3, 2, 1, 0])
+  })
+
+  it('reserves the position opposite the relation used to enter a scene', () => {
+    expect(getGraphScenePositionIndexes(2)).toEqual({
+      previousPositionIndex: 3,
+      relationPositionIndexes: [0, 1, 2, 4, 5],
+    })
+    expect(getGraphScenePositionIndexes()).toEqual({
+      previousPositionIndex: undefined,
+      relationPositionIndexes: [0, 1, 2, 3, 4, 5],
     })
   })
 })

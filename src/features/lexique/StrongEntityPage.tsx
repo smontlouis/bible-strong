@@ -14,10 +14,10 @@ import type {
 import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
 import {
   StrongEditorialSection,
-  StrongEntityRelationGraph,
   StrongEntityRelationList,
   StrongEntitySummaryCard,
 } from './StrongDetailUI'
+import { StrongEntityRelationGraph } from './StrongEntityRelationGraph'
 import StrongLexiconModuleCard from './StrongLexiconModuleCard'
 import { splitStrongEntityRelations } from './strongEntityPresentation'
 import type { StrongReadingTypography } from './strongEditorialHtmlStyles'

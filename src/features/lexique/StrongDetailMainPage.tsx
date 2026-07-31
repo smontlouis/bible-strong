@@ -22,12 +22,12 @@ import {
   StrongEditorialPreview,
   StrongEditorialSection,
   StrongEyebrow,
-  StrongEntityRelationGraph,
   StrongEntityRelationList,
   StrongEntitySummaryCard,
   StrongLexicalRelationCard,
   StrongPreviewLink,
 } from './StrongDetailUI'
+import { StrongEntityRelationGraph } from './StrongEntityRelationGraph'
 import {
   formatStrongContextMorphology,
   getStrongContextVerseText,
