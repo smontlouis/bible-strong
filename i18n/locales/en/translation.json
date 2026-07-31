@@ -1293,6 +1293,7 @@
   "strongDetail.entity.graphPage": "Group {{current}} of {{count}}",
   "strongDetail.entity.graphPreviousPage": "Previous relationships",
   "strongDetail.entity.graphNextPage": "Next relationships",
+  "strongDetail.entity.graphReset": "Reset navigation",
   "strongDetail.entity.type.supernatural": "Supernatural being",
   "strongDetail.entity.type.time": "Time",
   "strongDetail.entity.type.musical": "Musical concept",

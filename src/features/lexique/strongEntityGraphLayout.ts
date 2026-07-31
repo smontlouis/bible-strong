@@ -1,4 +1,4 @@
-const GRAPH_POSITION_INDEXES = [0, 1, 2, 3, 4, 5] as const
+const GRAPH_POSITION_INDEXES = [3, 1, 5, 2, 4, 0] as const
 const OPPOSITE_POSITION_INDEXES = [5, 4, 3, 2, 1, 0] as const
 
 export const getOppositeGraphPositionIndex = (index: number) =>

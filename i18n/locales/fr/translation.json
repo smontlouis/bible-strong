@@ -1252,6 +1252,7 @@
   "strongDetail.entity.graphPage": "Groupe {{current}} sur {{count}}",
   "strongDetail.entity.graphPreviousPage": "Relations précédentes",
   "strongDetail.entity.graphNextPage": "Relations suivantes",
+  "strongDetail.entity.graphReset": "Réinitialiser la navigation",
   "strongDetail.entity.type.supernatural": "Être surnaturel",
   "strongDetail.entity.type.time": "Temps",
   "strongDetail.entity.type.musical": "Élément musical",

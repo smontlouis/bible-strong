@@ -163,11 +163,11 @@ describe('Strong Biblical entity presentation', () => {
   it('reserves the position opposite the relation used to enter a scene', () => {
     expect(getGraphScenePositionIndexes(2)).toEqual({
       previousPositionIndex: 3,
-      relationPositionIndexes: [0, 1, 2, 4, 5],
+      relationPositionIndexes: [1, 5, 2, 4, 0],
     })
     expect(getGraphScenePositionIndexes()).toEqual({
       previousPositionIndex: undefined,
-      relationPositionIndexes: [0, 1, 2, 3, 4, 5],
+      relationPositionIndexes: [3, 1, 5, 2, 4, 0],
     })
   })
 })
