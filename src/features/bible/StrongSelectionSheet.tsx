@@ -49,6 +49,28 @@ type StrongSelectionSheetProps = {
   onClose: () => void
 }
 
+const StrongDownloadPromptCard = ({
+  children,
+  gap = 0,
+}: {
+  children: React.ReactNode
+  gap?: number
+}) => (
+  <VStack
+    bg="reverse"
+    borderRadius={14}
+    px={14}
+    py={14}
+    gap={gap}
+    opacity={0.5}
+    borderWidth={1}
+    borderColor="default"
+    style={{ borderStyle: 'dashed' }}
+  >
+    {children}
+  </VStack>
+)
+
 const StrongSelectionSheet = ({
   sheetRef,
   version,
@@ -194,16 +216,7 @@ const StrongSelectionSheet = ({
         {!coreAvailable && !downloading && !availabilityQuery.isPending && (
           <Box px={carouselHorizontalPadding}>
             <TouchableOpacity onPress={requestCoreDownload} activeOpacity={0.7}>
-              <VStack
-                bg="reverse"
-                borderRadius={14}
-                px={14}
-                py={14}
-                opacity={0.5}
-                borderWidth={1}
-                borderColor="default"
-                style={{ borderStyle: 'dashed' }}
-              >
+              <StrongDownloadPromptCard>
                 <HStack gap={12} alignItems="center">
                   <FeatherIcon name="download-cloud" size={19} color="default" />
                   <VStack flex gap={2}>
@@ -215,24 +228,14 @@ const StrongSelectionSheet = ({
                     </Text>
                   </VStack>
                 </HStack>
-              </VStack>
+              </StrongDownloadPromptCard>
             </TouchableOpacity>
           </Box>
         )}
 
         {downloading && (
           <Box px={carouselHorizontalPadding}>
-            <VStack
-              bg="reverse"
-              borderRadius={14}
-              px={14}
-              py={14}
-              gap={10}
-              opacity={0.5}
-              borderWidth={1}
-              borderColor="default"
-              style={{ borderStyle: 'dashed' }}
-            >
+            <StrongDownloadPromptCard gap={10}>
               <HStack gap={12} alignItems="center">
                 <FeatherIcon name="loader" size={19} color="default" />
                 <Text bold fontSize={14} flex>
@@ -245,7 +248,7 @@ const StrongSelectionSheet = ({
               <Box height={4} borderRadius={2} bg="border" overflow="hidden">
                 <Box height={4} borderRadius={2} bg="primary" width={`${progress * 100}%`} />
               </Box>
-            </VStack>
+            </StrongDownloadPromptCard>
           </Box>
         )}
 
