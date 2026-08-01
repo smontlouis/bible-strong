@@ -194,25 +194,51 @@ const StrongSelectionSheet = ({
         {!coreAvailable && !downloading && !availabilityQuery.isPending && (
           <Box px={carouselHorizontalPadding}>
             <TouchableOpacity onPress={requestCoreDownload} activeOpacity={0.7}>
-              <HStack bg="lightGrey" borderRadius={14} px={14} py={15} gap={12} alignItems="center">
-                <FeatherIcon name="download-cloud" size={20} color="default" />
-                <VStack flex gap={3}>
-                  <Text bold>{t('Télécharger le lexique Strong')}</Text>
-                  <Text color="tertiary" fontSize={12}>
-                    {t('Définitions françaises et anglaises, morphologie et mots liés')}
-                  </Text>
-                </VStack>
-              </HStack>
+              <VStack
+                bg="reverse"
+                borderRadius={14}
+                px={14}
+                py={14}
+                opacity={0.5}
+                borderWidth={1}
+                borderColor="default"
+                style={{ borderStyle: 'dashed' }}
+              >
+                <HStack gap={12} alignItems="center">
+                  <FeatherIcon name="download-cloud" size={19} color="default" />
+                  <VStack flex gap={2}>
+                    <Text bold fontSize={14}>
+                      {t('Télécharger le lexique Strong')}
+                    </Text>
+                    <Text color="default" fontSize={12}>
+                      {t('Définitions françaises et anglaises, morphologie et mots liés')}
+                    </Text>
+                  </VStack>
+                </HStack>
+              </VStack>
             </TouchableOpacity>
           </Box>
         )}
 
         {downloading && (
           <Box px={carouselHorizontalPadding}>
-            <VStack bg="lightGrey" borderRadius={14} px={14} py={15} gap={10}>
-              <HStack alignItems="center" justifyContent="space-between">
-                <Text bold>{t('Téléchargement du lexique Strong')}</Text>
-                <Text color="tertiary" fontSize={12}>
+            <VStack
+              bg="reverse"
+              borderRadius={14}
+              px={14}
+              py={14}
+              gap={10}
+              opacity={0.5}
+              borderWidth={1}
+              borderColor="default"
+              style={{ borderStyle: 'dashed' }}
+            >
+              <HStack gap={12} alignItems="center">
+                <FeatherIcon name="loader" size={19} color="default" />
+                <Text bold fontSize={14} flex>
+                  {t('Téléchargement du lexique Strong')}
+                </Text>
+                <Text color="default" fontSize={12}>
                   {Math.round(progress * 100)}%
                 </Text>
               </HStack>
