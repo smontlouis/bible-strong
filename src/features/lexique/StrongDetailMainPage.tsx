@@ -375,14 +375,14 @@ const StrongDetailMainPage = ({
               )}
           </StrongEditorialSection>
         ) : resourcesAvailability.status !== 'available' && entry.language === 'greek' ? (
-          <StrongEditorialSection title={t('strongDetail.dictionary.light')}>
-            <StrongLexiconModuleCard
-              moduleId="resources"
-              availability={resourcesAvailability}
-              title={t('strongLexicon.greekDictionary')}
-              description={t('strongLexicon.greekDictionaryDescription')}
-            />
-          </StrongEditorialSection>
+          <StrongLexiconModuleCard
+            moduleId="resources"
+            availability={resourcesAvailability}
+            sectionTitle={t('strongDetail.dictionary.light')}
+            title={t('strongLexicon.greekDictionary')}
+            description={t('strongLexicon.greekDictionaryDescription')}
+            dismissible
+          />
         ) : null)}
 
       {!!entry.entity ? (
@@ -434,14 +434,15 @@ const StrongDetailMainPage = ({
           )}
         </VStack>
       ) : entitiesAvailability.status !== 'available' ? (
-        <StrongEditorialSection title={t('strongDetail.entity.context')} separated>
-          <StrongLexiconModuleCard
-            moduleId="entities"
-            availability={entitiesAvailability}
-            title={t('strongLexicon.biblicalEntities')}
-            description={t('strongLexicon.biblicalEntitiesDescription')}
-          />
-        </StrongEditorialSection>
+        <StrongLexiconModuleCard
+          moduleId="entities"
+          availability={entitiesAvailability}
+          sectionTitle={t('strongDetail.entity.context')}
+          title={t('strongLexicon.biblicalEntities')}
+          description={t('strongLexicon.biblicalEntitiesDescription')}
+          dismissible
+          separated
+        />
       ) : null}
 
       {lexicalRelations.relatedWords.length > 0 && (
