@@ -4,8 +4,8 @@ import './strong.css'
 
 interface StrongProps {
   title: string
-  code?: string
-  codeStrong?: string
+  code?: string | number
+  codeStrong?: string | number
   strongType?: string
   phonetique?: string
   definition?: string

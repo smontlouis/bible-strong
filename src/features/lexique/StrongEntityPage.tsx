@@ -33,6 +33,8 @@ type Props = {
   onOpenEntityRelation: (relation: StrongLexiconEntityRelation) => void
 }
 
+const ENTITY_LOCATION_VISIBLE = false
+
 const StrongEntityPage = ({
   entity,
   availability,
@@ -85,7 +87,7 @@ const StrongEntityPage = ({
         onOpenStrong={onOpenStrong}
       />
 
-      {!!place && (
+      {ENTITY_LOCATION_VISIBLE && !!place && (
         <StrongEditorialSection title={t('strongDetail.entity.location')} separated>
           <VStack bg="lightGrey" borderRadius={18} p={16} gap={8}>
             <HStack alignItems="center" gap={10}>

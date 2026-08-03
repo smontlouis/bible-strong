@@ -4,6 +4,7 @@ import Strong from './Strong'
 import { dispatch } from './dispatch'
 import Quill from './quill'
 import type { QuillEmbedConstructor, QuillInstance, StrongBlockPayload } from './quill-types'
+import { getPersistedStudyStrongReference } from '../strongStudyReference'
 
 declare const quill: QuillInstance
 
@@ -18,8 +19,8 @@ class StrongBlock extends Embed {
 
   static create(data: StrongBlockPayload) {
     const node = super.create(data)
-    const { title, codeStrong, strongType, phonetique, definition, translatedBy, book, original } =
-      data
+    const { title, strongType, phonetique, definition, translatedBy, book, original } = data
+    const codeStrong = getPersistedStudyStrongReference(data)
     node.innerHTML = renderToString(
       <Strong
         {...{
@@ -43,10 +44,12 @@ class StrongBlock extends Embed {
       const isReadOnly = document.querySelector('#editor')?.classList.contains('ql-disabled')
       if (isReadOnly) {
         console.log(`[Studies] ${codeStrong} ${book}`)
-        dispatch('VIEW_BIBLE_STRONG', {
-          reference: codeStrong,
-          book,
-        })
+        if (codeStrong) {
+          dispatch('VIEW_BIBLE_STRONG', {
+            reference: codeStrong,
+            book,
+          })
+        }
       }
     })
 

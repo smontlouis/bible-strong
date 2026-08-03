@@ -7,6 +7,7 @@ import type {
   QuillModuleConstructor,
   QuillRange,
 } from './quill-types'
+import { getPersistedStudyStrongReference } from '../strongStudyReference'
 
 const Module = Quill.import('core/module') as QuillModuleConstructor
 
@@ -62,7 +63,10 @@ class ModuleInlineVerse extends Module {
     }
   }
 
-  receiveStrongLink = ({ title, codeStrong, book }: InlineStrongPayload) => {
+  receiveStrongLink = (data: InlineStrongPayload) => {
+    const { title, book } = data
+    const codeStrong = getPersistedStudyStrongReference(data)
+    if (!codeStrong) return
     const range = this.getInsertionRange()
     this.quill.focus()
     this.quill.setSelection(range, Quill.sources.SILENT)

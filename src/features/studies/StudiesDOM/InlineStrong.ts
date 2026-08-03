@@ -1,6 +1,7 @@
 import Quill from './quill'
 import { dispatch } from './dispatch'
 import type { InlineStrongPayload, QuillBlotConstructor } from './quill-types'
+import { getPersistedStudyStrongReference } from '../strongStudyReference'
 
 const Inline = Quill.import('blots/inline') as QuillBlotConstructor
 
@@ -9,20 +10,24 @@ class InlineStrong extends Inline {
   static tagName = 'a'
   static className = 'inline-strong'
 
-  static create({ title, codeStrong, book }: InlineStrongPayload) {
+  static create(data: InlineStrongPayload) {
     const node = super.create()
+    const { title, book } = data
+    const codeStrong = getPersistedStudyStrongReference(data)
     node.setAttribute('data-title', title)
-    node.setAttribute('data-codeStrong', codeStrong)
-    node.setAttribute('data-book', book)
+    if (codeStrong) node.setAttribute('data-codeStrong', codeStrong)
+    node.setAttribute('data-book', String(book))
 
     node.addEventListener('click', () => {
       const isReadOnly = document.querySelector('#editor')?.classList.contains('ql-disabled')
       if (isReadOnly) {
         console.log(`[Studies] ${codeStrong} ${book}`)
-        dispatch('VIEW_BIBLE_STRONG', {
-          reference: codeStrong,
-          book,
-        })
+        if (codeStrong) {
+          dispatch('VIEW_BIBLE_STRONG', {
+            reference: codeStrong,
+            book,
+          })
+        }
       }
     })
 
@@ -32,7 +37,10 @@ class InlineStrong extends Inline {
   static formats(domNode: HTMLElement) {
     return {
       title: domNode.getAttribute('data-title'),
-      codeStrong: domNode.getAttribute('data-codeStrong'),
+      codeStrong: getPersistedStudyStrongReference({
+        codeStrong: domNode.getAttribute('data-codeStrong'),
+        code: domNode.getAttribute('data-code'),
+      }),
       book: domNode.getAttribute('data-book'),
     }
   }

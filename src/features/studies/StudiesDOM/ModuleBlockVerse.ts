@@ -7,6 +7,7 @@ import type {
   StrongBlockPayload,
   VerseBlockPayload,
 } from './quill-types'
+import { getPersistedStudyStrongReference } from '../strongStudyReference'
 
 const Module = Quill.import('core/module') as QuillModuleConstructor
 
@@ -69,9 +70,10 @@ class ModuleBlockVerse extends Module {
     this.quill.focus()
     console.log(`[Studies] STRONG RECEIVED: ${JSON.stringify(data)}`)
 
-    const { title, codeStrong, phonetique, book, original } = data
+    const { title, phonetique, book, original } = data
+    const codeStrong = getPersistedStudyStrongReference(data)
 
-    if (range.length !== 0) return
+    if (range.length !== 0 || !codeStrong) return
     const cursorPosition = range.index
 
     this.quill.insertEmbed(

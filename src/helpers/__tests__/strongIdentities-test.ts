@@ -17,5 +17,13 @@ describe('createStrongIdentity', () => {
       kind: 'dstrong',
       code: 'H3068G',
     })
+    expect(createStrongIdentityForBook('3651C', 1)).toEqual({
+      kind: 'dstrong',
+      code: 'H3651C',
+    })
+    expect(createStrongIdentityForBook('H0310B', 1)).toEqual({
+      kind: 'dstrong',
+      code: 'H0310B',
+    })
   })
 })

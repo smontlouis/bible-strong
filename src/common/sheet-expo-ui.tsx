@@ -24,7 +24,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import Back from '~common/Back'
-import Box, { TouchableBox } from '~common/ui/Box'
+import Box, { FadingText, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import type {
@@ -230,9 +230,14 @@ const SheetHeader = ({
           alignItems={centerTitle ? 'center' : undefined}
         >
           {!!title && (
-            <Text numberOfLines={1} bold fontSize={16} textAlign={centerTitle ? 'center' : 'left'}>
+            <FadingText
+              numberOfLines={1}
+              bold
+              fontSize={16}
+              textAlign={centerTitle ? 'center' : 'left'}
+            >
               {title}
-            </Text>
+            </FadingText>
           )}
           {!!subTitle && (
             <Text fontSize={13} color="grey" textAlign={centerTitle ? 'center' : 'left'}>

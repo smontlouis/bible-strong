@@ -18,7 +18,7 @@ import { TrueSheet, TrueSheetProvider, type TrueSheetProps } from '@lodev09/reac
 import { FlashList, type FlashListProps } from '@shopify/flash-list'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Back from '~common/Back'
-import Box, { type BoxProps, TouchableBox } from '~common/ui/Box'
+import Box, { FadingText, type BoxProps, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text, { type TextProps } from '~common/ui/Text'
 import { useTheme } from '@emotion/react'
@@ -356,9 +356,14 @@ const SheetHeader = ({
           alignItems={centerTitle ? 'center' : undefined}
         >
           {!!title && (
-            <Text numberOfLines={1} bold fontSize={16} textAlign={centerTitle ? 'center' : 'left'}>
+            <FadingText
+              numberOfLines={1}
+              bold
+              fontSize={16}
+              textAlign={centerTitle ? 'center' : 'left'}
+            >
               {title}
-            </Text>
+            </FadingText>
           )}
           {!!subTitle && (
             <Text fontSize={13} color="grey" textAlign={centerTitle ? 'center' : 'left'}>
