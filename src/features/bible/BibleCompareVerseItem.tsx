@@ -34,6 +34,7 @@ type CompareVerseItemProps = {
   selectedVerses: VerseIds
   position: number
   strongMode?: boolean
+  selectedStrongReference?: string
   onStrongSelect?: (selection: StrongSelection) => void
 }
 
@@ -115,6 +116,7 @@ const StrongCompareVerseItem = ({
   name,
   selectedVerses,
   position,
+  selectedStrongReference,
   onStrongSelect,
 }: CompareVerseItemProps & { versionId: StrongBibleVersionId }) => {
   const resources = useResourceAccess()
@@ -167,6 +169,7 @@ const StrongCompareVerseItem = ({
           key={`${verse.Livre}-${verse.Chapitre}-${verse.Verset}`}
           verse={verse}
           version={versionId}
+          selectedStrongReference={selectedStrongReference}
           onStrongSelect={onStrongSelect}
         />
       ))}

@@ -77,6 +77,7 @@ const CompareCard = ({ selectedVerses, onChangeVerse, strongMode = false }: Comp
             selectedVerses={selectedVerses}
             position={position}
             strongMode={strongMode}
+            selectedStrongReference={strongSelection?.reference}
             onStrongSelect={openStrongSelection}
           />
         ))}
@@ -98,7 +99,7 @@ const CompareCard = ({ selectedVerses, onChangeVerse, strongMode = false }: Comp
         word={strongSelection?.word}
         identities={strongSelection?.identities ?? []}
         morphologies={strongSelection?.morphologies ?? []}
-        onDismissStart={() => {}}
+        onDismissStart={closeStrongSelection}
         onClose={closeStrongSelection}
       />
     </>

@@ -1,4 +1,8 @@
-import { loadBibleReadingMain, loadBibleReadingRedWords } from '../bibleReadingChapter'
+import {
+  loadBibleReadingMain,
+  loadBibleReadingParallelVerses,
+  loadBibleReadingRedWords,
+} from '../bibleReadingChapter'
 import type { ResourceAccessRegistry } from '~features/resources/resourceAccess'
 
 jest.mock('~helpers/firebase', () => ({
@@ -71,5 +75,40 @@ describe('canonical V4 Bible chapter extras', () => {
 
     expect(result.pericope).toEqual({})
     expect(resources.bibleReading.loadPericope).not.toHaveBeenCalled()
+  })
+
+  it('loads Strong data for every compatible parallel version', async () => {
+    const resources = createResources()
+
+    await loadBibleReadingParallelVerses(
+      {
+        book: 1,
+        chapter: 1,
+        version: 'LSG',
+        parallelVersions: ['KJV', 'BSB'],
+        commentsDisplay: false,
+        strongMode: 'visible',
+        interlinearLocale: 'fr',
+        interlinearLocaleAutomatic: true,
+      },
+      resources
+    )
+
+    expect(resources.bibleContent.loadChapter).toHaveBeenNthCalledWith(1, {
+      book: 1,
+      chapter: 1,
+      version: 'KJV',
+      strongMode: 'visible',
+      interlinearLocale: 'fr',
+      interlinearLocaleAutomatic: true,
+    })
+    expect(resources.bibleContent.loadChapter).toHaveBeenNthCalledWith(2, {
+      book: 1,
+      chapter: 1,
+      version: 'BSB',
+      strongMode: 'visible',
+      interlinearLocale: 'fr',
+      interlinearLocaleAutomatic: true,
+    })
   })
 })

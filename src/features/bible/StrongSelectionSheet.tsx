@@ -1,6 +1,6 @@
 import { useTheme } from '@emotion/react'
 import MaskedView from '@react-native-masked-view/masked-view'
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useAtomValue } from 'jotai/react'
 import React, { useEffect, useRef, useState } from 'react'
@@ -17,7 +17,7 @@ import truncHTML from 'trunc-html'
 
 import { Sheet, SheetHeader, SheetView, type SheetRef } from '~common/sheet'
 import StylizedHTMLView from '~common/StylizedHTMLView'
-import Box, { HStack, VStack } from '~common/ui/Box'
+import Box, { FadingBox, HStack, VStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useResourceAccess } from '~features/resources/resourceAccess'
@@ -33,7 +33,10 @@ import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import { createStrongSelectionPreviewCard } from './strongSelectionPreviewCard'
-import { getStrongSelectionPreviewIndex } from './strongSelectionPreviewCarousel'
+import {
+  getStrongSelectionPreviewIndex,
+  prioritizeStrongSelectionPreview,
+} from './strongSelectionPreviewCarousel'
 import { getStrongSelectionPreviewHtmlStyles } from './strongSelectionPreviewHtmlStyles'
 
 type StrongSelectionSheetProps = {
@@ -112,12 +115,32 @@ const StrongSelectionSheet = ({
   })
   const coreAvailable = availabilityQuery.data?.status === 'available'
   const previewQuery = useQuery({
-    queryKey: ['strong-lexicon', 'preview', resourceLanguage, identities],
-    queryFn: () => resources.strongLexicon.loadPreview(identities, resourceLanguage),
+    queryKey: ['strong-lexicon', 'preview', resourceLanguage, selectionKey],
+    queryFn: async () => ({
+      previews: prioritizeStrongSelectionPreview(
+        await resources.strongLexicon.loadPreview(identities, resourceLanguage),
+        identities[0]
+      ),
+      morphologies,
+    }),
     enabled: coreAvailable && identities.length > 0,
     networkMode: 'always',
+    placeholderData: keepPreviousData,
   })
-  const hasMultiplePreviews = (previewQuery.data?.length ?? 0) > 1
+  const displayedPreviews = previewQuery.data?.previews
+  const displayedMorphologies = previewQuery.data?.morphologies ?? morphologies
+  const previewIdentityKey =
+    displayedPreviews
+      ?.map(preview => `${preview.selectedIdentity.kind}:${preview.selectedIdentity.code}`)
+      .join('|') ?? 'loading'
+  const previewMorphologyKey = displayedMorphologies
+    .map(
+      morphology =>
+        `${morphology.identity.kind}:${morphology.identity.code}:${morphology.codes.join(',')}`
+    )
+    .join('|')
+  const previewContentKey = `${previewIdentityKey}|${previewMorphologyKey}`
+  const hasMultiplePreviews = (displayedPreviews?.length ?? 0) > 1
   const previewWidth = windowWidth - carouselHorizontalPadding * 2 - (hasMultiplePreviews ? 24 : 0)
   const carouselStep = previewWidth + carouselGap
   const downloading =
@@ -182,7 +205,7 @@ const StrongSelectionSheet = ({
     const index = getStrongSelectionPreviewIndex(
       event.nativeEvent.contentOffset.x,
       carouselStep,
-      previewQuery.data?.length ?? 0
+      displayedPreviews?.length ?? 0
     )
     setSelectedPreviewIndex(index)
   }
@@ -296,8 +319,8 @@ const StrongSelectionSheet = ({
           </VStack>
         )}
 
-        {coreAvailable && !!previewQuery.data?.length && (
-          <VStack gap={12}>
+        {coreAvailable && !!displayedPreviews?.length && (
+          <FadingBox keyProp={previewContentKey} gap={12} skipEntering={false} skipExiting={false}>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -306,7 +329,7 @@ const StrongSelectionSheet = ({
                 paddingHorizontal: carouselHorizontalPadding,
               }}
             >
-              {previewQuery.data.map((preview, index) => {
+              {displayedPreviews.map((preview, index) => {
                 const selected = selectedPreviewIndex === index
                 return (
                   <TouchableOpacity
@@ -333,7 +356,7 @@ const StrongSelectionSheet = ({
             <ScrollView
               ref={previewPagerRef}
               horizontal
-              scrollEnabled={previewQuery.data.length > 1}
+              scrollEnabled={displayedPreviews.length > 1}
               showsHorizontalScrollIndicator={false}
               snapToInterval={carouselStep}
               snapToAlignment="start"
@@ -350,12 +373,12 @@ const StrongSelectionSheet = ({
                 paddingRight: carouselHorizontalPadding + (hasMultiplePreviews ? 24 : 0),
               }}
             >
-              {previewQuery.data.map(preview => {
+              {displayedPreviews.map(preview => {
                 const descriptionHtml = preview.definitionHtml
                   ? truncHTML(preview.definitionHtml, 360).html
                   : undefined
                 const morphologyCodes = getStrongSelectionMorphologyCodes(
-                  morphologies,
+                  displayedMorphologies,
                   preview.selectedIdentity
                 )
                 const card = createStrongSelectionPreviewCard(preview, morphologyCodes)
@@ -430,10 +453,10 @@ const StrongSelectionSheet = ({
                 )
               })}
             </ScrollView>
-          </VStack>
+          </FadingBox>
         )}
 
-        {coreAvailable && previewQuery.data?.length === 0 && (
+        {coreAvailable && displayedPreviews?.length === 0 && (
           <Box minHeight={100} center>
             <Text color="tertiary">{t('Aucune entrée lexicale trouvée')}</Text>
           </Box>
