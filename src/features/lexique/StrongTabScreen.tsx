@@ -27,9 +27,13 @@ const StrongTabScreen = ({ strongAtom }: StrongTabScreenProps) => {
   const onStrongSelect = (book: number, ref: string) => {
     setStrongTab(
       produce(draft => {
-        draft.data.book = book
-        draft.data.reference = ref
-        draft.data.strongReference = undefined
+        const { bibleVersion, strongBibleVersionId } = draft.data
+        draft.data = {
+          book,
+          reference: ref,
+          ...(bibleVersion ? { bibleVersion } : {}),
+          ...(strongBibleVersionId ? { strongBibleVersionId } : {}),
+        }
       })
     )
   }
@@ -52,19 +56,14 @@ const StrongTabScreen = ({ strongAtom }: StrongTabScreenProps) => {
   }
 
   if (!hasDetail) {
-    return (
-      <LexiqueListScreen
-        hasBackButton={hasBackButton}
-        strongAtom={strongAtom}
-        onStrongSelect={onStrongSelect}
-      />
-    )
+    return <LexiqueListScreen hasBackButton={hasBackButton} onStrongSelect={onStrongSelect} />
   }
 
   return (
     <StrongMainScreen
       context={strongTab.data}
       onBack={returnToLexicon}
+      onStrongSelect={onStrongSelect}
       onTitleChange={updateTitle}
     />
   )

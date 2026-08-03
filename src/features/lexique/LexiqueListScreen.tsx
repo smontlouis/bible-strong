@@ -16,10 +16,8 @@ import { getFirstLetterFrom } from '~helpers/alphabet'
 
 import { useResultsByLetterOrSearch, useSearchValue } from './useUtilities'
 
-import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import waitForStrongDB from '~common/waitForStrongDB'
-import { StrongTab } from '../../state/tabs'
 import LexiqueItem from './LexiqueItem'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
@@ -55,7 +53,6 @@ const useSectionResults = (results: StrongLexiconSearchResult[]) => {
 }
 
 interface LexiqueListScreenProps {
-  strongAtom: PrimitiveAtom<StrongTab>
   hasBackButton?: boolean
   isFormSheet?: boolean
   isNewTabSelection?: boolean
@@ -64,7 +61,6 @@ interface LexiqueListScreenProps {
 }
 
 const LexiqueListScreen = ({
-  strongAtom,
   hasBackButton,
   isFormSheet = false,
   isNewTabSelection = false,
