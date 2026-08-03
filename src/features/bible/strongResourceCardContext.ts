@@ -31,7 +31,7 @@ export const getStrongWordOccurrences = (
     .flatMap(run =>
       run.identities.map(identity => ({
         identity,
-        ...(run.word ? { clickedWord: run.word } : {}),
+        ...(run.contextWord || run.word ? { clickedWord: run.contextWord || run.word } : {}),
         morphologyCodes: getStrongSelectionMorphologyCodes(run.morphologies ?? [], identity),
       }))
     )

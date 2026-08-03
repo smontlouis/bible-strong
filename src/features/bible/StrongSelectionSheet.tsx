@@ -370,7 +370,7 @@ const StrongSelectionSheet = ({
                       activeOpacity={0.7}
                     >
                       <VStack
-                        bg="lightGrey"
+                        bg="reverse"
                         bgOpacity="050"
                         borderRadius={14}
                         px={15}

@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import React from 'react'
-import type { TextStyle } from 'react-native'
+import type { LayoutChangeEvent, TextStyle } from 'react-native'
 
 import Paragraph from '~common/ui/Paragraph'
 import { StrongResourceScrollConsumer } from './StrongResourceScrollContext'
@@ -27,6 +27,7 @@ const StyledCircle = styled.TouchableOpacity<SelectableProps>(({ theme }) => ({
   backgroundColor: theme.colors.lightPrimary,
   alignItems: 'center',
   justifyContent: 'center',
+  marginHorizontal: 3,
 }))
 
 const StyledInsideCircle = styled.View<SelectableProps & { isConcordance?: boolean }>(
@@ -76,6 +77,7 @@ type BibleStrongRefProps = {
   concordanceFor?: string | number
   textStyle?: StrongVerseTextStyle
   occurrenceIndex: number
+  selectionTargets?: Array<{ reference: string; occurrenceIndex: number }>
 }
 
 const BibleStrongRef = ({
@@ -85,6 +87,7 @@ const BibleStrongRef = ({
   concordanceFor,
   textStyle,
   occurrenceIndex,
+  selectionTargets,
 }: BibleStrongRefProps) => {
   if (concordanceFor) {
     const isConcordance = `0${concordanceFor}` === reference || `${concordanceFor}` === reference
@@ -108,16 +111,26 @@ const BibleStrongRef = ({
     <StrongResourceScrollConsumer>
       {value => {
         if (!value) return null
-        const { currentTarget, scrollToStrongCard } = value
-        const isSelected = currentTarget
-          ? Number(currentTarget.code) === Number(reference) &&
-            currentTarget.occurrenceIndex === occurrenceIndex
-          : false
+        const { currentTarget, registerStrongWordLayout, scrollToStrongCard } = value
+        const registerLayout = (event: LayoutChangeEvent) => {
+          for (const target of selectionTargets ?? [{ reference, occurrenceIndex }]) {
+            registerStrongWordLayout(target.occurrenceIndex, event.nativeEvent.layout.x)
+          }
+        }
+        const isSelected = Boolean(
+          currentTarget &&
+          (selectionTargets ?? [{ reference, occurrenceIndex }]).some(
+            target =>
+              Number(currentTarget.code) === Number(target.reference) &&
+              currentTarget.occurrenceIndex === target.occurrenceIndex
+          )
+        )
         if (!word) {
           return (
             <StyledCircle
               activeOpacity={0.5}
               onPress={() => scrollToStrongCard(reference, occurrenceIndex)}
+              onLayout={registerLayout}
               isSelected={isSelected}
             >
               <StyledInsideCircle isSelected={isSelected} />
@@ -129,6 +142,7 @@ const BibleStrongRef = ({
           <StyledView
             activeOpacity={0.5}
             onPress={() => scrollToStrongCard(reference, occurrenceIndex)}
+            onLayout={registerLayout}
             isSelected={isSelected}
           >
             <StyledText isSelected={isSelected} style={textStyle}>

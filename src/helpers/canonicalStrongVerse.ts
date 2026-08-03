@@ -25,6 +25,7 @@ export type CanonicalStrongVerseRun =
   | {
       kind: 'strong'
       word: string
+      contextWord?: string
       identities: StrongIdentity[]
       isUntranslated: boolean
       morphologies?: NonNullable<Verse['StrongSpans']>[number]['morphologies']
@@ -54,9 +55,27 @@ export const buildCanonicalStrongVerseRuns = (
         left.ordinal - right.ordinal
     )
 
+  const mergedSpans = matchingSpans.reduce<typeof matchingSpans>((merged, span) => {
+    const endOffset = span.startOffset + span.length
+    const previous = merged[merged.length - 1]
+    const previousEndOffset = previous ? previous.startOffset + previous.length : -1
+    if (span.length > 0 && previous?.length && previousEndOffset === endOffset) {
+      for (const identity of span.identities) {
+        if (!previous.identities.some(candidate => areStrongIdentitiesEqual(candidate, identity))) {
+          previous.identities.push(identity)
+        }
+      }
+      previous.morphologies = [...(previous.morphologies ?? []), ...(span.morphologies ?? [])]
+      return merged
+    }
+    merged.push({ ...span, identities: [...span.identities] })
+    return merged
+  }, [])
+
   const runs: CanonicalStrongVerseRun[] = []
   let offset = 0
-  for (const span of matchingSpans) {
+  let previousStrongOffset = 0
+  for (const span of mergedSpans) {
     const endOffset = span.startOffset + span.length
     if (span.startOffset < offset || span.startOffset < 0 || endOffset > text.length) {
       continue
@@ -65,12 +84,7 @@ export const buildCanonicalStrongVerseRuns = (
     if (precedingText) runs.push({ kind: 'text', text: precedingText })
 
     const previousRun = runs[runs.length - 1]
-    if (
-      previousRun?.kind === 'strong' &&
-      span.length === 0 &&
-      previousRun.isUntranslated &&
-      span.startOffset === offset
-    ) {
+    if (previousRun?.kind === 'strong' && span.length === 0 && span.startOffset === offset) {
       for (const identity of span.identities) {
         if (
           !previousRun.identities.some(candidate => areStrongIdentitiesEqual(candidate, identity))
@@ -82,11 +96,21 @@ export const buildCanonicalStrongVerseRuns = (
       runs.push({
         kind: 'strong',
         word: text.slice(span.startOffset, endOffset),
+        ...(span.length > 0
+          ? {
+              contextWord:
+                text
+                  .slice(previousStrongOffset, endOffset)
+                  .trim()
+                  .replace(/^[\p{P}\s]+|[\p{P}\s]+$/gu, '') || undefined,
+            }
+          : {}),
         identities: span.identities,
         isUntranslated: span.length === 0,
         ...(span.morphologies?.length ? { morphologies: span.morphologies } : {}),
       })
     }
+    previousStrongOffset = endOffset
     offset = endOffset
   }
 

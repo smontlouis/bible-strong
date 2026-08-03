@@ -10,7 +10,10 @@ import {
   type InterlinearSidecarAvailability,
   type InterlinearToken,
 } from '~helpers/interlinearBibleSidecar'
-import { getDisplayedStrongIdentities } from '~helpers/strongIdentities'
+import {
+  getDisplayedStrongIdentities,
+  resolveDisplayedStrongIdentities,
+} from '~helpers/strongIdentities'
 import type { StrongBibleSpan } from '~helpers/canonicalStrongVerse'
 import { collectStrongSelectionMorphologies } from '~helpers/strongSelection'
 import {
@@ -168,6 +171,37 @@ export const createBhgStrongSpans = (tokens: InterlinearToken[]): StrongBibleSpa
     ]
   })
 
+const enrichStrongVerseWithInterlinearTokens = (
+  verse: Verse,
+  tokens: InterlinearToken[]
+): Verse => {
+  const tokensById = new Map(
+    tokens.flatMap(token => (token.id == null ? [] : [[token.id, token] as const]))
+  )
+  const strongSpans = (verse.StrongSpans ?? []) as StrongBibleSpan[]
+
+  return {
+    ...verse,
+    StrongSpans: strongSpans.map(span => {
+      const alignedSegments = (span.stepTokenIds ?? []).flatMap(
+        tokenId => tokensById.get(tokenId)?.segments ?? []
+      )
+      if (!alignedSegments.length) return span
+
+      const identities = resolveDisplayedStrongIdentities(
+        span.identities,
+        alignedSegments.flatMap(segment => segment.identities)
+      )
+      const morphologies = collectStrongSelectionMorphologies(identities, alignedSegments)
+      return {
+        ...span,
+        identities,
+        ...(morphologies.length ? { morphologies } : {}),
+      }
+    }),
+  }
+}
+
 export const createLexiconBibleResourceAccess = (
   dependencies: LexiconBibleResourceDependencies = defaultDependencies
 ): LexiconBibleResourceAccess => {
@@ -233,7 +267,29 @@ export const createLexiconBibleResourceAccess = (
         }
       }
 
-      return dependencies.strongBible.loadVerse(request)
+      const strongResult = await dependencies.strongBible.loadVerse(request)
+      if (strongResult.status !== 'available') return strongResult
+
+      try {
+        const availability = await resolveBhgAvailability(
+          request.preferredInterlinearLocale,
+          dependencies.getInterlinearAvailability
+        )
+        if (availability.status !== 'available') return strongResult
+        const tokens = await dependencies.loadInterlinearVerseTokens(
+          'BHG',
+          availability.locale,
+          request.book,
+          request.chapter,
+          request.verse
+        )
+        return {
+          ...strongResult,
+          verse: enrichStrongVerseWithInterlinearTokens(strongResult.verse, tokens),
+        }
+      } catch {
+        return strongResult
+      }
     },
 
     async loadCountsByBook(request) {

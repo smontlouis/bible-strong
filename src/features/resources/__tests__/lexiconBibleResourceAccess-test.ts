@@ -183,8 +183,85 @@ describe('lexiconBibleResourceAccess', () => {
     })
 
     expect(result).toEqual(expect.objectContaining({ status: 'available' }))
-    expect(dependencies.getInterlinearAvailability).not.toHaveBeenCalled()
+    expect(dependencies.getInterlinearAvailability).toHaveBeenCalled()
     expect(dependencies.strongBible.loadVerse).toHaveBeenCalled()
+  })
+
+  it('adds aligned STEP identities to a regular Strong verse', async () => {
+    const dependencies = createDependencies()
+    dependencies.getInterlinearAvailability.mockResolvedValue({
+      status: 'available',
+      locale: 'fr',
+      textRevision: 'bhg-test',
+    })
+    ;(dependencies.strongBible.loadVerse as jest.Mock).mockResolvedValue({
+      status: 'available',
+      provenance: { versionId: 'LSG', datasetId: 'LSG', isFallback: false },
+      verse: {
+        Livre: 2,
+        Chapitre: 1,
+        Verset: 1,
+        Texte: 'Voici',
+        StrongSpans: [
+          {
+            ordinal: 0,
+            startOffset: 0,
+            length: 5,
+            stepTokenIds: [20615],
+            identities: [{ kind: 'strong', code: 'H0428' }],
+          },
+        ],
+      },
+    })
+    dependencies.loadInterlinearVerseTokens.mockResolvedValue([
+      {
+        id: 20615,
+        ordinal: 0,
+        startOffset: 0,
+        length: 5,
+        segments: [
+          {
+            ordinal: 0,
+            startOffset: 0,
+            length: 5,
+            transliteration: 'elleh',
+            lemma: 'אֵלֶּה',
+            morphology: 'H:DemP',
+            gloss: 'voici',
+            identities: [
+              { kind: 'strong', code: 'H0428' },
+              { kind: 'strong', code: 'H9002' },
+            ],
+          },
+        ],
+      },
+    ])
+    const access = createLexiconBibleResourceAccess(dependencies)
+
+    const result = await access.loadVerse({
+      currentVersionId: 'LSG',
+      defaultVersionId: 'LSG',
+      preferredInterlinearLocale: 'fr',
+      book: 2,
+      chapter: 1,
+      verse: 1,
+    })
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: 'available',
+        verse: expect.objectContaining({
+          StrongSpans: [
+            expect.objectContaining({
+              identities: [
+                { kind: 'strong', code: 'H0428' },
+                { kind: 'strong', code: 'H9002' },
+              ],
+            }),
+          ],
+        }),
+      })
+    )
   })
 
   it('falls back to regular Strong Bibles when no BHG index is installed', async () => {

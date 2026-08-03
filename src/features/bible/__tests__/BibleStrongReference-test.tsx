@@ -34,6 +34,7 @@ describe('BibleStrongReference', () => {
     ['4352', 'se prosterner devant'],
   ])('selects Strong card %s from its rendered surface', (reference, word) => {
     const scrollToStrongCard = jest.fn()
+    const registerStrongWordLayout = jest.fn()
     const textStyle = { fontSize: 24, lineHeight: 24 }
     const consumer = BibleStrongReference({
       reference,
@@ -43,13 +44,20 @@ describe('BibleStrongReference', () => {
     }) as React.ReactElement<{
       children: (value: StrongResourceScrollValue) => React.ReactElement<{
         onPress: () => void
+        onLayout: (event: { nativeEvent: { layout: { x: number } } }) => void
         children: React.ReactElement<{ style?: typeof textStyle }>
       }>
     }>
-    const lexicalToken = consumer.props.children({ currentTarget: null, scrollToStrongCard })
+    const lexicalToken = consumer.props.children({
+      currentTarget: null,
+      registerStrongWordLayout,
+      scrollToStrongCard,
+    })
     lexicalToken.props.onPress()
+    lexicalToken.props.onLayout({ nativeEvent: { layout: { x: 120 } } })
 
     expect(scrollToStrongCard).toHaveBeenCalledWith(reference, 2)
+    expect(registerStrongWordLayout).toHaveBeenCalledWith(2, 120)
     expect(lexicalToken.props.children.props.style).toEqual(textStyle)
   })
 
@@ -64,6 +72,7 @@ describe('BibleStrongReference', () => {
 
     const lexicalToken = consumer.props.children({
       currentTarget: { code: '430', occurrenceIndex: 0 },
+      registerStrongWordLayout: jest.fn(),
       scrollToStrongCard: jest.fn(),
     })
 

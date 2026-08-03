@@ -29,6 +29,7 @@ describe('buildCanonicalStrongVerseRuns', () => {
       {
         kind: 'strong',
         word: 'continue',
+        contextWord: 'continue',
         identities: [{ kind: 'strong', code: 'H5331' }],
         isUntranslated: false,
       },

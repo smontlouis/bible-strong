@@ -23,7 +23,7 @@ describe('getStrongWordOccurrences', () => {
     ).toEqual([
       {
         identity: { kind: 'strong', code: 'H07225' },
-        clickedWord: 'commencement',
+        clickedWord: 'Au commencement',
         morphologyCodes: ['HNcfsa', 'HTd'],
       },
     ])
@@ -82,6 +82,39 @@ describe('getStrongWordOccurrences', () => {
         identity: { kind: 'strong', code: 'H0430' },
         clickedWord: 'Dieu',
         morphologyCodes: ['HVqp3ms'],
+      },
+    ])
+  })
+
+  it('keeps zero-length Strong identities attached to the preceding visible word', () => {
+    expect(
+      getStrongWordOccurrences({
+        Texte: 'Voici',
+        StrongSpans: [
+          {
+            ordinal: 0,
+            startOffset: 0,
+            length: 5,
+            identities: [{ kind: 'strong', code: 'H0428' }],
+          },
+          {
+            ordinal: 1,
+            startOffset: 5,
+            length: 0,
+            identities: [{ kind: 'strong', code: 'H9002' }],
+          },
+        ],
+      })
+    ).toEqual([
+      {
+        identity: { kind: 'strong', code: 'H0428' },
+        clickedWord: 'Voici',
+        morphologyCodes: [],
+      },
+      {
+        identity: { kind: 'strong', code: 'H9002' },
+        clickedWord: 'Voici',
+        morphologyCodes: [],
       },
     ])
   })

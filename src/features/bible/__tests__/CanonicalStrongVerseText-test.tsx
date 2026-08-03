@@ -45,11 +45,21 @@ describe('CanonicalStrongVerseText', () => {
       word?: string
       textStyle?: { fontSize: number; lineHeight: number }
       occurrenceIndex: number
+      selectionTargets?: Array<{ reference: string; occurrenceIndex: number }>
     }>[]
 
-    expect(rendered.map(node => node.props.reference)).toEqual(['3068', '413'])
-    expect(rendered.map(node => node.props.word)).toEqual(['L’Éternel', undefined])
-    expect(rendered.map(node => node.props.textStyle)).toEqual([textStyle, textStyle])
-    expect(rendered.map(node => node.props.occurrenceIndex)).toEqual([0, 1])
+    expect(rendered).toHaveLength(1)
+    expect(rendered[0].props).toEqual(
+      expect.objectContaining({
+        reference: '3068',
+        word: 'L’Éternel',
+        textStyle,
+        occurrenceIndex: 0,
+        selectionTargets: [
+          { reference: '3068', occurrenceIndex: 0 },
+          { reference: '413', occurrenceIndex: 1 },
+        ],
+      })
+    )
   })
 })

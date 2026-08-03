@@ -1,12 +1,11 @@
 import styled from '@emotion/native'
-import * as Icon from '@expo/vector-icons'
 import React from 'react'
 import { ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
-import Link from '~common/Link'
 import StylizedHTMLView from '~common/StylizedHTMLView'
-import Box from '~common/ui/Box'
+import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import ListenToStrong, { hasStrongAudio } from './ListenStrong'
 
@@ -20,27 +19,12 @@ import { Theme } from '@emotion/react'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
 import { createStrongDetailRoute } from '~features/lexique/strongDetailRoutes'
-import { formatStrongContextMorphology } from '~features/lexique/strongContextPresentation'
 import type { StrongVerseContext } from './strongResourceCardContext'
 
-const slideWidth = wp(60)
-const itemHorizontalMargin = wp(2)
-const itemWidth = slideWidth
-
-const Container = styled(Box)<{ isModal?: boolean; cardHeight?: number }>(
-  ({ isModal, cardHeight }) => ({
-    width: itemWidth,
-    flex: cardHeight === undefined ? 1 : undefined,
-    height: cardHeight,
-    maxHeight: cardHeight,
-    paddingHorizontal: itemHorizontalMargin,
-
-    ...(isModal && {
-      width: 'auto',
-      paddingHorizontal: 20,
-    }),
-  })
-)
+const Container = styled(Box)<{ isModal?: boolean }>(() => ({
+  flex: 1,
+  paddingHorizontal: 10,
+}))
 
 const TitleBorder = styled.View(({ theme }) => ({
   marginTop: 10,
@@ -58,19 +42,6 @@ const SubTitle = styled(Text)({
   marginBottom: 3,
 })
 
-const Header = styled.View(() => ({
-  flex: 1,
-  paddingTop: 5,
-  flexDirection: 'row',
-  alignItems: 'center',
-  // justifyContent: 'center'
-}))
-
-const IconFeather = styled(Icon.Feather)(({ theme }) => ({
-  paddingTop: 5,
-  color: theme.colors.default,
-}))
-
 const smallTextStyle = (theme: Theme) => ({
   lineHeight: 20,
   fontSize: 14,
@@ -80,9 +51,7 @@ const smallTextStyle = (theme: Theme) => ({
 
 const smallLinkStyle = (theme: Theme) => ({
   ...smallTextStyle(theme),
-  color: theme.colors.quart,
-  textDecorationLine: 'underline' as const,
-  textDecorationColor: theme.colors.quart,
+  color: theme.colors.primary,
 })
 
 type Props = {
@@ -91,10 +60,8 @@ type Props = {
   book: string
   strongEntry: StrongLexiconEntry
   isSelectionMode?: StudyNavigateBibleType
-  isModal?: boolean
   onClosed?: () => void
   strongVerseContext?: StrongVerseContext
-  cardHeight?: number
 }
 
 const StrongCard = (props: Props) => {
@@ -168,83 +135,68 @@ const StrongCard = (props: Props) => {
     }
   }
 
-  const { isSelectionMode, strongEntry, theme, isModal } = props
+  const { isSelectionMode, strongEntry, theme } = props
   const Mot = strongEntry.gloss
   const Phonetique = strongEntry.transliteration
+  const Pronunciation = strongEntry.pronunciation
   const Definition = strongEntry.definitionHtml ?? ''
   const original = strongEntry.original
+  const clickedWord = props.strongVerseContext?.clickedWord
   const morphology = props.strongVerseContext?.morphologyCodes.length
     ? props.strongVerseContext.morphologyCodes.join(' · ')
-    : strongEntry.morphology
-      ? formatStrongContextMorphology(strongEntry.morphology)
-      : undefined
+    : strongEntry.morphology?.code
 
   return (
-    <Container overflow="visible" isModal={isModal} cardHeight={props.cardHeight}>
-      <Box
-        mt={14}
-        px={15}
-        py={14}
-        flex={1}
-        bg="reverse"
-        bgOpacity="050"
-        borderRadius={14}
-        overflow="hidden"
-      >
-        <Text color="primary" bold fontSize={12} textTransform="uppercase">
-          {strongEntry.selectedIdentity.code}
-        </Text>
-        <Box>
-          <Box row alignItems="flex-end">
-            <Header>
-              <Link onPress={openStrong} style={{ flex: 1 }}>
-                <Text bold fontSize={18} flex>
-                  {Mot}
-                  {!!Phonetique && (
-                    <Text color="tertiary" fontSize={12}>
-                      {' '}
-                      {Phonetique}
-                    </Text>
-                  )}
+    <Container overflow="visible">
+      <Box mt={20} px={15} py={14} flex={1} bg="reverse" borderRadius={14} overflow="hidden">
+        <TouchableBox
+          onPress={openStrong}
+          activeOpacity={0.7}
+          accessibilityRole="link"
+          accessibilityLabel={`${strongEntry.stepCode} · ${Mot}`}
+        >
+          <HStack alignItems="flex-start" gap={10}>
+            <VStack flex gap={4}>
+              <Text color="primary" bold fontSize={12} textTransform="uppercase">
+                {strongEntry.stepCode}
+              </Text>
+
+              <Text fontWeight="500" fontSize={16}>
+                {Mot}
+              </Text>
+
+              {!!(Phonetique || Pronunciation || original) && (
+                <Text color="tertiary" fontSize={12}>
+                  {[Phonetique, Pronunciation, original].filter(Boolean).join(' · ')}
                 </Text>
-              </Link>
-              {hasStrongAudio(
+              )}
+
+              {!!morphology && (
+                <Text color="tertiary" fontSize={11} style={{ fontFamily: 'Arial' }}>
+                  {morphology}
+                </Text>
+              )}
+            </VStack>
+            {isSelectionMode ? (
+              <Box bg="primary" bgOpacity="010" borderRadius={16} size={32} center>
+                <FeatherIcon name="share" size={17} color="primary" />
+              </Box>
+            ) : hasStrongAudio(
                 strongEntry.language === 'hebrew' ? 'hebreu' : 'grec',
                 strongEntry.baseCode
-              ) && (
-                <Box mr={10} bg="primary" bgOpacity="010" borderRadius={18} size={36} center>
-                  <ListenToStrong
-                    type={strongEntry.language === 'hebrew' ? 'hebreu' : 'grec'}
-                    code={strongEntry.baseCode}
-                    iconSize={16}
-                    touchSize={36}
-                  />
-                </Box>
-              )}
-              <Link onPress={openStrong}>
-                {isSelectionMode ? (
-                  <IconFeather name="share" size={20} />
-                ) : (
-                  <IconFeather name="maximize-2" size={17} />
-                )}
-              </Link>
-            </Header>
-          </Box>
-          <Text color="darkGrey" bold fontSize={16} textAlign="left">
-            {original}
-          </Text>
-          {!!morphology && (
-            <Text color="tertiary" fontSize={11} style={{ fontFamily: 'Arial' }}>
-              {morphology}
-            </Text>
-          )}
-          {/* {!!Type && (
-              <Text titleItalic color="darkGrey" fontSize={12}>
-                {Type}
-              </Text>
-            )} */}
+              ) ? (
+              <Box bg="primary" bgOpacity="010" borderRadius={16} size={32} center>
+                <ListenToStrong
+                  type={strongEntry.language === 'hebrew' ? 'hebreu' : 'grec'}
+                  code={strongEntry.baseCode}
+                  iconSize={13}
+                  touchSize={32}
+                />
+              </Box>
+            ) : null}
+          </HStack>
           <TitleBorder />
-        </Box>
+        </TouchableBox>
 
         <ScrollView
           nestedScrollEnabled

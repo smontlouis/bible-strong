@@ -84,7 +84,17 @@ const StrongLexiconModuleCard = ({
     return null
 
   const content = (
-    <VStack bg="lightGrey" borderRadius={14} px={14} py={14} gap={10} opacity={0.75}>
+    <VStack
+      bg="reverse"
+      borderRadius={14}
+      px={14}
+      py={14}
+      gap={10}
+      opacity={0.5}
+      borderWidth={1}
+      borderColor="default"
+      style={{ borderStyle: 'dashed' }}
+    >
       <HStack gap={12} alignItems="center">
         <TouchableBox
           flex
@@ -100,15 +110,17 @@ const StrongLexiconModuleCard = ({
               color="default"
             />
             <VStack flex gap={2}>
-              <Text bold>{title}</Text>
-              <Text color="tertiary" fontSize={12}>
+              <Text bold fontSize={14}>
+                {title}
+              </Text>
+              <Text color="default" fontSize={12}>
                 {description}
               </Text>
             </VStack>
           </HStack>
         </TouchableBox>
         {downloading && (
-          <Text color="tertiary" fontSize={12}>
+          <Text color="default" fontSize={12}>
             {Math.round(progress * 100)}%
           </Text>
         )}

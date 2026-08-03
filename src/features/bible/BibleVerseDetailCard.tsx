@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
-import React, { useEffect, useRef, useState } from 'react'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import React, { useEffect, useRef, useState } from 'react'
 
 import waitForStrongDB from '~common/waitForStrongDB'
 
@@ -12,38 +12,38 @@ import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import RoundedCorner from '~common/ui/RoundedCorner'
-import StrongCard from './StrongCard'
 import CanonicalStrongVerseText from './CanonicalStrongVerseText'
+import StrongCard from './StrongCard'
 
 import BibleVerseDetailFooter from './BibleVerseDetailFooter'
 
-import { useTranslation } from 'react-i18next'
-import { useAtomValue } from 'jotai/react'
-import { ScrollView } from 'react-native'
 import { useRouter } from 'expo-router'
+import { useAtomValue } from 'jotai/react'
+import { useTranslation } from 'react-i18next'
+import { ScrollView } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useSelector } from 'react-redux'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { StudyNavigateBibleType } from '~common/types'
-import { getChapterVerseCountSafe } from '~helpers/bibleCoverage'
-import { useLayoutSize } from '~helpers/useLayoutSize'
-import { wp } from '~helpers/utils'
-import { useResourceAccess } from '~features/resources/resourceAccess'
-import type { LexiconBibleProvenance } from '~features/resources/lexiconBibleResourceAccess'
-import type { RootState } from '~redux/modules/reducer'
 import Button from '~common/ui/Button'
-import type { VersionCode } from '~state/tabs'
+import type { LexiconBibleProvenance } from '~features/resources/lexiconBibleResourceAccess'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
+import { getChapterVerseCountSafe } from '~helpers/bibleCoverage'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import { downloadCompletionSignalAtom } from '~state/downloadQueue'
+import { localQueryOptions } from '~helpers/queryOptions'
 import {
   getStrongBibleFallbackPriority,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
-import { localQueryOptions } from '~helpers/queryOptions'
+import { areStrongIdentitiesEqual } from '~helpers/strongIdentities'
+import { wp } from '~helpers/utils'
+import type { RootState } from '~redux/modules/reducer'
+import { downloadCompletionSignalAtom } from '~state/downloadQueue'
+import { useResourcesLanguageValue } from '~state/resourcesLanguage'
+import type { VersionCode } from '~state/tabs'
 import { scaleFontSize } from './BibleDOM/scaleFontSize'
 import { scaleLineHeight } from './BibleDOM/scaleLineHeight'
-import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
-import { areStrongIdentitiesEqual } from '~helpers/strongIdentities'
-import { useResourcesLanguageValue } from '~state/resourcesLanguage'
 import { getStrongWordOccurrences, type StrongVerseContext } from './strongResourceCardContext'
 import { StrongResourceScrollProvider } from './StrongResourceScrollContext'
 
@@ -157,19 +157,20 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   const verseBook = verse.Livre
   const verseChapter = verse.Chapitre
   const verseNumber = verse.Verset
+  const verseScrollRef = useRef<ScrollView>(null)
   const strongCardsScrollRef = useRef<ScrollView>(null)
+  const strongWordLayoutsRef = useRef(new Map<number, number>())
+  const currentStrongCardIndexRef = useRef(0)
+  const isProgrammaticCardsScrollRef = useRef(false)
   const hasDisplayedStrongVerseRef = useRef(false)
-  const [boxHeight, setBoxHeight] = useState(0)
-  const {
-    ref: strongCardsContainerRef,
-    size: strongCardsContainerSize,
-    onLayout: onStrongCardsContainerLayout,
-  } = useLayoutSize()
+  const insets = useSafeAreaInsets()
+
   const [currentStrongCardIndex, setCurrentStrongCardIndex] = useState(0)
 
   const strongVerseQuery = useQuery({
     queryKey: [
       'strong-verse-detail',
+      'step-aligned',
       selectedVersion,
       defaultStrongVersion,
       preferredStrongVersionId,
@@ -258,7 +259,6 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   })
   const strongVerseData = strongVerseQuery.data
   const strongCards = strongVerseData?.strongCards ?? []
-  const availableCardHeight = Math.max(0, strongCardsContainerSize.height - bottomInset)
 
   const findRefIndex = (ref: string | number, occurrenceIndex: number) =>
     strongCards.findIndex(
@@ -269,17 +269,37 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   const scrollToStrongCard = (ref: string | number, occurrenceIndex: number) => {
     const index = findRefIndex(ref, occurrenceIndex)
     if (index !== -1) {
+      isProgrammaticCardsScrollRef.current = true
       strongCardsScrollRef.current?.scrollTo({ x: index * itemWidth, animated: true })
+      currentStrongCardIndexRef.current = index
       setCurrentStrongCardIndex(index)
     }
   }
 
+  const registerStrongWordLayout = (occurrenceIndex: number, verseContentOffsetX: number) => {
+    strongWordLayoutsRef.current.set(occurrenceIndex, verseContentOffsetX)
+  }
+
+  const scrollVerseToOccurrence = (occurrenceIndex: number) => {
+    const x = strongWordLayoutsRef.current.get(occurrenceIndex)
+    if (x === undefined) return
+
+    verseScrollRef.current?.scrollTo({ x, animated: true })
+  }
+
   const selectStrongCardFromOffset = (offsetX: number) => {
+    if (isProgrammaticCardsScrollRef.current) return
+
     const index = Math.min(
       Math.max(0, Math.round(offsetX / itemWidth)),
       Math.max(0, strongCards.length - 1)
     )
+    if (index === currentStrongCardIndexRef.current) return
+
+    currentStrongCardIndexRef.current = index
     setCurrentStrongCardIndex(index)
+    const occurrenceIndex = strongCards[index]?.occurrenceIndex
+    if (occurrenceIndex !== undefined) scrollVerseToOccurrence(occurrenceIndex)
   }
 
   const renderStrongCard = ({ item, index }: { item: StrongCardItem; index: number }) => {
@@ -290,7 +310,6 @@ const BibleVerseDetailCard: React.FC<Props> = ({
         book={String(strongVerseData?.displayedVerse?.Livre ?? verse.Livre)}
         strongEntry={item.entry}
         strongVerseContext={item.context}
-        cardHeight={availableCardHeight}
         index={index}
       />
     )
@@ -299,8 +318,11 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   useEffect(() => {
     if (!strongVerseData || strongVerseQuery.isPlaceholderData) return
     hasDisplayedStrongVerseRef.current = true
+    currentStrongCardIndexRef.current = 0
+    isProgrammaticCardsScrollRef.current = false
     setCurrentStrongCardIndex(0)
     onStrongBibleProvenanceChange?.(strongVerseData.provenance)
+    verseScrollRef.current?.scrollTo({ x: 0, animated: false })
     strongCardsScrollRef.current?.scrollTo({ x: 0, animated: false })
   }, [onStrongBibleProvenanceChange, strongVerseData, strongVerseQuery.isPlaceholderData])
 
@@ -370,16 +392,21 @@ const BibleVerseDetailCard: React.FC<Props> = ({
 
   const verseTextStyle = {
     fontSize: Number.parseFloat(scaleFontSize(24, fontSizeScale)),
-    lineHeight: Number.parseFloat(scaleLineHeight(24, lineHeightSetting, fontSizeScale)),
+    lineHeight: Number.parseFloat(scaleLineHeight(30, lineHeightSetting, fontSizeScale)),
   }
 
   return (
-    <Box flex={1} onLayout={e => setBoxHeight(e.nativeEvent.layout.height)}>
-      <Box maxHeight={boxHeight / 2} position="relative" zIndex={1}>
+    <Box flex={1}>
+      <Box position="relative" zIndex={1}>
         <ScrollView
+          ref={verseScrollRef}
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingTop: 10, paddingRight: 20 }}
+          contentContainerStyle={{
+            paddingTop: 10,
+            paddingRight: 20,
+            marginTop: 20,
+          }}
         >
           <StyledVerse>
             <VersetWrapper>
@@ -393,6 +420,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
                       occurrenceIndex: strongCards[currentStrongCardIndex]?.occurrenceIndex,
                     }
                   : null,
+                registerStrongWordLayout,
                 scrollToStrongCard,
               }}
             >
@@ -412,12 +440,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
       <Box bg="lightGrey" mt={-30} position="relative" zIndex={0}>
         <RoundedCorner />
       </Box>
-      <Box
-        ref={strongCardsContainerRef}
-        bg="lightGrey"
-        flex={1}
-        onLayout={onStrongCardsContainerLayout}
-      >
+      <Box bg="lightGrey" flex={1}>
         <ScrollView
           ref={strongCardsScrollRef}
           horizontal
@@ -425,15 +448,24 @@ const BibleVerseDetailCard: React.FC<Props> = ({
           snapToInterval={itemWidth}
           snapToAlignment="start"
           decelerationRate="fast"
+          onScrollBeginDrag={() => {
+            isProgrammaticCardsScrollRef.current = false
+          }}
+          onMomentumScrollEnd={() => {
+            isProgrammaticCardsScrollRef.current = false
+          }}
           onScroll={event => selectStrongCardFromOffset(event.nativeEvent.contentOffset.x)}
           scrollEventThrottle={16}
-          contentContainerStyle={{ paddingLeft: 20, paddingRight: 20 }}
+          contentContainerStyle={{
+            paddingLeft: 20,
+            paddingRight: 20,
+            paddingBottom: insets.bottom + 180,
+          }}
         >
           {strongCards.map((item, index) => (
             <Box
               key={`${item.entry.selectedIdentity.kind}:${item.entry.selectedIdentity.code}:${item.occurrenceIndex}`}
               width={itemWidth}
-              height={availableCardHeight}
             >
               {renderStrongCard({ item, index })}
             </Box>

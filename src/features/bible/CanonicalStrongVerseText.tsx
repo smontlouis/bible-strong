@@ -32,24 +32,28 @@ const CanonicalStrongVerseText = ({ verse, concordanceFor, small, textStyle }: P
         })
       }
 
-      return run.identities.flatMap((identity, identityIndex) => {
+      const selectionTargets = run.identities.flatMap(identity => {
         const currentOccurrenceIndex = occurrenceIndex
         occurrenceIndex += 1
         const reference = getStrongReferenceNumber(identity.code)
-        if (!reference) return []
-        return [
-          <BibleStrongReference
-            small={small}
-            concordanceFor={concordanceFor}
-            book={verse.Livre}
-            textStyle={textStyle}
-            word={identityIndex === 0 ? run.word || undefined : undefined}
-            reference={reference}
-            occurrenceIndex={currentOccurrenceIndex}
-            key={`strong-${runIndex}-${identity.kind}-${identity.code}`}
-          />,
-        ]
+        return reference ? [{ reference, occurrenceIndex: currentOccurrenceIndex }] : []
       })
+      const firstTarget = selectionTargets[0]
+      if (!firstTarget) return []
+
+      return [
+        <BibleStrongReference
+          small={small}
+          concordanceFor={concordanceFor}
+          book={verse.Livre}
+          textStyle={textStyle}
+          word={run.word || undefined}
+          reference={firstTarget.reference}
+          occurrenceIndex={firstTarget.occurrenceIndex}
+          selectionTargets={selectionTargets}
+          key={`strong-${runIndex}-${selectionTargets.map(target => target.reference).join('-')}`}
+        />,
+      ]
     }
   )
 }

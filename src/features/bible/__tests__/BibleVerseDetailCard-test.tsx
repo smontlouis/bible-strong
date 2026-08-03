@@ -336,7 +336,7 @@ describe('BibleVerseDetailCard', () => {
     )
     expect(renderedVerse.props.textStyle).toEqual({
       fontSize: 26.4,
-      lineHeight: 37,
+      lineHeight: 46,
     })
   })
 
@@ -484,6 +484,46 @@ describe('BibleVerseDetailCard', () => {
     act(() => provider.props.value.scrollToStrongCard('430', 1))
 
     expect(mockScrollTo).toHaveBeenCalledWith({ x: 64, animated: true })
+  })
+
+  it('scrolls the verse to the occurrence selected by scrolling the Strong cards', async () => {
+    mockLoadVerse.mockResolvedValueOnce(
+      makeAvailableVerse('Dieu Dieu', [
+        {
+          ordinal: 0,
+          startOffset: 0,
+          length: 4,
+          identities: [{ kind: 'strong', code: 'H0430' }],
+        },
+        {
+          ordinal: 1,
+          startOffset: 5,
+          length: 4,
+          identities: [{ kind: 'strong', code: 'H0430' }],
+        },
+      ])
+    )
+
+    await act(async () => {
+      renderer = create(renderCard(1))
+      await flushQueryUpdates()
+    })
+    await act(async () => {
+      renderer.update(renderCard(1))
+      await flushQueryUpdates()
+    })
+
+    const provider = renderer.root.find(
+      node => String(node.type) === 'StrongResourceScrollProvider'
+    )
+    const cardsScrollView = renderer.root
+      .findAll(node => String(node.type) === 'ScrollView')
+      .find(node => node.props.snapToInterval === 64)
+    act(() => provider.props.value.registerStrongWordLayout(1, 180))
+    mockScrollTo.mockClear()
+    act(() => cardsScrollView?.props.onScroll({ nativeEvent: { contentOffset: { x: 64 } } }))
+
+    expect(mockScrollTo).toHaveBeenCalledWith({ x: 180, animated: true })
   })
 
   it('requests the contextual BHG lexicon source with the tab interlinear locale', async () => {
