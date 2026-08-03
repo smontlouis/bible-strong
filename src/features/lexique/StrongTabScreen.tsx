@@ -63,7 +63,6 @@ const StrongTabScreen = ({ strongAtom }: StrongTabScreenProps) => {
     <StrongMainScreen
       context={strongTab.data}
       onBack={returnToLexicon}
-      onStrongSelect={onStrongSelect}
       onTitleChange={updateTitle}
     />
   )

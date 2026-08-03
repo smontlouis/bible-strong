@@ -75,7 +75,7 @@ describe('lexicon navigation mode', () => {
     })
   })
 
-  it('injects Strong state mutation only from a Strong tab', () => {
+  it('only mutates Strong tab state from the lexicon list', () => {
     const strongAtom = atom<StrongTab>({
       id: 'strong-tab',
       title: 'après',
@@ -97,17 +97,19 @@ describe('lexicon navigation mode', () => {
       renderer = create(<StrongTabScreen strongAtom={strongAtom} />)
     })
 
-    const onStrongSelect = renderer.root.find(node => String(node.type) === 'StrongMainScreen')
-      .props.onStrongSelect
-    expect(onStrongSelect).toEqual(expect.any(Function))
+    const detail = renderer.root.find(node => String(node.type) === 'StrongMainScreen')
+    expect(detail.props).not.toHaveProperty('onStrongSelect')
 
-    act(() => onStrongSelect(40, 'G0002'))
+    act(() => detail.props.onBack())
+
+    const list = renderer.root.find(node => String(node.type) === 'LexiqueListScreen')
+    expect(list.props.onStrongSelect).toEqual(expect.any(Function))
+
+    act(() => list.props.onStrongSelect(40, 'G0002'))
 
     expect(getDefaultStore().get(strongAtom).data).toEqual({
       book: 40,
       reference: 'G0002',
-      bibleVersion: 'LSG',
-      strongBibleVersionId: 'LSG',
     })
   })
 })

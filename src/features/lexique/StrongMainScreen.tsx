@@ -27,7 +27,6 @@ interface StrongMainScreenProps {
   context: StrongDetailRouteContext
   isFormSheet?: boolean
   onBack?: () => void
-  onStrongSelect?: (book: number, reference: string) => void
   onTitleChange?: (title: string) => void
 }
 
@@ -35,7 +34,6 @@ const StrongMainScreen = ({
   context,
   isFormSheet = false,
   onBack,
-  onStrongSelect,
   onTitleChange,
 }: StrongMainScreenProps) => {
   const pushRouteOnce = usePushRouteOnce()
@@ -57,13 +55,6 @@ const StrongMainScreen = ({
   const selectedLemmaId =
     lemmaSelection.navigationKey === navigationKey ? lemmaSelection.lemmaId : undefined
   const routeNavigation = useStrongRouteNavigation(activeContext)
-  const openStrong = (stepCode: string) => {
-    if (onStrongSelect) {
-      onStrongSelect(stepCode.startsWith('G') ? 40 : 1, stepCode)
-      return
-    }
-    routeNavigation.openStrong(stepCode)
-  }
   const addHistory = useSetAtom(historyAtom)
   const { t } = useTranslation()
   const historyDataUpdatedAtRef = useRef(0)
@@ -328,7 +319,7 @@ const StrongMainScreen = ({
               })
             )
           }
-          onOpenStrong={openStrong}
+          onOpenStrong={routeNavigation.openStrong}
           onOpenBibleReference={routeNavigation.openBibleReference}
           onOpenConcordanceVerse={openConcordanceVerse}
           onOpenEntityProfile={routeNavigation.openEntity}
