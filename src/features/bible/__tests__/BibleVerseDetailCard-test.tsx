@@ -389,7 +389,16 @@ describe('BibleVerseDetailCard', () => {
   })
 
   it('limits Strong cards above the ResourceModal footer and safe-area inset', async () => {
-    mockLoadVerse.mockResolvedValueOnce(makeAvailableVerse('Dieu'))
+    mockLoadVerse.mockResolvedValueOnce(
+      makeAvailableVerse('Dieu', [
+        {
+          ordinal: 0,
+          startOffset: 0,
+          length: 4,
+          identities: [{ kind: 'strong', code: 'H0430' }],
+        },
+      ])
+    )
 
     await act(async () => {
       renderer = create(renderCard(1, jest.fn(), jest.fn(), 'BFC', 120))
@@ -401,6 +410,9 @@ describe('BibleVerseDetailCard', () => {
     })
 
     expect(renderer.root.find(node => String(node.type) === 'Carousel').props.itemHeight).toBe(280)
+    expect(renderer.root.find(node => String(node.type) === 'StrongCard').props.cardHeight).toBe(
+      280
+    )
   })
 
   it('renders repeated Strong words as distinct cards with occurrence morphology', async () => {

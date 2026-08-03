@@ -27,16 +27,20 @@ const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
 const itemWidth = slideWidth
 
-const Container = styled(Box)<{ isModal?: boolean }>(({ isModal }) => ({
-  width: itemWidth,
-  flex: 1,
-  paddingHorizontal: itemHorizontalMargin,
+const Container = styled(Box)<{ isModal?: boolean; cardHeight?: number }>(
+  ({ isModal, cardHeight }) => ({
+    width: itemWidth,
+    flex: cardHeight === undefined ? 1 : undefined,
+    height: cardHeight,
+    maxHeight: cardHeight,
+    paddingHorizontal: itemHorizontalMargin,
 
-  ...(isModal && {
-    width: 'auto',
-    paddingHorizontal: 20,
-  }),
-}))
+    ...(isModal && {
+      width: 'auto',
+      paddingHorizontal: 20,
+    }),
+  })
+)
 
 const TitleBorder = styled.View(({ theme }) => ({
   marginTop: 10,
@@ -90,6 +94,7 @@ type Props = {
   isModal?: boolean
   onClosed?: () => void
   strongVerseContext?: StrongVerseContext
+  cardHeight?: number
 }
 
 const StrongCard = (props: Props) => {
@@ -175,7 +180,7 @@ const StrongCard = (props: Props) => {
       : undefined
 
   return (
-    <Container overflow="visible" isModal={isModal}>
+    <Container overflow="visible" isModal={isModal} cardHeight={props.cardHeight}>
       <Box
         mt={14}
         px={15}

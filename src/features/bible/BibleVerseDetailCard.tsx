@@ -263,6 +263,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   const strongVerseData = strongVerseQuery.data
   const strongCards = strongVerseData?.strongCards ?? []
   const strongReferences = strongCards.map(card => card.entry)
+  const availableCardHeight = Math.max(0, carouselContainerSize.height - bottomInset)
 
   const findRefIndex = (ref: string | number, occurrenceIndex?: number) =>
     occurrenceIndex === undefined
@@ -296,6 +297,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
         book={String(strongVerseData?.displayedVerse?.Livre ?? verse.Livre)}
         strongEntry={item.entry}
         strongVerseContext={item.context}
+        cardHeight={availableCardHeight}
         index={index}
       />
     )
@@ -425,7 +427,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
           mode="horizontal-stack"
           scrollAnimationDuration={300}
           itemWidth={itemWidth}
-          itemHeight={Math.max(0, carouselContainerSize.height - bottomInset)}
+          itemHeight={availableCardHeight}
           onConfigurePanGesture={gestureChain => {
             gestureChain.activeOffsetX([-10, 10])
           }}
