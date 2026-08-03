@@ -96,6 +96,7 @@ interface Props {
   onOpenStrongBibleSourceSheet: () => void
   isSelectionMode?: StudyNavigateBibleType
   updateVerse: (direction: number) => void
+  bottomInset?: number
 }
 
 type StrongVerseQueryErrorCode =
@@ -137,6 +138,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   onOpenStrongBibleSourceSheet,
   isSelectionMode,
   updateVerse,
+  bottomInset = 0,
 }) => {
   const theme = useTheme()
   const { t } = useTranslation()
@@ -423,7 +425,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
           mode="horizontal-stack"
           scrollAnimationDuration={300}
           itemWidth={itemWidth}
-          itemHeight={carouselContainerSize.height}
+          itemHeight={Math.max(0, carouselContainerSize.height - bottomInset)}
           onConfigurePanGesture={gestureChain => {
             gestureChain.activeOffsetX([-10, 10])
           }}

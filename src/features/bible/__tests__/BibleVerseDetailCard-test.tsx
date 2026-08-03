@@ -74,13 +74,15 @@ jest.mock('react-native-reanimated-carousel', () => {
     default: ({
       data,
       renderItem,
+      itemHeight,
     }: {
       data: unknown[]
       renderItem: (info: { item: unknown; index: number }) => React.ReactNode
+      itemHeight: number
     }) =>
       ReactModule.createElement(
         'Carousel',
-        { itemCount: data.length },
+        { itemCount: data.length, itemHeight },
         data.map((item, index) => renderItem({ item, index }))
       ),
   }
@@ -218,7 +220,8 @@ const renderCard = (
   verseNumber: number,
   onOpenStrongBibleSourceSheet = jest.fn(),
   onStrongBibleProvenanceChange = jest.fn(),
-  selectedVersion: 'BFC' | 'BHG' = 'BFC'
+  selectedVersion: 'BFC' | 'BHG' = 'BFC',
+  bottomInset = 0
 ) => (
   <QueryClientProvider client={queryClient}>
     <BibleVerseDetailCard
@@ -228,6 +231,7 @@ const renderCard = (
       updateVerse={jest.fn()}
       onOpenStrongBibleSourceSheet={onOpenStrongBibleSourceSheet}
       onStrongBibleProvenanceChange={onStrongBibleProvenanceChange}
+      bottomInset={bottomInset}
     />
   </QueryClientProvider>
 )
@@ -382,6 +386,21 @@ describe('BibleVerseDetailCard', () => {
         },
       })
     )
+  })
+
+  it('limits Strong cards above the ResourceModal footer and safe-area inset', async () => {
+    mockLoadVerse.mockResolvedValueOnce(makeAvailableVerse('Dieu'))
+
+    await act(async () => {
+      renderer = create(renderCard(1, jest.fn(), jest.fn(), 'BFC', 120))
+      await flushQueryUpdates()
+    })
+    await act(async () => {
+      renderer.update(renderCard(1, jest.fn(), jest.fn(), 'BFC', 120))
+      await flushQueryUpdates()
+    })
+
+    expect(renderer.root.find(node => String(node.type) === 'Carousel').props.itemHeight).toBe(280)
   })
 
   it('renders repeated Strong words as distinct cards with occurrence morphology', async () => {

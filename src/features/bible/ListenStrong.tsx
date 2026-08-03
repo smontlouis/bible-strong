@@ -10,6 +10,8 @@ type AudioStatus = 'Idle' | 'Loading' | 'Playing'
 interface Props {
   type: 'hebreu' | 'grec'
   code: string | number
+  iconSize?: number
+  touchSize?: number
 }
 
 export const hasStrongAudio = (type: Props['type'], code: Props['code']) => {
@@ -19,7 +21,7 @@ export const hasStrongAudio = (type: Props['type'], code: Props['code']) => {
   return Number.isInteger(numericCode) && numericCode >= 1 && numericCode <= maximumCode
 }
 
-const ListenToStrong = ({ type, code }: Props) => {
+const ListenToStrong = ({ type, code, iconSize = 20, touchSize }: Props) => {
   const codeId = `${code}`.padStart(4, '0')
   const audioId = `${type}-${codeId}`
   const url =
@@ -39,8 +41,20 @@ const ListenToStrong = ({ type, code }: Props) => {
   return (
     <Box>
       {audioStatus === 'Idle' && (
-        <LinkBox onPress={playAudio}>
-          <IonIcon name="play" size={20} color="primary" style={{ marginLeft: 2 }} />
+        <LinkBox
+          onPress={playAudio}
+          style={
+            touchSize
+              ? {
+                  width: touchSize,
+                  height: touchSize,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }
+              : undefined
+          }
+        >
+          <IonIcon name="play" size={iconSize} color="primary" style={{ marginLeft: 2 }} />
         </LinkBox>
       )}
       {audioStatus === 'Loading' && (
@@ -50,7 +64,12 @@ const ListenToStrong = ({ type, code }: Props) => {
       )}
       {audioStatus === 'Playing' && (
         <Box>
-          <IonIcon name="play" size={20} color="primary" style={{ opacity: 0.3, marginLeft: 2 }} />
+          <IonIcon
+            name="play"
+            size={iconSize}
+            color="primary"
+            style={{ opacity: 0.3, marginLeft: 2 }}
+          />
         </Box>
       )}
     </Box>

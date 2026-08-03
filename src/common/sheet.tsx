@@ -38,6 +38,13 @@ const SheetContext = React.createContext<SheetContextValue>({
   setFooterHeight: () => {},
 })
 
+const useSheetFooterInset = () => {
+  const { footerHeight } = React.useContext(SheetContext)
+  const insets = useSafeAreaInsets()
+
+  return footerHeight + insets.bottom
+}
+
 export type SheetRef = {
   present: () => void
   presentAt: (snapPoint: SheetSnapPoint) => void
@@ -447,6 +454,7 @@ export {
   SheetFooter,
   SheetHeader,
   SheetItem,
+  useSheetFooterInset,
   useSheetInternal,
 }
 
