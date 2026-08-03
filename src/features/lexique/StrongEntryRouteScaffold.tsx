@@ -1,20 +1,27 @@
 import type { ReactNode } from 'react'
 import { Alert } from 'react-native'
 import { useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
 
 import Empty from '~common/Empty'
+import EntityChipList from '~common/EntityChipList'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
-import { VStack } from '~common/ui/Box'
+import Box, { VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
+import { createStrongEndpoint } from '~features/studyRelations/endpoints'
+import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
+import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { createStrongLexiconModuleDownloadItem } from '~helpers/downloadItemFactory'
 import { downloadManager } from '~helpers/downloadManager'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import type { RootState } from '~redux/modules/reducer'
+import { makeStrongTagsSelector } from '~redux/selectors/bible'
 import StrongEntryMenu from './StrongEntryMenu'
 import type { StrongDetailRouteContext } from './strongDetailRoutes'
 import { useStrongEntryRoute } from './useStrongEntryRoute'
@@ -31,6 +38,7 @@ type Props = {
   fontSize?: number
   isFormSheet?: boolean
   onBack?: () => void
+  requireEntry?: boolean
   showEntryMenu?: boolean
   subTitle?: string
   title: string
@@ -43,12 +51,29 @@ const StrongEntryRouteScaffold = ({
   fontSize,
   isFormSheet = false,
   onBack,
+  requireEntry = true,
   showEntryMenu = false,
   subTitle,
   title,
 }: Props) => {
   const { t } = useTranslation()
   const canGoBackInStack = useCanGoBackInStack()
+  const selectStrongTags = makeStrongTagsSelector()
+  const tags = useSelector((state: RootState) =>
+    entryState.entry
+      ? selectStrongTags(state, entryState.entry.stepCode, entryState.entry.language === 'greek')
+      : undefined
+  )
+  const strongEndpoint = entryState.entry
+    ? createStrongEndpoint({
+        language: entryState.entry.language,
+        code: entryState.entry.stepCode,
+        labelFallback: entryState.entry.gloss,
+        originalWord: entryState.entry.original,
+      })
+    : null
+  const relationCount = useRelationCount(strongEndpoint)
+  const openEntityRelations = useOpenEntityRelations()
   const coreDownload = useDownloadItemStatus(
     createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'core' })
   )
@@ -68,14 +93,25 @@ const StrongEntryRouteScaffold = ({
           <StrongEntryMenu context={context} entry={entryState.entry} />
         ) : undefined
       }
-    />
+    >
+      {entryState.entry && (tags || relationCount > 0) && (
+        <Box px={20} mt={-8} pb={10}>
+          <EntityChipList
+            tags={tags}
+            relationCount={relationCount}
+            onRelationPress={() => strongEndpoint && openEntityRelations(strongEndpoint)}
+          />
+        </Box>
+      )}
+    </Header>
   )
 
   if (
-    entryState.coreAvailability.isPending ||
-    (Boolean(entryState.identity) &&
-      entryState.coreAvailability.data?.status === 'available' &&
-      entryState.entryQuery.isPending)
+    requireEntry &&
+    (entryState.coreAvailability.isPending ||
+      (Boolean(entryState.identity) &&
+        entryState.coreAvailability.data?.status === 'available' &&
+        entryState.entryQuery.isPending))
   ) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
@@ -92,7 +128,7 @@ const StrongEntryRouteScaffold = ({
     )
   }
 
-  if (entryState.coreAvailability.data?.status !== 'available') {
+  if (requireEntry && entryState.coreAvailability.data?.status !== 'available') {
     const requestCoreDownload = () => {
       Alert.alert(
         t('Télécharger le lexique Strong ?'),
@@ -130,7 +166,7 @@ const StrongEntryRouteScaffold = ({
     )
   }
 
-  if (!entryState.entry) {
+  if (requireEntry && !entryState.entry) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
         {header}
