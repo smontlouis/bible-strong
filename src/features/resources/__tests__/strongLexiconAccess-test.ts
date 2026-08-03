@@ -158,7 +158,6 @@ describe('strongLexiconAccess', () => {
     await expect(localStrongLexiconAccess.browseByGlossPrefix('S', 'fr', 25)).resolves.toEqual([
       expect.objectContaining({
         stepCode: 'H3068G',
-        uStrong: 'H3068G',
         gloss: 'SEIGNEUR',
       }),
     ])
@@ -168,7 +167,7 @@ describe('strongLexiconAccess', () => {
     )
   })
 
-  it('returns the full unified Strong code when the STEP identity is classical', async () => {
+  it('returns the matched STEP Strong code for a disambiguated dictionary identity', async () => {
     const database = createDatabase()
     database.getAllAsync.mockResolvedValue([
       {
@@ -191,7 +190,6 @@ describe('strongLexiconAccess', () => {
       expect.objectContaining({
         stepCode: 'H3651',
         classicStrong: 'H3651',
-        uStrong: 'H3651C',
       }),
     ])
     expect(database.getAllAsync).toHaveBeenCalledWith(expect.stringContaining('e.dStrong LIKE ?'), [
@@ -251,7 +249,6 @@ describe('strongLexiconAccess', () => {
       expect.objectContaining({
         id: 11446,
         stepCode: 'H0310A',
-        uStrong: 'H0310A',
       }),
     ])
   })
@@ -297,7 +294,6 @@ describe('strongLexiconAccess', () => {
       expect.objectContaining({
         id: 11446,
         stepCode: 'H0310A',
-        uStrong: 'H0310A',
       }),
     ])
     expect(database.getAllAsync).toHaveBeenCalledWith(
@@ -308,6 +304,47 @@ describe('strongLexiconAccess', () => {
       expect.stringContaining('WHERE unifiedRank=1'),
       expect.any(Array)
     )
+  })
+
+  it('keeps Greek and Hebrew STEP entries distinct when they share a unified Strong', async () => {
+    const database = createDatabase()
+    const aaronEntries = [
+      {
+        ...rows.H0413,
+        id: 3,
+        language: 'greek' as const,
+        baseCode: 2,
+        eStrong: 'G0002',
+        dStrong: 'G0002 = the Greek of',
+        uStrong: 'H0175',
+        stepCode: 'G0002',
+        original: 'Ἀαρών',
+        gloss: 'Aaron',
+        localizedGloss: 'Aaron',
+      },
+      {
+        ...rows.H0413,
+        id: 11257,
+        baseCode: 175,
+        eStrong: 'H0175',
+        dStrong: 'H0175 =',
+        uStrong: 'H0175',
+        stepCode: 'H0175',
+        original: 'אַהֲרֹן',
+        gloss: 'Aaron',
+        localizedGloss: 'Aaron',
+      },
+    ]
+    database.getAllAsync.mockImplementation(async (sql: string) =>
+      sql.includes('PARTITION BY e.language,') ? aaronEntries : [aaronEntries[1]]
+    )
+    mockWithStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(database as unknown as SQLiteDatabase)
+    )
+
+    const results = await localStrongLexiconAccess.search('Aaron', 'fr', 25)
+
+    expect(results.map(result => result.stepCode)).toEqual(['G0002', 'H0175'])
   })
 
   it('loads the full localized morphology for the selected verse token', async () => {

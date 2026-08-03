@@ -41,7 +41,7 @@ export const createVerseKeys = (
     (_, index) => `${book}-${chapter}-${startVerse + index}`
   )
 
-export const getStrongDisplayCode = (strong: StrongLexiconSearchResult) => strong.uStrong
+export const getStrongDisplayCode = (strong: StrongLexiconSearchResult) => strong.stepCode
 
 export const getStrongOriginalWord = (strong: StrongLexiconSearchResult) => strong.original
 

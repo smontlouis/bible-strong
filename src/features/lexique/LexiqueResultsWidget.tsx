@@ -60,7 +60,7 @@ const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
         return (
           <LexiqueResultItem
             key={`${strong.id}:${strong.stepCode}`}
-            displayCode={strong.uStrong}
+            displayCode={strong.stepCode}
             reference={strong.stepCode}
             title={strong.gloss}
             variant={variant}

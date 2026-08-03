@@ -95,7 +95,7 @@ describe('searchResultsModel', () => {
     expect(model.sections[0].items).toEqual([noteResult])
   })
 
-  it('displays the full unified Strong code while opening the matched lexicon identity', () => {
+  it('displays and opens the matched STEP Strong identity', () => {
     const model = getSearchResultsModel({
       ...baseInput,
       strongResults: [
@@ -103,7 +103,6 @@ describe('searchResultsModel', () => {
           id: 3651,
           stepCode: 'H3651',
           classicStrong: 'H3651',
-          uStrong: 'H3651C',
           language: 'hebrew',
           original: 'כֵּן',
           transliteration: 'kēn',
@@ -114,7 +113,7 @@ describe('searchResultsModel', () => {
 
     expect(model.sections[0].items[0]).toEqual(
       expect.objectContaining({
-        chip: 'H3651C',
+        chip: 'H3651',
         endpoint: expect.objectContaining({ code: '3651' }),
         strongReference: { language: 'hebrew', code: 'H3651' },
       })

@@ -102,6 +102,7 @@ const StrongCard = (props: Props) => {
     const Phonetique = strongEntry.transliteration
     const Definition = strongEntry.definitionHtml ?? ''
     const original = strongEntry.original
+    const stepStrongCode = strongEntry.stepCode
 
     if (isSelectionMode) {
       const store = getDefaultStore()
@@ -114,7 +115,7 @@ const StrongCard = (props: Props) => {
           studyId: currentStudyId,
           type: isSelectionMode,
           title: Mot,
-          codeStrong: strongEntry.classicStrong,
+          codeStrong: stepStrongCode,
           strongType: Type,
           phonetique: Phonetique,
           definition: Definition,
@@ -142,6 +143,7 @@ const StrongCard = (props: Props) => {
   const Definition = strongEntry.definitionHtml ?? ''
   const original = strongEntry.original
   const clickedWord = props.strongVerseContext?.clickedWord
+  const stepStrongCode = strongEntry.stepCode
   const morphology = props.strongVerseContext?.morphologyCodes.length
     ? props.strongVerseContext.morphologyCodes.join(' · ')
     : strongEntry.morphology?.code
@@ -153,12 +155,12 @@ const StrongCard = (props: Props) => {
           onPress={openStrong}
           activeOpacity={0.7}
           accessibilityRole="link"
-          accessibilityLabel={`${strongEntry.stepCode} · ${Mot}`}
+          accessibilityLabel={`${stepStrongCode} · ${Mot}`}
         >
           <HStack alignItems="flex-start" gap={10}>
             <VStack flex gap={4}>
               <Text color="primary" bold fontSize={12} textTransform="uppercase">
-                {strongEntry.stepCode}
+                {stepStrongCode}
               </Text>
 
               <Text fontWeight="500" fontSize={16}>

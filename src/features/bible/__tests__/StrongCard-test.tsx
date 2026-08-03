@@ -5,6 +5,7 @@ import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess
 import StrongCard from '../StrongCard'
 
 const mockPushRouteOnce = jest.fn()
+const mockDismissTo = jest.fn()
 
 jest.mock('@emotion/native', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
@@ -35,7 +36,7 @@ jest.mock('react-i18next', () => ({
 }))
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ dismissTo: jest.fn() }),
+  useRouter: () => ({ dismissTo: mockDismissTo }),
 }))
 
 jest.mock('jotai/react', () => ({ useAtomValue: () => false }))
@@ -132,6 +133,7 @@ describe('StrongCard', () => {
   afterEach(() => {
     act(() => renderer?.unmount())
     mockPushRouteOnce.mockClear()
+    mockDismissTo.mockClear()
     consoleError.mockRestore()
   })
 
@@ -209,6 +211,36 @@ describe('StrongCard', () => {
     expect(renderer.root.findAll(node => String(node.type) === 'ListenStrong')).toHaveLength(0)
     expect(renderer.root.find(node => String(node.type) === 'FeatherIcon').props).toEqual(
       expect.objectContaining({ name: 'share', size: 17, color: 'primary' })
+    )
+  })
+
+  it('inserts the STEP Strong code into a study', () => {
+    act(() => {
+      renderer = create(
+        <StrongCard
+          theme={{ colors: { default: '#000', quart: '#f00' }, fontFamily: {} } as never}
+          book="1"
+          strongEntry={{
+            ...entry,
+            selectedIdentity: { kind: 'dstrong', code: 'H3651C' },
+            stepCode: 'H3651',
+            classicStrong: 'H3651',
+            eStrong: 'H3651',
+            dStrong: 'H3651C =',
+            uStrong: 'H3651C',
+            baseCode: 3651,
+          }}
+          isSelectionMode="strong"
+        />
+      )
+    })
+
+    act(() => renderer.root.find(node => String(node.type) === 'TouchableBox').props.onPress())
+
+    expect(mockDismissTo).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({ codeStrong: 'H3651' }),
+      })
     )
   })
 })

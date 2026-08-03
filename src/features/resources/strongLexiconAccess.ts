@@ -112,7 +112,6 @@ export type StrongLexiconSearchResult = {
   id: number
   stepCode: string
   classicStrong: string
-  uStrong: string
   language: 'greek' | 'hebrew'
   original: string
   transliteration: string
@@ -699,7 +698,6 @@ const toSearchResult = (
     CoreEntryRow,
     | 'id'
     | 'stepCode'
-    | 'uStrong'
     | 'language'
     | 'baseCode'
     | 'original'
@@ -713,7 +711,6 @@ const toSearchResult = (
   id: row.id,
   stepCode: row.stepCode,
   classicStrong: getClassicStrong(row as CoreEntryRow),
-  uStrong: row.uStrong,
   language: row.language,
   original: row.original,
   transliteration: row.classicTransliteration || row.transliteration,
@@ -815,7 +812,7 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
                   tr.meaning AS localizedMeaning,
                   tr.meaningHtml AS localizedMeaningHtml,
                   ROW_NUMBER() OVER (
-                    PARTITION BY COALESCE(
+                    PARTITION BY e.language, COALESCE(
                       NULLIF(e.uStrong, ''),
                       CAST(e.id AS TEXT) || ':' || i.stepCode
                     )

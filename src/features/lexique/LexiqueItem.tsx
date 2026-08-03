@@ -37,14 +37,7 @@ interface LexiqueItemProps extends StrongLexiconSearchResult {
   onSelect?: (book: number, reference: string, title?: string) => void
 }
 
-const LexiqueItem = ({
-  stepCode,
-  uStrong,
-  language,
-  original,
-  gloss,
-  onSelect,
-}: LexiqueItemProps) => {
+const LexiqueItem = ({ stepCode, language, original, gloss, onSelect }: LexiqueItemProps) => {
   const { t } = useTranslation()
   const book = language === 'hebrew' ? 1 : 40
   const lexiqueType = language === 'hebrew' ? 'Hébreu' : 'Grec'
@@ -60,7 +53,7 @@ const LexiqueItem = ({
           <Text fontSize={10}>{t(lexiqueType)}</Text>
         </Chip>
         <Chip marginLeft={5}>
-          <Text fontSize={10}>{uStrong}</Text>
+          <Text fontSize={10}>{stepCode}</Text>
         </Chip>
       </Box>
       <Box row>
