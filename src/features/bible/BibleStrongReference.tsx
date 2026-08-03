@@ -11,6 +11,8 @@ type SelectableProps = {
   isSelected?: boolean
 }
 
+export type StrongVerseTextStyle = Pick<TextStyle, 'fontSize' | 'lineHeight'>
+
 const isStrongCarouselValue = (
   value: CarouselContextValue
 ): value is Extract<CarouselContextValue, { currentStrongReference: unknown }> =>
@@ -79,7 +81,7 @@ type BibleStrongRefProps = {
   word?: string
   book?: string | number
   concordanceFor?: string | number
-  textStyle?: TextStyle
+  textStyle?: StrongVerseTextStyle
 }
 
 const BibleStrongRef = ({

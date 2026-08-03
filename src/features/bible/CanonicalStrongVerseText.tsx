@@ -1,17 +1,16 @@
 import React from 'react'
-import type { TextStyle } from 'react-native'
 
 import type { Verse } from '~common/types'
 import Paragraph from '~common/ui/Paragraph'
 import { buildCanonicalStrongVerseRuns } from '~helpers/canonicalStrongVerse'
 import { getStrongReferenceNumber } from '~helpers/strongIdentities'
-import BibleStrongReference from './BibleStrongReference'
+import BibleStrongReference, { type StrongVerseTextStyle } from './BibleStrongReference'
 
 type Props = {
   verse: Pick<Verse, 'Texte' | 'Livre' | 'StrongSpans'>
   concordanceFor?: string | number
   small?: boolean
-  textStyle?: TextStyle
+  textStyle?: StrongVerseTextStyle
 }
 
 const splitTextRun = (text: string): string[] => text.match(/\S+\s*|\s+/gu) || []

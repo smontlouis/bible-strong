@@ -140,7 +140,9 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   const fontSizeScale = useSelector(
     (rootState: RootState) => rootState.user.bible.settings.fontSizeScale
   )
-  const lineHeight = useSelector((rootState: RootState) => rootState.user.bible.settings.lineHeight)
+  const lineHeightSetting = useSelector(
+    (rootState: RootState) => rootState.user.bible.settings.lineHeight
+  )
   const resources = useResourceAccess()
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const strongResourceLanguage = useResourcesLanguageValue().STRONG
@@ -337,7 +339,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   )
   const verseTextStyle = {
     fontSize: Number.parseFloat(scaleFontSize(24, fontSizeScale)),
-    lineHeight: Number.parseFloat(scaleLineHeight(24, lineHeight, fontSizeScale)),
+    lineHeight: Number.parseFloat(scaleLineHeight(24, lineHeightSetting, fontSizeScale)),
   }
 
   return (
