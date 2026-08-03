@@ -101,6 +101,12 @@ describe('lexiconBibleResourceAccess', () => {
             startOffset: 0,
             length: 10,
             identities: [{ kind: 'dstrong', code: 'H07225A' }],
+            morphologies: [
+              {
+                identity: { kind: 'dstrong', code: 'H07225A' },
+                codes: ['HNcfsa'],
+              },
+            ],
           },
         ],
       },
@@ -304,6 +310,12 @@ describe('lexiconBibleResourceAccess', () => {
               startOffset: 14,
               length: 5,
               identities: [{ kind: 'strong', code: 'G03056' }],
+              morphologies: [
+                {
+                  identity: { kind: 'strong', code: 'G03056' },
+                  codes: ['N-NSM'],
+                },
+              ],
             },
           ],
         },
@@ -424,6 +436,10 @@ describe('createBhgStrongSpans', () => {
         identities: [
           { kind: 'dstrong', code: 'H0001A' },
           { kind: 'strong', code: 'H0002' },
+        ],
+        morphologies: [
+          { identity: { kind: 'dstrong', code: 'H0001A' }, codes: ['HNcmsa'] },
+          { identity: { kind: 'strong', code: 'H0002' }, codes: ['HNcmsa'] },
         ],
       },
     ])

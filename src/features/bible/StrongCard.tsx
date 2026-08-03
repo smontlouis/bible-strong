@@ -21,6 +21,7 @@ import { SheetScrollView } from '~common/sheet'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
+import { createStrongCardDetailRouteParams } from './strongCardDetailRoute'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -89,6 +90,11 @@ type Props = {
   isModal?: boolean
   onClosed?: () => void
   strongBibleVersionId?: StrongBibleVersionId
+  bibleVersion?: string
+  bibleChapter?: number
+  bibleVerse?: number
+  clickedWord?: string
+  morphologyCodes?: string[]
 }
 
 const StrongCard = (props: Props) => {
@@ -152,12 +158,16 @@ const StrongCard = (props: Props) => {
     } else {
       pushRouteOnce({
         pathname: '/strong',
-        params: {
-          book: String(Number(book)),
-          identityKind: strongEntry.selectedIdentity.kind,
-          identityCode: strongEntry.selectedIdentity.code,
+        params: createStrongCardDetailRouteParams({
+          book,
+          identity: strongEntry.selectedIdentity,
           strongBibleVersionId: props.strongBibleVersionId,
-        },
+          bibleVersion: props.bibleVersion,
+          clickedWord: props.clickedWord,
+          bibleChapter: props.bibleChapter,
+          bibleVerse: props.bibleVerse,
+          morphologyCodes: props.morphologyCodes,
+        }),
       })
     }
   }
@@ -209,6 +219,11 @@ const StrongCard = (props: Props) => {
           <Text color="darkGrey" bold fontSize={16} textAlign="left">
             {original}
           </Text>
+          {!!props.morphologyCodes?.length && (
+            <Text color="darkGrey" fontSize={12} style={{ fontFamily: 'Arial' }}>
+              {props.morphologyCodes.join(' · ')}
+            </Text>
+          )}
           {/* {!!Type && (
               <Text titleItalic color="darkGrey" fontSize={12}>
                 {Type}

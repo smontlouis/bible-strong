@@ -12,6 +12,7 @@ import {
 } from '~helpers/interlinearBibleSidecar'
 import { getDisplayedStrongIdentities } from '~helpers/strongIdentities'
 import type { StrongBibleSpan } from '~helpers/canonicalStrongVerse'
+import { collectStrongSelectionMorphologies } from '~helpers/strongSelection'
 import {
   localStrongBibleResourceAccess,
   type StrongBibleResourceAccess,
@@ -154,6 +155,7 @@ export const createBhgStrongSpans = (tokens: InterlinearToken[]): StrongBibleSpa
       token.segments.flatMap(segment => segment.identities)
     )
     if (!identities.length) return []
+    const morphologies = collectStrongSelectionMorphologies(identities, token.segments)
 
     return [
       {
@@ -161,6 +163,7 @@ export const createBhgStrongSpans = (tokens: InterlinearToken[]): StrongBibleSpa
         startOffset: token.startOffset,
         length: token.length,
         identities: identities.map(identity => ({ kind: identity.kind, code: identity.code })),
+        ...(morphologies.length ? { morphologies } : {}),
       },
     ]
   })

@@ -46,6 +46,10 @@ import { scaleLineHeight } from './BibleDOM/scaleLineHeight'
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
 import { getDisplayedStrongIdentities } from '~helpers/strongIdentities'
 import { useResourcesLanguageValue } from '~state/resourcesLanguage'
+import {
+  getStrongResourceCardContext,
+  type StrongResourceCardContext,
+} from './strongResourceCardContext'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -115,6 +119,7 @@ class StrongVerseQueryError extends Error {
 
 interface StrongVerseQueryData {
   strongReferences: StrongLexiconEntry[]
+  strongContexts: StrongResourceCardContext[]
   versesInCurrentChapter: number | null
   formattedTexte: React.ReactElement<React.ComponentProps<typeof CanonicalStrongVerseText>> | null
   provenance: LexiconBibleProvenance | null
@@ -204,6 +209,9 @@ const BibleVerseDetailCard: React.FC<Props> = ({
         resources.strongLexicon.loadEntries(strongIdentities, strongResourceLanguage),
       ])
       const strongReferences = strongReferencesResult
+      const strongContexts = strongReferences.map(entry =>
+        getStrongResourceCardContext(strongVerse, entry.selectedIdentity)
+      )
       const formattedTexte = (
         <CanonicalStrongVerseText verse={{ ...strongVerse, Livre: verseBook }} />
       )
@@ -211,6 +219,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
       return {
         formattedTexte,
         strongReferences,
+        strongContexts,
         versesInCurrentChapter:
           versesInCurrentChapterResult || countLsgChapters[`${verseBook}-${verseChapter}`],
         provenance: result.provenance,
@@ -246,6 +255,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   }
 
   const renderItem = ({ item, index }: { item: StrongLexiconEntry; index: number }) => {
+    const context = strongVerseData?.strongContexts[index]
     return (
       <StrongCard
         theme={theme}
@@ -257,6 +267,11 @@ const BibleVerseDetailCard: React.FC<Props> = ({
             ? undefined
             : strongVerseData?.provenance?.versionId
         }
+        bibleVersion={strongVerseData?.provenance?.versionId}
+        bibleChapter={strongVerseData?.displayedVerse?.Chapitre}
+        bibleVerse={strongVerseData?.displayedVerse?.Verset}
+        clickedWord={context?.clickedWord}
+        morphologyCodes={context?.morphologyCodes}
         index={index}
       />
     )

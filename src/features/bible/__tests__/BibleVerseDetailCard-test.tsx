@@ -71,8 +71,18 @@ jest.mock('react-native-reanimated-carousel', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
   return {
     __esModule: true,
-    default: ({ data }: { data: unknown[] }) =>
-      ReactModule.createElement('Carousel', { itemCount: data.length }),
+    default: ({
+      data,
+      renderItem,
+    }: {
+      data: unknown[]
+      renderItem: (info: { item: unknown; index: number }) => React.ReactNode
+    }) =>
+      ReactModule.createElement(
+        'Carousel',
+        { itemCount: data.length },
+        data.map((item, index) => renderItem({ item, index }))
+      ),
   }
 })
 
@@ -173,12 +183,24 @@ jest.mock('../BibleVerseDetailFooter', () => {
 })
 jest.mock('../StrongCard', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
-  return () => ReactModule.createElement('StrongCard')
+  return (props: Record<string, unknown>) => ReactModule.createElement('StrongCard', props)
 })
 
-const makeAvailableVerse = (text: string) => ({
+const makeAvailableVerse = (
+  text: string,
+  strongSpans?: {
+    ordinal: number
+    startOffset: number
+    length: number
+    identities: { kind: 'strong'; code: string }[]
+    morphologies?: {
+      identity: { kind: 'strong'; code: string }
+      codes: string[]
+    }[]
+  }[]
+) => ({
   status: 'available' as const,
-  verse: { Texte: text },
+  verse: { Texte: text, StrongSpans: strongSpans },
   provenance: {
     versionId: 'DBY' as const,
     datasetId: 'DBY' as const,
@@ -317,6 +339,45 @@ describe('BibleVerseDetailCard', () => {
       fontSize: 26.4,
       lineHeight: 37,
     })
+  })
+
+  it('passes the contextual word and morphology to the ResourceModal Strong card', async () => {
+    mockLoadVerse.mockResolvedValueOnce(
+      makeAvailableVerse('Dieu créa', [
+        {
+          ordinal: 0,
+          startOffset: 0,
+          length: 4,
+          identities: [{ kind: 'strong', code: 'H0430' }],
+          morphologies: [
+            {
+              identity: { kind: 'strong', code: 'H0430' },
+              codes: ['HNcmpa'],
+            },
+          ],
+        },
+      ])
+    )
+
+    await act(async () => {
+      renderer = create(renderCard(1))
+      await flushQueryUpdates()
+    })
+    await act(async () => {
+      renderer.update(renderCard(1))
+      await flushQueryUpdates()
+    })
+
+    const strongCard = renderer.root.find(node => String(node.type) === 'StrongCard')
+    expect(strongCard.props).toEqual(
+      expect.objectContaining({
+        bibleVersion: 'DBY',
+        bibleChapter: 1,
+        bibleVerse: 1,
+        clickedWord: 'Dieu',
+        morphologyCodes: ['HNcmpa'],
+      })
+    )
   })
 
   it('requests the contextual BHG lexicon source with the tab interlinear locale', async () => {
