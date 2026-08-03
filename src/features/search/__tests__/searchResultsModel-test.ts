@@ -95,7 +95,7 @@ describe('searchResultsModel', () => {
     expect(model.sections[0].items).toEqual([noteResult])
   })
 
-  it('uses the full unified Strong code in results and navigation', () => {
+  it('displays the full unified Strong code while opening the matched lexicon identity', () => {
     const model = getSearchResultsModel({
       ...baseInput,
       strongResults: [
@@ -116,7 +116,7 @@ describe('searchResultsModel', () => {
       expect.objectContaining({
         chip: 'H3651C',
         endpoint: expect.objectContaining({ code: '3651' }),
-        strongReference: { language: 'hebrew', code: 'H3651C' },
+        strongReference: { language: 'hebrew', code: 'H3651' },
       })
     )
   })

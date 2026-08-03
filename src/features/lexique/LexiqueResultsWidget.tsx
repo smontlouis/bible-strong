@@ -59,8 +59,9 @@ const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
         const variant = strong.language === 'greek' ? 'grec' : 'hebreu'
         return (
           <LexiqueResultItem
-            key={`${strong.id}:${strong.uStrong}`}
-            id={strong.uStrong}
+            key={`${strong.id}:${strong.stepCode}`}
+            displayCode={strong.uStrong}
+            reference={strong.stepCode}
             title={strong.gloss}
             variant={variant}
           />

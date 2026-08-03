@@ -194,7 +194,7 @@ describe('strongLexiconAccess', () => {
         uStrong: 'H3651C',
       }),
     ])
-    expect(database.getAllAsync).toHaveBeenCalledWith(expect.stringContaining('e.uStrong LIKE ?'), [
+    expect(database.getAllAsync).toHaveBeenCalledWith(expect.stringContaining('e.dStrong LIKE ?'), [
       'fr',
       '%H3651C%',
       '%H3651C%',
@@ -203,8 +203,56 @@ describe('strongLexiconAccess', () => {
       '%H3651C%',
       '%H3651C%',
       '%H3651C%',
-      '%H3651C%',
       25,
+    ])
+  })
+
+  it('does not expand an existing Strong identity through its shared unified code', async () => {
+    const database = createDatabase()
+    const directEntry = {
+      ...rows.H0413,
+      id: 11446,
+      baseCode: 310,
+      eStrong: 'H0310a',
+      dStrong: 'H0310A =',
+      uStrong: 'H0310A',
+      stepCode: 'H0310A',
+      gloss: 'after',
+      localizedGloss: 'après',
+    }
+    const entriesSharingUnifiedCode = [
+      directEntry,
+      {
+        ...directEntry,
+        id: 11448,
+        eStrong: 'H0311',
+        dStrong: 'H0311 = in Aramaic of',
+        stepCode: 'H0311',
+      },
+      {
+        ...directEntry,
+        id: 11455,
+        eStrong: 'H0318',
+        dStrong: 'H0318 = in Aramaic of',
+        original: 'אָחֳרֵין',
+        stepCode: 'H0318',
+        gloss: 'finally',
+        localizedGloss: 'finalement',
+      },
+    ]
+    database.getAllAsync.mockImplementation(async (sql: string) =>
+      sql.includes('e.uStrong LIKE ?') ? entriesSharingUnifiedCode : [directEntry]
+    )
+    mockWithStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(database as unknown as SQLiteDatabase)
+    )
+
+    await expect(localStrongLexiconAccess.search('H0310A', 'fr', 25)).resolves.toEqual([
+      expect.objectContaining({
+        id: 11446,
+        stepCode: 'H0310A',
+        uStrong: 'H0310A',
+      }),
     ])
   })
 

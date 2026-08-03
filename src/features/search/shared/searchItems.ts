@@ -221,7 +221,7 @@ export const getStrongSearchItems = (
       endpoint: getStrongEndpoint(strong),
       strongReference: {
         language: strong.language,
-        code,
+        code: strong.stepCode,
       },
     }
   })

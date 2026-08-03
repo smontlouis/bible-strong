@@ -6,7 +6,6 @@ import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useTranslation } from 'react-i18next'
-import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 
 const SectionItem = styled(Box)(({ theme }) => ({
@@ -38,21 +37,20 @@ interface LexiqueItemProps extends StrongLexiconSearchResult {
   onSelect?: (book: number, reference: string, title?: string) => void
 }
 
-const LexiqueItem = ({ uStrong, language, original, gloss, onSelect }: LexiqueItemProps) => {
+const LexiqueItem = ({
+  stepCode,
+  uStrong,
+  language,
+  original,
+  gloss,
+  onSelect,
+}: LexiqueItemProps) => {
   const { t } = useTranslation()
-  const pushRouteOnce = usePushRouteOnce()
   const book = language === 'hebrew' ? 1 : 40
   const lexiqueType = language === 'hebrew' ? 'Hébreu' : 'Grec'
 
   const handlePress = () => {
-    if (onSelect) {
-      onSelect(book, uStrong, gloss)
-    } else {
-      pushRouteOnce({
-        pathname: '/strong',
-        params: { book: String(book), reference: uStrong },
-      })
-    }
+    onSelect?.(book, stepCode, gloss)
   }
 
   const content = (
@@ -81,7 +79,7 @@ const LexiqueItem = ({ uStrong, language, original, gloss, onSelect }: LexiqueIt
   }
 
   return (
-    <Link route="Strong" params={{ book, reference: uStrong }}>
+    <Link route="Strong" params={{ book, reference: stepCode }}>
       {content}
     </Link>
   )
