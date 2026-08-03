@@ -1,50 +1,88 @@
-import { getStrongResourceCardContext } from '../strongResourceCardContext'
+import { getStrongWordOccurrences } from '../strongResourceCardContext'
 
-describe('getStrongResourceCardContext', () => {
+describe('getStrongWordOccurrences', () => {
   it('collects the surface word and contextual morphology for one Strong identity', () => {
     expect(
-      getStrongResourceCardContext(
-        {
-          Texte: 'Au commencement',
-          StrongSpans: [
-            {
-              ordinal: 0,
-              startOffset: 3,
-              length: 12,
-              identities: [{ kind: 'strong', code: 'H07225' }],
-              morphologies: [
-                {
-                  identity: { kind: 'strong', code: 'H07225' },
-                  codes: ['HNcfsa', 'HTd'],
-                },
-              ],
-            },
-          ],
-        },
-        { kind: 'strong', code: 'H07225' }
-      )
-    ).toEqual({
-      clickedWord: 'commencement',
-      morphologyCodes: ['HNcfsa', 'HTd'],
-    })
+      getStrongWordOccurrences({
+        Texte: 'Au commencement',
+        StrongSpans: [
+          {
+            ordinal: 0,
+            startOffset: 3,
+            length: 12,
+            identities: [{ kind: 'strong', code: 'H07225' }],
+            morphologies: [
+              {
+                identity: { kind: 'strong', code: 'H07225' },
+                codes: ['HNcfsa', 'HTd'],
+              },
+            ],
+          },
+        ],
+      })
+    ).toEqual([
+      {
+        identity: { kind: 'strong', code: 'H07225' },
+        clickedWord: 'commencement',
+        morphologyCodes: ['HNcfsa', 'HTd'],
+      },
+    ])
   })
 
   it('keeps the word while omitting unavailable morphology', () => {
     expect(
-      getStrongResourceCardContext(
-        {
-          Texte: 'Dieu',
-          StrongSpans: [
-            {
-              ordinal: 0,
-              startOffset: 0,
-              length: 4,
-              identities: [{ kind: 'strong', code: 'H0430' }],
-            },
-          ],
-        },
-        { kind: 'strong', code: 'H0430' }
-      )
-    ).toEqual({ clickedWord: 'Dieu', morphologyCodes: [] })
+      getStrongWordOccurrences({
+        Texte: 'Dieu',
+        StrongSpans: [
+          {
+            ordinal: 0,
+            startOffset: 0,
+            length: 4,
+            identities: [{ kind: 'strong', code: 'H0430' }],
+          },
+        ],
+      })
+    ).toEqual([
+      {
+        identity: { kind: 'strong', code: 'H0430' },
+        clickedWord: 'Dieu',
+        morphologyCodes: [],
+      },
+    ])
+  })
+
+  it('keeps repeated Strong occurrences and their morphology separate', () => {
+    expect(
+      getStrongWordOccurrences({
+        Texte: 'Dieu Dieu',
+        StrongSpans: [
+          {
+            ordinal: 0,
+            startOffset: 0,
+            length: 4,
+            identities: [{ kind: 'strong', code: 'H0430' }],
+            morphologies: [{ identity: { kind: 'strong', code: 'H0430' }, codes: ['HNcmpa'] }],
+          },
+          {
+            ordinal: 1,
+            startOffset: 5,
+            length: 4,
+            identities: [{ kind: 'strong', code: 'H0430' }],
+            morphologies: [{ identity: { kind: 'strong', code: 'H0430' }, codes: ['HVqp3ms'] }],
+          },
+        ],
+      })
+    ).toEqual([
+      {
+        identity: { kind: 'strong', code: 'H0430' },
+        clickedWord: 'Dieu',
+        morphologyCodes: ['HNcmpa'],
+      },
+      {
+        identity: { kind: 'strong', code: 'H0430' },
+        clickedWord: 'Dieu',
+        morphologyCodes: ['HVqp3ms'],
+      },
+    ])
   })
 })

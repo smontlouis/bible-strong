@@ -44,12 +44,9 @@ import { localQueryOptions } from '~helpers/queryOptions'
 import { scaleFontSize } from './BibleDOM/scaleFontSize'
 import { scaleLineHeight } from './BibleDOM/scaleLineHeight'
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
-import { getDisplayedStrongIdentities } from '~helpers/strongIdentities'
+import { areStrongIdentitiesEqual } from '~helpers/strongIdentities'
 import { useResourcesLanguageValue } from '~state/resourcesLanguage'
-import {
-  getStrongResourceCardContext,
-  type StrongResourceCardContext,
-} from './strongResourceCardContext'
+import { getStrongWordOccurrences, type StrongVerseContext } from './strongResourceCardContext'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -117,9 +114,14 @@ class StrongVerseQueryError extends Error {
   }
 }
 
+interface StrongCardItem {
+  entry: StrongLexiconEntry
+  context: StrongVerseContext
+  occurrenceIndex: number
+}
+
 interface StrongVerseQueryData {
-  strongReferences: StrongLexiconEntry[]
-  strongContexts: StrongResourceCardContext[]
+  strongCards: StrongCardItem[]
   versesInCurrentChapter: number | null
   formattedTexte: React.ReactElement<React.ComponentProps<typeof CanonicalStrongVerseText>> | null
   provenance: LexiconBibleProvenance | null
@@ -165,6 +167,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   const [currentStrongReference, setCurrentStrongReference] = useState<StrongLexiconEntry | null>(
     null
   )
+  const [currentStrongCardIndex, setCurrentStrongCardIndex] = useState(0)
 
   const strongVerseQuery = useQuery({
     queryKey: [
@@ -197,29 +200,50 @@ const BibleVerseDetailCard: React.FC<Props> = ({
       }
 
       const strongVerse = result.verse
+      const strongOccurrences = getStrongWordOccurrences(strongVerse)
       const strongIdentities = [
         ...new Map(
-          (strongVerse.StrongSpans ?? [])
-            .flatMap(span => getDisplayedStrongIdentities(span.identities))
-            .map(identity => [`${identity.kind}:${identity.code}`, identity])
+          strongOccurrences.map(occurrence => [
+            `${occurrence.identity.kind}:${occurrence.identity.code}`,
+            occurrence.identity,
+          ])
         ).values(),
       ]
       const [versesInCurrentChapterResult, strongReferencesResult] = await Promise.all([
         getChapterVerseCountSafe(result.provenance.versionId, verseBook, verseChapter),
         resources.strongLexicon.loadEntries(strongIdentities, strongResourceLanguage),
       ])
-      const strongReferences = strongReferencesResult
-      const strongContexts = strongReferences.map(entry =>
-        getStrongResourceCardContext(strongVerse, entry.selectedIdentity)
-      )
+      const strongCards = strongOccurrences.flatMap((occurrence, occurrenceIndex) => {
+        const entry = strongReferencesResult.find(candidate =>
+          areStrongIdentitiesEqual(candidate.selectedIdentity, occurrence.identity)
+        )
+        if (!entry) return []
+
+        return [
+          {
+            entry,
+            occurrenceIndex,
+            context: {
+              bibleVersion: result.provenance.versionId,
+              ...(result.provenance.versionId === 'BHG'
+                ? {}
+                : { strongBibleVersionId: result.provenance.versionId }),
+              book: verseBook,
+              bibleChapter: verseChapter,
+              bibleVerse: verseNumber,
+              ...(occurrence.clickedWord ? { clickedWord: occurrence.clickedWord } : {}),
+              morphologyCodes: occurrence.morphologyCodes,
+            },
+          },
+        ]
+      })
       const formattedTexte = (
         <CanonicalStrongVerseText verse={{ ...strongVerse, Livre: verseBook }} />
       )
 
       return {
         formattedTexte,
-        strongReferences,
-        strongContexts,
+        strongCards,
         versesInCurrentChapter:
           versesInCurrentChapterResult || countLsgChapters[`${verseBook}-${verseChapter}`],
         provenance: result.provenance,
@@ -235,15 +259,22 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     ...localQueryOptions,
   })
   const strongVerseData = strongVerseQuery.data
-  const strongReferences = strongVerseData?.strongReferences ?? []
+  const strongCards = strongVerseData?.strongCards ?? []
+  const strongReferences = strongCards.map(card => card.entry)
 
-  const findRefIndex = (ref: string | number) =>
-    strongReferences.findIndex(r => Number(r.baseCode) === Number(ref))
+  const findRefIndex = (ref: string | number, occurrenceIndex?: number) =>
+    occurrenceIndex === undefined
+      ? strongReferences.findIndex(r => Number(r.baseCode) === Number(ref))
+      : strongCards.findIndex(
+          card =>
+            card.occurrenceIndex === occurrenceIndex && Number(card.entry.baseCode) === Number(ref)
+        )
 
-  const goToCarouselItem = (ref: string | number) => {
-    const index = findRefIndex(ref)
+  const goToCarouselItem = (ref: string | number, occurrenceIndex?: number) => {
+    const index = findRefIndex(ref, occurrenceIndex)
     if (index !== -1) {
       carouselRef.current?.scrollTo({ index, animated: true })
+      setCurrentStrongCardIndex(index)
     }
     setCurrentStrongReference(
       strongReferences.find(reference => Number(reference.baseCode) === Number(ref)) || null
@@ -252,26 +283,17 @@ const BibleVerseDetailCard: React.FC<Props> = ({
 
   const onSnapToItem = (index: number) => {
     setCurrentStrongReference(strongReferences[index] || null)
+    setCurrentStrongCardIndex(index)
   }
 
-  const renderItem = ({ item, index }: { item: StrongLexiconEntry; index: number }) => {
-    const context = strongVerseData?.strongContexts[index]
+  const renderItem = ({ item, index }: { item: StrongCardItem; index: number }) => {
     return (
       <StrongCard
         theme={theme}
         isSelectionMode={isSelectionMode}
         book={String(strongVerseData?.displayedVerse?.Livre ?? verse.Livre)}
-        strongEntry={item}
-        strongBibleVersionId={
-          strongVerseData?.provenance?.versionId === 'BHG'
-            ? undefined
-            : strongVerseData?.provenance?.versionId
-        }
-        bibleVersion={strongVerseData?.provenance?.versionId}
-        bibleChapter={strongVerseData?.displayedVerse?.Chapitre}
-        bibleVerse={strongVerseData?.displayedVerse?.Verset}
-        clickedWord={context?.clickedWord}
-        morphologyCodes={context?.morphologyCodes}
+        strongEntry={item.entry}
+        strongVerseContext={item.context}
         index={index}
       />
     )
@@ -280,7 +302,8 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   useEffect(() => {
     if (!strongVerseData || strongVerseQuery.isPlaceholderData) return
     hasDisplayedStrongVerseRef.current = true
-    setCurrentStrongReference(strongVerseData.strongReferences[0] || null)
+    setCurrentStrongReference(strongVerseData.strongCards[0]?.entry || null)
+    setCurrentStrongCardIndex(0)
     onStrongBibleProvenanceChange?.(strongVerseData.provenance)
     carouselRef.current?.scrollTo({ index: 0, animated: false })
   }, [onStrongBibleProvenanceChange, strongVerseData, strongVerseQuery.isPlaceholderData])
@@ -349,9 +372,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     return <Loading />
   }
 
-  const currentStrongReferenceIndex = strongReferences.findIndex(
-    r => Number(r.baseCode) === Number(currentStrongReference?.baseCode)
-  )
+  const currentStrongReferenceIndex = currentStrongCardIndex
   const verseTextStyle = {
     fontSize: Number.parseFloat(scaleFontSize(24, fontSizeScale)),
     lineHeight: Number.parseFloat(scaleLineHeight(24, lineHeightSetting, fontSizeScale)),
@@ -372,7 +393,10 @@ const BibleVerseDetailCard: React.FC<Props> = ({
             <CarouselProvider
               value={{
                 currentStrongReference: currentStrongReference
-                  ? { Code: currentStrongReference.baseCode }
+                  ? {
+                      Code: currentStrongReference.baseCode,
+                      occurrenceIndex: strongCards[currentStrongCardIndex]?.occurrenceIndex,
+                    }
                   : null,
                 goToCarouselItem,
               }}
@@ -415,7 +439,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
             flex: 1,
             width: '100%',
           }}
-          data={strongReferences}
+          data={strongCards}
           renderItem={renderItem}
           onSnapToItem={onSnapToItem}
           defaultIndex={currentStrongReferenceIndex === -1 ? 0 : currentStrongReferenceIndex}

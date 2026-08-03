@@ -17,6 +17,7 @@ const splitTextRun = (text: string): string[] => text.match(/\S+\s*|\s+/gu) || [
 
 const CanonicalStrongVerseText = ({ verse, concordanceFor, small, textStyle }: Props) => {
   let textOffset = 0
+  let occurrenceIndex = 0
   return buildCanonicalStrongVerseRuns(verse.Texte, verse.StrongSpans, concordanceFor).flatMap(
     (run, runIndex) => {
       if (run.kind === 'text') {
@@ -32,6 +33,8 @@ const CanonicalStrongVerseText = ({ verse, concordanceFor, small, textStyle }: P
       }
 
       return run.identities.flatMap((identity, identityIndex) => {
+        const currentOccurrenceIndex = occurrenceIndex
+        occurrenceIndex += 1
         const reference = getStrongReferenceNumber(identity.code)
         if (!reference) return []
         return [
@@ -42,6 +45,7 @@ const CanonicalStrongVerseText = ({ verse, concordanceFor, small, textStyle }: P
             textStyle={textStyle}
             word={identityIndex === 0 ? run.word || undefined : undefined}
             reference={reference}
+            occurrenceIndex={currentOccurrenceIndex}
             key={`strong-${runIndex}-${identity.kind}-${identity.code}`}
           />,
         ]

@@ -82,6 +82,7 @@ type BibleStrongRefProps = {
   book?: string | number
   concordanceFor?: string | number
   textStyle?: StrongVerseTextStyle
+  occurrenceIndex?: number
 }
 
 const BibleStrongRef = ({
@@ -90,6 +91,7 @@ const BibleStrongRef = ({
   word,
   concordanceFor,
   textStyle,
+  occurrenceIndex,
 }: BibleStrongRefProps) => {
   if (concordanceFor) {
     const isConcordance = `0${concordanceFor}` === reference || `${concordanceFor}` === reference
@@ -115,13 +117,15 @@ const BibleStrongRef = ({
         if (!isStrongCarouselValue(value)) return null
         const { currentStrongReference, goToCarouselItem } = value
         const isSelected = currentStrongReference
-          ? Number(currentStrongReference.Code) === Number(reference)
+          ? Number(currentStrongReference.Code) === Number(reference) &&
+            (occurrenceIndex === undefined ||
+              currentStrongReference.occurrenceIndex === occurrenceIndex)
           : false
         if (!word) {
           return (
             <StyledCircle
               activeOpacity={0.5}
-              onPress={() => goToCarouselItem(reference)}
+              onPress={() => goToCarouselItem(reference, occurrenceIndex)}
               isSelected={isSelected}
             >
               <StyledInsideCircle isSelected={isSelected} />
@@ -132,7 +136,7 @@ const BibleStrongRef = ({
         return (
           <StyledView
             activeOpacity={0.5}
-            onPress={() => goToCarouselItem(reference)}
+            onPress={() => goToCarouselItem(reference, occurrenceIndex)}
             isSelected={isSelected}
           >
             <StyledText isSelected={isSelected} style={textStyle}>

@@ -35,7 +35,12 @@ describe('BibleStrongReference', () => {
   ])('selects carousel reference %s from its rendered surface', (reference, word) => {
     const goToCarouselItem = jest.fn()
     const textStyle = { fontSize: 24, lineHeight: 24 }
-    const consumer = BibleStrongReference({ reference, word, textStyle }) as React.ReactElement<{
+    const consumer = BibleStrongReference({
+      reference,
+      word,
+      textStyle,
+      occurrenceIndex: 2,
+    }) as React.ReactElement<{
       children: (value: CarouselContextValue) => React.ReactElement<{
         onPress: () => void
         children: React.ReactElement<{ style?: typeof textStyle }>
@@ -44,7 +49,24 @@ describe('BibleStrongReference', () => {
     const lexicalToken = consumer.props.children({ currentStrongReference: null, goToCarouselItem })
     lexicalToken.props.onPress()
 
-    expect(goToCarouselItem).toHaveBeenCalledWith(reference)
+    expect(goToCarouselItem).toHaveBeenCalledWith(reference, 2)
     expect(lexicalToken.props.children.props.style).toEqual(textStyle)
+  })
+
+  it('selects only the active occurrence when a Strong reference is repeated', () => {
+    const consumer = BibleStrongReference({
+      reference: '430',
+      word: 'Dieu',
+      occurrenceIndex: 1,
+    }) as React.ReactElement<{
+      children: (value: CarouselContextValue) => React.ReactElement<{ isSelected: boolean }>
+    }>
+
+    const lexicalToken = consumer.props.children({
+      currentStrongReference: { Code: '430', occurrenceIndex: 0 },
+      goToCarouselItem: jest.fn(),
+    })
+
+    expect(lexicalToken.props.isSelected).toBe(false)
   })
 })

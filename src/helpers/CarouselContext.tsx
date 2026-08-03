@@ -6,8 +6,8 @@ interface DictionnaireCarouselValue {
 }
 
 interface StrongCarouselValue {
-  currentStrongReference: { Code: string | number } | null
-  goToCarouselItem: (ref: string | number) => void
+  currentStrongReference: { Code: string | number; occurrenceIndex?: number } | null
+  goToCarouselItem: (ref: string | number, occurrenceIndex?: number) => void
 }
 
 export type CarouselContextValue = DictionnaireCarouselValue | StrongCarouselValue

@@ -371,13 +371,54 @@ describe('BibleVerseDetailCard', () => {
     const strongCard = renderer.root.find(node => String(node.type) === 'StrongCard')
     expect(strongCard.props).toEqual(
       expect.objectContaining({
-        bibleVersion: 'DBY',
-        bibleChapter: 1,
-        bibleVerse: 1,
-        clickedWord: 'Dieu',
-        morphologyCodes: ['HNcmpa'],
+        strongVerseContext: {
+          bibleVersion: 'DBY',
+          strongBibleVersionId: 'DBY',
+          book: 1,
+          bibleChapter: 1,
+          bibleVerse: 1,
+          clickedWord: 'Dieu',
+          morphologyCodes: ['HNcmpa'],
+        },
       })
     )
+  })
+
+  it('renders repeated Strong words as distinct cards with occurrence morphology', async () => {
+    mockLoadVerse.mockResolvedValueOnce(
+      makeAvailableVerse('Dieu Dieu', [
+        {
+          ordinal: 0,
+          startOffset: 0,
+          length: 4,
+          identities: [{ kind: 'strong', code: 'H0430' }],
+          morphologies: [{ identity: { kind: 'strong', code: 'H0430' }, codes: ['HNcmpa'] }],
+        },
+        {
+          ordinal: 1,
+          startOffset: 5,
+          length: 4,
+          identities: [{ kind: 'strong', code: 'H0430' }],
+          morphologies: [{ identity: { kind: 'strong', code: 'H0430' }, codes: ['HVqp3ms'] }],
+        },
+      ])
+    )
+
+    await act(async () => {
+      renderer = create(renderCard(1))
+      await flushQueryUpdates()
+    })
+    await act(async () => {
+      renderer.update(renderCard(1))
+      await flushQueryUpdates()
+    })
+
+    const strongCards = renderer.root.findAll(node => String(node.type) === 'StrongCard')
+    expect(strongCards).toHaveLength(2)
+    expect(strongCards.map(card => card.props.strongVerseContext.morphologyCodes)).toEqual([
+      ['HNcmpa'],
+      ['HVqp3ms'],
+    ])
   })
 
   it('requests the contextual BHG lexicon source with the tab interlinear locale', async () => {

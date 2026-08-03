@@ -19,9 +19,9 @@ import { StudyNavigateBibleType } from '~common/types'
 import { Theme } from '@emotion/react'
 import { SheetScrollView } from '~common/sheet'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
-import { createStrongCardDetailRouteParams } from './strongCardDetailRoute'
+import { createStrongDetailRoute } from '~features/lexique/strongDetailRoutes'
+import type { StrongVerseContext } from './strongResourceCardContext'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -89,12 +89,7 @@ type Props = {
   isSelectionMode?: StudyNavigateBibleType
   isModal?: boolean
   onClosed?: () => void
-  strongBibleVersionId?: StrongBibleVersionId
-  bibleVersion?: string
-  bibleChapter?: number
-  bibleVerse?: number
-  clickedWord?: string
-  morphologyCodes?: string[]
+  strongVerseContext?: StrongVerseContext
 }
 
 const StrongCard = (props: Props) => {
@@ -122,7 +117,7 @@ const StrongCard = (props: Props) => {
       params: {
         book: bookNum,
         reference: reference,
-        strongBibleVersionId: props.strongBibleVersionId,
+        strongBibleVersionId: props.strongVerseContext?.strongBibleVersionId,
       },
     })
   }
@@ -156,19 +151,14 @@ const StrongCard = (props: Props) => {
         },
       })
     } else {
-      pushRouteOnce({
-        pathname: '/strong',
-        params: createStrongCardDetailRouteParams({
-          book,
-          identity: strongEntry.selectedIdentity,
-          strongBibleVersionId: props.strongBibleVersionId,
-          bibleVersion: props.bibleVersion,
-          clickedWord: props.clickedWord,
-          bibleChapter: props.bibleChapter,
-          bibleVerse: props.bibleVerse,
-          morphologyCodes: props.morphologyCodes,
-        }),
-      })
+      pushRouteOnce(
+        createStrongDetailRoute('index', {
+          ...props.strongVerseContext,
+          book: props.strongVerseContext?.book ?? Number(book),
+          identityKind: strongEntry.selectedIdentity.kind,
+          identityCode: strongEntry.selectedIdentity.code,
+        })
+      )
     }
   }
 
@@ -219,9 +209,9 @@ const StrongCard = (props: Props) => {
           <Text color="darkGrey" bold fontSize={16} textAlign="left">
             {original}
           </Text>
-          {!!props.morphologyCodes?.length && (
+          {!!props.strongVerseContext?.morphologyCodes.length && (
             <Text color="darkGrey" fontSize={12} style={{ fontFamily: 'Arial' }}>
-              {props.morphologyCodes.join(' · ')}
+              {props.strongVerseContext.morphologyCodes.join(' · ')}
             </Text>
           )}
           {/* {!!Type && (
