@@ -13,7 +13,6 @@ import {
 const createEntity = (overrides: Partial<StrongLexiconEntity> = {}): StrongLexiconEntity => ({
   id: 1,
   uniqueName: 'Peter@Matt.4.18',
-  uStrong: 'G4074G',
   strongCodes: ['G4074G'],
   name: 'Pierre',
   category: 'person',
@@ -23,7 +22,6 @@ const createEntity = (overrides: Partial<StrongLexiconEntity> = {}): StrongLexic
   summaryHtml: '',
   brief: '',
   articleHtml: '',
-  matchedStrong: 'G4074G',
   relations: [],
   ...overrides,
 })

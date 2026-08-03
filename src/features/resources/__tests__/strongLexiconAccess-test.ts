@@ -136,6 +136,19 @@ describe('strongLexiconAccess', () => {
     expect(String(relationQuery)).not.toContain('LIMIT 72')
   })
 
+  it('resolves a legacy classical study reference against the unified lexicon', async () => {
+    const entry = await localStrongLexiconAccess.loadEntry({ kind: 'strong', code: 'H3068' }, 'fr')
+
+    expect(entry).toEqual(
+      expect.objectContaining({
+        selectedIdentity: { kind: 'strong', code: 'H3068' },
+        classicStrong: 'H3068',
+        stepCode: 'H3068G',
+      })
+    )
+    expect(entry).not.toHaveProperty('uStrong')
+  })
+
   it('returns no entry when none of the STEP or classical fallbacks resolves', async () => {
     const database = createDatabase()
     database.getFirstAsync.mockResolvedValue(null)
@@ -380,9 +393,23 @@ describe('strongLexiconAccess', () => {
 
   it('loads a Biblical entity by its durable unique name with localized relations', async () => {
     const coreDatabase = {
-      getAllAsync: jest.fn(async (sql: string) =>
-        sql.includes('FROM StepEntries e') ? [{ stepCode: 'G4074G' }, { stepCode: 'G4074' }] : []
-      ),
+      getAllAsync: jest.fn(async (sql: string, parameters: string[]) => {
+        if (!sql.includes('FROM StepEntries e')) return []
+        return [
+          ...(parameters.includes('H0175')
+            ? [
+                { uStrong: 'H0175', code: 'G0002' },
+                { uStrong: 'H0175', code: 'H0175' },
+              ]
+            : []),
+          ...(parameters.includes('G4074G')
+            ? [
+                { uStrong: 'G4074G', code: 'G4074G' },
+                { uStrong: 'G4074G', code: 'G4074' },
+              ]
+            : []),
+        ]
+      }),
     }
     const entitiesDatabase = {
       getFirstAsync: jest.fn(async (sql: string) => {
@@ -418,7 +445,7 @@ describe('strongLexiconAccess', () => {
             certainty: 'asserted',
             targetId: 114,
             targetUniqueName: 'Andrew@Matt.4.18',
-            targetUStrong: 'G0406',
+            targetUStrong: 'H0175',
             targetCategory: 'person',
             targetType: 'Male',
             targetName: 'Andrew',
@@ -440,11 +467,11 @@ describe('strongLexiconAccess', () => {
       operation(coreDatabase as unknown as SQLiteDatabase)
     )
 
-    await expect(localStrongLexiconAccess.loadEntity('Peter@Matt.4.18', 'fr')).resolves.toEqual(
+    const entity = await localStrongLexiconAccess.loadEntity('Peter@Matt.4.18', 'fr')
+    expect(entity).toEqual(
       expect.objectContaining({
         uniqueName: 'Peter@Matt.4.18',
-        uStrong: 'G4074G',
-        strongCodes: ['G4074G', 'G4074'],
+        strongCodes: ['G4074G'],
         name: 'Pierre',
         category: 'person',
         relations: [
@@ -453,27 +480,31 @@ describe('strongLexiconAccess', () => {
             targetId: 114,
             targetName: 'André',
             targetUniqueName: 'Andrew@Matt.4.18',
-            targetUStrong: 'G0406',
+            targetStepCodes: ['G0002', 'H0175'],
             targetCategory: 'person',
             targetType: 'Male',
           }),
         ],
       })
     )
+    expect(entity).not.toHaveProperty('uStrong')
     expect(entitiesDatabase.getFirstAsync).toHaveBeenCalledWith(
       expect.stringContaining('WHERE e.uniqueName=?'),
       ['fr', 'Peter@Matt.4.18']
     )
     expect(coreDatabase.getAllAsync).toHaveBeenCalledWith(
-      expect.stringContaining('WHERE e.uStrong=?'),
-      ['G4074G', 'G4074G']
+      expect.stringContaining('WHERE e.uStrong IN (?, ?)'),
+      ['G4074G', 'H0175']
     )
+    expect(coreDatabase.getAllAsync).toHaveBeenCalledTimes(1)
   })
 
   it('resolves legacy relation targets and leaves missing targets non-navigable', async () => {
     const coreDatabase = {
-      getAllAsync: jest.fn(async (sql: string) =>
-        sql.includes('FROM StepEntries e') ? [{ stepCode: 'H6882' }] : []
+      getAllAsync: jest.fn(async (sql: string, parameters: string[]) =>
+        sql.includes('FROM StepEntries e')
+          ? parameters.map(uStrong => ({ uStrong, code: uStrong }))
+          : []
       ),
     }
     const entitiesDatabase = {
@@ -553,7 +584,6 @@ describe('strongLexiconAccess', () => {
     ).resolves.toEqual(
       expect.objectContaining({
         uniqueName: 'Zorathites@1Ch.2.53-',
-        uStrong: 'H6882',
         strongCodes: ['H6882'],
         name: 'Zorathites',
         category: 'group',
@@ -563,7 +593,7 @@ describe('strongLexiconAccess', () => {
             targetId: 3465,
             targetName: 'Etam',
             targetUniqueName: 'Etam@1Ch.4.3-',
-            targetUStrong: 'H5862H',
+            targetStepCodes: ['H5862H'],
             targetCategory: 'place',
             targetType: 'Place',
           }),
@@ -592,9 +622,10 @@ describe('strongLexiconAccess', () => {
       ['fr', 3067]
     )
     expect(coreDatabase.getAllAsync).toHaveBeenCalledWith(
-      expect.stringContaining('WHERE e.uStrong=?'),
-      ['H6882', 'H6882']
+      expect.stringContaining('WHERE e.uStrong IN (?, ?)'),
+      ['H6882', 'H5862H']
     )
+    expect(coreDatabase.getAllAsync).toHaveBeenCalledTimes(1)
   })
 
   it.each([

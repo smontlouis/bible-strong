@@ -135,6 +135,21 @@ describe('openable study objects', () => {
     })
   })
 
+  it('preserves a STEP suffix when opening a Strong relation endpoint', () => {
+    expect(
+      getOpenableActionForRelationEndpoint(
+        createStrongEndpoint({ language: 'hebrew', code: 'H0310A' })
+      )
+    ).toEqual({
+      type: 'route',
+      pathname: '/strong',
+      params: {
+        book: '1',
+        reference: '310A',
+      },
+    })
+  })
+
   it('opens a Strong search result with its full code without changing its stable endpoint', () => {
     expect(
       getOpenableAction({

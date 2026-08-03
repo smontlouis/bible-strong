@@ -102,7 +102,6 @@ const entry = {
   classicStrong: 'H430',
   eStrong: 'H0430',
   dStrong: 'H0430',
-  uStrong: 'H0430',
   language: 'hebrew',
   baseCode: 430,
   original: 'אֱלֹהִים',
@@ -227,7 +226,6 @@ describe('StrongCard', () => {
             classicStrong: 'H3651',
             eStrong: 'H3651',
             dStrong: 'H3651C =',
-            uStrong: 'H3651C',
             baseCode: 3651,
           }}
           isSelectionMode="strong"
@@ -240,6 +238,33 @@ describe('StrongCard', () => {
     expect(mockDismissTo).toHaveBeenCalledWith(
       expect.objectContaining({
         params: expect.objectContaining({ codeStrong: 'H3651' }),
+      })
+    )
+  })
+
+  it('opens the STEP Strong identity instead of the source identity', () => {
+    act(() => {
+      renderer = create(
+        <StrongCard
+          theme={{ colors: { default: '#000', quart: '#f00' }, fontFamily: {} } as never}
+          book="1"
+          strongEntry={{
+            ...entry,
+            selectedIdentity: { kind: 'strong', code: 'H3651' },
+            stepCode: 'H3651C',
+          }}
+        />
+      )
+    })
+
+    act(() => renderer.root.find(node => String(node.type) === 'TouchableBox').props.onPress())
+
+    expect(mockPushRouteOnce).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          identityKind: 'dstrong',
+          identityCode: 'H3651C',
+        }),
       })
     )
   })

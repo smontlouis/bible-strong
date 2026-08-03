@@ -1,6 +1,11 @@
 import type { SQLiteDatabase } from '~helpers/sqlite'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import type { StrongIdentity, StrongIdentityKind } from '~helpers/strongIdentities'
+import {
+  createStrongIdentity,
+  getDisplayedStrongIdentities,
+  type StrongIdentity,
+  type StrongIdentityKind,
+} from '~helpers/strongIdentities'
 import type { StrongLexiconModuleId } from '~helpers/strongLexiconPublications'
 import {
   getStrongLexiconModuleAvailability,
@@ -38,7 +43,7 @@ export type StrongLexiconEntityRelation = {
   certainty: string
   targetId?: number
   targetUniqueName?: string
-  targetUStrong?: string
+  targetStepCodes?: string[]
   targetCategory?: string
   targetType?: string
   targetName: string
@@ -47,7 +52,6 @@ export type StrongLexiconEntityRelation = {
 export type StrongLexiconEntity = {
   id: number
   uniqueName: string
-  uStrong: string
   strongCodes: string[]
   name: string
   category: string
@@ -57,7 +61,6 @@ export type StrongLexiconEntity = {
   summaryHtml: string
   brief: string
   articleHtml: string
-  matchedStrong: string
   place?: {
     name: string
     area: string
@@ -76,7 +79,6 @@ export type StrongLexiconEntry = {
   classicStrong: string
   eStrong: string
   dStrong: string
-  uStrong: string
   language: 'greek' | 'hebrew'
   baseCode: number
   original: string
@@ -434,27 +436,38 @@ type EntityRow = {
 
 export const formatStrongEntityDisplayName = (value: string): string => value.replace(/_+/gu, ' ')
 
-const loadEntityStrongCodes = async (
+const loadEntityStrongCodeMap = async (
   database: SQLiteDatabase,
-  uStrong: string
-): Promise<string[]> => {
-  const rows = await database.getAllAsync<{ stepCode: string }>(
-    `SELECT DISTINCT i.stepCode
+  uStrongValues: string[]
+): Promise<Map<string, string[]>> => {
+  const uniqueValues = [...new Set(uStrongValues.filter(Boolean))]
+  if (!uniqueValues.length) return new Map()
+  const placeholders = uniqueValues.map(() => '?').join(', ')
+  const rows = await database.getAllAsync<{ uStrong: string; code: string }>(
+    `SELECT DISTINCT e.uStrong, i.stepCode AS code
        FROM StepEntries e
        JOIN StepEntryIdentities i ON i.stepEntryId=e.id
-      WHERE e.uStrong=?
-      ORDER BY CASE WHEN i.stepCode=? THEN 0 ELSE 1 END, i.stepCode`,
-    [uStrong, uStrong]
+      WHERE e.uStrong IN (${placeholders})
+      ORDER BY e.uStrong, i.stepCode`,
+    uniqueValues
   )
-  const codes = rows.map(row => row.stepCode).filter(Boolean)
-  return codes.includes(uStrong) ? codes : [uStrong, ...codes]
+  return new Map(
+    uniqueValues.map(uStrong => [
+      uStrong,
+      getDisplayedStrongIdentities(
+        rows
+          .filter(row => row.uStrong === uStrong)
+          .map(row => createStrongIdentity(row.code, inferLanguage(row.code)))
+      ).map(identity => identity.code),
+    ])
+  )
 }
 
 const hydrateEntity = async (
   database: SQLiteDatabase,
+  core: SQLiteDatabase,
   entity: EntityRow,
-  language: ResourceLanguage,
-  strongCodes: string[] = [entity.uStrong]
+  language: ResourceLanguage
 ): Promise<StrongLexiconEntity> => {
   const [place, relations] = await Promise.all([
     database.getFirstAsync<{
@@ -505,10 +518,15 @@ const hydrateEntity = async (
     ),
   ])
 
+  const strongCodeMap = await loadEntityStrongCodeMap(core, [
+    entity.uStrong,
+    ...relations.flatMap(relation => (relation.targetUStrong ? [relation.targetUStrong] : [])),
+  ])
+  const strongCodes = strongCodeMap.get(entity.uStrong) ?? []
+
   return {
     id: entity.id,
     uniqueName: entity.uniqueName,
-    uStrong: entity.uStrong,
     strongCodes,
     name: formatStrongEntityDisplayName(
       chooseLocalized(language, entity.localizedDisplayName, entity.displayName)
@@ -524,7 +542,6 @@ const hydrateEntity = async (
     summaryHtml: chooseLocalized(language, entity.localizedSummaryHtml, entity.summaryHtml),
     brief: chooseLocalized(language, entity.localizedBrief, entity.brief),
     articleHtml: chooseLocalized(language, entity.localizedArticleHtml, entity.articleHtml),
-    matchedStrong: entity.uStrong,
     ...(place
       ? {
           place: {
@@ -537,12 +554,14 @@ const hydrateEntity = async (
           },
         }
       : {}),
-    relations: relations.map(relation => ({
+    relations: relations.map((relation, index) => ({
       relation: relation.relation,
       certainty: relation.certainty,
       ...(relation.targetId == null ? {} : { targetId: relation.targetId }),
       ...(relation.targetUniqueName ? { targetUniqueName: relation.targetUniqueName } : {}),
-      ...(relation.targetUStrong ? { targetUStrong: relation.targetUStrong } : {}),
+      ...(relation.targetUStrong && strongCodeMap.get(relation.targetUStrong)?.length
+        ? { targetStepCodes: strongCodeMap.get(relation.targetUStrong)! }
+        : {}),
       ...(relation.targetCategory ? { targetCategory: relation.targetCategory } : {}),
       ...(relation.targetType ? { targetType: relation.targetType } : {}),
       targetName: formatStrongEntityDisplayName(
@@ -588,11 +607,7 @@ const loadEntityForEntry = async (
   )
   if (!entity) return undefined
 
-  const [hydratedEntity, strongCodes] = await Promise.all([
-    hydrateEntity(database, entity, language),
-    loadEntityStrongCodes(core, entity.uStrong),
-  ])
-  return { ...hydratedEntity, strongCodes }
+  return hydrateEntity(database, core, entity, language)
 }
 
 const toEntry = async (
@@ -633,7 +648,6 @@ const toEntry = async (
     classicStrong: getClassicStrong(row),
     eStrong: row.eStrong,
     dStrong: row.dStrong,
-    uStrong: row.uStrong,
     language: row.language,
     baseCode: row.baseCode,
     original: row.original,
@@ -759,28 +773,25 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
   async loadEntity(uniqueName, language) {
     const availability = await getStrongLexiconModuleAvailability('entities')
     if (availability.status !== 'available') return undefined
-    const entity = await withOptionalStrongLexiconDatabase('entities', async database => {
-      const row = await database.getFirstAsync<EntityRow>(
-        `SELECT e.*,
-              tr.displayName AS localizedDisplayName,
-              tr.description AS localizedDescription,
-              tr.shortDescription AS localizedShortDescription,
-              tr.summaryHtml AS localizedSummaryHtml,
-              tr.brief AS localizedBrief,
-              tr.articleHtml AS localizedArticleHtml
-         FROM Entities e
-         LEFT JOIN EntityTranslations tr ON tr.entityId=e.id AND tr.language=?
-        WHERE e.uniqueName=?
-        LIMIT 1`,
-        [language, uniqueName]
-      )
-      return row ? hydrateEntity(database, row, language) : undefined
-    })
-    if (!entity) return undefined
-    const strongCodes = await withStrongLexiconDatabase('core', database =>
-      loadEntityStrongCodes(database, entity.uStrong)
+    return withStrongLexiconDatabase('core', core =>
+      withOptionalStrongLexiconDatabase('entities', async database => {
+        const row = await database.getFirstAsync<EntityRow>(
+          `SELECT e.*,
+                tr.displayName AS localizedDisplayName,
+                tr.description AS localizedDescription,
+                tr.shortDescription AS localizedShortDescription,
+                tr.summaryHtml AS localizedSummaryHtml,
+                tr.brief AS localizedBrief,
+                tr.articleHtml AS localizedArticleHtml
+           FROM Entities e
+           LEFT JOIN EntityTranslations tr ON tr.entityId=e.id AND tr.language=?
+          WHERE e.uniqueName=?
+          LIMIT 1`,
+          [language, uniqueName]
+        )
+        return row ? hydrateEntity(database, core, row, language) : undefined
+      }).then(entity => entity ?? undefined)
     )
-    return { ...entity, strongCodes }
   },
 
   async loadEntry(identity, language) {

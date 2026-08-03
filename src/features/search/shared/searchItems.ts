@@ -53,7 +53,7 @@ export const getStrongEndpoint = (
   const isGreek = isGreekStrong(strong)
   return createStrongEndpoint({
     language: isGreek ? 'greek' : 'hebrew',
-    code: strong.classicStrong,
+    code: strong.stepCode,
     labelFallback: strong.gloss,
     originalWord: getStrongOriginalWord(strong),
   })

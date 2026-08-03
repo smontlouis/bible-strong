@@ -100,9 +100,9 @@ describe('searchResultsModel', () => {
       ...baseInput,
       strongResults: [
         {
-          id: 3651,
-          stepCode: 'H3651',
-          classicStrong: 'H3651',
+          id: 11446,
+          stepCode: 'H0310A',
+          classicStrong: 'H0310',
           language: 'hebrew',
           original: 'כֵּן',
           transliteration: 'kēn',
@@ -113,9 +113,9 @@ describe('searchResultsModel', () => {
 
     expect(model.sections[0].items[0]).toEqual(
       expect.objectContaining({
-        chip: 'H3651',
-        endpoint: expect.objectContaining({ code: '3651' }),
-        strongReference: { language: 'hebrew', code: 'H3651' },
+        chip: 'H0310A',
+        endpoint: expect.objectContaining({ code: '310A' }),
+        strongReference: { language: 'hebrew', code: 'H0310A' },
       })
     )
   })

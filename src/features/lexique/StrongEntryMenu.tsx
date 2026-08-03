@@ -10,6 +10,7 @@ import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess
 import { createStrongEndpoint } from '~features/studyRelations/endpoints'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import generateUUID from '~helpers/generateUUID'
+import { createStrongIdentity } from '~helpers/strongIdentities'
 import { unifiedTagsModalAtom } from '~state/app'
 import type { StrongDetailRouteContext } from './strongDetailRoutes'
 import { useStrongLexiconLanguage } from './useStrongLexiconLanguage'
@@ -32,17 +33,18 @@ const StrongEntryMenu = ({ context, entry }: Props) => {
   const openEntityRelations = useOpenEntityRelations()
   const openInNewTab = useOpenInNewTab()
   const { menuTitle, toggleLanguage } = useStrongLexiconLanguage()
-  const code = String(entry.baseCode)
+  const stepStrongCode = entry.stepCode
+  const stepStrongIdentity = createStrongIdentity(stepStrongCode, entry.language)
   const strongEndpoint = createStrongEndpoint({
     language: entry.language,
-    code,
+    code: stepStrongCode,
     labelFallback: entry.gloss,
     originalWord: entry.original,
   })
 
   const shareEntry = () => {
     const lines = [
-      `${entry.stepCode} — ${entry.gloss}`,
+      `${stepStrongCode} — ${entry.gloss}`,
       `${entry.original} · ${entry.transliteration}`,
       entry.definitionHtml ? stripHtml(entry.definitionHtml) : '',
       'https://bible-strong.app',
@@ -53,7 +55,7 @@ const StrongEntryMenu = ({ context, entry }: Props) => {
   const openTags = () => {
     setUnifiedTagsModal({
       mode: 'select',
-      id: code,
+      id: stepStrongCode,
       title: entry.gloss,
       entity: entry.language === 'greek' ? 'strongsGrec' : 'strongsHebreu',
     })
@@ -68,9 +70,9 @@ const StrongEntryMenu = ({ context, entry }: Props) => {
       data: {
         ...context,
         book: entry.language === 'hebrew' ? 1 : 40,
-        reference: entry.stepCode,
-        identityKind: 'dstrong',
-        identityCode: entry.stepCode,
+        reference: stepStrongCode,
+        identityKind: stepStrongIdentity.kind,
+        identityCode: stepStrongCode,
       },
     })
   }

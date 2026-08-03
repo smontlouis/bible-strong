@@ -23,7 +23,7 @@ import Text from '~common/ui/Text'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { createStrongLexiconModuleDownloadItem } from '~helpers/downloadItemFactory'
 import { downloadManager } from '~helpers/downloadManager'
-import type { StrongIdentity } from '~helpers/strongIdentities'
+import { createStrongIdentity, type StrongIdentity } from '~helpers/strongIdentities'
 import {
   getStrongSelectionMorphologyCodes,
   type StrongSelectionMorphology,
@@ -151,8 +151,8 @@ const StrongSelectionSheet = ({
     )
   }
 
-  const openEntry = (identity: StrongIdentity) => {
-    const morphologyCodes = getStrongSelectionMorphologyCodes(morphologies, identity)
+  const openEntry = (stepCode: string, language: 'greek' | 'hebrew', morphologyCodes: string[]) => {
+    const identity = createStrongIdentity(stepCode, language)
     pushRouteOnce({
       pathname: '/strong',
       params: {
@@ -366,7 +366,7 @@ const StrongSelectionSheet = ({
                     width={previewWidth}
                   >
                     <TouchableOpacity
-                      onPress={() => openEntry(preview.selectedIdentity)}
+                      onPress={() => openEntry(preview.stepCode, preview.language, morphologyCodes)}
                       activeOpacity={0.7}
                     >
                       <VStack

@@ -50,7 +50,7 @@ const StrongConcordancePage = ({
   const resources = useResourceAccess()
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const [selectedLemmaId, setSelectedLemmaId] = useState<number>()
-  const sourceKey = `${currentVersionId}:${defaultVersionId}:${preferredInterlinearLocale}:${entry.selectedIdentity.kind}:${entry.selectedIdentity.code}:${downloadCompletionSignal}`
+  const sourceKey = `${currentVersionId}:${defaultVersionId}:${preferredInterlinearLocale}:${entry.stepCode}:${downloadCompletionSignal}`
   const [fallbackSource, setFallbackSource] = useState<{
     key: string
     versionId?: StrongBibleVersionId
@@ -64,7 +64,7 @@ const StrongConcordancePage = ({
     defaultVersionId,
     preferredInterlinearLocale,
     book: entry.language === 'hebrew' ? 1 : 40,
-    reference: entry.selectedIdentity.code,
+    reference: entry.stepCode,
     allBooks: true,
   }
   const countsQuery = useQuery({
@@ -75,7 +75,7 @@ const StrongConcordancePage = ({
       defaultVersionId,
       preferredInterlinearLocale,
       downloadCompletionSignal,
-      entry.selectedIdentity,
+      entry.stepCode,
     ],
     queryFn: () => resources.lexiconBible.loadCountsByBook(request),
     networkMode: 'always',
@@ -90,7 +90,7 @@ const StrongConcordancePage = ({
       defaultVersionId,
       preferredInterlinearLocale,
       downloadCompletionSignal,
-      entry.selectedIdentity,
+      entry.stepCode,
     ],
     queryFn: () => resources.lexiconBible.loadLemmaStats(request),
     networkMode: 'always',
@@ -105,7 +105,7 @@ const StrongConcordancePage = ({
       defaultVersionId,
       preferredInterlinearLocale,
       downloadCompletionSignal,
-      entry.selectedIdentity,
+      entry.stepCode,
       selectedLemmaId,
       PAGE_SIZE,
     ],

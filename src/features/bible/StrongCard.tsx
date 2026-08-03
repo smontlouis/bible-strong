@@ -19,6 +19,7 @@ import { Theme } from '@emotion/react'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
 import { createStrongDetailRoute } from '~features/lexique/strongDetailRoutes'
+import { createStrongIdentity } from '~helpers/strongIdentities'
 import type { StrongVerseContext } from './strongResourceCardContext'
 
 const Container = styled(Box)<{ isModal?: boolean }>(() => ({
@@ -125,12 +126,13 @@ const StrongCard = (props: Props) => {
         },
       })
     } else {
+      const stepStrongIdentity = createStrongIdentity(stepStrongCode, strongEntry.language)
       pushRouteOnce(
         createStrongDetailRoute('index', {
           ...props.strongVerseContext,
           book: props.strongVerseContext?.book ?? Number(book),
-          identityKind: strongEntry.selectedIdentity.kind,
-          identityCode: strongEntry.selectedIdentity.code,
+          identityKind: stepStrongIdentity.kind,
+          identityCode: stepStrongIdentity.code,
         })
       )
     }

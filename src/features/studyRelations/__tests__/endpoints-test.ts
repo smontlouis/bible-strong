@@ -37,6 +37,12 @@ describe('relation endpoint builders', () => {
       )
     ).toBe('strong:greek:25')
     expect(
+      createStrongEndpoint({ language: 'hebrew', code: 'H0310A', labelFallback: 'après' })
+    ).toMatchObject({
+      key: 'strong:hebrew:310A',
+      code: '310A',
+    })
+    expect(
       endpointIdentity(createNaveEndpoint({ nameLower: 'Amour', labelFallback: 'Amour' }))
     ).toBe('nave:fr:amour')
     expect(

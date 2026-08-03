@@ -84,7 +84,7 @@ const StrongMainScreen = ({
       defaultStrongBibleVersionId,
       resourceLanguage,
       downloadCompletionSignal,
-      entry?.selectedIdentity,
+      entry?.stepCode,
       selectedLemmaId,
     ],
     queryFn: async () => {
@@ -93,7 +93,7 @@ const StrongMainScreen = ({
         defaultVersionId: defaultStrongBibleVersionId,
         preferredInterlinearLocale: resourceLanguage,
         book: entry?.language === 'hebrew' ? 1 : 40,
-        reference: entry!.selectedIdentity.code,
+        reference: entry!.stepCode,
         limit: 3,
         offset: 0,
         allBooks: true,
@@ -120,7 +120,7 @@ const StrongMainScreen = ({
       defaultStrongBibleVersionId,
       resourceLanguage,
       downloadCompletionSignal,
-      entry?.selectedIdentity,
+      entry?.stepCode,
     ],
     queryFn: () =>
       resources.lexiconBible.loadCountsByBook({
@@ -128,7 +128,7 @@ const StrongMainScreen = ({
         defaultVersionId: defaultStrongBibleVersionId,
         preferredInterlinearLocale: resourceLanguage,
         book: entry?.language === 'hebrew' ? 1 : 40,
-        reference: entry!.selectedIdentity.code,
+        reference: entry!.stepCode,
         allBooks: true,
       }),
     enabled: Boolean(entry),
@@ -142,7 +142,7 @@ const StrongMainScreen = ({
       defaultStrongBibleVersionId,
       resourceLanguage,
       downloadCompletionSignal,
-      entry?.selectedIdentity,
+      entry?.stepCode,
     ],
     queryFn: () =>
       resources.lexiconBible.loadLemmaStats({
@@ -150,7 +150,7 @@ const StrongMainScreen = ({
         defaultVersionId: defaultStrongBibleVersionId,
         preferredInterlinearLocale: resourceLanguage,
         book: entry?.language === 'hebrew' ? 1 : 40,
-        reference: entry!.selectedIdentity.code,
+        reference: entry!.stepCode,
       }),
     enabled: Boolean(entry),
     networkMode: 'always',
@@ -237,7 +237,7 @@ const StrongMainScreen = ({
       Grec: entry.language === 'greek' ? entry.original : '',
       Mot: entry.gloss,
       book: entry.language === 'hebrew' ? 1 : 40,
-      reference: entry.selectedIdentity.code,
+      reference: entry.stepCode,
       date: Date.now(),
       type: 'strong',
     })

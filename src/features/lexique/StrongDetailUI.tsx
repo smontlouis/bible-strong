@@ -401,9 +401,9 @@ export const StrongEntityRelationList = ({
                 })}
               </Text>
             </VStack>
-            {!!relation.targetUStrong && (
+            {!!relation.targetStepCodes?.length && (
               <Text color="tertiary" fontSize={11}>
-                {relation.targetUStrong}
+                {relation.targetStepCodes.join(' · ')}
               </Text>
             )}
             {!!relation.targetUniqueName && (
