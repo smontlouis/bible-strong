@@ -38,7 +38,7 @@ interface LexiqueItemProps extends StrongLexiconSearchResult {
   onSelect?: (book: number, reference: string, title?: string) => void
 }
 
-const LexiqueItem = ({ stepCode, language, original, gloss, onSelect }: LexiqueItemProps) => {
+const LexiqueItem = ({ uStrong, language, original, gloss, onSelect }: LexiqueItemProps) => {
   const { t } = useTranslation()
   const pushRouteOnce = usePushRouteOnce()
   const book = language === 'hebrew' ? 1 : 40
@@ -46,11 +46,11 @@ const LexiqueItem = ({ stepCode, language, original, gloss, onSelect }: LexiqueI
 
   const handlePress = () => {
     if (onSelect) {
-      onSelect(book, stepCode, gloss)
+      onSelect(book, uStrong, gloss)
     } else {
       pushRouteOnce({
         pathname: '/strong',
-        params: { book: String(book), reference: stepCode },
+        params: { book: String(book), reference: uStrong },
       })
     }
   }
@@ -62,7 +62,7 @@ const LexiqueItem = ({ stepCode, language, original, gloss, onSelect }: LexiqueI
           <Text fontSize={10}>{t(lexiqueType)}</Text>
         </Chip>
         <Chip marginLeft={5}>
-          <Text fontSize={10}>{stepCode}</Text>
+          <Text fontSize={10}>{uStrong}</Text>
         </Chip>
       </Box>
       <Box row>
@@ -81,7 +81,7 @@ const LexiqueItem = ({ stepCode, language, original, gloss, onSelect }: LexiqueI
   }
 
   return (
-    <Link route="Strong" params={{ book, reference: stepCode }}>
+    <Link route="Strong" params={{ book, reference: uStrong }}>
       {content}
     </Link>
   )

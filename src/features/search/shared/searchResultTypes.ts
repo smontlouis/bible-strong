@@ -16,6 +16,10 @@ export type SearchEntityResult = {
   description?: string
   iconType: SearchItemType
   endpoint?: RelationEndpoint
+  strongReference?: {
+    language: 'greek' | 'hebrew'
+    code: string
+  }
   passage?: SearchResult
   referenceSegment?: ParsedSegment
   matches?: readonly FuseResultMatch[]

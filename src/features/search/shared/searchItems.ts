@@ -41,7 +41,7 @@ export const createVerseKeys = (
     (_, index) => `${book}-${chapter}-${startVerse + index}`
   )
 
-export const getStrongCode = (strong: StrongLexiconSearchResult) => strong.classicStrong
+export const getStrongDisplayCode = (strong: StrongLexiconSearchResult) => strong.uStrong
 
 export const getStrongOriginalWord = (strong: StrongLexiconSearchResult) => strong.original
 
@@ -53,7 +53,7 @@ export const getStrongEndpoint = (
   const isGreek = isGreekStrong(strong)
   return createStrongEndpoint({
     language: isGreek ? 'greek' : 'hebrew',
-    code: getStrongCode(strong),
+    code: strong.classicStrong,
     labelFallback: strong.gloss,
     originalWord: getStrongOriginalWord(strong),
   })
@@ -206,7 +206,7 @@ export const getStrongSearchItems = (
   t: Translate = translate
 ) =>
   results.map<SearchEntityResult>(strong => {
-    const code = getStrongCode(strong)
+    const code = getStrongDisplayCode(strong)
     const isGreek = isGreekStrong(strong)
     const prefix = isGreek ? 'G' : 'H'
     const lexiqueType = isGreek ? 'Grec' : 'Hébreu'
@@ -219,6 +219,10 @@ export const getStrongSearchItems = (
       subtitle: t(lexiqueType),
       description: getStrongOriginalWord(strong),
       endpoint: getStrongEndpoint(strong),
+      strongReference: {
+        language: strong.language,
+        code,
+      },
     }
   })
 

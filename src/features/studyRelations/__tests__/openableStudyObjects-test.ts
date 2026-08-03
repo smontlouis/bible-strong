@@ -135,6 +135,26 @@ describe('openable study objects', () => {
     })
   })
 
+  it('opens a Strong search result with its full code without changing its stable endpoint', () => {
+    expect(
+      getOpenableAction({
+        id: 'strong:hebrew:3651:H3651C',
+        type: 'strong',
+        iconType: 'strong',
+        title: 'ainsi',
+        endpoint: createStrongEndpoint({ language: 'hebrew', code: 'H3651' }),
+        strongReference: { language: 'hebrew', code: 'H3651C' },
+      })
+    ).toEqual({
+      type: 'route',
+      pathname: '/strong',
+      params: {
+        book: '1',
+        reference: 'H3651C',
+      },
+    })
+  })
+
   it('surfaces unavailable external Links as a toast action', () => {
     expect(
       getOpenableActionForRelationEndpoint(

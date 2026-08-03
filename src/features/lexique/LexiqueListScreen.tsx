@@ -202,7 +202,7 @@ const LexiqueListScreen = ({
               )}
               stickySectionHeadersEnabled
               sections={sectionResults}
-              keyExtractor={item => `${item.id}:${item.stepCode}`}
+              keyExtractor={item => `${item.id}:${item.uStrong}`}
             />
           ) : (
             <Empty

@@ -95,6 +95,32 @@ describe('searchResultsModel', () => {
     expect(model.sections[0].items).toEqual([noteResult])
   })
 
+  it('uses the full unified Strong code in results and navigation', () => {
+    const model = getSearchResultsModel({
+      ...baseInput,
+      strongResults: [
+        {
+          id: 3651,
+          stepCode: 'H3651',
+          classicStrong: 'H3651',
+          uStrong: 'H3651C',
+          language: 'hebrew',
+          original: 'כֵּן',
+          transliteration: 'kēn',
+          gloss: 'ainsi',
+        },
+      ],
+    })
+
+    expect(model.sections[0].items[0]).toEqual(
+      expect.objectContaining({
+        chip: 'H3651C',
+        endpoint: expect.objectContaining({ code: '3651' }),
+        strongReference: { language: 'hebrew', code: 'H3651C' },
+      })
+    )
+  })
+
   it('keeps an empty passages section visible while passages are loading', () => {
     const model = getSearchResultsModel({
       ...baseInput,

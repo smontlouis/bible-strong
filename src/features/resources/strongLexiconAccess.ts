@@ -112,6 +112,7 @@ export type StrongLexiconSearchResult = {
   id: number
   stepCode: string
   classicStrong: string
+  uStrong: string
   language: 'greek' | 'hebrew'
   original: string
   transliteration: string
@@ -698,6 +699,7 @@ const toSearchResult = (
     CoreEntryRow,
     | 'id'
     | 'stepCode'
+    | 'uStrong'
     | 'language'
     | 'baseCode'
     | 'original'
@@ -711,6 +713,7 @@ const toSearchResult = (
   id: row.id,
   stepCode: row.stepCode,
   classicStrong: getClassicStrong(row as CoreEntryRow),
+  uStrong: row.uStrong,
   language: row.language,
   original: row.original,
   transliteration: row.classicTransliteration || row.transliteration,
@@ -814,12 +817,12 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
          JOIN StepEntryIdentities i ON i.stepEntryId=e.id
          LEFT JOIN LexiconTranslations tr
            ON tr.stepEntryId=e.id AND tr.language=?
-        WHERE i.stepCode LIKE ? OR e.eStrong LIKE ? OR e.dStrong LIKE ?
+        WHERE i.stepCode LIKE ? OR e.eStrong LIKE ? OR e.dStrong LIKE ? OR e.uStrong LIKE ?
            OR e.original LIKE ? OR e.transliteration LIKE ?
            OR e.gloss LIKE ? OR tr.gloss LIKE ?
         ORDER BY COALESCE(NULLIF(tr.gloss, ''), e.gloss), e.baseCode
         LIMIT ?`,
-        [language, like, like, like, like, like, like, like, limit]
+        [language, like, like, like, like, like, like, like, like, limit]
       )
       return rows.map(row => toSearchResult(row, language))
     })

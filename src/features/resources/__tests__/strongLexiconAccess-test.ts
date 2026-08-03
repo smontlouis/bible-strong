@@ -158,6 +158,7 @@ describe('strongLexiconAccess', () => {
     await expect(localStrongLexiconAccess.browseByGlossPrefix('S', 'fr', 25)).resolves.toEqual([
       expect.objectContaining({
         stepCode: 'H3068G',
+        uStrong: 'H3068G',
         gloss: 'SEIGNEUR',
       }),
     ])
@@ -165,6 +166,46 @@ describe('strongLexiconAccess', () => {
       expect.stringContaining("COALESCE(NULLIF(tr.gloss, ''), e.gloss) LIKE ?"),
       ['fr', 'S%', 25]
     )
+  })
+
+  it('returns the full unified Strong code when the STEP identity is classical', async () => {
+    const database = createDatabase()
+    database.getAllAsync.mockResolvedValue([
+      {
+        ...rows.H0413,
+        id: 3651,
+        baseCode: 3651,
+        eStrong: 'H3651',
+        dStrong: 'H3651C =',
+        uStrong: 'H3651C',
+        stepCode: 'H3651',
+        gloss: 'thus',
+        localizedGloss: 'ainsi',
+      },
+    ])
+    mockWithStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(database as unknown as SQLiteDatabase)
+    )
+
+    await expect(localStrongLexiconAccess.search('H3651C', 'fr', 25)).resolves.toEqual([
+      expect.objectContaining({
+        stepCode: 'H3651',
+        classicStrong: 'H3651',
+        uStrong: 'H3651C',
+      }),
+    ])
+    expect(database.getAllAsync).toHaveBeenCalledWith(expect.stringContaining('e.uStrong LIKE ?'), [
+      'fr',
+      '%H3651C%',
+      '%H3651C%',
+      '%H3651C%',
+      '%H3651C%',
+      '%H3651C%',
+      '%H3651C%',
+      '%H3651C%',
+      '%H3651C%',
+      25,
+    ])
   })
 
   it('loads the full localized morphology for the selected verse token', async () => {
