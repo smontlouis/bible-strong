@@ -132,7 +132,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
           </MenuView>
         }
       />
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
         {!Object.entries(versions).filter(([versionId]) => versionsToCompare.includes(versionId))
           .length ? (
           <Empty
@@ -152,17 +152,17 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
               />
             ))
         )}
+        {prevNextItems && (
+          <Box bg="reverse" borderTopWidth={1} borderColor="border">
+            <BibleVerseDetailFooter
+              verseNumber={prevNextItems.verseNumber}
+              goToNextVerse={() => goToVerse(+1)}
+              goToPrevVerse={() => goToVerse(-1)}
+              versesInCurrentChapter={prevNextItems.versesInCurrentChapter}
+            />
+          </Box>
+        )}
       </ScrollView>
-      {prevNextItems && (
-        <Box bg="reverse" borderTopWidth={1} borderColor="border">
-          <BibleVerseDetailFooter
-            verseNumber={prevNextItems.verseNumber}
-            goToNextVerse={() => goToVerse(+1)}
-            goToPrevVerse={() => goToVerse(-1)}
-            versesInCurrentChapter={prevNextItems.versesInCurrentChapter}
-          />
-        </Box>
-      )}
       <CompareVersionSelectorSheet sheetRef={compareVersionSelectorRef} />
     </Container>
   )
