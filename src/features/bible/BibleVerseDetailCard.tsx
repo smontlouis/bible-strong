@@ -2,7 +2,6 @@ import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import React, { useEffect, useRef, useState } from 'react'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 
 import waitForStrongDB from '~common/waitForStrongDB'
 
@@ -25,7 +24,6 @@ import { useRouter } from 'expo-router'
 import { useSelector } from 'react-redux'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { StudyNavigateBibleType } from '~common/types'
-import { CarouselProvider } from '~helpers/CarouselContext'
 import { getChapterVerseCountSafe } from '~helpers/bibleCoverage'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
@@ -47,6 +45,7 @@ import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess
 import { areStrongIdentitiesEqual } from '~helpers/strongIdentities'
 import { useResourcesLanguageValue } from '~state/resourcesLanguage'
 import { getStrongWordOccurrences, type StrongVerseContext } from './strongResourceCardContext'
+import { StrongResourceScrollProvider } from './StrongResourceScrollContext'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -158,17 +157,14 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   const verseBook = verse.Livre
   const verseChapter = verse.Chapitre
   const verseNumber = verse.Verset
-  const carouselRef = useRef<ICarouselInstance>(null)
+  const strongCardsScrollRef = useRef<ScrollView>(null)
   const hasDisplayedStrongVerseRef = useRef(false)
   const [boxHeight, setBoxHeight] = useState(0)
   const {
-    ref: carouselContainerRef,
-    size: carouselContainerSize,
-    onLayout: onCarouselContainerLayout,
+    ref: strongCardsContainerRef,
+    size: strongCardsContainerSize,
+    onLayout: onStrongCardsContainerLayout,
   } = useLayoutSize()
-  const [currentStrongReference, setCurrentStrongReference] = useState<StrongLexiconEntry | null>(
-    null
-  )
   const [currentStrongCardIndex, setCurrentStrongCardIndex] = useState(0)
 
   const strongVerseQuery = useQuery({
@@ -262,34 +258,31 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   })
   const strongVerseData = strongVerseQuery.data
   const strongCards = strongVerseData?.strongCards ?? []
-  const strongReferences = strongCards.map(card => card.entry)
-  const availableCardHeight = Math.max(0, carouselContainerSize.height - bottomInset)
+  const availableCardHeight = Math.max(0, strongCardsContainerSize.height - bottomInset)
 
-  const findRefIndex = (ref: string | number, occurrenceIndex?: number) =>
-    occurrenceIndex === undefined
-      ? strongReferences.findIndex(r => Number(r.baseCode) === Number(ref))
-      : strongCards.findIndex(
-          card =>
-            card.occurrenceIndex === occurrenceIndex && Number(card.entry.baseCode) === Number(ref)
-        )
+  const findRefIndex = (ref: string | number, occurrenceIndex: number) =>
+    strongCards.findIndex(
+      card =>
+        card.occurrenceIndex === occurrenceIndex && Number(card.entry.baseCode) === Number(ref)
+    )
 
-  const goToCarouselItem = (ref: string | number, occurrenceIndex?: number) => {
+  const scrollToStrongCard = (ref: string | number, occurrenceIndex: number) => {
     const index = findRefIndex(ref, occurrenceIndex)
     if (index !== -1) {
-      carouselRef.current?.scrollTo({ index, animated: true })
+      strongCardsScrollRef.current?.scrollTo({ x: index * itemWidth, animated: true })
       setCurrentStrongCardIndex(index)
     }
-    setCurrentStrongReference(
-      strongReferences.find(reference => Number(reference.baseCode) === Number(ref)) || null
-    )
   }
 
-  const onSnapToItem = (index: number) => {
-    setCurrentStrongReference(strongReferences[index] || null)
+  const selectStrongCardFromOffset = (offsetX: number) => {
+    const index = Math.min(
+      Math.max(0, Math.round(offsetX / itemWidth)),
+      Math.max(0, strongCards.length - 1)
+    )
     setCurrentStrongCardIndex(index)
   }
 
-  const renderItem = ({ item, index }: { item: StrongCardItem; index: number }) => {
+  const renderStrongCard = ({ item, index }: { item: StrongCardItem; index: number }) => {
     return (
       <StrongCard
         theme={theme}
@@ -306,10 +299,9 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   useEffect(() => {
     if (!strongVerseData || strongVerseQuery.isPlaceholderData) return
     hasDisplayedStrongVerseRef.current = true
-    setCurrentStrongReference(strongVerseData.strongCards[0]?.entry || null)
     setCurrentStrongCardIndex(0)
     onStrongBibleProvenanceChange?.(strongVerseData.provenance)
-    carouselRef.current?.scrollTo({ index: 0, animated: false })
+    strongCardsScrollRef.current?.scrollTo({ x: 0, animated: false })
   }, [onStrongBibleProvenanceChange, strongVerseData, strongVerseQuery.isPlaceholderData])
 
   useEffect(() => {
@@ -376,7 +368,6 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     return <Loading />
   }
 
-  const currentStrongReferenceIndex = currentStrongCardIndex
   const verseTextStyle = {
     fontSize: Number.parseFloat(scaleFontSize(24, fontSizeScale)),
     lineHeight: Number.parseFloat(scaleLineHeight(24, lineHeightSetting, fontSizeScale)),
@@ -394,21 +385,21 @@ const BibleVerseDetailCard: React.FC<Props> = ({
             <VersetWrapper>
               <NumberText>{strongVerseData?.displayedVerse?.Verset ?? verse.Verset}</NumberText>
             </VersetWrapper>
-            <CarouselProvider
+            <StrongResourceScrollProvider
               value={{
-                currentStrongReference: currentStrongReference
+                currentTarget: strongCards[currentStrongCardIndex]
                   ? {
-                      Code: currentStrongReference.baseCode,
+                      code: strongCards[currentStrongCardIndex].entry.baseCode,
                       occurrenceIndex: strongCards[currentStrongCardIndex]?.occurrenceIndex,
                     }
                   : null,
-                goToCarouselItem,
+                scrollToStrongCard,
               }}
             >
               <VerseText>
                 {React.cloneElement(formattedTexte, { textStyle: verseTextStyle })}
               </VerseText>
-            </CarouselProvider>
+            </StrongResourceScrollProvider>
           </StyledVerse>
         </ScrollView>
         <BibleVerseDetailFooter
@@ -421,33 +412,33 @@ const BibleVerseDetailCard: React.FC<Props> = ({
       <Box bg="lightGrey" mt={-30} position="relative" zIndex={0}>
         <RoundedCorner />
       </Box>
-      <Box ref={carouselContainerRef} bg="lightGrey" flex={1} onLayout={onCarouselContainerLayout}>
-        <Carousel
-          ref={carouselRef}
-          mode="horizontal-stack"
-          scrollAnimationDuration={300}
-          itemWidth={itemWidth}
-          itemHeight={availableCardHeight}
-          onConfigurePanGesture={gestureChain => {
-            gestureChain.activeOffsetX([-10, 10])
-          }}
-          modeConfig={{
-            opacityInterval: 0.8,
-            scaleInterval: 0,
-            stackInterval: itemWidth,
-            rotateZDeg: 0,
-          }}
-          style={{
-            paddingLeft: 20,
-            overflow: 'visible',
-            flex: 1,
-            width: '100%',
-          }}
-          data={strongCards}
-          renderItem={renderItem}
-          onSnapToItem={onSnapToItem}
-          defaultIndex={currentStrongReferenceIndex === -1 ? 0 : currentStrongReferenceIndex}
-        />
+      <Box
+        ref={strongCardsContainerRef}
+        bg="lightGrey"
+        flex={1}
+        onLayout={onStrongCardsContainerLayout}
+      >
+        <ScrollView
+          ref={strongCardsScrollRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={itemWidth}
+          snapToAlignment="start"
+          decelerationRate="fast"
+          onScroll={event => selectStrongCardFromOffset(event.nativeEvent.contentOffset.x)}
+          scrollEventThrottle={16}
+          contentContainerStyle={{ paddingLeft: 20, paddingRight: 20 }}
+        >
+          {strongCards.map((item, index) => (
+            <Box
+              key={`${item.entry.selectedIdentity.kind}:${item.entry.selectedIdentity.code}:${item.occurrenceIndex}`}
+              width={itemWidth}
+              height={availableCardHeight}
+            >
+              {renderStrongCard({ item, index })}
+            </Box>
+          ))}
+        </ScrollView>
       </Box>
     </Box>
   )

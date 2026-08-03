@@ -2,21 +2,14 @@ import styled from '@emotion/native'
 import React from 'react'
 import type { TextStyle } from 'react-native'
 
-import { CarouselConsumer } from '~helpers/CarouselContext'
-
 import Paragraph from '~common/ui/Paragraph'
-import type { CarouselContextValue } from '~helpers/CarouselContext'
+import { StrongResourceScrollConsumer } from './StrongResourceScrollContext'
 
 type SelectableProps = {
   isSelected?: boolean
 }
 
 export type StrongVerseTextStyle = Pick<TextStyle, 'fontSize' | 'lineHeight'>
-
-const isStrongCarouselValue = (
-  value: CarouselContextValue
-): value is Extract<CarouselContextValue, { currentStrongReference: unknown }> =>
-  'currentStrongReference' in value
 
 const StyledView = styled.TouchableOpacity<SelectableProps>(({ isSelected, theme }) => ({
   backgroundColor: isSelected ? theme.colors.primary : theme.colors.lightPrimary,
@@ -82,7 +75,7 @@ type BibleStrongRefProps = {
   book?: string | number
   concordanceFor?: string | number
   textStyle?: StrongVerseTextStyle
-  occurrenceIndex?: number
+  occurrenceIndex: number
 }
 
 const BibleStrongRef = ({
@@ -112,20 +105,19 @@ const BibleStrongRef = ({
   }
 
   return (
-    <CarouselConsumer>
+    <StrongResourceScrollConsumer>
       {value => {
-        if (!isStrongCarouselValue(value)) return null
-        const { currentStrongReference, goToCarouselItem } = value
-        const isSelected = currentStrongReference
-          ? Number(currentStrongReference.Code) === Number(reference) &&
-            (occurrenceIndex === undefined ||
-              currentStrongReference.occurrenceIndex === occurrenceIndex)
+        if (!value) return null
+        const { currentTarget, scrollToStrongCard } = value
+        const isSelected = currentTarget
+          ? Number(currentTarget.code) === Number(reference) &&
+            currentTarget.occurrenceIndex === occurrenceIndex
           : false
         if (!word) {
           return (
             <StyledCircle
               activeOpacity={0.5}
-              onPress={() => goToCarouselItem(reference, occurrenceIndex)}
+              onPress={() => scrollToStrongCard(reference, occurrenceIndex)}
               isSelected={isSelected}
             >
               <StyledInsideCircle isSelected={isSelected} />
@@ -136,7 +128,7 @@ const BibleStrongRef = ({
         return (
           <StyledView
             activeOpacity={0.5}
-            onPress={() => goToCarouselItem(reference, occurrenceIndex)}
+            onPress={() => scrollToStrongCard(reference, occurrenceIndex)}
             isSelected={isSelected}
           >
             <StyledText isSelected={isSelected} style={textStyle}>
@@ -145,7 +137,7 @@ const BibleStrongRef = ({
           </StyledView>
         )
       }}
-    </CarouselConsumer>
+    </StrongResourceScrollConsumer>
   )
 }
 

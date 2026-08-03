@@ -6,6 +6,7 @@ import BibleVerseDetailCard from '../BibleVerseDetailCard'
 
 const mockLoadVerse = jest.fn()
 const mockLoadEntries = jest.fn()
+const mockScrollTo = jest.fn()
 const mockResourceAccess = {
   lexiconBible: { loadVerse: mockLoadVerse },
   strongLexicon: { loadEntries: mockLoadEntries },
@@ -61,30 +62,28 @@ jest.mock('react-redux', () => ({
 
 jest.mock('react-native', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
+  const ScrollView = ReactModule.forwardRef(
+    (
+      { children, ...props }: React.PropsWithChildren<Record<string, unknown>>,
+      ref: React.ForwardedRef<{ scrollTo: typeof mockScrollTo }>
+    ) => {
+      ReactModule.useImperativeHandle(ref, () => ({ scrollTo: mockScrollTo }))
+      return ReactModule.createElement('ScrollView', props, children)
+    }
+  )
   return {
-    ScrollView: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
-      ReactModule.createElement('ScrollView', props, children),
+    ScrollView,
   }
 })
 
-jest.mock('react-native-reanimated-carousel', () => {
+jest.mock('../StrongResourceScrollContext', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
   return {
-    __esModule: true,
-    default: ({
-      data,
-      renderItem,
-      itemHeight,
-    }: {
-      data: unknown[]
-      renderItem: (info: { item: unknown; index: number }) => React.ReactNode
-      itemHeight: number
-    }) =>
-      ReactModule.createElement(
-        'Carousel',
-        { itemCount: data.length, itemHeight },
-        data.map((item, index) => renderItem({ item, index }))
-      ),
+    StrongResourceScrollProvider: ({
+      children,
+      value,
+    }: React.PropsWithChildren<{ value: unknown }>) =>
+      ReactModule.createElement('StrongResourceScrollProvider', { value }, children),
   }
 })
 
@@ -128,10 +127,6 @@ jest.mock('~helpers/strongBiblePublications', () => ({
   FRENCH_STRONG_BIBLE_PRIORITY: ['LSG', 'DBY', 'DBR'],
   ENGLISH_STRONG_BIBLE_PRIORITY: ['KJV'],
   getStrongBibleFallbackPriority: () => ['LSG', 'DBY', 'DBR'],
-}))
-
-jest.mock('~helpers/CarouselContext', () => ({
-  CarouselProvider: ({ children }: React.PropsWithChildren) => <>{children}</>,
 }))
 
 jest.mock('~common/Empty', () => {
@@ -409,7 +404,10 @@ describe('BibleVerseDetailCard', () => {
       await flushQueryUpdates()
     })
 
-    expect(renderer.root.find(node => String(node.type) === 'Carousel').props.itemHeight).toBe(280)
+    const cardsScrollView = renderer.root
+      .findAll(node => String(node.type) === 'ScrollView')
+      .find(node => node.props.snapToInterval === 64)
+    expect(cardsScrollView).toBeDefined()
     expect(renderer.root.find(node => String(node.type) === 'StrongCard').props.cardHeight).toBe(
       280
     )
@@ -450,6 +448,42 @@ describe('BibleVerseDetailCard', () => {
       ['HNcmpa'],
       ['HVqp3ms'],
     ])
+  })
+
+  it('scrolls the horizontal cards list to the tapped verse occurrence', async () => {
+    mockLoadVerse.mockResolvedValueOnce(
+      makeAvailableVerse('Dieu Dieu', [
+        {
+          ordinal: 0,
+          startOffset: 0,
+          length: 4,
+          identities: [{ kind: 'strong', code: 'H0430' }],
+        },
+        {
+          ordinal: 1,
+          startOffset: 5,
+          length: 4,
+          identities: [{ kind: 'strong', code: 'H0430' }],
+        },
+      ])
+    )
+
+    await act(async () => {
+      renderer = create(renderCard(1))
+      await flushQueryUpdates()
+    })
+    await act(async () => {
+      renderer.update(renderCard(1))
+      await flushQueryUpdates()
+    })
+    mockScrollTo.mockClear()
+
+    const provider = renderer.root.find(
+      node => String(node.type) === 'StrongResourceScrollProvider'
+    )
+    act(() => provider.props.value.scrollToStrongCard('430', 1))
+
+    expect(mockScrollTo).toHaveBeenCalledWith({ x: 64, animated: true })
   })
 
   it('requests the contextual BHG lexicon source with the tab interlinear locale', async () => {
