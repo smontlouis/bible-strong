@@ -105,6 +105,7 @@ export interface CompareTab extends TabBase {
   type: 'compare'
   data: {
     selectedVerses: SelectedVerses
+    strongMode?: boolean
   }
 }
 

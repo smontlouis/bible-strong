@@ -3,9 +3,7 @@ import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 
 import CompareVersesTabScreen from '../CompareVersesTabScreen'
 
-jest.mock('@tanstack/react-query', () => ({
-  useQuery: () => ({ data: { verseNumber: 2, versesInCurrentChapter: 16 } }),
-}))
+const mockSetCompareTab = jest.fn()
 
 jest.mock('jotai/react', () => ({
   useAtom: () => [
@@ -15,13 +13,8 @@ jest.mock('jotai/react', () => ({
       type: 'compare',
       data: { selectedVerses: { '45-2-2': true } },
     },
-    jest.fn(),
+    mockSetCompareTab,
   ],
-}))
-
-jest.mock('react-redux', () => ({
-  shallowEqual: jest.fn(),
-  useSelector: () => ['LSG'],
 }))
 
 jest.mock('react-i18next', () => ({
@@ -29,9 +22,6 @@ jest.mock('react-i18next', () => ({
 }))
 
 jest.mock('~helpers/verseToReference', () => () => 'Romains 2:2')
-jest.mock('~helpers/bibleVersions', () => ({ versions: { LSG: { name: 'Louis Segond' } } }))
-jest.mock('~helpers/bibleCoverage', () => ({ getMaxChapterVerseCount: jest.fn() }))
-jest.mock('~helpers/queryOptions', () => ({ localQueryOptions: {} }))
 jest.mock('~features/app-switcher/utils/useOpenInNewTab', () => ({
   useOpenInNewTab: () => jest.fn(),
 }))
@@ -53,13 +43,9 @@ jest.mock('~common/ui/ScrollView', () => ({
 }))
 jest.mock('~common/ui/Box', () => ({ __esModule: true, default: mockHostComponent('Box') }))
 jest.mock('~common/Empty', () => ({ __esModule: true, default: mockHostComponent('Empty') }))
-jest.mock('~features/bible/BibleCompareVerseItem', () => ({
+jest.mock('../resources/CompareCard', () => ({
   __esModule: true,
-  default: mockHostComponent('BibleCompareVerseItem'),
-}))
-jest.mock('~features/bible/BibleVerseDetailFooter', () => ({
-  __esModule: true,
-  default: mockHostComponent('BibleVerseDetailFooter'),
+  default: mockHostComponent('CompareCard'),
 }))
 jest.mock('../CompareVersionSelectorSheet', () => ({
   __esModule: true,
@@ -83,6 +69,7 @@ describe('CompareVersesTabScreen', () => {
   let consoleError: jest.SpyInstance
 
   beforeEach(() => {
+    mockSetCompareTab.mockClear()
     ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
     consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined)
   })
@@ -92,7 +79,7 @@ describe('CompareVersesTabScreen', () => {
     consoleError.mockRestore()
   })
 
-  it('keeps previous and next verse controls inside the padded scroll content', () => {
+  it('keeps comparison content inside the padded scroll area', () => {
     act(() => {
       renderer = create(<CompareVersesTabScreen compareAtom={{} as never} />)
     })
@@ -101,8 +88,30 @@ describe('CompareVersesTabScreen', () => {
     expect(scrollView.props.contentContainerStyle).toEqual(
       expect.objectContaining({ paddingBottom: expect.any(Number) })
     )
+    expect(scrollView.findAll(node => String(node.type) === 'CompareCard')).toHaveLength(1)
+  })
+
+  it('exposes a Strong mode toggle that updates the comparison tab', () => {
+    act(() => {
+      renderer = create(<CompareVersesTabScreen compareAtom={{} as never} />)
+    })
+
+    const header = renderer.root.find(node => String(node.type) === 'Header')
+    const menu = header.props.rightComponent
+    expect(menu.props.actions).toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: 'toggle-strong', state: 'off' })])
+    )
+
+    act(() => menu.props.onPressAction({ nativeEvent: { event: 'toggle-strong' } }))
+
+    const update = mockSetCompareTab.mock.calls.at(-1)?.[0]
     expect(
-      scrollView.findAll(node => String(node.type) === 'BibleVerseDetailFooter')
-    ).toHaveLength(1)
+      update({
+        id: 'compare-test',
+        title: 'Comparer',
+        type: 'compare',
+        data: { selectedVerses: { '45-2-2': true } },
+      }).data.strongMode
+    ).toBe(true)
   })
 })

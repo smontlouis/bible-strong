@@ -13,15 +13,21 @@ import { versions } from '~helpers/bibleVersions'
 import { getMaxChapterVerseCount } from '~helpers/bibleCoverage'
 import { selectCompareVersions } from '~redux/selectors/user'
 import { localQueryOptions } from '~helpers/queryOptions'
+import { useSheet } from '~helpers/useSheet'
+import type { StrongSelection } from '~helpers/strongSelection'
+import StrongSelectionSheet from '../StrongSelectionSheet'
 
 interface CompareCardProps {
   selectedVerses: VerseIds
   onChangeVerse: (verse: string) => void
+  strongMode?: boolean
 }
 
-const CompareCard = ({ selectedVerses, onChangeVerse }: CompareCardProps) => {
+const CompareCard = ({ selectedVerses, onChangeVerse, strongMode = false }: CompareCardProps) => {
   const { t } = useTranslation()
   const versionsToCompare = useSelector(selectCompareVersions, shallowEqual)
+  const strongSelectionSheet = useSheet()
+  const [strongSelection, setStrongSelection] = React.useState<StrongSelection | null>(null)
 
   const selectedVerseKeys = Object.keys(selectedVerses)
   const { data: prevNextItems = null } = useQuery({
@@ -45,6 +51,11 @@ const CompareCard = ({ selectedVerses, onChangeVerse }: CompareCardProps) => {
   const filteredVersions = Object.entries(versions).filter(([versionId]) =>
     versionsToCompare.includes(versionId)
   )
+  const openStrongSelection = (selection: StrongSelection) => {
+    setStrongSelection(selection)
+    strongSelectionSheet.open()
+  }
+  const closeStrongSelection = () => setStrongSelection(null)
 
   if (!filteredVersions.length) {
     return (
@@ -56,25 +67,41 @@ const CompareCard = ({ selectedVerses, onChangeVerse }: CompareCardProps) => {
   }
 
   return (
-    <Box>
-      {filteredVersions.map(([versionId, obj], position) => (
-        <BibleCompareVerseItem
-          key={`${versionId}-${Object.keys(selectedVerses).join('-')}`}
-          versionId={versionId}
-          name={obj.name}
-          selectedVerses={selectedVerses}
-          position={position}
-        />
-      ))}
-      {prevNextItems && (
-        <BibleVerseDetailFooter
-          verseNumber={prevNextItems.verseNumber}
-          goToNextVerse={() => goToVerse(+1)}
-          goToPrevVerse={() => goToVerse(-1)}
-          versesInCurrentChapter={prevNextItems.versesInCurrentChapter}
-        />
-      )}
-    </Box>
+    <>
+      <Box>
+        {filteredVersions.map(([versionId, obj], position) => (
+          <BibleCompareVerseItem
+            key={`${versionId}-${Object.keys(selectedVerses).join('-')}`}
+            versionId={versionId}
+            name={obj.name}
+            selectedVerses={selectedVerses}
+            position={position}
+            strongMode={strongMode}
+            onStrongSelect={openStrongSelection}
+          />
+        ))}
+        {prevNextItems && (
+          <BibleVerseDetailFooter
+            verseNumber={prevNextItems.verseNumber}
+            goToNextVerse={() => goToVerse(+1)}
+            goToPrevVerse={() => goToVerse(-1)}
+            versesInCurrentChapter={prevNextItems.versesInCurrentChapter}
+          />
+        )}
+      </Box>
+      <StrongSelectionSheet
+        sheetRef={strongSelectionSheet.getRef()}
+        version={strongSelection?.version}
+        book={strongSelection?.book}
+        chapter={strongSelection?.chapter}
+        verse={strongSelection?.verse}
+        word={strongSelection?.word}
+        identities={strongSelection?.identities ?? []}
+        morphologies={strongSelection?.morphologies ?? []}
+        onDismissStart={() => {}}
+        onClose={closeStrongSelection}
+      />
+    </>
   )
 }
 

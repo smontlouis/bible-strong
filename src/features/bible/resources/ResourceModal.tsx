@@ -96,6 +96,7 @@ const ResourcesModal = ({
   const compareVersionSelectorRef = React.useRef<SheetRef>(null)
   const strongBibleSourceSheetRef = React.useRef<SheetRef>(null)
   const [isOpen, setIsOpen] = useState(false)
+  const [compareStrongMode, setCompareStrongMode] = useState(false)
   const openInNewTab = useOpenInNewTab()
   const bible = useAtomValue(bibleAtom)
   const [strongLanguage, setStrongLanguage] = useResourceLanguage('STRONG')
@@ -171,6 +172,12 @@ const ResourcesModal = ({
       case 'compare':
         return [
           {
+            id: 'toggle-strong',
+            title: t('Mode Strong'),
+            image: 'number',
+            state: compareStrongMode ? 'on' : 'off',
+          },
+          {
             id: 'choose-versions',
             title: t('common.chooseCompareVersions'),
             image: 'checkmark.square',
@@ -201,6 +208,9 @@ const ResourcesModal = ({
       case 'choose-versions':
         compareVersionSelectorRef.current?.present()
         break
+      case 'toggle-strong':
+        setCompareStrongMode(value => !value)
+        break
       case 'open-tab':
         if (resourceType === 'commentary') {
           openInNewTab({
@@ -217,7 +227,7 @@ const ResourcesModal = ({
             title: t('tabs.new'),
             isRemovable: true,
             type: 'compare',
-            data: { selectedVerses },
+            data: { selectedVerses, strongMode: compareStrongMode },
           })
         }
         break
@@ -308,6 +318,7 @@ const ResourcesModal = ({
               onStrongBibleProvenanceChange={setResolvedStrongProvenance}
               onOpenStrongBibleSourceSheet={() => strongBibleSourceSheetRef.current?.present()}
               selectedVerses={selectedVerses}
+              compareStrongMode={compareStrongMode}
               onChangeVerse={onChangeVerse}
             />
           </View>
@@ -336,6 +347,7 @@ const Resource = ({
   onStrongBibleProvenanceChange,
   onOpenStrongBibleSourceSheet,
   selectedVerses,
+  compareStrongMode,
   onChangeVerse,
 }: {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -347,6 +359,7 @@ const Resource = ({
   onStrongBibleProvenanceChange?: (provenance: LexiconBibleProvenance | null) => void
   onOpenStrongBibleSourceSheet: () => void
   selectedVerses: VerseIds
+  compareStrongMode: boolean
   onChangeVerse?: (verseKey: string) => void
 }) => {
   const bottomInset = useSheetFooterInset()
@@ -420,9 +433,10 @@ const Resource = ({
         />
       </Slide>
       <Slide key="compare">
-        <SheetScrollView contentContainerStyle={{}}>
+        <SheetScrollView contentContainerStyle={{ paddingBottom: 20 }}>
           <CompareCard
             selectedVerses={selectedVerses}
+            strongMode={compareStrongMode}
             onChangeVerse={onChangeVerse ?? actions.selectSelectedVerse}
           />
         </SheetScrollView>
