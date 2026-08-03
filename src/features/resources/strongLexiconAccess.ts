@@ -809,18 +809,30 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
     const like = `%${normalized}%`
     return withStrongLexiconDatabase('core', async core => {
       const rows = await core.getAllAsync<CoreEntryRow>(
-        `SELECT e.*, i.stepCode,
-              tr.gloss AS localizedGloss,
-              tr.meaning AS localizedMeaning,
-              tr.meaningHtml AS localizedMeaningHtml
-         FROM StepEntries e
-         JOIN StepEntryIdentities i ON i.stepEntryId=e.id
-         LEFT JOIN LexiconTranslations tr
-           ON tr.stepEntryId=e.id AND tr.language=?
-        WHERE i.stepCode LIKE ? OR e.eStrong LIKE ? OR e.dStrong LIKE ?
-           OR e.original LIKE ? OR e.transliteration LIKE ?
-           OR e.gloss LIKE ? OR tr.gloss LIKE ?
-        ORDER BY COALESCE(NULLIF(tr.gloss, ''), e.gloss), e.baseCode
+        `WITH rankedMatches AS (
+           SELECT e.*, i.stepCode,
+                  tr.gloss AS localizedGloss,
+                  tr.meaning AS localizedMeaning,
+                  tr.meaningHtml AS localizedMeaningHtml,
+                  ROW_NUMBER() OVER (
+                    PARTITION BY COALESCE(
+                      NULLIF(e.uStrong, ''),
+                      CAST(e.id AS TEXT) || ':' || i.stepCode
+                    )
+                    ORDER BY CASE WHEN i.stepCode=e.uStrong THEN 0 ELSE 1 END, e.id
+                  ) AS unifiedRank
+             FROM StepEntries e
+             JOIN StepEntryIdentities i ON i.stepEntryId=e.id
+             LEFT JOIN LexiconTranslations tr
+               ON tr.stepEntryId=e.id AND tr.language=?
+            WHERE i.stepCode LIKE ? OR e.eStrong LIKE ? OR e.dStrong LIKE ?
+               OR e.original LIKE ? OR e.transliteration LIKE ?
+               OR e.gloss LIKE ? OR tr.gloss LIKE ?
+         )
+         SELECT *
+           FROM rankedMatches
+          WHERE unifiedRank=1
+          ORDER BY COALESCE(NULLIF(localizedGloss, ''), gloss), baseCode
         LIMIT ?`,
         [language, like, like, like, like, like, like, like, limit]
       )

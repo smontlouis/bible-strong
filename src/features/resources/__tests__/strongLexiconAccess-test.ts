@@ -256,6 +256,60 @@ describe('strongLexiconAccess', () => {
     ])
   })
 
+  it('shows one textual search result when STEP entries share the same unified Strong', async () => {
+    const database = createDatabase()
+    const entriesSharingUnifiedStrong = [
+      {
+        ...rows.H0413,
+        id: 11446,
+        baseCode: 310,
+        eStrong: 'H0310a',
+        dStrong: 'H0310A =',
+        uStrong: 'H0310A',
+        stepCode: 'H0310A',
+        gloss: 'after',
+        localizedGloss: 'après',
+      },
+      {
+        ...rows.H0413,
+        id: 11448,
+        baseCode: 311,
+        eStrong: 'H0311',
+        dStrong: 'H0311 = in Aramaic of',
+        uStrong: 'H0310A',
+        stepCode: 'H0311',
+        gloss: 'after',
+        localizedGloss: 'après',
+      },
+    ]
+    database.getAllAsync.mockImplementation(async (sql: string) =>
+      sql.includes('WHERE unifiedRank=1')
+        ? [entriesSharingUnifiedStrong[0]]
+        : entriesSharingUnifiedStrong
+    )
+    mockWithStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(database as unknown as SQLiteDatabase)
+    )
+
+    const results = await localStrongLexiconAccess.search('après', 'fr', 25)
+
+    expect(results).toEqual([
+      expect.objectContaining({
+        id: 11446,
+        stepCode: 'H0310A',
+        uStrong: 'H0310A',
+      }),
+    ])
+    expect(database.getAllAsync).toHaveBeenCalledWith(
+      expect.stringContaining('ROW_NUMBER() OVER'),
+      expect.any(Array)
+    )
+    expect(database.getAllAsync).toHaveBeenCalledWith(
+      expect.stringContaining('WHERE unifiedRank=1'),
+      expect.any(Array)
+    )
+  })
+
   it('loads the full localized morphology for the selected verse token', async () => {
     const database = createDatabase()
     database.getAllAsync.mockResolvedValue([
