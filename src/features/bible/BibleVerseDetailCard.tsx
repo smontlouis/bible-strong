@@ -41,6 +41,8 @@ import {
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
 import { localQueryOptions } from '~helpers/queryOptions'
+import { scaleFontSize } from './BibleDOM/scaleFontSize'
+import { scaleLineHeight } from './BibleDOM/scaleLineHeight'
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
 import { getDisplayedStrongIdentities } from '~helpers/strongIdentities'
 import { useResourcesLanguageValue } from '~state/resourcesLanguage'
@@ -50,8 +52,7 @@ const itemHorizontalMargin = wp(2)
 const itemWidth = slideWidth + itemHorizontalMargin * 2
 
 const VerseText = styled.View(() => ({
-  flex: 1,
-  flexWrap: 'wrap',
+  flexWrap: 'nowrap',
   alignItems: 'flex-start',
   flexDirection: 'row',
 }))
@@ -71,7 +72,7 @@ const NumberText = styled(Paragraph)({
   marginRight: 3,
 })
 
-const StyledVerse = styled.View(({ theme }) => ({
+const StyledVerse = styled.View(() => ({
   paddingLeft: 0,
   paddingRight: 10,
   marginBottom: 5,
@@ -115,7 +116,7 @@ class StrongVerseQueryError extends Error {
 interface StrongVerseQueryData {
   strongReferences: StrongLexiconEntry[]
   versesInCurrentChapter: number | null
-  formattedTexte: React.ReactNode | null
+  formattedTexte: React.ReactElement<React.ComponentProps<typeof CanonicalStrongVerseText>> | null
   provenance: LexiconBibleProvenance | null
   displayedVerse: Verse | null
 }
@@ -136,6 +137,10 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   const defaultStrongVersion = useSelector(
     (rootState: RootState) => rootState.user.bible.settings.defaultStrongBibleVersionId ?? 'LSG'
   )
+  const fontSizeScale = useSelector(
+    (rootState: RootState) => rootState.user.bible.settings.fontSizeScale
+  )
+  const lineHeight = useSelector((rootState: RootState) => rootState.user.bible.settings.lineHeight)
   const resources = useResourceAccess()
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const strongResourceLanguage = useResourcesLanguageValue().STRONG
@@ -330,11 +335,19 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   const currentStrongReferenceIndex = strongReferences.findIndex(
     r => Number(r.baseCode) === Number(currentStrongReference?.baseCode)
   )
+  const verseTextStyle = {
+    fontSize: Number.parseFloat(scaleFontSize(24, fontSizeScale)),
+    lineHeight: Number.parseFloat(scaleLineHeight(24, lineHeight, fontSizeScale)),
+  }
 
   return (
     <Box flex={1} onLayout={e => setBoxHeight(e.nativeEvent.layout.height)}>
       <Box maxHeight={boxHeight / 2} position="relative" zIndex={1}>
-        <ScrollView contentContainerStyle={{ paddingTop: 10 }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingTop: 10, paddingRight: 20 }}
+        >
           <StyledVerse>
             <VersetWrapper>
               <NumberText>{strongVerseData?.displayedVerse?.Verset ?? verse.Verset}</NumberText>
@@ -347,7 +360,9 @@ const BibleVerseDetailCard: React.FC<Props> = ({
                 goToCarouselItem,
               }}
             >
-              <VerseText>{formattedTexte}</VerseText>
+              <VerseText>
+                {React.cloneElement(formattedTexte, { textStyle: verseTextStyle })}
+              </VerseText>
             </CarouselProvider>
           </StyledVerse>
         </ScrollView>

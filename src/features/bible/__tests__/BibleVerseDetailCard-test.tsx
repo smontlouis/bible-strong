@@ -49,7 +49,11 @@ jest.mock('react-redux', () => ({
     selector({
       user: {
         bible: {
-          settings: { defaultStrongBibleVersionId: 'LSG' },
+          settings: {
+            defaultStrongBibleVersionId: 'LSG',
+            fontSizeScale: 1,
+            lineHeight: 'large',
+          },
         },
       },
     }),
@@ -87,8 +91,8 @@ jest.mock('~common/waitForStrongDB', () => ({
 
 jest.mock('../CanonicalStrongVerseText', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
-  return ({ verse }: { verse: { Texte: string } }) =>
-    ReactModule.createElement('CanonicalStrongVerseText', null, verse.Texte)
+  return ({ verse, textStyle }: { verse: { Texte: string }; textStyle?: unknown }) =>
+    ReactModule.createElement('CanonicalStrongVerseText', { textStyle }, verse.Texte)
 })
 
 jest.mock('~helpers/bibleCoverage', () => ({
@@ -287,6 +291,32 @@ describe('BibleVerseDetailCard', () => {
     })
 
     expect(JSON.stringify(renderer.toJSON())).not.toContain('Strong fourni par DBY')
+  })
+
+  it('renders the verse on one scalable horizontally scrollable line', async () => {
+    mockLoadVerse.mockResolvedValueOnce(makeAvailableVerse('Un verset très long'))
+
+    await act(async () => {
+      renderer = create(renderCard(1))
+      await flushQueryUpdates()
+    })
+    await act(async () => {
+      renderer.update(renderCard(1))
+      await flushQueryUpdates()
+    })
+
+    const horizontalScroll = renderer.root
+      .findAll(node => node.props.horizontal === true)
+      .find(node => String(node.type) === 'ScrollView')
+    expect(horizontalScroll).toBeDefined()
+    expect(horizontalScroll?.props.showsHorizontalScrollIndicator).toBe(false)
+    const renderedVerse = renderer.root.find(
+      node => String(node.type) === 'CanonicalStrongVerseText'
+    )
+    expect(renderedVerse.props.textStyle).toEqual({
+      fontSize: 26.4,
+      lineHeight: 37,
+    })
   })
 
   it('requests the contextual BHG lexicon source with the tab interlinear locale', async () => {

@@ -1,5 +1,6 @@
 import styled from '@emotion/native'
 import React from 'react'
+import type { TextStyle } from 'react-native'
 
 import { CarouselConsumer } from '~helpers/CarouselContext'
 
@@ -78,9 +79,16 @@ type BibleStrongRefProps = {
   word?: string
   book?: string | number
   concordanceFor?: string | number
+  textStyle?: TextStyle
 }
 
-const BibleStrongRef = ({ small, reference, word, concordanceFor }: BibleStrongRefProps) => {
+const BibleStrongRef = ({
+  small,
+  reference,
+  word,
+  concordanceFor,
+  textStyle,
+}: BibleStrongRefProps) => {
   if (concordanceFor) {
     const isConcordance = `0${concordanceFor}` === reference || `${concordanceFor}` === reference
 
@@ -93,7 +101,7 @@ const BibleStrongRef = ({ small, reference, word, concordanceFor }: BibleStrongR
     }
 
     return (
-      <ConcordanceText small={small} isConcordance={isConcordance}>
+      <ConcordanceText small={small} isConcordance={isConcordance} style={textStyle}>
         {word}
       </ConcordanceText>
     )
@@ -125,7 +133,9 @@ const BibleStrongRef = ({ small, reference, word, concordanceFor }: BibleStrongR
             onPress={() => goToCarouselItem(reference)}
             isSelected={isSelected}
           >
-            <StyledText isSelected={isSelected}>{word}</StyledText>
+            <StyledText isSelected={isSelected} style={textStyle}>
+              {word}
+            </StyledText>
           </StyledView>
         )
       }}

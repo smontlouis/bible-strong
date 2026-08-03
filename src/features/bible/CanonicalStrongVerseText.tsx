@@ -1,4 +1,5 @@
 import React from 'react'
+import type { TextStyle } from 'react-native'
 
 import type { Verse } from '~common/types'
 import Paragraph from '~common/ui/Paragraph'
@@ -10,11 +11,12 @@ type Props = {
   verse: Pick<Verse, 'Texte' | 'Livre' | 'StrongSpans'>
   concordanceFor?: string | number
   small?: boolean
+  textStyle?: TextStyle
 }
 
 const splitTextRun = (text: string): string[] => text.match(/\S+\s*|\s+/gu) || []
 
-const CanonicalStrongVerseText = ({ verse, concordanceFor, small }: Props) => {
+const CanonicalStrongVerseText = ({ verse, concordanceFor, small, textStyle }: Props) => {
   let textOffset = 0
   return buildCanonicalStrongVerseRuns(verse.Texte, verse.StrongSpans, concordanceFor).flatMap(
     (run, runIndex) => {
@@ -23,7 +25,7 @@ const CanonicalStrongVerseText = ({ verse, concordanceFor, small }: Props) => {
           const key = `text-${runIndex}-${textOffset}`
           textOffset += chunk.length
           return (
-            <Paragraph small={small} key={key}>
+            <Paragraph small={small} key={key} style={textStyle}>
               {chunk}
             </Paragraph>
           )
@@ -38,6 +40,7 @@ const CanonicalStrongVerseText = ({ verse, concordanceFor, small }: Props) => {
             small={small}
             concordanceFor={concordanceFor}
             book={verse.Livre}
+            textStyle={textStyle}
             word={identityIndex === 0 ? run.word || undefined : undefined}
             reference={reference}
             key={`strong-${runIndex}-${identity.kind}-${identity.code}`}

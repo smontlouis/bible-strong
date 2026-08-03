@@ -34,12 +34,17 @@ describe('BibleStrongReference', () => {
     ['4352', 'se prosterner devant'],
   ])('selects carousel reference %s from its rendered surface', (reference, word) => {
     const goToCarouselItem = jest.fn()
-    const consumer = BibleStrongReference({ reference, word }) as React.ReactElement<{
-      children: (value: CarouselContextValue) => React.ReactElement<{ onPress: () => void }>
+    const textStyle = { fontSize: 24, lineHeight: 24 }
+    const consumer = BibleStrongReference({ reference, word, textStyle }) as React.ReactElement<{
+      children: (value: CarouselContextValue) => React.ReactElement<{
+        onPress: () => void
+        children: React.ReactElement<{ style?: typeof textStyle }>
+      }>
     }>
     const lexicalToken = consumer.props.children({ currentStrongReference: null, goToCarouselItem })
     lexicalToken.props.onPress()
 
     expect(goToCarouselItem).toHaveBeenCalledWith(reference)
+    expect(lexicalToken.props.children.props.style).toEqual(textStyle)
   })
 })
