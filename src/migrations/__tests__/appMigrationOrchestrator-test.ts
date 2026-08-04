@@ -112,6 +112,61 @@ describe('appMigrationOrchestrator', () => {
     })
   })
 
+  it('uses locale-independent code-unit ordering to break migration order ties', async () => {
+    const store = createMemoryStore()
+    const orchestrator = createAppMigrationOrchestrator({
+      migrations: [
+        createMigration({ id: 'ä-migration', order: 10 }),
+        createMigration({ id: 'z-migration', order: 10 }),
+      ],
+      store,
+    })
+
+    await expect(orchestrator.inspect(context)).resolves.toMatchObject({
+      migrationId: 'z-migration',
+    })
+  })
+
+  it('resumes an active execution before detecting newly applicable earlier migrations', async () => {
+    const store = createMemoryStore()
+    store.value = {
+      schemaVersion: 1,
+      executions: [
+        {
+          scopeId: 'device',
+          migrationId: 'partially-applied',
+          migrationVersion: 1,
+          phase: 'local',
+          status: 'failed',
+          plan: { steps: [{ id: 'resume', label: 'partiallyApplied.resume' }] },
+          completedStepIds: [],
+          completedCleanupStepIds: [],
+          currentStepId: 'resume',
+          errorCode: 'OFFLINE',
+          createdAt: 1,
+          updatedAt: 2,
+        },
+      ],
+    }
+    const detectEarlier = jest.fn(async () => ({
+      steps: [{ id: 'earlier-step', label: 'earlier.step' }],
+    }))
+    const orchestrator = createAppMigrationOrchestrator({
+      migrations: [
+        createMigration({ id: 'earlier', order: 10, detect: detectEarlier }),
+        createMigration({ id: 'partially-applied', order: 20 }),
+      ],
+      store,
+    })
+
+    await expect(orchestrator.inspect(context)).resolves.toMatchObject({
+      status: 'failed',
+      migrationId: 'partially-applied',
+      isResuming: true,
+    })
+    expect(detectEarlier).not.toHaveBeenCalled()
+  })
+
   it('rejects duplicate migration registrations', () => {
     const store = createMemoryStore()
 
@@ -551,6 +606,36 @@ describe('appMigrationOrchestrator', () => {
       'abandoned-after-failure:first',
       'abandoned-after-failure:second',
     ])
+  })
+
+  it('protects cleanup accounting when a finalizer mutates its plan copy', async () => {
+    const store = createMemoryStore()
+    const cleanupOperations: string[] = []
+    const migration = createMigration({
+      id: 'mutating-finalizer',
+      order: 10,
+      async detect() {
+        return {
+          steps: [{ id: 'install', label: 'mutating.install' }],
+          cleanupSteps: [{ id: 'remove', label: 'mutating.remove' }],
+        }
+      },
+      async finalizeIdempotently({ plan, runCleanupStep }) {
+        plan.cleanupSteps?.splice(0)
+        await runCleanupStep('remove', async () => {
+          cleanupOperations.push('remove')
+        })
+      },
+    })
+    const orchestrator = createAppMigrationOrchestrator({ migrations: [migration], store })
+
+    await orchestrator.inspect(context)
+    await expect(orchestrator.run(context)).resolves.toMatchObject({
+      status: 'completed',
+      completedCleanupStepIds: ['remove'],
+      plan: { cleanupSteps: [{ id: 'remove', label: 'mutating.remove' }] },
+    })
+    expect(cleanupOperations).toEqual(['remove'])
   })
 
   it('rejects plans whose step identifiers cannot be checkpointed unambiguously', async () => {

@@ -388,6 +388,9 @@ const isTerminal = (status: MigrationExecutionStatus): boolean =>
 const clonePlan = (plan: MigrationPlan): MigrationPlan =>
   JSON.parse(JSON.stringify(plan)) as MigrationPlan
 
+const compareCodeUnits = (left: string, right: string): number =>
+  left < right ? -1 : left > right ? 1 : 0
+
 const toSnapshot = (execution: PersistedMigrationExecution): MigrationSnapshot => ({
   status: execution.status,
   migrationId: execution.migrationId,
@@ -446,8 +449,8 @@ export const createAppMigrationOrchestrator = <TContext extends MigrationContext
   const orderedMigrations = [...migrations].sort(
     (left, right) =>
       left.order - right.order ||
-      left.phase.localeCompare(right.phase) ||
-      left.id.localeCompare(right.id) ||
+      compareCodeUnits(left.phase, right.phase) ||
+      compareCodeUnits(left.id, right.id) ||
       left.version - right.version
   )
   const loadState = async (context: TContext): Promise<PersistedMigrationState> => {
@@ -608,7 +611,7 @@ export const createAppMigrationOrchestrator = <TContext extends MigrationContext
     outcome: MigrationTerminalOutcome
     onChange?: MigrationSnapshotListener
   }): Promise<void> => {
-    const cleanupSteps = execution.plan.cleanupSteps ?? []
+    const cleanupSteps = clonePlan(execution.plan).cleanupSteps ?? []
     execution.currentStepId = '__finalize__'
     if (cleanupSteps.length > 0 && execution.cleanupOutcome !== outcome) {
       execution.completedCleanupStepIds = []
@@ -661,7 +664,7 @@ export const createAppMigrationOrchestrator = <TContext extends MigrationContext
       if (cleanupSteps.length === 0) emitEvent(migration, 'cleanup-started')
       await migration.finalizeIdempotently({
         context,
-        plan: execution.plan,
+        plan: clonePlan(execution.plan),
         outcome,
         runCleanupStep,
       })
@@ -675,6 +678,21 @@ export const createAppMigrationOrchestrator = <TContext extends MigrationContext
 
   const inspectUnlocked = async (context: TContext): Promise<MigrationSnapshot> => {
     const state = await loadState(context)
+
+    const activeExecution = state.executions.find(
+      execution =>
+        execution.scopeId === context.scopeId &&
+        execution.phase === context.phase &&
+        !isTerminal(execution.status)
+    )
+    if (activeExecution) {
+      if (activeExecution.status === 'detected') {
+        activeExecution.status = 'awaiting-confirmation'
+        touchExecution(activeExecution)
+        await store.save(state)
+      }
+      return toSnapshot(activeExecution)
+    }
 
     for (const migration of orderedMigrations) {
       if (migration.phase !== context.phase) continue
