@@ -6,6 +6,7 @@ import {
   getStoredState,
   type PersistConfig,
 } from 'redux-persist'
+import type { PersistedState } from 'redux-persist/es/types'
 import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2'
 import FilesystemStorage from 'redux-persist-filesystem-storage'
 import devToolsEnhancer from 'redux-devtools-expo-dev-plugin'
@@ -16,7 +17,8 @@ import migrations from './migrations'
 import { applyPreferredColorScheme, themeAppearanceMiddleware } from './themeAppearanceMiddleware'
 
 import reducer from '~redux/modules/reducer'
-import { mmkvStorage } from '~helpers/storage'
+import { mmkvStorage, storage } from '~helpers/storage'
+import { tryCaptureLegacyReferenceEvidenceFromReduxState } from '../migrations/legacyResourceEvidence'
 
 type RootReducerState = ReturnType<typeof reducer>
 type HotModule = NodeJS.Module & {
@@ -42,10 +44,11 @@ function configureStore() {
 
   // MMKV migration
   persistConfig.getStoredState = async config => {
-    const storedState = getStoredState(config).catch(err => {
-      return getStoredState({ ...config, storage: FilesystemStorage })
-    })
-    return storedState as ReturnType<NonNullable<typeof persistConfig.getStoredState>>
+    const storedState = (await getStoredState(config).catch(() =>
+      getStoredState({ ...config, storage: FilesystemStorage })
+    )) as PersistedState
+    tryCaptureLegacyReferenceEvidenceFromReduxState(storedState, storage)
+    return storedState
   }
 
   const persistedReducer = persistReducer(persistConfig, reducer)

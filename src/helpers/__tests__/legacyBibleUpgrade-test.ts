@@ -37,14 +37,26 @@ describe('legacyBibleUpgrade', () => {
       'LSGS',
       {
         selectedVersion: 'LSG',
-        strongMode: 'visible',
+        strongMode: 'hidden',
+        pendingModeAcquisition: {
+          kind: 'strong',
+          versionId: 'LSG',
+          mode: 'visible',
+          planIds: ['bible-strong:LSG'],
+        },
       },
     ],
     [
       'KJVS',
       {
         selectedVersion: 'KJV',
-        strongMode: 'visible',
+        strongMode: 'hidden',
+        pendingModeAcquisition: {
+          kind: 'strong',
+          versionId: 'KJV',
+          mode: 'visible',
+          planIds: ['bible-strong:KJV'],
+        },
       },
     ],
     [
@@ -53,6 +65,12 @@ describe('legacyBibleUpgrade', () => {
         selectedVersion: 'BHG',
         interlinearMode: 'hidden',
         interlinearLocale: 'fr',
+        pendingModeAcquisition: {
+          kind: 'interlinear',
+          mode: 'interlinear',
+          locale: 'fr',
+          planIds: ['bible-interlinear:BHG:fr'],
+        },
       },
     ],
     [
@@ -61,6 +79,12 @@ describe('legacyBibleUpgrade', () => {
         selectedVersion: 'BHG',
         interlinearMode: 'hidden',
         interlinearLocale: 'en',
+        pendingModeAcquisition: {
+          kind: 'interlinear',
+          mode: 'interlinear',
+          locale: 'en',
+          planIds: ['bible-interlinear:BHG:en'],
+        },
       },
     ],
   ])('migrates a persisted %s Bible tab', (selectedVersion, expected) => {
@@ -79,6 +103,45 @@ describe('legacyBibleUpgrade', () => {
       'BHG',
       'KJV',
     ])
+  })
+
+  it('keeps the capability implied by a removed Bible instead of a stale pending plan', () => {
+    expect(
+      migrateLegacyBibleTabData({
+        selectedVersion: 'INT',
+        pendingModeAcquisition: {
+          kind: 'strong',
+          versionId: 'LSGS',
+          planIds: ['bible:LSGS', 'bible-strong:LSGS'],
+        },
+      })
+    ).toMatchObject({
+      selectedVersion: 'BHG',
+      pendingModeAcquisition: {
+        kind: 'interlinear',
+        locale: 'fr',
+        planIds: ['bible-interlinear:BHG:fr'],
+      },
+    })
+  })
+
+  it('regenerates a pending Strong plan that references a removed Bible', () => {
+    expect(
+      migrateLegacyBibleTabData({
+        selectedVersion: 'LSG',
+        pendingModeAcquisition: {
+          kind: 'strong',
+          versionId: 'LSGS',
+          planIds: ['bible:LSGS', 'bible-strong:LSGS'],
+        },
+      })
+    ).toMatchObject({
+      pendingModeAcquisition: {
+        kind: 'strong',
+        versionId: 'LSG',
+        planIds: ['bible-strong:LSG'],
+      },
+    })
   })
 
   it('removes obsolete downloads from the persisted queue', () => {
