@@ -54,11 +54,16 @@ describe('useAccountMigrations', () => {
   })
 
   const renderController = async (
-    orchestrator: AppMigrationOrchestrator<AccountMigrationContext>
+    orchestrator: AppMigrationOrchestrator<AccountMigrationContext>,
+    onWriteScopeOpened?: () => Promise<void>
   ) => {
     let controller: ReturnType<typeof useAccountMigrations>
     const Harness = () => {
-      controller = useAccountMigrations({ activeUserId: 'user-1', orchestrator })
+      controller = useAccountMigrations({
+        activeUserId: 'user-1',
+        orchestrator,
+        onWriteScopeOpened,
+      })
       return null
     }
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined)
@@ -118,6 +123,38 @@ describe('useAccountMigrations', () => {
     expect(getController().presentation).toEqual({ kind: 'hidden' })
     expect(getController().isAccountSyncReady).toBe(true)
     expect(mockSetAccountMigrationWriteScope).toHaveBeenLastCalledWith('user-1')
+  })
+
+  it('replays gated startup work after opening writes and before enabling incoming sync', async () => {
+    const orchestrator: AppMigrationOrchestrator<AccountMigrationContext> = {
+      inspect: jest.fn(
+        async (): Promise<MigrationSnapshot> => ({ status: 'idle', isResuming: false })
+      ),
+      run: jest.fn(),
+      abandon: jest.fn(),
+    }
+    let releaseReplay = () => {}
+    const replayPending = new Promise<void>(resolve => {
+      releaseReplay = resolve
+    })
+    const onWriteScopeOpened = jest.fn(async () => replayPending)
+    const getController = await renderController(orchestrator, onWriteScopeOpened)
+
+    let inspection: Promise<boolean>
+    await act(async () => {
+      inspection = getController().runBeforeSync('user-1', state)
+      await Promise.resolve()
+    })
+
+    expect(mockSetAccountMigrationWriteScope).toHaveBeenLastCalledWith('user-1')
+    expect(onWriteScopeOpened).toHaveBeenCalledTimes(1)
+    expect(getController().isAccountSyncReady).toBe(false)
+
+    await act(async () => {
+      releaseReplay()
+      await expect(inspection!).resolves.toBe(true)
+    })
+    expect(getController().isAccountSyncReady).toBe(true)
   })
 
   it('surfaces an initial inspection failure so sync is never disabled silently', async () => {

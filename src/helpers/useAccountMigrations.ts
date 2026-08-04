@@ -25,6 +25,7 @@ export type AccountMigrationPresentation =
 interface UseAccountMigrationsOptions {
   activeUserId?: string
   orchestrator?: AppMigrationOrchestrator<AccountMigrationContext>
+  onWriteScopeOpened?: () => Promise<void>
 }
 
 const isTerminal = (snapshot: MigrationSnapshot): boolean =>
@@ -40,6 +41,7 @@ const safeInspectionErrorCode = (error: unknown): string => {
 export const useAccountMigrations = ({
   activeUserId,
   orchestrator = accountMigrationOrchestrator,
+  onWriteScopeOpened,
 }: UseAccountMigrationsOptions = {}) => {
   const [presentation, setPresentation] = useState<AccountMigrationPresentation>({
     kind: 'hidden',
@@ -95,11 +97,13 @@ export const useAccountMigrations = ({
       })
       if (activeUserRef.current !== context.userId) return false
       if (result.status === 'idle') {
+        setAccountMigrationWriteScope(context.userId)
+        await onWriteScopeOpened?.()
+        if (activeUserRef.current !== context.userId) return false
+        clearAccountMigrationMutationJournal(context.userId)
         setPresentation({ kind: 'hidden' })
         setReadyUserId(context.userId)
         setWriteUserId(context.userId)
-        setAccountMigrationWriteScope(context.userId)
-        clearAccountMigrationMutationJournal(context.userId)
         return true
       }
       if (result.status === 'failed') {
